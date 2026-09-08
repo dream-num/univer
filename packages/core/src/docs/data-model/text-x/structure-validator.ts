@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICustomTable, IDocumentBody, IDocumentData } from '../../../types/interfaces/i-document-data';
+import type { ICustomTable, IDocumentBody, IDocumentData, IFootnoteData } from '../../../types/interfaces/i-document-data';
+import { CustomRangeType, PositionedObjectLayoutType, TableTextWrapType } from '../../../types/interfaces/i-document-data';
 import { DataStreamTreeTokenType } from '../types';
 import {
     getBlockRangeInterval,
@@ -24,6 +25,12 @@ import {
 } from './build-utils/range-interval';
 
 export type DocStructureIssueCode =
+    | 'missing-footnote'
+    | 'invalid-footnote-reference'
+    | 'nested-footnote'
+    | 'invalid-footnote-body'
+    | 'invalid-footnote-id'
+    | 'duplicate-footnote-reference'
     | 'missing-root-paragraph'
     | 'missing-root-section-break'
     | 'paragraph-token-mismatch'
@@ -54,7 +61,7 @@ export type DocStructureIssueCode =
 
 export interface IDocStructureIssue {
     code: DocStructureIssueCode;
-    segmentType: 'body' | 'header' | 'footer';
+    segmentType: 'body' | 'header' | 'footer' | 'footnote';
     segmentId?: string;
     index?: number;
     message: string;
@@ -546,14 +553,59 @@ export function validateDocBodyStructure(
     validateCustomBlockMetadata(body, scan, issues, context);
     validateStructuralContainers(body, issues, context);
 
+    if (context.segmentType === 'header' || context.segmentType === 'footer') {
+        for (const range of body.customRanges ?? []) {
+            if (range.rangeType === CustomRangeType.FOOTNOTE) {
+                issues.push(createIssue(context, 'invalid-footnote-reference', 'Footnote references are only supported in the document body.', range.startIndex));
+            }
+        }
+    }
+
     return issues;
 }
 
-export function validateDocumentStructure(snapshot: Pick<IDocumentData, 'body' | 'headers' | 'footers'>): IDocStructureIssue[] {
+function validateFootnoteBody(footnoteId: string, footnote: IFootnoteData): IDocStructureIssue[] {
+    const context: IValidationContext = { segmentType: 'footnote', segmentId: footnoteId };
+    const issues = validateDocBodyStructure(footnote.body, context);
+    if (footnote.footnoteId !== footnoteId || footnoteId.length === 0) {
+        issues.push({ ...context, code: 'invalid-footnote-id', message: 'Footnote identity must match its segment key.' });
+    }
+    if (footnote.body.customRanges?.some((range) => range.rangeType === CustomRangeType.FOOTNOTE)) {
+        issues.push({ ...context, code: 'nested-footnote', message: 'A footnote cannot contain another footnote reference.' });
+    }
+    const rootSections = footnote.body.sectionBreaks?.filter((section) =>
+        !footnote.body.tables?.some((table) => section.startIndex >= table.startIndex && section.startIndex < table.endIndex)) ?? [];
+    const hasPageSetup = rootSections.some((section) => Object.keys(section).some((key) => key !== 'sectionId' && key !== 'startIndex'));
+    const hasFloatingDrawings = Object.values(footnote.drawings ?? {}).some((drawing) => drawing.layoutType !== PositionedObjectLayoutType.INLINE);
+    const hasFloatingTables = Object.values(footnote.tableSource ?? {}).some((table) => table.textWrap === TableTextWrapType.WRAP);
+    if (rootSections.length > 1 || hasPageSetup || footnote.body.columnGroups?.length || hasFloatingDrawings || hasFloatingTables) {
+        issues.push({ ...context, code: 'invalid-footnote-body', message: 'Footnotes support paragraphs, inline drawings and flow tables without independent sections or columns.' });
+    }
+    return issues;
+}
+
+export function validateDocumentStructure(snapshot: Pick<IDocumentData, 'body' | 'headers' | 'footers' | 'footnotes'>): IDocStructureIssue[] {
     const issues: IDocStructureIssue[] = [];
 
     if (snapshot.body) {
         issues.push(...validateDocBodyStructure(snapshot.body, { segmentType: 'body' }));
+        const referencedNotes = new Set<string>();
+        for (const range of snapshot.body.customRanges ?? []) {
+            if (range.rangeType !== CustomRangeType.FOOTNOTE) {
+                continue;
+            }
+            const footnoteId = range.properties?.footnoteId;
+            if (typeof footnoteId !== 'string' || snapshot.footnotes?.[footnoteId] == null) {
+                issues.push({ code: 'missing-footnote', segmentType: 'body', index: range.startIndex, message: 'Footnote reference must resolve to a footnote segment.' });
+            } else if (referencedNotes.has(footnoteId)) {
+                issues.push({ code: 'duplicate-footnote-reference', segmentType: 'body', index: range.startIndex, message: 'Each footnote must have its own reference identity.' });
+            } else {
+                referencedNotes.add(footnoteId);
+            }
+            if (range.startIndex !== range.endIndex || snapshot.body.dataStream[range.startIndex] !== '\uFFFC' || !range.wholeEntity) {
+                issues.push({ code: 'invalid-footnote-reference', segmentType: 'body', index: range.startIndex, message: 'Footnote reference must cover one whole-entity reference character.' });
+            }
+        }
     }
 
     for (const [headerId, header] of Object.entries(snapshot.headers ?? {})) {
@@ -562,6 +614,13 @@ export function validateDocumentStructure(snapshot: Pick<IDocumentData, 'body' |
 
     for (const [footerId, footer] of Object.entries(snapshot.footers ?? {})) {
         issues.push(...validateDocBodyStructure(footer.body, { segmentType: 'footer', segmentId: footerId }));
+    }
+
+    for (const [footnoteId, footnote] of Object.entries(snapshot.footnotes ?? {})) {
+        issues.push(...validateFootnoteBody(footnoteId, footnote));
+        if (snapshot.headers?.[footnoteId] || snapshot.footers?.[footnoteId]) {
+            issues.push({ code: 'invalid-footnote-id', segmentType: 'footnote', segmentId: footnoteId, message: 'Footnotes must not share a segment identity with a header or footer.' });
+        }
     }
 
     return issues;

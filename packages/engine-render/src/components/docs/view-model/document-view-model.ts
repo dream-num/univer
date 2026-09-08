@@ -540,6 +540,7 @@ export class DocumentViewModel implements IDisposable {
 
     private _headerTreeMap: Map<string, DocumentViewModel> = new Map();
     private _footerTreeMap: Map<string, DocumentViewModel> = new Map();
+    private _footnoteTreeMap: Map<string, DocumentViewModel> = new Map();
 
     private readonly _segmentViewModels$ = new BehaviorSubject<DocumentViewModel[]>([]);
     readonly segmentViewModels$ = this._segmentViewModels$.asObservable();
@@ -583,7 +584,8 @@ export class DocumentViewModel implements IDisposable {
         this._plainTopLevelParagraphNodes = [];
         this._lastTextRun = null;
         // this._headerTreeMap.clear();
-        // this._footerTreeMap.clear();
+        this._footnoteTreeMap.forEach((viewModel) => viewModel.dispose());
+        this._footnoteTreeMap.clear();
         this._segmentViewModels$.complete();
         this._editAreaChange$.complete();
     }
@@ -593,6 +595,10 @@ export class DocumentViewModel implements IDisposable {
             headerTreeMap: this._headerTreeMap,
             footerTreeMap: this._footerTreeMap,
         };
+    }
+
+    getFootnoteTreeMap(): ReadonlyMap<string, DocumentViewModel> {
+        return this._footnoteTreeMap;
     }
 
     getEditArea() {
@@ -633,6 +639,10 @@ export class DocumentViewModel implements IDisposable {
 
         if (this._footerTreeMap.has(segmentId)) {
             return this._footerTreeMap.get(segmentId)!;
+        }
+
+        if (this._footnoteTreeMap.has(segmentId)) {
+            return this._footnoteTreeMap.get(segmentId)!;
         }
 
         return this as DocumentViewModel;
@@ -1138,6 +1148,12 @@ export class DocumentViewModel implements IDisposable {
     }
 
     private _buildHeaderFooterViewModel() {
+        for (const [footnoteId, viewModel] of this._footnoteTreeMap) {
+            if (viewModel.getDataModel() !== this._documentDataModel.footnoteModelMap.get(footnoteId)) {
+                viewModel.dispose();
+                this._footnoteTreeMap.delete(footnoteId);
+            }
+        }
         const { headerModelMap, footerModelMap } = this._documentDataModel;
         const viewModels = [];
         const rootTableSource = this.getSnapshot().tableSource;
@@ -1157,6 +1173,12 @@ export class DocumentViewModel implements IDisposable {
             viewModels.push(this._footerTreeMap.get(footerId)!);
         }
 
+        for (const [footnoteId, model] of this._documentDataModel.footnoteModelMap) {
+            const viewModel = this._footnoteTreeMap.get(footnoteId)
+                ?? new DocumentViewModel(model, { ...rootTableSource, ...model.getSnapshot().tableSource });
+            this._footnoteTreeMap.set(footnoteId, viewModel);
+            viewModels.push(viewModel);
+        }
         this._segmentViewModels$.next(viewModels);
     }
 }

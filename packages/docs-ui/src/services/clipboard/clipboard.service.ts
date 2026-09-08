@@ -26,6 +26,7 @@ import {
     Disposable,
     DOC_RANGE_TYPE,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    DocumentFlavor,
     DrawingTypeEnum,
     ErrorService,
     generateRandomId,
@@ -77,6 +78,7 @@ import {
     DOC_INTERNAL_FRAGMENT_MIME,
     embedInternalClipboardFragment,
     extractInternalClipboardFragmentFromHtml,
+    omitClipboardFootnotes,
     parseInternalClipboardFragment,
     wrapClipboardHtml,
 } from './internal-fragment';
@@ -477,6 +479,10 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         const currentDocument = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (!currentDocument || (expectedUnitId && currentDocument.getUnitId() !== expectedUnitId)) {
             return false;
+        }
+
+        if (currentDocument.getDocumentStyle().documentFlavor !== DocumentFlavor.TRADITIONAL) {
+            body = omitClipboardFootnotes(body);
         }
 
         this._clipboardHooks.forEach((hook) => {

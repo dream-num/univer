@@ -254,6 +254,68 @@ describe('drawing build utils', () => {
         expect(doc.getBody()?.dataStream).toBe('A\bB\r\n');
     });
 
+    it('keeps inserted and replaced footnote images scoped through undo and redo', () => {
+        const doc = new DocumentDataModel({
+            id: 'doc-note-images',
+            body: { dataStream: 'Main\r\n' },
+            footnotes: { note: { footnoteId: 'note', body: { dataStream: 'Note\r\n' } } },
+        });
+        const before = doc.getSnapshot();
+        const drawings = ['image-1', 'image-2'].map((drawingId) => ({
+            drawingId,
+            unitId: 'doc-note-images',
+            subUnitId: 'doc-note-images',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            layoutType: PositionedObjectLayoutType.INLINE,
+            docTransform: {
+                size: { width: 20, height: 20 },
+                positionH: { relativeFrom: 0, posOffset: 0 },
+                positionV: { relativeFrom: 0, posOffset: 0 },
+            },
+        }));
+        try {
+            const insert = addDrawing({
+                selection: { startOffset: 4, endOffset: 4, collapsed: true, segmentId: 'note' },
+                documentDataModel: doc,
+                drawings,
+            });
+            if (!insert) {
+                throw new Error('Expected footnote drawing insertion');
+            }
+            const undoInsert = JSONX.invertWithDoc(insert, before);
+            doc.apply(insert);
+            const inserted = doc.getSnapshot();
+            expect(inserted.footnotes?.note.body.dataStream).toBe('Note\b\b\r\n');
+            expect(inserted.footnotes?.note.drawingsOrder).toEqual(['image-1', 'image-2']);
+            expect(inserted.footnotes?.note.drawings).toMatchObject({ 'image-1': drawings[0], 'image-2': drawings[1] });
+            expect(inserted.body).toEqual(before.body);
+            expect(inserted.drawings).toEqual(before.drawings);
+            expect(inserted.drawingsOrder).toEqual(before.drawingsOrder);
+
+            const replace = addDrawing({
+                selection: { startOffset: 4, endOffset: 6, collapsed: false, segmentId: 'note' },
+                documentDataModel: doc,
+                drawings: [{ ...drawings[0], drawingId: 'replacement' }],
+            });
+            if (!replace) {
+                throw new Error('Expected footnote drawing replacement');
+            }
+            const undoReplace = JSONX.invertWithDoc(replace, inserted);
+            doc.apply(replace);
+            expect(doc.getSnapshot().footnotes?.note.drawingsOrder).toEqual(['replacement']);
+            expect(Object.keys(doc.getSnapshot().footnotes?.note.drawings ?? {})).toEqual(['replacement']);
+            expect(doc.getSnapshot().footnotes?.note.body.dataStream).toBe('Note\b\r\n');
+            doc.apply(undoReplace);
+            expect(doc.getSnapshot()).toEqual(inserted);
+            doc.apply(undoInsert);
+            expect(doc.getSnapshot()).toEqual(before);
+            doc.apply(insert);
+            expect(doc.getSnapshot()).toEqual(inserted);
+        } finally {
+            doc.dispose();
+        }
+    });
+
     it('should return false when drawing insertion targets a missing body', () => {
         const documentDataModel = new DocumentDataModel({ id: 'doc-without-body' });
         delete documentDataModel.getSnapshot().body;

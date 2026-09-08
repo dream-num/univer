@@ -45,7 +45,7 @@ import { CellValueType, ColumnSeparatorType, DashStyleType, DocumentFlavor, Hori
 import { Subject } from 'rxjs';
 import { BORDER_TYPE, COLOR_BLACK_RGB, drawLineByBorderType } from '../../basics';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
-import { LineType } from '../../basics/i-document-skeleton-cached';
+import { DocumentSkeletonPageType, LineType } from '../../basics/i-document-skeleton-cached';
 import { VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
 import { degToRad, fixLineWidthByScale } from '../../basics/tools';
 import { Vector2 } from '../../basics/vector2';
@@ -670,6 +670,28 @@ export class Documents extends DocComponent {
             }
 
             this._resetRotation(ctx, finalAngle);
+
+            for (const footnote of [...page.footnoteDecorations ?? [], ...page.footnotes ?? []]) {
+                this._drawHeaderFooter(
+                    footnote.page,
+                    ctx,
+                    extensions,
+                    backgroundExtension,
+                    preTextBackgroundExtensions,
+                    glyphExtensionsExcludeBackground,
+                    Vector2.create(horizontalOffsetNoAngle + footnote.left - page.marginLeft, footnote.top),
+                    centerAngle,
+                    vertexAngle,
+                    renderConfig,
+                    parentScale,
+                    page,
+                    false,
+                    pages.length,
+                    'kind' in footnote
+                        ? this.getSkeleton()?.getViewModel().getSnapshot().footnoteSettings?.[footnote.kind]?.customRanges ?? []
+                        : undefined
+                );
+            }
 
             const footerSkeletonPage = skeFooters.get(footerId)?.get(pageWidth);
 
@@ -1492,7 +1514,8 @@ export class Documents extends DocComponent {
         parentScale: IScale,
         parentPage: IDocumentSkeletonPage,
         isHeader = true,
-        pageCount = 1
+        pageCount = 1,
+        customRangesOverride?: ICustomRange[]
     ) {
         if (this._drawLiquid == null) {
             return;
@@ -1500,13 +1523,13 @@ export class Documents extends DocComponent {
         const { sections, skeTables } = page;
         const { y: originY } = this._drawLiquid;
         const skeleton = this.getSkeleton();
-        const customRanges = typeof skeleton?.getViewModel === 'function'
+        const customRanges = customRangesOverride ?? (typeof skeleton?.getViewModel === 'function'
             ? skeleton
                 .getViewModel()
                 .getSelfOrHeaderFooterViewModel(page.segmentId)
                 .getBody()
                 ?.customRanges ?? []
-            : [];
+            : []);
 
         if (skeTables.size > 0) {
             const tablePage = {
@@ -1572,7 +1595,7 @@ export class Documents extends DocComponent {
                         this._drawLiquid.translateLine(line, true, true);
                         const { y } = this._drawLiquid;
 
-                        if (!isHeader) {
+                        if (!isHeader && page.type !== DocumentSkeletonPageType.FOOTNOTE) {
                             if ((y - originY + alignOffset.y + lineHeight) < (parentPage.pageHeight - 100) / 2 + 100) {
                                 this._drawLiquid.translateRestore();
                                 continue;

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDocumentData } from '@univerjs/core';
-import { generateRandomId, Tools } from '@univerjs/core';
+import type { IDocumentBody, IDocumentData, IFootnoteData } from '@univerjs/core';
+import { BuildTextUtils, createParagraphId, createSectionId, CustomRangeType, generateRandomId, TextX, Tools } from '@univerjs/core';
 
 export const DOC_INTERNAL_FRAGMENT_MIME = 'application/x-doc-fragment+json';
 export const DOC_INTERNAL_FRAGMENT_COMMENT_PREFIX = 'univer-doc-fragment:';
@@ -51,9 +51,26 @@ export function parseInternalClipboardFragment(value?: string): Partial<IDocumen
     return null;
 }
 
+function copyReferencedFootnotes(doc: IDocumentData): IDocumentData['footnotes'] {
+    let copied: IDocumentData['footnotes'];
+    for (const range of doc.body?.customRanges ?? []) {
+        const id = range.rangeType === CustomRangeType.FOOTNOTE ? range.properties?.footnoteId : undefined;
+        if (typeof id === 'string' && doc.footnotes?.[id]) {
+            copied ??= {};
+            copied[id] = Tools.deepClone(doc.footnotes[id]);
+        }
+    }
+    return copied;
+}
+
 export function createInternalClipboardDocData(doc: IDocumentData): Partial<IDocumentData> {
     const body = Tools.deepClone(doc.body);
     const internalDocData: Partial<IDocumentData> = { body };
+
+    const footnotes = copyReferencedFootnotes(doc);
+    if (footnotes) {
+        internalDocData.footnotes = footnotes;
+    }
 
     if (body?.tables?.length && doc.tableSource) {
         internalDocData.tableSource = {};
@@ -138,9 +155,83 @@ export function createInternalClipboardDocDataList(docs: IDocumentData[]): Parti
             merged.drawings ??= {};
             Object.assign(merged.drawings, part.drawings);
         }
+        if (part.footnotes) {
+            merged.footnotes ??= {};
+            Object.assign(merged.footnotes, part.footnotes);
+        }
     }
 
     return merged.body?.dataStream ? merged : null;
+}
+
+/** Removes reference characters through TextX so every following clipboard offset stays valid. */
+export function omitClipboardFootnotes(body: IDocumentBody): IDocumentBody {
+    const references = body.customRanges?.filter((range) => range.rangeType === CustomRangeType.FOOTNOTE) ?? [];
+    if (references.length === 0) {
+        return body;
+    }
+    const textX = new TextX();
+    let cursor = 0;
+    for (const reference of references) {
+        textX.retain(reference.startIndex - cursor).delete(reference.endIndex - reference.startIndex + 1);
+        cursor = reference.endIndex + 1;
+    }
+    return TextX.apply(Tools.deepClone(body), textX.serialize());
+}
+
+/** Each pasted reference owns a new rich segment, including its drawing and table identities. */
+export function cloneClipboardFootnotes(body: IDocumentBody, notes: IDocumentData['footnotes']): Record<string, IFootnoteData> {
+    const copied: Record<string, IFootnoteData> = {};
+    for (const range of body.customRanges ?? []) {
+        if (range.rangeType !== CustomRangeType.FOOTNOTE) {
+            continue;
+        }
+        const sourceId = range.properties?.footnoteId;
+        const source = typeof sourceId === 'string' ? notes?.[sourceId] : undefined;
+        if (!source) {
+            continue;
+        }
+        const note = Tools.deepClone(source);
+        note.footnoteId = generateRandomId(12);
+        range.rangeId = generateRandomId(12);
+        range.properties = { ...range.properties, footnoteId: note.footnoteId };
+        const paragraphIds = new Set<string>();
+        const sectionIds = new Set<string>();
+        note.body.paragraphs?.forEach((paragraph) => {
+            paragraph.paragraphId = createParagraphId(paragraphIds);
+        });
+        note.body.sectionBreaks?.forEach((section) => {
+            section.sectionId = createSectionId(sectionIds);
+        });
+        note.body.customRanges = note.body.customRanges?.map((item) => BuildTextUtils.customRange.copyCustomRange(item));
+        resetFootnoteResourceIds(note);
+        copied[note.footnoteId] = note;
+    }
+    return copied;
+}
+
+function resetFootnoteResourceIds(note: IFootnoteData): void {
+    for (const range of note.body.tables ?? []) {
+        const previousId = range.tableId;
+        const table = note.tableSource?.[previousId];
+        if (table && note.tableSource) {
+            range.tableId = generateRandomId(12);
+            table.tableId = range.tableId;
+            note.tableSource[range.tableId] = table;
+            delete note.tableSource[previousId];
+        }
+    }
+    for (const block of note.body.customBlocks ?? []) {
+        const previousId = block.blockId;
+        const drawing = note.drawings?.[previousId];
+        if (drawing && note.drawings) {
+            block.blockId = generateRandomId(12);
+            drawing.drawingId = block.blockId;
+            note.drawings[block.blockId] = drawing;
+            delete note.drawings[previousId];
+            note.drawingsOrder = note.drawingsOrder?.map((id) => id === previousId ? block.blockId : id);
+        }
+    }
 }
 
 export function embedInternalClipboardFragment(html: string, fragmentJson: string): string {

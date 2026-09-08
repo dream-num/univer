@@ -21,6 +21,7 @@ import type { IDocLayoutExecutor } from '@univerjs/docs';
 import type { Documents, IPointerEvent, RenderUnit } from '@univerjs/engine-render';
 import {
     BooleanNumber,
+    CustomRangeType,
     DataStreamTreeTokenType,
     DocumentFlavor,
     DrawingTypeEnum,
@@ -69,7 +70,7 @@ import { DocInputController } from '../doc-input.controller';
 import { DocSelectionRenderController } from '../doc-selection-render.controller';
 import { DocRenderController } from '../doc.render-controller';
 
-function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout = false, documentFlavor = DocumentFlavor.TRADITIONAL) {
+function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout = false, documentFlavor = DocumentFlavor.TRADITIONAL, withFootnote = false) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const root = document.createElement('div');
@@ -100,8 +101,9 @@ function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout
         .forEach((command) => commands.registerCommand(command));
     const firstParagraph = 'Hello world';
     const drawingToken = withDrawing ? DataStreamTreeTokenType.CUSTOM_BLOCK : '';
+    const noteStream = `${'Footnote continuation with several words.\r'.repeat(40)}\n`;
     const separator = documentFlavor === DocumentFlavor.MODERN ? '\r\r' : '\r';
-    const dataStream = `${firstParagraph}\r${drawingToken}${Array.from({ length: paragraphCount }, (_, i) => `Paragraph ${i} has enough words to wrap across several lines.${separator}`).join('')}\n`;
+    const dataStream = `${firstParagraph}\r${drawingToken}${withFootnote ? '\uFFFC' : ''}${Array.from({ length: paragraphCount }, (_, i) => `Paragraph ${i} has enough words to wrap across several lines.${separator}`).join('')}\n`;
     const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
         id: 'bounded-caret-test',
         // A drawing on the edited page deliberately keeps the conservative
@@ -123,8 +125,24 @@ function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout
                 },
             }
             : {},
+        footnotes: withFootnote
+            ? { note: { footnoteId: 'note', body: {
+                dataStream: noteStream,
+                paragraphs: [...noteStream.matchAll(/\r/g)].map((match, index) => ({ startIndex: match.index!, paragraphId: `note-${index}` })),
+            } } }
+            : undefined,
         body: {
             dataStream,
+            customRanges: withFootnote
+                ? [{
+                    rangeType: CustomRangeType.FOOTNOTE,
+                    rangeId: 'note-ref',
+                    wholeEntity: true,
+                    startIndex: 12,
+                    endIndex: 12,
+                    properties: { footnoteId: 'note' },
+                }]
+                : [],
             customBlocks: withDrawing ? [{ blockId: 'inline-drawing', startIndex: firstParagraph.length + 1 }] : [],
             paragraphs: [...dataStream.matchAll(/\r/g)].map((match, index) => ({
                 startIndex: match.index!,
@@ -218,6 +236,53 @@ describe('DocRenderController bounded input publication', () => {
         vi.restoreAllMocks();
         vi.unstubAllGlobals();
         vi.useRealTimers();
+    });
+
+    it('keeps typing at the logical footnote caret after Enter moves it to a continuation page', async () => {
+        const editor = createEditor(8, false, false, DocumentFlavor.TRADITIONAL, true);
+        try {
+            await vi.dynamicImportSettled();
+            const pages = editor.skeleton.getSkeletonData()!.pages;
+            const oldPage = pages.findIndex((page) => page.footnotes?.some((note) => note.footnoteId === 'note'));
+            const boundary = pages[oldPage].footnotes![0].page.ed;
+            editor.selectionManager.replaceDocRanges([{
+                startOffset: boundary,
+                endOffset: boundary,
+                segmentId: 'note',
+                segmentPage: oldPage,
+            }], { unitId: editor.unitId, subUnitId: editor.unitId }, true);
+            expect(await editor.commands.executeCommand(BreakLineCommand.id)).toBe(true);
+            for (const text of ['A', ' ', '中', 'B']) {
+                editor.input.textContent = text;
+                editor.input.dispatchEvent(new InputEvent('input', { data: text, inputType: 'insertText' }));
+                await Promise.resolve();
+                await Promise.resolve();
+            }
+            await vi.advanceTimersByTimeAsync(1_000);
+            const offset = boundary + 5;
+            expect(editor.model.getSnapshot().footnotes!.note.body.dataStream.slice(boundary, offset)).toBe('\rA 中B');
+            expect(editor.selectionManager.getActiveTextRange()?.endOffset).toBe(offset);
+            const position = editor.skeleton.findNodePositionByCharIndex(offset, true, 'note');
+            expect(position?.page).toBeGreaterThan(oldPage);
+            expect(editor.selection.getActiveTextRange()?.endOffset).toBe(offset);
+            expect(editor.selection.getSegmentPage()).toBe(position?.page);
+            expect(editor.selection.hasPendingSelection).toBe(false);
+            editor.selectionManager.replaceDocRanges([{
+                startOffset: 5,
+                endOffset: 5,
+                segmentId: '',
+                segmentPage: -1,
+            }], { unitId: editor.unitId, subUnitId: editor.unitId }, true);
+            expect(editor.selection.getSegment()).toBe('');
+            editor.input.textContent = 'Z';
+            editor.input.dispatchEvent(new InputEvent('input', { data: 'Z', inputType: 'insertText' }));
+            await Promise.resolve();
+            await Promise.resolve();
+            expect(editor.model.getBody()!.dataStream.startsWith('HelloZ world')).toBe(true);
+            expect(editor.model.getSnapshot().footnotes!.note.body.dataStream.slice(boundary, offset)).toBe('\rA 中B');
+        } finally {
+            editor.dispose();
+        }
     });
 
     it('keeps short Modern edits and spaces complete while Worker initialization is pending', async () => {

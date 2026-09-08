@@ -108,6 +108,18 @@ export class FontAndBaseLine extends docExtension {
             spanPointWithFont.y += bBox.sbo;
         }
 
+        if (glyph.footnoteSeparator) {
+            ctx.save();
+            ctx.strokeStyle = fontColor;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveToByPrecision(spanPointWithFont.x, spanPointWithFont.y);
+            ctx.lineToByPrecision(spanPointWithFont.x + glyph.width, spanPointWithFont.y);
+            ctx.stroke();
+            ctx.restore();
+            return;
+        }
+
         const drawText = () => {
             if (this._fillTextWithTextFill(ctx, glyph, spanPointWithFont, textFill, fontColor)) {
                 return;

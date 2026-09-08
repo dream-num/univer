@@ -283,25 +283,51 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             this._pendingSelection = null;
             return false;
         }
-        if (this._currentSegmentId === '' && ranges.length > 0) {
-            const progress = this._docSkeletonManagerService.getSkeleton().getLayoutProgress();
-            if (progress?.reason === 'edit' && !progress.anchorReady && !progress.complete && !progress.cancelled) {
-                const { unitId } = this._context;
-                const selection = this._docSelectionManagerService.getSelectionInfo({ unitId, subUnitId: unitId });
-                // Only a refresh of the current logical selection belongs to this
-                // publication. A new pointer/programmatic selection takes over.
-                if (
-                    selection != null &&
-                    ranges.length === selection.textRanges.length &&
-                    ranges.every((range, index) => range === selection.textRanges[index])
-                ) {
-                    this._pendingSelection = selection;
+        this._syncFootnoteSegment(ranges[0]);
+        const isBodyOrFootnote = this._currentSegmentId === '' ||
+            this._context.unit.getSnapshot().footnotes?.[this._currentSegmentId] != null;
+        let currentLogicalSelection: Nullable<IDocSelectionInnerParam> = null;
+        if (isBodyOrFootnote && ranges.length > 0) {
+            const { unitId } = this._context;
+            const selection = this._docSelectionManagerService.getSelectionInfo({ unitId, subUnitId: unitId });
+            // Only a refresh of the current logical selection belongs to this
+            // publication. A new pointer/programmatic selection takes over.
+            if (selection != null && ranges.length === selection.textRanges.length &&
+                ranges.every((range, index) => range === selection.textRanges[index])) {
+                currentLogicalSelection = selection;
+                const progress = this._docSkeletonManagerService.getSkeleton().getLayoutProgress();
+                if (progress?.reason === 'edit' && !progress.anchorReady && !progress.complete && !progress.cancelled) {
+                    this._pendingSelection = currentLogicalSelection;
                     return false;
                 }
             }
         }
         this._pendingSelection = null;
-        return this.addDocRanges(ranges, isEditing, options, true);
+        const replaced = this.addDocRanges(ranges, isEditing, options, true);
+        if (!replaced) {
+            this._pendingSelection = currentLogicalSelection;
+        }
+        return replaced;
+    }
+
+    private _syncFootnoteSegment(range: ISuccinctDocRangeParam | undefined): void {
+        const targetSegment = range?.segmentId;
+        if (targetSegment == null) {
+            return;
+        }
+        const footnotes = this._context.unit.getSnapshot().footnotes;
+        if (targetSegment !== this._currentSegmentId &&
+            (footnotes?.[targetSegment] || footnotes?.[this._currentSegmentId])) {
+            this.setSegment(targetSegment);
+            this.setSegmentPage(range?.segmentPage ?? -1);
+        }
+        if (footnotes?.[targetSegment] && range != null) {
+            const position = this._docSkeletonManagerService.getSkeleton()
+                .findNodePositionByCharIndex(range.endOffset, true, targetSegment);
+            if (position != null && position.page !== this._currentSegmentPage) {
+                this.setSegmentPage(position.page);
+            }
+        }
     }
 
     private _getPendingSelection(): Nullable<IDocSelectionInnerParam> {
@@ -697,7 +723,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._pendingSelection = null;
         const { segmentId, segmentPage } = startNode;
 
-        if (segmentId && this._currentSegmentId && segmentId !== this._currentSegmentId) {
+        const footnotes = this._context.unit.getSnapshot().footnotes;
+        if (segmentId !== this._currentSegmentId &&
+            ((segmentId && this._currentSegmentId) || footnotes?.[segmentId] || footnotes?.[this._currentSegmentId])) {
             this.setSegment(segmentId);
         }
 

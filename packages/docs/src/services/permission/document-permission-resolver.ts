@@ -23,8 +23,10 @@ import type {
     TextXAction,
 } from '@univerjs/core';
 import {
+    CustomRangeType,
     getParagraphContentStartOffset,
     getParagraphContentStartOffsets,
+    JSON1,
     resolveSectionHeaderFooterReference,
     TextX,
     TextXActionType,
@@ -60,6 +62,7 @@ interface IDocumentPermissionSegmentIndex {
 
 interface IDocumentPermissionResolverIndex {
     drawingSegmentIds: Map<string, string>;
+    footnoteReferenceRanges: Map<string, IDocumentPermissionRange>;
     mutationRevision: number;
     segments: Map<string, IDocumentPermissionSegmentIndex>;
     topLevelSections: ISectionBreak[];
@@ -93,9 +96,20 @@ function getDocumentPermissionResolverIndex(documentDataModel: DocumentDataModel
     addDrawingSegments(snapshot.body, '');
     Object.entries(snapshot.headers ?? {}).forEach(([segmentId, header]) => addDrawingSegments(header.body, segmentId));
     Object.entries(snapshot.footers ?? {}).forEach(([segmentId, footer]) => addDrawingSegments(footer.body, segmentId));
+    Object.entries(snapshot.footnotes ?? {}).forEach(([segmentId, footnote]) => addDrawingSegments(footnote.body, segmentId));
+    const footnoteReferenceRanges = new Map<string, IDocumentPermissionRange>();
+    for (const reference of snapshot.body?.customRanges ?? []) {
+        if (reference.rangeType === CustomRangeType.FOOTNOTE && typeof reference.properties?.footnoteId === 'string') {
+            footnoteReferenceRanges.set(reference.properties.footnoteId, {
+                startOffset: reference.startIndex,
+                endOffset: reference.endIndex + 1,
+            });
+        }
+    }
 
     const index: IDocumentPermissionResolverIndex = {
         drawingSegmentIds,
+        footnoteReferenceRanges,
         mutationRevision,
         segments: new Map(),
         topLevelSections,
@@ -115,7 +129,9 @@ function getDocumentPermissionSegmentIndex(
     }
 
     const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody() ?? null;
-    const drawings = documentDataModel.getSnapshot().drawings ?? {};
+    const snapshot = documentDataModel.getSnapshot();
+    const note = snapshot.footnotes?.[segmentId];
+    const drawings = (note ? note.drawings : snapshot.drawings) ?? {};
     const entities: IDocumentPermissionEntityRange[] = body == null
         ? []
         : [
@@ -179,12 +195,39 @@ export function getDocumentEditTargetObjectIdsFromActions(
     segmentId: string,
     actions: JSONXActions
 ): string[] {
-    const textActions = getTextXActions(actions);
     const result = new Set<string>();
-    if (textActions) {
+    if (actions == null) {
+        return [];
+    }
+    const cursor = JSON1.type.readCursor(actions);
+    cursor.traverse(null, () => {
+        const path = cursor.getPath();
+        const edit = cursor.getComponent();
+        const scopedSegment = ['headers', 'footers', 'footnotes'].includes(String(path[0])) && typeof path[1] === 'string'
+            ? path[1]
+            : segmentId;
+        if (path[0] === 'footnotes' && typeof path[1] === 'string') {
+            getSectionPermissionObjectIds(documentDataModel, path[1], { startOffset: 0, endOffset: 0 })
+                .forEach((objectId) => result.add(objectId));
+        }
+        if (path[0] === 'footnoteSettings') {
+            getDocumentPermissionResolverIndex(documentDataModel).topLevelSections.forEach((section) => {
+                result.add(getDocumentSectionPermissionObjectId('', section.sectionId));
+            });
+        }
+        if (path[0] === 'body' && path[1] === 'sectionBreaks' && typeof path[2] === 'number' && path[3] === 'footnoteProperties') {
+            const sectionId = documentDataModel.getBody()?.sectionBreaks?.[path[2]]?.sectionId;
+            if (sectionId) {
+                result.add(getDocumentSectionPermissionObjectId('', sectionId));
+            }
+        }
+        if (path[path.length - 1] !== 'body' || edit?.et !== TextX.id || !Array.isArray(edit.e) || !edit.e.every(isTextXAction)) {
+            return;
+        }
+        const textActions = edit.e;
         let offset = 0;
         const addRange = (startOffset: number, endOffset: number): void => {
-            getDocumentEditTargetObjectIds(documentDataModel, segmentId, { startOffset, endOffset })
+            getDocumentEditTargetObjectIds(documentDataModel, scopedSegment, { startOffset, endOffset })
                 .forEach((objectId) => result.add(objectId));
         };
 
@@ -203,7 +246,7 @@ export function getDocumentEditTargetObjectIdsFromActions(
             }
             offset += action.len;
         });
-    }
+    });
 
     getDrawingIdsFromActions(actions).forEach((drawingId) => {
         result.add(getDocumentEntityPermissionObjectId(segmentId, 'drawing', drawingId));
@@ -239,14 +282,6 @@ function getDrawingIdsFromActions(actions: JSONXActions): string[] {
     };
     visit(actions);
     return [...result];
-}
-
-function getTextXActions(actions: JSONXActions): TextXAction[] | null {
-    if (!Array.isArray(actions) || actions.length !== 2 || actions[0] !== 'body' || !isRecord(actions[1])) {
-        return null;
-    }
-    const edit = actions[1];
-    return edit.et === TextX.id && Array.isArray(edit.e) && edit.e.every(isTextXAction) ? edit.e : null;
 }
 
 function isTextXAction(value: unknown): value is TextXAction {
@@ -313,6 +348,12 @@ function getSectionPermissionObjectIds(
     resolverIndex = getDocumentPermissionResolverIndex(documentDataModel)
 ): string[] {
     if (segmentId) {
+        const referenceRange = resolverIndex.footnoteReferenceRanges.get(segmentId);
+        if (referenceRange) {
+            // A note belongs to its reference, including the enclosing paragraph,
+            // table and section. Moving the reference moves those restrictions too.
+            return getDocumentEditTargetObjectIds(documentDataModel, '', referenceRange);
+        }
         return getHeaderFooterOwnerSectionIds(documentDataModel, segmentId, resolverIndex.topLevelSections)
             .map((sectionId) => getDocumentSectionPermissionObjectId('', sectionId));
     }

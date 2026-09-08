@@ -16,6 +16,7 @@
 
 import type { DocumentDataModel, IDocumentBody, JSONXActions, JSONXPath } from '@univerjs/core';
 import {
+    CustomRangeType,
     DataStreamTreeTokenType,
 
     getRichTextEditPath,
@@ -25,6 +26,7 @@ import {
     TextX,
     TextXActionType,
     validateDocBodyStructure,
+    validateDocumentStructure,
 } from '@univerjs/core';
 
 const STRUCTURAL_BODY_FIELDS = [
@@ -155,7 +157,7 @@ function isStructurePreservingJSONXEdit(actions: JSONXActions, expectedPath: JSO
     return hasComponent && isStructurePreserving;
 }
 
-function getSegmentType(documentDataModel: DocumentDataModel, segmentId: string): 'body' | 'header' | 'footer' {
+function getSegmentType(documentDataModel: DocumentDataModel, segmentId: string): 'body' | 'header' | 'footer' | 'footnote' {
     if (!segmentId) {
         return 'body';
     }
@@ -169,6 +171,10 @@ function getSegmentType(documentDataModel: DocumentDataModel, segmentId: string)
         return 'footer';
     }
 
+    if (documentDataModel.getSnapshot().footnotes?.[segmentId]) {
+        return 'footnote';
+    }
+
     return 'body';
 }
 
@@ -180,7 +186,10 @@ function assertValidDocBodyStructure(documentDataModel: DocumentDataModel, segme
     }
 
     const segmentType = getSegmentType(documentDataModel, segmentId);
-    const issues = validateDocBodyStructure(body, { segmentType, segmentId: segmentId || undefined });
+    const footnote = documentDataModel.getSnapshot().footnotes?.[segmentId];
+    const issues = footnote
+        ? validateDocumentStructure({ footnotes: { [segmentId]: footnote } })
+        : validateDocBodyStructure(body, { segmentType, segmentId: segmentId || undefined });
     if (!issues.length) {
         return;
     }
@@ -201,8 +210,29 @@ export function validateDocStructureMutation(
         isStructurePreservingJSONXEdit(actions, editPath) &&
         isStructurePreservingJSONXEdit(undoActions, editPath);
 
-    if (!preservesStructure) {
+    let changesFootnoteStructure = false;
+    const cursor = JSON1.type.readCursor(actions);
+    cursor.traverse(null, (component) => {
+        const path = cursor.getPath();
+        if ((path[0] === 'footnotes' && (path.length <= 2 || path[2] !== 'body')) || path.includes('customRanges')) {
+            changesFootnoteStructure = true;
+        }
+        if (component.et === TextX.id && Array.isArray(component.e)) {
+            for (const action of component.e) {
+                const ranges: unknown = isRecord(action) && isRecord(action.body) ? action.body.customRanges : undefined;
+                if (Array.isArray(ranges) && ranges.some((range) => isRecord(range) && range.rangeType === CustomRangeType.FOOTNOTE)) {
+                    changesFootnoteStructure = true;
+                }
+            }
+        }
+    });
+    if (changesFootnoteStructure) {
+        const issues = validateDocumentStructure(documentDataModel.getSnapshot());
+        if (issues.length > 0) {
+            throw new Error(`[DocStructure] ${issues.map((issue) => `${issue.code}@${issue.index ?? issue.segmentId ?? ''}`).join(', ')}`);
+        }
+    } else if (!preservesStructure) {
         assertValidDocBodyStructure(documentDataModel, segmentId);
     }
-    return preservesStructure;
+    return preservesStructure && !changesFootnoteStructure;
 }

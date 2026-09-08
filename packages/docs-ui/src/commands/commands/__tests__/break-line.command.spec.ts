@@ -14,12 +14,67 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } from '@univerjs/core';
-import { awaitTime, DataStreamTreeTokenType, DocumentBlockRangeType, DocumentFlavor, ICommandService, IUniverInstanceService, NamedStyleType, PresetListType, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
+import type { DocumentDataModel, ICommand, IDocumentData, Injector } from '@univerjs/core';
+import { awaitTime, CustomRangeType, DataStreamTreeTokenType, DocumentBlockRangeType, DocumentFlavor, ICommandService, IUniverInstanceService, NamedStyleType, PresetListType, Univer, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService, DocStateChangeManagerService, DocStateEmitService, InsertTextCommand, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
+import { IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, RenderManagerService } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { DocMenuStyleService } from '../../../services/doc-menu-style.service';
 import { BreakLineCommand, BreakLineInsertionMode } from '../break-line.command';
 import { createCommandTestBed } from './create-command-test-bed';
+
+it('keeps typing in the footnote after inserting a paragraph', async () => {
+    const univer = new Univer();
+    const injector = univer.__getInjector();
+    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    injector.add([DocSelectionManagerService]);
+    injector.add([DocStateEmitService]);
+    injector.add([DocStateChangeManagerService]);
+    injector.add([DocMenuStyleService]);
+    injector.get(DocStateChangeManagerService);
+    const doc = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+        id: 'note-input',
+        documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+        body: { dataStream: 'Body\uFFFC\r\n', paragraphs: [{ paragraphId: 'p', startIndex: 5 }], sectionBreaks: [{ sectionId: 's', startIndex: 6 }], customRanges: [{ rangeId: 'reference', rangeType: CustomRangeType.FOOTNOTE, startIndex: 4, endIndex: 4, properties: { footnoteId: 'note' } }] },
+        footnotes: { note: { footnoteId: 'note', body: { dataStream: '\r\n', paragraphs: [{ paragraphId: 'np', startIndex: 0 }] } } },
+    });
+    injector.get(IUniverInstanceService).focusUnit(doc.getUnitId());
+    const commands = injector.get(ICommandService);
+    [RichTextEditingMutation, InsertTextCommand, BreakLineCommand]
+        .forEach((command) => commands.registerCommand(command));
+    const selections = injector.get(DocSelectionManagerService);
+    selections.__TEST_ONLY_setCurrentSelection({ unitId: 'note-input', subUnitId: 'note-input' });
+    selections.replaceSelectionInfoWithoutRefresh({
+        textRanges: [{ startOffset: 0, endOffset: 0, collapsed: true, isActive: true, segmentId: 'note' }],
+        rectRanges: [],
+        segmentId: '',
+        segmentPage: -1,
+        isEditing: true,
+        style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+    });
+    try {
+        const noteId = Object.keys(doc.getSnapshot().footnotes!)[0];
+        for (const text of ['First', ' ', 'line', '\r', 'Next', ' ', 'line']) {
+            const range = selections.getActiveTextRange()!;
+            expect(range.segmentId).toBe(noteId);
+            if (text === '\r') {
+                expect(commands.syncExecuteCommand(BreakLineCommand.id)).toBe(true);
+            } else {
+                expect(commands.syncExecuteCommand(InsertTextCommand.id, {
+                    unitId: doc.getUnitId(),
+                    range,
+                    body: { dataStream: text },
+                })).toBe(true);
+            }
+            await Promise.resolve();
+        }
+        expect(selections.getActiveTextRange()).toMatchObject({ segmentId: noteId, startOffset: 20 });
+        expect(doc.getBody()?.dataStream).toBe('Body\uFFFC\r\n');
+        expect(doc.getSnapshot().footnotes?.[noteId].body.dataStream).toBe('First line\rNext line\r\n');
+    } finally {
+        univer.dispose();
+    }
+});
 
 function getDocumentData(): IDocumentData {
     return {

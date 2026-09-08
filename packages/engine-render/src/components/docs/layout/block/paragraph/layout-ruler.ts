@@ -44,7 +44,7 @@ import {
     TabStopAlignment,
     WrapStrategy,
 } from '@univerjs/core';
-import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
+import { DocumentSkeletonPageType, GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
 import { isCjkLeftAlignedPunctuation } from '../../../../../basics/tools';
 import { getDocsCustomBlockRenderViewport } from '../../../custom-block-render-viewport';
 import { isTraditionalDocumentCompatibility } from '../../../document-compatibility';
@@ -56,6 +56,7 @@ import {
     createAndUpdateBlockAnchor,
     createSkeletonLine,
     setLineMarginBottom,
+    TRADITIONAL_TABLE_WRAP_MIN_WIDTH,
     updateDivideInfo,
 } from '../../model/line';
 import { createSkeletonPage } from '../../model/page';
@@ -188,7 +189,8 @@ function isGlyphGroupEndWithWhiteSpaces(glyphGroup: IDocumentSkeletonGlyph[]) {
         }
 
         if (isInWhiteSpace &&
-            g.content !== DataStreamTreeTokenType.SPACE && g.content !== DataStreamTreeTokenType.PARAGRAPH && g.streamType !== DataStreamTreeTokenType.SECTION_BREAK) {
+            g.content !== DataStreamTreeTokenType.SPACE && g.content !== DataStreamTreeTokenType.PARAGRAPH &&
+            g.streamType !== DataStreamTreeTokenType.SECTION_BREAK && g.streamType !== DataStreamTreeTokenType.PAGE_BREAK) {
             return false;
         }
     }
@@ -291,6 +293,7 @@ function _divideOperator(
 ) {
     const lastPage = getLastPage(pages);
     const divideInfo = getLastNotFullDivideInfo(lastPage); // Get the first divide in the latest line that is not full.
+    ctx.footnoteLayout?.updateReferenceGlyphs(lastPage, glyphGroup, sectionBreakConfig, paragraphConfig);
     if (divideInfo) {
         const { divide, isLast } = divideInfo;
         _adjustExplicitTabStop(divide, glyphGroup, paragraphConfig);
@@ -364,6 +367,20 @@ function _divideOperator(
                     defaultSpanMetrics
                 );
             } else if (divide?.glyphGroup.length === 0) {
+                const line = divide.parent!;
+                const column = line.parent!;
+                const section = column.parent!;
+                const wordWidth = __getGlyphGroupWidth(glyphGroup);
+                if (
+                    isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy!) &&
+                    wordWidth < column.width &&
+                    calculateLineTopByDrawings(line.lineHeight, line.top, lastPage, null, null, column.left, column.width, section.top, wordWidth - 0.001) > line.top
+                ) {
+                    // Preserve the shaped word when the obstacle, rather than the
+                    // column, is too narrow. Normal long-word breaking still applies.
+                    _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType, defaultSpanMetrics);
+                    return;
+                }
                 const sliceGlyphGroup: IDocumentSkeletonGlyph[] = [];
 
                 while (glyphGroup.length) {
@@ -457,7 +474,32 @@ function _divideOperator(
         } else {
             // w does not exceed divide width, add it to divide
             const currentLine = divide.parent;
+            if (currentLine?.parent?.parent && ctx.footnoteLayout && glyphGroup.some((glyph) => glyph.footnoteId)) {
+                const bodyBottom = currentLine.parent.parent.top + currentLine.top + currentLine.lineHeight;
+                const bodyLimit = ctx.footnoteLayout.getBodyLimit(lastPage, pages, sectionBreakConfig, bodyBottom, glyphGroup);
+                if (bodyBottom > bodyLimit + LINE_LAYOUT_OVERFLOW_TOLERANCE) {
+                    const column = currentLine.parent;
+                    const cachedGlyphs = __getGlyphGroupByLine(currentLine);
+                    column.lines.pop();
+                    const previousLine = column.lines[column.lines.length - 1];
+                    const previousBottom = column.parent!.top + (previousLine == null ? 0 : previousLine.top + previousLine.lineHeight);
+                    ctx.footnoteLayout.getBodyLimit(lastPage, pages, sectionBreakConfig, previousBottom);
+                    _pageOperator(ctx, [...cachedGlyphs, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, currentLine.paragraphStart, breakPointType, defaultSpanMetrics);
+                    return;
+                }
+            }
             const maxBox = __maxFontBoundingBoxByGlyphGroup(glyphGroup);
+
+            if (currentLine?.parent && __isNullLine(currentLine) && __hasFlowGlyph(glyphGroup)) {
+                const cachedGlyphs = __getGlyphGroupByLine(currentLine);
+                if (cachedGlyphs.length > 0 && cachedGlyphs.every((glyph) => glyph.streamType === DataStreamTreeTokenType.PAGE_BREAK)) {
+                    // A skipped rendered-page hint has no font metrics. Let the first real text
+                    // establish its line, including normal font leading and available page height.
+                    currentLine.parent.lines.pop();
+                    _lineOperator(ctx, [...cachedGlyphs, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, currentLine.paragraphStart, breakPointType, defaultSpanMetrics);
+                    return;
+                }
+            }
 
             if (
                 currentLine &&
@@ -634,6 +676,7 @@ function _lineOperator(
     defaultSpanMetrics?: IDefaultSpanMetrics
 ) {
     let lastPage = getLastPage(pages);
+    ctx.footnoteLayout?.updateReferenceGlyphs(lastPage, glyphGroup, sectionBreakConfig, paragraphConfig);
     let columnInfo = getLastNotFullColumnInfo(lastPage);
     if (!columnInfo || !columnInfo.column) {
         const lastSection = getLastSection(lastPage);
@@ -683,6 +726,10 @@ function _lineOperator(
         paragraphIndex,
     } = paragraphConfig;
     const isZeroWidthNonFlowFloatingAnchorLine = __isZeroWidthNonFlowFloatingAnchorLine(glyphGroup, paragraphNonInlineSkeDrawings);
+    const isSyntheticTableAnchorLine = isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy!) &&
+        skeTablesInParagraph?.some(({ table }) => table.tableSource.textWrap === TableTextWrapType.NONE) === true &&
+        ctx.viewModel.getSelfOrHeaderFooterViewModel(lastPage.segmentId).getParagraph(paragraphIndex) == null &&
+        glyphGroup.every((glyph) => glyph.streamType === DataStreamTreeTokenType.PARAGRAPH || glyph.streamType === DataStreamTreeTokenType.SECTION_BREAK);
     const { namedStyleType } = originParagraphStyle;
     const namedStyle = namedStyleType !== undefined ? NAMED_STYLE_SPACE_MAP[namedStyleType] : null;
     const paragraphStyle = {
@@ -802,7 +849,9 @@ function _lineOperator(
         spaceBelowApply = 0;
     }
 
-    if (isZeroWidthNonFlowFloatingAnchorLine) {
+    // A table's structural terminator has no Word paragraph. Keep its glyph and
+    // character position without adding a blank line after the table.
+    if (isZeroWidthNonFlowFloatingAnchorLine || isSyntheticTableAnchorLine) {
         paddingTop = 0;
         paddingBottom = 0;
         contentHeight = 0;
@@ -822,7 +871,10 @@ function _lineOperator(
         section = getLastSection(lastPage);
     }
     const preLineHeight = preLine?.lineHeight || 0;
-    const preTop = preLine?.top || 0;
+    const initialFootnoteTop = lastPage.type === DocumentSkeletonPageType.FOOTNOTE && lastPage.pageNumber === 1 && columnInfo.index === ctx.footnoteFirstColumn?.index
+        ? ctx.footnoteFirstColumn.top
+        : 0;
+    const preTop = preLine?.top ?? initialFootnoteTop;
     const lineTop = preLineHeight + preTop;
 
     const { pageWidth, headerId, footerId, segmentId } = lastPage;
@@ -873,7 +925,7 @@ function _lineOperator(
     }
 
     if (skeTablesInParagraph != null && skeTablesInParagraph.length > 0) {
-        needOpenNewPageByTableLayout = _updateAndPositionTable(ctx, lineTop, lineHeight, lastPage, column, section, skeTablesInParagraph, paragraphConfig.paragraphIndex, sectionBreakConfig, pDrawingAnchor?.get(paragraphIndex)?.top);
+        needOpenNewPageByTableLayout = _updateAndPositionTable(ctx, lineTop, lineHeight, lastPage, pages, column, section, skeTablesInParagraph, paragraphConfig.paragraphIndex, sectionBreakConfig, pDrawingAnchor?.get(paragraphIndex)?.top);
     }
 
     const hasSameParagraphTopBottomDrawingWithInline = hasInlineCustomBlock &&
@@ -891,7 +943,10 @@ function _lineOperator(
             footerPage,
             column.left,
             column.width,
-            section.top
+            section.top,
+            isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy!)
+                ? Math.max(TRADITIONAL_TABLE_WRAP_MIN_WIDTH, Math.min(__getGlyphGroupWidth(glyphGroup) - 0.001, column.width - 1))
+                : 0
         ); // WRAP_TOP_AND_BOTTOM drawing and WRAP NONE table will change the starting top of the line
     const previousTopBottomCustomBlockFlowBottom = deferredTopBottomAnchorDrawings.length > 0
         ? paragraphConfig.topBottomCustomBlockFlowBottom
@@ -903,12 +958,20 @@ function _lineOperator(
     // Word keeps an inline drawing below a top-bottom floating drawing from the
     // same paragraph and clips the inline drawing at the physical page bottom.
     const clipsSameParagraphInlineDrawing = hasSameParagraphTopBottomDrawingWithInline && newLineTop < section.height;
+    const footnoteBodyLimit = ctx.footnoteLayout?.getBodyLimit(
+        lastPage,
+        pages,
+        sectionBreakConfig,
+        section.top + newLineTop + lineHeight,
+        glyphGroup
+    );
+    const availableSectionHeight = footnoteBodyLimit == null ? section.height : Math.min(section.height, footnoteBodyLimit - section.top);
     const lineOverflowsSection = !clipsSameParagraphInlineDrawing &&
-        lineHeight + newLineTop - section.height > LINE_LAYOUT_OVERFLOW_TOLERANCE;
+        lineHeight + newLineTop - availableSectionHeight > LINE_LAYOUT_OVERFLOW_TOLERANCE;
 
     if (
         (lineOverflowsSection &&
-            (column.lines.length > 0 || section.top > 0) &&
+            (column.lines.length > 0 || initialFootnoteTop > 0 || section.top > 0 || (lastPage.footnoteHeight ?? 0) > 0 || footnoteBodyLimit === -1) &&
             lastPage.sections.length > 0) ||
         needOpenNewPageByTableLayout
     ) {
@@ -1139,7 +1202,10 @@ function __getWrapTablePosition(
     const { tableSource, width, height } = table;
     const { positionH, positionV } = tableSource.position;
 
-    const left = getPositionHorizon(positionH, column, page, width, isPageBreak) ?? 0;
+    const horizontalPosition = getPositionHorizon(positionH, column, page, width, isPageBreak);
+    // Tables render from the body origin; page/margin anchors return page coordinates.
+    const pageRelative = positionH.relativeFrom === ObjectRelativeFromH.PAGE || positionH.relativeFrom === ObjectRelativeFromH.MARGIN;
+    const left = horizontalPosition == null ? 0 : horizontalPosition - (pageRelative ? page.marginLeft : 0);
     const top = getPositionVertical(
         positionV,
         page,
@@ -1196,6 +1262,7 @@ function _updateAndPositionTable(
     lineTop: number,
     lineHeight: number,
     page: IDocumentSkeletonPage,
+    pages: IDocumentSkeletonPage[],
     column: IDocumentSkeletonColumn,
     section: IDocumentSkeletonSection,
     skeTablesInParagraph: IParagraphTableCache[],
@@ -1244,8 +1311,22 @@ function _updateAndPositionTable(
     }
 
     const { top, left, height } = table;
-
     const localTop = top - section.top;
+
+    // A short table and its note must move together. Waiting until the trailing
+    // paragraph overflows leaves the table on the old page without its note.
+    // Tables that already exceed the remaining body space still use row pagination below.
+    if (ctx.footnoteLayout && localTop + height <= section.height && (column.lines.length > 0 || firstUnPositionedTable.isSlideTable) &&
+        tableSource.textWrap === TableTextWrapType.NONE) {
+        const bodyLimit = ctx.footnoteLayout.getTableBodyLimit(page, pages, sectionBreakConfig, table);
+        if (top + height > bodyLimit + LINE_LAYOUT_OVERFLOW_TOLERANCE) {
+            const previousLine = column.lines[column.lines.length - 1];
+            const bodyBottom = previousLine ? section.top + previousLine.top + previousLine.lineHeight : section.top;
+            ctx.footnoteLayout.getBodyLimit(page, pages, sectionBreakConfig, bodyBottom);
+            return true;
+        }
+    }
+
     if (
         (localTop + height > section.height || table.hasPageBreak === true) &&
         firstUnPositionedTable.isSlideTable === false
@@ -1282,6 +1363,7 @@ function _updateAndPositionTable(
 
             page.skeTables.set(firstTable.tableId, firstTable);
             firstTable.parent = page;
+            ctx.footnoteLayout?.getTableBodyLimit(page, pages, sectionBreakConfig, firstTable);
             skeTablesInParagraph.push({
                 table: firstTable,
                 tableId: firstTable.tableId,
@@ -1306,6 +1388,7 @@ function _updateAndPositionTable(
     } else {
         page.skeTables.set(tableId, table);
         table.parent = page;
+        ctx.footnoteLayout?.getTableBodyLimit(page, pages, sectionBreakConfig, table);
         firstUnPositionedTable.hasPositioned = true;
 
         const isLastTable = firstUnPositionedTable === skeTablesInParagraph[skeTablesInParagraph.length - 1];

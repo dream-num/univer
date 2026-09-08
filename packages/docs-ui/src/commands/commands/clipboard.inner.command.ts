@@ -23,6 +23,7 @@ import {
     CommandType,
     createParagraphId,
     DataStreamTreeTokenType,
+    DocumentFlavor,
     generateRandomId,
     getCustomBlockIdsInSelections,
     getRichTextEditPath,
@@ -43,6 +44,7 @@ import { getCustomDecorationAtPosition, getCustomRangeAtPosition } from '../../b
 import {
     IDocClipboardPasteAdapterService,
 } from '../../services/clipboard/doc-paste-mutation-adapter.service';
+import { cloneClipboardFootnotes, omitClipboardFootnotes } from '../../services/clipboard/internal-fragment';
 import { getCommandSkeleton } from '../util';
 import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams } from './table/table';
 
@@ -83,7 +85,8 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         const selections = docSelectionManagerService.getTextRanges() ?? [];
         const rectRanges = docSelectionManagerService.getRectRanges() ?? [];
         const selectionInfo = docSelectionManagerService.getSelectionInfo();
-        const { body, tableSource, drawings } = doc;
+        const { body: sourceBody, tableSource, drawings } = doc;
+        let body = sourceBody;
         if ((selections.length === 0 && rectRanges.length === 0) || body == null) {
             return false;
         }
@@ -94,6 +97,9 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             return false;
         }
         const unitId = docDataModel.getUnitId();
+        if (docDataModel.getDocumentStyle().documentFlavor !== DocumentFlavor.TRADITIONAL) {
+            body = omitClipboardFootnotes(body);
+        }
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -112,6 +118,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
         const rawActions: JSONXActions = [];
+        const pastedFootnotes: NonNullable<IDocumentData['footnotes']> = {};
         const resourceRedoMutations: IMutationInfo[] = [];
         const resourceUndoMutations: IMutationInfo[] = [];
         const resourceMutationGroups: Array<{ redoMutations: IMutationInfo[]; undoMutations: IMutationInfo[] }> = [];
@@ -179,14 +186,17 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             const cloneBody = Tools.deepClone(body);
             const blockRangeMappings: IDocClipboardPasteBlockRangeMapping[] = [];
             const customBlockMappings: IDocClipboardPasteCustomBlockMapping[] = [];
-            const selectionCustomRangeMappings = customRangeMappings.map(({ sourceRange }) => ({
-                sourceRange,
-                targetRange: BuildTextUtils.customRange.copyCustomRange(sourceRange),
+            const selectionCustomRangeMappings = (body.customRanges ?? []).map((range) => ({
+                sourceRange: customRangeMappings.find(({ targetRange }) => targetRange.rangeId === range.rangeId)?.sourceRange ?? range,
+                targetRange: BuildTextUtils.customRange.copyCustomRange(range),
             }));
             if (selectionCustomRangeMappings.length > 0) {
                 cloneBody.customRanges = selectionCustomRangeMappings.map(
                     ({ targetRange }) => targetRange
                 );
+            }
+            if (docDataModel.getDocumentStyle().documentFlavor === DocumentFlavor.TRADITIONAL) {
+                Object.assign(pastedFootnotes, cloneClipboardFootnotes(cloneBody, doc.footnotes));
             }
 
             if (hasBlockRange) {
@@ -306,6 +316,20 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         }
 
         const path = getRichTextEditPath(docDataModel, segmentId);
+
+        if (Object.keys(pastedFootnotes).length > 0) {
+            if (segmentId) {
+                return false;
+            }
+            const existing = docDataModel.getSnapshot().footnotes;
+            if (existing == null) {
+                rawActions.push(jsonX.insertOp(['footnotes'], pastedFootnotes)!);
+            } else {
+                for (const [id, note] of Object.entries(pastedFootnotes)) {
+                    rawActions.push(jsonX.insertOp(['footnotes', id], note)!);
+                }
+            }
+        }
 
         rawActions.push(jsonX.editOp(textX.serialize(), path)!);
 

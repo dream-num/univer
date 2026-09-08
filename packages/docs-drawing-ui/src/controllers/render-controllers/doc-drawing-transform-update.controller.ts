@@ -161,6 +161,7 @@ export type DocumentDrawingPublicationProgress = Pick<
 >;
 
 interface IDocumentDrawingPublicationNestedPage {
+    footnotes?: Array<{ page: IDocumentDrawingPublicationNestedPage }>;
     skeDrawings: ReadonlyMap<string, unknown>;
     skeTables?: ReadonlyMap<string, {
         rows: Array<{ cells: IDocumentDrawingPublicationNestedPage[] }>;
@@ -393,7 +394,7 @@ function hasHorizontalTableViewport(viewport: IDocsTableRenderViewport | null | 
 }
 
 function hasSkeletonPageDrawings(page: IDocumentDrawingPublicationNestedPage): boolean {
-    if (page.skeDrawings.size > 0) {
+    if (page.skeDrawings.size > 0 || page.footnotes?.some((note) => hasSkeletonPageDrawings(note.page))) {
         return true;
     }
 
@@ -420,6 +421,9 @@ function hasSkeletonPageDrawings(page: IDocumentDrawingPublicationNestedPage): b
 
 function countSkeletonPageDrawings(page: IDocumentDrawingPublicationNestedPage): number {
     let count = page.skeDrawings.size;
+    page.footnotes?.forEach((note) => {
+        count += countSkeletonPageDrawings(note.page);
+    });
     page.skeTables?.forEach((table) => {
         table.rows.forEach((row) => {
             row.cells.forEach((cell) => {
@@ -783,6 +787,20 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             undefined,
             selectable
         );
+        for (const note of page.footnotes ?? []) {
+            this._collectSegmentDrawingPositions(
+                unitId,
+                note.page,
+                docsLeft,
+                docsTop,
+                updateDrawingMap,
+                note.top,
+                note.left,
+                undefined,
+                selectable,
+                { top: note.top, left: note.left }
+            );
+        }
     }
 
     private _collectSegmentDrawingPositions(
@@ -794,7 +812,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         marginTop: number,
         marginLeft: number,
         hostPage: IDocumentSkeletonPage | undefined,
-        selectable: boolean
+        selectable: boolean,
+        clipOffset?: { left: number; top: number }
     ): void {
         this._calculateDrawingPosition(
             unitId,
@@ -805,7 +824,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             marginTop,
             marginLeft,
             hostPage,
-            selectable
+            selectable,
+            clipOffset
         );
         this._calculateTableCellDrawingPositions(
             unitId,

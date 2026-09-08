@@ -15,6 +15,7 @@
  */
 
 import type { IDocumentData, IParagraph } from '@univerjs/core';
+import type { IDocumentLayoutPageGeometryPublication } from '../document-layout-publication';
 import {
     BooleanNumber,
     ColumnSeparatorType,
@@ -54,6 +55,7 @@ import { setDocsCustomBlockRenderViewportProvider } from '../../custom-block-ren
 import { setDocsTableRenderViewportProvider } from '../../table-render-viewport';
 import { DocumentViewModel } from '../../view-model/document-view-model';
 import { DocumentSkeleton } from '../doc-skeleton';
+import { serializeDocumentSkeletonPage } from '../document-layout-page-patch';
 import { Hyphen } from '../hyphenation/hyphen';
 import { Lang } from '../hyphenation/lang';
 import { PATTERN_LOADERS } from '../hyphenation/pattern-loaders.gen';
@@ -219,6 +221,261 @@ function createPage(type: DocumentSkeletonPageType, st: number, tableId = '') {
 }
 
 describe('doc skeleton', () => {
+    it.each([2, 6].flatMap((paragraphCount) => [TableRowHeightRule.AUTO, TableRowHeightRule.AT_LEAST, TableRowHeightRule.EXACT].map((hRule) => ({ paragraphCount, hRule }))))('sizes vertically merged cells against the whole row span ($paragraphCount paragraphs, rule $hRule)', ({ paragraphCount, hRule }) => {
+        const measure = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
+            width: text.length * 5,
+            fontBoundingBoxAscent: 8,
+            fontBoundingBoxDescent: 2,
+            actualBoundingBoxAscent: 8,
+            actualBoundingBoxDescent: 2,
+        }) as TextMetrics);
+        const univer = new Univer();
+        const T = DataStreamTreeTokenType;
+        const cell = (text: string) => `${T.TABLE_CELL_START}${text}\n${T.TABLE_CELL_END}`;
+        const row = (left: string, right: string) => `${T.TABLE_ROW_START}${cell(left)}${cell(right)}${T.TABLE_ROW_END}`;
+        const tableStream = `${T.TABLE_START}${row('Merged\r'.repeat(paragraphCount), 'One\r')}${row('\r', 'Two\r')}${T.TABLE_END}`;
+        const dataStream = `${tableStream}\rAfter\r\n`;
+        const snapshot: IDocumentData = {
+            id: 'merged-cell-height',
+            body: {
+                dataStream,
+                paragraphs: [...dataStream.matchAll(/\r/g)].filter((match) => match.index !== tableStream.length).map((match, index) => ({ paragraphId: `p-${index}`, startIndex: match.index })),
+                sectionBreaks: [...dataStream.matchAll(/\n/g)].map((match, index) => ({ sectionId: `s-${index}`, startIndex: match.index })),
+                tables: [{ tableId: 'table', startIndex: 0, endIndex: tableStream.length }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 400, height: 400 },
+                marginTop: 10,
+                marginBottom: 10,
+                marginLeft: 10,
+                marginRight: 10,
+            },
+            tableSource: { table: {
+                tableId: 'table',
+                align: TableAlignmentType.START,
+                indent: { v: 0 },
+                textWrap: TableTextWrapType.NONE,
+                size: { type: TableSizeType.SPECIFIED, width: { v: 200 } },
+                position: {
+                    positionH: { relativeFrom: ObjectRelativeFromH.PAGE },
+                    positionV: { relativeFrom: ObjectRelativeFromV.PAGE },
+                },
+                dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
+                tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 100 } } }, { size: { type: TableSizeType.SPECIFIED, width: { v: 100 } } }],
+                tableRows: [0, 1].map((index) => ({
+                    trHeight: { hRule, val: { v: 25 } },
+                    tableCells: [{ rowSpan: index === 0 ? 2 : 0, vAlign: VerticalAlignmentType.CENTER }, {}],
+                })),
+            } },
+        };
+        const viewModel = new DocumentViewModel(new DocumentDataModel(snapshot));
+        const skeleton = DocumentSkeleton.create(viewModel, univer.__getInjector().get(LocaleService));
+        try {
+            skeleton.calculate();
+            const pages = skeleton.getSkeletonData()!.pages;
+            expect(pages).toHaveLength(1);
+            const table = pages[0].skeTables.get('table')!;
+            const mergedCell = table.rows[0].cells[0];
+            const otherCellsHeight = table.rows.reduce((height, row) => height + row.cells[1].height, 0);
+            let expectedHeight = Math.max(mergedCell.height, otherCellsHeight);
+            if (hRule === TableRowHeightRule.EXACT) {
+                expectedHeight = 50;
+            } else if (hRule === TableRowHeightRule.AT_LEAST) {
+                expectedHeight = Math.max(expectedHeight, 50);
+            }
+            expect(table.height).toBeCloseTo(expectedHeight);
+            expect(mergedCell.pageHeight).toBeCloseTo(table.height);
+            expect(mergedCell.marginTop).toBeCloseTo(Math.max(0, (table.height - mergedCell.height) / 2));
+            expect(table.rows[1].top).toBeCloseTo(table.rows[0].height);
+            expectIncrementalSkeletonToEqualSynchronous(snapshot, univer.__getInjector().get(LocaleService));
+        } finally {
+            skeleton.dispose();
+            viewModel.dispose();
+            univer.dispose();
+            measure.mockRestore();
+        }
+    });
+
+    it('reserves footnote space and carries long notes through synchronous and sliced pagination', () => {
+        const measure = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
+            width: text.length * 5,
+            fontBoundingBoxAscent: 8,
+            fontBoundingBoxDescent: 2,
+            actualBoundingBoxAscent: 8,
+            actualBoundingBoxDescent: 2,
+        }) as TextMetrics);
+        const univer = new Univer();
+        const dataStream = `${'Intro\r'.repeat(30)}Text with reference\uFFFC and more text.\r${'Later body paragraph.\r'.repeat(10)}\n`;
+        const noteStream = `${'Long explanation that continues onto the following page.\r'.repeat(10)}\n`;
+        const referenceIndex = dataStream.indexOf('\uFFFC');
+        const snapshot: IDocumentData = {
+            id: 'footnote-pagination',
+            body: {
+                dataStream,
+                paragraphs: [...dataStream.matchAll(/\r/g)].map((match, i) => ({ startIndex: match.index!, paragraphId: `p-${i}` })),
+                sectionBreaks: [{ startIndex: dataStream.length - 1, sectionId: 'main' }],
+                customRanges: [{
+                    rangeType: CustomRangeType.FOOTNOTE,
+                    rangeId: 'ref',
+                    wholeEntity: true,
+                    startIndex: referenceIndex,
+                    endIndex: referenceIndex,
+                    properties: { footnoteId: 'note' },
+                }],
+            },
+            footnotes: { note: { footnoteId: 'note', body: {
+                dataStream: noteStream,
+                paragraphs: [...noteStream.matchAll(/\r/g)].map((match, i) => ({ startIndex: match.index!, paragraphId: `n-${i}` })),
+                sectionBreaks: [{ startIndex: noteStream.length - 1, sectionId: 'note' }],
+            } } },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 220, height: 160 },
+                marginTop: 10,
+                marginBottom: 10,
+                marginLeft: 10,
+                marginRight: 10,
+            },
+        };
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(snapshot)), univer.__getInjector().get(LocaleService));
+        try {
+            skeleton.calculate();
+            const pages = skeleton.getSkeletonData()!.pages;
+            const fragments = pages.flatMap((page) => page.footnotes ?? []);
+            expect(fragments.length).toBeGreaterThan(1);
+            const referencePage = pages.find((page) => page.st <= referenceIndex && page.ed >= referenceIndex)!;
+            expect(referencePage.footnotes?.[0]).toMatchObject({ footnoteId: 'note', continued: false });
+            expect(fragments.slice(1).every((fragment) => fragment.continued)).toBe(true);
+            const firstPosition = skeleton.findNodePositionByCharIndex(0, true, 'note');
+            expect(firstPosition?.pageType).toBe(DocumentSkeletonPageType.FOOTNOTE);
+            expect(firstPosition?.path).toContain('footnotes');
+            expect(skeleton.findCharIndexByPosition(firstPosition!)).toBe(0);
+            expect(skeleton.findGlyphByPosition(firstPosition)).toBe(skeleton.findNodeByCharIndex(0, 'note'));
+            const referencePageIndex = pages.indexOf(referencePage);
+            const continuation = fragments[1];
+            const continuationPosition = skeleton.findNodePositionByCharIndex(continuation.page.st, true, 'note', referencePageIndex);
+            expect(continuationPosition?.page).toBeGreaterThan(referencePageIndex);
+            expect(skeleton.findCharIndexByPosition(continuationPosition!)).toBe(continuation.page.st);
+            const pageTop = pages.slice(0, referencePageIndex).reduce((top, page) => top + page.pageHeight, 0);
+            const firstFragment = referencePage.footnotes![0];
+            const hit = skeleton.findNodeByCoord(Vector2.create(firstFragment.left + 20, pageTop + firstFragment.top + 5), PageLayoutType.VERTICAL, 0, 0);
+            expect(hit?.segmentId).toBe('note');
+            expect(hit?.segmentPage).toBe(referencePageIndex);
+            for (const page of pages) {
+                const firstNote = page.footnotes?.[0];
+                if (!firstNote) {
+                    continue;
+                }
+                expect(page.height + page.marginTop).toBeLessThanOrEqual(firstNote.top);
+                expect(firstNote.top + firstNote.page.height).toBeLessThanOrEqual(page.pageHeight - page.marginBottom + 2);
+            }
+            expect(fragments.map((fragment) => fragment.page.sections.flatMap((section) => section.columns.flatMap(
+                (column) => column.lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.raw)))
+            )).join('')).join('')).toBe(noteStream);
+            expectIncrementalSkeletonToEqualSynchronous(snapshot, univer.__getInjector().get(LocaleService));
+            const edited = structuredClone(snapshot);
+            const added = 'Expanded note content.\r'.repeat(3);
+            const editedBody = edited.footnotes!.note.body;
+            editedBody.dataStream = added + noteStream;
+            editedBody.paragraphs = [...editedBody.dataStream.matchAll(/\r/g)].map((match, index) => ({
+                paragraphId: `edited-note-${index}`,
+                startIndex: match.index!,
+            }));
+            editedBody.sectionBreaks![0].startIndex = editedBody.dataStream.length - 1;
+            skeleton.getViewModel().reset(new DocumentDataModel(edited));
+            const generation = skeleton.startIncrementalLayout({
+                reason: 'edit',
+                anchor: referenceIndex,
+                invalidation: { oldStart: referenceIndex, oldEnd: referenceIndex + 1, newEnd: referenceIndex + 1 },
+            });
+            let progress = skeleton.stepIncrementalLayout(generation, 0);
+            for (let step = 0; !progress.complete && step < 1_000; step++) {
+                progress = skeleton.stepIncrementalLayout(generation, 0);
+            }
+            expect(progress.complete).toBe(true);
+            const expected = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(edited)), univer.__getInjector().get(LocaleService));
+            try {
+                expected.calculate();
+                expect(normalizeSkeleton(skeleton.getSkeletonData())).toEqual(normalizeSkeleton(expected.getSkeletonData()));
+                const data = skeleton.getSkeletonData()!;
+                const notePageIndex = data.pages.findIndex((page) => page.footnotes?.length);
+                const protectedPage = data.pages[notePageIndex];
+                const publication: IDocumentLayoutPageGeometryPublication = {
+                    kind: 'page',
+                    left: data.left,
+                    top: data.top,
+                    st: data.st,
+                    resources: { reset: false, skeHeaders: [], skeFooters: [], skeListLevel: null, drawingAnchor: null },
+                    pages: data.pages.map((page, pageIndex) => ({ pageIndex, page: serializeDocumentSkeletonPage(page) })),
+                };
+                skeleton.beginExternalLayout({
+                    reason: 'edit',
+                    protectedRange: { mode: 'paginated', startPageIndex: notePageIndex, endPageIndex: notePageIndex },
+                });
+                // A Worker can agree on body pagination but move a footnote line
+                // to the next page. That boundary must take part in the merge.
+                publication.pages[notePageIndex].page.footnotes![0].page.ed -= 1;
+                const partial = { ...progress, complete: false };
+                expect(skeleton.applyLayoutPublication(publication, partial).didReplaceProtectedPages).toBe(false);
+                expect(skeleton.getSkeletonData()!.pages[notePageIndex]).toBe(protectedPage);
+                expect(skeleton.applyLayoutPublication({ ...publication, pages: [] }, progress).didReplaceProtectedPages).toBe(true);
+                expect(skeleton.getSkeletonData()!.pages[notePageIndex].footnotes![0].page.ed)
+                    .toBe(protectedPage.footnotes![0].page.ed - 1);
+            } finally {
+                expected.dispose();
+            }
+        } finally {
+            measure.mockRestore();
+            skeleton.dispose();
+            univer.dispose();
+        }
+    });
+
+    it('shapes a multi-character footnote number as one editable reference in both layout paths', () => {
+        const univer = new Univer();
+        const snapshot: Partial<IDocumentData> = {
+            id: 'footnote-caret',
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 400, height: 500 } },
+            body: {
+                dataStream: 'A\uFFFCB\r\n',
+                paragraphs: [{ startIndex: 3, paragraphId: 'paragraph' }],
+                sectionBreaks: [{ startIndex: 4, sectionId: 'section' }],
+                customRanges: [{
+                    rangeId: 'reference',
+                    rangeType: CustomRangeType.FOOTNOTE,
+                    startIndex: 1,
+                    endIndex: 1,
+                    wholeEntity: true,
+                    properties: { footnoteId: 'note' },
+                }],
+            },
+            footnotes: { note: { footnoteId: 'note', body: {
+                dataStream: 'Explanation\r\n',
+                paragraphs: [{ startIndex: 11, paragraphId: 'note-paragraph' }],
+                sectionBreaks: [{ startIndex: 12, sectionId: 'note-section' }],
+            } } },
+            footnoteSettings: { startNumber: 8, numberFormat: 'upperRoman' },
+        };
+        const model = new DocumentDataModel(snapshot);
+        const viewModel = new DocumentViewModel(model);
+        const localeService = univer.__getInjector().get(LocaleService);
+        const skeleton = DocumentSkeleton.create(viewModel, localeService);
+        try {
+            skeleton.calculate();
+            expect(skeleton.findNodeByCharIndex(1)).toMatchObject({ content: 'VIII', raw: '\uFFFC', count: 1 });
+            expect(skeleton.findNodeByCharIndex(2)).toMatchObject({ content: 'B' });
+            expect(skeleton.findNodePositionByCharIndex(2)?.page).toBe(0);
+            expectIncrementalSkeletonToEqualSynchronous(snapshot, localeService);
+        } finally {
+            skeleton.dispose();
+            viewModel.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
     it.each(['ready', 'cancel', 'failure', 'header', 'footer'])('waits for cold hyphenation rules and matches a warm executor (%s)', async (scenario) => {
         const univer = new Univer();
         const content = scenario === 'header' || scenario === 'footer'
@@ -975,19 +1232,10 @@ describe('doc skeleton', () => {
         const header = createPage(DocumentSkeletonPageType.HEADER, 200);
         const footer = createPage(DocumentSkeletonPageType.FOOTER, 300);
 
-        const docViewModel = {
-            getDataModel: () => ({
-                documentStyle: {
-                    pageSize: { width: 210, height: 297 },
-                },
-            }),
-            getHeaderFooterTreeMap: () => ({
-                headerTreeMap: new Map(),
-                footerTreeMap: new Map(),
-            }),
-            dispose: vi.fn(),
-        } as any;
-        const skeleton = new DocumentSkeleton(docViewModel, {} as any);
+        const univer = new Univer();
+        const model = createDocumentModelWithStyle('ABC', {});
+        model.updateDocumentStyle({ pageSize: { width: 210, height: 297 } });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
         (skeleton as any)._skeletonData = {
             pages: [body.page],
             skeHeaders: new Map([['header-seg', new Map([[body.page.pageWidth, header.page]])]]),
@@ -1058,6 +1306,9 @@ describe('doc skeleton', () => {
 
         (skeleton as any)._translatePage(body.page, PageLayoutType.VERTICAL, 1, 2);
         expect((skeleton as any)._findLiquid.x).toBeGreaterThanOrEqual(0);
+        skeleton.dispose();
+        model.dispose();
+        univer.dispose();
     });
 
     it('finds nodes by coordinate inside column group columns', () => {
@@ -1446,12 +1697,12 @@ describe('doc skeleton', () => {
         const localeService = univer.__getInjector().get(LocaleService);
         const viewModel = new DocumentViewModel(documentModel);
         const skeleton = DocumentSkeleton.create(viewModel, localeService);
-        const createSkeletonSpy = vi.spyOn(skeleton as any, '_createSkeleton');
+        const createSkeletonPassSpy = vi.spyOn(skeleton as any, '_createSkeletonPass');
         const restoreContinuousSectionSpy = vi.spyOn(skeleton as any, '_restoreContinuousSection');
 
         skeleton.calculate();
 
-        expect(createSkeletonSpy.mock.calls.length).toBeGreaterThan(1);
+        expect(createSkeletonPassSpy.mock.calls.length).toBeGreaterThan(1);
         expect(restoreContinuousSectionSpy).not.toHaveBeenCalled();
         const firstPageSections = skeleton.getSkeletonData()?.pages[0]?.sections ?? [];
         expect(firstPageSections).toHaveLength(2);
@@ -1542,11 +1793,11 @@ describe('doc skeleton', () => {
         const univer = new Univer();
         const localeService = univer.__getInjector().get(LocaleService);
         const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
-        const createSkeletonSpy = vi.spyOn(skeleton as any, '_createSkeleton');
+        const createSkeletonPassSpy = vi.spyOn(skeleton as any, '_createSkeletonPass');
 
         skeleton.calculate();
 
-        expect(createSkeletonSpy.mock.calls.length).toBeGreaterThan(1);
+        expect(createSkeletonPassSpy.mock.calls.length).toBeGreaterThan(1);
         expect(skeleton.getSkeletonData()?.pages.map(({ pageNumber }) => pageNumber)).toEqual([1, 2]);
 
         const incremental = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);

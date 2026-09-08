@@ -56,16 +56,20 @@ export function getCustomBlockIdsInSelections(body: IDocumentBody, selections: I
 }
 
 export function removeDrawingReferences(
-    documentData: Pick<IDocumentData, 'body' | 'drawings' | 'drawingsOrder'>,
+    documentData: Pick<IDocumentData, 'body' | 'drawings' | 'drawingsOrder' | 'footnotes'>,
     selections: ITextRange[],
-    body: IDocumentBody | undefined = documentData.body
+    body: IDocumentBody | undefined = documentData.body,
+    segmentId = ''
 ): JSONXActions[] {
     if (!body) {
         return [];
     }
 
-    const drawings = documentData.drawings ?? {};
-    const drawingOrder = documentData.drawingsOrder ?? [];
+    const footnote = documentData.footnotes?.[segmentId];
+    const source = footnote ?? documentData;
+    const prefix = footnote ? ['footnotes', segmentId] : [];
+    const drawings = source.drawings ?? {};
+    const drawingOrder = source.drawingsOrder ?? [];
     const blockIds = [...new Set(getCustomBlockIdsInSelections(body, selections))]
         .sort((left, right) => drawingOrder.indexOf(right) - drawingOrder.indexOf(left));
     const jsonX = JSONX.getInstance();
@@ -74,7 +78,7 @@ export function removeDrawingReferences(
     for (const blockId of blockIds) {
         const drawing = drawings[blockId];
         if (drawing != null) {
-            const removeDrawingAction = jsonX.removeOp(['drawings', blockId], drawing);
+            const removeDrawingAction = jsonX.removeOp([...prefix, 'drawings', blockId], drawing);
             if (removeDrawingAction) {
                 actions.push(removeDrawingAction);
             }
@@ -82,7 +86,7 @@ export function removeDrawingReferences(
 
         const drawingIndex = drawingOrder.indexOf(blockId);
         if (drawingIndex >= 0) {
-            const removeDrawingOrderAction = jsonX.removeOp(['drawingsOrder', drawingIndex], blockId);
+            const removeDrawingOrderAction = jsonX.removeOp([...prefix, 'drawingsOrder', drawingIndex], blockId);
             if (removeDrawingOrderAction) {
                 actions.push(removeDrawingOrderAction);
             }
@@ -92,7 +96,6 @@ export function removeDrawingReferences(
     return actions;
 }
 
-// eslint-disable-next-line max-lines-per-function
 export const addDrawing = (param: IAddDrawingParam) => {
     const { selection, documentDataModel, drawings } = param;
     const { collapsed, startOffset, segmentId } = selection;
@@ -105,11 +108,21 @@ export const addDrawing = (param: IAddDrawingParam) => {
         return false;
     }
 
-    const drawingOrderLength = documentDataModel.getSnapshot().drawingsOrder?.length ?? 0;
-    let removeDrawingLen = 0;
+    const snapshot = documentDataModel.getSnapshot();
+    const footnote = snapshot.footnotes?.[segmentId ?? ''];
+    const source = footnote ?? snapshot;
+    const prefix = footnote ? ['footnotes', segmentId!] : [];
+    const drawingOrder = source.drawingsOrder ?? [];
+    let insertDrawingIndex = drawingOrder.length;
+    if (source.drawings == null) {
+        rawActions.push(jsonX.insertOp([...prefix, 'drawings'], {})!);
+    }
+    if (source.drawingsOrder == null) {
+        rawActions.push(jsonX.insertOp([...prefix, 'drawingsOrder'], [])!);
+    }
     const insertOffset = collapsed ? normalizeDrawingInsertOffset(body, startOffset ?? 0) : (startOffset ?? 0);
 
-        // Step 1: Insert placeholder `\b` in dataStream and add drawing to customBlocks.
+    // Step 1: Insert placeholder `\b` in dataStream and add drawing to customBlocks.
     if (collapsed) {
         if (insertOffset > 0) {
             textX.push({
@@ -121,34 +134,11 @@ export const addDrawing = (param: IAddDrawingParam) => {
         const dos = deleteSelectionTextX([selection], body, 0, null, false);
         textX.push(...dos);
 
-        const removedCustomBlockIds = getCustomBlockIdsInSelections(body, [selection]);
-        const drawings = documentDataModel.getDrawings() ?? {};
-        const drawingOrder = documentDataModel.getDrawingsOrder() ?? [];
-        const sortedRemovedCustomBlockIds = removedCustomBlockIds.sort((a, b) => {
-            if (drawingOrder.indexOf(a) > drawingOrder.indexOf(b)) {
-                return -1;
-            } else if (drawingOrder.indexOf(a) < drawingOrder.indexOf(b)) {
-                return 1;
-            }
-
-            return 0;
-        });
-
-        if (sortedRemovedCustomBlockIds.length > 0) {
-            for (const blockId of sortedRemovedCustomBlockIds) {
-                const drawing = drawings[blockId];
-                const drawingIndex = drawingOrder.indexOf(blockId);
-                if (drawing == null || drawingIndex < 0) {
-                    continue;
-                }
-
-                const removeDrawingAction = jsonX.removeOp(['drawings', blockId], drawing);
-                const removeDrawingOrderAction = jsonX.removeOp(['drawingsOrder', drawingIndex], blockId);
-
-                rawActions.push(removeDrawingAction!);
-                rawActions.push(removeDrawingOrderAction!);
-
-                removeDrawingLen++;
+        const removedIds = new Set(getCustomBlockIdsInSelections(body, [selection]));
+        insertDrawingIndex -= drawingOrder.filter((id) => removedIds.has(id)).length;
+        for (const action of removeDrawingReferences(snapshot, [selection], body, segmentId)) {
+            if (action) {
+                rawActions.push(action);
             }
         }
     }
@@ -165,11 +155,11 @@ export const addDrawing = (param: IAddDrawingParam) => {
 
     rawActions.push(placeHolderAction!);
 
-        // Step 2: add drawing to drawings and drawingsOrder fields.
+    // Step 2: add drawing to drawings and drawingsOrder fields.
     for (const drawing of drawings) {
         const { drawingId } = drawing;
-        const addDrawingAction = jsonX.insertOp(['drawings', drawingId], drawing);
-        const addDrawingOrderAction = jsonX.insertOp(['drawingsOrder', drawingOrderLength - removeDrawingLen], drawingId);
+        const addDrawingAction = jsonX.insertOp([...prefix, 'drawings', drawingId], drawing);
+        const addDrawingOrderAction = jsonX.insertOp([...prefix, 'drawingsOrder', insertDrawingIndex++], drawingId);
 
         rawActions.push(addDrawingAction!);
         rawActions.push(addDrawingOrderAction!);

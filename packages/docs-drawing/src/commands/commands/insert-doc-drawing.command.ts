@@ -21,8 +21,10 @@ import {
     BooleanNumber,
     BuildTextUtils,
     CommandType,
+    DrawingTypeEnum,
     ICommandService,
     IUniverInstanceService,
+    PositionedObjectLayoutType,
     UniverInstanceType,
 } from '@univerjs/core';
 import {
@@ -74,14 +76,21 @@ export const InsertDocDrawingCommand: ICommand = {
         }
 
         const snapshot = documentDataModel.getSnapshot();
+        const isFootnote = !!snapshot.footnotes?.[segmentId];
+        if (isFootnote && drawings.some((drawing) => drawing.drawingType !== DrawingTypeEnum.DRAWING_IMAGE)) {
+            return false;
+        }
         const isHeaderFooter = !!snapshot.headers?.[segmentId] || !!snapshot.footers?.[segmentId];
-        const targetDrawings = isHeaderFooter
+        let targetDrawings = isHeaderFooter
             ? drawings.map((drawing) => ({
                 ...drawing,
                 isMultiTransform: BooleanNumber.TRUE,
                 transforms: drawing.transforms ?? (drawing.transform ? [drawing.transform] : null),
             }))
             : drawings;
+        if (isFootnote) {
+            targetDrawings = drawings.map((drawing) => ({ ...drawing, layoutType: PositionedObjectLayoutType.INLINE }));
+        }
         const actions = BuildTextUtils.drawing.add({
             selection: resolvedTextRange,
             documentDataModel,
@@ -96,6 +105,7 @@ export const InsertDocDrawingCommand: ICommand = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
+                segmentId,
                 actions: [],
                 textRanges: [],
             },

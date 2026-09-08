@@ -26,6 +26,7 @@ import pkg from '../../package.json';
 import { UniverDocsPlugin } from '../plugin';
 import { DocLayoutExecutorService, DocLayoutExecutorType } from '../services/doc-layout-executor.service';
 import { DEFAULT_DOCS_LAYOUT_WORKER_REQUEST_TIMEOUT_MS, defaultPluginDocsLayoutWorkerConfig, DOCS_LAYOUT_WORKER_PLUGIN_CONFIG_KEY } from './config/config';
+import { collectDocumentFontFamilies, measureDocumentFontFamilies } from './document-font-metrics';
 import { DocsLayoutWorkerPerformanceTracker } from './performance-tracker';
 import { DOCS_LAYOUT_WORKER_CHANNEL, DOCS_LAYOUT_WORKER_PROTOCOL_VERSION } from './protocol';
 import { startDocsLayoutWorker } from './worker';
@@ -65,6 +66,7 @@ export class DocsLayoutWorkerClientService extends Disposable implements IDocLay
     private _initialization: Promise<void>;
     private _initialized = false;
     private readonly _performanceTracker = new DocsLayoutWorkerPerformanceTracker();
+    private readonly _fontFamilies = new Map<string, Set<string>>();
 
     constructor(
         private readonly _workerFactory: () => Worker,
@@ -88,18 +90,29 @@ export class DocsLayoutWorkerClientService extends Disposable implements IDocLay
     }
 
     createSession(request: IDocLayoutCreateSessionRequest): Promise<void> {
+        const families = new Set<string>();
+        collectDocumentFontFamilies(request.snapshot, families);
+        this._fontFamilies.set(request.unitId, families);
+        const measuredRequest = { ...request, normalFontLineHeights: measureDocumentFontFamilies(families) };
         if (this._initialized) {
-            return this._withTimeout(this._getRuntime().createSession(request), 'create session');
+            return this._withTimeout(this._getRuntime().createSession(measuredRequest), 'create session');
         }
 
-        const capturedRequest = Tools.deepClone(request);
+        const capturedRequest = Tools.deepClone(measuredRequest);
         return this._initialization.then(() =>
             this._withTimeout(this._getRuntime().createSession(capturedRequest), 'create session'));
     }
 
     async startLayout(request: IDocLayoutStartRequest): Promise<IDocLayoutStartResult> {
         await this._initialization;
-        return this._withTimeout(this._getRuntime().startLayout(request), 'start layout');
+        const families = this._fontFamilies.get(request.unitId);
+        if (families != null) {
+            collectDocumentFontFamilies(request.mutations, families);
+        }
+        const measuredRequest = families == null
+            ? request
+            : { ...request, normalFontLineHeights: measureDocumentFontFamilies(families) };
+        return this._withTimeout(this._getRuntime().startLayout(measuredRequest), 'start layout');
     }
 
     async stepLayout(request: IDocLayoutStepRequest): Promise<IDocLayoutStepResult> {
@@ -156,6 +169,7 @@ export class DocsLayoutWorkerClientService extends Disposable implements IDocLay
         await this._initialization;
         await this._withTimeout(this._getRuntime().disposeSession(request), 'dispose session');
         this._performanceTracker.reset(request.unitId);
+        this._fontFamilies.delete(request.unitId);
     }
 
     override dispose(): void {
@@ -178,6 +192,7 @@ export class DocsLayoutWorkerClientService extends Disposable implements IDocLay
     }
 
     private _disposeRuntime(): void {
+        this._fontFamilies.clear();
         this._initialized = false;
         this._channelService?.dispose();
         this._channelService = null;

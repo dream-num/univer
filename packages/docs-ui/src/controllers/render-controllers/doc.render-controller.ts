@@ -997,11 +997,14 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             );
         } else if (isInitialLayout) {
             this._refreshPagePosition();
-        } else if (progress.didPublishAnchor && (
+        } else if ((progress.didPublishAnchor && (
             refreshIncompleteAnchorSelection || this._docSelectionRenderService.hasPendingSelection
-        )) {
+        )) || (publication != null &&
+            this._context.unit.getSnapshot().footnotes?.[this._getActiveRange(unitId)?.segmentId ?? ''] != null)) {
             // The foreground pass replaces edited line and glyph objects. Rebuild
             // the caret from stable document offsets without moving the viewport.
+            // A footnote can continue beyond the body anchor, so later Worker
+            // publications must also resolve its current segment offset.
             this._textSelectionManagerService.refreshSelection(
                 { unitId, subUnitId: unitId },
                 this._getActiveEditingRange(unitId) != null
@@ -1728,7 +1731,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             if (!doesDocMutationRequireLayout(params.actions, snapshot.drawings)) {
                 return;
             }
-            const bodyRanges = textRanges?.filter((range) => !range.segmentId) ?? [];
+            const bodyRanges = textRanges?.filter((range) => !(range.segmentId ?? params.segmentId)) ?? [];
             const textInvalidation = getBodyMutationInvalidation(params.actions, params.segmentId);
             const mutationLayoutImpact = getDocumentMutationLayoutImpact(
                 params.actions,
@@ -1754,7 +1757,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                 ? undefined
                 : bodyRanges.find((range) => range.isActive) ??
                     (bodyRanges.length === 1 ? bodyRanges[0] : undefined);
-            const priorityAnchor = mutationActiveRange?.endOffset ?? activeRange?.endOffset;
+            const priorityAnchor = mutationActiveRange?.endOffset ??
+                (activeRange?.segmentId ? undefined : activeRange?.endOffset);
             // RichTextEditingMutation preserves the original Main input
             // contract by refreshing its local post-edit range in a microtask,
             // once the synchronous layout prefix has finished. Do not publish

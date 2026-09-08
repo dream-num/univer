@@ -18,7 +18,9 @@ import type { IDocumentData, IObjectPositionH, IObjectPositionV } from '@univerj
 import {
     ArrangeTypeEnum,
     BooleanNumber,
+    CustomRangeType,
     DataStreamTreeTokenType,
+    DocumentFlavor,
     ICommandService,
     ImageSourceType,
     ObjectRelativeFromH,
@@ -108,6 +110,60 @@ describe('FDocument image facade', () => {
         expect(testBed.document.save().body?.dataStream).toBe('Hello\b world\r\n');
         expect(testBed.document.getImage(image!.getId())).not.toBeNull();
         expect(testBed.document.getImages().map((item) => item.getId())).toEqual([image!.getId()]);
+    });
+
+    it('inserts, resizes and removes an inline footnote image without changing body resources', async () => {
+        testBed.univer.dispose();
+        testBed = createFacadeTestBed({
+            id: 'test-doc',
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+            body: {
+                dataStream: 'A\uFFFC\r\n',
+                paragraphs: [{ startIndex: 2, paragraphId: 'p' }],
+                sectionBreaks: [{ startIndex: 3, sectionId: 's' }],
+                customRanges: [{
+                    rangeId: 'reference',
+                    rangeType: CustomRangeType.FOOTNOTE,
+                    startIndex: 1,
+                    endIndex: 1,
+                    wholeEntity: true,
+                    properties: { footnoteId: 'note' },
+                }],
+            },
+            footnotes: { note: { footnoteId: 'note', body: {
+                dataStream: 'Note\r\n',
+                paragraphs: [{ startIndex: 4, paragraphId: 'np' }],
+            } } },
+        });
+        const before = testBed.document.save();
+        const image = await testBed.document.insertImage({
+            source: 'data:image/png;base64,image',
+            imageSourceType: ImageSourceType.BASE64,
+            width: 20,
+            height: 10,
+            wrappingStyle: TextWrappingStyle.WRAP_SQUARE,
+            textRange: { startOffset: 4, endOffset: 4, collapsed: true, segmentId: 'note' },
+        });
+        if (!image) {
+            throw new Error('Expected footnote image insertion');
+        }
+        expect(image.getImageData()?.layoutType).toBe(PositionedObjectLayoutType.INLINE);
+        expect(testBed.document.getImage(image.getId())?.getSource()).toBe('data:image/png;base64,image');
+        expect(testBed.document.getImages().map((item) => item.getId())).toEqual([image.getId()]);
+        expect(image.setSize(30, 15)).toBe(true);
+        expect(image.getSize()).toEqual({ width: 30, height: 15 });
+        expect(image.setWrappingStyle(TextWrappingStyle.WRAP_SQUARE)).toBe(false);
+        const inserted = testBed.document.save();
+        expect(inserted.footnotes?.note.body.dataStream).toBe('Note\b\r\n');
+        expect(inserted.footnotes?.note.drawingsOrder).toEqual([image.getId()]);
+        expect(inserted.drawings).toEqual(before.drawings);
+        expect(inserted.body).toEqual(before.body);
+        expect(image.remove()).toBe(true);
+        expect(testBed.document.save().footnotes?.note.body.dataStream).toBe('Note\r\n');
+        expect(testBed.document.save().footnotes?.note.drawingsOrder).toEqual([]);
+        expect(testBed.document.getImage(image.getId())).toBeNull();
+        expect(testBed.document.undo()).toBe(true);
+        expect(testBed.document.save().footnotes?.note).toEqual(inserted.footnotes?.note);
     });
 
     it('resolves the insertion range only once', async () => {

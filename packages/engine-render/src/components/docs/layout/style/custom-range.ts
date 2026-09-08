@@ -15,11 +15,14 @@
  */
 
 import type { ICustomRangeForInterceptor, ITextStyle, Nullable } from '@univerjs/core';
-import { BooleanNumber, CustomRangeType } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber, CustomRangeType } from '@univerjs/core';
 
 const CUSTOM_RANGE_COLOR_TOKEN = 'blue.600';
 
 export function getCustomRangeStyle(customRange: ICustomRangeForInterceptor): Nullable<ITextStyle> {
+    if (customRange.rangeType === CustomRangeType.FOOTNOTE) {
+        return { va: BaselineOffset.SUPERSCRIPT };
+    }
     if (
         customRange.rangeType === CustomRangeType.HYPERLINK ||
         customRange.rangeType === CustomRangeType.MENTION ||

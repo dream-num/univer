@@ -36,7 +36,7 @@ import { Tools } from '../../shared/tools';
 import { createSectionId } from '../section-break-id';
 import { calculateDocumentStatistics } from './document-statistics';
 import { getEmptySnapshot } from './empty-snapshot';
-import { JSONX } from './json-x/json-x';
+import { JSON1, JSONX } from './json-x/json-x';
 import { PRESET_LIST_TYPE } from './preset-list-type';
 import { getPlainText } from './text-x/build-utils/parse';
 import { getBodySlice, SliceBodyType } from './text-x/utils';
@@ -337,6 +337,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
     headerModelMap: Map<string, DocumentDataModel> = new Map();
 
     footerModelMap: Map<string, DocumentDataModel> = new Map();
+    footnoteModelMap: Map<string, DocumentDataModel> = new Map();
     change$ = new BehaviorSubject<number>(0);
 
     constructor(snapshot: Partial<IDocumentData>) {
@@ -359,6 +360,8 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         this.footerModelMap.forEach((footer) => {
             footer.dispose();
         });
+        this.footnoteModelMap.forEach((footnote) => footnote.dispose());
+        this.footnoteModelMap.clear();
 
         this._name$.complete();
     }
@@ -408,6 +411,10 @@ export class DocumentDataModel extends DocumentDataModelSimple {
             return this.footerModelMap.get(segmentId)!;
         }
 
+        if (this.footnoteModelMap.has(segmentId)) {
+            return this.footnoteModelMap.get(segmentId)!;
+        }
+
         return null;
     }
 
@@ -420,8 +427,24 @@ export class DocumentDataModel extends DocumentDataModelSimple {
             return;
         }
 
+        const previousFootnotes = this.snapshot.footnotes;
+        const changedFootnotes = new Set<string>();
+        let changedInheritedNoteStyles = false;
+        const cursor = JSON1.type.readCursor(actions);
+        cursor.traverse(null, () => {
+            const path = cursor.getPath();
+            if (path[0] === 'footnotes' && typeof path[1] === 'string') {
+                changedFootnotes.add(path[1]);
+            }
+            if (path[0] === 'styles' || path[0] === 'documentStyle') {
+                changedInheritedNoteStyles = true;
+            }
+        });
         this.snapshot = JSONX.apply(this.snapshot, actions) as unknown as IDocumentData;
         this._markMutation();
+        if (changedInheritedNoteStyles || previousFootnotes !== this.snapshot.footnotes || changedFootnotes.size > 0) {
+            this._initializeFootnoteModels(changedInheritedNoteStyles ? undefined : previousFootnotes, changedFootnotes);
+        }
 
         // FIXME: @JOCS, ANY better solution to find action that create or delete header/footer?
         if (actions?.some((a) => Array.isArray(a) && (a?.[0] === 'headers' || a?.[0] === 'footers'))) {
@@ -445,6 +468,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
     }
 
     private _initializeHeaderFooterModel() {
+        this._initializeFootnoteModels();
         const { headers, footers } = this.getSnapshot();
 
         if (headers) {
@@ -462,6 +486,32 @@ export class DocumentDataModel extends DocumentDataModelSimple {
                 this.footerModelMap.get(footerId)!.updateDocumentId(this.getUnitId());
             }
         }
+    }
+
+    private _initializeFootnoteModels(previousFootnotes?: IDocumentData['footnotes'], changedFootnotes?: ReadonlySet<string>): void {
+        for (const [id, model] of this.footnoteModelMap) {
+            if (changedFootnotes?.has(id) || previousFootnotes?.[id] !== this.snapshot.footnotes?.[id] || !previousFootnotes?.[id]) {
+                model.dispose();
+                this.footnoteModelMap.delete(id);
+            }
+        }
+        for (const [id, footnote] of Object.entries(this.snapshot.footnotes ?? {})) {
+            if (this.footnoteModelMap.has(id)) {
+                continue;
+            }
+            const model = new DocumentDataModel({
+                ...footnote,
+                id: this.getUnitId(),
+                documentStyle: this.snapshot.documentStyle,
+                styles: this.snapshot.styles,
+            });
+            this.footnoteModelMap.set(id, model);
+        }
+    }
+
+    override updateDocumentStyle(config: IDocumentStyle) {
+        super.updateDocumentStyle(config);
+        this._initializeFootnoteModels();
     }
 
     override updateDocumentId(unitId: string) {

@@ -255,6 +255,7 @@ export class DocCanvasPopManagerService extends Disposable {
             position,
             position$,
             disposable,
+            updatePosition,
         };
     }
 
@@ -273,7 +274,9 @@ export class DocCanvasPopManagerService extends Disposable {
             return bound;
         };
 
-        return this._createRectPositionObserver(getBound, currentRender);
+        const observer = this._createRectPositionObserver(getBound, currentRender);
+        observer.disposable.add(targetObject.onTransformChange$.subscribeEvent(observer.updatePosition));
+        return observer;
     }
 
     private _createRangePositionObserver(range: ITextRangeParam, currentRender: IRender) {

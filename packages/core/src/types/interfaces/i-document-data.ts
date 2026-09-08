@@ -34,6 +34,9 @@ export interface IDocumentData extends IReferenceSource {
     locale?: LocaleType;
     title?: string;
     body?: IDocumentBody; // Rich text.
+    /** Independent rich-text segments addressed by FOOTNOTE references in the main body. */
+    footnotes?: Record<string, IFootnoteData>;
+    footnoteSettings?: IFootnoteSettings;
     documentStyle: IDocumentStyle;
     /** OOXML-compatible named document styles keyed by stable style id. */
     styles?: IDocStyles;
@@ -56,6 +59,39 @@ export interface IReferenceSource {
 export interface IDocumentSettings {
     zoomRatio?: number;
 }
+
+/** Settings inherit from the document into each section; absent values do not reset inheritance. */
+export interface IFootnoteProperties {
+    position?: 'pageBottom' | 'beneathText';
+    /** OOXML ST_NumberFormat name, shared by the import/export and numbering engines. */
+    numberFormat?: string;
+    startNumber?: number;
+    restart?: 'continuous' | 'eachSect' | 'eachPage';
+    /** Zero matches the body section's column count. */
+    columnCount?: number;
+}
+
+export interface IFootnoteSettings extends IFootnoteProperties {
+    separator?: IDocumentBody;
+    continuationSeparator?: IDocumentBody;
+    continuationNotice?: IDocumentBody;
+}
+
+/** A footnote has editable content, but no independent page setup or nested notes. */
+export interface IFootnoteData {
+    footnoteId: string;
+    body: IDocumentBody;
+    tableSource?: ITables;
+    drawings?: IDrawings;
+    drawingsOrder?: string[];
+    lists?: ILists;
+    /** Custom marks do not consume a number in the automatic sequence. */
+    customMark?: string;
+    /** Style of the generated note marker; it does not affect text inserted at body offset zero. */
+    referenceTextStyle?: ITextStyle;
+}
+
+export type IFootnoteCustomRange = ICustomRange<{ footnoteId: string }>;
 
 /**
  * Set of headers
@@ -437,6 +473,7 @@ export enum CustomRangeType {
     CUSTOM,
     MENTION,
     UNI_FORMULA,
+    FOOTNOTE,
 
     DELTED = 9999,
 }
@@ -538,6 +575,8 @@ export interface IDocumentLayout {
     characterSpacingControl?: characterSpacingControlType; // characterSpacingControl 17.18.7 ST_CharacterSpacing (Character-Level Whitespace Compression Settings)，default compressPunctuation
     /** Use the legacy East Asian Word layout rules stored as OOXML `useFELayout`. */
     useFELayout?: BooleanNumber;
+    /** OOXML `splitPgBreakAndParaMark`: move a trailing paragraph mark after a manual page break. */
+    splitPageBreakAndParagraphMark?: BooleanNumber;
     /** Align automatic line height inside tables to the active document line grid. */
     adjustLineHeightInTable?: BooleanNumber;
     paragraphLineGapDefault?: number; // paragraphLineGapDefault default line spacing
@@ -597,6 +636,7 @@ export interface IDocumentRenderConfig {
 }
 
 export interface ISectionBreakBase {
+    footnoteProperties?: IFootnoteProperties;
     // docGrid (Document Grid), open xml $17.6.5
     charSpace?: number; // charSpace
     linePitch?: number; // linePitch

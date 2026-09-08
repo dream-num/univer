@@ -16,17 +16,19 @@
 
 // @vitest-environment jsdom
 
-import type { IDisposable, IDocumentData } from '@univerjs/core';
+import type { IDisposable, IDocumentData, ITextRangeParam } from '@univerjs/core';
 import type { Mock } from 'vitest';
 import {
     DataStreamTreeTokenType,
     DOC_RANGE_TYPE,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    DocumentDataModel,
+    DocumentFlavor,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { GlyphType, RenderUnit } from '@univerjs/engine-render';
+import { DocLayoutExecutorService, DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { GlyphType, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, RenderUnit } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
@@ -193,6 +195,7 @@ function createService() {
             scene,
             mainComponent,
             unitId: 'unit-1',
+            unit: new DocumentDataModel({ id: 'unit-1' }),
         },
         _container: {
             style: {},
@@ -306,6 +309,7 @@ class TestRenderEvent<T> {
 }
 
 function createRealSelectionRenderService(options: {
+    documentData?: IDocumentData;
     embedInteractionBoundaryService?: Partial<EmbedInteractionBoundaryService>;
     embedRuntimeFocusCoordinator?: EmbedRuntimeFocusCoordinator;
     mainComponent?: unknown;
@@ -323,7 +327,7 @@ function createRealSelectionRenderService(options: {
     if (options.embedRuntimeFocusCoordinator) {
         injector.add([EmbedRuntimeFocusCoordinator, { useValue: options.embedRuntimeFocusCoordinator }]);
     }
-    const documentData: IDocumentData = {
+    const documentData: IDocumentData = options.documentData ?? {
         id: 'selection-render-doc',
         body: {
             dataStream: 'Hello\r\n',
@@ -895,6 +899,60 @@ describe('doc selection render service internals', () => {
 });
 
 describe('DocSelectionRenderService', () => {
+    it.each(['', 'note'])('uses the logical caret in segment "%s" while replacement layout is pending', (segmentId) => {
+        TestLayoutService.reset();
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([DocSelectionManagerService]);
+        injector.add([DocLayoutExecutorService]);
+        injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
+        const doc = univer.createUnit(UniverInstanceType.UNIVER_DOC, {
+            id: 'pending-input',
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+            body: { dataStream: 'Body\r\n', paragraphs: [{ paragraphId: 'p', startIndex: 4 }] },
+            footnotes: { note: { footnoteId: 'note', body: {
+                dataStream: 'Note\r\n',
+                paragraphs: [{ paragraphId: 'np', startIndex: 4 }],
+            } } },
+        });
+        const render = injector.createInstance(RenderUnit, {
+            engine: {} as never,
+            scene: { getViewports: () => [], getEngine: () => null, enableObjectsEvent: () => {} } as never,
+            isMainScene: true,
+            unit: doc,
+        });
+        render.addRenderDependencies([[DocSkeletonManagerService], [DocSelectionRenderService]]);
+        try {
+            const service = render.with(DocSelectionRenderService);
+            render.with(DocSkeletonManagerService).getSkeleton().beginExternalLayout({ reason: 'edit' });
+            const manager = injector.get(DocSelectionManagerService);
+            manager.__TEST_ONLY_setCurrentSelection({ unitId: 'pending-input', subUnitId: 'pending-input' });
+            manager.replaceSelectionInfoWithoutRefresh({
+                textRanges: [{ startOffset: 3, endOffset: 3, collapsed: true, isActive: true, segmentId }],
+                rectRanges: [],
+                segmentId,
+                segmentPage: -1,
+                isEditing: true,
+                style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            });
+            expect(service.replaceDocRanges(manager.getSelectionInfo()!.textRanges)).toBe(false);
+            expect(service.hasPendingSelection).toBe(true);
+            const received: Array<ITextRangeParam | null> = [];
+            const subscription = service.onInput$.subscribe((event) => received.push(event.activeRange ?? null));
+            try {
+                const input = document.getElementById('__editor_pending-input')!;
+                input.textContent = 'X';
+                input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: 'X' }));
+                expect(received).toEqual([expect.objectContaining({ startOffset: 3, endOffset: 3, segmentId })]);
+            } finally {
+                subscription.unsubscribe();
+            }
+        } finally {
+            render.dispose();
+            univer.dispose();
+        }
+    });
+
     it('cancels an active pointer selection and disposes its cached ranges', () => {
         const { scene, service } = createService();
         const liveTextRange = createTextRange();

@@ -33,7 +33,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import { UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
+import { findDocDrawing, UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
 import { DocSelectionRenderService, getAnchorBounding, getOneTextSelectionRange, neoGetDocObject, NodePositionConvertToCursor, TEXT_RANGE_LAYER_INDEX } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DocumentSkeletonPageType, getColor, IRenderManagerService, Liquid, PageLayoutType, Rect, Vector2 } from '@univerjs/engine-render';
@@ -162,7 +162,6 @@ export class DocDrawingTransformerController extends Disposable {
 
     // Only handle one drawing transformer change.
 
-    // eslint-disable-next-line max-lines-per-function
     private _listenTransformerChange(unitId: string): void {
         const transformer = this._getSceneAndTransformerByDrawingSearch(unitId)?.transformer;
 
@@ -184,7 +183,7 @@ export class DocDrawingTransformerController extends Disposable {
                         }
 
                         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(drawing.unitId, UniverInstanceType.UNIVER_DOC);
-                        const drawingData = documentDataModel?.getSnapshot().drawings?.[drawing.drawingId];
+                        const drawingData = documentDataModel ? findDocDrawing(documentDataModel.getSnapshot(), drawing.drawingId)?.drawing : undefined;
 
                         if (drawingData?.layoutType === PositionedObjectLayoutType.INLINE) {
                             try {

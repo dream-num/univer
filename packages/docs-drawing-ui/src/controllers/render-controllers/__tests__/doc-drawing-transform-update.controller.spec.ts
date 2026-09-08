@@ -235,7 +235,7 @@ describe('DocDrawingTransformUpdateController', () => {
         expect(tracker.shouldRefresh(skeleton, progress(2))).toBe(true);
     });
 
-    it('refreshes when a published column group contains drawings', () => {
+    it.each(['column', 'footnote'])('refreshes when a published %s contains drawings', (scope) => {
         const nestedPage = {
             skeDrawings: new Map([['column-drawing', {}]]),
             skeTables: new Map(),
@@ -247,9 +247,12 @@ describe('DocDrawingTransformUpdateController', () => {
             pageWidth: 100,
             skeDrawings: new Map(),
             skeTables: new Map(),
-            skeColumnGroups: new Map([['column-group', {
-                columns: [{ page: nestedPage }],
-            }]]),
+            skeColumnGroups: new Map(scope === 'column'
+                ? [['column-group', {
+                    columns: [{ page: nestedPage }],
+                }]]
+                : []),
+            footnotes: scope === 'footnote' ? [{ page: nestedPage }] : [],
         }];
         const skeleton = {
             getSkeletonData: () => ({

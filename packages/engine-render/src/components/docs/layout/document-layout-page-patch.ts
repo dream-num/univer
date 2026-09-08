@@ -22,6 +22,8 @@ import type {
     IDocumentSkeletonColumnGroupColumn,
     IDocumentSkeletonDivide,
     IDocumentSkeletonDrawing,
+    IDocumentSkeletonFootnote,
+    IDocumentSkeletonFootnoteDecoration,
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
@@ -74,17 +76,19 @@ export interface IDocumentSkeletonColumnGroupPatch extends Omit<IDocumentSkeleto
 
 export interface IDocumentSkeletonPagePatch extends Omit<
     IDocumentSkeletonPage,
-    'sections' | 'skeDrawings' | 'skeTables' | 'skeColumnGroups' | 'parent'
+    'sections' | 'skeDrawings' | 'skeTables' | 'skeColumnGroups' | 'footnotes' | 'footnoteDecorations' | 'parent'
 > {
     sections: IDocumentSkeletonSectionPatch[];
     skeDrawings: Array<[string, IDocumentSkeletonDrawingPatch]>;
     skeTables: Array<[string, IDocumentSkeletonTablePatch]>;
     skeColumnGroups: Array<[string, IDocumentSkeletonColumnGroupPatch]>;
+    footnoteDecorations?: Array<Omit<IDocumentSkeletonFootnoteDecoration, 'page'> & { page: IDocumentSkeletonPagePatch }>;
+    footnotes?: Array<Omit<IDocumentSkeletonFootnote, 'page' | 'parent'> & { page: IDocumentSkeletonPagePatch }>;
 }
 
 export type IDocumentSkeletonPageGeometryPatch = Omit<
     IDocumentSkeletonPagePatch,
-    'sections' | 'skeDrawings' | 'skeTables' | 'skeColumnGroups'
+    'sections' | 'skeDrawings' | 'skeTables' | 'skeColumnGroups' | 'footnotes' | 'footnoteDecorations'
 >;
 
 export type IDocumentSkeletonSectionGeometryPatch = Omit<IDocumentSkeletonSectionPatch, 'columns'>;
@@ -206,9 +210,16 @@ export function serializeDocumentSkeletonPage(
     source: IDocumentSkeletonPage,
     omitResourceSources = false
 ): IDocumentSkeletonPagePatch {
+    const { footnotes, footnoteDecorations, ...geometry } = withoutParent(source);
     return {
-        ...withoutParent(source),
+        ...geometry,
         sections: source.sections.map(serializeSection),
+        footnoteDecorations: footnoteDecorations?.map((decoration) => ({ ...decoration, page: serializeDocumentSkeletonPage(decoration.page, omitResourceSources) })),
+        ...(footnotes == null
+            ? {}
+            : {
+                footnotes: footnotes.map((note) => ({ ...withoutParent(note), page: serializeDocumentSkeletonPage(note.page, omitResourceSources) })),
+            }),
         skeDrawings: [...source.skeDrawings].map(([drawingId, drawing]) => [
             drawingId,
             serializeDrawing(drawing, omitResourceSources),
@@ -271,7 +282,7 @@ function getDocumentReferenceSource(
     snapshot: IDocumentData,
     segmentId: string
 ): IReferenceSource {
-    return snapshot.headers?.[segmentId] ?? snapshot.footers?.[segmentId] ?? snapshot;
+    return snapshot.headers?.[segmentId] ?? snapshot.footers?.[segmentId] ?? snapshot.footnotes?.[segmentId] ?? snapshot;
 }
 
 function requireDrawingOrigin(
@@ -409,6 +420,8 @@ export function hydrateDocumentSkeletonPagePlaceholder(
 ): IDocumentSkeletonPage {
     const {
         sections: _sections,
+        footnotes: _footnotes,
+        footnoteDecorations: _footnoteDecorations,
         skeDrawings: _skeDrawings,
         skeTables: _skeTables,
         skeColumnGroups: _skeColumnGroups,
@@ -448,6 +461,14 @@ function hydrateDocumentSkeletonPageInternal(
     const page: IDocumentSkeletonPage = {
         ...source,
         sections: [],
+        footnoteDecorations: source.footnoteDecorations?.map((decoration) => ({
+            ...decoration,
+            page: hydrateDocumentSkeletonPageInternal(decoration.page, undefined, snapshot, decoration.page.segmentId),
+        })),
+        footnotes: source.footnotes?.map((note) => ({
+            ...note,
+            page: hydrateDocumentSkeletonPageInternal(note.page, undefined, snapshot, note.footnoteId),
+        })),
         skeDrawings: new Map(source.skeDrawings.map(([drawingId, drawing]) => [
             drawingId,
             hydrateDrawing(drawing, snapshot, resourceSegmentId),
@@ -457,6 +478,10 @@ function hydrateDocumentSkeletonPageInternal(
         parent,
     };
     page.sections = source.sections.map((section) => hydrateSection(section, page));
+    for (const note of page.footnotes ?? []) {
+        note.parent = page;
+        note.page.parent = note;
+    }
     page.skeTables = new Map(source.skeTables.map(([tableId, table]) => [
         tableId,
         hydrateTable(table, page, snapshot, resourceSegmentId),
@@ -549,6 +574,8 @@ function serializePageGeometry(source: IDocumentSkeletonPage): IDocumentSkeleton
     const serialized = withoutParent(source);
     const {
         sections: _sections,
+        footnotes: _footnotes,
+        footnoteDecorations: _footnoteDecorations,
         skeDrawings: _skeDrawings,
         skeTables: _skeTables,
         skeColumnGroups: _skeColumnGroups,

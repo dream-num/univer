@@ -16,21 +16,27 @@
 
 import type {
     DocumentDataModel,
+    ICustomRange,
+    IDocumentData,
     IExecutionOptions,
     IMutation,
     IMutationCommonParams,
     JSONXActions,
     Nullable,
+    TextXAction,
     TPriority,
 } from '@univerjs/core';
 import type { DocumentViewModel, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDocStateChangeInfo } from '../../services/doc-state-emit.service';
 import {
     CommandType,
-
+    CustomRangeType,
     IUniverInstanceService,
+    JSON1,
     JSONX,
-
+    TextX,
+    TextXActionType,
+    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -124,17 +130,78 @@ export function transformDocumentTextRanges(
     });
 }
 
+function canRemoveFootnoteReference(actions: JSONXActions, references: ICustomRange[]): boolean {
+    let canRemove = false;
+    const cursor = JSON1.type.readCursor(actions);
+    cursor.traverse(null, (component) => {
+        const path = cursor.getPath();
+        if (path.length === 0) {
+            canRemove = true;
+        }
+        if (canRemove || path[0] !== 'body') {
+            return;
+        }
+        if (path.length === 1 && component.et === TextX.id && Array.isArray(component.e)) {
+            let offset = 0;
+            for (const action of component.e as TextXAction[]) {
+                if (action.t === TextXActionType.DELETE && references.some((reference) =>
+                    offset <= reference.endIndex && offset + action.len > reference.startIndex
+                )) {
+                    canRemove = true;
+                    return;
+                }
+                if (action.t === TextXActionType.RETAIN && action.body?.customRanges != null) {
+                    canRemove = true;
+                    return;
+                }
+                if (action.t !== TextXActionType.INSERT) {
+                    offset += action.len;
+                }
+            }
+        } else if (path.length === 1 || path[1] === 'customRanges' || path[1] === 'dataStream') {
+            canRemove = true;
+        }
+    });
+    return canRemove;
+}
+
+function includeFootnoteCleanup(before: IDocumentData, actions: JSONXActions): JSONXActions {
+    if (!before.footnotes) {
+        return actions;
+    }
+    const references = before.body?.customRanges?.filter((range) => range.rangeType === CustomRangeType.FOOTNOTE) ?? [];
+    if (references.length === 0 || !canRemoveFootnoteReference(actions, references)) {
+        return actions;
+    }
+    // TextX edits mutate their body. Isolate the cleanup preview, and only run it
+    // for edits that can remove a reference; ordinary typing keeps the fast path.
+    const after = JSONX.apply(Tools.deepClone(before), actions) as unknown as IDocumentData;
+    const remaining = new Set(after.body?.customRanges?.filter((range) => range.rangeType === CustomRangeType.FOOTNOTE)
+        .map((range) => range.properties?.footnoteId));
+    let cleanup: JSONXActions = null;
+    const previousIds = new Set(references.map((reference) => reference.properties?.footnoteId));
+    for (const id of previousIds) {
+        if (typeof id === 'string' && !remaining.has(id) && after.footnotes?.[id]) {
+            cleanup = JSONX.compose(cleanup, JSONX.getInstance().removeOp(['footnotes', id], after.footnotes[id]));
+        }
+    }
+    return JSONX.isNoop(cleanup) ? actions : JSONX.compose(actions, cleanup);
+}
+
 function applyValidatedDocumentActions(
     documentDataModel: DocumentDataModel,
     segmentId: string,
     actions: JSONXActions
-): { undoActions: JSONXActions; preservesStructure: boolean } {
-    const undoActions = JSONX.invertWithDoc(actions, documentDataModel.getSnapshot());
-    documentDataModel.apply(actions);
+): { actions: JSONXActions; undoActions: JSONXActions; preservesStructure: boolean } {
+    const before = documentDataModel.getSnapshot();
+    const appliedActions = includeFootnoteCleanup(before, actions);
+    const undoActions = JSONX.invertWithDoc(appliedActions, before);
+    documentDataModel.apply(appliedActions);
     try {
         return {
+            actions: appliedActions,
             undoActions,
-            preservesStructure: validateDocStructureMutation(documentDataModel, segmentId, actions, undoActions),
+            preservesStructure: validateDocStructureMutation(documentDataModel, segmentId, appliedActions, undoActions),
         };
     } catch (error) {
         documentDataModel.apply(undoActions);
@@ -172,17 +239,18 @@ function scheduleDocumentSelectionUpdate(
     }
     const selectionTarget = { unitId, subUnitId: unitId };
     const currentSelection = selectionManager.getSelectionInfo(selectionTarget);
+    const logicalTextRanges = textRanges.map((textRange, index) => ({
+        ...textRange,
+        segmentId: textRange.segmentId ?? params.segmentId ?? '',
+        collapsed: textRange.startOffset === textRange.endOffset,
+        isActive: index === textRanges.length - 1,
+    }));
     if (currentSelection != null) {
-        const logicalTextRanges = textRanges.map((textRange, index) => ({
-            ...textRange,
-            collapsed: textRange.startOffset === textRange.endOffset,
-            isActive: index === textRanges.length - 1,
-        }));
-
         // Advance logical intent with the mutation. Only its visual refresh is
         // deferred; a later input or pointer selection must supersede this one.
         selectionManager.replaceSelectionInfoWithoutRefresh({
             ...currentSelection,
+            segmentId: logicalTextRanges[logicalTextRanges.length - 1].segmentId,
             textRanges: logicalTextRanges,
             rectRanges: [],
             isEditing,
@@ -195,7 +263,7 @@ function scheduleDocumentSelectionUpdate(
             return;
         }
         if (updatedSelection == null) {
-            selectionManager.replaceDocRanges(textRanges, selectionTarget, isEditing, params.options);
+            selectionManager.replaceDocRanges(logicalTextRanges, selectionTarget, isEditing, params.options);
         } else {
             selectionManager.refreshSelection(selectionTarget, isEditing);
         }
@@ -255,13 +323,15 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             };
         }
 
-        const { undoActions, preservesStructure } = applyValidatedDocumentActions(
+        const { actions: appliedActions, undoActions, preservesStructure } = applyValidatedDocumentActions(
             documentDataModel,
             segmentId,
             actions
         );
 
-        resetDocumentViewModel(documentViewModel, documentDataModel, segmentId, actions, preservesStructure);
+        // Publish reference deletion and note cleanup in the same deterministic mutation.
+        params.actions = appliedActions;
+        resetDocumentViewModel(documentViewModel, documentDataModel, segmentId, appliedActions, preservesStructure);
         scheduleDocumentSelectionUpdate(docSelectionManagerService, params, isSync);
 
         // Step 4: Emit state change event.
@@ -273,7 +343,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             noHistory,
             debounce,
             redoState: {
-                actions,
+                actions: appliedActions,
                 textRanges,
                 options: params.options,
                 isEditing,

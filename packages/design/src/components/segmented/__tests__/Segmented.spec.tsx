@@ -43,7 +43,7 @@ describe('Segmented', () => {
     it('should call onChange when click', () => {
         const handleChange = vi.fn();
         const { getByText } = render(<Segmented items={items} onChange={handleChange} />);
-        getByText('B').click();
+        fireEvent.click(getByText('B'));
         expect(handleChange).toHaveBeenCalledWith('b');
     });
 

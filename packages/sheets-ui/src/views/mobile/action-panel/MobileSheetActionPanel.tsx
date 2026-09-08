@@ -40,13 +40,14 @@ import {
     IMenuManagerService,
     IRibbonService,
     MobileDrawer,
+    MobileKeyboardInsetContext,
     MobileMenu,
     RibbonPosition,
     RibbonStartGroup,
     useDependency,
     useObservable,
 } from '@univerjs/ui';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { map, startWith } from 'rxjs';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
@@ -155,6 +156,7 @@ export function MobileSheetActionPanel() {
 }
 
 function MobileSheetActionPanelContent() {
+    const keyboardInset = useContext(MobileKeyboardInsetContext);
     const workbook = useActiveWorkbook();
     const commandService = useDependency(ICommandService);
     const contextService = useDependency(IContextService);
@@ -386,7 +388,7 @@ function MobileSheetActionPanelContent() {
                   active:univer-bg-primary-700
                 `)}
                 style={{
-                    bottom: `calc(var(--univer-mobile-keyboard-inset, 0px) + ${getMobileEditingMenuBottomOffset(formulaOperatorsVisible)}px)`,
+                    bottom: keyboardInset + getMobileEditingMenuBottomOffset(formulaOperatorsVisible),
                 }}
                 onClick={() => openTools().catch(() => undefined)}
             >

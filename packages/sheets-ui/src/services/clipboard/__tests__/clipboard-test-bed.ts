@@ -27,6 +27,7 @@ import {
     LocaleType,
     LogLevel,
     Plugin,
+    Tools,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -621,7 +622,10 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
     }
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData || TEST_WORKBOOK_DATA_DEMO);
+    const sheet = univer.createUnit<IWorkbookData, Workbook>(
+        UniverInstanceType.UNIVER_SHEET,
+        Tools.deepClone(workbookData || TEST_WORKBOOK_DATA_DEMO)
+    );
 
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');

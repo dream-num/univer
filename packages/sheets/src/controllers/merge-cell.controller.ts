@@ -149,14 +149,25 @@ export class MergeCellController extends Disposable {
     }
 
     private _initCommandInterceptor() {
-        const self = this;
         this._sheetInterceptorService.interceptCommand({
-            getMutations(commandInfo) {
+            getMutations: (commandInfo) => {
                 switch (commandInfo.id) {
+                    case MoveRangeCommand.id: {
+                        const params = commandInfo.params as IMoveRangeCommandParams;
+                        const sourceTarget = getSheetCommandTarget(this._univerInstanceService, {
+                            unitId: params.fromUnitId,
+                            subUnitId: params.fromSubUnitId,
+                        });
+                        if (!sourceTarget) {
+                            return { redos: [], undos: [] };
+                        }
+
+                        return this._handleMoveRangeCommand(params, sourceTarget.unitId, sourceTarget.subUnitId);
+                    }
                     case ClearSelectionAllCommand.id:
                     case ClearSelectionFormatCommand.id: {
                         // TODO@Gggpound: get by unit id and subUnitId
-                        const workbook = self._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                         const unitId = workbook.getUnitId();
                         const worksheet = workbook?.getActiveSheet();
                         if (!worksheet) {
@@ -165,7 +176,7 @@ export class MergeCellController extends Disposable {
 
                         const subUnitId = worksheet.getSheetId();
                         const mergeData = worksheet.getConfig().mergeData;
-                        const selections = self._selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+                        const selections = this._selectionManagerService.getCurrentSelections()?.map((s) => s.range);
                         if (selections && selections.length > 0) {
                             const isHasMerge = selections.some((range) =>
                                 mergeData.some((item) => Rectangle.intersects(item, range))
@@ -177,7 +188,7 @@ export class MergeCellController extends Disposable {
                                     ranges: selections,
                                 };
                                 const undoRemoveMergeParams: IAddWorksheetMergeMutationParams =
-                                    RemoveMergeUndoMutationFactory(self._injector, removeMergeParams);
+                                    RemoveMergeUndoMutationFactory(this._injector, removeMergeParams);
                                 const redos: IMutationInfo[] = [
                                     { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams },
                                 ];
@@ -265,10 +276,6 @@ export class MergeCellController extends Disposable {
                 return this._handleRemoveRowCommand(params, unitId, subUnitId);
             }
 
-            case MoveRangeCommand.id: {
-                const params = config.params as IMoveRangeCommandParams;
-                return this._handleMoveRangeCommand(params, unitId, subUnitId);
-            }
             case InsertRangeMoveRightCommand.id: {
                 const params = config.params as unknown as IInsertRangeMoveRightCommandParams;
                 return this._handleInsertRangeMoveRightCommand(params, unitId, subUnitId);
@@ -450,7 +457,7 @@ export class MergeCellController extends Disposable {
             params: IAddWorksheetMergeMutationParams | IRemoveWorksheetMergeMutationParams;
         }> = [];
 
-        if (subUnitId === sourceSubUnitId && fromMergeRanges.length > 0) {
+        if (fromMergeRanges.length > 0) {
             redos.push({
                 id: RemoveWorksheetMergeMutation.id,
                 params: {
@@ -469,7 +476,7 @@ export class MergeCellController extends Disposable {
             });
         }
 
-        if (subUnitId === targetSubUnitId && toMergeRanges.length > 0) {
+        if (toMergeRanges.length > 0) {
             redos.push({
                 id: RemoveWorksheetMergeMutation.id,
                 params: {
@@ -488,7 +495,7 @@ export class MergeCellController extends Disposable {
             });
         }
 
-        if (subUnitId === targetSubUnitId && addMergeCellRanges.length > 0) {
+        if (addMergeCellRanges.length > 0) {
             redos.push({
                 id: AddWorksheetMergeMutation.id,
                 params: {

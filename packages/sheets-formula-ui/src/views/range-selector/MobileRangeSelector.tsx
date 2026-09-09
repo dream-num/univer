@@ -19,7 +19,7 @@ import type { Editor } from '@univerjs/docs-ui';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { LocaleKey } from '../../locale/types';
 import type { IRangeSelectorProps } from './index';
-import { ICommandService, RichTextBuilder } from '@univerjs/core';
+import { ICommandService, LocaleService, RichTextBuilder } from '@univerjs/core';
 import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { SelectRangeIcon } from '@univerjs/icons';
 import { SetSelectionsOperation } from '@univerjs/sheets';
@@ -57,6 +57,7 @@ export function MobileRangeSelector(props: IRangeSelectorProps) {
     const [rangeSelectorRanges, setRangeSelectorRanges] = useState<IUnitRangeName[]>([]);
     const editorService = useDependency(IEditorService);
     const commandService = useDependency(ICommandService);
+    const localeService = useDependency(LocaleService);
     const { sequenceNodes } = useRangesHighlight(editor, focusing, unitId, subUnitId);
     const sequenceNodesRef = useStateRef(sequenceNodes);
     const blurEditor = useEvent(() => {

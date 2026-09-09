@@ -19,14 +19,13 @@ import type { Editor } from '@univerjs/docs-ui';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { LocaleKey } from '../../locale/types';
 import type { IRangeSelectorProps } from './index';
-import { ICommandService, LocaleService, RichTextBuilder } from '@univerjs/core';
+import { HorizontalAlign, ICommandService, LocaleService, RichTextBuilder, Tools } from '@univerjs/core';
 import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { SelectRangeIcon } from '@univerjs/icons';
 import { SetSelectionsOperation } from '@univerjs/sheets';
 import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { useStateRef } from '../formula-editor/hooks/use-state-ref';
-import { useRangeSelectorEditorAlignment } from './hooks/use-range-selector-editor-alignment';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
 import { parseRanges, stringifyRanges } from './index';
 import { MobileRangeSelectorDialog } from './MobileRangeSelectorDialog';
@@ -35,6 +34,8 @@ import { verifyRange } from './utils/verify-range';
 export function MobileRangeSelector(props: IRangeSelectorProps) {
     const [editor, setEditor] = useState<Editor | null>(null);
     const {
+        className,
+        dir,
         onVerify,
         selectorRef,
         unitId,
@@ -60,7 +61,16 @@ export function MobileRangeSelector(props: IRangeSelectorProps) {
     const commandService = useDependency(ICommandService);
     const { sequenceNodes } = useRangesHighlight(editor, focusing, unitId, subUnitId);
     const sequenceNodesRef = useStateRef(sequenceNodes);
-    useRangeSelectorEditorAlignment(editor);
+    useEffect(() => {
+        if (!editor || !dir) {
+            return;
+        }
+
+        const documentData = RichTextBuilder.create(Tools.deepClone(editor.getDocumentData()))
+            .align({ horizontal: dir === 'rtl' ? HorizontalAlign.RIGHT : HorizontalAlign.LEFT })
+            .getData();
+        editor.setDocumentData(documentData, editor.getSelectionRanges());
+    }, [dir, editor]);
     const blurEditor = useEvent(() => {
         editor?.setSelectionRanges([]);
         editor?.blur();
@@ -126,7 +136,7 @@ export function MobileRangeSelector(props: IRangeSelectorProps) {
                 <RichTextEditor
                     isSingle
                     {...props}
-                    className={props.className}
+                    className={className}
                     preserveHostFocus
                     onFocusChange={(isFocusing, newValue) => {
                         setFocusing(isFocusing);

@@ -22,7 +22,7 @@ import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-form
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
 import { TableManager } from '@univerjs/sheets-table';
-import { useDependency } from '@univerjs/ui';
+import { useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
 
 export interface ISheetTableSelectorProps extends ITableSelectionInfo {
@@ -38,11 +38,13 @@ export const SheetTableSelector = (props: ISheetTableSelectorProps) => {
     const [selectedRange, setSelectedRange] = useState(range);
     const [rangeError, setRangeError] = useState('');
     const localeService = useDependency(LocaleService);
+    const direction = useObservable(localeService.direction$, localeService.getDirection());
     const univerInstanceService = useDependency(IUniverInstanceService);
 
     return (
         <>
             <RangeSelector
+                dir={direction}
                 maxRangeCount={1}
                 unitId={unitId}
                 subUnitId={subUnitId}

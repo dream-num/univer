@@ -22,7 +22,7 @@ import { Injector, isValidRange, IUniverInstanceService, LocaleService, UniverIn
 import { FormLayout, Input } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { setEndForRange } from '@univerjs/sheets';
-import { ComponentManager, useDependency } from '@univerjs/ui';
+import { ComponentManager, useDependency, useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { RANGE_SELECTOR_COMPONENT_KEY } from '../../../common/keys';
 import { checkRangeValid } from '../util';
@@ -42,6 +42,7 @@ export const PermissionDetailMainPart = (props: IPermissionDetailMainPartProps) 
     const RangeSelector: ComponentType<IRangeSelectorProps> = useMemo(() => componentManager.get(RANGE_SELECTOR_COMPONENT_KEY), []) as any;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const localeService = useDependency(LocaleService);
+    const direction = useObservable(localeService.direction$, localeService.getDirection());
     const injector = useDependency(Injector);
 
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
@@ -84,6 +85,7 @@ export const PermissionDetailMainPart = (props: IPermissionDetailMainPartProps) 
             >
                 {RangeSelector && (
                     <RangeSelector
+                        dir={direction}
                         unitId={unitId}
                         subUnitId={subUnitId}
                         initialValue={ranges?.map((i) => serializeRange(i)).join(',')}

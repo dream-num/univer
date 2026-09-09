@@ -70,6 +70,7 @@ export const CellLinkEdit = () => {
     const [payload, setPayload] = useState('');
 
     const localeService = useDependency(LocaleService);
+    const direction = useObservable(localeService.direction$, localeService.getDirection());
     const definedNameService = useDependency(IDefinedNamesService);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -493,6 +494,7 @@ export const CellLinkEdit = () => {
             {type === SheetHyperLinkType.RANGE && (
                 <FormLayout error={showError && !payload ? localeService.t<LocaleKey>('sheets-hyper-link-ui.form.inputError') : ''}>
                     <RangeSelector
+                        dir={direction}
                         unitId={workbook.getUnitId()}
                         subUnitId={subUnitId}
                         maxRangeCount={1}

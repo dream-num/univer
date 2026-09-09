@@ -34,6 +34,7 @@ import { useOnChange } from './rich-text-editor/hooks/use-on-change';
 
 export interface IRichTextEditorProps {
     className?: string;
+    dir?: 'ltr' | 'rtl';
     autoFocus?: boolean;
     onFocusChange?: (isFocus: boolean, newValue?: string) => void;
     initialValue?: IDocumentData | string;
@@ -59,6 +60,7 @@ export interface IRichTextEditorProps {
 export const RichTextEditor = (props: IRichTextEditorProps) => {
     const {
         className,
+        dir,
         autoFocus,
         onFocusChange: _onFocusChange,
         initialValue,
@@ -167,7 +169,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
     useOnChange(editor, onChange);
 
     return (
-        <div className={className} style={style}>
+        <div className={className} style={style} dir={dir}>
             <div
                 className={clsx(
                     {

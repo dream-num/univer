@@ -19,7 +19,7 @@ import type { Editor, IRichTextEditorProps } from '@univerjs/docs-ui';
 import type { ISelectionWithStyle, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { RefObject } from 'react';
 import type { LocaleKey } from '../../locale/types';
-import { ICommandService, LocaleService, RichTextBuilder } from '@univerjs/core';
+import { HorizontalAlign, ICommandService, LocaleService, RichTextBuilder, Tools } from '@univerjs/core';
 import { Button, clsx, Dialog, Input, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import {
@@ -35,7 +35,6 @@ import { SetSelectionsOperation } from '@univerjs/sheets';
 import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { useStateRef } from '../formula-editor/hooks/use-state-ref';
-import { useRangeSelectorEditorAlignment } from './hooks/use-range-selector-editor-alignment';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
 import { useRangeSelectorSelectionChange } from './hooks/use-selection-change';
 import { rangePreProcess } from './utils/range-pre-process';
@@ -264,6 +263,8 @@ export function stringifyRanges(ranges: IUnitRangeName[]) {
 export function RangeSelector(props: IRangeSelectorProps) {
     const [editor, setEditor] = useState<Editor | null>(null);
     const {
+        className,
+        dir,
         onVerify,
         selectorRef,
         unitId,
@@ -289,7 +290,16 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const { sequenceNodes } = useRangesHighlight(editor, focusing, unitId, subUnitId);
     const sequenceNodesRef = useStateRef(sequenceNodes);
     const commandService = useDependency(ICommandService);
-    useRangeSelectorEditorAlignment(editor);
+    useEffect(() => {
+        if (!editor || !dir) {
+            return;
+        }
+
+        const documentData = RichTextBuilder.create(Tools.deepClone(editor.getDocumentData()))
+            .align({ horizontal: dir === 'rtl' ? HorizontalAlign.RIGHT : HorizontalAlign.LEFT })
+            .getData();
+        editor.setDocumentData(documentData, editor.getSelectionRanges());
+    }, [dir, editor]);
 
     const blurEditor = useEvent(() => {
         editor?.setSelectionRanges([]);
@@ -357,7 +367,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                     <RichTextEditor
                         isSingle
                         {...props}
-                        className={props.className}
+                        className={className}
                         preserveHostFocus
                         onFocusChange={(focusing, newValue) => {
                             setFocusing(focusing);

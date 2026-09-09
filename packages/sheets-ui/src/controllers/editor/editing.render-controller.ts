@@ -739,8 +739,6 @@ export class EditingRenderController extends Disposable {
             }
             this._editorBridgeService.refreshEditCellState();
             this._refreshCurrentSelections(sheetId);
-            // An unchanged selection does not reload the editor; discard the canceled draft explicitly.
-            this._editorBridgeService.refreshEditCellState();
             return;
         }
 

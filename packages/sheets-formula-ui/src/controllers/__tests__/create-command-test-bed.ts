@@ -15,12 +15,46 @@
  */
 
 import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
-import { ILogService, Inject, Injector, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import {
+    ILogService,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    LocaleType,
+    LogLevel,
+    Plugin,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
-import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, HyperlinkEngineFormulaService, ICalculateFormulaService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, IHyperlinkEngineFormulaService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import {
+    CalculateFormulaService,
+    DefinedNamesService,
+    FormulaCurrentConfigService,
+    FormulaDataModel,
+    FormulaRuntimeService,
+    HyperlinkEngineFormulaService,
+    ICalculateFormulaService,
+    IDefinedNamesService,
+    IFormulaCurrentConfigService,
+    IFormulaRuntimeService,
+    IHyperlinkEngineFormulaService,
+    LexerTreeBuilder,
+} from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { DefinedNameDataController, IRefSelectionsService, RangeProtectionRuleModel, SheetInterceptorService, SheetSkeletonService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import {
+    DefinedNameDataController,
+    IRefSelectionsService,
+    RangeProtectionRuleModel,
+    SheetInterceptorService,
+    SheetSkeletonService,
+    SheetsSelectionsService,
+    WorkbookPermissionService,
+    WorksheetPermissionService,
+    WorksheetProtectionPointModel,
+    WorksheetProtectionRuleModel,
+} from '@univerjs/sheets';
 import { EditorBridgeService, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
@@ -112,7 +146,12 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
-            injector.add([SheetSkeletonManagerService]);
+            const hasSheetSkeletonManagerService = dependencies?.some((dependency) =>
+                Array.isArray(dependency) && dependency[0] === SheetSkeletonManagerService
+            );
+            if (!hasSheetSkeletonManagerService) {
+                injector.add([SheetSkeletonManagerService]);
+            }
             injector.add([IEditorBridgeService, { useClass: EditorBridgeService }]);
             injector.add([IEditorService, { useClass: EditorService }]);
             injector.add([IRenderManagerService, { useClass: RenderManagerService }]);

@@ -33,7 +33,9 @@ import {
 import {
     AddWorksheetMergeMutation,
     discreteRangeToRange,
+    MergeCellController,
     MoveRangeMutation,
+    RefRangeService,
     RemoveWorksheetMergeMutation,
     SetRangeValuesMutation,
     SetSelectionsOperation,
@@ -71,13 +73,15 @@ describe('Test clipboard', () => {
         startRow: number,
         startColumn: number,
         endRow: number,
-        endColumn: number
+        endColumn: number,
+        subUnitId?: string
     ) => Array<Array<Nullable<ICellData>>> | undefined;
     let getMergedCells: (
         startRow: number,
         startColumn: number,
         endRow: number,
-        endColumn: number
+        endColumn: number,
+        subUnitId?: string
     ) => IRange[] | undefined;
 
     let getStyles: (
@@ -88,9 +92,20 @@ describe('Test clipboard', () => {
     ) => Array<Array<Nullable<IStyleData>>> | undefined;
 
     beforeEach(async () => {
-        const testBed = clipboardTestBed(undefined, [[SheetPermissionInterceptorClipboardController]]);
+        const testBed = clipboardTestBed(undefined, [
+            [SheetPermissionInterceptorClipboardController],
+            [MergeCellController],
+            [RefRangeService],
+        ]);
         univer = testBed.univer;
         get = testBed.get;
+        testBed.sheet.addWorksheet('sheet2', 1, {
+            id: 'sheet2',
+            name: 'sheet2',
+            cellData: {},
+            mergeData: [],
+        });
+        get(MergeCellController);
 
         commandService = get(ICommandService);
         commandService.registerCommand(SetRangeValuesMutation);
@@ -109,11 +124,12 @@ describe('Test clipboard', () => {
             startRow: number,
             startColumn: number,
             endRow: number,
-            endColumn: number
+            endColumn: number,
+            subUnitId = 'sheet1'
         ): Array<Array<Nullable<ICellData>>> | undefined =>
             get(IUniverInstanceService)
                 .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
-                ?.getSheetBySheetId('sheet1')
+                ?.getSheetBySheetId(subUnitId)
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValues();
 
@@ -121,11 +137,12 @@ describe('Test clipboard', () => {
             startRow: number,
             startColumn: number,
             endRow: number,
-            endColumn: number
+            endColumn: number,
+            subUnitId = 'sheet1'
         ): IRange[] | undefined => {
             return get(IUniverInstanceService)
                 .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
-                ?.getSheetBySheetId('sheet1')
+                ?.getSheetBySheetId(subUnitId)
                 ?.getMergeData()
                 .filter((rect) => Rectangle.intersects({ startRow, startColumn, endRow, endColumn }, rect));
         };
@@ -769,6 +786,69 @@ describe('Test clipboard', () => {
                     endColumn: 12,
                 },
             ]);
+        });
+    });
+
+    describe('Test internal copy and cut of merged cells', () => {
+        it.each([
+            { name: 'copies within the current sheet', copyType: COPY_TYPE.COPY, targetSubUnitId: 'sheet1' },
+            { name: 'cuts within the current sheet', copyType: COPY_TYPE.CUT, targetSubUnitId: 'sheet1' },
+            { name: 'copies across sheets', copyType: COPY_TYPE.COPY, targetSubUnitId: 'sheet2' },
+            { name: 'cuts across sheets', copyType: COPY_TYPE.CUT, targetSubUnitId: 'sheet2' },
+        ])('$name', async ({ copyType, targetSubUnitId }) => {
+            const sourceRange = {
+                startRow: 21,
+                startColumn: 10,
+                endRow: 22,
+                endColumn: 11,
+            };
+            const targetRange = {
+                startRow: 25,
+                startColumn: 5,
+                endRow: 26,
+                endColumn: 6,
+            };
+            const selectionManager = get(SheetsSelectionsService);
+            selectionManager.addSelections([{
+                range: { ...sourceRange, rangeType: RANGE_TYPE.NORMAL },
+                primary: null,
+                style: null,
+            }]);
+
+            expect(await (copyType === COPY_TYPE.COPY ? sheetClipboardService.copy() : sheetClipboardService.cut())).toBe(true);
+            const copyId = sheetClipboardService.copyContentCache().getLastCopyId();
+            expect(copyId).not.toBeNull();
+
+            if (targetSubUnitId !== 'sheet1') {
+                expect(await commandService.executeCommand(SetWorksheetActiveOperation.id, {
+                    unitId: 'test',
+                    subUnitId: targetSubUnitId,
+                })).toBe(true);
+            }
+            selectionManager.addSelections([{
+                range: { ...targetRange, rangeType: RANGE_TYPE.NORMAL },
+                primary: null,
+                style: null,
+            }]);
+
+            expect(await sheetClipboardService.pasteByCopyId(copyId!)).toBe(true);
+            expect(getValues(targetRange.startRow, targetRange.startColumn, targetRange.endRow, targetRange.endColumn, targetSubUnitId)?.[0][0]?.v).toBe(
+                copyType === COPY_TYPE.COPY ? 456 : '456'
+            );
+            expect(getMergedCells(sourceRange.startRow, sourceRange.startColumn, sourceRange.endRow, sourceRange.endColumn)).toEqual(
+                copyType === COPY_TYPE.COPY ? [sourceRange] : []
+            );
+            expect(getMergedCells(targetRange.startRow, targetRange.startColumn, targetRange.endRow, targetRange.endColumn, targetSubUnitId)).toEqual([targetRange]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+            expect(getMergedCells(sourceRange.startRow, sourceRange.startColumn, sourceRange.endRow, sourceRange.endColumn)).toEqual([sourceRange]);
+            expect(getMergedCells(targetRange.startRow, targetRange.startColumn, targetRange.endRow, targetRange.endColumn, targetSubUnitId)).toEqual([]);
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+            expect(getMergedCells(sourceRange.startRow, sourceRange.startColumn, sourceRange.endRow, sourceRange.endColumn)).toEqual(
+                copyType === COPY_TYPE.COPY ? [sourceRange] : []
+            );
+            expect(getMergedCells(targetRange.startRow, targetRange.startColumn, targetRange.endRow, targetRange.endColumn, targetSubUnitId)).toEqual([targetRange]);
         });
     });
 

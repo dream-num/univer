@@ -19,7 +19,7 @@ import type { IRange, IWorkbookData } from '../typedef';
 import type { Worksheet } from '../worksheet';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DisposableCollection } from '../../shared/lifecycle';
-import { CellValueType } from '../../types/enum';
+import { CellValueType, HorizontalAlign, VerticalAlign, WrapStrategy } from '../../types/enum';
 import { LocaleType } from '../../types/enum/locale-type';
 import { RANGE_TYPE } from '../typedef';
 import { extractPureTextFromCell } from '../worksheet';
@@ -322,6 +322,29 @@ describe('test worksheet', () => {
                     },
                 },
             });
+        });
+
+        it('preserves the composed style in the blank cell document model', () => {
+            const paddingData = { t: 3, r: 4, b: 5, l: 6 };
+            worksheet.setDefaultCellStyle({
+                ff: 'Noto Sans',
+                bg: { rgb: '#abcdef' },
+                ht: HorizontalAlign.CENTER,
+                vt: VerticalAlign.MIDDLE,
+                tb: WrapStrategy.WRAP,
+                pd: paddingData,
+            });
+
+            const documentLayoutObject = worksheet.getBlankCellDocumentModel(null, 2, 0);
+
+            expect(documentLayoutObject).toMatchObject({
+                horizontalAlign: HorizontalAlign.CENTER,
+                verticalAlign: VerticalAlign.MIDDLE,
+                wrapStrategy: WrapStrategy.WRAP,
+                paddingData,
+                fill: '#abcdef',
+            });
+            expect(documentLayoutObject.fontString).toContain('Noto Sans');
         });
     });
 });

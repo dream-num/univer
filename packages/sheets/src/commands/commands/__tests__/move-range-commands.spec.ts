@@ -32,6 +32,7 @@ import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.m
 import { MoveRangeMutation } from '../../mutations/move-range.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
 import { SetSelectionsOperation } from '../../operations/selection.operation';
+import { SetWorksheetActiveOperation } from '../../operations/set-worksheet-active.operation';
 import { MoveRangeCommand } from '../move-range.command';
 import { SetRangeValuesCommand } from '../set-range-values.command';
 import { createCommandTestBed } from './create-command-test-bed';
@@ -57,6 +58,7 @@ describe('Test move range commands', () => {
             MoveRangeCommand,
             MoveRangeMutation,
             SetSelectionsOperation,
+            SetWorksheetActiveOperation,
         ].forEach((c) => commandService.registerCommand(c));
     });
 
@@ -169,6 +171,44 @@ describe('Test move range commands', () => {
             expect(getMergedInfo(toRange.startRow, toRange.startColumn)).toEqual(toRange);
         });
 
+        it('moves merged cells across worksheets and restores merges on undo and redo', async () => {
+            const fromRange: IRange = {
+                startRow: 2,
+                endRow: 3,
+                startColumn: 2,
+                endColumn: 2,
+            };
+            const toRange: IRange = {
+                startRow: 5,
+                endRow: 6,
+                startColumn: 2,
+                endColumn: 2,
+            };
+            await commandService.executeCommand(SetWorksheetActiveOperation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet2',
+            });
+
+            expect(await commandService.executeCommand(MoveRangeCommand.id, {
+                fromRange,
+                toRange,
+                fromUnitId: 'test',
+                fromSubUnitId: 'sheet1',
+                toUnitId: 'test',
+                toSubUnitId: 'sheet2',
+            })).toBeTruthy();
+            expect(getMergedInfo(fromRange.startRow, fromRange.startColumn, 'sheet1')).toBeNull();
+            expect(getMergedInfo(toRange.startRow, toRange.startColumn, 'sheet2')).toEqual(toRange);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expect(getMergedInfo(fromRange.startRow, fromRange.startColumn, 'sheet1')).toEqual(fromRange);
+            expect(getMergedInfo(toRange.startRow, toRange.startColumn, 'sheet2')).toBeNull();
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expect(getMergedInfo(fromRange.startRow, fromRange.startColumn, 'sheet1')).toBeNull();
+            expect(getMergedInfo(toRange.startRow, toRange.startColumn, 'sheet2')).toEqual(toRange);
+        });
+
         it('move c1:d2 to c3 ,should be replace', async () => {
             const fromRange: IRange = {
                 startRow: 0,
@@ -190,10 +230,10 @@ describe('Test move range commands', () => {
         });
     });
 
-    function getMergedInfo(row: number, col: number): Nullable<IRange> {
+    function getMergedInfo(row: number, col: number, subUnitId?: string): Nullable<IRange> {
         const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet()!;
+        const worksheet = subUnitId ? workbook.getSheetBySheetId(subUnitId)! : workbook.getActiveSheet()!;
         return worksheet.getMergedCell(row, col);
     }
 
@@ -247,10 +287,17 @@ const TEST_ROW_COL_INSERTION_DEMO: IWorkbookData = {
             rowCount: 20,
             columnCount: 20,
         },
+        sheet2: {
+            id: 'sheet2',
+            cellData: {},
+            mergeData: [],
+            rowCount: 20,
+            columnCount: 20,
+        },
     },
     locale: LocaleType.ZH_CN,
     name: '',
-    sheetOrder: [],
+    sheetOrder: ['sheet1', 'sheet2'],
     styles: {},
 };
 

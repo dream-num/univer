@@ -40,13 +40,14 @@ import {
     IMenuManagerService,
     IRibbonService,
     MobileDrawer,
+    MobileKeyboardInsetContext,
     MobileMenu,
     RibbonPosition,
     RibbonStartGroup,
     useDependency,
     useObservable,
 } from '@univerjs/ui';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { map, startWith } from 'rxjs';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
@@ -139,6 +140,23 @@ export function getMobileMenuCommand(params: IValueOption | IMobileStyleCommand)
 }
 
 export function MobileSheetActionPanel() {
+    const contextService = useDependency(IContextService);
+    const focusingDrawing = useObservable(
+        () => contextService.subscribeContextValue$(FOCUSING_COMMON_DRAWINGS).pipe(map(Boolean)),
+        Boolean(contextService.getContextValue(FOCUSING_COMMON_DRAWINGS)),
+        false,
+        [contextService]
+    );
+
+    if (focusingDrawing) {
+        return null;
+    }
+
+    return <MobileSheetActionPanelContent />;
+}
+
+function MobileSheetActionPanelContent() {
+    const keyboardInset = useContext(MobileKeyboardInsetContext);
     const workbook = useActiveWorkbook();
     const commandService = useDependency(ICommandService);
     const contextService = useDependency(IContextService);
@@ -177,12 +195,6 @@ export function MobileSheetActionPanel() {
     const formulaOperatorsVisible = useObservable(
         () => contextService.subscribeContextValue$(MOBILE_FORMULA_OPERATORS_VISIBLE).pipe(map(Boolean)),
         Boolean(contextService.getContextValue(MOBILE_FORMULA_OPERATORS_VISIBLE)),
-        false,
-        [contextService]
-    );
-    const focusingDrawing = useObservable(
-        () => contextService.subscribeContextValue$(FOCUSING_COMMON_DRAWINGS).pipe(map(Boolean)),
-        Boolean(contextService.getContextValue(FOCUSING_COMMON_DRAWINGS)),
         false,
         [contextService]
     );
@@ -299,7 +311,7 @@ export function MobileSheetActionPanel() {
         if (contentRef.current) contentRef.current.scrollTop = 0;
     }, [activeTab, menuNavigation?.title, styleViewStack.length]);
 
-    if (!workbook || focusingDrawing) {
+    if (!workbook) {
         return null;
     }
 
@@ -347,14 +359,21 @@ export function MobileSheetActionPanel() {
         }).catch(() => undefined);
     }
 
-    function executeMenuItem(params: IValueOption | IMobileStyleCommand) {
+    function executeMenuItem(params: IValueOption | IMobileStyleCommand): boolean {
         const command = getMobileMenuCommand(params);
         if (!command) {
-            return;
+            return false;
         }
 
         ensureSelectionPrimary();
-        commandService.executeCommand(command.commandId, command.commandParams);
+        commandService.executeCommand(command.commandId, command.commandParams).catch(() => undefined);
+        return true;
+    }
+
+    function executeMenuItemAndClose(params: IValueOption | IMobileStyleCommand) {
+        if (executeMenuItem(params)) {
+            closeTools();
+        }
     }
 
     if (editing) {
@@ -369,7 +388,7 @@ export function MobileSheetActionPanel() {
                   active:univer-bg-primary-700
                 `)}
                 style={{
-                    bottom: `calc(var(--univer-mobile-keyboard-inset, 0px) + ${getMobileEditingMenuBottomOffset(formulaOperatorsVisible)}px)`,
+                    bottom: keyboardInset + getMobileEditingMenuBottomOffset(formulaOperatorsVisible),
                 }}
                 onClick={() => openTools().catch(() => undefined)}
             >
@@ -520,7 +539,7 @@ export function MobileSheetActionPanel() {
                     menuManagerService={menuManagerService}
                     showHeader={false}
                     onNavigationChange={handleInsertNavigation}
-                    onOptionSelect={executeMenuItem}
+                    onOptionSelect={executeMenuItemAndClose}
                 />
             )}
             {activeTab === 'style' && (
@@ -533,7 +552,10 @@ export function MobileSheetActionPanel() {
                         setStyleViewStack((stack) => [...stack, view]);
                     }}
                     onBack={() => setStyleViewStack((stack) => stack.slice(0, -1))}
-                    onExecute={executeMenuItem}
+                    onExecute={currentStyleView?.kind === 'number-format' ||
+                        currentStyleView?.kind === 'custom-number-format'
+                        ? executeMenuItemAndClose
+                        : executeMenuItem}
                     onUseColor={(color) => setRecentColors((colors) => [
                         color,
                         ...colors.filter((item) => item.toUpperCase() !== color.toUpperCase()),
@@ -548,7 +570,7 @@ export function MobileSheetActionPanel() {
                             menuManagerService={menuManagerService}
                             showHeader={false}
                             onNavigationChange={handleDataNavigation}
-                            onOptionSelect={executeMenuItem}
+                            onOptionSelect={executeMenuItemAndClose}
                         />
                     )}
                     {(!menuNavigation || menuNavigation.source === 'operation') && (
@@ -557,7 +579,7 @@ export function MobileSheetActionPanel() {
                             menuManagerService={menuManagerService}
                             showHeader={false}
                             onNavigationChange={handleOperationNavigation}
-                            onOptionSelect={executeMenuItem}
+                            onOptionSelect={executeMenuItemAndClose}
                         />
                     )}
                 </div>

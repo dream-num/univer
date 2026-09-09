@@ -33,6 +33,13 @@ const locale: typeof enUS = {
             'clear-filter': 'Очистить фильтр',
             cancel: 'Отмена',
             confirm: 'Подтвердить',
+            mobile: {
+                resize: 'Изменить размер панели фильтра',
+                back: 'Назад',
+                column: 'Столбец {0}',
+                'previous-column': 'Предыдущий столбец',
+                'next-column': 'Следующий столбец',
+            },
             'by-values': 'По значениям',
             'by-colors': 'По цветам',
             'filter-by-cell-fill-color': 'Фильтр по цвету заливки ячейки',

@@ -15,7 +15,11 @@
  */
 
 import type { InterceptorManager } from '@univerjs/core';
+import type { IDropdownProps, ISelectProps } from '@univerjs/design';
 import type { IConditionalFormattingRuleConfig } from '@univerjs/sheets-conditional-formatting';
+import type { FormulaEditor } from '@univerjs/sheets-formula-ui';
+import type { ComponentType } from 'react';
+import type { IConditionalColorPickerProps } from '../../ColorPicker';
 import { createInterceptorKey } from '@univerjs/core';
 
 export const beforeSubmit = createInterceptorKey<boolean, null>('beforeSubmit');
@@ -25,4 +29,8 @@ export interface IStyleEditorProps<S = any, R = IConditionalFormattingRuleConfig
     onChange: (style: S) => void;
     rule?: R;
     interceptorManager: InterceptorManager<{ beforeSubmit: typeof beforeSubmit; submit: typeof submit }>;
+    SelectComponent?: ComponentType<ISelectProps>;
+    DropdownComponent?: ComponentType<IDropdownProps>;
+    ColorPickerComponent?: ComponentType<IConditionalColorPickerProps>;
+    FormulaEditorComponent?: typeof FormulaEditor;
 };

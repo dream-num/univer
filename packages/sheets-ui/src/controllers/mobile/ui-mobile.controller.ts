@@ -69,6 +69,7 @@ import {
 } from '../../commands/commands/inline-format.command';
 import { InsertRangeMoveDownConfirmCommand } from '../../commands/commands/insert-range-move-down-confirm.command';
 import { InsertRangeMoveRightConfirmCommand } from '../../commands/commands/insert-range-move-right-confirm.command';
+import { MoveRangeConfirmCommand } from '../../commands/commands/move-range-confirm.command';
 import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBarCommand, AddRangeProtectionFromToolbarCommand, DeleteRangeProtectionFromContextMenuCommand, SetRangeProtectionFromContextMenuCommand, ViewSheetPermissionFromContextMenuCommand, ViewSheetPermissionFromSheetBarCommand } from '../../commands/commands/range-protection.command';
 import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../../commands/commands/remove-row-col-confirm.command';
 import { RemoveSheetConfirmCommand } from '../../commands/commands/remove-sheet-confirm.command';
@@ -111,16 +112,16 @@ import { SheetPermissionOpenPanelOperation } from '../../commands/operations/she
 import { SidebarDefinedNameOperation } from '../../commands/operations/sidebar-defined-name.operation';
 import {
     MOBILE_FORMULA_BAR_SUBMIT_COMMAND_ID,
+    MOBILE_FORMULA_FUNCTION_PANEL_OPEN,
     MOBILE_FX_EDITOR_EXPANDED,
     MOBILE_KEYBOARD_VISIBLE,
-    MOBILE_SHEET_FX_EDITOR,
 } from '../../consts/mobile-context';
 import { menuSchema } from '../../menu/schema';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { MobileSheetActionPanel } from '../../views/mobile/action-panel/MobileSheetActionPanel';
 import { MobileFormulaBar } from '../../views/mobile/formula-bar/MobileFormulaBar';
 import { MobileSheetBar } from '../../views/mobile/sheet-bar/MobileSheetBar';
-import { RenderSheetContent } from '../../views/sheet-container/SheetContainer';
+import { MobileRenderSheetContent } from '../../views/mobile/sheet-container/MobileRenderSheetContent';
 import { EditingRenderController } from '../editor/editing.render-controller';
 
 export const MobileFormulaBarBreakLineCommand: ICommand = {
@@ -212,7 +213,6 @@ export class SheetUIMobileController extends Disposable {
     ) {
         super();
 
-        this._contextService.setContextValue(MOBILE_SHEET_FX_EDITOR, true);
         this._init();
     }
 
@@ -283,6 +283,7 @@ export class SheetUIMobileController extends Disposable {
             DeleteRangeMoveUpConfirmCommand,
             InsertRangeMoveRightConfirmCommand,
             DeleteRangeMoveLeftConfirmCommand,
+            MoveRangeConfirmCommand,
             SidebarDefinedNameOperation,
 
             // permission
@@ -314,7 +315,7 @@ export class SheetUIMobileController extends Disposable {
         const injector = this._injector;
 
         this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.HEADER, () => connectInjector(MobileSheetBar, injector)));
-        this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(RenderSheetContent, injector)));
+        this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(MobileRenderSheetContent, injector)));
         this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.FOOTER, () => connectInjector(MobileFormulaBar, injector)));
         this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.FOOTER, () => connectInjector(MobileSheetActionPanel, injector)));
     }
@@ -363,11 +364,13 @@ export class SheetUIMobileController extends Disposable {
             const keyboardVisible = isMobileKeyboardVisible(stableHeight, visibleBottom);
             this._contextService.setContextValue(MOBILE_KEYBOARD_VISIBLE, keyboardVisible);
 
-            if (
+            if (shouldHideMobileEditorOnKeyboardClose(
                 keyboardWasVisible &&
-                !keyboardVisible &&
-                !this._contextService.getContextValue(MOBILE_FX_EDITOR_EXPANDED)
-            ) {
+                !keyboardVisible,
+                this._contextService.getContextValue(MOBILE_FX_EDITOR_EXPANDED),
+                this._contextService.getContextValue(MOBILE_FORMULA_FUNCTION_PANEL_OPEN),
+                this._editorBridgeService.isForceKeepVisible()
+            )) {
                 const visibleState = this._editorBridgeService.isVisible();
                 if (visibleState.visible) {
                     this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
@@ -424,4 +427,13 @@ export class SheetUIMobileController extends Disposable {
 
 export function isMobileKeyboardVisible(stableHeight: number, visibleBottom: number): boolean {
     return stableHeight - visibleBottom > 80;
+}
+
+export function shouldHideMobileEditorOnKeyboardClose(
+    keyboardClosed: boolean,
+    editorExpanded: boolean,
+    functionPanelOpen: boolean,
+    forceKeepVisible: boolean
+): boolean {
+    return keyboardClosed && !editorExpanded && !functionPanelOpen && !forceKeepVisible;
 }

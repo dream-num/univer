@@ -32,14 +32,14 @@ export const MOBILE_EXPANDING_SELECTION = 'MOBILE_EXPANDING_SELECTION';
  */
 export const MOBILE_TRIGGER_CONTEXT_MENU = 'MOBILE_TRIGGER_CONTEXT_MENU';
 
-/** Mobile sheets edit through the formula bar while the in-cell editor stays hidden. */
-export const MOBILE_SHEET_FX_EDITOR = 'MOBILE_SHEET_FX_EDITOR';
-
 /** Whether the software keyboard currently occupies the mobile visual viewport. */
 export const MOBILE_KEYBOARD_VISIBLE = 'MOBILE_KEYBOARD_VISIBLE';
 
 /** Whether the mobile formula editor currently occupies the immersive full-screen surface. */
 export const MOBILE_FX_EDITOR_EXPANDED = 'MOBILE_FX_EDITOR_EXPANDED';
+
+/** Whether the mobile formula function panel is open above the formula editor. */
+export const MOBILE_FORMULA_FUNCTION_PANEL_OPEN = 'MOBILE_FORMULA_FUNCTION_PANEL_OPEN';
 
 /** Whether the compact mobile formula operator strip is currently visible. */
 export const MOBILE_FORMULA_OPERATORS_VISIBLE = 'MOBILE_FORMULA_OPERATORS_VISIBLE';

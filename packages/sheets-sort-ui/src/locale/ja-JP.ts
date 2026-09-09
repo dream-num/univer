@@ -41,6 +41,7 @@ const locale: typeof enUS = {
             'sort-reminder-no': '範囲を維持して並べ替え',
             'first-row-check': '先頭行を並べ替えの対象に含めない',
             'add-condition': '条件を追加',
+            'delete-condition': '条件を削除',
             cancel: 'キャンセル',
             confirm: '確認',
         },

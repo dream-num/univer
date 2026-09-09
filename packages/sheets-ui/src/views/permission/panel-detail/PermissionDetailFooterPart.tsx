@@ -50,10 +50,11 @@ interface IPermissionDetailFooterPartProps {
     editState: EditStateEnum;
     viewState: ViewStateEnum;
     oldRule?: IPermissionPanelRule;
+    ActionRowComponent?: typeof ActionRow;
 }
 
 export const PermissionDetailFooterPart = (props: IPermissionDetailFooterPartProps) => {
-    const { viewState, editState, permissionId, ranges, rangesErrMsg, desc, oldRule, id } = props;
+    const { viewState, editState, permissionId, ranges, rangesErrMsg, desc, oldRule, id, ActionRowComponent = ActionRow } = props;
     const sheetPermissionPanelModel = useDependency(SheetPermissionPanelModel);
     const sidebarService = useDependency(ISidebarService);
     const authzIoService = useDependency(IAuthzIoService);
@@ -71,7 +72,7 @@ export const PermissionDetailFooterPart = (props: IPermissionDetailFooterPartPro
     const subUnitId = worksheet.getSheetId();
 
     return (
-        <ActionRow
+        <ActionRowComponent
             className="univer-mt-auto univer-flex univer-flex-row-reverse univer-gap-2 univer-py-5"
         >
             <Button
@@ -235,6 +236,6 @@ export const PermissionDetailFooterPart = (props: IPermissionDetailFooterPartPro
             >
                 {localeService.t<LocaleKey>('sheets-ui.permission.button.cancel')}
             </Button>
-        </ActionRow>
+        </ActionRowComponent>
     );
 };

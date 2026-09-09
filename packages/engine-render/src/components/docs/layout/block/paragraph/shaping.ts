@@ -22,6 +22,7 @@ import type { DocumentViewModel } from '../../../view-model/document-view-model'
 import type { IBreakPoints } from '../../line-breaker/line-breaker';
 import type { ILayoutContext } from '../../tools';
 import {
+    BaselineOffset,
     BooleanNumber,
     DataStreamTreeTokenType,
     GridType,
@@ -32,6 +33,7 @@ import { cjk } from '../../../../../basics/cjk-regexp';
 import { GlyphType } from '../../../../../basics/i-document-skeleton-cached';
 import {
     getFirstGrapheme,
+    getFontStyleString,
     hasArabic,
     hasThai,
     hasTibetan,
@@ -280,6 +282,20 @@ export function shaping(
         const word = content.slice(last, bk.position);
         const shapedGlyphs: IDocumentSkeletonGlyph[] = [];
 
+        if (last === 0 && ctx.noteLabel != null && viewModel === ctx.viewModel &&
+            paragraphNode.endIndex === viewModel.getBody()?.paragraphs?.[0]?.startIndex) {
+            const config = getFontCreateConfig(0, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+            const textStyle = { ...config.textStyle, va: BaselineOffset.SUPERSCRIPT, ...ctx.noteReferenceTextStyle };
+            const marker = createSkeletonLetterGlyph(ctx.noteLabel, {
+                ...config,
+                textStyle,
+                fontStyle: getFontStyleString({ ...textStyle, ff: [textStyle.ff, textStyle.eastAsiaFontFamily].filter(Boolean).join(', ') }),
+            });
+            marker.raw = '';
+            marker.count = 0;
+            shapedGlyphs.push(marker);
+        }
+
         let src = word;
         let i = last;
         while (src.length > 0) {
@@ -317,7 +333,34 @@ export function shaping(
                 measuredWholeEntityRangeIndex++;
             }
 
-            if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
+            const fieldType = char === '\uFFFC'
+                ? viewModel.getCustomRangeRaw(paragraphNode.startIndex + i)?.properties?.fieldType
+                : undefined;
+            const isSeparator = fieldType === 'FOOTNOTE_SEPARATOR' || fieldType === 'FOOTNOTE_CONTINUATION_SEPARATOR';
+            const note = viewModel === ctx.viewModel && char === '\uFFFC'
+                ? ctx.noteReferences?.get(paragraphNode.startIndex + i)
+                : undefined;
+            if (isSeparator) {
+                const config = getFontCreateConfig(i, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+                const textWidth = Math.max(0, (sectionBreakConfig.pageSize?.width ?? 192) -
+                    (sectionBreakConfig.marginLeft ?? 0) - (sectionBreakConfig.marginRight ?? 0));
+                const width = fieldType === 'FOOTNOTE_SEPARATOR' ? Math.min(192, textWidth) : textWidth;
+                const glyph = createSkeletonLetterGlyph(' ', config, width);
+                glyph.raw = '\uFFFC';
+                glyph.noteSeparator = true;
+                shapedGlyphs.push(glyph);
+                i++;
+                src = src.substring(1);
+            } else if (note) {
+                const config = getFontCreateConfig(i, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+                const glyph = createSkeletonLetterGlyph(note.label, config);
+                glyph.raw = '\uFFFC';
+                glyph.count = 1;
+                glyph.noteId = note.noteId;
+                shapedGlyphs.push(glyph);
+                i++;
+                src = src.substring(1);
+            } else if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
                 const config = getFontCreateConfig(i, viewModel, paragraphNode, sectionBreakConfig, paragraph);
                 let newGlyph: Nullable<IDocumentSkeletonGlyph> = null;
                 const customBlock = viewModel.getCustomBlockWithoutSetCurrentIndex(paragraphNode.startIndex + i);

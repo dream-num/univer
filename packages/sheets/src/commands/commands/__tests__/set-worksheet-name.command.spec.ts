@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Injector, Univer, Workbook } from '@univerjs/core';
+import type { ICommandInfo, Injector, Univer, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SetWorksheetNameMutation } from '../../mutations/set-worksheet-name.mutation';
@@ -44,7 +44,9 @@ describe('Test set worksheet name commands', () => {
         describe('set worksheet name', async () => {
             it('correct situation: ', async () => {
                 const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                if (!workbook) throw new Error('This is an error');
+                if (!workbook) {
+                    throw new Error('This is an error');
+                }
 
                 expect(
                     await commandService.executeCommand(SetWorksheetNameCommand.id, {
@@ -62,6 +64,33 @@ describe('Test set worksheet name commands', () => {
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(workbook.getSheetBySheetId('sheet1')?.getConfig().name).toEqual('new name');
+            });
+
+            it('carries the previous name through rename and undo/redo', async () => {
+                const mutations: ICommandInfo[] = [];
+                const listener = commandService.onMutationExecutedForCollab((mutation) => {
+                    if (mutation.id === SetWorksheetNameMutation.id) {
+                        mutations.push({ ...mutation, params: { ...mutation.params } });
+                    }
+                });
+                try {
+                    expect(await commandService.executeCommand(SetWorksheetNameCommand.id, {
+                        unitId: 'test',
+                        subUnitId: 'sheet1',
+                        name: 'Sheet2',
+                    })).toBe(true);
+                    expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+                    expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+                    expect(mutations.map((mutation) => mutation.params)).toMatchObject([
+                        { oldName: 'sheet1', name: 'Sheet2' },
+                        // Undo the rename: Sheet2 -> sheet1.
+                        { oldName: 'Sheet2', name: 'sheet1' },
+                        // Redo the rename: sheet1 -> Sheet2.
+                        { oldName: 'sheet1', name: 'Sheet2' },
+                    ]);
+                } finally {
+                    listener.dispose();
+                }
             });
         });
     });

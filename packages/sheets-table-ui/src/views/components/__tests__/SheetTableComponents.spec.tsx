@@ -23,10 +23,12 @@ import {
     Inject,
     Injector,
     IPermissionService,
+    IUniverInstanceService,
     LocaleService,
     LocaleType,
     Plugin,
     toDisposable,
+    UndoCommand,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -52,6 +54,7 @@ import {
     SetSheetTableFilterCommand,
     SetSheetTableFilterMutation,
     SetSheetTableMutation,
+    SetSheetTableSortStateCommand,
     SheetsTableSortStateEnum,
     SheetTableInsertColumnAtCommand,
     SheetTableRemoveColumnAtCommand,
@@ -72,6 +75,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SheetsTableComponentController } from '../../../controllers/sheet-table-component.controller';
 import { SheetTableThemeUIController } from '../../../controllers/sheet-table-theme-ui.controller';
 import { SheetsTableUiService } from '../../../services/sheets-table-ui.service';
+import { MobileSheetTableFilterPanel } from '../MobileSheetTableFilterPanel';
 import { SheetTableConditionPanel } from '../SheetTableConditionPanel';
 import { SheetTableFilterPanel } from '../SheetTableFilterPanel';
 import { SheetTableRenameDialog } from '../SheetTableRenameDialog';
@@ -429,11 +433,11 @@ function createWorkbookData(): IWorkbookData {
                     },
                     1: {
                         0: { v: 'book' },
-                        1: { v: 12 },
+                        1: { v: 12, s: { bg: { rgb: '#ff0000' } } },
                     },
                     2: {
                         0: { v: 'pen' },
-                        1: { v: 3 },
+                        1: { v: 3, s: { bg: { rgb: '#0000ff' } } },
                     },
                     3: {
                         1: { v: 8 },
@@ -530,11 +534,18 @@ function createTestBed(): ITestBed {
                     },
                 },
                 filter: {
+                    title: 'Filter',
                     'by-values': 'Filter by values',
+                    'by-colors': 'Filter by colors',
                     'by-conditions': 'Filter by conditions',
+                    back: 'Back',
+                    resize: 'Resize',
                     cancel: 'Cancel',
                     'clear-filter': 'Clear filter',
                     confirm: 'Confirm',
+                    'filter-by-cell-fill-color': 'Cell fill color',
+                    'filter-by-cell-text-color': 'Cell text color',
+                    'filter-by-color-none': 'This column contains only one color',
                     'search-placeholder': 'Search',
                     'select-all': 'Select all',
                 },
@@ -559,6 +570,7 @@ function createTestBed(): ITestBed {
         SetSheetTableMutation,
         SetSheetTableFilterCommand,
         SetSheetTableFilterMutation,
+        SetSheetTableSortStateCommand,
         ReorderRangeCommand,
         ReorderRangeMutation,
         AddRangeThemeMutation,
@@ -980,6 +992,157 @@ describe('sheet table view components', () => {
             values: ['pen', TABLE_FILTER_EMPTY_VALUE],
         });
         expect(componentController.closeCount).toBe(1);
+    });
+
+    it('shows table actions before opening a mobile filter detail drawer', () => {
+        testBed = createTestBed();
+        const componentController = testBed.injector.get(SheetsTableComponentController) as TestComponentController;
+        componentController.setCurrentTableFilterInfo({
+            unitId: testBed.workbook.getUnitId(),
+            subUnitId: 'sheet1',
+            tableId: 'table-orders',
+            row: 0,
+            column: 0,
+        });
+        const rendered = renderWithRediContext(testBed, <MobileSheetTableFilterPanel />);
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(container.textContent).toContain('Insert 1 table column left');
+        expect(container.textContent).toContain('Insert 1 table column right');
+        expect(container.textContent).toContain('Delete table column');
+        expect(container.textContent).toContain('Ascending');
+        expect(container.textContent).toContain('Descending');
+        expect(container.textContent).toContain('Filter by values');
+        expect(container.textContent).toContain('Filter by colors');
+        expect(container.textContent).toContain('Filter by conditions');
+        expect(container.querySelector('input')).toBeNull();
+        expect(getButtonByText(container, 'Insert 1 table column left').className).toContain('univer-bg-gray-100');
+        expect(getButtonByText(container, 'Insert 1 table column left').className).toContain('univer-rounded-xl');
+        expect(getButtonByText(container, 'Filter by values').className).toContain('univer-bg-gray-100');
+        expect(getButtonByText(container, 'Clear filter').className).toContain('univer-bg-gray-100');
+
+        clickButtonByText(container, 'Filter by values');
+
+        expect(document.querySelector('[data-u-comp="mobile-sheet-table-filter-detail"]')).toBeTruthy();
+        expect(document.querySelector('input')).toBeTruthy();
+        expect(document.body.textContent).toContain('Confirm');
+        expect(document.body.textContent).toContain('Cancel');
+    });
+
+    it('edits an existing color filter in the desktop table filter panel', () => {
+        testBed = createTestBed();
+        const table = testBed.injector.get(TableManager).getTable(testBed.workbook.getUnitId(), 'table-orders')!;
+        table.setTableFilterColumn(1, {
+            filterType: TableColumnFilterTypeEnum.color,
+            cellFillColors: ['rgb(255,0,0)'],
+        });
+        const componentController = testBed.injector.get(SheetsTableComponentController) as TestComponentController;
+        componentController.setCurrentTableFilterInfo({
+            unitId: testBed.workbook.getUnitId(),
+            subUnitId: 'sheet1',
+            tableId: 'table-orders',
+            row: 0,
+            column: 1,
+        });
+        const rendered = renderWithRediContext(testBed, <SheetTableFilterPanel />);
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(container.textContent).toContain('Filter by colors');
+        expect(container.textContent).toContain('Cell fill color');
+        expect(container.querySelector('[aria-label="rgb(255,0,0)"]')?.getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('applies a table color filter from the mobile detail drawer', async () => {
+        testBed = createTestBed();
+        const componentController = testBed.injector.get(SheetsTableComponentController) as TestComponentController;
+        componentController.setCurrentTableFilterInfo({
+            unitId: testBed.workbook.getUnitId(),
+            subUnitId: 'sheet1',
+            tableId: 'table-orders',
+            row: 0,
+            column: 1,
+        });
+        const rendered = renderWithRediContext(testBed, <MobileSheetTableFilterPanel />);
+        root = rendered.root;
+        container = rendered.container;
+
+        clickButtonByText(container, 'Filter by colors');
+        const blueOption = document.body.querySelector('[aria-label="rgb(0,0,255)"]');
+        if (!blueOption) {
+            throw new Error('Blue color option was not found.');
+        }
+        clickElement(blueOption);
+        clickElement(getButtonByText(document.body, 'Confirm'));
+        await flushCommands();
+
+        const table = testBed.injector.get(TableManager).getTable(testBed.workbook.getUnitId(), 'table-orders')!;
+        expect(table.getTableFilterColumn(1)).toEqual({
+            filterType: TableColumnFilterTypeEnum.color,
+            cellFillColors: ['rgb(0,0,255)'],
+        });
+        expect(componentController.closeCount).toBe(1);
+    });
+
+    it('discards mobile value filter edits when the detail drawer is cancelled', async () => {
+        testBed = createTestBed();
+        const table = testBed.injector.get(TableManager).getTable(testBed.workbook.getUnitId(), 'table-orders')!;
+        table.setTableFilterColumn(0, {
+            filterType: TableColumnFilterTypeEnum.manual,
+            values: ['book'],
+        });
+        const componentController = testBed.injector.get(SheetsTableComponentController) as TestComponentController;
+        componentController.setCurrentTableFilterInfo({
+            unitId: testBed.workbook.getUnitId(),
+            subUnitId: 'sheet1',
+            tableId: 'table-orders',
+            row: 0,
+            column: 0,
+        });
+        const rendered = renderWithRediContext(testBed, <MobileSheetTableFilterPanel />);
+        root = rendered.root;
+        container = rendered.container;
+
+        clickButtonByText(container, 'Filter by values');
+        clickCheckboxByText(document.body, 'pen');
+        clickElement(getButtonByText(document.body, 'Cancel'));
+        clickButtonByText(container, 'Filter by values');
+        clickElement(getButtonByText(document.body, 'Confirm'));
+        await flushCommands();
+
+        expect(table.getTableFilterColumn(0)).toEqual({
+            filterType: TableColumnFilterTypeEnum.manual,
+            values: ['book'],
+        });
+    });
+
+    it('undoes the mobile table sort state together with the reordered rows', async () => {
+        testBed = createTestBed();
+        const componentController = testBed.injector.get(SheetsTableComponentController) as TestComponentController;
+        const unitId = testBed.workbook.getUnitId();
+        const worksheet = testBed.workbook.getSheetBySheetId('sheet1')!;
+        testBed.injector.get(IUniverInstanceService).focusUnit(unitId);
+        componentController.setCurrentTableFilterInfo({
+            unitId,
+            subUnitId: 'sheet1',
+            tableId: 'table-orders',
+            row: 0,
+            column: 0,
+        });
+        const rendered = renderWithRediContext(testBed, <MobileSheetTableFilterPanel />);
+        root = rendered.root;
+        container = rendered.container;
+
+        clickButtonByText(container, 'Descending');
+        await flushCommands();
+        await testBed.injector.get(ICommandService).executeCommand(UndoCommand.id);
+
+        const table = testBed.injector.get(TableManager).getTable(unitId, 'table-orders')!;
+        expect(worksheet.getCellRaw(1, 0)?.v).toBe('book');
+        expect(worksheet.getCellRaw(2, 0)?.v).toBe('pen');
+        expect(worksheet.getCellRaw(3, 0)?.v).toBe(undefined);
+        expect(table.getTableFilters().getSortState()).toEqual({});
     });
 
     it('leaves an unfiltered column unchanged when all values remain selected', async () => {

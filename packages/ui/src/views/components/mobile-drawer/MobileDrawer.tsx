@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import type { AriaRole, PointerEvent, ReactNode } from 'react';
+import type { AriaRole, PointerEvent, ReactNode, RefObject } from 'react';
 import { clsx, resetButtonClassName, scrollbarClassName } from '@univerjs/design';
-import { useRef, useState } from 'react';
+import { useContext, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
+import { MobileDrawerCoordinatorContext } from './MobileDrawerCoordinator';
 
 export type MobileDrawerSnap = 'compact' | 'expanded';
 export type MobileDrawerRelease = MobileDrawerSnap | 'closed';
+export type MobileDrawerOpenMode = 'replace' | 'push';
 type MobileDrawerRef<T> = { current: T | null } | ((instance: T | null) => void) | null;
 
 const MOBILE_DRAWER_COMPACT_PERCENT = 40;
@@ -51,6 +53,8 @@ export function MobileDrawer(props: {
     componentName?: string;
     panelRef?: MobileDrawerRef<HTMLElement>;
     contentRef?: MobileDrawerRef<HTMLDivElement>;
+    layerRef?: RefObject<HTMLElement | null>;
+    openMode?: MobileDrawerOpenMode;
     panelClassName?: string;
     contentClassName?: string;
     footer?: ReactNode;
@@ -69,12 +73,26 @@ export function MobileDrawer(props: {
         componentName = 'mobile-drawer',
         panelRef,
         contentRef,
+        layerRef,
+        openMode = 'replace',
         panelClassName,
         contentClassName,
         footer,
         role,
         ariaLabel,
     } = props;
+    const coordinator = useContext(MobileDrawerCoordinatorContext);
+    const registerDrawer = coordinator?.register;
+    const unregisterDrawer = coordinator?.unregister;
+    const panelElementRef = useRef<HTMLElement>(null);
+    const drawerIdRef = useRef<symbol | null>(null);
+    const onCloseRef = useRef(onClose);
+    onCloseRef.current = onClose;
+    if (!drawerIdRef.current) {
+        drawerIdRef.current = Symbol(componentName);
+    }
+    const drawerId = drawerIdRef.current;
+    const active = !coordinator || coordinator.activeDrawerId === drawerId;
     const [dragPercent, setDragPercent] = useState<number | null>(null);
     const suppressHandleClickRef = useRef(false);
     const dragRef = useRef<{
@@ -87,6 +105,27 @@ export function MobileDrawer(props: {
     const drawerPercent = dragPercent ?? (snap === 'compact'
         ? MOBILE_DRAWER_COMPACT_PERCENT
         : MOBILE_DRAWER_EXPANDED_PERCENT);
+    const viewportHeightUnit = globalThis.CSS?.supports('height', '1dvh') ? 'dvh' : 'vh';
+
+    useImperativeHandle(panelRef, () => panelElementRef.current!);
+
+    useLayoutEffect(() => {
+        if (!registerDrawer || !unregisterDrawer) {
+            return;
+        }
+
+        registerDrawer(drawerId, openMode, () => onCloseRef.current());
+        return () => unregisterDrawer(drawerId);
+    }, [drawerId, openMode, registerDrawer, unregisterDrawer]);
+
+    useLayoutEffect(() => {
+        const layer = layerRef?.current ?? (layerRef ? panelElementRef.current?.parentElement : null);
+        if (!layer) {
+            return;
+        }
+
+        layer.toggleAttribute('hidden', !active);
+    }, [active, layerRef]);
 
     function beginDrag(clientY: number) {
         dragRef.current = {
@@ -126,7 +165,11 @@ export function MobileDrawer(props: {
         dragRef.current = null;
         setDragPercent(null);
         if (result === 'closed') {
-            onClose();
+            if (coordinator) {
+                coordinator.close(drawerId);
+            } else {
+                onClose();
+            }
         } else {
             onSnapChange(result);
         }
@@ -149,18 +192,24 @@ export function MobileDrawer(props: {
         endDrag(event.clientY);
     }
 
+    function handlePointerCancel() {
+        dragRef.current = null;
+        setDragPercent(null);
+    }
+
     return (
         <>
             {floatingActions && (
                 <div
                     className="univer-pointer-events-none univer-absolute univer-right-4 univer-z-30"
-                    style={{ bottom: `calc(${drawerPercent}dvh + 12px)` }}
+                    style={{ bottom: `calc(${drawerPercent}${viewportHeightUnit} + 12px)` }}
                 >
                     {floatingActions}
                 </div>
             )}
             <section
-                ref={panelRef}
+                ref={panelElementRef}
+                hidden={!active}
                 role={role}
                 aria-modal={role === 'dialog' || undefined}
                 aria-label={ariaLabel}
@@ -173,7 +222,7 @@ export function MobileDrawer(props: {
                   dark:!univer-bg-gray-900
                 `, dragPercent != null && '!univer-transition-none', panelClassName)}
                 style={{
-                    height: `${drawerPercent}dvh`,
+                    height: `${drawerPercent}${viewportHeightUnit}`,
                     paddingBottom: 'env(safe-area-inset-bottom, 0px)',
                 }}
             >
@@ -190,10 +239,11 @@ export function MobileDrawer(props: {
                           univer-absolute univer-left-1/2 univer-top-0 univer-z-10 univer-flex univer-h-6 univer-w-16
                           -univer-translate-x-1/2 univer-touch-none univer-items-center univer-justify-center
                         `)}
+                        style={{ touchAction: 'none' }}
                         onPointerDown={handlePointerDown}
                         onPointerMove={handlePointerMove}
                         onPointerUp={handlePointerUp}
-                        onPointerCancel={handlePointerUp}
+                        onPointerCancel={handlePointerCancel}
                         onClick={() => {
                             if (suppressHandleClickRef.current) {
                                 suppressHandleClickRef.current = false;

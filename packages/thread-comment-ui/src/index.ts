@@ -30,6 +30,8 @@ export { ThreadCommentDraftService } from './services/thread-comment-draft.servi
 export type { IThreadCommentDraft } from './services/thread-comment-draft.service';
 export { ThreadCommentPanelService } from './services/thread-comment-panel.service';
 export type { ActiveCommentInfo } from './services/thread-comment-panel.service';
+export { MobileThreadCommentPanel } from './views/mobile/MobileThreadCommentPanel';
+export { MobileThreadCommentTree } from './views/mobile/MobileThreadCommentTree';
 export { ThreadCommentPanel } from './views/ThreadCommentPanel';
 export type { IThreadCommentPanelProps } from './views/ThreadCommentPanel';
 export { ThreadCommentTree, ThreadCommentTreeLocation } from './views/ThreadCommentTree';

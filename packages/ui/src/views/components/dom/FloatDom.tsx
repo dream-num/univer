@@ -76,6 +76,7 @@ function FloatDomSingleContent(props: { layer: IFloatDom; id: string; Component?
     const floatDomOverflow = resolveFloatDomOverflow(layerProps);
     const wrapperInset = layer.contentBox?.wrapperInset;
     const contentInset = layer.contentBox?.contentInset;
+    const forwardEvents = shouldForwardFloatDomEvents(layer);
 
     useEffect(() => {
         const subscription = layer.position$.subscribe((position) => {
@@ -119,24 +120,48 @@ function FloatDomSingleContent(props: { layer: IFloatDom; id: string; Component?
             style={{
                 ...layout.wrapper,
                 overflow: floatDomOverflow.outerOverflow,
+                touchAction: forwardEvents ? 'none' : undefined,
             }}
             onPointerMove={(e) => {
-                if (shouldForwardFloatDomEvents(layer)) {
+                if (forwardEvents) {
                     layer.onPointerMove(e.nativeEvent);
                 }
             }}
             onPointerDown={(e) => {
-                if (shouldForwardFloatDomEvents(layer)) {
+                if (forwardEvents) {
+                    e.currentTarget.setPointerCapture?.(e.pointerId);
                     layer.onPointerDown(e.nativeEvent);
                 }
             }}
             onPointerUp={(e) => {
-                if (shouldForwardFloatDomEvents(layer)) {
+                if (!forwardEvents) {
+                    return;
+                }
+
+                try {
                     layer.onPointerUp(e.nativeEvent);
+                } finally {
+                    if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+                        e.currentTarget.releasePointerCapture?.(e.pointerId);
+                    }
+                }
+            }}
+            onPointerCancel={(e) => {
+                if (!forwardEvents) {
+                    return;
+                }
+
+                try {
+                    // The layer forwards the original event type, so the canvas receives pointercancel rather than pointerup.
+                    layer.onPointerUp(e.nativeEvent);
+                } finally {
+                    if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+                        e.currentTarget.releasePointerCapture?.(e.pointerId);
+                    }
                 }
             }}
             onWheel={(e) => {
-                if (shouldForwardFloatDomEvents(layer)) {
+                if (forwardEvents) {
                     layer.onWheel(e.nativeEvent);
                 }
             }}

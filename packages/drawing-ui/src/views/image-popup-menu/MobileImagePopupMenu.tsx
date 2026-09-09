@@ -14,20 +14,38 @@
  * limitations under the License.
  */
 
-import type { IImagePopupMenuItem } from './ImagePopupMenu';
+import type { IImagePopupMenuExtraProps, IImagePopupMenuItem } from './ImagePopupMenu';
+import { ICommandService, LocaleService } from '@univerjs/core';
 import { MobileActionRow } from '@univerjs/design';
+import { IDialogService, useDependency } from '@univerjs/ui';
 
 interface IMobileImagePopupMenuProps {
-    menuItems: IImagePopupMenuItem[];
-    getLabel: (item: IImagePopupMenuItem) => string;
-    onSelect: (item: IImagePopupMenuItem) => void;
+    popup: {
+        extraProps?: Pick<IImagePopupMenuExtraProps, 'menuItems'> & { dialogId?: string };
+    };
 }
 
-export function MobileImagePopupMenu({ menuItems, getLabel, onSelect }: IMobileImagePopupMenuProps) {
+export function MobileImagePopupMenu({ popup }: IMobileImagePopupMenuProps) {
+    const menuItems = popup?.extraProps?.menuItems;
+    const commandService = useDependency(ICommandService);
+    const localeService = useDependency(LocaleService);
+    const dialogService = useDependency(IDialogService);
+
+    if (!menuItems) {
+        return null;
+    }
+
+    const handleSelect = async (item: IImagePopupMenuItem) => {
+        await commandService.executeCommand(item.commandId, item.commandParams);
+        if (popup.extraProps?.dialogId) {
+            dialogService.close(popup.extraProps.dialogId);
+        }
+    };
+
     return (
         <div className="univer-flex univer-flex-col univer-gap-2">
             {menuItems.map((item) => {
-                const label = getLabel(item);
+                const label = localeService.t(item.label);
 
                 return (
                     <MobileActionRow
@@ -36,7 +54,7 @@ export function MobileImagePopupMenu({ menuItems, getLabel, onSelect }: IMobileI
                         aria-label={label}
                         variant="subtle"
                         disabled={item.disable}
-                        onClick={() => onSelect(item)}
+                        onClick={() => handleSelect(item)}
                     />
                 );
             })}

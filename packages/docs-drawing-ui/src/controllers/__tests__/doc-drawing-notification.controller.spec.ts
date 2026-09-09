@@ -19,6 +19,7 @@ import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { RenderUnit } from '@univerjs/engine-render';
 import {
     BooleanNumber,
+    CustomRangeType,
     DocumentFlavor,
     DrawingTypeEnum,
     ICommandService,
@@ -240,6 +241,47 @@ describe('DocDrawingAddRemoveController with real commands and services', () => 
         expect(removed).toHaveBeenCalled();
         addSubscription.unsubscribe();
         removeSubscription.unsubscribe();
+    });
+
+    it('registers scoped note images and removes them when their note is deleted', () => {
+        const body = model.getBody()!;
+        const referencedBody = {
+            ...body,
+            dataStream: `\uFFFC${body.dataStream}`,
+            paragraphs: body.paragraphs?.map((paragraph) => ({ ...paragraph, startIndex: paragraph.startIndex + 1 })),
+            sectionBreaks: body.sectionBreaks?.map((section) => ({ ...section, startIndex: section.startIndex + 1 })),
+            customBlocks: body.customBlocks?.map((block) => ({ ...block, startIndex: block.startIndex + 1 })),
+            customRanges: [{
+                rangeId: 'ref',
+                rangeType: CustomRangeType.FOOTNOTE,
+                startIndex: 0,
+                endIndex: 0,
+                wholeEntity: true,
+                properties: { noteId: 'note' },
+            }],
+        };
+        const note = { type: 'footnote' as const, noteId: 'note', body: {
+            dataStream: '\b\r\n',
+            paragraphs: [{ startIndex: 1, paragraphId: 'np' }],
+            customBlocks: [{ startIndex: 0, blockId: 'note-image' }],
+        }, drawings: { 'note-image': { ...drawing('note-image'), layoutType: PositionedObjectLayoutType.INLINE } }, drawingsOrder: ['note-image'] };
+        const jsonX = JSONX.getInstance();
+        mutate(JSONX.compose(jsonX.replaceOp(['body'], body, referencedBody), jsonX.insertOp(['notes', 'note'], note)));
+        const search = { unitId, subUnitId: unitId, drawingId: 'note-image' };
+        expect(manager.getDrawingByParam(search)?.drawingId).toBe('note-image');
+        expect(docDrawings.getDrawingOrder(unitId, unitId)).toEqual(['a', 'b', 'note-image']);
+        expect(commands.syncExecuteCommand(UpdateDrawingDocTransformCommand.id, {
+            unitId,
+            subUnitId: unitId,
+            drawings: [{ drawingId: 'note-image', key: 'size', value: { width: 70, height: 35 } }],
+        })).toBe(true);
+        expect(manager.getDrawingByParam(search)).toMatchObject({ docTransform: { size: { width: 70, height: 35 } } });
+        expect(model.getDrawings()).not.toHaveProperty('note-image');
+        mutate(jsonX.replaceOp(['body'], model.getBody(), body));
+        expect(model.getSnapshot().notes?.note).toBeUndefined();
+        expect(manager.getDrawingByParam(search)).toBeUndefined();
+        expect(docDrawings.getDrawingByParam(search)).toBeUndefined();
+        expect(manager.getDrawingByParam({ ...search, drawingId: 'a' })).toBeDefined();
     });
 
     it('updates persisted order and keeps behind-text drawings below foreground drawings', () => {

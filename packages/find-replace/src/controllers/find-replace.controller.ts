@@ -28,6 +28,7 @@ import { IDialogService, ILayoutService, IMenuManagerService, IShortcutService }
 import { takeUntil } from 'rxjs';
 import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../commands/commands/replace.command';
 import {
+    CloseFindDialogOperation,
     FocusSelectionOperation,
     GoToNextMatchOperation,
     GoToPreviousMatchOperation,
@@ -80,6 +81,7 @@ export class FindReplaceController extends RxDisposable {
         [
             OpenFindDialogOperation,
             OpenReplaceDialogOperation,
+            CloseFindDialogOperation,
             GoToNextMatchOperation,
             GoToPreviousMatchOperation,
             ReplaceAllMatchesCommand,
@@ -108,6 +110,8 @@ export class FindReplaceController extends RxDisposable {
         this._findReplaceService.stateUpdates$.pipe(takeUntil(this.dispose$)).subscribe((newState) => {
             if (newState.revealed === true) {
                 this._openPanel();
+            } else if (newState.revealed === false) {
+                this._closePanel(false);
             }
         });
     }
@@ -138,6 +142,10 @@ export class FindReplaceController extends RxDisposable {
 
     private _closingListenerDisposable: Nullable<IDisposable>;
     closePanel(): void {
+        this._closePanel(true);
+    }
+
+    private _closePanel(terminateSession: boolean): void {
         if (!this._closingListenerDisposable) {
             return;
         }
@@ -146,7 +154,9 @@ export class FindReplaceController extends RxDisposable {
         this._closingListenerDisposable = null;
 
         this._dialogService.close(FIND_REPLACE_DIALOG_ID);
-        this._findReplaceService.terminate();
+        if (terminateSession) {
+            this._findReplaceService.terminate();
+        }
 
         queueMicrotask(() => this._layoutService.focus());
     }

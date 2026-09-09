@@ -15,7 +15,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { FontCache } from '../font-cache';
+import { FontCache, invalidateDocumentFontMetrics } from '../font-cache';
 
 describe('font cache', () => {
     it('isolates kerning metrics and resets the context for legacy measurements', () => {
@@ -44,6 +44,7 @@ describe('font cache', () => {
     });
 
     beforeEach(() => {
+        invalidateDocumentFontMetrics(() => true);
         (FontCache as any)._globalFontMeasureCache = new Map();
         (FontCache as any)._fontDataMap = new Map();
         (FontCache as any)._getTextHeightCache = {};
@@ -51,7 +52,103 @@ describe('font cache', () => {
     });
 
     afterEach(() => {
+        invalidateDocumentFontMetrics(() => true);
         vi.unstubAllGlobals();
+        vi.restoreAllMocks();
+    });
+
+    it('remeasures glyph widths and DOM fallback heights after font metrics are invalidated', () => {
+        let width = 12;
+        let height = 20;
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+            font: '',
+            textBaseline: 'alphabetic',
+            measureText: () => ({
+                width,
+                actualBoundingBoxAscent: height,
+                actualBoundingBoxDescent: 0,
+            }),
+        } as unknown as CanvasRenderingContext2D);
+        vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(() => ({
+            left: 0,
+            top: 0,
+            right: width,
+            bottom: height,
+            x: 0,
+            y: 0,
+            width,
+            height,
+            toJSON: () => ({}),
+        }));
+        const first = FontCache.getMeasureText('Agent', '14px FontChange');
+        const unrelated = FontCache.getMeasureText('Agent', '14px Unrelated');
+        const unrelatedHeight = FontCache.getTextSizeByDom('Agent', '14px Unrelated');
+        const domOnly = FontCache.getTextSizeByDom('Agent', '14px DOMOnly');
+        expect(first).toMatchObject({ width: 12, fontBoundingBoxAscent: 20 });
+        width = 24;
+        height = 40;
+        expect(FontCache.getMeasureText('Agent', '14px FontChange')).toBe(first);
+        expect(FontCache.getTextSizeByDom('Agent', '14px FontChange').height).toBe(20);
+
+        expect(invalidateDocumentFontMetrics((font) => font === '14px FontChange')).toBe(true);
+        const next = FontCache.getMeasureText('Agent', '14px FontChange');
+        expect(next).toMatchObject({ width: 24, fontBoundingBoxAscent: 40 });
+        expect(next).not.toBe(first);
+        expect(FontCache.getTextSizeByDom('Agent', '14px FontChange').height).toBe(40);
+        expect(FontCache.getMeasureText('Agent', '14px Unrelated')).toBe(unrelated);
+        expect(FontCache.getTextSizeByDom('Agent', '14px Unrelated')).toBe(unrelatedHeight);
+        expect(invalidateDocumentFontMetrics((font) => font === '14px DOMOnly')).toBe(true);
+        expect(FontCache.getTextSizeByDom('Agent', '14px DOMOnly')).not.toBe(domOnly);
+        expect(FontCache.getTextSizeByDom('Agent', '14px DOMOnly').height).toBe(40);
+        expect(invalidateDocumentFontMetrics(() => false)).toBe(false);
+        expect(invalidateDocumentFontMetrics((font) => font === '14px FontChange')).toBe(true);
+        expect(invalidateDocumentFontMetrics((font) => font === '14px FontChange')).toBe(false);
+        expect(FontCache.getMeasureText('Agent', '14px FontChange')).toEqual(next);
+    });
+
+    it('preserves fractional normal spacing across font sizes and transfers it to a DOM-free Worker', () => {
+        let normalHeight = 3066;
+        const measureRect = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(() => ({
+            height: normalHeight,
+        } as DOMRect));
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+            font: '',
+            measureText: () => ({
+                width: 8,
+                fontBoundingBoxAscent: 14,
+                fontBoundingBoxDescent: 3,
+                actualBoundingBoxAscent: 11,
+                actualBoundingBoxDescent: 2,
+            }),
+        } as unknown as CanvasRenderingContext2D);
+        const style = {
+            fontString: '12pt FixtureFont',
+            fontCache: '12pt FixtureFont',
+            fontFamily: 'FixtureFont',
+            fontSize: 12,
+            originFontSize: 12,
+        };
+        const originalChildCount = document.body.childElementCount;
+        const main = FontCache.getTextSize('A', style, true);
+        expect(main.normalLineHeight).toBeCloseTo(18.396);
+        expect(FontCache.getTextSize('A', style).normalLineHeight).toBe(17);
+        expect(FontCache.getNormalLineHeight({ ...style, originFontSize: 10 })).toBeCloseTo(15.33);
+        expect(measureRect).toHaveBeenCalledTimes(1);
+        expect(document.body.childElementCount).toBe(originalChildCount);
+
+        const transferred = FontCache.getNormalLineHeightCache();
+        // Superscript keeps the paragraph's original font size for normal spacing.
+        expect(FontCache.getNormalLineHeight({ ...style, fontSize: 7.2, fontString: '7.2pt FixtureFont' }))
+            .toBeCloseTo(main.normalLineHeight!);
+        invalidateDocumentFontMetrics((font) => font === style.fontString);
+        normalHeight = 3200;
+        expect(FontCache.getTextSize('A', style, true).normalLineHeight).toBeCloseTo(19.2);
+
+        vi.stubGlobal('document', undefined);
+        invalidateDocumentFontMetrics(() => true);
+        FontCache.setNormalLineHeightCache(transferred);
+        expect(FontCache.getTextSize('A', style, true)).toEqual(main);
+        expect(measureRect).toHaveBeenCalledTimes(2);
     });
 
     it.each(['auto', 'normal', 'none'] as const)('measures text without a DOM or native kerning support in %s mode', (kerning) => {
@@ -219,6 +316,7 @@ describe('font cache', () => {
             }],
         ]);
 
+        invalidateDocumentFontMetrics((font) => font === '12px Local Font');
         const byFont = FontCache.getTextSize('A', {
             fontString: '12px Local Font',
             fontSize: 12,

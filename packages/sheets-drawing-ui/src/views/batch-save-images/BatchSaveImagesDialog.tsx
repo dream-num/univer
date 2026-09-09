@@ -24,7 +24,11 @@ import { useCallback, useMemo, useState } from 'react';
 import { FileNamePart, IBatchSaveImagesService } from '../../services/batch-save-images.service';
 import { BATCH_SAVE_IMAGES_DIALOG_ID } from './component-name';
 
-export function BatchSaveImagesDialog() {
+export interface IBatchSaveImagesDialogProps {
+    SelectComponent?: typeof Select;
+}
+
+export function BatchSaveImagesDialog({ SelectComponent = Select }: IBatchSaveImagesDialogProps = {}) {
     const localeService = useDependency(LocaleService);
     const dialogService = useDependency(IDialogService);
     const batchSaveService = useDependency(IBatchSaveImagesService);
@@ -132,7 +136,7 @@ export function BatchSaveImagesDialog() {
 
             {showColumnSelect && (
                 <FormLayout label={localeService.t<LocaleKey>('sheets-drawing-ui.save.selectColumn')}>
-                    <Select
+                    <SelectComponent
                         value={selectedColumn}
                         options={columnOptions}
                         onChange={handleColumnChange}

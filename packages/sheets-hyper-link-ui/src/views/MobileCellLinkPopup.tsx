@@ -14,47 +14,165 @@
  * limitations under the License.
  */
 
-import { MobileActionRow } from '@univerjs/design';
+import type { ICustomRange, Nullable, Workbook } from '@univerjs/core';
+import type { LocaleKey } from '../locale/types';
+import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { MessageType, MobileActionRow } from '@univerjs/design';
+import {
+    CancelHyperLinkCommand,
+    CancelRichHyperLinkCommand,
+    SheetHyperLinkType,
+    SheetsHyperLinkParserService,
+} from '@univerjs/sheets-hyper-link';
+import { IEditorBridgeService } from '@univerjs/sheets-ui';
+import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
+import { OpenHyperLinkEditPanelOperation } from '../commands/operations/popup.operations';
+import { SheetsHyperLinkPopupService } from '../services/popup.service';
+import { SheetsHyperLinkResolverService } from '../services/resolver.service';
+import { HyperLinkEditSourceType } from '../types/enums/edit-source';
 
-interface IMobileCellLinkPopupProps {
-    name: string;
-    copyText: string;
-    editText: string;
-    removeText: string;
-    invalid: boolean;
-    copyPermission: boolean;
-    editPermission: boolean;
-    onNavigate: () => void;
-    onCopy: () => void;
-    onEdit: () => void;
-    onRemove: () => void;
+interface IMobileCellLinkPopupPureProps {
+    customRange?: Nullable<ICustomRange>;
+    row: number;
+    col: number;
+    unitId: string;
+    subUnitId: string;
+    editPermission?: boolean;
+    copyPermission?: boolean;
+    type: HyperLinkEditSourceType;
 }
 
-export function MobileCellLinkPopup(props: IMobileCellLinkPopupProps) {
+export function MobileCellLinkPopupPure(props: IMobileCellLinkPopupPureProps) {
+    const popupService = useDependency(SheetsHyperLinkPopupService);
+    const commandService = useDependency(ICommandService);
+    const messageService = useDependency(IMessageService);
+    const localeService = useDependency(LocaleService);
+    const resolverService = useDependency(SheetsHyperLinkResolverService);
+    const editorBridgeService = useDependency(IEditorBridgeService);
+    const parserHyperLinkService = useDependency(SheetsHyperLinkParserService);
+    const { customRange, row, col, unitId, subUnitId, editPermission, copyPermission, type } = props;
+
+    if (!customRange?.properties?.url) {
+        return null;
+    }
+
+    const linkObj = parserHyperLinkService.parseHyperLink(customRange.properties.url);
+    const isError = linkObj.type === SheetHyperLinkType.INVALID;
+    const close = () => popupService.hideCurrentPopup(undefined, true);
+
     return (
         <div className="univer-flex univer-flex-col univer-gap-2">
             <MobileActionRow
-                title={<span className="univer-truncate">{props.name}</span>}
-                aria-label={props.name}
+                title={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.open')}
+                value={linkObj.name}
+                valueType="text"
+                aria-label={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.open')}
                 variant="subtle"
-                disabled={props.invalid}
-                onClick={props.onNavigate}
+                disabled={isError}
+                onClick={() => {
+                    resolverService.navigate(linkObj);
+                    close();
+                }}
             />
-            {props.copyPermission && (
+            {copyPermission && (
                 <MobileActionRow
-                    title={props.copyText}
-                    aria-label={props.copyText}
+                    title={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.copy')}
+                    aria-label={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.copy')}
                     variant="subtle"
-                    disabled={props.invalid}
-                    onClick={props.onCopy}
+                    disabled={isError}
+                    onClick={() => {
+                        let url = linkObj.url;
+                        if (linkObj.type !== SheetHyperLinkType.URL) {
+                            const currentUrl = new URL(window.location.href);
+                            currentUrl.hash = linkObj.url.slice(1);
+                            url = currentUrl.href;
+                        }
+
+                        return navigator.clipboard.writeText(url).then(() => {
+                            messageService.show({
+                                content: localeService.t<LocaleKey>('sheets-hyper-link-ui.message.coped'),
+                                type: MessageType.Info,
+                            });
+                            close();
+                        });
+                    }}
                 />
             )}
-            {props.editPermission && (
+            {editPermission && (
                 <>
-                    <MobileActionRow title={props.editText} aria-label={props.editText} variant="subtle" onClick={props.onEdit} />
-                    <MobileActionRow title={props.removeText} aria-label={props.removeText} variant="subtle" onClick={props.onRemove} />
+                    <MobileActionRow
+                        title={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.edit')}
+                        aria-label={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.edit')}
+                        variant="subtle"
+                        onClick={() => {
+                            close();
+                            return commandService.executeCommand(OpenHyperLinkEditPanelOperation.id, {
+                                unitId,
+                                subUnitId,
+                                row,
+                                col,
+                                customRangeId: customRange.rangeId,
+                                type,
+                            });
+                        }}
+                    />
+                    <MobileActionRow
+                        title={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.cancel')}
+                        aria-label={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.cancel')}
+                        variant="subtle"
+                        onClick={() => {
+                            const commandId = type === HyperLinkEditSourceType.EDITING
+                                ? CancelRichHyperLinkCommand.id
+                                : CancelHyperLinkCommand.id;
+                            if (commandService.syncExecuteCommand(commandId, {
+                                unitId,
+                                subUnitId,
+                                id: customRange.rangeId,
+                                row,
+                                column: col,
+                                documentId: editorBridgeService.getCurrentEditorId(),
+                            })) {
+                                close();
+                            }
+                        }}
+                    />
                 </>
             )}
         </div>
     );
 }
+
+export function MobileCellLinkPopup() {
+    const popupService = useDependency(SheetsHyperLinkPopupService);
+    const currentPopup = useObservable(popupService.currentPopup$, popupService.currentPopup);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+
+    if (!currentPopup) {
+        return null;
+    }
+
+    if (currentPopup.showAll) {
+        const workbook = univerInstanceService.getUnit<Workbook>(currentPopup.unitId, UniverInstanceType.UNIVER_SHEET);
+        const worksheet = workbook?.getSheetBySheetId(currentPopup.subUnitId);
+        const cell = worksheet?.getCell(currentPopup.row, currentPopup.col);
+        const customRanges = cell?.p?.body?.customRanges;
+
+        return customRanges?.length
+            ? (
+                <div>
+                    {customRanges.map((customRange) => (
+                        <MobileCellLinkPopupPure
+                            key={customRange.rangeId}
+                            {...currentPopup}
+                            customRange={customRange}
+                        />
+                    ))}
+                </div>
+            )
+            : null;
+    }
+
+    return <MobileCellLinkPopupPure {...currentPopup} />;
+}
+
+MobileCellLinkPopup.componentKey = 'univer.sheet.mobile-cell-link-popup';

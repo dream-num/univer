@@ -18,14 +18,24 @@ import type { IDocumentData } from '@univerjs/core';
 import type { CSSProperties, ReactNode, RefObject } from 'react';
 import type { Editor, IEditorCanvasStyle } from '../services/editor/editor';
 import type { IKeyboardEventConfig } from './rich-text-editor/hooks';
-import { BuildTextUtils, createInternalEditorID, generateRandomId, getPlainText, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import {
+    BuildTextUtils,
+    createInternalEditorID,
+    generateRandomId,
+    getPlainText,
+    HorizontalAlign,
+    ICommandService,
+    IUniverInstanceService,
+    LocaleService,
+    RichTextBuilder,
+    Tools,
+} from '@univerjs/core';
 import { borderClassName, clsx } from '@univerjs/design';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { map, merge, startWith } from 'rxjs';
-import { IEditorService } from '../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
 import { createEditorUndoRedoKeyboardConfig, useEditorClickOutside, useIsFocusing, useKeyboardEvent, useResize } from './rich-text-editor/hooks';
 import { useEditor } from './rich-text-editor/hooks/use-editor';
@@ -79,9 +89,10 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         noStyle,
         canvasStyle,
     } = props;
-    const editorService = useDependency(IEditorService);
+
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const localeService = useDependency(LocaleService);
     const onFocusChange = useEvent(_onFocusChange);
     const onClickOutside = useEvent(_onClickOutside);
     const [height, setHeight] = useState(defaultHeight);
@@ -96,6 +107,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         isSingle,
         canvasStyle,
     });
+    const direction = useObservable(localeService.direction$, localeService.getDirection());
     const renderManagerService = useDependency(IRenderManagerService);
     const renderer = renderManagerService.getRenderUnitById(editorId);
     const selectionIsFocusing = useIsFocusing(editorId);
@@ -146,6 +158,18 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         _onChange?.(data, getPlainText(data.body?.dataStream ?? ''));
         checkScrollBar();
     });
+
+    useEffect(() => {
+        if (!editor) {
+            return;
+        }
+
+        const documentData = RichTextBuilder.create(Tools.deepClone(editor.getDocumentData()))
+            .align({ horizontal: direction === 'rtl' ? HorizontalAlign.RIGHT : HorizontalAlign.LEFT })
+            .getData();
+
+        editor.setDocumentData(documentData, editor.getSelectionRanges());
+    }, [direction, editor]);
 
     useEffect(() => {
         const data = editor?.getDocumentData();

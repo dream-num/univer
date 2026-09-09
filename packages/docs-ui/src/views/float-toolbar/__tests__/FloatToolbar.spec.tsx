@@ -40,7 +40,7 @@ import {
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
     SetInlineFormatBoldCommand,
     SetInlineFormatTextBackgroundColorCommand,
@@ -183,7 +183,7 @@ function createToolbarTestBed() {
     };
 }
 
-function renderToolbar(injector: Injector, avaliableMenus: string[]) {
+function renderToolbar(injector: Injector, avaliableMenus: string[], onDismiss?: () => void) {
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = createRoot(container);
@@ -191,7 +191,7 @@ function renderToolbar(injector: Injector, avaliableMenus: string[]) {
     act(() => {
         root.render(
             <RediContext.Provider value={{ injector }}>
-                <FloatToolbar avaliableMenus={avaliableMenus} />
+                <FloatToolbar avaliableMenus={avaliableMenus} popup={{ extraProps: { onDismiss } }} />
             </RediContext.Provider>
         );
     });
@@ -222,6 +222,45 @@ describe('FloatToolbar', () => {
         container?.remove();
         root = undefined;
         container = undefined;
+    });
+
+    it('fades outside the safe area and dismisses only once without prior hover', () => {
+        const testBed = createToolbarTestBed();
+        const onDismiss = vi.fn();
+        ({ root, container } = renderToolbar(testBed.injector, [], onDismiss));
+        const toolbar = container.querySelector<HTMLElement>('[data-doc-float-toolbar]')!;
+        vi.spyOn(toolbar, 'getBoundingClientRect').mockReturnValue({ left: 100, right: 300, top: 100, bottom: 160 } as DOMRect);
+        const move = (y: number) => act(() => document.dispatchEvent(new PointerEvent('pointermove', { clientX: 200, clientY: y })));
+
+        move(170);
+        expect(toolbar.style.opacity).toBe('1');
+        move(210);
+        expect(toolbar.style.opacity).toBe('0.5');
+        move(170);
+        expect(toolbar.style.opacity).toBe('1');
+        move(250);
+        move(260);
+        expect(onDismiss).toHaveBeenCalledTimes(1);
+        testBed.injector.dispose();
+    });
+
+    it('stays fully visible after hover even when the pointer leaves the menu', () => {
+        const testBed = createToolbarTestBed();
+        const onDismiss = vi.fn();
+        ({ root, container } = renderToolbar(testBed.injector, [], onDismiss));
+        const toolbar = container.querySelector<HTMLElement>('[data-doc-float-toolbar]')!;
+        vi.spyOn(toolbar, 'getBoundingClientRect').mockReturnValue({ left: 100, right: 300, top: 100, bottom: 160 } as DOMRect);
+        act(() => document.dispatchEvent(new PointerEvent('pointermove', { clientX: 200, clientY: 210 })));
+        expect(toolbar.style.opacity).toBe('0.5');
+        act(() => toolbar.dispatchEvent(new PointerEvent('pointerover', { bubbles: true })));
+        act(() => document.dispatchEvent(new PointerEvent('pointermove', { clientX: 800, clientY: 800 })));
+        expect(toolbar.style.opacity).toBe('1');
+        expect(onDismiss).not.toHaveBeenCalled();
+        act(() => root!.unmount());
+        root = undefined;
+        act(() => document.dispatchEvent(new PointerEvent('pointermove', { clientX: 1000, clientY: 1000 })));
+        expect(onDismiss).not.toHaveBeenCalled();
+        testBed.injector.dispose();
     });
 
     it('keeps whitelisted toolbar menus ordered and separates direct extension menus', () => {

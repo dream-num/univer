@@ -26,7 +26,9 @@ import {
     Disposable,
     DOC_RANGE_TYPE,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    DocumentFlavor,
     DrawingTypeEnum,
+    ErrorService,
     generateRandomId,
     getBodySlice,
     ICommandService,
@@ -76,6 +78,7 @@ import {
     DOC_INTERNAL_FRAGMENT_MIME,
     embedInternalClipboardFragment,
     extractInternalClipboardFragmentFromHtml,
+    omitClipboardNotes,
     parseInternalClipboardFragment,
     wrapClipboardHtml,
 } from './internal-fragment';
@@ -259,6 +262,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         @ICommandService private readonly _commandService: ICommandService,
         @IPermissionService private readonly _permissionService: IPermissionService,
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
+        @Inject(ErrorService) private readonly _errorService: ErrorService,
         @Inject(DocHtmlExportService) docHtmlExportService: DocHtmlExportService,
         @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService
     ) {
@@ -389,7 +393,11 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             getDocumentEditTargetObjectIds(document, range.segmentId ?? '', range)
                 .forEach((objectId) => objectIds.add(objectId));
         });
-        return canEditDocumentTargets(this._permissionService, document.getUnitId(), objectIds);
+        const canEdit = canEditDocumentTargets(this._permissionService, document.getUnitId(), objectIds);
+        if (!canEdit) {
+            this._errorService.emitPermissionDenied(document.getUnitId(), objectIds);
+        }
+        return canEdit;
     }
 
     private async _cut(ranges?: ITextRangeWithStyle[]): Promise<boolean> {
@@ -471,6 +479,10 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         const currentDocument = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (!currentDocument || (expectedUnitId && currentDocument.getUnitId() !== expectedUnitId)) {
             return false;
+        }
+
+        if (currentDocument.getDocumentStyle().documentFlavor !== DocumentFlavor.TRADITIONAL) {
+            body = omitClipboardNotes(body);
         }
 
         this._clipboardHooks.forEach((hook) => {

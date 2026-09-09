@@ -163,6 +163,7 @@ export interface IFindReplaceService {
     focusFindInput(): void;
 
     revealReplace(): void;
+    hideReplace(): void;
     changeFindString(value: string): void;
     changeInputtingFindString(value: string): void;
     changeReplaceString(value: string): void;
@@ -875,6 +876,14 @@ export class FindReplaceService extends Disposable implements IFindReplaceServic
     revealReplace(): void {
         this._state.changeState({ replaceRevealed: true, inputtingFindString: this._state.findString });
         this._toggleRevealReplace(true);
+    }
+
+    hideReplace(): void {
+        this._state.changeState({
+            replaceRevealed: false,
+            findString: this._state.inputtingFindString,
+        });
+        this._toggleRevealReplace(false);
     }
 
     focusSelection(): void {

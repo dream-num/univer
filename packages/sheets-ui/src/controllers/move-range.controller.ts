@@ -24,8 +24,8 @@ import {
     Inject,
     toDisposable,
 } from '@univerjs/core';
-
-import { MoveRangeCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { SheetsSelectionsService } from '@univerjs/sheets';
+import { MoveRangeConfirmCommand } from '../commands/commands/move-range-confirm.command';
 import { ISheetSelectionRenderService } from '../services/selection/base-selection-render.service';
 
 export class MoveRangeRenderController extends Disposable implements IRenderModule {
@@ -57,7 +57,7 @@ export class MoveRangeRenderController extends Disposable implements IRenderModu
                 selectionControls.forEach((controlSelection) => {
                     disposableCollection.add(
                         toDisposable(
-                            controlSelection.selectionMoveEnd$.subscribe((_toRange) => {
+                            controlSelection.selectionMoveEnd$.subscribe(async (_toRange) => {
                                 if (!_toRange) {
                                     return;
                                 }
@@ -93,7 +93,7 @@ export class MoveRangeRenderController extends Disposable implements IRenderModu
                                     fromRange,
                                     toRange,
                                 };
-                                this._commandService.executeCommand(MoveRangeCommand.id, params);
+                                await this._commandService.executeCommand(MoveRangeConfirmCommand.id, params);
                             })
                         )
                     );

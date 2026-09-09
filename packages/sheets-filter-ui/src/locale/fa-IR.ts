@@ -33,6 +33,13 @@ const locale: typeof enUS = {
             'clear-filter': 'پاک کردن فیلتر',
             cancel: 'انصراف',
             confirm: 'تایید',
+            mobile: {
+                resize: 'تغییر اندازه پنل فیلتر',
+                back: 'بازگشت',
+                column: 'ستون {0}',
+                'previous-column': 'ستون قبلی',
+                'next-column': 'ستون بعدی',
+            },
             'by-values': 'بر اساس مقادیر',
             'by-colors': 'بر اساس رنگ‌ها',
             'filter-by-cell-fill-color': 'فیلتر بر اساس رنگ پر کردن سلول',

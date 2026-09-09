@@ -15,7 +15,17 @@
  */
 
 import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
-import { ICommandService, Inject, Injector, LocaleService, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import {
+    ICommandService,
+    Inject,
+    Injector,
+    LocaleService,
+    LocaleType,
+    Plugin,
+    ThemeColorType,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
 import {
     SetSheetTableFilterCommand,
@@ -55,11 +65,11 @@ function createWorkbookData(): IWorkbookData {
                     },
                     1: {
                         0: { v: 'book' },
-                        1: { v: 12 },
+                        1: { v: 12, s: { bg: { rgb: '#ff0000' } } },
                     },
                     2: {
                         0: { v: 'pen' },
-                        1: { v: 3 },
+                        1: { v: 3, s: { bg: { rgb: '#0000ff' } } },
                     },
                     3: {
                         1: { v: 8 },
@@ -163,6 +173,70 @@ describe('SheetsTableUiService', () => {
         const service = testBed.get(SheetsTableUiService);
 
         expect(service.getTableFilterCheckedItems(testBed.workbook.getUnitId(), 'table-orders', 0)).toEqual(['book', '(Empty)']);
+    });
+
+    it('builds color filter state and candidates after applying other table filters', async () => {
+        testBed = createTestBed();
+        const service = testBed.get(SheetsTableUiService);
+        await testBed.get(ICommandService).executeCommand(SetRangeValuesMutation.id, {
+            unitId: testBed.workbook.getUnitId(),
+            subUnitId: 'sheet1',
+            cellValue: {
+                1: {
+                    1: { v: 12, s: { bg: { rgb: '#ff0000' }, cl: { rgb: null } } },
+                },
+            },
+        });
+        const table = testBed.get(TableManager).getTable(testBed.workbook.getUnitId(), 'table-orders')!;
+        table.setTableFilterColumn(1, {
+            filterType: TableColumnFilterTypeEnum.color,
+            cellFillColors: ['rgb(255, 0, 0)'],
+        });
+
+        expect(service.getTableFilterPanelInitProps(
+            testBed.workbook.getUnitId(),
+            'sheet1',
+            'table-orders',
+            1
+        ).currentFilterBy).toBe(FilterByEnum.Color);
+        expect(service.getTableFilterColors(
+            testBed.workbook.getUnitId(),
+            'sheet1',
+            'table-orders',
+            1
+        )).toEqual({
+            cellFillColors: [
+                { color: 'rgb(255,0,0)', checked: true },
+                { color: null, checked: false },
+            ],
+            cellTextColors: [
+                { color: 'rgb(0,0,0)', checked: false },
+            ],
+        });
+    });
+
+    it('includes theme colors in table filter candidates', async () => {
+        testBed = createTestBed();
+        const commandService = testBed.get(ICommandService);
+        await commandService.executeCommand(SetRangeValuesMutation.id, {
+            unitId: testBed.workbook.getUnitId(),
+            subUnitId: 'sheet1',
+            cellValue: {
+                1: {
+                    1: { v: 12, s: { bg: { th: ThemeColorType.ACCENT1 } } },
+                },
+            },
+        });
+
+        expect(testBed.get(SheetsTableUiService).getTableFilterColors(
+            testBed.workbook.getUnitId(),
+            'sheet1',
+            'table-orders',
+            1
+        ).cellFillColors).toEqual([
+            { color: 'rgb(68,114,196)', checked: false },
+            { color: null, checked: false },
+        ]);
     });
 
     it('builds candidate values after applying filters from other table columns', () => {

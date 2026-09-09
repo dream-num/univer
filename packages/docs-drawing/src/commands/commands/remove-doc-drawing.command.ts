@@ -32,6 +32,7 @@ import {
 } from '@univerjs/core';
 import { DocHistoryAction, DocSelectionManagerService, getContentInsertRange, normalizeTextRange, RichTextEditingMutation } from '@univerjs/docs';
 import { IDocDrawingAdapterService } from '../../services/doc-drawing-adapter.service';
+import { findDocDrawing } from '../../services/doc-drawing-source';
 
 export interface IRemoveDocDrawingCommandParam {
     unitId: string;
@@ -49,7 +50,6 @@ export interface IRemoveDocDrawingCommandParams {
 export const RemoveDocDrawingCommand: ICommand = {
     id: 'doc.command.remove-doc-image',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function
     handler: (accessor: IAccessor, params?: IRemoveDocDrawingCommandParams) => {
         if (!params) {
             return false;
@@ -70,7 +70,15 @@ export const RemoveDocDrawingCommand: ICommand = {
         const activeTextRange = docSelectionManagerService.getActiveTextRange();
         const explicitTextRange = !textRange ? null : normalizeTextRange(textRange);
         const contentInsertRange = explicitTextRange ?? getContentInsertRange(accessor, unitId);
-        const segmentId = contentInsertRange?.segmentId ?? activeTextRange?.segmentId ?? '';
+        const snapshot = documentDataModel.getSnapshot();
+        const noteSegments = removeDrawings.map(({ drawingId }) => findDocDrawing(snapshot, drawingId)?.segmentId ?? '');
+        if (noteSegments.some((id) => id !== noteSegments[0])) {
+            return false;
+        }
+        const segmentId = noteSegments[0] || (contentInsertRange?.segmentId ?? activeTextRange?.segmentId ?? '');
+        const footnote = snapshot.notes?.[segmentId];
+        const source = footnote ?? snapshot;
+        const prefix = footnote ? ['notes', segmentId] : [];
 
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
@@ -84,7 +92,7 @@ export const RemoveDocDrawingCommand: ICommand = {
             return false;
         }
 
-        const drawings = documentDataModel.getDrawings() ?? {};
+        const drawings = source.drawings ?? {};
         const removeDrawingParamById = new Map(removeDrawings.map((drawing) => [drawing.drawingId, drawing]));
         const removeDrawingSnapshots = removeCustomBlocks
             .map((block) => drawings[block!.blockId] as IDocDrawing | undefined)
@@ -140,7 +148,7 @@ export const RemoveDocDrawingCommand: ICommand = {
         const historyActions = getHistoryActions(removeDrawings);
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
-            params: { unitId, actions: [], textRanges, historyActions },
+            params: { unitId, segmentId, actions: [], textRanges, historyActions },
         };
         const rawActions: JSONXActions = [];
 
@@ -155,11 +163,19 @@ export const RemoveDocDrawingCommand: ICommand = {
 
         rawActions.push(jsonX.editOp(textX.serialize(), getRichTextEditPath(documentDataModel, segmentId))!);
 
-        for (const block of removeCustomBlocks) {
+        const drawingOrder = source.drawingsOrder ?? [];
+        const resourceBlocks = [...removeCustomBlocks].sort((left, right) =>
+            drawingOrder.indexOf(right!.blockId) - drawingOrder.indexOf(left!.blockId)
+        );
+        for (const block of resourceBlocks) {
             const { blockId } = block!;
-            const drawingIndex = documentDataModel.getDrawingsOrder()!.indexOf(blockId);
-            rawActions.push(jsonX.removeOp(['drawings', blockId], drawings[blockId])!);
-            rawActions.push(jsonX.removeOp(['drawingsOrder', drawingIndex], blockId)!);
+            const drawingIndex = drawingOrder.indexOf(blockId);
+            if (drawings[blockId]) {
+                rawActions.push(jsonX.removeOp([...prefix, 'drawings', blockId], drawings[blockId])!);
+            }
+            if (drawingIndex >= 0) {
+                rawActions.push(jsonX.removeOp([...prefix, 'drawingsOrder', drawingIndex], blockId)!);
+            }
         }
 
         doMutation.params.actions = rawActions.reduce((acc, cur) => JSONX.compose(acc, cur as JSONXActions), null as JSONXActions);

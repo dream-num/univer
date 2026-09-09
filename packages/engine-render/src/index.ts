@@ -72,6 +72,7 @@ export type {
     IDocumentLayoutProtectedPageRange,
     IDocumentLayoutProtectedRange,
 } from './components/docs/layout/document-layout-types';
+export { invalidateDocumentFontMetrics } from './components/docs/layout/shaping-engine/font-cache';
 export {
     compareDocumentSkeletonNestedPagePathOrder,
     documentSkeletonLineIterator,

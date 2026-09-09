@@ -47,6 +47,8 @@ const locale: typeof enUS = {
             coped: 'Link in Zwischenablage kopiert',
         },
         popup: {
+            title: 'Hyperlink',
+            open: 'Link öffnen',
             copy: 'Link kopieren',
             edit: 'Link bearbeiten',
             cancel: 'Link aufheben',

@@ -21,6 +21,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createTestBed } from '../../../__tests__/create-test-bed';
 import { FindReplaceService, IFindReplaceService } from '../../../services/find-replace.service';
 import {
+    CloseFindDialogOperation,
     FocusSelectionOperation,
     GoToNextMatchOperation,
     GoToPreviousMatchOperation,
@@ -55,6 +56,7 @@ describe('find-replace.operation', () => {
 
         const commandService = get(ICommandService);
         [
+            CloseFindDialogOperation,
             OpenFindDialogOperation,
             OpenReplaceDialogOperation,
             GoToNextMatchOperation,
@@ -124,5 +126,17 @@ describe('find-replace.operation', () => {
         expect(nextSpy).toHaveBeenCalledTimes(1);
         expect(previousSpy).toHaveBeenCalledTimes(1);
         expect(focusSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should terminate the current session when closing the find UI', () => {
+        const commandService = get(ICommandService);
+        const service = get(IFindReplaceService);
+        service.registerFindReplaceProvider(createProvider());
+        service.start();
+        const terminateSpy = vi.spyOn(service, 'terminate');
+
+        expect(commandService.syncExecuteCommand(CloseFindDialogOperation.id)).toBe(true);
+        expect(terminateSpy).toHaveBeenCalledTimes(1);
+        expect(service.revealed).toBe(false);
     });
 });

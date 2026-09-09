@@ -15,12 +15,13 @@
  */
 
 import type { ComponentProps } from 'react';
+import type { LocaleKey } from '../../../locale/types';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import type { MobileDrawerSnap } from '../../components/mobile-drawer/MobileDrawer';
 import { LocaleService } from '@univerjs/core';
 import { clsx, ConfigContext, resetButtonClassName } from '@univerjs/design';
 import { CloseIcon, MoreLeftIcon } from '@univerjs/icons';
-import { useContext, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { useDependency, useObservable } from '../../../utils/di';
@@ -53,16 +54,21 @@ function MobileMenuDrawerContent(props: IMobileMenuDrawerProps) {
     const rootMenuManagerService = useDependency(IMenuManagerService);
     const direction = useObservable(localeService.direction$);
     const { mountContainer } = useContext(ConfigContext);
+    const layerRef = useRef<HTMLDivElement>(null);
 
     if (!mountContainer) {
         return null;
     }
 
     return createPortal(
-        <div dir={direction} className="univer-fixed univer-inset-0 univer-z-[1080] univer-flex univer-items-end">
+        <div
+            ref={layerRef}
+            dir={direction}
+            className="univer-fixed univer-inset-0 univer-z-[1080] univer-flex univer-items-end"
+        >
             <button
                 type="button"
-                aria-label={localeService.t('ui.rangeSelector.cancel')}
+                aria-label={localeService.t<LocaleKey>('ui.rangeSelector.cancel')}
                 className={clsx(resetButtonClassName, `
                   !univer-absolute !univer-inset-0 !univer-m-0 !univer-block !univer-appearance-none
                   !univer-rounded-none !univer-border-0 !univer-bg-black/35 !univer-p-0 univer-backdrop-blur-[2px]
@@ -70,10 +76,11 @@ function MobileMenuDrawerContent(props: IMobileMenuDrawerProps) {
                 onClick={onClose}
             />
             <MobileDrawer
+                layerRef={layerRef}
                 componentName="mobile-menu-drawer"
                 snap={drawerSnap}
-                expandLabel={localeService.t('ui.ribbon.more')}
-                collapseLabel={localeService.t('ui.ribbon.more')}
+                expandLabel={localeService.t<LocaleKey>('ui.ribbon.more')}
+                collapseLabel={localeService.t<LocaleKey>('ui.ribbon.more')}
                 onSnapChange={setDrawerSnap}
                 onClose={onClose}
                 role="dialog"
@@ -90,7 +97,7 @@ function MobileMenuDrawerContent(props: IMobileMenuDrawerProps) {
                             ? (
                                 <button
                                     type="button"
-                                    aria-label={localeService.t('ui.navigation.back')}
+                                    aria-label={localeService.t<LocaleKey>('ui.navigation.back')}
                                     className={clsx(resetButtonClassName, `
                                       univer-size-10 univer-rounded-xl univer-text-gray-700
                                       active:univer-bg-gray-200
@@ -114,7 +121,7 @@ function MobileMenuDrawerContent(props: IMobileMenuDrawerProps) {
                         </div>
                         <button
                             type="button"
-                            aria-label={localeService.t('ui.rangeSelector.cancel')}
+                            aria-label={localeService.t<LocaleKey>('ui.rangeSelector.cancel')}
                             className={clsx(resetButtonClassName, `
                               univer-size-10 univer-rounded-xl univer-text-gray-700
                               active:univer-bg-gray-200

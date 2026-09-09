@@ -15,24 +15,22 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { shouldHandleMobileNormalSelectionPointerDown, shouldKeepCurrentSelectionOnMobileTap } from '../mobile-selection-render.service';
+import {
+    shouldHandleMobileNormalSelectionPointerDown,
+    shouldHandleMobileNormalSelectionPointerUp,
+} from '../mobile-selection-render.service';
 
 describe('MobileSheetsSelectionRenderService', () => {
-    it('keeps the current mobile selection when a tap stays inside an existing range', () => {
-        expect(shouldKeepCurrentSelectionOnMobileTap(
-            [{ startRow: 1, endRow: 3, startColumn: 1, endColumn: 3 }],
-            { startRow: 2, endRow: 2, startColumn: 2, endColumn: 2 }
-        )).toBe(true);
-
-        expect(shouldKeepCurrentSelectionOnMobileTap(
-            [{ startRow: 1, endRow: 3, startColumn: 1, endColumn: 3 }],
-            { startRow: 4, endRow: 4, startColumn: 2, endColumn: 2 }
-        )).toBe(false);
-    });
-
     it('lets the formula reference renderer own pointer down while reference selection is enabled', () => {
         expect(shouldHandleMobileNormalSelectionPointerDown(true, false)).toBe(false);
         expect(shouldHandleMobileNormalSelectionPointerDown(false, true)).toBe(false);
         expect(shouldHandleMobileNormalSelectionPointerDown(false, false)).toBe(true);
+    });
+
+    it('does not finish a tap selection after a long press consumed the gesture', () => {
+        expect(shouldHandleMobileNormalSelectionPointerUp(false, false, true)).toBe(false);
+        expect(shouldHandleMobileNormalSelectionPointerUp(true, false, false)).toBe(false);
+        expect(shouldHandleMobileNormalSelectionPointerUp(false, true, false)).toBe(false);
+        expect(shouldHandleMobileNormalSelectionPointerUp(false, false, false)).toBe(true);
     });
 });

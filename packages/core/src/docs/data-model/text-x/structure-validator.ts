@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICustomTable, IDocumentBody, IDocumentData } from '../../../types/interfaces/i-document-data';
+import type { ICustomTable, IDocumentBody, IDocumentData, IDocumentNote } from '../../../types/interfaces/i-document-data';
+import { CustomRangeType, PositionedObjectLayoutType, TableTextWrapType } from '../../../types/interfaces/i-document-data';
 import { DataStreamTreeTokenType } from '../types';
 import {
     getBlockRangeInterval,
@@ -24,6 +25,12 @@ import {
 } from './build-utils/range-interval';
 
 export type DocStructureIssueCode =
+    | 'missing-note'
+    | 'invalid-note-reference'
+    | 'nested-note'
+    | 'invalid-note-body'
+    | 'invalid-note-id'
+    | 'duplicate-note-reference'
     | 'missing-root-paragraph'
     | 'missing-root-section-break'
     | 'paragraph-token-mismatch'
@@ -54,7 +61,7 @@ export type DocStructureIssueCode =
 
 export interface IDocStructureIssue {
     code: DocStructureIssueCode;
-    segmentType: 'body' | 'header' | 'footer';
+    segmentType: 'body' | 'header' | 'footer' | 'note';
     segmentId?: string;
     index?: number;
     message: string;
@@ -546,14 +553,61 @@ export function validateDocBodyStructure(
     validateCustomBlockMetadata(body, scan, issues, context);
     validateStructuralContainers(body, issues, context);
 
+    if (context.segmentType === 'header' || context.segmentType === 'footer') {
+        for (const range of body.customRanges ?? []) {
+            if ((range.rangeType === CustomRangeType.FOOTNOTE || range.rangeType === CustomRangeType.ENDNOTE)) {
+                issues.push(createIssue(context, 'invalid-note-reference', 'Note references are only supported in the document body.', range.startIndex));
+            }
+        }
+    }
+
     return issues;
 }
 
-export function validateDocumentStructure(snapshot: Pick<IDocumentData, 'body' | 'headers' | 'footers'>): IDocStructureIssue[] {
+function validateNoteBody(noteId: string, note: IDocumentNote): IDocStructureIssue[] {
+    const context: IValidationContext = { segmentType: 'note', segmentId: noteId };
+    const issues = validateDocBodyStructure(note.body, context);
+    if (note.noteId !== noteId || noteId.length === 0 || !['footnote', 'endnote'].includes(note.type)) {
+        issues.push({ ...context, code: 'invalid-note-id', message: 'Note identity must match its segment key.' });
+    }
+    if (note.body.customRanges?.some((range) => (range.rangeType === CustomRangeType.FOOTNOTE || range.rangeType === CustomRangeType.ENDNOTE))) {
+        issues.push({ ...context, code: 'nested-note', message: 'A note cannot contain another note reference.' });
+    }
+    const rootSections = note.body.sectionBreaks?.filter((section) =>
+        !note.body.tables?.some((table) => section.startIndex >= table.startIndex && section.startIndex < table.endIndex)) ?? [];
+    const hasPageSetup = rootSections.some((section) => Object.keys(section).some((key) => key !== 'sectionId' && key !== 'startIndex'));
+    const hasFloatingDrawings = Object.values(note.drawings ?? {}).some((drawing) => drawing.layoutType !== PositionedObjectLayoutType.INLINE);
+    const hasFloatingTables = Object.values(note.tableSource ?? {}).some((table) => table.textWrap === TableTextWrapType.WRAP);
+    if (rootSections.length > 1 || hasPageSetup || note.body.columnGroups?.length || hasFloatingDrawings || hasFloatingTables) {
+        issues.push({ ...context, code: 'invalid-note-body', message: 'Notes support paragraphs, inline drawings and flow tables without independent sections or columns.' });
+    }
+    return issues;
+}
+
+export function validateDocumentStructure(snapshot: Pick<IDocumentData, 'body' | 'headers' | 'footers' | 'notes'>): IDocStructureIssue[] {
     const issues: IDocStructureIssue[] = [];
 
     if (snapshot.body) {
         issues.push(...validateDocBodyStructure(snapshot.body, { segmentType: 'body' }));
+        const referencedNotes = new Set<string>();
+        for (const range of snapshot.body.customRanges ?? []) {
+            if ((range.rangeType !== CustomRangeType.FOOTNOTE && range.rangeType !== CustomRangeType.ENDNOTE)) {
+                continue;
+            }
+            const noteId = range.properties?.noteId;
+            if (typeof noteId !== 'string' || snapshot.notes?.[noteId] == null) {
+                issues.push({ code: 'missing-note', segmentType: 'body', index: range.startIndex, message: 'Note reference must resolve to a note segment.' });
+            } else if (snapshot.notes[noteId].type !== (range.rangeType === CustomRangeType.ENDNOTE ? 'endnote' : 'footnote')) {
+                issues.push({ code: 'invalid-note-reference', segmentType: 'body', index: range.startIndex, message: 'Note reference kind must match its target.' });
+            } else if (referencedNotes.has(noteId)) {
+                issues.push({ code: 'duplicate-note-reference', segmentType: 'body', index: range.startIndex, message: 'Each note must have its own reference identity.' });
+            } else {
+                referencedNotes.add(noteId);
+            }
+            if (range.startIndex !== range.endIndex || snapshot.body.dataStream[range.startIndex] !== '\uFFFC' || !range.wholeEntity) {
+                issues.push({ code: 'invalid-note-reference', segmentType: 'body', index: range.startIndex, message: 'Note reference must cover one whole-entity reference character.' });
+            }
+        }
     }
 
     for (const [headerId, header] of Object.entries(snapshot.headers ?? {})) {
@@ -562,6 +616,13 @@ export function validateDocumentStructure(snapshot: Pick<IDocumentData, 'body' |
 
     for (const [footerId, footer] of Object.entries(snapshot.footers ?? {})) {
         issues.push(...validateDocBodyStructure(footer.body, { segmentType: 'footer', segmentId: footerId }));
+    }
+
+    for (const [noteId, note] of Object.entries(snapshot.notes ?? {})) {
+        issues.push(...validateNoteBody(noteId, note));
+        if (snapshot.headers?.[noteId] || snapshot.footers?.[noteId]) {
+            issues.push({ code: 'invalid-note-id', segmentType: 'note', segmentId: noteId, message: 'Notes must not share a segment identity with a header or footer.' });
+        }
     }
 
     return issues;

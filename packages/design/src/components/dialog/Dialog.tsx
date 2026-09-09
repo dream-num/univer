@@ -27,7 +27,6 @@ import {
     Dialog as DialogProvider,
     DialogTitle,
 } from './DialogPrimitive';
-import { MobileDialogContent } from './MobileDialogContent';
 
 export interface IDialogProps {
     children: ReactNode;
@@ -154,7 +153,9 @@ function useDraggable(
     const initializedRef = useRef(false);
 
     useEffect(() => {
-        if (!elementRef.current || initializedRef.current || options.defaultPosition) return;
+        if (!elementRef.current || initializedRef.current || options.defaultPosition) {
+            return;
+        }
 
         const { width, height } = elementRef.current.getBoundingClientRect();
         const { innerWidth, innerHeight } = window;
@@ -168,7 +169,9 @@ function useDraggable(
     }, [options.defaultPosition]);
 
     const calculateBounds = useCallback((clientX: number, clientY: number) => {
-        if (!elementRef.current) return { x: clientX, y: clientY };
+        if (!elementRef.current) {
+            return { x: clientX, y: clientY };
+        }
 
         const rect = elementRef.current.getBoundingClientRect();
         const { clientWidth, clientHeight } = document.documentElement;
@@ -176,16 +179,26 @@ function useDraggable(
         let newX = startPosRef.current.x + (clientX - startClientRef.current.x);
         let newY = startPosRef.current.y + (clientY - startClientRef.current.y);
 
-        if (newX < 0) newX = 0;
-        if (newY < 0) newY = 0;
-        if (newX + rect.width > clientWidth) newX = clientWidth - rect.width;
-        if (newY + rect.height > clientHeight) newY = clientHeight - rect.height;
+        if (newX < 0) {
+            newX = 0;
+        }
+        if (newY < 0) {
+            newY = 0;
+        }
+        if (newX + rect.width > clientWidth) {
+            newX = clientWidth - rect.width;
+        }
+        if (newY + rect.height > clientHeight) {
+            newY = clientHeight - rect.height;
+        }
 
         return { x: newX, y: newY };
     }, []);
 
     const startDrag = useCallback((e: MouseEvent<HTMLElement> | MouseEvent) => {
-        if (!enabled) return;
+        if (!enabled) {
+            return;
+        }
 
         e.preventDefault();
         e.stopPropagation();
@@ -198,7 +211,9 @@ function useDraggable(
     }, [enabled, position]);
 
     const onDrag = useCallback((e: globalThis.MouseEvent) => {
-        if (!isDragging) return;
+        if (!isDragging) {
+            return;
+        }
 
         e.preventDefault();
         e.stopPropagation();
@@ -271,7 +286,7 @@ export function Dialog(props: IDialogProps) {
         onCancel,
     } = props;
 
-    const { locale, mountContainer, direction, mobile } = useContext(ConfigContext);
+    const { locale, mountContainer, direction } = useContext(ConfigContext);
 
     const { position, isDragging, setElementRef, handleMouseDown } = useDraggable({ defaultPosition, enabled: draggable });
 
@@ -315,15 +330,13 @@ export function Dialog(props: IDialogProps) {
         onClose?.();
     }
 
-    const Content = mobile ? MobileDialogContent : DialogContent;
-
     return (
         <DialogProvider
             open={open}
             onOpenChange={handleOpenChange}
             modal={mask !== false}
         >
-            <Content
+            <DialogContent
                 ref={handleContentRef}
                 className={clsx(className, {
                     '!univer-animate-none': draggable,
@@ -385,7 +398,7 @@ export function Dialog(props: IDialogProps) {
                         {footer}
                     </DialogFooter>
                 )}
-            </Content>
+            </DialogContent>
         </DialogProvider>
     );
 }

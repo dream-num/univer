@@ -26,8 +26,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
-
-const CF_PANEL_KEY = 'sheet.conditional.formatting.panel';
+import { CF_PANEL_KEY } from '../const';
 
 export class ConditionalFormattingPanelController extends Disposable {
     private _sidebarDisposable: IDisposable | null = null;

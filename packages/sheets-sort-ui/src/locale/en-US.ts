@@ -39,6 +39,7 @@ const locale = {
             'sort-reminder-no': 'Keep range sorting',
             'first-row-check': 'First row does not participate in sorting',
             'add-condition': 'Add condition',
+            'delete-condition': 'Delete condition',
             cancel: 'Cancel',
             confirm: 'Confirm',
         },

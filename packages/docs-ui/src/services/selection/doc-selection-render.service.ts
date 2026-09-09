@@ -283,25 +283,51 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             this._pendingSelection = null;
             return false;
         }
-        if (this._currentSegmentId === '' && ranges.length > 0) {
-            const progress = this._docSkeletonManagerService.getSkeleton().getLayoutProgress();
-            if (progress?.reason === 'edit' && !progress.anchorReady && !progress.complete && !progress.cancelled) {
-                const { unitId } = this._context;
-                const selection = this._docSelectionManagerService.getSelectionInfo({ unitId, subUnitId: unitId });
-                // Only a refresh of the current logical selection belongs to this
-                // publication. A new pointer/programmatic selection takes over.
-                if (
-                    selection != null &&
-                    ranges.length === selection.textRanges.length &&
-                    ranges.every((range, index) => range === selection.textRanges[index])
-                ) {
-                    this._pendingSelection = selection;
+        this._syncNoteSegment(ranges[0]);
+        const isBodyOrNote = this._currentSegmentId === '' ||
+            this._context.unit.getSnapshot().notes?.[this._currentSegmentId] != null;
+        let currentLogicalSelection: Nullable<IDocSelectionInnerParam> = null;
+        if (isBodyOrNote && ranges.length > 0) {
+            const { unitId } = this._context;
+            const selection = this._docSelectionManagerService.getSelectionInfo({ unitId, subUnitId: unitId });
+            // Only a refresh of the current logical selection belongs to this
+            // publication. A new pointer/programmatic selection takes over.
+            if (selection != null && ranges.length === selection.textRanges.length &&
+                ranges.every((range, index) => range === selection.textRanges[index])) {
+                currentLogicalSelection = selection;
+                const progress = this._docSkeletonManagerService.getSkeleton().getLayoutProgress();
+                if (progress?.reason === 'edit' && !progress.anchorReady && !progress.complete && !progress.cancelled) {
+                    this._pendingSelection = currentLogicalSelection;
                     return false;
                 }
             }
         }
         this._pendingSelection = null;
-        return this.addDocRanges(ranges, isEditing, options, true);
+        const replaced = this.addDocRanges(ranges, isEditing, options, true);
+        if (!replaced) {
+            this._pendingSelection = currentLogicalSelection;
+        }
+        return replaced;
+    }
+
+    private _syncNoteSegment(range: ISuccinctDocRangeParam | undefined): void {
+        const targetSegment = range?.segmentId;
+        if (targetSegment == null) {
+            return;
+        }
+        const notes = this._context.unit.getSnapshot().notes;
+        if (targetSegment !== this._currentSegmentId &&
+            (notes?.[targetSegment] || notes?.[this._currentSegmentId])) {
+            this.setSegment(targetSegment);
+            this.setSegmentPage(range?.segmentPage ?? -1);
+        }
+        if (notes?.[targetSegment] && range != null) {
+            const position = this._docSkeletonManagerService.getSkeleton()
+                .findNodePositionByCharIndex(range.endOffset, true, targetSegment);
+            if (position != null && position.page !== this._currentSegmentPage) {
+                this.setSegmentPage(position.page);
+            }
+        }
     }
 
     private _getPendingSelection(): Nullable<IDocSelectionInnerParam> {
@@ -697,7 +723,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._pendingSelection = null;
         const { segmentId, segmentPage } = startNode;
 
-        if (segmentId && this._currentSegmentId && segmentId !== this._currentSegmentId) {
+        const notes = this._context.unit.getSnapshot().notes;
+        if (segmentId !== this._currentSegmentId &&
+            ((segmentId && this._currentSegmentId) || notes?.[segmentId] || notes?.[this._currentSegmentId])) {
             this.setSegment(segmentId);
         }
 
@@ -1459,7 +1487,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
                 this._eventHandle(e, (config) => {
                     this._onCompositionstart$.next(config);
-                });
+                }, true);
             })
         );
 
@@ -1484,7 +1512,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                 this._eventHandle(e, (config) => {
                     this._onInputBefore$.next(config);
                     this._onCompositionupdate$.next(config);
-                });
+                }, true);
             })
         );
 
@@ -1530,10 +1558,16 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         );
     }
 
-    private _eventHandle(e: Event | CompositionEvent | KeyboardEvent, func: (config: IEditorInputConfig) => void) {
+    private _eventHandle(
+        e: Event | CompositionEvent | KeyboardEvent,
+        func: (config: IEditorInputConfig) => void,
+        preserveInput = false
+    ) {
         const content = this._input.textContent || '';
 
-        this._input.innerHTML = '';
+        if (!preserveInput) {
+            this._input.innerHTML = '';
+        }
 
         // Geometry remains on the previous page until the edited page is ready.
         // Continue native input from the existing logical selection only while

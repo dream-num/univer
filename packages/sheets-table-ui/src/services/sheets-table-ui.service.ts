@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
+import type { Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { ISetSheetTableParams, ITableFilterItem } from '@univerjs/sheets-table';
 import type { LocaleKey } from '../locale/types';
-import type { IFilterByValueWithTreeItem, ITableFilterItemList } from '../types';
+import type { IFilterByValueWithTreeItem, ITableFilterColorList, ITableFilterItemList } from '../types';
 import {
     cellToRange,
+    ColorKit,
+    DEFAULT_STYLES,
     Disposable,
+    getColorStyle,
     ICommandService,
     Inject,
     IUniverInstanceService,
@@ -31,6 +34,7 @@ import {
 } from '@univerjs/core';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
 import {
+    isColorTableFilter,
     isConditionFilter,
     isManualTableFilter,
     SetSheetTableFilterCommand,
@@ -109,7 +113,9 @@ export class SheetsTableUiService extends Disposable {
             unitId,
             subUnitId,
             tableFilter,
-            currentFilterBy: isConditionFilter(tableFilter) ? FilterByEnum.Condition : FilterByEnum.Items,
+            currentFilterBy: isConditionFilter(tableFilter)
+                ? FilterByEnum.Condition
+                : isColorTableFilter(tableFilter) ? FilterByEnum.Color : FilterByEnum.Items,
             tableId,
             columnIndex: column - tableRange.startColumn,
         };
@@ -127,10 +133,15 @@ export class SheetsTableUiService extends Disposable {
         return checkedItems;
     }
 
-    setTableFilter(unitId: string, tableId: string, columnIndex: number, tableFilter: ITableFilterItem | undefined) {
+    async setTableFilter(
+        unitId: string,
+        tableId: string,
+        columnIndex: number,
+        tableFilter: ITableFilterItem | undefined
+    ): Promise<boolean> {
         const table = this._tableManager.getTable(unitId, tableId);
         if (!table) {
-            return;
+            return false;
         }
         const setTableFilterParams: ISetSheetTableParams = {
             unitId,
@@ -138,7 +149,62 @@ export class SheetsTableUiService extends Disposable {
             column: columnIndex,
             tableFilter,
         };
-        this._commandService.executeCommand(SetSheetTableFilterCommand.id, setTableFilterParams);
+        return this._commandService.executeCommand(SetSheetTableFilterCommand.id, setTableFilterParams);
+    }
+
+    getTableFilterColors(
+        unitId: string,
+        subUnitId: string,
+        tableId: string,
+        columnIndex: number
+    ): ITableFilterColorList {
+        const emptyResult = { cellFillColors: [], cellTextColors: [] };
+        const table = this._tableManager.getTable(unitId, tableId);
+        if (!table) {
+            return emptyResult;
+        }
+
+        const worksheet = this._univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return emptyResult;
+        }
+
+        const normalizeColor = (color: Nullable<string>) => color ? new ColorKit(color).toRgbString() : null;
+        const currentFilter = table.getTableFilterColumn(columnIndex);
+        const checkedFillColors = new Set(
+            isColorTableFilter(currentFilter) ? currentFilter.cellFillColors?.map(normalizeColor) : []
+        );
+        const checkedTextColors = new Set(
+            isColorTableFilter(currentFilter) ? currentFilter.cellTextColors?.map(normalizeColor) : []
+        );
+        const cellFillColors = new Map<string | null, boolean>();
+        const cellTextColors = new Map<string | null, boolean>();
+        const tableRange = table.getTableFilterRange();
+        const column = tableRange.startColumn + columnIndex;
+        const filteredRowsByOtherColumns = this._getFilteredRowsByOtherColumns(
+            worksheet,
+            tableId,
+            unitId,
+            columnIndex
+        );
+
+        for (let row = tableRange.startRow; row <= tableRange.endRow; row++) {
+            if (filteredRowsByOtherColumns.has(row)) {
+                continue;
+            }
+
+            const cellData = worksheet.getCell(row, column);
+            const style = worksheet.getComposedCellStyleByCellData(row, column, cellData);
+            const fillColor = normalizeColor(getColorStyle(style.bg));
+            const textColor = normalizeColor(getColorStyle(style.cl) ?? getColorStyle(DEFAULT_STYLES.cl));
+            cellFillColors.set(fillColor, checkedFillColors.has(fillColor));
+            cellTextColors.set(textColor, checkedTextColors.has(textColor));
+        }
+
+        return {
+            cellFillColors: Array.from(cellFillColors, ([color, checked]) => ({ color, checked })),
+            cellTextColors: Array.from(cellTextColors, ([color, checked]) => ({ color, checked })),
+        };
     }
 
     getTableFilterItems(unitId: string, subUnitId: string, tableId: string, columnIndex: number): ITableFilterItemList {
@@ -160,14 +226,12 @@ export class SheetsTableUiService extends Disposable {
         const data: IFilterByValueWithTreeItem[] = [];
 
         const map = new Map<string, number>();
-        const filteredRowsByOtherColumns = new Set<number>();
-        const tableFilters = table.getTableFilters();
-        for (let i = tableRange.startColumn; i <= tableRange.endColumn; i++) {
-            const currentColumnIndex = i - tableRange.startColumn;
-            if (currentColumnIndex !== columnIndex && table.getTableFilterColumn(currentColumnIndex)) {
-                tableFilters.doColumnFilter(worksheet, tableRange, currentColumnIndex, filteredRowsByOtherColumns);
-            }
-        }
+        const filteredRowsByOtherColumns = this._getFilteredRowsByOtherColumns(
+            worksheet,
+            tableId,
+            unitId,
+            columnIndex
+        );
 
         let allItemsCount = 0;
         for (let row = startRow; row <= endRow; row++) {
@@ -192,5 +256,28 @@ export class SheetsTableUiService extends Disposable {
         }
         this._itemsCache.set(tableId + columnIndex, { data, itemsCountMap: map, allItemsCount });
         return { data, itemsCountMap: map, allItemsCount };
+    }
+
+    private _getFilteredRowsByOtherColumns(
+        worksheet: Worksheet,
+        tableId: string,
+        unitId: string,
+        columnIndex: number
+    ): Set<number> {
+        const filteredRows = new Set<number>();
+        const table = this._tableManager.getTable(unitId, tableId);
+        if (!table) {
+            return filteredRows;
+        }
+
+        const tableRange = table.getTableFilterRange();
+        const tableFilters = table.getTableFilters();
+        for (let column = tableRange.startColumn; column <= tableRange.endColumn; column++) {
+            const currentColumnIndex = column - tableRange.startColumn;
+            if (currentColumnIndex !== columnIndex && table.getTableFilterColumn(currentColumnIndex)) {
+                tableFilters.doColumnFilter(worksheet, tableRange, currentColumnIndex, filteredRows);
+            }
+        }
+        return filteredRows;
     }
 }

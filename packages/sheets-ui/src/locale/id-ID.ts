@@ -220,6 +220,7 @@ const locale: typeof enUS = {
             error: 'Kesalahan',
             forceStringInfo: 'Angka disimpan sebagai teks',
             convertToNumber: 'Konversi ke angka',
+            overwriteCellContent: 'Sudah ada data di area target. Tindakan ini akan menimpa data yang ada. Apakah Anda ingin melanjutkan?',
         },
         clipboard: {
             paste: {

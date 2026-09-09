@@ -30,7 +30,14 @@ import type {
 } from '@univerjs/engine-render';
 import { Disposable, fromEventSubject, Inject, PresetListType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import { CURSOR_TYPE, documentSkeletonLineIterator, documentSkeletonTableIterator, getDocsTableRenderViewport, getTableIdAndSliceIndex, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
+import {
+    CURSOR_TYPE,
+    documentSkeletonLineIterator,
+    documentSkeletonTableIterator,
+    getDocsTableRenderViewport,
+    getTableIdAndSliceIndex,
+    TRANSFORM_CHANGE_OBSERVABLE_TYPE,
+} from '@univerjs/engine-render';
 import { BehaviorSubject, distinctUntilChanged, filter, map, Subject, switchMap, take, tap, throttleTime } from 'rxjs';
 import { DOC_VERTICAL_PADDING } from '../types/const/padding';
 import { transformOffset2Bound } from './doc-popup-manager.service';
@@ -1110,6 +1117,12 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         this._tableParagraphBounds.set(tableId, retained);
         paragraphBounds.forEach((bound) => this._tableParagraphBoundsByIndex.set(bound.startIndex, bound));
         return paragraphBounds;
+    }
+
+    contextMenuParagraph: { unitId: string; segmentId: string; paragraphId: string } | null = null;
+
+    getParagraphByOffset(offsetX: number, offsetY: number): Nullable<IMutiPageParagraphBound> {
+        return this._calcActiveParagraph(transformOffset2Bound(offsetX, offsetY, this._context.scene));
     }
 
     private _calcActiveParagraph(evt: { x: number; y: number }): Nullable<IMutiPageParagraphBound> {

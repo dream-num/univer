@@ -19,7 +19,11 @@ import { MobileActionRow } from '@univerjs/design';
 
 const ACTIONS: SheetTableMenuAction[] = ['rename', 'update-range', 'set-theme', 'delete'];
 
-export function MobileSheetTableMenu({ menu }: { menu: ISheetTableMenuExtraProps }) {
+export function MobileSheetTableMenu({ menu }: { menu?: ISheetTableMenuExtraProps }) {
+    if (!menu) {
+        return null;
+    }
+
     return (
         <div className="univer-flex univer-flex-col univer-gap-2">
             {ACTIONS.map((action) => (

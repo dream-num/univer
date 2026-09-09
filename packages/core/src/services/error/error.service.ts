@@ -19,6 +19,8 @@ import { Disposable } from '../../shared/lifecycle';
 
 export interface IError {
     errorKey: string;
+    code?: 'PERMISSION_DENIED';
+    permissionTarget?: string;
 }
 
 export class ErrorService extends Disposable {
@@ -27,6 +29,14 @@ export class ErrorService extends Disposable {
 
     override dispose(): void {
         this._error$.complete();
+    }
+
+    emitPermissionDenied(unitId: string, objectIds: Iterable<string> = []): void {
+        this._error$.next({
+            errorKey: 'Permission denied.',
+            code: 'PERMISSION_DENIED',
+            permissionTarget: JSON.stringify([unitId, [...new Set(objectIds)].sort()]),
+        });
     }
 
     emit(key: string): void {

@@ -75,6 +75,7 @@ type getPopupMenuItemCallback = (unitId: string, subUnitId: string, drawingId: s
 export class SheetCanvasPopManagerService extends Disposable {
     // the DrawingTypeEnum should refer from drawing package, here we just use type, so no need to import the drawing package
     private _popupMenuFeatureMap = new Map<DrawingTypeEnum, getPopupMenuItemCallback>();
+    private _popupMenuTitleMap = new Map<DrawingTypeEnum, string>();
     private _popupMenuOffsetMap = new Map<DrawingTypeEnum, { offsetX: number; offsetY: number }>();
     private readonly _popupDisposables = new Set<IDisposable>();
 
@@ -121,8 +122,11 @@ export class SheetCanvasPopManagerService extends Disposable {
     /**
      * Register a feature menu callback for a specific drawing type.such as image, chart, etc.
      */
-    registerFeatureMenu(type: DrawingTypeEnum, getPopupMenuCallBack: getPopupMenuItemCallback) {
+    registerFeatureMenu(type: DrawingTypeEnum, getPopupMenuCallBack: getPopupMenuItemCallback, title?: string) {
         this._popupMenuFeatureMap.set(type, getPopupMenuCallBack);
+        if (title) {
+            this._popupMenuTitleMap.set(type, title);
+        }
     }
 
     /**
@@ -150,11 +154,16 @@ export class SheetCanvasPopManagerService extends Disposable {
         }
     }
 
+    getFeatureMenuTitle(drawingType: DrawingTypeEnum): Nullable<string> {
+        return this._popupMenuTitleMap.get(drawingType);
+    }
+
     override dispose(): void {
         Array.from(this._popupDisposables).forEach((disposable) => disposable.dispose());
         this._popupDisposables.clear();
         super.dispose();
         this._popupMenuFeatureMap.clear();
+        this._popupMenuTitleMap.clear();
         this._popupMenuOffsetMap.clear();
     }
 

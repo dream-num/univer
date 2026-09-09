@@ -47,6 +47,8 @@ const locale: typeof enUS = {
             coped: 'Lien copié dans le presse-papiers',
         },
         popup: {
+            title: 'Lien hypertexte',
+            open: 'Ouvrir le lien',
             copy: 'Copier le lien',
             edit: 'Modifier le lien',
             cancel: 'Annuler le lien',

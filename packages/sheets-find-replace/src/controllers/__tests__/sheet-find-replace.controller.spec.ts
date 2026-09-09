@@ -18,7 +18,7 @@ import type { ICellData, IRange } from '@univerjs/core';
 import type { IFindQuery } from '@univerjs/find-replace';
 import { UniverInstanceType } from '@univerjs/core';
 import { RENDER_RAW_FORMULA_KEY } from '@univerjs/engine-render';
-import { FindBy, FindDirection, FindScope } from '@univerjs/find-replace';
+import { CloseFindDialogOperation, FindBy, FindDirection, FindScope } from '@univerjs/find-replace';
 import { SelectRangeCommand, SetRangeValuesCommand, SetWorksheetActivateCommand } from '@univerjs/sheets';
 import { ScrollToCellCommand } from '@univerjs/sheets-ui';
 import { Subject } from 'rxjs';
@@ -199,17 +199,17 @@ describe('SheetsFindReplaceController integration', () => {
             }),
         };
         let provider: any;
+        const terminate = vi.fn();
         const findReplaceService = {
             registerFindReplaceProvider: vi.fn((registeredProvider) => {
                 provider = registeredProvider;
                 return { dispose: vi.fn() };
             }),
+            terminate,
         };
-        const findReplaceController = { closePanel: vi.fn() };
 
         const controller = new SheetsFindReplaceController(
             injector as any,
-            findReplaceController as any,
             contextService as any,
             findReplaceService as any,
             commandService as any
@@ -219,14 +219,14 @@ describe('SheetsFindReplaceController integration', () => {
         const [model] = await provider.find({ ...baseQuery, findString: '  ALPHA  ' });
 
         expect(commandService.registerCommand).toHaveBeenCalledWith(SheetReplaceCommand);
-        expect(findReplaceController.closePanel).toHaveBeenCalledTimes(1);
+        expect(commandService.executeCommand).toHaveBeenCalledWith(CloseFindDialogOperation.id);
         expect(model).toBeInstanceOf(SheetFindModel);
         expect(model.matchesCount).toBe(2);
         expect(model.getMatches().map((match: any) => match.range.range.startRow)).toEqual([0, 1]);
         expect(model.getMatches().map((match: any) => match.replaceable)).toEqual([true, false]);
 
         controller.dispose();
-        expect(findReplaceController.closePanel).toHaveBeenCalledTimes(2);
+        expect(terminate).toHaveBeenCalledOnce();
     });
 
     it('returns no models when the provider has no active workbook', async () => {
@@ -240,13 +240,13 @@ describe('SheetsFindReplaceController integration', () => {
         let provider: any;
         const controller = new SheetsFindReplaceController(
             injector as any,
-            { closePanel: vi.fn() } as any,
             { subscribeContextValue$: vi.fn(() => new Subject<boolean>()) } as any,
             {
                 registerFindReplaceProvider: vi.fn((registeredProvider) => {
                     provider = registeredProvider;
                     return { dispose: vi.fn() };
                 }),
+                terminate: vi.fn(),
             } as any,
             { registerCommand: vi.fn(() => ({ dispose: vi.fn() })) } as any
         );

@@ -198,6 +198,24 @@ describe('docs font and baseline extension', () => {
         expect(ScreenContext.fillStyle).toBe('#000000');
     });
 
+    it('draws footnote separator marks with their measured width and text color', () => {
+        const extension = new FontAndBaseLine();
+        const SeparatorContext = Object.assign(createContext(), {
+            beginPath: vi.fn(),
+            moveToByPrecision: vi.fn(),
+            lineToByPrecision: vi.fn(),
+            stroke: vi.fn(),
+        });
+        extension.extensionOffset = { spanPointWithFont: Vector2.create(12, 20) };
+        extension.draw(SeparatorContext, DEFAULT_SCALE, createGlyph(' ', { noteSeparator: true, width: 192 }));
+        expect(SeparatorContext.moveToByPrecision).toHaveBeenCalledWith(12, 20);
+        expect(SeparatorContext.lineToByPrecision).toHaveBeenCalledWith(204, 20);
+        expect(SeparatorContext.strokeStyle).toBe('#223344');
+        expect(SeparatorContext.stroke).toHaveBeenCalledOnce();
+        expect(SeparatorContext.fillText).not.toHaveBeenCalled();
+        expect(SeparatorContext.restore).toHaveBeenCalledOnce();
+    });
+
     it('renders public glow and outer shadow behind the source text without canvas filters', () => {
         const extension = new FontAndBaseLine();
         const TestContext = createContext();

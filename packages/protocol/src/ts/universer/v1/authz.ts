@@ -58,6 +58,19 @@ export interface ICreateRequest {
     objectType: UnitObject;
     selectRangeObject?: ICreateRequestSelectRangeObject | undefined;
     worksheetObject?: ICreateRequestWorksheetObject | undefined;
+    /** Mirror these optional oneof payloads in univer-protocol before enabling the corresponding product. */
+    documentObject?: ICreateRequestPermissionObject | undefined;
+    slideObject?: ICreateRequestPermissionObject | undefined;
+    baseObject?: ICreateRequestPermissionObject | undefined;
+    boardObject?: ICreateRequestPermissionObject | undefined;
+}
+
+interface ICreateRequestPermissionObject {
+    collaborators: ICollaborator[];
+    unitID: string;
+    name: string;
+    strategies: IUnitPermissionStrategy[];
+    scope: IObjScope | undefined;
 }
 
 export interface ICreateRequestSelectRangeObject {

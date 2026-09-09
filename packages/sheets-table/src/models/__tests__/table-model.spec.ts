@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { CellValueType } from '@univerjs/core';
+import type { ITableColorFilterItem } from '../../types/type';
+import { CellValueType, ThemeColorType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { TABLE_FILTER_EMPTY_VALUE } from '../../const';
 import {
@@ -164,5 +165,168 @@ describe('TableFilters', () => {
 
         filters.dispose();
         expect(filters.toJSON().tableColumnFilterList).toEqual([]);
+    });
+
+    it('filters rows by cell fill colors', () => {
+        const filters = new TableFilters();
+        const cells = [
+            { v: 'Red', s: { bg: { rgb: '#ff0000' } } },
+            { v: 'Blue', s: { bg: { rgb: '#0000ff' } } },
+            { v: 'Default' },
+        ];
+        const sheet = {
+            getCell(row: number) {
+                return cells[row] ?? null;
+            },
+            getCellRaw(row: number) {
+                return this.getCell(row);
+            },
+            getComposedCellStyleByCellData(_row: number, _column: number, cell: typeof cells[number]) {
+                return cell?.s ?? {};
+            },
+        };
+
+        filters.setColumnFilter(0, {
+            filterType: TableColumnFilterTypeEnum.color,
+            cellFillColors: ['rgb(255, 0, 0)'],
+        });
+
+        expect([...filters.doFilter(sheet as never, {
+            startRow: 0,
+            endRow: 2,
+            startColumn: 0,
+            endColumn: 0,
+        })]).toEqual([1, 2]);
+    });
+
+    it('filters rows by theme fill colors', () => {
+        const filters = new TableFilters();
+        const cells = [
+            { v: 'Theme', s: { bg: { th: ThemeColorType.ACCENT1 } } },
+            { v: 'Red', s: { bg: { rgb: '#ff0000' } } },
+        ];
+        const sheet = {
+            getCell(row: number) {
+                return cells[row] ?? null;
+            },
+            getCellRaw(row: number) {
+                return this.getCell(row);
+            },
+            getComposedCellStyleByCellData(_row: number, _column: number, cell: typeof cells[number]) {
+                return cell?.s ?? {};
+            },
+        };
+
+        filters.setColumnFilter(0, {
+            filterType: TableColumnFilterTypeEnum.color,
+            cellFillColors: ['rgb(68, 114, 196)'],
+        });
+
+        expect([...filters.doFilter(sheet as never, {
+            startRow: 0,
+            endRow: 1,
+            startColumn: 0,
+            endColumn: 0,
+        })]).toEqual([1]);
+    });
+
+    it('filters rows by the default fill color', () => {
+        const filters = new TableFilters();
+        const cells = [
+            { v: 'Red', s: { bg: { rgb: '#ff0000' } } },
+            { v: 'Default' },
+        ];
+        const sheet = {
+            getCell(row: number) {
+                return cells[row] ?? null;
+            },
+            getCellRaw(row: number) {
+                return this.getCell(row);
+            },
+            getComposedCellStyleByCellData(_row: number, _column: number, cell: typeof cells[number]) {
+                return cell?.s ?? {};
+            },
+        };
+
+        filters.setColumnFilter(0, {
+            filterType: TableColumnFilterTypeEnum.color,
+            cellFillColors: [null],
+        });
+
+        expect([...filters.doFilter(sheet as never, {
+            startRow: 0,
+            endRow: 1,
+            startColumn: 0,
+            endColumn: 0,
+        })]).toEqual([0]);
+    });
+
+    it('filters rows by cell text colors and preserves the filter in JSON', () => {
+        const filters = new TableFilters();
+        const cells = [
+            { v: 'Red', s: { cl: { rgb: '#ff0000' } } },
+            { v: 'Blue', s: { cl: { rgb: '#0000ff' } } },
+            { v: 'Default' },
+        ];
+        const sheet = {
+            getCell(row: number) {
+                return cells[row] ?? null;
+            },
+            getCellRaw(row: number) {
+                return this.getCell(row);
+            },
+            getComposedCellStyleByCellData(_row: number, _column: number, cell: typeof cells[number]) {
+                return cell?.s ?? {};
+            },
+        };
+        const filter: ITableColorFilterItem = {
+            filterType: TableColumnFilterTypeEnum.color,
+            cellTextColors: ['rgb(0, 0, 255)'],
+        };
+
+        filters.setColumnFilter(0, filter);
+
+        expect([...filters.doFilter(sheet as never, {
+            startRow: 0,
+            endRow: 2,
+            startColumn: 0,
+            endColumn: 0,
+        })]).toEqual([0, 2]);
+        expect(filters.toJSON().tableColumnFilterList).toEqual([filter]);
+
+        const restored = new TableFilters();
+        restored.fromJSON(filters.toJSON());
+        expect(restored.getColumnFilter(0)).toEqual(filter);
+    });
+
+    it('treats the default text color as black', () => {
+        const filters = new TableFilters();
+        const cells = [
+            { v: 'Blue', s: { cl: { rgb: '#0000ff' } } },
+            { v: 'Default', s: { cl: { rgb: null } } },
+        ];
+        const sheet = {
+            getCell(row: number) {
+                return cells[row] ?? null;
+            },
+            getCellRaw(row: number) {
+                return this.getCell(row);
+            },
+            getComposedCellStyleByCellData(_row: number, _column: number, cell: typeof cells[number]) {
+                return cell?.s ?? {};
+            },
+        };
+
+        filters.setColumnFilter(0, {
+            filterType: TableColumnFilterTypeEnum.color,
+            cellTextColors: ['rgb(0, 0, 0)'],
+        });
+
+        expect([...filters.doFilter(sheet as never, {
+            startRow: 0,
+            endRow: 1,
+            startColumn: 0,
+            endColumn: 0,
+        })]).toEqual([0]);
     });
 });

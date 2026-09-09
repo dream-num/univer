@@ -47,6 +47,8 @@ const locale: typeof enUS = {
             coped: 'Łącze skopiowane do schowka',
         },
         popup: {
+            title: 'Hiperłącze',
+            open: 'Otwórz łącze',
             copy: 'Kopiuj łącze',
             edit: 'Edytuj łącze',
             cancel: 'Anuluj łącze',

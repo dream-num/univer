@@ -220,6 +220,7 @@ const locale: typeof enUS = {
             error: 'Ошибка',
             forceStringInfo: 'Число хранится как текст',
             convertToNumber: 'Преобразовать в число',
+            overwriteCellContent: 'В целевой области уже есть данные, это действие перезапишет их. Продолжить?',
         },
         clipboard: {
             paste: {

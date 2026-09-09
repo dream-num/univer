@@ -79,6 +79,8 @@ import { DocParagraphSettingPanelOperation } from '../commands/operations/doc-pa
 import { DocSectionSettingPanelOperation } from '../commands/operations/doc-section-setting-panel.operation';
 import { InsertDocumentColumnBreakOperation } from '../commands/operations/insert-break.operation';
 import { DocOpenPageSettingCommand } from '../commands/operations/open-page-setting.operation';
+import { OpenDocParagraphPermissionOperation } from '../commands/operations/paragraph-permission.operation';
+import { OpenDocPermissionPanelOperation } from '../commands/operations/permission-panel.operation';
 import {
     CopyMenuFactory,
     CutMenuFactory,
@@ -117,7 +119,6 @@ import {
     DOC_SECTION_BREAK_NEXT_COLUMN_MENU_ID,
     DOC_SECTION_BREAK_NEXT_PAGE_MENU_ID,
     DOC_SECTION_BREAK_ODD_PAGE_MENU_ID,
-    // DocSwitchModeMenuItemFactory,
     EmojiPickerMenuItemFactory,
     FLOAT_TEXT_STYLE_MENU_ID,
     FLOAT_TOOLBAR_MENU_POSITION,
@@ -210,6 +211,7 @@ import {
     TableBlockPasteMenuItemFactory,
     TitleHeadingMenuItemFactory,
 } from './paragraph-menu';
+import { DocParagraphPermissionMenuItemFactory, DocPermissionMenuItemFactory } from './permission.menu';
 
 export const floatToolbarMenuSchema: MenuSchemaType = {
     [FLOAT_TOOLBAR_MENU_POSITION]: {
@@ -222,6 +224,13 @@ export const floatToolbarMenuSchema: MenuSchemaType = {
 
 export const menuSchema: MenuSchemaType = {
     ...floatToolbarMenuSchema,
+    [RibbonStartGroup.OTHERS]: {
+        [OpenDocPermissionPanelOperation.id]: {
+            order: 0,
+            gridLayout: { row: 1, column: 1, rowSpan: 2, showLabel: true },
+            menuItemFactory: DocPermissionMenuItemFactory,
+        },
+    },
     [RibbonStartGroup.FORMAT]: {
         [SetInlineFormatBoldCommand.id]: {
             order: 0,
@@ -379,6 +388,12 @@ export const menuSchema: MenuSchemaType = {
         },
     },
     [ContextMenuPosition.MAIN_AREA]: {
+        [ContextMenuGroup.OTHERS]: {
+            [OpenDocParagraphPermissionOperation.id]: {
+                order: 10,
+                menuItemFactory: DocParagraphPermissionMenuItemFactory,
+            },
+        },
         [ContextMenuGroup.QUICK]: ({
             quickLayout: 'tile',
             [DocCopyCommand.name]: {

@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import type { ICellData, Nullable, Worksheet } from '@univerjs/core';
+import type { ICellData, IStyleData, Nullable, Worksheet } from '@univerjs/core';
 import type { SheetsTableButtonStateEnum } from '../types/enum';
 import type { ICalculatedOptions, ITableFilterItem, ITableFilterJSON, ITableRange } from '../types/type';
-import { DateSystem } from '@univerjs/core';
+import { ColorKit, DateSystem, DEFAULT_STYLES, getColorStyle } from '@univerjs/core';
 import { TABLE_FILTER_EMPTY_VALUE } from '../const';
 import { SheetsTableSortStateEnum, TableColumnFilterTypeEnum, TableConditionTypeEnum } from '../types/enum';
-import { getTableFilterState, isConditionFilter } from '../util';
+import { getTableFilterState, isColorTableFilter, isConditionFilter } from '../util';
 import { getCellValueWithConditionType, getConditionExecuteFunc, isNumberDynamicFilter } from './filter-util/condition';
 
 export class TableFilters {
     private _tableColumnFilterList: (ITableFilterItem | undefined)[];
-    private _tableSortInfo: { columnIndex: number; sortState: SheetsTableSortStateEnum };
+    private _tableSortInfo?: { columnIndex: number; sortState: SheetsTableSortStateEnum };
     private _filterOutRows: Set<number>;
     constructor() {
         this._tableColumnFilterList = [];
@@ -41,6 +41,10 @@ export class TableFilters {
 
     setSortState(columnIndex: number, sortState: SheetsTableSortStateEnum) {
         this._tableSortInfo = { columnIndex, sortState };
+    }
+
+    setSortInfo(sortInfo: ITableFilterJSON['tableSortInfo']) {
+        this._tableSortInfo = sortInfo;
     }
 
     getColumnFilter(columnIndex: number): ITableFilterItem | undefined {
@@ -89,7 +93,15 @@ export class TableFilters {
             const column = startColumn + columnIndex;
             const executeFunc = this.getExecuteFunc(sheet, range, columnIndex, filter);
             for (let row = startRow; row <= endRow; row++) {
-                // const cellValue = sheet.getCell(row, column);
+                if (isColorTableFilter(filter)) {
+                    const cellData = sheet.getCell(row, column);
+                    const cellStyle = sheet.getComposedCellStyleByCellData(row, column, cellData);
+                    if (!executeFunc(cellStyle)) {
+                        filterOutRows.add(row);
+                    }
+                    continue;
+                }
+
                 const conditionType = isConditionFilter(filter) ? filter.filterInfo.conditionType : TableConditionTypeEnum.String;
                 const cellValue = getCellValueWithConditionType(sheet, row, column, conditionType, dateSystem);
                 if (cellValue === null && !executeFunc(cellValue)) {
@@ -134,11 +146,25 @@ export class TableFilters {
             const isDynamic = isNumberDynamicFilter(filter.filterInfo.compareType);
             const calculatedOptions = isDynamic ? this._getNumberCalculatedOptions(sheet, range, columnIndex) : undefined;
             return getConditionExecuteFunc(filter, calculatedOptions);
+        } else if (filter.filterType === TableColumnFilterTypeEnum.color) {
+            const normalizeColor = (color: Nullable<string>) => color ? new ColorKit(color).toRgbString() : null;
+            if (filter.cellFillColors) {
+                const colors = new Set(filter.cellFillColors.map(normalizeColor));
+                return (style: Nullable<IStyleData>) => colors.has(normalizeColor(getColorStyle(style?.bg)));
+            }
+            if (filter.cellTextColors) {
+                const colors = new Set(filter.cellTextColors.map(normalizeColor));
+                return (style: Nullable<IStyleData>) => colors.has(normalizeColor(
+                    getColorStyle(style?.cl) ?? getColorStyle(DEFAULT_STYLES.cl)
+                ));
+            }
         } else {
-            return (value: Nullable<ICellData>) => {
+            return (_value: Nullable<ICellData>) => {
                 return true;
             };
         }
+
+        return () => true;
     }
 
     toJSON(): ITableFilterJSON {

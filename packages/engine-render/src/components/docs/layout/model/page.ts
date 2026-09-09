@@ -24,11 +24,23 @@ import type { ISectionBreakConfig } from '../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
-import { BooleanNumber, GridType, PageOrientType, PositionedObjectLayoutType, SpacingRule, TableTextWrapType } from '@univerjs/core';
+import {
+    BooleanNumber,
+    GridType,
+    PageOrientType,
+    PositionedObjectLayoutType,
+    SpacingRule,
+    TableTextWrapType,
+} from '@univerjs/core';
 import { BreakType, DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility } from '../../document-compatibility';
 import { dealWithSection } from '../block/section';
-import { reachesNextDocumentGridLine, resetContext, updateBlockIndex, updateInlineDrawingCoordsAndBorder } from '../tools';
+import {
+    reachesNextDocumentGridLine,
+    resetContext,
+    updateBlockIndex,
+    updateInlineDrawingCoordsAndBorder,
+} from '../tools';
 import { createSkeletonSection } from './section';
 
 function getHeaderFooterMaxHeight(pageHeight: number) {
@@ -44,7 +56,14 @@ export function createSkeletonPage(
     pageNumber = 1,
     breakType = BreakType.SECTION
 ): IDocumentSkeletonPage {
-    const page: IDocumentSkeletonPage = _getNullPage();
+    let page: IDocumentSkeletonPage;
+    if (sectionBreakConfig.cellTableId) {
+        page = _getNullPage(DocumentSkeletonPageType.CELL, sectionBreakConfig.cellTableId);
+    } else if (ctx.noteSegmentId) {
+        page = _getNullPage(DocumentSkeletonPageType.NOTE, ctx.noteSegmentId);
+    } else {
+        page = _getNullPage();
+    }
 
     const {
         sectionId,
@@ -70,7 +89,8 @@ export function createSkeletonPage(
 
     const { skeHeaders, skeFooters } = skeletonResourceReference;
 
-    const { width: pageWidth = Number.POSITIVE_INFINITY, height: pageHeight = Number.POSITIVE_INFINITY } = pageSize;
+    const { width: pageWidth = Number.POSITIVE_INFINITY, height: configuredHeight = Number.POSITIVE_INFINITY } = pageSize;
+    const pageHeight = sectionBreakConfig.cellPageHeights?.[pageNumber - 1] ?? configuredHeight;
 
     page.pageNumber = pageNumber;
     page.sectionId = sectionId;
@@ -310,7 +330,8 @@ export function createNullCellPage(
     availableHeight: number = Number.POSITIVE_INFINITY,
     maxCellPageHeight: number = Number.POSITIVE_INFINITY,
     inheritDocumentLinePitch = true,
-    enableDocumentTableLineGrid = true
+    enableDocumentTableLineGrid = true,
+    cellPageHeights?: readonly number[]
 ) {
     const {
         sectionId,
@@ -365,6 +386,8 @@ export function createNullCellPage(
 
     const cellSectionBreakConfig: ISectionBreakConfig = {
         sectionId,
+        cellTableId: tableId,
+        cellPageHeights,
         lists,
         footerTreeMap,
         headerTreeMap,
@@ -527,7 +550,8 @@ export function createSkeletonCellPages(
     row: number,
     col: number,
     availableHeight: number = Number.POSITIVE_INFINITY,
-    maxCellPageHeight: number = Number.POSITIVE_INFINITY
+    maxCellPageHeight: number = Number.POSITIVE_INFINITY,
+    cellPageHeights?: readonly number[]
 ) {
     // Table cell only has one section.
     const sectionNode = cellNode.children[0];
@@ -547,7 +571,8 @@ export function createSkeletonCellPages(
         availableHeight,
         maxCellPageHeight,
         inheritDocumentLinePitch,
-        enableDocumentTableLineGrid
+        enableDocumentTableLineGrid,
+        cellPageHeights
     );
 
     const segmentId = tableConfig.tableId;
@@ -628,7 +653,8 @@ export function startSkeletonCellPagesBuild(
     row: number,
     col: number,
     availableHeight: number = Number.POSITIVE_INFINITY,
-    maxCellPageHeight: number = Number.POSITIVE_INFINITY
+    maxCellPageHeight: number = Number.POSITIVE_INFINITY,
+    cellPageHeights?: readonly number[]
 ): ICellSkeletonBuildState {
     const sectionNode = cellNode.children[0];
     const { enableDocumentTableLineGrid, inheritDocumentLinePitch } = getCellLineGridOptions(
@@ -645,7 +671,8 @@ export function startSkeletonCellPagesBuild(
         availableHeight,
         maxCellPageHeight,
         inheritDocumentLinePitch,
-        enableDocumentTableLineGrid
+        enableDocumentTableLineGrid,
+        cellPageHeights
     );
     page.type = DocumentSkeletonPageType.CELL;
     page.segmentId = tableConfig.tableId;

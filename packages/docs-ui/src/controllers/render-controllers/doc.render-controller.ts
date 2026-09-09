@@ -85,7 +85,12 @@ import { IEditorService } from '../../services/editor/editor-manager.service';
 import { NodePositionConvertToCursor } from '../../services/selection/convert-text-range';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 import { getAnchorBounding } from '../../services/selection/text-range';
-import { getBodyTextXActions, getDocumentMutationLayoutImpact, getSingleBodyTextXActions, resolveMutationLayoutRequest } from './doc-mutation-layout';
+import {
+    getBodyTextXActions,
+    getDocumentMutationLayoutImpact,
+    getSingleBodyTextXActions,
+    resolveMutationLayoutRequest,
+} from './doc-mutation-layout';
 
 function getTextXActionLength(action: unknown): number | undefined {
     if (typeof action !== 'object' || action == null || !('t' in action) || !('len' in action)) {
@@ -845,7 +850,9 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                         workerOptions,
                         protectedRange,
                         mainThreadCallbacks,
-                        preserveInactiveViewportAnchor
+                        preserveInactiveViewportAnchor,
+                        true,
+                        progress.mode === 'continuous' && progress.complete
                     );
                 });
             },
@@ -990,11 +997,14 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             );
         } else if (isInitialLayout) {
             this._refreshPagePosition();
-        } else if (progress.didPublishAnchor && (
+        } else if ((progress.didPublishAnchor && (
             refreshIncompleteAnchorSelection || this._docSelectionRenderService.hasPendingSelection
-        )) {
+        )) || (publication != null &&
+            this._context.unit.getSnapshot().notes?.[this._getActiveRange(unitId)?.segmentId ?? ''] != null)) {
             // The foreground pass replaces edited line and glyph objects. Rebuild
             // the caret from stable document offsets without moving the viewport.
+            // A footnote can continue beyond the body anchor, so later Worker
+            // publications must also resolve its current segment offset.
             this._textSelectionManagerService.refreshSelection(
                 { unitId, subUnitId: unitId },
                 this._getActiveEditingRange(unitId) != null
@@ -1059,7 +1069,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         protectedRange: IDocumentLayoutProtectedRange | undefined,
         mainThreadCallbacks: DocLayoutCoordinatorCallbacks,
         preserveInactiveViewportAnchor: boolean,
-        allowRecovery = true
+        allowRecovery = true,
+        preserveCompletedLayout = false
     ): void {
         if (layoutRequestId !== this._layoutRequestId) {
             return;
@@ -1098,8 +1109,10 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                 mainThreadCallbacks,
                 preserveInactiveViewportAnchor,
                 allowRecovery,
-                error
-            )
+                error,
+                preserveCompletedLayout
+            ),
+            preserveCompletedLayout
         );
     }
 
@@ -1113,7 +1126,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         mainThreadCallbacks: DocLayoutCoordinatorCallbacks,
         preserveInactiveViewportAnchor: boolean,
         allowRecovery: boolean,
-        error: unknown
+        error: unknown,
+        preserveCompletedLayout: boolean
     ): void {
         if (!allowRecovery) {
             this._logService.error('[DocRenderController]: Worker layout failed; using main-thread layout.', error);
@@ -1138,7 +1152,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                 protectedRange,
                 mainThreadCallbacks,
                 preserveInactiveViewportAnchor,
-                false
+                false,
+                preserveCompletedLayout
             );
         }).catch((recoveryError: unknown) => {
             this._logService.error('[DocRenderController]: document layout Worker recovery failed; using main-thread layout.', recoveryError);
@@ -1343,23 +1358,13 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             return undefined;
         }
 
-        let endPageIndex = publishedEndPageIndex;
-        const maximumProtectedEndPageIndex = Math.min(
-            pages.length - 1,
-            startPageIndex + MATERIALIZED_PAGE_WINDOW_SIZE - 1
-        );
-        while (endPageIndex < maximumProtectedEndPageIndex) {
-            const nextPage = pages[endPageIndex + 1];
-            if (nextPage == null || nextPage.isLayoutPlaceholder || nextPage.isMaterializationPlaceholder) {
-                break;
-            }
-            endPageIndex++;
-        }
-
+        // Pages beyond Main's published boundary are retained previews. Keeping
+        // them in the protected range would reject fresh Worker geometry until
+        // the entire document completes, leaving the next page visibly stale.
         return {
             mode: 'paginated',
             startPageIndex,
-            endPageIndex,
+            endPageIndex: publishedEndPageIndex,
         };
     }
 
@@ -1726,7 +1731,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             if (!doesDocMutationRequireLayout(params.actions, snapshot.drawings)) {
                 return;
             }
-            const bodyRanges = textRanges?.filter((range) => !range.segmentId) ?? [];
+            const bodyRanges = textRanges?.filter((range) => !(range.segmentId ?? params.segmentId)) ?? [];
             const textInvalidation = getBodyMutationInvalidation(params.actions, params.segmentId);
             const mutationLayoutImpact = getDocumentMutationLayoutImpact(
                 params.actions,
@@ -1752,7 +1757,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                 ? undefined
                 : bodyRanges.find((range) => range.isActive) ??
                     (bodyRanges.length === 1 ? bodyRanges[0] : undefined);
-            const priorityAnchor = mutationActiveRange?.endOffset ?? activeRange?.endOffset;
+            const priorityAnchor = mutationActiveRange?.endOffset ??
+                (activeRange?.segmentId ? undefined : activeRange?.endOffset);
             // RichTextEditingMutation preserves the original Main input
             // contract by refreshing its local post-edit range in a microtask,
             // once the synchronous layout prefix has finished. Do not publish

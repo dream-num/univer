@@ -18,7 +18,9 @@ import { Disposable, Inject } from '@univerjs/core';
 import { CrossHighlightingIcon } from '@univerjs/icons';
 import { ComponentManager, IconManager } from '@univerjs/ui';
 import { CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT } from '../menu/crosshair.menu';
+import { MOBILE_CROSSHAIR_HIGHLIGHT_PANEL } from '../menu/mobile-crosshair.menu';
 import { CrosshairOverlay } from '../views/components/CrosshairHighlight';
+import { MobileCrosshairHighlightPanel } from '../views/mobile/MobileCrosshairHighlightPanel';
 
 export class ComponentsController extends Disposable {
     constructor(
@@ -33,6 +35,10 @@ export class ComponentsController extends Disposable {
 
     private _registerComponents(): void {
         this.disposeWithMe(this._componentManager.register(CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT, CrosshairOverlay));
+        this.disposeWithMe(this._componentManager.register(
+            MOBILE_CROSSHAIR_HIGHLIGHT_PANEL,
+            MobileCrosshairHighlightPanel
+        ));
     }
 
     private _registerIcons(): void {

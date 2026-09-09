@@ -18,7 +18,7 @@ import type { LocaleKey } from '../../../locale/types';
 import type { MobileDrawerSnap } from '../mobile-drawer/MobileDrawer';
 import type { ISidebarMethodOptions } from './Sidebar';
 import { LocaleService } from '@univerjs/core';
-import { ActionRow } from '@univerjs/design';
+import { MobileActionRowGroup } from '@univerjs/design';
 import { CloseIcon } from '@univerjs/icons';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
@@ -30,13 +30,16 @@ export function MobileSidebar() {
     const localeService = useDependency(LocaleService);
     const sidebarService = useDependency(ISidebarService);
     const sidebarOptions = useObservable<ISidebarMethodOptions>(sidebarService.sidebarOptions$);
+    const layerRef = useRef<HTMLDivElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
     const closeButtonRef = useRef<HTMLButtonElement>(null);
     const [drawerSnap, setDrawerSnap] = useState<MobileDrawerSnap>('expanded');
     const options = useMemo(() => renderSidebarOptions(sidebarOptions), [sidebarOptions]);
 
     useEffect(() => {
-        if (options?.visible) closeButtonRef.current?.focus();
+        if (options?.visible) {
+            closeButtonRef.current?.focus();
+        }
     }, [options?.visible]);
 
     useEffect(() => {
@@ -50,12 +53,18 @@ export function MobileSidebar() {
         };
     }, [options?.visible, sidebarService]);
 
-    if (!options?.visible) return null;
+    if (!options?.visible) {
+        return null;
+    }
 
     const close = () => sidebarService.close(sidebarOptions?.id);
 
     return (
-        <div className="univer-fixed univer-inset-0 univer-z-[1100]" data-u-comp="mobile-sidebar">
+        <div
+            ref={layerRef}
+            className="univer-fixed univer-inset-0 univer-z-[1100]"
+            data-u-comp="mobile-sidebar"
+        >
             <button
                 type="button"
                 aria-label={localeService.t<LocaleKey>('ui.sidebar.close')}
@@ -66,6 +75,7 @@ export function MobileSidebar() {
                 onClick={close}
             />
             <MobileDrawer
+                layerRef={layerRef}
                 componentName="mobile-sidebar-drawer"
                 snap={drawerSnap}
                 expandLabel={localeService.t<LocaleKey>('ui.ribbon.more')}
@@ -114,7 +124,7 @@ export function MobileSidebar() {
                               dark:!univer-border-gray-700
                             "
                         >
-                            <ActionRow>{options.footer}</ActionRow>
+                            <MobileActionRowGroup>{options.footer}</MobileActionRowGroup>
                         </footer>
                     )
                     : undefined}

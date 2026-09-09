@@ -41,6 +41,7 @@ const locale: typeof enUS = {
             'sort-reminder-no': 'Zachovať triedenie rozsahu',
             'first-row-check': 'Prvý riadok sa nezúčastňuje triedenia',
             'add-condition': 'Pridať podmienku',
+            'delete-condition': 'Odstrániť podmienku',
             cancel: 'Zrušiť',
             confirm: 'Potvrdiť',
         },

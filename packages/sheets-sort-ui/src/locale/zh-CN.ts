@@ -41,6 +41,7 @@ const locale: typeof enUS = {
             'sort-reminder-no': '保持所选排序范围',
             'first-row-check': '标题不参与排序',
             'add-condition': '添加排序条件',
+            'delete-condition': '删除排序条件',
             cancel: '取消',
             confirm: '确认',
         },

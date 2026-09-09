@@ -384,12 +384,13 @@ describe('DocDrawingUpdateRenderController', () => {
         focus$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'body-drawing' }]);
         expect(contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_COMMON_DRAWINGS, true);
         expect(docDrawingService.focusDrawing).toHaveBeenLastCalledWith([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'body-drawing' }]);
-        expect(docSelectionManagerService.replaceDocRanges).toHaveBeenCalledWith([{ startOffset: 4, endOffset: 5 }]);
+        expect(docSelectionManagerService.replaceDocRanges).toHaveBeenCalledWith([{ startOffset: 4, endOffset: 5, segmentId: '' }]);
         expect(docSelectionRenderService.setSegment).not.toHaveBeenCalled();
         expect(transformer.resetProps).toHaveBeenLastCalledWith({ zeroTop: 18, zeroLeft: 12 });
 
         focus$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'header-drawing' }]);
         expect(docSelectionRenderService.setSegment).toHaveBeenCalledWith('header-1');
+        expect(docSelectionManagerService.replaceDocRanges).toHaveBeenLastCalledWith([{ startOffset: 2, endOffset: 3, segmentId: 'header-1' }]);
     });
 
     it('refreshes doc selection after transformer changes finish', async () => {

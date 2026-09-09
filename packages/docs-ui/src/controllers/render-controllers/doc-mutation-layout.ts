@@ -16,7 +16,7 @@
 
 import type { IDocStyles, IDocumentBody, IDocumentData, JSONXActions } from '@univerjs/core';
 import type { IDocumentLayoutInvalidation } from '@univerjs/engine-render';
-import { JSON1, TextX } from '@univerjs/core';
+import { CustomRangeType, JSON1, TextX } from '@univerjs/core';
 
 interface IDocumentLayoutRange {
     end: number;
@@ -225,6 +225,21 @@ function getComponentLayoutImpact(
     }
     if (root === 'body') {
         return getBodyComponentLayoutImpact(path, component, body);
+    }
+    if (root === 'notes') {
+        const ids = getChangedRecordKeys(path, component);
+        let range: IDocumentLayoutRange | undefined;
+        for (const reference of body?.customRanges ?? []) {
+            const id = reference.properties?.noteId;
+            if ((reference.rangeType === CustomRangeType.FOOTNOTE || reference.rangeType === CustomRangeType.ENDNOTE) && typeof id === 'string' && ids.has(id)) {
+                range = mergeLayoutRange(range, { start: reference.startIndex, end: reference.endIndex + 1 });
+            }
+        }
+        return {
+            global: false,
+            range,
+            unresolvedLocal: range == null,
+        };
     }
     if (root === 'tableSource') {
         const tableId = path[1];

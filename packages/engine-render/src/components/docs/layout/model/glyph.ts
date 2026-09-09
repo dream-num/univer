@@ -355,10 +355,10 @@ export function _createSkeletonWordOrLetter(
     let xOffset = 0;
 
     const isDrawingMLLineSeparator = glyphWidth == null && content === '\u2028' && documentCompatibilityPolicy.mode === 'drawingml';
-    bBox = FontCache.getTextSize(content, fontStyle);
+    bBox = FontCache.getTextSize(content, fontStyle, isTraditionalDocumentCompatibility(documentCompatibilityPolicy));
     if (fontStyle !== config.fontStyle) {
         bBox = {
-            ...FontCache.getTextSize(content, config.fontStyle),
+            ...FontCache.getTextSize(content, config.fontStyle, isTraditionalDocumentCompatibility(documentCompatibilityPolicy)),
             width: bBox.width,
             aba: bBox.aba,
             abd: bBox.abd,

@@ -41,6 +41,7 @@ const locale: typeof enUS = {
             'sort-reminder-no': 'الاحتفاظ بنطاق الفرز',
             'first-row-check': 'الصف الأول لا يشارك في الفرز',
             'add-condition': 'إضافة شرط',
+            'delete-condition': 'حذف الشرط',
             cancel: 'إلغاء',
             confirm: 'تأكيد',
         },

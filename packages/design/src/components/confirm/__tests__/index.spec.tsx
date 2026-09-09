@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Confirm } from '../Confirm';
+import { MobileConfirm } from '../MobileConfirm';
 import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
@@ -37,5 +38,12 @@ describe('Confirm', () => {
         const { getByText } = render(<Confirm visible cancelText="No" confirmText="Yes">content</Confirm>);
         expect(getByText('No')).toBeInTheDocument();
         expect(getByText('Yes')).toBeInTheDocument();
+    });
+
+    it('should render the mobile confirmation as a bottom surface', () => {
+        render(<MobileConfirm visible title="Mobile confirm" confirmText="Confirm">content</MobileConfirm>);
+
+        expect(document.querySelector('[role="dialog"]')).toHaveClass('!univer-bottom-0');
+        expect(screen.getByRole('button', { name: 'Confirm' }).parentElement).toHaveClass('univer-w-full');
     });
 });

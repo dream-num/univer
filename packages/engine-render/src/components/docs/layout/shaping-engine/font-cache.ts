@@ -37,6 +37,10 @@ const getDefaultBaselineOffset = (fontSize: number) => ({
     spo: fontSize,
 });
 
+function getNormalFontKey(font: string): string {
+    return font.replace(/\d+(?:\.\d+)?(?:pt|px)/, '1000pt').trim();
+}
+
 interface IFontData {
     notDefWidth: number;
     ascender: number;
@@ -58,7 +62,14 @@ interface IGlyphHorizonData {
     pixelsPerEm?: number[];
 }
 
+/** Invalidates selected CSS font keys in both measurement caches; registered font data is retained. */
+export function invalidateDocumentFontMetrics(matches: (fontStyle: string) => boolean): boolean {
+    return FontCache.invalidateMetrics(matches);
+}
+
 export class FontCache {
+    private static _normalLineHeightCache = new Map<string, number>();
+
     private static _getTextHeightCache: { [key: string]: { width: number; height: number } } = {};
 
     private static _context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
@@ -69,6 +80,25 @@ export class FontCache {
 
     static get globalFontMeasureCache() {
         return this._globalFontMeasureCache;
+    }
+
+    static invalidateMetrics(matches: (fontStyle: string) => boolean): boolean {
+        let changed = false;
+        const keys = new Set([
+            ...this._globalFontMeasureCache.keys(),
+            ...Object.keys(this._getTextHeightCache),
+            ...this._normalLineHeightCache.keys(),
+        ]);
+        for (const key of keys) {
+            if (matches(key)) {
+                this._globalFontMeasureCache.delete(key);
+                delete this._getTextHeightCache[key];
+                this._normalLineHeightCache.delete(key);
+                this._normalLineHeightCache.delete(getNormalFontKey(key));
+                changed = true;
+            }
+        }
+        return changed;
     }
 
     static setFontMeasureCache(fontStyle: string, content: string, tm: IMeasureTextCache) {
@@ -191,7 +221,55 @@ export class FontCache {
         return result;
     }
 
-    static getTextSize(content: string, fontStyle: IDocumentSkeletonFontStyle): IDocumentSkeletonBoundingBox {
+    /** CSS normal spacing includes font leading that Canvas bounding boxes omit. */
+    static getNormalLineHeight(fontStyle: IDocumentSkeletonFontStyle): number | undefined {
+        const key = getNormalFontKey(fontStyle.fontString);
+        let ratio = this._normalLineHeightCache.get(key);
+        if (ratio == null && typeof document !== 'undefined' && document.body != null) {
+            const element = document.createElement('div');
+            element.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;white-space:pre;margin:0;padding:0;border:0;';
+            element.style.font = key;
+            element.style.lineHeight = 'normal';
+            element.textContent = 'Hg\nHg';
+            document.body.appendChild(element);
+            try {
+                // Measuring large text preserves subpixel font metrics at ordinary document sizes.
+                const height = element.getBoundingClientRect().height / 2000;
+                if (Number.isFinite(height) && height > 0) {
+                    ratio = height;
+                    if (this._normalLineHeightCache.size >= 1024) {
+                        this._normalLineHeightCache.clear();
+                    }
+                    this._normalLineHeightCache.set(key, ratio);
+                }
+            } finally {
+                element.remove();
+            }
+        }
+        return ratio == null ? undefined : ratio * fontStyle.originFontSize;
+    }
+
+    /** Transfers browser-only normal spacing measurements to the document layout Worker. */
+    static getNormalLineHeightCache(): Record<string, number> {
+        return Object.fromEntries(this._normalLineHeightCache);
+    }
+
+    static setNormalLineHeightCache(metrics: Record<string, number>): void {
+        for (const [font, ratio] of Object.entries(metrics)) {
+            if (Number.isFinite(ratio) && ratio > 0) {
+                if (this._normalLineHeightCache.size >= 1024 && !this._normalLineHeightCache.has(font)) {
+                    this._normalLineHeightCache.clear();
+                }
+                this._normalLineHeightCache.set(font, ratio);
+            }
+        }
+    }
+
+    static getTextSize(
+        content: string,
+        fontStyle: IDocumentSkeletonFontStyle,
+        includeNormalFontLeading = false
+    ): IDocumentSkeletonBoundingBox {
         const { fontString, fontSize, fontFamily } = fontStyle;
 
         let bBox = this._getBoundingBoxByFont(fontFamily, fontSize);
@@ -206,7 +284,7 @@ export class FontCache {
 
         return {
             ...bBox,
-            normalLineHeight: bBox.ba + bBox.bd,
+            normalLineHeight: (includeNormalFontLeading ? this.getNormalLineHeight(fontStyle) : undefined) ?? bBox.ba + bBox.bd,
         };
     }
 

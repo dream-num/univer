@@ -17,12 +17,14 @@
 import type { IDocumentSkeletonDivide, IDocumentSkeletonGlyph } from '../../../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig } from '../../../../../../basics/interfaces';
 import {
+    AlignTypeH,
     BooleanNumber,
     DataStreamTreeTokenType,
     DocumentFlavor,
     DrawingTypeEnum,
     GridType,
     NumberUnitType,
+    ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
     SpacingRule,
@@ -34,6 +36,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GlyphType, LineType } from '../../../../../../basics/i-document-skeleton-cached';
 import { setDocsCustomBlockRenderViewportProvider } from '../../../../custom-block-render-viewport';
 import { getDocumentCompatibilityPolicy } from '../../../../document-compatibility';
+import { DocumentSkeleton } from '../../../doc-skeleton';
 import { Lang } from '../../../hyphenation/lang';
 import { BreakPointType } from '../../../line-breaker/break';
 import { createSkeletonCustomBlockGlyph } from '../../../model/glyph';
@@ -61,6 +64,146 @@ describe('layout-ruler', () => {
                 }),
             }),
         });
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((documentFlavor) =>
+        [false, true].map((incremental) => ({ documentFlavor, incremental }))))('preserves table terminators without adding traditional blank lines (flavor: $documentFlavor, incremental: $incremental)', ({ documentFlavor, incremental }) => {
+        const T = DataStreamTreeTokenType;
+        const tableStream = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cell\r\n${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+        const dataStream = `${tableStream}\r\rAfter\r\n`;
+        const anchorIndex = tableStream.length;
+        const bed = createParagraphLayoutTestBed('', {
+            documentStyle: { documentFlavor },
+            body: {
+                dataStream,
+                paragraphs: [...dataStream.matchAll(/\r/g)].filter((match) => match.index !== anchorIndex).map((match, index) => ({ paragraphId: `p-${index}`, startIndex: match.index })),
+                sectionBreaks: [{ sectionId: 'cell', startIndex: dataStream.indexOf('\n') }, { sectionId: 'body', startIndex: dataStream.length - 1 }],
+                tables: [{ tableId: 'table', startIndex: 0, endIndex: anchorIndex }],
+            },
+            tableSource: { table: {
+                tableId: 'table',
+                align: 0,
+                indent: { v: 0 },
+                textWrap: 0,
+                size: { type: 0, width: { v: 200 } },
+                tableRows: [{ tableCells: [{ size: { type: 0, width: { v: 200 } } }], trHeight: { val: { v: 0 }, hRule: 0 } }],
+                tableColumns: [{ size: { type: 0, width: { v: 200 } } }],
+            } },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        try {
+            if (incremental) {
+                const generation = skeleton.startIncrementalLayout();
+                let progress = skeleton.stepIncrementalLayout(generation, 0);
+                for (let step = 0; step < 20 && !progress.complete; step++) {
+                    progress = skeleton.stepIncrementalLayout(generation, 0);
+                }
+                expect(progress.complete).toBe(true);
+            } else {
+                skeleton.calculate();
+            }
+            const page = skeleton.getSkeletonData()!.pages[0];
+            const table = page.skeTables.get('table')!;
+            const lines = page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines));
+            const anchor = lines.find((line) => line.paragraphIndex === anchorIndex)!;
+            const emptyParagraph = lines.find((line) => line.paragraphIndex === anchorIndex + 1)!;
+            if (documentFlavor === DocumentFlavor.TRADITIONAL) {
+                expect(anchor.lineHeight).toBe(0);
+            } else {
+                expect(anchor.lineHeight).toBeGreaterThan(0);
+            }
+            expect(emptyParagraph.lineHeight).toBeGreaterThan(0);
+            expect(emptyParagraph.top).toBeCloseTo(table.top + table.height + anchor.lineHeight);
+            expect(bed.dataModel.getBody()?.dataStream).toBe(dataStream);
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it.each([
+        { relativeFrom: ObjectRelativeFromH.MARGIN, align: AlignTypeH.CENTER, expectedLeft: 10 },
+        { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 60, expectedLeft: 20 },
+        { relativeFrom: ObjectRelativeFromH.COLUMN, posOffset: 20, expectedLeft: 20 },
+    ])('positions floating tables in body coordinates for anchor $relativeFrom', ({ expectedLeft, ...positionH }) => {
+        const T = DataStreamTreeTokenType;
+        const tableStream = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cell\r\n${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+        const dataStream = `${tableStream}\rAfter\r\n`;
+        const bed = createParagraphLayoutTestBed('', {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, marginLeft: 40, marginRight: 20 },
+            body: {
+                dataStream,
+                paragraphs: [...dataStream.matchAll(/\r/g)].map((match, index) => ({ paragraphId: `p-${index}`, startIndex: match.index })),
+                sectionBreaks: [{ sectionId: 'cell', startIndex: dataStream.indexOf('\n') }, { sectionId: 'body', startIndex: dataStream.length - 1 }],
+                tables: [{ tableId: 'table', startIndex: 0, endIndex: tableStream.length }],
+            },
+            tableSource: { table: {
+                tableId: 'table',
+                align: 0,
+                indent: { v: 0 },
+                textWrap: TableTextWrapType.WRAP,
+                dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                position: { positionH, positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 10 } },
+                size: { type: 0, width: { v: 320 } },
+                tableRows: [{ tableCells: [{ size: { type: 0, width: { v: 320 } } }], trHeight: { val: { v: 0 }, hRule: 0 } }],
+                tableColumns: [{ size: { type: 0, width: { v: 320 } } }],
+            } },
+        });
+        try {
+            const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+            skeleton.calculate();
+            const tables = skeleton.getSkeletonData()!.pages.flatMap((page) => [...page.skeTables.values()]);
+            expect(tables).toHaveLength(1);
+            const table = tables[0];
+            expect(table.left).toBeCloseTo(expectedLeft);
+            expect(table.top).toBeCloseTo(10);
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it('keeps words intact below floating tables while retaining usable side wraps', () => {
+        const T = DataStreamTreeTokenType;
+        const tableStream = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cell\r\n${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+        const dataStream = `${tableStream}\rEn las Quintas columnas\r\n`;
+        const bed = createParagraphLayoutTestBed('', {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+            body: {
+                dataStream,
+                paragraphs: [...dataStream.matchAll(/\r/g)].map((match, index) => ({ paragraphId: `p-${index}`, startIndex: match.index })),
+                sectionBreaks: [{ sectionId: 'cell', startIndex: dataStream.indexOf('\n') }, { sectionId: 'body', startIndex: dataStream.length - 1 }],
+                tables: [{ tableId: 'table', startIndex: 0, endIndex: tableStream.length }],
+            },
+            tableSource: { table: {
+                tableId: 'table',
+                align: 0,
+                indent: { v: 0 },
+                textWrap: TableTextWrapType.WRAP,
+                dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                position: {
+                    positionH: { relativeFrom: ObjectRelativeFromH.COLUMN, posOffset: 30 },
+                    positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 0 },
+                },
+                size: { type: 0, width: { v: 300 } },
+                tableRows: [{ tableCells: [{ size: { type: 0, width: { v: 300 } } }], trHeight: { val: { v: 120 }, hRule: 0 } }],
+                tableColumns: [{ size: { type: 0, width: { v: 300 } } }],
+            } },
+        });
+        try {
+            const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+            skeleton.calculate();
+            const page = skeleton.getSkeletonData()!.pages[0];
+            const table = [...page.skeTables.values()][0];
+            const lines = page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines));
+            const text = (line: typeof lines[number]) => line.divides.map((divide) => divide.glyphGroup.map((glyph) => glyph.content).join('')).join('');
+            expect(lines.map(text).join('')).toContain('En las Quintas columnas');
+            expect(lines.find((line) => text(line).includes('En'))!.top).toBeLessThan(table.top + table.height);
+            expect(lines.find((line) => text(line).includes('Quintas'))!.top).toBeGreaterThanOrEqual(table.top + table.height);
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
     });
 
     function createGlyph(content: string, width: number): IDocumentSkeletonGlyph {
@@ -1446,6 +1589,7 @@ describe('layout-ruler', () => {
             0,
             14,
             page,
+            [page],
             column,
             section,
             cache,

@@ -125,6 +125,14 @@ function collectPageDrawingIds(page: IDocumentSkeletonPage | IDocumentSkeletonHe
     for (const drawingId of page.skeDrawings.keys()) {
         drawingIds.add(drawingId);
     }
+    for (const note of page.notes ?? []) {
+        collectPageDrawingIds(note.page, drawingIds);
+    }
+    for (const group of page.skeColumnGroups?.values() ?? []) {
+        for (const column of group.columns) {
+            collectPageDrawingIds(column.page, drawingIds);
+        }
+    }
     // Cell drawings belong to their cell skeleton, not the host page's map.
     for (const table of page.skeTables.values()) {
         for (const row of table.rows) {

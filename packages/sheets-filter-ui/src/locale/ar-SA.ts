@@ -33,6 +33,13 @@ const locale: typeof enUS = {
             'clear-filter': 'مسح التصفية',
             cancel: 'إلغاء',
             confirm: 'تأكيد',
+            mobile: {
+                resize: 'تغيير حجم لوحة التصفية',
+                back: 'رجوع',
+                column: 'العمود {0}',
+                'previous-column': 'العمود السابق',
+                'next-column': 'العمود التالي',
+            },
             'by-values': 'حسب القيم',
             'by-colors': 'حسب الألوان',
             'filter-by-cell-fill-color': 'تصفية حسب لون تعبئة الخلية',

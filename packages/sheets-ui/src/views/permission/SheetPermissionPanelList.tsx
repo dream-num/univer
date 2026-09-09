@@ -52,14 +52,18 @@ import { panelListEmptyBase64 } from './panel-list/constant';
 
 type IRuleItem = IRangeProtectionRule | IWorksheetProtectionRule;
 
-export function SheetPermissionPanelList() {
+export interface ISheetPermissionPanelListProps {
+    ActionRowComponent?: typeof ActionRow;
+}
+
+export function SheetPermissionPanelList({ ActionRowComponent = ActionRow }: ISheetPermissionPanelListProps = {}) {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
 
-    return workbook ? <SheetPermissionPanelListContent /> : null;
+    return workbook ? <SheetPermissionPanelListContent ActionRowComponent={ActionRowComponent} /> : null;
 }
 
-function SheetPermissionPanelListContent() {
+function SheetPermissionPanelListContent({ ActionRowComponent }: Required<ISheetPermissionPanelListProps>) {
     const [isCurrentSheet, setIsCurrentSheet] = useState(true);
     const [currentRuleRanges, setCurrentRuleRanges] = useState<IRange[]>([]);
 
@@ -405,7 +409,7 @@ function SheetPermissionPanelListContent() {
                 )}
 
             {hasSetProtectPermission && (
-                <ActionRow className="univer-mt-auto univer-py-5">
+                <ActionRowComponent className="univer-mt-auto univer-py-5">
                     <Button
                         className="univer-w-full"
                         variant="primary"
@@ -424,7 +428,7 @@ function SheetPermissionPanelListContent() {
                         <div>+ </div>
                         {localeService.t<LocaleKey>('sheets-ui.permission.button.addNewPermission')}
                     </Button>
-                </ActionRow>
+                </ActionRowComponent>
             )}
         </div>
     );

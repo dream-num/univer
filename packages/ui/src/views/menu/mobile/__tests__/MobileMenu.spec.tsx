@@ -486,6 +486,9 @@ describe('MobileMenu', () => {
 
         const increase = screen.getByRole('button', { name: 'Increase' });
         expect(increase.parentElement?.closest('button')).toBeNull();
+        const row = increase.closest('[role="group"]');
+        expect(row?.className).toContain('univer-gap-3');
+        expect(row?.className).not.toContain('[&>div]:!univer-w-full');
         fireEvent.click(increase);
         expect(onOptionSelect).toHaveBeenCalledWith(expect.objectContaining({
             id: 'insert.rows',

@@ -29,6 +29,7 @@ import {
     ICommandService,
     Inject,
     IUniverInstanceService,
+    JSON1,
     JSONX,
     PositionedObjectLayoutType,
     RedoCommand,
@@ -37,6 +38,7 @@ import {
 } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import {
+    collectDocDrawings,
     getDocDrawingRenderOrder,
     IDocDrawingService,
     TextWrappingStyle,
@@ -224,6 +226,16 @@ export class DocDrawingAddRemoveController extends Disposable {
 
                 const params = command.params as IRichTextEditingMutationParams;
                 const { unitId, actions } = params;
+                let changedNotes = false;
+                if (!JSONX.isNoop(actions)) {
+                    const cursor = JSON1.type.readCursor(actions);
+                    cursor.traverse(null, () => {
+                        changedNotes ||= cursor.getPath()[0] === 'notes';
+                    });
+                }
+                if (changedNotes) {
+                    this._syncNoteDrawings(unitId);
+                }
                 const reOrderedDrawings = getReOrderedDrawings(actions);
 
                 if (reOrderedDrawings.length > 0) {
@@ -413,7 +425,7 @@ export class DocDrawingAddRemoveController extends Disposable {
             return;
         }
 
-        const { drawings, drawingsOrder } = documentDataModel.getSnapshot();
+        const { drawings, drawingsOrder } = collectDocDrawings(documentDataModel.getSnapshot());
 
         if (drawingsOrder == null) {
             return;
@@ -441,6 +453,27 @@ export class DocDrawingAddRemoveController extends Disposable {
         });
     }
 
+    private _syncNoteDrawings(unitId: string): void {
+        const model = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        if (!model) {
+            return;
+        }
+        const { drawings } = collectDocDrawings(model.getSnapshot());
+        const previous = this._docDrawingService.getDrawingData(unitId, unitId) ?? {};
+        const added = Object.keys(drawings).filter((id) => !previous[id]);
+        const removed = Object.keys(previous).filter((id) => !drawings[id]);
+        const changed = Object.keys(drawings).filter((id) => drawings[id] !== previous[id]);
+        if (added.length > 0) {
+            this._addDrawings(unitId, added.map((id) => ({ ...drawings[id], unitId, subUnitId: unitId })));
+        }
+        if (removed.length > 0) {
+            this._removeDrawings(unitId, removed);
+        }
+        if (changed.length > 0) {
+            this._syncDrawingDataFromSnapshot(unitId, changed);
+        }
+    }
+
     private _syncDrawingDataFromSnapshot(unitId: string, drawingIds: string[]) {
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
 
@@ -448,7 +481,7 @@ export class DocDrawingAddRemoveController extends Disposable {
             return;
         }
 
-        const { drawings = {}, drawingsOrder = [] } = documentDataModel.getSnapshot();
+        const { drawings, drawingsOrder } = collectDocDrawings(documentDataModel.getSnapshot());
         const drawingData = drawings as IDrawingMapItemData<IDocDrawing>;
         const previousDrawings = this._docDrawingService.getDrawingData(unitId, unitId);
         const orderChanged = drawingsOrder !== this._docDrawingService.getDrawingOrder(unitId, unitId) ||

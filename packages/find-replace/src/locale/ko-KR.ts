@@ -19,6 +19,13 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'find-replace': {
         toolbar: '찾기 및 바꾸기',
+        mobile: {
+            settings: '찾기 및 바꾸기 설정',
+            'settings-title': '찾기 및 바꾸기 설정',
+            'previous-match': '이전 일치 항목',
+            'next-match': '다음 일치 항목',
+            close: '찾기 및 바꾸기 닫기',
+        },
         shortcut: {
             'open-find-dialog': '찾기 대화 상자 열기',
             'open-replace-dialog': '바꾸기 대화 상자 열기',

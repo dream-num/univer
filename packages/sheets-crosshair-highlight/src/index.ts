@@ -25,5 +25,6 @@ export {
 export type { ISetCrosshairHighlightColorOperationParams } from './commands/operations/operation';
 export type { IUniverSheetsCrosshairHighlightConfig } from './config/config';
 export { menuSchema as SheetsCrosshairHighlightMenuSchema } from './menu/schema';
+export { UniverSheetsCrosshairHighlightMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsCrosshairHighlightPlugin } from './plugin';
 export { SheetsCrosshairHighlightService } from './services/crosshair.service';

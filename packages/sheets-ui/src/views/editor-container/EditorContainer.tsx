@@ -49,7 +49,6 @@ import {
     SetCellEditVisibleOperation,
 } from '../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
-import { MOBILE_SHEET_FX_EDITOR } from '../../consts/mobile-context';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { SheetCellEditorResizeService } from '../../services/editor/cell-editor-resize.service';
@@ -206,7 +205,11 @@ function isEmbedRuntimeEditorOrPopup(target: EventTarget | null | undefined): bo
  * Cell editor container.
  * @returns the rendered cell editor container.
  */
-export function EditorContainer() {
+export interface IEditorContainerProps {
+    hidden?: boolean;
+}
+
+export function EditorContainer({ hidden = false }: IEditorContainerProps) {
     const [state, setState] = useState({
         ...EDITOR_DEFAULT_POSITION,
     });
@@ -229,12 +232,6 @@ export function EditorContainer() {
         false,
         undefined,
         [contextService, DISABLE_AUTO_FOCUS_KEY]
-    );
-    const mobileFxEditor = useObservable(
-        () => contextService.subscribeContextValue$(MOBILE_SHEET_FX_EDITOR),
-        contextService.getContextValue(MOBILE_SHEET_FX_EDITOR),
-        undefined,
-        [contextService]
     );
     const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);
     const editState = useObservable(editorBridgeService.currentEditCellState$);
@@ -356,13 +353,13 @@ export function EditorContainer() {
     }, [cellEditorResizeService, injector]);
 
     useEffect(() => {
-        if (!disableAutoFocus && !contextService.getContextValue(DISABLE_AUTO_FOCUS_KEY)) {
+        if (!hidden && !disableAutoFocus && !contextService.getContextValue(DISABLE_AUTO_FOCUS_KEY)) {
             cellEditorManagerService.setFocus(true);
         }
-    }, [cellEditorManagerService, contextService, disableAutoFocus, state]);
+    }, [cellEditorManagerService, contextService, disableAutoFocus, hidden, state]);
 
     useEffect(() => {
-        if (!visible?.visible) {
+        if (hidden || !visible?.visible) {
             return;
         }
 
@@ -431,7 +428,7 @@ export function EditorContainer() {
                 ownerWindow.clearTimeout(delayedFocusTimer);
             }
         };
-    }, [cellEditorResizeService, editorService, visible?.visible]);
+    }, [cellEditorResizeService, contextService, editorService, hidden, visible?.visible]);
 
     useEffect(() => {
         if (!visible?.visible || !rootRef.current || !focusCoordinator) {
@@ -636,7 +633,7 @@ export function EditorContainer() {
     }, []);
 
     const refocusEditorAfterPointerDown = useEvent((event: React.PointerEvent<HTMLDivElement>) => {
-        if (!visible?.visible) {
+        if (hidden || !visible?.visible) {
             return;
         }
 
@@ -704,8 +701,8 @@ export function EditorContainer() {
                 top: state.top,
                 width: state.width,
                 height: state.height,
-                opacity: mobileFxEditor ? 0 : undefined,
-                pointerEvents: mobileFxEditor ? 'none' : undefined,
+                opacity: hidden ? 0 : undefined,
+                pointerEvents: hidden ? 'none' : undefined,
                 backgroundColor: getCellEditorHostBackgroundColor(editState, {
                     darkMode,
                     getColorFromTheme: themeService.getColorFromTheme.bind(themeService),
@@ -737,7 +734,7 @@ export function EditorContainer() {
                     `}
                     initValue=""
                     onChange={() => {}}
-                    isFocus={visible?.visible}
+                    isFocus={!hidden && visible?.visible}
                     unitId={editState?.unitId}
                     subUnitId={editState?.sheetId}
                     keyboardEventConfig={keyCodeConfig}

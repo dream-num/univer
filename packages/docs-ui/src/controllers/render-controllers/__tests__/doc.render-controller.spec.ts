@@ -236,6 +236,19 @@ describe('DocRenderController bounded input publication', () => {
             }),
         }, { get: (target, key) => key in target ? Reflect.get(target, key) : () => {} });
         vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(context as never);
+        const getBoundingClientRect = HTMLElement.prototype.getBoundingClientRect;
+        vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+            // Match the fixture's 14pt Canvas metrics; jsdom returns zero and cannot cache normal leading.
+            if (this.style.visibility === 'hidden' && this.style.whiteSpace === 'pre' && this.style.lineHeight === 'normal') {
+                const fontSize = Number.parseFloat(this.style.fontSize);
+                const pointsPerUnit = this.style.fontSize.endsWith('px') ? 3 / 4 : 1;
+                const lineCount = (this.textContent ?? '').split('\n').length;
+                const metrics = context.measureText('Hg');
+                const lineHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
+                return new DOMRect(0, 0, 0, fontSize * pointsPerUnit / 14 * lineHeight * lineCount);
+            }
+            return getBoundingClientRect.call(this);
+        });
     });
     afterEach(() => {
         vi.restoreAllMocks();

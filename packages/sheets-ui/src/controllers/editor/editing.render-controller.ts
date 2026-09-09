@@ -731,6 +731,7 @@ export class EditingRenderController extends Disposable {
             if (this._editorBridgeService.isForceKeepVisible()) {
                 this._editorBridgeService.disableForceKeepVisible();
             }
+            this._editorBridgeService.refreshEditCellState();
             this._refreshCurrentSelections(sheetId);
             return;
         }

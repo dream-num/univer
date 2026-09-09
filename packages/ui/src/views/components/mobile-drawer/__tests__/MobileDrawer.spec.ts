@@ -101,7 +101,7 @@ describe('mobile drawer snap behavior', () => {
         }, 'Drawer content'));
         const handle = screen.getByRole('button', { name: 'Expand drawer' });
 
-        expect(handle.style.touchAction).toBe('none');
+        expect(handle.classList.contains('univer-touch-none')).toBe(true);
         fireEvent.pointerDown(handle, { pointerId: 1, clientY: 500 });
         fireEvent.pointerMove(handle, { pointerId: 1, clientY: 450 });
         fireEvent.pointerCancel(handle, { pointerId: 1, clientY: 0 });

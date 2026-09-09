@@ -75,7 +75,7 @@ export const MENU_OPTIONS = (currencySymbol: string): Array<{
         },
         {
             label: 'sheets-numfmt-ui.timeDuration',
-            pattern: 'h:mm:ss',
+            pattern: '[h]:mm:ss',
         },
         '|',
         {

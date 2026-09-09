@@ -19,11 +19,11 @@ import type { Editor } from '@univerjs/docs-ui';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { LocaleKey } from '../../locale/types';
 import type { IRangeSelectorProps } from './index';
-import { HorizontalAlign, ICommandService, LocaleService, RichTextBuilder, Tools } from '@univerjs/core';
+import { ICommandService, RichTextBuilder } from '@univerjs/core';
 import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { SelectRangeIcon } from '@univerjs/icons';
 import { SetSelectionsOperation } from '@univerjs/sheets';
-import { useDependency, useEvent, useObservable } from '@univerjs/ui';
+import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { useStateRef } from '../formula-editor/hooks/use-state-ref';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
@@ -55,22 +55,10 @@ export function MobileRangeSelector(props: IRangeSelectorProps) {
     const [focusing, setFocusing] = useState(autoFocus ?? false);
     const [popupVisible, setPopupVisible] = useState(false);
     const [rangeSelectorRanges, setRangeSelectorRanges] = useState<IUnitRangeName[]>([]);
-    const localeService = useDependency(LocaleService);
-    const direction = useObservable(localeService.direction$, localeService.getDirection());
     const editorService = useDependency(IEditorService);
     const commandService = useDependency(ICommandService);
     const { sequenceNodes } = useRangesHighlight(editor, focusing, unitId, subUnitId);
     const sequenceNodesRef = useStateRef(sequenceNodes);
-    useEffect(() => {
-        if (!editor) {
-            return;
-        }
-
-        const documentData = RichTextBuilder.create(Tools.deepClone(editor.getDocumentData()))
-            .align({ horizontal: direction === 'rtl' ? HorizontalAlign.RIGHT : HorizontalAlign.LEFT })
-            .getData();
-        editor.setDocumentData(documentData, editor.getSelectionRanges());
-    }, [direction, editor]);
     const blurEditor = useEvent(() => {
         editor?.setSelectionRanges([]);
         editor?.blur();

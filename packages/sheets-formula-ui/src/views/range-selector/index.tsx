@@ -19,7 +19,7 @@ import type { Editor, IRichTextEditorProps } from '@univerjs/docs-ui';
 import type { ISelectionWithStyle, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { RefObject } from 'react';
 import type { LocaleKey } from '../../locale/types';
-import { HorizontalAlign, ICommandService, LocaleService, RichTextBuilder, Tools } from '@univerjs/core';
+import { ICommandService, LocaleService, RichTextBuilder } from '@univerjs/core';
 import { Button, clsx, Dialog, Input, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import {
@@ -32,7 +32,7 @@ import {
 } from '@univerjs/engine-formula';
 import { DeleteIcon, IncreaseIcon, SelectRangeIcon } from '@univerjs/icons';
 import { SetSelectionsOperation } from '@univerjs/sheets';
-import { useDependency, useEvent, useObservable } from '@univerjs/ui';
+import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { useStateRef } from '../formula-editor/hooks/use-state-ref';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
@@ -284,22 +284,10 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const [focusing, setFocusing] = useState(autoFocus ?? false);
     const [popupVisible, setPopupVisible] = useState(false);
     const [rangeSelectorRanges, setRangeSelectorRanges] = useState<IUnitRangeName[]>([]);
-    const localeService = useDependency(LocaleService);
-    const direction = useObservable(localeService.direction$, localeService.getDirection());
     const editorService = useDependency(IEditorService);
     const { sequenceNodes } = useRangesHighlight(editor, focusing, unitId, subUnitId);
     const sequenceNodesRef = useStateRef(sequenceNodes);
     const commandService = useDependency(ICommandService);
-    useEffect(() => {
-        if (!editor) {
-            return;
-        }
-
-        const documentData = RichTextBuilder.create(Tools.deepClone(editor.getDocumentData()))
-            .align({ horizontal: direction === 'rtl' ? HorizontalAlign.RIGHT : HorizontalAlign.LEFT })
-            .getData();
-        editor.setDocumentData(documentData, editor.getSelectionRanges());
-    }, [direction, editor]);
 
     const blurEditor = useEvent(() => {
         editor?.setSelectionRanges([]);

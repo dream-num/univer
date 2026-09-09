@@ -84,6 +84,7 @@ function createDocumentDataModel(overrides?: {
         getSnapshot: vi.fn(() => snapshot),
         headerModelMap: overrides?.headerModelMap ?? new Map(),
         footerModelMap: overrides?.footerModelMap ?? new Map(),
+        noteModelMap: new Map(),
     } as any;
 }
 
@@ -98,6 +99,35 @@ function findFirstNodeByType(node: any, type: DataStreamTreeNodeType): any | nul
 }
 
 describe('DocumentViewModel', () => {
+    it('rebuilds an edited footnote tree without rebuilding unrelated note trees', () => {
+        const noteBody = (text: string) => ({
+            dataStream: `${text}\r\n`,
+            paragraphs: [{ paragraphId: `${text}-p`, startIndex: text.length }],
+            sectionBreaks: [{ sectionId: `${text}-s`, startIndex: text.length + 1 }],
+        });
+        const model = new DocumentDataModel({
+            id: 'notes',
+            body: noteBody('Body'),
+            notes: {
+                first: { type: 'footnote' as const, noteId: 'first', body: noteBody('First') },
+                second: { type: 'footnote' as const, noteId: 'second', body: noteBody('Second') },
+            },
+        });
+        const view = new DocumentViewModel(model);
+        const first = view.getNoteTreeMap().get('first');
+        const second = view.getNoteTreeMap().get('second');
+        try {
+            model.apply(JSONX.getInstance().editOp(new TextX().insert(4, { dataStream: 'New ' }).serialize(), ['notes', 'first', 'body']));
+            view.reset(model);
+            expect(view.getNoteTreeMap().get('first')).not.toBe(first);
+            expect(view.getNoteTreeMap().get('second')).toBe(second);
+            expect(view.getNoteTreeMap().get('first')?.getChildren()[0].children[0].content).toBe('New First\r\n');
+        } finally {
+            view.dispose();
+            model.dispose();
+        }
+    });
+
     describe('parseDataStreamToTree', () => {
         it('should handle empty section correctly', () => {
             const dataStream = DataStreamTreeTokenType.SECTION_BREAK;

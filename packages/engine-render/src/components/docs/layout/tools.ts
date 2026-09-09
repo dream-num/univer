@@ -49,8 +49,11 @@ import type { IBoundRectNoAngle } from '../../../basics/vector2';
 import type { IDocumentCompatibilityPolicy } from '../document-compatibility';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
+import type { DocumentEndnoteLayout } from './endnote-layout';
+import type { DocumentFootnoteLayout } from './footnote-layout';
 import type { Hyphen } from './hyphenation/hyphen';
 import type { LanguageDetector } from './hyphenation/language-detector';
+import type { INoteReferenceLayout } from './note-numbering';
 import {
     AlignTypeH,
     AlignTypeV,
@@ -1591,6 +1594,7 @@ export function getGlyphGroupWidth(divide: IDocumentSkeletonDivide) {
 }
 
 interface IFontCreateConfig {
+    documentCompatibilityPolicy?: IDocumentCompatibilityPolicy;
     fontStyle: IDocumentSkeletonFontStyle;
     textStyle: ITextStyle;
     charSpace: number;
@@ -1625,6 +1629,7 @@ export function getFontConfigFromLastGlyph(
     const pageWidth = pageSize.width || Number.POSITIVE_INFINITY - marginLeft - marginRight;
 
     const result = {
+        documentCompatibilityPolicy: sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy(),
         fontStyle: fontStyle!,
         textStyle: ts!,
         charSpace,
@@ -1813,6 +1818,10 @@ export function getNullSkeleton(): IDocumentSkeletonCached {
 export function setPageParent(pages: IDocumentSkeletonPage[], parent: IDocumentSkeletonCached) {
     for (const page of pages) {
         page.parent = parent;
+        for (const note of page.notes ?? []) {
+            note.parent = page;
+            note.page.parent = note;
+        }
     }
 }
 
@@ -1854,6 +1863,15 @@ export interface IDocumentPaginationMetrics {
 }
 
 export interface ILayoutContext {
+    noteReferences?: ReadonlyMap<number, INoteReferenceLayout>;
+    footnoteLayout?: DocumentFootnoteLayout;
+    endnoteLayout?: DocumentEndnoteLayout;
+    /** Virtual marker in a note body; it never consumes a persisted character. */
+    noteLabel?: string;
+    noteReferenceTextStyle?: ITextStyle;
+    /** Preserve the local note segment when the paragraph/table pipeline opens a continuation page. */
+    noteSegmentId?: string;
+    footnoteFirstColumn?: { index: number; top: number };
     // The view model of current layout document.
     viewModel: DocumentViewModel;
     // The data model of current layout document.
@@ -2156,6 +2174,13 @@ export function getPageFromPath(skeletonData: IDocumentSkeletonCached, path: (st
             const cellIndex = pathCopy.shift() as number;
 
             page = page.skeTables?.get(tableId)?.rows[rowIndex]?.cells[cellIndex];
+        } else if (field === 'notes') {
+            if (page == null) {
+                return null;
+            }
+            const footnoteIndex = pathCopy.shift() as number;
+            pathCopy.shift(); // page
+            page = page.notes?.[footnoteIndex]?.page;
         } else if (field === 'skeColumnGroups') {
             if (page == null) {
                 return null;

@@ -263,6 +263,7 @@ export function stringifyRanges(ranges: IUnitRangeName[]) {
 export function RangeSelector(props: IRangeSelectorProps) {
     const [editor, setEditor] = useState<Editor | null>(null);
     const {
+        className,
         onVerify,
         selectorRef,
         unitId,
@@ -283,11 +284,11 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const [focusing, setFocusing] = useState(autoFocus ?? false);
     const [popupVisible, setPopupVisible] = useState(false);
     const [rangeSelectorRanges, setRangeSelectorRanges] = useState<IUnitRangeName[]>([]);
-    const localeService = useDependency(LocaleService);
     const editorService = useDependency(IEditorService);
     const { sequenceNodes } = useRangesHighlight(editor, focusing, unitId, subUnitId);
     const sequenceNodesRef = useStateRef(sequenceNodes);
     const commandService = useDependency(ICommandService);
+    const localeService = useDependency(LocaleService);
 
     const blurEditor = useEvent(() => {
         editor?.setSelectionRanges([]);
@@ -355,7 +356,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                     <RichTextEditor
                         isSingle
                         {...props}
-                        className={clsx(props.className, 'rtl:[&>div]:univer-flex-row-reverse')}
+                        className={className}
                         preserveHostFocus
                         onFocusChange={(focusing, newValue) => {
                             setFocusing(focusing);

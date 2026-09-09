@@ -90,6 +90,7 @@ export interface IDocLayoutPerformanceMetrics {
 }
 
 export interface IDocLayoutCreateSessionRequest {
+    normalFontLineHeights?: Record<string, number>;
     unitId: string;
     sessionEpoch: number;
     snapshot: IDocumentData;
@@ -118,6 +119,7 @@ export interface IDocLayoutMountIdentity {
 }
 
 export interface IDocLayoutStartRequest extends IDocLayoutMountIdentity {
+    normalFontLineHeights?: Record<string, number>;
     metricsRevision: number;
     baseRevision: number;
     modelRevision: number;

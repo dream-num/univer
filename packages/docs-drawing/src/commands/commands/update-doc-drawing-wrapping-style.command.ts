@@ -36,6 +36,8 @@ import { DocHistoryAction, RichTextEditingMutation } from '@univerjs/docs';
  * `INLINE`, `WRAP_SQUARE`, and `WRAP_TOP_AND_BOTTOM` participate in text layout and can cause text to reflow.
  * `BEHIND_TEXT` and `IN_FRONT_OF_TEXT` are overlay styles and do not cause text to reflow.
  */
+import { findDocDrawing } from '../../services/doc-drawing-source';
+
 export enum TextWrappingStyle {
     /**
      * Places the drawing in the text flow like a character.
@@ -106,9 +108,12 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
             return false;
         }
 
-        const oldDrawings = documentDataModel.getDrawings() ?? {};
+        const snapshot = documentDataModel.getSnapshot();
+        if (wrappingStyle !== TextWrappingStyle.INLINE && drawings.some(({ drawingId }) => findDocDrawing(snapshot, drawingId)?.segmentId)) {
+            return false;
+        }
         const historyAction = drawings.length > 0 && drawings.every(({ drawingId }) =>
-            oldDrawings[drawingId]?.drawingType === DrawingTypeEnum.DRAWING_IMAGE
+            findDocDrawing(snapshot, drawingId)?.drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE
         )
             ? DocHistoryAction.UpdateImage
             : undefined;
@@ -116,20 +121,21 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
         const rawActions: JSONXActions = [];
 
         for (const drawing of drawings) {
-            const oldDrawing = oldDrawings[drawing.drawingId] as IDocDrawing | undefined;
-            if (!oldDrawing) {
+            const source = findDocDrawing(snapshot, drawing.drawingId);
+            const oldDrawing = source?.drawing as IDocDrawing | undefined;
+            if (!oldDrawing || !source) {
                 continue;
             }
 
             const layoutType = WRAPPING_STYLE_TO_LAYOUT_TYPE[wrappingStyle];
             if (oldDrawing.layoutType !== layoutType) {
-                rawActions.push(jsonX.replaceOp(['drawings', drawing.drawingId, 'layoutType'], oldDrawing.layoutType, layoutType)!);
+                rawActions.push(jsonX.replaceOp([...source.path, 'layoutType'], oldDrawing.layoutType, layoutType)!);
             }
 
             if (wrappingStyle === TextWrappingStyle.BEHIND_TEXT || wrappingStyle === TextWrappingStyle.IN_FRONT_OF_TEXT) {
                 const behindDoc = wrappingStyle === TextWrappingStyle.BEHIND_TEXT ? BooleanNumber.TRUE : BooleanNumber.FALSE;
                 if (oldDrawing.behindDoc !== behindDoc) {
-                    rawActions.push(jsonX.replaceOp(['drawings', drawing.drawingId, 'behindDoc'], oldDrawing.behindDoc, behindDoc)!);
+                    rawActions.push(jsonX.replaceOp([...source.path, 'behindDoc'], oldDrawing.behindDoc, behindDoc)!);
                 }
             }
 
@@ -138,7 +144,7 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
                     const value = drawing.docTransform?.[key];
                     const oldValue = oldDrawing.docTransform[key];
                     if (value && !Tools.diffValue(oldValue, value)) {
-                        rawActions.push(jsonX.replaceOp(['drawings', drawing.drawingId, 'docTransform', key], oldValue, value)!);
+                        rawActions.push(jsonX.replaceOp([...source.path, 'docTransform', key], oldValue, value)!);
                     }
                 }
             }

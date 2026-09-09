@@ -26,6 +26,7 @@ import {
     Disposable,
     DOC_RANGE_TYPE,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    DocumentFlavor,
     DrawingTypeEnum,
     ErrorService,
     generateRandomId,
@@ -77,6 +78,7 @@ import {
     DOC_INTERNAL_FRAGMENT_MIME,
     embedInternalClipboardFragment,
     extractInternalClipboardFragmentFromHtml,
+    omitClipboardNotes,
     parseInternalClipboardFragment,
     wrapClipboardHtml,
 } from './internal-fragment';
@@ -490,6 +492,10 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
         const unitId = currentDocument.getUnitId();
         const selectionParams = this._getSelectionParams(unitId);
+
+        if (currentDocument.getDocumentStyle().documentFlavor !== DocumentFlavor.TRADITIONAL) {
+            body = omitClipboardNotes(body);
+        }
 
         this._clipboardHooks.forEach((hook) => {
             if (hook.onBeforePaste) {

@@ -231,9 +231,11 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
             startOffset: startOffset + cursorMove,
             endOffset: startOffset + cursorMove,
             collapsed,
+            segmentId,
         }];
 
         const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params.segmentId = segmentId;
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

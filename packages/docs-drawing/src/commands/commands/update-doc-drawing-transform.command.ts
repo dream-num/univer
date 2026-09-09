@@ -28,6 +28,8 @@ import {
 } from '@univerjs/core';
 import { DocHistoryAction, RichTextEditingMutation } from '@univerjs/docs';
 
+import { findDocDrawing } from '../../services/doc-drawing-source';
+
 export interface IDrawingDocTransform {
     drawingId: string;
     key: 'size' | 'angle' | 'positionH' | 'positionV' | 'flipX' | 'flipY' | 'srcRect';
@@ -57,9 +59,9 @@ export const UpdateDrawingDocTransformCommand: ICommand = {
             return false;
         }
 
-        const oldDrawings = documentDataModel.getSnapshot().drawings ?? {};
+        const snapshot = documentDataModel.getSnapshot();
         const historyAction = drawings.length > 0 && drawings.every(({ drawingId }) =>
-            oldDrawings[drawingId]?.drawingType === DrawingTypeEnum.DRAWING_IMAGE
+            findDocDrawing(snapshot, drawingId)?.drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE
         )
             ? DocHistoryAction.UpdateImage
             : undefined;
@@ -67,14 +69,18 @@ export const UpdateDrawingDocTransformCommand: ICommand = {
         const actions: JSONXActions = [];
 
         for (const { drawingId, key, value } of drawings) {
-            const oldDrawing = oldDrawings[drawingId];
+            const source = findDocDrawing(snapshot, drawingId);
+            if (!source) {
+                return false;
+            }
+            const oldDrawing = source.drawing;
             const oldValue = key === 'srcRect'
                 ? (oldDrawing as IDocImage | undefined)?.srcRect
                 : oldDrawing?.docTransform?.[key];
             if (!Tools.diffValue(oldValue, value)) {
                 const path = key === 'srcRect'
-                    ? ['drawings', drawingId, key]
-                    : ['drawings', drawingId, 'docTransform', key];
+                    ? [...source.path, key]
+                    : [...source.path, 'docTransform', key];
                 // Optional transform fields such as flips do not exist in older documents.
                 actions.push(oldValue === undefined
                     ? jsonX.insertOp(path, value)!

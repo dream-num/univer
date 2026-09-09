@@ -142,6 +142,7 @@ export class DocsLayoutWorkerRuntime implements IDocsLayoutWorkerRuntime {
         }
         this._disposeSession(request.unitId);
 
+        FontCache.setNormalLineHeightCache(request.normalFontLineHeights ?? {});
         const dataModel = new DocumentDataModel(request.snapshot);
         const localeService = new LocaleService();
         if (request.localeData != null) {
@@ -178,6 +179,8 @@ export class DocsLayoutWorkerRuntime implements IDocsLayoutWorkerRuntime {
                 modelRevision: session.modelRevision,
             };
         }
+
+        FontCache.setNormalLineHeightCache(request.normalFontLineHeights ?? {});
 
         this._updateCustomRangePresentations(session, request);
         this._applyCustomRangePresentations(session.dataModel, Array.from(session.customRangePresentations.values()));

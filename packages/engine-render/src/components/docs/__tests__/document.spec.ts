@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ColumnSeparatorType, DashStyleType, DocumentFlavor } from '@univerjs/core';
+import { ColumnSeparatorType, CustomRangeType, DashStyleType, DocumentFlavor } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { setupRenderTestEnv } from '../../../__tests__/render-test-utils';
 import {
@@ -34,6 +34,8 @@ import { DocBackground } from '../doc-background';
 import { DOCS_EXTENSION_TYPE } from '../doc-extension';
 import { Documents, drawSectionColumnSeparators, resolveHeaderFooterFieldGlyph } from '../document';
 import { getDocumentCompatibilityPolicy } from '../document-compatibility';
+import { createParagraphLayoutTestBed } from '../layout/block/paragraph/__tests__/create-paragraph-layout-test-bed';
+import { DocumentSkeleton } from '../layout/doc-skeleton';
 import { setDocsTableRenderViewportProvider } from '../table-render-viewport';
 
 function createGlyph(content: string, left: number, width = 16, backgroundColor?: string) {
@@ -368,6 +370,60 @@ describe('documents render', () => {
         document.body.innerHTML = '';
         vi.restoreAllMocks();
         setDocsTableRenderViewportProvider(null);
+    });
+
+    it.each(['separator', 'continuationSeparator', 'continuationNotice'] as const)('renders each note kind with its own %s fields', (kind) => {
+        const fieldBody = (fieldType: string) => ({
+            dataStream: '\uFFFC\r\n',
+            paragraphs: [{ startIndex: 1, paragraphId: 'field' }],
+            sectionBreaks: [{ startIndex: 2, sectionId: 'field-section' }],
+            customRanges: [{ rangeId: fieldType, rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 0, properties: { fieldType } }],
+        });
+        const footnoteBody = fieldBody('PAGE');
+        const endnoteBody = fieldBody('NUMPAGES');
+        const bed = createParagraphLayoutTestBed('Reference\uFFFC\uFFFC', {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+            body: {
+                customRanges: ['footnote', 'endnote'].map((type, index) => ({
+                    rangeId: type,
+                    rangeType: index === 0 ? CustomRangeType.FOOTNOTE : CustomRangeType.ENDNOTE,
+                    startIndex: 9 + index,
+                    endIndex: 9 + index,
+                    wholeEntity: true,
+                    properties: { noteId: type },
+                })),
+            },
+            notes: Object.fromEntries(['footnote', 'endnote'].map((type) => [type, { noteId: type, type, body: fieldBody('PAGE') }])),
+            noteSettings: { footnote: { [kind]: footnoteBody }, endnote: { [kind]: endnoteBody } },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        const documents = new Documents('note-fields', skeleton);
+        try {
+            skeleton.calculate();
+            const page = skeleton.getSkeletonData()!.pages[0];
+            const fragments = page.notes!;
+            // Render both kinds on the same body page, including continuation decorations.
+            page.noteDecorations = fragments.map((note) => ({
+                noteType: bed.dataModel.getSnapshot().notes![note.noteId].type,
+                kind,
+                left: note.left,
+                top: note.top,
+                page: note.page,
+            }));
+            const render = vi.spyOn(documents as unknown as { _drawHeaderFooter: (...args: unknown[]) => void }, '_drawHeaderFooter');
+            documents.draw(canvas.getContext());
+            for (const decoration of page.noteDecorations) {
+                const call = render.mock.calls.find((args) => args[0] === decoration.page);
+                expect(call).toBeDefined();
+                expect(call![14]).toEqual(decoration.noteType === 'endnote' ? endnoteBody.customRanges : footnoteBody.customRanges);
+            }
+            expect(page.noteDecorations.map((note) => note.noteType).sort()).toEqual(['endnote', 'footnote']);
+        } finally {
+            documents.dispose();
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
     });
 
     it('hit tests table content and controls that overflow the document bounds', () => {

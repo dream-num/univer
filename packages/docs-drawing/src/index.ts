@@ -35,6 +35,8 @@ export type {
     IDocDrawingMutationInfos,
     IDocDrawingRemoveMutationInfoParams,
 } from './services/doc-drawing-adapter.service';
+export { collectDocDrawings, findDocDrawing } from './services/doc-drawing-source';
 export { DocDrawingService, IDocDrawingService } from './services/doc-drawing.service';
 export type { IDocDrawing, IDocImage } from './services/doc-drawing.service';
+
 export { type IDocFloatDom } from './services/doc-drawing.service';

@@ -15,7 +15,6 @@
  */
 
 import type { IDistFromText, Nullable } from '@univerjs/core';
-import type { IParagraphConfig } from '../../../../basics';
 import type {
     IDocumentSkeletonDivide,
     IDocumentSkeletonDrawing,
@@ -25,11 +24,17 @@ import type {
     IDocumentSkeletonTable,
     LineType,
 } from '../../../../basics/i-document-skeleton-cached';
+import type { IParagraphConfig } from '../../../../basics/interfaces';
 import type { IFloatObject } from '../tools';
 import { PositionedObjectLayoutType, TableTextWrapType, WrapTextType } from '@univerjs/core';
 import { Path2 } from '../../../../basics/path2';
 import { Transform } from '../../../../basics/transform';
 import { Vector2 } from '../../../../basics/vector2';
+import { isTraditionalDocumentCompatibility } from '../../document-compatibility';
+
+// Word reserves at least 18pt for text beside a floating table. Narrower gaps
+// move the line below the table, including empty paragraphs.
+export const TRADITIONAL_TABLE_WRAP_MIN_WIDTH = 24;
 
 interface IDrawingsSplit {
     left: number;
@@ -131,7 +136,10 @@ export function createSkeletonLine(
             affectSkeDrawings,
             headersDrawings,
             footersDrawings,
-            wrapTypeTables
+            wrapTypeTables,
+            paragraphConfig.documentCompatibilityPolicy && isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
+                ? TRADITIONAL_TABLE_WRAP_MIN_WIDTH
+                : 0
         );
 
     for (const divide of lineSke.divides) {
@@ -149,7 +157,8 @@ export function calculateLineTopByDrawings(
     footerPage: Nullable<IDocumentSkeletonPage>,
     columnLeft: number = 0,
     columnWidth: number = 0,
-    sectionTop: number = 0
+    sectionTop: number = 0,
+    minimumTableWrapWidth: number = 0
 ) {
     const absoluteLineTop = sectionTop + lineTop;
     let maxTop = absoluteLineTop;
@@ -208,7 +217,48 @@ export function calculateLineTopByDrawings(
         }
     });
 
+    // A later table can occupy the line reached after clearing an earlier one.
+    for (let pass = 0; pass < page.skeTables.size; pass++) {
+        const previousTop = maxTop;
+        for (const table of page.skeTables.values()) {
+            if (table.tableSource.textWrap !== TableTextWrapType.WRAP || columnWidth <= 0) {
+                continue;
+            }
+            const split = _getTableWrapSplit(table, maxTop, lineHeight, columnLeft, columnWidth, minimumTableWrapWidth);
+            if (split && split.left <= 0 && split.left + split.width >= columnWidth) {
+                maxTop = Math.max(maxTop, table.top + table.height + (table.tableSource.dist?.distB ?? 0));
+            }
+        }
+        if (maxTop === previousTop) {
+            break;
+        }
+    }
+
     return maxTop - sectionTop;
+}
+
+function _getTableWrapSplit(
+    table: IDocumentSkeletonTable,
+    lineTop: number,
+    lineHeight: number,
+    columnLeft: number,
+    columnWidth: number,
+    minimumWidth: number
+) {
+    const { left, top, width, height, tableSource } = table;
+    const split = __getSplitWidthNoAngle(top, height, left - columnLeft, width, lineTop, lineHeight, columnWidth, tableSource.dist ?? {});
+    if (!split || split.left >= columnWidth || split.left + split.width <= 0) {
+        return;
+    }
+    let right = split.left + split.width;
+    if (split.left <= minimumWidth) {
+        split.left = 0;
+    }
+    if (columnWidth - right <= minimumWidth) {
+        right = columnWidth;
+    }
+    split.width = right - split.left;
+    return split;
 }
 
 function _getLineTopWithFullColumnWrap(
@@ -363,7 +413,8 @@ function _calculateDividesByDrawings(
     paragraphNonInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>,
     headersDrawings?: Map<string, IDocumentSkeletonDrawing>,
     footersDrawings?: Map<string, IDocumentSkeletonDrawing>,
-    wrapTypeTables?: Map<string, IDocumentSkeletonTable>
+    wrapTypeTables?: Map<string, IDocumentSkeletonTable>,
+    minimumTableWrapWidth: number = 0
 ): IDocumentSkeletonDivide[] {
     const drawingsMix: IDrawingsSplit[] = []; // Mixed text and graphics case
     // Insert indent placeholder
@@ -410,9 +461,7 @@ function _calculateDividesByDrawings(
 
     if (wrapTypeTables && wrapTypeTables.size > 0) {
         wrapTypeTables.forEach((table) => {
-            const { left, top, width, height, tableSource } = table;
-            const { dist } = tableSource;
-            const split = __getSplitWidthNoAngle(top, height, left - columnLeft, width, lineTop, lineHeight, columnWidth, dist);
+            const split = _getTableWrapSplit(table, lineTop, lineHeight, columnLeft, columnWidth, minimumTableWrapWidth);
 
             if (split) {
                 drawingsMix.push(split);

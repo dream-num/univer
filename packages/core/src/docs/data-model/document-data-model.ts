@@ -36,7 +36,7 @@ import { Tools } from '../../shared/tools';
 import { createSectionId } from '../section-break-id';
 import { calculateDocumentStatistics } from './document-statistics';
 import { getEmptySnapshot } from './empty-snapshot';
-import { JSONX } from './json-x/json-x';
+import { JSON1, JSONX } from './json-x/json-x';
 import { PRESET_LIST_TYPE } from './preset-list-type';
 import { getPlainText } from './text-x/build-utils/parse';
 import { getBodySlice, SliceBodyType } from './text-x/utils';
@@ -337,6 +337,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
     headerModelMap: Map<string, DocumentDataModel> = new Map();
 
     footerModelMap: Map<string, DocumentDataModel> = new Map();
+    noteModelMap: Map<string, DocumentDataModel> = new Map();
     change$ = new BehaviorSubject<number>(0);
 
     constructor(snapshot: Partial<IDocumentData>) {
@@ -359,6 +360,8 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         this.footerModelMap.forEach((footer) => {
             footer.dispose();
         });
+        this.noteModelMap.forEach((note) => note.dispose());
+        this.noteModelMap.clear();
 
         this._name$.complete();
     }
@@ -408,6 +411,10 @@ export class DocumentDataModel extends DocumentDataModelSimple {
             return this.footerModelMap.get(segmentId)!;
         }
 
+        if (this.noteModelMap.has(segmentId)) {
+            return this.noteModelMap.get(segmentId)!;
+        }
+
         return null;
     }
 
@@ -420,8 +427,24 @@ export class DocumentDataModel extends DocumentDataModelSimple {
             return;
         }
 
+        const previousNotes = this.snapshot.notes;
+        const changedNotes = new Set<string>();
+        let changedInheritedNoteStyles = false;
+        const cursor = JSON1.type.readCursor(actions);
+        cursor.traverse(null, () => {
+            const path = cursor.getPath();
+            if (path[0] === 'notes' && typeof path[1] === 'string') {
+                changedNotes.add(path[1]);
+            }
+            if (path[0] === 'styles' || path[0] === 'documentStyle') {
+                changedInheritedNoteStyles = true;
+            }
+        });
         this.snapshot = JSONX.apply(this.snapshot, actions) as unknown as IDocumentData;
         this._markMutation();
+        if (changedInheritedNoteStyles || previousNotes !== this.snapshot.notes || changedNotes.size > 0) {
+            this._initializeNoteModels(changedInheritedNoteStyles ? undefined : previousNotes, changedNotes);
+        }
 
         // FIXME: @JOCS, ANY better solution to find action that create or delete header/footer?
         if (actions?.some((a) => Array.isArray(a) && (a?.[0] === 'headers' || a?.[0] === 'footers'))) {
@@ -445,6 +468,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
     }
 
     private _initializeHeaderFooterModel() {
+        this._initializeNoteModels();
         const { headers, footers } = this.getSnapshot();
 
         if (headers) {
@@ -462,6 +486,32 @@ export class DocumentDataModel extends DocumentDataModelSimple {
                 this.footerModelMap.get(footerId)!.updateDocumentId(this.getUnitId());
             }
         }
+    }
+
+    private _initializeNoteModels(previousNotes?: IDocumentData['notes'], changedNotes?: ReadonlySet<string>): void {
+        for (const [id, model] of this.noteModelMap) {
+            if (changedNotes?.has(id) || previousNotes?.[id] !== this.snapshot.notes?.[id] || !previousNotes?.[id]) {
+                model.dispose();
+                this.noteModelMap.delete(id);
+            }
+        }
+        for (const [id, note] of Object.entries(this.snapshot.notes ?? {})) {
+            if (this.noteModelMap.has(id)) {
+                continue;
+            }
+            const model = new DocumentDataModel({
+                ...note,
+                id: this.getUnitId(),
+                documentStyle: this.snapshot.documentStyle,
+                styles: this.snapshot.styles,
+            });
+            this.noteModelMap.set(id, model);
+        }
+    }
+
+    override updateDocumentStyle(config: IDocumentStyle) {
+        super.updateDocumentStyle(config);
+        this._initializeNoteModels();
     }
 
     override updateDocumentId(unitId: string) {

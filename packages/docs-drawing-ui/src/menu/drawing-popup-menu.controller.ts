@@ -323,6 +323,9 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                     object,
                     {
                         componentKey: COMPONENT_IMAGE_POPUP_MENU,
+                        // Object anchors follow transform updates. Keeping this toolbar
+                        // open must not suspend publication after a resize or move.
+                        requiresStableLayout: false,
                         direction: isImage || isChart ? 'top-center' : 'horizontal',
                         offset: isImage || isChart ? [0, 8] : [2, 0],
                         extraProps: {

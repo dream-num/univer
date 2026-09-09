@@ -24,6 +24,7 @@ import {
 } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
 import {
+    findDocDrawing,
     RemoveDocDrawingCommand,
     SetDocDrawingArrangeCommand,
     UpdateDocDrawingWrappingStyleCommand,
@@ -193,7 +194,7 @@ export class FDocumentImage extends FBase {
      * ```
      */
     getImageData(): IDocImage | null {
-        const drawing = this._document.getDocumentDataModel().getDrawings()?.[this._imageId];
+        const drawing = findDocDrawing(this._document.getDocumentDataModel().getSnapshot(), this._imageId)?.drawing;
         if (!drawing || drawing.drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
             return null;
         }
@@ -453,11 +454,12 @@ export class FDocumentImage extends FBase {
 
     private _getTextRange(): ITextRangeParam | null {
         const snapshot = this._document.getDocumentDataModel().getSnapshot();
-        const { body, headers = {}, footers = {} } = snapshot;
+        const { body, headers = {}, footers = {}, notes = {} } = snapshot;
         const segments = [
             { segmentId: '', body },
             ...Object.entries(headers).map(([segmentId, header]) => ({ segmentId, body: header.body })),
             ...Object.entries(footers).map(([segmentId, footer]) => ({ segmentId, body: footer.body })),
+            ...Object.entries(notes).map(([segmentId, note]) => ({ segmentId, body: note.body })),
         ];
 
         for (const { segmentId, body } of segments) {

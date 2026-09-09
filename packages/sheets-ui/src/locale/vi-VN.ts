@@ -220,6 +220,7 @@ const locale: typeof enUS = {
             error: 'Lỗi',
             forceStringInfo: 'Số được lưu trữ dưới dạng văn bản',
             convertToNumber: 'Chuyển đổi thành số',
+            overwriteCellContent: 'Khu vực mục tiêu đã có dữ liệu, thao tác này sẽ ghi đè dữ liệu hiện có. Bạn có muốn tiếp tục không?',
         },
         clipboard: {
             paste: {

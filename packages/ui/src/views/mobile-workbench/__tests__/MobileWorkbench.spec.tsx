@@ -34,17 +34,16 @@ import {
     ThemeService,
     UniverInstanceService,
 } from '@univerjs/core';
+import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { useContext } from 'react';
 import { createPortal } from 'react-dom';
 import { of, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-
 import { BuiltInUIPart, IUIPartsService, UIPartsService } from '../../../services/parts/parts.service';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import { ThemeSwitcherService } from '../../../services/theme-switcher/theme-switcher.service';
 import { IWorkbenchService, WorkbenchService } from '../../../services/workbench/workbench.service';
-import { connectInjector } from '../../../utils/di';
-import { MobileKeyboardInsetContext } from '../MobileKeyboardInsetContext';
+import { MobileKeyboardInsetContext } from '../mobile-keyboard-inset-context';
 import { MobileWorkbench } from '../MobileWorkbench';
 
 function KeyboardBar() {

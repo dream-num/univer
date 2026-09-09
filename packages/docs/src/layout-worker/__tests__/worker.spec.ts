@@ -18,11 +18,13 @@ import {
     createDocumentModelWithStyle,
     CustomRangeType,
     DocumentFlavor,
+    JSONX,
     LocaleType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
 } from '@univerjs/core';
+import { getFontStyleString, invalidateDocumentFontMetrics } from '@univerjs/engine-render';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DocLayoutSessionStatus } from '../../services/doc-layout-executor.service';
 import { DocsLayoutWorkerPerformanceTracker } from '../performance-tracker';
@@ -50,7 +52,72 @@ function stubOffscreenCanvas(): void {
 
 describe('DocsLayoutWorkerRuntime', () => {
     afterEach(() => {
+        invalidateDocumentFontMetrics(() => true);
         vi.unstubAllGlobals();
+    });
+
+    it('uses browser normal font spacing for initial layout and a newly introduced font during editing', async () => {
+        stubOffscreenCanvas();
+        vi.stubGlobal('document', undefined);
+        const source = createDocumentModelWithStyle('Normal spacing', { ff: 'Initial Font', fs: 12 });
+        source.updateDocumentStyle({ documentFlavor: DocumentFlavor.TRADITIONAL });
+        source.updateDocumentDataPageSize(300, 300);
+        source.updateDocumentDataMargin({ t: 0, r: 0, b: 0, l: 0 });
+        const snapshot = structuredClone(source.getSnapshot());
+        const runtime = new DocsLayoutWorkerRuntime();
+        const identity = { unitId: source.getUnitId(), mountId: 'font-mount', mountEpoch: 1, viewportEpoch: 1 };
+        const fontKey = (ff: string) => getFontStyleString({ ff, fs: 1000 }).fontString.trim();
+        invalidateDocumentFontMetrics(() => true);
+        await runtime.createSession({
+            unitId: identity.unitId,
+            sessionEpoch: 1,
+            snapshot,
+            modelRevision: 0,
+            locale: LocaleType.EN_US,
+            direction: 'ltr',
+            normalFontLineHeights: { [fontKey('Initial Font')]: 1.5 },
+        });
+        try {
+            for (const revision of [0, 1]) {
+                const start = await runtime.startLayout({
+                    ...identity,
+                    metricsRevision: revision + 1,
+                    baseRevision: 0,
+                    modelRevision: revision,
+                    mutations: revision === 0
+                        ? []
+                        : [{
+                            baseRevision: 0,
+                            modelRevision: 1,
+                            actions: JSONX.getInstance().replaceOp(
+                                ['body', 'textRuns', 0, 'ts', 'ff'],
+                                'Initial Font',
+                                'Edited Font'
+                            ),
+                        }],
+                    normalFontLineHeights: revision === 0 ? undefined : { [fontKey('Edited Font')]: 1.75 },
+                    reason: revision === 0 ? 'initial' : 'edit',
+                    budgetMs: 8,
+                });
+                if (start.status !== DocLayoutSessionStatus.ACCEPTED) {
+                    throw new Error('Expected layout to accept the font measurement update.');
+                }
+                let step = start.step;
+                await expect.poll(async () => {
+                    if (!step.progress.complete) {
+                        step = await runtime.stepLayout({ ...identity, generation: step.progress.generation, budgetMs: 8 });
+                    }
+                    return step.progress.complete;
+                }).toBe(true);
+                const result = await runtime.getLayoutPage({ ...identity, pageIndex: 0 });
+                const line = result.page?.page.sections[0].columns[0].lines[0];
+                expect(line?.lineHeight).toBeCloseTo(revision === 0 ? 18 : 21);
+                expect(line?.divides.flatMap((divide) => divide.glyphGroup).map((glyph) => glyph.raw).join(''))
+                    .toBe(snapshot.body!.dataStream);
+            }
+        } finally {
+            await runtime.disposeSession({ unitId: identity.unitId, sessionEpoch: 1 });
+        }
     });
 
     it('applies custom range presentations to the matching body, header, and footer segments', async () => {
@@ -213,7 +280,7 @@ describe('DocsLayoutWorkerRuntime', () => {
         });
 
         await expect(runtime.getCapabilities()).resolves.toMatchObject({
-            protocolVersion: 4,
+            protocolVersion: 5,
             executor: 'worker',
             offscreenCanvas: true,
             structuredClone: true,

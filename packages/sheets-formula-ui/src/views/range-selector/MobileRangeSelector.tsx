@@ -20,7 +20,6 @@ import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { LocaleKey } from '../../locale/types';
 import type { IRangeSelectorProps } from './index';
 import { ICommandService, LocaleService, RichTextBuilder } from '@univerjs/core';
-import { clsx } from '@univerjs/design';
 import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { SelectRangeIcon } from '@univerjs/icons';
 import { SetSelectionsOperation } from '@univerjs/sheets';
@@ -35,6 +34,7 @@ import { verifyRange } from './utils/verify-range';
 export function MobileRangeSelector(props: IRangeSelectorProps) {
     const [editor, setEditor] = useState<Editor | null>(null);
     const {
+        className,
         onVerify,
         selectorRef,
         unitId,
@@ -55,9 +55,9 @@ export function MobileRangeSelector(props: IRangeSelectorProps) {
     const [focusing, setFocusing] = useState(autoFocus ?? false);
     const [popupVisible, setPopupVisible] = useState(false);
     const [rangeSelectorRanges, setRangeSelectorRanges] = useState<IUnitRangeName[]>([]);
-    const localeService = useDependency(LocaleService);
     const editorService = useDependency(IEditorService);
     const commandService = useDependency(ICommandService);
+    const localeService = useDependency(LocaleService);
     const { sequenceNodes } = useRangesHighlight(editor, focusing, unitId, subUnitId);
     const sequenceNodesRef = useStateRef(sequenceNodes);
     const blurEditor = useEvent(() => {
@@ -125,7 +125,7 @@ export function MobileRangeSelector(props: IRangeSelectorProps) {
                 <RichTextEditor
                     isSingle
                     {...props}
-                    className={clsx(props.className, 'rtl:[&>div]:univer-flex-row-reverse')}
+                    className={className}
                     preserveHostFocus
                     onFocusChange={(isFocusing, newValue) => {
                         setFocusing(isFocusing);

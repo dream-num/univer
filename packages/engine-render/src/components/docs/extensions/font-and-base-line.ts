@@ -15,15 +15,15 @@
  */
 
 import type { IDocTextFill, IDocTextFillGradientStop, IScale, TabStopLeader } from '@univerjs/core';
-import type { IBoundRectNoAngle } from '../../../basics';
 import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
+import type { IBoundRectNoAngle } from '../../../basics/vector2';
 import type { UniverRenderingContext } from '../../../context';
 import type { IDrawInfo } from '../../extension';
 import { BaselineOffset } from '@univerjs/core';
-import { GlyphType } from '../../../basics';
 import { cjk } from '../../../basics/cjk-regexp';
 import { COLOR_BLACK_RGB } from '../../../basics/const';
 import { resolveGlowEffect, resolveOuterShadowEffect } from '../../../basics/drawing-effect';
+import { GlyphType } from '../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../basics/vector2';
 import { CheckboxShape, isCheckboxGlyph } from '../../../shape/checkbox';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
@@ -84,6 +84,10 @@ export class FontAndBaseLine extends docExtension {
 
         if (content == null) {
             return;
+        }
+
+        if (ctx.fontKerning != null) {
+            ctx.fontKerning = fontStyle?.fontKerning ?? 'auto';
         }
 
         if (!textStyle) {
@@ -426,7 +430,7 @@ export class FontAndBaseLine extends docExtension {
             ctx.translate(spanStartPoint.x + centerPoint.x, spanStartPoint.y + centerPoint.y);
             ctx.rotate(Math.PI / 2);
             ctx.translate(-width / 2, (aba + abd) / 2 - abd);
-            ctx.fillText(content, 0, 0);
+            this._paintGlyphText(ctx, glyph, 0, 0);
             ctx.restore();
         } else {
             if (isCheckboxGlyph(content) && glyph.glyphType === GlyphType.LIST) {
@@ -451,8 +455,20 @@ export class FontAndBaseLine extends docExtension {
                     x_offset = (glyph.width - glyph.bBox.width) / 2;
                     y_offset = -(glyph.width - fontHeight) / 2;
                 }
-                ctx.fillText(content, spanPointWithFont.x + x_offset, spanPointWithFont.y + y_offset);
+                this._paintGlyphText(ctx, glyph, spanPointWithFont.x + x_offset, spanPointWithFont.y + y_offset);
             }
+        }
+    }
+
+    private _paintGlyphText(ctx: UniverRenderingContext, glyph: IDocumentSkeletonGlyph, x: number, y: number): void {
+        const { content, textSpacing } = glyph;
+        // Field resolution can replace content after shaping; never paint offsets belonging to the old text.
+        if (textSpacing?.content === content) {
+            for (const segment of textSpacing.segments) {
+                ctx.fillText(segment.content, x + segment.left, y);
+            }
+        } else {
+            ctx.fillText(content, x, y);
         }
     }
 

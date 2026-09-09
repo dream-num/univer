@@ -18,6 +18,31 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FontCache } from '../font-cache';
 
 describe('font cache', () => {
+    it('isolates kerning metrics and resets the context for legacy measurements', () => {
+        const context = {
+            font: '',
+            fontKerning: 'auto',
+            measureText: () => ({
+                width: context.fontKerning === 'normal' ? 18 : 20,
+                fontBoundingBoxAscent: 10,
+                fontBoundingBoxDescent: 2,
+                actualBoundingBoxAscent: 10,
+                actualBoundingBoxDescent: 2,
+            }),
+        };
+        vi.stubGlobal('document', undefined);
+        vi.stubGlobal('OffscreenCanvas', class {
+            getContext() {
+                return context;
+            }
+        });
+        expect(FontCache.getMeasureText('AV', '12pt Arial', 'normal').width).toBe(18);
+        expect(FontCache.getMeasureText('AV', '12pt Arial', 'none').width).toBe(20);
+        expect(FontCache.getMeasureText('AV', '12pt Arial').width).toBe(20);
+        expect(context.fontKerning).toBe('auto');
+        expect(FontCache.getMeasureText('AV', '12pt Arial', 'normal').width).toBe(18);
+    });
+
     beforeEach(() => {
         (FontCache as any)._globalFontMeasureCache = new Map();
         (FontCache as any)._fontDataMap = new Map();
@@ -29,7 +54,7 @@ describe('font cache', () => {
         vi.unstubAllGlobals();
     });
 
-    it('measures text with OffscreenCanvas when the DOM is unavailable', () => {
+    it.each(['auto', 'normal', 'none'] as const)('measures text without a DOM or native kerning support in %s mode', (kerning) => {
         const measureText = vi.fn(() => ({
             width: 16,
             fontBoundingBoxAscent: 9,
@@ -49,7 +74,7 @@ describe('font cache', () => {
             }
         });
 
-        const result = FontCache.getMeasureText('W', '12px Arial');
+        const result = FontCache.getMeasureText('W', '12px Arial', kerning);
 
         expect(result).toEqual({
             width: 16,

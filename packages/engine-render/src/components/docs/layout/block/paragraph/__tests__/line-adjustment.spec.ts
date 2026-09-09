@@ -14,14 +14,132 @@
  * limitations under the License.
  */
 
-import { HorizontalAlign } from '@univerjs/core';
+import { BooleanNumber, DocumentFlavor, HorizontalAlign, WrapStrategy } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
+import { getFontStyleString } from '../../../../../../basics/tools';
+import { getDocumentCompatibilityPolicy } from '../../../../document-compatibility';
+import { FontCache } from '../../../shaping-engine/font-cache';
+import { clearFontCreateConfigCache } from '../../../tools';
 import { lineAdjustment } from '../line-adjustment';
 import { lineBreaking } from '../linebreaking';
 import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 describe('line-adjustment', () => {
+    it.each([HorizontalAlign.CENTER, HorizontalAlign.RIGHT, HorizontalAlign.DISTRIBUTED])(
+        'aligns DrawingML trailing breakable spaces without deleting editable glyphs (%s)',
+        (horizontalAlign) => {
+            const textStyle = { ff: 'DrawingML trailing-space regression', fs: 12 };
+            const font = getFontStyleString(textStyle).fontString;
+            for (const text of ['A', 'B', 'C', 'D', ' ', '\u3000', '\u00A0', '\t', '\u2028', '\r']) {
+                FontCache.setFontMeasureCache(font, text, {
+                    width: text === '\r' ? 0 : 10,
+                    fontBoundingBoxAscent: 12,
+                    fontBoundingBoxDescent: 3,
+                    actualBoundingBoxAscent: 10,
+                    actualBoundingBoxDescent: 2,
+                });
+            }
+            try {
+                for (const documentFlavor of [DocumentFlavor.UNSPECIFIED, DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL, DocumentFlavor.DRAWINGML]) {
+                    for (const wrapStrategy of [WrapStrategy.WRAP, WrapStrategy.OVERFLOW]) {
+                        for (const ending of ['', '\u2028CD']) {
+                            const results = ['', ' ', '  ', '\u3000', '\u00A0', '\t'].map((suffix) => {
+                                clearFontCreateConfigCache();
+                                const content = `AB${suffix}${ending}`;
+                                const context = createParagraphLayoutTestBed(content, {
+                                    documentStyle: {
+                                        documentFlavor,
+                                        textStyle,
+                                        pageSize: { width: 240, height: 600 },
+                                        marginLeft: 0,
+                                        marginRight: 0,
+                                        autoHyphenation: BooleanNumber.FALSE,
+                                        renderConfig: { wrapStrategy },
+                                    },
+                                    body: { paragraphs: [{ startIndex: content.length, paragraphStyle: { horizontalAlign } }] },
+                                });
+                                const { ctx, viewModel, paragraphNode, sectionBreakConfig, curPage } = context;
+                                sectionBreakConfig.documentCompatibilityPolicy = getDocumentCompatibilityPolicy(documentFlavor);
+                                const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+                                const pages = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, null);
+                                const divide = pages[0].sections[0].columns[0].lines[0].divides[0];
+                                const characters = divide.glyphGroup.map(({ content, count }) => ({ content, count }));
+                                const trailingWidths = divide.glyphGroup.filter((glyph) => suffix.includes(glyph.content) && glyph.content !== '')
+                                    .map((glyph) => glyph.width);
+                                lineAdjustment(pages, viewModel, paragraphNode, sectionBreakConfig);
+                                expect(divide.glyphGroup.map(({ content, count }) => ({ content, count }))).toEqual(characters);
+                                if (horizontalAlign !== HorizontalAlign.DISTRIBUTED || (documentFlavor === DocumentFlavor.DRAWINGML && [' ', '  ', '\u3000'].includes(suffix))) {
+                                    expect(divide.glyphGroup.filter((glyph) => suffix.includes(glyph.content) && glyph.content !== '')
+                                        .map((glyph) => glyph.width)).toEqual(trailingWidths);
+                                }
+                                const positions = divide.glyphGroup.filter((glyph) => /[AB]/.test(glyph.content))
+                                    .map((glyph) => divide.paddingLeft + glyph.left);
+                                viewModel.dispose();
+                                return positions;
+                            });
+                            if (documentFlavor === DocumentFlavor.DRAWINGML) {
+                                for (const index of [1, 2, 3]) {
+                                    expect(results[index], `${wrapStrategy}/${ending}/${index}`).toEqual(results[0]);
+                                }
+                            } else {
+                                expect(results[1]).not.toEqual(results[0]);
+                            }
+                            expect(results[4]).not.toEqual(results[0]);
+                            expect(results[5]).not.toEqual(results[0]);
+                        }
+                    }
+                }
+            } finally {
+                FontCache.clearFontMeasureCache(font);
+                clearFontCreateConfigCache();
+            }
+        }
+    );
+
+    it('justifies a wrapped DrawingML line using internal spaces without stretching trailing spaces', () => {
+        const content = 'A B  CCCCCCC';
+        const textStyle = { ff: 'DrawingML justified-space regression', fs: 12 };
+        const font = getFontStyleString(textStyle).fontString;
+        for (const text of ['A', 'B', 'C', ' ']) {
+            FontCache.setFontMeasureCache(font, text, {
+                width: 10,
+                fontBoundingBoxAscent: 12,
+                fontBoundingBoxDescent: 3,
+                actualBoundingBoxAscent: 10,
+                actualBoundingBoxDescent: 2,
+            });
+        }
+        const { ctx, viewModel, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
+            documentStyle: {
+                documentFlavor: DocumentFlavor.DRAWINGML,
+                textStyle,
+                pageSize: { width: 50, height: 600 },
+                marginLeft: 0,
+                marginRight: 0,
+                autoHyphenation: BooleanNumber.FALSE,
+            },
+            body: { paragraphs: [{ startIndex: content.length, paragraphStyle: { horizontalAlign: HorizontalAlign.JUSTIFIED } }] },
+        });
+        try {
+            clearFontCreateConfigCache();
+            sectionBreakConfig.documentCompatibilityPolicy = getDocumentCompatibilityPolicy(DocumentFlavor.DRAWINGML);
+            const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+            const pages = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, null);
+            const divide = pages[0].sections[0].columns[0].lines[0].divides[0];
+            expect(divide.glyphGroup.map((glyph) => glyph.content).join('')).toBe('A B  ');
+            expect(divide.isFull).toBe(true);
+            lineAdjustment(pages, viewModel, paragraphNode, sectionBreakConfig);
+            expect(divide.glyphGroup.map((glyph) => glyph.width)).toEqual([10, 30, 10, 10, 10]);
+            expect(divide.glyphGroup.map((glyph) => glyph.left)).toEqual([0, 10, 40, 50, 60]);
+            expect(divide.glyphGroupWidth).toBe(70);
+        } finally {
+            viewModel.dispose();
+            FontCache.clearFontMeasureCache(font);
+            clearFontCreateConfigCache();
+        }
+    });
+
     it.each([0, 1024])('adjusts a late paragraph without revisiting unrelated cell lines (%i following lines)', (followingLineCount) => {
         const prefixCount = 1024;
         const prefix = 'A\r'.repeat(prefixCount);

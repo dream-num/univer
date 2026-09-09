@@ -19,7 +19,7 @@ import type {
     IRange,
     IRangeWithCoord,
     IScale,
-    IStyleBase,
+    ITextStyle,
     Nullable,
 } from '@univerjs/core';
 import type { IDocumentSkeletonFontStyle } from './i-document-skeleton-cached';
@@ -257,7 +257,7 @@ export function fixLineWidthByScale(num: number, scale: number) {
 }
 
 export function getFontStyleString(
-    textStyle?: Nullable<IStyleBase>
+    textStyle?: Nullable<ITextStyle>
 ): IDocumentSkeletonFontStyle {
     const defaultFont = DEFAULT_STYLES.ff;
 
@@ -316,12 +316,26 @@ export function getFontStyleString(
     const fontString = `${fontStringPure}, ${DEFAULT_FONTFACE_PLANE} `;
 
     return {
+        ...(textStyle.kerning != null && Number.isFinite(textStyle.kerning) && textStyle.kerning >= 0
+            ? { fontKerning: textStyle.kerning > 0 && originFontSize >= textStyle.kerning ? 'normal' as const : 'none' as const }
+            : {}),
         fontCache: fontStringPure,
         fontString,
         fontSize,
         originFontSize,
         fontFamily: fontFamilyResult,
     };
+}
+
+/** Office display casing preserves one source character instead of expanding forms such as ß to SS. */
+export function getTextWithCaps(content: string, caps?: boolean): string {
+    if (!caps) {
+        return content;
+    }
+    return Array.from(content, (char) => {
+        const upper = char.toUpperCase();
+        return Array.from(upper).length === 1 ? upper : char;
+    }).join('');
 }
 
 function normalizeFontFamily(fontFamily: Nullable<string>, defaultFont: string): string {

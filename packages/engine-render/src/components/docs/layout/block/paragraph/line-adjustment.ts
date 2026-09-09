@@ -180,10 +180,30 @@ function getGlyphGroupInkBounds(divide: IDocumentSkeletonDivide): { left: number
     return { left, right };
 }
 
+function getDrawingMLAlignmentDivide(divide: IDocumentSkeletonDivide): IDocumentSkeletonDivide {
+    const { glyphGroup } = divide;
+    let end = glyphGroup.length;
+    let hasTrailingSpace = false;
+    while (end > 0) {
+        const glyph = glyphGroup[end - 1];
+        if (/^[ \u3000]+$/.test(glyph.content)) {
+            hasTrailingSpace = true;
+        } else if (glyph.width !== 0 || !['', '\r', '\n', '\u2028'].includes(glyph.content)) {
+            break;
+        }
+        end--;
+    }
+
+    // DrawingML hangs breakable spaces outside alignment, but retains tabs and
+    // nonbreaking spaces. Share glyphs without removing editable source positions.
+    return hasTrailingSpace ? { ...divide, glyphGroup: glyphGroup.slice(0, end) } : divide;
+}
+
 function horizontalAlignHandler(
     line: IDocumentSkeletonLine,
     horizontalAlign: HorizontalAlign,
-    allowOverflowHorizontalOffset = false
+    allowOverflowHorizontalOffset = false,
+    isDrawingML = false
 ) {
     const { divides } = line;
 
@@ -197,21 +217,22 @@ function horizontalAlignHandler(
             continue;
         }
 
-        let glyphGroupWidth = getGlyphGroupWidth(divide);
+        const alignmentDivide = isDrawingML ? getDrawingMLAlignmentDivide(divide) : divide;
+        let glyphGroupWidth = getGlyphGroupWidth(alignmentDivide);
 
-        divide.glyphGroupWidth = glyphGroupWidth;
+        divide.glyphGroupWidth = getGlyphGroupWidth(divide);
 
         if (width === Number.POSITIVE_INFINITY) {
             continue;
         }
 
-        if (divide.isFull) {
+        if (divide.isFull && alignmentDivide.glyphGroup.length > 0) {
             let remaining = width - glyphGroupWidth;
 
             // Handle hanging punctuation to the right.
             // TODO: @jocs Handle hanging punctuation to the left if text dir is RTL.
-            if (divide.glyphGroup.length > 1) {
-                const lastGlyph = divide.glyphGroup[divide.glyphGroup.length - 1];
+            if (alignmentDivide.glyphGroup.length > 1) {
+                const lastGlyph = alignmentDivide.glyphGroup[alignmentDivide.glyphGroup.length - 1];
                 const amount = overhang(lastGlyph.content) * lastGlyph.width;
 
                 remaining += amount;
@@ -219,8 +240,8 @@ function horizontalAlignHandler(
 
             let justificationRatio = 0;
             let extraJustification = 0;
-            const shrink = getDivideShrinkability(divide);
-            const stretch = getDivideStretchability(divide);
+            const shrink = getDivideShrinkability(alignmentDivide);
+            const stretch = getDivideStretchability(alignmentDivide);
 
             if (remaining < 0 && shrink > 0) {
                 // Attempt to reduce the length of the line, using shrinkability.
@@ -233,7 +254,7 @@ function horizontalAlignHandler(
                     remaining = Math.max(remaining - stretch, 0);
                 }
 
-                const justifiables = getJustifiables(divide);
+                const justifiables = getJustifiables(alignmentDivide);
 
                 if (justifiables > 0 && remaining > 0) {
                     extraJustification = remaining / justifiables;
@@ -244,19 +265,24 @@ function horizontalAlignHandler(
             if (justificationRatio !== 0 || extraJustification !== 0) {
                 // Extrude or stretch row so that they fit within a specified width,
                 // or they can be squeezed or stretched to justify the row.
-                adjustGlyphsInDivide(divide, justificationRatio, extraJustification);
+                adjustGlyphsInDivide(alignmentDivide, justificationRatio, extraJustification);
+                if (alignmentDivide !== divide) {
+                    setGlyphGroupLeft(divide.glyphGroup);
+                }
                 // Recalculate the glyph group width, because we adjust the width and xOffset of glyphs.
-                glyphGroupWidth = getGlyphGroupWidth(divide);
-                divide.glyphGroupWidth = glyphGroupWidth;
+                glyphGroupWidth = getGlyphGroupWidth(alignmentDivide);
+                divide.glyphGroupWidth = getGlyphGroupWidth(divide);
             }
         }
 
-        const inkBounds = allowOverflowHorizontalOffset ? getGlyphGroupInkBounds(divide) : null;
+        const inkBounds = allowOverflowHorizontalOffset ? getGlyphGroupInkBounds(alignmentDivide) : null;
 
         if (horizontalAlign === HorizontalAlign.DISTRIBUTED) {
-            if (distributeGlyphsInDivide(divide, width - glyphGroupWidth)) {
-                glyphGroupWidth = getGlyphGroupWidth(divide);
-                divide.glyphGroupWidth = glyphGroupWidth;
+            if (distributeGlyphsInDivide(alignmentDivide, width - glyphGroupWidth)) {
+                if (alignmentDivide !== divide) {
+                    setGlyphGroupLeft(divide.glyphGroup);
+                }
+                divide.glyphGroupWidth = getGlyphGroupWidth(divide);
             }
             divide.paddingLeft = 0;
         } else if (horizontalAlign === HorizontalAlign.CENTER && inkBounds) {
@@ -386,7 +412,12 @@ export function lineAdjustment(
                     shrinkStartAndEndCJKPunctuation(line);
                     restoreLastCJKGlyphWidth(line);
                     addHyphenDash(line, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-                    horizontalAlignHandler(line, horizontalAlign, shouldAllowOverflowHorizontalOffset(sectionBreakConfig));
+                    horizontalAlignHandler(
+                        line,
+                        horizontalAlign,
+                        shouldAllowOverflowHorizontalOffset(sectionBreakConfig),
+                        sectionBreakConfig.documentCompatibilityPolicy?.mode === 'drawingml'
+                    );
                 }
             }
         }

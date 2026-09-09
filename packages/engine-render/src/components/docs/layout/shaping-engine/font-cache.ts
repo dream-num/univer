@@ -200,7 +200,7 @@ export class FontCache {
             // if (content === DataStreamTreeTokenType.PARAGRAPH) {
             //     content = '0';
             // }
-            const measureText = this.getMeasureText(content, fontString);
+            const measureText = this.getMeasureText(content, fontString, fontStyle.fontKerning);
             bBox = this._calculateBoundingBoxByMeasureText(measureText, fontStyle);
         }
 
@@ -216,7 +216,7 @@ export class FontCache {
      * @param fontString
      * @returns IMeasureTextCache
      */
-    static getMeasureText(content: string, fontString: string): IMeasureTextCache {
+    static getMeasureText(content: string, fontString: string, kerning: CanvasFontKerning = 'auto'): IMeasureTextCache {
         if (!this._context) {
             this._context = this._createMeasureContext();
         }
@@ -233,11 +233,15 @@ export class FontCache {
 
         const ctx = this._context;
 
-        const mtc = this.getFontMeasureCache(fontString, content);
+        const cacheKey = kerning === 'auto' ? fontString : `${fontString}\u0000${kerning}`;
+        const mtc = this.getFontMeasureCache(cacheKey, content);
         if (mtc != null) {
             return mtc;
         }
         ctx.font = fontString;
+        if ('fontKerning' in ctx) {
+            ctx.fontKerning = kerning;
+        }
 
         const textMetrics = ctx.measureText(content);
 
@@ -281,7 +285,7 @@ export class FontCache {
             }
         }
 
-        this.setFontMeasureCache(fontString, content, cache);
+        this.setFontMeasureCache(cacheKey, content, cache);
 
         return cache;
     }

@@ -31,6 +31,7 @@ import {
 import { cjk } from '../../../../../basics/cjk-regexp';
 import { GlyphType } from '../../../../../basics/i-document-skeleton-cached';
 import {
+    getFirstGrapheme,
     hasArabic,
     hasThai,
     hasTibetan,
@@ -100,7 +101,8 @@ function addCJKLatinSpacing(shapedTextList: IShapedText[]) {
     for (let i = 0; i < len; i++) {
         const curGlyph = shapedGlyphs[i];
         const nextGlyph = i < len - 1 ? shapedGlyphs[i + 1] : null;
-        const { width } = curGlyph;
+        // Automatic mixed-script spacing is based on the character, not its explicit tracking interval.
+        const width = curGlyph.ts?.sc && Number.isFinite(curGlyph.ts.sc) ? curGlyph.bBox.width : curGlyph.width;
 
         // Case 1: CJ followed by a Latin character.
         if (cjk.hasCJKText(curGlyph.content) && nextGlyph && LATIN_REG.test(nextGlyph.content)) {
@@ -288,7 +290,7 @@ export function shaping(
                 measuredWholeEntityRangeIndex++;
             }
 
-            const char = src.match(/^[\s\S]/gu)?.[0];
+            let char = src.match(/^[\s\S]/gu)?.[0];
 
             if (char == null) {
                 break;
@@ -358,6 +360,9 @@ export function shaping(
                 src = src.substring(char.length);
             } else if (/\s/.test(char) || cjk.hasCJK(char)) {
                 const config = getFontCreateConfig(i, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+                if (config.textStyle.sc && cjk.hasCJK(char)) {
+                    char = getFirstGrapheme(src) ?? char;
+                }
                 let newGlyph: Nullable<IDocumentSkeletonGlyph> = null;
 
                 if (char === DataStreamTreeTokenType.TAB) {
@@ -369,10 +374,13 @@ export function shaping(
                     if (zeroWidthParagraphBreak === BooleanNumber.TRUE) {
                         newGlyph = createSkeletonLetterGlyph(char, config, 0);
                     } else {
+                        const defaultWidth = zeroWidthParagraphBreak == null && sectionBreakConfig.documentCompatibilityPolicy?.mode === 'drawingml'
+                            ? 0
+                            : undefined;
                         newGlyph = createSkeletonLetterGlyph(
                             char,
                             config,
-                            getCustomRangeGlyphMetrics(i, viewModel, paragraphNode, config)
+                            getCustomRangeGlyphMetrics(i, viewModel, paragraphNode, config) ?? defaultWidth
                         );
                     }
                 } else {

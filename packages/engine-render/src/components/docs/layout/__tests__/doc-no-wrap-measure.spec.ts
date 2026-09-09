@@ -15,7 +15,9 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
+import { DocumentFlavor } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
+import { getFontStyleString } from '../../../../basics/tools';
 import {
     measureDocumentNoWrapTextRangeWidth,
     measureDocumentNoWrapTextWidth,
@@ -41,6 +43,105 @@ function createDocument(dataStream: string): IDocumentData {
 }
 
 describe('measureDocumentNoWrapTextWidth', () => {
+    it.each([DocumentFlavor.MODERN, DocumentFlavor.DRAWINGML])('shares small-cap fonts for inherited styles and source ranges (%s)', (flavor) => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text, font) => ({
+            width: Array.from(text).length * Number(font.match(/([\d.]+)pt/)![1]),
+        }) as never);
+        try {
+            const document = createDocument('Hh x  \r\n');
+            document.documentStyle.documentFlavor = flavor;
+            document.documentStyle.textStyle = { fs: 12, smallCaps: true };
+            const small = flavor === DocumentFlavor.DRAWINGML ? 9.6 : 9.5;
+            expect(measureDocumentNoWrapTextWidth(document)).toBeCloseTo(24 + small * 2);
+            expect(measureDocumentNoWrapTextRangeWidth(document, 1, 2)).toBeCloseTo(small);
+            document.body!.textRuns = [{ st: 3, ed: 4, ts: { smallCaps: false } }];
+            expect(measureDocumentNoWrapTextWidth(document)).toBeCloseTo(36 + small);
+            document.body!.textRuns = [{ st: 3, ed: 4, ts: { caps: true } }];
+            expect(measureDocumentNoWrapTextWidth(document)).toBeCloseTo(36 + small);
+            expect(document.body!.dataStream).toBe('Hh x  \r\n');
+        } finally {
+            measureSpy.mockRestore();
+        }
+    });
+
+    it('measures inherited display capitals with direct off and unchanged source ranges', () => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
+            width: Array.from(text).reduce((width, char) => width + (/[A-Z]/.test(char) ? 10 : 5), 0),
+        }) as never);
+        try {
+            const document = createDocument('ab cd\r\n');
+            document.documentStyle.textStyle = { caps: true, fs: 12 };
+            document.body!.textRuns = [{ st: 0, ed: 2, ts: { bl: 1 } }, { st: 3, ed: 5, ts: { caps: false } }];
+            expect(measureDocumentNoWrapTextWidth(document)).toBe(35);
+            expect(measureDocumentNoWrapTextRangeWidth(document, 0, 2)).toBe(20);
+            expect(measureDocumentNoWrapTextRangeWidth(document, 3, 5)).toBe(10);
+            expect(document.body!.dataStream).toBe('ab cd\r\n');
+        } finally {
+            measureSpy.mockRestore();
+        }
+    });
+
+    it('preserves space-letter kerning across styled runs but not across line or font changes', () => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text, _font, mode) => ({
+            width: text.length * 10 - (mode === 'normal' ? (text.match(/ V/g)?.length ?? 0) * 2 : 0),
+        }) as never);
+        try {
+            const document = createDocument('A V  \r\n');
+            const style = { ff: 'Space kerning regression', fs: 12, kerning: 12 };
+            document.body!.textRuns = [
+                { st: 0, ed: 2, ts: style },
+                { st: 2, ed: 5, ts: { ...style, bl: 0 } },
+            ];
+            expect(measureDocumentNoWrapTextWidth(document)).toBe(28);
+            expect(measureDocumentNoWrapTextRangeWidth(document, 0, 2)).toBe(10);
+            document.body!.textRuns[1].ts!.fs = 13;
+            expect(measureDocumentNoWrapTextWidth(document)).toBe(30);
+            document.body!.textRuns[1].ts!.fs = 12;
+            document.body!.dataStream = 'A\rV  \r\n';
+            expect(measureDocumentNoWrapTextWidth(document)).toBe(10);
+        } finally {
+            measureSpy.mockRestore();
+        }
+    });
+
+    it.each([false, true])('measures explicit line separators without reserving an advance (styled: %s)', (styled) => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({ width: text.length * 10 }) as never);
+        try {
+            const document = createDocument('AA \u2028BBBB\r\n');
+            if (styled) {
+                document.body!.textRuns = [{ st: 0, ed: 8, ts: { fs: 12 } }];
+            }
+            expect(measureDocumentNoWrapTextWidth(document)).toBe(40);
+            expect(measureDocumentNoWrapTextRangeWidth(document, 0, 4)).toBe(20);
+            expect(measureDocumentNoWrapTextRangeWidth(document, 0, 8)).toBe(40);
+            expect(measureDocumentUnbreakableTextWidth(document)).toBe(40);
+        } finally {
+            measureSpy.mockRestore();
+        }
+    });
+
+    it('includes run tracking without inflating East Asian automatic spacing or trailing whitespace', () => {
+        const font = getFontStyleString({ fs: 12, ff: 'Tracking no-wrap' }).fontCache;
+        for (const text of ['A', 'B', '中', ' ']) {
+            FontCache.setFontMeasureCache(font, text, {
+                width: text === '中' ? 20 : 10,
+                fontBoundingBoxAscent: 12,
+                fontBoundingBoxDescent: 3,
+                actualBoundingBoxAscent: 10,
+                actualBoundingBoxDescent: 2,
+            });
+        }
+        try {
+            const document = createDocument('A中B  \r\n');
+            document.body!.textRuns = [{ st: 0, ed: 5, ts: { fs: 12, ff: 'Tracking no-wrap', sc: -3 } }];
+            // 40 measured + 10 automatic CJK spacing - 9 tracking; trailing spaces do not count.
+            expect(measureDocumentNoWrapTextWidth(document)).toBe(41);
+            expect(measureDocumentNoWrapTextRangeWidth(document, 0, 3)).toBe(41);
+        } finally {
+            FontCache.clearFontMeasureCache(font);
+        }
+    });
+
     it('uses docs CJK-Latin spacing for mixed no-wrap text', () => {
         const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
             width: Array.from(text).reduce((total, char) => total + (/[\u2E80-\u9FFF\uF900-\uFAFF]/u.test(char) ? 20 : 10), 0),

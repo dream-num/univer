@@ -44,17 +44,19 @@ export function otherHandler(
     let src = charArray;
 
     while (src.length) {
-        const char = src.match(/^[\s\S]/gu)?.[0];
+        const config = getFontCreateConfig(index + step, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+        const char = config.textStyle.sc || config.textStyle.kerning != null || config.textStyle.caps || config.textStyle.smallCaps
+            ? getFirstGrapheme(src)
+            : src.match(/^[\s\S]/gu)?.[0];
 
         if (char == null) {
             break;
         }
 
-        if (hasSpace(char) || startWithEmoji(charArray.substring(step))) {
+        if (hasSpace(char) || startWithEmoji(charArray.substring(step)) || (config.textStyle.sc && hasArabic(char))) {
             break;
         }
 
-        const config = getFontCreateConfig(index + step, viewModel, paragraphNode, sectionBreakConfig, paragraph);
         const glyph = createSkeletonLetterGlyph(char, config, getCustomRangeGlyphMetrics(index + step, viewModel, paragraphNode, config));
 
         glyphGroup.push(glyph);

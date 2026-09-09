@@ -36,6 +36,7 @@ import {
     DocumentFlavor,
     GridType,
     NAMED_STYLE_SPACE_MAP,
+    NumberUnitType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
@@ -49,7 +50,12 @@ import { isCjkLeftAlignedPunctuation } from '../../../../../basics/tools';
 import { getDocsCustomBlockRenderViewport } from '../../../custom-block-render-viewport';
 import { getNominalFontLineHeight, isTraditionalDocumentCompatibility } from '../../../document-compatibility';
 import { BreakPointType } from '../../line-breaker/break';
-import { addGlyphToDivide, createSkeletonBulletGlyph } from '../../model/glyph';
+import {
+    addGlyphToDivide,
+    applyGlyphKerning,
+    createSkeletonBulletGlyph,
+    getGlyphPairKerningAdjustment,
+} from '../../model/glyph';
 import {
     calculateLineTopByDrawings,
     collisionDetection,
@@ -64,12 +70,14 @@ import {
     FloatObjectType,
     getCharSpaceApply,
     getCharSpaceConfig,
+    getDrawingMLLineBaseline,
     getLastLineByColumn,
     getLastNotFullColumnInfo,
     getLastNotFullDivideInfo,
     getLastPage,
     getLastSection,
     getLineHeightConfig,
+    getLineMetricGlyphs,
     getNumberUnitValue,
     getPositionHorizon,
     getPositionVertical,
@@ -120,7 +128,17 @@ function isGlyphGroupBeyondDivideWidth(
     }
     const trailingGlyph = glyphGroup[trailingIndex];
     const trailingShrinkability = trailingGlyph?.adjustability?.shrinkability?.[1] ?? 0;
-    const trailingHangingWidth = hangingPunctuation && trailingGlyph && isCjkLeftAlignedPunctuation(trailingGlyph.content)
+    const alternateLanguage = trailingGlyph?.ts?.altLang;
+    // Office uses the alternate East Asian language for CJK punctuation in mixed-language runs.
+    const punctuationLanguage = /^(?:ja|zh|ko)(?:-|$)/i.test(alternateLanguage ?? '')
+        ? alternateLanguage
+        : trailingGlyph?.ts?.lang;
+    // JLREQ hanging punctuation covers full stops and commas, not closing brackets.
+    // Keep punctuation compression and the legacy behavior for unspecified languages separate.
+    const permitsHanging = trailingGlyph && (/^ja(?:-|$)/i.test(punctuationLanguage ?? '')
+        ? /^[。．、，]$/.test(trailingGlyph.content)
+        : isCjkLeftAlignedPunctuation(trailingGlyph.content));
+    const trailingHangingWidth = hangingPunctuation && permitsHanging
         ? trailingGlyph.width
         : 0;
 
@@ -148,7 +166,12 @@ export function layoutParagraph(
             const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
-            const bulletGlyph = createSkeletonBulletGlyph(glyphGroup[0], bulletSkeleton, charSpaceApply);
+            const bulletGlyph = createSkeletonBulletGlyph(
+                glyphGroup[0],
+                bulletSkeleton,
+                charSpaceApply,
+                sectionBreakConfig.documentCompatibilityPolicy
+            );
             const paragraphProperties = bulletSkeleton.paragraphProperties || {};
             const bulletParagraphStyle = {
                 ...paragraphProperties,
@@ -186,7 +209,7 @@ export function layoutParagraph(
     return [...pages];
 }
 
-function isGlyphGroupEndWithWhiteSpaces(glyphGroup: IDocumentSkeletonGlyph[]) {
+function isGlyphGroupEndWithWhiteSpaces(glyphGroup: IDocumentSkeletonGlyph[], drawingML = false) {
     if (glyphGroup.length <= 1) {
         return false;
     }
@@ -194,12 +217,13 @@ function isGlyphGroupEndWithWhiteSpaces(glyphGroup: IDocumentSkeletonGlyph[]) {
     let isInWhiteSpace = false;
 
     for (const g of glyphGroup) {
-        if (g.content === DataStreamTreeTokenType.SPACE) {
+        if (g.content === DataStreamTreeTokenType.SPACE || (drawingML && g.content === '\u3000')) {
             isInWhiteSpace = true;
         }
 
         if (isInWhiteSpace &&
-            g.content !== DataStreamTreeTokenType.SPACE && g.content !== DataStreamTreeTokenType.PARAGRAPH && g.streamType !== DataStreamTreeTokenType.SECTION_BREAK) {
+            g.content !== DataStreamTreeTokenType.SPACE && !(drawingML && g.content === '\u3000') &&
+            g.content !== DataStreamTreeTokenType.PARAGRAPH && g.streamType !== DataStreamTreeTokenType.SECTION_BREAK) {
             return false;
         }
     }
@@ -207,7 +231,7 @@ function isGlyphGroupEndWithWhiteSpaces(glyphGroup: IDocumentSkeletonGlyph[]) {
     return isInWhiteSpace;
 }
 
-function isGlyphGroupBeyondContentBox(glyphGroup: IDocumentSkeletonGlyph[], left: number, divideWidth: number) {
+function isGlyphGroupBeyondContentBox(glyphGroup: IDocumentSkeletonGlyph[], left: number, divideWidth: number, drawingML = false) {
     if (glyphGroup.length <= 1) {
         return false;
     }
@@ -218,6 +242,7 @@ function isGlyphGroupBeyondContentBox(glyphGroup: IDocumentSkeletonGlyph[], left
     for (const g of glyphGroup) {
         if (
             g.content === DataStreamTreeTokenType.SPACE ||
+            (drawingML && g.content === '\u3000') ||
             g.content === DataStreamTreeTokenType.PARAGRAPH ||
             g.streamType === DataStreamTreeTokenType.SECTION_BREAK
         ) {
@@ -309,11 +334,14 @@ function _divideOperator(
         const lastWidth = lastGlyph?.width || 0;
         const lastLeft = lastGlyph?.left || 0;
         const preOffsetLeft = lastWidth + lastLeft;
+        const fitOffsetLeft = preOffsetLeft + getGlyphPairKerningAdjustment(lastGlyph, glyphGroup[0]) -
+            (lastGlyph?.kerningAdjustment ?? 0);
         const { hyphenationZone } = sectionBreakConfig;
+        const drawingML = sectionBreakConfig.documentCompatibilityPolicy?.mode === 'drawingml';
         const hangingPunctuation = paragraphConfig.paragraphStyle?.hangingPunctuation === BooleanNumber.TRUE;
         const lineWrapTolerance = sectionBreakConfig.renderConfig?.lineWrapTolerance ??
-            (sectionBreakConfig.documentCompatibilityPolicy?.mode === 'drawingml' ? 0 : undefined);
-        if (isGlyphGroupBeyondDivideWidth(glyphGroup, preOffsetLeft, divide.width, hangingPunctuation, lineWrapTolerance)) {
+            (drawingML ? 0 : undefined);
+        if (isGlyphGroupBeyondDivideWidth(glyphGroup, fitOffsetLeft, divide.width, hangingPunctuation, lineWrapTolerance)) {
             if (
                 divide?.glyphGroup.length === 0 &&
                 glyphGroup.length > 0 &&
@@ -345,12 +373,14 @@ function _divideOperator(
                 divideInfo.isLast &&
                 glyphGroup.length === 1 &&
                 (glyphGroup[0].content === DataStreamTreeTokenType.SPACE ||
+                    (drawingML && glyphGroup[0].content === '\u3000') ||
                     glyphGroup[0].content === DataStreamTreeTokenType.PARAGRAPH)
             ) {
                 addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
             } else if (
                 // If a line of text ends with consecutive spaces, the spaces should not be placed on the second line.
-                divideInfo.isLast && !isGlyphGroupBeyondContentBox(glyphGroup, preOffsetLeft, divide.width) && isGlyphGroupEndWithWhiteSpaces(glyphGroup)
+                divideInfo.isLast && !isGlyphGroupBeyondContentBox(glyphGroup, fitOffsetLeft, divide.width, drawingML) &&
+                isGlyphGroupEndWithWhiteSpaces(glyphGroup, drawingML)
             ) {
                 addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
             } else if (
@@ -470,7 +500,11 @@ function _divideOperator(
         } else {
             // w does not exceed divide width, add it to divide
             const currentLine = divide.parent;
-            const maxBox = __maxFontBoundingBoxByGlyphGroup(glyphGroup);
+            const maxBox = __maxFontBoundingBoxByGlyphGroup(getLineMetricGlyphs(
+                glyphGroup,
+                sectionBreakConfig.documentCompatibilityPolicy,
+                currentLine ? __getGlyphGroupByLine(currentLine) : []
+            ));
 
             if (
                 currentLine &&
@@ -691,10 +725,11 @@ function _lineOperator(
 
     const preLine = getLastLineByColumn(column);
 
-    const ascent = Math.max(...glyphGroup.map((glyph) => glyph.bBox.ba));
-    const descent = Math.max(...glyphGroup.map((glyph) => glyph.bBox.bd));
+    const metricGlyphs = getLineMetricGlyphs(glyphGroup, sectionBreakConfig.documentCompatibilityPolicy);
+    const ascent = Math.max(...metricGlyphs.map((glyph) => glyph.bBox.ba));
+    const descent = Math.max(...metricGlyphs.map((glyph) => glyph.bBox.bd));
     const glyphLineHeight = defaultSpanMetrics?.lineHeight || (ascent + descent);
-    const normalLineHeight = Math.max(...glyphGroup.map((glyph) => glyph.bBox.normalLineHeight ?? 0)) || undefined;
+    const normalLineHeight = Math.max(...metricGlyphs.map((glyph) => glyph.bBox.normalLineHeight ?? 0)) || undefined;
 
     const {
         paragraphStyle: originParagraphStyle = {},
@@ -759,6 +794,8 @@ function _lineOperator(
     const glyphGroupCustomBlockIds = new Set(glyphGroup
         .filter((glyph) => glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.drawingId != null)
         .map((glyph) => glyph.drawingId!));
+    const drawingMLLineHeight = defaultSpanMetrics?.drawingMLLineHeight ??
+        getDrawingMLNominalLineHeight(glyphGroup, sectionBreakConfig, hasInlineCustomBlock);
     let { paddingTop, paddingBottom, contentHeight, lineSpacingApply } = getLineHeightMetrics(
         glyphLineHeight,
         paragraphLineGapDefault,
@@ -771,8 +808,17 @@ function _lineOperator(
         !hasInlineCustomBlock,
         normalLineHeight,
         snapMultilineParagraphToWholeGrid,
-        defaultSpanMetrics?.drawingMLLineHeight ?? getDrawingMLNominalLineHeight(glyphGroup, sectionBreakConfig, hasInlineCustomBlock)
+        drawingMLLineHeight
     );
+    const drawingMLBaselineHeight = !positionedCustomBlockOnly && !isZeroWidthNonFlowFloatingAnchorLine &&
+        drawingMLLineHeight != null && (spacingRule === SpacingRule.EXACT || (spacingRule === SpacingRule.AUTO && lineSpacing > 1)) &&
+        (snapToGrid === BooleanNumber.FALSE || (gridType !== GridType.LINES && gridType !== GridType.LINES_AND_CHARS))
+        ? lineSpacingApply
+        : undefined;
+    if (drawingMLBaselineHeight != null) {
+        paddingTop = getDrawingMLLineBaseline(drawingMLBaselineHeight, ascent, descent) - ascent;
+        paddingBottom = lineSpacingApply - contentHeight - paddingTop;
+    }
 
     if (snapMultilineParagraphToWholeGrid && preLine?.paragraphIndex === paragraphIndex) {
         const preLineGlyphs = __getGlyphGroupByLine(preLine);
@@ -811,7 +857,7 @@ function _lineOperator(
     }
 
     let { marginTop, spaceBelowApply } = __getParagraphSpace(
-        ctx,
+        sectionBreakConfig.documentCompatibilityPolicy?.mode === 'drawingml',
         lineSpacingApply,
         spaceAbove,
         spaceBelow,
@@ -819,7 +865,8 @@ function _lineOperator(
         preLine,
         isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy!) &&
             preLine == null &&
-            (column.parent?.top ?? 0) === 0
+            (column.parent?.top ?? 0) === 0,
+        drawingMLLineHeight
     );
 
     if (positionedCustomBlockOnly) {
@@ -1015,6 +1062,12 @@ function _lineOperator(
         column.left,
         section.top
     );
+    if (drawingMLBaselineHeight != null) {
+        newLine.drawingMLBaselineHeight = drawingMLBaselineHeight;
+        if (spacingRule === SpacingRule.AUTO) {
+            newLine.drawingMLNormalLineHeight = drawingMLLineHeight;
+        }
+    }
 
     column.lines.push(newLine);
     newLine.parent = column;
@@ -1695,25 +1748,29 @@ function __getIndentPadding(
 }
 
 function __getParagraphSpace(
-    ctx: ILayoutContext,
+    isDrawingML: boolean,
     lineSpacing: number = 0,
     spaceAbove: Nullable<INumberUnit>,
     spaceBelow: Nullable<INumberUnit>,
     isParagraphFirstShapedText: boolean,
     preLine?: IDocumentSkeletonLine,
-    suppressSpaceAbove = false
+    suppressSpaceAbove = false,
+    drawingMLLineHeight?: number
 ) {
     // Unable to read the paragraph information from the previous line,
     // So add the spaceBelowApply information to each line when creating a new line.
     // `SpaceBelowApply` will not participate in the current line height calculation.
-    const spaceBelowApply = getNumberUnitValue(spaceBelow, lineSpacing);
+    const spaceBelowApply = getParagraphSpaceValue(spaceBelow, lineSpacing, drawingMLLineHeight);
 
     if (isParagraphFirstShapedText) {
-        let marginTop = suppressSpaceAbove ? 0 : getNumberUnitValue(spaceAbove, lineSpacing);
+        let marginTop = suppressSpaceAbove ? 0 : getParagraphSpaceValue(spaceAbove, lineSpacing, drawingMLLineHeight);
 
         if (preLine) {
             const { spaceBelowApply: preSpaceBelowApply } = preLine;
-            if (marginTop < preSpaceBelowApply) {
+            if (isDrawingML) {
+                // DrawingML adds adjacent paragraph spacing; Word collapses it to the larger value.
+                marginTop += preSpaceBelowApply;
+            } else if (marginTop < preSpaceBelowApply) {
                 const maxValue = Math.max(preSpaceBelowApply, marginTop);
                 // spaceBelow and spaceAbove compare the size, the larger one takes effect
                 // 17.3.1.33 spacing (Spacing Between Lines and Above/Below Paragraph)
@@ -1733,6 +1790,13 @@ function __getParagraphSpace(
         marginTop: 0,
         spaceBelowApply,
     };
+}
+
+function getParagraphSpaceValue(value: Nullable<INumberUnit>, lineSpacing: number, drawingMLLineHeight?: number): number {
+    // DrawingML paragraph percentages use a normal line, independent of the paragraph's line spacing.
+    const relativeToNormalLine = drawingMLLineHeight != null &&
+        (value?.u === NumberUnitType.LINE || value?.u === NumberUnitType.PERCENT);
+    return getNumberUnitValue(value, relativeToNormalLine ? drawingMLLineHeight : lineSpacing);
 }
 
 function __getParagraphAnchorLeft(
@@ -2208,6 +2272,7 @@ function __checkPageBreak(column: IDocumentSkeletonColumn) {
 }
 
 function __getGlyphGroupWidth(glyphGroup: IDocumentSkeletonGlyph[]) {
+    applyGlyphKerning(glyphGroup);
     const glyphGroupLen = glyphGroup.length;
     let width = 0;
 

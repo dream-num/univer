@@ -78,7 +78,7 @@ export function getEmptySnapshot(
             marginBottom: TRADITIONAL_DOCUMENT_DEFAULT_MARGIN,
             marginRight: TRADITIONAL_DOCUMENT_DEFAULT_MARGIN,
             marginLeft: TRADITIONAL_DOCUMENT_DEFAULT_MARGIN,
-            autoHyphenation: BooleanNumber.TRUE,
+            autoHyphenation: documentFlavor === DocumentFlavor.DRAWINGML ? BooleanNumber.FALSE : BooleanNumber.TRUE,
             doNotHyphenateCaps: BooleanNumber.FALSE,
             consecutiveHyphenLimit: 2,
             defaultHeaderId: '',

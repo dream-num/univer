@@ -432,6 +432,28 @@ function getParagraphLogicalStartAnchors(pages: IDocumentSkeletonPage[]): Map<ID
     return anchors;
 }
 
+export function getLineMetricGlyphs(
+    glyphGroup: IDocumentSkeletonGlyph[],
+    documentCompatibilityPolicy?: IDocumentCompatibilityPolicy,
+    previousGlyphs: IDocumentSkeletonGlyph[] = []
+): IDocumentSkeletonGlyph[] {
+    if (documentCompatibilityPolicy?.mode !== 'drawingml') {
+        return glyphGroup;
+    }
+    const hasText = (glyph: IDocumentSkeletonGlyph) =>
+        glyph.content && glyph.streamType !== DataStreamTreeTokenType.PARAGRAPH && glyph.glyphType !== GlyphType.LIST;
+    // An empty line needs the paragraph-end font; a populated DrawingML line does not.
+    return glyphGroup.some(hasText) || previousGlyphs.some(hasText)
+        ? glyphGroup.filter((glyph) => glyph.streamType !== DataStreamTreeTokenType.PARAGRAPH)
+        : glyphGroup;
+}
+
+export function getDrawingMLLineBaseline(lineHeight: number, ascent: number, descent: number): number {
+    const bottomAlignedBaseline = lineHeight - descent;
+    // Preserve the quarter-line descent without crossing either natural font edge near its line height.
+    return Math.min(Math.max(lineHeight * 0.75, Math.min(ascent, bottomAlignedBaseline)), Math.max(ascent, bottomAlignedBaseline));
+}
+
 export function updateBlockIndex(
     pages: IDocumentSkeletonPage[],
     start: number = -1,
@@ -498,8 +520,9 @@ export function updateBlockIndex(
                     const lineEndIndex = lineStartIndex;
                     let preDivideStartIndex = lineStartIndex;
                     let actualWidth = 0;
-                    let maxLineAsc = 0;
-                    let macLineDsc = 0;
+                    const metricGlyphs = getLineMetricGlyphs(divides.flatMap((divide) => divide.glyphGroup), documentCompatibilityPolicy);
+                    const maxLineAsc = Math.max(0, ...metricGlyphs.map((glyph) => glyph.bBox.ba));
+                    const maxLineDsc = Math.max(0, ...metricGlyphs.map((glyph) => glyph.bBox.bd));
                     columnHeight = top + lineHeight;
                     const divideLength = divides.length;
                     let lineHasGlyph = false;
@@ -515,12 +538,6 @@ export function updateBlockIndex(
                             const increaseValue = glyph.glyphType === GlyphType.LIST ? 0 : glyph.count;
 
                             divEndIndex += increaseValue;
-
-                            const bBox = glyph.bBox;
-                            const { ba, bd } = bBox;
-
-                            maxLineAsc = Math.max(maxLineAsc, ba);
-                            macLineDsc = Math.max(macLineDsc, bd);
 
                             if (i === divideLength - 1) {
                                 actualWidth += glyph.width;
@@ -560,7 +577,12 @@ export function updateBlockIndex(
                     line.ed = preDivideStartIndex >= line.st ? preDivideStartIndex : line.st;
                     line.width = actualWidth;
                     line.asc = maxLineAsc;
-                    line.dsc = macLineDsc;
+                    line.dsc = maxLineDsc;
+                    if (line.drawingMLBaselineHeight != null) {
+                        const lineBoxHeight = line.paddingTop + line.contentHeight + line.paddingBottom;
+                        line.paddingTop = getDrawingMLLineBaseline(line.drawingMLBaselineHeight, maxLineAsc, maxLineDsc) - maxLineAsc;
+                        line.paddingBottom = lineBoxHeight - line.contentHeight - line.paddingTop;
+                    }
                     maxColumnWidth = Math.max(maxColumnWidth, actualWidth);
                     // Please do not use pre line's top and height to calculate the current's top,
                     // because of float objects will between lines.
@@ -568,6 +590,13 @@ export function updateBlockIndex(
                 }
                 column.st = columStartIndex + 1;
                 column.ed = preLineStartIndex >= column.st ? preLineStartIndex : column.st;
+                const lastLine = lines[lines.length - 1];
+                if (lastLine?.drawingMLNormalLineHeight != null) {
+                    // Automatic spacing is a baseline interval. Its trailing leading does not enlarge the text body.
+                    const terminalHeight = Math.max(lastLine.drawingMLNormalLineHeight, lastLine.paddingTop + lastLine.asc + lastLine.dsc);
+                    const lineBoxHeight = lastLine.paddingTop + lastLine.contentHeight + lastLine.paddingBottom;
+                    columnHeight -= Math.max(0, lineBoxHeight - terminalHeight);
+                }
                 column.height = columnHeight;
 
                 const measuredColumnWidth = shouldUseLayoutColumnWidth && Number.isFinite(column.width) && column.width > 0

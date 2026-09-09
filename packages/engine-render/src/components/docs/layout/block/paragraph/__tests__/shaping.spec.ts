@@ -23,6 +23,7 @@ import {
     PositionedObjectLayoutType,
 } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
+import { getFontStyleString } from '../../../../../../basics/tools';
 import { getDocumentCompatibilityPolicy } from '../../../../document-compatibility';
 import { Lang } from '../../../hyphenation/lang';
 import { createSkeletonLetterGlyph } from '../../../model/glyph';
@@ -32,6 +33,39 @@ import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 describe('shaping', () => {
+    it.each(['Ae\u0301👩‍💻', 'Aمرحبا', '中\uFE00A', 'A中A'])('preserves source graphemes and inherited tracking in %s', (content) => {
+        const textStyle = { ff: 'Tracking shaping', fs: 12, sc: -3 };
+        const font = getFontStyleString(textStyle).fontString;
+        for (const text of ['A', 'e\u0301', '👩‍💻', 'مرحبا', '中\uFE00', '中']) {
+            FontCache.setFontMeasureCache(font, text, {
+                width: 10,
+                fontBoundingBoxAscent: 12,
+                fontBoundingBoxDescent: 3,
+                actualBoundingBoxAscent: 10,
+                actualBoundingBoxDescent: 2,
+            });
+        }
+        try {
+            clearFontCreateConfigCache();
+            const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content, {
+                documentStyle: { textStyle, spaceWidthEastAsian: content === 'A中A' ? BooleanNumber.TRUE : BooleanNumber.FALSE },
+            });
+            const glyphs = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig)
+                .flatMap((item) => item.glyphs)
+                .filter((glyph) => glyph.streamType === DataStreamTreeTokenType.LETTER);
+            expect(glyphs.map((glyph) => glyph.content).join('')).toBe(content);
+            expect(glyphs.reduce((count, glyph) => count + glyph.count, 0)).toBe(content.length);
+            if (content === 'A中A') {
+                expect(glyphs.map((glyph) => glyph.width)).toEqual([7, 12, 7]);
+            } else {
+                expect(glyphs.map((glyph) => glyph.width)).toEqual(content === 'Ae\u0301👩‍💻' ? [7, 7, 7] : [7, 7]);
+            }
+        } finally {
+            FontCache.clearFontMeasureCache(font);
+            clearFontCreateConfigCache();
+        }
+    });
+
     it.each([DocumentFlavor.UNSPECIFIED, DocumentFlavor.DRAWINGML])('selects font metrics from runtime layout semantics: %s', (documentFlavor) => {
         const measuredWidth = 6.1572265625;
         const measure = vi.spyOn(FontCache, 'getMeasureText').mockReturnValue({
@@ -421,6 +455,31 @@ describe('shaping', () => {
         const paragraphGlyph = allGlyphs.find((g) => g.content === '\r');
         expect(paragraphGlyph).toBeDefined();
         expect(paragraphGlyph!.width).toBe(0);
+    });
+
+    it.each([undefined, BooleanNumber.FALSE])('preserves explicit custom-range metrics on a DrawingML paragraph mark (%s)', (zeroWidthParagraphBreak) => {
+        clearFontCreateConfigCache();
+        const range: ICustomRangeForInterceptor = {
+            startIndex: 1,
+            endIndex: 1,
+            rangeId: 'paragraph-custom-metrics',
+            rangeType: CustomRangeType.CUSTOM,
+            glyphWidthEm: 2,
+            glyphAscentEm: 1.5,
+            glyphDescentEm: 0.5,
+        };
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('A', {
+            documentStyle: { textStyle: { fs: 12 }, renderConfig: { zeroWidthParagraphBreak } },
+            body: { customRanges: [range] },
+        });
+        sectionBreakConfig.documentCompatibilityPolicy = getDocumentCompatibilityPolicy(DocumentFlavor.DRAWINGML);
+        const glyphs = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig)
+            .flatMap((item) => item.glyphs);
+        const mark = glyphs.find((glyph) => glyph.content === '\r')!;
+        expect(mark.width).toBe(32);
+        expect(mark.bBox.ba).toBe(24);
+        expect(mark.bBox.bd).toBe(8);
+        expect(glyphs.map((glyph) => glyph.content).join('')).toBe('A\r');
     });
 
     it('shapes custom block when drawing is not found', () => {

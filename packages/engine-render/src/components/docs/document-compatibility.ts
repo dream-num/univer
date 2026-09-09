@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { ITable } from '@univerjs/core';
+import type { ITable, ITextStyle } from '@univerjs/core';
 import type {
     IDocumentSkeletonBoundingBox,
     IDocumentSkeletonFontStyle,
 } from '../../basics/i-document-skeleton-cached';
 import { DocumentFlavor } from '@univerjs/core';
+import { getFontStyleString } from '../../basics/tools';
 
 interface IFontMetricScaleRule {
     fontFamily: RegExp;
@@ -152,6 +153,26 @@ export function applyFontMetricCompatibility(
     return {
         ...bBox,
         width: bBox.width * rule.widthScale,
+    };
+}
+
+export function getSmallCapsFontStyle(
+    raw: string,
+    textStyle: ITextStyle | undefined,
+    fontStyle: IDocumentSkeletonFontStyle,
+    policy: IDocumentCompatibilityPolicy
+): IDocumentSkeletonFontStyle {
+    if (!textStyle?.smallCaps || textStyle.caps || raw === raw.toUpperCase()) {
+        return fontStyle;
+    }
+    // Native Office uses synthetic 80% capitals; Word rounds the size to half-points.
+    // Keep the authored size for line metrics and kerning-threshold decisions.
+    const size = fontStyle.originFontSize * 0.8;
+    const fs = policy.mode === 'drawingml' ? size : Math.max(0.5, Math.round(size * 2) / 2);
+    return {
+        ...getFontStyleString({ ...textStyle, fs }),
+        originFontSize: fontStyle.originFontSize,
+        fontKerning: fontStyle.fontKerning,
     };
 }
 

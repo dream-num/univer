@@ -22,8 +22,9 @@ import { BaselineOffset } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { COLOR_BLACK_RGB } from '../../../../basics/const';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
+import { getFontStyleString } from '../../../../basics/tools';
 import { Vector2 } from '../../../../basics/vector2';
-import { CheckboxShape } from '../../../../shape';
+import { CheckboxShape } from '../../../../shape/checkbox';
 import { FontAndBaseLine } from '../font-and-base-line';
 
 type MockRenderContext = UniverRenderingContext & {
@@ -131,6 +132,45 @@ function createGlyph(content: string, overrides?: GlyphOverrides): IDocumentSkel
 }
 
 describe('docs font and baseline extension', () => {
+    it('uses the measured kerning mode and resets it for legacy text', () => {
+        const extension = new FontAndBaseLine();
+        const context = createContext();
+        context.fontKerning = 'auto';
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: { vertexAngle: 0, centerAngle: 0 },
+        };
+        for (const fontKerning of ['normal', 'none', undefined] as const) {
+            extension.draw(context, DEFAULT_SCALE, createGlyph('AV', {
+                fontStyle: { ...getFontStyleString({ fs: 12, ff: 'Arial' }), fontKerning },
+            }));
+            expect(context.fontKerning).toBe(fontKerning ?? 'auto');
+        }
+    });
+
+    it.each([0, 90])('paints tracked glyph segments using layout positions at %s degrees without native letterSpacing', (angle) => {
+        const extension = new FontAndBaseLine();
+        const context = createContext();
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: { vertexAngle: angle, centerAngle: angle },
+        };
+        const glyph = createGlyph('ก้ข', {
+            textSpacing: { content: 'ก้ข', segments: [{ content: 'ก้', left: 0 }, { content: 'ข', left: 7 }] },
+        });
+        extension.draw(context, DEFAULT_SCALE, glyph);
+        const x = angle === 0 ? 12 : 0;
+        const y = angle === 0 ? 20 : 0;
+        expect(context.fillText.mock.calls).toEqual([['ก้', x, y], ['ข', x + 7, y]]);
+        context.fillText.mockClear();
+        extension.draw(context, DEFAULT_SCALE, { ...glyph, content: 'Updated field' });
+        expect(context.fillText).toHaveBeenCalledWith('Updated field', x, y);
+    });
+
     it('keeps existing document text colors unchanged', () => {
         const screenExtension = new FontAndBaseLine();
         const ScreenContext = createContext();

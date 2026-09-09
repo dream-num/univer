@@ -228,6 +228,8 @@ export interface IDocumentSkeletonLine {
     top: number; // top paragraph(spaceAbove, spaceBelow, lineSpacing*PreLineHeight)
     asc: number; // =max(glyph.textMetrics.ba) alphabet alignment, needs calibration
     dsc: number; // =max(glyph.textMetrics.bd) alphabet alignment, needs calibration
+    drawingMLBaselineHeight?: number; // Recomputed as the final glyph metrics grow.
+    drawingMLNormalLineHeight?: number; // Minimum terminal extent for expanded automatic line spacing.
     paddingTop: number; // paddingTop distance from content to top
     paddingBottom: number; // paddingBottom distance from content to bottom
     marginTop: number; // marginTop paragraph spaceAbove
@@ -298,7 +300,11 @@ export interface IDocumentSkeletonGlyph {
     featureId?: string; // support interaction for feature ,eg. hyperLine person
     drawingId?: string; // drawing.drawingId
     fauxBoldStrokeWidth?: number;
+    /** Runtime-only advance adjustment, recomputed when a shaped word is split across lines. */
+    kerningAdjustment?: number;
     tabLeader?: TabStopLeader;
+    /** Runtime-only positions for tracked text that shares one shaping glyph. */
+    textSpacing?: { content: string; segments: Array<{ content: string; left: number }> };
 }
 
 export interface IDocumentSkeletonBullet {
@@ -348,6 +354,7 @@ export interface IDocumentSkeletonDrawing {
 }
 
 export interface IDocumentSkeletonFontStyle {
+    fontKerning?: CanvasFontKerning;
     fontString: string;
     fontSize: number;
     originFontSize: number;

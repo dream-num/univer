@@ -14,7 +14,18 @@
  * limitations under the License.
  */
 
-import { BlockType, DataStreamTreeTokenType, DeleteDirection, DrawingTypeEnum, getRichTextEditPath, ICommandService, IUndoRedoService, JSONX, PositionedObjectLayoutType, TextXActionType } from '@univerjs/core';
+import {
+    BlockType,
+    DataStreamTreeTokenType,
+    DeleteDirection,
+    DrawingTypeEnum,
+    getRichTextEditPath,
+    ICommandService,
+    IUndoRedoService,
+    JSONX,
+    PositionedObjectLayoutType,
+    TextXActionType,
+} from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createTestBed } from '../../../facade/__tests__/create-test-bed';
 import { RichTextEditingMutation } from '../../mutations/core-editing.mutation';
@@ -31,6 +42,40 @@ describe('core editing commands', () => {
 
     afterEach(() => {
         testBed.univer.dispose();
+    });
+
+    it.each([{}, { lang: 'ja-JP', altLang: 'zh-CN' }, { eastAsiaFontFamily: 'Meiryo' }, { kerning: 0 }, { kerning: 12.5 }, { caps: false }, { caps: true }, { smallCaps: false }, { smallCaps: true }])('preserves text styles through text replacement, undo, redo and save (%j)', (style) => {
+        testBed.univer.dispose();
+        const ts = { fs: 14, ...style };
+        testBed = createTestBed({
+            id: 'test',
+            body: {
+                dataStream: 'Av\r\n',
+                paragraphs: [{ startIndex: 2, paragraphId: 'kerning-paragraph' }],
+                textRuns: [{ st: 0, ed: 2, ts }],
+            },
+            documentStyle: { textStyle: { kerning: 10, caps: true } },
+        });
+        commandService = testBed.get(ICommandService);
+        testBed.get(IUndoRedoService);
+        const document = testBed.univerAPI.getActiveDocument()!;
+        const before = document.save();
+
+        expect(commandService.syncExecuteCommand(InsertTextCommand.id, {
+            unitId: 'test',
+            body: { dataStream: 'To', textRuns: [{ st: 0, ed: 2, ts }] },
+            range: { startOffset: 0, endOffset: 2, collapsed: false },
+            debounce: false,
+        })).toBe(true);
+        const edited = document.save();
+        expect(edited.body?.dataStream).toBe('To\r\n');
+        expect(edited.body?.textRuns).toEqual([{ st: 0, ed: 2, ts }]);
+        expect(edited.documentStyle.textStyle?.kerning).toBe(10);
+        expect(edited.documentStyle.textStyle?.caps).toBe(true);
+        expect(document.undo()).toBe(true);
+        expect(document.save().body).toMatchObject(before.body!);
+        expect(document.redo()).toBe(true);
+        expect(document.save().body).toEqual(edited.body);
     });
 
     it('deletes text to the left of the collapsed range in the active document', () => {

@@ -19,14 +19,19 @@ import type {
     IDocumentSkeletonBoundingBox,
     IDocumentSkeletonBullet,
     IDocumentSkeletonDivide,
+    IDocumentSkeletonFontStyle,
     IDocumentSkeletonGlyph,
 } from '../../../../basics/i-document-skeleton-cached';
 import type { IFontCreateConfig } from '../../../../basics/interfaces';
+import type { IDocumentCompatibilityPolicy } from '../../document-compatibility';
 import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType, GridType } from '@univerjs/core';
 import { cjk } from '../../../../basics/cjk-regexp';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import {
+    getFirstGrapheme,
     getFontStyleString,
+    getTextWithCaps,
+    hasArabic,
     isCjkCenterAlignedPunctuation,
     isCjkLeftAlignedPunctuation,
     isCjkRightAlignedPunctuation,
@@ -35,6 +40,7 @@ import { getCheckboxShapeSize, isCheckboxGlyph } from '../../../../shape/checkbo
 import {
     applyFontMetricCompatibility,
     getDocumentCompatibilityPolicy,
+    getSmallCapsFontStyle,
     isTraditionalDocumentCompatibility,
 } from '../../document-compatibility';
 import { FontCache } from '../shaping-engine/font-cache';
@@ -57,7 +63,10 @@ export function isJustifiable(
         || isCjkCenterAlignedPunctuation(content);
 }
 
-export function baseAdjustability(content: string, width: number): IAdjustability {
+export function baseAdjustability(content: string, width: number, emWidth = width): IAdjustability {
+    // CJK punctuation compression removes side spacing, not the half-em glyph itself.
+    // Proportional fonts may already provide half-width punctuation with no spacing to remove.
+    const punctuationSpacing = Math.min(width / 2, Math.max(0, width - emWidth / 2));
     if (isSpace(content)) {
         return {
             // The number for spaces is from Knuth-Plass' paper
@@ -67,17 +76,17 @@ export function baseAdjustability(content: string, width: number): IAdjustabilit
     } else if (isCjkLeftAlignedPunctuation(content)) {
         return {
             stretchability: [0, 0],
-            shrinkability: [0, width / 2.0],
+            shrinkability: [0, punctuationSpacing],
         };
     } else if (isCjkRightAlignedPunctuation(content)) {
         return {
             stretchability: [0, 0],
-            shrinkability: [width / 2.0, 0],
+            shrinkability: [punctuationSpacing, 0],
         };
     } else if (isCjkCenterAlignedPunctuation(content)) {
         return {
             stretchability: [0, 0],
-            shrinkability: [width / 4.0, width / 4.0],
+            shrinkability: [punctuationSpacing / 2, punctuationSpacing / 2],
         };
     } else {
         return {
@@ -189,13 +198,103 @@ export function createSkeletonCustomBlockGlyph(config: IFontCreateConfig, glyphW
     };
 }
 
+export function getPairKerningAdjustment(left: string, right: string, font: IDocumentSkeletonFontStyle): number {
+    if (font.fontKerning !== 'normal' || !left || !right || /[\u0000-\u001F\u2028\u2029]/u.test(left + right)) {
+        return 0;
+    }
+    // Subtract unkerned shaping to isolate kerning from ligatures and script shaping.
+    const adjustment = (text: string) => FontCache.getMeasureText(text, font.fontString, 'normal').width -
+        FontCache.getMeasureText(text, font.fontString, 'none').width;
+    return adjustment(left + right) - adjustment(left) - adjustment(right);
+}
+
+export function applyGlyphKerning(glyphs: IDocumentSkeletonGlyph[]): void {
+    for (const glyph of glyphs) {
+        if (glyph.kerningAdjustment) {
+            glyph.width -= glyph.kerningAdjustment;
+            glyph.kerningAdjustment = 0;
+        }
+    }
+    for (let i = 1; i < glyphs.length; i++) {
+        const left = glyphs[i - 1];
+        const right = glyphs[i];
+        const adjustment = getGlyphPairKerningAdjustment(left, right);
+        if (adjustment) {
+            left.kerningAdjustment = adjustment;
+            left.width += adjustment;
+        }
+    }
+}
+
+export function getGlyphPairKerningAdjustment(left?: IDocumentSkeletonGlyph, right?: IDocumentSkeletonGlyph): number {
+    const font = left?.fontStyle;
+    if (!left || !right || !font || font.fontKerning !== 'normal' || right.fontStyle?.fontKerning !== 'normal' ||
+        font.fontString !== right.fontStyle.fontString ||
+        left.glyphType !== GlyphType.LETTER || right.glyphType !== GlyphType.LETTER ||
+        left.streamType !== DataStreamTreeTokenType.LETTER || right.streamType !== DataStreamTreeTokenType.LETTER ||
+        getTextWithCaps(left.raw, left.ts?.caps || left.ts?.smallCaps) !== left.content ||
+        getTextWithCaps(right.raw, right.ts?.caps || right.ts?.smallCaps) !== right.content ||
+        left.xOffset !== 0 || right.xOffset !== 0 ||
+        left.kerningAdjustment == null || right.kerningAdjustment == null) {
+        return 0;
+    }
+    const adjustment = getPairKerningAdjustment(left.content, right.content, font);
+    return Number.isFinite(adjustment) && left.width - left.kerningAdjustment + adjustment >= 0 ? adjustment : 0;
+}
+
+/** Shared by skeleton layout and lightweight host measurement; offsets also drive painting. */
+export function measureTextWithCharacterSpacing(
+    content: string,
+    spacing: number | undefined,
+    measure: (text: string) => number,
+    pairAdjustment?: (left: string, right: string) => number
+): { content: string; width: number; inkWidth: number; segments: Array<{ content: string; left: number }> } | undefined {
+    if (!spacing || !Number.isFinite(spacing) || !content) {
+        return;
+    }
+
+    const segments: Array<{ content: string; left: number }> = [];
+    let width = 0;
+    let inkWidth = 0;
+    let index = 0;
+    while (index < content.length) {
+        let text = getFirstGrapheme(content.slice(index))!;
+        index += text.length;
+        // Keep cursive joins intact. Canvas cannot insert tracking inside an Arabic word without reshaping it.
+        if (hasArabic(text)) {
+            while (index < content.length) {
+                const next = getFirstGrapheme(content.slice(index))!;
+                if (!hasArabic(next)) {
+                    break;
+                }
+                text += next;
+                index += next.length;
+            }
+        }
+        const measuredWidth = measure(text);
+        const previous = segments[segments.length - 1];
+        if (previous && pairAdjustment) {
+            width += pairAdjustment(previous.content, text);
+        }
+        segments.push({ content: text, left: width });
+        inkWidth = Math.max(inkWidth, width + measuredWidth);
+        // Structural and zero-width formatting characters do not reserve a tracking interval.
+        const extra = /^[\u0000-\u001F\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]+$/u.test(text) ? 0 : spacing;
+        width += Math.max(0, measuredWidth + extra);
+    }
+    return { content, width, inkWidth, segments };
+}
+
 export function _createSkeletonWordOrLetter(
     glyphType: GlyphType,
-    content: string,
+    raw: string,
     config: IFontCreateConfig,
     glyphWidth?: number
 ): IDocumentSkeletonGlyph {
-    const { fontStyle, textStyle, charSpace = 1, gridType = GridType.LINES, snapToGrid = BooleanNumber.FALSE } = config;
+    const { textStyle, charSpace = 1, gridType = GridType.LINES, snapToGrid = BooleanNumber.FALSE } = config;
+    const documentCompatibilityPolicy = config.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy();
+    const fontStyle = getSmallCapsFontStyle(raw, textStyle, config.fontStyle, documentCompatibilityPolicy);
+    const content = getTextWithCaps(raw, textStyle.caps || textStyle.smallCaps);
     const skipWidthList: string[] = [
         DataStreamTreeTokenType.SECTION_BREAK,
         DataStreamTreeTokenType.TABLE_START,
@@ -255,25 +354,49 @@ export function _createSkeletonWordOrLetter(
     let bBox = null;
     let xOffset = 0;
 
-    const documentCompatibilityPolicy = config.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy();
+    const isDrawingMLLineSeparator = glyphWidth == null && content === '\u2028' && documentCompatibilityPolicy.mode === 'drawingml';
     bBox = FontCache.getTextSize(content, fontStyle);
+    if (fontStyle !== config.fontStyle) {
+        bBox = {
+            ...FontCache.getTextSize(content, config.fontStyle),
+            width: bBox.width,
+            aba: bBox.aba,
+            abd: bBox.abd,
+        };
+    }
     bBox = applyFontMetricCompatibility(
         content,
         fontStyle,
         bBox,
         documentCompatibilityPolicy
     );
-    if (content === DataStreamTreeTokenType.PARAGRAPH && isTraditionalDocumentCompatibility(documentCompatibilityPolicy)) {
+    // Canvas normalizes a line separator to a space; DrawingML breaks must not consume line width.
+    if (isDrawingMLLineSeparator ||
+        (content === DataStreamTreeTokenType.PARAGRAPH && isTraditionalDocumentCompatibility(documentCompatibilityPolicy))) {
         bBox = { ...bBox, width: 0 };
     }
 
+    const unspacedWidth = bBox.width;
+    const spacing = glyphWidth == null && !isDrawingMLLineSeparator && streamType === DataStreamTreeTokenType.LETTER && glyphType !== GlyphType.TAB
+        ? measureTextWithCharacterSpacing(
+            content,
+            textStyle.sc,
+            (text) => text === content
+                ? unspacedWidth
+                : applyFontMetricCompatibility(text, fontStyle, FontCache.getTextSize(text, fontStyle), documentCompatibilityPolicy).width,
+            (left, right) => getPairKerningAdjustment(left, right, fontStyle)
+        )
+        : undefined;
+    if (spacing) {
+        bBox = { ...bBox, width: spacing.inkWidth };
+    }
     const { width: contentWidth = 0 } = bBox;
-    let width = glyphWidth ?? contentWidth;
+    let width = glyphWidth ?? spacing?.width ?? contentWidth;
 
-    if (validationGrid(gridType, snapToGrid)) {
+    if (!isDrawingMLLineSeparator && validationGrid(gridType, snapToGrid)) {
         // When text also needs to align to the grid, process it
         // const multiple = Math.ceil(contentWidth / charSpace);
-        width = contentWidth + (cjk.hasCJK(content) ? charSpace : charSpace / 2);
+        width = (spacing?.width ?? contentWidth) + (cjk.hasCJK(content) ? charSpace : charSpace / 2);
         if (gridType === GridType.SNAP_TO_CHARS) {
             xOffset = (width - contentWidth) / 2;
         }
@@ -290,16 +413,23 @@ export function _createSkeletonWordOrLetter(
         glyphType,
         streamType,
         isJustifiable: isJustifiable(content),
-        adjustability: baseAdjustability(content, width),
-        count: content.length,
-        raw: content,
+        adjustability: baseAdjustability(content, width, documentCompatibilityPolicy.mode === 'drawingml' && glyphWidth == null
+            ? fontStyle.fontSize * (96 / 72)
+            : width),
+        count: raw.length,
+        raw,
+        ...(glyphWidth == null && !validationGrid(gridType, snapToGrid) && fontStyle.fontKerning === 'normal'
+            ? { kerningAdjustment: 0 }
+            : {}),
+        ...(spacing && spacing.segments.length > 1 ? { textSpacing: spacing } : {}),
     };
 }
 
 export function createSkeletonBulletGlyph(
     glyph: IDocumentSkeletonGlyph,
     bulletSkeleton: IDocumentSkeletonBullet,
-    charSpaceApply: number
+    charSpaceApply: number,
+    compatibilityPolicy?: IDocumentCompatibilityPolicy
 ): IDocumentSkeletonGlyph {
     const {
         symbol: content,
@@ -324,7 +454,10 @@ export function createSkeletonBulletGlyph(
     // When text also needs to align to the grid, process it. LINES default reference is the global font size of the doc
 
     const multiple = Math.ceil(contentWidth / charSpaceApply);
-    let width = (multiple < 2 ? 2 : multiple) * charSpaceApply; // Default bullet has 2 tabs
+    // DrawingML uses paragraph indents for bullet spacing, not Word's default tab reservation.
+    let width = compatibilityPolicy?.mode === 'drawingml'
+        ? contentWidth
+        : Math.max(2, multiple) * charSpaceApply;
 
     let left = 0;
 
@@ -399,7 +532,17 @@ export function addGlyphToDivide(
     glyphGroup: IDocumentSkeletonGlyph[],
     offsetLeft: number = 0
 ) {
-    setGlyphGroupLeft(glyphGroup, offsetLeft);
+    applyGlyphKerning(glyphGroup);
+    let left = offsetLeft;
+    const previous = divide.glyphGroup[divide.glyphGroup.length - 1];
+    if (previous?.kerningAdjustment != null && glyphGroup.length) {
+        const adjustment = getGlyphPairKerningAdjustment(previous, glyphGroup[0]);
+        const delta = adjustment - previous.kerningAdjustment;
+        previous.width += delta;
+        previous.kerningAdjustment = adjustment;
+        left += delta;
+    }
+    setGlyphGroupLeft(glyphGroup, left);
 
     // Set glyph parent pointer.
     for (const glyph of glyphGroup) {

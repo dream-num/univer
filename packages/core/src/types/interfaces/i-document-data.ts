@@ -594,7 +594,7 @@ export interface IDocumentRenderConfig {
     wrapStrategy?: WrapStrategy; // wrap to the next line, for sheet cell
     cellValueType?: CellValueType; // sheet cell type, In a spreadsheet cell, without any alignment settings applied, text should be left-aligned, numbers should be right-aligned, and Boolean values should be center-aligned.
     isRenderStyle?: BooleanNumber; // Whether to render the style(textRuns), used in formula bar editor. the default value is TRUE.
-    zeroWidthParagraphBreak?: BooleanNumber; // Whether to render the paragraph \r to zero width. the default value is false.
+    zeroWidthParagraphBreak?: BooleanNumber; // Override paragraph-mark width; DrawingML defaults to zero without custom glyph metrics.
     shapeTextOpticalVerticalAlign?: BooleanNumber; // Align shape text by visible glyph bounds instead of the font line box.
     lineWrapTolerance?: number; // Allowed line-width overflow in layout pixels; 0 enforces the content-box boundary.
 }
@@ -887,6 +887,16 @@ export interface IDocTextOutline {
 }
 
 export interface ITextStyle extends IStyleBase {
+    /** Authored text language (BCP 47), used by language-sensitive text layout. Absent inherits. */
+    lang?: string;
+    /** Alternate language from the authored text properties (BCP 47). Absent inherits. */
+    altLang?: string;
+    /** Minimum font size for pair kerning, in the same units as fs. Zero disables it; absent inherits. */
+    kerning?: number;
+    /** Display capital letters without changing the source text. Absent inherits. */
+    caps?: boolean;
+    /** Display lowercase letters as smaller capitals without changing source text. Absent inherits. */
+    smallCaps?: boolean;
     // bo?: BaselineOffset; // BaselineOffset, sup, sub
     sc?: number; // character spacing in points
     pos?: number; // position

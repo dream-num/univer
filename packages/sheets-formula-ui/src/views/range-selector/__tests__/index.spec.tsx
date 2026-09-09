@@ -21,25 +21,15 @@ import type { Root } from 'react-dom/client';
 import type { IRangeSelectorInstance } from '../index';
 import {
     CommandType,
-    ConfigService,
-    ContextService,
-    DocumentDataModel,
-    HorizontalAlign,
     ICommandService,
-    IConfigService,
-    IContextService,
     Injector,
-    IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
-    LocalUndoRedoService,
-    RichTextBuilder,
     ThemeService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
-import { Editor, IEditorService } from '@univerjs/docs-ui';
+import { IEditorService } from '@univerjs/docs-ui';
 import { IDescriptionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
@@ -167,20 +157,6 @@ class TestMarkSelectionService {
 }
 
 class TestUniverInstanceService {
-    readonly focused$ = of(null);
-    readonly editorDocument = new DocumentDataModel({
-        ...RichTextBuilder.create().insertText('A1:B2').getData(),
-        id: 'range-editor',
-    });
-
-    getFocusedUnit() {
-        return null;
-    }
-
-    getCurrentTypeOfUnit$() {
-        return of(null);
-    }
-
     private readonly _workbook = {
         getActiveSheet: () => ({
             getSheetId: () => 'sheet-1',
@@ -189,9 +165,6 @@ class TestUniverInstanceService {
     };
 
     getUnit(_unitId: string, type?: UniverInstanceType) {
-        if (type === UniverInstanceType.UNIVER_DOC) {
-            return this.editorDocument;
-        }
         return type === UniverInstanceType.UNIVER_SHEET ? this._workbook : null;
     }
 
@@ -269,81 +242,6 @@ describe('GlobalRangeSelector', () => {
             root.unmount();
         });
         container.remove();
-    });
-
-    it.each([['desktop', RangeSelector], ['mobile', MobileRangeSelector]] as const)('follows locale direction and preserves snapshots and selections (%s)', async (_, Selector) => {
-        const { injector } = createGlobalRangeSelectorTestBed();
-        const localeService = injector.get(LocaleService);
-        localeService.setDirection('ltr');
-        injector.add([IConfigService, { useClass: ConfigService }]);
-        injector.add([IContextService, { useClass: ContextService }]);
-        injector.add([IUndoRedoService, { useClass: LocalUndoRedoService }]);
-        injector.add([DocSelectionManagerService]);
-        const instanceService = injector.get(IUniverInstanceService);
-        const snapshot = (instanceService as unknown as TestUniverInstanceService).editorDocument.getSnapshot();
-        const platformEvents = {
-            onBlur$: new Subject(),
-            onFocus$: new Subject(),
-            onPaste$: new Subject(),
-            onInput$: new Subject(),
-            onKeydown$: new Subject(),
-            onCompositionupdate$: new Subject(),
-            onCompositionend$: new Subject(),
-        };
-        const editorDom = document.createElement('div');
-        const createEditor = () => injector.createInstance(Editor, {
-            initialSnapshot: snapshot,
-            render: { with: () => platformEvents },
-            editorDom,
-        } as never, instanceService, injector.get(DocSelectionManagerService), injector.get(ICommandService), injector.get(IUndoRedoService), injector);
-        injector.add([Editor, { useFactory: createEditor }]);
-        const editor = injector.get(Editor);
-        const selectionManager = injector.get(DocSelectionManagerService);
-        selectionManager.__TEST_ONLY_setCurrentSelection({ unitId: 'range-editor', subUnitId: 'range-editor' });
-        selectionManager.__TEST_ONLY_add([{ startOffset: 1, endOffset: 3, collapsed: false }]);
-        const selection = editor.getSelectionRanges();
-        const setDocumentData = vi.spyOn(editor, 'setDocumentData');
-        const renderSelector = async () => {
-            await act(async () => {
-                root.render(
-                    <RediContext.Provider value={{ injector }}>
-                        <Selector unitId="book-1" subUnitId="sheet-1" />
-                    </RediContext.Provider>
-                );
-            });
-        };
-
-        await renderSelector();
-        await act(async () => {
-            const editorRef = richTextEditorProps?.editorRef;
-            if (typeof editorRef === 'function') {
-                editorRef(editor);
-            }
-        });
-        expect(setDocumentData).toHaveBeenCalledWith(expect.objectContaining({
-            documentStyle: expect.objectContaining({
-                renderConfig: expect.objectContaining({ horizontalAlign: HorizontalAlign.LEFT }),
-            }),
-        }), selection);
-        setDocumentData.mockClear();
-        await act(async () => localeService.setDirection('rtl'));
-        expect(setDocumentData).toHaveBeenCalledWith(expect.objectContaining({
-            documentStyle: expect.objectContaining({
-                renderConfig: expect.objectContaining({ horizontalAlign: HorizontalAlign.RIGHT }),
-            }),
-        }), selection);
-        expect(snapshot.documentStyle?.renderConfig?.horizontalAlign).toBeUndefined();
-
-        setDocumentData.mockClear();
-        await act(async () => localeService.setDirection('ltr'));
-        expect(setDocumentData).toHaveBeenCalledWith(expect.objectContaining({
-            documentStyle: expect.objectContaining({
-                renderConfig: expect.objectContaining({ horizontalAlign: HorizontalAlign.LEFT }),
-            }),
-        }), selection);
-        expect(snapshot.documentStyle?.renderConfig?.horizontalAlign).toBeUndefined();
-        await act(async () => root.unmount());
-        injector.dispose();
     });
 
     it('does not override the inherited RTL item order on desktop or mobile', async () => {

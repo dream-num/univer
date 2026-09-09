@@ -18,7 +18,18 @@ import type { IDocumentData } from '@univerjs/core';
 import type { CSSProperties, ReactNode, RefObject } from 'react';
 import type { Editor, IEditorCanvasStyle } from '../services/editor/editor';
 import type { IKeyboardEventConfig } from './rich-text-editor/hooks';
-import { BuildTextUtils, createInternalEditorID, generateRandomId, getPlainText, HorizontalAlign, ICommandService, IUniverInstanceService, LocaleService, RichTextBuilder } from '@univerjs/core';
+import {
+    BuildTextUtils,
+    createInternalEditorID,
+    generateRandomId,
+    getPlainText,
+    HorizontalAlign,
+    ICommandService,
+    IUniverInstanceService,
+    LocaleService,
+    RichTextBuilder,
+    Tools,
+} from '@univerjs/core';
 import { borderClassName, clsx } from '@univerjs/design';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -153,7 +164,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
             return;
         }
 
-        const documentData = RichTextBuilder.create(editor.getDocumentData())
+        const documentData = RichTextBuilder.create(Tools.deepClone(editor.getDocumentData()))
             .align({ horizontal: direction === 'rtl' ? HorizontalAlign.RIGHT : HorizontalAlign.LEFT })
             .getData();
 

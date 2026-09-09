@@ -19,7 +19,7 @@
  */
 
 import type { ComponentType, ReactElement } from 'react';
-import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
+import { act, cleanup, createEvent, fireEvent, render, waitFor } from '@testing-library/react';
 import {
     CommandService,
     ConfigService,
@@ -148,6 +148,58 @@ describe('ToolbarTooltip', () => {
 });
 
 describe('DropdownMenuLabel', () => {
+    it('keeps Ribbon trigger toggling and closed-menu pointer focus separate during exit', async () => {
+        const getComputedStyle = window.getComputedStyle.bind(window);
+        const styleSpy = vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudoElement) => {
+            const styles = getComputedStyle(element, pseudoElement);
+            if (element.getAttribute('data-slot') !== 'dropdown-menu-content') {
+                return styles;
+            }
+            // jsdom does not animate; keep the real Presence exit lifecycle alive.
+            return new Proxy(styles, {
+                get(target, property) {
+                    if (property === 'animationName') {
+                        return element.getAttribute('data-state') === 'closed' ? 'menu-exit' : 'none';
+                    }
+                    return Reflect.get(target, property);
+                },
+            });
+        });
+        try {
+            const { getByRole, getByText } = renderWithDependencies(
+                <>
+                    <input aria-label="Next editor" />
+                    <TooltipWrapper dropdownKey="exit-menu">
+                        <DropdownMenuWrapper menuId="test-menu" options={[{ label: 'Center', value: 'center' }]} onOptionSelect={vi.fn()}>
+                            <button type="button">Align</button>
+                        </DropdownMenuWrapper>
+                    </TooltipWrapper>
+                </>
+            );
+            const trigger = getByRole('button', { name: 'Align' });
+            for (const open of [true, false, true, false]) {
+                await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
+                fireEvent.pointerDown(trigger, { button: 0, ctrlKey: false, pointerType: 'mouse' });
+                expect(trigger.getAttribute('aria-expanded')).toBe(String(open));
+                const item = getByText('Center');
+                expect(item.closest('[data-radix-menu-content]')?.getAttribute('data-state')).toBe(open ? 'open' : 'closed');
+                if (!open) {
+                    const editor = getByRole('textbox', { name: 'Next editor' });
+                    editor.focus();
+                    for (const type of ['pointerMove', 'pointerOut'] as const) {
+                        const event = createEvent[type](item, { bubbles: true, cancelable: true, relatedTarget: editor });
+                        Object.defineProperty(event, 'pointerType', { value: 'mouse' });
+                        fireEvent(item, event);
+                        expect(document.activeElement).toBe(editor);
+                    }
+                }
+            }
+        } finally {
+            cleanup();
+            styleSpy.mockRestore();
+        }
+    });
+
     it('preserves option metadata when a custom label emits a dynamic value', () => {
         const onOptionSelect = vi.fn();
         const params = (value?: string | number) => ({ value });

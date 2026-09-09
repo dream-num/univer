@@ -288,6 +288,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const { sequenceNodes } = useRangesHighlight(editor, focusing, unitId, subUnitId);
     const sequenceNodesRef = useStateRef(sequenceNodes);
     const commandService = useDependency(ICommandService);
+    const localeService = useDependency(LocaleService);
 
     const blurEditor = useEvent(() => {
         editor?.setSelectionRanges([]);

@@ -167,6 +167,7 @@ function createController(initialDataStream = 'new value\r\n', isPercentFormat =
         getEditorDirty: vi.fn(() => true),
         isForceKeepVisible: vi.fn(() => false),
         disableForceKeepVisible: vi.fn(),
+        refreshEditCellState: vi.fn(),
         refreshEditCellPosition: vi.fn(),
         changeEditorDirty: vi.fn(),
     };
@@ -371,6 +372,19 @@ describe('EditingRenderController business methods', () => {
             keycode,
             direction,
         });
+    });
+
+    it('refreshes editor content when Esc cancels editing', async () => {
+        const { controller } = createController();
+
+        await controller._handleEditorInvisible({
+            visible: false,
+            eventType: DeviceInputEventType.Keyboard,
+            unitId: 'unit-1',
+            keycode: KeyCode.ESC,
+        });
+
+        expect(controller._editorBridgeService.refreshEditCellState).toHaveBeenCalledTimes(1);
     });
 
     it('moves the cursor inside the editor and resets editor state on exit', () => {

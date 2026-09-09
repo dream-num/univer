@@ -91,7 +91,63 @@ describe('Sidebar', () => {
 
         expect(sidebarService.visible).toBe(false);
         expect(TestState.closes).toBe(1);
-        expect(screen.getByRole('complementary', { name: 'Sidebar panel' }).getAttribute('aria-expanded')).toBe('false');
+        expect(screen.queryByRole('complementary', { name: 'Sidebar panel' })).toBeNull();
+        expect(rendered.container.querySelector('[data-u-comp="sidebar"]')?.getAttribute('aria-expanded')).toBe('false');
+        rendered.dispose();
+    });
+
+    it('restores the opener and removes closed content from keyboard navigation', () => {
+        const rendered = renderWithDependencies(
+            <>
+                <button type="button">Open inspector</button>
+                <Sidebar />
+            </>
+        );
+        const sidebarService = rendered.injector.get(ISidebarService);
+        const opener = screen.getByRole('button', { name: 'Open inspector' });
+        opener.focus();
+
+        act(() => {
+            sidebarService.open({
+                id: 'inspector',
+                header: { title: <span>Inspector</span> },
+                children: { title: <button type="button">Focusable content</button> },
+            });
+        });
+
+        const closeButton = screen.getByRole('button', { name: 'Close sidebar' });
+        expect(document.activeElement).toBe(closeButton);
+
+        fireEvent.click(closeButton);
+
+        expect(document.activeElement).toBe(opener);
+        expect(screen.queryByRole('complementary', { name: 'Sidebar panel' })).toBeNull();
+        expect(rendered.container.querySelector('[data-u-comp="sidebar"]')?.className).toContain('univer-invisible');
+        rendered.dispose();
+    });
+
+    it('does not restore the opener after another control claims focus', () => {
+        const rendered = renderWithDependencies(
+            <>
+                <button type="button">Open inspector</button>
+                <button type="button">Next control</button>
+                <Sidebar />
+            </>
+        );
+        const sidebarService = rendered.injector.get(ISidebarService);
+        screen.getByRole('button', { name: 'Open inspector' }).focus();
+
+        act(() => {
+            sidebarService.open({ id: 'inspector' });
+        });
+
+        const nextControl = screen.getByRole('button', { name: 'Next control' });
+        nextControl.focus();
+        act(() => {
+            sidebarService.close('inspector');
+        });
+
+        expect(document.activeElement).toBe(nextControl);
         rendered.dispose();
     });
 

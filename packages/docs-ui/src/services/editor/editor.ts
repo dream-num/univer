@@ -374,10 +374,23 @@ export class Editor extends Disposable implements IEditor {
         return this._undoRedoService.clearUndoRedo(editorUnitId);
     }
 
-    override dispose(): void {
-        const docDataModel = this._getDocDataModel();
+    override dispose(disposeDocument = true): void {
+        if (this._disposed) {
+            return;
+        }
 
-        docDataModel?.dispose();
+        super.dispose();
+        this._change$.complete();
+        this._input$.complete();
+        this._paste$.complete();
+        this._focus$.complete();
+        this._blur$.complete();
+        this._selectionChange$.complete();
+
+        // Rebinding a registered editor transfers its document to the next container.
+        if (disposeDocument) {
+            this._getDocDataModel()?.dispose();
+        }
     }
 
     get cancelDefaultResizeListener() {

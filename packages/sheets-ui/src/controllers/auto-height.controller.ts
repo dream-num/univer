@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange, ObjectMatrix, Workbook } from '@univerjs/core';
+import type { IMutationInfo, IRange, ObjectMatrix } from '@univerjs/core';
 import type { ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
-import { Disposable, generateRandomId, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, generateRandomId, Inject, IUniverInstanceService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     CancelMarkDirtyRowAutoHeightOperation,
@@ -73,32 +73,26 @@ export class AutoHeightController extends Disposable {
         return redoUndoItem;
     }
 
-    getUndoRedoParamsOfAutoHeight(ranges: IRange[], subUnitIdParam?: string, currentCellHeights?: ObjectMatrix<number>): { redos: IMutationInfo[]; undos: IMutationInfo[] } {
-        const { _univerInstanceService: univerInstanceService } = this;
-        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-
-        // Better NOT use `getActiveWorksheet` method, because users may manipulate another worksheet in active sheet.
-        const unitId = workbook.getUnitId();
-        let worksheet = workbook.getActiveSheet();
-        let subUnitId = worksheet.getSheetId();
-        if (subUnitIdParam) {
-            const target = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId: subUnitIdParam });
-            if (target) {
-                worksheet = target.worksheet;
-                subUnitId = worksheet.getSheetId();
-            }
+    getUndoRedoParamsOfAutoHeight(
+        ranges: IRange[],
+        subUnitIdParam?: string,
+        currentCellHeights?: ObjectMatrix<number>,
+        unitIdParam?: string
+    ): { redos: IMutationInfo[]; undos: IMutationInfo[] } {
+        const target = getSheetCommandTarget(this._univerInstanceService, { unitId: unitIdParam, subUnitId: subUnitIdParam });
+        if (!target) {
+            return { redos: [], undos: [] };
         }
-        const sheetSkeletonService = this._renderManagerService.getRenderUnitById(unitId)!.with<SheetSkeletonManagerService>(SheetSkeletonManagerService);
 
-        // Better NOT use `getCurrentParam` method, because users may manipulate another worksheet in active sheet.
-        // const { skeleton } = sheetSkeletonService.getCurrentParam()!;
-        const skeleton = sheetSkeletonService.ensureSkeleton(subUnitId);
+        const { unitId, subUnitId, worksheet } = target;
+        const render = this._renderManagerService.getRenderUnitById(unitId);
+        const skeleton = render?.with<SheetSkeletonManagerService>(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
         if (!skeleton) {
             return {
                 redos: [],
                 undos: [],
             };
-        };
+        }
         const rowsAutoHeightInfo = skeleton.calculateAutoHeightInRange(ranges, currentCellHeights);
 
         const updatedRowsAutoHeightInfo = rowsAutoHeightInfo.filter((info) => {
@@ -147,7 +141,7 @@ export class AutoHeightController extends Disposable {
             getMutations: (info) => {
                 const { unitId, subUnitId, ranges, autoHeightRanges, lazyAutoHeightRanges, cellHeights } = info;
 
-                const undoRedoItem = this.getUndoRedoParamsOfAutoHeight(autoHeightRanges ?? ranges, subUnitId, cellHeights);
+                const undoRedoItem = this.getUndoRedoParamsOfAutoHeight(autoHeightRanges ?? ranges, subUnitId, cellHeights, unitId);
                 return this._processLazyAutoHeight(undoRedoItem, unitId, subUnitId, lazyAutoHeightRanges);
             },
         }));

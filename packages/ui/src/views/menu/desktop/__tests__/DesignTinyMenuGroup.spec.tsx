@@ -73,6 +73,26 @@ describe('DesignTinyMenuGroup', () => {
         expect(container.querySelector('button')?.getAttribute('title')).toBe('Heading 1');
     });
 
+    it('keeps default tiny-menu tooltips from intercepting sibling actions', async () => {
+        const Icon = () => <span data-testid="quick-icon" />;
+
+        render(
+            <DesignTinyMenuGroup
+                items={[{
+                    key: 'center',
+                    Icon,
+                    className: '',
+                    onClick: () => undefined,
+                    tooltip: 'Center',
+                }]}
+            />
+        );
+
+        fireEvent.mouseEnter(screen.getByRole('button', { name: 'Center' }).parentElement!);
+
+        expect((await screen.findByRole('tooltip')).classList.contains('univer-pointer-events-none')).toBe(true);
+    });
+
     it('uses the primary color channel for two-channel icons', () => {
         const Icon = ({ extend }: { className?: string; extend?: { colorChannel1?: string } }) => (
             React.createElement('span', { 'data-color-channel': extend?.colorChannel1 })

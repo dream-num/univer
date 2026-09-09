@@ -14,55 +14,159 @@
  * limitations under the License.
  */
 
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { DeviceType } from '../basics/i-events';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { DeviceType, PointerInput } from '../basics/i-events';
+import { Engine } from '../engine';
+import { MAIN_VIEW_PORT_KEY, Scene } from '../scene';
 import { InputManager } from '../scene.input-manager';
+import { Rect } from '../shape/rect';
+import { Viewport } from '../viewport';
+import { setupRenderTestEnv } from './render-test-utils';
 
-function createScene() {
-    return {
-        onDblclick$: { emitEvent: vi.fn() },
-        onPointerUp$: { emitEvent: vi.fn() },
-        onTripleClick$: { emitEvent: vi.fn() },
-        pick: vi.fn(() => null),
-    };
-}
+describe('InputManager click gestures', () => {
+    let env: ReturnType<typeof setupRenderTestEnv>;
+    let engine: Engine;
+    let scene: Scene;
+    let doubleClick: ReturnType<typeof vi.fn<() => void>>;
+    let tripleClick: ReturnType<typeof vi.fn<() => void>>;
 
-function createPointerUpEvent(clientX: number, deviceType: DeviceType) {
-    return {
-        button: 0,
-        clientX,
-        clientY: 20,
-        deviceType,
-        offsetX: clientX,
-        offsetY: 20,
-        pointerId: 1,
-    };
-}
+    function pointer(type: string, x = 20, y = 20, button = 0, deviceType = DeviceType.Mouse) {
+        engine.onInputChanged$.emitEvent(Object.assign(new MouseEvent(type, { clientX: x, clientY: y, button }), {
+            deviceType,
+            inputIndex: PointerInput.LeftClick + button,
+            previousState: null,
+            currentState: null,
+            pointerId: 1,
+        }));
+    }
 
-describe('InputManager double click recognition', () => {
+    function click(x = 20, y = 20, button = 0) {
+        pointer('pointerdown', x, y, button);
+        pointer('pointerup', x, y, button);
+    }
+
+    beforeEach(() => {
+        env = setupRenderTestEnv();
+        vi.useFakeTimers();
+        engine = new Engine('click-unit', { elementWidth: 300, elementHeight: 200, dpr: 1 });
+        scene = new Scene('click-scene', engine);
+        new Viewport(MAIN_VIEW_PORT_KEY, scene, { left: 0, top: 0, width: 300, height: 200 });
+        const rect = new Rect('target', { left: 0, top: 0, width: 200, height: 150 });
+        scene.addObject(rect);
+        doubleClick = vi.fn();
+        tripleClick = vi.fn();
+        rect.onDblclick$.subscribeEvent(doubleClick);
+        rect.onTripleClick$.subscribeEvent(tripleClick);
+        scene.attachControl();
+    });
+
     afterEach(() => {
+        scene.dispose();
+        engine.dispose();
+        vi.runOnlyPendingTimers();
         vi.useRealTimers();
+        env.restore();
+        vi.restoreAllMocks();
     });
 
-    it('allows natural finger drift between two touch taps', () => {
-        vi.useFakeTimers();
-        const scene = createScene();
-        const inputManager = new InputManager(scene as never);
-
-        inputManager._onPointerUp(createPointerUpEvent(20, DeviceType.Touch) as never);
-        inputManager._onPointerUp(createPointerUpEvent(26, DeviceType.Touch) as never);
-
-        expect(scene.onDblclick$.emitEvent).toHaveBeenCalledTimes(1);
+    it('recognizes primary-button double and triple clicks', () => {
+        click();
+        click();
+        expect(doubleClick).toHaveBeenCalledTimes(1);
+        click();
+        expect(tripleClick).toHaveBeenCalledTimes(1);
     });
 
-    it('keeps the precise double-click threshold for mouse input', () => {
-        vi.useFakeTimers();
-        const scene = createScene();
-        const inputManager = new InputManager(scene as never);
+    it('does not turn a drag ending at the last clicked cell into a double click', () => {
+        click();
+        pointer('pointerdown', 100, 80);
+        pointer('pointermove', 60, 50);
+        pointer('pointerup');
+        expect(doubleClick).not.toHaveBeenCalled();
+        click();
+        expect(doubleClick).not.toHaveBeenCalled();
+        click();
+        expect(doubleClick).toHaveBeenCalledTimes(1);
+    });
 
-        inputManager._onPointerUp(createPointerUpEvent(20, DeviceType.Mouse) as never);
-        inputManager._onPointerUp(createPointerUpEvent(26, DeviceType.Mouse) as never);
+    it('does not treat a drag returning to its origin as a click', () => {
+        click();
+        pointer('pointerdown');
+        pointer('pointermove', 100, 80);
+        pointer('pointermove');
+        pointer('pointerup');
+        expect(doubleClick).not.toHaveBeenCalled();
+    });
 
-        expect(scene.onDblclick$.emitEvent).not.toHaveBeenCalled();
+    it.each([1, 2])('does not include button %s in a primary click sequence', (button) => {
+        click();
+        click(20, 20, button);
+        expect(doubleClick).not.toHaveBeenCalled();
+        click();
+        expect(doubleClick).not.toHaveBeenCalled();
+        click();
+        expect(doubleClick).toHaveBeenCalledTimes(1);
+        click(20, 20, button);
+        expect(tripleClick).not.toHaveBeenCalled();
+    });
+
+    it('does not recognize a triple click at a different position', () => {
+        click();
+        click();
+        click(100, 80);
+        expect(tripleClick).not.toHaveBeenCalled();
+    });
+
+    it('starts a fresh sequence after pointer cancellation', () => {
+        click();
+        pointer('pointerdown');
+        pointer('pointercancel');
+        pointer('pointerup');
+        click();
+        expect(doubleClick).not.toHaveBeenCalled();
+        click();
+        expect(doubleClick).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([1, 2])('starts a fresh sequence after leaving the canvas following %s clicks', (count) => {
+        for (let index = 0; index < count; index += 1) {
+            click();
+        }
+        const previousDoubleClicks = doubleClick.mock.calls.length;
+        pointer('pointerleave');
+        pointer('pointerenter');
+        click();
+        expect(doubleClick).toHaveBeenCalledTimes(previousDoubleClicks);
+        expect(tripleClick).not.toHaveBeenCalled();
+        click();
+        expect(doubleClick).toHaveBeenCalledTimes(previousDoubleClicks + 1);
+    });
+
+    it('expires double and triple click sequences', () => {
+        click();
+        vi.advanceTimersByTime(InputManager.DoubleClickDelay + 1);
+        click();
+        expect(doubleClick).not.toHaveBeenCalled();
+        click();
+        vi.advanceTimersByTime(InputManager.TripleClickDelay + 1);
+        click();
+        expect(tripleClick).not.toHaveBeenCalled();
+    });
+
+    it('allows a small movement within the click tolerance', () => {
+        click();
+        pointer('pointerdown');
+        pointer('pointermove', 21, 21);
+        pointer('pointerup', 21, 21);
+        expect(doubleClick).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([DeviceType.Touch, DeviceType.Mouse])('uses the device-specific double-click threshold for %s', (deviceType) => {
+        pointer('pointerdown', 20, 20, 0, deviceType);
+        pointer('pointerup', 20, 20, 0, deviceType);
+        pointer('pointerdown', 26, 20, 0, deviceType);
+        pointer('pointerup', 26, 20, 0, deviceType);
+
+        expect(doubleClick).toHaveBeenCalledTimes(deviceType === DeviceType.Touch ? 1 : 0);
     });
 });

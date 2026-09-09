@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/id-ID.generated';
 
 const locale: typeof enUS = {
     ui: {
+        accessibility: {
+            menu: 'Menu',
+            zoom: 'Zoom',
+            zoomIn: 'Perbesar',
+            zoomOut: 'Perkecil',
+            resetZoom: 'Atur ulang zoom',
+        },
         objectPermission: {
             operationDenied: 'Konten ini dilindungi. Tindakan ini tidak diizinkan.',
             remove: 'Hapus perlindungan',

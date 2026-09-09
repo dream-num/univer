@@ -24,7 +24,7 @@ export { mergeMenuConfigs } from './common/menu-merge-configs';
 export { objectPermissionMenuItemFactory } from './common/object-permission-menu';
 export { UI_PLUGIN_CONFIG_KEY } from './config/config';
 export type { IUniverUIConfig } from './config/config';
-export { UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
+export { MOBILE_UI_MODE, UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
 export { ErrorController } from './controllers/error/error.controller';
 export {
     CopyShortcutItem,

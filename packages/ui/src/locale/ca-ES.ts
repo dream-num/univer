@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/ca-ES.generated';
 
 const locale: typeof enUS = {
     ui: {
+        accessibility: {
+            menu: 'Menú',
+            zoom: 'Zoom',
+            zoomIn: 'Apropa',
+            zoomOut: 'Allunya',
+            resetZoom: 'Restableix el zoom',
+        },
         objectPermission: {
             operationDenied: 'Aquest contingut està protegit. No es pot fer aquesta acció.',
             remove: 'Elimina la protecció',

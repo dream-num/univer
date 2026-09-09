@@ -180,7 +180,7 @@ describe('FloatDomSingle', () => {
         expect(onPointerDown).toHaveBeenCalledOnce();
     });
 
-    it('captures forwarded pointers and finishes the canvas gesture when the browser cancels it', async () => {
+    it('captures forwarded pointers on the original descendant and finishes cancelled canvas gestures', async () => {
         const onPointerDown = vi.fn();
         const onPointerUp = vi.fn();
         const layer = { ...createFloatDom(), onPointerDown, onPointerUp };
@@ -191,7 +191,9 @@ describe('FloatDomSingle', () => {
         const wrapper = inner.parentElement as HTMLDivElement;
         const setPointerCapture = vi.fn();
         const releasePointerCapture = vi.fn();
-        Object.defineProperties(wrapper, {
+        const captureOnWrapper = vi.fn();
+        Object.defineProperty(wrapper, 'setPointerCapture', { configurable: true, value: captureOnWrapper });
+        Object.defineProperties(inner, {
             hasPointerCapture: { configurable: true, value: () => true },
             releasePointerCapture: { configurable: true, value: releasePointerCapture },
             setPointerCapture: { configurable: true, value: setPointerCapture },
@@ -205,6 +207,7 @@ describe('FloatDomSingle', () => {
         expect(wrapper.style.touchAction).toBe('none');
         expect(setPointerCapture).toHaveBeenCalledWith(7);
         expect(setPointerCapture).toHaveBeenCalledWith(8);
+        expect(captureOnWrapper).not.toHaveBeenCalled();
         expect(onPointerDown).toHaveBeenCalledTimes(2);
         expect(onPointerUp).toHaveBeenCalledWith(expect.objectContaining({ type: 'pointerup' }));
         expect(onPointerUp).toHaveBeenCalledWith(expect.objectContaining({ type: 'pointercancel' }));

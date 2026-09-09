@@ -124,6 +124,25 @@ export class DocIMEInputController extends Disposable implements IRenderModule {
 
         const content = e.data;
 
+        if (isUpdate && content === '') {
+            return;
+        }
+
+        if (!isUpdate && content === '') {
+            if (this._previousIMEContent !== '') {
+                await this._commandService.executeCommand(IMEInputCommand.id, {
+                    unitId,
+                    newText: '',
+                    oldTextLen: this._previousIMEContent.length,
+                    isCompositionStart: false,
+                    isCompositionEnd: true,
+                    isCompositionCanceled: true,
+                });
+            }
+            this._resetIME();
+            return;
+        }
+
         if (content === this._previousIMEContent && isUpdate) {
             return;
         }

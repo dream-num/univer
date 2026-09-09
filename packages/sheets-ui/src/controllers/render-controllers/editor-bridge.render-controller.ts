@@ -29,7 +29,7 @@ import {
     SetWorksheetActiveOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { DISABLE_AUTO_FOCUS_KEY } from '@univerjs/ui';
+import { DISABLE_AUTO_FOCUS_KEY, getEmbedChildUnitId } from '@univerjs/ui';
 import { filter, merge } from 'rxjs';
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { SetActivateCellEditOperation } from '../../commands/operations/activate-cell-edit.operation';
@@ -85,11 +85,12 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     }
 
     private _initSelectionChangeListener(d: DisposableCollection) {
+        const selections = this._selectionManagerService.getWorkbookSelections(this._context.unitId);
         d.add(merge(
-            this._selectionManagerService.selectionSet$,
-            this._selectionManagerService.selectionMoveStart$
+            selections.selectionSet$,
+            selections.selectionMoveStart$
         ).subscribe((params) => this._updateEditorPosition(params)));
-        d.add(this._selectionManagerService.selectionMoveEnd$.subscribe((params) => {
+        d.add(selections.selectionMoveEnd$.subscribe((params) => {
             this._updateEditorPosition(params);
             if (params?.[params.length - 1]?.primary) {
                 this._updateInputPosition();
@@ -191,7 +192,10 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         }));
 
         d.add(spreadsheet.onPointerDown$.subscribeEvent({
-            next: (payload) => this._tryHideEditor(resolvePointerEventPayload(payload)),
+            next: (payload) => {
+                this._tryHideEditor(resolvePointerEventPayload(payload));
+                this._focusCellEditorInput();
+            },
             priority: -1,
         }));
         d.add(spreadsheetColumnHeader.onPointerDown$.subscribeEvent({
@@ -268,6 +272,17 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     }
 
     private _focusCellEditorInput(): void {
+        // Restoring the host context after a child command must not reclaim the child's keyboard focus.
+        const focusedChildUnitId = getEmbedChildUnitId(typeof document === 'undefined' ? null : document.activeElement);
+        if (
+            (focusedChildUnitId != null && focusedChildUnitId !== this._context.unitId) ||
+            !this._isCurrentSheetFocused() ||
+            this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR) ||
+            this._editorBridgeService.isVisible().visible
+        ) {
+            return;
+        }
+
         const render = this._renderManagerService.getRenderUnitById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
         const docSelectionRenderService = render?.with(DocSelectionRenderService);
 

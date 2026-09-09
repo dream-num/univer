@@ -45,9 +45,8 @@ export function otherHandler(
 
     while (src.length) {
         const config = getFontCreateConfig(index + step, viewModel, paragraphNode, sectionBreakConfig, paragraph);
-        const char = config.textStyle.sc || config.textStyle.kerning != null || config.textStyle.caps || config.textStyle.smallCaps
-            ? getFirstGrapheme(src)
-            : src.match(/^[\s\S]/gu)?.[0];
+        // Keep ordinary ASCII cheap, but never expose a caret stop inside a combining sequence.
+        const char = src.match(/^\p{ASCII}(?![\p{Mark}\u200D])/u)?.[0] ?? getFirstGrapheme(src);
 
         if (char == null) {
             break;

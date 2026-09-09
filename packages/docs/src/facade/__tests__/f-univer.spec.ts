@@ -51,4 +51,20 @@ describe('FUniver docs facade', () => {
         expect(created.getName()).toBe('Created');
         expect(univerAPI.getDocument('created-doc')?.save().body?.dataStream).toBe('Created\r\n');
     });
+
+    it('creates an embedded document without changing the active document', () => {
+        const created = univerAPI.createDocument({
+            id: 'embedded-doc',
+            title: 'Embedded',
+            body: { dataStream: '\r\n' },
+            documentStyle: DOCUMENT_STYLE,
+        }, {
+            embeddedRender: true,
+            makeCurrent: false,
+            skipAutoRender: true,
+        });
+
+        expect(created.getId()).toBe('embedded-doc');
+        expect(univerAPI.getActiveDocument()?.getId()).toBe('test');
+    });
 });

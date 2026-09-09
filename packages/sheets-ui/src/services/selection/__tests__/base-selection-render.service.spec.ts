@@ -94,18 +94,18 @@ class TestSelectionRenderService extends BaseSelectionRenderService {
         this._movingHandler(offsetX, offsetY, activeControl, rangeType);
     }
 
-    listenPointerMoveForTest(rangeType = RANGE_TYPE.NORMAL) {
+    listenPointerMoveForTest(rangeType = RANGE_TYPE.NORMAL, start = { x: 0, y: 0 }) {
         const activeControl = this.getActiveSelectionControl()!;
         this._startRangeWhenPointerDown = activeControl.model as never;
-        this._startViewportPosX = 0;
-        this._startViewportPosY = 0;
+        this._startViewportPosX = start.x;
+        this._startViewportPosY = start.y;
         this._setupPointerMoveListener(
             this._scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN),
             activeControl,
             rangeType,
             ScrollTimerType.ALL,
-            0,
-            0
+            start.x,
+            start.y
         );
     }
 
@@ -446,6 +446,44 @@ describe('BaseSelectionRenderService', () => {
             endColumn: 3,
         });
         expect(movingSelections.length).toBeGreaterThan(0);
+    });
+
+    it.each([false, true])('preserves scrolled frozen-pane selection in reverse=%s', (reverse) => {
+        const { service } = createSelectionRenderService();
+        const { scene } = service.changeRuntimeForTest({
+            freeze: { startRow: 2, startColumn: 2, xSplit: 2, ySplit: 2 },
+        });
+        const main = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!;
+        main.left = 200;
+        main.top = 40;
+        main.scrollY = 200;
+        main.viewportScrollY = 200;
+        const resetScroll = vi.fn();
+        Reflect.set(main, 'scrollToBarPos', resetScroll);
+        scene.getActiveViewportByCoord = (point) => {
+            if (point.y < 40) {
+                return scene.getViewport(point.x < 200 ? SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP : SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP)!;
+            }
+            return scene.getViewport(point.x < 200 ? SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT : SHEET_VIEWPORT_KEY.VIEW_MAIN)!;
+        };
+        scene.getScrollXYInfoByViewport = (point, viewport) => {
+            const target = viewport ?? scene.getActiveViewportByCoord(point)!;
+            return { x: target.viewportScrollX, y: target.viewportScrollY };
+        };
+        const start = reverse ? { x: 350, y: 65 } : { x: 100, y: 20 };
+        const end = reverse ? { x: 100, y: 20 } : { x: 350, y: 65 };
+        const row = reverse ? 13 : 1;
+        const column = reverse ? 3 : 1;
+        service.resetSelectionsByModelData([createSelection({ startRow: row, endRow: row, startColumn: column, endColumn: column })]);
+        service.listenPointerMoveForTest(RANGE_TYPE.NORMAL, start);
+        (scene.onPointerMove$ as unknown as { emit: (evt: unknown) => void }).emit({
+            offsetX: end.x,
+            offsetY: end.y,
+            buttons: 1,
+        });
+        expect(resetScroll).not.toHaveBeenCalled();
+        expect(service.getActiveRange()).toEqual({ startRow: 1, endRow: 13, startColumn: 1, endColumn: 3 });
+        expect(main.viewportScrollY).toBe(200);
     });
 
     it('ends a leaked drag before handling pointer movement with no pressed buttons', () => {

@@ -14,9 +14,22 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type {
+    ICellDataForSheetInterceptor,
+    ICommandInfo,
+    IObjectMatrixPrimitiveType,
+    IRange,
+    IRowAutoHeightInfo,
+    Nullable,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISelectionWithStyle, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
+import type {
+    ISelectionWithStyle,
+    ISetRangeValuesMutationParams,
+    ISetWorksheetRowAutoHeightMutationParams,
+} from '@univerjs/sheets';
 import {
     ColorKit,
     Disposable,
@@ -34,8 +47,16 @@ import {
     SetFormulaCalculationResultMutation,
 } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { attachSelectionWithCoord, BEFORE_CELL_EDIT, SetWorksheetRowAutoHeightMutation, SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
 import {
+    attachSelectionWithCoord,
+    BEFORE_CELL_EDIT,
+    SetRangeValuesMutation,
+    SetWorksheetRowAutoHeightMutation,
+    SheetInterceptorService,
+    SheetSkeletonService,
+} from '@univerjs/sheets';
+import {
+    IEditorBridgeService,
     SELECTION_SHAPE_DEPTH,
     SelectionControl,
     SheetSkeletonManagerService,
@@ -57,7 +78,8 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @ILogService private readonly _logService: ILogService
+        @ILogService private readonly _logService: ILogService,
+        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService
     ) {
         super();
         this._initSkeletonChangeListener();
@@ -157,6 +179,31 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
             if (command.id === SetFormulaCalculationResultMutation.id || (command.id === SetArrayFormulaDataMutation.id && options && options.remove)) {
                 this._removeArrayFormulaRangeShape();
             }
+
+            if (command.id !== SetRangeValuesMutation.id || options?.applyFormulaCalculationResult !== true || command.params == null) {
+                return;
+            }
+
+            const params = command.params as ISetRangeValuesMutationParams;
+            const editLocation = this._editorBridgeService.getEditLocation();
+            if (
+                editLocation == null
+                || params.unitId !== this._context.unitId
+                || params.unitId !== editLocation.unitId
+                || params.subUnitId !== editLocation.sheetId
+                || this._editorBridgeService.isVisible().visible
+            ) {
+                return;
+            }
+
+            const { row, column, isInArrayFormulaRange } = editLocation;
+            const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
+            const isInArrayFormulaCell = arrayFormulaCellData?.[params.unitId]?.[params.subUnitId]?.[row]?.[column] != null;
+            if (isInArrayFormulaRange !== true && !isInArrayFormulaCell) {
+                return;
+            }
+
+            this._editorBridgeService.refreshEditCellState();
         }));
 
         this.disposeWithMe(
@@ -174,6 +221,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
 
     private _displayArrayFormulaRangeShape(matrixRange: IObjectMatrixPrimitiveType<IRange>, row: number, col: number, unitId: string, subUnitId: string, worksheet: Worksheet, cellInfo: Nullable<ICellDataForSheetInterceptor>): Nullable<ICellDataForSheetInterceptor> {
         // const sheetFormulaData = this._formulaDataModel.getSheetFormulaData(unitId, subUnitId);
+        let result = cellInfo;
 
         new ObjectMatrix(matrixRange).forValue((rowIndex, columnIndex, range) => {
             if (range == null) {
@@ -191,8 +239,8 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
                     return;
                 }
 
-                if (cellInfo == null) {
-                    cellInfo = {
+                if (result == null) {
+                    result = {
                         f: mainCellValue.f,
                         isInArrayFormulaRange: true,
                     };
@@ -203,7 +251,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
             }
         });
 
-        return cellInfo;
+        return result;
     }
 
     private _createArrayFormulaRangeShape(arrayRange: IRange, unitId: string, subUnitId: string): void {

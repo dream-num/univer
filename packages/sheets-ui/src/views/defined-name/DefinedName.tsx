@@ -181,6 +181,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
             rangeString,
             unitId,
             formulaOrRefString,
+            worksheet: workbook.getActiveSheet(),
             univerInstanceService,
             definedNamesService,
             superTableService,

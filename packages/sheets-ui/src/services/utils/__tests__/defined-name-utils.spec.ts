@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
-import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
+import type { IUniverInstanceService, Workbook } from '@univerjs/core';
+import type {
+    IDefinedNamesService,
+    IDefinedNamesServiceParam,
+    IFunctionService,
+    ISuperTableService,
+    LexerTreeBuilder,
+} from '@univerjs/engine-formula';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { AbsoluteRefType } from '@univerjs/core';
 import { validateDefinedName } from '@univerjs/sheets';
@@ -23,12 +29,16 @@ import { describe, expect, it, vi } from 'vitest';
 import { getAbsoluteRefStringFromSelection, resolveDefinedNameBoxAction } from '../defined-name-utils';
 
 function createWorkbookMock(sheetNames = ['Sheet1']) {
-    const sheets = new Map(sheetNames.map((name, index) => [`sheet-${index}`, { getName: () => name }]));
+    const sheets = new Map(sheetNames.map((name, index) => [`sheet-${index}`, {
+        getName: () => name,
+        getRowCount: () => 1000,
+        getColumnCount: () => 20,
+    }]));
 
     return {
         getSheetOrders: () => Array.from(sheets.keys()),
         getSheetBySheetId: (sheetId: string) => sheets.get(sheetId),
-        getActiveSheet: () => ({ getName: () => 'Sheet1' }),
+        getActiveSheet: () => sheets.get('sheet-0'),
     } as unknown as Workbook;
 }
 
@@ -43,16 +53,16 @@ function createValidationDeps(overrides: {
         workbook: createWorkbookMock(),
         definedNamesService: {
             getValueByName: vi.fn(() => overrides.definedName ?? null),
-        } as any,
+        } as unknown as IDefinedNamesService,
         superTableService: {
             hasTable: vi.fn(() => overrides.hasTable ?? false),
-        } as any,
+        } as unknown as ISuperTableService,
         functionService: {
             hasExecutor: vi.fn(() => overrides.hasFunction ?? false),
-        } as any,
+        } as unknown as IFunctionService,
         univerInstanceService: {
             getUnit: vi.fn(() => ({ getSheets: () => [{ getName: () => 'Sheet1' }] })),
-        } as any,
+        } as unknown as IUniverInstanceService,
     };
 }
 
@@ -108,6 +118,7 @@ describe('defined-name.utils', () => {
             rangeString: 'A1',
             unitId,
             formulaOrRefString: existingDefinedName.formulaOrRefString,
+            worksheet: createWorkbookMock().getActiveSheet(),
             univerInstanceService,
             definedNamesService,
             superTableService,
@@ -134,6 +145,7 @@ describe('defined-name.utils', () => {
             rangeString: 'A1',
             unitId,
             formulaOrRefString: '',
+            worksheet: createWorkbookMock().getActiveSheet(),
             univerInstanceService,
             definedNamesService,
             superTableService,
@@ -143,6 +155,32 @@ describe('defined-name.utils', () => {
         expect(action).toEqual({
             type: 'focusSelection',
             refString: 'B2:C4',
+        });
+    });
+
+    it('should reset when a typed reference is outside the worksheet bounds', () => {
+        const {
+            unitId,
+            univerInstanceService,
+            definedNamesService,
+            superTableService,
+            functionService,
+        } = createValidationDeps();
+
+        const action = resolveDefinedNameBoxAction({
+            inputValue: 'Z200',
+            rangeString: 'A1',
+            unitId,
+            formulaOrRefString: '',
+            worksheet: createWorkbookMock().getActiveSheet(),
+            univerInstanceService,
+            definedNamesService,
+            superTableService,
+            functionService,
+        });
+
+        expect(action).toEqual({
+            type: 'reset',
         });
     });
 
@@ -160,6 +198,7 @@ describe('defined-name.utils', () => {
             rangeString: 'A1',
             unitId,
             formulaOrRefString: 'A1',
+            worksheet: createWorkbookMock().getActiveSheet(),
             univerInstanceService,
             definedNamesService,
             superTableService,
@@ -186,6 +225,7 @@ describe('defined-name.utils', () => {
             rangeString: 'A1',
             unitId,
             formulaOrRefString: '',
+            worksheet: createWorkbookMock().getActiveSheet(),
             univerInstanceService,
             definedNamesService,
             superTableService,
@@ -211,7 +251,7 @@ describe('defined-name.utils', () => {
         const absoluteRef = getAbsoluteRefStringFromSelection(
             createWorkbookMock(),
             selections,
-            { convertRefersToAbsolute } as any
+            { convertRefersToAbsolute } as unknown as LexerTreeBuilder
         );
 
         expect(absoluteRef).toBe('ABS(Sheet1!A1)');
@@ -232,7 +272,7 @@ describe('defined-name.utils', () => {
         const absoluteRef = getAbsoluteRefStringFromSelection(
             createWorkbookMock(),
             selections,
-            { convertRefersToAbsolute } as any
+            { convertRefersToAbsolute } as unknown as LexerTreeBuilder
         );
 
         expect(absoluteRef).toBe('ABS(Sheet1!B2:C4)');

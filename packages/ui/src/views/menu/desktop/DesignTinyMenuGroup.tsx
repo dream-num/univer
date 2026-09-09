@@ -200,7 +200,7 @@ export function DesignTinyMenuGroup({
                     ? (
                         <Tooltip
                             key={item.key}
-                            className="univer-fill-mode-backwards univer-delay-100"
+                            className="univer-fill-mode-backwards univer-pointer-events-none univer-delay-100"
                             title={item.tooltip}
                         >
                             {ele}

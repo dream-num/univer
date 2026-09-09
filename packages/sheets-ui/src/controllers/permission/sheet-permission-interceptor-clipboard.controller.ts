@@ -18,26 +18,27 @@ import type { ICellDataForSheetInterceptor, IRange, Workbook } from '@univerjs/c
 import type { LocaleKey } from '../../locale/types';
 import {
     Disposable,
-    DisposableCollection,
     Inject,
     IUniverInstanceService,
     LocaleService,
     UniverInstanceType,
 } from '@univerjs/core';
 import { UnitAction } from '@univerjs/protocol';
-import { SheetPermissionCheckController, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    discreteRangeToRange,
+    RangeProtectionPermissionEditPoint,
+    SheetPermissionCheckController,
+    WorkbookEditablePermission,
+    WorksheetEditPermission,
+} from '@univerjs/sheets';
 import { ISheetClipboardService } from '../../services/clipboard/clipboard.service';
-import { virtualizeDiscreteRanges } from '../utils/range-tools';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
 
 export class SheetPermissionInterceptorClipboardController extends Disposable {
-    disposableCollection = new DisposableCollection();
-
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(LocaleService) private readonly _localService: LocaleService,
         @Inject(ISheetClipboardService) private _sheetClipboardService: ISheetClipboardService,
         @Inject(SheetPermissionCheckController) private readonly _sheetPermissionCheckController: SheetPermissionCheckController
@@ -51,30 +52,28 @@ export class SheetPermissionInterceptorClipboardController extends Disposable {
             this._sheetClipboardService.addClipboardHook({
                 id: SHEET_PERMISSION_PASTE_PLUGIN,
                 onBeforePaste: (pasteTo) => {
-                    const [ranges] = virtualizeDiscreteRanges([pasteTo.range]).ranges;
-                    const startRange = this._selectionManagerService.getCurrentLastSelection()?.range;
-                    if (!startRange) {
-                        return false;
-                    }
-                    const targetRange = {
-                        startRow: startRange.startRow + ranges.startRow,
-                        endRow: startRange.startRow + ranges.endRow,
-                        startColumn: startRange.startColumn + ranges.startColumn,
-                        endColumn: startRange.startColumn + ranges.endColumn,
-                    };
-
-                    const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                    const worksheet = workbook.getActiveSheet();
+                    const { unitId, subUnitId, range } = pasteTo;
+                    const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+                    const worksheet = workbook?.getSheetBySheetId(subUnitId);
                     if (!worksheet) {
                         return false;
                     }
 
-                    const { startRow, endRow, startColumn, endColumn } = targetRange;
+                    if (!this._sheetPermissionCheckController.permissionCheckWithRanges({
+                        workbookTypes: [WorkbookEditablePermission],
+                        worksheetTypes: [WorksheetEditPermission],
+                        rangeTypes: [RangeProtectionPermissionEditPoint],
+                    }, [discreteRangeToRange(range)], unitId, subUnitId)) {
+                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(
+                            this._localService.t<LocaleKey>('sheets-ui.permission.dialog.pasteErr')
+                        );
+                        return false;
+                    }
 
                     let hasPermission = true;
 
-                    for (let row = startRow; row <= endRow; row++) {
-                        for (let col = startColumn; col <= endColumn; col++) {
+                    for (const row of range.rows) {
+                        for (const col of range.cols) {
                             const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
                             if (permission?.[UnitAction.Edit] === false) {
                                 hasPermission = false;

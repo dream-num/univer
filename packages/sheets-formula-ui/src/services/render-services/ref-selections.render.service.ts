@@ -407,6 +407,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             : null;
         const remainLastEnable = this._remainLastEnabled &&
             !evt.ctrlKey &&
+            !evt.metaKey &&
             !evt.shiftKey &&
             !this._skipLastEnabled &&
             !this._singleSelectionEnabled;

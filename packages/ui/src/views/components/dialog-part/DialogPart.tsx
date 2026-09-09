@@ -17,10 +17,69 @@
 import type { IDialogProps } from '@univerjs/design';
 import type { IDialogPartMethodOptions } from './interface';
 import { Dialog } from '@univerjs/design';
-import { useMemo } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
 import { IDialogService } from '../../../services/dialog/dialog.service';
 import { useDependency, useObservable } from '../../../utils/di';
+import { getEmbedBoundaryOwner } from '../../../utils/embed-boundary';
 import { CustomLabel } from '../../custom-label/CustomLabel';
+
+function DialogItem(props: IDialogProps) {
+    const dialogRef = useRef<Element | null>(null);
+    const openRef = useRef(false);
+    const handleContentRef = useCallback((node: HTMLDivElement | null) => {
+        if (node) {
+            dialogRef.current = node.closest('[role="dialog"]');
+        }
+    }, []);
+
+    useLayoutEffect(() => {
+        openRef.current = !!props.open;
+        if (!props.open) {
+            return;
+        }
+        // Capture before the portal mounts and its focus scope moves focus into the dialog.
+        const ownerDocument = document;
+        const opener = ownerDocument.activeElement;
+        const owner = getEmbedBoundaryOwner(opener);
+        const ownerWindow = ownerDocument?.defaultView;
+        const handleCompositionEscape = (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && event.isComposing &&
+                event.target instanceof Element && event.target.closest('[role="dialog"]') === dialogRef.current) {
+                // The candidate window owns Escape before the dialog's document-level listener sees it.
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        };
+        ownerWindow?.addEventListener('keydown', handleCompositionEscape, true);
+        return () => {
+            openRef.current = false;
+            const content = dialogRef.current;
+            ownerWindow?.removeEventListener('keydown', handleCompositionEscape, true);
+            if (props.mask === false) {
+                return;
+            }
+            queueMicrotask(() => {
+                if (openRef.current) {
+                    return;
+                }
+                if (dialogRef.current === content) {
+                    dialogRef.current = null;
+                }
+                const active = ownerDocument?.activeElement;
+                if (opener instanceof HTMLElement && opener.isConnected && getEmbedBoundaryOwner(opener) === owner &&
+                    (active === ownerDocument?.body || (active && content?.contains(active)))) {
+                    opener.focus({ preventScroll: true });
+                }
+            });
+        };
+    }, [props.open, props.mask]);
+
+    return (
+        <Dialog {...props}>
+            <div ref={handleContentRef} className="univer-contents">{props.children}</div>
+        </Dialog>
+    );
+}
 
 export function DialogPart() {
     const dialogService = useDependency(IDialogService);
@@ -46,6 +105,6 @@ export function DialogPart() {
     }), [dialogOptions]);
 
     return attrs?.map((options) => (
-        <Dialog key={options.id} {...options} />
+        <DialogItem key={options.id} {...options} />
     ));
 }

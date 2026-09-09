@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/fa-IR.generated';
 
 const locale: typeof enUS = {
     ui: {
+        accessibility: {
+            menu: 'منو',
+            zoom: 'بزرگ‌نمایی',
+            zoomIn: 'بزرگ‌نمایی',
+            zoomOut: 'کوچک‌نمایی',
+            resetZoom: 'بازنشانی بزرگ‌نمایی',
+        },
         objectPermission: {
             operationDenied: 'این محتوا محافظت شده است. انجام این عملیات مجاز نیست.',
             remove: 'حذف محافظت',

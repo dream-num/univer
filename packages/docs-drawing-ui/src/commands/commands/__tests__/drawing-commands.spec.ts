@@ -296,6 +296,7 @@ class TestDocDrawingUpdateRenderController {
 
 function setupDrawingTestBed(docData: IDocumentData, dependencies: Dependency[] = []) {
     const refreshControls = vi.fn();
+    const focusSelection = vi.fn();
     const testBed = createDocUiTestBed(docData, [
         [IRenderManagerService, { useClass: RenderManagerService }],
         ...dependencies,
@@ -328,6 +329,7 @@ function setupDrawingTestBed(docData: IDocumentData, dependencies: Dependency[] 
                     setSegment: (segmentId: string) => currentSegment = segmentId,
                     getSegmentPage: () => currentSegmentPage,
                     setSegmentPage: (page: number) => currentSegmentPage = page,
+                    focus: focusSelection,
                 } as T;
             }
 
@@ -380,6 +382,7 @@ function setupDrawingTestBed(docData: IDocumentData, dependencies: Dependency[] 
         docDrawingService: injector.get(IDocDrawingService),
         drawingManagerService: injector.get(IDrawingManagerService),
         refreshControls,
+        focusSelection,
     };
 }
 
@@ -621,6 +624,7 @@ describe('docs drawing commands integration', () => {
         expect(doc.getSnapshot().drawingsOrder).toEqual([]);
         expect(testBed.docDrawingService.getDrawingByParam({ unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-1' })).toBeUndefined();
         expect(testBed.drawingManagerService.getDrawingByParam({ unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-1' })).toBeUndefined();
+        expect(testBed.focusSelection).toHaveBeenCalledTimes(2);
 
         testBed.univer.dispose();
     });

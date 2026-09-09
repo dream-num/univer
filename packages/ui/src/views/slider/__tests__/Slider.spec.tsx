@@ -20,9 +20,12 @@
 
 import type { ISliderProps } from '../Slider';
 import { cleanup, fireEvent, render } from '@testing-library/react';
-import { DesktopLogService, ILogService, Injector, LocaleService } from '@univerjs/core';
+import { DesktopLogService, ILogService, Injector, LocaleService, LocaleType } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
-import { ComponentManager, IconManager } from '../../../common';
+import { ComponentManager } from '../../../common/component-manager';
+import { IconManager } from '../../../common/icon-manager';
+import enUS from '../../../locale/en-US';
+import zhCN from '../../../locale/zh-CN';
 import { RediProvider } from '../../../utils/di';
 import { Slider } from '../Slider';
 
@@ -31,18 +34,28 @@ type SliderTestProps = Partial<Omit<ISliderProps, 'onChange'>> & {
 };
 
 describe('Slider', () => {
+    const injectors: Injector[] = [];
     afterEach(() => {
         cleanup();
+        injectors.splice(0).forEach((injector) => injector.dispose());
     });
 
-    function renderSlider(props: SliderTestProps = {}, direction: 'ltr' | 'rtl' = 'ltr') {
+    function renderSlider(
+        props: SliderTestProps = {},
+        direction: 'ltr' | 'rtl' = 'ltr',
+        locale = LocaleType.EN_US
+    ) {
         const injector = new Injector([
             [ILogService, { useClass: DesktopLogService }],
             [LocaleService],
             [ComponentManager],
             [IconManager],
         ]);
-        injector.get(LocaleService).setDirection(direction);
+        injectors.push(injector);
+        const localeService = injector.get(LocaleService);
+        localeService.load({ [LocaleType.EN_US]: enUS, [LocaleType.ZH_CN]: zhCN });
+        localeService.setLocale(locale);
+        localeService.setDirection(direction);
         const { onChange = () => {}, ...sliderProps } = props;
 
         return render(
@@ -160,6 +173,32 @@ describe('Slider', () => {
         fireEvent.click(increaseButton);
 
         expect(changes).toEqual([115, 100, 135]);
+    });
+
+    it.each([
+        [LocaleType.EN_US, enUS.ui.accessibility],
+        [LocaleType.ZH_CN, zhCN.ui.accessibility],
+    ])('exposes UI-owned zoom labels and keyboard input in %s', (locale, labels) => {
+        const changes: number[] = [];
+        const { getByRole } = renderSlider(
+            { value: 125, min: 10, max: 400, onChange: (value) => changes.push(value) },
+            'ltr',
+            locale
+        );
+        const slider = getByRole('slider', { name: labels.zoom });
+
+        expect(getByRole('button', { name: labels.zoomOut })).toBeTruthy();
+        expect(getByRole('button', { name: labels.zoomIn })).toBeTruthy();
+        expect(getByRole('button', { name: labels.resetZoom })).toBeTruthy();
+        expect(getByRole('textbox', { name: labels.zoom })).toBeTruthy();
+        expect(getByRole('button', { name: labels.menu })).toBeTruthy();
+
+        fireEvent.keyDown(slider, { key: 'ArrowRight' });
+        fireEvent.keyDown(slider, { key: 'PageUp' });
+        fireEvent.keyDown(slider, { key: 'Home' });
+        fireEvent.keyDown(slider, { key: 'End' });
+
+        expect(changes).toEqual([135, 225, 10, 400]);
     });
 
     it('clamps step buttons at the min and max boundaries', () => {

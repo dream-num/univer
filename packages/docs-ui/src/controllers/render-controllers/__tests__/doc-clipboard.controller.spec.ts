@@ -43,8 +43,8 @@ function createClipboardEvent(options: {
 }
 
 function createController(options?: { focusingDoc?: boolean; editorActivated?: boolean; editorExists?: boolean }) {
-    const onPaste$ = new Subject<any>();
-    const legacyPaste = vi.fn();
+    const onPaste$ = new Subject<{ event: ReturnType<typeof createClipboardEvent> }>();
+    const legacyPaste = vi.fn(() => Promise.resolve(true));
     const controller = new DocClipboardController(
         { unitId: 'doc-1' } as never,
         {} as never,
@@ -85,6 +85,7 @@ describe('DocClipboardController', () => {
             internalJson: '{"body":true}',
             text: 'Hello',
             files: [imageFile],
+            unitId: 'doc-1',
         });
 
         controller.dispose();

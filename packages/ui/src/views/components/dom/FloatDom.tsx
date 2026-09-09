@@ -19,7 +19,7 @@ import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
 import { DocumentDataModel, IUniverInstanceService } from '@univerjs/core';
 import { memo, useEffect, useMemo, useRef } from 'react';
 import { first } from 'rxjs';
-import { ComponentManager } from '../../../common';
+import { ComponentManager } from '../../../common/component-manager';
 import { CanvasFloatDomService, shouldForwardFloatDomEvents, shouldRenderFloatDomLayer } from '../../../services/dom/canvas-dom-layer.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { resolveFloatDomLayout } from './float-dom-layout';
@@ -129,7 +129,10 @@ function FloatDomSingleContent(props: { layer: IFloatDom; id: string; Component?
             }}
             onPointerDown={(e) => {
                 if (forwardEvents) {
-                    e.currentTarget.setPointerCapture?.(e.pointerId);
+                    // Keep pointerup on the original descendant so its activation handler still runs.
+                    if (e.target instanceof Element) {
+                        e.target.setPointerCapture?.(e.pointerId);
+                    }
                     layer.onPointerDown(e.nativeEvent);
                 }
             }}
@@ -141,8 +144,8 @@ function FloatDomSingleContent(props: { layer: IFloatDom; id: string; Component?
                 try {
                     layer.onPointerUp(e.nativeEvent);
                 } finally {
-                    if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
-                        e.currentTarget.releasePointerCapture?.(e.pointerId);
+                    if (e.target instanceof Element && e.target.hasPointerCapture?.(e.pointerId)) {
+                        e.target.releasePointerCapture?.(e.pointerId);
                     }
                 }
             }}
@@ -155,8 +158,8 @@ function FloatDomSingleContent(props: { layer: IFloatDom; id: string; Component?
                     // The layer forwards the original event type, so the canvas receives pointercancel rather than pointerup.
                     layer.onPointerUp(e.nativeEvent);
                 } finally {
-                    if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
-                        e.currentTarget.releasePointerCapture?.(e.pointerId);
+                    if (e.target instanceof Element && e.target.hasPointerCapture?.(e.pointerId)) {
+                        e.target.releasePointerCapture?.(e.pointerId);
                     }
                 }
             }}

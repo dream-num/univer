@@ -18,12 +18,23 @@
  * @vitest-environment jsdom
  */
 
-import { ICommandService, IContextService, Injector } from '@univerjs/core';
+import {
+    CommandService,
+    CommandType,
+    ConfigService,
+    ContextService,
+    DesktopLogService,
+    ICommandService,
+    IConfigService,
+    IContextService,
+    ILogService,
+    Injector,
+} from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EMBED_CHILD_UNIT_ID_ATTRIBUTE } from '../../../utils/embed-boundary';
 import { ILayoutService } from '../../layout/layout.service';
-import { IPlatformService } from '../../platform/platform.service';
-import { IUIRuntimeScopeService } from '../../runtime-scope/ui-runtime-scope.service';
+import { IPlatformService, PlatformService } from '../../platform/platform.service';
+import { IUIRuntimeScopeService, UIRuntimeScopeService } from '../../runtime-scope/ui-runtime-scope.service';
 import { KeyCode, MetaKeys } from '../keycode';
 import { NativeTextEditorShortcutBehavior, ShortcutService } from '../shortcut.service';
 
@@ -119,6 +130,155 @@ describe('ShortcutService', () => {
         vi.unstubAllGlobals();
     });
 
+    it.each([KeyCode.BACKSPACE, KeyCode.DELETE])('keeps toolbar input deletion key %s out of grid shortcuts', (keyCode) => {
+        const injector = new Injector([
+            [ICommandService, { useClass: CommandService }],
+            [IConfigService, { useClass: ConfigService }],
+            [IContextService, { useClass: ContextService }],
+            [ILogService, { useClass: DesktopLogService }],
+            [IPlatformService, { useClass: PlatformService }],
+            [IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }],
+            [ShortcutService],
+        ]);
+        const control = document.createElement('div');
+        control.dataset.uCommand = 'sheet.command.set-range-fontsize';
+        const input = document.createElement('input');
+        control.appendChild(input);
+        document.body.appendChild(control);
+        try {
+            const service = injector.get(ShortcutService);
+            service.registerShortcut({ id: 'test.grid-delete', binding: keyCode });
+            const event = new KeyboardEvent('input-delete-test', { keyCode, cancelable: true });
+            input.dispatchEvent(event);
+            expect(service.dispatch(event)).toBeUndefined();
+            expect(event.defaultPrevented).toBe(false);
+            const canvas = document.createElement('canvas');
+            const canvasEvent = new KeyboardEvent('input-delete-test', { keyCode });
+            canvas.dispatchEvent(canvasEvent);
+            expect(service.dispatch(canvasEvent)?.id).toBe('test.grid-delete');
+        } finally {
+            control.remove();
+            injector.dispose();
+        }
+    });
+
+    it.each([KeyCode.ENTER, KeyCode.SPACE, KeyCode.TAB, KeyCode.ESC, KeyCode.ARROW_DOWN, KeyCode.ARROW_UP, KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT, KeyCode.HOME, KeyCode.END])(
+        'yields menu navigation key %s while retaining canvas shortcuts',
+        (keyCode) => {
+            const injector = new Injector();
+            injector.add([ICommandService, { useClass: CommandService }]);
+            injector.add([IConfigService, { useClass: ConfigService }]);
+            injector.add([IContextService, { useClass: ContextService }]);
+            injector.add([ILogService, { useClass: DesktopLogService }]);
+            injector.add([IPlatformService, { useClass: PlatformService }]);
+            injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
+            injector.add([ShortcutService]);
+            const container = document.createElement('div');
+            document.body.appendChild(container);
+            try {
+                const service = injector.get(ShortcutService);
+                service.registerShortcut({ id: 'test.grid-navigation', binding: keyCode });
+                const trigger = document.createElement('div');
+                trigger.dataset.uCommand = 'sheet.command.set-horizontal-text-align';
+                trigger.setAttribute('role', 'button');
+                const menu = document.createElement('div');
+                menu.setAttribute('role', 'menu');
+                const item = document.createElement('button');
+                item.setAttribute('role', 'menuitem');
+                menu.appendChild(item);
+                const floatingMenu = document.createElement('div');
+                floatingMenu.setAttribute('data-embed-floating-menu', 'true');
+                const compactTrigger = document.createElement('button');
+                floatingMenu.appendChild(compactTrigger);
+                const fontControl = document.createElement('div');
+                fontControl.dataset.uCommand = 'sheet.command.set-range-font-family';
+                const fontInput = document.createElement('input');
+                fontControl.appendChild(fontInput);
+                container.append(trigger, menu, floatingMenu, fontControl);
+                for (const target of [trigger, item, compactTrigger, fontInput]) {
+                    const event = new KeyboardEvent('navigation-test', { keyCode, cancelable: true });
+                    target.dispatchEvent(event);
+                    expect(service.dispatch(event)).toBeUndefined();
+                    expect(event.defaultPrevented).toBe(false);
+                }
+                const canvas = document.createElement('canvas');
+                container.appendChild(canvas);
+                const event = new KeyboardEvent('navigation-test', { keyCode });
+                canvas.dispatchEvent(event);
+                expect(service.dispatch(event)?.id).toBe('test.grid-navigation');
+            } finally {
+                container.remove();
+                injector.dispose();
+            }
+        }
+    );
+
+    it.each([
+        ['Enter', KeyCode.ENTER],
+        ['Escape', KeyCode.ESC],
+        ['ArrowLeft', KeyCode.ARROW_LEFT],
+        ['ArrowRight', KeyCode.ARROW_RIGHT],
+        ['Backspace', KeyCode.BACKSPACE],
+        ['Tab', KeyCode.TAB],
+    ])('yields composing %s to the IME and resumes the shortcut after composition', async (key, keyCode) => {
+        const injector = new Injector();
+        injector.add([ICommandService, { useClass: CommandService }]);
+        injector.add([IConfigService, { useClass: ConfigService }]);
+        injector.add([IContextService, { useClass: ContextService }]);
+        injector.add([ILogService, { useClass: DesktopLogService }]);
+        injector.add([IPlatformService, { useClass: PlatformService }]);
+        injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
+        injector.add([ShortcutService]);
+        try {
+            const service = injector.get(ShortcutService);
+            const commandService = injector.get(ICommandService);
+            let executionCount = 0;
+            commandService.registerCommand({
+                id: 'test.ime-shortcut',
+                type: CommandType.OPERATION,
+                handler: () => {
+                    executionCount += 1;
+                    return true;
+                },
+            });
+            service.registerShortcut({
+                id: 'test.ime-shortcut',
+                binding: keyCode,
+                nativeTextEditorBehavior: NativeTextEditorShortcutBehavior.OVERRIDE_NATIVE,
+            });
+            const composingEvent = new KeyboardEvent('keydown', {
+                bubbles: true,
+                cancelable: true,
+                isComposing: true,
+                key,
+                keyCode,
+            });
+            expect(service.dispatch(composingEvent)).toBeUndefined();
+            window.dispatchEvent(composingEvent);
+            expect(executionCount).toBe(0);
+            expect(composingEvent.defaultPrevented).toBe(false);
+
+            // Safari may deliver the IME confirmation key after compositionend with keyCode 229.
+            const confirmationEvent = new KeyboardEvent('keydown', {
+                bubbles: true,
+                cancelable: true,
+                isComposing: false,
+                key,
+                keyCode: 229,
+            });
+            window.dispatchEvent(confirmationEvent);
+            expect(executionCount).toBe(0);
+            expect(confirmationEvent.defaultPrevented).toBe(false);
+
+            const regularEvent = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key, keyCode });
+            window.dispatchEvent(regularEvent);
+            await expect.poll(() => executionCount).toBe(1);
+            expect(regularEvent.defaultPrevented).toBe(true);
+        } finally {
+            injector.dispose();
+        }
+    });
+
     it('should register and unregister shortcuts', () => {
         const { service } = createService();
         const changed = vi.fn();
@@ -196,8 +356,12 @@ describe('ShortcutService', () => {
             binding: KeyCode.A | MetaKeys.CTRL_COMMAND,
         });
         const escapedDisposable = escapedService.forceEscape();
+        const nestedEscapedDisposable = escapedService.forceEscape();
         expect(escapedService.dispatch(createKeyboardEvent(KeyCode.A, { ctrlKey: true }))).toBeUndefined();
         escapedDisposable.dispose();
+        expect(escapedService.dispatch(createKeyboardEvent(KeyCode.A, { ctrlKey: true }))).toBeUndefined();
+        nestedEscapedDisposable.dispose();
+        expect(escapedService.dispatch(createKeyboardEvent(KeyCode.A, { ctrlKey: true }))?.id).toBe('cmd.esc');
         escapedService.dispose();
 
         const disabledService = createService().service;

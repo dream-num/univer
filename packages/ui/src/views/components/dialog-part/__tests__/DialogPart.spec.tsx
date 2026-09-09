@@ -16,10 +16,11 @@
 
 import type { ReactElement } from 'react';
 import type { IDialogPartMethodOptions } from '../interface';
-import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
-import { DesktopLogService, ILogService, Injector, LocaleService } from '@univerjs/core';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { DesktopLogService, ILogService, Injector, LocaleService, LocaleType } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ComponentManager, IconManager } from '../../../../common';
+import { ComponentManager } from '../../../../common/component-manager';
+import { IconManager } from '../../../../common/icon-manager';
 import { DesktopDialogService } from '../../../../services/dialog/desktop-dialog.service';
 import { IDialogService } from '../../../../services/dialog/dialog.service';
 import { IUIPartsService, UIPartsService } from '../../../../services/parts/parts.service';
@@ -36,6 +37,10 @@ function renderWithDependencies(element: ReactElement) {
     injector.add([LocaleService]);
     injector.add([ComponentManager]);
     injector.add([IconManager]);
+    const localeService = injector.get(LocaleService);
+    localeService.load({ [LocaleType.EN_US]: {} });
+    localeService.setLocale(LocaleType.EN_US);
+    localeService.setDirection('ltr');
 
     const result = render(
         <RediProvider value={{ injector }}>
@@ -49,6 +54,7 @@ function renderWithDependencies(element: ReactElement) {
         dispose: () => {
             result.unmount();
             cleanup();
+            injector.dispose();
         },
     };
 }
@@ -57,6 +63,60 @@ describe('DialogPart', () => {
     afterEach(() => {
         vi.restoreAllMocks();
         cleanup();
+    });
+
+    it.each([false, true])('restores the caller after close without stealing a newer focus (%s)', async (moveFocus) => {
+        const editor = document.createElement('input');
+        const nextEditor = document.createElement('input');
+        document.body.append(editor, nextEditor);
+        const rendered = renderWithDependencies(<DialogPart />);
+        try {
+            const dialogService = rendered.injector.get(IDialogService);
+            for (const opener of [editor, nextEditor]) {
+                opener.focus();
+                act(() => dialogService.open({
+                    id: 'editing',
+                    title: { title: 'Editing' },
+                    children: { title: <input aria-label="Dialog draft" /> },
+                }));
+                await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('textbox', { name: 'Dialog draft' })));
+                const newTarget = opener === editor ? nextEditor : editor;
+                act(() => {
+                    dialogService.close('editing');
+                });
+                if (moveFocus) {
+                    newTarget.focus();
+                }
+                await waitFor(() => expect(document.activeElement).toBe(moveFocus ? newTarget : opener));
+            }
+        } finally {
+            rendered.dispose();
+            editor.remove();
+            nextEditor.remove();
+        }
+    });
+
+    it('leaves composing Escape to the candidate window, then closes on ordinary Escape', async () => {
+        const rendered = renderWithDependencies(<DialogPart />);
+        try {
+            const dialogService = rendered.injector.get(IDialogService);
+            const onClose = vi.fn(() => dialogService.close('editing'));
+            act(() => dialogService.open({
+                id: 'editing',
+                title: { title: 'Editing' },
+                children: { title: <input aria-label="Dialog draft" /> },
+                onClose,
+            }));
+            const input = screen.getByRole('textbox', { name: 'Dialog draft' });
+            fireEvent.keyDown(input, { key: 'Escape', isComposing: true });
+            expect(onClose).not.toHaveBeenCalled();
+            expect(screen.getByRole('dialog').contains(input)).toBe(true);
+            fireEvent.keyDown(input, { key: 'Escape' });
+            expect(onClose).toHaveBeenCalledOnce();
+            await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+        } finally {
+            rendered.dispose();
+        }
     });
 
     it('renders service-opened dialog labels and clears the requested dialog when service closes it', async () => {

@@ -292,9 +292,13 @@ describe('ImageCropperController', () => {
         expect(firstCropperDispose).toHaveBeenCalledOnce();
 
         const secondCropperDispose = vi.spyOn(createdCropper!, 'dispose');
+        transformer.clearCopperControl.mockImplementationOnce(() => {
+            commandService.syncExecuteCommand(CloseImageCropOperation.id, undefined);
+        });
         commandHandlers[1]({ id: CloseImageCropOperation.id, params: { isCancel: true } } as never);
         expect(transformer.detachFrom).toHaveBeenCalledWith(createdCropper);
         expect(secondCropperDispose).toHaveBeenCalledOnce();
+        expect(commandService.syncExecuteCommand).toHaveBeenLastCalledWith(CloseImageCropOperation.id, undefined);
         expect(firstEnterShortcutDisposable.dispose).toHaveBeenCalledOnce();
         expect(firstCancelShortcutDisposable.dispose).toHaveBeenCalledOnce();
         expect(secondEnterShortcutDisposable.dispose).toHaveBeenCalledOnce();

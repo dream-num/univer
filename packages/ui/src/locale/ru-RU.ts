@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/ru-RU.generated';
 
 const locale: typeof enUS = {
     ui: {
+        accessibility: {
+            menu: 'Меню',
+            zoom: 'Масштаб',
+            zoomIn: 'Увеличить',
+            zoomOut: 'Уменьшить',
+            resetZoom: 'Сбросить масштаб',
+        },
         objectPermission: {
             operationDenied: 'Этот контент защищён. Действие недоступно.',
             remove: 'Удалить защиту',

@@ -15,23 +15,18 @@
  */
 
 import type { ReactElement } from 'react';
-import { Injector, LocaleService } from '@univerjs/core';
+import { Injector, LocaleService, LocaleType } from '@univerjs/core';
 import { ConfigProvider } from '@univerjs/design';
-import enUS from '@univerjs/design/locale/en-US';
+import designEnUS from '@univerjs/design/locale/en-US';
 import { ContextMenuService, IContextMenuService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject } from 'rxjs';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import enUS from '../../../locale/en-US';
 import { MenuItemInput } from '../MenuItemInput';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-class TestLocaleService {
-    t(key: string): string {
-        return key;
-    }
-}
 
 class ChangeRecords {
     static values: string[] = [];
@@ -47,8 +42,12 @@ class ChangeRecords {
 
 function createInjector() {
     const injector = new Injector();
-    injector.add([LocaleService, { useClass: TestLocaleService as never }]);
+    injector.add([LocaleService]);
     injector.add([IContextMenuService, { useClass: ContextMenuService }]);
+    const localeService = injector.get(LocaleService);
+    localeService.load({ [LocaleType.EN_US]: { ...enUS, ...designEnUS } });
+    localeService.setLocale(LocaleType.EN_US);
+    localeService.setDirection('ltr');
 
     return injector;
 }
@@ -62,7 +61,7 @@ function renderWithDependencies(element: ReactElement) {
     act(() => {
         root.render(
             <RediContext.Provider value={{ injector }}>
-                <ConfigProvider locale={enUS.design} mountContainer={container}>
+                <ConfigProvider locale={designEnUS.design} mountContainer={container}>
                     {element}
                 </ConfigProvider>
             </RediContext.Provider>
@@ -75,6 +74,7 @@ function renderWithDependencies(element: ReactElement) {
         unmount: () => {
             act(() => root.unmount());
             container.remove();
+            injector.dispose();
         },
     };
 }
@@ -95,7 +95,7 @@ function setInputText(input: HTMLInputElement, value: string) {
 }
 
 function clickIncrement(container: HTMLElement) {
-    const incrementButton = container.querySelector(`[aria-label="${enUS.design.Accessibility.increment}"]`);
+    const incrementButton = container.querySelector(`[aria-label="${designEnUS.design.Accessibility.increment}"]`);
     if (!(incrementButton instanceof HTMLElement)) {
         throw new TypeError('Increment button not found');
     }
@@ -109,13 +109,14 @@ describe('MenuItemInput', () => {
     afterEach(() => {
         disposals.splice(0).forEach((dispose) => dispose());
         ChangeRecords.reset();
+        vi.useRealTimers();
     });
 
     it('clamps typed values to the configured maximum before reporting the command value', () => {
         const { container, unmount } = renderWithDependencies(
             <MenuItemInput
-                prefix="sheet.menu.before"
-                suffix="sheet.menu.after"
+                prefix="sheets-ui.rightClick.insertRowsAbove"
+                suffix="sheets-ui.rightClick.insertRowsAboveSuffix"
                 value="12"
                 min={5}
                 max={20}
@@ -136,8 +137,8 @@ describe('MenuItemInput', () => {
         const disabled$ = new BehaviorSubject(false);
         const { container, unmount } = renderWithDependencies(
             <MenuItemInput
-                prefix="sheet.menu.before"
-                suffix="sheet.menu.after"
+                prefix="sheets-ui.rightClick.insertRowsAbove"
+                suffix="sheets-ui.rightClick.insertRowsAboveSuffix"
                 value="10"
                 min={1}
                 max={20}
@@ -146,6 +147,7 @@ describe('MenuItemInput', () => {
             />
         );
         disposals.push(unmount);
+        disposals.push(() => disabled$.complete());
 
         act(() => {
             disabled$.next(true);
@@ -166,5 +168,117 @@ describe('MenuItemInput', () => {
 
         expect(getInput(container).value).toBe('11');
         expect(ChangeRecords.values).toEqual(['11']);
+    });
+
+    it('lets Escape reach the enclosing menu without changing the input value', () => {
+        const keys: string[] = [];
+        const { container, unmount } = renderWithDependencies(
+            <div onKeyDown={(event) => keys.push(event.key)}>
+                <MenuItemInput
+                    prefix="sheets-ui.rightClick.insertRowsAbove"
+                    suffix="sheets-ui.rightClick.insertRowsAboveSuffix"
+                    value="2"
+                    min={1}
+                    onChange={(value) => ChangeRecords.push(value)}
+                />
+            </div>
+        );
+        disposals.push(unmount);
+        act(() => getInput(container).dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
+
+        expect(keys).toEqual(['Escape']);
+        expect(getInput(container).value).toBe('2');
+        expect(ChangeRecords.values).toEqual([]);
+    });
+
+    it('keeps editing keys and an active IME Escape inside the input', () => {
+        const keys: string[] = [];
+        const { container, unmount } = renderWithDependencies(
+            <div onKeyDown={(event) => keys.push(event.key)}>
+                <MenuItemInput
+                    prefix="sheets-ui.rightClick.insertRowsAbove"
+                    suffix="sheets-ui.rightClick.insertRowsAboveSuffix"
+                    value="2"
+                    min={1}
+                    onChange={(value) => ChangeRecords.push(value)}
+                />
+            </div>
+        );
+        disposals.push(unmount);
+        const input = getInput(container);
+        for (const key of ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'Backspace', 'Delete', 'Enter']) {
+            act(() => input.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true })));
+        }
+        for (const modifier of [{ ctrlKey: true }, { metaKey: true }]) {
+            act(() => input.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', bubbles: true, ...modifier })));
+        }
+        act(() => input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, isComposing: true })));
+
+        expect(keys).toEqual([]);
+        expect(input.value).toBe('2');
+    });
+
+    it('keeps the composition-ending Escape local and accepts a subsequent Escape', () => {
+        vi.useFakeTimers();
+        const keys: string[] = [];
+        const { container, unmount } = renderWithDependencies(
+            <div onKeyDown={(event) => keys.push(event.key)}>
+                <MenuItemInput
+                    prefix="sheets-ui.rightClick.insertRowsAbove"
+                    suffix="sheets-ui.rightClick.insertRowsAboveSuffix"
+                    value="2"
+                    min={1}
+                    onChange={(value) => ChangeRecords.push(value)}
+                />
+            </div>
+        );
+        disposals.push(unmount);
+        const input = getInput(container);
+        act(() => {
+            input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+            input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
+            // Safari can deliver the ending key after compositionend with isComposing already false.
+            input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, isComposing: false }));
+        });
+        expect(keys).toEqual([]);
+        expect(input.value).toBe('2');
+        expect(ChangeRecords.values).toEqual([]);
+
+        act(() => vi.runOnlyPendingTimers());
+        act(() => input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
+        expect(keys).toEqual(['Escape']);
+    });
+
+    it.each(['blur', 'unmount'])('cleans up the composition boundary on %s', (action) => {
+        vi.useFakeTimers();
+        const keys: string[] = [];
+        const { container, unmount } = renderWithDependencies(
+            <div onKeyDown={(event) => keys.push(event.key)}>
+                <MenuItemInput
+                    prefix="sheets-ui.rightClick.insertRowsAbove"
+                    suffix="sheets-ui.rightClick.insertRowsAboveSuffix"
+                    value="2"
+                    min={1}
+                    onChange={(value) => ChangeRecords.push(value)}
+                />
+            </div>
+        );
+        disposals.push(unmount);
+        const input = getInput(container);
+        const initialTimers = vi.getTimerCount();
+        act(() => {
+            input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+            input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
+        });
+
+        if (action === 'unmount') {
+            disposals.pop()?.();
+        } else {
+            act(() => input.dispatchEvent(new FocusEvent('focusout', { bubbles: true })));
+            act(() => input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
+            expect(keys).toEqual(['Escape']);
+        }
+        expect(vi.getTimerCount()).toBe(initialTimers);
+        expect(ChangeRecords.values).toEqual([]);
     });
 });

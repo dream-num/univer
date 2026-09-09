@@ -191,6 +191,7 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
             <section ref={contentRef}>
                 {menuType && (
                     <ContextMenuPanel
+                        key={menuSessionVersionRef.current}
                         menuType={menuType}
                         autoFocus={autoFocus}
                         menuManagerService={menuManagerService}

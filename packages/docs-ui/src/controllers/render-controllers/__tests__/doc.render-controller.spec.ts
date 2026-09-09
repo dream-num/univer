@@ -71,6 +71,11 @@ import { DocSelectionRenderController } from '../doc-selection-render.controller
 import { DocRenderController } from '../doc.render-controller';
 
 function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout = false, documentFlavor = DocumentFlavor.TRADITIONAL, withFootnote = false) {
+    if (workerBeforeLayout) {
+        // Model computation cost separately from fake timers so foreground work yields before Worker handoff.
+        let elapsed = 0;
+        vi.spyOn(performance, 'now').mockImplementation(() => ++elapsed);
+    }
     const univer = new Univer();
     const injector = univer.__getInjector();
     const root = document.createElement('div');
@@ -231,6 +236,19 @@ describe('DocRenderController bounded input publication', () => {
             }),
         }, { get: (target, key) => key in target ? Reflect.get(target, key) : () => {} });
         vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(context as never);
+        const getBoundingClientRect = HTMLElement.prototype.getBoundingClientRect;
+        vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+            // Match the fixture's 14pt Canvas metrics; jsdom returns zero and cannot cache normal leading.
+            if (this.style.visibility === 'hidden' && this.style.whiteSpace === 'pre' && this.style.lineHeight === 'normal') {
+                const fontSize = Number.parseFloat(this.style.fontSize);
+                const pointsPerUnit = this.style.fontSize.endsWith('px') ? 3 / 4 : 1;
+                const lineCount = (this.textContent ?? '').split('\n').length;
+                const metrics = context.measureText('Hg');
+                const lineHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
+                return new DOMRect(0, 0, 0, fontSize * pointsPerUnit / 14 * lineHeight * lineCount);
+            }
+            return getBoundingClientRect.call(this);
+        });
     });
     afterEach(() => {
         vi.restoreAllMocks();
@@ -325,10 +343,14 @@ describe('DocRenderController bounded input publication', () => {
             window.setTimeout(() => callback({ didTimeout: false, timeRemaining: () => 10 }), 0));
         vi.stubGlobal('cancelIdleCallback', (id: number) => window.clearTimeout(id));
         const editor = createEditor(paragraphCount, false, true);
+        const layoutSteps = vi.spyOn(editor.skeleton, 'stepIncrementalLayout');
         try {
             await vi.advanceTimersByTimeAsync(1_000);
             expect(editor.startWorkerLayout).toHaveBeenCalledTimes(paragraphCount === 1 ? 0 : 1);
             expect(editor.skeleton.hasCompleteLayout()).toBe(paragraphCount === 1);
+            if (paragraphCount > 1) {
+                expect(layoutSteps.mock.results[0].value.processedBlockCount).toBeLessThan(paragraphCount);
+            }
             const pages = editor.skeleton.getSkeletonData()!.pages;
             expect(pages.length).toBeGreaterThan(0);
             expect(pages.length).toBeLessThanOrEqual(5);

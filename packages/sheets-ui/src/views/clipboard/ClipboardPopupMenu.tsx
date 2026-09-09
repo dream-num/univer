@@ -20,7 +20,7 @@ import { ICommandService, IUniverInstanceService, LocaleService } from '@univerj
 import { borderClassName, clsx, DropdownMenu } from '@univerjs/design';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
 import { MoreDownIcon, PasteSpecialDoubleIcon } from '@univerjs/icons';
-import { useDependency, useObservable } from '@univerjs/ui';
+import { ILayoutService, useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
 import { SheetOptionalPasteCommand } from '../../commands/commands/clipboard.command';
 import { getViewportByCell } from '../../common/utils';
@@ -117,6 +117,7 @@ export const ClipboardPopupMenu = ({ DropdownMenuComponent = DropdownMenu }: ICl
     const pasteOptionsCache = useObservable(clipboardService.pasteOptionsCache$, null);
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
+    const layoutService = useDependency(ILayoutService);
 
     const [menuHovered, setMenuHovered] = useState(false);
     const [visible, setVisible] = useState(false);
@@ -151,6 +152,10 @@ export const ClipboardPopupMenu = ({ DropdownMenuComponent = DropdownMenu }: ICl
             >
                 <DropdownMenuComponent
                     align="start"
+                    onCloseAutoFocus={(event) => {
+                        event.preventDefault();
+                        layoutService.focus();
+                    }}
                     items={SheetPasteOptions.map((item) => ({
                         type: 'checkbox',
                         value: item.value,

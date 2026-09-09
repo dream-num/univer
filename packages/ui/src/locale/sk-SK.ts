@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/sk-SK.generated';
 
 const locale: typeof enUS = {
     ui: {
+        accessibility: {
+            menu: 'Ponuka',
+            zoom: 'Priblíženie',
+            zoomIn: 'Priblížiť',
+            zoomOut: 'Oddialiť',
+            resetZoom: 'Obnoviť priblíženie',
+        },
         objectPermission: {
             operationDenied: 'Tento obsah je chránený. Túto akciu nemožno vykonať.',
             remove: 'Odstrániť ochranu',

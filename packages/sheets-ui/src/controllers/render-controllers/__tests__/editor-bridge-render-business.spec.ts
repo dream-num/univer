@@ -119,6 +119,8 @@ function createController(options?: {
         ]),
     };
     const docSelectionRenderService = {
+        focus: vi.fn(),
+        isFocusing: false,
         onInputBefore$: inputBefore$,
         setInputPosition: vi.fn(),
     };
@@ -162,6 +164,9 @@ function createController(options?: {
             selectionMoveStart$,
             selectionSet$,
             getWorkbookSelections: vi.fn(() => ({
+                selectionMoveEnd$,
+                selectionMoveStart$,
+                selectionSet$,
                 getCurrentSelections: vi.fn(() => [{
                     primary: {
                         actualRow: 3,
@@ -353,6 +358,49 @@ describe('EditorBridgeRenderController business flows', () => {
 
         expect(docSelectionRenderService.setInputPosition).toHaveBeenCalledWith(150, 100);
 
+        controller.dispose();
+    });
+
+    it('does not reopen mobile editing implicitly when a selection changes', () => {
+        const { commandService, controller, selectionMoveEnd$, spreadsheet } = createController({
+            editorVisible: true,
+            disableAutoFocus: true,
+        });
+
+        spreadsheet.onPointerDown$.emit({});
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(SetCellEditVisibleOperation.id, {
+            visible: false,
+            eventType: DeviceInputEventType.PointerDown,
+            unitId: 'unit-1',
+        });
+
+        selectionMoveEnd$.next([{
+            primary: {
+                actualRow: 3,
+                actualColumn: 4,
+                startRow: 3,
+                startColumn: 4,
+                endRow: 3,
+                endColumn: 4,
+            },
+        }]);
+
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledTimes(1);
+        expect(commandService.executeCommand).not.toHaveBeenCalled();
+
+        controller.dispose();
+    });
+
+    it('focuses the hidden input when an active embedded sheet clicks the unchanged cell', () => {
+        const { controller, docSelectionRenderService, spreadsheet } = createController({
+            focusedUnitId: 'host-unit',
+            focusingSheet: false,
+            isEmbedActiveSession: true,
+        });
+
+        spreadsheet.onPointerDown$.emit({});
+
+        expect(docSelectionRenderService.focus).toHaveBeenCalledTimes(1);
         controller.dispose();
     });
 

@@ -15,7 +15,14 @@
  */
 
 import type { ICellData, Injector, IStyleData, Nullable, Univer, Workbook } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
+import {
+    HorizontalAlign,
+    ICommandService,
+    IUniverInstanceService,
+    LocaleType,
+    RANGE_TYPE,
+    UniverInstanceType,
+} from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
     MoveRangeMutation,
@@ -165,14 +172,15 @@ describe('Test clipboard', () => {
             const cellStyle = getStyles(2, 3, 2, 3)?.[0]?.[0];
             expect(cellStyle?.vt).toBe(3);
             expect(cellStyle?.bg).toStrictEqual({ rgb: 'rgb(255,0,0)' });
-            const richTextStyle = getValues(2, 3, 2, 3)?.[0]?.[0]?.p;
+            const richTextCell = getValues(2, 3, 2, 3)?.[0]?.[0];
+            const layout = worksheet.getCellDocumentModel(richTextCell, cellStyle, { isDeepClone: true });
+            expect(layout?.documentModel?.getBody()?.paragraphs?.[0]?.paragraphStyle?.horizontalAlign)
+                .toBe(HorizontalAlign.UNSPECIFIED);
+            const richTextStyle = richTextCell?.p;
             expect(richTextStyle?.body?.dataStream).toBe('univer\r\n');
             expect(richTextStyle?.body?.paragraphs).toStrictEqual([
                 {
                     paragraphId: expect.stringMatching(/^para_/),
-                    paragraphStyle: {
-                        horizontalAlign: 0,
-                    },
                     startIndex: 6,
                 },
             ]);

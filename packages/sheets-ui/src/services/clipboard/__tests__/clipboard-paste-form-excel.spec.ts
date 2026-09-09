@@ -18,6 +18,7 @@ import type { ICellData, Injector, IStyleData, Nullable, Univer, Workbook } from
 import {
     CellValueType,
     DEFAULT_TEXT_FORMAT_EXCEL,
+    HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
     LocaleType,
@@ -202,14 +203,15 @@ describe('Test clipboard', () => {
             const cellStyle = getStyles(2, 3, 2, 3)?.[0]?.[0];
             expect(cellStyle?.vt).toBe(2);
             expect(cellStyle?.bg).toStrictEqual({ rgb: 'rgb(15,158,213)' });
-            const richTextStyle = getValues(2, 3, 2, 3)?.[0]?.[0]?.p;
+            const richTextCell = getValues(2, 3, 2, 3)?.[0]?.[0];
+            const layout = worksheet.getCellDocumentModel(richTextCell, cellStyle, { isDeepClone: true });
+            expect(layout?.documentModel?.getBody()?.paragraphs?.[0]?.paragraphStyle?.horizontalAlign)
+                .toBe(HorizontalAlign.UNSPECIFIED);
+            const richTextStyle = richTextCell?.p;
             expect(richTextStyle?.body?.dataStream).toBe('Univer\r\n');
             expect(richTextStyle?.body?.paragraphs).toStrictEqual([
                 {
                     paragraphId: expect.stringMatching(/^para_/),
-                    paragraphStyle: {
-                        horizontalAlign: 0,
-                    },
                     startIndex: 6,
                 },
             ]);

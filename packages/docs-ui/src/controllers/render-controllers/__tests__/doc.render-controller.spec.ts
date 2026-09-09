@@ -71,6 +71,11 @@ import { DocSelectionRenderController } from '../doc-selection-render.controller
 import { DocRenderController } from '../doc.render-controller';
 
 function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout = false, documentFlavor = DocumentFlavor.TRADITIONAL, withFootnote = false) {
+    if (workerBeforeLayout) {
+        // Model computation cost separately from fake timers so foreground work yields before Worker handoff.
+        let elapsed = 0;
+        vi.spyOn(performance, 'now').mockImplementation(() => ++elapsed);
+    }
     const univer = new Univer();
     const injector = univer.__getInjector();
     const root = document.createElement('div');
@@ -325,10 +330,14 @@ describe('DocRenderController bounded input publication', () => {
             window.setTimeout(() => callback({ didTimeout: false, timeRemaining: () => 10 }), 0));
         vi.stubGlobal('cancelIdleCallback', (id: number) => window.clearTimeout(id));
         const editor = createEditor(paragraphCount, false, true);
+        const layoutSteps = vi.spyOn(editor.skeleton, 'stepIncrementalLayout');
         try {
             await vi.advanceTimersByTimeAsync(1_000);
             expect(editor.startWorkerLayout).toHaveBeenCalledTimes(paragraphCount === 1 ? 0 : 1);
             expect(editor.skeleton.hasCompleteLayout()).toBe(paragraphCount === 1);
+            if (paragraphCount > 1) {
+                expect(layoutSteps.mock.results[0].value.processedBlockCount).toBeLessThan(paragraphCount);
+            }
             const pages = editor.skeleton.getSkeletonData()!.pages;
             expect(pages.length).toBeGreaterThan(0);
             expect(pages.length).toBeLessThanOrEqual(5);

@@ -17,7 +17,6 @@
 import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, IDrawingParam, IImageIoServiceParam, ITextRangeParam, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IDocDrawing, IDrawingDocTransform, IInsertDocDrawingCommandParams, ISetDocDrawingArrangeCommandParams, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
-import type { IImageData } from '@univerjs/drawing';
 import type { BaseObject, Documents, Image, IRenderContext, IRenderModule, ITransformerConfig } from '@univerjs/engine-render';
 import type { LocaleKey } from '../../locale/types';
 import {
@@ -345,7 +344,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         );
     }
 
-    private _getImageCropUpdates(param: IImageData): IDrawingDocTransform[] {
+    private _getImageCropUpdates(param: IDrawingParam): IDrawingDocTransform[] {
         const { unitId, subUnitId, drawingId } = param;
         if ([unitId, subUnitId].some((id) => id !== this._context.unitId)) {
             return [];
@@ -353,7 +352,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         return getDocImageCropUpdates(
             param,
             this._getDocDrawing(drawingId),
-            this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId }) as IImageData | undefined
+            this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId }) ?? undefined
         );
     }
 

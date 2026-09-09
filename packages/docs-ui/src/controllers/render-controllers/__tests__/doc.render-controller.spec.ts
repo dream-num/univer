@@ -1,3 +1,20 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// @vitest-environment jsdom
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { IDocLayoutExecutor } from '@univerjs/docs';
@@ -26,24 +43,6 @@ import {
     RichTextEditingMutation,
     SetTextSelectionsOperation,
 } from '@univerjs/docs';
-/**
- * Copyright 2023-present DreamNum Co., Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-// @vitest-environment jsdom
-
 import {
     CanvasColorService,
     ICanvasColorService,
@@ -57,16 +56,21 @@ import { AfterSpaceCommand } from '../../../commands/commands/auto-format.comman
 import { BreakLineCommand } from '../../../commands/commands/break-line.command';
 import { IMEInputCommand } from '../../../commands/commands/ime-input.command';
 import { DocAutoFormatService } from '../../../services/doc-auto-format.service';
+import { DocEventManagerService } from '../../../services/doc-event-manager.service';
 import { DocIMEInputManagerService } from '../../../services/doc-ime-input-manager.service';
 import { DocLayoutInteractionService } from '../../../services/doc-layout-interaction.service';
 import { DocMenuStyleService } from '../../../services/doc-menu-style.service';
 import { DocMobileElementMenuService } from '../../../services/doc-mobile-element-menu.service';
 import { DocPageLayoutService } from '../../../services/doc-page-layout.service';
+import { DocParagraphMenuService } from '../../../services/doc-paragraph-menu.service';
 import { DocCanvasPopManagerService } from '../../../services/doc-popup-manager.service';
 import { DocViewScaleService } from '../../../services/doc-view-scale';
 import { EditorService, IEditorService } from '../../../services/editor/editor-manager.service';
+import { DocFloatMenuService } from '../../../services/float-menu.service';
+import { MobileDocParagraphMenuService } from '../../../services/mobile/doc-paragraph-menu.service';
 import { MobileDocSelectionRenderService } from '../../../services/mobile/doc-selection-render.service';
 import { MobileDocViewScaleService } from '../../../services/mobile/doc-view-scale';
+import { MobileDocFloatMenuService } from '../../../services/mobile/float-menu.service';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 import { cursorConvertToTextRange } from '../../../services/selection/text-range';
 import { DocBackScrollRenderController } from '../back-scroll.render-controller';
@@ -236,6 +240,25 @@ function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout
 }
 
 describe('DocRenderController bounded input publication', () => {
+    it('uses the mobile render providers without desktop hover menus or Modern horizontal scrolling', () => {
+        const editor = createEditor(8, true, false, DocumentFlavor.MODERN, false, true);
+        try {
+            expect(editor.render.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)?.getScrollBar()?.enableHorizontal).toBe(false);
+            editor.render.addRenderDependencies([
+                [DocEventManagerService],
+                [DocFloatMenuService, { useClass: MobileDocFloatMenuService }],
+                [DocParagraphMenuService, { useClass: MobileDocParagraphMenuService }],
+            ]);
+            const menu = editor.render.with(DocParagraphMenuService);
+            const rect = { left: 0, top: 0, right: 100, bottom: 20 };
+            menu.showParagraphMenu({ paragraphStart: 0, paragraphEnd: 10, startIndex: 10, pageIndex: 0, firstLine: rect, rect, rects: [rect] });
+            expect(menu.activeTarget).toBeNull();
+            expect(editor.render.getInjector().get(ICanvasPopupService).popups).toHaveLength(0);
+        } finally {
+            editor.dispose();
+        }
+    });
+
     beforeEach(() => {
         vi.useFakeTimers();
         const context = new Proxy({

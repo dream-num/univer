@@ -54,6 +54,7 @@ describe('SidebarDocDrawingOperation', () => {
             header: { title: 'docs-drawing-ui.panel.title' },
             children: { label: COMPONENT_DOC_DRAWING_PANEL },
             width: 360,
+            mobileLayout: 'canvas',
         }));
         const onClose = sidebarService.open.mock.calls[0][0].onClose;
         onClose();

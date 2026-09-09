@@ -23,11 +23,11 @@ import { describe, expect, it } from 'vitest';
 import { DocPasteCommand } from '../../commands/commands/clipboard.command';
 import { DocSelectAllCommand, DocSelectWordCommand } from '../../commands/commands/doc-select-all.command';
 import { CopyMenuFactory, ParagraphSettingMenuFactory, PasteMenuFactory, SectionSettingMenuFactory, SelectAllMenuFactory, SelectWordMenuFactory } from '../context-menu';
-import { menuSchema } from '../schema';
+import { mobileMenuSchema } from '../mobile-schema';
 
 describe('settings context menu factories', () => {
     it('registers a dedicated three-action mobile caret menu', () => {
-        const caretMenu = Object.entries(menuSchema).find(([position]) => position === ContextMenuPosition.DOC_CARET)?.[1];
+        const caretMenu = Object.entries(mobileMenuSchema).find(([position]) => position === ContextMenuPosition.DOC_CARET)?.[1];
 
         expect(caretMenu).toEqual({
             [ContextMenuGroup.QUICK]: {

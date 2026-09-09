@@ -682,7 +682,7 @@ describe('engine scene viewport extra', () => {
             pointerType: 'touch',
         }));
 
-        expect(pick).toHaveBeenCalledWith(expect.objectContaining({ x: 18, y: 20 }));
+        expect(pick).toHaveBeenCalledWith(expect.objectContaining({ x: 18, y: 20 }), DeviceType.Touch);
 
         scene.dispose();
         engine.dispose();

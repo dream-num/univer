@@ -31,6 +31,7 @@ export interface IDocMobileElementTarget extends IMobileDocElementMenuProps {
 /** Element hit testing stays in its plugin; the document owns tap-versus-scroll recognition. */
 export class DocMobileElementMenuService extends Disposable {
     private _pending: IDocMobileElementTarget | null = null;
+    private _editingBounds: { unitId: string; rect: IBoundRectNoAngle } | null = null;
     private _popup: IDisposable | null = null;
     private _unitId: string | null = null;
 
@@ -45,6 +46,9 @@ export class DocMobileElementMenuService extends Disposable {
             }
             if (this._pending?.unitId === unit.getUnitId()) {
                 this._pending = null;
+            }
+            if (this._editingBounds?.unitId === unit.getUnitId()) {
+                this._editingBounds = null;
             }
         }));
     }
@@ -63,11 +67,22 @@ export class DocMobileElementMenuService extends Disposable {
     takeTarget(unitId: string): IDocMobileElementTarget | null {
         const target = this._pending;
         this._pending = null;
-        return target?.unitId === unitId ? target : null;
+        const current = target?.unitId === unitId ? target : null;
+        this._editingBounds = current;
+        return current;
+    }
+
+    setEditingBounds(unitId: string, rect: IBoundRectNoAngle): void {
+        this._editingBounds = { unitId, rect };
+    }
+
+    getEditingBounds(unitId: string): IBoundRectNoAngle | null {
+        return this._editingBounds?.unitId === unitId ? this._editingBounds.rect : null;
     }
 
     show(target: IDocMobileElementTarget): void {
         this.close();
+        this.setEditingBounds(target.unitId, target.rect);
         this._unitId = target.unitId;
         this._popup = this._popupService.attachPopupToRect(target.rect, {
             componentKey: MOBILE_DOC_ELEMENT_MENU,
@@ -94,6 +109,7 @@ export class DocMobileElementMenuService extends Disposable {
 
     override dispose(): void {
         this._pending = null;
+        this._editingBounds = null;
         this.close();
         super.dispose();
     }

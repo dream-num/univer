@@ -40,17 +40,17 @@ describe('mobile canvas layout', () => {
         return <div ref={ref} role="region" aria-label="panel"><input aria-label="editor" /></div>;
     }
 
-    function Canvas() {
+    function Canvas({ panelsOnly }: { panelsOnly?: boolean }) {
         const containerRef = useRef<HTMLDivElement>(null);
         const canvasRef = useRef<HTMLDivElement>(null);
-        useMobileCanvasViewport({ containerRef, canvasRef, onReveal: reveal });
+        useMobileCanvasViewport({ containerRef, canvasRef, panelsOnly, onReveal: reveal });
         return <div ref={containerRef} role="region" aria-label="host"><div ref={canvasRef} role="region" aria-label="canvas" /></div>;
     }
 
-    function App({ layout, dragging }: { layout?: MobilePanelLayout; dragging?: boolean }) {
+    function App({ layout, dragging, panelsOnly }: { layout?: MobilePanelLayout; dragging?: boolean; panelsOnly?: boolean }) {
         return (
             <MobileCanvasLayoutProvider>
-                <Canvas />
+                <Canvas panelsOnly={panelsOnly} />
                 {layout && <Panel layout={layout} dragging={dragging} />}
             </MobileCanvasLayoutProvider>
         );
@@ -122,6 +122,28 @@ describe('mobile canvas layout', () => {
         flush();
         expect(screen.getByRole('region', { name: 'canvas' }).style.height).toBe('856px');
         expect(reveal).not.toHaveBeenCalled();
+    });
+
+    it('leaves document keyboard layout alone outside object panels and restores the host on close', () => {
+        const view = render(<App panelsOnly />);
+        const canvas = screen.getByRole('region', { name: 'canvas' });
+        viewportHeight = 700;
+        act(() => viewportEvents.dispatchEvent(new Event('resize')));
+        flush();
+        expect(canvas.style.height).toBe('');
+        view.rerender(<App panelsOnly layout="canvas" />);
+        flush();
+        expect(canvas.style.height).toBe('296px');
+        expect(reveal).toHaveBeenCalledTimes(1);
+        view.rerender(<App panelsOnly />);
+        flush();
+        expect(canvas.style.height).toBe('');
+        expect(canvas.style.top).toBe('');
+        expect(canvas.style.bottom).toBe('');
+        view.rerender(<App panelsOnly layout="modal" />);
+        flush();
+        expect(canvas.style.height).toBe('');
+        expect(reveal).toHaveBeenCalledTimes(1);
     });
 
     it('counts keyboard and panel geometry once and retains input focus over repeated keyboard cycles', () => {

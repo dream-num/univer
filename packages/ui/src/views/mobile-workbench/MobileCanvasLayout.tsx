@@ -87,9 +87,11 @@ export function useMobileCanvasViewport(options: {
     containerRef: RefObject<HTMLElement | null>;
     canvasRef: RefObject<HTMLElement | null>;
     enabled?: boolean;
+    /** Preserve the document's own keyboard viewport handling outside object panels. */
+    panelsOnly?: boolean;
     onReveal: () => void;
 }): void {
-    const { containerRef, canvasRef, enabled = true, onReveal } = options;
+    const { containerRef, canvasRef, enabled = true, panelsOnly = false, onReveal } = options;
     const context = useContext(MobileCanvasLayoutContext);
     const revealRef = useRef(onReveal);
     useLayoutEffect(() => {
@@ -107,6 +109,11 @@ export function useMobileCanvasViewport(options: {
 
         const panels = context.panels.flatMap(({ ref, layout, dragging }) =>
             ref.current ? [{ element: ref.current, layout, dragging }] : []);
+        if (panelsOnly && !panels.some((panel) => panel.layout === 'canvas')) {
+            previousHeightRef.current = null;
+            needsRevealRef.current = false;
+            return;
+        }
         const viewport = window.visualViewport;
         let frame = 0;
         let settleFrame = 0;
@@ -197,5 +204,5 @@ export function useMobileCanvasViewport(options: {
                 element.style.maxHeight = maxHeight;
             });
         };
-    }, [context, enabled, containerRef, canvasRef]);
+    }, [context, enabled, panelsOnly, containerRef, canvasRef]);
 }

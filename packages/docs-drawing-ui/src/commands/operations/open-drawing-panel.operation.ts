@@ -38,6 +38,7 @@ export const SidebarDocDrawingOperation: ICommand = {
         switch (params.value) {
             case 'open':
                 sidebarService.open({
+                    mobileLayout: 'canvas',
                     header: { title: localeService.t<LocaleKey>('docs-drawing-ui.panel.title') },
                     children: { label: COMPONENT_DOC_DRAWING_PANEL },
                     onClose: () => {

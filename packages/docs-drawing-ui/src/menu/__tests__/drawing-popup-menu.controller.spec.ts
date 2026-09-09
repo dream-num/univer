@@ -128,7 +128,7 @@ function createControllerHarness(drawingType = DrawingTypeEnum.DRAWING_IMAGE, mo
         } as never,
     }]);
     injector.add([IDocDrawingService, { useClass: DocDrawingService }]);
-    const attachPopupToObject = vi.fn(() => popupDisposable);
+    const attachPopupToObject = vi.fn<DocCanvasPopManagerService['attachPopupToObject']>(() => popupDisposable);
     injector.add([DocCanvasPopManagerService, {
         useValue: {
             attachPopupToObject,
@@ -156,6 +156,25 @@ function createControllerHarness(drawingType = DrawingTypeEnum.DRAWING_IMAGE, mo
 }
 
 describe('DocDrawingPopupMenuController', () => {
+    it('closes a mobile popup without clearing the object being edited', () => {
+        const harness = createControllerHarness(DrawingTypeEnum.DRAWING_CHART, true);
+        const controller = harness.injector.get(DocDrawingPopupMenuController);
+        try {
+            harness.createControl$.next();
+            const onClose = harness.attachPopupToObject.mock.calls[0][1].extraProps?.onClose;
+            expect(onClose).toBeTypeOf('function');
+            if (typeof onClose === 'function') {
+                onClose();
+            }
+            expect(harness.popupDisposable.dispose).toHaveBeenCalledOnce();
+            expect(harness.selectedObjects.size).toBe(1);
+            expect(harness.transformer.clearSelectedObjects).not.toHaveBeenCalled();
+        } finally {
+            controller.dispose();
+            harness.injector.dispose();
+        }
+    });
+
     it('removes the floating menu and selection handles when its drawing is deleted', () => {
         const { createControl$, injector, popupDisposable, remove$, transformer } = createControllerHarness();
         const controller = injector.get(DocDrawingPopupMenuController);

@@ -562,17 +562,6 @@ describe('doc render controller', () => {
         });
     });
 
-    it('disables horizontal scrolling for Modern documents on mobile', () => {
-        createControllerFixture({
-            documentFlavor: DocumentFlavor.MODERN,
-            mobile: true,
-        });
-
-        expect(mockScrollBarProps[0]).toMatchObject({
-            enableHorizontal: false,
-        });
-    });
-
     it('treats a layout rerender without an explicit anchor as invalidated from the document start', () => {
         const { controller, skeletonManager } = createControllerFixture();
         const skeleton = skeletonManager.getSkeleton();

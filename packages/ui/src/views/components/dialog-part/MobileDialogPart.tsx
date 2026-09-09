@@ -73,32 +73,34 @@ export function MobileDialogPart() {
             className="univer-pointer-events-none univer-fixed univer-inset-0 univer-z-[1200]"
             data-u-comp="mobile-dialog"
         >
-            {options.mobileLayout !== 'canvas' && (<button
-                type="button"
-                aria-label={localeService.t<LocaleKey>('ui.sidebar.close')}
-                className="
-                  univer-pointer-events-auto univer-absolute univer-inset-0 univer-m-0 univer-appearance-none univer-rounded-none univer-border-0
-                  univer-bg-black/35 univer-p-0
-                "
-                onPointerDown={options.maskClosable === false
-                    ? undefined
-                    : (event) => {
-                        backdropPointerIdRef.current = event.pointerId;
-                    }}
-                onPointerUp={options.maskClosable === false
-                    ? undefined
-                    : (event) => {
-                        if (backdropPointerIdRef.current !== event.pointerId) {
-                            return;
-                        }
+            {options.mobileLayout !== 'canvas' && (
+                <button
+                    type="button"
+                    aria-label={localeService.t<LocaleKey>('ui.sidebar.close')}
+                    className="
+                      univer-pointer-events-auto univer-absolute univer-inset-0 univer-m-0 univer-appearance-none
+                      univer-rounded-none univer-border-0 univer-bg-black/35 univer-p-0
+                    "
+                    onPointerDown={options.maskClosable === false
+                        ? undefined
+                        : (event) => {
+                            backdropPointerIdRef.current = event.pointerId;
+                        }}
+                    onPointerUp={options.maskClosable === false
+                        ? undefined
+                        : (event) => {
+                            if (backdropPointerIdRef.current !== event.pointerId) {
+                                return;
+                            }
 
+                            backdropPointerIdRef.current = null;
+                            close();
+                        }}
+                    onPointerCancel={() => {
                         backdropPointerIdRef.current = null;
-                        close();
                     }}
-                onPointerCancel={() => {
-                    backdropPointerIdRef.current = null;
-                }}
-            />)}
+                />
+            )}
             <MobileDrawer
                 layerRef={layerRef}
                 layout={options.mobileLayout}

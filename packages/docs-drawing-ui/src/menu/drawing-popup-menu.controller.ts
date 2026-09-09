@@ -87,7 +87,12 @@ export class DocDrawingPopupMenuController extends RxDisposable {
     private _init(): void {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command) => {
-                if (command.id === EditDocDrawingOperation.id) {
+                const opensDrawingEditor = [...this._popupTargetsByUnit.values()].some((target) => {
+                    const drawing = this._docDrawingService.getDrawingByParam(target);
+                    const edit = drawing && this._drawingAdapterService.getEditDrawingCommandInfo({ ...target, drawing });
+                    return edit?.commandId === command.id;
+                });
+                if (command.id === EditDocDrawingOperation.id || opensDrawingEditor) {
                     this._isDrawingPanelOpen = true;
                     this._clearPopups(undefined, true);
                 }
@@ -342,6 +347,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                         direction: isImage || isChart ? 'top-center' : 'horizontal',
                         offset: isImage || isChart ? [0, 8] : [2, 0],
                         extraProps: {
+                            onClose: () => this._clearPopups(unitId, true),
                             onEdit: () => {
                                 const drawing = this._docDrawingService.getDrawingByParam(drawingParam);
                                 const edit = drawing && this._drawingAdapterService.getEditDrawingCommandInfo({

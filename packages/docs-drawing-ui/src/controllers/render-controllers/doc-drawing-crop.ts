@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
+import type { IDrawingParam } from '@univerjs/core';
 import type { IDocDrawing, IDrawingDocTransform } from '@univerjs/docs-drawing';
 import type { IImageData } from '@univerjs/drawing';
 import { BooleanNumber, DrawingTypeEnum, PositionedObjectLayoutType } from '@univerjs/core';
 
 export function getDocImageCropUpdates(
-    param: IImageData,
+    param: IDrawingParam & Partial<IImageData>,
     docDrawing: IDocDrawing | undefined,
-    renderDrawing: IImageData | undefined | null
+    renderDrawing: IDrawingParam | undefined | null
 ): IDrawingDocTransform[] {
     const { drawingId, transform } = param;
     if (docDrawing?.drawingType !== DrawingTypeEnum.DRAWING_IMAGE || renderDrawing?.transform == null) {

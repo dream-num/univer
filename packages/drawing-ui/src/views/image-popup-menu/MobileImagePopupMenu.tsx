@@ -22,7 +22,7 @@ import { of } from 'rxjs';
 
 interface IMobileImagePopupMenuProps {
     popup: {
-        extraProps?: Pick<IImagePopupMenuExtraProps, 'menuItems' | 'variant'> & { dialogId?: string };
+        extraProps?: Pick<IImagePopupMenuExtraProps, 'menuItems' | 'variant'> & { dialogId?: string; onClose?: () => void };
     };
 }
 
@@ -70,8 +70,11 @@ export function MobileImagePopupMenu({ popup }: IMobileImagePopupMenuProps) {
                     ? item.commandParamsFactory?.(value) ?? { ...item.commandParams, value }
                     : item.commandParams;
                 await commandService.executeCommand(item.commandId, params);
-                if (item.hideOnClick !== false && popup.extraProps?.dialogId) {
-                    dialogService.close(popup.extraProps.dialogId);
+                if (item.hideOnClick !== false) {
+                    popup.extraProps?.onClose?.();
+                    if (popup.extraProps?.dialogId) {
+                        dialogService.close(popup.extraProps.dialogId);
+                    }
                 }
             }}
         />

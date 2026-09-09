@@ -19,10 +19,15 @@ import { BuiltInUIPart, connectInjector } from '@univerjs/ui';
 import { mobileMenuSchema } from '../../menu/mobile-schema';
 import { menuSchema } from '../../menu/schema';
 import { MobileDocEditDoneButton, MobileDocToolbar } from '../../views/mobile-doc-toolbar/MobileDocToolbar';
+import { MobileDocCanvasViewport } from '../../views/mobile/MobileDocCanvasViewport';
 import { DocUIController } from '../ui.controller';
 
 export class DocMobileUIController extends DocUIController {
     protected override _initUiParts(): void {
+        this.disposeWithMe(this._uiPartsService.registerComponent(
+            BuiltInUIPart.CONTENT,
+            () => connectInjector(MobileDocCanvasViewport, this._injector)
+        ));
         this.disposeWithMe(this._uiPartsService.registerComponent(
             BuiltInUIPart.FOOTER,
             () => connectInjector(MobileDocToolbar, this._injector)

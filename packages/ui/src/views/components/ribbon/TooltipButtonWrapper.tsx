@@ -297,6 +297,7 @@ export function DropdownMenuWrapper({
     const instanceService = useDependency(IUniverInstanceService);
     const layoutService = useDependency(ILayoutService);
     const editorFocusRef = useRef<{ element: HTMLElement; owner?: string } | null>(null);
+    const menuContentRef = useRef<HTMLElement | null>(null);
     const sheetTargetRef = useRef<{ unitId: string; sheetId: string; valid: boolean } | null>(null);
     const sheetTarget = sheetTargetRef.current;
 
@@ -425,12 +426,32 @@ export function DropdownMenuWrapper({
         editorFocus.element.focus({ preventScroll: true });
     }
 
-    function handlePointerDownOutside(event: { currentTarget: EventTarget | null; target: EventTarget | null; preventDefault: () => void }) {
+    const handleMenuFocus: NonNullable<IDropdownMenuProps['onFocusCapture']> = (event) => {
+        menuContentRef.current = event.currentTarget;
+    };
+
+    const handleClosedMenuPointer: NonNullable<IDropdownMenuProps['onPointerMoveCapture']> = (event) => {
+        if (event.currentTarget.dataset.state === 'closed') {
+            // Exit-animation DOM must not take focus back from the editor or a newly opened menu.
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    };
+
+    const handlePointerDownOutside: NonNullable<IDropdownMenuProps['onPointerDownOutside']> = (event) => {
+        const content = menuContentRef.current;
+        const triggerId = content?.getAttribute('aria-labelledby');
+        const trigger = triggerId ? content?.ownerDocument.getElementById(triggerId) : null;
+        if (trigger?.contains(event.detail.originalEvent.target as Node)) {
+            // The Ribbon trigger owns toggling, including when the previous menu is still exiting.
+            event.preventDefault();
+            return;
+        }
         if (editorFocusRef.current && (!editorFocusRef.current.owner || getEmbedBoundaryOwner(event.target) !== editorFocusRef.current.owner)) {
             editorFocusRef.current = null;
         }
         keepInteractionInsideSameEmbedBoundary(event);
-    }
+    };
 
     function handleEmbedBoundaryFocusOutside(event: { currentTarget: EventTarget | null; target: EventTarget | null; preventDefault: () => void }) {
         keepInteractionInsideSameEmbedBoundary(event);
@@ -554,6 +575,9 @@ export function DropdownMenuWrapper({
                 disabled={disabled}
                 open={dropdownVisible}
                 onOpenChange={handleVisibleChange}
+                onFocusCapture={handleMenuFocus}
+                onPointerMoveCapture={handleClosedMenuPointer}
+                onPointerOutCapture={handleClosedMenuPointer}
                 onCloseAutoFocus={handleCloseAutoFocus}
                 onPointerDownOutside={handlePointerDownOutside}
                 onFocusOutside={handleEmbedBoundaryFocusOutside}
@@ -607,6 +631,9 @@ export function DropdownMenuWrapper({
                 disabled={disabled}
                 open={dropdownVisible}
                 onOpenChange={handleVisibleChange}
+                onFocusCapture={handleMenuFocus}
+                onPointerMoveCapture={handleClosedMenuPointer}
+                onPointerOutCapture={handleClosedMenuPointer}
                 onCloseAutoFocus={handleCloseAutoFocus}
                 onPointerDownOutside={handlePointerDownOutside}
                 onFocusOutside={handleEmbedBoundaryFocusOutside}

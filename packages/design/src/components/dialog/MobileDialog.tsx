@@ -27,7 +27,6 @@ import {
     Dialog as DialogProvider,
     DialogTitle,
 } from './DialogPrimitive';
-import { useDialogFocus } from './use-dialog-focus';
 
 export type IMobileDialogProps = IDialogProps;
 
@@ -48,12 +47,10 @@ export function MobileDialog(props: IMobileDialogProps) {
         showCancel,
         onOpenChange,
         onClose,
-        onCloseAutoFocus,
         onOk,
         onCancel,
     } = props;
     const { locale, mountContainer, direction } = useContext(ConfigContext);
-    const { handleContentRef, handleOpenAutoFocus, handleCloseAutoFocus } = useDialogFocus(mask, onCloseAutoFocus);
     const maxHeight = globalThis.CSS?.supports('height', '1dvh') ? '80dvh' : '80vh';
     const footer = propFooter ?? (showOk || showCancel
         ? (
@@ -83,7 +80,6 @@ export function MobileDialog(props: IMobileDialogProps) {
     return (
         <DialogProvider open={open} onOpenChange={handleOpenChange} modal={mask !== false}>
             <DialogContent
-                ref={handleContentRef}
                 className={clsx(`
                   !univer-bottom-0 !univer-left-0 !univer-right-0 !univer-top-auto !univer-max-w-none
                   !univer-translate-x-0 !univer-translate-y-0 !univer-gap-4 !univer-overflow-y-auto
@@ -111,13 +107,7 @@ export function MobileDialog(props: IMobileDialogProps) {
                 overlayClassName={overlayClassName}
                 dir={direction}
                 onClickClose={close}
-                onOpenAutoFocus={handleOpenAutoFocus}
-                onCloseAutoFocus={handleCloseAutoFocus}
                 onEscapeKeyDown={(event) => {
-                    if (event.isComposing) {
-                        event.preventDefault();
-                        return;
-                    }
                     if (keyboard) {
                         close();
                     }

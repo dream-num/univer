@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ComponentProps, PointerEvent } from 'react';
+import type { ComponentProps } from 'react';
 import {
     CheckboxItem,
     Content,
@@ -33,17 +33,8 @@ import {
     Trigger,
 } from '@radix-ui/react-dropdown-menu';
 import { CheckMarkIcon, MoreRightIcon } from '@univerjs/icons';
-import { useCallback, useRef } from 'react';
 import { borderClassName, scrollbarClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
-
-function handleMenuPointerEvent<T extends HTMLElement>(event: PointerEvent<T>, handler?: (event: PointerEvent<T>) => void) {
-    if (event.currentTarget.closest('[data-radix-menu-content]')?.getAttribute('data-state') === 'closed') {
-        event.preventDefault();
-        return;
-    }
-    handler?.(event);
-}
 
 function DropdownMenuPrimitive({
     ...props
@@ -120,8 +111,6 @@ function DropdownMenuSubTrigger({
                 className
             )}
             {...props}
-            onPointerMove={(event) => handleMenuPointerEvent(event, props.onPointerMove)}
-            onPointerLeave={(event) => handleMenuPointerEvent(event, props.onPointerLeave)}
         >
             {children}
             <MoreRightIcon className="ml-auto" />
@@ -163,26 +152,8 @@ function DropdownMenuSubContent({
 function DropdownMenuContent({
     className,
     sideOffset = 4,
-    ref,
-    onPointerDownOutside,
     ...props
 }: ComponentProps<typeof Content>) {
-    const contentRef = useRef<HTMLDivElement>(null);
-    const setContentRef = useCallback((node: HTMLDivElement | null) => {
-        contentRef.current = node;
-        if (typeof ref === 'function') {
-            const cleanup = ref(node);
-            if (typeof cleanup === 'function') {
-                return () => {
-                    contentRef.current = null;
-                    cleanup();
-                };
-            }
-        } else if (ref) {
-            ref.current = node;
-        }
-    }, [ref]);
-
     return (
         <Portal>
             <Content
@@ -208,17 +179,6 @@ function DropdownMenuContent({
                     className
                 )}
                 {...props}
-                ref={setContentRef}
-                onPointerDownOutside={(event) => {
-                    onPointerDownOutside?.(event);
-                    const content = contentRef.current;
-                    const triggerId = content?.getAttribute('aria-labelledby');
-                    const trigger = triggerId ? content?.ownerDocument.getElementById(triggerId) : null;
-                    if (trigger?.contains(event.detail.originalEvent.target as Node)) {
-                        // The trigger already toggles this menu, including while its exit animation is running.
-                        event.preventDefault();
-                    }
-                }}
             />
         </Portal>
     );
@@ -255,8 +215,6 @@ function DropdownMenuItem({
                 className
             )}
             {...props}
-            onPointerMove={(event) => handleMenuPointerEvent(event, props.onPointerMove)}
-            onPointerLeave={(event) => handleMenuPointerEvent(event, props.onPointerLeave)}
         />
     );
 }
@@ -287,8 +245,6 @@ function DropdownMenuCheckboxItem({
             )}
             checked={checked}
             {...props}
-            onPointerMove={(event) => handleMenuPointerEvent(event, props.onPointerMove)}
-            onPointerLeave={(event) => handleMenuPointerEvent(event, props.onPointerLeave)}
         >
             {!hideIndicator && (
                 <span
@@ -333,8 +289,6 @@ function DropdownMenuRadioItem({
                 className
             )}
             {...props}
-            onPointerMove={(event) => handleMenuPointerEvent(event, props.onPointerMove)}
-            onPointerLeave={(event) => handleMenuPointerEvent(event, props.onPointerLeave)}
         >
             {!hideIndicator && (
                 <span

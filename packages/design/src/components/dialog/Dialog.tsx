@@ -27,7 +27,6 @@ import {
     Dialog as DialogProvider,
     DialogTitle,
 } from './DialogPrimitive';
-import { useDialogFocus } from './use-dialog-focus';
 
 export interface IDialogProps {
     children: ReactNode;
@@ -117,9 +116,6 @@ export interface IDialogProps {
      * The callback function when the dialog is closed.
      */
     onClose?: () => void;
-
-    /** Prevent default to provide a caller-owned focus destination when the dialog closes. */
-    onCloseAutoFocus?: (event: Event) => void;
 
     showOk?: boolean;
     showCancel?: boolean;
@@ -286,13 +282,11 @@ export function Dialog(props: IDialogProps) {
         showCancel,
         onOpenChange,
         onClose,
-        onCloseAutoFocus,
         onOk,
         onCancel,
     } = props;
 
     const { locale, mountContainer, direction } = useContext(ConfigContext);
-    const { handleContentRef, handleOpenAutoFocus, handleCloseAutoFocus } = useDialogFocus(mask, onCloseAutoFocus);
 
     const { position, isDragging, setElementRef, handleMouseDown } = useDraggable({ defaultPosition, enabled: draggable });
 
@@ -313,12 +307,11 @@ export function Dialog(props: IDialogProps) {
         )
         : null);
 
-    const handleDraggableContentRef = useCallback((node: HTMLDivElement | null) => {
-        handleContentRef(node);
+    const handleContentRef = useCallback((node: HTMLDivElement | null) => {
         if (node && draggable) {
             setElementRef(node);
         }
-    }, [draggable, handleContentRef, setElementRef]);
+    }, [draggable, setElementRef]);
 
     const handleOpenChange = useCallback((isOpen: boolean) => {
         if (!mask && !isOpen) {
@@ -344,7 +337,7 @@ export function Dialog(props: IDialogProps) {
             modal={mask !== false}
         >
             <DialogContent
-                ref={handleDraggableContentRef}
+                ref={handleContentRef}
                 className={clsx(className, {
                     '!univer-animate-none': draggable,
                 })}
@@ -369,14 +362,7 @@ export function Dialog(props: IDialogProps) {
                 overlayClassName={overlayClassName}
                 dir={direction}
                 onClickClose={handleClickClose}
-                onOpenAutoFocus={handleOpenAutoFocus}
-                onCloseAutoFocus={handleCloseAutoFocus}
                 onEscapeKeyDown={(e) => {
-                    if (e.isComposing) {
-                        e.preventDefault();
-                        return;
-                    }
-
                     if (keyboard) {
                         handleClickClose();
                     }

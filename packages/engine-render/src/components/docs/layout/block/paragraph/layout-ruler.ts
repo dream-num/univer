@@ -410,52 +410,7 @@ function _divideOperator(
                     defaultSpanMetrics
                 );
             } else if (divide?.glyphGroup.length === 0) {
-                const line = divide.parent!;
-                const column = line.parent!;
-                const section = column.parent!;
-                const wordWidth = __getGlyphGroupWidth(glyphGroup);
-                if (
-                    isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy!) &&
-                    wordWidth < column.width &&
-                    calculateLineTopByDrawings(line.lineHeight, line.top, lastPage, null, null, column.left, column.width, section.top, wordWidth - 0.001) > line.top
-                ) {
-                    // Preserve the shaped word when the obstacle, rather than the
-                    // column, is too narrow. Normal long-word breaking still applies.
-                    _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType, defaultSpanMetrics);
-                    return;
-                }
-                const sliceGlyphGroup: IDocumentSkeletonGlyph[] = [];
-
-                while (glyphGroup.length) {
-                    sliceGlyphGroup.push(glyphGroup.shift()!);
-
-                    if (isGlyphGroupBeyondDivideWidth(sliceGlyphGroup, 0, divide.width, hangingPunctuation, lineWrapTolerance)) {
-                        // To avoid infinity loop when width is less than one char's width.
-                        if (sliceGlyphGroup.length > 1) { // || (sliceGlyphGroup.length > 0 && sliceGlyphGroup[sliceGlyphGroup.length - 1].drawingId)) {
-                            glyphGroup.unshift(sliceGlyphGroup.pop()!);
-                        }
-                        break;
-                    }
-                }
-
-                if (sliceGlyphGroup.length > 0) {
-                    addGlyphToDivide(divide, sliceGlyphGroup, preOffsetLeft);
-                }
-
-                if (glyphGroup.length) {
-                    // Only Divide in the first paragraph is the beginning of the paragraph
-                    _divideOperator(
-                        ctx,
-                        glyphGroup,
-                        pages,
-                        sectionBreakConfig,
-                        paragraphConfig,
-                        false,
-
-                        breakPointType,
-                        defaultSpanMetrics
-                    );
-                }
+                _fillEmptyDivide(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType, defaultSpanMetrics, divide, preOffsetLeft, hangingPunctuation, lineWrapTolerance);
             } else if (hyphenLineCount > consecutiveHyphenLimit) {
                 const hyphenSliceGlyphGroup = _popHyphenSlice(divide);
 
@@ -515,168 +470,247 @@ function _divideOperator(
                 defaultSpanMetrics
             );
         } else {
-            // w does not exceed divide width, add it to divide
-            const currentLine = divide.parent;
-            if (currentLine?.parent?.parent && ctx.footnoteLayout && glyphGroup.some((glyph) => glyph.noteId)) {
-                const bodyBottom = currentLine.parent.parent.top + currentLine.top + currentLine.lineHeight;
-                const bodyLimit = ctx.footnoteLayout.getBodyLimit(lastPage, pages, sectionBreakConfig, bodyBottom, glyphGroup);
-                if (bodyBottom > bodyLimit + LINE_LAYOUT_OVERFLOW_TOLERANCE) {
-                    const column = currentLine.parent;
-                    const cachedGlyphs = __getGlyphGroupByLine(currentLine);
-                    column.lines.pop();
-                    const previousLine = column.lines[column.lines.length - 1];
-                    const previousBottom = column.parent!.top + (previousLine == null ? 0 : previousLine.top + previousLine.lineHeight);
-                    ctx.footnoteLayout.getBodyLimit(lastPage, pages, sectionBreakConfig, previousBottom);
-                    _pageOperator(ctx, [...cachedGlyphs, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, currentLine.paragraphStart, breakPointType, defaultSpanMetrics);
-                    return;
-                }
-            }
-            const maxBox = __maxFontBoundingBoxByGlyphGroup(getLineMetricGlyphs(
-                glyphGroup,
-                sectionBreakConfig.documentCompatibilityPolicy,
-                currentLine ? __getGlyphGroupByLine(currentLine) : []
-            ));
-
-            if (currentLine?.parent && __isNullLine(currentLine) && __hasFlowGlyph(glyphGroup)) {
-                const cachedGlyphs = __getGlyphGroupByLine(currentLine);
-                if (cachedGlyphs.length > 0 && cachedGlyphs.every((glyph) => glyph.streamType === DataStreamTreeTokenType.PAGE_BREAK)) {
-                    // A skipped rendered-page hint has no font metrics. Let the first real text
-                    // establish its line, including normal font leading and available page height.
-                    currentLine.parent.lines.pop();
-                    _lineOperator(ctx, [...cachedGlyphs, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, currentLine.paragraphStart, breakPointType, defaultSpanMetrics);
-                    return;
-                }
-            }
-
-            if (
-                currentLine &&
-                __isPositionedCustomBlockOnlyLine(__getGlyphGroupByLine(currentLine), paragraphConfig.paragraphNonInlineSkeDrawings) &&
-                __hasFlowGlyph(glyphGroup)
-            ) {
-                for (const lineDivide of currentLine.divides) {
-                    updateDivideInfo(lineDivide, {
-                        isFull: true,
-                    });
-                }
-                _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, false, breakPointType);
-                return;
-            }
-
-            if (
-                currentLine &&
-                maxBox &&
-                !__isNullLine(currentLine) &&
-                __hasFlowGlyph(__getGlyphGroupByLine(currentLine)) &&
-                !__isZeroWidthNonFlowFloatingAnchorLine(glyphGroup, paragraphConfig.paragraphNonInlineSkeDrawings)
-            ) {
-                const { paragraphLineGapDefault, linePitch, lineSpacing, spacingRule, snapToGrid, gridType } =
-                    getLineHeightConfig(sectionBreakConfig, paragraphConfig);
-                const { boundingBoxAscent, boundingBoxDescent } = maxBox;
-                const spanLineHeight = boundingBoxAscent + boundingBoxDescent;
-                const combinedGlyphs = [...__getGlyphGroupByLine(currentLine), ...glyphGroup];
-                const hasInlineCustomBlock = combinedGlyphs.some((glyph) =>
-                    glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0
-                );
-                const drawingMLLineHeight = getDrawingMLNominalLineHeight(combinedGlyphs, sectionBreakConfig, hasInlineCustomBlock);
-                const { contentHeight, lineSpacingApply } = getLineHeightMetrics(
-                    spanLineHeight,
-                    paragraphLineGapDefault,
-                    linePitch,
-                    gridType,
-                    lineSpacing,
-                    spacingRule,
-                    snapToGrid,
-                    paragraphConfig.useWordStyleLineHeight,
-                    !hasInlineCustomBlock,
-                    undefined,
-                    false,
-                    drawingMLLineHeight
-                );
-
-                const growsDrawingMLLine = drawingMLLineHeight != null &&
-                    lineSpacingApply > currentLine.paddingTop + currentLine.contentHeight + currentLine.paddingBottom + 1e-6;
-                if (contentHeight - currentLine.contentHeight > LINE_LAYOUT_OVERFLOW_TOLERANCE || growsDrawingMLLine) {
-                    // If the height of the new content exceeds the height of the line it joins, for mixed text and graphics layout, the entire line needs to be recalculated according to the new height
-                    // If the height of the new content exceeds the height of the added row,
-                    // the entire row needs to be recalculated according to the new height
-                    // in order to handle the mixing of graphics and text
-                    const spanGroupCached = __getGlyphGroupByLine(currentLine);
-                    const spanGroupCachedLen = spanGroupCached.length;
-                    let newGlyphGroup = [];
-                    let startIndex = 1;
-
-                    if (spanGroupCachedLen > 2 && spanGroupCached[0].glyphType === GlyphType.LIST) {
-                        newGlyphGroup = [spanGroupCached[0], spanGroupCached[1]];
-                        startIndex = 2;
-                    } else {
-                        newGlyphGroup = [spanGroupCached[0]];
-                    }
-                    const column = currentLine.parent!;
-
-                    const { paragraphStart: lineIsStart } = column.lines.pop()!; // Delete the previous line and recalculate according to the maximum content height
-
-                    _lineOperator(
-                        ctx,
-                        newGlyphGroup,
-                        pages,
-                        sectionBreakConfig,
-                        paragraphConfig,
-                        lineIsStart,
-
-                        breakPointType,
-                        {
-                            lineHeight: boundingBoxAscent + boundingBoxDescent,
-                            hasInlineCustomBlock,
-                            drawingMLLineHeight,
-                        }
-                    );
-
-                    for (let i = startIndex; i < spanGroupCached.length; i++) {
-                        // TODO: @jocs Here you may see non-breakpoints appearing at the end of the line.
-                        _divideOperator(
-                            ctx,
-                            [spanGroupCached[i]],
-                            pages,
-                            sectionBreakConfig,
-                            paragraphConfig,
-                            isParagraphFirstShapedText
-                        );
-                    }
-
-                    _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType);
-
-                    return;
-                }
-            }
-            if (currentLine?.parent) {
-                const anchorDrawings = __getZeroWidthNonFlowFloatingAnchorDrawings(glyphGroup, paragraphConfig.paragraphNonInlineSkeDrawings);
-                if (anchorDrawings.length > 0) {
-                    const paragraphAnchorLeft = __getParagraphAnchorLeft(sectionBreakConfig, paragraphConfig, paragraphConfig.paragraphStyle?.indentStart);
-                    const drawings = __getDrawingPosition(
-                        ctx,
-                        currentLine.top,
-                        currentLine.lineHeight,
-                        currentLine.parent,
-                        true,
-                        paragraphConfig.pDrawingAnchor?.get(paragraphConfig.paragraphIndex)?.top,
-                        anchorDrawings,
-                        paragraphAnchorLeft,
-                        false
-                    );
-                    __updateDrawingPosition(currentLine.parent, drawings);
-                    addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
-                    updateDivideInfo(divide, { breakType: breakPointType });
-                    glyphGroup.length = 0;
-                    return;
-                }
-            }
-
-            addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
-            updateDivideInfo(divide, { breakType: breakPointType });
+            _appendFittingGlyphGroup(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType, defaultSpanMetrics, divide, preOffsetLeft);
         }
     } else {
         _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType, defaultSpanMetrics);
     }
+}
+
+function _fillEmptyDivide(
+    ctx: ILayoutContext,
+    glyphGroup: IDocumentSkeletonGlyph[],
+    pages: IDocumentSkeletonPage[],
+    sectionBreakConfig: ISectionBreakConfig,
+    paragraphConfig: IParagraphConfig,
+    isParagraphFirstShapedText: boolean,
+    breakPointType: BreakPointType,
+    defaultSpanMetrics: IDefaultSpanMetrics | undefined,
+    divide: IDocumentSkeletonDivide,
+    preOffsetLeft: number,
+    hangingPunctuation: boolean,
+    lineWrapTolerance: number | undefined
+): void {
+    const lastPage = getLastPage(pages);
+    const line = divide.parent!;
+    const column = line.parent!;
+    const section = column.parent!;
+    const wordWidth = __getGlyphGroupWidth(glyphGroup);
+    if (
+        isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy!) &&
+        wordWidth < column.width &&
+        calculateLineTopByDrawings(line.lineHeight, line.top, lastPage, null, null, column.left, column.width, section.top, wordWidth - 0.001) > line.top
+    ) {
+        // Preserve the shaped word when the obstacle, rather than the
+        // column, is too narrow. Normal long-word breaking still applies.
+        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType, defaultSpanMetrics);
+        return;
+    }
+    const sliceGlyphGroup: IDocumentSkeletonGlyph[] = [];
+
+    while (glyphGroup.length) {
+        sliceGlyphGroup.push(glyphGroup.shift()!);
+
+        if (isGlyphGroupBeyondDivideWidth(sliceGlyphGroup, 0, divide.width, hangingPunctuation, lineWrapTolerance)) {
+            // To avoid infinity loop when width is less than one char's width.
+            if (sliceGlyphGroup.length > 1) { // || (sliceGlyphGroup.length > 0 && sliceGlyphGroup[sliceGlyphGroup.length - 1].drawingId)) {
+                glyphGroup.unshift(sliceGlyphGroup.pop()!);
+            }
+            break;
+        }
+    }
+
+    if (sliceGlyphGroup.length > 0) {
+        addGlyphToDivide(divide, sliceGlyphGroup, preOffsetLeft);
+    }
+
+    if (glyphGroup.length) {
+        // Only Divide in the first paragraph is the beginning of the paragraph
+        _divideOperator(
+            ctx,
+            glyphGroup,
+            pages,
+            sectionBreakConfig,
+            paragraphConfig,
+            false,
+
+            breakPointType,
+            defaultSpanMetrics
+        );
+    }
+}
+
+function _appendFittingGlyphGroup(
+    ctx: ILayoutContext,
+    glyphGroup: IDocumentSkeletonGlyph[],
+    pages: IDocumentSkeletonPage[],
+    sectionBreakConfig: ISectionBreakConfig,
+    paragraphConfig: IParagraphConfig,
+    isParagraphFirstShapedText: boolean,
+    breakPointType: BreakPointType,
+    defaultSpanMetrics: IDefaultSpanMetrics | undefined,
+    divide: IDocumentSkeletonDivide,
+    preOffsetLeft: number
+): void {
+    const lastPage = getLastPage(pages);
+    // w does not exceed divide width, add it to divide
+    const currentLine = divide.parent;
+    if (currentLine?.parent?.parent && ctx.footnoteLayout && glyphGroup.some((glyph) => glyph.noteId)) {
+        const bodyBottom = currentLine.parent.parent.top + currentLine.top + currentLine.lineHeight;
+        const bodyLimit = ctx.footnoteLayout.getBodyLimit(lastPage, pages, sectionBreakConfig, bodyBottom, glyphGroup);
+        if (bodyBottom > bodyLimit + LINE_LAYOUT_OVERFLOW_TOLERANCE) {
+            const column = currentLine.parent;
+            const cachedGlyphs = __getGlyphGroupByLine(currentLine);
+            column.lines.pop();
+            const previousLine = column.lines[column.lines.length - 1];
+            const previousBottom = column.parent!.top + (previousLine == null ? 0 : previousLine.top + previousLine.lineHeight);
+            ctx.footnoteLayout.getBodyLimit(lastPage, pages, sectionBreakConfig, previousBottom);
+            _pageOperator(ctx, [...cachedGlyphs, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, currentLine.paragraphStart, breakPointType, defaultSpanMetrics);
+            return;
+        }
+    }
+    const maxBox = __maxFontBoundingBoxByGlyphGroup(getLineMetricGlyphs(
+        glyphGroup,
+        sectionBreakConfig.documentCompatibilityPolicy,
+        currentLine ? __getGlyphGroupByLine(currentLine) : []
+    ));
+
+    if (currentLine?.parent && __isNullLine(currentLine) && __hasFlowGlyph(glyphGroup)) {
+        const cachedGlyphs = __getGlyphGroupByLine(currentLine);
+        if (cachedGlyphs.length > 0 && cachedGlyphs.every((glyph) => glyph.streamType === DataStreamTreeTokenType.PAGE_BREAK)) {
+            // A skipped rendered-page hint has no font metrics. Let the first real text
+            // establish its line, including normal font leading and available page height.
+            currentLine.parent.lines.pop();
+            _lineOperator(ctx, [...cachedGlyphs, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, currentLine.paragraphStart, breakPointType, defaultSpanMetrics);
+            return;
+        }
+    }
+
+    if (
+        currentLine &&
+        __isPositionedCustomBlockOnlyLine(__getGlyphGroupByLine(currentLine), paragraphConfig.paragraphNonInlineSkeDrawings) &&
+        __hasFlowGlyph(glyphGroup)
+    ) {
+        for (const lineDivide of currentLine.divides) {
+            updateDivideInfo(lineDivide, {
+                isFull: true,
+            });
+        }
+        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, false, breakPointType);
+        return;
+    }
+
+    if (
+        currentLine &&
+        maxBox &&
+        !__isNullLine(currentLine) &&
+        __hasFlowGlyph(__getGlyphGroupByLine(currentLine)) &&
+        !__isZeroWidthNonFlowFloatingAnchorLine(glyphGroup, paragraphConfig.paragraphNonInlineSkeDrawings)
+    ) {
+        const { paragraphLineGapDefault, linePitch, lineSpacing, spacingRule, snapToGrid, gridType } =
+            getLineHeightConfig(sectionBreakConfig, paragraphConfig);
+        const { boundingBoxAscent, boundingBoxDescent } = maxBox;
+        const spanLineHeight = boundingBoxAscent + boundingBoxDescent;
+        const combinedGlyphs = [...__getGlyphGroupByLine(currentLine), ...glyphGroup];
+        const hasInlineCustomBlock = combinedGlyphs.some((glyph) =>
+            glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0
+        );
+        const drawingMLLineHeight = getDrawingMLNominalLineHeight(combinedGlyphs, sectionBreakConfig, hasInlineCustomBlock);
+        const { contentHeight, lineSpacingApply } = getLineHeightMetrics(
+            spanLineHeight,
+            paragraphLineGapDefault,
+            linePitch,
+            gridType,
+            lineSpacing,
+            spacingRule,
+            snapToGrid,
+            paragraphConfig.useWordStyleLineHeight,
+            !hasInlineCustomBlock,
+            undefined,
+            false,
+            drawingMLLineHeight
+        );
+
+        const growsDrawingMLLine = drawingMLLineHeight != null &&
+            lineSpacingApply > currentLine.paddingTop + currentLine.contentHeight + currentLine.paddingBottom + 1e-6;
+        if (contentHeight - currentLine.contentHeight > LINE_LAYOUT_OVERFLOW_TOLERANCE || growsDrawingMLLine) {
+            // If the height of the new content exceeds the height of the line it joins, for mixed text and graphics layout, the entire line needs to be recalculated according to the new height
+            // If the height of the new content exceeds the height of the added row,
+            // the entire row needs to be recalculated according to the new height
+            // in order to handle the mixing of graphics and text
+            const spanGroupCached = __getGlyphGroupByLine(currentLine);
+            const spanGroupCachedLen = spanGroupCached.length;
+            let newGlyphGroup = [];
+            let startIndex = 1;
+
+            if (spanGroupCachedLen > 2 && spanGroupCached[0].glyphType === GlyphType.LIST) {
+                newGlyphGroup = [spanGroupCached[0], spanGroupCached[1]];
+                startIndex = 2;
+            } else {
+                newGlyphGroup = [spanGroupCached[0]];
+            }
+            const column = currentLine.parent!;
+
+            const { paragraphStart: lineIsStart } = column.lines.pop()!; // Delete the previous line and recalculate according to the maximum content height
+
+            _lineOperator(
+                ctx,
+                newGlyphGroup,
+                pages,
+                sectionBreakConfig,
+                paragraphConfig,
+                lineIsStart,
+
+                breakPointType,
+                {
+                    lineHeight: boundingBoxAscent + boundingBoxDescent,
+                    hasInlineCustomBlock,
+                    drawingMLLineHeight,
+                }
+            );
+
+            for (let i = startIndex; i < spanGroupCached.length; i++) {
+                // TODO: @jocs Here you may see non-breakpoints appearing at the end of the line.
+                _divideOperator(
+                    ctx,
+                    [spanGroupCached[i]],
+                    pages,
+                    sectionBreakConfig,
+                    paragraphConfig,
+                    isParagraphFirstShapedText
+                );
+            }
+
+            _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType);
+
+            return;
+        }
+    }
+    if (currentLine?.parent) {
+        const anchorDrawings = __getZeroWidthNonFlowFloatingAnchorDrawings(glyphGroup, paragraphConfig.paragraphNonInlineSkeDrawings);
+        if (anchorDrawings.length > 0) {
+            const paragraphAnchorLeft = __getParagraphAnchorLeft(sectionBreakConfig, paragraphConfig, paragraphConfig.paragraphStyle?.indentStart);
+            const drawings = __getDrawingPosition(
+                ctx,
+                currentLine.top,
+                currentLine.lineHeight,
+                currentLine.parent,
+                true,
+                paragraphConfig.pDrawingAnchor?.get(paragraphConfig.paragraphIndex)?.top,
+                anchorDrawings,
+                paragraphAnchorLeft,
+                false
+            );
+            __updateDrawingPosition(currentLine.parent, drawings);
+            addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
+            updateDivideInfo(divide, { breakType: breakPointType });
+            glyphGroup.length = 0;
+            return;
+        }
+    }
+
+    addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
+    updateDivideInfo(divide, { breakType: breakPointType });
 }
 
 function _adjustExplicitTabStop(

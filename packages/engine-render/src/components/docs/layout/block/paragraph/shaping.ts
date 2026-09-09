@@ -210,6 +210,89 @@ function getShapedGlyphText(glyph: IDocumentSkeletonGlyph): string {
     return glyph.content;
 }
 
+function createShapedCustomBlockGlyph(
+    i: number,
+    char: string,
+    viewModel: DocumentViewModel,
+    paragraphNode: DataStreamTreeNode,
+    sectionBreakConfig: ISectionBreakConfig,
+    paragraph: IParagraph
+): IDocumentSkeletonGlyph {
+    const { drawings = {} } = sectionBreakConfig;
+    const config = getFontCreateConfig(i, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+    let newGlyph: Nullable<IDocumentSkeletonGlyph> = null;
+    const customBlock = viewModel.getCustomBlockWithoutSetCurrentIndex(paragraphNode.startIndex + i);
+
+    if (customBlock != null) {
+        const { blockId } = customBlock;
+        const drawingOrigin = drawings[blockId];
+        if (drawingOrigin?.layoutType === PositionedObjectLayoutType.INLINE) {
+            const { angle } = drawingOrigin.docTransform;
+            const { width = 0, height = 0 } = drawingOrigin.docTransform.size;
+            const top = 0;
+            const left = 0;
+            const boundingBox = getBoundingBox(angle, left, width, top, height);
+            const viewport = getDocsCustomBlockRenderViewport(
+                viewModel.getDataModel().getUnitId?.() ?? '',
+                drawingOrigin.drawingId,
+                {
+                    fallbackHeight: boundingBox.height ?? 0,
+                    fallbackWidth: boundingBox.width ?? 0,
+                }
+            );
+
+            newGlyph = createSkeletonCustomBlockGlyph(
+                config,
+                viewport?.layoutWidth ?? viewport?.width ?? boundingBox.width,
+                viewport?.height ?? boundingBox.height,
+                drawingOrigin.drawingId
+            );
+        } else if (drawingOrigin != null) {
+            newGlyph = createSkeletonCustomBlockGlyph(config, 0, 0, drawingOrigin.drawingId);
+        }
+    }
+
+    if (newGlyph == null) {
+        newGlyph = createSkeletonLetterGlyph(char, config);
+    }
+    return newGlyph;
+}
+
+function createWhitespaceGlyph(
+    char: string,
+    config: ReturnType<typeof getFontCreateConfig>,
+    i: number,
+    viewModel: DocumentViewModel,
+    paragraphNode: DataStreamTreeNode,
+    sectionBreakConfig: ISectionBreakConfig,
+    snapToGrid: BooleanNumber
+): IDocumentSkeletonGlyph {
+    const { gridType = GridType.LINES, charSpace = 0, defaultTabStop = 10.5 } = sectionBreakConfig;
+    let newGlyph: IDocumentSkeletonGlyph;
+    if (char === DataStreamTreeTokenType.TAB) {
+        const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
+        newGlyph = createSkeletonTabGlyph(config, charSpaceApply);
+    } else if (char === DataStreamTreeTokenType.PARAGRAPH) {
+        const zeroWidthParagraphBreak = sectionBreakConfig.renderConfig?.zeroWidthParagraphBreak;
+
+        if (zeroWidthParagraphBreak === BooleanNumber.TRUE) {
+            newGlyph = createSkeletonLetterGlyph(char, config, 0);
+        } else {
+            const defaultWidth = zeroWidthParagraphBreak == null && sectionBreakConfig.documentCompatibilityPolicy?.mode === 'drawingml'
+                ? 0
+                : undefined;
+            newGlyph = createSkeletonLetterGlyph(
+                char,
+                config,
+                getCustomRangeGlyphMetrics(i, viewModel, paragraphNode, config) ?? defaultWidth
+            );
+        }
+    } else {
+        newGlyph = createSkeletonLetterGlyph(char, config);
+    }
+    return newGlyph;
+}
+
 export function shaping(
     ctx: ILayoutContext,
     content: string,
@@ -217,12 +300,6 @@ export function shaping(
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig
 ): IShapedText[] {
-    const {
-        gridType = GridType.LINES,
-        charSpace = 0,
-        defaultTabStop = 10.5,
-        drawings = {},
-    } = sectionBreakConfig;
     const shapedTextList: IShapedText[] = [];
     const lineBreaker = new LineBreaker(content);
     const { endIndex } = paragraphNode;
@@ -361,42 +438,7 @@ export function shaping(
                 i++;
                 src = src.substring(1);
             } else if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
-                const config = getFontCreateConfig(i, viewModel, paragraphNode, sectionBreakConfig, paragraph);
-                let newGlyph: Nullable<IDocumentSkeletonGlyph> = null;
-                const customBlock = viewModel.getCustomBlockWithoutSetCurrentIndex(paragraphNode.startIndex + i);
-
-                if (customBlock != null) {
-                    const { blockId } = customBlock;
-                    const drawingOrigin = drawings[blockId];
-                    if (drawingOrigin?.layoutType === PositionedObjectLayoutType.INLINE) {
-                        const { angle } = drawingOrigin.docTransform;
-                        const { width = 0, height = 0 } = drawingOrigin.docTransform.size;
-                        const top = 0;
-                        const left = 0;
-                        const boundingBox = getBoundingBox(angle, left, width, top, height);
-                        const viewport = getDocsCustomBlockRenderViewport(
-                            viewModel.getDataModel().getUnitId?.() ?? '',
-                            drawingOrigin.drawingId,
-                            {
-                                fallbackHeight: boundingBox.height ?? 0,
-                                fallbackWidth: boundingBox.width ?? 0,
-                            }
-                        );
-
-                        newGlyph = createSkeletonCustomBlockGlyph(
-                            config,
-                            viewport?.layoutWidth ?? viewport?.width ?? boundingBox.width,
-                            viewport?.height ?? boundingBox.height,
-                            drawingOrigin.drawingId
-                        );
-                    } else if (drawingOrigin != null) {
-                        newGlyph = createSkeletonCustomBlockGlyph(config, 0, 0, drawingOrigin.drawingId);
-                    }
-                }
-
-                if (newGlyph == null) {
-                    newGlyph = createSkeletonLetterGlyph(char, config);
-                }
+                const newGlyph = createShapedCustomBlockGlyph(i, char, viewModel, paragraphNode, sectionBreakConfig, paragraph);
 
                 shapedGlyphs.push(newGlyph);
                 i += char.length;
@@ -406,29 +448,7 @@ export function shaping(
                 if (config.textStyle.sc && cjk.hasCJK(char)) {
                     char = getFirstGrapheme(src) ?? char;
                 }
-                let newGlyph: Nullable<IDocumentSkeletonGlyph> = null;
-
-                if (char === DataStreamTreeTokenType.TAB) {
-                    const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
-                    newGlyph = createSkeletonTabGlyph(config, charSpaceApply);
-                } else if (char === DataStreamTreeTokenType.PARAGRAPH) {
-                    const zeroWidthParagraphBreak = sectionBreakConfig.renderConfig?.zeroWidthParagraphBreak;
-
-                    if (zeroWidthParagraphBreak === BooleanNumber.TRUE) {
-                        newGlyph = createSkeletonLetterGlyph(char, config, 0);
-                    } else {
-                        const defaultWidth = zeroWidthParagraphBreak == null && sectionBreakConfig.documentCompatibilityPolicy?.mode === 'drawingml'
-                            ? 0
-                            : undefined;
-                        newGlyph = createSkeletonLetterGlyph(
-                            char,
-                            config,
-                            getCustomRangeGlyphMetrics(i, viewModel, paragraphNode, config) ?? defaultWidth
-                        );
-                    }
-                } else {
-                    newGlyph = createSkeletonLetterGlyph(char, config);
-                }
+                const newGlyph = createWhitespaceGlyph(char, config, i, viewModel, paragraphNode, sectionBreakConfig, snapToGrid);
 
                 shapedGlyphs.push(newGlyph);
                 i += char.length;

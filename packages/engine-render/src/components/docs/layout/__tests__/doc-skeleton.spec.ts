@@ -478,19 +478,22 @@ describe('doc skeleton', () => {
 
     it.each(['ready', 'cancel', 'failure', 'header', 'footer'])('waits for cold hyphenation rules and matches a warm executor (%s)', async (scenario) => {
         const univer = new Univer();
-        const content = scenario === 'header' || scenario === 'footer'
-            ? 'Este documento contiene información sobre la configuración y la administración de los servicios.'
-            : `${'A continued paragraph crosses several physical pages. '.repeat(50)}Hello world ${'Further text keeps the paragraph flowing. '.repeat(100)}`;
+        const content = 'Este documento contiene información sobre la configuración y la administración de los servicios. '
+            .repeat(scenario === 'header' || scenario === 'footer' ? 1 : 4);
         const snapshot: Partial<IDocumentData> = {
             id: 'hyphen-readiness',
             body: {
                 dataStream: `${content}\r\n`,
-                paragraphs: [{ startIndex: content.length, paragraphId: 'hyphen-paragraph' }],
+                paragraphs: [{
+                    startIndex: content.length,
+                    paragraphId: 'hyphen-paragraph',
+                    paragraphStyle: { lineSpacing: 18, spacingRule: SpacingRule.EXACT },
+                }],
                 sectionBreaks: [{ startIndex: content.length + 1, sectionId: 'hyphen-section' }],
             },
             documentStyle: {
                 documentFlavor: DocumentFlavor.TRADITIONAL,
-                pageSize: { width: 600, height: 700 },
+                pageSize: { width: 120, height: 120 },
                 marginTop: 30,
                 marginBottom: 30,
                 marginLeft: 30,
@@ -546,6 +549,9 @@ describe('doc skeleton', () => {
             }
             await vi.waitFor(() => expect(cold.stepIncrementalLayout(coldGeneration, 8).complete).toBe(true));
             completeIncrementalLayout(warm);
+            if (scenario !== 'header' && scenario !== 'footer') {
+                expect(cold.getSkeletonData()?.pages.length).toBeGreaterThan(1);
+            }
             expect(normalizeSkeleton(cold.getSkeletonData())).toEqual(normalizeSkeleton(warm.getSkeletonData()));
         } finally {
             loader.mockRestore();

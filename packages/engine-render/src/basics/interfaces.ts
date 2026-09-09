@@ -113,6 +113,9 @@ export interface IFooterIds {
 
 export interface ISectionBreakConfig extends IDocStyleBase, ISectionBreakBase, IDocsConfig {
     sectionId: string;
+    /** Cell continuation pages retain their segment and physical row-slice budgets. */
+    cellTableId?: string;
+    cellPageHeights?: readonly number[];
     headerIds?: IHeaderIds;
     footerIds?: IFooterIds;
     useFirstPageHeaderFooter?: BooleanNumber;

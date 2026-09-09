@@ -24,7 +24,10 @@ import {
     sequenceExecute,
 } from '@univerjs/core';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import { SetWorksheetNameMutation, SetWorksheetNameMutationFactory } from '../mutations/set-worksheet-name.mutation';
+import {
+    SetWorksheetNameMutation,
+    SetWorksheetNameUndoMutationFactory,
+} from '../mutations/set-worksheet-name.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ISetWorksheetNameCommandParams {
@@ -46,15 +49,18 @@ export const SetWorksheetNameCommand: ICommand = {
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
-        const { unitId, subUnitId } = target;
+        const { unitId, subUnitId, worksheet } = target;
         const redoMutationParams: ISetWorksheetNameMutationParams = {
             subUnitId,
             name: params.name,
+            oldName: worksheet.getName(),
             unitId,
         };
-        const undoMutationParams: ISetWorksheetNameMutationParams = SetWorksheetNameMutationFactory(
+        const undoMutationParams: ISetWorksheetNameMutationParams = SetWorksheetNameUndoMutationFactory(
             accessor,
             redoMutationParams
         );

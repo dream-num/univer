@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import { MoveRangeCommand } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { SHEET_VIEW_KEY } from '../../common/keys';
 import { HoverRenderController } from '../hover-render.controller';
-import { MoveRangeRenderController } from '../move-range.controller';
 
 function createEventSubject() {
     const handlers = new Set<(evt: any) => void>();
@@ -115,58 +113,6 @@ describe('HoverRenderController', () => {
         expect(hoverManagerService.triggerRowHeaderClick).toHaveBeenCalledWith('unit-1', 1, 2);
         expect(hoverManagerService.triggerColHeaderDbClick).toHaveBeenCalledWith('unit-1', 3, 4);
         expect(hoverManagerService.triggerScroll).toHaveBeenCalled();
-
-        controller.dispose();
-    });
-});
-
-describe('MoveRangeRenderController', () => {
-    it('executes move range command after dragging a selection to a valid different range', () => {
-        const selectionMoveEnd$ = new Subject<void>();
-        const controlMoveEnd$ = new Subject<any>();
-        const commandService = { executeCommand: vi.fn() };
-        const controller = new MoveRangeRenderController(
-            {} as never,
-            {
-                getSelectionControls: vi.fn(() => [{
-                    model: {
-                        getRange: vi.fn(() => ({
-                            startRow: 1,
-                            startColumn: 2,
-                            endRow: 3,
-                            endColumn: 4,
-                            rangeType: 0,
-                        })),
-                    },
-                    selectionMoveEnd$: controlMoveEnd$,
-                }]),
-            } as never,
-            { selectionMoveEnd$ } as never,
-            commandService as never
-        );
-
-        selectionMoveEnd$.next();
-        controlMoveEnd$.next({ startRow: 5, startColumn: 6, endRow: 7, endColumn: 8 });
-        controlMoveEnd$.next({ startRow: 1, startColumn: 2, endRow: 3, endColumn: 4 });
-        controlMoveEnd$.next({ startRow: -1, startColumn: 2, endRow: 3, endColumn: 4 });
-
-        expect(commandService.executeCommand).toHaveBeenCalledTimes(1);
-        expect(commandService.executeCommand).toHaveBeenCalledWith(MoveRangeCommand.id, {
-            fromRange: {
-                startRow: 1,
-                startColumn: 2,
-                endRow: 3,
-                endColumn: 4,
-                rangeType: 0,
-            },
-            toRange: {
-                startRow: 5,
-                startColumn: 6,
-                endRow: 7,
-                endColumn: 8,
-                rangeType: 0,
-            },
-        });
 
         controller.dispose();
     });

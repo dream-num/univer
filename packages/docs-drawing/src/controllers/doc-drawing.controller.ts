@@ -24,6 +24,7 @@ import { RemoveDocDrawingCommand } from '../commands/commands/remove-doc-drawing
 import { SetDocDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
 import { UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing-transform.command';
 import { UpdateDocDrawingWrappingStyleCommand } from '../commands/commands/update-doc-drawing-wrapping-style.command';
+import { collectDocDrawings } from '../services/doc-drawing-source';
 import { IDocDrawingService } from '../services/doc-drawing.service';
 
 export const DOCS_DRAWING_PLUGIN = 'DOC_DRAWING_PLUGIN';
@@ -140,8 +141,7 @@ export class DocDrawingController extends Disposable {
 
         const subUnitId = unitId;
 
-        const drawingDataModels = dataModel.getDrawings();
-        const drawingOrderModel = dataModel.getDrawingsOrder();
+        const { drawings: drawingDataModels, drawingsOrder: drawingOrderModel } = collectDocDrawings(dataModel.getSnapshot());
 
         if (!drawingDataModels || !drawingOrderModel) {
             return false;

@@ -39,7 +39,12 @@ export function resolveDocLayoutProgressPercent(progress: IDocumentLayoutProgres
     const pageProgress = progress.mode === 'paginated' && estimatedPageCount > 0
         ? progress.publishedPageCount / estimatedPageCount
         : 0;
-    return Math.min(99, Math.max(0, Math.floor(Math.max(blockProgress, pageProgress) * 100)));
+    // Before the first Worker slice, the page estimate only contains the Main
+    // interaction window. Publishing that window does not complete initial layout.
+    const completedFraction = progress.reason === 'initial' && progress.totalBlockCount > 0
+        ? blockProgress
+        : Math.max(blockProgress, pageProgress);
+    return Math.min(99, Math.max(0, Math.floor(completedFraction * 100)));
 }
 
 export class DocLayoutProgressRenderController extends RxDisposable implements IRenderModule {

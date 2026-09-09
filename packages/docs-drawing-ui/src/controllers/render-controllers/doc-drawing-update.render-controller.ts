@@ -48,7 +48,7 @@ import {
     getDocumentEntityPermissionObjectId,
     RichTextEditingMutation,
 } from '@univerjs/docs';
-import { IDocDrawingService, InsertDocDrawingCommand, SetDocDrawingArrangeCommand, UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
+import { collectDocDrawings, findDocDrawing, IDocDrawingService, InsertDocDrawingCommand, SetDocDrawingArrangeCommand, UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import {
     DRAWING_IMAGE_ALLOW_IMAGE_LIST,
@@ -66,6 +66,7 @@ import { debounceTime } from 'rxjs';
 import { GroupDocDrawingCommand } from '../../commands/commands/group-doc-drawing.command';
 import { UngroupDocDrawingCommand } from '../../commands/commands/ungroup-doc-drawing.command';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
+import { getDocImageCropUpdates } from './doc-drawing-crop';
 import { getDocMutationAffectedDrawingIds } from './doc-drawing-mutation';
 
 interface IImageInsertPosition {
@@ -345,58 +346,19 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     }
 
     private _getImageCropUpdates(param: IImageData): IDrawingDocTransform[] {
-        const { unitId, subUnitId, drawingId, transform } = param;
+        const { unitId, subUnitId, drawingId } = param;
         if ([unitId, subUnitId].some((id) => id !== this._context.unitId)) {
             return [];
         }
-        if (transform == null || !Object.prototype.hasOwnProperty.call(param, 'srcRect')) {
-            return [];
-        }
-
-        const docDrawing = this._getDocDrawing(drawingId);
-        const renderDrawing = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId });
-        if (docDrawing?.drawingType !== DrawingTypeEnum.DRAWING_IMAGE || renderDrawing?.transform == null) {
-            return [];
-        }
-        const nextTransform = { ...renderDrawing.transform, ...transform };
-        const drawings: IDrawingDocTransform[] = [{ drawingId, key: 'srcRect', value: param.srcRect }];
-
-        if (nextTransform.width != null && nextTransform.height != null) {
-            drawings.push({
-                drawingId,
-                key: 'size',
-                value: { width: nextTransform.width, height: nextTransform.height },
-            });
-        }
-
-        if (docDrawing.layoutType === PositionedObjectLayoutType.INLINE || renderDrawing.isMultiTransform === BooleanNumber.TRUE) {
-            return drawings;
-        }
-
-        const horizontalDelta = (nextTransform.left ?? 0) - (renderDrawing.transform.left ?? 0);
-        const verticalDelta = (nextTransform.top ?? 0) - (renderDrawing.transform.top ?? 0);
-        const { positionH, positionV } = docDrawing.docTransform;
-
-        if (horizontalDelta !== 0 && positionH.posOffset != null) {
-            drawings.push({
-                drawingId,
-                key: 'positionH',
-                value: { relativeFrom: positionH.relativeFrom, posOffset: positionH.posOffset + horizontalDelta },
-            });
-        }
-        if (verticalDelta !== 0 && positionV.posOffset != null) {
-            drawings.push({
-                drawingId,
-                key: 'positionV',
-                value: { relativeFrom: positionV.relativeFrom, posOffset: positionV.posOffset + verticalDelta },
-            });
-        }
-
-        return drawings;
+        return getDocImageCropUpdates(
+            param,
+            this._getDocDrawing(drawingId),
+            this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId }) as IImageData | undefined
+        );
     }
 
     private _getDocDrawing(drawingId: string): IDocDrawing | undefined {
-        return this._context.unit.getDrawings()?.[drawingId] as IDocDrawing | undefined;
+        return findDocDrawing(this._context.unit.getSnapshot(), drawingId)?.drawing as IDocDrawing | undefined;
     }
 
     private _groupDrawingListener() {
@@ -491,7 +453,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         }
 
         const snapshot = docDataModel.getSnapshot();
-        const { drawings = {} } = snapshot;
+        const { drawings } = collectDocDrawings(snapshot);
         const isEditBody = viewModel.getEditArea() === DocumentEditArea.BODY;
         const isDocInteractionFocusing = this._docSelectionRenderService.isFocusing
             || this._drawingManagerService.getFocusDrawings().some((drawing) => drawing.unitId === unitId);
@@ -719,15 +681,12 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
 
     private _setDrawingSelections(params: IDrawingParam[]) {
         const { unit } = this._context;
-        const customBlocks = unit.getSnapshot().body?.customBlocks ?? [];
-        const ranges = params.map((item) => {
-            const id = item.drawingId;
-            const block = customBlocks.find((b) => b.blockId === id);
-            if (block) {
-                return block.startIndex;
-            }
-            return null;
-        }).filter((e) => e !== null).map((offset) => ({ startOffset: offset, endOffset: offset + 1 }));
+        const ranges = params.flatMap((item) => {
+            const segmentId = getDocumentDrawingSegmentId(unit, item.drawingId);
+            const body = unit.getSelfOrHeaderFooterModel(segmentId)?.getBody();
+            const block = body?.customBlocks?.find((block) => block.blockId === item.drawingId);
+            return block ? [{ startOffset: block.startIndex, endOffset: block.startIndex + 1, segmentId }] : [];
+        });
         this._docSelectionManagerService.replaceDocRanges(ranges);
     }
 }

@@ -218,6 +218,7 @@ const locale = {
             error: 'Error',
             forceStringInfo: 'Number stored as text',
             convertToNumber: 'Convert to Number',
+            overwriteCellContent: 'There is already data in the target area. This action will overwrite the existing data. Do you want to continue?',
         },
         clipboard: {
             paste: {

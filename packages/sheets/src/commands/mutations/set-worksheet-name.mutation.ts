@@ -20,23 +20,26 @@ import { getSheetMutationTarget } from '../commands/utils/target-util';
 
 export interface ISetWorksheetNameMutationParams {
     name: string;
+    /** The worksheet name before the rename. */
+    oldName?: string;
     unitId: string;
     subUnitId: string;
 }
 
-export const SetWorksheetNameMutationFactory = (
+export const SetWorksheetNameUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetWorksheetNameMutationParams
 ): ISetWorksheetNameMutationParams => {
     const target = getSheetMutationTarget(accessor.get(IUniverInstanceService), params);
     if (!target) {
-        throw new Error('[SetWorksheetNameMutationFactory]: worksheet is null error!');
+        throw new Error('[SetWorksheetNameUndoMutationFactory]: worksheet is null error!');
     }
 
     const { worksheet } = target;
     return {
         unitId: params.unitId,
         name: worksheet.getName(),
+        oldName: params.name,
         subUnitId: worksheet.getSheetId(),
     };
 };

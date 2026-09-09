@@ -14,7 +14,23 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IColumnGroup, ICustomBlock, ICustomColumnGroup, ICustomDecorationForInterceptor, ICustomRangeForInterceptor, ICustomTable, IDisposable, IParagraph, ISectionBreak, ITable, ITextRun, JSONXActions, JSONXPath, Nullable } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    IColumnGroup,
+    ICustomBlock,
+    ICustomColumnGroup,
+    ICustomDecorationForInterceptor,
+    ICustomRangeForInterceptor,
+    ICustomTable,
+    IDisposable,
+    IParagraph,
+    ISectionBreak,
+    ITable,
+    ITextRun,
+    JSONXActions,
+    JSONXPath,
+    Nullable,
+} from '@univerjs/core';
 import {
     DataStreamTreeNodeType,
     DataStreamTreeTokenType,
@@ -540,6 +556,7 @@ export class DocumentViewModel implements IDisposable {
 
     private _headerTreeMap: Map<string, DocumentViewModel> = new Map();
     private _footerTreeMap: Map<string, DocumentViewModel> = new Map();
+    private _noteTreeMap: Map<string, DocumentViewModel> = new Map();
 
     private readonly _segmentViewModels$ = new BehaviorSubject<DocumentViewModel[]>([]);
     readonly segmentViewModels$ = this._segmentViewModels$.asObservable();
@@ -583,7 +600,8 @@ export class DocumentViewModel implements IDisposable {
         this._plainTopLevelParagraphNodes = [];
         this._lastTextRun = null;
         // this._headerTreeMap.clear();
-        // this._footerTreeMap.clear();
+        this._noteTreeMap.forEach((viewModel) => viewModel.dispose());
+        this._noteTreeMap.clear();
         this._segmentViewModels$.complete();
         this._editAreaChange$.complete();
     }
@@ -593,6 +611,10 @@ export class DocumentViewModel implements IDisposable {
             headerTreeMap: this._headerTreeMap,
             footerTreeMap: this._footerTreeMap,
         };
+    }
+
+    getNoteTreeMap(): ReadonlyMap<string, DocumentViewModel> {
+        return this._noteTreeMap;
     }
 
     getEditArea() {
@@ -633,6 +655,10 @@ export class DocumentViewModel implements IDisposable {
 
         if (this._footerTreeMap.has(segmentId)) {
             return this._footerTreeMap.get(segmentId)!;
+        }
+
+        if (this._noteTreeMap.has(segmentId)) {
+            return this._noteTreeMap.get(segmentId)!;
         }
 
         return this as DocumentViewModel;
@@ -1138,6 +1164,12 @@ export class DocumentViewModel implements IDisposable {
     }
 
     private _buildHeaderFooterViewModel() {
+        for (const [noteId, viewModel] of this._noteTreeMap) {
+            if (viewModel.getDataModel() !== this._documentDataModel.noteModelMap.get(noteId)) {
+                viewModel.dispose();
+                this._noteTreeMap.delete(noteId);
+            }
+        }
         const { headerModelMap, footerModelMap } = this._documentDataModel;
         const viewModels = [];
         const rootTableSource = this.getSnapshot().tableSource;
@@ -1157,6 +1189,12 @@ export class DocumentViewModel implements IDisposable {
             viewModels.push(this._footerTreeMap.get(footerId)!);
         }
 
+        for (const [noteId, model] of this._documentDataModel.noteModelMap) {
+            const viewModel = this._noteTreeMap.get(noteId)
+                ?? new DocumentViewModel(model, { ...rootTableSource, ...model.getSnapshot().tableSource });
+            this._noteTreeMap.set(noteId, viewModel);
+            viewModels.push(viewModel);
+        }
         this._segmentViewModels$.next(viewModels);
     }
 }

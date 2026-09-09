@@ -28,6 +28,8 @@ import {
 } from '@univerjs/core';
 import { buildDocTransform, docDrawingPositionToTransform } from '@univerjs/docs';
 import {
+    collectDocDrawings,
+    findDocDrawing,
     InsertDocDrawingCommand,
     TextWrappingStyle,
     WRAPPING_STYLE_TO_LAYOUT_TYPE,
@@ -195,7 +197,7 @@ export class FDocumentImageMixin extends FDocument implements IFDocumentImageMix
     }
 
     override getImage(imageId: string): FDocumentImage | null {
-        const drawing = this.getDocumentDataModel().getDrawings()?.[imageId];
+        const drawing = findDocDrawing(this.getDocumentDataModel().getSnapshot(), imageId)?.drawing;
         if (!drawing || drawing.drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
             return null;
         }
@@ -204,8 +206,7 @@ export class FDocumentImageMixin extends FDocument implements IFDocumentImageMix
 
     override getImages(): FDocumentImage[] {
         const documentDataModel = this.getDocumentDataModel();
-        const drawings = documentDataModel.getDrawings() ?? {};
-        const drawingIds = documentDataModel.getDrawingsOrder() ?? Object.keys(drawings);
+        const { drawings, drawingsOrder: drawingIds } = collectDocDrawings(documentDataModel.getSnapshot());
         return drawingIds
             .filter((drawingId) => drawings[drawingId]?.drawingType === DrawingTypeEnum.DRAWING_IMAGE)
             .map((drawingId) => this._injector.createInstance(FDocumentImage, this, drawingId, this._injector));

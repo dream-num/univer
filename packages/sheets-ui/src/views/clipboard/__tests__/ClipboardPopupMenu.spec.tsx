@@ -27,7 +27,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { RediContext } from '@univerjs/ui';
+import { ILayoutService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject } from 'rxjs';
@@ -124,6 +124,16 @@ class TestRenderManagerService {
     }
 }
 
+class TestLayoutService {
+    focusCount = 0;
+    menuOpenWhenFocused = false;
+
+    focus(): void {
+        this.focusCount += 1;
+        this.menuOpenWhenFocused = document.querySelector('[role="menu"][data-state="open"]') !== null;
+    }
+}
+
 function createWorkbookData(): IWorkbookData {
     return {
         id: UNIT_ID,
@@ -148,6 +158,7 @@ function createClipboardPopupTestBed() {
 
     injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
     injector.add([ISheetClipboardService, { useClass: TestSheetClipboardService as never }]);
+    injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
 
     const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
     injector.get(IUniverInstanceService).focusUnit(UNIT_ID);
@@ -235,5 +246,29 @@ describe('ClipboardPopupMenu', () => {
         await clickElement(getByText('sheets-ui.rightClick.pasteValue'));
 
         expect(clipboardService.selectedPasteTypes).toEqual(['SPECIAL_PASTE_VALUE']);
+    });
+
+    it('restores focus after selecting a paste option', async () => {
+        currentBed = createClipboardPopupTestBed();
+        const clipboardService = currentBed.injector.get(ISheetClipboardService) as unknown as TestSheetClipboardService;
+        const layoutService = currentBed.injector.get(ILayoutService) as unknown as TestLayoutService;
+        const rendered = renderWithDependencies(<ClipboardPopupMenu />, currentBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        act(() => {
+            clipboardService.setShowMenu(true);
+        });
+
+        const trigger = rendered.container.querySelector('[data-slot="dropdown-menu-trigger"]');
+        if (!(trigger instanceof HTMLElement)) {
+            throw new TypeError('Clipboard menu trigger not found');
+        }
+
+        await clickElement(trigger);
+        await clickElement(getByText('sheets-ui.rightClick.pasteValue'));
+
+        await expect.poll(() => layoutService.focusCount).toBe(1);
+        expect(layoutService.menuOpenWhenFocused).toBe(false);
     });
 });

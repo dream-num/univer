@@ -14,115 +14,262 @@
  * limitations under the License.
  */
 
-import { BEFORE_CELL_EDIT, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
-import { Subject } from 'rxjs';
-import { describe, expect, it, vi } from 'vitest';
+import type { Injector, Univer } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import { ICommandService } from '@univerjs/core';
+import { FormulaDataModel } from '@univerjs/engine-formula';
+import { DeviceInputEventType } from '@univerjs/engine-render';
+import {
+    BEFORE_CELL_EDIT,
+    SetRangeValuesMutation,
+    SheetInterceptorService,
+} from '@univerjs/sheets';
+import { IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { FormulaEditorShowController } from '../formula-editor-show.controller';
+import { createCommandTestBed } from './create-command-test-bed';
 
-function createController() {
-    let editInterceptor: any;
-    let beforeCommandHandler: ((command: { id: string; params?: unknown }) => void) | undefined;
-    let commandExecutedHandler: ((command: { id: string; params?: unknown }, options?: unknown) => void) | undefined;
-    const currentSkeleton$ = new Subject<any>();
-    const worksheet = {
-        getSheetId: () => 'sheet-1',
-        unitId: 'unit-1',
-        getCell: vi.fn(() => ({ f: '=SUM(A1:A2)' })),
-    };
-    const skeleton = { worksheet };
+type EditLocation = NonNullable<ReturnType<IEditorBridgeService['getEditLocation']>>;
 
-    const controller = new FormulaEditorShowController(
-        { unitId: 'unit-1' } as never,
-        {
-            writeCellInterceptor: {
-                intercept: vi.fn((point, config) => {
-                    expect(point).toBe(BEFORE_CELL_EDIT);
-                    editInterceptor = config;
-                    return { dispose: vi.fn() };
-                }),
+let activeUniver: Univer | null = null;
+
+function createEditLocation(isInArrayFormulaRange = false): EditLocation {
+    return {
+        unitId: 'test',
+        sheetId: 'sheet1',
+        row: 1,
+        column: 1,
+        isInArrayFormulaRange,
+    } as EditLocation;
+}
+
+function createControllerTestBed(editLocation = createEditLocation()) {
+    let injector: Injector;
+    const renderContext = {
+        unitId: 'test',
+        scene: {
+            onTransformChange$: {
+                subscribeEvent: () => ({ dispose: vi.fn() }),
             },
-        } as never,
-        { getSkeleton: vi.fn(() => skeleton) } as never,
-        {
-            getArrayFormulaRange: vi.fn(() => null),
-            getArrayFormulaCellData: vi.fn(() => ({})),
-            getFormulaStringByCell: vi.fn(() => '=SUM(A1:A2)'),
-        } as never,
-        { getColorFromTheme: vi.fn(() => '#fff') } as never,
-        { getRenderUnitById: vi.fn(() => null) } as never,
-        {
-            currentSkeleton$,
-            getCurrentSkeleton: vi.fn(() => skeleton),
-        } as never,
-        {
-            onCommandExecuted: vi.fn((handler) => {
-                commandExecutedHandler = handler;
-                return { dispose: vi.fn() };
-            }),
-            beforeCommandExecuted: vi.fn((handler) => {
-                beforeCommandHandler = handler;
-                return { dispose: vi.fn() };
-            }),
-        } as never,
-        { debug: vi.fn() } as never
-    );
+        },
+    };
+    const createSheetSkeletonManagerService = () =>
+        injector.createInstance(SheetSkeletonManagerService, renderContext as never);
+    const createFormulaEditorShowController = () =>
+        injector.createInstance(FormulaEditorShowController, renderContext as never);
+    const testBed = createCommandTestBed(undefined, [
+        [
+            SheetSkeletonManagerService,
+            { useFactory: createSheetSkeletonManagerService },
+        ],
+        [
+            FormulaEditorShowController,
+            { useFactory: createFormulaEditorShowController },
+        ],
+    ]);
+    activeUniver = testBed.univer;
+    injector = testBed.univer.__getInjector();
+    testBed.sheet.addWorksheet('sheet2', 1, { id: 'sheet2', name: 'Sheet2', cellData: {} });
 
-    currentSkeleton$.next({ skeleton, unitId: 'unit-1', sheetId: 'sheet-1' });
+    const commandService = testBed.get(ICommandService);
+    commandService.registerCommand(SetRangeValuesMutation);
+
+    const editorBridgeService = testBed.get(IEditorBridgeService);
+    vi.spyOn(editorBridgeService, 'getEditLocation').mockReturnValue(editLocation);
+    testBed.get(FormulaEditorShowController);
 
     return {
-        controller,
-        editInterceptor: () => editInterceptor,
-        beforeCommandHandler: () => beforeCommandHandler,
-        commandExecutedHandler: () => commandExecutedHandler,
-        worksheet,
+        commandService,
+        editorBridgeService,
+        formulaDataModel: testBed.get(FormulaDataModel),
+        get: testBed.get,
+        injector,
+        refreshEditCellState: vi.spyOn(editorBridgeService, 'refreshEditCellState'),
+        sheet: testBed.sheet,
+        sheetInterceptorService: testBed.get(SheetInterceptorService),
     };
 }
 
+function createSetRangeValuesParams(subUnitId = 'sheet1'): ISetRangeValuesMutationParams {
+    return {
+        unitId: 'test',
+        subUnitId,
+        cellValue: {
+            0: {
+                1: { v: 2 },
+            },
+        },
+    };
+}
+
+function setSpillCellData(formulaDataModel: FormulaDataModel): void {
+    formulaDataModel.setArrayFormulaCellData({
+        test: {
+            sheet1: {
+                1: {
+                    1: { v: 2 },
+                },
+            },
+        },
+    });
+}
+
+afterEach(() => {
+    activeUniver?.dispose();
+    activeUniver = null;
+});
+
 describe('FormulaEditorShowController', () => {
     it('preserves the formula string when starting to edit a calculated formula cell', () => {
-        const { controller, editInterceptor, worksheet } = createController();
-        const originalCell = { v: 3 };
-        const result = editInterceptor().handler(
-            originalCell,
-            {
-                row: 0,
-                col: 1,
-                unitId: 'unit-1',
-                subUnitId: 'sheet-1',
-                worksheet,
-            },
-            vi.fn((cell) => cell)
-        );
+        const testBed = createControllerTestBed();
+        const worksheet = testBed.sheet.getSheetBySheetId('sheet1');
+        if (worksheet == null) {
+            throw new Error('Expected sheet1 to exist');
+        }
 
-        expect(result).toEqual({ v: 3, f: '=SUM(A1:A2)' });
+        const result = testBed.sheetInterceptorService.writeCellInterceptor
+            .fetchThroughInterceptors(BEFORE_CELL_EDIT)(
+                { v: 3 },
+                {
+                    row: 0,
+                    col: 1,
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    worksheet,
+                    workbook: testBed.sheet,
+                    origin: worksheet.getCellRaw(0, 1),
+                }
+            );
 
-        controller.dispose();
+        expect(result).toEqual({ v: 3, f: '=SUM(A1)' });
     });
 
-    it('passes empty edit values through and registers row-height refresh listener', () => {
-        const { controller, editInterceptor, beforeCommandHandler } = createController();
-        const next = vi.fn((cell) => cell);
+    it('passes an empty edit value through unchanged', () => {
+        const testBed = createControllerTestBed();
+        const worksheet = testBed.sheet.getSheetBySheetId('sheet1');
+        if (worksheet == null) {
+            throw new Error('Expected sheet1 to exist');
+        }
 
-        expect(editInterceptor().handler(null, {
-            row: 0,
-            col: 1,
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            worksheet: {},
-        }, next)).toBeNull();
-        expect(next).toHaveBeenCalledWith(null);
+        const result = testBed.sheetInterceptorService.writeCellInterceptor
+            .fetchThroughInterceptors(BEFORE_CELL_EDIT)(
+                null,
+                {
+                    row: 0,
+                    col: 1,
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    worksheet,
+                    workbook: testBed.sheet,
+                    origin: worksheet.getCellRaw(0, 1),
+                }
+            );
 
-        beforeCommandHandler()?.({
-            id: SetWorksheetRowAutoHeightMutation.id,
-            params: {
-                unitId: 'unit-1',
-                subUnitId: 'sheet-1',
-                rowsAutoHeightInfo: [{ row: 0 }],
-            },
+        expect(result).toBeNull();
+    });
+
+    it('refreshes when the current cell becomes a spill cell', async () => {
+        const testBed = createControllerTestBed();
+        setSpillCellData(testBed.formulaDataModel);
+
+        const result = await testBed.commandService.executeCommand(
+            SetRangeValuesMutation.id,
+            createSetRangeValuesParams(),
+            { applyFormulaCalculationResult: true }
+        );
+
+        expect(result).toBe(true);
+        expect(testBed.refreshEditCellState).toHaveBeenCalledOnce();
+    });
+
+    it('refreshes when the current cell was a spill cell before its array data was removed', async () => {
+        const testBed = createControllerTestBed(createEditLocation(true));
+
+        const result = await testBed.commandService.executeCommand(
+            SetRangeValuesMutation.id,
+            createSetRangeValuesParams(),
+            { applyFormulaCalculationResult: true }
+        );
+
+        expect(result).toBe(true);
+        expect(testBed.refreshEditCellState).toHaveBeenCalledOnce();
+    });
+
+    it('does not refresh for a formula result on a non-spill cell', async () => {
+        const testBed = createControllerTestBed();
+
+        const result = await testBed.commandService.executeCommand(
+            SetRangeValuesMutation.id,
+            createSetRangeValuesParams(),
+            { applyFormulaCalculationResult: true }
+        );
+
+        expect(result).toBe(true);
+        expect(testBed.refreshEditCellState).not.toHaveBeenCalled();
+    });
+
+    it('does not refresh for an ordinary range value mutation', async () => {
+        const testBed = createControllerTestBed();
+        setSpillCellData(testBed.formulaDataModel);
+
+        const result = await testBed.commandService.executeCommand(
+            SetRangeValuesMutation.id,
+            createSetRangeValuesParams()
+        );
+
+        expect(result).toBe(true);
+        expect(testBed.refreshEditCellState).not.toHaveBeenCalled();
+    });
+
+    it('does not refresh for a formula result on another sheet', async () => {
+        const testBed = createControllerTestBed();
+        setSpillCellData(testBed.formulaDataModel);
+
+        const result = await testBed.commandService.executeCommand(
+            SetRangeValuesMutation.id,
+            createSetRangeValuesParams('sheet2'),
+            { applyFormulaCalculationResult: true }
+        );
+
+        expect(result).toBe(true);
+        expect(testBed.refreshEditCellState).not.toHaveBeenCalled();
+    });
+
+    it('does not refresh while the editor is visible', async () => {
+        const testBed = createControllerTestBed();
+        setSpillCellData(testBed.formulaDataModel);
+        testBed.editorBridgeService.changeVisible({
+            visible: true,
+            eventType: DeviceInputEventType.Dblclick,
+            unitId: 'test',
         });
 
-        expect(beforeCommandHandler()).toBeDefined();
+        const result = await testBed.commandService.executeCommand(
+            SetRangeValuesMutation.id,
+            createSetRangeValuesParams(),
+            { applyFormulaCalculationResult: true }
+        );
 
-        controller.dispose();
+        expect(result).toBe(true);
+        expect(testBed.refreshEditCellState).not.toHaveBeenCalled();
+    });
+
+    it('refreshes only for the controller associated with the result workbook', async () => {
+        const testBed = createControllerTestBed();
+        const otherWorkbookController = testBed.injector.createInstance(
+            FormulaEditorShowController,
+            { unitId: 'other' } as never
+        );
+        setSpillCellData(testBed.formulaDataModel);
+
+        const result = await testBed.commandService.executeCommand(
+            SetRangeValuesMutation.id,
+            createSetRangeValuesParams(),
+            { applyFormulaCalculationResult: true }
+        );
+
+        expect(result).toBe(true);
+        expect(testBed.refreshEditCellState).toHaveBeenCalledOnce();
+        otherWorkbookController.dispose();
     });
 });

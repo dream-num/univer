@@ -24,7 +24,7 @@ import { borderBottomClassName, borderClassName, Button, clsx, Input, Radio, Rad
 import { IDefinedNamesService, IFunctionService, isReferenceStrings, ISuperTableService, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { ErrorIcon } from '@univerjs/icons';
 import { SCOPE_WORKBOOK_VALUE_DEFINED_NAME, validateDefinedName } from '@univerjs/sheets';
-import { ComponentManager, useDependency, useObservable, useSidebarClick } from '@univerjs/ui';
+import { ComponentManager, useDependency, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '../../common/keys';
 
@@ -63,7 +63,6 @@ function DefinedNameInputContent(props: IDefinedNameInputProps) {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const localeService = useDependency(LocaleService);
-    const direction = useObservable(localeService.direction$, localeService.getDirection());
     const definedNamesService = useDependency(IDefinedNamesService);
     const superTableService = useDependency(ISuperTableService);
     const functionService = useDependency(IFunctionService);
@@ -216,7 +215,6 @@ function DefinedNameInputContent(props: IDefinedNameInputProps) {
                 ? (
                     RangeSelector && (
                         <RangeSelector
-                            dir={direction}
                             unitId={unitId}
                             subUnitId={subUnitId}
                             initialValue={formulaOrRefStringValue}

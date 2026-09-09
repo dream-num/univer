@@ -271,8 +271,10 @@ describe('GlobalRangeSelector', () => {
         container.remove();
     });
 
-    it.each([['desktop', RangeSelector], ['mobile', MobileRangeSelector]] as const)('follows dir independently of locale and preserves snapshots and selections (%s)', async (_, Selector) => {
+    it.each([['desktop', RangeSelector], ['mobile', MobileRangeSelector]] as const)('follows locale direction and preserves snapshots and selections (%s)', async (_, Selector) => {
         const { injector } = createGlobalRangeSelectorTestBed();
+        const localeService = injector.get(LocaleService);
+        localeService.setDirection('ltr');
         injector.add([IConfigService, { useClass: ConfigService }]);
         injector.add([IContextService, { useClass: ContextService }]);
         injector.add([IUndoRedoService, { useClass: LocalUndoRedoService }]);
@@ -301,17 +303,17 @@ describe('GlobalRangeSelector', () => {
         selectionManager.__TEST_ONLY_add([{ startOffset: 1, endOffset: 3, collapsed: false }]);
         const selection = editor.getSelectionRanges();
         const setDocumentData = vi.spyOn(editor, 'setDocumentData');
-        const renderSelector = async (dir: 'ltr' | 'rtl') => {
+        const renderSelector = async () => {
             await act(async () => {
                 root.render(
                     <RediContext.Provider value={{ injector }}>
-                        <Selector unitId="book-1" subUnitId="sheet-1" dir={dir} />
+                        <Selector unitId="book-1" subUnitId="sheet-1" />
                     </RediContext.Provider>
                 );
             });
         };
 
-        await renderSelector('rtl');
+        await renderSelector();
         await act(async () => {
             const editorRef = richTextEditorProps?.editorRef;
             if (typeof editorRef === 'function') {
@@ -320,14 +322,20 @@ describe('GlobalRangeSelector', () => {
         });
         expect(setDocumentData).toHaveBeenCalledWith(expect.objectContaining({
             documentStyle: expect.objectContaining({
+                renderConfig: expect.objectContaining({ horizontalAlign: HorizontalAlign.LEFT }),
+            }),
+        }), selection);
+        setDocumentData.mockClear();
+        await act(async () => localeService.setDirection('rtl'));
+        expect(setDocumentData).toHaveBeenCalledWith(expect.objectContaining({
+            documentStyle: expect.objectContaining({
                 renderConfig: expect.objectContaining({ horizontalAlign: HorizontalAlign.RIGHT }),
             }),
         }), selection);
         expect(snapshot.documentStyle?.renderConfig?.horizontalAlign).toBeUndefined();
 
-        await act(async () => injector.get(LocaleService).setDirection('rtl'));
         setDocumentData.mockClear();
-        await renderSelector('ltr');
+        await act(async () => localeService.setDirection('ltr'));
         expect(setDocumentData).toHaveBeenCalledWith(expect.objectContaining({
             documentStyle: expect.objectContaining({
                 renderConfig: expect.objectContaining({ horizontalAlign: HorizontalAlign.LEFT }),

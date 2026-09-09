@@ -49,7 +49,7 @@ import {
     SetCfCommand,
 } from '@univerjs/sheets-conditional-formatting';
 import { FormulaEditor, RangeSelector } from '@univerjs/sheets-formula-ui';
-import { useDependency, useObservable } from '@univerjs/ui';
+import { useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ColorScaleStyleEditor } from './rule-edit/ColorScale';
 import { DataBarStyleEditor } from './rule-edit/DataBar';
@@ -81,7 +81,6 @@ export const RuleEdit = (props: IRuleEditProps) => {
         FormulaEditorComponent = FormulaEditor,
     } = props;
     const localeService = useDependency(LocaleService);
-    const direction = useObservable(localeService.direction$, localeService.getDirection());
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const conditionalFormattingRuleModel = useDependency(ConditionalFormattingRuleModel);
@@ -290,7 +289,6 @@ export const RuleEdit = (props: IRuleEditProps) => {
             </div>
             <div className="univer-mt-4">
                 <RangeSelectorComponent
-                    dir={direction}
                     unitId={unitId}
                     subUnitId={subUnitId}
                     initialValue={rangeString}

@@ -32,7 +32,7 @@ import {
 } from '@univerjs/engine-formula';
 import { DeleteIcon, IncreaseIcon, SelectRangeIcon } from '@univerjs/icons';
 import { SetSelectionsOperation } from '@univerjs/sheets';
-import { useDependency, useEvent } from '@univerjs/ui';
+import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { useStateRef } from '../formula-editor/hooks/use-state-ref';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
@@ -264,7 +264,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const [editor, setEditor] = useState<Editor | null>(null);
     const {
         className,
-        dir,
         onVerify,
         selectorRef,
         unitId,
@@ -286,20 +285,21 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const [popupVisible, setPopupVisible] = useState(false);
     const [rangeSelectorRanges, setRangeSelectorRanges] = useState<IUnitRangeName[]>([]);
     const localeService = useDependency(LocaleService);
+    const direction = useObservable(localeService.direction$, localeService.getDirection());
     const editorService = useDependency(IEditorService);
     const { sequenceNodes } = useRangesHighlight(editor, focusing, unitId, subUnitId);
     const sequenceNodesRef = useStateRef(sequenceNodes);
     const commandService = useDependency(ICommandService);
     useEffect(() => {
-        if (!editor || !dir) {
+        if (!editor) {
             return;
         }
 
         const documentData = RichTextBuilder.create(Tools.deepClone(editor.getDocumentData()))
-            .align({ horizontal: dir === 'rtl' ? HorizontalAlign.RIGHT : HorizontalAlign.LEFT })
+            .align({ horizontal: direction === 'rtl' ? HorizontalAlign.RIGHT : HorizontalAlign.LEFT })
             .getData();
         editor.setDocumentData(documentData, editor.getSelectionRanges());
-    }, [dir, editor]);
+    }, [direction, editor]);
 
     const blurEditor = useEvent(() => {
         editor?.setSelectionRanges([]);

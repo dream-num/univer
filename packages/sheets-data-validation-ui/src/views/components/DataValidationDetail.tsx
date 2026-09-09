@@ -99,7 +99,6 @@ function DataValidationDetailInner(props: { activeRuleInfo: { unitId: string; su
     const commandService = useDependency(ICommandService);
     const dataValidationModel = useDependency(DataValidationModel);
     const localeService = useDependency(LocaleService);
-    const direction = useObservable(localeService.direction$, localeService.getDirection());
     const workbook = useObservable(
         () => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET),
         undefined,
@@ -328,7 +327,6 @@ function DataValidationDetailInner(props: { activeRuleInfo: { unitId: string; su
                 error={(!localRule.ranges.length || isRangeError) ? localeService.t<LocaleKey>('sheets-data-validation-ui.panel.rangeError') : ''}
             >
                 <RangeSelector
-                    dir={direction}
                     selectorRef={rangeSelectorInstance}
                     unitId={unitId}
                     subUnitId={subUnitId}

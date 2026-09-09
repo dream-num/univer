@@ -19,17 +19,35 @@
  */
 
 import type { ComponentType, ReactElement } from 'react';
-import { cleanup, fireEvent, render } from '@testing-library/react';
-import { ILogService, Injector, LocaleService } from '@univerjs/core';
+import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
+import {
+    CommandService,
+    ConfigService,
+    ContextService,
+    DesktopLogService,
+    FOCUSING_SHEET,
+    ICommandService,
+    IConfigService,
+    IContextService,
+    ILogService,
+    Injector,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    UniverInstanceService,
+    Workbook,
+} from '@univerjs/core';
 import { ConfigProvider, Dialog, Dropdown } from '@univerjs/design';
 import { useState } from 'react';
-import { of } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
+import { DesktopLayoutService, ILayoutService } from '../../../../services/layout/layout.service';
 import { MenuItemType } from '../../../../services/menu/menu';
-import { IMenuManagerService } from '../../../../services/menu/menu-manager.service';
+import { IMenuManagerService, MenuManagerService } from '../../../../services/menu/menu-manager.service';
+import { IPlatformService, PlatformService } from '../../../../services/platform/platform.service';
+import { IUIRuntimeScopeService, UIRuntimeScopeService } from '../../../../services/runtime-scope/ui-runtime-scope.service';
+import { IShortcutService, ShortcutService } from '../../../../services/shortcut/shortcut.service';
 import { connectInjector } from '../../../../utils/di';
 import {
     DropdownMenuLabel,
@@ -40,15 +58,7 @@ import {
     TooltipWrapper,
 } from '../TooltipButtonWrapper';
 
-class TestLocaleService {
-    t(key: string) {
-        return key;
-    }
-}
-
-class TestLogService {
-    warn(): void {}
-}
+const testInjectors: Injector[] = [];
 
 function NestedDialogDropdown() {
     const [open, setOpen] = useState(false);
@@ -68,28 +78,44 @@ function renderWithDependencies(
     menuItems: ReturnType<IMenuManagerService['getMenuByPositionKey']> = []
 ) {
     const injector = new Injector();
-    injector.add([LocaleService, { useClass: TestLocaleService as never }]);
-    injector.add([ILogService, { useClass: TestLogService as never }]);
+    testInjectors.push(injector);
+    injector.add([LocaleService]);
+    injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([ComponentManager]);
     injector.add([IconManager]);
-    injector.add([IMenuManagerService, {
-        useValue: {
-            menuChanged$: of(undefined),
-            mergeMenu: () => {},
-            appendRootMenu: () => {},
-            getMenuByPositionKey: () => menuItems,
-            getFlatMenuByPositionKey: () => [],
-        },
-    }]);
+    injector.add([IMenuManagerService, { useClass: MenuManagerService }]);
+    injector.add([ICommandService, { useClass: CommandService }]);
+    injector.add([IConfigService, { useClass: ConfigService }]);
+    injector.add([IContextService, { useClass: ContextService }]);
+    injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
+    injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
+    injector.add([IPlatformService, { useClass: PlatformService }]);
+    injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
+    injector.add([IShortcutService, { useClass: ShortcutService }]);
+    const localeService = injector.get(LocaleService);
+    localeService.load({ [LocaleType.EN_US]: { Reset: 'Reset' } });
+    localeService.setLocale(LocaleType.EN_US);
+    localeService.setDirection('ltr');
+    injector.get(IMenuManagerService).appendRootMenu({
+        'test-menu': Object.fromEntries(menuItems.map((item) => [item.key, {
+            order: item.order,
+            menuItemFactory: () => item.item!,
+        }])),
+    });
+    const forceEscape = vi.spyOn(injector.get(IShortcutService), 'forceEscape');
     injector.get(ComponentManager).register('TestDynamicOption', ({ onChange }: { onChange: (value: string) => void }) => (
         <button type="button" onClick={() => onChange('dynamic-value')}>Choose dynamic value</button>
     ));
 
     const ConnectedTestRoot = connectInjector(() => element, injector) as ComponentType;
-    return render(<ConnectedTestRoot />);
+    return { ...render(<ConnectedTestRoot />), forceEscape, injector };
 }
 
-afterEach(cleanup);
+afterEach(() => {
+    cleanup();
+    testInjectors.forEach((injector) => injector.dispose());
+    testInjectors.length = 0;
+});
 
 describe('ToolbarTooltip', () => {
     it('stays hidden after its popup closes until a new trigger interaction', () => {
@@ -105,7 +131,9 @@ describe('ToolbarTooltip', () => {
         }
 
         fireEvent.mouseEnter(trigger);
-        expect(getByRole('tooltip').textContent).toBe('Fill');
+        const tooltip = getByRole('tooltip');
+        expect(tooltip.textContent).toBe('Fill');
+        expect(tooltip.classList.contains('univer-pointer-events-none')).toBe(true);
 
         rerender(renderTooltip(true));
         expect(queryByRole('tooltip')).toBeNull();
@@ -233,8 +261,143 @@ describe('DropdownWrapper', () => {
 });
 
 describe('DropdownMenuWrapper', () => {
+    it.each(['worksheet', 'workbook'])(
+        'invalidates an open Sheet menu when its %s changes',
+        async (change) => {
+            const onOptionSelect = vi.fn();
+            const { injector, getByRole, findByRole, queryByRole } = renderWithDependencies(
+                <TooltipWrapper>
+                    <DropdownMenuWrapper
+                        menuId="test-menu"
+                        options={[{ label: { name: 'RetainedOption', selectable: false } }]}
+                        onOptionSelect={onOptionSelect}
+                    >
+                        <button type="button">Open scoped menu</button>
+                    </DropdownMenuWrapper>
+                </TooltipWrapper>
+            );
+            let retainedChange: ((value: string) => void) | undefined;
+            const registration = injector.get(ComponentManager).register('RetainedOption', ({ onChange }: {
+                onChange: (value: string) => void;
+            }) => {
+                retainedChange = onChange;
+                return <button type="button">Retained option</button>;
+            });
+            const editor = document.createElement('input');
+            document.body.appendChild(editor);
+            const workbook = injector.createInstance(Workbook, {
+                id: 'original',
+                sheetOrder: ['first', 'second'],
+                sheets: { first: { id: 'first', name: 'First' }, second: { id: 'second', name: 'Second' } },
+            });
+            const peer = injector.createInstance(Workbook, {
+                id: 'peer',
+                sheetOrder: ['peer-sheet'],
+                sheets: { 'peer-sheet': { id: 'peer-sheet', name: 'Peer' } },
+            });
+            const instances = injector.get(IUniverInstanceService);
+            instances.__addUnit(workbook);
+            instances.__addUnit(peer);
+            instances.setCurrentUnitForType(workbook.getUnitId());
+            injector.get(IContextService).setContextValue(FOCUSING_SHEET, true);
+            editor.focus();
+            fireEvent.pointerDown(getByRole('button', { name: 'Open scoped menu' }), { button: 0, ctrlKey: false });
+            await findByRole('button', { name: 'Retained option' });
+            const callback = retainedChange;
+            act(() => workbook.setActiveSheet(workbook.getActiveSheet()));
+            expect(queryByRole('button', { name: 'Retained option' })).not.toBeNull();
+            act(() => {
+                if (change === 'worksheet') {
+                    workbook.setActiveSheet(workbook.getSheetBySheetId('second')!);
+                } else {
+                    instances.setCurrentUnitForType(peer.getUnitId());
+                }
+                callback?.('stale-value');
+            });
+            await waitFor(() => expect(queryByRole('button', { name: 'Retained option' })).toBeNull());
+            expect(onOptionSelect).not.toHaveBeenCalled();
+            act(() => {
+                instances.setCurrentUnitForType(workbook.getUnitId());
+                workbook.setActiveSheet(workbook.getSheetBySheetId('first')!);
+            });
+            fireEvent.pointerDown(getByRole('button', { name: 'Open scoped menu' }), { button: 0, ctrlKey: false });
+            await findByRole('button', { name: 'Retained option' });
+            act(() => callback?.('late-value-after-reopen'));
+            expect(onOptionSelect).not.toHaveBeenCalled();
+            expect(queryByRole('button', { name: 'Retained option' })).not.toBeNull();
+            registration.dispose();
+            editor.remove();
+            workbook.dispose();
+            peer.dispose();
+        }
+    );
+
+    it.each([undefined, 'embed-1'].flatMap((owner) => (
+        ['select', 'escape', 'outside', 'owner-change', 'command-focus'].map((closeAction) => ({ owner, closeAction }))
+    )))(
+        'restores the editor with boundary $owner after $closeAction only while it still owns the interaction',
+        async ({ owner, closeAction }) => {
+            const editor = document.createElement('div');
+            editor.tabIndex = 0;
+            editor.dataset.uComp = 'editor';
+            if (owner) {
+                editor.dataset.embedInteractionBoundaryOwner = owner;
+            }
+            const outside = document.createElement('input');
+            document.body.append(editor, outside);
+            try {
+                const { findByRole, getByRole } = renderWithDependencies(
+                    <ToolbarDropdownProvider>
+                        <TooltipWrapper dropdownKey="test-editor-focus">
+                            <DropdownMenuWrapper
+                                menuId="test-menu"
+                                options={[{ label: { name: 'TestDynamicOption', hoverable: false, selectable: false } }]}
+                                onOptionSelect={() => {
+                                    if (closeAction === 'command-focus') {
+                                        editor.focus();
+                                    }
+                                }}
+                            >
+                                <button type="button">Open editor menu</button>
+                            </DropdownMenuWrapper>
+                        </TooltipWrapper>
+                    </ToolbarDropdownProvider>
+                );
+                const trigger = getByRole('button', { name: 'Open editor menu' });
+                editor.focus();
+                fireEvent.pointerDown(trigger, { button: 0, ctrlKey: false });
+                const option = await findByRole('button', { name: 'Choose dynamic value' });
+                option.focus();
+
+                if (closeAction === 'outside') {
+                    fireEvent.pointerDown(outside, { button: 0, ctrlKey: false });
+                    outside.focus();
+                } else if (closeAction === 'escape') {
+                    fireEvent.keyDown(option, { key: 'Escape', keyCode: 27 });
+                } else {
+                    if (closeAction === 'owner-change') {
+                        editor.dataset.embedInteractionBoundaryOwner = 'embed-2';
+                    }
+                    fireEvent.click(option);
+                }
+
+                await waitFor(() => expect(trigger.getAttribute('aria-expanded')).toBe('false'));
+                if (closeAction === 'outside') {
+                    await waitFor(() => expect(document.activeElement).toBe(outside));
+                } else if (closeAction === 'owner-change') {
+                    await waitFor(() => expect(document.activeElement).toBe(trigger));
+                } else {
+                    await waitFor(() => expect(document.activeElement).toBe(editor));
+                }
+            } finally {
+                editor.remove();
+                outside.remove();
+            }
+        }
+    );
+
     it('renders a single embedded custom panel flush with the dropdown edge', async () => {
-        const { findByRole, getByRole } = renderWithDependencies(
+        const { findByRole, forceEscape, getByRole } = renderWithDependencies(
             <ToolbarDropdownProvider>
                 <TooltipWrapper dropdownKey="test-custom-panel">
                     <DropdownMenuWrapper
@@ -262,6 +425,11 @@ describe('DropdownMenuWrapper', () => {
 
         expect(menuItem?.className).toContain('!univer-p-0');
         expect(menuContent?.className).toContain('!univer-p-0');
+        expect(forceEscape).toHaveBeenCalledOnce();
+        const disposeShortcutEscape = vi.spyOn(forceEscape.mock.results[0].value, 'dispose');
+
+        fireEvent.click(option);
+        await waitFor(() => expect(disposeShortcutEscape).toHaveBeenCalledOnce());
     });
 
     it('keeps padding around a non-embedded custom panel', async () => {

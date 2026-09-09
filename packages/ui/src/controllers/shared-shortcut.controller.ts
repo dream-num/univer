@@ -75,16 +75,6 @@ export const OnlyDisplayPasteShortcutItem: IShortcutItem = {
     preconditions: () => false,
 };
 
-// For compatibility issues, paste from the shortcut should always go with the native paste event,
-// see #1404.
-// export const PasteShortcutItem: IShortcutItem = {
-//     id: PasteCommand.id,
-//     description: 'ui.shortcut.paste',
-//     group: '1_common-edit',
-//     binding: KeyCode.V | MetaKeys.CTRL_COMMAND,
-//     preconditions: supportClipboardAPI,
-// };
-
 export const UndoShortcutItem: IShortcutItem = {
     id: UndoCommand.id,
     description: 'ui.shortcut.undo',
@@ -101,6 +91,12 @@ export const RedoShortcutItem: IShortcutItem = {
     groupTitle: 'ui.common-edit',
     binding: KeyCode.Y | MetaKeys.CTRL_COMMAND,
     preconditions: whenEditorFocusedButNotCellEditor,
+};
+
+const RedoMacShortcutItem: IShortcutItem = {
+    ...RedoShortcutItem,
+    binding: undefined,
+    mac: KeyCode.Z | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
 };
 
 /**
@@ -129,7 +125,24 @@ export class SharedController extends Disposable {
     }
 
     private _registerShortcuts(): void {
-        const shortcutItems = [UndoShortcutItem, RedoShortcutItem];
+        const shortcutItems = [UndoShortcutItem, RedoShortcutItem, RedoMacShortcutItem];
+        for (const shortcut of shortcutItems) {
+            // Keyboard menu dismissal restores its command trigger, not the editor focus context.
+            this.disposeWithMe(this._shortcutService.registerShortcut({
+                ...shortcut,
+                eventPreconditions: (event) => {
+                    const target = event.target;
+                    return target instanceof HTMLElement &&
+                        target === target.ownerDocument.activeElement &&
+                        !target.isContentEditable &&
+                        target.matches('button[data-u-command], [data-u-command][role="button"], [data-embed-floating-menu="true"] button');
+                },
+                preconditions: (contextService) => !(
+                    contextService.getContextValue(EDITOR_ACTIVATED) ||
+                    contextService.getContextValue(FOCUSING_FX_BAR_EDITOR)
+                ),
+            }));
+        }
         shortcutItems.push(CutShortcutItem, CopyShortcutItem, OnlyDisplayPasteShortcutItem);
 
         shortcutItems.forEach((shortcut) => this.disposeWithMe(this._shortcutService.registerShortcut(shortcut)));

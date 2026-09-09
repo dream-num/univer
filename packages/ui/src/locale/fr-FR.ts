@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/fr-FR.generated';
 
 const locale: typeof enUS = {
     ui: {
+        accessibility: {
+            menu: 'Menu',
+            zoom: 'Zoom',
+            zoomIn: 'Zoom avant',
+            zoomOut: 'Zoom arrière',
+            resetZoom: 'Réinitialiser le zoom',
+        },
         objectPermission: {
             operationDenied: 'Ce contenu est protégé. Cette action est interdite.',
             remove: 'Supprimer la protection',

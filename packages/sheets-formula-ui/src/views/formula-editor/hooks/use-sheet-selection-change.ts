@@ -188,7 +188,7 @@ export function createSelectionChangeHandler<TSelection>(opts: {
     let pendingCtrlAddCount = 0;
     const duplicateEndGuard = opts.duplicateEndGuard ?? createSelectionChangeDuplicateEndGuard<TSelection>();
 
-    return (selections: TSelection[], isEnd: boolean, options?: { initial?: boolean }) => {
+    return (selections: TSelection[], isEnd: boolean, options?: { initial?: boolean; start?: boolean }) => {
         if (options?.initial) {
             // Ignore the BehaviorSubject replay when subscribing; real user selections arrive through later move events.
             return;
@@ -196,6 +196,11 @@ export function createSelectionChangeHandler<TSelection>(opts: {
 
         if (selections.length === 0) {
             return;
+        }
+
+        if (options?.start) {
+            // A new gesture may intentionally select the same reference after an edit was cancelled or committed.
+            duplicateEndGuard.reset();
         }
 
         const isCtrlAddMode = !options?.initial && prevSelectionsCount > 0 && selections.length > prevSelectionsCount;
@@ -470,15 +475,21 @@ export const useSheetSelectionChange = (
 
             const disposableCollection = new DisposableCollection();
             disposableCollection.add(refSelectionsRenderService.selectionMoveStart$.subscribe((selections) => {
-                if (!isInteractionOwner()) return;
-                handleSelectionsChange(selections, false);
+                if (!isInteractionOwner()) {
+                    return;
+                }
+                handleSelectionsChange(selections, false, { start: true });
             }));
             disposableCollection.add(refSelectionsRenderService.selectionMoving$.subscribe((selections) => {
-                if (!isInteractionOwner()) return;
+                if (!isInteractionOwner()) {
+                    return;
+                }
                 handleSelectionsChange(selections, false);
             }));
             disposableCollection.add(refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
-                if (!isInteractionOwner()) return;
+                if (!isInteractionOwner()) {
+                    return;
+                }
                 handleSelectionsChange(selections, true, { initial: isInitialMoveEnd });
                 isInitialMoveEnd = false;
             }));

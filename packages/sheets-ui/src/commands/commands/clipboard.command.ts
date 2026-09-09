@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IMultiCommand } from '@univerjs/core';
+import type { IAccessor, ICommand, IMultiCommand, Workbook } from '@univerjs/core';
+import type { ISheetRangeLocation } from '@univerjs/sheets';
 import type { LocaleKey } from '../../locale/types';
 import type { IPasteHookKeyType } from '../../services/clipboard/type';
 import { CommandType, ICommandService, IPermissionService, IUniverInstanceService, LocaleService } from '@univerjs/core';
@@ -67,6 +68,7 @@ export const SheetCutCommand: IMultiCommand = {
 
 export interface ISheetPasteParams {
     value: string;
+    target?: ISheetRangeLocation;
 }
 
 export interface ISheetPasteByShortKeyParams {
@@ -74,6 +76,7 @@ export interface ISheetPasteByShortKeyParams {
     textContent?: string;
     files?: File[];
     formulaClipboardPayload?: string;
+    target?: ISheetRangeLocation;
 }
 
 export const SheetPasteCommand: IMultiCommand = {
@@ -84,26 +87,41 @@ export const SheetPasteCommand: IMultiCommand = {
     priority: SHEET_CLIPBOARD_PRIORITY,
     preconditions: whenSheetFocused,
     handler: async (accessor: IAccessor, params: ISheetPasteParams) => {
-        checkSheetClipboardPermission(accessor, PasteCommand.id, params);
+        const sheetClipboardService = accessor.get(ISheetClipboardService);
+        const target = params?.target ?? sheetClipboardService.capturePasteTarget();
+        if (!target) {
+            return false;
+        }
+        const instanceService = accessor.get(IUniverInstanceService);
+        const workbook = instanceService.getUnit<Workbook>(target.unitId);
+        const worksheet = workbook?.getSheetBySheetId(target.subUnitId);
+        if (!workbook || !worksheet) {
+            return false;
+        }
+        const pasteParams = { value: params?.value, target };
+        checkSheetClipboardPermission(accessor, PasteCommand.id, pasteParams);
         // const messageService = accessor.get(IMessageService);
 
         // TODO: @yuhongz: check if there is excel content in the clipboard, if so
         // ask users to use shortcuts instead.
 
-        const sheetClipboardService = accessor.get(ISheetClipboardService);
-
         const clipboardInterfaceService = accessor.get(IClipboardInterfaceService);
         if (clipboardInterfaceService.supportClipboard) {
             const clipboardItems = await clipboardInterfaceService.read();
+            // A restored unit may reuse the same IDs but must not inherit an old clipboard request.
+            if (instanceService.getUnit(target.unitId) !== workbook || workbook.getSheetBySheetId(target.subUnitId) !== worksheet) {
+                return false;
+            }
             if (clipboardItems.length !== 0) {
-                return sheetClipboardService.paste(clipboardItems[0], params?.value);
+                checkSheetClipboardPermission(accessor, PasteCommand.id, pasteParams);
+                return sheetClipboardService.paste(clipboardItems[0], params?.value, target);
             }
         }
 
         const lastCopyId = sheetClipboardService.copyContentCache().getLastCopyId();
         if (lastCopyId) {
             console.warn('Since the current environment does not support the Clipboard API, we will use the internal copyId to paste the content.');
-            return sheetClipboardService.pasteByCopyId(lastCopyId, params?.value);
+            return sheetClipboardService.pasteByCopyId(lastCopyId, params?.value, target);
         }
 
         return false;
@@ -114,12 +132,17 @@ export const SheetPasteShortKeyCommand: ICommand = {
     id: SheetPasteShortKeyCommandName,
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: ISheetPasteByShortKeyParams) => {
-        checkSheetClipboardPermission(accessor, PasteCommand.id);
         const clipboardService = accessor.get(ISheetClipboardService);
+        const target = params.target ?? clipboardService.capturePasteTarget();
+        if (!target) {
+            return false;
+        }
+        checkSheetClipboardPermission(accessor, PasteCommand.id, {
+            value: PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE,
+            target,
+        });
         const { htmlContent, textContent, files, formulaClipboardPayload } = params;
-        clipboardService.legacyPaste(htmlContent, textContent, files, formulaClipboardPayload);
-
-        return true;
+        return clipboardService.legacyPaste(htmlContent, textContent, files, formulaClipboardPayload, target);
     },
 };
 
@@ -176,6 +199,8 @@ function checkSheetPastePermission(
     permissionCheckController: SheetPermissionCheckController,
     params?: ISheetPasteParams
 ): boolean {
+    const target = params?.target;
+    const ranges = target ? [target.range] : undefined;
     if (
         params?.value === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE ||
         params?.value === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMULA ||
@@ -185,7 +210,7 @@ function checkSheetPastePermission(
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
-        });
+        }, ranges, target?.unitId, target?.subUnitId);
     }
 
     if (params?.value === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_COL_WIDTH) {
@@ -198,14 +223,14 @@ function checkSheetPastePermission(
                 WorksheetSetColumnStylePermission,
             ],
             rangeTypes: [RangeProtectionPermissionEditPoint],
-        });
+        }, ranges, target?.unitId, target?.subUnitId);
     }
 
     return permissionCheckController.permissionCheckWithRanges({
         workbookTypes: [WorkbookEditablePermission],
         worksheetTypes: [WorksheetSetCellValuePermission, WorksheetSetCellStylePermission, WorksheetEditPermission],
         rangeTypes: [RangeProtectionPermissionEditPoint],
-    });
+    }, ranges, target?.unitId, target?.subUnitId);
 }
 
 export const SheetPasteValueCommand: ICommand = {

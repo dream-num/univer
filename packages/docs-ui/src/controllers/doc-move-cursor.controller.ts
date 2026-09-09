@@ -239,6 +239,19 @@ export class DocMoveCursorController extends Disposable {
             // must skip them in both directions, as ordinary cursor movement does.
             focusOffset = this._normalizeCursorOffset(body.dataStream, customRanges, focusOffset, direction);
             focusOffset = Math.min(dataStreamLength - 2, Math.max(0, focusOffset));
+            const normalizedFocusOffset = this._normalizeRenderableCursorOffset(
+                skeleton,
+                body.dataStream,
+                customRanges,
+                focusOffset,
+                direction,
+                normalizedSegmentId,
+                normalizedSegmentPage
+            );
+            if (normalizedFocusOffset == null) {
+                return;
+            }
+            focusOffset = normalizedFocusOffset;
 
             this._textSelectionManagerService.replaceDocRanges([
                 {

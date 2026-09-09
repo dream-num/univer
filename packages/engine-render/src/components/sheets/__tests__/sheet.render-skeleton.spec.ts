@@ -14,9 +14,75 @@
  * limitations under the License.
  */
 
+import type { IWorkbookData, Workbook } from '@univerjs/core';
+import { DocumentFlavor, LocaleType, Tools, Univer, UniverInstanceType } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { setupRenderTestEnv } from '../../../__tests__/render-test-utils';
 import { FontCache } from '../../docs/layout/shaping-engine/font-cache';
-import { getGeneralNumberDisplayText } from '../sheet.render-skeleton';
+import { getGeneralNumberDisplayText, SpreadsheetSkeleton } from '../sheet.render-skeleton';
+
+describe('Rich-text render snapshot isolation', () => {
+    it.each(['font cache', 'row height', 'column width'])(
+        'does not rewrite persisted rich text while calculating %s',
+        (path) => {
+            const environment = setupRenderTestEnv();
+            const univer = new Univer({ locale: LocaleType.EN_US });
+            const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+                id: 'rich-render-isolation',
+                sheetOrder: ['sheet'],
+                sheets: {
+                    sheet: {
+                        id: 'sheet',
+                        name: 'Sheet',
+                        rowCount: 10,
+                        columnCount: 10,
+                        cellData: {
+                            0: {
+                                0: {
+                                    v: '中文😀',
+                                    p: {
+                                        id: 'rich-cell',
+                                        documentStyle: {
+                                            documentFlavor: DocumentFlavor.TRADITIONAL,
+                                            pageSize: { width: 37, height: 80 },
+                                            marginTop: 7,
+                                        },
+                                        body: {
+                                            dataStream: '中文😀\r\n',
+                                            paragraphs: [{ startIndex: 4, paragraphId: 'paragraph' }],
+                                            sectionBreaks: [{ startIndex: 5, sectionId: 'section' }],
+                                            textRuns: [{ st: 0, ed: 2, ts: { bl: 1 } }],
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+            const worksheet = workbook.getActiveSheet()!;
+            const skeleton = univer.__getInjector().createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles());
+            try {
+                skeleton.calculate();
+                const before = Tools.deepClone(workbook.getSnapshot());
+                const cell = worksheet.getCellRaw(0, 0)!;
+                if (path === 'font cache') {
+                    skeleton._setFontStylesCache(0, 0, cell, {}, false);
+                    expect(skeleton.stylesCache.fontMatrix.getValue(0, 0)?.documentSkeleton).toBeDefined();
+                } else if (path === 'row height') {
+                    expect(skeleton.calculateAutoHeightForCell(0, 0)).toBeGreaterThan(0);
+                } else {
+                    expect(skeleton._getMeasuredWidthByCell(cell, 0, 0, 0)).toBeGreaterThan(0);
+                }
+                expect(workbook.getSnapshot()).toEqual(before);
+            } finally {
+                skeleton.dispose();
+                univer.dispose();
+                environment.restore();
+            }
+        }
+    );
+});
 
 describe('General number display', () => {
     afterEach(() => {

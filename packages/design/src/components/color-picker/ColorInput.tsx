@@ -15,7 +15,7 @@
  */
 
 import type { ChangeEvent } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { hexToHsv, hsvToHex, hsvToRgb, rgbToHsv } from './color-conversion';
@@ -34,51 +34,102 @@ interface IInputProps {
     onChange?: (h: number, s: number, v: number, a?: number) => void;
 }
 
+const FULL_HEX_COLOR_PATTERN = /^[0-9a-f]{6}$/i;
+
 function HexInput({ hsv, onChange }: IInputProps) {
+    const inputRef = useRef<HTMLInputElement>(null);
+    const isComposingRef = useRef(false);
     const [inputValue, setInputValue] = useState('');
     const hexValue = useMemo(() => hsvToHex(hsv[0], hsv[1], hsv[2]), [hsv]);
 
     useEffect(() => {
-        setInputValue(hexValue.replace(/^#/, ''));
+        if (isComposingRef.current) {
+            return;
+        }
+
+        const nextValue = hexValue.replace(/^#/, '');
+        // Preserve the user's casing so color echoes do not rewrite native selection or undo history.
+        setInputValue((previous) => previous.toLowerCase() === nextValue ? previous : nextValue);
     }, [hexValue]);
 
-    const isValidHex = (hex: string) => {
-        return /^[0-9A-Fa-f]{6}$/.test(hex);
-    };
-
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const newValue = e.target.value.trim();
-
-        if (newValue.length > 6) return;
-
-        if (newValue !== '' && !/^[0-9A-Fa-f]*$/.test(newValue)) return;
+    const updateInputValue = useCallback((newValue: string) => {
+        if (!/^[0-9a-f]{0,6}$/i.test(newValue)) {
+            return;
+        }
 
         setInputValue(newValue);
 
-        if (isValidHex(newValue)) {
+        if (FULL_HEX_COLOR_PATTERN.test(newValue)) {
             const hsvValue = hexToHsv(newValue);
             if (hsvValue && onChange) {
                 onChange(...hsvValue);
             }
         }
+    }, [onChange]);
+
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value.trim();
+        if (isComposingRef.current || (e.nativeEvent as InputEvent).isComposing) {
+            setInputValue(newValue);
+            return;
+        }
+
+        updateInputValue(newValue);
     };
 
+    useEffect(() => {
+        const input = inputRef.current;
+        if (!input) {
+            return;
+        }
+
+        const handleCompositionStart = (event: CompositionEvent) => {
+            event.stopPropagation();
+            isComposingRef.current = true;
+        };
+        const handleCompositionUpdate = (event: CompositionEvent) => {
+            event.stopPropagation();
+        };
+        const handleCompositionEnd = (event: CompositionEvent) => {
+            event.stopPropagation();
+            isComposingRef.current = false;
+            const value = input.value.trim();
+            if (value !== '' && !FULL_HEX_COLOR_PATTERN.test(value)) {
+                setInputValue(hexValue.replace(/^#/, ''));
+                return;
+            }
+            updateInputValue(value);
+        };
+
+        // Stop native composition before it reaches the host editor's DOM listeners.
+        input.addEventListener('compositionstart', handleCompositionStart);
+        input.addEventListener('compositionupdate', handleCompositionUpdate);
+        input.addEventListener('compositionend', handleCompositionEnd);
+        return () => {
+            input.removeEventListener('compositionstart', handleCompositionStart);
+            input.removeEventListener('compositionupdate', handleCompositionUpdate);
+            input.removeEventListener('compositionend', handleCompositionEnd);
+        };
+    }, [hexValue, updateInputValue]);
+
     const handleBlur = () => {
-        if (!isValidHex(inputValue)) {
-            setInputValue(hexValue.replace(/^#/, ''));
+        if (!FULL_HEX_COLOR_PATTERN.test(inputRef.current?.value ?? '')) {
+            const nextValue = hexValue.replace(/^#/, '');
+            setInputValue(nextValue);
         }
     };
 
     return (
         <>
             <input
+                ref={inputRef}
+                value={inputValue}
                 className={clsx(`
                   univer-w-full univer-px-2 !univer-pl-4 univer-uppercase
                   focus:univer-border-primary-500 focus:univer-outline-none
                   rtl:!univer-pl-2 rtl:!univer-pr-4
                   dark:!univer-text-gray-0
                 `, borderClassName)}
-                value={inputValue}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 maxLength={6}

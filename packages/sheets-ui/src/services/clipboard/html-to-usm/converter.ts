@@ -210,7 +210,8 @@ export class HtmlToUSMService {
                 });
                 const isEmptyMatrix = Object.keys(valueMatrix.getMatrix()).length === 0;
                 valueMatrix.setValue(isEmptyMatrix ? 0 : valueMatrix.getLength(), 0, {
-                    v: cellDataStream,
+                    // The document needs its terminal paragraph/section markers; the plain cell value does not.
+                    v: cellDataStream.slice(0, -2),
                     p,
                 });
                 rowProperties.push({}); // TODO@yuhongz

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICellDataForSheetInterceptor, IDocumentBody, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ICellData, ICellDataForSheetInterceptor, IDocumentBody, IRange, Nullable } from '@univerjs/core';
 import type {
     INumfmtItemWithCache,
     IRemoveNumfmtMutationParams,
     ISetCellsNumfmt,
     ISetNumfmtMutationParams,
+    ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
 import {
     CellValueType,
@@ -32,7 +33,6 @@ import {
     IUniverInstanceService,
     Optional,
     toDisposable,
-    UniverInstanceType,
     willLoseNumericPrecision,
 } from '@univerjs/core';
 import { stripErrorMargin } from '@univerjs/engine-formula';
@@ -41,6 +41,7 @@ import {
     BEFORE_CELL_EDIT,
     factoryRemoveNumfmtUndoMutation,
     factorySetNumfmtUndoMutation,
+    getSheetCommandTarget,
     INumfmtService,
     RemoveNumfmtMutation,
     SetNumfmtMutation,
@@ -294,23 +295,26 @@ export class NumfmtEditorController extends Disposable {
                 getMutations(command) {
                     switch (command.id) {
                         case SetRangeValuesCommand.id: {
-                            const workbook = self._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                            const unitId = workbook.getUnitId();
-                            const subUnitId = workbook.getActiveSheet()?.getSheetId();
-                            if (!subUnitId) {
-                                return {
-                                    redos: [],
-                                    undos: [],
-                                };
-                            }
-                            const list = self._collectEffectMutation.getEffects();
+                            const effects = self._collectEffectMutation.getEffects();
                             self._collectEffectMutation.clean();
-                            if (!list.length) {
+                            if (!effects.length) {
                                 return {
                                     redos: [],
                                     undos: [],
                                 };
                             }
+                            const target = getSheetCommandTarget(
+                                self._univerInstanceService,
+                                command.params as ISetRangeValuesMutationParams
+                            );
+                            if (!target) {
+                                return {
+                                    redos: [],
+                                    undos: [],
+                                };
+                            }
+                            const { unitId, subUnitId } = target;
+                            const list = effects.filter((item) => item.unitId === unitId && item.subUnitId === subUnitId);
                             const cells: ISetCellsNumfmt = list
                                 .filter((item) => !!item.value?.pattern)
                                 .map((item) => ({

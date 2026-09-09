@@ -44,7 +44,8 @@ export function otherHandler(
     let src = charArray;
 
     while (src.length) {
-        const char = src.match(/^[\s\S]/gu)?.[0];
+        // Keep ordinary ASCII cheap, but never expose a caret stop inside a combining sequence.
+        const char = src.match(/^\p{ASCII}(?![\p{Mark}\u200D])/u)?.[0] ?? getFirstGrapheme(src);
 
         if (char == null) {
             break;

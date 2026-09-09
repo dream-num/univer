@@ -729,7 +729,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         colWidth -= sideGap;
 
         if (isRichText) {
-            const modelObject = cell && this.worksheet.getCellDocumentModel(cell, style);
+            const modelObject = cell && this.worksheet.getCellDocumentModel(cell, style, { isDeepClone: true });
             if (modelObject == null) {
                 return undefined;
             }
@@ -957,7 +957,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             }
         }
         const style = this.worksheet.getComposedCellStyleByCellData(row, column, cell);
-        const modelObject = this.worksheet.getCellDocumentModel(cell, style);
+        const modelObject = this.worksheet.getCellDocumentModel(cell, style, { isDeepClone: true });
         if (modelObject == null) {
             return measuredWidth;
         }
@@ -1493,7 +1493,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         const isRichText = cellData?.p || vertexAngle || centerAngle;
 
         const modelObject = isRichText ?
-            this.worksheet.getCellDocumentModel(cellData, style, { displayRawFormula: this._renderRawFormula })
+            this.worksheet.getCellDocumentModel(cellData, style, {
+                isDeepClone: true,
+                displayRawFormula: this._renderRawFormula,
+            })
             : null;
 
         if (modelObject) {

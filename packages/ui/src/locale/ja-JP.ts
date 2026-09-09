@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/ja-JP.generated';
 
 const locale: typeof enUS = {
     ui: {
+        accessibility: {
+            menu: 'メニュー',
+            zoom: 'ズーム',
+            zoomIn: '拡大',
+            zoomOut: '縮小',
+            resetZoom: 'ズームをリセット',
+        },
         objectPermission: {
             operationDenied: 'このコンテンツは保護されているため、操作できません。',
             remove: '保護を削除',

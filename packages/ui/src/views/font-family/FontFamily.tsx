@@ -19,7 +19,6 @@ import type { Observable } from 'rxjs';
 import type { ICustomComponentProps } from '../../services/menu/menu';
 import { LocaleService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-
 import { useMemo, useState } from 'react';
 import { useDependency, useObservable } from '../../utils/di';
 import { useFontList } from './use-font-list';
@@ -71,7 +70,9 @@ export const FontFamily = ({ className, disabled: disabledProp, value, disabled$
     function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
         e.stopPropagation();
 
-        if (disabled) return;
+        if (disabled || e.nativeEvent.isComposing) {
+            return;
+        }
 
         if (e.key === 'Enter') {
             confirm();
@@ -86,9 +87,15 @@ export const FontFamily = ({ className, disabled: disabledProp, value, disabled$
     }
 
     function confirm() {
+        const query = inputValue.trim().toLowerCase();
+        if (!query) {
+            resetValue();
+            return;
+        }
+
         const font = fonts.find((item) => {
             const label = localeService.t(item.label);
-            return label.toLowerCase().includes(inputValue.trim().toLowerCase());
+            return label.toLowerCase().includes(query);
         });
 
         if (!font) {
@@ -120,6 +127,7 @@ export const FontFamily = ({ className, disabled: disabledProp, value, disabled$
                 `}
                 type="text"
                 value={inputValue}
+                onPointerDown={(event) => event.stopPropagation()}
                 onChange={handleChangeSelection}
                 onKeyDown={handleKeyDown}
                 onBlur={handleBlur}

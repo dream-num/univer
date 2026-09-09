@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/ko-KR.generated';
 
 const locale: typeof enUS = {
     ui: {
+        accessibility: {
+            menu: '메뉴',
+            zoom: '확대/축소',
+            zoomIn: '확대',
+            zoomOut: '축소',
+            resetZoom: '확대/축소 초기화',
+        },
         objectPermission: {
             operationDenied: '이 콘텐츠는 보호되어 있어 작업을 수행할 수 없습니다.',
             remove: '보호 삭제',

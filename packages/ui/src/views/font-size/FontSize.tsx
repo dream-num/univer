@@ -17,32 +17,48 @@
 import type { KeyboardEvent } from 'react';
 import type { IFontSizeProps } from './interface';
 import { InputNumber } from '@univerjs/design';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useObservable } from '../../utils/di';
 
 export const FontSize = (props: IFontSizeProps) => {
     const { value, min, max, onChange, disabled$ } = props;
     const disabled = useObservable(disabled$);
-    const [realValue, setRealValue] = useState<number>(Number(value ?? 0));
+    const [draft, setDraft] = useState<{ source: number; value: number | null } | null>(null);
+    const inputValue = draft !== null && draft.source === value ? draft.value : Number(value ?? 0);
 
-    const _value = useMemo(() => Number(value ?? realValue), [value]);
+    if (draft !== null && draft.source !== value) {
+        setDraft(null);
+    }
 
-    function handleChange(value: number | null) {
-        if (value === null) return;
+    function handleChange(nextValue: number | null) {
+        setDraft({ source: value, value: nextValue });
+    }
 
-        setRealValue(value);
+    function resetDraft() {
+        setDraft(null);
     }
 
     function handleStopPropagation(e: KeyboardEvent<HTMLInputElement>) {
         e.stopPropagation();
 
-        if (e.code === 'Enter') {
-            onChange(realValue);
+        if (disabled || e.nativeEvent.isComposing) {
+            return;
+        }
+
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            resetDraft();
+        } else if (e.code === 'Enter') {
+            resetDraft();
+            if (inputValue !== null) {
+                // Clamp on confirmation: a draft "2" must remain a valid prefix of "24".
+                onChange(Math.min(max, Math.max(min, inputValue)));
+            }
         }
     }
 
     return (
-        <div className="univer-h-6 univer-w-7 univer-text-sm">
+        <div className="univer-h-6 univer-w-7 univer-text-sm" onPointerDown={(event) => event.stopPropagation()}>
             <InputNumber
                 className={`
                   univer-block univer-h-6 univer-border-none univer-bg-transparent univer-leading-6
@@ -50,12 +66,11 @@ export const FontSize = (props: IFontSizeProps) => {
                   [&_input]:univer-h-6 [&_input]:univer-w-7 [&_input]:univer-border-none
                   [&_input]:!univer-bg-transparent [&_input]:univer-p-0 [&_input]:univer-text-sm
                 `}
-                value={_value}
+                value={inputValue}
                 controls={false}
-                min={min}
-                max={max}
                 onKeyDown={handleStopPropagation}
                 onChange={handleChange}
+                onBlur={resetDraft}
                 disabled={disabled}
             />
         </div>

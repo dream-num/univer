@@ -853,7 +853,7 @@ export class SheetFindModel extends FindModel {
             }
 
             const isSame = isSamePosition(range, matchRange);
-            return stayIfOnMatch ? isSame : !isSame;
+            return stayIfOnMatch || !isSame;
         });
 
         if (index === -1) {

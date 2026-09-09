@@ -16,6 +16,7 @@
 
 import type { PropsWithChildren } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AnchoredContextMenu } from '../AnchoredContextMenu';
 
@@ -41,11 +42,16 @@ vi.mock('../../../../utils/di', () => ({
 
 vi.mock('../ContextMenuPanel', () => ({
     CONTEXT_MENU_SUBMENU_PORTAL_ATTR: 'data-u-context-menu-submenu',
-    ContextMenuPanel: (props: { autoFocus?: boolean; onCancel?: () => void }) => {
+    ContextMenuPanel: (props: {
+        autoFocus?: boolean;
+        onCancel?: () => void;
+        onOptionSelect?: (option: { label: string; value: string }) => void;
+    }) => {
+        const [value, setValue] = useState('2');
         panelProps(props);
         return (
-            <button
-                type="button"
+            <div
+                tabIndex={-1}
                 onKeyDown={(event) => {
                     if (event.key === 'Escape') {
                         event.stopPropagation();
@@ -53,8 +59,18 @@ vi.mock('../ContextMenuPanel', () => ({
                     }
                 }}
             >
-                Context menu item
-            </button>
+                <button
+                    type="button"
+                    aria-label="Context menu item"
+                    onClick={() => props.onOptionSelect?.({ label: 'test.command.menu-value', value })}
+                >
+                    <input
+                        aria-label="Menu value"
+                        value={value}
+                        onChange={(event) => setValue(event.target.value)}
+                    />
+                </button>
+            </div>
         );
     },
 }));
@@ -203,4 +219,72 @@ describe('AnchoredContextMenu', () => {
 
         expect(panelProps).toHaveBeenCalledWith(expect.objectContaining({ autoFocus: true }));
     });
+
+    it('keeps a draft during anchor movement but resets it when the menu reopens', () => {
+        const selections: Array<{ label: string; value: string }> = [];
+        const renderMenu = (visible: boolean, left: number) => (
+            <AnchoredContextMenu
+                hostId="desktop"
+                visible={visible}
+                anchorRect={{ left, top: 10, bottom: 10 }}
+                menuType="drawing"
+                onRequestClose={() => {}}
+                onOptionSelect={(option) => selections.push(option as { label: string; value: string })}
+            />
+        );
+        const view = render(renderMenu(true, 10));
+        const input = screen.getByRole('textbox', { name: 'Menu value' }) as HTMLInputElement;
+        input.focus();
+        fireEvent.change(input, { target: { value: '3' } });
+
+        view.rerender(renderMenu(true, 20));
+
+        expect(screen.getByRole('textbox', { name: 'Menu value' })).toBe(input);
+        expect(document.activeElement).toBe(input);
+        expect(input.value).toBe('3');
+        expect(selections).toEqual([]);
+
+        view.rerender(renderMenu(false, 20));
+        view.rerender(renderMenu(true, 20));
+        const reopenedInput = screen.getByRole('textbox', { name: 'Menu value' }) as HTMLInputElement;
+        expect(reopenedInput.value).toBe('2');
+        fireEvent.click(reopenedInput.closest('button')!);
+        expect(selections).toEqual([{ label: 'test.command.menu-value', value: '2' }]);
+    });
+
+    it.each(['container', 'button', 'input'] as const)(
+        'requests closure once when Escape comes from the %s',
+        (targetKind) => {
+            const close = vi.fn();
+            const selection = vi.fn();
+            const view = render(
+                <AnchoredContextMenu
+                    hostId="desktop"
+                    visible
+                    anchorRect={{ left: 10, top: 10, bottom: 10 }}
+                    menuType="drawing"
+                    onRequestClose={close}
+                    onOptionSelect={selection}
+                />
+            );
+            const input = screen.getByRole('textbox', { name: 'Menu value' });
+            const targets = {
+                input,
+                button: input.closest('button'),
+                container: input.closest('[tabindex="-1"]'),
+            };
+            const target = targets[targetKind];
+            expect(target).not.toBeNull();
+
+            fireEvent.keyDown(target!, { key: 'Escape', bubbles: true });
+
+            expect(close).toHaveBeenCalledOnce();
+            expect(selection).not.toHaveBeenCalled();
+            expect((input as HTMLInputElement).value).toBe('2');
+
+            view.unmount();
+            fireEvent.keyDown(document.body, { key: 'Escape', bubbles: true });
+            expect(close).toHaveBeenCalledOnce();
+        }
+    );
 });

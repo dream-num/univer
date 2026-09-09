@@ -53,6 +53,8 @@ export class InputManager extends Disposable {
 
     private _currentMouseEnterPicked: Nullable<BaseObject | Scene>;
     private _startingPosition = new Vector2(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
+    private _pointerDownPosition: Nullable<Vector2>;
+    private _pointerDragged = false;
     private _delayedTimeout: NodeJS.Timeout | number = -1;
     private _delayedTripeTimeout: NodeJS.Timeout | number = -1;
     private _doubleClickOccurred = 0;
@@ -156,6 +158,7 @@ export class InputManager extends Disposable {
     }
 
     _onPointerLeave(evt: IPointerEvent) {
+        this._resetClickSequence();
         // preserve compatibility with Safari when pointerId is not present
         if (evt.pointerId === undefined) {
             evt.pointerId = 0;
@@ -169,6 +172,9 @@ export class InputManager extends Disposable {
         // preserve compatibility with Safari when pointerId is not present
         if ((evt as IPointerEvent).pointerId === undefined) {
             (evt as unknown as PointerEvent).pointerId = 0;
+        }
+        if (this._pointerDownPosition && this._isPointerSwiping(evt.clientX, evt.clientY, this._pointerDownPosition)) {
+            this._pointerDragged = true;
         }
         const currentObject = this._currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
 
@@ -188,6 +194,12 @@ export class InputManager extends Disposable {
             (evt as unknown as PointerEvent).pointerId = 0;
         }
 
+        this._pointerDownPosition = new Vector2(evt.clientX, evt.clientY);
+        this._pointerDragged = false;
+        if (evt.button !== 0) {
+            this._resetClickSequence();
+        }
+
         const currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
         const isStop = currentObject?.triggerPointerDown(evt);
 
@@ -202,6 +214,10 @@ export class InputManager extends Disposable {
             evt.pointerId = 0;
         }
 
+        const isClick = evt.button === 0 && this._pointerDownPosition != null && !this._pointerDragged &&
+            !this._isPointerSwiping(evt.clientX, evt.clientY, this._pointerDownPosition);
+        this._pointerDownPosition = null;
+
         const currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
         const isStop = currentObject?.triggerPointerUp(evt);
 
@@ -209,10 +225,16 @@ export class InputManager extends Disposable {
             this._scene.onPointerUp$.emitEvent(evt);
         }
 
-        this._prePointerDoubleOrTripleClick(evt);
+        if (isClick) {
+            this._prePointerDoubleOrTripleClick(evt);
+        } else {
+            this._resetClickSequence();
+        }
     }
 
     _onPointerCancel(evt: IPointerEvent) {
+        this._pointerDownPosition = null;
+        this._resetClickSequence();
         this._scene.onPointerCancel$.emitEvent(evt);
         const currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
         currentObject?.triggerPointerCancel(evt);
@@ -367,6 +389,8 @@ export class InputManager extends Disposable {
      * Detaches all event handlers
      */
     detachControl() {
+        this._pointerDownPosition = null;
+        this._resetClickSequence();
         if (!this._alreadyAttached) {
             return;
         }
@@ -448,10 +472,15 @@ export class InputManager extends Disposable {
      * @hidden
      * @returns Boolean if delta for pointer exceeds drag movement threshold
      */
-    private _isPointerSwiping(pointerX: number, pointerY: number, threshold = InputManager.DragMovementThreshold): boolean {
+    private _isPointerSwiping(
+        pointerX: number,
+        pointerY: number,
+        origin = this._startingPosition,
+        threshold = InputManager.DragMovementThreshold
+    ): boolean {
         return (
-            Math.abs(this._startingPosition.x - pointerX) > threshold ||
-            Math.abs(this._startingPosition.y - pointerY) > threshold
+            Math.abs(origin.x - pointerX) > threshold ||
+            Math.abs(origin.y - pointerY) > threshold
         );
     }
 
@@ -461,12 +490,13 @@ export class InputManager extends Disposable {
             ? InputManager.TouchDoubleClickMovementThreshold
             : InputManager.DragMovementThreshold;
 
-        const isMoveThreshold = this._isPointerSwiping(clientX, clientY, movementThreshold);
+        const isMoveThreshold = this._isPointerSwiping(clientX, clientY, this._startingPosition, movementThreshold);
 
         if (isMoveThreshold) {
-            this._resetDoubleClickParam();
+            this._resetClickSequence();
         }
 
+        clearTimeout(this._delayedTimeout);
         this._delayedTimeout = setTimeout(() => {
             this._resetDoubleClickParam();
         }, InputManager.DoubleClickDelay);
@@ -500,6 +530,12 @@ export class InputManager extends Disposable {
     private _resetDoubleClickParam() {
         this._doubleClickOccurred = 0;
         clearTimeout(this._delayedTimeout);
+    }
+
+    private _resetClickSequence() {
+        this._resetDoubleClickParam();
+        this._tripleClickState = false;
+        clearTimeout(this._delayedTripeTimeout);
     }
 
     get capturedObject() {

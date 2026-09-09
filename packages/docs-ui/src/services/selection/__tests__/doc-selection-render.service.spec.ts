@@ -1282,6 +1282,22 @@ describe('DocSelectionRenderService', () => {
         expect(document.activeElement).toBe(input);
     });
 
+    it.each(['input', 'textarea', 'select'])('preserves an embed-owned %s during selection synchronization', (tagName) => {
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService();
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        TestLayoutService.root.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        input.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        const control = document.createElement(tagName);
+        TestLayoutService.root.appendChild(control);
+        control.focus();
+        expect(document.activeElement).toBe(control);
+        expect(service.canFocusing).toBe(false);
+        service.sync();
+        expect(document.activeElement).toBe(control);
+        service.activate(12, 34, true);
+        expect(document.activeElement).toBe(control);
+    });
+
     it('allows the internal sheet cell editor to refocus from an embed-owned canvas', () => {
         const focusCoordinator = new EmbedRuntimeFocusCoordinator();
         const { input, renderUnit, service, univer } = createRealSelectionRenderService({
@@ -1351,6 +1367,64 @@ describe('DocSelectionRenderService', () => {
             { type: 'blur', content: 'leaving editor' },
         ]);
         expect(input.textContent).toBe('');
+    });
+
+    it.each(['input', 'compositionupdate'])('retains the first %s content when before-input restores a missing caret', (type) => {
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService();
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        const caret = {
+            ...createTextRange({ isActive: vi.fn(() => true), collapsed: true }),
+            startOffset: 0,
+            endOffset: 0,
+        };
+        const before = service.onInputBefore$.subscribe((config) => {
+            expect(config?.activeRange).toBeNull();
+            (service as unknown as { _rangeList: TextRange[] })._rangeList = [caret as never];
+        });
+        const received: Array<{ content?: string; start?: number; end?: number }> = [];
+        const inputStream = type === 'input' ? service.onInput$ : service.onCompositionupdate$;
+        const subscription = inputStream.subscribe((config) => {
+            if (config) {
+                received.push({
+                    content: config.content,
+                    start: config.activeRange?.startOffset,
+                    end: config.activeRange?.endOffset,
+                });
+            }
+        });
+        cleanup.push(() => before.unsubscribe(), () => subscription.unsubscribe());
+
+        input.textContent = '首';
+        input.dispatchEvent(type === 'input'
+            ? new InputEvent(type, { bubbles: true, data: '首', inputType: 'insertText' })
+            : new CompositionEvent(type, { bubbles: true, data: '首' }));
+
+        expect(received).toEqual([{ content: '首', start: 0, end: 0 }]);
+    });
+
+    it('preserves an existing input selection snapshot when before-input changes the caret', () => {
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService();
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        const range = {
+            ...createTextRange({ isActive: vi.fn(() => true) }),
+            startOffset: 1,
+            endOffset: 3,
+        };
+        (service as unknown as { _rangeList: TextRange[] })._rangeList = [range as never];
+        const before = service.onInputBefore$.subscribe(() => {
+            (service as unknown as { _rangeList: TextRange[] })._rangeList = [];
+        });
+        const received: Array<{ start?: number; end?: number }> = [];
+        const subscription = service.onInput$.subscribe((config) => received.push({
+            start: config.activeRange?.startOffset,
+            end: config.activeRange?.endOffset,
+        }));
+        cleanup.push(() => before.unsubscribe(), () => subscription.unsubscribe());
+
+        input.textContent = 'A';
+        input.dispatchEvent(new InputEvent('input', { bubbles: true, data: 'A', inputType: 'insertText' }));
+
+        expect(received).toEqual([{ start: 1, end: 3 }]);
     });
 
     it('does not publish host hidden editor events while a child session owns the host document', () => {
@@ -1663,7 +1737,7 @@ describe('DocSelectionRenderService', () => {
         expect(container.style.top).toBe('-153px');
     });
 
-    it('parks the active selection while scrolling and restores the editor when the selection remains in view', () => {
+    it.each(['editor', 'button', 'input'] as const)('updates the caret position after scrolling without moving focus from the %s', (target) => {
         getCanvasOffsetByEngineMock.mockReturnValue({ left: 1, top: 2 });
         const scrollAfter$ = new TestRenderEvent<{ viewport: unknown }>();
         const scrollEnd$ = new TestRenderEvent<{ viewport: unknown }>();
@@ -1686,8 +1760,17 @@ describe('DocSelectionRenderService', () => {
             getViewports: () => [viewport],
             getEngine: () => ({ name: 'engine' }),
         };
-        const { renderUnit, service, univer } = createRealSelectionRenderService({ scene });
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService({ scene });
         cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        TestLayoutService.root.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        const focusTarget = target === 'editor' ? input : document.createElement(target);
+        if (focusTarget !== input) {
+            TestLayoutService.root.appendChild(focusTarget);
+            focusTarget.focus();
+        } else {
+            service.focus();
+        }
+        expect(document.activeElement).toBe(focusTarget);
         const activeRange = {
             isActive: () => true,
             activeStatic,
@@ -1701,6 +1784,7 @@ describe('DocSelectionRenderService', () => {
         scrollAfter$.emit({ viewport });
         scrollEnd$.emit({ viewport });
 
+        expect(document.activeElement).toBe(focusTarget);
         const container = document.getElementById('univer-doc-selection-container-selection-render-doc')!;
         expect(activeStatic).toHaveBeenCalledTimes(1);
         expect(deactivateStatic).not.toHaveBeenCalled();

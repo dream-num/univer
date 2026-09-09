@@ -203,8 +203,16 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 
     override dispose(): void {
-        this._editors.clear();
+        if (this._disposed) {
+            return;
+        }
+
+        for (const editorUnitId of this._editors.keys()) {
+            this._unRegister(editorUnitId);
+        }
         this._editorRenderConfigs.clear();
+        this._blur$.complete();
+        this._focus$.complete();
         super.dispose();
     }
 
@@ -222,14 +230,18 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 
     register(config: IEditorConfigParams, container: HTMLDivElement): IDisposable {
+        this.ensureNotDisposed();
         const { initialSnapshot, canvasStyle = {} } = config;
         const editorUnitId = initialSnapshot.id;
-        this._editorRenderConfigs.set(editorUnitId, {
+        this._editors.get(editorUnitId)?.dispose(false);
+        this._editors.delete(editorUnitId);
+        const renderConfig: IEditorRenderConfig = {
             canvasStyle,
             scrollBar: config.scrollBar,
             ...(config.backScrollOffset === undefined ? {} : { backScrollOffset: config.backScrollOffset }),
             ...(config.preserveHostFocus === undefined ? {} : { preserveHostFocus: config.preserveHostFocus }),
-        });
+        };
+        this._editorRenderConfigs.set(editorUnitId, renderConfig);
 
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(editorUnitId, UniverInstanceType.UNIVER_DOC);
 
@@ -287,7 +299,10 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             }
         }
         return toDisposable(() => {
-            this._unRegister(editorUnitId);
+            // An older container may unmount after a replacement has registered the same ID.
+            if (this._editorRenderConfigs.get(editorUnitId) === renderConfig) {
+                this._unRegister(editorUnitId);
+            }
         });
     }
 
@@ -296,6 +311,10 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         if (editor == null) {
             this._editorRenderConfigs.delete(editorUnitId);
             return;
+        }
+
+        if (this._focusEditorUnitId === editorUnitId) {
+            this.blur(true);
         }
 
         const preserveHostFocus = this._editorRenderConfigs.get(editorUnitId)?.preserveHostFocus === true;

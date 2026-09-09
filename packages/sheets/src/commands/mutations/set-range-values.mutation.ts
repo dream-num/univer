@@ -207,6 +207,6 @@ function updateCellProperty<K extends keyof ICellData>(
     } else if (value === null) {
         delete cell[key];
     } else {
-        cell[key] = value;
+        cell[key] = Tools.deepClone(value);
     }
 }

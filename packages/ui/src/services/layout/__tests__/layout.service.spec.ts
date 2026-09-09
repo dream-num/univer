@@ -136,6 +136,29 @@ describe('DesktopLayoutService', () => {
         expect(service.rootContainerElement).toBeNull();
     });
 
+    it('focuses an explicit child without replacing the globally focused host', () => {
+        const { injector, service, univerInstanceService } = createService();
+        const child = injector.createInstance(TestSlideUnit, 'slide-child');
+        univerInstanceService.__addUnit(child);
+        const current = univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SLIDE);
+        const focused: string[] = [];
+        const registration = service.registerFocusHandler(UniverInstanceType.UNIVER_SLIDE, (unitId) => focused.push(unitId));
+        try {
+            service.focus('slide-child');
+            expect(focused).toEqual(['slide-child']);
+            expect(univerInstanceService.getFocusedUnit()?.getUnitId()).toBe('slide-1');
+            expect(univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SLIDE)).toBe(current);
+
+            service.focus('missing-child');
+            expect(focused).toEqual(['slide-child']);
+            service.focus();
+            expect(focused).toEqual(['slide-child', 'slide-1']);
+        } finally {
+            registration.dispose();
+            injector.dispose();
+        }
+    });
+
     it('rejects duplicate registrations that would make focus ownership ambiguous', () => {
         const { service } = createService();
         const root = createElement('app-layout');

@@ -266,6 +266,13 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
         const bId = commandId ?? id;
         const sId = selectionsCommandId ?? commandId ?? id;
         const titleToDisplay = grid ? (showLabel ? gridLabel : large ? undefined : title) : title;
+        const customLabelName = typeof label === 'string' ? label : label?.name ?? '';
+        const hasCustomLabel = Boolean(componentManager.get(customLabelName));
+        const selectorAriaLabel = tooltip
+            ? localeService.t(tooltip)
+            : typeof titleToDisplay === 'string'
+                ? localeService.t(titleToDisplay)
+                : undefined;
 
         function handleSelect(option: IValueOption) {
             if (disabled) return;
@@ -359,6 +366,10 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                 >
                     <div
                         data-u-command={id}
+                        role={hasCustomLabel ? undefined : 'button'}
+                        tabIndex={hasCustomLabel ? undefined : disabled ? -1 : 0}
+                        aria-disabled={hasCustomLabel ? undefined : disabled}
+                        aria-label={hasCustomLabel ? undefined : selectorAriaLabel}
                         className={clsx(toolbarSelectorRootVariants({ disabled, active: activated }), {
                             'univer-box-border univer-h-full univer-min-w-14 univer-flex-col univer-justify-center univer-gap-1 univer-px-1.5 univer-py-1 univer-text-xs [&>svg]:univer-size-8': grid && large,
                             'univer-box-border univer-h-full': grid && !large,
@@ -418,6 +429,11 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
 
     function renderButtonType() {
         const isCustomComponent = componentManager.get(typeof label === 'string' ? label : label?.name ?? '');
+        const buttonAriaLabel = tooltip
+            ? localeService.t(tooltip)
+            : typeof title === 'string'
+                ? localeService.t(title)
+                : undefined;
         const buttonClassName = clsx(grid && !large && `
           univer-h-full univer-min-w-8
           [&>svg]:univer-size-4
@@ -462,6 +478,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
         return (
             <ToolbarButton
                 data-u-command={id}
+                aria-label={buttonAriaLabel}
                 className={buttonClassName}
                 style={buttonStyle}
                 noIcon={!icon}

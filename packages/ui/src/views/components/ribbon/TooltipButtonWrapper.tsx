@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import type { Workbook } from '@univerjs/core';
 import type { IDropdownMenuProps, IDropdownProps, ITooltipProps } from '@univerjs/design';
 import type { ComponentType, ReactNode } from 'react';
 import type { IMenuItem, IValueOption } from '../../../services/menu/menu';
+import { FOCUSING_SHEET, IContextService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import {
     clsx,
     ConfigContext,
@@ -36,10 +38,12 @@ import {
     useRef,
     useState,
 } from 'react';
-import { combineLatest, map, merge, of, scan, startWith } from 'rxjs';
+import { combineLatest, map, merge, of, scan, startWith, switchMap } from 'rxjs';
+import { ILayoutService } from '../../../services/layout/layout.service';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
+import { IShortcutService } from '../../../services/shortcut/shortcut.service';
 import { useDependency, useObservable } from '../../../utils/di';
-import { keepInteractionInsideSameEmbedBoundary } from '../../../utils/embed-boundary';
+import { getEmbedBoundaryOwner, keepInteractionInsideSameEmbedBoundary } from '../../../utils/embed-boundary';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 
 const TooltipWrapperContext = createContext({
@@ -78,7 +82,9 @@ export function ToolbarTooltip(props: IToolbarTooltipProps) {
     return (
         <Tooltip
             {...tooltipProps}
-            className={clsx('univer-fill-mode-backwards univer-delay-100', tooltipProps.className)}
+            className={clsx('univer-fill-mode-backwards univer-delay-100', tooltipProps.className, `
+              univer-pointer-events-none
+            `)}
             visible={!popupOpen && tooltipVisible}
             onVisibleChange={(visible) => {
                 if (!popupOpen) {
@@ -286,6 +292,50 @@ export function DropdownMenuWrapper({
     dropdownMenuComponent?: ComponentType<IDropdownMenuProps>;
 }) {
     const { dropdownVisible, setDropdownVisible } = useContext(TooltipWrapperContext);
+    const shortcutService = useDependency(IShortcutService);
+    const contextService = useDependency(IContextService);
+    const instanceService = useDependency(IUniverInstanceService);
+    const layoutService = useDependency(ILayoutService);
+    const editorFocusRef = useRef<{ element: HTMLElement; owner?: string } | null>(null);
+    const sheetTargetRef = useRef<{ unitId: string; sheetId: string; valid: boolean } | null>(null);
+    const sheetTarget = sheetTargetRef.current;
+
+    useEffect(() => {
+        const target = sheetTargetRef.current;
+        if (!dropdownVisible || !target) {
+            return undefined;
+        }
+
+        const subscription = instanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(
+            switchMap((workbook) => workbook
+                ? workbook.activeSheet$.pipe(map((sheet) => ({ workbook, sheetId: sheet?.getSheetId() })))
+                : of(null))
+        ).subscribe((current) => {
+            if (current?.workbook.getUnitId() !== target.unitId || current?.sheetId !== target.sheetId) {
+                target.valid = false;
+                editorFocusRef.current = null;
+                setDropdownVisible(false);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [dropdownVisible, instanceService, setDropdownVisible]);
+
+    useEffect(() => () => {
+        if (sheetTargetRef.current) {
+            sheetTargetRef.current.valid = false;
+            sheetTargetRef.current = null;
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!dropdownVisible) {
+            return undefined;
+        }
+
+        const shortcutEscape = shortcutService.forceEscape();
+        return () => shortcutEscape.dispose();
+    }, [dropdownVisible, shortcutService]);
 
     useEffect(() => {
         if (disabled && dropdownVisible) {
@@ -331,7 +381,55 @@ export function DropdownMenuWrapper({
     }, [menuItems, hiddenStates]);
 
     function handleVisibleChange(visible: boolean) {
+        if (visible) {
+            const element = document.activeElement;
+            const workbook = contextService.getContextValue(FOCUSING_SHEET)
+                ? instanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)
+                : null;
+            const sheetId = workbook?.getActiveSheet()?.getSheetId();
+            if (sheetTargetRef.current) {
+                sheetTargetRef.current.valid = false;
+            }
+            sheetTargetRef.current = workbook && sheetId ? { unitId: workbook.getUnitId(), sheetId, valid: true } : null;
+            const owner = getEmbedBoundaryOwner(element);
+            editorFocusRef.current = element instanceof HTMLElement && element.dataset.uComp === 'editor'
+                ? { element, owner }
+                : null;
+        }
         setDropdownVisible(visible);
+    }
+
+    function handleCloseAutoFocus(event: Event) {
+        const editorFocus = editorFocusRef.current;
+        editorFocusRef.current = null;
+        if (sheetTargetRef.current && !sheetTargetRef.current.valid) {
+            event.preventDefault();
+            const activeElement = document.activeElement;
+            const focusInClosingMenu = event.target instanceof HTMLElement && event.target.contains(activeElement);
+            if (activeElement === document.body || focusInClosingMenu) {
+                layoutService.focus();
+            }
+            return;
+        }
+        if (!editorFocus?.element.isConnected || getEmbedBoundaryOwner(editorFocus.element) !== editorFocus.owner) {
+            return;
+        }
+
+        const activeElement = editorFocus.element.ownerDocument.activeElement;
+        const focusInClosingMenu = event.target instanceof HTMLElement && event.target.contains(activeElement);
+        if (activeElement !== editorFocus.element.ownerDocument.body && activeElement !== editorFocus.element && !focusInClosingMenu) {
+            return;
+        }
+
+        event.preventDefault();
+        editorFocus.element.focus({ preventScroll: true });
+    }
+
+    function handlePointerDownOutside(event: { currentTarget: EventTarget | null; target: EventTarget | null; preventDefault: () => void }) {
+        if (editorFocusRef.current && (!editorFocusRef.current.owner || getEmbedBoundaryOwner(event.target) !== editorFocusRef.current.owner)) {
+            editorFocusRef.current = null;
+        }
+        keepInteractionInsideSameEmbedBoundary(event);
     }
 
     function handleEmbedBoundaryFocusOutside(event: { currentTarget: EventTarget | null; target: EventTarget | null; preventDefault: () => void }) {
@@ -339,6 +437,19 @@ export function DropdownMenuWrapper({
     }
 
     function handleOptionSelect(option: IValueOption) {
+        const target = sheetTarget;
+        if (target && target !== sheetTargetRef.current) {
+            return;
+        }
+        if (target && (
+            !target.valid ||
+            instanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId() !== target.unitId ||
+            instanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet()?.getSheetId() !== target.sheetId
+        )) {
+            editorFocusRef.current = null;
+            setDropdownVisible(false);
+            return;
+        }
         onOptionSelect(option);
         setDropdownVisible(false);
     }
@@ -443,6 +554,8 @@ export function DropdownMenuWrapper({
                 disabled={disabled}
                 open={dropdownVisible}
                 onOpenChange={handleVisibleChange}
+                onCloseAutoFocus={handleCloseAutoFocus}
+                onPointerDownOutside={handlePointerDownOutside}
                 onFocusOutside={handleEmbedBoundaryFocusOutside}
                 onInteractOutside={handleEmbedBoundaryFocusOutside}
             >
@@ -494,6 +607,8 @@ export function DropdownMenuWrapper({
                 disabled={disabled}
                 open={dropdownVisible}
                 onOpenChange={handleVisibleChange}
+                onCloseAutoFocus={handleCloseAutoFocus}
+                onPointerDownOutside={handlePointerDownOutside}
                 onFocusOutside={handleEmbedBoundaryFocusOutside}
                 onInteractOutside={handleEmbedBoundaryFocusOutside}
             >

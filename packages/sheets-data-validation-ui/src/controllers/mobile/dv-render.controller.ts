@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellRenderContext, IRange } from '@univerjs/core';
+import type { ICellRenderContext } from '@univerjs/core';
 import {
     DataValidationStatus,
     DataValidationType,
@@ -22,14 +22,14 @@ import {
     Inject,
     InterceptorEffectEnum,
     RxDisposable,
-    sequenceExecute,
 } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { DataValidationCacheService, getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { AutoHeightController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { bufferTime, filter } from 'rxjs';
+import { bufferTime, filter, takeUntil } from 'rxjs';
+import { recalculateAutoHeight } from '../dv-render.controller';
 
 const INVALID_MARK = {
     tr: {
@@ -166,22 +166,11 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
         this._sheetDataValidationModel.ruleChange$
             .pipe(
                 filter((change) => change.source === 'command'),
-                bufferTime(16)
+                bufferTime(16),
+                takeUntil(this.dispose$)
             )
             .subscribe((infos) => {
-                const ranges: IRange[] = [];
-                infos.forEach((info) => {
-                    if (info.rule.type === DataValidationType.LIST_MULTIPLE || info.rule.type === DataValidationType.LIST) {
-                        if (info.rule?.ranges) {
-                            ranges.push(...info.rule.ranges);
-                        }
-                    }
-                });
-
-                if (ranges.length) {
-                    const mutations = this._autoHeightController.getUndoRedoParamsOfAutoHeight(ranges);
-                    sequenceExecute(mutations.redos, this._commandService);
-                }
+                recalculateAutoHeight(infos, this._autoHeightController, this._commandService);
             });
     }
 }

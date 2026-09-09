@@ -41,6 +41,7 @@ import {
     Injector,
     IUniverInstanceService,
     LocaleService,
+    LocaleType,
     LogLevel,
     toDisposable,
     UniverInstanceType,
@@ -52,14 +53,16 @@ import { createRoot } from 'react-dom/client';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
+import enUS from '../../locale/en-US';
 import { ThreadCommentPanelService } from '../../services/thread-comment-panel.service';
 import { ThreadCommentEditor } from '../ThreadCommentEditor';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 const EDITOR_ID = 'thread-comment-editor';
-const REPLY_LABEL = 'thread-comment-ui.editor.reply';
-const CANCEL_LABEL = 'thread-comment-ui.editor.cancel';
+const REPLY_LABEL = enUS['thread-comment-ui'].editor.reply;
+const CANCEL_LABEL = enUS['thread-comment-ui'].editor.cancel;
+const testInjectors: Injector[] = [];
 const IRenderManagerService = createIdentifier<TestRenderManagerService>('engine-render.render-manager.service');
 
 interface IEditorRecord {
@@ -316,12 +319,6 @@ class TestRenderManagerService {
     dispose(): void {}
 }
 
-class TestLocaleService {
-    t(key: string) {
-        return key;
-    }
-}
-
 class TestShortcutService {
     readonly shortcutChanged$ = new Subject<void>();
 
@@ -394,12 +391,13 @@ const DeleteRightCommand: ICommand = {
 
 function createEditorTestBed() {
     const injector = new Injector();
+    testInjectors.push(injector);
     const dependencies: Dependency[] = [
         [ICommandService, { useClass: CommandService }],
         [ILogService, { useClass: DesktopLogService }],
         [IContextService, { useClass: ContextService }],
         [IConfigService, { useClass: ConfigService }],
-        [LocaleService, { useClass: TestLocaleService as never }],
+        [LocaleService],
         [IEditorService, { useClass: TestEditorService as never }],
         [IRenderManagerService, { useClass: TestRenderManagerService as never }],
         [IShortcutService, { useClass: TestShortcutService as never }],
@@ -410,6 +408,10 @@ function createEditorTestBed() {
 
     dependencies.forEach((dependency) => injector.add(dependency));
     injector.get(ILogService).setLogLevel(LogLevel.SILENT);
+    const localeService = injector.get(LocaleService);
+    localeService.load({ [LocaleType.EN_US]: enUS });
+    localeService.setLocale(LocaleType.EN_US);
+    localeService.setDirection('ltr');
 
     const commandService = injector.get(ICommandService);
     [SetActiveCommentOperation, BreakLineCommand, DeleteLeftCommand, DeleteRightCommand]
@@ -464,6 +466,7 @@ describe('ThreadCommentEditor', () => {
             act(() => root!.unmount());
         }
         container?.remove();
+        testInjectors.splice(0).forEach((injector) => injector.dispose());
         root = undefined;
         container = undefined;
     });

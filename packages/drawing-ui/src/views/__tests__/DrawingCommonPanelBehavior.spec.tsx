@@ -24,6 +24,7 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { ComponentsController } from '../../controllers/components.controller';
 import { DrawingImageClipService } from '../../services/drawing-image-clip.service';
 import { DrawingCommonPanel } from '../panel/DrawingCommonPanel';
 
@@ -136,6 +137,8 @@ describe('DrawingCommonPanel behavior', () => {
         injector.add([IconManager]);
         injector.add([ComponentManager]);
         injector.add([DrawingImageClipService]);
+        injector.add([ComponentsController]);
+        injector.get(ComponentsController);
 
         drawingManagerService = injector.get(IDrawingManagerService);
     });

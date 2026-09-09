@@ -18,7 +18,7 @@ import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import type { Root } from 'react-dom/client';
 import { DrawingTypeEnum, ImageSourceType } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { DrawingImageClipService } from '@univerjs/drawing-ui';
+import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { InsertSheetDrawingCommand, ISheetDrawingService, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { ComponentManager, IconManager, RediContext } from '@univerjs/ui';
@@ -138,8 +138,8 @@ describe('SheetDrawingPanel behavior', () => {
             [IRenderManagerService, { useClass: TestRenderManagerService as never }],
             [IconManager],
             [ComponentManager],
-            [DrawingImageClipService],
         ]);
+        currentTestBed.injector.createInstance(UniverDrawingUIPlugin, {}).onStarting();
         const drawingManagerService = currentTestBed.get(IDrawingManagerService);
         const sheetDrawingService = currentTestBed.get(ISheetDrawingService);
         const drawings = [
@@ -194,8 +194,8 @@ describe('SheetDrawingPanel behavior', () => {
             [IRenderManagerService, { useClass: TestRenderManagerService as never }],
             [IconManager],
             [ComponentManager],
-            [DrawingImageClipService],
         ]);
+        currentTestBed.injector.createInstance(UniverDrawingUIPlugin, {}).onStarting();
         const drawingManagerService = currentTestBed.get(IDrawingManagerService);
         const sheetDrawingService = currentTestBed.get(ISheetDrawingService);
         const drawings = [
@@ -240,8 +240,8 @@ describe('SheetDrawingPanel behavior', () => {
             [IRenderManagerService, { useClass: TestRenderManagerService as never }],
             [IconManager],
             [ComponentManager],
-            [DrawingImageClipService],
         ]);
+        currentTestBed.injector.createInstance(UniverDrawingUIPlugin, {}).onStarting();
         const drawingManagerService = currentTestBed.get(IDrawingManagerService);
         const drawings = [
             createSheetDrawing(currentTestBed.unitId, currentTestBed.subUnitId, 'drawing-a', SheetDrawingAnchorType.Position),

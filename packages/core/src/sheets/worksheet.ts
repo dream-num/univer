@@ -1309,19 +1309,14 @@ export class Worksheet {
             return documentModelObject;
         }
 
-        const content = '';
-
-        let fontString = 'document';
-
+        const cellOtherConfig = extractOtherStyle(style);
         const textRotation: ITextRotation = DEFAULT_STYLES.tr;
-        const horizontalAlign: HorizontalAlign = DEFAULT_STYLES.ht;
-        const verticalAlign: VerticalAlign = DEFAULT_STYLES.vt;
-        const wrapStrategy: WrapStrategy = DEFAULT_STYLES.tb;
-        const paddingData: IPaddingData = DEFAULT_PADDING_DATA;
-
-        fontString = getFontStyleString({}).fontCache;
-
-        const documentModel = createDocumentModelWithStyle(content, textStyle);
+        const horizontalAlign: HorizontalAlign = cellOtherConfig.horizontalAlign ?? DEFAULT_STYLES.ht;
+        const verticalAlign: VerticalAlign = cellOtherConfig.verticalAlign ?? DEFAULT_STYLES.vt;
+        const wrapStrategy: WrapStrategy = cellOtherConfig.wrapStrategy ?? DEFAULT_STYLES.tb;
+        const paddingData: IPaddingData = cellOtherConfig.paddingData ?? DEFAULT_PADDING_DATA;
+        const fontString = getFontStyleString(textStyle).fontCache;
+        const documentModel = createDocumentModelWithStyle('', textStyle);
 
         return {
             documentModel,
@@ -1331,6 +1326,7 @@ export class Worksheet {
             verticalAlign,
             horizontalAlign,
             paddingData,
+            fill: style?.bg?.rgb,
         };
     }
 

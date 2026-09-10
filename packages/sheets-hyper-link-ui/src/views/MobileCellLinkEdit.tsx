@@ -469,6 +469,7 @@ export const MobileCellLinkEdit = () => {
                     error={showError ? !payload ? localeService.t<LocaleKey>('sheets-hyper-link-ui.form.inputError') : !isLegalLink(payload) ? localeService.t<LocaleKey>('sheets-hyper-link-ui.form.linkError') : '' : ''}
                 >
                     <Input
+                        dir="ltr"
                         value={payload}
                         onChange={(newLink) => {
                             setPayload(newLink);

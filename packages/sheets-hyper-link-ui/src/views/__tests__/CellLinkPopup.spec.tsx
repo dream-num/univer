@@ -64,6 +64,7 @@ import { SheetsHyperLinkSidePanelService } from '../../services/side-panel.servi
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 import { CellLinkEdit } from '../CellLinkEdit';
 import { CellLinkPopupPure } from '../CellLinkPopup';
+import { MobileCellLinkEdit } from '../MobileCellLinkEdit';
 import { MobileCellLinkPopupPure } from '../MobileCellLinkPopup';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -483,6 +484,40 @@ describe('CellLinkEdit', () => {
         root = undefined;
         container = undefined;
         currentTestBed = undefined;
+    });
+
+    it('inherits the page direction for labels and uses left-to-right direction for URLs', () => {
+        currentTestBed = createPopupTestBed();
+        container = document.createElement('div');
+        container.dir = 'rtl';
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const popupService = currentTestBed.injector.get(SheetsHyperLinkPopupService);
+
+        act(() => {
+            popupService.startAddEditing({
+                unitId: UNIT_ID,
+                subUnitId: SUB_UNIT_ID,
+                row: 1,
+                col: 0,
+                type: HyperLinkEditSourceType.VIEWING,
+            });
+        });
+
+        for (const LinkEdit of [CellLinkEdit, MobileCellLinkEdit]) {
+            act(() => {
+                root!.render(
+                    <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                        <LinkEdit />
+                    </RediContext.Provider>
+                );
+            });
+
+            const inputs = Array.from(container.querySelectorAll('input'));
+            expect(inputs).toHaveLength(2);
+            expect(inputs[0].hasAttribute('dir')).toBe(false);
+            expect(inputs[1].dir).toBe('ltr');
+        }
     });
 
     it('adds a URL hyperlink to the current cell text and closes the popup', async () => {

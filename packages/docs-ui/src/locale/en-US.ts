@@ -107,6 +107,8 @@ const locale = {
             selection: 'Current selection',
             wordCount: '{0} words',
             selectedWords: '{0} of {1} words',
+            currentPage: 'Page {0}',
+            currentPageOfTotal: 'Page {0} of {1}',
             pages: 'Pages',
             words: 'Words',
             charactersWithoutSpaces: 'Characters (no spaces)',

@@ -163,7 +163,12 @@ export function calculateLineTopByDrawings(
     const absoluteLineTop = sectionTop + lineTop;
     let maxTop = absoluteLineTop;
     const pageSkeDrawings = page.skeDrawings;
-    const skeNonWrapTables = new Map(Array.from(page.skeTables).filter(([_, table]) => table.tableSource.textWrap === TableTextWrapType.NONE));
+    const flowBlockingTables = new Map(Array.from(page.skeTables).filter(([_, table]) =>
+        table.tableSource.textWrap === TableTextWrapType.NONE ||
+        (table.tableSource.textWrap === TableTextWrapType.WRAP && columnWidth > 0 &&
+            table.left - (table.tableSource.dist?.distL ?? 0) <= columnLeft &&
+            table.left + table.width + (table.tableSource.dist?.distR ?? 0) >= columnLeft + columnWidth)
+    ));
     const headersDrawings = headerPage?.skeDrawings;
     const footersDrawings = footerPage?.skeDrawings;
 
@@ -210,7 +215,7 @@ export function calculateLineTopByDrawings(
         }
     });
 
-    skeNonWrapTables?.forEach((table) => {
+    flowBlockingTables.forEach((table) => {
         const top = _getLineTopWidthWrapNone(table, lineHeight, absoluteLineTop, columnLeft, columnWidth);
         if (top) {
             maxTop = Math.max(maxTop, top);
@@ -261,6 +266,18 @@ function _getTableWrapSplit(
     return split;
 }
 
+function _getDrawingWrapBounds(drawing: IDocumentSkeletonDrawing) {
+    const { angle = 0, aLeft, width, aTop, height, drawingOrigin } = drawing;
+    const bounds = getBoundingBox(angle, aLeft, width, aTop, height);
+    const extent = drawingOrigin.effectExtent;
+    return {
+        left: (bounds.left ?? aLeft) - (extent?.left ?? 0),
+        top: (bounds.top ?? aTop) - (extent?.top ?? 0),
+        width: (bounds.width ?? width) + (extent?.left ?? 0) + (extent?.right ?? 0),
+        height: (bounds.height ?? height) + (extent?.top ?? 0) + (extent?.bottom ?? 0),
+    };
+}
+
 function _getLineTopWithFullColumnWrap(
     drawing: IDocumentSkeletonDrawing,
     lineHeight: number,
@@ -294,6 +311,14 @@ function _getLineTopWithFullColumnWrap(
         drawingHeight = boundingBox.height ?? drawingHeight;
         left = boundingBox.left ?? left;
         drawingWidth = boundingBox.width ?? drawingWidth;
+    }
+
+    if (layoutType === PositionedObjectLayoutType.WRAP_SQUARE) {
+        const bounds = _getDrawingWrapBounds(drawing);
+        top = bounds.top;
+        left = bounds.left - columnLeft;
+        drawingWidth = bounds.width;
+        drawingHeight = bounds.height;
     }
 
     const newTop = top - (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distT : 0);
@@ -356,48 +381,28 @@ function _getLineTopWidthWrapTopBottom(
     columnLeft: number,
     columnWidth: number
 ) {
-    const { aTop, height, aLeft, width, angle = 0, drawingOrigin } = drawing;
+    const { drawingOrigin } = drawing;
     const { layoutType, distT = 0, distB = 0 } = drawingOrigin;
 
     if (layoutType !== PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM) {
         return;
     }
 
+    const bounds = _getDrawingWrapBounds(drawing);
     if (columnWidth > 0) {
-        const bounds = angle === 0 ? { left: aLeft, width } : getBoundingBox(angle, aLeft, width, aTop, height);
-        const drawingLeft = bounds.left ?? aLeft;
-        const drawingRight = drawingLeft + (bounds.width ?? width);
+        const drawingLeft = bounds.left;
+        const drawingRight = drawingLeft + bounds.width;
         if (drawingRight <= columnLeft || drawingLeft >= columnLeft + columnWidth) {
             return;
         }
     }
 
-    // if (elementIndex && showElementIndex < elementIndex) {
-    //     // Drawing appears after a specific element, usually in the same paragraph cross-page scenario
-    //     // When operating on drawing, set showElementIndex if cross-page
-    //     return;
-    // }
-
-    if (angle === 0) {
-        const newAtop = aTop - distT;
-        const newHeight = distT + height + distB;
-
-        if (newAtop + newHeight < lineTop || newAtop > lineHeight + lineTop) {
-            return;
-        }
-
-        return newAtop + newHeight;
-    }
-    // In rotation case, consider the maximum area obtained by the first/last position of the line and the rotated drawing
-    let { top: sTop = 0, height: sHeight = 0 } = getBoundingBox(angle, aLeft, width, aTop, height);
-
-    sTop -= distT;
-    sHeight += distB;
-
-    if (sTop + sHeight < lineTop || sTop > lineHeight + lineTop) {
+    const top = bounds.top - distT;
+    const bottom = bounds.top + bounds.height + distB;
+    if (bottom < lineTop || top > lineHeight + lineTop) {
         return;
     }
-    return sTop + sHeight;
+    return bottom;
 }
 
 function _calculateDividesByDrawings(
@@ -490,12 +495,13 @@ export function collisionDetection(
     const { top: oTop, height: oHeight, left: oLeft, width: oWidth, angle = 0 } = floatObject;
 
     const { top = 0, left = 0, width = 0, height = 0 } = getBoundingBox(angle, oLeft, oWidth, oTop, oHeight);
+    const extent = floatObject.effectExtent;
 
-    if (top + height < lineTop || top > lineHeight + lineTop) {
+    if (top + height + (extent?.bottom ?? 0) < lineTop || top - (extent?.top ?? 0) > lineHeight + lineTop) {
         return false;
     }
 
-    if (left + width < columnLeft || left > columnLeft + columnWidth) {
+    if (left + width + (extent?.right ?? 0) < columnLeft || left - (extent?.left ?? 0) > columnLeft + columnWidth) {
         return false;
     }
 
@@ -550,6 +556,11 @@ function _calculateSplit(
     const { distL = 0, distT = 0, distB = 0, distR = 0, wrapText } = drawingOrigin;
     const dist = { distL, distT, distB, distR };
 
+    if (layoutType === PositionedObjectLayoutType.WRAP_SQUARE) {
+        const bounds = _getDrawingWrapBounds(drawing);
+        return __getSplitWidthNoAngle(bounds.top, bounds.height, bounds.left - columnLeft, bounds.width, lineTop, lineHeight, columnWidth, dist, layoutType, wrapText);
+    }
+
     if (angle === 0) {
         // No rotation case, wrapSquare | wrapThrough | wrapTight
         return __getSplitWidthNoAngle(aTop, height, aLeft - columnLeft, width, lineTop, lineHeight, columnWidth, dist, layoutType, wrapText);
@@ -557,23 +568,6 @@ function _calculateSplit(
 
     // In rotation case, consider the maximum area obtained by the first/last position of the line and the rotated drawing
     const boundingBox = getBoundingBox(angle, aLeft - columnLeft, width, aTop, height);
-
-    if (layoutType === PositionedObjectLayoutType.WRAP_SQUARE) {
-        // In WRAP_SQUARE case, the rotated shape will have a new rect, use this new rect to determine split
-        const { left: sLeft, width: sWidth, top: sTop, height: sHeight } = boundingBox;
-        return __getSplitWidthNoAngle(
-            sTop!,
-            sHeight!,
-            sLeft!,
-            sWidth!,
-            lineTop,
-            lineHeight,
-            columnWidth,
-            dist,
-            layoutType,
-            wrapText
-        );
-    }
 
     // wrapThrough | wrapTight
     return __getCrossPoint(boundingBox.points, lineTop, lineHeight, columnWidth);

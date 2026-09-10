@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IParagraph, ISectionBreak, ITable, ITableCell, ITableColumn, ITableRow, Nullable } from '@univerjs/core';
-import type { DataStreamTreeNode, DocumentViewModel, ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { ICustomTable, IParagraph, ISectionBreak, ITable, ITableCell, ITableColumn, ITableRow, Nullable } from '@univerjs/core';
+import type { DocumentViewModel, ITextRangeWithStyle } from '@univerjs/engine-render';
 import { createParagraphId, createSectionId, DataStreamTreeTokenType, generateRandomId, ObjectRelativeFromH, ObjectRelativeFromV, TableAlignmentType, TableRowHeightRule, TableSizeType, TableTextWrapType, Tools } from '@univerjs/core';
 
 export enum INSERT_ROW_POSITION {
@@ -217,6 +217,24 @@ export function getRangeInfoFromRanges(textRange: Nullable<ITextRangeWithStyle>,
     }
 }
 
+function getInnermostTable(rangeInfo: IRangeInfo, viewModel: DocumentViewModel) {
+    const { startOffset, endOffset, segmentId } = rangeInfo;
+    const vm = viewModel.getSelfOrHeaderFooterViewModel(segmentId);
+    const tableRange = vm.getBody()?.tables?.reduce((current, table) =>
+        startOffset >= table.startIndex &&
+        endOffset <= table.endIndex &&
+        (current == null || table.endIndex - table.startIndex < current.endIndex - current.startIndex)
+            ? table
+            : current, null as Nullable<ICustomTable>);
+
+    if (!tableRange) {
+        return null;
+    }
+
+    const table = vm.findTableNodeById(tableRange.tableId);
+    return table ? { table, tableId: tableRange.tableId } : null;
+}
+
 export function getInsertRowBody(col: number) {
     let dataStream: string = DataStreamTreeTokenType.TABLE_ROW_START;
     const paragraphs: IParagraph[] = [];
@@ -277,43 +295,16 @@ export function getInsertColumnBody() {
 }
 
 export function getInsertRowActionsParams(rangeInfo: IRangeInfo, position: INSERT_ROW_POSITION, viewModel: DocumentViewModel) {
-    const { startOffset, endOffset, segmentId } = rangeInfo;
-    const vm = viewModel.getSelfOrHeaderFooterViewModel(segmentId);
+    const { startOffset, endOffset } = rangeInfo;
     const index = position === INSERT_ROW_POSITION.ABOVE ? startOffset : endOffset;
+    const target = getInnermostTable(rangeInfo, viewModel);
+    const tableRow = target?.table.children.find((row) => row.startIndex <= index && index <= row.endIndex);
 
-    let tableRow = null;
-    const tableId = viewModel.getBody()?.tables?.find((t) => index >= t.startIndex && index <= t.endIndex)?.tableId;
-    let rowIndex = 0;
-
-    // TODO: handle nested tables
-    for (const section of vm.getChildren()) {
-        for (const paragraph of section.children) {
-            const { children } = paragraph;
-            const table = children[0];
-
-            if (table) {
-                for (const row of table.children) {
-                    if (row.startIndex <= index && index <= row.endIndex) {
-                        rowIndex = table.children.indexOf(row);
-                        tableRow = row;
-                        break;
-                    }
-                }
-            }
-
-            if (tableRow) {
-                break;
-            }
-        }
-
-        if (tableRow) {
-            break;
-        }
-    }
-
-    if (tableRow == null || tableId == null) {
+    if (!target || !tableRow) {
         return null;
     }
+    const { table, tableId } = target;
+    const rowIndex = table.children.indexOf(tableRow);
 
     return {
         offset: position === INSERT_ROW_POSITION.ABOVE ? tableRow.startIndex : tableRow.endIndex + 1,
@@ -323,56 +314,30 @@ export function getInsertRowActionsParams(rangeInfo: IRangeInfo, position: INSER
     };
 }
 
-// eslint-disable-next-line complexity
 export function getInsertColumnActionsParams(rangeInfo: IRangeInfo, position: INSERT_COLUMN_POSITION, viewModel: DocumentViewModel) {
-    const { startOffset, endOffset, segmentId } = rangeInfo;
-    const vm = viewModel.getSelfOrHeaderFooterViewModel(segmentId);
+    const { startOffset, endOffset } = rangeInfo;
     const index = position === INSERT_COLUMN_POSITION.LEFT ? startOffset : endOffset;
-
-    const tableId = viewModel.getBody()?.tables?.find((t) => index >= t.startIndex && index <= t.endIndex)?.tableId;
+    const target = getInnermostTable(rangeInfo, viewModel);
     const offsets: number[] = [];
-    let table: Nullable<DataStreamTreeNode> = null;
     let columnIndex = -1;
 
-    for (const section of vm.getChildren()) {
-        for (const paragraph of section.children) {
-            const { children } = paragraph;
-            const tableNode = children[0];
-
-            if (tableNode) {
-                if (index < tableNode.startIndex || index > tableNode.endIndex) {
-                    continue;
-                }
-
-                table = tableNode;
-
-                for (const row of tableNode.children) {
-                    for (const cell of row.children) {
-                        const cellIndex = row.children.indexOf(cell);
-
-                        if (index >= cell.startIndex && index <= cell.endIndex) {
-                            columnIndex = cellIndex;
-                            break;
-                        }
-                    }
-
-                    if (columnIndex !== -1) {
-                        break;
-                    }
-                }
-            }
-
-            if (table) {
+    if (!target) {
+        return null;
+    }
+    const { table, tableId } = target;
+    for (const row of table.children) {
+        for (const cell of row.children) {
+            if (index >= cell.startIndex && index <= cell.endIndex) {
+                columnIndex = row.children.indexOf(cell);
                 break;
             }
         }
-
-        if (table) {
+        if (columnIndex !== -1) {
             break;
         }
     }
 
-    if (table == null || tableId == null || columnIndex === -1) {
+    if (columnIndex === -1) {
         return null;
     }
 
@@ -417,62 +382,39 @@ export function getColumnWidths(pageWidth: number, tableColumns: ITableColumn[],
     };
 }
 
-// eslint-disable-next-line complexity
 export function getDeleteRowsActionsParams(rangeInfo: IRangeInfo, viewModel: DocumentViewModel) {
-    const { startOffset, endOffset, segmentId } = rangeInfo;
-    const vm = viewModel.getSelfOrHeaderFooterViewModel(segmentId);
-    const tableId = viewModel.getBody()?.tables?.find((t) => startOffset >= t.startIndex && endOffset <= t.endIndex)?.tableId;
+    const { startOffset, endOffset } = rangeInfo;
+    const target = getInnermostTable(rangeInfo, viewModel);
     const rowIndexes: number[] = [];
     let offset = -1;
     let len = 0;
     let cursor = -1;
     let selectWholeTable = false;
 
-    for (const section of vm.getChildren()) {
-        for (const paragraph of section.children) {
-            const { children } = paragraph;
-            const table = children[0];
+    if (!target) {
+        return null;
+    }
+    const { table, tableId } = target;
+    cursor = table.startIndex + 3;
+    for (const row of table.children) {
+        const rowIndex = table.children.indexOf(row);
+        const { startIndex: rowStartIndex, endIndex: rowEndIndex } = row;
 
-            if (table) {
-                if (startOffset < table.startIndex || endOffset > table.endIndex) {
-                    continue;
-                }
-
-                cursor = table.startIndex + 3;
-
-                for (const row of table.children) {
-                    const rowIndex = table.children.indexOf(row);
-                    const { startIndex, endIndex } = row;
-
-                    if (startOffset >= startIndex && startOffset <= endIndex) {
-                        offset = startIndex;
-                        rowIndexes.push(rowIndex);
-                        len += endIndex - startIndex + 1;
-                    } else if (startIndex > startOffset && endIndex < endOffset) {
-                        rowIndexes.push(rowIndex);
-                        len += endIndex - startIndex + 1;
-                    } else if (endOffset >= startIndex && endOffset <= endIndex) {
-                        rowIndexes.push(rowIndex);
-                        len += endIndex - startIndex + 1;
-                    }
-
-                    if (rowIndexes.length === table.children.length) {
-                        selectWholeTable = true;
-                    }
-                }
-            }
-
-            if (rowIndexes.length) {
-                break;
-            }
-        }
-
-        if (rowIndexes.length) {
-            break;
+        if (startOffset >= rowStartIndex && startOffset <= rowEndIndex) {
+            offset = rowStartIndex;
+            rowIndexes.push(rowIndex);
+            len += rowEndIndex - rowStartIndex + 1;
+        } else if (rowStartIndex > startOffset && rowEndIndex < endOffset) {
+            rowIndexes.push(rowIndex);
+            len += rowEndIndex - rowStartIndex + 1;
+        } else if (endOffset >= rowStartIndex && endOffset <= rowEndIndex) {
+            rowIndexes.push(rowIndex);
+            len += rowEndIndex - rowStartIndex + 1;
         }
     }
+    selectWholeTable = rowIndexes.length === table.children.length;
 
-    if (tableId == null || rowIndexes.length === 0) {
+    if (rowIndexes.length === 0) {
         return null;
     }
 
@@ -491,57 +433,34 @@ interface IRetainDeleteOffset {
     delete: number;
 }
 
-// eslint-disable-next-line max-lines-per-function, complexity
 export function getDeleteColumnsActionParams(rangeInfo: IRangeInfo, viewModel: DocumentViewModel) {
-    const { startOffset, endOffset, segmentId } = rangeInfo;
-    const vm = viewModel.getSelfOrHeaderFooterViewModel(segmentId);
-
-    const tableId = viewModel.getBody()?.tables?.find((t) => startOffset >= t.startIndex && endOffset <= t.endIndex)?.tableId;
+    const { startOffset, endOffset } = rangeInfo;
+    const target = getInnermostTable(rangeInfo, viewModel);
     const offsets: IRetainDeleteOffset[] = [];
-    let table: Nullable<DataStreamTreeNode> = null;
     const columnIndexes: number[] = [];
     let cursor = -1;
     let startColumnIndex = -1;
     let endColumnIndex = -1;
 
-    for (const section of vm.getChildren()) {
-        for (const paragraph of section.children) {
-            const { children } = paragraph;
-            const tableNode = children[0];
+    if (!target) {
+        return null;
+    }
+    const { table, tableId } = target;
+    for (const row of table.children) {
+        for (const cell of row.children) {
+            const cellIndex = row.children.indexOf(cell);
 
-            if (tableNode) {
-                if (startOffset < tableNode.startIndex || endOffset > tableNode.endIndex) {
-                    continue;
-                }
-
-                table = tableNode;
-
-                for (const row of tableNode.children) {
-                    for (const cell of row.children) {
-                        const cellIndex = row.children.indexOf(cell);
-
-                        if (startOffset >= cell.startIndex && startOffset <= cell.endIndex) {
-                            startColumnIndex = cellIndex;
-                        }
-
-                        if (endOffset >= cell.startIndex && endOffset <= cell.endIndex) {
-                            endColumnIndex = cellIndex;
-                        }
-                    }
-                }
+            if (startOffset >= cell.startIndex && startOffset <= cell.endIndex) {
+                startColumnIndex = cellIndex;
             }
 
-            if (table) {
-                break;
+            if (endOffset >= cell.startIndex && endOffset <= cell.endIndex) {
+                endColumnIndex = cellIndex;
             }
-        }
-
-        if (table) {
-            break;
         }
     }
 
-    if (table == null || tableId == null) {
+    if (startColumnIndex === -1 || endColumnIndex === -1) {
         return null;
     }
 
@@ -575,107 +494,51 @@ export function getDeleteColumnsActionParams(rangeInfo: IRangeInfo, viewModel: D
 }
 
 export function getDeleteTableActionParams(rangeInfo: IRangeInfo, viewModel: DocumentViewModel) {
-    const { startOffset, endOffset, segmentId } = rangeInfo;
-    const vm = viewModel.getSelfOrHeaderFooterViewModel(segmentId);
-
-    const tableId = viewModel.getBody()?.tables?.find((t) => startOffset >= t.startIndex && endOffset <= t.endIndex)?.tableId;
-    let offset = -1;
-    let len = 0;
-    let cursor = -1;
-
-    for (const section of vm.getChildren()) {
-        for (const paragraph of section.children) {
-            const { children } = paragraph;
-            const table = children[0];
-
-            if (table) {
-                if (startOffset < table.startIndex || endOffset > table.endIndex) {
-                    continue;
-                }
-
-                offset = table.startIndex;
-                len = table.endIndex - table.startIndex + 1;
-                cursor = table.startIndex;
-            }
-
-            if (table) {
-                break;
-            }
-        }
-
-        if (len > 0) {
-            break;
-        }
-    }
-
-    if (tableId == null) {
+    const target = getInnermostTable(rangeInfo, viewModel);
+    if (!target) {
         return null;
     }
+    const { table, tableId } = target;
 
     return {
         tableId,
-        offset,
-        len,
-        cursor,
+        offset: table.startIndex,
+        len: table.endIndex - table.startIndex + 1,
+        cursor: table.startIndex,
     };
 }
 
-// eslint-disable-next-line complexity
 export function getDeleteRowContentActionParams(rangeInfo: IRangeInfo, viewModel: DocumentViewModel) {
-    const { startOffset, endOffset, segmentId } = rangeInfo;
-    const vm = viewModel.getSelfOrHeaderFooterViewModel(segmentId);
-
-    const tableId = viewModel.getBody()?.tables?.find((t) => startOffset >= t.startIndex && endOffset <= t.endIndex)?.tableId;
+    const { startOffset, endOffset } = rangeInfo;
+    const target = getInnermostTable(rangeInfo, viewModel);
     const offsets: IRetainDeleteOffset[] = [];
-    let table: Nullable<DataStreamTreeNode> = null;
-
     let cursor = -1;
     let rowIndex = -1;
     let startColumnIndex = -1;
     let endColumnIndex = -1;
 
-    for (const section of vm.getChildren()) {
-        for (const paragraph of section.children) {
-            const { children } = paragraph;
-            const tableNode = children[0];
+    if (!target) {
+        return null;
+    }
+    const { table, tableId } = target;
+    for (const row of table.children) {
+        const rIndex = table.children.indexOf(row);
 
-            if (tableNode) {
-                if (startOffset < tableNode.startIndex || endOffset > tableNode.endIndex) {
-                    continue;
-                }
+        for (const cell of row.children) {
+            const cellIndex = row.children.indexOf(cell);
 
-                table = tableNode;
-
-                for (const row of tableNode.children) {
-                    const rIndex = tableNode.children.indexOf(row);
-
-                    for (const cell of row.children) {
-                        const cellIndex = row.children.indexOf(cell);
-
-                        if (startOffset >= cell.startIndex && startOffset <= cell.endIndex) {
-                            rowIndex = rIndex;
-                            startColumnIndex = cellIndex;
-                        }
-
-                        if (endOffset >= cell.startIndex && endOffset <= cell.endIndex) {
-                            // StartOffset and endOffset are in the same row.
-                            endColumnIndex = cellIndex;
-                        }
-                    }
-                }
+            if (startOffset >= cell.startIndex && startOffset <= cell.endIndex) {
+                rowIndex = rIndex;
+                startColumnIndex = cellIndex;
             }
 
-            if (table) {
-                break;
+            if (endOffset >= cell.startIndex && endOffset <= cell.endIndex) {
+                endColumnIndex = cellIndex;
             }
-        }
-
-        if (table) {
-            break;
         }
     }
 
-    if (table == null || tableId == null || rowIndex === -1) {
+    if (rowIndex === -1) {
         return null;
     }
 
@@ -710,31 +573,13 @@ export enum CellPosition {
     PREV,
 }
 
-// eslint-disable-next-line complexity, max-lines-per-function
 export function getCellOffsets(viewModel: DocumentViewModel, range: ITextRangeWithStyle, position: CellPosition): Nullable<IOffsets> {
-    const { startOffset } = range;
-
-    let targetTable = null;
-
-    for (const section of viewModel.getChildren()) {
-        for (const paragraph of section.children) {
-            const table = paragraph.children[0];
-            if (table) {
-                if (startOffset > table.startIndex && startOffset < table.endIndex) {
-                    targetTable = table;
-                    break;
-                }
-            }
-        }
-
-        if (targetTable) {
-            break;
-        }
-    }
-
-    if (targetTable == null) {
+    const { startOffset, endOffset, segmentId = '' } = range;
+    const target = getInnermostTable({ startOffset, endOffset, segmentId }, viewModel);
+    if (!target) {
         return null;
     }
+    const targetTable = target.table;
 
     let cellIndex = -1;
     let rowIndex = -1;

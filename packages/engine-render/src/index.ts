@@ -89,11 +89,13 @@ export {
 export type { IDocumentSkeletonColumnPagePathInfo, IDocumentSkeletonLineContext, IDocumentSkeletonLineIteratorOptions, IDocumentSkeletonTableCellGeometry, IDocumentSkeletonTableContext, IDocumentSkeletonTableIteratorOptions } from './components/docs/layout/tools';
 export { getLastColumn } from './components/docs/layout/tools';
 export { Liquid } from './components/docs/liquid';
+export { getTopmostDocsTableHit } from './components/docs/table-hit-test';
 export type {
     DocsTableRenderViewportProvider,
     IDocsTableRenderViewport,
 } from './components/docs/table-render-viewport';
 export {
+    getDocsTableLayoutViewportWidth,
     getDocsTableRenderViewport,
     getDocsTableViewportLeft,
     setDocsTableRenderViewportProvider,

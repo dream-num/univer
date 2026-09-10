@@ -109,6 +109,8 @@ const locale: typeof enUS = {
             selection: 'Vùng chọn hiện tại',
             wordCount: '{0} từ',
             selectedWords: '{0} trên {1} từ',
+            currentPage: 'Trang {0}',
+            currentPageOfTotal: 'Trang {0} trên {1}',
             pages: 'Trang',
             words: 'Từ',
             charactersWithoutSpaces: 'Ký tự (không có dấu cách)',

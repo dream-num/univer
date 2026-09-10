@@ -424,7 +424,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         const isFocusEditor = this._contextService.getContextValue(EDITOR_ACTIVATED);
 
         if (isFocusSheet) {
-            if (isFocusFormulaEditor) {
+            if (isFocusFormulaEditor && isFocusEditor) {
                 unitID = DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
             } else if (isFocusEditor) {
                 unitID = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;

@@ -30,7 +30,7 @@ import { CopyIcon, LinkIcon, UnlinkIcon, WriteIcon } from '@univerjs/icons';
 import { UnitAction } from '@univerjs/protocol';
 import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
 import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
-import { ShowDocHyperLinkEditPopupOperation } from '../commands/operations/popup.operation';
+import { ClickDocHyperLinkOperation, ShowDocHyperLinkEditPopupOperation } from '../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../services/hyper-link-popup.service';
 
 export const DocLinkPopup = () => {
@@ -56,7 +56,7 @@ export const DocLinkPopup = () => {
         return null;
     }
 
-    const url = link.properties?.url;
+    const target = link.properties?.url ?? `#${link.properties?.bookmarkId ?? link.properties?.headingId ?? ''}`;
     const canEdit = hyperLinkService.canEditLink(unitId, currentPopup);
     const canCopy = getDocumentPermissionValue(permissionService, unitId, unitId, UnitAction.Copy);
     return (
@@ -81,7 +81,7 @@ export const DocLinkPopup = () => {
                   univer-flex univer-h-6 univer-flex-1 univer-cursor-pointer univer-items-center univer-truncate
                   univer-text-sm univer-leading-5 univer-text-primary-500
                 `}
-                onClick={() => window.open(url, undefined, 'noopener noreferrer')}
+                onClick={() => commandService.executeCommand(ClickDocHyperLinkOperation.id, { unitId, linkId, segmentId })}
             >
                 <div
                     className={`
@@ -92,8 +92,8 @@ export const DocLinkPopup = () => {
                 >
                     <LinkIcon />
                 </div>
-                <Tooltip showIfEllipsis title={url}>
-                    <span className="univer-flex-1 univer-truncate">{url}</span>
+                <Tooltip showIfEllipsis title={target}>
+                    <span className="univer-flex-1 univer-truncate">{target}</span>
                 </Tooltip>
             </div>
             <div className="univer-flex univer-h-6 univer-flex-[0_0_auto] univer-items-center univer-justify-center">
@@ -111,7 +111,7 @@ export const DocLinkPopup = () => {
                     "
                     disabled={!canCopy}
                     onClick={() => {
-                        navigator.clipboard.writeText(url);
+                        navigator.clipboard.writeText(target);
                         messageService.show({
                             content: localeService.t<LocaleKey>('docs-hyper-link-ui.info.coped'),
                             type: MessageType.Info,

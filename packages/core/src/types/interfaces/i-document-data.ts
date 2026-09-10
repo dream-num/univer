@@ -50,6 +50,8 @@ export interface IReferenceSource {
     tableSource?: ITables; // Table
     footers?: IFooters;
     headers?: IHeaders;
+    footnotes?: Record<string, IDocxNoteStory>;
+    endnotes?: Record<string, IDocxNoteStory>;
     lists?: ILists;
     drawings?: IDrawings;
     drawingsOrder?: string[];
@@ -113,10 +115,19 @@ export interface IDocumentNote {
     customMark?: string;
     /** Style of the generated note marker; it does not affect text inserted at body offset zero. */
     referenceTextStyle?: ITextStyle;
+    /** False preserves an imported note body without a reference marker; the main-story anchor is unaffected. */
+    showBodyReference?: boolean;
 }
 
 export type IFootnoteCustomRange = ICustomRange<{ noteId: string }>;
 
+/** A note story keyed by its OOXML id, independently of its displayed number. */
+export interface IDocxNoteStory {
+    noteId: string;
+    type: 'normal' | 'separator' | 'continuationSeparator' | 'continuationNotice';
+    body: IDocumentBody;
+    tableSource?: ITables;
+}
 /**
  * Set of headers
  */
@@ -469,7 +480,105 @@ export interface ICustomRange<T extends Record<string, any> = Record<string, any
     properties?: T;
 }
 
-export type IHyperLinkCustomRange = ICustomRange<{ url: string }>;
+export type IHyperLinkCustomRange = ICustomRange<IHyperlink>;
+
+export interface IFieldRangeProperties {
+    /** Original OOXML field instruction. This is the round-trip source of truth. */
+    instruction: string;
+    /** Upper-case first token of `instruction`, used only for field dispatch. */
+    fieldType: string;
+    sourceKind?: 'complex' | 'simple';
+    dirty?: BooleanNumber;
+    locked?: BooleanNumber;
+    cachedResult?: string;
+}
+
+/** A field range includes its CUSTOM_RANGE_START/END sentinels and may contain nested fields. */
+export type IFieldCustomRange = ICustomRange<IFieldRangeProperties> & {
+    rangeType: CustomRangeType.FIELD;
+    wholeEntity?: false;
+};
+
+export type SdtKind =
+    | 'richText'
+    | 'text'
+    | 'checkbox'
+    | 'date'
+    | 'dropDownList'
+    | 'comboBox'
+    | 'picture'
+    | 'group'
+    | 'repeatingSection'
+    | 'repeatingSectionItem'
+    | 'docPartObj';
+
+export type SdtLock = 'unlocked' | 'sdtLocked' | 'contentLocked' | 'sdtContentLocked';
+export type SdtPlacement = 'inline' | 'block' | 'table' | 'row' | 'cell' | 'header' | 'footer';
+
+export interface ISdtListItem {
+    displayText?: string;
+    value: string;
+}
+
+export interface ISdtRangeProperties {
+    kind: SdtKind;
+    placement: SdtPlacement;
+    alias?: string;
+    tag?: string;
+    ooxmlId?: string;
+    lock?: SdtLock;
+    appearance?: string;
+    color?: string;
+    showingPlaceholder?: boolean;
+    temporary?: boolean;
+    placeholder?: string;
+    checkbox?: {
+        checked: boolean;
+        checkedState?: { value?: string; font?: string };
+        uncheckedState?: { value?: string; font?: string };
+    };
+    text?: {
+        /** Whether a plain-text content control accepts paragraph breaks. */
+        multiLine?: boolean;
+    };
+    date?: {
+        fullDate?: string;
+        format?: string;
+        locale?: string;
+        calendar?: string;
+        storage?: string;
+    };
+    listItems?: ISdtListItem[];
+    repeatingSection?: {
+        sectionTitle?: string;
+        doNotAllowInsertDelete?: boolean;
+    };
+    docPart?: {
+        gallery?: string;
+        category?: string;
+        unique?: boolean;
+    };
+    dataBinding?: {
+        prefixMappings?: string;
+        xpath?: string;
+        storeItemID?: string;
+        /** Visible result captured during import, used to detect direct text edits. */
+        cachedResult?: string;
+        /** Set after a content-control interaction so export updates the bound custom XML node. */
+        dirty?: boolean;
+    };
+    /** Original property XML retained for lossless OOXML round-trip. */
+    rawSdtPr?: string;
+    /** Original end-run properties retained for lossless OOXML round-trip. */
+    rawSdtEndPr?: string;
+}
+
+/** A Word structured document tag. SDTs may nest and span structural table tokens. */
+export type ISdtCustomRange = ICustomRange<ISdtRangeProperties> & {
+    rangeType: CustomRangeType.SDT;
+    wholeEntity?: false;
+    properties: ISdtRangeProperties;
+};
 
 export type IMentionCustomRange = ICustomRange<IMention>;
 
@@ -517,6 +626,9 @@ export interface ICustomBlock {
     blockType?: BlockType;
     // A unique ID associated with a custom block.
     blockId: string;
+    /** A note reference in the body, or the matching number/rule inside a note story. */
+    noteType?: 'footnote' | 'endnote' | 'separator' | 'continuationSeparator';
+    noteId?: string;
 
     /** Original DOCX run XML retained by the exchange layer for lossless round-trip. */
     docxRawXml?: string;
@@ -572,19 +684,39 @@ export enum DocumentFlavor {
     UNSPECIFIED,
     TRADITIONAL,
     MODERN,
+    /** DrawingML text semantics for host-prepared shape and slide text models. */
+    DRAWINGML,
 }
 
-/**
- * Basics properties of doc style
- */
+/** Page border geometry is expressed in 96-DPI layout pixels. */
+export interface IPageBorder {
+    /** Word line/art border style name; separate from table dash patterns. */
+    style?: string;
+    width?: number;
+    padding?: number;
+    color?: IColorStyle;
+}
+
+export interface IPageBorders {
+    offsetFrom?: 'page' | 'text';
+    display?: 'allPages' | 'firstPage' | 'notFirstPage';
+    zOrder?: 'front' | 'back';
+    top?: IPageBorder;
+    left?: IPageBorder;
+    bottom?: IPageBorder;
+    right?: IPageBorder;
+}
+
+/** Basics properties of doc style. */
 export interface IDocStyleBase extends IMargin {
+    pageBorders?: IPageBorders;
     pageNumberStart?: number; // pageNumberStart
     /** Page size in 96-DPI layout pixels. */
     pageSize?: ISize;
 
     pageOrient?: PageOrientType;
 
-    documentFlavor?: DocumentFlavor; // DocumentFlavor: TRADITIONAL, MODERN
+    documentFlavor?: DocumentFlavor;
 
     /** Distance from the page edge to the header, in 96-DPI layout pixels. */
     marginHeader?: number;
@@ -602,6 +734,8 @@ export interface IDocumentLayout {
     useFELayout?: BooleanNumber;
     /** OOXML `splitPgBreakAndParaMark`: move a trailing paragraph mark after a manual page break. */
     splitPageBreakAndParagraphMark?: BooleanNumber;
+    /** Preserve the OOXML half/full-width space compatibility switch. */
+    balanceSingleByteDoubleByteWidth?: BooleanNumber;
     /** Align automatic line height inside tables to the active document line grid. */
     adjustLineHeightInTable?: BooleanNumber;
     paragraphLineGapDefault?: number; // paragraphLineGapDefault default line spacing
@@ -622,7 +756,11 @@ export enum GridType {
 }
 
 export interface IDocumentStyle extends IDocStyleBase, IDocumentLayout, IHeaderAndFooterBase {
+    /** Imported Word on/off compatibility flags, keyed by their OOXML local names. */
+    compatibilityFlags?: Record<string, BooleanNumber>;
     textStyle?: ITextStyle; // default style for text
+    /** Document-declared alternate families, tried only after the authored font is unavailable. */
+    fontFamilyFallbacks?: Record<string, string>;
     defaultParagraphStyle?: IDocumentDefaultParagraphStyle; // default style inherited by paragraphs
     background?: IDocumentBackground; // Page background image.
 }
@@ -656,8 +794,9 @@ export interface IDocumentRenderConfig {
     wrapStrategy?: WrapStrategy; // wrap to the next line, for sheet cell
     cellValueType?: CellValueType; // sheet cell type, In a spreadsheet cell, without any alignment settings applied, text should be left-aligned, numbers should be right-aligned, and Boolean values should be center-aligned.
     isRenderStyle?: BooleanNumber; // Whether to render the style(textRuns), used in formula bar editor. the default value is TRUE.
-    zeroWidthParagraphBreak?: BooleanNumber; // Whether to render the paragraph \r to zero width. the default value is false.
+    zeroWidthParagraphBreak?: BooleanNumber; // Override paragraph-mark width; DrawingML defaults to zero without custom glyph metrics.
     shapeTextOpticalVerticalAlign?: BooleanNumber; // Align shape text by visible glyph bounds instead of the font line box.
+    lineWrapTolerance?: number; // Allowed line-width overflow in layout pixels; 0 enforces the content-box boundary.
 }
 
 export interface ISectionBreakBase {
@@ -837,6 +976,8 @@ export interface IDocDrawingBase extends IDrawingParam {
     distR?: number; // wrapSquare | wrapThrough | wrapTight
     distT?: number; // wrapSquare | wrapTopAndBottom
     distB?: number; // wrapSquare | wrapTopAndBottom
+    /** Effect bounds outside the drawing box, in layout pixels (OOXML wp:effectExtent). */
+    effectExtent?: { left?: number; top?: number; right?: number; bottom?: number };
 }
 
 /**
@@ -951,10 +1092,26 @@ export interface IDocTextOutline {
 }
 
 export interface ITextStyle extends IStyleBase {
+    /** Word font-type hint for characters shared by Latin, East Asian and complex scripts. */
+    fontHint?: 'default' | 'eastAsia' | 'cs';
+    /** Alignment tab anchored to the page margins or paragraph indents. Applies only to a tab character. */
+    positionedTab?: { alignment: TabStopAlignment; relativeTo: 'margin' | 'indent'; leader?: TabStopLeader };
+    /** Original font-specific OOXML symbol; only applies to the matching character. */
+    symbol?: { font: string; code: number };
+    /** Authored text language (BCP 47), used by language-sensitive text layout. Absent inherits. */
+    lang?: string;
+    /** Alternate language from the authored text properties (BCP 47). Absent inherits. */
+    altLang?: string;
+    /** Minimum font size for pair kerning, in the same units as fs. Zero disables it; absent inherits. */
+    kerning?: number;
+    /** Display capital letters without changing the source text. Absent inherits. */
+    caps?: boolean;
+    /** Display lowercase letters as smaller capitals without changing source text. Absent inherits. */
+    smallCaps?: boolean;
     // bo?: BaselineOffset; // BaselineOffset, sup, sub
     sc?: number; // character spacing in points
     pos?: number; // position
-    sa?: number; // scale
+    sa?: number; // Horizontal character scale in percent; omitted means 100.
     textFill?: IDocTextFill;
     textOutline?: IDocTextOutline;
     /**
@@ -993,22 +1150,28 @@ export type ParagraphFontAlign = 'auto' | 'top' | 'center' | 'baseline' | 'botto
 export interface IParagraphStyle extends IParagraphProperties {
     // Not achieved, aligned with Excel's standards.
     textStyle?: ITextStyle; // paragraph textStyle
+    /** Formatting of the paragraph terminator only, not inherited by body text. */
+    paragraphMarkTextStyle?: ITextStyle;
 }
 
 /**
  * Paragraph properties that may be inherited from the document defaults.
  * Paragraph identity and named/text styles have their own inheritance mechanisms.
  */
-export type IDocumentDefaultParagraphStyle = Omit<IParagraphStyle, 'headingId' | 'namedStyleType' | 'textStyle'>;
+export type IDocumentDefaultParagraphStyle = Omit<IParagraphStyle, 'headingId' | 'namedStyleType' | 'outlineLevel' | 'textStyle' | 'paragraphMarkTextStyle'>;
 
 export interface IParagraphProperties extends IIndentStart {
     headingId?: string; // headingId
     namedStyleType?: NamedStyleType; // namedStyleType
+    /** Zero-based OOXML outline level used by TOC generation; 9 denotes body text. */
+    outlineLevel?: number;
     defaultTabStop?: number; // Distance between automatic tab stops for this paragraph.
     /** Whether East Asian kinsoku line-breaking rules apply to this paragraph. */
     eastAsianLineBreak?: BooleanNumber;
     /** Whether punctuation may hang outside the paragraph text bounds. */
     hangingPunctuation?: BooleanNumber;
+    /** Whether full-width punctuation at a line start may be compressed (OOXML topLinePunct). */
+    topLinePunct?: BooleanNumber;
     fontAlign?: ParagraphFontAlign;
     horizontalAlign?: HorizontalAlign; // Horizontal alignment
     lineSpacing?: number; // lineSpacing 17.3.1.33 spacing (Spacing Between Lines and Above/Below Paragraph)
@@ -1076,6 +1239,15 @@ export interface IParagraphProperties extends IIndentStart {
     widowControl?: BooleanNumber;
     shading?: IShading; // shading
     suppressHyphenation?: BooleanNumber; // 17.3.1.34 suppressAutoHyphens (Suppress Hyphenation for Paragraph)
+    /** Positioned Word frame metadata; legacy snapshots may contain only a presence flag. */
+    paragraphFrame?: BooleanNumber | {
+        horizontalSpace?: number;
+        wrap?: string;
+        verticalAnchor?: string;
+        horizontalAnchor?: string;
+        x?: string;
+        y?: string;
+    };
 }
 
 /**
@@ -1151,6 +1323,7 @@ export interface ITabStop {
     offset: number; // offset
     alignment: TabStopAlignment; // alignment
     leader?: TabStopLeader; // leader drawn between the preceding text and this tab stop
+    clear?: boolean; // removes an inherited stop at this position; not a layout stop
 }
 
 /**
@@ -1275,6 +1448,8 @@ export interface ITable {
     tableColumns: ITableColumn[]; // tableColumns
     align: TableAlignmentType; // 17.4.28 jc (Table Alignment)
     indent: INumberUnit; // left align only. leftIndent
+    /** Imported pre-2013 Word text-to-frame indent correction for top-level tables. */
+    legacyIndentAdjustment?: INumberUnit;
     textWrap: TableTextWrapType; // 17.4.57 tblpPr (Floating Table Positioning)
     position: ITableAnchor; // 17.4.57 tblpPr (Floating Table Positioning)
     dist: IDistFromText; // 17.4.57 tblpPr (Floating Table Positioning)
@@ -1349,6 +1524,10 @@ export interface ITableCell {
     borderBottom?: ITableCellBorder; // borderBottom
     size?: IWidthInTableSize; // size
     tcFitText?: BooleanNumber; // 17.4.67 tcFitText (Fit Text Within Cell)
+    /** Exclude the cell's final paragraph mark from content height (OOXML w:hideMark). */
+    tcHideMark?: BooleanNumber;
+    /** OOXML table-cell writing direction; independent of paragraph bidirectional ordering. */
+    textDirection?: 'lrTb' | 'tbRl' | 'btLr' | 'lrTbV' | 'tbRlV' | 'tbLrV';
     // hAlign: use paragraph align to instead.
     vAlign?: VerticalAlignmentType; // 17.4.83 vAlign (Table Cell Vertical Alignment)
 }

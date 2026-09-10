@@ -18,12 +18,14 @@ import type { ICustomRangeForInterceptor } from '@univerjs/core';
 import type { IDocsCustomBlockRenderViewport } from '@univerjs/engine-render';
 import type { IMessageProtocol } from '@univerjs/rpc';
 import type { IDocLayoutCancelRequest, IDocLayoutCreateSessionRequest, IDocLayoutCustomRangePresentationEntry, IDocLayoutDisposeMountRequest, IDocLayoutDisposeSessionRequest, IDocLayoutMountIdentity, IDocLayoutPageRequest, IDocLayoutPageResult, IDocLayoutPerformanceMetrics, IDocLayoutStartRequest, IDocLayoutStartResult, IDocLayoutStepRequest, IDocLayoutStepResult } from '../services/doc-layout-executor.service';
+import type { IDocsLayoutFontFace } from './config/config';
 import type { IDocsLayoutWorkerCapabilities, IDocsLayoutWorkerRuntime } from './protocol';
 import { DocumentDataModel, LocaleService, requestImmediateMacroTask, Tools } from '@univerjs/core';
 import { DocumentLayoutSession, FontCache, setDocsCustomBlockRenderViewportProvider } from '@univerjs/engine-render';
 import { ChannelService, fromModule } from '@univerjs/rpc';
 import { Observable, shareReplay } from 'rxjs';
 import { DocLayoutExecutorType, DocLayoutSessionStatus } from '../services/doc-layout-executor.service';
+import { DocsLayoutFontLoader } from './font-loader';
 import { DocsLayoutWorkerPerformanceTracker } from './performance-tracker';
 import { DOCS_LAYOUT_WORKER_CHANNEL, DOCS_LAYOUT_WORKER_PROTOCOL_VERSION } from './protocol';
 
@@ -95,14 +97,15 @@ function applyRecordPatch<T>(
 
 export class DocsLayoutWorkerRuntime implements IDocsLayoutWorkerRuntime {
     private readonly _sessions = new Map<string, IDocsLayoutWorkerSession>();
+    private readonly _fontLoader = new DocsLayoutFontLoader();
     readonly type = DocLayoutExecutorType.WORKER;
 
     constructor(
         private readonly _performanceTracker = new DocsLayoutWorkerPerformanceTracker()
     ) {}
 
-    initialize(): Promise<void> {
-        return Promise.resolve();
+    initialize(fontFaces: IDocsLayoutFontFace[] = []): Promise<void> {
+        return this._fontLoader.load(fontFaces);
     }
 
     async getCapabilities(): Promise<IDocsLayoutWorkerCapabilities> {
@@ -400,6 +403,7 @@ export class DocsLayoutWorkerRuntime implements IDocsLayoutWorkerRuntime {
     }
 
     dispose(): void {
+        this._fontLoader.dispose();
         for (const unitId of this._sessions.keys()) {
             this._disposeSession(unitId);
         }
@@ -497,12 +501,24 @@ export class DocsLayoutWorkerRuntime implements IDocsLayoutWorkerRuntime {
     }
 }
 
+class DocsLayoutWorkerChannelService extends ChannelService {
+    constructor(protocol: IMessageProtocol, private readonly _runtime: DocsLayoutWorkerRuntime) {
+        super(protocol);
+    }
+
+    override dispose(): void {
+        this._runtime.dispose();
+        super.dispose();
+    }
+}
+
 export function startDocsLayoutWorker(): ChannelService {
     const performanceTracker = new DocsLayoutWorkerPerformanceTracker();
-    const channelService = new ChannelService(createDocsLayoutWorkerMessageProtocol(performanceTracker));
+    const runtime = new DocsLayoutWorkerRuntime(performanceTracker);
+    const channelService = new DocsLayoutWorkerChannelService(createDocsLayoutWorkerMessageProtocol(performanceTracker), runtime);
     channelService.registerChannel(
         DOCS_LAYOUT_WORKER_CHANNEL,
-        fromModule(new DocsLayoutWorkerRuntime(performanceTracker))
+        fromModule(runtime)
     );
     return channelService;
 }

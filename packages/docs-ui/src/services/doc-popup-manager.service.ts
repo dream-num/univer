@@ -25,7 +25,7 @@ import { ICanvasPopupService } from '@univerjs/ui';
 import { BehaviorSubject, map } from 'rxjs';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
 import { SetDocZoomRatioOperation } from '../commands/operations/set-doc-zoom-ratio.operation';
-import { NodePositionConvertToCursor } from './selection/convert-text-range';
+import { findDocRangeNodePositions, NodePositionConvertToCursor } from './selection/convert-text-range';
 import { getLineBounding } from './selection/text-range';
 
 export function transformBound2OffsetBound(originBound: IBoundRectNoAngle, scene: Scene): IBoundRectNoAngle {
@@ -97,13 +97,11 @@ export interface IDocCanvasPopup extends Omit<IPopup, 'anchorRect$' | 'children'
 export const calcDocRangePositions = (range: ITextRangeParam, currentRender: IRender): IBoundRectNoAngle[] | undefined => {
     const { scene, mainComponent, engine } = currentRender;
     const skeleton = currentRender.with(DocSkeletonManagerService).getSkeleton();
-    const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, true, range.segmentId, range.segmentPage);
     const endIndex = range.collapsed ? range.startOffset : range.endOffset - 1;
-    // Include the last glyph in the anchor and its outside-click exclusion.
-    const endPosition = skeleton.findNodePositionByCharIndex(endIndex, range.collapsed === true, range.segmentId, range.segmentPage);
+    const positions = findDocRangeNodePositions(skeleton, range.startOffset, endIndex, range.segmentId, range.segmentPage);
     const document = mainComponent as Documents;
 
-    if (!endPosition || !startPosition) {
+    if (!positions) {
         return;
     }
 
@@ -121,7 +119,7 @@ export const calcDocRangePositions = (range: ITextRangeParam, currentRender: IRe
 
     const { scaleX, scaleY } = scene.getAncestorScale();
     const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
-    const { borderBoxPointGroup } = convertor.getRangePointData(startPosition, endPosition);
+    const { borderBoxPointGroup } = convertor.getRangePointData(positions.startPosition, positions.endPosition);
     const bounds = getLineBounding(borderBoxPointGroup);
     const res = bounds.map((bound) => transformBound2OffsetBound(bound, scene)).map((i) => ({
         left: (i.left + docsLeft * scaleX) * scaleAdjust + left,

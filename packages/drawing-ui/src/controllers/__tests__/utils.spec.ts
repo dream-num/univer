@@ -298,6 +298,23 @@ describe('drawing controller utils', () => {
         expect(scene.getObject).not.toHaveBeenCalled();
     });
 
+    it('disposes every repeated drawing instance including hidden ones', () => {
+        const prefix = getDrawingShapeKeyByDrawingSearch({ unitId: 'unit-1', subUnitId: 'doc-1', drawingId: 'footer' });
+        const hidden = { oKey: `${prefix}#-#0`, visible: false, dispose: vi.fn() };
+        const visible = { oKey: `${prefix}#-#1`, visible: true, dispose: vi.fn() };
+        const unrelated = { oKey: `${prefix}-other#-#0`, visible: true, dispose: vi.fn() };
+        const scene = { getAllObjects: () => [hidden, visible, unrelated] };
+        expect(disposeDrawingRenderObject(scene as never, {
+            unitId: 'unit-1',
+            subUnitId: 'doc-1',
+            drawingId: 'footer',
+            isMultiTransform: 1,
+        })).toBe(true);
+        expect(hidden.dispose).toHaveBeenCalledOnce();
+        expect(visible.dispose).toHaveBeenCalledOnce();
+        expect(unrelated.dispose).not.toHaveBeenCalled();
+    });
+
     it('does not fall back to top-level scene lookup when grouped lookup misses', () => {
         const scene = {
             getObject: vi.fn(() => ({ oKey: 'top-level-child', dispose: vi.fn() })),

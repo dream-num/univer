@@ -27,7 +27,7 @@ import type {
     ITextRun,
 } from '../../../../types/interfaces';
 import { Tools, UpdateDocsAttributeType } from '../../../../shared';
-import { CustomDecorationType } from '../../../../types/interfaces';
+import { CustomDecorationType, CustomRangeType } from '../../../../types/interfaces';
 import { PresetListType } from '../../preset-list-type';
 import {
     deleteBlockRanges,
@@ -628,6 +628,19 @@ function updateCustomRanges(
 
     updateDataCustomRanges.forEach((customRange) => {
         const { startIndex, endIndex } = customRange;
+        const existingSdt = customRange.rangeType === CustomRangeType.SDT
+            ? newCustomRanges.find((range) => range.rangeType === CustomRangeType.SDT && range.rangeId === customRange.rangeId)
+            : undefined;
+
+        // A retain carrying metadata can cover only one fragment of an enclosing SDT
+        // after TextX composition (for example, a value replacement between cell
+        // boundary tokens). In that case the retained range is a property update for
+        // the existing entity, not a second SDT with clipped boundaries.
+        if (existingSdt) {
+            existingSdt.properties = Tools.deepClone(customRange.properties);
+            existingSdt.wholeEntity = customRange.wholeEntity;
+            return;
+        }
         newCustomRanges.push({
             ...customRange,
             startIndex: startIndex + currentIndex,

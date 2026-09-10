@@ -254,6 +254,27 @@ describe('DocHyperLinkPopupService', () => {
         }
     });
 
+    it('keeps the current popup while the pointer crosses adjacent links', () => {
+        const { service, attached, disposed } = createService();
+        const firstLink = { unitId: 'doc-1', linkId: 'link-1', startIndex: 4, endIndex: 8 };
+        const secondLink = { unitId: 'doc-1', linkId: 'link-2', startIndex: 9, endIndex: 13 };
+
+        service.showInfoPopup(firstLink);
+        service.showInfoPopupFromHover(secondLink);
+
+        expect(service.showing).toEqual(firstLink);
+        expect(attached).toHaveLength(1);
+        expect(disposed).toEqual([]);
+
+        service.hideInfoPopup();
+        service.showInfoPopupFromHover(secondLink);
+        expect(service.showing).toEqual(secondLink);
+        expect(attached).toHaveLength(2);
+        expect(disposed).toEqual([1]);
+
+        service.dispose();
+    });
+
     it('does not show link information when the target document is not loaded', () => {
         const { service, attached } = createService();
 

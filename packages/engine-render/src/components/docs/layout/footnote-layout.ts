@@ -136,7 +136,9 @@ export function layoutNoteSegment(
         noteReferences: undefined,
         footnoteLayout: undefined,
         endnoteLayout: undefined,
-        noteLabel: reference.label,
+        noteLabel: parentContext.dataModel.getSnapshot().notes?.[reference.noteId]?.showBodyReference === false
+            ? undefined
+            : reference.label,
         noteReferenceTextStyle: parentContext.dataModel.getSnapshot().notes?.[reference.noteId]?.referenceTextStyle,
         noteSegmentId: reference.noteId,
         footnoteFirstColumn: constraints.firstColumn,

@@ -18,6 +18,7 @@ import type {
     DocumentDataModel,
     IBullet,
     ICustomRangeForInterceptor,
+    IDocDrawingBase,
     IDocumentStyle,
     INumberUnit,
     IObjectPositionH,
@@ -90,6 +91,7 @@ import {
     hasDocsTableHorizontalViewport,
 } from '../table-render-viewport';
 import { updateInlineDrawingPosition } from './block/paragraph/layout-ruler';
+import { getGlyphGroupFontBoundingBox } from './model/glyph';
 import { getCustomDecorationStyle } from './style/custom-decoration';
 import { getCustomRangeStyle } from './style/custom-range';
 
@@ -395,6 +397,7 @@ function getParagraphLogicalStartAnchors(pages: IDocumentSkeletonPage[]): Map<ID
     const paragraphs = new Map<number, {
         firstLine: IDocumentSkeletonLine;
         glyphCount: number;
+        paragraphEndGlyphCount?: number;
         terminal?: string;
     }>();
 
@@ -402,15 +405,26 @@ function getParagraphLogicalStartAnchors(pages: IDocumentSkeletonPage[]): Map<ID
         for (const section of page.sections) {
             for (const column of section.columns) {
                 for (const line of column.lines) {
-                    const glyphCount = line.divides.reduce((divideCount, divide) =>
-                        divideCount + divide.glyphGroup.reduce((count, glyph) =>
-                            count + (glyph.glyphType === GlyphType.LIST ? 0 : glyph.count), 0), 0);
+                    const paragraph = paragraphs.get(line.paragraphIndex);
+                    let glyphCount = paragraph?.glyphCount ?? 0;
+                    let paragraphEndGlyphCount = paragraph?.paragraphEndGlyphCount;
+                    for (const divide of line.divides) {
+                        for (const glyph of divide.glyphGroup) {
+                            if (glyph.glyphType === GlyphType.LIST) {
+                                continue;
+                            }
+                            glyphCount += glyph.count;
+                            if ((glyph.raw ?? glyph.streamType) === DataStreamTreeTokenType.PARAGRAPH) {
+                                paragraphEndGlyphCount = glyphCount;
+                            }
+                        }
+                    }
                     const lastDivide = line.divides[line.divides.length - 1];
                     const lastGlyph = lastDivide?.glyphGroup[lastDivide.glyphGroup.length - 1];
-                    const paragraph = paragraphs.get(line.paragraphIndex);
                     paragraphs.set(line.paragraphIndex, {
                         firstLine: paragraph?.firstLine ?? line,
-                        glyphCount: (paragraph?.glyphCount ?? 0) + glyphCount,
+                        glyphCount,
+                        paragraphEndGlyphCount,
                         terminal: lastGlyph?.raw ?? lastGlyph?.streamType,
                     });
                 }
@@ -420,7 +434,7 @@ function getParagraphLogicalStartAnchors(pages: IDocumentSkeletonPage[]): Map<ID
 
     const anchors = new Map<IDocumentSkeletonLine, number>();
     for (const [paragraphIndex, paragraph] of paragraphs) {
-        const { firstLine, glyphCount, terminal } = paragraph;
+        const { firstLine, glyphCount, paragraphEndGlyphCount, terminal } = paragraph;
         if (!firstLine.paragraphStart || paragraphIndex < 0) {
             continue;
         }
@@ -433,10 +447,34 @@ function getParagraphLogicalStartAnchors(pages: IDocumentSkeletonPage[]): Map<ID
             continue;
         }
 
-        anchors.set(firstLine, paragraphIndex - glyphCount + 1);
+        // paragraphIndex points at the paragraph mark, not at a following section
+        // terminator that shaping may append to the same line (including in cells).
+        anchors.set(firstLine, paragraphIndex - (paragraphEndGlyphCount ?? glyphCount) + 1);
     }
 
     return anchors;
+}
+
+export function getLineMetricGlyphs(
+    glyphGroup: IDocumentSkeletonGlyph[],
+    documentCompatibilityPolicy?: IDocumentCompatibilityPolicy,
+    previousGlyphs: IDocumentSkeletonGlyph[] = []
+): IDocumentSkeletonGlyph[] {
+    if (documentCompatibilityPolicy?.mode !== 'drawingml') {
+        return glyphGroup;
+    }
+    const hasText = (glyph: IDocumentSkeletonGlyph) =>
+        glyph.content && glyph.streamType !== DataStreamTreeTokenType.PARAGRAPH && glyph.glyphType !== GlyphType.LIST;
+    // An empty line needs the paragraph-end font; a populated DrawingML line does not.
+    return glyphGroup.some(hasText) || previousGlyphs.some(hasText)
+        ? glyphGroup.filter((glyph) => glyph.streamType !== DataStreamTreeTokenType.PARAGRAPH)
+        : glyphGroup;
+}
+
+export function getDrawingMLLineBaseline(lineHeight: number, ascent: number, descent: number): number {
+    const bottomAlignedBaseline = lineHeight - descent;
+    // Preserve the quarter-line descent without crossing either natural font edge near its line height.
+    return Math.min(Math.max(lineHeight * 0.75, Math.min(ascent, bottomAlignedBaseline)), Math.max(ascent, bottomAlignedBaseline));
 }
 
 export function updateBlockIndex(
@@ -447,9 +485,9 @@ export function updateBlockIndex(
     let prePageStartIndex = start;
     const paragraphLogicalStartAnchors = getParagraphLogicalStartAnchors(pages);
     // Real docs declare a classic/modern compatibility mode, so their measured layout column
-    // width can be reused. Embedded editors keep the mode unspecified and must fall back to
+    // width can be reused. Embedded editors (including DrawingML text) must fall back to
     // content width; otherwise a sheet cell editor may stretch to the far edge of the canvas.
-    const shouldUseLayoutColumnWidth = documentCompatibilityPolicy?.mode !== 'unspecified';
+    const shouldUseLayoutColumnWidth = documentCompatibilityPolicy?.mode !== 'unspecified' && documentCompatibilityPolicy?.mode !== 'drawingml';
 
     for (const page of pages) {
         const { sections, skeTables, skeColumnGroups = new Map() } = page;
@@ -505,8 +543,6 @@ export function updateBlockIndex(
                     const lineEndIndex = lineStartIndex;
                     let preDivideStartIndex = lineStartIndex;
                     let actualWidth = 0;
-                    let maxLineAsc = 0;
-                    let macLineDsc = 0;
                     columnHeight = top + lineHeight;
                     const divideLength = divides.length;
                     let lineHasGlyph = false;
@@ -522,12 +558,6 @@ export function updateBlockIndex(
                             const increaseValue = glyph.glyphType === GlyphType.LIST ? 0 : glyph.count;
 
                             divEndIndex += increaseValue;
-
-                            const bBox = glyph.bBox;
-                            const { ba, bd } = bBox;
-
-                            maxLineAsc = Math.max(maxLineAsc, ba);
-                            macLineDsc = Math.max(macLineDsc, bd);
 
                             if (i === divideLength - 1) {
                                 actualWidth += glyph.width;
@@ -566,8 +596,17 @@ export function updateBlockIndex(
                     line.st = lineHasGlyph ? lineStartIndex + 1 : lineStartIndex;
                     line.ed = preDivideStartIndex >= line.st ? preDivideStartIndex : line.st;
                     line.width = actualWidth;
-                    line.asc = maxLineAsc;
-                    line.dsc = macLineDsc;
+                    const { boundingBoxAscent, boundingBoxDescent } = getGlyphGroupFontBoundingBox(
+                        documentCompatibilityPolicy,
+                        ...divides.map((divide) => divide.glyphGroup)
+                    );
+                    line.asc = boundingBoxAscent;
+                    line.dsc = boundingBoxDescent;
+                    if (line.drawingMLBaselineHeight != null) {
+                        const lineBoxHeight = line.paddingTop + line.contentHeight + line.paddingBottom;
+                        line.paddingTop = getDrawingMLLineBaseline(line.drawingMLBaselineHeight, boundingBoxAscent, boundingBoxDescent) - boundingBoxAscent;
+                        line.paddingBottom = lineBoxHeight - line.contentHeight - line.paddingTop;
+                    }
                     maxColumnWidth = Math.max(maxColumnWidth, actualWidth);
                     // Please do not use pre line's top and height to calculate the current's top,
                     // because of float objects will between lines.
@@ -575,6 +614,13 @@ export function updateBlockIndex(
                 }
                 column.st = columStartIndex + 1;
                 column.ed = preLineStartIndex >= column.st ? preLineStartIndex : column.st;
+                const lastLine = lines[lines.length - 1];
+                if (lastLine?.drawingMLNormalLineHeight != null) {
+                    // Automatic spacing is a baseline interval. Its trailing leading does not enlarge the text body.
+                    const terminalHeight = Math.max(lastLine.drawingMLNormalLineHeight, lastLine.paddingTop + lastLine.asc + lastLine.dsc);
+                    const lineBoxHeight = lastLine.paddingTop + lastLine.contentHeight + lastLine.paddingBottom;
+                    columnHeight -= Math.max(0, lineBoxHeight - terminalHeight);
+                }
                 column.height = columnHeight;
 
                 const measuredColumnWidth = shouldUseLayoutColumnWidth && Number.isFinite(column.width) && column.width > 0
@@ -651,7 +697,7 @@ function collapseRedundantColumnBreakOverflow(section: IDocumentSkeletonSection)
     section.columns.splice(expectedColumnCount);
 }
 
-function isParagraphEnd(line: IDocumentSkeletonLine) {
+export function isParagraphEnd(line: IDocumentSkeletonLine) {
     const lastDivide = line.divides[line.divides.length - 1];
     const lastGlyph = lastDivide?.glyphGroup[lastDivide.glyphGroup.length - 1];
 
@@ -696,7 +742,8 @@ export function updateInlineDrawingCoordsAndBorder(ctx: ILayoutContext, pages: I
                 affectInlineDrawings,
                 ctx.dataModel.getUnitId?.() ?? '',
                 drawingAnchor?.top,
-                affectNonInlineDrawings
+                affectNonInlineDrawings,
+                paragraphConfig?.documentCompatibilityPolicy
             );
         }
 
@@ -896,7 +943,7 @@ export interface IDocumentSkeletonLineContext {
     visualWidth?: number;
 }
 
-export type DocumentSkeletonTableSource = 'page' | 'column' | 'header' | 'footer';
+export type DocumentSkeletonTableSource = 'page' | 'table-cell' | 'column' | 'header' | 'footer';
 type HeaderFooterSkeletonMap = Map<string, Map<number, IDocumentSkeletonPage>>;
 
 export interface IDocumentSkeletonTableCellGeometry {
@@ -1309,33 +1356,34 @@ function collectPageTables(options: ICollectPageTablesOptions): void {
         const tableViewportRight = tableViewportLeft + (hasHorizontalViewport ? viewport.viewportWidth : table.width);
         const tableScrollLeft = hasHorizontalViewport ? viewport.scrollLeft : 0;
         const cells: IDocumentSkeletonTableCellGeometry[] = [];
+        const nestedCells: Array<{ cell: IDocumentSkeletonPage; pageLeft: number; pageTop: number }> = [];
 
-        if (includeCells) {
-            table.rows.forEach((row, rowIndex) => {
-                row.cells.forEach((cell, columnIndex) => {
-                    if ((cell as IDocumentSkeletonPage & { isMergedCellCovered?: boolean }).isMergedCellCovered) {
-                        return;
-                    }
+        table.rows.forEach((row, rowIndex) => {
+            row.cells.forEach((cell, columnIndex) => {
+                if ((cell as IDocumentSkeletonPage & { isMergedCellCovered?: boolean }).isMergedCellCovered) {
+                    return;
+                }
 
-                    const cellMarginLeft = cell.marginLeft ?? 0;
-                    const cellMarginRight = cell.marginRight ?? 0;
-                    const cellMarginTop = cell.marginTop ?? 0;
-                    const cellMarginBottom = cell.marginBottom ?? 0;
-                    const cellPageWidth = cell.pageWidth ?? 0;
-                    const cellPageHeight = cell.pageHeight ?? 0;
-                    const cellTop = tableTop + (row.top ?? 0) + cellMarginTop;
-                    const cellLeft = tableLeft + (cell.left ?? 0) - tableScrollLeft + cellMarginLeft;
-                    const cellContentRight = cellLeft + cellPageWidth - cellMarginLeft - cellMarginRight;
-                    const visualLeft = cellLeft + tableCellInsetX;
-                    const visualRight = cellContentRight - tableCellInsetX;
-                    const visualWidth = Math.max(0, visualRight - visualLeft);
-                    const clipLeft = tableViewportLeft;
-                    const clipRight = Math.min(cellContentRight, tableViewportRight);
+                const cellMarginLeft = cell.marginLeft ?? 0;
+                const cellMarginRight = cell.marginRight ?? 0;
+                const cellMarginTop = cell.marginTop ?? 0;
+                const cellMarginBottom = cell.marginBottom ?? 0;
+                const cellPageWidth = cell.pageWidth ?? 0;
+                const cellPageHeight = cell.pageHeight ?? 0;
+                const cellTop = tableTop + (row.top ?? 0) + cellMarginTop;
+                const cellLeft = tableLeft + (cell.left ?? 0) - tableScrollLeft + cellMarginLeft;
+                const cellContentRight = cellLeft + cellPageWidth - cellMarginLeft - cellMarginRight;
+                const visualLeft = cellLeft + tableCellInsetX;
+                const visualRight = cellContentRight - tableCellInsetX;
+                const visualWidth = Math.max(0, visualRight - visualLeft);
+                const clipLeft = tableViewportLeft;
+                const clipRight = Math.min(cellContentRight, tableViewportRight);
 
-                    if (visualWidth <= 0 || Math.min(visualRight, clipRight) <= Math.max(visualLeft, clipLeft)) {
-                        return;
-                    }
+                if (cell.skeTables?.size) {
+                    nestedCells.push({ cell, pageLeft: cellLeft, pageTop: cellTop });
+                }
 
+                if (includeCells && visualWidth > 0 && Math.min(visualRight, clipRight) > Math.max(visualLeft, clipLeft)) {
                     cells.push({
                         cell,
                         cellRect: {
@@ -1354,9 +1402,9 @@ function collectPageTables(options: ICollectPageTablesOptions): void {
                         visualLeft,
                         visualWidth,
                     });
-                });
+                }
             });
-        }
+        });
 
         contexts.push({
             cells,
@@ -1374,6 +1422,16 @@ function collectPageTables(options: ICollectPageTablesOptions): void {
                 right: tableLeft + table.width,
                 top: tableTop,
             },
+        });
+
+        nestedCells.forEach(({ cell, pageLeft: nestedPageLeft, pageTop: nestedPageTop }) => {
+            collectPageTables({
+                ...options,
+                page: cell,
+                pageLeft: nestedPageLeft,
+                pageTop: nestedPageTop,
+                source: 'table-cell',
+            });
         });
     });
 }
@@ -1583,11 +1641,26 @@ export function getPositionVertical(
     }
 }
 
-export function getGlyphGroupWidth(divide: IDocumentSkeletonDivide) {
+export function getGlyphGroupWidth(divide: IDocumentSkeletonDivide, excludeTrailingSpaces = false) {
     let width = 0;
+    const glyphs = divide.glyphGroup;
+    let end = glyphs.length;
+    if (excludeTrailingSpaces) {
+        while (end > 0) {
+            const glyph = glyphs[end - 1];
+            // Word excludes trailing ordinary/full-width spaces from alignment,
+            // including those followed by paragraph or custom-range markers.
+            // NBSP and tabs still occupy their authored advance.
+            if (glyph.width !== 0 && glyph.content !== ' ' && glyph.content !== '\u3000' &&
+                glyph.streamType !== DataStreamTreeTokenType.PARAGRAPH) {
+                break;
+            }
+            end--;
+        }
+    }
 
-    for (const glyph of divide.glyphGroup) {
-        width += glyph.width;
+    for (let i = 0; i < end; i++) {
+        width += glyphs[i].width;
     }
 
     return width;
@@ -1601,6 +1674,7 @@ interface IFontCreateConfig {
     gridType: GridType;
     snapToGrid: BooleanNumber;
     pageWidth: number;
+    balanceSingleByteDoubleByteWidth?: BooleanNumber;
 }
 
 const fontCreateConfigCache = new ObjectMatrix<IFontCreateConfig>();
@@ -1632,6 +1706,7 @@ export function getFontConfigFromLastGlyph(
         documentCompatibilityPolicy: sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy(),
         fontStyle: fontStyle!,
         textStyle: ts!,
+        balanceSingleByteDoubleByteWidth: sectionBreakConfig.balanceSingleByteDoubleByteWidth,
         charSpace,
         gridType,
         snapToGrid,
@@ -1672,7 +1747,7 @@ export function getFontCreateConfig(
     } = sectionBreakConfig;
     const { paragraphStyle = {}, bullet } = paragraph;
     const { isRenderStyle } = renderConfig;
-    const { startIndex } = paragraphNode;
+    const startIndex = paragraphNode.contentStartIndex;
     const originTextRun = viewModel.getTextRun(index + startIndex);
 
     const textRun = isRenderStyle === BooleanNumber.FALSE
@@ -1684,7 +1759,7 @@ export function getFontCreateConfig(
     const customRange = viewModel.getCustomRange(index + startIndex);
     const showCustomRange = customRange && (customRange.show !== false);
     const customRangeStyle = showCustomRange ? getCustomRangeStyle(customRange) : null;
-    const hasAddonStyle = showCustomRange || showCustomDecoration || !!bullet || paragraphStyle?.namedStyleType || paragraphStyle?.textStyle != null;
+    const hasAddonStyle = showCustomRange || showCustomDecoration || !!bullet || paragraphStyle?.namedStyleType || paragraphStyle?.textStyle != null || paragraphStyle?.paragraphMarkTextStyle != null;
     const { st, ed } = textRun;
     let textStyle: ITextStyle = textRun.ts ?? {};
     const cache = fontCreateConfigCache.getValue(st, ed);
@@ -1695,13 +1770,15 @@ export function getFontCreateConfig(
     const { snapToGrid = BooleanNumber.TRUE, namedStyleType, textStyle: paragraphTextStyle } = paragraphStyle;
     const bulletTextStyle = bullet ? getBulletParagraphTextStyle(bullet, viewModel) : null;
     // Apply named style if it exists
-    const namedStyle = namedStyleType ? NAMED_STYLE_MAP[namedStyleType] : null;
+    // Imported Word styles are already resolved; the outline role does not imply an SDK preset.
+    const namedStyle = namedStyleType && paragraph.styleId == null ? NAMED_STYLE_MAP[namedStyleType] : null;
 
     textStyle = {
         ...documentTextStyle,
         ...namedStyle,
         ...paragraphTextStyle,
         ...textStyle,
+        ...(index + startIndex === paragraph.startIndex ? paragraphStyle.paragraphMarkTextStyle : undefined),
         ...customDecorationStyle,
         ...customRangeStyle,
         ...bulletTextStyle,
@@ -1713,7 +1790,7 @@ export function getFontCreateConfig(
             ...textStyle,
             ff: `${textStyle.ff || DEFAULT_STYLES.ff}, ${eastAsiaFontFamily}`,
         }
-        : textStyle);
+        : textStyle, sectionBreakConfig.fontFamilyFallbacks);
 
     const mixTextStyle: ITextStyle = {
         ...documentTextStyle,
@@ -1725,6 +1802,7 @@ export function getFontCreateConfig(
     const result = {
         fontStyle,
         textStyle: mixTextStyle,
+        balanceSingleByteDoubleByteWidth: sectionBreakConfig.balanceSingleByteDoubleByteWidth,
         charSpace,
         gridType,
         snapToGrid,
@@ -1777,7 +1855,7 @@ export function getCustomRangeGlyphMetrics(
     paragraphNode: DataStreamTreeNode,
     config: IFontCreateConfig
 ): { ascent?: number; descent?: number; width?: number } | undefined {
-    const customRange = viewModel.getCustomRange(index + paragraphNode.startIndex);
+    const customRange = viewModel.getCustomRange(index + paragraphNode.contentStartIndex);
     if (!customRange) {
         return undefined;
     }
@@ -1839,6 +1917,7 @@ export interface IFloatObject {
     angle: number;
     behindDoc?: BooleanNumber;
     layoutType?: PositionedObjectLayoutType;
+    effectExtent?: IDocDrawingBase['effectExtent'];
     type: FloatObjectType;
     positionV: IObjectPositionV;
 }
@@ -2023,6 +2102,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         marginFooter: global_marginFooter = 0,
 
         autoHyphenation = BooleanNumber.FALSE,
+        spaceWidthEastAsian,
         doNotHyphenateCaps = BooleanNumber.FALSE,
         consecutiveHyphenLimit = Number.POSITIVE_INFINITY,
         hyphenationZone,
@@ -2089,6 +2169,8 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
 
     const sectionBreakConfig: ISectionBreakConfig = {
         sectionId,
+        fontFamilyFallbacks: documentStyle.fontFamilyFallbacks,
+        balanceSingleByteDoubleByteWidth: documentStyle.balanceSingleByteDoubleByteWidth,
         charSpace,
         linePitch,
         gridType,
@@ -2118,6 +2200,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         renderConfig,
 
         autoHyphenation,
+        spaceWidthEastAsian,
         doNotHyphenateCaps,
         consecutiveHyphenLimit,
         hyphenationZone,

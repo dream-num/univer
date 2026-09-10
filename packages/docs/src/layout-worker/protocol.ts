@@ -15,6 +15,7 @@
  */
 
 import type { DocLayoutExecutorType, IDocLayoutExecutor } from '../services/doc-layout-executor.service';
+import type { IDocsLayoutFontFace } from './config/config';
 
 export const DOCS_LAYOUT_WORKER_CHANNEL = 'univer.docs-layout-worker';
 export const DOCS_LAYOUT_WORKER_PROTOCOL_VERSION = 5;
@@ -36,5 +37,6 @@ export interface IDocsLayoutWorkerCapabilities {
 }
 
 export interface IDocsLayoutWorkerRuntime extends IDocLayoutExecutor {
+    initialize(fontFaces?: IDocsLayoutFontFace[]): Promise<void>;
     getCapabilities(): Promise<IDocsLayoutWorkerCapabilities>;
 }

@@ -109,6 +109,8 @@ const locale: typeof enUS = {
             selection: 'Bieżące zaznaczenie',
             wordCount: 'Liczba wyrazów: {0}',
             selectedWords: 'Liczba wyrazów: {0} z {1}',
+            currentPage: 'Strona {0}',
+            currentPageOfTotal: 'Strona {0} z {1}',
             pages: 'Strony',
             words: 'Wyrazy',
             charactersWithoutSpaces: 'Znaki (bez spacji)',

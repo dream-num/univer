@@ -26,6 +26,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
     compareNodePosition,
     compareNodePositionLogic,
+    findDocRangeNodePositions,
     getOneTextSelectionRange,
     NodePositionConvertToCursor,
     pushToPoints,
@@ -129,7 +130,7 @@ describe('selection convert text range helpers', () => {
         ]);
     });
 
-    it('projects cell cursors through the table horizontal viewport', () => {
+    it.each([false, true])('projects cell cursors through the table viewport (vertical: %s)', (vertical) => {
         setDocsTableRenderViewportProvider((unitId, tableId) => {
             if (unitId !== 'unit-1' || tableId !== 'table-1') {
                 return null;
@@ -151,6 +152,8 @@ describe('selection convert text range helpers', () => {
         };
         const cell = {
             left: 100,
+            pageWidth: 40,
+            cellTextDirection: vertical ? 'tbRlV' : undefined,
             marginLeft: 0,
             marginTop: 0,
             sections: [{
@@ -231,7 +234,130 @@ describe('selection convert text range helpers', () => {
 
         const result = convertor.getRangePointData(position, position);
 
-        expect(getAnchorBounding(result.contentBoxPointGroup).left).toBe(70);
+        const bounds = getAnchorBounding(result.contentBoxPointGroup);
+        if (vertical) {
+            expect(bounds).toMatchObject({ left: 78, top: 20, width: 10, height: 10 });
+        } else {
+            expect(bounds.left).toBe(70);
+        }
+    });
+
+    it('does not pass a cross-cell structural range to the text selection converter', () => {
+        const first = {
+            pageType: DocumentSkeletonPageType.CELL,
+            path: ['pages', 0, 'skeTables', 'table-1', 'rows', 0, 'cells', 0],
+        } as never;
+        const second = {
+            pageType: DocumentSkeletonPageType.CELL,
+            path: ['pages', 0, 'skeTables', 'table-1', 'rows', 0, 'cells', 1],
+        } as never;
+        const skeleton = {
+            findNodePositionByCharIndex: (index: number) => index === 1 ? first : second,
+        } as never;
+
+        expect(findDocRangeNodePositions(skeleton, 1, 2)).toBeUndefined();
+    });
+
+    it('resolves visible positions inside structural range sentinels', () => {
+        const start = { glyph: 1, isBack: true } as never;
+        const end = { glyph: 8, isBack: false } as never;
+        const skeleton = {
+            findNodePositionByCharIndex: (index: number, isBack: boolean) => index === 12
+                ? start
+                : index === 18 && !isBack
+                    ? end
+                    : undefined,
+        } as unknown as DocumentSkeleton;
+
+        expect(findDocRangeNodePositions(skeleton, 10, 20)).toEqual({ startPosition: start, endPosition: end });
+    });
+
+    it('includes ancestor table and cell offsets for a nested vertical cell selection', () => {
+        const glyph = {
+            bBox: { ba: 8, bd: 2 },
+            count: 1,
+            glyphType: 'LETTER',
+            left: 20,
+            width: 10,
+        };
+        const innerCell = {
+            cellTextDirection: 'tbRlV',
+            left: 19,
+            marginLeft: 3,
+            marginTop: 4,
+            pageWidth: 40,
+            sections: [{
+                columns: [{
+                    left: 0,
+                    lines: [{
+                        asc: 10,
+                        divides: [{ glyphGroup: [glyph], left: 0, paddingLeft: 0 }],
+                        lineHeight: 20,
+                        marginBottom: 0,
+                        marginTop: 0,
+                        paddingTop: 0,
+                        top: 0,
+                    }],
+                }],
+                top: 0,
+            }],
+        };
+        const innerRow = { cells: [innerCell], height: 20, index: 0, top: 17 };
+        const innerTable = { left: 11, rows: [innerRow], tableId: 'inner', top: 13 };
+        const outerCell = {
+            left: 30,
+            marginLeft: 5,
+            marginTop: 7,
+            sections: [],
+            skeTables: new Map([['inner', innerTable]]),
+        };
+        const outerRow = { cells: [outerCell], height: 100, index: 0, top: 0 };
+        const outerTable = { left: 100, rows: [outerRow], tableId: 'outer', top: 200 };
+        const page = {
+            marginLeft: 10,
+            marginTop: 20,
+            pageHeight: 500,
+            pageWidth: 500,
+            skeTables: new Map([['outer', outerTable]]),
+        };
+
+        (innerCell as { parent?: unknown }).parent = innerRow;
+        (innerRow as { parent?: unknown }).parent = innerTable;
+        (innerTable as { parent?: unknown }).parent = outerCell;
+        (outerCell as { parent?: unknown }).parent = outerRow;
+        (outerRow as { parent?: unknown }).parent = outerTable;
+        (outerTable as { parent?: unknown }).parent = page;
+
+        const skeleton = {
+            getSkeletonData: () => ({ pages: [page], skeFooters: new Map(), skeHeaders: new Map() }),
+            getViewModel: () => ({ getDataModel: () => ({ getUnitId: () => 'unit-1' }) }),
+        };
+        const position = {
+            column: 0,
+            divide: 0,
+            glyph: 0,
+            isBack: false,
+            line: 0,
+            page: 0,
+            pageType: DocumentSkeletonPageType.CELL,
+            path: ['pages', 0, 'skeTables', 'outer', 'rows', 0, 'cells', 0, 'skeTables', 'inner', 'rows', 0, 'cells', 0],
+            section: 0,
+            segmentPage: 0,
+        };
+        const convertor = new NodePositionConvertToCursor({
+            docsLeft: 0,
+            docsTop: 0,
+            pageLayoutType: 0,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        } as never, skeleton as never);
+
+        expect(getAnchorBounding(convertor.getRangePointData(position, position).contentBoxPointGroup)).toMatchObject({
+            left: 199,
+            top: 280,
+            width: 10,
+            height: 10,
+        });
     });
 
     it('projects header table cell cursors from the segment page without requiring a body page index', () => {

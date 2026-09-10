@@ -36,6 +36,9 @@ import {
 import { parseDataStreamToTree } from '@univerjs/engine-render';
 
 const DEFAULT_CLIPBOARD_FONT_FAMILY = 'Arial';
+function stripFieldBoundaryMarkers(value: string): string {
+    return value.replaceAll('\u001E', '').replaceAll('\u001F', '');
+}
 
 function covertImageToHtml(item: IDocImage) {
     const transformObjectToString = (obj: Record<string, string | number | undefined>) => {
@@ -63,7 +66,7 @@ export function covertTextRunToHtml(dataStream: string, textRun: ITextRun): stri
     const { st: start, ed, ts = {} } = textRun;
     const { ff, fs, it, bl, ul, st, ol, bg, cl, va } = ts;
 
-    let html = escapeInlineText(dataStream.slice(start, ed));
+    let html = escapeInlineText(stripFieldBoundaryMarkers(dataStream.slice(start, ed)));
     const style: string[] = [];
 
     // italic
@@ -131,7 +134,7 @@ function getBodyInlineSlice(body: IDocumentBody, startIndex: number, endIndex: n
         const { st, ed } = textRun;
         if (Tools.hasIntersectionBetweenTwoRanges(startIndex, endIndex, st, ed)) {
             if (st > cursorIndex) {
-                spanList.push(escapeInlineText(dataStream.slice(cursorIndex, st)));
+                spanList.push(escapeInlineText(stripFieldBoundaryMarkers(dataStream.slice(cursorIndex, st))));
 
                 spanList.push(covertTextRunToHtml(dataStream, {
                     ...textRun,
@@ -150,7 +153,7 @@ function getBodyInlineSlice(body: IDocumentBody, startIndex: number, endIndex: n
     }
 
     if (cursorIndex !== endIndex) {
-        spanList.push(escapeInlineText(dataStream.slice(cursorIndex, endIndex)));
+        spanList.push(escapeInlineText(stripFieldBoundaryMarkers(dataStream.slice(cursorIndex, endIndex))));
     }
 
     return spanList.join('');
@@ -161,7 +164,11 @@ export function getBodySliceHtml(doc: IDocumentData, startIndex: number, endInde
     const drawings = doc.drawings || {};
     const { customRanges = [], customBlocks = [] } = body || {};
     const cloneCustomBlocks = [...customBlocks];
-    const customRangesInRange = customRanges.filter((range) => range.startIndex >= startIndex && range.endIndex <= endIndex);
+    const customRangesInRange = customRanges.filter((range) =>
+        range.rangeType === CustomRangeType.HYPERLINK &&
+        range.startIndex >= startIndex &&
+        range.endIndex <= endIndex
+    );
     let cursorIndex = startIndex;
     let html = '';
     const handleCustomBlock = (startIndex: number, endIndex: number) => {
@@ -203,7 +210,8 @@ export function getBodySliceHtml(doc: IDocumentData, startIndex: number, endInde
         const sliceHtml = handleCustomBlock(startIndex, endIndex + 1);
         switch (rangeType) {
             case CustomRangeType.HYPERLINK: {
-                html += `<a data-rangeid="${rangeId}" href="${range.properties?.url ?? ''}">${sliceHtml.sliceHtml}</a>`;
+                const href = range.properties?.url ?? (range.properties?.bookmarkId ? `#${range.properties.bookmarkId}` : '');
+                html += `<a data-rangeid="${rangeId}" href="${href}">${sliceHtml.sliceHtml}</a>`;
                 break;
             }
             default: {

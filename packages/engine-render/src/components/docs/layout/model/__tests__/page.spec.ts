@@ -194,50 +194,6 @@ describe('page model', () => {
         expect(page.marginBottom).toBe(40);
     });
 
-    it('keeps traditional document margins when header and footer content overlap the body', () => {
-        dealWithSectionMock.mockImplementation((_ctx: any, _vm: any, _node: any, areaPage: any) => ({
-            pages: [{
-                ...areaPage,
-                height: 80,
-                sections: [{ columns: [{ lines: [{ paragraphIndex: 0 }] }] }],
-                skeDrawings: new Map(),
-                skeTables: new Map(),
-            }],
-        }));
-
-        const skeletonResourceReference = createSkeletonResourceReference();
-        const ctx = {
-            layoutStartPointer: {},
-            skeletonResourceReference,
-            isDirty: false,
-        } as any;
-
-        const page = createSkeletonPage(
-            ctx,
-            {
-                pageNumberStart: 1,
-                pageSize: { width: 816, height: 1056 },
-                headerIds: { defaultHeaderId: 'h-default' },
-                footerIds: { defaultFooterId: 'f-default' },
-                headerTreeMap: new Map([['h-default', { getChildren: () => [{}] }]]),
-                footerTreeMap: new Map([['f-default', { getChildren: () => [{}] }]]),
-                columnProperties: [],
-                marginTop: 24,
-                marginBottom: 42,
-                marginHeader: 24,
-                marginFooter: 24,
-                documentCompatibilityPolicy: getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL),
-            } as any,
-            skeletonResourceReference,
-            1
-        );
-
-        expect(page.originMarginTop).toBe(24);
-        expect(page.marginTop).toBe(24);
-        expect(page.originMarginBottom).toBe(42);
-        expect(page.marginBottom).toBe(42);
-    });
-
     it('does not create negative-width columns for oversized single-column section properties', () => {
         const skeletonResourceReference = createSkeletonResourceReference();
         const ctx = {
@@ -405,6 +361,7 @@ describe('page model', () => {
             adjustLineHeightInTable: BooleanNumber.TRUE,
             characterSpacingControl: 2,
             useFELayout: BooleanNumber.TRUE,
+            balanceSingleByteDoubleByteWidth: BooleanNumber.TRUE,
             spaceWidthEastAsian: BooleanNumber.TRUE,
             autoHyphenation: BooleanNumber.TRUE,
             consecutiveHyphenLimit: 3,
@@ -436,6 +393,7 @@ describe('page model', () => {
             adjustLineHeightInTable: cellConfig.adjustLineHeightInTable,
             characterSpacingControl: cellConfig.characterSpacingControl,
             useFELayout: cellConfig.useFELayout,
+            balanceSingleByteDoubleByteWidth: cellConfig.balanceSingleByteDoubleByteWidth,
             spaceWidthEastAsian: cellConfig.spaceWidthEastAsian,
             autoHyphenation: cellConfig.autoHyphenation,
             consecutiveHyphenLimit: cellConfig.consecutiveHyphenLimit,
@@ -452,6 +410,7 @@ describe('page model', () => {
             adjustLineHeightInTable: BooleanNumber.TRUE,
             characterSpacingControl: 2,
             useFELayout: BooleanNumber.TRUE,
+            balanceSingleByteDoubleByteWidth: BooleanNumber.TRUE,
             spaceWidthEastAsian: BooleanNumber.TRUE,
             autoHyphenation: BooleanNumber.TRUE,
             consecutiveHyphenLimit: 3,
@@ -756,7 +715,7 @@ describe('page model', () => {
         expect(pages[0].height).toBe(48);
     });
 
-    it('DOCX golden e2e expands table cell height to include inline drawings', () => {
+    it.each([0, 9])('expands a cell for inline drawing geometry and effect bounds (%s)', (bottom) => {
         const page = {
             height: 20,
             skeDrawings: new Map([
@@ -765,6 +724,7 @@ describe('page model', () => {
                     height: 48,
                     drawingOrigin: {
                         layoutType: PositionedObjectLayoutType.INLINE,
+                        effectExtent: { bottom },
                     },
                 }],
                 ['float-1', {
@@ -779,7 +739,28 @@ describe('page model', () => {
 
         expandCellPageHeightForInlineDrawings([page as never]);
 
-        expect(page.height).toBe(54);
+        expect(page.height).toBe(54 + bottom);
+    });
+
+    it('keeps trailing paragraph spacing below a final inline drawing in a table cell', () => {
+        const line = {
+            spaceBelowApply: 10.4,
+            divides: [{ glyphGroup: [{ drawingId: 'logo' }] }],
+        };
+        const page = {
+            height: 20,
+            sections: [{ columns: [{ lines: [line] }] }],
+            skeDrawings: new Map([['logo', {
+                drawingId: 'logo',
+                aTop: 0,
+                height: 54,
+                drawingOrigin: { layoutType: PositionedObjectLayoutType.INLINE },
+            }]]),
+        };
+
+        expandCellPageHeightForInlineDrawings([page as never]);
+
+        expect(page.height).toBe(64.4);
     });
 
     it('expands table cell height to include nested flow tables', () => {

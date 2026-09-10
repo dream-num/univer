@@ -179,6 +179,7 @@ export {
     BackgroundColorSelectorMenuItemFactory,
     BoldMenuItemFactory,
     disableMenuWhenHeaderFooterEditing,
+    disableMenuWithoutDocumentUnitPermission,
     FLOAT_TEXT_STYLE_MENU_ID,
     FLOAT_TOOLBAR_MENU_POSITION,
     FloatTextStyleMenuItemFactory,
@@ -265,6 +266,7 @@ export {
     isValidRectRange,
     NodePositionConvertToRectRange,
 } from './services/selection/convert-rect-range';
+export { findDocRangeNodePositions } from './services/selection/convert-text-range';
 export { NodePositionConvertToCursor } from './services/selection/convert-text-range';
 export { getOneTextSelectionRange } from './services/selection/convert-text-range';
 export type { IEditorInputConfig } from './services/selection/doc-selection-render.service';

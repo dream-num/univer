@@ -59,6 +59,7 @@ export class InputManager extends Disposable {
     private _delayedTripeTimeout: NodeJS.Timeout | number = -1;
     private _doubleClickOccurred = 0;
     private _tripleClickState = false;
+    private _lastClickTime = Number.NEGATIVE_INFINITY;
     private _currentObject: Nullable<BaseObject | Scene>;
 
     constructor(scene: Scene) {
@@ -486,14 +487,24 @@ export class InputManager extends Disposable {
 
     private _prePointerDoubleOrTripleClick(evt: IPointerEvent) {
         const { clientX, clientY } = evt;
+        const clickTime = Number.isFinite(evt.timeStamp) ? evt.timeStamp : performance.now();
+        const elapsed = clickTime - this._lastClickTime;
+        this._lastClickTime = clickTime;
         const movementThreshold = evt.deviceType === DeviceType.Touch
             ? InputManager.TouchDoubleClickMovementThreshold
             : InputManager.DragMovementThreshold;
 
         const isMoveThreshold = this._isPointerSwiping(clientX, clientY, this._startingPosition, movementThreshold);
 
+        // Timers may run late after layout or a browser focus round trip.
         if (isMoveThreshold) {
             this._resetClickSequence();
+        } else if (elapsed < 0 || elapsed > InputManager.DoubleClickDelay) {
+            this._resetDoubleClickParam();
+        }
+        if (isMoveThreshold || elapsed < 0 || elapsed > InputManager.TripleClickDelay) {
+            this._tripleClickState = false;
+            clearTimeout(this._delayedTripeTimeout);
         }
 
         clearTimeout(this._delayedTimeout);

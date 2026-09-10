@@ -109,6 +109,8 @@ const locale: typeof enUS = {
             selection: 'Aktuálny výber',
             wordCount: 'Počet slov: {0}',
             selectedWords: 'Počet slov: {0} z {1}',
+            currentPage: 'Strana {0}',
+            currentPageOfTotal: 'Strana {0} z {1}',
             pages: 'Strany',
             words: 'Slová',
             charactersWithoutSpaces: 'Znaky (bez medzier)',

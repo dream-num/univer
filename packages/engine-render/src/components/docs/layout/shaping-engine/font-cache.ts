@@ -268,18 +268,26 @@ export class FontCache {
     static getTextSize(
         content: string,
         fontStyle: IDocumentSkeletonFontStyle,
-        includeNormalFontLeading = false
+        includeNormalFontLeading = false,
+        useUnhintedMetrics = includeNormalFontLeading
     ): IDocumentSkeletonBoundingBox {
         const { fontString, fontSize, fontFamily } = fontStyle;
 
         let bBox = this._getBoundingBoxByFont(fontFamily, fontSize);
 
         if (!bBox) {
-            // if (content === DataStreamTreeTokenType.PARAGRAPH) {
-            //     content = '0';
-            // }
-            const measureText = this.getMeasureText(content, fontString);
+            const measureText = this.getMeasureText(content, fontString, fontStyle.fontKerning);
             bBox = this._calculateBoundingBoxByMeasureText(measureText, fontStyle);
+            if (useUnhintedMetrics) {
+                // Native-size font boxes and bitmap strikes round to device pixels. Print layout
+                // needs scalable advances and line metrics; retain native-size ink bounds.
+                const outlineFont = fontString.replace(/\b\d+(?:\.\d+)?(?:pt|px)\b/, '1024px');
+                const outlineMetrics = this.getMeasureText(content, outlineFont, fontStyle.fontKerning);
+                bBox.width = outlineMetrics.width * (fontSize / 0.75) / 1024;
+                const metricScale = (fontStyle.originFontSize / 0.75) / 1024;
+                bBox.ba = outlineMetrics.fontBoundingBoxAscent * metricScale;
+                bBox.bd = outlineMetrics.fontBoundingBoxDescent * metricScale;
+            }
         }
 
         return {
@@ -294,7 +302,7 @@ export class FontCache {
      * @param fontString
      * @returns IMeasureTextCache
      */
-    static getMeasureText(content: string, fontString: string): IMeasureTextCache {
+    static getMeasureText(content: string, fontString: string, kerning: CanvasFontKerning = 'auto'): IMeasureTextCache {
         if (!this._context) {
             this._context = this._createMeasureContext();
         }
@@ -311,11 +319,15 @@ export class FontCache {
 
         const ctx = this._context;
 
-        const mtc = this.getFontMeasureCache(fontString, content);
+        const cacheKey = kerning === 'auto' ? fontString : `${fontString}\u0000${kerning}`;
+        const mtc = this.getFontMeasureCache(cacheKey, content);
         if (mtc != null) {
             return mtc;
         }
         ctx.font = fontString;
+        if ('fontKerning' in ctx) {
+            ctx.fontKerning = kerning;
+        }
 
         const textMetrics = ctx.measureText(content);
 
@@ -359,7 +371,7 @@ export class FontCache {
             }
         }
 
-        this.setFontMeasureCache(fontString, content, cache);
+        this.setFontMeasureCache(cacheKey, content, cache);
 
         return cache;
     }

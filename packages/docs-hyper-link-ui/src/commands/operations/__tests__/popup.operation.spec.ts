@@ -19,7 +19,7 @@ import { CustomRangeType, ICommandService, toDisposable, Univer, UniverInstanceT
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DocHyperLinkPopupService } from '../../../services/hyper-link-popup.service';
 import {
     ClickDocHyperLinkOperation,
@@ -42,7 +42,29 @@ function createDocData(): IDocumentData {
                 properties: {
                     url: 'javascript:alert(1)',
                 },
+            }, {
+                rangeId: 'bookmark-link',
+                rangeType: CustomRangeType.HYPERLINK,
+                startIndex: 6,
+                endIndex: 10,
+                properties: { bookmarkId: '_Toc1' },
+            }, {
+                rangeId: 'bookmark-range',
+                rangeType: CustomRangeType.BOOKMARK,
+                startIndex: 11,
+                endIndex: 11,
+                properties: { bookmarkId: '_Toc1' },
+            }, {
+                rangeId: 'heading-link',
+                rangeType: CustomRangeType.HYPERLINK,
+                startIndex: 0,
+                endIndex: 4,
+                properties: { headingId: 'heading-2' },
             }],
+            paragraphs: [
+                { startIndex: 5, paragraphId: 'paragraph-1' },
+                { startIndex: 11, paragraphId: 'paragraph-2', paragraphStyle: { headingId: 'heading-2' } },
+            ],
         },
         documentStyle: {
             pageSize: {
@@ -158,5 +180,41 @@ describe('doc hyperlink popup operations', () => {
         });
 
         expect(result).toBe(false);
+    });
+
+    it('moves the caret to an internal bookmark', async () => {
+        const replaceDocRanges = vi.spyOn(selectionManager, 'replaceDocRanges');
+
+        const result = await commandService.executeCommand(ClickDocHyperLinkOperation.id, {
+            unitId,
+            linkId: 'bookmark-link',
+            segmentId: '',
+        });
+
+        expect(result).toBe(true);
+        expect(replaceDocRanges).toHaveBeenCalledWith(
+            [{ startOffset: 11, endOffset: 11, collapsed: true }],
+            { unitId, subUnitId: unitId },
+            false,
+            { preserveCaret: true }
+        );
+    });
+
+    it('moves the caret to the start of an internal heading', async () => {
+        const replaceDocRanges = vi.spyOn(selectionManager, 'replaceDocRanges');
+
+        const result = await commandService.executeCommand(ClickDocHyperLinkOperation.id, {
+            unitId,
+            linkId: 'heading-link',
+            segmentId: '',
+        });
+
+        expect(result).toBe(true);
+        expect(replaceDocRanges).toHaveBeenCalledWith(
+            [{ startOffset: 6, endOffset: 6, collapsed: true }],
+            { unitId, subUnitId: unitId },
+            false,
+            { preserveCaret: true }
+        );
     });
 });

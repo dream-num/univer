@@ -19,6 +19,47 @@ import { describe, expect, it } from 'vitest';
 import { createDocumentLayoutSnapshot } from '../document-layout-snapshot';
 
 describe('createDocumentLayoutSnapshot', () => {
+    it('transfers note stories and their table geometry without raw exchange payloads', () => {
+        const snapshot: IDocumentData = {
+            id: 'note-layout',
+            documentStyle: {},
+            footnotes: {
+                7: {
+                    noteId: '7',
+                    type: 'normal',
+                    tableSource: {},
+                    body: {
+                        dataStream: '\bNote\r\n',
+                        textRuns: [{ st: 0, ed: 1, ts: { fs: 9 } }],
+                        customBlocks: [{ startIndex: 0, blockId: 'footnote-7', noteType: 'footnote', noteId: '7' }],
+                        docxRawBlocks: [{ startIndex: 0, xml: '<w:footnote />' }],
+                    },
+                },
+                '-1': {
+                    noteId: '-1',
+                    type: 'separator',
+                    body: { dataStream: '\b\r\n' },
+                },
+            },
+            endnotes: {
+                7: { noteId: '7', type: 'normal', body: { dataStream: 'Endnote\r\n', payloads: { raw: 'excluded' } } },
+            },
+        };
+
+        const projected = createDocumentLayoutSnapshot(snapshot);
+
+        expect(projected.footnotes?.['7'].body).toEqual({
+            dataStream: '\bNote\r\n',
+            textRuns: [{ st: 0, ed: 1, ts: { fs: 9 } }],
+            customBlocks: [{ startIndex: 0, blockId: 'footnote-7', noteType: 'footnote', noteId: '7' }],
+        });
+        expect(projected.footnotes?.['7'].tableSource).toEqual({});
+        expect(projected.footnotes?.['-1'].type).toBe('separator');
+        expect(projected.endnotes?.['7'].body).toEqual({ dataStream: 'Endnote\r\n' });
+        expect(snapshot.footnotes?.['7'].body.docxRawBlocks).toHaveLength(1);
+        expect(snapshot.endnotes?.['7'].body.payloads).toEqual({ raw: 'excluded' });
+    });
+
     it('excludes exchange-only resources while preserving layout metadata', () => {
         const snapshot: IDocumentData = {
             id: 'layout-snapshot',

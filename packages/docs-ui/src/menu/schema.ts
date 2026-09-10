@@ -335,7 +335,7 @@ export const menuSchema: MenuSchemaType = {
     [RibbonInsertGroup.MEDIA]: {
         [TABLE_MENU_ID]: {
             order: 2,
-            gridLayout: { row: 1, column: 1, rowSpan: 2, showLabel: true },
+            gridLayout: { row: 1, column: 2 },
             menuItemFactory: TableMenuFactory,
             [DocCreateTableOperation.id]: {
                 order: 0,
@@ -343,13 +343,13 @@ export const menuSchema: MenuSchemaType = {
             },
         },
         [HorizontalLineCommand.id]: {
-            order: 3,
-            gridLayout: { row: 1, column: 2, rowSpan: 2, showLabel: true },
+            order: 4,
+            gridLayout: { row: 2, column: 5 },
             menuItemFactory: HorizontalLineFactory,
         },
         [DOC_BREAKS_MENU_ID]: {
             order: 4,
-            gridLayout: { row: 1, column: 3, rowSpan: 2, showLabel: true },
+            gridLayout: { row: 1, column: 1, rowSpan: 2, showLabel: true },
             menuItemFactory: BreaksMenuFactory,
             [InsertDocumentColumnBreakOperation.id]: {
                 order: 0,
@@ -378,12 +378,12 @@ export const menuSchema: MenuSchemaType = {
         },
         [DOC_INSERT_EMOJI_MENU_ID]: {
             order: 5,
-            gridLayout: { row: 1, column: 4 },
+            gridLayout: { row: 1, column: 3 },
             menuItemFactory: EmojiPickerMenuItemFactory,
         },
         [DOC_INSERT_SYMBOL_MENU_ID]: {
             order: 6,
-            gridLayout: { row: 2, column: 4 },
+            gridLayout: { row: 2, column: 3 },
             menuItemFactory: SymbolPickerMenuItemFactory,
         },
     },

@@ -25,15 +25,15 @@ import {
 import { AddDocCommentMenuItemFactory, AddDocDrawingCommentMenuItemFactory, ToolbarDocCommentMenuItemFactory } from './menu';
 
 export const menuSchema: MenuSchemaType = {
-    [RibbonInsertGroup.MEDIA]: {
+    [RibbonInsertGroup.OTHERS]: {
         [ToggleCommentPanelOperation.id]: {
-            order: 3,
-            gridLayout: { row: 1, column: 4, showLabel: true },
+            order: 0,
+            gridLayout: { row: 1, column: 1, showLabel: true },
             menuItemFactory: ToolbarDocCommentMenuItemFactory,
         },
         [StartAddCommentOperation.id]: {
-            order: 3.1,
-            gridLayout: { row: 2, column: 4, showLabel: true },
+            order: 0.1,
+            gridLayout: { row: 2, column: 1, showLabel: true },
             menuItemFactory: AddDocCommentMenuItemFactory,
         },
     },

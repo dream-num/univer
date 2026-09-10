@@ -15,13 +15,18 @@
  */
 
 import type { IDocumentData, ITextRun, ITextStyle } from '@univerjs/core';
-import { getFontStyleString } from '../../../basics/tools';
+import type { IDocumentSkeletonFontStyle } from '../../../basics/i-document-skeleton-cached';
+import type { IDocumentCompatibilityPolicy } from '../document-compatibility';
+import { BooleanNumber } from '@univerjs/core';
+import { getFirstGrapheme, getFontStyleString, getTextWithCaps } from '../../../basics/tools';
+import { getDocumentCompatibilityPolicy, getSmallCapsFontStyle } from '../document-compatibility';
 import { LineBreaker } from './line-breaker';
 import { BreakPointType } from './line-breaker/break';
+import { getPairKerningAdjustment, measureTextWithCharacterSpacing } from './model/glyph';
 import { FontCache } from './shaping-engine/font-cache';
 
 function splitDocumentNoWrapMeasureLines(text: string): string[] {
-    return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+    return text.replace(/\r\n/g, '\n').split(/[\r\n\u2028]/u);
 }
 
 function isDocumentNoWrapMeasureTrailingWhitespace(char: string): boolean {
@@ -44,12 +49,19 @@ function isDocumentNoWrapMeasureLatinText(char: string): boolean {
     return /[a-z\d]/i.test(char);
 }
 
-function measureDocumentNoWrapTextByStyle(text: string, textStyle: ITextStyle | undefined): number {
+function measureDocumentNoWrapTextByStyle(text: string, textStyle: ITextStyle | undefined, font: IDocumentSkeletonFontStyle): number {
     if (!text) {
         return 0;
     }
 
-    return FontCache.getMeasureText(text, getFontStyleString(textStyle).fontCache).width;
+    const content = getTextWithCaps(text, textStyle?.caps || textStyle?.smallCaps);
+    const measure = (segment: string) => FontCache.getMeasureText(segment, font.fontCache, font.fontKerning).width;
+    return measureTextWithCharacterSpacing(
+        content,
+        textStyle?.sc == null ? undefined : textStyle.sc / 0.75,
+        measure,
+        (left, right) => getPairKerningAdjustment(left, right, font)
+    )?.width ?? measure(content);
 }
 
 function measureDocumentNoWrapCJKLatinSpacing(
@@ -61,7 +73,7 @@ function measureDocumentNoWrapCJKLatinSpacing(
 
     for (const char of Array.from(segment)) {
         const isCJK = isDocumentNoWrapMeasureCJKText(char);
-        const cjkWidth = isCJK ? measureDocumentNoWrapTextByStyle(char, textStyle) : 0;
+        const cjkWidth = isCJK ? FontCache.getMeasureText(char, getFontStyleString(textStyle).fontCache).width : 0;
 
         if (isCJK && isDocumentNoWrapMeasureLatinText(previous.char)) {
             spacing += cjkWidth / 4;
@@ -78,25 +90,31 @@ function measureDocumentNoWrapCJKLatinSpacing(
     return spacing;
 }
 
-function measureDocumentNoWrapLineByStyle(text: string, textStyle: ITextStyle | undefined): number {
-    const visibleText = text.slice(0, getDocumentNoWrapMeasureTrailingWhitespaceStart(text));
-    const previous = { char: '', cjkWidth: 0 };
-
-    return measureDocumentNoWrapTextByStyle(visibleText, textStyle) +
-        measureDocumentNoWrapCJKLatinSpacing(visibleText, textStyle, previous);
-}
-
 function measureDocumentNoWrapRunsWidth(
     dataStream: string,
     textRuns: ITextRun[],
-    fallbackTextStyle: ITextStyle | undefined
+    fallbackTextStyle: ITextStyle | undefined,
+    policy: IDocumentCompatibilityPolicy,
+    spaceWidthEastAsian: boolean
 ): number {
     let currentLineWidth = 0;
     let maxLineWidth = 0;
     let pendingTrailingWhitespaceWidth = 0;
     const previous = { char: '', cjkWidth: 0 };
+    let previousText = '';
+    let previousFont: ReturnType<typeof getFontStyleString> | undefined;
 
-    const appendSegment = (segment: string, textStyle: ITextStyle | undefined) => {
+    const measureSegment = (segment: string, textStyle: ITextStyle | undefined, font: IDocumentSkeletonFontStyle) => {
+        const content = getTextWithCaps(segment, textStyle?.caps || textStyle?.smallCaps);
+        const adjustment = previousFont?.fontString === font.fontString && previousFont.fontKerning === font.fontKerning
+            ? getPairKerningAdjustment(previousText, content, font)
+            : 0;
+        previousText = content;
+        previousFont = font;
+        return measureDocumentNoWrapTextByStyle(segment, textStyle, font) + adjustment;
+    };
+
+    const appendSegment = (segment: string, textStyle: ITextStyle | undefined, font: IDocumentSkeletonFontStyle) => {
         if (!segment) {
             return;
         }
@@ -108,13 +126,17 @@ function measureDocumentNoWrapRunsWidth(
         if (visibleSegment) {
             currentLineWidth += pendingTrailingWhitespaceWidth;
             pendingTrailingWhitespaceWidth = 0;
-            currentLineWidth += measureDocumentNoWrapTextByStyle(visibleSegment, textStyle);
-            currentLineWidth += measureDocumentNoWrapCJKLatinSpacing(visibleSegment, textStyle, previous);
+            currentLineWidth += measureSegment(visibleSegment, textStyle, font);
+            if (spaceWidthEastAsian) {
+                currentLineWidth += measureDocumentNoWrapCJKLatinSpacing(visibleSegment, textStyle, previous);
+            }
         }
 
         if (trailingWhitespace) {
-            pendingTrailingWhitespaceWidth += measureDocumentNoWrapTextByStyle(trailingWhitespace, textStyle);
-            measureDocumentNoWrapCJKLatinSpacing(trailingWhitespace, textStyle, previous);
+            pendingTrailingWhitespaceWidth += measureSegment(trailingWhitespace, textStyle, font);
+            if (spaceWidthEastAsian) {
+                measureDocumentNoWrapCJKLatinSpacing(trailingWhitespace, textStyle, previous);
+            }
         }
     };
 
@@ -124,17 +146,36 @@ function measureDocumentNoWrapRunsWidth(
         pendingTrailingWhitespaceWidth = 0;
         previous.char = '';
         previous.cjkWidth = 0;
+        previousText = '';
+        previousFont = undefined;
     };
 
     const appendRange = (text: string, textStyle: ITextStyle | undefined) => {
         const segments = splitDocumentNoWrapMeasureLines(text);
+        const font = getFontStyleString(textStyle);
 
         segments.forEach((segment, index) => {
             if (index > 0) {
                 finishLine();
             }
 
-            appendSegment(segment, textStyle);
+            if (!textStyle?.smallCaps || textStyle.caps) {
+                appendSegment(segment, textStyle, font);
+                return;
+            }
+            let start = 0;
+            let currentFont = font;
+            for (let offset = 0; offset < segment.length;) {
+                const raw = getFirstGrapheme(segment.slice(offset))!;
+                const nextFont = getSmallCapsFontStyle(raw, textStyle, font, policy);
+                if (nextFont.fontString !== currentFont.fontString) {
+                    appendSegment(segment.slice(start, offset), textStyle, currentFont);
+                    start = offset;
+                    currentFont = nextFont;
+                }
+                offset += raw.length;
+            }
+            appendSegment(segment.slice(start), textStyle, currentFont);
         });
     };
 
@@ -149,7 +190,7 @@ function measureDocumentNoWrapRunsWidth(
             }
             const effectiveStart = Math.max(start, cursor);
             if (end > effectiveStart) {
-                appendRange(dataStream.slice(effectiveStart, end), run.ts);
+                appendRange(dataStream.slice(effectiveStart, end), { ...fallbackTextStyle, ...run.ts });
             }
             cursor = Math.max(cursor, end);
         });
@@ -182,11 +223,13 @@ export function measureDocumentNoWrapTextRangeWidth(documentData: IDocumentData,
         })
         .filter((run): run is ITextRun => run !== null);
 
-    if (textRuns.length) {
-        return measureDocumentNoWrapRunsWidth(rangeText, textRuns, documentData.documentStyle?.textStyle);
-    }
-
-    return measureDocumentNoWrapLineByStyle(rangeText, documentData.documentStyle?.textStyle);
+    return measureDocumentNoWrapRunsWidth(
+        rangeText,
+        textRuns,
+        documentData.documentStyle?.textStyle,
+        getDocumentCompatibilityPolicy(documentData.documentStyle?.documentFlavor),
+        documentData.documentStyle?.spaceWidthEastAsian !== BooleanNumber.FALSE
+    );
 }
 
 /**
@@ -205,19 +248,12 @@ export function measureDocumentNoWrapTextWidth(documentData: IDocumentData | nul
     const dataStream = body?.dataStream ?? '';
     const textRuns = body?.textRuns;
 
-    if (textRuns?.length) {
-        return measureDocumentNoWrapRunsWidth(
-            dataStream,
-            textRuns,
-            documentData?.documentStyle?.textStyle
-        );
-    }
-
-    const fallbackTextStyle = documentData?.documentStyle?.textStyle;
-
-    return Math.max(
-        0,
-        ...splitDocumentNoWrapMeasureLines(dataStream).map((line) => measureDocumentNoWrapLineByStyle(line, fallbackTextStyle))
+    return measureDocumentNoWrapRunsWidth(
+        dataStream,
+        textRuns ?? [],
+        documentData?.documentStyle?.textStyle,
+        getDocumentCompatibilityPolicy(documentData?.documentStyle?.documentFlavor),
+        documentData?.documentStyle?.spaceWidthEastAsian !== BooleanNumber.FALSE
     );
 }
 

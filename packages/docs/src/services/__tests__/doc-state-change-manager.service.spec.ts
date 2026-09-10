@@ -89,8 +89,8 @@ describe('DocStateChangeManagerService', () => {
 
         expect(undoRedoService.pitchTopUndoElement()).toMatchObject({
             unitID: 'doc-1',
-            undoMutations: [{ id: 'doc.rich-text-editing' }],
-            redoMutations: [{ id: 'doc.rich-text-editing' }],
+            undoMutations: [{ id: 'doc.rich-text-editing', params: { trigger: 'univer.command.undo' } }],
+            redoMutations: [{ id: 'doc.rich-text-editing', params: { trigger: 'univer.command.redo' } }],
         });
         expect(changes.at(-1)).toMatchObject({
             commandId: 'doc.rich-text-editing',

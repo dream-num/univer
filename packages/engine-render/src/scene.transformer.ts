@@ -528,6 +528,9 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
             this._addCancelObserver(scene);
 
+            // Selection can mount DOM chrome under the pointer before pointerup.
+            // Keep the complete gesture on the canvas, including a click with no move.
+            scene.getEngine()?.setCapture();
             scene.disableObjectsEvent();
 
             const scrollTimer = ScrollTimer.create(scene);
@@ -1112,6 +1115,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                     if (topScene == null) {
                         return;
                     }
+                    topScene.getEngine()?.setCapture();
                     topScene.disableObjectsEvent();
                     const scrollTimer = ScrollTimer.create(topScene);
                     scrollTimer.startScroll(evtOffsetX, evtOffsetY);
@@ -1234,6 +1238,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         return;
                     }
 
+                    topScene.getEngine()?.setCapture();
                     topScene.disableObjectsEvent();
 
                     const viewportActualXY = topScene.getScrollXYInfoByViewport(Vector2.create(evtOffsetX, evtOffsetY));

@@ -1152,6 +1152,83 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(@types/node@26.1.2)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.11.6)(jsdom@29.1.1)(vite@8.0.11(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
 
+  packages/docs-toc:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../docs
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      rxjs:
+        specifier: ^7.8.2
+        version: 7.8.2
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^5.0.0
+        version: 5.0.0(@types/node@26.2.0)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.11.6)(jsdom@29.1.1)(vite@8.0.11(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
+
+  packages/docs-toc-ui:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../docs
+      '@univerjs/docs-toc':
+        specifier: workspace:*
+        version: link:../docs-toc
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../docs-ui
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
+      '@univerjs/protocol':
+        specifier: workspace:*
+        version: link:../protocol
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../ui
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      postcss:
+        specifier: ^8.5.26
+        version: 8.5.26
+      react:
+        specifier: 19.2.8
+        version: 19.2.8
+      react-dom:
+        specifier: 19.2.8
+        version: 19.2.8(react@19.2.8)
+      rxjs:
+        specifier: ^7.8.2
+        version: 7.8.2
+      tailwindcss:
+        specifier: 3.4.18
+        version: 3.4.18
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^5.0.0
+        version: 5.0.0(@types/node@26.2.0)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.11.6)(jsdom@29.1.1)(vite@8.0.11(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.22.4)(yaml@2.9.0))
+
   packages/docs-ui:
     dependencies:
       '@univerjs/core':
@@ -13428,7 +13505,7 @@ snapshots:
     dependencies:
       '@types/estree': 1.0.8
       estree-walker: 2.0.2
-      picomatch: 4.0.5
+      picomatch: 4.0.7
     optionalDependencies:
       rollup: 4.55.1
 
@@ -13694,7 +13771,7 @@ snapshots:
       eslint-visitor-keys: 4.2.1
       espree: 10.4.0
       estraverse: 5.3.0
-      picomatch: 4.0.5
+      picomatch: 4.0.7
 
   '@swc/core-darwin-arm64@1.13.5':
     optional: true
@@ -18937,7 +19014,7 @@ snapshots:
     dependencies:
       '@jridgewell/remapping': 2.3.5
       acorn: 8.16.0
-      picomatch: 4.0.5
+      picomatch: 4.0.7
       webpack-virtual-modules: 0.6.2
 
   unplugin@3.0.0:

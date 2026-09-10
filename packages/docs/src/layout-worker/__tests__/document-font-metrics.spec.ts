@@ -14,11 +14,38 @@
  * limitations under the License.
  */
 
-import { JSONX } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
-import { collectDocumentFontFamilies } from '../document-font-metrics';
+import { BooleanNumber, DEFAULT_STYLES, JSONX } from '@univerjs/core';
+import { FontCache, getFontStyleString } from '@univerjs/engine-render';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { collectDocumentFontFamilies, measureDocumentFontFamilies } from '../document-font-metrics';
 
 describe('document font metrics', () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+        vi.unstubAllGlobals();
+        FontCache.invalidateMetrics(() => true);
+    });
+
+    it.each(['Latin Font', undefined])('transfers the composite East Asian font key used in document layout (%s)', (ff) => {
+        vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ height: 3000 } as DOMRect);
+        const families = new Set<string>();
+        collectDocumentFontFamilies({ ts: { ff, eastAsiaFontFamily: 'East Asian Font' } }, families);
+        const transferred = measureDocumentFontFamilies(families);
+        const primary = ff || DEFAULT_STYLES.ff;
+        const fontStyles = [
+            `${primary}, East Asian Font`,
+            `East Asian Font, ${primary}, East Asian Font`,
+        ].flatMap((family) => [BooleanNumber.FALSE, BooleanNumber.TRUE].flatMap((bl) =>
+            [BooleanNumber.FALSE, BooleanNumber.TRUE].map((it) => getFontStyleString({ ff: family, fs: 12, bl, it }))));
+
+        FontCache.invalidateMetrics(() => true);
+        vi.stubGlobal('document', undefined);
+        FontCache.setNormalLineHeightCache(transferred);
+        for (const fontStyle of fontStyles) {
+            expect(FontCache.getNormalLineHeight(fontStyle), fontStyle.fontString).toBe(18);
+        }
+    });
+
     it('collects inherited, header and footnote families and font changes without inspecting text content', () => {
         const families = new Set<string>();
         collectDocumentFontFamilies({

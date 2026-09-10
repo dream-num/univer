@@ -17,7 +17,7 @@
 // @vitest-environment jsdom
 
 import type { IDocumentData } from '@univerjs/core';
-import type { RenderUnit } from '@univerjs/engine-render';
+import type { IDocSelectionInnerParam, RenderUnit } from '@univerjs/engine-render';
 import type { EmbedInteractionBoundaryService } from '../../../services/doc-embed-integration.service';
 import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -90,7 +90,7 @@ function createEventSubject() {
     };
 }
 
-function createController(options: { readonly?: boolean; hasEditor?: boolean; preserveHostFocus?: boolean; embedRecentInteraction?: boolean; embedContains?: boolean; unitId?: string; currentSelectionUnitId?: string; embedRuntimeFocusCoordinator?: EmbedRuntimeFocusCoordinator } = {}) {
+function createController(options: { readonly?: boolean; hasEditor?: boolean; preserveHostFocus?: boolean; embedRecentInteraction?: boolean; embedContains?: boolean; unitId?: string; currentSelectionUnitId?: string; currentSelection?: Pick<IDocSelectionInnerParam, 'isEditing' | 'rectRanges' | 'textRanges'>; embedRuntimeFocusCoordinator?: EmbedRuntimeFocusCoordinator } = {}) {
     const refreshSelection$ = new Subject<any>();
     const textSelectionInner$ = new Subject<any>();
     const currentSkeleton$ = new Subject<any>();
@@ -135,6 +135,7 @@ function createController(options: { readonly?: boolean; hasEditor?: boolean; pr
         addDocRanges: vi.fn(),
         replaceDocRanges: vi.fn(),
         textSelectionInner$,
+        canFocusing: true,
         focus: vi.fn(),
         __onPointDown: vi.fn(),
         __handleDblClick: vi.fn(),
@@ -147,6 +148,7 @@ function createController(options: { readonly?: boolean; hasEditor?: boolean; pr
         refreshSelection$,
         __replaceTextRangesWithNoRefresh: vi.fn(),
         __getCurrentSelection: vi.fn(() => ({ unitId: options.currentSelectionUnitId ?? options.unitId ?? 'doc-1' })),
+        getSelectionInfo: vi.fn(() => options.currentSelection),
         refreshSelection: vi.fn(),
         replaceDocRanges: vi.fn(),
         replaceSelectionInfoWithoutRefresh: vi.fn(),
@@ -273,8 +275,13 @@ describe('DocSelectionRenderController', () => {
             render.scene.addObject(documents);
             const viewport = new Viewport(VIEWPORT_KEY.VIEW_MAIN, render.scene, { left: 0, top: 0, width: 400, height: 600, active: true });
             viewport.resetCanvasSizeAndUpdateScroll();
+            const peerEditor = document.createElement('textarea');
+            peerEditor.dataset.uComp = 'editor';
+            root.appendChild(peerEditor);
+            peerEditor.focus();
             render.addRenderDependencies([[DocSelectionRenderService], [DocSelectionRenderController]]);
             render.with(DocSelectionRenderController);
+            expect(document.activeElement).toBe(peerEditor);
             const selections = injector.get(DocSelectionManagerService);
             expect(selections.getActiveTextRange()?.startOffset).toBe(0);
 
@@ -342,6 +349,25 @@ describe('DocSelectionRenderController', () => {
             false
         );
         expect(docSelectionManagerService.refreshSelection).toHaveBeenNthCalledWith(2);
+
+        controller.dispose();
+    });
+
+    it('preserves an existing caret when a document edit rebuilds the skeleton', () => {
+        const currentSelection = {
+            textRanges: [{ startOffset: 242, endOffset: 242, collapsed: true, isActive: true }],
+            rectRanges: [],
+            isEditing: true,
+        };
+        const { controller, currentSkeleton$, docSelectionManagerService } = createController({ currentSelection });
+
+        currentSkeleton$.next({ id: 'rebuilt-skeleton' });
+
+        expect(docSelectionManagerService.replaceSelectionInfoWithoutRefresh).not.toHaveBeenCalled();
+        expect(docSelectionManagerService.refreshSelection).toHaveBeenCalledWith(
+            { unitId: 'doc-1', subUnitId: 'doc-1' },
+            true
+        );
 
         controller.dispose();
     });

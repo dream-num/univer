@@ -21,6 +21,9 @@ const THEME_COLOR_TOKEN_PATTERN = /^[a-z][a-z0-9-]*\.\d+$/i;
 
 export function getColorStyleForCanvas(color: Nullable<IColorStyle>): Nullable<string> {
     const rgb = color?.rgb;
+    if (rgb && /^#?auto$/i.test(rgb.trim())) {
+        return undefined;
+    }
     if (rgb && THEME_COLOR_TOKEN_PATTERN.test(rgb)) {
         return rgb;
     }

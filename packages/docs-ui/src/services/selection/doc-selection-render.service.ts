@@ -177,7 +177,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     get canFocusing() {
         const ownerDocument = this._getOwnerDocument();
         const activeElement = ownerDocument.activeElement;
-        return !this._shouldPreserveExternalFocus() && (
+        return !this._shouldPreserveExternalFocus() && !this._isAnotherEditorFocused() && (
             this.isFocusing ||
             activeElement === ownerDocument.body ||
             activeElement === null ||

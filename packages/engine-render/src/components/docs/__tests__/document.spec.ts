@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import { ColumnSeparatorType, CustomRangeType, DashStyleType, DocumentFlavor } from '@univerjs/core';
+import type { IDocumentBody, IParagraphStyle, ITable } from '@univerjs/core';
+import { ColumnSeparatorType, CustomRangeType, DashStyleType, DataStreamTreeTokenType, DocumentDataModel, DocumentFlavor, HorizontalAlign, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, TableAlignmentType, TableRowHeightRule, TableSizeType, TableTextWrapType, TabStopAlignment, Univer } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { setupRenderTestEnv } from '../../../__tests__/render-test-utils';
+import { BORDER_TYPE } from '../../../basics/const';
 import {
     DocumentSkeletonPageType,
     GlyphType,
@@ -33,10 +35,10 @@ import { Viewport } from '../../../viewport';
 import { DocBackground } from '../doc-background';
 import { DOCS_EXTENSION_TYPE } from '../doc-extension';
 import { Documents, drawSectionColumnSeparators, resolveHeaderFooterFieldGlyph } from '../document';
-import { getDocumentCompatibilityPolicy } from '../document-compatibility';
 import { createParagraphLayoutTestBed } from '../layout/block/paragraph/__tests__/create-paragraph-layout-test-bed';
 import { DocumentSkeleton } from '../layout/doc-skeleton';
 import { setDocsTableRenderViewportProvider } from '../table-render-viewport';
+import { DocumentEditArea, DocumentViewModel } from '../view-model/document-view-model';
 
 function createGlyph(content: string, left: number, width = 16, backgroundColor?: string) {
     return {
@@ -316,12 +318,12 @@ function attachColumnGroup(page: any) {
 
 describe('documents render', () => {
     it('resolves PAGE and NUMPAGES fields without mutating the model glyph', () => {
-        const glyph = { st: 0, ed: 0, content: '1' } as any;
-        const pageRange = { startIndex: 0, endIndex: 0, properties: { fieldType: 'PAGE' } } as any;
-        const pageCountRange = { startIndex: 0, endIndex: 0, properties: { fieldType: 'NUMPAGES' } } as any;
+        const glyph = { st: 1, ed: 1, content: '1' } as any;
+        const pageRange = { startIndex: 0, endIndex: 2, properties: { fieldType: 'PAGE' } } as any;
+        const pageCountRange = { startIndex: 0, endIndex: 2, properties: { fieldType: 'NUMPAGES' } } as any;
 
-        expect(resolveHeaderFooterFieldGlyph(glyph, 0, 0, [pageRange], 15, 16).content).toBe('15');
-        expect(resolveHeaderFooterFieldGlyph(glyph, 0, 0, [pageCountRange], 15, 16).content).toBe('16');
+        expect(resolveHeaderFooterFieldGlyph(glyph, 1, 1, [pageRange], 15, 16).content).toBe('15');
+        expect(resolveHeaderFooterFieldGlyph(glyph, 1, 1, [pageCountRange], 15, 16).content).toBe('16');
         expect(glyph.content).toBe('1');
     });
     let restoreEnv: () => void;
@@ -552,6 +554,89 @@ describe('documents render', () => {
         expect(ctx.stroke).toHaveBeenCalledTimes(1);
 
         documents.dispose();
+    });
+
+    it.each([
+        { a: 1, d: 1, e: 0, f: 0 },
+        { a: 1.25, d: 1.25, e: 0.35, f: 0.7 },
+        { a: 2, d: 2, e: 1.1, f: 2.3 },
+        { a: 1.5, d: 2, e: -0.7, f: -1.3 },
+    ])('paints traditional table borders on whole device pixels at $a/$d scale', ({ a, d, e, f }) => {
+        const bed = createParagraphLayoutTestBed('Table', {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        const documents = new Documents('pixel-table-border', skeleton);
+        const ctx = canvas.getContext();
+        ctx.setTransform(a, 0, 0, d, e, f);
+        const move = vi.spyOn(ctx, 'moveTo');
+        const line = vi.spyOn(ctx, 'lineTo');
+        const widths: number[] = [];
+        vi.spyOn(ctx, 'stroke').mockImplementation(() => {
+            widths.push(ctx.lineWidth);
+        });
+        const position = { startX: 10.99, startY: 20.99, endX: 110.1, endY: 80.4 };
+        const savedPosition = { ...position };
+        try {
+            for (const width of [2 / 3, 1, 2]) {
+                const border = { color: { rgb: '#000000' }, width: { v: width } };
+                for (const side of [BORDER_TYPE.TOP, BORDER_TYPE.RIGHT, BORDER_TYPE.BOTTOM, BORDER_TYPE.LEFT]) {
+                    (documents as any)._drawTableCellBorder(ctx, border, side, position);
+                    const horizontal = side === BORDER_TYPE.TOP || side === BORDER_TYPE.BOTTOM;
+                    const scale = horizontal ? d : a;
+                    const paintedWidth = widths[widths.length - 1] * scale;
+                    const start = move.mock.calls[move.mock.calls.length - 1];
+                    const end = line.mock.calls[line.mock.calls.length - 1];
+                    const center = horizontal ? start[1] * d + f : start[0] * a + e;
+                    expect(paintedWidth).toBeGreaterThanOrEqual(1);
+                    expect(Math.abs(paintedWidth - width * scale)).toBeLessThanOrEqual(0.5);
+                    expect(center - paintedWidth / 2).toBeCloseTo(Math.round(center - paintedWidth / 2), 10);
+                    expect(center + paintedWidth / 2).toBeCloseTo(Math.round(center + paintedWidth / 2), 10);
+                    expect(horizontal ? end[1] : end[0]).toBe(horizontal ? start[1] : start[0]);
+                    const modelX = side === BORDER_TYPE.LEFT ? position.startX : position.endX;
+                    const modelY = side === BORDER_TYPE.TOP ? position.startY : position.endY;
+                    const modelCenter = horizontal ? modelY * d + f : modelX * a + e;
+                    const originalInkEdge = modelCenter - width * scale / 2;
+                    expect(Math.abs(center - paintedWidth / 2 - originalInkEdge)).toBeLessThanOrEqual(0.5);
+                    expect(border.width.v).toBe(width);
+                }
+            }
+            expect(position).toEqual(savedPosition);
+            expect(ctx.getTransform()).toMatchObject({ a, b: 0, c: 0, d, e, f });
+        } finally {
+            documents.dispose();
+            skeleton.dispose();
+            bed.viewModel.dispose();
+        }
+    });
+
+    it.each([
+        { flavor: DocumentFlavor.MODERN, rotated: false },
+        { flavor: DocumentFlavor.TRADITIONAL, rotated: true },
+    ])('retains the existing stroke path for $flavor with rotation=$rotated', ({ flavor, rotated }) => {
+        const bed = createParagraphLayoutTestBed('Table', { documentStyle: { documentFlavor: flavor } });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        const documents = new Documents('unsnapped-table-border', skeleton);
+        const ctx = canvas.getContext();
+        if (rotated) {
+            ctx.rotate(Math.PI / 4);
+        }
+        const move = vi.spyOn(ctx, 'moveToByPrecision');
+        const width = vi.spyOn(ctx, 'setLineWidthByPrecision');
+        try {
+            (documents as any)._drawTableCellBorder(
+                ctx,
+                { width: { v: 2 / 3 } },
+                BORDER_TYPE.TOP,
+                { startX: 10, startY: 20, endX: 100, endY: 80 }
+            );
+            expect(move).toHaveBeenCalledWith(10, 20);
+            expect(width).toHaveBeenCalledWith(2 / 3);
+        } finally {
+            documents.dispose();
+            skeleton.dispose();
+            bed.viewModel.dispose();
+        }
     });
 
     it('draws section column separators between columns', () => {
@@ -910,7 +995,7 @@ describe('documents render', () => {
         documents.dispose();
     });
 
-    it('draws all paragraph borders with their own style, padding, and paragraph indentation', () => {
+    it.each([false, true])('draws styled paragraph borders but skips explicit zero widths (cleared: %s)', (cleared) => {
         const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
         const documents = new Documents('docs-paragraph-border', skeleton, {
             pageLayoutType: PageLayoutType.VERTICAL,
@@ -945,6 +1030,11 @@ describe('documents render', () => {
             padding: 5,
             dashStyle: DashStyleType.DASH,
         };
+        if (cleared) {
+            for (const border of [line.borderTop, line.borderBottom, line.borderLeft, line.borderRight]) {
+                border.width = 0;
+            }
+        }
         (documents as any)._drawLiquid = { x: 0, y: 0 };
 
         const strokeStyles: string[] = [];
@@ -964,6 +1054,13 @@ describe('documents render', () => {
         } as any;
 
         (documents as any)._drawParagraphBorders(ctx, page, line, 72);
+
+        if (cleared) {
+            expect(ctx.stroke).not.toHaveBeenCalled();
+            expect(ctx.setLineWidthByPrecision).not.toHaveBeenCalled();
+            documents.dispose();
+            return;
+        }
 
         expect(ctx.setLineWidthByPrecision.mock.calls).toEqual([[1], [4], [2], [3]]);
         expect(ctx.setLineDash.mock.calls).toEqual([[[2]], [[6]], [[0]], [[6]]]);
@@ -1425,9 +1522,7 @@ describe('documents render', () => {
         } as any;
 
         vi.spyOn(documents as any, '_drawTableCell').mockImplementation(() => {});
-        vi.spyOn(documents as any, '_getDocumentCompatibilityPolicy').mockReturnValue(
-            getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL)
-        );
+        vi.spyOn(documents as any, '_getDocumentFlavor').mockReturnValue(DocumentFlavor.TRADITIONAL);
 
         (documents as any)._drawTable(
             ctx,
@@ -1612,6 +1707,137 @@ describe('documents render', () => {
         documents.dispose();
     });
 
+    it('clips nested table cells at the accumulated content origin', () => {
+        const parent = createPage(DocumentSkeletonPageType.CELL, 'outer-cell');
+        parent.marginLeft = 4;
+        parent.marginTop = 6;
+        const cell = createPage(DocumentSkeletonPageType.CELL, 'inner-cell');
+        cell.pageWidth = 120;
+        cell.pageHeight = 60;
+        cell.sections[0].columns[0].lines = [];
+        const documents = new Documents('docs-nested-table-cell-clip');
+        (documents as any)._drawLiquid.translate(12, 20);
+        const ctx = {
+            beginPath: vi.fn(),
+            clip: vi.fn(),
+            closePath: vi.fn(),
+            rectByPrecision: vi.fn(),
+            restore: vi.fn(),
+            save: vi.fn(),
+        };
+
+        (documents as any)._drawNestedPageContent(
+            ctx,
+            parent,
+            cell,
+            [],
+            null,
+            [],
+            [],
+            Vector2.create(30, 40),
+            0,
+            0,
+            {},
+            { scaleX: 1, scaleY: 1 }
+        );
+
+        expect(ctx.rectByPrecision).toHaveBeenCalledWith(42, 60, 120, 60);
+        expect((documents as any)._drawLiquid).toMatchObject({ x: 12, y: 20 });
+        documents.dispose();
+    });
+
+    it.each([TableTextWrapType.NONE, TableTextWrapType.WRAP])('clips flow tables but preserves floating table overflow beyond the anchor cell: %s', (textWrap) => {
+        const parent = createPage(DocumentSkeletonPageType.BODY, '');
+        const cell = createPage(DocumentSkeletonPageType.CELL, 'anchor');
+        cell.pageWidth = 50;
+        cell.sections[0].columns[0].lines = [];
+        attachTable(cell);
+        const table = cell.skeTables.get('table-1');
+        table.tableSource.textWrap = textWrap;
+        table.tableSource.size = { width: { v: 120 } };
+        table.tableSource.tableColumns = [{ size: { width: { v: 120 } } }];
+        table.rows[0].cells[0].sections[0].columns[0].lines = [];
+        const univer = new Univer();
+        const model = new DocumentDataModel({
+            id: 'floating-table-cell-overflow',
+            body: { dataStream: '\r\n' },
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        const documents = new Documents(model.getUnitId(), skeleton);
+        const ctx = canvas.getContext();
+        const clip = vi.spyOn(ctx, 'clip');
+        const fill = vi.spyOn(ctx, 'fill');
+
+        (documents as any)._drawNestedPageContent(
+            ctx,
+            parent,
+            cell,
+            [],
+            null,
+            [],
+            [],
+            Vector2.create(10, 12),
+            0,
+            0,
+            {},
+            { scaleX: 1, scaleY: 1 }
+        );
+
+        expect(fill).toHaveBeenCalled();
+        expect(clip).toHaveBeenCalled();
+        expect(fill.mock.invocationCallOrder[0] < clip.mock.invocationCallOrder[0])
+            .toBe(textWrap === TableTextWrapType.WRAP);
+        expect((documents as any)._drawLiquid).toMatchObject({ x: 0, y: 0 });
+        documents.dispose();
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it('draws vertical cell glyphs down the physical cell and restores its parent origin', () => {
+        const parent = createPage(DocumentSkeletonPageType.CELL, 'outer');
+        const cell = createPage(DocumentSkeletonPageType.CELL, 'vertical');
+        cell.cellTextDirection = 'tbRlV';
+        cell.pageWidth = 40;
+        cell.pageHeight = 120;
+        cell.marginLeft = 5;
+        cell.marginTop = 4;
+        const line = createLine(LineType.PARAGRAPH, 0);
+        line.paddingTop = 0;
+        line.marginTop = 0;
+        const column = cell.sections[0].columns[0];
+        column.lines = [line];
+        line.parent = column;
+        const documents = new Documents('vertical-cell-render');
+        (documents as any)._drawLiquid.translate(12, 20);
+        const positions: { x: number; y: number }[] = [];
+        const extension = {
+            extensionOffset: {} as any,
+            draw() {
+                expect(this.extensionOffset.renderConfig).toMatchObject({ centerAngle: 90, vertexAngle: 90 });
+                const { spanStartPoint, centerPoint } = this.extensionOffset;
+                positions.push({ x: spanStartPoint.x + centerPoint.x, y: spanStartPoint.y + centerPoint.y });
+            },
+        };
+        const ctx = {
+            beginPath: vi.fn(),
+            clip: vi.fn(),
+            closePath: vi.fn(),
+            rectByPrecision: vi.fn(),
+            restore: vi.fn(),
+            save: vi.fn(),
+        };
+        (documents as any)._drawNestedPageContent(ctx, parent, cell, [], null, [], [extension], Vector2.create(30, 40), 0, 0, {}, { scaleX: 1, scaleY: 1 });
+        expect(ctx.rectByPrecision).toHaveBeenCalledWith(42, 60, 40, 120);
+        expect(positions).toHaveLength(2);
+        expect(positions[0].x).toBeCloseTo(68);
+        expect(positions[1].x).toBeCloseTo(68);
+        expect(positions[0].y).toBeCloseTo(73);
+        expect(positions[1].y).toBeCloseTo(91);
+        expect((documents as any)._drawLiquid).toMatchObject({ x: 12, y: 20 });
+        documents.dispose();
+    });
+
     it('offsets table cell paragraph backgrounds by parent page margins', () => {
         const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
         bodyPage.marginLeft = 30;
@@ -1773,7 +1999,8 @@ describe('documents render', () => {
             0,
             0,
             {},
-            { scaleX: 1, scaleY: 1 }
+            { scaleX: 1, scaleY: 1 },
+            undefined
         );
         expect(translate).toHaveBeenCalledWith(4, 6);
 
@@ -1837,6 +2064,373 @@ describe('documents render', () => {
         expect(drawNestedPageContent).toHaveBeenCalledTimes(2);
 
         documents.dispose();
+    });
+
+    it.each([
+        { documentFlavor: DocumentFlavor.TRADITIONAL, zOrder: 'front' as const },
+        { documentFlavor: DocumentFlavor.TRADITIONAL, zOrder: 'back' as const },
+        { documentFlavor: DocumentFlavor.MODERN, zOrder: 'front' as const },
+    ])('renders section borders only in paginated documents, with $zOrder ordering: $documentFlavor', ({ documentFlavor, zOrder }) => {
+        const univer = new Univer();
+        const model = new DocumentDataModel({
+            id: 'section-page-borders',
+            body: {
+                dataStream: 'A\r\n',
+                paragraphs: [{ startIndex: 1, paragraphId: 'p' }],
+                sectionBreaks: [{ startIndex: 2, sectionId: 'section', pageBorders: {
+                    offsetFrom: 'page',
+                    zOrder,
+                    top: { width: 2, padding: 24, color: { rgb: '#123456' } },
+                } }],
+            },
+            documentStyle: { documentFlavor, pageSize: { width: 320, height: 400 } },
+        });
+        const viewModel = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(viewModel, univer.__getInjector().get(LocaleService));
+        skeleton.calculate();
+        const documents = new Documents(model.getUnitId(), skeleton);
+        scene.addObject(documents, 1);
+        const ctx = canvas.getContext();
+        const paints: string[] = [];
+        const rectangles: number[][] = [];
+        vi.spyOn(ctx, 'fillRect').mockImplementation((...rect) => {
+            if (ctx.fillStyle === '#123456') {
+                paints.push('border');
+                rectangles.push(rect);
+            }
+        });
+        vi.spyOn(ctx, 'fillText').mockImplementation(() => {
+            paints.push('text');
+        });
+        documents.draw(ctx);
+        if (documentFlavor === DocumentFlavor.MODERN) {
+            expect(rectangles).toEqual([]);
+        } else {
+            expect(rectangles).toEqual([[0, 24, 320, 2]]);
+            expect(paints).toContain('text');
+            expect(paints.indexOf('border') < paints.indexOf('text')).toBe(zOrder === 'back');
+        }
+        documents.dispose();
+        skeleton.dispose();
+        viewModel.dispose();
+        univer.dispose();
+    });
+
+    it.each(['PAGE', 'NUMPAGES'])('renders %s once, excluding sentinels and subsequent cached digit runs', (fieldType) => {
+        const univer = new Univer();
+        const model = new DocumentDataModel({
+            id: 'footer-field-once',
+            body: {
+                dataStream: 'A\r\n',
+                paragraphs: [{ startIndex: 1, paragraphId: 'p' }],
+                sectionBreaks: [{ startIndex: 2, sectionId: 's', defaultFooterId: 'footer' }],
+            },
+            footers: { footer: { footerId: 'footer', body: {
+                dataStream: `${DataStreamTreeTokenType.CUSTOM_RANGE_START}67${DataStreamTreeTokenType.CUSTOM_RANGE_END}\r\n`,
+                paragraphs: [{ startIndex: 4, paragraphId: 'footer-p' }],
+                textRuns: [{ st: 1, ed: 2, ts: { fs: 11 } }, { st: 2, ed: 3, ts: { fs: 12 } }],
+                customRanges: [{ startIndex: 0, endIndex: 3, rangeId: 'f', rangeType: 1, properties: { fieldType } }],
+            } } },
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 320, height: 400 } },
+        });
+        const viewModel = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(viewModel, univer.__getInjector().get(LocaleService));
+        skeleton.calculate();
+        const documents = new Documents(model.getUnitId(), skeleton);
+        scene.addObject(documents, 1);
+        const ctx = canvas.getContext();
+        const text = vi.spyOn(ctx, 'fillText');
+        documents.draw(ctx);
+        expect(text.mock.calls.map(([value]) => value).filter((value) => /\d/.test(String(value)))).toEqual(['1']);
+        expect(model.getSnapshot().footers!.footer.body.dataStream).toContain('67');
+        documents.dispose();
+        skeleton.dispose();
+        viewModel.dispose();
+        univer.dispose();
+    });
+
+    it.each([
+        { horizontalAlign: HorizontalAlign.LEFT },
+        { horizontalAlign: HorizontalAlign.CENTER },
+        { horizontalAlign: HorizontalAlign.RIGHT },
+        { tabStops: [{ offset: 150, alignment: TabStopAlignment.START }] },
+        { tabStops: [{ offset: 150, alignment: TabStopAlignment.CENTER }] },
+        { tabStops: [{ offset: 150, alignment: TabStopAlignment.END }] },
+    ].flatMap((paragraphStyle) => [80, 100].map((scale) => ({ paragraphStyle, scale }))))(
+        'positions live multi-digit page fields independently of cached digit widths: %j',
+        ({ paragraphStyle, scale }: { paragraphStyle: IParagraphStyle; scale: number }) => {
+            const render = (cached: string) => {
+                const univer = new Univer();
+                const T = DataStreamTreeTokenType;
+                const prefix = paragraphStyle.tabStops ? 'X\t' : 'X';
+                const fieldStart = prefix.length;
+                const suffix = paragraphStyle.tabStops ? 'Y\tZ' : 'Y Z';
+                const dataStream = `${prefix}${T.CUSTOM_RANGE_START}${cached}${T.CUSTOM_RANGE_END}${suffix}\r\n`;
+                const bodyStream = `${new Array(18).fill('A').join(T.PAGE_BREAK)}\r\n`;
+                const model = new DocumentDataModel({
+                    id: `field-advance-${cached}`,
+                    body: {
+                        dataStream: bodyStream,
+                        paragraphs: [{ startIndex: bodyStream.length - 2, paragraphId: 'body' }],
+                        sectionBreaks: [{ startIndex: bodyStream.length - 1, sectionId: 's', defaultFooterId: 'footer' }],
+                    },
+                    footers: { footer: { footerId: 'footer', body: {
+                        dataStream,
+                        paragraphs: [{ startIndex: dataStream.length - 2, paragraphId: 'f', paragraphStyle }],
+                        textRuns: [{ st: 0, ed: dataStream.length - 1, ts: { fs: 11, sa: scale } }],
+                        customRanges: [{ startIndex: fieldStart, endIndex: fieldStart + cached.length + 1, rangeId: 'field', rangeType: CustomRangeType.FIELD, properties: { fieldType: 'NUMPAGES' } }],
+                    } } },
+                    documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 320, height: 400 } },
+                });
+                const viewModel = new DocumentViewModel(model);
+                const skeleton = DocumentSkeleton.create(viewModel, univer.__getInjector().get(LocaleService));
+                const documents = new Documents(model.getUnitId(), skeleton);
+                try {
+                    skeleton.calculate();
+                    expect(skeleton.getSkeletonData()!.pages).toHaveLength(18);
+                    scene.addObject(documents, 1);
+                    const text = vi.spyOn(canvas.getContext(), 'fillText');
+                    text.mockClear();
+                    documents.draw(canvas.getContext());
+                    const positions = text.mock.calls.filter(([value]) => ['X', '18', 'Y', 'Z'].includes(String(value)))
+                        .map(([value, x, y]) => [value, x, y]);
+                    expect(positions).toHaveLength(18 * 4);
+                    expect(model.getSnapshot().footers!.footer.body.dataStream).toBe(dataStream);
+                    return positions;
+                } finally {
+                    documents.dispose();
+                    skeleton.dispose();
+                    viewModel.dispose();
+                    model.dispose();
+                    univer.dispose();
+                }
+            };
+            const expected = render('18');
+            for (const cached of ['1', '123']) {
+                const actual = render(cached);
+                actual.forEach(([value, x, y], i) => {
+                    expect(value).toBe(expected[i][0]);
+                    expect(x).toBeCloseTo(expected[i][1] as number, 4);
+                    expect(y).toBeCloseTo(expected[i][2] as number, 4);
+                });
+            }
+        }
+    );
+
+    it.each(['header', 'footer'] as const)('renders live page fields inside nested %s tables without changing cached results', (story) => {
+        const univer = new Univer();
+        const T = DataStreamTreeTokenType;
+        const fields = `${T.CUSTOM_RANGE_START}67${T.CUSTOM_RANGE_END} / ${T.CUSTOM_RANGE_START}89${T.CUSTOM_RANGE_END}\r`;
+        const wrap = (content: string) => `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}${content}\n${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+        const inner = wrap(fields);
+        const outer = wrap(`${inner}\r`);
+        const dataStream = `${outer}\r\n`;
+        const fieldStart = dataStream.indexOf(T.CUSTOM_RANGE_START);
+        const countStart = dataStream.indexOf(T.CUSTOM_RANGE_START, fieldStart + 1);
+        const body: IDocumentBody = {
+            dataStream,
+            paragraphs: [...dataStream.matchAll(/\r/g)].map((match, index) => ({ startIndex: match.index!, paragraphId: `p-${index}` })),
+            sectionBreaks: [...dataStream.matchAll(/\n/g)].map((match, index) => ({ startIndex: match.index!, sectionId: `s-${index}` })),
+            tables: [
+                { tableId: 'outer', startIndex: 0, endIndex: outer.length },
+                { tableId: 'inner', startIndex: 3, endIndex: 3 + inner.length },
+            ],
+            customRanges: [fieldStart, countStart].map((startIndex, index) => ({
+                startIndex,
+                endIndex: startIndex + 3,
+                rangeId: `f-${index}`,
+                rangeType: CustomRangeType.FIELD,
+                properties: { fieldType: index === 0 ? 'PAGE' : 'NUMPAGES' },
+            })),
+            textRuns: [fieldStart, countStart].flatMap((st) => [
+                { st: st + 1, ed: st + 2, ts: { fs: 11 } },
+                { st: st + 2, ed: st + 3, ts: { fs: 12 } },
+            ]),
+        };
+        const tableSource = Object.fromEntries(['outer', 'inner'].map((tableId): [string, ITable] => [tableId, {
+            tableId,
+            align: TableAlignmentType.START,
+            indent: { v: 0 },
+            textWrap: TableTextWrapType.NONE,
+            size: { type: TableSizeType.SPECIFIED, width: { v: 200 } },
+            position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
+            dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+            cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
+            tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } }],
+            tableRows: [{ trHeight: { hRule: TableRowHeightRule.AUTO, val: { v: 0 } }, tableCells: [{}] }],
+        }]));
+        const model = new DocumentDataModel({
+            id: `nested-${story}-fields`,
+            body: {
+                dataStream: `A${T.PAGE_BREAK}B${T.PAGE_BREAK}C\r\n`,
+                paragraphs: [{ startIndex: 5, paragraphId: 'body' }],
+                sectionBreaks: [{ startIndex: 6, sectionId: 'section', defaultHeaderId: 'header', defaultFooterId: 'footer' }],
+            },
+            headers: story === 'header' ? { header: { headerId: 'header', body } } : {},
+            footers: story === 'footer' ? { footer: { footerId: 'footer', body } } : {},
+            tableSource,
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 320, height: 400 } },
+        });
+        const viewModel = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(viewModel, univer.__getInjector().get(LocaleService));
+        const documents = new Documents(model.getUnitId(), skeleton);
+        try {
+            skeleton.calculate();
+            expect(skeleton.getSkeletonData()!.pages).toHaveLength(3);
+            scene.addObject(documents, 1);
+            const text = vi.spyOn(canvas.getContext(), 'fillText');
+            documents.draw(canvas.getContext());
+            expect(text.mock.calls.map(([value]) => String(value)).filter((value) => /\d/.test(value)))
+                .toEqual(['1', '3', '2', '3', '3', '3']);
+            expect((story === 'header' ? model.getSnapshot().headers!.header : model.getSnapshot().footers!.footer).body.dataStream)
+                .toBe(dataStream);
+        } finally {
+            documents.dispose();
+            skeleton.dispose();
+            viewModel.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
+    it('does not treat the first visible continuation page as the first page of its section', () => {
+        const univer = new Univer();
+        const pageBorders = {
+            display: 'firstPage' as const,
+            offsetFrom: 'page' as const,
+            top: { width: 2, padding: 24, color: { rgb: '#123456' } },
+        };
+        const model = new DocumentDataModel({
+            id: 'section-border-scroll',
+            body: {
+                dataStream: `A${DataStreamTreeTokenType.PAGE_BREAK}B\r\nC\r\n`,
+                paragraphs: [{ startIndex: 3, paragraphId: 'ab' }, { startIndex: 6, paragraphId: 'c' }],
+                sectionBreaks: [
+                    { startIndex: 4, sectionId: 'ab', pageBorders },
+                    { startIndex: 7, sectionId: 'c', pageBorders },
+                ],
+            },
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 320, height: 400 } },
+        });
+        const viewModel = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(viewModel, univer.__getInjector().get(LocaleService));
+        skeleton.calculate();
+        const pages = skeleton.getSkeletonData()!.pages;
+        expect(pages.map((page) => page.sectionId)).toEqual(['ab', 'ab', 'c']);
+        const documents = new Documents(model.getUnitId(), skeleton);
+        scene.addObject(documents, 1);
+        const ctx = canvas.getContext();
+        const rectangles: number[][] = [];
+        vi.spyOn(ctx, 'fillRect').mockImplementation((...rect) => {
+            if (ctx.fillStyle === '#123456') {
+                rectangles.push(rect);
+            }
+        });
+        documents.draw(ctx, { viewBound: { left: 0, right: 500, top: 700, bottom: 1500 } } as any);
+        expect(rectangles).toEqual([[0, 2 * (400 + documents.pageMarginTop) + 24, 320, 2]]);
+        documents.dispose();
+        skeleton.dispose();
+        viewModel.dispose();
+        univer.dispose();
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('retains the physical page boundary only in paginated rendering: %s', (documentFlavor) => {
+        const univer = new Univer();
+        const model = new DocumentDataModel({
+            id: 'physical-page-clip',
+            body: { dataStream: 'A\r\n', paragraphs: [{ startIndex: 1, paragraphId: 'p' }] },
+            documentStyle: { documentFlavor, pageSize: { width: 320, height: 400 } },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        skeleton.calculate();
+        const documents = new Documents(model.getUnitId(), skeleton);
+        scene.addObject(documents, 1);
+        const ctx = canvas.getContext();
+        const rect = vi.spyOn(ctx, 'rect');
+        const clip = vi.spyOn(ctx, 'clip');
+
+        documents.draw(ctx);
+
+        if (documentFlavor === DocumentFlavor.TRADITIONAL) {
+            expect(rect).toHaveBeenCalledWith(0, 0, 320, 400);
+            expect(clip).toHaveBeenCalled();
+        } else {
+            expect(clip).not.toHaveBeenCalled();
+        }
+        documents.dispose();
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it.each([
+        { documentFlavor: DocumentFlavor.TRADITIONAL, enabled: true },
+        { documentFlavor: DocumentFlavor.TRADITIONAL, enabled: false },
+        { documentFlavor: DocumentFlavor.MODERN, enabled: true },
+    ])('dims inactive content, not page-margin rectangles: $documentFlavor, editor=$enabled', ({ documentFlavor, enabled }) => {
+        const univer = new Univer();
+        const model = new DocumentDataModel({
+            id: 'edit-area-colors',
+            body: {
+                dataStream: 'D\r\n',
+                paragraphs: [{ startIndex: 1, paragraphId: 'body-p' }],
+                sectionBreaks: [{ startIndex: 2, sectionId: 'section', defaultHeaderId: 'header', defaultFooterId: 'footer' }],
+            },
+            headers: { header: { headerId: 'header', body: { dataStream: 'H\r\n', paragraphs: [{ startIndex: 1, paragraphId: 'header-p' }] } } },
+            footers: { footer: { footerId: 'footer', body: { dataStream: 'F\r\n', paragraphs: [{ startIndex: 1, paragraphId: 'footer-p' }] } } },
+            documentStyle: {
+                documentFlavor,
+                pageSize: { width: 320, height: 400 },
+                marginTop: 50,
+                marginBottom: 50,
+                marginHeader: 10,
+                marginFooter: 10,
+            },
+        });
+        const viewModel = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(viewModel, univer.__getInjector().get(LocaleService));
+        skeleton.calculate();
+        const bodyPage = skeleton.getSkeletonData()!.pages[0];
+        attachTable(bodyPage);
+        bodyPage.skeTables.get('table-1')!.top = -bodyPage.marginTop;
+        const documents = new Documents(model.getUnitId(), skeleton);
+        scene.addObject(documents, 1);
+        if (enabled) {
+            documents.setInactiveAreaOpacity(0.5);
+        }
+        const ctx = canvas.getContext();
+        const textPaints: Array<{ text: string; alpha: number }> = [];
+        const tablePaints: number[] = [];
+        vi.spyOn(ctx, 'fillText').mockImplementation((text) => {
+            textPaints.push({ text: String(text), alpha: ctx.globalAlpha });
+        });
+        vi.spyOn(ctx, 'fill').mockImplementation(() => {
+            if (ctx.fillStyle === '#ffeecc') {
+                tablePaints.push(ctx.globalAlpha);
+            }
+        });
+
+        for (const editArea of [DocumentEditArea.BODY, DocumentEditArea.HEADER, DocumentEditArea.FOOTER]) {
+            viewModel.setEditArea(editArea);
+            textPaints.length = 0;
+            tablePaints.length = 0;
+            ctx.globalAlpha = 0.8;
+            documents.draw(ctx);
+
+            const dims = enabled && documentFlavor === DocumentFlavor.TRADITIONAL;
+            const bodyAlpha = dims && editArea !== DocumentEditArea.BODY ? 0.4 : 0.8;
+            expect(textPaints.filter(({ text }) => text === 'D').map(({ alpha }) => alpha)).toEqual([bodyAlpha]);
+            expect(tablePaints).toEqual([bodyAlpha]);
+            if (documentFlavor === DocumentFlavor.TRADITIONAL) {
+                const headerFooterAlpha = dims && editArea === DocumentEditArea.BODY ? 0.4 : 0.8;
+                expect(textPaints.filter(({ text }) => text === 'H' || text === 'F').map(({ alpha }) => alpha))
+                    .toEqual([headerFooterAlpha, headerFooterAlpha]);
+            }
+            expect(ctx.globalAlpha).toBe(0.8);
+        }
+        documents.dispose();
+        skeleton.dispose();
+        viewModel.dispose();
+        univer.dispose();
     });
 
     it('draws body/header/footer/table flows with extension dispatch and page events', () => {

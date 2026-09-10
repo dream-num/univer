@@ -215,6 +215,16 @@ export class DocHyperLinkPopupService extends Disposable {
         return this._infoPopup;
     }
 
+    showInfoPopupFromHover(info: ILinkInfo): void {
+        this.cancelScheduledHideInfoPopup();
+        if (this._infoPopupPinned || this._infoPopupSuppressed) {
+            return;
+        }
+        if (!this.showing) {
+            this.showInfoPopup(info);
+        }
+    }
+
     hideInfoPopup() {
         this.cancelScheduledHideInfoPopup();
         this._infoPopupPinned = false;

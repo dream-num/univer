@@ -34,9 +34,11 @@ import {
     IUniverInstanceService,
     JSON1,
     JSONX,
+    RedoCommandId,
     TextX,
     TextXActionType,
     Tools,
+    UndoCommandId,
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -191,7 +193,8 @@ function includeFootnoteCleanup(before: IDocumentData, actions: JSONXActions): J
 function applyValidatedDocumentActions(
     documentDataModel: DocumentDataModel,
     segmentId: string,
-    actions: JSONXActions
+    actions: JSONXActions,
+    isHistoryReplay = false
 ): { actions: JSONXActions; undoActions: JSONXActions; preservesStructure: boolean } {
     const before = documentDataModel.getSnapshot();
     const appliedActions = includeFootnoteCleanup(before, actions);
@@ -201,7 +204,7 @@ function applyValidatedDocumentActions(
         return {
             actions: appliedActions,
             undoActions,
-            preservesStructure: validateDocStructureMutation(documentDataModel, segmentId, appliedActions, undoActions),
+            preservesStructure: validateDocStructureMutation(documentDataModel, segmentId, appliedActions, undoActions, isHistoryReplay),
         };
     } catch (error) {
         documentDataModel.apply(undoActions);
@@ -326,7 +329,8 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         const { actions: appliedActions, undoActions, preservesStructure } = applyValidatedDocumentActions(
             documentDataModel,
             segmentId,
-            actions
+            actions,
+            trigger === UndoCommandId || trigger === RedoCommandId
         );
 
         // Publish reference deletion and note cleanup in the same deterministic mutation.

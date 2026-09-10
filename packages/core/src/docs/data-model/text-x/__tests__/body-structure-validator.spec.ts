@@ -16,7 +16,7 @@
 
 import type { IDocumentBody } from '../../../../types/interfaces';
 import { describe, expect, it } from 'vitest';
-import { DocumentBlockRangeType } from '../../../../types/interfaces';
+import { CustomRangeType, DocumentBlockRangeType } from '../../../../types/interfaces';
 import { DataStreamTreeTokenType } from '../../types';
 import { validateDocBodyStructure, validateDocumentStructure } from '../structure-validator';
 
@@ -29,6 +29,24 @@ describe('validateDocBodyStructure', () => {
         };
 
         expect(validateDocBodyStructure(body)).toEqual([]);
+    });
+
+    it('accepts nested marker-backed fields and rejects crossing metadata', () => {
+        const T = DataStreamTreeTokenType;
+        const body: IDocumentBody = {
+            dataStream: `${T.CUSTOM_RANGE_START}A${T.CUSTOM_RANGE_START}1${T.CUSTOM_RANGE_END}B${T.CUSTOM_RANGE_END}${T.PARAGRAPH}${T.SECTION_BREAK}`,
+            paragraphs: [{ startIndex: 7, paragraphId: 'root' }],
+            sectionBreaks: [{ sectionId: 'section_field', startIndex: 8 }],
+            customRanges: [
+                { startIndex: 0, endIndex: 6, rangeId: 'toc', rangeType: CustomRangeType.FIELD },
+                { startIndex: 2, endIndex: 4, rangeId: 'page-ref', rangeType: CustomRangeType.FIELD },
+            ],
+        };
+
+        expect(validateDocBodyStructure(body)).toEqual([]);
+
+        body.customRanges![1].endIndex = 6;
+        expect(validateDocBodyStructure(body).map((issue) => issue.code)).toContain('custom-range-token-mismatch');
     });
 
     it('reports root bodies without a minimum paragraph and section pair', () => {

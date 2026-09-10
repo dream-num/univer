@@ -253,12 +253,10 @@ describe('DocRenderController bounded input publication', () => {
         vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
             // Match the fixture's 14pt Canvas metrics; jsdom returns zero and cannot cache normal leading.
             if (this.style.visibility === 'hidden' && this.style.whiteSpace === 'pre' && this.style.lineHeight === 'normal') {
-                const fontSize = Number.parseFloat(this.style.fontSize);
-                const pointsPerUnit = this.style.fontSize.endsWith('px') ? 3 / 4 : 1;
                 const lineCount = (this.textContent ?? '').split('\n').length;
-                const metrics = context.measureText('Hg');
+                const metrics = context.measureText.call({ font: this.style.font }, 'Hg');
                 const lineHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
-                return new DOMRect(0, 0, 0, fontSize * pointsPerUnit / 14 * lineHeight * lineCount);
+                return new DOMRect(0, 0, 0, lineHeight * lineCount);
             }
             return getBoundingClientRect.call(this);
         });

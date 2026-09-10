@@ -16,8 +16,6 @@
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import zhCN from '../../../locale/zh-CN';
-import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { MobileDialog } from '../MobileDialog';
 import '@testing-library/jest-dom/vitest';
 
@@ -30,17 +28,6 @@ describe('MobileDialog', () => {
         expect(screen.getByRole('textbox')).not.toHaveFocus();
         screen.getByRole('textbox').focus();
         expect(screen.getByRole('textbox')).toHaveFocus();
-    });
-
-    it('localizes the close action using the configured language', () => {
-        const onClose = vi.fn();
-        render(
-            <ConfigProvider locale={zhCN.design} mountContainer={document.body}>
-                <MobileDialog open title="Print" onClose={onClose}>Preview</MobileDialog>
-            </ConfigProvider>
-        );
-        fireEvent.click(screen.getByRole('button', { name: zhCN.design.Accessibility.close }));
-        expect(onClose).toHaveBeenCalledOnce();
     });
 
     it('closes once when the close control is pressed', () => {

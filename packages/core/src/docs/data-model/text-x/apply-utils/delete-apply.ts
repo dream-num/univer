@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody } from '../../../../types/interfaces';
-import { deleteContent } from '../../../../shared';
+import type { IDocumentBody } from '../../../../types/interfaces/i-document-data';
+import { deleteContent } from '../../../../shared/doc-tool';
 import {
     deleteBlockRanges,
     deleteColumnGroups,
@@ -36,6 +36,15 @@ export function updateAttributeByDelete(body: IDocumentBody, textLength: number,
 
     const startIndex = currentIndex;
     const endIndex = currentIndex + textLength;
+
+    const removedRenderedPageBreaks = body.renderedPageBreaks
+        ?.filter((offset) => offset >= startIndex && offset < endIndex)
+        .map((offset) => offset - startIndex);
+    if (body.renderedPageBreaks != null) {
+        body.renderedPageBreaks = body.renderedPageBreaks
+            .filter((offset) => offset < startIndex || offset >= endIndex)
+            .map((offset) => offset >= endIndex ? offset - textLength : offset);
+    }
 
     const removeTextRuns = deleteTextRuns(body, textLength, currentIndex);
 
@@ -69,6 +78,7 @@ export function updateAttributeByDelete(body: IDocumentBody, textLength: number,
 
     return {
         dataStream: removeDataStream,
+        renderedPageBreaks: removedRenderedPageBreaks,
         textRuns: removeTextRuns,
         paragraphs: removeParagraphs,
         sectionBreaks: removeSectionBreaks,

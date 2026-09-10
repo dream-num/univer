@@ -686,6 +686,15 @@ describe('DocEventManagerService list marker helpers', () => {
         internalService._customRangeDirty = false;
         internalService._customRangeBounds = [{
             customRange: {
+                rangeId: 'outer-field',
+                startIndex: 0,
+                endIndex: 30,
+                rangeType: CustomRangeType.FIELD,
+            },
+            rects: [{ top: 40, bottom: 60, left: 20, right: 80 }],
+            segmentPageIndex: -1,
+        }, {
+            customRange: {
                 rangeId: 'link-1',
                 startIndex: 12,
                 endIndex: 15,
@@ -708,6 +717,7 @@ describe('DocEventManagerService list marker helpers', () => {
         });
 
         expect(pointerDowns).toEqual([[
+            expect.objectContaining({ range: expect.objectContaining({ rangeId: 'outer-field' }) }),
             expect.objectContaining({ range: expect.objectContaining({ rangeId: 'link-1' }) }),
         ]]);
         expect(clicks).toEqual([]);

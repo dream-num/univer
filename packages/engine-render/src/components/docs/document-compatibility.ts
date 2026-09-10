@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import type { ITable } from '@univerjs/core';
+import type { ITable, ITextStyle } from '@univerjs/core';
 import type {
     IDocumentSkeletonBoundingBox,
     IDocumentSkeletonFontStyle,
 } from '../../basics/i-document-skeleton-cached';
 import { DocumentFlavor } from '@univerjs/core';
+import { cjk } from '../../basics/cjk-regexp';
+import { getFontStyleString } from '../../basics/tools';
 
 interface IFontMetricScaleRule {
     fontFamily: RegExp;
@@ -30,7 +32,7 @@ interface IFontMetricScaleRule {
 }
 
 export interface IDocumentCompatibilityPolicy {
-    mode: 'modern' | 'traditional' | 'unspecified';
+    mode: 'modern' | 'traditional' | 'unspecified' | 'drawingml';
     applyDocumentDefaultParagraphStyle: boolean;
     useWordStyleLineHeight: boolean;
     font: {
@@ -63,12 +65,6 @@ const TRADITIONAL_DOCUMENT_COMPATIBILITY_POLICY: IDocumentCompatibilityPolicy = 
     useWordStyleLineHeight: true,
     font: {
         metricScaleRules: [
-            {
-                fontFamily: /^arial$/i,
-                fontString: /^\S+\s+normal\s+\d+(?:\.\d+)?pt\s+["']?Arial["']?(?:,|$)/i,
-                content: /^[\u0000-\u024F\u2000-\u206F]$/u,
-                widthScale: 0.98,
-            },
             {
                 fontFamily: /^calibri$/i,
                 minFontSize: 20,
@@ -104,7 +100,15 @@ const UNSPECIFIED_DOCUMENT_COMPATIBILITY_POLICY: IDocumentCompatibilityPolicy = 
     },
 };
 
+const DRAWINGML_COMPATIBILITY_POLICY: IDocumentCompatibilityPolicy = {
+    ...UNSPECIFIED_DOCUMENT_COMPATIBILITY_POLICY,
+    mode: 'drawingml',
+};
+
 export function getDocumentCompatibilityPolicy(documentFlavor?: DocumentFlavor): IDocumentCompatibilityPolicy {
+    if (documentFlavor === DocumentFlavor.DRAWINGML) {
+        return DRAWINGML_COMPATIBILITY_POLICY;
+    }
     if (documentFlavor === DocumentFlavor.MODERN) {
         return MODERN_DOCUMENT_COMPATIBILITY_POLICY;
     }
@@ -122,6 +126,18 @@ export function applyFontMetricCompatibility(
     bBox: IDocumentSkeletonBoundingBox,
     policy: IDocumentCompatibilityPolicy
 ): IDocumentSkeletonBoundingBox {
+    if (policy.mode === 'drawingml') {
+        // PowerPoint's measured advances use eighths of a slide-layout unit.
+        return { ...bBox, width: Math.round(bBox.width * 8) / 8 };
+    }
+    // Canvas quantizes fractional font sizes (10pt Han advances can become 13.330px).
+    // Recover the nominal em only for already full-width CJK glyphs; leave proportional
+    // glyphs, explicit half-width forms, and their actual ink/vertical metrics unchanged.
+    const em = fontStyle.fontSize / 0.75;
+    const width = policy.mode === 'traditional' && Array.from(content).length === 1 && cjk.hasCJK(content)
+        && Math.abs(bBox.width - em) < 0.01
+        ? em
+        : bBox.width;
     const fontFamilies = fontStyle.fontFamily
         .split(',')
         .map((item) => item.trim().replace(/^['"]|['"]$/g, ''));
@@ -133,14 +149,58 @@ export function applyFontMetricCompatibility(
         fontFamilies.some((family) => rule.fontFamily.test(family))
     );
 
-    if (rule?.widthScale == null) {
+    const adjustedWidth = width * (rule?.widthScale ?? 1);
+    let normalLineHeight = bBox.normalLineHeight;
+    if (policy.mode === 'traditional' && /^(?:Microsoft YaHei|微软雅黑)$/i.test(fontFamilies[0])
+        && Math.abs((bBox.ba + bBox.bd) / (fontStyle.originFontSize / 0.75) - 2703 / 2048) < 0.001) {
+        // Word's single spacing adds leading to YaHei's font box. Isolated native
+        // Word probes at 7.5pt and 12pt measure 17.12px and 27.52px baseline advances.
+        // Guard the actual font metrics so a missing/substituted font is not inflated.
+        // Only AUTO spacing consumes this value; keep ink and fixed/minimum metrics.
+        normalLineHeight = Math.max(normalLineHeight ?? 0, (bBox.ba + bBox.bd) * 1.3);
+    }
+    if (policy.mode === 'traditional' && /^(?:MS Gothic|ＭＳ ゴシック)$/i.test(fontFamilies[0])
+        && Math.abs(bBox.ba + bBox.bd - fontStyle.originFontSize / 0.75) < 0.01) {
+        // Word adds auto-leading beyond MS Gothic's one-em font box, for Latin
+        // text as well as symbols. Native Word probes at 11pt and 16pt confirm
+        // this ratio; leave ink metrics and fixed/minimum line spacing intact.
+        normalLineHeight = Math.max(normalLineHeight ?? 0, fontStyle.originFontSize / 0.75 * 83 / 64);
+    }
+    if (adjustedWidth === bBox.width && normalLineHeight === bBox.normalLineHeight) {
         return bBox;
     }
 
     return {
         ...bBox,
-        width: bBox.width * rule.widthScale,
+        width: adjustedWidth,
+        ...(normalLineHeight != null ? { normalLineHeight } : {}),
     };
+}
+
+export function getSmallCapsFontStyle(
+    raw: string,
+    textStyle: ITextStyle | undefined,
+    fontStyle: IDocumentSkeletonFontStyle,
+    policy: IDocumentCompatibilityPolicy
+): IDocumentSkeletonFontStyle {
+    if (!textStyle?.smallCaps || textStyle.caps || raw === raw.toUpperCase()) {
+        return fontStyle;
+    }
+    // Native Office uses synthetic 80% capitals; Word rounds the size to half-points.
+    // Keep the authored size for line metrics and kerning-threshold decisions.
+    const size = fontStyle.originFontSize * 0.8;
+    const fs = policy.mode === 'drawingml' ? size : Math.max(0.5, Math.round(size * 2) / 2);
+    return {
+        ...getFontStyleString({ ...textStyle, fs }),
+        originFontSize: fontStyle.originFontSize,
+        fontKerning: fontStyle.fontKerning,
+    };
+}
+
+export function getNominalFontLineHeight(fontSize: number, policy?: IDocumentCompatibilityPolicy): number | undefined {
+    // Office renderer compatibility, not an OOXML-specified font metric.
+    // Font sizes are points; the layout engine uses 96-DPI pixels.
+    return policy?.mode === 'drawingml' && fontSize > 0 ? fontSize * 1.2 * (96 / 72) : undefined;
 }
 
 export function isTraditionalDocumentCompatibility(policy?: IDocumentCompatibilityPolicy): boolean {

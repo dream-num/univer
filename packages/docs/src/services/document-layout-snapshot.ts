@@ -60,9 +60,25 @@ function projectFooter(footer: IFooterData): IFooterData {
  * the structured-clone boundary because they do not affect document geometry.
  */
 export function createDocumentLayoutSnapshot(snapshot: IDocumentData): IDocumentData {
-    const { resources: _resources, body, headers, footers, ...layoutSnapshot } = snapshot;
+    const { resources: _resources, body, headers, footers, footnotes, endnotes, ...layoutSnapshot } = snapshot;
     return {
         ...layoutSnapshot,
+        ...(footnotes == null
+            ? {}
+            : {
+                footnotes: Object.fromEntries(Object.entries(footnotes).map(([id, note]) => [
+                    id,
+                    { ...note, body: projectDocumentBody(note.body) },
+                ])),
+            }),
+        ...(endnotes == null
+            ? {}
+            : {
+                endnotes: Object.fromEntries(Object.entries(endnotes).map(([id, note]) => [
+                    id,
+                    { ...note, body: projectDocumentBody(note.body) },
+                ])),
+            }),
         ...(body == null ? {} : { body: projectDocumentBody(body) }),
         ...(headers == null
             ? {}

@@ -22,6 +22,7 @@ import { BaselineOffset } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { COLOR_BLACK_RGB } from '../../../../basics/const';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
+import { getFontStyleString } from '../../../../basics/tools';
 import { Vector2 } from '../../../../basics/vector2';
 import { CheckboxShape } from '../../../../shape/checkbox';
 import { FontAndBaseLine } from '../font-and-base-line';
@@ -32,6 +33,7 @@ type MockRenderContext = UniverRenderingContext & {
     fillText: ReturnType<typeof vi.fn>;
     translate: ReturnType<typeof vi.fn>;
     rotate: ReturnType<typeof vi.fn>;
+    scale: ReturnType<typeof vi.fn>;
     createLinearGradient: ReturnType<typeof vi.fn>;
     createRadialGradient: ReturnType<typeof vi.fn>;
     createPattern: ReturnType<typeof vi.fn>;
@@ -76,6 +78,7 @@ function createContext(): MockRenderContext {
         fillText: vi.fn(),
         translate: vi.fn(),
         rotate: vi.fn(),
+        scale: vi.fn(),
         createLinearGradient: vi.fn(() => gradient),
         createRadialGradient: vi.fn(() => gradient),
         createPattern: vi.fn(() => ({ setTransform: vi.fn() })),
@@ -131,6 +134,61 @@ function createGlyph(content: string, overrides?: GlyphOverrides): IDocumentSkel
 }
 
 describe('docs font and baseline extension', () => {
+    it.each([90, 200])('paints character width scaling at the glyph origin without changing baseline: %s', (sa) => {
+        const extension = new FontAndBaseLine();
+        const context = createContext();
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: { vertexAngle: 0, centerAngle: 0 },
+        };
+        extension.draw(context, DEFAULT_SCALE, createGlyph('AB', { ts: { fs: 12, sa } }));
+        expect(context.translate).toHaveBeenCalledWith(12, 20);
+        expect(context.scale).toHaveBeenCalledWith(sa / 100, 1);
+        expect(context.fillText).toHaveBeenCalledWith('AB', 0, 0);
+        expect(context.save.mock.calls.length).toBe(context.restore.mock.calls.length);
+    });
+
+    it('uses the measured kerning mode and resets it for legacy text', () => {
+        const extension = new FontAndBaseLine();
+        const context = createContext();
+        context.fontKerning = 'auto';
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: { vertexAngle: 0, centerAngle: 0 },
+        };
+        for (const fontKerning of ['normal', 'none', undefined] as const) {
+            extension.draw(context, DEFAULT_SCALE, createGlyph('AV', {
+                fontStyle: { ...getFontStyleString({ fs: 12, ff: 'Arial' }), fontKerning },
+            }));
+            expect(context.fontKerning).toBe(fontKerning ?? 'auto');
+        }
+    });
+
+    it.each([0, 90])('paints tracked glyph segments using layout positions at %s degrees without native letterSpacing', (angle) => {
+        const extension = new FontAndBaseLine();
+        const context = createContext();
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: { vertexAngle: angle, centerAngle: angle },
+        };
+        const glyph = createGlyph('ก้ข', {
+            textSpacing: { content: 'ก้ข', segments: [{ content: 'ก้', left: 0 }, { content: 'ข', left: 7 }] },
+        });
+        extension.draw(context, DEFAULT_SCALE, glyph);
+        const x = angle === 0 ? 12 : 0;
+        const y = angle === 0 ? 20 : 0;
+        expect(context.fillText.mock.calls).toEqual([['ก้', x, y], ['ข', x + 7, y]]);
+        context.fillText.mockClear();
+        extension.draw(context, DEFAULT_SCALE, { ...glyph, content: 'Updated field' });
+        expect(context.fillText).toHaveBeenCalledWith('Updated field', x, y);
+    });
+
     it('keeps existing document text colors unchanged', () => {
         const screenExtension = new FontAndBaseLine();
         const ScreenContext = createContext();
@@ -156,22 +214,40 @@ describe('docs font and baseline extension', () => {
         }));
 
         expect(ScreenContext.fillStyle).toBe('#000000');
+
+        for (const rgb of ['auto', '#auto']) {
+            ScreenContext.fillStyle = '#ffffff';
+            screenExtension.draw(ScreenContext, DEFAULT_SCALE, createGlyph('Automatic color', {
+                ts: { fs: 12, cl: { rgb } },
+            }));
+            expect(ScreenContext.fillStyle).toBe(COLOR_BLACK_RGB);
+        }
     });
 
-    it('draws footnote separator marks with their measured width and text color', () => {
+    it.each([
+        { fs: 8, rise: 3, thickness: 0.48 },
+        { fs: 11, rise: 3.92, thickness: 0.8 },
+        { fs: 16, rise: 5.84, thickness: 1.12 },
+        { fs: 22, rise: 8.08, thickness: 1.44 },
+    ])('draws a $fs pt footnote separator above the baseline with scalable thickness', ({ fs, rise, thickness }) => {
         const extension = new FontAndBaseLine();
         const SeparatorContext = Object.assign(createContext(), {
-            beginPath: vi.fn(),
-            moveToByPrecision: vi.fn(),
-            lineToByPrecision: vi.fn(),
-            stroke: vi.fn(),
+            fillRect: vi.fn(),
         });
         extension.extensionOffset = { spanPointWithFont: Vector2.create(12, 20) };
-        extension.draw(SeparatorContext, DEFAULT_SCALE, createGlyph(' ', { noteSeparator: true, width: 192 }));
-        expect(SeparatorContext.moveToByPrecision).toHaveBeenCalledWith(12, 20);
-        expect(SeparatorContext.lineToByPrecision).toHaveBeenCalledWith(204, 20);
-        expect(SeparatorContext.strokeStyle).toBe('#223344');
-        expect(SeparatorContext.stroke).toHaveBeenCalledOnce();
+        extension.draw(SeparatorContext, DEFAULT_SCALE, createGlyph(' ', {
+            noteSeparator: true,
+            width: 192,
+            fontStyle: getFontStyleString({ ff: 'Univers', fs }),
+        }));
+        expect(SeparatorContext.fillRect).toHaveBeenCalledOnce();
+        const [left, top, width, height] = SeparatorContext.fillRect.mock.calls[0];
+        expect(left).toBe(12);
+        expect(width).toBe(192);
+        // Word's native PDF measurements are quantized to 1/600 inch (0.16 CSS px).
+        expect(Math.abs(20 - top - height / 2 - rise)).toBeLessThan(0.16);
+        expect(Math.abs(height - thickness)).toBeLessThan(0.08);
+        expect(SeparatorContext.fillStyle).toBe('#223344');
         expect(SeparatorContext.fillText).not.toHaveBeenCalled();
         expect(SeparatorContext.restore).toHaveBeenCalledOnce();
     });

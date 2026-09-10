@@ -19,9 +19,10 @@ import type { IRetainAction } from '../action-types';
 import { describe, expect, it, vi } from 'vitest';
 import { Tools } from '../../../../shared/tools';
 import { BooleanNumber } from '../../../../types/enum/text-style';
+import { CustomRangeType } from '../../../../types/interfaces/i-document-data';
 import { PresetListType } from '../../preset-list-type';
 import { TextXActionType } from '../action-types';
-import { composeBody, getBodySlice, getTextRunSlice, isUselessRetainAction } from '../utils';
+import { composeBody, getBodySlice, getTextRunSlice, isUselessRetainAction, SliceBodyType } from '../utils';
 
 describe('test text-x utils', () => {
     it('only clones text runs intersecting the requested slice', () => {
@@ -168,6 +169,34 @@ describe('test text-x utils', () => {
                 paragraphId: 'para_fixture_1051',
             }],
         });
+    });
+
+    it('drops a clipped outer field while preserving a fully copied nested field', () => {
+        const body: IDocumentBody = {
+            dataStream: '\u001FOld\t\u001F1\u001E\r\u001E',
+            customRanges: [{
+                startIndex: 0,
+                endIndex: 9,
+                rangeId: 'toc',
+                rangeType: CustomRangeType.FIELD,
+                wholeEntity: false,
+            }, {
+                startIndex: 5,
+                endIndex: 7,
+                rangeId: 'page-ref',
+                rangeType: CustomRangeType.FIELD,
+                wholeEntity: false,
+            }],
+        };
+
+        const copied = getBodySlice(body, 1, 9, false, SliceBodyType.copy);
+
+        expect(copied.dataStream).toBe('Old\t\u001F1\u001E\r');
+        expect(copied.customRanges).toEqual([expect.objectContaining({
+            rangeId: 'page-ref',
+            startIndex: 4,
+            endIndex: 6,
+        })]);
     });
 
     it('test composeBody fn with textRuns', () => {

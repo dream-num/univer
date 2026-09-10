@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentBody, JSONXActions, JSONXPath } from '@univerjs/core';
+import type { DocumentDataModel, IDocStructureIssue, IDocumentBody, IDocumentData, JSONXActions, JSONXPath } from '@univerjs/core';
 import {
     CustomRangeType,
     DataStreamTreeTokenType,
@@ -22,9 +22,11 @@ import {
     getRichTextEditPath,
 
     JSON1,
+    JSONX,
 
     TextX,
     TextXActionType,
+    Tools,
     validateDocBodyStructure,
     validateDocumentStructure,
 } from '@univerjs/core';
@@ -178,7 +180,36 @@ function getSegmentType(documentDataModel: DocumentDataModel, segmentId: string)
     return 'body';
 }
 
-function assertValidDocBodyStructure(documentDataModel: DocumentDataModel, segmentId: string): void {
+function getSnapshotBody(snapshot: IDocumentData, segmentId: string): IDocumentBody | undefined {
+    if (!segmentId) {
+        return snapshot.body;
+    }
+    return snapshot.headers?.[segmentId]?.body ?? snapshot.footers?.[segmentId]?.body ?? snapshot.notes?.[segmentId]?.body;
+}
+
+function containsTextXEdit(actions: JSONXActions): boolean {
+    const cursor = JSON1.type.readCursor(actions);
+    let found = false;
+    cursor.traverse(null, (component) => {
+        if (component.et === TextX.id) found = true;
+    });
+    return found;
+}
+
+function subtractBaselineIssues(issues: IDocStructureIssue[], baseline: IDocStructureIssue[]): IDocStructureIssue[] {
+    const counts = new Map<string, number>();
+    baseline.forEach((issue) => counts.set(issue.code, (counts.get(issue.code) ?? 0) + 1));
+    return issues.filter((issue) => {
+        const count = counts.get(issue.code) ?? 0;
+        if (count === 0) {
+            return true;
+        }
+        counts.set(issue.code, count - 1);
+        return false;
+    });
+}
+
+function assertValidDocBodyStructure(documentDataModel: DocumentDataModel, segmentId: string, undoActions: JSONXActions): void {
     const segmentModel = documentDataModel.getSelfOrHeaderFooterModel(segmentId);
     const body = segmentModel?.getBody();
     if (!body) {
@@ -186,6 +217,7 @@ function assertValidDocBodyStructure(documentDataModel: DocumentDataModel, segme
     }
 
     const segmentType = getSegmentType(documentDataModel, segmentId);
+    const context = { segmentType, segmentId: segmentId || undefined };
     const note = documentDataModel.getSnapshot().notes?.[segmentId];
     const issues = note
         ? validateDocumentStructure({ notes: { [segmentId]: note } })
@@ -194,21 +226,84 @@ function assertValidDocBodyStructure(documentDataModel: DocumentDataModel, segme
         return;
     }
 
-    const detail = issues.map((issue) => `${issue.code}${issue.index == null ? '' : `@${issue.index}`}`).join(', ');
+    const snapshot = Tools.deepClone(documentDataModel.getSnapshot());
+    const restoredSnapshot = JSONX.apply(snapshot, undoActions) as unknown as IDocumentData;
+    const baselineBody = getSnapshotBody(restoredSnapshot, segmentId);
+    // ponytail: issue counts preserve editability for legacy imports; add offset-aware mapping if two
+    // defects of the same kind can be exchanged by one mutation in production.
+    const newIssues = baselineBody
+        ? subtractBaselineIssues(issues, validateDocBodyStructure(baselineBody, context))
+        : issues;
+    if (!newIssues.length) {
+        return;
+    }
+
+    const detail = newIssues.map((issue) => `${issue.code}${issue.index == null ? '' : `@${issue.index}`}`).join(', ');
     const segmentLabel = segmentId ? `${segmentType} ${segmentId}` : segmentType;
     throw new Error(`[DocStructure] ${segmentLabel}: ${detail}`);
+}
+
+function containsLockedSdt(value: unknown): boolean {
+    if (Array.isArray(value)) {
+        return value.some(containsLockedSdt);
+    }
+    if (!isRecord(value)) {
+        return false;
+    }
+    return (value.rangeType === CustomRangeType.SDT && isRecord(value.properties) &&
+        typeof value.properties.lock === 'string' && value.properties.lock !== 'unlocked') ||
+        Object.values(value).some(containsLockedSdt);
+}
+
+function assertSdtLocks(documentDataModel: DocumentDataModel, segmentId: string, undoActions: JSONXActions): void {
+    const currentBody = documentDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
+    if (!currentBody) return;
+    const snapshot = Tools.deepClone(documentDataModel.getSnapshot());
+    const restoredSnapshot = JSONX.apply(snapshot, undoActions) as unknown as IDocumentData;
+    const previousBody = getSnapshotBody(restoredSnapshot, segmentId);
+    if (!previousBody) return;
+
+    for (const previous of previousBody.customRanges ?? []) {
+        if (previous.rangeType !== CustomRangeType.SDT) continue;
+        const lock = previous.properties?.lock;
+        if (!lock || lock === 'unlocked') continue;
+        const current = currentBody.customRanges?.find((range) => range.rangeId === previous.rangeId && range.rangeType === CustomRangeType.SDT);
+        const wrapperLocked = lock === 'sdtLocked' || lock === 'sdtContentLocked';
+        const contentLocked = lock === 'contentLocked' || lock === 'sdtContentLocked';
+        if (wrapperLocked && !current) {
+            throw new Error(`[DocSDT] ${previous.rangeId}: wrapper is locked`);
+        }
+        // Word allows deleting a contentLocked control as a whole, but not changing its contents.
+        if (contentLocked && current) {
+            const before = previousBody.dataStream.slice(previous.startIndex, previous.endIndex + 1);
+            const after = currentBody.dataStream.slice(current.startIndex, current.endIndex + 1);
+            // Content locking protects the value, not the control's developer properties.
+            // Word still lets the author change or clear the lock from Content Control Properties.
+            if (before !== after) {
+                throw new Error(`[DocSDT] ${previous.rangeId}: content is locked`);
+            }
+        }
+    }
 }
 
 export function validateDocStructureMutation(
     documentDataModel: DocumentDataModel,
     segmentId: string,
     actions: JSONXActions,
-    undoActions: JSONXActions
+    undoActions: JSONXActions,
+    isHistoryReplay = false
 ): boolean {
     const editPath = getRichTextEditPath(documentDataModel, segmentId);
     const preservesStructure =
         isStructurePreservingJSONXEdit(actions, editPath) &&
         isStructurePreservingJSONXEdit(undoActions, editPath);
+
+    if (!isHistoryReplay) {
+        const hasCurrentLock = containsTextXEdit(actions) && documentDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges?.some((range) => range.rangeType === CustomRangeType.SDT && range.properties?.lock && range.properties.lock !== 'unlocked');
+        if (hasCurrentLock || (!preservesStructure && containsLockedSdt(undoActions))) {
+            assertSdtLocks(documentDataModel, segmentId, undoActions);
+        }
+    }
 
     let changesFootnoteStructure = false;
     const cursor = JSON1.type.readCursor(actions);
@@ -231,8 +326,8 @@ export function validateDocStructureMutation(
         if (issues.length > 0) {
             throw new Error(`[DocStructure] ${issues.map((issue) => `${issue.code}@${issue.index ?? issue.segmentId ?? ''}`).join(', ')}`);
         }
-    } else if (!preservesStructure) {
-        assertValidDocBodyStructure(documentDataModel, segmentId);
+    } else if (!preservesStructure && !isHistoryReplay) {
+        assertValidDocBodyStructure(documentDataModel, segmentId, undoActions);
     }
     return preservesStructure && !changesFootnoteStructure;
 }

@@ -15,12 +15,13 @@
  */
 
 import type { ITable } from '@univerjs/core';
-import type { IParagraphList } from '../../../../../basics/i-document-skeleton-cached';
-import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { ILayoutContext } from '../../tools';
 import {
     BooleanNumber,
     DocumentFlavor,
+    NumberUnitType,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
     TableAlignmentType,
     TableRowHeightRule,
     TableSizeType,
@@ -38,7 +39,7 @@ import {
     getTableIdAndSliceIndex,
     getTableLeft,
     getTableSliceId,
-    rollbackListCache,
+    resolveTableLayoutColumns,
     startTableSkeletonBuild,
     startTableSkeletonsBuild,
     stepTableSkeletonBuild,
@@ -48,7 +49,8 @@ import {
 const createSkeletonCellPagesMock = vi.fn();
 const createNullCellPageMock = vi.fn();
 
-vi.mock('../../model/page', () => ({
+vi.mock('../../model/page', async (importOriginal) => ({
+    ...await importOriginal<typeof import('../../model/page')>(),
     createSkeletonCellPages: (...args: unknown[]) => createSkeletonCellPagesMock(...args),
     createNullCellPage: (...args: unknown[]) => createNullCellPageMock(...args),
     startSkeletonCellPagesBuild: (...args: unknown[]) => ({
@@ -175,6 +177,52 @@ function useDocumentFlavor(sectionBreakConfig: Record<string, unknown>, document
 }
 
 describe('table utilities', () => {
+    describe('resolveTableLayoutColumns', () => {
+        it('scales imported percentage table grids to the current page or parent-cell width', () => {
+            const table = createMockTable({
+                size: { type: TableSizeType.SPECIFIED, width: { v: 100, u: NumberUnitType.PERCENT } },
+                tableColumns: [
+                    { size: { type: TableSizeType.SPECIFIED, width: { v: 80 } } },
+                    { size: { type: TableSizeType.SPECIFIED, width: { v: 120 } } },
+                ],
+            });
+
+            const resolved = resolveTableLayoutColumns(table, 600);
+
+            expect(resolved.tableColumns.map((column) => column.size.width.v)).toEqual([240, 360]);
+            expect(table.tableColumns.map((column) => column.size.width.v)).toEqual([80, 120]);
+        });
+
+        it('keeps AutoFit grids because their imported widths already contain Word layout results', () => {
+            const table = createMockTable({
+                size: { type: TableSizeType.UNSPECIFIED, width: { v: 0 } },
+                tableColumns: [
+                    { size: { type: TableSizeType.SPECIFIED, width: { v: 80 } } },
+                    { size: { type: TableSizeType.SPECIFIED, width: { v: 120 } } },
+                ],
+            });
+
+            expect(resolveTableLayoutColumns(table, 600)).toBe(table);
+        });
+
+        it.each([false, true])('resolves legacy percentage width in frame coordinates (traditional: %s)', (traditional) => {
+            const table = createMockTable({
+                size: { type: TableSizeType.SPECIFIED, width: { v: 100, u: NumberUnitType.PERCENT } },
+                legacyIndentAdjustment: { v: 7.2 },
+                cellMargin: { start: { v: 7.2 }, end: { v: 7.2 }, top: { v: 0 }, bottom: { v: 0 } },
+                tableColumns: [
+                    { size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } },
+                    { size: { type: TableSizeType.SPECIFIED, width: { v: 493.6 } } },
+                ],
+            });
+            const source = JSON.stringify(table);
+            const resolved = resolveTableLayoutColumns(table, 679.2, traditional);
+            expect(resolved.tableColumns.reduce((width, column) => width + column.size.width.v, 0))
+                .toBeCloseTo(traditional ? 693.6 : 679.2);
+            expect(JSON.stringify(table)).toBe(source);
+        });
+    });
+
     describe('getTableLeft', () => {
         it('centers a table within the supplied column width', () => {
             expect(getTableLeft(243, 243, TableAlignmentType.CENTER)).toBe(0);
@@ -226,92 +274,6 @@ describe('table utilities', () => {
             expect(skeleton.tableSource).toBe(table);
         });
     });
-
-    describe('rollbackListCache', () => {
-        it('removes paragraph lists whose startIndex is inside the table range', () => {
-            const paragraphList1: IParagraphList = {
-                bullet: {} as unknown as IParagraphList['bullet'],
-                paragraph: { startIndex: 5 } as unknown as IParagraphList['paragraph'],
-            };
-            const paragraphList2: IParagraphList = {
-                bullet: {} as unknown as IParagraphList['bullet'],
-                paragraph: { startIndex: 15 } as unknown as IParagraphList['paragraph'],
-            };
-            const paragraphList3: IParagraphList = {
-                bullet: {} as unknown as IParagraphList['bullet'],
-                paragraph: { startIndex: 25 } as unknown as IParagraphList['paragraph'],
-            };
-
-            const listLevel = new Map<string, IParagraphList[][]>([
-                ['list1', [[paragraphList1, paragraphList2, paragraphList3]]],
-            ]);
-
-            const tableNode = {
-                startIndex: 10,
-                endIndex: 20,
-            } as DataStreamTreeNode;
-
-            rollbackListCache(listLevel, tableNode);
-
-            const result = listLevel.get('list1')![0];
-            expect(result).toHaveLength(1);
-            expect(result[0].paragraph.startIndex).toBe(5);
-        });
-
-        it('does not remove paragraph lists outside the table range', () => {
-            const paragraphList1: IParagraphList = {
-                bullet: {} as unknown as IParagraphList['bullet'],
-                paragraph: { startIndex: 1 } as unknown as IParagraphList['paragraph'],
-            };
-            const paragraphList2: IParagraphList = {
-                bullet: {} as unknown as IParagraphList['bullet'],
-                paragraph: { startIndex: 2 } as unknown as IParagraphList['paragraph'],
-            };
-
-            const listLevel = new Map<string, IParagraphList[][]>([
-                ['list1', [[paragraphList1, paragraphList2]]],
-            ]);
-
-            const tableNode = {
-                startIndex: 10,
-                endIndex: 20,
-            } as DataStreamTreeNode;
-
-            rollbackListCache(listLevel, tableNode);
-
-            const result = listLevel.get('list1')![0];
-            expect(result).toHaveLength(2);
-        });
-
-        it('handles empty listLevel', () => {
-            const listLevel = new Map<string, IParagraphList[][]>();
-            const tableNode = {
-                startIndex: 10,
-                endIndex: 20,
-            } as DataStreamTreeNode;
-
-            expect(() => rollbackListCache(listLevel, tableNode)).not.toThrow();
-        });
-
-        it('skips sparse paragraph list levels', () => {
-            const paragraphList: IParagraphList = {
-                bullet: {} as unknown as IParagraphList['bullet'],
-                paragraph: { startIndex: 25 } as unknown as IParagraphList['paragraph'],
-            };
-            const paragraphLists = [] as unknown as IParagraphList[][];
-            paragraphLists[2] = [paragraphList];
-            const listLevel = new Map<string, IParagraphList[][]>([
-                ['list1', paragraphLists],
-            ]);
-            const tableNode = {
-                startIndex: 10,
-                endIndex: 20,
-            } as DataStreamTreeNode;
-
-            expect(() => rollbackListCache(listLevel, tableNode)).not.toThrow();
-            expect(listLevel.get('list1')![2]).toHaveLength(1);
-        });
-    });
 });
 
 describe('docs table layout', () => {
@@ -347,6 +309,38 @@ describe('docs table layout', () => {
         expect(skeleton?.rows[0].cells[1].marginTop).toBeGreaterThanOrEqual(1);
     });
 
+    it.each([VerticalAlignmentType.CENTER, VerticalAlignmentType.BOTTOM])(
+        'keeps cell-relative floating anchors fixed while vertically aligning text (%s)',
+        (vAlign) => {
+            const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+            tableSource.tableRows[0].trHeight = { hRule: TableRowHeightRule.EXACT, val: { v: 180 } };
+            tableSource.tableRows[0].tableCells[0].vAlign = vAlign;
+            const anchors = [
+                ['margin', ObjectRelativeFromV.MARGIN, PositionedObjectLayoutType.WRAP_NONE],
+                ['page', ObjectRelativeFromV.PAGE, PositionedObjectLayoutType.WRAP_NONE],
+                ['paragraph', ObjectRelativeFromV.PARAGRAPH, PositionedObjectLayoutType.WRAP_NONE],
+                ['inline', ObjectRelativeFromV.MARGIN, PositionedObjectLayoutType.INLINE],
+            ] as const;
+            const cell = {
+                ...makeCellPage(60, 20),
+                skeDrawings: new Map(anchors.map(([drawingId, relativeFrom, layoutType]) => [drawingId, {
+                    aTop: 10,
+                    drawingOrigin: { layoutType, docTransform: { positionV: { relativeFrom, posOffset: 10 } } },
+                }])),
+            };
+            createSkeletonCellPagesMock.mockImplementationOnce(() => [cell]);
+
+            const skeleton = createTableSkeleton(ctx, curPage, viewModel, tableNode, sectionBreakConfig)!;
+            const result = skeleton.rows[0].cells[0];
+
+            expect(result.marginTop).toBeGreaterThan(cell.originMarginTop);
+            expect(result.marginTop + result.skeDrawings.get('margin')!.aTop).toBe(11);
+            expect(result.marginTop + result.skeDrawings.get('page')!.aTop).toBe(11);
+            expect(result.skeDrawings.get('paragraph')!.aTop).toBe(10);
+            expect(result.skeDrawings.get('inline')!.aTop).toBe(10);
+        }
+    );
+
     it('builds a table one source cell at a time', () => {
         const { ctx, curPage, viewModel, tableNode, sectionBreakConfig } = createContextAndTable();
         const state = startTableSkeletonBuild(ctx, curPage, viewModel, tableNode, sectionBreakConfig);
@@ -372,7 +366,7 @@ describe('docs table layout', () => {
         while (!stepTableSkeletonBuild(state)) {
             // Build all source rows through the resumable path before pagination consumes them.
         }
-        cachePrecomputedTableSkeleton(ctx, tableNode.startIndex, state.tableSkeleton);
+        cachePrecomputedTableSkeleton(ctx, tableNode, state.tableSkeleton);
         const callsBeforePagination = createSkeletonCellPagesMock.mock.calls.length;
 
         const result = createTableSkeletons(ctx, curPage, viewModel, tableNode, sectionBreakConfig, 90);
@@ -399,7 +393,7 @@ describe('docs table layout', () => {
         }
         expect(state.result).not.toBeNull();
 
-        cachePrecomputedSlicedTableSkeletons(ctx, tableNode.startIndex, 90, state.result!);
+        cachePrecomputedSlicedTableSkeletons(ctx, tableNode, 90, state.result!);
         const callsBeforeConsume = createSkeletonCellPagesMock.mock.calls.length;
         const result = createTableSkeletons(ctx, curPage, viewModel, tableNode, sectionBreakConfig, 90);
 
@@ -448,7 +442,7 @@ describe('docs table layout', () => {
         }
         cachePrecomputedSlicedTableSkeletons(
             ctx,
-            tableNode.startIndex,
+            tableNode,
             request!.availableHeight,
             state.result!
         );
@@ -564,6 +558,35 @@ describe('docs table layout', () => {
         expect(skeleton?.rows[0].cells[0].pageHeight).toBe(
             skeleton!.rows[0].height + skeleton!.rows[1].height
         );
+    });
+
+    it('counts a vertically merged cell height once across its spanned rows', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        tableSource.tableRows[0].tableCells = [
+            { rowSpan: 2, vAlign: VerticalAlignmentType.TOP },
+            { vAlign: VerticalAlignmentType.TOP },
+        ];
+        tableSource.tableRows[1].tableCells = [
+            { rowSpan: 0, columnSpan: 0, vAlign: VerticalAlignmentType.TOP },
+            { vAlign: VerticalAlignmentType.TOP },
+        ];
+        createSkeletonCellPagesMock.mockImplementation(
+            (
+                _ctx: unknown,
+                _viewModel: unknown,
+                _cellNode: unknown,
+                _section: unknown,
+                _table: unknown,
+                row: number,
+                col: number
+            ) => [makeCellPage(60, row === 0 && col === 0 ? 100 : row === 0 ? 20 : 30)]
+        );
+
+        const skeleton = createTableSkeleton(ctx, curPage, viewModel, tableNode, sectionBreakConfig);
+
+        expect(skeleton?.height).toBe(102);
+        expect(skeleton?.rows.map((row) => row.height)).toEqual([22, 80]);
+        expect(skeleton?.rows[0].cells[0].pageHeight).toBe(102);
     });
 
     it('treats at-least row height as a minimum so wrapped cell content remains visible', () => {

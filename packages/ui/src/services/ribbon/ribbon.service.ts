@@ -35,7 +35,7 @@ export interface IRibbonService {
     fakeToolbarVisible$: Observable<boolean>;
 
     setActivatedTab(tab: string): void;
-    showContextualTab(tab: string, options?: { activate?: boolean }): void;
+    showContextualTab(tab: string, options?: { activate?: boolean; priority?: number }): void;
     hideContextualTab(tab: string): void;
     hideAllContextualTabs(): void;
     setCollapsedIds(ids: string[]): void;
@@ -56,6 +56,7 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
     readonly fakeToolbarVisible$ = this._fakeToolbarVisible$.asObservable();
 
     private readonly _visibleContextualTabs = new Set<string>();
+    private readonly _contextualTabPriorities = new Map<string, number>();
     private readonly _contextualTabs = new Set<string>();
     private _lastNonContextualActivatedTab: string = RibbonPosition.START;
     private _hiddenSubscription: Subscription | null = null;
@@ -76,11 +77,16 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
         this._activatedTab$.next(tab);
     }
 
-    showContextualTab(tab: string, options?: { activate?: boolean }): void {
+    showContextualTab(tab: string, options?: { activate?: boolean; priority?: number }): void {
         this._visibleContextualTabs.add(tab);
+        this._contextualTabPriorities.set(tab, options?.priority ?? 0);
         this._updateRibbon();
 
-        if (options?.activate) {
+        const activeTab = this._activatedTab$.getValue();
+        const activePriority = this._visibleContextualTabs.has(activeTab)
+            ? this._contextualTabPriorities.get(activeTab) ?? 0
+            : Number.NEGATIVE_INFINITY;
+        if (options?.activate && (options.priority ?? 0) >= activePriority) {
             this.setActivatedTab(tab);
         }
     }
@@ -90,6 +96,7 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
             return;
         }
 
+        this._contextualTabPriorities.delete(tab);
         this._updateRibbon();
     }
 
@@ -99,6 +106,7 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
         }
 
         this._visibleContextualTabs.clear();
+        this._contextualTabPriorities.clear();
         this._updateRibbon();
     }
 
@@ -216,7 +224,11 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
         const activeGroup = ribbon.find((group) => group.key === activatedTab);
 
         if (!activeGroup && this._contextualTabs.has(activatedTab)) {
-            const fallbackTab = ribbon.find((group) => group.key === this._lastNonContextualActivatedTab && !group.contextual)
+            const contextualFallback = ribbon
+                .filter((group) => group.contextual)
+                .sort((left, right) => (this._contextualTabPriorities.get(right.key) ?? 0) - (this._contextualTabPriorities.get(left.key) ?? 0))[0];
+            const fallbackTab = contextualFallback
+                ?? ribbon.find((group) => group.key === this._lastNonContextualActivatedTab && !group.contextual)
                 ?? ribbon.find((group) => group.key === RibbonPosition.START)
                 ?? ribbon[0];
 

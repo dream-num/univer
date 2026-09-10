@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICustomTable, IDocumentBody, IDocumentData, IDocumentNote } from '../../../types/interfaces/i-document-data';
+import type { ICustomRange, ICustomTable, IDocumentBody, IDocumentData, IDocumentNote } from '../../../types/interfaces/i-document-data';
 import { CustomRangeType, PositionedObjectLayoutType, TableTextWrapType } from '../../../types/interfaces/i-document-data';
 import { DataStreamTreeTokenType } from '../types';
 import {
@@ -54,6 +54,11 @@ export type DocStructureIssueCode =
     | 'custom-block-token-mismatch'
     | 'missing-custom-block-metadata'
     | 'duplicate-custom-block-metadata'
+    | 'custom-range-token-mismatch'
+    | 'missing-custom-range-metadata'
+    | 'duplicate-custom-range-id'
+    | 'crossing-custom-range'
+    | 'unbalanced-custom-range'
     | 'empty-column'
     | 'empty-table-cell'
     | 'unbalanced-column-group'
@@ -537,6 +542,74 @@ function validateStructuralContainers(body: IDocumentBody, issues: IDocStructure
     }
 }
 
+function validateCustomRangeMetadata(body: IDocumentBody, issues: IDocStructureIssue[], context: IValidationContext) {
+    const pairs = new Map<number, number>();
+    const starts: number[] = [];
+    for (let index = 0; index < body.dataStream.length; index++) {
+        const token = body.dataStream[index];
+        if (token === DataStreamTreeTokenType.CUSTOM_RANGE_START) {
+            starts.push(index);
+        } else if (token === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
+            const start = starts.pop();
+            if (start == null) {
+                issues.push(createIssue(context, 'unbalanced-custom-range', 'Custom range end token has no matching start.', index));
+            } else {
+                pairs.set(start, index);
+            }
+        }
+    }
+    for (const start of starts) {
+        issues.push(createIssue(context, 'unbalanced-custom-range', 'Custom range start token has no matching end.', start));
+    }
+
+    const ranges = body.customRanges ?? [];
+    const ids = new Set<string>();
+    for (const range of ranges) {
+        if (ids.has(range.rangeId)) {
+            issues.push(createIssue(context, 'duplicate-custom-range-id', 'Custom range ids must be unique.', range.startIndex));
+        }
+        ids.add(range.rangeId);
+
+        if (range.rangeType !== CustomRangeType.FIELD) {
+            continue;
+        }
+        if (
+            body.dataStream[range.startIndex] !== DataStreamTreeTokenType.CUSTOM_RANGE_START ||
+            body.dataStream[range.endIndex] !== DataStreamTreeTokenType.CUSTOM_RANGE_END ||
+            pairs.get(range.startIndex) !== range.endIndex
+        ) {
+            issues.push(createIssue(
+                context,
+                'custom-range-token-mismatch',
+                'Field metadata must point to a matching custom range token pair.',
+                range.startIndex
+            ));
+        }
+    }
+
+    for (const [start, end] of pairs) {
+        if (!ranges.some((range) => range.startIndex === start && range.endIndex === end)) {
+            issues.push(createIssue(context, 'missing-custom-range-metadata', 'Custom range token pair has no metadata.', start));
+        }
+    }
+
+    const sortedFields = ranges
+        .filter((range): range is ICustomRange => range.rangeType === CustomRangeType.FIELD)
+        .slice()
+        .sort((left, right) => left.startIndex - right.startIndex || right.endIndex - left.endIndex);
+    const parents: ICustomRange[] = [];
+    for (const range of sortedFields) {
+        while (parents.length > 0 && parents[parents.length - 1].endIndex < range.startIndex) {
+            parents.pop();
+        }
+        const parent = parents[parents.length - 1];
+        if (parent && range.endIndex > parent.endIndex) {
+            issues.push(createIssue(context, 'crossing-custom-range', 'Field ranges may nest but must not cross.', range.startIndex));
+        }
+        parents.push(range);
+    }
+}
+
 export function validateDocBodyStructure(
     body: IDocumentBody,
     context: IValidationContext = { segmentType: 'body' }
@@ -552,6 +625,7 @@ export function validateDocBodyStructure(
     validateColumnGroupMetadata(body, scan, issues, context);
     validateCustomBlockMetadata(body, scan, issues, context);
     validateStructuralContainers(body, issues, context);
+    validateCustomRangeMetadata(body, issues, context);
 
     if (context.segmentType === 'header' || context.segmentType === 'footer') {
         for (const range of body.customRanges ?? []) {

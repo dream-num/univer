@@ -40,11 +40,23 @@ export function isSameStyleTextRun(tr1: ITextRun, tr2: ITextRun) {
     const ts1 = tr1.ts || {};
     const ts2 = tr2.ts || {};
 
-    if (tr1.sId !== tr2.sId) {
+    if (tr1.sId !== tr2.sId || !deepCompare(ts1, ts2)) {
         return false;
     }
 
-    return deepCompare(ts1, ts2);
+    // Importers retain formatting provenance alongside ts; merging different
+    // metadata would silently discard it even outside the edited range.
+    const metadataKeys = new Set([...Object.keys(tr1), ...Object.keys(tr2)]);
+    for (const key of metadataKeys) {
+        if (key === 'st' || key === 'ed' || key === 'ts' || key === 'sId') {
+            continue;
+        }
+        if (!deepCompare((tr1 as IAnyObject)[key], (tr2 as IAnyObject)[key])) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 export function checkForSubstrings(searchString: string, substrings: string[]): boolean {

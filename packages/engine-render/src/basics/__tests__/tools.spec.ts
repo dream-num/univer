@@ -174,6 +174,24 @@ describe('tools extra', () => {
         expect(isObject({ a: 1 })).toBe(true);
     });
 
+    it.each([
+        [undefined, undefined],
+        [Number.NaN, undefined],
+        [Number.POSITIVE_INFINITY, undefined],
+        [-1, undefined],
+        [0, 'none'],
+        [12, 'normal'],
+        [12.5, 'normal'],
+        [13, 'none'],
+    ] as const)('resolves kerning threshold %s against the authored font size', (kerning, expected) => {
+        vi.spyOn(FontCache, 'getBaselineOffsetInfo').mockReturnValue({ sbr: 0.5, sbo: 0, spr: 0.6, spo: 0 });
+        const textStyle = { ff: 'Arial', fs: 12.5, kerning };
+        for (const va of [undefined, BaselineOffset.SUBSCRIPT, BaselineOffset.SUPERSCRIPT]) {
+            expect(getFontStyleString({ ...textStyle, va }).fontKerning).toBe(expected);
+        }
+        expect(textStyle).toEqual({ ff: 'Arial', fs: 12.5, kerning });
+    });
+
     it('builds font styles and language detectors', () => {
         const baselineSpy = vi.spyOn(FontCache, 'getBaselineOffsetInfo').mockReturnValue({ sbr: 0.5, spr: 0.6 } as any);
 

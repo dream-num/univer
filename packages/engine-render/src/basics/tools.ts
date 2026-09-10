@@ -19,7 +19,7 @@ import type {
     IRange,
     IRangeWithCoord,
     IScale,
-    IStyleBase,
+    ITextStyle,
     Nullable,
 } from '@univerjs/core';
 import type { IDocumentSkeletonFontStyle } from './i-document-skeleton-cached';
@@ -257,7 +257,8 @@ export function fixLineWidthByScale(num: number, scale: number) {
 }
 
 export function getFontStyleString(
-    textStyle?: Nullable<IStyleBase>
+    textStyle?: Nullable<ITextStyle>,
+    fontFamilyFallbacks?: Record<string, string>
 ): IDocumentSkeletonFontStyle {
     const defaultFont = DEFAULT_STYLES.ff;
 
@@ -297,7 +298,19 @@ export function getFontStyleString(
     }
     let fontSize = originFontSize;
 
-    const fontFamilyResult = normalizeFontFamily(textStyle.ff, defaultFont);
+    let fontFamilyResult = normalizeFontFamily(textStyle.ff, defaultFont);
+    if (fontFamilyFallbacks) {
+        const families = fontFamilyResult.split(',').map((family) => family.trim().replace(/^['"]|['"]$/g, ''));
+        const expanded: string[] = [];
+        for (const family of families) {
+            let current: string | undefined = family;
+            while (typeof current === 'string' && current && !expanded.includes(current)) {
+                expanded.push(current);
+                current = fontFamilyFallbacks[current];
+            }
+        }
+        fontFamilyResult = normalizeFontFamily(expanded.join(', '), defaultFont);
+    }
 
     const { va: baselineOffset } = textStyle;
 
@@ -316,12 +329,26 @@ export function getFontStyleString(
     const fontString = `${fontStringPure}, ${DEFAULT_FONTFACE_PLANE} `;
 
     return {
+        ...(textStyle.kerning != null && Number.isFinite(textStyle.kerning) && textStyle.kerning >= 0
+            ? { fontKerning: textStyle.kerning > 0 && originFontSize >= textStyle.kerning ? 'normal' as const : 'none' as const }
+            : {}),
         fontCache: fontStringPure,
         fontString,
         fontSize,
         originFontSize,
         fontFamily: fontFamilyResult,
     };
+}
+
+/** Office display casing preserves one source character instead of expanding forms such as ß to SS. */
+export function getTextWithCaps(content: string, caps?: boolean): string {
+    if (!caps) {
+        return content;
+    }
+    return Array.from(content, (char) => {
+        const upper = char.toUpperCase();
+        return Array.from(upper).length === 1 ? upper : char;
+    }).join('');
 }
 
 function normalizeFontFamily(fontFamily: Nullable<string>, defaultFont: string): string {

@@ -169,4 +169,29 @@ describe('InputManager click gestures', () => {
 
         expect(doubleClick).toHaveBeenCalledTimes(deviceType === DeviceType.Touch ? 1 : 0);
     });
+
+    it('does not turn two clicks across a toolbar visit into text editing', () => {
+        vi.useFakeTimers();
+        const scene = createScene();
+        const manager = new InputManager(scene as never);
+        const event = createPointerUpEvent(20, DeviceType.Mouse);
+        manager._onPointerUp(event as never);
+        manager._onPointerLeave(event as never);
+        manager._onPointerUp(event as never);
+        expect(scene.onDblclick$.emitEvent).not.toHaveBeenCalled();
+        manager.dispose();
+    });
+
+    it('uses event timestamps even when the double-click expiry callback is delayed', () => {
+        vi.useFakeTimers();
+        const scene = createScene();
+        const manager = new InputManager(scene as never);
+        const event = createPointerUpEvent(20, DeviceType.Mouse);
+        manager._onPointerUp({ ...event, timeStamp: 100 } as never);
+        manager._onPointerUp({ ...event, timeStamp: 601 } as never);
+        expect(scene.onDblclick$.emitEvent).not.toHaveBeenCalled();
+        manager._onPointerUp({ ...event, timeStamp: 700 } as never);
+        expect(scene.onDblclick$.emitEvent).toHaveBeenCalledTimes(1);
+        manager.dispose();
+    });
 });

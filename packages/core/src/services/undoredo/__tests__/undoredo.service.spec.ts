@@ -314,6 +314,7 @@ describe('LocalUndoRedoService', () => {
     it('should resolve focused unit id from sheet editor contexts and clear unit stacks', () => {
         contextService.setContextValue(FOCUSING_SHEET, true);
         contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
+        contextService.setContextValue(EDITOR_ACTIVATED, true);
         undoRedoService.pushUndoRedo({
             unitID: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
             undoMutations: [{ id: MUTATION_ID, params: { label: 'fx-undo' } }],
@@ -321,6 +322,17 @@ describe('LocalUndoRedoService', () => {
             id: 'fx',
         });
         expect(undoRedoService.pitchTopUndoElement()?.id).toBe('fx');
+
+        undoRedoService.pushUndoRedo({
+            unitID: 'unit-1',
+            undoMutations: [{ id: MUTATION_ID, params: { label: 'sheet-undo' } }],
+            redoMutations: [{ id: MUTATION_ID, params: { label: 'sheet-redo' } }],
+        });
+        // Committing a formula ends editing even if its focus context outlives the editor.
+        contextService.setContextValue(EDITOR_ACTIVATED, false);
+        expect(commandService.syncExecuteCommand(UndoCommandId)).toBe(true);
+        expect(commandService.syncExecuteCommand(RedoCommandId)).toBe(true);
+        expect(mutationLog).toEqual(['sheet-undo', 'sheet-redo']);
 
         contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, false);
         contextService.setContextValue(EDITOR_ACTIVATED, true);

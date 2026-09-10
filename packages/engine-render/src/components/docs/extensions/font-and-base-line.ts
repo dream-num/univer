@@ -15,19 +15,21 @@
  */
 
 import type { IDocTextFill, IDocTextFillGradientStop, IScale, TabStopLeader } from '@univerjs/core';
-import type { IBoundRectNoAngle } from '../../../basics';
 import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
+import type { IBoundRectNoAngle } from '../../../basics/vector2';
 import type { UniverRenderingContext } from '../../../context';
 import type { IDrawInfo } from '../../extension';
 import { BaselineOffset } from '@univerjs/core';
-import { GlyphType } from '../../../basics';
 import { cjk } from '../../../basics/cjk-regexp';
 import { COLOR_BLACK_RGB } from '../../../basics/const';
 import { resolveGlowEffect, resolveOuterShadowEffect } from '../../../basics/drawing-effect';
+import { GlyphType } from '../../../basics/i-document-skeleton-cached';
+import { getFontStyleString } from '../../../basics/tools';
 import { Vector2 } from '../../../basics/vector2';
 import { CheckboxShape, isCheckboxGlyph } from '../../../shape/checkbox';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
+import { getTextHorizontalScale } from '../layout/model/glyph';
 import { getColorStyleForCanvas } from '../layout/style/color';
 
 const UNIQUE_KEY = 'DefaultDocsFontAndBaseLineExtension';
@@ -86,6 +88,10 @@ export class FontAndBaseLine extends docExtension {
             return;
         }
 
+        if (ctx.fontKerning != null) {
+            ctx.fontKerning = fontStyle?.fontKerning ?? 'auto';
+        }
+
         if (!textStyle) {
             this._fillText(ctx, glyph, spanPointWithFont);
             return;
@@ -109,13 +115,13 @@ export class FontAndBaseLine extends docExtension {
         }
 
         if (glyph.noteSeparator) {
+            const em = (fontStyle ?? getFontStyleString(textStyle)).fontSize / 0.75;
+            const thickness = em / 20;
             ctx.save();
-            ctx.strokeStyle = fontColor;
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveToByPrecision(spanPointWithFont.x, spanPointWithFont.y);
-            ctx.lineToByPrecision(spanPointWithFont.x + glyph.width, spanPointWithFont.y);
-            ctx.stroke();
+            ctx.fillStyle = fontColor;
+            // Word places the rule's bottom a quarter em above the baseline.
+            // Preserve fractional geometry instead of snapping a 1 px baseline stroke.
+            ctx.fillRect(spanPointWithFont.x, spanPointWithFont.y - em / 4 - thickness, glyph.width, thickness);
             ctx.restore();
             return;
         }
@@ -432,13 +438,17 @@ export class FontAndBaseLine extends docExtension {
         const VERTICAL_DEG = 90;
 
         const isVertical = vertexAngle === VERTICAL_DEG && centerAngle === VERTICAL_DEG;
+        const horizontalScale = getTextHorizontalScale(glyph.ts?.sa);
 
         if (isVertical && !cjk.hasCJK(content)) {
             ctx.save();
             ctx.translate(spanStartPoint.x + centerPoint.x, spanStartPoint.y + centerPoint.y);
             ctx.rotate(Math.PI / 2);
             ctx.translate(-width / 2, (aba + abd) / 2 - abd);
-            ctx.fillText(content, 0, 0);
+            if (horizontalScale !== 1) {
+                ctx.scale(horizontalScale, 1);
+            }
+            this._paintGlyphText(ctx, glyph, 0, 0);
             ctx.restore();
         } else {
             if (isCheckboxGlyph(content) && glyph.glyphType === GlyphType.LIST) {
@@ -463,8 +473,28 @@ export class FontAndBaseLine extends docExtension {
                     x_offset = (glyph.width - glyph.bBox.width) / 2;
                     y_offset = -(glyph.width - fontHeight) / 2;
                 }
-                ctx.fillText(content, spanPointWithFont.x + x_offset, spanPointWithFont.y + y_offset);
+                if (horizontalScale !== 1) {
+                    ctx.save();
+                    ctx.translate(spanPointWithFont.x + x_offset, spanPointWithFont.y + y_offset);
+                    ctx.scale(horizontalScale, 1);
+                    this._paintGlyphText(ctx, glyph, 0, 0);
+                    ctx.restore();
+                } else {
+                    this._paintGlyphText(ctx, glyph, spanPointWithFont.x + x_offset, spanPointWithFont.y + y_offset);
+                }
             }
+        }
+    }
+
+    private _paintGlyphText(ctx: UniverRenderingContext, glyph: IDocumentSkeletonGlyph, x: number, y: number): void {
+        const { content, textSpacing } = glyph;
+        // Field resolution can replace content after shaping; never paint offsets belonging to the old text.
+        if (textSpacing?.content === content) {
+            for (const segment of textSpacing.segments) {
+                ctx.fillText(segment.content, x + segment.left / getTextHorizontalScale(glyph.ts?.sa), y);
+            }
+        } else {
+            ctx.fillText(content, x, y);
         }
     }
 

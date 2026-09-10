@@ -14,269 +14,174 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import type { RenderUnit } from '@univerjs/engine-render';
 import {
     DocumentFlavor,
     ICommandService,
-    Injector,
     IUniverInstanceService,
     LocaleService,
+    LocaleType,
     ThemeService,
+    Univer,
+    UniverInstanceType,
 } from '@univerjs/core';
-import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { DocumentEditArea, IRenderManagerService, Path, Rect } from '@univerjs/engine-render';
-import { BehaviorSubject, Subject } from 'rxjs';
+import {
+    DocLayoutExecutorService,
+    DocSelectionManagerService,
+    DocSkeletonManagerService,
+    DocStateEmitService,
+    RichTextEditingMutation,
+} from '@univerjs/docs';
+import {
+    CanvasColorService,
+    DocumentEditArea,
+    Documents,
+    ICanvasColorService,
+    IRenderManagerService,
+    RenderManagerService,
+} from '@univerjs/engine-render';
+import { DesktopLayoutService, DesktopSidebarService, ILayoutService, ISidebarService } from '@univerjs/ui';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CloseHeaderFooterCommand } from '../../commands/commands/doc-header-footer.command';
-import { IEditorService } from '../../services/editor/editor-manager.service';
+import { SidebarDocHeaderFooterPanelOperation } from '../../commands/operations/doc-header-footer-panel.operation';
+import enUS from '../../locale/en-US';
+import { EditorService, IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
-import { TextBubbleShape } from '../../views/header-footer/text-bubble';
 import { DocHeaderFooterController } from '../doc-header-footer.controller';
 
-const neoGetDocObjectMock = vi.hoisted(() => vi.fn());
+const cleanups: Array<() => void> = [];
 
-vi.mock('../../basics/component-tools', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('../../basics/component-tools')>();
-
-    return {
-        ...actual,
-        neoGetDocObject: neoGetDocObjectMock,
-    };
-});
-
-function createCtx() {
-    return {
-        save: vi.fn(),
-        restore: vi.fn(),
-        translate: vi.fn(),
-    };
-}
-
-function createController(options: {
-    editArea?: DocumentEditArea;
-    documentFlavor?: DocumentFlavor;
-    editor?: boolean;
-} = {}) {
-    const pageRender$ = new Subject<{
-        ctx: ReturnType<typeof createCtx>;
-        pageLeft: number;
-        pageTop: number;
-        page: {
-            pageWidth: number;
-            pageHeight: number;
-            marginTop: number;
-            marginBottom: number;
-        };
-    }>();
-    const commandHandlers: Array<(command: { id: string; params?: unknown }) => void> = [];
-    const document = {
-        pageRender$,
-        onDblclick$: {
-            subscribeEvent: vi.fn(() => ({ dispose: vi.fn() })),
+function createTestBed(documentFlavor = DocumentFlavor.TRADITIONAL) {
+    vi.useFakeTimers();
+    const univer = new Univer();
+    const root = document.createElement('div');
+    document.body.appendChild(root);
+    cleanups.push(() => {
+        univer.dispose();
+        root.remove();
+    });
+    const injector = univer.__getInjector();
+    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+    injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
+    injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
+    injector.add([IEditorService, { useClass: EditorService }]);
+    injector.add([DocLayoutExecutorService]);
+    injector.add([DocSelectionManagerService]);
+    injector.add([DocStateEmitService]);
+    injector.get(ILayoutService).registerRootContainerElement(root);
+    const locale = injector.get(LocaleService);
+    locale.load({ [LocaleType.EN_US]: enUS });
+    locale.setLocale(LocaleType.EN_US);
+    root.dir = locale.getDirection();
+    const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+        id: 'header-footer-document',
+        body: {
+            dataStream: 'D\r\n',
+            paragraphs: [{ startIndex: 1, paragraphId: 'body-p' }],
+            sectionBreaks: [{ startIndex: 2, sectionId: 'body-section' }],
         },
-        getOffsetConfig: vi.fn(() => ({ documentTransform: { clone: vi.fn() } })),
-    };
-    const scene = {
-        getViewports: vi.fn(() => []),
-    };
-    neoGetDocObjectMock.mockReturnValue({ document, scene });
-    const unit = {
-        getSnapshot: vi.fn(() => ({
-            documentStyle: {
-                documentFlavor: options.documentFlavor ?? DocumentFlavor.TRADITIONAL,
-            },
-        })),
-    };
-    const viewModel = {
-        getEditArea: vi.fn(() => options.editArea ?? DocumentEditArea.BODY),
-    };
-    const commandService = {
-        onCommandExecuted: vi.fn((handler) => {
-            commandHandlers.push(handler);
-            return { dispose: vi.fn() };
-        }),
-        executeCommand: vi.fn(),
-    };
-    const context = {
-        unitId: 'doc-1',
-        unit,
-        mainComponent: document,
-    } as never;
-    const injector = new Injector([
-        [ICommandService, { useValue: commandService }],
-        [IEditorService, { useValue: {
-            isEditor: vi.fn(() => options.editor ?? false),
-            getEditor: vi.fn(() => null),
-        } }],
-        [IUniverInstanceService, { useValue: {
-            getCurrentTypeOfUnit$: vi.fn(() => new BehaviorSubject({ getUnitId: () => 'doc-1' })),
-            getUnit: vi.fn(() => unit),
-        } }],
-        [IRenderManagerService, { useValue: {
-            getRenderUnitById: vi.fn(() => ({ mainComponent: document })),
-        } }],
-        [DocSkeletonManagerService, { useValue: {
-            getViewModel: vi.fn(() => viewModel),
-        } }],
-        [DocSelectionRenderService, { useValue: {
-            setSegment: vi.fn(),
-            setSegmentPage: vi.fn(),
-            setCursorManually: vi.fn(),
-        } }],
-        [LocaleService, { useValue: {
-            t: vi.fn((key: string) => key),
-        } }],
-        [ThemeService],
-    ]);
-    const controller = injector.createInstance(DocHeaderFooterController, context);
-
-    return { controller, pageRender$, commandHandlers, commandService, document, themeService: injector.get(ThemeService) };
+        documentStyle: {
+            documentFlavor,
+            pageSize: { width: 300, height: 400 },
+            marginTop: 50,
+            marginBottom: 50,
+        },
+    });
+    injector.get(IUniverInstanceService).setCurrentUnitForType(model.getUnitId());
+    const render = injector.get(IRenderManagerService).createRender(model.getUnitId()) as RenderUnit;
+    render.deactivate();
+    render.engine.resizeBySize(300, 400);
+    render.addRenderDependencies([[DocSkeletonManagerService]]);
+    const manager = render.with(DocSkeletonManagerService);
+    const documents = new Documents(model.getUnitId(), manager.getSkeleton());
+    render.mainComponent = documents;
+    render.scene.addObject(documents);
+    render.addRenderDependencies([[DocSelectionRenderService]]);
+    const ctx = render.engine.getCanvas().getContext();
+    const paints: Array<{ text: string; alpha: number }> = [];
+    vi.spyOn(ctx, 'fillText').mockImplementation((text) => {
+        paints.push({ text: String(text), alpha: ctx.globalAlpha });
+    });
+    return { univer, injector, model, render, documents, manager, ctx, paints };
 }
 
 describe('DocHeaderFooterController', () => {
     afterEach(() => {
+        cleanups.splice(0).reverse().forEach((dispose) => dispose());
         vi.restoreAllMocks();
-        neoGetDocObjectMock.mockReset();
+        vi.useRealTimers();
     });
 
-    it('closes header/footer editing after rich text changes in modern document mode', () => {
-        const { controller, commandHandlers, commandService } = createController({
-            editArea: DocumentEditArea.HEADER,
-            documentFlavor: DocumentFlavor.MODERN,
-        });
+    it('keeps body content in page margins at full opacity without painting a covering rectangle', () => {
+        const { render, documents, ctx, paints } = createTestBed();
+        render.addRenderDependencies([[DocHeaderFooterController]]);
+        render.with(DocHeaderFooterController);
+        const fill = vi.spyOn(ctx, 'fill');
+        documents.draw(ctx);
+        expect(paints).toContainEqual({ text: 'D', alpha: 1 });
+        expect(fill).not.toHaveBeenCalled();
+    });
 
-        commandHandlers[0]({ id: RichTextEditingMutation.id });
-
-        expect(commandService.executeCommand).toHaveBeenCalledWith(CloseHeaderFooterCommand.id, {
-            unitId: 'doc-1',
-        });
+    it('dims the body during header editing, redraws on edit-area changes, and restores opacity on disposal', () => {
+        const { render, documents, manager, ctx, paints } = createTestBed();
+        render.addRenderDependencies([[DocHeaderFooterController]]);
+        const controller = render.with(DocHeaderFooterController);
+        documents.makeDirty(false);
+        manager.getViewModel().setEditArea(DocumentEditArea.HEADER);
+        expect(documents.isDirty()).toBe(true);
+        documents.draw(ctx);
+        expect(paints).toContainEqual({ text: 'D', alpha: 0.5 });
 
         controller.dispose();
+        paints.length = 0;
+        const stroke = vi.spyOn(ctx, 'stroke');
+        documents.draw(ctx);
+        expect(paints.filter(({ text }) => text.trim())).toEqual([{ text: 'D', alpha: 1 }]);
+        expect(stroke).not.toHaveBeenCalled();
     });
 
-    it('covers header and footer areas while editing the document body', () => {
-        const { controller, pageRender$, themeService } = createController({ editArea: DocumentEditArea.BODY });
-        const rectSpy = vi.spyOn(Rect, 'drawWith').mockImplementation(() => undefined);
-        const pathSpy = vi.spyOn(Path, 'drawWith').mockImplementation(() => undefined);
-        const textSpy = vi.spyOn(TextBubbleShape, 'drawWith').mockImplementation(() => undefined);
-        const ctx = createCtx();
+    it('draws localized guides using current theme tokens without resolving colors per page', () => {
+        const { injector, render, documents, manager, ctx, paints } = createTestBed();
+        render.addRenderDependencies([[DocHeaderFooterController]]);
+        render.with(DocHeaderFooterController);
+        manager.getViewModel().setEditArea(DocumentEditArea.HEADER);
+        const themeService = injector.get(ThemeService);
         const theme = themeService.getCurrentTheme();
-
-        themeService.setTheme({
-            ...theme,
-            gray: {
-                ...theme.gray,
-                0: '#123456',
-            },
+        themeService.setTheme({ ...theme, primary: { ...theme.primary, 600: '#123456' } });
+        const colors = vi.spyOn(themeService, 'getColorFromTheme');
+        const strokes: Array<string | CanvasGradient | CanvasPattern> = [];
+        vi.spyOn(ctx, 'stroke').mockImplementation(() => {
+            strokes.push(ctx.strokeStyle);
         });
-
-        pageRender$.next({
-            ctx,
-            pageLeft: 12,
-            pageTop: 24,
-            page: {
-                pageWidth: 200,
-                pageHeight: 300,
-                marginTop: 30,
-                marginBottom: 40,
-            },
-        });
-
-        expect(ctx.translate).toHaveBeenCalledWith(11.5, 23.5);
-        expect(rectSpy).toHaveBeenCalledTimes(2);
-        expect(rectSpy.mock.calls[0][1]).toMatchObject({
-            width: 200,
-            height: 30,
-            fill: 'rgba(18,52,86,0.5)',
-        });
-        expect(rectSpy.mock.calls[1][1]).toMatchObject({
-            width: 200,
-            height: 40,
-            fill: 'rgba(18,52,86,0.5)',
-        });
-        expect(pathSpy).not.toHaveBeenCalled();
-        expect(textSpy).not.toHaveBeenCalled();
-
-        controller.dispose();
+        documents.draw(ctx);
+        documents.draw(ctx);
+        expect(colors).not.toHaveBeenCalled();
+        expect(strokes.filter((color) => color === '#123456')).toHaveLength(4);
+        expect(paints).toContainEqual({ text: enUS['docs-ui'].headerFooter.header, alpha: 1 });
+        expect(paints).toContainEqual({ text: enUS['docs-ui'].headerFooter.footer, alpha: 1 });
     });
 
-    it('covers the body and draws header/footer guides while editing header or footer', () => {
-        const { controller, pageRender$, themeService } = createController({ editArea: DocumentEditArea.HEADER });
-        const rectSpy = vi.spyOn(Rect, 'drawWith').mockImplementation(() => undefined);
-        const pathSpy = vi.spyOn(Path, 'drawWith').mockImplementation(() => undefined);
-        const textSpy = vi.spyOn(TextBubbleShape, 'drawWith').mockImplementation(() => undefined);
-        const ctx = createCtx();
-        const theme = themeService.getCurrentTheme();
-
-        themeService.setTheme({
-            ...theme,
-            primary: {
-                ...theme.primary,
-                600: '#123456',
-            },
-        });
-
-        pageRender$.next({
-            ctx,
-            pageLeft: 0,
-            pageTop: 0,
-            page: {
-                pageWidth: 200,
-                pageHeight: 300,
-                marginTop: 30,
-                marginBottom: 40,
-            },
-        });
-
-        expect(rectSpy).toHaveBeenCalledWith(ctx, expect.objectContaining({
-            top: 30,
-            width: 200,
-            height: 230,
-        }));
-        expect(pathSpy).toHaveBeenCalledTimes(2);
-        expect(pathSpy).toHaveBeenCalledWith(ctx, expect.objectContaining({ stroke: '#123456' }));
-        expect(textSpy).toHaveBeenCalledWith(ctx, expect.objectContaining({
-            text: 'docs-ui.headerFooter.header',
-            color: 'rgba(18,52,86,0.08)',
-        }));
-        expect(textSpy).toHaveBeenCalledWith(ctx, expect.objectContaining({
-            text: 'docs-ui.headerFooter.footer',
-            color: 'rgba(18,52,86,0.08)',
-        }));
-
-        controller.dispose();
+    it('does not apply editing emphasis or guides to modern documents', () => {
+        const { render, documents, manager, ctx, paints } = createTestBed(DocumentFlavor.MODERN);
+        render.addRenderDependencies([[DocHeaderFooterController]]);
+        render.with(DocHeaderFooterController);
+        manager.getViewModel().setEditArea(DocumentEditArea.HEADER);
+        documents.draw(ctx);
+        expect(paints.filter(({ text }) => text.trim())).toEqual([{ text: 'D', alpha: 1 }]);
     });
 
-    it('keeps theme color lookups out of the page render hot path', () => {
-        const { controller, pageRender$, themeService } = createController({ editArea: DocumentEditArea.BODY });
-        const getColorFromTheme = vi.spyOn(themeService, 'getColorFromTheme');
-        vi.spyOn(Rect, 'drawWith').mockImplementation(() => undefined);
-        const theme = themeService.getCurrentTheme();
-        const config = {
-            ctx: createCtx(),
-            pageLeft: 0,
-            pageTop: 0,
-            page: {
-                pageWidth: 200,
-                pageHeight: 300,
-                marginTop: 30,
-                marginBottom: 40,
-            },
-        };
-
-        themeService.setTheme({
-            ...theme,
-            gray: {
-                ...theme.gray,
-                0: '#123456',
-            },
-        });
-        getColorFromTheme.mockClear();
-
-        pageRender$.next(config);
-        pageRender$.next(config);
-
-        expect(getColorFromTheme).not.toHaveBeenCalled();
-
-        controller.dispose();
+    it('closes header/footer editing after rich-text changes in modern document mode', async () => {
+        const { injector, render, manager, model } = createTestBed(DocumentFlavor.MODERN);
+        const commands = injector.get(ICommandService);
+        commands.registerCommand(RichTextEditingMutation);
+        commands.registerCommand(CloseHeaderFooterCommand);
+        commands.registerCommand(SidebarDocHeaderFooterPanelOperation);
+        render.addRenderDependencies([[DocHeaderFooterController]]);
+        render.with(DocHeaderFooterController);
+        manager.getViewModel().setEditArea(DocumentEditArea.HEADER);
+        await commands.executeCommand(RichTextEditingMutation.id, { unitId: model.getUnitId(), actions: [], textRanges: [] });
+        expect(manager.getViewModel().getEditArea()).toBe(DocumentEditArea.BODY);
     });
 });

@@ -32,6 +32,7 @@ import type { IRetainAction } from './action-types';
 import { merge } from '../../../common/lodash';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
+import { CustomRangeType } from '../../../types/interfaces/i-document-data';
 import { DataStreamTreeTokenType } from '../types';
 import { PRESERVE_INSERTED_PARAGRAPH_IDS } from './action-types';
 import { normalizeTextRuns } from './apply-utils/common';
@@ -350,6 +351,12 @@ export function getBodySlice(
         dataStream: dataStream.slice(startOffset, endOffset),
     };
 
+    if (body.renderedPageBreaks != null) {
+        docBody.renderedPageBreaks = body.renderedPageBreaks
+            .filter((offset) => offset >= startOffset && offset < endOffset)
+            .map((offset) => offset - startOffset);
+    }
+
     if ((body as IDocumentBody & Record<string, unknown>)[PRESERVE_INSERTED_PARAGRAPH_IDS]) {
         (docBody as IDocumentBody & Record<string, unknown>)[PRESERVE_INSERTED_PARAGRAPH_IDS] = true;
     }
@@ -389,7 +396,15 @@ export function getBodySlice(
     }
     const { customRanges } = getCustomRangeSlice(body, startOffset, endOffset);
     if (customRanges) {
-        docBody.customRanges = customRanges;
+        docBody.customRanges = type === SliceBodyType.copy
+            ? customRanges.filter((range) =>
+                range.rangeType !== CustomRangeType.FIELD ||
+                (
+                    docBody.dataStream[range.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_START &&
+                    docBody.dataStream[range.endIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_END
+                )
+            )
+            : customRanges;
     } else if (returnEmptyArray) {
         docBody.customRanges = [];
     }
@@ -429,6 +444,9 @@ export function getBodySliceForSplitTextXAction(
 }
 
 function shiftBodyMetadata(body: IDocumentBody, leftOffset: number, rightOffset: number): void {
+    if (body.renderedPageBreaks != null) {
+        body.renderedPageBreaks = body.renderedPageBreaks.map((offset) => offset + leftOffset);
+    }
     body.textRuns?.forEach((textRun) => {
         textRun.st += leftOffset;
         textRun.ed += leftOffset;
@@ -577,20 +595,27 @@ function composeCustomRanges(
         return updateDataCustomRanges;
     }
 
-    if (originCustomRanges.length > 1 || updateDataCustomRanges.length > 1) {
-        throw new Error('Cannot cover multiple customRanges');
+    if (coverType === UpdateDocsAttributeType.REPLACE) {
+        return updateDataCustomRanges.map((range) => ({ ...range }));
     }
 
-    if (coverType === UpdateDocsAttributeType.REPLACE) {
-        return [{
-            ...updateDataCustomRanges[0],
-        }];
-    } else {
-        return [{
-            ...originCustomRanges[0],
-            ...updateDataCustomRanges[0],
-        }];
-    }
+    const updates = new Map(updateDataCustomRanges.map((range) => [range.rangeId, range]));
+    // Hyperlinks are exclusive: a replacement can have a new id at the same
+    // boundaries. Nested FIELD/SDT entities still compose by their own ids.
+    const composed = originCustomRanges.filter((range) => !updateDataCustomRanges.some((update) =>
+        range.rangeType === CustomRangeType.HYPERLINK &&
+        update.rangeType === CustomRangeType.HYPERLINK &&
+        update.rangeId !== range.rangeId &&
+        update.startIndex === range.startIndex && update.endIndex === range.endIndex
+    )).map((range) => {
+        const update = updates.get(range.rangeId);
+        if (update == null) {
+            return range;
+        }
+        updates.delete(range.rangeId);
+        return { ...range, ...update };
+    });
+    return [...composed, ...updates.values()];
 }
 
 function composeCustomDecorations(
@@ -628,6 +653,11 @@ export function composeBody(
     const retBody: IDocumentBody = {
         dataStream: thisBody.dataStream,
     };
+
+    // Soft-break provenance belongs to the inserted tokens, not to text formatting.
+    if (thisBody.renderedPageBreaks != null) {
+        retBody.renderedPageBreaks = [...thisBody.renderedPageBreaks];
+    }
 
     if (
         (thisBody as IDocumentBody & Record<string, unknown>)[PRESERVE_INSERTED_PARAGRAPH_IDS] ||

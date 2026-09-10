@@ -508,6 +508,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
     private _isMaterializingPages = false;
     private _reservedLayoutWidth = 0;
     private _reservedLayoutHeight = 0;
+    private _fontInitialization: Promise<void> | null = null;
 
     constructor(
         protected readonly _context: IRenderContext<DocumentDataModel>,
@@ -633,6 +634,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         this._pendingWorkerEditBatch = null;
         this._pendingChangesetLayoutRequest = null;
         this._latestLayoutRestart = null;
+        this._fontInitialization = null;
         this._pendingImeLayoutRestart = null;
         this._pendingMaterializedPageRange = null;
         this._recoveryViewportAnchor = null;
@@ -678,7 +680,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         this._cancelWorkerHandoff();
         const isInitialLayout = options.reason === 'initial';
         const docsComponent = this._context.mainComponent;
-        if (!(docsComponent instanceof Documents)) {
+        if (!(docsComponent instanceof Documents) || this._waitForConfiguredFonts(layoutRequestId)) {
             return;
         }
         this._prepareReservedLayoutExtent(skeleton, docsComponent);
@@ -732,6 +734,22 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             refreshMainSelection,
             preserveInactiveViewportAnchor
         );
+    }
+
+    private _waitForConfiguredFonts(layoutRequestId: number): boolean {
+        const initialization = this._docLayoutExecutorService.getExecutor()?.renderingFontsReady;
+        if (initialization == null || this._fontInitialization === initialization) {
+            return false;
+        }
+        // Do not publish fallback-font geometry that becomes stale as web fonts finish loading.
+        initialization.then(() => {
+            if (this._disposed || layoutRequestId !== this._layoutRequestId) {
+                return;
+            }
+            this._fontInitialization = initialization;
+            this._latestLayoutRestart?.();
+        }, (error) => this._logService.error('[DocRenderController]: configured document fonts failed to initialize.', error));
+        return true;
     }
 
     private _scheduleInitialInteractionWindow(

@@ -23,17 +23,18 @@ import {
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
 } from '@univerjs/core';
-import { Liquid, setDocsTableRenderViewportProvider } from '@univerjs/engine-render';
+import { DocumentSkeletonPageType, Liquid, setDocsTableRenderViewportProvider } from '@univerjs/engine-render';
+import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getDocsTableCellAnchorContext } from '../../doc-drawing-transformer-update.controller';
 import { doesDocMutationAffectDrawingPresentation, getDocMutationAffectedDrawingIds } from '../doc-drawing-mutation';
 import {
     DocDrawingPublicationTracker,
     DocDrawingTransformUpdateController,
-
     getDocsDrawingBehindText,
     getDocsDrawingClipPage,
     getDocsDrawingPageClipBounds,
+    getDocsOverlayRuntimeDrawing,
     getDocsPageRelativeDrawingAnchorPage,
     getDocsPageRelativeDrawingLeft,
     getDocsPageRelativeDrawingTop,
@@ -44,6 +45,38 @@ import {
 describe('DocDrawingTransformUpdateController', () => {
     afterEach(() => {
         setDocsTableRenderViewportProvider(null);
+    });
+
+    it('refreshes drawings when scrolling materializes pages without a layout progress event', () => {
+        vi.stubGlobal('requestAnimationFrame', vi.fn(() => 1));
+        vi.stubGlobal('cancelAnimationFrame', vi.fn());
+        const controller = Object.create(DocDrawingTransformUpdateController.prototype);
+        const currentSkeleton$ = new Subject();
+        const skeleton = {
+            layoutProgress$: new Subject(),
+            layoutPageMaterialized$: new Subject<void>(),
+        };
+        const subscriptions: Array<{ unsubscribe: () => void }> = [];
+        controller.disposeWithMe = (subscription: { unsubscribe: () => void }) => subscriptions.push(subscription);
+        controller._context = { mainComponent: null };
+        controller._docSkeletonManagerService = { currentSkeleton$ };
+        controller._docRefreshDrawingsService = { refreshDrawings$: new Subject() };
+        controller._publicationTracker = new DocDrawingPublicationTracker();
+        controller._refreshDrawing = vi.fn();
+        controller._initialRenderRefresh();
+        try {
+            currentSkeleton$.next(skeleton);
+            expect(controller._refreshDrawing).toHaveBeenCalledTimes(1);
+            skeleton.layoutPageMaterialized$.next();
+            expect(controller._refreshDrawing).toHaveBeenCalledTimes(2);
+            expect(controller._refreshDrawing).toHaveBeenLastCalledWith(skeleton);
+            currentSkeleton$.next(null);
+            skeleton.layoutPageMaterialized$.next();
+            expect(controller._refreshDrawing).toHaveBeenCalledTimes(2);
+        } finally {
+            subscriptions.forEach((subscription) => subscription.unsubscribe());
+            vi.unstubAllGlobals();
+        }
     });
 
     it('does not eagerly refresh drawings for table metadata mutations', () => {
@@ -619,11 +652,11 @@ describe('DocDrawingTransformUpdateController', () => {
             }),
             expect.objectContaining({
                 drawingId: 'square-drawing',
-                transform: expect.objectContaining({ left: 26, top: 40, width: 30, height: 40, angle: 5 }),
+                transform: expect.objectContaining({ left: 104, top: 95, width: 30, height: 40, angle: 5 }),
             }),
             expect.objectContaining({
                 drawingId: 'top-bottom-drawing',
-                transform: expect.objectContaining({ left: 28, top: 42, width: 30, height: 40, angle: 5 }),
+                transform: expect.objectContaining({ left: 104, top: 95, width: 30, height: 40, angle: 5 }),
             }),
             expect.objectContaining({
                 drawingId: 'inline-drawing',
@@ -702,6 +735,108 @@ describe('DocDrawingTransformUpdateController', () => {
             width: 321,
             height: 300,
         });
+    });
+
+    it('does not crop cell-anchored pictures to the vertically aligned text origin', () => {
+        expect(getDocsDrawingPageClipBounds({
+            docsLeft: 20,
+            docsTop: 30,
+            pageOffsetLeft: 100,
+            pageOffsetTop: 200,
+            clipOffsetLeft: 138,
+            clipOffsetTop: 98 + 141,
+            page: {
+                type: DocumentSkeletonPageType.CELL,
+                pageWidth: 321,
+                pageHeight: 300,
+                marginLeft: 8,
+                marginTop: 141,
+            },
+        })).toEqual({ left: 250, top: 328, width: 321, height: 300 });
+    });
+
+    it('restores visibility and presentation when publishing a previously hidden header drawing', () => {
+        const controller = Object.create(DocDrawingTransformUpdateController.prototype);
+        const drawing = { drawingId: 'logo', hidden: true, source: 'image-source' };
+        const update = {
+            drawingId: 'logo',
+            hidden: false,
+            behindText: true,
+            selectable: false,
+            isMultiTransform: BooleanNumber.TRUE,
+            transform: { left: 10, top: 20, width: 30, height: 40 },
+            transforms: [{ left: 10, top: 20, width: 30, height: 40 }],
+        };
+        controller._context = {
+            unitId: 'doc',
+            scene: { getTransformerByCreate: () => ({ getSelectedObjectMap: () => new Map() }) },
+        };
+        controller._drawingManagerService = {
+            getDrawingByParam: () => drawing,
+            getDrawingData: () => ({ logo: drawing }),
+            removeNotification: vi.fn(),
+            addNotification: vi.fn(() => expect(drawing).toMatchObject(update)),
+        };
+        controller._handleMultiDrawingsTransform([update]);
+        expect(controller._drawingManagerService.addNotification).toHaveBeenCalledWith([update]);
+        expect(drawing.source).toBe('image-source');
+    });
+
+    it('anchors footer drawings at the same bottom-aligned origin as footer text', () => {
+        const controller = Object.create(DocDrawingTransformUpdateController.prototype);
+        controller._collectSegmentDrawingPositions = vi.fn();
+        const page = { pageWidth: 800, pageHeight: 1100, marginLeft: 50, marginBottom: 70, footerId: 'footer' };
+        const footer = { height: 16, marginTop: 5, marginBottom: 30 };
+        controller._collectPublishedPageDrawingPositions('doc', page, new Map(), new Map([['footer', new Map([[800, footer]])]]), 0, 0, {});
+        expect(controller._collectSegmentDrawingPositions.mock.calls[0][5]).toBe(1054);
+    });
+
+    it('allows floating pictures to overflow a cell without crossing the document page', () => {
+        const config = {
+            docsLeft: 20,
+            docsTop: 30,
+            pageOffsetLeft: 0,
+            pageOffsetTop: 0,
+            clipOffsetLeft: 60,
+            clipOffsetTop: 900,
+            overflowClipBounds: { left: 20, top: 30, width: 794, height: 1123 },
+            page: { type: DocumentSkeletonPageType.CELL, pageWidth: 200, pageHeight: 155 },
+        };
+        expect(getDocsDrawingPageClipBounds({
+            ...config,
+            drawingLayoutType: PositionedObjectLayoutType.WRAP_NONE,
+        })).toEqual(config.overflowClipBounds);
+        expect(getDocsDrawingPageClipBounds({
+            ...config,
+            drawingLayoutType: PositionedObjectLayoutType.INLINE,
+        })).toEqual({ left: 80, top: 930, width: 200, height: 155 });
+    });
+
+    it('paints measured inline-object dimensions without changing source or overriding live floating transforms', () => {
+        const source = {
+            layoutType: PositionedObjectLayoutType.INLINE,
+            docTransform: {
+                angle: 0,
+                size: { width: 100, height: 44 },
+                positionH: { relativeFrom: ObjectRelativeFromH.COLUMN },
+                positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH },
+            },
+        };
+        const measured = getDocsOverlayRuntimeDrawing(source, undefined, { width: 100, height: 76 });
+        expect(measured.docTransform.size).toEqual({ width: 100, height: 76 });
+        expect(source.docTransform.size.height).toBe(44);
+        const overlay = { ...source, layoutType: PositionedObjectLayoutType.WRAP_NONE };
+        const edited = { ...overlay, docTransform: { ...overlay.docTransform, size: { width: 120, height: 90 } } };
+        expect(getDocsOverlayRuntimeDrawing(overlay, edited, { width: 100, height: 76 })).toBe(edited);
+    });
+
+    it.each([DocumentSkeletonPageType.HEADER, DocumentSkeletonPageType.FOOTER])('clips small foreground story drawings to physical page bounds (story: %s)', (type) => {
+        const hostPage = { pageWidth: 794, pageHeight: 1123 };
+        expect(getDocsDrawingClipPage({
+            page: { type, pageWidth: 602, pageHeight: 510 },
+            hostPage,
+            drawing: { behindText: false, transform: { width: 175, height: 33 } },
+        })).toBe(hostPage);
     });
 
     it('clips page-sized header background drawings to the host document page', () => {
@@ -797,6 +932,29 @@ describe('DocDrawingTransformUpdateController', () => {
             },
             height: 1055,
         })).toBe(1);
+    });
+
+    it.each([
+        PositionedObjectLayoutType.WRAP_NONE,
+        PositionedObjectLayoutType.WRAP_SQUARE,
+        PositionedObjectLayoutType.WRAP_POLYGON,
+        PositionedObjectLayoutType.WRAP_THROUGH,
+        PositionedObjectLayoutType.WRAP_TIGHT,
+        PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM,
+    ])('uses page coordinates for floating drawing layout %s regardless of text wrapping', (drawingLayoutType) => {
+        const page = { pageWidth: 793.4, pageHeight: 1121.13 };
+        const anchor = getDocsPageRelativeDrawingAnchorPage({ page, clipPage: page, drawingLayoutType });
+        expect(anchor).toBe(page);
+        expect(getDocsPageRelativeDrawingLeft({
+            hostPage: anchor!,
+            positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 35.4 },
+            width: 755.4,
+        })).toBe(35.4);
+        expect(getDocsPageRelativeDrawingAnchorPage({
+            page,
+            clipPage: page,
+            drawingLayoutType: PositionedObjectLayoutType.INLINE,
+        })).toBeUndefined();
     });
 
     it('uses body pages as page-relative drawing anchors when no host page exists', () => {

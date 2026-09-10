@@ -18,6 +18,31 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FontCache, invalidateDocumentFontMetrics } from '../font-cache';
 
 describe('font cache', () => {
+    it('isolates kerning metrics and resets the context for legacy measurements', () => {
+        const context = {
+            font: '',
+            fontKerning: 'auto',
+            measureText: () => ({
+                width: context.fontKerning === 'normal' ? 18 : 20,
+                fontBoundingBoxAscent: 10,
+                fontBoundingBoxDescent: 2,
+                actualBoundingBoxAscent: 10,
+                actualBoundingBoxDescent: 2,
+            }),
+        };
+        vi.stubGlobal('document', undefined);
+        vi.stubGlobal('OffscreenCanvas', class {
+            getContext() {
+                return context;
+            }
+        });
+        expect(FontCache.getMeasureText('AV', '12pt Arial', 'normal').width).toBe(18);
+        expect(FontCache.getMeasureText('AV', '12pt Arial', 'none').width).toBe(20);
+        expect(FontCache.getMeasureText('AV', '12pt Arial').width).toBe(20);
+        expect(context.fontKerning).toBe('auto');
+        expect(FontCache.getMeasureText('AV', '12pt Arial', 'normal').width).toBe(18);
+    });
+
     beforeEach(() => {
         invalidateDocumentFontMetrics(() => true);
         (FontCache as any)._globalFontMeasureCache = new Map();
@@ -126,7 +151,42 @@ describe('font cache', () => {
         expect(measureRect).toHaveBeenCalledTimes(2);
     });
 
-    it('measures text with OffscreenCanvas when the DOM is unavailable', () => {
+    it('uses scalable print advances and line metrics without changing native ink or screen measurements', () => {
+        const measureText = vi.fn(function (this: CanvasRenderingContext2D) {
+            return {
+                width: this.font.startsWith('1024px') ? 1024 : 16,
+                fontBoundingBoxAscent: this.font.startsWith('1024px') ? 880 : 13,
+                fontBoundingBoxDescent: this.font.startsWith('1024px') ? 144 : 2,
+                actualBoundingBoxAscent: 11,
+                actualBoundingBoxDescent: 0,
+            };
+        });
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+            font: '',
+            measureText,
+        } as unknown as CanvasRenderingContext2D);
+        const fontStyle = {
+            fontString: '11pt "MS Gothic"',
+            fontCache: '11pt "MS Gothic"',
+            fontSize: 11,
+            originFontSize: 11,
+            fontFamily: 'MS Gothic',
+        };
+        const screen = FontCache.getTextSize('☐', fontStyle);
+        const print = FontCache.getTextSize('☐', fontStyle, true);
+        expect(screen.width).toBe(16);
+        expect(print.width).toBeCloseTo(44 / 3);
+        expect(print).toMatchObject({ aba: screen.aba, abd: screen.abd });
+        expect(print.ba).toBeCloseTo(880 * (44 / 3) / 1024);
+        expect(print.bd).toBeCloseTo(144 * (44 / 3) / 1024);
+        expect(print.normalLineHeight).toBeCloseTo(44 / 3);
+        expect(screen).toMatchObject({ ba: 13, bd: 2, normalLineHeight: 15 });
+        expect(FontCache.getTextSize('☐', fontStyle).width).toBe(16);
+        expect(FontCache.getTextSize('☐', fontStyle, true)).toEqual(print);
+        expect(measureText).toHaveBeenCalledTimes(2);
+    });
+
+    it.each(['auto', 'normal', 'none'] as const)('measures text without a DOM or native kerning support in %s mode', (kerning) => {
         const measureText = vi.fn(() => ({
             width: 16,
             fontBoundingBoxAscent: 9,
@@ -146,7 +206,7 @@ describe('font cache', () => {
             }
         });
 
-        const result = FontCache.getMeasureText('W', '12px Arial');
+        const result = FontCache.getMeasureText('W', '12px Arial', kerning);
 
         expect(result).toEqual({
             width: 16,

@@ -391,7 +391,7 @@ describe('DocDrawingTransformerController business methods', () => {
             hostPage: bodyPage,
             page: headerPage,
             width: 80,
-        })).toBe(false);
+        })).toBe(true);
         expect(shouldUseDocsDrawingOuterPageOrigin({
             drawing: overlayDrawing,
             height: 1055,

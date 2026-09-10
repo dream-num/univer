@@ -14,9 +14,21 @@
  * limitations under the License.
  */
 
-import { createDocumentModelWithStyle, DocumentFlavor, LocaleService, Univer } from '@univerjs/core';
+import type { IDocumentData, ITable } from '@univerjs/core';
+import {
+    BooleanNumber,
+    createDocumentModelWithStyle,
+    DataStreamTreeTokenType,
+    DocumentDataModel,
+    DocumentFlavor,
+    LocaleService,
+    TableRowHeightRule,
+    Univer,
+} from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { DocumentViewModel } from '../../view-model/document-view-model';
+import { createParagraphLayoutTestBed } from '../block/paragraph/__tests__/create-paragraph-layout-test-bed';
+import { cachePrecomputedTableSkeleton, createTableSkeleton } from '../block/table';
 import { DocumentSkeleton } from '../doc-skeleton';
 import { hydrateDocumentSkeletonPage, serializeDocumentSkeletonPage } from '../document-layout-page-patch';
 
@@ -41,6 +53,107 @@ function normalizeSkeleton(value: unknown): unknown {
 }
 
 describe('document layout page patch', () => {
+    it.each(['header', 'footer'] as const)('keeps precomputed body tables out of a %s at the same stream offset', (kind) => {
+        const T = DataStreamTreeTokenType;
+        const story = (text: string, rowCount: number, rowHeight: number): Required<Pick<IDocumentData, 'body' | 'tableSource'>> => {
+            const row = `${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}`;
+            const tableText = `${T.TABLE_START}${row.repeat(rowCount)}${T.TABLE_END}`;
+            const dataStream = `${tableText}${T.PARAGRAPH}${T.SECTION_BREAK}`;
+            const table: ITable = {
+                tableId: 'table-1',
+                align: 0,
+                indent: { v: 0 },
+                textWrap: 0,
+                position: { positionH: { relativeFrom: 0 }, positionV: { relativeFrom: 0 } },
+                dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                size: { type: 1, width: { v: 240 } },
+                cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
+                tableColumns: [{ size: { type: 1, width: { v: 240 } } }],
+                tableRows: Array.from({ length: rowCount }, () => ({
+                    tableCells: [{}],
+                    trHeight: { hRule: TableRowHeightRule.EXACT, val: { v: rowHeight } },
+                })),
+            };
+            return {
+                body: {
+                    dataStream,
+                    tables: [{ tableId: 'table-1', startIndex: 0, endIndex: tableText.length - 1 }],
+                    paragraphs: Array.from(dataStream).flatMap((c, i) => c === T.PARAGRAPH ? [{ startIndex: i, paragraphId: `p-${i}` }] : []),
+                    sectionBreaks: Array.from(dataStream).flatMap((c, i) => c === T.SECTION_BREAK ? [{ startIndex: i, sectionId: `s-${i}` }] : []),
+                },
+                tableSource: { 'table-1': table },
+            };
+        };
+        const snapshot: IDocumentData = {
+            id: 'segment-local-tables',
+            ...story('Body', 4, 100),
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 300, height: 240 },
+                marginLeft: 30,
+                marginRight: 30,
+                marginTop: 40,
+                marginBottom: 40,
+                marginHeader: 10,
+                marginFooter: 10,
+                useFirstPageHeaderFooter: BooleanNumber.TRUE,
+                ...(kind === 'header'
+                    ? { defaultHeaderId: 'regular', firstPageHeaderId: 'first' }
+                    : { defaultFooterId: 'regular', firstPageFooterId: 'first' }),
+            },
+            ...(kind === 'header'
+                ? { headers: {
+                    first: { headerId: 'first', ...story('First', 1, 18) },
+                    regular: { headerId: 'regular', ...story('Header', 1, 18) },
+                } }
+                : { footers: {
+                    first: { footerId: 'first', ...story('First', 1, 18) },
+                    regular: { footerId: 'regular', ...story('Footer', 1, 18) },
+                } }),
+        };
+        const { ctx, curPage, viewModel, sectionBreakConfig } = createParagraphLayoutTestBed('', {
+            ...snapshot,
+            body: { ...snapshot.body },
+            documentStyle: { ...snapshot.documentStyle },
+        });
+        try {
+            const bodyNode = viewModel.getChildren()[0].children[0].children[0];
+            const bodyTable = createTableSkeleton(ctx, curPage, viewModel, bodyNode, sectionBreakConfig)!;
+            cachePrecomputedTableSkeleton(ctx, bodyNode, bodyTable);
+            const resourceViewModel = viewModel.getSelfOrHeaderFooterViewModel('regular');
+            const resourceNode = resourceViewModel.getChildren()[0].children[0].children[0];
+            expect(resourceNode.startIndex).toBe(bodyNode.startIndex);
+            const resourceTable = createTableSkeleton(ctx, curPage, resourceViewModel, resourceNode, sectionBreakConfig)!;
+            expect(resourceTable.rows).toHaveLength(1);
+            expect(resourceTable.height).toBe(18);
+            expect(createTableSkeleton(ctx, curPage, viewModel, bodyNode, sectionBreakConfig)).toBe(bodyTable);
+        } finally {
+            viewModel.dispose();
+        }
+        const univer = new Univer();
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(snapshot)), univer.__getInjector().get(LocaleService));
+        try {
+            const generation = skeleton.startIncrementalLayout();
+            let complete = false;
+            for (let i = 0; i < 1000 && !complete; i++) {
+                complete = skeleton.stepIncrementalLayout(generation, 1).complete;
+            }
+            expect(complete).toBe(true);
+            const data = skeleton.getSkeletonData()!;
+            expect(data.pages.length).toBeGreaterThan(1);
+            const resources = kind === 'header' ? data.skeHeaders : data.skeFooters;
+            const page = [...resources.get('regular')!.values()][0];
+            const table = [...page.skeTables.values()][0];
+            expect(table.rows).toHaveLength(1);
+            expect(table.height).toBe(18);
+            const hydrated = hydrateDocumentSkeletonPage(structuredClone(serializeDocumentSkeletonPage(page, true)), undefined, snapshot);
+            expect([...hydrated.skeTables.values()][0].rows[0].rowSource).toBe(table.tableSource.tableRows[0]);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+        }
+    });
+
     it('survives structured clone and restores render parent links', () => {
         const univer = new Univer();
         const localeService = univer.__getInjector().get(LocaleService);

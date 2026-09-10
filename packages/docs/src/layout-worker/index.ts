@@ -16,7 +16,7 @@
 
 import type { IMessageProtocol } from '@univerjs/rpc';
 import type { IDocLayoutCancelRequest, IDocLayoutCreateSessionRequest, IDocLayoutDisposeMountRequest, IDocLayoutDisposeSessionRequest, IDocLayoutExecutor, IDocLayoutPageRequest, IDocLayoutPageResult, IDocLayoutPerformanceMetrics, IDocLayoutStartRequest, IDocLayoutStartResult, IDocLayoutStepRequest, IDocLayoutStepResult } from '../services/doc-layout-executor.service';
-import type { IUniverDocsLayoutWorkerConfig } from './config/config';
+import type { IDocsLayoutFontFace, IUniverDocsLayoutWorkerConfig } from './config/config';
 import type { IDocsLayoutWorkerCapabilities, IDocsLayoutWorkerRuntime } from './protocol';
 import { DependentOn, Disposable, IConfigService, Inject, Injector, merge, Plugin, Tools } from '@univerjs/core';
 import { FontCache } from '@univerjs/engine-render';
@@ -27,6 +27,7 @@ import { UniverDocsPlugin } from '../plugin';
 import { DocLayoutExecutorService, DocLayoutExecutorType } from '../services/doc-layout-executor.service';
 import { DEFAULT_DOCS_LAYOUT_WORKER_REQUEST_TIMEOUT_MS, defaultPluginDocsLayoutWorkerConfig, DOCS_LAYOUT_WORKER_PLUGIN_CONFIG_KEY } from './config/config';
 import { collectDocumentFontFamilies, measureDocumentFontFamilies } from './document-font-metrics';
+import { DocsLayoutFontLoader } from './font-loader';
 import { DocsLayoutWorkerPerformanceTracker } from './performance-tracker';
 import { DOCS_LAYOUT_WORKER_CHANNEL, DOCS_LAYOUT_WORKER_PROTOCOL_VERSION } from './protocol';
 import { startDocsLayoutWorker } from './worker';
@@ -67,12 +68,15 @@ export class DocsLayoutWorkerClientService extends Disposable implements IDocLay
     private _initialized = false;
     private readonly _performanceTracker = new DocsLayoutWorkerPerformanceTracker();
     private readonly _fontFamilies = new Map<string, Set<string>>();
+    private readonly _fontLoader = new DocsLayoutFontLoader();
 
     constructor(
         private readonly _workerFactory: () => Worker,
-        private readonly _requestTimeoutMs = DEFAULT_DOCS_LAYOUT_WORKER_REQUEST_TIMEOUT_MS
+        private readonly _requestTimeoutMs = DEFAULT_DOCS_LAYOUT_WORKER_REQUEST_TIMEOUT_MS,
+        private readonly _fontFaces: IDocsLayoutFontFace[] = []
     ) {
         super();
+        this.disposeWithMe(this._fontLoader);
         this._initialization = this._replaceRuntime();
     }
 
@@ -80,7 +84,12 @@ export class DocsLayoutWorkerClientService extends Disposable implements IDocLay
         return this._initialization;
     }
 
-    getCapabilities(): Promise<IDocsLayoutWorkerCapabilities> {
+    get renderingFontsReady(): Promise<void> | undefined {
+        return this._fontFaces.length > 0 ? this._initialization : undefined;
+    }
+
+    async getCapabilities(): Promise<IDocsLayoutWorkerCapabilities> {
+        await this._initialization;
         return this._getRuntime().getCapabilities();
     }
 
@@ -180,6 +189,8 @@ export class DocsLayoutWorkerClientService extends Disposable implements IDocLay
     private async _replaceRuntime(): Promise<void> {
         this._initialized = false;
         this._disposeRuntime();
+        await this._withTimeout(this._fontLoader.load(this._fontFaces), 'load rendering fonts');
+        this.ensureNotDisposed();
         const worker = this._workerFactory();
         const channelService = new ChannelService(createDocsLayoutWorkerMessageProtocol(worker, this._performanceTracker));
         this._worker = worker;
@@ -187,8 +198,17 @@ export class DocsLayoutWorkerClientService extends Disposable implements IDocLay
         this._runtime = toModule<IDocsLayoutWorkerRuntime>(
             channelService.requestChannel(DOCS_LAYOUT_WORKER_CHANNEL)
         );
-        await this._withTimeout(this._verifyCapabilities(), 'verify capabilities');
-        this._initialized = true;
+        try {
+            await this._withTimeout(this._runtime.initialize(this._fontFaces), 'load Worker fonts');
+            await this._withTimeout(this._verifyCapabilities(), 'verify capabilities');
+            this.ensureNotDisposed();
+            this._initialized = true;
+        } catch (error) {
+            if (this._worker === worker) {
+                this._disposeRuntime();
+            }
+            throw error;
+        }
     }
 
     private _disposeRuntime(): void {
@@ -224,7 +244,7 @@ export class DocsLayoutWorkerClientService extends Disposable implements IDocLay
     }
 
     private async _verifyCapabilities(): Promise<void> {
-        const capabilities = await this.getCapabilities();
+        const capabilities = await this._getRuntime().getCapabilities();
         if (capabilities.protocolVersion !== DOCS_LAYOUT_WORKER_PROTOCOL_VERSION) {
             throw new DocsLayoutWorkerCapabilityError('Document layout Worker protocol version mismatch.');
         }
@@ -286,7 +306,7 @@ export class UniverDocsLayoutWorkerPlugin extends Plugin {
             throw new RangeError('[UniverDocsLayoutWorkerPlugin]: requestTimeoutMs must be a positive finite number.');
         }
 
-        const client = new DocsLayoutWorkerClientService(this._config.workerFactory, requestTimeoutMs);
+        const client = new DocsLayoutWorkerClientService(this._config.workerFactory, requestTimeoutMs, this._config.fontFaces);
         this._injector.add([DocsLayoutWorkerClientService, { useValue: client }]);
         this.disposeWithMe(client);
         this.disposeWithMe(this._layoutExecutorService.register(client));

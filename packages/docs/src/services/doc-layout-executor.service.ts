@@ -206,6 +206,8 @@ export interface IDocLayoutStepResult extends IDocumentLayoutStepResult, IDocLay
 
 export interface IDocLayoutExecutor {
     readonly type: DocLayoutExecutorType;
+    /** When present, foreground layout must wait for the configured rendering and Worker fonts. */
+    readonly renderingFontsReady?: Promise<void>;
     initialize(): Promise<void>;
     recover(): Promise<void>;
     /**
@@ -331,7 +333,12 @@ function collectCustomBlockViewports(dataModel: DocumentDataModel): Record<strin
     const documentStyle = snapshot.documentStyle;
     const viewports: Record<string, IDocsCustomBlockRenderViewport> = {};
 
-    for (const customBlock of snapshot.body?.customBlocks ?? []) {
+    const bodies = [
+        snapshot.body,
+        ...Object.values(snapshot.headers ?? {}).map((header) => header.body),
+        ...Object.values(snapshot.footers ?? {}).map((footer) => footer.body),
+    ];
+    for (const customBlock of bodies.flatMap((body) => body?.customBlocks ?? [])) {
         const drawing = snapshot.drawings?.[customBlock.blockId];
         if (drawing == null) {
             continue;

@@ -29,6 +29,7 @@ import enUS from '../../../locale/en-US';
 import { DocStatistics } from '../DocStatistics';
 import { useDocStatistics } from '../use-doc-statistics';
 
+vi.mock('../DocPageStatus', () => ({ DocPageStatus: () => null }));
 vi.mock('../use-doc-statistics');
 
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { configurable: true, value: true });

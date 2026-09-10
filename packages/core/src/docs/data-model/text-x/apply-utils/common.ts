@@ -32,6 +32,7 @@ import type {
 import { shallowEqual } from '../../../../common/equal';
 import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../../shared';
 import { isSameStyleTextRun } from '../../../../shared/compare';
+import { CustomRangeType } from '../../../../types/interfaces';
 import { cloneParagraphWithId } from '../../../paragraph-id';
 import { cloneSectionBreakWithId } from '../../../section-break-id';
 import { DataStreamTreeTokenType } from '../../types';
@@ -730,20 +731,23 @@ export function mergeContinuousRanges(ranges: ICustomRange[]): ICustomRange[] {
 }
 
 export function splitCustomRangesByIndex(customRanges: ICustomRange[], currentIndex: number) {
-    const matchedCustomRangeIndex = customRanges.findIndex((c) => c.startIndex < currentIndex && c.endIndex >= currentIndex);
-    const matchedCustomRange = customRanges[matchedCustomRangeIndex];
+    const matches = customRanges.filter((range) =>
+        range.rangeType !== CustomRangeType.FIELD &&
+        range.rangeType !== CustomRangeType.SDT &&
+        range.startIndex < currentIndex &&
+        range.endIndex >= currentIndex
+    );
 
-    if (matchedCustomRange) {
-        customRanges.splice(matchedCustomRangeIndex, 1, {
-            ...matchedCustomRange,
-            startIndex: matchedCustomRange.startIndex,
+    for (const matched of matches) {
+        const index = customRanges.indexOf(matched);
+        customRanges.splice(index, 1, {
+            ...matched,
             endIndex: currentIndex - 1,
-            properties: { ...matchedCustomRange.properties },
+            properties: { ...matched.properties },
         }, {
-            ...matchedCustomRange,
+            ...matched,
             startIndex: currentIndex,
-            endIndex: matchedCustomRange.endIndex,
-            properties: { ...matchedCustomRange.properties },
+            properties: { ...matched.properties },
         });
     }
 }
@@ -810,6 +814,14 @@ export function insertCustomRanges(
     for (let i = 0, len = customRanges.length; i < len; i++) {
         const customRange = customRanges[i];
         const { startIndex } = customRange;
+        if (
+            (customRange.rangeType === CustomRangeType.FIELD || customRange.rangeType === CustomRangeType.SDT) &&
+            startIndex < currentIndex &&
+            customRange.endIndex >= currentIndex
+        ) {
+            customRange.endIndex += textLength;
+            continue;
+        }
         // move custom range when insert text before it
         if (startIndex >= currentIndex) {
             customRange.startIndex += textLength;
@@ -821,6 +833,16 @@ export function insertCustomRanges(
     if (insertBody.customRanges) {
         for (let i = 0, len = insertBody.customRanges.length; i < len; i++) {
             const customRange = insertBody.customRanges[i];
+            const existingSdt = customRange.rangeType === CustomRangeType.SDT
+                ? customRanges.find((range) => range.rangeType === CustomRangeType.SDT && range.rangeId === customRange.rangeId)
+                : undefined;
+            if (existingSdt) {
+                existingSdt.startIndex = Math.min(existingSdt.startIndex, currentIndex + customRange.startIndex);
+                existingSdt.endIndex = Math.max(existingSdt.endIndex, currentIndex + customRange.endIndex);
+                existingSdt.properties = Tools.deepClone(customRange.properties);
+                existingSdt.wholeEntity = customRange.wholeEntity;
+                continue;
+            }
             customRange.startIndex += currentIndex;
             customRange.endIndex += currentIndex;
             // new custom range

@@ -869,6 +869,8 @@ export class DocMoveCursorController extends Disposable {
             DataStreamTreeTokenType.SECTION_BREAK,
             DataStreamTreeTokenType.BLOCK_START,
             DataStreamTreeTokenType.BLOCK_END,
+            DataStreamTreeTokenType.CUSTOM_RANGE_START,
+            DataStreamTreeTokenType.CUSTOM_RANGE_END,
         ];
 
         if (includeParagraph) {

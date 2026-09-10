@@ -145,7 +145,8 @@ export class UniverUIPlugin extends Plugin {
             [IDialogService, { useClass: DesktopDialogService, lazy: true }],
             [IConfirmService, { useClass: DesktopConfirmService, lazy: true }],
             [ISidebarService, { useClass: DesktopSidebarService, lazy: true }],
-            [IMessageService, { useClass: DesktopMessageService, lazy: true }],
+            // Mount the message host before a command can publish its first error.
+            [IMessageService, { useClass: DesktopMessageService }],
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
             [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],
             [ILocalFileService, { useClass: DesktopLocalFileService }],

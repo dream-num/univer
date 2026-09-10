@@ -1282,7 +1282,7 @@ describe('DocSelectionRenderService', () => {
         expect(document.activeElement).toBe(input);
     });
 
-    it.each(['input', 'textarea', 'select'])('preserves an embed-owned %s during selection synchronization', (tagName) => {
+    it.each(['input', 'textarea', 'select', 'button'])('preserves an embed-owned %s during selection synchronization', (tagName) => {
         const { input, renderUnit, service, univer } = createRealSelectionRenderService();
         cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
         TestLayoutService.root.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');

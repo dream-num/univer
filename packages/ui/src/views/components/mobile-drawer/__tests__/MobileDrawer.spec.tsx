@@ -16,6 +16,8 @@
 
 import type { MobileDrawerOpenMode } from '../MobileDrawer';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { ConfigProvider, MobileDropdown } from '@univerjs/design';
+import enUS from '@univerjs/design/locale/en-US';
 import { createElement, useRef } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MobileDrawer, resolveMobileDrawerRelease } from '../MobileDrawer';
@@ -48,6 +50,47 @@ afterEach(() => {
 });
 
 describe('mobile drawer snap behavior', () => {
+    it.each(['canvas', 'modal'] as const)('coordinates nested %s menus without changing the other layout', (layout) => {
+        vi.stubGlobal('CSS', { supports: () => false });
+        const app = (open: boolean) => (
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <MobileDrawer
+                    snap="compact"
+                    expandLabel="Expand"
+                    collapseLabel="Collapse"
+                    onSnapChange={vi.fn()}
+                    onClose={vi.fn()}
+                    layout={layout}
+                >
+                    <button type="button">Canvas action</button>
+                    <MobileDropdown open={open} overlay={<input aria-label="Option" />}>
+                        <button type="button">Trigger</button>
+                    </MobileDropdown>
+                </MobileDrawer>
+            </ConfigProvider>
+        );
+        const view = render(app(false));
+        const action = screen.getByRole('button', { name: 'Canvas action' });
+        action.focus();
+        view.rerender(app(true));
+        const dialog = screen.getByRole('dialog');
+        if (layout === 'canvas') {
+            expect(dialog.style.height).toBe('40vh');
+            expect(document.activeElement).toBe(action);
+            expect(document.body.style.pointerEvents).not.toBe('none');
+        } else {
+            expect(dialog.style.height).toBe('');
+            expect(dialog.style.maxHeight).toBe('80vh');
+            expect(dialog.contains(document.activeElement)).toBe(true);
+        }
+        view.rerender(app(false));
+        expect(screen.queryByRole('dialog')).toBeNull();
+        expect(document.body.style.pointerEvents).not.toBe('none');
+        if (layout === 'canvas') {
+            expect(document.activeElement).toBe(action);
+        }
+    });
+
     it('falls back to viewport height units when dynamic viewport units are unavailable', () => {
         vi.stubGlobal('CSS', { supports: () => false });
         const { container } = render(createElement(MobileDrawer, {

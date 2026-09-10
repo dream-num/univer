@@ -18,7 +18,13 @@ import type { RefObject } from 'react';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { getMobileCanvasPanDelta, useDependency, useMobileCanvasViewport } from '@univerjs/ui';
+import {
+    getMobileCanvasPanDelta,
+    IWorkbenchService,
+    useDependency,
+    useMobileCanvasViewport,
+    useObservable,
+} from '@univerjs/ui';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { DocMobileElementMenuService } from '../../services/doc-mobile-element-menu.service';
 import { calcDocRangePositions, transformBound2OffsetBound } from '../../services/doc-popup-manager.service';
@@ -31,9 +37,14 @@ export function MobileDocCanvasViewport({ containerRef, canvasRef }: {
     const renders = useDependency(IRenderManagerService);
     const elements = useDependency(DocMobileElementMenuService);
     const selections = useDependency(DocSelectionManagerService);
+    const workbench = useDependency(IWorkbenchService);
+    const rootUnitType = useObservable(workbench.rootUnitType$, null, true);
     useMobileCanvasViewport({
         containerRef,
         canvasRef,
+        // Docs UI is also loaded for embedded text editors in other products.
+        // Only a document workbench may resize this outer content container.
+        enabled: rootUnitType === UniverInstanceType.UNIVER_DOC,
         panelsOnly: true,
         onReveal: () => {
             const doc = instances.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);

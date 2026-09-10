@@ -109,7 +109,23 @@ export function MobileDrawer(props: {
     const inheritedLayout = useContext(MobileDrawerLayoutContext);
     const layout = requestedLayout ?? inheritedLayout;
     const registerOverlay = useMobileOverlayRegistration(layout);
-    const overlay = useMemo(() => ({ modal: layout === 'modal', onMount: registerOverlay }), [layout, registerOverlay]);
+    const viewportHeightUnit = globalThis.CSS?.supports('height', '1dvh') ? 'dvh' : 'vh';
+    const overlay = useMemo(() => ({
+        modal: layout === 'modal',
+        contentProps: {
+            style: layout === 'canvas'
+                ? {
+                    height: `${MOBILE_DRAWER_COMPACT_PERCENT}${viewportHeightUnit}`,
+                    maxHeight: `${MOBILE_DRAWER_COMPACT_PERCENT}${viewportHeightUnit}`,
+                }
+                : undefined,
+            // Nested canvas controls must not steal focus or restore it to a
+            // trigger after the user has resumed editing in the canvas.
+            onOpenAutoFocus: layout === 'canvas' ? (event: Event) => event.preventDefault() : undefined,
+            onCloseAutoFocus: layout === 'canvas' ? (event: Event) => event.preventDefault() : undefined,
+        },
+        onMount: registerOverlay,
+    }), [layout, registerOverlay, viewportHeightUnit]);
     const [dragPercent, setDragPercent] = useState<number | null>(null);
     const surfaceRef = useRef<HTMLElement>(null);
     const setPanelRef = useCallback((element: HTMLElement | null) => {
@@ -129,7 +145,6 @@ export function MobileDrawer(props: {
     const drawerPercent = dragPercent ?? (snap === 'compact'
         ? MOBILE_DRAWER_COMPACT_PERCENT
         : MOBILE_DRAWER_EXPANDED_PERCENT);
-    const viewportHeightUnit = globalThis.CSS?.supports('height', '1dvh') ? 'dvh' : 'vh';
 
     useLayoutEffect(() => {
         if (!registerDrawer || !unregisterDrawer) {

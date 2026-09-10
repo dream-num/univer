@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+import type { ComponentPropsWithoutRef } from 'react';
+import type { DialogContent } from '../dialog/DialogPrimitive';
 import { createContext } from 'react';
 
-/** Geometry coordination for mobile surfaces that leave their canvas interactive. */
+/** The host supplies layout and focus behavior for nested mobile surfaces. */
 export const MobileOverlayContext = createContext<{
     modal: boolean;
+    contentProps: Pick<ComponentPropsWithoutRef<typeof DialogContent>, 'style' | 'onOpenAutoFocus' | 'onCloseAutoFocus'>;
     onMount: (element: HTMLElement) => void | (() => void);
 } | null>(null);

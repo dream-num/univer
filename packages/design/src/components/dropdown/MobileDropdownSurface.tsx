@@ -68,14 +68,14 @@ export function MobileDropdownSurface(props: {
                     insetInline: 0,
                     top: 'auto',
                     bottom: 0,
-                    maxHeight: `${modal ? 80 : 40}${viewportHeightUnit}`,
-                    height: modal ? undefined : `40${viewportHeightUnit}`,
+                    maxHeight: `80${viewportHeightUnit}`,
                     width: '100%',
                     maxWidth: 'none',
                     transform: 'none',
+                    ...mobileOverlay?.contentProps.style,
                 }}
-                onOpenAutoFocus={modal ? undefined : (event) => event.preventDefault()}
-                onCloseAutoFocus={modal ? undefined : (event) => event.preventDefault()}
+                onOpenAutoFocus={mobileOverlay?.contentProps.onOpenAutoFocus}
+                onCloseAutoFocus={mobileOverlay?.contentProps.onCloseAutoFocus}
             >
                 <div
                     aria-hidden="true"

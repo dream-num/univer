@@ -40,17 +40,17 @@ describe('mobile canvas layout', () => {
         return <div ref={ref} role="region" aria-label="panel"><input aria-label="editor" /></div>;
     }
 
-    function Canvas({ panelsOnly }: { panelsOnly?: boolean }) {
+    function Canvas({ panelsOnly, enabled }: { panelsOnly?: boolean; enabled?: boolean }) {
         const containerRef = useRef<HTMLDivElement>(null);
         const canvasRef = useRef<HTMLDivElement>(null);
-        useMobileCanvasViewport({ containerRef, canvasRef, panelsOnly, onReveal: reveal });
+        useMobileCanvasViewport({ containerRef, canvasRef, panelsOnly, enabled, onReveal: reveal });
         return <div ref={containerRef} role="region" aria-label="host"><div ref={canvasRef} role="region" aria-label="canvas" /></div>;
     }
 
-    function App({ layout, dragging, panelsOnly }: { layout?: MobilePanelLayout; dragging?: boolean; panelsOnly?: boolean }) {
+    function App({ layout, dragging, panelsOnly, enabled }: { layout?: MobilePanelLayout; dragging?: boolean; panelsOnly?: boolean; enabled?: boolean }) {
         return (
             <MobileCanvasLayoutProvider>
-                <Canvas panelsOnly={panelsOnly} />
+                <Canvas panelsOnly={panelsOnly} enabled={enabled} />
                 {layout && <Panel layout={layout} dragging={dragging} />}
             </MobileCanvasLayoutProvider>
         );
@@ -112,6 +112,27 @@ describe('mobile canvas layout', () => {
         view.rerender(<App />);
         flush();
         expect(screen.getByRole('region', { name: 'canvas' }).style.height).toBe('856px');
+        expect(reveal).toHaveBeenCalledTimes(1);
+    });
+
+    it('only resizes the canvas while its owning product enables the viewport', () => {
+        const view = render(<App panelsOnly enabled={false} layout="canvas" />);
+        const canvas = screen.getByRole('region', { name: 'canvas' });
+        flush();
+        expect(canvas.style.height).toBe('');
+        expect(reveal).not.toHaveBeenCalled();
+
+        view.rerender(<App panelsOnly enabled layout="canvas" />);
+        flush();
+        expect(canvas.style.height).toBe('496px');
+        expect(reveal).toHaveBeenCalledTimes(1);
+
+        view.rerender(<App panelsOnly enabled={false} layout="canvas" />);
+        act(() => resizeCallbacks.forEach((callback) => callback()));
+        flush();
+        expect(canvas.style.height).toBe('');
+        expect(canvas.style.top).toBe('');
+        expect(canvas.style.bottom).toBe('');
         expect(reveal).toHaveBeenCalledTimes(1);
     });
 

@@ -16,11 +16,27 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
-import { UniverInstanceType } from '@univerjs/core';
+import { IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { RangeProtectionPermissionViewPoint, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
-import { getCurrentRangeDisable$, whenSheetEditorFocused } from '@univerjs/sheets-ui';
+import { deriveStateFromActiveSheet$, getCurrentRangeDisable$, whenSheetEditorFocused } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, KeyCode, MenuItemType, MetaKeys } from '@univerjs/ui';
+import { map } from 'rxjs';
 import { AddSheetDrawingCommentOperation, ShowAddSheetCommentModalOperation, ToggleSheetCommentPanelOperation } from '../commands/operations/comment.operation';
+
+function getDrawingCommentDisable$(accessor: IAccessor) {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const permissionService = accessor.get(IPermissionService);
+
+    return deriveStateFromActiveSheet$(univerInstanceService, true, ({ workbook, worksheet }) => {
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
+
+        return permissionService.composePermission$([
+            new WorkbookCommentPermission(unitId).id,
+            new WorksheetViewPermission(unitId, subUnitId).id,
+        ]).pipe(map((permissions) => permissions.some((permission) => permission.value === false)));
+    });
+}
 
 export const drawingCommentMenuFactory = (accessor: IAccessor) => ({
     id: AddSheetDrawingCommentOperation.id,
@@ -29,10 +45,7 @@ export const drawingCommentMenuFactory = (accessor: IAccessor) => ({
     title: 'sheets-thread-comment-ui.menu.addComment',
     tooltip: 'sheets-thread-comment-ui.menu.addComment',
     hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-    disabled$: getCurrentRangeDisable$(accessor, {
-        workbookTypes: [WorkbookCommentPermission],
-        worksheetTypes: [WorksheetViewPermission],
-    }),
+    disabled$: getDrawingCommentDisable$(accessor),
 });
 
 export const threadCommentMenuFactory = (accessor: IAccessor) => {

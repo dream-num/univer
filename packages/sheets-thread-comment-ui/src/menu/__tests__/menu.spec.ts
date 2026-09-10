@@ -25,7 +25,7 @@ import {
 import { RangeProtectionRuleModel, SheetsSelectionsService, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
-import { drawingCommentMenuFactory } from '../menu';
+import { drawingCommentMenuFactory, threadCommentMenuFactory } from '../menu';
 
 describe('drawingCommentMenuFactory', () => {
     it('stays enabled for a focused drawing until comment permission is denied', () => {
@@ -74,5 +74,28 @@ describe('drawingCommentMenuFactory', () => {
         expect(disabledValues).toEqual([false, true]);
         subscription.unsubscribe();
         injector.dispose();
+    });
+});
+
+describe('thread comment menu', () => {
+    it('shows the add comment label in its tooltip', () => {
+        const service = {
+            currentUser$: of(null),
+            focused$: of(null),
+            getCurrentTypeOfUnit$: () => of(null),
+            subscribeContextValue$: () => of(false),
+        };
+        const accessor = new Injector([
+            [IContextService, { useValue: service }],
+            [IUniverInstanceService, { useValue: service }],
+            [UserManagerService, { useValue: service }],
+        ]);
+
+        expect(threadCommentMenuFactory(accessor)).toMatchObject({
+            title: 'sheets-thread-comment-ui.menu.addComment',
+            tooltip: 'sheets-thread-comment-ui.menu.addComment',
+        });
+
+        accessor.dispose();
     });
 });

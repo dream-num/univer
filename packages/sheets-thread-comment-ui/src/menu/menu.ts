@@ -54,6 +54,7 @@ export const threadCommentMenuFactory = (accessor: IAccessor) => {
         type: MenuItemType.BUTTON,
         icon: 'InsertCommentDoubleIcon',
         title: 'sheets-thread-comment-ui.menu.addComment',
+        tooltip: 'sheets-thread-comment-ui.menu.addComment',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookCommentPermission],

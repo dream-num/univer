@@ -19,9 +19,8 @@ import type { RibbonType } from '../../../controllers/ui/ui.controller';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { LocaleService, throttle } from '@univerjs/core';
 import { borderBottomClassName, clsx, ConfigContext, ConfigProvider, divideXClassName, Dropdown } from '@univerjs/design';
-
 import { MoreVerticalIcon } from '@univerjs/icons';
-import { Fragment, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import { Fragment, useCallback, useContext, useLayoutEffect, useMemo, useRef } from 'react';
 import { RibbonPosition } from '../../../services/menu/types';
 import { IRibbonOverrideService } from '../../../services/ribbon/ribbon-override.service';
 import { IRibbonService } from '../../../services/ribbon/ribbon.service';
@@ -53,6 +52,7 @@ export function Ribbon(props: IRibbonProps) {
     const ribbonService = ribbonOverride?.ribbonService ?? defaultRibbonService;
 
     const containerRef = useRef<HTMLDivElement>(null!);
+    const availableWidthRef = useRef(0);
     const toolbarItemsRef = useRef<Record<string, {
         el: HTMLElement;
         key: string;
@@ -123,7 +123,7 @@ export function Ribbon(props: IRibbonProps) {
         };
     }, [collapsedIds, ribbon, effectiveActivatedTab]);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (hideToolbar || ribbonType === 'grid') {
             toolbarItemsRef.current = {};
             ribbonService.setCollapsedIds([]);
@@ -135,45 +135,18 @@ export function Ribbon(props: IRibbonProps) {
             return;
         }
 
-        let timer: number | null = null;
         const observer = new ResizeObserver(throttle((entries) => {
             for (const entry of entries) {
+                availableWidthRef.current = entry.contentRect.width;
                 ribbonService.setFakeToolbarVisible(true);
-
-                timer = requestAnimationFrame(() => {
-                    const { width: avaliableWidth } = entry.contentRect;
-                    const toolbarItems = Object.values(toolbarItemsRef.current);
-                    const sortedToolbarItems = toolbarItems.sort((a, b) => {
-                        return a.order - b.order || a.groupOrder - b.groupOrder || a.itemOrder - b.itemOrder;
-                    });
-
-                    const newCollapsedIds: string[] = [];
-                    let totalWidth = 32;
-                    const allGroups = ribbon.find((group) => group.key === effectiveActivatedTab)?.children ?? [];
-
-                    const gapWidth = (allGroups.length - 1) * 8;
-                    totalWidth += gapWidth;
-
-                    for (const { el, key } of sortedToolbarItems) {
-                        const { width } = el.getBoundingClientRect();
-                        totalWidth += width + 8;
-
-                        if (totalWidth > avaliableWidth) {
-                            newCollapsedIds.push(key);
-                        }
-                    }
-
-                    ribbonService.setCollapsedIds(newCollapsedIds);
-
-                    ribbonService.setFakeToolbarVisible(false);
-                });
             }
         }, 10));
 
         observer.observe(containerRef.current);
+        availableWidthRef.current = containerRef.current.getBoundingClientRect().width;
+        ribbonService.setFakeToolbarVisible(true);
 
         return () => {
-            timer && cancelAnimationFrame(timer);
             observer.disconnect();
         };
     }, [hideToolbar, ribbon, effectiveActivatedTab, ribbonService, ribbonType]);
@@ -212,6 +185,8 @@ export function Ribbon(props: IRibbonProps) {
                                                     groupOrder: groupItem.order,
                                                     itemOrder: child.order,
                                                 };
+                                            } else {
+                                                delete toolbarItemsRef.current[child.key];
                                             }
                                         }}
                                     />
@@ -223,6 +198,29 @@ export function Ribbon(props: IRibbonProps) {
             </div>
         );
     }, [activeGroup.allGroups, fakeToolbarVisible]);
+
+    useLayoutEffect(() => {
+        if (!fakeToolbarVisible || hideToolbar || ribbonType === 'grid') {
+            return;
+        }
+
+        const sortedToolbarItems = Object.values(toolbarItemsRef.current).sort((a, b) => {
+            return a.order - b.order || a.groupOrder - b.groupOrder || a.itemOrder - b.itemOrder;
+        });
+        const newCollapsedIds: string[] = [];
+        const allGroups = ribbon.find((group) => group.key === effectiveActivatedTab)?.children ?? [];
+        let totalWidth = 32 + (allGroups.length - 1) * 8;
+
+        for (const { el, key } of sortedToolbarItems) {
+            totalWidth += el.getBoundingClientRect().width + 8;
+            if (totalWidth > availableWidthRef.current) {
+                newCollapsedIds.push(key);
+            }
+        }
+
+        ribbonService.setCollapsedIds(newCollapsedIds);
+        ribbonService.setFakeToolbarVisible(false);
+    }, [effectiveActivatedTab, fakeToolbarVisible, hideToolbar, ribbon, ribbonService, ribbonType]);
 
     const embedRibbonOverrideAttributes = ribbonOverride
         ? {

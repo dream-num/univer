@@ -318,10 +318,8 @@ export class ShortcutService extends Disposable implements IShortcutService {
             return;
         }
 
-        if (
-            (e.keyCode === KeyCode.BACKSPACE || e.keyCode === KeyCode.DELETE) &&
-            e.target instanceof HTMLInputElement && e.target.closest('[data-u-command]')
-        ) {
+        // Toolbar fields own their native editing and history before component key handlers run.
+        if (e.target instanceof HTMLInputElement && e.target.closest('[data-u-command]')) {
             return;
         }
 

@@ -130,7 +130,17 @@ describe('ShortcutService', () => {
         vi.unstubAllGlobals();
     });
 
-    it.each([KeyCode.BACKSPACE, KeyCode.DELETE])('keeps toolbar input deletion key %s out of grid shortcuts', (keyCode) => {
+    it.each([
+        { keyCode: KeyCode.BACKSPACE, ctrlKey: false, shiftKey: false },
+        { keyCode: KeyCode.DELETE, ctrlKey: false, shiftKey: false },
+        { keyCode: KeyCode.A, ctrlKey: true, shiftKey: false },
+        { keyCode: KeyCode.X, ctrlKey: true, shiftKey: false },
+        { keyCode: KeyCode.C, ctrlKey: true, shiftKey: false },
+        { keyCode: KeyCode.V, ctrlKey: true, shiftKey: false },
+        { keyCode: KeyCode.Z, ctrlKey: true, shiftKey: false },
+        { keyCode: KeyCode.Z, ctrlKey: true, shiftKey: true },
+        { keyCode: KeyCode.Y, ctrlKey: true, shiftKey: false },
+    ])('keeps toolbar input key $keyCode (ctrl=$ctrlKey, shift=$shiftKey) out of grid shortcuts', (keys) => {
         const injector = new Injector([
             [ICommandService, { useClass: CommandService }],
             [IConfigService, { useClass: ConfigService }],
@@ -147,15 +157,16 @@ describe('ShortcutService', () => {
         document.body.appendChild(control);
         try {
             const service = injector.get(ShortcutService);
-            service.registerShortcut({ id: 'test.grid-delete', binding: keyCode });
-            const event = new KeyboardEvent('input-delete-test', { keyCode, cancelable: true });
+            const binding = keys.keyCode | (keys.ctrlKey ? MetaKeys.CTRL_COMMAND : 0) | (keys.shiftKey ? MetaKeys.SHIFT : 0);
+            service.registerShortcut({ id: 'test.grid-edit', binding });
+            const event = new KeyboardEvent('input-key-test', { ...keys, cancelable: true });
             input.dispatchEvent(event);
             expect(service.dispatch(event)).toBeUndefined();
             expect(event.defaultPrevented).toBe(false);
             const canvas = document.createElement('canvas');
-            const canvasEvent = new KeyboardEvent('input-delete-test', { keyCode });
+            const canvasEvent = new KeyboardEvent('input-key-test', keys);
             canvas.dispatchEvent(canvasEvent);
-            expect(service.dispatch(canvasEvent)?.id).toBe('test.grid-delete');
+            expect(service.dispatch(canvasEvent)?.id).toBe('test.grid-edit');
         } finally {
             control.remove();
             injector.dispose();

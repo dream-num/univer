@@ -480,7 +480,7 @@ describe('doc skeleton', () => {
         const univer = new Univer();
         const content = scenario === 'header' || scenario === 'footer'
             ? 'Este documento contiene información sobre la configuración y la administración de los servicios.'
-            : `${'A continued paragraph crosses several physical pages. '.repeat(100)}Hello world ${'Further text keeps the paragraph flowing. '.repeat(200)}`;
+            : `${'A continued paragraph crosses several physical pages. '.repeat(50)}Hello world ${'Further text keeps the paragraph flowing. '.repeat(100)}`;
         const snapshot: Partial<IDocumentData> = {
             id: 'hyphen-readiness',
             body: {

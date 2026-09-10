@@ -27,15 +27,20 @@ export function throttle<T extends (...args: any[]) => any>(fn: T, wait: number 
     return function throttled(this: any, ...args: any[]) {
         const now = Date.now();
         if (now - lastTime < wait) {
-            if (timer) {
+            if (timer !== null) {
                 clearTimeout(timer);
             }
 
             timer = setTimeout(() => {
+                timer = null;
                 lastTime = now;
                 fn.apply(this, args);
             }, wait) as unknown as number;
         } else {
+            if (timer !== null) {
+                clearTimeout(timer);
+                timer = null;
+            }
             lastTime = now;
             fn.apply(this, args);
         }

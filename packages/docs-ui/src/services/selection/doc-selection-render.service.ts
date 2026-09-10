@@ -1703,7 +1703,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         const activeElement = ownerDocument.activeElement;
         const currentEmbedOwner = this._getCurrentEmbedOwner();
         // Layout and drawing refreshes must not take focus from native controls or open menu buttons.
-        if (activeElement?.matches('input, textarea, select, button')) {
+        if (activeElement?.closest('input, textarea, select, [data-slot="popover-content"][data-state="open"]')) {
             return true;
         }
 

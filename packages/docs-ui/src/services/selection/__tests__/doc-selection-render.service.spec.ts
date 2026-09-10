@@ -1282,7 +1282,7 @@ describe('DocSelectionRenderService', () => {
         expect(document.activeElement).toBe(input);
     });
 
-    it.each(['input', 'textarea', 'select', 'button'])('preserves an embed-owned %s during selection synchronization', (tagName) => {
+    it.each(['input', 'textarea', 'select'])('preserves an embed-owned %s during selection synchronization', (tagName) => {
         const { input, renderUnit, service, univer } = createRealSelectionRenderService();
         cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
         TestLayoutService.root.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
@@ -1296,6 +1296,43 @@ describe('DocSelectionRenderService', () => {
         expect(document.activeElement).toBe(control);
         service.activate(12, 34, true);
         expect(document.activeElement).toBe(control);
+    });
+
+    it('preserves focus inside an open popover during selection synchronization', () => {
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService();
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        TestLayoutService.root.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        input.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        const popover = document.createElement('div');
+        popover.dataset.slot = 'popover-content';
+        popover.dataset.state = 'open';
+        const button = document.createElement('button');
+        popover.appendChild(button);
+        TestLayoutService.root.appendChild(popover);
+        button.focus();
+
+        service.sync();
+        expect(document.activeElement).toBe(button);
+        service.activate(12, 34, true);
+        expect(document.activeElement).toBe(button);
+
+        popover.dataset.state = 'closed';
+        service.sync();
+        expect(document.activeElement).toBe(input);
+    });
+
+    it.each(['button', 'tab'])('refocuses the document from a Ribbon %s when setting a selection', (role) => {
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService();
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        TestLayoutService.root.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        input.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        const button = document.createElement('button');
+        button.setAttribute('role', role);
+        TestLayoutService.root.appendChild(button);
+        button.focus();
+
+        service.sync();
+        expect(document.activeElement).toBe(input);
     });
 
     it('allows the internal sheet cell editor to refocus from an embed-owned canvas', () => {

@@ -606,7 +606,7 @@ describe('DocLayoutExecutorService', () => {
         ]);
     });
 
-    it('serializes main-thread custom block viewport measurements with a layout start', async () => {
+    it.each(['body', 'header', 'footer'] as const)('serializes main-thread custom block viewport measurements from the %s with a layout start', async (story) => {
         const injector = univer.__getInjector();
         const service = injector.get(DocLayoutExecutorService);
         const executor = createExecutor();
@@ -648,6 +648,17 @@ describe('DocLayoutExecutorService', () => {
                 },
             },
         };
+        if (story !== 'body') {
+            const body = documentData.body;
+            documentData.body = createDocumentData('traditional-doc', DocumentFlavor.TRADITIONAL).body;
+            if (story === 'header') {
+                documentData.headers = { header: { headerId: 'header', body } };
+                documentData.documentStyle.defaultHeaderId = 'header';
+            } else {
+                documentData.footers = { footer: { footerId: 'footer', body } };
+                documentData.documentStyle.defaultFooterId = 'footer';
+            }
+        }
         univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, documentData);
         await Promise.resolve();
 

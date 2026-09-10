@@ -109,6 +109,8 @@ const locale: typeof enUS = {
             selection: '현재 선택 영역',
             wordCount: '{0}개 단어',
             selectedWords: '{1}개 중 {0}개 단어',
+            currentPage: '{0}페이지',
+            currentPageOfTotal: '{1}페이지 중 {0}페이지',
             pages: '페이지',
             words: '단어',
             charactersWithoutSpaces: '문자 수(공백 제외)',

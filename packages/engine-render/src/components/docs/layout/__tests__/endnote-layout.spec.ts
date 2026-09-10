@@ -42,7 +42,17 @@ function snapshot(position: 'docEnd' | 'sectEnd', long = false) {
 
 describe('endnote pagination', () => {
     beforeEach(() => {
-        vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({ width: text.length * 5, fontBoundingBoxAscent: 8, fontBoundingBoxDescent: 2, actualBoundingBoxAscent: 8, actualBoundingBoxDescent: 2 }) as TextMetrics);
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+            font: '',
+            measureText(this: CanvasRenderingContext2D, text: string) {
+                const size = this.font.match(/([\d.]+)(px|pt)/);
+                const points = size ? Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) : 11;
+                const scale = points / 11;
+                return { width: text.length * 5 * scale, fontBoundingBoxAscent: 8 * scale, fontBoundingBoxDescent: 2 * scale, actualBoundingBoxAscent: 8 * scale, actualBoundingBoxDescent: 2 * scale };
+            },
+        } as unknown as CanvasRenderingContext2D);
+        Reflect.set(FontCache, '_context', null);
+        FontCache.invalidateMetrics(() => true);
     });
     afterEach(() => vi.restoreAllMocks());
 

@@ -1334,6 +1334,26 @@ describe('DocSelectionRenderService', () => {
         expect(document.activeElement).toBe(input);
     });
 
+    it('preserves the sibling editor focus during passive updates inside the same embed', () => {
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService();
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        TestLayoutService.root.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        const formulaInput = document.createElement('div');
+        formulaInput.dataset.uComp = input.dataset.uComp;
+        formulaInput.tabIndex = -1;
+        TestLayoutService.root.appendChild(formulaInput);
+        formulaInput.focus();
+
+        service.activate(12, 34);
+
+        expect(document.activeElement).toBe(formulaInput);
+        expect(service.canFocusing).toBe(false);
+
+        // An explicit pointer selection can still move focus between the editors.
+        service.activate(12, 34, true);
+        expect(document.activeElement).toBe(input);
+    });
+
     it('publishes hidden editor input, paste, focus, and blur events with the typed content', () => {
         const { input, renderUnit, service, univer } = createRealSelectionRenderService();
         cleanup.push(() => renderUnit.dispose(), () => univer.dispose());

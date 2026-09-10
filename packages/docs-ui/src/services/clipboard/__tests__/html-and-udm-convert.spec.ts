@@ -721,6 +721,42 @@ describe('test case in html and udm convert', () => {
             expect(html).toContain('src=remote-image-id');
         });
 
+        it('should serialize nested TOC fields as visible linked text without field markers', () => {
+            const doc: IDocumentData = {
+                id: 'copy-toc-html',
+                documentStyle: {},
+                body: {
+                    dataStream: '\u001F1 Intro\t\u001F3\u001E\u001E',
+                    customRanges: [{
+                        startIndex: 0,
+                        endIndex: 12,
+                        rangeId: 'toc',
+                        rangeType: CustomRangeType.FIELD,
+                        wholeEntity: false,
+                        properties: { fieldType: 'TOC', instruction: 'TOC \\o "1-3"' },
+                    }, {
+                        startIndex: 1,
+                        endIndex: 10,
+                        rangeId: 'toc-link',
+                        rangeType: CustomRangeType.HYPERLINK,
+                        properties: { bookmarkId: '_Toc1' },
+                    }, {
+                        startIndex: 9,
+                        endIndex: 11,
+                        rangeId: 'page-ref',
+                        rangeType: CustomRangeType.FIELD,
+                        wholeEntity: false,
+                        properties: { fieldType: 'PAGEREF', instruction: 'PAGEREF _Toc1 \\h' },
+                    }],
+                },
+            };
+
+            const html = getBodySliceHtml(doc, 0, doc.body!.dataStream.length);
+
+            expect(html).toBe('<a data-rangeid="toc-link" href="#_Toc1">1 Intro\t3</a>');
+            expect(html).not.toMatch(/[\u001E\u001F]/);
+        });
+
         it('should paste docs feature coverage from html with styles, blocks, lists and table dimensions', () => {
             const convertor = new HtmlToUDMService();
             const pasted = convertor.convert(`

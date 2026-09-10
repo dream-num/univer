@@ -52,6 +52,30 @@ describe('selection rect range helpers', () => {
         expect(isInSameTableCell(sameCell, otherCell)).toBe(false);
     });
 
+    it('uses the innermost table path for nested cell selections', () => {
+        const innerCell = (tableId: string, cell: number) => createNodePosition([
+            'pages',
+            0,
+            'skeTables',
+            'outer',
+            'rows',
+            0,
+            'cells',
+            0,
+            'skeTables',
+            tableId,
+            'rows',
+            0,
+            'cells',
+            cell,
+        ]);
+
+        expect(isValidRectRange(innerCell('inner', 0), innerCell('inner', 1))).toBe(true);
+        expect(isValidRectRange(innerCell('inner', 0), innerCell('other-inner', 1))).toBe(false);
+        expect(isInSameTableCell(innerCell('inner', 0), innerCell('inner', 0))).toBe(true);
+        expect(isInSameTableCell(innerCell('inner', 0), innerCell('inner', 1))).toBe(false);
+    });
+
     it('ignores column page paths when converting rect ranges', () => {
         const columnPosition = createNodePosition(['pages', 0, 'skeColumnGroups', 'cg-1', 'columns', 0, 'page']);
         const columnPage = { parent: { parent: { columnGroupId: 'cg-1' } } };

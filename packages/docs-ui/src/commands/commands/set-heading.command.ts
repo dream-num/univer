@@ -38,6 +38,12 @@ export interface ISetParagraphNamedStyleCommandParams {
     textRanges?: ITextRangeParam[];
 }
 
+function namedStyleToOutlineLevel(namedStyleType: NamedStyleType): number | undefined {
+    if (namedStyleType >= NamedStyleType.HEADING_1 && namedStyleType <= NamedStyleType.HEADING_5) {
+        return namedStyleType - NamedStyleType.HEADING_1;
+    }
+}
+
 export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleCommandParams> = {
     id: 'doc.command.set-paragraph-named-style',
     type: CommandType.COMMAND,
@@ -82,6 +88,7 @@ export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleComm
             style: {
                 namedStyleType: params.value,
                 headingId: !params.value || params.value === NamedStyleType.NORMAL_TEXT ? undefined : generateRandomId(6),
+                outlineLevel: namedStyleToOutlineLevel(params.value),
                 spaceAbove: undefined,
                 spaceBelow: undefined,
                 lineSpacing: undefined,
@@ -134,6 +141,7 @@ function insertNamedStyleParagraph(
                 paragraphStyle: {
                     namedStyleType,
                     headingId: !namedStyleType || namedStyleType === NamedStyleType.NORMAL_TEXT ? undefined : generateRandomId(6),
+                    outlineLevel: namedStyleToOutlineLevel(namedStyleType),
                 },
             }],
         },
@@ -224,6 +232,7 @@ export const QuickHeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams>
                 ...paragraphStyle,
                 headingId: generateRandomId(6),
                 namedStyleType: value,
+                outlineLevel: namedStyleToOutlineLevel(value),
                 lineSpacing: undefined,
                 spacingRule: undefined,
             },

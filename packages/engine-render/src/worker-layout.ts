@@ -41,6 +41,13 @@ export interface IDocumentLayoutStepResult {
     publication: IDocumentLayoutGeometryPublication | null;
 }
 
+export interface IDocumentLayoutPageResolution {
+    pageIndex: number;
+    pageNumber: number;
+    startOffset: number;
+    endOffset: number;
+}
+
 /**
  * Worker-safe owner of the document view model and incremental layout state.
  * Scheduling, transport, presentation and model revision ordering belong to callers.
@@ -120,6 +127,34 @@ export class DocumentLayoutSession extends Disposable {
             pageIndex,
             page: serializeDocumentSkeletonPage(page, true),
         };
+    }
+
+    resolvePageByOffset(offset: number): IDocumentLayoutPageResolution | null {
+        const pages = this._skeleton.getSkeletonData()?.pages;
+        if (pages == null || offset < 0) {
+            return null;
+        }
+        let low = 0;
+        let high = pages.length - 1;
+        while (low <= high) {
+            const pageIndex = Math.floor((low + high) / 2);
+            const page = pages[pageIndex];
+            if (offset < page.st) {
+                high = pageIndex - 1;
+            } else if (offset > page.ed) {
+                low = pageIndex + 1;
+            } else if (!page.isLayoutPlaceholder) {
+                return {
+                    pageIndex,
+                    pageNumber: page.pageNumber,
+                    startOffset: page.st,
+                    endOffset: page.ed,
+                };
+            } else {
+                return null;
+            }
+        }
+        return null;
     }
 
     cancel(generation?: number): void {

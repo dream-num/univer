@@ -43,6 +43,12 @@ export class DataStreamTreeNode {
         return new DataStreamTreeNode(nodeType, content);
     }
 
+    get contentStartIndex(): number {
+        // A table wrapper includes its child in the structural range, but not in its text content.
+        const firstChild = this.children[0];
+        return firstChild?.nodeType === DataStreamTreeNodeType.TABLE ? firstChild.endIndex + 1 : this.startIndex;
+    }
+
     dispose() {
         this.children.forEach((child) => {
             child.dispose();

@@ -34,9 +34,9 @@ export function isValidRectRange(anchorNodePosition: INodePosition, focusNodePos
         return false;
     }
 
-    const tableIdIndex = anchorPath.indexOf('skeTables') + 1;
-    const rowIndex = anchorPath.indexOf('rows') + 1;
-    const cellIndex = anchorPath.indexOf('cells') + 1;
+    const tableIdIndex = anchorPath.lastIndexOf('skeTables') + 1;
+    const rowIndex = anchorPath.lastIndexOf('rows') + 1;
+    const cellIndex = anchorPath.lastIndexOf('cells') + 1;
 
     const { tableId: anchorTableId, sliceIndex: anchorSliceIndex } = getTableIdAndSliceIndex(anchorPath[tableIdIndex] as string);
     const { tableId: focusTableId, sliceIndex: focusSliceIndex } = getTableIdAndSliceIndex(focusPath[tableIdIndex] as string);
@@ -66,12 +66,12 @@ export function isInSameTableCell(anchorNodePosition: INodePosition, focusNodePo
         return false;
     }
 
-    const anchorTableIdIndex = anchorPath.indexOf('skeTables') + 1;
-    const anchorRowIndex = anchorPath.indexOf('rows') + 1;
-    const anchorCellIndex = anchorPath.indexOf('cells') + 1;
-    const focusTableIdIndex = focusPath.indexOf('skeTables') + 1;
-    const focusRowIndex = focusPath.indexOf('rows') + 1;
-    const focusCellIndex = focusPath.indexOf('cells') + 1;
+    const anchorTableIdIndex = anchorPath.lastIndexOf('skeTables') + 1;
+    const anchorRowIndex = anchorPath.lastIndexOf('rows') + 1;
+    const anchorCellIndex = anchorPath.lastIndexOf('cells') + 1;
+    const focusTableIdIndex = focusPath.lastIndexOf('skeTables') + 1;
+    const focusRowIndex = focusPath.lastIndexOf('rows') + 1;
+    const focusCellIndex = focusPath.lastIndexOf('cells') + 1;
 
     if (
         anchorTableIdIndex === 0 ||
@@ -152,8 +152,8 @@ export function compareNodePositionInTable(a: INodePosition, b: INodePosition): 
     return aCellCount <= bCellCount;
 }
 
-function isEmptyCellPage(cell: IDocumentSkeletonPage) {
-    return cell.sections[0].columns[0].lines.length === 0;
+function isEmptyCellPage(cell: Nullable<IDocumentSkeletonPage>) {
+    return !cell?.sections[0]?.columns[0]?.lines.length;
 }
 
 function findNonEmptyCellPages(
@@ -328,7 +328,7 @@ export class NodePositionConvertToRectRange {
             if (table == null) {
                 const nestedTableContext = nestedTableContexts.find((context) => (
                     context.pageIndex === p &&
-                    (context.source === 'column' || context.source === 'header' || context.source === 'footer') &&
+                    (context.source === 'table-cell' || context.source === 'column' || context.source === 'header' || context.source === 'footer') &&
                     context.tableId.startsWith(tableId)
                 ));
                 if (nestedTableContext) {

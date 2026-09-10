@@ -44,6 +44,22 @@ function createTopBottomDrawing(top: number, height: number, angle = 0) {
 }
 
 describe('line model', () => {
+    it.each([PositionedObjectLayoutType.WRAP_SQUARE, PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM])('reserves asymmetric effect bounds while leaving drawing geometry unchanged (%s)', (layoutType) => {
+        const drawing = {
+            aTop: 20,
+            aLeft: 10,
+            width: 80,
+            height: 40,
+            angle: 0,
+            drawingOrigin: { layoutType, distB: 2, effectExtent: { left: 10, top: 4, right: 10, bottom: 9 } },
+        };
+        const page = { skeDrawings: new Map([['effects', drawing]]), skeTables: new Map() } as unknown as IDocumentSkeletonPage;
+        expect(calculateLineTopByDrawings(10, 58, page, null, null, 0, 100)).toBe(71);
+        expect(collisionDetection({ ...drawing, top: 20, left: 10, effectExtent: drawing.drawingOrigin.effectExtent } as never, 2, 64, 0, 100)).toBe(true);
+        expect(collisionDetection({ ...drawing, top: 20, left: 10 } as never, 2, 64, 0, 100)).toBe(false);
+        expect(drawing).toMatchObject({ aTop: 20, aLeft: 10, width: 80, height: 40 });
+    });
+
     it.each([
         { gap: 24, minimumWidth: 24, expectedTop: 130 },
         { gap: 25, minimumWidth: 24, expectedTop: 20 },
@@ -534,7 +550,7 @@ describe('line model', () => {
         expect(calculateLineTopByDrawings(15, 10, page, null, null, 110, 100)).toBe(10);
     });
 
-    it('only applies no-wrap tables to intersecting columns', () => {
+    it.each([TableTextWrapType.NONE, TableTextWrapType.WRAP])('moves text below a full-column table without affecting adjacent columns: %s', (textWrap) => {
         const page = {
             skeDrawings: new Map(),
             skeTables: new Map([
@@ -543,7 +559,7 @@ describe('line model', () => {
                     left: 0,
                     width: 100,
                     height: 42,
-                    tableSource: { textWrap: TableTextWrapType.NONE },
+                    tableSource: { textWrap },
                 }],
             ]),
         } as any;

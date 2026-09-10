@@ -51,6 +51,7 @@ import { IEditorService, SetDocZoomRatioOperation } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import {
     Documents,
+    DocumentSkeletonPageType,
     getDocsTableRenderViewport,
     getTableIdAndSliceIndex,
     Liquid,
@@ -138,6 +139,7 @@ interface IDrawingPositionContext {
     selectable: boolean;
     hostPage?: IDocumentSkeletonPage;
     clipOffset?: { left: number; top: number };
+    overflowClipBounds?: IDrawingClipBounds;
 }
 
 /**
@@ -147,11 +149,15 @@ interface IDrawingPositionContext {
  */
 export function getDocsOverlayRuntimeDrawing(
     skeletonDrawing: Pick<IDocDrawingBase, 'docTransform' | 'layoutType'> & Partial<IDocDrawingBase>,
-    currentDrawing: (Pick<IDocDrawingBase, 'docTransform' | 'layoutType'> & Partial<IDocDrawingBase>) | undefined
+    currentDrawing: (Pick<IDocDrawingBase, 'docTransform' | 'layoutType'> & Partial<IDocDrawingBase>) | undefined,
+    measuredSize?: { width: number; height: number }
 ): Pick<IDocDrawingBase, 'docTransform' | 'layoutType'> & Partial<IDocDrawingBase> {
-    return skeletonDrawing.layoutType === PositionedObjectLayoutType.WRAP_NONE &&
-        currentDrawing?.layoutType === PositionedObjectLayoutType.WRAP_NONE
-        ? currentDrawing
+    if (skeletonDrawing.layoutType === PositionedObjectLayoutType.WRAP_NONE &&
+        currentDrawing?.layoutType === PositionedObjectLayoutType.WRAP_NONE) {
+        return currentDrawing;
+    }
+    return measuredSize
+        ? { ...skeletonDrawing, docTransform: { ...skeletonDrawing.docTransform, size: measuredSize } }
         : skeletonDrawing;
 }
 
@@ -242,17 +248,30 @@ export function getDocsDrawingPageClipBounds(config: {
     pageOffsetTop: number;
     clipOffsetLeft?: number;
     clipOffsetTop?: number;
-    page: Pick<IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter, 'pageWidth' | 'pageHeight'>;
+    drawingLayoutType?: PositionedObjectLayoutType;
+    overflowClipBounds?: IDrawingClipBounds;
+    page: Pick<IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter, 'pageWidth' | 'pageHeight'> &
+        Partial<Pick<IDocumentSkeletonPage, 'type' | 'marginLeft' | 'marginTop'>>;
 }): IDrawingClipBounds | undefined {
     const { docsLeft, docsTop, pageOffsetLeft, pageOffsetTop, clipOffsetLeft = 0, clipOffsetTop = 0, page } = config;
+    if (
+        page.type === DocumentSkeletonPageType.CELL &&
+        config.drawingLayoutType === PositionedObjectLayoutType.WRAP_NONE &&
+        config.overflowClipBounds != null
+    ) {
+        return config.overflowClipBounds;
+    }
     const { pageWidth, pageHeight } = page;
     if (!Number.isFinite(pageWidth) || !Number.isFinite(pageHeight) || pageWidth <= 0 || pageHeight <= 0) {
         return;
     }
 
+    // A cell clip covers its physical box, not the vertically aligned text origin passed to drawing layout.
+    const cellInsetLeft = page.type === DocumentSkeletonPageType.CELL ? page.marginLeft ?? 0 : 0;
+    const cellInsetTop = page.type === DocumentSkeletonPageType.CELL ? page.marginTop ?? 0 : 0;
     return {
-        left: docsLeft + pageOffsetLeft + clipOffsetLeft,
-        top: docsTop + pageOffsetTop + clipOffsetTop,
+        left: docsLeft + pageOffsetLeft + clipOffsetLeft - cellInsetLeft,
+        top: docsTop + pageOffsetTop + clipOffsetTop - cellInsetTop,
         width: pageWidth,
         height: pageHeight,
     };
@@ -263,9 +282,13 @@ export function getDocsDrawingClipPage(config: {
         transform?: Pick<ITransformState, 'width' | 'height'>;
     };
     hostPage?: Pick<IDocumentSkeletonPage, 'pageWidth' | 'pageHeight'>;
-    page: Pick<IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter, 'pageWidth' | 'pageHeight'>;
+    page: Pick<IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter, 'pageWidth' | 'pageHeight'> &
+        Partial<Pick<IDocumentSkeletonPage, 'type'>>;
 }): Pick<IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter, 'pageWidth' | 'pageHeight'> {
     const { drawing, hostPage, page } = config;
+    if (hostPage && (page.type === DocumentSkeletonPageType.HEADER || page.type === DocumentSkeletonPageType.FOOTER)) {
+        return hostPage;
+    }
     if (hostPage == null || drawing.behindText !== true || drawing.transform == null) {
         return page;
     }
@@ -346,8 +369,12 @@ export function getDocsPageRelativeDrawingAnchorPage(config: {
     page: Pick<IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter, 'pageWidth' | 'pageHeight'>;
     clipPage: Pick<IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter, 'pageWidth' | 'pageHeight'>;
     hostPage?: Pick<IDocumentSkeletonPage, 'pageWidth' | 'pageHeight'>;
+    drawingLayoutType?: PositionedObjectLayoutType;
 }): Pick<IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter, 'pageWidth' | 'pageHeight'> | undefined {
     const { page, clipPage, hostPage } = config;
+    if (config.drawingLayoutType === PositionedObjectLayoutType.INLINE) {
+        return;
+    }
     if (hostPage != null && hostPage === clipPage) {
         return hostPage;
     }
@@ -554,6 +581,9 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                     return merge(
                         documentSkeleton.layoutProgress$.pipe(
                             map((progress) => ({ documentSkeleton, progress }))
+                        ),
+                        documentSkeleton.layoutPageMaterialized$.pipe(
+                            map(() => ({ documentSkeleton, progress: null }))
                         ),
                         positionRefresh$
                     );
@@ -762,7 +792,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
 
         const footerPage = footerId ? skeFooters.get(footerId)?.get(pageWidth) : undefined;
         if (footerPage != null) {
-            const footerTop = page.pageHeight - page.marginBottom + footerPage.marginTop;
+            const footerTop = page.pageHeight - footerPage.height - footerPage.marginBottom;
             this._collectSegmentDrawingPositions(
                 unitId,
                 footerPage,
@@ -815,6 +845,13 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         selectable: boolean,
         clipOffset?: { left: number; top: number }
     ): void {
+        const overflowClipBounds = getDocsDrawingPageClipBounds({
+            docsLeft,
+            docsTop,
+            pageOffsetLeft: this._liquid.x,
+            pageOffsetTop: this._liquid.y,
+            page: hostPage ?? page,
+        });
         this._calculateDrawingPosition(
             unitId,
             page,
@@ -825,7 +862,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             marginLeft,
             hostPage,
             selectable,
-            clipOffset
+            clipOffset,
+            overflowClipBounds
         );
         this._calculateTableCellDrawingPositions(
             unitId,
@@ -835,7 +873,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             updateDrawingMap,
             marginTop,
             marginLeft,
-            selectable
+            selectable,
+            overflowClipBounds
         );
         this._calculateColumnGroupDrawingPositions(
             unitId,
@@ -845,7 +884,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             updateDrawingMap,
             marginTop,
             marginLeft,
-            selectable
+            selectable,
+            overflowClipBounds
         );
     }
 
@@ -884,9 +924,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                 return;
             }
 
-            param.transform = updateParam.transform;
-            param.transforms = updateParam.transforms;
-            param.isMultiTransform = updateParam.isMultiTransform;
+            // A segment drawing may have been hidden before its first layout publication.
+            Object.assign(param, updateParam);
         });
 
         // Step 2: remove all drawing shapes.
@@ -921,7 +960,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         marginLeft: number,
         hostPage?: IDocumentSkeletonPage,
         selectable = true,
-        clipOffset?: { left: number; top: number }
+        clipOffset?: { left: number; top: number },
+        overflowClipBounds?: IDrawingClipBounds
     ) {
         const { skeDrawings } = page;
         const pageOffsetLeft = this._liquid.x;
@@ -942,6 +982,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             hostPage,
             selectable,
             clipOffset,
+            overflowClipBounds,
         };
         skeDrawings.forEach((drawing) => this._collectDrawingPosition(drawing, drawingPositionContext));
 
@@ -957,7 +998,11 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
     ): void {
         const { aLeft, aTop, angle: skeletonAngle, drawingId, drawingOrigin, height: skeletonHeight, width: skeletonWidth } = drawing;
         const currentDrawing = this._context.unit?.getSnapshot?.().drawings?.[drawingId];
-        const runtimeDrawing = getDocsOverlayRuntimeDrawing(drawingOrigin, currentDrawing);
+        const runtimeDrawing = getDocsOverlayRuntimeDrawing(
+            drawingOrigin,
+            currentDrawing,
+            drawing.customBlockRenderViewport ? { width: skeletonWidth, height: skeletonHeight } : undefined
+        );
         const { angle = skeletonAngle, size } = runtimeDrawing.docTransform;
         const height = size?.height ?? skeletonHeight;
         const width = size?.width ?? skeletonWidth;
@@ -977,14 +1022,15 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             clipOffsetLeft,
             clipOffsetTop,
             page: clipPage,
+            drawingLayoutType: runtimeDrawing.layoutType,
+            overflowClipBounds: context.overflowClipBounds,
         });
-        const anchorPage = runtimeDrawing.layoutType === PositionedObjectLayoutType.WRAP_NONE
-            ? getDocsPageRelativeDrawingAnchorPage({
-                page: context.page,
-                clipPage,
-                hostPage: context.hostPage,
-            })
-            : undefined;
+        const anchorPage = getDocsPageRelativeDrawingAnchorPage({
+            page: context.page,
+            clipPage,
+            hostPage: context.hostPage,
+            drawingLayoutType: runtimeDrawing.layoutType,
+        });
         const pageRelativeLeft = anchorPage == null
             ? undefined
             : getDocsPageRelativeDrawingLeft({
@@ -1032,7 +1078,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         updateDrawingMap: Record<string, IDrawingParamsWithBehindText>,
         baseMarginTop: number,
         baseMarginLeft: number,
-        selectable: boolean
+        selectable: boolean,
+        overflowClipBounds?: IDrawingClipBounds
     ) {
         page.skeTables?.forEach((table) => {
             table.rows.forEach((row) => {
@@ -1059,7 +1106,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                         marginLeft,
                         undefined,
                         selectable,
-                        { left: marginLeft, top: marginTop }
+                        { left: marginLeft, top: marginTop },
+                        overflowClipBounds
                     );
                     this._calculateTableCellDrawingPositions(
                         unitId,
@@ -1069,7 +1117,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                         updateDrawingMap,
                         marginTop,
                         marginLeft,
-                        selectable
+                        selectable,
+                        overflowClipBounds
                     );
                     this._calculateColumnGroupDrawingPositions(
                         unitId,
@@ -1079,7 +1128,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                         updateDrawingMap,
                         marginTop,
                         marginLeft,
-                        selectable
+                        selectable,
+                        overflowClipBounds
                     );
                 });
             });
@@ -1094,7 +1144,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         updateDrawingMap: Record<string, IDrawingParamsWithBehindText>,
         baseMarginTop: number,
         baseMarginLeft: number,
-        selectable: boolean
+        selectable: boolean,
+        overflowClipBounds?: IDrawingClipBounds
     ): void {
         page.skeColumnGroups?.forEach((columnGroup) => {
             columnGroup.columns.forEach((column) => {
@@ -1113,7 +1164,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                     marginLeft,
                     undefined,
                     selectable,
-                    clipOffset
+                    clipOffset,
+                    overflowClipBounds
                 );
                 this._calculateTableCellDrawingPositions(
                     unitId,
@@ -1123,7 +1175,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                     updateDrawingMap,
                     marginTop,
                     marginLeft,
-                    selectable
+                    selectable,
+                    overflowClipBounds
                 );
                 this._calculateColumnGroupDrawingPositions(
                     unitId,
@@ -1133,7 +1186,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                     updateDrawingMap,
                     marginTop,
                     marginLeft,
-                    selectable
+                    selectable,
+                    overflowClipBounds
                 );
             });
         });

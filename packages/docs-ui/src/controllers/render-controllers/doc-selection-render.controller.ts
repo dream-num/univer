@@ -355,8 +355,10 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                 }
                 selectionInitialized = true;
 
-                //TODO: @JOCS Only for docs. move to docs in the future.
-                this._docSelectionRenderService.focus();
+                // A background document may finish its first layout after the user switches editors.
+                if (this._docSelectionRenderService.canFocusing) {
+                    this._docSelectionRenderService.focus();
+                }
                 const docDataModel = this._context.unit;
                 const snapshot = docDataModel.getSnapshot();
                 const offset = findFirstCursorOffset(snapshot);
@@ -364,6 +366,14 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                     unitId,
                     subUnitId: unitId,
                 };
+                const currentSelection = this._docSelectionManagerService.getSelectionInfo(selectionTarget);
+                if (currentSelection && (currentSelection.textRanges.length > 0 || currentSelection.rectRanges.length > 0)) {
+                    this._docSelectionManagerService.refreshSelection(
+                        selectionTarget,
+                        currentSelection.isEditing
+                    );
+                    return;
+                }
                 this._docSelectionManagerService.replaceSelectionInfoWithoutRefresh({
                     textRanges: [{
                         startOffset: offset,

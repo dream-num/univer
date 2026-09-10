@@ -109,6 +109,8 @@ const locale: typeof enUS = {
             selection: 'Текущее выделение',
             wordCount: 'Слов: {0}',
             selectedWords: 'Слов: {0} из {1}',
+            currentPage: 'Страница {0}',
+            currentPageOfTotal: 'Страница {0} из {1}',
             pages: 'Страницы',
             words: 'Слова',
             charactersWithoutSpaces: 'Знаки (без пробелов)',

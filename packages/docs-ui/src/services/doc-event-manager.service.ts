@@ -28,7 +28,7 @@ import type {
     IRenderContext,
     IRenderModule,
 } from '@univerjs/engine-render';
-import { Disposable, fromEventSubject, Inject, PresetListType } from '@univerjs/core';
+import { CustomRangeType, Disposable, fromEventSubject, Inject, PresetListType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import {
     CURSOR_TYPE,
@@ -36,12 +36,13 @@ import {
     documentSkeletonTableIterator,
     getDocsTableRenderViewport,
     getTableIdAndSliceIndex,
+    getTopmostDocsTableHit,
     TRANSFORM_CHANGE_OBSERVABLE_TYPE,
 } from '@univerjs/engine-render';
 import { BehaviorSubject, distinctUntilChanged, filter, map, Subject, switchMap, take, tap, throttleTime } from 'rxjs';
 import { DOC_VERTICAL_PADDING } from '../types/const/padding';
 import { transformOffset2Bound } from './doc-popup-manager.service';
-import { NodePositionConvertToCursor } from './selection/convert-text-range';
+import { findDocRangeNodePositions, NodePositionConvertToCursor } from './selection/convert-text-range';
 import { getLineBounding } from './selection/text-range';
 
 export interface ICustomRangeBound {
@@ -59,7 +60,6 @@ export interface IBulletBound {
 }
 
 const calcDocRangePositions = (range: ITextRangeParam, documents: Documents, skeleton: DocumentSkeleton, pageIndex: number): IBoundRectNoAngle[] | undefined => {
-    const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, true, range.segmentId, pageIndex);
     const skeletonData = skeleton.getSkeletonData();
     let end = range.collapsed ? range.startOffset : range.endOffset - 1;
     if (range.segmentId) {
@@ -68,16 +68,16 @@ const calcDocRangePositions = (range: ITextRangeParam, documents: Documents, ske
             end = Math.min(root.ed, end);
         }
     }
-    // `end` is inclusive: a non-collapsed range covers the final glyph,
-    // not just its leading caret edge (which gives single-glyph links no area).
-    const endPosition = skeleton.findNodePositionByCharIndex(end, range.collapsed === true, range.segmentId, pageIndex);
-    if (!endPosition || !startPosition) {
+    // SDTs may wrap a cell, row, table, or block. Their structural sentinels do not
+    // have glyphs, so resolve the first and last visible positions inside the range.
+    const positions = findDocRangeNodePositions(skeleton, range.startOffset, end, range.segmentId, pageIndex);
+    if (!positions) {
         return;
     }
 
     const documentOffsetConfig = documents.getOffsetConfig();
     const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
-    const { borderBoxPointGroup } = convertor.getRangePointData(startPosition, endPosition);
+    const { borderBoxPointGroup } = convertor.getRangePointData(positions.startPosition, positions.endPosition);
     const bounds = getLineBounding(borderBoxPointGroup);
 
     return bounds.map((rect) => ({
@@ -455,6 +455,8 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     readonly hoverTableRealTime$ = this._hoverTable$.asObservable();
 
     private _customRangeDirty = true;
+    private _customRangeCount = -1;
+    private _customRangeSkeletonSignature = '';
     private _bulletDirty = true;
     private _paragraphDirty = true;
     private _tableBoundsDirty = true;
@@ -617,8 +619,9 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
             const ranges = this._calcActiveRanges(point);
             if (ranges.length) {
+                const hyperlink = ranges.filter(({ range }) => range.rangeType === CustomRangeType.HYPERLINK).pop();
                 this._clickCustomRanges$.next({
-                    ...ranges.pop()!,
+                    ...(hyperlink ?? ranges.pop()!),
                     ctrlKey: !!down.ctrlKey,
                     metaKey: !!down.metaKey,
                 });
@@ -664,9 +667,17 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                 segmentId,
             };
 
-            const rects = calcDocRangePositions(textRange, this._documents, this._skeleton, segmentPage);
+            let rects: IBoundRectNoAngle[] | undefined;
+            try {
+                rects = calcDocRangePositions(textRange, this._documents, this._skeleton, segmentPage);
+            } catch {
+                // A structural wrapper can span incompatible nested page paths. It is
+                // not a text hit target and must not prevent later, inner controls
+                // from receiving hover and click events.
+                return;
+            }
             if (!rects) {
-                return null;
+                return;
             }
 
             layouts.push({
@@ -676,15 +687,21 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                 segmentPageIndex: segmentPage,
             });
         });
-
         return layouts;
     }
 
     private _buildCustomRangeBounds() {
-        if (!this._customRangeDirty) {
+        const currentRangeCount = this._context.unit.getBody?.()?.customRanges?.length ?? 0;
+        const pages = this._skeleton.getSkeletonData()?.pages ?? [];
+        const currentSkeletonSignature = `${pages.length}:${pages.at(-1)?.ed ?? -1}`;
+        const cacheMatchesDocument = this._customRangeCount === -1 || this._customRangeCount === currentRangeCount;
+        const cacheMatchesSkeleton = this._customRangeSkeletonSignature === '' || this._customRangeSkeletonSignature === currentSkeletonSignature;
+        if (!this._customRangeDirty && cacheMatchesDocument && cacheMatchesSkeleton && (currentRangeCount === 0 || this._customRangeBounds.length > 0)) {
             return;
         }
         this._customRangeDirty = false;
+        this._customRangeCount = currentRangeCount;
+        this._customRangeSkeletonSignature = currentSkeletonSignature;
         const customRangeBounds: ICustomRangeBound[] = [];
 
         customRangeBounds.push(...this._buildCustomRangeBoundsBySegment());
@@ -1129,7 +1146,12 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         const { x, y } = evt;
         this._buildTableBounds();
 
-        const table = Array.from(this._tableBounds.values()).find((bound) => isPointInRect(x, y, getTableBlockMenuHoverRect(bound.rect)));
+        const table = getTopmostDocsTableHit(
+            Array.from(this._tableBounds.values()),
+            (bound) => isPointInRect(x, y, bound.rect),
+            (bound) => isPointInRect(x, y, getTableBlockMenuHoverRect(bound.rect)),
+            (outer, inner) => getRectArea(inner.rect) < getRectArea(outer.rect) && isRectContainingRect(outer.rect, inner.rect)
+        );
         this._hoverTable$.next(table);
 
         if (table) {

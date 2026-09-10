@@ -19,8 +19,8 @@ import { BreakPointType } from '../../break';
 import { LineBreaker } from '../../line-breaker';
 import { LineBreakerLinkEnhancer } from '../link-enhancer';
 
-function collectBreaks(content: string) {
-    const enhancer = new LineBreakerLinkEnhancer(new LineBreaker(content));
+function collectBreaks(content: string, allowLinkBreaks = true) {
+    const enhancer = new LineBreakerLinkEnhancer(new LineBreaker(content), allowLinkBreaks);
     const points: Array<{ position: number; type: BreakPointType }> = [];
     while (true) {
         const bk = enhancer.nextBreakPoint();
@@ -36,6 +36,37 @@ function collectBreaks(content: string) {
 }
 
 describe('link enhancer', () => {
+    it.each([
+        ['说明', 'http://www.swsresearch.com', '网站。'],
+        ['😀 ', 'https://example.com/a?b=1', ' next'],
+        ['', 'www.example.com', ''],
+        ['地址', 'https://example.com', '，继续 https://second.example/path 结束'],
+    ])('preserves a complete URL and surrounding text when internal breaks are disabled (%s)', (prefix, url, suffix) => {
+        const content = prefix + url + suffix;
+        const points = collectBreaks(content, false).map((point) => point.position);
+        const end = prefix.length + url.length;
+        expect(points.some((position) => position > prefix.length && position < end)).toBe(false);
+        // Keep normal trailing-space and closing-punctuation rules intact.
+        expect(points.find((position) => position >= end)).toBe(end + (suffix.startsWith(' ') || suffix.startsWith('，') ? 1 : 0));
+        expect(points[points.length - 1]).toBe(content.length);
+        expect(points.every((position, index) => index === 0 || position > points[index - 1])).toBe(true);
+        if (prefix) {
+            expect(points).toContain(prefix.length);
+        }
+    });
+
+    it.each([
+        ['需以本公司', 'http://www.swsresearch.com', '网站刊载为准'],
+        ['visit ', 'https://foo123bar.example/path-now', ' and continue'],
+        ['', `www.${'a'.repeat(40)}.com`, ''],
+    ])('keeps a link intact when character-level wrapping is disabled: %s%s%s', (prefix, link, suffix) => {
+        const content = prefix + link + suffix;
+        const breaks = collectBreaks(content, false);
+        expect(breaks.some((point) => point.position > prefix.length && point.position < prefix.length + link.length)).toBe(false);
+        expect(breaks[breaks.length - 1].position).toBe(content.length);
+        expect(breaks.every((point, index) => index === 0 || point.position > breaks[index - 1].position)).toBe(true);
+    });
+
     it('keeps normal text breaking behavior without links', () => {
         const breaks = collectBreaks('hello world');
         expect(breaks.length).toBeGreaterThan(0);

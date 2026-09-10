@@ -21,6 +21,7 @@ import { Dropdown, Separator } from '@univerjs/design';
 import { LoadingMultiIcon, StatisticalFunctionIcon } from '@univerjs/icons';
 import { ToolbarButton, useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
+import { DocPageStatus } from './DocPageStatus';
 import { useDocStatistics } from './use-doc-statistics';
 
 type DisplayStatistics = IDocumentStatistics & { pages: number; lines: number };
@@ -185,6 +186,7 @@ export function DocStatistics() {
                 >
                     <span className="univer-flex univer-items-center univer-gap-1.5">
                         <StatisticalFunctionIcon className="univer-size-4" />
+                        <DocPageStatus />
                         <span>{label}</span>
                         {loading && <LoadingMultiIcon className="univer-size-3.5 univer-animate-spin" />}
                     </span>

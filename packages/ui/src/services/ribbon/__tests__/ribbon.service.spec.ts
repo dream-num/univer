@@ -50,6 +50,34 @@ function createService(univerInstanceService?: { focused$: BehaviorSubject<strin
 }
 
 describe('DesktopRibbonService', () => {
+    it('keeps the more specific contextual tab active and falls back to its container tab', () => {
+        const { service, menuManagerService } = createService();
+        let active = '';
+        const activeSub = service.activatedTab$.subscribe((tab) => active = tab);
+        menuManagerService.appendRootMenu({
+            [MenuManagerPosition.RIBBON]: {
+                'table-tools': {
+                    order: 100,
+                    contextual: true,
+                    group: { order: 0, command: { order: 0, menuItemFactory: () => ({ id: 'table-command' }) } },
+                },
+                'content-control-tools': {
+                    order: 110,
+                    contextual: true,
+                    group: { order: 0, command: { order: 0, menuItemFactory: () => ({ id: 'sdt-command' }) } },
+                },
+            },
+        } as MenuSchemaType);
+
+        service.showContextualTab('content-control-tools', { activate: true, priority: 10 });
+        service.showContextualTab('table-tools', { activate: true });
+        expect(active).toBe('content-control-tools');
+
+        service.hideContextualTab('content-control-tools');
+        expect(active).toBe('table-tools');
+        activeSub.unsubscribe();
+    });
+
     it('shows contextual ribbon tabs only when requested and restores the last regular tab when hidden', () => {
         const { service, menuManagerService } = createService();
         const ribbons: string[][] = [];

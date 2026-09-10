@@ -109,6 +109,8 @@ const locale: typeof enUS = {
             selection: 'Pilihan saat ini',
             wordCount: '{0} kata',
             selectedWords: '{0} dari {1} kata',
+            currentPage: 'Halaman {0}',
+            currentPageOfTotal: 'Halaman {0} dari {1}',
             pages: 'Halaman',
             words: 'Kata',
             charactersWithoutSpaces: 'Karakter (tanpa spasi)',

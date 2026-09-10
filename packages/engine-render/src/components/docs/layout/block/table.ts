@@ -27,20 +27,33 @@ import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { DocumentFootnoteLayout } from '../footnote-layout';
 import type { ICellSkeletonBuildState } from '../model/page';
 import type { ILayoutContext } from '../tools';
-import { BooleanNumber, TableAlignmentType, TableRowHeightRule, VerticalAlignmentType } from '@univerjs/core';
+import {
+    BooleanNumber,
+    DataStreamTreeTokenType,
+    NumberUnitType,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
+    SpacingRule,
+    TableAlignmentType,
+    TableRowHeightRule,
+    TableSizeType,
+    VerticalAlignmentType,
+} from '@univerjs/core';
 import { DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility } from '../../document-compatibility';
 import {
     createNullCellPage,
     createSkeletonCellPages,
+    getRowBorderInset,
     startSkeletonCellPagesBuild,
     stepSkeletonCellPagesBuild,
 } from '../model/page';
 
-const precomputedTableSkeletons = new WeakMap<ILayoutContext, Map<number, IDocumentSkeletonTable>>();
+// Body, header and footer streams can share both table IDs and character offsets.
+const precomputedTableSkeletons = new WeakMap<ILayoutContext, WeakMap<DataStreamTreeNode, IDocumentSkeletonTable>>();
 const precomputedSlicedTableSkeletons = new WeakMap<
     ILayoutContext,
-    Map<number, { availableHeight: number; result: ISlicedTableSkeletonParams }>
+    WeakMap<DataStreamTreeNode, { availableHeight: number; result: ISlicedTableSkeletonParams }>
 >();
 
 export interface ITableSkeletonBuildState {
@@ -60,6 +73,7 @@ export interface ITableSkeletonBuildState {
     currentColumnIndex: number;
     currentRowLeft: number;
     currentRowHeight: number;
+    mergedCellContentHeights: Map<string, number>;
     currentCellBuild: Nullable<ICellSkeletonBuildState>;
 }
 
@@ -70,11 +84,16 @@ export function startTableSkeletonBuild(
     tableNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig
 ): Nullable<ITableSkeletonBuildState> {
-    const table = viewModel.getTableByStartIndex(tableNode.startIndex)?.tableSource;
-    if (table == null) {
+    const tableSource = viewModel.getTableByStartIndex(tableNode.startIndex)?.tableSource;
+    if (tableSource == null) {
         console.warn(`Table not found when creating table skeleton at index ${tableNode.startIndex}`);
         return null;
     }
+    const table = resolveTableLayoutColumns(
+        tableSource,
+        getTableAvailableWidth(curPage),
+        isTraditionalDocumentCompatibility(sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy())
+    );
 
     return {
         ctx,
@@ -93,6 +112,7 @@ export function startTableSkeletonBuild(
         currentColumnIndex: 0,
         currentRowLeft: 0,
         currentRowHeight: 0,
+        mergedCellContentHeights: new Map(),
         currentCellBuild: null,
     };
 }
@@ -124,15 +144,15 @@ export function stepTableSkeletonBuild(state: ITableSkeletonBuildState): boolean
 
 export function cachePrecomputedTableSkeleton(
     ctx: ILayoutContext,
-    tableStartIndex: number,
+    tableNode: DataStreamTreeNode,
     tableSkeleton: IDocumentSkeletonTable
 ): void {
     let cache = precomputedTableSkeletons.get(ctx);
     if (cache == null) {
-        cache = new Map();
+        cache = new WeakMap();
         precomputedTableSkeletons.set(ctx, cache);
     }
-    cache.set(tableStartIndex, tableSkeleton);
+    cache.set(tableNode, tableSkeleton);
 }
 
 export function createTableSkeleton(
@@ -142,7 +162,7 @@ export function createTableSkeleton(
     tableNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig
 ): Nullable<IDocumentSkeletonTable> {
-    const cached = precomputedTableSkeletons.get(ctx)?.get(tableNode.startIndex);
+    const cached = precomputedTableSkeletons.get(ctx)?.get(tableNode);
     if (cached != null) {
         return cached;
     }
@@ -240,7 +260,9 @@ function _appendUnslicedCell(state: ITableSkeletonBuildState, cellPageSkeletons:
     }
     const pageHeight = getCellPagesLayoutHeight(
         cellPageSkeletons,
-        state.curPage.type === DocumentSkeletonPageType.CELL
+        state.curPage.type === DocumentSkeletonPageType.CELL,
+        state.viewModel,
+        state.table.tableRows[row]
     );
     cellPageSkeleton.left = state.currentRowLeft;
     if (shouldAdvanceTableCellLeft(state.table, row, col)) {
@@ -248,7 +270,12 @@ function _appendUnslicedCell(state: ITableSkeletonBuildState, cellPageSkeletons:
     }
     cellPageSkeleton.parent = rowSkeleton;
     rowSkeleton.cells.push(cellPageSkeleton);
-    state.currentRowHeight = Math.max(state.currentRowHeight, pageHeight);
+    const rowSpan = state.table.tableRows[row].tableCells[col].rowSpan ?? 1;
+    if (rowSpan > 1) {
+        state.mergedCellContentHeights.set(`${row}:${col}`, pageHeight);
+    } else {
+        state.currentRowHeight = Math.max(state.currentRowHeight, pageHeight);
+    }
 }
 
 function _finishUnslicedTableRow(state: ITableSkeletonBuildState): void {
@@ -258,7 +285,10 @@ function _finishUnslicedTableRow(state: ITableSkeletonBuildState): void {
     let rowHeight = state.currentRowHeight;
 
     if (hRule === TableRowHeightRule.AT_LEAST) {
-        rowHeight = Math.max(rowHeight, val.v);
+        const traditional = isTraditionalDocumentCompatibility(
+            state.sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy()
+        );
+        rowHeight = Math.max(rowHeight, getRowMinimumHeight(state.table, state.rowIndex, traditional));
     } else if (hRule === TableRowHeightRule.EXACT) {
         rowHeight = val.v;
     }
@@ -280,15 +310,20 @@ function _finishUnslicedTableRow(state: ITableSkeletonBuildState): void {
 
 function _finishTableSkeletonBuild(state: ITableSkeletonBuildState): void {
     const { curPage, table, tableSkeleton } = state;
+    applyMergedCellContentHeights(tableSkeleton, state.mergedCellContentHeights);
     tableSkeleton.width = state.tableWidth;
-    tableSkeleton.height = state.rowTop;
-    const mergedRowHeightsChanged = isTraditionalDocumentCompatibility(state.sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy()) &&
+    tableSkeleton.height = tableSkeleton.rows.reduce((height, row) => {
+        row.top = height;
+        return height + row.height;
+    }, 0);
+    if (isTraditionalDocumentCompatibility(state.sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy())) {
         resolveMergedRowHeights(tableSkeleton);
+    }
     applyMergedCellSpanHeights(tableSkeleton);
-    if (mergedRowHeightsChanged) {
-        for (const row of tableSkeleton.rows) {
-            _verticalAlignInCell(row, table.tableRows[row.index]);
-        }
+    applyTableOuterBorderSpacing(tableSkeleton, state.sectionBreakConfig);
+
+    for (const rowSkeleton of tableSkeleton.rows) {
+        _verticalAlignInCell(rowSkeleton, table.tableRows[rowSkeleton.index]);
     }
 
     const { pageWidth, marginLeft = 0, marginRight = 0 } = curPage;
@@ -301,30 +336,134 @@ function _finishTableSkeletonBuild(state: ITableSkeletonBuildState): void {
     state.complete = true;
 }
 
-function getCellPagesLayoutHeight(pages: IDocumentSkeletonPage[], includeContinuations: boolean): number {
-    const measuredPages = includeContinuations ? pages : pages.slice(0, 1);
-    return measuredPages.reduce((total, page) => {
-        const { marginTop = 0, marginBottom = 0 } = page;
-        return total + page.height + marginTop + marginBottom;
-    }, 0);
+function applyMergedCellContentHeights(
+    tableSkeleton: IDocumentSkeletonTable,
+    mergedCellContentHeights: Map<string, number>
+): void {
+    for (const [cellKey, contentHeight] of mergedCellContentHeights) {
+        const [rowIndex, columnIndex] = cellKey.split(':').map(Number);
+        const rowSpan =
+            tableSkeleton.tableSource?.tableRows[rowIndex]?.tableCells[columnIndex]?.rowSpan ?? 1;
+        const spannedRows = tableSkeleton.rows.slice(rowIndex, rowIndex + rowSpan);
+        const spanHeight = spannedRows.reduce((height, row) => height + row.height, 0);
+        const lastRow = spannedRows[spannedRows.length - 1];
+
+        if (lastRow != null && contentHeight > spanHeight) {
+            lastRow.height += contentHeight - spanHeight;
+        }
+    }
+
+    for (const rowSkeleton of tableSkeleton.rows) {
+        for (const cellPageSkeleton of rowSkeleton.cells) {
+            cellPageSkeleton.pageHeight = rowSkeleton.height;
+        }
+    }
 }
 
-export function rollbackListCache(listLevel: Map<string, IParagraphList[][]>, table: DataStreamTreeNode) {
+function rollbackListCache(listLevel: Map<string, IParagraphList[][]>, table: DataStreamTreeNode): void {
     const { startIndex, endIndex } = table;
-
     for (const paragraphLists of listLevel.values()) {
         for (const paragraphList of paragraphLists) {
             if (paragraphList == null) {
                 continue;
             }
-
-            const paragraphListIndex = paragraphList.findIndex((p) => p.paragraph.startIndex > startIndex && p.paragraph.startIndex < endIndex);
-
-            if (paragraphListIndex > -1) {
-                paragraphList.splice(paragraphListIndex);
+            const index = paragraphList.findIndex((item) => item.paragraph.startIndex > startIndex && item.paragraph.startIndex < endIndex);
+            if (index > -1) {
+                paragraphList.splice(index);
             }
         }
     }
+}
+
+function getTableBorderHeight(firstRow: ITableRow, lastRow: ITableRow, traditional: boolean): number {
+    return traditional ? getRowBorderInset(firstRow, 'borderTop') + getRowBorderInset(lastRow, 'borderBottom') : 0;
+}
+
+function getRowMinimumHeight(table: ITable, index: number, traditional: boolean): number {
+    const row = table.tableRows[index];
+    const minimum = row.trHeight.val.v;
+    if (!traditional || minimum <= 0) {
+        return minimum;
+    }
+    // Word's authored minimum excludes the collapsed row-border insets. Content
+    // measurement already contains them, so add them only to the minimum branch.
+    const previous = table.tableRows[index - 1];
+    const next = table.tableRows[index + 1];
+    const top = Math.max(getRowBorderInset(row, 'borderTop'), previous ? getRowBorderInset(previous, 'borderBottom') : 0);
+    const bottom = Math.max(getRowBorderInset(row, 'borderBottom'), next ? getRowBorderInset(next, 'borderTop') : 0);
+    return minimum + top + bottom;
+}
+
+function applyTableOuterBorderSpacing(table: IDocumentSkeletonTable, config: ISectionBreakConfig): void {
+    if (!isTraditionalDocumentCompatibility(config.documentCompatibilityPolicy) || table.rows.length === 0) {
+        return;
+    }
+    const firstRow = table.rows[0].rowSource;
+    const lastRow = table.rows[table.rows.length - 1].rowSource;
+    const top = getRowBorderInset(firstRow, 'borderTop');
+    for (const row of table.rows) {
+        row.top += top;
+    }
+    table.height += top + getRowBorderInset(lastRow, 'borderBottom');
+}
+
+function getCellPagesLayoutHeight(
+    pages: IDocumentSkeletonPage[],
+    includeContinuations: boolean,
+    viewModel: DocumentViewModel,
+    rowSource?: ITableRow
+): number {
+    const measuredPages = includeContinuations ? pages : pages.slice(0, 1);
+    return measuredPages.reduce((total, page) => total + getCellPageLayoutHeight(page, viewModel, rowSource), 0);
+}
+
+function getCellPageLayoutHeight(page: IDocumentSkeletonPage, viewModel: DocumentViewModel, rowSource?: ITableRow): number {
+    if (
+        rowSource?.trHeight.hRule === TableRowHeightRule.AT_LEAST &&
+        rowSource.trHeight.val.v > 0 &&
+        isStructurallyEmptyCellPage(page, viewModel)
+    ) {
+        return 0;
+    }
+
+    const { marginTop = 0, marginBottom = 0 } = page;
+    if (page.cellTextDirection === 'tbRlV') {
+        return page.height + page.marginLeft + page.marginRight;
+    }
+    return page.height + marginTop + marginBottom;
+}
+
+function isStructurallyEmptyCellPage(page: IDocumentSkeletonPage, viewModel: DocumentViewModel): boolean {
+    if (
+        (page.skeTables?.size ?? 0) > 0 ||
+        (page.skeDrawings?.size ?? 0) > 0 ||
+        (page.skeColumnGroups?.size ?? 0) > 0
+    ) {
+        return false;
+    }
+
+    const lines = page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines));
+    // An authored blank paragraph with fixed/minimum leading is content, not a table terminator.
+    if (lines.some((line) => {
+        const style = viewModel.getParagraph(line.paragraphIndex)?.paragraphStyle;
+        return (style?.spacingRule === SpacingRule.EXACT || style?.spacingRule === SpacingRule.AT_LEAST) &&
+            (style.lineSpacing ?? 0) > 0;
+    })) {
+        return false;
+    }
+    const glyphs = lines.flatMap((line) =>
+        line.divides.flatMap((divide) => divide.glyphGroup)
+    );
+    if (glyphs.length === 0) {
+        return false;
+    }
+
+    return glyphs.every(
+        (glyph) =>
+            glyph.streamType === DataStreamTreeTokenType.PARAGRAPH ||
+            glyph.streamType === DataStreamTreeTokenType.SECTION_BREAK ||
+            glyph.streamType === DataStreamTreeTokenType.DOCS_END
+    );
 }
 
 export interface ISlicedTableSkeletonParams {
@@ -370,10 +509,15 @@ export function startTableSkeletonsBuild(
     availableHeight: number
 ): Nullable<ISlicedTableSkeletonBuildState> {
     const { startIndex, endIndex, children: rowNodes } = tableNode;
-    const table = viewModel.getTableByStartIndex(startIndex)?.tableSource;
-    if (table == null) {
+    const tableSource = viewModel.getTableByStartIndex(startIndex)?.tableSource;
+    if (tableSource == null) {
         return null;
     }
+    const table = resolveTableLayoutColumns(
+        tableSource,
+        getTableAvailableWidth(curPage),
+        isTraditionalDocumentCompatibility(sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy())
+    );
 
     const skeTables = [getNullTableSkeleton(startIndex, endIndex, table)];
     return {
@@ -387,7 +531,7 @@ export function startTableSkeletonsBuild(
         skeTables,
         createCache: {
             rowTop: 0,
-            tableWidth: precomputedTableSkeletons.get(ctx)?.get(startIndex)?.width ?? 0,
+            tableWidth: precomputedTableSkeletons.get(ctx)?.get(tableNode)?.width ?? 0,
             remainHeight: availableHeight,
             repeatRows: getLeadingRepeatHeaderRows(table, rowNodes),
             repeatRowsHeight: 0,
@@ -416,19 +560,23 @@ export function stepTableSkeletonsBuild(state: ISlicedTableSkeletonBuildState): 
     const cellNode = rowNode.children[state.columnIndex];
     const rowSource = state.table.tableRows[state.rowIndex];
     const cellConfig = rowSource.tableCells[state.columnIndex];
-    const precomputedRow = precomputedTableSkeletons.get(state.ctx)?.get(state.tableNode.startIndex)?.rows[state.rowIndex];
+    const traditional = isTraditionalDocumentCompatibility(state.sectionBreakConfig.documentCompatibilityPolicy);
+    const firstRowSource = getCurTableSkeleton(state.skeTables).rows[0]?.rowSource ?? rowSource;
+    const firstBorderHeight = getTableBorderHeight(firstRowSource, rowSource, traditional);
+    const nextBorderHeight = getTableBorderHeight(rowSource, rowSource, traditional);
+    const precomputedRow = precomputedTableSkeletons.get(state.ctx)?.get(state.tableNode)?.rows[state.rowIndex];
     // Pagination uses the same current-generation measurements as the synchronous
     // path. Only cells in rows that actually need splitting must be laid out again.
-    const reusePrecomputedRow = state.cellPageHeights == null && canReusePrecomputedTableRow(state.curPage, state.createCache, rowSource, precomputedRow);
+    const reusePrecomputedRow = state.cellPageHeights == null && canReusePrecomputedTableRow(state.curPage, state.createCache, rowSource, precomputedRow, firstBorderHeight);
     if (!reusePrecomputedRow && cellNode != null && !isCoveredTableCell(cellConfig)) {
-        const pageContentHeight = getAvailableHeight(state.curPage, state.createCache, false);
-        const availableHeight = getAvailableHeight(state.curPage, state.createCache, true);
+        const pageContentHeight = getAvailableHeight(state.curPage, state.createCache, false) - nextBorderHeight;
+        const availableHeight = getAvailableHeight(state.curPage, state.createCache, true) - nextBorderHeight;
         const canRowSplit =
             rowSource.cantSplit !== BooleanNumber.TRUE &&
-            rowSource.trHeight.hRule === TableRowHeightRule.AUTO;
-        const needOpenNewTable = state.createCache.remainHeight <= 72;
+            rowSource.trHeight.hRule !== TableRowHeightRule.EXACT;
+        const needOpenNewTable = state.createCache.remainHeight <= firstBorderHeight;
         const firstCellPageHeight = canRowSplit && !needOpenNewTable
-            ? state.createCache.remainHeight
+            ? state.createCache.remainHeight - firstBorderHeight
             : availableHeight;
         state.pendingCellBuild ??= startSkeletonCellPagesBuild(
             state.ctx,
@@ -503,20 +651,21 @@ export function stepTableSkeletonsBuild(state: ISlicedTableSkeletonBuildState): 
 
 export function cachePrecomputedSlicedTableSkeletons(
     ctx: ILayoutContext,
-    tableStartIndex: number,
+    tableNode: DataStreamTreeNode,
     availableHeight: number,
     result: ISlicedTableSkeletonParams
 ): void {
     let cache = precomputedSlicedTableSkeletons.get(ctx);
     if (cache == null) {
-        cache = new Map();
+        cache = new WeakMap();
         precomputedSlicedTableSkeletons.set(ctx, cache);
     }
-    cache.set(tableStartIndex, { availableHeight, result });
+    cache.set(tableNode, { availableHeight, result });
 }
 
 function _finishTableSkeletonsBuild(state: ISlicedTableSkeletonBuildState): void {
     updateTableSkeletonsPosition(state.createCache, state.curPage, state.skeTables, state.table);
+    state.skeTables.forEach((table) => applyTableOuterBorderSpacing(table, state.sectionBreakConfig));
     const policy =
         state.sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy();
     state.result = {
@@ -540,13 +689,13 @@ export function createTableSkeletons(
 ): ISlicedTableSkeletonParams {
     const skeTables: IDocumentSkeletonTable[] = [];
     const { startIndex, endIndex, children: rowNodes } = tableNode;
-    const precomputedSliced = precomputedSlicedTableSkeletons.get(ctx)?.get(startIndex);
+    const precomputedSliced = precomputedSlicedTableSkeletons.get(ctx)?.get(tableNode);
     if (
         precomputedSliced != null &&
         Math.abs(precomputedSliced.availableHeight - availableHeight) < 0.01
     ) {
-        precomputedSlicedTableSkeletons.get(ctx)?.delete(startIndex);
-        precomputedTableSkeletons.get(ctx)?.delete(startIndex);
+        precomputedSlicedTableSkeletons.get(ctx)?.delete(tableNode);
+        precomputedTableSkeletons.get(ctx)?.delete(tableNode);
         return precomputedSliced.result;
     }
 
@@ -566,18 +715,23 @@ export function createTableSkeletons(
         return { skeTables: [], fromCurrentPage: false };
     }
 
-    const table = viewModel.getTableByStartIndex(startIndex)?.tableSource;
-    if (table == null) {
+    const tableSource = viewModel.getTableByStartIndex(startIndex)?.tableSource;
+    if (tableSource == null) {
         console.warn(`Table not found when creating sliced table skeletons at index ${startIndex}`);
         return {
             skeTables,
             fromCurrentPage: false,
         };
     }
+    const table = resolveTableLayoutColumns(
+        tableSource,
+        getTableAvailableWidth(curPage),
+        isTraditionalDocumentCompatibility(sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy())
+    );
 
     const repeatRows = getLeadingRepeatHeaderRows(table, rowNodes);
-    const precomputedTable = precomputedTableSkeletons.get(ctx)?.get(startIndex);
-    precomputedTableSkeletons.get(ctx)?.delete(startIndex);
+    const precomputedTable = precomputedTableSkeletons.get(ctx)?.get(tableNode);
+    precomputedTableSkeletons.get(ctx)?.delete(tableNode);
     const curTableSkeleton = getNullTableSkeleton(startIndex, endIndex, table);
 
     const createCache: ICreateTableCache = {
@@ -615,6 +769,7 @@ export function createTableSkeletons(
     }
 
     updateTableSkeletonsPosition(createCache, curPage, skeTables, table);
+    skeTables.forEach((table) => applyTableOuterBorderSpacing(table, sectionBreakConfig));
 
     const documentCompatibilityPolicy = sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy();
     const fromCurrentPage =
@@ -676,12 +831,32 @@ function canReusePrecomputedTableRow(
     curPage: IDocumentSkeletonPage,
     cache: ICreateTableCache,
     rowSource: ITableRow,
-    precomputedRow?: IDocumentSkeletonRow
+    precomputedRow?: IDocumentSkeletonRow,
+    borderHeight = 0
 ): precomputedRow is IDocumentSkeletonRow {
     const canRowSplit = rowSource.cantSplit !== BooleanNumber.TRUE && rowSource.trHeight.hRule !== TableRowHeightRule.EXACT;
     return precomputedRow != null &&
-        precomputedRow.height <= getAvailableHeight(curPage, cache, false) &&
-        (cache.remainHeight <= 0 || !canRowSplit || precomputedRow.height <= cache.remainHeight);
+        precomputedRow.parent?.hasPageBreak !== true &&
+        precomputedRow.height + borderHeight <= getAvailableHeight(curPage, cache, false) &&
+        (cache.remainHeight <= 0 || !canRowSplit || precomputedRow.height + borderHeight <= cache.remainHeight ||
+            getRowFirstLineHeight(precomputedRow) + borderHeight > cache.remainHeight);
+}
+
+function getRowFirstLineHeight(row: IDocumentSkeletonRow): number {
+    let minimum = Number.POSITIVE_INFINITY;
+    for (const [index, cell] of row.cells.entries()) {
+        if (isCoveredTableCell(row.rowSource.tableCells[index])) {
+            continue;
+        }
+        const line = cell.sections[0]?.columns[0]?.lines[0];
+        if (!line || cell.cellTextDirection || cell.skeTables.size > 0 || cell.skeDrawings.size > 0 || cell.skeColumnGroups.size > 0) {
+            return 0;
+        }
+        minimum = Math.min(minimum, cell.marginTop + line.top + line.lineHeight + cell.marginBottom);
+    }
+    // If no first line fits, keep the original row intact on the next page.
+    // Splitting it first can move both fragments there and add a spurious border.
+    return Number.isFinite(minimum) ? minimum : 0;
 }
 
 function dealWithTableRow(
@@ -699,16 +874,20 @@ function dealWithTableRow(
     preparedCellPages?: Map<number, IDocumentSkeletonPage[]>,
     cellPageHeights?: readonly number[]
 ): number[] | undefined {
-    const pageContentHeight = getAvailableHeight(curPage, cache, false);
-    const availableHeight = getAvailableHeight(curPage, cache, true);
     const documentCompatibilityPolicy = sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy();
     const { children: cellNodes, startIndex, endIndex } = rowNode;
     const rowSource = table.tableRows[row];
+    const traditional = isTraditionalDocumentCompatibility(documentCompatibilityPolicy);
+    const firstRowSource = getCurTableSkeleton(skeTables).rows[0]?.rowSource ?? rowSource;
+    const firstBorderHeight = getTableBorderHeight(firstRowSource, rowSource, traditional);
+    const nextBorderHeight = getTableBorderHeight(rowSource, rowSource, traditional);
+    const pageContentHeight = getAvailableHeight(curPage, cache, false) - nextBorderHeight;
+    const availableHeight = getAvailableHeight(curPage, cache, true) - nextBorderHeight;
     const { trHeight, cantSplit } = rowSource;
     const { hRule, val } = trHeight;
     const canRowSplit = cantSplit !== BooleanNumber.TRUE && trHeight.hRule !== TableRowHeightRule.EXACT;
-    const needOpenNewTable = cache.remainHeight <= 0;
-    const precomputedRowFits = !isRepeatRow && cellPageHeights == null && canReusePrecomputedTableRow(curPage, cache, rowSource, precomputedRow);
+    const needOpenNewTable = cache.remainHeight <= firstBorderHeight;
+    const precomputedRowFits = !isRepeatRow && cellPageHeights == null && canReusePrecomputedTableRow(curPage, cache, rowSource, precomputedRow, firstBorderHeight);
     const rowSkeletons: IDocumentSkeletonRow[] = precomputedRowFits ? [precomputedRow] : [];
     let curTableSkeleton = getCurTableSkeleton(skeTables);
 
@@ -743,7 +922,7 @@ function dealWithTableRow(
                 table,
                 row,
                 col,
-                canRowSplit && !needOpenNewTable ? cache.remainHeight : availableHeight,
+                canRowSplit && !needOpenNewTable ? cache.remainHeight - firstBorderHeight : availableHeight,
                 pageContentHeight,
                 cellPageHeights
             );
@@ -765,8 +944,7 @@ function dealWithTableRow(
         }
 
         for (const cellPageSkeleton of cellPageSkeletons) {
-            const { marginTop: cellMarginTop = 0, marginBottom: cellMarginBottom = 0 } = cellPageSkeleton;
-            const cellPageHeight = cellPageSkeleton.height + cellMarginTop + cellMarginBottom;
+            const cellPageHeight = getCellPageLayoutHeight(cellPageSkeleton, viewModel, rowSource);
             const pageIndex = cellPageSkeletons.indexOf(cellPageSkeleton);
             const rowSke = rowSkeletons[pageIndex];
 
@@ -784,13 +962,31 @@ function dealWithTableRow(
         }
     }
 
+    if (traditional && rowSkeletons.length > 1 && precomputedRow &&
+        precomputedRow.parent?.hasPageBreak !== true &&
+        precomputedRow.height <= availableHeight &&
+        rowSkeletons[0].cells.some((cell, column) =>
+            !isCoveredTableCell(rowSource.tableCells[column]) &&
+            cell.height === 0 && (precomputedRow.cells[column]?.height ?? 0) > 0
+        )) {
+        // A paragraph constraint can move all text in one cell off the first
+        // fragment. Keep its sibling cells with it when the whole row fits.
+        rowSkeletons.splice(0, rowSkeletons.length, precomputedRow);
+        rowHeights.splice(0, rowHeights.length, precomputedRow.height);
+    }
+
+    if (hRule === TableRowHeightRule.AT_LEAST && rowHeights.length > 0) {
+        // The minimum applies to the source row, not independently to every page
+        // fragment. Only extend the final fragment for unfulfilled minimum height.
+        const contentHeight = rowHeights.reduce((total, height) => total + height, 0);
+        rowHeights[rowHeights.length - 1] += Math.max(0, getRowMinimumHeight(table, row, traditional) - contentHeight);
+    }
+
     for (const rowSke of rowSkeletons) {
         // Update row height.
         const rowIndex = rowSkeletons.indexOf(rowSke);
 
-        if (hRule === TableRowHeightRule.AT_LEAST) {
-            rowHeights[rowIndex] = Math.max(rowHeights[rowIndex], val.v);
-        } else if (hRule === TableRowHeightRule.EXACT) {
+        if (hRule === TableRowHeightRule.EXACT) {
             rowHeights[rowIndex] = val.v;
         }
 
@@ -847,7 +1043,8 @@ function dealWithTableRow(
     while (rowSkeletons.length > 0) {
         const rowSkeleton = rowSkeletons.shift()!;
         const lastRow = curTableSkeleton.rows[curTableSkeleton.rows.length - 1];
-        const rowOverflowHeight = rowSkeleton.height - cache.remainHeight;
+        const borderHeight = getTableBorderHeight(curTableSkeleton.rows[0]?.rowSource ?? rowSource, rowSource, traditional);
+        const rowOverflowHeight = rowSkeleton.height + borderHeight - cache.remainHeight;
         const geometryOverflow =
             cache.remainHeight <= 0 ||
             forcedPageBreakRows.has(rowSkeleton) ||
@@ -936,36 +1133,48 @@ function _verticalAlignInCell(
         }
 
         const { vAlign = VerticalAlignmentType.CONTENT_ALIGNMENT_UNSPECIFIED } = cellConfig;
-        const { pageHeight, height, originMarginTop, originMarginBottom } = cellPageSkeleton;
+        const { originMarginTop, originMarginBottom } = cellPageSkeleton;
+        const isVerticalCell = cellPageSkeleton.cellTextDirection === 'tbRlV';
+        const pageHeight = isVerticalCell ? cellPageSkeleton.pageWidth : cellPageSkeleton.pageHeight;
+        const height = isVerticalCell ? cellPageSkeleton.width : cellPageSkeleton.height;
 
         let marginTop = originMarginTop;
 
         // Word applies cell vertical alignment to an unsplit row as a whole. Centering or bottom-aligning
         // every continuation fragment independently creates large blank areas and clipped text.
-        if (isSplitRow) {
-            cellPageSkeleton.marginTop = originMarginTop;
-            continue;
-        }
-
-        switch (vAlign) {
-            case VerticalAlignmentType.TOP: {
-                marginTop = originMarginTop;
-                break;
+        if (!isSplitRow) {
+            switch (vAlign) {
+                case VerticalAlignmentType.TOP: {
+                    marginTop = originMarginTop;
+                    break;
+                }
+                case VerticalAlignmentType.CENTER: {
+                    marginTop = (pageHeight - height) / 2;
+                    break;
+                }
+                case VerticalAlignmentType.BOTTOM: {
+                    marginTop = pageHeight - height - originMarginBottom;
+                    break;
+                }
+                default:
+                    break;
             }
-            case VerticalAlignmentType.CENTER: {
-                marginTop = (pageHeight - height) / 2;
-                break;
-            }
-            case VerticalAlignmentType.BOTTOM: {
-                marginTop = pageHeight - height - originMarginBottom;
-                break;
-            }
-            default:
-                break;
         }
 
         marginTop = Math.max(originMarginTop, marginTop);
 
+        // Cell margins also carry text alignment. Page/margin anchors must stay fixed when that offset changes.
+        const alignmentDelta = marginTop - cellPageSkeleton.marginTop;
+        cellPageSkeleton.skeDrawings?.forEach((drawing) => {
+            const { layoutType, docTransform } = drawing.drawingOrigin;
+            const relativeFrom = docTransform.positionV.relativeFrom;
+            if (
+                layoutType !== PositionedObjectLayoutType.INLINE &&
+                (relativeFrom === ObjectRelativeFromV.PAGE || relativeFrom === ObjectRelativeFromV.MARGIN)
+            ) {
+                drawing.aTop -= alignmentDelta;
+            }
+        });
         cellPageSkeleton.marginTop = marginTop;
     }
 }
@@ -1056,7 +1265,7 @@ function resolveMergedRowHeights(tableSkeleton: IDocumentSkeletonTable): boolean
         if (hRule === TableRowHeightRule.EXACT) {
             row.height = val.v;
         } else if (hRule === TableRowHeightRule.AT_LEAST) {
-            row.height = Math.max(contentHeight, val.v);
+            row.height = Math.max(contentHeight, getRowMinimumHeight(tableSkeleton.tableSource, row.index, true));
         }
     }
 
@@ -1096,13 +1305,18 @@ function createMergedAwareNullCellPage(
     col: number,
     rowSkeleton: IDocumentSkeletonRow
 ): IDocumentSkeletonPage {
-    const cellSkeleton = createNullCellPage(
+    const { page: cellSkeleton, verticalCellWidth } = createNullCellPage(
         ctx,
         sectionBreakConfig,
         table,
         row,
         col
-    ).page;
+    );
+    if (verticalCellWidth != null) {
+        cellSkeleton.pageHeight = cellSkeleton.pageWidth;
+        cellSkeleton.pageWidth = verticalCellWidth;
+        cellSkeleton.cellTextDirection = 'tbRlV';
+    }
 
     cellSkeleton.parent = rowSkeleton;
     if (isCoveredTableCell(table.tableRows[row].tableCells[col])) {
@@ -1158,6 +1372,47 @@ function findMergedMasterCell(table: ITable, row: number, col: number): Nullable
 
 function isCoveredTableCell(cellConfig: ITableCell | undefined): boolean {
     return cellConfig?.rowSpan === 0 || cellConfig?.columnSpan === 0;
+}
+
+function getTableAvailableWidth(page: IDocumentSkeletonPage): number {
+    return Math.max(0, page.pageWidth - (page.marginLeft ?? 0) - (page.marginRight ?? 0));
+}
+
+export function resolveTableLayoutColumns(table: ITable, availableWidth: number, traditional = false): ITable {
+    if (table.size?.type !== TableSizeType.SPECIFIED || !table.tableColumns?.length) {
+        return table;
+    }
+
+    let preferredWidth = table.size.width.u === NumberUnitType.PERCENT
+        ? availableWidth * table.size.width.v / 100
+        : table.size.width.v;
+    if (traditional && table.size.width.u === NumberUnitType.PERCENT && table.legacyIndentAdjustment != null) {
+        // Legacy Word percentage widths align cell text to the page margins;
+        // the outer cell margins extend beyond that text width.
+        const cells = table.tableRows[0]?.tableCells;
+        const lastCell = cells?.[cells.length - 1];
+        const endMargin = lastCell?.margin?.end?.v ?? table.cellMargin?.end?.v ?? 7.2;
+        preferredWidth += Math.max(0, table.legacyIndentAdjustment.v) + Math.max(0, endMargin);
+    }
+    const gridWidth = table.tableColumns.reduce((sum, column) => sum + column.size.width.v, 0);
+    if (!Number.isFinite(preferredWidth) || preferredWidth <= 0 || gridWidth <= 0 || Math.abs(preferredWidth - gridWidth) < 0.01) {
+        return table;
+    }
+
+    const scale = preferredWidth / gridWidth;
+    return {
+        ...table,
+        tableColumns: table.tableColumns.map((column) => ({
+            ...column,
+            size: {
+                ...column.size,
+                width: {
+                    ...column.size.width,
+                    v: column.size.width.v * scale,
+                },
+            },
+        })),
+    };
 }
 
 export function getTableLeft(pageWidth: number, tableWidth: number, align: TableAlignmentType, indent: INumberUnit = { v: 0 }) {

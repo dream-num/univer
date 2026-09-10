@@ -33,14 +33,12 @@ import {
     generateRandomId,
     ICommandService,
     Inject,
-    IUniverInstanceService,
     LocaleService,
     ThemeService,
     toDisposable,
-    UniverInstanceType,
 } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { DocumentEditArea, IRenderManagerService, PageLayoutType, Path, Rect, Vector2 } from '@univerjs/engine-render';
+import { DocumentEditArea, PageLayoutType, Path, Vector2 } from '@univerjs/engine-render';
 import { neoGetDocObject } from '../basics/component-tools';
 import { CloseHeaderFooterCommand, CoreHeaderFooterCommand } from '../commands/commands/doc-header-footer.command';
 import { IEditorService } from '../services/editor/editor-manager.service';
@@ -48,14 +46,13 @@ import { DocSelectionRenderService } from '../services/selection/doc-selection-r
 import { getHeaderFooterTarget } from '../utils/section-header-footer';
 import { TextBubbleShape } from '../views/header-footer/text-bubble';
 
-const HEADER_FOOTER_COVER_ALPHA = 0.5;
+const INACTIVE_AREA_OPACITY = 0.5;
 const HEADER_FOOTER_LABEL_ALPHA = 0.08;
 
 export class DocHeaderFooterController extends Disposable implements IRenderModule {
     private _loadedMap = new WeakSet<RenderComponentType>();
     private _headerFooterColors = {
         primary: '',
-        cover: '',
         label: '',
     };
 
@@ -63,8 +60,6 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         private readonly _context: IRenderContext<DocumentDataModel>,
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorService private readonly _editorService: IEditorService,
-        @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
@@ -88,9 +83,6 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
 
             this._headerFooterColors = {
                 primary,
-                cover: new ColorKit(this._themeService.getColorFromTheme('gray.0'))
-                    .setAlpha(HEADER_FOOTER_COVER_ALPHA)
-                    .toRgbString(),
                 label: new ColorKit(primary)
                     .setAlpha(HEADER_FOOTER_LABEL_ALPHA)
                     .toRgbString(),
@@ -244,31 +236,20 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
     }
 
     private _drawHeaderFooterLabel() {
-        this.disposeWithMe(this._instanceSrv.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC).subscribe((unit) => {
-            if (unit == null) {
-                return;
-            }
+        const { unitId, mainComponent } = this._context;
+        if (this._editorService.isEditor(unitId) || mainComponent == null) {
+            return;
+        }
 
-            const unitId = unit.getUnitId();
-            const currentRender = this._renderManagerService.getRenderUnitById(unitId);
-            if (this._editorService.isEditor(unitId) || this._instanceSrv.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC) == null) {
-                return;
-            }
-
-            if (currentRender == null) {
-                return;
-            }
-
-            const { mainComponent } = currentRender;
-
-            const docsComponent = mainComponent as Documents;
-
-            this.disposeWithMe(
-                toDisposable(
-                    docsComponent.pageRender$.subscribe((config: IPageRenderConfig) => this._drawHeaderFooterPage(config, unitId))
-                )
-            );
+        const docsComponent = mainComponent as Documents;
+        docsComponent.setInactiveAreaOpacity(INACTIVE_AREA_OPACITY);
+        this.disposeWithMe(toDisposable(() => docsComponent.setInactiveAreaOpacity(1)));
+        this.disposeWithMe(this._docSkeletonManagerService.getViewModel().editAreaChange$.subscribe(() => {
+            docsComponent.makeDirty(true);
         }));
+        this.disposeWithMe(
+            docsComponent.pageRender$.subscribe((config: IPageRenderConfig) => this._drawHeaderFooterPage(config, unitId))
+        );
     }
 
     private _drawHeaderFooterPage(config: IPageRenderConfig, unitId: string): void {
@@ -277,53 +258,15 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         }
 
         const editArea = this._docSkeletonManagerService.getViewModel().getEditArea();
-        const isEditBody = editArea === DocumentEditArea.BODY;
+        if (editArea === DocumentEditArea.BODY) {
+            return;
+        }
         const { pageLeft, pageTop, ctx } = config;
 
         ctx.save();
         ctx.translate(pageLeft - 0.5, pageTop - 0.5);
-        this._drawHeaderFooterCover(config, isEditBody);
+        this._drawHeaderFooterGuides(config);
 
-        if (!isEditBody) {
-            this._drawHeaderFooterGuides(config);
-        }
-
-        ctx.restore();
-    }
-
-    private _drawHeaderFooterCover({ page, ctx }: IPageRenderConfig, isEditBody: boolean): void {
-        const { pageWidth, pageHeight, marginTop, marginBottom } = page;
-
-        if (isEditBody) {
-            Rect.drawWith(ctx, {
-                left: 0,
-                top: 0,
-                width: pageWidth,
-                height: marginTop,
-                fill: this._headerFooterColors.cover,
-            });
-            ctx.save();
-            ctx.translate(0, pageHeight - marginBottom);
-            Rect.drawWith(ctx, {
-                left: 0,
-                top: 0,
-                width: pageWidth,
-                height: marginBottom,
-                fill: this._headerFooterColors.cover,
-            });
-            ctx.restore();
-            return;
-        }
-
-        ctx.save();
-        ctx.translate(0, marginTop);
-        Rect.drawWith(ctx, {
-            left: 0,
-            top: marginTop,
-            width: pageWidth,
-            height: pageHeight - marginTop - marginBottom,
-            fill: this._headerFooterColors.cover,
-        });
         ctx.restore();
     }
 

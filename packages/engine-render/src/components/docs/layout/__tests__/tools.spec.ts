@@ -28,10 +28,10 @@ import {
     SectionType,
     SpacingRule,
 } from '@univerjs/core';
-
 import { describe, expect, it, vi } from 'vitest';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy } from '../../document-compatibility';
+import { createParagraphLayoutTestBed } from '../block/paragraph/__tests__/create-paragraph-layout-test-bed';
 import {
     clearFontCreateConfigCache,
     columnIterator,
@@ -629,6 +629,7 @@ describe('docs layout tools extra', () => {
                 gridType: GridType.LINES,
                 charSpace: 1,
                 pageSize: { width: 500 },
+                balanceSingleByteDoubleByteWidth: BooleanNumber.TRUE,
                 marginLeft: 10,
                 marginRight: 20,
             } as any,
@@ -636,6 +637,7 @@ describe('docs layout tools extra', () => {
         );
         expect(fromLastGlyph.pageWidth).toBe(500);
         expect(fromLastGlyph.charSpace).toBe(1);
+        expect(fromLastGlyph.balanceSingleByteDoubleByteWidth).toBe(BooleanNumber.TRUE);
 
         const viewModel = {
             getTextRun: vi.fn(() => ({ st: 0, ed: 10, ts: { fs: 12, ff: 'Arial', eastAsiaFontFamily: '宋体' } })),
@@ -652,6 +654,7 @@ describe('docs layout tools extra', () => {
             gridType: GridType.LINES,
             charSpace: 2,
             documentTextStyle: { fs: 10, ff: 'Calibri' },
+            balanceSingleByteDoubleByteWidth: BooleanNumber.TRUE,
             pageSize: { width: 300 },
             marginLeft: 0,
             marginRight: 0,
@@ -663,6 +666,7 @@ describe('docs layout tools extra', () => {
         const config1 = getFontCreateConfig(0, viewModel as any, paragraphNode as any, sectionBreakConfig as any, paragraph as any);
         const config2 = getFontCreateConfig(0, viewModel as any, paragraphNode as any, sectionBreakConfig as any, paragraph as any);
         expect(config1).toBe(config2);
+        expect(config1.balanceSingleByteDoubleByteWidth).toBe(BooleanNumber.TRUE);
         expect(config1.fontStyle.fontFamily).toBe('Arial, 宋体');
 
         const configWithBullet = getFontCreateConfig(
@@ -682,6 +686,27 @@ describe('docs layout tools extra', () => {
             { paragraphStyle: {}, bullet: { listType: 'missing' } } as any
         );
         expect(configWithMissingBulletList.textStyle.bl).toBeUndefined();
+    });
+
+    it('applies paragraph-mark formatting only to the terminator without leaking through the font cache', () => {
+        clearFontCreateConfigCache();
+        const paragraph = {
+            startIndex: 5,
+            paragraphId: 'formatted-mark',
+            paragraphStyle: {
+                textStyle: { ff: 'Arial' },
+                paragraphMarkTextStyle: { bl: 1, it: 1, fs: 14, cl: { rgb: '#FF0000' } },
+            },
+        };
+        const { viewModel, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello', {
+            body: { paragraphs: [paragraph], textRuns: [{ st: 0, ed: 6, ts: { fs: 10 } }] },
+        });
+        const config = (index: number) => getFontCreateConfig(index, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+        expect(config(5).textStyle).toMatchObject({ bl: 1, it: 1, fs: 14, cl: { rgb: '#FF0000' } });
+        expect(config(0).textStyle).toMatchObject({ ff: 'Arial', fs: 10 });
+        expect(config(0).textStyle.bl).toBeUndefined();
+        expect(config(0).textStyle.it).toBeUndefined();
+        expect(config(0).textStyle.cl).toBeUndefined();
     });
 
     it('creates default skeleton, prepares section config, and resolves page paths', () => {
@@ -717,6 +742,7 @@ describe('docs layout tools extra', () => {
                 documentStyle: {
                     documentFlavor: DocumentFlavor.MODERN,
                     pageSize: { width: 800, height: 1000 },
+                    balanceSingleByteDoubleByteWidth: BooleanNumber.TRUE,
                     marginLeft: 20,
                     marginRight: 20,
                     marginTop: 20,
@@ -729,6 +755,7 @@ describe('docs layout tools extra', () => {
         };
 
         const sectionConfig = prepareSectionBreakConfig(ctx as any, 0);
+        expect(sectionConfig.balanceSingleByteDoubleByteWidth).toBe(BooleanNumber.TRUE);
         expect(sectionConfig.pageSize?.width).toBeGreaterThan(0);
         expect(sectionConfig.headerIds).toEqual({
             defaultHeaderId: '',
@@ -1122,6 +1149,61 @@ describe('docs layout tools extra', () => {
                 top: 44,
             },
         }]);
+    });
+
+    it('iterates tables nested inside cells after their parent table', () => {
+        const innerTable = {
+            tableId: 'inner-table',
+            height: 20,
+            left: 8,
+            rows: [],
+            top: 6,
+            width: 40,
+        };
+        const page = {
+            marginLeft: 10,
+            marginTop: 20,
+            pageHeight: 400,
+            sections: [],
+            skeTables: new Map([['outer-table', {
+                tableId: 'outer-table',
+                height: 80,
+                left: 5,
+                rows: [{
+                    top: 3,
+                    cells: [{
+                        left: 4,
+                        marginLeft: 2,
+                        marginTop: 1,
+                        pageHeight: 60,
+                        pageWidth: 90,
+                        sections: [],
+                        skeTables: new Map([['inner-table', innerTable]]),
+                    }],
+                }],
+                top: 7,
+                width: 100,
+            }]]),
+        };
+
+        const tables = documentSkeletonTableIterator([page as any], {
+            docsLeft: 100,
+            docsTop: 200,
+            includeCells: false,
+        });
+
+        expect(tables.map(({ source, tableId, tableRect }) => ({ source, tableId, tableRect }))).toEqual([
+            {
+                source: 'page',
+                tableId: 'outer-table',
+                tableRect: { bottom: 307, left: 115, right: 215, top: 227 },
+            },
+            {
+                source: 'table-cell',
+                tableId: 'inner-table',
+                tableRect: { bottom: 257, left: 129, right: 169, top: 237 },
+            },
+        ]);
     });
 
     it('uses the accumulated height of preceding pages for table coordinates', () => {

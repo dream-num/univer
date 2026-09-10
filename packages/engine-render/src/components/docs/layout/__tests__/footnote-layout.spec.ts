@@ -69,16 +69,45 @@ function getPageGlyphs(page: IDocumentSkeletonPage) {
 
 describe('footnote body layout', () => {
     beforeEach(() => {
-        vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
-            width: text.length * 5,
-            fontBoundingBoxAscent: 8,
-            fontBoundingBoxDescent: 2,
-            actualBoundingBoxAscent: 8,
-            actualBoundingBoxDescent: 2,
-        }) as TextMetrics);
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+            font: '',
+            measureText(this: CanvasRenderingContext2D, text: string) {
+                const size = this.font.match(/([\d.]+)(px|pt)/);
+                const points = size ? Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) : 11;
+                const scale = points / 11;
+                return { width: text.length * 5 * scale, fontBoundingBoxAscent: 8 * scale, fontBoundingBoxDescent: 2 * scale, actualBoundingBoxAscent: 8 * scale, actualBoundingBoxDescent: 2 * scale };
+            },
+        } as unknown as CanvasRenderingContext2D);
+        Reflect.set(FontCache, '_context', null);
+        FontCache.invalidateMetrics(() => true);
     });
 
     afterEach(() => vi.restoreAllMocks());
+
+    it.each([undefined, false, true])('keeps the anchor but respects note-body marker presence: %s', (showBodyReference) => {
+        const bed = createNoteTestBed(600, {
+            showBodyReference,
+            body: {
+                dataStream: '19 Literal\r\n',
+                paragraphs: [{ paragraphId: 'literal', startIndex: 10 }],
+                sectionBreaks: [{ sectionId: 'literal', startIndex: 11 }],
+            },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        try {
+            skeleton.calculate();
+            const page = skeleton.getSkeletonData()!.pages[0];
+            expect(getPageGlyphs(page).some((glyph) => glyph.noteId === 'note' && glyph.content === 'VIII')).toBe(true);
+            const fragment = page.notes!.find((note) => note.noteId === 'note')!;
+            const text = getPageGlyphs(fragment.page).map((glyph) => glyph.content).join('');
+            expect(text.startsWith(showBodyReference === false ? '19 Literal' : 'VIII19 Literal')).toBe(true);
+            expect(bed.dataModel.getSnapshot().notes!.note.body.dataStream).toBe('19 Literal\r\n');
+        } finally {
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
 
     it.each([false, true])('fills the remaining body space with table rows after an earlier footnote (incremental: %s)', (incremental) => {
         const T = DataStreamTreeTokenType;

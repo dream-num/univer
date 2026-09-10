@@ -109,6 +109,8 @@ const locale: typeof enUS = {
             selection: 'Seleção atual',
             wordCount: '{0} palavras',
             selectedWords: '{0} de {1} palavras',
+            currentPage: 'Página {0}',
+            currentPageOfTotal: 'Página {0} de {1}',
             pages: 'Páginas',
             words: 'Palavras',
             charactersWithoutSpaces: 'Caracteres (sem espaços)',

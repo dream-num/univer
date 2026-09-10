@@ -41,6 +41,74 @@ const bBox = {
 } as IDocumentSkeletonBoundingBox;
 
 describe('document compatibility policy', () => {
+    it.each([7.5, 12])('matches native Word YaHei single spacing at %s pt without changing ink metrics', (fontSize) => {
+        const em = fontSize / 0.75;
+        const measured = { ...bBox, ba: em * 2167 / 2048, bd: em * 536 / 2048, normalLineHeight: em * 2703 / 2048 };
+        const traditional = getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL);
+        for (const fontFamily of ['Microsoft YaHei', '"微软雅黑", Arial, 微软雅黑']) {
+            const style = { ...fontStyle, fontSize, originFontSize: fontSize, fontFamily };
+            for (const content of ['中', 'H']) {
+                const actual = applyFontMetricCompatibility(content, style, measured, traditional);
+                // Native PDF coordinates at 96 DPI; tolerate Word's sub-point rounding.
+                expect(Math.abs(actual.normalLineHeight! - (fontSize === 7.5 ? 17.12 : 27.52))).toBeLessThan(0.1);
+                expect({ ...actual, normalLineHeight: measured.normalLineHeight }).toEqual(measured);
+                expect(applyFontMetricCompatibility(content, style, measured, getDocumentCompatibilityPolicy(DocumentFlavor.MODERN))).toBe(measured);
+            }
+            const larger = { ...measured, normalLineHeight: 60 };
+            expect(applyFontMetricCompatibility('H', style, larger, traditional)).toBe(larger);
+            const substituted = { ...measured, ba: em, bd: 0 };
+            expect(applyFontMetricCompatibility('H', style, substituted, traditional)).toBe(substituted);
+            expect(applyFontMetricCompatibility('H', { ...style, fontFamily: 'Arial, Microsoft YaHei' }, measured, traditional)).toBe(measured);
+            expect(applyFontMetricCompatibility('H', { ...style, fontFamily: 'Microsoft YaHei UI' }, measured, traditional)).toBe(measured);
+        }
+    });
+
+    it.each([11, 16])('retains Word MS Gothic auto-leading at %s pt without enlarging the ink box', (fontSize) => {
+        const em = fontSize / 0.75;
+        const style = { ...fontStyle, fontSize, originFontSize: fontSize, fontFamily: '"MS Gothic", Arial' };
+        const measured = { ...bBox, ba: em * 220 / 256, bd: em * 36 / 256, normalLineHeight: em };
+        for (const content of ['☐', 'M']) {
+            const actual = applyFontMetricCompatibility(content, style, measured, getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL));
+            // Native Word PDF row heights, excluding the 0.5pt table border, at 96 DPI.
+            expect(actual.normalLineHeight).toBeCloseTo(fontSize === 11 ? 19.01334 : 27.65334, 1);
+            expect({ ...actual, normalLineHeight: em }).toEqual(measured);
+            expect(applyFontMetricCompatibility(content, style, measured, getDocumentCompatibilityPolicy(DocumentFlavor.MODERN))).toBe(measured);
+        }
+        expect(applyFontMetricCompatibility(
+            'M',
+            { ...style, fontFamily: 'Arial, "MS Gothic"' },
+            measured,
+            getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL)
+        )).toBe(measured);
+    });
+
+    it.each([
+        { content: '中', measured: 13.329986572265623, expected: 40 / 3 },
+        { content: '（', measured: 13.329986572265623, expected: 40 / 3 },
+        { content: '𠀀', measured: 13.329986572265623, expected: 40 / 3 },
+        { content: 'ｶ', measured: 20 / 3, expected: 20 / 3 },
+        { content: '中', measured: 12.5, expected: 12.5 },
+        { content: 'A', measured: 13.33, expected: 13.33 },
+        { content: '中文', measured: 13.33, expected: 13.33 },
+    ])('recovers fractional-em CJK advances without changing proportional glyphs: $content/$measured', ({ content, measured, expected }) => {
+        const measuredBox = { ...bBox, width: measured };
+        const style = { ...fontStyle, fontSize: 10, originFontSize: 10, fontFamily: 'Microsoft YaHei' };
+        const traditional = applyFontMetricCompatibility(content, style, measuredBox, getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL));
+        expect(traditional.width).toBeCloseTo(expected, 10);
+        expect({ ...traditional, width: measured }).toEqual(measuredBox);
+        expect(measuredBox.width).toBe(measured);
+        expect(applyFontMetricCompatibility(content, style, measuredBox, getDocumentCompatibilityPolicy(DocumentFlavor.MODERN)))
+            .toBe(measuredBox);
+    });
+
+    it('selects DrawingML font metrics without changing existing document flavors', () => {
+        const policy = getDocumentCompatibilityPolicy(DocumentFlavor.DRAWINGML);
+        expect(policy.mode).toBe('drawingml');
+        expect(applyFontMetricCompatibility('5', fontStyle, bBox, policy)).toEqual(bBox);
+        for (const flavor of [undefined, DocumentFlavor.UNSPECIFIED, DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL]) {
+            expect(getDocumentCompatibilityPolicy(flavor).mode).not.toBe('drawingml');
+        }
+    });
     it('applies traditional Word font metric width rules without changing modern documents', () => {
         const traditional = getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL);
         const modern = getDocumentCompatibilityPolicy(DocumentFlavor.MODERN);
@@ -49,7 +117,7 @@ describe('document compatibility policy', () => {
         expect(applyFontMetricCompatibility('5', fontStyle, bBox, modern).width).toBe(16);
     });
 
-    it('scales only non-bold primary Arial Latin glyphs in traditional documents', () => {
+    it('preserves measured Arial advances instead of narrowing Latin text in traditional documents', () => {
         const normalArial = {
             ...fontStyle,
             fontString: 'normal normal 11.5pt Arial',
@@ -67,7 +135,9 @@ describe('document compatibility policy', () => {
         const traditional = getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL);
         const modern = getDocumentCompatibilityPolicy(DocumentFlavor.MODERN);
 
-        expect(applyFontMetricCompatibility('A', normalArial, browserMeasuredGlyph, traditional).width).toBeCloseTo(9.8);
+        for (const content of ['A', '0', '1', '8', ' ', '“']) {
+            expect(applyFontMetricCompatibility(content, normalArial, browserMeasuredGlyph, traditional)).toBe(browserMeasuredGlyph);
+        }
         expect(applyFontMetricCompatibility('A', boldArial, browserMeasuredGlyph, traditional).width).toBe(10);
         expect(applyFontMetricCompatibility('A', normalArial, browserMeasuredGlyph, modern).width).toBe(10);
         expect(applyFontMetricCompatibility('中', normalArial, browserMeasuredGlyph, traditional).width).toBe(10);

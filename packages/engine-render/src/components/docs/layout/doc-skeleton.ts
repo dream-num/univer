@@ -1155,6 +1155,9 @@ export class DocumentSkeleton extends Skeleton {
     private _layoutProgress$ = new Subject<IDocumentLayoutProgress>();
     readonly layoutProgress$ = this._layoutProgress$.asObservable();
 
+    private readonly _layoutPageMaterialized$ = new Subject<void>();
+    readonly layoutPageMaterialized$ = this._layoutPageMaterialized$.asObservable();
+
     private _skeletonData: Nullable<IDocumentSkeletonCached>;
 
     private _findLiquid: Liquid = new Liquid();
@@ -1221,6 +1224,7 @@ export class DocumentSkeleton extends Skeleton {
         this.cancelIncrementalLayout();
         super.dispose();
         this._layoutProgress$.complete();
+        this._layoutPageMaterialized$.complete();
         this._skeletonData = null;
         this._lastCompleteSkeletonData = null;
         this._pendingInvalidationAnchor = null;
@@ -2770,6 +2774,7 @@ export class DocumentSkeleton extends Skeleton {
         );
         this._compactMaterializedPages(skeletonData, materializedPageRange);
         this._dirty$.next(true);
+        this._layoutPageMaterialized$.next();
         return true;
     }
 
@@ -3565,6 +3570,12 @@ export class DocumentSkeleton extends Skeleton {
             }
         }
 
+        if (segmentPage.cellTextDirection === 'tbRlV') {
+            const physicalX = x;
+            x = pageLeft + y - pageTop;
+            y = pageTop + segmentPage.pageWidth - (physicalX - pageLeft);
+        }
+
         switch (pageType) {
             case DocumentSkeletonPageType.NOTE: {
                 this._findLiquid.translate(note?.left ?? page.marginLeft, note?.top ?? page.marginTop);
@@ -3715,13 +3726,16 @@ export class DocumentSkeleton extends Skeleton {
         let exactMatch = null;
         if (pointInPage && skeTables.size > 0) {
             const unitId = this._docViewModel.getDataModel().getUnitId?.() ?? '';
-            for (const table of skeTables.values()) {
+            for (const table of Array.from(skeTables.values()).reverse()) {
                 const { top: tableTop, left: tableLeft, rows } = table;
                 const sourceTableId = getTableIdAndSliceIndex(table.tableId).tableId;
                 const viewport = getDocsTableRenderViewport(unitId, sourceTableId);
 
                 this._findLiquid?.translateSave();
                 this._findLiquid?.translate(tableLeft, tableTop);
+                const pointInTable = x >= this._findLiquid.x && x <= this._findLiquid.x + table.width
+                    && y >= this._findLiquid.y && y <= this._findLiquid.y + table.height;
+                const tableCache: INearestCache = { nearestNodeList: [], nearestNodeDistanceList: [] };
                 if (hasDocsTableHorizontalViewport(viewport)) {
                     // Hit-test coordinates already include this page's padding.
                     const visibleLeft = this._findLiquid.x - (viewport.leadingInsetLeft ?? 0);
@@ -3757,7 +3771,7 @@ export class DocumentSkeleton extends Skeleton {
                             cell,
                             segmentId,
                             pi,
-                            cache,
+                            tableCache,
                             x,
                             y,
                             pageLength,
@@ -3771,6 +3785,15 @@ export class DocumentSkeleton extends Skeleton {
                 }
 
                 this._findLiquid?.translateRestore();
+                if (pointInTable) {
+                    // Blank cell padding still belongs to the topmost painted table.
+                    exactMatch ??= this._getNearestNode(tableCache.nearestNodeList, tableCache.nearestNodeDistanceList);
+                }
+                if (exactMatch) {
+                    break;
+                }
+                cache.nearestNodeList.push(...tableCache.nearestNodeList);
+                cache.nearestNodeDistanceList.push(...tableCache.nearestNodeDistanceList);
             }
         }
 
@@ -4117,9 +4140,14 @@ export class DocumentSkeleton extends Skeleton {
                 );
         }
 
-        // First-open layout has no prior boundary. The first physical page becomes
-        // stable as soon as layout has entered a second page.
-        return state.laidOutThrough >= anchor && state.ctx.skeleton.pages.length > 1;
+        // A fresh Worker mount can resume at an anchor beyond the first page.
+        // Publishing its still-open page finalizes the available section height
+        // to the content height and pushes subsequent blocks onto an extra page.
+        if (state.stableLaidOutThrough < anchor || state.ctx.skeleton.pages.length < 2) {
+            return false;
+        }
+        const anchorPageIndex = this._findPublishablePriorityPageIndex(state);
+        return anchorPageIndex >= 0 && anchorPageIndex < state.ctx.skeleton.pages.length - 1;
     }
 
     private _tryReuseInteractionPageTail(
@@ -4376,7 +4404,7 @@ export class DocumentSkeleton extends Skeleton {
             if (pending.result != null) {
                 cachePrecomputedSlicedTableSkeletons(
                     ctx,
-                    pending.tableNode.startIndex,
+                    pending.tableNode,
                     pending.availableHeight,
                     pending.result
                 );
@@ -4427,7 +4455,7 @@ export class DocumentSkeleton extends Skeleton {
                 const tableSkeleton = state.pendingTableBuild.tableSkeleton;
                 cachePrecomputedTableSkeleton(
                     ctx,
-                    tableNode.startIndex,
+                    tableNode,
                     tableSkeleton
                 );
             }

@@ -1478,6 +1478,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                                 const latestTarget = docParagraphMenuService?.activeTarget ?? activeTarget;
 
                                 if (latestTarget?.kind === 'table' && commandId && targetRange) {
+                                    univerInstanceService.focusUnit(popup.unitId);
                                     const tableRange = {
                                         ...targetRange,
                                         segmentId: targetRange.segmentId ?? '',
@@ -1510,12 +1511,19 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                                     }
 
                                     if (commandService && commandId) {
-                                        commandService.executeCommand(commandId, commandId === DocTableDeleteTableCommand.id
-                                            ? { ...commandParams, targetRange: tableRange }
-                                            : commandParams);
+                                        const isOverriddenTableDelete = params.id === DocTableDeleteTableCommand.id;
+                                        await commandService.executeCommand(commandId, commandId === DocTableDeleteTableCommand.id
+                                            ? { ...commandParams, targetRange: tableRange, unitId: popup.unitId }
+                                            : isOverriddenTableDelete
+                                                ? {
+                                                    ...commandParams,
+                                                    tableId: (commandParams as { tableId?: string } | undefined)?.tableId ?? latestTarget.table?.tableId,
+                                                }
+                                                : commandParams);
                                     }
 
                                     finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);
+                                    univerInstanceService.focusUnit(popup.unitId);
                                     return;
                                 }
 

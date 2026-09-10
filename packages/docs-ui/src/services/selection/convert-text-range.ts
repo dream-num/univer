@@ -26,6 +26,7 @@ import type {
     IDocumentSkeletonPage,
     IDocumentSkeletonRow,
     IDocumentSkeletonSection,
+    IDocumentSkeletonTable,
     INodePosition,
     IPoint,
 } from '@univerjs/engine-render';
@@ -41,6 +42,53 @@ import {
     GlyphType,
     Liquid,
 } from '@univerjs/engine-render';
+
+export function findDocRangeNodePositions(
+    skeleton: DocumentSkeleton,
+    startIndex: number,
+    endIndex: number,
+    segmentId = '',
+    pageIndex = -1
+): { startPosition: INodePosition; endPosition: INodePosition } | undefined {
+    const dataStream = skeleton.getViewModel?.().getDataModel?.().getSelfOrHeaderFooterModel?.(segmentId)?.getBody?.()?.dataStream as string | undefined;
+    let startPosition: Nullable<INodePosition>;
+    for (let index = startIndex; index <= endIndex && !startPosition; index++) {
+        if (dataStream && isStructuralControl(dataStream.charCodeAt(index))) continue;
+        startPosition = skeleton.findNodePositionByCharIndex(index, true, segmentId, pageIndex);
+    }
+
+    let endPosition: Nullable<INodePosition>;
+    for (let index = endIndex; index >= startIndex && !endPosition; index--) {
+        if (dataStream && isStructuralControl(dataStream.charCodeAt(index))) continue;
+        endPosition = skeleton.findNodePositionByCharIndex(index, false, segmentId, pageIndex);
+    }
+
+    if (!startPosition || !endPosition) return;
+
+    // NodePositionConvertToCursor traverses a cell selection through one nested
+    // page path. A row/table wrapper can start and end in different cells, so
+    // feeding both positions to it indexes the first cell with the second cell's
+    // line coordinates. Structural table SDTs are not text hit targets; their
+    // inner controls are, and are resolved independently.
+    if (startPosition.pageType !== endPosition.pageType) return;
+    if (
+        startPosition.pageType === DocumentSkeletonPageType.CELL &&
+        endPosition.pageType === DocumentSkeletonPageType.CELL &&
+        !sameNodePath(startPosition.path, endPosition.path)
+    ) {
+        return;
+    }
+
+    return { startPosition, endPosition };
+}
+
+function isStructuralControl(code: number): boolean {
+    return code < 0x20 && code !== 0x09;
+}
+
+function sameNodePath(left: Array<string | number>, right: Array<string | number>): boolean {
+    return left.length === right.length && left.every((part, index) => part === right[index]);
+}
 
 export enum NodePositionStateType {
     NORMAL,
@@ -230,6 +278,7 @@ export function pushToPoints(position: IPosition) {
 export class NodePositionConvertToCursor {
     private _liquid = new Liquid();
     private _horizontalClip: Nullable<{ left: number; right: number }> = null;
+    private _verticalCellOrigin: Nullable<{ x: number; y: number; width: number }> = null;
 
     private _currentStartState: ICurrentNodePositionState = {
         page: NodePositionStateType.NORMAL,
@@ -357,8 +406,8 @@ export class NodePositionConvertToCursor {
                 };
             }
 
-            const clippedBorderBoxPosition = clipPositionToHorizontalRange(borderBoxPosition, this._horizontalClip);
-            const clippedContentBoxPosition = clipPositionToHorizontalRange(contentBoxPosition, this._horizontalClip);
+            const clippedBorderBoxPosition = clipPositionToHorizontalRange(this._toPhysicalPosition(borderBoxPosition), this._horizontalClip);
+            const clippedContentBoxPosition = clipPositionToHorizontalRange(this._toPhysicalPosition(contentBoxPosition), this._horizontalClip);
 
             if (clippedBorderBoxPosition && !isSelectionOnlyNonInlineDrawing) {
                 borderBoxPointGroup.push(pushToPoints(clippedBorderBoxPosition));
@@ -378,6 +427,19 @@ export class NodePositionConvertToCursor {
             borderBoxPointGroup,
             contentBoxPointGroup,
             cursorList,
+        };
+    }
+
+    private _toPhysicalPosition(position: IPosition): IPosition {
+        const origin = this._verticalCellOrigin;
+        if (!origin) {
+            return position;
+        }
+        return {
+            startX: origin.x + origin.width - (position.endY - origin.y),
+            endX: origin.x + origin.width - (position.startY - origin.y),
+            startY: origin.y + position.startX - origin.x,
+            endY: origin.y + position.endX - origin.x,
         };
     }
 
@@ -639,7 +701,9 @@ export class NodePositionConvertToCursor {
             );
             this._liquid.translateSave();
             const previousHorizontalClip = this._horizontalClip;
+            const previousVerticalCellOrigin = this._verticalCellOrigin;
             this._horizontalClip = null;
+            this._verticalCellOrigin = null;
 
             switch (pageType) {
                 case DocumentSkeletonPageType.NOTE: {
@@ -659,61 +723,20 @@ export class NodePositionConvertToCursor {
                     break;
                 }
                 case DocumentSkeletonPageType.CELL: {
-                    const nestedPageOffset = getDocumentSkeletonNestedPageOffset(segmentPage);
-                    if (nestedPageOffset) {
-                        this._liquid.translatePagePadding(page);
-                        this._liquid.translate(nestedPageOffset.left, nestedPageOffset.top);
-                        this._liquid.translatePagePadding(segmentPage);
-                        break;
-                    }
-
-                    const rowSke = segmentPage.parent as IDocumentSkeletonRow;
-                    const tableSke = rowSke.parent!;
-                    const tablePage = tableSke.parent as IDocumentSkeletonPage | undefined;
-                    const tablePageNestedOffset = tablePage ? getDocumentSkeletonNestedPageOffset(tablePage) : undefined;
-                    const { left: cellLeft } = segmentPage;
-                    const { top: tableTop, left: tableLeft } = tableSke;
-                    const { top: rowTop } = rowSke;
-                    const sourceTableId = getTableIdAndSliceIndex(tableSke.tableId).tableId;
-                    const viewport = getDocsTableRenderViewport(getDocumentUnitId(skeleton), sourceTableId);
-                    const hasHorizontalViewport = hasHorizontalTableViewport(viewport);
-                    const scrollLeft = hasHorizontalViewport ? viewport.scrollLeft : 0;
-
-                    if (tablePage?.type === DocumentSkeletonPageType.HEADER) {
-                        this._liquid.translatePagePadding({
-                            ...tablePage,
-                            marginLeft: page.marginLeft,
-                        });
-                    } else if (tablePage?.type === DocumentSkeletonPageType.FOOTER) {
-                        const footerTop = page.pageHeight - tablePage.height - tablePage.marginBottom;
-                        this._liquid.translate(page.marginLeft, footerTop);
-                    } else if (tablePage?.type === DocumentSkeletonPageType.NOTE) {
-                        const note = page.notes?.find((fragment) => fragment.page === tablePage);
-                        this._liquid.translate(note?.left ?? page.marginLeft, note?.top ?? page.marginTop);
-                    } else {
-                        this._liquid.translatePagePadding(page);
-                    }
-
-                    if (tablePageNestedOffset) {
-                        this._liquid.translate(tablePageNestedOffset.left, tablePageNestedOffset.top);
-                        this._liquid.translatePagePadding(tablePage!);
-                    }
-
-                    if (hasHorizontalViewport) {
-                        const visibleLeft = this._liquid.x + tableLeft - (viewport.leadingInsetLeft ?? 0);
-                        this._horizontalClip = {
-                            left: visibleLeft,
-                            right: visibleLeft + viewport.viewportWidth,
-                        };
-                    }
-
-                    this._liquid.translate(tableLeft + cellLeft - scrollLeft, tableTop + rowTop);
-                    this._liquid.translatePagePadding(segmentPage);
+                    this._translateToCellPage(page, segmentPage, skeleton);
                     break;
                 }
                 default:
                     this._liquid.translatePagePadding(page);
                     break;
+            }
+
+            if (segmentPage.cellTextDirection === 'tbRlV') {
+                this._verticalCellOrigin = {
+                    x: this._liquid.x - segmentPage.marginLeft,
+                    y: this._liquid.y - segmentPage.marginTop,
+                    width: segmentPage.pageWidth,
+                };
             }
 
             for (let s = start_s; s <= end_s; s++) {
@@ -799,8 +822,75 @@ export class NodePositionConvertToCursor {
             }
             this._liquid.translateRestore();
             this._horizontalClip = previousHorizontalClip;
+            this._verticalCellOrigin = previousVerticalCellOrigin;
 
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
+        }
+    }
+
+    private _translateToCellPage(
+        rootPage: IDocumentSkeletonPage,
+        segmentPage: IDocumentSkeletonPage,
+        skeleton: DocumentSkeleton
+    ): void {
+        const ancestors: Array<{
+            cell: IDocumentSkeletonPage;
+            row: IDocumentSkeletonRow;
+            table: IDocumentSkeletonTable;
+        }> = [];
+        let hostPage = segmentPage;
+
+        while (hostPage.parent) {
+            const row = hostPage.parent as IDocumentSkeletonRow;
+            const table = row.parent;
+            if (!row.cells?.includes(hostPage) || !table?.rows?.includes(row) || !table.tableId) {
+                break;
+            }
+
+            ancestors.unshift({ cell: hostPage, row, table });
+            if (!table.parent) {
+                hostPage = rootPage;
+                break;
+            }
+            hostPage = table.parent;
+        }
+
+        const nestedPageOffset = getDocumentSkeletonNestedPageOffset(hostPage);
+        if (hostPage.type === DocumentSkeletonPageType.HEADER) {
+            this._liquid.translatePagePadding({ ...hostPage, marginLeft: rootPage.marginLeft });
+        } else if (hostPage.type === DocumentSkeletonPageType.FOOTER) {
+            const footerTop = rootPage.pageHeight - hostPage.height - hostPage.marginBottom;
+            this._liquid.translate(rootPage.marginLeft, footerTop);
+        } else if (hostPage.type === DocumentSkeletonPageType.NOTE) {
+            const note = rootPage.notes?.find((fragment) => fragment.page === hostPage);
+            this._liquid.translate(note?.left ?? rootPage.marginLeft, note?.top ?? rootPage.marginTop);
+        } else {
+            this._liquid.translatePagePadding(rootPage);
+            if (nestedPageOffset) {
+                this._liquid.translate(nestedPageOffset.left, nestedPageOffset.top);
+                this._liquid.translatePagePadding(hostPage);
+            }
+        }
+
+        for (const { cell, row, table } of ancestors) {
+            const sourceTableId = getTableIdAndSliceIndex(table.tableId).tableId;
+            const viewport = getDocsTableRenderViewport(getDocumentUnitId(skeleton), sourceTableId);
+            const hasHorizontalViewport = hasHorizontalTableViewport(viewport);
+            const scrollLeft = hasHorizontalViewport ? viewport.scrollLeft : 0;
+
+            if (hasHorizontalViewport) {
+                const left = this._liquid.x + table.left - (viewport.leadingInsetLeft ?? 0);
+                const clip = { left, right: left + viewport.viewportWidth };
+                this._horizontalClip = this._horizontalClip
+                    ? {
+                        left: Math.max(this._horizontalClip.left, clip.left),
+                        right: Math.min(this._horizontalClip.right, clip.right),
+                    }
+                    : clip;
+            }
+
+            this._liquid.translate(table.left + cell.left - scrollLeft, table.top + row.top);
+            this._liquid.translatePagePadding(cell);
         }
     }
 }

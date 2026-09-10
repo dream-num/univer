@@ -18,6 +18,12 @@ import { describe, expect, it } from 'vitest';
 import { getColorStyleForCanvas } from '../color';
 
 describe('getColorStyleForCanvas', () => {
+    it.each(['auto', '#auto', 'AUTO'])('uses the renderer default for Word automatic color %s', (rgb) => {
+        const color = Object.freeze({ rgb });
+        expect(getColorStyleForCanvas(color)).toBeUndefined();
+        expect(color.rgb).toBe(rgb);
+    });
+
     it.each(['0000FF', 'aAbBcC', '000000'])('renders legacy imported RGB %s without making text transparent', (rgb) => {
         const color = Object.freeze({ rgb, th: 0 });
         expect(getColorStyleForCanvas(color)).toBe(`#${rgb.toLowerCase()}`);

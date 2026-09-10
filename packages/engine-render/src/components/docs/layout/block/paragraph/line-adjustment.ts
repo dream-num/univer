@@ -23,16 +23,34 @@ import type {
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
-import { HorizontalAlign, WrapStrategy } from '@univerjs/core';
+import {
+    BooleanNumber,
+    characterSpacingControlType,
+    DataStreamTreeTokenType,
+    HorizontalAlign,
+    resolveDocumentParagraphStyle,
+    SpacingRule,
+    WrapStrategy,
+} from '@univerjs/core';
 import { cjk } from '../../../../../basics/cjk-regexp';
 import {
     isCjkLeftAlignedPunctuation,
     isCjkRightAlignedPunctuation,
 } from '../../../../../basics/tools';
+import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility } from '../../../document-compatibility';
 import { BreakPointType } from '../../line-breaker/break';
 import { isLetter } from '../../line-breaker/enhancers/utils';
-import { createHyphenDashGlyph, glyphShrinkLeft, glyphShrinkRight, setGlyphGroupLeft } from '../../model/glyph';
-import { getFontConfigFromLastGlyph, getGlyphGroupWidth } from '../../tools';
+import {
+    createHyphenDashGlyph,
+    getGlyphGroupFontBoundingBox,
+    getGlyphGroupShrinkability,
+    getGlyphGroupStretchability,
+    glyphShrinkLeft,
+    glyphShrinkRight,
+    removeGlyphAutoSpacing,
+    setGlyphGroupLeft,
+} from '../../model/glyph';
+import { getFontConfigFromLastGlyph, getGlyphGroupWidth, isParagraphEnd } from '../../tools';
 
 // How much a character should hang into the end margin.
 // For more discussion, see:
@@ -65,32 +83,6 @@ function overhang(c: string): number {
     }
 }
 
-function getDivideShrinkability(divide: IDocumentSkeletonDivide): number {
-    const { glyphGroup } = divide;
-    let shrinkability = 0;
-
-    for (const glyph of glyphGroup) {
-        const [left, right] = glyph.adjustability.shrinkability;
-
-        shrinkability += left + right;
-    }
-
-    return shrinkability;
-}
-
-function getDivideStretchability(divide: IDocumentSkeletonDivide): number {
-    const { glyphGroup } = divide;
-    let stretchability = 0;
-
-    for (const glyph of glyphGroup) {
-        const [left, right] = glyph.adjustability.stretchability;
-
-        stretchability += left + right;
-    }
-
-    return stretchability;
-}
-
 function getJustifiables(divide: IDocumentSkeletonDivide): number {
     const justifiables = divide.glyphGroup.filter((glyph) => glyph.isJustifiable).length;
     const lastGlyph = divide.glyphGroup[divide.glyphGroup.length - 1];
@@ -104,6 +96,7 @@ function getJustifiables(divide: IDocumentSkeletonDivide): number {
 }
 
 function adjustGlyphsInDivide(divide: IDocumentSkeletonDivide, justificationRatio: number, extraJustification: number) {
+    const lastGlyph = divide.glyphGroup[divide.glyphGroup.length - 1];
     for (const glyph of divide.glyphGroup) {
         const adjustabilityLeft = justificationRatio < 0
             ? glyph.adjustability.shrinkability[0]
@@ -115,7 +108,7 @@ function adjustGlyphsInDivide(divide: IDocumentSkeletonDivide, justificationRati
         const justificationLeft = adjustabilityLeft * justificationRatio;
         let justificationRight = adjustabilityRight * justificationRatio;
 
-        if (glyph.isJustifiable) {
+        if (glyph.isJustifiable && (glyph !== lastGlyph || !cjk.hasCJK(glyph.content))) {
             justificationRight += extraJustification;
         }
 
@@ -180,10 +173,33 @@ function getGlyphGroupInkBounds(divide: IDocumentSkeletonDivide): { left: number
     return { left, right };
 }
 
+function getDrawingMLAlignmentDivide(divide: IDocumentSkeletonDivide): IDocumentSkeletonDivide {
+    const { glyphGroup } = divide;
+    let end = glyphGroup.length;
+    let hasTrailingSpace = false;
+    while (end > 0) {
+        const glyph = glyphGroup[end - 1];
+        if (/^[ \u3000]+$/.test(glyph.content)) {
+            hasTrailingSpace = true;
+        } else if (glyph.width !== 0 || !['', '\r', '\n', '\u2028'].includes(glyph.content)) {
+            break;
+        }
+        end--;
+    }
+
+    // DrawingML hangs breakable spaces outside alignment, but retains tabs and
+    // nonbreaking spaces. Share glyphs without removing editable source positions.
+    return hasTrailingSpace ? { ...divide, glyphGroup: glyphGroup.slice(0, end) } : divide;
+}
+
 function horizontalAlignHandler(
     line: IDocumentSkeletonLine,
     horizontalAlign: HorizontalAlign,
-    allowOverflowHorizontalOffset = false
+    allowOverflowHorizontalOffset = false,
+    hangingCjkPunctuation = false,
+    excludeTrailingSpaces = false,
+    preserveWordSpacing = false,
+    isDrawingML = false
 ) {
     const { divides } = line;
 
@@ -197,43 +213,52 @@ function horizontalAlignHandler(
             continue;
         }
 
-        let glyphGroupWidth = getGlyphGroupWidth(divide);
+        removeGlyphAutoSpacing(divide.glyphGroup[divide.glyphGroup.length - 1], 1);
+        const alignmentDivide = isDrawingML ? getDrawingMLAlignmentDivide(divide) : divide;
+        let glyphGroupWidth = getGlyphGroupWidth(alignmentDivide);
 
-        divide.glyphGroupWidth = glyphGroupWidth;
+        divide.glyphGroupWidth = getGlyphGroupWidth(divide);
 
         if (width === Number.POSITIVE_INFINITY) {
             continue;
         }
 
-        if (divide.isFull) {
+        if (divide.isFull && alignmentDivide.glyphGroup.length > 0) {
             let remaining = width - glyphGroupWidth;
 
             // Handle hanging punctuation to the right.
             // TODO: @jocs Handle hanging punctuation to the left if text dir is RTL.
-            if (divide.glyphGroup.length > 1) {
-                const lastGlyph = divide.glyphGroup[divide.glyphGroup.length - 1];
-                const amount = overhang(lastGlyph.content) * lastGlyph.width;
+            if (alignmentDivide.glyphGroup.length > 1) {
+                const lastGlyph = alignmentDivide.glyphGroup[alignmentDivide.glyphGroup.length - 1];
+                // A no-compression line can already contain a full CJK punctuation
+                // glyph outside its text extent. Do not compress it back inside.
+                const amount = hangingCjkPunctuation && glyphGroupWidth > width && isCjkLeftAlignedPunctuation(lastGlyph.content)
+                    ? lastGlyph.width
+                    : overhang(lastGlyph.content) * lastGlyph.width;
 
                 remaining += amount;
             }
 
             let justificationRatio = 0;
             let extraJustification = 0;
-            const shrink = getDivideShrinkability(divide);
-            const stretch = getDivideStretchability(divide);
+            const shrink = getGlyphGroupShrinkability(alignmentDivide.glyphGroup);
+            const stretch = getGlyphGroupStretchability(alignmentDivide.glyphGroup);
 
-            if (remaining < 0 && shrink > 0) {
+            if (remaining < 0 && shrink > 0 && !preserveWordSpacing) {
                 // Attempt to reduce the length of the line, using shrinkability.
                 justificationRatio = Math.max(remaining / shrink, -1.0);
                 remaining = Math.min(remaining + shrink, 0);
-            } else if (horizontalAlign === HorizontalAlign.JUSTIFIED) {
+            } else if (
+                (horizontalAlign === HorizontalAlign.JUSTIFIED || horizontalAlign === HorizontalAlign.BOTH) &&
+                !(i === divides.length - 1 && isParagraphEnd(line))
+            ) {
                 // Attempt to increase the length of the line, using stretchability.
                 if (stretch > 0) {
                     justificationRatio = Math.min(remaining / stretch, 1.0);
                     remaining = Math.max(remaining - stretch, 0);
                 }
 
-                const justifiables = getJustifiables(divide);
+                const justifiables = getJustifiables(alignmentDivide);
 
                 if (justifiables > 0 && remaining > 0) {
                     extraJustification = remaining / justifiables;
@@ -244,19 +269,25 @@ function horizontalAlignHandler(
             if (justificationRatio !== 0 || extraJustification !== 0) {
                 // Extrude or stretch row so that they fit within a specified width,
                 // or they can be squeezed or stretched to justify the row.
-                adjustGlyphsInDivide(divide, justificationRatio, extraJustification);
+                adjustGlyphsInDivide(alignmentDivide, justificationRatio, extraJustification);
+                if (alignmentDivide !== divide) {
+                    setGlyphGroupLeft(divide.glyphGroup);
+                }
                 // Recalculate the glyph group width, because we adjust the width and xOffset of glyphs.
-                glyphGroupWidth = getGlyphGroupWidth(divide);
-                divide.glyphGroupWidth = glyphGroupWidth;
+                glyphGroupWidth = getGlyphGroupWidth(alignmentDivide);
+                divide.glyphGroupWidth = getGlyphGroupWidth(divide);
             }
         }
 
-        const inkBounds = allowOverflowHorizontalOffset ? getGlyphGroupInkBounds(divide) : null;
+        const inkBounds = allowOverflowHorizontalOffset ? getGlyphGroupInkBounds(alignmentDivide) : null;
+        const alignmentWidth = excludeTrailingSpaces ? getGlyphGroupWidth(divide, true) : glyphGroupWidth;
 
         if (horizontalAlign === HorizontalAlign.DISTRIBUTED) {
-            if (distributeGlyphsInDivide(divide, width - glyphGroupWidth)) {
-                glyphGroupWidth = getGlyphGroupWidth(divide);
-                divide.glyphGroupWidth = glyphGroupWidth;
+            if (distributeGlyphsInDivide(alignmentDivide, width - glyphGroupWidth)) {
+                if (alignmentDivide !== divide) {
+                    setGlyphGroupLeft(divide.glyphGroup);
+                }
+                divide.glyphGroupWidth = getGlyphGroupWidth(divide);
             }
             divide.paddingLeft = 0;
         } else if (horizontalAlign === HorizontalAlign.CENTER && inkBounds) {
@@ -264,9 +295,9 @@ function horizontalAlignHandler(
         } else if (horizontalAlign === HorizontalAlign.RIGHT && inkBounds) {
             divide.paddingLeft = width - inkBounds.right;
         } else if (horizontalAlign === HorizontalAlign.CENTER) {
-            divide.paddingLeft = (width - glyphGroupWidth) / 2;
+            divide.paddingLeft = (width - alignmentWidth) / 2;
         } else if (horizontalAlign === HorizontalAlign.RIGHT) {
-            divide.paddingLeft = width - glyphGroupWidth;
+            divide.paddingLeft = width - alignmentWidth;
         }
 
         if (!allowOverflowHorizontalOffset) {
@@ -276,30 +307,10 @@ function horizontalAlignHandler(
     }
 }
 
-// If the last glyph is a CJK character adjusted by [`addCJKLatinSpacing`],
-// restore the original width.
-function restoreLastCJKGlyphWidth(line: IDocumentSkeletonLine) {
-    for (const divide of line.divides) {
-        const lastGlyph = divide.glyphGroup[divide.glyphGroup.length - 1];
-
-        if (
-            lastGlyph &&
-            divide.isFull &&
-            cjk.hasCJKText(lastGlyph.content) &&
-            lastGlyph.width - lastGlyph.xOffset > lastGlyph.bBox.width
-        ) {
-            const shrinkAmount = lastGlyph.width - lastGlyph.xOffset - lastGlyph.bBox.width;
-
-            lastGlyph.width -= shrinkAmount;
-            lastGlyph.adjustability.shrinkability[1] = 0;
-        }
-    }
-}
-
 // If the first or last glyph is a CJK punctuation, we want to shrink it.
 // See Requirements for Chinese Text Layout, Section 3.1.6.3
 // Compression of punctuation marks at line start or line end
-function shrinkStartAndEndCJKPunctuation(line: IDocumentSkeletonLine) {
+function shrinkStartAndEndCJKPunctuation(line: IDocumentSkeletonLine, preserveEndSpace = false) {
     for (const divide of line.divides) {
         const glyphGroupLength = divide.glyphGroup.length;
         if (glyphGroupLength < 2) {
@@ -315,7 +326,7 @@ function shrinkStartAndEndCJKPunctuation(line: IDocumentSkeletonLine) {
             glyphShrinkLeft(firstGlyph, shrinkAmount);
         }
 
-        if (isCjkLeftAlignedPunctuation(lastGlyph.content)) {
+        if (!preserveEndSpace && isCjkLeftAlignedPunctuation(lastGlyph.content)) {
             const shrinkAmount = lastGlyph.adjustability.shrinkability[1];
 
             glyphShrinkRight(lastGlyph, shrinkAmount);
@@ -364,6 +375,17 @@ export function lineAdjustment(
 
     const { paragraphStyle = {} } = paragraph;
     const { horizontalAlign = HorizontalAlign.UNSPECIFIED } = paragraphStyle;
+    const snapshot = viewModel.getSnapshot();
+    const documentStyle = snapshot.documentStyle;
+    const policy = sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy(documentStyle.documentFlavor);
+    const traditional = isTraditionalDocumentCompatibility(policy);
+    const excludeTrailingSpaces = traditional && (horizontalAlign === HorizontalAlign.CENTER || horizontalAlign === HorizontalAlign.RIGHT);
+    const resolvedParagraphStyle = resolveDocumentParagraphStyle(documentStyle, paragraphStyle, {
+        styles: snapshot.styles,
+        paragraphStyleId: paragraph.styleId,
+    });
+    const hangingCjkPunctuation = traditional && (sectionBreakConfig.characterSpacingControl ?? documentStyle.characterSpacingControl) === characterSpacingControlType.doNotCompress
+        && resolvedParagraphStyle.hangingPunctuation === BooleanNumber.TRUE;
     for (const page of pages) {
         for (const section of page.sections) {
             for (const column of section.columns) {
@@ -383,10 +405,21 @@ export function lineAdjustment(
                 }
                 for (let index = low; index < lines.length && lines[index].paragraphIndex === paragraph.startIndex; index++) {
                     const line = lines[index];
-                    shrinkStartAndEndCJKPunctuation(line);
-                    restoreLastCJKGlyphWidth(line);
+                    if (traditional && resolvedParagraphStyle.spacingRule === SpacingRule.EXACT && line.contentHeight > 0.01 &&
+                        !line.divides.some((divide) => divide.glyphGroup.some((glyph) => glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width > 0))) {
+                        // Word places text at 80% of the exact line box, independent of font ascent.
+                        // Keep the line box unchanged so pagination and following objects do not move.
+                        const lineBoxHeight = line.paddingTop + line.contentHeight + line.paddingBottom;
+                        const { boundingBoxAscent } = getGlyphGroupFontBoundingBox(policy, ...line.divides.map((divide) => divide.glyphGroup));
+                        line.paddingTop = lineBoxHeight * 0.8 - boundingBoxAscent;
+                        line.paddingBottom = lineBoxHeight - line.contentHeight - line.paddingTop;
+                    }
+                    shrinkStartAndEndCJKPunctuation(line, hangingCjkPunctuation);
                     addHyphenDash(line, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-                    horizontalAlignHandler(line, horizontalAlign, shouldAllowOverflowHorizontalOffset(sectionBreakConfig));
+                    const preserveWordSpacing = traditional
+                        && (horizontalAlign === HorizontalAlign.UNSPECIFIED || horizontalAlign === HorizontalAlign.LEFT)
+                        && !line.divides.some((divide) => divide.glyphGroup.some((glyph) => cjk.hasCJKText(glyph.content)));
+                    horizontalAlignHandler(line, horizontalAlign, shouldAllowOverflowHorizontalOffset(sectionBreakConfig), hangingCjkPunctuation, excludeTrailingSpaces, preserveWordSpacing, sectionBreakConfig.documentCompatibilityPolicy?.mode === 'drawingml');
                 }
             }
         }

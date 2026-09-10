@@ -305,6 +305,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                 <div
                     data-u-command={id}
                     data-disabled={disabled}
+                    aria-disabled={disabled}
                     className={clsx(toolbarButtonSelectorRootVariants({ disabled }), {
                         'univer-box-border univer-h-full univer-min-w-14 univer-flex-col !univer-pr-0': grid && large,
                         'univer-box-border univer-h-full': grid && !large,

@@ -113,6 +113,8 @@ export interface IDocumentSkeletonPage {
     marginBottom: number;
 
     left: number; // Only use for cell.
+    /** Cell lines use logical axes; the page bounds remain physical after layout. */
+    cellTextDirection?: 'tbRlV';
 
     pageNumber: number; // page number
     pageNumberStart: number; // start page number
@@ -254,6 +256,8 @@ export interface IDocumentSkeletonLine {
     top: number; // top paragraph(spaceAbove, spaceBelow, lineSpacing*PreLineHeight)
     asc: number; // =max(glyph.textMetrics.ba) alphabet alignment, needs calibration
     dsc: number; // =max(glyph.textMetrics.bd) alphabet alignment, needs calibration
+    drawingMLBaselineHeight?: number; // Recomputed as the final glyph metrics grow.
+    drawingMLNormalLineHeight?: number; // Minimum terminal extent for expanded automatic line spacing.
     paddingTop: number; // paddingTop distance from content to top
     paddingBottom: number; // paddingBottom distance from content to bottom
     marginTop: number; // marginTop paragraph spaceAbove
@@ -311,6 +315,10 @@ export interface IDocumentSkeletonGlyph {
     width: number; // cum width
     bBox: IDocumentSkeletonBoundingBox; // bBox: size of glyph
     xOffset: number; // xOffset, adjust text align in glyph
+    /** Automatic CJK/Latin gaps on the left and right; omitted at a wrapped line edge. */
+    autoSpacing?: [number, number];
+    /** Left-side punctuation space removed during shaping, restorable at a new line boundary. */
+    leadingPunctuationCompression?: number;
     left: number; // left
     count: number; // count, content length，default 1
     content: string; // content
@@ -326,7 +334,12 @@ export interface IDocumentSkeletonGlyph {
     noteId?: string;
     noteSeparator?: boolean;
     fauxBoldStrokeWidth?: number;
+    /** Runtime-only advance adjustment, recomputed when a shaped word is split across lines. */
+    kerningAdjustment?: number;
     tabLeader?: TabStopLeader;
+    tabAlignedTextWidth?: number;
+    /** Runtime-only positions for tracked text that shares one shaping glyph. */
+    textSpacing?: { content: string; segments: Array<{ content: string; left: number }> };
 }
 
 export interface IDocumentSkeletonBullet {
@@ -376,6 +389,7 @@ export interface IDocumentSkeletonDrawing {
 }
 
 export interface IDocumentSkeletonFontStyle {
+    fontKerning?: CanvasFontKerning;
     fontString: string;
     fontSize: number;
     originFontSize: number;

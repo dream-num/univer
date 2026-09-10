@@ -123,6 +123,45 @@ describe('linebreaking', () => {
     });
 
     it.each([
+        { content: 'A M', leading: 20 },
+        { content: 'M A', leading: 20 },
+        { content: 'A M', leading: 14.8 },
+    ])('includes $leading px auto-leading regardless of run position: $content', ({ content, leading }) => {
+        const { viewModel, ctx, sectionNode, sectionBreakConfig, curPage } = createSectionLayoutTestBed(['A', content], {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, gridType: GridType.DEFAULT },
+            body: {
+                paragraphs: [{
+                    startIndex: 1,
+                    paragraphId: 'preceding-paragraph',
+                    paragraphStyle: { lineSpacing: 1, spacingRule: SpacingRule.AUTO, spaceBelow: { v: 10 } },
+                }, {
+                    startIndex: content.length + 2,
+                    paragraphId: 'mixed-leading',
+                    paragraphStyle: { lineSpacing: 1, spacingRule: SpacingRule.AUTO, snapToGrid: BooleanNumber.FALSE },
+                }],
+            },
+        });
+        let result = [curPage];
+        for (const paragraphNode of sectionNode.children) {
+            const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+            for (const run of shapedTextList) {
+                for (const glyph of run.glyphs) {
+                    glyph.bBox = { ...glyph.bBox, ba: 10, bd: 4, normalLineHeight: glyph.content === 'M' ? leading : 14 };
+                }
+            }
+            result = lineBreaking(ctx, viewModel, shapedTextList, result[result.length - 1], paragraphNode, sectionBreakConfig, null);
+        }
+        expect(paragraphLines(result[0], sectionNode.children[0].endIndex)[0].lineHeight).toBeCloseTo(24);
+        const lines = paragraphLines(result[0], sectionNode.children[1].endIndex);
+        expect(lines).toHaveLength(1);
+        expect(lines[0].top).toBeCloseTo(24);
+        expect(lines[0].lineHeight).toBeCloseTo(leading);
+        expect(lines[0].contentHeight).toBe(14);
+        expect(lines[0].paddingTop).toBeCloseTo((leading - 14) / 2);
+        expect(lines[0].paddingBottom).toBeCloseTo((leading - 14) / 2);
+    });
+
+    it.each([
         { name: 'explicitly disabled', snapToGrid: BooleanNumber.FALSE, expectedLineHeight: 21 },
         { name: 'enabled by default', snapToGrid: undefined, expectedLineHeight: 41.6 },
     ])('keeps document-grid multiline spacing $name outside a table', ({ snapToGrid, expectedLineHeight }) => {
@@ -173,7 +212,7 @@ describe('linebreaking', () => {
         }
     });
 
-    it('suppresses paragraph space above at the top of a traditional page', () => {
+    it.each([1, 2])('preserves initial paragraph spacing but suppresses it on following traditional pages (%s)', (pageNumber) => {
         const content = 'Heading';
         const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
             documentStyle: {
@@ -189,6 +228,7 @@ describe('linebreaking', () => {
             },
         });
 
+        curPage.pageNumber = pageNumber;
         const result = lineBreaking(
             ctx,
             viewModel,
@@ -200,7 +240,7 @@ describe('linebreaking', () => {
         );
         const firstLine = result[0].sections[0].columns[0].lines[0];
 
-        expect(firstLine.marginTop).toBe(0);
+        expect(firstLine.marginTop).toBe(pageNumber === 1 ? 22 : 0);
         expect(firstLine.top).toBe(0);
     });
 
@@ -468,6 +508,126 @@ describe('linebreaking', () => {
         expect(result).toHaveLength(1);
     });
 
+    it.each([
+        [DocumentFlavor.TRADITIONAL, false, false],
+        [DocumentFlavor.MODERN, false, true],
+        [DocumentFlavor.TRADITIONAL, true, false],
+    ])('distinguishes terminal manual breaks from cached metadata (%s, cached: %s)', (documentFlavor, cached, hasBlankLine) => {
+        const content = `Before${DataStreamTreeTokenType.PAGE_BREAK}`;
+        const testBed = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor },
+            body: { renderedPageBreaks: cached ? [content.length - 1] : [] },
+        });
+        const result = lineBreaking(
+            testBed.ctx,
+            testBed.viewModel,
+            shaping(testBed.ctx, testBed.paragraphNode.content!, testBed.viewModel, testBed.paragraphNode, testBed.sectionBreakConfig),
+            testBed.curPage,
+            testBed.paragraphNode,
+            testBed.sectionBreakConfig,
+            null
+        );
+
+        expect(result).toHaveLength(cached ? 1 : 2);
+        expect(result[1] ? paragraphLines(result[1], testBed.paragraphNode.endIndex).length > 0 : false).toBe(hasBlankLine);
+        expect(result.map(pageText).join('')).toBe(`Before${DataStreamTreeTokenType.PARAGRAPH}`);
+        if (!hasBlankLine) {
+            const glyphs = paragraphLines(result[0], testBed.paragraphNode.endIndex)
+                .flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup));
+            expect(glyphs.map((glyph) => glyph.raw).join('')).toBe(testBed.paragraphNode.content);
+        }
+    });
+
+    it.each([false, true].flatMap((blankParagraph) => [
+        { blankParagraph, pageHeight: 80 },
+        { blankParagraph, pageHeight: 600 },
+    ]))('starts a heading after a standalone manual break without removing authored blank paragraphs: %j', ({ blankParagraph, pageHeight }) => {
+        const contents = ['Before', DataStreamTreeTokenType.PAGE_BREAK, ...(blankParagraph ? [''] : []), 'Title'];
+        let endIndex = -1;
+        const paragraphs = contents.map((content, index) => {
+            endIndex += content.length + 1;
+            return {
+                startIndex: endIndex,
+                paragraphId: `break-paragraph-${index}`,
+                paragraphStyle: { lineSpacing: index === 0 ? 40 : 20, spacingRule: SpacingRule.EXACT },
+            };
+        });
+        const { ctx, viewModel, sectionNode, sectionBreakConfig, curPage } = createSectionLayoutTestBed(contents, {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 400, height: pageHeight } },
+            body: { paragraphs },
+        });
+        let pages = [curPage];
+        for (const paragraph of sectionNode.children) {
+            const result = lineBreaking(
+                ctx,
+                viewModel,
+                shaping(ctx, paragraph.content!, viewModel, paragraph, sectionBreakConfig),
+                pages[pages.length - 1],
+                paragraph,
+                sectionBreakConfig,
+                null
+            );
+            pages = [...pages.slice(0, -1), ...result];
+        }
+
+        expect(pages).toHaveLength(2);
+        const heading = sectionNode.children[sectionNode.children.length - 1];
+        const headingLine = paragraphLines(pages[1], heading.endIndex)[0];
+        expect(headingLine.top > 0).toBe(blankParagraph);
+        expect(pageText(pages[1])).toBe(`${blankParagraph ? '\r' : ''}Title\r`);
+        expect(pageText(pages[0])).toBe('Before\r\r');
+    });
+
+    it('does not add an empty line for a leading cached pagination marker', () => {
+        const content = `${DataStreamTreeTokenType.PAGE_BREAK}Title`;
+        const testBed = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+            body: { renderedPageBreaks: [0] },
+        });
+        const result = lineBreaking(
+            testBed.ctx,
+            testBed.viewModel,
+            shaping(testBed.ctx, testBed.paragraphNode.content!, testBed.viewModel, testBed.paragraphNode, testBed.sectionBreakConfig),
+            testBed.curPage,
+            testBed.paragraphNode,
+            testBed.sectionBreakConfig,
+            null
+        );
+
+        expect(result).toHaveLength(1);
+        const lines = paragraphLines(result[0], testBed.paragraphNode.endIndex);
+        expect(lines).toHaveLength(1);
+        expect(lines[0].top).toBe(0);
+        expect(pageText(result[0])).toContain('Title');
+    });
+
+    it.each([1, 9])('ignores a leading cached page break regardless of the current page ordinal: %s', (pageNumber) => {
+        const text = '利润率整体稳中向好，期间费用率有所提升。2023年公司毛利率';
+        const { ctx, viewModel, sectionNode, sectionBreakConfig, curPage } = createSectionLayoutTestBed(
+            ['Before', `${DataStreamTreeTokenType.PAGE_BREAK}${text}`],
+            {
+                documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+                body: { renderedPageBreaks: [7] },
+            }
+        );
+        curPage.pageNumber = pageNumber;
+        let pages = [curPage];
+        for (const paragraph of sectionNode.children) {
+            const result = lineBreaking(
+                ctx,
+                viewModel,
+                shaping(ctx, paragraph.content!, viewModel, paragraph, sectionBreakConfig),
+                pages[pages.length - 1],
+                paragraph,
+                sectionBreakConfig,
+                null
+            );
+            pages = [...pages.slice(0, -1), ...result];
+        }
+        expect(pages).toHaveLength(1);
+        expect(pageText(pages[0])).toBe(`Before\r${text}\r`);
+    });
+
     it('keeps the entry contract for empty shaped text while initializing paragraph caches', () => {
         const testBed = createParagraphLayoutTestBed('Empty contract');
 
@@ -611,6 +771,41 @@ describe('linebreaking', () => {
         expect(listGlyphCounts).toEqual([1, 0]);
     });
 
+    it.each(['', 'Intro'])('applies first-line indentation only at the paragraph start across a cached break after "%s"', (beforeBreak) => {
+        const content = `${beforeBreak}${DataStreamTreeTokenType.PAGE_BREAK}敏锐如热泵领域针对市面上的产品`;
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 120, height: 200 },
+                marginLeft: 20,
+                marginRight: 20,
+            },
+            body: {
+                renderedPageBreaks: [beforeBreak.length],
+                paragraphs: [{
+                    startIndex: content.length,
+                    paragraphStyle: { indentFirstLine: { v: 16 }, snapToGrid: BooleanNumber.FALSE },
+                }],
+            },
+        });
+        const pages = lineBreaking(
+            bed.ctx,
+            bed.viewModel,
+            shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig),
+            bed.curPage,
+            bed.paragraphNode,
+            bed.sectionBreakConfig,
+            null
+        );
+        expect(pages).toHaveLength(1);
+        const lines = paragraphLines(pages[0], bed.paragraphNode.endIndex);
+        expect(lines[0].paragraphStart).toBe(true);
+        expect(lines[0].divides[0].width).toBe(64);
+        expect(lines.slice(1).every((line) => !line.paragraphStart && line.divides[0].width === 80)).toBe(true);
+        expect(pageText(pages[0])).toBe(`${beforeBreak}敏锐如热泵领域针对市面上的产品\r`);
+        bed.viewModel.dispose();
+    });
+
     it('does not add a second boundary when a rendered page break follows natural overflow', () => {
         const beforeBreak = 'One two three four five six seven eight nine ten '.repeat(8);
         const content = `${beforeBreak}${DataStreamTreeTokenType.PAGE_BREAK}After`;
@@ -657,6 +852,11 @@ describe('linebreaking', () => {
     });
 
     it.each([0, 19])('an obsolete rendered page marker at offset %s does not change wrapping or disable widow control', (offset) => {
+        vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text, font) => {
+            const size = /([\d.]+)(px|pt)/.exec(font)!;
+            const scale = Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) / 11;
+            return { width: text.length * 8 * scale, fontBoundingBoxAscent: 10 * scale, fontBoundingBoxDescent: 4 * scale, actualBoundingBoxAscent: 10 * scale, actualBoundingBoxDescent: 4 * scale };
+        });
         vi.spyOn(FontCache, 'getNormalLineHeight').mockReturnValue(14.8);
         const text = 'One two three four five six seven eight nine ten eleven twelve';
         const layout = (marker: boolean) => {
@@ -698,7 +898,7 @@ describe('linebreaking', () => {
         expect(layout(true)).toEqual(expected);
     });
 
-    it('preserves a rendered page break before a fitting inline drawing', () => {
+    it.each([360.4, 365])('ignores cached pagination while retaining a %s px inline drawing and its paragraph mark', (drawingWidth) => {
         const beforeBreak = 'Intro';
         const content = `${beforeBreak}${DataStreamTreeTokenType.PAGE_BREAK}${DataStreamTreeTokenType.CUSTOM_BLOCK}`;
         const createBed = (rendered: boolean) => createParagraphLayoutTestBed(content, {
@@ -723,7 +923,7 @@ describe('linebreaking', () => {
                         positionH: {},
                         positionV: {},
                         // DOCX EMU-to-pixel conversion can leave a sub-pixel width over the column.
-                        size: { width: 360.4, height: 90 },
+                        size: { width: drawingWidth, height: 90 },
                     },
                 },
             },
@@ -740,116 +940,46 @@ describe('linebreaking', () => {
         const renderedResult = layout(createBed(true));
         const manualResult = layout(createBed(false));
 
-        expect(renderedResult).toHaveLength(manualResult.length);
+        expect(manualResult).toHaveLength(2);
+        expect(renderedResult).toHaveLength(1);
+        const lines = paragraphLines(renderedResult[0], content.length);
+        expect(lines).toHaveLength(2);
+        const glyphs = lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup));
+        expect(glyphs.filter((glyph) => glyph.drawingId === 'inline-image')).toHaveLength(1);
+        expect(glyphs.map((glyph) => glyph.raw).join('')).toBe(`${content}\r\n`);
+        expect(glyphs[glyphs.length - 1].parent).toBe(glyphs.find((glyph) => glyph.drawingId === 'inline-image')?.parent);
+    });
 
-        expect({
-            rendered: paginationSignature(renderedResult),
-            manual: paginationSignature(manualResult),
-        }).toMatchInlineSnapshot(`
-          {
-            "manual": [
-              {
-                "breakType": 0,
-                "pageNumber": 1,
-                "sections": [
-                  {
-                    "columns": [
-                      {
-                        "lines": [
-                          {
-                            "divideCount": 1,
-                            "lineIndex": 0,
-                            "paragraphIndex": 7,
-                            "top": 0,
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-              {
-                "breakType": 1,
-                "pageNumber": 2,
-                "sections": [
-                  {
-                    "columns": [
-                      {
-                        "lines": [
-                          {
-                            "divideCount": 1,
-                            "lineIndex": 0,
-                            "paragraphIndex": 7,
-                            "top": 0,
-                          },
-                          {
-                            "divideCount": 1,
-                            "lineIndex": 1,
-                            "paragraphIndex": 7,
-                            "top": 90,
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-            "rendered": [
-              {
-                "breakType": 0,
-                "pageNumber": 1,
-                "sections": [
-                  {
-                    "columns": [
-                      {
-                        "lines": [
-                          {
-                            "divideCount": 1,
-                            "lineIndex": 0,
-                            "paragraphIndex": 7,
-                            "top": 0,
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-              {
-                "breakType": 1,
-                "pageNumber": 2,
-                "sections": [
-                  {
-                    "columns": [
-                      {
-                        "lines": [
-                          {
-                            "divideCount": 1,
-                            "lineIndex": 0,
-                            "paragraphIndex": 7,
-                            "top": 0,
-                          },
-                          {
-                            "divideCount": 1,
-                            "lineIndex": 1,
-                            "paragraphIndex": 7,
-                            "top": 90,
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          }
-        `);
+    it('honors manual boundaries without promoting a later cached marker to a page break', () => {
+        const contents = ['First\fSecond', '\fThird'];
+        const testBed = createSectionLayoutTestBed(contents, {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+            body: { renderedPageBreaks: [contents[0].length + 1] },
+        });
+        const pages = [testBed.curPage];
+        for (const paragraph of testBed.sectionNode.children) {
+            const result = lineBreaking(
+                testBed.ctx,
+                testBed.viewModel,
+                shaping(testBed.ctx, paragraph.content!, testBed.viewModel, paragraph, testBed.sectionBreakConfig),
+                pages[pages.length - 1],
+                paragraph,
+                testBed.sectionBreakConfig,
+                null
+            );
+            pages.splice(pages.length - 1, 1, ...result);
+        }
+
+        expect(pages).toHaveLength(2);
+        expect(pages.map(pageText)).toEqual([
+            'First',
+            'Second\rThird\r',
+        ]);
     });
 
     it('does not duplicate a rendered page boundary already reached by an earlier paragraph', () => {
         const overflowingParagraph = 'One two three four five six seven eight nine ten '.repeat(8);
-        const beforeBreak = 'Short paragraph';
+        const beforeBreak = 'Pre ';
         const breakParagraph = `${beforeBreak}${DataStreamTreeTokenType.PAGE_BREAK}After`;
         const renderedBreakIndex = overflowingParagraph.length + 1 + beforeBreak.length;
         const testBed = createSectionLayoutTestBed([overflowingParagraph, breakParagraph], {
@@ -902,10 +1032,10 @@ describe('linebreaking', () => {
             section.columns.some((column) => !column.isFull)
         )).toBe(true);
         expect(secondPages).toHaveLength(1);
-        expect(paragraphLines(secondPages[0], secondParagraph.endIndex).length).toBeGreaterThan(0);
+        expect(paragraphLines(secondPages[0], secondParagraph.endIndex)).toHaveLength(1);
     });
 
-    it('exposes cell-local rendered page breaks to the outer table paginator', () => {
+    it('does not split a table cell at a cached pagination marker', () => {
         const beforeBreak = 'Before';
         const content = `${beforeBreak}${DataStreamTreeTokenType.PAGE_BREAK}After`;
         const testBed = createParagraphLayoutTestBed(content, {
@@ -932,7 +1062,9 @@ describe('linebreaking', () => {
             null
         );
 
-        expect(result).toHaveLength(2);
+        expect(result).toHaveLength(1);
+        expect(paragraphLines(result[0], testBed.paragraphNode.endIndex)).toHaveLength(1);
+        expect(pageText(result[0])).toBe('BeforeAfter\r');
     });
 
     it.each([
@@ -1053,14 +1185,15 @@ describe('linebreaking', () => {
         expect(result[0].sections[0].columns).toHaveLength(2);
     });
 
-    it('DOCX golden e2e moves a split keepLines paragraph when it fits on an empty page', () => {
+    it.each([0, 4])('moves split keepLines paragraphs without carrying %s px before-spacing onto the next page', (spaceAbove) => {
         const contents = ['Filler filler filler filler', 'One two three four five'];
         const firstEnd = contents[0].length;
         const secondEnd = firstEnd + 1 + contents[1].length;
         const { viewModel, ctx, sectionNode, sectionBreakConfig, curPage } = createSectionLayoutTestBed(contents, {
             documentStyle: {
                 documentFlavor: DocumentFlavor.TRADITIONAL,
-                pageSize: { width: 120, height: 100 },
+                pageSize: { width: 120, height: 150 },
+                defaultParagraphStyle: { spacingRule: SpacingRule.EXACT, lineSpacing: 20 },
                 marginTop: 20,
                 marginBottom: 20,
                 marginLeft: 20,
@@ -1072,7 +1205,7 @@ describe('linebreaking', () => {
                     {
                         startIndex: secondEnd,
                         paragraphId: 'kept',
-                        paragraphStyle: { keepLines: BooleanNumber.TRUE },
+                        paragraphStyle: { keepLines: BooleanNumber.TRUE, spaceAbove: { v: spaceAbove } },
                     },
                 ],
             },
@@ -1100,13 +1233,20 @@ describe('linebreaking', () => {
         expect(result.length).toBeGreaterThanOrEqual(2);
         expect(paragraphLines(result[0], secondParagraph.endIndex)).toHaveLength(0);
         expect(paragraphLines(result[1], secondParagraph.endIndex).length).toBeGreaterThan(1);
+        expect(paragraphLines(result[1], secondParagraph.endIndex)[0].marginTop).toBe(0);
+        expect(ctx.paginationMetrics!.movedLineCount).toBeGreaterThan(0);
     });
 
-    it('keeps a heading tail with the following paragraph when the pair fits on an empty page', () => {
+    it.each([[0, 0], [4, 8], [8, 4]])('keeps a heading with its following paragraph and collapses spacing %s/%s', (spaceBelow, spaceAbove) => {
         const contents = [
-            'Prefix prefix prefix prefix prefix prefix',
+            'Prefix',
             'Heading',
             'Following paragraph words',
+        ];
+        const paragraphStyles = [
+            { lineSpacing: 50, spacingRule: SpacingRule.EXACT },
+            { keepNext: BooleanNumber.TRUE, spaceBelow: { v: spaceBelow } },
+            { spaceAbove: { v: spaceAbove } },
         ];
         let offset = 0;
         const paragraphs = contents.map((content, index) => {
@@ -1114,9 +1254,7 @@ describe('linebreaking', () => {
             const paragraph = {
                 startIndex: offset,
                 paragraphId: `paragraph-${index}`,
-                ...(index === 1
-                    ? { paragraphStyle: { keepNext: BooleanNumber.TRUE } }
-                    : {}),
+                paragraphStyle: paragraphStyles[index],
             };
             offset += 1;
             return paragraph;
@@ -1124,7 +1262,7 @@ describe('linebreaking', () => {
         const { viewModel, ctx, sectionNode, sectionBreakConfig, curPage } = createSectionLayoutTestBed(contents, {
             documentStyle: {
                 documentFlavor: DocumentFlavor.TRADITIONAL,
-                pageSize: { width: 120, height: 100 },
+                pageSize: { width: 120, height: 120 },
                 marginTop: 20,
                 marginBottom: 20,
                 marginLeft: 20,
@@ -1154,6 +1292,11 @@ describe('linebreaking', () => {
         expect(paragraphLines(lastResult[0], headingIndex)).toHaveLength(0);
         expect(paragraphLines(lastResult[1], headingIndex).length).toBeGreaterThan(0);
         expect(paragraphLines(lastResult[1], followingIndex).length).toBeGreaterThan(0);
+        const headingLines = paragraphLines(lastResult[1], headingIndex);
+        const headingLast = headingLines[headingLines.length - 1];
+        const followingFirst = paragraphLines(lastResult[1], followingIndex)[0];
+        const headingBottom = headingLast.top + headingLast.lineHeight - (headingLast.marginBottom ?? 0);
+        expect(followingFirst.top + followingFirst.marginTop - headingBottom).toBeCloseTo(Math.max(spaceBelow, spaceAbove));
     });
 
     it('DOCX golden e2e moves a bounded keepNext chain and stops at a manual break', () => {
@@ -1361,6 +1504,11 @@ describe('linebreaking', () => {
     });
 
     it('DOCX golden e2e avoids a single natural widow line and lets oversized keepLines paragraphs terminate', () => {
+        vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text, font) => {
+            const size = /([\d.]+)(px|pt)/.exec(font)!;
+            const scale = Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) / 11;
+            return { width: text.length * 8 * scale, fontBoundingBoxAscent: 10 * scale, fontBoundingBoxDescent: 4 * scale, actualBoundingBoxAscent: 10 * scale, actualBoundingBoxDescent: 4 * scale };
+        });
         const content = 'One two three four five six seven eight nine ten eleven twelve';
         const widowBed = createParagraphLayoutTestBed(content, {
             documentStyle: {
@@ -1434,6 +1582,43 @@ describe('linebreaking', () => {
         expect(oversizedResult.length).toBeGreaterThan(2);
         expect(oversizedResult.every((page) =>
             paragraphLines(page, oversizedBed.paragraphNode.endIndex).length > 0)).toBe(true);
+    });
+
+    it.each(['widowControl', 'keepLines'] as const)('does not insert after-spacing inside a paragraph relocated by %s', (constraint) => {
+        const content = 'aaaa bbbb cccc dddd eeee ffff';
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 120, height: 200 },
+            },
+            body: {
+                paragraphs: [{
+                    startIndex: content.length,
+                    paragraphId: 'relocated',
+                    paragraphStyle: {
+                        [constraint]: BooleanNumber.TRUE,
+                        lineSpacing: 20,
+                        spacingRule: SpacingRule.EXACT,
+                        spaceBelow: { v: 13 },
+                    },
+                }],
+            },
+        });
+        curPage.sections[0].height = 25;
+        const pages = lineBreaking(
+            ctx,
+            viewModel,
+            shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig),
+            curPage,
+            paragraphNode,
+            sectionBreakConfig,
+            null
+        );
+        expect(pages).toHaveLength(2);
+        expect(paragraphLines(pages[0], paragraphNode.endIndex)).toHaveLength(0);
+        const lines = paragraphLines(pages[1], paragraphNode.endIndex);
+        expect(lines.map((line) => line.top)).toEqual([0, 20, 40]);
+        expect(lines[2].spaceBelowApply).toBe(13);
     });
 
     it('DOCX golden e2e does not soften a manual page break with keep or widow constraints', () => {
@@ -1565,6 +1750,38 @@ describe('linebreaking', () => {
         expect(first.metrics.keepNextScanCount).toBeLessThanOrEqual(32);
         expect(first.metrics.measuredLineCount).toBeGreaterThanOrEqual(first.metrics.movedLineCount);
         expect(first.metrics.peakCheckpointLineCount).toBeLessThanOrEqual(first.metrics.measuredLineCount);
+    });
+
+    it.each([
+        { name: 'same named style', ids: ['List', 'List', 'List'], flags: [1, 1, 1], tops: [8, 28, 48] },
+        { name: 'different named styles', ids: ['List', 'Other', 'List'], flags: [1, 1, 1], tops: [8, 40, 72] },
+        { name: 'one-sided opt-out', ids: ['List', 'List', 'List'], flags: [1, 0, 1], tops: [8, 36, 68] },
+        { name: 'implicit default style', ids: [undefined, undefined, undefined], flags: [1, 1, 1], tops: [8, 28, 48] },
+    ])('applies Word contextual spacing for $name', ({ ids, flags, tops }) => {
+        const paragraphs = ids.map((styleId, index) => ({
+            startIndex: index * 2 + 1,
+            paragraphId: `p-${index}`,
+            styleId,
+            paragraphStyle: {
+                spacingRule: SpacingRule.EXACT,
+                lineSpacing: 20,
+                spaceAbove: { v: 8 },
+                spaceBelow: { v: 12 },
+                contextualSpacing: flags[index],
+            },
+        }));
+        const { viewModel, ctx, sectionNode, sectionBreakConfig, curPage } = createSectionLayoutTestBed(['A', 'B', 'C'], {
+            body: { paragraphs },
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+        });
+        for (const [index, node] of sectionNode.children.entries()) {
+            const shaped = shaping(ctx, node.content!, viewModel, node, sectionBreakConfig);
+            lineBreaking(ctx, viewModel, shaped, curPage, node, sectionBreakConfig, null, false, sectionNode.children[index + 1]);
+        }
+        const lines = curPage.sections[0].columns[0].lines;
+        expect(lines.map((line) => line.top + line.marginTop)).toEqual(tops);
+        expect(lines[2].spaceBelowApply).toBe(12);
+        expect(viewModel.getBody()?.paragraphs?.map((paragraph) => paragraph.paragraphStyle?.spaceBelow?.v)).toEqual([12, 12, 12]);
     });
 
     it('reserves bottom-border clearance when paragraph spacing is smaller', () => {
@@ -1924,8 +2141,9 @@ describe('linebreaking', () => {
         lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
 
         const line = curPage.sections[0].columns[0].lines[0];
-        expect(line.contentHeight).toBeCloseTo(96);
-        expect(line.lineHeight).toBeCloseTo(96);
+        const textDescent = Math.max(...shapedTextList.flatMap((run) => run.glyphs.map((glyph) => glyph.bBox.bd)));
+        expect(line.contentHeight).toBeCloseTo(96 + textDescent);
+        expect(line.lineHeight).toBeCloseTo(96 + textDescent);
     });
 
     it.each([
@@ -2019,7 +2237,7 @@ describe('linebreaking', () => {
         expect(textLine?.top).toBeGreaterThanOrEqual((drawing?.aTop ?? 0) + (drawing?.height ?? 0));
     });
 
-    it('keeps inline custom block height when the paragraph terminator relayouts its line', () => {
+    it('does not add the paragraph-mark descent to a traditional picture-only line', () => {
         const content = DataStreamTreeTokenType.CUSTOM_BLOCK;
         const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
             body: {
@@ -2115,6 +2333,47 @@ describe('linebreaking', () => {
 
         expect(result).toHaveLength(2);
         expect(result[1].breakType).toBe(1);
+    });
+
+    it.each([
+        { flavor: DocumentFlavor.TRADITIONAL, followingText: '', drawingPage: 0 },
+        { flavor: DocumentFlavor.TRADITIONAL, followingText: 'After', drawingPage: 1 },
+        { flavor: DocumentFlavor.MODERN, followingText: '', drawingPage: 1 },
+    ])('anchors a terminal floating picture to its manual-break paragraph ($flavor, "$followingText")', ({ flavor, followingText, drawingPage }) => {
+        const content = `Before${DataStreamTreeTokenType.PAGE_BREAK}${DataStreamTreeTokenType.CUSTOM_BLOCK}${followingText}`;
+        const { ctx, viewModel, paragraphNode, curPage, sectionBreakConfig } = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor: flavor },
+            body: { customBlocks: [{ startIndex: 7, blockId: 'corner' }] },
+            drawings: {
+                corner: {
+                    drawingId: 'corner',
+                    layoutType: PositionedObjectLayoutType.WRAP_NONE,
+                    docTransform: {
+                        size: { width: 60, height: 100 },
+                        positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 300 },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 0 },
+                        angle: 0,
+                    },
+                },
+            },
+        });
+        const pages = lineBreaking(
+            ctx,
+            viewModel,
+            shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig),
+            curPage,
+            paragraphNode,
+            sectionBreakConfig,
+            null
+        );
+        expect(pages).toHaveLength(2);
+        expect(pages[drawingPage].skeDrawings.has('corner')).toBe(true);
+        expect(pages[1 - drawingPage].skeDrawings.has('corner')).toBe(false);
+        const raw = pages.flatMap((page) => paragraphLines(page, paragraphNode.endIndex))
+            .flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup))
+            .map((glyph) => glyph.raw)
+            .join('');
+        expect(raw).toBe(paragraphNode.content);
     });
 
     it('keeps floating custom blocks after a page break on the next page', () => {
@@ -2367,6 +2626,37 @@ describe('linebreaking', () => {
         expect(inlineDrawing.aTop).toBeGreaterThanOrEqual(floatingDrawing.aTop + floatingDrawing.height);
     });
 
+    it('keeps a trailing non-flow picture on its existing text line', () => {
+        const content = `Heading${DataStreamTreeTokenType.CUSTOM_BLOCK}`;
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+            body: {
+                customBlocks: [{ startIndex: 7, blockId: 'decoration' }],
+                paragraphs: [{ startIndex: content.length, paragraphStyle: { spaceAbove: { v: 24 }, spaceBelow: { v: 2 } } }],
+            },
+            drawings: {
+                decoration: {
+                    drawingId: 'decoration',
+                    layoutType: PositionedObjectLayoutType.WRAP_NONE,
+                    behindDoc: BooleanNumber.TRUE,
+                    docTransform: {
+                        size: { width: 120, height: 90 },
+                        positionH: { posOffset: 0 },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 0 },
+                        angle: 0,
+                    },
+                },
+            },
+        });
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const result = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
+        const lines = paragraphLines(result[0], paragraphNode.endIndex);
+
+        expect(lines).toHaveLength(1);
+        expect(lines[0].divides.flatMap((divide) => divide.glyphGroup).some((glyph) => glyph.drawingId === 'decoration')).toBe(true);
+        expect(result[0].skeDrawings.has('decoration')).toBe(true);
+    });
+
     it('does not move a zero-width wrap-none floating anchor to a new page at the page bottom', () => {
         const content = DataStreamTreeTokenType.CUSTOM_BLOCK;
         const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
@@ -2530,11 +2820,12 @@ describe('linebreaking', () => {
 
         expect(result).toHaveLength(1);
         expect(result[0].skeDrawings.get('cover-background')).toMatchObject({
-            aLeft: 0,
+            aLeft: -result[0].marginLeft,
             aTop: 0,
             width: 400,
             height: 600,
         });
+        expect(result[0].marginLeft + result[0].skeDrawings.get('cover-background')!.aLeft).toBe(0);
     });
 
     it('keeps DOCX manual line breaks in the same page instead of treating them as column breaks', () => {
@@ -2595,6 +2886,30 @@ describe('linebreaking', () => {
             .join('');
         expect(renderedText).toContain('PROGRAM');
         expect(renderedText).toContain('SECOND');
+    });
+
+    it.each([1, 2, 3])('preserves the height of %s consecutive authored soft line breaks', (count) => {
+        const content = `Before${DataStreamTreeTokenType.COLUMN_BREAK.repeat(count)}After`;
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+        });
+        const pages = lineBreaking(
+            bed.ctx,
+            bed.viewModel,
+            shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig),
+            bed.curPage,
+            bed.paragraphNode,
+            bed.sectionBreakConfig,
+            null
+        );
+        expect(pages).toHaveLength(1);
+        const lines = paragraphLines(pages[0], bed.paragraphNode.endIndex);
+        expect(lines).toHaveLength(count + 1);
+        expect(lines.every((line) => line.lineHeight > 0)).toBe(true);
+        expect(lines[lines.length - 1].top).toBeCloseTo(lines[0].lineHeight * count);
+        expect(lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup)).map((glyph) => glyph.raw).join(''))
+            .toBe(bed.dataModel.getBody()!.dataStream);
+        bed.viewModel.dispose();
     });
 
     it('treats marked DOCX column breaks as column breaks in traditional documents', () => {
@@ -3126,7 +3441,12 @@ describe('linebreaking', () => {
         const terminatorGlyphs = allGlyphs.filter((glyph) =>
             glyph.streamType === DataStreamTreeTokenType.PARAGRAPH ||
             glyph.streamType === DataStreamTreeTokenType.SECTION_BREAK
-        );
+        ).map((glyph) => ({
+            ...glyph,
+            // These are synthetic terminators moved before Hello, not the authored
+            // paragraph mark after Hello; only the latter carries paragraph height.
+            bBox: { ...glyph.bBox, ba: 0, bd: 0, normalLineHeight: 0 },
+        }));
         const textGlyphs = allGlyphs
             .filter((glyph) => glyph.streamType !== DataStreamTreeTokenType.CUSTOM_BLOCK)
             .filter((glyph) => glyph.streamType !== DataStreamTreeTokenType.PARAGRAPH)

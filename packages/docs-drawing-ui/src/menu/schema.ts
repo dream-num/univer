@@ -40,6 +40,7 @@ export const menuSchema: MenuSchemaType = {
     [RibbonInsertGroup.MEDIA]: {
         [DOCS_IMAGE_MENU_ID]: {
             order: 0,
+            gridLayout: { row: 1, column: 4 },
             menuItemFactory: ImageMenuFactory,
         },
     },

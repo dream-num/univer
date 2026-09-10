@@ -15,8 +15,9 @@
  */
 
 import type { IDocumentSkeletonPage } from '../basics/i-document-skeleton-cached';
-import { cpuUsage } from 'node:process';
+import { cpuUsage, memoryUsage, stdout } from 'node:process';
 import {
+    BooleanNumber,
     ColumnLayoutType,
     ColumnResponsiveType,
     createDocumentModelWithStyle,
@@ -26,6 +27,7 @@ import {
     DrawingTypeEnum,
     JSONX,
     LocaleService,
+    LocaleType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
@@ -36,6 +38,7 @@ import {
     TableTextWrapType,
     TextX,
     TextXActionType,
+    Univer,
     VerticalAlignmentType,
 } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -124,6 +127,154 @@ describe('worker document layout session', () => {
         vi.unstubAllGlobals();
     });
 
+    it('paginates and resolves a 1000-page TOC target incrementally', () => {
+        vi.stubGlobal('document', undefined);
+        vi.stubGlobal('OffscreenCanvas', class {
+            getContext() {
+                return {
+                    font: '',
+                    textBaseline: 'alphabetic',
+                    measureText(this: { font: string }, content: string) {
+                        const size = this.font.match(/([\d.]+)(px|pt)/);
+                        const points = size ? Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) : 11;
+                        return {
+                            width: content.length * 7 * points / 11,
+                            fontBoundingBoxAscent: 9 * points / 11,
+                            fontBoundingBoxDescent: 3 * points / 11,
+                            actualBoundingBoxAscent: 8 * points / 11,
+                            actualBoundingBoxDescent: 2 * points / 11,
+                        };
+                    },
+                };
+            }
+        });
+        const paragraphs = [];
+        const pageStarts = [];
+        let dataStream = '';
+        for (let pageIndex = 0; pageIndex < 1_000; pageIndex++) {
+            pageStarts.push(dataStream.length);
+            dataStream += `Page ${pageIndex + 1}\r`;
+            paragraphs.push({
+                startIndex: dataStream.length - 1,
+                paragraphId: `page-${pageIndex + 1}`,
+                paragraphStyle: pageIndex === 0 ? undefined : { pageBreakBefore: BooleanNumber.TRUE },
+            });
+        }
+        dataStream += '\n';
+        const dataModel = new DocumentDataModel({
+            id: 'toc-1000-page-benchmark',
+            body: {
+                dataStream,
+                paragraphs,
+                sectionBreaks: [{ startIndex: dataStream.length - 1, sectionId: 'section' }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 240, height: 180 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const session = new DocumentLayoutSession(dataModel, new LocaleService());
+        const heapStart = memoryUsage().heapUsed;
+        const startedAt = performance.now();
+        const generation = session.start({ reason: 'initial' });
+        let result = session.step(generation, 8);
+        let stepCount = 1;
+        while (!result.progress.complete && stepCount < 20_000) {
+            result = session.step(generation, 8);
+            stepCount++;
+        }
+        const benchmark = {
+            elapsedMs: Math.round(performance.now() - startedAt),
+            heapDeltaMb: Math.round((memoryUsage().heapUsed - heapStart) / 1024 / 1024),
+            maxBlockMs: Math.round(result.progress.maxBlockDuration),
+            stepCount,
+        };
+        if (process.env.DOC_BENCHMARK_LOG === '1') {
+            stdout.write(`1000-page-layout ${JSON.stringify(benchmark)}\n`);
+        }
+
+        expect(result.progress.complete).toBe(true);
+        expect(result.progress.pageCount).toBe(1_000);
+        expect(session.resolvePageByOffset(pageStarts[999])).toMatchObject({
+            pageIndex: 999,
+            pageNumber: 1_000,
+        });
+        expect(session.getPage(999)?.pageIndex).toBe(999);
+        expect(benchmark.maxBlockMs).toBeLessThan(50);
+        session.dispose();
+        dataModel.dispose();
+    }, 60_000);
+
+    it.each(['initial', 'edit'] as const)('finishes a late anchor page before publishing a fresh %s session', (reason) => {
+        vi.stubGlobal('document', undefined);
+        vi.stubGlobal('OffscreenCanvas', class {
+            getContext() {
+                return {
+                    font: '',
+                    textBaseline: 'alphabetic',
+                    measureText(this: { font: string }, content: string) {
+                        const size = this.font.match(/([\d.]+)(px|pt)/);
+                        const points = size ? Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) : 11;
+                        return {
+                            width: content.length * 7 * points / 11,
+                            fontBoundingBoxAscent: 9 * points / 11,
+                            fontBoundingBoxDescent: 3 * points / 11,
+                            actualBoundingBoxAscent: 8 * points / 11,
+                            actualBoundingBoxDescent: 2 * points / 11,
+                        };
+                    },
+                };
+            }
+        });
+        const univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: {} } });
+        const localeService = univer.__getInjector().get(LocaleService);
+        localeService.setDirection('ltr');
+        const dataModel = new DocumentDataModel({
+            id: 'fresh-late-anchor',
+            body: {
+                dataStream: 'Cover\rHeading\rFollowing\rTail\r\n',
+                paragraphs: [
+                    { startIndex: 5, paragraphId: 'cover' },
+                    { startIndex: 13, paragraphId: 'heading', paragraphStyle: { pageBreakBefore: BooleanNumber.TRUE } },
+                    { startIndex: 23, paragraphId: 'following' },
+                    { startIndex: 28, paragraphId: 'tail' },
+                ],
+                sectionBreaks: [{ startIndex: 29, sectionId: 'section' }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 240, height: 180 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const session = new DocumentLayoutSession(dataModel, localeService);
+        try {
+            // A recreated Worker mount has no previous page boundary, even for an edit.
+            const generation = session.start({ reason, anchor: 8 });
+            let result = session.step(generation, 0);
+            for (let step = 0; step < 100 && !result.progress.complete; step++) {
+                if (result.progress.didPublishAnchor) {
+                    expect(result.progress.laidOutThrough).toBeGreaterThanOrEqual(28);
+                }
+                result = session.step(generation, 0);
+            }
+            expect(result.progress.complete).toBe(true);
+            expect(result.progress.pageCount).toBe(2);
+            expect(session.getPage(1)?.page.ed).toBe(29);
+        } finally {
+            session.dispose();
+            dataModel.dispose();
+            univer.dispose();
+        }
+    });
+
     it('publishes list nesting jumps and tolerates legacy sparse list caches', () => {
         vi.stubGlobal('document', undefined);
         vi.stubGlobal('OffscreenCanvas', class {
@@ -131,13 +282,15 @@ describe('worker document layout session', () => {
                 return {
                     font: '',
                     textBaseline: 'alphabetic',
-                    measureText(content: string) {
+                    measureText(this: { font: string }, content: string) {
+                        const size = this.font.match(/([\d.]+)(px|pt)/);
+                        const points = size ? Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) : 11;
                         return {
-                            width: content.length * 7,
-                            fontBoundingBoxAscent: 9,
-                            fontBoundingBoxDescent: 3,
-                            actualBoundingBoxAscent: 8,
-                            actualBoundingBoxDescent: 2,
+                            width: content.length * 7 * points / 11,
+                            fontBoundingBoxAscent: 9 * points / 11,
+                            fontBoundingBoxDescent: 3 * points / 11,
+                            actualBoundingBoxAscent: 8 * points / 11,
+                            actualBoundingBoxDescent: 2 * points / 11,
                         };
                     },
                 };
@@ -256,13 +409,15 @@ describe('worker document layout session', () => {
                 return {
                     font: '',
                     textBaseline: 'alphabetic',
-                    measureText(content: string) {
+                    measureText(this: { font: string }, content: string) {
+                        const size = this.font.match(/([\d.]+)(px|pt)/);
+                        const points = size ? Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) : 11;
                         return {
-                            width: content.length * 7,
-                            fontBoundingBoxAscent: 9,
-                            fontBoundingBoxDescent: 3,
-                            actualBoundingBoxAscent: 8,
-                            actualBoundingBoxDescent: 2,
+                            width: content.length * 7 * points / 11,
+                            fontBoundingBoxAscent: 9 * points / 11,
+                            fontBoundingBoxDescent: 3 * points / 11,
+                            actualBoundingBoxAscent: 8 * points / 11,
+                            actualBoundingBoxDescent: 2 * points / 11,
                         };
                     },
                 };
@@ -398,13 +553,15 @@ describe('worker document layout session', () => {
                 return {
                     font: '',
                     textBaseline: 'alphabetic',
-                    measureText(content: string) {
+                    measureText(this: { font: string }, content: string) {
+                        const size = this.font.match(/([\d.]+)(px|pt)/);
+                        const points = size ? Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) : 11;
                         return {
-                            width: content.length * 7,
-                            fontBoundingBoxAscent: 9,
-                            fontBoundingBoxDescent: 3,
-                            actualBoundingBoxAscent: 8,
-                            actualBoundingBoxDescent: 2,
+                            width: content.length * 7 * points / 11,
+                            fontBoundingBoxAscent: 9 * points / 11,
+                            fontBoundingBoxDescent: 3 * points / 11,
+                            actualBoundingBoxAscent: 8 * points / 11,
+                            actualBoundingBoxDescent: 2 * points / 11,
                         };
                     },
                 };
@@ -456,6 +613,10 @@ describe('worker document layout session', () => {
 
         const distantPageIndex = 10;
         const distantWindow = { startPageIndex: 8, endPageIndex: 12 };
+        const materializedPageListener = vi.fn();
+        const layoutProgressListener = vi.fn();
+        mainSkeleton.layoutPageMaterialized$.subscribe(materializedPageListener);
+        mainSkeleton.layoutProgress$.subscribe(layoutProgressListener);
         for (
             let pageIndex = distantWindow.startPageIndex;
             pageIndex <= distantWindow.endPageIndex;
@@ -475,6 +636,8 @@ describe('worker document layout session', () => {
             !page.isLayoutPlaceholder && !page.isMaterializationPlaceholder
         ) ?? [];
         expect(materializedPages).toHaveLength(5);
+        expect(materializedPageListener).toHaveBeenCalledTimes(5);
+        expect(layoutProgressListener).not.toHaveBeenCalled();
         expect(mainSkeleton.getSkeletonData()?.pages[0].isMaterializationPlaceholder).toBe(true);
         const distantPublication = session.getPage(distantPageIndex);
         if (distantPublication == null) {
@@ -488,6 +651,10 @@ describe('worker document layout session', () => {
         if (editAnchor == null || editAnchor < 0) {
             throw new Error('Expected the distant Main page to expose a logical edit anchor.');
         }
+        expect(session.resolvePageByOffset(editAnchor)).toMatchObject({
+            pageIndex: distantPageIndex,
+            startOffset: editAnchor,
+        });
         const textX = new TextX();
         textX.push({ t: TextXActionType.RETAIN, len: editAnchor });
         textX.push({ t: TextXActionType.INSERT, len: 1, body: { dataStream: 'X' } });
@@ -523,13 +690,15 @@ describe('worker document layout session', () => {
                 return {
                     font: '',
                     textBaseline: 'alphabetic',
-                    measureText(content: string) {
+                    measureText(this: { font: string }, content: string) {
+                        const size = this.font.match(/([\d.]+)(px|pt)/);
+                        const points = size ? Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) : 11;
                         return {
-                            width: content.length * 7,
-                            fontBoundingBoxAscent: 9,
-                            fontBoundingBoxDescent: 3,
-                            actualBoundingBoxAscent: 8,
-                            actualBoundingBoxDescent: 2,
+                            width: content.length * 7 * points / 11,
+                            fontBoundingBoxAscent: 9 * points / 11,
+                            fontBoundingBoxDescent: 3 * points / 11,
+                            actualBoundingBoxAscent: 8 * points / 11,
+                            actualBoundingBoxDescent: 2 * points / 11,
                         };
                     },
                 };
@@ -625,13 +794,15 @@ describe('worker document layout session', () => {
                 return {
                     font: '',
                     textBaseline: 'alphabetic',
-                    measureText(content: string) {
+                    measureText(this: { font: string }, content: string) {
+                        const size = this.font.match(/([\d.]+)(px|pt)/);
+                        const points = size ? Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) : 11;
                         return {
-                            width: content.length * 7,
-                            fontBoundingBoxAscent: 9,
-                            fontBoundingBoxDescent: 3,
-                            actualBoundingBoxAscent: 8,
-                            actualBoundingBoxDescent: 2,
+                            width: content.length * 7 * points / 11,
+                            fontBoundingBoxAscent: 9 * points / 11,
+                            fontBoundingBoxDescent: 3 * points / 11,
+                            actualBoundingBoxAscent: 8 * points / 11,
+                            actualBoundingBoxDescent: 2 * points / 11,
                         };
                     },
                 };
@@ -698,13 +869,15 @@ describe('worker document layout session', () => {
                 return {
                     font: '',
                     textBaseline: 'alphabetic',
-                    measureText(content: string) {
+                    measureText(this: { font: string }, content: string) {
+                        const size = this.font.match(/([\d.]+)(px|pt)/);
+                        const points = size ? Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) : 11;
                         return {
-                            width: content.length * 7,
-                            fontBoundingBoxAscent: 9,
-                            fontBoundingBoxDescent: 3,
-                            actualBoundingBoxAscent: 8,
-                            actualBoundingBoxDescent: 2,
+                            width: content.length * 7 * points / 11,
+                            fontBoundingBoxAscent: 9 * points / 11,
+                            fontBoundingBoxDescent: 3 * points / 11,
+                            actualBoundingBoxAscent: 8 * points / 11,
+                            actualBoundingBoxDescent: 2 * points / 11,
                         };
                     },
                 };
@@ -788,13 +961,15 @@ describe('worker document layout session', () => {
                 return {
                     font: '',
                     textBaseline: 'alphabetic',
-                    measureText(content: string) {
+                    measureText(this: { font: string }, content: string) {
+                        const size = this.font.match(/([\d.]+)(px|pt)/);
+                        const points = size ? Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) : 11;
                         return {
-                            width: content.length * 7,
-                            fontBoundingBoxAscent: 9,
-                            fontBoundingBoxDescent: 3,
-                            actualBoundingBoxAscent: 8,
-                            actualBoundingBoxDescent: 2,
+                            width: content.length * 7 * points / 11,
+                            fontBoundingBoxAscent: 9 * points / 11,
+                            fontBoundingBoxDescent: 3 * points / 11,
+                            actualBoundingBoxAscent: 8 * points / 11,
+                            actualBoundingBoxDescent: 2 * points / 11,
                         };
                     },
                 };
@@ -943,13 +1118,15 @@ describe('worker document layout session', () => {
                 return {
                     font: '',
                     textBaseline: 'alphabetic',
-                    measureText(content: string) {
+                    measureText(this: { font: string }, content: string) {
+                        const size = this.font.match(/([\d.]+)(px|pt)/);
+                        const points = size ? Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) : 11;
                         return {
-                            width: content.length * 7,
-                            fontBoundingBoxAscent: 9,
-                            fontBoundingBoxDescent: 3,
-                            actualBoundingBoxAscent: 8,
-                            actualBoundingBoxDescent: 2,
+                            width: content.length * 7 * points / 11,
+                            fontBoundingBoxAscent: 9 * points / 11,
+                            fontBoundingBoxDescent: 3 * points / 11,
+                            actualBoundingBoxAscent: 8 * points / 11,
+                            actualBoundingBoxDescent: 2 * points / 11,
                         };
                     },
                 };
@@ -1027,13 +1204,15 @@ describe('worker document layout session', () => {
                 return {
                     font: '',
                     textBaseline: 'alphabetic',
-                    measureText(content: string) {
+                    measureText(this: { font: string }, content: string) {
+                        const size = this.font.match(/([\d.]+)(px|pt)/);
+                        const points = size ? Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) : 11;
                         return {
-                            width: content.length * 7,
-                            fontBoundingBoxAscent: 9,
-                            fontBoundingBoxDescent: 3,
-                            actualBoundingBoxAscent: 8,
-                            actualBoundingBoxDescent: 2,
+                            width: content.length * 7 * points / 11,
+                            fontBoundingBoxAscent: 9 * points / 11,
+                            fontBoundingBoxDescent: 3 * points / 11,
+                            actualBoundingBoxAscent: 8 * points / 11,
+                            actualBoundingBoxDescent: 2 * points / 11,
                         };
                     },
                 };
@@ -1120,13 +1299,15 @@ describe('worker document layout session', () => {
                 return {
                     font: '',
                     textBaseline: 'alphabetic',
-                    measureText(content: string) {
+                    measureText(this: { font: string }, content: string) {
+                        const size = this.font.match(/([\d.]+)(px|pt)/);
+                        const points = size ? Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) : 11;
                         return {
-                            width: content.length * 7,
-                            fontBoundingBoxAscent: 9,
-                            fontBoundingBoxDescent: 3,
-                            actualBoundingBoxAscent: 8,
-                            actualBoundingBoxDescent: 2,
+                            width: content.length * 7 * points / 11,
+                            fontBoundingBoxAscent: 9 * points / 11,
+                            fontBoundingBoxDescent: 3 * points / 11,
+                            actualBoundingBoxAscent: 8 * points / 11,
+                            actualBoundingBoxDescent: 2 * points / 11,
                         };
                     },
                 };
@@ -1557,13 +1738,15 @@ describe('worker document layout session', () => {
                 return {
                     font: '',
                     textBaseline: 'alphabetic',
-                    measureText(content: string) {
+                    measureText(this: { font: string }, content: string) {
+                        const size = this.font.match(/([\d.]+)(px|pt)/);
+                        const points = size ? Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) : 11;
                         return {
-                            width: content.length * 7,
-                            fontBoundingBoxAscent: 9,
-                            fontBoundingBoxDescent: 3,
-                            actualBoundingBoxAscent: 8,
-                            actualBoundingBoxDescent: 2,
+                            width: content.length * 7 * points / 11,
+                            fontBoundingBoxAscent: 9 * points / 11,
+                            fontBoundingBoxDescent: 3 * points / 11,
+                            actualBoundingBoxAscent: 8 * points / 11,
+                            actualBoundingBoxDescent: 2 * points / 11,
                         };
                     },
                 };

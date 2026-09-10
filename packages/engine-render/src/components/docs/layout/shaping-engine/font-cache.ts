@@ -27,6 +27,7 @@ export interface IMeasureTextCache {
     fontBoundingBoxDescent: number;
     actualBoundingBoxAscent: number;
     actualBoundingBoxDescent: number;
+    actualBoundingBoxRight?: number;
     width: number;
 }
 
@@ -325,6 +326,7 @@ export class FontCache {
             fontBoundingBoxDescent,
             actualBoundingBoxAscent,
             actualBoundingBoxDescent,
+            actualBoundingBoxRight,
         } = textMetrics;
 
         const cache: IMeasureTextCache = {
@@ -333,6 +335,7 @@ export class FontCache {
             fontBoundingBoxDescent,
             actualBoundingBoxAscent,
             actualBoundingBoxDescent,
+            actualBoundingBoxRight,
         };
 
         // Compatibility for browsers that do not support textMetrics

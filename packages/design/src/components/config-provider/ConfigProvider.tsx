@@ -18,7 +18,6 @@ import type { ReactNode } from 'react';
 import { DirectionProvider } from '@radix-ui/react-direction';
 import { createContext, useMemo } from 'react';
 import { isBrowser } from '../../helper/is-browser';
-import enUS from '../../locale/en-US';
 
 export interface IConfigProviderProps {
     children: ReactNode;
@@ -29,11 +28,10 @@ export interface IConfigProviderProps {
 
 export const ConfigContext = createContext<Omit<IConfigProviderProps, 'children'>>({
     mountContainer: isBrowser() ? document.body : null,
-    locale: enUS.design,
 });
 
 export function ConfigProvider(props: IConfigProviderProps) {
-    const { children, locale = enUS.design, mountContainer, direction } = props;
+    const { children, locale, mountContainer, direction } = props;
 
     const value = useMemo(() => {
         return {

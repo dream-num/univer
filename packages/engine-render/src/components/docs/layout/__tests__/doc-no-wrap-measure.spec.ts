@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { DocumentFlavor } from '@univerjs/core';
+import { BooleanNumber, DocumentFlavor } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { getFontStyleString } from '../../../../basics/tools';
 import {
@@ -43,6 +43,29 @@ function createDocument(dataStream: string): IDocumentData {
 }
 
 describe('measureDocumentNoWrapTextWidth', () => {
+    it.each([undefined, DocumentFlavor.UNSPECIFIED, DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN, DocumentFlavor.DRAWINGML])(
+        'honors the East Asian spacing switch across runs and ranges without changing its default (%s)',
+        (documentFlavor) => {
+            const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
+                width: Array.from(text).reduce((width, char) => width + (/[中文]/.test(char) ? 16 : 8), 0),
+            }) as never);
+            try {
+                const document = createDocument('A中1文B\r\n');
+                document.documentStyle.documentFlavor = documentFlavor;
+                for (const runs of [[], [{ st: 0, ed: 1, ts: { bl: 1 } }, { st: 1, ed: 2, ts: { bl: 1 } }]]) {
+                    document.body!.textRuns = runs;
+                    for (const flag of [undefined, BooleanNumber.TRUE, BooleanNumber.FALSE]) {
+                        document.documentStyle.spaceWidthEastAsian = flag;
+                        expect(measureDocumentNoWrapTextWidth(document)).toBe(flag === BooleanNumber.FALSE ? 56 : 72);
+                        expect(measureDocumentNoWrapTextRangeWidth(document, 0, 3)).toBe(flag === BooleanNumber.FALSE ? 32 : 40);
+                    }
+                }
+            } finally {
+                measureSpy.mockRestore();
+            }
+        }
+    );
+
     it.each([DocumentFlavor.MODERN, DocumentFlavor.DRAWINGML])('shares small-cap fonts for inherited styles and source ranges (%s)', (flavor) => {
         const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text, font) => ({
             width: Array.from(text).length * Number(font.match(/([\d.]+)pt/)![1]),

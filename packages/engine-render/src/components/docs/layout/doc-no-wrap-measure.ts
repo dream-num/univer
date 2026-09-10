@@ -17,6 +17,7 @@
 import type { IDocumentData, ITextRun, ITextStyle } from '@univerjs/core';
 import type { IDocumentSkeletonFontStyle } from '../../../basics/i-document-skeleton-cached';
 import type { IDocumentCompatibilityPolicy } from '../document-compatibility';
+import { BooleanNumber } from '@univerjs/core';
 import { getFirstGrapheme, getFontStyleString, getTextWithCaps } from '../../../basics/tools';
 import { getDocumentCompatibilityPolicy, getSmallCapsFontStyle } from '../document-compatibility';
 import { LineBreaker } from './line-breaker';
@@ -93,7 +94,8 @@ function measureDocumentNoWrapRunsWidth(
     dataStream: string,
     textRuns: ITextRun[],
     fallbackTextStyle: ITextStyle | undefined,
-    policy: IDocumentCompatibilityPolicy
+    policy: IDocumentCompatibilityPolicy,
+    spaceWidthEastAsian: boolean
 ): number {
     let currentLineWidth = 0;
     let maxLineWidth = 0;
@@ -125,12 +127,16 @@ function measureDocumentNoWrapRunsWidth(
             currentLineWidth += pendingTrailingWhitespaceWidth;
             pendingTrailingWhitespaceWidth = 0;
             currentLineWidth += measureSegment(visibleSegment, textStyle, font);
-            currentLineWidth += measureDocumentNoWrapCJKLatinSpacing(visibleSegment, textStyle, previous);
+            if (spaceWidthEastAsian) {
+                currentLineWidth += measureDocumentNoWrapCJKLatinSpacing(visibleSegment, textStyle, previous);
+            }
         }
 
         if (trailingWhitespace) {
             pendingTrailingWhitespaceWidth += measureSegment(trailingWhitespace, textStyle, font);
-            measureDocumentNoWrapCJKLatinSpacing(trailingWhitespace, textStyle, previous);
+            if (spaceWidthEastAsian) {
+                measureDocumentNoWrapCJKLatinSpacing(trailingWhitespace, textStyle, previous);
+            }
         }
     };
 
@@ -221,7 +227,8 @@ export function measureDocumentNoWrapTextRangeWidth(documentData: IDocumentData,
         rangeText,
         textRuns,
         documentData.documentStyle?.textStyle,
-        getDocumentCompatibilityPolicy(documentData.documentStyle?.documentFlavor)
+        getDocumentCompatibilityPolicy(documentData.documentStyle?.documentFlavor),
+        documentData.documentStyle?.spaceWidthEastAsian !== BooleanNumber.FALSE
     );
 }
 
@@ -245,7 +252,8 @@ export function measureDocumentNoWrapTextWidth(documentData: IDocumentData | nul
         dataStream,
         textRuns ?? [],
         documentData?.documentStyle?.textStyle,
-        getDocumentCompatibilityPolicy(documentData?.documentStyle?.documentFlavor)
+        getDocumentCompatibilityPolicy(documentData?.documentStyle?.documentFlavor),
+        documentData?.documentStyle?.spaceWidthEastAsian !== BooleanNumber.FALSE
     );
 }
 

@@ -19,6 +19,8 @@
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { IDocLayoutExecutor } from '@univerjs/docs';
 import type { Documents, IPointerEvent, RenderUnit } from '@univerjs/engine-render';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
     BooleanNumber,
     CustomRangeType,
@@ -56,21 +58,16 @@ import { AfterSpaceCommand } from '../../../commands/commands/auto-format.comman
 import { BreakLineCommand } from '../../../commands/commands/break-line.command';
 import { IMEInputCommand } from '../../../commands/commands/ime-input.command';
 import { DocAutoFormatService } from '../../../services/doc-auto-format.service';
-import { DocEventManagerService } from '../../../services/doc-event-manager.service';
 import { DocIMEInputManagerService } from '../../../services/doc-ime-input-manager.service';
 import { DocLayoutInteractionService } from '../../../services/doc-layout-interaction.service';
 import { DocMenuStyleService } from '../../../services/doc-menu-style.service';
 import { DocMobileElementMenuService } from '../../../services/doc-mobile-element-menu.service';
 import { DocPageLayoutService } from '../../../services/doc-page-layout.service';
-import { DocParagraphMenuService } from '../../../services/doc-paragraph-menu.service';
 import { DocCanvasPopManagerService } from '../../../services/doc-popup-manager.service';
 import { DocViewScaleService } from '../../../services/doc-view-scale';
 import { EditorService, IEditorService } from '../../../services/editor/editor-manager.service';
-import { DocFloatMenuService } from '../../../services/float-menu.service';
-import { MobileDocParagraphMenuService } from '../../../services/mobile/doc-paragraph-menu.service';
 import { MobileDocSelectionRenderService } from '../../../services/mobile/doc-selection-render.service';
 import { MobileDocViewScaleService } from '../../../services/mobile/doc-view-scale';
-import { MobileDocFloatMenuService } from '../../../services/mobile/float-menu.service';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 import { cursorConvertToTextRange } from '../../../services/selection/text-range';
 import { DocBackScrollRenderController } from '../back-scroll.render-controller';
@@ -240,20 +237,22 @@ function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout
 }
 
 describe('DocRenderController bounded input publication', () => {
-    it('uses the mobile render providers without desktop hover menus or Modern horizontal scrolling', () => {
+    it('keeps mobile layout state out of the desktop render controller', () => {
+        const desktopSource = readFileSync(resolve(process.cwd(), 'src/controllers/render-controllers/doc.render-controller.ts'), 'utf8');
+        const mobilePluginSource = readFileSync(resolve(process.cwd(), 'src/mobile-plugin.ts'), 'utf8');
+
+        expect(desktopSource).not.toContain('MOBILE_DOC_OUTER_MARGIN');
+        expect(desktopSource).not.toContain('_mobileModernPageWidth');
+        expect(desktopSource).not.toContain('_getMobileModernLayoutOptions');
+        expect(desktopSource).not.toContain('_initMobileResponsiveLayout');
+        expect(desktopSource).not.toContain('_initResponsiveLayout');
+        expect(mobilePluginSource).toContain('[DocRenderController, { useClass: MobileDocRenderController }]');
+    });
+
+    it('uses the mobile render providers without Modern horizontal scrolling', () => {
         const editor = createEditor(8, true, false, DocumentFlavor.MODERN, false, true);
         try {
             expect(editor.render.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)?.getScrollBar()?.enableHorizontal).toBe(false);
-            editor.render.addRenderDependencies([
-                [DocEventManagerService],
-                [DocFloatMenuService, { useClass: MobileDocFloatMenuService }],
-                [DocParagraphMenuService, { useClass: MobileDocParagraphMenuService }],
-            ]);
-            const menu = editor.render.with(DocParagraphMenuService);
-            const rect = { left: 0, top: 0, right: 100, bottom: 20 };
-            menu.showParagraphMenu({ paragraphStart: 0, paragraphEnd: 10, startIndex: 10, pageIndex: 0, firstLine: rect, rect, rects: [rect] });
-            expect(menu.activeTarget).toBeNull();
-            expect(editor.render.getInjector().get(ICanvasPopupService).popups).toHaveLength(0);
         } finally {
             editor.dispose();
         }
@@ -549,7 +548,7 @@ describe('DocRenderController bounded input publication', () => {
         const editor = createEditor(8, true, false, DocumentFlavor.TRADITIONAL, false, mobile);
         try {
             if (mobile) {
-                editor.selection.enterMobileEditMode();
+                (editor.selection as MobileDocSelectionRenderService).enterMobileEditMode();
             }
             editor.selection.focus();
             editor.input.textContent = 'A';

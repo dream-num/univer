@@ -14,9 +14,73 @@
  * limitations under the License.
  */
 
-import type { IDrawingArrangeProps } from './DrawingArrange';
-import { DrawingArrange } from './DrawingArrange';
+import type { IDrawingParam } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
+import { ArrangeTypeEnum, ICommandService, LocaleService } from '@univerjs/core';
+import { Button, clsx } from '@univerjs/design';
+import { IDrawingManagerService } from '@univerjs/drawing';
+import { IconManager, useDependency, useObservable } from '@univerjs/ui';
+import { SetDrawingArrangeOperation } from '../../commands/operations/drawing-arrange.operation';
 
-export function MobileDrawingArrange(props: IDrawingArrangeProps) {
-    return <DrawingArrange {...props} actionClassName="univer-h-12 univer-w-full" />;
+interface IMobileDrawingArrangeProps {
+    arrangeShow: boolean;
+    drawings: IDrawingParam[];
+}
+
+export function MobileDrawingArrange(props: IMobileDrawingArrangeProps) {
+    const { arrangeShow, drawings: focusDrawings } = props;
+    const localeService = useDependency(LocaleService);
+    const drawingManagerService = useDependency(IDrawingManagerService);
+    const commandService = useDependency(ICommandService);
+    const iconManager = useDependency(IconManager);
+    const MoveUpIcon = iconManager.get('MoveUpIcon');
+    const MoveDownIcon = iconManager.get('MoveDownIcon');
+    const TopmostIcon = iconManager.get('TopmostIcon');
+    const BottomIcon = iconManager.get('BottomIcon');
+    const drawings = useObservable(
+        () => drawingManagerService.focus$,
+        focusDrawings,
+        false,
+        [drawingManagerService]
+    );
+
+    const arrange = (arrangeType: ArrangeTypeEnum) => {
+        commandService.syncExecuteCommand(SetDrawingArrangeOperation.id, { arrangeType, drawings });
+    };
+
+    return (
+        <div
+            className={clsx('univer-grid univer-gap-2 univer-py-2 univer-text-gray-400', {
+                'univer-hidden': !arrangeShow,
+            })}
+        >
+            <header
+                className="
+                  univer-text-gray-600
+                  dark:!univer-text-gray-200
+                "
+            >
+                <div>{localeService.t<LocaleKey>('drawing-ui.image-panel.arrange.title')}</div>
+            </header>
+
+            <div className="univer-grid univer-grid-cols-2 univer-gap-2">
+                <Button className="univer-h-12 univer-w-full" onClick={() => arrange(ArrangeTypeEnum.forward)}>
+                    <MoveUpIcon />
+                    {localeService.t<LocaleKey>('drawing-ui.image-panel.arrange.forward')}
+                </Button>
+                <Button className="univer-h-12 univer-w-full" onClick={() => arrange(ArrangeTypeEnum.backward)}>
+                    <MoveDownIcon />
+                    {localeService.t<LocaleKey>('drawing-ui.image-panel.arrange.backward')}
+                </Button>
+                <Button className="univer-h-12 univer-w-full" onClick={() => arrange(ArrangeTypeEnum.front)}>
+                    <TopmostIcon />
+                    {localeService.t<LocaleKey>('drawing-ui.image-panel.arrange.front')}
+                </Button>
+                <Button className="univer-h-12 univer-w-full" onClick={() => arrange(ArrangeTypeEnum.back)}>
+                    <BottomIcon />
+                    {localeService.t<LocaleKey>('drawing-ui.image-panel.arrange.back')}
+                </Button>
+            </div>
+        </div>
+    );
 }

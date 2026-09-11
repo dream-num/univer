@@ -254,7 +254,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         }
     }
 
-    protected _init() {
+    private _init() {
         const handleHoverTarget = (paragraph: Nullable<IMutiPageParagraphBound>, tableBound: Nullable<ITableBound>) => {
             if (this._isBlockMenuDragging) {
                 return;

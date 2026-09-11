@@ -16,6 +16,8 @@
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { Root } from 'react-dom/client';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
     CustomRangeType,
     ICommandService,
@@ -43,6 +45,7 @@ import { ShowDocHyperLinkEditPopupOperation } from '../../commands/operations/po
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 import { DocHyperLinkEdit } from '../DocHyperLinkEdit';
 import { DocLinkPopup } from '../DocLinkPopup';
+import { MobileDocHyperLinkEdit } from '../MobileDocHyperLinkEdit';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -189,7 +192,7 @@ function renderEditPopup(root: Root, testBed: ReturnType<typeof createPopupTestB
     act(() => {
         root.render(
             <RediContext.Provider value={{ injector: testBed.injector }}>
-                <DocHyperLinkEdit mobile={mobile} />
+                {mobile ? <MobileDocHyperLinkEdit /> : <DocHyperLinkEdit />}
             </RediContext.Provider>
         );
     });
@@ -209,6 +212,14 @@ describe('DocLinkPopup', () => {
         root = undefined;
         container = undefined;
         currentTestBed = undefined;
+    });
+
+    it('keeps desktop and mobile hyperlink edit components independent', () => {
+        const desktopSource = readFileSync(resolve(process.cwd(), 'src/views/DocHyperLinkEdit.tsx'), 'utf8');
+        const mobileSource = readFileSync(resolve(process.cwd(), 'src/views/MobileDocHyperLinkEdit.tsx'), 'utf8');
+
+        expect(desktopSource).not.toContain('props.mobile');
+        expect(mobileSource).not.toContain("from './DocHyperLinkEdit'");
     });
 
     it('opens the hyperlink edit popup for the currently displayed document link', async () => {

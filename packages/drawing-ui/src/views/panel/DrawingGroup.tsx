@@ -15,7 +15,6 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
-import type { ComponentProps, ComponentType } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import { DrawingTypeEnum, ICommandService, LocaleService } from '@univerjs/core';
 import { Button, clsx } from '@univerjs/design';
@@ -32,7 +31,6 @@ import { getUpdateParams } from '../../utils/get-update-params';
 export interface IDrawingGroupProps {
     drawings: IDrawingParam[];
     hasGroup: boolean;
-    ButtonComponent?: ComponentType<ComponentProps<typeof Button>>;
 }
 
 export const DrawingGroup = (props: IDrawingGroupProps) => {
@@ -42,7 +40,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
     const commandService = useDependency(ICommandService);
     const iconManager = useDependency(IconManager);
 
-    const { hasGroup, drawings, ButtonComponent = Button } = props;
+    const { hasGroup, drawings } = props;
     const GroupIcon = iconManager.get('GroupIcon');
     const UngroupIcon = iconManager.get('UngroupIcon');
 
@@ -99,7 +97,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
             </header>
 
             <div className="univer-flex univer-items-center univer-justify-center univer-gap-2">
-                <ButtonComponent
+                <Button
                     className={clsx({
                         'univer-hidden': !groupBtnShow,
                     })}
@@ -107,8 +105,8 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
                 >
                     <GroupIcon />
                     {localeService.t<LocaleKey>('drawing-ui.image-panel.group.group')}
-                </ButtonComponent>
-                <ButtonComponent
+                </Button>
+                <Button
                     className={clsx({
                         'univer-hidden': !ungroupBtnShow,
                     })}
@@ -116,7 +114,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
                 >
                     <UngroupIcon />
                     {localeService.t<LocaleKey>('drawing-ui.image-panel.group.unGroup')}
-                </ButtonComponent>
+                </Button>
             </div>
         </div>
     );

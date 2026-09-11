@@ -257,8 +257,6 @@ describe('Transformer', () => {
             if (!anchor) {
                 throw new Error(`Missing ${controlKey} control`);
             }
-            expect(transformer.isControlObject(anchor)).toBe(true);
-            expect(transformer.isControlObject(rect)).toBe(false);
             const initial = rect.getState();
             const point = anchor.ancestorTransform.applyPoint(new Vector2(anchor.width / 2, anchor.height / 2));
             anchor.onPointerDown$.emitEvent(createPointerEvent('pointerdown', point.x, point.y));

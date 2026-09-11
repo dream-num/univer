@@ -16,16 +16,16 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IRenderContext } from '@univerjs/engine-render';
-import { CustomRangeType, ICommandService, Univer } from '@univerjs/core';
+import { CustomRangeType, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, Univer } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { DocCanvasPopManagerService, DocEventManagerService, DocMobileElementMenuService } from '@univerjs/docs-ui';
-import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { CanvasPopupService, ICanvasPopupService } from '@univerjs/ui';
+import { DocEventManagerService } from '@univerjs/docs-ui';
 import { config, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { DeleteDocHyperLinkCommand } from '../../../commands/commands/delete-link.command';
 import { ClickDocHyperLinkOperation } from '../../../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../../../services/hyper-link-popup.service';
 import { DocHyperLinkEventRenderController } from '../hyper-link-event.render-controller';
+import { MobileDocHyperLinkEventRenderController } from '../mobile/hyper-link-event.render-controller';
 
 function createController(
     context: IRenderContext<DocumentDataModel>,
@@ -37,10 +37,6 @@ function createController(
 ) {
     const univer = new Univer();
     const injector = univer.__getInjector();
-    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
-    injector.add([ICanvasPopupService, { useClass: CanvasPopupService }]);
-    injector.add([DocCanvasPopManagerService]);
-    injector.add([DocMobileElementMenuService]);
     injector.add([DocEventManagerService, { useValue: events }]);
     injector.add([DocHyperLinkPopupService, { useValue: popup }]);
     injector.add([DocSkeletonManagerService, { useValue: skeleton }]);
@@ -52,6 +48,120 @@ function createController(
 }
 
 describe('DocHyperLinkEventRenderController', () => {
+    it('keeps the mobile event controller independent from the desktop controller', () => {
+        expect(MobileDocHyperLinkEventRenderController.prototype).not.toBeInstanceOf(DocHyperLinkEventRenderController);
+    });
+
+    it('handles hyperlink menus and clicks in the standalone mobile controller', async () => {
+        const hoverCustomRanges$ = new Subject<unknown[]>();
+        const clickCustomRanges$ = new Subject<unknown>();
+        const pointerDownCustomRanges$ = new Subject<unknown[]>();
+        const commandService = { executeCommand: vi.fn() };
+        const popupService = {
+            canEditLink: vi.fn(() => true),
+            hideInfoPopupOnPointerDown: vi.fn(),
+            showEditPopup: vi.fn(),
+            showInfoPopup: vi.fn(),
+        };
+        const capture = vi.fn<(target: { onEdit: () => unknown; onDelete: () => unknown }) => boolean>(() => true);
+        const controller = new MobileDocHyperLinkEventRenderController(
+            { unitId: 'doc-unit' } as never,
+            { hoverCustomRanges$, clickCustomRanges$, pointerDownCustomRanges$ } as never,
+            commandService as never,
+            popupService as never,
+            { getSkeleton: vi.fn() } as never,
+            { capture } as never
+        );
+        const linkRange = {
+            range: {
+                rangeId: 'link-1',
+                rangeType: CustomRangeType.HYPERLINK,
+                startIndex: 4,
+                endIndex: 10,
+            },
+            segmentId: 'header-1',
+            segmentPageIndex: 0,
+            rects: [{ left: 10, top: 20, right: 50, bottom: 40 }],
+        };
+
+        pointerDownCustomRanges$.next([linkRange]);
+        const target = capture.mock.calls[0][0];
+        await target.onEdit();
+        await target.onDelete();
+
+        expect(popupService.showEditPopup).toHaveBeenCalledWith('doc-unit', {
+            unitId: 'doc-unit',
+            linkId: 'link-1',
+            segmentId: 'header-1',
+            segmentPage: 0,
+            startIndex: 4,
+            endIndex: 10,
+        });
+        expect(commandService.executeCommand).toHaveBeenCalledWith(DeleteDocHyperLinkCommand.id, {
+            unitId: 'doc-unit',
+            linkId: 'link-1',
+            segmentId: 'header-1',
+            segmentPage: 0,
+            startIndex: 4,
+            endIndex: 10,
+        });
+
+        clickCustomRanges$.next({ ...linkRange, ctrlKey: false, metaKey: false });
+        expect(popupService.showInfoPopup).toHaveBeenCalledWith(
+            expect.objectContaining({ unitId: 'doc-unit', linkId: 'link-1' }),
+            { pinned: true }
+        );
+
+        commandService.executeCommand.mockClear();
+        clickCustomRanges$.next({ ...linkRange, ctrlKey: true, metaKey: false });
+        expect(commandService.executeCommand).toHaveBeenCalledWith(ClickDocHyperLinkOperation.id, {
+            unitId: 'doc-unit',
+            linkId: 'link-1',
+            segmentId: 'header-1',
+        });
+
+        pointerDownCustomRanges$.next([]);
+        expect(popupService.hideInfoPopupOnPointerDown).toHaveBeenCalledOnce();
+        controller.dispose();
+
+        capture.mockClear();
+        popupService.showInfoPopup.mockClear();
+        pointerDownCustomRanges$.next([linkRange]);
+        clickCustomRanges$.next({ ...linkRange, ctrlKey: false, metaKey: false });
+        expect(capture).not.toHaveBeenCalled();
+        expect(popupService.showInfoPopup).not.toHaveBeenCalled();
+    });
+
+    it('does not register mobile hyperlink events for the normal internal editor', () => {
+        const hoverCustomRanges$ = new Subject<unknown[]>();
+        const clickCustomRanges$ = new Subject<unknown>();
+        const pointerDownCustomRanges$ = new Subject<unknown[]>();
+        const capture = vi.fn();
+        const showInfoPopup = vi.fn();
+        const controller = new MobileDocHyperLinkEventRenderController(
+            { unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY } as never,
+            { hoverCustomRanges$, clickCustomRanges$, pointerDownCustomRanges$ } as never,
+            { executeCommand: vi.fn() } as never,
+            { showInfoPopup } as never,
+            { getSkeleton: vi.fn() } as never,
+            { capture } as never
+        );
+
+        pointerDownCustomRanges$.next([{
+            range: { rangeType: CustomRangeType.HYPERLINK },
+            rects: [{ left: 0, top: 0, right: 1, bottom: 1 }],
+        }]);
+        clickCustomRanges$.next({
+            range: { rangeType: CustomRangeType.HYPERLINK },
+            ctrlKey: false,
+            metaKey: false,
+        });
+
+        expect(capture).not.toHaveBeenCalled();
+        expect(showInfoPopup).not.toHaveBeenCalled();
+        controller.dispose();
+    });
+
     it('ignores hover ranges when the current selection has no text ranges', async () => {
         const hoverCustomRanges$ = new Subject<unknown[]>();
         const clickCustomRanges$ = new Subject<unknown>();

@@ -24,7 +24,7 @@ import {
     Inject,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { DocEventManagerService, DocMobileElementMenuService } from '@univerjs/docs-ui';
+import { DocEventManagerService } from '@univerjs/docs-ui';
 import {
     ClickDocHyperLinkOperation,
     ToggleDocHyperLinkInfoPopupOperation,
@@ -37,13 +37,12 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
     }
 
     constructor(
-        protected readonly _context: IRenderContext<DocumentDataModel>,
-        @Inject(DocEventManagerService) protected readonly _docEventManagerService: DocEventManagerService,
-        @ICommandService protected readonly _commandService: ICommandService,
-        @Inject(DocHyperLinkPopupService) protected readonly _hyperLinkPopupService: DocHyperLinkPopupService,
+        private readonly _context: IRenderContext<DocumentDataModel>,
+        @Inject(DocEventManagerService) private readonly _docEventManagerService: DocEventManagerService,
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(DocHyperLinkPopupService) private readonly _hyperLinkPopupService: DocHyperLinkPopupService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
-        @Inject(DocMobileElementMenuService) protected readonly _mobileElementMenuService: DocMobileElementMenuService
+        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService
     ) {
         super();
 
@@ -66,7 +65,7 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
         }
     }
 
-    protected _initPointerDown() {
+    private _initPointerDown() {
         this.disposeWithMe(
             this._docEventManagerService.pointerDownCustomRanges$.subscribe((ranges) => {
                 const link = ranges.find((range) => range.range.rangeType === CustomRangeType.HYPERLINK);
@@ -77,7 +76,7 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
         );
     }
 
-    protected _initHover() {
+    private _initHover() {
         this.disposeWithMe(
             this._docEventManagerService.hoverCustomRanges$.subscribe((ranges) => {
                 const link = ranges.find((range) => range.range.rangeType === CustomRangeType.HYPERLINK);

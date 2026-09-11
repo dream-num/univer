@@ -44,11 +44,12 @@ import {
     RenderManagerService,
     Viewport,
 } from '@univerjs/engine-render';
-import { CanvasPopupService, ContextMenuPosition, ContextMenuService, DesktopLayoutService, ICanvasPopupService, IContextMenuService, ILayoutService } from '@univerjs/ui';
+import { CanvasPopupService, ContextMenuService, DesktopLayoutService, ICanvasPopupService, IContextMenuService, ILayoutService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { VIEWPORT_KEY } from '../../../basics/docs-view-key';
 import { SetDocZoomRatioOperation } from '../../../commands/operations/set-doc-zoom-ratio.operation';
+import { DOC_CARET_MENU_ID } from '../../../consts/mobile-context';
 import {
     EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
     EmbedRuntimeFocusCoordinator,
@@ -225,10 +226,14 @@ function createController(options: { readonly?: boolean; hasEditor?: boolean; pr
     };
     const univer = new Univer();
     const injector = univer.__getInjector();
-    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
-    injector.add([ICanvasPopupService, { useClass: CanvasPopupService }]);
-    injector.add([DocCanvasPopManagerService]);
-    injector.add([DocMobileElementMenuService]);
+    let elementMenu: DocMobileElementMenuService | undefined;
+    if (options.mobile) {
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        injector.add([ICanvasPopupService, { useClass: CanvasPopupService }]);
+        injector.add([DocCanvasPopManagerService]);
+        injector.add([DocMobileElementMenuService]);
+        elementMenu = injector.get(DocMobileElementMenuService);
+    }
     const child = injector.createChild([
         [ICommandService, { useValue: {
             onCommandExecuted: vi.fn((handler) => {
@@ -254,7 +259,7 @@ function createController(options: { readonly?: boolean; hasEditor?: boolean; pr
     if (options.embedRuntimeFocusCoordinator) {
         child.add([IDocEmbedRuntimeFocusCoordinator, { useValue: options.embedRuntimeFocusCoordinator }]);
     }
-    const controller = child.createInstance(options.mobile ? MobileDocSelectionRenderController : DocSelectionRenderController, {
+    const renderContext = {
         unitId: options.unitId ?? 'doc-1',
         unit: {
             getSnapshot: vi.fn(() => ({
@@ -264,11 +269,14 @@ function createController(options: { readonly?: boolean; hasEditor?: boolean; pr
         },
         scene,
         engine,
-    } as never);
+    } as never;
+    const controller = options.mobile
+        ? child.createInstance(MobileDocSelectionRenderController, renderContext)
+        : child.createInstance(DocSelectionRenderController, renderContext);
     controller.disposeWithMe(() => univer.dispose());
 
     return {
-        elementMenu: injector.get(DocMobileElementMenuService),
+        elementMenu: elementMenu!,
         controller,
         transformer,
         document,
@@ -297,6 +305,10 @@ const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
 const originalCancelAnimationFrame = globalThis.cancelAnimationFrame;
 
 describe('DocSelectionRenderController', () => {
+    it('keeps the mobile render controller independent from the desktop controller', () => {
+        expect(MobileDocSelectionRenderController.prototype).not.toBeInstanceOf(DocSelectionRenderController);
+    });
+
     it.each([
         { mobile: true, focusing: true, button: 0, prevented: true },
         { mobile: true, focusing: false, button: 0, prevented: false },
@@ -563,7 +575,7 @@ describe('DocSelectionRenderController', () => {
         controller.dispose();
     });
 
-    it('still syncs embedded internal editor selections while a child session owns interaction', () => {
+    it.each([false, true])('still syncs embedded internal editor selections while a child session owns interaction (mobile: %s)', (mobile) => {
         const focusCoordinator = new EmbedRuntimeFocusCoordinator();
         const lease = focusCoordinator.acquireLease({
             embedId: 'embed-1',
@@ -573,6 +585,7 @@ describe('DocSelectionRenderController', () => {
             childUnitId: 'child-sheet',
         });
         const { controller, textSelectionInner$, docSelectionManagerService } = createController({
+            mobile,
             unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
             embedRuntimeFocusCoordinator: focusCoordinator,
         });
@@ -974,8 +987,8 @@ describe('DocSelectionRenderController', () => {
 
         expect(contextMenuService.triggerContextMenu).toHaveBeenCalledWith(
             expect.objectContaining({ clientX: 132, clientY: 244 }),
-            ContextMenuPosition.DOC_CARET,
-            { unitId: 'doc-1', subUnitId: 'doc-1' }
+            DOC_CARET_MENU_ID,
+            { unitId: 'doc-1', subUnitId: 'doc-1', caretAnchor: true }
         );
 
         controller.dispose();
@@ -1112,6 +1125,25 @@ describe('DocSelectionRenderController', () => {
         expect(docSelectionRenderService.setCursorManually).not.toHaveBeenCalled();
     });
 
+    it('cancels deferred editor focus for a mobile internal editor when disposed', () => {
+        vi.useFakeTimers();
+        const { controller, document, docSelectionRenderService, editorService } = createController({
+            hasEditor: true,
+            mobile: true,
+            unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+        });
+
+        document.onPointerDown$.emit(
+            { offsetX: 11, offsetY: 22, button: 0 },
+            { stopPropagation: vi.fn() }
+        );
+        controller.dispose();
+        vi.runOnlyPendingTimers();
+
+        expect(editorService.focus).toHaveBeenCalledTimes(1);
+        expect(docSelectionRenderService.setCursorManually).not.toHaveBeenCalled();
+    });
+
     it('preserves the host unit focus for configured editors', () => {
         const { controller, document, editorService, instanceService } = createController({
             hasEditor: true,
@@ -1183,12 +1215,12 @@ describe('DocSelectionRenderController', () => {
         controller.dispose();
     });
 
-    it('keeps embedded internal editors interactive inside their own embed boundary', () => {
+    it.each([false, true])('keeps embedded internal editors interactive inside their own embed boundary (mobile: %s)', (mobile) => {
         const {
             controller,
             document,
             docSelectionRenderService,
-        } = createController({ hasEditor: true, unitId: '__INTERNAL_EDITOR__DOCS_NORMAL' });
+        } = createController({ hasEditor: true, mobile, unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY });
         const stopPropagation = vi.fn();
         const embedTarget = window.document.createElement('canvas');
         embedTarget.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');

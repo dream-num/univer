@@ -1996,14 +1996,21 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
             ...DEFAULT_MODERN_DOCUMENT_STYLE.pageSize!,
             width: modernPageWidth,
         };
-        const modernHorizontalMargin = ctx.modernHorizontalMargin ?? DEFAULT_MODERN_DOCUMENT_STYLE.marginLeft;
-        const mobileMargins = { marginLeft: modernHorizontalMargin, marginRight: modernHorizontalMargin };
         // Imported sections can retain their own paper size. It must not
         // override the continuous page when the document switches to modern
         // mode, otherwise layout still paginates and pointer bounds stop at
         // the first sheet of paper while rendering merges the entire document.
-        sectionBreak = Object.assign({}, sectionBreak, DEFAULT_MODERN_SECTION_BREAK, { pageSize: modernPageSize, ...mobileMargins });
-        documentStyle = Object.assign({}, documentStyle, DEFAULT_MODERN_DOCUMENT_STYLE, { pageSize: modernPageSize, ...mobileMargins });
+        const modernLayout = {
+            pageSize: modernPageSize,
+            ...(ctx.modernHorizontalMargin == null
+                ? {}
+                : {
+                    marginLeft: ctx.modernHorizontalMargin,
+                    marginRight: ctx.modernHorizontalMargin,
+                }),
+        };
+        sectionBreak = Object.assign({}, sectionBreak, DEFAULT_MODERN_SECTION_BREAK, modernLayout);
+        documentStyle = Object.assign({}, documentStyle, DEFAULT_MODERN_DOCUMENT_STYLE, modernLayout);
     }
 
     const {

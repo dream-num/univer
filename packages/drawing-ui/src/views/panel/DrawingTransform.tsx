@@ -16,7 +16,6 @@
 
 import type { IDrawingParam, Nullable } from '@univerjs/core';
 import type { IChangeObserverConfig, Scene } from '@univerjs/engine-render';
-import type { ComponentProps, ComponentType } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import { debounce, LocaleService } from '@univerjs/core';
 import { Checkbox, clsx, InputNumber } from '@univerjs/design';
@@ -31,8 +30,6 @@ import { createDrawingTransformRotationChangeHandler, isDrawingTransformRotation
 
 export interface IDrawingTransformProps {
     transformShow: boolean;
-    InputNumberComponent?: ComponentType<ComponentProps<typeof InputNumber>>;
-    CheckboxComponent?: ComponentType<ComponentProps<typeof Checkbox>>;
     drawings: IDrawingParam[];
 }
 
@@ -56,7 +53,7 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
     const drawingManagerService = useDependency(IDrawingManagerService);
     const renderManagerService = useDependency(IRenderManagerService);
 
-    const { drawings, transformShow, InputNumberComponent = InputNumber, CheckboxComponent = Checkbox } = props;
+    const { drawings, transformShow } = props;
 
     const drawingParam = drawings[0]!;
     const transform = drawingParam.transform!;
@@ -376,7 +373,7 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
             >
                 <div>
                     <span>{localeService.t<LocaleKey>('drawing-ui.image-panel.transform.width')}</span>
-                    <InputNumberComponent
+                    <InputNumber
                         precision={1}
                         value={width}
                         min={MIN_DRAWING_WIDTH_LIMIT}
@@ -385,7 +382,7 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
                 </div>
                 <div>
                     <span>{localeService.t<LocaleKey>('drawing-ui.image-panel.transform.height')}</span>
-                    <InputNumberComponent
+                    <InputNumber
                         precision={1}
                         value={height}
                         min={MIN_DRAWING_HEIGHT_LIMIT}
@@ -395,7 +392,7 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
                 <div>
                     <span>{localeService.t<LocaleKey>('drawing-ui.image-panel.transform.lock')}</span>
                     <div className="univer-text-center">
-                        <CheckboxComponent checked={lockRatio} onChange={handleLockRatioChange} />
+                        <Checkbox checked={lockRatio} onChange={handleLockRatioChange} />
                     </div>
                 </div>
             </div>
@@ -408,15 +405,15 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
             >
                 <div>
                     <span>{localeService.t<LocaleKey>('drawing-ui.image-panel.transform.x')}</span>
-                    <InputNumberComponent precision={1} value={xPosition} onChange={(val) => { handleXChange(val); }} />
+                    <InputNumber precision={1} value={xPosition} onChange={(val) => { handleXChange(val); }} />
                 </div>
                 <div>
                     <span>{localeService.t<LocaleKey>('drawing-ui.image-panel.transform.y')}</span>
-                    <InputNumberComponent precision={1} value={yPosition} onChange={(val) => { handleYChange(val); }} />
+                    <InputNumber precision={1} value={yPosition} onChange={(val) => { handleYChange(val); }} />
                 </div>
                 <div>
                     <span>{localeService.t<LocaleKey>('drawing-ui.image-panel.transform.rotate')}</span>
-                    <InputNumberComponent
+                    <InputNumber
                         precision={1}
                         value={rotation}
                         min={RANGE_DRAWING_ROTATION_LIMIT[0]}

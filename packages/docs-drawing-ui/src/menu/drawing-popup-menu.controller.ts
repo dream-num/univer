@@ -15,7 +15,6 @@
  */
 
 import type { DocumentDataModel, IDisposable, INeedCheckDisposable, Nullable } from '@univerjs/core';
-import type { IImagePopupMenuItem } from '@univerjs/drawing-ui';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import {
     DrawingTypeEnum,
@@ -84,6 +83,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         this._init();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _init(): void {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command) => {
@@ -287,6 +287,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
             previous.drawingId === next.drawingId;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _popupMenuListener(unitId: string): IDisposable | undefined {
         const scene = this._renderManagerService.getRenderUnitById(unitId)?.scene;
         if (!scene) {
@@ -342,29 +343,11 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 const popup = this._canvasPopManagerService.attachPopupToObject(
                     object,
                     {
-                        componentKey: this._getPopupComponent(drawingType),
+                        componentKey: COMPONENT_IMAGE_POPUP_MENU,
                         requiresStableLayout: false,
                         direction: isImage || isChart ? 'top-center' : 'horizontal',
                         offset: isImage || isChart ? [0, 8] : [2, 0],
                         extraProps: {
-                            onClose: () => this._clearPopups(unitId, true),
-                            onEdit: () => {
-                                const drawing = this._docDrawingService.getDrawingByParam(drawingParam);
-                                const edit = drawing && this._drawingAdapterService.getEditDrawingCommandInfo({
-                                    unitId: drawingUnitId,
-                                    subUnitId,
-                                    drawing,
-                                });
-                                this._clearPopups(unitId, true);
-                                return this._commandService.executeCommand(edit?.commandId ?? EditDocDrawingOperation.id, edit?.commandParams ?? { unitId: drawingUnitId, subUnitId, drawingId });
-                            },
-                            onDelete: () => {
-                                this._clearPopups(unitId, true);
-                                return this._commandService.executeCommand(RemoveDocDrawingCommand.id, {
-                                    unitId: drawingUnitId,
-                                    drawings: [{ unitId: drawingUnitId, subUnitId, drawingId }],
-                                });
-                            },
                             menuItems: this._getDrawingPopupMenuItems(drawingUnitId, subUnitId, drawingId, drawingType),
                             variant: isImage ? 'doc-floating-toolbar' : isChart ? 'doc-chart-floating-toolbar' : undefined,
                             unitId: drawingUnitId,
@@ -400,10 +383,6 @@ export class DocDrawingPopupMenuController extends RxDisposable {
             ...getDocumentEntityParentPermissionObjectIds(documentDataModel, segmentId, 'drawing', drawingId),
             getDocumentEntityPermissionObjectId(segmentId, 'drawing', drawingId),
         ]);
-    }
-
-    protected _getPopupComponent(_drawingType: number): string {
-        return COMPONENT_IMAGE_POPUP_MENU;
     }
 
     private _getDrawingPopupMenuItems(unitId: string, subUnitId: string, drawingId: string, drawingType: number) {
@@ -450,11 +429,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
             },
         ];
 
-        return this._resolvePopupMenuItems(defaultItems, floatingToolbarMenuItems, drawingType);
-    }
-
-    protected _resolvePopupMenuItems(defaultItems: IImagePopupMenuItem[], customItems: IImagePopupMenuItem[] | null, _drawingType: number): IImagePopupMenuItem[] {
-        return [...(customItems ?? defaultItems), ...this._getFloatingObjectMenuItems()];
+        return [...(floatingToolbarMenuItems ?? defaultItems), ...this._getFloatingObjectMenuItems()];
     }
 
     private _getFloatingObjectMenuItems() {

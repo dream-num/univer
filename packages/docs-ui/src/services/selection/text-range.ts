@@ -19,10 +19,8 @@ import type {
     Documents,
     DocumentSkeleton,
     IDocumentSkeletonGlyph,
-    IMouseEvent,
     INodePosition,
     IPoint,
-    IPointerEvent,
     ISuccinctDocRangeParam,
     ITextSelectionStyle,
     Scene,
@@ -45,11 +43,6 @@ const ID_LENGTH = 6;
 const BLINK_ON = 500;
 const BLINK_OFF = 500;
 const DEFAULT_CARET_COLOR = 'gray.1000';
-const MOBILE_HANDLE_TOUCH_SIZE = 32;
-const MOBILE_HANDLE_VISUAL_SIZE = 12;
-const MOBILE_HANDLE_STEM_WIDTH = 2;
-
-export type TextRangeHandleType = 'start' | 'end';
 
 export const TEXT_RANGE_LAYER_INDEX = 3;
 
@@ -124,16 +117,6 @@ export class TextRange implements IDocRange {
     private _rangeShape: Nullable<RegularPolygon>;
     // The rendered range graphic when collapsed is true
     private _anchorShape: Nullable<Rect>;
-    private _startHandleShape: Nullable<Rect>;
-    private _endHandleShape: Nullable<Rect>;
-    private _startHandleStemShape: Nullable<Rect>;
-    private _endHandleStemShape: Nullable<Rect>;
-    private _mobileHandlesVisible = false;
-    private _caretVisible = true;
-    private _mobileHandlePointerDown: Nullable<(
-        handle: TextRangeHandleType,
-        event: IPointerEvent | IMouseEvent
-    ) => void> = null;
 
     private _cursorList: ITextRange[] = [];
 
@@ -338,15 +321,8 @@ export class TextRange implements IDocRange {
         this._current = true;
 
         if (this._isCollapsed()) {
-            if (this._caretVisible) {
-                this._anchorShape?.show();
-                this.activeStatic();
-            }
-            return;
-        }
-
-        if (this._mobileHandlesVisible) {
-            this._refreshMobileHandles();
+            this._anchorShape?.show();
+            this.activeStatic();
         }
     }
 
@@ -356,7 +332,6 @@ export class TextRange implements IDocRange {
         if (this._isCollapsed()) {
             this._anchorShape?.hide();
         }
-        this._hideMobileHandleShapes();
     }
 
     dispose() {
@@ -364,15 +339,6 @@ export class TextRange implements IDocRange {
         this._rangeShape = null;
         this._anchorShape?.dispose();
         this._anchorShape = null;
-        this._startHandleShape?.dispose();
-        this._startHandleShape = null;
-        this._endHandleShape?.dispose();
-        this._endHandleShape = null;
-        this._startHandleStemShape?.dispose();
-        this._startHandleStemShape = null;
-        this._endHandleStemShape?.dispose();
-        this._endHandleStemShape = null;
-        this._mobileHandlePointerDown = null;
 
         if (this._anchorBlinkTimer) {
             clearInterval(this._anchorBlinkTimer);
@@ -399,7 +365,6 @@ export class TextRange implements IDocRange {
 
         this._anchorShape?.hide();
         this._rangeShape?.hide();
-        this._hideMobileHandleShapes();
 
         if (this._isEmpty()) {
             return;
@@ -419,9 +384,6 @@ export class TextRange implements IDocRange {
             if (contentBoxPointGroup.length > 0) {
                 const glyphAtCursor = _docSkeleton.findGlyphByPosition(anchor);
                 this._createOrUpdateAnchor(contentBoxPointGroup, docsLeft, docsTop, glyphAtCursor);
-                if (!this._caretVisible) {
-                    this._anchorShape?.hide();
-                }
             }
 
             return;
@@ -433,34 +395,7 @@ export class TextRange implements IDocRange {
 
         if (borderBoxPointGroup.length > 0) {
             this._createOrUpdateRange(borderBoxPointGroup, docsLeft, docsTop);
-            this._refreshMobileHandles();
         }
-    }
-
-    setCaretVisible(visible: boolean): void {
-        this._caretVisible = visible;
-        if (visible && this._current && this.collapsed) {
-            this._anchorShape?.show();
-            return;
-        }
-        if (!visible) {
-            this._anchorShape?.hide();
-        }
-    }
-
-    showMobileHandles(
-        color: string,
-        onPointerDown: (handle: TextRangeHandleType, event: IPointerEvent | IMouseEvent) => void
-    ): void {
-        this._mobileHandlesVisible = true;
-        this._mobileHandlePointerDown = onPointerDown;
-        this._createMobileHandleShapes(color);
-        this._refreshMobileHandles();
-    }
-
-    hideMobileHandles(): void {
-        this._mobileHandlesVisible = false;
-        this._hideMobileHandleShapes();
     }
 
     private _isEmpty() {
@@ -495,143 +430,6 @@ export class TextRange implements IDocRange {
         }
 
         return true;
-    }
-
-    private _createMobileHandleShapes(color: string): void {
-        if (
-            this._startHandleShape &&
-            this._endHandleShape &&
-            this._startHandleStemShape &&
-            this._endHandleStemShape
-        ) {
-            this._startHandleShape.setProps({ fill: color });
-            this._endHandleShape.setProps({ fill: color });
-            this._startHandleStemShape.setProps({ fill: color });
-            this._endHandleStemShape.setProps({ fill: color });
-            return;
-        }
-
-        const createStem = () => {
-            const shape = new Rect(`${TEXT_RANGE_KEY_PREFIX}MobileHandleStem${generateRandomId(ID_LENGTH)}`, {
-                fill: color,
-                evented: false,
-                debounceParentDirty: false,
-            });
-            this._scene.addObject(shape, TEXT_RANGE_LAYER_INDEX + 1);
-            return shape;
-        };
-        const createHandle = (handle: TextRangeHandleType) => {
-            const shape = new Rect(`${TEXT_RANGE_KEY_PREFIX}MobileHandle${generateRandomId(ID_LENGTH)}`, {
-                width: MOBILE_HANDLE_TOUCH_SIZE,
-                height: MOBILE_HANDLE_TOUCH_SIZE,
-                radius: MOBILE_HANDLE_VISUAL_SIZE / 2,
-                visualWidth: MOBILE_HANDLE_VISUAL_SIZE,
-                visualHeight: MOBILE_HANDLE_VISUAL_SIZE,
-                fill: color,
-                evented: true,
-                debounceParentDirty: false,
-            });
-            shape.onPointerDown$.subscribeEvent((event, state) => {
-                state.stopPropagation();
-                this._mobileHandlePointerDown?.(handle, event);
-            });
-            this._scene.addObject(shape, TEXT_RANGE_LAYER_INDEX + 1);
-            return shape;
-        };
-
-        this._startHandleStemShape = createStem();
-        this._endHandleStemShape = createStem();
-        this._startHandleShape = createHandle('start');
-        this._endHandleShape = createHandle('end');
-    }
-
-    private _refreshMobileHandles(): void {
-        if (!this._mobileHandlesVisible || this.collapsed) {
-            this._hideMobileHandleShapes();
-            return;
-        }
-
-        const start = this._getNodeCaretBounding(this.startNodePosition);
-        const end = this._getNodeCaretBounding(this.endNodePosition);
-        if (
-            !start ||
-            !end ||
-            !this._startHandleShape ||
-            !this._endHandleShape ||
-            !this._startHandleStemShape ||
-            !this._endHandleStemShape
-        ) {
-            this._hideMobileHandleShapes();
-            return;
-        }
-
-        const { scaleX, scaleY } = this._scene.getAncestorScale();
-        const scale = Math.max(scaleX, scaleY, 0.01);
-        const touchSize = MOBILE_HANDLE_TOUCH_SIZE / scale;
-        const visualSize = MOBILE_HANDLE_VISUAL_SIZE / scale;
-        const stemWidth = MOBILE_HANDLE_STEM_WIDTH / scale;
-        const placeHandle = (
-            shape: Rect,
-            stem: Rect,
-            bounding: ReturnType<TextRange['_getNodeCaretBounding']>,
-            edge: TextRangeHandleType
-        ) => {
-            if (!bounding) {
-                return;
-            }
-            const handleTop = edge === 'start'
-                ? bounding.top - touchSize / 2
-                : bounding.top + bounding.height - touchSize / 2;
-            stem.transformByState({
-                left: bounding.left - stemWidth / 2,
-                top: bounding.top,
-                width: stemWidth,
-                height: bounding.height,
-            });
-            shape.setProps({
-                radius: visualSize / 2,
-                visualWidth: visualSize,
-                visualHeight: visualSize,
-            });
-            shape.transformByState({
-                left: bounding.left - touchSize / 2,
-                top: handleTop,
-                width: touchSize,
-                height: touchSize,
-            });
-            stem.show();
-            shape.show();
-        };
-
-        placeHandle(this._startHandleShape, this._startHandleStemShape, start, 'start');
-        placeHandle(this._endHandleShape, this._endHandleStemShape, end, 'end');
-    }
-
-    private _getNodeCaretBounding(position: Nullable<INodePosition>) {
-        if (!position) {
-            return;
-        }
-
-        const { docsLeft, docsTop } = this._document.getOffsetConfig();
-        const convertor = new NodePositionConvertToCursor(this._document.getOffsetConfig(), this._docSkeleton);
-        const { contentBoxPointGroup } = convertor.getRangePointData(position, position);
-        if (contentBoxPointGroup.length === 0) {
-            return;
-        }
-
-        const bounding = getAnchorBounding(contentBoxPointGroup);
-        return {
-            ...bounding,
-            left: bounding.left + docsLeft,
-            top: bounding.top + docsTop,
-        };
-    }
-
-    private _hideMobileHandleShapes(): void {
-        this._startHandleShape?.hide();
-        this._endHandleShape?.hide();
-        this._startHandleStemShape?.hide();
-        this._endHandleStemShape?.hide();
     }
 
     private _createOrUpdateRange(pointsGroup: IPoint[][], left: number, top: number) {

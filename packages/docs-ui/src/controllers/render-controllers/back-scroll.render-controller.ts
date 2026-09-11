@@ -20,10 +20,8 @@ import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs
 import * as EngineRender from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
-import { DocPageLayoutService } from '../../services/doc-page-layout.service';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { NodePositionConvertToCursor } from '../../services/selection/convert-text-range';
-import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 import { getAnchorBounding } from '../../services/selection/text-range';
 
 const ANCHOR_WIDTH = 1.5;
@@ -32,25 +30,21 @@ const ANCHOR_WIDTH = 1.5;
 const MAX_SELECTION_SCROLL_RETRY_FRAMES = 6000;
 
 export class DocBackScrollRenderController extends RxDisposable implements EngineRender.IRenderModule {
-    protected _pendingSelectionScrollFrame: number | null = null;
+    private _pendingSelectionScrollFrame: number | null = null;
     private _suppressedSelection: Nullable<ITextRangeParam> = null;
     private _pendingExplicitRange: Nullable<ITextRangeParam> = null;
     private _selectionBeforeExplicitRange: Nullable<ITextRangeParam> = null;
     private _scrollingToRange = false;
-    protected _mobileKeyboardInset = 0;
 
     constructor(
         protected readonly _context: EngineRender.IRenderContext<DocumentDataModel>,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
-        @Inject(DocSelectionRenderService) protected readonly _docSelectionRenderService: DocSelectionRenderService,
         @IEditorService private readonly _editorService: IEditorService,
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @Inject(DocPageLayoutService) protected readonly _docPageLayoutService: DocPageLayoutService
+        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService
     ) {
         super();
 
         this._init();
-        this._initViewportOcclusion();
     }
 
     private _init() {
@@ -112,7 +106,6 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
         this._cancelPendingSelectionScroll();
         this._suppressedSelection = null;
         this._clearExplicitRangeOwnership();
-        this._docPageLayoutService.setBottomReserve(0);
         super.dispose();
     }
 
@@ -133,14 +126,12 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
             };
     }
 
-    private _cancelPendingSelectionScroll(): void {
+    protected _cancelPendingSelectionScroll(): void {
         if (this._pendingSelectionScrollFrame != null && typeof cancelAnimationFrame !== 'undefined') {
             cancelAnimationFrame(this._pendingSelectionScrollFrame);
         }
         this._pendingSelectionScrollFrame = null;
     }
-
-    protected _initViewportOcclusion(): void {}
 
     private _scheduleScrollToSelection(): void {
         if (typeof requestAnimationFrame === 'undefined') {

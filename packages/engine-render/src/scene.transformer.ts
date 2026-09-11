@@ -315,11 +315,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
         this._finishGesture?.();
     }
 
-    isControlObject(object: BaseObject): boolean {
-        const group = this._findGroupObject(object);
-        return group === this._copperControl || Array.from(this._transformerControlMap.values()).some((control) => control === group);
-    }
-
     private _bindGestureEnd(scene: Scene, initialEvent: IPointerEvent | IMouseEvent, onEnd: (event: IPointerEvent | IMouseEvent) => void): void {
         let latestEvent = initialEvent;
         const subscriptions: Subscription[] = [];

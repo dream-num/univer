@@ -16,6 +16,7 @@
 
 import type { ReactNode } from 'react';
 import type { LocaleKey } from '../../../locale/types';
+import type { MobilePanelLayout } from '../../mobile-workbench/MobileCanvasLayout';
 import type { MobileDrawerSnap } from '../mobile-drawer/MobileDrawer';
 import type { IDialogPartMethodOptions } from './interface';
 import { LocaleService } from '@univerjs/core';
@@ -27,13 +28,17 @@ import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 import { MobileDrawer } from '../mobile-drawer/MobileDrawer';
 
-interface IMobileDialogOptions extends Omit<IDialogPartMethodOptions, 'children' | 'title' | 'footer'> {
+export interface IMobileDialogPartMethodOptions extends IDialogPartMethodOptions {
+    layout?: MobilePanelLayout;
+}
+
+interface IMobileDialogOptions extends Omit<IMobileDialogPartMethodOptions, 'children' | 'title' | 'footer'> {
     children?: ReactNode;
     title?: ReactNode;
     footer?: ReactNode;
 }
 
-function toMobileDialogOptions(options: IDialogPartMethodOptions): IMobileDialogOptions {
+function toMobileDialogOptions(options: IMobileDialogPartMethodOptions): IMobileDialogOptions {
     const { children, title, footer, ...rest } = options;
     return {
         ...rest,
@@ -49,7 +54,7 @@ export function MobileDialogPart() {
     const dialogOptions = useObservable(dialogService.getDialogs$(), []);
     const options = useMemo(() => {
         const activeDialogs = dialogOptions.filter((item) => item.open !== false);
-        const active = activeDialogs[activeDialogs.length - 1];
+        const active = activeDialogs[activeDialogs.length - 1] as IMobileDialogPartMethodOptions | undefined;
         return active ? toMobileDialogOptions(active) : null;
     }, [dialogOptions]);
     const [snapOverride, setSnapOverride] = useState<{ id: string; snap: MobileDrawerSnap } | null>(null);
@@ -59,7 +64,7 @@ export function MobileDialogPart() {
     if (!options) {
         return null;
     }
-    const defaultSnap = options.mobileLayout === 'canvas' ? 'compact' : 'expanded';
+    const defaultSnap = options.layout === 'canvas' ? 'compact' : 'expanded';
 
     const close = () => {
         dialogService.close(options.id);
@@ -73,7 +78,7 @@ export function MobileDialogPart() {
             className="univer-pointer-events-none univer-fixed univer-inset-0 univer-z-[1200]"
             data-u-comp="mobile-dialog"
         >
-            {options.mobileLayout !== 'canvas' && (
+            {options.layout !== 'canvas' && (
                 <button
                     type="button"
                     aria-label={localeService.t<LocaleKey>('ui.sidebar.close')}
@@ -103,7 +108,7 @@ export function MobileDialogPart() {
             )}
             <MobileDrawer
                 layerRef={layerRef}
-                layout={options.mobileLayout}
+                layout={options.layout}
                 componentName="mobile-dialog-drawer"
                 snap={snapOverride?.id === options.id ? snapOverride.snap : defaultSnap}
                 expandLabel={localeService.t<LocaleKey>('ui.sidebar.resize')}

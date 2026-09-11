@@ -31,10 +31,10 @@ import { DocDrawingTransformerController } from './controllers/doc-drawing-trans
 import { DocFloatDomController } from './controllers/doc-float-dom.controller';
 import { MobileComponentsController } from './controllers/mobile/components.controller';
 import { MobileDocDrawingPopupMenuController } from './controllers/mobile/drawing-popup-menu.controller';
+import { MobileDocDrawingUIController } from './controllers/mobile/ui.controller';
 import { DocDrawingTransformUpdateController } from './controllers/render-controllers/doc-drawing-transform-update.controller';
 import { DocDrawingUpdateRenderController } from './controllers/render-controllers/doc-drawing-update.render-controller';
 import { MobileDocDrawingUpdateRenderController } from './controllers/render-controllers/mobile/doc-drawing-update.render-controller';
-import { DocDrawingUIController } from './controllers/ui.controller';
 import { DocDrawingFloatingToolbarAdapterService } from './services/doc-drawing-floating-toolbar-adapter.service';
 import { DocRefreshDrawingsService } from './services/doc-refresh-drawings.service';
 
@@ -71,7 +71,7 @@ export class UniverDocsDrawingMobileUIPlugin extends Plugin {
     override onStarting(): void {
         const dependencies: Dependency[] = [
             [MobileComponentsController],
-            [DocDrawingUIController],
+            [MobileDocDrawingUIController],
             [MobileDocDrawingPopupMenuController],
             [DocDrawingTransformerController],
             [DocDrawingAddRemoveController],
@@ -92,7 +92,7 @@ export class UniverDocsDrawingMobileUIPlugin extends Plugin {
         ] as Dependency[]).forEach((m) => this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m));
 
         this._injector.get(DocDrawingAddRemoveController);
-        this._injector.get(DocDrawingUIController);
+        this._injector.get(MobileDocDrawingUIController);
         this._injector.get(DocDrawingTransformerController);
         this._injector.get(DocDrawingPrintingController);
     }

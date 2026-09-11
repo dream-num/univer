@@ -64,7 +64,8 @@ export function MobileContextMenu() {
     const runtimeScopeService = useDependency(IUIRuntimeScopeService);
     const localeService = useDependency(LocaleService);
     const { mountContainer } = useContext(ConfigContext);
-    const isFloatingContextMenu = menuType === ContextMenuPosition.MAIN_AREA || menuType === ContextMenuPosition.DOC_CARET;
+    const isCaretAnchor = menuContext?.caretAnchor === true;
+    const isFloatingContextMenu = menuType === ContextMenuPosition.MAIN_AREA || isCaretAnchor;
 
     visibleRef.current = visible;
 
@@ -124,7 +125,7 @@ export function MobileContextMenu() {
     }, [contextMenuHostService, isFloatingContextMenu, mountContainer, visible]);
 
     useLayoutEffect(() => {
-        if (!visible || menuType !== ContextMenuPosition.DOC_CARET) {
+        if (!visible || !isCaretAnchor) {
             return undefined;
         }
 
@@ -158,7 +159,7 @@ export function MobileContextMenu() {
             menu.style.removeProperty('left');
             menu.style.removeProperty('--univer-mobile-context-menu-pointer-left');
         };
-    }, [anchor.x, menuType, visible]);
+    }, [anchor.x, isCaretAnchor, visible]);
 
     const sheetTitle = useMemo(() => {
         switch (menuType) {
@@ -221,7 +222,7 @@ export function MobileContextMenu() {
                     ref={floatingMenuRef}
                     className={`
                       univer-pointer-events-auto univer-min-w-0 univer-max-w-[560px]
-                      ${menuType === ContextMenuPosition.DOC_CARET
+                      ${isCaretAnchor
                             ? 'univer-absolute univer-left-0 univer-top-0 univer-w-fit'
                             : 'univer-relative univer-flex-1'}
                     `}
@@ -244,7 +245,7 @@ export function MobileContextMenu() {
                               dark:!univer-bg-gray-700
                             `}
                         style={{
-                            left: menuType === ContextMenuPosition.DOC_CARET
+                            left: isCaretAnchor
                                 ? 'var(--univer-mobile-context-menu-pointer-left, calc(50% - 4px))'
                                 : pointerLeft,
                         }}

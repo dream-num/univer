@@ -15,20 +15,17 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import type { LocaleKey } from '../../locale/types';
+import type { IMobileSidebarMethodOptions } from '@univerjs/ui';
+import type { LocaleKey } from '../../../locale/types';
+import type { IUIComponentCommandParams } from '../open-drawing-panel.operation';
 import { CommandType, LocaleService } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { ISidebarService } from '@univerjs/ui';
-import {
-    COMPONENT_DOC_DRAWING_PANEL,
-} from '../../views/doc-image-panel/component-name';
+import { COMPONENT_DOC_DRAWING_PANEL } from '../../../views/doc-image-panel/component-name';
+import { SidebarDocDrawingOperation } from '../open-drawing-panel.operation';
 
-export interface IUIComponentCommandParams {
-    value: string;
-}
-
-export const SidebarDocDrawingOperation: ICommand = {
-    id: 'sidebar.operation.doc-image',
+export const SidebarDocDrawingMobileOperation: ICommand = {
+    id: SidebarDocDrawingOperation.id,
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IUIComponentCommandParams) => {
         const sidebarService = accessor.get(ISidebarService);
@@ -36,16 +33,19 @@ export const SidebarDocDrawingOperation: ICommand = {
         const drawingManagerService = accessor.get(IDrawingManagerService);
 
         switch (params.value) {
-            case 'open':
-                sidebarService.open({
+            case 'open': {
+                const options: IMobileSidebarMethodOptions = {
+                    layout: 'canvas',
                     header: { title: localeService.t<LocaleKey>('docs-drawing-ui.panel.title') },
                     children: { label: COMPONENT_DOC_DRAWING_PANEL },
                     onClose: () => {
                         drawingManagerService.focusDrawing(null);
                     },
                     width: 360,
-                });
+                };
+                sidebarService.open(options);
                 break;
+            }
             case 'close':
             default:
                 sidebarService.close();

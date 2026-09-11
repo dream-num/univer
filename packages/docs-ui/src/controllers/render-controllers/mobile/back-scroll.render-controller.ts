@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel } from '@univerjs/core';
+import type { IRenderContext } from '@univerjs/engine-render';
+import type { MobileDocSelectionRenderService } from '../../../services/mobile/doc-selection-render.service';
+import { Inject } from '@univerjs/core';
+import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { DocPageLayoutService } from '../../../services/doc-page-layout.service';
+import { IEditorService } from '../../../services/editor/editor-manager.service';
+import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 import { DocBackScrollRenderController } from '../back-scroll.render-controller';
 
 const MOBILE_CARET_MARGIN = 32;
@@ -21,7 +29,18 @@ const MOBILE_TOOLBAR_HEIGHT = 48;
 const MOBILE_CARET_VIEWPORT_RATIO = 0.4;
 
 export class MobileDocBackScrollRenderController extends DocBackScrollRenderController {
-    protected override _initViewportOcclusion(): void {
+    private _mobileKeyboardInset = 0;
+
+    constructor(
+        context: IRenderContext<DocumentDataModel>,
+        @Inject(DocSelectionManagerService) textSelectionManagerService: DocSelectionManagerService,
+        @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: MobileDocSelectionRenderService,
+        @IEditorService editorService: IEditorService,
+        @Inject(DocSkeletonManagerService) docSkeletonManagerService: DocSkeletonManagerService,
+        @Inject(DocPageLayoutService) private readonly _docPageLayoutService: DocPageLayoutService
+    ) {
+        super(context, textSelectionManagerService, editorService, docSkeletonManagerService);
+
         this.disposeWithMe(this._docSelectionRenderService.mobileKeyboardState$.subscribe(({ visible, inset }) => {
             const previousInset = this._mobileKeyboardInset;
             this._mobileKeyboardInset = visible ? inset + MOBILE_TOOLBAR_HEIGHT : 0;
@@ -30,13 +49,15 @@ export class MobileDocBackScrollRenderController extends DocBackScrollRenderCont
             );
             if (this._mobileKeyboardInset > previousInset) {
                 // Apply occlusion and caret scrolling before the same viewport change is painted.
-                if (this._pendingSelectionScrollFrame != null && typeof cancelAnimationFrame !== 'undefined') {
-                    cancelAnimationFrame(this._pendingSelectionScrollFrame);
-                    this._pendingSelectionScrollFrame = null;
-                }
+                this._cancelPendingSelectionScroll();
                 this._scrollToSelection();
             }
         }));
+    }
+
+    override dispose(): void {
+        this._docPageLayoutService.setBottomReserve(0);
+        super.dispose();
     }
 
     protected override _getVerticalScrollDelta(top: number, height: number, boundTop: number, boundBottom: number, _delta: number): number {

@@ -18,6 +18,8 @@
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { IPointerEvent } from '@univerjs/engine-render';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { DocumentFlavor, getDocsEmptySnapshot, ICommandService, IUniverInstanceService, LocaleType, RichTextBuilder, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocLayoutExecutorService, DocSelectionManagerService, DocSkeletonManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
 import {
@@ -272,6 +274,20 @@ describe('DocBackScrollRenderController', () => {
     });
 });
 
+describe('back scroll controller platform boundaries', () => {
+    it('keeps mobile-only state and services out of the desktop controller', () => {
+        const desktopSource = readFileSync(resolve(process.cwd(), 'src/controllers/render-controllers/back-scroll.render-controller.ts'), 'utf8');
+        const mobileSource = readFileSync(resolve(process.cwd(), 'src/controllers/render-controllers/mobile/back-scroll.render-controller.ts'), 'utf8');
+
+        expect(desktopSource).not.toContain('mobileKeyboard');
+        expect(desktopSource).not.toContain('_initViewportOcclusion');
+        expect(desktopSource).not.toContain('DocSelectionRenderService');
+        expect(desktopSource).not.toContain('DocPageLayoutService');
+        expect(desktopSource).not.toContain('setBottomReserve');
+        expect(mobileSource).toContain('extends DocBackScrollRenderController');
+    });
+});
+
 const cleanup: Array<() => void> = [];
 
 function createRender(mobile = true, documentFlavor = DocumentFlavor.MODERN, zoomRatio = 1) {
@@ -347,7 +363,9 @@ function createRender(mobile = true, documentFlavor = DocumentFlavor.MODERN, zoo
     render.addRenderDependencies([[DocBackScrollRenderController, { useClass: mobile ? MobileDocBackScrollRenderController : DocBackScrollRenderController }]]);
     render.with(DocBackScrollRenderController);
     const selection = render.with(DocSelectionRenderService);
-    selection.enterMobileEditMode();
+    if (mobile) {
+        (selection as MobileDocSelectionRenderService).enterMobileEditMode();
+    }
     const manager = injector.get(DocSelectionManagerService);
 
     const getCaretBounds = (paragraph: number) => {

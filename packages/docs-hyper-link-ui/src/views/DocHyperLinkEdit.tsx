@@ -14,114 +14,27 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
 import type { LocaleKey } from '../locale/types';
-import {
-    BuildTextUtils,
-    getBodySlice,
-    ICommandService,
-    IUniverInstanceService,
-    LocaleService,
-    Tools,
-    UniverInstanceType,
-} from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { borderClassName, Button, clsx, FormLayout, Input } from '@univerjs/design';
-import { DocSelectionManagerService } from '@univerjs/docs';
-import { KeyCode, useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
-import { AddDocHyperLinkCommand } from '../commands/commands/add-link.command';
-import { UpdateDocHyperLinkCommand } from '../commands/commands/update-link.command';
-import { DocHyperLinkPopupService } from '../services/hyper-link-popup.service';
+import { KeyCode, useDependency } from '@univerjs/ui';
+import { useDocHyperLinkEdit } from './hyper-link-edit/use-doc-hyper-link-edit';
 import { isBlankInput } from './hyper-link-edit/utils';
 
-function hasProtocol(urlString: string) {
-    const pattern = /^[a-zA-Z]+:\/\//;
-    return pattern.test(urlString);
-}
-
-function isEmail(url: string) {
-    const pattern = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
-    return pattern.test(url);
-}
-
-function transformUrl(urlStr: string) {
-    return hasProtocol(urlStr) ? urlStr : isEmail(urlStr) ? `mailto://${urlStr}` : `https://${urlStr}`;
-}
-
-interface IDocHyperLinkEditProps {
-    mobile?: boolean;
-}
-
-export const DocHyperLinkEdit = (props: IDocHyperLinkEditProps = {}) => {
-    const hyperLinkService = useDependency(DocHyperLinkPopupService);
+export const DocHyperLinkEdit = () => {
     const localeService = useDependency(LocaleService);
-    const editing = useObservable(hyperLinkService.editingLink$, hyperLinkService.editing);
-    const commandService = useDependency(ICommandService);
-    const univerInstanceService = useDependency(IUniverInstanceService);
-
-    const docSelectionManagerService = useDependency(DocSelectionManagerService);
-    const [link, setLink] = useState('');
-    const [label, setLabel] = useState('');
-    const [showError, setShowError] = useState(false);
-    const isLegal = Tools.isLegalUrl(link);
-    const doc = editing
-        ? univerInstanceService.getUnit<DocumentDataModel>(editing.unitId, UniverInstanceType.UNIVER_DOC) :
-        univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-
-    useEffect(() => {
-        const activeRange = docSelectionManagerService.getActiveTextRange();
-        if (!activeRange) {
-            return;
-        }
-
-        if (editing) {
-            const body = doc?.getSelfOrHeaderFooterModel(editing.segmentId)?.getBody();
-            const matchedRange = body?.customRanges?.find((i) => editing?.linkId === i.rangeId && i.startIndex === editing.startIndex && i.endIndex === editing.endIndex);
-            if (doc && matchedRange) {
-                setLink(matchedRange.properties?.url ?? '');
-                setLabel(BuildTextUtils.transform.getPlainText(getBodySlice(body!, matchedRange.startIndex, matchedRange.endIndex + 1).dataStream));
-            }
-            return;
-        }
-
-        const body = doc?.getSelfOrHeaderFooterModel(activeRange.segmentId)?.getBody();
-        const selection = body ? activeRange : null;
-        const matchedRange = selection && BuildTextUtils.customRange.getCustomRangesInterestsWithSelection(selection, body?.customRanges ?? [])?.[0];
-        if (doc && matchedRange) {
-            setLink(matchedRange?.properties?.url ?? '');
-        }
-    }, [doc, editing, docSelectionManagerService, univerInstanceService]);
-
-    const handleCancel = () => {
-        hyperLinkService.hideEditPopup();
-    };
-    const handleConfirm = () => {
-        setShowError(true);
-        if (!isLegal || !doc) {
-            return;
-        }
-        const linkFinal = transformUrl(link);
-
-        if (!editing) {
-            commandService.executeCommand(AddDocHyperLinkCommand.id, {
-                unitId: doc.getUnitId(),
-                payload: linkFinal,
-            }).catch(() => undefined);
-        } else {
-            if (isBlankInput(label)) {
-                return;
-            }
-
-            commandService.executeCommand(UpdateDocHyperLinkCommand.id, {
-                unitId: doc.getUnitId(),
-                payload: linkFinal,
-                linkId: editing.linkId,
-                label,
-                segmentId: editing.segmentId,
-            }).catch(() => undefined);
-        }
-        hyperLinkService.hideEditPopup();
-    };
+    const {
+        doc,
+        editing,
+        handleCancel,
+        handleConfirm,
+        isLegal,
+        label,
+        link,
+        setLabel,
+        setLink,
+        showError,
+    } = useDocHyperLinkEdit();
 
     if (!doc) {
         return;
@@ -129,18 +42,11 @@ export const DocHyperLinkEdit = (props: IDocHyperLinkEditProps = {}) => {
 
     return (
         <div
-            className={clsx(
-                `
-                  univer-box-border univer-bg-gray-0
-                  dark:!univer-bg-gray-900
-                `,
-                props.mobile
-                    ? 'univer-w-full univer-py-2'
-                    : `
-                      univer-w-[328px] univer-rounded-xl univer-px-6 univer-py-5 univer-shadow
-                      ${borderClassName}
-                    `
-            )}
+            className={clsx(`
+              univer-box-border univer-w-[328px] univer-rounded-xl univer-bg-gray-0 univer-px-6 univer-py-5
+              univer-shadow
+              dark:!univer-bg-gray-900
+            `, borderClassName)}
         >
             <div>
                 {editing
@@ -153,8 +59,8 @@ export const DocHyperLinkEdit = (props: IDocHyperLinkEditProps = {}) => {
                                 value={label}
                                 onChange={setLabel}
                                 autoFocus
-                                onKeyDown={(evt) => {
-                                    if (evt.keyCode === KeyCode.ENTER) {
+                                onKeyDown={(event) => {
+                                    if (event.keyCode === KeyCode.ENTER) {
                                         handleConfirm();
                                     }
                                 }}
@@ -169,22 +75,21 @@ export const DocHyperLinkEdit = (props: IDocHyperLinkEditProps = {}) => {
                     <Input
                         value={link}
                         onChange={setLink}
-                        autoFocus={!props.mobile || !editing}
-                        onKeyDown={(evt) => {
-                            if (evt.keyCode === KeyCode.ENTER) {
+                        autoFocus
+                        onKeyDown={(event) => {
+                            if (event.keyCode === KeyCode.ENTER) {
                                 handleConfirm();
                             }
                         }}
                     />
                 </FormLayout>
             </div>
-            <div className={clsx('univer-flex univer-gap-3', props.mobile ? 'univer-mt-5' : 'univer-justify-end')}>
-                <Button className={props.mobile ? 'univer-h-12 univer-flex-1' : undefined} onClick={handleCancel}>
+            <div className="univer-flex univer-justify-end univer-gap-3">
+                <Button onClick={handleCancel}>
                     {localeService.t<LocaleKey>('docs-hyper-link-ui.edit.cancel')}
                 </Button>
                 <Button
                     variant="primary"
-                    className={props.mobile ? 'univer-h-12 univer-flex-1' : undefined}
                     disabled={isBlankInput(link)}
                     onClick={handleConfirm}
                 >

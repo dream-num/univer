@@ -30,7 +30,6 @@ import { TextWrappingStyle, UpdateDocDrawingWrappingStyleCommand } from '@univer
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
-
 import {
     UpdateDocDrawingDistanceCommand,
     UpdateDocDrawingWrapTextCommand,
@@ -260,5 +259,19 @@ export function useDocDrawingTextWrap(props: IDocDrawingTextWrapProps) {
         };
     }, [commandService, documentDataModel, drawingManagerService]);
 
-    return { localeService, showPanel, wrappingStyle, wrapText, distToText, disableWrapText, disableDistTB, disableDistLR, handleWrappingStyleChange, handleWrapTextChange, handleDistToTextChange, MIN_MARGIN, MAX_MARGIN };
+    return {
+        localeService,
+        showPanel,
+        wrappingStyle,
+        wrapText,
+        distToText,
+        disableWrapText,
+        disableDistTB,
+        disableDistLR,
+        handleWrappingStyleChange,
+        handleWrapTextChange,
+        handleDistToTextChange,
+        MIN_MARGIN,
+        MAX_MARGIN,
+    };
 }

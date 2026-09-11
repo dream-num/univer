@@ -168,10 +168,12 @@ import {
     DocParagraphPlaceholderRenderController,
 } from './controllers/render-controllers/doc-paragraph-placeholder.render-controller';
 import { DocResizeRenderController } from './controllers/render-controllers/doc-resize.render-controller';
+import { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 import { MobileDocBackScrollRenderController } from './controllers/render-controllers/mobile/back-scroll.render-controller';
 import { MobileDocSelectionRenderController } from './controllers/render-controllers/mobile/doc-selection-render.controller';
 import { MobileDocRenderController } from './controllers/render-controllers/mobile/doc.render-controller';
 import { MobileDocZoomRenderController } from './controllers/render-controllers/mobile/zoom.render-controller';
+import { DocZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import {
     DocClipboardPasteAdapterService,
@@ -187,14 +189,12 @@ import { DocLayoutProgressService } from './services/doc-layout-progress.service
 import { DocMenuStyleService, SetDocInputStyleCommand } from './services/doc-menu-style.service';
 import { DocMobileElementMenuService } from './services/doc-mobile-element-menu.service';
 import { DocPageLayoutService } from './services/doc-page-layout.service';
-import { DocParagraphMenuService } from './services/doc-paragraph-menu.service';
 import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 import { DocPrintInterceptorService } from './services/doc-print-interceptor.service';
 import { DocViewScaleService } from './services/doc-view-scale';
 import { DocsRenderService } from './services/docs-render.service';
 import { EditorService, IEditorService } from './services/editor/editor-manager.service';
 import { DocFloatMenuService } from './services/float-menu.service';
-import { MobileDocParagraphMenuService } from './services/mobile/doc-paragraph-menu.service';
 import { MobileDocSelectionRenderService } from './services/mobile/doc-selection-render.service';
 import { MobileDocViewScaleService } from './services/mobile/doc-view-scale';
 import { MobileDocFloatMenuService } from './services/mobile/float-menu.service';
@@ -426,8 +426,8 @@ export class UniverDocsMobileUIPlugin extends Plugin {
             [DocCanvasPopupLayoutInteractionController],
             [DocIMEInputManagerService],
             [DocLayoutProgressRenderController],
-            [MobileDocRenderController],
-            [MobileDocZoomRenderController],
+            [DocRenderController, { useClass: MobileDocRenderController }],
+            [DocZoomRenderController, { useClass: MobileDocZoomRenderController }],
             [DocBackScrollRenderController, { useClass: MobileDocBackScrollRenderController }],
             [MobileDocSelectionRenderController],
         ] as Dependency[]).forEach((m) => {
@@ -439,7 +439,6 @@ export class UniverDocsMobileUIPlugin extends Plugin {
         ([
             [DocEventManagerService],
             [DocFloatMenuService, { useClass: MobileDocFloatMenuService }],
-            [DocParagraphMenuService, { useClass: MobileDocParagraphMenuService }],
             [DocHeaderFooterController],
             [DocResizeRenderController],
             [DocParagraphPlaceholderRenderController],

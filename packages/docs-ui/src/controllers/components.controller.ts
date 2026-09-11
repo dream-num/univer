@@ -123,7 +123,7 @@ const paragraphSettingIndexKey = 'doc_ui_paragraph-setting-panel';
 
 export class ComponentsController extends Disposable {
     constructor(
-        @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @Inject(IconManager) private readonly _iconManager: IconManager
     ) {
         super();
@@ -220,7 +220,7 @@ export class ComponentsController extends Disposable {
         }));
     }
 
-    protected _registerComponents(): void {
+    private _registerComponents(): void {
         if (!this._componentManager.get(COMPONENT_DOC_HEADER_FOOTER_PANEL)) {
             this.disposeWithMe(this._componentManager.register(COMPONENT_DOC_HEADER_FOOTER_PANEL, DocHeaderFooterPanel));
         }

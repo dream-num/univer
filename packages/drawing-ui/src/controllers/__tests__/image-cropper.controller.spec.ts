@@ -57,9 +57,14 @@ function createController(
         [IShortcutService, { useValue: shortcut }],
         [ILayoutService, { useValue: layout }],
         [IContextService, { useClass: ContextService }],
-        [ImageCropperController, { useClass: mobile ? MobileImageCropperController : ImageCropperController }],
     ]);
     injectors.push(injector);
+    if (mobile) {
+        injector.add([MobileImageCropperController]);
+        return injector.get(MobileImageCropperController);
+    }
+
+    injector.add([ImageCropperController]);
     return injector.get(ImageCropperController);
 }
 
@@ -228,6 +233,8 @@ describe('ImageCropperController', () => {
             layoutService as never,
             mobile
         );
+
+        expect(controller instanceof ImageCropperController).toBe(!mobile);
 
         // OpenImageCrop handler
         commandHandlers[0]({ id: OpenImageCropOperation.id, params: focusDrawing } as never);

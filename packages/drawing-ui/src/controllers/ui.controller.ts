@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
-import { IMenuManagerService, IUIPartsService } from '@univerjs/ui';
+import { Disposable, ICommandService } from '@univerjs/core';
+import { IMenuManagerService } from '@univerjs/ui';
 import {
     SetDrawingAlignBottomOperation,
     SetDrawingAlignCenterOperation,
@@ -42,17 +42,12 @@ import { menuSchema } from '../menu/schema';
 export class DrawingUIController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
-        @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
-        @Inject(Injector) protected readonly _injector: Injector
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService
     ) {
         super();
 
         this._init();
-        this._initUiParts();
     }
-
-    protected _initUiParts(): void {}
 
     private _init(): void {
         this._initMenus();

@@ -14,4 +14,5 @@
  * limitations under the License.
  */
 
+export const DOC_CARET_MENU_ID = 'docs.contextMenu.caret';
 export const MOBILE_DOC_PINCH_ZOOMING = 'MOBILE_DOC_PINCH_ZOOMING';

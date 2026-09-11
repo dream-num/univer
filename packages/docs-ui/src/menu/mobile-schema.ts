@@ -18,6 +18,7 @@ import type { MenuSchemaType } from '@univerjs/ui';
 import { ContextMenuGroup, ContextMenuPosition } from '@univerjs/ui';
 import { DocPasteCommand } from '../commands/commands/clipboard.command';
 import { DocSelectAllCommand, DocSelectWordCommand } from '../commands/commands/doc-select-all.command';
+import { DOC_CARET_MENU_ID } from '../consts/mobile-context';
 import { PasteMenuFactory, SelectAllMenuFactory, SelectWordMenuFactory } from './context-menu';
 
 export const mobileMenuSchema: MenuSchemaType = {
@@ -27,7 +28,7 @@ export const mobileMenuSchema: MenuSchemaType = {
             [DocSelectAllCommand.id]: { order: 4, menuItemFactory: SelectAllMenuFactory },
         },
     },
-    [ContextMenuPosition.DOC_CARET]: {
+    [DOC_CARET_MENU_ID]: {
         [ContextMenuGroup.QUICK]: {
             quickLayout: 'tile',
             [DocPasteCommand.id]: {

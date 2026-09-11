@@ -14,13 +14,97 @@
  * limitations under the License.
  */
 
-import { DocumentFlavor } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
+import type { IRenderContext } from '@univerjs/engine-render';
+import type { IDocPageSetupCommandParams } from '../../../commands/commands/doc-page-setup.command';
+import type { ISetDocZoomRatioOperationParams } from '../../../commands/operations/set-doc-zoom-ratio.operation';
+import {
+    DocumentFlavor,
+    ICommandService,
+    IContextService,
+    Inject,
+    isInternalEditorID,
+    IUniverInstanceService,
+    Optional,
+} from '@univerjs/core';
+import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { VIEWPORT_KEY } from '../../../basics/docs-view-key';
+import { DocPageSetupCommand } from '../../../commands/commands/doc-page-setup.command';
+import { SetDocZoomRatioCommand } from '../../../commands/commands/set-doc-zoom-ratio.command';
+import { SwitchDocModeCommand } from '../../../commands/commands/switch-doc-mode.command';
+import { SetDocZoomRatioOperation } from '../../../commands/operations/set-doc-zoom-ratio.operation';
+import { MOBILE_DOC_PINCH_ZOOMING } from '../../../consts/mobile-context';
+import { IDocEmbedInteractionBoundaryService } from '../../../services/doc-embed-integration.service';
+import { DocPageLayoutService } from '../../../services/doc-page-layout.service';
+import { DocViewScaleService } from '../../../services/doc-view-scale';
+import { DEFAULT_MODERN_DOC_ZOOM_RATIO, getDocEffectiveZoomRatio } from '../../../services/doc-zoom';
+import { IEditorService } from '../../../services/editor/editor-manager.service';
 import { DocZoomRenderController } from '../zoom.render-controller';
 import { MobileDocPinchZoomGesture } from './doc-pinch-zoom';
 
 export class MobileDocZoomRenderController extends DocZoomRenderController {
-    protected override _initGestureZoom(): void {
+    constructor(
+        context: IRenderContext<DocumentDataModel>,
+        @IContextService contextService: IContextService,
+        @Inject(DocSkeletonManagerService) docSkeletonManagerService: DocSkeletonManagerService,
+        @IUniverInstanceService univerInstanceService: IUniverInstanceService,
+        @ICommandService commandService: ICommandService,
+        @Inject(DocSelectionManagerService) textSelectionManagerService: DocSelectionManagerService,
+        @IEditorService editorService: IEditorService,
+        @Inject(DocPageLayoutService) docPageLayoutService: DocPageLayoutService,
+        @IRenderManagerService renderManagerService: IRenderManagerService,
+        @Inject(DocViewScaleService) docViewScaleService: DocViewScaleService,
+        @Optional(IDocEmbedInteractionBoundaryService) embedInteractionBoundaryService?: IDocEmbedInteractionBoundaryService
+    ) {
+        super(
+            context,
+            contextService,
+            docSkeletonManagerService,
+            univerInstanceService,
+            commandService,
+            textSelectionManagerService,
+            editorService,
+            docPageLayoutService,
+            renderManagerService,
+            docViewScaleService,
+            embedInteractionBoundaryService
+        );
+
+        if (!isInternalEditorID(context.unitId)) {
+            this._initGestureZoom();
+        }
+    }
+
+    protected override _initCommandExecutedListener(): void {
+        const updateCommandList = [SetDocZoomRatioOperation.id];
+
+        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            if (updateCommandList.includes(command.id) && (command.params as ISetDocZoomRatioOperationParams).unitId === this._context.unitId) {
+                const zoomRatio = getDocEffectiveZoomRatio(this._context.unit);
+                this.updateViewZoom(
+                    zoomRatio,
+                    !this._contextService.getContextValue(MOBILE_DOC_PINCH_ZOOMING)
+                );
+            }
+        }));
+
+        this.disposeWithMe(
+            this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
+                const shouldResetZoom = command.id === SwitchDocModeCommand.id ||
+                    (command.id === DocPageSetupCommand.id && (command.params as IDocPageSetupCommandParams | undefined)?.documentFlavor === DocumentFlavor.MODERN);
+
+                if (shouldResetZoom) {
+                    this._commandService.executeCommand(SetDocZoomRatioCommand.id, {
+                        zoomRatio: DEFAULT_MODERN_DOC_ZOOM_RATIO,
+                        documentId: this._context.unitId,
+                    });
+                }
+            })
+        );
+    }
+
+    private _initGestureZoom(): void {
         if (
             this._context.unit.getSnapshot().documentStyle.documentFlavor !== DocumentFlavor.TRADITIONAL
         ) {

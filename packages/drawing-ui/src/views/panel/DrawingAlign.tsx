@@ -15,7 +15,6 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
-import type { ComponentProps, ComponentType } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { clsx, Select } from '@univerjs/design';
@@ -26,14 +25,13 @@ import { AlignType, SetDrawingAlignOperation } from '../../commands/operations/d
 export interface IDrawingAlignProps {
     drawings: IDrawingParam[];
     alignShow: boolean;
-    SelectComponent?: ComponentType<ComponentProps<typeof Select>>;
 }
 
 export const DrawingAlign = (props: IDrawingAlignProps) => {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
 
-    const { drawings, alignShow, SelectComponent = Select } = props;
+    const { drawings, alignShow } = props;
 
     const [alignValue, setAlignValue] = useState<AlignType>(AlignType.default);
     const alignOptions = [
@@ -121,7 +119,7 @@ export const DrawingAlign = (props: IDrawingAlignProps) => {
                       dark:!univer-text-gray-0
                     `}
                 >
-                    <SelectComponent value={alignValue} options={alignOptions} onChange={handleAlignChange} />
+                    <Select value={alignValue} options={alignOptions} onChange={handleAlignChange} />
                 </div>
             </div>
         </div>

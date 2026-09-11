@@ -163,6 +163,7 @@ export { DesktopContextMenu as ContextMenu } from './views/components/context-me
 export { ContextMenuPanel } from './views/components/context-menu/ContextMenuPanel';
 export { MobileContextMenu } from './views/components/context-menu/MobileContextMenu';
 export { type IDialogPartMethodOptions } from './views/components/dialog-part/interface';
+export type { IMobileDialogPartMethodOptions } from './views/components/dialog-part/MobileDialogPart';
 export { FloatDomSingle } from './views/components/dom/FloatDom';
 export { FloatDom } from './views/components/dom/FloatDom';
 export { PrintFloatDomSingle } from './views/components/dom/Print';
@@ -177,6 +178,7 @@ export { useToolbarItemStatus } from './views/components/ribbon/hook';
 export { Ribbon } from './views/components/ribbon/Ribbon';
 export { ToolbarButton } from './views/components/ribbon/ToolbarButton';
 export { ToolbarItem } from './views/components/ribbon/ToolbarItem';
+export type { IMobileSidebarMethodOptions } from './views/components/sidebar/MobileSidebar';
 export { Sidebar } from './views/components/sidebar/Sidebar';
 export type { ISidebarMethodOptions } from './views/components/sidebar/Sidebar';
 export { FONT_FAMILY_COMPONENT, FontFamily } from './views/font-family/FontFamily';

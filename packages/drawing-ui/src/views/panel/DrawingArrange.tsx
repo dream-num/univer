@@ -24,7 +24,6 @@ import { SetDrawingArrangeOperation } from '../../commands/operations/drawing-ar
 
 export interface IDrawingArrangeProps {
     arrangeShow: boolean;
-    actionClassName?: string;
     drawings: IDrawingParam[];
 }
 
@@ -68,19 +67,19 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
             </header>
 
             <div className="univer-grid univer-grid-cols-2 univer-gap-2">
-                <Button className={props.actionClassName} onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.forward); }}>
+                <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.forward); }}>
                     <MoveUpIcon />
                     {localeService.t<LocaleKey>('drawing-ui.image-panel.arrange.forward')}
                 </Button>
-                <Button className={props.actionClassName} onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.backward); }}>
+                <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.backward); }}>
                     <MoveDownIcon />
                     {localeService.t<LocaleKey>('drawing-ui.image-panel.arrange.backward')}
                 </Button>
-                <Button className={props.actionClassName} onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.front); }}>
+                <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.front); }}>
                     <TopmostIcon />
                     {localeService.t<LocaleKey>('drawing-ui.image-panel.arrange.front')}
                 </Button>
-                <Button className={props.actionClassName} onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.back); }}>
+                <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.back); }}>
                     <BottomIcon />
                     {localeService.t<LocaleKey>('drawing-ui.image-panel.arrange.back')}
                 </Button>

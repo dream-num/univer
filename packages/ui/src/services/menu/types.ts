@@ -74,7 +74,6 @@ export enum RibbonOthersGroup {
 
 export enum ContextMenuPosition {
     MAIN_AREA = 'contextMenu.mainArea',
-    DOC_CARET = 'contextMenu.docCaret',
     COL_HEADER = 'contextMenu.colHeader',
     ROW_HEADER = 'contextMenu.rowHeader',
     FOOTER_TABS = 'contextMenu.footerTabs',

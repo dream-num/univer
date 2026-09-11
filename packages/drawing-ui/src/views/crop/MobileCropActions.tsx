@@ -20,12 +20,12 @@ import { MobileActionRow } from '@univerjs/design';
 import { CheckMarkIcon, CloseIcon } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { CloseImageCropOperation } from '../../commands/operations/image-crop.operation';
-import { ImageCropperController } from '../../controllers/image-cropper.controller';
+import { MobileImageCropperController } from '../../controllers/mobile/image-cropper.controller';
 
 export function MobileCropActions() {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
-    const cropperController = useDependency(ImageCropperController);
+    const cropperController = useDependency(MobileImageCropperController);
     const cropping = useObservable(cropperController.cropping$, false);
 
     if (!cropping) {

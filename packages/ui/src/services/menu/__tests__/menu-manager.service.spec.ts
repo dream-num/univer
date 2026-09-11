@@ -19,7 +19,7 @@ import { ConfigService, IConfigService, Injector } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { isMenuButtonSelectorItem, isMenuSelectorItem, MenuItemType } from '../menu';
 import { IMenuManagerService, MenuManagerService } from '../menu-manager.service';
-import { ContextMenuGroup, ContextMenuPosition, FloatingObjectToolbarPosition } from '../types';
+import { FloatingObjectToolbarPosition } from '../types';
 
 function createService(): IMenuManagerService {
     const injector = new Injector();
@@ -66,20 +66,6 @@ describe('MenuManagerService', () => {
         });
 
         expect(service.getFlatMenuByPositionKey(position).map((item) => item.item?.id)).toEqual(['comment']);
-    });
-
-    it('accepts contributions for the document caret context menu', () => {
-        const service = createService();
-
-        service.mergeMenu({
-            [ContextMenuPosition.DOC_CARET]: {
-                [ContextMenuGroup.QUICK]: {
-                    paste: { order: 0, menuItemFactory: () => ({ id: 'paste', type: MenuItemType.BUTTON }) },
-                },
-            },
-        });
-
-        expect(service.getFlatMenuByPositionKey(ContextMenuPosition.DOC_CARET).flatMap((item) => item.item ? [item.item.id] : [])).toEqual(['paste']);
     });
 
     it('returns an empty array for missing menu positions', () => {

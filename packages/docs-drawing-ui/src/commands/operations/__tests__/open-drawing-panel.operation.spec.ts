@@ -50,12 +50,12 @@ describe('SidebarDocDrawingOperation', () => {
     it('opens the doc drawing sidebar and clears focus when closed', async () => {
         const { accessor, sidebarService, drawingManagerService } = createAccessor();
         await expect(SidebarDocDrawingOperation.handler(accessor, { value: 'open' })).resolves.toBe(true);
-        expect(sidebarService.open).toHaveBeenCalledWith(expect.objectContaining({
+        expect(sidebarService.open).toHaveBeenCalledWith({
             header: { title: 'docs-drawing-ui.panel.title' },
             children: { label: COMPONENT_DOC_DRAWING_PANEL },
+            onClose: expect.any(Function),
             width: 360,
-            mobileLayout: 'canvas',
-        }));
+        });
         const onClose = sidebarService.open.mock.calls[0][0].onClose;
         onClose();
         expect(drawingManagerService.focusDrawing).toHaveBeenCalledWith(null);

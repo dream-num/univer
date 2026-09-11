@@ -40,7 +40,6 @@ import {
     CustomRangeType,
     DocumentFlavor,
     ICommandService,
-    IContextService,
     ILogService,
     Inject,
     isInternalEditorID,
@@ -94,7 +93,6 @@ import {
 } from './doc-mutation-layout';
 
 const DOC_PAGE_MARGIN = 20;
-const MOBILE_DOC_OUTER_MARGIN = 12;
 
 function getTextXActionLength(action: unknown): number | undefined {
     if (typeof action !== 'object' || action == null || !('t' in action) || !('len' in action)) {
@@ -324,7 +322,7 @@ interface IDocLayoutWorkerEditBatch {
     invalidation: IDocumentLayoutInvalidation | undefined;
 }
 
-interface IDocLayoutScheduleOptions {
+export interface IDocLayoutScheduleOptions {
     deferForeground?: boolean;
     reuseMainBaseline?: boolean;
     allowMetadataOnlyStructuralTailReuse?: boolean;
@@ -510,7 +508,6 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
     private _isMaterializingPages = false;
     private _reservedLayoutWidth = 0;
     private _reservedLayoutHeight = 0;
-    protected _mobileModernPageWidth: number | undefined;
 
     constructor(
         protected readonly _context: IRenderContext<DocumentDataModel>,
@@ -526,7 +523,6 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Inject(DocLayoutExecutorService) private readonly _docLayoutExecutorService: DocLayoutExecutorService,
         @Inject(DocLayoutInteractionService) private readonly _docLayoutInteractionService: DocLayoutInteractionService,
-        @IContextService private readonly _contextService: IContextService,
         @ILogService private readonly _logService: ILogService
     ) {
         super();
@@ -537,7 +533,6 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
 
         this._addNewRender();
         this._initRenderRefresh();
-        this._initMobileResponsiveLayout();
         this._initCommandListener();
         this._initInteractionLayoutProtection();
         this._initThemeListener();
@@ -679,14 +674,9 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             // continue instead of replaying the stale pre-composition request.
             this._pendingImeLayoutRestart = null;
         }
-        const layoutOptions = {
-            ...options,
-            ...this._getMobileModernLayoutOptions(),
-        };
-        this._mobileModernPageWidth = layoutOptions.modernPageWidth;
         const layoutRequestId = ++this._layoutRequestId;
         this._cancelWorkerHandoff();
-        const isInitialLayout = layoutOptions.reason === 'initial';
+        const isInitialLayout = options.reason === 'initial';
         const docsComponent = this._context.mainComponent;
         if (!(docsComponent instanceof Documents)) {
             return;
@@ -696,35 +686,35 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         const mainThreadCallbacks = this._createLayoutCallbacks(
             unitId,
             skeleton,
-            layoutOptions,
+            options,
             refreshMainSelection,
             true,
             preserveInactiveViewportAnchor,
             undefined,
             false
         );
-        if (layoutOptions.reuseMainBaseline) {
+        if (options.reuseMainBaseline) {
             // Offset-preserving render metadata does not change Worker geometry.
             // Keep any older pending batch intact, but do not create a false
             // background-layout task for this Main-only publication.
-            this._layoutCoordinator.schedule(skeleton, layoutOptions, mainThreadCallbacks);
+            this._layoutCoordinator.schedule(skeleton, options, mainThreadCallbacks);
             return;
         }
         if (this._docLayoutExecutorService.getExecutor() == null) {
             this._pendingWorkerEditBatch = null;
-            this._layoutCoordinator.schedule(skeleton, layoutOptions, mainThreadCallbacks);
+            this._layoutCoordinator.schedule(skeleton, options, mainThreadCallbacks);
             return;
         }
         const workerOptions = isInitialLayout
-            ? layoutOptions
-            : this._accumulateWorkerEditBatch(layoutOptions);
+            ? options
+            : this._accumulateWorkerEditBatch(options);
         if (isInitialLayout) {
             this._pendingWorkerEditBatch = null;
             this._scheduleInitialInteractionWindow(
                 layoutRequestId,
                 unitId,
                 skeleton,
-                layoutOptions,
+                options,
                 workerOptions,
                 mainThreadCallbacks,
                 preserveInactiveViewportAnchor
@@ -736,7 +726,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             layoutRequestId,
             unitId,
             skeleton,
-            layoutOptions,
+            options,
             workerOptions,
             mainThreadCallbacks,
             refreshMainSelection,
@@ -1657,12 +1647,6 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         const options = this._docViewScaleService.getOptions();
         return !(options.mode === 'fit-width' && options.target === 'container' && options.align === 'start');
     }
-
-    protected _getMobileModernLayoutOptions(): Pick<IDocLayoutScheduleOptions, 'modernPageWidth' | 'modernHorizontalMargin'> {
-        return {};
-    }
-
-    protected _initMobileResponsiveLayout(): void {}
 
     protected _getHorizontalPageMargin(): number {
         return DOC_PAGE_MARGIN;

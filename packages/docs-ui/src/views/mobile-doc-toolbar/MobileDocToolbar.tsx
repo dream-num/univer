@@ -16,6 +16,7 @@
 
 import type { IMenuSchema, IValueOption, MobileDrawerSnap } from '@univerjs/ui';
 import type { ReactNode } from 'react';
+import type { MobileDocSelectionRenderService } from '../../services/mobile/doc-selection-render.service';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { clsx, resetButtonClassName } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -184,7 +185,7 @@ function useMobileDocEditState() {
     );
     const unitId = currentDoc?.getUnitId();
     const selectionService = unitId
-        ? renderManagerService.getRenderUnitById(unitId)?.with(DocSelectionRenderService)
+        ? renderManagerService.getRenderUnitById(unitId)?.with(DocSelectionRenderService) as MobileDocSelectionRenderService | undefined
         : undefined;
     const isEditing = useObservable(
         selectionService?.mobileEditMode$,

@@ -16,7 +16,6 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { IThreadComment } from '@univerjs/thread-comment';
-import type { ComponentType } from 'react';
 import type { Observable } from 'rxjs';
 import type { LocaleKey } from '../locale/types';
 import type { ThreadCommentPanelSection } from './thread-comment-panel/util';
@@ -51,12 +50,6 @@ export interface IThreadCommentPanelProps {
     formatRef?: (comment: IThreadComment) => string;
     onTempCommentClose?: () => void;
     autoFocusActiveComment?: boolean;
-    ActionRowComponent?: typeof ActionRow;
-    SelectComponent?: typeof Select;
-    ThreadCommentTreeComponent?: typeof ThreadCommentTree;
-    DetailHeaderComponent?: ComponentType<{ comment: IThreadComment; displayRef?: string }>;
-    AddCommentComponent?: ComponentType<{ onAdd: () => void }>;
-    filterClassName?: string;
 }
 
 interface IThreadCommentWithUsers extends IThreadComment {
@@ -83,12 +76,6 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         formatRef,
         onTempCommentClose,
         autoFocusActiveComment = false,
-        ActionRowComponent = ActionRow,
-        SelectComponent = Select,
-        ThreadCommentTreeComponent = ThreadCommentTree,
-        DetailHeaderComponent,
-        AddCommentComponent,
-        filterClassName = 'univer-mt-3 univer-flex univer-flex-row univer-justify-between',
     } = props;
     const [unit, setUnit] = useState('all');
     const [status, setStatus] = useState('all');
@@ -160,43 +147,10 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         ? [scopedTempComment, ...statuedComments]
         : statuedComments;
 
-    const activeComment = DetailHeaderComponent && activeCommentId
-        ? renderComments.find((comment) => isSameThreadCommentTarget(activeCommentId, comment))
-        : undefined;
-    const visibleComments = activeComment ? [activeComment] : renderComments;
-
-    const unSolvedComments = visibleComments.filter((comment) => !comment.resolved);
-    const solvedComments = visibleComments.filter((comment) => comment.resolved);
+    const unSolvedComments = renderComments.filter((comment) => !comment.resolved);
+    const solvedComments = renderComments.filter((comment) => comment.resolved);
 
     const isFiltering = status !== 'all' || unit !== 'all';
-    const unitFilterOptions = [
-        {
-            value: 'current',
-            label: localeService.t<LocaleKey>('thread-comment-ui.filter.sheet.current'),
-        },
-        {
-            value: 'all',
-            label: localeService.t<LocaleKey>('thread-comment-ui.filter.sheet.all'),
-        },
-    ];
-    const statusFilterOptions = [
-        {
-            value: 'all',
-            label: localeService.t<LocaleKey>('thread-comment-ui.filter.status.all'),
-        },
-        {
-            value: 'resolved',
-            label: localeService.t<LocaleKey>('thread-comment-ui.filter.status.resolved'),
-        },
-        {
-            value: 'unsolved',
-            label: localeService.t<LocaleKey>('thread-comment-ui.filter.status.unsolved'),
-        },
-        {
-            value: 'concern_me',
-            label: localeService.t<LocaleKey>('thread-comment-ui.filter.status.concernMe'),
-        },
-    ];
 
     const onReset = () => {
         setStatus('all');
@@ -261,7 +215,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     }, [activeCommentId, location]);
 
     const renderComment = (section: ThreadCommentPanelSection) => (comment: IThreadComment, index: number) => (
-        <ThreadCommentTreeComponent
+        <ThreadCommentTree
             full
             location={location}
             getSubUnitName={getSubUnitName}
@@ -316,17 +270,51 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
 
     return (
         <div className="univer-flex univer-min-h-full univer-flex-col univer-pb-3">
-            {activeComment && DetailHeaderComponent && <DetailHeaderComponent comment={activeComment} displayRef={formatRef?.(activeComment)} />}
-            {!activeComment && (
-                <div className={filterClassName}>
-                    {type === UniverInstanceType.UNIVER_SHEET && (
-                        <SelectComponent borderless value={unit} options={unitFilterOptions} onChange={setUnit} />
-                    )}
-                    <SelectComponent borderless value={status} options={statusFilterOptions} onChange={setStatus} />
-                </div>
-            )}
-            {AddCommentComponent && !activeComment && !disableAdd && !scopedTempComment && <AddCommentComponent onAdd={onAdd} />}
-            {visibleComments.length === 0
+            <div className="univer-mt-3 univer-flex univer-flex-row univer-justify-between">
+                {type === UniverInstanceType.UNIVER_SHEET
+                    ? (
+                        <Select
+                            borderless
+                            value={unit}
+                            options={[
+                                {
+                                    value: 'current',
+                                    label: localeService.t<LocaleKey>('thread-comment-ui.filter.sheet.current'),
+                                },
+                                {
+                                    value: 'all',
+                                    label: localeService.t<LocaleKey>('thread-comment-ui.filter.sheet.all'),
+                                },
+                            ]}
+                            onChange={setUnit}
+                        />
+                    )
+                    : null}
+                <Select
+                    borderless
+                    value={status}
+                    options={[
+                        {
+                            value: 'all',
+                            label: localeService.t<LocaleKey>('thread-comment-ui.filter.status.all'),
+                        },
+                        {
+                            value: 'resolved',
+                            label: localeService.t<LocaleKey>('thread-comment-ui.filter.status.resolved'),
+                        },
+                        {
+                            value: 'unsolved',
+                            label: localeService.t<LocaleKey>('thread-comment-ui.filter.status.unsolved'),
+                        },
+                        {
+                            value: 'concern_me',
+                            label: localeService.t<LocaleKey>('thread-comment-ui.filter.status.concernMe'),
+                        },
+                    ]}
+                    onChange={setStatus}
+                />
+            </div>
+            {renderComments.length === 0
                 ? (
                     <div
                         className={`
@@ -338,22 +326,22 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                         {localeService.t<LocaleKey>('thread-comment-ui.panel.empty')}
                         {isFiltering
                             ? (
-                                <ActionRowComponent className="univer-mt-2 univer-flex univer-flex-row">
+                                <ActionRow className="univer-mt-2 univer-flex univer-flex-row">
                                     <Button onClick={onReset}>
                                         {localeService.t<LocaleKey>('thread-comment-ui.panel.reset')}
                                     </Button>
-                                </ActionRowComponent>
+                                </ActionRow>
                             )
-                            : !disableAdd && !AddCommentComponent
+                            : !disableAdd
                                 ? (
-                                    <ActionRowComponent
+                                    <ActionRow
                                         className="univer-mt-2 univer-flex univer-flex-row"
                                     >
                                         <Button onClick={onAdd}>
                                             <IncreaseIcon className="univer-mr-1.5" />
                                             {localeService.t<LocaleKey>('thread-comment-ui.panel.addComment')}
                                         </Button>
-                                    </ActionRowComponent>
+                                    </ActionRow>
                                 )
                                 : null}
                     </div>

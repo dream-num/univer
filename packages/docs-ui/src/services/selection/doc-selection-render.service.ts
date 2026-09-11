@@ -34,10 +34,8 @@ import type {
 } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
 import type { RectRange } from './rect-range';
-import type { TextRangeHandleType } from './text-range';
 import {
     DataStreamTreeTokenType,
-    DisposableCollection,
     DOC_RANGE_TYPE,
     IContextService,
     ILogService,
@@ -59,7 +57,7 @@ import {
     Vector2,
 } from '@univerjs/engine-render';
 import { ILayoutService, KeyCode } from '@univerjs/ui';
-import { BehaviorSubject, distinctUntilChanged, filter, fromEvent, map, merge, Subject, takeUntil } from 'rxjs';
+import { BehaviorSubject, filter, fromEvent, merge, Subject, takeUntil } from 'rxjs';
 import { DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../doc-embed-integration.service';
 import { compareNodePositionLogic } from './convert-text-range';
 import {
@@ -74,9 +72,6 @@ import {
 } from './selection-utils';
 import { cursorConvertToTextRange, TextRange } from './text-range';
 import { getWordBoundaryByIndex } from './word-boundary';
-
-const MOBILE_KEYBOARD_THRESHOLD = 80;
-const MOBILE_INPUT_VIEWPORT_INSET = 1;
 
 export interface IEditorInputConfig {
     event: Event | CompositionEvent | KeyboardEvent;
@@ -134,20 +129,20 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private _scrollTimers: ScrollTimer[] = [];
     protected _rangeList: TextRange[] = [];
     // Use to cache range list in moving.
-    private _rangeListCache: TextRange[] = [];
+    protected _rangeListCache: TextRange[] = [];
     // Rect range list.
     private _rectRangeList: RectRange[] = [];
     // Use to cache rect range list in moving.
-    private _rectRangeListCache: RectRange[] = [];
-    private _anchorNodePosition: Nullable<INodePosition> = null;
-    private _focusNodePosition: Nullable<INodePosition> = null;
+    protected _rectRangeListCache: RectRange[] = [];
+    protected _anchorNodePosition: Nullable<INodePosition> = null;
+    protected _focusNodePosition: Nullable<INodePosition> = null;
 
     private _currentSegmentId: string = '';
     private _currentSegmentPage: number = -1;
     private readonly _segmentContext$ = new BehaviorSubject({ segmentId: '', segmentPage: -1 });
     readonly segmentContext$ = this._segmentContext$.asObservable();
     private _selectionStyle: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE;
-    private _onPointerEvent = false;
+    protected _onPointerEvent = false;
 
     private _viewPortObserverMap = new Map<
         string,
@@ -162,21 +157,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private _scenePointerUpSubs: Array<Subscription> = [];
     // When the user switches editors, whether to clear the doc ranges.
     private _reserveRanges = false;
-    protected _mobileSelectionHandleColor = '';
-    private readonly _mobileHandleDragDisposables = new DisposableCollection();
-    private readonly _mobileKeyboardState$ = new BehaviorSubject({ visible: false, inset: 0 });
-    protected _mobileViewportBaselineHeight = 0;
-    protected _mobileViewportBaselineBottom = 0;
-    protected _mobileViewportBaselineWidth = 0;
-    protected _pendingMobileBlurEvent: Event | null = null;
-    private readonly _mobileEditMode$ = new BehaviorSubject(false);
-    readonly mobileKeyboardState$ = this._mobileKeyboardState$.asObservable();
-    readonly mobileKeyboardVisible$ = this.mobileKeyboardState$.pipe(
-        map(({ visible }) => visible),
-        distinctUntilChanged()
-    );
-
-    readonly mobileEditMode$ = this._mobileEditMode$.asObservable();
     private _pendingSelection: Nullable<IDocSelectionInnerParam> = null;
 
     get hasPendingSelection(): boolean {
@@ -195,10 +175,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         return this._textSelectionInner$.value?.isEditing === true;
     }
 
-    get isMobileEditMode() {
-        return this._mobileEditMode$.value;
-    }
-
     get canFocusing() {
         const ownerDocument = this._getOwnerDocument();
         const activeElement = ownerDocument.activeElement;
@@ -215,7 +191,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             return;
         }
 
-        this._mobileHandleDragDisposables.dispose();
         this._scenePointerMoveSubs.forEach((subscription) => subscription.unsubscribe());
         this._scenePointerUpSubs.forEach((subscription) => subscription.unsubscribe());
         this._scenePointerMoveSubs = [];
@@ -241,9 +216,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         @Optional(IDocEmbedRuntimeFocusCoordinator) private readonly _embedRuntimeFocusCoordinator?: IDocEmbedRuntimeFocusCoordinator
     ) {
         super();
-        this.disposeWithMe(this._mobileHandleDragDisposables);
         this._initDOM();
-        this._initMobileKeyboardViewport();
         this._registerContainer();
         this._setSystemHighlightColorToStyle();
         this._listenCurrentUnitChange();
@@ -300,7 +273,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     refreshRanges() {
         this._rangeList.forEach((range) => range.refresh());
         this._rectRangeList.forEach((range) => range.refresh());
-        this._syncMobileSelectionVisuals();
     }
 
     private _setRangeStyle(style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE) {
@@ -547,7 +519,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             options,
         });
 
-        this._syncMobileSelectionVisuals();
         if (!ranges.length || options?.shouldFocus === false) {
             return true;
         }
@@ -591,7 +562,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             isEditing,
         });
 
-        this._syncMobileSelectionVisuals();
         if (shouldFocusInput) {
             this._updateInputPosition({ forceFocus: true });
         }
@@ -855,8 +825,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             this._emitCurrentSelection(false);
 
             this._disposeScrollTimers();
-            this._syncMobileSelectionVisuals();
-
             if (shouldFocusInput) {
                 this._updateInputPosition({ forceFocus: true });
             }
@@ -884,20 +852,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         return true;
     }
 
-    enterMobileEditMode(shouldFocusInput = false): boolean {
-        this._mobileEditMode$.next(true);
-        return shouldFocusInput ? this.enterEditing() : true;
-    }
-
-    suspendMobileEditingInput(): void {
-        this.blur();
-    }
-
-    exitMobileEditMode(): void {
-        this._mobileEditMode$.next(false);
-        this.exitEditing();
-    }
-
     exitEditing(): void {
         this._setEditing(false);
         this.blur();
@@ -907,21 +861,15 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._pendingSelection = null;
         this._removeAllRanges();
         this.deactivate();
-        this._syncMobileSelectionVisuals();
     }
 
     getActiveTextRange() {
         return this._getActiveRangeInstance();
     }
 
-    private _setEditing(isEditing: boolean): void {
-        if (!isEditing) {
-            this._setMobileKeyboardState(false, 0);
-            this._pendingMobileBlurEvent = null;
-        }
+    protected _setEditing(isEditing: boolean): void {
         const selection = this._textSelectionInner$.value;
         if (!selection || selection.isEditing === isEditing) {
-            this._syncMobileSelectionVisuals();
             return;
         }
 
@@ -929,79 +877,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             ...selection,
             isEditing,
         });
-        this._syncMobileSelectionVisuals();
     }
 
-    protected _syncMobileSelectionVisuals(): void {}
-
-    protected _startMobileSelectionHandleDrag(
-        handle: TextRangeHandleType,
-        event: IPointerEvent | IMouseEvent
-    ): void {
-        this._mobileHandleDragDisposables.dispose();
-        const activeRange = this._getActiveRangeInstance();
-        const anchor = handle === 'start' ? activeRange?.endNodePosition : activeRange?.startNodePosition;
-        if (!activeRange || activeRange.collapsed || !anchor) {
-            return;
-        }
-
-        const { scene } = this._context;
-        const scrollTimer = ScrollTimer.create(scene);
-        let moved = false;
-        let previousX = event.offsetX;
-        let previousY = event.offsetY;
-
-        this._anchorNodePosition = { ...anchor };
-        this._focusNodePosition = null;
-        this._removeAllCacheRanges();
-        activeRange.hideMobileHandles();
-        scene.disableObjectsEvent();
-        this._onPointerEvent = true;
-        scrollTimer.startScroll(event.offsetX, event.offsetY);
-        this._mobileHandleDragDisposables.add(() => {
-            scrollTimer.dispose();
-            this._onPointerEvent = false;
-            scene.enableObjectsEvent();
-        });
-
-        this._mobileHandleDragDisposables.add(scene.onPointerMove$.subscribeEvent((moveEvent: IPointerEvent | IMouseEvent) => {
-            const distance = Math.hypot(moveEvent.offsetX - previousX, moveEvent.offsetY - previousY);
-            if (distance < 2) {
-                return;
-            }
-
-            moved = true;
-            this._tryMoving(moveEvent.offsetX, moveEvent.offsetY);
-            scrollTimer.scrolling(moveEvent.offsetX, moveEvent.offsetY, () => {
-                this._tryMoving(moveEvent.offsetX, moveEvent.offsetY);
-            });
-            previousX = moveEvent.offsetX;
-            previousY = moveEvent.offsetY;
-        }));
-        const finishDrag = () => {
-            this._mobileHandleDragDisposables.dispose();
-
-            if (moved && (this._rangeListCache.length || this._rectRangeListCache.length)) {
-                for (const textRange of this._rangeListCache) {
-                    this._addTextRange(textRange);
-                }
-                this._addRectRanges(this._rectRangeListCache);
-                this._rangeListCache = [];
-                this._rectRangeListCache = [];
-            } else {
-                this._removeAllCacheRanges();
-            }
-
-            this._anchorNodePosition = null;
-            this._focusNodePosition = null;
-            this._emitCurrentSelection(false);
-            this._syncMobileSelectionVisuals();
-        };
-        this._mobileHandleDragDisposables.add(scene.onPointerUp$.subscribeEvent(finishDrag));
-        this._mobileHandleDragDisposables.add(scene.onPointerCancel$.subscribeEvent(finishDrag));
-    }
-
-    private _emitCurrentSelection(isEditing: boolean): void {
+    protected _emitCurrentSelection(isEditing: boolean): void {
         this._textSelectionInner$.next({
             textRanges: this._getAllTextRanges(),
             rectRanges: this._getAllRectRanges(),
@@ -1022,8 +900,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     private _setSystemHighlightColorToStyle() {
         const { r, g, b, a } = getSystemHighlightColor();
-        this._mobileSelectionHandleColor = `rgb(${r}, ${g}, ${b})`;
-
         // Only set selection use highlight color.
         const style: ITextSelectionStyle = {
             strokeWidth: 1,
@@ -1111,60 +987,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             // the content editable div should be regarded as part of the applications container
             this._layoutService.registerContainerElement(this._container)
         );
-    }
-
-    protected _initMobileKeyboardViewport(): void {}
-
-    protected _updateMobileKeyboardState(visualViewport: VisualViewport): void {
-        const visibleBottom = visualViewport.offsetTop + visualViewport.height;
-        if (Math.abs(this._mobileViewportBaselineWidth - visualViewport.width) > 1) {
-            this._mobileViewportBaselineHeight = visualViewport.height;
-            this._mobileViewportBaselineBottom = visibleBottom;
-            this._mobileViewportBaselineWidth = visualViewport.width;
-        }
-
-        const keyboardVisible = this._mobileViewportBaselineHeight - visualViewport.height >= MOBILE_KEYBOARD_THRESHOLD;
-        if (!keyboardVisible) {
-            this._mobileViewportBaselineHeight = Math.max(this._mobileViewportBaselineHeight, visualViewport.height);
-            this._mobileViewportBaselineBottom = Math.max(this._mobileViewportBaselineBottom, visibleBottom);
-        }
-
-        if (!this.isMobileEditMode) {
-            this._setMobileKeyboardState(false, 0);
-            return;
-        }
-
-        if (keyboardVisible) {
-            this._setMobileKeyboardState(
-                true,
-                Math.max(0, Math.round(this._mobileViewportBaselineBottom - visibleBottom))
-            );
-            return;
-        }
-
-        if (!this._mobileKeyboardState$.value.visible) {
-            return;
-        }
-
-        this._setMobileKeyboardState(false, 0);
-        const blurEvent = this._pendingMobileBlurEvent;
-        this._pendingMobileBlurEvent = null;
-        if (!blurEvent) {
-            return;
-        }
-
-        this._eventHandle(blurEvent, (config) => {
-            this._onBlur$.next(config);
-        });
-    }
-
-    private _setMobileKeyboardState(visible: boolean, inset: number): void {
-        const current = this._mobileKeyboardState$.value;
-        if (current.visible === visible && current.inset === inset) {
-            return;
-        }
-
-        this._mobileKeyboardState$.next({ visible, inset });
     }
 
     private _initInput() {
@@ -1275,7 +1097,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._removeAllRectRanges();
     }
 
-    private _removeAllCacheRanges() {
+    protected _removeAllCacheRanges() {
         this._rangeListCache.forEach((range) => {
             range.dispose();
         });
@@ -1345,7 +1167,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._rangeListCache.push(...textRanges);
     }
 
-    private _addTextRange(textRange: TextRange) {
+    protected _addTextRange(textRange: TextRange) {
         this._deactivateAllTextRanges();
         textRange.activate();
 
@@ -1356,7 +1178,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._rectRangeListCache.push(...rectRanges);
     }
 
-    private _addRectRanges(rectRanges: RectRange[]) {
+    protected _addRectRanges(rectRanges: RectRange[]) {
         if (rectRanges.length === 0) {
             return;
         }
@@ -1467,7 +1289,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         }
     }
 
-    private _tryMoving(moveOffsetX: number, moveOffsetY: number) {
+    protected _tryMoving(moveOffsetX: number, moveOffsetY: number) {
         try {
             this._moving(moveOffsetX, moveOffsetY);
         } catch (error) {
@@ -1754,10 +1576,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                 if (this._shouldSuppressHostHiddenEditorEvent(e)) {
                     return;
                 }
-                this._pendingMobileBlurEvent = null;
-                this._eventHandle(e, (config) => {
-                    this._onFocus$.next(config);
-                });
+                this._handleInputFocus(e);
             })
         );
 
@@ -1787,8 +1606,18 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         }
     }
 
+    protected _handleInputFocus(event: Event): void {
+        this._eventHandle(event, (config) => {
+            this._onFocus$.next(config);
+        });
+    }
+
     protected _handleInputBlur(event: Event): void {
         this._setEditing(false);
+        this._emitInputBlur(event);
+    }
+
+    protected _emitInputBlur(event: Event): void {
         this._eventHandle(event, (config) => {
             this._onBlur$.next(config);
         });
@@ -2017,8 +1846,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     private _detachEvent() {
-        this._mobileKeyboardState$.complete();
-        this._mobileEditMode$.complete();
         this._onInputBefore$.complete();
         this._onKeydown$.complete();
         this._onInput$.complete();

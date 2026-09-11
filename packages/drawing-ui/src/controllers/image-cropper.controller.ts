@@ -240,8 +240,6 @@ export class ImageCropperController extends Disposable {
         });
     }
 
-    protected _configureCropControls(_cropper: ImageCropperObject): void {}
-
     private _initOpenCrop() {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
@@ -299,7 +297,6 @@ export class ImageCropperController extends Disposable {
                     prstGeom: imageShape.prstGeom,
                     applyTransform: imageShape.calculateTransformWithSrcRect(),
                 });
-                this._configureCropControls(imageCropperObject);
                 this._cropSnapshots.set(imageCropperObject, this._pendingCropSnapshot ?? this._captureCropSnapshot(imageShape));
                 this._pendingCropSnapshot = null;
 

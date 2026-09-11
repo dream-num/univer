@@ -18,7 +18,6 @@ import {
     Disposable,
     ICommandService,
     IConfigService,
-    IContextService,
     Inject,
     Injector,
     IUniverInstanceService,
@@ -72,8 +71,6 @@ export class DocUIController extends Disposable {
         @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
         @IShortcutService protected readonly _shortcutService: IShortcutService,
         @IConfigService protected readonly _configService: IConfigService,
-        @IContextService protected readonly _contextService: IContextService,
-        @IRenderManagerService protected readonly _renderManagerService: IRenderManagerService,
         @Optional(IDocEmbedInteractionBoundaryService) _embedInteractionBoundaryService?: IDocEmbedInteractionBoundaryService,
         @Optional(IDocEmbedRuntimeFocusCoordinator) protected readonly _embedRuntimeFocusCoordinator?: IDocEmbedRuntimeFocusCoordinator
     ) {
@@ -82,17 +79,17 @@ export class DocUIController extends Disposable {
         this._init();
     }
 
-    protected _initUiParts() {
+    private _initUiParts() {
         this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.FOOTER, () => connectInjector(DocFooter, this._injector)));
         this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(DocSideMenu, this._injector)));
     }
 
-    protected _initMenus(): void {
+    private _initMenus(): void {
         this._menuManagerService.appendRootMenu(floatToolbarMenuSchema);
         this._menuManagerService.mergeMenu(menuSchema);
     }
 
-    protected _initShortCut() {
+    private _initShortCut() {
         [
             BoldShortCut,
             ItalicShortCut,
@@ -130,14 +127,15 @@ export class DocUIController extends Disposable {
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
-    protected _initFocusHandler(): void {
+    private _initFocusHandler(): void {
         this.disposeWithMe(
             this._layoutService.registerFocusHandler(UniverInstanceType.UNIVER_DOC, (unitId: string) => {
                 if (this._shouldPreserveEmbedFocus(unitId)) {
                     return;
                 }
 
-                const renderUnit = this._renderManagerService.getRenderUnitById(unitId);
+                const renderManagerService = this._injector.get(IRenderManagerService);
+                const renderUnit = renderManagerService.getRenderUnitById(unitId);
                 if (!renderUnit) {
                     return;
                 }

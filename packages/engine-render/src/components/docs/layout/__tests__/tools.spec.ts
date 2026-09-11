@@ -747,6 +747,15 @@ describe('docs layout tools extra', () => {
         expect(sectionConfig.evenAndOddHeaders).toBe(BooleanNumber.FALSE);
         expect(sectionConfig.useFirstPageHeaderFooter).toBe(BooleanNumber.FALSE);
 
+        const desktopSectionConfig = prepareSectionBreakConfig({
+            ...ctx,
+            modernPageWidth: undefined,
+            modernHorizontalMargin: undefined,
+        } as any, 0);
+        expect(desktopSectionConfig.pageSize?.width).toBe(800);
+        expect(desktopSectionConfig.marginLeft).toBe(30);
+        expect(desktopSectionConfig.marginRight).toBe(40);
+
         const dirtyCtx = {
             isDirty: true,
             skeleton: { drawingAnchor: new Map([['a', 1]]) },

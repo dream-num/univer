@@ -35,7 +35,6 @@ import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
-
 import { useEffect, useState } from 'react';
 
 const MIN_OFFSET = -1000;
@@ -358,5 +357,21 @@ export function useDocDrawingPosition(props: IDocDrawingPositionProps) {
         };
     }, [commandService, documentDataModel, drawingManagerService]);
 
-    return { localeService, showPanel, disabled, hPosition, vPosition, followTextMove, documentFlavor, HORIZONTAL_RELATIVE_FROM, VERTICAL_RELATIVE_FROM, handlePositionChange, handleHorizontalRelativeFromChange, handleVerticalRelativeFromChange, handleFollowTextMoveCheck, MIN_OFFSET, MAX_OFFSET };
+    return {
+        localeService,
+        showPanel,
+        disabled,
+        hPosition,
+        vPosition,
+        followTextMove,
+        documentFlavor,
+        HORIZONTAL_RELATIVE_FROM,
+        VERTICAL_RELATIVE_FROM,
+        handlePositionChange,
+        handleHorizontalRelativeFromChange,
+        handleVerticalRelativeFromChange,
+        handleFollowTextMoveCheck,
+        MIN_OFFSET,
+        MAX_OFFSET,
+    };
 }

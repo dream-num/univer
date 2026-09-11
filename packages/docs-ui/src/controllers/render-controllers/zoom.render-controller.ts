@@ -40,7 +40,6 @@ import { DocPageSetupCommand } from '../../commands/commands/doc-page-setup.comm
 import { SetDocZoomRatioCommand } from '../../commands/commands/set-doc-zoom-ratio.command';
 import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.command';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
-import { MOBILE_DOC_PINCH_ZOOMING } from '../../consts/mobile-context';
 import { IDocEmbedInteractionBoundaryService } from '../../services/doc-embed-integration.service';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
 import { DocViewScaleService } from '../../services/doc-view-scale';
@@ -93,7 +92,6 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
 
         if (!isInternalEditorID(this._context.unitId)) {
             this._initZoomEventListener();
-            this._initGestureZoom();
         }
     }
 
@@ -122,17 +120,14 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         }));
     }
 
-    private _initCommandExecutedListener() {
+    protected _initCommandExecutedListener() {
         const updateCommandList = [SetDocZoomRatioOperation.id];
 
         this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
             if (updateCommandList.includes(command.id) && (command.params as ISetDocZoomRatioOperationParams).unitId === this._context.unitId) {
                 const documentModel = this._context.unit;
                 const zoomRatio = getDocEffectiveZoomRatio(documentModel);
-                this.updateViewZoom(
-                    zoomRatio,
-                    !this._contextService.getContextValue(MOBILE_DOC_PINCH_ZOOMING)
-                );
+                this.updateViewZoom(zoomRatio);
             }
         }));
 
@@ -226,6 +221,4 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
             })
         );
     }
-
-    protected _initGestureZoom(): void {}
 }

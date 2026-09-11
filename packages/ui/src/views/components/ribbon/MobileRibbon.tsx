@@ -53,9 +53,12 @@ export function MobileRibbon(props: IMobileRibbonProps) {
     const activatedTab = useObservable(ribbonService.activatedTab$, RibbonPosition.START);
     const rootUnitType = useObservable(workbenchService.rootUnitType$, null, true);
 
-    if (rootUnitType === UniverInstanceType.UNIVER_SHEET) {
+    if (
+        rootUnitType === UniverInstanceType.UNIVER_SHEET ||
+        rootUnitType === UniverInstanceType.UNIVER_DOC
+    ) {
         return (
-            <MobileSheetTopBar
+            <MobileCompactTopBar
                 ribbon={ribbon}
                 headerMenu={headerMenu}
                 headerMenuComponents={headerMenuComponents}
@@ -110,13 +113,14 @@ function MobileRibbonToolbar(props: IMobileRibbonProps & { ribbon: IMenuSchema[]
             setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 4);
         };
 
-        updateScrollState();
+        const animationFrame = requestAnimationFrame(updateScrollState);
 
         const resizeObserver = new ResizeObserver(updateScrollState);
         resizeObserver.observe(container);
         container.addEventListener('scroll', updateScrollState, { passive: true });
 
         return () => {
+            cancelAnimationFrame(animationFrame);
             resizeObserver.disconnect();
             container.removeEventListener('scroll', updateScrollState);
         };
@@ -387,7 +391,7 @@ function MobileRibbonToolbar(props: IMobileRibbonProps & { ribbon: IMenuSchema[]
     );
 }
 
-function MobileSheetTopBar(props: IMobileRibbonProps & { ribbon: IMenuSchema[] }) {
+function MobileCompactTopBar(props: IMobileRibbonProps & { ribbon: IMenuSchema[] }) {
     const { headerMenuComponents, headerMenu = true, ribbon } = props;
     const [moreOpen, setMoreOpen] = useState(false);
     const moreTriggerRef = useRef<HTMLButtonElement>(null);
@@ -419,7 +423,7 @@ function MobileSheetTopBar(props: IMobileRibbonProps & { ribbon: IMenuSchema[] }
                 onClick={() => setMoreOpen(false)}
             />
             <div
-                data-u-comp="mobile-sheet-more-menu"
+                data-u-comp="mobile-more-menu"
                 className={clsx(`
                   univer-fixed univer-z-[1400] univer-flex univer-w-60 univer-max-w-[calc(100vw-24px)] univer-flex-col
                   univer-gap-1 univer-rounded-2xl univer-bg-gray-0 univer-p-2 univer-shadow-lg
@@ -453,7 +457,7 @@ function MobileSheetTopBar(props: IMobileRibbonProps & { ribbon: IMenuSchema[] }
     return (
         <>
             <div
-                data-u-comp="mobile-sheet-top-bar"
+                data-u-comp="mobile-compact-top-bar"
                 className={clsx(`
                   univer-flex univer-h-12 univer-items-center univer-justify-end univer-gap-1 univer-bg-gray-0
                   univer-px-3
@@ -474,22 +478,11 @@ function MobileSheetTopBar(props: IMobileRibbonProps & { ribbon: IMenuSchema[] }
                         />
                     ))}
                 </div>
-                {hasHeaderMenu && (
-                    <div
-                        className="
-                          univer-flex univer-items-center univer-gap-1
-                          [&>*]:univer-m-0 [&>*]:univer-inline-flex [&>*]:univer-min-h-10 [&>*]:univer-min-w-10
-                          [&>*]:univer-items-center [&>*]:univer-justify-center [&>*]:univer-rounded-lg
-                        "
-                    >
-                        <ComponentContainer components={headerMenuComponents!} />
-                    </div>
-                )}
                 {moreItems.length > 0 && (
                     <button
                         ref={moreTriggerRef}
                         type="button"
-                        data-u-comp="mobile-sheet-more-trigger"
+                        data-u-comp="mobile-more-trigger"
                         aria-label={localeService.t<LocaleKey>('ui.ribbon.more')}
                         aria-expanded={moreOpen}
                         className={clsx(resetButtonClassName, `
@@ -503,6 +496,17 @@ function MobileSheetTopBar(props: IMobileRibbonProps & { ribbon: IMenuSchema[] }
                     >
                         <MoreHorizontalIcon className="univer-size-5" preserveStrokeWidth />
                     </button>
+                )}
+                {hasHeaderMenu && (
+                    <div
+                        className="
+                          univer-flex univer-items-center univer-gap-1
+                          [&>*]:univer-m-0 [&>*]:univer-inline-flex [&>*]:univer-min-h-10 [&>*]:univer-min-w-10
+                          [&>*]:univer-items-center [&>*]:univer-justify-center [&>*]:univer-rounded-lg
+                        "
+                    >
+                        <ComponentContainer components={headerMenuComponents!} />
+                    </div>
                 )}
             </div>
             {moreMenu}

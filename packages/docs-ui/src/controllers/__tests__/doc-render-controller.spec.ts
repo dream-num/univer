@@ -138,6 +138,7 @@ vi.mock('../../services/selection/convert-text-range', () => ({
 
 function createControllerFixture(options?: {
     documentFlavor?: DocumentFlavor;
+    mobile?: boolean;
     fitToWidth?: {
         align?: 'center' | 'start';
         mode?: 'none' | 'fit-width';
@@ -186,6 +187,7 @@ function createControllerFixture(options?: {
     supportsIncrementalLayout?: boolean;
     engineBeginFrame$?: Subject<number>;
     sceneParent?: { width: number; height: number };
+    bottomReserve?: number;
     onWorkerStart?: (layoutInteractionService: DocLayoutInteractionService) => void;
 }) {
     mockScrollBarProps.length = 0;
@@ -335,6 +337,7 @@ function createControllerFixture(options?: {
         },
         engine: {
             beginFrame$: options?.engineBeginFrame$,
+            onTransformChange$: { subscribeEvent: vi.fn(() => ({ dispose: vi.fn() })) },
             canvasColorService,
             runRenderLoop: vi.fn(),
             stopRenderLoop: vi.fn(),
@@ -362,6 +365,7 @@ function createControllerFixture(options?: {
     const editorRenderConfig = pendingEditorRenderConfig;
     const pageLayoutService = {
         calculatePagePosition: vi.fn(),
+        resolveSceneHeight: vi.fn((height: number) => height + (options?.bottomReserve ?? 0)),
     };
     const selectionManager = {
         refreshSelection: vi.fn(),
@@ -473,6 +477,7 @@ function createControllerFixture(options?: {
         { currentTheme$, darkMode$ },
         layoutExecutorService,
         layoutInteractionService,
+        { getContextValue: vi.fn(() => options?.mobile ?? false) },
         { error: vi.fn(), warn: vi.fn() }
     );
 
@@ -2668,6 +2673,34 @@ describe('doc render controller', () => {
 
         expect(context.mainComponent?.height).toBe(18_420);
         expect(context.scene.transformByState).toHaveBeenCalledWith(expect.objectContaining({ height: 18_420 }));
+    });
+
+    it('keeps the temporary mobile bottom reserve during incremental layout publications', async () => {
+        const { commandCallbacks, context, pageLayoutService } = createControllerFixture({
+            bottomReserve: 388,
+            layoutProgress: [{
+                complete: false,
+                anchorReady: true,
+                elapsedTime: 8,
+                estimatedPageCount: 20,
+                estimatedHeight: 18_000,
+                processedBlockCount: 10,
+                totalBlockCount: 200,
+            }],
+        });
+
+        commandCallbacks[0]({
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId: 'doc-unit',
+                actions: [],
+            },
+        } satisfies ICommandInfo);
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+        expect(context.mainComponent?.height).toBe(18_420);
+        expect(pageLayoutService.resolveSceneHeight).toHaveBeenCalledWith(18_420);
+        expect(context.scene.transformByState).toHaveBeenCalledWith({ width: 640, height: 18_808 });
     });
 
     it('uses the first published page width instead of the default scene width on first open', async () => {

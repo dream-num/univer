@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'drawing-ui': {
+        mobile: { close: 'Chiudi', more: 'Altro' },
         'image-cropper': {
             error: 'Impossibile ritagliare oggetti non immagine.',
         },
@@ -88,6 +89,8 @@ const locale: typeof enUS = {
                 lock: 'Blocca proporzioni (%)',
             },
             crop: {
+                cancel: 'Annulla',
+                apply: 'Fine',
                 title: 'Ritaglia',
                 start: 'Inizia ritaglio',
                 mode: 'Libero',

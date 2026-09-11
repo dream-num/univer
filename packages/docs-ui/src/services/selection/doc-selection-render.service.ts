@@ -37,6 +37,7 @@ import type { RectRange } from './rect-range';
 import {
     DataStreamTreeTokenType,
     DOC_RANGE_TYPE,
+    IContextService,
     ILogService,
     Inject,
     isInternalEditorID,
@@ -57,11 +58,7 @@ import {
 } from '@univerjs/engine-render';
 import { ILayoutService, KeyCode } from '@univerjs/ui';
 import { BehaviorSubject, filter, fromEvent, merge, Subject, takeUntil } from 'rxjs';
-import {
-    DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
-    IDocEmbedInteractionBoundaryService,
-    IDocEmbedRuntimeFocusCoordinator,
-} from '../doc-embed-integration.service';
+import { DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../doc-embed-integration.service';
 import { compareNodePositionLogic } from './convert-text-range';
 import {
     getCanvasOffsetByEngine,
@@ -126,26 +123,26 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private readonly _onPointerDown$ = new Subject<void>();
     readonly onPointerDown$ = this._onPointerDown$.asObservable();
 
-    private _container!: HTMLDivElement;
+    protected _container!: HTMLDivElement;
     private _inputParent!: HTMLDivElement;
     private _input!: HTMLDivElement;
     private _scrollTimers: ScrollTimer[] = [];
-    private _rangeList: TextRange[] = [];
+    protected _rangeList: TextRange[] = [];
     // Use to cache range list in moving.
-    private _rangeListCache: TextRange[] = [];
+    protected _rangeListCache: TextRange[] = [];
     // Rect range list.
     private _rectRangeList: RectRange[] = [];
     // Use to cache rect range list in moving.
-    private _rectRangeListCache: RectRange[] = [];
-    private _anchorNodePosition: Nullable<INodePosition> = null;
-    private _focusNodePosition: Nullable<INodePosition> = null;
+    protected _rectRangeListCache: RectRange[] = [];
+    protected _anchorNodePosition: Nullable<INodePosition> = null;
+    protected _focusNodePosition: Nullable<INodePosition> = null;
 
     private _currentSegmentId: string = '';
     private _currentSegmentPage: number = -1;
     private readonly _segmentContext$ = new BehaviorSubject({ segmentId: '', segmentPage: -1 });
     readonly segmentContext$ = this._segmentContext$.asObservable();
     private _selectionStyle: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE;
-    private _onPointerEvent = false;
+    protected _onPointerEvent = false;
 
     private _viewPortObserverMap = new Map<
         string,
@@ -172,6 +169,10 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     get isFocusing() {
         return this._input === this._getOwnerDocument().activeElement;
+    }
+
+    get isEditing() {
+        return this._textSelectionInner$.value?.isEditing === true;
     }
 
     get canFocusing() {
@@ -204,9 +205,10 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     constructor(
-        private readonly _context: IRenderContext<DocumentDataModel>,
+        protected readonly _context: IRenderContext<DocumentDataModel>,
         @ILayoutService private readonly _layoutService: ILayoutService,
         @ILogService private readonly _logService: ILogService,
+        @IContextService private readonly _contextService: IContextService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
@@ -524,9 +526,15 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         return true;
     }
 
-    setCursorManually(evtOffsetX: number, evtOffsetY: number) {
+    setCursorManually(
+        evtOffsetX: number,
+        evtOffsetY: number,
+        isEditing = false,
+        shouldFocusInput = false,
+        options?: { strict?: boolean }
+    ) {
         const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY, {
-            strict: true,
+            strict: options?.strict ?? true,
             segmentId: this._currentSegmentId,
             segmentPage: this._currentSegmentPage,
         });
@@ -551,8 +559,12 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             segmentId: this._currentSegmentId,
             segmentPage: this._currentSegmentPage,
             style: this._selectionStyle,
-            isEditing: false,
+            isEditing,
         });
+
+        if (shouldFocusInput) {
+            this._updateInputPosition({ forceFocus: true });
+        }
     }
 
     // Sync canvas selection to dom selection.
@@ -572,22 +584,13 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         }
     }
 
-    private _positionInput(x: number, y: number) {
-        // Keep the hidden editor inside the Portal subtree when possible to avoid focus-trap loops,
-        // then compensate coordinates if a transformed ancestor changes the fixed containing block.
+    protected _positionInput(x: number, y: number) {
         this._ensureHostContainer();
         this._container.style.position = 'fixed';
-        let left = x;
-        let top = y;
         const fixedContainer = this._container.offsetParent;
-        if (fixedContainer) {
-            const rect = fixedContainer.getBoundingClientRect();
-            left -= rect.left;
-            top -= rect.top;
-        }
-
-        this._container.style.left = `${left}px`;
-        this._container.style.top = `${top}px`;
+        const rect = fixedContainer?.getBoundingClientRect();
+        this._container.style.left = `${x - (rect?.left ?? 0)}px`;
+        this._container.style.top = `${y - (rect?.top ?? 0)}px`;
         this._container.style.zIndex = '1000';
     }
 
@@ -613,7 +616,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     // Handler double click.
-    __handleDblClick(evt: IPointerEvent | IMouseEvent) {
+    __handleDblClick(evt: IPointerEvent | IMouseEvent, isEditing = false, shouldFocusInput = true) {
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
         const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY, {
@@ -648,7 +651,10 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                 },
             ];
 
-            this.addDocRanges(textRanges, false, { forceFocus: true });
+            this.addDocRanges(textRanges, isEditing, {
+                forceFocus: shouldFocusInput,
+                shouldFocus: shouldFocusInput,
+            });
         }
     }
 
@@ -686,7 +692,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     // Handle pointer down.
     // eslint-disable-next-line max-lines-per-function, complexity
-    __onPointDown(evt: IPointerEvent | IMouseEvent) {
+    __onPointDown(evt: IPointerEvent | IMouseEvent, shouldFocusInput = true) {
         const { scene, mainComponent } = this._context;
         const skeleton = this._docSkeletonManagerService.getSkeleton();
 
@@ -816,20 +822,12 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             this._anchorNodePosition = null;
             this._focusNodePosition = null;
 
-            const selectionInfo = {
-                textRanges: this._getAllTextRanges(),
-                rectRanges: this._getAllRectRanges(),
-                segmentId: this._currentSegmentId,
-                segmentPage: this._currentSegmentPage,
-                style: this._selectionStyle,
-                isEditing: false,
-            };
-
-            this._textSelectionInner$.next(selectionInfo);
+            this._emitCurrentSelection(false);
 
             this._disposeScrollTimers();
-
-            this._updateInputPosition({ forceFocus: true });
+            if (shouldFocusInput) {
+                this._updateInputPosition({ forceFocus: true });
+            }
         }));
     }
 
@@ -844,6 +842,21 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this.blur();
     }
 
+    enterEditing(): boolean {
+        if (!this._getActiveRangeInstance()) {
+            return false;
+        }
+
+        this._setEditing(true);
+        this._updateInputPosition({ forceFocus: true });
+        return true;
+    }
+
+    exitEditing(): void {
+        this._setEditing(false);
+        this.blur();
+    }
+
     removeAllRanges() {
         this._pendingSelection = null;
         this._removeAllRanges();
@@ -852,6 +865,29 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     getActiveTextRange() {
         return this._getActiveRangeInstance();
+    }
+
+    protected _setEditing(isEditing: boolean): void {
+        const selection = this._textSelectionInner$.value;
+        if (!selection || selection.isEditing === isEditing) {
+            return;
+        }
+
+        this._textSelectionInner$.next({
+            ...selection,
+            isEditing,
+        });
+    }
+
+    protected _emitCurrentSelection(isEditing: boolean): void {
+        this._textSelectionInner$.next({
+            textRanges: this._getAllTextRanges(),
+            rectRanges: this._getAllRectRanges(),
+            segmentId: this._currentSegmentId,
+            segmentPage: this._currentSegmentPage,
+            style: this._selectionStyle,
+            isEditing,
+        });
     }
 
     private _disposeScrollTimers() {
@@ -864,7 +900,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     private _setSystemHighlightColorToStyle() {
         const { r, g, b, a } = getSystemHighlightColor();
-
         // Only set selection use highlight color.
         const style: ITextSelectionStyle = {
             strokeWidth: 1,
@@ -908,7 +943,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         return serializeTextRange(activeRange);
     }
 
-    private _getActiveRangeInstance() {
+    protected _getActiveRangeInstance() {
         return this._rangeList.find((range) => range.isActive());
     }
 
@@ -981,7 +1016,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         `;
     }
 
-    private _ensureHostContainer(): void {
+    protected _ensureHostContainer(): void {
         // Prefer the Univer root container (often inside a Portal) so focus stays within the modal subtree.
         const host = this._layoutService.rootContainerElement;
         if (host?.isConnected) {
@@ -1062,7 +1097,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._removeAllRectRanges();
     }
 
-    private _removeAllCacheRanges() {
+    protected _removeAllCacheRanges() {
         this._rangeListCache.forEach((range) => {
             range.dispose();
         });
@@ -1132,7 +1167,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._rangeListCache.push(...textRanges);
     }
 
-    private _addTextRange(textRange: TextRange) {
+    protected _addTextRange(textRange: TextRange) {
         this._deactivateAllTextRanges();
         textRange.activate();
 
@@ -1143,7 +1178,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._rectRangeListCache.push(...rectRanges);
     }
 
-    private _addRectRanges(rectRanges: RectRange[]) {
+    protected _addRectRanges(rectRanges: RectRange[]) {
         if (rectRanges.length === 0) {
             return;
         }
@@ -1223,7 +1258,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         return getCanvasOffsetByEngine(engine);
     }
 
-    private _updateInputPosition({ forceFocus = false, preserveFocus = false } = {}) {
+    protected _updateInputPosition({ forceFocus = false, preserveFocus = false } = {}) {
         const activeRangeInstance = this._getActiveRangeInstance();
         const anchor = activeRangeInstance?.getAnchor();
 
@@ -1254,7 +1289,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         }
     }
 
-    private _tryMoving(moveOffsetX: number, moveOffsetY: number) {
+    protected _tryMoving(moveOffsetX: number, moveOffsetY: number) {
         try {
             this._moving(moveOffsetX, moveOffsetY);
         } catch (error) {
@@ -1541,9 +1576,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                 if (this._shouldSuppressHostHiddenEditorEvent(e)) {
                     return;
                 }
-                this._eventHandle(e, (config) => {
-                    this._onFocus$.next(config);
-                });
+                this._handleInputFocus(e);
             })
         );
 
@@ -1560,9 +1593,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                 if (this._shouldSuppressHostHiddenEditorEvent(e)) {
                     return;
                 }
-                this._eventHandle(e, (config) => {
-                    this._onBlur$.next(config);
-                });
+                this._handleInputBlur(e);
             })
         );
     }
@@ -1573,6 +1604,23 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             config.activeRange = this._getActiveRange();
             config.rangeList = this._getAllTextRanges();
         }
+    }
+
+    protected _handleInputFocus(event: Event): void {
+        this._eventHandle(event, (config) => {
+            this._onFocus$.next(config);
+        });
+    }
+
+    protected _handleInputBlur(event: Event): void {
+        this._setEditing(false);
+        this._emitInputBlur(event);
+    }
+
+    protected _emitInputBlur(event: Event): void {
+        this._eventHandle(event, (config) => {
+            this._onBlur$.next(config);
+        });
     }
 
     private _eventHandle(

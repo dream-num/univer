@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'drawing-ui': {
+        mobile: { close: 'Tutup', more: 'Lebih Banyak' },
         'image-cropper': {
             error: 'Tidak dapat memangkas objek non-gambar.',
         },
@@ -88,6 +89,8 @@ const locale: typeof enUS = {
                 lock: 'Kunci Rasio (%)',
             },
             crop: {
+                cancel: 'Batal',
+                apply: 'Selesai',
                 title: 'Pangkas',
                 start: 'Mulai Pangkas',
                 mode: 'Bebas',

@@ -20,15 +20,17 @@ import type { IDisposable, IDocumentData, ITextRangeParam } from '@univerjs/core
 import type { Mock } from 'vitest';
 import {
     DataStreamTreeTokenType,
+    DisposableCollection,
     DOC_RANGE_TYPE,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentDataModel,
     DocumentFlavor,
+    EventSubject,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocLayoutExecutorService, DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { GlyphType, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, RenderUnit } from '@univerjs/engine-render';
+import { DeviceType, GlyphType, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PointerInput, RenderUnit } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
@@ -36,6 +38,7 @@ import {
     EmbedInteractionBoundaryService,
     EmbedRuntimeFocusCoordinator,
 } from '../../doc-embed-integration.service';
+import { MobileDocSelectionRenderService } from '../../mobile/doc-selection-render.service';
 import { DocSelectionRenderService } from '../doc-selection-render.service';
 import { TextRange } from '../text-range';
 
@@ -46,6 +49,7 @@ const {
     getRangeListFromSelectionMock,
     getRectRangeFromCharIndexMock,
     getTextRangeFromCharIndexMock,
+    mobileSelectionVisualsMock,
 } = vi.hoisted(() => ({
     cursorConvertToTextRangeMock: vi.fn(),
     getCanvasOffsetByEngineMock: vi.fn(),
@@ -53,6 +57,19 @@ const {
     getRangeListFromSelectionMock: vi.fn(),
     getRectRangeFromCharIndexMock: vi.fn(),
     getTextRangeFromCharIndexMock: vi.fn(),
+    mobileSelectionVisualsMock: {
+        dispose: vi.fn(),
+        hide: vi.fn(),
+        show: vi.fn(),
+    },
+}));
+
+vi.mock('../../mobile/mobile-text-selection-visuals', () => ({
+    MobileTextSelectionVisuals: class {
+        dispose = mobileSelectionVisualsMock.dispose;
+        hide = mobileSelectionVisualsMock.hide;
+        show = mobileSelectionVisualsMock.show;
+    },
 }));
 
 vi.mock('../selection-utils', async () => {
@@ -79,13 +96,22 @@ vi.mock('../text-range', async () => {
 
 type VoidMock = Mock<() => void>;
 type BooleanMock = Mock<() => boolean>;
-type AnchorMock = Mock<() => { left: number; top: number; visible: boolean } | null>;
+interface IFakeAnchor {
+    hide: VoidMock;
+    left: number;
+    show: VoidMock;
+    top: number;
+    visible: boolean;
+}
+
+type AnchorMock = Mock<() => IFakeAnchor | null>;
 type IntersectionMock = Mock<(range: unknown) => boolean>;
 
 interface IFakeTextRange {
     activate: VoidMock;
     deactivate: VoidMock;
     dispose: VoidMock;
+    refresh: VoidMock;
     getAnchor: AnchorMock;
     isActive: BooleanMock;
     isIntersection: IntersectionMock;
@@ -118,7 +144,8 @@ interface IServiceHarness {
     _scenePointerUpSubs: Array<{ unsubscribe: VoidMock }>;
     _scrollTimers: Array<{ dispose: VoidMock }>;
     _selectionStyle: { strokeWidth: number };
-    _textSelectionInner$: { next: Mock<(...args: unknown[]) => void> };
+    _textSelectionInner$: { next: Mock<(...args: unknown[]) => void>; value: { isEditing: boolean } | null };
+    _contextService: { getContextValue: Mock<() => boolean> };
     focus: Mock<() => void>;
     _getAllTextRanges: Mock<() => string[]>;
     _getAllRectRanges: Mock<() => string[]>;
@@ -139,6 +166,7 @@ interface IServiceHarness {
     _moving(moveOffsetX: number, moveOffsetY: number): void;
     _isAnotherEditorFocused: Mock<() => boolean>;
     _updateInputPosition(): void;
+    refreshRanges(): void;
     addDocRanges(ranges: Array<Record<string, unknown>>, isEditing?: boolean, options?: Record<string, boolean>): void;
     cancelPointerSelection(): void;
     replaceDocRanges(ranges: Array<Record<string, unknown>>, isEditing?: boolean, options?: Record<string, boolean>): boolean;
@@ -146,11 +174,13 @@ interface IServiceHarness {
 }
 
 function createTextRange(overrides: Partial<IFakeTextRange> = {}): IFakeTextRange {
+    const anchor = { hide: vi.fn(), left: 12, show: vi.fn(), top: 34, visible: true };
     return {
         activate: vi.fn(),
         deactivate: vi.fn(),
         dispose: vi.fn(),
-        getAnchor: vi.fn(() => ({ left: 12, top: 34, visible: true })),
+        refresh: vi.fn(),
+        getAnchor: vi.fn(() => anchor),
         isActive: vi.fn(() => false),
         isIntersection: vi.fn(() => false),
         collapsed: false,
@@ -189,6 +219,8 @@ function createService() {
         _scrollTimers: [],
         _onPointerEvent: false,
         _selectionStyle: { strokeWidth: 1 },
+        _mobileSelectionHandleColor: '#0f6bdc',
+        _mobileHandleDragDisposables: new DisposableCollection(),
         _currentSegmentId: 'segment-1',
         _currentSegmentPage: 2,
         _context: {
@@ -203,11 +235,15 @@ function createService() {
         _docSkeletonManagerService: {
             getSkeleton: vi.fn(() => skeleton),
         },
+        _contextService: {
+            getContextValue: vi.fn(() => false),
+        },
         _logService: {
             error: vi.fn(),
         },
         _textSelectionInner$: {
             next: vi.fn(),
+            value: { isEditing: false },
         },
         _getAllTextRanges: vi.fn(() => ['serialized-text']),
         _getAllRectRanges: vi.fn(() => ['serialized-rect']),
@@ -313,7 +349,9 @@ function createRealSelectionRenderService(options: {
     embedInteractionBoundaryService?: Partial<EmbedInteractionBoundaryService>;
     embedRuntimeFocusCoordinator?: EmbedRuntimeFocusCoordinator;
     mainComponent?: unknown;
+    mobile?: boolean;
     scene?: unknown;
+    unitId?: string;
 } = {}) {
     TestLayoutService.reset();
     TestDocSkeletonManagerService.reset();
@@ -328,7 +366,7 @@ function createRealSelectionRenderService(options: {
         injector.add([EmbedRuntimeFocusCoordinator, { useValue: options.embedRuntimeFocusCoordinator }]);
     }
     const documentData: IDocumentData = options.documentData ?? {
-        id: 'selection-render-doc',
+        id: options.unitId ?? 'selection-render-doc',
         body: {
             dataStream: 'Hello\r\n',
             paragraphs: [{ paragraphId: 'para_docs_ui_selection_fixture_1', startIndex: 5 }],
@@ -351,11 +389,11 @@ function createRealSelectionRenderService(options: {
     }
     renderUnit.addRenderDependencies([
         [DocSkeletonManagerService, { useClass: TestDocSkeletonManagerService as never }],
-        DocSelectionRenderService,
+        [DocSelectionRenderService, { useClass: options.mobile ? MobileDocSelectionRenderService : DocSelectionRenderService }],
     ] as never);
 
     return {
-        input: document.getElementById('__editor_selection-render-doc') as HTMLDivElement,
+        input: document.getElementById(`__editor_${documentData.id}`) as HTMLDivElement,
         renderUnit,
         service: renderUnit.with(DocSelectionRenderService),
         univer,
@@ -1427,6 +1465,131 @@ describe('DocSelectionRenderService', () => {
         expect(received).toEqual([{ start: 1, end: 3 }]);
     });
 
+    it.each([
+        { mobile: false, unitId: 'selection-render-doc' },
+        { mobile: true, unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY },
+    ])('preserves automatic input focus outside mobile standalone docs ($mobile, $unitId)', (options) => {
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService(options);
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        const focus = vi.spyOn(input, 'focus');
+        cleanup.push(() => focus.mockRestore());
+
+        service.sync();
+
+        expect(focus).toHaveBeenCalledOnce();
+        expect(service.isFocusing).toBe(true);
+    });
+
+    it('does not reopen the mobile keyboard when formatting refreshes a blurred selection', () => {
+        const { input, renderUnit, service: selectionService, univer } = createRealSelectionRenderService({ mobile: true });
+        const service = selectionService as MobileDocSelectionRenderService;
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        service.enterMobileEditMode();
+        service.focus();
+        service.suspendMobileEditingInput();
+        const focus = vi.spyOn(input, 'focus');
+        cleanup.push(() => focus.mockRestore());
+
+        for (let cycle = 0; cycle < 5; cycle++) {
+            service.replaceDocRanges([], true);
+            service.sync();
+        }
+
+        expect(focus).not.toHaveBeenCalled();
+        expect(service.isMobileEditMode).toBe(true);
+        expect(service.isFocusing).toBe(false);
+
+        service.activate(0, 0, true);
+        expect(focus).toHaveBeenCalledOnce();
+        expect(service.isFocusing).toBe(true);
+        focus.mockClear();
+        service.sync();
+        expect(service.isFocusing).toBe(true);
+        expect(focus).not.toHaveBeenCalled();
+    });
+
+    it('keeps mobile edit mode active without closing a newly focused keyboard', () => {
+        const originalVisualViewport = window.visualViewport;
+        const viewportTarget = new EventTarget();
+        const visualViewport = Object.assign(viewportTarget, {
+            height: 900,
+            offsetTop: 0,
+            offsetLeft: 0,
+            width: 430,
+        });
+        Object.defineProperty(window, 'visualViewport', {
+            configurable: true,
+            value: visualViewport,
+        });
+        cleanup.push(() => Object.defineProperty(window, 'visualViewport', {
+            configurable: true,
+            value: originalVisualViewport,
+        }));
+
+        const { renderUnit, service: selectionService, univer } = createRealSelectionRenderService({
+            mobile: true,
+        });
+        const service = selectionService as MobileDocSelectionRenderService;
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        const blurEvents: Event[] = [];
+        const keyboardVisibility: boolean[] = [];
+        const blurSubscription = service.onBlur$.subscribe((config) => blurEvents.push(config.event));
+        const keyboardSubscription = service.mobileKeyboardVisible$.subscribe((visible) => keyboardVisibility.push(visible));
+        cleanup.push(() => blurSubscription.unsubscribe(), () => keyboardSubscription.unsubscribe());
+
+        service.replaceDocRanges([], true);
+        service.enterMobileEditMode();
+        service.focus();
+        visualViewport.height = 500;
+        viewportTarget.dispatchEvent(new Event('resize'));
+        service.suspendMobileEditingInput();
+
+        expect(service.isEditing).toBe(true);
+        expect(blurEvents).toEqual([]);
+        expect(keyboardVisibility).toEqual([false, true]);
+
+        visualViewport.height = 900;
+        viewportTarget.dispatchEvent(new Event('resize'));
+
+        expect(service.isEditing).toBe(true);
+        expect(service.isMobileEditMode).toBe(true);
+        expect(blurEvents).toHaveLength(1);
+        expect(keyboardVisibility).toEqual([false, true, false]);
+
+        for (let cycle = 0; cycle < 5; cycle++) {
+            service.focus();
+            visualViewport.height = 500;
+            visualViewport.offsetTop = cycle % 2 === 0 ? 0 : 100;
+            viewportTarget.dispatchEvent(new Event('resize'));
+            visualViewport.height = cycle % 2 === 0 ? 880 : 900;
+            visualViewport.offsetTop = 0;
+            viewportTarget.dispatchEvent(new Event('resize'));
+        }
+
+        expect(service.isFocusing).toBe(true);
+        expect(blurEvents).toHaveLength(1);
+        expect(keyboardVisibility).toEqual([
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+        ]);
+
+        service.exitMobileEditMode();
+
+        expect(service.isEditing).toBe(false);
+        expect(service.isMobileEditMode).toBe(false);
+    });
+
     it('does not publish host hidden editor events while a child session owns the host document', () => {
         const focusCoordinator = new EmbedRuntimeFocusCoordinator();
         const { input, renderUnit, service, univer } = createRealSelectionRenderService({
@@ -1531,11 +1694,14 @@ describe('DocSelectionRenderService', () => {
 
         input.textContent = '拼';
         input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true, data: '拼' }));
+        expect(input.textContent).toBe('拼');
         input.textContent = 'pin';
         input.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'p' }));
         input.dispatchEvent(new CompositionEvent('compositionupdate', { bubbles: true, data: '拼' }));
+        expect(input.textContent).toBe('pin');
         input.textContent = '拼';
         input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: '拼' }));
+        expect(input.textContent).toBe('');
         input.textContent = 'done';
         input.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }));
 
@@ -1737,6 +1903,82 @@ describe('DocSelectionRenderService', () => {
         expect(container.style.top).toBe('-153px');
     });
 
+    it('parks the mobile hidden editor inside the visual viewport instead of moving it to the canvas caret', () => {
+        const originalVisualViewport = window.visualViewport;
+        const viewportEvents = new EventTarget();
+        Object.defineProperty(window, 'visualViewport', {
+            configurable: true,
+            value: {
+                addEventListener: viewportEvents.addEventListener.bind(viewportEvents),
+                removeEventListener: viewportEvents.removeEventListener.bind(viewportEvents),
+                height: 700,
+                width: 430,
+                offsetLeft: 5,
+                offsetTop: 120,
+            },
+        });
+        const { renderUnit, service, univer } = createRealSelectionRenderService({ mobile: true });
+        cleanup.push(
+            () => Object.defineProperty(window, 'visualViewport', {
+                configurable: true,
+                value: originalVisualViewport,
+            }),
+            () => renderUnit.dispose(),
+            () => univer.dispose()
+        );
+
+        service.activate(350, 470);
+
+        const container = document.getElementById('univer-doc-selection-container-selection-render-doc')!;
+        expect(container.style.left).toBe('6px');
+        expect(container.style.top).toBe('121px');
+    });
+
+    it('does not apply the visual viewport offset twice inside a fixed containing block', () => {
+        const originalVisualViewport = window.visualViewport;
+        const viewportEvents = new EventTarget();
+        const visualViewport = Object.assign(viewportEvents, {
+            height: 900,
+            width: 430,
+            offsetLeft: 0,
+            offsetTop: 0,
+        });
+        Object.defineProperty(window, 'visualViewport', {
+            configurable: true,
+            value: visualViewport,
+        });
+        const { renderUnit, service, univer } = createRealSelectionRenderService({ mobile: true });
+        cleanup.push(
+            () => Object.defineProperty(window, 'visualViewport', {
+                configurable: true,
+                value: originalVisualViewport,
+            }),
+            () => renderUnit.dispose(),
+            () => univer.dispose()
+        );
+        const container = document.getElementById('univer-doc-selection-container-selection-render-doc')!;
+        vi.spyOn(container, 'offsetParent', 'get').mockReturnValue(TestLayoutService.root);
+        vi.spyOn(TestLayoutService.root, 'getBoundingClientRect').mockImplementation(() => ({
+            left: 0,
+            top: -visualViewport.offsetTop,
+        } as DOMRect));
+
+        for (let cycle = 0; cycle < 5; cycle++) {
+            visualViewport.height = 500;
+            visualViewport.offsetTop = 120;
+            viewportEvents.dispatchEvent(new Event('resize'));
+            service.activate(350, 470);
+            expect(container.style.left).toBe('1px');
+            expect(container.style.top).toBe('121px');
+
+            visualViewport.height = 900;
+            visualViewport.offsetTop = 0;
+            viewportEvents.dispatchEvent(new Event('resize'));
+            service.activate(350, 470);
+            expect(container.style.top).toBe('1px');
+        }
+    });
+
     it.each(['editor', 'button', 'input'] as const)('updates the caret position after scrolling without moving focus from the %s', (target) => {
         getCanvasOffsetByEngineMock.mockReturnValue({ left: 1, top: 2 });
         const scrollAfter$ = new TestRenderEvent<{ viewport: unknown }>();
@@ -1871,7 +2113,8 @@ describe('DocSelectionRenderService', () => {
         });
         cleanup.push(() => subscription.unsubscribe());
 
-        service.__onPointDown({ offsetX: 10, offsetY: 10, button: 0 } as never);
+        service.blur();
+        service.__onPointDown({ offsetX: 10, offsetY: 10, button: 0 } as never, false);
         pointerMove$.emit({ offsetX: 20, offsetY: 20 });
         pointerUp$.emit({});
 
@@ -1880,6 +2123,76 @@ describe('DocSelectionRenderService', () => {
         expect(clearSelectedObjects).toHaveBeenCalledTimes(1);
         expect(setCursor).toHaveBeenCalledWith('text');
         expect(selections.at(-1)).toBe('2:6');
+        expect(service.isFocusing).toBe(false);
+    });
+
+    it.each(['cancel', 'dispose'])('releases mobile handle events and scroll ownership on %s', (reason) => {
+        const pointerMove$ = new EventSubject<MouseEvent>();
+        const pointerUp$ = new EventSubject<MouseEvent>();
+        const pointerCancel$ = new EventSubject<MouseEvent>();
+        const enableObjectsEvent = vi.fn();
+        const scene = {
+            getViewports: () => [],
+            getEngine: () => null,
+            findViewportByPosToScene: () => null,
+            disableObjectsEvent: vi.fn(),
+            enableObjectsEvent,
+            onPointerMove$: pointerMove$,
+            onPointerUp$: pointerUp$,
+            onPointerCancel$: pointerCancel$,
+        };
+        const { renderUnit, service, univer } = createRealSelectionRenderService({ mainComponent: {}, scene, mobile: true });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        const node = { page: 0, section: 0, column: 0, line: 0, divide: 0, glyph: 0, isBack: true };
+        const range = {
+            ...createTextRange({ isActive: vi.fn(() => true) }),
+            startOffset: 0,
+            endOffset: 3,
+            startNodePosition: node,
+            endNodePosition: { ...node, glyph: 3 },
+        };
+        getRangeListFromCharIndexMock.mockReturnValue({ textRanges: [range], rectRanges: [] });
+        service.addDocRanges([{ startOffset: 0, endOffset: 3 }], false, { shouldFocus: false });
+        const handlePointerDown = mobileSelectionVisualsMock.show.mock.calls[0]?.[4];
+        if (!handlePointerDown) {
+            throw new Error('The mobile selection did not expose its handles');
+        }
+        const event = Object.assign(new MouseEvent('pointerdown', { clientX: 10, clientY: 10 }), {
+            deviceType: DeviceType.Touch,
+            inputIndex: PointerInput.LeftClick,
+            currentState: null,
+            previousState: null,
+        });
+        handlePointerDown('end', event);
+        expect(scene.disableObjectsEvent).toHaveBeenCalledOnce();
+        expect(pointerMove$.observed).toBe(true);
+        if (reason === 'cancel') {
+            pointerCancel$.emitEvent(event);
+            expect(mobileSelectionVisualsMock.show).toHaveBeenCalledTimes(2);
+        } else {
+            renderUnit.dispose();
+        }
+        expect(enableObjectsEvent).toHaveBeenCalledOnce();
+        expect(pointerMove$.observed).toBe(false);
+        expect(pointerUp$.observed).toBe(false);
+        expect(pointerCancel$.observed).toBe(false);
+    });
+
+    it('shows mobile range controls only for the active non-editing selection', () => {
+        const { service, renderUnit, univer } = createRealSelectionRenderService({ mainComponent: {}, mobile: true });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        const inactiveRange = createTextRange({ collapsed: false });
+        const activeRange = createTextRange({ collapsed: false, isActive: vi.fn(() => true) });
+        const inactiveAnchor = inactiveRange.getAnchor();
+        const activeAnchor = activeRange.getAnchor();
+        getRangeListFromCharIndexMock.mockReturnValue({ textRanges: [inactiveRange, activeRange], rectRanges: [] });
+        service.addDocRanges([{ startOffset: 0, endOffset: 3 }], false, { shouldFocus: false });
+        expect(inactiveAnchor?.hide).toHaveBeenCalled();
+        expect(activeAnchor?.hide).toHaveBeenCalled();
+        expect(mobileSelectionVisualsMock.show).toHaveBeenCalled();
+        service.addDocRanges([{ startOffset: 0, endOffset: 3 }], true, { shouldFocus: false });
+        expect(activeAnchor?.show).toHaveBeenCalled();
+        expect(mobileSelectionVisualsMock.hide).toHaveBeenCalled();
     });
 
     it('places the manual cursor from transformed document coordinates', () => {
@@ -1959,5 +2272,19 @@ describe('DocSelectionRenderService', () => {
             segmentId: 'header-1',
             segmentPage: 2,
         });
+
+        findNodeByCoord.mockClear();
+        service.setCursorManually(12, 18, true, false, { strict: false });
+        expect(findNodeByCoord).toHaveBeenCalledWith(
+            transformedPoint,
+            0,
+            9,
+            11,
+            {
+                strict: false,
+                segmentId: 'header-1',
+                segmentPage: 2,
+            }
+        );
     });
 });

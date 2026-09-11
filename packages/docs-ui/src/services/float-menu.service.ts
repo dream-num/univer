@@ -31,6 +31,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { canEditDocumentTargets, DocSelectionManagerService, getDocumentEditTargetObjectIds } from '@univerjs/docs';
+import { IContextMenuService } from '@univerjs/ui';
 import { FLOAT_MENU_COMPONENT_KEY } from '../views/float-toolbar/FloatToolbar';
 import { IDocEmbedRuntimeFocusCoordinator } from './doc-embed-integration.service';
 import { DocLayoutInteractionService } from './doc-layout-interaction.service';
@@ -43,7 +44,7 @@ const SKIP_SYMBOLS: string[] = [
 ];
 
 export class DocFloatMenuService extends Disposable implements IRenderModule {
-    private _floatMenu: Nullable<{ disposable: IDisposable; start: number; end: number; segmentId: string }> = null;
+    protected _floatMenu: Nullable<{ disposable: IDisposable; start: number; end: number; segmentId: string }> = null;
     private _suppressed = false;
     private _embedSuppressed = false;
     private _invalidatedSelection: Nullable<string> = null;
@@ -51,10 +52,11 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
     constructor(
         private _context: IRenderContext<DocumentDataModel>,
         @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
-        @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopManagerService: DocCanvasPopManagerService,
+        @Inject(DocCanvasPopManagerService) protected readonly _docCanvasPopManagerService: DocCanvasPopManagerService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @IContextService private readonly _contextService: IContextService,
+        @IContextMenuService protected readonly _contextMenuService: IContextMenuService,
         @IPermissionService private readonly _permissionService: IPermissionService,
         @Inject(DocLayoutInteractionService) private readonly _docLayoutInteractionService: DocLayoutInteractionService,
         @Optional(IDocEmbedRuntimeFocusCoordinator) private readonly _embedRuntimeFocusCoordinator?: IDocEmbedRuntimeFocusCoordinator
@@ -226,6 +228,11 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
             return;
         }
 
+        return this._openSelectionMenu(unitId, range);
+    }
+
+    protected _openSelectionMenu(unitId: string, range: ITextRangeParam): IDisposable | undefined {
+        const segmentId = range.segmentId ?? '';
         const popup = this._docCanvasPopManagerService.attachPopupToRange(
             range,
             {

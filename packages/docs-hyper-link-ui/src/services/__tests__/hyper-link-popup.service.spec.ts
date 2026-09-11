@@ -16,6 +16,7 @@
 
 import {
     IPermissionService,
+    toDisposable,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -23,6 +24,8 @@ import { DocSelectionManagerService, setDocumentPermissionValue } from '@univerj
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
+import { IDialogService } from '@univerjs/ui';
+import { of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { DocHyperLinkPopupService } from '../hyper-link-popup.service';
 
@@ -42,6 +45,14 @@ const CapturingDocCanvasPopManagerServiceCtor = CapturingDocCanvasPopManagerServ
 function createService() {
     const univer = new Univer();
     const injector = univer.__getInjector();
+    injector.add([IDialogService, {
+        useValue: {
+            close: () => {},
+            closeAll: () => {},
+            getDialogs$: () => of([]),
+            open: () => toDisposable(() => {}),
+        },
+    }]);
     injector.add([DocCanvasPopManagerService, { useClass: CapturingDocCanvasPopManagerServiceCtor }]);
     injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
     injector.add([DocSelectionManagerService]);

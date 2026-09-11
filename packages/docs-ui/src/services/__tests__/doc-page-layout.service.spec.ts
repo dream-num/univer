@@ -200,6 +200,29 @@ describe('DocPageLayoutService', () => {
         expect(scene.viewport.scrollX).toBe(0);
     });
 
+    it('adds and removes temporary bottom scroll reserve without changing document placement', () => {
+        const { documentComponent, scene, service } = createLayoutService({
+            documentWidth: 600,
+            documentHeight: 900,
+            pageMarginLeft: 40,
+            pageMarginTop: 20,
+            engineWidth: 500,
+            engineHeight: 800,
+        });
+
+        service.calculatePagePosition();
+        service.setBottomReserve(300);
+
+        expect(documentComponent.left).toBe(40);
+        expect(documentComponent.top).toBe(20);
+        expect(service.resolveSceneHeight(940)).toBe(1240);
+        expect(scene.height).toBe(1240);
+
+        service.setBottomReserve(0);
+
+        expect(scene.height).toBe(940);
+    });
+
     it('uses fit-width start alignment padding instead of centering the page', () => {
         TestDocViewScaleService.viewScale = 2;
         TestDocViewScaleService.availableWidth = 1000;

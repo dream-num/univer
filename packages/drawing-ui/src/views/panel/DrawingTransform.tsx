@@ -343,8 +343,11 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
     });
 
     const handleLockRatioChange = (val: string | number | boolean) => {
-        setLockRatio(val as boolean);
-        transformer.keepRatio = val as boolean;
+        if (typeof val !== 'boolean') {
+            return;
+        }
+        setLockRatio(val);
+        transformer.keepRatio = val;
     };
 
     return (

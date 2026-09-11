@@ -260,6 +260,13 @@ export class Editor extends Disposable implements IEditor {
             this._univerInstanceService.setCurrentUnitForType(editorUnitId);
         }
 
+        // Newly mounted inputs can receive focus before their first layout is published.
+        // Establish a logical caret without replacing an existing selection.
+        if (isInternalEditorID(editorUnitId) && this.getSelectionRanges().length === 0) {
+            const offset = Math.max(0, (this.getDocumentData().body?.dataStream.length ?? 2) - 2);
+            this.setSelectionRanges([{ startOffset: offset, endOffset: offset }], false);
+        }
+
         // Step 2: Focus this input element.
         const docSelectionRenderService = this._param.render.with(DocSelectionRenderService);
         docSelectionRenderService.focus();

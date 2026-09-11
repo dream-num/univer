@@ -77,6 +77,7 @@ export { MobileDropdownMenu } from './components/dropdown-menu/MobileDropdownMen
 export type { IMobileDropdownMenuProps } from './components/dropdown-menu/MobileDropdownMenu';
 export { Dropdown } from './components/dropdown/Dropdown';
 export type { IDropdownProps } from './components/dropdown/Dropdown';
+export { MobileOverlayContext } from './components/dropdown/mobile-overlay-context';
 export { MobileDropdown } from './components/dropdown/MobileDropdown';
 export type { IMobileDropdownProps } from './components/dropdown/MobileDropdown';
 export { FormDualColumnLayout, FormLayout } from './components/form-layout';
@@ -90,6 +91,7 @@ export type {
     IGradientStop,
     IGradientValue,
 } from './components/gradient-color-picker/GradientColorPicker';
+export { MobileGradientColorPicker } from './components/gradient-color-picker/MobileGradientColorPicker';
 export { HoverCard } from './components/hover-card/HoverCard';
 export type { IHoverCardProps } from './components/hover-card/HoverCard';
 export { InputNumber } from './components/input-number/InputNumber';

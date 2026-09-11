@@ -56,7 +56,7 @@ import { KeyCode, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CloseHyperLinkPopupOperation } from '../commands/operations/popup.operations';
 import { isLegalLink, serializeUrl } from '../common/util';
-import { SheetsHyperLinkPopupService } from '../services/popup.service';
+import { ISheetsHyperLinkPopupService } from '../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../services/resolver.service';
 import { SheetsHyperLinkSidePanelService } from '../services/side-panel.service';
 import { HyperLinkEditSourceType } from '../types/enums/edit-source';
@@ -73,7 +73,7 @@ export const MobileCellLinkEdit = () => {
     const definedNameService = useDependency(IDefinedNamesService);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const popupService = useDependency(SheetsHyperLinkPopupService);
+    const popupService = useDependency(ISheetsHyperLinkPopupService);
     const editing = useObservable(popupService.currentEditing$);
     const parserService = useDependency(SheetsHyperLinkParserService);
     const resolverService = useDependency(SheetsHyperLinkResolverService);

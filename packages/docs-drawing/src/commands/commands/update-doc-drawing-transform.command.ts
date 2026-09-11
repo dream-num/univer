@@ -32,8 +32,8 @@ import { findDocDrawing } from '../../services/doc-drawing-source';
 
 export interface IDrawingDocTransform {
     drawingId: string;
-    key: 'size' | 'angle' | 'positionH' | 'positionV' | 'flipX' | 'flipY' | 'srcRect';
-    value: ISize | number | boolean | IObjectPositionH | IObjectPositionV | Nullable<ISrcRect>;
+    key: 'size' | 'angle' | 'positionH' | 'positionV' | 'flipX' | 'flipY' | 'srcRect' | 'prstGeom' | 'adjustValues';
+    value: ISize | number | boolean | IObjectPositionH | IObjectPositionV | Nullable<ISrcRect> | IDocImage['prstGeom'] | IDocImage['adjustValues'];
 }
 
 export interface IUpdateDrawingDocTransformCommandParams {
@@ -66,7 +66,7 @@ export const UpdateDrawingDocTransformCommand: ICommand = {
             ? DocHistoryAction.UpdateImage
             : undefined;
         const jsonX = JSONX.getInstance();
-        const actions: JSONXActions = [];
+        const actions: JSONXActions[] = [];
 
         for (const { drawingId, key, value } of drawings) {
             const source = findDocDrawing(snapshot, drawingId);
@@ -74,24 +74,26 @@ export const UpdateDrawingDocTransformCommand: ICommand = {
                 return false;
             }
             const oldDrawing = source.drawing;
-            const oldValue = key === 'srcRect'
-                ? (oldDrawing as IDocImage | undefined)?.srcRect
+            const isImageProperty = key === 'srcRect' || key === 'prstGeom' || key === 'adjustValues';
+            const oldValue = isImageProperty
+                ? (key in oldDrawing ? Reflect.get(oldDrawing, key) : undefined)
                 : oldDrawing?.docTransform?.[key];
             if (!Tools.diffValue(oldValue, value)) {
-                const path = key === 'srcRect'
+                const path = isImageProperty
                     ? [...source.path, key]
                     : [...source.path, 'docTransform', key];
                 // Optional transform fields such as flips do not exist in older documents.
-                actions.push(oldValue === undefined
-                    ? jsonX.insertOp(path, value)!
-                    : jsonX.replaceOp(path, oldValue, value)!);
+                const action = oldValue === undefined
+                    ? jsonX.insertOp(path, value)
+                    : jsonX.replaceOp(path, oldValue, value);
+                actions.push(action);
             }
         }
 
         return Boolean(commandService.syncExecuteCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(RichTextEditingMutation.id, {
             unitId,
             historyAction,
-            actions: actions.reduce((acc, action) => JSONX.compose(acc, action as JSONXActions), null as JSONXActions),
+            actions: actions.reduce<JSONXActions>((acc, action) => JSONX.compose(acc, action), null),
             textRanges: null,
             debounce: true,
         }));

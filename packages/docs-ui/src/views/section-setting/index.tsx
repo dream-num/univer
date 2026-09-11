@@ -15,13 +15,14 @@
  */
 
 import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
+import type { ISectionSettingProps } from './Setting';
 import { generateRandomId, ICommandService } from '@univerjs/core';
 import { RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { SectionSetting } from './Setting';
 
-export function SectionSettingIndex() {
+export function SectionSettingIndex(props: ISectionSettingProps) {
     const commandService = useDependency(ICommandService);
     const [key, setKey] = useState(() => generateRandomId(4));
 
@@ -39,5 +40,5 @@ export function SectionSettingIndex() {
         return () => disposable.dispose();
     }, [commandService]);
 
-    return <SectionSetting key={key} />;
+    return <SectionSetting {...props} key={key} />;
 }

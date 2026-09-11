@@ -15,7 +15,7 @@
  */
 
 import type { IDialogProps } from './Dialog';
-import { useContext } from 'react';
+import { useContext, useRef } from 'react';
 import { clsx } from '../../helper/clsx';
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
@@ -50,6 +50,7 @@ export function MobileDialog(props: IMobileDialogProps) {
         onOk,
         onCancel,
     } = props;
+    const contentRef = useRef<HTMLDivElement>(null);
     const { locale, mountContainer, direction } = useContext(ConfigContext);
     const maxHeight = globalThis.CSS?.supports('height', '1dvh') ? '80dvh' : '80vh';
     const footer = propFooter ?? (showOk || showCancel
@@ -81,8 +82,8 @@ export function MobileDialog(props: IMobileDialogProps) {
         <DialogProvider open={open} onOpenChange={handleOpenChange} modal={mask !== false}>
             <DialogContent
                 className={clsx(`
-                  !univer-bottom-0 !univer-left-0 !univer-right-0 !univer-top-auto !univer-max-w-none
-                  !univer-translate-x-0 !univer-translate-y-0 !univer-gap-4 !univer-overflow-y-auto
+                  !univer-bottom-0 !univer-left-0 !univer-right-0 !univer-top-auto !univer-flex !univer-max-w-none
+                  !univer-translate-x-0 !univer-translate-y-0 !univer-flex-col !univer-gap-4 !univer-overflow-hidden
                   !univer-rounded-t-2xl !univer-p-4
                   [&_[data-slot='dialog-footer']]:!univer-flex-row [&_[data-slot='dialog-footer']]:!univer-gap-3
                   [&_[data-slot='dialog-footer']_button]:!univer-h-12
@@ -90,6 +91,11 @@ export function MobileDialog(props: IMobileDialogProps) {
                   [&_button[data-slot='close']]:!univer-right-3 [&_button[data-slot='close']]:!univer-top-3
                   [&_button[data-slot='close']]:!univer-size-10
                 `, className)}
+                ref={contentRef}
+                onOpenAutoFocus={(event) => {
+                    event.preventDefault();
+                    contentRef.current?.focus({ preventScroll: true });
+                }}
                 style={{
                     ...style,
                     position: 'fixed',
@@ -106,7 +112,6 @@ export function MobileDialog(props: IMobileDialogProps) {
                 mountContainer={mountContainer}
                 overlayClassName={overlayClassName}
                 dir={direction}
-                onClickClose={close}
                 onEscapeKeyDown={(event) => {
                     if (keyboard) {
                         close();
@@ -120,14 +125,16 @@ export function MobileDialog(props: IMobileDialogProps) {
                     event.preventDefault();
                 }}
             >
-                <DialogHeader className={title ? undefined : '!univer-hidden'}>
+                <DialogHeader className={title ? 'univer-shrink-0 univer-px-10' : '!univer-hidden'}>
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription className="univer-hidden" />
                 </DialogHeader>
 
-                {children}
+                <div className="univer-min-h-0 univer-min-w-0 univer-overflow-y-auto">
+                    {children}
+                </div>
 
-                {footer && <DialogFooter>{footer}</DialogFooter>}
+                {footer && <DialogFooter className="univer-shrink-0">{footer}</DialogFooter>}
             </DialogContent>
         </DialogProvider>
     );

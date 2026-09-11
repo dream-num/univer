@@ -34,6 +34,7 @@ import { DEFAULT_TRANSFORMER_CONFIG } from './basics/transformer-config';
 import { Vector2 } from './basics/vector2';
 import { Group } from './group';
 import { ScrollTimer } from './scroll-timer';
+import { Control } from './shape/control';
 import { Line } from './shape/line';
 import { Rect } from './shape/rect';
 import { RegularPolygon } from './shape/regular-polygon';
@@ -129,7 +130,24 @@ class TransformerRotateIcon extends Rect {
     }
 }
 
-class TransformerAnchor extends Rect {
+class TransformerCropAnchor extends RegularPolygon {
+    constructor(key: string, props: IRegularPolygonProps, private readonly _hitSize: number) {
+        super(key, props);
+    }
+
+    override isHit(coord: Vector2): boolean {
+        if (this._hitSize <= 0) {
+            return super.isHit(coord);
+        }
+        const point = this.getInverseCoord(coord);
+        const scale = this.getScene()?.getAncestorScale();
+        const halfWidth = Math.max(this.width, this._hitSize / Math.max(scale?.scaleX ?? 1, 0.01)) / 2;
+        const halfHeight = Math.max(this.height, this._hitSize / Math.max(scale?.scaleY ?? 1, 0.01)) / 2;
+        return Math.abs(point.x - this.width / 2) <= halfWidth && Math.abs(point.y - this.height / 2) <= halfHeight;
+    }
+}
+
+class TransformerAnchor extends Control {
     protected override _draw(ctx: UniverRenderingContext) {
         if (!this.shadowColor || (!this.shadowBlur && !this.shadowOffsetX && !this.shadowOffsetY)) {
             Rect.drawWith(ctx, this as IRectProps);
@@ -152,6 +170,8 @@ class TransformerAnchor extends Rect {
  * when you resize them. Instead it changes `scaleX` and `scaleY` properties.
  */
 export class Transformer extends Disposable implements ITransformerConfig {
+    private static readonly _selectionTapMovementThreshold = 12;
+
     isCropper: boolean = false;
 
     hoverEnabled = false;
@@ -159,6 +179,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     hoverLeaveFunc: Nullable<(e: IPointerEvent | IMouseEvent) => void>;
 
     moveEnabled: boolean = DEFAULT_TRANSFORMER_CONFIG.moveEnabled;
+    moveOnlyWhenSelected = false;
     resizeEnabled: boolean = DEFAULT_TRANSFORMER_CONFIG.resizeEnabled;
 
     rotateEnabled: boolean = DEFAULT_TRANSFORMER_CONFIG.rotateEnabled;
@@ -249,15 +270,13 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _viewportScrollX: number = -1;
     private _viewportScrollY: number = -1;
 
-    private _topScenePointerMoveSub: Nullable<Subscription>;
-    private _topScenePointerUpSub: Nullable<Subscription>;
+    private _finishGesture: (() => void) | null = null;
     private _cancelFocusSubscription: Nullable<Subscription>;
 
     private _transformerControlMap = new Map<string, Group>();
     private _selectedObjectMap = new Map<string, BaseObject>();
 
     private _subscriptionObjectMap = new Map<string, Nullable<Subscription>>();
-
     private _copperControl: Nullable<Group>;
     private _copperSelectedObject: Nullable<BaseObject>;
 
@@ -289,6 +308,30 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     getSelectedObjectMap() {
         return this._selectedObjectMap;
+    }
+
+    /** Complete the current object transform before another gesture takes ownership of the scene. */
+    finishTransform(): void {
+        this._finishGesture?.();
+    }
+
+    private _bindGestureEnd(scene: Scene, initialEvent: IPointerEvent | IMouseEvent, onEnd: (event: IPointerEvent | IMouseEvent) => void): void {
+        let latestEvent = initialEvent;
+        const subscriptions: Subscription[] = [];
+        subscriptions.push(scene.onPointerMove$.subscribeEvent((event) => {
+            latestEvent = event;
+        }));
+        const finish = (event = latestEvent) => {
+            if (this._finishGesture !== finish) {
+                return;
+            }
+            this._finishGesture = null;
+            subscriptions.forEach((subscription) => subscription.unsubscribe());
+            onEnd(event);
+        };
+        subscriptions.push(scene.onPointerUp$.subscribeEvent((event) => finish(event)));
+        subscriptions.push(scene.onPointerCancel$.subscribeEvent(() => finish()));
+        this._finishGesture = finish;
     }
 
     resetProps(config?: ITransformerConfig) {
@@ -358,6 +401,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             hoverEnterFunc,
             hoverLeaveFunc,
             moveEnabled,
+            moveOnlyWhenSelected,
             resizeEnabled,
             rotateEnabled,
             rotationSnaps,
@@ -407,6 +451,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             hoverEnterFunc = objectTransformerConfig.hoverEnterFunc ?? hoverEnterFunc;
             hoverLeaveFunc = objectTransformerConfig.hoverLeaveFunc ?? hoverLeaveFunc;
             moveEnabled = objectTransformerConfig.moveEnabled ?? moveEnabled;
+            moveOnlyWhenSelected = objectTransformerConfig.moveOnlyWhenSelected ?? moveOnlyWhenSelected;
             resizeEnabled = objectTransformerConfig.resizeEnabled ?? resizeEnabled;
             rotateEnabled = objectTransformerConfig.rotateEnabled ?? rotateEnabled;
             rotationSnaps = objectTransformerConfig.rotationSnaps ?? rotationSnaps;
@@ -457,6 +502,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             hoverEnterFunc,
             hoverLeaveFunc,
             moveEnabled,
+            moveOnlyWhenSelected,
             resizeEnabled,
             rotateEnabled,
             rotationSnaps,
@@ -509,11 +555,42 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
         // eslint-disable-next-line max-lines-per-function
         const observer = applyObject.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            this.finishTransform();
             const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
             this._startOffsetX = evtOffsetX;
             this._startOffsetY = evtOffsetY;
 
-            const { isCropper, moveEnabled } = this._getConfig(applyObject);
+            const { isCropper, moveEnabled, moveOnlyWhenSelected } = this._getConfig(applyObject);
+
+            if (!isCropper && moveOnlyWhenSelected && !this._selectedObjectMap.has(this._findGroupObject(applyObject).oKey)) {
+                const scene = this._getTopScene();
+                if (!scene) {
+                    this._updateActiveObjectList(applyObject, evt);
+                    return;
+                }
+
+                let moved = false;
+                let moveSubscription: Nullable<Subscription>;
+                let upSubscription: Nullable<Subscription>;
+                let cancelSubscription: Nullable<Subscription>;
+                const disposeGesture = () => {
+                    moveSubscription?.unsubscribe();
+                    upSubscription?.unsubscribe();
+                    cancelSubscription?.unsubscribe();
+                };
+
+                moveSubscription = scene.onPointerMove$.subscribeEvent((moveEvent: IPointerEvent | IMouseEvent) => {
+                    moved ||= Math.hypot(moveEvent.offsetX - evtOffsetX, moveEvent.offsetY - evtOffsetY) >= Transformer._selectionTapMovementThreshold;
+                });
+                upSubscription = scene.onPointerUp$.subscribeEvent(() => {
+                    disposeGesture();
+                    if (!moved) {
+                        this._updateActiveObjectList(applyObject, evt);
+                    }
+                });
+                cancelSubscription = scene.onPointerCancel$.subscribeEvent(disposeGesture);
+                return;
+            }
 
             if (!isCropper && !moveEnabled) {
                 this._updateActiveObjectList(applyObject, evt);
@@ -567,9 +644,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 });
             });
 
-            const scenePointerUpSub = scene.onPointerUp$.subscribeEvent((event) => {
+            this._bindGestureEnd(scene, evt, (event) => {
                 scenePointerMoveSub?.unsubscribe();
-                scenePointerUpSub?.unsubscribe();
                 scene.enableObjectsEvent();
                 !isCropper && this.refreshControls();
                 scrollTimer.dispose();
@@ -619,19 +695,15 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     override dispose() {
+        this.finishTransform();
         super.dispose();
 
         this._subscriptionObjectMap.forEach((subscription) => subscription?.unsubscribe());
         this._subscriptionObjectMap.clear();
 
-        this._topScenePointerMoveSub?.unsubscribe();
-        this._topScenePointerUpSub?.unsubscribe();
-
         this._cancelFocusSubscription?.unsubscribe();
         this._cancelFocusSubscription = null;
 
-        this._topScenePointerMoveSub = null;
-        this._topScenePointerUpSub = null;
         this._cancelFocusSubscription = null;
 
         this._transformerControlMap.forEach((control) => control.dispose());
@@ -1104,6 +1176,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             toDisposable(
                 // eslint-disable-next-line max-lines-per-function
                 anchor.onPointerDown$.subscribeEvent((evt, state) => {
+                    this.finishTransform();
                     const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
                     this._startOffsetX = evtOffsetX;
                     this._startOffsetY = evtOffsetY;
@@ -1143,7 +1216,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                     }
 
                     this._moveBufferSkip = false;
-                    this._topScenePointerMoveSub = topScene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
+                    const moveSubscription = topScene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
                         const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
                         this._anchorMoving(type, moveOffsetX, moveOffsetY, scrollTimer, keepRatio, isCropper, applyObject);
 
@@ -1153,11 +1226,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         topScene.setCursor(cursor);
                     });
 
-                    this._topScenePointerUpSub = topScene.onPointerUp$.subscribeEvent((event) => {
-                        // topScene.onPointerMove$.remove(this._moveObserver);
-                        // topScene.onPointerUp$.remove(this._topScenePointerUpSub);
-                        this._topScenePointerMoveSub?.unsubscribe();
-                        this._topScenePointerUpSub?.unsubscribe();
+                    this._bindGestureEnd(topScene, evt, (event) => {
+                        moveSubscription.unsubscribe();
                         topScene.enableObjectsEvent();
                         topScene.resetCursor();
                         scrollTimer.dispose();
@@ -1223,6 +1293,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
         this.disposeWithMe(
             toDisposable(
                 rotateControl.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+                    this.finishTransform();
                     const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
                     this._startOffsetX = evtOffsetX;
@@ -1261,11 +1332,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         topScene.setCursor(cursor);
                     });
 
-                    const topScenePointerUpSub = topScene.onPointerUp$.subscribeEvent((event) => {
-                        // topScenePointerMoveSub?.dispose();
-                        // topScenePointerUpSub?.dispose();
+                    this._bindGestureEnd(topScene, evt, (event) => {
                         topScenePointerMoveSub?.unsubscribe();
-                        topScenePointerUpSub?.unsubscribe();
                         topScene.enableObjectsEvent();
                         topScene.resetCursor();
                         this.refreshControls();
@@ -1603,9 +1671,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
         const cursor = this._getRotateAnchorCursor(type);
 
-        let anchor: BaseObject;
         const oKey = `${type}_${zIndex}`;
-        const config: IRectProps | IRegularPolygonProps = {
+        const config: IRegularPolygonProps = {
             zIndex: zIndex - 1,
             fill: anchorFill,
             stroke: anchorStroke,
@@ -1614,42 +1681,44 @@ export class Transformer extends Disposable implements ITransformerConfig {
             height: anchorSize,
             left,
             top,
+            pointsGroup: [],
         };
         const longEdge = anchorSize;
         const shortEdge = anchorSize / 4;
         if (cursor === CURSOR_TYPE.EAST_RESIZE) {
             config.width = shortEdge;
             config.height = longEdge;
-            anchor = new Rect(oKey, config);
         } else if (cursor === CURSOR_TYPE.WEST_RESIZE) {
             config.width = shortEdge;
             config.height = longEdge;
-            anchor = new Rect(oKey, config);
         } else if (cursor === CURSOR_TYPE.NORTH_RESIZE) {
             config.width = longEdge;
             config.height = shortEdge;
-            anchor = new Rect(oKey, config);
         } else if (cursor === CURSOR_TYPE.SOUTH_RESIZE) {
             config.width = longEdge;
             config.height = shortEdge;
-            anchor = new Rect(oKey, config);
         } else if (cursor === CURSOR_TYPE.NORTH_EAST_RESIZE) {
-            (config as IRegularPolygonProps).pointsGroup = this._getNorthEastPoints(longEdge, shortEdge);
-            anchor = new RegularPolygon(oKey, config as IRegularPolygonProps);
+            config.pointsGroup = this._getNorthEastPoints(longEdge, shortEdge);
         } else if (cursor === CURSOR_TYPE.NORTH_WEST_RESIZE) {
-            (config as IRegularPolygonProps).pointsGroup = this._getNorthWestPoints(longEdge, shortEdge);
-            anchor = new RegularPolygon(oKey, config as IRegularPolygonProps);
+            config.pointsGroup = this._getNorthWestPoints(longEdge, shortEdge);
         } else if (cursor === CURSOR_TYPE.SOUTH_EAST_RESIZE) {
-            (config as IRegularPolygonProps).pointsGroup = this._getSouthEastPoints(longEdge, shortEdge);
-            anchor = new RegularPolygon(oKey, config as IRegularPolygonProps);
+            config.pointsGroup = this._getSouthEastPoints(longEdge, shortEdge);
         } else if (cursor === CURSOR_TYPE.SOUTH_WEST_RESIZE) {
-            (config as IRegularPolygonProps).pointsGroup = this._getSouthWestPoints(longEdge, shortEdge);
-            anchor = new RegularPolygon(oKey, config as IRegularPolygonProps);
+            config.pointsGroup = this._getSouthWestPoints(longEdge, shortEdge);
         }
 
-        this._attachHover(anchor!, cursor, CURSOR_TYPE.DEFAULT);
+        if (config.pointsGroup.length === 0) {
+            config.pointsGroup = [[
+                { x: 0, y: 0 },
+                { x: config.width ?? 0, y: 0 },
+                { x: config.width ?? 0, y: config.height ?? 0 },
+                { x: 0, y: config.height ?? 0 },
+            ]];
+        }
+        const anchor = new TransformerCropAnchor(oKey, config, applyObject.transformerConfig?.cropAnchorHitSize ?? 0);
+        this._attachHover(anchor, cursor, CURSOR_TYPE.DEFAULT);
 
-        return anchor!;
+        return anchor;
     }
 
     private _getNorthEastPoints(longEdge: number, shortEdge: number): IPoint[][] {

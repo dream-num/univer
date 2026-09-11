@@ -27,7 +27,7 @@ import {
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
 import { OpenHyperLinkEditPanelOperation } from '../commands/operations/popup.operations';
-import { SheetsHyperLinkPopupService } from '../services/popup.service';
+import { ISheetsHyperLinkPopupService } from '../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../services/resolver.service';
 import { HyperLinkEditSourceType } from '../types/enums/edit-source';
 
@@ -43,7 +43,7 @@ interface IMobileCellLinkPopupPureProps {
 }
 
 export function MobileCellLinkPopupPure(props: IMobileCellLinkPopupPureProps) {
-    const popupService = useDependency(SheetsHyperLinkPopupService);
+    const popupService = useDependency(ISheetsHyperLinkPopupService);
     const commandService = useDependency(ICommandService);
     const messageService = useDependency(IMessageService);
     const localeService = useDependency(LocaleService);
@@ -143,7 +143,7 @@ export function MobileCellLinkPopupPure(props: IMobileCellLinkPopupPureProps) {
 }
 
 export function MobileCellLinkPopup() {
-    const popupService = useDependency(SheetsHyperLinkPopupService);
+    const popupService = useDependency(ISheetsHyperLinkPopupService);
     const currentPopup = useObservable(popupService.currentPopup$, popupService.currentPopup);
     const univerInstanceService = useDependency(IUniverInstanceService);
 

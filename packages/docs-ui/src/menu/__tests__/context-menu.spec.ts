@@ -17,11 +17,29 @@
 import { Injector, IPermissionService, IUniverInstanceService, PermissionService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, setDocumentPermissionValue } from '@univerjs/docs';
 import { UnitAction } from '@univerjs/protocol';
+import { ContextMenuGroup } from '@univerjs/ui';
 import { firstValueFrom, of } from 'rxjs';
 import { describe, expect, it } from 'vitest';
-import { CopyMenuFactory, ParagraphSettingMenuFactory, PasteMenuFactory, SectionSettingMenuFactory } from '../context-menu';
+import { DocPasteCommand } from '../../commands/commands/clipboard.command';
+import { DocSelectAllCommand, DocSelectWordCommand } from '../../commands/commands/doc-select-all.command';
+import { DOC_CARET_MENU_ID } from '../../consts/mobile-context';
+import { CopyMenuFactory, ParagraphSettingMenuFactory, PasteMenuFactory, SectionSettingMenuFactory, SelectAllMenuFactory, SelectWordMenuFactory } from '../context-menu';
+import { mobileMenuSchema } from '../mobile-schema';
 
 describe('settings context menu factories', () => {
+    it('registers a dedicated three-action mobile caret menu', () => {
+        const caretMenu = Object.entries(mobileMenuSchema).find(([position]) => position === DOC_CARET_MENU_ID)?.[1];
+
+        expect(caretMenu).toEqual({
+            [ContextMenuGroup.QUICK]: {
+                quickLayout: 'tile',
+                [DocPasteCommand.id]: { order: 0, menuItemFactory: PasteMenuFactory },
+                [DocSelectWordCommand.id]: { order: 1, menuItemFactory: SelectWordMenuFactory },
+                [DocSelectAllCommand.id]: { order: 2, menuItemFactory: SelectAllMenuFactory },
+            },
+        });
+    });
+
     it('does not show leading icons', () => {
         const accessor = new Injector([
             [DocSelectionManagerService, {

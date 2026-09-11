@@ -45,13 +45,18 @@ import {
 } from '@univerjs/docs';
 import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
-import { ComponentManager } from '@univerjs/ui';
+import {
+    ComponentManager,
+    ContextMenuPosition,
+    IContextMenuService,
+} from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { EmbedRuntimeFocusCoordinator, IDocEmbedRuntimeFocusCoordinator } from '../doc-embed-integration.service';
 import { DocLayoutInteractionService } from '../doc-layout-interaction.service';
 import { DocCanvasPopManagerService } from '../doc-popup-manager.service';
 import { DocFloatMenuService } from '../float-menu.service';
+import { MobileDocFloatMenuService } from '../mobile/float-menu.service';
 import { DocSelectionRenderService } from '../selection/doc-selection-render.service';
 
 class InertDocCanvasPopManagerService {
@@ -71,6 +76,10 @@ class RecordingDocCanvasPopManagerService {
     onDismiss?: () => void;
     disposedCount = 0;
 
+    getRangeBounds() {
+        return [{ left: 100, right: 200, top: 240, bottom: 260 }];
+    }
+
     attachPopupToRange(range: { startOffset: number; endOffset: number }, options: { direction: string; offset?: [number, number]; extraProps?: { onDismiss?: () => void } }) {
         this.ranges.push(`${range.startOffset}:${range.endOffset}`);
         this.directions.push(options.direction);
@@ -82,6 +91,36 @@ class RecordingDocCanvasPopManagerService {
                 this.disposedCount++;
             },
         };
+    }
+}
+
+class RecordingContextMenuService implements IContextMenuService {
+    disabled = false;
+    visible = false;
+    readonly triggers: Array<{ clientX: number; clientY: number; menuType: string }> = [];
+
+    enable(): void {
+        this.disabled = false;
+    }
+
+    disable(): void {
+        this.disabled = true;
+    }
+
+    triggerContextMenu(event: { clientX: number; clientY: number }, menuType: string): void {
+        if (this.disabled) {
+            return;
+        }
+        this.visible = true;
+        this.triggers.push({ clientX: event.clientX, clientY: event.clientY, menuType });
+    }
+
+    hideContextMenu(): void {
+        this.visible = false;
+    }
+
+    registerContextMenuHandler() {
+        return { dispose() {} };
     }
 }
 
@@ -103,13 +142,16 @@ function createActiveFloatMenuHarness(
     unitId: string,
     body: ConstructorParameters<typeof DocumentDataModel>[0]['body'],
     runtimeFocusCoordinator?: EmbedRuntimeFocusCoordinator,
-    headers?: ConstructorParameters<typeof DocumentDataModel>[0]['headers']
+    headers?: ConstructorParameters<typeof DocumentDataModel>[0]['headers'],
+    mobile = false
 ) {
     const injector = new Injector();
+    const contextMenuService = new RecordingContextMenuService();
     injector.add([IPermissionService, { useClass: PermissionService }]);
     injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([IContextService, { useClass: ContextService }]);
+    injector.add([IContextMenuService, { useValue: contextMenuService }]);
     injector.add([ICommandService, { useClass: CommandService }]);
     injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
     injector.add([DocSelectionManagerService]);
@@ -123,12 +165,13 @@ function createActiveFloatMenuHarness(
     injector.get(ICommandService).registerCommand(SetTextSelectionsOperation);
     const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;
     univerInstanceService.__addUnit(new DocumentDataModel({ id: unitId, body, headers }));
-    const service = injector.createInstance(DocFloatMenuService, { unitId } as never);
+    const service = injector.createInstance(mobile ? MobileDocFloatMenuService : DocFloatMenuService, { unitId } as never);
     const selectionManager = injector.get(DocSelectionManagerService);
     selectionManager.__TEST_ONLY_setCurrentSelection({ unitId, subUnitId: unitId });
 
     return {
         injector,
+        contextMenuService,
         popupService: injector.get(DocCanvasPopManagerService) as unknown as RecordingDocCanvasPopManagerService,
         selectionManager,
         service,
@@ -144,6 +187,7 @@ describe('DocFloatMenuService', () => {
         injector.add([ILogService, { useClass: DesktopLogService }]);
         injector.add([IConfigService, { useClass: ConfigService }]);
         injector.add([IContextService, { useClass: ContextService }]);
+        injector.add([IContextMenuService, { useClass: RecordingContextMenuService }]);
         injector.add([ICommandService, { useClass: CommandService }]);
         injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
         injector.add([DocSelectionManagerService]);
@@ -164,6 +208,7 @@ describe('DocFloatMenuService', () => {
         injector.add([ILogService, { useClass: DesktopLogService }]);
         injector.add([IConfigService, { useClass: ConfigService }]);
         injector.add([IContextService, { useClass: ContextService }]);
+        injector.add([IContextMenuService, { useClass: RecordingContextMenuService }]);
         injector.add([ICommandService, { useClass: CommandService }]);
         injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
         injector.add([DocSelectionManagerService]);
@@ -227,6 +272,37 @@ describe('DocFloatMenuService', () => {
         expect(service.floatMenu).toBeNull();
         expect(popupService.disposedCount).toBe(1);
         expect(layoutInteractionService.isActive).toBe(false);
+    });
+
+    it('opens the mobile context menu above an expanded text selection instead of the desktop float toolbar', () => {
+        const unitId = 'doc-mobile-selection-menu';
+        const harness = createActiveFloatMenuHarness(unitId, {
+            dataStream: 'Mobile selection\r\n',
+            paragraphs: [{ paragraphId: 'para_docs_ui_mobile_selection_menu', startIndex: 16 }],
+            sectionBreaks: [],
+            customRanges: [],
+            tables: [],
+            textRuns: [],
+        }, undefined, undefined, true);
+
+        harness.selectionManager.__replaceTextRangesWithNoRefresh({
+            textRanges: [{ startOffset: 0, endOffset: 6, collapsed: false }],
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            isEditing: true,
+        }, { unitId, subUnitId: unitId });
+
+        expect(harness.contextMenuService.triggers).toEqual([{
+            clientX: 150,
+            clientY: 240,
+            menuType: ContextMenuPosition.MAIN_AREA,
+        }]);
+        expect(harness.popupService.ranges).toEqual([]);
+
+        harness.selectionRenderService.emitSelectionStart();
+        expect(harness.contextMenuService.visible).toBe(false);
     });
 
     it('hides the floating toolbar when document edit permission is revoked', () => {
@@ -399,6 +475,7 @@ describe('DocFloatMenuService', () => {
         injector.add([ILogService, { useClass: DesktopLogService }]);
         injector.add([IConfigService, { useClass: ConfigService }]);
         injector.add([IContextService, { useClass: ContextService }]);
+        injector.add([IContextMenuService, { useClass: RecordingContextMenuService }]);
         injector.add([ICommandService, { useClass: CommandService }]);
         injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
         injector.add([DocSelectionManagerService]);

@@ -21,6 +21,8 @@ import type { IMouseEvent, IPointerEvent } from './i-events';
 export interface ITransformerConfig {
     // for image copper
     isCropper?: boolean;
+    /** Minimum crop-handle hit target in screen pixels; does not change its appearance. */
+    cropAnchorHitSize?: number;
 
     hoverEnabled?: boolean;
     hoverEnterFunc?: Nullable<(e: IPointerEvent | IMouseEvent) => void>;
@@ -49,6 +51,8 @@ export interface ITransformerConfig {
 
     resizeEnabled?: boolean;
     moveEnabled?: boolean;
+    /** Start moving only when the object was already selected before pointer down. */
+    moveOnlyWhenSelected?: boolean;
     enabledAnchors?: number[];
     anchorFill?: string;
     anchorStroke?: string;

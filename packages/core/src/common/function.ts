@@ -36,6 +36,10 @@ export function throttle<T extends (...args: any[]) => any>(fn: T, wait: number 
                 fn.apply(this, args);
             }, wait) as unknown as number;
         } else {
+            if (timer) {
+                clearTimeout(timer);
+                timer = null;
+            }
             lastTime = now;
             fn.apply(this, args);
         }

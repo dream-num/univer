@@ -478,19 +478,22 @@ describe('doc skeleton', () => {
 
     it.each(['ready', 'cancel', 'failure', 'header', 'footer'])('waits for cold hyphenation rules and matches a warm executor (%s)', async (scenario) => {
         const univer = new Univer();
-        const content = scenario === 'header' || scenario === 'footer'
-            ? 'Este documento contiene información sobre la configuración y la administración de los servicios.'
-            : `${'A continued paragraph crosses several physical pages. '.repeat(50)}Hello world ${'Further text keeps the paragraph flowing. '.repeat(100)}`;
+        const content = 'Este documento contiene información sobre la configuración y la administración de los servicios. '
+            .repeat(scenario === 'header' || scenario === 'footer' ? 1 : 4);
         const snapshot: Partial<IDocumentData> = {
             id: 'hyphen-readiness',
             body: {
                 dataStream: `${content}\r\n`,
-                paragraphs: [{ startIndex: content.length, paragraphId: 'hyphen-paragraph' }],
+                paragraphs: [{
+                    startIndex: content.length,
+                    paragraphId: 'hyphen-paragraph',
+                    paragraphStyle: { lineSpacing: 18, spacingRule: SpacingRule.EXACT },
+                }],
                 sectionBreaks: [{ startIndex: content.length + 1, sectionId: 'hyphen-section' }],
             },
             documentStyle: {
                 documentFlavor: DocumentFlavor.TRADITIONAL,
-                pageSize: { width: 600, height: 700 },
+                pageSize: { width: 120, height: 120 },
                 marginTop: 30,
                 marginBottom: 30,
                 marginLeft: 30,
@@ -546,6 +549,9 @@ describe('doc skeleton', () => {
             }
             await vi.waitFor(() => expect(cold.stepIncrementalLayout(coldGeneration, 8).complete).toBe(true));
             completeIncrementalLayout(warm);
+            if (scenario !== 'header' && scenario !== 'footer') {
+                expect(cold.getSkeletonData()?.pages.length).toBeGreaterThan(1);
+            }
             expect(normalizeSkeleton(cold.getSkeletonData())).toEqual(normalizeSkeleton(warm.getSkeletonData()));
         } finally {
             loader.mockRestore();
@@ -2972,6 +2978,59 @@ describe('doc skeleton', () => {
             univer.dispose();
         }
     );
+
+    it('keeps mobile geometry when typing interrupts a modern viewport reflow', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const paragraphs = Array.from(
+            { length: 20 },
+            (_, index) => `Modern paragraph ${index} wraps at the available mobile width.\r`
+        );
+        const content = paragraphs.join('');
+        const initialModel = createDocumentModelWithStyle(content, {});
+        initialModel.updateDocumentStyle({
+            documentFlavor: DocumentFlavor.MODERN,
+            pageSize: { width: 960, height: Number.POSITIVE_INFINITY },
+        });
+        const viewModel = new DocumentViewModel(initialModel);
+        const skeleton = DocumentSkeleton.create(viewModel, localeService);
+        const mobileGeometry = { modernPageWidth: 366, modernHorizontalMargin: 20 };
+        skeleton.calculate();
+
+        const resizeGeneration = skeleton.startIncrementalLayout({ reason: 'initial', ...mobileGeometry });
+        const resizeProgress = skeleton.stepIncrementalLayout(resizeGeneration, 0);
+        expect(resizeProgress.complete).toBe(false);
+        expect(skeleton.getSkeletonData()?.pages[0].pageWidth).toBe(mobileGeometry.modernPageWidth);
+
+        const anchor = paragraphs[0].length + 5;
+        const nextModel = createDocumentModelWithStyle(`${content.slice(0, anchor)}输入${content.slice(anchor)}`, {});
+        nextModel.updateDocumentStyle({
+            documentFlavor: DocumentFlavor.MODERN,
+            pageSize: { width: 960, height: Number.POSITIVE_INFINITY },
+        });
+        viewModel.reset(nextModel);
+        const generation = skeleton.startIncrementalLayout({
+            reason: 'edit',
+            anchor,
+            invalidation: { oldStart: anchor, oldEnd: anchor, newEnd: anchor + 2 },
+            ...mobileGeometry,
+        });
+        let progress = skeleton.stepIncrementalLayout(generation, 0);
+        for (let step = 0; step < 100 && !progress.complete; step++) {
+            progress = skeleton.stepIncrementalLayout(generation, 0);
+        }
+        expect(progress.complete).toBe(true);
+        expect(skeleton.getSkeletonData()?.pages[0]).toMatchObject({
+            pageWidth: mobileGeometry.modernPageWidth,
+            marginLeft: mobileGeometry.modernHorizontalMargin,
+            marginRight: mobileGeometry.modernHorizontalMargin,
+        });
+
+        skeleton.dispose();
+        initialModel.dispose();
+        nextModel.dispose();
+        univer.dispose();
+    });
 
     it('falls back to full incremental layout for a complex modern page', () => {
         const univer = new Univer();

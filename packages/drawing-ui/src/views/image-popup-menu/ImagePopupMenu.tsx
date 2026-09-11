@@ -15,6 +15,7 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
+import type { IValueOption } from '@univerjs/ui';
 import type { ReactNode } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import {
@@ -43,7 +44,7 @@ export interface IImagePopupMenuItem {
     disable: boolean;
     type?: 'button' | 'select';
     value?: string;
-    options?: Array<{ icon?: string; label: unknown; value: string }>;
+    options?: Array<{ icon?: string; label: IValueOption['label']; value: string }>;
     commandParamsFactory?: (value: string) => object;
     hideOnClick?: boolean;
     icon?: string;

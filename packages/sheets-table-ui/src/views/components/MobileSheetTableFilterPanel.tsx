@@ -51,7 +51,7 @@ import {
 import { MobileDrawer, useDependency } from '@univerjs/ui';
 import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { SheetsTableComponentController } from '../../controllers/sheet-table-component.controller';
+import { SheetsTableMobileComponentController } from '../../controllers/mobile/sheet-table-component.controller';
 import { SheetsTableUiService } from '../../services/sheets-table-ui.service';
 import { FilterByEnum } from '../../types';
 import { MobileSheetTableColorFilterPanel } from './MobileSheetTableColorFilterPanel';
@@ -66,7 +66,7 @@ const FILTER_BY_OPTIONS: Array<{ label: LocaleKey; value: FilterByEnum }> = [
 ];
 
 export function MobileSheetTableFilterPanel() {
-    const sheetsTableComponentController = useDependency(SheetsTableComponentController);
+    const sheetsTableComponentController = useDependency(SheetsTableMobileComponentController);
     const tableFilterPanelInfo = sheetsTableComponentController.getCurrentTableFilterInfo();
     if (!tableFilterPanelInfo) {
         return null;
@@ -87,7 +87,7 @@ function MobileSheetTableFilterPanelContent(props: IMobileSheetTableFilterPanelC
     const commandService = useDependency(ICommandService);
     const permissionService = useDependency(IPermissionService);
     const undoRedoService = useDependency(IUndoRedoService);
-    const sheetsTableComponentController = useDependency(SheetsTableComponentController);
+    const sheetsTableComponentController = useDependency(SheetsTableMobileComponentController);
     const [detailFilterBy, setDetailFilterBy] = useState<FilterByEnum | null>(null);
     const [drawerSnap, setDrawerSnap] = useState<MobileDrawerSnap>('expanded');
     const layerRef = useRef<HTMLDivElement>(null);

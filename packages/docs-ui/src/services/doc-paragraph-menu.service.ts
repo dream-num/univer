@@ -18,7 +18,7 @@ import type { DocumentDataModel, ICustomBlock, ICustomTable, IDisposable, IDocum
 import type { IBoundRectNoAngle, IRenderContext, IRenderModule, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IMutiPageParagraphBound, ITableBound, ITableParagraphBound } from './doc-event-manager.service';
 import type { IEditorInputConfig } from './selection/doc-selection-render.service';
-import { BlockType, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DocumentBlockType, getParagraphContentStartOffset, Inject, IPermissionService, isInternalEditorID, PresetListType } from '@univerjs/core';
+import { BlockType, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DocumentBlockType, getParagraphContentStartOffset, IContextService, Inject, IPermissionService, isInternalEditorID, PresetListType } from '@univerjs/core';
 import { canEditDocumentTargets, DocSelectionManagerService, DocSkeletonManagerService, getDocumentEditTargetObjectIds } from '@univerjs/docs';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { BehaviorSubject, combineLatest, first, throttleTime } from 'rxjs';
@@ -163,7 +163,8 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         @Inject(DocFloatMenuService) private _floatMenuService: DocFloatMenuService,
         @Inject(DocSelectionRenderService) private _docSelectionRenderService: DocSelectionRenderService,
         @IPermissionService private readonly _permissionService: IPermissionService,
-        @Inject(DocLayoutInteractionService) private _docLayoutInteractionService: DocLayoutInteractionService
+        @Inject(DocLayoutInteractionService) private _docLayoutInteractionService: DocLayoutInteractionService,
+        @IContextService private readonly _contextService: IContextService
     ) {
         super();
 

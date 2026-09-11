@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IDrawingSearch } from '@univerjs/core';
 import {
     ContextService,
     DocumentDataModel,
@@ -27,19 +28,22 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { setDocumentPermissionValue } from '@univerjs/docs';
-import { IDocDrawingAdapterService } from '@univerjs/docs-drawing';
-import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import { DocDrawingService, IDocDrawingAdapterService, IDocDrawingService, RemoveDocDrawingCommand } from '@univerjs/docs-drawing';
+import { DocCanvasPopManagerService, MOBILE_DOC_ELEMENT_MENU } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
+import { COMPONENT_MOBILE_IMAGE_POPUP_MENU, OpenImageCropOperation } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
 import { IMenuManagerService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
+import { EditDocDrawingOperation } from '../../commands/operations/edit-doc-drawing.operation';
+import { MobileDocDrawingPopupMenuController } from '../../controllers/mobile/drawing-popup-menu.controller';
 import { DocDrawingFloatingToolbarAdapterService } from '../../services/doc-drawing-floating-toolbar-adapter.service';
 import { DocDrawingPopupMenuController } from '../drawing-popup-menu.controller';
 
-function createControllerHarness() {
+function createControllerHarness(drawingType = DrawingTypeEnum.DRAWING_IMAGE, mobile = false) {
     const unitId = 'doc-1';
     const drawingId = 'drawing-1';
     const injector = new Injector();
@@ -47,6 +51,7 @@ function createControllerHarness() {
     const clearControl$ = new Subject<boolean>();
     const changing$ = new Subject<void>();
     const focus$ = new Subject<never[]>();
+    const remove$ = new Subject<IDrawingSearch[]>();
     const currentDocument$ = new Subject<never>();
     const disposedDocument$ = new Subject<never>();
     const renderCreated$ = new Subject<never>();
@@ -61,7 +66,7 @@ function createControllerHarness() {
         unitId,
         subUnitId: unitId,
         drawingId,
-        drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+        drawingType,
     };
     const documentDataModel = new DocumentDataModel({
         id: unitId,
@@ -75,18 +80,22 @@ function createControllerHarness() {
         clearControl$,
         changing$,
         getSelectedObjectMap: () => selectedObjects,
+        clearSelectedObjects: vi.fn(),
     };
     const scene = {
         getAllObjects: () => [],
         getTransformerByCreate: () => transformer,
     };
 
+    const executeCommand = vi.fn();
     injector.add([ICommandService, {
         useValue: {
+            executeCommand,
             onCommandExecuted: () => toDisposable(() => undefined),
         } as never,
     }]);
-    injector.add([IContextService, { useValue: new ContextService() }]);
+    const contextService = new ContextService();
+    injector.add([IContextService, { useValue: contextService }]);
     injector.add([IPermissionService, { useClass: PermissionService }]);
     injector.add([IUniverInstanceService, {
         useValue: {
@@ -108,6 +117,7 @@ function createControllerHarness() {
     injector.add([IDrawingManagerService, {
         useValue: {
             focus$,
+            remove$,
             focusDrawing: vi.fn(),
             getDrawingByParam: () => drawing,
             getDrawingOKey: () => drawing,
@@ -119,9 +129,11 @@ function createControllerHarness() {
             getEditDrawingCommandInfo: () => null,
         } as never,
     }]);
+    injector.add([IDocDrawingService, { useClass: DocDrawingService }]);
+    const attachPopupToObject = vi.fn<DocCanvasPopManagerService['attachPopupToObject']>(() => popupDisposable);
     injector.add([DocCanvasPopManagerService, {
         useValue: {
-            attachPopupToObject: () => popupDisposable,
+            attachPopupToObject,
         } as never,
     }]);
     injector.add([IMenuManagerService, {
@@ -130,21 +142,116 @@ function createControllerHarness() {
         } as never,
     }]);
     injector.add([DocDrawingFloatingToolbarAdapterService]);
-    injector.add([DocDrawingPopupMenuController]);
+    if (mobile) {
+        injector.add([MobileDocDrawingPopupMenuController]);
+    } else {
+        injector.add([DocDrawingPopupMenuController]);
+    }
+    const controller = mobile
+        ? injector.get(MobileDocDrawingPopupMenuController)
+        : injector.get(DocDrawingPopupMenuController);
 
     return {
         clearControl$,
         createControl$,
+        contextService,
+        controller,
+        executeCommand,
         injector,
+        attachPopupToObject,
         popupDisposable,
         selectedObjects,
+        remove$,
+        transformer,
     };
 }
 
 describe('DocDrawingPopupMenuController', () => {
-    it('keeps an active popup during refresh and removes it after the selected drawing is deleted', () => {
-        const { clearControl$, createControl$, injector, popupDisposable, selectedObjects } = createControllerHarness();
-        const controller = injector.get(DocDrawingPopupMenuController);
+    it('keeps the mobile popup controller independent from the desktop controller', () => {
+        expect(MobileDocDrawingPopupMenuController.prototype).not.toBeInstanceOf(DocDrawingPopupMenuController);
+    });
+
+    it('does not expose mobile callbacks through the desktop popup', () => {
+        const harness = createControllerHarness();
+        const { controller } = harness;
+        try {
+            harness.createControl$.next();
+            const extraProps = harness.attachPopupToObject.mock.calls[0][1].extraProps;
+
+            expect(extraProps).not.toHaveProperty('onClose');
+            expect(extraProps).not.toHaveProperty('onEdit');
+            expect(extraProps).not.toHaveProperty('onDelete');
+        } finally {
+            controller.dispose();
+            harness.injector.dispose();
+        }
+    });
+
+    it('closes a mobile popup without clearing the object being edited', () => {
+        const harness = createControllerHarness(DrawingTypeEnum.DRAWING_CHART, true);
+        const { controller } = harness;
+        try {
+            harness.createControl$.next();
+            const onClose = harness.attachPopupToObject.mock.calls[0][1].extraProps?.onClose;
+            expect(onClose).toBeTypeOf('function');
+            if (typeof onClose === 'function') {
+                onClose();
+            }
+            expect(harness.popupDisposable.dispose).toHaveBeenCalledOnce();
+            expect(harness.selectedObjects.size).toBe(1);
+            expect(harness.transformer.clearSelectedObjects).not.toHaveBeenCalled();
+        } finally {
+            controller.dispose();
+            harness.injector.dispose();
+        }
+    });
+
+    it('keeps generic drawing edit and delete callbacks in the mobile controller', async () => {
+        const harness = createControllerHarness(DrawingTypeEnum.DRAWING_TABLE, true);
+        const { controller } = harness;
+        try {
+            harness.createControl$.next();
+            const popupOptions = harness.attachPopupToObject.mock.calls[0][1];
+            const extraProps = popupOptions.extraProps as typeof popupOptions.extraProps & {
+                onEdit?: () => unknown;
+                onDelete?: () => unknown;
+            };
+
+            expect(popupOptions.componentKey).toBe(MOBILE_DOC_ELEMENT_MENU);
+            await extraProps?.onEdit?.();
+            expect(harness.executeCommand).toHaveBeenCalledWith(EditDocDrawingOperation.id, {
+                unitId: 'doc-1',
+                subUnitId: 'doc-1',
+                drawingId: 'drawing-1',
+            });
+
+            await extraProps?.onDelete?.();
+            expect(harness.executeCommand).toHaveBeenCalledWith(RemoveDocDrawingCommand.id, {
+                unitId: 'doc-1',
+                drawings: [{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'drawing-1' }],
+            });
+        } finally {
+            controller.dispose();
+            harness.injector.dispose();
+        }
+    });
+
+    it.each([false, true])('removes the floating menu and selection handles when its drawing is deleted (mobile: %s)', (mobile) => {
+        const { controller, createControl$, injector, popupDisposable, remove$, transformer } = createControllerHarness(DrawingTypeEnum.DRAWING_IMAGE, mobile);
+        try {
+            createControl$.next();
+            remove$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'another-drawing' }]);
+            expect(popupDisposable.dispose).not.toHaveBeenCalled();
+            remove$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'drawing-1' }]);
+            expect(popupDisposable.dispose).toHaveBeenCalledOnce();
+            expect(transformer.clearSelectedObjects).toHaveBeenCalledOnce();
+        } finally {
+            controller.dispose();
+            injector.dispose();
+        }
+    });
+    it.each([false, true])('keeps an active popup during refresh and removes it after the selected drawing is deleted (mobile: %s)', (mobile) => {
+        const { controller, clearControl$, createControl$, injector, popupDisposable, selectedObjects } = createControllerHarness(DrawingTypeEnum.DRAWING_IMAGE, mobile);
 
         try {
             createControl$.next();
@@ -161,9 +268,8 @@ describe('DocDrawingPopupMenuController', () => {
         }
     });
 
-    it('removes an active popup when document editing is revoked even if drawing focus is empty', () => {
-        const { createControl$, injector, popupDisposable } = createControllerHarness();
-        const controller = injector.get(DocDrawingPopupMenuController);
+    it.each([false, true])('removes an active popup when document editing is revoked even if drawing focus is empty (mobile: %s)', (mobile) => {
+        const { controller, createControl$, injector, popupDisposable } = createControllerHarness(DrawingTypeEnum.DRAWING_IMAGE, mobile);
 
         try {
             createControl$.next();
@@ -175,6 +281,57 @@ describe('DocDrawingPopupMenuController', () => {
         } finally {
             controller.dispose();
             injector.dispose();
+        }
+    });
+
+    it('uses the mobile drawing menu for images and charts', () => {
+        const imageHarness = createControllerHarness(DrawingTypeEnum.DRAWING_IMAGE, true);
+        const imageController = imageHarness.controller;
+
+        try {
+            imageHarness.createControl$.next();
+            expect(imageHarness.attachPopupToObject).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({
+                    componentKey: COMPONENT_MOBILE_IMAGE_POPUP_MENU,
+                    extraProps: expect.objectContaining({
+                        variant: 'doc-floating-toolbar',
+                        menuItems: [
+                            expect.objectContaining({ commandId: EditDocDrawingOperation.id }),
+                            expect.objectContaining({ commandId: OpenImageCropOperation.id }),
+                            expect.objectContaining({ commandId: RemoveDocDrawingCommand.id }),
+                        ],
+                    }),
+                }),
+                'doc-1'
+            );
+        } finally {
+            imageController.dispose();
+            imageHarness.injector.dispose();
+        }
+
+        const chartHarness = createControllerHarness(DrawingTypeEnum.DRAWING_CHART, true);
+        const chartController = chartHarness.controller;
+
+        try {
+            chartHarness.createControl$.next();
+            expect(chartHarness.attachPopupToObject).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({
+                    componentKey: COMPONENT_MOBILE_IMAGE_POPUP_MENU,
+                    extraProps: expect.objectContaining({
+                        variant: 'doc-chart-floating-toolbar',
+                        menuItems: [
+                            expect.objectContaining({ commandId: EditDocDrawingOperation.id, label: 'docs-drawing-ui.image-popup.edit' }),
+                            expect.objectContaining({ commandId: RemoveDocDrawingCommand.id }),
+                        ],
+                    }),
+                }),
+                'doc-1'
+            );
+        } finally {
+            chartController.dispose();
+            chartHarness.injector.dispose();
         }
     });
 });

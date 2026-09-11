@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'drawing-ui': {
+        mobile: { close: 'Закрыть', more: 'Больше' },
         'image-cropper': {
             error: 'Невозможно обрезать не изображения.',
         },
@@ -88,6 +89,8 @@ const locale: typeof enUS = {
                 lock: 'Заблокировать пропорции (%)',
             },
             crop: {
+                cancel: 'Отмена',
+                apply: 'Готово',
                 title: 'Обрезка',
                 start: 'Начать обрезку',
                 mode: 'Свободный',

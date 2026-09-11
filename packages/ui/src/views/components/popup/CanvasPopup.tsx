@@ -18,9 +18,9 @@ import type { ReactNode } from 'react';
 import type { IPopup } from '../../../services/popup/canvas-popup.service';
 import { useMemo } from 'react';
 import { animationFrameScheduler, combineLatest, map, of, throttleTime } from 'rxjs';
-import { ComponentManager } from '../../../common';
+import { ComponentManager } from '../../../common/component-manager';
 import { ICanvasPopupService } from '../../../services/popup/canvas-popup.service';
-import { connectInjector, useDependency, useObservable, useObservableRef } from '../../../utils/di';
+import { RediContext, useDependency, useObservable, useObservableRef } from '../../../utils/di';
 import { RectPopup } from './RectPopup';
 
 interface ISingleCanvasPopupProps {
@@ -107,23 +107,24 @@ export const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) 
 
 export function CanvasPopup() {
     const popupService = useDependency(ICanvasPopupService);
-    const componentManager = useDependency(ComponentManager);
     const popups = useObservable(popupService.popups$, undefined, true);
 
-    return popups.map((item) => {
-        const [key, popup] = item;
-        const Component = componentManager.get(popup.componentKey);
-        const PopupComponent = Component && popup.connectorInjector
-            ? connectInjector(Component, popup.connectorInjector)
-            : Component;
+    return popups.map(([key, popup]) => (
+        <SingleCanvasPopup key={key} popup={popup}>
+            <CanvasPopupContent popup={popup} />
+        </SingleCanvasPopup>
+    ));
+}
 
-        return (
-            <SingleCanvasPopup
-                key={key}
-                popup={popup}
-            >
-                {PopupComponent && <PopupComponent popup={popup} />}
-            </SingleCanvasPopup>
-        );
-    });
+function CanvasPopupContent({ popup }: { popup: IPopup }) {
+    const componentManager = useDependency(ComponentManager);
+    const Component = componentManager.get(popup.componentKey);
+    const connectorContext = useMemo(() => ({ injector: popup.connectorInjector ?? null }), [popup.connectorInjector]);
+    if (!Component) {
+        return null;
+    }
+    const content = <Component popup={popup} />;
+    return popup.connectorInjector
+        ? <RediContext.Provider value={connectorContext}>{content}</RediContext.Provider>
+        : content;
 }

@@ -24,7 +24,7 @@ import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import pkg from '../package.json';
-import { defaultPluginConfig, DOCS_DRAWING_UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { defaultPluginConfig, DOCS_DRAWING_UI_PLUGIN_CONFIG_KEY, DOCS_DRAWING_UI_PLUGIN_NAME } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
 import { DocDrawingAddRemoveController } from './controllers/doc-drawing-notification.controller';
 import { DocDrawingPrintingController } from './controllers/doc-drawing-printing.controller';
@@ -51,7 +51,7 @@ import { DocRefreshDrawingsService } from './services/doc-refresh-drawings.servi
 )
 export class UniverDocsDrawingUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_DOC;
-    static override pluginName = 'DOC_DRAWING_UI_PLUGIN';
+    static override pluginName = DOCS_DRAWING_UI_PLUGIN_NAME;
     static override packageName = pkg.name;
     static override version = pkg.version;
 

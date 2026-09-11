@@ -22,11 +22,26 @@ import { VIEWPORT_KEY } from '../basics/docs-view-key';
 import { DocViewScaleService, resolveDocFitPaddingX } from './doc-view-scale';
 
 export class DocPageLayoutService extends Disposable implements IRenderModule {
+    private _bottomReserve = 0;
+
     constructor(
         private _context: IRenderContext<DocumentDataModel>,
         @Inject(DocViewScaleService) private readonly _docViewScaleService: DocViewScaleService
     ) {
         super();
+    }
+
+    setBottomReserve(height: number): void {
+        const bottomReserve = Math.max(0, height);
+        if (bottomReserve === this._bottomReserve) {
+            return;
+        }
+        this._bottomReserve = bottomReserve;
+        this.calculatePagePosition();
+    }
+
+    resolveSceneHeight(contentHeight: number): number {
+        return contentHeight + this._bottomReserve / Math.max(this._docViewScaleService.getViewScale(), 0.01);
     }
 
     calculatePagePosition() {
@@ -78,6 +93,7 @@ export class DocPageLayoutService extends Disposable implements IRenderModule {
         } else {
             sceneHeight = docsHeight + pageMarginTop * 2;
         }
+        sceneHeight = this.resolveSceneHeight(sceneHeight);
 
         scene.transformByState({ width: sceneWidth, height: sceneHeight });
 

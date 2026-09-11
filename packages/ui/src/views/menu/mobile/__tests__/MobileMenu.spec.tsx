@@ -28,12 +28,15 @@ import {
 } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ComponentManager, IconManager } from '../../../../common';
+import { ComponentManager } from '../../../../common/component-manager';
+import { IconManager } from '../../../../common/icon-manager';
 import enUS from '../../../../locale/en-US';
 import { MenuItemType } from '../../../../services/menu/menu';
 import { IMenuManagerService, MenuManagerService } from '../../../../services/menu/menu-manager.service';
 import { RediProvider } from '../../../../utils/di';
 import { MobileMenu } from '../MobileMenu';
+
+const injectors: Injector[] = [];
 
 function renderWithDependencies(
     schemas: IMenuSchema[],
@@ -41,6 +44,7 @@ function renderWithDependencies(
     props?: Pick<ComponentProps<typeof MobileMenu>, 'showHeader' | 'onNavigationChange' | 'presentation'>
 ) {
     const injector = new Injector();
+    injectors.push(injector);
     injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([LocaleService]);
     injector.get(LocaleService).load({ [LocaleType.EN_US]: enUS });
@@ -72,9 +76,118 @@ function renderWithDependencies(
     };
 }
 
-afterEach(cleanup);
+afterEach(() => {
+    cleanup();
+    injectors.splice(0).forEach((injector) => injector.dispose());
+});
 
 describe('MobileMenu', () => {
+    it('shows the selected option label instead of its persisted identifier', () => {
+        const value$ = new BehaviorSubject('wideScreen16By9');
+        renderWithDependencies([{
+            key: 'size',
+            order: 0,
+            item: {
+                id: 'size',
+                type: MenuItemType.SELECTOR,
+                title: 'Page size',
+                value$,
+                selections: [
+                    { value: 'wideScreen16By9', label: 'Widescreen (16:9)' },
+                    { value: 'standard4By3', label: 'Standard (4:3)' },
+                ],
+            },
+        }], vi.fn());
+        expect(screen.getByRole('button', { name: 'Page size Widescreen (16:9)' })).toBeTruthy();
+        act(() => value$.next('standard4By3'));
+        expect(screen.getByRole('button', { name: 'Page size Standard (4:3)' })).toBeTruthy();
+        expect(screen.queryByText('wideScreen16By9')).toBeNull();
+    });
+
+    it('does not expose a custom picker internal identifier as its current label', () => {
+        renderWithDependencies([{
+            key: 'theme',
+            order: 0,
+            item: {
+                id: 'theme',
+                type: MenuItemType.SELECTOR,
+                title: 'Theme',
+                value$: new BehaviorSubject('office'),
+                selections: [{ label: { name: 'plain-custom-label', selectable: false } }],
+            },
+        }], vi.fn());
+        expect(screen.getByRole('button', { name: 'Theme' })).toBeTruthy();
+        expect(screen.queryByText('office')).toBeNull();
+    });
+
+    it.each(['drawer', 'context-bar'] as const)('preserves selection commands and option overrides in %s', (presentation) => {
+        const onOptionSelect = vi.fn();
+        renderWithDependencies([{
+            key: 'insert',
+            order: 0,
+            item: {
+                id: 'insert.menu',
+                type: MenuItemType.SELECTOR,
+                title: 'Insert',
+                selectionsCommandId: 'insert.command',
+                selections: [
+                    { label: 'Basic', value: 'basic' },
+                    { label: 'Special', value: 'special', commandId: 'special.command' },
+                ],
+            },
+        }], onOptionSelect, { presentation });
+        fireEvent.click(screen.getByRole(presentation === 'drawer' ? 'button' : 'menuitem', { name: 'Insert' }));
+        fireEvent.click(screen.getByRole(presentation === 'drawer' ? 'button' : 'menuitem', { name: 'Basic' }));
+        expect(onOptionSelect).toHaveBeenLastCalledWith(expect.objectContaining({ commandId: 'insert.command', value: 'basic' }));
+        fireEvent.click(screen.getByRole(presentation === 'drawer' ? 'button' : 'menuitem', { name: 'Special' }));
+        expect(onOptionSelect).toHaveBeenLastCalledWith(expect.objectContaining({ commandId: 'special.command', value: 'special' }));
+    });
+
+    it('forwards a custom picker value to its selector command', () => {
+        const onOptionSelect = vi.fn();
+        renderWithDependencies([{
+            key: 'picker',
+            order: 0,
+            item: {
+                id: 'picker.menu',
+                type: MenuItemType.SELECTOR,
+                title: 'Picker',
+                selectionsCommandId: 'picker.command',
+                selections: [{ label: { name: 'interactive-button-label' }, value: 0 }],
+            },
+        }], onOptionSelect);
+        fireEvent.click(screen.getByRole('button', { name: 'Picker' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Increase' }));
+        expect(onOptionSelect).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ commandId: 'picker.command', value: 1 }));
+    });
+
+    it('renders quick-layout groups as touch-friendly tiles', () => {
+        const onOptionSelect = vi.fn();
+        renderWithDependencies([{
+            key: 'common',
+            order: 0,
+            title: 'Common',
+            quickLayout: 'tile',
+            quickColumns: 3,
+            children: [{
+                key: 'image',
+                order: 0,
+                item: { id: 'image', type: MenuItemType.BUTTON, title: 'Image' },
+            }, {
+                key: 'table',
+                order: 1,
+                item: { id: 'table', type: MenuItemType.BUTTON, title: 'Table' },
+            }],
+        }], onOptionSelect);
+
+        expect(screen.getByText('Common')).toBeTruthy();
+        const image = screen.getByRole('button', { name: 'Image' });
+        expect(image.className).toContain('univer-min-h-20');
+        expect(image.parentElement?.getAttribute('style')).toContain('repeat(3');
+        fireEvent.click(image);
+        expect(onOptionSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'image' }));
+    });
+
     it('renders grouped context menu items as a horizontal text-only bar', () => {
         const onOptionSelect = vi.fn();
         renderWithDependencies([{
@@ -99,7 +212,11 @@ describe('MobileMenu', () => {
         const bar = document.querySelector('[data-u-comp="mobile-context-menu-bar"]');
         const copy = screen.getByRole('menuitem', { name: 'Copy' });
         expect(bar).toBeTruthy();
+        expect(bar?.className).toContain('univer-h-10');
+        expect(bar?.className).toContain('univer-text-xs');
         expect(copy.querySelector('svg')).toBeNull();
+        expect(copy.className).toContain('univer-min-w-[60px]');
+        expect(copy.className).toContain('univer-px-3');
         expect(copy.className).toContain('univer-snap-start');
         expect(copy.className).toContain('univer-outline-none');
 
@@ -324,6 +441,37 @@ describe('MobileMenu', () => {
 
         act(() => activated$.next(true));
         expect(toggle.getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('keeps button-selector choices available beside auxiliary submenu items', () => {
+        const onOptionSelect = vi.fn();
+
+        renderWithDependencies([{
+            key: 'color',
+            order: 0,
+            item: {
+                id: 'color.menu',
+                type: MenuItemType.BUTTON_SELECTOR,
+                title: 'Color',
+                value$: new BehaviorSubject('black'),
+                selections: [{ label: 'Black', value: 'black', commandId: 'color.command' }],
+            },
+            children: [{
+                key: 'color.reset',
+                order: 0,
+                item: { id: 'color.reset', type: MenuItemType.BUTTON, title: 'Reset' },
+            }],
+        }], onOptionSelect);
+
+        fireEvent.click(screen.getByRole('button', { name: /Color/ }));
+        fireEvent.click(screen.getByRole('button', { name: /Color/ }));
+        fireEvent.click(screen.getByRole('button', { name: 'Black' }));
+
+        expect(onOptionSelect).toHaveBeenCalledWith(expect.objectContaining({
+            id: 'color.menu',
+            commandId: 'color.command',
+            value: 'black',
+        }));
     });
 
     it('executes every supported actionable menu type with its command metadata', () => {

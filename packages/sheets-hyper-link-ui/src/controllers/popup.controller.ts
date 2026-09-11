@@ -38,13 +38,13 @@ import {
 } from '@univerjs/sheets';
 import { HoverManagerService, HoverRenderController, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { debounceTime, map, switchMap } from 'rxjs';
-import { SheetsHyperLinkPopupService } from '../services/popup.service';
+import { ISheetsHyperLinkPopupService } from '../services/popup.service';
 import { HyperLinkEditSourceType } from '../types/enums/edit-source';
 
 export class SheetsHyperLinkPopupController extends Disposable {
     constructor(
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
-        @Inject(SheetsHyperLinkPopupService) private readonly _sheetsHyperLinkPopupService: SheetsHyperLinkPopupService,
+        @Inject(ISheetsHyperLinkPopupService) private readonly _sheetsHyperLinkPopupService: ISheetsHyperLinkPopupService,
         @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService,
         @Inject(IPermissionService) private readonly _permissionService: IPermissionService,
         @Inject(SheetPermissionCheckController) private readonly _sheetPermissionCheckController: SheetPermissionCheckController,

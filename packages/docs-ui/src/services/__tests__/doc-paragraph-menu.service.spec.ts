@@ -1353,6 +1353,7 @@ function createService(options: {
     inputBefore$?: Subject<unknown>;
     keydown$?: Subject<unknown>;
     layoutInteractionService?: DocLayoutInteractionService;
+    mobile?: boolean;
     replaceDocRanges?: ReturnType<typeof vi.fn>;
     scrollAfter$?: { subscribeEvent: (callback: (event: { scrollY: number }) => void) => { dispose: () => void } };
     selectionStart$?: Subject<unknown>;
@@ -1439,7 +1440,10 @@ function createService(options: {
             }),
             permissionPointUpdate$: new Subject(),
         } as never,
-        options.layoutInteractionService ?? new DocLayoutInteractionService()
+        options.layoutInteractionService ?? new DocLayoutInteractionService(),
+        {
+            getContextValue: () => options.mobile ?? false,
+        } as never
     );
 }
 

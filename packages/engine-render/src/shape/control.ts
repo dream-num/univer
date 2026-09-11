@@ -14,4 +14,20 @@
  * limitations under the License.
  */
 
-export class Control {}
+import { Vector2 } from '../basics/vector2';
+import { Rect } from './rect';
+
+const CONTROL_TOUCH_HIT_RADIUS = 22;
+
+/** A precise mouse handle with a zoom-independent touch target. */
+export class Control extends Rect {
+    getTouchHitDistance(coord: Vector2): number {
+        const center = this.ancestorTransform.applyPoint(new Vector2(this.width / 2, this.height / 2));
+        const scale = this.getScene()?.getAncestorScale();
+        const distance = Math.hypot(
+            (coord.x - center.x) * (scale?.scaleX ?? 1),
+            (coord.y - center.y) * (scale?.scaleY ?? 1)
+        );
+        return distance <= CONTROL_TOUCH_HIT_RADIUS || this.isHit(coord) ? distance : Number.POSITIVE_INFINITY;
+    }
+}

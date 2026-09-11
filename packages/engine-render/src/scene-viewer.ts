@@ -15,6 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import type { DeviceType } from './basics/i-events';
 import type { IObjectFullState } from './basics/interfaces';
 import type { IViewportInfo, Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
@@ -124,14 +125,14 @@ export class SceneViewer extends BaseObject {
     }
 
     // Determine the uniquely selected object
-    pick(coord: Vector2) {
+    pick(coord: Vector2, deviceType?: DeviceType) {
         if (this._activeSubScene === undefined) {
             return;
         }
 
         const tCoord = this.transform.invert().applyPoint(coord);
 
-        return this._activeSubScene?.pick(tCoord);
+        return this._activeSubScene?.pick(tCoord, deviceType);
     }
 
     override dispose() {

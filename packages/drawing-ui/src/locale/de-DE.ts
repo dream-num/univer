@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'drawing-ui': {
+        mobile: { close: 'Schließen', more: 'Mehr' },
         'image-cropper': {
             error: 'Nicht-Bildobjekte können nicht zugeschnitten werden.',
         },
@@ -88,6 +89,8 @@ const locale: typeof enUS = {
                 lock: 'Verhältnis sperren (%)',
             },
             crop: {
+                cancel: 'Abbrechen',
+                apply: 'Fertig',
                 title: 'Zuschneiden',
                 start: 'Zuschneiden starten',
                 mode: 'Frei',

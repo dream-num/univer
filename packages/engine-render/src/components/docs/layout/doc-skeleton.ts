@@ -1200,6 +1200,10 @@ export class DocumentSkeleton extends Skeleton {
 
     private readonly _isolateIncrementalPublications: boolean;
 
+    private _modernPageWidth: number | undefined;
+
+    private _modernHorizontalMargin: number | undefined;
+
     constructor(
         private _docViewModel: DocumentViewModel,
         localeService: LocaleService,
@@ -1263,6 +1267,8 @@ export class DocumentSkeleton extends Skeleton {
         anchor?: number;
         priorityAnchor?: number;
         invalidation?: IDocumentLayoutInvalidation;
+        modernPageWidth?: number;
+        modernHorizontalMargin?: number;
         bounds?: IViewportInfo;
         reuseUnaffectedTail?: boolean;
         /** The caller proved this edit only changes offset-preserving render metadata. */
@@ -1271,6 +1277,8 @@ export class DocumentSkeleton extends Skeleton {
         /** Cooperative schedulers wait for code-split dictionaries before publishing. */
         waitForHyphenationPatterns?: boolean;
     }): number {
+        this._modernPageWidth = options?.modernPageWidth;
+        this._modernHorizontalMargin = options?.modernHorizontalMargin;
         this.cancelIncrementalLayout();
         this._externalLayoutProgress = null;
         this._externalProtectedPages = null;
@@ -1787,6 +1795,12 @@ export class DocumentSkeleton extends Skeleton {
         }
 
         const previousPage = previousSkeleton.pages[0];
+        // Typing can interrupt a viewport reflow before its new geometry replaces
+        // the last complete checkpoint. Reusing that prefix would restore the old width.
+        if (!hasCompatiblePageGeometry(previousPage, prepareSectionBreakConfig(ctx, 0))) {
+            return null;
+        }
+
         const previousSection = previousPage.sections[0];
         const previousColumn = previousSection?.columns[0];
         if (
@@ -4960,6 +4974,8 @@ export class DocumentSkeleton extends Skeleton {
             skeleton,
             skeletonResourceReference,
             docsConfig,
+            modernPageWidth: this._modernPageWidth,
+            modernHorizontalMargin: this._modernHorizontalMargin,
             layoutStartPointer: {
                 '': null, // '' is the main document.
             },

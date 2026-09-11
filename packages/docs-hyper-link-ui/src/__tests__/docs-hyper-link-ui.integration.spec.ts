@@ -20,10 +20,13 @@ import {
     CustomRangeType,
     ICommandService,
     IUniverInstanceService,
+    toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import { IDialogService } from '@univerjs/ui';
+import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AddDocHyperLinkCommand } from '../commands/commands/add-link.command';
 import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
@@ -186,6 +189,14 @@ describe('docs-hyper-link-ui integration', () => {
     it('shows and hides the info popup when the executed selection enters and leaves a hyperlink', async () => {
         const popupManagerStub = createPopupManagerStub();
         injector.add([DocCanvasPopManagerService, { useValue: popupManagerStub as unknown as DocCanvasPopManagerService }]);
+        injector.add([IDialogService, {
+            useValue: {
+                close: () => {},
+                closeAll: () => {},
+                getDialogs$: () => of([]),
+                open: () => toDisposable(() => {}),
+            },
+        }]);
         injector.add([DocHyperLinkPopupService]);
         injector.add([DocHyperLinkSelectionController]);
 

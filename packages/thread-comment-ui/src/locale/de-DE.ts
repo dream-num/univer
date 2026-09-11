@@ -18,7 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'thread-comment-ui': {
+        mobile: { back: 'Zurück' },
         panel: {
+            title: 'Kommentarverwaltung',
             empty: 'Noch keine Kommentare',
             reset: 'Filter zurücksetzen',
             addComment: 'Kommentar hinzufügen',

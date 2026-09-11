@@ -51,4 +51,26 @@ describe('MobileRibbon', () => {
             act(() => rootUnitType$.next(UniverInstanceType.UNIVER_SHEET));
         }).not.toThrow();
     });
+
+    it('keeps a stable hook order when the docs workbench becomes ready', () => {
+        const rootUnitType$ = new BehaviorSubject<UniverInstanceType | null>(null);
+        const injector = new Injector([
+            [LocaleService, { useValue: { t: (key: string) => key } }],
+            [IRibbonService, {
+                useValue: {
+                    ribbon$: of([]),
+                    activatedTab$: of(''),
+                    setActivatedTab: () => {},
+                },
+            }],
+            [IWorkbenchService, { useValue: { rootUnitType$ } }],
+        ]);
+        const ConnectedMobileRibbon = connectInjector(MobileRibbon, injector);
+
+        render(<ConnectedMobileRibbon />);
+
+        expect(() => {
+            act(() => rootUnitType$.next(UniverInstanceType.UNIVER_DOC));
+        }).not.toThrow();
+    });
 });

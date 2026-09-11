@@ -15,6 +15,7 @@
  */
 
 export const DOCS_DRAWING_UI_PLUGIN_CONFIG_KEY = 'docs-drawing-ui.config';
+export const DOCS_DRAWING_UI_PLUGIN_NAME = 'DOC_DRAWING_UI_PLUGIN';
 
 export const configSymbol = Symbol(DOCS_DRAWING_UI_PLUGIN_CONFIG_KEY);
 

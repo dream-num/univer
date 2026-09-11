@@ -18,11 +18,12 @@
  * @vitest-environment jsdom
  */
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../locale/en-US';
 import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Dropdown } from '../Dropdown';
+import { MobileOverlayContext } from '../mobile-overlay-context';
 import { MobileDropdown } from '../MobileDropdown';
 
 afterEach(() => {
@@ -90,8 +91,63 @@ describe('Dropdown', () => {
 
         const dialog = screen.getByRole('dialog');
         expect(dialog.textContent).toContain('Overlay Content');
-        expect(dialog.classList.contains('!univer-bottom-0')).toBe(true);
+        expect(dialog.style.bottom).toBe('0px');
         expect(dialog.style.maxHeight).toBe('80vh');
         expect(screen.getByText(enUS.design.Accessibility.menu)).toBeTruthy();
+    });
+
+    it('registers a non-modal object surface and releases it when closed', () => {
+        const release = vi.fn();
+        const onMount = vi.fn((_element: HTMLElement) => release);
+        const overlay = { modal: false, contentProps: {}, onMount };
+        const app = (open: boolean) => (
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <MobileOverlayContext.Provider value={overlay}>
+                    <button type="button">Canvas action</button>
+                    <MobileDropdown overlay={<div>Object options</div>} open={open}>
+                        <button type="button">Trigger</button>
+                    </MobileDropdown>
+                </MobileOverlayContext.Provider>
+            </ConfigProvider>
+        );
+        const view = render(app(true));
+        const dialog = screen.getByRole('dialog');
+        expect(onMount).toHaveBeenCalledWith(dialog);
+        expect(dialog.getAttribute('aria-modal')).not.toBe('true');
+        expect(screen.getByRole('button', { name: 'Canvas action' })).toBeTruthy();
+        expect(dialog.style.height).toBe('');
+        view.rerender(app(false));
+        expect(release).toHaveBeenCalledTimes(1);
+    });
+
+    it('applies host sizing and focus behavior independently of modality', async () => {
+        const onOpenAutoFocus = vi.fn((event: Event) => event.preventDefault());
+        const onCloseAutoFocus = vi.fn((event: Event) => event.preventDefault());
+        const overlay = {
+            modal: false,
+            contentProps: { style: { height: 240, maxHeight: 320 }, onOpenAutoFocus, onCloseAutoFocus },
+            onMount: vi.fn(),
+        };
+        const app = (open: boolean) => (
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <MobileOverlayContext.Provider value={overlay}>
+                    <input aria-label="Editor" />
+                    <MobileDropdown overlay={<input aria-label="Options" />} open={open}>
+                        <button type="button">Trigger</button>
+                    </MobileDropdown>
+                </MobileOverlayContext.Provider>
+            </ConfigProvider>
+        );
+        const view = render(app(false));
+        const editor = screen.getByRole('textbox', { name: 'Editor' });
+        editor.focus();
+        view.rerender(app(true));
+        expect(screen.getByRole('dialog').style.height).toBe('240px');
+        expect(screen.getByRole('dialog').style.maxHeight).toBe('320px');
+        expect(document.activeElement).toBe(editor);
+        expect(onOpenAutoFocus).toHaveBeenCalledOnce();
+        view.rerender(app(false));
+        await waitFor(() => expect(onCloseAutoFocus).toHaveBeenCalledOnce());
+        expect(document.activeElement).toBe(editor);
     });
 });

@@ -14,11 +14,23 @@
  * limitations under the License.
  */
 
-import { Disposable, DocumentDataModel, Inject, IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { IDisposable, ITextRangeParam } from '@univerjs/core';
+import {
+    Disposable,
+    DocumentDataModel,
+    ICommandService,
+    Inject,
+    IPermissionService,
+    IUniverInstanceService,
+    LocaleService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { canEditDocumentTargets, DocSelectionManagerService, getDocumentEntityParentPermissionObjectIds, getDocumentEntityPermissionObjectId } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { IDialogService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
+import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
 import { DocHyperLinkEdit } from '../views/DocHyperLinkEdit';
 import { DocLinkPopup } from '../views/DocLinkPopup';
 
@@ -30,8 +42,6 @@ export interface ILinkInfo {
     startIndex: number;
     endIndex: number;
 }
-
-type LinkPopupDisposable = ReturnType<DocCanvasPopManagerService['attachPopupToRange']>;
 
 const INFO_POPUP_HIDE_DELAY = 150;
 
@@ -50,20 +60,23 @@ export class DocHyperLinkPopupService extends Disposable {
     readonly editingLink$ = this._editingLink$.asObservable();
     readonly showingLink$ = this._showingLink$.asObservable();
 
-    private _editPopup: LinkPopupDisposable | null = null;
+    private _editPopup: IDisposable | null = null;
     private _editPopupUnitId: string | null = null;
-    private _infoPopup: LinkPopupDisposable | null = null;
+    private _infoPopup: IDisposable | null = null;
     private _infoPopupPinned = false;
     private _infoPopupHideTimer: ReturnType<typeof setTimeout> | null = null;
     private _infoPopupSuppressed = false;
     private _infoPopupSuppressionTimer: ReturnType<typeof setTimeout> | null = null;
 
     constructor(
-        @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopupManagerService: DocCanvasPopManagerService,
+        @Inject(DocCanvasPopManagerService) protected readonly _docCanvasPopupManagerService: DocCanvasPopManagerService,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IPermissionService private readonly _permissionService: IPermissionService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IDialogService protected readonly _dialogService: IDialogService,
+        @Inject(LocaleService) protected readonly _localeService: LocaleService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
@@ -114,7 +127,7 @@ export class DocHyperLinkPopupService extends Disposable {
         return this._infoPopupPinned;
     }
 
-    showEditPopup(unitId: string, linkInfo: ILinkInfo | null): LinkPopupDisposable | null {
+    showEditPopup(unitId: string, linkInfo: ILinkInfo | null): IDisposable | null {
         if (!this.canEditLink(unitId, linkInfo)) {
             return null;
         }
@@ -144,15 +157,7 @@ export class DocHyperLinkPopupService extends Disposable {
         }
 
         if (activeRange) {
-            this._editPopup = this._docCanvasPopupManagerService.attachPopupToRange(
-                activeRange,
-                {
-                    componentKey: DocHyperLinkEdit.componentKey,
-                    direction: 'bottom',
-                    offset: [0, 10],
-                },
-                unitId
-            );
+            this._editPopup = this._openEditSurface(activeRange, unitId);
             this._editPopupUnitId = unitId;
             return this._editPopup;
         }
@@ -162,12 +167,13 @@ export class DocHyperLinkPopupService extends Disposable {
 
     hideEditPopup() {
         this._editingLink$.next(null);
-        this._editPopup?.dispose();
+        const popup = this._editPopup;
         this._editPopup = null;
+        popup?.dispose();
         this._editPopupUnitId = null;
     }
 
-    showInfoPopup(info: ILinkInfo, options?: { pinned?: boolean }): LinkPopupDisposable | null | undefined {
+    showInfoPopup(info: ILinkInfo, options?: { pinned?: boolean }): IDisposable | null | undefined {
         this.cancelScheduledHideInfoPopup();
         if (this._infoPopupSuppressed) {
             return;
@@ -193,7 +199,21 @@ export class DocHyperLinkPopupService extends Disposable {
         this._infoPopupPinned = options?.pinned ?? false;
         this._showingLink$.next({ unitId, linkId, segmentId, segmentPage, startIndex, endIndex });
 
-        this._infoPopup = this._docCanvasPopupManagerService.attachPopupToRange(
+        this._infoPopup = this._openInfoSurface(info);
+        return this._infoPopup;
+    }
+
+    protected _openEditSurface(activeRange: ITextRangeParam, unitId: string): IDisposable {
+        return this._docCanvasPopupManagerService.attachPopupToRange(activeRange, {
+            componentKey: DocHyperLinkEdit.componentKey,
+            direction: 'bottom',
+            offset: [0, 10],
+        }, unitId);
+    }
+
+    protected _openInfoSurface(info: ILinkInfo, componentKey = DocLinkPopup.componentKey): IDisposable {
+        const { unitId, linkId, segmentId, segmentPage, startIndex, endIndex } = info;
+        return this._docCanvasPopupManagerService.attachPopupToRange(
             {
                 collapsed: false,
                 startOffset: startIndex,
@@ -202,7 +222,18 @@ export class DocHyperLinkPopupService extends Disposable {
                 segmentPage,
             },
             {
-                componentKey: DocLinkPopup.componentKey,
+                componentKey,
+                extraProps: {
+                    onEdit: () => {
+                        this.hideInfoPopup();
+                        this.showEditPopup(unitId, info);
+                    },
+                    onDelete: async () => {
+                        if (await this._commandService.executeCommand(DeleteDocHyperLinkCommand.id, { unitId, linkId, segmentId })) {
+                            this.hideInfoPopup();
+                        }
+                    },
+                },
                 direction: 'top-center',
                 multipleDirection: 'top',
                 offset: [0, 10],
@@ -212,15 +243,15 @@ export class DocHyperLinkPopupService extends Disposable {
             },
             unitId
         );
-        return this._infoPopup;
     }
 
     hideInfoPopup() {
         this.cancelScheduledHideInfoPopup();
         this._infoPopupPinned = false;
         this._showingLink$.next(null);
-        this._infoPopup?.dispose();
+        const popup = this._infoPopup;
         this._infoPopup = null;
+        popup?.dispose();
     }
 
     scheduleHideInfoPopup() {

@@ -84,6 +84,8 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
     private _focusEditorUnitId: Nullable<string>;
 
+    private _preservedHostUnitId: Nullable<string>;
+
     private readonly _blur$ = new Subject();
     readonly blur$ = this._blur$.asObservable();
 
@@ -151,6 +153,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
     blur(force?: boolean) {
         const focusingEditor = this.getFocusEditor();
+        const preservedHostUnitId = this._preservedHostUnitId;
         if (force) {
             focusingEditor?.setSelectionRanges([]);
         }
@@ -160,6 +163,13 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this._contextService.setContextValue(FOCUSING_EDITOR_STANDALONE, false);
         this._contextService.setContextValue(FOCUSING_COMMENT_EDITOR, false);
         this._setFocusId(null);
+        this._preservedHostUnitId = null;
+        if (
+            preservedHostUnitId &&
+            this._univerInstanceService.getUnit(preservedHostUnitId, UniverInstanceType.UNIVER_DOC)
+        ) {
+            this._univerInstanceService.setCurrentUnitForType(preservedHostUnitId);
+        }
         this._blur$.next(null);
     }
 
@@ -179,6 +189,13 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             return;
         }
 
+        const currentDoc = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(
+            UniverInstanceType.UNIVER_DOC
+        );
+        this._preservedHostUnitId = this._editorRenderConfigs.get(editorUnitId)?.preserveHostFocus &&
+            currentDoc?.getUnitId() !== editorUnitId
+            ? currentDoc?.getUnitId()
+            : null;
         this._univerInstanceService.setCurrentUnitForType(editorUnitId);
         const dataStream = editor.getDocumentData().body?.dataStream ?? '';
         const valueCount = dataStream.replace(/\r?\n/g, '').length;
@@ -327,6 +344,9 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             && this._univerInstanceService.getUnitType(focusedHostId) === UniverInstanceType.UNIVER_DOC
             ? focusedHostId
             : null;
+        if (this._focusEditorUnitId === editorUnitId) {
+            this.blur();
+        }
 
         this._renderManagerService.removeRender(editorUnitId);
         editor.dispose();

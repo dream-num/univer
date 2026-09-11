@@ -72,6 +72,7 @@ import { act, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { SheetsTableMobileComponentController } from '../../../controllers/mobile/sheet-table-component.controller';
 import { SheetsTableComponentController } from '../../../controllers/sheet-table-component.controller';
 import { SheetTableThemeUIController } from '../../../controllers/sheet-table-theme-ui.controller';
 import { SheetsTableUiService } from '../../../services/sheets-table-ui.service';
@@ -88,6 +89,15 @@ const IEditorService = createIdentifier<TestEditorService>('univer.editor.servic
 const IDescriptionService = createIdentifier<TestDescriptionService>('formula.description-service');
 
 class TestComponentController extends SheetsTableComponentController {
+    closeCount = 0;
+
+    override closeFilterPanel(): void {
+        this.closeCount += 1;
+        super.closeFilterPanel();
+    }
+}
+
+class TestMobileComponentController extends SheetsTableMobileComponentController {
     closeCount = 0;
 
     override closeFilterPanel(): void {
@@ -487,6 +497,7 @@ function createTestBed(): ITestBed {
                 [SheetCanvasPopManagerService, { useClass: TestSheetCanvasPopManagerService }],
                 [IDialogService, { useClass: TestDialogService }],
                 [SheetsTableComponentController, { useClass: TestComponentController }],
+                [SheetsTableMobileComponentController, { useClass: TestMobileComponentController }],
             ];
             dependencies.forEach((dependency) => this._injector.add(dependency));
         }
@@ -996,7 +1007,7 @@ describe('sheet table view components', () => {
 
     it('shows table actions before opening a mobile filter detail drawer', () => {
         testBed = createTestBed();
-        const componentController = testBed.injector.get(SheetsTableComponentController) as TestComponentController;
+        const componentController = testBed.injector.get(SheetsTableMobileComponentController) as TestMobileComponentController;
         componentController.setCurrentTableFilterInfo({
             unitId: testBed.workbook.getUnitId(),
             subUnitId: 'sheet1',
@@ -1056,7 +1067,7 @@ describe('sheet table view components', () => {
 
     it('applies a table color filter from the mobile detail drawer', async () => {
         testBed = createTestBed();
-        const componentController = testBed.injector.get(SheetsTableComponentController) as TestComponentController;
+        const componentController = testBed.injector.get(SheetsTableMobileComponentController) as TestMobileComponentController;
         componentController.setCurrentTableFilterInfo({
             unitId: testBed.workbook.getUnitId(),
             subUnitId: 'sheet1',
@@ -1092,7 +1103,7 @@ describe('sheet table view components', () => {
             filterType: TableColumnFilterTypeEnum.manual,
             values: ['book'],
         });
-        const componentController = testBed.injector.get(SheetsTableComponentController) as TestComponentController;
+        const componentController = testBed.injector.get(SheetsTableMobileComponentController) as TestMobileComponentController;
         componentController.setCurrentTableFilterInfo({
             unitId: testBed.workbook.getUnitId(),
             subUnitId: 'sheet1',
@@ -1119,7 +1130,7 @@ describe('sheet table view components', () => {
 
     it('undoes the mobile table sort state together with the reordered rows', async () => {
         testBed = createTestBed();
-        const componentController = testBed.injector.get(SheetsTableComponentController) as TestComponentController;
+        const componentController = testBed.injector.get(SheetsTableMobileComponentController) as TestMobileComponentController;
         const unitId = testBed.workbook.getUnitId();
         const worksheet = testBed.workbook.getSheetBySheetId('sheet1')!;
         testBed.injector.get(IUniverInstanceService).focusUnit(unitId);

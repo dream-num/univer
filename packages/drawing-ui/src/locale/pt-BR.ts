@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'drawing-ui': {
+        mobile: { close: 'Fechar', more: 'Mais' },
         'image-cropper': {
             error: 'Não é possível cortar objetos que não são imagens.',
         },
@@ -88,6 +89,8 @@ const locale: typeof enUS = {
                 lock: 'Bloquear proporção (%)',
             },
             crop: {
+                cancel: 'Cancelar',
+                apply: 'Concluído',
                 title: 'Cortar',
                 start: 'Iniciar corte',
                 mode: 'Livre',

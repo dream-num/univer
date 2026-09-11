@@ -16,7 +16,14 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
-import { CustomRangeType, Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import {
+    CustomRangeType,
+    Disposable,
+    ICommandService,
+    Inject,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { DocHyperLinkPopupService } from '../services/hyper-link-popup.service';
 
@@ -40,6 +47,13 @@ export class DocHyperLinkSelectionController extends Disposable {
 
                     const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
                     const primary = ranges[0];
+                    const editing = this._docHyperLinkService.editing;
+                    // Opening the editor selects its own link; that is not a user dismissal.
+                    if (editing?.unitId === unitId &&
+                        (editing.segmentId ?? '') === (segmentId ?? '') &&
+                        primary?.startOffset === editing.startIndex && primary.endOffset === editing.endIndex + 1) {
+                        return;
+                    }
                     if (primary?.collapsed && doc) {
                         const { startOffset, endOffset, segmentPage } = primary;
                         const customRanges = doc.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges;

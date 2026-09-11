@@ -19,7 +19,9 @@ import type { LocaleKey } from '../../locale/types';
 import { CommandType, LocaleService } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { ISidebarService } from '@univerjs/ui';
-import { COMPONENT_DOC_DRAWING_PANEL } from '../../views/doc-image-panel/component-name';
+import {
+    COMPONENT_DOC_DRAWING_PANEL,
+} from '../../views/doc-image-panel/component-name';
 
 export interface IUIComponentCommandParams {
     value: string;

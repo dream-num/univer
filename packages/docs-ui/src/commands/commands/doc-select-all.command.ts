@@ -18,6 +18,7 @@ import type { DocumentDataModel, ICommand, ICustomColumnGroup, ICustomTable, IDo
 import type { ISuccinctDocRangeParam } from '@univerjs/engine-render';
 import { CommandType, DataStreamTreeTokenType, DOC_RANGE_TYPE, getParagraphContentStartOffsets, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
+import { getWordBoundaryByIndex } from '../../services/selection/word-boundary';
 
 interface ISelectAllCommandParams {
     segmentId?: string;
@@ -74,6 +75,50 @@ export const DocSelectAllCommand: ICommand<ISelectAllCommandParams> = {
             subUnitId: unitId,
         }, false, { wholeDocument });
 
+        return true;
+    },
+};
+
+export const DocSelectWordCommand: ICommand = {
+    id: 'doc.command.select-word',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const selectionManager = accessor.get(DocSelectionManagerService);
+        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const activeRange = selectionManager.getActiveTextRange();
+        if (!docDataModel || !activeRange?.collapsed || activeRange.startOffset == null) {
+            return false;
+        }
+
+        const body = docDataModel.getSelfOrHeaderFooterModel(activeRange.segmentId)?.getBody();
+        if (!body) {
+            return false;
+        }
+
+        const paragraphStarts = getParagraphContentStartOffsets(body);
+        const paragraph = body.paragraphs?.find((item) => {
+            const start = paragraphStarts.get(item.startIndex) ?? 0;
+            return start <= activeRange.startOffset && activeRange.startOffset <= item.startIndex;
+        });
+        if (!paragraph) {
+            return false;
+        }
+
+        const paragraphStart = paragraphStarts.get(paragraph.startIndex) ?? 0;
+        const content = body.dataStream.slice(paragraphStart, paragraph.startIndex);
+        const index = activeRange.startOffset - paragraphStart;
+        const boundary = getWordBoundaryByIndex(content, index, paragraphStart) ??
+            getWordBoundaryByIndex(content, index - 1, paragraphStart);
+        if (!boundary) {
+            return false;
+        }
+
+        const unitId = docDataModel.getUnitId();
+        selectionManager.replaceDocRanges([{
+            ...boundary,
+            rangeType: DOC_RANGE_TYPE.TEXT,
+        }], { unitId, subUnitId: unitId }, false);
         return true;
     },
 };

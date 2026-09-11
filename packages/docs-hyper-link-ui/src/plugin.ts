@@ -64,17 +64,18 @@ export class UniverDocsHyperLinkUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        this._injector.add([ComponentsController]);
-        this._injector.get(ComponentsController);
         const deps: Dependency[] = [
+            [ComponentsController],
             [DocHyperLinkPopupService],
             [DocHyperLinkUIController],
             [DocHyperLinkSelectionController],
         ];
+
         deps.forEach((dep) => {
             this._injector.add(dep);
         });
 
+        this._injector.get(ComponentsController);
         this._injector.get(DocHyperLinkUIController);
     }
 

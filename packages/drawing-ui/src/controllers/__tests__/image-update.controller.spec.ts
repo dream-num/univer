@@ -14,15 +14,51 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum, ImageSourceType, UniverInstanceType } from '@univerjs/core';
-import { SetDrawingSelectedOperation } from '@univerjs/drawing';
-import { Subject } from 'rxjs';
+import { ContextService, DrawingTypeEnum, ICommandService, IContextService, IImageIoService, ImageSourceType, Injector, IUniverInstanceService, LocaleService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { IDialogService, ILayoutService, IMessageService, IShortcutService } from '@univerjs/ui';
+import { NEVER, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ImageResetSizeOperation } from '../../commands/operations/image-reset-size.operation';
-import { DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX } from '../../services/drawing-render.service';
+import { DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX, DrawingRenderService } from '../../services/drawing-render.service';
+import { ImageCropperController } from '../image-cropper.controller';
 import { ImageUpdateController } from '../image-update.controller';
 
+const injectors: Injector[] = [];
+
+function createController(
+    command: ICommandService,
+    render: IRenderManagerService,
+    drawing: IDrawingManagerService,
+    dialog: IDialogService,
+    imageIo: IImageIoService,
+    instance: IUniverInstanceService,
+    drawingRender: DrawingRenderService
+) {
+    const injector = new Injector([
+        [ICommandService, { useValue: command }],
+        [IRenderManagerService, { useValue: render }],
+        [IDrawingManagerService, { useValue: drawing }],
+        [IDialogService, { useValue: dialog }],
+        [IImageIoService, { useValue: imageIo }],
+        [IUniverInstanceService, { useValue: { ...instance, getCurrentTypeOfUnit$: () => NEVER } }],
+        [DrawingRenderService, { useValue: drawingRender }],
+        [IContextService, { useClass: ContextService }],
+        [ThemeService],
+        [LocaleService],
+        [ILayoutService, { useValue: { focus: vi.fn() } }],
+        [IMessageService, { useValue: { show: vi.fn() } }],
+        [IShortcutService, { useValue: { registerShortcut: vi.fn(() => ({ dispose: vi.fn() })) } }],
+        [ImageCropperController],
+        [ImageUpdateController],
+    ]);
+    injectors.push(injector);
+    return injector.get(ImageUpdateController);
+}
+
 afterEach(() => {
+    injectors.splice(0).forEach((injector) => injector.dispose());
     vi.useRealTimers();
 });
 
@@ -63,7 +99,7 @@ describe('ImageUpdateController', () => {
             syncExecuteCommand: vi.fn(),
         };
 
-        const controller = new ImageUpdateController(
+        const controller = createController(
             commandService as never,
             {
                 getRenderUnitById: vi.fn(() => ({
@@ -118,7 +154,7 @@ describe('ImageUpdateController', () => {
         };
         const renderImages = vi.fn(async () => []);
 
-        const controller = new ImageUpdateController(
+        const controller = createController(
             { onCommandExecuted: vi.fn(() => ({ dispose: vi.fn() })), syncExecuteCommand: vi.fn() } as never,
             {
                 getRenderUnitById: vi.fn(() => ({
@@ -164,7 +200,7 @@ describe('ImageUpdateController', () => {
             finishRendering = resolve;
         }));
         const refreshTransform = vi.fn();
-        const controller = new ImageUpdateController(
+        const controller = createController(
             { onCommandExecuted: vi.fn(() => ({ dispose: vi.fn() })), syncExecuteCommand: vi.fn() } as never,
             {
                 getRenderUnitById: vi.fn(() => ({
@@ -236,7 +272,7 @@ describe('ImageUpdateController', () => {
             getDrawingByParam: vi.fn(() => imageParam),
         };
 
-        const controller = new ImageUpdateController(
+        const controller = createController(
             { onCommandExecuted: vi.fn(() => ({ dispose: vi.fn() })), syncExecuteCommand: vi.fn() } as never,
             {
                 getRenderUnitById: vi.fn(() => ({ scene })),

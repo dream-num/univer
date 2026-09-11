@@ -37,7 +37,7 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
     private _scrollingToRange = false;
 
     constructor(
-        private readonly _context: EngineRender.IRenderContext<DocumentDataModel>,
+        protected readonly _context: EngineRender.IRenderContext<DocumentDataModel>,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @IEditorService private readonly _editorService: IEditorService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService
@@ -126,7 +126,7 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
             };
     }
 
-    private _cancelPendingSelectionScroll(): void {
+    protected _cancelPendingSelectionScroll(): void {
         if (this._pendingSelectionScrollFrame != null && typeof cancelAnimationFrame !== 'undefined') {
             cancelAnimationFrame(this._pendingSelectionScrollFrame);
         }
@@ -355,12 +355,7 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
 
         const editorRenderConfig = this._editorService.getEditorRenderConfig(unitId);
         const delta = editorRenderConfig ? editorRenderConfig.backScrollOffset ?? 0 : 100;
-
-        if (top < boundTop) {
-            offsetY = top - boundTop - delta;
-        } else if (top > boundBottom - height) {
-            offsetY = top - boundBottom + height + delta;
-        }
+        offsetY = this._getVerticalScrollDelta(top, height, boundTop, boundBottom, delta);
 
         if (left < boundLeft) {
             offsetX = left - boundLeft;
@@ -368,12 +363,26 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
             offsetX = left - boundRight + ANCHOR_WIDTH;
         }
 
+        if (offsetX === 0 && offsetY === 0) {
+            return;
+        }
+
         const config = viewportMain.transViewportScroll2ScrollValue(offsetX, offsetY);
         viewportMain.scrollByBarDeltaValue(config);
     }
 
+    protected _getVerticalScrollDelta(top: number, height: number, boundTop: number, boundBottom: number, delta: number): number {
+        if (top < boundTop) {
+            return top - boundTop - delta;
+        }
+        if (top > boundBottom - height) {
+            return top - boundBottom + height + delta;
+        }
+        return 0;
+    }
+
     // Let the selection show on the current screen.
-    private _scrollToSelection() {
+    protected _scrollToSelection() {
         const activeTextRange = this._textSelectionManagerService.getActiveTextRange();
         if (activeTextRange == null) {
             return;

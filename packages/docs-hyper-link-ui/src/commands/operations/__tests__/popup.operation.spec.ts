@@ -19,6 +19,8 @@ import { CustomRangeType, ICommandService, toDisposable, Univer, UniverInstanceT
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { IDialogService } from '@univerjs/ui';
+import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DocHyperLinkPopupService } from '../../../services/hyper-link-popup.service';
 import {
@@ -75,6 +77,14 @@ describe('doc hyperlink popup operations', () => {
         injector.add([DocSelectionManagerService]);
         injector.add([DocCanvasPopManagerService, { useClass: TestDocCanvasPopManagerService as never }]);
         injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        injector.add([IDialogService, {
+            useValue: {
+                close: () => {},
+                closeAll: () => {},
+                getDialogs$: () => of([]),
+                open: () => toDisposable(() => {}),
+            },
+        }]);
         injector.add([DocHyperLinkPopupService]);
 
         univer.createUnit(UniverInstanceType.UNIVER_DOC, createDocData());

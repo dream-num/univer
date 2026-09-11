@@ -24,7 +24,7 @@ import { QuickInsertPopup } from '../views/QuickInsertPopup';
 
 export class ComponentsController extends Disposable {
     constructor(
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
         @Inject(IconManager) private readonly _iconManager: IconManager
     ) {
         super();
@@ -40,9 +40,9 @@ export class ComponentsController extends Disposable {
         }));
     }
 
-    private _registerComponents(): void {
+    protected _registerComponents(): void {
+        this._registerPopup();
         ([
-            [QuickInsertPopup.componentKey, QuickInsertPopup],
             [KeywordInputPlaceholder.componentKey, KeywordInputPlaceholder],
             [QuickInsertPlaceholder.componentKey, QuickInsertPlaceholder],
             [QuickInsertButton.componentKey, QuickInsertButton],
@@ -51,5 +51,9 @@ export class ComponentsController extends Disposable {
                 this.disposeWithMe(this._componentManager.register(key, comp));
             }
         });
+    }
+
+    protected _registerPopup(): void {
+        this.disposeWithMe(this._componentManager.register(QuickInsertPopup.componentKey, QuickInsertPopup));
     }
 }

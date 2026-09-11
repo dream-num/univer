@@ -31,6 +31,26 @@ import { MobileDrawerCoordinatorProvider } from '../components/mobile-drawer/Mob
 import { MobileSidebar } from '../components/sidebar/MobileSidebar';
 import { WorkbenchSkeleton } from '../components/workbench-skeleton/WorkbenchSkeleton';
 import { MobileKeyboardInsetContext } from './mobile-keyboard-inset-context';
+import { MobileCanvasLayoutProvider } from './MobileCanvasLayout';
+
+const MOBILE_KEYBOARD_THRESHOLD = 80;
+
+export function resolveMobileKeyboardInset(stableHeight: number, visibleBottom: number, baselineInset: number): number {
+    const keyboardInset = Math.max(0, Math.round(stableHeight - visibleBottom) - baselineInset);
+    return keyboardInset >= MOBILE_KEYBOARD_THRESHOLD ? keyboardInset : 0;
+}
+
+export function shouldUpdateMobileStableHeight(
+    stableHeight: number,
+    nextHeight: number,
+    stableWidth: number,
+    nextWidth: number,
+    editing: boolean,
+    keyboardVisible: boolean
+): boolean {
+    return nextWidth !== stableWidth ||
+        (!editing && !keyboardVisible && stableHeight - nextHeight < MOBILE_KEYBOARD_THRESHOLD);
+}
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
@@ -75,6 +95,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
     const themeSwitcherService = useDependency(ThemeSwitcherService);
 
     const contentRef = useRef<HTMLDivElement>(null);
+    const canvasContainerRef = useRef<HTMLDivElement>(null);
     const viewportRef = useRef<HTMLDivElement>(null);
     const [keyboardInset, setKeyboardInset] = useState(0);
 
@@ -143,22 +164,59 @@ export function MobileWorkbench(props: IUniverAppProps) {
 
         let stableHeight = Math.round(mountContainer.getBoundingClientRect().height || window.innerHeight);
         let stableWidth = Math.round(mountContainer.getBoundingClientRect().width || window.innerWidth);
+        let baselineInset = Math.max(0, stableHeight - Math.round(
+            visualViewport ? visualViewport.offsetTop + visualViewport.height : window.innerHeight
+        ));
+        let keyboardVisible = false;
+
+        const isEditing = () => {
+            const activeElement = document.activeElement;
+            return activeElement instanceof HTMLInputElement ||
+                activeElement instanceof HTMLTextAreaElement ||
+                activeElement?.getAttribute('contenteditable') === 'true';
+        };
 
         const updateKeyboardInset = () => {
             const visibleBottom = visualViewport
                 ? visualViewport.offsetTop + visualViewport.height
                 : window.innerHeight;
-            setKeyboardInset(Math.max(0, Math.round(stableHeight - visibleBottom)));
+            const viewportInset = Math.max(0, Math.round(stableHeight - visibleBottom));
+            const keyboardInset = resolveMobileKeyboardInset(stableHeight, visibleBottom, baselineInset);
+            const editing = isEditing();
+
+            if (!editing) {
+                keyboardVisible = false;
+                if (keyboardInset === 0) {
+                    baselineInset = viewportInset;
+                }
+            } else if (keyboardInset > 0) {
+                keyboardVisible = true;
+            } else if (keyboardVisible && keyboardInset === 0) {
+                keyboardVisible = false;
+                baselineInset = viewportInset;
+            }
+
+            viewportElement.style.setProperty(
+                '--univer-mobile-keyboard-inset',
+                `${keyboardVisible ? keyboardInset : 0}px`
+            );
+
+            setKeyboardInset(keyboardVisible ? keyboardInset : 0);
         };
         const updateStableViewport = () => {
+            const height = Math.round(mountContainer.getBoundingClientRect().height || window.innerHeight);
             const width = Math.round(mountContainer.getBoundingClientRect().width || window.innerWidth);
-            const activeElement = document.activeElement;
-            const editing = activeElement instanceof HTMLInputElement ||
-                activeElement instanceof HTMLTextAreaElement ||
-                activeElement?.getAttribute('contenteditable') === 'true';
+            const editing = isEditing();
 
-            if (!editing || width !== stableWidth) {
-                stableHeight = Math.round(mountContainer.getBoundingClientRect().height || window.innerHeight);
+            if (shouldUpdateMobileStableHeight(
+                stableHeight,
+                height,
+                stableWidth,
+                width,
+                editing,
+                keyboardVisible
+            )) {
+                stableHeight = height;
                 stableWidth = width;
                 viewportElement.style.height = `${stableHeight}px`;
             }
@@ -185,110 +243,122 @@ export function MobileWorkbench(props: IUniverAppProps) {
             direction={direction}
             mountContainer={portalContainer}
         >
-            <MobileKeyboardInsetContext.Provider value={keyboardInset}>
-                <MobileDrawerCoordinatorProvider>
-                    <div
-                        ref={viewportRef}
-                        className="
-                          univer-relative univer-h-full univer-min-h-0
-                          [&_button:active]:!univer-opacity-70
-                          [&_button]:univer-touch-manipulation
-                        "
-                    >
+            <MobileCanvasLayoutProvider>
+                <MobileKeyboardInsetContext.Provider value={keyboardInset}>
+                    <MobileDrawerCoordinatorProvider>
                         <div
-                            data-u-comp="app-layout"
-                            className={clsx(`
-                              univer-relative univer-flex univer-h-full univer-min-h-0 univer-flex-col univer-bg-gray-0
-                              dark:!univer-bg-gray-800
-                            `, {
-                                'univer-dark': darkMode,
-                            })}
-                            tabIndex={-1}
-                            onBlur={(e) => e.stopPropagation()}
-                            onContextMenu={(e) => e.preventDefault()}
-                            dir={direction}
+                            ref={viewportRef}
+                            className="
+                              univer-relative univer-h-full univer-min-h-0
+                              [&_button:active]:!univer-opacity-70
+                              [&_button]:univer-touch-manipulation
+                            "
                         >
-                            {/* header */}
-                            {header && toolbar && (
-                                <header
-                                    data-u-comp="headerbar"
-                                    className="univer-relative univer-z-10 univer-w-full univer-overflow-hidden"
-                                >
-                                    <ComponentContainer
-                                        key="toolbar"
-                                        components={toolbarComponents}
-                                        sharedProps={{
-                                            ribbonType,
-                                            headerMenuComponents,
-                                            headerMenu,
-                                        }}
-                                    />
-                                </header>
-                            )}
-
-                            {/* content */}
-                            <section
-                                className="univer-relative univer-flex univer-min-h-0 univer-flex-1 univer-flex-col"
+                            <div
+                                data-u-comp="app-layout"
+                                className={clsx(`
+                                  univer-relative univer-flex univer-h-full univer-min-h-0 univer-flex-col
+                                  univer-bg-gray-0
+                                  dark:!univer-bg-gray-800
+                                `, {
+                                    'univer-dark': darkMode,
+                                })}
+                                tabIndex={-1}
+                                onBlur={(e) => e.stopPropagation()}
+                                onContextMenu={(e) => e.preventDefault()}
+                                dir={direction}
                             >
-                                <div
-                                    className={`
-                                      univer-grid univer-h-full univer-grid-cols-[auto_1fr_auto] univer-grid-rows-[100%]
-                                      univer-overflow-hidden
-                                    `}
-                                >
-                                    <aside className="univer-h-full">
-                                        <ComponentContainer key="left-sidebar" components={leftSidebarComponents} />
-                                    </aside>
-
-                                    <section
-                                        className={clsx(`
-                                          univer-relative univer-grid univer-flex-1 univer-grid-rows-[auto_1fr]
-                                          univer-overflow-hidden univer-bg-gray-0
-                                          dark:!univer-bg-gray-800
-                                        `, borderBottomClassName)}
+                                {/* header */}
+                                {header && toolbar && (
+                                    <header
+                                        data-u-comp="headerbar"
+                                        className="univer-relative univer-z-10 univer-w-full univer-overflow-hidden"
                                     >
-                                        <header className="univer-w-screen">
-                                            {header && <ComponentContainer key="header" components={headerComponents} />}
-                                        </header>
+                                        <ComponentContainer
+                                            key="toolbar"
+                                            components={toolbarComponents}
+                                            sharedProps={{
+                                                ribbonType,
+                                                headerMenuComponents,
+                                                headerMenu,
+                                            }}
+                                        />
+                                    </header>
+                                )}
+
+                                {/* content */}
+                                <section
+                                    className="univer-relative univer-flex univer-min-h-0 univer-flex-1 univer-flex-col"
+                                >
+                                    <div
+                                        className={`
+                                          univer-grid univer-min-h-0 univer-flex-1 univer-grid-cols-[auto_1fr_auto]
+                                          univer-grid-rows-[100%] univer-overflow-hidden
+                                        `}
+                                    >
+                                        <aside className="univer-h-full">
+                                            <ComponentContainer key="left-sidebar" components={leftSidebarComponents} />
+                                        </aside>
 
                                         <section
-                                            ref={contentRef}
-                                            className="univer-relative univer-overflow-hidden"
-                                            data-range-selector
-                                            onContextMenu={(e) => e.preventDefault()}
+                                            className={clsx(`
+                                              univer-relative univer-grid univer-flex-1 univer-grid-rows-[auto_1fr]
+                                              univer-overflow-hidden univer-bg-gray-0
+                                              dark:!univer-bg-gray-800
+                                            `, borderBottomClassName)}
                                         >
-                                            <ComponentContainer key="content" components={contentComponents} />
+                                            <header className="univer-w-screen">
+                                                {header && <ComponentContainer key="header" components={headerComponents} />}
+                                            </header>
+
+                                            <section
+                                                ref={canvasContainerRef}
+                                                className="univer-relative univer-min-h-0 univer-overflow-hidden"
+                                            >
+                                                <div
+                                                    ref={contentRef}
+                                                    className="univer-absolute univer-inset-0 univer-overflow-hidden"
+                                                    data-range-selector
+                                                    onContextMenu={(e) => e.preventDefault()}
+                                                >
+                                                    <ComponentContainer
+                                                        key="content"
+                                                        components={contentComponents}
+                                                        sharedProps={{ containerRef: canvasContainerRef, canvasRef: contentRef }}
+                                                    />
+                                                </div>
+                                            </section>
                                         </section>
-                                    </section>
 
-                                    <aside className="univer-h-full" />
-                                </div>
+                                        <aside className="univer-h-full" />
+                                    </div>
 
-                                {/* footer */}
-                                {footer && (
-                                    <footer>
-                                        <ComponentContainer key="footer" components={footerComponents} />
-                                    </footer>
-                                )}
-                            </section>
+                                    {/* footer */}
+                                    {footer && (
+                                        <footer className="univer-shrink-0">
+                                            <ComponentContainer key="footer" components={footerComponents} />
+                                        </footer>
+                                    )}
+                                </section>
+                            </div>
+                            {(!ready || externalSkeletonVisible) && (
+                                <WorkbenchSkeleton darkMode={darkMode} direction={direction} overlay />
+                            )}
                         </div>
-                        {(!ready || externalSkeletonVisible) && (
-                            <WorkbenchSkeleton darkMode={darkMode} direction={direction} overlay />
-                        )}
-                    </div>
-                    <div
-                        className="
-                          [&_button:active]:!univer-opacity-70
-                          [&_button]:univer-touch-manipulation
-                        "
-                        dir={direction}
-                    >
-                        <ComponentContainer key="global" components={globalComponents} />
-                        {contextMenu && <MobileContextMenu />}
-                        <MobileSidebar />
-                    </div>
-                </MobileDrawerCoordinatorProvider>
-            </MobileKeyboardInsetContext.Provider>
+                        <div
+                            className="
+                              [&_button:active]:!univer-opacity-70
+                              [&_button]:univer-touch-manipulation
+                            "
+                            dir={direction}
+                        >
+                            <ComponentContainer key="global" components={globalComponents} />
+                            {contextMenu && <MobileContextMenu />}
+                            <MobileSidebar />
+                        </div>
+                    </MobileDrawerCoordinatorProvider>
+                </MobileKeyboardInsetContext.Provider>
+            </MobileCanvasLayoutProvider>
         </ConfigProvider>
     );
 }

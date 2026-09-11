@@ -58,7 +58,7 @@ import { createRoot } from 'react-dom/client';
 import { of } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { CloseHyperLinkPopupOperation, OpenHyperLinkEditPanelOperation } from '../../commands/operations/popup.operations';
-import { SheetsHyperLinkPopupService } from '../../services/popup.service';
+import { ISheetsHyperLinkPopupService, SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { SheetsHyperLinkSidePanelService } from '../../services/side-panel.service';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
@@ -270,7 +270,7 @@ function createPopupTestBed() {
     injector.add([SheetsSelectionsService]);
     injector.add([SheetsHyperLinkParserService]);
     injector.add([SheetsHyperLinkResolverService]);
-    injector.add([SheetsHyperLinkPopupService]);
+    injector.add([ISheetsHyperLinkPopupService, { useClass: SheetsHyperLinkPopupService }]);
     injector.add([SheetsHyperLinkSidePanelService]);
 
     const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData(customRange));
@@ -492,7 +492,7 @@ describe('CellLinkEdit', () => {
         container.dir = 'rtl';
         document.body.appendChild(container);
         root = createRoot(container);
-        const popupService = currentTestBed.injector.get(SheetsHyperLinkPopupService);
+        const popupService = currentTestBed.injector.get(ISheetsHyperLinkPopupService);
 
         act(() => {
             popupService.startAddEditing({
@@ -525,7 +525,7 @@ describe('CellLinkEdit', () => {
         container = document.createElement('div');
         document.body.appendChild(container);
         root = createRoot(container);
-        const popupService = currentTestBed.injector.get(SheetsHyperLinkPopupService);
+        const popupService = currentTestBed.injector.get(ISheetsHyperLinkPopupService);
         const renderManagerService = currentTestBed.injector.get(IRenderManagerService) as unknown as TestRenderManagerService;
 
         act(() => {
@@ -575,7 +575,7 @@ describe('CellLinkEdit', () => {
         container = document.createElement('div');
         document.body.appendChild(container);
         root = createRoot(container);
-        const popupService = currentTestBed.injector.get(SheetsHyperLinkPopupService);
+        const popupService = currentTestBed.injector.get(ISheetsHyperLinkPopupService);
         const renderManagerService = currentTestBed.injector.get(IRenderManagerService) as unknown as TestRenderManagerService;
 
         act(() => {

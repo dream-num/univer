@@ -3154,7 +3154,8 @@ describe('doc skeleton', () => {
         const localeService = univer.__getInjector().get(LocaleService);
         const content = Array.from(
             { length: paragraphCount },
-            (_, index) => `Short paragraph ${index}.\r`
+            // Keep single-line paragraphs inexpensive while preserving the multi-page fixture.
+            (_, index) => `P${index}.\r`
         ).join('');
         const documentModel = createDocumentModelWithStyle(content, {}, { horizontalAlign });
         documentModel.updateDocumentDataPageSize(600, 600);

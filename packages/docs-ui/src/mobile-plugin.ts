@@ -145,7 +145,7 @@ import { DocSectionSettingPanelOperation } from './commands/operations/doc-secti
 import { InsertDocumentColumnBreakOperation, InsertDocumentSectionBreakOperation } from './commands/operations/insert-break.operation';
 import { DocOpenPageSettingCommand } from './commands/operations/open-page-setting.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
-import { defaultPluginConfig, DOCS_UI_PLUGIN_CONFIG_KEY, DOCS_UI_PLUGIN_NAME } from './config/config';
+import { defaultPluginMobileConfig, DOCS_UI_PLUGIN_CONFIG_KEY, DOCS_UI_PLUGIN_NAME } from './config/config';
 import { DocAutoFormatController } from './controllers/doc-auto-format.controller';
 import { DocHeaderFooterController } from './controllers/doc-header-footer.controller';
 import { DocMoveCursorController } from './controllers/doc-move-cursor.controller';
@@ -205,10 +205,9 @@ export class UniverDocsMobileUIPlugin extends Plugin {
     static override pluginName = DOCS_UI_PLUGIN_NAME;
     static override packageName = pkg.name;
     static override version = pkg.version;
-    // static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(
-        private readonly _config: Partial<IUniverDocsUIConfig> = {},
+        private readonly _config: Partial<IUniverDocsUIConfig> = defaultPluginMobileConfig,
         @Inject(Injector) override _injector: Injector,
         @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
         @ICommandService private _commandService: ICommandService,
@@ -216,25 +215,11 @@ export class UniverDocsMobileUIPlugin extends Plugin {
     ) {
         super();
 
-        const mobileConfig: Partial<IUniverDocsUIConfig> = {
-            ...this._config,
-            fitToWidth: {
-                ...defaultPluginConfig.fitToWidth,
-                mode: 'fit-width',
-                target: 'viewport',
-                paddingX: 12,
-                minScale: 0,
-                maxScale: 1,
-                align: 'center',
-                ...this._config.fitToWidth,
-            },
-        };
-
         // Manage the plugin configuration.
         const { menu, ...rest } = merge(
             {},
-            defaultPluginConfig,
-            mobileConfig
+            defaultPluginMobileConfig,
+            this._config
         );
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });

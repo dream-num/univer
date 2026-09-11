@@ -35,6 +35,7 @@ export interface IUseEditorProps {
     customGlyphRenderers?: readonly IDocCustomGlyphRendererRegistration[];
     cancelDefaultResizeListener?: boolean;
     disableBackScroll?: boolean;
+    documentLayoutSize?: Readonly<Pick<DOMRectReadOnly, 'width' | 'height'>>;
     pixelRatio?: number;
 }
 
@@ -46,6 +47,7 @@ export function useEditor(opts: IUseEditorProps) {
         container,
         customGlyphRenderers,
         disableBackScroll,
+        documentLayoutSize,
         editorId,
         initialValue,
         isSingle,
@@ -82,7 +84,8 @@ export function useEditor(opts: IUseEditorProps) {
                 documentStyle: {
                     ...initialDoc?.documentStyle,
                     pageSize: {
-                        width: !isSingle ? container.current.clientWidth : Infinity,
+                        // Match the first skeleton to the explicit reflow width, before resize runs.
+                        width: isSingle ? Infinity : (documentLayoutSize?.width ?? container.current.clientWidth),
                         height: Infinity,
                     },
                 },

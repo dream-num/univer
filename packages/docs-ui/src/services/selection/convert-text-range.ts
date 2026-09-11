@@ -316,6 +316,8 @@ export class NodePositionConvertToCursor {
             const collapsed = start === end;
             const rawAnchorGlyph = isStartBack ? (preGlyph ?? firstGlyph) : firstGlyph;
             const anchorGlyph = this._getCaretGlyph(rawAnchorGlyph, glyphGroup, start_sp);
+            const caretAscent = anchorGlyph.bBox.fontAscent ?? anchorGlyph.bBox.ba;
+            const caretDescent = anchorGlyph.bBox.fontDescent ?? anchorGlyph.bBox.bd;
             const selectedGlyphs = glyphGroup.slice(start_sp, end_sp + 1);
             const isSelectionOnlyNonInlineDrawing = !collapsed &&
                 selectedGlyphs.length > 0 &&
@@ -335,9 +337,9 @@ export class NodePositionConvertToCursor {
 
                 contentBoxPosition = {
                     startX: startX + firstGlyphLeft + (isCurrentList ? firstGlyphWidth : 0),
-                    startY: startY + paddingTop + asc - anchorGlyph.bBox.ba,
+                    startY: startY + paddingTop + asc - caretAscent,
                     endX: startX + lastGlyphLeft + (isEndBack ? 0 : lastGlyphWidth),
-                    endY: startY + paddingTop + asc + anchorGlyph.bBox.bd,
+                    endY: startY + paddingTop + asc + caretDescent,
                 };
             } else {
                 const isStartBackFin = isStartBack && !isCurrentList;
@@ -351,9 +353,9 @@ export class NodePositionConvertToCursor {
 
                 contentBoxPosition = {
                     startX: startX + firstGlyphLeft + (isStartBackFin ? 0 : firstGlyphWidth),
-                    startY: startY + paddingTop + asc - anchorGlyph.bBox.ba,
+                    startY: startY + paddingTop + asc - caretAscent,
                     endX: startX + lastGlyphLeft + (isEndBack ? 0 : lastGlyphWidth),
-                    endY: startY + paddingTop + asc + anchorGlyph.bBox.bd,
+                    endY: startY + paddingTop + asc + caretDescent,
                 };
             }
 

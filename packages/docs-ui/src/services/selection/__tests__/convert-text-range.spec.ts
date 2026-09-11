@@ -633,23 +633,31 @@ describe('selection convert text range helpers', () => {
         expect(getSelectionBounds(end, start)).toEqual(expectedBounds);
     });
 
-    it('excludes layout-only paragraph spacing from text selection height', () => {
+    it.each([
+        { name: 'normal font metrics', bBox: { ba: 10, bd: 3 }, ascent: 13, contentHeight: 16 },
+        {
+            name: 'fixed line metrics',
+            bBox: { ba: 56, bd: 0, fontAscent: 10, fontDescent: 3 },
+            ascent: 59,
+            contentHeight: 62,
+        },
+    ])('excludes layout-only spacing from the caret with $name', ({ bBox, ascent, contentHeight }) => {
         const glyph = {
-            bBox: { ba: 10, bd: 3 },
+            bBox: { ...bBox },
             count: 1,
             glyphType: 'LETTER',
             left: 0,
             width: 20,
         };
         const line = {
-            asc: 13,
-            contentHeight: 16,
+            asc: ascent,
+            contentHeight,
             divides: [{
                 glyphGroup: [glyph],
                 left: 0,
                 paddingLeft: 0,
             }],
-            lineHeight: 92,
+            lineHeight: contentHeight + 76,
             marginBottom: 34,
             marginTop: 0,
             paddingBottom: 4,
@@ -699,11 +707,19 @@ describe('selection convert text range helpers', () => {
         const result = convertor.getRangePointData(position, position);
 
         expect(getLineBounding(result.borderBoxPointGroup)[0]).toEqual({
-            bottom: 24,
+            bottom: contentHeight + 8,
             left: 0,
             right: 20,
             top: 0,
         });
+        expect(getAnchorBounding(result.contentBoxPointGroup)).toEqual({
+            left: 0,
+            top: 4 + ascent - 10,
+            width: 20,
+            height: 13,
+        });
+        expect(line.asc).toBe(ascent);
+        expect(glyph.bBox).toEqual(bBox);
     });
 
     it('uses normal caret height for non-inline embed custom blocks', () => {

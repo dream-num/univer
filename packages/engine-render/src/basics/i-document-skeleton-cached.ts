@@ -336,6 +336,9 @@ export interface IDocumentSkeletonBoundingBox {
     width: number; // width
     ba: number; // boundingBoxAscent
     bd: number; // boundingBoxDescent
+    /** Font metrics retained for the caret when ba/bd are overridden for fixed line layout. */
+    fontAscent?: number;
+    fontDescent?: number;
     normalLineHeight?: number; // Canvas font bounding-box height, used as the base for Word AUTO spacing
     aba: number; // actualBoundingBoxAscent
     abd: number; // actualBoundingBoxDescent

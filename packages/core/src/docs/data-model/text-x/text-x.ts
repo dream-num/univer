@@ -302,6 +302,10 @@ export class TextX {
 
             if (action.t === TextXActionType.RETAIN && action.body != null) {
                 const body = getBodySlice(doc, index, index + action.len, true);
+                // Attribute-only edits must not restore a clipped copy of an untouched column group.
+                if (action.body.columnGroups == null) {
+                    delete body.columnGroups;
+                }
 
                 action.oldBody = {
                     ...body,

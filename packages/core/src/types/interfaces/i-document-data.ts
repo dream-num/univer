@@ -873,6 +873,8 @@ export interface ITextStyle extends IStyleBase {
     textSkewX?: number;
     /** Fixed advance per Unicode character in 96-DPI layout pixels. */
     textAdvance?: number;
+    /** Optional identity consumed by a registered custom glyph renderer. */
+    customGlyphKey?: string;
     /** Fixed line ascent in 96-DPI layout pixels. */
     lineAscent?: number;
     /** Fixed line descent in 96-DPI layout pixels. */

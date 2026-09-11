@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { getTextRunAtPosition } from '../paragraph';
+import { getTextRunAtInputPosition, getTextRunAtPosition } from '../paragraph';
 
 describe('getTextRunAtPosition', () => {
     it('uses the concrete default text color without overriding inherited or cached colors', () => {
@@ -41,6 +41,42 @@ describe('getTextRunAtPosition', () => {
             textRuns: [{ st: 0, ed: 1, ts: { cl: { rgb: '#000000' } } }],
         }, 1, defaultStyle, null, true).ts).toEqual({
             cl: { rgb: '#000000' },
+        });
+    });
+
+    it('inherits the following run at a non-empty paragraph start', () => {
+        const body = {
+            dataStream: 'A\rB\r\n',
+            textRuns: [
+                {
+                    st: 0,
+                    ed: 2,
+                    ts: { ff: 'Previous', lineAscent: 20, lineDescent: 4, textAdvance: 12 },
+                },
+                {
+                    st: 2,
+                    ed: 3,
+                    ts: {
+                        customGlyphKey: 'source-glyph',
+                        ff: 'Following',
+                        lineAscent: 8,
+                        lineDescent: 2,
+                        textAdvance: 6,
+                    },
+                },
+            ],
+        };
+
+        expect(getTextRunAtPosition(body, 2, {}, null).ts).toEqual({
+            ff: 'Previous',
+            lineAscent: 20,
+            lineDescent: 4,
+            textAdvance: 12,
+        });
+        expect(getTextRunAtInputPosition(body, 2, {}, null).ts).toEqual({
+            ff: 'Following',
+            lineAscent: 8,
+            lineDescent: 2,
         });
     });
 });

@@ -32,7 +32,6 @@ import {
 } from '../../../../../basics/tools';
 import { getDocsCustomBlockRenderViewport } from '../../../custom-block-render-viewport';
 import { Lang } from '../../hyphenation/lang';
-import { LineBreaker } from '../../line-breaker';
 import { BreakPointType } from '../../line-breaker/break';
 import { LineBreakerHyphenEnhancer } from '../../line-breaker/enhancers/hyphen-enhancer';
 import { LineBreakerLinkEnhancer } from '../../line-breaker/enhancers/link-enhancer';
@@ -40,6 +39,7 @@ import { LineBreakerWholeEntityEnhancer } from '../../line-breaker/enhancers/who
 import { customBlockLineBreakExtension } from '../../line-breaker/extensions/custom-block-linebreak-extension';
 import { eastAsianQuoteLineBreakExtension } from '../../line-breaker/extensions/east-asian-quote-linebreak-extension';
 import { tabLineBreakExtension } from '../../line-breaker/extensions/tab-linebreak-extension';
+import { LineBreaker } from '../../line-breaker/line-breaker';
 import {
     createSkeletonCustomBlockGlyph,
     createSkeletonLetterGlyph,
@@ -467,6 +467,15 @@ export function shaping(
                 shapedGlyphsList.push([glyph]);
             } else {
                 lastList.push(glyph);
+            }
+
+            // Fixed tab positions are resolved when the following shaped segment is laid out.
+            if (
+                paragraphStyle.fixedTabStops === BooleanNumber.TRUE
+                && glyph.glyphType === GlyphType.TAB
+                && i < shapedGlyphs.length - 1
+            ) {
+                shapedGlyphsList.push([]);
             }
         }
 

@@ -75,6 +75,24 @@ describe('docs line extension', () => {
         expect(ctx.lineTo).toHaveBeenCalled();
     });
 
+    it('applies a custom underline offset without moving other decorations', () => {
+        const line = new Line();
+        (line as any).extensionOffset = {};
+        const ctx = createCtx();
+        const glyph = createGlyph();
+        glyph.ts.ul.offset = 2.5;
+        glyph.ts.st = undefined;
+        glyph.ts.ol = undefined;
+        glyph.ts.bbl = undefined;
+
+        line.draw(ctx, { scaleX: 1, scaleY: 1 } as any, glyph);
+
+        expect(ctx.moveTo.mock.calls[0][0]).toBeCloseTo(10);
+        expect(ctx.moveTo.mock.calls[0][1]).toBeCloseTo(10.5);
+        expect(ctx.lineTo.mock.calls[0][0]).toBeCloseTo(22);
+        expect(ctx.lineTo.mock.calls[0][1]).toBeCloseTo(10.5);
+    });
+
     it('handles early return and baseline offset variants', () => {
         const line = new Line();
         (line as any).extensionOffset = {};

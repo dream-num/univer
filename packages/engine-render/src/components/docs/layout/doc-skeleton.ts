@@ -28,7 +28,14 @@ import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch } from '../../.
 import type { IViewportInfo, Vector2 } from '../../../basics/vector2';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { IDocumentPaginationMetrics, ILayoutContext } from './tools';
-import { BooleanNumber, DataStreamTreeTokenType, PRESET_LIST_TYPE, SectionType, Skeleton } from '@univerjs/core';
+import {
+    BaselineOffset,
+    BooleanNumber,
+    DataStreamTreeTokenType,
+    PRESET_LIST_TYPE,
+    SectionType,
+    Skeleton,
+} from '@univerjs/core';
 import { Subject } from 'rxjs';
 import {
     BreakType,
@@ -47,6 +54,7 @@ import { Hyphen } from './hyphenation/hyphen';
 import { LanguageDetector } from './hyphenation/language-detector';
 import { createSkeletonPage } from './model/page';
 import { createSkeletonSection } from './model/section';
+import { FontCache } from './shaping-engine/font-cache';
 import {
     getLastNotFullColumnInfo,
     getLastPage,
@@ -549,6 +557,14 @@ export class DocumentSkeleton extends Skeleton {
 
     getSkeletonData() {
         return this._skeletonData;
+    }
+
+    /** Invalidate measurements captured before the requested fonts finished loading. */
+    invalidateFontMetrics(fontStyles: readonly string[]): void {
+        for (const fontStyle of new Set(fontStyles)) {
+            FontCache.clearFontMeasureCache(fontStyle);
+        }
+        this.makeDirty(true);
     }
 
     /**
@@ -1099,6 +1115,7 @@ export class DocumentSkeleton extends Skeleton {
         allowPageOverflow = false
     ): Nullable<INodeInfo> {
         const { sections, skeTables, skeColumnGroups = new Map() } = segmentPage;
+        const useContentBounds = segmentPage.renderConfig?.topAlignExactLineSpacing === BooleanNumber.TRUE;
         this._findLiquid.translateSave();
 
         const pageLeft = this._findLiquid.x;
@@ -1153,6 +1170,8 @@ export class DocumentSkeleton extends Skeleton {
 
         if (pointInPage) {
             let nearestNodeDistanceY = Number.POSITIVE_INFINITY;
+            let positionedMatch: Nullable<INodeInfo>;
+            let positionedDistanceY = Number.POSITIVE_INFINITY;
 
             for (const section of sections) {
                 const { columns } = section;
@@ -1174,13 +1193,14 @@ export class DocumentSkeleton extends Skeleton {
                             continue;
                         } else {
                             this._findLiquid.translateSave();
-                            this._findLiquid.translateLine(line);
+                            // Positioned exact lines can paint beyond their nominal advance height.
+                            this._findLiquid.translateLine(line, useContentBounds, useContentBounds);
 
                             const { y: startY } = this._findLiquid;
 
                             const startY_fin = startY;
 
-                            const endY_fin = startY + lineHeight;
+                            const endY_fin = startY + (useContentBounds ? line.contentHeight : lineHeight);
 
                             const distanceY = Math.abs(y - endY_fin);
 
@@ -1208,13 +1228,36 @@ export class DocumentSkeleton extends Skeleton {
                                     if (y >= startY_fin && y <= endY_fin) {
                                         // Exact match glyph.
                                         if (x >= startX_fin && x <= endX_fin) {
-                                            return {
+                                            const match = {
                                                 node: glyph,
                                                 segmentPage: pageType === DocumentSkeletonPageType.BODY ? -1 : pi,
                                                 segmentId,
                                                 ratioX: x / (startX_fin + endX_fin),
                                                 ratioY: y / (startY_fin + endY_fin),
                                             };
+                                            if (!useContentBounds) {
+                                                return match;
+                                            }
+
+                                            // Overlapping exact lines must not steal hits from a nearer painted script.
+                                            const { bBox, ts } = glyph;
+                                            let baseline = startY + line.asc;
+                                            if (typeof ts?.pos === 'number' && Number.isFinite(ts.pos)) {
+                                                baseline -= ts.pos * 4 / 3;
+                                            }
+                                            if (ts?.va === BaselineOffset.SUPERSCRIPT) {
+                                                baseline -= bBox.spo;
+                                            } else if (ts?.va === BaselineOffset.SUBSCRIPT) {
+                                                baseline += bBox.sbo;
+                                            }
+                                            const glyphDistanceY = Math.max(baseline - bBox.aba - y, y - baseline - bBox.abd, 0);
+                                            if (glyphDistanceY === 0) {
+                                                return match;
+                                            }
+                                            if (glyphDistanceY < positionedDistanceY) {
+                                                positionedMatch = match;
+                                                positionedDistanceY = glyphDistanceY;
+                                            }
                                         }
 
                                         if (nearestNodeDistanceY !== Number.NEGATIVE_INFINITY) {
@@ -1270,6 +1313,9 @@ export class DocumentSkeleton extends Skeleton {
                 }
 
                 this._findLiquid.translateRestore();
+            }
+            if (positionedMatch) {
+                return positionedMatch;
             }
         }
 

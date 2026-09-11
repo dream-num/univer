@@ -24,6 +24,7 @@ import {
     DocumentFlavor,
     GridType,
     LocaleService,
+    LocaleType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PageOrientType,
@@ -32,6 +33,7 @@ import {
     SpacingRule,
     TableSizeType,
     Univer,
+    WrapStrategy,
     WrapTextType,
 } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
@@ -111,6 +113,174 @@ function createPage(type: DocumentSkeletonPageType, st: number, tableId = '') {
 }
 
 describe('doc skeleton', () => {
+    it('invalidates only requested font measurements before laying out loaded fonts again', () => {
+        const univer = new Univer();
+        const model = new DocumentDataModel({
+            id: 'font-loading-layout',
+            body: {
+                dataStream: 'A\r\n',
+                paragraphs: [{ startIndex: 1, paragraphId: 'font-loading-paragraph' }],
+                sectionBreaks: [{ startIndex: 2, sectionId: 'font-loading-section' }],
+            },
+            documentStyle: { pageSize: { width: 200, height: 200 }, textStyle: { ff: 'FontLoadingRegression', fs: 12 } },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        const getGlyph = () => skeleton.getSkeletonData()!.pages[0].sections[0].columns[0].lines[0].divides[0].glyphGroup[0];
+        try {
+            skeleton.calculate();
+            const glyph = getGlyph();
+            const fontStyle = glyph.fontStyle!.fontString;
+            const originalWidth = glyph.width;
+            const fresh = FontCache.getMeasureText('A', fontStyle);
+            const stale = { ...fresh, width: 99, fontBoundingBoxAscent: 77, fontBoundingBoxDescent: 33 };
+            FontCache.setFontMeasureCache(fontStyle, 'A', stale);
+            FontCache.setFontMeasureCache('unrelated-font', 'A', stale);
+            skeleton.makeDirty(false);
+
+            skeleton.invalidateFontMetrics([fontStyle]);
+
+            expect(skeleton.dirty).toBe(true);
+            expect(FontCache.getFontMeasureCache(fontStyle, 'A')).toBeUndefined();
+            expect(FontCache.getFontMeasureCache('unrelated-font', 'A')).toEqual(stale);
+            skeleton.calculate();
+            expect(getGlyph().width).toBe(originalWidth);
+            expect(model.getBody()?.dataStream).toBe('A\r\n');
+        } finally {
+            FontCache.clearFontMeasureCache('unrelated-font');
+            skeleton.dispose();
+            univer.dispose();
+        }
+    });
+    it.each([BooleanNumber.TRUE, BooleanNumber.FALSE])('hit-tests positioned glyphs with top-aligned exact spacing %s', (topAlignExactLineSpacing) => {
+        const topAligned = topAlignExactLineSpacing === BooleanNumber.TRUE;
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        const documentModel = new DocumentDataModel({
+            id: 'positioned-exact-line-hit-test',
+            body: {
+                dataStream: '公司航路\r公司航路名称。（可选择性输入）\r航班号\r\n',
+                paragraphs: [
+                    { startIndex: 4, paragraphId: 'positioned-label', paragraphStyle: { lineSpacing: 15 } },
+                    {
+                        startIndex: 20,
+                        paragraphId: 'positioned-description',
+                        paragraphStyle: { lineSpacing: topAligned ? 5 : 15, spaceAbove: { v: 5 } },
+                    },
+                    { startIndex: 24, paragraphId: 'positioned-field', paragraphStyle: { indentStart: { v: 468 } } },
+                ],
+                textRuns: [
+                    { st: 0, ed: 5, ts: { lineAscent: 15, lineDescent: 0 } },
+                    { st: 5, ed: 25, ts: { lineAscent: 10.8, lineDescent: 3.6 } },
+                ],
+                sectionBreaks: [{ startIndex: 25, sectionId: 'positioned-section' }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                fontMetricScaleEnabled: BooleanNumber.FALSE,
+                pageSize: { width: 600, height: 200 },
+                marginTop: 7,
+                marginBottom: 0,
+                marginLeft: 0,
+                marginRight: 0,
+                textStyle: { fs: 9, textAdvance: 12 },
+                defaultParagraphStyle: {
+                    spacingRule: SpacingRule.EXACT,
+                    lineSpacing: 14.4,
+                    snapToGrid: BooleanNumber.FALSE,
+                    spaceAbove: { v: 0 },
+                    spaceBelow: { v: 0 },
+                },
+                renderConfig: {
+                    topAlignExactLineSpacing,
+                    zeroWidthParagraphBreak: BooleanNumber.TRUE,
+                    wrapStrategy: WrapStrategy.OVERFLOW,
+                },
+            },
+        });
+        const skeleton = DocumentSkeleton.create(
+            new DocumentViewModel(documentModel),
+            injector.get(LocaleService)
+        );
+
+        try {
+            skeleton.calculate();
+            // Short advances can overlap the labels vertically without overlapping their painted horizontal bounds.
+            expect(skeleton.findNodeByCoord(Vector2.FromArray([37, 33]), PageLayoutType.VERTICAL, 0, 0)?.node.content)
+                .toBe('路');
+            expect(skeleton.findNodeByCoord(Vector2.FromArray([133, 38]), PageLayoutType.VERTICAL, 0, 0)?.node.content)
+                .toBe('性');
+            expect(skeleton.findNodeByCoord(Vector2.FromArray([481, topAligned ? 38 : 48]), PageLayoutType.VERTICAL, 0, 0)?.node.content)
+                .toBe('班');
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+        }
+    });
+
+    it('hits the painted script rather than an overlapping positioned line', () => {
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const model = new DocumentDataModel({
+            id: 'overlapping-script-hit-test',
+            body: {
+                dataStream: 'd23x\rmodel\r\n',
+                paragraphs: [
+                    { startIndex: 4, paragraphId: 'upper' },
+                    { startIndex: 10, paragraphId: 'lower', paragraphStyle: { indentStart: { v: 7 } } },
+                ],
+                textRuns: [
+                    { st: 0, ed: 1, ts: { fs: 10, textAdvance: 7, lineAscent: 14, lineDescent: 4 } },
+                    { st: 1, ed: 3, ts: { fs: 7, textAdvance: 5, pos: 4.25, lineAscent: 8.4, lineDescent: 2.8 } },
+                    { st: 3, ed: 5, ts: { fs: 10, textAdvance: 7, lineAscent: 14, lineDescent: 4 } },
+                    { st: 5, ed: 11, ts: { fs: 7, textAdvance: 5, lineAscent: 8.4, lineDescent: 2.8 } },
+                ],
+                sectionBreaks: [{ startIndex: 11, sectionId: 'scripts' }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                fontMetricScaleEnabled: BooleanNumber.FALSE,
+                pageSize: { width: 200, height: 100 },
+                marginTop: 7,
+                marginBottom: 0,
+                marginLeft: 3,
+                marginRight: 0,
+                defaultParagraphStyle: {
+                    spacingRule: SpacingRule.EXACT,
+                    lineSpacing: 9.5,
+                    snapToGrid: BooleanNumber.FALSE,
+                },
+                renderConfig: {
+                    topAlignExactLineSpacing: BooleanNumber.TRUE,
+                    zeroWidthParagraphBreak: BooleanNumber.TRUE,
+                    wrapStrategy: WrapStrategy.OVERFLOW,
+                },
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        try {
+            skeleton.calculate();
+            const page = skeleton.getSkeletonData()!.pages[0];
+            const column = page.sections[0].columns[0];
+            const [upper, lower] = column.lines;
+            expect(lower.top).toBeLessThan(upper.top + upper.contentHeight);
+            for (const line of [upper, lower]) {
+                const divide = line.divides[0];
+                for (const glyph of divide.glyphGroup.filter((glyph) => glyph.content.trim())) {
+                    const baseline = page.marginTop + line.top + line.marginTop + line.paddingTop + line.asc
+                        - (glyph.ts?.pos ?? 0) * 4 / 3;
+                    const point = Vector2.FromArray([
+                        page.marginLeft + column.left + divide.left + divide.paddingLeft + glyph.left + glyph.width / 2,
+                        baseline - (glyph.bBox.aba - glyph.bBox.abd) / 2,
+                    ]);
+                    expect(skeleton.findNodeByCoord(point, PageLayoutType.VERTICAL, 0, 0)?.node).toBe(glyph);
+                }
+            }
+        } finally {
+            skeleton.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
     it('uses empty paragraph glyphs as mouse hit-test targets', () => {
         const body = createPage(DocumentSkeletonPageType.BODY, 0);
         const emptyParagraphGlyph = {

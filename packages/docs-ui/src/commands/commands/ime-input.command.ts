@@ -20,7 +20,7 @@ import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-
 import { BuildTextUtils, CommandType, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, SHEET_EDITOR_UNITS, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { getCustomDecorationAtPosition, getCustomRangeAtPosition, getTextRunAtPosition } from '../../basics/paragraph';
+import { getCustomDecorationAtPosition, getCustomRangeAtPosition, getTextRunAtInputPosition } from '../../basics/paragraph';
 import { DocIMEInputManagerService } from '../../services/doc-ime-input-manager.service';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { getDocRangeInsertOffset, getReplaceDocRangesActions } from './clipboard.inner.command';
@@ -109,7 +109,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         const styleCache = docMenuStyleService.getStyleCache();
         const styleOffset = replacesComplexSelection ? replacementOffset : startOffset + oldTextLen;
         const curCustomRange = getCustomRangeAtPosition(body.customRanges ?? [], styleOffset, SHEET_EDITOR_UNITS.includes(unitId));
-        const curTextRun = getTextRunAtPosition(
+        const curTextRun = getTextRunAtInputPosition(
             body,
             replacesComplexSelection ? replacementOffset : isCompositionStart ? endOffset : startOffset + oldTextLen,
             defaultTextStyle,
@@ -192,7 +192,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             });
         }
 
-        if (!replacesComplexSelection) {
+        if (!replacesComplexSelection && newText.length > 0) {
             textX.push({
                 t: TextXActionType.INSERT,
                 body: insertBody,

@@ -343,6 +343,7 @@ describe('DocInputController', () => {
                 ed: 2,
                 ts: {
                     bl: BooleanNumber.TRUE,
+                    customGlyphKey: 'source-glyph',
                     lineAscent: 12,
                     lineDescent: 4,
                     sa: 0.75,

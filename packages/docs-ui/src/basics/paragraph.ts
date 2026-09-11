@@ -87,6 +87,33 @@ export function getTextRunAtPosition(
     return retTextRun;
 }
 
+export function getTextRunAtInputPosition(
+    body: IDocumentBody,
+    position: number,
+    defaultStyle: ITextStyle,
+    cacheStyle: Nullable<ITextStyle>,
+    isCellEditor?: boolean
+): ITextRun {
+    const inheritedTextRun = getTextRunAtPosition(body, position, defaultStyle, cacheStyle, isCellEditor);
+    const nextTextRun = body.dataStream[position - 1] === DataStreamTreeTokenType.PARAGRAPH
+        ? body.textRuns?.find((textRun) => textRun.st === position && textRun.ed > position)
+        : undefined;
+    const textStyle = nextTextRun
+        ? {
+            ...(!defaultStyle.cl ? {} : { cl: { ...defaultStyle.cl } }),
+            ...nextTextRun.ts,
+            ...cacheStyle,
+        }
+        : { ...inheritedTextRun.ts };
+    delete textStyle.textAdvance;
+    delete textStyle.customGlyphKey;
+
+    return {
+        ...(nextTextRun ?? inheritedTextRun),
+        ts: textStyle,
+    };
+}
+
 export function getCustomRangeAtPosition(customRanges: ICustomRange[], position: number, extendRange?: boolean) {
     if (extendRange) {
         const range = customRanges.find((customRange) => position >= customRange.startIndex && position <= customRange.endIndex + 1);

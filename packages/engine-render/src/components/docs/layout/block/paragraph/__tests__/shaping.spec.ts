@@ -15,14 +15,57 @@
  */
 
 import type { ICustomRangeForInterceptor } from '@univerjs/core';
-import { BooleanNumber, CustomRangeType, DataStreamTreeTokenType, PositionedObjectLayoutType } from '@univerjs/core';
+import {
+    BooleanNumber,
+    CustomRangeType,
+    DataStreamTreeTokenType,
+    PositionedObjectLayoutType,
+    TabStopAlignment,
+} from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { Lang } from '../../../hyphenation/lang';
 import { createSkeletonLetterGlyph } from '../../../model/glyph';
+import { lineBreaking } from '../linebreaking';
 import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 describe('shaping', () => {
+    it.each([
+        { content: '/\t/\t/\t/', positions: [0, 100, 200, 300] },
+        { content: '/\t/1\t/\t/', positions: [0, 100, 200, 300] },
+        { content: '/1\t/1\t/1\t/', positions: [0, 100, 200, 300] },
+        { content: '\t/\t/\t/', positions: [100, 200, 300] },
+        { content: '/\t\t/\t/', positions: [0, 200, 300] },
+    ])(
+        'keeps fixed tab anchors after preceding text changes: $content',
+        ({ content, positions }) => {
+            const testBed = createParagraphLayoutTestBed(content, {
+                documentStyle: { pageSize: { width: 800, height: 600 } },
+                body: {
+                    textRuns: Array.from(content, (character, index) => ({
+                        st: index,
+                        ed: index + 1,
+                        ts: { textAdvance: character === '\t' ? 92 : 8 },
+                    })),
+                    paragraphs: [{
+                        startIndex: content.length,
+                        paragraphStyle: {
+                            tabStops: [100, 200, 300].map((offset) => ({ offset, alignment: TabStopAlignment.START })),
+                            fixedTabStops: BooleanNumber.TRUE,
+                        },
+                    }],
+                },
+            });
+            const { ctx, paragraphNode, viewModel, sectionBreakConfig, curPage } = testBed;
+            const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+            const pages = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, null);
+            const glyphs = pages[0].sections[0].columns[0].lines[0].divides[0].glyphGroup;
+
+            expect(glyphs.filter((glyph) => glyph.content === '/').map((glyph) => glyph.left))
+                .toEqual(positions);
+        }
+    );
+
     it('uses paragraph text style for an empty traditional paragraph mark', () => {
         const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('', {
             documentStyle: {

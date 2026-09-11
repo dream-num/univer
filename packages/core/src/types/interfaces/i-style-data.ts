@@ -58,12 +58,14 @@ export interface ITextDecoration {
      * lineType
      */
     t?: TextDecoration;
+    /** Additional canvas-layout offset perpendicular to the text baseline. */
+    offset?: number;
 }
 
 /**
  * Exact keys of {@link ITextDecoration}.
  */
-export const TEXT_DECORATION_KEYS = defineExactKeys<ITextDecoration>()(['s', 'c', 'cl', 't'] as const);
+export const TEXT_DECORATION_KEYS = defineExactKeys<ITextDecoration>()(['s', 'c', 'cl', 't', 'offset'] as const);
 
 /**
  * Key union of {@link ITextDecoration}.

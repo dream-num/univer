@@ -172,6 +172,26 @@ describe('docs font and baseline extension', () => {
         expect(ScreenContext.fillStyle).toBe('#000000');
     });
 
+    it('does not paint the tab control character when no leader is configured', () => {
+        const extension = new FontAndBaseLine();
+        const TestContext = createContext();
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: {
+                vertexAngle: 0,
+                centerAngle: 0,
+            },
+        };
+
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('\t', {
+            glyphType: GlyphType.TAB,
+        }));
+
+        expect(TestContext.fillText).not.toHaveBeenCalled();
+    });
+
     it('renders a text outline after the glyph fill', () => {
         const extension = new FontAndBaseLine();
         const TestContext = createContext();
@@ -360,13 +380,14 @@ describe('docs font and baseline extension', () => {
         };
 
         extension.draw(TestContext, DEFAULT_SCALE, createGlyph('A', {
-            ts: { fs: 12, ff: '"PdfOutline", serif' },
+            ts: { customGlyphKey: 'pdf-glyph-1', fs: 12, ff: '"PdfOutline", serif' },
         }));
 
         expect(renderer).toHaveBeenCalledWith({
             content: 'A',
             context: TestContext,
             fontSizePx: 12,
+            glyphKey: 'pdf-glyph-1',
             x: 12,
             y: 20,
         });

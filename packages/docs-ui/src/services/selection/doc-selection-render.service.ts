@@ -1190,7 +1190,13 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         }
 
         const { textRanges, rectRanges } = ranges;
-        if (!this._hasVisibleSelectionRanges(textRanges, rectRanges)) {
+        // Returning an expanded drag to its anchor must publish the collapsed range,
+        // otherwise the last non-empty selection remains visible until mouseup.
+        const collapsesMovingSelection = rectRanges.length === 0
+            && textRanges.length === 1
+            && textRanges[0].collapsed
+            && this._hasVisibleSelectionRanges(this._rangeListCache, this._rectRangeListCache);
+        if (!this._hasVisibleSelectionRanges(textRanges, rectRanges) && !collapsesMovingSelection) {
             textRanges.forEach((range) => range.dispose());
             rectRanges.forEach((range) => range.dispose());
             return;

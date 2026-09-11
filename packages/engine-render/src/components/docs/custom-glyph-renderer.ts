@@ -22,6 +22,7 @@ export interface IDocCustomGlyphRenderInput {
     content: string;
     context: UniverRenderingContext;
     fontSizePx: number;
+    glyphKey?: string;
     x: number;
     y: number;
 }

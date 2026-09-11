@@ -14,7 +14,19 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, ICommand, IDocumentBlockRange, IDocumentBody, IMultiCommand, IMutationInfo, IParagraph, ITextRange, JSONXActions, Nullable } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    IAccessor,
+    ICommand,
+    IDocumentBlockRange,
+    IDocumentBody,
+    IMultiCommand,
+    IMutationInfo,
+    IParagraph,
+    ITextRange,
+    JSONXActions,
+    Nullable,
+} from '@univerjs/core';
 import type { IDeleteTextCommandParams, IRichTextEditingMutationParams, IUpdateTextCommandParams } from '@univerjs/docs';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
@@ -421,7 +433,6 @@ export const DeleteLeftCommand: ICommand = {
     id: 'doc.command.delete-left',
 
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function, complexity
     handler: async (accessor) => {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -632,13 +643,14 @@ export const DeleteLeftCommand: ICommand = {
                     });
                 }
             } else {
-                const textRanges = getTextRangesWhenDelete(actualRange, [actualRange]);
+                const selections = getDeleteTextRanges(actualRange, ranges);
+                const textRanges = getTextRangesWhenDelete(actualRange, selections);
                 // If the selection is not closed, the effect of Delete and
                 // BACKSPACE is the same as CUT, so the CUT command is executed.
                 result = await commandService.executeCommand(CutContentCommand.id, {
                     segmentId,
                     textRanges,
-                    selections: [actualRange],
+                    selections,
                 });
             }
         }
@@ -652,7 +664,6 @@ export const DeleteRightCommand: ICommand = {
     id: 'doc.command.delete-right',
     type: CommandType.COMMAND,
 
-    // eslint-disable-next-line max-lines-per-function, complexity
     handler: async (accessor) => {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -773,14 +784,15 @@ export const DeleteRightCommand: ICommand = {
                 });
             }
         } else {
-            const textRanges = getTextRangesWhenDelete(actualRange, [actualRange]);
+            const selections = getDeleteTextRanges(actualRange, ranges);
+            const textRanges = getTextRangesWhenDelete(actualRange, selections);
 
             // If the selection is not closed, the effect of Delete and
             // BACKSPACE is the same as CUT, so the CUT command is executed.
             result = await commandService.executeCommand(CutContentCommand.id, {
                 segmentId,
                 textRanges,
-                selections: [actualRange],
+                selections,
             });
         }
 
@@ -802,22 +814,21 @@ async function executeDeleteAutoFormat(accessor: IAccessor, commandId: string): 
     return (await sequenceExecuteAsync(mutations, commandService)).result;
 }
 
-// get cursor position when BACKSPACE/DELETE excuse the CutContentCommand.
-function getTextRangesWhenDelete(activeRange: ITextRangeWithStyle, ranges: readonly ITextRange[]) {
-    let cursor = activeRange.endOffset;
-
-    for (const range of ranges) {
-        const { startOffset, endOffset } = range;
-
-        if (startOffset == null || endOffset == null) {
-            continue;
-        }
-
-        if (endOffset <= activeRange.endOffset) {
-            cursor -= endOffset - startOffset;
-        }
+function getDeleteTextRanges(activeRange: ITextRangeWithStyle, ranges: readonly ITextRangeWithStyle[]) {
+    // A continuous ColumnGroup selection is split into a range per column.
+    // Deleting only its active endpoint leaves other highlighted text untouched.
+    const spansColumns = ranges.some((range) => range.startNodePosition?.path.includes('skeColumnGroups'));
+    if (!spansColumns) {
+        return [activeRange];
     }
 
+    return ranges.filter((range) => !range.collapsed && range.segmentId === activeRange.segmentId);
+}
+
+function getTextRangesWhenDelete(activeRange: ITextRangeWithStyle, ranges: readonly ITextRange[]) {
+    // Structural separators survive a cross-column cut. Place the caret at the
+    // beginning of the selection, not at the transformed active column's end.
+    const cursor = Math.min(activeRange.startOffset, ...ranges.map((range) => range.startOffset));
     const textRanges = [
         {
             startOffset: cursor,

@@ -15,6 +15,7 @@
  */
 
 import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
+import type { IFontCreateConfig } from '../../../../../basics/interfaces';
 import { BooleanNumber, DataStreamTreeTokenType, DocumentFlavor } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { GlyphType } from '../../../../../basics/i-document-skeleton-cached';
@@ -103,6 +104,41 @@ describe('Glyph utils test cases', () => {
         it('should return false for other characters', () => {
             const result = isSpace('a');
             expect(result).toBe(false);
+        });
+    });
+
+    describe('test explicit text advance', () => {
+        it('keeps fixed punctuation advances out of line shrink calculations', () => {
+            vi.spyOn(FontCache, 'getTextSize').mockReturnValue({
+                width: 9,
+                ba: 10,
+                bd: 2,
+                aba: 10,
+                abd: 2,
+                sp: 0,
+                sbr: 0,
+                sbo: 0,
+                spr: 0,
+                spo: 0,
+            });
+            const glyph = createSkeletonLetterGlyph('，', {
+                fontStyle: {
+                    fontString: 'normal normal 12pt Arial',
+                    fontSize: 12,
+                    originFontSize: 12,
+                    fontFamily: 'Arial',
+                    fontCache: 'normal normal 12pt Arial',
+                },
+                textStyle: { textAdvance: 12 },
+                charSpace: 0,
+                snapToGrid: 0,
+            } as IFontCreateConfig);
+
+            expect(glyph.width).toBe(12);
+            expect(glyph.adjustability).toEqual({
+                stretchability: [0, 0],
+                shrinkability: [0, 0],
+            });
         });
     });
 
@@ -272,7 +308,18 @@ describe('Glyph utils test cases', () => {
     });
 
     describe('test font compatibility policy', () => {
-        it('uses explicit line metrics without changing glyph ink metrics', () => {
+        it.each([
+            {
+                name: 'font glyph',
+                metrics: undefined,
+                expected: { ba: 13, bd: 5, fontAscent: 30, fontDescent: 9, aba: 24, abd: 6 },
+            },
+            {
+                name: 'measured custom range',
+                metrics: { ascent: 7, descent: 2 },
+                expected: { ba: 7, bd: 2, fontAscent: undefined, fontDescent: undefined, aba: 7, abd: 2 },
+            },
+        ])('keeps caret metrics separate from fixed line metrics for a $name', ({ metrics, expected }) => {
             vi.stubGlobal('document', {
                 createElement: () => ({
                     getContext: () => ({
@@ -299,15 +346,15 @@ describe('Glyph utils test cases', () => {
                 textStyle: { lineAscent: 13, lineDescent: 5 },
                 charSpace: 0,
                 snapToGrid: 0,
-            } as any);
+            } as IFontCreateConfig, metrics);
 
+            const { fontAscent, fontDescent, ...expectedMetrics } = expected;
             expect(glyph.bBox).toMatchObject({
-                ba: 13,
-                bd: 5,
-                aba: 24,
-                abd: 6,
+                ...expectedMetrics,
                 normalLineHeight: 18,
             });
+            expect(glyph.bBox.fontAscent).toBe(fontAscent);
+            expect(glyph.bBox.fontDescent).toBe(fontDescent);
         });
 
         it('should apply traditional font metric width rules to letter glyphs only when enabled', () => {

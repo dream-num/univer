@@ -407,13 +407,15 @@ export class FontAndBaseLine extends docExtension {
             return;
         }
 
-        if (glyph.glyphType === GlyphType.TAB && glyph.tabLeader != null) {
-            const leader = this._getTabLeaderCharacter(glyph.tabLeader);
-            if (leader) {
-                const leaderWidth = ctx.measureText(leader).width;
-                const count = leaderWidth > 0 ? Math.floor(width / leaderWidth) : 0;
-                if (count > 0) {
-                    this._paintText(ctx, glyph, leader.repeat(count), spanPointWithFont.x, spanPointWithFont.y);
+        if (glyph.glyphType === GlyphType.TAB) {
+            if (glyph.tabLeader != null) {
+                const leader = this._getTabLeaderCharacter(glyph.tabLeader);
+                if (leader) {
+                    const leaderWidth = ctx.measureText(leader).width;
+                    const count = leaderWidth > 0 ? Math.floor(width / leaderWidth) : 0;
+                    if (count > 0) {
+                        this._paintText(ctx, glyph, leader.repeat(count), spanPointWithFont.x, spanPointWithFont.y);
+                    }
                 }
             }
             return;
@@ -585,7 +587,7 @@ export class FontAndBaseLine extends docExtension {
         const customRenderer = getDocCustomGlyphRenderer(fontFamily);
         const fontSizePx = canvasFontPixelSize(ctx.font);
         const customRendered = customRenderer && fontSizePx !== undefined
-            ? customRenderer({ content, context: ctx, fontSizePx, x, y })
+            ? customRenderer({ content, context: ctx, fontSizePx, glyphKey: glyph.ts?.customGlyphKey, x, y })
             : false;
         if (!customRendered) {
             ctx.fillText(content, x, y);
@@ -606,7 +608,7 @@ export class FontAndBaseLine extends docExtension {
             }
             const strokeRenderer = getDocCustomGlyphStrokeRenderer(fontFamily);
             const customStroked = strokeRenderer && fontSizePx !== undefined
-                ? strokeRenderer({ content, context: ctx, fontSizePx, x, y })
+                ? strokeRenderer({ content, context: ctx, fontSizePx, glyphKey: glyph.ts?.customGlyphKey, x, y })
                 : false;
             if (!customStroked) {
                 ctx.strokeText(content, x, y);

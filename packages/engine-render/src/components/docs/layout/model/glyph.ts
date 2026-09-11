@@ -106,9 +106,11 @@ export function createSkeletonLetterGlyph(
     if (typeof glyphMetrics === 'object') {
         if (glyphMetrics.ascent != null) {
             glyph.bBox.ba = glyph.bBox.aba = glyphMetrics.ascent;
+            delete glyph.bBox.fontAscent;
         }
         if (glyphMetrics.descent != null) {
             glyph.bBox.bd = glyph.bBox.abd = glyphMetrics.descent;
+            delete glyph.bBox.fontDescent;
         }
     }
 
@@ -288,6 +290,8 @@ export function _createSkeletonWordOrLetter(
     ) {
         bBox = {
             ...bBox,
+            fontAscent: bBox.ba,
+            fontDescent: bBox.bd,
             ba: requestedLineAscent,
             bd: requestedLineDescent,
             normalLineHeight: requestedLineAscent + requestedLineDescent,
@@ -312,14 +316,20 @@ export function _createSkeletonWordOrLetter(
         width = Math.max(0, width + characterSpacing * Array.from(content).length);
     }
     const requestedTextAdvance = textStyle.textAdvance;
-    if (
-        typeof requestedTextAdvance === 'number'
+    const hasFixedTextAdvance = typeof requestedTextAdvance === 'number'
         && Number.isFinite(requestedTextAdvance)
         && requestedTextAdvance >= 0
-        && streamType !== DataStreamTreeTokenType.PARAGRAPH
-    ) {
+        && streamType !== DataStreamTreeTokenType.PARAGRAPH;
+    if (hasFixedTextAdvance) {
         width = requestedTextAdvance * Array.from(content).length;
     }
+
+    const adjustability = hasFixedTextAdvance
+        ? {
+            stretchability: [0, 0] as [number, number],
+            shrinkability: [0, 0] as [number, number],
+        }
+        : baseAdjustability(content, width);
 
     return {
         content,
@@ -332,7 +342,7 @@ export function _createSkeletonWordOrLetter(
         glyphType,
         streamType,
         isJustifiable: isJustifiable(content),
-        adjustability: baseAdjustability(content, width),
+        adjustability,
         count: content.length,
         raw: content,
     };

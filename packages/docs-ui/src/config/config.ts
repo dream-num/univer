@@ -63,3 +63,14 @@ export const defaultPluginConfig: IUniverDocsUIConfig = {
     placeholder: true,
     fitToWidth: DEFAULT_DOC_FIT_TO_WIDTH_OPTIONS,
 };
+
+export const defaultPluginMobileConfig: IUniverDocsUIConfig = {
+    ...defaultPluginConfig,
+    fitToWidth: {
+        ...DEFAULT_DOC_FIT_TO_WIDTH_OPTIONS,
+        mode: 'fit-width',
+        paddingX: 12,
+        minScale: 0,
+        maxScale: 1,
+    },
+};

@@ -22,10 +22,10 @@ import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import pkg from '../package.json';
 import { defaultPluginConfig, DRAWING_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { DrawingUpdateController } from './controllers/drawing-update.controller';
-import { ImageCropperController } from './controllers/image-cropper.controller';
-import { ImageUpdateController } from './controllers/image-update.controller';
 import { MobileComponentsController } from './controllers/mobile/components.controller';
-import { DrawingUIController } from './controllers/ui.controller';
+import { MobileImageCropperController } from './controllers/mobile/image-cropper.controller';
+import { MobileImageUpdateController } from './controllers/mobile/image-update.controller';
+import { MobileDrawingUIController } from './controllers/mobile/ui.controller';
 import { DrawingImageClipService } from './services/drawing-image-clip.service';
 import { DrawingRenderService } from './services/drawing-render.service';
 
@@ -57,9 +57,9 @@ export class UniverDrawingMobileUIPlugin extends Plugin {
 
     override onRendered(): void {
         this._injector.get(DrawingUpdateController);
-        this._injector.get(DrawingUIController);
-        this._injector.get(ImageCropperController);
-        this._injector.get(ImageUpdateController);
+        this._injector.get(MobileDrawingUIController);
+        this._injector.get(MobileImageCropperController);
+        this._injector.get(MobileImageUpdateController);
     }
 
     private _initDependencies(): void {
@@ -67,9 +67,9 @@ export class UniverDrawingMobileUIPlugin extends Plugin {
             [DrawingImageClipService],
             [DrawingRenderService],
             [DrawingUpdateController],
-            [DrawingUIController],
-            [ImageCropperController],
-            [ImageUpdateController],
+            [MobileDrawingUIController],
+            [MobileImageCropperController],
+            [MobileImageUpdateController],
         ];
 
         dependencies.forEach((dependency) => this._injector.add(dependency));

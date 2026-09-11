@@ -47,16 +47,17 @@ import { neoGetDocObject } from '../../basics/component-tools';
 import { findFirstCursorOffset } from '../../basics/selection';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import {
-    DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
     IDocEmbedInteractionBoundaryService,
     IDocEmbedRuntimeFocusCoordinator,
 } from '../../services/doc-embed-integration.service';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
+import { isEmbedInteractionEvent } from './doc-selection-render.util';
 
 export class DocSelectionRenderController extends Disposable implements IRenderModule {
     private _loadedMap = new WeakSet<RenderComponentType>();
     private _deferredEditorFocusTimer: ReturnType<typeof setTimeout> | null = null;
+    private _initialSelectionReady = false;
 
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
@@ -167,32 +168,10 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                 this._instanceSrv.focusUnit(unitId);
             }
 
-            const skeleton = this._docSkeletonManagerService.getSkeleton();
             const { offsetX, offsetY } = evt;
-            const coord = this._getTransformCoordForDocumentOffset(offsetX, offsetY);
+            this._syncEditArea(offsetX, offsetY);
 
-            if (coord != null) {
-                const {
-                    pageLayoutType = PageLayoutType.VERTICAL,
-                    pageMarginLeft,
-                    pageMarginTop,
-                } = document.getOffsetConfig();
-                const { editArea } = skeleton.findEditAreaByCoord(
-                    coord,
-                    pageLayoutType,
-                    pageMarginLeft,
-                    pageMarginTop
-                );
-
-                const viewModel = this._docSkeletonManagerService.getViewModel();
-                const preEditArea = viewModel.getEditArea();
-
-                if (preEditArea !== DocumentEditArea.BODY && editArea !== DocumentEditArea.BODY && editArea !== preEditArea) {
-                    viewModel.setEditArea(editArea);
-                }
-            }
-
-            this._docSelectionRenderService.__onPointDown(evt);
+            this._docSelectionRenderService.__onPointDown(evt, true);
 
             if (this._editorService.getEditor(unitId)) {
                 /**
@@ -232,6 +211,9 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                 return;
             }
 
+            if (this._editorService.getEditor(unitId)) {
+                this._setEditorFocus(unitId);
+            }
             this._docSelectionRenderService.__handleDblClick(evt);
         }));
 
@@ -253,6 +235,33 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
             this._deferredEditorFocusTimer = null;
         }
         super.dispose();
+    }
+
+    private _syncEditArea(offsetX: number, offsetY: number): void {
+        const coord = this._getTransformCoordForDocumentOffset(offsetX, offsetY);
+        if (coord == null) {
+            return;
+        }
+
+        const { document } = neoGetDocObject(this._context);
+        const {
+            pageLayoutType = PageLayoutType.VERTICAL,
+            pageMarginLeft,
+            pageMarginTop,
+        } = document.getOffsetConfig();
+        const skeleton = this._docSkeletonManagerService.getSkeleton();
+        const { editArea } = skeleton.findEditAreaByCoord(
+            coord,
+            pageLayoutType,
+            pageMarginLeft,
+            pageMarginTop
+        );
+        const viewModel = this._docSkeletonManagerService.getViewModel();
+        const preEditArea = viewModel.getEditArea();
+
+        if (preEditArea !== DocumentEditArea.BODY && editArea !== DocumentEditArea.BODY && editArea !== preEditArea) {
+            viewModel.setEditArea(editArea);
+        }
     }
 
     private _getTransformCoordForDocumentOffset(evtOffsetX: number, evtOffsetY: number) {
@@ -333,10 +342,9 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
     }
 
     private _skeletonListener() {
-        let selectionInitialized = false;
         // Change text selection runtime(skeleton, scene) and update text selection manager current selection.
         this.disposeWithMe(this._docSkeletonManagerService.currentSkeleton$.subscribe((skeleton) => {
-            if (!skeleton) return;
+            if (!skeleton || this._initialSelectionReady) return;
 
             const { unitId } = this._context;
             const isInternalEditor = isInternalEditorID(unitId);
@@ -348,12 +356,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                 if (this._isEmbedChildInteractionActive(unitId)) {
                     return;
                 }
-
-                // Synchronous layout publishes after every edit. Preserve the post-edit selection.
-                if (selectionInitialized) {
-                    return;
-                }
-                selectionInitialized = true;
+                this._initialSelectionReady = true;
 
                 //TODO: @JOCS Only for docs. move to docs in the future.
                 this._docSelectionRenderService.focus();
@@ -389,48 +392,4 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
             }
         }));
     }
-}
-
-function isEmbedInteractionEvent(evt: IPointerEvent | IMouseEvent): boolean {
-    const target = (evt as Event).target;
-    if (typeof Element !== 'undefined' && target instanceof Element && target.closest(`[${DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`) != null) {
-        return true;
-    }
-
-    if (typeof document === 'undefined') {
-        return false;
-    }
-
-    const point = getEventClientPoint(evt, target);
-    const clientX = point?.clientX;
-    const clientY = point?.clientY;
-    if (typeof clientX !== 'number' || typeof clientY !== 'number' || !Number.isFinite(clientX) || !Number.isFinite(clientY)) {
-        return false;
-    }
-
-    if (typeof document.elementFromPoint !== 'function') {
-        return false;
-    }
-
-    return document.elementFromPoint(clientX, clientY)?.closest(`[${DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}]`) != null;
-}
-
-function getEventClientPoint(evt: IPointerEvent | IMouseEvent, target: EventTarget | null): { clientX: number; clientY: number } | undefined {
-    if (Number.isFinite(evt.clientX) && Number.isFinite(evt.clientY)) {
-        return { clientX: evt.clientX, clientY: evt.clientY };
-    }
-
-    if (typeof Element !== 'undefined' && target instanceof Element && Number.isFinite(evt.offsetX) && Number.isFinite(evt.offsetY)) {
-        const rect = target.getBoundingClientRect();
-        return {
-            clientX: rect.left + evt.offsetX,
-            clientY: rect.top + evt.offsetY,
-        };
-    }
-
-    if (Number.isFinite(evt.x) && Number.isFinite(evt.y)) {
-        return { clientX: evt.x, clientY: evt.y };
-    }
-
-    return undefined;
 }

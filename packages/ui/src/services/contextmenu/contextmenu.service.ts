@@ -20,6 +20,7 @@ import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 
 export interface IContextMenuTriggerContext {
     autoFocus?: boolean;
+    caretAnchor?: boolean;
     unitId?: string;
     subUnitId?: string;
 }

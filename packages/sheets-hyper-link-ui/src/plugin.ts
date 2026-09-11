@@ -79,7 +79,6 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
         const dependencies: Dependency[] = [
             [SheetsHyperLinkResolverService],
             [ISheetsHyperLinkPopupService, { useClass: SheetsHyperLinkPopupService }],
-            [SheetsHyperLinkPopupService, { useExisting: ISheetsHyperLinkPopupService }],
             [SheetsHyperLinkSidePanelService],
 
             [SheetsHyperLinkPopupController],

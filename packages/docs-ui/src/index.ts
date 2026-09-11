@@ -206,6 +206,7 @@ export {
     ParagraphMenuInsertBelowSubmenuItemFactory,
 } from './menu/paragraph-menu';
 export { menuSchema as DocsUIMenuSchema } from './menu/schema';
+export { UniverDocsMobileUIPlugin } from './mobile-plugin';
 export { UniverDocsUIPlugin } from './plugin';
 export * from './services';
 export {
@@ -250,8 +251,10 @@ export { DocIMEInputManagerService } from './services/doc-ime-input-manager.serv
 export { DocLayoutInteractionService } from './services/doc-layout-interaction.service';
 export { SetDocInputStyleCommand } from './services/doc-menu-style.service';
 export type { ISetDocInputStyleCommandParams } from './services/doc-menu-style.service';
+export { DocMobileElementMenuService } from './services/doc-mobile-element-menu.service';
 export { DocPageLayoutService } from './services/doc-page-layout.service';
 export { DocParagraphMenuService } from './services/doc-paragraph-menu.service';
+export type { IDocCanvasPopup } from './services/doc-popup-manager.service';
 export { calcDocRangePositions, DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 export type { IDocPrintPreparationContext } from './services/doc-print-interceptor.service';
 export { DocPrintInterceptorService } from './services/doc-print-interceptor.service';
@@ -276,6 +279,8 @@ export { getAnchorBounding, getLineBounding, TEXT_RANGE_LAYER_INDEX, TextRange }
 export { whenDocAndEditorFocused } from './shortcuts/utils';
 export { DOC_VERTICAL_PADDING } from './types/const/padding';
 export { BulletListTypePicker, OrderListTypePicker } from './views/list-type-picker/Picker';
+export { MOBILE_DOC_ELEMENT_MENU, MobileDocElementMenu } from './views/mobile-element-menu/MobileDocElementMenu';
+export { MobileRichTextEditor } from './views/mobile-rich-text-editor/MobileRichTextEditor';
 export { MobileRichTextToolbar } from './views/mobile-rich-text-toolbar/MobileRichTextToolbar';
 export type { IMobileRichTextToolbarProps } from './views/mobile-rich-text-toolbar/MobileRichTextToolbar';
 export {

@@ -50,9 +50,6 @@ export interface IThreadCommentPanelProps {
     formatRef?: (comment: IThreadComment) => string;
     onTempCommentClose?: () => void;
     autoFocusActiveComment?: boolean;
-    ActionRowComponent?: typeof ActionRow;
-    SelectComponent?: typeof Select;
-    ThreadCommentTreeComponent?: typeof ThreadCommentTree;
 }
 
 interface IThreadCommentWithUsers extends IThreadComment {
@@ -79,9 +76,6 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         formatRef,
         onTempCommentClose,
         autoFocusActiveComment = false,
-        ActionRowComponent = ActionRow,
-        SelectComponent = Select,
-        ThreadCommentTreeComponent = ThreadCommentTree,
     } = props;
     const [unit, setUnit] = useState('all');
     const [status, setStatus] = useState('all');
@@ -221,7 +215,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     }, [activeCommentId, location]);
 
     const renderComment = (section: ThreadCommentPanelSection) => (comment: IThreadComment, index: number) => (
-        <ThreadCommentTreeComponent
+        <ThreadCommentTree
             full
             location={location}
             getSubUnitName={getSubUnitName}
@@ -279,7 +273,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
             <div className="univer-mt-3 univer-flex univer-flex-row univer-justify-between">
                 {type === UniverInstanceType.UNIVER_SHEET
                     ? (
-                        <SelectComponent
+                        <Select
                             borderless
                             value={unit}
                             options={[
@@ -296,7 +290,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                         />
                     )
                     : null}
-                <SelectComponent
+                <Select
                     borderless
                     value={status}
                     options={[
@@ -332,22 +326,22 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                         {localeService.t<LocaleKey>('thread-comment-ui.panel.empty')}
                         {isFiltering
                             ? (
-                                <ActionRowComponent className="univer-mt-2 univer-flex univer-flex-row">
+                                <ActionRow className="univer-mt-2 univer-flex univer-flex-row">
                                     <Button onClick={onReset}>
                                         {localeService.t<LocaleKey>('thread-comment-ui.panel.reset')}
                                     </Button>
-                                </ActionRowComponent>
+                                </ActionRow>
                             )
                             : !disableAdd
                                 ? (
-                                    <ActionRowComponent
+                                    <ActionRow
                                         className="univer-mt-2 univer-flex univer-flex-row"
                                     >
                                         <Button onClick={onAdd}>
                                             <IncreaseIcon className="univer-mr-1.5" />
                                             {localeService.t<LocaleKey>('thread-comment-ui.panel.addComment')}
                                         </Button>
-                                    </ActionRowComponent>
+                                    </ActionRow>
                                 )
                                 : null}
                     </div>

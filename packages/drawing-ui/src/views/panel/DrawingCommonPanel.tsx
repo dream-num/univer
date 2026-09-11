@@ -20,14 +20,10 @@ import { LocaleService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { useDependency, useObservable } from '@univerjs/ui';
+import { ComponentManager, useDependency, useObservable } from '@univerjs/ui';
 import { filter, map, merge } from 'rxjs';
 import { getUpdateParams } from '../../utils/get-update-params';
-import { DrawingAlign } from './DrawingAlign';
-import { DrawingArrange } from './DrawingArrange';
-import { DrawingGroup } from './DrawingGroup';
-import { DrawingTransform } from './DrawingTransform';
-import { ImageCropper } from './ImageCropper';
+import { DRAWING_ALIGN_COMPONENT, DRAWING_ARRANGE_COMPONENT, DRAWING_GROUP_COMPONENT, DRAWING_TRANSFORM_COMPONENT, IMAGE_CROPPER_COMPONENT } from './component-name';
 
 export interface IDrawingCommonPanelProps {
     drawings: IDrawingParam[];
@@ -36,6 +32,7 @@ export interface IDrawingCommonPanelProps {
     hasAlign?: boolean;
     hasCropper?: boolean;
     hasGroup?: boolean;
+    onCropStart?: () => void;
 }
 
 function getPanelShowState(drawings: IDrawingParam[]) {
@@ -69,6 +66,12 @@ function getPanelShowState(drawings: IDrawingParam[]) {
 }
 
 export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
+    const componentManager = useDependency(ComponentManager);
+    const DrawingArrange = componentManager.get(DRAWING_ARRANGE_COMPONENT);
+    const DrawingAlign = componentManager.get(DRAWING_ALIGN_COMPONENT);
+    const DrawingGroup = componentManager.get(DRAWING_GROUP_COMPONENT);
+    const DrawingTransform = componentManager.get(DRAWING_TRANSFORM_COMPONENT);
+    const ImageCropper = componentManager.get(IMAGE_CROPPER_COMPONENT);
     const drawingManagerService = useDependency(IDrawingManagerService);
     const renderManagerService = useDependency(IRenderManagerService);
     const localeService = useDependency(LocaleService);
@@ -91,7 +94,7 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
                     ),
                     transformer.changeStart$.pipe(
                         map((state) => getPanelShowState(
-                            getUpdateParams(state.objects, drawingManagerService) as IDrawingParam[]
+                            getUpdateParams(state.objects, drawingManagerService).filter((drawing): drawing is IDrawingParam => drawing != null)
                         ))
                     ),
                 ]
@@ -124,7 +127,7 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
             <DrawingArrange arrangeShow={hasArrange === true ? arrangeShow : false} drawings={drawings} />
             <DrawingTransform transformShow={hasTransform === true ? transformShow : false} drawings={drawings} />
             <DrawingAlign alignShow={hasAlign === true ? alignShow : false} drawings={drawings} />
-            <ImageCropper cropperShow={hasCropper === true ? cropperShow : false} drawings={drawings} />
+            <ImageCropper cropperShow={hasCropper === true ? cropperShow : false} drawings={drawings} onCropStart={props.onCropStart} />
             <DrawingGroup hasGroup={hasGroup} drawings={drawings} />
         </>
     );

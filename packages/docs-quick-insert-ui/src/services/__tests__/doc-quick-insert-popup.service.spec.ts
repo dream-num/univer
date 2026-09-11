@@ -14,201 +14,108 @@
  * limitations under the License.
  */
 
-import { DocSkeletonManagerService } from '@univerjs/docs';
-import { DocEventManagerService } from '@univerjs/docs-ui';
+import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import { createRequire } from 'node:module';
+import { DocumentFlavor, Univer, UniverInstanceType } from '@univerjs/core';
+import { DocLayoutExecutorService, DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { DocCanvasPopManagerService, DocEventManagerService, DocLayoutInteractionService } from '@univerjs/docs-ui';
+import { CanvasColorService, Documents, ICanvasColorService, IRenderManagerService, RenderManagerService, RenderUnit } from '@univerjs/engine-render';
+import { CanvasPopupService, ICanvasPopupService } from '@univerjs/ui';
 import { of } from 'rxjs';
-import { describe, expect, it, vi } from 'vitest';
-import { DeleteSearchKeyCommand } from '../../commands/commands/doc-quick-insert.command';
-import { KeywordInputPlaceholder } from '../../views/KeywordInputPlaceholder';
-import { QuickInsertPopup } from '../../views/QuickInsertPopup';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { DocQuickInsertPopupService } from '../doc-quick-insert-popup.service';
 
-function createPopupDisposable() {
-    return {
-        dispose: vi.fn(),
-        canDispose: vi.fn(() => true),
-    };
-}
+beforeAll(() => {
+    vi.stubGlobal('jest', vi);
+    createRequire(import.meta.url)('jest-canvas-mock');
+});
+afterAll(() => vi.unstubAllGlobals());
 
-function createServiceTestBed() {
-    let dataStream = '/';
-    const paragraphBound = {
-        firstLine: { left: 0, top: 0, right: 10, bottom: 20 },
-    };
-    const popupEntries: Array<{
-        rect: unknown;
-        popup: { componentKey: string; extraProps?: unknown };
-        disposable: ReturnType<typeof createPopupDisposable>;
-    }> = [];
-    const activeRange = {
-        startOffset: 1,
-        endOffset: 1,
-        segmentId: '',
-        segmentPage: -1,
-    };
-    const glyph = {
-        content: '\r',
-        ts: { fs: 11, ff: 'Arial' },
-        fontStyle: {
-            fontString: '14.6666666667px Arial',
-            fontFamily: 'Arial',
-        },
-        bBox: {
-            ba: 10,
-            bd: 4,
-        },
-    };
-    const docDataModel = {
-        getBody: () => ({
-            dataStream,
-            paragraphs: [{ startIndex: 1, paragraphId: 'para_quick_insert_test' }],
-        }),
-    };
-    const docEventManagerService = {
-        findParagraphBoundByIndex: vi.fn(() => paragraphBound),
-    };
-    let layoutInteractionActive = false;
-    const skeleton = {
-        findNodeByCharIndex: vi.fn(() => glyph),
-        findNodePositionByCharIndex: vi.fn(() => undefined),
-    };
-    const currentRender = {
-        with: vi.fn((token: unknown) => {
-            if (token === DocEventManagerService) {
-                return docEventManagerService;
-            }
-            if (token === DocSkeletonManagerService) {
-                return { getSkeleton: () => skeleton };
-            }
-            return undefined;
-        }),
-        mainComponent: {
-            getOffsetConfig: () => ({ docsLeft: 0, docsTop: 0 }),
-        },
-    };
-    const docCanvasPopupManagerService = {
-        attachPopupToRect: vi.fn((rect: unknown, popup: { componentKey: string; extraProps?: unknown }) => {
-            const disposable = createPopupDisposable();
-            popupEntries.push({ rect, popup, disposable });
-            return disposable;
-        }),
-    };
-    const docLayoutInteractionService = {
-        beginInteraction: vi.fn(() => {
-            layoutInteractionActive = true;
-            return {
-                dispose: () => {
-                    layoutInteractionActive = false;
-                },
-            };
-        }),
-    };
-    const commandService = {
-        syncExecuteCommand: vi.fn(() => true),
-    };
-
-    const service = new DocQuickInsertPopupService(
-        docCanvasPopupManagerService as never,
-        {
-            getCurrentUnitOfType: vi.fn(() => docDataModel),
-            getUnit: vi.fn(() => docDataModel),
-        } as never,
-        commandService as never,
-        {
-            getRenderUnitById: vi.fn(() => currentRender),
-        } as never,
-        {
-            getActiveTextRange: vi.fn(() => activeRange),
-        } as never,
-        docLayoutInteractionService as never
-    );
-
-    return {
-        service,
-        popupEntries,
-        commandService,
-        isLayoutInteractionActive: () => layoutInteractionActive,
-        paragraphBound,
-        setDataStream: (value: string) => {
-            dataStream = value;
-        },
-    };
+function createTestBed() {
+    const univer = new Univer();
+    const injector = univer.__getInjector();
+    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+    injector.add([ICanvasPopupService, { useClass: CanvasPopupService }]);
+    injector.add([DocLayoutExecutorService]);
+    injector.add([DocSelectionManagerService]);
+    injector.add([DocCanvasPopManagerService]);
+    injector.add([DocQuickInsertPopupService]);
+    return { univer, injector };
 }
 
 describe('DocQuickInsertPopupService', () => {
-    it('registers popups, resolves them by trigger and emits selected menus after deleting the search key', () => {
-        vi.useFakeTimers();
-
-        const { service, commandService } = createServiceTestBed();
-        const popup = {
-            keyword: '/',
-            menus$: of([]),
-        };
-        const menu = {
-            id: 'menu-1',
-            title: 'Text',
-        };
-        const onSelected = vi.fn();
-
-        const unregisterPopup = service.registerPopup(popup);
-        const unregisterHandler = service.onMenuSelected(onSelected);
-
-        expect(service.resolvePopup('/')).toBe(popup);
-
-        service.setInputOffset({ start: 2, end: 4 });
-        service.emitMenuSelected(menu as never);
-
-        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(DeleteSearchKeyCommand.id, { start: 2, end: 4 });
-        expect(onSelected).not.toHaveBeenCalled();
-
-        vi.runAllTimers();
-        expect(onSelected).toHaveBeenCalledWith(menu);
-
-        unregisterHandler();
-        unregisterPopup();
-        expect(service.resolvePopup('/')).toBeUndefined();
-
-        service.dispose();
-        vi.useRealTimers();
+    it('uses the target document layout interaction instead of a global service', () => {
+        const { univer, injector } = createTestBed();
+        try {
+            const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+                id: 'quick-insert-doc',
+                body: {
+                    dataStream: '/\r\n',
+                    paragraphs: [{ startIndex: 1, paragraphId: 'paragraph-1' }],
+                    sectionBreaks: [{ startIndex: 2, sectionId: 'body' }],
+                },
+                documentStyle: {
+                    documentFlavor: DocumentFlavor.TRADITIONAL,
+                    pageSize: { width: 300, height: 400 },
+                    marginTop: 20,
+                    marginBottom: 20,
+                    marginLeft: 20,
+                    marginRight: 20,
+                },
+            });
+            const render = injector.get(IRenderManagerService).createRender(model.getUnitId());
+            if (!(render instanceof RenderUnit)) {
+                throw new TypeError('Expected a render unit');
+            }
+            render.deactivate();
+            render.engine.resizeBySize(300, 400);
+            render.addRenderDependencies([[DocSkeletonManagerService], [DocLayoutInteractionService]]);
+            const documents = new Documents('quick-insert-doc', render.with(DocSkeletonManagerService).getSkeleton());
+            render.mainComponent = documents;
+            render.scene.addObject(documents);
+            render.addRenderDependencies([[DocEventManagerService]]);
+            injector.get(DocSelectionManagerService).replaceDocRanges([{
+                startOffset: 1,
+                endOffset: 1,
+                collapsed: true,
+                segmentId: '',
+            }]);
+            const service = injector.get(DocQuickInsertPopupService);
+            const interaction = render.with(DocLayoutInteractionService);
+            const popup = { keyword: '/', menus$: of([]) };
+            const unregister = service.registerPopup(popup);
+            expect(service.resolvePopup('/')).toBe(popup);
+            service.showPopup({ popup, index: 0, unitId: model.getUnitId() });
+            expect(service.editPopup?.unitId).toBe(model.getUnitId());
+            expect(interaction.isActive).toBe(true);
+            service.setIsComposing(true);
+            service.setIsComposing(false);
+            service.closePopup();
+            service.closePopup();
+            expect(interaction.isActive).toBe(false);
+            expect(service.editPopup).toBeNull();
+            service.showPopup({ popup, index: 0, unitId: model.getUnitId() });
+            expect(interaction.isActive).toBe(true);
+            service.dispose();
+            service.dispose();
+            expect(interaction.isActive).toBe(false);
+            expect(injector.get(ICanvasPopupService).popups).toHaveLength(0);
+            unregister();
+            expect(service.resolvePopup('/')).toBeUndefined();
+        } finally {
+            univer.dispose();
+        }
     });
 
-    it('shows the popup on an empty line and remounts the keyword placeholder as input state changes', () => {
-        const { service, popupEntries, isLayoutInteractionActive, setDataStream } = createServiceTestBed();
-        const popup = {
-            keyword: '/',
-            menus$: of([]),
-        };
-
-        service.showPopup({ popup, index: 0, unitId: 'doc-1' });
-
-        expect(popupEntries).toHaveLength(2);
-        expect(popupEntries[0].popup.componentKey).toBe(KeywordInputPlaceholder.componentKey);
-        expect(popupEntries[1].popup.componentKey).toBe(QuickInsertPopup.componentKey);
-        expect(isLayoutInteractionActive()).toBe(true);
-        expect(service.editPopup).toEqual(expect.objectContaining({ popup, anchor: 0, unitId: 'doc-1' }));
-
-        setDataStream('/a');
-        service.setInputOffset({ start: 0, end: 2 });
-        expect(popupEntries[0].disposable.dispose).toHaveBeenCalledTimes(1);
-
-        setDataStream('/');
-        service.setInputOffset({ start: 0, end: 1 });
-        expect(popupEntries).toHaveLength(3);
-        expect(popupEntries[2].popup.componentKey).toBe(KeywordInputPlaceholder.componentKey);
-
-        service.setIsComposing(true);
-        expect(popupEntries[2].disposable.dispose).toHaveBeenCalledTimes(1);
-
-        service.setIsComposing(false);
-        expect(popupEntries).toHaveLength(4);
-        expect(popupEntries[3].popup.componentKey).toBe(KeywordInputPlaceholder.componentKey);
-
-        service.closePopup();
-        expect(popupEntries[1].disposable.dispose).toHaveBeenCalledTimes(1);
-        expect(popupEntries[3].disposable.dispose).toHaveBeenCalledTimes(1);
-        expect(service.editPopup).toBeNull();
-        expect(isLayoutInteractionActive()).toBe(false);
-
-        service.dispose();
+    it('does not open a popup for a document without a render', () => {
+        const { univer, injector } = createTestBed();
+        try {
+            const service = injector.get(DocQuickInsertPopupService);
+            service.showPopup({ popup: { keyword: '/', menus$: of([]) }, index: 0, unitId: 'missing' });
+            expect(service.editPopup).toBeUndefined();
+        } finally {
+            univer.dispose();
+        }
     });
 });

@@ -16,10 +16,19 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { CustomRangeType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, Inject } from '@univerjs/core';
+import {
+    CustomRangeType,
+    Disposable,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    ICommandService,
+    Inject,
+} from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DocEventManagerService } from '@univerjs/docs-ui';
-import { ClickDocHyperLinkOperation, ToggleDocHyperLinkInfoPopupOperation } from '../../commands/operations/popup.operation';
+import {
+    ClickDocHyperLinkOperation,
+    ToggleDocHyperLinkInfoPopupOperation,
+} from '../../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
 export class DocHyperLinkEventRenderController extends Disposable implements IRenderModule {
@@ -59,7 +68,8 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
     private _initPointerDown() {
         this.disposeWithMe(
             this._docEventManagerService.pointerDownCustomRanges$.subscribe((ranges) => {
-                if (!ranges.some((range) => range.range.rangeType === CustomRangeType.HYPERLINK)) {
+                const link = ranges.find((range) => range.range.rangeType === CustomRangeType.HYPERLINK);
+                if (!link) {
                     this._hyperLinkPopupService.hideInfoPopupOnPointerDown();
                 }
             })
@@ -78,17 +88,17 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
                 }
 
                 if (link) {
+                    const info = {
+                        unitId: this._context.unitId,
+                        linkId: link.range.rangeId,
+                        segmentId: link.segmentId,
+                        segmentPage: link.segmentPageIndex,
+                        startIndex: link.range.startIndex,
+                        endIndex: link.range.endIndex,
+                    };
                     this._commandService.executeCommand(
                         ToggleDocHyperLinkInfoPopupOperation.id,
-                        {
-                            unitId: this._context.unitId,
-                            linkId: link.range.rangeId,
-                            segmentId: link.segmentId,
-                            segmentPage: link.segmentPageIndex,
-                            rangeId: link.range.rangeId,
-                            startIndex: link.range.startIndex,
-                            endIndex: link.range.endIndex,
-                        }
+                        info
                     );
                 } else {
                     this._hideInfoPopup();

@@ -18,6 +18,7 @@ import type { DependencyOverride } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
 
 export const DOCS_UI_PLUGIN_CONFIG_KEY = 'docs-ui.config';
+export const DOCS_UI_PLUGIN_NAME = 'DOC_UI_PLUGIN';
 
 export const configSymbol = Symbol(DOCS_UI_PLUGIN_CONFIG_KEY);
 

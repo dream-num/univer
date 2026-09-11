@@ -30,6 +30,7 @@ export { DocFloatDomController } from './controllers/doc-float-dom.controller';
 export { DOCS_IMAGE_MENU_ID } from './menu/image.menu';
 export { menuSchema as DocsDrawingUIMenuSchema } from './menu/schema';
 export { DOCS_SHAPE_BELOW_MENU_ID, DOCS_SHAPE_MENU_ID } from './menu/shape.menu';
+export { UniverDocsDrawingMobileUIPlugin } from './mobile-plugin';
 export { UniverDocsDrawingUIPlugin } from './plugin';
 export { DocDrawingFloatingToolbarAdapterService } from './services/doc-drawing-floating-toolbar-adapter.service';
 export type {
@@ -42,3 +43,5 @@ export type {
 } from './services/doc-drawing-floating-toolbar-adapter.service';
 export { DocDrawingPosition } from './views/doc-image-panel/DocDrawingPosition';
 export { DocDrawingTextWrap } from './views/doc-image-panel/DocDrawingTextWrap';
+export { MobileDocDrawingPosition } from './views/doc-image-panel/MobileDocDrawingPosition';
+export { MobileDocDrawingTextWrap } from './views/doc-image-panel/MobileDocDrawingTextWrap';

@@ -15,3 +15,4 @@
  */
 
 export const COMPONENT_DOC_DRAWING_PANEL = 'COMPONENT_DOC_DRAWING_PANEL';
+export const MOBILE_DOC_DRAWING_PANEL_DIALOG_ID = 'docs-drawing-ui.mobile-panel';

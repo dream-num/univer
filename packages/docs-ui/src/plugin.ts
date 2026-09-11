@@ -64,7 +64,7 @@ import {
 } from './commands/commands/doc-horizontal-line.command';
 import { DocPageSetupCommand } from './commands/commands/doc-page-setup.command';
 import { DocParagraphSettingCommand } from './commands/commands/doc-paragraph-setting.command';
-import { DocSelectAllCommand } from './commands/commands/doc-select-all.command';
+import { DocSelectAllCommand, DocSelectWordCommand } from './commands/commands/doc-select-all.command';
 import { IMEInputCommand } from './commands/commands/ime-input.command';
 import {
     ResetInlineFormatTextBackgroundColorCommand,
@@ -145,7 +145,7 @@ import { DocSectionSettingPanelOperation } from './commands/operations/doc-secti
 import { InsertDocumentColumnBreakOperation, InsertDocumentSectionBreakOperation } from './commands/operations/insert-break.operation';
 import { DocOpenPageSettingCommand } from './commands/operations/open-page-setting.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
-import { defaultPluginConfig, DOCS_UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { defaultPluginConfig, DOCS_UI_PLUGIN_CONFIG_KEY, DOCS_UI_PLUGIN_NAME } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
 import { DocAutoFormatController } from './controllers/doc-auto-format.controller';
 import { DocHeaderFooterController } from './controllers/doc-header-footer.controller';
@@ -184,6 +184,7 @@ import { DocIMEStateChangeInterceptorService } from './services/doc-ime-state-ch
 import { DocLayoutInteractionService } from './services/doc-layout-interaction.service';
 import { DocLayoutProgressService } from './services/doc-layout-progress.service';
 import { DocMenuStyleService, SetDocInputStyleCommand } from './services/doc-menu-style.service';
+import { DocMobileElementMenuService } from './services/doc-mobile-element-menu.service';
 import { DocPageLayoutService } from './services/doc-page-layout.service';
 import { DocParagraphMenuService } from './services/doc-paragraph-menu.service';
 import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
@@ -239,7 +240,7 @@ import {
 
 @DependentOn(UniverDocsPlugin, UniverRenderEnginePlugin)
 export class UniverDocsUIPlugin extends Plugin {
-    static override pluginName = 'DOC_UI_PLUGIN';
+    static override pluginName = DOCS_UI_PLUGIN_NAME;
     static override packageName = pkg.name;
     static override version = pkg.version;
     // static override type = UniverInstanceType.UNIVER_DOC;
@@ -359,6 +360,7 @@ export class UniverDocsUIPlugin extends Plugin {
             CoverContentCommand,
             SetDocZoomRatioCommand,
             DocSelectAllCommand,
+            DocSelectWordCommand,
             DocParagraphSettingPanelOperation,
             DocSectionSettingPanelOperation,
             InsertDocumentColumnBreakOperation,
@@ -457,6 +459,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocHtmlExportService],
             [DocCanvasPopManagerService],
             [DocLayoutProgressService],
+            [DocMobileElementMenuService],
             [DocsRenderService],
             [IDocStateChangeInterceptorService, { useClass: DocIMEStateChangeInterceptorService }],
             [DocAutoFormatService],
@@ -481,7 +484,7 @@ export class UniverDocsUIPlugin extends Plugin {
         }));
     }
 
-    private _initRenderBasics(): void {
+    private _initRenderBasics() {
         ([
             [DocSkeletonManagerService],
             [DocSelectionRenderService],
@@ -501,7 +504,7 @@ export class UniverDocsUIPlugin extends Plugin {
         });
     }
 
-    private _initRenderModules(): void {
+    private _initRenderModules() {
         ([
             [DocEventManagerService],
             [DocFloatMenuService],

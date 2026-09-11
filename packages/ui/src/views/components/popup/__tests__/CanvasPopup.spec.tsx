@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import type { ComponentType, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import type { IPopup, IPopupWithExtraProps } from '../../../../services/popup/canvas-popup.service';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ConfigService, IConfigService, Injector, LocaleService } from '@univerjs/core';
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, expectTypeOf, it } from 'vitest';
-import { ComponentManager } from '../../../../common';
+import { ComponentManager } from '../../../../common/component-manager';
 import { CanvasPopupService, ICanvasPopupService } from '../../../../services/popup/canvas-popup.service';
-import { connectInjector } from '../../../../utils/di';
+import { RediContext } from '../../../../utils/di';
 import { CanvasPopup } from '../CanvasPopup';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -48,8 +50,7 @@ function renderWithDependencies(element: ReactElement) {
 
     injector.get(ComponentManager).register('test-popup', TestPopup);
 
-    const ConnectedTestRoot = connectInjector(() => element, injector) as ComponentType;
-    const result = render(<ConnectedTestRoot />);
+    const result = render(<RediContext.Provider value={{ injector }}>{element}</RediContext.Provider>);
 
     return {
         ...result,
@@ -57,6 +58,7 @@ function renderWithDependencies(element: ReactElement) {
         dispose: () => {
             result.unmount();
             cleanup();
+            injector.dispose();
         },
     };
 }
@@ -70,7 +72,79 @@ function createCanvasElement(rect: DOMRect): HTMLCanvasElement {
     return canvasElement;
 }
 
+function StatefulPopup() {
+    const [open, setOpen] = useState(false);
+    return <button type="button" onClick={() => setOpen(true)}>{open ? 'Style drawer opened' : 'Open styles'}</button>;
+}
+
+function PortaledPopup() {
+    const [open, setOpen] = useState(false);
+    return open
+        ? createPortal(<div role="dialog" aria-label="Table styles">Styles</div>, document.body)
+        : <button type="button" onClick={() => setOpen(true)}>Edit table</button>;
+}
+
 describe('CanvasPopup', () => {
+    it('keeps an open portaled editor when resizing moves its anchor outside the canvas', async () => {
+        const rendered = renderWithDependencies(<CanvasPopup />);
+        rendered.injector.get(ComponentManager).register('portaled-popup', PortaledPopup);
+        const anchorRect$ = new BehaviorSubject({ left: 40, top: 620, right: 160, bottom: 680 });
+        let canvasRect = new DOMRect(0, 0, 390, 844);
+        const canvas = document.createElement('canvas');
+        Object.defineProperty(canvas, 'getBoundingClientRect', { value: () => canvasRect });
+        act(() => {
+            rendered.injector.get(ICanvasPopupService).addPopup({
+                unitId: 'board',
+                subUnitId: 'page',
+                componentKey: 'portaled-popup',
+                anchorRect$,
+                canvasElement: canvas,
+                hiddenType: 'hide',
+            });
+        });
+        fireEvent.click(await screen.findByRole('button', { name: 'Edit table' }));
+        await act(async () => {
+            canvasRect = new DOMRect(0, 0, 390, 500);
+            anchorRect$.next({ left: 40, top: 620, right: 160, bottom: 680 });
+            await new Promise((resolve) => setTimeout(resolve, 0));
+        });
+        expect(screen.getByRole('dialog', { name: 'Table styles' })).toBeTruthy();
+        rendered.dispose();
+    });
+
+    it('preserves connected popup state when sibling popups change', async () => {
+        const rendered = renderWithDependencies(<CanvasPopup />);
+        const injector = rendered.injector;
+        injector.get(ComponentManager).register('stateful-popup', StatefulPopup);
+        const service = injector.get(ICanvasPopupService);
+        const popup: IPopup = {
+            unitId: 'board',
+            subUnitId: 'page',
+            componentKey: 'stateful-popup',
+            connectorInjector: injector,
+            canvasElement: createCanvasElement(new DOMRect(0, 0, 390, 844)),
+            anchorRect$: new BehaviorSubject({ left: 40, top: 60, right: 160, bottom: 100 }),
+            hideOnInvisible: false,
+        };
+        act(() => {
+            service.addPopup(popup);
+        });
+        fireEvent.click(await screen.findByRole('button', { name: 'Open styles' }));
+        expect(screen.getByRole('button', { name: 'Style drawer opened' })).toBeTruthy();
+        let sibling = '';
+        act(() => {
+            sibling = service.addPopup({ ...popup, componentKey: 'test-popup', extraProps: { label: 'Sibling' } });
+        });
+        expect(await screen.findByRole('button', { name: 'Sibling' })).toBeTruthy();
+        expect(screen.queryByRole('button', { name: 'Open styles' })).toBeNull();
+        expect(screen.getByRole('button', { name: 'Style drawer opened' })).toBeTruthy();
+        act(() => {
+            service.removePopup(sibling);
+        });
+        expect(screen.getByRole('button', { name: 'Style drawer opened' })).toBeTruthy();
+        rendered.dispose();
+    });
+
     it('requires extraProps only for popups that declare them', () => {
         expectTypeOf<IPopup['extraProps']>().toEqualTypeOf<Record<string, unknown> | undefined>();
         expectTypeOf<IPopupWithExtraProps<{ label: string }>['extraProps']>().toEqualTypeOf<{ label: string }>();

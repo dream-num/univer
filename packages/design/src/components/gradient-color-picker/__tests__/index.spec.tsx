@@ -20,11 +20,19 @@
 
 import type { IGradientValue } from '../GradientColorPicker';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { useState } from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import enUS from '../../../locale/en-US';
+import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { GradientColorPicker } from '../GradientColorPicker';
+import { MobileGradientColorPicker } from '../MobileGradientColorPicker';
 import '@testing-library/jest-dom/vitest';
 
-afterEach(cleanup);
+beforeEach(() => vi.stubGlobal('CSS', { ...globalThis.CSS, supports: () => false }));
+afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+});
 
 const defaultValue: IGradientValue = {
     type: 'linear',
@@ -34,6 +42,51 @@ const defaultValue: IGradientValue = {
     ],
     angle: 0,
 };
+
+describe('mobile GradientColorPicker', () => {
+    it('updates the selected stop, adds and removes stops without desktop hover controls', () => {
+        const onChange = vi.fn();
+        function Editor() {
+            const [value, setValue] = useState(defaultValue);
+            return (
+                <ConfigProvider mountContainer={document.body} locale={enUS.design}>
+                    <MobileGradientColorPicker
+                        value={value}
+                        types={['linear']}
+                        onChange={(next) => {
+                            setValue(next);
+                            onChange(next);
+                        }}
+                    />
+                </ConfigProvider>
+            );
+        }
+        const view = render(<Editor />);
+        expect(view.queryByText(enUS.design.GradientColorPicker.radial)).toBeNull();
+        fireEvent.click(view.getByRole('button', { name: enUS.design.Accessibility.increment }));
+        expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ stops: [defaultValue.stops[0], defaultValue.stops[1], { ...defaultValue.stops[0], offset: 50 }] }));
+        expect(view.getByRole('button', { name: `${enUS.design.GradientColorPicker.offset} 50%` })).toHaveAttribute('aria-pressed', 'true');
+        fireEvent.change(view.getByLabelText(enUS.design.GradientColorPicker.angle), { target: { value: '180' } });
+        fireEvent.change(view.getByLabelText(enUS.design.GradientColorPicker.offset), { target: { value: '60' } });
+        fireEvent.change(view.getByLabelText(enUS.design.GradientColorPicker.transparency), { target: { value: '40' } });
+        expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ angle: 180, stops: expect.arrayContaining([{ color: '#ffffff', offset: 60, opacity: 0.6 }]) }));
+        fireEvent.click(view.getByRole('button', { name: enUS.design.GradientColorPicker.delete }));
+        expect(onChange).toHaveBeenLastCalledWith({ ...defaultValue, angle: 180 });
+        expect(view.getByRole('button', { name: enUS.design.GradientColorPicker.delete })).toBeDisabled();
+    });
+
+    it('supports every registered gradient type and controlled value updates', () => {
+        const onChange = vi.fn();
+        const view = render(<ConfigProvider mountContainer={document.body} locale={enUS.design}><MobileGradientColorPicker value={defaultValue} onChange={onChange} /></ConfigProvider>);
+        for (const type of ['linear', 'radial', 'angular', 'diamond'] as const) {
+            fireEvent.click(view.getByRole('button', { name: enUS.design.GradientColorPicker[type] }));
+            expect(onChange).toHaveBeenLastCalledWith({ ...defaultValue, type });
+        }
+        view.rerender(<ConfigProvider mountContainer={document.body} locale={enUS.design}><MobileGradientColorPicker value={{ ...defaultValue, type: 'radial' }} onChange={onChange} /></ConfigProvider>);
+        expect(view.getByRole('button', { name: enUS.design.GradientColorPicker.radial })).toHaveAttribute('aria-pressed', 'true');
+        expect(view.queryByLabelText(enUS.design.GradientColorPicker.angle)).toBeNull();
+    });
+});
 
 describe('GradientColorPicker', () => {
     it('renders correctly', () => {

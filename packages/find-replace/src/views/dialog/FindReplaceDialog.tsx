@@ -251,8 +251,10 @@ export const ReplaceDialog = forwardRef(function ReplaceDialogImpl(_props, ref) 
                                 <Checkbox
                                     checked={caseSensitive}
                                     onChange={(checked) => {
-                                        findReplaceService.changeCaseSensitive(checked as boolean);
-                                        if (findCompleted) findReplaceService.find();
+                                        findReplaceService.changeCaseSensitive(Boolean(checked));
+                                        if (findCompleted) {
+                                            findReplaceService.find();
+                                        }
                                     }}
                                 >
                                     {localeService.t<LocaleKey>('find-replace.dialog.case-sensitive')}
@@ -261,7 +263,7 @@ export const ReplaceDialog = forwardRef(function ReplaceDialogImpl(_props, ref) 
                         )}
                         {capabilities.matchesTheWholeCell && (
                             <FormLayout>
-                                <Checkbox checked={matchesTheWholeCell} onChange={(checked) => findReplaceService.changeMatchesTheWholeCell(checked as boolean)}>
+                                <Checkbox checked={matchesTheWholeCell} onChange={(checked) => findReplaceService.changeMatchesTheWholeCell(Boolean(checked))}>
                                     {localeService.t<LocaleKey>('find-replace.dialog.match-the-whole-cell')}
                                 </Checkbox>
                             </FormLayout>
@@ -271,8 +273,10 @@ export const ReplaceDialog = forwardRef(function ReplaceDialogImpl(_props, ref) 
                                 <Checkbox
                                     checked={matchesTheWholeWord}
                                     onChange={(checked) => {
-                                        findReplaceService.changeMatchesTheWholeWord(checked as boolean);
-                                        if (findCompleted) findReplaceService.find();
+                                        findReplaceService.changeMatchesTheWholeWord(Boolean(checked));
+                                        if (findCompleted) {
+                                            findReplaceService.find();
+                                        }
                                     }}
                                 >
                                     {localeService.t<LocaleKey>('find-replace.dialog.match-the-whole-word')}

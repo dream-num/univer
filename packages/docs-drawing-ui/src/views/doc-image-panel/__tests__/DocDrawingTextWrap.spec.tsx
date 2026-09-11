@@ -16,6 +16,7 @@
 
 import type { DependencyIdentifier, DocumentDataModel, ICommand, IDocumentData } from '@univerjs/core';
 import type { Root } from 'react-dom/client';
+import { within } from '@testing-library/react';
 import {
     BooleanNumber,
     ICommandService,
@@ -28,6 +29,7 @@ import {
     UniverInstanceType,
     WrapTextType,
 } from '@univerjs/core';
+import { ConfigProvider } from '@univerjs/design';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocDrawingController, DocDrawingService, IDocDrawingService } from '@univerjs/docs-drawing';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
@@ -46,6 +48,7 @@ import { DocDrawingAddRemoveController } from '../../../controllers/doc-drawing-
 import locale from '../../../locale/en-US';
 import { DocRefreshDrawingsService } from '../../../services/doc-refresh-drawings.service';
 import { DocDrawingTextWrap } from '../DocDrawingTextWrap';
+import { MobileDocDrawingTextWrap } from '../MobileDocDrawingTextWrap';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -240,13 +243,16 @@ function createPanelTestBed() {
     return testBed;
 }
 
-function renderPanel(root: Root, testBed: ReturnType<typeof createPanelTestBed>) {
+function renderPanel(root: Root, testBed: ReturnType<typeof createPanelTestBed>, mobile = false) {
+    const Panel = mobile ? MobileDocDrawingTextWrap : DocDrawingTextWrap;
     const drawing = testBed.doc.getSnapshot().drawings![DRAWING_ID];
 
     act(() => {
         root.render(
             <RediContext.Provider value={{ injector: testBed.injector }}>
-                <DocDrawingTextWrap drawings={[drawing as never]} />
+                <ConfigProvider mountContainer={document.body}>
+                    <Panel drawings={[drawing as never]} />
+                </ConfigProvider>
             </RediContext.Provider>
         );
     });
@@ -277,6 +283,34 @@ describe('DocDrawingTextWrap', () => {
     let root: Root | undefined;
     let container: HTMLDivElement | undefined;
     let currentTestBed: ReturnType<typeof createPanelTestBed> | undefined;
+
+    it('applies mobile wrapping and distance controls and reflects the current model', async () => {
+        const testBed = createPanelTestBed();
+        currentTestBed = testBed;
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        renderPanel(root, testBed, true);
+        const view = within(container);
+
+        await act(async () => {
+            view.getByRole('button', { name: 'Right only' }).click();
+        });
+        expect(currentDrawing(testBed).wrapText).toBe(WrapTextType.RIGHT);
+        expect(view.getByRole('button', { name: 'Right only' }).getAttribute('aria-pressed')).toBe('true');
+
+        const topInput = view.getByLabelText<HTMLInputElement>('Top(px)');
+        await act(async () => setInputValue(topInput, '15'));
+        expect(currentDrawing(testBed).distT).toBe(15);
+
+        await act(async () => {
+            view.getByRole('button', { name: 'Top and Bottom' }).click();
+        });
+        expect(currentDrawing(testBed).layoutType).toBe(PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM);
+        expect(view.queryByRole('button', { name: 'Right only' })).toBeNull();
+        expect(view.queryByLabelText('Left(px)')).toBeNull();
+        expect(view.getByLabelText<HTMLInputElement>('Top(px)').value).toBe('15');
+    });
 
     afterEach(() => {
         act(() => {

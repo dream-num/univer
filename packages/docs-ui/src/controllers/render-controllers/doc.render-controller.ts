@@ -92,6 +92,8 @@ import {
     resolveMutationLayoutRequest,
 } from './doc-mutation-layout';
 
+const DOC_PAGE_MARGIN = 20;
+
 function getTextXActionLength(action: unknown): number | undefined {
     if (typeof action !== 'object' || action == null || !('t' in action) || !('len' in action)) {
         return undefined;
@@ -320,7 +322,7 @@ interface IDocLayoutWorkerEditBatch {
     invalidation: IDocumentLayoutInvalidation | undefined;
 }
 
-interface IDocLayoutScheduleOptions {
+export interface IDocLayoutScheduleOptions {
     deferForeground?: boolean;
     reuseMainBaseline?: boolean;
     allowMetadataOnlyStructuralTailReuse?: boolean;
@@ -328,6 +330,8 @@ interface IDocLayoutScheduleOptions {
     anchor?: number;
     priorityAnchor?: number;
     invalidation?: IDocumentLayoutInvalidation;
+    modernPageWidth?: number;
+    modernHorizontalMargin?: number;
 }
 
 function mapPreviousOffsetToCurrent(
@@ -506,10 +510,10 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
     private _reservedLayoutHeight = 0;
 
     constructor(
-        private readonly _context: IRenderContext<DocumentDataModel>,
+        protected readonly _context: IRenderContext<DocumentDataModel>,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
+        @Inject(DocSkeletonManagerService) protected readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IEditorService private readonly _editorService: IEditorService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -650,7 +654,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         return !result.requiresLayout;
     }
 
-    private _scheduleLayout(
+    protected _scheduleLayout(
         unitId: string,
         skeleton: DocumentSkeleton,
         options: IDocLayoutScheduleOptions,
@@ -1639,15 +1643,19 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         });
     }
 
-    private _shouldEnableHorizontalScrollBar(): boolean {
+    protected _shouldEnableHorizontalScrollBar(): boolean {
         const options = this._docViewScaleService.getOptions();
         return !(options.mode === 'fit-width' && options.target === 'container' && options.align === 'start');
     }
 
+    protected _getHorizontalPageMargin(): number {
+        return DOC_PAGE_MARGIN;
+    }
+
     private _addComponent() {
         const { scene, unit: documentModel, components } = this._context;
-        const DEFAULT_PAGE_MARGIN_LEFT = 20;
-        const DEFAULT_PAGE_MARGIN_TOP = 20;
+        const DEFAULT_PAGE_MARGIN_LEFT = this._getHorizontalPageMargin();
+        const DEFAULT_PAGE_MARGIN_TOP = DOC_PAGE_MARGIN;
         const config = {
             pageMarginLeft: DEFAULT_PAGE_MARGIN_LEFT,
             pageMarginTop: DEFAULT_PAGE_MARGIN_TOP,
@@ -1707,7 +1715,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         }
 
         this._recalculateSizeBySkeleton(skeleton);
-        this._refreshPagePositionAndSelection();
+        this._refreshPagePositionAndSelection(this._getActiveEditingRange(unitId) != null);
     }
 
     private _initCommandListener() {
@@ -1955,6 +1963,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             documentFlavor,
             layoutProgress
         );
+        const sceneHeight = this._docPageLayoutService.resolveSceneHeight(height);
 
         docsComponent.resize(width, height);
         docBackground.resize(width, height);
@@ -1962,9 +1971,9 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         const editorRenderConfig = this._editorService.getEditorRenderConfig(unitId);
         if (
             (!editorRenderConfig || editorRenderConfig.scrollBar) &&
-            (scene.width !== width || scene.height !== height)
+            (scene.width !== width || scene.height !== sceneHeight)
         ) {
-            scene.transformByState({ width, height });
+            scene.transformByState({ width, height: sceneHeight });
         }
     }
 

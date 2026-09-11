@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'drawing-ui': {
+        mobile: { close: 'Tanca', more: 'Més' },
         'image-cropper': {
             error: 'No es poden retallar objectes que no siguin imatges.',
         },
@@ -88,6 +89,8 @@ const locale: typeof enUS = {
                 lock: 'Bloca proporció (%)',
             },
             crop: {
+                cancel: 'Cancel·la',
+                apply: 'Fet',
                 title: 'Retalla',
                 start: 'Inicia retallada',
                 mode: 'Lliure',

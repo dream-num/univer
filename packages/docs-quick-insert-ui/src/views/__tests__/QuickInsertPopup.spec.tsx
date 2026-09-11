@@ -14,28 +14,18 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { Root } from 'react-dom/client';
 import type { DocPopupMenu } from '../../services/doc-quick-insert-popup.service';
-import {
-    CommandService,
-    CommandType,
-    ConfigService,
-    ContextService,
-    DesktopLogService,
-    ICommandService,
-    IConfigService,
-    IContextService,
-    ILogService,
-    Injector,
-    IUniverInstanceService,
-    LocaleService,
-    LocaleType,
-} from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
+import { createRequire } from 'node:module';
+import { DocumentFlavor, ICommandService, LocaleService, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
+import { DocLayoutExecutorService, DocSelectionManagerService, DocSkeletonManagerService, DocStateEmitService, RichTextEditingMutation } from '@univerjs/docs';
 import { CutContentCommand, DocCanvasPopManagerService, DocEventManagerService, DocLayoutInteractionService } from '@univerjs/docs-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { CanvasColorService, Documents, ICanvasColorService, IRenderManagerService, RenderManagerService, RenderUnit } from '@univerjs/engine-render';
 import {
+    CanvasPopupService,
     ComponentManager,
+    ICanvasPopupService,
     IconManager,
     IPlatformService,
     IShortcutService,
@@ -49,126 +39,80 @@ import {
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject } from 'rxjs';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DeleteSearchKeyCommand } from '../../commands/commands/doc-quick-insert.command';
 import { CloseQuickInsertPopupOperation } from '../../commands/operations/quick-insert-popup.operation';
 import { DocQuickInsertPopupService } from '../../services/doc-quick-insert-popup.service';
 import { QuickInsertPlaceholder } from '../QuickInsertPlaceholder';
 import { QuickInsertPopup } from '../QuickInsertPopup';
 
-(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+const testUnivers: Univer[] = [];
+beforeAll(() => {
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+    vi.stubGlobal('jest', vi);
+    createRequire(import.meta.url)('jest-canvas-mock');
+});
+afterAll(() => vi.unstubAllGlobals());
 
 const TEST_DOC_UNIT_ID = 'doc-quick-insert-test';
-
-class TestUniverInstanceService {
-    dataStream = '/ta\r\n';
-
-    private readonly _doc = {
-        getUnitId: () => TEST_DOC_UNIT_ID,
-        getBody: () => ({
-            dataStream: this.dataStream,
-            paragraphs: [{ startIndex: 3, paragraphId: 'para_quick_insert_popup_test' }],
-        }),
-    };
-
-    getCurrentUnitOfType() {
-        return this._doc;
-    }
-
-    getUnit() {
-        return this._doc;
-    }
-}
-
-class TestDocCanvasPopManagerService {
-    readonly attachedPopups: Array<{
-        componentKey?: string;
-        disposed: boolean;
-    }> = [];
-
-    attachPopupToRect(_rect: unknown, popup: { componentKey?: string }) {
-        const entry = {
-            componentKey: popup.componentKey,
-            disposed: false,
-        };
-
-        this.attachedPopups.push(entry);
-
-        return {
-            dispose: () => {
-                entry.disposed = true;
-            },
-        };
-    }
-}
-
-class TestDocLayoutInteractionService {
-    beginInteraction() {
-        return {
-            dispose: () => {},
-        };
-    }
-}
-
-class TestRenderManagerService {
-    getRenderUnitById() {
-        return {
-            with(token: unknown) {
-                if (token === DocEventManagerService) {
-                    return {
-                        findParagraphBoundByIndex: () => ({
-                            firstLine: {
-                                left: 0,
-                                top: 0,
-                                right: 120,
-                                bottom: 24,
-                            },
-                        }),
-                    };
-                }
-
-                return undefined;
-            },
-            mainComponent: {
-                getOffsetConfig: () => ({ docsLeft: 0, docsTop: 0 }),
-            },
-        };
-    }
-}
-
-class TestDocSelectionManagerService {
-    getActiveTextRange() {
-        return null;
-    }
-}
 
 function createQuickInsertPopupTestBed(options?: {
     dataStream?: string;
     inputOffset?: { start: number; end: number };
 }) {
-    const injector = new Injector();
+    const univer = new Univer();
+    testUnivers.push(univer);
+    const injector = univer.__getInjector();
     let cutContentParams: unknown;
     let selectedMenu: unknown;
 
-    injector.add([ILogService, { useClass: DesktopLogService }]);
-    injector.add([IConfigService, { useClass: ConfigService }]);
-    injector.add([IContextService, { useClass: ContextService }]);
-    injector.add([ICommandService, { useClass: CommandService }]);
-    injector.add([LocaleService, { useClass: LocaleService }]);
     injector.add([IPlatformService, { useClass: PlatformService }]);
     injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
     injector.add([IShortcutService, { useClass: ShortcutService }]);
     injector.add([ComponentManager, { useClass: ComponentManager }]);
     injector.add([IconManager, { useClass: IconManager }]);
-    injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
-    injector.add([DocCanvasPopManagerService, { useClass: TestDocCanvasPopManagerService as never }]);
-    injector.add([DocLayoutInteractionService, { useClass: TestDocLayoutInteractionService as never }]);
-    injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
-    injector.add([DocSelectionManagerService, { useClass: TestDocSelectionManagerService as never }]);
-    injector.add([DocQuickInsertPopupService, { useClass: DocQuickInsertPopupService }]);
-
-    const univerInstanceService = injector.get(IUniverInstanceService) as unknown as TestUniverInstanceService;
-    univerInstanceService.dataStream = options?.dataStream ?? '/ta\r\n';
+    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+    injector.add([ICanvasPopupService, { useClass: CanvasPopupService }]);
+    injector.add([DocLayoutExecutorService]);
+    injector.add([DocSelectionManagerService]);
+    injector.add([DocStateEmitService]);
+    injector.add([DocCanvasPopManagerService]);
+    injector.add([DocQuickInsertPopupService]);
+    const dataStream = options?.dataStream ?? '/ta\r\n';
+    const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+        id: TEST_DOC_UNIT_ID,
+        body: {
+            dataStream,
+            paragraphs: [{ startIndex: dataStream.length - 2, paragraphId: 'popup-paragraph' }],
+            sectionBreaks: [{ startIndex: dataStream.length - 1, sectionId: 'body' }],
+        },
+        documentStyle: {
+            documentFlavor: DocumentFlavor.TRADITIONAL,
+            pageSize: { width: 300, height: 400 },
+            marginTop: 20,
+            marginBottom: 20,
+            marginLeft: 20,
+            marginRight: 20,
+        },
+    });
+    const render = injector.get(IRenderManagerService).createRender(model.getUnitId());
+    if (!(render instanceof RenderUnit)) {
+        throw new TypeError('Expected a render unit');
+    }
+    render.deactivate();
+    render.engine.resizeBySize(300, 400);
+    render.addRenderDependencies([[DocSkeletonManagerService], [DocLayoutInteractionService]]);
+    const documents = new Documents(TEST_DOC_UNIT_ID, render.with(DocSkeletonManagerService).getSkeleton());
+    render.mainComponent = documents;
+    render.scene.addObject(documents);
+    render.addRenderDependencies([[DocEventManagerService]]);
+    injector.get(DocSelectionManagerService).replaceDocRanges([{
+        startOffset: dataStream.length - 2,
+        endOffset: dataStream.length - 2,
+        collapsed: true,
+        segmentId: '',
+    }]);
 
     const localeService = injector.get(LocaleService);
     localeService.load({
@@ -186,19 +130,19 @@ function createQuickInsertPopupTestBed(options?: {
         },
     });
 
+    localeService.setLocale(LocaleType.ZH_CN);
     const componentManager = injector.get(ComponentManager);
     componentManager.register(QuickInsertPlaceholder.componentKey, QuickInsertPlaceholder);
 
     const commandService = injector.get(ICommandService);
     commandService.registerCommand(CloseQuickInsertPopupOperation);
     commandService.registerCommand(DeleteSearchKeyCommand);
-    commandService.registerCommand({
-        id: CutContentCommand.id,
-        type: CommandType.COMMAND,
-        handler: (_accessor, params) => {
-            cutContentParams = params;
-            return true;
-        },
+    commandService.registerCommand(CutContentCommand);
+    commandService.registerCommand(RichTextEditingMutation);
+    commandService.onCommandExecuted((command) => {
+        if (command.id === CutContentCommand.id) {
+            cutContentParams = command.params;
+        }
     });
 
     const menus$ = new BehaviorSubject<DocPopupMenu[]>([
@@ -238,7 +182,8 @@ function createQuickInsertPopupTestBed(options?: {
         getSelectedMenu: () => selectedMenu,
         injector,
         popupService,
-        popupManagerService: injector.get(DocCanvasPopManagerService) as unknown as TestDocCanvasPopManagerService,
+        popupManagerService: injector.get(ICanvasPopupService),
+        model,
     };
 }
 
@@ -278,6 +223,7 @@ describe('QuickInsertPopup', () => {
             root.unmount();
         });
         container.remove();
+        testUnivers.splice(0).forEach((univer) => univer.dispose());
         if (scrollIntoViewDescriptor) {
             Object.defineProperty(Element.prototype, 'scrollIntoView', scrollIntoViewDescriptor);
         } else {
@@ -298,7 +244,7 @@ describe('QuickInsertPopup', () => {
     });
 
     it('filters the popup menu by the typed keyword and closes the popup after selecting a business menu item', async () => {
-        const { getCutContentParams, getSelectedMenu, injector, popupManagerService, popupService } = createQuickInsertPopupTestBed();
+        const { getCutContentParams, getSelectedMenu, injector, model, popupManagerService, popupService } = createQuickInsertPopupTestBed();
 
         await act(async () => {
             root.render(
@@ -312,8 +258,8 @@ describe('QuickInsertPopup', () => {
         expect(container.textContent).toContain('Table');
         expect(container.textContent).not.toContain('Image');
 
-        const tableMenuItem = Array.from(container.querySelectorAll('[role="button"]'))
-            .find((node) => node.textContent === 'Table') as HTMLElement | undefined;
+        const tableMenuItem = Array.from(container.querySelectorAll<HTMLElement>('[role="button"]'))
+            .find((node) => node.textContent === 'Table');
 
         expect(tableMenuItem).toBeDefined();
 
@@ -331,7 +277,8 @@ describe('QuickInsertPopup', () => {
             selections: [expect.objectContaining({ startOffset: 0, endOffset: 3 })],
         }));
         expect(popupService.editPopup).toBeNull();
-        expect(popupManagerService.attachedPopups.find((popup) => popup.componentKey === QuickInsertPopup.componentKey)?.disposed).toBe(true);
+        expect(popupManagerService.popups).toHaveLength(0);
+        expect(model.getBody()?.dataStream).toBe('\r\n');
     });
 
     it('uses popup keyboard commands to move focus and select the focused business menu item', async () => {

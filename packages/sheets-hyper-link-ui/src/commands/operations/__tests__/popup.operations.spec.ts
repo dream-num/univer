@@ -19,7 +19,7 @@ import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { describe, expect, it, vi } from 'vitest';
-import { SheetsHyperLinkPopupService } from '../../../services/popup.service';
+import { ISheetsHyperLinkPopupService } from '../../../services/popup.service';
 import { HyperLinkEditSourceType } from '../../../types/enums/edit-source';
 import {
     CloseHyperLinkPopupOperation,
@@ -72,7 +72,7 @@ describe('hyper-link popup operations', () => {
         const startAddEditing = vi.fn();
         const startEditing = vi.fn();
         const popupService = { startAddEditing, startEditing };
-        const accessor = createAccessor([[SheetsHyperLinkPopupService, popupService]]);
+        const accessor = createAccessor([[ISheetsHyperLinkPopupService, popupService]]);
         const startAddParams: IOpenHyperLinkEditPanelOperationParams = {
             unitId: 'u1',
             subUnitId: 's1',
@@ -96,7 +96,7 @@ describe('hyper-link popup operations', () => {
 
     it('closes the popup edit session', () => {
         const endEditing = vi.fn();
-        const accessor = createAccessor([[SheetsHyperLinkPopupService, { endEditing }]]);
+        const accessor = createAccessor([[ISheetsHyperLinkPopupService, { endEditing }]]);
 
         expect(CloseHyperLinkPopupOperation.handler(accessor)).toBe(true);
         expect(endEditing).toHaveBeenCalledTimes(1);
@@ -134,20 +134,20 @@ describe('hyper-link popup operations', () => {
             [IUniverInstanceService, createUniverInstanceService({ workbook: createWorkbook(disabledWorksheet) })],
             [SheetsSelectionsService, { getCurrentSelections: () => [{ range: { startRow: 1, startColumn: 1 } }] }],
             [ICommandService, { executeCommand }],
-            [SheetsHyperLinkPopupService, { currentEditing: null }],
+            [ISheetsHyperLinkPopupService, { currentEditing: null }],
         ]))).toBe(false);
 
         expect(InsertHyperLinkToolbarOperation.handler(createAccessor([
             [IUniverInstanceService, createUniverInstanceService({ workbook: createWorkbook(enabledWorksheet) })],
             [SheetsSelectionsService, { getCurrentSelections: () => [{ range: { startRow: 1, startColumn: 1 } }] }],
             [ICommandService, { executeCommand }],
-            [SheetsHyperLinkPopupService, { currentEditing: { row: 1 } }],
+            [ISheetsHyperLinkPopupService, { currentEditing: { row: 1 } }],
         ]))).toBe(true);
         expect(InsertHyperLinkToolbarOperation.handler(createAccessor([
             [IUniverInstanceService, createUniverInstanceService({ workbook: createWorkbook(enabledWorksheet) })],
             [SheetsSelectionsService, { getCurrentSelections: () => [{ range: { startRow: 1, startColumn: 1 } }] }],
             [ICommandService, { executeCommand }],
-            [SheetsHyperLinkPopupService, { currentEditing: null }],
+            [ISheetsHyperLinkPopupService, { currentEditing: null }],
         ]))).toBe(true);
 
         expect(executeCommand).toHaveBeenCalledWith(CloseHyperLinkPopupOperation.id);

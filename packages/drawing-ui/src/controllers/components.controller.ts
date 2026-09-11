@@ -32,6 +32,14 @@ import {
 } from '../views/image-popup-menu/component-name';
 import { ImagePopupMenu } from '../views/image-popup-menu/ImagePopupMenu';
 
+import { DRAWING_ALIGN_COMPONENT, DRAWING_ARRANGE_COMPONENT, DRAWING_GROUP_COMPONENT, DRAWING_TRANSFORM_COMPONENT, IMAGE_CROPPER_COMPONENT } from '../views/panel/component-name';
+import { DrawingAlign } from '../views/panel/DrawingAlign';
+import { DrawingArrange } from '../views/panel/DrawingArrange';
+
+import { DrawingGroup } from '../views/panel/DrawingGroup';
+import { DrawingTransform } from '../views/panel/DrawingTransform';
+import { ImageCropper } from '../views/panel/ImageCropper';
+
 export class ComponentsController extends Disposable {
     constructor(
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
@@ -46,6 +54,11 @@ export class ComponentsController extends Disposable {
     private _registerComponents(): void {
         ([
             [COMPONENT_IMAGE_POPUP_MENU, ImagePopupMenu],
+            [DRAWING_ARRANGE_COMPONENT, DrawingArrange],
+            [DRAWING_ALIGN_COMPONENT, DrawingAlign],
+            [DRAWING_GROUP_COMPONENT, DrawingGroup],
+            [DRAWING_TRANSFORM_COMPONENT, DrawingTransform],
+            [IMAGE_CROPPER_COMPONENT, ImageCropper],
         ] as const).forEach(([key, component]) => {
             this.disposeWithMe(this._componentManager.register(key, component));
         });

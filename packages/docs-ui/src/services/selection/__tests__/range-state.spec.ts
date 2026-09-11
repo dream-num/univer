@@ -80,6 +80,7 @@ function createTextRangeHarness(backgroundColor?: string, themeColors: Record<st
                 getRenderColor: (color: string) => themeColors[color] ?? color,
             },
         }),
+        getAncestorScale: () => ({ scaleX: 1, scaleY: 1 }),
     };
     const document = {
         getOffsetConfig: () => ({
@@ -266,6 +267,8 @@ describe('selection range state', () => {
             _segmentId: '',
             _segmentPage: -1,
             _current: false,
+            _caretVisible: true,
+            _mobileHandlesVisible: false,
             _rangeShape: { dispose: vi.fn() },
             _anchorShape: { dispose: vi.fn(), hide: vi.fn(), show: vi.fn(), setProps: vi.fn() },
             _docSkeleton: {

@@ -16,7 +16,11 @@
 
 import { DocumentFlavor } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { DocZoomRenderController, shouldHandleDocWheelZoom } from '../zoom.render-controller';
+import { resolveMobileDocPinchZoomRatio } from '../mobile/doc-pinch-zoom';
+import {
+    DocZoomRenderController,
+    shouldHandleDocWheelZoom,
+} from '../zoom.render-controller';
 
 const mockSceneScale = vi.hoisted(() => vi.fn());
 const mockClearSelectedObjects = vi.hoisted(() => vi.fn());
@@ -60,6 +64,13 @@ describe('DocZoomRenderController', () => {
         expect(shouldHandleDocWheelZoom({ ctrlKey: false, metaKey: true }, true, DocumentFlavor.TRADITIONAL)).toBe(true);
         expect(shouldHandleDocWheelZoom({ ctrlKey: false, metaKey: false }, true, DocumentFlavor.TRADITIONAL)).toBe(false);
         expect(shouldHandleDocWheelZoom({ ctrlKey: true, metaKey: false }, false, DocumentFlavor.TRADITIONAL)).toBe(false);
+    });
+
+    it('resolves mobile pinch zoom relative to the fitted 100% baseline', () => {
+        expect(resolveMobileDocPinchZoomRatio(1, 100, 150)).toBe(1.5);
+        expect(resolveMobileDocPinchZoomRatio(1, 100, 20)).toBe(0.5);
+        expect(resolveMobileDocPinchZoomRatio(2, 100, 200)).toBe(3);
+        expect(resolveMobileDocPinchZoomRatio(1.25, 0, 200)).toBe(1.25);
     });
 
     it('applies composed view scale and immediately renders embedded docs while receiving user zoom', () => {

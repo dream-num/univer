@@ -33,6 +33,7 @@ import {
 } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { DesktopDialogService, IDialogService, IUIPartsService, UIPartsService } from '@univerjs/ui';
 import { NEVER } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DocHyperLinkPopupService } from '../../../services/hyper-link-popup.service';
@@ -63,6 +64,8 @@ describe('DocHyperLinkRenderController', () => {
             attachPopupToRange: () => ({ dispose: disposePopup, canDispose: () => true }),
         } as unknown as DocCanvasPopManagerService }]);
         injector.add([DocHyperLinkPopupService]);
+        injector.add([IUIPartsService, { useClass: UIPartsService }]);
+        injector.add([IDialogService, { useClass: DesktopDialogService }]);
         injector.add([DocHyperLinkRenderController, { useFactory: () => injector.createInstance(DocHyperLinkRenderController, context) }]);
 
         const controller = injector.get(DocHyperLinkRenderController);

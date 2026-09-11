@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ReactNode } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import { HorizontalAlign, LocaleService } from '@univerjs/core';
 import { borderClassName, Button, clsx, InputNumber, Select, Tooltip } from '@univerjs/design';
@@ -117,7 +117,44 @@ const AutoFocusInputNumber = (props: {
         />
     );
 };
-export function ParagraphSetting() {
+export interface IParagraphSettingProps {
+    RowComponent?: typeof ParagraphSettingRow;
+    NumberComponent?: typeof AutoFocusInputNumber;
+    SelectComponent?: typeof Select;
+    AlignmentButtonComponent?: ComponentType<IParagraphAlignmentButtonProps>;
+}
+
+export interface IParagraphAlignmentButtonProps {
+    label: string;
+    selected: boolean;
+    onClick: () => void;
+    children: ReactNode;
+}
+
+function ParagraphAlignmentButton({ label, selected, onClick, children }: IParagraphAlignmentButtonProps) {
+    return (
+        <Tooltip title={label} placement="bottom">
+            <Button
+                type="button"
+                variant="text"
+                aria-label={label}
+                className={clsx({ '!univer-bg-gray-200 dark:!univer-bg-gray-700': selected })}
+                onClick={onClick}
+            >
+                <span className="univer-flex univer-size-5 univer-items-center univer-justify-center univer-text-lg">
+                    {children}
+                </span>
+            </Button>
+        </Tooltip>
+    );
+}
+
+export function ParagraphSetting({
+    RowComponent = ParagraphSettingRow,
+    NumberComponent = AutoFocusInputNumber,
+    SelectComponent = Select,
+    AlignmentButtonComponent = ParagraphAlignmentButton,
+}: IParagraphSettingProps) {
     const localeService = useDependency(LocaleService);
 
     const currentParagraph = useCurrentParagraph();
@@ -148,27 +185,18 @@ export function ParagraphSetting() {
                 >
                     {ALIGNMENT_OPTIONS.map((item) => {
                         return (
-                            <Tooltip title={localeService.t(item.label)} key={item.value} placement="bottom">
-                                <span className="univer-flex univer-w-full univer-items-center univer-justify-center">
-                                    <Button
-                                        type="button"
-                                        variant="text"
-                                        className={clsx({
-                                            '!univer-bg-gray-200 dark:!univer-bg-gray-700': horizontalAlignValue === item.value,
-                                        })}
-                                        onClick={() => setHorizontalAlign(item.value)}
-                                    >
-                                        <span
-                                            className="
-                                              univer-flex univer-size-5 univer-items-center univer-justify-center
-                                              univer-text-lg
-                                            "
-                                        >
-                                            {item.icon}
-                                        </span>
-                                    </Button>
-                                </span>
-                            </Tooltip>
+                            <span
+                                key={item.value}
+                                className="univer-flex univer-w-full univer-items-center univer-justify-center"
+                            >
+                                <AlignmentButtonComponent
+                                    label={localeService.t(item.label)}
+                                    selected={horizontalAlignValue === item.value}
+                                    onClick={() => setHorizontalAlign(item.value)}
+                                >
+                                    {item.icon}
+                                </AlignmentButtonComponent>
+                            </span>
                         );
                     })}
                 </div>
@@ -176,44 +204,44 @@ export function ParagraphSetting() {
 
             <ParagraphSettingSection title={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.indentation')}>
                 <div className="univer-grid univer-gap-3">
-                    <ParagraphSettingRow label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.left')} unit="(px)">
-                        <AutoFocusInputNumber value={indentStart} onChange={(v) => setIndentStart(v ?? 0)} />
-                    </ParagraphSettingRow>
-                    <ParagraphSettingRow label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.right')} unit="(px)">
-                        <AutoFocusInputNumber value={indentEnd} onChange={(v) => setIndentEnd(v ?? 0)} />
-                    </ParagraphSettingRow>
-                    <ParagraphSettingRow label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.firstLine')} unit="(px)">
-                        <AutoFocusInputNumber value={indentFirstLine} onChange={(v) => setIndentFirstLine(v ?? 0)} />
-                    </ParagraphSettingRow>
-                    <ParagraphSettingRow label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.hanging')} unit="(px)">
-                        <AutoFocusInputNumber value={hanging} onChange={(v) => setHanging(v ?? 0)} />
-                    </ParagraphSettingRow>
+                    <RowComponent label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.left')} unit="(px)">
+                        <NumberComponent value={indentStart} onChange={(v) => setIndentStart(v ?? 0)} />
+                    </RowComponent>
+                    <RowComponent label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.right')} unit="(px)">
+                        <NumberComponent value={indentEnd} onChange={(v) => setIndentEnd(v ?? 0)} />
+                    </RowComponent>
+                    <RowComponent label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.firstLine')} unit="(px)">
+                        <NumberComponent value={indentFirstLine} onChange={(v) => setIndentFirstLine(v ?? 0)} />
+                    </RowComponent>
+                    <RowComponent label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.hanging')} unit="(px)">
+                        <NumberComponent value={hanging} onChange={(v) => setHanging(v ?? 0)} />
+                    </RowComponent>
                 </div>
             </ParagraphSettingSection>
 
             <ParagraphSettingSection title={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.spacing')}>
                 <div className="univer-grid univer-gap-3">
-                    <ParagraphSettingRow label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.before')} unit="(px)">
-                        <AutoFocusInputNumber value={spaceAbove} onChange={(v) => setSpaceAbove(v ?? 0)} />
-                    </ParagraphSettingRow>
-                    <ParagraphSettingRow label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.after')} unit="(px)">
-                        <AutoFocusInputNumber value={spaceBelow} onChange={(v) => setSpaceBelow(v ?? 0)} />
-                    </ParagraphSettingRow>
-                    <ParagraphSettingRow label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.lineSpace')}>
+                    <RowComponent label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.before')} unit="(px)">
+                        <NumberComponent value={spaceAbove} onChange={(v) => setSpaceAbove(v ?? 0)} />
+                    </RowComponent>
+                    <RowComponent label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.after')} unit="(px)">
+                        <NumberComponent value={spaceBelow} onChange={(v) => setSpaceBelow(v ?? 0)} />
+                    </RowComponent>
+                    <RowComponent label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.lineSpace')}>
                         <div className="univer-flex univer-w-full univer-flex-col univer-gap-2">
-                            <Select
+                            <SelectComponent
                                 className="univer-w-full"
                                 value={`${spacingRule}`}
                                 options={lineSpacingOptions}
                                 onChange={(v) => setSpacingRule(Number(v))}
                             />
-                            <AutoFocusInputNumber
+                            <NumberComponent
                                 {...lineSpaceConfig}
                                 value={lineSpacing}
                                 onChange={(v) => setLineSpacing(v ?? 0)}
                             />
                         </div>
-                    </ParagraphSettingRow>
+                    </RowComponent>
                 </div>
             </ParagraphSettingSection>
         </div>

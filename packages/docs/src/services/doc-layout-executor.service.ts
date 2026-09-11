@@ -128,6 +128,8 @@ export interface IDocLayoutStartRequest extends IDocLayoutMountIdentity {
     anchor?: number;
     priorityAnchor?: number;
     invalidation?: IDocumentLayoutSessionStartOptions['invalidation'];
+    modernPageWidth?: number;
+    modernHorizontalMargin?: number;
     customBlockViewports?: Record<string, IDocsCustomBlockRenderViewport>;
     customBlockViewportPatch?: IDocLayoutRecordPatch<IDocsCustomBlockRenderViewport>;
     customRangePresentations?: IDocLayoutCustomRangePresentationEntry[];
@@ -355,6 +357,8 @@ export interface IDocLayoutStartOptions {
     anchor?: number;
     priorityAnchor?: number;
     invalidation?: IDocumentLayoutSessionStartOptions['invalidation'];
+    modernPageWidth?: number;
+    modernHorizontalMargin?: number;
 }
 
 export class DocLayoutExecutorService extends Disposable {

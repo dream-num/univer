@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'drawing-ui': {
+        mobile: { close: '閉じる', more: 'もっと見る' },
         'image-cropper': {
             error: '画像以外のオブジェクトはトリミングできません。',
         },
@@ -88,6 +89,8 @@ const locale: typeof enUS = {
                 lock: '縦横比を固定 (%)',
             },
             crop: {
+                cancel: 'キャンセル',
+                apply: '完了',
                 title: 'トリミング',
                 start: 'トリミングを開始',
                 mode: '自由モード',

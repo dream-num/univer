@@ -23,6 +23,7 @@ import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentFlavor,
     FOCUSING_DOC,
+    fromEventSubject,
     ICommandService,
     IContextService,
     Inject,
@@ -33,6 +34,7 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { getNextWheelZoomRatio, IRenderManagerService } from '@univerjs/engine-render';
+import { animationFrameScheduler, throttleTime } from 'rxjs';
 import { neoGetDocObject } from '../../basics/component-tools';
 import { DocPageSetupCommand } from '../../commands/commands/doc-page-setup.command';
 import { SetDocZoomRatioCommand } from '../../commands/commands/set-doc-zoom-ratio.command';
@@ -56,24 +58,26 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
     private _isSheetEditor = false;
     private _initTimer: number;
     private _updateTimer: number;
+    private _fitToWidthAvailableWidth = 0;
 
     constructor(
-        private readonly _context: IRenderContext<DocumentDataModel>,
-        @IContextService private readonly _contextService: IContextService,
+        protected readonly _context: IRenderContext<DocumentDataModel>,
+        @IContextService protected readonly _contextService: IContextService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
+        @ICommandService protected readonly _commandService: ICommandService,
+        @Inject(DocSelectionManagerService) protected readonly _textSelectionManagerService: DocSelectionManagerService,
         @IEditorService private readonly _editorService: IEditorService,
         @Inject(DocPageLayoutService) private readonly _docPageLayoutService: DocPageLayoutService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(DocViewScaleService) private readonly _docViewScaleService: DocViewScaleService,
+        @Inject(DocViewScaleService) protected readonly _docViewScaleService: DocViewScaleService,
         @Optional(IDocEmbedInteractionBoundaryService) private readonly _embedInteractionBoundaryService?: IDocEmbedInteractionBoundaryService
     ) {
         super();
 
         this._initSkeletonListener();
         this._initCommandExecutedListener();
+        this._initFitToWidthResizeListener();
         this._isSheetEditor = this._context.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
         const currentSheet = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         const sheetRenderer = currentSheet && this._renderManagerService.getRenderUnitById(currentSheet.getUnitId());
@@ -94,6 +98,7 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
     override dispose() {
         window.clearTimeout(this._initTimer);
         window.clearTimeout(this._updateTimer);
+        super.dispose();
     }
 
     private _initSkeletonListener() {
@@ -115,7 +120,7 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         }));
     }
 
-    private _initCommandExecutedListener() {
+    protected _initCommandExecutedListener() {
         const updateCommandList = [SetDocZoomRatioOperation.id];
 
         this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
@@ -139,6 +144,24 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
                 }
             })
         );
+    }
+
+    private _initFitToWidthResizeListener(): void {
+        this.disposeWithMe(fromEventSubject(this._context.engine.onTransformChange$).pipe(
+            throttleTime(0, animationFrameScheduler)
+        ).subscribe(() => {
+            if (this._docViewScaleService.getOptions().mode !== 'fit-width') {
+                return;
+            }
+
+            const availableWidth = this._docViewScaleService.getAvailableWidth();
+            if (availableWidth <= 1 || Math.abs(availableWidth - this._fitToWidthAvailableWidth) < 1) {
+                return;
+            }
+
+            this._fitToWidthAvailableWidth = availableWidth;
+            this.updateViewZoom(getDocEffectiveZoomRatio(this._context.unit), false);
+        }));
     }
 
     updateViewZoom(zoomRatio: number, needRefreshSelection = true) {

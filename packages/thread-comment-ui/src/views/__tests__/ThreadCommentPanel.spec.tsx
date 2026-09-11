@@ -19,7 +19,6 @@ import type { ISuccinctDocRangeParam } from '@univerjs/engine-render';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import type { IShortcutItem } from '@univerjs/ui';
 import type { Root } from 'react-dom/client';
-import type { IThreadCommentTreeProps } from '../ThreadCommentTree';
 import {
     CommandService,
     ConfigService,
@@ -64,6 +63,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
 import { ThreadCommentPanelService } from '../../services/thread-comment-panel.service';
+import { MobileThreadCommentPanel } from '../mobile/MobileThreadCommentPanel';
 import { transformTextNodes2Document } from '../thread-comment-editor/util';
 import { ThreadCommentPanel } from '../ThreadCommentPanel';
 
@@ -72,13 +72,6 @@ import { ThreadCommentPanel } from '../ThreadCommentPanel';
 const UNIT_ID = 'unit-1';
 const SHEET_ID = 'sheet-1';
 const IRenderManagerService = createIdentifier<TestRenderManagerService>('engine-render.render-manager.service');
-let renderedTreeProps: IThreadCommentTreeProps[] = [];
-
-function TestThreadCommentTree(props: IThreadCommentTreeProps) {
-    renderedTreeProps.push(props);
-    return <div data-comment-id={props.id} />;
-}
-
 interface IEditorRecord {
     id: string;
     data: IDocumentData;
@@ -449,7 +442,6 @@ describe('ThreadCommentPanel', () => {
 
     beforeEach(() => {
         document.body.innerHTML = '';
-        renderedTreeProps = [];
     });
 
     afterEach(() => {
@@ -497,7 +489,7 @@ describe('ThreadCommentPanel', () => {
         expect(panelText.indexOf('thread-comment-ui.panel.solved')).toBeLessThan(panelText.indexOf('Resolved comment'));
     });
 
-    it('auto-focuses the active comment when requested by the host panel', () => {
+    it('auto-focuses the active comment when requested by the host panel', async () => {
         const testBed = createPanelTestBed();
         addRootComment(testBed.threadCommentModel, createComment({ id: 'comment-1', ref: 'A1' }));
         testBed.panelService.setActiveComment({
@@ -515,11 +507,42 @@ describe('ThreadCommentPanel', () => {
                 onAdd={() => undefined}
                 getSubUnitName={(subUnitId) => subUnitId}
                 autoFocusActiveComment
-                ThreadCommentTreeComponent={TestThreadCommentTree}
             />
         ));
 
-        expect(renderedTreeProps.find((props) => props.id === 'comment-1')?.autoFocus).toBe(true);
+        await vi.waitFor(() => {
+            expect((testBed.injector.get(IEditorService) as unknown as TestEditorService).getFocusId()).toBeTruthy();
+        });
+    });
+
+    it('renders and closes the active comment in the mobile detail view', () => {
+        const testBed = createPanelTestBed();
+        addRootComment(testBed.threadCommentModel, createComment({ id: 'comment-1', ref: 'A1' }));
+        testBed.panelService.setActiveComment({
+            unitId: UNIT_ID,
+            subUnitId: SHEET_ID,
+            commentId: 'comment-1',
+        });
+
+        ({ container, root } = renderPanel(
+            testBed.injector,
+            <MobileThreadCommentPanel
+                unitId={UNIT_ID}
+                subUnitId$={new BehaviorSubject<string | undefined>(SHEET_ID)}
+                type={UniverInstanceType.UNIVER_SHEET}
+                onAdd={() => undefined}
+                getSubUnitName={(subUnitId) => subUnitId}
+            />
+        ));
+
+        const backButton = container.querySelector<HTMLButtonElement>('[aria-label="thread-comment-ui.mobile.back"]');
+        expect(backButton).not.toBeNull();
+        expect(container.textContent).not.toContain('thread-comment-ui.filter.status.all');
+
+        act(() => backButton!.click());
+
+        expect(testBed.panelService.activeCommentId).toBeUndefined();
+        expect(container.textContent).toContain('thread-comment-ui.filter.status.all');
     });
 
     it('keeps an empty-id temporary target active and shows its editor', () => {

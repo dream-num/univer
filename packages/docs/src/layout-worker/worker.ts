@@ -227,6 +227,8 @@ export class DocsLayoutWorkerRuntime implements IDocsLayoutWorkerRuntime {
             anchor: request.anchor,
             priorityAnchor: request.priorityAnchor,
             invalidation: request.invalidation,
+            modernPageWidth: request.modernPageWidth,
+            modernHorizontalMargin: request.modernHorizontalMargin,
         });
         mount.activeGeneration = generation;
         mount.cancelledGeneration = null;

@@ -18,7 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'thread-comment-ui': {
+        mobile: { back: '戻る' },
         panel: {
+            title: 'コメント管理',
             empty: 'まだコメントはありません',
             reset: 'フィルタをリセット',
             addComment: 'コメントを追加',

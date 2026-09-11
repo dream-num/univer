@@ -43,6 +43,7 @@ export interface IGradientColorPickerProps {
     compact?: boolean;
     value?: IGradientValue;
     onChange?: (value: IGradientValue) => void;
+    types?: readonly GradientType[];
 }
 
 const DEFAULT_VALUE: IGradientValue = {
@@ -260,7 +261,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                             { label: locale?.GradientColorPicker.radial, value: 'radial' },
                             { label: locale?.GradientColorPicker.angular, value: 'angular' },
                             { label: locale?.GradientColorPicker.diamond, value: 'diamond' },
-                        ].map((item) => {
+                        ].filter((item) => !props.types || props.types.some((type) => type === item.value)).map((item) => {
                             const selected = draftValue.type === item.value;
 
                             return (
@@ -309,7 +310,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                             { label: locale?.GradientColorPicker.radial, value: 'radial' },
                             { label: locale?.GradientColorPicker.angular, value: 'angular' },
                             { label: locale?.GradientColorPicker.diamond, value: 'diamond' },
-                        ]}
+                        ].filter((item) => !props.types || props.types.some((type) => type === item.value))}
                         value={draftValue.type}
                         onChange={(v) => handleTypeChange(v as GradientType)}
                     />

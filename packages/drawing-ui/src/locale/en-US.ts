@@ -16,6 +16,7 @@
 
 const locale = {
     'drawing-ui': {
+        mobile: { close: 'Close', more: 'More' },
         'image-cropper': {
             error: 'Cannot crop non-image objects.',
         },
@@ -86,6 +87,8 @@ const locale = {
                 lock: 'Lock Ratio (%)',
             },
             crop: {
+                cancel: 'Cancel',
+                apply: 'Done',
                 title: 'Crop',
                 start: 'Start Crop',
                 mode: 'Free',

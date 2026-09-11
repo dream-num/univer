@@ -151,6 +151,7 @@ export { ThemeSwitcherService } from './services/theme-switcher/theme-switcher.s
 export { UndoRedoGroupService } from './services/undo-redo/undo-redo-group.service';
 export { IWorkbenchService, WorkbenchService } from './services/workbench/workbench.service';
 export * from './utils';
+export { MobileCanvasGesture } from './utils/mobile-canvas-gesture';
 export { COLOR_PICKER_COMPONENT } from './views/color-picker/interface';
 export { ComponentContainer, useComponentsOfPart } from './views/components/ComponentContainer';
 export type { IComponentContainerProps } from './views/components/ComponentContainer';
@@ -162,12 +163,14 @@ export { DesktopContextMenu as ContextMenu } from './views/components/context-me
 export { ContextMenuPanel } from './views/components/context-menu/ContextMenuPanel';
 export { MobileContextMenu } from './views/components/context-menu/MobileContextMenu';
 export { type IDialogPartMethodOptions } from './views/components/dialog-part/interface';
+export type { IMobileDialogPartMethodOptions } from './views/components/dialog-part/MobileDialogPart';
 export { FloatDomSingle } from './views/components/dom/FloatDom';
 export { FloatDom } from './views/components/dom/FloatDom';
 export { PrintFloatDomSingle } from './views/components/dom/Print';
 export { HOVER_TRACK_HOST_CLASS_NAME, HoverTrack } from './views/components/hover-track/HoverTrack';
 export { MobileDrawer } from './views/components/mobile-drawer/MobileDrawer';
 export type { MobileDrawerSnap } from './views/components/mobile-drawer/MobileDrawer';
+export { MobileZoomIndicator } from './views/components/mobile-zoom-indicator/mobile-zoom-indicator';
 export { CanvasPopup, SingleCanvasPopup } from './views/components/popup/CanvasPopup';
 export { RectPopup } from './views/components/popup/RectPopup';
 export type { RectPopupDirection } from './views/components/popup/RectPopup';
@@ -175,6 +178,7 @@ export { useToolbarItemStatus } from './views/components/ribbon/hook';
 export { Ribbon } from './views/components/ribbon/Ribbon';
 export { ToolbarButton } from './views/components/ribbon/ToolbarButton';
 export { ToolbarItem } from './views/components/ribbon/ToolbarItem';
+export type { IMobileSidebarMethodOptions } from './views/components/sidebar/MobileSidebar';
 export { Sidebar } from './views/components/sidebar/Sidebar';
 export type { ISidebarMethodOptions } from './views/components/sidebar/Sidebar';
 export { FONT_FAMILY_COMPONENT, FontFamily } from './views/font-family/FontFamily';
@@ -183,6 +187,7 @@ export { FontFamilyDropdown } from './views/font-family/FontFamilyDropdown';
 export type { IFontFamilyDropdownProps } from './views/font-family/FontFamilyDropdown';
 export { FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem } from './views/font-family/FontFamilyItem';
 export type { IFontFamilyItemProps } from './views/font-family/FontFamilyItem';
+export { MobileFontFamilyDropdown } from './views/font-family/MobileFontFamilyDropdown';
 export { FontSize } from './views/font-size/FontSize';
 export { FONT_SIZE_COMPONENT, FONT_SIZE_LIST, HEADING_LIST } from './views/font-size/interface';
 export * from './views/hooks/index';
@@ -190,9 +195,11 @@ export { preventBrowserZoomInContainers } from './views/hooks/prevent-browser-zo
 export * from './views/index';
 export { MobileMenu } from './views/menu/mobile/MobileMenu';
 export { MobileKeyboardInsetContext } from './views/mobile-workbench/mobile-keyboard-inset-context';
+export { getMobileCanvasPanDelta, useMobileCanvasPanel, useMobileCanvasViewport } from './views/mobile-workbench/MobileCanvasLayout';
+export type { MobilePanelLayout } from './views/mobile-workbench/MobileCanvasLayout';
 export type { INotificationOptions } from './views/notification/Notification';
 export { ObjectPermissionButton, openObjectPermissionDialog } from './views/object-permission/ObjectPermissionButton';
+
 export type { IObjectPermissionButtonProps } from './views/object-permission/ObjectPermissionButton';
 export { ObjectPermissionPanelButton, openObjectPermissionPanel } from './views/object-permission/ObjectPermissionPanel';
-
 export { ProgressBar } from './views/progress-bar/ProgressBar';

@@ -38,16 +38,27 @@ afterEach(cleanup);
 describe('Select', () => {
     it('should render mobile options in a touch-first dialog explicitly', () => {
         const handleChange = vi.fn();
-        const { container } = render(
+        render(
             <ConfigProvider locale={enUS.design} mountContainer={document.body}>
                 <MobileSelect value="1" options={options} onChange={handleChange} />
             </ConfigProvider>
         );
 
-        fireEvent.click(container.querySelector('[data-u-comp="mobile-select"]') as HTMLElement);
+        fireEvent.click(screen.getByRole('button', { name: 'Option 1' }));
         expect(screen.getByRole('dialog')).toBeInTheDocument();
         fireEvent.click(screen.getByText('Option 2'));
-        expect(handleChange).toHaveBeenCalledWith('2');
+        expect(handleChange).toHaveBeenCalledExactlyOnceWith('2');
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('does not open a disabled mobile select', () => {
+        const onChange = vi.fn();
+        render(<MobileSelect value="1" options={options} disabled onChange={onChange} />);
+        const trigger = screen.getByRole('button', { name: 'Option 1' });
+        expect(trigger).toBeDisabled();
+        fireEvent.click(trigger);
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        expect(onChange).not.toHaveBeenCalled();
     });
 
     it('should fall back to the mobile select value when its option label is empty', () => {

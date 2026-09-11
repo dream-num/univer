@@ -26,6 +26,7 @@ import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, map, Observable } from 'rxjs';
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
 import { DeleteLeftCommand } from '../commands/commands/doc-delete.command';
+import { DocSelectAllCommand, DocSelectWordCommand } from '../commands/commands/doc-select-all.command';
 import {
     DocTableDeleteColumnsCommand,
     DocTableDeleteRowsCommand,
@@ -54,6 +55,20 @@ const getDisableOnCollapsedObservable = (accessor: IAccessor) => {
             }
         });
 
+        return () => observable.unsubscribe();
+    });
+};
+
+const getDisableOnExpandedObservable = (accessor: IAccessor) => {
+    const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+    return new Observable<boolean>((subscriber) => {
+        const emit = () => {
+            const ranges = docSelectionManagerService.getDocRanges();
+            const range = ranges[0];
+            subscriber.next(ranges.length !== 1 || !(range.collapsed === true || range.startOffset === range.endOffset));
+        };
+        emit();
+        const observable = docSelectionManagerService.textSelection$.subscribe(emit);
         return () => observable.unsubscribe();
     });
 };
@@ -169,6 +184,25 @@ export function PasteMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 };
+
+export function SelectWordMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+    return {
+        id: DocSelectWordCommand.id,
+        type: MenuItemType.BUTTON,
+        title: 'docs-ui.rightClick.select',
+        disabled$: getDisableOnExpandedObservable(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
+
+export function SelectAllMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+    return {
+        id: DocSelectAllCommand.id,
+        type: MenuItemType.BUTTON,
+        title: 'docs-ui.rightClick.selectAll',
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
 
 export function DeleteMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {

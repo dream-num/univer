@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'drawing-ui': {
+        mobile: { close: 'Zamknij', more: 'Więcej' },
         'image-cropper': {
             error: 'Nie można przyciąć obiektów innych niż obraz.',
         },
@@ -88,6 +89,8 @@ const locale: typeof enUS = {
                 lock: 'Zablokuj proporcje (%)',
             },
             crop: {
+                cancel: 'Anuluj',
+                apply: 'Gotowe',
                 title: 'Przytnij',
                 start: 'Rozpocznij przycinanie',
                 mode: 'Dowolny',

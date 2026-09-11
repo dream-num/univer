@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'drawing-ui': {
+        mobile: { close: 'بستن', more: 'بیشتر' },
         'image-cropper': {
             error: 'کراپ کردن اشیاء غیرتصویری امکان‌پذیر نیست.',
         },
@@ -88,6 +89,8 @@ const locale: typeof enUS = {
                 lock: 'قفل نسبت (%)',
             },
             crop: {
+                cancel: 'لغو',
+                apply: 'انجام شد',
                 title: 'کراپ',
                 start: 'شروع کراپ',
                 mode: 'آزاد',

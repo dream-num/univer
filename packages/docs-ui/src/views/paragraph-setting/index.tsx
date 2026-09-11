@@ -16,6 +16,7 @@
 
 import type { ITextRange } from '@univerjs/core';
 import type { IRichTextEditingMutationParams, ISetTextSelectionsOperationParams } from '@univerjs/docs';
+import type { IParagraphSettingProps } from './Setting';
 import { debounce, generateRandomId, ICommandService, LocaleService } from '@univerjs/core';
 import { RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { useDependency, useObservable } from '@univerjs/ui';
@@ -29,7 +30,7 @@ const isRangesEqual = (oldRanges: ITextRange[], ranges: ITextRange[]) => {
             range.startOffset === oldRange.startOffset && range.endOffset === oldRange.endOffset));
 };
 
-export function ParagraphSettingIndex() {
+export function ParagraphSettingIndex(props: IParagraphSettingProps) {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const currentLocale = useObservable(localeService.currentLocale$);
@@ -67,5 +68,5 @@ export function ParagraphSettingIndex() {
 
     useEffect(() => () => debounceReset.cancel(), [debounceReset]);
 
-    return <ParagraphSetting key={key} />;
+    return <ParagraphSetting {...props} key={key} />;
 }

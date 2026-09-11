@@ -33,7 +33,7 @@ export const DrawingAlign = (props: IDrawingAlignProps) => {
 
     const { drawings, alignShow } = props;
 
-    const [alignValue, setAlignValue] = useState<string>(AlignType.default as string);
+    const [alignValue, setAlignValue] = useState<AlignType>(AlignType.default);
     const alignOptions = [
         {
             label: localeService.t<LocaleKey>('drawing-ui.image-panel.align.default'),
@@ -86,9 +86,13 @@ export const DrawingAlign = (props: IDrawingAlignProps) => {
     ];
 
     function handleAlignChange(value: string | number | boolean) {
-        setAlignValue((value as string));
+        const alignType = Object.values(AlignType).find((option) => option === value);
+        if (alignType == null) {
+            return;
+        }
+        setAlignValue(alignType);
         commandService.executeCommand(SetDrawingAlignOperation.id, {
-            alignType: value as AlignType,
+            alignType,
             drawings,
         });
     }

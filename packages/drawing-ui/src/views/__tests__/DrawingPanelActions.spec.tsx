@@ -19,11 +19,11 @@ import type { IDrawingOrderUpdateParam } from '@univerjs/drawing';
 import type { ReactElement } from 'react';
 import type { Root } from 'react-dom/client';
 import { ArrangeTypeEnum, CommandType, DrawingTypeEnum, ICommandService, LocaleType, Univer } from '@univerjs/core';
+import { ConfigProvider } from '@univerjs/design';
 import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
-import { ComponentManager, IconManager, IDialogService, RediContext } from '@univerjs/ui';
+import { ComponentManager, IconManager, IDialogService, IMenuManagerService, IUIPartsService, MenuManagerService, MobileDialogService, RediContext, UIPartsService } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SetDrawingArrangeOperation } from '../../commands/operations/drawing-arrange.operation';
 import {
@@ -33,10 +33,11 @@ import {
 } from '../../commands/operations/image-crop.operation';
 import { DrawingImageClipService } from '../../services/drawing-image-clip.service';
 import { ImagePopupMenu } from '../image-popup-menu/ImagePopupMenu';
+import { MobileImagePopupMenu } from '../image-popup-menu/MobileImagePopupMenu';
 import { DrawingArrange } from '../panel/DrawingArrange';
 import { ImageCropper } from '../panel/ImageCropper';
 
-(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', true);
 
 const unitId = 'drawing-panel-unit';
 const subUnitId = 'drawing-panel-subunit';
@@ -118,15 +119,10 @@ describe('drawing panel actions', () => {
         injector.add([IDrawingManagerService, { useClass: DrawingManagerService }]);
         injector.add([IconManager]);
         injector.add([ComponentManager]);
+        injector.add([IMenuManagerService, { useClass: MenuManagerService }]);
         injector.add([DrawingImageClipService]);
-        injector.add([IDialogService, {
-            useValue: {
-                open: () => ({ dispose: () => undefined }),
-                close: () => undefined,
-                closeAll: () => undefined,
-                getDialogs$: () => of([]),
-            },
-        }]);
+        injector.add([IUIPartsService, { useClass: UIPartsService }]);
+        injector.add([IDialogService, { useClass: MobileDialogService }]);
         injector.get(IconManager).register({ DrawingEditIcon: () => <span /> });
 
         commandService = injector.get(ICommandService);
@@ -395,5 +391,99 @@ describe('drawing panel actions', () => {
 
         expect(document.querySelector('[data-testid="line-chart-icon"]')).not.toBeNull();
         expect(document.querySelector('[data-testid="column-chart-icon"]')).not.toBeNull();
+    });
+
+    it('executes document image actions directly from the mobile context menu', async () => {
+        const executedCommands: ICommandInfo[] = [];
+        commandService.onCommandExecuted((command) => executedCommands.push(command));
+
+        const rendered = renderWithRediContext(
+            univer.__getInjector(),
+            <ConfigProvider mountContainer={document.body}>
+                <MobileImagePopupMenu
+                    popup={{
+                        extraProps: {
+                            variant: 'doc-floating-toolbar',
+                            menuItems: [{
+                                label: 'drawing.edit',
+                                index: 0,
+                                commandId: chartEditCommandId,
+                                commandParams: { source: 'mobile' },
+                                disable: false,
+                            }],
+                        },
+                    }}
+                />
+            </ConfigProvider>
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(container.querySelector('button[aria-label="drawing-ui.mobile.more"]')).toBeNull();
+        const edit = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'drawing.edit');
+        if (!edit) {
+            throw new Error('The document image edit action was not found');
+        }
+        clickElement(edit);
+        await flushPendingCommands();
+
+        expect(executedCommands).toContainEqual({
+            id: chartEditCommandId,
+            type: CommandType.OPERATION,
+            params: { source: 'mobile' },
+        });
+        expect(document.querySelector('[role="dialog"]')).toBeNull();
+    });
+
+    it('executes select options from the shared mobile drawing drawer', async () => {
+        const executedCommands: ICommandInfo[] = [];
+        commandService.onCommandExecuted((command) => executedCommands.push(command));
+
+        const rendered = renderWithRediContext(
+            univer.__getInjector(),
+            <ConfigProvider mountContainer={document.body}>
+                <MobileImagePopupMenu
+                    popup={{
+                        extraProps: {
+                            menuItems: [{
+                                type: 'select',
+                                label: 'chart.type',
+                                index: 0,
+                                commandId: chartEditCommandId,
+                                disable: false,
+                                value: 'line',
+                                options: [
+                                    { label: 'Line', value: 'line' },
+                                    { label: 'Column', value: 'column' },
+                                ],
+                                commandParamsFactory: (value) => ({ value }),
+                            }],
+                        },
+                    }}
+                />
+            </ConfigProvider>
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        const select = Array.from(container.querySelectorAll('button')).find((button) => button.textContent?.includes('chart.type'));
+        if (!select) {
+            throw new Error('Mobile chart selector was not found');
+        }
+        clickElement(select);
+        const option = Array.from(document.querySelectorAll<HTMLButtonElement>('button[aria-pressed]'))
+            .find((button) => button.textContent === 'Column');
+        if (!option) {
+            throw new Error('Mobile chart option was not found.');
+        }
+        clickElement(option);
+        await flushPendingCommands();
+
+        expect(executedCommands).toContainEqual({
+            id: chartEditCommandId,
+            type: CommandType.OPERATION,
+            params: { value: 'column' },
+        });
+        expect(document.querySelector('[role="dialog"]')).toBeNull();
     });
 });

@@ -44,7 +44,7 @@ import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import { ThemeSwitcherService } from '../../../services/theme-switcher/theme-switcher.service';
 import { IWorkbenchService, WorkbenchService } from '../../../services/workbench/workbench.service';
 import { MobileKeyboardInsetContext } from '../mobile-keyboard-inset-context';
-import { MobileWorkbench } from '../MobileWorkbench';
+import { MobileWorkbench, resolveMobileKeyboardInset, shouldUpdateMobileStableHeight } from '../MobileWorkbench';
 
 function KeyboardBar() {
     const bottom = useContext(MobileKeyboardInsetContext);
@@ -118,6 +118,9 @@ describe('MobileWorkbench keyboard positioning', () => {
         const portalBars = portal.querySelectorAll<HTMLElement>('[data-testid="keyboard-bar"]');
         const rootStyle = document.documentElement.getAttribute('style');
         const bodyStyle = document.body.getAttribute('style');
+        const input = document.createElement('input');
+        document.body.appendChild(input);
+        input.focus();
 
         act(() => {
             viewport.height = 500;
@@ -129,11 +132,11 @@ describe('MobileWorkbench keyboard positioning', () => {
         expect(portalBars[1].style.bottom).toBe('100px');
 
         act(() => {
-            viewport.offsetTop = 50;
+            viewport.offsetTop = 20;
             viewport.dispatchEvent(new Event('scroll'));
         });
-        expect(firstBar.style.bottom).toBe('250px');
-        expect(secondBar.style.bottom).toBe('50px');
+        expect(firstBar.style.bottom).toBe('280px');
+        expect(secondBar.style.bottom).toBe('80px');
 
         act(() => {
             viewport.height = 800;
@@ -144,13 +147,39 @@ describe('MobileWorkbench keyboard positioning', () => {
         expect(secondBar.style.bottom).toBe('0px');
         expect(document.documentElement.getAttribute('style')).toBe(rootStyle);
         expect(document.body.getAttribute('style')).toBe(bodyStyle);
-        expect([...first.container.querySelectorAll<HTMLElement>('[style]')].some((element) =>
-            [...element.style].some((property) => property.startsWith('--')))).toBe(false);
-
+        input.remove();
         first.unmount();
         second.unmount();
         expect(removeViewportListener.mock.calls.map(([event]) => event)).toEqual(['resize', 'scroll', 'resize', 'scroll']);
         expect(removeWindowListener).toHaveBeenCalledWith('resize', expect.any(Function));
         injector.dispose();
+    });
+});
+
+describe('resolveMobileKeyboardInset', () => {
+    it('excludes persistent browser chrome and reports only keyboard occlusion', () => {
+        expect(resolveMobileKeyboardInset(900, 700, 200)).toBe(0);
+        expect(resolveMobileKeyboardInset(900, 400, 200)).toBe(300);
+    });
+
+    it('uses the visual viewport bottom without displacing the canvas by offsetTop', () => {
+        expect(resolveMobileKeyboardInset(932, 180 + 500, 0)).toBe(252);
+    });
+});
+
+describe('shouldUpdateMobileStableHeight', () => {
+    it('fills newly available height without treating viewport growth as keyboard occlusion', () => {
+        expect(shouldUpdateMobileStableHeight(780, 860, 390, 390, false, false)).toBe(true);
+        expect(shouldUpdateMobileStableHeight(780, 870, 390, 390, false, false)).toBe(true);
+        expect(shouldUpdateMobileStableHeight(870, 780, 390, 390, false, false)).toBe(false);
+        expect(shouldUpdateMobileStableHeight(780, 870, 390, 390, true, false)).toBe(false);
+        expect(shouldUpdateMobileStableHeight(780, 870, 390, 390, false, true)).toBe(false);
+    });
+
+    it('does not capture an iOS keyboard-height viewport after focus is lost', () => {
+        expect(shouldUpdateMobileStableHeight(900, 520, 430, 430, false, true)).toBe(false);
+        expect(shouldUpdateMobileStableHeight(900, 520, 430, 430, false, false)).toBe(false);
+        expect(shouldUpdateMobileStableHeight(900, 860, 430, 430, false, false)).toBe(true);
+        expect(shouldUpdateMobileStableHeight(900, 430, 430, 900, false, true)).toBe(true);
     });
 });

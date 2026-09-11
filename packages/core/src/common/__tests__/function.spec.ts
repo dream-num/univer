@@ -17,25 +17,33 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { throttle } from '../function';
 
-afterEach(() => {
-    vi.useRealTimers();
-});
+afterEach(() => vi.useRealTimers());
 
 describe('throttle', () => {
-    it('does not publish an older trailing call after a newer immediate call', () => {
+    it('does not replay a delayed old value after a newer leading call', () => {
         vi.useFakeTimers();
-        vi.setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
-        const publish = vi.fn();
-        const update = throttle(publish, 100);
-
+        vi.setSystemTime(1000);
+        const render = vi.fn();
+        const update = throttle(render, 100);
         update('initial');
-        vi.advanceTimersByTime(50);
-        update('stale');
-        vi.advanceTimersByTime(60);
+        vi.setSystemTime(1010);
+        update('old');
+        // A background tab can delay timers beyond the throttle interval.
+        vi.setSystemTime(1200);
         update('latest');
-        expect(publish.mock.calls).toEqual([['initial'], ['latest']]);
+        vi.runAllTimers();
+        expect(render.mock.calls).toEqual([['initial'], ['latest']]);
+    });
 
-        vi.advanceTimersByTime(100);
-        expect(publish.mock.calls).toEqual([['initial'], ['latest']]);
+    it('still delivers the last value of a burst', () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(1000);
+        const render = vi.fn();
+        const update = throttle(render, 100);
+        update('initial');
+        update('middle');
+        update('latest');
+        vi.runAllTimers();
+        expect(render.mock.calls).toEqual([['initial'], ['latest']]);
     });
 });

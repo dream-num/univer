@@ -19,23 +19,12 @@ import { describe, expect, it, vi } from 'vitest';
 import { OpenFeatureSearchOperation } from '../../commands/operations/open-feature-search.operation';
 import { ToggleShortcutPanelOperation } from '../../commands/operations/toggle-shortcut-panel.operation';
 import { menuSchema } from '../../menu/schema';
-import { ShortcutPanelMenuItemFactory } from '../../menu/shortcut-panel.menu';
 import { RibbonStartGroup } from '../../services/menu/types';
 import { KeyCode, MetaKeys } from '../../services/shortcut/keycode';
 import { FeatureSearchController } from '../feature-search/feature-search.controller';
 import { ShortcutPanelController } from '../shortcut-display/shortcut-panel.controller';
 
 describe('shortcut-display controllers', () => {
-    it('should return shortcut panel menu item', () => {
-        expect(ShortcutPanelMenuItemFactory()).toEqual({
-            id: ToggleShortcutPanelOperation.id,
-            title: 'ui.toggle-shortcut-panel',
-            tooltip: 'ui.toggle-shortcut-panel',
-            icon: 'KeyboardIcon',
-            type: 0,
-        });
-    });
-
     it('should register command and shortcut', () => {
         const shortcutService = {
             registerShortcut: vi.fn(() => ({ dispose: vi.fn() })),

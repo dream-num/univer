@@ -17,7 +17,13 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IDocFitToWidthOptions, IUniverDocsUIConfig } from '../config/config';
-import { Disposable, DocumentFlavor, IConfigService, MODERN_DOCUMENT_WIDTH, ModernDocumentWidthMode } from '@univerjs/core';
+import {
+    Disposable,
+    DocumentFlavor,
+    IConfigService,
+    MODERN_DOCUMENT_WIDTH,
+    ModernDocumentWidthMode,
+} from '@univerjs/core';
 import { DEFAULT_DOC_FIT_TO_WIDTH_OPTIONS, DOCS_UI_PLUGIN_CONFIG_KEY } from '../config/config';
 import { getDocEffectiveZoomRatio } from './doc-zoom';
 
@@ -96,7 +102,7 @@ export function resolveDocViewScale(userZoomRatio: number, fitToWidthScale: numb
 
 export class DocViewScaleService extends Disposable implements IRenderModule {
     constructor(
-        private readonly _context: IRenderContext<DocumentDataModel>,
+        protected readonly _context: IRenderContext<DocumentDataModel>,
         @IConfigService private readonly _configService: IConfigService
     ) {
         super();

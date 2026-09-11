@@ -16,7 +16,9 @@
 
 const locale = {
     'thread-comment-ui': {
+        mobile: { back: 'Back' },
         panel: {
+            title: 'Comment Management',
             empty: 'No comments yet',
             reset: 'Reset Filter',
             addComment: 'Add Comment',

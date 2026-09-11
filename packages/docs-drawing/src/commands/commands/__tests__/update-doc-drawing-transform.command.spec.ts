@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
+import type { IUpdateDrawingDocTransformCommandParams } from '../update-doc-drawing-transform.command';
 import { ICommandService, ImageSourceType } from '@univerjs/core';
 import { DocHistoryAction, RichTextEditingMutation } from '@univerjs/docs';
-import { UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFacadeTestBed } from '../../../facade/__tests__/create-test-bed';
+import { UpdateDrawingDocTransformCommand } from '../update-doc-drawing-transform.command';
 
 class MockImage {
     width = 800;
@@ -47,6 +47,45 @@ describe('UpdateDrawingDocTransformCommand', () => {
     afterEach(() => {
         testBed.univer.dispose();
         vi.unstubAllGlobals();
+    });
+
+    it('persists image crop geometry and restores it through undo and redo', async () => {
+        const image = await testBed.document.insertImage({
+            source: 'data:image/png;base64,image',
+            imageSourceType: ImageSourceType.BASE64,
+            width: 160,
+            height: 90,
+            textRange: { startOffset: 3, endOffset: 3, collapsed: true, segmentId: '' },
+        });
+        if (!image) {
+            throw new Error('Image insertion failed');
+        }
+        const drawingId = image.getId();
+        const before = structuredClone(testBed.documentDataModel.getDrawings()?.[drawingId]);
+        const commandService = testBed.injector.get(ICommandService);
+        expect(commandService.syncExecuteCommand<IUpdateDrawingDocTransformCommandParams>(
+            UpdateDrawingDocTransformCommand.id,
+            {
+                unitId: 'test-doc',
+                subUnitId: 'test-doc',
+                drawings: [
+                    { drawingId, key: 'prstGeom', value: 'roundRect' },
+                    { drawingId, key: 'adjustValues', value: { adj: 25000 } },
+                    { drawingId, key: 'srcRect', value: { left: 10, top: 0, right: 10, bottom: 0 } },
+                ],
+            }
+        )).toBe(true);
+        const after = structuredClone(testBed.documentDataModel.getDrawings()?.[drawingId]);
+        expect(after).toMatchObject({
+            prstGeom: 'roundRect',
+            adjustValues: { adj: 25000 },
+            srcRect: { left: 10, top: 0, right: 10, bottom: 0 },
+            docTransform: before?.docTransform,
+        });
+        expect(testBed.document.undo()).toBe(true);
+        expect(testBed.documentDataModel.getDrawings()?.[drawingId]).toEqual(before);
+        expect(testBed.document.redo()).toBe(true);
+        expect(testBed.documentDataModel.getDrawings()?.[drawingId]).toEqual(after);
     });
 
     it('marks image transforms for history action summaries', async () => {

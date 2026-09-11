@@ -30,12 +30,23 @@ import { ComponentManager, IconManager } from '@univerjs/ui';
 import { COMPONENT_MOBILE_IMAGE_POPUP_MENU } from '../../views/image-popup-menu/component-name';
 import { MobileImagePopupMenu } from '../../views/image-popup-menu/MobileImagePopupMenu';
 
+import { DRAWING_ALIGN_COMPONENT, DRAWING_ARRANGE_COMPONENT, DRAWING_GROUP_COMPONENT, DRAWING_TRANSFORM_COMPONENT, IMAGE_CROPPER_COMPONENT } from '../../views/panel/component-name';
+import { MobileDrawingArrange } from '../../views/panel/MobileDrawingArrange';
+import { MobileDrawingAlign, MobileDrawingGroup, MobileDrawingTransform } from '../../views/panel/MobileDrawingControls';
+
+import { MobileImageCropper } from '../../views/panel/MobileImageCropper';
+
 export class MobileComponentsController extends Disposable {
     constructor(
         @Inject(ComponentManager) componentManager: ComponentManager,
         @Inject(IconManager) iconManager: IconManager
     ) {
         super();
+        this.disposeWithMe(componentManager.register(DRAWING_ALIGN_COMPONENT, MobileDrawingAlign));
+        this.disposeWithMe(componentManager.register(DRAWING_GROUP_COMPONENT, MobileDrawingGroup));
+        this.disposeWithMe(componentManager.register(DRAWING_TRANSFORM_COMPONENT, MobileDrawingTransform));
+        this.disposeWithMe(componentManager.register(DRAWING_ARRANGE_COMPONENT, MobileDrawingArrange));
+        this.disposeWithMe(componentManager.register(IMAGE_CROPPER_COMPONENT, MobileImageCropper));
 
         this.disposeWithMe(componentManager.register(COMPONENT_MOBILE_IMAGE_POPUP_MENU, MobileImagePopupMenu));
         this.disposeWithMe(iconManager.register({

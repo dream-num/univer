@@ -224,8 +224,10 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
         }
 
         function handleBlur(e: FocusEvent<HTMLInputElement>) {
+            // Focus can move before the controlled-value effect has rendered its state updates.
+            const currentValue = value !== undefined ? value : internalValue;
             // If allowEmpty is true and input is empty, do not restore the last valid value
-            if (internalValue === null) {
+            if (currentValue === null) {
                 if (inputValue === '' && allowEmpty) {
                     // Keep the input empty
                     if (onChange) {
@@ -246,7 +248,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             }
 
             // When blurring, format the value properly
-            let valueInRange = internalValue;
+            let valueInRange = currentValue;
 
             // Apply min/max constraints
             if (max !== undefined && valueInRange > max) {
@@ -256,14 +258,15 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                 valueInRange = min;
             }
 
-            if (valueInRange !== internalValue) {
+            if (valueInRange !== currentValue) {
                 setInternalValue(valueInRange);
                 setInputValue(formatValue(valueInRange));
 
                 onChange?.(valueInRange);
             } else {
                 // Just ensure the display is formatted correctly
-                setInputValue(formatValue(internalValue));
+                setInternalValue(currentValue);
+                setInputValue(formatValue(currentValue));
             }
 
             onBlur?.(e);

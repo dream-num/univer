@@ -47,4 +47,8 @@ export class DocMobileUIController extends DocUIController {
         // Only a direct canvas gesture may reopen the software keyboard.
         this.disposeWithMe(this._layoutService.registerFocusHandler(UniverInstanceType.UNIVER_DOC, () => {}));
     }
+
+    protected override _initShortCut(): void {
+        // Mobile interactions do not use keyboard shortcuts.
+    }
 }

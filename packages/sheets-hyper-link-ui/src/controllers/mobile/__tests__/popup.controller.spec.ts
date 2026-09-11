@@ -32,7 +32,7 @@ import { SheetPermissionCheckController } from '@univerjs/sheets';
 import { HoverManagerService, IEditorBridgeService } from '@univerjs/sheets-ui';
 import { of, Subject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
-import { SheetsHyperLinkPopupService } from '../../../services/popup.service';
+import { ISheetsHyperLinkPopupService } from '../../../services/popup.service';
 import { SheetsHyperLinkMobilePopupController } from '../popup.controller';
 
 class TestHoverManagerService {
@@ -121,7 +121,7 @@ class TestUniverInstanceService {
 function createMobilePopupControllerTestBed() {
     const injector = new Injector();
     injector.add([HoverManagerService, { useClass: TestHoverManagerService as never }]);
-    injector.add([SheetsHyperLinkPopupService, { useClass: TestSheetsHyperLinkPopupService as never }]);
+    injector.add([ISheetsHyperLinkPopupService, { useClass: TestSheetsHyperLinkPopupService as never }]);
     injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
     injector.add([IPermissionService, { useClass: TestPermissionService as never }]);
     injector.add([SheetPermissionCheckController, { useClass: TestSheetPermissionCheckController as never }]);
@@ -134,7 +134,7 @@ function createMobilePopupControllerTestBed() {
 
     return {
         hoverManagerService: injector.get(HoverManagerService) as unknown as TestHoverManagerService,
-        popupService: injector.get(SheetsHyperLinkPopupService) as unknown as TestSheetsHyperLinkPopupService,
+        popupService: injector.get(ISheetsHyperLinkPopupService) as unknown as TestSheetsHyperLinkPopupService,
         univerInstanceService: injector.get(IUniverInstanceService) as unknown as TestUniverInstanceService,
     };
 }

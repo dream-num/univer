@@ -92,7 +92,7 @@ export class DocUIController extends Disposable {
         this._menuManagerService.mergeMenu(menuSchema);
     }
 
-    private _initShortCut() {
+    protected _initShortCut() {
         [
             BoldShortCut,
             ItalicShortCut,

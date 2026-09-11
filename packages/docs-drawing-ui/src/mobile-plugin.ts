@@ -15,33 +15,90 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import { DependentOn, mergeOverrideWithDependencies } from '@univerjs/core';
+import type { IUniverDocsDrawingUIConfig } from './config/config';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
 import { UniverDocsMobileUIPlugin } from '@univerjs/docs-ui';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverDrawingMobileUIPlugin } from '@univerjs/drawing-ui';
-import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { ComponentsController } from './controllers/components.controller';
+import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import pkg from '../package.json';
+import { defaultPluginConfig, DOCS_DRAWING_UI_PLUGIN_CONFIG_KEY, DOCS_DRAWING_UI_PLUGIN_NAME } from './config/config';
+import { DocDrawingAddRemoveController } from './controllers/doc-drawing-notification.controller';
+import { DocDrawingPrintingController } from './controllers/doc-drawing-printing.controller';
+import { DocDrawingTransformerController } from './controllers/doc-drawing-transformer-update.controller';
+import { DocFloatDomController } from './controllers/doc-float-dom.controller';
 import { MobileComponentsController } from './controllers/mobile/components.controller';
 import { MobileDocDrawingPopupMenuController } from './controllers/mobile/drawing-popup-menu.controller';
+import { DocDrawingTransformUpdateController } from './controllers/render-controllers/doc-drawing-transform-update.controller';
 import { DocDrawingUpdateRenderController } from './controllers/render-controllers/doc-drawing-update.render-controller';
 import { MobileDocDrawingUpdateRenderController } from './controllers/render-controllers/mobile/doc-drawing-update.render-controller';
-import { DocDrawingPopupMenuController } from './menu/drawing-popup-menu.controller';
-import { UniverDocsDrawingUIPlugin } from './plugin';
+import { DocDrawingUIController } from './controllers/ui.controller';
+import { DocDrawingFloatingToolbarAdapterService } from './services/doc-drawing-floating-toolbar-adapter.service';
+import { DocRefreshDrawingsService } from './services/doc-refresh-drawings.service';
 
-@DependentOn(UniverDocsPlugin, UniverDrawingPlugin, UniverRenderEnginePlugin, UniverDocsDrawingPlugin, UniverDocsMobileUIPlugin, UniverDrawingMobileUIPlugin)
-export class UniverDocsDrawingMobileUIPlugin extends UniverDocsDrawingUIPlugin {
-    protected override _getDependencies(): Dependency[] {
-        return mergeOverrideWithDependencies(super._getDependencies(), [
-            [ComponentsController, { useClass: MobileComponentsController }],
-            [DocDrawingPopupMenuController, { useClass: MobileDocDrawingPopupMenuController }],
-        ]);
+@DependentOn(
+    UniverDocsPlugin,
+    UniverDrawingPlugin,
+    UniverRenderEnginePlugin,
+    UniverDocsDrawingPlugin,
+    UniverDocsMobileUIPlugin,
+    UniverDrawingMobileUIPlugin
+)
+export class UniverDocsDrawingMobileUIPlugin extends Plugin {
+    static override type = UniverInstanceType.UNIVER_DOC;
+    static override pluginName = DOCS_DRAWING_UI_PLUGIN_NAME;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
+
+    constructor(
+        private readonly _config: Partial<IUniverDocsDrawingUIConfig> = defaultPluginConfig,
+        @Inject(Injector) protected override _injector: Injector,
+        @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
+        @IConfigService private readonly _configService: IConfigService
+    ) {
+        super();
+
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        this._configService.setConfig(DOCS_DRAWING_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
-    protected override _getRenderModules(): Dependency[] {
-        return mergeOverrideWithDependencies(super._getRenderModules(), [
+    override onStarting(): void {
+        const dependencies: Dependency[] = [
+            [MobileComponentsController],
+            [DocDrawingUIController],
+            [MobileDocDrawingPopupMenuController],
+            [DocDrawingTransformerController],
+            [DocDrawingAddRemoveController],
+            [DocRefreshDrawingsService],
+            [DocDrawingFloatingToolbarAdapterService],
+            [DocFloatDomController],
+            [DocDrawingPrintingController],
+        ];
+
+        dependencies.forEach((dependency) => this._injector.add(dependency));
+        this._injector.get(MobileComponentsController);
+    }
+
+    override onReady(): void {
+        ([
             [DocDrawingUpdateRenderController, { useClass: MobileDocDrawingUpdateRenderController }],
-        ]);
+            [DocDrawingTransformUpdateController],
+        ] as Dependency[]).forEach((m) => this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m));
+
+        this._injector.get(DocDrawingAddRemoveController);
+        this._injector.get(DocDrawingUIController);
+        this._injector.get(DocDrawingTransformerController);
+        this._injector.get(DocDrawingPrintingController);
+    }
+
+    override onRendered(): void {
+        this._injector.get(MobileDocDrawingPopupMenuController);
+        this._injector.get(DocFloatDomController);
     }
 }

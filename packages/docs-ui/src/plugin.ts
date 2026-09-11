@@ -145,7 +145,7 @@ import { DocSectionSettingPanelOperation } from './commands/operations/doc-secti
 import { InsertDocumentColumnBreakOperation, InsertDocumentSectionBreakOperation } from './commands/operations/insert-break.operation';
 import { DocOpenPageSettingCommand } from './commands/operations/open-page-setting.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
-import { defaultPluginConfig, DOCS_UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { defaultPluginConfig, DOCS_UI_PLUGIN_CONFIG_KEY, DOCS_UI_PLUGIN_NAME } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
 import { DocAutoFormatController } from './controllers/doc-auto-format.controller';
 import { DocHeaderFooterController } from './controllers/doc-header-footer.controller';
@@ -240,7 +240,7 @@ import {
 
 @DependentOn(UniverDocsPlugin, UniverRenderEnginePlugin)
 export class UniverDocsUIPlugin extends Plugin {
-    static override pluginName = 'DOC_UI_PLUGIN';
+    static override pluginName = DOCS_UI_PLUGIN_NAME;
     static override packageName = pkg.name;
     static override version = pkg.version;
     // static override type = UniverInstanceType.UNIVER_DOC;
@@ -484,8 +484,8 @@ export class UniverDocsUIPlugin extends Plugin {
         }));
     }
 
-    protected _getRenderBasics(): Dependency[] {
-        return [
+    private _initRenderBasics() {
+        ([
             [DocSkeletonManagerService],
             [DocSelectionRenderService],
             [DocInterceptorService],
@@ -499,17 +499,13 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocZoomRenderController],
             [DocBackScrollRenderController],
             [DocSelectionRenderController],
-        ];
-    }
-
-    private _initRenderBasics(): void {
-        this._getRenderBasics().forEach((m) => {
+        ] as Dependency[]).forEach((m) => {
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
         });
     }
 
-    protected _getRenderModules(): Dependency[] {
-        return [
+    private _initRenderModules() {
+        ([
             [DocEventManagerService],
             [DocFloatMenuService],
             [DocParagraphMenuService],
@@ -523,11 +519,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocIMEInputController],
             [DocLayoutRecoveryRenderController],
             [DocEditorBridgeController],
-        ];
-    }
-
-    private _initRenderModules(): void {
-        this._getRenderModules().forEach((m) => {
+        ] as Dependency[]).forEach((m) => {
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
         });
     }

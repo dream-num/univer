@@ -14,28 +14,185 @@
  * limitations under the License.
  */
 
-import type { Dependency } from '@univerjs/core';
+import type { Dependency, DocumentDataModel } from '@univerjs/core';
 import type { IUniverDocsUIConfig } from './config/config';
-import { DependentOn, ICommandService, IConfigService, Inject, Injector, mergeOverrideWithDependencies } from '@univerjs/core';
-import { UniverDocsPlugin } from '@univerjs/docs';
+import {
+    DependentOn,
+    ICommandService,
+    IConfigService,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    merge,
+    mergeOverrideWithDependencies,
+    Plugin,
+    touchDependencies,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    DocInterceptorService,
+    DocSkeletonManagerService,
+    IDocStateChangeInterceptorService,
+    UniverDocsPlugin,
+} from '@univerjs/docs';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverMobileUIPlugin } from '@univerjs/ui';
-import { defaultPluginConfig } from './config/config';
-import { ComponentsController } from './controllers/components.controller';
+import pkg from '../package.json';
+import { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands/auto-format.command';
+import { BreakLineCommand } from './commands/commands/break-line.command';
+import {
+    DocCopyCommand,
+    DocCopyCurrentParagraphCommand,
+    DocCutCommand,
+    DocCutCurrentParagraphCommand,
+    DocPasteCommand,
+} from './commands/commands/clipboard.command';
+import { CutContentCommand, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
+import { MoveDocBlockCommand } from './commands/commands/doc-block-move.command';
+import {
+    DeleteCurrentParagraphCommand,
+    DeleteCustomBlockCommand,
+    DeleteLeftCommand,
+    DeleteRightCommand,
+    MergeTwoParagraphCommand,
+    RemoveHorizontalLineCommand,
+} from './commands/commands/doc-delete.command';
+import { CloseHeaderFooterCommand } from './commands/commands/doc-header-footer.command';
+import {
+    HorizontalLineCommand,
+    InsertHorizontalLineBellowCommand,
+} from './commands/commands/doc-horizontal-line.command';
+import { DocPageSetupCommand } from './commands/commands/doc-page-setup.command';
+import { DocParagraphSettingCommand } from './commands/commands/doc-paragraph-setting.command';
+import { DocSelectAllCommand, DocSelectWordCommand } from './commands/commands/doc-select-all.command';
+import { IMEInputCommand } from './commands/commands/ime-input.command';
+import {
+    ResetInlineFormatTextBackgroundColorCommand,
+    ResetInlineFormatTextColorCommand,
+    SetInlineFormatBoldCommand,
+    SetInlineFormatCommand,
+    SetInlineFormatFontFamilyCommand,
+    SetInlineFormatFontSizeCommand,
+    SetInlineFormatItalicCommand,
+    SetInlineFormatStrikethroughCommand,
+    SetInlineFormatSubscriptCommand,
+    SetInlineFormatSuperscriptCommand,
+    SetInlineFormatTextBackgroundColorCommand,
+    SetInlineFormatTextColorCommand,
+    SetInlineFormatTextFillCommand,
+    SetInlineFormatUnderlineCommand,
+} from './commands/commands/inline-format.command';
+import { InsertCustomRangeCommand } from './commands/commands/insert-custom-range.command';
+import { InsertSpecialCharacterCommand } from './commands/commands/insert-special-character.command';
+import {
+    BulletListCommand,
+    ChangeListNestingLevelCommand,
+    ChangeListTypeCommand,
+    CheckListCommand,
+    InsertBulletListBellowCommand,
+    InsertCheckListBellowCommand,
+    InsertOrderListBellowCommand,
+    ListOperationCommand,
+    OrderListCommand,
+    QuickListCommand,
+    ToggleCheckListCommand,
+} from './commands/commands/list.command';
+import {
+    AlignCenterCommand,
+    AlignJustifyCommand,
+    AlignLeftCommand,
+    AlignOperationCommand,
+    AlignRightCommand,
+} from './commands/commands/paragraph-align.command';
+import {
+    CoverContentCommand,
+    ReplaceSelectionCommand,
+    ReplaceSnapshotCommand,
+    ReplaceTextRunsCommand,
+} from './commands/commands/replace-content.command';
+import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
+import {
+    H1HeadingCommand,
+    H2HeadingCommand,
+    H3HeadingCommand,
+    H4HeadingCommand,
+    H5HeadingCommand,
+    NormalTextHeadingCommand,
+    QuickHeadingCommand,
+    SetParagraphNamedStyleCommand,
+    SubtitleHeadingCommand,
+    TitleHeadingCommand,
+} from './commands/commands/set-heading.command';
+import { SwitchDocModeCommand } from './commands/commands/switch-doc-mode.command';
+import { CreateDocTableCommand } from './commands/commands/table/doc-table-create.command';
+import {
+    DocTableDeleteColumnsCommand,
+    DocTableDeleteRowsCommand,
+    DocTableDeleteTableCommand,
+} from './commands/commands/table/doc-table-delete.command';
+import {
+    DocTableInsertColumnCommand,
+    DocTableInsertColumnLeftCommand,
+    DocTableInsertColumnRightCommand,
+    DocTableInsertRowAboveCommand,
+    DocTableInsertRowBellowCommand,
+    DocTableInsertRowCommand,
+} from './commands/commands/table/doc-table-insert.command';
+import { DocTableTabCommand } from './commands/commands/table/doc-table-tab.command';
+import { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/doc-cursor.operation';
+import { DocParagraphSettingPanelOperation } from './commands/operations/doc-paragraph-setting-panel.operation';
+import { DocSectionSettingPanelOperation } from './commands/operations/doc-section-setting-panel.operation';
+import { InsertDocumentColumnBreakOperation, InsertDocumentSectionBreakOperation } from './commands/operations/insert-break.operation';
+import { DocOpenPageSettingCommand } from './commands/operations/open-page-setting.operation';
+import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
+import { defaultPluginConfig, DOCS_UI_PLUGIN_CONFIG_KEY, DOCS_UI_PLUGIN_NAME } from './config/config';
+import { DocAutoFormatController } from './controllers/doc-auto-format.controller';
+import { DocHeaderFooterController } from './controllers/doc-header-footer.controller';
+import { DocMoveCursorController } from './controllers/doc-move-cursor.controller';
+import { DocParagraphSettingController } from './controllers/doc-paragraph-setting.controller';
+import { DocSectionSettingController } from './controllers/doc-section-setting.controller';
+import { DocTableController } from './controllers/doc-table.controller';
 import { MobileComponentsController } from './controllers/mobile/components.controller';
 import { DocMobileUIController } from './controllers/mobile/ui.controller';
 import { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
-import { DocSelectionRenderController } from './controllers/render-controllers/doc-selection-render.controller';
-import { DocRenderController } from './controllers/render-controllers/doc.render-controller';
+import { DocCanvasPopupLayoutInteractionController } from './controllers/render-controllers/doc-canvas-popup-layout-interaction.controller';
+import { DocChecklistRenderController } from './controllers/render-controllers/doc-checklist.render-controller';
+import { DocClipboardController } from './controllers/render-controllers/doc-clipboard.controller';
+import { DocContextMenuRenderController } from './controllers/render-controllers/doc-contextmenu.render-controller';
+import { DocEditorBridgeController } from './controllers/render-controllers/doc-editor-bridge.controller';
+import { DocIMEInputController } from './controllers/render-controllers/doc-ime-input.controller';
+import { DocInputController } from './controllers/render-controllers/doc-input.controller';
+import { DocLayoutProgressRenderController } from './controllers/render-controllers/doc-layout-progress.render-controller';
+import { DocLayoutRecoveryRenderController } from './controllers/render-controllers/doc-layout-recovery.render-controller';
+import {
+    DocParagraphPlaceholderRenderController,
+} from './controllers/render-controllers/doc-paragraph-placeholder.render-controller';
+import { DocResizeRenderController } from './controllers/render-controllers/doc-resize.render-controller';
 import { MobileDocBackScrollRenderController } from './controllers/render-controllers/mobile/back-scroll.render-controller';
 import { MobileDocSelectionRenderController } from './controllers/render-controllers/mobile/doc-selection-render.controller';
 import { MobileDocRenderController } from './controllers/render-controllers/mobile/doc.render-controller';
 import { MobileDocZoomRenderController } from './controllers/render-controllers/mobile/zoom.render-controller';
-import { DocZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
-import { DocUIController } from './controllers/ui.controller';
-import { UniverDocsUIPlugin } from './plugin';
+import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
+import {
+    DocClipboardPasteAdapterService,
+    IDocClipboardPasteAdapterService,
+} from './services/clipboard/doc-paste-mutation-adapter.service';
+import { DocHtmlExportService } from './services/clipboard/udm-to-html/doc-html-export.service';
+import { DocAutoFormatService } from './services/doc-auto-format.service';
+import { DocEventManagerService } from './services/doc-event-manager.service';
+import { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
+import { DocIMEStateChangeInterceptorService } from './services/doc-ime-state-change-interceptor.service';
+import { DocLayoutInteractionService } from './services/doc-layout-interaction.service';
+import { DocLayoutProgressService } from './services/doc-layout-progress.service';
+import { DocMenuStyleService, SetDocInputStyleCommand } from './services/doc-menu-style.service';
+import { DocMobileElementMenuService } from './services/doc-mobile-element-menu.service';
+import { DocPageLayoutService } from './services/doc-page-layout.service';
 import { DocParagraphMenuService } from './services/doc-paragraph-menu.service';
+import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
+import { DocPrintInterceptorService } from './services/doc-print-interceptor.service';
 import { DocViewScaleService } from './services/doc-view-scale';
+import { DocsRenderService } from './services/docs-render.service';
+import { EditorService, IEditorService } from './services/editor/editor-manager.service';
 import { DocFloatMenuService } from './services/float-menu.service';
 import { MobileDocParagraphMenuService } from './services/mobile/doc-paragraph-menu.service';
 import { MobileDocSelectionRenderService } from './services/mobile/doc-selection-render.service';
@@ -44,23 +201,23 @@ import { MobileDocFloatMenuService } from './services/mobile/float-menu.service'
 import { DocSelectionRenderService } from './services/selection/doc-selection-render.service';
 
 @DependentOn(UniverDocsPlugin, UniverRenderEnginePlugin, UniverMobileUIPlugin)
-export class UniverDocsMobileUIPlugin extends UniverDocsUIPlugin {
-    static override pluginName = UniverDocsUIPlugin.pluginName;
+export class UniverDocsMobileUIPlugin extends Plugin {
+    static override pluginName = DOCS_UI_PLUGIN_NAME;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
+    // static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(
-        config: Partial<IUniverDocsUIConfig> = {},
-        @Inject(Injector) injector: Injector,
-        @IRenderManagerService renderManagerService: IRenderManagerService,
-        @ICommandService commandService: ICommandService,
-        @IConfigService configService: IConfigService
+        private readonly _config: Partial<IUniverDocsUIConfig> = {},
+        @Inject(Injector) override _injector: Injector,
+        @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
+        @ICommandService private _commandService: ICommandService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
-        super({
-            ...config,
-            override: [
-                ...(config.override ?? []),
-                [DocUIController, { useClass: DocMobileUIController }],
-                [ComponentsController, { useClass: MobileComponentsController }],
-            ],
+        super();
+
+        const mobileConfig: Partial<IUniverDocsUIConfig> = {
+            ...this._config,
             fitToWidth: {
                 ...defaultPluginConfig.fitToWidth,
                 mode: 'fit-width',
@@ -69,26 +226,232 @@ export class UniverDocsMobileUIPlugin extends UniverDocsUIPlugin {
                 minScale: 0,
                 maxScale: 1,
                 align: 'center',
-                ...config.fitToWidth,
+                ...this._config.fitToWidth,
             },
-        }, injector, renderManagerService, commandService, configService);
+        };
+
+        // Manage the plugin configuration.
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            mobileConfig
+        );
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(DOCS_UI_PLUGIN_CONFIG_KEY, rest);
+
+        this._initDependencies(_injector);
+        this._initCommand();
     }
 
-    protected override _getRenderBasics(): Dependency[] {
-        return mergeOverrideWithDependencies(super._getRenderBasics(), [
-            [DocRenderController, { useClass: MobileDocRenderController }],
-            [DocSelectionRenderService, { useClass: MobileDocSelectionRenderService }],
-            [DocSelectionRenderController, { useClass: MobileDocSelectionRenderController }],
-            [DocBackScrollRenderController, { useClass: MobileDocBackScrollRenderController }],
-            [DocZoomRenderController, { useClass: MobileDocZoomRenderController }],
-            [DocViewScaleService, { useClass: MobileDocViewScaleService }],
+    override onReady(): void {
+        this._initRenderBasics();
+        this._initAutoFocus();
+
+        touchDependencies(this._injector, [
+            [DocsRenderService],
         ]);
     }
 
-    protected override _getRenderModules(): Dependency[] {
-        return mergeOverrideWithDependencies(super._getRenderModules(), [
+    override onRendered(): void {
+        this._initRenderModules();
+
+        touchDependencies(this._injector, [
+            [DocAutoFormatController],
+            [DocMoveCursorController],
+            [DocParagraphSettingController],
+            [DocSectionSettingController],
+            [DocTableController],
+            [MobileComponentsController],
+
+            // FIXME: LifecycleStages.Rendered must be used, otherwise the menu cannot be added to the DOM, but the sheet ui
+            // plugin can be added in LifecycleStages.Ready
+            [DocMobileUIController],
+        ]);
+    }
+
+    // eslint-disable-next-line max-lines-per-function
+    private _initCommand() {
+        [
+            DeleteLeftCommand,
+            DeleteRightCommand,
+            SetInlineFormatBoldCommand,
+            SetInlineFormatItalicCommand,
+            SetInlineFormatUnderlineCommand,
+            SetInlineFormatStrikethroughCommand,
+            SetInlineFormatSubscriptCommand,
+            SetInlineFormatSuperscriptCommand,
+            SetInlineFormatFontSizeCommand,
+            SetInlineFormatFontFamilyCommand,
+            SetInlineFormatTextColorCommand,
+            ResetInlineFormatTextColorCommand,
+            SetInlineFormatTextFillCommand,
+            ResetInlineFormatTextBackgroundColorCommand,
+            SetInlineFormatTextBackgroundColorCommand,
+            SetInlineFormatCommand,
+            SetDocInputStyleCommand,
+            BreakLineCommand,
+            DeleteCustomBlockCommand,
+            MoveDocBlockCommand,
+            MergeTwoParagraphCommand,
+            RemoveHorizontalLineCommand,
+            SetDocZoomRatioOperation,
+            OrderListCommand,
+            BulletListCommand,
+            ListOperationCommand,
+            AlignLeftCommand,
+            AlignCenterCommand,
+            AlignRightCommand,
+            AlignOperationCommand,
+            AlignJustifyCommand,
+            HorizontalLineCommand,
+            CreateDocTableCommand,
+            DocTableInsertRowCommand,
+            DocTableInsertRowAboveCommand,
+            DocTableInsertRowBellowCommand,
+            DocTableInsertColumnCommand,
+            DocTableInsertColumnLeftCommand,
+            DocTableInsertColumnRightCommand,
+            DocTableDeleteRowsCommand,
+            DocTableDeleteColumnsCommand,
+            DocTableDeleteTableCommand,
+            CloseHeaderFooterCommand,
+            DocTableTabCommand,
+            TabCommand,
+            AfterSpaceCommand,
+            EnterCommand,
+            ChangeListNestingLevelCommand,
+            ChangeListTypeCommand,
+            CheckListCommand,
+            ToggleCheckListCommand,
+            QuickListCommand,
+            IMEInputCommand,
+            SwitchDocModeCommand,
+            DocParagraphSettingCommand,
+            InnerPasteCommand,
+            CutContentCommand,
+            ReplaceSnapshotCommand,
+            CoverContentCommand,
+            SetDocZoomRatioCommand,
+            DocSelectAllCommand,
+            DocSelectWordCommand,
+            DocParagraphSettingPanelOperation,
+            DocSectionSettingPanelOperation,
+            InsertDocumentColumnBreakOperation,
+            InsertDocumentSectionBreakOperation,
+            MoveCursorOperation,
+            MoveSelectionOperation,
+            ReplaceTextRunsCommand,
+            ReplaceSelectionCommand,
+            InsertCustomRangeCommand,
+            InsertSpecialCharacterCommand,
+            SetParagraphNamedStyleCommand,
+            QuickHeadingCommand,
+            DocCopyCurrentParagraphCommand,
+            DocCutCurrentParagraphCommand,
+            H1HeadingCommand,
+            H2HeadingCommand,
+            H3HeadingCommand,
+            H4HeadingCommand,
+            H5HeadingCommand,
+            NormalTextHeadingCommand,
+            TitleHeadingCommand,
+            SubtitleHeadingCommand,
+            InsertBulletListBellowCommand,
+            InsertOrderListBellowCommand,
+            InsertCheckListBellowCommand,
+            InsertHorizontalLineBellowCommand,
+            DocPageSetupCommand,
+            DocOpenPageSettingCommand,
+        ].forEach((e) => {
+            this.disposeWithMe(this._commandService.registerCommand(e));
+        });
+
+        [DocCopyCommand, DocCutCommand, DocPasteCommand, DeleteCurrentParagraphCommand].forEach((command) => this.disposeWithMe(this._commandService.registerMultipleCommand(command)));
+    }
+
+    private _initDependencies(injector: Injector) {
+        const dependencies = mergeOverrideWithDependencies([
+            [DocPrintInterceptorService],
+            [DocClipboardController],
+            [DocEditorBridgeController],
+            [MobileComponentsController],
+            [DocMobileUIController],
+            [DocAutoFormatController],
+            [DocTableController],
+            [DocMoveCursorController],
+            [DocParagraphSettingController],
+            [DocSectionSettingController],
+            [IEditorService, { useClass: EditorService }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
+            [DocClipboardPasteAdapterService],
+            [IDocClipboardPasteAdapterService, { useClass: DocClipboardPasteAdapterService }],
+            [DocHtmlExportService],
+            [DocCanvasPopManagerService],
+            [DocLayoutProgressService],
+            [DocMobileElementMenuService],
+            [DocsRenderService],
+            [IDocStateChangeInterceptorService, { useClass: DocIMEStateChangeInterceptorService }],
+            [DocAutoFormatService],
+            [DocMenuStyleService],
+
+        ], this._config.override);
+        dependencies.forEach((d) => injector.add(d));
+    }
+
+    private _initAutoFocus() {
+        const currentService = this._injector.get(IUniverInstanceService);
+        const editorService = this._injector.get(IEditorService);
+        this.disposeWithMe(currentService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe((doc) => {
+            if (!doc) {
+                return;
+            }
+
+            const id = doc.getUnitId();
+            if (!editorService.isEditor(id)) {
+                currentService.focusUnit(id);
+            }
+        }));
+    }
+
+    private _initRenderBasics(): void {
+        ([
+            [DocSkeletonManagerService],
+            [DocSelectionRenderService, { useClass: MobileDocSelectionRenderService }],
+            [DocInterceptorService],
+            [DocViewScaleService, { useClass: MobileDocViewScaleService }],
+            [DocPageLayoutService],
+            [DocLayoutInteractionService],
+            [DocCanvasPopupLayoutInteractionController],
+            [DocIMEInputManagerService],
+            [DocLayoutProgressRenderController],
+            [MobileDocRenderController],
+            [MobileDocZoomRenderController],
+            [DocBackScrollRenderController, { useClass: MobileDocBackScrollRenderController }],
+            [MobileDocSelectionRenderController],
+        ] as Dependency[]).forEach((m) => {
+            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
+        });
+    }
+
+    private _initRenderModules(): void {
+        ([
+            [DocEventManagerService],
             [DocFloatMenuService, { useClass: MobileDocFloatMenuService }],
             [DocParagraphMenuService, { useClass: MobileDocParagraphMenuService }],
-        ]);
+            [DocHeaderFooterController],
+            [DocResizeRenderController],
+            [DocParagraphPlaceholderRenderController],
+            [DocContextMenuRenderController],
+            [DocChecklistRenderController],
+            [DocClipboardController],
+            [DocInputController],
+            [DocIMEInputController],
+            [DocLayoutRecoveryRenderController],
+            [DocEditorBridgeController],
+        ] as Dependency[]).forEach((m) => {
+            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
+        });
     }
 }

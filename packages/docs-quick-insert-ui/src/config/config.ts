@@ -17,6 +17,7 @@
 import type { MenuConfig } from '@univerjs/ui';
 
 export const DOCS_QUICK_INSERT_UI_PLUGIN_CONFIG_KEY = 'docs-quick-insert-ui.config';
+export const DOCS_QUICK_INSERT_UI_PLUGIN_NAME = 'DOC_QUICK_INSERT_UI_PLUGIN';
 
 export const configSymbol = Symbol(DOCS_QUICK_INSERT_UI_PLUGIN_CONFIG_KEY);
 

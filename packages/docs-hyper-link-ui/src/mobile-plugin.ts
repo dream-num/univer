@@ -15,31 +15,76 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import { DependentOn, mergeOverrideWithDependencies } from '@univerjs/core';
+import type { IUniverDocsHyperLinkUIConfig } from './config/config';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsHyperLinkPlugin } from '@univerjs/docs-hyper-link';
 import { UniverDocsMobileUIPlugin } from '@univerjs/docs-ui';
-import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { ComponentsController } from './controllers/components.controller';
+import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import pkg from '../package.json';
+import { defaultPluginConfig, DOCS_HYPER_LINK_UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { DocHyperLinkSelectionController } from './controllers/doc-hyper-link-selection.controller';
 import { MobileComponentsController } from './controllers/mobile/components.controller';
-import { DocHyperLinkEventRenderController } from './controllers/render-controllers/hyper-link-event.render-controller';
 import { MobileDocHyperLinkEventRenderController } from './controllers/render-controllers/mobile/hyper-link-event.render-controller';
-import { UniverDocsHyperLinkUIPlugin } from './plugin';
+import { DocHyperLinkRenderController } from './controllers/render-controllers/render.controller';
+import { DocHyperLinkUIController } from './controllers/ui.controller';
 import { DocHyperLinkPopupService } from './services/hyper-link-popup.service';
 import { MobileDocHyperLinkPopupService } from './services/mobile/hyper-link-popup.service';
+import { DOC_HYPER_LINK_UI_PLUGIN } from './types/const';
 
-@DependentOn(UniverDocsPlugin, UniverRenderEnginePlugin, UniverDocsHyperLinkPlugin, UniverDocsMobileUIPlugin)
-export class UniverDocsHyperLinkMobileUIPlugin extends UniverDocsHyperLinkUIPlugin {
-    protected override _getDependencies(): Dependency[] {
-        return mergeOverrideWithDependencies(super._getDependencies(), [
-            [ComponentsController, { useClass: MobileComponentsController }],
-            [DocHyperLinkPopupService, { useClass: MobileDocHyperLinkPopupService }],
-        ]);
+@DependentOn(
+    UniverDocsPlugin,
+    UniverRenderEnginePlugin,
+    UniverDocsHyperLinkPlugin,
+    UniverDocsMobileUIPlugin
+)
+export class UniverDocsHyperLinkMobileUIPlugin extends Plugin {
+    static override pluginName = DOC_HYPER_LINK_UI_PLUGIN;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
+    static override type = UniverInstanceType.UNIVER_DOC;
+
+    constructor(
+        private readonly _config: Partial<IUniverDocsHyperLinkUIConfig> = defaultPluginConfig,
+        @Inject(Injector) protected override _injector: Injector,
+        @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
+        @IConfigService private readonly _configService: IConfigService
+    ) {
+        super();
+
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(DOCS_HYPER_LINK_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
-    protected override _getRenderModules(): Dependency[] {
-        return mergeOverrideWithDependencies(super._getRenderModules(), [
-            [DocHyperLinkEventRenderController, { useClass: MobileDocHyperLinkEventRenderController }],
-        ]);
+    override onStarting(): void {
+        const dependencies: Dependency[] = [
+            [MobileComponentsController],
+            [DocHyperLinkPopupService, { useClass: MobileDocHyperLinkPopupService }],
+            [DocHyperLinkUIController],
+            [DocHyperLinkSelectionController],
+        ];
+        dependencies.forEach((dep) => this._injector.add(dep));
+        this._injector.get(MobileComponentsController);
+        this._injector.get(DocHyperLinkUIController);
+    }
+
+    override onReady(): void {
+        this._injector.get(DocHyperLinkSelectionController);
+    }
+
+    override onRendered(): void {
+        ([
+            [DocHyperLinkRenderController],
+            [MobileDocHyperLinkEventRenderController],
+        ] as Dependency[]).forEach((dep) => {
+            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, dep);
+        });
     }
 }

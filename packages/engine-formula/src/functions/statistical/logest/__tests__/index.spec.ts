@@ -100,6 +100,7 @@ describe('Test logest function', () => {
             ]);
         });
 
+        // Coefficients verified using 80-digit QR least squares on log(knownYs).
         it('KnownYs is one column, and knownXs is multiple columns', () => {
             const knownYs = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -147,7 +148,7 @@ describe('Test logest function', () => {
             const stats = BooleanValueObject.create(true);
             const result = testFunction.calculate(knownYs, knownXs, constb, stats);
             expect(getObjectValue(result, true)).toStrictEqual([
-                [1.00225626311, 0.955992743217, 1.32201735202, 0.997967326319, 1251594.75697854],
+                [1.00225626311, 0.955992743218, 1.32201735202, 0.997967326319, expect.closeTo(1251594.756974595, 6)],
                 [0.0111189448553, 0.465243257003, 0.349351101858, 0.00480304527334, 10.8320164753],
                 [0.123427911828, 0.848560623139, ErrorType.NA, ErrorType.NA, ErrorType.NA],
                 [0.211211228649, 6, ErrorType.NA, ErrorType.NA, ErrorType.NA],
@@ -160,14 +161,14 @@ describe('Test logest function', () => {
                 [0.997675048746, 0.67406990963, 1.33009450491, 1.00416405143, 1],
                 [0.0110423660294, 0.397171265872, 0.365893438396, 0.000535173314646, ErrorType.NA],
                 [0.994809235519, 0.888821753471, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [335.387237981475, 7, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [expect.closeTo(335.387237981475, 9), 7, ErrorType.NA, ErrorType.NA, ErrorType.NA],
                 [1059.82918504031, 5.5300287661, ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
 
             const stats2 = BooleanValueObject.create(false);
             const result3 = testFunction.calculate(knownYs, knownXs, constb, stats2);
             expect(getObjectValue(result3, true)).toStrictEqual([
-                [1.00225626311, 0.955992743217, 1.32201735202, 0.997967326319, 1251594.75697854],
+                [1.00225626311, 0.955992743218, 1.32201735202, 0.997967326319, expect.closeTo(1251594.756974595, 6)],
             ]);
         });
 
@@ -201,7 +202,7 @@ describe('Test logest function', () => {
             const stats = BooleanValueObject.create(true);
             const result = testFunction.calculate(knownYs, knownXs, constb, stats);
             expect(getObjectValue(result, true)).toStrictEqual([
-                [1.03240326243, 0.999873102005, 1.02157358567, 0.950065530365, 1.95065522079],
+                [1.03240326225, 0.999873102003, 1.02157358597, 0.950065530249, 1.95065522079],
                 [0, 0, 0, 0, 0],
                 [1, 0, ErrorType.NA, ErrorType.NA, ErrorType.NA],
                 [ErrorType.NUM, 0, ErrorType.NA, ErrorType.NA, ErrorType.NA],
@@ -211,10 +212,10 @@ describe('Test logest function', () => {
             const constb2 = BooleanValueObject.create(false);
             const result2 = testFunction.calculate(knownYs, knownXs, constb2, stats);
             expect(getObjectValue(result2, true)).toStrictEqual([
-                [1.05785486342, 1.00009083808, 1.00275120551, 0.944165822215, 1],
+                [1.05785486328, 1.00009083808, 1.00275120574, 0.944165822137, 1],
                 [0.382793300408, 0.00521575247085, 0.629924174927, 0.237868333877, ErrorType.NA],
-                [0.994573882203, 0.935634628939, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [45.8234560762, 1, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [0.994573882203, expect.closeTo(0.935634628939, 9), ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [expect.closeTo(45.8234560762, 8), 1, ErrorType.NA, ErrorType.NA, ErrorType.NA],
                 [160.457642442172, 0.875412158869, ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
         });

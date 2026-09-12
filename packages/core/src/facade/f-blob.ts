@@ -25,7 +25,7 @@ export interface IFBlobSource {
     getBlob(): FBlob;
 
     /**
-     * Return the data inside this object as a blob converted to the specified content type.
+     * Returns a copy labeled with the specified MIME type. The data bytes are not converted or re-encoded.
      * @param contentType the content type refer to https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types/Common_types
      */
     getAs(contentType: string): FBlob;
@@ -57,9 +57,9 @@ export class FBlob extends FBase {
     }
 
     /**
-     * Return the data inside this object as a blob converted to the specified content type.
+     * Returns a copy labeled with the specified MIME type. The data bytes are not converted or re-encoded.
      * @param contentType the content type refer to https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types/Common_types
-     * @returns a new blob by converting the current blob to the specified content type
+     * @returns {FBlob} A new facade containing the same data with the specified MIME type.
      * @example
      * ```ts
      * const blob = univerAPI.newBlob();
@@ -75,7 +75,7 @@ export class FBlob extends FBase {
 
     /**
      * Get the blob as a string.
-     * @returns
+     * @returns {Promise<string>} A promise resolving to decoded text; an unset blob returns an empty string.
      * @example
      * ```ts
      * const blob = univerAPI.newBlob();
@@ -86,8 +86,8 @@ export class FBlob extends FBase {
     getDataAsString(): Promise<string>;
     /**
      * Get the blob as a string.
-     * @param charset the charset
-     * @returns the blob content as a string
+     * @param {string} [charset] TextDecoder encoding label. Defaults to UTF-8.
+     * @returns {Promise<string>} A promise resolving to decoded text; an unset blob returns an empty string.
      * @example
      * ```ts
      * const blob = univerAPI.newBlob();
@@ -116,10 +116,10 @@ export class FBlob extends FBase {
 
     /**
      * Gets the data stored in this blob.
-     * @returns the blob content as a byte array
+     * @returns {Promise<Uint8Array>} A promise resolving to the bytes; rejects if no blob data is set.
      * @example
      * ```ts
-     * const blob = univerAPI.newBlob();
+     * const blob = univerAPI.newBlob().setDataFromString('Hello, World!');
      * const bytes = await blob.getBytes();
      * console.log(bytes);
      * ```
@@ -161,7 +161,7 @@ export class FBlob extends FBase {
     /**
      * Sets the data stored in this blob.
      * @param data a string
-     * @param contentType the content type refer to https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types/Common_types
+     * @param [contentType] the content type refer to https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types/Common_types
      * @returns the blob object
      * @example
      * ```ts
@@ -179,7 +179,7 @@ export class FBlob extends FBase {
 
     /**
      * Gets the content type of the data stored in this blob.
-     * @returns the content type
+     * @returns {string | undefined} The MIME type, or `undefined` if no blob data is set.
      * @example
      * ```ts
      * const blob = univerAPI.newBlob();
@@ -192,7 +192,7 @@ export class FBlob extends FBase {
     }
 
     /**
-     * Sets the content type of the data stored in this blob.
+     * Sets the MIME type without converting or re-encoding the data bytes. Has no effect when no blob data is set.
      * @param contentType the content type refer to https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types/Common_types
      * @returns the blob object
      * @example

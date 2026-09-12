@@ -73,7 +73,7 @@ export class FRangePermission extends FBase {
 
     /**
      * Protect the current range.
-     * @param {IRangeProtectionOptions} options Protection options.
+     * @param {IRangeProtectionOptions} [options] Protection options.
      * @returns {Promise<FRangeProtectionRule>} The created protection rule.
      * @example
      * ```ts
@@ -89,7 +89,6 @@ export class FRangePermission extends FBase {
      * console.log(rule);
      * ```
      */
-
     async protect(options?: IRangeProtectionOptions): Promise<FRangeProtectionRule> {
         if (this.isProtected()) {
             throw new Error('Range is already protected');

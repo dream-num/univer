@@ -154,8 +154,8 @@ interface IFRangeSheetsUIMixin {
 
     /**
      * Attach a DOM popup to the current range.
-     * @param {IFCanvasPopup} alert The alert to attach
-     * @returns {Nullable<IDisposable>} The disposable object to detach the alert.
+     * @param {IFCanvasPopup} popup The popup to attach.
+     * @returns {Nullable<IDisposable>} A disposable that detaches the popup, or `null` if the popup cannot be attached.
      * @example
      * ```ts
      * // Register a custom popup component
@@ -184,8 +184,8 @@ interface IFRangeSheetsUIMixin {
 
     /**
      * Highlight the range with the specified style and primary cell.
-     * @param {Nullable<Partial<ISelectionStyle>>} style - style for highlight range.
-     * @param {Nullable<ISelectionCell>} primary - primary cell for highlight range.
+     * @param {Nullable<Partial<ISelectionStyle>>} [style] - style for highlight range.
+     * @param {Nullable<ISelectionCell>} [primary] - primary cell for highlight range.
      * @returns {IDisposable} The disposable object to remove the highlight.
      * @example
      * ```ts
@@ -317,7 +317,7 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
     /**
      * attachRangePopup
      * @param popup
-     * @returns {IDisposable} disposable
+     * @returns {Nullable<IDisposable>} A disposable that detaches the popup, or `null` if the popup cannot be attached.
      * @example
      * ```typescript
      * let fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
@@ -372,7 +372,6 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
 
 FRange.extend(FRangeSheetsUIMixin);
 declare module '@univerjs/sheets/facade' {
-    // eslint-disable-next-line ts/naming-convention
     interface FRange extends IFRangeSheetsUIMixin { }
 }
 

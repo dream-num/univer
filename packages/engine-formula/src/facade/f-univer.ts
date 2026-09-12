@@ -21,6 +21,15 @@ import { FFormula } from './f-formula';
  * @ignore
  */
 export interface IFUniverEngineFormulaMixin {
+    /**
+     * Gets the formula engine facade for calculation, parsing, and dependency queries.
+     * @returns {FFormula} The formula engine facade.
+     * @example
+     * ```ts
+     * const formula = univerAPI.getFormula();
+     * await formula.onCalculationResultApplied();
+     * ```
+     */
     getFormula(): FFormula;
 }
 
@@ -32,6 +41,5 @@ export class FUniverEngineFormulaMixin extends FUniver implements IFUniverEngine
 
 FUniver.extend(FUniverEngineFormulaMixin);
 declare module '@univerjs/core/facade' {
-    // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverEngineFormulaMixin {}
 }

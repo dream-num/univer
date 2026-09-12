@@ -64,6 +64,10 @@ export class FEnum {
      */
     static _instance: FEnum | null;
 
+    /**
+     * Returns the shared registry of Facade enum values.
+     * @returns {FEnum} The registry also exposed by `univerAPI.Enum`.
+     */
     static get(): FEnum {
         if (this._instance) {
             return this._instance;

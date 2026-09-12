@@ -45,7 +45,7 @@ export interface IFWorkbookSheetsTableMixin {
     /**
      * Get table information
      * @param {string} tableId The table id
-     * @returns {ITableInfo} The table information
+     * @returns {ITableInfoWithUnitId | undefined} The table information, including workbook and worksheet IDs, or `undefined` if not found.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -74,7 +74,7 @@ export interface IFWorkbookSheetsTableMixin {
     /**
      * Get table information by name
      * @param {string} tableName The table name
-     * @returns {ITableInfo} The table information
+     * @returns {ITableInfoWithUnitId | undefined} The table information, including workbook and worksheet IDs, or `undefined` if not found.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -119,7 +119,7 @@ export interface IFWorkbookSheetsTableMixin {
      * @param {ITableRange} rangeInfo The table range information
      * @param {string} [tableId] The table id
      * @param {ITableOptions} [options] The table options
-     * @returns {string} The table id
+     * @returns {Promise<string | undefined>} A promise resolving to the table ID, or `undefined` if the name is invalid or creation fails.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -150,7 +150,7 @@ export interface IFWorkbookSheetsTableMixin {
      * set table filter
      * @param {string} tableId The table id
      * @param {number} column The column index, starting from 0.
-     * @param {ITableFilterItem} filter The filter item
+     * @param {ITableFilterItem | undefined} filter The filter to apply, or `undefined` to clear the column filter.
      * @returns {Promise<boolean>} The result of set table filter
      * @example
      * ```typescript
@@ -185,12 +185,12 @@ export interface IFWorkbookSheetsTableMixin {
      * }
      * ```
      */
-    setTableFilter(tableId: string, column: number, filter: ITableFilterItem | undefined): void;
+    setTableFilter(tableId: string, column: number, filter: ITableFilterItem | undefined): Promise<boolean>;
 
     /**
      * Remove table
      * @param {string} tableId The table id
-     * @returns {boolean} The result of remove table
+     * @returns {Promise<boolean>} A promise resolving to whether the table was removed; `false` if the table is not found.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -287,6 +287,5 @@ export class FWorkbookSheetsTableMixin extends FWorkbook implements IFWorkbookSh
 
 FWorkbook.extend(FWorkbookSheetsTableMixin);
 declare module '@univerjs/sheets/facade' {
-    // eslint-disable-next-line ts/naming-convention
     interface FWorkbook extends IFWorkbookSheetsTableMixin { }
 }

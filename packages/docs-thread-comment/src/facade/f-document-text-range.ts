@@ -30,8 +30,8 @@ export interface IFDocumentTextRangeThreadCommentMixin {
     /**
      * Creates a comment on this text range.
      * @param content Plain text or a Univer document body for rich comment content.
-     * @param options Optional stable IDs, author, attachments, and creation time.
-     * @returns `true` when the create command succeeds; otherwise, `false`.
+     * @param [options] Optional stable IDs, author, attachments, and creation time.
+     * @returns {Promise<boolean>} `true` when the create command succeeds; otherwise, `false`.
      * @throws {TypeError} If the content is empty.
      * @example
      * ```ts
@@ -56,7 +56,7 @@ export interface IFDocumentTextRangeThreadCommentMixin {
     getComments(): ThreadComment.IFacadeThreadCommentInfo[];
     /**
      * Synchronizes known document threads and returns comments whose decorations overlap this text range.
-     * @returns A promise resolving to the synchronized matching comment threads.
+     * @returns {Promise<ThreadComment.IFacadeThreadCommentInfo[]>} A promise resolving to the synchronized matching comment threads.
      * @example
      * ```ts
      * const range = univerAPI.getActiveDocument()?.getTextRange(0, 12);

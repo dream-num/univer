@@ -293,8 +293,8 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Gets the width of the applied area
-     * @returns {number} The width of the area
+     * Returns the number of columns in this range.
+     * @returns {number} The column count, not a size in pixels.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -309,8 +309,8 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Gets the height of the applied area
-     * @returns {number} The height of the area
+     * Returns the number of rows in this range.
+     * @returns {number} The row count, not a size in pixels.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -325,8 +325,8 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Return range whether this range is merged
-     * @returns {boolean} if true is merged
+     * Checks whether this range exactly matches a merged cell range.
+     * @returns {boolean} `true` only for an exact merged range match. Use `isPartOfMerge()` to check overlap.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -349,7 +349,7 @@ export class FRange extends FBaseInitialable {
      * Return first cell style data in this range. Please note that if there are row styles, col styles and (or)
      * worksheet style, they will be merged into the cell style. You can use `type` to specify the type of the style to get.
      *
-     * @param {GetStyleType} type - The type of the style to get. 'row' means get the composed style of row, col and
+     * @param {GetStyleType} [type] - The type of the style to get. 'row' means get the composed style of row, col and
      * default worksheet style. 'col' means get the composed style of col, row and default worksheet style.
      * 'cell' means get the style of cell without merging row style, col style and default worksheet style.
      * Default is 'row'.
@@ -375,7 +375,7 @@ export class FRange extends FBaseInitialable {
     /**
      * Get the font family of the cell.
      *
-     * @param {GetStyleType} type - The type of the style to get. 'row' means get the composed style of row, col and
+     * @param {GetStyleType} [type] - The type of the style to get. 'row' means get the composed style of row, col and
      * default worksheet style. 'col' means get the composed style of col, row and default worksheet style.
      * 'cell' means get the style of cell without merging row style, col style and default worksheet style.
      * Default is 'row'.
@@ -397,7 +397,7 @@ export class FRange extends FBaseInitialable {
     /**
      * Get the font size of the cell.
      *
-     * @param {GetStyleType} type - The type of the style to get. 'row' means get the composed style of row, col and
+     * @param {GetStyleType} [type] - The type of the style to get. 'row' means get the composed style of row, col and
      * default worksheet style. 'col' means get the composed style of col, row and default worksheet style.
      * 'cell' means get the style of cell without merging row style, col style and default worksheet style.
      * Default is 'row'.
@@ -419,7 +419,7 @@ export class FRange extends FBaseInitialable {
     /**
      * Return first cell style in this range.
      *
-     * @param {GetStyleType} type - The type of the style to get. 'row' means get the composed style of row, col and
+     * @param {GetStyleType} [type] - The type of the style to get. 'row' means get the composed style of row, col and
      * default worksheet style. 'col' means get the composed style of col, row and default worksheet style.
      * 'cell' means get the style of cell without merging row style, col style and default worksheet style.
      * Default is 'row'.
@@ -442,7 +442,7 @@ export class FRange extends FBaseInitialable {
     /**
      * Returns the cell styles for the cells in the range.
      *
-     * @param {GetStyleType} type - The type of the style to get. 'row' means get the composed style of row, col and
+     * @param {GetStyleType} [type] - The type of the style to get. 'row' means get the composed style of row, col and
      * default worksheet style. 'col' means get the composed style of col, row and default worksheet style.
      * 'cell' means get the style of cell without merging row style, col style and default worksheet style.
      * Default is 'row'.
@@ -489,7 +489,7 @@ export class FRange extends FBaseInitialable {
     getValue(): CellValue | null;
     /**
      * Return first cell value in this range
-     * @param {boolean} includeRichText Should the returns of this func to include rich text
+     * @param {true} includeRichText Pass `true` to return a `RichTextValue` for rich-text content instead of plain text.
      * @returns {CellValue | RichTextValue | null} The cell value
      * @example
      * ```ts
@@ -583,7 +583,7 @@ export class FRange extends FBaseInitialable {
     getValues(): Nullable<CellValue>[][];
     /**
      * Returns the cell values for the cells in the range.
-     * @param {boolean} includeRichText Should the returns of this func to include rich text
+     * @param {true} includeRichText Pass `true` to return `RichTextValue` entries for rich-text content instead of plain text.
      * @returns {Nullable<RichTextValue | CellValue>[][]} A two-dimensional array of cell values.
      * @example
      * ```ts
@@ -947,7 +947,10 @@ export class FRange extends FBaseInitialable {
         return this._worksheet.getRange(this._range).getWrap() === BooleanNumber.TRUE;
     }
 
-    /** Gets whether the top-left cell shrinks its font size to fit the cell width. */
+    /**
+     * Gets whether the top-left cell shrinks its font size to fit the cell width.
+     * @returns {boolean} Whether shrink-to-fit is enabled for the top-left cell.
+     */
     getShrinkToFit(): boolean {
         const { startRow, startColumn } = this._range;
         return this._worksheet.getComposedCellStyle(startRow, startColumn)?.stf === BooleanNumber.TRUE;
@@ -1057,6 +1060,7 @@ export class FRange extends FBaseInitialable {
      * Set custom meta data for first cell in current range.
      * @param {CustomData} data The custom meta data
      * @returns {FRange} This range, for chaining
+     * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
@@ -1087,6 +1091,7 @@ export class FRange extends FBaseInitialable {
      * Set custom meta data for current range.
      * @param {CustomData[][]} datas The custom meta data
      * @returns {FRange} This range, for chaining
+     * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
@@ -1135,7 +1140,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Returns the custom meta data for the cells in the range.
-     * @returns {CustomData[][]} A two-dimensional array of custom meta data
+     * @returns {Nullable<CustomData>[][]} A two-dimensional array of custom metadata, with `null` for cells without metadata.
      * @example
      * ```
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -1287,18 +1292,55 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Sets the value of the range.
-     * @param {CellValue | ICellData} value The value can be a number, string, boolean, or standard cell format. If it begins with `=`, it is interpreted as a formula. The value is tiled to all cells in the range.
+     * Sets the value or specified cell properties for every cell in this range.
+     *
+     * There are two input modes:
+     *
+     * - `CellValue` (`number`, `string`, or `boolean`): replaces the cell content. A string starting
+     *   with `=` and containing at least one more character is written as a formula (`f`), clearing
+     *   the previous value (`v`) and rich text (`p`). Other values clear the previous formula and
+     *   rich text. Strings recognized as formatted numbers (for example, percentages, dates, or
+     *   currencies) are converted to numeric values and apply the parsed number format. Existing
+     *   formatting is otherwise preserved.
+     * - `ICellData`: updates cell-data fields directly, for explicit control over `v` (value),
+     *   `f` (formula), `p` (rich text), `t` (value type), and `s` (style). The object bypasses the
+     *   formula and formatted-number parsing above: `{ v: '=SUM(A1:A2)' }` does not set a formula;
+     *   use `{ f: '=SUM(A1:A2)', v: null, p: null }` instead. Omitted content fields are not
+     *   automatically cleared, so use `f: null` and `p: null` when replacing a formula or rich text
+     *   with `v`. Use `v: null` to clear the stored value. Supplied style properties are merged into
+     *   the existing style; `s: null` clears the style.
+     *
+     * In both modes, the stored value is converted according to its cell type. Unless an `ICellData`
+     * input supplies `t`, the type is inferred from the value, number format, and existing cell type.
+     * Consequently, passing `{ v: '00123' }` alone does not guarantee that the value stays a string;
+     * supply `t: CellValueType.STRING` to store it as text.
+     *
+     * @param {CellValue | ICellData} value The scalar content or cell-data update to apply throughout the range.
      * @returns {FRange} This range, for chaining
+     * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
      * if (!fWorksheet) return;
-     * const fRange = fWorksheet.getRange('B2');
+     * const fRange = fWorksheet.getRange('B2:B3');
+     *
+     * // Replace the content of both cells, preserving their formatting.
      * fRange.setValue(123);
      *
-     * // or
-     * fRange.setValue({ v: 234, s: { bg: { rgb: '#ff0000' } } });
+     * // Parse a percentage and apply its number format to both cells.
+     * fRange.setValue('25%');
+     *
+     * // Write the same formula to both cells.
+     * fRange.setValue('=SUM(A1:A2)');
+     *
+     * // Explicitly replace content and update the background color.
+     * fRange.setValue({ v: 234, f: null, p: null, s: { bg: { rgb: '#ff0000' } } });
+     *
+     * // Store numeric-looking text (CellValueType is imported from '@univerjs/core').
+     * fRange.setValue({ v: '00123', t: CellValueType.STRING, f: null, p: null });
+     *
+     * // Clear value, formula, and rich text while preserving formatting.
+     * fRange.setValue({ v: null, f: null, p: null });
      * ```
      */
     setValue(value: CellValue | ICellData): FRange {
@@ -1319,9 +1361,11 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Set new value for current cell, first cell in this range.
-     * @param {CellValue | ICellData} value  The value can be a number, string, boolean, or standard cell format. If it begins with `=`, it is interpreted as a formula. The value is tiled to all cells in the range.
+     * Sets the value or specified cell properties of the top-left cell in this range.
+     * Uses the same scalar parsing and cell-data update rules as {@link FRange.setValue}.
+     * @param {CellValue | ICellData} value  The scalar content or cell-data update to apply to the top-left cell only.
      * @returns {FRange} This range, for chaining
+     * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
@@ -1395,7 +1439,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Set the rich text value for the cells in the range.
-     * @param {RichTextValue[][]} values The rich text value
+     * @param {(RichTextValue | IDocumentData)[][]} values A two-dimensional array of rich-text values or document data matching this range's dimensions.
      * @returns {FRange} The range
      * @example
      * ```ts
@@ -1412,7 +1456,7 @@ export class FRange extends FBaseInitialable {
      *   .setStyle(6, 7, { bl: 1, cl: { rgb: '#c81e1e' } });
      * fRange.setRichTextValues([
      *   [richText, richText],
-     *   [null, null]
+     *   [richText, richText]
      * ]);
      * console.log(fRange.getValue(true).toPlainText()); // Hello World
      * ```
@@ -1433,7 +1477,8 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Set the cell wrap of the given range.
-     * Cells with wrap enabled (the default) resize to display their full content. Cells with wrap disabled display as much as possible in the cell without resizing or running to multiple lines.
+     * Pass `true` to set `WrapStrategy.WRAP`, or `false` to reset to `WrapStrategy.UNSPECIFIED`.
+     * Use `setWrapStrategy()` to explicitly select clipping or overflow behavior.
      * @param {boolean} isWrapEnabled Whether to enable wrap
      * @returns {FRange} this range, for chaining
      * @example
@@ -1457,7 +1502,15 @@ export class FRange extends FBaseInitialable {
         return this;
     }
 
-    /** Sets whether cells shrink their font size to fit the cell width. */
+    /**
+     * Sets whether cells shrink their font size to fit the cell width.
+     * @param {boolean} enabled Whether to enable shrink-to-fit for this range.
+     * @returns {FRange} This range, for chaining.
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()?.getActiveSheet().getRange('A1:B2').setShrinkToFit(true);
+     * ```
+     */
     setShrinkToFit(enabled: boolean): FRange {
         this._commandService.syncExecuteCommand(SetShrinkToFitCommand.id, {
             unitId: this._workbook.getUnitId(),
@@ -1496,7 +1549,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Set the vertical (top to bottom) alignment for the given range (top/middle/bottom).
-     * @param {"top" | "middle" | "bottom"} alignment The vertical alignment
+     * @param {FVerticalAlignment} alignment The vertical alignment
      * @returns {FRange} this range, for chaining
      * @example
      * ```ts
@@ -1520,7 +1573,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Set the horizontal (left to right) alignment for the given range (left/center/right).
-     * @param {"left" | "center" | "normal"} alignment The horizontal alignment
+     * @param {FHorizontalAlignment} alignment The horizontal alignment
      * @returns {FRange} this range, for chaining
      * @example
      * ```ts
@@ -1543,8 +1596,13 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Sets a different value for each cell in the range. The value can be a two-dimensional array or a standard range matrix (must match the dimensions of this range), consisting of numbers, strings, Boolean values or Composed of standard cell formats. If a value begins with `=`, it is interpreted as a formula.
-     * @param {CellValue[][] | IObjectMatrixPrimitiveType<CellValue> | ICellData[][] | IObjectMatrixPrimitiveType<ICellData>} value The value can be a two-dimensional array or a standard range matrix (must match the dimensions of this range), consisting of numbers, strings, Boolean values or Composed of standard cell formats.
+     * Sets cell values or specified cell properties using an array or a sparse matrix.
+     * Each entry follows the scalar parsing and cell-data update rules of {@link FRange.setValue}.
+     *
+     * A two-dimensional array is relative to this range's top-left cell and must match its dimensions.
+     * A sparse matrix uses absolute, zero-based worksheet row and column keys. Only supplied entries
+     * are updated; matrix coordinates are not offset by or clipped to this range.
+     * @param {CellValue[][] | IObjectMatrixPrimitiveType<CellValue> | ICellData[][] | IObjectMatrixPrimitiveType<ICellData>} value An array relative to this range, or a sparse matrix using absolute worksheet coordinates.
      * @returns {FRange} This range, for chaining
      * @example
      * ```ts
@@ -1556,6 +1614,12 @@ export class FRange extends FBaseInitialable {
      *   [1, { v: 2, s: { bg: { rgb: '#ff0000' } } }],
      *   [3, 4]
      * ]);
+     *
+     * // Update only B2 and C3 using absolute worksheet coordinates.
+     * fWorksheet.getRange('B2:C3').setValues({
+     *   1: { 1: 'B2' },
+     *   2: { 2: { v: 10, f: null, p: null } },
+     * });
      * ```
      */
     setValues(
@@ -2001,6 +2065,7 @@ export class FRange extends FBaseInitialable {
      * @param {number} callback.row the row number of the cell
      * @param {number} callback.col the column number of the cell
      * @param {ICellData} callback.cell the cell data
+     * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
@@ -2027,6 +2092,7 @@ export class FRange extends FBaseInitialable {
      * @param {AbsoluteRefType} [startAbsoluteRefType] - The absolute reference type for the start cell.
      * @param {AbsoluteRefType} [endAbsoluteRefType] - The absolute reference type for the end cell.
      * @returns {string} The A1 notation of the range.
+     * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
@@ -2340,11 +2406,12 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Clears content and formatting information of the range. Or Optionally clears only the contents or only the formatting.
+     * Clears the range content and formatting, or only one of them as specified by the options.
+     * Both content and formatting are cleared when both flags are true or both are false.
      * @param {IFacadeClearOptions} [options] - Options for clearing the range. If not provided, the contents and formatting are cleared both.
-     * @param {boolean} [options.contentsOnly] - If true, the contents of the range are cleared. If false, the contents and formatting are cleared. Default is false.
-     * @param {boolean} [options.formatOnly] - If true, the formatting of the range is cleared. If false, the contents and formatting are cleared. Default is false.
-     * @returns {FWorksheet} Returns the current worksheet instance for method chaining
+     * @param {boolean} [options.contentsOnly] - If true, the contents of the range are cleared. Effective only when `formatOnly` is false. Defaults to false.
+     * @param {boolean} [options.formatOnly] - Clears only formatting when true and `contentsOnly` is false. Defaults to false.
+     * @returns {FRange} This range, for chaining.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -2379,7 +2446,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Clears content of the range, while preserving formatting information.
-     * @returns {FWorksheet} Returns the current worksheet instance for method chaining
+     * @returns {FRange} This range, for chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -2402,7 +2469,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Clears formatting information of the range, while preserving contents.
-     * @returns {FWorksheet} Returns the current worksheet instance for method chaining
+     * @returns {FRange} This range, for chaining.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -2595,7 +2662,6 @@ export class FRange extends FBaseInitialable {
      * console.log(range3.getA1Notation()); // B2:D4
      * ```
      */
-    // eslint-disable-next-line complexity
     getDataRegion(dimension?: Dimension): FRange {
         const { startRow, startColumn, endRow, endColumn } = this._range;
         const maxRows = this._worksheet.getMaxRows();
@@ -2755,8 +2821,8 @@ export class FRange extends FBaseInitialable {
      * Returns a new range that is relative to the current range, whose upper left point is offset from the current range by the given rows and columns, and with the given height and width in cells.
      * @param {number} rowOffset - The number of rows down from the range's top-left cell; negative values represent rows up from the range's top-left cell.
      * @param {number} columnOffset - The number of columns right from the range's top-left cell; negative values represent columns left from the range's top-left cell.
-     * @param {number} numRows - The height in rows of the new range.
-     * @param {number} numColumns - The width in columns of the new range.
+     * @param {number} [numRows] - The height in rows of the new range.
+     * @param {number} [numColumns] - The width in columns of the new range.
      * @returns {FRange} The new range.
      * @example
      * ```ts

@@ -20,6 +20,7 @@ import { IWatermarkTypeEnum } from '@univerjs/engine-render';
 import { WatermarkImageBaseConfig, WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
 
 interface IFWatermarkEnumMixin {
+    /** Text and image watermark types accepted by `addWatermark`. */
     IWatermarkTypeEnum: typeof IWatermarkTypeEnum;
 }
 
@@ -130,9 +131,7 @@ FUniver.extend(FUniverWatermarkMixin);
 FEnum.extend(FWatermarkEnumMixin);
 
 declare module '@univerjs/core/facade' {
-    // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverWatermarkMixin { }
-    // eslint-disable-next-line ts/naming-convention
     export interface FEnum extends IFWatermarkEnumMixin {
     }
 }

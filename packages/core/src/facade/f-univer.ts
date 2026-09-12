@@ -73,7 +73,7 @@ type Initializers = Array<(injector: Injector) => void>;
  */
 export class FUniver extends Disposable {
     /**
-     * Create an FUniver instance, if the injector is not provided, it will create a new Univer instance.
+     * Creates a Facade API instance for an existing Univer instance or its injector.
      * @static
      * @param {Univer | Injector} wrapped - The Univer instance or injector instance.
      * @returns {FUniver} - The FUniver instance.
@@ -304,8 +304,8 @@ export class FUniver extends Disposable {
     }
 
     /**
-     * Dispose the UniverSheet by the `unitId`. The UniverSheet would be unload from the application.
-     * @param unitId The unit id of the UniverSheet.
+     * Disposes the document, workbook, or other Univer unit identified by `unitId`, unloading it from the application.
+     * @param unitId The ID of the unit to dispose.
      * @returns Whether the Univer instance is disposed successfully.
      *
      * @example
@@ -525,9 +525,9 @@ export class FUniver extends Disposable {
     /**
      * Execute a command with the given id and parameters.
      * @param id Identifier of the command.
-     * @param params Parameters of this execution.
-     * @param options Options of this execution.
-     * @returns The result of the execution. It is a boolean value by default which indicates the command is executed.
+     * @param [params] Parameters of this execution.
+     * @param [options] Options of this execution.
+     * @returns {Promise<R>} The result of the execution. It is a boolean value by default which indicates the command is executed.
      *
      * @example
      * ```ts
@@ -548,8 +548,8 @@ export class FUniver extends Disposable {
     /**
      * Execute a command with the given id and parameters synchronously.
      * @param id Identifier of the command.
-     * @param params Parameters of this execution.
-     * @param options Options of this execution.
+     * @param [params] Parameters of this execution.
+     * @param [options] Options of this execution.
      * @returns The result of the execution. It is a boolean value by default which indicates the command is executed.
      *
      * @example
@@ -568,23 +568,32 @@ export class FUniver extends Disposable {
         return this._commandService.syncExecuteCommand(id, params, options);
     }
 
+    /**
+     * Enums exposed by the registered Facade extensions.
+     */
     get Enum(): FEnum {
         return FEnum.get();
     }
 
+    /**
+     * Event names to use with `addEvent`.
+     */
     get Event(): FEventName {
         return FEventName.get();
     }
 
+    /**
+     * Utility functions exposed by the registered Facade extensions.
+     */
     get Util(): FUtil {
         return FUtil.get();
     }
 
     /**
      * Add an event listener
-     * @param {string} event key of event
-     * @param {(params: IEventParamConfig[typeof event]) => void} callback callback when event triggered
-     * @returns {Disposable} The Disposable instance, for remove the listener
+     * @param {T} event key of event
+     * @param {(params: IEventParamConfig[T]) => void} callback callback when event triggered
+     * @returns {IDisposable} A disposable that removes the event listener.
      * @example
      * ```ts
      * // Add life cycle changed event listener
@@ -603,9 +612,9 @@ export class FUniver extends Disposable {
 
     /**
      * Fire an event, used in internal only.
-     * @param {string} event key of event
-     * @param {any} params params of event
-     * @returns {boolean} should cancel
+     * @param {T} event key of event
+     * @param {IEventParamConfig[T]} params params of event
+     * @returns {boolean | undefined} The event's `cancel` value after listeners run; `undefined` if it was not set.
      * @example
      * ```ts
      * this.fireEvent(univerAPI.Event.LifeCycleChanged, params);
@@ -615,6 +624,14 @@ export class FUniver extends Disposable {
         return this._eventRegistry.fireEvent(event, params);
     }
 
+    /**
+     * Gets the facade for reading the current user.
+     * @returns {FUserManager} The user manager facade.
+     * @example
+     * ```ts
+     * const user = univerAPI.getUserManager().getCurrentUser();
+     * ```
+     */
     getUserManager(): FUserManager {
         return this._injector.createInstance(FUserManager);
     }
@@ -680,7 +697,7 @@ export class FUniver extends Disposable {
      * This is an advanced document-model API. Application and agent code should normally use
      * `newRichText().paragraph({ ... })`.
      *
-     * @param {IParagraphStyle} style The paragraph style
+     * @param {IParagraphStyle} [style] The paragraph style
      * @returns {ParagraphStyleBuilder} The new paragraph style instance
      * @advanced
      */
@@ -690,7 +707,7 @@ export class FUniver extends Disposable {
 
     /**
      * Create a new paragraph style value.
-     * @param {IParagraphStyle} style - The paragraph style
+     * @param {IParagraphStyle} [style] - The paragraph style
      * @returns {ParagraphStyleValue} The new paragraph style value instance
      * @example
      * ```ts
@@ -703,7 +720,7 @@ export class FUniver extends Disposable {
 
     /**
      * Create a new text style.
-     * @param {ITextStyle} style - The text style
+     * @param {ITextStyle} [style] - The text style
      * @returns {TextStyleBuilder} The new text style instance
      * @example
      * ```ts
@@ -716,7 +733,7 @@ export class FUniver extends Disposable {
 
     /**
      * Create a new text style value.
-     * @param {ITextStyle} style - The text style
+     * @param {ITextStyle} [style] - The text style
      * @returns {TextStyleValue} The new text style value instance
      * @example
      * ```ts
@@ -729,7 +746,7 @@ export class FUniver extends Disposable {
 
     /**
      * Create a new text decoration.
-     * @param {ITextDecoration} decoration - The text decoration
+     * @param {ITextDecoration} [decoration] - The text decoration
      * @returns {TextDecorationBuilder} The new text decoration instance
      * @example
      * ```ts

@@ -105,7 +105,7 @@ export interface IFWorkbookSheetsUIMixin {
 
     /**
      * End the editing process of the current active cell
-     * @param {boolean} save - Whether to save the changes, default is true
+     * @param {boolean} [save] - Whether to save the changes, default is true
      * @returns {Promise<boolean>} Whether the editing process is ended successfully
      * @example
      * ```ts
@@ -141,7 +141,7 @@ export interface IFWorkbookSheetsUIMixin {
     /**
      * Get scroll state of specified sheet.
      * @param {string} sheetId - sheet id
-     * @returns {IScrollState} scroll state
+     * @returns {Nullable<IScrollState>} The sheet scroll state, or a nullish value when no state is available.
      * @example
      * ``` ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -341,6 +341,5 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
 
 FWorkbook.extend(FWorkbookSheetsUIMixin);
 declare module '@univerjs/sheets/facade' {
-    // eslint-disable-next-line ts/naming-convention
     interface FWorkbook extends IFWorkbookSheetsUIMixin {}
 }

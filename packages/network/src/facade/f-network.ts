@@ -38,8 +38,8 @@ export class FNetwork extends FBase {
     /**
      * Send a GET request to the server.
      * @param {string} url - The requested URL.
-     * @param {IRequestParams} [params] - Query parameters.
-     * @returns {Promise<HTTPResponse>} Network response.
+     * @param {IRequestParams} [params] - Request options, including query parameters, headers, and response type.
+     * @returns {Promise<HTTPResponse<T>>} A promise resolving to the HTTP response with a body of type `T`.
      */
     get<T>(url: string, params?: IRequestParams): Promise<HTTPResponse<T>> {
         return this._httpService.get(url, params) as Promise<HTTPResponse<T>>; ;
@@ -48,8 +48,8 @@ export class FNetwork extends FBase {
     /**
      * Send a POST request to the server.
      * @param {string} url - The requested URL.
-     * @param {IPostRequestParams} [params] - Query parameters.
-     * @returns {Promise<HTTPResponse>} Network response.
+     * @param {IPostRequestParams} [params] - Request options, including body, query parameters, headers, and response type.
+     * @returns {Promise<HTTPResponse<T>>} A promise resolving to the HTTP response with a body of type `T`.
      */
     post<T>(url: string, params?: IPostRequestParams): Promise<HTTPResponse<T>> {
         return this._httpService.post(url, params) as Promise<HTTPResponse<T>>; ;
@@ -58,8 +58,8 @@ export class FNetwork extends FBase {
     /**
      * Send a PUT request to the server.
      * @param {string} url - The requested URL
-     * @param {IPostRequestParams} [params] - Query parameters
-     * @returns {Promise<HTTPResponse>} Network response
+     * @param {IPostRequestParams} [params] - Request options, including body, query parameters, headers, and response type
+     * @returns {Promise<HTTPResponse<T>>} A promise resolving to the HTTP response with a body of type `T`.
      */
     put<T>(url: string, params?: IPostRequestParams): Promise<HTTPResponse<T>> {
         return this._httpService.put(url, params) as Promise<HTTPResponse<T>>; ;
@@ -68,8 +68,8 @@ export class FNetwork extends FBase {
     /**
      * Send DELETE request to the server.
      * @param {string} url - The requested URL
-     * @param {IRequestParams} [params] - Query parameters
-     * @returns {Promise<HTTPResponse>} Network response
+     * @param {IRequestParams} [params] - Request options, including query parameters, headers, and response type
+     * @returns {Promise<HTTPResponse<T>>} A promise resolving to the HTTP response with a body of type `T`.
      */
     delete<T>(url: string, params?: IRequestParams): Promise<HTTPResponse<T>> {
         return this._httpService.delete(url, params) as Promise<HTTPResponse<T>>; ;
@@ -78,8 +78,8 @@ export class FNetwork extends FBase {
     /**
      * Send PATCH request to the server.
      * @param {string} url - The requested URL
-     * @param {IPostRequestParams} [params] - Query parameters
-     * @returns {Promise<HTTPResponse>} Network response
+     * @param {IPostRequestParams} [params] - Request options, including body, query parameters, headers, and response type
+     * @returns {Promise<HTTPResponse<T>>} A promise resolving to the HTTP response with a body of type `T`.
      */
     patch<T>(url: string, params?: IPostRequestParams): Promise<HTTPResponse<T>> {
         return this._httpService.patch(url, params) as Promise<HTTPResponse<T>>;
@@ -90,8 +90,8 @@ export class FNetwork extends FBase {
      * Univer wraps the stream in an [`Observable`](https://rxjs.dev/guide/observable) which you can call `subscribe` on.
      * @param {HTTPRequestMethod} method - HTTP request method
      * @param {string} url - The requested URL
-     * @param {IPostRequestParams} [params] - params Query parameters
-     * @returns {Observable<HTTPEvent>} An observable that emits the network response.
+     * @param {IPostRequestParams} [params] - params Request options, including body, query parameters, headers, and response type
+     * @returns {Observable<HTTPEvent<T>>} An observable of HTTP events with response data of type `T`.
      */
     getSSE<T>(
         method: HTTPRequestMethod,

@@ -244,7 +244,7 @@ export class FWorkbookPermission extends FBase {
 
     /**
      * Set multiple collaborators at once (replaces existing collaborators).
-     * @param {Array<{ user: IUser; role: UnitRole }>} collaborators Array of collaborators with user information and role.
+     * @param {Array<{ user: ICollaboratorUser; role: UnitRole }>} collaborators Array of collaborators with user information and role.
      * @returns {Promise<void>} A promise that resolves when the collaborators are set.
      * @example
      * ```ts
@@ -280,7 +280,7 @@ export class FWorkbookPermission extends FBase {
 
     /**
      * Add a single collaborator.
-     * @param {IUser} user The user information (userID, name, avatar).
+     * @param {ICollaboratorUser} user The user information (userID, name, avatar).
      * @param {UnitRole} role The role to assign.
      * @returns {Promise<void>} A promise that resolves when the collaborator is added.
      * @example
@@ -307,7 +307,7 @@ export class FWorkbookPermission extends FBase {
 
     /**
      * Update an existing collaborator's role and information.
-     * @param {IUser} user The updated user information (userID, name, avatar).
+     * @param {ICollaboratorUser} user The updated user information (userID, name, avatar).
      * @param {UnitRole} role The new role to assign.
      * @returns {Promise<void>} A promise that resolves when the collaborator is updated.
      * @example

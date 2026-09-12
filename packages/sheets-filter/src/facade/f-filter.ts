@@ -92,7 +92,7 @@ export class FFilter {
 
     /**
      * Get the filter criteria of a column.
-     * @param {number} column - The column index.
+     * @param {number} column - The absolute, zero-based worksheet column index, not an index relative to the filter range.
      * @returns {Nullable<IFilterColumn>} The filter criteria of the column.
      * @example
      * ```typescript
@@ -144,7 +144,7 @@ export class FFilter {
 
     /**
      * Clear the filter criteria of a column.
-     * @param {number} column - The column index.
+     * @param {number} column - The absolute, zero-based worksheet column index, not an index relative to the filter range.
      * @returns {FFilter} The FFilter instance for chaining.
      * @example
      * ```typescript
@@ -203,7 +203,7 @@ export class FFilter {
 
     /**
      * Set the filter criteria of a column.
-     * @param {number} column - The column index.
+     * @param {number} column - The absolute, zero-based worksheet column index, not an index relative to the filter range.
      * @param {ISetSheetsFilterCriteriaCommandParams['criteria']} criteria - The new filter criteria.
      * @returns {FFilter} The FFilter instance for chaining.
      * @example

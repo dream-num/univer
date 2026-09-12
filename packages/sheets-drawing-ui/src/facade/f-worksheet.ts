@@ -330,7 +330,7 @@ export interface IFWorksheetDrawingUIMixin {
      * @param {string} [id] - The float dom id, if not given will be auto generated
      * @returns float dom id and dispose function
      * @example
-     * ```ts
+     * ```tsx
      * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
      * if (!fWorksheet) return;
      *
@@ -729,6 +729,5 @@ export class FWorksheetDrawingUIMixin extends FWorksheet implements IFWorksheetD
 
 FWorksheet.extend(FWorksheetDrawingUIMixin);
 declare module '@univerjs/sheets/facade' {
-    // eslint-disable-next-line ts/naming-convention
     interface FWorksheet extends IFWorksheetDrawingUIMixin { }
 }

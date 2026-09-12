@@ -153,7 +153,7 @@ export interface IFRangeSheetsDataValidationMixin {
     getValidatorStatus(): Promise<DataValidationStatus[][]>;
     /**
      * Get data validation errors for a specific range in current worksheet.
-     * @returns A promise that resolves to an array of validation errors in the specified range.
+     * @returns {Promise<IDataValidationError[]>} A promise that resolves to an array of validation errors in the specified range.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -305,6 +305,5 @@ export class FRangeSheetsDataValidationMixin extends FRange implements IFRangeSh
 
 FRange.extend(FRangeSheetsDataValidationMixin);
 declare module '@univerjs/sheets/facade' {
-    // eslint-disable-next-line ts/naming-convention
     interface FRange extends IFRangeSheetsDataValidationMixin { }
 }

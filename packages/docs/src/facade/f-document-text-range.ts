@@ -166,6 +166,8 @@ export class FDocumentTextRange extends FBaseInitialable {
      * Existing text-run splitting, merging, and normalization are handled by
      * the document mutation pipeline.
      * `style.fs` is a font size in points (pt), not CSS pixels.
+     * @param {ITextStyle} style Text-style properties to merge into the range.
+     * @returns {boolean} Whether the style update succeeded; `false` for an empty range.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -196,6 +198,8 @@ export class FDocumentTextRange extends FBaseInitialable {
 
     /**
      * Replaces the range with plain text while preserving document mutation semantics.
+     * @param {string} text Replacement plain text. An empty string deletes the range.
+     * @returns {boolean} Whether the replacement succeeded.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();

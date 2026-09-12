@@ -210,6 +210,8 @@ export class FFormula extends FBase {
 
     /**
      * Listens for formula results after every affected model has applied them.
+     * @param {(result: ISetFormulaCalculationResultMutation) => void} callback Receives each applied formula result asynchronously.
+     * @returns {IDisposable} A disposable that unsubscribes from future result notifications.
      */
     calculationResultApplied(callback: (result: ISetFormulaCalculationResultMutation) => void): IDisposable {
         const subscription = this._injector.get(FormulaCalculationSessionService).resultApplied$.subscribe((result) => {
@@ -226,6 +228,8 @@ export class FFormula extends FBase {
 
     /**
      * Waits until the latest formula-calculation results have been applied.
+     * @param {number} [timeout] Maximum wait in milliseconds. Omit to wait without an overall timeout.
+     * @returns {Promise<void>} Resolves when the latest calculation results have been applied; rejects if the supplied timeout expires.
      */
     onCalculationResultApplied(timeout?: number): Promise<void> {
         return this._injector.get(FormulaCalculationSessionService).waitForLatestApplied(timeout);

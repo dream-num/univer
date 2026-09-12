@@ -41,7 +41,7 @@ export class FTheadCommentItem {
 
     /**
      * Create a new FTheadCommentItem
-     * @param {IThreadComment|undefined} comment The comment
+     * @param {IThreadComment|undefined} [comment] The comment
      * @returns {FTheadCommentItem} A new instance of FTheadCommentItem
      * @example
      * ```ts
@@ -370,7 +370,7 @@ export class FThreadComment {
 
     /**
      * Get the replies of the comment
-     * @returns {FThreadComment[]} the replies of the comment
+     * @returns {FThreadComment[] | undefined} The loaded replies, or `undefined` when the thread or its replies are unavailable.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -515,7 +515,7 @@ export class FThreadComment {
 
     /**
      * Resolve the comment
-     * @param {boolean} resolved Whether the comment is resolved
+     * @param {boolean} [resolved] Whether the comment is resolved
      * @returns {Promise<boolean>} Set the comment to resolved or not operation result
      * @example
      * ```ts

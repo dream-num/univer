@@ -21,7 +21,7 @@ import type {
     ISetWorksheetShowCommandParams,
 } from '@univerjs/sheets';
 import type { ReactNode } from 'react';
-import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceService, UniverInstanceType, WorksheetVisibility } from '@univerjs/core';
+import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceService, UniverInstanceType, WorksheetHiddenState } from '@univerjs/core';
 import { clsx, DropdownMenu } from '@univerjs/design';
 import { CheckMarkIcon, ConvertIcon, EyelashIcon } from '@univerjs/icons';
 import {
@@ -83,7 +83,7 @@ export function SheetBarMenu() {
         const sheets = workbook.getSheets();
         const activeSheet = workbook.getActiveSheet();
         const worksheetMenuItems = sheets
-            .filter((sheet) => sheet.getSheetVisibility() !== WorksheetVisibility.VERY_HIDDEN)
+            .filter((sheet) => sheet.getHiddenState() !== WorksheetHiddenState.VERY_HIDDEN)
             .map((sheet, index) => ({
                 label: sheet.getName(),
                 index: `${index}`,

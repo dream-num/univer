@@ -25,14 +25,16 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
-    WorksheetVisibility,
+    WorksheetHiddenState,
 } from '@univerjs/core';
 import { SetWorksheetHideMutation, SetWorksheetHideMutationFactory } from '../mutations/set-worksheet-hide.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ISetWorksheetHiddenCommandParams {
+    unitId?: string;
     subUnitId?: string;
-    visibility?: WorksheetVisibility;
+    /** Defaults to ordinary hiding; VERY_HIDDEN is available to API callers. */
+    hidden?: WorksheetHiddenState;
 }
 
 export const SetWorksheetHideCommand: ICommand = {
@@ -46,26 +48,34 @@ export const SetWorksheetHideCommand: ICommand = {
         const localeService = accessor.get(LocaleService);
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { workbook, worksheet, unitId, subUnitId } = target;
-        const visibility = params?.visibility ?? WorksheetVisibility.HIDDEN;
-        const currentVisibility = worksheet.getSheetVisibility();
-        if (visibility === WorksheetVisibility.VISIBLE || currentVisibility === visibility) return false;
-        if (params?.visibility === undefined && currentVisibility !== WorksheetVisibility.VISIBLE) return false;
+        const hidden = params?.hidden ?? WorksheetHiddenState.HIDDEN;
+        const currentHiddenState = worksheet.getHiddenState();
+        if (hidden !== WorksheetHiddenState.HIDDEN && hidden !== WorksheetHiddenState.VERY_HIDDEN) {
+            return false;
+        }
+        if (currentHiddenState === hidden) {
+            return false;
+        }
+        if (params?.hidden === undefined && currentHiddenState !== WorksheetHiddenState.VISIBLE) {
+            return false;
+        }
 
         const redoMutationParams: ISetWorksheetHideMutationParams = {
             unitId,
             subUnitId,
-            hidden: BooleanNumber.TRUE,
-            visibility,
+            hidden,
         };
 
         const undoMutationParams = SetWorksheetHideMutationFactory(accessor, redoMutationParams);
 
         const worksheets = workbook.getSheets();
         const visibleWorksheets = worksheets.filter((sheet) => sheet.getConfig().hidden === BooleanNumber.FALSE);
-        if (currentVisibility === WorksheetVisibility.VISIBLE && visibleWorksheets.length === 1) {
+        if (currentHiddenState === WorksheetHiddenState.VISIBLE && visibleWorksheets.length === 1) {
             errorService.emit(localeService.t<LocaleKey>('sheets.info.hideSheet'));
             return false;
         }

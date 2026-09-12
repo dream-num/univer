@@ -52,6 +52,7 @@ import {
     ThemeColorType,
     UniverInstanceType,
     VerticalAlign,
+    WorksheetHiddenState,
     WrapStrategy,
 } from '@univerjs/core';
 
@@ -59,6 +60,11 @@ import {
  * @hideconstructor
  */
 export class FEnum {
+    /** Worksheet hiding states: VISIBLE (0), HIDDEN (1), VERY_HIDDEN (2). */
+    get WorksheetHiddenState(): typeof WorksheetHiddenState {
+        return WorksheetHiddenState;
+    }
+
     /**
      * @ignore
      */

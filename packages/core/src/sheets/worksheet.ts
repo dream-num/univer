@@ -43,7 +43,7 @@ import { Range } from './range';
 import { RowManager } from './row-manager';
 import { mergeWorksheetSnapshotWithDefault } from './sheet-snapshot-utils';
 import { SpanModel } from './span-model';
-import { CellModeEnum, WorksheetVisibility } from './typedef';
+import { CellModeEnum, WorksheetHiddenState } from './typedef';
 import {
     addLinkToDocumentModel,
     createDocumentModelWithStyle,
@@ -828,25 +828,19 @@ export class Worksheet {
         this._snapshot.columnCount = count;
     }
 
-    /**
-     * isSheetHidden
-     * @returns hidden status of sheet
-     */
+    /** Returns 0 for visible, 1 for either hidden state, preserving the existing predicate API. */
     isSheetHidden(): BooleanNumber {
-        return this._snapshot.hidden;
+        return this._snapshot.hidden === WorksheetHiddenState.VISIBLE ? BooleanNumber.FALSE : BooleanNumber.TRUE;
     }
 
-    getSheetVisibility(): WorksheetVisibility {
-        return this._snapshot.visibility ?? (this._snapshot.hidden === BooleanNumber.TRUE
-            ? WorksheetVisibility.HIDDEN
-            : WorksheetVisibility.VISIBLE);
+    /** Returns the complete persisted state, including VERY_HIDDEN (2). */
+    getHiddenState(): WorksheetHiddenState {
+        return this._snapshot.hidden as WorksheetHiddenState;
     }
 
-    setSheetVisibility(visibility: WorksheetVisibility): void {
-        this._snapshot.visibility = visibility;
-        this._snapshot.hidden = visibility === WorksheetVisibility.VISIBLE
-            ? BooleanNumber.FALSE
-            : BooleanNumber.TRUE;
+    /** Model mutation primitive. User-facing changes must go through worksheet hide/show commands. */
+    setHiddenState(hidden: WorksheetHiddenState | BooleanNumber): void {
+        this._snapshot.hidden = hidden;
     }
 
     /**

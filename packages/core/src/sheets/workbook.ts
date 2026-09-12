@@ -27,7 +27,7 @@ import { BooleanNumber } from '../types/enum';
 import { DateSystem } from '../types/enum/date-system';
 import { getEmptySnapshot } from './empty-snapshot';
 import { Styles } from './styles';
-import { WorksheetVisibility } from './typedef';
+import { WorksheetHiddenState } from './typedef';
 import { Worksheet } from './worksheet';
 
 export function getWorksheetUID(workbook: Workbook, worksheet: Worksheet): string {
@@ -388,14 +388,14 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
 
     getHiddenWorksheets(includeVeryHidden = true): string[] {
         return this.getSheets()
-            .filter((s) => s.getConfig().hidden === BooleanNumber.TRUE)
-            .filter((s) => includeVeryHidden || s.getSheetVisibility() !== WorksheetVisibility.VERY_HIDDEN)
+            .filter((s) => s.isSheetHidden() === BooleanNumber.TRUE)
+            .filter((s) => includeVeryHidden || s.getHiddenState() !== WorksheetHiddenState.VERY_HIDDEN)
             .map((s) => s.getConfig().id);
     }
 
     getUnhiddenWorksheets(): string[] {
         return this.getSheets()
-            .filter((s) => s.getConfig().hidden !== BooleanNumber.TRUE)
+            .filter((s) => s.isSheetHidden() !== BooleanNumber.TRUE)
             .map((s) => s.getConfig().id);
     }
 

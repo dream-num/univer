@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import type { IDirtyConversionManagerParams } from '@univerjs/engine-formula';
+import type { IActiveDirtyManagerService } from '@univerjs/engine-formula';
 import { RemoveSuperTableMutation, SetSuperTableMutation } from '@univerjs/engine-formula';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { SetSheetTableFilterMutation } from '../../commands/mutations/set-table-filter.mutation';
 import { SheetTableFormulaController } from '../sheet-table-formula.controller';
+
+type DirtyConversion = Parameters<IActiveDirtyManagerService['register']>[1];
 
 describe('SheetTableFormulaController', () => {
     it('should sync super table metadata on add/range/name/delete events', () => {
@@ -51,9 +53,9 @@ describe('SheetTableFormulaController', () => {
         const executeCommand = vi.fn();
         const commandService = { executeCommand };
 
-        const dirtyConversions = new Map<string, IDirtyConversionManagerParams>();
+        const dirtyConversions = new Map<string, DirtyConversion>();
         const activeDirtyManagerService = {
-            register: vi.fn((id: string, conversion: IDirtyConversionManagerParams) => dirtyConversions.set(id, conversion)),
+            register: vi.fn((id: string, conversion: DirtyConversion) => dirtyConversions.set(id, conversion)),
             remove: vi.fn((id: string) => dirtyConversions.delete(id)),
         };
 

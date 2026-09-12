@@ -1140,11 +1140,10 @@ export function getKnownsArrayCoefficients(knownYsValues: number[][], knownXsVal
 
     const solved = solveLeastSquaresByQR(X, Y.map((row) => row[0]));
 
-    if (!solved) {
-        return ErrorValueObject.create(ErrorType.NA);
-    }
-
-    const coefficients = [solved];
+    // Preserve the pseudoinverse solution for rank-deficient input.
+    const coefficients = solved
+        ? [solved]
+        : matrixTranspose(calculateMmult(XTXInverse, calculateMmult(XT, Y)));
 
     if (!constb) {
         coefficients[0].push(0);

@@ -96,6 +96,14 @@ export const RENDER_RAW_FORMULA_KEY = 'RENDER_RAW_FORMULA';
 const GENERAL_NUMBER_MAX_SIGNIFICANT_DIGITS = 15;
 const GENERAL_NUMBER_RESERVE_GLYPH = '0';
 
+function getNumberOverflowText(fontString: string, availableWidth: number): string {
+    const hashWidth = FontCache.getMeasureText('#', fontString).width;
+    if (hashWidth <= 0) {
+        return '#';
+    }
+    return '#'.repeat(Math.max(1, Math.floor(availableWidth / hashWidth)));
+}
+
 export function getShrinkToFitScale(contentWidth: number, availableWidth: number, fontSize: number): number {
     if (contentWidth <= availableWidth || contentWidth <= 0 || availableWidth <= 0 || fontSize <= 0) {
         return 1;
@@ -137,11 +145,22 @@ export function getGeneralNumberDisplayText(
         return '0';
     }
 
-    const hashWidth = FontCache.getMeasureText('#', fontString).width;
-    if (hashWidth <= 0) {
-        return '#';
+    return getNumberOverflowText(fontString, availableWidth);
+}
+
+export function getCustomNumberDisplayText(
+    displayText: string,
+    fontString: string,
+    availableWidth: number
+): string {
+    if (
+        availableWidth <= 0 ||
+        FontCache.getMeasureText(displayText, fontString).width <= availableWidth
+    ) {
+        return displayText;
     }
-    return '#'.repeat(Math.max(1, Math.floor(availableWidth / hashWidth)));
+
+    return getNumberOverflowText(fontString, availableWidth);
 }
 
 export function scaleDocumentDataForShrinkToFit(documentData: IDocumentData, scale: number, fallbackFontSize: number): IDocumentData {
@@ -1435,20 +1454,12 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
     }
 
-    private _applyGeneralNumberDisplay(row: number, col: number, fontCache: IFontCacheItem, style: IStyleData): void {
+    private _applyNumberDisplay(row: number, col: number, fontCache: IFontCacheItem, style: IStyleData): void {
         const cellData = fontCache.cellData;
         if (!cellData || style.stf === BooleanNumber.TRUE || fontCache.documentSkeleton) {
             return;
         }
-        if (!isDefaultFormat(style.n?.pattern)) {
-            return;
-        }
         if (cellData.t !== CellValueType.NUMBER && (Tools.isDefine(cellData.t) || typeof cellData.v !== 'number')) {
-            return;
-        }
-
-        const value = Number(cellData.v);
-        if (!Number.isFinite(value)) {
             return;
         }
 
@@ -1462,12 +1473,15 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             - (padding.r ?? DEFAULT_PADDING_DATA.r)
             - (extension?.leftOffset ?? 0)
             - (extension?.rightOffset ?? 0);
-        fontCache.displayText = getGeneralNumberDisplayText(
-            value,
-            fontCache.displayText ?? getDisplayValueFromCell(cellData),
-            fontCache.fontString,
-            availableWidth
-        );
+        const displayText = fontCache.displayText ?? getDisplayValueFromCell(cellData);
+        if (isDefaultFormat(style.n?.pattern)) {
+            const value = Number(cellData.v);
+            if (Number.isFinite(value)) {
+                fontCache.displayText = getGeneralNumberDisplayText(value, displayText, fontCache.fontString, availableWidth);
+            }
+        } else {
+            fontCache.displayText = getCustomNumberDisplayText(displayText, fontCache.fontString, availableWidth);
+        }
     }
 
     _setFontStylesCache(row: number, col: number, cellData: Nullable<ICellDataForSheetInterceptor>, style: IStyleData, hasMergeData = true) {
@@ -1485,7 +1499,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             const cacheItem = cacheValue as IFontCacheItem;
             cacheItem.cellData = cellData;
             setRenderTextCache(cacheItem, cellData);
-            this._applyGeneralNumberDisplay(row, col, cacheItem, style);
+            this._applyNumberDisplay(row, col, cacheItem, style);
             this._stylesCache.fontMatrix.setValue(row, col, cacheValue as IFontCacheItem);
             return;
         }
@@ -1540,7 +1554,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
         const fontCacheItem = config as IFontCacheItem;
         setRenderTextCache(fontCacheItem, cellData);
-        this._applyGeneralNumberDisplay(row, col, fontCacheItem, style);
+        this._applyNumberDisplay(row, col, fontCacheItem, style);
         this._applyShrinkToFit(row, col, fontCacheItem, style);
         this._calculateOverflowCell(row, col, fontCacheItem, hasMergeData);
         this._stylesCache.fontMatrix.setValue(row, col, fontCacheItem);

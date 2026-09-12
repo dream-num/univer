@@ -117,6 +117,39 @@ describe('TableReferenceObject current row', () => {
         });
     });
 
+    it('matches escaped hash characters in table column names', () => {
+        const table = {
+            sheetId: 'sheet',
+            titleMap: new Map([['Account #', 1], ['Unit #', 2]]),
+            range: { startRow: 0, endRow: 3, startColumn: 0, endColumn: 2 },
+        };
+
+        expect(new TableReferenceObject(
+            "Table1[Account '#]",
+            table,
+            "[Account '#]",
+            options
+        ).getRangeData()).toEqual({
+            startRow: 1,
+            endRow: 3,
+            startColumn: 1,
+            endColumn: 1,
+        });
+        const currentRow = new TableReferenceObject(
+            "Table1[[#This Row],[Unit '#]]",
+            table,
+            "[[#This Row],[Unit '#]]",
+            options
+        );
+        currentRow.setCurrentRowAndColumn(2, 4);
+        expect(currentRow.getRangeData()).toEqual({
+            startRow: 2,
+            endRow: 2,
+            startColumn: 2,
+            endColumn: 2,
+        });
+    });
+
     it('treats commas inside single-bracket column titles as title text', () => {
         const reference = new TableReferenceObject('Table1[Deposit,\r\nCredit (+)]', {
             sheetId: 'sheet',

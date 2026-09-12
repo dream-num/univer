@@ -147,7 +147,9 @@ export class WorksheetPermissionService extends RxDisposable {
                 businesses: [UniverInstanceType.UNIVER_SHEET],
                 onLoad: (unitId, resources) => {
                     this._worksheetProtectionRuleModel.fromObject(resources);
-                    Object.keys(resources).forEach((subUnitId) => {
+                    const rules = Object.values(resources).flatMap((value) => Array.isArray(value) ? value : []);
+                    rules.filter((rule) => !rule.cellStyleProtection).forEach((rule) => {
+                        const subUnitId = rule.subUnitId;
                         getAllWorksheetPermissionPoint().forEach((F) => {
                             const instance = new F(unitId, subUnitId);
                             instance.value = false;

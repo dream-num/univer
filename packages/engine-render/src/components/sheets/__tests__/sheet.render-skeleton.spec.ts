@@ -19,7 +19,7 @@ import { DocumentFlavor, LocaleType, Tools, Univer, UniverInstanceType } from '@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { setupRenderTestEnv } from '../../../__tests__/render-test-utils';
 import { FontCache } from '../../docs/layout/shaping-engine/font-cache';
-import { getGeneralNumberDisplayText, SpreadsheetSkeleton } from '../sheet.render-skeleton';
+import { getCustomNumberDisplayText, getGeneralNumberDisplayText, SpreadsheetSkeleton } from '../sheet.render-skeleton';
 
 describe('Rich-text render snapshot isolation', () => {
     it.each(['font cache', 'row height', 'column width'])(
@@ -102,5 +102,24 @@ describe('General number display', () => {
         expect(getGeneralNumberDisplayText(209501025, '209501025', '13.33px SimSun', 66)).toBe('2.1E+08');
         expect(getGeneralNumberDisplayText(800510403, '800510403', '13.33px SimSun', 66)).toBe('8.01E+08');
         expect(getGeneralNumberDisplayText(148706409, '148706409', '13.33px SimSun', 70)).toBe('148706409');
+    });
+});
+
+describe('Custom number display', () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it('uses hashes when a formatted number does not fit', () => {
+        vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text) => ({
+            fontBoundingBoxAscent: 0,
+            fontBoundingBoxDescent: 0,
+            actualBoundingBoxAscent: 0,
+            actualBoundingBoxDescent: 0,
+            width: text.length * 7,
+        }));
+
+        expect(getCustomNumberDisplayText('2022-11-01 0:00:00', '13.33px SimSun', 66)).toBe('#########');
+        expect(getCustomNumberDisplayText('10/1/2022', '13.33px SimSun', 70)).toBe('10/1/2022');
     });
 });

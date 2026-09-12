@@ -70,7 +70,7 @@ export class FDataValidation {
      * ```
      */
     getAllowInvalid(): boolean {
-        return this.rule.errorStyle !== DataValidationErrorStyle.STOP;
+        return this.rule.showErrorMessage === false || this.rule.errorStyle !== DataValidationErrorStyle.STOP;
     };
 
     /**

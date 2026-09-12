@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Disposable } from '@univerjs/core';
+import type { IDisposable } from '@univerjs/core';
+import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 
 type CallbackFunction = (unitId: string, subUnitId: string, row: number) => boolean;
 
@@ -22,24 +23,32 @@ type CallbackFunction = (unitId: string, subUnitId: string, row: number) => bool
  * The service that gets the row filter status
  */
 export interface ISheetRowFilteredService {
-    register(callback: CallbackFunction): void;
+    register(callback: CallbackFunction): IDisposable;
 
     getRowFiltered(unitId: string, subUnitId: string, row: number): boolean;
 }
 
 export class SheetRowFilteredService extends Disposable implements ISheetRowFilteredService {
-    private _getRowFilteredCallback: CallbackFunction | undefined;
+    private _getRowFilteredCallbacks = new Set<CallbackFunction>();
 
     register(callback: CallbackFunction) {
-        this._getRowFilteredCallback = callback;
+        this._getRowFilteredCallbacks.add(callback);
+        return toDisposable(() => this._getRowFilteredCallbacks.delete(callback));
     }
 
     getRowFiltered(unitId: string, subUnitId: string, row: number): boolean {
-        if (!this._getRowFilteredCallback) {
-            return false;
+        for (const callback of this._getRowFilteredCallbacks) {
+            if (callback(unitId, subUnitId, row)) {
+                return true;
+            }
         }
 
-        return this._getRowFilteredCallback(unitId, subUnitId, row) ?? false;
+        return false;
+    }
+
+    override dispose(): void {
+        this._getRowFilteredCallbacks.clear();
+        super.dispose();
     }
 }
 

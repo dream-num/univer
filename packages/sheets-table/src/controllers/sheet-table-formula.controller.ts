@@ -15,18 +15,45 @@
  */
 
 import type { IRemoveSuperTableMutationParam, ISetSuperTableMutationParam, ISetSuperTableMutationSearchParam } from '@univerjs/engine-formula';
+import type { ISetSheetTableParams } from '../commands/mutations/set-table-filter.mutation';
 import type { Table } from '../models/table';
-import { Disposable, ICommandService, Inject } from '@univerjs/core';
-import { RemoveSuperTableMutation, SetSuperTableMutation } from '@univerjs/engine-formula';
+import { Disposable, ICommandService, Inject, toDisposable } from '@univerjs/core';
+import { IActiveDirtyManagerService, RemoveSuperTableMutation, SetSuperTableMutation } from '@univerjs/engine-formula';
+import { SetSheetTableFilterMutation } from '../commands/mutations/set-table-filter.mutation';
 import { TableManager } from '../models/table-manager';
 
 export class SheetTableFormulaController extends Disposable {
     constructor(
         @Inject(TableManager) private _tableManager: TableManager,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService
     ) {
         super();
         this._initRangeListener();
+        this._initFilterDirtyRange();
+    }
+
+    private _initFilterDirtyRange() {
+        this._activeDirtyManagerService.register(SetSheetTableFilterMutation.id, {
+            commandId: SetSheetTableFilterMutation.id,
+            getDirtyData: (command) => {
+                const params = command.params as ISetSheetTableParams;
+                const table = this._tableManager.getTableById(params.unitId, params.tableId);
+                if (!table) {
+                    return {};
+                }
+
+                const { subUnitId, range } = table.getTableInfo();
+                return {
+                    dirtyRanges: [{ unitId: params.unitId, sheetId: subUnitId, range }],
+                    clearDependencyTreeCache: { [params.unitId]: { [subUnitId]: '1' } },
+                };
+            },
+        });
+
+        this.disposeWithMe(toDisposable(() => {
+            this._activeDirtyManagerService.remove(SetSheetTableFilterMutation.id);
+        }));
     }
 
     private _initRangeListener() {

@@ -26,7 +26,7 @@ import { getCellValueWithConditionType, getConditionExecuteFunc, isNumberDynamic
 export class TableFilters {
     private _tableColumnFilterList: (ITableFilterItem | undefined)[];
     private _tableSortInfo?: { columnIndex: number; sortState: SheetsTableSortStateEnum };
-    private _filterOutRows: Set<number>;
+    private _filterOutRows = new Set<number>();
     constructor() {
         this._tableColumnFilterList = [];
     }
@@ -71,6 +71,10 @@ export class TableFilters {
 
     getFilterOutRows() {
         return this._filterOutRows;
+    }
+
+    setFilterOutRows(rows: Iterable<number>) {
+        this._filterOutRows = new Set(rows);
     }
 
     doFilter(sheet: Worksheet, range: ITableRange, dateSystem = DateSystem.Date1900) {
@@ -136,11 +140,11 @@ export class TableFilters {
     getExecuteFunc(sheet: Worksheet, range: ITableRange, columnIndex: number, filter: ITableFilterItem): (value: any) => boolean {
         if (filter.filterType === TableColumnFilterTypeEnum.manual) {
             const valuesSet = new Set(filter.values);
-            return (value: string) => {
+            return (value: string | number) => {
                 if (value == null) {
                     return valuesSet.has(TABLE_FILTER_EMPTY_VALUE);
                 }
-                return valuesSet.has(value);
+                return valuesSet.has(String(value));
             };
         } else if (filter.filterType === TableColumnFilterTypeEnum.condition) {
             const isDynamic = isNumberDynamicFilter(filter.filterInfo.compareType);
@@ -183,5 +187,6 @@ export class TableFilters {
 
     dispose() {
         this._tableColumnFilterList = [];
+        this._filterOutRows = new Set();
     }
 }

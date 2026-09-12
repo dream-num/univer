@@ -15,6 +15,7 @@
  */
 
 import {
+    BooleanNumber,
     CommandService,
     ConfigService,
     ContextService,
@@ -34,6 +35,7 @@ import {
     RANGE_TYPE,
     ThemeService,
     UniverInstanceService,
+    UniverInstanceType,
     Workbook,
 } from '@univerjs/core';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
@@ -42,6 +44,7 @@ import {
     SetWorksheetActiveOperation,
     SheetSkeletonService,
     SheetsSelectionsService,
+    WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import {
     IClipboardInterfaceService,
@@ -160,6 +163,7 @@ function createTestContext(appVersion = 'Linux') {
     injector.add([IContextService, { useClass: ContextService }]);
     injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
     injector.add([SheetsSelectionsService]);
+    injector.add([WorksheetProtectionRuleModel]);
     injector.add([IClipboardInterfaceService, { useClass: TestClipboardInterfaceService }]);
     injector.add([IUndoRedoService, { useClass: LocalUndoRedoService }]);
     injector.add([ICommandService, { useClass: CommandService }]);
@@ -238,6 +242,32 @@ function selectRange(injector: Injector, startRow: number, startColumn: number, 
 }
 
 describe('SheetClipboardService', () => {
+    it('copies a protected hidden formula as its cached value', () => {
+        const { injector, service } = createTestContext();
+        const workbook = injector.get(IUniverInstanceService).getUnit<Workbook>(
+            'unit-1',
+            UniverInstanceType.UNIVER_SHEET
+        )!;
+        const worksheet = workbook.getSheetBySheetId('sheet-1')!;
+        const styleId = workbook.getStyles().setValue({ formulaHidden: BooleanNumber.TRUE });
+        worksheet.getCellMatrix().setValue(0, 0, { f: '=1+1', v: 2, s: styleId });
+        injector.get(WorksheetProtectionRuleModel).addRule('unit-1', {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+        } as never);
+
+        const copyContent = service.generateCopyContent('unit-1', 'sheet-1', {
+            startRow: 0,
+            startColumn: 0,
+            endRow: 0,
+            endColumn: 0,
+        });
+
+        expect(copyContent?.matrixFragment.getValue(0, 0)).toMatchObject({ v: 2 });
+        expect(copyContent?.matrixFragment.getValue(0, 0)?.f).toBeNull();
+        expect(copyContent?.formulaClipboardPayload).toBeUndefined();
+    });
+
     afterEach(() => {
         vi.unstubAllGlobals();
     });

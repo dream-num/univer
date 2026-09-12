@@ -23,8 +23,13 @@ import { Lexer } from '../../../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
 import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-tool';
+import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
 import { IFunctionService } from '../../../../services/function.service';
+import { IFormulaRuntimeService } from '../../../../services/runtime.service';
+import { ISheetRowFilteredService } from '../../../../services/sheet-row-filtered.service';
 import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
+import { FUNCTION_NAMES_MATH } from '../../../math/function-names';
+import { Subtotal } from '../../../math/subtotal';
 import { FUNCTION_NAMES_META } from '../../../meta/function-names';
 import { Multiply } from '../../../meta/multiply';
 import { getObjectValue } from '../../../util';
@@ -38,9 +43,10 @@ describe('Test byrow', () => {
     let lexer: Lexer;
     let astTreeBuilder: AstTreeBuilder;
     let interpreter: Interpreter;
+    let testBed: ReturnType<typeof createFunctionTestBed>;
 
     beforeEach(() => {
-        const testBed = createFunctionTestBed();
+        testBed = createFunctionTestBed();
 
         get = testBed.get;
 
@@ -53,7 +59,8 @@ describe('Test byrow', () => {
         functionService.registerExecutors(
             new Byrow(FUNCTION_NAMES_LOGICAL.BYROW),
             new Lambda(FUNCTION_NAMES_LOGICAL.LAMBDA),
-            new Multiply(FUNCTION_NAMES_META.MULTIPLY)
+            new Multiply(FUNCTION_NAMES_META.MULTIPLY),
+            new Subtotal(FUNCTION_NAMES_MATH.SUBTOTAL)
         );
     });
 
@@ -94,6 +101,52 @@ describe('Test byrow', () => {
             astNode = astTreeBuilder.parse(lexerNode as LexerNode);
             result = await interpreter.executeAsync(generateExecuteAstNodeData(astNode as BaseAstNode));
             expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('keeps row references so SUBTOTAL can observe filtered rows', async () => {
+            get(ISheetRowFilteredService).register((_unitId, _sheetId, row) => row === 1);
+            get(IFormulaCurrentConfigService).load({
+                formulaData: {},
+                arrayFormulaCellData: {},
+                arrayFormulaRange: {},
+                forceCalculate: false,
+                dirtyRanges: [],
+                dirtyNameMap: {},
+                dirtyDefinedNameMap: {},
+                dirtyUnitFeatureMap: {},
+                excludedCell: {},
+                allUnitData: { [testBed.unitId]: testBed.sheetData },
+                dirtyUnitOtherFormulaMap: {},
+            });
+            const sheetItem = testBed.sheetData[testBed.sheetId];
+            get(IFormulaRuntimeService).setCurrent(
+                0,
+                0,
+                sheetItem.rowCount,
+                sheetItem.columnCount,
+                testBed.sheetId,
+                testBed.unitId
+            );
+
+            const lexerNode = lexer.treeBuilder('=BYROW(A1:A3,LAMBDA(x,SUBTOTAL(3,x)))');
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+            const result = await interpreter.executeAsync(generateExecuteAstNodeData(astNode as BaseAstNode));
+
+            expect(getObjectValue(result)).toStrictEqual([
+                [1],
+                [0],
+                [1],
+            ]);
+
+            const multiColumnLexerNode = lexer.treeBuilder('=BYROW(A1:B3,LAMBDA(x,SUBTOTAL(3,x)))');
+            const multiColumnAstNode = astTreeBuilder.parse(multiColumnLexerNode as LexerNode);
+            const multiColumnResult = await interpreter.executeAsync(generateExecuteAstNodeData(multiColumnAstNode as BaseAstNode));
+
+            expect(getObjectValue(multiColumnResult)).toStrictEqual([
+                [2],
+                [0],
+                [2],
+            ]);
         });
     });
 });

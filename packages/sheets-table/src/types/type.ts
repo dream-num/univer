@@ -36,6 +36,11 @@ export interface ITableOptions {
      */
     showFooter?: boolean;
     /**
+     * Whether the table has an AutoFilter control.
+     * @default true
+     */
+    showAutoFilter?: boolean;
+    /**
      * The table style id. If the property is empty, the default style will be used.
      * @default: table-default-0 ~ table-default-5
      */
@@ -199,6 +204,15 @@ export interface ITableColumnJson {
     id: string;
     displayName: string;
     formula: string;
+    formulaIsArray?: boolean;
+    totalsRowLabel?: string;
+    totalsRowFunction?: string;
+    totalsRowFormula?: string;
+    /**
+     * Whether to show the filter button for this table column.
+     * @default true
+     */
+    showFilterButton?: boolean;
     meta: TableMetaType;
     style: IStyleData;
 }
@@ -221,6 +235,7 @@ export interface ITableInfo {
     meta: TableMetaType;
     columns: ITableColumnJson[];
     showHeader: boolean;
+    showAutoFilter: boolean;
 }
 
 export interface ITableInfoWithUnitId extends ITableInfo {

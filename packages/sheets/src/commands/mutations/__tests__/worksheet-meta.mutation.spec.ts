@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { BooleanNumber, LocaleType } from '@univerjs/core';
+import { BooleanNumber, LocaleType, WorksheetHiddenState } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
     SetGridlinesColorMutation,
@@ -118,7 +118,7 @@ describe('worksheet meta mutations', () => {
                 hidden: BooleanNumber.FALSE,
             })
         ).toEqual({
-            hidden: BooleanNumber.TRUE,
+            hidden: WorksheetHiddenState.HIDDEN,
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
         });
@@ -131,6 +131,13 @@ describe('worksheet meta mutations', () => {
             })
         ).toBe(true);
         expect(worksheet.getConfig().hidden).toBe(BooleanNumber.FALSE);
+        expect(worksheet.getHiddenState()).toBe(WorksheetHiddenState.VISIBLE);
+        expect(SetWorksheetHideMutation.handler(testBed, {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            hidden: 3,
+        } as never)).toBe(false);
+        expect(worksheet.getHiddenState()).toBe(WorksheetHiddenState.VISIBLE);
         expect(SetWorksheetHideMutation.handler(testBed, { unitId: 'missing', subUnitId: 'sheet-1', hidden: BooleanNumber.FALSE })).toBe(false);
         expect(SetWorksheetHideMutation.handler(testBed, { unitId: 'unit-1', subUnitId: 'missing', hidden: BooleanNumber.FALSE })).toBe(false);
         expect(() => SetWorksheetHideMutationFactory(testBed, { unitId: 'missing', subUnitId: 'sheet-1', hidden: BooleanNumber.FALSE }))

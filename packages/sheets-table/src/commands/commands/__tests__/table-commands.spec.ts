@@ -303,6 +303,7 @@ describe('sheets-table commands', () => {
             [TableManager, {
                 getTable: () => ({
                     getTableFilterColumn: () => previousFilter,
+                    getTableFilters: () => ({ getColumnFilter: () => previousFilter, getFilterOutRows: () => new Set() }),
                 }),
             }],
         ]);
@@ -333,8 +334,43 @@ describe('sheets-table commands', () => {
                     tableId: 't1',
                     column: 1,
                     tableFilter: previousFilter,
+                    filterOutRows: [],
                 },
             }],
+        }));
+    });
+
+    it('SetSheetTableFilterCommand restores the previous filter and cached filtered rows', () => {
+        const syncExecuteCommand = vi.fn(() => true);
+        const pushUndoRedo = vi.fn();
+        const previousFilter = { filterType: 'manual', values: ['original'] };
+        const previousRows = new Set([2, 5]);
+        const accessor = createAccessor([
+            [IUndoRedoService, { pushUndoRedo }],
+            [ICommandService, { syncExecuteCommand }],
+            [TableManager, {
+                getTable: () => ({
+                    getTableFilters: () => ({
+                        getColumnFilter: () => previousFilter,
+                        getFilterOutRows: () => previousRows,
+                    }),
+                }),
+            }],
+        ]);
+
+        const result = SetSheetTableFilterCommand.handler(accessor, {
+            unitId: 'u1',
+            tableId: 't1',
+            column: 0,
+            tableFilter: undefined,
+        });
+
+        expect(result).toBe(true);
+        expect(pushUndoRedo).toHaveBeenCalledWith(expect.objectContaining({
+            undoMutations: [expect.objectContaining({
+                id: SetSheetTableFilterMutation.id,
+                params: expect.objectContaining({ tableFilter: previousFilter, filterOutRows: [2, 5] }),
+            })],
         }));
     });
 

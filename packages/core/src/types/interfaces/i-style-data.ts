@@ -324,6 +324,10 @@ export interface IStyleBase {
  * Properties of cell style
  */
 export interface IStyleData extends IStyleBase {
+    /** Whether the cell is locked while worksheet protection is active. */
+    locked?: BooleanNumber;
+    /** Whether the formula is hidden while worksheet protection is active. */
+    formulaHidden?: BooleanNumber;
     /** Whether the font size should shrink to fit the cell width. */
     stf?: BooleanNumber;
     /**
@@ -371,6 +375,8 @@ export const STYLE_KEYS = defineExactKeys<IStyleData>()([
     'cl',
     'va',
     'n',
+    'locked',
+    'formulaHidden',
     'stf',
     'tr',
     'td',

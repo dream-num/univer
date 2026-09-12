@@ -23,7 +23,14 @@ import { AbsoluteRefType, Disposable, isValidRange, MAX_COLUMN_COUNT, MAX_ROW_CO
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_COUNT_ARRAY, ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { isFormulaLexerToken, isTokenCannotBeAtEnd, isTokenCannotPrecedeSuffixToken } from '../../basics/match-token';
-import { isReferenceString, regexTestSingeRange } from '../../basics/regex';
+import {
+    isReferenceString,
+    regexTestReferenceTableAllColumn,
+    regexTestReferenceTableMultipleColumn,
+    regexTestReferenceTableSingleColumn,
+    regexTestReferenceTableTitleOnlyAnyHash,
+    regexTestSingeRange,
+} from '../../basics/regex';
 import {
     matchToken,
     OPERATOR_TOKEN_PRIORITY,
@@ -2485,7 +2492,13 @@ export class LexerTreeBuilder extends Disposable {
 
     private _getTableNameFromStructuredRef(token: string, getTable: (unitId: string, tableName: string) => Nullable<ISuperTable>) {
         const { tableName } = splitTableStructuredRef(token);
-        if (getTable(this._currentUnitId, tableName)) {
+        const isExplicitStructuredReference = token.includes('[') && (
+            regexTestReferenceTableAllColumn(token)
+            || regexTestReferenceTableSingleColumn(token)
+            || regexTestReferenceTableMultipleColumn(token)
+            || regexTestReferenceTableTitleOnlyAnyHash(token)
+        );
+        if (getTable(this._currentUnitId, tableName) || isExplicitStructuredReference) {
             return tableName;
         }
         return null;

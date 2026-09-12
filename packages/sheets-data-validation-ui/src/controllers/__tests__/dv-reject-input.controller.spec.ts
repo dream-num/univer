@@ -38,7 +38,7 @@ describe('DataValidationRejectInputController', () => {
             | undefined;
         const open = vi.fn();
         const close = vi.fn();
-        const getRuleById = vi.fn(() => ({ type: 'list', errorStyle: DataValidationErrorStyle.STOP }));
+        const getRuleById = vi.fn(() => ({ type: 'list', errorStyle: DataValidationErrorStyle.STOP, showErrorMessage: true }));
         const model = {
             getRuleIdByLocation: vi.fn(() => 'rule-1'),
             getRuleById,
@@ -82,7 +82,10 @@ describe('DataValidationRejectInputController', () => {
 
         await expect(interceptedHandler!(Promise.resolve(true), context, next)).resolves.toBe(true);
 
-        getRuleById.mockReturnValue({ type: 'list', errorStyle: DataValidationErrorStyle.WARNING });
+        getRuleById.mockReturnValue({ type: 'list', errorStyle: DataValidationErrorStyle.STOP, showErrorMessage: false });
+        await expect(interceptedHandler!(Promise.resolve(true), context, next)).resolves.toBe(true);
+
+        getRuleById.mockReturnValue({ type: 'list', errorStyle: DataValidationErrorStyle.WARNING, showErrorMessage: true });
         await expect(interceptedHandler!(Promise.resolve(true), context, next)).resolves.toBe(true);
 
         controller.showReject('Bad input');

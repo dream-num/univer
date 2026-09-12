@@ -128,7 +128,7 @@ export class FDataValidationBuilder {
      * ```
      */
     getAllowInvalid(): boolean {
-        return this._rule.errorStyle !== DataValidationErrorStyle.STOP;
+        return this._rule.showErrorMessage === false || this._rule.errorStyle !== DataValidationErrorStyle.STOP;
     }
 
     /**

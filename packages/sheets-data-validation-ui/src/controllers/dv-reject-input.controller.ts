@@ -49,7 +49,7 @@ export class DataValidationRejectInputController extends Disposable {
                         return next(Promise.resolve(false))!;
                     }
 
-                    if (!rule || rule.errorStyle !== DataValidationErrorStyle.STOP) {
+                    if (!rule || rule.showErrorMessage === false || rule.errorStyle !== DataValidationErrorStyle.STOP) {
                         return next(Promise.resolve(true))!;
                     }
                     const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);

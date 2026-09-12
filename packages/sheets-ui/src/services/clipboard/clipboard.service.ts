@@ -47,6 +47,7 @@ import type {
     IUniverSheetCopyDataModel,
 } from './type';
 import {
+    BooleanNumber,
     CellModeEnum,
     cloneCellDataWithSpanAndDisplay,
     createIdentifier,
@@ -81,6 +82,7 @@ import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowAutoHeightMutationFactory,
     SheetsSelectionsService,
+    WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import {
     FILE__BMP_CLIPBOARD_MIME_TYPE,
@@ -235,6 +237,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         @ILogService private readonly _logService: ILogService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
+        @Inject(WorksheetProtectionRuleModel) private readonly _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -594,6 +597,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         const handleMatrixOnCellHook = copyHookType === PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY ? hooks.find((h) => h.handleMatrixOnCell) : undefined;
         const getCellValueBySpecialMatrixHooks = hooks.filter((h) => h.getCellValueBySpecialMatrix);
+        const hasWorksheetProtection = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId) != null;
 
         for (let r = startRow; r <= endRow; r++) {
             if (filteredRows.has(r)) {
@@ -601,7 +605,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             }
             discreteRange.rows.push(r);
             for (let c = startColumn; c <= endColumn; c++) {
-                if (handleMatrixOnCellHook) {
+                const formulaHidden = hasWorksheetProtection &&
+                    worksheet.getComposedCellStyle(r, c).formulaHidden === BooleanNumber.TRUE;
+                if (handleMatrixOnCellHook && !formulaHidden) {
                     handleMatrixOnCellHook.handleMatrixOnCell?.(r, c, rowIndex - startRow, c - startColumn, matrix, matrixFragment, plainMatrix);
                     continue;
                 }
@@ -612,6 +618,11 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 ) || matrix.getValue(r, c);
                 if (cellData) {
                     const newCellData = cloneCellDataWithSpanAndDisplay(cellData)!;
+                    if (formulaHidden) {
+                        delete newCellData.f;
+                        delete newCellData.si;
+                        matrix.setValue(r, c, newCellData);
+                    }
                     plainMatrix.setValue(rowIndex - startRow, c - startColumn, {
                         ...getEmptyCell(),
                         ...newCellData,
@@ -665,9 +676,16 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const columnCount = endColumn - startColumn + 1;
         const formulaOnlyHook = hooks.find((hook) => hook.id === PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY);
         const formulas: IFormulaClipboardPayload['formulas'] = [];
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+        const worksheet = workbook?.getSheetBySheetId(subUnitId);
+        const hasWorksheetProtection = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId) != null;
 
         for (let row = 0; row < rowCount; row++) {
             for (let column = 0; column < columnCount; column++) {
+                if (hasWorksheetProtection &&
+                    worksheet?.getComposedCellStyle(startRow + row, startColumn + column).formulaHidden === BooleanNumber.TRUE) {
+                    continue;
+                }
                 const formula = formulaOnlyHook?.onCopyCellContent?.(startRow + row, startColumn + column) ||
                     copyContent.matrixFragment.getValue(row, column)?.f;
 

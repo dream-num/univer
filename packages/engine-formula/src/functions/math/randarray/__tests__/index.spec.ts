@@ -221,6 +221,11 @@ describe('Test randarray function', () => {
             ]);
         });
 
+        it('explicit implicit intersection keeps a legacy scalar formula from spilling', async () => {
+            const result = await calculate('=@RANDARRAY(10,1,1,1,TRUE)');
+            expect(result).toBe(1);
+        });
+
         it('rows and columns is exceed', async () => {
             const result = await calculate('=RANDARRAY(10000,10000)');
             expect(result).toBe(ErrorType.VALUE);

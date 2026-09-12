@@ -25,6 +25,8 @@ export interface IFormulaUnitReferenceResolveInput {
     hostUnitId: string;
     qualifier: string;
     referenceKind: FormulaUnitReferenceKind;
+    /** Called only when the source workbook cannot be resolved. */
+    onUnavailable?: () => void;
 }
 
 export interface IFormulaUnitReferenceResolution {
@@ -62,6 +64,7 @@ export class FormulaUnitReferenceResolver implements IFormulaUnitReferenceResolv
         hostUnitId,
         qualifier,
         referenceKind,
+        onUnavailable,
     }: IFormulaUnitReferenceResolveInput): IFormulaUnitReferenceResolution | ErrorType {
         const unitNameMap = this._currentConfigService.getUnitNameMap();
         const unitData = this._currentConfigService.getUnitData();
@@ -95,6 +98,9 @@ export class FormulaUnitReferenceResolver implements IFormulaUnitReferenceResolv
                 );
 
         if (matches.length !== 1) {
+            if (matches.length === 0) {
+                onUnavailable?.();
+            }
             return ErrorType.REF;
         }
 

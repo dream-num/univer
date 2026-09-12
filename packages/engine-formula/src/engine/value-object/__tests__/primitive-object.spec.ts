@@ -33,6 +33,18 @@ describe('StringValueObject', () => {
         expect(date1900Value.convertToNumberObjectValue().getValue()).toBe(1462);
         expect(date1904Value.convertToNumberObjectValue().getValue()).toBe(0);
         expect(date1900Value.convertToNumberObjectValue().getValue()).toBe(1462);
+        expect(
+            StringValueObject.create('March 2025')
+                .withDateSystem(DateSystem.Date1904)
+                .convertToNumberObjectValue()
+                .getValue()
+        ).toBe(44255);
+        expect(
+            StringValueObject.create('April2024')
+                .withDateSystem(DateSystem.Date1904)
+                .convertToNumberObjectValue()
+                .getValue()
+        ).toBe(43921);
     });
 
     it('does not reuse a hyperlink object as a plain string', () => {

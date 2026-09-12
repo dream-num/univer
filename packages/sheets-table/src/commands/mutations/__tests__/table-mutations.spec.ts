@@ -106,18 +106,51 @@ describe('sheets-table mutations', () => {
     });
 
     it('SetSheetTableFilterMutation should delegate to TableManager.addFilter', () => {
-        const tableManager = {
-            addFilter: vi.fn(),
-        } as unknown as TableManager;
-
-        const result = SetSheetTableFilterMutation.handler(accessorForTableManager(tableManager), {
+        const params = {
             unitId: 'u1',
             tableId: 't1',
             column: 0,
             tableFilter: { filterType: 'manual', values: ['A'] } as any,
-        });
+        };
+        const setFilterOutRows = vi.fn();
+        const getFilterOutRows = vi.fn(() => new Set([2, 4]));
+        const tableManager = {
+            addFilter: vi.fn(),
+            getTable: vi.fn(() => ({
+                getSubunitId: () => 's1',
+                getTableFilters: () => ({ getFilterOutRows, setFilterOutRows }),
+            })),
+            toJSON: vi.fn(() => ({ s1: { tables: [], tableFilteredOutRows: [2, 4] } })),
+        } as unknown as TableManager;
+
+        const result = SetSheetTableFilterMutation.handler(accessorForTableManager(tableManager), params);
 
         expect(result).toBe(true);
         expect(tableManager.addFilter).toHaveBeenCalledWith('u1', 't1', 0, { filterType: 'manual', values: ['A'] });
+        expect(params).toMatchObject({ filterOutRows: [2, 4], subUnitId: 's1', tableFilteredOutRows: [2, 4] });
+        expect(setFilterOutRows).not.toHaveBeenCalled();
+    });
+
+    it('SetSheetTableFilterMutation should restore cached rows during undo', () => {
+        const setFilterOutRows = vi.fn();
+        const params = {
+            unitId: 'u1',
+            tableId: 't1',
+            column: 0,
+            tableFilter: { filterType: 'manual', values: ['old'] } as any,
+            filterOutRows: [2, 5],
+        };
+        const tableManager = {
+            addFilter: vi.fn(),
+            getTable: vi.fn(() => ({
+                getSubunitId: () => 's1',
+                getTableFilters: () => ({ getFilterOutRows: () => new Set([3]), setFilterOutRows }),
+            })),
+            toJSON: vi.fn(() => ({ s1: { tables: [], tableFilteredOutRows: [2, 5] } })),
+        } as unknown as TableManager;
+
+        expect(SetSheetTableFilterMutation.handler(accessorForTableManager(tableManager), params)).toBe(true);
+        expect(setFilterOutRows).toHaveBeenCalledWith([2, 5]);
+        expect(params).toMatchObject({ subUnitId: 's1', tableFilteredOutRows: [2, 5] });
     });
 });

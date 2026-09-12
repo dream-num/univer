@@ -281,8 +281,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
 
         this._dependencyTreeCache.set(FDtree.treeId, FDtree);
 
-        const treeCache = this._dependencyManagerService.getFeatureFormulaDependency(params.unitId, params.subUnitId, featureId);
-        if (treeCache) {
+        if (treeId != null) {
             FDtree.isCache = true;
         }
 

@@ -129,6 +129,8 @@ export interface IFormulaRuntimeService {
 
     getFunctionDefinitionPrivacyVar(lambdaId: string): Nullable<Map<string, Nullable<BaseAstNode>>>;
 
+    markExternalReferenceUnavailable(): void;
+
     setRuntimeData(functionVariant: FunctionVariantType): void;
 
     getUnitData(): IRuntimeUnitDataType;
@@ -212,6 +214,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     private _formulaExecuteStage: FormulaExecuteStageType = FormulaExecuteStageType.IDLE;
 
     private _stopState = false;
+    private _externalReferenceUnavailable = false;
 
     private _currentRow: number = -1;
     private _currentColumn: number = -1;
@@ -427,6 +430,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         sheetId: string,
         unitId: string
     ) {
+        this._externalReferenceUnavailable = false;
         this._currentRow = row;
         this._currentColumn = column;
         this._currentRowCount = rowCount;
@@ -510,8 +514,23 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         subComponentData[formulaId][y][x] = cellDatas;
     }
 
+    markExternalReferenceUnavailable(): void {
+        this._externalReferenceUnavailable = true;
+    }
+
     // eslint-disable-next-line max-lines-per-function
     setRuntimeData(functionVariant: FunctionVariantType) {
+        if (this._externalReferenceUnavailable) {
+            const cell = this._currentConfigService.getUnitData()[this._currentUnitId]?.[this._currentSubUnitId]
+                ?.cellData
+                .getValue(this._currentRow, this._currentColumn);
+            // Leaving the original cell in place also lets downstream formulas read its cached value.
+            const formula = this._currentConfigService.getFormulaData()[this._currentUnitId]?.[this._currentSubUnitId]
+                ?.[this._currentRow]?.[this._currentColumn]?.f;
+            if (cell?.f && cell.v != null && (formula == null || formula === cell.f)) {
+                return;
+            }
+        }
         const row = this._currentRow;
         const column = this._currentColumn;
         const rowCount = this._currentRowCount;

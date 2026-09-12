@@ -198,6 +198,16 @@ export class Index extends BaseFunction {
             _reference = (reference as CubeValueObject).getCubeValues()[areaNumValue - 1];
         }
 
+        if (
+            !columnNum &&
+            rowNumValue > 0 &&
+            referenceRowColumnCount.rowCount > 1 &&
+            referenceRowColumnCount.columnCount > 1 &&
+            _reference.isReferenceObject()
+        ) {
+            return ErrorValueObject.create(ErrorType.REF);
+        }
+
         if (_reference.isReferenceObject()) {
             return this._calculateReferenceObject(_reference as BaseReferenceObject, rowNumValue, columnNumValue);
         }

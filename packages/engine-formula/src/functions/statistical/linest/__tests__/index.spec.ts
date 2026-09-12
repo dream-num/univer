@@ -147,17 +147,17 @@ describe('Test linest function', () => {
             const stats = BooleanValueObject.create(true);
             const result = testFunction.calculate(knownYs, knownXs, constb, stats);
             expect(getObjectValue(result, true)).toStrictEqual([
-                [204.080843005, -3407.54648312088, 12743.5528364893, -127.712022706619, 303849.43123395],
-                [651.098478042223, 27243.5182021205, 20457.1543147678, 281.254697108, 634296.647114014],
+                [204.080843005, -3407.54648311873, 12743.5528364872, -127.712022706613, 303849.431233932],
+                [651.098478042223, 27243.5182021205, 20457.1543147677, 281.254697108, 634296.647114014],
                 [0.107464822024, 49689.6546787527, ErrorType.NA, ErrorType.NA, ErrorType.NA],
                 [0.180606027654, 6, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [1783709761.98331, 14814370692.5621, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [1783709761.98333, 14814370692.5621, ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
 
             const constb2 = BooleanValueObject.create(false);
             const result2 = testFunction.calculate(knownYs, knownXs, constb2, stats);
             expect(getObjectValue(result2, true)).toStrictEqual([
-                [104.931508746584, -10969.5506756924, 12875.3758749945, 6.2539663735, 0],
+                [104.931508746583, -10969.5506756927, 12875.3758749944, 6.2539663735, 0],
                 [582.358051352254, 20946.2250961889, 19296.6787389021, 28.2242490263, ErrorType.NA],
                 [0.378600130052, 46875.144599683, ErrorType.NA, ErrorType.NA, ErrorType.NA],
                 [1.06622202487, 7, ErrorType.NA, ErrorType.NA, ErrorType.NA],
@@ -167,7 +167,7 @@ describe('Test linest function', () => {
             const stats2 = BooleanValueObject.create(false);
             const result3 = testFunction.calculate(knownYs, knownXs, constb, stats2);
             expect(getObjectValue(result3, true)).toStrictEqual([
-                [204.080843005, -3407.54648312088, 12743.5528364893, -127.712022706619, 303849.43123395],
+                [204.080843005, -3407.54648311873, 12743.5528364872, -127.712022706613, 303849.431233932],
             ]);
         });
 
@@ -201,22 +201,74 @@ describe('Test linest function', () => {
             const stats = BooleanValueObject.create(true);
             const result = testFunction.calculate(knownYs, knownXs, constb, stats);
             expect(getObjectValue(result, true)).toStrictEqual([
-                [0.25951909813, 0.000629921633028, 0.172592800629, 0.548068078609, -0.134842435655],
+                [0.259519098763, 0.000629921769464, 0.172592784662, 0.548068059432, -0.134842435684],
                 [0, 0, 0, 0, 0],
                 [1, 0, ErrorType.NA, ErrorType.NA, ErrorType.NA],
                 [ErrorType.NUM, 0, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [152301876.8, 2.44622825105e-7, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [152301876.8, 2.64699020724e-23, ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
 
             const constb2 = BooleanValueObject.create(false);
             const result2 = testFunction.calculate(knownYs, knownXs, constb2, stats);
             expect(getObjectValue(result2, true)).toStrictEqual([
-                [0.254604257643, 0.000585979549214, 0.176345787942, 0.549325160682, 0],
-                [0.0772515444895, 0.00105259139493, 0.127125044698, 0.0480042261908, ErrorType.NA],
-                [0.999999999828, 0.18882049421, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [1451318743.33408, 1, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [206976507.964347, 0.0356531790337, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [0.254604259712, 0.000585979662783, 0.176345792867, 0.549325164445, 0],
+                [0.0772515108466, 0.00105259093653, 0.127124989335, 0.0480042052851, ErrorType.NA],
+                [0.999999999828, 0.188820411979, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [1451320007.4257, 1, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [206976507.964347, 0.03565314798, ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
+        });
+
+        it('Keeps high-order polynomial coefficients stable', () => {
+            const xValues = [155, 178, 195, 205, 189, 179, 142, 130, 152, 166, 194];
+            const yValues = [
+                975097,
+                1076088.07,
+                985880.56,
+                1264998.15,
+                1487692.02,
+                879096.99,
+                1013152.71,
+                480886.67,
+                651359.67,
+                472135.74,
+                720614.91,
+            ];
+            const knownYs = ArrayValueObject.create({
+                calculateValueList: transformToValueObject(yValues.map((value) => [value])),
+                rowCount: yValues.length,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const knownXs = ArrayValueObject.create({
+                calculateValueList: transformToValueObject(
+                    xValues.map((value) => Array.from({ length: 6 }, (_, index) => value ** (index + 1)))
+                ),
+                rowCount: xValues.length,
+                columnCount: 6,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = getObjectValue(testFunction.calculate(knownYs, knownXs)) as number[][];
+            const expected = [
+                0.003030803284094725,
+                -3.014286876228756,
+                1242.0301184586228,
+                -271378.1017228177,
+                33159765.83632094,
+                -2148345015.0620275,
+                57656015344.78786,
+            ];
+
+            result[0].forEach((actual, index) => {
+                const relativeError = Math.abs(actual - expected[index]) / Math.max(Math.abs(expected[index]), 1);
+                expect(relativeError).toBeLessThan(1e-8);
+            });
         });
 
         it('Stats value test', () => {

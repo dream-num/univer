@@ -98,6 +98,10 @@ export class FEventName {
      */
     static _instance: FEventName | null;
 
+    /**
+     * Returns the shared registry of Facade event names.
+     * @returns {FEventName} The registry also exposed by `univerAPI.Event`.
+     */
     static get(): FEventName {
         if (this._instance) {
             return this._instance;

@@ -116,7 +116,7 @@ export class FWorksheetPermission extends FBase {
     /**
      * Create worksheet protection with collaborators support.
      * This must be called before setting permission points for collaboration to work.
-     * @param {IWorksheetProtectionOptions} options Protection options including allowed users.
+     * @param {IWorksheetProtectionOptions} [options] Protection options including allowed users.
      * @returns {Promise<string>} The permissionId for the created protection.
      * @example
      * ```ts
@@ -206,7 +206,7 @@ export class FWorksheetPermission extends FBase {
     /**
      * Remove worksheet protection.
      * This deletes the protection rule and resets all permission points to allowed.
-     * @returns {Promise<void>} A promise that resolves when protection is removed.
+     * @returns {Promise<boolean>} A promise resolving to whether protection was removed; also resolves to `true` if already unprotected.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -613,7 +613,6 @@ export class FWorksheetPermission extends FBase {
      * console.log(rules);
      * ```
      */
-    // eslint-disable-next-line max-lines-per-function
     async protectRanges(
         configs: Array<{
             ranges: FRange[];
@@ -733,7 +732,7 @@ export class FWorksheetPermission extends FBase {
     /**
      * Remove multiple protection rules at once.
      * @param {string[]} ruleIds Array of rule IDs to remove.
-     * @returns {Promise<void>} A promise that resolves when the rules are removed.
+     * @returns {Promise<boolean>} A promise resolving to whether the rules were removed; also resolves to `true` for an empty ID list.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -800,7 +799,7 @@ export class FWorksheetPermission extends FBase {
      * Debug cell permission information.
      * @param {number} row Row index.
      * @param {number} col Column index.
-     * @returns {FRangeProtectionRule | undefined} Debug information about which rules affect this cell, or null if no rules apply.
+     * @returns {Promise<FRangeProtectionRule | undefined>} A promise resolving to the protection rule affecting this cell, or `undefined` if no range protection rule applies.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();

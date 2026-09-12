@@ -214,6 +214,10 @@ export class FDocumentSection {
      * Sets equal or explicitly sized columns for this traditional section.
      * Use `columnCount = 1` to restore normal single-column layout.
      * `gap` and `widths` are in 96-DPI layout pixels.
+     * @param {number} columnCount Positive integer column count.
+     * @param {IFDocumentSectionColumnOptions} [options] Column widths, gap (default 18 pixels), and separator (default none).
+     * @returns {boolean} Whether the section update succeeded.
+     * @throws {RangeError} If column dimensions or the separator are invalid, or columns exceed the available width.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -258,6 +262,10 @@ export class FDocumentSection {
 
     /**
      * Sets explicit OOXML-compatible column width and trailing-space values in 96-DPI layout pixels.
+     * @param {ISectionColumnProperties[]} columns Explicit widths and trailing spaces; an empty array restores a single column.
+     * @param {ColumnSeparatorType} [separator] Column separator style. Defaults to `ColumnSeparatorType.NONE`.
+     * @returns {boolean} Whether the section update succeeded.
+     * @throws {RangeError} If column dimensions or the separator are invalid, or columns exceed the available width.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -448,6 +456,8 @@ export class FDocumentSection {
 
     /**
      * Ensures a header segment linked specifically to this section.
+     * @param {SectionHeaderFooterVariant} [variant] The `'default'`, `'first'`, or `'even'` variant. Defaults to `'default'`.
+     * @returns {string} The existing or newly created section-specific segment ID.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -465,6 +475,8 @@ export class FDocumentSection {
 
     /**
      * Ensures a footer segment linked specifically to this section.
+     * @param {SectionHeaderFooterVariant} [variant] The `'default'`, `'first'`, or `'even'` variant. Defaults to `'default'`.
+     * @returns {string} The existing or newly created section-specific segment ID.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -482,6 +494,8 @@ export class FDocumentSection {
 
     /**
      * Returns the effective header id after resolving links to previous sections.
+     * @param {SectionHeaderFooterVariant} [variant] The `'default'`, `'first'`, or `'even'` variant. Defaults to `'default'`.
+     * @returns {string | null} The effective segment ID, or `null` if no segment is available.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -494,6 +508,8 @@ export class FDocumentSection {
 
     /**
      * Returns the effective footer id after resolving links to previous sections.
+     * @param {SectionHeaderFooterVariant} [variant] The `'default'`, `'first'`, or `'even'` variant. Defaults to `'default'`.
+     * @returns {string | null} The effective segment ID, or `null` if no segment is available.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -506,6 +522,8 @@ export class FDocumentSection {
 
     /**
      * Whether this header variant inherits the previous section's reference.
+     * @param {SectionHeaderFooterVariant} [variant] The `'default'`, `'first'`, or `'even'` variant. Defaults to `'default'`.
+     * @returns {boolean} Whether this variant inherits from the previous section.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -518,6 +536,8 @@ export class FDocumentSection {
 
     /**
      * Whether this footer variant inherits the previous section's reference.
+     * @param {SectionHeaderFooterVariant} [variant] The `'default'`, `'first'`, or `'even'` variant. Defaults to `'default'`.
+     * @returns {boolean} Whether this variant inherits from the previous section.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -530,6 +550,9 @@ export class FDocumentSection {
 
     /**
      * Links or unlinks this header variant. Unlinking clones the inherited header.
+     * @param {boolean} linkedToPrevious Whether to inherit the previous section's header/footer.
+     * @param {SectionHeaderFooterVariant} [variant] The `'default'`, `'first'`, or `'even'` variant. Defaults to `'default'`.
+     * @returns {boolean} Whether the link update succeeded.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -544,6 +567,9 @@ export class FDocumentSection {
 
     /**
      * Links or unlinks this footer variant. Unlinking clones the inherited footer.
+     * @param {boolean} linkedToPrevious Whether to inherit the previous section's header/footer.
+     * @param {SectionHeaderFooterVariant} [variant] The `'default'`, `'first'`, or `'even'` variant. Defaults to `'default'`.
+     * @returns {boolean} Whether the link update succeeded.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -559,6 +585,8 @@ export class FDocumentSection {
     /**
      * Updates header/footer switches and margins on this section break.
      * `marginHeader` and `marginFooter` are in 96-DPI layout pixels.
+     * @param {IHeaderFooterProps} options Header/footer switches and margins to update. Omitted properties are preserved.
+     * @returns {boolean} Whether the update command succeeded.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();

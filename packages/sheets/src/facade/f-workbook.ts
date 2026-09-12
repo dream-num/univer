@@ -27,7 +27,6 @@ import type {
 } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { IRangeThemeStyleJSON, ISetSelectionsOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
-import type { FontLine as _FontLine } from './f-range';
 import {
     ICommandService,
     ILogService,
@@ -107,6 +106,7 @@ export class FWorkbook extends FBaseInitialable {
         return this._workbook;
     }
 
+    /** Releases this facade's resources. Use `univerAPI.disposeUnit()` to unload the owning unit. */
     override dispose(): void {
         super.dispose();
         //@ts-ignore
@@ -436,7 +436,7 @@ export class FWorkbook extends FBaseInitialable {
     // #region editing
     /**
      * Undo the last action.
-     * @returns {FWorkbook} A promise that resolves to true if the undo was successful, false otherwise.
+     * @returns {FWorkbook} This workbook, for chaining.
      * @example
      * ```ts
      * // The code below undoes the last action
@@ -452,7 +452,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Redo the last undone action.
-     * @returns {FWorkbook} A promise that resolves to true if the redo was successful, false otherwise.
+     * @returns {FWorkbook} This workbook, for chaining.
      * @example
      * ```ts
      * // The code below redoes the last undone action
@@ -471,7 +471,6 @@ export class FWorkbook extends FBaseInitialable {
      * @callback onBeforeCommandExecuteCallback
      * @param {ICommandInfo<ISheetCommandSharedParams>} command The command that was executed.
      */
-
     /**
      * Register a callback that will be triggered before invoking a command targeting the Univer sheet.
      * @param {onBeforeCommandExecuteCallback} callback the callback.
@@ -500,7 +499,6 @@ export class FWorkbook extends FBaseInitialable {
      * @callback onCommandExecutedCallback
      * @param {ICommandInfo<ISheetCommandSharedParams>} command The command that was executed
      */
-
     /**
      * Register a callback that will be triggered when a command is invoked targeting the Univer sheet.
      * @param {onCommandExecutedCallback} callback the callback.
@@ -529,7 +527,6 @@ export class FWorkbook extends FBaseInitialable {
      * @callback onSelectionChangeCallback
      * @param {IRange[]} selections The new selection.
      */
-
     /**
      * Register a callback that will be triggered when the selection changes.
      * @param {onSelectionChangeCallback} callback The callback.
@@ -875,7 +872,7 @@ export class FWorkbook extends FBaseInitialable {
      * const definedNameParam = fWorkbook.newDefinedNameBuilder()
      *   .setRef('Sheet1!$A$1')
      *   .setName('MyDefinedName')
-     *   .setComment('This is a comment');
+     *   .setComment('This is a comment')
      *   .build();
      * console.log(definedNameParam);
      * fWorkbook.insertDefinedNameBuilder(definedNameParam);
@@ -1028,7 +1025,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Create a range theme style.
      * @param {string} themeName - The name of the theme to register
-     * @param {Omit<IRangeThemeStyleJSON, 'name'>} themeStyleJson - The theme style json to register
+     * @param {Omit<IRangeThemeStyleJSON, 'name'>} [themeStyleJson] - The theme style json to register
      * @returns {RangeThemeStyle} - The created range theme style
      * @example
      * ```ts
@@ -1159,14 +1156,4 @@ export class FWorkbook extends FBaseInitialable {
     removeStyles(styleKeys: string[]): void {
         this._workbook.removeStyles(styleKeys);
     }
-}
-
-/**
- * @ignore
- */
-// eslint-disable-next-line ts/no-namespace
-export namespace FWorkbook {
-    export type FontLine = _FontLine;
-    export type FontStyle = _FontLine;
-    export type FontWeight = _FontLine;
 }

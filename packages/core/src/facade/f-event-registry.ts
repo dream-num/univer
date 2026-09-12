@@ -32,6 +32,13 @@ export class FEventRegistry {
         return this._eventRegistry.get(event)!;
     }
 
+    /**
+     * Registers a factory for the underlying subscription that produces an event.
+     * The factory starts when the event has listeners; its subscription is disposed when the last listener is removed.
+     * @param {string} event The event name.
+     * @param {() => IDisposable | Subscription} handler Creates the underlying event subscription.
+     * @returns {IDisposable} Unregisters the factory and disposes its active subscription.
+     */
     registerEventHandler(event: string, handler: () => IDisposable | Subscription): IDisposable {
         const current = this._eventHandlerMap.get(event);
         if (current) {
@@ -51,6 +58,11 @@ export class FEventRegistry {
         });
     }
 
+    /**
+     * Removes one event listener and stops underlying subscriptions when no listeners remain.
+     * @param {T} event The event name.
+     * @param {(params: IEventParamConfig[T]) => void} callback The previously registered callback.
+     */
     removeEvent<T extends keyof IEventParamConfig>(event: T, callback: (params: IEventParamConfig[T]) => void): void {
         const map = this._ensureEventRegistry(event);
         map.delete(callback);
@@ -78,9 +90,9 @@ export class FEventRegistry {
 
     /**
      * Add an event listener
-     * @param {string} event key of event
-     * @param {(params: IEventParamConfig[typeof event]) => void} callback callback when event triggered
-     * @returns {Disposable} The Disposable instance, for remove the listener
+     * @param {T} event key of event
+     * @param {(params: IEventParamConfig[T]) => void} callback callback when event triggered
+     * @returns {IDisposable} A disposable that removes the event listener.
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, (params) => {
@@ -97,9 +109,9 @@ export class FEventRegistry {
 
     /**
      * Fire an event, used in internal only.
-     * @param {string} event key of event
-     * @param {any} params params of event
-     * @returns {boolean} should cancel
+     * @param {T} event key of event
+     * @param {IEventParamConfig[T]} params params of event
+     * @returns {boolean | undefined} The event's `cancel` value after listeners run; `undefined` if it was not set.
      * @example
      * ```ts
      * this.fireEvent(univerAPI.Event.LifeCycleChanged, params);

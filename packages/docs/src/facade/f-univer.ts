@@ -26,11 +26,11 @@ export interface IFUniverDocsMixin {
     /**
      * Create a new document and get the API handler of that document.
      * @param {Partial<IDocumentData>} data The snapshot of the document.
-     * @param {ICreateUnitOptions} options The options of creating the document.
+     * @param {ICreateUnitOptions} [options] The options of creating the document.
      * @returns {FDocument} The document API instance.
      * @example
      * ```typescript
-     * const fDocument = univerAPI.createUniverDoc({ id: 'document-01', title: 'Document1'  });
+     * const fDocument = univerAPI.createDocument({ id: 'document-01', title: 'Document1'  });
      * console.log(fDocument);
      * ```
      */
@@ -92,6 +92,5 @@ export class FUniverDocsMixin extends FUniver implements IFUniverDocsMixin {
 
 FUniver.extend(FUniverDocsMixin);
 declare module '@univerjs/core/facade' {
-    // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverDocsMixin {}
 }

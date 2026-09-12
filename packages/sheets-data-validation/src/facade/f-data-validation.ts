@@ -229,8 +229,8 @@ export class FDataValidation {
     }
 
     /**
-     * Gets the unit ID of the worksheet
-     * @returns {string | undefined} The unit ID of the worksheet
+     * Gets the unit ID of the workbook
+     * @returns {string | undefined} The unit ID of the workbook
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();

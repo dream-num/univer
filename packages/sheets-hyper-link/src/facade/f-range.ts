@@ -36,7 +36,7 @@ export interface IFRangeSheetsHyperlinkMixin {
      * The hyperlink can be a URL, a range link, or a sheet link.
      * When the hyperlink is a range link or a sheet link, the url should be the url of the target range or sheet.
      * @param {string} url - The hyperlink url, can be a URL, a range link, or a sheet link.
-     * @param {string} [label] - The display text of the hyperlink. If not provided, the url will be used as the display text.
+     * @param {string} [label] - The display text of the hyperlink. If omitted, the existing cell text is linked. Supply a label when linking an empty cell.
      * @return {Promise<boolean>} A promise that resolves to true if the hyperlink is set successfully, otherwise false.
      *
      * @example
@@ -71,8 +71,8 @@ export interface IFRangeSheetsHyperlinkMixin {
     setHyperLink(url: string, label?: string): Promise<boolean>;
 
     /**
-     * Get all hyperlinks in this range.
-     * @return {ICellHyperLink[]} An array of hyperlinks in this range.
+     * Gets the first hyperlink from each cell containing hyperlinks in this range.
+     * @returns {ICellHyperLink[]} At most one hyperlink per cell, with absolute, zero-based worksheet coordinates.
      *
      * @example
      * ```ts
@@ -87,8 +87,10 @@ export interface IFRangeSheetsHyperlinkMixin {
     /**
      * Update the hyperlink of this range top left cell.
      * @param {string} url - The new hyperlink url, can be a URL, a range link, or a sheet link.
-     * @param {string} [label] - The new display text of the hyperlink. If not provided, the url will be used as the display text.
+     * @param {string} [label] - The new display text of the hyperlink. If omitted, the replacement display text is empty. Supply a label to keep the link visible.
      *
+     * @returns {Promise<boolean>} A promise resolving to whether the update succeeded.
+     * @throws {Error} The promise rejects if the top-left cell contains no hyperlink.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -260,6 +262,5 @@ export class FRangeSheetsHyperlinkMixin extends FRange implements IFRangeSheetsH
 
 FRange.extend(FRangeSheetsHyperlinkMixin);
 declare module '@univerjs/sheets/facade' {
-    // eslint-disable-next-line ts/naming-convention
     interface FRange extends IFRangeSheetsHyperlinkMixin {}
 }

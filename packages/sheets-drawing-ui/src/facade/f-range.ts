@@ -40,7 +40,7 @@ export interface IFRangeSheetsDrawingUIMixin {
      * Inserts an image into the current cell.
      *
      * @param {string | File} file File or URL string
-     * @returns True if the image is inserted successfully, otherwise false
+     * @returns {Promise<boolean>} True if the image is inserted successfully, otherwise false
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -161,6 +161,5 @@ export class FRangeSheetsDrawingUIMixin extends FRange implements IFRangeSheetsD
 
 FRange.extend(FRangeSheetsDrawingUIMixin);
 declare module '@univerjs/sheets/facade' {
-    // eslint-disable-next-line ts/naming-convention
     interface FRange extends IFRangeSheetsDrawingUIMixin { }
 }

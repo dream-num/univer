@@ -76,7 +76,7 @@ export class FRangeProtectionRule {
     /**
      * Update the protected ranges.
      * @param {FRange[]} ranges New ranges to protect.
-     * @returns {Promise<void>} A promise that resolves when the ranges are updated.
+     * @returns {Promise<boolean>} A promise resolving to whether the protected ranges were updated.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -138,7 +138,7 @@ export class FRangeProtectionRule {
 
     /**
      * Delete the current protection rule.
-     * @returns {Promise<void>} A promise that resolves when the rule is removed.
+     * @returns {Promise<boolean>} A promise resolving to whether the rule was removed.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();

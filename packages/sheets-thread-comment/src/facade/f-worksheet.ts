@@ -68,6 +68,7 @@ export interface IFWorksheetCommentMixin {
     /**
      * get comment by comment id
      * @param {string} commentId comment id
+     * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
@@ -131,6 +132,5 @@ export class FWorksheetCommentMixin extends FWorksheet implements IFWorksheetCom
 
 FWorksheet.extend(FWorksheetCommentMixin);
 declare module '@univerjs/sheets/facade' {
-    // eslint-disable-next-line ts/naming-convention
     interface FWorksheet extends IFWorksheetCommentMixin {}
 }

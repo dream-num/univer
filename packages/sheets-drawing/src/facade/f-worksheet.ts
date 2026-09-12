@@ -50,7 +50,7 @@ export interface IFWorksheetDrawingMixin {
     /**
      * Insert an image to the sheet
      * @param {string} url - The image url
-     * @returns true if the image is inserted successfully
+     * @returns {Promise<boolean>} true if the image is inserted successfully
      * @example
      * ```ts
      * // Insert an image to the sheet, default position is A1
@@ -65,7 +65,7 @@ export interface IFWorksheetDrawingMixin {
      * @param {string} url - The image url
      * @param {number} column - The column index to insert the image
      * @param {number} row - The row index to insert the image
-     * @returns True if the image is inserted successfully
+     * @returns {Promise<boolean>} True if the image is inserted successfully
      * @example
      * ```ts
      * // Insert an image to the sheet, position is F6
@@ -82,7 +82,7 @@ export interface IFWorksheetDrawingMixin {
      * @param {number} row - The row index to insert the image
      * @param {number} offsetX - The column offset, pixel unit
      * @param {number} offsetY - The row offset, pixel unit
-     * @returns True if the image is inserted successfully
+     * @returns {Promise<boolean>} True if the image is inserted successfully
      * @example
      * ```ts
      * // Insert an image to the sheet, position is F6, offset is 10px
@@ -919,6 +919,5 @@ function getDrawingBounds(drawing: ISheetDrawing): IGroupBaseBound | null {
 
 FWorksheet.extend(FWorksheetDrawingMixin);
 declare module '@univerjs/sheets/facade' {
-    // eslint-disable-next-line ts/naming-convention
     interface FWorksheet extends IFWorksheetDrawingMixin { }
 }

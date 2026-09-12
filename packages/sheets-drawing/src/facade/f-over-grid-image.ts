@@ -726,16 +726,40 @@ export class FOverGridImageBuilder {
         return this;
     }
 
+    /**
+     * Sets the workbook unit ID of the image to build.
+     * @param {string} unitId The target workbook unit ID.
+     * @returns {FOverGridImageBuilder} This builder, for chaining.
+     */
     setUnitId(unitId: string): FOverGridImageBuilder {
         this._image.unitId = unitId;
         return this;
     }
 
+    /**
+     * Sets the worksheet ID of the image to build.
+     * @param {string} subUnitId The target worksheet ID.
+     * @returns {FOverGridImageBuilder} This builder, for chaining.
+     */
     setSubUnitId(subUnitId: string): FOverGridImageBuilder {
         this._image.subUnitId = subUnitId;
         return this;
     }
 
+    /**
+     * Builds image data for insertion or updating; this does not insert the image.
+     * An explicit placement takes precedence over the individual position and size fields.
+     * Without explicit placement, zero width or height is filled from the source image's intrinsic size.
+     * @returns {Promise<ISheetImage>} A promise resolving to the built sheet image data.
+     * @example
+     * ```ts
+     * const sheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * if (sheet) {
+     *   const image = await sheet.newOverGridImage().setSource('https://example.com/image.png').buildAsync();
+     *   sheet.insertImages([image]);
+     * }
+     * ```
+     */
     async buildAsync(): Promise<ISheetImage> {
         const sheetSkeletonService = this._sheetSkeletonService;
 
@@ -1011,7 +1035,7 @@ export class FOverGridImage extends FBase {
      * Set the position of the image
      * @param {number} row - The row index of the image start position
      * @param {number} column - The column index of the image start position
-     * @returns {boolean} true if the position is set successfully, otherwise false
+     * @returns {Promise<boolean>} A promise resolving to whether the image update succeeded.
      * @example
      * ```ts
      * // set the position of the image, the start position is F6 cell.
@@ -1019,7 +1043,7 @@ export class FOverGridImage extends FBase {
      * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
      * if (!fWorksheet) return;
      * const image = fWorksheet.getImages()[0];
-     * const result = image?.setPositionAsync(5, 5);
+     * const result = await image?.setPositionAsync(5, 5);
      * console.log(result);
      * ```
      */
@@ -1027,9 +1051,9 @@ export class FOverGridImage extends FBase {
     /**
      * @param {number} row - The row index of the image start position
      * @param {number} column - The column index of the image start position
-     * @param {number} rowOffset - The row offset of the image start position, pixel unit
-     * @param {number} columnOffset - The column offset of the image start position, pixel unit
-     * @returns {boolean} true if the position is set successfully, otherwise false
+     * @param {number} [rowOffset] - The row offset of the image start position, pixel unit
+     * @param {number} [columnOffset] - The column offset of the image start position, pixel unit
+     * @returns {Promise<boolean>} A promise resolving to whether the image update succeeded.
      * @example
      * ```ts
      * // set the position of the image, the start position is F6 cell, and the offset is 10px.
@@ -1037,7 +1061,7 @@ export class FOverGridImage extends FBase {
      * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
      * if (!fWorksheet) return;
      * const image = fWorksheet.getImages()[0];
-     * const result = image?.setPositionAsync(5, 5, 10, 10);
+     * const result = await image?.setPositionAsync(5, 5, 10, 10);
      * console.log(result);
      * ```
      */
@@ -1060,7 +1084,7 @@ export class FOverGridImage extends FBase {
      * Set the size of the image
      * @param {number} width - The width of the image, pixel unit
      * @param {number} height - The height of the image, pixel unit
-     * @returns {boolean} true if the size is set successfully, otherwise false
+     * @returns {Promise<boolean>} A promise resolving to whether the image update succeeded.
      * @example
      * ```ts
      * // set the image width 120px and height 50px
@@ -1068,7 +1092,7 @@ export class FOverGridImage extends FBase {
      * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
      * if (!fWorksheet) return;
      * const image = fWorksheet.getImages()[0];
-     * const result = image?.setSizeAsync(120, 50);
+     * const result = await image?.setSizeAsync(120, 50);
      * console.log(result);
      * ```
      */
@@ -1082,10 +1106,10 @@ export class FOverGridImage extends FBase {
 
     /**
      * Set the cropping region of the image by defining the top, bottom, left, and right edges, thereby displaying the specific part of the image you want.
-     * @param {number} top - The number of pixels to crop from the top of the image
-     * @param {number} left - The number of pixels to crop from the left side of the image
-     * @param {number} bottom - The number of pixels to crop from the bottom of the image
-     * @param {number} right - The number of pixels to crop from the right side of the image
+     * @param {number} [top] - The number of pixels to crop from the top of the image
+     * @param {number} [left] - The number of pixels to crop from the left side of the image
+     * @param {number} [bottom] - The number of pixels to crop from the bottom of the image
+     * @param {number} [right] - The number of pixels to crop from the right side of the image
      * @returns {boolean} true if the crop is set successfully, otherwise false
      * @example
      * ```ts

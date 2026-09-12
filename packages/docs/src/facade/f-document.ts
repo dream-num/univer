@@ -101,7 +101,7 @@ export class FDocument extends FBaseInitialable {
 
     /**
      * Get the document data model of the document.
-     * @param {string} segmentId The segment id used to get the header/footer data model. Defaults to an empty string for the document data model of the document.
+     * @param {string} [segmentId] The segment id used to get the header/footer data model. Defaults to an empty string for the document data model of the document.
      * @returns {DocumentDataModel} The document data model.
      * @example
      * ```typescript
@@ -149,7 +149,7 @@ export class FDocument extends FBaseInitialable {
      * Get the document body or header/footer body by the segment id.
      * The main body has an empty segment id.
      * The header and footer body have their respective segment ids.
-     * @param {string} segmentId The segment id of the body. Defaults to an empty string for the main body.
+     * @param {string} [segmentId] The segment id of the body. Defaults to an empty string for the main body.
      * @returns {IDocumentBody} The document body.
      * @example
      * ```typescript
@@ -168,6 +168,7 @@ export class FDocument extends FBaseInitialable {
         return body;
     }
 
+    /** Releases this facade's resources. Use `univerAPI.disposeUnit()` to unload the owning unit. */
     override dispose(): void {
         super.dispose();
     }
@@ -377,7 +378,7 @@ export class FDocument extends FBaseInitialable {
 
     /**
      * Ensure the page header segment exists and return its segment id.
-     * @param {number} pageIndex The zero-based page index. Defaults to the first page.
+     * @param {number} [pageIndex] The zero-based page index. Defaults to the first page.
      * @returns {string} The header segment id.
      * @example
      * ```ts
@@ -392,7 +393,7 @@ export class FDocument extends FBaseInitialable {
 
     /**
      * Ensure the page footer segment exists and return its segment id.
-     * @param {number} pageIndex The zero-based page index. Defaults to the first page.
+     * @param {number} [pageIndex] The zero-based page index. Defaults to the first page.
      * @returns {string} The footer segment id.
      * @example
      * ```ts
@@ -409,7 +410,7 @@ export class FDocument extends FBaseInitialable {
      * Insert plain text at a document body offset.
      * @param {number} index The zero-based insertion offset.
      * @param {string} text The plain text to insert.
-     * @param {string} segmentId The segment id of the body. Defaults to an empty string for the main body.
+     * @param {string} [segmentId] The segment id of the body. Defaults to an empty string for the main body.
      * @returns {boolean} `true` if the edit was applied.
      * @example
      * ```ts
@@ -457,6 +458,8 @@ export class FDocument extends FBaseInitialable {
      * Traditional and Unspecified documents keep the legacy header/footer
      * behavior. Modern documents reject this API. `marginHeader` and
      * `marginFooter` use 96-DPI layout pixels.
+     * @param {IHeaderFooterProps} options Header/footer switches and margins to update. Omitted properties are preserved.
+     * @returns {boolean} Whether the update command succeeded.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -483,7 +486,7 @@ export class FDocument extends FBaseInitialable {
      * The end offset is exclusive, and offsets are scoped to the selected body segment.
      * @param {number} startOffset The inclusive start offset.
      * @param {number} endOffset The exclusive end offset.
-     * @param {string} segmentId The header/footer segment id, or an empty string for the main body.
+     * @param {string} [segmentId] The header/footer segment id, or an empty string for the main body.
      * @returns {FDocumentTextRange} A fixed text-range facade.
      * @example
      * ```ts
@@ -516,6 +519,8 @@ export class FDocument extends FBaseInitialable {
 
     /**
      * Returns a traditional section by zero-based index, or `null` in modern documents.
+     * @param {number} index Zero-based section index.
+     * @returns {FDocumentSection | null} The matching section, or `null` if none exists or the document is not Traditional.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -529,6 +534,8 @@ export class FDocument extends FBaseInitialable {
 
     /**
      * Returns the traditional section containing a data-stream offset, or `null` in modern documents.
+     * @param {number} offset Zero-based data-stream offset in the main document body.
+     * @returns {FDocumentSection | null} The matching section, or `null` if none exists or the document is not Traditional.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -618,6 +625,8 @@ export class FDocument extends FBaseInitialable {
      * In a single-column section, the traditional renderer advances to the next physical page.
      * Modern documents must use ColumnGroup. Unspecified documents must resolve
      * their flavor first. Both throw `DocsSectionUnsupportedDocumentFlavorError`.
+     * @param {number} offset Zero-based data-stream offset at which to insert the column break.
+     * @returns {boolean} Whether the insertion succeeded.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -644,6 +653,10 @@ export class FDocument extends FBaseInitialable {
      * Inserts a horizontal rule using the existing paragraph `borderBottom` mechanism.
      * The returned paragraph can be inspected or removed with normal paragraph APIs.
      * Border width and padding are in points (pt).
+     * @param {number} offset Zero-based insertion offset in the selected body segment.
+     * @param {IParagraphBorder} [border] Bottom border appearance. Defaults to a solid gray 1 pt line with 5 pt padding.
+     * @param {string} [segmentId] Header/footer segment ID, or an empty string for the main body (default).
+     * @returns {FDocumentParagraph | null} The inserted paragraph, or `null` if insertion fails.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -686,7 +699,7 @@ export class FDocument extends FBaseInitialable {
 
     /**
      * Get all paragraphs in the document body or header/footer body by the segment id.
-     * @param {string} segmentId The segment id of the body. Defaults to an empty string for the main body.
+     * @param {string} [segmentId] The segment id of the body. Defaults to an empty string for the main body.
      * @returns {FDocumentParagraph[]} An array of paragraph facade instances.
      * @example
      * ```ts
@@ -707,7 +720,7 @@ export class FDocument extends FBaseInitialable {
     /**
      * Get a paragraph by its paragraph id and segment id.
      * @param {string} paragraphId The paragraph id.
-     * @param {string} segmentId The segment id of the body. Defaults to an empty string for the main body.
+     * @param {string} [segmentId] The segment id of the body. Defaults to an empty string for the main body.
      * @returns {FDocumentParagraph | null} The paragraph facade instance, or `null` if the paragraph is not found.
      * @example
      * ```ts
@@ -732,7 +745,7 @@ export class FDocument extends FBaseInitialable {
     /**
      * Find a paragraph by its text content and segment id.
      * @param {string} text The text content to search for.
-     * @param {string} segmentId The segment id of the body. Defaults to an empty string for the main body.
+     * @param {string} [segmentId] The segment id of the body. Defaults to an empty string for the main body.
      * @returns {FDocumentParagraph | null} The paragraph facade instance, or `null` if the paragraph is not found.
      * @example
      * ```ts
@@ -787,8 +800,8 @@ export class FDocument extends FBaseInitialable {
     /**
      * Insert a plain-text paragraph before the paragraph at the given paragraph index.
      * @param {number} index The zero-based paragraph insertion index.
-     * @param {string} text The paragraph text. Defaults to an empty paragraph.
-     * @param {string} segmentId The segment id of the body. Defaults to an empty string for the main body.
+     * @param {string} [text] The paragraph text. Defaults to an empty paragraph.
+     * @param {string} [segmentId] The segment id of the body. Defaults to an empty string for the main body.
      * @returns {FDocumentParagraph} The inserted paragraph facade instance.
      * @example
      * ```ts
@@ -829,8 +842,8 @@ export class FDocument extends FBaseInitialable {
 
     /**
      * Append a plain-text paragraph at the end of the body.
-     * @param {string} text The paragraph text. Defaults to an empty paragraph.
-     * @param {string} segmentId The segment id of the body. Defaults to an empty string for the main body.
+     * @param {string} [text] The paragraph text. Defaults to an empty paragraph.
+     * @param {string} [segmentId] The segment id of the body. Defaults to an empty string for the main body.
      * @returns {FDocumentParagraph} The appended paragraph wrapper.
      * @example
      * ```ts

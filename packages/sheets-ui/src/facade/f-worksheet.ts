@@ -62,8 +62,8 @@ export interface IFWorksheetUIMixin {
     /**
      * Highlight multiple ranges on the worksheet.
      * @param {FRange[]} ranges  The ranges to highlight.
-     * @param {Nullable<Partial<ISelectionStyle>>} style - style for highlight ranges.
-     * @param {Nullable<ISelectionCell>} primary - primary cell for highlight ranges.
+     * @param {Nullable<Partial<ISelectionStyle>>} [style] - style for highlight ranges.
+     * @param {Nullable<ISelectionCell>} [primary] - primary cell for highlight ranges.
      * @return {IDisposable} An IDisposable to remove the highlights.
      * @example
      * ```ts
@@ -113,7 +113,7 @@ export interface IFWorksheetUIMixin {
 
     /**
      * Get visible range of main viewport.
-     * @returns {IRange} - visible range
+     * @returns {IRange | null} The visible range of the main viewport, or `null` if no sheet skeleton is available.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -121,14 +121,16 @@ export interface IFWorksheetUIMixin {
      * if (!fWorksheet) return;
      * const visibleRange = fWorksheet.getVisibleRange();
      * console.log(visibleRange);
-     * console.log(fWorksheet.getRange(visibleRange).getA1Notation());
+     * if (visibleRange) {
+     *   console.log(fWorksheet.getRange(visibleRange).getA1Notation());
+     * }
      * ```
      */
     getVisibleRange(): IRange | null;
 
     /**
      * Get visible ranges of all viewports.
-     * @returns {Record<SHEET_VIEWPORT_KEY, IRange>} - visible ranges of all viewports
+     * @returns {Map<SHEET_VIEWPORT_KEY, IRange> | null} Visible ranges keyed by viewport in a `Map`, or `null` if no sheet skeleton is available.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -137,7 +139,9 @@ export interface IFWorksheetUIMixin {
      * const visibleRanges = fWorksheet.getVisibleRangesOfAllViewports();
      * console.log(visibleRanges);
      * const mainLeftTopViewportRange = visibleRanges?.get(univerAPI.Enum.SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP);
-     * console.log(fWorksheet.getRange(mainLeftTopViewportRange).getA1Notation());
+     * if (mainLeftTopViewportRange) {
+     *   console.log(fWorksheet.getRange(mainLeftTopViewportRange).getA1Notation());
+     * }
      * ```
      */
     getVisibleRangesOfAllViewports(): Map<SHEET_VIEWPORT_KEY, IRange> | null;
@@ -292,7 +296,7 @@ export interface IFWorksheetUIMixin {
     customizeRowHeader(cfg: IRowsHeaderCfgParam): void;
 
     /**
-     * Set column height for column header.
+     * Sets the height of the column header in pixels.
      * @param {number} height - The height to set.
      * @returns {FWorksheet} - The FWorksheet instance for chaining.
      * @example
@@ -306,7 +310,7 @@ export interface IFWorksheetUIMixin {
     setColumnHeaderHeight(height: number): FWorksheet;
 
     /**
-     * Set column height for column header.
+     * Sets the width of the row header in pixels.
      * @param {number} width - The width to set.
      * @returns {FWorksheet} - The FWorksheet instance for chaining.
      * @example
@@ -553,6 +557,5 @@ export class FWorksheetUIMixin extends FWorksheet implements IFWorksheetUIMixin 
 
 FWorksheet.extend(FWorksheetUIMixin);
 declare module '@univerjs/sheets/facade' {
-    // eslint-disable-next-line ts/naming-convention
     interface FWorksheet extends IFWorksheetUIMixin { }
 }

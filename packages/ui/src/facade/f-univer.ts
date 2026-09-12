@@ -144,7 +144,7 @@ export interface IFUniverUIMixin {
      * @param {IFacadeMenuItem} menuItem the menu item
      * @returns the {@link FMenu} object
      * @example
-     * ```ts
+     * ```tsx
      * // Univer Icon can be viewed at https://docs.univer.ai/icons
      * import { SmileIcon } from '@univerjs/icons'
      *
@@ -256,7 +256,7 @@ export interface IFUniverUIMixin {
      * @param {IDialogPartMethodOptions} dialog the dialog options
      * @returns {IDisposable} the disposable object
      * @example
-     * ```ts
+     * ```tsx
      * import { Button } from '@univerjs/design';
      *
      * univerAPI.openDialog({
@@ -298,6 +298,7 @@ export interface IFUniverUIMixin {
     /**
      * Show a message.
      * @returns {FUniver} the {@link FUniver} instance for chaining
+     * @param {IMessageProps} options Message content, type, duration, and other display options.
      * @example
      * ```ts
      * univerAPI.showMessage({
@@ -325,7 +326,7 @@ export interface IFUniverUIMixin {
      * @param {BuiltInUIPart} key the built-in UI part
      * @param {boolean} visible the visibility
      * @returns the {@link FUniver} instance for chaining
-     * example
+     * @example
      * ```ts
      * // Hide header, footer, and toolbar
      * univerAPI.setUIVisible(univerAPI.Enum.BuiltInUIPart.HEADER, false)
@@ -373,7 +374,7 @@ export interface IFUniverUIMixin {
      * @param {IComponentOptions} [options] - The options of the component.
      * @returns {IDisposable} The disposable object.
      * @example
-     * ```ts
+     * ```tsx
      * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
      * if (!fWorksheet) return;
      *
@@ -551,6 +552,5 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
 
 FUniver.extend(FUniverUIMixin);
 declare module '@univerjs/core/facade' {
-    // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverUIMixin { }
 }

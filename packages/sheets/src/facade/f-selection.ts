@@ -93,7 +93,7 @@ export class FSelection {
 
     /**
      * Represents the current select cell in the sheet.
-     * @returns {ISelectionCell} The current select cell info.Pay attention to the type of the return value.
+     * @returns {Nullable<ISelectionCell>} The primary cell of the current selection, or `null` when none exists.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();

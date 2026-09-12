@@ -76,7 +76,7 @@ export interface IFUniverSheetsMixin {
     /**
      * Create a new spreadsheet and get the API handler of that spreadsheet.
      * @param {Partial<IWorkbookData>} data The snapshot of the spreadsheet.
-     * @param {ICreateUnitOptions} options The options of creating the spreadsheet.
+     * @param {ICreateUnitOptions} [options] The options of creating the spreadsheet.
      * @returns {FWorkbook} The spreadsheet API instance.
      * @example
      * ```ts
@@ -118,13 +118,12 @@ export interface IFUniverSheetsMixin {
 
     /**
      * Get the target of the sheet.
-     * @param {ICommandInfo<object>} commandInfo - The commandInfo of the command.
-     * @returns {Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>} - The target of the sheet.
+     * @param {{ unitId?: string; subUnitId?: string; sheetId?: string }} [params] Target IDs from the command parameters. Omitted IDs use the current workbook and active sheet.
+     * @returns {{ workbook: FWorkbook; worksheet: FWorksheet; unitId: string; subUnitId: string } | null} The resolved workbook, worksheet, and their IDs, or `null` if the target cannot be resolved.
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.CommandExecuted, (event) => {
-     *   const { options, ...commandInfo } = event;
-     *   const target = univerAPI.getSheetCommandTarget(commandInfo.params);
+     *   const target = univerAPI.getSheetCommandTarget(event.params);
      *   if (!target) return;
      *   const { workbook, worksheet } = target;
      *   console.log(workbook, worksheet);
@@ -226,7 +225,6 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
     /**
      * @ignore
      */
-    // eslint-disable-next-line max-lines-per-function
     override _initialize(injector: Injector): void {
         const univerInstanceService = injector.get(IUniverInstanceService);
         const commandService = injector.get(ICommandService);
@@ -745,6 +743,5 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
 
 FUniver.extend(FUniverSheetsMixin);
 declare module '@univerjs/core/facade' {
-    // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverSheetsMixin { }
 }

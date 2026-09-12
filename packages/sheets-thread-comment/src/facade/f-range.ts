@@ -76,8 +76,8 @@ export interface IFRangeSheetsThreadCommentMixin {
     /**
      * Add a comment to the start cell in the current range.
      * @param content The content of the comment.
-     * @param options Optional stable IDs, author, attachments, and creation time.
-     * @returns Whether the comment is added successfully.
+     * @param [options] Optional stable IDs, author, attachments, and creation time.
+     * @returns {Promise<boolean>} Whether the comment is added successfully.
      * @throws {TypeError} If the content is empty.
      * @example
      * ```ts
@@ -108,7 +108,7 @@ export interface IFRangeSheetsThreadCommentMixin {
 
     /**
      * Clear the comment of the start cell in the current range.
-     * @returns Whether the comment is cleared successfully.
+     * @returns {Promise<boolean>} Whether the comment is cleared successfully.
      * @example
      * ```ts
      * const range = univerAPI.getActiveWorkbook().getActiveSheet().getRange('A1');
@@ -120,7 +120,7 @@ export interface IFRangeSheetsThreadCommentMixin {
 
     /**
      * Clear all of the comments in the current range.
-     * @returns Whether the comments are cleared successfully.
+     * @returns {Promise<boolean>} Whether the comments are cleared successfully.
      * @example
      * ```ts
      * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');

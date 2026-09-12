@@ -42,7 +42,7 @@ export interface IDataValidationError {
 export interface IFWorkbookSheetsDataValidationMixin {
     /**
      * Get data validation validator status for current workbook.
-     * @returns A promise that resolves to a matrix of validator status.
+     * @returns {Promise<Record<string, ObjectMatrix<Nullable<DataValidationStatus>>>>} A promise resolving to an object keyed by sheet ID, with a validation-status matrix for each sheet.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -54,11 +54,11 @@ export interface IFWorkbookSheetsDataValidationMixin {
 
     /**
      * Get all data validation errors for current workbook.
-     * @returns A promise that resolves to an array of validation errors.
+     * @returns {Promise<IDataValidationError[]>} A promise that resolves to an array of validation errors.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const errors = await fWorkbook.getAllDataValidationError();
+     * const errors = await fWorkbook.getAllDataValidationErrorAsync();
      * console.log(errors);
      * ```
      */
@@ -182,6 +182,5 @@ export class FWorkbookSheetsDataValidationMixin extends FWorkbook implements IFW
 
 FWorkbook.extend(FWorkbookSheetsDataValidationMixin);
 declare module '@univerjs/sheets/facade' {
-    // eslint-disable-next-line ts/naming-convention
     interface FWorkbook extends IFWorkbookSheetsDataValidationMixin { }
 }

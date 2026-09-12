@@ -47,7 +47,7 @@ export interface IFWorksheetTableMixin {
      * @param {ITableRange} rangeInfo The table range information
      * @param {string} [tableId] The table id
      * @param {ITableOptions} [options] The table options
-     * @returns {Promise<boolean>} Whether the table was added successfully
+     * @returns {Promise<boolean> | boolean} `false` for an invalid table name; otherwise, a promise resolving to whether the command succeeded.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -187,7 +187,7 @@ export interface IFWorksheetTableMixin {
      * Set the name of a table
      * @param {string} tableId The table id
      * @param {string} tableName The new table name
-     * @returns {Promise<boolean>} Whether the table name was set successfully
+     * @returns {Promise<boolean> | boolean} `false` for an invalid table name; otherwise, a promise resolving to whether the command succeeded.
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -474,6 +474,5 @@ export class FWorksheetTableMixin extends FWorksheet implements IFWorksheetTable
 
 FWorksheet.extend(FWorksheetTableMixin);
 declare module '@univerjs/sheets/facade' {
-    // eslint-disable-next-line ts/naming-convention
     interface FWorksheet extends IFWorksheetTableMixin { }
 }

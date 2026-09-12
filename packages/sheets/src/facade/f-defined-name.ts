@@ -107,7 +107,7 @@ export class FDefinedNameBuilder {
 
     /**
      * Sets the formula of the defined name builder.
-     * @param {string }formula The formula of the defined name.
+     * @param {string} formula The formula without the leading `=`; this method prepends it.
      * @returns {FDefinedNameBuilder} The instance of `FDefinedNameBuilder` for method chaining.
      * @example
      * ```ts
@@ -370,7 +370,7 @@ export class FDefinedName extends FBase {
 
     /**
      * Sets the formula of the defined name.
-     * @param {string} formula The formula of the defined name.
+     * @param {string} formula The formula without the leading `=`; this method prepends it.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();

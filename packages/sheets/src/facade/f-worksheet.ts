@@ -114,7 +114,9 @@ function assertValidRowInsertion(methodName: string, rowIndex: number, rowCount:
 }
 
 export interface IFacadeClearOptions {
+    /** Clears only content when true and `formatOnly` is false. */
     contentsOnly?: boolean;
+    /** Clears only formatting when true and `contentsOnly` is false. */
     formatOnly?: boolean;
 }
 
@@ -145,6 +147,7 @@ export class FWorksheet extends FBaseInitialable {
         super(_injector);
     }
 
+    /** Releases this facade's resources. Use `univerAPI.disposeUnit()` to unload the owning unit. */
     override dispose(): void {
         super.dispose();
         //@ts-ignore
@@ -232,7 +235,7 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Get the current selection of the worksheet.
-     * @returns {FSelection} return the current selections of the worksheet or null if there is no selection.
+     * @returns {FSelection | null} The current selections, or `null` when no selection data is available.
      * @example
      * ```typescript
      * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
@@ -256,7 +259,7 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Get the default style of the worksheet.
-     * @returns {IStyleData} Default style of the worksheet.
+     * @returns {Nullable<IStyleData> | string} The default style object or style ID, or a nullish value when no default style is set.
      * @example
      * ```typescript
      * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
@@ -315,7 +318,7 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Set the default style of the worksheet
-     * @param {string} style - The style to set
+     * @param {string | Nullable<IStyleData>} style - A style ID or style object, or `null` to clear the default style.
      * @returns {FWorksheet} This worksheet instance for chaining
      * @example
      * ```typescript
@@ -339,8 +342,8 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
-     * Set the default style of the worksheet row
-     * @param {number} index - The row index
+     * Set the default style of the worksheet column
+     * @param {number} index - The zero-based column index
      * @param {string | Nullable<IStyleData>} style - The style name or style data
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
@@ -372,8 +375,8 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
-     * Set the default style of the worksheet column
-     * @param {number} index - The column index
+     * Set the default style of the worksheet row
+     * @param {number} index - The zero-based row index
      * @param {string | Nullable<IStyleData>} style - The style name or style data
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
@@ -589,7 +592,7 @@ export class FWorksheet extends FBaseInitialable {
     /**
      * Inserts one or more consecutive blank rows in a sheet starting at the specified location.
      * @param {number} rowIndex - The existing row before which rows are inserted. The index is zero-based and must be between 0 and `getMaxRows() - 1`.
-     * @param {number} numRows - The positive number of rows to insert.
+     * @param {number} [numRows] - The positive number of rows to insert.
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
      * ```typescript
@@ -841,7 +844,7 @@ export class FWorksheet extends FBaseInitialable {
     /**
      * Hides one or more consecutive rows starting at the given index. Use 0-index for this method
      * @param {number} rowIndex - The starting index of the rows to hide
-     * @param {number} numRow - The number of rows to hide
+     * @param {number} [numRow] - The number of rows to hide
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
      * ```typescript
@@ -903,9 +906,9 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
-     * Scrolling sheet to make specific rows visible.
+     * Unhides one or more consecutive rows starting at the given zero-based index.
      * @param {number} rowIndex - The starting index of the rows
-     * @param {number} numRows - The number of rows
+     * @param {number} [numRows] - The number of rows
      * @returns {FWorksheet} This worksheet instance for chaining
      * @example
      * ```typescript
@@ -959,7 +962,7 @@ export class FWorksheet extends FBaseInitialable {
     /**
      * Make certain row wrap and auto height.
      * @param {number} rowPosition - The row position to change.
-     * @param {BooleanNumber} auto - Whether to auto fit the row height.
+     * @param {BooleanNumber} [auto] - Whether to auto fit the row height.
      * @returns {FWorksheet} This worksheet instance for chaining
      * @example
      * ```ts
@@ -1246,7 +1249,7 @@ export class FWorksheet extends FBaseInitialable {
     /**
      * Inserts one or more consecutive blank columns in a sheet starting at the specified location.
      * @param {number} columnIndex - The index indicating where to insert a column, starting at 0 for the first column
-     * @param {number} numColumns - The number of columns to insert
+     * @param {number} [numColumns] - The number of columns to insert
      * @returns {FWorksheet} This sheet, for chaining
      * @example
      * ```typescript
@@ -1493,7 +1496,7 @@ export class FWorksheet extends FBaseInitialable {
     /**
      * Hides one or more consecutive columns starting at the given index. Use 0-index for this method
      * @param {number} columnIndex - The starting index of the columns to hide
-     * @param {number} numColumn - The number of columns to hide
+     * @param {number} [numColumn] - The number of columns to hide
      * @returns {FWorksheet} This sheet, for chaining
      * @example
      * ```typescript
@@ -1558,7 +1561,7 @@ export class FWorksheet extends FBaseInitialable {
     /**
      * Show one or more consecutive columns starting at the given index. Use 0-index for this method
      * @param {number} columnIndex - The starting index of the columns to unhide
-     * @param {number} numColumns - The number of columns to unhide
+     * @param {number} [numColumns] - The number of columns to unhide
      * @returns {FWorksheet} This sheet, for chaining
      * @example
      * ```typescript
@@ -1658,7 +1661,7 @@ export class FWorksheet extends FBaseInitialable {
      * fRange.setValue('Whenever it is a damp, drizzly November in my soul...');
      *
      * // Set the column A to a width which fits the text
-     * fWorksheet.autoResizeColumn(0);
+     * fWorksheet.autoResizeColumns(0);
      *
      * // Get the width of the column A
      * console.log(fWorksheet.getColumnWidth(0));
@@ -2172,7 +2175,7 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Sets the sheet tab color.
-     * @param {string|null|undefined} color - A color code in CSS notation (like '#ffffff' or 'white'), or null to reset the tab color.
+     * @param {string} color - A color in CSS notation, such as '#ffffff' or 'white'.
      * @returns {FWorksheet} Returns the current worksheet instance for method chaining
      * @example
      * ```ts
@@ -2194,8 +2197,7 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Get the tab color of the sheet.
-     * @returns {string} The tab color of the sheet or undefined.
-     * The default color is css style property 'unset'.
+     * @returns {string | undefined} The tab color, or `undefined` when no color is set.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -2330,10 +2332,11 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
-     * Clears the sheet of content and formatting information.Or Optionally clears only the contents or only the formatting.
+     * Clears the sheet content and formatting, or only one of them as specified by the options.
+     * Both content and formatting are cleared when both flags are true or both are false.
      * @param {IFacadeClearOptions} [options] - Options for clearing the sheet. If not provided, the contents and formatting are cleared both.
-     * @param {boolean} [options.contentsOnly] - If true, the contents of the sheet are cleared. If false, the contents and formatting are cleared. Default is false.
-     * @param {boolean} [options.formatOnly] - If true, the formatting of the sheet is cleared. If false, the contents and formatting are cleared. Default is false.
+     * @param {boolean} [options.contentsOnly] - If true, the contents of the sheet are cleared. Effective only when `formatOnly` is false. Defaults to false.
+     * @param {boolean} [options.formatOnly] - Clears only formatting when true and `contentsOnly` is false. Defaults to false.
      * @returns {FWorksheet} Returns the current worksheet instance for method chaining
      * @example
      * ```ts
@@ -2461,8 +2464,8 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
-     * Returns the column index of the last column that contains content.
-     * @returns {number} the column index of the last column that contains content.
+     * Returns the zero-based index of the last column with stored cell data, including formatting-only cells.
+     * @returns {number} The last stored column index, or 0 for an empty sheet.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -2479,8 +2482,8 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
-     * Returns the row index of the last row that contains content.
-     * @returns {number} the row index of the last row that contains content.
+     * Returns the zero-based index of the last row with stored cell data, including formatting-only cells.
+     * @returns {number} The last stored row index, or 0 for an empty sheet.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();

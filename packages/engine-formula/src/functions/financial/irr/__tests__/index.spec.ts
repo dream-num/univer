@@ -34,6 +34,25 @@ describe('Test irr function', () => {
             expect(getObjectValue(result, true)).toBe(0.0866309480365);
         });
 
+        it('handles long cashflows when low bracket rates overflow', () => {
+            const cashflows = [
+                -149150,
+                ...Array.from({ length: 24 }, () => 250),
+                ...Array.from({ length: 276 }, () => 832.1256634329588),
+            ];
+            const values = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([cashflows]),
+                rowCount: 1,
+                columnCount: cashflows.length,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+
+            expect(getObjectValue(testFunction.calculate(values), true)).toBe(0.00308889248291);
+        });
+
         it('Value is normal, but no positive and negative number', () => {
             const values = ArrayValueObject.create('{700000,120000,150000,180000,210000,260000}');
             const guess = NumberValueObject.create(0.1);

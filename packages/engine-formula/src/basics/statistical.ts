@@ -1025,6 +1025,85 @@ function getSlopeAndInterceptOfConstbIsFalse(knownXsValues: number[], knownYsVal
     };
 }
 
+function solveLeastSquaresByQR(matrix: number[][], values: number[]): number[] | null {
+    const rows = matrix.length;
+    const columns = matrix[0]?.length ?? 0;
+
+    if (!columns || rows < columns || values.length !== rows || matrix.some((row) => row.length !== columns)) {
+        return null;
+    }
+
+    const qr = matrix.map((row) => [...row]);
+    const scales: number[] = [];
+
+    for (let column = 0; column < columns; column++) {
+        let sumSquares = 0;
+        for (let row = 0; row < rows; row++) {
+            sumSquares += qr[row][column] ** 2;
+        }
+        const scale = Math.sqrt(sumSquares);
+        if (!Number.isFinite(scale) || scale === 0) {
+            return null;
+        }
+        scales.push(scale);
+        for (let row = 0; row < rows; row++) {
+            qr[row][column] /= scale;
+        }
+    }
+
+    const transformed = [...values];
+    for (let pivot = 0; pivot < columns; pivot++) {
+        let sumSquares = 0;
+        for (let row = pivot; row < rows; row++) {
+            sumSquares += qr[row][pivot] ** 2;
+        }
+        const norm = Math.sqrt(sumSquares);
+        if (!Number.isFinite(norm) || norm <= Number.EPSILON * rows) {
+            return null;
+        }
+        const alpha = qr[pivot][pivot] >= 0 ? -norm : norm;
+        const reflector = Array.from({ length: rows - pivot }, (_, offset) => qr[pivot + offset][pivot]);
+        reflector[0] -= alpha;
+        const reflectorNorm = reflector.reduce((sum, value) => sum + value ** 2, 0);
+        if (!Number.isFinite(reflectorNorm) || reflectorNorm === 0) {
+            return null;
+        }
+
+        for (let column = pivot; column < columns; column++) {
+            let projection = 0;
+            for (let offset = 0; offset < reflector.length; offset++) {
+                projection += reflector[offset] * qr[pivot + offset][column];
+            }
+            const factor = 2 * projection / reflectorNorm;
+            for (let offset = 0; offset < reflector.length; offset++) {
+                qr[pivot + offset][column] -= factor * reflector[offset];
+            }
+        }
+        let projection = 0;
+        for (let offset = 0; offset < reflector.length; offset++) {
+            projection += reflector[offset] * transformed[pivot + offset];
+        }
+        const factor = 2 * projection / reflectorNorm;
+        for (let offset = 0; offset < reflector.length; offset++) {
+            transformed[pivot + offset] -= factor * reflector[offset];
+        }
+    }
+
+    const coefficients = new Array(columns).fill(0);
+    for (let row = columns - 1; row >= 0; row--) {
+        const diagonal = qr[row][row];
+        if (!Number.isFinite(diagonal) || Math.abs(diagonal) <= Number.EPSILON * rows) {
+            return null;
+        }
+        let remainder = 0;
+        for (let column = row + 1; column < columns; column++) {
+            remainder += qr[row][column] * coefficients[column];
+        }
+        coefficients[row] = (transformed[row] - remainder) / diagonal;
+    }
+    return coefficients.map((coefficient, index) => coefficient / scales[index]);
+}
+
 export function getKnownsArrayCoefficients(knownYsValues: number[][], knownXsValues: number[][], newXsValues: number[][], constb: number, isExponentialTransform: boolean) {
     const isOneRow = knownYsValues.length === 1 && knownYsValues[0].length > 1;
 
@@ -1049,8 +1128,6 @@ export function getKnownsArrayCoefficients(knownYsValues: number[][], knownXsVal
 
     const XT = matrixTranspose(X);
     const XTX = calculateMmult(XT, X);
-    const XTY = calculateMmult(XT, Y);
-
     let XTXInverse = inverseMatrixByLUD(XTX);
 
     if (!XTXInverse) {
@@ -1061,13 +1138,17 @@ export function getKnownsArrayCoefficients(knownYsValues: number[][], knownXsVal
         }
     }
 
-    let coefficients = calculateMmult(XTXInverse, XTY);
+    const solved = solveLeastSquaresByQR(X, Y.map((row) => row[0]));
 
-    if (!constb) {
-        coefficients.push([0]);
+    if (!solved) {
+        return ErrorValueObject.create(ErrorType.NA);
     }
 
-    coefficients = matrixTranspose(coefficients);
+    const coefficients = [solved];
+
+    if (!constb) {
+        coefficients[0].push(0);
+    }
 
     const pop = coefficients[0].pop() as number;
 
@@ -1162,13 +1243,17 @@ const NESTED_AGGREGATE_FORMULA_CACHE = new WeakMap<FormulaDataModel, Map<string,
 
 // Check if the cell is a nested SUBTOTAL or AGGREGATE result
 function isNestedAggregateOrSubtotal(
-    cellData: ObjectMatrix<ICellData>,
+    cellData: Nullable<ObjectMatrix<ICellData>>,
     rowIndex: number,
     columnIndex: number,
     sheetId: string,
     unitId: string,
     formulaDataModel: FormulaDataModel
 ): boolean {
+    if (!cellData) {
+        return false;
+    }
+
     const cellValue = cellData.getValue(rowIndex, columnIndex);
 
     if (!cellValue?.f && !cellValue?.si) {

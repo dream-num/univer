@@ -31,6 +31,12 @@ export class Sumif extends BaseFunction {
     override needsReferenceObject = true;
 
     override calculate(range: FunctionVariantType, criteria: FunctionVariantType, sumRange?: FunctionVariantType): BaseValueObject {
+        if (range.isError()) {
+            return range as BaseValueObject;
+        }
+        if (sumRange?.isError()) {
+            return sumRange as BaseValueObject;
+        }
         if (!range.isReferenceObject() || (sumRange && !sumRange.isReferenceObject())) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }

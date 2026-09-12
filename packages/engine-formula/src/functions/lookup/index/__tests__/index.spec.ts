@@ -627,8 +627,7 @@ describe('Test index', () => {
             // null
             let result = await calculate('=INDEX(A6:B7,2)');
 
-            // reference Google Sheets
-            expect(result).toStrictEqual([['Alex', 'Mickey']]);
+            expect(result).toBe(ErrorType.REF);
 
             // blank cell
             result = await calculate('=INDEX(A6:B7,2,)');
@@ -692,8 +691,7 @@ describe('Test index', () => {
             // null
             let result = await calculate('=INDEX(A6:B7,A3:A5)');
 
-            // reference Google Sheets
-            expect(result).toStrictEqual([['Tom'], ['Tom'], ['Tom']]);
+            expect(result).toStrictEqual([[ErrorType.REF], ['Tom'], ['Tom']]);
 
             // blank cell
             result = await calculate('=INDEX(A6:B7,A3:A5,)');
@@ -742,6 +740,10 @@ describe('Test index', () => {
     });
 
     describe('Reference is Array', () => {
+        it('returns a whole row when column number is omitted', async () => {
+            expect(await calculate('=INDEX({1,2,3;4,5,6},2)')).toStrictEqual([[4, 5, 6]]);
+        });
+
         it('Row number 1, column number 1', async () => {
             // number
             let result = await calculate('=INDEX({1,2;3,4},0,2)');

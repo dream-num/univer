@@ -992,6 +992,12 @@ describe('lexer nodeMaker test', () => {
                 expect(JSON.stringify(exprTreeNode)).toStrictEqual('{"value":"SUM(Table1[Column1])+MAX(Table2[ColumnA],Table2[ColumnB])","children":[{"value":"SUM(Table1[Column1])","children":[{"value":"Table1[Column1]","children":[],"startIndex":-1}],"startIndex":0},{"value":"MAX(Table2[ColumnA],Table2[ColumnB])","children":[{"value":"Table2[ColumnA]","children":[],"startIndex":-1},{"value":"Table2[ColumnB]","children":[],"startIndex":-1}],"startIndex":23}],"startIndex":-1}');
             });
 
+            it('keeps missing table references in the expression tree', () => {
+                const exprTreeNode = lexerTreeBuilder.getFormulaExprTree('=SUM(Tout[Quantity])', 'mockUnitId', hasFunction, getDefinedNameName, getTable) || {};
+
+                expect(JSON.stringify(exprTreeNode)).toStrictEqual('{"value":"SUM(Tout[Quantity])","children":[{"value":"Tout[Quantity]","children":[],"startIndex":-1}],"startIndex":0}');
+            });
+
             it('builds ExprTree with mixed defined names and table references', () => {
                 const exprTreeNode = lexerTreeBuilder.getFormulaExprTree('=SUM(defineName1, Table1[Column1]) + OFFSET(Table2[ColumnC], defineName2, 0)', 'mockUnitId', hasFunction, getDefinedNameName, getTable) || {};
 

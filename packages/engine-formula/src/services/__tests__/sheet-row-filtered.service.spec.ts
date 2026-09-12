@@ -27,11 +27,16 @@ describe('SheetRowFilteredService', () => {
         service = injector.get(ISheetRowFilteredService);
     });
 
-    it('delegates row visibility checks to the active filter feature', () => {
-        service.register((unitId, subUnitId, row) => unitId === 'book-1' && subUnitId === 'sheet-1' && row === 3);
+    it('combines row visibility checks from every filter feature', () => {
+        const sheetFilter = service.register((unitId, subUnitId, row) => unitId === 'book-1' && subUnitId === 'sheet-1' && row === 3);
+        service.register((unitId, subUnitId, row) => unitId === 'book-1' && subUnitId === 'sheet-1' && row === 4);
 
         expect(service.getRowFiltered('book-1', 'sheet-1', 3)).toBe(true);
-        expect(service.getRowFiltered('book-1', 'sheet-1', 4)).toBe(false);
+        expect(service.getRowFiltered('book-1', 'sheet-1', 4)).toBe(true);
         expect(service.getRowFiltered('book-1', 'sheet-2', 3)).toBe(false);
+
+        sheetFilter.dispose();
+        expect(service.getRowFiltered('book-1', 'sheet-1', 3)).toBe(false);
+        expect(service.getRowFiltered('book-1', 'sheet-1', 4)).toBe(true);
     });
 });

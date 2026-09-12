@@ -256,4 +256,24 @@ describe('WorksheetPermissionService', () => {
         expect(permissionService.updatedPermissionPoints.length).toBeGreaterThan(0);
         expect(permissionService.updatedPermissionPoints.every((item) => item.id.includes('book-1') && item.id.includes('sheet-1') && item.value === false)).toBe(true);
     });
+
+    it('keeps worksheet permission points enabled for cell-style protection rules', () => {
+        const ruleResource = resourceManagerService.resources[0];
+        permissionService.updatedPermissionPoints.length = 0;
+
+        ruleResource.onLoad('book-1', {
+            'book-1': [{
+                permissionId: 'xlsx-protection',
+                unitType: UnitObject.Worksheet,
+                unitId: 'book-1',
+                subUnitId: 'sheet-1',
+                viewState: ViewStateEnum.OthersCanView,
+                editState: EditStateEnum.OnlyMe,
+                cellStyleProtection: true,
+            }],
+        });
+
+        expect(worksheetRuleModel.getRule('book-1', 'sheet-1')?.cellStyleProtection).toBe(true);
+        expect(permissionService.updatedPermissionPoints).toEqual([]);
+    });
 });

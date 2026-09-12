@@ -17,7 +17,7 @@
 import type { IDisposable } from '../common/di';
 import type { IInterceptor } from '../common/interceptor';
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
-import type { BooleanNumber, HorizontalAlign, TextDirection, VerticalAlign, WrapStrategy } from '../types/enum';
+import type { HorizontalAlign, TextDirection, VerticalAlign, WrapStrategy } from '../types/enum';
 import type { IDocumentData, IDocumentRenderConfig, IPaddingData, IStyleData, ITextRotation } from '../types/interfaces';
 import type { Styles } from './styles';
 import type {
@@ -36,14 +36,14 @@ import { composeStyles, ObjectMatrix, toDisposable, Tools } from '../shared';
 import { generateRandomId } from '../shared/random-id';
 import { createRowColIter } from '../shared/row-col-iter';
 import { DEFAULT_STYLES } from '../types/const';
-import { CellValueType } from '../types/enum';
+import { BooleanNumber, CellValueType } from '../types/enum';
 import { DocumentFlavor } from '../types/interfaces';
 import { ColumnManager } from './column-manager';
 import { Range } from './range';
 import { RowManager } from './row-manager';
 import { mergeWorksheetSnapshotWithDefault } from './sheet-snapshot-utils';
 import { SpanModel } from './span-model';
-import { CellModeEnum } from './typedef';
+import { CellModeEnum, WorksheetVisibility } from './typedef';
 import {
     addLinkToDocumentModel,
     createDocumentModelWithStyle,
@@ -834,6 +834,19 @@ export class Worksheet {
      */
     isSheetHidden(): BooleanNumber {
         return this._snapshot.hidden;
+    }
+
+    getSheetVisibility(): WorksheetVisibility {
+        return this._snapshot.visibility ?? (this._snapshot.hidden === BooleanNumber.TRUE
+            ? WorksheetVisibility.HIDDEN
+            : WorksheetVisibility.VISIBLE);
+    }
+
+    setSheetVisibility(visibility: WorksheetVisibility): void {
+        this._snapshot.visibility = visibility;
+        this._snapshot.hidden = visibility === WorksheetVisibility.VISIBLE
+            ? BooleanNumber.FALSE
+            : BooleanNumber.TRUE;
     }
 
     /**

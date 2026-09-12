@@ -15,6 +15,7 @@
  */
 
 import { ICommandService, IConfigService, IUniverInstanceService } from '@univerjs/core';
+import { WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { describe, expect, it, vi } from 'vitest';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import {
@@ -41,7 +42,7 @@ describe('cell edit operations', () => {
         const accessor = createAccessor([
             [IConfigService, { getConfig: vi.fn(() => ({ disableEdit: true })) }],
             [IUniverInstanceService, { getCurrentUnitOfType: vi.fn(() => ({ getUnitId: () => 'u1' })) }],
-            [IEditorBridgeService, { changeVisible }],
+            [IEditorBridgeService, { changeVisible, getEditLocation: vi.fn(() => null) }],
         ]);
 
         expect(SetCellEditVisibleOperation.handler(accessor, undefined as any)).toBe(false);
@@ -53,7 +54,7 @@ describe('cell edit operations', () => {
         const accessor = createAccessor([
             [IConfigService, { getConfig: vi.fn(() => ({ disableEdit: false })) }],
             [IUniverInstanceService, { getCurrentUnitOfType: vi.fn(() => null) }],
-            [IEditorBridgeService, { changeVisible: vi.fn() }],
+            [IEditorBridgeService, { changeVisible: vi.fn(), getEditLocation: vi.fn(() => null) }],
         ]);
 
         expect(SetCellEditVisibleOperation.handler(accessor, { visible: false } as any)).toBe(false);
@@ -64,11 +65,33 @@ describe('cell edit operations', () => {
         const accessor = createAccessor([
             [IConfigService, { getConfig: vi.fn(() => ({ disableEdit: false })) }],
             [IUniverInstanceService, { getCurrentUnitOfType: vi.fn(() => ({ getUnitId: () => 'workbook-u1' })) }],
-            [IEditorBridgeService, { changeVisible }],
+            [IEditorBridgeService, { changeVisible, getEditLocation: vi.fn(() => null) }],
         ]);
 
         expect(SetCellEditVisibleOperation.handler(accessor, { visible: true } as any)).toBe(true);
         expect(changeVisible).toHaveBeenCalledWith({ visible: true, unitId: 'workbook-u1' });
+    });
+
+    it('keeps a protected formula-hidden cell editor closed', () => {
+        const changeVisible = vi.fn();
+        const workbook = {
+            getUnitId: () => 'u1',
+            getSheetBySheetId: vi.fn(() => ({
+                getComposedCellStyle: vi.fn(() => ({ formulaHidden: 1 })),
+            })),
+        };
+        const accessor = createAccessor([
+            [IConfigService, { getConfig: vi.fn(() => ({ disableEdit: false })) }],
+            [IUniverInstanceService, { getCurrentUnitOfType: vi.fn(() => workbook) }],
+            [IEditorBridgeService, {
+                changeVisible,
+                getEditLocation: vi.fn(() => ({ unitId: 'u1', sheetId: 's1', row: 2, column: 3 })),
+            }],
+            [WorksheetProtectionRuleModel, { getRule: vi.fn(() => ({ unitId: 'u1', subUnitId: 's1' })) }],
+        ]);
+
+        expect(SetCellEditVisibleOperation.handler(accessor, { visible: true, unitId: 'u1' } as any)).toBe(false);
+        expect(changeVisible).not.toHaveBeenCalled();
     });
 
     it('SetCellEditVisibleWithF2Operation respects workbook existence and delegates command execution', () => {

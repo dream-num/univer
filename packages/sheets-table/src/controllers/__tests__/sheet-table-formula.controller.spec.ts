@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import type { IDirtyConversionManagerParams } from '@univerjs/engine-formula';
 import { RemoveSuperTableMutation, SetSuperTableMutation } from '@univerjs/engine-formula';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { SetSheetTableFilterMutation } from '../../commands/mutations/set-table-filter.mutation';
 import { SheetTableFormulaController } from '../sheet-table-formula.controller';
 
 describe('SheetTableFormulaController', () => {
@@ -49,7 +51,30 @@ describe('SheetTableFormulaController', () => {
         const executeCommand = vi.fn();
         const commandService = { executeCommand };
 
-        const controller = new SheetTableFormulaController(tableManager as any, commandService as any);
+        const dirtyConversions = new Map<string, IDirtyConversionManagerParams>();
+        const activeDirtyManagerService = {
+            register: vi.fn((id: string, conversion: IDirtyConversionManagerParams) => dirtyConversions.set(id, conversion)),
+            remove: vi.fn((id: string) => dirtyConversions.delete(id)),
+        };
+
+        const controller = new SheetTableFormulaController(
+            tableManager as any,
+            commandService as any,
+            activeDirtyManagerService as any
+        );
+
+        const filterDirtyData = dirtyConversions.get(SetSheetTableFilterMutation.id)?.getDirtyData({
+            id: SetSheetTableFilterMutation.id,
+            params: { unitId: 'u1', tableId: 't1', column: 0, tableFilter: undefined },
+        } as any);
+        expect(filterDirtyData).toEqual({
+            dirtyRanges: [{
+                unitId: 'u1',
+                sheetId: 's1',
+                range: { startRow: 0, endRow: 5, startColumn: 0, endColumn: 2 },
+            }],
+            clearDependencyTreeCache: { u1: { s1: '1' } },
+        });
 
         tableAdd$.next({ unitId: 'u1', tableId: 't1' });
 
@@ -93,5 +118,6 @@ describe('SheetTableFormulaController', () => {
         expect(executeCommand.mock.calls.every((call) => call[2]?.onlyLocal === true)).toBe(true);
 
         controller.dispose();
+        expect(activeDirtyManagerService.remove).toHaveBeenCalledWith(SetSheetTableFilterMutation.id);
     });
 });

@@ -16,10 +16,13 @@
 
 import type { IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import type { IFormulaUnitReferenceResolver } from '../../../services/unit-reference-resolver.service';
+import type { BaseValueObject } from '../../value-object/base-value-object';
 import { describe, expect, it, vi } from 'vitest';
+import { ErrorType } from '../../../basics/error-type';
 import { ReferenceObjectType } from '../../utils/value-object';
+import { ErrorValueObject } from '../../value-object/base-value-object';
 import { BaseAstNode } from '../base-ast-node';
-import { ReferenceNode } from '../reference-node';
+import { ReferenceNode, ReferenceNodeFactory } from '../reference-node';
 import { UnionNode } from '../union-node';
 
 describe('ReferenceNode external range loading', () => {
@@ -33,6 +36,7 @@ describe('ReferenceNode external range loading', () => {
             getUnitStylesData: () => ({}),
         };
         const runtime = {
+            markExternalReferenceUnavailable: vi.fn(),
             currentUnitId: 'host',
             currentSubUnitId: 'host-sheet',
             currentRow: 0,
@@ -81,5 +85,79 @@ describe('ReferenceNode external range loading', () => {
         expect(load).toHaveBeenCalledWith(expect.objectContaining({
             token: "'[Sales]Data'!A1:B2",
         }));
+    });
+
+    it('returns REF for a missing local structured table reference', () => {
+        const currentConfig = {
+            getSheetNameMap: () => ({}),
+            getUnitData: () => ({}),
+            getArrayFormulaCellData: () => ({}),
+            getArrayFormulaRange: () => ({}),
+            getUnitStylesData: () => ({}),
+        };
+        const runtime = {
+            markExternalReferenceUnavailable: vi.fn(),
+            currentUnitId: 'host',
+            currentSubUnitId: 'host-sheet',
+            currentRow: 0,
+            currentColumn: 0,
+            getUnitData: () => ({}),
+            getRuntimeArrayFormulaCellData: () => ({}),
+            getUnitArrayFormula: () => ({}),
+            getRuntimeFeatureCellData: () => ({}),
+        };
+        const factory = new ReferenceNodeFactory(
+            currentConfig as never,
+            runtime as never,
+            {} as never,
+            {
+                getTableMap: () => null,
+                getTableOptionMap: () => new Map(),
+            } as never,
+            { resolve: () => ({ unitId: 'host' }) } as IFormulaUnitReferenceResolver,
+            { load: vi.fn() } as never
+        );
+
+        const node = factory.checkAndCreateNodeType('Tout[Quantity]');
+        expect(node).toBeInstanceOf(ReferenceNode);
+        node?.execute();
+        expect((node?.getValue() as BaseValueObject).getValue()).toBe(ErrorType.REF);
+    });
+
+    it('keeps ordinary cell references out of the structured-table path', () => {
+        const currentConfig = {
+            getSheetNameMap: () => ({}),
+            getUnitData: () => ({}),
+            getArrayFormulaCellData: () => ({}),
+            getArrayFormulaRange: () => ({}),
+            getUnitStylesData: () => ({}),
+        };
+        const runtime = {
+            markExternalReferenceUnavailable: vi.fn(),
+            currentUnitId: 'host',
+            currentSubUnitId: 'host-sheet',
+            currentRow: 0,
+            currentColumn: 0,
+            getUnitData: () => ({}),
+            getRuntimeArrayFormulaCellData: () => ({}),
+            getUnitArrayFormula: () => ({}),
+            getRuntimeFeatureCellData: () => ({}),
+        };
+        const factory = new ReferenceNodeFactory(
+            currentConfig as never,
+            runtime as never,
+            {} as never,
+            {
+                getTableMap: () => null,
+                getTableOptionMap: () => new Map(),
+            } as never,
+            { resolve: () => ({ unitId: 'host' }) } as IFormulaUnitReferenceResolver,
+            { load: vi.fn() } as never
+        );
+
+        const node = factory.checkAndCreateNodeType('G2');
+        expect(node).toBeInstanceOf(ReferenceNode);
+        node?.execute();
+        expect(node?.getValue()).not.toBeInstanceOf(ErrorValueObject);
     });
 });

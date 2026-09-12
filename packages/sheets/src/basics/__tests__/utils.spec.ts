@@ -19,6 +19,7 @@ import { cellToRange, IUniverInstanceService } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import {
     createUniqueKey,
+    deserializeListOptions,
     discreteRangeToRange,
     findFirstNonEmptyCell,
     generateNullCell,
@@ -38,6 +39,11 @@ function createAccessor(getter: (token: unknown) => unknown): IAccessor {
 }
 
 describe('Test utils', () => {
+    it('trims legacy comma-delimited list options like Excel', () => {
+        expect(deserializeListOptions('Asc, Desc ,  Pending')).toEqual(['Asc', 'Desc', 'Pending']);
+        expect(deserializeListOptions('[" keep ","spaces"]')).toEqual([' keep ', 'spaces']);
+    });
+
     it('Test generateNullCell', () => {
         const range: IRange[] = [cellToRange(0, 0), cellToRange(1, 1)];
         const result = generateNullCell(range);

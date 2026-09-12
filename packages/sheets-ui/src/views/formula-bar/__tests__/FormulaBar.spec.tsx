@@ -52,6 +52,7 @@ import {
     SheetPermissionCheckController,
     SheetsSelectionsService,
     WorksheetProtectionRuleModel,
+    WorksheetSetCellValuePermission,
 } from '@univerjs/sheets';
 import { ComponentManager, ILayoutService, IUIPartsService, KeyCode, RediContext, UIPartsService } from '@univerjs/ui';
 import { act } from 'react';
@@ -287,6 +288,22 @@ function createFormulaBarTestBed(cellStyle?: IStyleData) {
     );
     injector.get(IUniverInstanceService).focusUnit(UNIT_ID);
     injector.get(IConfigService).setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, {});
+    injector.get(SheetsSelectionsService).addSelections([
+        {
+            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+            primary: {
+                startRow: 0,
+                endRow: 0,
+                startColumn: 0,
+                endColumn: 0,
+                actualRow: 0,
+                actualColumn: 0,
+                isMerged: false,
+                isMergedMainCell: false,
+            },
+            style: null,
+        } as never,
+    ]);
 
     const componentManager = injector.get(ComponentManager);
     componentManager.register(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, TestFormulaEditor);
@@ -496,6 +513,57 @@ describe('FormulaBar', () => {
         const editorHost = rendered.container.querySelector('[data-editor-id]')?.parentElement;
         expect(editorHost?.style.backgroundColor).toBe('#000000');
         expect(rendered.container.querySelector('[data-editor-id]')?.getAttribute('data-canvas-background')).toBeNull();
+    });
+
+    it.each([FormulaBar, MobileFormulaBar])('hides a protected cell formula while leaving an unprotected hidden style visible (%s)', (Bar) => {
+        currentBed = createFormulaBarTestBed({ formulaHidden: 1 } as IStyleData);
+        ({ container, root } = renderWithDependencies(<Bar />, currentBed.injector));
+
+        expect(container.querySelector('[data-u-comp="formula-bar-hidden-cover"]')).toBeNull();
+
+        act(() => {
+            currentBed!.injector.get(WorksheetProtectionRuleModel).addRule(UNIT_ID, {
+                unitId: UNIT_ID,
+                subUnitId: SHEET_ID,
+                permissionId: 'worksheet-protection',
+            } as never);
+        });
+
+        expect(container.querySelector('[data-u-comp="formula-bar-hidden-cover"]')).not.toBeNull();
+    });
+
+    it('allows value commands on an unlocked cell in a cell-style protected sheet', () => {
+        currentBed = createFormulaBarTestBed({ locked: 0 } as IStyleData);
+        currentBed.injector.get(WorksheetProtectionRuleModel).addRule(UNIT_ID, {
+            unitId: UNIT_ID,
+            subUnitId: SHEET_ID,
+            permissionId: 'xlsx-protection',
+            cellStyleProtection: true,
+        } as never);
+
+        expect(currentBed.injector.get(SheetPermissionCheckController).permissionCheckWithRanges(
+            { worksheetTypes: [WorksheetSetCellValuePermission] },
+            [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
+            UNIT_ID,
+            SHEET_ID
+        )).toBe(true);
+    });
+
+    it('blocks value commands on a locked cell in a cell-style protected sheet', () => {
+        currentBed = createFormulaBarTestBed({ locked: 1 } as IStyleData);
+        currentBed.injector.get(WorksheetProtectionRuleModel).addRule(UNIT_ID, {
+            unitId: UNIT_ID,
+            subUnitId: SHEET_ID,
+            permissionId: 'xlsx-protection',
+            cellStyleProtection: true,
+        } as never);
+
+        expect(currentBed.injector.get(SheetPermissionCheckController).permissionCheckWithRanges(
+            { worksheetTypes: [WorksheetSetCellValuePermission] },
+            [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
+            UNIT_ID,
+            SHEET_ID
+        )).toBe(false);
     });
 
     it('opens immersive mobile editing from the compact up arrow', async () => {

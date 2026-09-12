@@ -80,7 +80,14 @@ export class Cell extends BaseFunction {
         const { columnData, defaultColumnWidth } = currentActiveSheetData;
         const forcedSheetName = (_reference as BaseReferenceObject).getForcedSheetName();
 
-        _reference = (_reference as BaseReferenceObject).toArrayValueObject();
+        const referenceObject = _reference as BaseReferenceObject;
+        const cellData = referenceObject.getCellData(
+            referenceObject.getRangePosition().startRow,
+            referenceObject.getRangePosition().startColumn
+        );
+        const numberFormat = referenceObject.getCurrentStylesData()?.getStyleByCell(cellData)?.n?.pattern;
+
+        _reference = referenceObject.toArrayValueObject();
 
         const _currentRow = (_reference as ArrayValueObject).getCurrentRow();
         const _currentColumn = (_reference as ArrayValueObject).getCurrentColumn();
@@ -107,8 +114,7 @@ export class Cell extends BaseFunction {
                 // This value is not supported in Excel for the web. google sheet return #VALUE!.
                 return ErrorValueObject.create(ErrorType.VALUE);
             case 'format':
-                // This value is not supported in Excel for the web. google sheet return G.
-                return StringValueObject.create('G');
+                return StringValueObject.create(getCellFormatCode(numberFormat));
             case 'parentheses':
                 // This value is not supported in Excel for the web. return 0.
                 return NumberValueObject.create(0);
@@ -154,4 +160,30 @@ export class Cell extends BaseFunction {
 
         return ArrayValueObject.createByArray(resultArray);
     }
+}
+
+function getCellFormatCode(pattern?: string): string {
+    if (!pattern || /^general$/iu.test(pattern.trim())) return 'G';
+
+    const normalized = pattern
+        .split(';')[0]
+        .replace(/"[^"]*"/gu, '')
+        .replace(/\\./gu, '')
+        .replace(/_.|\*./gu, '')
+        .toLocaleLowerCase();
+    const hasDate = /[yd]/u.test(normalized);
+    const hasTime = /h|s/u.test(normalized);
+
+    if (hasDate) return 'D4';
+    if (hasTime) return /s/u.test(normalized) ? 'D8' : 'D9';
+    if (/%/u.test(normalized)) return `P${decimalPlaces(normalized)}`;
+    if (/[eE][+-]?0+/u.test(normalized)) return `S${decimalPlaces(normalized)}`;
+    if (/[$£¥€]/u.test(normalized)) return `C${decimalPlaces(normalized)}`;
+    if (/,/u.test(normalized)) return `,${decimalPlaces(normalized)}`;
+    if (/[0#?]/u.test(normalized)) return `F${decimalPlaces(normalized)}`;
+    return 'G';
+}
+
+function decimalPlaces(pattern: string): number {
+    return pattern.match(/\.([0#?]+)/u)?.[1]?.length ?? 0;
 }

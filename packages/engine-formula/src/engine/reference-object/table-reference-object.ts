@@ -349,7 +349,7 @@ export class TableReferenceObject extends BaseReferenceObject {
 
     /** Column title → column index; returns -1 if not found (caller should handle as parse error) */
     private _titleToIndex(name: string, titleMap: Map<string, number>): number {
-        const key = name.trim();
+        const key = this._unescapeColumnName(name.trim());
         const hit = titleMap.get(key);
         if (hit !== undefined) return hit;
 
@@ -365,6 +365,10 @@ export class TableReferenceObject extends BaseReferenceObject {
             }
         }
         return -1;
+    }
+
+    private _unescapeColumnName(name: string): string {
+        return name.replace(/'(['#\[\]@])/g, '$1');
     }
 
     /** Resolve #This Row's row number; takes first data row (tableStartRow+1) when no context available */

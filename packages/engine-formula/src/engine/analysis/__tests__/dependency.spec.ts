@@ -19,6 +19,7 @@ import type { FormulaDependencyTreeVirtual } from '../../dependency/dependency-t
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
 import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
+import { IFeatureCalculationManagerService } from '../../../services/feature-calculation-manager.service';
 import { IOtherFormulaManagerService } from '../../../services/other-formula-manager.service';
 import { IFormulaRuntimeService } from '../../../services/runtime.service';
 import { FormulaDependencyTree } from '../../dependency/dependency-tree';
@@ -295,6 +296,59 @@ describe('Test dependency', () => {
                 [realTree, 0, 1],
                 [realTree, 0, 2],
             ]);
+        });
+
+        it('orders a newly registered feature after formulas in its dependency range', async () => {
+            formulaCurrentConfigService.load({
+                formulaData: {
+                    [testUnitId]: {
+                        [testSheetId]: {
+                            0: {
+                                1: { f: '=A1' },
+                            },
+                        },
+                    },
+                },
+                arrayFormulaCellData: {},
+                arrayFormulaRange: {},
+                forceCalculate: false,
+                dirtyRanges: [{
+                    unitId: testUnitId,
+                    sheetId: testSheetId,
+                    range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+                }],
+                dirtyNameMap: {},
+                dirtyDefinedNameMap: {},
+                dirtyUnitFeatureMap: {},
+                dirtyUnitOtherFormulaMap: {},
+                excludedCell: {},
+                allUnitData: {
+                    [testUnitId]: testSheetData,
+                },
+            });
+
+            get(IFeatureCalculationManagerService).register(testUnitId, testSheetId, 'feature-1', {
+                unitId: testUnitId,
+                subUnitId: testSheetId,
+                dependencyRanges: [{
+                    unitId: testUnitId,
+                    sheetId: testSheetId,
+                    range: { startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 },
+                }],
+                getDirtyData: () => ({
+                    runtimeCellData: {},
+                    dirtyRanges: {
+                        [testUnitId]: {
+                            [testSheetId]: [{ startRow: 0, endRow: 0, startColumn: 2, endColumn: 2 }],
+                        },
+                    },
+                }),
+            });
+
+            const treeList = await formulaDependencyGenerator.generate();
+            const executionOrder = treeList.toReversed().map((tree) => tree.featureId ?? tree.formula);
+
+            expect(executionOrder).toEqual(['=A1', 'feature-1']);
         });
 
         it('ignores a non-reference result while collecting dependency ranges', async () => {

@@ -98,41 +98,13 @@ export function calculateMdeterm(matrix: number[][]): number {
 }
 
 export function calculateMinverse(matrix: number[][]): number[][] | null {
-    const det = calculateMdeterm(matrix);
+    const { smallPivotDetected, luMatrix, permutation } = performLUDecomposition(matrix, false, Number.EPSILON);
 
-    if (det === 0) {
+    if (smallPivotDetected) {
         return null; // Matrix is irreversible
     }
 
-    if (matrix.length === 1) {
-        return [[1 / det]];
-    }
-
-    const adjugate = adjoint(matrix);
-    const inverseMatrix = adjugate.map((row) => row.map((value) => value / det));
-
-    return inverseMatrix;
-}
-
-function minor(matrix: number[][], row: number, col: number): number[][] {
-    return matrix
-        .filter((_, r) => r !== row)
-        .map((row) => row.filter((_, c) => c !== col));
-}
-
-function adjoint(matrix: number[][]): number[][] {
-    const n = matrix.length;
-    const adj = Array.from({ length: n }, () => new Array(n).fill(0));
-
-    for (let i = 0; i < n; i++) {
-        for (let j = 0; j < n; j++) {
-            const sign = ((i + j) % 2 === 0 ? 1 : -1);
-            const res = sign * calculateMdeterm(minor(matrix, i, j));
-            adj[j][i] = (res === 0 ? 0 : res); // deal with -0 case
-        }
-    }
-
-    return adj;
+    return transformMatrix(luMatrix, permutation);
 }
 
 export function calculateMmult(matrix1: number[][], matrix2: number[][]): number[][] {
@@ -155,8 +127,8 @@ export function inverseMatrixByLUD(matrix: number[][]) {
     return transformMatrix(luMatrix, permutation);
 }
 
-function performLUDecomposition(matrix: number[][]) {
-    const decomposedMatrix = matrixTranspose(matrix);
+function performLUDecomposition(matrix: number[][], transpose: boolean = true, minimumPivot: number = 1e-11) {
+    const decomposedMatrix = transpose ? matrixTranspose(matrix) : matrix.map((row) => [...row]);
     const numRows = decomposedMatrix.length;
     const numCols = decomposedMatrix[0].length;
     let isRowSwap = true;
@@ -195,7 +167,9 @@ function performLUDecomposition(matrix: number[][]) {
             }
         }
 
-        if (Math.abs(luMatrix[pivotRow][c]) < 1e-11) {
+        const pivot = Math.abs(luMatrix[pivotRow][c]);
+
+        if (!Number.isFinite(pivot) || pivot <= minimumPivot) {
             smallPivotDetected = true;
             break;
         }

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { ICommandService } from '@univerjs/core';
-import { SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
+import { CellValueType, ICommandService } from '@univerjs/core';
+import { ErrorType, SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
 import { describe, expect, it } from 'vitest';
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
 import { CalculateResultApplyController } from '../calculate-result-apply.controller';
@@ -42,6 +42,90 @@ describe('CalculateResultApplyController', () => {
         });
 
         expect(testBed.sheet.getSheetBySheetId(testBed.sheetId)?.getCellMatrix().getValue(0, 0)?.v).toBe(2760);
+        testBed.univer.dispose();
+    });
+
+    it('keeps a valid imported cache when a legacy array origin recalculates to an error', async () => {
+        const testBed = createFunctionTestBed();
+        const commandService = testBed.get(ICommandService);
+        commandService.registerCommand(SetFormulaCalculationResultMutation);
+        commandService.registerCommand(SetRangeValuesMutation);
+        testBed.get(CalculateResultApplyController);
+        const sheet = testBed.sheet.getSheetBySheetId(testBed.sheetId)!;
+        sheet.getCellMatrix().setValue(0, 0, {
+            f: '=VSTACK("Project")',
+            v: 'Project',
+            t: CellValueType.STRING,
+            custom: { _xlsx: { legacyArrayFormula: true } },
+        });
+        sheet.getCellMatrix().setValue(0, 1, {
+            f: '=VSTACK("Project")',
+            v: 'Project',
+            t: CellValueType.STRING,
+        });
+
+        await commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
+            unitData: {
+                [testBed.unitId]: {
+                    [testBed.sheetId]: {
+                        0: {
+                            0: { v: ErrorType.REF, t: CellValueType.STRING },
+                            1: { v: ErrorType.REF, t: CellValueType.STRING },
+                        },
+                    },
+                },
+            },
+            unitOtherData: {},
+        });
+
+        expect(sheet.getCellMatrix().getValue(0, 0)?.v).toBe('Project');
+        expect(sheet.getCellMatrix().getValue(0, 1)?.v).toBe(ErrorType.REF);
+        testBed.univer.dispose();
+    });
+
+    it('keeps legacy array cells when recalculation returns null entries', async () => {
+        const testBed = createFunctionTestBed();
+        const commandService = testBed.get(ICommandService);
+        commandService.registerCommand(SetFormulaCalculationResultMutation);
+        commandService.registerCommand(SetRangeValuesMutation);
+        testBed.get(CalculateResultApplyController);
+        const sheet = testBed.sheet.getSheetBySheetId(testBed.sheetId)!;
+        sheet.getCellMatrix().setValue(0, 0, {
+            f: '=A2:B2',
+            ref: 'A1:B1',
+            custom: { _xlsx: { legacyArrayFormula: true } },
+        });
+        sheet.getCellMatrix().setValue(0, 1, {
+            ref: 'A1:B1',
+            s: { bl: 1 },
+        });
+        sheet.getCellMatrix().setValue(0, 2, {
+            f: '=C2',
+        });
+        const legacyFollower = sheet.getCellMatrix().getValue(0, 1);
+
+        await commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
+            unitData: {
+                [testBed.unitId]: {
+                    [testBed.sheetId]: {
+                        0: {
+                            0: null,
+                            1: null,
+                            2: null,
+                        },
+                    },
+                },
+            },
+            unitOtherData: {},
+        });
+
+        expect(sheet.getCellMatrix().getValue(0, 0)).toMatchObject({
+            f: '=A2:B2',
+            ref: 'A1:B1',
+            custom: { _xlsx: { legacyArrayFormula: true } },
+        });
+        expect(sheet.getCellMatrix().getValue(0, 1)).toEqual(legacyFollower);
+        expect(sheet.getCellMatrix().getValue(0, 2)).toBeUndefined();
         testBed.univer.dispose();
     });
 });

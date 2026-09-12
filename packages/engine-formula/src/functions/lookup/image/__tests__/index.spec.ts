@@ -17,6 +17,7 @@
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { ImageFunction } from '../index';
@@ -49,6 +50,14 @@ describe('ImageFunction', () => {
             height: 100,
             width: 200,
         });
+    });
+
+    it('should propagate scalar optional argument errors', () => {
+        const result = fn.calculate(
+            StringValueObject.create('https://image'),
+            ErrorValueObject.create(ErrorType.REF)
+        );
+        expect(result.getValue()).toBe(ErrorType.REF);
     });
 
     it('should validate sizing and size constraints', () => {

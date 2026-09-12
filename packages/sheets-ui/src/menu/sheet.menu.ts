@@ -156,7 +156,7 @@ export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
     const commandService = accessor.get(ICommandService);
 
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-    const hiddenList = workbook.getHiddenWorksheets().map((s) => ({
+    const hiddenList = workbook.getHiddenWorksheets(false).map((s) => ({
         label: workbook.getSheetBySheetId(s)?.getName() || '',
         value: s,
     }));
@@ -166,7 +166,7 @@ export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
             if (c.id !== SetWorksheetHideCommand.id && c.id !== SetWorksheetShowCommand.id) {
                 return;
             }
-            const newList = workbook.getHiddenWorksheets();
+            const newList = workbook.getHiddenWorksheets(false);
             const isEmpty = newList.length === 0;
             subscriber.next(isEmpty);
         });
@@ -189,7 +189,7 @@ export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
                 if (c.id !== SetWorksheetHideCommand.id && c.id !== SetWorksheetShowCommand.id) {
                     return;
                 }
-                const newList = workbook.getHiddenWorksheets().map((s) => ({
+                const newList = workbook.getHiddenWorksheets(false).map((s) => ({
                     label: workbook.getSheetBySheetId(s)?.getName() || '',
                     value: s,
                 }));

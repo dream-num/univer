@@ -20,6 +20,7 @@ import type { Workbook } from '../workbook';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { BooleanNumber, DateSystem } from '../../types/enum';
 import { LocaleType } from '../../types/enum/locale-type';
+import { WorksheetVisibility } from '../typedef';
 import { createCoreTestBed } from './create-core-test-bed';
 
 describe('Test workbook', () => {
@@ -131,7 +132,7 @@ describe('Test workbook', () => {
                 styles: {},
                 sheetOrder: ['s1', 's2'],
                 sheets: {
-                    s1: { id: 's1', name: 'Hidden', hidden: BooleanNumber.TRUE },
+                    s1: { id: 's1', name: 'Hidden', hidden: BooleanNumber.TRUE, visibility: WorksheetVisibility.VERY_HIDDEN },
                     s2: { id: 's2', name: 'Visible' },
                 },
             };
@@ -143,6 +144,8 @@ describe('Test workbook', () => {
             expect(hiddenWorkbook.getActiveSheet().getSheetId()).toBe('s2');
             expect(hiddenWorkbook.getActiveSheetIndex()).toBe(1);
             expect(hiddenWorkbook.getHiddenWorksheets()).toEqual(['s1']);
+            expect(hiddenWorkbook.getHiddenWorksheets(false)).toEqual([]);
+            expect(hiddenWorkbook.getSheetBySheetId('s1')?.getSheetVisibility()).toBe(WorksheetVisibility.VERY_HIDDEN);
             expect(hiddenWorkbook.getUnhiddenWorksheets()).toEqual(['s2']);
             expect(hiddenWorkbook.checkSheetName('visible')).toBe(true);
 

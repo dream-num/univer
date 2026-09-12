@@ -71,6 +71,46 @@ describe('Test minverse function', () => {
             ]);
         });
 
+        it('Returns Excel-compatible values for non-zero floating-point pivots', () => {
+            const values = [
+                [0, 90, 161, 235, 307, 380, 452, 525],
+                [-90, 0, 71, 145, 217, 290, 362, 435],
+                [-161, -71, 0, 74, 146, 219, 291, 364],
+                [-235, -145, -74, 0, 72, 145, 217, 290],
+                [-307, -217, -146, -72, 0, 73, 145, 218],
+                [-380, -290, -219, -145, -73, 0, 72, 145],
+                [-452, -362, -291, -217, -145, -72, 0, 73],
+                [-525, -435, -364, -290, -218, -145, -73, 0],
+            ];
+            const array = ArrayValueObject.create({
+                calculateValueList: transformToValueObject(values),
+                rowCount: values.length,
+                columnCount: values[0].length,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+
+            const result = getObjectValue(testFunction.calculate(array)) as number[][];
+            const expectedFirstRow = [
+                20_312_366_176_490.105,
+                3_127_499_741_229.562,
+                -30_395_388_110_074.422,
+                32_643_278_549_083.152,
+                -51_212_808_262_633.188,
+                4_691_249_611_844.3125,
+                781_874_935_307.3981,
+                20_051_927_358_753.352,
+            ];
+
+            expect(result).toHaveLength(8);
+            expect(result[0]).toHaveLength(8);
+            result[0].forEach((value, index) => {
+                expect(Math.abs((value - expectedFirstRow[index]) / expectedFirstRow[index])).toBeLessThan(1e-12);
+            });
+        });
+
         it('ArrayRowCount !== arrayColumnCount', () => {
             const array = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

@@ -17,7 +17,7 @@
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { ISetWorksheetHideMutationParams } from '../mutations/set-worksheet-hide.mutation';
 import type { ISetWorksheetActiveOperationParams } from '../operations/set-worksheet-active.operation';
-import { BooleanNumber, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import { BooleanNumber, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, WorksheetVisibility } from '@univerjs/core';
 import { SetWorksheetHideMutation, SetWorksheetHideMutationFactory } from '../mutations/set-worksheet-hide.mutation';
 import {
     SetWorksheetActiveOperation,
@@ -49,6 +49,7 @@ export const SetWorksheetShowCommand: ICommand = {
             unitId,
             subUnitId,
             hidden: BooleanNumber.FALSE,
+            visibility: WorksheetVisibility.VISIBLE,
         };
 
         const undoMutationParams = SetWorksheetHideMutationFactory(accessor, redoMutationParams);

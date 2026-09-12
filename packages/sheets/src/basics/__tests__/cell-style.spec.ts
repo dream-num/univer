@@ -20,6 +20,16 @@ import { describe, expect, it } from 'vitest';
 import { handleStyle, transformStyle } from '../cell-style';
 
 describe('Test cell style sanitization', () => {
+    it('preserves formula hiding through native style operations', () => {
+        const styles = new Styles();
+        const oldVal: ICellData = {};
+
+        handleStyle(styles, oldVal, { s: { locked: 0, formulaHidden: 1 } });
+
+        expect(styles.getStyleByCell(oldVal)).toEqual({ locked: 0, formulaHidden: 1 });
+        expect(transformStyle({ locked: 0, formulaHidden: 1 }, { locked: 1, formulaHidden: 0 })).toEqual({ locked: 0, formulaHidden: 1 });
+    });
+
     it('ignores unexpected keys when merging cell borders', () => {
         const styles = new Styles();
         const oldVal: ICellData = {

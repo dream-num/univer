@@ -210,6 +210,10 @@ export function handleRefStringInfo(refString: string) {
     if (unitIdMatch != null) {
         unitQualifier = unitIdMatch[0].trim();
         unitQualifier = unquoteSheetName(unitQualifier.slice(1, unitQualifier.length - 1));
+        const pathPrefix = refString.slice(0, unitIdMatch.index);
+        if (pathPrefix.startsWith("'") && /[\\/]$/.test(pathPrefix)) {
+            refString = `'${refString.slice(unitIdMatch.index)}`;
+        }
         refString = refString.replace(UNIT_NAME_REGEX_PRECOMPILING, '');
     }
 

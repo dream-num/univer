@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injector, IUniverInstanceService } from '@univerjs/core';
+import { Injector, IUniverInstanceService, toDisposable } from '@univerjs/core';
 import { IActiveDirtyManagerService, ISheetRowFilteredService } from '@univerjs/engine-formula';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SheetsFilterFormulaService } from '../sheet-filter-formula.service';
@@ -31,7 +31,12 @@ describe('SheetsFilterFormulaService', () => {
         }
 
         class TestSheetRowFilteredService {
-            register = (callback: never) => (rowFilteredCallback = callback);
+            register = (callback: never) => {
+                rowFilteredCallback = callback;
+                return toDisposable(() => {
+                    rowFilteredCallback = undefined;
+                });
+            };
         }
 
         class TestSheetsFilterService {

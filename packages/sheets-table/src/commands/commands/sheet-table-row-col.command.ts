@@ -19,11 +19,13 @@
 import type { IAccessor, ICommand, IMutationInfo } from '@univerjs/core';
 import type { ITableColumnJson } from '../../types/type';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { getMoveRangeUndoRedoMutations, getSheetCommandTarget, InsertColMutation, InsertRowMutation, RemoveColMutation, RemoveRowMutation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsTableController } from '../../controllers/sheets-table.controller';
 import { TableManager } from '../../models/table-manager';
 import { IRangeOperationTypeEnum, IRowColTypeEnum } from '../../types/type';
 import { SetSheetTableMutation } from '../mutations/set-sheet-table.mutation';
+import { getCalculatedColumnFillMutation } from '../utils/calculated-column';
 
 interface ISheetTableRowColOperationCommandParams {
     tableId: string;
@@ -205,6 +207,18 @@ export const SheetTableInsertRowCommand: ICommand<ISheetTableRowColOperationComm
             }
         }
 
+        const formulaMutation = getCalculatedColumnFillMutation(
+            table,
+            unitId,
+            subUnitId,
+            range.startRow,
+            range.endRow,
+            () => accessor.get(LexerTreeBuilder)
+        );
+        if (formulaMutation) {
+            redos.push(formulaMutation);
+        }
+
         const commandService = accessor.get(ICommandService);
         const res = sequenceExecute(redos, commandService);
 
@@ -310,6 +324,18 @@ export const SheetTableInsertRowAtCommand: ICommand<ISheetTableInsertAtCommandPa
         if (moveRangeMutations) {
             redos.push(...moveRangeMutations.redos);
             undos.push(...moveRangeMutations.undos);
+        }
+
+        const formulaMutation = getCalculatedColumnFillMutation(
+            table,
+            unitId,
+            subUnitId,
+            index,
+            index + count - 1,
+            () => accessor.get(LexerTreeBuilder)
+        );
+        if (formulaMutation) {
+            redos.push(formulaMutation);
         }
 
         return executeTableMutationSequence(accessor, unitId, redos, undos);

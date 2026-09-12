@@ -89,6 +89,12 @@ export interface IWorkbookData {
     custom?: CustomData;
 }
 
+export enum WorksheetVisibility {
+    VISIBLE = 'visible',
+    HIDDEN = 'hidden',
+    VERY_HIDDEN = 'veryHidden',
+}
+
 /**
  * Snapshot of a worksheet.
  */
@@ -112,6 +118,9 @@ export interface IWorksheetData {
      * @defaultValue `BooleanNumber.FALSE`
      */
     hidden: BooleanNumber;
+
+    /** Controls whether the sheet is visible and whether users can reveal it through the UI. */
+    visibility?: WorksheetVisibility;
 
     freeze: IFreeze;
 

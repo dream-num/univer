@@ -17,6 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { Subscription } from 'rxjs';
 import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { ISheetRowFilteredService } from '@univerjs/engine-formula';
 import { getSheetCommandTarget, INTERCEPTOR_POINT, SheetInterceptorService, ZebraCrossingCacheController } from '@univerjs/sheets';
 import { filter, switchMap } from 'rxjs';
 import { TableManager } from '../models/table-manager';
@@ -29,12 +30,20 @@ export class TableFilterController extends Disposable {
         @Inject(TableManager) private _tableManager: TableManager,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(ISheetRowFilteredService) private readonly _sheetRowFilteredService: ISheetRowFilteredService,
         @Inject(ZebraCrossingCacheController) private readonly _zebraCrossingCacheController: ZebraCrossingCacheController
     ) {
         super();
         this.registerFilterChangeEvent();
         this.initTableHiddenRowIntercept();
+        this._registerFormulaRowFiltered();
         this._initFilteredOutRows();
+    }
+
+    private _registerFormulaRowFiltered(): void {
+        this.disposeWithMe(this._sheetRowFilteredService.register((unitId, subUnitId, row) => {
+            return this._getTableFilteredOutRows(unitId, subUnitId).has(row);
+        }));
     }
 
     initTableHiddenRowIntercept() {
@@ -106,7 +115,11 @@ export class TableFilterController extends Disposable {
     }
 
     private _getTableFilteredOutRows(unitId: string, subUnitId: string): Set<number> {
-        return this._tableFilteredOutRows.get(this._getSheetKey(unitId, subUnitId)) ?? new Set();
+        const key = this._getSheetKey(unitId, subUnitId);
+        if (!this._tableFilteredOutRows.has(key)) {
+            this._refreshTableFilteredOutRows(unitId, subUnitId);
+        }
+        return this._tableFilteredOutRows.get(key) ?? new Set();
     }
 
     private _getSheetKey(unitId: string, subUnitId: string): string {

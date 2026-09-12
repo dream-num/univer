@@ -343,7 +343,7 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                       dark:!univer-bg-gray-800
                     "
                 >
-                    {workbook.getHiddenWorksheets().map((sheetId) => (
+                    {workbook.getHiddenWorksheets(false).map((sheetId) => (
                         <button
                             key={sheetId}
                             type="button"

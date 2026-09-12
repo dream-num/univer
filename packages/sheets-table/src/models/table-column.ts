@@ -23,6 +23,11 @@ export class TableColumn {
     id: string;
     displayName: string;
     formula: string;
+    formulaIsArray?: boolean;
+    totalsRowLabel?: string;
+    totalsRowFunction?: string;
+    totalsRowFormula?: string;
+    showFilterButton: boolean;
     meta: TableMetaType;
     style: IStyleData;
     constructor(id: string, name: string) {
@@ -30,6 +35,7 @@ export class TableColumn {
         this.displayName = name;
         this.dataType = TableColumnDataTypeEnum.String;
         this.formula = '';
+        this.showFilterButton = true;
         this.meta = {};
         this.style = {};
     }
@@ -52,6 +58,11 @@ export class TableColumn {
             displayName: this.displayName,
             dataType: this.dataType,
             formula: this.formula,
+            formulaIsArray: this.formulaIsArray,
+            totalsRowLabel: this.totalsRowLabel,
+            totalsRowFunction: this.totalsRowFunction,
+            totalsRowFormula: this.totalsRowFormula,
+            showFilterButton: this.showFilterButton,
             meta: this.meta,
             style: this.style,
         };
@@ -62,7 +73,16 @@ export class TableColumn {
         this.displayName = json.displayName;
         this.dataType = json.dataType;
         this.formula = json.formula;
+        this.formulaIsArray = json.formulaIsArray;
+        this.totalsRowLabel = json.totalsRowLabel;
+        this.totalsRowFunction = json.totalsRowFunction;
+        this.totalsRowFormula = json.totalsRowFormula;
+        this.showFilterButton = json.showFilterButton ?? true;
         this.meta = json.meta;
         this.style = json.style;
+    }
+
+    isShowFilterButton() {
+        return this.showFilterButton;
     }
 }

@@ -131,7 +131,7 @@ describe('Test convert function', () => {
 
             toUnit = StringValueObject.create('Rank');
             result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(getObjectValue(result)).toStrictEqual(491.67);
+            expect(getObjectValue(result)).toBeCloseTo(491.67, 12);
 
             toUnit = StringValueObject.create('Reau');
             result = testFunction.calculate(number, fromUnit, toUnit);
@@ -145,13 +145,20 @@ describe('Test convert function', () => {
             let result = testFunction.calculate(number, fromUnit, toUnit);
             expect(getObjectValue(result)).toStrictEqual(0);
 
+            const precise = testFunction.calculate(
+                NumberValueObject.create(4),
+                fromUnit,
+                StringValueObject.create('C')
+            );
+            expect(getObjectValue(precise)).toBeCloseTo(-15.555555555555555, 12);
+
             toUnit = StringValueObject.create('K');
             result = testFunction.calculate(number, fromUnit, toUnit);
             expect(getObjectValue(result)).toStrictEqual(273.15);
 
             toUnit = StringValueObject.create('Rank');
             result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(getObjectValue(result)).toStrictEqual(491.67);
+            expect(getObjectValue(result)).toBeCloseTo(491.67, 12);
 
             toUnit = StringValueObject.create('Reau');
             result = testFunction.calculate(number, fromUnit, toUnit);
@@ -171,7 +178,7 @@ describe('Test convert function', () => {
 
             toUnit = StringValueObject.create('Rank');
             result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(getObjectValue(result)).toStrictEqual(491.67);
+            expect(getObjectValue(result)).toBeCloseTo(491.67, 12);
 
             toUnit = StringValueObject.create('Reau');
             result = testFunction.calculate(number, fromUnit, toUnit);

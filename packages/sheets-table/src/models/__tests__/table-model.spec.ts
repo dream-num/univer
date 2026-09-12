@@ -31,6 +31,84 @@ import { TableColumn } from '../table-column';
 import { TableFilters } from '../table-filter';
 
 describe('Table model', () => {
+    it('restores a visible footer from constructor options', () => {
+        const table = new Table(
+            'table-1',
+            'Sales',
+            { startRow: 0, endRow: 4, startColumn: 0, endColumn: 1 },
+            ['Region', 'Amount'],
+            { showFooter: true }
+        );
+
+        expect(table.isShowFooter()).toBe(true);
+        expect(table.getTableFilterRange()).toEqual({
+            startRow: 1,
+            endRow: 3,
+            startColumn: 0,
+            endColumn: 1,
+        });
+        expect(table.toJSON().options.showFooter).toBe(true);
+    });
+
+    it('preserves dormant totals row definitions while the footer is hidden', () => {
+        const table = new Table('placeholder', 'Placeholder', { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }, []);
+        table.fromJSON({
+            id: 'table-1',
+            name: 'StartTbl',
+            range: { startRow: 0, endRow: 4, startColumn: 0, endColumn: 0 },
+            options: {
+                showFooter: false,
+            },
+            filters: {},
+            columns: [{
+                id: 'column-time',
+                displayName: 'Time',
+                dataType: TableColumnDataTypeEnum.String,
+                formula: '+StartTbl[Time]+0.5/24',
+                formulaIsArray: true,
+                totalsRowFunction: 'custom',
+                totalsRowFormula: '+StartTbl[Time]+0.5/24',
+                meta: {},
+                style: {},
+            }],
+            meta: {},
+        });
+
+        const snapshot = table.toJSON();
+        const restored = new Table('placeholder', 'Placeholder', { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }, []);
+        restored.fromJSON(snapshot);
+
+        expect(restored.toJSON().options.showFooter).toBe(false);
+        expect(restored.toJSON().columns.find((column) => column.id === 'column-time')).toEqual(expect.objectContaining({
+            formulaIsArray: true,
+            totalsRowFunction: 'custom',
+            totalsRowFormula: '+StartTbl[Time]+0.5/24',
+        }));
+    });
+
+    it('preserves table and column filter-button visibility', () => {
+        const table = new Table('placeholder', 'Placeholder', { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }, []);
+        table.fromJSON({
+            id: 'table-1',
+            name: 'HiddenFilters',
+            range: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 1 },
+            options: { showAutoFilter: false },
+            filters: {},
+            columns: [
+                { id: 'c1', displayName: 'Visible', dataType: TableColumnDataTypeEnum.String, formula: '', meta: {}, style: {} },
+                { id: 'c2', displayName: 'Hidden', dataType: TableColumnDataTypeEnum.String, formula: '', showFilterButton: false, meta: {}, style: {} },
+            ],
+            meta: {},
+        });
+
+        const snapshot = table.toJSON();
+        expect(table.isShowAutoFilter()).toBe(false);
+        expect(table.getTableInfo().showAutoFilter).toBe(false);
+        expect(snapshot.options.showAutoFilter).toBe(false);
+        expect(snapshot.columns[0].showFilterButton).toBe(true);
+        expect(snapshot.columns[1].showFilterButton).toBe(false);
+    });
+
     it('builds a table from headers, tracks metadata, and serializes user changes', () => {
         const table = new Table(
             'table-1',
@@ -80,6 +158,7 @@ describe('Table model', () => {
             options: {
                 showHeader: true,
                 showFooter: false,
+                showAutoFilter: true,
             },
             tableStyleId: 'theme-2',
         });
@@ -162,6 +241,13 @@ describe('TableFilters', () => {
             ],
             tableSortInfo: { columnIndex: 0, sortState: SheetsTableSortStateEnum.Asc },
         });
+
+        filters.setColumnFilter(0, undefined);
+        filters.setColumnFilter(1, {
+            filterType: TableColumnFilterTypeEnum.manual,
+            values: ['12', '20'],
+        });
+        expect([...filters.doFilter(sheet as never, range)]).toEqual([1, 3]);
 
         filters.dispose();
         expect(filters.toJSON().tableColumnFilterList).toEqual([]);

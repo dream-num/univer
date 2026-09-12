@@ -15,11 +15,12 @@
  */
 
 import type { BooleanNumber, IAccessor, IMutation, Workbook } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType, WorksheetVisibility } from '@univerjs/core';
 import { getSheetMutationTarget } from '../commands/utils/target-util';
 
 export interface ISetWorksheetHideMutationParams {
     hidden: BooleanNumber;
+    visibility?: WorksheetVisibility;
     unitId: string;
     subUnitId: string;
 }
@@ -36,6 +37,7 @@ export const SetWorksheetHideMutationFactory = (
     const { worksheet } = target;
     return {
         hidden: worksheet.isSheetHidden(),
+        visibility: worksheet.getSheetVisibility(),
         unitId: params.unitId,
         subUnitId: worksheet.getSheetId(),
     };
@@ -57,7 +59,9 @@ export const SetWorksheetHideMutation: IMutation<ISetWorksheetHideMutationParams
             return false;
         }
 
-        worksheet.getConfig().hidden = params.hidden;
+        worksheet.setSheetVisibility(params.visibility ?? (params.hidden
+            ? WorksheetVisibility.HIDDEN
+            : WorksheetVisibility.VISIBLE));
 
         return true;
     },

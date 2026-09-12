@@ -25,6 +25,7 @@ import {
     RANGE_TYPE,
     TestConfirmService,
     UniverInstanceType,
+    WorksheetVisibility,
 } from '@univerjs/core';
 import {
     AddWorksheetMergeCommand,
@@ -699,6 +700,16 @@ describe('Test FWorksheet', () => {
         expect(activeSheet.getActiveCell()?.getA1Notation()).toBe('C3');
 
         expect(() => activeSheet.hideSheet()).toThrow('Cannot hide the only visible sheet');
+        expect(activeSheet.isSheetHidden()).toBe(false);
+
+        const workbookModel = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        workbookModel.addWorksheet('sheet2', 1, { id: 'sheet2', name: 'Second' });
+        activeSheet.setSheetVisibility(WorksheetVisibility.VERY_HIDDEN);
+        expect(activeSheet.isSheetHidden()).toBe(true);
+        expect(activeSheet.getSheetVisibility()).toBe(WorksheetVisibility.VERY_HIDDEN);
+        activeSheet.setSheetVisibility(WorksheetVisibility.HIDDEN);
+        expect(activeSheet.getSheetVisibility()).toBe(WorksheetVisibility.HIDDEN);
+        activeSheet.setSheetVisibility(WorksheetVisibility.VISIBLE);
         expect(activeSheet.isSheetHidden()).toBe(false);
 
         activeSheet.setName('Renamed');

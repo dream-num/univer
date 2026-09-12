@@ -19,6 +19,7 @@ import { describe, expect, it } from 'vitest';
 import { Tools } from '../../shared/tools';
 import { BooleanNumber } from '../../types/enum';
 import { cloneWorksheetData } from '../clone';
+import { WorksheetVisibility } from '../typedef';
 
 function createTestWorksheetData(rowCount: number, colCount: number): IWorksheetData {
     const cellData: IWorksheetData['cellData'] = {};
@@ -59,6 +60,7 @@ function createTestWorksheetData(rowCount: number, colCount: number): IWorksheet
         name: 'Test Sheet',
         tabColor: '#FF0000',
         hidden: BooleanNumber.FALSE,
+        visibility: WorksheetVisibility.VERY_HIDDEN,
         freeze: {
             xSplit: 0,
             ySplit: 0,
@@ -112,6 +114,7 @@ describe('cloneWorksheetData', () => {
         expect(cloned.id).toBe(original.id);
         expect(cloned.name).toBe(original.name);
         expect(cloned.tabColor).toBe(original.tabColor);
+        expect(cloned.visibility).toBe(WorksheetVisibility.VERY_HIDDEN);
         expect(cloned.rowCount).toBe(original.rowCount);
         expect(cloned.columnCount).toBe(original.columnCount);
 

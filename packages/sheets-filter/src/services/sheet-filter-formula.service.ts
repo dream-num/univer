@@ -87,8 +87,8 @@ export class SheetsFilterFormulaService extends Disposable {
     }
 
     private _registerSheetRowFiltered() {
-        this._sheetRowFilteredService.register((unitId, subUnitId, row) => {
+        this.disposeWithMe(this._sheetRowFilteredService.register((unitId, subUnitId, row) => {
             return this._sheetsFilterService.getFilterModel(unitId, subUnitId)?.isRowFiltered(row) ?? false;
-        });
+        }));
     }
 }

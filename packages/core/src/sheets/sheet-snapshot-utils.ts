@@ -16,6 +16,7 @@
 
 import type { IWorksheetData } from './typedef';
 import { BooleanNumber } from '../types/enum/text-style';
+import { WorksheetVisibility } from './typedef';
 
 // TODO@wzhudev: default value should not be exposed, but the keys.
 
@@ -87,6 +88,13 @@ export function mergeWorksheetSnapshotWithDefault(snapshot: Partial<IWorksheetDa
             snapshot[key] = defaultSnapshot[key];
         }
     });
+
+    snapshot.visibility ??= snapshot.hidden === BooleanNumber.TRUE
+        ? WorksheetVisibility.HIDDEN
+        : WorksheetVisibility.VISIBLE;
+    snapshot.hidden = snapshot.visibility === WorksheetVisibility.VISIBLE
+        ? BooleanNumber.FALSE
+        : BooleanNumber.TRUE;
 
     const freeze = snapshot.freeze!;
     freeze.xSplit = freeze.xSplit ?? defaultSnapshot.freeze.xSplit;

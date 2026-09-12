@@ -50,6 +50,7 @@ import {
     Injector,
     ObjectMatrix,
     RANGE_TYPE,
+    WorksheetVisibility,
     WrapStrategy,
 } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
@@ -2271,6 +2272,37 @@ export class FWorksheet extends FBaseInitialable {
      */
     isSheetHidden(): boolean {
         return Boolean(this._worksheet.isSheetHidden() === BooleanNumber.TRUE);
+    }
+
+    /** Returns the sheet's visibility state. */
+    getSheetVisibility(): WorksheetVisibility {
+        return this._worksheet.getSheetVisibility();
+    }
+
+    /** Sets whether the sheet is visible, hidden, or only revealable through the API. */
+    setSheetVisibility(visibility: WorksheetVisibility): FWorksheet {
+        if (visibility === WorksheetVisibility.VISIBLE) {
+            return this.showSheet();
+        }
+        if (visibility !== WorksheetVisibility.HIDDEN && visibility !== WorksheetVisibility.VERY_HIDDEN) {
+            throw new RangeError(`Unsupported worksheet visibility: ${String(visibility)}`);
+        }
+        if (this._worksheet.getSheetVisibility() === visibility) {
+            return this;
+        }
+        if (this._worksheet.getSheetVisibility() === WorksheetVisibility.VISIBLE) {
+            const visibleSheets = this._workbook.getSheets().filter((sheet) => !sheet.isSheetHidden());
+            if (visibleSheets.length <= 1) {
+                throw new Error('Cannot hide the only visible sheet');
+            }
+        }
+
+        this._injector.get(ICommandService).syncExecuteCommand(SetWorksheetHideCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            visibility,
+        });
+        return this;
     }
 
     /**

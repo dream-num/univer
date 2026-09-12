@@ -31,13 +31,18 @@ export const SetSheetTableFilterCommand: ICommand<ISetSheetTableParams> = {
         const commandService = accessor.get(ICommandService);
         const tableManager = accessor.get(TableManager);
         const tableId = params.tableId || generateRandomId();
-        const previousFilter = tableManager.getTable(params.unitId, tableId)?.getTableFilterColumn(params.column);
+        const tableFilters = tableManager.getTable(params.unitId, tableId)?.getTableFilters();
+        const oldTableFilter = tableFilters?.getColumnFilter(params.column);
+        const oldFilterOutRows = [...(tableFilters?.getFilterOutRows() ?? [])];
 
         const redos: IMutationInfo[] = [];
         const undos: IMutationInfo[] = [];
 
         redos.push({ id: SetSheetTableFilterMutation.id, params: { ...params, tableId } });
-        undos.push({ id: SetSheetTableFilterMutation.id, params: { ...params, tableId, tableFilter: previousFilter } });
+        undos.push({
+            id: SetSheetTableFilterMutation.id,
+            params: { ...params, tableId, tableFilter: oldTableFilter, filterOutRows: oldFilterOutRows },
+        });
 
         const res = sequenceExecute(redos, commandService);
 

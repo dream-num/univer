@@ -38,6 +38,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import {
+    ActiveDirtyManagerService,
     AstRootNodeFactory,
     AstTreeBuilder,
     CalculateFormulaService,
@@ -53,6 +54,7 @@ import {
     generateExecuteAstNodeData,
     getObjectValue,
     HyperlinkEngineFormulaService,
+    IActiveDirtyManagerService,
     ICalculateFormulaService,
     IDefinedNamesService,
     IFormulaCurrentConfigService,
@@ -250,6 +252,7 @@ function createWorkbookData(): IWorkbookData {
 function createControllerTestBed() {
     const dependencies: Dependency[] = [
         [ICalculateFormulaService, { useClass: CalculateFormulaService }],
+        [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
         [Lexer],
         [IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }],
         [IFormulaUnitReferenceResolver, { useClass: FormulaUnitReferenceResolver }],

@@ -34,7 +34,7 @@ export const RANGE_SYMBOL = '\\s*?:\\s*?';
 const COLUMN_REGEX = '[A-Za-z]+';
 const ROW_REGEX = '[1-9][0-9]*';
 
-export const UNIT_NAME_SHEET_NAME_REGEX = `'?(${UNIT_NAME_REGEX})?(${SHEET_NAME_REGEX})?'?`;
+export const UNIT_NAME_SHEET_NAME_REGEX = `(?:'(?:[^'\\[]|'')*[\\\\/]|'?)(${UNIT_NAME_REGEX})?(${SHEET_NAME_REGEX})?'?`;
 
 export const SIMPLE_SINGLE_RANGE_REGEX = `\\${ABSOLUTE_SYMBOL}?${COLUMN_REGEX}\\${ABSOLUTE_SYMBOL}?${ROW_REGEX}`;
 

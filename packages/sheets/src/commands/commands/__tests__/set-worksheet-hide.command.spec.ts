@@ -15,7 +15,7 @@
  */
 
 import type { Injector, Univer, Workbook } from '@univerjs/core';
-import { BooleanNumber, ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType, WorksheetVisibility } from '@univerjs/core';
+import { BooleanNumber, ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType, WorksheetHiddenState } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { InsertSheetMutation } from '../../mutations/insert-sheet.mutation';
 import { SetWorksheetHideMutation } from '../../mutations/set-worksheet-hide.mutation';
@@ -82,12 +82,16 @@ describe('Test set worksheet hide commands', () => {
 
             expect(await commandService.executeCommand(SetWorksheetHideCommand.id, {
                 subUnitId: targetSheetId,
-                visibility: WorksheetVisibility.VERY_HIDDEN,
+                hidden: WorksheetHiddenState.VERY_HIDDEN,
             })).toBeTruthy();
-            expect(targetActiveSheet?.getSheetVisibility()).toBe(WorksheetVisibility.VERY_HIDDEN);
+            expect(targetActiveSheet?.getHiddenState()).toBe(WorksheetHiddenState.VERY_HIDDEN);
 
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-            expect(targetActiveSheet?.getSheetVisibility()).toBe(WorksheetVisibility.HIDDEN);
+            expect(targetActiveSheet?.getHiddenState()).toBe(WorksheetHiddenState.HIDDEN);
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expect(targetActiveSheet?.getConfig().hidden).toBe(2);
+            expect(targetActiveSheet?.isSheetHidden()).toBe(BooleanNumber.TRUE);
+            expect(workbook.getHiddenWorksheets(false)).not.toContain(targetSheetId);
         });
     });
 });

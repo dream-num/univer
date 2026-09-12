@@ -325,7 +325,6 @@ export function cloneWorksheetData(worksheet: IWorksheetData): IWorksheetData {
         name: worksheet.name,
         tabColor: worksheet.tabColor,
         hidden: worksheet.hidden,
-        visibility: worksheet.visibility,
         rowCount: worksheet.rowCount,
         columnCount: worksheet.columnCount,
         zoomRatio: worksheet.zoomRatio,

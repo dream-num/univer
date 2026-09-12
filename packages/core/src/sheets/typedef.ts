@@ -89,10 +89,14 @@ export interface IWorkbookData {
     custom?: CustomData;
 }
 
-export enum WorksheetVisibility {
-    VISIBLE = 'visible',
-    HIDDEN = 'hidden',
-    VERY_HIDDEN = 'veryHidden',
+/** Worksheet-only hiding states; row/column and cell flags still use BooleanNumber. */
+export enum WorksheetHiddenState {
+    /** Visible in the sheet bar. Preserves the existing hidden: 0 value. */
+    VISIBLE = 0,
+    /** Hidden, and listed in the UI's Unhide dialog. Preserves hidden: 1. */
+    HIDDEN = 1,
+    /** Omitted from Unhide UI; can be revealed through the API. Not an access permission. */
+    VERY_HIDDEN = 2,
 }
 
 /**
@@ -110,17 +114,12 @@ export interface IWorksheetData {
     tabColor: string;
 
     /**
-     * Determine whether the sheet is hidden.
-     *
-     * @remarks
-     * See {@link BooleanNumber| the BooleanNumber enum} for more details.
-     *
-     * @defaultValue `BooleanNumber.FALSE`
+     * Sheet hiding state: 0 = visible, 1 = hidden, 2 = very hidden.
+     * BooleanNumber remains accepted for existing 0/1 snapshots and integrations.
+     * Use WorksheetHiddenState for new code; do not interpret this as a boolean flag.
+     * @defaultValue WorksheetHiddenState.VISIBLE
      */
-    hidden: BooleanNumber;
-
-    /** Controls whether the sheet is visible and whether users can reveal it through the UI. */
-    visibility?: WorksheetVisibility;
+    hidden: WorksheetHiddenState | BooleanNumber;
 
     freeze: IFreeze;
 

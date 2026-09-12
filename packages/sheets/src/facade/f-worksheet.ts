@@ -50,7 +50,7 @@ import {
     Injector,
     ObjectMatrix,
     RANGE_TYPE,
-    WorksheetVisibility,
+    WorksheetHiddenState,
     WrapStrategy,
 } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
@@ -2223,20 +2223,8 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     hideSheet(): FWorksheet {
-        const commandService = this._injector.get(ICommandService);
-        const workbook = this._workbook;
-        const sheets = workbook.getSheets();
-        const visibleSheets = sheets.filter((sheet) => sheet.isSheetHidden() !== BooleanNumber.TRUE);
-        if (visibleSheets.length <= 1) {
-            throw new Error('Cannot hide the only visible sheet');
-        }
-
-        commandService.syncExecuteCommand(SetWorksheetHideCommand.id, {
-            unitId: this._workbook.getUnitId(),
-            subUnitId: this._worksheet.getSheetId(),
-        });
-
-        return this;
+        // Preserve a very-hidden state when hideSheet() is called without an explicit state.
+        return this.isSheetHidden() ? this : this.setHiddenState(WorksheetHiddenState.HIDDEN);
     }
 
     /**
@@ -2260,7 +2248,7 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
-     * Returns true if the sheet is currently hidden.
+     * Returns true for both HIDDEN and VERY_HIDDEN sheets.
      * @returns {boolean} True if the sheet is hidden; otherwise, false.
      * @example
      * ```ts
@@ -2274,23 +2262,31 @@ export class FWorksheet extends FBaseInitialable {
         return Boolean(this._worksheet.isSheetHidden() === BooleanNumber.TRUE);
     }
 
-    /** Returns the sheet's visibility state. */
-    getSheetVisibility(): WorksheetVisibility {
-        return this._worksheet.getSheetVisibility();
+    /**
+     * Returns 0 (visible), 1 (hidden), or 2 (very hidden).
+     * @example fWorksheet.getHiddenState() === univerAPI.Enum.WorksheetHiddenState.VERY_HIDDEN
+     */
+    getHiddenState(): WorksheetHiddenState {
+        return this._worksheet.getHiddenState();
     }
 
-    /** Sets whether the sheet is visible, hidden, or only revealable through the API. */
-    setSheetVisibility(visibility: WorksheetVisibility): FWorksheet {
-        if (visibility === WorksheetVisibility.VISIBLE) {
+    /**
+     * Changes the persisted hiding state through an undoable command.
+     * VERY_HIDDEN removes the sheet from Unhide UI; showSheet() can reveal it through the API.
+     * The last visible sheet cannot be hidden. Existing isSheetHidden() stays a boolean predicate.
+     * @example fWorksheet.setHiddenState(univerAPI.Enum.WorksheetHiddenState.VERY_HIDDEN)
+     */
+    setHiddenState(hidden: WorksheetHiddenState): FWorksheet {
+        if (hidden === WorksheetHiddenState.VISIBLE) {
             return this.showSheet();
         }
-        if (visibility !== WorksheetVisibility.HIDDEN && visibility !== WorksheetVisibility.VERY_HIDDEN) {
-            throw new RangeError(`Unsupported worksheet visibility: ${String(visibility)}`);
+        if (hidden !== WorksheetHiddenState.HIDDEN && hidden !== WorksheetHiddenState.VERY_HIDDEN) {
+            throw new RangeError(`Unsupported worksheet hidden state: ${String(hidden)}`);
         }
-        if (this._worksheet.getSheetVisibility() === visibility) {
+        if (this._worksheet.getHiddenState() === hidden) {
             return this;
         }
-        if (this._worksheet.getSheetVisibility() === WorksheetVisibility.VISIBLE) {
+        if (this._worksheet.getHiddenState() === WorksheetHiddenState.VISIBLE) {
             const visibleSheets = this._workbook.getSheets().filter((sheet) => !sheet.isSheetHidden());
             if (visibleSheets.length <= 1) {
                 throw new Error('Cannot hide the only visible sheet');
@@ -2300,7 +2296,7 @@ export class FWorksheet extends FBaseInitialable {
         this._injector.get(ICommandService).syncExecuteCommand(SetWorksheetHideCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
-            visibility,
+            hidden,
         });
         return this;
     }

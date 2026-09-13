@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import type { IStyleData, Nullable } from '@univerjs/core';
 import type { IUniverSheetsUIConfig } from '../../config/config';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
-    BooleanNumber,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     FOCUSING_FX_BAR_EDITOR,
     ICommandService,
@@ -69,10 +67,6 @@ enum ArrowDirection {
 interface IProps {
     className?: string;
     disableDefinedName?: boolean;
-}
-
-function isFormulaHidden(style: Nullable<IStyleData>): boolean {
-    return style?.formulaHidden === BooleanNumber.TRUE;
 }
 
 export function FormulaBar(props: IProps) {
@@ -161,34 +155,26 @@ export function FormulaBar(props: IProps) {
                 map((cellInfo) => {
                     if (cellInfo) {
                         const { unitId, subUnitId, primary } = cellInfo;
-                        const worksheetProtectionRule = worksheetProtectionRuleModel.getRule(unitId, subUnitId);
-                        const { actualRow, actualColumn } = primary;
-                        const formulaHide = !!worksheetProtectionRule && isFormulaHidden(
-                            workbook.getSheetBySheetId(subUnitId)?.getCellStyle(actualRow, actualColumn)
-                        );
-                        if (worksheetProtectionRule) {
-                            const editDisable = worksheetProtectionRule.cellStyleProtection
-                                ? workbook.getSheetBySheetId(subUnitId)?.getComposedCellStyle(actualRow, actualColumn).locked !== 0
-                                : !(permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? true);
+                        if (worksheetProtectionRuleModel.getRule(unitId, subUnitId)) {
+                            const editDisable = !(permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? true);
                             const viewDisable = !(permissionService.getPermissionPoint(new WorksheetViewPermission(unitId, subUnitId).id)?.value ?? true);
                             return {
                                 viewDisable,
                                 editDisable,
-                                formulaHide,
                             };
                         }
+                        const { actualRow, actualColumn } = primary;
                         const cellInfoWithPermission = rangeProtectionCache.getCellInfo(unitId, subUnitId, actualRow, actualColumn);
                         return {
                             editDisable: !(cellInfoWithPermission?.[UnitAction.Edit] ?? true),
                             viewDisable: !(cellInfoWithPermission?.[UnitAction.View] ?? true),
-                            formulaHide,
                         };
                     }
-                    return { viewDisable: false, editDisable: false, formulaHide: false };
+                    return { viewDisable: false, editDisable: false };
                 })
             );
         },
-        { editDisable: false, viewDisable: false, formulaHide: false },
+        { editDisable: false, viewDisable: false },
         false,
         [
             permissionService,
@@ -256,7 +242,7 @@ export function FormulaBar(props: IProps) {
     }
 
     // TODO Is there a need to disable an editor here?
-    const { viewDisable, editDisable: permissionEditDisable, formulaHide } = disableInfo;
+    const { viewDisable, editDisable: permissionEditDisable } = disableInfo;
     const editDisable = permissionEditDisable || !!disableEdit;
     const workbookEditDisable = !(workbookEditablePermission?.value ?? true);
     const editorActivationDisable = editDisable || workbookEditDisable;
@@ -307,7 +293,7 @@ export function FormulaBar(props: IProps) {
     };
 
     const cellImage = isCellImage(editState?.documentLayoutObject.documentModel?.getSnapshot());
-    const hideEditor = cellImage || viewDisable || formulaHide;
+    const hideEditor = cellImage || viewDisable;
 
     return (
         <div
@@ -417,7 +403,6 @@ export function FormulaBar(props: IProps) {
                         {/* Cover the hidden editor instead of re-instantiating the formula editor. */}
                         {hideEditor && (
                             <div
-                                data-u-comp="formula-bar-hidden-cover"
                                 className={`
                                   univer-pointer-events-none univer-relative univer-left-0 univer-top-0 univer-z-[100]
                                   univer-size-full univer-cursor-not-allowed univer-bg-gray-0

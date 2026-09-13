@@ -25,8 +25,6 @@ export interface IWorksheetProtectionRule {
     subUnitId: string;
     viewState: ViewStateEnum;
     editState: EditStateEnum;
-    /** Use Excel-compatible cell `locked` styles instead of whole-sheet edit permissions. */
-    cellStyleProtection?: boolean;
 }
 
 export interface IWorksheetProtectionPointRule {

@@ -18,7 +18,6 @@ import type { IUniverSheetsUIConfig } from '../../../config/config';
 import type { LocaleKey } from '../../../locale/types';
 import type { IEditorBridgeServiceVisibleParam } from '../../../services/editor-bridge.service';
 import {
-    BooleanNumber,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     FOCUSING_FX_BAR_EDITOR,
     ICommandService,
@@ -188,32 +187,25 @@ function MobileFormulaBarEditor() {
                 map((cellInfo) => {
                     if (cellInfo) {
                         const { unitId, subUnitId, primary } = cellInfo;
-                        const worksheetProtectionRule = worksheetProtectionRuleModel.getRule(unitId, subUnitId);
-                        const { actualRow, actualColumn } = primary;
-                        const formulaHide = !!worksheetProtectionRule && workbook.getSheetBySheetId(subUnitId)?.getCellStyle(actualRow, actualColumn)?.formulaHidden === BooleanNumber.TRUE;
-                        if (worksheetProtectionRule) {
-                            const editDisable = worksheetProtectionRule.cellStyleProtection
-                                ? workbook.getSheetBySheetId(subUnitId)?.getComposedCellStyle(actualRow, actualColumn).locked !== 0
-                                : !(permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? true);
+                        if (worksheetProtectionRuleModel.getRule(unitId, subUnitId)) {
+                            const editDisable = !(permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? true);
                             const viewDisable = !(permissionService.getPermissionPoint(new WorksheetViewPermission(unitId, subUnitId).id)?.value ?? true);
-                            return {
-                                viewDisable,
-                                editDisable,
-                                formulaHide,
-                            };
+                            return { viewDisable, editDisable };
                         }
+
+                        const { actualRow, actualColumn } = primary;
                         const cellInfoWithPermission = rangeProtectionCache.getCellInfo(unitId, subUnitId, actualRow, actualColumn);
                         return {
                             editDisable: !(cellInfoWithPermission?.[UnitAction.Edit] ?? true),
                             viewDisable: !(cellInfoWithPermission?.[UnitAction.View] ?? true),
-                            formulaHide,
                         };
                     }
-                    return { viewDisable: false, editDisable: false, formulaHide: false };
+
+                    return { viewDisable: false, editDisable: false };
                 })
             );
         },
-        { editDisable: false, viewDisable: false, formulaHide: false },
+        { editDisable: false, viewDisable: false },
         false,
         [
             permissionService,
@@ -332,9 +324,9 @@ function MobileFormulaBarEditor() {
         shouldSkipFocusRef.current = false;
     }
 
-    const { viewDisable, editDisable: permissionEditDisable, formulaHide } = disableInfo;
+    const { viewDisable, editDisable: permissionEditDisable } = disableInfo;
     const editDisable = permissionEditDisable || !!disableEdit;
-    const hideEditor = isCellImage(editState?.documentLayoutObject.documentModel?.getSnapshot()) || viewDisable || formulaHide;
+    const hideEditor = isCellImage(editState?.documentLayoutObject.documentModel?.getSnapshot()) || viewDisable;
     const editorBackground = editState
         ? workbook?.getSheetBySheetId(editState.sheetId)?.getCellStyle(editState.row, editState.column)?.bg?.rgb ?? undefined
         : undefined;
@@ -435,7 +427,6 @@ function MobileFormulaBarEditor() {
                             )}
                             {hideEditor && (
                                 <div
-                                    data-u-comp="formula-bar-hidden-cover"
                                     className="
                                       univer-pointer-events-none univer-relative univer-left-0 univer-top-0
                                       univer-z-[100] univer-size-full univer-cursor-not-allowed univer-bg-gray-0

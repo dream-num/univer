@@ -18,8 +18,7 @@ import type { IOperation, Workbook } from '@univerjs/core';
 import type { IUniverSheetsUIConfig } from '../../config/config';
 
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
-import { BooleanNumber, CommandType, ICommandService, IConfigService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { CommandType, ICommandService, IConfigService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
@@ -44,17 +43,6 @@ export const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisible
             return false;
         }
         const editorBridgeService = accessor.get(IEditorBridgeService);
-        const editLocation = editorBridgeService.getEditLocation();
-        if (params.visible && editLocation) {
-            const worksheetProtectionRuleModel = accessor.get(WorksheetProtectionRuleModel);
-            const worksheet = workbook.getSheetBySheetId(editLocation.sheetId);
-            if (
-                worksheetProtectionRuleModel.getRule(workbook.getUnitId(), editLocation.sheetId) &&
-                worksheet?.getComposedCellStyle(editLocation.row, editLocation.column).formulaHidden === BooleanNumber.TRUE
-            ) {
-                return false;
-            }
-        }
         editorBridgeService.changeVisible({
             ...params,
             unitId: unitId ?? workbook.getUnitId(),

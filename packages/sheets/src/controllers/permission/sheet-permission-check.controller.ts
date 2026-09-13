@@ -24,7 +24,6 @@ import type {
     Nullable,
     Workbook,
     WorkbookPermissionPointConstructor,
-    Worksheet,
 } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { IAutoFillCommandParams } from '../../commands/commands/auto-fill.command';
@@ -208,22 +207,6 @@ export class SheetPermissionCheckController extends Disposable {
     public blockExecuteWithoutPermission(errorMsg: string) {
         this._triggerPermissionUIEvent$.next(errorMsg);
         throw new CustomCommandExecutionError('have no permission');
-    }
-
-    private _cellStyleProtectionAllowsRanges(worksheet: Worksheet, unitId: string, subUnitId: string, ranges: IRange[]): boolean {
-        const rule = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
-        if (!rule?.cellStyleProtection) return true;
-
-        for (const range of ranges) {
-            for (let row = range.startRow; row <= range.endRow; row++) {
-                for (let column = range.startColumn; column <= range.endColumn; column++) {
-                    if (worksheet.getComposedCellStyle(row, column).locked !== 0) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
     }
 
     private _getPermissionCheck(commandInfo: ICommandInfo) {
@@ -600,7 +583,7 @@ export class SheetPermissionCheckController extends Disposable {
         const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
         if (!target) return false;
 
-        const { worksheet, unitId: _unitId, subUnitId: _subUnitId } = target;
+        const { unitId: _unitId, subUnitId: _subUnitId } = target;
         const { workbookTypes, worksheetTypes, rangeTypes } = permissionTypes;
 
         if (
@@ -623,11 +606,6 @@ export class SheetPermissionCheckController extends Disposable {
             })
         ) {
             return false;
-        }
-
-        if (worksheetTypes?.includes(WorksheetSetCellValuePermission)) {
-            const ranges = selectionRanges ?? this._selectionManagerService.getCurrentSelections()?.map((selection) => selection.range);
-            if (!ranges?.length || !this._cellStyleProtectionAllowsRanges(worksheet, _unitId, _subUnitId, ranges)) return false;
         }
 
         if (rangeTypes && rangeTypes.length > 0) {
@@ -728,14 +706,7 @@ export class SheetPermissionCheckController extends Disposable {
         const target = getSheetCommandTarget(this._univerInstanceService, params);
         if (!target) return false;
 
-        const { workbook, worksheet, unitId, subUnitId } = target;
-
-        const targetRanges = params.range
-            ? [params.range]
-            : [new ObjectMatrix(params.value as IObjectMatrixPrimitiveType<ICellData>).getStartEndScope()];
-        if (!this._cellStyleProtectionAllowsRanges(worksheet, unitId, subUnitId, targetRanges)) {
-            return false;
-        }
+        const { workbook, unitId, subUnitId } = target;
 
         const formulaString = (params.value as ICellData).f;
         if (formulaString) {

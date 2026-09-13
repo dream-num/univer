@@ -39,7 +39,6 @@ import {
     SetWorksheetRowHeightMutation,
     SheetInterceptorService,
     SheetsSelectionsService,
-    WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import {
     DragManagerService,
@@ -575,7 +574,6 @@ describe('Test FUniver UI mixin', () => {
             [IDefinedNamesService, { useClass: DefinedNamesService }],
             [IRefSelectionsService, { useClass: RefSelectionsService }],
             [SheetsSelectionsService],
-            [WorksheetProtectionRuleModel, { useValue: { getRule: () => undefined } }],
         ]);
 
         const commandService = testBed.get(ICommandService);

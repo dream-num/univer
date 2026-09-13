@@ -37,6 +37,7 @@ import {
     Disposable,
     InterceptorManager,
     RANGE_TYPE,
+    Rectangle,
     ThemeService,
 } from '@univerjs/core';
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
@@ -455,6 +456,27 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
             return controls[this._activeControlIndex] as T;
         }
+    }
+
+    /**
+     * Find the selection control whose range is identical to the given range and move it to
+     * the end of the control list, so it becomes the active (last) selection. Used to reuse
+     * an existing selection instead of stacking a duplicate on top of it.
+     */
+    protected _activateDuplicateControl(range: IRange): Nullable<SelectionControl> {
+        const controls = this.getSelectionControls();
+        const duplicateControl = controls.find((control) => Rectangle.equals(control.model, range));
+        if (!duplicateControl) {
+            return null;
+        }
+
+        const index = controls.indexOf(duplicateControl);
+        if (index !== controls.length - 1) {
+            controls.splice(index, 1);
+            controls.push(duplicateControl);
+        }
+
+        return duplicateControl;
     }
 
     endSelection(): void {

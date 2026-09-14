@@ -32,12 +32,11 @@ import type {
     IDrawingVisibleParam,
     IUnitDrawingService,
 } from './drawing-manager.service';
-import { DrawingTypeEnum, normalizeDrawingOrderIndex, sortRules, sortRulesByDesc } from '@univerjs/core';
-import * as json1 from 'ot-json1';
+import { DrawingTypeEnum, JSON1, normalizeDrawingOrderIndex, sortRules, sortRulesByDesc } from '@univerjs/core';
 import { Subject } from 'rxjs';
 
-type JSONOp = json1.JSONOp;
-type JSONOpList = json1.JSONOpList;
+type JSONOp = JSON1.JSONOp;
+type JSONOpList = JSON1.JSONOpList;
 
 export interface IDrawingJsonUndo1<
     TObjects = IDrawingSearch[] | IDrawingOrderMapParam | IDrawingGroupUpdateParam | IDrawingGroupUpdateParam[]
@@ -99,11 +98,11 @@ function hasOnlyEnumerableOwnProperties(value: Record<string, unknown>): boolean
     return Object.getOwnPropertyNames(value).every((key) => Object.prototype.propertyIsEnumerable.call(value, key));
 }
 
-function createJsonRemoveOp(path: Array<number | string>, value: json1.Doc): JSONOp {
-    return json1.type.writeCursor().writeAtPath(path, 'r', value).get();
+function createJsonRemoveOp(path: Array<number | string>, value: JSON1.Doc): JSONOp {
+    return JSON1.type.writeCursor().writeAtPath(path, 'r', value).get();
 }
 
-function normalizeJsonDocument(value: unknown): json1.Doc | undefined {
+function normalizeJsonDocument(value: unknown): JSON1.Doc | undefined {
     if (value === undefined) {
         return undefined;
     }
@@ -120,7 +119,7 @@ function normalizeJsonDocument(value: unknown): json1.Doc | undefined {
         return undefined;
     }
 
-    const normalizedValue: Record<string, json1.Doc> = {};
+    const normalizedValue: Record<string, JSON1.Doc> = {};
     Object.entries(value).forEach(([key, item]) => {
         const normalizedItem = normalizeJsonDocument(item);
         if (normalizedItem !== undefined) {
@@ -164,10 +163,10 @@ function appendJsonUpdateOps(
     }
 
     const op = !hasNormalizedOldValue
-        ? normalizedNewValue === undefined ? null : json1.insertOp(path, normalizedNewValue)
+        ? normalizedNewValue === undefined ? null : JSON1.insertOp(path, normalizedNewValue)
         : normalizedNewValue === undefined
             ? createJsonRemoveOp(path, normalizedOldValue)
-            : json1.replaceOp(path, normalizedOldValue, normalizedNewValue);
+            : JSON1.replaceOp(path, normalizedOldValue, normalizedNewValue);
     if (op && isNonEmptyOp(op)) {
         ops.push(op);
     }
@@ -376,8 +375,8 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             invertOps.push(invertOp);
         });
 
-        const op = ops.reduce(json1.type.compose, null);
-        const invertOp = invertOps.reduce(json1.type.compose, null);
+        const op = ops.reduce(JSON1.type.compose, null);
+        const invertOp = invertOps.reduce(JSON1.type.compose, null);
 
         // this._add$.next(objects);
 
@@ -484,8 +483,8 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             ops.unshift(op);
             invertOps.push(invertOp);
         });
-        const op = ops.reduce(json1.type.compose, null);
-        const invertOp = invertOps.reduce(json1.type.compose, null);
+        const op = ops.reduce(JSON1.type.compose, null);
+        const invertOp = invertOps.reduce(JSON1.type.compose, null);
 
         // this._remove$.next(objects);
 
@@ -512,8 +511,8 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             return { undo: null as unknown as JSONOp, redo: null as unknown as JSONOp, unitId, subUnitId, objects };
         }
 
-        const op = ops.reduce(json1.type.compose, null);
-        const invertOp = invertOps.reduce(json1.type.compose, null);
+        const op = ops.reduce(JSON1.type.compose, null);
+        const invertOp = invertOps.reduce(JSON1.type.compose, null);
 
         // this._update$.next(objects);
 
@@ -557,9 +556,9 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             ops.push(this._getGroupDrawingOp(groupParam));
         });
 
-        const op = ops.reduce(json1.type.compose, null);
+        const op = ops.reduce(JSON1.type.compose, null);
 
-        const invertOp = json1.type.invertWithDoc(op, this.drawingManagerData as unknown as json1.Doc);
+        const invertOp = JSON1.type.invertWithDoc(op, this.drawingManagerData as unknown as JSON1.Doc);
 
         return { undo: invertOp, redo: op, unitId, subUnitId, objects: groupParams };
     }
@@ -571,9 +570,9 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             ops.push(this._getUngroupDrawingOp(groupParam));
         });
 
-        const op = ops.reduce(json1.type.compose, null);
+        const op = ops.reduce(JSON1.type.compose, null);
 
-        const invertOp = json1.type.invertWithDoc(op, this.drawingManagerData as unknown as json1.Doc);
+        const invertOp = JSON1.type.invertWithDoc(op, this.drawingManagerData as unknown as JSON1.Doc);
 
         return { undo: invertOp, redo: op, unitId, subUnitId, objects: groupParams };
     }
@@ -657,7 +656,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         const ops: JSONOp[] = [];
 
         ops.push(
-            json1.insertOp([groupUnitId, groupSubUnitId, DrawingMapItemType.data, groupDrawingId], parent as unknown as json1.Doc)
+            JSON1.insertOp([groupUnitId, groupSubUnitId, DrawingMapItemType.data, groupDrawingId], parent as unknown as JSON1.Doc)
         );
         let maxChildIndex = Number.NEGATIVE_INFINITY;
         children.forEach((child) => {
@@ -674,10 +673,10 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         }
 
         ops.push(
-            json1.insertOp([groupUnitId, groupSubUnitId, DrawingMapItemType.order, maxChildIndex], groupDrawingId)
+            JSON1.insertOp([groupUnitId, groupSubUnitId, DrawingMapItemType.order, maxChildIndex], groupDrawingId)
         );
 
-        return ops.reduce(json1.type.compose, null);
+        return ops.reduce(JSON1.type.compose, null);
     }
 
     private _getUngroupDrawingOp(groupParam: IDrawingGroupUpdateParam): JSONOp {
@@ -693,20 +692,20 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             );
         });
         ops.push(
-            json1.removeOp([groupUnitId, groupSubUnitId, DrawingMapItemType.data, groupDrawingId], true)
+            JSON1.removeOp([groupUnitId, groupSubUnitId, DrawingMapItemType.data, groupDrawingId], true)
         );
         ops.push(
-            json1.removeOp([groupUnitId, groupSubUnitId, DrawingMapItemType.order, this._getDrawingOrder(groupUnitId, groupSubUnitId).indexOf(groupDrawingId)], true)
+            JSON1.removeOp([groupUnitId, groupSubUnitId, DrawingMapItemType.order, this._getDrawingOrder(groupUnitId, groupSubUnitId).indexOf(groupDrawingId)], true)
         );
 
-        return ops.reduce(json1.type.compose, null);
+        return ops.reduce(JSON1.type.compose, null);
     }
 
     applyJson1(unitId: string, subUnitId: string, jsonOp: JSONOp) {
         this._establishDrawingMap(unitId, subUnitId);
         // this._fillMissingFields(jsonOp);
         this._oldDrawingManagerData = { ...this.drawingManagerData };
-        this.drawingManagerData = json1.type.apply(this.drawingManagerData as unknown as json1.Doc, jsonOp) as unknown as IDrawingMap<T>;
+        this.drawingManagerData = JSON1.type.apply(this.drawingManagerData as unknown as JSON1.Doc, jsonOp) as unknown as IDrawingMap<T>;
     }
 
     // private _fillMissingFields(jsonOp: JSONOp) {
@@ -825,7 +824,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             if (index === -1 || index === orders.length - 1) {
                 return;
             }
-            const op = json1.moveOp([unitId, subUnitId, DrawingMapItemType.order, index], [unitId, subUnitId, DrawingMapItemType.order, index + 1]);
+            const op = JSON1.moveOp([unitId, subUnitId, DrawingMapItemType.order, index], [unitId, subUnitId, DrawingMapItemType.order, index + 1]);
             ops.push(op);
             if (!newIds.includes(orders[index + 1])) {
                 newIds.push(orders[index + 1]);
@@ -833,8 +832,8 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             // this._moveDrawingOrder(unitId, subUnitId, drawingId, index + 1);
         });
 
-        const op = ops.reduce(json1.type.compose, null);
-        const invertOp = json1.type.invertWithDoc(op, this.drawingManagerData as unknown as json1.Doc);
+        const op = ops.reduce(JSON1.type.compose, null);
+        const invertOp = JSON1.type.invertWithDoc(op, this.drawingManagerData as unknown as JSON1.Doc);
 
         // this._order$.next({ unitId, subUnitId, drawingIds: this.getDrawingOrder(unitId, subUnitId) });
 
@@ -852,15 +851,15 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
                 return;
             }
             // this._moveDrawingOrder(unitId, subUnitId, drawingId, index - 1);
-            const op = json1.moveOp([unitId, subUnitId, DrawingMapItemType.order, index], [unitId, subUnitId, DrawingMapItemType.order, index - 1]);
+            const op = JSON1.moveOp([unitId, subUnitId, DrawingMapItemType.order, index], [unitId, subUnitId, DrawingMapItemType.order, index - 1]);
             ops.push(op);
             if (!newIds.includes(orders[index - 1])) {
                 newIds.push(orders[index - 1]);
             }
         });
 
-        const op = ops.reduce(json1.type.compose, null);
-        const invertOp = json1.type.invertWithDoc(op, this.drawingManagerData as unknown as json1.Doc);
+        const op = ops.reduce(JSON1.type.compose, null);
+        const invertOp = JSON1.type.invertWithDoc(op, this.drawingManagerData as unknown as JSON1.Doc);
 
         // this._order$.next({ unitId, subUnitId, drawingIds: this.getDrawingOrder(unitId, subUnitId) });
 
@@ -877,7 +876,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             const { drawingId } = orderDrawingId;
             const index = this._getDrawingCount(unitId, subUnitId) - 1;
 
-            const op = json1.moveOp([unitId, subUnitId, DrawingMapItemType.order, this._getDrawingOrder(unitId, subUnitId).indexOf(drawingId)], [unitId, subUnitId, DrawingMapItemType.order, index]);
+            const op = JSON1.moveOp([unitId, subUnitId, DrawingMapItemType.order, this._getDrawingOrder(unitId, subUnitId).indexOf(drawingId)], [unitId, subUnitId, DrawingMapItemType.order, index]);
             ops.push(op);
             if (!newIds.includes(orders[index])) {
                 newIds.push(orders[index]);
@@ -885,8 +884,8 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             // this._moveDrawingOrder(unitId, subUnitId, drawingId, index + 1);
         });
 
-        const op = ops.reduce(json1.type.compose, null);
-        const invertOp = json1.type.invertWithDoc(op, this.drawingManagerData as unknown as json1.Doc);
+        const op = ops.reduce(JSON1.type.compose, null);
+        const invertOp = JSON1.type.invertWithDoc(op, this.drawingManagerData as unknown as JSON1.Doc);
 
         return { undo: invertOp, redo: op, unitId, subUnitId, objects: { ...orderParams, drawingIds: newIds } };
     }
@@ -900,7 +899,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         orderSearchParams.forEach((orderSearchParam) => {
             const { drawingId } = orderSearchParam;
 
-            const op = json1.moveOp([unitId, subUnitId, DrawingMapItemType.order, this._getDrawingOrder(unitId, subUnitId).indexOf(drawingId)], [unitId, subUnitId, DrawingMapItemType.order, 0]);
+            const op = JSON1.moveOp([unitId, subUnitId, DrawingMapItemType.order, this._getDrawingOrder(unitId, subUnitId).indexOf(drawingId)], [unitId, subUnitId, DrawingMapItemType.order, 0]);
             ops.push(op);
 
             if (!newIds.includes(orders[0])) {
@@ -908,8 +907,8 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             }
         });
 
-        const op = ops.reduce(json1.type.compose, null);
-        const invertOp = json1.type.invertWithDoc(op, this.drawingManagerData as unknown as json1.Doc);
+        const op = ops.reduce(JSON1.type.compose, null);
+        const invertOp = JSON1.type.invertWithDoc(op, this.drawingManagerData as unknown as JSON1.Doc);
 
         return { undo: invertOp, redo: op, unitId, subUnitId, objects: { ...orderParams, drawingIds: newIds } };
     }
@@ -928,11 +927,11 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             return null;
         }
 
-        const op = json1.moveOp(
+        const op = JSON1.moveOp(
             [unitId, subUnitId, DrawingMapItemType.order, currentIndex],
             [unitId, subUnitId, DrawingMapItemType.order, targetIndex]
         );
-        const invertOp = json1.type.invertWithDoc(op, this.drawingManagerData as unknown as json1.Doc);
+        const invertOp = JSON1.type.invertWithDoc(op, this.drawingManagerData as unknown as JSON1.Doc);
         const affectedDrawingIds = orders.slice(
             Math.min(currentIndex, targetIndex),
             Math.max(currentIndex, targetIndex) + 1
@@ -1013,11 +1012,11 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
         // this._insertDrawingOrder({ unitId, subUnitId, drawingId });
 
-        const op1 = json1.insertOp([unitId, subUnitId, DrawingMapItemType.data, drawingId], insertParam as unknown as json1.Doc);
-        const op2 = json1.insertOp([unitId, subUnitId, DrawingMapItemType.order, this._getDrawingOrder(unitId, subUnitId).length], drawingId);
-        const op = [op1, op2].reduce(json1.type.compose, null);
+        const op1 = JSON1.insertOp([unitId, subUnitId, DrawingMapItemType.data, drawingId], insertParam as unknown as JSON1.Doc);
+        const op2 = JSON1.insertOp([unitId, subUnitId, DrawingMapItemType.order, this._getDrawingOrder(unitId, subUnitId).length], drawingId);
+        const op = [op1, op2].reduce(JSON1.type.compose, null);
 
-        const invertOp = json1.type.invertWithDoc(op, this.drawingManagerData as unknown as json1.Doc);
+        const invertOp = JSON1.type.invertWithDoc(op, this.drawingManagerData as unknown as JSON1.Doc);
 
         return { op, invertOp };
     }
@@ -1038,11 +1037,11 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
         // this._removeDrawingOrder({ unitId, subUnitId, drawingId });
 
-        const op1 = json1.removeOp([unitId, subUnitId, DrawingMapItemType.data, drawingId], true);
-        const op2 = json1.removeOp([unitId, subUnitId, DrawingMapItemType.order, this._getDrawingOrder(unitId, subUnitId).indexOf(drawingId)], true);
-        const op = [op1, op2].reduce(json1.type.compose, null);
+        const op1 = JSON1.removeOp([unitId, subUnitId, DrawingMapItemType.data, drawingId], true);
+        const op2 = JSON1.removeOp([unitId, subUnitId, DrawingMapItemType.order, this._getDrawingOrder(unitId, subUnitId).indexOf(drawingId)], true);
+        const op = [op1, op2].reduce(JSON1.type.compose, null);
 
-        const invertOp = json1.type.invertWithDoc(op, this.drawingManagerData as unknown as json1.Doc);
+        const invertOp = JSON1.type.invertWithDoc(op, this.drawingManagerData as unknown as JSON1.Doc);
 
         return { op, invertOp };
     }
@@ -1069,9 +1068,9 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             return { op: [] as unknown as JSONOp, invertOp: [] as unknown as JSONOp };
         }
 
-        const op = ops.reduce(json1.type.compose, null);
+        const op = ops.reduce(JSON1.type.compose, null);
 
-        const invertOp = json1.type.invert(op);
+        const invertOp = JSON1.type.invert(op);
 
         return { op, invertOp };
     }

@@ -17,7 +17,8 @@
 import type { IDrawingParam, IDrawingSearch } from '@univerjs/core';
 import { BooleanNumber, DrawingTypeEnum, Injector, JSON1 } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { UnitDrawingService } from '../drawing-manager-impl.service';
+
+import { DrawingManagerService, UnitDrawingService } from '../drawing-manager-impl.service';
 
 const unitId = 'unit';
 const subUnitId = 'subUnit';
@@ -534,5 +535,29 @@ describe('UnitDrawingService', () => {
 
         service.dispose();
         expect(service.drawingManagerData).toEqual({});
+    });
+});
+
+describe('DrawingManagerService', () => {
+    it('uses the shared drawing manager behavior to register and remove drawings by unit', () => {
+        const injector = new Injector();
+        injector.add([DrawingManagerService]);
+        const service = injector.get(DrawingManagerService);
+        const removed: unknown[] = [];
+        service.remove$.subscribe((value) => removed.push(value));
+
+        service.registerDrawingData('unit-1', {
+            'sheet-1': {
+                data: {
+                    image1: { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'image1', drawingType: DrawingTypeEnum.DRAWING_IMAGE },
+                },
+                order: ['image1'],
+            },
+        });
+        expect(service.getDrawingData('unit-1', 'sheet-1')).toHaveProperty('image1');
+
+        service.removeDrawingDataForUnit('unit-1');
+        expect(service.getDrawingDataForUnit('unit-1')).toEqual({});
+        expect(removed).toEqual([[{ unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'image1' }]]);
     });
 });

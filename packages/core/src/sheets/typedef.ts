@@ -254,6 +254,15 @@ export interface IColAutoWidthInfo {
  */
 export type CellValue = string | number | boolean;
 
+/** Formula kinds from SpreadsheetML ST_CellFormulaType. */
+export enum FormulaType {
+    NORMAL = 0,
+    SHARED = 1,
+    ARRAY = 2,
+    /** What-if analysis data table, not a structured table. */
+    DATA_TABLE = 3,
+}
+
 /**
  * Cell data
  */
@@ -279,6 +288,12 @@ export interface ICellData {
      * Raw formula string. For example `=SUM(A1:B4)`.
      */
     f?: Nullable<string>;
+
+    /** Formula type, mapped from OOXML f@t. Omission preserves existing runtime behavior. */
+    ft?: Nullable<FormulaType>;
+
+    /** Dynamic array flag, mapped from the referenced dynamicArrayProperties@fDynamic metadata. */
+    fd?: Nullable<BooleanNumber>;
 
     /**
      * If the formula is a formula array, this field is used to store the referencing range.
@@ -357,6 +372,8 @@ export function isICellData(value: any): value is ICellData {
             (value as ICellData).v !== undefined ||
             (value as ICellData).t !== undefined ||
             (value as ICellData).f !== undefined ||
+            (value as ICellData).ft !== undefined ||
+            (value as ICellData).fd !== undefined ||
             (value as ICellData).si !== undefined ||
             (value as ICellData).custom !== undefined)
     );

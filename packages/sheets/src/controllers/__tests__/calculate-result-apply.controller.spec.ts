@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CellValueType, ICommandService } from '@univerjs/core';
+import { BooleanNumber, CellValueType, FormulaType, ICommandService } from '@univerjs/core';
 import { ErrorType, SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
 import { describe, expect, it } from 'vitest';
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
@@ -56,9 +56,12 @@ describe('CalculateResultApplyController', () => {
             f: '=VSTACK("Project")',
             v: 'Project',
             t: CellValueType.STRING,
-            custom: { _xlsx: { legacyArrayFormula: true } },
+            ft: FormulaType.ARRAY,
+            fd: BooleanNumber.FALSE,
         });
         sheet.getCellMatrix().setValue(0, 1, {
+            ft: FormulaType.ARRAY,
+            fd: BooleanNumber.TRUE,
             f: '=VSTACK("Project")',
             v: 'Project',
             t: CellValueType.STRING,
@@ -93,7 +96,8 @@ describe('CalculateResultApplyController', () => {
         sheet.getCellMatrix().setValue(0, 0, {
             f: '=A2:B2',
             ref: 'A1:B1',
-            custom: { _xlsx: { legacyArrayFormula: true } },
+            ft: FormulaType.ARRAY,
+            fd: BooleanNumber.FALSE,
         });
         sheet.getCellMatrix().setValue(0, 1, {
             ref: 'A1:B1',
@@ -122,7 +126,8 @@ describe('CalculateResultApplyController', () => {
         expect(sheet.getCellMatrix().getValue(0, 0)).toMatchObject({
             f: '=A2:B2',
             ref: 'A1:B1',
-            custom: { _xlsx: { legacyArrayFormula: true } },
+            ft: FormulaType.ARRAY,
+            fd: BooleanNumber.FALSE,
         });
         expect(sheet.getCellMatrix().getValue(0, 1)).toEqual(legacyFollower);
         expect(sheet.getCellMatrix().getValue(0, 2)).toBeUndefined();

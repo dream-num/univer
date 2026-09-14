@@ -45,7 +45,7 @@ describe('CalculateResultApplyController', () => {
         testBed.univer.dispose();
     });
 
-    it('keeps a valid imported cache when a legacy array origin recalculates to an error', async () => {
+    it.each([ErrorType.REF, ErrorType.NAME, ErrorType.DIV_BY_ZERO])('applies calculated %s errors to fixed and dynamic arrays', async (error) => {
         const testBed = createFunctionTestBed();
         const commandService = testBed.get(ICommandService);
         commandService.registerCommand(SetFormulaCalculationResultMutation);
@@ -54,6 +54,7 @@ describe('CalculateResultApplyController', () => {
         const sheet = testBed.sheet.getSheetBySheetId(testBed.sheetId)!;
         sheet.getCellMatrix().setValue(0, 0, {
             f: '=VSTACK("Project")',
+            ref: 'A1:A2',
             v: 'Project',
             t: CellValueType.STRING,
             ft: FormulaType.ARRAY,
@@ -67,26 +68,31 @@ describe('CalculateResultApplyController', () => {
             t: CellValueType.STRING,
         });
 
+        sheet.getCellMatrix().setValue(1, 0, { v: 100, ref: 'A1:A2' });
+
         await commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
             unitData: {
                 [testBed.unitId]: {
                     [testBed.sheetId]: {
                         0: {
-                            0: { v: ErrorType.REF, t: CellValueType.STRING },
-                            1: { v: ErrorType.REF, t: CellValueType.STRING },
+                            0: { v: error, t: CellValueType.STRING },
+                            1: { v: error, t: CellValueType.STRING },
                         },
+                        1: { 0: { v: error, t: CellValueType.STRING } },
                     },
                 },
             },
             unitOtherData: {},
         });
 
-        expect(sheet.getCellMatrix().getValue(0, 0)?.v).toBe('Project');
-        expect(sheet.getCellMatrix().getValue(0, 1)?.v).toBe(ErrorType.REF);
+        expect(sheet.getCellMatrix().getValue(0, 0)?.v).toBe(error);
+        expect(sheet.getCellMatrix().getValue(0, 1)?.v).toBe(error);
+        expect(sheet.getCellMatrix().getValue(1, 0)?.v).toBe(error);
+        expect(sheet.getCellMatrix().getValue(0, 0)).toMatchObject({ ft: FormulaType.ARRAY, fd: BooleanNumber.FALSE });
         testBed.univer.dispose();
     });
 
-    it('keeps legacy array cells when recalculation returns null entries', async () => {
+    it('applies explicit clearing results to array anchors and followers', async () => {
         const testBed = createFunctionTestBed();
         const commandService = testBed.get(ICommandService);
         commandService.registerCommand(SetFormulaCalculationResultMutation);
@@ -106,7 +112,6 @@ describe('CalculateResultApplyController', () => {
         sheet.getCellMatrix().setValue(0, 2, {
             f: '=C2',
         });
-        const legacyFollower = sheet.getCellMatrix().getValue(0, 1);
 
         await commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
             unitData: {
@@ -123,13 +128,8 @@ describe('CalculateResultApplyController', () => {
             unitOtherData: {},
         });
 
-        expect(sheet.getCellMatrix().getValue(0, 0)).toMatchObject({
-            f: '=A2:B2',
-            ref: 'A1:B1',
-            ft: FormulaType.ARRAY,
-            fd: BooleanNumber.FALSE,
-        });
-        expect(sheet.getCellMatrix().getValue(0, 1)).toEqual(legacyFollower);
+        expect(sheet.getCellMatrix().getValue(0, 0)).toBeUndefined();
+        expect(sheet.getCellMatrix().getValue(0, 1)).toBeUndefined();
         expect(sheet.getCellMatrix().getValue(0, 2)).toBeUndefined();
         testBed.univer.dispose();
     });

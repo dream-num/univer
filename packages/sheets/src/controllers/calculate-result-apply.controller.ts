@@ -16,13 +16,12 @@
 
 import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, Nullable, Workbook } from '@univerjs/core';
 import type { ErrorType, ISetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, ObjectMatrix, sequenceExecute, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, Disposable, FormulaType, ICommandService, Inject, IUniverInstanceService, ObjectMatrix, sequenceExecute, UniverInstanceType } from '@univerjs/core';
 import { ERROR_TYPE_SET, handleNumfmtInCell, SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
 
 function isLegacyArrayFormulaOrigin(cell: Nullable<ICellData>): boolean {
-    const xlsx = cell?.custom?._xlsx as { legacyArrayFormula?: boolean } | undefined;
-    return xlsx?.legacyArrayFormula === true;
+    return cell?.ft === FormulaType.ARRAY && cell.fd !== BooleanNumber.TRUE;
 }
 
 function isLegacyArrayFormulaCell(cell: Nullable<ICellData>, legacyArrayRefs: Set<string>): boolean {

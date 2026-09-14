@@ -69,7 +69,7 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "@wendellhu/redi": "1.1.2",
+        "@wendellhu/redi": "1.1.3",
         "typescript": "^6.0.3"
     }
 }

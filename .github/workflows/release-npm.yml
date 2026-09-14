@@ -34,15 +34,15 @@ jobs:
                   ref: ${{ github.ref_name }}
                   persist-credentials: false
 
-            - name: Install pnpm
-              uses: pnpm/action-setup@v6
+            - name: Install pnpm and Node.js
+              uses: pnpm/setup@v2
               with:
-                  run_install: false
+                  runtime: node@24.3.0
+                  install: false
 
-            - name: Install Node.js
+            - name: Configure npm registry
               uses: actions/setup-node@v6
               with:
-                  node-version: 24.3.0
                   registry-url: https://registry.npmjs.org
                   package-manager-cache: false
 

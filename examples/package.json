@@ -40,18 +40,18 @@
         "@univerjs/slides-ui": "workspace:*",
         "@univerjs/themes": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "react": "19.2.8",
-        "react-dom": "19.2.8",
+        "react": "19.3.0",
+        "react-dom": "19.3.0",
         "rxjs": "^7.8.2"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "postcss": "^8.5.26",
+        "postcss": "^8.5.28",
         "tailwindcss": "3.4.18",
         "tailwindcss-animate": "^1.0.7",
-        "tsx": "^4.22.4",
+        "tsx": "^4.23.13",
         "typescript": "^6.0.3",
-        "vite": "^8.0.11",
+        "vite": "^8.3.0",
         "vitest": "^5.0.0"
     }
 }

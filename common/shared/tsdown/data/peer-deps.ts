@@ -32,7 +32,7 @@ export const peerDepsMap = {
     '@wendellhu/redi': {
         global: '@wendellhu/redi',
         name: '@wendellhu/redi',
-        version: '1.1.2',
+        version: '1.1.3',
     },
     '@wendellhu/redi/react-bindings': {
         global: '@wendellhu/redi/react-bindings',

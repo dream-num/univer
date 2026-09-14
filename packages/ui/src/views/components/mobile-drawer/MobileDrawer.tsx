@@ -68,6 +68,8 @@ export function MobileDrawer(props: {
     openMode?: MobileDrawerOpenMode;
     panelClassName?: string;
     contentClassName?: string;
+    /** Fit the compact drawer to its contents while retaining drag and expand behavior. */
+    fitContent?: boolean;
     footer?: ReactNode;
     role?: AriaRole;
     ariaLabel?: string;
@@ -89,6 +91,7 @@ export function MobileDrawer(props: {
         openMode = 'replace',
         panelClassName,
         contentClassName,
+        fitContent = false,
         footer,
         role,
         ariaLabel,
@@ -164,12 +167,16 @@ export function MobileDrawer(props: {
         layer.toggleAttribute('hidden', !active);
     }, [active, layerRef]);
 
+    const fitCompactContent = fitContent && snap === 'compact' && dragPercent === null;
+
     function beginDrag(clientY: number) {
+        const contentHeight = fitCompactContent ? panelElementRef.current?.getBoundingClientRect().height : 0;
+        const startPercent = contentHeight ? contentHeight / Math.max(window.innerHeight, 1) * 100 : drawerPercent;
         dragRef.current = {
             startY: clientY,
             startTime: performance.now(),
-            startPercent: drawerPercent,
-            currentPercent: drawerPercent,
+            startPercent,
+            currentPercent: startPercent,
             moved: false,
         };
     }
@@ -196,7 +203,10 @@ export function MobileDrawer(props: {
             snap,
             deltaY: clientY - drag.startY,
             durationMs: performance.now() - drag.startTime,
-            percent: drag.currentPercent,
+            // Content-sized drawers use movement relative to the compact snap for release thresholds.
+            percent: fitContent && snap === 'compact'
+                ? MOBILE_DRAWER_COMPACT_PERCENT + drag.currentPercent - drag.startPercent
+                : drag.currentPercent,
         });
         suppressHandleClickRef.current = drag.moved;
         dragRef.current = null;
@@ -265,7 +275,8 @@ export function MobileDrawer(props: {
                       [&_textarea]:!univer-text-base
                     `, 'univer-pointer-events-auto', dragPercent != null && '!univer-transition-none', panelClassName)}
                     style={{
-                        height: `${drawerPercent}${viewportHeightUnit}`,
+                        height: fitCompactContent ? 'auto' : `${drawerPercent}${viewportHeightUnit}`,
+                        maxHeight: fitCompactContent ? 'min(560px, 100%)' : undefined,
                         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
                     }}
                 >
@@ -306,6 +317,7 @@ export function MobileDrawer(props: {
                     </div>
                     <div
                         ref={contentRef}
+                        style={fitCompactContent ? { flex: '0 1 auto', minHeight: 0 } : undefined}
                         className={clsx(
                             'univer-flex-1 univer-overflow-y-auto univer-overflow-x-hidden univer-p-3',
                             scrollbarClassName,

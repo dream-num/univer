@@ -104,6 +104,32 @@ describe('mobile drawer snap behavior', () => {
         expect(container.querySelector('section')?.style.height).toBe('40vh');
     });
 
+    it('fits compact content and restores snap sizing during expansion and dragging', () => {
+        vi.stubGlobal('CSS', { supports: () => false });
+        const props = {
+            expandLabel: 'Expand drawer',
+            collapseLabel: 'Collapse drawer',
+            onSnapChange: vi.fn(),
+            onClose: vi.fn(),
+            fitContent: true,
+        };
+        const { container, rerender } = render(<MobileDrawer {...props} snap="compact">Short editor</MobileDrawer>);
+        const panel = container.querySelector('section')!;
+        expect(panel.style.height).toBe('auto');
+        expect(panel.style.maxHeight).not.toBe('');
+        const layout = vi.spyOn(panel, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 600, 320, 120));
+        const handle = screen.getByRole('button', { name: 'Expand drawer' });
+        fireEvent.pointerDown(handle, { pointerId: 1, clientY: 600 });
+        fireEvent.pointerMove(handle, { pointerId: 1, clientY: 500 });
+        expect(Number.parseFloat(panel.style.height)).toBeCloseTo(220 / window.innerHeight * 100);
+        layout.mockRestore();
+        fireEvent.pointerCancel(handle, { pointerId: 1 });
+        expect(panel.style.height).toBe('auto');
+        rerender(<MobileDrawer {...props} snap="expanded">Long editor</MobileDrawer>);
+        expect(panel.style.height).toBe('80vh');
+        expect(panel.style.maxHeight).toBe('');
+    });
+
     it('supports expand, collapse, restore, and fast close gestures', () => {
         expect(resolveMobileDrawerRelease({ snap: 'compact', deltaY: -40, durationMs: 300, percent: 45 })).toBe('expanded');
         expect(resolveMobileDrawerRelease({ snap: 'expanded', deltaY: 40, durationMs: 300, percent: 75 })).toBe('compact');

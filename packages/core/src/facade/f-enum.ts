@@ -34,6 +34,7 @@ import {
     DeveloperMetadataVisibility,
     Dimension,
     Direction,
+    FormulaType,
     HorizontalAlign,
     ImageSourceType,
     InterpolationPointType,
@@ -52,6 +53,7 @@ import {
     ThemeColorType,
     UniverInstanceType,
     VerticalAlign,
+    WorksheetHiddenState,
     WrapStrategy,
 } from '@univerjs/core';
 
@@ -59,6 +61,16 @@ import {
  * @hideconstructor
  */
 export class FEnum {
+    /** SpreadsheetML formula types. */
+    get FormulaType(): typeof FormulaType {
+        return FormulaType;
+    }
+
+    /** Worksheet hiding states: VISIBLE (0), HIDDEN (1), VERY_HIDDEN (2). */
+    get WorksheetHiddenState(): typeof WorksheetHiddenState {
+        return WorksheetHiddenState;
+    }
+
     /**
      * @ignore
      */

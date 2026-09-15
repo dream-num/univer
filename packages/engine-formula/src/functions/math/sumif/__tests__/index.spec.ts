@@ -244,13 +244,16 @@ describe('Test sumif function', () => {
             const error = ErrorValueObject.create(ErrorType.NAME);
 
             const result = await calculate(`=SUMIF(${error},A1:A4)`);
-            expect(result).toBe(ErrorType.VALUE);
+            expect(result).toBe(ErrorType.NAME);
 
             const result2 = await calculate(`=SUMIF(A1:A4,${error})`);
             expect(result2).toBe(0);
 
             const result3 = await calculate(`=SUMIF(A1:A4,">40",${error})`);
-            expect(result3).toBe(ErrorType.VALUE);
+            expect(result3).toBe(ErrorType.NAME);
+
+            const result4 = await calculate('=SUMIF(#REF!,A1:A4,#REF!)');
+            expect(result4).toBe(ErrorType.REF);
         });
 
         it('Range or sumRange is not referenceObject', async () => {

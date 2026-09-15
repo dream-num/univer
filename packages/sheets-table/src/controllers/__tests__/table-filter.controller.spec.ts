@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DateSystem } from '@univerjs/core';
+import { DateSystem, toDisposable } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { TableFilterController } from '../table-filter.controller';
@@ -43,7 +43,7 @@ describe('TableFilterController', () => {
             tableFilterChanged$,
             tableInitStatus$,
             getTable: vi.fn(() => mainTable),
-            getTablesBySubunitId: vi.fn(() => [mainTable, extraTable]),
+            getTablesBySubunitId: vi.fn((_unitId, subUnitId) => subUnitId === 's1' ? [mainTable, extraTable] : []),
         };
 
         let rowFilteredHandler: any;
@@ -74,10 +74,21 @@ describe('TableFilterController', () => {
             updateZebraCrossingCache: vi.fn(),
         };
 
+        let formulaRowFiltered: ((unitId: string, subUnitId: string, row: number) => boolean) | undefined;
+        const sheetRowFilteredService = {
+            register: vi.fn((callback) => {
+                formulaRowFiltered = callback;
+                return toDisposable(() => {
+                    formulaRowFiltered = undefined;
+                });
+            }),
+        };
+
         const controller = new TableFilterController(
             tableManager as any,
             sheetInterceptorService as any,
             univerInstanceService as any,
+            sheetRowFilteredService as any,
             zebraCrossingCacheController as any
         );
 
@@ -90,6 +101,7 @@ describe('TableFilterController', () => {
         );
         expect(zebraCrossingCacheController.updateZebraCrossingCache).toHaveBeenCalledWith('u1', 's1');
         expect(rowFilteredHandler(false, { unitId: 'u1', subUnitId: 's1', row: 4 }, vi.fn(() => false))).toBe(true);
+        expect(formulaRowFiltered?.('u1', 's1', 4)).toBe(true);
         expect(rowFilteredHandler(false, { unitId: 'u1', subUnitId: 's2', row: 4 }, vi.fn(() => false))).toBe(false);
         expect(rowFilteredHandler(false, { unitId: 'u1', subUnitId: 's1', row: 9 }, vi.fn(() => false))).toBe(false);
 

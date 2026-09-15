@@ -29,6 +29,7 @@ export class Table {
     private _tableStyleId?: string;
     private _showHeader: boolean;
     private _showFooter: boolean;
+    private _showAutoFilter: boolean;
     private _range: ITableRange;
     private _columns: Map<string, TableColumn> = new Map();
     private _columnOrder: string[] = [];
@@ -48,8 +49,8 @@ export class Table {
     _init(header: string[], options: ITableOptions) {
         this._tableStyleId = options?.tableStyleId;
         this._showHeader = options?.showHeader ?? true;
-        // Summarization is not supported yet. Footer is not displayed yet.
-        this._showFooter = false;
+        this._showFooter = options?.showFooter ?? false;
+        this._showAutoFilter = options?.showAutoFilter ?? true;
         // init table columns
         const range = this.getRange();
         const startColumn = range.startColumn;
@@ -216,6 +217,14 @@ export class Table {
         return this._showFooter ?? false;
     }
 
+    isShowAutoFilter() {
+        return this._showAutoFilter ?? true;
+    }
+
+    setShowAutoFilter(showAutoFilter: boolean) {
+        this._showAutoFilter = showAutoFilter;
+    }
+
     getTableInfo(): ITableInfo {
         return {
             id: this._id,
@@ -224,6 +233,7 @@ export class Table {
             range: this.getRangeInfo(),
             meta: this.tableMeta,
             showHeader: this._showHeader,
+            showAutoFilter: this._showAutoFilter,
             columns: this._columnOrder.map((columnId) => this._columns.get(columnId)!.toJSON()),
         };
     }
@@ -235,6 +245,7 @@ export class Table {
             options: {
                 showHeader: this._showHeader,
                 showFooter: this._showFooter,
+                showAutoFilter: this._showAutoFilter,
             },
             tableStyleId: this._tableStyleId,
         };
@@ -256,6 +267,7 @@ export class Table {
             options: {
                 showHeader: this._showHeader,
                 showFooter: this._showFooter,
+                showAutoFilter: this._showAutoFilter,
                 tableStyleId: this._tableStyleId,
             },
             // TODO: support filter
@@ -273,6 +285,9 @@ export class Table {
         this._tableStyleId = json.options.tableStyleId || '';
         this._showHeader = json.options.showHeader ?? true;
         this._showFooter = json.options.showFooter ?? true;
+        this._showAutoFilter = json.options.showAutoFilter ?? true;
+        this._columns.clear();
+        this._columnOrder = [];
         const columns = json.columns;
         columns.forEach((column) => {
             const tableColumn = new TableColumn(column.id, column.displayName);
@@ -290,6 +305,7 @@ export class Table {
         this._tableStyleId = '';
         this._showHeader = true;
         this._showFooter = true;
+        this._showAutoFilter = true;
         // @ts-ignore
         delete this._range;
         this._columns.clear();

@@ -89,6 +89,16 @@ export interface IWorkbookData {
     custom?: CustomData;
 }
 
+/** Worksheet-only hiding states; row/column and cell flags still use BooleanNumber. */
+export enum WorksheetHiddenState {
+    /** Visible in the sheet bar. Preserves the existing hidden: 0 value. */
+    VISIBLE = 0,
+    /** Hidden, and listed in the UI's Unhide dialog. Preserves hidden: 1. */
+    HIDDEN = 1,
+    /** Omitted from Unhide UI; can be revealed through the API. Not an access permission. */
+    VERY_HIDDEN = 2,
+}
+
 /**
  * Snapshot of a worksheet.
  */
@@ -104,14 +114,12 @@ export interface IWorksheetData {
     tabColor: string;
 
     /**
-     * Determine whether the sheet is hidden.
-     *
-     * @remarks
-     * See {@link BooleanNumber| the BooleanNumber enum} for more details.
-     *
-     * @defaultValue `BooleanNumber.FALSE`
+     * Sheet hiding state: 0 = visible, 1 = hidden, 2 = very hidden.
+     * BooleanNumber remains accepted for existing 0/1 snapshots and integrations.
+     * Use WorksheetHiddenState for new code; do not interpret this as a boolean flag.
+     * @defaultValue WorksheetHiddenState.VISIBLE
      */
-    hidden: BooleanNumber;
+    hidden: WorksheetHiddenState | BooleanNumber;
 
     freeze: IFreeze;
 
@@ -246,6 +254,15 @@ export interface IColAutoWidthInfo {
  */
 export type CellValue = string | number | boolean;
 
+/** Formula kinds from SpreadsheetML ST_CellFormulaType. */
+export enum FormulaType {
+    NORMAL = 0,
+    SHARED = 1,
+    ARRAY = 2,
+    /** What-if analysis data table, not a structured table. */
+    DATA_TABLE = 3,
+}
+
 /**
  * Cell data
  */
@@ -271,6 +288,12 @@ export interface ICellData {
      * Raw formula string. For example `=SUM(A1:B4)`.
      */
     f?: Nullable<string>;
+
+    /** Formula type, mapped from OOXML f@t. Omission preserves existing runtime behavior. */
+    ft?: Nullable<FormulaType>;
+
+    /** Dynamic array flag, mapped from the referenced dynamicArrayProperties@fDynamic metadata. */
+    fd?: Nullable<BooleanNumber>;
 
     /**
      * If the formula is a formula array, this field is used to store the referencing range.
@@ -349,6 +372,8 @@ export function isICellData(value: any): value is ICellData {
             (value as ICellData).v !== undefined ||
             (value as ICellData).t !== undefined ||
             (value as ICellData).f !== undefined ||
+            (value as ICellData).ft !== undefined ||
+            (value as ICellData).fd !== undefined ||
             (value as ICellData).si !== undefined ||
             (value as ICellData).custom !== undefined)
     );

@@ -24,6 +24,9 @@ export interface ISetSheetTableParams {
     tableId: string;
     column: number;
     tableFilter: ITableFilterItem | undefined;
+    filterOutRows?: number[];
+    subUnitId?: string;
+    tableFilteredOutRows?: number[];
 }
 
 export const SetSheetTableFilterMutation: IMutation<ISetSheetTableParams & { tableId: string }> = {
@@ -32,7 +35,18 @@ export const SetSheetTableFilterMutation: IMutation<ISetSheetTableParams & { tab
     handler: (accessor, params) => {
         const { tableId, unitId, column, tableFilter } = params;
         const tableManager = accessor.get(TableManager);
+        const table = tableManager.getTable(unitId, tableId);
         tableManager.addFilter(unitId, tableId, column, tableFilter);
+        if (table) {
+            const tableFilters = table.getTableFilters();
+            if (params.filterOutRows) {
+                tableFilters.setFilterOutRows(params.filterOutRows);
+            } else {
+                params.filterOutRows = [...tableFilters.getFilterOutRows()];
+            }
+            params.subUnitId = table.getSubunitId();
+            params.tableFilteredOutRows = tableManager.toJSON(unitId)[params.subUnitId]?.tableFilteredOutRows ?? [];
+        }
         return true;
     },
 };

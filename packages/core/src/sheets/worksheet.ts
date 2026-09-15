@@ -17,7 +17,7 @@
 import type { IDisposable } from '../common/di';
 import type { IInterceptor } from '../common/interceptor';
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
-import type { BooleanNumber, HorizontalAlign, TextDirection, VerticalAlign, WrapStrategy } from '../types/enum';
+import type { HorizontalAlign, TextDirection, VerticalAlign, WrapStrategy } from '../types/enum';
 import type { IDocumentData, IDocumentRenderConfig, IPaddingData, IStyleData, ITextRotation } from '../types/interfaces';
 import type { Styles } from './styles';
 import type {
@@ -36,14 +36,14 @@ import { composeStyles, ObjectMatrix, toDisposable, Tools } from '../shared';
 import { generateRandomId } from '../shared/random-id';
 import { createRowColIter } from '../shared/row-col-iter';
 import { DEFAULT_STYLES } from '../types/const';
-import { CellValueType } from '../types/enum';
+import { BooleanNumber, CellValueType } from '../types/enum';
 import { DocumentFlavor } from '../types/interfaces';
 import { ColumnManager } from './column-manager';
 import { Range } from './range';
 import { RowManager } from './row-manager';
 import { mergeWorksheetSnapshotWithDefault } from './sheet-snapshot-utils';
 import { SpanModel } from './span-model';
-import { CellModeEnum } from './typedef';
+import { CellModeEnum, WorksheetHiddenState } from './typedef';
 import {
     addLinkToDocumentModel,
     createDocumentModelWithStyle,
@@ -828,12 +828,19 @@ export class Worksheet {
         this._snapshot.columnCount = count;
     }
 
-    /**
-     * isSheetHidden
-     * @returns hidden status of sheet
-     */
+    /** Returns 0 for visible, 1 for either hidden state, preserving the existing predicate API. */
     isSheetHidden(): BooleanNumber {
-        return this._snapshot.hidden;
+        return this._snapshot.hidden === WorksheetHiddenState.VISIBLE ? BooleanNumber.FALSE : BooleanNumber.TRUE;
+    }
+
+    /** Returns the complete persisted state, including VERY_HIDDEN (2). */
+    getHiddenState(): WorksheetHiddenState {
+        return this._snapshot.hidden as WorksheetHiddenState;
+    }
+
+    /** Model mutation primitive. User-facing changes must go through worksheet hide/show commands. */
+    setHiddenState(hidden: WorksheetHiddenState | BooleanNumber): void {
+        this._snapshot.hidden = hidden;
     }
 
     /**

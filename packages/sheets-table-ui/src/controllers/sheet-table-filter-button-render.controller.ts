@@ -160,8 +160,17 @@ export class SheetsTableFilterButtonRenderController extends RxDisposable implem
             const headerStyle = table ? this._rangeThemeModel.getRangeThemeStyle(unitId, table.getTableStyleId())?.getHeaderRowStyle() : null;
             const iconColor = headerStyle?.cl?.rgb ?? '#fff';
             const hoverIconColor = headerStyle?.bg?.rgb ?? '#202124';
-            this._interceptCellContent(unitId, worksheetId, range);
+            const visibleColumns = new Set<number>();
             for (let col = startColumn; col <= endColumn; col++) {
+                if (table?.getTableColumnByIndex(col - startColumn)?.isShowFilterButton() !== false) {
+                    visibleColumns.add(col);
+                }
+            }
+            this._interceptCellContent(unitId, worksheetId, range, visibleColumns);
+            for (let col = startColumn; col <= endColumn; col++) {
+                if (!visibleColumns.has(col)) {
+                    continue;
+                }
                 const key = `sheets-table-filter-button-${startRow}-${col}`;
                 const startPosition = getCoordByCell(startRow, col, scene, skeleton);
                 const cellStyle = worksheet.getCellStyle(startRow, col);
@@ -197,7 +206,7 @@ export class SheetsTableFilterButtonRenderController extends RxDisposable implem
         scene.makeDirty();
     }
 
-    private _interceptCellContent(workbookId: string, worksheetId: string, range: IRange): void {
+    private _interceptCellContent(workbookId: string, worksheetId: string, range: IRange, visibleColumns: Set<number>): void {
         const { startRow, startColumn, endColumn } = range;
         this._buttonRenderDisposable = this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
             effect: InterceptorEffectEnum.Style,
@@ -208,7 +217,8 @@ export class SheetsTableFilterButtonRenderController extends RxDisposable implem
                     subUnitId !== worksheetId ||
                     row !== startRow ||
                     col < startColumn ||
-                    col > endColumn
+                    col > endColumn ||
+                    !visibleColumns.has(col)
                 ) {
                     return next(cell);
                 }

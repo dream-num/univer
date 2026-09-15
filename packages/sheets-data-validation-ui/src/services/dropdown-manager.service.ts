@@ -221,6 +221,7 @@ export class DataValidationDropdownManagerService extends Disposable {
 
         const handleSerialSave = async (serial: number, targetPatternType: DatePatternType, interceptValue: string) => {
             if (
+                rule.showErrorMessage === false ||
                 rule.errorStyle !== DataValidationErrorStyle.STOP ||
                 (await validator.validator({
                     value: serial,

@@ -32,6 +32,7 @@ import { SheetsFilterService } from '../../services/sheet-filter.service';
  */
 export interface ISetSheetsFilterRangeMutationParams extends ISheetCommandSharedParams {
     range: IRange;
+    filteredOutRows?: number[];
 }
 
 /**
@@ -51,6 +52,7 @@ export const SetSheetsFilterRangeMutation: IMutation<ISetSheetsFilterRangeMutati
         // check if the range is in bound?
         const filterModel = sheetsFilterService.ensureFilterModel(unitId, subUnitId);
         filterModel.setRange(range);
+        params.filteredOutRows = Array.from(filterModel.filteredOutRows);
 
         return true;
     },
@@ -66,6 +68,7 @@ export interface ISetSheetsFilterCriteriaMutationParams extends ISheetCommandSha
     col: number;
     criteria: Nullable<IFilterColumn>;
     reCalc?: boolean;
+    filteredOutRows?: number[];
 }
 
 /**
@@ -82,6 +85,7 @@ export const SetSheetsFilterCriteriaMutation: IMutation<ISetSheetsFilterCriteria
         if (!filterModel) return false;
 
         filterModel.setCriteria(col, criteria, reCalc);
+        params.filteredOutRows = Array.from(filterModel.filteredOutRows);
         return true;
     },
 };
@@ -95,7 +99,11 @@ export const RemoveSheetsFilterMutation: IMutation<ISheetCommandSharedParams> = 
     handler: (accessor, params) => {
         const { unitId, subUnitId } = params;
         const sheetsFilterService = accessor.get(SheetsFilterService);
-        return sheetsFilterService.removeFilterModel(unitId, subUnitId);
+        const removed = sheetsFilterService.removeFilterModel(unitId, subUnitId);
+        if (removed) {
+            (params as ISheetCommandSharedParams & { filteredOutRows?: number[] }).filteredOutRows = [];
+        }
+        return removed;
     },
 };
 
@@ -114,6 +122,9 @@ export const ReCalcSheetsFilterMutation: IMutation<ISheetCommandSharedParams> = 
         }
 
         filterModel.reCalc();
+        (params as ISheetCommandSharedParams & { filteredOutRows?: number[] }).filteredOutRows = Array.from(
+            filterModel.filteredOutRows
+        );
         return true;
     },
 };

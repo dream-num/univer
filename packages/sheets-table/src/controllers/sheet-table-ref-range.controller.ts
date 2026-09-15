@@ -32,6 +32,7 @@ import {
     LocaleService,
     Rectangle,
 } from '@univerjs/core';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import {
     getSheetCommandTarget,
     InsertColCommand,
@@ -48,6 +49,7 @@ import {
 import { AddSheetTableMutation } from '../commands/mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from '../commands/mutations/delete-sheet-table.mutation';
 import { SetSheetTableMutation } from '../commands/mutations/set-sheet-table.mutation';
+import { getCalculatedColumnFillMutation } from '../commands/utils/calculated-column';
 import { TableManager } from '../models/table-manager';
 import { IRangeOperationTypeEnum, IRowColTypeEnum } from '../types/type';
 import { convertCellDataToString, getColumnName } from '../util';
@@ -130,6 +132,18 @@ export class SheetTableRefRangeController extends Disposable {
                         },
                     },
                 });
+
+                const formulaMutation = getCalculatedColumnFillMutation(
+                    table,
+                    unitId,
+                    subUnitId,
+                    range.startRow,
+                    range.endRow,
+                    () => this._injector.get(LexerTreeBuilder)
+                );
+                if (formulaMutation) {
+                    redos.push(formulaMutation);
+                }
 
                 undos.push({
                     id: SetSheetTableMutation.id,

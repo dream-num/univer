@@ -25,6 +25,7 @@ import {
     RANGE_TYPE,
     TestConfirmService,
     UniverInstanceType,
+    WorksheetHiddenState,
 } from '@univerjs/core';
 import {
     AddWorksheetMergeCommand,
@@ -699,6 +700,23 @@ describe('Test FWorksheet', () => {
         expect(activeSheet.getActiveCell()?.getA1Notation()).toBe('C3');
 
         expect(() => activeSheet.hideSheet()).toThrow('Cannot hide the only visible sheet');
+        expect(() => activeSheet.setHiddenState(WorksheetHiddenState.VERY_HIDDEN)).toThrow('Cannot hide the only visible sheet');
+        expect(activeSheet.isSheetHidden()).toBe(false);
+
+        const workbookModel = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        workbookModel.addWorksheet('sheet2', 1, { id: 'sheet2', name: 'Second' });
+        expect(univerAPI.Enum.WorksheetHiddenState.VERY_HIDDEN).toBe(2);
+        activeSheet.setHiddenState(univerAPI.Enum.WorksheetHiddenState.VERY_HIDDEN);
+        expect(activeSheet.isSheetHidden()).toBe(true);
+        expect(activeSheet.getHiddenState()).toBe(WorksheetHiddenState.VERY_HIDDEN);
+        expect(workbookModel.getSheetBySheetId(activeSheet.getSheetId())!.getSnapshot()).toMatchObject({ hidden: 2 });
+        activeSheet.hideSheet();
+        expect(activeSheet.getHiddenState()).toBe(WorksheetHiddenState.VERY_HIDDEN);
+        activeSheet.showSheet();
+        expect(activeSheet.getHiddenState()).toBe(WorksheetHiddenState.VISIBLE);
+        activeSheet.setHiddenState(WorksheetHiddenState.HIDDEN);
+        expect(activeSheet.getHiddenState()).toBe(WorksheetHiddenState.HIDDEN);
+        activeSheet.setHiddenState(WorksheetHiddenState.VISIBLE);
         expect(activeSheet.isSheetHidden()).toBe(false);
 
         activeSheet.setName('Renamed');

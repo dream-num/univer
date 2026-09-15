@@ -142,9 +142,14 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
     },
 };
 
-const overwriteCellPropertiesSet = new Set(['f', 'p', 'si', 'custom', 'ref', 'xf']);
+const overwriteCellPropertiesSet = new Set(['f', 'p', 'si', 'custom', 'ref', 'xf', 'ft', 'fd']);
 function mergeCellData(newValue: ICellData, oldValue: ICellData, styles: Styles, isOverrideStyle = false) {
     const type = getCellType(styles, newValue, oldValue);
+    // Clearing a formula also clears its type. Reference rewrites preserve the type.
+    if (newValue.f === null || newValue.f === '') {
+        delete oldValue.ft;
+        delete oldValue.fd;
+    }
     Object.keys(newValue).forEach((key) => {
         const cellPropertyKey = key as keyof ICellData;
         if (overwriteCellPropertiesSet.has(cellPropertyKey)) {

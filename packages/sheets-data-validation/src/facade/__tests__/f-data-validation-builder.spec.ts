@@ -268,5 +268,11 @@ describe('Test FDataValidationBuilder', () => {
             error: 'Choose an approval state',
         });
         expect(copiedRule.uid).not.toBe(rule.uid);
+
+        const disabledAlert = new FDataValidationBuilder({
+            ...rule,
+            showErrorMessage: false,
+        });
+        expect(disabledAlert.getAllowInvalid()).toBe(true);
     });
 });

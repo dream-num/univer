@@ -191,7 +191,7 @@ describe('test mutations of sheets filter', () => {
             expect(filterModel!.getRange()).toEqual({ startRow: 0, startColumn: 0, endRow: 5, endColumn: 5 });
             expect(filterModel!.filteredOutRows.size).toBe(0);
 
-            expect(commandService.syncExecuteCommand(SetSheetsFilterCriteriaMutation.id, {
+            const params = {
                 unitId: 'test',
                 subUnitId: 'sheet1',
                 col: 0,
@@ -199,8 +199,10 @@ describe('test mutations of sheets filter', () => {
                     colId: 0,
                     filters: ['A'],
                 },
-            } as ISetSheetsFilterCriteriaMutationParams)).toBeTruthy();
+            } as ISetSheetsFilterCriteriaMutationParams;
+            expect(commandService.syncExecuteCommand(SetSheetsFilterCriteriaMutation.id, params)).toBeTruthy();
             expect(filterModel!.filteredOutRows.size).toBe(5);
+            expect(params.filteredOutRows).toEqual(Array.from(filterModel!.filteredOutRows));
         });
 
         it('should return false when set filter criteria on a non-existing filter model', () => {

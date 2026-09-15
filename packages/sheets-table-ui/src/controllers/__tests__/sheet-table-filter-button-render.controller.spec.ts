@@ -128,14 +128,14 @@ describe('SheetsTableFilterButtonRenderController', () => {
             endRow: 8,
             startColumn: 2,
             endColumn: 4,
-        });
+        }, new Set([2, 4]));
 
         const rawCell = { v: 'Header', fontRenderExtension: { leftOffset: 3 } };
         const headerResult = interceptor.handler(rawCell, {
             unitId: 'u1',
             subUnitId: 's1',
             row: 4,
-            col: 3,
+            col: 2,
             rawData: rawCell,
         }, (cell: unknown) => cell);
 
@@ -146,6 +146,13 @@ describe('SheetsTableFilterButtonRenderController', () => {
         });
 
         const bodyCell = { v: 'Body' };
+        expect(interceptor.handler(bodyCell, {
+            unitId: 'u1',
+            subUnitId: 's1',
+            row: 4,
+            col: 3,
+            rawData: bodyCell,
+        }, (cell: unknown) => cell)).toBe(bodyCell);
         expect(interceptor.handler(bodyCell, {
             unitId: 'u1',
             subUnitId: 's1',

@@ -255,5 +255,5 @@ export function deserializeListOptions(optionsStr: string) {
         // Fallback for data saved by older versions.
     }
 
-    return optionsStr.split(',').filter(Boolean);
+    return optionsStr.split(',').map((option) => option.trim()).filter(Boolean);
 }

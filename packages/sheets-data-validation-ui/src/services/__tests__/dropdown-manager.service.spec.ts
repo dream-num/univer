@@ -53,6 +53,7 @@ interface IRule {
     formula1?: string;
     renderMode?: DataValidationRenderMode;
     errorStyle?: DataValidationErrorStyle;
+    showErrorMessage?: boolean;
     bizInfo?: Record<string, unknown>;
 }
 
@@ -410,6 +411,26 @@ describe('DataValidationDropdownManagerService', () => {
                     },
                 },
             }),
+        });
+    });
+
+    it('allows an invalid date selection when the error alert is disabled', async () => {
+        testBed = createTestBed();
+        setRule(testBed, {
+            uid: 'rule-date-alert-disabled',
+            type: 'date',
+            errorStyle: DataValidationErrorStyle.STOP,
+            showErrorMessage: false,
+        }, {
+            dropdownType: DataValidatorDropdownType.DATE,
+            validator: () => false,
+        });
+
+        showDropdown(testBed, 4);
+        const dropdown = getDropdown(testBed);
+        await expect((dropdown.props as { onChange: (value: ReturnType<typeof dateKit>) => Promise<boolean> }).onChange(dateKit('2026-06-17'))).resolves.toBe(true);
+        expect(getSetRangeValue(testBed)).toMatchObject({
+            v: expect.any(Number),
         });
     });
 

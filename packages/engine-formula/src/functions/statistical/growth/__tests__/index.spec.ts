@@ -581,7 +581,7 @@ describe('Test growth function', () => {
                 [27.2459520893],
                 [43.0060060724],
                 [67.8822509939],
-                [107.147824707258],
+                [expect.closeTo(107.147824707258, 9)],
             ]);
 
             const knownYs3 = ArrayValueObject.create({

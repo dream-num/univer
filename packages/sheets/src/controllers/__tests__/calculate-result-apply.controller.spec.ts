@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { ICommandService } from '@univerjs/core';
-import { SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
+import { BooleanNumber, CellValueType, FormulaType, ICommandService } from '@univerjs/core';
+import { ErrorType, SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
 import { describe, expect, it } from 'vitest';
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
 import { CalculateResultApplyController } from '../calculate-result-apply.controller';
@@ -42,6 +42,95 @@ describe('CalculateResultApplyController', () => {
         });
 
         expect(testBed.sheet.getSheetBySheetId(testBed.sheetId)?.getCellMatrix().getValue(0, 0)?.v).toBe(2760);
+        testBed.univer.dispose();
+    });
+
+    it.each([ErrorType.REF, ErrorType.NAME, ErrorType.DIV_BY_ZERO])('applies calculated %s errors to fixed and dynamic arrays', async (error) => {
+        const testBed = createFunctionTestBed();
+        const commandService = testBed.get(ICommandService);
+        commandService.registerCommand(SetFormulaCalculationResultMutation);
+        commandService.registerCommand(SetRangeValuesMutation);
+        testBed.get(CalculateResultApplyController);
+        const sheet = testBed.sheet.getSheetBySheetId(testBed.sheetId)!;
+        sheet.getCellMatrix().setValue(0, 0, {
+            f: '=VSTACK("Project")',
+            ref: 'A1:A2',
+            v: 'Project',
+            t: CellValueType.STRING,
+            ft: FormulaType.ARRAY,
+            fd: BooleanNumber.FALSE,
+        });
+        sheet.getCellMatrix().setValue(0, 1, {
+            ft: FormulaType.ARRAY,
+            fd: BooleanNumber.TRUE,
+            f: '=VSTACK("Project")',
+            v: 'Project',
+            t: CellValueType.STRING,
+        });
+
+        sheet.getCellMatrix().setValue(1, 0, { v: 100, ref: 'A1:A2' });
+
+        await commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
+            unitData: {
+                [testBed.unitId]: {
+                    [testBed.sheetId]: {
+                        0: {
+                            0: { v: error, t: CellValueType.STRING },
+                            1: { v: error, t: CellValueType.STRING },
+                        },
+                        1: { 0: { v: error, t: CellValueType.STRING } },
+                    },
+                },
+            },
+            unitOtherData: {},
+        });
+
+        expect(sheet.getCellMatrix().getValue(0, 0)?.v).toBe(error);
+        expect(sheet.getCellMatrix().getValue(0, 1)?.v).toBe(error);
+        expect(sheet.getCellMatrix().getValue(1, 0)?.v).toBe(error);
+        expect(sheet.getCellMatrix().getValue(0, 0)).toMatchObject({ ft: FormulaType.ARRAY, fd: BooleanNumber.FALSE });
+        testBed.univer.dispose();
+    });
+
+    it('applies explicit clearing results to array anchors and followers', async () => {
+        const testBed = createFunctionTestBed();
+        const commandService = testBed.get(ICommandService);
+        commandService.registerCommand(SetFormulaCalculationResultMutation);
+        commandService.registerCommand(SetRangeValuesMutation);
+        testBed.get(CalculateResultApplyController);
+        const sheet = testBed.sheet.getSheetBySheetId(testBed.sheetId)!;
+        sheet.getCellMatrix().setValue(0, 0, {
+            f: '=A2:B2',
+            ref: 'A1:B1',
+            ft: FormulaType.ARRAY,
+            fd: BooleanNumber.FALSE,
+        });
+        sheet.getCellMatrix().setValue(0, 1, {
+            ref: 'A1:B1',
+            s: { bl: 1 },
+        });
+        sheet.getCellMatrix().setValue(0, 2, {
+            f: '=C2',
+        });
+
+        await commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
+            unitData: {
+                [testBed.unitId]: {
+                    [testBed.sheetId]: {
+                        0: {
+                            0: null,
+                            1: null,
+                            2: null,
+                        },
+                    },
+                },
+            },
+            unitOtherData: {},
+        });
+
+        expect(sheet.getCellMatrix().getValue(0, 0)).toBeUndefined();
+        expect(sheet.getCellMatrix().getValue(0, 1)).toBeUndefined();
+        expect(sheet.getCellMatrix().getValue(0, 2)).toBeUndefined();
         testBed.univer.dispose();
     });
 });

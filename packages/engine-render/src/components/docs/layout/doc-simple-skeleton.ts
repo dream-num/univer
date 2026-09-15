@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IMeasureTextCache } from './shaping-engine/font-cache';
 import { LineBreaker } from './line-breaker';
 import { BreakPointType } from './line-breaker/break';
 import { FontCache } from './shaping-engine/font-cache';
@@ -23,6 +24,11 @@ export interface ILineInfo {
     width: number;
     height: number;
     baseline: number;
+}
+
+function getVisualTextWidth(textSize: IMeasureTextCache) {
+    const actualRight = textSize.actualBoundingBoxRight ?? textSize.width;
+    return Number.isFinite(actualRight) ? Math.max(textSize.width, actualRight) : textSize.width;
 }
 
 export class DocSimpleSkeleton {
@@ -62,7 +68,7 @@ export class DocSimpleSkeleton {
             const textSize = FontCache.getMeasureText(this._text, this._fontStyle);
             this._lines.push({
                 text: this._text,
-                width: textSize.width,
+                width: getVisualTextWidth(textSize),
                 height: textSize.fontBoundingBoxAscent + textSize.fontBoundingBoxDescent,
                 baseline: textSize.fontBoundingBoxAscent,
             });
@@ -90,10 +96,11 @@ export class DocSimpleSkeleton {
 
             if (text.length > 0) {
                 const textSize = FontCache.getMeasureText(text, this._fontStyle);
+                const textWidth = getVisualTextWidth(textSize);
 
                 // Check if adding this text would exceed the width
-                if ((textSize.width + currentLine.width) > this._width) {
-                    if (textSize.width > this._width) {
+                if ((textWidth + currentLine.width) > this._width) {
+                    if (textWidth > this._width) {
                         // Push current line if it has content
                         if (currentLine.text.length > 0) {
                             this._lines.push(currentLine);
@@ -127,14 +134,14 @@ export class DocSimpleSkeleton {
                             let testText = remainingText.slice(0, startGuess);
                             let testSize = FontCache.getMeasureText(testText, this._fontStyle);
 
-                            if (testSize.width + currentLine.width <= this._width) {
+                            if (getVisualTextWidth(testSize) + currentLine.width <= this._width) {
                                 // The guess fits, search forward for the maximum
                                 charCount = startGuess;
                                 for (let i = startGuess + 1; i <= remainingText.length; i++) {
                                     testText = remainingText.slice(0, i);
                                     testSize = FontCache.getMeasureText(testText, this._fontStyle);
 
-                                    if (testSize.width + currentLine.width <= this._width) {
+                                    if (getVisualTextWidth(testSize) + currentLine.width <= this._width) {
                                         charCount = i;
                                     } else {
                                         break;
@@ -147,7 +154,7 @@ export class DocSimpleSkeleton {
                                     testText = remainingText.slice(0, i);
                                     testSize = FontCache.getMeasureText(testText, this._fontStyle);
 
-                                    if (testSize.width + currentLine.width <= this._width) {
+                                    if (getVisualTextWidth(testSize) + currentLine.width <= this._width) {
                                         charCount = i;
                                         break;
                                     }
@@ -162,7 +169,7 @@ export class DocSimpleSkeleton {
                             if (charCount > 0) {
                                 lineText = remainingText.slice(0, charCount);
                                 const textSize = FontCache.getMeasureText(lineText, this._fontStyle);
-                                lineWidth = textSize.width;
+                                lineWidth = getVisualTextWidth(textSize);
                             }
 
                             // If no character can fit, force add one character to avoid infinite loop
@@ -170,7 +177,7 @@ export class DocSimpleSkeleton {
                                 charCount = 1;
                                 lineText = remainingText[0];
                                 const charSize = FontCache.getMeasureText(lineText, this._fontStyle);
-                                lineWidth = charSize.width;
+                                lineWidth = getVisualTextWidth(charSize);
                             }
 
                             if (charCount > 0) {
@@ -215,7 +222,7 @@ export class DocSimpleSkeleton {
                             // Reset current line and add the new text
                             currentLine = {
                                 text,
-                                width: textSize.width,
+                                width: textWidth,
                                 height: textSize.fontBoundingBoxAscent + textSize.fontBoundingBoxDescent,
                                 baseline: textSize.fontBoundingBoxAscent,
                             };
@@ -223,7 +230,7 @@ export class DocSimpleSkeleton {
                             // If current line is empty, we have to add this text anyway (single word too long)
                             currentLine = {
                                 text,
-                                width: textSize.width,
+                                width: textWidth,
                                 height: textSize.fontBoundingBoxAscent + textSize.fontBoundingBoxDescent,
                                 baseline: textSize.fontBoundingBoxAscent,
                             };
@@ -232,7 +239,7 @@ export class DocSimpleSkeleton {
                 } else {
                     // Add text to current line
                     currentLine.text = currentLine.text + text;
-                    currentLine.width = currentLine.width + textSize.width;
+                    currentLine.width = currentLine.width + textWidth;
                     currentLine.baseline = textSize.fontBoundingBoxAscent;
                     currentLine.height = textSize.fontBoundingBoxAscent + textSize.fontBoundingBoxDescent;
                 }

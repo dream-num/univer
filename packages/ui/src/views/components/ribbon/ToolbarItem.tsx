@@ -453,7 +453,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
             return (
                 <span
                     data-u-command={id}
-                    className={toolbarButtonVariants({
+                    className={clsx(toolbarButtonVariants({
                         noIcon: !icon,
                         active: activated,
                         className: clsx(buttonClassName, !hoverable && `
@@ -461,7 +461,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                           hover:!univer-bg-transparent
                           dark:hover:!univer-bg-transparent
                         `),
-                    })}
+                    }))}
                     style={buttonStyle}
                     aria-disabled={disabled}
                 >

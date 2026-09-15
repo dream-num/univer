@@ -461,6 +461,54 @@ describe('font extension', () => {
         expect(documentSkeleton.calculate).not.toHaveBeenCalled();
     });
 
+    it.each([HorizontalAlign.JUSTIFIED, HorizontalAlign.DISTRIBUTED])(
+        'keeps the cell width while rendering full-width alignment %s',
+        (horizontalAlign) => {
+            const font = new Font() as any;
+            const ctx = createCtx();
+            const overflow = new ObjectMatrix<any>();
+            const spreadsheetSkeleton = createSpreadsheetSkeleton();
+            const documentDataModel = {
+                updateDocumentDataPageSize: vi.fn(),
+                getBody: vi.fn(() => ({ paragraphs: [{}] })),
+                getSnapshot: vi.fn(() => ({ documentStyle: {} })),
+            };
+            const documentSkeleton = {
+                getViewModel: vi.fn(() => ({
+                    getDataModel: vi.fn(() => documentDataModel),
+                })),
+                calculate: vi.fn(),
+                makeDirty: vi.fn(),
+            };
+            const documents = {
+                resize: vi.fn(),
+                changeSkeleton: vi.fn(() => documents),
+                render: vi.fn(),
+            };
+            font.parent = {
+                getDocuments: vi.fn(() => documents),
+            };
+
+            font._renderDocuments(ctx, 0, 0, {
+                fontCache: createFontCache({
+                    documentSkeleton,
+                    horizontalAlign,
+                    wrapStrategy: WrapStrategy.OVERFLOW,
+                    vertexAngle: 0,
+                }),
+                startX: 10,
+                startY: 0,
+                endX: 110,
+                endY: 20,
+                spreadsheetSkeleton,
+            }, overflow);
+
+            expect(documentDataModel.updateDocumentDataPageSize).toHaveBeenCalledOnce();
+            expect(documentDataModel.updateDocumentDataPageSize).toHaveBeenCalledWith(100);
+            expect(documentSkeleton.calculate).toHaveBeenCalledOnce();
+        }
+    );
+
     it('covers image rendering fallback branches', () => {
         const font = new Font() as any;
         const ctx = createCtx();

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IRange } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     CommandService,
@@ -111,6 +112,10 @@ class TestSelectionRenderService extends BaseSelectionRenderService {
 
     checkClearPreviousControlsForTest(evt: { ctrlKey?: boolean; shiftKey?: boolean }) {
         this._checkClearPreviousControls(evt as never);
+    }
+
+    activateDuplicateControlForTest(range: IRange) {
+        return this._activateDuplicateControl(range);
     }
 
     setSingleModeForTest(enabled: boolean) {
@@ -316,6 +321,29 @@ describe('BaseSelectionRenderService', () => {
         expect(service.getSelectionControls()).toHaveLength(1);
         expect(service.isSelectionDisabled()).toBe(true);
         expect(service.inRefSelectionMode()).toBe(false);
+    });
+
+    it('moves a reused duplicate selection control to the end so it becomes the active selection', () => {
+        const { service } = createSelectionRenderService();
+        service.changeRuntimeForTest();
+        service.resetSelectionsByModelData(selections);
+
+        const [first, second] = service.getSelectionControls();
+        expect(service.getActiveSelectionControl()).toBe(second);
+
+        // a range without an identical selection control is not reused
+        expect(service.activateDuplicateControlForTest(
+            { startRow: 9, endRow: 9, startColumn: 9, endColumn: 9, rangeType: RANGE_TYPE.NORMAL }
+        )).toBeNull();
+        expect(service.getSelectionControls()).toEqual([first, second]);
+
+        // reusing the first control moves it to the end and makes it active
+        const reused = service.activateDuplicateControlForTest(
+            { startRow: 1, endRow: 1, startColumn: 1, endColumn: 1, rangeType: RANGE_TYPE.NORMAL }
+        );
+        expect(reused).toBe(first);
+        expect(service.getSelectionControls()).toEqual([second, first]);
+        expect(service.getActiveSelectionControl()).toBe(first);
     });
 
     it('chooses the visible viewport for frozen row and column selections', () => {

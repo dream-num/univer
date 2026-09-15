@@ -47,6 +47,8 @@ import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IRemoveRowColCommandParams extends Partial<ISheetCommandSharedParams> {
     range: IRange;
+    /** Whether the selection should follow the removed range after removal. Defaults to true. */
+    followSelection?: boolean;
 }
 
 export interface IRemoveRowColCommandInterceptParams extends IRemoveRowColCommandParams {
@@ -59,12 +61,16 @@ export interface IRemoveRowByRangeCommandParams {
     range: IRange;
     unitId: string;
     subUnitId: string;
+    /** Whether the selection should follow the removed range after removal. Defaults to true. */
+    followSelection?: boolean;
 }
 
 export interface IRemoveColByRangeCommandParams {
     range: IRange;
     unitId: string;
     subUnitId: string;
+    /** Whether the selection should follow the removed range after removal. Defaults to true. */
+    followSelection?: boolean;
 }
 
 /**
@@ -145,7 +151,9 @@ export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> =
         );
 
         if (result.result) {
-            setSelection(range, workbook, worksheet, commandService);
+            if (params.followSelection !== false) {
+                setSelection(range, workbook, worksheet, commandService);
+            }
 
             const afterInterceptors = sheetInterceptorService.afterCommandExecute({
                 id: RemoveRowCommandId,
@@ -216,6 +224,7 @@ export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
             range,
             unitId,
             subUnitId,
+            followSelection: params?.followSelection,
         });
     },
 };
@@ -267,7 +276,9 @@ export const RemoveColByRangeCommand: ICommand<IRemoveColByRangeCommandParams> =
         );
 
         if (result.result) {
-            setSelection(range, workbook, worksheet, commandService);
+            if (params.followSelection !== false) {
+                setSelection(range, workbook, worksheet, commandService);
+            }
 
             const afterInterceptors = sheetInterceptorService.afterCommandExecute({
                 id: RemoveColCommandId,
@@ -339,6 +350,7 @@ export const RemoveColCommand: ICommand = {
             range,
             unitId,
             subUnitId,
+            followSelection: params?.followSelection,
         });
     },
 };

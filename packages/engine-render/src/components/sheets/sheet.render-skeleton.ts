@@ -95,6 +95,10 @@ export const RENDER_RAW_FORMULA_KEY = 'RENDER_RAW_FORMULA';
 
 const GENERAL_NUMBER_MAX_SIGNIFICANT_DIGITS = 15;
 const GENERAL_NUMBER_RESERVE_GLYPH = '0';
+export const FULL_WIDTH_HORIZONTAL_ALIGNMENTS = new Set([
+    HorizontalAlign.JUSTIFIED,
+    HorizontalAlign.DISTRIBUTED,
+]);
 
 export function getShrinkToFitScale(contentWidth: number, availableWidth: number, fontSize: number): number {
     if (contentWidth <= availableWidth || contentWidth <= 0 || availableWidth <= 0 || fontSize <= 0) {
@@ -195,6 +199,12 @@ function setRenderTextCache(cacheItem: IFontCacheItem, cellData: Nullable<ICellD
         cacheItem.horizontalAlign ?? HorizontalAlign.UNSPECIFIED,
         cellData
     );
+}
+
+function updateDocumentPageWidth(documentModel: DocumentDataModel, cellInfo: ICellWithCoord): void {
+    const startX = cellInfo.isMergedMainCell ? cellInfo.mergeInfo.startX : cellInfo.startX;
+    const endX = cellInfo.isMergedMainCell ? cellInfo.mergeInfo.endX : cellInfo.endX;
+    documentModel.updateDocumentDataPageSize(endX - startX, Infinity);
 }
 
 function pushRowRange(ranges: IRange[], row: number, startColumn: number, endColumn: number): void {
@@ -1117,7 +1127,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             (wrapStrategy === WrapStrategy.OVERFLOW || wrapStrategy === WrapStrategy.UNSPECIFIED) &&
             cellValueType !== CellValueType.NUMBER &&
             cellValueType !== CellValueType.BOOLEAN &&
-            horizontalAlign !== HorizontalAlign.JUSTIFIED
+            !FULL_WIDTH_HORIZONTAL_ALIGNMENTS.has(horizontalAlign)
         ) {
             docsConfig.textFitsCurrentCell = false;
             // Merged cells do not support overflow.
@@ -1348,20 +1358,20 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         if (!cacheItem.border) return;
 
         this._handleBorderMatrix.setValue(row, col, true);
-        if (style && style.bd) {
-            const mergeRange = options?.mergeRange;
-            if (mergeRange) {
-                this._setMergeBorderProps(BORDER_TYPE.TOP, this._stylesCache, mergeRange);
-                this._setMergeBorderProps(BORDER_TYPE.BOTTOM, this._stylesCache, mergeRange);
-                this._setMergeBorderProps(BORDER_TYPE.LEFT, this._stylesCache, mergeRange);
-                this._setMergeBorderProps(BORDER_TYPE.RIGHT, this._stylesCache, mergeRange);
-            } else if (!this.intersectMergeRange(row, col)) {
-                this._setBorderProps(row, col, BORDER_TYPE.TOP, style, this._stylesCache);
-                this._setBorderProps(row, col, BORDER_TYPE.BOTTOM, style, this._stylesCache);
-                this._setBorderProps(row, col, BORDER_TYPE.LEFT, style, this._stylesCache);
-                this._setBorderProps(row, col, BORDER_TYPE.RIGHT, style, this._stylesCache);
-            }
+        const mergeRange = options?.mergeRange;
+        if (mergeRange) {
+            this._setMergeBorderProps(BORDER_TYPE.TOP, this._stylesCache, mergeRange);
+            this._setMergeBorderProps(BORDER_TYPE.BOTTOM, this._stylesCache, mergeRange);
+            this._setMergeBorderProps(BORDER_TYPE.LEFT, this._stylesCache, mergeRange);
+            this._setMergeBorderProps(BORDER_TYPE.RIGHT, this._stylesCache, mergeRange);
+        } else if (style && style.bd && !this.intersectMergeRange(row, col)) {
+            this._setBorderProps(row, col, BORDER_TYPE.TOP, style, this._stylesCache);
+            this._setBorderProps(row, col, BORDER_TYPE.BOTTOM, style, this._stylesCache);
+            this._setBorderProps(row, col, BORDER_TYPE.LEFT, style, this._stylesCache);
+            this._setBorderProps(row, col, BORDER_TYPE.RIGHT, style, this._stylesCache);
+        }
 
+        if (style && style.bd) {
             this._setBorderProps(row, col, BORDER_TYPE.TL_BR, style, this._stylesCache);
             this._setBorderProps(row, col, BORDER_TYPE.TL_BC, style, this._stylesCache);
             this._setBorderProps(row, col, BORDER_TYPE.TL_MR, style, this._stylesCache);
@@ -1490,9 +1500,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             return;
         }
         const { vertexAngle, centerAngle } = convertTextRotation(style?.tr ?? { a: 0 });
-        const isRichText = cellData?.p || vertexAngle || centerAngle;
+        const shouldUseDocumentLayout = Boolean(cellData?.p || vertexAngle || centerAngle) ||
+            FULL_WIDTH_HORIZONTAL_ALIGNMENTS.has(style?.ht ?? HorizontalAlign.UNSPECIFIED);
 
-        const modelObject = isRichText ?
+        const modelObject = shouldUseDocumentLayout ?
             this.worksheet.getCellDocumentModel(cellData, style, {
                 isDeepClone: true,
                 displayRawFormula: this._renderRawFormula,
@@ -1503,6 +1514,9 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             const { documentModel } = modelObject;
             if (documentModel) {
                 const { fontString, wrapStrategy, verticalAlign, horizontalAlign } = modelObject;
+                if (FULL_WIDTH_HORIZONTAL_ALIGNMENTS.has(horizontalAlign)) {
+                    updateDocumentPageWidth(documentModel, this.getCellWithCoordByIndex(row, col, false));
+                }
                 const documentViewModel = new DocumentViewModel(documentModel);
                 if (documentViewModel) {
                     const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService);

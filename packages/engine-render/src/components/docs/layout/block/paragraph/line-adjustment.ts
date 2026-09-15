@@ -23,7 +23,7 @@ import type {
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
-import { HorizontalAlign, WrapStrategy } from '@univerjs/core';
+import { DataStreamTreeTokenType, HorizontalAlign, WrapStrategy } from '@univerjs/core';
 import { cjk } from '../../../../../basics/cjk-regexp';
 import {
     isCjkLeftAlignedPunctuation,
@@ -126,14 +126,20 @@ function adjustGlyphsInDivide(divide: IDocumentSkeletonDivide, justificationRati
     setGlyphGroupLeft(divide.glyphGroup);
 }
 
-function distributeGlyphsInDivide(divide: IDocumentSkeletonDivide, remaining: number): boolean {
-    if (remaining <= 0) {
+function distributeGlyphsInDivide(divide: IDocumentSkeletonDivide): boolean {
+    const visibleGlyphs = divide.glyphGroup.filter((glyph) =>
+        glyph.content !== '' &&
+        glyph.width > 0 &&
+        glyph.streamType !== DataStreamTreeTokenType.PARAGRAPH
+    );
+
+    if (visibleGlyphs.length < 2) {
         return false;
     }
 
-    const visibleGlyphs = divide.glyphGroup.filter((glyph) => glyph.content !== '' && glyph.width > 0);
-
-    if (visibleGlyphs.length < 2) {
+    const lastGlyph = visibleGlyphs[visibleGlyphs.length - 1];
+    const remaining = divide.width - lastGlyph.left - lastGlyph.width;
+    if (remaining <= 0) {
         return false;
     }
 
@@ -254,7 +260,7 @@ function horizontalAlignHandler(
         const inkBounds = allowOverflowHorizontalOffset ? getGlyphGroupInkBounds(divide) : null;
 
         if (horizontalAlign === HorizontalAlign.DISTRIBUTED) {
-            if (distributeGlyphsInDivide(divide, width - glyphGroupWidth)) {
+            if (distributeGlyphsInDivide(divide)) {
                 glyphGroupWidth = getGlyphGroupWidth(divide);
                 divide.glyphGroupWidth = glyphGroupWidth;
             }

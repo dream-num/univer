@@ -47,7 +47,7 @@ import { clampRange, inViewRanges } from '../../../basics/tools';
 import { Text } from '../../../shape/text';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, FONT_EXTENSION_Z_INDEX, shouldRenderRowText } from '../constants';
-import { DEFAULT_PADDING_DATA, getDocsSkeletonPageSize } from '../sheet.render-skeleton';
+import { DEFAULT_PADDING_DATA, FULL_WIDTH_HORIZONTAL_ALIGNMENTS, getDocsSkeletonPageSize } from '../sheet.render-skeleton';
 import { calculateCellImageRect } from '../util';
 import { SheetExtension } from './sheet-extension';
 
@@ -684,7 +684,7 @@ export class Font extends SheetExtension {
         const { fontCache } = renderFontCtx;
         if (!fontCache) return;
 
-        const { documentSkeleton, vertexAngle = 0, wrapStrategy } = fontCache;
+        const { documentSkeleton, vertexAngle = 0, wrapStrategy, horizontalAlign } = fontCache;
         if (!documentSkeleton) return;
 
         const documentDataModel = documentSkeleton.getViewModel().getDataModel();
@@ -693,7 +693,10 @@ export class Font extends SheetExtension {
         const cellHeight = endY - startY;
 
         // WRAP means next line
-        if (wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0) {
+        if (
+            vertexAngle === 0 &&
+            (wrapStrategy === WrapStrategy.WRAP || FULL_WIDTH_HORIZONTAL_ALIGNMENTS.has(horizontalAlign))
+        ) {
             documentDataModel.updateDocumentDataPageSize(endX - startX);
             documentSkeleton.calculate();
         } else {

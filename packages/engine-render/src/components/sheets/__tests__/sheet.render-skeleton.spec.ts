@@ -15,9 +15,21 @@
  */
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
-import { DocumentFlavor, LocaleType, Tools, Univer, UniverInstanceType } from '@univerjs/core';
+import {
+    BorderStyleTypes,
+    DataStreamTreeTokenType,
+    DocumentFlavor,
+    HorizontalAlign,
+    LocaleType,
+    RANGE_TYPE,
+    Tools,
+    Univer,
+    UniverInstanceType,
+    WrapStrategy,
+} from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { setupRenderTestEnv } from '../../../__tests__/render-test-utils';
+import { BORDER_TYPE } from '../../../basics/const';
 import { FontCache } from '../../docs/layout/shaping-engine/font-cache';
 import { getGeneralNumberDisplayText, SpreadsheetSkeleton } from '../sheet.render-skeleton';
 
@@ -82,6 +94,193 @@ describe('Rich-text render snapshot isolation', () => {
             }
         }
     );
+});
+
+describe('Cell layout and merged styles', () => {
+    it('renders justified plain text using the cell width', () => {
+        const environment = setupRenderTestEnv();
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'justified-cell',
+            styles: {
+                justified: {
+                    ht: HorizontalAlign.JUSTIFIED,
+                    tb: WrapStrategy.WRAP,
+                },
+            },
+            sheetOrder: ['sheet'],
+            sheets: {
+                sheet: {
+                    id: 'sheet',
+                    name: 'Sheet',
+                    rowCount: 10,
+                    columnCount: 10,
+                    defaultColumnWidth: 72,
+                    cellData: {
+                        0: {
+                            0: {
+                                v: 'one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen',
+                                s: 'justified',
+                            },
+                        },
+                    },
+                },
+            },
+        });
+        const worksheet = workbook.getActiveSheet()!;
+        const skeleton = univer
+            .__getInjector()
+            .createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles());
+        try {
+            skeleton.calculate();
+            const cell = worksheet.getCellRaw(0, 0)!;
+            const style = worksheet.getComposedCellStyleByCellData(0, 0, cell);
+            skeleton._setFontStylesCache(0, 0, cell, style, true);
+            const documentSkeleton = skeleton.stylesCache.fontMatrix.getValue(0, 0)?.documentSkeleton;
+            const lines = documentSkeleton?.getSkeletonData()?.pages[0].sections[0].columns[0].lines ?? [];
+            const firstDivide = lines[0]?.divides[0];
+            const visibleGlyphs = firstDivide?.glyphGroup.filter((glyph) => glyph.content !== '') ?? [];
+            const lastGlyph = visibleGlyphs[visibleGlyphs.length - 1];
+
+            expect(documentSkeleton).toBeDefined();
+            expect(lines.length).toBeGreaterThan(1);
+            expect(firstDivide?.isFull).toBe(true);
+            expect(lastGlyph).toBeDefined();
+            expect(lastGlyph!.left + lastGlyph!.width).toBeCloseTo(firstDivide!.width, 1);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+            environment.restore();
+        }
+    });
+
+    it('renders distributed plain text across the merged cell width', () => {
+        const environment = setupRenderTestEnv();
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'distributed-merged-cell',
+            styles: {
+                distributed: {
+                    ht: HorizontalAlign.DISTRIBUTED,
+                },
+            },
+            sheetOrder: ['sheet'],
+            sheets: {
+                sheet: {
+                    id: 'sheet',
+                    name: 'Sheet',
+                    rowCount: 10,
+                    columnCount: 10,
+                    defaultColumnWidth: 72,
+                    mergeData: [
+                        {
+                            startRow: 0,
+                            endRow: 0,
+                            startColumn: 0,
+                            endColumn: 2,
+                            rangeType: RANGE_TYPE.NORMAL,
+                        },
+                    ],
+                    cellData: {
+                        0: {
+                            0: { v: '重庆市建设工程质量监督总站', s: 'distributed' },
+                        },
+                    },
+                },
+            },
+        });
+        const worksheet = workbook.getActiveSheet()!;
+        const skeleton = univer
+            .__getInjector()
+            .createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles());
+        try {
+            skeleton.calculate();
+            const cell = worksheet.getCellRaw(0, 0)!;
+            const style = worksheet.getComposedCellStyleByCellData(0, 0, cell);
+            skeleton._setFontStylesCache(0, 0, cell, style, true);
+            const documentSkeleton = skeleton.stylesCache.fontMatrix.getValue(0, 0)?.documentSkeleton;
+            const divide = documentSkeleton?.getSkeletonData()?.pages[0].sections[0].columns[0].lines[0].divides[0];
+            const visibleGlyphs = divide?.glyphGroup.filter((glyph) =>
+                glyph.content !== '' && glyph.streamType !== DataStreamTreeTokenType.PARAGRAPH
+            ) ?? [];
+            const lastGlyph = visibleGlyphs[visibleGlyphs.length - 1];
+
+            expect(documentSkeleton).toBeDefined();
+            expect(lastGlyph).toBeDefined();
+            expect(lastGlyph!.left + lastGlyph!.width).toBeCloseTo(divide!.width, 1);
+            expect(divide?.paddingLeft).toBe(0);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+            environment.restore();
+        }
+    });
+
+    it('renders a merged border stored only on an edge cell', () => {
+        const environment = setupRenderTestEnv();
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'merged-cell-edge-border',
+            styles: {
+                rightBorder: {
+                    bd: {
+                        r: { s: BorderStyleTypes.THIN, cl: { rgb: '#000000' } },
+                    },
+                },
+            },
+            sheetOrder: ['sheet'],
+            sheets: {
+                sheet: {
+                    id: 'sheet',
+                    name: 'Sheet',
+                    rowCount: 10,
+                    columnCount: 10,
+                    mergeData: [
+                        {
+                            startRow: 0,
+                            endRow: 0,
+                            startColumn: 0,
+                            endColumn: 1,
+                            rangeType: RANGE_TYPE.NORMAL,
+                        },
+                    ],
+                    cellData: {
+                        0: {
+                            0: { v: 'merged' },
+                            1: { s: 'rightBorder' },
+                        },
+                    },
+                },
+            },
+        });
+        const worksheet = workbook.getActiveSheet()!;
+        const skeleton = univer
+            .__getInjector()
+            .createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles());
+        try {
+            skeleton.calculate();
+            const cell = worksheet.getCellRaw(0, 0)!;
+            const style = worksheet.getComposedCellStyleByCellData(0, 0, cell);
+            skeleton._setBorderStylesCache(0, 0, style, {
+                mergeRange: {
+                    startRow: 0,
+                    endRow: 0,
+                    startColumn: 0,
+                    endColumn: 1,
+                },
+            });
+
+            expect(skeleton.stylesCache.border?.getValue(0, 1)?.[BORDER_TYPE.RIGHT]).toEqual({
+                type: BORDER_TYPE.RIGHT,
+                style: BorderStyleTypes.THIN,
+                color: '#000000',
+            });
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+            environment.restore();
+        }
+    });
 });
 
 describe('General number display', () => {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { HorizontalAlign } from '@univerjs/core';
+import { DataStreamTreeTokenType, HorizontalAlign } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { lineAdjustment } from '../line-adjustment';
 import { lineBreaking } from '../linebreaking';
@@ -212,7 +212,9 @@ describe('line-adjustment', () => {
         const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
         const pages = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
         const divide = pages[0].sections[0].columns[0].lines[0].divides[0];
-        const visibleGlyphs = divide.glyphGroup.filter((glyph) => glyph.content !== '');
+        const visibleGlyphs = divide.glyphGroup.filter((glyph) =>
+            glyph.content !== '' && glyph.streamType !== DataStreamTreeTokenType.PARAGRAPH
+        );
         const lastVisibleGlyph = visibleGlyphs[visibleGlyphs.length - 1];
         const initialLastGlyphLeft = lastVisibleGlyph.left;
 
@@ -220,6 +222,26 @@ describe('line-adjustment', () => {
 
         expect(lastVisibleGlyph.left).toBeGreaterThan(initialLastGlyphLeft);
         expect(lastVisibleGlyph.left + lastVisibleGlyph.width).toBeCloseTo(divide.width, 1);
+        expect(divide.paddingLeft).toBe(0);
+    });
+
+    it('distributes visible glyphs to both edges without counting the paragraph mark', () => {
+        const lastVisibleGlyph = createGlyph('馆', 10);
+        const paragraphMark = createGlyph(DataStreamTreeTokenType.PARAGRAPH, 10, {
+            streamType: DataStreamTreeTokenType.PARAGRAPH,
+        });
+        const divide = {
+            width: 100,
+            isFull: false,
+            paddingLeft: 0,
+            glyphGroup: [createGlyph('重', 10), createGlyph('庆', 10), lastVisibleGlyph, paragraphMark],
+        } as any;
+        const context = createPagesWithLine(divide, HorizontalAlign.DISTRIBUTED);
+
+        lineAdjustment(context.pages, context.viewModel, context.paragraphNode, context.sectionBreakConfig);
+
+        expect(lastVisibleGlyph.left + lastVisibleGlyph.width).toBeCloseTo(divide.width, 1);
+        expect(paragraphMark.left).toBeCloseTo(divide.width, 1);
         expect(divide.paddingLeft).toBe(0);
     });
 

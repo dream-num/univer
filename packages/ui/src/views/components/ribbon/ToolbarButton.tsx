@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { cva } from '@univerjs/design';
+import { clsx, cva } from '@univerjs/design';
 
 export interface IBaseToolbarButtonProps {
     children?: React.ReactNode;
@@ -115,7 +115,7 @@ export function ToolbarButton(props: IBaseToolbarButtonProps) {
     return (
         <button
             type="button"
-            className={toolbarButtonVariants({ noIcon, active, className })}
+            className={clsx(toolbarButtonVariants({ noIcon, active, className }))}
             style={style}
             disabled={disabled}
             onClick={handleClick}

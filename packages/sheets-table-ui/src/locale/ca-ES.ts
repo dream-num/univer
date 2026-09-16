@@ -18,6 +18,17 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        calculatedColumn: 'Columna calculada',
+        columnFormula: 'Fórmula',
+        columnFormulaHint: 'Substitueix immediatament les {0} cel·les de dades, sense capçalera ni totals. Aturar conserva les cel·les existents. Es pot desfer.',
+        applyColumnFormula: 'Aplica a tota la columna',
+        stopColumnFormula: 'Atura l’emplenament automàtic',
+        columnFormulaApplied: 'Configuració aplicada',
+        settings: 'Configuració de taula',
+        showFilterButtons: 'Mostra els botons de filtre',
+        columnFilterButtons: 'Botons de filtre per columna',
+        filterButtonsHint: 'Amagar els botons conserva els criteris de filtre existents.',
+        settingsError: 'No s’ha pogut desar. La taula pot haver canviat. Torneu a obrir la configuració.',
         title: 'Taula',
         selectRange: 'Selecciona el rang de la taula',
         rename: 'Reanomena la taula',

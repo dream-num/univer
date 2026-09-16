@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
-import type { IAddHyperLinkCommandParams, ICancelHyperLinkCommandParams, IUpdateHyperLinkCommandParams } from '@univerjs/sheets-hyper-link';
+import type {
+    IAddHyperLinkCommandParams,
+    ICancelHyperLinkCommandParams,
+    IUpdateHyperLinkCommandParams,
+} from '@univerjs/sheets-hyper-link';
 import { CustomRangeType, DataStreamTreeTokenType, generateRandomId } from '@univerjs/core';
-import { AddHyperLinkCommand, CancelHyperLinkCommand, SheetsHyperLinkParserService, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
+import {
+    AddHyperLinkCommand,
+    CancelHyperLinkCommand,
+    SheetsHyperLinkParserService,
+    UpdateHyperLinkCommand,
+} from '@univerjs/sheets-hyper-link';
 import { FRange } from '@univerjs/sheets/facade';
 
 export interface ICellHyperLink {
@@ -25,6 +34,7 @@ export interface ICellHyperLink {
     column: number;
     url: string;
     label: string;
+    tooltip?: string;
 }
 
 /**
@@ -37,6 +47,7 @@ export interface IFRangeSheetsHyperlinkMixin {
      * When the hyperlink is a range link or a sheet link, the url should be the url of the target range or sheet.
      * @param {string} url - The hyperlink url, can be a URL, a range link, or a sheet link.
      * @param {string} [label] - The display text of the hyperlink. If omitted, the existing cell text is linked. Supply a label when linking an empty cell.
+     * @param {string} [tooltip] - Optional text shown inside the hyperlink popup.
      * @return {Promise<boolean>} A promise that resolves to true if the hyperlink is set successfully, otherwise false.
      *
      * @example
@@ -68,7 +79,7 @@ export interface IFRangeSheetsHyperlinkMixin {
      * await fRange4.setHyperLink(definedNameHyperlinkUrl, 'Link to MyDefinedName');
      * ```
      */
-    setHyperLink(url: string, label?: string): Promise<boolean>;
+    setHyperLink(url: string, label?: string, tooltip?: string): Promise<boolean>;
 
     /**
      * Gets the first hyperlink from each cell containing hyperlinks in this range.
@@ -88,6 +99,7 @@ export interface IFRangeSheetsHyperlinkMixin {
      * Update the hyperlink of this range top left cell.
      * @param {string} url - The new hyperlink url, can be a URL, a range link, or a sheet link.
      * @param {string} [label] - The new display text of the hyperlink. If omitted, the replacement display text is empty. Supply a label to keep the link visible.
+     * @param {string} [tooltip] - Omit to preserve the current tooltip; use an empty string to clear it.
      *
      * @returns {Promise<boolean>} A promise resolving to whether the update succeeded.
      * @throws {Error} The promise rejects if the top-left cell contains no hyperlink.
@@ -108,7 +120,7 @@ export interface IFRangeSheetsHyperlinkMixin {
      * await fRange.updateHyperLink(rangeUrl, 'Link to B2:D4');
      * ```
      */
-    updateHyperLink(url: string, label?: string): Promise<boolean>;
+    updateHyperLink(url: string, label?: string, tooltip?: string): Promise<boolean>;
 
     /**
      * Cancel all hyperlinks in this range. If a hyperlink is provided, only cancel the specified hyperlink.
@@ -157,7 +169,7 @@ export interface IFRangeSheetsHyperlinkMixin {
 }
 
 export class FRangeSheetsHyperlinkMixin extends FRange implements IFRangeSheetsHyperlinkMixin {
-    override setHyperLink(url: string, label?: string): Promise<boolean> {
+    override setHyperLink(url: string, label?: string, tooltip?: string): Promise<boolean> {
         return this._commandService.executeCommand<IAddHyperLinkCommandParams>(AddHyperLinkCommand.id, {
             unitId: this.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
@@ -167,6 +179,7 @@ export class FRangeSheetsHyperlinkMixin extends FRange implements IFRangeSheetsH
                 column: this._range.startColumn,
                 payload: url,
                 display: label,
+                tooltip,
             },
         });
     }
@@ -193,6 +206,7 @@ export class FRangeSheetsHyperlinkMixin extends FRange implements IFRangeSheetsH
                     column,
                     url,
                     label,
+                    tooltip: properties?.tooltip ?? properties?._xlsxHyperlinkTooltip,
                 });
             }
         });
@@ -200,7 +214,7 @@ export class FRangeSheetsHyperlinkMixin extends FRange implements IFRangeSheetsH
         return hyperlinks;
     }
 
-    override updateHyperLink(url: string, label?: string): Promise<boolean> {
+    override updateHyperLink(url: string, label?: string, tooltip?: string): Promise<boolean> {
         const hyperlink = this.getHyperLinks().find((link) => link.row === this._range.startRow && link.column === this._range.startColumn);
 
         if (!hyperlink) {
@@ -218,6 +232,7 @@ export class FRangeSheetsHyperlinkMixin extends FRange implements IFRangeSheetsH
             payload: {
                 payload: url,
                 display: label,
+                tooltip,
             },
         });
     }

@@ -22,7 +22,8 @@ export type ThreadCommentJSON = {
     id: string;
     threadId: string;
     ref: string;
-} & Partial<Omit<IThreadComment, 'id' | 'threadId' | 'ref'>>;
+    children?: Array<Omit<ThreadCommentJSON, 'ref'> & { ref?: string }>;
+} & Partial<Omit<IThreadComment, 'id' | 'threadId' | 'ref' | 'children'>>;
 
 type Success = boolean;
 

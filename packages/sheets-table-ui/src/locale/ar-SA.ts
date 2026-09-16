@@ -18,6 +18,17 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        calculatedColumn: 'عمود محسوب',
+        columnFormula: 'الصيغة',
+        columnFormulaHint: 'يستبدل فورًا {0} خلية بيانات دون الرأس والإجمالي. إيقاف التعبئة يحافظ على الخلايا الحالية. يمكن التراجع.',
+        applyColumnFormula: 'تطبيق على العمود بالكامل',
+        stopColumnFormula: 'إيقاف التعبئة التلقائية',
+        columnFormulaApplied: 'تم تطبيق إعداد العمود',
+        settings: 'إعدادات الجدول',
+        showFilterButtons: 'إظهار أزرار التصفية',
+        columnFilterButtons: 'أزرار تصفية الأعمدة',
+        filterButtonsHint: 'يؤدي إخفاء الأزرار إلى الاحتفاظ بمعايير التصفية الحالية.',
+        settingsError: 'تعذر الحفظ. ربما تغير الجدول. أعد فتح الإعدادات وحاول مجددًا.',
         title: 'جدول',
         selectRange: 'حدد نطاق الجدول',
         rename: 'إعادة تسمية الجدول',

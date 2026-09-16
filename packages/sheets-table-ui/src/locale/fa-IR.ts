@@ -18,6 +18,17 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        calculatedColumn: 'ستون محاسباتی',
+        columnFormula: 'فرمول',
+        columnFormulaHint: 'بلافاصله {0} سلول داده را بدون سربرگ و جمع جایگزین می‌کند. توقف، سلول‌های موجود را حفظ می‌کند. قابل واگرد است.',
+        applyColumnFormula: 'اعمال به کل ستون',
+        stopColumnFormula: 'توقف پرکردن خودکار',
+        columnFormulaApplied: 'تنظیم ستون اعمال شد',
+        settings: 'تنظیمات جدول',
+        showFilterButtons: 'نمایش دکمه‌های فیلتر',
+        columnFilterButtons: 'دکمه‌های فیلتر ستون‌ها',
+        filterButtonsHint: 'پنهان کردن دکمه‌ها معیارهای فیلتر موجود را حفظ می‌کند.',
+        settingsError: 'ذخیره نشد. ممکن است جدول تغییر کرده باشد. تنظیمات را دوباره باز کنید.',
         title: 'جدول',
         selectRange: 'انتخاب محدوده جدول',
         rename: 'تغییر نام جدول',

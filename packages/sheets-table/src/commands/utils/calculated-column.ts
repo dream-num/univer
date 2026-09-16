@@ -17,6 +17,8 @@
 import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType } from '@univerjs/core';
 import type { LexerTreeBuilder } from '@univerjs/engine-formula';
 import type { Table } from '../../models/table';
+import type { ITableCalculatedColumnConfig } from '../../types/type';
+import { BooleanNumber, FormulaType } from '@univerjs/core';
 import { serializeRange } from '@univerjs/engine-formula';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
 
@@ -26,7 +28,8 @@ export function getCalculatedColumnFillMutation(
     subUnitId: string,
     startRow: number,
     endRow: number,
-    getLexerTreeBuilder: () => LexerTreeBuilder
+    getLexerTreeBuilder: () => LexerTreeBuilder,
+    config?: ITableCalculatedColumnConfig
 ): IMutationInfo | undefined {
     const tableInfo = table.getTableInfo?.();
     if (!tableInfo) {
@@ -37,7 +40,11 @@ export function getCalculatedColumnFillMutation(
     let lexerTreeBuilder: LexerTreeBuilder | undefined;
 
     tableInfo.columns.forEach((column, columnIndex) => {
-        const formula = column.formula?.trim();
+        if (config && column.id !== config.columnId) {
+            return;
+        }
+        const formula = (config?.formula ?? column.formula)?.trim();
+        const formulaIsArray = config?.formulaIsArray ?? column.formulaIsArray;
         if (!formula) {
             return;
         }
@@ -49,8 +56,15 @@ export function getCalculatedColumnFillMutation(
             cellValue[row] ??= {};
             const cell: ICellData = {
                 f: lexerTreeBuilder.moveFormulaRefOffset(baseFormula, 0, row - firstDataRow),
+                si: null,
+                ref: null,
+                ft: formulaIsArray ? FormulaType.ARRAY : null,
+                fd: formulaIsArray ? BooleanNumber.FALSE : null,
+                v: null,
+                p: null,
+                t: null,
             };
-            if (column.formulaIsArray) {
+            if (formulaIsArray) {
                 cell.ref = serializeRange({
                     startRow: row,
                     endRow: row,

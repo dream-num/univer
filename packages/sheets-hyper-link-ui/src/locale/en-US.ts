@@ -17,6 +17,7 @@
 const locale = {
     'sheets-hyper-link-ui': {
         form: {
+            tooltip: 'Screen tip',
             addTitle: 'Insert Link',
             label: 'Label',
             type: 'Type',

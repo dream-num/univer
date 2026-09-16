@@ -19,6 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-hyper-link-ui': {
         form: {
+            tooltip: 'نص التلميح',
             addTitle: 'إدراج ارتباط تشعبي',
             label: 'التسمية',
             type: 'النوع',

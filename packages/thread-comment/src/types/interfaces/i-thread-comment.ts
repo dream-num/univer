@@ -28,6 +28,8 @@ export interface IBaseComment {
     dT: string;
     updateT?: string;
     personId: string;
+    /** Display-only fallback when the author profile cannot be resolved. Never used for permissions. */
+    authorName?: string;
     text: IDocumentBody;
     attachments?: string[];
     updated?: boolean;

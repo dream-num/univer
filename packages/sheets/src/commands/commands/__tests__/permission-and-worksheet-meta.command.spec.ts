@@ -17,7 +17,15 @@
 import type { IAccessor, IRange } from '@univerjs/core';
 import type { IRangeProtectionRule } from '../../../models/range-protection-rule.model';
 import type { IWorksheetProtectionRule } from '../../../services/permission/type';
-import { BooleanNumber, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import {
+    BooleanNumber,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    Styles,
+    Worksheet,
+    WorksheetHiddenState,
+} from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
 import { describe, expect, it } from 'vitest';
 import { EditStateEnum, RangeProtectionRuleModel, ViewStateEnum } from '../../../models/range-protection-rule.model';
@@ -101,17 +109,13 @@ function createWorksheetRule(permissionId = 'permission-sheet-1'): IWorksheetPro
 }
 
 function createWorkbookTarget() {
-    const config = { hidden: BooleanNumber.TRUE, rightToLeft: BooleanNumber.FALSE };
-    const worksheet = {
+    const worksheet = new Worksheet('unit-1', {
+        id: 'sheet-1',
         rowCount: 100,
         columnCount: 20,
-        config,
-        getSheetId: () => 'sheet-1',
-        getConfig: () => config,
-        isSheetHidden: () => config.hidden,
-        getRowCount() { return this.rowCount; },
-        getColumnCount() { return this.columnCount; },
-    };
+        hidden: WorksheetHiddenState.HIDDEN,
+        rightToLeft: BooleanNumber.FALSE,
+    }, new Styles());
     const workbook = {
         getUnitId: () => 'unit-1',
         getSheetBySheetId: (subUnitId: string) => subUnitId === 'sheet-1' ? worksheet : null,
@@ -515,7 +519,7 @@ describe('worksheet row, column, rtl and show commands', () => {
             redoMutations: [{ id: SetWorksheetHideMutation.id, params: { unitId: 'unit-1', subUnitId: 'sheet-1', hidden: BooleanNumber.FALSE } }],
         });
 
-        worksheet.config.hidden = BooleanNumber.FALSE;
+        worksheet.getConfig().hidden = WorksheetHiddenState.VISIBLE;
         expect(SetWorksheetShowCommand.handler(accessor, { unitId: 'unit-1', subUnitId: 'sheet-1' })).toBe(false);
     });
 

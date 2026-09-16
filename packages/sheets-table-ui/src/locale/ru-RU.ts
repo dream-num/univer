@@ -18,6 +18,17 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        calculatedColumn: 'Вычисляемый столбец',
+        columnFormula: 'Формула',
+        columnFormulaHint: 'Сразу заменяет {0} ячеек данных без заголовка и итогов. Остановка сохраняет текущие ячейки. Действие можно отменить.',
+        applyColumnFormula: 'Применить ко всему столбцу',
+        stopColumnFormula: 'Остановить автозаполнение',
+        columnFormulaApplied: 'Настройка применена',
+        settings: 'Настройки таблицы',
+        showFilterButtons: 'Показывать кнопки фильтра',
+        columnFilterButtons: 'Кнопки фильтра столбцов',
+        filterButtonsHint: 'При скрытии кнопок сохраняются текущие условия фильтрации.',
+        settingsError: 'Не удалось сохранить. Возможно, таблица изменилась. Откройте настройки заново.',
         title: 'Таблица',
         selectRange: 'Выбрать диапазон таблицы',
         rename: 'Переименовать таблицу',

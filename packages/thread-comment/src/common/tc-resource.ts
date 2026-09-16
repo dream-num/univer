@@ -35,7 +35,8 @@ function isSnapshotComment(value: unknown, allowChildren = true): value is IThre
         && comment.id.length > 0
         && typeof comment.threadId === 'string'
         && comment.threadId.length > 0
-        && typeof comment.ref === 'string'
+        && (typeof comment.ref === 'string' || (!allowChildren && comment.ref === undefined))
+        && (comment.authorName === undefined || typeof comment.authorName === 'string')
         && (comment.text === undefined || isThreadCommentDocumentBody(comment.text))
         && (comment.attachments === undefined || isStringArray(comment.attachments))
         && (comment.mentions === undefined || isStringArray(comment.mentions))

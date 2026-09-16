@@ -18,6 +18,17 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        calculatedColumn: '計算欄',
+        columnFormula: '公式',
+        columnFormulaHint: '套用後立即覆寫此欄的 {0} 個資料儲存格，不含標題和合計列。停止自動填入會保留現有儲存格。操作可復原。',
+        applyColumnFormula: '套用至整欄',
+        stopColumnFormula: '停止自動填入',
+        columnFormulaApplied: '已套用欄設定',
+        settings: '表格設定',
+        showFilterButtons: '顯示篩選按鈕',
+        columnFilterButtons: '各欄篩選按鈕',
+        filterButtonsHint: '隱藏按鈕會保留現有篩選條件。',
+        settingsError: '儲存失敗，表格可能已變更。請重新開啟設定後重試。',
         title: '表格',
         selectRange: '選擇表格範圍',
         rename: '重新命名表格',

@@ -184,6 +184,7 @@ describe('SheetTableControlsRenderController', () => {
             rename: 'sheets-table-ui.rename',
             'update-range': 'sheets-table-ui.updateRange',
             'set-theme': 'sheets-table-ui.setTheme',
+            settings: 'sheets-table-ui.settings',
             delete: 'sheets-table-ui.removeTable',
         });
 

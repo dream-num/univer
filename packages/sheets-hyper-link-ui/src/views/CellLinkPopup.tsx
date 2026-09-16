@@ -65,12 +65,13 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
         return null;
     }
     const linkObj = parserHyperLinkService.parseHyperLink(customRange.properties.url ?? '');
+    const tooltip = customRange.properties.tooltip ?? customRange.properties._xlsxHyperlinkTooltip;
     const isError = linkObj.type === SheetHyperLinkType.INVALID;
 
     return (
         <div
             className={clsx(`
-              univer-mb-1 univer-flex univer-max-w-80 univer-flex-row univer-items-center univer-justify-between
+              univer-mb-1 univer-grid univer-max-w-80 univer-grid-cols-[minmax(0,1fr)_auto] univer-items-center
               univer-gap-2 univer-overflow-hidden univer-rounded-lg univer-bg-gray-0 univer-p-2 univer-shadow-md
               dark:!univer-bg-gray-900
             `, borderClassName)}
@@ -192,6 +193,16 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                     </>
                 )}
             </div>
+            {typeof tooltip === 'string' && tooltip && (
+                <div
+                    className="
+                      univer-col-span-2 univer-max-h-32 univer-overflow-y-auto univer-whitespace-pre-wrap
+                      univer-break-words univer-text-sm univer-text-gray-500
+                    "
+                >
+                    {tooltip}
+                </div>
+            )}
         </div>
     );
 };

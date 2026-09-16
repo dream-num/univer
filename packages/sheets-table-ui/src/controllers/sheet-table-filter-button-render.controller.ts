@@ -16,14 +16,23 @@
 
 import type { ICommandInfo, IDisposable, IRange, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ITableRangeWithState } from '@univerjs/sheets-table';
+import type { ISetSheetTableMutationParams, ITableRangeWithState } from '@univerjs/sheets-table';
 import type { ISheetsTableFilterButtonShapeProps } from '../views/widgets/table-filter-button.shape';
 import { ICommandService, Inject, Injector, InterceptorEffectEnum, RxDisposable, VerticalAlign } from '@univerjs/core';
-import { INTERCEPTOR_POINT, SetVerticalTextAlignCommand, SheetInterceptorService, SheetRangeThemeModel } from '@univerjs/sheets';
-import { TableManager } from '@univerjs/sheets-table';
+import {
+    INTERCEPTOR_POINT,
+    SetVerticalTextAlignCommand,
+    SheetInterceptorService,
+    SheetRangeThemeModel,
+} from '@univerjs/sheets';
+import { SetSheetTableMutation, TableManager } from '@univerjs/sheets-table';
 import { getCoordByCell, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { map, merge, of, startWith, switchMap, takeUntil } from 'rxjs';
-import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsTableFilterButtonShape } from '../views/widgets/table-filter-button.shape';
+import {
+    FILTER_ICON_PADDING,
+    FILTER_ICON_SIZE,
+    SheetsTableFilterButtonShape,
+} from '../views/widgets/table-filter-button.shape';
 
 const SHEETS_FILTER_BUTTON_Z_INDEX = 5000;
 
@@ -119,8 +128,15 @@ export class SheetsTableFilterButtonRenderController extends RxDisposable implem
     private _initCommandExecuted() {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (command.id !== SetVerticalTextAlignCommand.id) {
+                if (command.id !== SetVerticalTextAlignCommand.id && command.id !== SetSheetTableMutation.id) {
                     return;
+                }
+                if (command.id === SetSheetTableMutation.id) {
+                    const params = command.params as ISetSheetTableMutationParams | undefined;
+                    if (!params?.config.filterButtons || params.unitId !== this._context.unitId
+                        || params.subUnitId !== this._context.unit.getActiveSheet()?.getSheetId()) {
+                        return;
+                    }
                 }
 
                 const { unit: workbook, unitId } = this._context;

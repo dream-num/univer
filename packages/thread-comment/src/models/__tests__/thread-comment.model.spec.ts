@@ -238,6 +238,33 @@ describe('ThreadCommentModel', () => {
         });
     });
 
+    it('preserves imported root and reply author names across refreshes only for the same author', async () => {
+        lifecycleService.stage = LifecycleStages.Rendered;
+        const root = { ...createComment({ id: 'imported-root' }), authorName: 'Ada' };
+        const reply = { ...createComment({ id: 'imported-reply', parentId: root.id }), authorName: 'Lin' };
+        threadCommentModel.addComment('unit-1', 'sheet-1', { ...root, children: [reply] });
+        let personId = root.personId;
+        dataSourceService.dataSource = {
+            addComment: async (comment) => comment,
+            updateComment: async () => true,
+            resolveComment: async () => true,
+            deleteComment: async () => true,
+            listComments: async () => [{ ...root, personId, authorName: undefined, children: [{ ...reply, personId, authorName: undefined }] }],
+            saveCommentToSnapshot: (comment) => comment,
+        };
+        await threadCommentModel.syncThreadComments('unit-1', 'sheet-1', [root.threadId]);
+        let thread = threadCommentModel.getThread('unit-1', 'sheet-1', root.threadId)!;
+        expect(thread.root.authorName).toBe('Ada');
+        expect(thread.children[0].authorName).toBe('Lin');
+        const snapshot = JSON.parse(JSON.stringify({ sheet: [{ ...thread.root, children: thread.children }] }));
+        expect(snapshot.sheet[0].children[0].authorName).toBe('Lin');
+        personId = 'another-user';
+        await threadCommentModel.syncThreadComments('unit-1', 'sheet-1', [root.threadId]);
+        thread = threadCommentModel.getThread('unit-1', 'sheet-1', root.threadId)!;
+        expect(thread.root.authorName).toBeUndefined();
+        expect(thread.children[0].authorName).toBeUndefined();
+    });
+
     it('keeps the newest sync result when overlapping requests finish out of order', async () => {
         lifecycleService.stage = LifecycleStages.Rendered;
         const root = createComment({ id: 'racing-root', text: createBody('initial') });

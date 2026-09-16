@@ -17,9 +17,26 @@
 import type { ICellData, ICommand, IDocumentData, IMutationInfo } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { ISheetHyperLink } from '../../types/interfaces/i-hyper-link';
-import { BuildTextUtils, CellValueType, CommandType, CustomRangeType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute, TextX, Tools } from '@univerjs/core';
+import {
+    BuildTextUtils,
+    CellValueType,
+    CommandType,
+    CustomRangeType,
+    generateRandomId,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    sequenceExecute,
+    TextX,
+    Tools,
+} from '@univerjs/core';
 import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
-import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
+import {
+    getSheetCommandTarget,
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+    SheetInterceptorService,
+} from '@univerjs/sheets';
 import { HyperLinkModel } from '../../models/hyper-link.model';
 import { AddHyperLinkMutation } from '../mutations/add-hyper-link.mutation';
 import { RemoveHyperLinkMutation } from '../mutations/remove-hyper-link.mutation';
@@ -36,7 +53,6 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheets.command.add-hyper-link',
 
-    // eslint-disable-next-line max-lines-per-function
     async handler(accessor, params) {
         if (!params) return false;
 
@@ -76,6 +92,7 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
                         rangeId: id,
                         properties: {
                             url: payload,
+                            tooltip: link.tooltip,
                             // refId: id,
                         },
                     }],
@@ -90,6 +107,7 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
                 rangeType: CustomRangeType.HYPERLINK,
                 properties: {
                     url: payload,
+                    tooltip: link.tooltip,
                     refId: id,
                 },
             });
@@ -196,6 +214,7 @@ export const AddRichHyperLinkCommand: ICommand<IAddRichHyperLinkCommandParams> =
             rangeType: CustomRangeType.HYPERLINK,
             properties: {
                 url: payload,
+                tooltip: link.tooltip,
                 refId: newId,
             },
         });

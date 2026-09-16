@@ -14,96 +14,34 @@
  * limitations under the License.
  */
 
-import type { LexerTreeBuilder } from '@univerjs/engine-formula';
-import type { Table } from '../../../models/table';
-import { describe, expect, it, vi } from 'vitest';
+import { BooleanNumber, FormulaType, Injector } from '@univerjs/core';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import { describe, expect, it } from 'vitest';
+import { Table } from '../../../models/table';
 import { getCalculatedColumnFillMutation } from '../calculated-column';
 
 describe('getCalculatedColumnFillMutation', () => {
-    it('fills inserted table rows with row-adjusted calculated column formulas', () => {
-        const table = {
-            getTableInfo: () => ({
-                showHeader: true,
-                range: { startRow: 0, startColumn: 4, endRow: 9, endColumn: 6 },
-                columns: [
-                    { formula: undefined },
-                    { formula: 'A2*2' },
-                    { formula: '=$A2' },
-                ],
-            }),
-        } as unknown as Table;
-        const moveFormulaRefOffset = vi.fn((formula: string, _columnOffset: number, rowOffset: number) => `${formula}@${rowOffset}`);
-
-        const mutation = getCalculatedColumnFillMutation(
-            table,
-            'unit-1',
-            'sheet-1',
-            7,
-            8,
-            () => ({ moveFormulaRefOffset } as unknown as LexerTreeBuilder)
-        );
-
-        expect(moveFormulaRefOffset.mock.calls).toEqual([
-            ['=A2*2', 0, 6],
-            ['=A2*2', 0, 7],
-            ['=$A2', 0, 6],
-            ['=$A2', 0, 7],
-        ]);
-        expect(mutation?.params).toEqual({
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            cellValue: {
-                7: { 5: { f: '=A2*2@6' }, 6: { f: '=$A2@6' } },
-                8: { 5: { f: '=A2*2@7' }, 6: { f: '=$A2@7' } },
-            },
-        });
-    });
-
-    it('skips tables without calculated columns', () => {
-        const table = {
-            getTableInfo: () => ({
-                showHeader: true,
-                range: { startRow: 0, startColumn: 0, endRow: 2, endColumn: 0 },
-                columns: [{ formula: '' }],
-            }),
-        } as unknown as Table;
-
-        expect(getCalculatedColumnFillMutation(
-            table,
-            'unit-1',
-            'sheet-1',
-            2,
-            2,
-            () => ({ moveFormulaRefOffset: vi.fn() } as unknown as LexerTreeBuilder)
-        )).toBeUndefined();
-    });
-
-    it('marks inserted rows as single-cell arrays for array calculated columns', () => {
-        const table = {
-            getTableInfo: () => ({
-                showHeader: false,
-                range: { startRow: 0, startColumn: 7, endRow: 9, endColumn: 7 },
-                columns: [{ formula: 'A1*2', formulaIsArray: true }],
-            }),
-        } as unknown as Table;
-        const moveFormulaRefOffset = vi.fn((formula: string, _columnOffset: number, rowOffset: number) => `${formula}@${rowOffset}`);
-
-        const mutation = getCalculatedColumnFillMutation(
-            table,
-            'unit-1',
-            'sheet-1',
-            3,
-            4,
-            () => ({ moveFormulaRefOffset } as unknown as LexerTreeBuilder)
-        );
-
-        expect(mutation?.params).toEqual({
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            cellValue: {
-                3: { 7: { f: '=A1*2@3', ref: 'H4' } },
-                4: { 7: { f: '=A1*2@4', ref: 'H5' } },
-            },
-        });
+    it('fills relative references and marks imported arrays using formal formula metadata', () => {
+        const injector = new Injector([[LexerTreeBuilder]]);
+        try {
+            const table = new Table('table', 'Orders', { startRow: 0, endRow: 9, startColumn: 4, endColumn: 6 }, ['Name', 'Amount', 'Array']);
+            table.getTableColumnByIndex(1)!.formula = 'A2*2';
+            table.getTableColumnByIndex(2)!.formula = '=$A2';
+            table.getTableColumnByIndex(2)!.formulaIsArray = true;
+            const mutation = getCalculatedColumnFillMutation(table, 'unit', 'sheet', 7, 8, () => injector.get(LexerTreeBuilder));
+            expect(mutation?.params).toMatchObject({
+                cellValue: {
+                    7: { 5: { f: '=A8*2', ft: null, v: null }, 6: { f: '=$A8', ref: 'G8', ft: FormulaType.ARRAY, fd: BooleanNumber.FALSE } },
+                    8: { 5: { f: '=A9*2' }, 6: { f: '=$A9', ref: 'G9', ft: FormulaType.ARRAY, fd: BooleanNumber.FALSE } },
+                },
+            });
+            const stopped = getCalculatedColumnFillMutation(table, 'unit', 'sheet', 7, 8, () => injector.get(LexerTreeBuilder), {
+                columnId: table.getTableColumnByIndex(1)!.id,
+                formula: '',
+            });
+            expect(stopped).toBeUndefined();
+        } finally {
+            injector.dispose();
+        }
     });
 });

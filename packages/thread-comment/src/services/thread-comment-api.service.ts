@@ -46,6 +46,8 @@ export interface ICreateThreadCommentOptions {
     threadId?: string;
     /** Author user ID. Defaults to the current user managed by `UserManagerService`. */
     personId?: string;
+    /** Display-only author name used when the user profile is unavailable. */
+    authorName?: string;
     /** Creation time. Defaults to the current time. */
     dateTime?: Date;
 }
@@ -65,6 +67,8 @@ export interface IReplyThreadCommentOptions {
     id?: string;
     /** Author user ID. Defaults to the current user managed by `UserManagerService`. */
     personId?: string;
+    /** Display-only author name used when the user profile is unavailable. */
+    authorName?: string;
     /** Creation time. Defaults to the current time. */
     dateTime?: Date;
 }
@@ -213,6 +217,7 @@ export class ThreadCommentFacadeService {
                 text: normalizeThreadCommentContent(options.content),
                 attachments: options.attachments ?? [],
                 dT: getDT(options.dateTime),
+                authorName: options.authorName,
                 personId,
             },
         });
@@ -237,6 +242,7 @@ export class ThreadCommentFacadeService {
                 text: normalizeThreadCommentContent(options.content),
                 attachments: options.attachments ?? [],
                 dT: getDT(options.dateTime),
+                authorName: options.authorName,
                 personId: options.personId ?? this._userManagerService.getCurrentUser().userID,
             },
         });

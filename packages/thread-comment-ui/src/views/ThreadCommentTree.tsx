@@ -136,6 +136,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const localeService = useDependency(LocaleService);
     const regionService = useDependency(RegionService);
     const userManagerService = useDependency(UserManagerService);
+    useObservable(userManagerService.userChange$);
     const user = userManagerService.getUser(item.personId);
     const currentUser = useObservable(userManagerService.currentUser$);
     const isCommentBySelf = currentUser?.userID === item.personId;
@@ -195,11 +196,11 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                     backgroundImage: `url(${user?.avatar || avatarFallback})`,
                 }}
             />
-            {user
+            {user || item.authorName
                 ? (
                     <div className="univer-mb-1 univer-flex univer-h-6 univer-items-center univer-justify-between">
                         <div className="univer-text-sm univer-font-medium univer-leading-5">
-                            {user?.name || ' '}
+                            {user?.name || item.authorName || ' '}
                         </div>
                         <div>
                             {(isMock || resolved)

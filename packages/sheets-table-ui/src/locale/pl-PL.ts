@@ -18,6 +18,17 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        calculatedColumn: 'Kolumna obliczeniowa',
+        columnFormula: 'Formuła',
+        columnFormulaHint: 'Natychmiast zastępuje {0} komórek danych bez nagłówka i sumy. Zatrzymanie zachowuje istniejące komórki. Można cofnąć.',
+        applyColumnFormula: 'Zastosuj do całej kolumny',
+        stopColumnFormula: 'Zatrzymaj autowypełnianie',
+        columnFormulaApplied: 'Ustawienie zastosowane',
+        settings: 'Ustawienia tabeli',
+        showFilterButtons: 'Pokaż przyciski filtrów',
+        columnFilterButtons: 'Przyciski filtrów kolumn',
+        filterButtonsHint: 'Ukrycie przycisków zachowuje istniejące kryteria filtrowania.',
+        settingsError: 'Nie można zapisać. Tabela mogła się zmienić. Otwórz ponownie ustawienia.',
         title: 'Tabela',
         selectRange: 'Zaznacz zakres tabeli',
         rename: 'Zmień nazwę tabeli',

@@ -18,6 +18,17 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        calculatedColumn: 'Kolom terhitung',
+        columnFormula: 'Rumus',
+        columnFormulaHint: 'Langsung mengganti {0} sel data, kecuali header dan total. Berhenti mempertahankan sel yang ada. Perubahan dapat diurungkan.',
+        applyColumnFormula: 'Terapkan ke seluruh kolom',
+        stopColumnFormula: 'Hentikan isi otomatis',
+        columnFormulaApplied: 'Pengaturan kolom diterapkan',
+        settings: 'Pengaturan tabel',
+        showFilterButtons: 'Tampilkan tombol filter',
+        columnFilterButtons: 'Tombol filter kolom',
+        filterButtonsHint: 'Menyembunyikan tombol mempertahankan kriteria filter yang ada.',
+        settingsError: 'Tidak dapat menyimpan. Tabel mungkin telah berubah. Buka kembali pengaturan.',
         title: 'Tabel',
         selectRange: 'Pilih Rentang Tabel',
         rename: 'Ubah Nama Tabel',

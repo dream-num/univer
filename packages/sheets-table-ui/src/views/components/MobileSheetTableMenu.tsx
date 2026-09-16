@@ -17,7 +17,7 @@
 import type { ISheetTableMenuExtraProps, SheetTableMenuAction } from './SheetTableMenu';
 import { MobileActionRow } from '@univerjs/design';
 
-const ACTIONS: SheetTableMenuAction[] = ['rename', 'update-range', 'set-theme', 'delete'];
+const ACTIONS: SheetTableMenuAction[] = ['rename', 'update-range', 'set-theme', 'settings', 'delete'];
 
 export function MobileSheetTableMenu({ menu }: { menu?: ISheetTableMenuExtraProps }) {
     if (!menu) {

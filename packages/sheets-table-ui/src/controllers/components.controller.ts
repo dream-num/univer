@@ -20,6 +20,7 @@ import { ComponentManager, IconManager } from '@univerjs/ui';
 import {
     SHEET_TABLE_MENU,
     SHEET_TABLE_RENAME_DIALOG,
+    SHEET_TABLE_SETTINGS_DIALOG,
     SHEET_TABLE_THEME_PANEL,
     SHEETS_TABLE_FILTER_PANEL_OPENED_KEY,
     TABLE_SELECTOR_DIALOG,
@@ -28,6 +29,7 @@ import { SheetTableFilterPanel } from '../views/components/SheetTableFilterPanel
 import { SheetTableMenu } from '../views/components/SheetTableMenu';
 import { SheetTableRenameDialog } from '../views/components/SheetTableRenameDialog';
 import { SheetTableSelector } from '../views/components/SheetTableSelector';
+import { SheetTableSettingsDialog } from '../views/components/SheetTableSettingsDialog';
 import { SheetTableThemePanel } from '../views/components/SheetTableThemePanel';
 
 export class ComponentsController extends Disposable {
@@ -46,6 +48,7 @@ export class ComponentsController extends Disposable {
             [SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, SheetTableFilterPanel],
             [SHEET_TABLE_MENU, SheetTableMenu],
             [SHEET_TABLE_RENAME_DIALOG, SheetTableRenameDialog],
+            [SHEET_TABLE_SETTINGS_DIALOG, SheetTableSettingsDialog],
         ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(this._componentManager.register(key, comp));
         });

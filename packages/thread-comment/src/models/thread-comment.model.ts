@@ -17,7 +17,14 @@
 import type { Nullable } from '@univerjs/core';
 import type { IUpdateCommentPayload, IUpdateCommentRefPayload } from '../commands/mutations/comment.mutation';
 import type { IBaseComment, IThreadComment } from '../types/interfaces/i-thread-comment';
-import { Disposable, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, UniverInstanceType } from '@univerjs/core';
+import {
+    Disposable,
+    Inject,
+    IUniverInstanceService,
+    LifecycleService,
+    LifecycleStages,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { IThreadCommentDataSourceService } from '../services/tc-datasource.service';
 import { deserializeThreadCommentAnchor, ThreadCommentAnchorKind } from '../types/comment-anchor';
@@ -207,6 +214,7 @@ export class ThreadCommentModel extends Disposable {
         });
         const newComment = {
             ...rest,
+            authorName: rest.authorName ?? (rest.personId === currentComment.personId ? currentComment.authorName : undefined),
             ref: currentComment.ref,
         };
         commentMap.set(comment.id, newComment);
@@ -224,6 +232,7 @@ export class ThreadCommentModel extends Disposable {
         safeChildren.forEach((child) => {
             commentMap.set(child.id, {
                 ...child,
+                authorName: child.authorName ?? (child.personId === commentMap.get(child.id)?.personId ? commentMap.get(child.id)?.authorName : undefined),
                 parentId: comment.id,
                 ref: '',
             });

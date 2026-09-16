@@ -15,7 +15,17 @@
  */
 
 import type { IWorkbookData, UnitModel } from '@univerjs/core';
-import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
+import {
+    ICommandService,
+    ILogService,
+    IUniverInstanceService,
+    LocaleType,
+    LogLevel,
+    RedoCommand,
+    UndoCommand,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
@@ -64,6 +74,23 @@ describe('FRangeSheetsHyperlinkMixin', () => {
 
     afterEach(() => {
         univer.dispose();
+    });
+
+    it('persists, preserves and clears hyperlink tips through undoable facade edits', async () => {
+        const cell = univerAPI.getActiveWorkbook()!.getActiveSheet().getRange('A1');
+        await expect(cell.setHyperLink('https://univer.ai', 'Original', 'Imported tip')).resolves.toBe(true);
+        expect(cell.getHyperLinks()[0].tooltip).toBe('Imported tip');
+        await cell.updateHyperLink('https://docs.univer.ai', 'Edited');
+        expect(cell.getHyperLinks()[0]).toMatchObject({ label: 'Edited', tooltip: 'Imported tip' });
+        await cell.updateHyperLink('https://docs.univer.ai', 'Edited', '');
+        expect(cell.getHyperLinks()[0].tooltip).toBe('');
+        const commands = univer.__getInjector().get(ICommandService);
+        await commands.executeCommand(UndoCommand.id);
+        expect(cell.getHyperLinks()[0].tooltip).toBe('Imported tip');
+        await commands.executeCommand(RedoCommand.id);
+        expect(cell.getHyperLinks()[0].tooltip).toBe('');
+        const body = cell.getCellData()?.p?.body;
+        expect(JSON.parse(JSON.stringify(body)).customRanges[0].properties.tooltip).toBe('');
     });
 
     it('should set, read, update and cancel hyperlinks through the real facade API', async () => {

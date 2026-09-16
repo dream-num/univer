@@ -367,9 +367,29 @@ export class TableManager extends Disposable {
     setTableByConfig(unitId: string, tableId: string, config: ITableSetConfig) {
         const unitMap = this._tableMap.get(unitId);
         const table = unitMap?.get(tableId);
-        if (!table) return;
+        if (!table) {
+            return;
+        }
         const subUnitId = table.getSubunitId();
-        const { name, updateRange, rowColOperation, theme, sortInfo, options } = config;
+        const { name, updateRange, rowColOperation, theme, sortInfo, options, filterButtons } = config;
+        if (config.calculatedColumn) {
+            const column = table.getColumn(config.calculatedColumn.columnId);
+            if (column) {
+                column.formula = config.calculatedColumn.formula;
+                column.formulaIsArray = config.calculatedColumn.formulaIsArray;
+            }
+        }
+        if (filterButtons) {
+            if (filterButtons.showAutoFilter !== undefined) {
+                table.setShowAutoFilter(filterButtons.showAutoFilter);
+            }
+            for (const [columnId, visible] of Object.entries(filterButtons.columns ?? {})) {
+                const column = table.getColumn(columnId);
+                if (column) {
+                    column.showFilterButton = visible;
+                }
+            }
+        }
         if (name) {
             const oldTableName = table.getDisplayName();
             table.setDisplayName(name);

@@ -18,6 +18,17 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        calculatedColumn: '集計列',
+        columnFormula: '数式',
+        columnFormulaHint: '適用すると列のデータセル {0} 個を置換します。見出しと集計行は除きます。自動入力の停止は既存セルを保持します。元に戻せます。',
+        applyColumnFormula: '列全体に適用',
+        stopColumnFormula: '自動入力を停止',
+        columnFormulaApplied: '列設定を適用しました',
+        settings: 'テーブル設定',
+        showFilterButtons: 'フィルターボタンを表示',
+        columnFilterButtons: '列のフィルターボタン',
+        filterButtonsHint: 'ボタンを非表示にしても既存のフィルター条件は保持されます。',
+        settingsError: '保存できませんでした。テーブルが変更された可能性があります。設定を開き直してください。',
         title: '表',
         selectRange: '表の範囲を選択',
         rename: '表の名前を変更',

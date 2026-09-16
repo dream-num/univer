@@ -17,7 +17,12 @@
 import type { ITableManualFilterItem } from '../../../types/type';
 import { ICommandService, ILogService, IUndoRedoService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
-import { AddRangeThemeMutation, RemoveRangeThemeMutation, SheetInterceptorService, SheetRangeThemeModel } from '@univerjs/sheets';
+import {
+    AddRangeThemeMutation,
+    RemoveRangeThemeMutation,
+    SheetInterceptorService,
+    SheetRangeThemeModel,
+} from '@univerjs/sheets';
 import { describe, expect, it, vi } from 'vitest';
 import { TableManager } from '../../../models/table-manager';
 import { TableColumnFilterTypeEnum } from '../../../types/enum';
@@ -209,7 +214,7 @@ describe('sheets-table commands', () => {
     });
 
     it('SetSheetTableCommand should execute mutation and build inverse undo config', () => {
-        const executeCommand = vi.fn();
+        const syncExecuteCommand = vi.fn((_id: string) => true);
         const pushUndoRedo = vi.fn();
         const onCommandExecute = vi.fn(() => ({
             preRedos: [{ id: 'formula.redo.before', params: { phase: 'pre' } }],
@@ -229,7 +234,7 @@ describe('sheets-table commands', () => {
             [LocaleService, { t: () => 'msg' }],
             [IUniverInstanceService, { getUnit: () => ({ getSheets: () => [{ getName: () => 'SheetA' }] }) }],
             [IDefinedNamesService, { getDefinedNameMap: () => ({}) }],
-            [ICommandService, { executeCommand }],
+            [ICommandService, { syncExecuteCommand }],
             [IUndoRedoService, { pushUndoRedo }],
             [ILogService, { warn: vi.fn() }],
             [SheetInterceptorService, { onCommandExecute }],
@@ -261,7 +266,7 @@ describe('sheets-table commands', () => {
                 oldTableName: 'OldName',
             }),
         });
-        expect(executeCommand.mock.calls.map(([id]) => id)).toEqual([
+        expect(syncExecuteCommand.mock.calls.map(([id]) => id)).toEqual([
             'formula.redo.before',
             SetSheetTableMutation.id,
             'formula.redo.after',

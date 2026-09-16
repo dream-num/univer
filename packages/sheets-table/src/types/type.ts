@@ -15,7 +15,16 @@
  */
 
 import type { IRange, IStyleData, Nullable } from '@univerjs/core';
-import type { SheetsTableButtonStateEnum, SheetsTableSortStateEnum, TableColumnDataTypeEnum, TableColumnFilterTypeEnum, TableConditionTypeEnum, TableDateCompareTypeEnum, TableNumberCompareTypeEnum, TableStringCompareTypeEnum } from './enum';
+import type {
+    SheetsTableButtonStateEnum,
+    SheetsTableSortStateEnum,
+    TableColumnDataTypeEnum,
+    TableColumnFilterTypeEnum,
+    TableConditionTypeEnum,
+    TableDateCompareTypeEnum,
+    TableNumberCompareTypeEnum,
+    TableStringCompareTypeEnum,
+} from './enum';
 
 export interface ITableRange {
     startRow: number;
@@ -151,7 +160,24 @@ export interface ITableRangeRowColOperation {
     columnsJson?: ITableColumnJson[];
 }
 
+/** Changes button visibility without clearing existing filter criteria. */
+export interface ITableFilterButtonConfig {
+    showAutoFilter?: boolean;
+    /** Partial update keyed by stable table column ID, not worksheet column index. */
+    columns?: Record<string, boolean>;
+}
+
+/** Formula is anchored at the first data row; an empty formula stops automatic filling. */
+export interface ITableCalculatedColumnConfig {
+    columnId: string;
+    formula: string;
+    /** Preserve imported array semantics when omitted. */
+    formulaIsArray?: boolean;
+}
+
 export interface ITableSetConfig {
+    calculatedColumn?: ITableCalculatedColumnConfig;
+    filterButtons?: ITableFilterButtonConfig;
     name?: string;
     updateRange?: ITableRangeUpdate;
     rowColOperation?: ITableRangeRowColOperation;

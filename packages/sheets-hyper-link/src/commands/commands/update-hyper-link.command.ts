@@ -16,9 +16,27 @@
 
 import type { DocumentDataModel, ICellData, ICommand, IMutationInfo } from '@univerjs/core';
 import type { ICellLinkContent } from '../../types/interfaces/i-hyper-link';
-import { CellValueType, CommandType, CustomRangeType, generateRandomId, getBodySlice, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute, TextX, Tools, UniverInstanceType } from '@univerjs/core';
+import {
+    CellValueType,
+    CommandType,
+    CustomRangeType,
+    generateRandomId,
+    getBodySlice,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    sequenceExecute,
+    TextX,
+    Tools,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { replaceSelectionFactory } from '@univerjs/docs';
-import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
+import {
+    getSheetCommandTarget,
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+    SheetInterceptorService,
+} from '@univerjs/sheets';
 import { HyperLinkModel } from '../../models/hyper-link.model';
 import { AddHyperLinkMutation } from '../mutations/add-hyper-link.mutation';
 import { RemoveHyperLinkMutation } from '../mutations/remove-hyper-link.mutation';
@@ -35,7 +53,6 @@ export interface IUpdateHyperLinkCommandParams {
 export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheets.command.update-hyper-link',
-    // eslint-disable-next-line max-lines-per-function
     async handler(accessor, params) {
         if (!params) return false;
 
@@ -84,6 +101,7 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
                     endIndex: display.length - 1,
                     properties: {
                         url: payload,
+                        tooltip: link.tooltip ?? range.properties?.tooltip ?? range.properties?._xlsxHyperlinkTooltip,
                     },
                 }],
                 textRuns: textRun ? [textRun] : undefined,
@@ -211,6 +229,7 @@ export const UpdateRichHyperLinkCommand: ICommand<IUpdateRichHyperLinkCommandPar
                     endIndex: display.length - 1,
                     properties: {
                         url: payload.payload,
+                        tooltip: payload.tooltip ?? range.properties?.tooltip ?? range.properties?._xlsxHyperlinkTooltip,
                     },
                 }],
                 textRuns: textRun ? [textRun] : undefined,

@@ -22,7 +22,7 @@ import { FTheadCommentBuilder, FThreadComment } from './f-thread-comment';
 
 export type ISheetCellCommentCreateOptions = Pick<
     ThreadComment.ICreateThreadCommentOptions,
-    'attachments' | 'dateTime' | 'id' | 'personId' | 'threadId'
+    'attachments' | 'authorName' | 'dateTime' | 'id' | 'personId' | 'threadId'
 >;
 
 interface IRangeCommentDependencies {
@@ -210,6 +210,7 @@ export class FRangeSheetsThreadCommentMixin extends FRange implements IFRangeShe
                 id: firstNonEmpty(options.id, commentData?.id),
                 ref: refStr,
                 personId: firstNonEmpty(options.personId, commentData?.personId, currentUser.userID),
+                authorName: options.authorName ?? commentData?.authorName,
                 parentId: currentComment?.id,
                 unitId,
                 subUnitId: sheetId,

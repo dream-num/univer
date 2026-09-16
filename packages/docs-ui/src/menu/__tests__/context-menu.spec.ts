@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injector, IPermissionService, IUniverInstanceService, PermissionService, UniverInstanceType } from '@univerjs/core';
+import { Injector, IPermissionService, IUniverInstanceService, PermissionService } from '@univerjs/core';
 import { DocSelectionManagerService, setDocumentPermissionValue } from '@univerjs/docs';
 import { UnitAction } from '@univerjs/protocol';
 import { ContextMenuGroup } from '@univerjs/ui';
@@ -23,7 +23,7 @@ import { describe, expect, it } from 'vitest';
 import { DocPasteCommand } from '../../commands/commands/clipboard.command';
 import { DocSelectAllCommand, DocSelectWordCommand } from '../../commands/commands/doc-select-all.command';
 import { DOC_CARET_MENU_ID } from '../../consts/mobile-context';
-import { CopyMenuFactory, ParagraphSettingMenuFactory, PasteMenuFactory, SectionSettingMenuFactory, SelectAllMenuFactory, SelectWordMenuFactory } from '../context-menu';
+import { CopyMenuFactory, ParagraphSettingMenuFactory, PasteMenuFactory, SelectAllMenuFactory, SelectWordMenuFactory } from '../context-menu';
 import { mobileMenuSchema } from '../mobile-schema';
 
 describe('settings context menu factories', () => {
@@ -38,30 +38,6 @@ describe('settings context menu factories', () => {
                 [DocSelectAllCommand.id]: { order: 2, menuItemFactory: SelectAllMenuFactory },
             },
         });
-    });
-
-    it('does not show leading icons', () => {
-        const accessor = new Injector([
-            [DocSelectionManagerService, {
-                useValue: {
-                    textSelection$: of(null),
-                    getActiveTextRange: () => null,
-                },
-            }],
-            [IUniverInstanceService, {
-                useValue: {
-                    focused$: of('doc-1'),
-                    getCurrentTypeOfUnit$: () => of({ getUnitId: () => 'doc-1' }),
-                    getUnitType: () => UniverInstanceType.UNIVER_DOC,
-                },
-            }],
-            [IPermissionService, { useClass: PermissionService }],
-        ]);
-
-        expect(ParagraphSettingMenuFactory(accessor).icon).toBeUndefined();
-        expect(SectionSettingMenuFactory(accessor).icon).toBeUndefined();
-
-        accessor.dispose();
     });
 
     it('disables copy without Unit Copy while keeping copy available in read-only mode', async () => {

@@ -80,7 +80,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "1.38.0",
+        "@univerjs/icons": "1.39.0",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula-ui": "workspace:*",
         "@univerjs/sheets-sort": "workspace:*",

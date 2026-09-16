@@ -154,6 +154,7 @@ export function ParagraphSettingMenuFactory(accessor: IAccessor): IMenuButtonIte
         id: DocParagraphSettingPanelOperation.id,
         type: MenuItemType.BUTTON,
         title: 'docs-ui.doc.menu.paragraphSetting',
+        icon: 'ParagraphSettingIcon',
         disabled$: disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
@@ -260,6 +261,7 @@ export function SectionSettingMenuFactory(accessor: IAccessor): IMenuButtonItem<
         id: DocSectionSettingPanelOperation.id,
         type: MenuItemType.BUTTON,
         title: 'docs-ui.doc.menu.sectionSetting',
+        icon: 'SectionSettingIcon',
         disabled$: disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit),
         hidden$: combineLatest(
             getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),

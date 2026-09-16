@@ -14,21 +14,49 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IRangeWithCoord, Nullable, Workbook } from '@univerjs/core';
+import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
-import type { ISelectionWithCoord, ISelectionWithStyle, ISetSelectionsOperationParams, WorkbookSelectionModel } from '@univerjs/sheets';
+import type {
+    ISelectionWithCoord,
+    ISelectionWithStyle,
+    ISetSelectionsOperationParams,
+    WorkbookSelectionModel,
+} from '@univerjs/sheets';
 import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
 import type { SelectionControl } from './selection-control';
-import { ICommandService, IContextService, ILogService, Inject, Injector, RANGE_TYPE, Rectangle, set, ThemeService, toDisposable } from '@univerjs/core';
+import {
+    ICommandService,
+    IContextService,
+    ILogService,
+    Inject,
+    Injector,
+    RANGE_TYPE,
+    Rectangle,
+    set,
+    ThemeService,
+    toDisposable,
+} from '@univerjs/core';
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { attachSelectionWithCoord, convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SELECTIONS_ENABLED, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    attachSelectionWithCoord,
+    convertSelectionDataToRange,
+    REF_SELECTIONS_ENABLED,
+    SelectionMoveType,
+    SELECTIONS_ENABLED,
+    SetSelectionsOperation,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, merge, startWith } from 'rxjs';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
-
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
-import { BaseSelectionRenderService, getTopLeftSelectionOfCurrSheet, selectionDataForSelectAll } from './base-selection-render.service';
+import {
+    BaseSelectionRenderService,
+    genSelectionByRange,
+    getTopLeftSelectionOfCurrSheet,
+    selectionDataForSelectAll,
+} from './base-selection-render.service';
 import { genNormalSelectionStyle } from './const';
 
 /**
@@ -39,6 +67,8 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
     private readonly _workbookSelections: WorkbookSelectionModel;
 
     private _renderDisposable: Nullable<IDisposable> = null;
+
+    private _selectionBeforeModifierClick: readonly ISelectionWithStyle[] | null = null;
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -331,7 +361,6 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
      * @param viewport
      * @param scrollTimerType
      */
-    // eslint-disable-next-line complexity, max-lines-per-function
     protected _onPointerDown(
         evt: IPointerEvent | IMouseEvent,
         _zIndex = 0,
@@ -339,6 +368,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         viewport: Nullable<Viewport>,
         scrollTimerType: ScrollTimerType = ScrollTimerType.ALL
     ): void {
+        this._selectionBeforeModifierClick = null;
         this._rangeType = rangeType;
 
         const skeleton = this._skeleton;
@@ -388,77 +418,73 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         }
         const selectionWithStyle: ISelectionWithStyle = { range: selectCell, primary: selectCell, style: null };
         selectionWithStyle.range.rangeType = rangeType;
-        const selectionCellWithCoord = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
-        this._startRangeWhenPointerDown = { ...selectionCellWithCoord.rangeWithCoord };
-
-        let activeSelectionControl: Nullable<SelectionControl> = this.getActiveSelectionControl();
-        const cursorRangeWidthCoord: IRangeWithCoord = { ...selectionCellWithCoord.rangeWithCoord, rangeType };
-        const curControls = this.getSelectionControls();
-        for (const control of curControls) {
-            // If right click on a selection, we should not create a new selection control.
-            // Instead, the context menu will popup.
-            if (evt.button === 2 && Rectangle.contains(control.model, cursorRangeWidthCoord)) {
-                activeSelectionControl = control;
-                return;
-            }
-        }
-
-        this._checkClearPreviousControls(evt);
-
-        const currentCell = activeSelectionControl?.model.currentCell;
-        const expandByShiftKey = evt.shiftKey && currentCell;
-        const remainLastEnable = this._remainLastEnabled &&
-            !evt.ctrlKey &&
-            !evt.metaKey &&
-            !evt.shiftKey &&
-            !this._skipLastEnabled &&
-            !this._singleSelectionEnabled;
-
-        //#region update selection control
-        if (expandByShiftKey) {
-            // Perform pointer down selection.
-            this._makeSelectionByTwoCells(
-                currentCell,
-                cursorRangeWidthCoord,
-                skeleton,
-                rangeType,
-                activeSelectionControl! // Get updated in this method
-            );
-        } else if (remainLastEnable && activeSelectionControl) {
-            // Supports the formula ref text selection feature,
-
-            activeSelectionControl.updateRangeBySelectionWithCoord(selectionCellWithCoord);// (cursorRangeWidthCoord, primaryCursorCellRange);
-        } else {
-            // In normal situation, pointerdown ---> Create new SelectionControl,
-            activeSelectionControl = this.newSelectionControl(scene, skeleton, selectionWithStyle);
-        }
-        // clear highlight except last one.
-        for (let i = 0; i < this.getSelectionControls().length - 1; i++) {
-            this.getSelectionControls()[i].clearHighlight();
-        }
-        //#endregion
+        const activeSelectionControl = this._updateSelectionControl(evt, selectionWithStyle);
+        if (!activeSelectionControl) return;
 
         scene.disableObjectsEvent();
         this._clearUpdatingListeners();
         this._addEndingListeners();
         scene.getTransformer()?.clearSelectedObjects();
 
-        this._setupPointerMoveListener(viewportMain, activeSelectionControl!, rangeType, scrollTimerType, offsetX, offsetY);
+        this._setupPointerMoveListener(viewportMain, activeSelectionControl, rangeType, scrollTimerType, offsetX, offsetY);
         this._escapeShortcutDisposable = this._shortcutService.forceEscape();
 
         this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
-        this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
-            this._clearUpdatingListeners();
-
-            // selection control would be disposed in _selectionMoveEnd$.
-            // SelectionRenderService@selectionMoveEnd$ exec SetSelectionsOperation
-            // SheetsSelectionsService@setSelections
-            // SelectionRenderService._workbookSelections.selectionMoveEnd$ call _reset() to clear selectionControl.
-            this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
-            this._escapeShortcutDisposable?.dispose();
-            this._escapeShortcutDisposable = null;
-        });
+        this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => this.endSelection());
 
         this._scene.getEngine()?.setCapture();
+    }
+
+    private _updateSelectionControl(evt: IPointerEvent | IMouseEvent, selection: ISelectionWithStyle): Nullable<SelectionControl> {
+        const selectionWithCoord = attachSelectionWithCoord(selection, this._skeleton);
+        const cursorRange = selectionWithCoord.rangeWithCoord;
+        this._startRangeWhenPointerDown = { ...cursorRange };
+        const controls = this.getSelectionControls();
+        const isSelected = controls.some((control) => Rectangle.contains(control.model, cursorRange));
+        // Right clicking inside a selection only opens the context menu.
+        if (evt.button === 2 && isSelected) return;
+
+        if (evt.button === 0 && (evt.ctrlKey || evt.metaKey) && !evt.shiftKey &&
+            !this._singleSelectionEnabled && this._rangeType === RANGE_TYPE.NORMAL && isSelected) {
+            this._selectionBeforeModifierClick = this.getSelectionDataWithStyle().map(convertSelectionDataToRange);
+        }
+
+        let activeControl = this.getActiveSelectionControl();
+        this._checkClearPreviousControls(evt);
+        const currentCell = activeControl?.model.currentCell;
+        if (evt.shiftKey && currentCell && activeControl) {
+            this._makeSelectionByTwoCells(currentCell, cursorRange, this._skeleton, this._rangeType, activeControl);
+        } else {
+            activeControl = this.newSelectionControl(this._scene, this._skeleton, selection);
+        }
+        for (let i = 0; i < controls.length - 1; i++) {
+            controls[i].clearHighlight();
+        }
+        return activeControl;
+    }
+
+    override endSelection(): void {
+        const previousSelections = this._selectionBeforeModifierClick;
+        this._selectionBeforeModifierClick = null;
+
+        // Only a click toggles a cell; dragging still appends a range.
+        if (previousSelections && !this.selectionMoving) {
+            const selections = previousSelections.flatMap((selection) =>
+                Rectangle.subtract(selection.range, this._startRangeWhenPointerDown).map<ISelectionWithStyle>((range) => ({
+                    range,
+                    primary: null,
+                    style: selection.style,
+                }))
+            );
+            // A worksheet always retains at least one active cell.
+            if (selections.length === 0) {
+                selections.push(genSelectionByRange(this._skeleton, this._startRangeWhenPointerDown));
+            }
+            const lastSelection = selections[selections.length - 1];
+            lastSelection.primary = genSelectionByRange(this._skeleton, lastSelection.range).primary;
+            this.resetSelectionsByModelData(selections);
+        }
+
+        super.endSelection();
     }
 }

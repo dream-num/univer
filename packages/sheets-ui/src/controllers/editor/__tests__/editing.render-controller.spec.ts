@@ -15,9 +15,46 @@
  */
 
 import type { ICellData } from '@univerjs/core';
-import { CellValueType, Styles, Tools } from '@univerjs/core';
+import {
+    BooleanNumber,
+    CellValueType,
+    FormulaType,
+    LocaleService,
+    LocaleType,
+    Styles,
+    Tools,
+} from '@univerjs/core';
+import { FunctionService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { describe, expect, it } from 'vitest';
-import { getComparableCellData } from '../editing.render-controller';
+import { getCellDataByInput, getComparableCellData } from '../editing.render-controller';
+import { createTestBed } from './create-test-bed';
+
+describe('imported formula metadata when editing', () => {
+    it.each([BooleanNumber.FALSE, BooleanNumber.TRUE])('clears copied metadata on edits and keeps unchanged formulas (fd=%s)', (fd) => {
+        const testBed = createTestBed(undefined, [[LexerTreeBuilder], [IFunctionService, { useClass: FunctionService }]]);
+        try {
+            const localeService = testBed.get(LocaleService);
+            localeService.setLocale(LocaleType.EN_US);
+            const previous: ICellData = { f: '=SUM(A1:A3)', ft: FormulaType.ARRAY, fd, v: 6 };
+            const parseInput = (input: string, cell: ICellData) => getCellDataByInput(
+                cell,
+                { id: 'editor', body: { dataStream: `${input}\r\n` } },
+                testBed.get(LexerTreeBuilder),
+                localeService,
+                testBed.get(IFunctionService),
+                testBed.sheet.getStyles()
+            );
+            for (const input of ['=2+2', 'plain text', '']) {
+                expect(parseInput(input, { ...previous })).toMatchObject({ ft: null, fd: null });
+            }
+            const unchanged = { ...previous };
+            expect(parseInput(previous.f!, unchanged)).toBeNull();
+            expect(unchanged).toMatchObject({ f: previous.f, ft: previous.ft, fd });
+        } finally {
+            testBed.univer.dispose();
+        }
+    });
+});
 
 describe('cell editor commit comparison', () => {
     const unchanged: Array<{ name: string; previous: ICellData; incoming: ICellData }> = [

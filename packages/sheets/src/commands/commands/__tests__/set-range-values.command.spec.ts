@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDocumentData, Injector, IStyleData, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
+import type {
+    ICellData,
+    IDocumentData,
+    Injector,
+    IStyleData,
+    IWorkbookData,
+    Nullable,
+    Univer,
+    Workbook,
+} from '@univerjs/core';
 import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
 import {
     BooleanNumber,
@@ -290,6 +299,20 @@ describe('Test set range values commands', () => {
                 expect(await commandService.executeCommand(SetRangeValuesCommand.id, { value: { f: '=1+1' } })).toBeTruthy();
                 expect(getValue()?.ft).toBeUndefined();
                 expect(getValue()?.fd).toBeUndefined();
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValue()).toMatchObject(array);
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getValue()?.ft).toBeUndefined();
+                expect(getValue()?.fd).toBeUndefined();
+            });
+
+            it.each([null, ''])('clears copied formula metadata when f is %s and restores it on undo', async (f) => {
+                const array = { f: '=SUM(B1:B3)', ft: FormulaType.ARRAY, fd: BooleanNumber.FALSE };
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, { value: array })).toBeTruthy();
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, { value: { ...array, f, v: 7 } })).toBeTruthy();
+                expect(getValue()?.ft).toBeUndefined();
+                expect(getValue()?.fd).toBeUndefined();
+                expect(getValue()?.v).toBe(7);
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
                 expect(getValue()).toMatchObject(array);
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();

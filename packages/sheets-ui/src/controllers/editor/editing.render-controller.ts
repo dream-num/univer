@@ -1041,6 +1041,7 @@ export function getCellDataByInput(
         return null;
     }
     const { body } = snapshot;
+    const previousFormula = cellData.f;
     cellData.t = undefined;
 
     const data = body.dataStream;
@@ -1124,6 +1125,12 @@ export function getCellDataByInput(
         if (style) {
             cellData.s = style;
         }
+    }
+
+    // Editor input starts from a copy of the old cell, including imported metadata.
+    if (cellData.f !== previousFormula && (cellData.ft !== undefined || cellData.fd !== undefined)) {
+        cellData.ft = null;
+        cellData.fd = null;
     }
 
     return cellData;

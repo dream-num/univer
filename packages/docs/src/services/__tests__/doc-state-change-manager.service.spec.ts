@@ -77,6 +77,25 @@ describe('DocStateChangeManagerService', () => {
         };
     }
 
+    it('cancels pending history and collaboration callbacks when disposed', () => {
+        vi.useFakeTimers();
+        const { service, emitter, undoRedoService } = createService();
+        const changes: unknown[] = [];
+        const completed = vi.fn();
+        service.docStateChange$.subscribe({ next: (value) => changes.push(value), complete: completed });
+        emitter.emitStateChangeInfo(createChange({ debounce: true }));
+        expect(vi.getTimerCount()).toBe(2);
+
+        service.dispose();
+
+        expect(vi.getTimerCount()).toBe(0);
+        expect(service.getStateCache('doc-1')).toEqual({ history: [], collaboration: [] });
+        vi.advanceTimersByTime(300);
+        expect(undoRedoService.pitchTopUndoElement()).toBeNull();
+        expect(changes).toEqual([null]);
+        expect(completed).toHaveBeenCalledOnce();
+    });
+
     it('turns emitted document edits into history items and collaboration change events', () => {
         const { service, emitter, undoRedoService, univerInstanceService } = createService();
         const changes: unknown[] = [];

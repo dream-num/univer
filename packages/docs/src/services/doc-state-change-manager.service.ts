@@ -61,6 +61,21 @@ export class DocStateChangeManagerService extends RxDisposable {
         this._listenDocStateChange();
     }
 
+    override dispose(): void {
+        if (this._historyTimer != null) {
+            clearTimeout(this._historyTimer);
+            this._historyTimer = null;
+        }
+        if (this._changeStateCacheTimer != null) {
+            clearTimeout(this._changeStateCacheTimer);
+            this._changeStateCacheTimer = null;
+        }
+        this._historyStateCache.clear();
+        this._changeStateCache.clear();
+        this._docStateChange$.complete();
+        super.dispose();
+    }
+
     getStateCache(unitId: string) {
         return {
             history: this._historyStateCache.get(unitId) ?? [],

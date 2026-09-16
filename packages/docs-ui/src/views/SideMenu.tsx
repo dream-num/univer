@@ -204,7 +204,7 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                                           focus-visible:univer-outline-primary-600
                                           dark:hover:univer-bg-gray-800
                                         `, menu.isTitle ? 'univer-font-semibold' : 'univer-font-normal', {
-                                            'univer-bg-primary-50 univer-text-primary-700 hover:univer-bg-primary-50 dark:univer-bg-primary-900 dark:univer-text-primary-200 dark:hover:univer-bg-primary-900': menu.id === activeId,
+                                            'univer-bg-primary-50 univer-text-primary-700 hover:univer-bg-primary-50 dark:univer-bg-gray-700 dark:univer-text-primary-200 dark:hover:univer-bg-gray-700': menu.id === activeId,
                                             'univer-text-gray-900 dark:univer-text-gray-100': menu.isTitle && menu.id !== activeId,
                                             'univer-text-gray-600 dark:univer-text-gray-300': !menu.isTitle && menu.id !== activeId,
                                         })}
@@ -221,10 +221,11 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                                             <span
                                                 aria-hidden="true"
                                                 className="
-                                                  univer-absolute univer-bottom-0 univer-left-2.5 univer-top-0
-                                                  univer-w-px univer-bg-gray-200
+                                                  univer-absolute univer-bottom-0 univer-top-0 univer-w-px
+                                                  univer-bg-gray-200
                                                   dark:univer-bg-gray-700
                                                 "
+                                                style={{ left: 14 + Math.max(0, menu.level - 2) * 12 }}
                                             />
                                         )}
                                         {menu.id === activeId && (

@@ -49,7 +49,7 @@ export function getCalculatedColumnFillMutation(
             return;
         }
 
-        const baseFormula = formula.startsWith('=') ? formula : `=${formula}`;
+        const baseFormula = normalizeCalculatedColumnFormula(formula.startsWith('=') ? formula : `=${formula}`, tableInfo.name);
         const sheetColumn = tableInfo.range.startColumn + columnIndex;
         lexerTreeBuilder ??= getLexerTreeBuilder();
         for (let row = startRow; row <= endRow; row++) {
@@ -84,4 +84,51 @@ export function getCalculatedColumnFillMutation(
         id: SetRangeValuesMutation.id,
         params: { unitId, subUnitId, cellValue },
     };
+}
+
+function normalizeCalculatedColumnFormula(formula: string, tableName: string): string {
+    let result = '';
+    for (let index = 0; index < formula.length; index++) {
+        const start = index;
+        const char = formula[index];
+        if (char === '"' || char === "'") {
+            while (++index < formula.length) {
+                if (formula[index] === char) {
+                    if (formula[index + 1] !== char) break;
+                    index++;
+                }
+            }
+        } else if (char === '[') {
+            let depth = 1;
+            while (++index < formula.length && depth > 0) {
+                if (formula[index] === "'") {
+                    index++;
+                } else if (formula[index] === '[') {
+                    depth++;
+                } else if (formula[index] === ']') {
+                    depth--;
+                }
+                if (depth === 0) break;
+            }
+            if (depth === 0) {
+                const body = formula.slice(start + 1, index);
+                const previous = formula.slice(0, start).trimEnd().slice(-1);
+                const unqualified = !previous || /[=+\-*/^&(<>,;:{]/.test(previous);
+                // External workbook qualifiers are followed by a table/sheet name or '!'.
+                const next = formula.slice(index + 1).trimStart();
+                const qualifier = /^[^+\-*/^&=<>%),;}:\s]/.test(next);
+                if (!qualifier) {
+                    const prefix = unqualified ? tableName : '';
+                    // The formula engine consumes the explicit OOXML current-row form.
+                    const columns = body.slice(1);
+                    result += body.startsWith('@')
+                        ? `${prefix}[[#This Row],${columns.startsWith('[') ? columns : `[${columns}]`}]`
+                        : `${prefix}[${body}]`;
+                    continue;
+                }
+            }
+        }
+        result += formula.slice(start, index + 1);
+    }
+    return result;
 }

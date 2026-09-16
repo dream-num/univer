@@ -712,6 +712,11 @@ describe('lexer nodeMaker test', () => {
     });
 
     describe('moveFormulaRefOffset', () => {
+        it('preserves escaped quotes and reference-like text while moving cell references', () => {
+            expect(lexerTreeBuilder.moveFormulaRefOffset('=IF(A1="a""b","[@Column]","""quoted""")', 1, 1))
+                .toBe('=IF(B2="a""b","[@Column]","""quoted""")');
+        });
+
         it('move all', () => {
             const result = lexerTreeBuilder.moveFormulaRefOffset('=sum(A1:B1)', 1, 1, false);
             expect(result).toStrictEqual('=sum(B2:C2)');

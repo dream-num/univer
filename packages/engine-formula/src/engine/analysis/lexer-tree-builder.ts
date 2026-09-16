@@ -397,6 +397,11 @@ export class LexerTreeBuilder extends Disposable {
 
         for (let i = 0, len = sequenceNodes.length; i < len; i++) {
             const node = sequenceNodes[i];
+            if (typeof node !== 'string' && node.nodeType === sequenceNodeType.STRING) {
+                // The lexer decodes doubled quotes; serializing a formula must escape them again.
+                newSequenceNodes.push({ ...node, token: `"${node.token.slice(1, -1).replace(/"/g, '""')}"` });
+                continue;
+            }
             if (typeof node === 'string' || node.nodeType !== sequenceNodeType.REFERENCE) {
                 newSequenceNodes.push(node);
                 continue;

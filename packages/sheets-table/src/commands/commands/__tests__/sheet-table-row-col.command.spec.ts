@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
+import { ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Univer } from '@univerjs/core';
 import { MoveRangeMutation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SheetsTableController } from '../../../controllers/sheets-table.controller';
 import { TableManager } from '../../../models/table-manager';
 import {
@@ -29,8 +29,20 @@ import {
     SheetTableRemoveRowCommand,
 } from '../sheet-table-row-col.command';
 
+const testUnivers: Univer[] = [];
+afterEach(() => {
+    testUnivers.splice(0).forEach((univer) => univer.dispose());
+});
+
 function createAccessor(pairs: Array<[unknown, unknown]>) {
     const map = new Map<unknown, unknown>(pairs);
+    if (!map.has(SheetInterceptorService)) {
+        const univer = new Univer();
+        testUnivers.push(univer);
+        const injector = univer.__getInjector();
+        injector.add([SheetInterceptorService]);
+        map.set(SheetInterceptorService, injector.get(SheetInterceptorService));
+    }
     return {
         get(token: unknown) {
             if (!map.has(token)) {

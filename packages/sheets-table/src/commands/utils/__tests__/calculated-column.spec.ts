@@ -44,4 +44,26 @@ describe('getCalculatedColumnFillMutation', () => {
             injector.dispose();
         }
     });
+
+    it.each([
+        ['[@单价]*[@数量]', '=Orders[[#This Row],[单价]]*Orders[[#This Row],[数量]]'],
+        ['[@[单价]]*[@[数量]]', '=Orders[[#This Row],[单价]]*Orders[[#This Row],[数量]]'],
+        ['SUM([单价])+SUM([[#Data],[数量]])', '=SUM(Orders[单价])+SUM(Orders[[#Data],[数量]])'],
+        ['SUM([@[单价]:[数量]])+$A2', '=SUM(Orders[[#This Row],[单价]:[数量]])+$A8'],
+        ['Other[@单价]*[@数量]', '=Other[[#This Row],[单价]]*Orders[[#This Row],[数量]]'],
+        ['IF(A2="[@单价]",[@数量],"a""[数量]")', '=IF(A8="[@单价]",Orders[[#This Row],[数量]],"a""[数量]")'],
+        ["[@[Tax'] rate]]", "=Orders[[#This Row],[Tax'] rate]]"],
+        ["SUM('[other.xlsx]Sheet 1'!A2)+SUM([other]Other[单价])", "=SUM('[other.xlsx]Sheet 1'!A8)+SUM([other]Other[单价])"],
+    ])('fills structured references without changing literals or external qualifiers: %s', (formula, expected) => {
+        const injector = new Injector([[LexerTreeBuilder]]);
+        try {
+            const table = new Table('table', 'Orders', { startRow: 0, endRow: 9, startColumn: 0, endColumn: 2 }, ['单价', '数量', '金额']);
+            table.getTableColumnByIndex(2)!.formula = formula;
+            const mutation = getCalculatedColumnFillMutation(table, 'unit', 'sheet', 7, 7, () => injector.get(LexerTreeBuilder));
+            expect(mutation?.params).toMatchObject({ cellValue: { 7: { 2: { f: expected } } } });
+            expect(table.getTableColumnByIndex(2)!.formula).toBe(formula);
+        } finally {
+            injector.dispose();
+        }
+    });
 });

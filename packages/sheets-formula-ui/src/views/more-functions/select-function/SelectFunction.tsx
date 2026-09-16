@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import type { IFunctionInfo, IFunctionParam, ISearchItem } from '@univerjs/engine-formula';
+import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import type { IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
-import type { ISidebarMethodOptions } from '@univerjs/ui';
 import type { KeyboardEvent } from 'react';
 import type { LocaleKey } from '../../../locale/types';
-import { IConfigService, LocaleService } from '@univerjs/core';
+import { IConfigService, LocaleService, regexp } from '@univerjs/core';
 import { borderClassName, clsx, divideYClassName, Input, scrollbarClassName, Select } from '@univerjs/design';
 import { IDescriptionService } from '@univerjs/engine-formula';
 import { CheckMarkIcon } from '@univerjs/icons';
 import { PLUGIN_CONFIG_KEY_BASE } from '@univerjs/sheets-formula';
-import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { ISidebarService, useDependency } from '@univerjs/ui';
+import { useEffect, useMemo, useState } from 'react';
 import { getFunctionTypeValues } from '../../../services/utils';
 import { FunctionHelp } from '../function-help/FunctionHelp';
 
@@ -42,15 +41,19 @@ export function SelectFunction(props: ISelectFunctionProps) {
 
     const allTypeValue = '-1';
     const [searchText, setSearchText] = useState<string>('');
-    const [selectList, setSelectList] = useState<ISearchItem[]>([]);
     const [active, setActive] = useState(0);
     const [typeSelected, setTypeSelected] = useState(allTypeValue);
     const [nameSelected, setNameSelected] = useState(0);
-    const [functionInfo, setFunctionInfo] = useState<IFunctionInfo | null>(null);
     const descriptionService = useDependency(IDescriptionService);
     const localeService = useDependency(LocaleService);
     const sidebarService = useDependency(ISidebarService);
-    const sidebarOptions = useObservable<ISidebarMethodOptions>(sidebarService.sidebarOptions$);
+    const selectList = useMemo(() => {
+        const query = searchText.trim().toUpperCase();
+        return descriptionService.getSearchListByType(Number(typeSelected))
+            .filter(({ name }) => name.toUpperCase().includes(query));
+    }, [descriptionService, searchText, typeSelected]);
+    const selectedItem = selectList[nameSelected];
+    const functionInfo = selectedItem ? descriptionService.getFunctionInfo(selectedItem.name) ?? null : null;
 
     const options = getFunctionTypeValues(localeService, Boolean(customFunction))
         .filter(
@@ -66,30 +69,28 @@ export function SelectFunction(props: ISelectFunctionProps) {
     const optional = localeService.t<LocaleKey>('sheets-formula-ui.prompt.optional');
 
     useEffect(() => {
-        handleSelectChange(allTypeValue);
-    }, []);
+        onChange(functionInfo);
+    }, [functionInfo, onChange]);
 
     useEffect(() => {
-        setCurrentFunctionInfo(0);
-    }, [selectList]);
-
-    // Reset data when the component enters again
-    useEffect(() => {
-        if (sidebarOptions?.visible) {
-            setSearchText('');
-            setSelectList([]);
-            setActive(0);
-            setTypeSelected(allTypeValue);
-            setNameSelected(0);
-            setFunctionInfo(null);
-            handleSelectChange(allTypeValue);
-        }
-    }, [sidebarOptions]);
+        const subscription = sidebarService.sidebarOptions$.subscribe((options) => {
+            if (options.visible) {
+                setSearchText('');
+                setTypeSelected(allTypeValue);
+                setActive(0);
+                setNameSelected(0);
+            }
+        });
+        return () => subscription.unsubscribe();
+    }, [sidebarService]);
 
     const highlightSearchText = (text: string) => {
-        if (searchText.trim() === '') return text;
+        const query = searchText.trim().toUpperCase();
+        if (query === '') {
+            return text;
+        }
 
-        const regex = new RegExp(`(${searchText.toLocaleUpperCase()})`);
+        const regex = new RegExp(`(${regexp.escapeRegExp(query)})`, 'i');
         const parts = text.split(regex).filter(Boolean);
 
         return parts.map((part: string, index: number) => {
@@ -104,40 +105,30 @@ export function SelectFunction(props: ISelectFunctionProps) {
         });
     };
 
-    const setCurrentFunctionInfo = (selectedIndex: number) => {
-        if (selectList.length === 0) {
-            setFunctionInfo(null);
-            onChange(null);
-            return;
+    function setCurrentFunctionInfo(selectedIndex: number) {
+        if (selectList[selectedIndex]) {
+            setNameSelected(selectedIndex);
         }
-
-        setNameSelected(selectedIndex);
-        const functionInfo = descriptionService.getFunctionInfo(selectList[selectedIndex].name);
-        if (!functionInfo) {
-            setFunctionInfo(null);
-            onChange(null);
-            return;
-        }
-
-        setFunctionInfo(functionInfo);
-        onChange(functionInfo);
-    };
+    }
 
     function handleSelectChange(value: string) {
         setTypeSelected(value);
-        const selectList = descriptionService.getSearchListByType(+value);
-        setSelectList(selectList);
+        setActive(0);
+        setNameSelected(0);
     }
 
-    // TODO@Dushusir: debounce
     function handleSearchInputChange(value: string) {
         setSearchText(value);
-        const selectList = descriptionService.getSearchListByName(value);
-        setSelectList(selectList);
+        setActive(0);
+        setNameSelected(0);
     }
 
     function handleSelectListKeyDown(e: KeyboardEvent<HTMLUListElement> | KeyboardEvent<HTMLInputElement>) {
         e.stopPropagation();
+        if (selectList.length === 0) {
+            return;
+        }
+
         if (e.key === 'ArrowDown') {
             const nextActive = active + 1;
             setActive(nextActive === selectList.length ? 0 : nextActive);
@@ -183,7 +174,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
                 >
                     {selectList.map(({ name }, index) => (
                         <li
-                            key={index}
+                            key={name}
                             className={clsx(`
                               univer-relative univer-box-border univer-cursor-pointer univer-rounded univer-px-7
                               univer-py-1 univer-text-sm univer-text-gray-900 univer-transition-colors

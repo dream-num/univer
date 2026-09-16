@@ -15,9 +15,17 @@
  */
 
 import type { IRange, IWorkbookData, Workbook } from '@univerjs/core';
-import type { IPointerEvent } from '@univerjs/engine-render';
+import type { IPointerEvent, IRenderContext, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { ICommandService, LocaleService, LocaleType, RANGE_TYPE, Univer, UniverInstanceType } from '@univerjs/core';
+import {
+    ICommandService,
+    LocaleService,
+    LocaleType,
+    RANGE_TYPE,
+    Rectangle,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import {
     CanvasColorService,
     ICanvasColorService,
@@ -27,7 +35,12 @@ import {
     Spreadsheet,
     Viewport,
 } from '@univerjs/engine-render';
-import { SetSelectionsOperation, SheetInterceptorService, SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    SetSelectionsOperation,
+    SheetInterceptorService,
+    SheetSkeletonService,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import {
     IPlatformService,
     IShortcutService,
@@ -37,6 +50,7 @@ import {
     UIRuntimeScopeService,
 } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { SHEET_VIEW_KEY } from '../../../common/keys';
 import { createRenderTestBed } from '../../../controllers/render-controllers/__tests__/render-test-bed';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
@@ -90,11 +104,11 @@ describe('SheetSelectionRenderService', () => {
         (engine as never as { setCapture: () => void }).setCapture = () => { };
         commandService.registerCommand(SetSelectionsOperation);
 
-        const service = testBed.injector.createInstance(SheetSelectionRenderService, context as any);
+        const service = testBed.injector.createInstance(SheetSelectionRenderService, context as unknown as IRenderContext<Workbook>);
         testBed.sheetSkeletonManagerService.emitCurrentSkeleton({
             unitId: testBed.sheet.getUnitId(),
             sheetId: 'sheet1',
-            skeleton: skeleton as any,
+            skeleton: skeleton as unknown as SpreadsheetSkeleton,
         });
 
         return { ...testBed, service };
@@ -112,13 +126,13 @@ describe('SheetSelectionRenderService', () => {
         (skeleton as never as { getRowCount: () => number }).getRowCount = () => skeleton.worksheet.getRowCount();
         commandService.registerCommand(SetSelectionsOperation);
 
-        const renderService = injector.createInstance(SheetSelectionRenderService, context as any);
+        const renderService = injector.createInstance(SheetSelectionRenderService, context as unknown as IRenderContext<Workbook>);
 
         // Simulate initial skeleton ready (as if the sheet got rendered).
         sheetSkeletonManagerService.emitCurrentSkeleton({
             unitId: sheet.getUnitId(),
             sheetId: 'sheet1',
-            skeleton: skeleton as any,
+            skeleton: skeleton as unknown as SpreadsheetSkeleton,
         });
         await Promise.resolve();
 
@@ -290,30 +304,52 @@ describe('SheetSelectionRenderService additive pointer modifiers with real rende
         vi.useRealTimers();
     });
 
+    function createSelectionTestBed(mergeData: IRange[] = []) {
+        const injector = univer.__getInjector();
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'pointer-modifiers',
+            name: 'Pointer modifiers',
+            sheetOrder: ['sheet1'],
+            sheets: { sheet1: { id: 'sheet1', name: 'Sheet 1', rowCount: 20, columnCount: 10, cellData: {}, mergeData } },
+        });
+        const renderManager = injector.get(IRenderManagerService);
+        const render = renderManager.createRender(workbook.getUnitId());
+        render.engine.resizeBySize(800, 600);
+        injector.createInstance(Viewport, SHEET_VIEWPORT_KEY.VIEW_MAIN, render.scene, { left: 0, top: 0, right: 0, bottom: 0 });
+        const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
+        render.mainComponent = spreadsheet;
+        render.components.set(SHEET_VIEW_KEY.MAIN, spreadsheet);
+        render.scene.addObject(spreadsheet);
+        const skeletonManager = render.with(SheetSkeletonManagerService);
+        skeletonManager.setCurrent({ sheetId: 'sheet1' });
+        renderManager.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSelectionRenderService]);
+        const service = render.with(SheetSelectionRenderService);
+        const skeleton = skeletonManager.getCurrentSkeleton()!;
+        const selectionsService = injector.get(SheetsSelectionsService);
+        const getSelections = () => selectionsService.getWorkbookSelections(workbook.getUnitId()).getCurrentSelections();
+        const eventAt = (row: number, column: number, modifiers: Partial<IPointerEvent> = {}) => {
+            const cell = skeleton.getNoMergeCellWithCoordByIndex(row, column);
+            return {
+                offsetX: (cell.startX + cell.endX) / 2,
+                offsetY: (cell.startY + cell.endY) / 2,
+                button: 0,
+                buttons: 1,
+                ...modifiers,
+            } as IPointerEvent;
+        };
+        const click = (row: number, column: number, modifiers: Partial<IPointerEvent> = {}) => {
+            const event = eventAt(row, column, modifiers);
+            spreadsheet.onPointerDown$.emitEvent(event);
+            render.scene.onPointerUp$.emitEvent(event);
+        };
+        return { injector, workbook, render, spreadsheet, service, skeleton, getSelections, eventAt, click };
+    }
+
     for (const single of [false, true]) {
         for (const modifier of ['none', 'ctrlKey', 'metaKey', 'shiftKey'] as const) {
             it(`preserves the intended pointer range with ${modifier} and single selection ${single}`, () => {
-                const injector = univer.__getInjector();
-                const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
-                    id: 'pointer-modifiers',
-                    name: 'Pointer modifiers',
-                    sheetOrder: ['sheet1'],
-                    sheets: { sheet1: { id: 'sheet1', name: 'Sheet 1', rowCount: 20, columnCount: 10, cellData: {} } },
-                });
-                const renderManager = injector.get(IRenderManagerService);
-                const render = renderManager.createRender(workbook.getUnitId());
-                render.engine.resizeBySize(800, 600);
-                new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN, render.scene, { left: 0, top: 0, right: 0, bottom: 0 });
-                const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
-                render.mainComponent = spreadsheet;
-                render.components.set(SHEET_VIEW_KEY.MAIN, spreadsheet);
-                render.scene.addObject(spreadsheet);
-                const skeletonManager = render.with(SheetSkeletonManagerService);
-                skeletonManager.setCurrent({ sheetId: 'sheet1' });
-                renderManager.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSelectionRenderService]);
-                const service = render.with(SheetSelectionRenderService);
+                const { injector, workbook, render, spreadsheet, service, skeleton } = createSelectionTestBed();
                 service.setSingleSelectionEnabled(single);
-                const skeleton = skeletonManager.getCurrentSkeleton()!;
 
                 for (const index of [0, 2]) {
                     const cell = skeleton.getNoMergeCellWithCoordByIndex(index, index);
@@ -350,4 +386,105 @@ describe('SheetSelectionRenderService additive pointer modifiers with real rende
             });
         }
     }
+
+    it.each(['ctrlKey', 'metaKey'] as const)('toggles a cell inside a range with %s without accumulating selections', (modifier) => {
+        const { click, getSelections, service } = createSelectionTestBed();
+        click(0, 0);
+        click(2, 2, { shiftKey: true });
+        const clickedCell = { startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 };
+
+        for (const selected of [false, true, false, true, false]) {
+            click(1, 1, { [modifier]: true });
+            const ranges = getSelections().map(({ range }) => range);
+            expect(ranges.filter((range) => Rectangle.contains(range, clickedCell))).toHaveLength(selected ? 1 : 0);
+            const selectedCellCount = ranges.reduce((count, range) =>
+                count + (range.endRow - range.startRow + 1) * (range.endColumn - range.startColumn + 1), 0);
+            expect(selectedCellCount).toBe(selected ? 9 : 8);
+            expect(service.getSelectionControls()).toHaveLength(ranges.length);
+            const lastSelection = getSelections().at(-1)!;
+            expect(Rectangle.contains(lastSelection.range, lastSelection.primary!)).toBe(true);
+        }
+    });
+
+    it('removes a clicked cell from every overlapping selection but preserves additive dragging', () => {
+        const { click, getSelections, eventAt, spreadsheet, render } = createSelectionTestBed();
+        click(0, 0);
+        click(2, 2, { shiftKey: true });
+        spreadsheet.onPointerDown$.emitEvent(eventAt(3, 3, { metaKey: true }));
+        render.scene.onPointerMove$.emitEvent(eventAt(1, 1, { metaKey: true }));
+        render.scene.onPointerUp$.emitEvent(eventAt(1, 1, { metaKey: true }));
+        const clickedCell = { startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 };
+        expect(getSelections().filter(({ range }) => Rectangle.contains(range, clickedCell))).toHaveLength(2);
+
+        click(1, 1, { metaKey: true });
+        expect(getSelections().some(({ range }) => Rectangle.contains(range, clickedCell))).toBe(false);
+        expect(getSelections().some(({ range }) => Rectangle.contains(range, {
+            startRow: 3,
+            endRow: 3,
+            startColumn: 3,
+            endColumn: 3,
+        }))).toBe(true);
+    });
+
+    it('deselects an entire merged cell and retains the final active cell', () => {
+        const merged = { startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 };
+        const { click, getSelections } = createSelectionTestBed([merged]);
+        click(0, 0);
+        click(3, 3, { shiftKey: true });
+        click(2, 2, { metaKey: true });
+        expect(getSelections().some(({ range }) => Rectangle.intersects(range, merged))).toBe(false);
+
+        click(2, 2);
+        for (let index = 0; index < 3; index++) {
+            click(2, 2, { metaKey: true });
+            expect(getSelections()).toHaveLength(1);
+            expect(getSelections()[0].range).toMatchObject(merged);
+            expect(getSelections()[0].primary).toMatchObject(merged);
+        }
+    });
+
+    it('preserves right click, shift extension, and single-selection mode inside a selected range', () => {
+        const { click, getSelections, service } = createSelectionTestBed();
+        click(0, 0);
+        click(2, 2, { shiftKey: true });
+        click(1, 1, { metaKey: true, button: 2 });
+        expect(getSelections()).toHaveLength(1);
+        expect(getSelections()[0].range).toMatchObject({ startRow: 0, endRow: 2, startColumn: 0, endColumn: 2 });
+
+        click(1, 1, { metaKey: true, shiftKey: true });
+        expect(getSelections()).toHaveLength(1);
+        expect(getSelections()[0].range).toMatchObject({ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 });
+
+        service.setSingleSelectionEnabled(true);
+        click(1, 1, { metaKey: true });
+        expect(getSelections()).toHaveLength(1);
+        expect(getSelections()[0].range).toMatchObject({ startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 });
+    });
+
+    it('keeps dragging additive even when it starts inside a selection', () => {
+        const { click, getSelections, eventAt, spreadsheet, render } = createSelectionTestBed();
+        click(0, 0);
+        click(2, 2, { shiftKey: true });
+        spreadsheet.onPointerDown$.emitEvent(eventAt(1, 1, { ctrlKey: true }));
+        render.scene.onPointerMove$.emitEvent(eventAt(3, 3, { ctrlKey: true }));
+        render.scene.onPointerUp$.emitEvent(eventAt(3, 3, { ctrlKey: true }));
+        expect(getSelections().map(({ range }) => range)).toMatchObject([
+            { startRow: 0, endRow: 2, startColumn: 0, endColumn: 2 },
+            { startRow: 1, endRow: 3, startColumn: 1, endColumn: 3 },
+        ]);
+    });
+
+    it('finishes deselection when a released pointer returns without a pointer-up event', () => {
+        const { click, getSelections, eventAt, spreadsheet, render } = createSelectionTestBed();
+        click(0, 0);
+        click(2, 2, { shiftKey: true });
+        spreadsheet.onPointerDown$.emitEvent(eventAt(0, 0, { ctrlKey: true }));
+        render.scene.onPointerMove$.emitEvent(eventAt(0, 0, { buttons: 0 }));
+        expect(getSelections().some(({ range }) => Rectangle.contains(range, {
+            startRow: 0,
+            endRow: 0,
+            startColumn: 0,
+            endColumn: 0,
+        }))).toBe(false);
+    });
 });

@@ -19,6 +19,7 @@ import {
     AlignTypeH,
     AlignTypeV,
     BooleanNumber,
+    CustomRangeType,
     DataStreamTreeTokenType,
     DocumentFlavor,
     GridType,
@@ -444,7 +445,7 @@ describe('docs layout tools extra', () => {
         expect(line1).toMatchObject(paragraphStyle);
     });
 
-    it('uses the between border only between adjacent paragraphs with matching border sets', () => {
+    it.each([false, true])('joins adjacent matching border sets with an optional between border (%s)', (between) => {
         const { page, line1, line2 } = createPageSkeleton();
         line1.paragraphStart = true;
         line1.paragraphIndex = 10;
@@ -457,7 +458,7 @@ describe('docs layout tools extra', () => {
             borderBottom: { color: { rgb: '#222222' }, width: 2, padding: 2 },
             borderLeft: { color: { rgb: '#333333' }, width: 3, padding: 3 },
             borderRight: { color: { rgb: '#444444' }, width: 4, padding: 4 },
-            borderBetween: { color: { rgb: '#555555' }, width: 5, padding: 5 },
+            borderBetween: between ? { color: { rgb: '#555555' }, width: 5, padding: 5 } : undefined,
         };
         const ctx = {
             paragraphConfigCache: new Map([[
@@ -477,6 +478,30 @@ describe('docs layout tools extra', () => {
         expect(line2.borderTop).toBeUndefined();
         expect(line2.borderBetween).toBeUndefined();
         expect(line2.borderBottom).toEqual(paragraphStyle.borderBottom);
+    });
+
+    it('draws a paragraph border around its text rather than its zero-height floating anchor', () => {
+        const { page, line1, line2 } = createPageSkeleton();
+        const border = { color: { rgb: '#111111' }, width: 1, padding: 1 };
+        const paragraphStyle = { borderTop: border, borderBottom: border };
+        line1.lineHeight = 0;
+        line1.paragraphStart = true;
+        line1.paragraphIndex = 20;
+        line1.borderTop = border;
+        line2.paragraphStart = false;
+        line2.paragraphIndex = 20;
+        line2.ed = 20;
+        line2.borderTopSpace = 2;
+        const ctx = {
+            paragraphConfigCache: new Map([[undefined, new Map([[20, { paragraphStyle }]])]]),
+        };
+
+        updateParagraphBorders(ctx as any, [page] as any);
+
+        expect(line1.borderTop).toBeUndefined();
+        expect(line1.borderBottom).toBeUndefined();
+        expect(line2.borderTop).toEqual(border);
+        expect(line2.borderBottom).toEqual(border);
     });
 
     it('uses cached border styles at retained and reused page boundaries', () => {
@@ -707,6 +732,23 @@ describe('docs layout tools extra', () => {
         expect(config(0).textStyle.bl).toBeUndefined();
         expect(config(0).textStyle.it).toBeUndefined();
         expect(config(0).textStyle.cl).toBeUndefined();
+    });
+
+    it.each([undefined, { s: BooleanNumber.FALSE }, { s: BooleanNumber.TRUE }])('preserves authored hyperlink underline %j in the real font path', (ul) => {
+        clearFontCreateConfigCache();
+        const paragraph = { startIndex: 4, paragraphId: 'mail-paragraph', paragraphStyle: { textStyle: { cl: { rgb: '#123456' } } } };
+        const { dataModel, viewModel, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Mail', {
+            body: {
+                paragraphs: [paragraph],
+                textRuns: [{ st: 0, ed: 4, ts: { ul, fs: 11 } }],
+                customRanges: [{ startIndex: 0, endIndex: 3, rangeId: 'mail', rangeType: CustomRangeType.HYPERLINK, properties: { url: 'mailto:test@example.test', textStyleMode: 'text' } }],
+            },
+        });
+        const before = JSON.stringify(dataModel.getSnapshot());
+        const result = getFontCreateConfig(0, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+        expect(result.textStyle.ul).toEqual(ul);
+        expect(result.textStyle.cl).toEqual({ rgb: '#123456' });
+        expect(JSON.stringify(dataModel.getSnapshot())).toBe(before);
     });
 
     it('creates default skeleton, prepares section config, and resolves page paths', () => {

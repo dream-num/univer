@@ -40,6 +40,20 @@ import {
 } from '../glyph';
 
 describe('Glyph utils test cases', () => {
+    it.each(['A', '😀', 'مرحبا', '\t', '\r'])('preserves hidden %j offsets without painting or measuring it', (raw) => {
+        const textStyle: ITextStyle = { ff: 'Arial', fs: 80, hidden: true };
+        const glyph = createSkeletonLetterGlyph(raw, {
+            textStyle,
+            fontStyle: getFontStyleString(textStyle),
+            charSpace: 0,
+            gridType: GridType.SNAP_TO_CHARS,
+            snapToGrid: BooleanNumber.TRUE,
+        }, { width: 120, ascent: 90, descent: 20 });
+        expect(glyph).toMatchObject({ raw, count: raw.length, content: '', width: 0, bBox: { ba: 0, bd: 0, width: 0 } });
+        expect(glyph.streamType).toBe(raw === '\r' ? DataStreamTreeTokenType.PARAGRAPH : DataStreamTreeTokenType.LETTER);
+        expect(glyph.isJustifiable).toBe(false);
+    });
+
     it.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL])('uses the correct picture-only line metrics in %s mode', (flavor) => {
         const policy = getDocumentCompatibilityPolicy(flavor);
         const picture = {
@@ -54,6 +68,11 @@ describe('Glyph utils test cases', () => {
         } as IDocumentSkeletonGlyph;
         const mark = { ...largeMark, bBox: { ba: 14, bd: 4 } } as IDocumentSkeletonGlyph;
         const text = { ...mark, streamType: DataStreamTreeTokenType.LETTER, width: 8 };
+        expect(getGlyphGroupFontBoundingBox(policy, [text], [largeMark])).toEqual(
+            flavor === DocumentFlavor.TRADITIONAL
+                ? { boundingBoxAscent: 14, boundingBoxDescent: 4, normalLineHeight: 0 }
+                : { boundingBoxAscent: 96, boundingBoxDescent: 24, normalLineHeight: 0 }
+        );
         expect(getGlyphGroupFontBoundingBox(policy, [picture], [largeMark])).toEqual(
             flavor === DocumentFlavor.TRADITIONAL
                 ? { boundingBoxAscent: 54, boundingBoxDescent: 0, normalLineHeight: 0 }
@@ -561,6 +580,7 @@ describe('Glyph utils test cases', () => {
                 count: 1,
             } as IDocumentSkeletonGlyph;
 
+            paragraphGlyph.bBox = { ...paragraphGlyph.bBox, ba: 28, width: 30 };
             const bulletGlyph = createSkeletonBulletGlyph(
                 paragraphGlyph,
                 {
@@ -576,6 +596,8 @@ describe('Glyph utils test cases', () => {
             );
 
             expect(bulletGlyph.content).toBe('p');
+            expect(bulletGlyph.bBox).toMatchObject({ ba: 28, bd: 4, width: 12 });
+            expect(paragraphGlyph.bBox.width).toBe(30);
             expect(bulletGlyph.ts).toMatchObject({
                 ff: 'Wingdings',
                 fs: 24,

@@ -17,7 +17,14 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IDocumentLayoutProgress, IDocumentSkeletonPage, IScrollObserverParam } from '@univerjs/engine-render';
 import type { LocaleKey } from '../../locale/types';
-import { DocumentFlavor, fromEventSubject, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import {
+    DisposableCollection,
+    DocumentFlavor,
+    fromEventSubject,
+    IUniverInstanceService,
+    LocaleService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { Popup } from '@univerjs/design';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { Documents, IRenderManagerService, PageLayoutType } from '@univerjs/engine-render';
@@ -187,8 +194,25 @@ export function DocPageStatus() {
             }, DRAG_TOOLTIP_HIDE_DELAY);
         };
 
+        const subscriptions = new DisposableCollection();
+        const cleanup = () => {
+            subscriptions.dispose();
+            if (scrollSettleTimerRef.current != null) {
+                clearTimeout(scrollSettleTimerRef.current);
+                scrollSettleTimerRef.current = null;
+            }
+            if (tooltipHideTimerRef.current != null) {
+                clearTimeout(tooltipHideTimerRef.current);
+                tooltipHideTimerRef.current = null;
+            }
+        };
+        // Render disposal is synchronous; React effect cleanup can run after layout publications.
+        subscriptions.add(fromEventSubject(docsComponent.onDispose$).subscribe(() => {
+            cleanup();
+            setState(EMPTY_DOC_PAGE_STATUS);
+        }));
         scheduleFooterUpdate();
-        const scrollSubscription = fromEventSubject(viewport.onScrollAfter$).subscribe((param) => {
+        subscriptions.add(fromEventSubject(viewport.onScrollAfter$).subscribe((param) => {
             if (param.isBarDragging || param.isBarDragEnd) {
                 if (tooltipHideTimerRef.current != null) {
                     clearTimeout(tooltipHideTimerRef.current);
@@ -202,23 +226,11 @@ export function DocPageStatus() {
                 return;
             }
             scheduleFooterUpdate();
-        });
-        const progressSubscription = skeleton.layoutProgress$.subscribe(updateFooter);
-        const materializedSubscription = skeleton.layoutPageMaterialized$.subscribe(updateFooter);
+        }));
+        subscriptions.add(skeleton.layoutProgress$.subscribe(updateFooter));
+        subscriptions.add(skeleton.layoutPageMaterialized$.subscribe(updateFooter));
 
-        return () => {
-            scrollSubscription.unsubscribe();
-            progressSubscription.unsubscribe();
-            materializedSubscription.unsubscribe();
-            if (scrollSettleTimerRef.current != null) {
-                clearTimeout(scrollSettleTimerRef.current);
-                scrollSettleTimerRef.current = null;
-            }
-            if (tooltipHideTimerRef.current != null) {
-                clearTimeout(tooltipHideTimerRef.current);
-                tooltipHideTimerRef.current = null;
-            }
-        };
+        return cleanup;
     }, [canShowPageStatus, renderer, skeleton]);
 
     if (!canShowPageStatus) {

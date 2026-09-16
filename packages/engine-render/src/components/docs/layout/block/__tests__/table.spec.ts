@@ -296,6 +296,24 @@ describe('docs table layout', () => {
         );
     });
 
+    it.each([false, true])('retains omitted grid columns on both sides of a row (sliced: %s)', (sliced) => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        tableSource.tableColumns = [15, 60, 60, 25].map((width) => ({ size: { type: TableSizeType.SPECIFIED, width: { v: width } } }));
+        tableSource.tableRows[0].gridBefore = 1;
+        tableSource.tableRows[0].gridAfter = 1;
+        tableSource.tableRows[1].gridBefore = 0;
+        tableSource.tableRows[1].gridAfter = 0;
+        const source = JSON.stringify(tableSource);
+        const tables = sliced
+            ? createTableSkeletons(ctx, curPage, viewModel, tableNode, sectionBreakConfig, 90).skeTables
+            : [createTableSkeleton(ctx, curPage, viewModel, tableNode, sectionBreakConfig)!];
+        expect(tables[0].rows[0].cells.map((cell) => cell.left)).toEqual([15, 75]);
+        expect(tables[0].width).toBe(160);
+        const secondRow = tables.flatMap((table) => table.rows).find((row) => row.index === 1)!;
+        expect(secondRow.cells[0].left).toBe(0);
+        expect(JSON.stringify(tableSource)).toBe(source);
+    });
+
     it('creates table skeleton and applies row/cell alignment data', () => {
         const { ctx, curPage, viewModel, tableNode, sectionBreakConfig } = createContextAndTable();
 
@@ -560,8 +578,16 @@ describe('docs table layout', () => {
         );
     });
 
-    it('counts a vertically merged cell height once across its spanned rows', () => {
+    it.each([
+        { flavor: DocumentFlavor.MODERN, fixedLastRow: false, heights: [22, 80] },
+        { flavor: DocumentFlavor.TRADITIONAL, fixedLastRow: false, heights: [22, 80] },
+        { flavor: DocumentFlavor.TRADITIONAL, fixedLastRow: true, heights: [74, 28] },
+    ])('expands the last flexible row of a vertical merge ($flavor, fixed last: $fixedLastRow)', ({ flavor, fixedLastRow, heights }) => {
         const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        useDocumentFlavor(sectionBreakConfig, flavor);
+        if (fixedLastRow) {
+            tableSource.tableRows[1].trHeight.hRule = TableRowHeightRule.EXACT;
+        }
         tableSource.tableRows[0].tableCells = [
             { rowSpan: 2, vAlign: VerticalAlignmentType.TOP },
             { vAlign: VerticalAlignmentType.TOP },
@@ -585,7 +611,7 @@ describe('docs table layout', () => {
         const skeleton = createTableSkeleton(ctx, curPage, viewModel, tableNode, sectionBreakConfig);
 
         expect(skeleton?.height).toBe(102);
-        expect(skeleton?.rows.map((row) => row.height)).toEqual([22, 80]);
+        expect(skeleton?.rows.map((row) => row.height)).toEqual(heights);
         expect(skeleton?.rows[0].cells[0].pageHeight).toBe(102);
     });
 

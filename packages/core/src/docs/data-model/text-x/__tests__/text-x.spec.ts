@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody } from '../../../../types/interfaces/i-document-data';
+import type { IDocumentBody, IDocumentData } from '../../../../types/interfaces/i-document-data';
+import type { IInsertAction, IRetainAction } from '../action-types';
 import { describe, expect, it } from 'vitest';
 import { UpdateDocsAttributeType } from '../../../../shared/command-enum';
+import { Tools } from '../../../../shared/tools';
 import { BooleanNumber } from '../../../../types/enum/text-style';
 import {
     CustomDecorationType,
     CustomRangeType,
     DocumentBlockRangeType,
 } from '../../../../types/interfaces/i-document-data';
+import { JSONX } from '../../json-x/json-x';
 import { DataStreamTreeTokenType } from '../../types';
 import { TextXActionType } from '../action-types';
 import { BuildTextUtils } from '../build-utils';
@@ -30,6 +33,185 @@ import { TextX } from '../text-x';
 import { composeBody } from '../utils';
 
 describe('test TextX methods and branches', () => {
+    it('keeps scalar identity distinct from adjacent typing, different controls and document snapshots', () => {
+        const value = { t: TextXActionType.INSERT, len: 1, body: { dataStream: 'A' }, valueRangeId: 'first' } as IInsertAction;
+        const edit = new TextX().insert(1, { dataStream: 'X' }).push(value).delete(1).serialize();
+        const peer = new TextX().push({ ...value, body: { dataStream: 'B' } }).delete(1).serialize();
+        const original = { dataStream: 'Old\r\n' };
+        for (const priority of ['left', 'right'] as const) {
+            const left = TextX.apply(TextX.apply(Tools.deepClone(original), edit), TextX.transform(peer, edit, priority === 'left' ? 'right' : 'left'));
+            const right = TextX.apply(TextX.apply(Tools.deepClone(original), peer), TextX.transform(edit, peer, priority));
+            expect(left).toEqual(right);
+            expect(left.dataStream.replace('X', '')).toBe(`${priority === 'left' ? 'A' : 'B'}ld\r\n`);
+            expect(left.dataStream).toContain('X');
+            expect(JSON.stringify(left)).not.toContain('valueRangeId');
+        }
+        const independent = new TextX().push({ ...value, valueRangeId: 'second', body: { dataStream: 'C' } }).serialize();
+        const left = TextX.apply(TextX.apply(Tools.deepClone(original), [value]), TextX.transform(independent, [value], 'right'));
+        const right = TextX.apply(TextX.apply(Tools.deepClone(original), independent), TextX.transform([value], independent, 'left'));
+        expect(left).toEqual(right);
+        expect(left.dataStream).toBe('ACOld\r\n');
+        TextX.makeInvertible(edit, original);
+        const applied = TextX.apply(Tools.deepClone(original), edit);
+        TextX.apply(applied, TextX.invert(edit));
+        expect(applied.dataStream).toBe(original.dataStream);
+    });
+
+    it('rejects malformed scalar identities before any text is applied', () => {
+        for (const valueRangeId of ['', null, 1, [], {}]) {
+            const original = { dataStream: 'Old\r\n' };
+            const actions = new TextX().insert(1, { dataStream: 'X' }).push({
+                t: TextXActionType.INSERT,
+                len: 1,
+                body: { dataStream: 'A' },
+                valueRangeId,
+            } as IInsertAction).serialize();
+            expect(() => TextX.apply(original, actions)).toThrow('Invalid scalar value range identity');
+            expect(original.dataStream).toBe('Old\r\n');
+        }
+    });
+
+    it('composes property edits with positional metadata and preserves independent concurrent metadata', () => {
+        const range = { startIndex: 0, endIndex: 4, rangeId: 'sdt', rangeType: CustomRangeType.SDT, properties: { kind: 'text', alias: 'Old', tag: 'Old tag' } };
+        const original: IDocumentBody = { dataStream: 'Value\r\n', customRanges: [range] };
+        const edit = new TextX().updateCustomRangeProperties(range, { ...range.properties, alias: 'New' }).serialize();
+        const legacy = new TextX().retain(5, { dataStream: '', customRanges: [{ ...range, properties: { ...range.properties, tag: 'Peer tag' } }] }).serialize();
+        const left = Tools.deepClone(original);
+        const right = Tools.deepClone(original);
+        TextX.apply(left, edit);
+        TextX.apply(left, TextX.transform(legacy, edit, 'right'));
+        TextX.apply(right, legacy);
+        TextX.apply(right, TextX.transform(edit, legacy, 'left'));
+        expect(left).toEqual(right);
+        expect(left.customRanges![0].properties).toMatchObject({ alias: 'New', tag: 'Peer tag' });
+        const composed = Tools.deepClone(original);
+        const sequential = Tools.deepClone(original);
+        TextX.apply(composed, TextX.compose(edit, legacy));
+        TextX.apply(sequential, edit);
+        TextX.apply(sequential, legacy);
+        expect(composed).toEqual(sequential);
+    });
+
+    it('roundtrips new nested property edits without leaving empty objects or reverting peers', () => {
+        const range = { startIndex: 0, endIndex: 4, rangeId: 'sdt', rangeType: CustomRangeType.SDT, properties: { kind: 'date' } };
+        const original: IDocumentBody = { dataStream: 'Value\r\n', customRanges: [range] };
+        const first = new TextX().updateCustomRangeProperties(range, { ...range.properties, date: { format: 'yyyy' } }).serialize();
+        TextX.makeInvertible(first, original);
+        const body = Tools.deepClone(original);
+        TextX.apply(body, first);
+        TextX.apply(body, TextX.invert(first));
+        expect(body).toEqual(original);
+        const peer = new TextX().updateCustomRangeProperties(range, { ...range.properties, date: { locale: 'zh-CN' } }).serialize();
+        TextX.apply(body, TextX.compose(first, peer));
+        TextX.apply(body, TextX.transform(TextX.invert(first), peer, 'left'));
+        expect(body.customRanges![0].properties).toEqual({ kind: 'date', date: { locale: 'zh-CN' } });
+    });
+
+    it.each(['left', 'right'] as const)('converges on nested property removal versus child edits (%s)', (priority) => {
+        const range = { startIndex: 0, endIndex: 4, rangeId: 'sdt', rangeType: CustomRangeType.SDT, properties: { kind: 'date', date: { format: 'yyyy', locale: 'en-US' } } };
+        const original: IDocumentBody = { dataStream: 'Value\r\n', customRanges: [range] };
+        const remove = new TextX().updateCustomRangeProperties(range, { kind: 'date' }).serialize();
+        const edit = new TextX().updateCustomRangeProperties(range, { ...range.properties, date: { format: 'dd', locale: 'en-US' } }).serialize();
+        const left = Tools.deepClone(original);
+        const right = Tools.deepClone(original);
+        TextX.apply(left, remove);
+        TextX.apply(left, TextX.transform(edit, remove, priority === 'left' ? 'right' : 'left'));
+        TextX.apply(right, edit);
+        TextX.apply(right, TextX.transform(remove, edit, priority));
+        expect(left).toEqual(right);
+        expect(left.customRanges![0].properties).toEqual(priority === 'left' ? { kind: 'date' } : { kind: 'date', date: { format: 'dd', locale: 'en-US' } });
+    });
+
+    it('rejects malformed identity metadata before applying any text edits', () => {
+        const range = { startIndex: 0, endIndex: 4, rangeId: 'sdt', rangeType: CustomRangeType.SDT };
+        const original: IDocumentBody = { dataStream: 'Value\r\n', customRanges: [range] };
+        const invalidUpdates: unknown[] = [
+            ...[{ startIndex: -1 }, { endIndex: 20 }, { rangeId: 'other' }]
+                .map((patch) => ({ rangeId: 'sdt', range: { ...range, ...patch } })),
+            { rangeId: 'sdt' },
+            ...[false, 0, '', []].map((value) => ({ rangeId: 'sdt', range: value })),
+            { rangeId: 'sdt', range, nextRangeId: 0 },
+            ...[null, 'alias', [[]], [['__proto__', 'polluted']], [['alias', 1]]]
+                .map((propertyPaths) => ({ rangeId: 'sdt', range, propertyPaths })),
+        ];
+        for (const update of invalidUpdates) {
+            const body = Tools.deepClone(original);
+            const actions = new TextX().insert(1, { dataStream: 'X' }).updateCustomRanges([
+                update as NonNullable<IRetainAction['rangeUpdates']>[number],
+            ]).serialize();
+            expect(() => TextX.apply(body, actions)).toThrow('Invalid custom range');
+            expect(body).toEqual(original);
+        }
+    });
+    it.each(['', 'Value'])('roundtrips identity removal and history through JSONX for %j', (value) => {
+        const original = {
+            id: 'doc',
+            documentStyle: {},
+            body: {
+                dataStream: `\x1F${value}\x1EAfter\r\n`,
+                customRanges: [{ startIndex: 0, endIndex: value.length + 1, rangeId: 'sdt', rangeType: CustomRangeType.SDT, properties: { kind: 'text', placement: 'inline' } }],
+            },
+        } as IDocumentData;
+        const edit = new TextX().delete(1).retain(value.length).delete(1).updateCustomRanges([{ rangeId: 'sdt', range: null }]).serialize();
+        const op = JSONX.getInstance().editOp(edit);
+        const undo = JSONX.invertWithDoc(op, Tools.deepClone(original));
+        const removed = JSONX.apply(Tools.deepClone(original), JSON.parse(JSON.stringify(op))) as unknown as IDocumentData;
+        expect(removed.body!.dataStream).toBe(`${value}After\r\n`);
+        expect(removed.body!.customRanges).toEqual([]);
+        const restored = JSONX.apply(Tools.deepClone(removed), JSON.parse(JSON.stringify(undo))) as unknown as IDocumentData;
+        expect(restored.body!.dataStream).toBe(original.body!.dataStream);
+        expect(restored.body!.customRanges).toEqual(original.body!.customRanges);
+        const combined = JSONX.apply(Tools.deepClone(original), JSONX.compose(op, undo)) as unknown as IDocumentData;
+        expect(combined.body!.dataStream).toBe(original.body!.dataStream);
+        expect(combined.body!.customRanges).toEqual(original.body!.customRanges);
+
+        const peer = new TextX().retain(1).insert(1, { dataStream: 'X' }).serialize();
+        const peerAfterRemove = TextX.transform(peer, edit, 'right');
+        const afterBoth = Tools.deepClone(removed.body!);
+        TextX.apply(afterBoth, peerAfterRemove);
+        const inverse = (undo![1] as { e: ReturnType<TextX['serialize']> }).e;
+        TextX.apply(afterBoth, TextX.transform(inverse, peerAfterRemove, 'left'));
+        expect(afterBoth.dataStream).toBe(`\x1FX${value}\x1EAfter\r\n`);
+        expect(afterBoth.customRanges).toEqual([{ ...original.body!.customRanges![0], endIndex: value.length + 2 }]);
+    });
+
+    it('composes identity edits with later typing and resolves concurrent identity conflicts', () => {
+        const range = { startIndex: 0, endIndex: 4, rangeId: 'sdt', rangeType: CustomRangeType.SDT, properties: { kind: 'text', alias: 'Old' } };
+        const original: IDocumentBody = { dataStream: 'Value\r\n', customRanges: [range] };
+        const first = new TextX().updateCustomRanges([{ rangeId: 'sdt', range: { ...range, properties: { ...range.properties, alias: 'First' } } }]).serialize();
+        const second = new TextX().updateCustomRanges([{ rangeId: 'sdt', range: { ...range, properties: { ...range.properties, alias: 'Second' } } }]).serialize();
+        const removal = new TextX().updateCustomRanges([{ rangeId: 'sdt', range: null }]).serialize();
+        const insert = new TextX().retain(2).insert(1, { dataStream: 'X' }).serialize();
+        const legacy = new TextX().retain(5, { dataStream: '', customRanges: [{ ...range, properties: { kind: 'text', alias: 'Legacy' } }] }).serialize();
+        for (const next of [second, removal, insert, legacy]) {
+            const composed = Tools.deepClone(original);
+            TextX.apply(composed, TextX.compose(first, next));
+            const sequential = Tools.deepClone(original);
+            TextX.apply(sequential, first);
+            TextX.apply(sequential, next);
+            expect(composed.dataStream).toBe(sequential.dataStream);
+            expect(composed.customRanges).toEqual(sequential.customRanges);
+            for (const priority of ['left', 'right'] as const) {
+                const left = Tools.deepClone(original);
+                const right = Tools.deepClone(original);
+                TextX.apply(left, first);
+                TextX.apply(left, TextX.transform(next, first, priority === 'left' ? 'right' : 'left'));
+                TextX.apply(right, next);
+                TextX.apply(right, TextX.transform(first, next, priority));
+                expect(left.dataStream).toBe(right.dataStream);
+                expect(left.customRanges).toEqual(right.customRanges);
+            }
+        }
+        const reinsert = new TextX().insert(1, { dataStream: 'X', customRanges: [{ ...range, startIndex: 0, endIndex: 0 }] }).serialize();
+        const sequential = Tools.deepClone(original);
+        TextX.apply(sequential, removal);
+        TextX.apply(sequential, reinsert);
+        const composed = Tools.deepClone(original);
+        TextX.apply(composed, TextX.compose(removal, reinsert));
+        expect(composed.dataStream).toBe(sequential.dataStream);
+        expect(composed.customRanges).toEqual(sequential.customRanges);
+    });
+
     it('joins inserted SDT content with its surviving paragraph anchor', () => {
         const anchor = {
             startIndex: 1,

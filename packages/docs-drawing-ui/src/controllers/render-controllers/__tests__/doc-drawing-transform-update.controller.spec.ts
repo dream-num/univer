@@ -969,6 +969,15 @@ describe('DocDrawingTransformUpdateController', () => {
         })).toBe(bodyPage);
     });
 
+    it('keeps a table-cell drawing in the translated cell coordinate space', () => {
+        const cell = { type: DocumentSkeletonPageType.CELL, pageWidth: 200, pageHeight: 40 };
+        expect(getDocsPageRelativeDrawingAnchorPage({
+            page: cell,
+            clipPage: cell,
+            drawingLayoutType: PositionedObjectLayoutType.WRAP_NONE,
+        })).toBeUndefined();
+    });
+
     it('renders header and footer drawings in the host page behind-text layer', () => {
         expect(getDocsDrawingBehindText({
             drawingOrigin: {

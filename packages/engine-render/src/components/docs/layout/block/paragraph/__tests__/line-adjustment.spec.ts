@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, characterSpacingControlType, DataStreamTreeTokenType, DocumentFlavor, HorizontalAlign, SpacingRule, WrapStrategy } from '@univerjs/core';
+import {
+    BooleanNumber,
+    characterSpacingControlType,
+    DataStreamTreeTokenType,
+    DocumentFlavor,
+    HorizontalAlign,
+    SpacingRule,
+    WrapStrategy,
+} from '@univerjs/core';
 import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { getFontStyleString } from '../../../../../../basics/tools';
 import { getDocumentCompatibilityPolicy } from '../../../../document-compatibility';

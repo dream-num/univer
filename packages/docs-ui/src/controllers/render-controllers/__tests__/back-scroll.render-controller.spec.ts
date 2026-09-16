@@ -132,13 +132,17 @@ beforeEach(() => {
     const context = new Proxy({
         font: '',
         webkitBackingStorePixelRatio: 1,
-        measureText: (text: string) => ({
-            width: text.length * 8,
-            actualBoundingBoxAscent: 8,
-            actualBoundingBoxDescent: 2,
-            fontBoundingBoxAscent: 8,
-            fontBoundingBoxDescent: 2,
-        }),
+        measureText(text: string) {
+            const font = /([\d.]+)(px|pt)/.exec(this.font);
+            const fontSize = Number(font?.[1] ?? 10) * (font?.[2] === 'pt' ? 4 / 3 : 1);
+            return {
+                width: text.length * fontSize * 0.6,
+                actualBoundingBoxAscent: fontSize * 0.8,
+                actualBoundingBoxDescent: fontSize * 0.2,
+                fontBoundingBoxAscent: fontSize * 0.8,
+                fontBoundingBoxDescent: fontSize * 0.2,
+            };
+        },
     }, { get: (target, key) => key in target ? Reflect.get(target, key) : () => {} });
     vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(context as never);
 });

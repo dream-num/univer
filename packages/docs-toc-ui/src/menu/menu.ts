@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ICustomRange } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
-import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
+import { BooleanNumber, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService, DocStateChangeManagerService } from '@univerjs/docs';
 import { DeleteTableOfContentsCommand, findTableOfContentsAtOffset } from '@univerjs/docs-toc';
 import { disableMenuWithoutDocumentUnitPermission } from '@univerjs/docs-ui';
 import { UnitAction } from '@univerjs/protocol';
@@ -31,21 +31,23 @@ import {
 
 export const INSERT_TABLE_OF_CONTENTS_MENU_ID = 'doc.menu.insert-table-of-contents';
 
-function getTableOfContentsHiddenObservable(accessor: IAccessor): Observable<boolean> {
+function getActiveTableOfContentsObservable(accessor: IAccessor): Observable<ICustomRange | undefined> {
     const selectionManager = accessor.get(DocSelectionManagerService);
     const instanceService = accessor.get(IUniverInstanceService);
     return new Observable((subscriber) => {
         const emit = () => {
             const doc = instanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
             const selection = selectionManager.getActiveTextRange();
-            subscriber.next(!findTableOfContentsAtOffset(doc?.getBody(), selection?.startOffset));
+            subscriber.next(selection?.segmentId ? undefined : findTableOfContentsAtOffset(doc?.getBody(), selection?.startOffset));
         };
         emit();
         const selectionSubscription = selectionManager.textSelection$.subscribe(emit);
         const unitSubscription = instanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC).subscribe(emit);
+        const documentSubscription = accessor.get(DocStateChangeManagerService).docStateChange$.subscribe(emit);
         return () => {
             selectionSubscription.unsubscribe();
             unitSubscription.unsubscribe();
+            documentSubscription.unsubscribe();
         };
     });
 }
@@ -104,11 +106,14 @@ export function UpdateTableOfContentsMenuFactory(accessor: IAccessor): IMenuButt
         type: MenuItemType.BUTTON,
         icon: 'UnorderIcon',
         title: 'docs-toc-ui.tableOfContents.updateTitle',
-        disabled$: disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit),
+        disabled$: combineLatest([
+            disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit),
+            getActiveTableOfContentsObservable(accessor),
+        ]).pipe(map(([permissionDisabled, toc]) => permissionDisabled || !toc || toc.properties?.locked === BooleanNumber.TRUE)),
         hidden$: combineLatest([
             getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-            getTableOfContentsHiddenObservable(accessor),
-        ]).pipe(map(([hidden, unavailable]) => hidden || unavailable)),
+            getActiveTableOfContentsObservable(accessor),
+        ]).pipe(map(([hidden, toc]) => hidden || !toc)),
     };
 }
 
@@ -122,7 +127,7 @@ export function DeleteTableOfContentsMenuFactory(accessor: IAccessor): IMenuButt
         disabled$: disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit),
         hidden$: combineLatest([
             getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-            getTableOfContentsHiddenObservable(accessor),
-        ]).pipe(map(([hidden, unavailable]) => hidden || unavailable)),
+            getActiveTableOfContentsObservable(accessor),
+        ]).pipe(map(([hidden, toc]) => hidden || !toc)),
     };
 }

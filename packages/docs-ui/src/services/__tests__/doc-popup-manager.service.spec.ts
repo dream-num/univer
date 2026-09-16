@@ -156,6 +156,26 @@ describe('popup anchors with real document layout', () => {
             render.mainComponent = documents;
             render.scene.addObject(documents);
             const bounds = calcDocRangePositions({ startOffset: 1, endOffset: 1 + length, collapsed: length === 0 }, render)!;
+            injector.add([ICanvasPopupService, { useClass: CanvasPopupService }]);
+            injector.add([DocCanvasPopManagerService]);
+            const pendingRange = { startOffset: 1000, endOffset: 1001, collapsed: false };
+            const pendingPopup = injector.get(DocCanvasPopManagerService).attachPopupToRange(pendingRange, {
+                componentKey: 'pending-selection-toolbar',
+                rangeAnchor: 'selection-end',
+                requiresStableLayout: false,
+            }, model.getUnitId());
+            const popupService = injector.get(ICanvasPopupService);
+            expect(popupService.popups).toHaveLength(0);
+            pendingRange.startOffset = 1;
+            pendingRange.endOffset = 2;
+            skeleton.calculate();
+            expect(popupService.popups).toHaveLength(1);
+            expect(popupService.popups[0][1].anchorRect).toEqual(expect.objectContaining({ right: expect.any(Number) }));
+            pendingRange.startOffset = 1000;
+            pendingRange.endOffset = 1001;
+            skeleton.calculate();
+            expect(popupService.popups).toHaveLength(0);
+            pendingPopup.dispose();
             const lastGlyph = skeleton.findNodeByCharIndex(Math.max(1, length))!;
             const lastGlyphBounds = calcDocGlyphPosition(lastGlyph, documents, skeleton)!;
             expect(bounds).toHaveLength(1);

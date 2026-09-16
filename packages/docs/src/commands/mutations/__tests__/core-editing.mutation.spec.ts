@@ -79,6 +79,34 @@ describe('transformDocumentTextRanges', () => {
 });
 
 describe('RichTextEditingMutation selection scheduling', () => {
+    it('rejects a locked keystroke without normalizing or modifying the imported snapshot', () => {
+        const snapshot = createDocumentData('locked-input', {
+            dataStream: 'ABCD\r\n',
+            paragraphs: [{ paragraphId: 'p', startIndex: 4 }],
+            sectionBreaks: [{ sectionId: 's', startIndex: 5 }],
+            textRuns: [
+                { st: 0, ed: 2, ts: { ff: 'Arial' } },
+                { st: 2, ed: 4, ts: { ff: 'Arial' } },
+            ],
+            customRanges: [{ rangeId: 'locked', rangeType: CustomRangeType.SDT, startIndex: 0, endIndex: 3, properties: { kind: 'text', placement: 'inline', lock: 'contentLocked' } }],
+        });
+        const bed = createTestBed(snapshot);
+        try {
+            const before = structuredClone(bed.doc.getSnapshot());
+            const params = {
+                unitId: snapshot.id,
+                textRanges: null,
+                actions: JSONX.getInstance().editOp(new TextX().retain(1).insert(1, { dataStream: 'X' }).serialize(), ['body']),
+            };
+            expect(bed.get(ICommandService).syncExecuteCommand(RichTextEditingMutation.id, params))
+                .toEqual({ unitId: snapshot.id, actions: [], textRanges: [] });
+            expect(params.actions).toEqual([]);
+            expect(bed.doc.getSnapshot()).toEqual(before);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
     it('rejects a remote footnote whose segment identity belongs to a header', () => {
         const snapshot = createDocumentData('note-collision', {
             dataStream: 'Body\r\n',

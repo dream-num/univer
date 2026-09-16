@@ -17,8 +17,11 @@
 import type { DocumentDataModel, IAccessor, ICommand, ICustomRange, IDocumentBody, IParagraph, ITextRange, ITextRun } from '@univerjs/core';
 import type { DocumentSkeleton } from '@univerjs/engine-render';
 import {
+    BooleanNumber,
     BuildTextUtils,
+    cloneParagraphWithId,
     CommandType,
+    createParagraphId,
     CustomRangeType,
     generateRandomId,
     getBodySlice,
@@ -129,9 +132,12 @@ async function updateTableOfContents(
         ? body?.customRanges?.find((range) => range.rangeId === params.rangeId && isTableOfContentsRange(range))
         : findTableOfContentsAtOffset(body, selection?.startOffset);
     const unitId = doc?.getUnitId();
-    const render = unitId ? accessor.get(IRenderManagerService).getRenderUnitById(unitId) : undefined;
+    if (!doc || !body || !toc || toc.properties?.locked === BooleanNumber.TRUE || !unitId) {
+        return false;
+    }
+    const render = accessor.get(IRenderManagerService).getRenderUnitById(unitId);
     const renderInjector = render?.getInjector?.();
-    if (!doc || !body || !toc || !unitId || !render || !renderInjector?.has(DocSkeletonManagerService)) {
+    if (!render || !renderInjector?.has(DocSkeletonManagerService)) {
         return false;
     }
 
@@ -143,7 +149,7 @@ async function updateTableOfContents(
     for (let iteration = 0; iteration < 3; iteration += 1) {
         const currentBody = doc.getBody();
         const currentToc = currentBody?.customRanges?.find((range) => range.rangeId === toc.rangeId && isTableOfContentsRange(range));
-        if (!currentBody || !currentToc) {
+        if (!currentBody || !currentToc || currentToc.properties?.locked === BooleanNumber.TRUE) {
             return false;
         }
         const resolvePageNumber = (offset: number) => {
@@ -155,6 +161,14 @@ async function updateTableOfContents(
             : buildTableOfContentsBody(currentBody, currentToc, resolvePageNumber);
         if (!replacement) {
             return false;
+        }
+        // An accurate page-only update must not create history or restart pagination.
+        // Compare metadata too: identical visible text can still have stale field caches.
+        if (params?.mode === 'pageNumbersOnly' && Tools.diffValue(
+            getBodySlice(currentBody, currentToc.startIndex, currentToc.endIndex + 1, true, SliceBodyType.cut),
+            replacement
+        )) {
+            return true;
         }
         if (updated && currentBody.dataStream.slice(currentToc.startIndex, currentToc.endIndex + 1) === replacement.dataStream) {
             return true;
@@ -338,9 +352,15 @@ export function buildPageNumberOnlyTableOfContentsBody(
     toc: ICustomRange,
     resolvePageNumber: (offset: number) => number | undefined
 ): IDocumentBody | null {
-    const result = getBodySlice(body, toc.startIndex, toc.endIndex + 1, true, SliceBodyType.cut);
+    if (toc.properties?.locked === BooleanNumber.TRUE) {
+        return null;
+    }
+    // Slice metadata may share nested range properties with the source. Build the
+    // replacement in isolation so history captures the unmodified field caches.
+    const result = Tools.deepClone(getBodySlice(body, toc.startIndex, toc.endIndex + 1, true, SliceBodyType.cut));
     const pageFields = result.customRanges
-        ?.filter((range) => range.rangeType === CustomRangeType.FIELD && range.properties?.fieldType === 'PAGEREF')
+        ?.filter((range) => range.rangeType === CustomRangeType.FIELD && range.properties?.fieldType === 'PAGEREF' &&
+            range.properties?.locked !== BooleanNumber.TRUE)
         .sort((left, right) => right.startIndex - left.startIndex) ?? [];
 
     for (const pageField of pageFields) {
@@ -354,7 +374,9 @@ export function buildPageNumberOnlyTableOfContentsBody(
     }
     const outer = result.customRanges?.find((range) => range.rangeId === toc.rangeId);
     if (outer?.properties) {
-        outer.properties.cachedResult = getPlainText(result.dataStream.slice(1, -1));
+        outer.properties.cachedResult = getPlainText(result.dataStream.slice(1, -1))
+            .replaceAll(FIELD_START, '')
+            .replaceAll(FIELD_END, '');
     }
     return result;
 }
@@ -380,6 +402,13 @@ function resolvePageReferenceOffset(body: IDocumentBody, pageField: ICustomRange
 function replaceFieldResult(body: IDocumentBody, field: ICustomRange, value: string): void {
     const start = field.startIndex + 1;
     const end = field.endIndex;
+    if (field.properties) {
+        field.properties.cachedResult = value;
+    }
+    // Unchanged text can still need a cache repair, but cannot shift any ranges.
+    if (body.dataStream.slice(start, end) === value) {
+        return;
+    }
     const delta = value.length - (end - start);
     body.dataStream = `${body.dataStream.slice(0, start)}${value}${body.dataStream.slice(end)}`;
     shiftRuns(body.textRuns, start, end, delta);
@@ -394,9 +423,6 @@ function replaceFieldResult(body: IDocumentBody, field: ICustomRange, value: str
             range.endIndex += delta;
         } else if (range.endIndex >= end) {
             range.endIndex += delta;
-        }
-        if (range.rangeId === field.rangeId && range.properties) {
-            range.properties.cachedResult = value;
         }
     });
 }
@@ -419,6 +445,9 @@ export function buildTableOfContentsBody(
     idFactory: () => string = generateRandomId,
     options?: { tabStopOffset?: number }
 ): IDocumentBody | null {
+    if (toc.properties?.locked === BooleanNumber.TRUE) {
+        return null;
+    }
     const instruction = String(toc.properties?.instruction ?? '');
     if (/\\c\s+/i.test(instruction)) {
         return null;
@@ -443,16 +472,19 @@ export function buildTableOfContentsBody(
         : getExistingTableOfContentsTitle(body, oldParagraphs);
     const result: IDocumentBody = { dataStream: FIELD_START, paragraphs: [], customRanges: [] };
     const ranges = result.customRanges!;
+    const oldTitleParagraph = oldParagraphs.find((paragraph) => paragraph.styleId?.toLowerCase() === 'tocheading');
+    const oldEntryParagraphs = oldParagraphs.filter((paragraph) => paragraph !== oldTitleParagraph);
+    const usedParagraphIds = new Set<string>();
     let cachedResult = '';
 
     if (title) {
         result.dataStream += `${title}\r`;
         cachedResult += `${title}\r`;
-        result.paragraphs!.push({
+        result.paragraphs!.push(cloneParagraphWithId({
             startIndex: result.dataStream.length - 1,
-            paragraphId: idFactory(),
+            paragraphId: oldTitleParagraph?.paragraphId ?? '',
             styleId: 'TOCHeading',
-        });
+        }, usedParagraphIds));
     }
 
     for (const [index, heading] of headings.entries()) {
@@ -471,7 +503,10 @@ export function buildTableOfContentsBody(
             rangeId: idFactory(),
             rangeType: CustomRangeType.HYPERLINK,
             wholeEntity: false,
-            properties: heading.bookmarkId ? { bookmarkId: targetId } : { headingId: targetId },
+            properties: {
+                ...(heading.bookmarkId ? { bookmarkId: targetId } : { headingId: targetId }),
+                textStyleMode: 'text',
+            },
         };
         ranges.push(link);
         if (showPageNumbers) {
@@ -496,11 +531,11 @@ export function buildTableOfContentsBody(
         result.dataStream += '\r';
         cachedResult += `${visibleEntry}\r`;
         result.paragraphs!.push(copyTocParagraph(
-            oldParagraphs,
+            oldEntryParagraphs,
             index,
             heading.level,
             result.dataStream.length - 1,
-            idFactory,
+            usedParagraphIds,
             rightAlignPageNumbers ? options?.tabStopOffset : undefined,
             tabLeader,
             format
@@ -606,22 +641,25 @@ function copyTocParagraph(
     index: number,
     level: number,
     startIndex: number,
-    idFactory: () => string,
+    usedParagraphIds: Set<string>,
     tabStopOffset?: number,
     tabLeader: TableOfContentsTabLeader = 'dots',
     format: TableOfContentsFormat = 'fromTemplate'
 ): IParagraph {
     const byStyleLevel = oldParagraphs.find((paragraph) => paragraph.styleId?.match(/TOC(\d+)/i)?.[1] === String(level));
     const source = byStyleLevel ?? oldParagraphs[Math.min(index, oldParagraphs.length - 1)];
+    // A same-level paragraph is a formatting template, not the identity of every
+    // entry. Keep distinct existing row IDs and allocate only for additional rows.
     if (source) {
-        return {
-            ...Tools.deepClone(source),
+        return cloneParagraphWithId({
+            ...source,
             startIndex,
-        };
+            paragraphId: oldParagraphs[index]?.paragraphId ?? '',
+        }, usedParagraphIds);
     }
     return {
         startIndex,
-        paragraphId: idFactory(),
+        paragraphId: createParagraphId(usedParagraphIds),
         styleId: `TOC${level}`,
         paragraphStyle: {
             indentStart: { v: Math.max(0, level - 1) * getFormatIndent(format) },

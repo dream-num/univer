@@ -14,16 +14,24 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocStructureIssue, IDocumentBody, IDocumentData, JSONXActions, JSONXPath } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    ICustomRange,
+    IDocStructureIssue,
+    IDocumentBody,
+    IDocumentData,
+    ISdtCustomRange,
+    JSONXActions,
+    JSONXPath,
+} from '@univerjs/core';
 import {
     CustomRangeType,
     DataStreamTreeTokenType,
-
     getRichTextEditPath,
-
+    getSdtBindingKey,
+    getSdtBindingValue,
     JSON1,
     JSONX,
-
     TextX,
     TextXActionType,
     Tools,
@@ -243,47 +251,133 @@ function assertValidDocBodyStructure(documentDataModel: DocumentDataModel, segme
     throw new Error(`[DocStructure] ${segmentLabel}: ${detail}`);
 }
 
-function containsLockedSdt(value: unknown): boolean {
-    if (Array.isArray(value)) {
-        return value.some(containsLockedSdt);
+function getLockedSdtContent(body: IDocumentBody, range: ICustomRange): string {
+    if (range.properties?.kind !== 'group') {
+        return body.dataStream.slice(range.startIndex, range.endIndex + 1);
     }
-    if (!isRecord(value)) {
-        return false;
+    // A Word group protects text outside its child controls. Each child retains
+    // its own lock policy; keep its identity here so deleting it is not an edit.
+    const children = (body.customRanges ?? []).filter((child) =>
+        child.rangeType === CustomRangeType.SDT && child.rangeId !== range.rangeId &&
+        child.startIndex >= range.startIndex && child.endIndex <= range.endIndex
+    ).sort((left, right) => {
+        const position = left.startIndex - right.startIndex || right.endIndex - left.endIndex;
+        if (position || left.rangeId === right.rangeId) {
+            return position;
+        }
+        return left.rangeId < right.rangeId ? -1 : 1;
+    });
+    const protectedContent: string[] = [];
+    let offset = range.startIndex;
+    for (const child of children) {
+        if (child.startIndex < offset) {
+            continue;
+        }
+        protectedContent.push(body.dataStream.slice(offset, child.startIndex), child.rangeId);
+        offset = child.endIndex + 1;
     }
-    return (value.rangeType === CustomRangeType.SDT && isRecord(value.properties) &&
-        typeof value.properties.lock === 'string' && value.properties.lock !== 'unlocked') ||
-        Object.values(value).some(containsLockedSdt);
+    protectedContent.push(body.dataStream.slice(offset, range.endIndex + 1));
+    return JSON.stringify(protectedContent);
 }
 
-function assertSdtLocks(documentDataModel: DocumentDataModel, segmentId: string, undoActions: JSONXActions): void {
-    const currentBody = documentDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
-    if (!currentBody) return;
-    const snapshot = Tools.deepClone(documentDataModel.getSnapshot());
-    const restoredSnapshot = JSONX.apply(snapshot, undoActions) as unknown as IDocumentData;
-    const previousBody = getSnapshotBody(restoredSnapshot, segmentId);
-    if (!previousBody) return;
+function getRepeatingItemIds(body: IDocumentBody, section: ICustomRange): string[] {
+    const ranges = body.customRanges ?? [];
+    const sectionIndex = ranges.indexOf(section);
+    const nestedSections = ranges.filter((range, index) => range.rangeType === CustomRangeType.SDT &&
+        range.properties?.kind === 'repeatingSection' && range.rangeId !== section.rangeId &&
+        range.startIndex >= section.startIndex && range.endIndex <= section.endIndex &&
+        (range.startIndex > section.startIndex || range.endIndex < section.endIndex || index < sectionIndex));
+    return ranges.filter((range, index) => range.rangeType === CustomRangeType.SDT &&
+        range.properties?.kind === 'repeatingSectionItem' &&
+        range.startIndex >= section.startIndex && range.endIndex <= section.endIndex &&
+        !nestedSections.some((nested) => nested.startIndex <= range.startIndex && range.endIndex <= nested.endIndex &&
+            (nested.startIndex < range.startIndex || range.endIndex < nested.endIndex || index < ranges.indexOf(nested))))
+        .map((range) => range.rangeId)
+        .sort();
+}
 
-    for (const previous of previousBody.customRanges ?? []) {
-        if (previous.rangeType !== CustomRangeType.SDT) continue;
+export function isDocSdtMutationAllowed(documentDataModel: DocumentDataModel, segmentId: string, actions: JSONXActions): boolean {
+    if (!containsTextXEdit(actions) && isStructurePreservingJSONXEdit(actions, getRichTextEditPath(documentDataModel, segmentId))) {
+        return true;
+    }
+    const snapshot = documentDataModel.getSnapshot();
+    const previousBody = getSnapshotBody(snapshot, segmentId);
+    const lockedRanges = previousBody?.customRanges?.filter((range) =>
+        range.rangeType === CustomRangeType.SDT && (
+            (range.properties?.lock && range.properties.lock !== 'unlocked') ||
+            (range.properties?.kind === 'repeatingSection' && range.properties.repeatingSection?.doNotAllowInsertDelete)
+        )
+    );
+    if (!previousBody || !lockedRanges?.length) {
+        return true;
+    }
+    // Preview before applying: an inverse TextX edit can merge imported runs,
+    // so rolling back a rejected keystroke is not an exact no-op.
+    const candidate = JSONX.apply(Tools.deepClone(snapshot), actions) as unknown as IDocumentData;
+    const currentBody = getSnapshotBody(candidate, segmentId);
+
+    for (const previous of lockedRanges) {
         const lock = previous.properties?.lock;
-        if (!lock || lock === 'unlocked') continue;
-        const current = currentBody.customRanges?.find((range) => range.rangeId === previous.rangeId && range.rangeType === CustomRangeType.SDT);
+        const current = currentBody?.customRanges?.find((range) => range.rangeId === previous.rangeId && range.rangeType === CustomRangeType.SDT);
         const wrapperLocked = lock === 'sdtLocked' || lock === 'sdtContentLocked';
         const contentLocked = lock === 'contentLocked' || lock === 'sdtContentLocked';
         if (wrapperLocked && !current) {
-            throw new Error(`[DocSDT] ${previous.rangeId}: wrapper is locked`);
+            return false;
+        }
+        if (previous.properties?.kind === 'repeatingSection' && previous.properties.repeatingSection?.doNotAllowInsertDelete &&
+            current && currentBody) {
+            const before = getRepeatingItemIds(previousBody, previous);
+            const after = getRepeatingItemIds(currentBody, current);
+            if (before.length !== after.length || before.some((id, index) => id !== after[index])) {
+                return false;
+            }
         }
         // Word allows deleting a contentLocked control as a whole, but not changing its contents.
-        if (contentLocked && current) {
-            const before = previousBody.dataStream.slice(previous.startIndex, previous.endIndex + 1);
-            const after = currentBody.dataStream.slice(current.startIndex, current.endIndex + 1);
+        if (contentLocked && current && currentBody) {
+            const before = getLockedSdtContent(previousBody, previous);
+            const after = getLockedSdtContent(currentBody, current);
             // Content locking protects the value, not the control's developer properties.
             // Word still lets the author change or clear the lock from Content Control Properties.
-            if (before !== after) {
-                throw new Error(`[DocSDT] ${previous.rangeId}: content is locked`);
+            if (before !== after && !isBoundSdtValueUpdate(snapshot, candidate, previous as ISdtCustomRange, current as ISdtCustomRange, currentBody)) {
+                return false;
             }
         }
     }
+    return true;
+}
+
+function isBoundSdtValueUpdate(
+    before: IDocumentData,
+    after: IDocumentData,
+    previous: ISdtCustomRange,
+    current: ISdtCustomRange,
+    currentBody: IDocumentBody
+): boolean {
+    const key = getSdtBindingKey(previous);
+    const value = getSdtBindingValue(currentBody, current);
+    if (!key || key !== getSdtBindingKey(current) || value === undefined) {
+        return false;
+    }
+    const segments = ['', ...Object.keys(before.headers ?? {}), ...Object.keys(before.footers ?? {}), ...Object.keys(before.notes ?? {})];
+    return segments.some((segmentId) => {
+        const previousBody = getSnapshotBody(before, segmentId);
+        const nextBody = getSnapshotBody(after, segmentId);
+        if (!previousBody || !nextBody) {
+            return false;
+        }
+        return previousBody.customRanges?.some((range) => {
+            if (range.rangeType !== CustomRangeType.SDT || range.properties?.lock === 'contentLocked' ||
+                range.properties?.lock === 'sdtContentLocked' || getSdtBindingKey(range as ISdtCustomRange) !== key) {
+                return false;
+            }
+            const next = nextBody.customRanges?.find((item) => item.rangeType === CustomRangeType.SDT && item.rangeId === range.rangeId);
+            // Word updates locked mirrors through the shared XML node, but a direct
+            // edit of the locked control alone must still be rejected.
+            return next != null && getSdtBindingKey(next as ISdtCustomRange) === key &&
+                getSdtBindingValue(previousBody, range as ISdtCustomRange) !== value &&
+                getSdtBindingValue(nextBody, next as ISdtCustomRange) === value;
+        }) ?? false;
+    });
 }
 
 export function validateDocStructureMutation(
@@ -298,13 +392,6 @@ export function validateDocStructureMutation(
         isStructurePreservingJSONXEdit(actions, editPath) &&
         isStructurePreservingJSONXEdit(undoActions, editPath);
 
-    if (!isHistoryReplay) {
-        const hasCurrentLock = containsTextXEdit(actions) && documentDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges?.some((range) => range.rangeType === CustomRangeType.SDT && range.properties?.lock && range.properties.lock !== 'unlocked');
-        if (hasCurrentLock || (!preservesStructure && containsLockedSdt(undoActions))) {
-            assertSdtLocks(documentDataModel, segmentId, undoActions);
-        }
-    }
-
     let changesFootnoteStructure = false;
     const cursor = JSON1.type.readCursor(actions);
     cursor.traverse(null, (component) => {
@@ -314,6 +401,11 @@ export function validateDocStructureMutation(
         }
         if (component.et === TextX.id && Array.isArray(component.e)) {
             for (const action of component.e) {
+                if (isRecord(action) && Array.isArray(action.rangeUpdates) && action.rangeUpdates.some((update) =>
+                    isRecord(update) && isRecord(update.range) &&
+                    (update.range.rangeType === CustomRangeType.FOOTNOTE || update.range.rangeType === CustomRangeType.ENDNOTE))) {
+                    changesFootnoteStructure = true;
+                }
                 const ranges: unknown = isRecord(action) && isRecord(action.body) ? action.body.customRanges : undefined;
                 if (Array.isArray(ranges) && ranges.some((range) => isRecord(range) && (range.rangeType === CustomRangeType.FOOTNOTE || range.rangeType === CustomRangeType.ENDNOTE))) {
                     changesFootnoteStructure = true;

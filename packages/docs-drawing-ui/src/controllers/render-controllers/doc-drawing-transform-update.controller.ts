@@ -366,7 +366,8 @@ export function getDocsPageRelativeDrawingTop(config: {
 }
 
 export function getDocsPageRelativeDrawingAnchorPage(config: {
-    page: Pick<IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter, 'pageWidth' | 'pageHeight'>;
+    page: Pick<IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter, 'pageWidth' | 'pageHeight'> &
+        Partial<Pick<IDocumentSkeletonPage, 'type'>>;
     clipPage: Pick<IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter, 'pageWidth' | 'pageHeight'>;
     hostPage?: Pick<IDocumentSkeletonPage, 'pageWidth' | 'pageHeight'>;
     drawingLayoutType?: PositionedObjectLayoutType;
@@ -378,7 +379,8 @@ export function getDocsPageRelativeDrawingAnchorPage(config: {
     if (hostPage != null && hostPage === clipPage) {
         return hostPage;
     }
-    if (hostPage == null && page === clipPage) {
+    // Cell drawings use the cell's translated origin, not the physical page origin.
+    if (hostPage == null && page === clipPage && page.type !== DocumentSkeletonPageType.CELL) {
         return page;
     }
 }

@@ -16,12 +16,16 @@
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { RenderUnit } from '@univerjs/engine-render';
+import type { HeaderFooterContentCover } from '../../views/header-footer/content-cover';
 import {
+    BooleanNumber,
     DocumentFlavor,
+    DrawingTypeEnum,
     ICommandService,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
+    PositionedObjectLayoutType,
     ThemeService,
     Univer,
     UniverInstanceType,
@@ -33,13 +37,16 @@ import {
     DocStateEmitService,
     RichTextEditingMutation,
 } from '@univerjs/docs';
+import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import {
     CanvasColorService,
     DocumentEditArea,
     Documents,
     ICanvasColorService,
     IRenderManagerService,
+    Rect,
     RenderManagerService,
+    Vector2,
 } from '@univerjs/engine-render';
 import { DesktopLayoutService, DesktopSidebarService, ILayoutService, ISidebarService } from '@univerjs/ui';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -52,7 +59,7 @@ import { DocHeaderFooterController } from '../doc-header-footer.controller';
 
 const cleanups: Array<() => void> = [];
 
-function createTestBed(documentFlavor = DocumentFlavor.TRADITIONAL) {
+function createTestBed(documentFlavor = DocumentFlavor.TRADITIONAL, overrides: Partial<IDocumentData> = {}) {
     vi.useFakeTimers();
     const univer = new Univer();
     const root = document.createElement('div');
@@ -82,11 +89,13 @@ function createTestBed(documentFlavor = DocumentFlavor.TRADITIONAL) {
             paragraphs: [{ startIndex: 1, paragraphId: 'body-p' }],
             sectionBreaks: [{ startIndex: 2, sectionId: 'body-section' }],
         },
+        ...overrides,
         documentStyle: {
             documentFlavor,
             pageSize: { width: 300, height: 400 },
             marginTop: 50,
             marginBottom: 50,
+            ...overrides.documentStyle,
         },
     });
     injector.get(IUniverInstanceService).setCurrentUnitForType(model.getUnitId());
@@ -122,6 +131,78 @@ describe('DocHeaderFooterController', () => {
         documents.draw(ctx);
         expect(paints).toContainEqual({ text: 'D', alpha: 1 });
         expect(fill).not.toHaveBeenCalled();
+    });
+
+    it('covers only header/footer ink bounds, stays transparent to picking, and is removed on disposal', () => {
+        const { render, documents, ctx, paints, manager } = createTestBed(DocumentFlavor.TRADITIONAL, {
+            headers: { header: { headerId: 'header', body: { dataStream: 'Logo\r\n', paragraphs: [{ startIndex: 4, paragraphId: 'header-p' }] } } },
+            footers: { footer: { footerId: 'footer', body: { dataStream: 'Page\r\n', paragraphs: [{ startIndex: 4, paragraphId: 'footer-p' }] } } },
+            documentStyle: { defaultHeaderId: 'header', defaultFooterId: 'footer', marginLeft: 40, marginRight: 40 },
+        });
+        render.addRenderDependencies([[DocHeaderFooterController]]);
+        const controller = render.with(DocHeaderFooterController);
+        const cover = render.scene.getObject('header-footer-document-header-footer-cover') as HeaderFooterContentCover;
+        const rects = vi.spyOn(ctx, 'rect');
+        const fill = vi.spyOn(ctx, 'fill');
+        documents.draw(ctx);
+        expect(paints.filter(({ text }) => /[LogoPage]/.test(text)).every(({ alpha }) => alpha === 1)).toBe(true);
+        rects.mockClear();
+        fill.mockClear();
+        cover.render(ctx);
+        const bounds = rects.mock.calls;
+        expect(bounds.length).toBeGreaterThan(0);
+        expect(bounds.every(([x, , width]) => x > 0 && width < 150)).toBe(true);
+        expect(bounds.some(([, y]) => y < 50)).toBe(true);
+        expect(bounds.some(([, y]) => y > 300)).toBe(true);
+        expect(fill).toHaveBeenCalledTimes(1);
+        expect(cover.evented).toBe(false);
+        expect(render.scene.pick(new Vector2(bounds[0][0] + 1, bounds[0][1] + 1))).not.toBe(cover);
+
+        manager.getViewModel().setEditArea(DocumentEditArea.HEADER);
+        fill.mockClear();
+        cover.render(ctx);
+        expect(fill).not.toHaveBeenCalled();
+        controller.dispose();
+        expect(render.scene.getObject(cover.oKey)).toBeUndefined();
+    });
+
+    it('uses live repeated drawing bounds without covering the horizontal gap or painting overlaps twice', () => {
+        const drawingDefaults = {
+            unitId: 'header-footer-document',
+            subUnitId: 'header-footer-document',
+            isMultiTransform: BooleanNumber.TRUE,
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            layoutType: PositionedObjectLayoutType.INLINE,
+            docTransform: {
+                size: { width: 30, height: 20 },
+                positionH: { relativeFrom: 0, posOffset: 0 },
+                positionV: { relativeFrom: 0, posOffset: 0 },
+                angle: 0,
+            },
+        };
+        const { render, ctx, documents } = createTestBed(DocumentFlavor.TRADITIONAL, {
+            drawings: {
+                first: { ...drawingDefaults, drawingId: 'first' },
+                second: { ...drawingDefaults, drawingId: 'second' },
+            },
+        });
+        render.addRenderDependencies([[DocHeaderFooterController]]);
+        render.with(DocHeaderFooterController);
+        const first = new Rect(getDrawingShapeKeyByDrawingSearch({ unitId: documents.oKey, subUnitId: documents.oKey, drawingId: 'first' }, 0), { left: 40, top: 10, width: 30, height: 20 });
+        const second = new Rect(getDrawingShapeKeyByDrawingSearch({ unitId: documents.oKey, subUnitId: documents.oKey, drawingId: 'second' }, 0), { left: 220, top: 10, width: 40, height: 20 });
+        render.scene.addObjects([first, second], 4);
+        const cover = render.scene.getObject('header-footer-document-header-footer-cover') as HeaderFooterContentCover;
+        const rects = vi.spyOn(ctx, 'rect');
+        const fill = vi.spyOn(ctx, 'fill');
+        cover.render(ctx);
+        expect(rects.mock.calls).toEqual([[40, 10, 30, 20], [220, 10, 40, 20]]);
+        expect(fill).toHaveBeenCalledTimes(1);
+        second.transformByState({ left: 50 });
+        rects.mockClear();
+        fill.mockClear();
+        cover.render(ctx);
+        expect(rects.mock.calls).toEqual([[40, 10, 30, 20], [50, 10, 40, 20]]);
+        expect(fill).toHaveBeenCalledTimes(1);
     });
 
     it('dims the body during header editing, redraws on edit-area changes, and restores opacity on disposal', () => {

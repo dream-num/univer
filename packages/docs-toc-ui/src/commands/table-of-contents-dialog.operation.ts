@@ -19,6 +19,7 @@ import type { LocaleKey } from '../locale/types';
 import type { IInsertTableOfContentsDialogProps, IInsertTableOfContentsDialogValue } from '../views/InsertTableOfContentsDialog';
 import type { ITableOfContentsDialogProps } from '../views/TableOfContentsDialog';
 import {
+    BooleanNumber,
     CommandType,
     ICommandService,
     IConfirmService,
@@ -123,7 +124,7 @@ export const OpenTableOfContentsDialogOperation: ICommand = {
             .getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const selection = accessor.get(DocSelectionManagerService).getActiveTextRange();
         const toc = findTableOfContentsAtOffset(doc?.getBody(), selection?.startOffset);
-        if (!doc || !toc) {
+        if (!doc || !toc || toc.properties?.locked === BooleanNumber.TRUE) {
             return false;
         }
 

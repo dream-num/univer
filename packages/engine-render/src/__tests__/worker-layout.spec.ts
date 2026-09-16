@@ -183,8 +183,18 @@ describe('worker document layout session', () => {
         const generation = session.start({ reason: 'initial' });
         let result = session.step(generation, 8);
         let stepCount = 1;
+        const publishedPages: number[] = [];
+        const publicationSizes: number[] = [];
+        const collectPages = () => {
+            if (result.publication?.kind === 'page') {
+                publishedPages.push(...result.publication.pages.map((page) => page.pageIndex));
+                publicationSizes.push(result.publication.pages.length);
+            }
+        };
+        collectPages();
         while (!result.progress.complete && stepCount < 20_000) {
             result = session.step(generation, 8);
+            collectPages();
             stepCount++;
         }
         const benchmark = {
@@ -199,6 +209,9 @@ describe('worker document layout session', () => {
 
         expect(result.progress.complete).toBe(true);
         expect(result.progress.pageCount).toBe(1_000);
+        expect(publishedPages).toEqual(Array.from({ length: 1_000 }, (_, index) => index));
+        expect(Math.max(...publicationSizes)).toBeGreaterThan(1);
+        expect(Math.max(...publicationSizes)).toBeLessThanOrEqual(4);
         expect(session.resolvePageByOffset(pageStarts[999])).toMatchObject({
             pageIndex: 999,
             pageNumber: 1_000,
@@ -777,9 +790,18 @@ describe('worker document layout session', () => {
         }
         expect(result.progress).toMatchObject({ complete: true, cancelled: false });
         expect(layoutStepCount).toBeLessThan(200);
+        const firstPublication = pagePublications[0];
+        expect(firstPublication?.kind === 'page' && firstPublication.pages.length).toBe(1);
         expect(pagePublications.every((publication) =>
-            publication?.kind !== 'page' || publication.pages.length <= 1
+            publication?.kind !== 'page' || publication.pages.length <= 4
         )).toBe(true);
+        const publishedIndexes = pagePublications.flatMap((publication) =>
+            publication?.kind === 'page' ? publication.pages.map((page) => page.pageIndex) : []
+        );
+        expect(publishedIndexes).toEqual(Array.from(
+            { length: result.progress.pageCount - publishedIndexes[0] },
+            (_, index) => publishedIndexes[0] + index
+        ));
 
         session.dispose();
         initialSkeleton.dispose();

@@ -88,12 +88,12 @@ export function getGlyphGroupFontBoundingBox(
             }
         }
     }
-    // Word does not let an invisible paragraph mark enlarge a picture-only line,
-    // even when the mark's authored font is larger than the picture.
+    // Word uses the paragraph-end font for empty lines, not to enlarge a line
+    // that already contains text or an inline object.
     const ignoreDrawingMLMark = policy?.mode === 'drawingml' && glyphGroups.some((glyphs) => glyphs.some((glyph) =>
         glyph.content && glyph.streamType !== DataStreamTreeTokenType.PARAGRAPH && glyph.glyphType !== GlyphType.LIST
     ));
-    if (!ignoreDrawingMLMark && (!traditional || !hasInlineObject || hasOtherContent)) {
+    if (!ignoreDrawingMLMark && (!traditional || (!hasInlineObject && !hasOtherContent))) {
         boundingBoxAscent = Math.max(boundingBoxAscent, markAscent);
         boundingBoxDescent = Math.max(boundingBoxDescent, markDescent);
         normalLineHeight = Math.max(normalLineHeight, markNormalLineHeight);
@@ -189,7 +189,7 @@ export function createSkeletonLetterGlyph(
     const glyphWidth = typeof glyphMetrics === 'number' ? glyphMetrics : glyphMetrics?.width;
     const glyph = _createSkeletonWordOrLetter(GlyphType.LETTER, content, config, glyphWidth);
 
-    if (typeof glyphMetrics === 'object') {
+    if (typeof glyphMetrics === 'object' && config.textStyle.hidden !== true) {
         if (glyphMetrics.ascent != null) {
             glyph.bBox.ba = glyph.bBox.aba = glyphMetrics.ascent;
         }
@@ -217,6 +217,10 @@ export function createSkeletonWholeEntityGlyph(
     glyphMetrics: { ascent?: number; descent?: number; width?: number }
 ): IDocumentSkeletonGlyph {
     const glyph = createSkeletonLetterGlyph(raw, config, glyphMetrics);
+
+    if (config.textStyle.hidden === true) {
+        return glyph;
+    }
 
     glyph.adjustability = baseAdjustability(WHOLE_ENTITY_RENDER_MARKER, glyph.width);
     glyph.bBox.width = glyph.width;
@@ -406,10 +410,13 @@ export function _createSkeletonWordOrLetter(
     ];
     let streamType = DataStreamTreeTokenType.LETTER;
 
-    if (skipWidthList.indexOf(content) > -1) {
+    if (skipWidthList.indexOf(content) > -1 || textStyle.hidden === true) {
+        const zeroWidthStreamType = skipWidthList.includes(content) || content === DataStreamTreeTokenType.PARAGRAPH
+            ? content as DataStreamTreeTokenType
+            : DataStreamTreeTokenType.LETTER;
         return {
             content: '',
-            raw: content,
+            raw,
             ts: textStyle,
             fontStyle,
             width: 0,
@@ -430,8 +437,8 @@ export function _createSkeletonWordOrLetter(
             isJustifiable: false,
             adjustability: baseAdjustability(content, 0),
             glyphType: GlyphType.PLACEHOLDER,
-            streamType: content as DataStreamTreeTokenType,
-            count: 1,
+            streamType: zeroWidthStreamType,
+            count: raw.length,
         };
     }
 
@@ -463,10 +470,10 @@ export function _createSkeletonWordOrLetter(
         (content === DataStreamTreeTokenType.PARAGRAPH && isTraditionalDocumentCompatibility(documentCompatibilityPolicy))) {
         bBox = { ...bBox, width: 0 };
     }
-    if (content === ' ' && textStyle.fontHint === 'eastAsia'
+    if (content === ' ' && (textStyle.fontHint === 'eastAsia' || config.balanceSpaceWidth)
         && config.balanceSingleByteDoubleByteWidth === BooleanNumber.TRUE
         && isTraditionalDocumentCompatibility(documentCompatibilityPolicy)) {
-        // ponytail: Calibrated against legacy East Asian report headings; other font/host combinations need native fixtures.
+        // Word's compatibility option also expands leading/trailing and consecutive spaces in Latin text.
         bBox = { ...bBox, width: fontStyle.fontSize / 0.75 / 2 };
     }
 
@@ -577,16 +584,18 @@ export function createSkeletonBulletGlyph(
         }
     }
 
-    const bBox = checkboxSize == null ? _getMaxBoundingBox(glyph, boundingBox) : boundingBox;
+    // The marker can inherit a taller line box, but its ink width must not become the text's width.
+    const bBox = checkboxSize == null ? { ..._getMaxBoundingBox(glyph, boundingBox), width: contentWidth } : boundingBox;
 
     return {
         content,
         ts: textStyle,
         fontStyle,
         width,
-        xOffset: 0,
+        // Line adjustment recomputes advances; keep Word marker alignment as an ink offset.
+        xOffset: isTraditionalDocumentCompatibility(documentCompatibilityPolicy) ? left : 0,
         bBox,
-        left,
+        left: isTraditionalDocumentCompatibility(documentCompatibilityPolicy) ? 0 : left,
         isJustifiable: isJustifiable(content),
         adjustability: baseAdjustability(content, width),
         glyphType: GlyphType.LIST,

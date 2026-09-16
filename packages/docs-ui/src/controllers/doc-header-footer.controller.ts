@@ -38,12 +38,13 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { DocumentEditArea, PageLayoutType, Path, Vector2 } from '@univerjs/engine-render';
+import { DocumentEditArea, DRAWING_OBJECT_UPPER_LAYER_INDEX, PageLayoutType, Path, Vector2 } from '@univerjs/engine-render';
 import { neoGetDocObject } from '../basics/component-tools';
 import { CloseHeaderFooterCommand, CoreHeaderFooterCommand } from '../commands/commands/doc-header-footer.command';
 import { IEditorService } from '../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
 import { getHeaderFooterTarget } from '../utils/section-header-footer';
+import { HeaderFooterContentCover } from '../views/header-footer/content-cover';
 import { TextBubbleShape } from '../views/header-footer/text-bubble';
 
 const INACTIVE_AREA_OPACITY = 0.5;
@@ -51,8 +52,10 @@ const HEADER_FOOTER_LABEL_ALPHA = 0.08;
 
 export class DocHeaderFooterController extends Disposable implements IRenderModule {
     private _loadedMap = new WeakSet<RenderComponentType>();
+    private _contentCover?: HeaderFooterContentCover;
     private _headerFooterColors = {
         primary: '',
+        cover: '',
         label: '',
     };
 
@@ -83,10 +86,17 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
 
             this._headerFooterColors = {
                 primary,
+                cover: new ColorKit(this._themeService.getColorFromTheme('gray.0'))
+                    .setAlpha(INACTIVE_AREA_OPACITY)
+                    .toRgbString(),
                 label: new ColorKit(primary)
                     .setAlpha(HEADER_FOOTER_LABEL_ALPHA)
                     .toRgbString(),
             };
+            if (this._contentCover) {
+                this._contentCover.color = this._headerFooterColors.cover;
+                this._contentCover.makeDirty(true);
+            }
         }));
     }
 
@@ -242,6 +252,14 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         }
 
         const docsComponent = mainComponent as Documents;
+        const cover = new HeaderFooterContentCover(`${unitId}-header-footer-cover`, docsComponent, this._context.scene);
+        cover.color = this._headerFooterColors.cover;
+        this._contentCover = cover;
+        this._context.scene.addObject(cover, DRAWING_OBJECT_UPPER_LAYER_INDEX);
+        this.disposeWithMe(cover);
+        this.disposeWithMe(toDisposable(() => {
+            this._contentCover = undefined;
+        }));
         docsComponent.setInactiveAreaOpacity(INACTIVE_AREA_OPACITY);
         this.disposeWithMe(toDisposable(() => docsComponent.setInactiveAreaOpacity(1)));
         this.disposeWithMe(this._docSkeletonManagerService.getViewModel().editAreaChange$.subscribe(() => {

@@ -156,7 +156,7 @@ export function applyFontMetricCompatibility(
         // Word's single spacing adds leading to YaHei's font box. Isolated native
         // Word probes at 7.5pt and 12pt measure 17.12px and 27.52px baseline advances.
         // Guard the actual font metrics so a missing/substituted font is not inflated.
-        // Only AUTO spacing consumes this value; keep ink and fixed/minimum metrics.
+        // AUTO and AT_LEAST consume this value; keep ink and exact line metrics.
         normalLineHeight = Math.max(normalLineHeight ?? 0, (bBox.ba + bBox.bd) * 1.3);
     }
     if (policy.mode === 'traditional' && /^(?:MS Gothic|ＭＳ ゴシック)$/i.test(fontFamilies[0])

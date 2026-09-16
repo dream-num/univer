@@ -779,6 +779,9 @@ function composeColumnGroups(
 }
 
 export function isUselessRetainAction(action: IRetainAction): boolean {
+    if (action.rangeUpdates?.length) {
+        return false;
+    }
     const { body } = action;
 
     if (body == null) {

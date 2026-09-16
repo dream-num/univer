@@ -35,6 +35,7 @@ import { BreakType, DocumentSkeletonPageType } from '../../../../basics/i-docume
 import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility } from '../../document-compatibility';
 import { dealWithSection } from '../block/section';
 import {
+    getGlyphGroupWidth,
     getLastLine,
     resetContext,
     updateBlockIndex,
@@ -133,7 +134,9 @@ export function createSkeletonPage(
                 true
             );
 
-            skeHeaders.set(headerId, new Map([[pageWidth, header]]));
+            const widths = skeHeaders.get(headerId) ?? new Map();
+            widths.set(pageWidth, header);
+            skeHeaders.set(headerId, widths);
         }
         page.headerId = headerId;
     }
@@ -151,7 +154,9 @@ export function createSkeletonPage(
                 false
             );
 
-            skeFooters.set(footerId, new Map([[pageWidth, footer]]));
+            const widths = skeFooters.get(footerId) ?? new Map();
+            widths.set(pageWidth, footer);
+            skeFooters.set(footerId, widths);
         }
         page.footerId = footerId;
     }
@@ -332,11 +337,14 @@ function _createSkeletonHeaderFooter(
         );
     }
 
-    updateBlockIndex([page], -1, sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy());
-
     const traditional = isTraditionalDocumentCompatibility(
         sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy()
     );
+    if (traditional) {
+        positionUnwrappedStoryFrames(page, headerOrFooterViewModel);
+    }
+    updateBlockIndex([page], -1, sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy());
+
     // Word reserves the complete text flow, including the final paragraph's spacing,
     // but does not add the modern document's synthetic gap between stories.
     const trailingSpace = traditional ? Math.max(0, getLastLine(page)?.spaceBelowApply ?? 0) : 0;
@@ -353,6 +361,67 @@ function _createSkeletonHeaderFooter(
     }
 
     return page;
+}
+
+function positionUnwrappedStoryFrames(page: IDocumentSkeletonHeaderFooter, viewModel: DocumentViewModel) {
+    // Positioned text-only frames share editable glyphs with their story. Wrapped
+    // frames and stories with anchored objects require the object-wrap layout path.
+    if (page.skeTables.size > 0 || page.skeDrawings.size > 0) {
+        return;
+    }
+    for (const section of page.sections) {
+        for (const column of section.columns) {
+            const { lines } = column;
+            let removedHeight = 0;
+            for (let index = 0; index < lines.length; index++) {
+                const line = lines[index];
+                const frame = viewModel.getParagraph(line.paragraphIndex)?.paragraphStyle?.paragraphFrame;
+                const y = typeof frame === 'object' ? Number(frame.y ?? 0) / 15 : 0;
+                if (frame == null || typeof frame !== 'object' || frame.wrap !== 'none'
+                    || frame.horizontalAnchor !== 'margin' || frame.verticalAnchor !== 'text'
+                    || !['left', 'center', 'right'].includes(frame.xAlign ?? '')
+                    || frame.yAlign != null || !Number.isFinite(y)) {
+                    line.top -= removedHeight;
+                    continue;
+                }
+                let end = index + 1;
+                while (end < lines.length && lines[end].paragraphIndex === line.paragraphIndex) {
+                    end++;
+                }
+                // A following flow paragraph supplies the frame's text anchor.
+                if (end === lines.length) {
+                    for (; index < end; index++) {
+                        lines[index].top -= removedHeight;
+                    }
+                    break;
+                }
+                const frameLines = lines.slice(index, end);
+                let width = 0;
+                for (const item of frameLines) {
+                    for (const divide of item.divides) {
+                        width = Math.max(width, divide.left + divide.paddingLeft + getGlyphGroupWidth(divide, true));
+                    }
+                }
+                const available = Math.max(0, column.width - width);
+                let left = 0;
+                if (frame.xAlign === 'right') {
+                    left = available;
+                } else if (frame.xAlign === 'center') {
+                    left = available / 2;
+                }
+                const occupiedHeight = lines[end].top - line.top;
+                for (const frameLine of frameLines) {
+                    frameLine.top += y - removedHeight;
+                    for (const divide of frameLine.divides) {
+                        divide.left += left;
+                        divide.width = Math.max(0, width - divide.left + left);
+                    }
+                }
+                removedHeight += occupiedHeight;
+                index = end - 1;
+            }
+        }
+    }
 }
 
 export function createNullCellPage(
@@ -514,8 +583,13 @@ export function getCellBorderWidth(border: ITableCellBorder | undefined): number
     return border == null || border.color?.rgb === 'transparent' ? 0 : Math.max(0, border.width?.v ?? 1);
 }
 
-export function getRowBorderInset(row: ITableRow, edge: 'borderTop' | 'borderBottom'): number {
-    return row.tableCells.reduce((inset, cell) => Math.max(inset, getCellBorderWidth(cell[edge]) / 2), 0);
+export function getRowBorderInset(row: ITableRow, edge: 'borderTop' | 'borderBottom', tableBoundary = false): number {
+    return row.tableCells.reduce((inset, cell) => {
+        const border = cell[edge];
+        const outer = edge === 'borderTop' ? border?.tableTopBorder : border?.tableBottomBorder;
+        const effective = tableBoundary ? outer ?? border : border;
+        return Math.max(inset, getCellBorderWidth(effective) / 2);
+    }, 0);
 }
 
 function getRowVerticalInset(table: ITable, index: number, edge: 'top' | 'bottom'): number {
@@ -584,6 +658,18 @@ function getCellLineGridOptions(
     };
 }
 
+function resetCellDrawingAnchors(ctx: ILayoutContext, cellNode: DataStreamTreeNode, tableId: string): void {
+    const anchors = ctx.skeletonResourceReference.drawingAnchor?.get(tableId);
+    if (!anchors) {
+        return;
+    }
+    // A paginated cell replaces its earlier unbounded measurement. Do not retain
+    // provisional line references or their off-page drawing anchor positions.
+    for (const paragraph of cellNode.children[0].children) {
+        anchors.delete(paragraph.endIndex);
+    }
+}
+
 export function createSkeletonCellPages(
     ctx: ILayoutContext,
     viewModel: DocumentViewModel,
@@ -620,6 +706,7 @@ export function createSkeletonCellPages(
         cellSectionBreakConfig.cellHiddenEndMarkIndex = sectionNode.children[sectionNode.children.length - 1]?.endIndex;
     }
     const segmentId = tableConfig.tableId;
+    resetCellDrawingAnchors(ctx, cellNode, segmentId);
     const retainedPages: IDocumentSkeletonPage[] = [];
     let currentPage = areaPage;
     let pages: IDocumentSkeletonPage[] = [];
@@ -723,6 +810,8 @@ export function startSkeletonCellPagesBuild(
     }
     page.type = DocumentSkeletonPageType.CELL;
     page.segmentId = tableConfig.tableId;
+
+    resetCellDrawingAnchors(ctx, cellNode, tableConfig.tableId);
 
     const layoutAnchor = ctx.layoutStartPointer[tableConfig.tableId];
     ctx.layoutStartPointer[tableConfig.tableId] = null;
@@ -840,8 +929,13 @@ function applyTrailingCellParagraphSpaceBelow(
         return;
     }
 
+    if (body?.paragraphs?.find((paragraph) => paragraph.startIndex === paragraphIndex)?.paragraphStyle?.afterAutoSpacing === BooleanNumber.TRUE) {
+        lastLine.spaceBelowApply = 0;
+        return;
+    }
+
     // Word includes the last paragraph's after-spacing in the cell's content height,
-    // independently of document grids and the paragraph's line-spacing rule.
+    // except automatic spacing at the cell boundary.
     page.height += spaceBelow;
 }
 

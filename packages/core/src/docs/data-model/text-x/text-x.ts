@@ -15,10 +15,11 @@
  */
 
 import type { ITextRange } from '../../../sheets/typedef';
-import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
+import type { ICustomRange, IDocumentBody } from '../../../types/interfaces/i-document-data';
 import type { IDeleteAction, IInsertAction, IRetainAction, TextXAction } from './action-types';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
+import { DataStreamTreeTokenType } from '../types';
 import { ActionIterator } from './action-iterator';
 import { PRESERVE_INSERTED_PARAGRAPH_IDS, TextXActionType } from './action-types';
 import { textXApply } from './apply';
@@ -27,11 +28,59 @@ import {
     normalizeInsertedSectionIdsForDocument,
     RESTORE_INSERTED_PARAGRAPH_IDS,
 } from './apply-utils/common';
+import {
+    appendRangeUpdates,
+    composeRangeUpdate,
+    dropRemovedRangeAnchors,
+    getChangedPropertyPaths,
+    getRangeUpdates,
+    moveRangeUpdates,
+    reconcileRangeUpdates,
+    transformRangeUpdate,
+    withoutRangeUpdates,
+} from './custom-range-update';
 import { transformBody } from './transform-utils';
 import { composeBody, getBodySlice, getBodySliceForTextXAction, isUselessRetainAction } from './utils';
 
 function onlyHasDataStream(body: IDocumentBody) {
     return Object.keys(body).length === 1;
+}
+
+function getValueRangeIds(actions: TextXAction[]): Set<string> {
+    return new Set(actions.flatMap((action) => action.t !== TextXActionType.RETAIN && action.valueRangeId ? [action.valueRangeId] : []));
+}
+
+function withoutValueRangeMetadata(actions: TextXAction[], suppressed: Set<string>): TextXAction[] {
+    return actions.map((action) => {
+        if (!action.body?.customRanges?.some((range) => suppressed.has(range.rangeId))) {
+            return action;
+        }
+        const body: IDocumentBody = { ...action.body, customRanges: action.body.customRanges.filter((range) => !suppressed.has(range.rangeId)) };
+        if (!body.customRanges?.length) {
+            delete body.customRanges;
+        }
+        return { ...action, body };
+    });
+}
+
+function insertedAnchorPriority(first: TextXAction, second: TextXAction, priority: TPriority): boolean {
+    if (first?.t !== TextXActionType.INSERT || second?.t !== TextXActionType.INSERT) {
+        return priority === 'left';
+    }
+    const firstText = first.body.dataStream;
+    const secondText = second.body.dataStream;
+    if (firstText === secondText) {
+        return priority === 'left';
+    }
+    // Restored delimiters enclose text typed at the collapsed boundary. Neither
+    // side of a removed delimiter remains distinguishable as a text position.
+    if (firstText === DataStreamTreeTokenType.CUSTOM_RANGE_START || secondText === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
+        return true;
+    }
+    if (firstText === DataStreamTreeTokenType.CUSTOM_RANGE_END || secondText === DataStreamTreeTokenType.CUSTOM_RANGE_START) {
+        return false;
+    }
+    return priority === 'left';
 }
 
 function normalizeInsertActionParagraphIds(
@@ -63,6 +112,17 @@ export class TextX {
 
     // eslint-disable-next-line complexity
     static compose(thisActions: TextXAction[], otherActions: TextXAction[]): TextXAction[] {
+        const thisUpdates = getRangeUpdates(thisActions);
+        const otherUpdates = getRangeUpdates(otherActions);
+        if (thisUpdates.length || otherUpdates.length) {
+            const thisText = withoutRangeUpdates(thisActions);
+            const otherText = withoutRangeUpdates(otherActions);
+            const updates = new Map(moveRangeUpdates(thisUpdates, otherText).map((update) => [update.rangeId, update]));
+            for (const update of otherUpdates) {
+                updates.set(update.rangeId, composeRangeUpdate(updates.get(update.rangeId), update));
+            }
+            return appendRangeUpdates(TextX.compose(thisText, otherText), Array.from(updates.values()));
+        }
         const thisIter = new ActionIterator(thisActions);
         const otherIter = new ActionIterator(otherActions);
 
@@ -148,26 +208,56 @@ export class TextX {
     // priority - if true, this actions takes priority over other, that is, this actions are considered to happen "first".
     // thisActions is the target action.
     static transform(thisActions: TextXAction[], otherActions: TextXAction[], priority: TPriority = 'right'): TextXAction[] {
+        const thisUpdates = getRangeUpdates(thisActions);
+        const otherUpdates = getRangeUpdates(otherActions);
+        if (thisUpdates.length || otherUpdates.length) {
+            const thisText = withoutRangeUpdates(thisActions);
+            const otherText = withoutRangeUpdates(otherActions);
+            const otherAfterThis = TextX._transform(thisText, otherText, priority, true);
+            const movedUpdates = moveRangeUpdates(thisUpdates, otherAfterThis, true);
+            const updates = movedUpdates.flatMap((update) => transformRangeUpdate(
+                update,
+                otherUpdates.find((item) => item.rangeId === update.rangeId),
+                priority
+            ));
+            const suppressed = movedUpdates.flatMap((update) => update.range &&
+                otherUpdates.some((other) => other.rangeId === update.rangeId && !other.range)
+                ? [update.range]
+                : []);
+            return dropRemovedRangeAnchors(
+                reconcileRangeUpdates(TextX._transform(otherText, thisText, priority === 'left' ? 'right' : 'left', true), otherUpdates),
+                suppressed,
+                updates
+            );
+        }
         return this._transform(otherActions, thisActions, priority === 'left' ? 'right' : 'left');
     }
 
     // otherActions is the actions to be transformed.
-    static _transform(thisActions: TextXAction[], otherActions: TextXAction[], priority: TPriority = 'right'): TextXAction[] {
-        const thisIter = new ActionIterator(thisActions);
-
-        const otherIter = new ActionIterator(otherActions);
+    static _transform(thisActions: TextXAction[], otherActions: TextXAction[], priority: TPriority = 'right', rangeAnchorAffinity = false): TextXAction[] {
+        const thisValues = getValueRangeIds(thisActions);
+        const conflicts = new Set(Array.from(getValueRangeIds(otherActions)).filter((id) => thisValues.has(id)));
+        const thisIter = new ActionIterator(conflicts.size && priority === 'right' ? withoutValueRangeMetadata(thisActions, conflicts) : thisActions);
+        const otherIter = new ActionIterator(conflicts.size && priority === 'left' ? withoutValueRangeMetadata(otherActions, conflicts) : otherActions);
 
         const textX = new TextX();
 
         while (thisIter.hasNext() || otherIter.hasNext()) {
             if (
                 thisIter.peekType() === TextXActionType.INSERT &&
-                (priority === 'left' || otherIter.peekType() !== TextXActionType.INSERT)
+                ((rangeAnchorAffinity ? insertedAnchorPriority(thisIter.peek(), otherIter.peek(), priority) : priority === 'left') || otherIter.peekType() !== TextXActionType.INSERT)
             ) {
                 const thisAction = thisIter.next();
-                textX.retain(thisAction.len);
+                if (thisAction.t === TextXActionType.INSERT && thisAction.valueRangeId && conflicts.has(thisAction.valueRangeId) && priority === 'right') {
+                    textX.push({ t: TextXActionType.DELETE, len: thisAction.len, valueRangeId: thisAction.valueRangeId });
+                } else {
+                    textX.retain(thisAction.len);
+                }
             } else if (otherIter.peekType() === TextXActionType.INSERT) {
-                textX.push(otherIter.next());
+                const otherAction = otherIter.next();
+                if (otherAction.t !== TextXActionType.INSERT || !otherAction.valueRangeId || !conflicts.has(otherAction.valueRangeId) || priority !== 'left') {
+                    textX.push(otherAction);
+                }
             } else {
                 const length = Math.min(thisIter.peekLength(), otherIter.peekLength());
                 const thisAction = thisIter.next(length);
@@ -235,6 +325,18 @@ export class TextX {
     }
 
     static invert(actions: TextXAction[]): TextXAction[] {
+        if (getRangeUpdates(actions).length) {
+            const restored = actions.flatMap((action) => {
+                if (action.t !== TextXActionType.RETAIN || !action.rangeUpdates) {
+                    return [];
+                }
+                if (!action.oldRangeUpdates) {
+                    throw new Error('makeInvertible must capture custom ranges before inversion.');
+                }
+                return action.oldRangeUpdates;
+            });
+            return appendRangeUpdates(TextX.invert(withoutRangeUpdates(actions)), Tools.deepClone(restored));
+        }
         const invertedActions: TextXAction[] = [];
 
         for (const action of actions) {
@@ -243,6 +345,7 @@ export class TextX {
                     t: TextXActionType.DELETE,
                     len: action.len,
                     body: action.body,
+                    valueRangeId: action.valueRangeId,
                 });
             } else if (action.t === TextXActionType.DELETE) {
                 if (action.body == null) {
@@ -258,6 +361,7 @@ export class TextX {
                     t: TextXActionType.INSERT,
                     body: action.body,
                     len: action.len,
+                    valueRangeId: action.valueRangeId,
                 });
             } else {
                 if (action.body != null) {
@@ -289,6 +393,17 @@ export class TextX {
         const reservedSectionIds = new Set<string>();
 
         for (const action of actions) {
+            if (action.t === TextXActionType.RETAIN && action.rangeUpdates) {
+                action.oldRangeUpdates = action.rangeUpdates.map(({ rangeId, propertyPaths }) => {
+                    const index = doc.customRanges?.findIndex((range) => range.rangeId === rangeId) ?? -1;
+                    return {
+                        rangeId,
+                        range: index < 0 ? null : Tools.deepClone(doc.customRanges![index]),
+                        nextRangeId: index < 0 ? undefined : doc.customRanges![index + 1]?.rangeId ?? null,
+                        propertyPaths: index < 0 ? undefined : propertyPaths,
+                    };
+                });
+            }
             if (action.t === TextXActionType.INSERT) {
                 normalizeInsertActionParagraphIds(action.body, doc, index, reservedParagraphIds);
                 normalizeInsertedSectionIdsForDocument(doc.sectionBreaks, action.body.sectionBreaks, reservedSectionIds);
@@ -330,6 +445,21 @@ export class TextX {
     }
 
     private _actions: TextXAction[] = [];
+
+    /** Edits only changed property leaves; does not replace range identity, bounds or peer properties. */
+    updateCustomRangeProperties(range: ICustomRange, properties: NonNullable<ICustomRange['properties']>): this {
+        const propertyPaths = getChangedPropertyPaths(range.properties ?? {}, properties);
+        if (propertyPaths.length) {
+            this.updateCustomRanges([{ rangeId: range.rangeId, range: { ...range, properties }, propertyPaths }]);
+        }
+        return this;
+    }
+
+    /** Updates identities after all text edits; range positions refer to the resulting document. */
+    updateCustomRanges(updates: NonNullable<IRetainAction['rangeUpdates']>): this {
+        this.push({ t: TextXActionType.RETAIN, len: 0, rangeUpdates: updates });
+        return this;
+    }
 
     insert(len: number, body: IDocumentBody): this {
         const insertAction: IInsertAction = {
@@ -397,13 +527,13 @@ export class TextX {
         const newAction = Tools.deepClone(args[0]);
 
         // Nothing need to do, if the retain 0 and body is null.
-        if (newAction.t === TextXActionType.RETAIN && newAction.len === 0 && newAction.body == null) {
+        if (newAction.t === TextXActionType.RETAIN && newAction.len === 0 && newAction.body == null && !newAction.rangeUpdates) {
             return this;
         }
 
         if (typeof lastAction === 'object') {
             // if lastAction and newAction are both delete action, merge the two actions and return this.
-            if (lastAction.t === TextXActionType.DELETE && newAction.t === TextXActionType.DELETE) {
+            if (lastAction.t === TextXActionType.DELETE && newAction.t === TextXActionType.DELETE && lastAction.valueRangeId === newAction.valueRangeId) {
                 lastAction.len += newAction.len;
 
                 return this;
@@ -423,14 +553,14 @@ export class TextX {
             }
 
             // if lastAction and newAction are both retain action and has no body, merge the two actions and return this.
-            if (lastAction.t === TextXActionType.RETAIN && newAction.t === TextXActionType.RETAIN && lastAction.body == null && newAction.body == null) {
+            if (lastAction.t === TextXActionType.RETAIN && newAction.t === TextXActionType.RETAIN && lastAction.body == null && newAction.body == null && !lastAction.rangeUpdates && !newAction.rangeUpdates) {
                 lastAction.len += newAction.len;
 
                 return this;
             }
 
             // Both are insert action, and has no styles, merge it.
-            if (lastAction.t === TextXActionType.INSERT && onlyHasDataStream(lastAction.body) && newAction.t === TextXActionType.INSERT && onlyHasDataStream(newAction.body)) {
+            if (lastAction.t === TextXActionType.INSERT && onlyHasDataStream(lastAction.body) && newAction.t === TextXActionType.INSERT && onlyHasDataStream(newAction.body) && lastAction.valueRangeId === newAction.valueRangeId) {
                 lastAction.len += newAction.len;
                 lastAction.body.dataStream += newAction.body.dataStream;
 

@@ -16,9 +16,27 @@
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { IPointerEvent, RenderUnit } from '@univerjs/engine-render';
-import { BooleanNumber, CustomRangeType, DocumentFlavor, EventState, EventSubject, Injector, PresetListType, Univer, UniverInstanceType } from '@univerjs/core';
+import {
+    BooleanNumber,
+    CustomRangeType,
+    DocumentFlavor,
+    EventState,
+    EventSubject,
+    Injector,
+    PresetListType,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocLayoutExecutorService, DocSkeletonManagerService } from '@univerjs/docs';
-import { CanvasColorService, Documents, ICanvasColorService, IRenderManagerService, RenderManagerService, setDocsTableRenderViewportProvider, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
+import {
+    CanvasColorService,
+    Documents,
+    ICanvasColorService,
+    IRenderManagerService,
+    RenderManagerService,
+    setDocsTableRenderViewportProvider,
+    TRANSFORM_CHANGE_OBSERVABLE_TYPE,
+} from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
     calcDocGlyphPosition,
@@ -50,7 +68,15 @@ describe('custom-range hit testing with real document layout', () => {
 
     afterEach(() => vi.restoreAllMocks());
 
-    it.each([1, 3])('includes the final glyph of a %i-character link without hitting adjacent text', (length) => {
+    it.each([
+        { length: 1, nested: false },
+        { length: 3, nested: false },
+        { length: 1, nested: true },
+        { length: 3, nested: true },
+        ...['checkbox', 'date', 'dropDownList', 'comboBox', 'text', 'richText', 'picture', 'group', 'repeatingSection'].map((kind) => ({ length: 1, nested: false, kind })),
+    ])('hits the innermost range including its final glyph: %j', (testCase) => {
+        const { length, nested } = testCase;
+        const kind = 'kind' in testCase ? testCase.kind : undefined;
         const univer = new Univer();
         try {
             const injector = univer.__getInjector();
@@ -63,7 +89,12 @@ describe('custom-range hit testing with real document layout', () => {
                     dataStream: 'A目CDZ\r\n',
                     paragraphs: [{ startIndex: 5, paragraphId: 'paragraph-1' }],
                     sectionBreaks: [{ startIndex: 6, sectionId: 'body' }],
-                    customRanges: [{ startIndex: 1, endIndex: length, rangeId: 'link', rangeType: CustomRangeType.HYPERLINK }],
+                    customRanges: nested
+                        ? [
+                            { startIndex: 1, endIndex: length, rangeId: 'link', rangeType: CustomRangeType.SDT, properties: { kind: 'repeatingSectionItem', placement: 'block' } },
+                            { startIndex: 1, endIndex: length, rangeId: 'parent', rangeType: CustomRangeType.SDT, properties: { kind: 'repeatingSection', placement: 'block' } },
+                        ]
+                        : [{ startIndex: 1, endIndex: length, rangeId: 'link', rangeType: kind ? CustomRangeType.SDT : CustomRangeType.HYPERLINK, ...(kind ? { properties: { kind } } : {}) }],
                 },
                 documentStyle: {
                     documentFlavor: DocumentFlavor.TRADITIONAL,
@@ -89,6 +120,11 @@ describe('custom-range hit testing with real document layout', () => {
             const glyph = skeleton.findNodeByCharIndex(length)!;
             const bounds = calcDocGlyphPosition(glyph, documents, skeleton)!;
             expect(bounds.right - bounds.left).toBeGreaterThan(0);
+            expect(service.isPointerOnInteractiveRange(
+                bounds.left + (bounds.right - bounds.left) * 0.75,
+                (bounds.top + bounds.bottom) / 2
+            )).toBe(!nested && kind !== 'group' && kind !== 'repeatingSection');
+            expect(service.isPointerOnInteractiveRange(bounds.right + 1, (bounds.top + bounds.bottom) / 2)).toBe(false);
             const click = (x: number): void => {
                 const event = {
                     button: 0,

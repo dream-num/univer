@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IDocumentData } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentBody, IDocumentData } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { InsertTableOfContentsCommand } from '@univerjs/docs-toc';
@@ -36,7 +36,7 @@ describe('InsertTableOfContentsOperation', () => {
         // The native notification surface is unavailable in this headless test.
         injector.add([IMessageService, { useValue: { show, remove: vi.fn(), removeAll: vi.fn() } }]);
         injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
-        univer.createUnit<IDocumentData>(UniverInstanceType.UNIVER_DOC, { id: 'doc-1', body, documentStyle: {} });
+        univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, { id: 'doc-1', body, documentStyle: {} });
         injector.get(IUniverInstanceService).focusUnit('doc-1');
         const locale = injector.get(LocaleService);
         locale.load({ [LocaleType.EN_US]: enUS });

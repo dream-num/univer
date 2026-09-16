@@ -46,7 +46,7 @@ import { DocSelectionManagerService } from '../../services/doc-selection-manager
 import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
 import { DocStateEmitService } from '../../services/doc-state-emit.service';
 import { RICH_TEXT_EDITING_MUTATION_ID } from './core-editing.mutation-id';
-import { validateDocStructureMutation } from './doc-structure-mutation-validation';
+import { isDocSdtMutationAllowed, validateDocStructureMutation } from './doc-structure-mutation-validation';
 
 export enum DocHistoryAction {
     DeleteChart = 'delete-chart',
@@ -152,7 +152,8 @@ function canRemoveFootnoteReference(actions: JSONXActions, references: ICustomRa
                     canRemove = true;
                     return;
                 }
-                if (action.t === TextXActionType.RETAIN && action.body?.customRanges != null) {
+                if (action.t === TextXActionType.RETAIN && (action.body?.customRanges != null ||
+                    action.rangeUpdates?.some((update) => references.some((reference) => reference.rangeId === update.rangeId)))) {
                     canRemove = true;
                     return;
                 }
@@ -326,11 +327,17 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             };
         }
 
+        const isHistoryReplay = trigger === UndoCommandId || trigger === RedoCommandId;
+        if (!isHistoryReplay && !isDocSdtMutationAllowed(documentDataModel, segmentId, actions)) {
+            params.actions = [];
+            return { unitId, actions: [], textRanges: docRanges };
+        }
+
         const { actions: appliedActions, undoActions, preservesStructure } = applyValidatedDocumentActions(
             documentDataModel,
             segmentId,
             actions,
-            trigger === UndoCommandId || trigger === RedoCommandId
+            isHistoryReplay
         );
 
         // Publish reference deletion and note cleanup in the same deterministic mutation.

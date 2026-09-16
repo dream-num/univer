@@ -15,9 +15,10 @@
  */
 
 import type { IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
-import { BooleanNumber, PositionedObjectLayoutType, TableTextWrapType, WrapTextType } from '@univerjs/core';
+import { BooleanNumber, DocumentFlavor, PositionedObjectLayoutType, TableTextWrapType, WrapTextType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { LineType } from '../../../../../basics/i-document-skeleton-cached';
+import { getDocumentCompatibilityPolicy } from '../../../document-compatibility';
 import {
     calculateLineTopByDrawings,
     collisionDetection,
@@ -44,6 +45,28 @@ function createTopBottomDrawing(top: number, height: number, angle = 0) {
 }
 
 describe('line model', () => {
+    it.each([
+        { flavor: DocumentFlavor.TRADITIONAL, left: -10, right: 0, expectedLeft: -10, expectedRight: 100 },
+        { flavor: DocumentFlavor.TRADITIONAL, left: 0, right: -15, expectedLeft: 0, expectedRight: 115 },
+        { flavor: DocumentFlavor.TRADITIONAL, left: -10, right: -15, expectedLeft: -10, expectedRight: 115 },
+        { flavor: DocumentFlavor.TRADITIONAL, left: -10, right: 10, expectedLeft: -10, expectedRight: 90 },
+        { flavor: DocumentFlavor.MODERN, left: -10, right: -15, expectedLeft: 0, expectedRight: 100 },
+    ])('honors negative Word indents without moving floating obstacles: %j', ({ flavor, left, right, expectedLeft, expectedRight }) => {
+        const drawing = {
+            aTop: 0,
+            aLeft: 30,
+            width: 20,
+            height: 30,
+            angle: 0,
+            drawingOrigin: { layoutType: PositionedObjectLayoutType.WRAP_SQUARE, wrapText: WrapTextType.BOTH_SIDES },
+        };
+        const page = { skeDrawings: new Map([['obstacle', drawing]]), skeTables: new Map() } as unknown as IDocumentSkeletonPage;
+        const line = createSkeletonLine(0, LineType.PARAGRAPH, { lineHeight: 16, contentHeight: 16, lineTop: 0, paddingLeft: left, paddingRight: right }, 100, 0, true, { documentCompatibilityPolicy: getDocumentCompatibilityPolicy(flavor) } as never, page, null, null);
+        expect(line.divides.map((divide) => [divide.left, divide.left + divide.width]))
+            .toEqual([[expectedLeft, 30], [50, expectedRight]]);
+        expect(drawing).toMatchObject({ aLeft: 30, width: 20 });
+    });
+
     it.each([PositionedObjectLayoutType.WRAP_SQUARE, PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM])('reserves asymmetric effect bounds while leaving drawing geometry unchanged (%s)', (layoutType) => {
         const drawing = {
             aTop: 20,

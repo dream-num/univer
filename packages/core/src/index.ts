@@ -61,6 +61,7 @@ export { mergeSets } from './common/set';
 export { UnitModel, UniverInstanceType } from './common/unit';
 export { isSafeUrl, normalizeUrl, resolveWithBasePath } from './common/url';
 export * from './docs';
+export { getSdtBindingKey, getSdtBindingValue } from './docs/sdt-binding';
 export { EventState, EventSubject, fromEventSubject } from './observer/observable';
 export type { IEventObserver } from './observer/observable';
 export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';

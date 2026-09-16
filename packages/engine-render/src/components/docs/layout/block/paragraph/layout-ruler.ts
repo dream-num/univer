@@ -108,8 +108,10 @@ const RELATIVE_LINE_WIDTH_TOLERANCE = 0.01;
 interface IDefaultSpanMetrics {
     lineHeight: number;
     hasInlineCustomBlock: boolean;
+    hasListGlyph?: boolean;
     normalLineHeight?: number;
     drawingMLLineHeight?: number;
+    paragraphEnd?: boolean;
 }
 
 function isBeyondDivideWidth(width: number, divideWidth: number, lineWrapTolerance?: number) {
@@ -122,7 +124,7 @@ function isBeyondDivideWidth(width: number, divideWidth: number, lineWrapToleran
         ? lineWrapTolerance
         : defaultTolerance;
 
-    return width - divideWidth > tolerance;
+    return width - divideWidth > tolerance + 1e-6;
 }
 
 function isGlyphGroupBeyondDivideWidth(
@@ -133,7 +135,8 @@ function isGlyphGroupBeyondDivideWidth(
     precedingGlyphs?: IDocumentSkeletonGlyph[],
     preserveWordSpacing = false,
     lineWrapTolerance?: number,
-    includeParagraphMark = false
+    includeParagraphMark = false,
+    justifyWordSpacing = false
 ) {
     let trailingIndex = glyphGroup.length - 1;
     while (trailingIndex >= 0 && (
@@ -156,9 +159,29 @@ function isGlyphGroupBeyondDivideWidth(
         for (let index = trailingIndex; index >= 0 && glyphGroup[index].content === DataStreamTreeTokenType.SPACE; index--) {
             trailingSpace += glyphGroup[index].width;
         }
-        // Word leaves trailing spaces outside the measure, but does not borrow whole-pixel
-        // overflow tolerance or compressed word spaces to pull another Western word in.
-        return offsetLeft + width - trailingSpace > divideWidth + 1e-6;
+        const overflow = offsetLeft + width - trailingSpace - divideWidth;
+        if (overflow <= 1e-6) {
+            return false;
+        }
+        const trailingGlyph = glyphGroup[trailingIndex];
+        const hanging = hangingPunctuation && /^[.,]$/.test(trailingGlyph.content)
+            ? trailingGlyph.width * 0.8
+            : 0;
+        if (!justifyWordSpacing || (trailingSpace === 0 && hanging === 0)) {
+            return true;
+        }
+        const preceding = precedingGlyphs ?? [];
+        if (preceding.some((glyph) => glyph.glyphType === GlyphType.TAB)
+            || glyphGroup.some((glyph) => glyph.glyphType === GlyphType.TAB)) {
+            return true;
+        }
+        // Word can tighten justified spaces by one quarter, but chooses the
+        // closer legal break. A terminal line also needs hanging punctuation.
+        const spaces = [...preceding, ...glyphGroup.slice(0, trailingIndex + 1)]
+            .filter((glyph) => glyph.content === DataStreamTreeTokenType.SPACE);
+        const shrink = spaces.reduce((sum, glyph) => sum + glyph.width / 4, 0) - trailingSpace / 4;
+        return overflow - hanging > shrink + 1e-6
+            || overflow + trailingSpace - hanging > Math.max(0, divideWidth - offsetLeft) + 1e-6;
     }
     if (!isBeyondDivideWidth(offsetLeft + width, divideWidth, lineWrapTolerance)) {
         return false;
@@ -403,209 +426,22 @@ function _divideOperator(
     ctx.footnoteLayout?.updateReferenceGlyphs(lastPage, glyphGroup, sectionBreakConfig, paragraphConfig);
     if (divideInfo) {
         const { divide, isLast } = divideInfo;
-        const compressLineStart = paragraphConfig.paragraphStyle?.topLinePunct
-            ?? (isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy) ? BooleanNumber.FALSE : BooleanNumber.TRUE);
-        if (divide.glyphGroup.length === 0 && glyphGroup.length > 0 && compressLineStart === BooleanNumber.FALSE) {
-            // Set the same uncompressed width before fitting and before line-wide justification.
-            preserveLineStartPunctuationSpace(glyphGroup[0]);
-        }
-        const tabStops = getParagraphTabStops(ctx, sectionBreakConfig, paragraphConfig);
-        _adjustExplicitTabStop(divide, glyphGroup, paragraphConfig, tabStops);
-        const lastGlyph = divide?.glyphGroup?.[divide.glyphGroup.length - 1];
-        const lastWidth = lastGlyph?.width || 0;
-        const lastLeft = lastGlyph?.left || 0;
-        const preOffsetLeft = lastWidth + lastLeft;
-        _adjustIncomingTabStops(divide, glyphGroup, preOffsetLeft, sectionBreakConfig, paragraphConfig, tabStops);
-        const fitOffsetLeft = preOffsetLeft + getGlyphPairKerningAdjustment(lastGlyph, glyphGroup[0]) -
-            (lastGlyph?.kerningAdjustment ?? 0);
+        const fit = _fitGlyphsToDivide(ctx, divide, glyphGroup, sectionBreakConfig, paragraphConfig);
+        const { preOffsetLeft } = fit;
         const { hyphenationZone } = sectionBreakConfig;
-        const drawingML = sectionBreakConfig.documentCompatibilityPolicy?.mode === 'drawingml';
-        const hangingPunctuation = paragraphConfig.paragraphStyle?.hangingPunctuation === BooleanNumber.TRUE;
-        const lineWrapTolerance = sectionBreakConfig.renderConfig?.lineWrapTolerance ?? (drawingML ? 0 : undefined);
-        const compression = sectionBreakConfig.characterSpacingControl ?? ctx.dataModel.documentStyle.characterSpacingControl;
-        const horizontalAlign = paragraphConfig.paragraphStyle?.horizontalAlign;
-        const westernLine = !glyphGroup.some((glyph) => cjk.hasCJKText(glyph.content))
-            && !divide.glyphGroup.some((glyph) => cjk.hasCJKText(glyph.content));
-        const preserveWordSpacing = isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
-            && (horizontalAlign == null || horizontalAlign === HorizontalAlign.UNSPECIFIED || horizontalAlign === HorizontalAlign.LEFT)
-            && preOffsetLeft + __getGlyphGroupWidth(glyphGroup) > divide.width
-            && westernLine;
-        // Word's character compression is independent of justification: left-aligned
-        // report text also contracts punctuation to fit a closer legal line break.
-        const allowLineCompression = isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
-            && (compression !== characterSpacingControlType.doNotCompress ||
-                (westernLine && (horizontalAlign === HorizontalAlign.JUSTIFIED || horizontalAlign === HorizontalAlign.BOTH)))
-            && (horizontalAlign === HorizontalAlign.LEFT || horizontalAlign === HorizontalAlign.JUSTIFIED || horizontalAlign === HorizontalAlign.BOTH || horizontalAlign === HorizontalAlign.DISTRIBUTED);
-        if (isGlyphGroupBeyondDivideWidth(
-            glyphGroup,
-            fitOffsetLeft,
-            divide.width,
-            hangingPunctuation,
-            allowLineCompression ? divide.glyphGroup : undefined,
-            preserveWordSpacing,
-            lineWrapTolerance,
-            !isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
-        )) {
-            if (
-                divide?.glyphGroup.length === 0 &&
-                glyphGroup.length > 0 &&
-                glyphGroup[0].streamType === DataStreamTreeTokenType.CUSTOM_BLOCK
-            ) {
-                addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
-                updateDivideInfo(divide, { breakType: breakPointType });
-                return;
-            }
-
-            if (shouldKeepOverflowingTextOnLine(sectionBreakConfig)) {
-                addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
-                updateDivideInfo(divide, { breakType: breakPointType });
-                return;
-            }
-
-            // width exceeds divide width
-            updateDivideInfo(divide, {
-                isFull: true,
-            });
-            const hyphenLineCount = _getConsecutiveHyphenLineCount(divideInfo.divide);
-            const { consecutiveHyphenLimit = Number.POSITIVE_INFINITY } = sectionBreakConfig;
-
-            // There are two main ways to deal with word or number strings exceeding divide width
-            // 1. If you end with a line break(\r), you need to append a line break(\r) to the end of divide, even if it exceeds the divide width.
-            // 2. In a blank line, if the English word or consecutive number exceeds the width of the divide, the English word and number string will be split, and some of them will be added to the previous line, and the rest will be placed in the new line.
-            // There is a boundary case, that is, the width of the English character exceeds the width of the divide, and this character needs to be appended to the previous line.
-            if (
-                divideInfo.isLast &&
-                glyphGroup.length === 1 &&
-                (glyphGroup[0].content === DataStreamTreeTokenType.SPACE ||
-                    (drawingML && glyphGroup[0].content === '\u3000') ||
-                    glyphGroup[0].content === DataStreamTreeTokenType.PARAGRAPH)
-            ) {
-                addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
-            } else if (
-                // If a line of text ends with consecutive spaces, the spaces should not be placed on the second line.
-                divideInfo.isLast && !isGlyphGroupBeyondContentBox(glyphGroup, fitOffsetLeft, divide.width, drawingML) &&
-                isGlyphGroupEndWithWhiteSpaces(glyphGroup, drawingML)
-            ) {
-                addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
-            } else if (
-                !isLast &&
-                divide?.glyphGroup.length === 0 &&
-                glyphGroup.length === 1 &&
-                glyphGroup[0].streamType === DataStreamTreeTokenType.CUSTOM_BLOCK &&
-                glyphGroup[0].width > divide.width
-            ) {
-                addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
-                updateDivideInfo(divide, { breakType: breakPointType });
-            } else if (!isLast && divide?.glyphGroup.length === 0) {
-                // A wrap drawing can leave a sliver before another usable divide.
-                // Preserve the shaped word and try the next divide instead of
-                // forcing a single glyph into that sliver.
-                _divideOperator(
-                    ctx,
-                    glyphGroup,
-                    pages,
-                    sectionBreakConfig,
-                    paragraphConfig,
-                    isParagraphFirstShapedText,
-                    breakPointType,
-                    defaultSpanMetrics
-                );
-            } else if (divide?.glyphGroup.length === 0) {
-                const line = divide.parent!;
-                const column = line.parent!;
-                const section = column.parent!;
-                const wordWidth = __getGlyphGroupWidth(glyphGroup);
-                if (
-                    isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy!) &&
-                    wordWidth < column.width &&
-                    calculateLineTopByDrawings(line.lineHeight, line.top, lastPage, null, null, column.left, column.width, section.top, wordWidth - 0.001) > line.top
-                ) {
-                    // Preserve the shaped word when the obstacle, rather than the
-                    // column, is too narrow. Normal long-word breaking still applies.
-                    _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType, defaultSpanMetrics);
-                    return;
-                }
-                const sliceGlyphGroup: IDocumentSkeletonGlyph[] = [];
-
-                while (glyphGroup.length) {
-                    sliceGlyphGroup.push(glyphGroup.shift()!);
-
-                    if (isGlyphGroupBeyondDivideWidth(
-                        sliceGlyphGroup,
-                        0,
-                        divide.width,
-                        hangingPunctuation,
-                        allowLineCompression ? [] : undefined,
-                        preserveWordSpacing,
-                        lineWrapTolerance,
-                        !isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
-                    )) {
-                        // To avoid infinity loop when width is less than one char's width.
-                        if (sliceGlyphGroup.length > 1) { // || (sliceGlyphGroup.length > 0 && sliceGlyphGroup[sliceGlyphGroup.length - 1].drawingId)) {
-                            glyphGroup.unshift(sliceGlyphGroup.pop()!);
-                        }
-                        break;
-                    }
-                }
-
-                if (sliceGlyphGroup.length > 0) {
-                    // An oversized first glyph still owns its paragraph terminator;
-                    // moving the terminator alone would create a spurious blank line.
-                    if (glyphGroup.every(__isStructuralTerminatorGlyph)) {
-                        sliceGlyphGroup.push(...glyphGroup.splice(0));
-                    }
-                    addGlyphToDivide(divide, sliceGlyphGroup, preOffsetLeft);
-                }
-
-                if (glyphGroup.length) {
-                    // Only Divide in the first paragraph is the beginning of the paragraph
-                    _divideOperator(
-                        ctx,
-                        glyphGroup,
-                        pages,
-                        sectionBreakConfig,
-                        paragraphConfig,
-                        false,
-
-                        breakPointType,
-                        defaultSpanMetrics
-                    );
-                }
-            } else if (hyphenLineCount > consecutiveHyphenLimit) {
-                const hyphenSliceGlyphGroup = _popHyphenSlice(divide);
-
-                if (hyphenSliceGlyphGroup.length > 0) {
-                    updateDivideInfo(divide, {
-                        breakType: BreakPointType.Normal,
-                    });
-
-                    _divideOperator(ctx, hyphenSliceGlyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, BreakPointType.Hyphen);
-                }
-
-                _divideOperator(
-                    ctx,
-                    glyphGroup,
-                    pages,
-                    sectionBreakConfig,
-                    paragraphConfig,
-                    isParagraphFirstShapedText,
-
-                    breakPointType,
-                    defaultSpanMetrics
-                );
-            } else {
-                _divideOperator(
-                    ctx,
-                    glyphGroup,
-                    pages,
-                    sectionBreakConfig,
-                    paragraphConfig,
-                    isParagraphFirstShapedText,
-
-                    breakPointType,
-                    defaultSpanMetrics
-                );
-            }
+        if (fit.beyondWidth) {
+            _appendOverflowingGlyphs(
+                ctx,
+                glyphGroup,
+                pages,
+                sectionBreakConfig,
+                paragraphConfig,
+                isParagraphFirstShapedText,
+                divideInfo,
+                fit,
+                breakPointType,
+                defaultSpanMetrics
+            );
         } else if ( // Determine if first word slice appears inside the hyphenation zone.
             isLast &&
             hyphenationZone &&
@@ -630,191 +466,494 @@ function _divideOperator(
                 defaultSpanMetrics
             );
         } else {
-            // w does not exceed divide width, add it to divide
-            const currentLine = divide.parent;
-            if (currentLine?.parent?.parent && ctx.footnoteLayout && glyphGroup.some((glyph) => glyph.noteId)) {
-                const bodyBottom = currentLine.parent.parent.top + currentLine.top + currentLine.lineHeight;
-                const bodyLimit = ctx.footnoteLayout.getBodyLimit(lastPage, pages, sectionBreakConfig, bodyBottom, glyphGroup);
-                if (bodyBottom > bodyLimit + LINE_LAYOUT_OVERFLOW_TOLERANCE) {
-                    const column = currentLine.parent;
-                    const cachedGlyphs = __getGlyphGroupByLine(currentLine);
-                    column.lines.pop();
-                    const previousLine = column.lines[column.lines.length - 1];
-                    const previousBottom = column.parent!.top + (previousLine == null ? 0 : previousLine.top + previousLine.lineHeight);
-                    ctx.footnoteLayout.getBodyLimit(lastPage, pages, sectionBreakConfig, previousBottom);
-                    _pageOperator(ctx, [...cachedGlyphs, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, currentLine.paragraphStart, breakPointType, defaultSpanMetrics);
-                    return;
-                }
-            }
-            const lineGlyphs = currentLine ? __getGlyphGroupByLine(currentLine) : [];
-            const maxBox = getGlyphGroupFontBoundingBox(paragraphConfig.documentCompatibilityPolicy, lineGlyphs, glyphGroup);
-
-            if (currentLine?.parent &&
-                isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy) &&
-                __isPositionedCustomBlockOnlyLine(lineGlyphs, paragraphConfig.paragraphNonInlineSkeDrawings) &&
-                glyphGroup.some((glyph) => glyph.streamType === DataStreamTreeTokenType.PARAGRAPH && glyph.bBox.ba + glyph.bBox.bd > 0) &&
-                ctx.viewModel.getSelfOrHeaderFooterViewModel(lastPage.segmentId).getParagraph(paragraphConfig.paragraphIndex) != null) {
-                // The mark can arrive after a heightless anchor fragment. Re-layout the
-                // complete paragraph so its real height also participates in pagination.
-                currentLine.parent.lines.pop();
-                _lineOperator(ctx, [...lineGlyphs, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, currentLine.paragraphStart, breakPointType);
-                return;
-            }
-
-            if (currentLine?.parent && __isNullLine(currentLine) && __hasFlowGlyph(glyphGroup)) {
-                const cachedGlyphs = __getGlyphGroupByLine(currentLine);
-                if (cachedGlyphs.length > 0 && cachedGlyphs.every((glyph) => glyph.streamType === DataStreamTreeTokenType.PAGE_BREAK)) {
-                    // A skipped rendered-page hint has no font metrics. Let the first real text
-                    // establish its line, including normal font leading and available page height.
-                    currentLine.parent.lines.pop();
-                    _lineOperator(ctx, [...cachedGlyphs, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, currentLine.paragraphStart, breakPointType, defaultSpanMetrics);
-                    return;
-                }
-            }
-
-            if (
-                currentLine &&
-                __isPositionedCustomBlockOnlyLine(lineGlyphs, paragraphConfig.paragraphNonInlineSkeDrawings) &&
-                __hasFlowGlyph(glyphGroup)
-            ) {
-                for (const lineDivide of currentLine.divides) {
-                    updateDivideInfo(lineDivide, {
-                        isFull: true,
-                    });
-                }
-                _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, false, breakPointType);
-                return;
-            }
-
-            if (
-                currentLine &&
-                maxBox &&
-                !__isNullLine(currentLine) &&
-                __hasFlowGlyph(lineGlyphs) &&
-                !isNonFlowFloatingAnchor(glyphGroup, paragraphConfig.paragraphNonInlineSkeDrawings)
-            ) {
-                const { paragraphLineGapDefault, linePitch, lineSpacing, spacingRule, snapToGrid, gridType } =
-                    getLineHeightConfig(sectionBreakConfig, paragraphConfig);
-                const { boundingBoxAscent, boundingBoxDescent } = maxBox;
-                const { normalLineHeight } = getGlyphGroupFontBoundingBox(
-                    paragraphConfig.documentCompatibilityPolicy,
-                    lineGlyphs.filter((glyph) => !__isStructuralTerminatorGlyph(glyph)),
-                    glyphGroup.filter((glyph) => !__isStructuralTerminatorGlyph(glyph))
-                );
-                const spanLineHeight = boundingBoxAscent + boundingBoxDescent;
-                const hasInlineCustomBlock = [lineGlyphs, glyphGroup].some((group) => group.some((glyph) =>
-                    glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0
-                ));
-                const drawingMLLineHeight = getDrawingMLNominalLineHeight([...lineGlyphs, ...glyphGroup], sectionBreakConfig, hasInlineCustomBlock);
-                const { contentHeight, paddingTop, paddingBottom } = getLineHeightMetrics(
-                    spanLineHeight,
-                    paragraphLineGapDefault,
-                    linePitch,
-                    gridType,
-                    lineSpacing,
-                    spacingRule,
-                    snapToGrid,
-                    paragraphConfig.useWordStyleLineHeight,
-                    !hasInlineCustomBlock,
-                    hasInlineCustomBlock && !isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
-                        ? undefined
-                        : normalLineHeight || undefined,
-                    false,
-                    drawingMLLineHeight
-                );
-
-                // Extra font leading can change the line extent without changing its
-                // font box. Keep the existing font-box tolerance for paragraph marks.
-                const expandsAutoLeading = spacingRule === SpacingRule.AUTO && (normalLineHeight > spanLineHeight || hasInlineCustomBlock || drawingMLLineHeight != null) &&
-                    contentHeight + paddingTop + paddingBottom - currentLine.contentHeight -
-                    currentLine.paddingTop - currentLine.paddingBottom > 1e-6;
-                if (contentHeight - currentLine.contentHeight > LINE_LAYOUT_OVERFLOW_TOLERANCE || expandsAutoLeading) {
-                    // If the height of the new content exceeds the height of the line it joins, for mixed text and graphics layout, the entire line needs to be recalculated according to the new height
-                    // If the height of the new content exceeds the height of the added row,
-                    // the entire row needs to be recalculated according to the new height
-                    // in order to handle the mixing of graphics and text
-                    const spanGroupCached = lineGlyphs;
-                    const spanGroupCachedLen = spanGroupCached.length;
-                    let newGlyphGroup = [];
-                    let startIndex = 1;
-
-                    if (spanGroupCachedLen > 2 && spanGroupCached[0].glyphType === GlyphType.LIST) {
-                        newGlyphGroup = [spanGroupCached[0], spanGroupCached[1]];
-                        startIndex = 2;
-                    } else {
-                        newGlyphGroup = [spanGroupCached[0]];
-                    }
-                    const column = currentLine.parent!;
-
-                    const { paragraphStart: lineIsStart } = column.lines.pop()!; // Delete the previous line and recalculate according to the maximum content height
-                    const reflowMetrics: IDefaultSpanMetrics = {
-                        lineHeight: boundingBoxAscent + boundingBoxDescent,
-                        hasInlineCustomBlock,
-                        normalLineHeight: normalLineHeight || undefined,
-                        drawingMLLineHeight,
-                    };
-
-                    _lineOperator(
-                        ctx,
-                        newGlyphGroup,
-                        pages,
-                        sectionBreakConfig,
-                        paragraphConfig,
-                        lineIsStart,
-
-                        breakPointType,
-                        reflowMetrics
-                    );
-
-                    for (let i = startIndex; i < spanGroupCached.length; i++) {
-                        // TODO: @jocs Here you may see non-breakpoints appearing at the end of the line.
-                        _divideOperator(
-                            ctx,
-                            [spanGroupCached[i]],
-                            pages,
-                            sectionBreakConfig,
-                            paragraphConfig,
-                            isParagraphFirstShapedText,
-                            BreakPointType.Normal,
-                            reflowMetrics
-                        );
-                    }
-
-                    // Replaying a zero-height page hint can rebuild the line again.
-                    // Keep the complete mixed-run metrics throughout that replay.
-                    _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType, reflowMetrics);
-
-                    return;
-                }
-            }
-            if (currentLine?.parent) {
-                const anchorDrawings = __getZeroWidthNonFlowFloatingAnchorDrawings(glyphGroup, paragraphConfig.paragraphNonInlineSkeDrawings);
-                if (anchorDrawings.length > 0) {
-                    const paragraphAnchorLeft = __getParagraphAnchorLeft(sectionBreakConfig, paragraphConfig, paragraphConfig.paragraphStyle?.indentStart);
-                    const drawings = __getDrawingPosition(
-                        ctx,
-                        currentLine.top,
-                        currentLine.lineHeight,
-                        currentLine.parent,
-                        true,
-                        paragraphConfig.pDrawingAnchor?.get(paragraphConfig.paragraphIndex)?.top,
-                        anchorDrawings,
-                        paragraphAnchorLeft,
-                        false
-                    );
-                    __updateDrawingPosition(currentLine.parent, drawings);
-                    addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
-                    updateDivideInfo(divide, { breakType: breakPointType });
-                    glyphGroup.length = 0;
-                    return;
-                }
-            }
-
-            addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
-            updateDivideInfo(divide, { breakType: breakPointType });
+            _appendFittingGlyphs(
+                ctx,
+                glyphGroup,
+                pages,
+                sectionBreakConfig,
+                paragraphConfig,
+                isParagraphFirstShapedText,
+                divide,
+                preOffsetLeft,
+                breakPointType,
+                defaultSpanMetrics
+            );
         }
     } else {
         _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType, defaultSpanMetrics);
+    }
+}
+
+function _fitGlyphsToDivide(
+    ctx: ILayoutContext,
+    divide: IDocumentSkeletonDivide,
+    glyphGroup: IDocumentSkeletonGlyph[],
+    sectionBreakConfig: ISectionBreakConfig,
+    paragraphConfig: IParagraphConfig
+) {
+    const compressLineStart = paragraphConfig.paragraphStyle?.topLinePunct
+        ?? (isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy) ? BooleanNumber.FALSE : BooleanNumber.TRUE);
+    if (divide.glyphGroup.length === 0 && glyphGroup.length > 0 && compressLineStart === BooleanNumber.FALSE) {
+        // Set the same uncompressed width before fitting and before line-wide justification.
+        preserveLineStartPunctuationSpace(glyphGroup[0]);
+    }
+    const tabStops = getParagraphTabStops(ctx, sectionBreakConfig, paragraphConfig);
+    _adjustExplicitTabStop(divide, glyphGroup, paragraphConfig, tabStops);
+    const lastGlyph = divide?.glyphGroup?.[divide.glyphGroup.length - 1];
+    const lastWidth = lastGlyph?.width || 0;
+    const lastLeft = lastGlyph?.left || 0;
+    const preOffsetLeft = lastWidth + lastLeft;
+    _adjustIncomingTabStops(divide, glyphGroup, preOffsetLeft, sectionBreakConfig, paragraphConfig, tabStops);
+    const fitOffsetLeft = preOffsetLeft + getGlyphPairKerningAdjustment(lastGlyph, glyphGroup[0]) -
+        (lastGlyph?.kerningAdjustment ?? 0);
+    const drawingML = sectionBreakConfig.documentCompatibilityPolicy?.mode === 'drawingml';
+    const hangingPunctuation = paragraphConfig.paragraphStyle?.hangingPunctuation === BooleanNumber.TRUE;
+    // Word line fitting must not borrow the legacy 1–3px allowance in addition
+    // to punctuation hanging/compression; small overflows accumulate across lines.
+    const lineWrapTolerance = sectionBreakConfig.renderConfig?.lineWrapTolerance
+        ?? (drawingML || isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy) ? 0 : undefined);
+    const compression = sectionBreakConfig.characterSpacingControl ?? ctx.dataModel.documentStyle.characterSpacingControl;
+    const horizontalAlign = paragraphConfig.paragraphStyle?.horizontalAlign;
+    const westernLine = !glyphGroup.some((glyph) => cjk.hasCJKText(glyph.content))
+        && !divide.glyphGroup.some((glyph) => cjk.hasCJKText(glyph.content));
+    const preserveWordSpacing = isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
+        && (horizontalAlign == null || horizontalAlign === HorizontalAlign.UNSPECIFIED || horizontalAlign === HorizontalAlign.LEFT
+            || horizontalAlign === HorizontalAlign.JUSTIFIED || horizontalAlign === HorizontalAlign.BOTH)
+        && preOffsetLeft + __getGlyphGroupWidth(glyphGroup) > divide.width
+        && westernLine;
+    const justifyWordSpacing = preserveWordSpacing
+        && (horizontalAlign === HorizontalAlign.JUSTIFIED || horizontalAlign === HorizontalAlign.BOTH);
+    // East Asian punctuation contracts before horizontal alignment, including
+    // centered and right-aligned cell text that would otherwise wrap.
+    const allowLineCompression = isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
+        && compression !== characterSpacingControlType.doNotCompress
+        && (horizontalAlign === HorizontalAlign.LEFT || (!westernLine && (horizontalAlign === HorizontalAlign.CENTER || horizontalAlign === HorizontalAlign.RIGHT))
+            || horizontalAlign === HorizontalAlign.JUSTIFIED || horizontalAlign === HorizontalAlign.BOTH || horizontalAlign === HorizontalAlign.DISTRIBUTED);
+
+    const beyondWidth = isGlyphGroupBeyondDivideWidth(
+        glyphGroup,
+        fitOffsetLeft,
+        divide.width,
+        hangingPunctuation,
+        allowLineCompression || justifyWordSpacing ? divide.glyphGroup : undefined,
+        preserveWordSpacing,
+        lineWrapTolerance,
+        !isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy),
+        justifyWordSpacing
+    );
+    return {
+        preOffsetLeft,
+        fitOffsetLeft,
+        drawingML,
+        hangingPunctuation,
+        allowLineCompression,
+        preserveWordSpacing,
+        lineWrapTolerance,
+        beyondWidth,
+    };
+}
+
+function _appendOverflowingGlyphs(
+    ctx: ILayoutContext,
+    glyphGroup: IDocumentSkeletonGlyph[],
+    pages: IDocumentSkeletonPage[],
+    sectionBreakConfig: ISectionBreakConfig,
+    paragraphConfig: IParagraphConfig,
+    isParagraphFirstShapedText: boolean,
+    divideInfo: NonNullable<ReturnType<typeof getLastNotFullDivideInfo>>,
+    fit: ReturnType<typeof _fitGlyphsToDivide>,
+    breakPointType: BreakPointType,
+    defaultSpanMetrics?: IDefaultSpanMetrics
+): void {
+    const lastPage = getLastPage(pages);
+    const { divide, isLast } = divideInfo;
+    const {
+        preOffsetLeft,
+        fitOffsetLeft,
+        drawingML,
+        hangingPunctuation,
+        allowLineCompression,
+        preserveWordSpacing,
+        lineWrapTolerance,
+    } = fit;
+    if (
+        divide?.glyphGroup.length === 0 &&
+        // A retained pagination marker must stay with the oversized picture;
+        // laying it out alone would reserve the picture's line height twice.
+        glyphGroup.find((glyph) => !__isIgnorableZeroSizeGlyph(glyph))?.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK
+    ) {
+        addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
+        updateDivideInfo(divide, { breakType: breakPointType });
+        return;
+    }
+
+    if (shouldKeepOverflowingTextOnLine(sectionBreakConfig)) {
+        addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
+        updateDivideInfo(divide, { breakType: breakPointType });
+        return;
+    }
+
+    // width exceeds divide width
+    updateDivideInfo(divide, {
+        isFull: true,
+    });
+    const hyphenLineCount = _getConsecutiveHyphenLineCount(divideInfo.divide);
+    const { consecutiveHyphenLimit = Number.POSITIVE_INFINITY } = sectionBreakConfig;
+
+    // There are two main ways to deal with word or number strings exceeding divide width
+    // 1. If you end with a line break(\r), you need to append a line break(\r) to the end of divide, even if it exceeds the divide width.
+    // 2. In a blank line, if the English word or consecutive number exceeds the width of the divide, the English word and number string will be split, and some of them will be added to the previous line, and the rest will be placed in the new line.
+    // There is a boundary case, that is, the width of the English character exceeds the width of the divide, and this character needs to be appended to the previous line.
+    if (
+        divideInfo.isLast &&
+        glyphGroup.length === 1 &&
+        (glyphGroup[0].content === DataStreamTreeTokenType.SPACE ||
+            (drawingML && glyphGroup[0].content === '\u3000') ||
+            glyphGroup[0].content === DataStreamTreeTokenType.PARAGRAPH)
+    ) {
+        addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
+    } else if (
+        // If a line of text ends with consecutive spaces, the spaces should not be placed on the second line.
+        divideInfo.isLast && !isGlyphGroupBeyondContentBox(glyphGroup, fitOffsetLeft, divide.width, drawingML) &&
+        isGlyphGroupEndWithWhiteSpaces(glyphGroup, drawingML)
+    ) {
+        addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
+    } else if (
+        !isLast &&
+        divide?.glyphGroup.length === 0 &&
+        glyphGroup.length === 1 &&
+        glyphGroup[0].streamType === DataStreamTreeTokenType.CUSTOM_BLOCK &&
+        glyphGroup[0].width > divide.width
+    ) {
+        addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
+        updateDivideInfo(divide, { breakType: breakPointType });
+    } else if (!isLast && divide?.glyphGroup.length === 0) {
+        // A wrap drawing can leave a sliver before another usable divide.
+        // Preserve the shaped word and try the next divide instead of
+        // forcing a single glyph into that sliver.
+        _divideOperator(
+            ctx,
+            glyphGroup,
+            pages,
+            sectionBreakConfig,
+            paragraphConfig,
+            isParagraphFirstShapedText,
+            breakPointType,
+            defaultSpanMetrics
+        );
+    } else if (divide?.glyphGroup.length === 0) {
+        const line = divide.parent!;
+        const column = line.parent!;
+        const section = column.parent!;
+        const wordWidth = __getGlyphGroupWidth(glyphGroup);
+        if (
+            isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy!) &&
+            wordWidth < column.width &&
+            calculateLineTopByDrawings(line.lineHeight, line.top, lastPage, null, null, column.left, column.width, section.top, wordWidth - 0.001) > line.top
+        ) {
+            // Preserve the shaped word when the obstacle, rather than the
+            // column, is too narrow. Normal long-word breaking still applies.
+            _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType, defaultSpanMetrics);
+            return;
+        }
+        const sliceGlyphGroup: IDocumentSkeletonGlyph[] = [];
+
+        while (glyphGroup.length) {
+            sliceGlyphGroup.push(glyphGroup.shift()!);
+
+            if (isGlyphGroupBeyondDivideWidth(
+                sliceGlyphGroup,
+                0,
+                divide.width,
+                hangingPunctuation,
+                allowLineCompression ? [] : undefined,
+                preserveWordSpacing,
+                lineWrapTolerance,
+                !isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
+            )) {
+                // To avoid infinity loop when width is less than one char's width.
+                if (sliceGlyphGroup.length > 1) { // || (sliceGlyphGroup.length > 0 && sliceGlyphGroup[sliceGlyphGroup.length - 1].drawingId)) {
+                    glyphGroup.unshift(sliceGlyphGroup.pop()!);
+                }
+                break;
+            }
+        }
+
+        if (sliceGlyphGroup.length > 0) {
+            // An oversized first glyph still owns its paragraph terminator;
+            // moving the terminator alone would create a spurious blank line.
+            if (glyphGroup.every(__isStructuralTerminatorGlyph)) {
+                sliceGlyphGroup.push(...glyphGroup.splice(0));
+            }
+            addGlyphToDivide(divide, sliceGlyphGroup, preOffsetLeft);
+        }
+
+        if (glyphGroup.length) {
+            // Only Divide in the first paragraph is the beginning of the paragraph
+            _divideOperator(
+                ctx,
+                glyphGroup,
+                pages,
+                sectionBreakConfig,
+                paragraphConfig,
+                false,
+
+                breakPointType,
+                defaultSpanMetrics
+            );
+        }
+    } else if (hyphenLineCount > consecutiveHyphenLimit) {
+        const hyphenSliceGlyphGroup = _popHyphenSlice(divide);
+
+        if (hyphenSliceGlyphGroup.length > 0) {
+            updateDivideInfo(divide, {
+                breakType: BreakPointType.Normal,
+            });
+
+            _divideOperator(ctx, hyphenSliceGlyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, BreakPointType.Hyphen);
+        }
+
+        _divideOperator(
+            ctx,
+            glyphGroup,
+            pages,
+            sectionBreakConfig,
+            paragraphConfig,
+            isParagraphFirstShapedText,
+
+            breakPointType,
+            defaultSpanMetrics
+        );
+    } else {
+        _divideOperator(
+            ctx,
+            glyphGroup,
+            pages,
+            sectionBreakConfig,
+            paragraphConfig,
+            isParagraphFirstShapedText,
+
+            breakPointType,
+            defaultSpanMetrics
+        );
+    }
+}
+
+function _appendFittingGlyphs(
+    ctx: ILayoutContext,
+    glyphGroup: IDocumentSkeletonGlyph[],
+    pages: IDocumentSkeletonPage[],
+    sectionBreakConfig: ISectionBreakConfig,
+    paragraphConfig: IParagraphConfig,
+    isParagraphFirstShapedText: boolean,
+    divide: IDocumentSkeletonDivide,
+    preOffsetLeft: number,
+    breakPointType: BreakPointType,
+    defaultSpanMetrics?: IDefaultSpanMetrics
+): void {
+    const lastPage = getLastPage(pages);
+    const currentLine = divide.parent;
+    if (currentLine?.parent?.parent && ctx.footnoteLayout && glyphGroup.some((glyph) => glyph.noteId)) {
+        const bodyBottom = currentLine.parent.parent.top + currentLine.top + currentLine.lineHeight;
+        const bodyLimit = ctx.footnoteLayout.getBodyLimit(lastPage, pages, sectionBreakConfig, bodyBottom, glyphGroup);
+        if (bodyBottom > bodyLimit + LINE_LAYOUT_OVERFLOW_TOLERANCE) {
+            const column = currentLine.parent;
+            const cachedGlyphs = __getGlyphGroupByLine(currentLine);
+            column.lines.pop();
+            const previousLine = column.lines[column.lines.length - 1];
+            const previousBottom = column.parent!.top + (previousLine == null ? 0 : previousLine.top + previousLine.lineHeight);
+            ctx.footnoteLayout.getBodyLimit(lastPage, pages, sectionBreakConfig, previousBottom);
+            _pageOperator(ctx, [...cachedGlyphs, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, currentLine.paragraphStart, breakPointType, defaultSpanMetrics);
+            return;
+        }
+    }
+    const lineGlyphs = currentLine ? __getGlyphGroupByLine(currentLine) : [];
+    if (currentLine?.parent &&
+        isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy) &&
+        __isPositionedCustomBlockOnlyLine(lineGlyphs, paragraphConfig.paragraphNonInlineSkeDrawings) &&
+        glyphGroup.some((glyph) => glyph.streamType === DataStreamTreeTokenType.PARAGRAPH && glyph.bBox.ba + glyph.bBox.bd > 0) &&
+        ctx.viewModel.getSelfOrHeaderFooterViewModel(lastPage.segmentId).getParagraph(paragraphConfig.paragraphIndex) != null) {
+        // The mark can arrive after a heightless anchor fragment. Re-layout the
+        // complete paragraph so its real height also participates in pagination.
+        currentLine.parent.lines.pop();
+        _lineOperator(ctx, [...lineGlyphs, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, currentLine.paragraphStart, breakPointType);
+        return;
+    }
+
+    if (currentLine?.parent && __isNullLine(currentLine) && __hasFlowGlyph(glyphGroup)) {
+        const cachedGlyphs = __getGlyphGroupByLine(currentLine);
+        if (cachedGlyphs.length > 0 && cachedGlyphs.every((glyph) => glyph.streamType === DataStreamTreeTokenType.PAGE_BREAK)) {
+            // A skipped rendered-page hint has no font metrics. Let the first real text
+            // establish its line, including normal font leading and available page height.
+            currentLine.parent.lines.pop();
+            _lineOperator(ctx, [...cachedGlyphs, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, currentLine.paragraphStart, breakPointType, defaultSpanMetrics);
+            return;
+        }
+    }
+
+    if (
+        currentLine &&
+        __isPositionedCustomBlockOnlyLine(lineGlyphs, paragraphConfig.paragraphNonInlineSkeDrawings) &&
+        __hasFlowGlyph(glyphGroup)
+    ) {
+        for (const lineDivide of currentLine.divides) {
+            updateDivideInfo(lineDivide, {
+                isFull: true,
+            });
+        }
+        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, false, breakPointType);
+        return;
+    }
+
+    const reflowMetrics = currentLine
+        ? _getExpandedLineMetrics(currentLine, lineGlyphs, glyphGroup, sectionBreakConfig, paragraphConfig)
+        : undefined;
+    if (currentLine && reflowMetrics) {
+        // Rebuild the complete line with the incoming run's metrics.
+        const spanGroupCached = lineGlyphs;
+        const spanGroupCachedLen = spanGroupCached.length;
+        let newGlyphGroup = [];
+        let startIndex = 1;
+
+        if (spanGroupCachedLen > 2 && spanGroupCached[0].glyphType === GlyphType.LIST) {
+            newGlyphGroup = [spanGroupCached[0], spanGroupCached[1]];
+            startIndex = 2;
+        } else {
+            newGlyphGroup = [spanGroupCached[0]];
+        }
+        const column = currentLine.parent!;
+
+        const { paragraphStart: lineIsStart } = column.lines.pop()!; // Delete the previous line and recalculate according to the maximum content height
+
+        _lineOperator(
+            ctx,
+            newGlyphGroup,
+            pages,
+            sectionBreakConfig,
+            paragraphConfig,
+            lineIsStart,
+
+            breakPointType,
+            reflowMetrics
+        );
+
+        for (let i = startIndex; i < spanGroupCached.length; i++) {
+            // TODO: @jocs Here you may see non-breakpoints appearing at the end of the line.
+            _divideOperator(
+                ctx,
+                [spanGroupCached[i]],
+                pages,
+                sectionBreakConfig,
+                paragraphConfig,
+                isParagraphFirstShapedText,
+                BreakPointType.Normal,
+                reflowMetrics
+            );
+        }
+
+        // Replaying a zero-height page hint can rebuild the line again.
+        // Keep the complete mixed-run metrics throughout that replay.
+        _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType, reflowMetrics);
+
+        return;
+    }
+
+    if (currentLine?.parent) {
+        const anchorDrawings = __getZeroWidthNonFlowFloatingAnchorDrawings(glyphGroup, paragraphConfig.paragraphNonInlineSkeDrawings);
+        if (anchorDrawings.length > 0) {
+            const paragraphAnchorLeft = __getParagraphAnchorLeft(sectionBreakConfig, paragraphConfig, paragraphConfig.paragraphStyle?.indentStart);
+            const drawings = __getDrawingPosition(
+                ctx,
+                currentLine.top,
+                currentLine.lineHeight,
+                currentLine.parent,
+                true,
+                paragraphConfig.pDrawingAnchor?.get(paragraphConfig.paragraphIndex)?.top,
+                anchorDrawings,
+                paragraphAnchorLeft,
+                false
+            );
+            __updateDrawingPosition(currentLine.parent, drawings);
+            addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
+            updateDivideInfo(divide, { breakType: breakPointType });
+            glyphGroup.length = 0;
+            return;
+        }
+    }
+
+    addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
+    updateDivideInfo(divide, { breakType: breakPointType });
+}
+
+function _getExpandedLineMetrics(
+    currentLine: IDocumentSkeletonLine,
+    lineGlyphs: IDocumentSkeletonGlyph[],
+    glyphGroup: IDocumentSkeletonGlyph[],
+    sectionBreakConfig: ISectionBreakConfig,
+    paragraphConfig: IParagraphConfig
+): IDefaultSpanMetrics | undefined {
+    if (__isNullLine(currentLine) || !__hasFlowGlyph(lineGlyphs)
+        || isNonFlowFloatingAnchor(glyphGroup, paragraphConfig.paragraphNonInlineSkeDrawings)) {
+        return;
+    }
+    const maxBox = getGlyphGroupFontBoundingBox(paragraphConfig.documentCompatibilityPolicy, lineGlyphs, glyphGroup);
+    const { paragraphLineGapDefault, linePitch, lineSpacing, spacingRule, snapToGrid, gridType } =
+        getLineHeightConfig(sectionBreakConfig, paragraphConfig);
+    const { boundingBoxAscent, boundingBoxDescent } = maxBox;
+    const { normalLineHeight: visibleNormalLineHeight, boundingBoxAscent: visibleAscent, boundingBoxDescent: visibleDescent } = getGlyphGroupFontBoundingBox(
+        paragraphConfig.documentCompatibilityPolicy,
+        lineGlyphs.filter((glyph) => !__isStructuralTerminatorGlyph(glyph)),
+        glyphGroup.filter((glyph) => !__isStructuralTerminatorGlyph(glyph))
+    );
+    const spanLineHeight = boundingBoxAscent + boundingBoxDescent;
+    const hasInlineCustomBlock = [lineGlyphs, glyphGroup].some((group) => group.some((glyph) =>
+        glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0
+    ));
+    const hasListGlyph = isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
+        && [lineGlyphs, glyphGroup].some((group) => group.some((glyph) => glyph.glyphType === GlyphType.LIST));
+    const normalLineHeight = hasListGlyph
+        ? getListTextLineHeight(paragraphConfig.documentCompatibilityPolicy, lineGlyphs, glyphGroup)
+        : visibleNormalLineHeight;
+    const drawingMLLineHeight = getDrawingMLNominalLineHeight([...lineGlyphs, ...glyphGroup], sectionBreakConfig, hasInlineCustomBlock);
+    const { contentHeight, paddingTop, paddingBottom } = getLineHeightMetrics(
+        spanLineHeight,
+        paragraphLineGapDefault,
+        linePitch,
+        gridType,
+        lineSpacing,
+        spacingRule,
+        snapToGrid,
+        paragraphConfig.useWordStyleLineHeight,
+        !hasInlineCustomBlock && !hasListGlyph,
+        hasInlineCustomBlock && !isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
+            ? undefined
+            : normalLineHeight || undefined,
+        false,
+        drawingMLLineHeight
+    );
+
+    // Extra font leading can change the line extent without changing its
+    // font box. Keep the existing font-box tolerance for paragraph marks.
+    const expandsFontLeading = spacingRule !== SpacingRule.EXACT && (normalLineHeight > spanLineHeight || hasInlineCustomBlock || hasListGlyph || drawingMLLineHeight != null) &&
+        contentHeight + paddingTop + paddingBottom - currentLine.contentHeight -
+        currentLine.paddingTop - currentLine.paddingBottom +
+        (currentLine.borderTopSpace ?? 0) + (currentLine.borderBottomSpace ?? 0) > 1e-6;
+    const paragraphEnd = (paragraphConfig.borderBottomSpace ?? 0) > 0 &&
+        (lineGlyphs.some((glyph) => glyph.streamType === DataStreamTreeTokenType.PARAGRAPH) ||
+            glyphGroup.some((glyph) => glyph.streamType === DataStreamTreeTokenType.PARAGRAPH));
+    const expandsBorder = paragraphEnd && (paragraphConfig.borderBottomSpace ?? 0) > (currentLine.borderBottomSpace ?? 0);
+    const expandsVisibleText = isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
+        && visibleAscent + visibleDescent - currentLine.contentHeight > 1e-6;
+
+    if (contentHeight - currentLine.contentHeight > LINE_LAYOUT_OVERFLOW_TOLERANCE || expandsVisibleText || expandsFontLeading || expandsBorder) {
+        return {
+            lineHeight: boundingBoxAscent + boundingBoxDescent,
+            hasInlineCustomBlock,
+            hasListGlyph,
+            normalLineHeight: normalLineHeight || undefined,
+            drawingMLLineHeight,
+            paragraphEnd,
+        };
     }
 }
 
@@ -990,6 +1129,15 @@ function shiftTrailingRangeMarkers(glyphs: IDocumentSkeletonGlyph[], tabIndex: n
     }
 }
 
+function getListTextLineHeight(
+    policy: IParagraphConfig['documentCompatibilityPolicy'],
+    ...groups: IDocumentSkeletonGlyph[][]
+): number {
+    // Word expands the line to fit the marker, but scales extra leading by the text font.
+    const metrics = getGlyphGroupFontBoundingBox(policy, ...groups.map((group) => group.filter((glyph) => glyph.glyphType !== GlyphType.LIST)));
+    return Math.max(metrics.normalLineHeight, metrics.boundingBoxAscent + metrics.boundingBoxDescent);
+}
+
 function _getParagraphLineMetrics(
     ctx: ILayoutContext,
     glyphGroup: IDocumentSkeletonGlyph[],
@@ -1007,9 +1155,11 @@ function _getParagraphLineMetrics(
         glyphGroup
     );
     const glyphLineHeight = defaultSpanMetrics?.lineHeight || (boundingBoxAscent + boundingBoxDescent);
+    const hasListGlyph = isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
+        && (defaultSpanMetrics?.hasListGlyph || glyphGroup.some((glyph) => glyph.glyphType === GlyphType.LIST));
     const normalLineHeight = Math.max(
         defaultSpanMetrics?.normalLineHeight ?? 0,
-        glyphNormalLineHeight
+        hasListGlyph ? getListTextLineHeight(paragraphConfig.documentCompatibilityPolicy, glyphGroup) : glyphNormalLineHeight
     ) || undefined;
     const ascent = boundingBoxAscent;
     const descent = boundingBoxDescent;
@@ -1107,7 +1257,7 @@ function _getParagraphLineMetrics(
         spacingRule,
         snapToGrid,
         paragraphConfig.useWordStyleLineHeight,
-        !hasInlineCustomBlock,
+        !hasInlineCustomBlock && !hasListGlyph,
         hasInlineCustomBlock && !isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
             ? undefined
             : normalLineHeight,
@@ -1116,6 +1266,16 @@ function _getParagraphLineMetrics(
         ),
         drawingMLLineHeight
     );
+    const wordAutoLeading = isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
+        && spacingRule === SpacingRule.AUTO && lineSpacing > 1 && !hasInlineCustomBlock
+        && (snapToGrid === BooleanNumber.FALSE || (gridType !== GridType.LINES && gridType !== GridType.LINES_AND_CHARS))
+        ? Math.max(0, lineSpacingApply - contentHeight)
+        : 0;
+    if (wordAutoLeading > 0) {
+        // Word adds multiple-line leading below the font box, not above the first baseline.
+        paddingTop = 0;
+        paddingBottom = wordAutoLeading;
+    }
     const drawingMLBaselineHeight = !positionedCustomBlockOnly && !isZeroWidthNonFlowFloatingAnchorLine &&
         drawingMLLineHeight != null && (spacingRule === SpacingRule.EXACT || (spacingRule === SpacingRule.AUTO && lineSpacing > 1)) &&
         (snapToGrid === BooleanNumber.FALSE || (gridType !== GridType.LINES && gridType !== GridType.LINES_AND_CHARS))
@@ -1162,23 +1322,52 @@ function _getParagraphLineMetrics(
         lineSpacingApply = 0.01;
     }
 
-    let { marginTop, spaceBelowApply } = __getParagraphSpace(
-        sectionBreakConfig.documentCompatibilityPolicy?.mode === 'drawingml',
-        lineSpacingApply,
-        spaceAbove,
-        spaceBelow,
-        isParagraphFirstShapedText,
-        preLine,
-        isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy!) &&
-            lastPage.pageNumber > 1 &&
+    const isHiddenParagraph = isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy) &&
+        glyphGroup.length > 0 && glyphGroup.every((glyph) => glyph.ts?.hidden === true);
+    const suppressCellAutoSpaceAbove = lastPage.type === DocumentSkeletonPageType.CELL && preLine == null &&
+        isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy) &&
+        paragraphStyle.beforeAutoSpacing === BooleanNumber.TRUE;
+    const firstPageNumber = lastPage.type === DocumentSkeletonPageType.BODY ? sectionBreakConfig.pageNumberStart ?? 1 : 1;
+    const startingSection = lastPage.type === DocumentSkeletonPageType.BODY && preLine == null
+        ? ctx.viewModel.getChildren().find((section, index) => index > 0 && section.children[0]?.endIndex === paragraphIndex)
+        : undefined;
+    let { marginTop, spaceBelowApply } = isHiddenParagraph
+        ? { marginTop: 0, spaceBelowApply: preLine?.spaceBelowApply ?? 0 }
+        : __getParagraphSpace(
+            sectionBreakConfig.documentCompatibilityPolicy?.mode === 'drawingml',
+            lineSpacingApply,
+            suppressCellAutoSpaceAbove ? undefined : spaceAbove,
+            spaceBelow,
+            isParagraphFirstShapedText,
+            preLine,
+            isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy!) &&
+            lastPage.pageNumber > firstPageNumber &&
+            !startingSection &&
             lastPage.type !== DocumentSkeletonPageType.HEADER &&
             lastPage.type !== DocumentSkeletonPageType.FOOTER &&
             (!paragraphConfig.isInsideTable || lastPage.type === DocumentSkeletonPageType.CELL) &&
             (preLine == null || (preLine.top === 0 && preLine.lineHeight === 0 &&
-                isNonFlowFloatingAnchor(__getGlyphGroupByLine(preLine), paragraphNonInlineSkeDrawings))) &&
+                !__hasFlowGlyph(__getGlyphGroupByLine(preLine)))) &&
             (column.parent?.top ?? 0) === 0,
-        drawingMLLineHeight
-    );
+            drawingMLLineHeight
+        );
+
+    if (startingSection && marginTop > 0 && isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)) {
+        // Word collapses before-spacing against the preceding section's final
+        // paragraph even though that paragraph's after-spacing stays off-page.
+        const previousParagraphIndex = startingSection.children[0].startIndex - 2;
+        for (let index = ctx.skeleton.pages.length - 1; index >= 0; index--) {
+            const previousPage = ctx.skeleton.pages[index];
+            const previousColumns = getLastSection(previousPage)?.columns ?? [];
+            const previousLine = previousColumns.slice().reverse().map(getLastLineByColumn).find((line) => line != null);
+            if (previousLine) {
+                if (previousLine.paragraphIndex === previousParagraphIndex) {
+                    marginTop = Math.max(0, marginTop - previousLine.spaceBelowApply);
+                }
+                break;
+            }
+        }
+    }
 
     if (positionedCustomBlockOnly) {
         spaceBelowApply = 0;
@@ -1198,6 +1387,24 @@ function _getParagraphLineMetrics(
         spaceBelowApply = 0;
     }
 
+    if (isHiddenParagraph) {
+        // Hidden paragraph marks do not reserve fixed/minimum line spacing.
+        // Carry the preceding visible paragraph's spacing across hidden content.
+        paddingTop = 0;
+        paddingBottom = 0;
+        contentHeight = 0;
+        lineSpacingApply = 0;
+    }
+
+    const firstFlowLine = isParagraphFirstShapedText ||
+        (preLine?.paragraphStart && preLine.paragraphIndex === paragraphIndex && preLine.lineHeight === 0);
+    const borderTopSpace = lineSpacingApply > 0.01 && firstFlowLine ? paragraphConfig.borderTopSpace ?? 0 : 0;
+    const paragraphEnd = (paragraphConfig.borderBottomSpace ?? 0) > 0 &&
+        (defaultSpanMetrics?.paragraphEnd || glyphGroup.some((glyph) => glyph.streamType === DataStreamTreeTokenType.PARAGRAPH));
+    const borderBottomSpace = lineSpacingApply > 0.01 && paragraphEnd ? paragraphConfig.borderBottomSpace ?? 0 : 0;
+    paddingTop += borderTopSpace;
+    paddingBottom += borderBottomSpace;
+
     return {
         paragraphStyle,
         spacingRule,
@@ -1207,11 +1414,15 @@ function _getParagraphLineMetrics(
         snapToGrid,
         hasInlineCustomBlock,
         positionedCustomBlockOnly,
+        isStandalonePageBoundary,
         paddingTop,
         paddingBottom,
         contentHeight,
         marginTop,
         spaceBelowApply,
+        borderTopSpace,
+        borderBottomSpace,
+        wordAutoLeading: Math.min(wordAutoLeading, Math.max(0, paddingBottom - borderBottomSpace)),
     };
 }
 
@@ -1380,11 +1591,15 @@ function _lineOperator(
         snapToGrid,
         hasInlineCustomBlock,
         positionedCustomBlockOnly,
+        isStandalonePageBoundary,
         paddingTop,
         paddingBottom,
         contentHeight,
         marginTop,
         spaceBelowApply,
+        borderTopSpace,
+        borderBottomSpace,
+        wordAutoLeading,
     } = _getParagraphLineMetrics(ctx, glyphGroup, lastPage, column, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, defaultSpanMetrics);
     const { indentFirstLine, hanging, indentStart, indentEnd } = paragraphStyle;
 
@@ -1474,8 +1689,11 @@ function _lineOperator(
         glyphGroup.every((glyph) => glyph.streamType === DataStreamTreeTokenType.PARAGRAPH)
         ? Math.max(0, spaceBelowApply)
         : 0;
+    // Blank multiple-line leading can hang below the last body line. Keep cell
+    // height and painted paragraph borders inside their full layout extent.
+    const trailingLeading = lastPage.type === DocumentSkeletonPageType.BODY && borderBottomSpace === 0 ? wordAutoLeading : 0;
     const lineOverflowsSection = !clipsSameParagraphInlineDrawing &&
-        lineHeight + emptyCellParagraphSpace + newLineTop - availableSectionHeight > LINE_LAYOUT_OVERFLOW_TOLERANCE;
+        lineHeight - trailingLeading + emptyCellParagraphSpace + newLineTop - availableSectionHeight > LINE_LAYOUT_OVERFLOW_TOLERANCE;
 
     if (
         (lineOverflowsSection &&
@@ -1492,8 +1710,11 @@ function _lineOperator(
             preLine.lineHeight = previousLineHeight;
             preLine.marginBottom = previousLineMarginBottom ?? 0;
         }
-        // Line height exceeds column height, and there is more than one line in the column, and there is more than one section;
-        // console.log('_lineOperator', { glyphGroup, pages, lineHeight, newLineTop, sectionHeight: section.height, lastPage });
+        // A provisional floating-only line may have recorded this paragraph on
+        // the old page before its real mark made the complete first line overflow.
+        if (isParagraphFirstShapedText) {
+            pDrawingAnchor?.delete(paragraphIndex);
+        }
         setColumnFullState(column, true);
         _columnOperator(
             ctx,
@@ -1570,8 +1791,17 @@ function _lineOperator(
     newLine.parent = column;
     newLine.paragraphPaddingLeft = paragraphPaddingLeft;
     newLine.paragraphPaddingRight = paragraphPaddingRight;
+    if (borderTopSpace > 0) {
+        newLine.borderTopSpace = borderTopSpace;
+    }
+    if (borderBottomSpace > 0) {
+        newLine.borderBottomSpace = borderBottomSpace;
+    }
     const blockAnchorTop = deferredTopBottomAnchorDrawings.length > 0 ? newLineTop : lineTop;
-    createAndUpdateBlockAnchor(paragraphIndex, newLine, blockAnchorTop, pDrawingAnchor);
+    // A leading page break is not the paragraph's content anchor on the destination page.
+    if (!isStandalonePageBoundary) {
+        createAndUpdateBlockAnchor(paragraphIndex, newLine, blockAnchorTop, pDrawingAnchor);
+    }
     if (deferredTopBottomAnchorDrawings.length > 0) {
         __updateAndPositionDrawings(ctx, newLineTop, lineHeight, column, deferredTopBottomAnchorDrawings, paragraphConfig.paragraphIndex, isParagraphFirstShapedText, blockAnchorTop, paragraphAnchorLeft, false, true);
         __updateTopBottomCustomBlockFlowBottom(paragraphConfig, deferredTopBottomAnchorDrawings, section.top);
@@ -1894,11 +2124,16 @@ function _updateAndPositionTable(
         top < 0;
     const fitsPhysicalPage = usesPhysicalPageBounds &&
         top + height <= page.pageHeight - page.marginTop + LINE_LAYOUT_OVERFLOW_TOLERANCE;
+    const wordCompatibilityMode = Number(ctx.dataModel?.documentStyle.compatibilitySettings?.compatibilityMode);
+    // Before Word 2013, floating tables remain intact even when they extend
+    // beyond the page. Inline tables and explicitly authored breaks still paginate.
+    const legacyFloatingTable = tableSource.textWrap === TableTextWrapType.WRAP &&
+        wordCompatibilityMode >= 11 && wordCompatibilityMode < 15;
     if (
         (tableSource.textWrap === TableTextWrapType.NONE ||
             (page.type === DocumentSkeletonPageType.BODY &&
                 isTraditionalDocumentCompatibility(sectionBreakConfig.documentCompatibilityPolicy))) &&
-        ((localTop + height > section.height && !fitsPhysicalPage) || table.hasPageBreak === true) &&
+        ((localTop + height > section.height && !fitsPhysicalPage && !legacyFloatingTable) || table.hasPageBreak === true) &&
         firstUnPositionedTable.isSlideTable === false
     ) {
         if (tableSource.textWrap === TableTextWrapType.WRAP &&
@@ -2562,7 +2797,7 @@ export function getLineHeightMetrics(
     }
 
     if (spacingRule === SpacingRule.AT_LEAST) {
-        const lineSpacingApply = Math.max(lineSpacing, glyphLineHeight);
+        const lineSpacingApply = Math.max(lineSpacing, glyphLineHeight, normalLineHeight ?? 0);
         const padding = (lineSpacingApply - glyphLineHeight) / 2;
 
         return {

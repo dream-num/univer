@@ -18,7 +18,6 @@
 
 import type { IDocumentData } from '@univerjs/core';
 import type { IDocSelectionInnerParam, RenderUnit } from '@univerjs/engine-render';
-import type { EmbedInteractionBoundaryService } from '../../../services/doc-embed-integration.service';
 import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentFlavor,

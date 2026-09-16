@@ -16,6 +16,7 @@
 
 import { BaselineOffset, BooleanNumber, TextDecoration } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
+import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import { Line } from '../line';
 
 function createCtx() {
@@ -61,6 +62,24 @@ function createGlyph() {
 }
 
 describe('docs line extension', () => {
+    it.each([0, -3, -6])('limits explicit marker decorations to aligned ink, not tab advance (%s)', (xOffset) => {
+        const extension = new Line();
+        extension.extensionOffset = {};
+        const ctx = createCtx();
+        const glyph = createGlyph();
+        glyph.glyphType = GlyphType.LIST;
+        glyph.xOffset = xOffset;
+        glyph.width = 24;
+        glyph.bBox.width = 6;
+        glyph.ts = { ul: { s: BooleanNumber.TRUE, t: TextDecoration.SINGLE } };
+        extension.draw(ctx, { scaleX: 1, scaleY: 1 }, glyph);
+        expect(ctx.moveTo.mock.calls[0][0]).toBeCloseTo(10 + xOffset);
+        expect(ctx.moveTo.mock.calls[0][1]).toBeCloseTo(8);
+        expect(ctx.lineTo.mock.calls[0][0]).toBeCloseTo(16 + xOffset);
+        expect(ctx.lineTo.mock.calls[0][1]).toBeCloseTo(8);
+        expect(glyph.width).toBe(24);
+    });
+
     it('draws underline/bottom-border/strikethrough/overline', () => {
         const line = new Line();
         (line as any).extensionOffset = {};

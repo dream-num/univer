@@ -97,7 +97,7 @@ function createEditor() {
     const skeleton = render.with(DocSkeletonManagerService).getSkeleton();
     const pages = skeleton.getSkeletonData()!.pages;
     const page = pages[6];
-    expect(page).toBeDefined();
+    expect(page, `Offscreen target requires seven pages; layout produced ${pages.length}`).toBeDefined();
     return {
         doc: FUniver.newAPI(injector).getActiveDocument()!,
         model,
@@ -125,13 +125,19 @@ describe('docs-ui document facade', () => {
         const context = new Proxy({
             font: '',
             webkitBackingStorePixelRatio: 1,
-            measureText: (text: string) => ({
-                width: text.length * 8,
-                actualBoundingBoxAscent: 8,
-                actualBoundingBoxDescent: 2,
-                fontBoundingBoxAscent: 8,
-                fontBoundingBoxDescent: 2,
-            }),
+            measureText(this: CanvasRenderingContext2D, text: string) {
+                // Font shaping measures a large reference size, then scales it down.
+                const size = this.font.match(/([\d.]+)(px|pt)/);
+                const points = size ? Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) : 11;
+                const scale = points / 11;
+                return {
+                    width: text.length * 8 * scale,
+                    actualBoundingBoxAscent: 8 * scale,
+                    actualBoundingBoxDescent: 2 * scale,
+                    fontBoundingBoxAscent: 8 * scale,
+                    fontBoundingBoxDescent: 2 * scale,
+                };
+            },
         }, { get: (target, key) => key in target ? Reflect.get(target, key) : () => {} });
         vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(context as never);
     });

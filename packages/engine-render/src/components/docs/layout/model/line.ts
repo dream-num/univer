@@ -137,9 +137,7 @@ export function createSkeletonLine(
             headersDrawings,
             footersDrawings,
             wrapTypeTables,
-            paragraphConfig.documentCompatibilityPolicy && isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
-                ? TRADITIONAL_TABLE_WRAP_MIN_WIDTH
-                : 0
+            isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
         );
 
     for (const divide of lineSke.divides) {
@@ -419,7 +417,7 @@ function _calculateDividesByDrawings(
     headersDrawings?: Map<string, IDocumentSkeletonDrawing>,
     footersDrawings?: Map<string, IDocumentSkeletonDrawing>,
     wrapTypeTables?: Map<string, IDocumentSkeletonTable>,
-    minimumTableWrapWidth: number = 0
+    traditionalLayout = false
 ): IDocumentSkeletonDivide[] {
     const drawingsMix: IDrawingsSplit[] = []; // Mixed text and graphics case
     // Insert indent placeholder
@@ -466,7 +464,7 @@ function _calculateDividesByDrawings(
 
     if (wrapTypeTables && wrapTypeTables.size > 0) {
         wrapTypeTables.forEach((table) => {
-            const split = _getTableWrapSplit(table, lineTop, lineHeight, columnLeft, columnWidth, minimumTableWrapWidth);
+            const split = _getTableWrapSplit(table, lineTop, lineHeight, columnLeft, columnWidth, traditionalLayout ? TRADITIONAL_TABLE_WRAP_MIN_WIDTH : 0);
 
             if (split) {
                 drawingsMix.push(split);
@@ -474,6 +472,18 @@ function _calculateDividesByDrawings(
         });
     }
 
+    // Negative Word indents expand the usable text interval beyond the column.
+    // Translate that interval before subtracting obstacles; a negative-width
+    // indent placeholder is not an obstacle and would otherwise be discarded.
+    const left = traditionalLayout ? Math.min(0, paddingLeft) : 0;
+    const right = traditionalLayout ? Math.min(0, paddingRight) : 0;
+    if (left < 0 || right < 0) {
+        const divides = _calculateDivideByDrawings(columnWidth - left - right, drawingsMix.map((split) => ({ ...split, left: split.left - left })));
+        for (const divide of divides) {
+            divide.left += left;
+        }
+        return divides;
+    }
     return _calculateDivideByDrawings(columnWidth, drawingsMix);
 }
 

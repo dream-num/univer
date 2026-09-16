@@ -29,6 +29,7 @@ import { getFontStyleString } from '../../../../../../basics/tools';
 import { setDocsCustomBlockRenderViewportProvider } from '../../../../custom-block-render-viewport';
 import { getDocumentCompatibilityPolicy } from '../../../../document-compatibility';
 import { Lang } from '../../../hyphenation/lang';
+import { BreakPointType } from '../../../line-breaker/break';
 import { createSkeletonLetterGlyph } from '../../../model/glyph';
 import { FontCache } from '../../../shaping-engine/font-cache';
 import { clearFontCreateConfigCache } from '../../../tools';
@@ -36,6 +37,116 @@ import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 describe('shaping', () => {
+    it.each(['…', '….', '....', ',...'])('keeps spaced trailing punctuation with its preceding Word token (%s)', (punctuation) => {
+        const content = `Before word ${punctuation} after`;
+        const { dataModel, viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+        });
+        try {
+            const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+            expect(result.map((item) => item.text)).toContain(`word ${punctuation} `);
+        } finally {
+            viewModel.dispose();
+            dataModel.dispose();
+        }
+    });
+
+    it.each([
+        { flavor: DocumentFlavor.TRADITIONAL, separator: '  ', joined: true },
+        { flavor: DocumentFlavor.MODERN, separator: ' ', joined: false },
+        { flavor: DocumentFlavor.TRADITIONAL, separator: '\t', joined: false },
+        { flavor: DocumentFlavor.TRADITIONAL, separator: '\v', joined: false },
+    ])('preserves the mode and authored boundaries around ellipses: %s', ({ flavor, separator, joined }) => {
+        const content = `Before word${separator}… after`;
+        const bed = createParagraphLayoutTestBed(content, { documentStyle: { documentFlavor: flavor } });
+        const before = JSON.stringify(bed.dataModel.getSnapshot());
+        try {
+            const result = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            expect(result.some((item) => item.text.includes(`word${separator}…`))).toBe(joined);
+            expect(result.map((item) => item.text).join('')).toBe(`${content.replace('\v', '')}\r`);
+            if (separator === '\v') {
+                expect(result.find((item) => item.text.endsWith('word'))?.breakPointType).toBe(BreakPointType.Mandatory);
+            }
+            expect(JSON.stringify(bed.dataModel.getSnapshot())).toBe(before);
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it.each([
+        { flavor: DocumentFlavor.TRADITIONAL, enabled: BooleanNumber.TRUE, sa: 100, sc: 0 },
+        { flavor: DocumentFlavor.TRADITIONAL, enabled: BooleanNumber.TRUE, sa: 50, sc: 1.5 },
+        { flavor: DocumentFlavor.TRADITIONAL, enabled: BooleanNumber.FALSE, sa: 100, sc: 0 },
+        { flavor: DocumentFlavor.TRADITIONAL, enabled: undefined, sa: 100, sc: 0 },
+        { flavor: DocumentFlavor.MODERN, enabled: BooleanNumber.TRUE, sa: 100, sc: 0 },
+    ])('balances authored Latin whitespace only with Word compatibility enabled: %j', ({ flavor, enabled, sa, sc }) => {
+        // Native Word COM: leading/trailing and consecutive spaces become half-em;
+        // an isolated inter-word space keeps its font advance, even in the same run.
+        const measure = vi.spyOn(FontCache, 'getMeasureText').mockReturnValue({
+            width: 6,
+            fontBoundingBoxAscent: 10,
+            fontBoundingBoxDescent: 2,
+            actualBoundingBoxAscent: 0,
+            actualBoundingBoxDescent: 0,
+        });
+        const content = ' A B  C ';
+        const shape = (balanceSingleByteDoubleByteWidth?: BooleanNumber) => {
+            clearFontCreateConfigCache();
+            const { dataModel, viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content, {
+                documentStyle: { documentFlavor: flavor, balanceSingleByteDoubleByteWidth },
+                body: { textRuns: [
+                    { st: 0, ed: 5, ts: { ff: 'Calibri', fs: 12, sa, sc } },
+                    { st: 5, ed: content.length, ts: { ff: 'Calibri', fs: 24, sa, sc } },
+                ] },
+            });
+            sectionBreakConfig.documentCompatibilityPolicy = getDocumentCompatibilityPolicy(flavor);
+            const before = JSON.stringify(dataModel.getSnapshot());
+            const glyphs = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig)
+                .flatMap((item) => item.glyphs);
+            expect(JSON.stringify(dataModel.getSnapshot())).toBe(before);
+            expect(glyphs.map((glyph) => glyph.content).join('')).toBe(`${content}\r`);
+            return glyphs;
+        };
+        try {
+            const ordinary = shape(BooleanNumber.FALSE);
+            const balanced = shape(enabled);
+            for (let index = 0; index < content.length; index++) {
+                if (flavor === DocumentFlavor.TRADITIONAL && enabled === BooleanNumber.TRUE && [0, 4, 5, 7].includes(index)) {
+                    const halfEm = (index < 5 ? 12 : 24) / 0.75 / 2 * sa / 100;
+                    expect(balanced[index].width).toBeCloseTo(halfEm + sc / 0.75);
+                    expect(balanced[index].bBox.width).toBeCloseTo(halfEm);
+                } else {
+                    expect(balanced[index].width).toBe(ordinary[index].width);
+                }
+            }
+        } finally {
+            measure.mockRestore();
+            clearFontCreateConfigCache();
+        }
+    });
+
+    it('keeps hidden runs in source offsets and honors explicit visible overrides', () => {
+        const content = 'A隐藏😀Visible';
+        const { dataModel, viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content, {
+            documentStyle: { textStyle: { hidden: true }, documentFlavor: DocumentFlavor.TRADITIONAL },
+            body: { textRuns: [
+                { st: 0, ed: 1, ts: { hidden: false } },
+                { st: 1, ed: 5, ts: { fs: 80 } },
+                { st: 5, ed: content.length + 1, ts: { hidden: false } },
+            ] },
+        });
+        const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const glyphs = shaped.flatMap((item) => item.glyphs);
+        const hidden = glyphs.filter((glyph) => glyph.ts?.hidden);
+        expect(hidden.map((glyph) => glyph.raw).join('')).toContain('隐藏😀');
+        expect(hidden.every((glyph) => glyph.width === 0 && glyph.bBox.ba === 0 && glyph.bBox.bd === 0)).toBe(true);
+        expect(glyphs.map((glyph) => glyph.content).join('')).toContain('AVisible');
+        expect(shaped.map((item) => item.text).join('')).not.toContain('隐藏');
+        expect(glyphs.reduce((count, glyph) => count + glyph.count, 0)).toBe(paragraphNode.content!.length);
+        expect(dataModel.getSnapshot().body?.dataStream).toBe(`${content}\r\n`);
+    });
+
     it.each([PositionedObjectLayoutType.INLINE, PositionedObjectLayoutType.WRAP_SQUARE])('keeps effect extents separate from drawing geometry (%s)', (layoutType) => {
         const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('\b', {
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
@@ -294,6 +405,58 @@ describe('shaping', () => {
         }
     });
 
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('allows Word signed-value breaks only in traditional CJK layout (%s)', (documentFlavor) => {
+        const content = '甲-3.09%、-0.57%、+3.47%、乙';
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor },
+        });
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        expect(result.map((item) => item.text)).toEqual(documentFlavor === DocumentFlavor.TRADITIONAL
+            ? ['甲', '-3.09%、', '-0.57%、', '+3.47%、', '乙\r']
+            : ['甲-3.09%、-0.57%、+3.47%、', '乙\r']);
+    });
+
+    it.each(['、', '，'])('breaks signed lists at CJK separators without requiring a Han letter (%s)', (separator) => {
+        const content = `-3.09%${separator}-0.57%${separator}+3.47%`;
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+        });
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        expect(result.map((item) => item.text)).toEqual([`-3.09%${separator}`, `-0.57%${separator}`, '+3.47%\r']);
+    });
+
+    it('keeps opening parentheses with signed values in traditional CJK text', () => {
+        const content = '甲（-3.09）、（+3.47）乙';
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+        });
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        expect(result.map((item) => item.text)).toEqual(['甲', '（-3.09）、', '（+3.47）', '乙\r']);
+    });
+
+    it.each([
+        { flavor: DocumentFlavor.TRADITIONAL, compression: characterSpacingControlType.doNotCompress, expected: true },
+        { flavor: DocumentFlavor.TRADITIONAL, compression: characterSpacingControlType.compressPunctuation, expected: false },
+        { flavor: DocumentFlavor.TRADITIONAL, compression: undefined, expected: false },
+        { flavor: DocumentFlavor.MODERN, compression: characterSpacingControlType.doNotCompress, expected: false },
+    ])('uses Word numeric-hyphen breaks with uncompressed punctuation: %j', ({ flavor, compression, expected }) => {
+        // Word COM: at 50pt, doNotCompress yields "甲甲甲-" / "2.19%，乙";
+        // compressPunctuation keeps the minus on the following numeric line.
+        const content = '甲甲甲-2.19%，乙+3.4%，（-5.6%）';
+        const { dataModel, viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor: flavor, characterSpacingControl: compression },
+        });
+        const before = JSON.stringify(dataModel.getSnapshot());
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        let offset = 0;
+        const breaks = result.map((item) => (offset += item.text.length));
+        expect(result.map((item) => item.text).join('')).toBe(`${content}\r`);
+        expect(breaks.includes(content.indexOf('-') + 1)).toBe(expected);
+        expect(breaks.includes(content.lastIndexOf('-') + 1)).toBe(expected);
+        expect(breaks.includes(content.indexOf('+') + 1)).toBe(false);
+        expect(JSON.stringify(dataModel.getSnapshot())).toBe(before);
+    });
+
     it('shapes text with spaces', () => {
         const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello world test');
 
@@ -476,6 +639,26 @@ describe('shaping', () => {
         const allGlyphs = result.flatMap((r) => r.glyphs);
         const emojiGlyph = allGlyphs.find((g) => g.content === '\uD83D\uDE00');
         expect(emojiGlyph).toBeDefined();
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('preserves offsets across mixed script dispatch in %s', (documentFlavor) => {
+        const content = 'Latin😀مرحبا你好ཀཁกข\tEnd';
+        const { dataModel, viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor },
+        });
+        const before = JSON.stringify(dataModel.getSnapshot());
+        const source = paragraphNode.content!;
+        try {
+            const glyphs = shaping(ctx, source, viewModel, paragraphNode, sectionBreakConfig)
+                .flatMap((item) => item.glyphs);
+            expect(glyphs.map((glyph) => glyph.raw).join('')).toBe(source);
+            expect(glyphs.reduce((count, glyph) => count + glyph.count, 0)).toBe(source.length);
+            expect(JSON.stringify(dataModel.getSnapshot())).toBe(before);
+        } finally {
+            viewModel.dispose();
+            dataModel.dispose();
+            clearFontCreateConfigCache();
+        }
     });
 
     it('shapes text with Arabic characters', () => {

@@ -620,8 +620,11 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             const ranges = this._calcActiveRanges(point);
             if (ranges.length) {
                 const hyperlink = ranges.filter(({ range }) => range.rangeType === CustomRangeType.HYPERLINK).pop();
+                const sdt = ranges.filter(({ range }) => range.rangeType === CustomRangeType.SDT)
+                    .sort((left, right) => left.range.endIndex - left.range.startIndex -
+                        (right.range.endIndex - right.range.startIndex))[0];
                 this._clickCustomRanges$.next({
-                    ...(hyperlink ?? ranges.pop()!),
+                    ...(hyperlink ?? sdt ?? ranges.pop()!),
                     ctrlKey: !!down.ctrlKey,
                     metaKey: !!down.metaKey,
                 });
@@ -636,6 +639,16 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
     isPointerOnBullet(offsetX: number, offsetY: number): boolean {
         return Boolean(this._calcActiveBullet(transformOffset2Bound(offsetX, offsetY, this._context.scene)));
+    }
+
+    isPointerOnInteractiveRange(offsetX: number, offsetY: number): boolean {
+        return this._calcActiveRanges(transformOffset2Bound(offsetX, offsetY, this._context.scene)).some(({ range }) => {
+            if (range.rangeType === CustomRangeType.HYPERLINK) {
+                return true;
+            }
+            return range.rangeType === CustomRangeType.SDT &&
+                ['checkbox', 'date', 'dropDownList', 'comboBox', 'text', 'richText', 'picture'].includes(range.properties?.kind);
+        });
     }
 
     isPointerOnNonChecklistBullet(offsetX: number, offsetY: number): boolean {
@@ -693,7 +706,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     private _buildCustomRangeBounds() {
         const currentRangeCount = this._context.unit.getBody?.()?.customRanges?.length ?? 0;
         const pages = this._skeleton.getSkeletonData()?.pages ?? [];
-        const currentSkeletonSignature = `${pages.length}:${pages.at(-1)?.ed ?? -1}`;
+        const currentSkeletonSignature = `${pages.length}:${pages[pages.length - 1]?.ed ?? -1}`;
         const cacheMatchesDocument = this._customRangeCount === -1 || this._customRangeCount === currentRangeCount;
         const cacheMatchesSkeleton = this._customRangeSkeletonSignature === '' || this._customRangeSkeletonSignature === currentSkeletonSignature;
         if (!this._customRangeDirty && cacheMatchesDocument && cacheMatchesSkeleton && (currentRangeCount === 0 || this._customRangeBounds.length > 0)) {

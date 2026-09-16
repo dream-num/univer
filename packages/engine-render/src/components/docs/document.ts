@@ -24,6 +24,7 @@ import type {
     Nullable,
 } from '@univerjs/core';
 import type {
+    IDocumentSkeletonColumn,
     IDocumentSkeletonColumnGroup,
     IDocumentSkeletonColumnGroupColumn,
     IDocumentSkeletonDivide,
@@ -427,9 +428,10 @@ export class Documents extends DocComponent {
         const inactiveAreaOpacity = isTraditionalLayout ? this._inactiveAreaOpacity : 1;
         const isEditBody = inactiveAreaOpacity === 1 || this.getSkeleton()?.getViewModel().getEditArea() === DocumentEditArea.BODY;
         const bodyOpacity = isEditBody ? 1 : inactiveAreaOpacity;
-        const headerFooterOpacity = isEditBody ? inactiveAreaOpacity : 1;
+        // Header/footer emphasis is painted over the completed content, so
+        // overlapping opaque objects retain their original occlusion.
+        const headerFooterOpacity = 1;
         const parentScale = this.getParentScale();
-        // const scale = getScale(parentScale);
         const extensions = this.getExtensionsByOrder();
 
         for (const extension of extensions) {
@@ -451,7 +453,6 @@ export class Documents extends DocComponent {
             renderedSections.add(page.sectionId);
             const pageBorders = (page.sectionId == null ? undefined : sectionBorders.get(page.sectionId)) ?? dataModel?.documentStyle.pageBorders;
             const {
-                sections,
                 marginTop: pagePaddingTop = 0,
                 marginBottom: pagePaddingBottom = 0,
                 marginLeft: pagePaddingLeft = 0,
@@ -470,11 +471,8 @@ export class Documents extends DocComponent {
                 horizontalAlign = HorizontalAlign.LEFT, // Do not make changes, otherwise the document will not render.
                 centerAngle: centerAngleDeg = 0,
                 vertexAngle: vertexAngleDeg = 0,
-                wrapStrategy = WrapStrategy.UNSPECIFIED,
                 cellValueType,
-                // isRotateNonEastAsian = BooleanNumber.FALSE,
             } = renderConfig;
-            const isVertical = vertexAngleDeg === VERTICAL_ROTATE_ANGLE && centerAngleDeg === VERTICAL_ROTATE_ANGLE;
             const horizontalOffsetNoAngle = this._horizontalHandler(
                 actualWidth,
                 pagePaddingLeft,
@@ -573,245 +571,22 @@ export class Documents extends DocComponent {
             ctx.globalAlpha *= bodyOpacity;
             this._startRotation(ctx, finalAngle);
 
-            for (const [sectionIndex, section] of sections.entries()) {
-                const { columns } = section;
-                const nextSectionTop = sections
-                    .slice(sectionIndex + 1)
-                    .find((candidate) => candidate.top > section.top)
-                    ?.top;
-                const separatorHeight = Math.max(
-                    0,
-                    (nextSectionTop ?? page.pageHeight - pagePaddingTop - pagePaddingBottom) - section.top
-                );
-
-                this._drawLiquid.translateSave();
-                this._drawLiquid.translateSection(section);
-                drawSectionColumnSeparators(
-                    ctx,
-                    section,
-                    separatorHeight,
-                    alignOffsetNoAngle.x,
-                    alignOffsetNoAngle.y
-                );
-
-                for (const column of columns) {
-                    const { lines, width: columnWidth } = column;
-
-                    this._drawLiquid.translateSave();
-                    this._drawLiquid.translateColumn(column);
-
-                    const linesCount = lines.length;
-                    const visibleLineRange = isContinuousLayout && bounds != null
-                        ? getVisibleContinuousLineRange(
-                            lines,
-                            bounds.viewBound.top,
-                            bounds.viewBound.bottom,
-                            pageTop + pagePaddingTop + section.top
-                        )
-                        : { start: 0, end: linesCount };
-
-                    let alignOffset = alignOffsetNoAngle;
-                    let rotateTranslateXListApply = null;
-
-                    let rotatedHeightStore = 0;
-
-                    if (vertexAngle !== 0) {
-                        const {
-                            rotateTranslateXList,
-                            rotatedHeight,
-                            rotatedWidth,
-                            fixOffsetX,
-                            fixOffsetY,
-                            rotateTranslateY,
-                        } = getRotateOffsetAndFarthestHypotenuse(lines, columnWidth, vertexAngle);
-
-                        rotatedHeightStore = rotatedHeight;
-
-                        let exceedWidthFix = rotatedWidth;
-                        if (rotatedHeight > this.height && wrapStrategy !== WrapStrategy.WRAP) {
-                            if (wrapStrategy === WrapStrategy.OVERFLOW || vertexAngle > 0) {
-                                exceedWidthFix = this.height / Math.tan(Math.abs(vertexAngle));
-                            }
-                        }
-
-                        const horizontalOffset = this._horizontalHandler(
-                            exceedWidthFix,
-                            pagePaddingLeft,
-                            pagePaddingRight,
-                            horizontalAlign,
-                            vertexAngleDeg,
-                            centerAngleDeg
-                        );
-
-                        const verticalOffset = this._verticalHandler(
-                            rotatedHeight,
-                            pagePaddingTop,
-                            pagePaddingBottom,
-                            verticalAlign
-                        );
-
-                        let exceedHeightFix = verticalOffset - fixOffsetY;
-                        if (rotatedHeight > this.height && !isVertical) {
-                            if (vertexAngle < 0) {
-                                exceedHeightFix = this.height - (rotatedHeight + fixOffsetY);
-                            } else {
-                                exceedHeightFix = -fixOffsetY;
-                            }
-                        }
-                        alignOffset = Vector2.create(horizontalOffset + fixOffsetX, exceedHeightFix);
-
-                        this._drawLiquid.translate(0, -rotateTranslateY);
-
-                        rotateTranslateXListApply = rotateTranslateXList;
-                    } else if (
-                        wrapStrategy === WrapStrategy.WRAP
-                        // Use fix: https://github.com/dream-num/univer-pro/issues/734
-                        && (horizontalAlign !== HorizontalAlign.UNSPECIFIED || cellValueType !== CellValueType.NUMBER)
-                    ) {
-                        // @Jocs, Why reset alignOffset.x? When you know the reason, add a description
-                        alignOffset.x = pagePaddingLeft;
-                    }
-
-                    for (let i = visibleLineRange.start; i < visibleLineRange.end; i++) {
-                        const line = lines[i];
-                        const { divides, asc = 0, type, lineHeight = 0 } = line;
-
-                        if (
-                            !isContinuousLayout &&
-                            page.pageHeight === Number.POSITIVE_INFINITY &&
-                            bounds != null
-                        ) {
-                            const lineTop = pageTop + pagePaddingTop + section.top + line.top +
-                                (line.marginTop ?? 0) + (line.paddingTop ?? 0);
-                            const lineBottom = lineTop + lineHeight;
-                            const { top, bottom } = bounds.viewBound;
-                            if (
-                                lineBottom < top - CONTINUOUS_LAYOUT_LINE_OVERSCAN ||
-                                lineTop > bottom + CONTINUOUS_LAYOUT_LINE_OVERSCAN
-                            ) {
-                                continue;
-                            }
-                        }
-
-                        const maxLineAsc = asc;
-
-                        const maxLineAscSin = maxLineAsc * Math.sin(centerAngle);
-                        const maxLineAscCos = maxLineAsc * Math.cos(centerAngle);
-
-                        if (type === LineType.BLOCK) {
-                            for (const extension of extensions) {
-                                if (extension.type === DOCS_EXTENSION_TYPE.LINE) {
-                                    extension.extensionOffset = {
-                                        alignOffset,
-                                        renderConfig,
-                                    };
-                                    extension.draw(ctx, parentScale, line);
-                                }
-                            }
-                        } else {
-                            // let { x, y } = this._drawLiquid;
-                            // x += horizontalOffsetNoAngle;
-                            // y += verticalOffsetNoAngle + line.top;
-                            // ctx.save();
-                            // ctx.strokeStyle = 'rgb(245, 90, 34)';
-                            // ctx.moveTo(x, y);
-                            // ctx.lineTo(line.width ?? 0 + x, y);
-                            // ctx.lineTo(line.width ?? 0 + x, lineHeight + y);
-                            // ctx.lineTo(x, lineHeight + y);
-                            // ctx.lineTo(x, y);
-                            // ctx.stroke();
-                            // ctx.restore();
-
-                            this._drawLiquid.translateSave();
-                            this._drawLiquid.translateLine(line, true, true);
-
-                            rotateTranslateXListApply && this._drawLiquid.translate(rotateTranslateXListApply[i]); // x axis offset
-                            this._drawLineBackground(ctx, page, line, column.width);
-
-                            const divideLength = divides.length;
-
-                            for (let i = 0; i < divideLength; i++) {
-                                const divide = divides[i];
-                                const { glyphGroup } = divide;
-
-                                this._drawLiquid.translateSave();
-                                this._drawLiquid.translateDivide(divide, isVertical && wrapStrategy === WrapStrategy.WRAP, verticalAlign, rotatedHeightStore);
-
-                                this._drawGlyphGroupBackgrounds(
-                                    ctx,
-                                    parentScale,
-                                    glyphGroup,
-                                    lineHeight,
-                                    alignOffset,
-                                    centerAngle,
-                                    vertexAngle,
-                                    backgroundExtension,
-                                    preTextBackgroundExtensions
-                                );
-
-                                // Draw text\border\lines etc.
-                                for (const glyph of glyphGroup) {
-                                    if (!glyph.content || glyph.content.length === 0) {
-                                        continue;
-                                    }
-
-                                    const { width: spanWidth, left: spanLeft, xOffset } = glyph;
-
-                                    const { x: translateX, y: translateY } = this._drawLiquid;
-
-                                    const originTranslate = Vector2.create(translateX, translateY);
-
-                                    const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
-
-                                    const spanStartPoint = calculateRectRotate(
-                                        originTranslate.addByPoint(spanLeft + xOffset, 0),
-                                        centerPoint,
-                                        centerAngle,
-                                        vertexAngle,
-                                        alignOffset
-                                    );
-
-                                    const spanPointWithFont = calculateRectRotate(
-                                        originTranslate.addByPoint(
-                                            spanLeft + maxLineAscSin + xOffset,
-                                            maxLineAscCos
-                                        ),
-                                        centerPoint,
-                                        centerAngle,
-                                        vertexAngle,
-                                        alignOffset
-                                    );
-
-                                    const extensionOffset: IExtensionConfig = {
-                                        originTranslate,
-                                        spanStartPoint,
-                                        spanPointWithFont,
-                                        centerPoint,
-                                        alignOffset,
-                                        renderConfig,
-                                    };
-
-                                    for (const extension of glyphExtensionsExcludeBackground) {
-                                        extension.extensionOffset = extensionOffset;
-                                        extension.draw(ctx, parentScale, glyph, [], {
-                                            viewBound: bounds?.viewBound,
-                                        } as IDrawInfo);
-                                    }
-                                }
-
-                                this._drawLiquid.translateRestore();
-                            }
-
-                            this._drawParagraphBorders(ctx, page, line, column.width);
-                            this._drawLiquid.translateRestore();
-                        }
-                    }
-
-                    this._drawLiquid.translateRestore();
-                }
-
-                this._drawLiquid.translateRestore();
-            }
+            this._drawBodySections(
+                ctx,
+                page,
+                extensions,
+                backgroundExtension,
+                preTextBackgroundExtensions,
+                glyphExtensionsExcludeBackground,
+                alignOffsetNoAngle,
+                centerAngle,
+                vertexAngle,
+                renderConfig,
+                parentScale,
+                isContinuousLayout,
+                pageTop,
+                bounds
+            );
 
             if (skeColumnGroups.size > 0) {
                 this._drawColumnGroups(
@@ -905,6 +680,295 @@ export class Documents extends DocComponent {
             );
             pageLeft += x;
             pageTop += y;
+        }
+    }
+
+    private _drawBodySections(
+        ctx: UniverRenderingContext,
+        page: IDocumentSkeletonPage,
+        extensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
+        backgroundExtension: Nullable<ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>>,
+        preTextBackgroundExtensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
+        glyphExtensionsExcludeBackground: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
+        alignOffsetNoAngle: Vector2,
+        centerAngle: number,
+        vertexAngle: number,
+        renderConfig: IDocumentRenderConfig,
+        parentScale: IScale,
+        isContinuousLayout: boolean,
+        pageTop: number,
+        bounds?: IViewportInfo
+    ): void {
+        if (this._drawLiquid == null) {
+            return;
+        }
+        const { sections, marginTop: pagePaddingTop = 0, marginBottom: pagePaddingBottom = 0 } = page;
+        const { verticalAlign = VerticalAlign.TOP, wrapStrategy = WrapStrategy.UNSPECIFIED } = renderConfig;
+        const isVertical = renderConfig.vertexAngle === VERTICAL_ROTATE_ANGLE && renderConfig.centerAngle === VERTICAL_ROTATE_ANGLE;
+
+        for (const [sectionIndex, section] of sections.entries()) {
+            const { columns } = section;
+            const nextSectionTop = sections
+                .slice(sectionIndex + 1)
+                .find((candidate) => candidate.top > section.top)
+                ?.top;
+            const separatorHeight = Math.max(
+                0,
+                (nextSectionTop ?? page.pageHeight - pagePaddingTop - pagePaddingBottom) - section.top
+            );
+
+            this._drawLiquid.translateSave();
+            this._drawLiquid.translateSection(section);
+            drawSectionColumnSeparators(
+                ctx,
+                section,
+                separatorHeight,
+                alignOffsetNoAngle.x,
+                alignOffsetNoAngle.y
+            );
+
+            for (const column of columns) {
+                const { lines } = column;
+
+                this._drawLiquid.translateSave();
+                this._drawLiquid.translateColumn(column);
+
+                const linesCount = lines.length;
+                const visibleLineRange = isContinuousLayout && bounds != null
+                    ? getVisibleContinuousLineRange(
+                        lines,
+                        bounds.viewBound.top,
+                        bounds.viewBound.bottom,
+                        pageTop + pagePaddingTop + section.top
+                    )
+                    : { start: 0, end: linesCount };
+
+                const {
+                    alignOffset,
+                    rotatedHeight: rotatedHeightStore,
+                    rotateTranslateXList: rotateTranslateXListApply,
+                    rotateTranslateY,
+                } = this._getColumnDrawLayout(page, column, alignOffsetNoAngle);
+                if (vertexAngle !== 0) {
+                    this._drawLiquid.translate(0, -rotateTranslateY);
+                }
+
+                for (let i = visibleLineRange.start; i < visibleLineRange.end; i++) {
+                    const line = lines[i];
+                    const { divides, type, lineHeight = 0 } = line;
+
+                    if (
+                        !isContinuousLayout &&
+                        page.pageHeight === Number.POSITIVE_INFINITY &&
+                        bounds != null
+                    ) {
+                        const lineTop = pageTop + pagePaddingTop + section.top + line.top +
+                            (line.marginTop ?? 0) + (line.paddingTop ?? 0);
+                        const lineBottom = lineTop + lineHeight;
+                        const { top, bottom } = bounds.viewBound;
+                        if (
+                            lineBottom < top - CONTINUOUS_LAYOUT_LINE_OVERSCAN ||
+                            lineTop > bottom + CONTINUOUS_LAYOUT_LINE_OVERSCAN
+                        ) {
+                            continue;
+                        }
+                    }
+
+                    if (type === LineType.BLOCK) {
+                        for (const extension of extensions) {
+                            if (extension.type === DOCS_EXTENSION_TYPE.LINE) {
+                                extension.extensionOffset = {
+                                    alignOffset,
+                                    renderConfig,
+                                };
+                                extension.draw(ctx, parentScale, line);
+                            }
+                        }
+                    } else {
+                        this._drawLiquid.translateSave();
+                        this._drawLiquid.translateLine(line, true, true);
+
+                        rotateTranslateXListApply && this._drawLiquid.translate(rotateTranslateXListApply[i]); // x axis offset
+                        this._drawLineBackground(ctx, page, line, column.width);
+
+                        const divideLength = divides.length;
+
+                        for (let i = 0; i < divideLength; i++) {
+                            const divide = divides[i];
+                            const { glyphGroup } = divide;
+
+                            this._drawLiquid.translateSave();
+                            this._drawLiquid.translateDivide(divide, isVertical && wrapStrategy === WrapStrategy.WRAP, verticalAlign, rotatedHeightStore);
+
+                            this._drawGlyphGroupBackgrounds(
+                                ctx,
+                                parentScale,
+                                glyphGroup,
+                                lineHeight,
+                                alignOffset,
+                                centerAngle,
+                                vertexAngle,
+                                backgroundExtension,
+                                preTextBackgroundExtensions
+                            );
+
+                            // Draw text\border\lines etc.
+                            this._drawGlyphGroup(
+                                ctx,
+                                parentScale,
+                                glyphGroup,
+                                line,
+                                alignOffset,
+                                centerAngle,
+                                vertexAngle,
+                                renderConfig,
+                                glyphExtensionsExcludeBackground,
+                                { viewBound: bounds?.viewBound } as IDrawInfo
+                            );
+
+                            this._drawLiquid.translateRestore();
+                        }
+
+                        this._drawParagraphBorders(ctx, page, line, column.width);
+                        this._drawLiquid.translateRestore();
+                    }
+                }
+
+                this._drawLiquid.translateRestore();
+            }
+
+            this._drawLiquid.translateRestore();
+        }
+    }
+
+    private _getColumnDrawLayout(
+        page: IDocumentSkeletonPage,
+        column: IDocumentSkeletonColumn,
+        alignOffset: Vector2
+    ): { alignOffset: Vector2; rotatedHeight: number; rotateTranslateXList: number[] | null; rotateTranslateY: number } {
+        const {
+            marginTop = 0,
+            marginBottom = 0,
+            marginLeft = 0,
+            marginRight = 0,
+            renderConfig = {},
+        } = page;
+        const {
+            verticalAlign = VerticalAlign.TOP,
+            horizontalAlign = HorizontalAlign.LEFT,
+            centerAngle: centerAngleDeg = 0,
+            vertexAngle: vertexAngleDeg = 0,
+            wrapStrategy = WrapStrategy.UNSPECIFIED,
+            cellValueType,
+        } = renderConfig;
+        const vertexAngle = degToRad(vertexAngleDeg);
+        if (vertexAngle === 0) {
+            if (wrapStrategy === WrapStrategy.WRAP &&
+                (horizontalAlign !== HorizontalAlign.UNSPECIFIED || cellValueType !== CellValueType.NUMBER)) {
+                // Wrapped text retains the cell padding rather than block alignment.
+                alignOffset.x = marginLeft;
+            }
+            return { alignOffset, rotatedHeight: 0, rotateTranslateXList: null, rotateTranslateY: 0 };
+        }
+
+        const {
+            rotateTranslateXList,
+            rotatedHeight,
+            rotatedWidth,
+            fixOffsetX,
+            fixOffsetY,
+            rotateTranslateY,
+        } = getRotateOffsetAndFarthestHypotenuse(column.lines, column.width, vertexAngle);
+        let exceedWidthFix = rotatedWidth;
+        if (rotatedHeight > this.height && wrapStrategy !== WrapStrategy.WRAP) {
+            if (wrapStrategy === WrapStrategy.OVERFLOW || vertexAngle > 0) {
+                exceedWidthFix = this.height / Math.tan(Math.abs(vertexAngle));
+            }
+        }
+        const horizontalOffset = this._horizontalHandler(
+            exceedWidthFix,
+            marginLeft,
+            marginRight,
+            horizontalAlign,
+            vertexAngleDeg,
+            centerAngleDeg
+        );
+        const verticalOffset = this._verticalHandler(rotatedHeight, marginTop, marginBottom, verticalAlign);
+        const isVertical = vertexAngleDeg === VERTICAL_ROTATE_ANGLE && centerAngleDeg === VERTICAL_ROTATE_ANGLE;
+        let exceedHeightFix = verticalOffset - fixOffsetY;
+        if (rotatedHeight > this.height && !isVertical) {
+            if (vertexAngle < 0) {
+                exceedHeightFix = this.height - (rotatedHeight + fixOffsetY);
+            } else {
+                exceedHeightFix = -fixOffsetY;
+            }
+        }
+        return {
+            alignOffset: Vector2.create(horizontalOffset + fixOffsetX, exceedHeightFix),
+            rotatedHeight,
+            rotateTranslateXList,
+            rotateTranslateY,
+        };
+    }
+
+    private _drawGlyphGroup(
+        ctx: UniverRenderingContext,
+        parentScale: IScale,
+        glyphGroup: IDocumentSkeletonGlyph[],
+        line: IDocumentSkeletonLine,
+        alignOffset: Vector2,
+        centerAngle: number,
+        vertexAngle: number,
+        renderConfig: IDocumentRenderConfig,
+        extensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
+        drawInfo?: IDrawInfo
+    ): void {
+        if (this._drawLiquid == null) {
+            return;
+        }
+        const { asc = 0, lineHeight = 0 } = line;
+        const maxLineAscSin = asc * Math.sin(centerAngle);
+        const maxLineAscCos = asc * Math.cos(centerAngle);
+
+        for (const glyph of glyphGroup) {
+            if (!glyph.content) {
+                continue;
+            }
+            const { width: spanWidth, left: spanLeft, xOffset } = glyph;
+            const { x, y } = this._drawLiquid;
+            const originTranslate = Vector2.create(x, y);
+            const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
+            const spanStartPoint = calculateRectRotate(
+                originTranslate.addByPoint(spanLeft + xOffset, 0),
+                centerPoint,
+                centerAngle,
+                vertexAngle,
+                alignOffset
+            );
+            const spanPointWithFont = calculateRectRotate(
+                originTranslate.addByPoint(spanLeft + maxLineAscSin + xOffset, maxLineAscCos),
+                centerPoint,
+                centerAngle,
+                vertexAngle,
+                alignOffset
+            );
+            const extensionOffset: IExtensionConfig = {
+                originTranslate,
+                spanStartPoint,
+                spanPointWithFont,
+                centerPoint,
+                alignOffset,
+                renderConfig,
+            };
+
+            for (const extension of extensions) {
+                extension.extensionOffset = extensionOffset;
+                if (drawInfo) {
+                    extension.draw(ctx, parentScale, glyph, [], { ...drawInfo });
+                } else {
+                    extension.draw(ctx, parentScale, glyph);
+                }
+            }
         }
     }
 
@@ -1217,10 +1281,17 @@ export class Documents extends DocComponent {
         y -= line.paddingTop;
         y += marginTop + top;
 
-        const startX = x + (line.paragraphPaddingLeft ?? 0) - (line.borderLeft?.padding ?? 0);
-        const endX = x + width - (line.paragraphPaddingRight ?? 0) + (line.borderRight?.padding ?? 0);
-        const startY = y + line.marginTop - (line.borderTop?.padding ?? 0);
-        const endY = y + line.lineHeight - line.marginBottom + (bottomBorder?.padding ?? 0);
+        // Word adds 1.5pt of horizontal clearance, even for top/bottom-only paragraph borders.
+        // Border spacing reaches the inner edge; Canvas strokes are centered on their path.
+        const traditional = this._getDocumentFlavor() === DocumentFlavor.TRADITIONAL;
+        const leftWidth = line.borderLeft ? Math.max(0, line.borderLeft.width ?? 1) : 0;
+        const rightWidth = line.borderRight ? Math.max(0, line.borderRight.width ?? 1) : 0;
+        const leftOutset = traditional ? 2 + leftWidth / 2 : 0;
+        const rightOutset = traditional ? 2 + rightWidth / 2 : 0;
+        const startX = x + (line.paragraphPaddingLeft ?? 0) - (line.borderLeft?.padding ?? 0) - leftOutset;
+        const endX = x + width - (line.paragraphPaddingRight ?? 0) + (line.borderRight?.padding ?? 0) + rightOutset;
+        const startY = y + line.marginTop + (line.borderTopSpace ?? 0) - (line.borderTop?.padding ?? 0);
+        const endY = y + line.lineHeight - line.marginBottom - (line.borderBottomSpace ?? 0) + (bottomBorder?.padding ?? 0);
         const drawBorder = (border: IParagraphBorder, type: BORDER_TYPE) => {
             const lineWidth = border.width ?? 1;
             // Explicit zero widths cancel inherited borders; Canvas ignores a zero lineWidth.
@@ -1462,12 +1533,7 @@ export class Documents extends DocComponent {
 
                 for (let i = 0; i < linesCount; i++) {
                     const line = lines[i];
-                    const { divides, asc = 0, type, lineHeight = 0 } = line;
-
-                    const maxLineAsc = asc;
-
-                    const maxLineAscSin = maxLineAsc * Math.sin(centerAngle);
-                    const maxLineAscCos = maxLineAsc * Math.cos(centerAngle);
+                    const { divides, type, lineHeight = 0 } = line;
 
                     if (type === LineType.BLOCK) {
                         for (const extension of extensions) {
@@ -1514,52 +1580,17 @@ export class Documents extends DocComponent {
                                 preTextBackgroundExtensions
                             );
 
-                            for (const glyph of glyphGroup) {
-                                if (!glyph.content || glyph.content.length === 0) {
-                                    continue;
-                                }
-
-                                const { width: spanWidth, left: spanLeft, xOffset } = glyph;
-
-                                const { x: translateX, y: translateY } = this._drawLiquid;
-
-                                const originTranslate = Vector2.create(translateX, translateY);
-
-                                const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
-
-                                const spanStartPoint = calculateRectRotate(
-                                    originTranslate.addByPoint(spanLeft + xOffset, 0),
-                                    centerPoint,
-                                    centerAngle,
-                                    vertexAngle,
-                                    alignOffset
-                                );
-
-                                const spanPointWithFont = calculateRectRotate(
-                                    originTranslate.addByPoint(
-                                        spanLeft + maxLineAscSin + xOffset,
-                                        maxLineAscCos
-                                    ),
-                                    centerPoint,
-                                    centerAngle,
-                                    vertexAngle,
-                                    alignOffset
-                                );
-
-                                const extensionOffset: IExtensionConfig = {
-                                    originTranslate,
-                                    spanStartPoint,
-                                    spanPointWithFont,
-                                    centerPoint,
-                                    alignOffset,
-                                    renderConfig,
-                                };
-
-                                for (const extension of glyphExtensionsExcludeBackground) {
-                                    extension.extensionOffset = extensionOffset;
-                                    extension.draw(ctx, parentScale, glyph);
-                                }
-                            }
+                            this._drawGlyphGroup(
+                                ctx,
+                                parentScale,
+                                glyphGroup,
+                                line,
+                                alignOffset,
+                                centerAngle,
+                                vertexAngle,
+                                renderConfig,
+                                glyphExtensionsExcludeBackground
+                            );
 
                             this._drawLiquid.translateRestore();
                         }
@@ -1638,11 +1669,44 @@ export class Documents extends DocComponent {
 
         const rightCellSource = this._getTableCellSource(rowSke, index + 1);
         const bottomCellSource = tableSke ? this._getTableCellSource(tableSke.rows[rowIndex + 1], index) : undefined;
+        const bottom = cellSource.borderBottom;
+        const bottomBorder = this._getDocumentFlavor() === DocumentFlavor.TRADITIONAL && rowIndex === (tableSke?.rows.length ?? 1) - 1
+            ? bottom?.tableBottomBorder ?? bottom
+            : bottom;
         this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderRight, rightCellSource?.borderLeft), BORDER_TYPE.RIGHT, position);
-        this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderBottom, bottomCellSource?.borderTop), BORDER_TYPE.BOTTOM, position);
+        this._drawTableCellBorder(ctx, this._resolveTableCellBorder(bottomBorder, bottomCellSource?.borderTop), BORDER_TYPE.BOTTOM, position);
 
         if (rowIndex <= 0) {
-            this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderTop), BORDER_TYPE.TOP, position);
+            const top = cellSource.borderTop;
+            const border = this._getDocumentFlavor() === DocumentFlavor.TRADITIONAL ? top?.tableTopBorder ?? top : top;
+            this._drawTableCellBorder(ctx, this._resolveTableCellBorder(border), BORDER_TYPE.TOP, position);
+        } else if (tableSke) {
+            // The preceding row owns shared horizontal edges, but omitted grid
+            // columns can leave part of this cell's top without an owner.
+            let left = cell.left;
+            const right = cell.left + pageWidth;
+            const drawExposedTop = (end: number) => {
+                if (end > left) {
+                    this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderTop), BORDER_TYPE.TOP, {
+                        ...position,
+                        startX: x + left - cell.left,
+                        endX: x + end - cell.left,
+                    });
+                }
+            };
+            const previous = tableSke.rows[rowIndex - 1];
+            for (const [column, above] of previous.cells.entries()) {
+                const source = previous.rowSource.tableCells[column];
+                if (source?.rowSpan === 0 || source?.columnSpan === 0) {
+                    continue;
+                }
+                drawExposedTop(Math.min(right, above.left));
+                left = Math.max(left, above.left + above.pageWidth);
+                if (left >= right) {
+                    break;
+                }
+            }
+            drawExposedTop(right);
         }
 
         if (index <= 0) {
@@ -1815,12 +1879,7 @@ export class Documents extends DocComponent {
 
                 for (let i = 0; i < linesCount; i++) {
                     const line = lines[i];
-                    const { divides, asc = 0, type, lineHeight = 0 } = line;
-
-                    const maxLineAsc = asc;
-
-                    const maxLineAscSin = maxLineAsc * Math.sin(centerAngle);
-                    const maxLineAscCos = maxLineAsc * Math.cos(centerAngle);
+                    const { divides, type, lineHeight = 0 } = line;
 
                     if (type === LineType.BLOCK) {
                         for (const extension of extensions) {
@@ -1867,52 +1926,17 @@ export class Documents extends DocComponent {
                             );
 
                             // Draw text\border\lines etc.
-                            for (const renderGlyph of glyphGroup) {
-                                if (!renderGlyph.content || renderGlyph.content.length === 0) {
-                                    continue;
-                                }
-
-                                const { width: spanWidth, left: spanLeft, xOffset } = renderGlyph;
-
-                                const { x: translateX, y: translateY } = this._drawLiquid;
-
-                                const originTranslate = Vector2.create(translateX, translateY);
-
-                                const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
-
-                                const spanStartPoint = calculateRectRotate(
-                                    originTranslate.addByPoint(spanLeft + xOffset, 0),
-                                    centerPoint,
-                                    centerAngle,
-                                    vertexAngle,
-                                    alignOffset
-                                );
-
-                                const spanPointWithFont = calculateRectRotate(
-                                    originTranslate.addByPoint(
-                                        spanLeft + maxLineAscSin + xOffset,
-                                        maxLineAscCos
-                                    ),
-                                    centerPoint,
-                                    centerAngle,
-                                    vertexAngle,
-                                    alignOffset
-                                );
-
-                                const extensionOffset: IExtensionConfig = {
-                                    originTranslate,
-                                    spanStartPoint,
-                                    spanPointWithFont,
-                                    centerPoint,
-                                    alignOffset,
-                                    renderConfig,
-                                };
-
-                                for (const extension of glyphExtensionsExcludeBackground) {
-                                    extension.extensionOffset = extensionOffset;
-                                    extension.draw(ctx, parentScale, renderGlyph);
-                                }
-                            }
+                            this._drawGlyphGroup(
+                                ctx,
+                                parentScale,
+                                glyphGroup,
+                                line,
+                                alignOffset,
+                                centerAngle,
+                                vertexAngle,
+                                renderConfig,
+                                glyphExtensionsExcludeBackground
+                            );
 
                             this._drawLiquid.translateRestore();
                         }

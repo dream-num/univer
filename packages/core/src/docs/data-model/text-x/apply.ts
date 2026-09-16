@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody } from '../../../types/interfaces';
+import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
 import type { TextXAction } from './action-types';
 import { MemoryCursor } from '../../../common/memory-cursor';
-import { Tools } from '../../../shared';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
+import { Tools } from '../../../shared/tools';
 import { TextXActionType } from './action-types';
 import { updateAttributeByDelete } from './apply-utils/delete-apply';
 import { updateAttributeByInsert } from './apply-utils/insert-apply';
 import { updateAttribute } from './apply-utils/update-apply';
+import { applyRangeUpdates, getRangeUpdates, validateRangeUpdates } from './custom-range-update';
 
 function updateApply(
     doc: IDocumentBody,
@@ -61,6 +62,23 @@ function insertApply(
 }
 
 export function textXApply(doc: IDocumentBody, actions: TextXAction[]): IDocumentBody {
+    if (actions.some((action) => action.t !== TextXActionType.RETAIN && action.valueRangeId !== undefined &&
+        (typeof action.valueRangeId !== 'string' || !action.valueRangeId))) {
+        throw new Error('Invalid scalar value range identity.');
+    }
+    const updates = getRangeUpdates(actions);
+    if (updates.length) {
+        const resultLength = actions.reduce((length, action) => {
+            if (action.t === TextXActionType.INSERT) {
+                return length + action.len;
+            }
+            if (action.t === TextXActionType.DELETE) {
+                return length - action.len;
+            }
+            return length;
+        }, doc.dataStream.length);
+        validateRangeUpdates(updates, resultLength);
+    }
     const memoryCursor = new MemoryCursor();
 
     memoryCursor.reset();
@@ -98,6 +116,7 @@ export function textXApply(doc: IDocumentBody, actions: TextXAction[]): IDocumen
         }
     });
 
+    applyRangeUpdates(doc, updates);
     return doc;
 }
 

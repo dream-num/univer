@@ -31,6 +31,7 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
+    SectionType,
     SpacingRule,
     TableAlignmentType,
     TableRowHeightRule,
@@ -373,7 +374,8 @@ describe('layout-ruler', () => {
     });
 
     it.each(['paragraph', 'text', 'text-and-paragraph'].flatMap((kind) =>
-        [SpacingRule.AUTO, SpacingRule.AT_LEAST].map((spacingRule) => ({ kind, spacingRule }))))('keeps paragraph-mark tolerance separate from visible-run normal leading ($kind, $spacingRule)', ({ kind, spacingRule }) => {
+        [SpacingRule.AUTO, SpacingRule.AT_LEAST].flatMap((spacingRule) =>
+            [1.5, 18].map((growth) => ({ kind, spacingRule, growth })))))('keeps paragraph-mark metrics separate from visible-run leading ($kind/$spacingRule/$growth)', ({ kind, spacingRule, growth }) => {
         const visibleRun = kind === 'text';
         const { ctx, curPage, sectionBreakConfig } = createParagraphLayoutTestBed('AB', {
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
@@ -382,7 +384,7 @@ describe('layout-ruler', () => {
         first.bBox = { ...first.bBox, ba: 15, bd: 3, normalLineHeight: 18.005 };
         const incoming = createGlyph(visibleRun ? 'B' : '\r', visibleRun ? 8 : 0);
         incoming.streamType = visibleRun ? DataStreamTreeTokenType.LETTER : DataStreamTreeTokenType.PARAGRAPH;
-        incoming.bBox = { ...incoming.bBox, ba: 16.5, bd: 3, normalLineHeight: 19.505 };
+        incoming.bBox = { ...incoming.bBox, ba: 15 + growth, bd: 3, normalLineHeight: 18.005 + growth };
         const config = {
             paragraphIndex: 2,
             paragraphStyle: { snapToGrid: BooleanNumber.FALSE, spacingRule, lineSpacing: spacingRule === SpacingRule.AUTO ? 1 : 17 },
@@ -392,11 +394,34 @@ describe('layout-ruler', () => {
         const pages = layoutParagraph(ctx, [first], [curPage], sectionBreakConfig, config, true);
         const incomingGlyphs = kind === 'text-and-paragraph' ? [{ ...first, raw: 'B', content: 'B' }, incoming] : [incoming];
         layoutParagraph(ctx, incomingGlyphs, pages, sectionBreakConfig, config, false);
-        let expectedHeight = 18;
+        let expectedHeight = visibleRun ? 18 + growth : 18;
         if (spacingRule === SpacingRule.AUTO) {
-            expectedHeight = visibleRun ? 19.505 : 18.005;
+            expectedHeight = visibleRun ? 18.005 + growth : 18.005;
         }
         expect(pages[0].sections[0].columns[0].lines[0].lineHeight).toBeCloseTo(expectedHeight);
+    });
+
+    it('expands an at-least line when a later font has extra leading but the same font box', () => {
+        const { ctx, curPage, sectionBreakConfig } = createParagraphLayoutTestBed('AB', {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+        });
+        const first = createGlyph('A', 8);
+        first.bBox = { ...first.bBox, ba: 15, bd: 3, normalLineHeight: 18 };
+        const incoming = createGlyph('B', 8);
+        incoming.bBox = { ...first.bBox, normalLineHeight: 30 };
+        const config = {
+            paragraphIndex: 2,
+            paragraphStyle: { snapToGrid: BooleanNumber.FALSE, spacingRule: SpacingRule.AT_LEAST, lineSpacing: 16 },
+            documentCompatibilityPolicy: getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL),
+            useWordStyleLineHeight: true,
+        } as IParagraphConfig;
+        const pages = layoutParagraph(ctx, [first], [curPage], sectionBreakConfig, config, true);
+        layoutParagraph(ctx, [incoming], pages, sectionBreakConfig, config, false);
+        const line = pages[0].sections[0].columns[0].lines[0];
+        expect(line.lineHeight).toBe(30);
+        expect(line.contentHeight).toBe(18);
+        expect(line.paddingTop).toBe(6);
+        expect(line.paddingBottom).toBe(6);
     });
 
     it.each([BooleanNumber.FALSE, BooleanNumber.TRUE])('preserves mixed-font reflow metrics after a zero-height page hint (grid: %s)', (snapToGrid) => {
@@ -1019,6 +1044,91 @@ describe('layout-ruler', () => {
         }
     });
 
+    it.each([HorizontalAlign.CENTER, HorizontalAlign.RIGHT].flatMap((horizontalAlign) =>
+        [DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((documentFlavor) =>
+            [undefined, characterSpacingControlType.doNotCompress].map((compression) => ({ horizontalAlign, documentFlavor, compression }))
+        )
+    ))('fits aligned table text using punctuation space ($horizontalAlign/$documentFlavor/$compression)', ({ horizontalAlign, documentFlavor, compression }) => {
+        const content = '12匹喷焓款产品（R410A)';
+        const widths: Record<string, number> = { R: 7.836, A: 8.448, ')': 4.008, '\r': 0 };
+        const measure = vi.spyOn(FontCache, 'getTextSize').mockImplementation((text) => ({
+            width: widths[text] ?? (/^\d$/.test(text) ? 7.032 : 12),
+            ba: 13,
+            bd: 3,
+            aba: 12,
+            abd: 1,
+            sp: 0,
+            sbr: 0,
+            sbo: 0,
+            spr: 0,
+            spo: 0,
+        }));
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: {
+                documentFlavor,
+                characterSpacingControl: compression,
+                textStyle: { ff: '微软雅黑', fs: 9 },
+                pageSize: { width: 136.8 + (documentFlavor === DocumentFlavor.MODERN ? 2 * MODERN_DOCUMENT_DEFAULT_MARGIN : 40), height: 600 },
+            },
+            body: { paragraphs: [{ startIndex: content.length, paragraphStyle: { horizontalAlign, snapToGrid: BooleanNumber.FALSE } }] },
+        });
+        try {
+            const { ctx, viewModel, paragraphNode, sectionBreakConfig, curPage } = bed;
+            const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+            const pages = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, null);
+            const lines = pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)));
+            expect(lines).toHaveLength(documentFlavor === DocumentFlavor.TRADITIONAL && compression === undefined ? 1 : 2);
+            lineAdjustment(pages, viewModel, paragraphNode, sectionBreakConfig);
+            const glyphs = lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup));
+            expect(glyphs.map((glyph) => glyph.content).join('')).toBe(`${content}\r`);
+            for (const line of lines) {
+                const divide = line.divides[0];
+                expect(divide.glyphGroupWidth).toBeLessThanOrEqual(divide.width + 1e-6);
+                expect(divide.paddingLeft).toBeGreaterThanOrEqual(0);
+            }
+            for (const glyph of glyphs.filter((glyph) => /^[匹喷焓款产品]$/.test(glyph.content))) {
+                expect(glyph.bBox.width).toBe(12);
+            }
+        } finally {
+            measure.mockRestore();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it.each([HorizontalAlign.CENTER, HorizontalAlign.RIGHT])('retains Western word spacing with alignment %s', (horizontalAlign) => {
+        const content = 'AAAA AAAA AAAA';
+        const measure = vi.spyOn(FontCache, 'getTextSize').mockImplementation((text) => ({
+            width: text === '\r' ? 0 : 8,
+            ba: 10,
+            bd: 4,
+            aba: 10,
+            abd: 4,
+            sp: 0,
+            sbr: 0,
+            sbo: 0,
+            spr: 0,
+            spo: 0,
+        }));
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 142, height: 600 } },
+            body: { paragraphs: [{ startIndex: content.length, paragraphStyle: { horizontalAlign } }] },
+        });
+        try {
+            const { ctx, viewModel, paragraphNode, sectionBreakConfig, curPage } = bed;
+            const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+            const pages = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, null);
+            const lines = pages[0].sections[0].columns[0].lines;
+            expect(lines).toHaveLength(2);
+            lineAdjustment(pages, viewModel, paragraphNode, sectionBreakConfig);
+            expect(lines[0].divides[0].glyphGroup.find((glyph) => glyph.content === ' ')?.width).toBe(8);
+        } finally {
+            measure.mockRestore();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
     it('does not pull an extra Han character onto a traditional line by pre-compressing a punctuation pair', () => {
         const content = '甲），乙丙丁戊己庚辛';
         const { ctx, viewModel, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
@@ -1090,6 +1200,11 @@ describe('layout-ruler', () => {
         expect(__testing.isGlyphGroupBeyondDivideWidth([glyph], 837.428, 847.428, false, undefined, false, tolerance)).toBe(false);
     });
 
+    it('does not wrap an exactly fitting fractional advance because of floating-point residue', () => {
+        expect(__testing.isGlyphGroupBeyondDivideWidth([createGlyph('甲', 0.1)], 0.2, 0.3, false, undefined, false, 0)).toBe(false);
+        expect(__testing.isGlyphGroupBeyondDivideWidth([createGlyph('甲', 0.101)], 0.2, 0.3, false, undefined, false, 0)).toBe(true);
+    });
+
     it('uses trailing CJK punctuation shrinkability when deciding line overflow', () => {
         const text = createGlyph('字', 10);
         const punctuation = createGlyph('，', 10);
@@ -1151,10 +1266,44 @@ describe('layout-ruler', () => {
         lineAdjustment(pages, viewModel, paragraphNode, sectionBreakConfig);
         const lines = pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)));
         expect(lines[0].divides[0].glyphGroup.map((glyph) => glyph.content).join('').trimEnd()).toBe('aa bb cc');
-        expect(lines[0].divides[0].glyphGroupWidth).toBeCloseTo(68);
+        const visibleGlyphs = lines[0].divides[0].glyphGroup.filter((glyph) => glyph.content.trim());
+        const lastVisibleGlyph = visibleGlyphs[visibleGlyphs.length - 1];
+        expect(lastVisibleGlyph.left + lastVisibleGlyph.width).toBeCloseTo(68);
     });
 
-    it.each([undefined, HorizontalAlign.LEFT].flatMap((horizontalAlign) => [41, 62].map((width) => ({ horizontalAlign, width }))))('does not squeeze Western word spaces to fit an extra word in a left-aligned line ($horizontalAlign/$width)', ({ horizontalAlign, width }) => {
+    it.each([
+        { content: 'aa bb cc dddd ee', width: 98, horizontalAlign: HorizontalAlign.BOTH, hanging: false, first: 'aa bb cc dddd', count: 2 },
+        { content: 'aa bb cc dddd ee', width: 97.9, horizontalAlign: HorizontalAlign.BOTH, hanging: false, first: 'aa bb cc', count: 2 },
+        { content: 'aa bb cc dddd ee', width: 98, horizontalAlign: HorizontalAlign.LEFT, hanging: false, first: 'aa bb cc', count: 2 },
+        { content: 'aa bb cc dd ee', width: 82, horizontalAlign: HorizontalAlign.BOTH, hanging: false, first: 'aa bb cc', count: 2 },
+        { content: 'aa bb cc dd ee', width: 84, horizontalAlign: HorizontalAlign.BOTH, hanging: false, first: 'aa bb cc dd', count: 2 },
+        { content: 'aa bb cc dd.', width: 86, horizontalAlign: HorizontalAlign.BOTH, hanging: true, first: 'aa bb cc dd.', count: 1 },
+        { content: 'aa bb cc dd.', width: 86, horizontalAlign: HorizontalAlign.BOTH, hanging: false, first: 'aa bb cc', count: 2 },
+        { content: 'aa bb cc dd.x', width: 86, horizontalAlign: HorizontalAlign.BOTH, hanging: true, first: 'aa bb cc', count: 2 },
+        { content: 'aa bb cc dd....', width: 86, horizontalAlign: HorizontalAlign.BOTH, hanging: true, first: 'aa bb cc', count: 2 },
+    ])('bounds Word justified compression and terminal punctuation ($content/$width/$horizontalAlign/$hanging)', ({ content, width, horizontalAlign, hanging, first, count }) => {
+        const { ctx, paragraphNode, viewModel, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                characterSpacingControl: characterSpacingControlType.doNotCompress,
+                pageSize: { width: width + 40, height: 600 },
+            },
+            body: { paragraphs: [{ startIndex: content.length, paragraphStyle: { horizontalAlign, hangingPunctuation: hanging ? BooleanNumber.TRUE : BooleanNumber.FALSE } }] },
+        });
+        const shaped = shaping(ctx, content, viewModel, paragraphNode, sectionBreakConfig);
+        const pages = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, null);
+        lineAdjustment(pages, viewModel, paragraphNode, sectionBreakConfig);
+        const lines = pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)));
+        expect(lines).toHaveLength(count);
+        expect(lines[0].divides[0].glyphGroup.map((glyph) => glyph.content).join('').trimEnd()).toBe(first);
+        const visible = lines[0].divides[0].glyphGroup.filter((glyph) => glyph.content.trim());
+        const last = visible[visible.length - 1];
+        const overhang = hanging && last.content === '.' ? last.bBox.width * 0.8 : 0;
+        expect(last.left + last.width).toBeLessThanOrEqual(width + overhang + 1e-6);
+        expect(lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content))).join('').trimEnd()).toBe(content);
+    });
+
+    it.each([undefined, HorizontalAlign.LEFT, HorizontalAlign.JUSTIFIED, HorizontalAlign.BOTH].flatMap((horizontalAlign) => [41, 62].map((width) => ({ horizontalAlign, width }))))('chooses the same Western word break before justification ($horizontalAlign/$width)', ({ horizontalAlign, width }) => {
         const content = 'aa bb cc';
         const { ctx, paragraphNode, viewModel, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: width + 40, height: 600 } },
@@ -1166,9 +1315,17 @@ describe('layout-ruler', () => {
         const lines = pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)));
         expect(lines).toHaveLength(2);
         expect(lines[0].divides[0].glyphGroup.map((glyph) => glyph.content).join('')).toBe('aa bb ');
-        const spaces = lines[0].divides[0].glyphGroup.filter((glyph) => glyph.content === ' ');
-        for (const space of spaces) {
-            expect(space.width).toBeCloseTo(space.bBox.width);
+        if (horizontalAlign === HorizontalAlign.JUSTIFIED || horizontalAlign === HorizontalAlign.BOTH) {
+            const visibleGlyphs = lines[0].divides[0].glyphGroup.filter((glyph) => glyph.content.trim());
+            const lastVisibleGlyph = visibleGlyphs[visibleGlyphs.length - 1];
+            expect(lastVisibleGlyph.left + lastVisibleGlyph.width).toBeCloseTo(width);
+            const trailingSpace = lines[0].divides[0].glyphGroup[lines[0].divides[0].glyphGroup.length - 1];
+            expect(trailingSpace.width).toBeCloseTo(trailingSpace.bBox.width);
+        } else {
+            const spaces = lines[0].divides[0].glyphGroup.filter((glyph) => glyph.content === ' ');
+            for (const space of spaces) {
+                expect(space.width).toBeCloseTo(space.bBox.width);
+            }
         }
     });
 
@@ -1763,6 +1920,9 @@ describe('layout-ruler', () => {
 
     it.each([
         [DocumentFlavor.UNSPECIFIED, undefined, 1],
+        [DocumentFlavor.MODERN, undefined, 1],
+        [DocumentFlavor.TRADITIONAL, undefined, 2],
+        [DocumentFlavor.TRADITIONAL, 1, 1],
         [DocumentFlavor.DRAWINGML, undefined, 2],
         [DocumentFlavor.DRAWINGML, 1, 1],
     ] as const)('uses the host wrapping default with an optional explicit tolerance (%s, %s)', (documentFlavor, lineWrapTolerance, expectedLines) => {
@@ -1859,7 +2019,7 @@ describe('layout-ruler', () => {
     });
 
     it.each([DocumentFlavor.DRAWINGML, DocumentFlavor.UNSPECIFIED, DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN]
-        .flatMap((documentFlavor) => [false, true].flatMap((empty) => [false, true].map((split) => ({ documentFlavor, empty, split })))))('uses paragraph-end metrics only for empty DrawingML lines ($documentFlavor, empty=$empty, split=$split)', ({ documentFlavor, empty, split }) => {
+        .flatMap((documentFlavor) => [false, true].flatMap((empty) => [false, true].map((split) => ({ documentFlavor, empty, split })))))('uses paragraph-end metrics only for empty Office lines ($documentFlavor, empty=$empty, split=$split)', ({ documentFlavor, empty, split }) => {
         const measure = (markSize: number) => {
             const { ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(empty ? '' : 'a', {
                 documentStyle: { pageSize: { width: 300, height: 300 }, marginTop: 0, marginBottom: 0, paragraphLineGapDefault: 0 },
@@ -1894,7 +2054,7 @@ describe('layout-ruler', () => {
         };
         const small = measure(18);
         const large = measure(36);
-        if (documentFlavor === DocumentFlavor.DRAWINGML && !empty) {
+        if ((documentFlavor === DocumentFlavor.DRAWINGML || documentFlavor === DocumentFlavor.TRADITIONAL) && !empty) {
             expect(large).toEqual(small);
         } else {
             expect(large).not.toEqual(small);
@@ -2248,6 +2408,37 @@ describe('layout-ruler', () => {
         expect(getLineBoxHeight(metrics)).toBeCloseTo(633, 4);
     });
 
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((flavor) =>
+        [false, true].flatMap((incremental) => [false, true].map((markerFirst) => ({ flavor, incremental, markerFirst })))))('keeps list marker height separate from text leading ($flavor/$incremental/$markerFirst)', ({ flavor, incremental, markerFirst }) => {
+        const { ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('AB', {
+            documentStyle: { documentFlavor: flavor },
+        });
+        const text = createGlyph('A', 10);
+        text.bBox = { ...text.bBox, ba: 14, bd: 4, normalLineHeight: 18 };
+        const marker = createGlyph('B', 10);
+        marker.glyphType = GlyphType.LIST;
+        marker.bBox = { ...marker.bBox, ba: 18, bd: 4, normalLineHeight: 22 };
+        const glyphs = markerFirst ? [marker, text] : [text, marker];
+        const paragraphConfig = {
+            paragraphIndex: paragraphNode.endIndex,
+            paragraphStyle: { lineSpacing: 1.5, spacingRule: SpacingRule.AUTO, snapToGrid: BooleanNumber.FALSE },
+            documentCompatibilityPolicy: getDocumentCompatibilityPolicy(flavor),
+            useWordStyleLineHeight: true,
+        } as IParagraphConfig;
+        let pages = [curPage];
+        const groups = incremental ? glyphs.map((glyph) => [glyph]) : [glyphs];
+        for (const [index, group] of groups.entries()) {
+            pages = layoutParagraph(ctx, group, pages, sectionBreakConfig, paragraphConfig, index === 0);
+        }
+        const line = pages[0].sections[0].columns[0].lines[0];
+        const expected = flavor === DocumentFlavor.TRADITIONAL ? 31 : 33;
+        expect(line.contentHeight).toBe(22);
+        expect(line.lineHeight).toBeCloseTo(expected);
+        expect(line.divides.flatMap((divide) => divide.glyphGroup)).toEqual(glyphs);
+        pages = layoutParagraph(ctx, [text], pages, sectionBreakConfig, paragraphConfig, true);
+        expect(pages[0].sections[0].columns[0].lines[1].top).toBeCloseTo(expected);
+    });
+
     it.each([
         { pictureFirst: false, flavor: DocumentFlavor.TRADITIONAL, expectedHeight: 31 },
         { pictureFirst: true, flavor: DocumentFlavor.TRADITIONAL, expectedHeight: 31 },
@@ -2326,6 +2517,16 @@ describe('layout-ruler', () => {
 
         expect(getLineBoxHeight(compactMetrics)).toBeCloseTo(16, 4);
         expect(getLineBoxHeight(expandedMetrics)).toBeCloseTo(40, 4);
+    });
+
+    it.each([10, 40])('retains natural font leading under an at-least line minimum of %s', (minimum) => {
+        // Native Word keeps YaHei single spacing when the requested minimum is
+        // smaller; it must not collapse to the shorter font bounding box.
+        const metrics = getLineHeightMetrics(20, 0, 15.6, GridType.DEFAULT, minimum, SpacingRule.AT_LEAST, BooleanNumber.FALSE, true, true, 28);
+        expect(getLineBoxHeight(metrics)).toBe(Math.max(minimum, 28));
+        expect(metrics.contentHeight).toBe(20);
+        expect(metrics.paddingTop).toBe((Math.max(minimum, 28) - 20) / 2);
+        expect(metrics.paddingBottom).toBe(metrics.paddingTop);
     });
 
     it('treats exact spacing as the requested line box height even when glyphs are taller', () => {
@@ -2837,7 +3038,7 @@ describe('layout-ruler', () => {
     it.each([
         { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 30 },
         { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 10 },
-    ])('paginates an oversized floating Word table without changing its source ($relativeFrom)', (positionV) => {
+    ].flatMap((positionV) => [undefined, '12', '14', '15'].map((mode) => ({ positionV, mode }))))('respects Word floating table pagination mode $mode at $positionV.relativeFrom', ({ positionV, mode }) => {
         const T = DataStreamTreeTokenType;
         const rows = ['First', 'Second', 'Third', 'Fourth'].map((text) =>
             `${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}`
@@ -2875,6 +3076,7 @@ describe('layout-ruler', () => {
             documentStyle: {
                 documentFlavor: DocumentFlavor.TRADITIONAL,
                 pageSize: { width: 200, height: 200 },
+                ...(mode == null ? {} : { compatibilitySettings: { compatibilityMode: mode } }),
             },
         });
         sectionBreakConfig.documentCompatibilityPolicy = getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL);
@@ -2882,6 +3084,15 @@ describe('layout-ruler', () => {
         const table = createTableSkeleton(ctx, curPage, viewModel, paragraphNode.children[0], sectionBreakConfig);
         const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
         const pages = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, table);
+        if (mode === '12' || mode === '14') {
+            expect(pages).toHaveLength(1);
+            const intact = [...pages[0].skeTables.values()];
+            expect(intact).toHaveLength(1);
+            expect(intact[0].rows).toHaveLength(4);
+            expect(intact[0].height).toBeGreaterThan(curPage.pageHeight);
+            expect(JSON.stringify(dataModel.getSnapshot())).toBe(sourceBefore);
+            return;
+        }
         expect(pages).toHaveLength(3);
         const slices = pages.flatMap((page) => [...page.skeTables.values()]);
         expect(slices.map((slice) => slice.rows.length)).toEqual([1, 2, 1]);
@@ -2945,13 +3156,103 @@ describe('layout-ruler', () => {
         }
     });
 
+    it.each([false, true])('suppresses automatic spacing only at Word cell boundaries (incremental: %s)', (incremental) => {
+        const heights = [false, true].map((automatic) => {
+            const T = DataStreamTreeTokenType;
+            const tableStream = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cell\r\n${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+            const content = `${tableStream}\rAfter\r\n`;
+            const bed = createParagraphLayoutTestBed('', {
+                documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+                body: {
+                    dataStream: content,
+                    paragraphs: [{ startIndex: content.indexOf('\r'), paragraphStyle: {
+                        spaceAbove: { v: 10 },
+                        spaceBelow: { v: 10 },
+                        beforeAutoSpacing: automatic ? BooleanNumber.TRUE : BooleanNumber.FALSE,
+                        afterAutoSpacing: automatic ? BooleanNumber.TRUE : BooleanNumber.FALSE,
+                    } }, { startIndex: content.length - 2 }],
+                    sectionBreaks: [{ startIndex: content.indexOf('\n') }, { startIndex: content.length - 1 }],
+                    tables: [{ tableId: 'table', startIndex: 0, endIndex: tableStream.length }],
+                },
+                tableSource: { table: {
+                    tableId: 'table',
+                    align: 0,
+                    textWrap: 0,
+                    size: { type: 0, width: { v: 200 } },
+                    cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
+                    tableRows: [{ tableCells: [{}], trHeight: { val: { v: 0 }, hRule: 0 } }],
+                    tableColumns: [{ size: { type: 0, width: { v: 200 } } }],
+                } },
+            });
+            try {
+                const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+                if (incremental) {
+                    const generation = skeleton.startIncrementalLayout();
+                    let progress = skeleton.stepIncrementalLayout(generation, 0);
+                    for (let step = 0; step < 50 && !progress.complete; step++) {
+                        progress = skeleton.stepIncrementalLayout(generation, 0);
+                    }
+                    expect(progress.complete).toBe(true);
+                } else {
+                    skeleton.calculate();
+                }
+                return skeleton.getSkeletonData()!.pages[0].skeTables.get('table')!.rows[0].height;
+            } finally {
+                bed.viewModel.dispose();
+                bed.dataModel.dispose();
+            }
+        });
+        expect(heights[0] - heights[1]).toBeCloseTo(20);
+    });
+
+    it.each([SpacingRule.AUTO, SpacingRule.EXACT, SpacingRule.AT_LEAST].flatMap((spacingRule) =>
+        [4, 24].map((spaceAbove) => ({ spacingRule, spaceAbove }))))('ignores fully hidden paragraphs without losing adjacent spacing (rule: $spacingRule, before: $spaceAbove)', ({ spacingRule, spaceAbove }) => {
+        const positions = [false, true].map((includeHidden) => {
+            const content = includeHidden ? 'Before\rHidden\r\rAfter\r\n' : 'Before\r\rAfter\r\n';
+            const hiddenEnd = content.indexOf('\r', 7);
+            const bed = createParagraphLayoutTestBed('', {
+                documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+                body: {
+                    dataStream: content,
+                    sectionBreaks: [{ startIndex: content.length - 1 }],
+                    textRuns: includeHidden ? [{ st: 7, ed: hiddenEnd + 1, ts: { hidden: true } }] : [],
+                    paragraphs: [...content.matchAll(/\r/g)].map((match) => ({
+                        startIndex: match.index,
+                        paragraphStyle: {
+                            spacingRule,
+                            lineSpacing: spacingRule === SpacingRule.AUTO ? 1 : 40,
+                            spaceAbove: { v: match.index === 6 ? 0 : spaceAbove },
+                            spaceBelow: { v: 12 },
+                            ...(includeHidden && match.index === hiddenEnd ? { paragraphMarkTextStyle: { hidden: true } } : {}),
+                        },
+                    })),
+                },
+            });
+            const before = JSON.stringify(bed.dataModel.getSnapshot());
+            try {
+                const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+                skeleton.calculate();
+                const lines = skeleton.getSkeletonData()!.pages[0].sections[0].columns[0].lines;
+                const after = lines.find((line) => line.divides.some((divide) => divide.glyphGroup.some((glyph) => glyph.content.includes('A'))))!;
+                expect(after).toBeDefined();
+                expect(JSON.stringify(bed.dataModel.getSnapshot())).toBe(before);
+                return after.top + after.marginTop + after.paddingTop + after.asc;
+            } finally {
+                bed.viewModel.dispose();
+                bed.dataModel.dispose();
+            }
+        });
+        expect(positions[1]).toBeCloseTo(positions[0]);
+    });
+
     it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((documentFlavor) =>
-        [1, 2].flatMap((pageNumber) => [false, true].map((isInsideTable) => ({ documentFlavor, pageNumber, isInsideTable })))))('preserves first-page before-spacing and suppresses it on subsequent traditional pages: %j', ({ documentFlavor, pageNumber, isInsideTable }) => {
+        [0, 1, 5].flatMap((pageNumberStart) => [0, 1].flatMap((pageOffset) => [false, true].map((isInsideTable) => ({ documentFlavor, pageNumberStart, pageOffset, isInsideTable }))))))('preserves first-page before-spacing independently of the displayed page number: %j', ({ documentFlavor, pageNumberStart, pageOffset, isInsideTable }) => {
         const bed = createParagraphLayoutTestBed('Cell', { documentStyle: { documentFlavor } });
         if (isInsideTable) {
             bed.curPage.type = DocumentSkeletonPageType.CELL;
         }
-        bed.curPage.pageNumber = pageNumber;
+        bed.curPage.pageNumber = (isInsideTable ? 1 : pageNumberStart) + pageOffset;
+        bed.sectionBreakConfig.pageNumberStart = pageNumberStart;
         const paragraphConfig = {
             paragraphIndex: bed.paragraphNode.endIndex,
             paragraphStyle: { spaceAbove: { v: 12 } },
@@ -2961,8 +3262,47 @@ describe('layout-ruler', () => {
         try {
             const pages = layoutParagraph(bed.ctx, [createGlyph('Cell', 32)], [bed.curPage], bed.sectionBreakConfig, paragraphConfig, true);
             const line = pages[0].sections[0].columns[0].lines[0];
-            expect(line.marginTop).toBe(documentFlavor === DocumentFlavor.TRADITIONAL && pageNumber > 1 ? 0 : 12);
+            expect(line.marginTop).toBe(documentFlavor === DocumentFlavor.TRADITIONAL && pageOffset > 0 ? 0 : 12);
         } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it.each([false, true].flatMap((incremental) => [0, 6, 18].map((previousAfter) => ({ incremental, previousAfter }))))('collapses paragraph spacing across a later section start: %j', ({ incremental, previousAfter }) => {
+        const bed = createParagraphLayoutTestBed('', {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+            body: {
+                dataStream: 'First\r\nSecond\r\n',
+                paragraphs: [
+                    { startIndex: 5, paragraphStyle: { spaceBelow: { v: previousAfter } } },
+                    { startIndex: 13, paragraphStyle: { spaceAbove: { v: 12 } } },
+                ],
+                sectionBreaks: [
+                    { startIndex: 6, sectionId: 'first-section', sectionType: SectionType.NEXT_PAGE },
+                    { startIndex: 14, sectionId: 'second-section', sectionType: SectionType.NEXT_PAGE },
+                ],
+            },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        try {
+            if (incremental) {
+                const generation = skeleton.startIncrementalLayout();
+                let progress = skeleton.stepIncrementalLayout(generation, 0);
+                for (let step = 0; step < 50 && !progress.complete; step++) {
+                    progress = skeleton.stepIncrementalLayout(generation, 0);
+                }
+                expect(progress.complete).toBe(true);
+            } else {
+                skeleton.calculate();
+            }
+            const pages = skeleton.getSkeletonData()!.pages;
+            expect(pages).toHaveLength(2);
+            expect(pages[1].pageNumber).toBe(2);
+            expect(pages[1].sections[0].columns[0].lines[0].marginTop).toBe(Math.max(0, 12 - previousAfter));
+            expect(bed.dataModel.getSnapshot().body!.paragraphs![1].paragraphStyle!.spaceAbove).toEqual({ v: 12 });
+        } finally {
+            skeleton.dispose();
             bed.viewModel.dispose();
             bed.dataModel.dispose();
         }
@@ -3183,7 +3523,7 @@ describe('layout-ruler', () => {
         expect(ctx.paragraphConfigCache.get('')?.get(content.length)?.bulletSkeleton?.symbol).toBe('6.');
     });
 
-    it.each([0, 50, 100, 110, 120])('applies the minimum row height once across its page fragments: %s', (minimumHeight) => {
+    it.each([0, 50, 100, 110, 120])('reserves the Word row minimum on its final continuation without exceeding a page: %s', (minimumHeight) => {
         const T = DataStreamTreeTokenType;
         const tableStream = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}One\rTwo\rThree\rFour\rFive\r${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
         const paragraphs = [];
@@ -3214,6 +3554,7 @@ describe('layout-ruler', () => {
             },
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 200, height: 100 } },
         });
+        sectionBreakConfig.documentCompatibilityPolicy = getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL);
         const table = createTableSkeleton(ctx, curPage, viewModel, paragraphNode.children[0], sectionBreakConfig);
         const pages = lineBreaking(
             ctx,
@@ -3225,7 +3566,7 @@ describe('layout-ruler', () => {
             table
         );
         const fragments = pages.flatMap((page) => [...page.skeTables.values()].flatMap((slice) => slice.rows));
-        const finalHeight = 40 + Math.max(0, minimumHeight - 100);
+        const finalHeight = Math.min(60, Math.max(40, minimumHeight));
         expect(fragments.map((row) => row.height)).toEqual([60, finalHeight]);
         expect(fragments.map((row) => row.cells[0].pageHeight)).toEqual([60, finalHeight]);
     });

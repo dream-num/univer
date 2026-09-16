@@ -28,6 +28,8 @@ import { DocumentSkeleton } from './components/docs/layout/doc-skeleton';
 import { hydrateDocumentSkeletonPage, serializeDocumentSkeletonContinuousBlock, serializeDocumentSkeletonPage } from './components/docs/layout/document-layout-page-patch';
 import { DocumentViewModel } from './components/docs/view-model/document-view-model';
 
+const MAX_PAGES_PER_PUBLICATION = 4;
+
 export interface IDocumentLayoutSessionStartOptions {
     reason?: DocumentLayoutReason;
     anchor?: number;
@@ -191,9 +193,26 @@ export class DocumentLayoutSession extends Disposable {
         super.dispose();
     }
 
-    private _collectPublications(progress: IDocumentLayoutProgress): IDocumentLayoutStepResult {
+    private _collectPublications(initialProgress: IDocumentLayoutProgress): IDocumentLayoutStepResult {
+        let progress = initialProgress;
         if (!progress.didPublish) {
             return { progress, publication: null };
+        }
+
+        // The transport already accepts multiple pages. Drain only computed,
+        // stable pages so a long document does not require one visual frame per
+        // page. Keep the priority-anchor publication separate and bound hydration.
+        while (progress.mode === 'paginated' && !progress.complete && !progress.didPublishAnchor &&
+            progress.publishedPageCount < Math.min(this._lastPublishedPageCount + MAX_PAGES_PER_PUBLICATION, progress.pageCount - 1)) {
+            const next = this._skeleton.publishIncrementalLayoutBacklog(progress.generation);
+            if (!next.didPublish || next.cancelled) {
+                break;
+            }
+            const previousPageCount = progress.publishedPageCount;
+            progress = next;
+            if (progress.publishedPageCount <= previousPageCount) {
+                break;
+            }
         }
 
         if (
@@ -215,7 +234,7 @@ export class DocumentLayoutSession extends Disposable {
         }
         const publishedPageCount = Math.min(
             completion.publishedPageCount,
-            this._lastPublishedPageCount + 1
+            this._lastPublishedPageCount + (completion.didPublishAnchor && !this._didPublishEditAnchor ? 1 : MAX_PAGES_PER_PUBLICATION)
         );
         const complete = publishedPageCount === completion.publishedPageCount;
         const progress: IDocumentLayoutProgress = {

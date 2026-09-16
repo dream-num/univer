@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-import type { IDocumentData } from '@univerjs/core';
-import { CustomRangeType, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import { BooleanNumber, CustomRangeType, ICommandService, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, UniverDocsPlugin } from '@univerjs/docs';
 import { MenuItemType } from '@univerjs/ui';
 import { firstValueFrom } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
+import { OpenTableOfContentsDialogOperation } from '../../commands/table-of-contents-dialog.operation';
 import { DeleteTableOfContentsMenuFactory, InsertTableOfContentsMenuFactory, UpdateTableOfContentsMenuFactory } from '../menu';
 
 describe('table of contents menu factories', () => {
     let univer: Univer;
     afterEach(() => univer?.dispose());
 
-    it('switches insert and manage actions at a TOC boundary', async () => {
+    it.each([undefined, BooleanNumber.FALSE, BooleanNumber.TRUE])('switches insert and manage actions with field lock %s', async (locked) => {
         univer = new Univer();
         univer.registerPlugin(UniverDocsPlugin);
         const accessor = univer.__getInjector();
-        univer.createUnit<IDocumentData>(UniverInstanceType.UNIVER_DOC, {
+        univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
             id: 'doc-1',
             body: {
                 dataStream: '\u001FContents\u001E\rBody\r\n',
@@ -41,7 +42,7 @@ describe('table of contents menu factories', () => {
                     rangeType: CustomRangeType.FIELD,
                     startIndex: 0,
                     endIndex: 9,
-                    properties: { fieldType: 'TOC' },
+                    properties: { fieldType: 'TOC', locked },
                 }],
             },
             documentStyle: {},
@@ -62,8 +63,17 @@ describe('table of contents menu factories', () => {
         expect(insertMenu.type).toBe(MenuItemType.SUBITEMS);
         expect(Array.isArray(insertMenu.selections) ? insertMenu.selections.map((selection) => selection.value) : []).toEqual(['automatic', 'custom']);
         expect(UpdateTableOfContentsMenuFactory(accessor).icon).toBe('UnorderIcon');
-        if (manageHidden.some((state) => !state)) throw new Error('TOC menus must expose hidden state.');
+        if (manageHidden.some((state) => !state)) {
+            throw new Error('TOC menus must expose hidden state.');
+        }
         expect(await Promise.all(manageHidden.map((state) => firstValueFrom(state!)))).toEqual([false, false]);
+        expect(await firstValueFrom(UpdateTableOfContentsMenuFactory(accessor).disabled$!)).toBe(locked === BooleanNumber.TRUE);
+        expect(await firstValueFrom(DeleteTableOfContentsMenuFactory(accessor).disabled$!)).toBe(false);
+        if (locked === BooleanNumber.TRUE) {
+            const commands = accessor.get(ICommandService);
+            commands.registerCommand(OpenTableOfContentsDialogOperation);
+            expect(await commands.executeCommand(OpenTableOfContentsDialogOperation.id)).toBe(false);
+        }
         expect(await firstValueFrom(insertMenu.hidden$!)).toBe(false);
         expect(await firstValueFrom(insertMenu.disabled$!)).toBe(true);
 

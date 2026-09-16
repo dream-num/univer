@@ -38,7 +38,7 @@ import type {
     INodeSearch,
     ISectionBreakConfig,
 } from '../../../basics/interfaces';
-import type { IViewportInfo, Vector2 } from '../../../basics/vector2';
+import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../../basics/vector2';
 import type { IDocsCustomBlockRenderViewport } from '../custom-block-render-viewport';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
@@ -3353,7 +3353,7 @@ export class DocumentSkeleton extends Skeleton {
                 const page = pages[pi];
                 const { headerId, footerId, pageWidth } = page;
 
-                let exactMatch = null;
+                let exactMatch: Nullable<INodeInfo> = null;
 
                 if (editArea === DocumentEditArea.HEADER || editArea === DocumentEditArea.FOOTER) {
                     const headerSke = skeHeaders.get(headerId)?.get(pageWidth) as IDocumentSkeletonPage;
@@ -3410,7 +3410,7 @@ export class DocumentSkeleton extends Skeleton {
             }
         } else {
             const { segmentId, segmentPage, strict } = restrictions;
-            let exactMatch = null;
+            let exactMatch: Nullable<INodeInfo> = null;
 
             if (strict && this._docViewModel.getNoteTreeMap().has(segmentId)) {
                 for (let pi = 0; pi < pageLength; pi++) {
@@ -3547,18 +3547,10 @@ export class DocumentSkeleton extends Skeleton {
         y: number,
         pageLength: number,
         nestLevel: number = 0
-        // eslint-disable-next-line ts/no-explicit-any
-    ): any {
-        const { sections, skeTables, skeColumnGroups = new Map() } = segmentPage;
+    ): Nullable<INodeInfo> {
         this._findLiquid.translateSave();
-
-        const note = pageType === DocumentSkeletonPageType.NOTE
-            ? page.notes?.find((fragment) => fragment.page === segmentPage)
-            : undefined;
-        const pageLeft = this._findLiquid.x + (note?.left ?? 0);
-        const pageRight = pageLeft + (note ? segmentPage.pageWidth : page.pageWidth);
-        const pageTop = this._findLiquid.y + (note?.top ?? (pageType === DocumentSkeletonPageType.FOOTER ? page.pageHeight - segmentPage.pageHeight : 0));
-        const pageBottom = pageTop + (note ? segmentPage.height : segmentPage.pageHeight);
+        const { bounds, paddingLeft, paddingTop } = this._getHitTestPageLayout(segmentPage, pageType, page);
+        const { left: pageLeft, right: pageRight, top: pageTop, bottom: pageBottom } = bounds;
 
         let pointInPage = x >= pageLeft
             && x <= pageRight
@@ -3567,21 +3559,10 @@ export class DocumentSkeleton extends Skeleton {
 
         // Handle the outmost page.
         if (nestLevel === 0 && pageType === DocumentSkeletonPageType.BODY) {
-            const isFirstPage = pi === 0;
-            const isLastPage = pi === pageLength - 1;
             // TODO: Use page margin top as page gap now, need to consider the page gap in the future.
             const halfMarginTop = page.originMarginTop / 2;
-
-            // It's the only page, point always in page.
-            if (isFirstPage && isLastPage) {
-                pointInPage = true;
-            } else if (isFirstPage) {
-                pointInPage = y <= pageBottom + halfMarginTop;
-            } else if (isLastPage) {
-                pointInPage = y >= pageTop - halfMarginTop;
-            } else {
-                pointInPage = y >= pageTop - halfMarginTop && y <= pageBottom + halfMarginTop;
-            }
+            pointInPage = (pi === 0 || y >= pageTop - halfMarginTop)
+                && (pi === pageLength - 1 || y <= pageBottom + halfMarginTop);
         }
 
         if (segmentPage.cellTextDirection === 'tbRlV') {
@@ -3590,163 +3571,83 @@ export class DocumentSkeleton extends Skeleton {
             y = pageTop + segmentPage.pageWidth - (physicalX - pageLeft);
         }
 
-        switch (pageType) {
-            case DocumentSkeletonPageType.NOTE: {
-                this._findLiquid.translate(note?.left ?? page.marginLeft, note?.top ?? page.marginTop);
-                break;
-            }
-            case DocumentSkeletonPageType.HEADER: {
-                this._findLiquid.translatePagePadding({
-                    ...segmentPage,
-                    marginLeft: page.marginLeft, // Because header or footer margin Left is 0.
-                });
-                break;
-            }
-
-            case DocumentSkeletonPageType.FOOTER: {
-                const footerTop = page.pageHeight - segmentPage.height - segmentPage.marginBottom;
-                this._findLiquid.translate(page.marginLeft, footerTop);
-                break;
-            }
-
-            default: {
-                this._findLiquid.translatePagePadding(page);
-                break;
-            }
-        }
+        this._findLiquid.translate(paddingLeft, paddingTop);
 
         if (pointInPage) {
-            let nearestNodeDistanceY = Number.POSITIVE_INFINITY;
-
-            for (const section of sections) {
-                const { columns } = section;
-
-                this._findLiquid.translateSave();
-                this._findLiquid.translateSection(section);
-
-                for (const column of columns) {
-                    const { lines } = column;
-
-                    this._findLiquid.translateSave();
-                    this._findLiquid.translateColumn(column);
-
-                    for (let i = 0; i < lines.length; i++) {
-                        const line = lines[i];
-                        const { divides, type, lineHeight = 0 } = line;
-
-                        if (type === LineType.BLOCK) {
-                            continue;
-                        } else {
-                            this._findLiquid.translateSave();
-                            this._findLiquid.translateLine(line);
-
-                            const { y: startY } = this._findLiquid;
-
-                            const startY_fin = startY;
-
-                            const endY_fin = startY + lineHeight;
-
-                            const distanceY = Math.abs(y - endY_fin);
-
-                            const divideLength = divides.length;
-                            for (let i = 0; i < divideLength; i++) {
-                                const divide = divides[i];
-                                const { glyphGroup } = divide;
-
-                                this._findLiquid.translateSave();
-                                this._findLiquid.translateDivide(divide);
-
-                                const { x: startX } = this._findLiquid;
-
-                                for (const glyph of glyphGroup) {
-                                    if (!isHitTestAddressableGlyph(glyph)) {
-                                        continue;
-                                    }
-
-                                    const { width: glyphWidth, left: glyphLeft } = glyph;
-                                    const startX_fin = startX + glyphLeft;
-                                    const endX_fin = startX + glyphLeft + glyphWidth;
-                                    const distanceX = Math.abs(x - endX_fin);
-
-                                    // Handle pointer in the same line.
-                                    if (y >= startY_fin && y <= endY_fin) {
-                                        // Exact match glyph.
-                                        if (x >= startX_fin && x <= endX_fin) {
-                                            return {
-                                                node: glyph,
-                                                segmentPage: pageType === DocumentSkeletonPageType.BODY ? -1 : pi,
-                                                segmentId,
-                                                ratioX: x / (startX_fin + endX_fin),
-                                                ratioY: y / (startY_fin + endY_fin),
-                                            };
-                                        }
-
-                                        if (nearestNodeDistanceY !== Number.NEGATIVE_INFINITY) {
-                                            cache.nearestNodeList = [];
-                                            cache.nearestNodeDistanceList = [];
-                                        }
-                                        cache.nearestNodeList.push({
-                                            node: glyph,
-                                            segmentPage: pageType === DocumentSkeletonPageType.BODY ? -1 : pi,
-                                            segmentId,
-                                            ratioX: x / (startX_fin + endX_fin),
-                                            ratioY: y / (startY_fin + endY_fin),
-                                        });
-
-                                        cache.nearestNodeDistanceList.push({
-                                            coordInPage: pointInPage,
-                                            distance: distanceX,
-                                            nestLevel,
-                                        });
-
-                                        nearestNodeDistanceY = Number.NEGATIVE_INFINITY;
-                                        continue;
-                                    }
-
-                                    if (distanceY < nearestNodeDistanceY) {
-                                        nearestNodeDistanceY = distanceY;
-                                        cache.nearestNodeList = [];
-                                        cache.nearestNodeDistanceList = [];
-                                    }
-
-                                    if (distanceY === nearestNodeDistanceY) {
-                                        cache.nearestNodeList.push({
-                                            node: glyph,
-                                            segmentPage: pageType === DocumentSkeletonPageType.BODY ? -1 : pi,
-                                            segmentId,
-                                            ratioX: x / (startX_fin + endX_fin),
-                                            ratioY: y / (startY_fin + endY_fin),
-                                        });
-
-                                        cache.nearestNodeDistanceList.push({
-                                            coordInPage: pointInPage,
-                                            distance: distanceX,
-                                            nestLevel,
-                                        });
-                                    }
-                                }
-                                this._findLiquid.translateRestore();
-                            }
-                            this._findLiquid.translateRestore();
-                        }
-                    }
-                    this._findLiquid.translateRestore();
-                }
-
+            const textMatch = this._collectNearestTextNode(segmentPage, {
+                segmentPage: pageType === DocumentSkeletonPageType.BODY ? -1 : pi,
+                segmentId,
+            }, cache, x, y, nestLevel);
+            if (textMatch) {
                 this._findLiquid.translateRestore();
+                return textMatch;
             }
         }
 
-        let exactMatch = null;
-        if (pointInPage && skeTables.size > 0) {
+        const tableMatch = pointInPage
+            ? this._collectNearestTableNode(segmentPage, segmentId, pi, cache, x, y, pageLength, nestLevel)
+            : undefined;
+        const exactMatch = tableMatch ?? this._collectNearestColumnGroupNode(segmentPage, segmentId, pi, x, y, pageLength, nestLevel);
+        this._findLiquid.translateRestore();
+        return exactMatch;
+    }
+
+    private _getHitTestPageLayout(
+        segmentPage: IDocumentSkeletonPage,
+        pageType: DocumentSkeletonPageType,
+        page: IDocumentSkeletonPage
+    ): { bounds: IBoundRectNoAngle; paddingLeft: number; paddingTop: number } {
+        const note = pageType === DocumentSkeletonPageType.NOTE
+            ? page.notes?.find((fragment) => fragment.page === segmentPage)
+            : undefined;
+        const left = this._findLiquid.x + (note?.left ?? 0);
+        const footerOffset = pageType === DocumentSkeletonPageType.FOOTER ? page.pageHeight - segmentPage.pageHeight : 0;
+        const top = this._findLiquid.y + (note?.top ?? footerOffset);
+        const bounds = {
+            left,
+            top,
+            right: left + (note ? segmentPage.pageWidth : page.pageWidth),
+            bottom: top + (note ? segmentPage.height : segmentPage.pageHeight),
+        };
+        let paddingLeft = page.marginLeft;
+        let paddingTop = page.marginTop;
+        switch (pageType) {
+            case DocumentSkeletonPageType.NOTE:
+                paddingLeft = note?.left ?? paddingLeft;
+                paddingTop = note?.top ?? paddingTop;
+                break;
+            case DocumentSkeletonPageType.HEADER:
+                // Header/footer stories inherit their owning physical page's left margin.
+                paddingTop = segmentPage.marginTop;
+                break;
+            case DocumentSkeletonPageType.FOOTER:
+                paddingTop = page.pageHeight - segmentPage.height - segmentPage.marginBottom;
+                break;
+        }
+        return { bounds, paddingLeft, paddingTop };
+    }
+
+    private _collectNearestTableNode(
+        segmentPage: IDocumentSkeletonPage,
+        segmentId: string,
+        pi: number,
+        cache: INearestCache,
+        x: number,
+        y: number,
+        pageLength: number,
+        nestLevel: number
+    ): Nullable<INodeInfo> {
+        const { skeTables } = segmentPage;
+        let exactMatch: Nullable<INodeInfo>;
+        if (skeTables.size > 0) {
             const unitId = this._docViewModel.getDataModel().getUnitId?.() ?? '';
             for (const table of Array.from(skeTables.values()).reverse()) {
                 const { top: tableTop, left: tableLeft, rows } = table;
                 const sourceTableId = getTableIdAndSliceIndex(table.tableId).tableId;
                 const viewport = getDocsTableRenderViewport(unitId, sourceTableId);
 
-                this._findLiquid?.translateSave();
-                this._findLiquid?.translate(tableLeft, tableTop);
+                this._findLiquid.translateSave();
+                this._findLiquid.translate(tableLeft, tableTop);
                 const pointInTable = x >= this._findLiquid.x && x <= this._findLiquid.x + table.width
                     && y >= this._findLiquid.y && y <= this._findLiquid.y + table.height;
                 const tableCache: INearestCache = { nearestNodeList: [], nearestNodeDistanceList: [] };
@@ -3755,11 +3656,11 @@ export class DocumentSkeleton extends Skeleton {
                     const visibleLeft = this._findLiquid.x - (viewport.leadingInsetLeft ?? 0);
                     const visibleRight = visibleLeft + viewport.viewportWidth;
                     if (x < visibleLeft || x > visibleRight) {
-                        this._findLiquid?.translateRestore();
+                        this._findLiquid.translateRestore();
                         continue;
                     }
 
-                    this._findLiquid?.translate(-viewport.scrollLeft, 0);
+                    this._findLiquid.translate(-viewport.scrollLeft, 0);
                 }
 
                 for (const row of rows) {
@@ -3770,14 +3671,14 @@ export class DocumentSkeleton extends Skeleton {
                         continue;
                     }
 
-                    this._findLiquid?.translateSave();
-                    this._findLiquid?.translate(0, rowTop);
+                    this._findLiquid.translateSave();
+                    this._findLiquid.translate(0, rowTop);
 
                     for (const cell of cells) {
                         const { left: cellLeft } = cell;
 
-                        this._findLiquid?.translateSave();
-                        this._findLiquid?.translate(cellLeft, 0);
+                        this._findLiquid.translateSave();
+                        this._findLiquid.translate(cellLeft, 0);
 
                         exactMatch = exactMatch ?? this._collectNearestNode(
                             cell,
@@ -3792,13 +3693,13 @@ export class DocumentSkeleton extends Skeleton {
                             nestLevel + 1
                         );
 
-                        this._findLiquid?.translateRestore();
+                        this._findLiquid.translateRestore();
                     }
 
-                    this._findLiquid?.translateRestore();
+                    this._findLiquid.translateRestore();
                 }
 
-                this._findLiquid?.translateRestore();
+                this._findLiquid.translateRestore();
                 if (pointInTable) {
                     // Blank cell padding still belongs to the topmost painted table.
                     exactMatch ??= this._getNearestNode(tableCache.nearestNodeList, tableCache.nearestNodeDistanceList);
@@ -3811,7 +3712,21 @@ export class DocumentSkeleton extends Skeleton {
             }
         }
 
-        if (skeColumnGroups.size > 0) {
+        return exactMatch;
+    }
+
+    private _collectNearestColumnGroupNode(
+        segmentPage: IDocumentSkeletonPage,
+        segmentId: string,
+        pi: number,
+        x: number,
+        y: number,
+        pageLength: number,
+        nestLevel: number
+    ): Nullable<INodeInfo> {
+        const { skeColumnGroups } = segmentPage;
+        let exactMatch: Nullable<INodeInfo>;
+        if (skeColumnGroups && skeColumnGroups.size > 0) {
             for (const columnGroup of skeColumnGroups.values()) {
                 const { top: columnGroupTop, left: columnGroupLeft, width: columnGroupWidth, height: columnGroupHeight, columns } = columnGroup;
                 const absoluteColumnGroupLeft = this._findLiquid.x + columnGroupLeft;
@@ -3826,8 +3741,8 @@ export class DocumentSkeleton extends Skeleton {
                     continue;
                 }
 
-                this._findLiquid?.translateSave();
-                this._findLiquid?.translate(columnGroupLeft, columnGroupTop);
+                this._findLiquid.translateSave();
+                this._findLiquid.translate(columnGroupLeft, columnGroupTop);
 
                 for (const column of columns) {
                     const absoluteColumnLeft = absoluteColumnGroupLeft + column.left;
@@ -3847,8 +3762,8 @@ export class DocumentSkeleton extends Skeleton {
                         nearestNodeDistanceList: [],
                     };
 
-                    this._findLiquid?.translateSave();
-                    this._findLiquid?.translate(column.left, column.top);
+                    this._findLiquid.translateSave();
+                    this._findLiquid.translate(column.left, column.top);
 
                     exactMatch = exactMatch ?? this._collectNearestNode(
                         column.page,
@@ -3863,19 +3778,65 @@ export class DocumentSkeleton extends Skeleton {
                         nestLevel + 1
                     ) ?? this._getNearestNode(nestedCache.nearestNodeList, nestedCache.nearestNodeDistanceList);
 
-                    this._findLiquid?.translateRestore();
+                    this._findLiquid.translateRestore();
                 }
 
-                this._findLiquid?.translateRestore();
+                this._findLiquid.translateRestore();
             }
         }
 
-        if (exactMatch) {
-            this._findLiquid.translateRestore();
-            return exactMatch;
-        }
+        return exactMatch;
+    }
 
-        this._findLiquid.translateRestore();
+    private _collectNearestTextNode(
+        page: IDocumentSkeletonPage,
+        segment: Pick<INodeInfo, 'segmentId' | 'segmentPage'>,
+        cache: INearestCache,
+        x: number,
+        y: number,
+        nestLevel: number
+    ): Nullable<INodeInfo> {
+        let nearestDistanceY = Number.POSITIVE_INFINITY;
+        const { x: originX, y: originY } = this._findLiquid;
+        for (const section of page.sections) {
+            for (const column of section.columns) {
+                for (const line of column.lines) {
+                    if (line.type === LineType.BLOCK) {
+                        continue;
+                    }
+                    const startY = originY + (section.top ?? 0) + line.top;
+                    const endY = startY + (line.lineHeight ?? 0);
+                    const sameLine = y >= startY && y <= endY;
+                    const distanceY = sameLine ? Number.NEGATIVE_INFINITY : Math.abs(y - endY);
+                    if (distanceY > nearestDistanceY) {
+                        continue;
+                    }
+                    for (const divide of line.divides) {
+                        const divideLeft = originX + column.left + divide.left + divide.paddingLeft;
+                        for (const glyph of divide.glyphGroup) {
+                            if (!isHitTestAddressableGlyph(glyph)) {
+                                continue;
+                            }
+                            const startX = divideLeft + glyph.left;
+                            const endX = startX + glyph.width;
+                            const node = { node: glyph, ...segment, ratioX: x / (startX + endX), ratioY: y / (startY + endY) };
+                            if (sameLine && x >= startX && x <= endX) {
+                                return node;
+                            }
+                            if (distanceY < nearestDistanceY) {
+                                nearestDistanceY = distanceY;
+                                cache.nearestNodeList = [];
+                                cache.nearestNodeDistanceList = [];
+                            }
+                            if (distanceY === nearestDistanceY) {
+                                cache.nearestNodeList.push(node);
+                                cache.nearestNodeDistanceList.push({ coordInPage: true, distance: Math.abs(x - endX), nestLevel });
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private _getNearestNode(nearestNodeList: INodeInfo[], nearestNodeDistanceList: IDistance[]) {
@@ -4424,7 +4385,13 @@ export class DocumentSkeleton extends Skeleton {
                 );
             }
             if (state.pendingParagraphCheckpoint != null) {
+                const tableAnchors = ctx.skeletonResourceReference.drawingAnchor?.get(pending.table.tableId);
                 this._restoreIncrementalParagraphCheckpoint(ctx, state.pendingParagraphCheckpoint);
+                // Restore the enclosing paragraph, not the completed table's
+                // newly paginated anchors with its old unbounded measurements.
+                if (tableAnchors != null) {
+                    ctx.skeletonResourceReference.drawingAnchor?.set(pending.table.tableId, tableAnchors);
+                }
             }
             state.pendingSlicedTableBuild = null;
             state.pendingParagraphCheckpoint = null;

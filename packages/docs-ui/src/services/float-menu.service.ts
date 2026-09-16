@@ -233,14 +233,23 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
 
     protected _openSelectionMenu(unitId: string, range: ITextRangeParam): IDisposable | undefined {
         const segmentId = range.segmentId ?? '';
+        let layoutInteraction: IDisposable | undefined;
         const popup = this._docCanvasPopManagerService.attachPopupToRange(
             range,
             {
                 componentKey: FLOAT_MENU_COMPONENT_KEY,
                 direction: 'top-left',
                 rangeAnchor: 'selection-end',
+                requiresStableLayout: false,
                 offset: [0, 8],
                 extraProps: {
+                    // Offscreen popups are not mounted. They must not hold the
+                    // layout needed to bring a restored selection into view.
+                    onMount: () => {
+                        const interaction = this._docLayoutInteractionService.beginInteraction();
+                        layoutInteraction = interaction;
+                        return () => interaction.dispose();
+                    },
                     onDismiss: () => {
                         this._invalidatedSelection = this._getSelectionKey(range);
                         this._hideFloatMenu();
@@ -249,11 +258,10 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
             },
             unitId
         );
-        const layoutInteraction = this._docLayoutInteractionService.beginInteraction();
         this._floatMenu = {
             disposable: toDisposable(() => {
                 popup.dispose();
-                layoutInteraction.dispose();
+                layoutInteraction?.dispose();
             }),
             start: range.startOffset,
             end: range.endOffset,

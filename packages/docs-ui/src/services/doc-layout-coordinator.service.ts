@@ -859,7 +859,7 @@ export class DocLayoutCoordinatorService extends Disposable {
             return true;
         }
         if (!backlogResult.progress.complete) {
-            // Match the Main path: one visible page publication per task.
+            // Yield after each bounded publication before requesting more pages.
             this._scheduleBackground();
         }
         return true;

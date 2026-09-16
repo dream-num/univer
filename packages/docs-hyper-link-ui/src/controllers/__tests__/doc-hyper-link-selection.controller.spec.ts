@@ -17,8 +17,16 @@
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
 import type { RenderUnit } from '@univerjs/engine-render';
-import { BooleanNumber, CustomRangeType, DocumentFlavor, ICommandService, Univer, UniverInstanceType } from '@univerjs/core';
-import { DocLayoutExecutorService, DocSelectionManagerService, DocSkeletonManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
+import { BooleanNumber, CustomRangeType, DocumentFlavor, ICommandService, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
+import {
+    DocLayoutExecutorService,
+    DocSelectionManagerService,
+    DocSkeletonManagerService,
+    DocStateEmitService,
+    InsertTextCommand,
+    RichTextEditingMutation,
+    SetTextSelectionsOperation,
+} from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { CanvasColorService, Documents, ICanvasColorService, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { CanvasPopupService, DesktopDialogService, ICanvasPopupService, IDialogService, IUIPartsService, UIPartsService } from '@univerjs/ui';
@@ -57,6 +65,7 @@ describe.each([1, 3])('DocHyperLinkSelectionController with a %i-character link'
         injector.add([IDialogService, { useClass: DesktopDialogService }]);
         injector.add([DocLayoutExecutorService]);
         injector.add([DocSelectionManagerService]);
+        injector.add([DocStateEmitService]);
         injector.add([DocCanvasPopManagerService]);
         injector.add([DocHyperLinkPopupService]);
         injector.add([DocHyperLinkSelectionController]);
@@ -81,16 +90,11 @@ describe.each([1, 3])('DocHyperLinkSelectionController with a %i-character link'
                 marginRight: 20,
             },
         });
-        const render = injector.get(IRenderManagerService).createRender(model.getUnitId()) as RenderUnit;
-        render.deactivate();
-        render.engine.resizeBySize(300, 400);
-        vi.spyOn(render.engine.getCanvasElement()!, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 300, 400));
-        render.addRenderDependencies([[DocSkeletonManagerService]]);
-        const documents = new Documents('link-selection-document', render.with(DocSkeletonManagerService).getSkeleton());
-        render.mainComponent = documents;
-        render.scene.addObject(documents);
+        mountDocument(model);
         commands = injector.get(ICommandService);
         commands.registerCommand(SetTextSelectionsOperation);
+        commands.registerCommand(InsertTextCommand);
+        commands.registerCommand(RichTextEditingMutation);
         popup = injector.get(DocHyperLinkPopupService);
         injector.get(DocHyperLinkSelectionController);
     });
@@ -100,12 +104,23 @@ describe.each([1, 3])('DocHyperLinkSelectionController with a %i-character link'
         vi.restoreAllMocks();
     });
 
-    async function select(startOffset: number, endOffset = startOffset): Promise<void> {
+    function mountDocument(model: DocumentDataModel): void {
+        const render = univer.__getInjector().get(IRenderManagerService).createRender(model.getUnitId()) as RenderUnit;
+        render.deactivate();
+        render.engine.resizeBySize(300, 400);
+        vi.spyOn(render.engine.getCanvasElement()!, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 300, 400));
+        render.addRenderDependencies([[DocSkeletonManagerService]]);
+        const documents = new Documents('link-selection-document', render.with(DocSkeletonManagerService).getSkeleton());
+        render.mainComponent = documents;
+        render.scene.addObject(documents);
+    }
+
+    async function select(startOffset: number, endOffset = startOffset, isEditing = false): Promise<void> {
         const params: ISetTextSelectionsOperationParams = {
             unitId: 'doc-unit',
             subUnitId: 'doc-unit',
             segmentId: '',
-            isEditing: false,
+            isEditing,
             style: { fill: '', stroke: '', strokeActive: '', strokeWidth: 0 },
             ranges: [{ startOffset, endOffset, collapsed: startOffset === endOffset, segmentPage: 0 }],
         };
@@ -155,5 +170,43 @@ describe.each([1, 3])('DocHyperLinkSelectionController with a %i-character link'
         expect(popup.showing?.linkId).toBe('link-1');
         await select(startIndex, endIndex + 1);
         expect(popup.showing).toBeNull();
+    });
+
+    it('releases link details after editing and does not reopen them on a layout selection refresh', async () => {
+        await select(startIndex);
+        expect(popup.showing?.linkId).toBe('link-1');
+        expect(await commands.executeCommand(InsertTextCommand.id, {
+            unitId: 'doc-unit',
+            body: { dataStream: '!' },
+            range: { startOffset: 5, endOffset: 5, collapsed: true },
+            textRanges: [],
+            noNeedSetTextRange: true,
+            debounce: false,
+        })).toBe(true);
+        expect(popup.showing).toBeNull();
+        await select(startIndex);
+        expect(popup.showing).toBeNull();
+        await select(0);
+        await select(startIndex);
+        expect(popup.showing?.linkId).toBe('link-1');
+    });
+
+    it('does not open link details for an editing caret', async () => {
+        await select(startIndex, startIndex, true);
+        expect(popup.showing).toBeNull();
+    });
+
+    it('opens link details at the same caret after closing and reopening the document', async () => {
+        const instances = univer.__getInjector().get(IUniverInstanceService);
+        const snapshot = instances.getUnit<DocumentDataModel>('doc-unit', UniverInstanceType.UNIVER_DOC)!.getSnapshot();
+        await select(startIndex);
+        expect(popup.showing?.linkId).toBe('link-1');
+        univer.__getInjector().get(IRenderManagerService).removeRender('doc-unit');
+        expect(instances.disposeUnit('doc-unit')).toBe(true);
+        expect(popup.showing).toBeNull();
+
+        mountDocument(univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, snapshot));
+        await select(startIndex);
+        expect(popup.showing?.linkId).toBe('link-1');
     });
 });

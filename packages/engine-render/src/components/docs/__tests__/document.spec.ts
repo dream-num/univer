@@ -14,8 +14,28 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IParagraphStyle, ITable } from '@univerjs/core';
-import { ColumnSeparatorType, CustomRangeType, DashStyleType, DataStreamTreeTokenType, DocumentDataModel, DocumentFlavor, HorizontalAlign, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, TableAlignmentType, TableRowHeightRule, TableSizeType, TableTextWrapType, TabStopAlignment, Univer } from '@univerjs/core';
+import type { IDocumentBody, IParagraphStyle, IScale, ITable } from '@univerjs/core';
+import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
+import type { IExtensionConfig } from '../../extension';
+import {
+    ColumnSeparatorType,
+    CustomRangeType,
+    DashStyleType,
+    DataStreamTreeTokenType,
+    DocumentDataModel,
+    DocumentFlavor,
+    HorizontalAlign,
+    LocaleService,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    TableAlignmentType,
+    TableRowHeightRule,
+    TableSizeType,
+    TableTextWrapType,
+    TabStopAlignment,
+    Univer,
+    WrapStrategy,
+} from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { setupRenderTestEnv } from '../../../__tests__/render-test-utils';
 import { BORDER_TYPE } from '../../../basics/const';
@@ -995,13 +1015,21 @@ describe('documents render', () => {
         documents.dispose();
     });
 
-    it.each([false, true])('draws styled paragraph borders but skips explicit zero widths (cleared: %s)', (cleared) => {
+    it.each([
+        { traditional: false, cleared: false },
+        { traditional: false, cleared: true },
+        { traditional: true, cleared: false },
+        { traditional: true, cleared: true },
+    ])('draws paragraph borders with mode-specific clearance: %s', ({ traditional, cleared }) => {
         const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
         const documents = new Documents('docs-paragraph-border', skeleton, {
             pageLayoutType: PageLayoutType.VERTICAL,
             pageMarginLeft: 0,
             pageMarginTop: 0,
         });
+        vi.spyOn(documents as any, '_getDocumentFlavor').mockReturnValue(
+            traditional ? DocumentFlavor.TRADITIONAL : DocumentFlavor.MODERN
+        );
         const page = createPage(DocumentSkeletonPageType.BODY, '');
         const line = page.sections[0].columns[0].lines[1];
         line.paragraphPaddingLeft = 8;
@@ -1065,14 +1093,47 @@ describe('documents render', () => {
         expect(ctx.setLineWidthByPrecision.mock.calls).toEqual([[1], [4], [2], [3]]);
         expect(ctx.setLineDash.mock.calls).toEqual([[[2]], [[6]], [[0]], [[6]]]);
         expect(ctx.lineToByPrecision.mock.calls).toEqual([
-            [75, 7],
-            [75, 35],
-            [14, 35],
-            [75, 35],
+            [traditional ? 78.5 : 75, 7],
+            [traditional ? 78.5 : 75, 35],
+            [traditional ? 11 : 14, 35],
+            [traditional ? 78.5 : 75, 35],
         ]);
         expect(strokeStyles).toEqual(['rgb(0,0,0)', '#444444', '#222222', '#333333']);
         expect(ctx.stroke).toHaveBeenCalledTimes(4);
 
+        documents.dispose();
+    });
+
+    it.each([
+        { sideWidth: null, left: 8, right: 84 },
+        { sideWidth: undefined, left: 7.5, right: 84.5 },
+        { sideWidth: 0, left: 8, right: 84 },
+        { sideWidth: 8, left: 4, right: 88 },
+    ])('keeps Word paragraph clearance independent of the side stroke: %s', ({ sideWidth, left, right }) => {
+        const documents = new Documents('docs-paragraph-clearance', { getSkeletonData: () => ({ pages: [] }) } as any);
+        vi.spyOn(documents as any, '_getDocumentFlavor').mockReturnValue(DocumentFlavor.TRADITIONAL);
+        const page = createPage(DocumentSkeletonPageType.BODY, '');
+        const line = page.sections[0].columns[0].lines[1];
+        line.borderTop = { color: { rgb: '#000000' }, width: 1 };
+        if (sideWidth !== null) {
+            line.borderLeft = { color: { rgb: '#000000' }, width: sideWidth };
+            line.borderRight = { color: { rgb: '#000000' }, width: sideWidth };
+        }
+        (documents as any)._drawLiquid = { x: 0, y: 0 };
+        const ctx = {
+            save: vi.fn(),
+            restore: vi.fn(),
+            setLineWidthByPrecision: vi.fn(),
+            beginPath: vi.fn(),
+            moveToByPrecision: vi.fn(),
+            lineToByPrecision: vi.fn(),
+            setLineDash: vi.fn(),
+            stroke: vi.fn(),
+            closePathByEnv: vi.fn(),
+        } as any;
+        (documents as any)._drawParagraphBorders(ctx, page, line, 72);
+        expect(ctx.moveToByPrecision.mock.calls[0][0]).toBe(left);
+        expect(ctx.lineToByPrecision.mock.calls[0][0]).toBe(right);
         documents.dispose();
     });
 
@@ -1170,6 +1231,54 @@ describe('documents render', () => {
         expect(ctx.stroke).toHaveBeenCalledTimes(12);
         expect(new Set(drawnSegments).size).toBe(12);
 
+        documents.dispose();
+    });
+
+    it('closes the exposed top of a wider row without redrawing its shared edge', () => {
+        const documents = new Documents('docs-omitted-grid', {
+            getSkeletonData: () => ({ pages: [] }),
+        } as any);
+        const none = { color: { rgb: 'transparent' }, width: { v: 0 } };
+        const top = { color: { rgb: '#000000' }, width: { v: 1 } };
+        const rows = [0, 1].map((index) => {
+            const cell = createPage(DocumentSkeletonPageType.CELL, `omitted-${index}`);
+            cell.left = index === 0 ? 10 : 0;
+            cell.pageWidth = index === 0 ? 80 : 100;
+            cell.pageHeight = 30;
+            const row = {
+                index,
+                cells: [cell],
+                rowSource: { tableCells: [{
+                    borderTop: index === 0 ? none : top,
+                    borderBottom: none,
+                    borderLeft: none,
+                    borderRight: none,
+                }] },
+            } as any;
+            cell.parent = row;
+            return row;
+        });
+        const table = { rows };
+        rows.forEach((row) => {
+            row.parent = table;
+        });
+        const ctx = {
+            save: vi.fn(),
+            restore: vi.fn(),
+            setLineWidthByPrecision: vi.fn(),
+            setLineDash: vi.fn(),
+            beginPath: vi.fn(),
+            closePathByEnv: vi.fn(),
+            stroke: vi.fn(),
+            moveToByPrecision: vi.fn(),
+            lineToByPrecision: vi.fn(),
+        } as any;
+        for (const row of rows) {
+            (documents as any)._drawLiquid = { x: row.cells[0].left, y: row.index * 30 };
+            (documents as any)._drawTableCellBordersAndBg(ctx, { marginLeft: 0, marginTop: 0 }, row.cells[0]);
+        }
+        expect(ctx.moveToByPrecision.mock.calls).toEqual([[10, 30], [0, 30], [90, 30]]);
+        expect(ctx.lineToByPrecision.mock.calls).toEqual([[90, 30], [10, 30], [100, 30]]);
         documents.dispose();
     });
 
@@ -1544,7 +1653,16 @@ describe('documents render', () => {
         documents.dispose();
     });
 
-    it('uses explicit table cell border width and skips no-border markers', () => {
+    it.each([
+        { inheritedTopWidth: undefined, traditional: true, expectedWidth: 5 },
+        { inheritedTopWidth: 0, traditional: true, expectedWidth: 0 },
+        { inheritedTopWidth: 2, traditional: true, expectedWidth: 2 },
+        { inheritedTopWidth: 0, traditional: false, expectedWidth: 5 },
+    ].flatMap((testCase) => [
+        { ...testCase, edge: 'top', boundary: true },
+        { ...testCase, edge: 'bottom', boundary: true },
+        { ...testCase, edge: 'bottom', boundary: false, expectedWidth: 5 },
+    ]))('resolves fragment edges without hiding explicit cell borders: %j', ({ inheritedTopWidth, traditional, expectedWidth, edge, boundary }) => {
         const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
         const documents = new Documents('docs-border', skeleton, {
             pageLayoutType: PageLayoutType.VERTICAL,
@@ -1560,19 +1678,37 @@ describe('documents render', () => {
             cells: [cell],
             rowSource: {
                 tableCells: [{
-                    borderTop: { color: { rgb: '#ff0000' }, width: { v: 5 } },
+                    borderTop: { color: { rgb: 'transparent' }, width: { v: 0 } },
                     borderBottom: { color: { rgb: 'transparent' }, width: { v: 0 } },
+                    [edge === 'top' ? 'borderTop' : 'borderBottom']: {
+                        color: { rgb: '#ff0000' },
+                        width: { v: 5 },
+                        ...(inheritedTopWidth == null
+                            ? {}
+                            : {
+                                [edge === 'top' ? 'tableTopBorder' : 'tableBottomBorder']: { color: { rgb: '#ff0000' }, width: { v: inheritedTopWidth } },
+                            }),
+                    },
                     borderLeft: { color: { rgb: 'transparent' }, width: { v: 0 } },
                     borderRight: { color: { rgb: 'transparent' }, width: { v: 0 } },
                 }],
             },
         } as any;
         cell.parent = row;
+        if (!boundary) {
+            row.parent = { rows: [row, { rowSource: { tableCells: [] } }] };
+        }
         (documents as any)._drawLiquid = { x: 0, y: 0 };
+        vi.spyOn(documents as any, '_getDocumentFlavor').mockReturnValue(
+            traditional ? DocumentFlavor.TRADITIONAL : DocumentFlavor.MODERN
+        );
 
         const lineWidths: number[] = [];
         const strokeStyles: string[] = [];
         const ctx = {
+            getTransform: () => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }),
+            moveTo: vi.fn(),
+            lineTo: vi.fn(),
             save: vi.fn(),
             restore: vi.fn(),
             fillRectByPrecision: vi.fn(),
@@ -1590,9 +1726,9 @@ describe('documents render', () => {
 
         (documents as any)._drawTableCellBordersAndBg(ctx, { marginLeft: 0, marginTop: 0 }, cell);
 
-        expect(lineWidths).toEqual([5]);
-        expect(strokeStyles).toEqual(['#ff0000']);
-        expect(ctx.stroke).toHaveBeenCalledTimes(1);
+        expect(lineWidths).toEqual(expectedWidth > 0 ? [expectedWidth] : []);
+        expect(strokeStyles).toEqual(expectedWidth > 0 ? ['#ff0000'] : []);
+        expect(ctx.stroke).toHaveBeenCalledTimes(expectedWidth > 0 ? 1 : 0);
 
         documents.dispose();
     });
@@ -2366,7 +2502,7 @@ describe('documents render', () => {
         { documentFlavor: DocumentFlavor.TRADITIONAL, enabled: true },
         { documentFlavor: DocumentFlavor.TRADITIONAL, enabled: false },
         { documentFlavor: DocumentFlavor.MODERN, enabled: true },
-    ])('dims inactive content, not page-margin rectangles: $documentFlavor, editor=$enabled', ({ documentFlavor, enabled }) => {
+    ])('dims body content but leaves header/footer intact for the content cover: $documentFlavor, editor=$enabled', ({ documentFlavor, enabled }) => {
         const univer = new Univer();
         const model = new DocumentDataModel({
             id: 'edit-area-colors',
@@ -2421,9 +2557,8 @@ describe('documents render', () => {
             expect(textPaints.filter(({ text }) => text === 'D').map(({ alpha }) => alpha)).toEqual([bodyAlpha]);
             expect(tablePaints).toEqual([bodyAlpha]);
             if (documentFlavor === DocumentFlavor.TRADITIONAL) {
-                const headerFooterAlpha = dims && editArea === DocumentEditArea.BODY ? 0.4 : 0.8;
                 expect(textPaints.filter(({ text }) => text === 'H' || text === 'F').map(({ alpha }) => alpha))
-                    .toEqual([headerFooterAlpha, headerFooterAlpha]);
+                    .toEqual([0.8, 0.8]);
             }
             expect(ctx.globalAlpha).toBe(0.8);
         }
@@ -2432,6 +2567,56 @@ describe('documents render', () => {
         viewModel.dispose();
         univer.dispose();
     });
+
+    it.each([
+        { centerAngle: 0, vertexAngle: 0 },
+        { centerAngle: 0, vertexAngle: -45 },
+        { centerAngle: 0, vertexAngle: 45 },
+        { centerAngle: 90, vertexAngle: 90 },
+    ].flatMap((angles) => [WrapStrategy.WRAP, WrapStrategy.OVERFLOW, WrapStrategy.CLIP]
+        .map((wrapStrategy) => ({ ...angles, wrapStrategy }))))(
+        'keeps glyph ink offsets independent of column layout at $centerAngle/$vertexAngle with wrap=$wrapStrategy',
+        ({ centerAngle, vertexAngle, wrapStrategy }) => {
+            const page = createPage(DocumentSkeletonPageType.BODY, '');
+            page.renderConfig = { ...page.renderConfig, centerAngle, vertexAngle, wrapStrategy };
+            const glyph = page.sections[0].columns[0].lines[1].divides[0].glyphGroup[0];
+            const skeletonData = { pages: [page], skeHeaders: new Map(), skeFooters: new Map() };
+            const documents = new Documents('ink-offset', { getSkeletonData: () => skeletonData } as never);
+            documents.resize(260, 40);
+            scene.addObject(documents, 1);
+            const paints: Array<{ start: Vector2; baseline: Vector2; origin: Vector2 }> = [];
+            const extension = {
+                uKey: 'InkOffset',
+                type: DOCS_EXTENSION_TYPE.SPAN,
+                extensionOffset: {} as IExtensionConfig,
+                clearCache() {},
+                draw(_ctx: UniverRenderingContext, _scale: IScale, paintedGlyph: IDocumentSkeletonGlyph) {
+                    if (paintedGlyph === glyph) {
+                        const { spanStartPoint, spanPointWithFont, originTranslate } = this.extensionOffset;
+                        if (!spanStartPoint || !spanPointWithFont || !originTranslate) {
+                            throw new Error('A painted glyph must have complete placement coordinates');
+                        }
+                        paints.push({ start: spanStartPoint.clone(), baseline: spanPointWithFont.clone(), origin: originTranslate.clone() });
+                    }
+                },
+            };
+            vi.spyOn(documents, 'getExtensionsByOrder').mockReturnValue([extension] as never);
+            try {
+                documents.draw(canvas.getContext());
+                glyph.xOffset = 6;
+                documents.draw(canvas.getContext());
+                expect(paints).toHaveLength(2);
+                expect(paints[1].origin).toEqual(paints[0].origin);
+                const angle = centerAngle * Math.PI / 180;
+                for (const key of ['start', 'baseline'] as const) {
+                    expect(paints[1][key].x - paints[0][key].x).toBeCloseTo(6 * Math.cos(angle));
+                    expect(paints[1][key].y - paints[0][key].y).toBeCloseTo(6 * Math.sin(angle));
+                }
+            } finally {
+                documents.dispose();
+            }
+        }
+    );
 
     it('draws body/header/footer/table flows with extension dispatch and page events', () => {
         const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');

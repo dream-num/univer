@@ -21,9 +21,11 @@ import {
     IConfigService,
     Inject,
     Injector,
+    IResourceManagerService,
     merge,
     ObjectPermissionService,
     Plugin,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
 import pkg from '../package.json';
@@ -94,6 +96,23 @@ export class UniverDocsPlugin extends Plugin {
         ));
         this._initializeDependencies();
         this._initializeCommands();
+        this._initializeWordResources();
+    }
+
+    private _initializeWordResources(): void {
+        // Imported Word package metadata is opaque to editing but must survive save().
+        for (const pluginName of ['DOC_WORD_STYLES_PLUGIN', 'DOC_NOTE_PLUGIN'] as const) {
+            const resources = new Map<string, string>();
+            this.disposeWithMe({ dispose: () => resources.clear() });
+            this.disposeWithMe(this._injector.get(IResourceManagerService).registerPluginResource({
+                pluginName,
+                businesses: [UniverInstanceType.UNIVER_DOC],
+                parseJson: (data: string) => data,
+                onLoad: (unitId, data) => { resources.set(unitId, data); },
+                onUnLoad: (unitId) => { resources.delete(unitId); },
+                toJson: (unitId) => resources.get(unitId) ?? '',
+            }));
+        }
     }
 
     private _initializeCommands(): void {

@@ -43,19 +43,21 @@ import type { ILayoutContext } from '../../tools';
 import type { IShapedText } from './shaping';
 import {
     BooleanNumber,
+    DataStreamTreeNodeType,
     DataStreamTreeTokenType,
     DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,
     DocumentBlockRangeType,
     DocxBreakType,
     PositionedObjectLayoutType,
     resolveDocumentParagraphStyle,
+    TableTextWrapType,
 } from '@univerjs/core';
 import { BreakType, DocumentSkeletonPageType, GlyphType } from '../../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility } from '../../../document-compatibility';
 import { BreakPointType } from '../../line-breaker/break';
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
-import { getLastNotFullColumnInfo, getLastSection, getNumberUnitValue, hasSameParagraphBorderSet, isBlankColumn } from '../../tools';
+import { getFontCreateConfig, getLastNotFullColumnInfo, getLastSection, getNumberUnitValue, hasSameParagraphBorderSet, isBlankColumn } from '../../tools';
 import { dealWithBullet } from './bullet';
 import { isNonFlowFloatingAnchor, layoutParagraph } from './layout-ruler';
 
@@ -530,8 +532,9 @@ function _lineSpanHeight(lines: IParagraphLineRef['line'][], includeAfterSpacing
         return 0;
     }
     const firstTop = Math.min(...lines.map((line) => line.top));
+    // The next paragraph may already have collapsed after-spacing into this line's height.
     return Math.max(...lines.map((line) =>
-        line.top + line.lineHeight + (includeAfterSpacing ? Math.max(0, line.spaceBelowApply ?? 0) : 0)
+        line.top + line.lineHeight + (includeAfterSpacing ? Math.max(0, (line.spaceBelowApply ?? 0) - (line.marginBottom ?? 0)) : 0)
     )) - firstTop;
 }
 
@@ -562,7 +565,8 @@ function _prependLines(
     const firstLine = lines[0];
     const targetPage = targetColumn.parent?.parent;
     // Traditional keep/widow moves must apply the same page-top spacing rule as fresh layout.
-    const suppressedBefore = targetPage != null && targetPage.pageNumber > 1 &&
+    const sourcePage = sourceColumn.parent?.parent;
+    const suppressedBefore = targetPage != null && sourcePage != null && targetPage !== sourcePage &&
         targetPage.type !== DocumentSkeletonPageType.HEADER && targetPage.type !== DocumentSkeletonPageType.FOOTER &&
         targetColumn.parent?.top === 0 && firstLine.paragraphStart
         ? Math.max(0, firstLine.marginTop)
@@ -577,7 +581,13 @@ function _prependLines(
         : 0;
     const movedHeight = _lineSpanHeight(lines, !continuesParagraph) - suppressedBefore + restoredGap;
     const targetHeight = targetColumn.parent?.height ?? Number.POSITIVE_INFINITY;
-    if (movedHeight + _columnUsedHeight(targetColumn) > targetHeight) {
+    const targetTables = [...(targetPage?.skeTables.values() ?? [])].filter((table) =>
+        table.tableSource?.textWrap === TableTextWrapType.NONE);
+    const targetTableBottom = targetTables.reduce((bottom, table) => Math.max(
+        bottom,
+        table.top + table.height - (targetColumn.parent?.top ?? 0)
+    ), 0);
+    if (movedHeight + Math.max(_columnUsedHeight(targetColumn), targetTableBottom) > targetHeight) {
         return 0;
     }
 
@@ -599,6 +609,9 @@ function _prependLines(
     for (const line of targetColumn.lines) {
         line.top += movedHeight;
     }
+    for (const table of targetTables) {
+        table.top += movedHeight;
+    }
     targetColumn.lines.unshift(...moved);
     sourceColumn.isFull = false;
     _reindexColumnLines(sourceColumn);
@@ -612,6 +625,9 @@ function _prependLines(
         originalTops?.forEach((top, line) => {
             line.top = top;
         });
+        for (const table of targetTables) {
+            table.top -= movedHeight;
+        }
         _reindexColumnLines(sourceColumn);
         _reindexColumnLines(targetColumn);
         validateMove();
@@ -620,13 +636,19 @@ function _prependLines(
     return moved.length;
 }
 
-function _hasExplicitStructuralBreak(shapedTextList: IShapedText[], viewModel: DocumentViewModel, startIndex: number): boolean {
+function _hasExplicitStructuralBreak(
+    shapedTextList: IShapedText[],
+    viewModel: DocumentViewModel,
+    startIndex: number,
+    traditionalPagination: boolean
+): boolean {
     let offset = startIndex;
     return shapedTextList.some(({ text, glyphs }) => {
         offset += _glyphCount(glyphs);
         return (_endsWithToken(text, glyphs, DataStreamTreeTokenType.PAGE_BREAK) &&
-            (!_isRenderedPageBreak(viewModel, offset - 1) || _isInsideFlowTable(viewModel, offset - 1))) ||
-            _endsWithToken(text, glyphs, DataStreamTreeTokenType.COLUMN_BREAK);
+            (!traditionalPagination || !_isRenderedPageBreak(viewModel, offset - 1))) ||
+            (_endsWithToken(text, glyphs, DataStreamTreeTokenType.COLUMN_BREAK) &&
+                (!traditionalPagination || _isMarkedColumnBreak(viewModel, offset - 1)));
     });
 }
 
@@ -694,6 +716,15 @@ function _applyKeepNext(
     const sourceColumn = sourceSection?.columns.findLast((column) => column.lines.length > 0);
     const targetColumn = refs[0].column;
     if (!sourceColumn || refs.some(({ column }) => column !== targetColumn)) {
+        return 0;
+    }
+
+    // A heading already followed by the first table slice has satisfied keep-next.
+    // Moving it again for a continuation would separate it from that first slice.
+    const sourceTail = sourceColumn.lines[sourceColumn.lines.length - 1];
+    if (sourceTail && [...originalPage.skeTables.values()].some((table) =>
+        table.tableSource?.textWrap === TableTextWrapType.NONE &&
+        table.top + table.height > sourceSection.top + sourceTail.top + sourceTail.lineHeight)) {
         return 0;
     }
 
@@ -818,11 +849,15 @@ function _prepareLineBreaking(
     const { endIndex, blocks = [], children } = paragraphNode;
     const { segmentId } = curPage;
     const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0, paragraphId: 'para_render_fallback' };
-    const { paragraphStyle = {}, bullet } = paragraph;
+    const { paragraphStyle = {} } = paragraph;
     const documentSnapshot = viewModel.getSnapshot?.();
     const documentStyle = documentSnapshot?.documentStyle;
     const documentCompatibilityPolicy = sectionBreakConfig.documentCompatibilityPolicy ??
         getDocumentCompatibilityPolicy(documentStyle?.documentFlavor);
+    // Keep list membership in the model; a page-break-only paragraph has no displayed item.
+    const bullet = isTraditionalDocumentCompatibility(documentCompatibilityPolicy) && /^\f+\r?$/.test(paragraphNode.content ?? '')
+        ? undefined
+        : paragraph.bullet;
     const shouldApplyDocumentDefaults = documentCompatibilityPolicy.applyDocumentDefaultParagraphStyle;
     const useWordStyleLineHeight = documentCompatibilityPolicy.useWordStyleLineHeight;
     const { skeHeaders, skeFooters, skeListLevel, drawingAnchor } = skeletonResourceReference;
@@ -850,20 +885,30 @@ function _prepareLineBreaking(
     if (isTraditionalDocumentCompatibility(documentCompatibilityPolicy) &&
         resolvedParagraphStyle.contextualSpacing === BooleanNumber.TRUE && children.length === 0) {
         // Contextual spacing suppresses each paragraph's own spacing, not its neighbour's.
-        // Exact stream adjacency prevents collapsing spacing across table/cell boundaries.
+        // A following flow table contributes its first cell paragraph to Word's
+        // same-style comparison; unrelated cells and floating tables do not.
         const previousParagraph = viewModel.getParagraph(paragraphNode.startIndex - 1);
         if (_hasSameParagraphStyle(paragraph, previousParagraph)) {
             resolvedParagraphStyle.spaceAbove = { v: 0 };
         }
-        if (nextParagraphNode?.startIndex === endIndex + 1 && nextParagraphNode.children.length === 0 &&
-            _hasSameParagraphStyle(paragraph, viewModel.getParagraph(nextParagraphNode.endIndex))) {
+        let nextTextNode = nextParagraphNode;
+        const nextTable = nextParagraphNode?.children[0];
+        if (nextTable?.nodeType === DataStreamTreeNodeType.TABLE &&
+            viewModel.getTableByStartIndex(nextTable.startIndex)?.tableSource.textWrap === TableTextWrapType.NONE) {
+            while (nextTextNode?.children.length) {
+                nextTextNode = nextTextNode.children[0];
+            }
+        }
+        if (nextParagraphNode?.startIndex === endIndex + 1 && nextTextNode?.nodeType === DataStreamTreeNodeType.PARAGRAPH && nextTextNode.children.length === 0 &&
+            _hasSameParagraphStyle(paragraph, viewModel.getParagraph(nextTextNode.endIndex))) {
             resolvedParagraphStyle.spaceBelow = { v: 0 };
         }
     }
     const borderTop = resolvedParagraphStyle.borderTop;
     const borderBottom = resolvedParagraphStyle.borderBottom;
     const borderBetween = resolvedParagraphStyle.borderBetween;
-    const nextParagraph = borderBetween && nextParagraphNode
+    const traditionalBorders = isTraditionalDocumentCompatibility(documentCompatibilityPolicy);
+    const nextParagraph = (borderBetween || (traditionalBorders && borderBottom)) && nextParagraphNode
         ? viewModel.getParagraph(nextParagraphNode.endIndex)
         : undefined;
     const nextParagraphStyle = nextParagraph == null
@@ -878,7 +923,7 @@ function _prepareLineBreaking(
             nextParagraph.styleId
         );
 
-    if (borderTop) {
+    if (borderTop && !traditionalBorders) {
         _withMinSpacing(
             resolvedParagraphStyle,
             'spaceAbove',
@@ -886,23 +931,48 @@ function _prepareLineBreaking(
         );
     }
 
-    const bottomBorder = borderBetween && nextParagraphStyle &&
-        hasSameParagraphBorderSet(resolvedParagraphStyle, nextParagraphStyle)
+    const matchingNextBorder = nextParagraphStyle &&
+        hasSameParagraphBorderSet(resolvedParagraphStyle, nextParagraphStyle);
+    const bottomBorder = matchingNextBorder && (traditionalBorders || borderBetween)
         ? borderBetween
         : borderBottom;
     const bottomBorderClearance = bottomBorder
         ? Math.max(0, bottomBorder.padding ?? 0) + Math.max(0, bottomBorder.width ?? 1) / 2
         : 0;
-    if (bottomBorderClearance > 0) {
+    if (bottomBorderClearance > 0 && !traditionalBorders) {
         // Keep the stroke inside the paragraph's post-text region when spaceBelow is smaller.
         _withMinSpacing(resolvedParagraphStyle, 'spaceBelow', bottomBorderClearance);
     }
+
+    const previousBorderParagraph = traditionalBorders && borderTop
+        ? viewModel.getParagraph(paragraphNode.startIndex - 1)
+        : undefined;
+    const previousParagraphStyle = previousBorderParagraph == null
+        ? undefined
+        : _applyBlockRangeLayoutParagraphStyle(
+            body,
+            previousBorderParagraph,
+            previousBorderParagraph.paragraphStyle ?? {},
+            documentStyle,
+            shouldApplyDocumentDefaults,
+            documentSnapshot?.styles,
+            previousBorderParagraph.styleId
+        );
+    const topBorderClearance = borderTop && (borderTop.width ?? 1) > 0 &&
+        (!previousParagraphStyle || !hasSameParagraphBorderSet(previousParagraphStyle, resolvedParagraphStyle))
+        ? Math.max(0, borderTop.padding ?? 0) + Math.max(0, borderTop.width ?? 1)
+        : 0;
 
     const paragraphConfig: IParagraphConfig = {
         paragraphIndex: endIndex,
         isInsideTable: _isInsideFlowTable(viewModel, endIndex),
         documentCompatibilityPolicy,
         paragraphStyle: resolvedParagraphStyle,
+        // Word border distances occupy space in addition to collapsed paragraph spacing.
+        borderTopSpace: traditionalBorders ? topBorderClearance : undefined,
+        borderBottomSpace: traditionalBorders && bottomBorder && (bottomBorder.width ?? 1) > 0
+            ? Math.max(0, bottomBorder.padding ?? 0) + Math.max(0, bottomBorder.width ?? 1)
+            : undefined,
         docxFallbackAnchorLeft: _getFollowingIndentedParagraphAnchorLeft(
             viewModel,
             paragraph,
@@ -941,7 +1011,17 @@ function _prepareLineBreaking(
         paragraphConfig.bulletSkeleton = bulletSkeleton;
     } else {
         const listLevelAncestors = _getListLevelAncestors(bullet, skeListLevel); // Get the cache of all levels of the list
-        const bulletSkeleton = dealWithBullet(bullet, lists, listLevelAncestors, localeService); // Generate bullet
+        const markerTextStyle = bullet && isTraditionalDocumentCompatibility(documentCompatibilityPolicy)
+            ? {
+                ...getFontCreateConfig(endIndex - paragraphNode.contentStartIndex, viewModel, paragraphNode, sectionBreakConfig, {
+                    ...paragraph,
+                    paragraphStyle: resolvedParagraphStyle,
+                }).textStyle,
+                // Explicit list formatting below may underline the marker; paragraph-mark formatting may not.
+                ul: { s: BooleanNumber.FALSE },
+            }
+            : undefined;
+        const bulletSkeleton = dealWithBullet(bullet, lists, listLevelAncestors, localeService, false, markerTextStyle);
 
         _updateListLevelAncestors(paragraph, bullet, bulletSkeleton, skeListLevel, lists); // Update the latest level cache list
 
@@ -1160,10 +1240,9 @@ function _layoutShapedTexts({
                 shapedTextOffset += _glyphCount(terminalParagraphGlyphs);
             }
             const currentPage = allPages[allPages.length - 1];
-            if (
-                _hasPageContent(currentPage) &&
-                !_hasOnlyExplicitPageBoundaryMarkers(currentPage)
-            ) {
+            const preserveAuthoredBlankPage = traditionalPagination && !_isInsideFlowTable(viewModel, textEndIndex - 1);
+            if (_hasPageContent(currentPage) &&
+                (preserveAuthoredBlankPage || !_hasOnlyExplicitPageBoundaryMarkers(currentPage))) {
                 const nextPage = createSkeletonPage(
                     ctx,
                     sectionBreakConfig,
@@ -1267,6 +1346,13 @@ function _applyPaginationConstraints({
     sectionBreakConfig,
 }: IApplyPaginationConstraintsParams): void {
     let moved = false;
+    const wordCompatibilityMode = Number(ctx.dataModel?.documentStyle.compatibilitySettings?.compatibilityMode);
+    // Before Word 2013, splittable table cells ignore paragraph keep-lines and
+    // widow control. Preserve the authored properties for body layout/export.
+    const legacyCell = curPage.type === DocumentSkeletonPageType.CELL &&
+        wordCompatibilityMode >= 11 && wordCompatibilityMode < 15;
+    const keepLines = !legacyCell && resolvedParagraphStyle.keepLines === BooleanNumber.TRUE;
+    const widowControl = !legacyCell && resolvedParagraphStyle.widowControl === BooleanNumber.TRUE;
     const validateMove = ctx.footnoteLayout ? () => ctx.footnoteLayout!.reconcilePages(allPages, sectionBreakConfig) : undefined;
     const needsPaginationCheckpoint =
         forcePageBreakBefore ||
@@ -1275,11 +1361,11 @@ function _applyPaginationConstraints({
             tableSkeleton == null &&
             paragraphNonInlineSkeDrawingsByBlockId.size === 0 &&
             (
-                resolvedParagraphStyle.keepLines === BooleanNumber.TRUE ||
+                keepLines ||
                 (
                     allPages.length > 1 &&
                     (
-                        resolvedParagraphStyle.widowControl === BooleanNumber.TRUE ||
+                        widowControl ||
                         segmentParagraphCache.size > 1
                     )
                 )
@@ -1296,16 +1382,16 @@ function _applyPaginationConstraints({
     if (traditionalPagination &&
         !explicitStructuralBreak &&
         !forcePageBreakBefore &&
-        tableSkeleton == null &&
         paragraphNonInlineSkeDrawingsByBlockId.size === 0) {
         // Apply Word-compatible soft constraints from strongest to weakest.
         // Each helper only relocates already-shaped local lines and remains bounded.
-        if (resolvedParagraphStyle.keepLines === BooleanNumber.TRUE &&
+        if (tableSkeleton == null && keepLines &&
             _applyKeepLines(allPages, endIndex, ctx.paginationMetrics, validateMove) > 0) {
             moved = true;
             ctx.paragraphsOpenNewPage.add(endIndex);
         }
-        const keepNextMoved = allPages.length > 1
+        const keepNextMoved = allPages.length > 1 &&
+            (tableSkeleton == null || tableSkeleton.tableSource?.textWrap === TableTextWrapType.NONE)
             ? _applyKeepNext(allPages, curPage, endIndex, segmentParagraphCache, ctx.paginationMetrics, validateMove)
             : 0;
         if (keepNextMoved > 0) {
@@ -1314,8 +1400,8 @@ function _applyPaginationConstraints({
         }
         let widowMoved = 0;
         if (
-            allPages.length > 1 &&
-            resolvedParagraphStyle.widowControl === BooleanNumber.TRUE
+            tableSkeleton == null && allPages.length > 1 &&
+            widowControl
         ) {
             widowMoved = _applyWidowControl(allPages, endIndex, ctx.paginationMetrics, validateMove);
         }
@@ -1365,7 +1451,7 @@ export function lineBreaking(
         nextParagraphNode
     );
     const traditionalPagination = isTraditionalDocumentCompatibility(documentCompatibilityPolicy);
-    const explicitStructuralBreak = _hasExplicitStructuralBreak(shapedTextList, viewModel, paragraphNode.contentStartIndex);
+    const explicitStructuralBreak = _hasExplicitStructuralBreak(shapedTextList, viewModel, paragraphNode.contentStartIndex, traditionalPagination);
     const forcePageBreakBefore =
         traditionalPagination &&
         (resolvedParagraphStyle.pageBreakBefore === BooleanNumber.TRUE || tablePageBreakBefore) &&

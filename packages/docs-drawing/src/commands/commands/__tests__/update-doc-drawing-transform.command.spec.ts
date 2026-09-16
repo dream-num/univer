@@ -15,7 +15,18 @@
  */
 
 import type { IUpdateDrawingDocTransformCommandParams } from '../update-doc-drawing-transform.command';
-import { ICommandService, ImageSourceType } from '@univerjs/core';
+import {
+    awaitTime,
+    DocumentFlavor,
+    DrawingTypeEnum,
+    ICommandService,
+    ImageSourceType,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
+    RedoCommand,
+    UndoCommand,
+} from '@univerjs/core';
 import { DocHistoryAction, RichTextEditingMutation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFacadeTestBed } from '../../../facade/__tests__/create-test-bed';
@@ -118,5 +129,51 @@ describe('UpdateDrawingDocTransformCommand', () => {
             RichTextEditingMutation.id,
             expect.objectContaining({ historyAction: DocHistoryAction.UpdateImage })
         );
+    });
+
+    it('retains picture-local scale through resize, undo and redo', async () => {
+        testBed.univer.dispose();
+        testBed = createFacadeTestBed({
+            id: 'test-doc',
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+            body: {
+                dataStream: '\b\r\n',
+                paragraphs: [{ startIndex: 1, paragraphId: 'paragraph-1' }],
+                customBlocks: [{ startIndex: 0, blockId: 'picture' }],
+            },
+            drawingsOrder: ['picture'],
+            drawings: {
+                picture: {
+                    unitId: 'test-doc',
+                    subUnitId: 'test-doc',
+                    drawingId: 'picture',
+                    drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                    layoutType: PositionedObjectLayoutType.INLINE,
+                    docTransform: {
+                        angle: 0,
+                        size: { width: 100, height: 50 },
+                        positionH: { relativeFrom: ObjectRelativeFromH.PAGE },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH },
+                    },
+                    drawingMLSizeScale: { width: 1.1, height: 1.2 },
+                },
+            },
+        });
+        const commandService = testBed.injector.get(ICommandService);
+        expect(commandService.syncExecuteCommand(UpdateDrawingDocTransformCommand.id, {
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            drawings: [{ drawingId: 'picture', key: 'size', value: { width: 200, height: 75 } }],
+        })).toBe(true);
+        await awaitTime(350);
+        const drawing = () => testBed.documentDataModel.getSnapshot().drawings!.picture;
+        expect(drawing().docTransform.size).toEqual({ width: 200, height: 75 });
+        expect(drawing().drawingMLSizeScale).toEqual({ width: 1.1, height: 1.2 });
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(drawing().docTransform.size).toEqual({ width: 100, height: 50 });
+        expect(drawing().drawingMLSizeScale).toEqual({ width: 1.1, height: 1.2 });
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(drawing().docTransform.size).toEqual({ width: 200, height: 75 });
+        expect(drawing().drawingMLSizeScale).toEqual({ width: 1.1, height: 1.2 });
     });
 });

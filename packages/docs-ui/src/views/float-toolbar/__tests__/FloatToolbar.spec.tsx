@@ -35,6 +35,7 @@ import {
     IShortcutService,
     MenuItemType,
     MenuManagerPosition,
+    MenuManagerService,
     RediContext,
 } from '@univerjs/ui';
 import { act } from 'react';
@@ -46,6 +47,7 @@ import {
     SetInlineFormatTextBackgroundColorCommand,
 } from '../../../commands/commands/inline-format.command';
 import { FLOAT_TEXT_STYLE_MENU_ID, FLOAT_TOOLBAR_MENU_POSITION } from '../../../menu/menu';
+import { DocLayoutInteractionService } from '../../../services/doc-layout-interaction.service';
 import { FloatToolbar, resolveFloatToolbarMenus } from '../FloatToolbar';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -183,7 +185,7 @@ function createToolbarTestBed() {
     };
 }
 
-function renderToolbar(injector: Injector, avaliableMenus: string[], onDismiss?: () => void) {
+function renderToolbar(injector: Injector, avaliableMenus: string[], onDismiss?: () => void, onMount?: () => () => void) {
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = createRoot(container);
@@ -191,7 +193,7 @@ function renderToolbar(injector: Injector, avaliableMenus: string[], onDismiss?:
     act(() => {
         root.render(
             <RediContext.Provider value={{ injector }}>
-                <FloatToolbar avaliableMenus={avaliableMenus} popup={{ extraProps: { onDismiss } }} />
+                <FloatToolbar avaliableMenus={avaliableMenus} popup={{ extraProps: { onDismiss, onMount } }} />
             </RediContext.Provider>
         );
     });
@@ -222,6 +224,31 @@ describe('FloatToolbar', () => {
         container?.remove();
         root = undefined;
         container = undefined;
+    });
+
+    it('holds layout only during the mounted toolbar lifetime', () => {
+        const injector = new Injector();
+        injector.add([IConfigService, { useClass: ConfigService }]);
+        injector.add([IMenuManagerService, { useClass: MenuManagerService }]);
+        injector.add([DocLayoutInteractionService]);
+        const interaction = injector.get(DocLayoutInteractionService);
+        try {
+            expect(interaction.isActive).toBe(false);
+            ({ root, container } = renderToolbar(injector, [], undefined, () => {
+                const lock = interaction.beginInteraction();
+                return () => lock.dispose();
+            }));
+            expect(interaction.isActive).toBe(true);
+            act(() => root!.unmount());
+            root = undefined;
+            expect(interaction.isActive).toBe(false);
+        } finally {
+            if (root) {
+                act(() => root!.unmount());
+                root = undefined;
+            }
+            injector.dispose();
+        }
     });
 
     it('fades outside the safe area and dismisses only once without prior hover', () => {

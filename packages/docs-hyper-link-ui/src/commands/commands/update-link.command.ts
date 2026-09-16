@@ -49,6 +49,8 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
             return false;
         }
 
+        const oldLink = oldBody.customRanges?.find((range) => range.rangeId === linkId && range.rangeType === CustomRangeType.HYPERLINK);
+
         const textRun = getBodySlice(oldBody, currentSelection.startOffset!, currentSelection.endOffset!).textRuns?.[0];
         if (textRun) {
             textRun.ed = params.label.length + 1;
@@ -65,6 +67,8 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
                     endIndex: params.label.length + 1,
                     properties: {
                         url: payload,
+                        ...(oldLink?.properties?.textStyleMode ? { textStyleMode: oldLink.properties.textStyleMode } : null),
+                        ...(oldLink?.properties?.textColorMode ? { textColorMode: oldLink.properties.textColorMode } : null),
                     },
                 }],
                 textRuns: textRun ? [textRun] : undefined,

@@ -795,6 +795,14 @@ export function updateParagraphBorders(
             line.paragraphBorders = paragraphBorders;
         }
 
+        // A floating object's zero-height anchor is not an extra bordered text line.
+        if (line.lineHeight === 0) {
+            if (target) {
+                line.borderTop = line.borderBottom = line.borderBetween = line.borderLeft = line.borderRight = undefined;
+            }
+            return;
+        }
+
         renderLines.push({
             line,
             paragraphBorders: paragraphConfig ? paragraphBorders : line.paragraphBorders,
@@ -829,7 +837,7 @@ export function updateParagraphBorders(
             hasSameParagraphBorderSet(paragraphBorders, next.paragraphBorders);
 
         if (updateTop) {
-            line.borderTop = line.paragraphStart && !hasMatchingPrevious
+            line.borderTop = (line.paragraphStart || (line.borderTopSpace ?? 0) > 0) && !hasMatchingPrevious
                 ? paragraphBorders?.borderTop
                 : undefined;
         }
@@ -841,7 +849,7 @@ export function updateParagraphBorders(
             line.borderBetween = undefined;
             line.borderBottom = undefined;
             if (isParagraphEnd(line)) {
-                if (hasMatchingNext && paragraphBorders?.borderBetween) {
+                if (hasMatchingNext) {
                     line.borderBetween = paragraphBorders.borderBetween;
                 } else if (paragraphBorders?.borderBottom) {
                     line.borderBottom = paragraphBorders.borderBottom;

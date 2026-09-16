@@ -157,6 +157,8 @@ export interface IParagraphConfig {
     // pageContentWidth: number;
     // pageContentHeight: number;
     paragraphStyle?: IParagraphStyle;
+    borderTopSpace?: number;
+    borderBottomSpace?: number;
     skeHeaders: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>;
     skeFooters: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>;
     pDrawingAnchor?: Map<number, IDocumentSkeletonDrawingAnchor>;
@@ -171,6 +173,7 @@ export interface IFontCreateConfig {
     documentCompatibilityPolicy?: IDocumentCompatibilityPolicy;
     gridType?: GridType;
     balanceSingleByteDoubleByteWidth?: BooleanNumber;
+    balanceSpaceWidth?: boolean;
     pageWidth?: number;
 }
 

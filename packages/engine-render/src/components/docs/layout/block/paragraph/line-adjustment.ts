@@ -179,7 +179,7 @@ function getGlyphGroupInkBounds(divide: IDocumentSkeletonDivide): { left: number
     return { left, right };
 }
 
-function getDrawingMLAlignmentDivide(divide: IDocumentSkeletonDivide): IDocumentSkeletonDivide {
+function getAlignmentDivide(divide: IDocumentSkeletonDivide): IDocumentSkeletonDivide {
     const { glyphGroup } = divide;
     let end = glyphGroup.length;
     let hasTrailingSpace = false;
@@ -193,7 +193,7 @@ function getDrawingMLAlignmentDivide(divide: IDocumentSkeletonDivide): IDocument
         end--;
     }
 
-    // DrawingML hangs breakable spaces outside alignment, but retains tabs and
+    // Office hangs breakable spaces outside alignment, but retains tabs and
     // nonbreaking spaces. Share glyphs without removing editable source positions.
     return hasTrailingSpace ? { ...divide, glyphGroup: glyphGroup.slice(0, end) } : divide;
 }
@@ -205,7 +205,8 @@ function horizontalAlignHandler(
     hangingCjkPunctuation = false,
     excludeTrailingSpaces = false,
     preserveWordSpacing = false,
-    isDrawingML = false
+    isDrawingML = false,
+    compressAlignedOverflow = false
 ) {
     const { divides } = line;
 
@@ -220,7 +221,7 @@ function horizontalAlignHandler(
         }
 
         removeGlyphAutoSpacing(divide.glyphGroup[divide.glyphGroup.length - 1], 1);
-        const alignmentDivide = isDrawingML ? getDrawingMLAlignmentDivide(divide) : divide;
+        const alignmentDivide = isDrawingML || preserveWordSpacing ? getAlignmentDivide(divide) : divide;
         let glyphGroupWidth = getGlyphGroupWidth(alignmentDivide);
 
         divide.glyphGroupWidth = getGlyphGroupWidth(divide);
@@ -229,7 +230,10 @@ function horizontalAlignHandler(
             continue;
         }
 
-        if (divide.isFull && alignmentDivide.glyphGroup.length > 0) {
+        const justifiedWords = preserveWordSpacing
+            && (horizontalAlign === HorizontalAlign.JUSTIFIED || horizontalAlign === HorizontalAlign.BOTH);
+        const compressedAlignedText = compressAlignedOverflow && alignmentDivide.glyphGroup.some((glyph) => cjk.hasCJKText(glyph.content));
+        if ((divide.isFull || ((justifiedWords || compressedAlignedText) && glyphGroupWidth > width)) && alignmentDivide.glyphGroup.length > 0) {
             let remaining = width - glyphGroupWidth;
 
             // Handle hanging punctuation to the right.
@@ -242,7 +246,7 @@ function horizontalAlignHandler(
                     ? lastGlyph.width
                     : overhang(lastGlyph.content) * lastGlyph.width;
 
-                remaining += amount;
+                remaining += preserveWordSpacing && !hangingCjkPunctuation ? 0 : amount;
             }
 
             let justificationRatio = 0;
@@ -250,7 +254,8 @@ function horizontalAlignHandler(
             const shrink = getGlyphGroupShrinkability(alignmentDivide.glyphGroup);
             const stretch = getGlyphGroupStretchability(alignmentDivide.glyphGroup);
 
-            if (remaining < 0 && shrink > 0 && !preserveWordSpacing) {
+            if (remaining < 0 && shrink > 0 && (!preserveWordSpacing
+                || horizontalAlign === HorizontalAlign.JUSTIFIED || horizontalAlign === HorizontalAlign.BOTH)) {
                 // Attempt to reduce the length of the line, using shrinkability.
                 justificationRatio = Math.max(remaining / shrink, -1.0);
                 remaining = Math.min(remaining + shrink, 0);
@@ -386,6 +391,10 @@ export function lineAdjustment(
     const policy = sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy(documentStyle.documentFlavor);
     const traditional = isTraditionalDocumentCompatibility(policy);
     const excludeTrailingSpaces = traditional && (horizontalAlign === HorizontalAlign.CENTER || horizontalAlign === HorizontalAlign.RIGHT);
+    // Fitting can borrow punctuation space even on the terminal line of an
+    // aligned paragraph. Apply that contraction before computing its offset.
+    const compressAlignedOverflow = excludeTrailingSpaces
+        && (sectionBreakConfig.characterSpacingControl ?? documentStyle.characterSpacingControl) !== characterSpacingControlType.doNotCompress;
     const resolvedParagraphStyle = resolveDocumentParagraphStyle(documentStyle, paragraphStyle, {
         styles: snapshot.styles,
         paragraphStyleId: paragraph.styleId,
@@ -423,9 +432,10 @@ export function lineAdjustment(
                     shrinkStartAndEndCJKPunctuation(line, hangingCjkPunctuation);
                     addHyphenDash(line, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
                     const preserveWordSpacing = traditional
-                        && (horizontalAlign === HorizontalAlign.UNSPECIFIED || horizontalAlign === HorizontalAlign.LEFT)
+                        && (horizontalAlign === HorizontalAlign.UNSPECIFIED || horizontalAlign === HorizontalAlign.LEFT
+                            || horizontalAlign === HorizontalAlign.JUSTIFIED || horizontalAlign === HorizontalAlign.BOTH)
                         && !line.divides.some((divide) => divide.glyphGroup.some((glyph) => cjk.hasCJKText(glyph.content)));
-                    horizontalAlignHandler(line, horizontalAlign, shouldAllowOverflowHorizontalOffset(sectionBreakConfig), hangingCjkPunctuation, excludeTrailingSpaces, preserveWordSpacing, sectionBreakConfig.documentCompatibilityPolicy?.mode === 'drawingml');
+                    horizontalAlignHandler(line, horizontalAlign, shouldAllowOverflowHorizontalOffset(sectionBreakConfig), hangingCjkPunctuation, excludeTrailingSpaces, preserveWordSpacing, sectionBreakConfig.documentCompatibilityPolicy?.mode === 'drawingml', compressAlignedOverflow);
                 }
             }
         }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentData } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import { CustomRangeType, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, UniverDocsPlugin } from '@univerjs/docs';
 import { DesktopRibbonService, IMenuManagerService, IRibbonService, MenuManagerService } from '@univerjs/ui';
@@ -34,7 +34,7 @@ describe('TableOfContentsRibbonController', () => {
         injector.add([IMenuManagerService, { useClass: MenuManagerService }]);
         injector.add([IRibbonService, { useClass: DesktopRibbonService }]);
         injector.add([TableOfContentsRibbonController]);
-        univer.createUnit<IDocumentData>(UniverInstanceType.UNIVER_DOC, {
+        univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
             id: 'doc-1',
             body: {
                 dataStream: 'Before\r\u001FContents\u001E\rAfter\r\n',

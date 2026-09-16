@@ -498,7 +498,7 @@ describe('DocDrawingUpdateRenderController', () => {
 
         expect(scene.attachTransformerTo).toHaveBeenCalledWith(getShape('body-drawing'));
         expect(getShape('body-drawing').setOpacity).toHaveBeenLastCalledWith(1);
-        expect(getShape('header-drawing').setOpacity).toHaveBeenLastCalledWith(0.5);
+        expect(getShape('header-drawing').setOpacity).toHaveBeenLastCalledWith(1);
 
         scene.attachTransformerTo.mockClear();
         setEditArea(DocumentEditArea.HEADER);
@@ -588,7 +588,7 @@ describe('DocDrawingUpdateRenderController', () => {
 
         expect(scene.attachTransformerTo).toHaveBeenCalledWith(getShape('body-drawing'));
         expect(getShape('body-drawing').setOpacity).toHaveBeenLastCalledWith(1);
-        expect(getShape('header-drawing').setOpacity).toHaveBeenLastCalledWith(0.5);
+        expect(getShape('header-drawing').setOpacity).toHaveBeenLastCalledWith(1);
 
         setIsFocusing(false);
         onBlur$.next({});

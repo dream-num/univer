@@ -442,6 +442,8 @@ export interface IHyperlink {
     url?: string;
     bookmarkId?: string; // bookmarkId
     headingId?: string; // headingId
+    /** Use authored text formatting instead of the default link color and underline. */
+    textStyleMode?: 'link' | 'text';
 }
 
 /**
@@ -482,6 +484,21 @@ export interface ICustomRange<T extends Record<string, any> = Record<string, any
 
 export type IHyperLinkCustomRange = ICustomRange<IHyperlink>;
 
+/** Legacy Word form field settings. Macro names are retained as data, never executed by the SDK. */
+export interface IFormFieldData {
+    name?: string;
+    enabled?: BooleanNumber;
+    calcOnExit?: BooleanNumber;
+    entryMacro?: string;
+    exitMacro?: string;
+    helpText?: { type?: 'text' | 'autoText'; value?: string };
+    statusText?: { type?: 'text' | 'autoText'; value?: string };
+    tabIndex?: number;
+    textInput?: { type?: string; default?: string; maxLength?: number; format?: string };
+    checkBox?: { size?: number; sizeAuto?: BooleanNumber; default?: BooleanNumber; checked?: BooleanNumber };
+    ddList?: { default?: number; result?: number; entries?: string[] };
+}
+
 export interface IFieldRangeProperties {
     /** Original OOXML field instruction. This is the round-trip source of truth. */
     instruction: string;
@@ -490,6 +507,7 @@ export interface IFieldRangeProperties {
     sourceKind?: 'complex' | 'simple';
     dirty?: BooleanNumber;
     locked?: BooleanNumber;
+    formData?: IFormFieldData;
     cachedResult?: string;
 }
 
@@ -532,6 +550,8 @@ export interface ISdtRangeProperties {
     showingPlaceholder?: boolean;
     temporary?: boolean;
     placeholder?: string;
+    /** Imported OOXML placeholder reference and its original display text; not user-facing configuration. */
+    placeholderDocPart?: { name?: string; text?: string };
     checkbox?: {
         checked: boolean;
         checkedState?: { value?: string; font?: string };
@@ -758,6 +778,8 @@ export enum GridType {
 export interface IDocumentStyle extends IDocStyleBase, IDocumentLayout, IHeaderAndFooterBase {
     /** Imported Word on/off compatibility flags, keyed by their OOXML local names. */
     compatibilityFlags?: Record<string, BooleanNumber>;
+    /** Imported OOXML compatSetting values, including the Word compatibilityMode. */
+    compatibilitySettings?: Record<string, string>;
     textStyle?: ITextStyle; // default style for text
     /** Document-declared alternate families, tried only after the authored font is unavailable. */
     fontFamilyFallbacks?: Record<string, string>;
@@ -874,6 +896,10 @@ export interface IParagraph {
     styleId?: string;
     paragraphStyle?: IParagraphStyle; // paragraphStyle
     bullet?: IBullet; // bullet
+    /** Imported resolved numbering, used to distinguish later edits from unchanged inheritance. */
+    sourceBullet?: IBullet | null;
+    /** Imported direct numbering. Absent inherits from the style; null explicitly disables numbering. */
+    directBullet?: IBullet | null;
     // dIds?: string[]; // drawingIds drawingId
 }
 
@@ -978,6 +1004,8 @@ export interface IDocDrawingBase extends IDrawingParam {
     distB?: number; // wrapSquare | wrapTopAndBottom
     /** Effect bounds outside the drawing box, in layout pixels (OOXML wp:effectExtent). */
     effectExtent?: { left?: number; top?: number; right?: number; bottom?: number };
+    /** Picture-local DrawingML size / layout size; retained on resize without changing the layout box. */
+    drawingMLSizeScale?: { width: number; height: number };
 }
 
 /**
@@ -1092,6 +1120,8 @@ export interface IDocTextOutline {
 }
 
 export interface ITextStyle extends IStyleBase {
+    /** Retain text in the document without painting it or reserving layout space (OOXML vanish). Absent inherits. */
+    hidden?: boolean;
     /** Word font-type hint for characters shared by Latin, East Asian and complex scripts. */
     fontHint?: 'default' | 'eastAsia' | 'cs';
     /** Alignment tab anchored to the page margins or paragraph indents. Applies only to a tab character. */
@@ -1247,6 +1277,8 @@ export interface IParagraphProperties extends IIndentStart {
         horizontalAnchor?: string;
         x?: string;
         y?: string;
+        xAlign?: string;
+        yAlign?: string;
     };
 }
 
@@ -1489,6 +1521,8 @@ export interface ITableRowSize {
  * Properties of row of table
  */
 export interface ITableRow {
+    /** Authored row-level default margins (OOXML tblPrEx); imported cells contain resolved margins. */
+    cellMargin?: ITableCellMargin;
     /**
      * Rows do not persist stream offsets. Their ordinal position must match the
      * corresponding `TABLE_ROW_START`/`TABLE_ROW_END` pair in `dataStream`.
@@ -1498,6 +1532,10 @@ export interface ITableRow {
     gridBefore?: number;
     /** Number of table-grid columns omitted after the last cell in this row. */
     gridAfter?: number;
+    /** Preferred width of the omitted leading grid columns (OOXML wBefore). */
+    widthBefore?: IWidthInTableSize;
+    /** Preferred width of the omitted trailing grid columns (OOXML wAfter). */
+    widthAfter?: IWidthInTableSize;
     // If omitted, then the table row shall automatically resize its height to the height required by its contents
     // (the equivalent of an hRule value of auto)
     trHeight: ITableRowSize; // 17.4.80 trHeight (Table Row Height)
@@ -1546,6 +1584,15 @@ export interface ITableCellBorder {
     color: IColorStyle; // color
     width?: INumberUnit; // width
     dashStyle?: DashStyleType; // dashStyle
+    /**
+     * Resolved outer table top when borderTop inherits the table's insideH edge.
+     * At the top of a traditional table page fragment, use this instead of the
+     * internal edge. Absent for explicit cell borders and legacy snapshots.
+     * Replacing or editing the cell border must discard this inheritance.
+     */
+    tableTopBorder?: ITableCellBorder;
+    /** Resolved outer bottom for an inherited insideH edge; follows the same editing rules as tableTopBorder. */
+    tableBottomBorder?: ITableCellBorder;
 }
 
 // 17.18.101ST_VerticalJc (Vertical Alignment Type)

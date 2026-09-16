@@ -278,6 +278,8 @@ export interface IDocumentSkeletonLine {
     paragraphBorders?: IDocumentSkeletonParagraphBorders;
     paragraphPaddingLeft?: number;
     paragraphPaddingRight?: number;
+    borderTopSpace?: number;
+    borderBottomSpace?: number;
     backgroundColor?: IColorStyle; // backgroundColor
     bullet?: IDocumentSkeletonBullet; // unordered and ordered list bullet
     width?: number; // the actual width of a line

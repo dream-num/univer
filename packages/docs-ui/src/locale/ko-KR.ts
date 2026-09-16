@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'docs-ui': {
+        outline: {
+            title: '문서 개요',
+        },
         objectPermission: {
             paragraphPermission: '권한',
             title: '권한',

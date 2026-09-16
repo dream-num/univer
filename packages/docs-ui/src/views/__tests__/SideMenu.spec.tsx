@@ -14,97 +14,92 @@
  * limitations under the License.
  */
 
+import type { ComponentProps } from 'react';
 import type { Root } from 'react-dom/client';
-import { act } from 'react';
+import { act, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import { SideMenu } from '../SideMenu';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 const menus = [
-    { id: 'title', level: 1, text: 'Document outline', isTitle: true },
+    { id: 'title', level: 1, text: 'Harbor habitat field report', isTitle: true },
     { id: 'intro', level: 1, text: 'Introduction' },
     { id: 'details', level: 2, text: 'Details' },
 ];
 
-function renderSideMenu(props: React.ComponentProps<typeof SideMenu>) {
+function renderSideMenu(props: Partial<ComponentProps<typeof SideMenu>> = {}) {
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = createRoot(container);
 
-    act(() => {
-        root.render(<SideMenu {...props} />);
-    });
+    function Example() {
+        const [open, setOpen] = useState(props.open ?? true);
+        return <SideMenu label="Document outline" menus={menus} maxHeight={180} {...props} open={open} onOpenChange={setOpen} />;
+    }
 
+    act(() => root.render(<Example />));
     return { container, root };
 }
 
 describe('SideMenu', () => {
     let root: Root | undefined;
-    let container: HTMLElement | undefined;
+    let container: HTMLElement;
 
     afterEach(() => {
-        if (root) {
-            act(() => root!.unmount());
-        }
+        act(() => root?.unmount());
         container?.remove();
         root = undefined;
-        container = undefined;
     });
 
-    it('emits the clicked outline item with its document location metadata', () => {
-        const selectedItems: typeof menus = [];
-        const rendered = renderSideMenu({
-            menus,
-            maxHeight: 180,
-            open: true,
-            onClick: (menu) => {
-                selectedItems.push(menu);
-            },
-        });
-        root = rendered.root;
-        container = rendered.container;
-
-        const detailsItem = Array.from(container.querySelectorAll('div')).find((element) => element.textContent === 'Details');
-        if (!detailsItem) {
-            throw new Error('Missing Details menu item');
-        }
-
-        act(() => {
-            detailsItem.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-        });
-
-        expect(selectedItems).toEqual([{ id: 'details', level: 2, text: 'Details' }]);
+    it('selects a heading with its document location metadata and marks the current location', () => {
+        const onClick = vi.fn();
+        ({ root, container } = renderSideMenu({ onClick, activeId: 'intro' }));
+        const details = container.querySelector<HTMLButtonElement>('button[title="Details"]')!;
+        act(() => details.click());
+        expect(onClick).toHaveBeenCalledWith(menus[2]);
+        expect(container.querySelector('[aria-current="location"]')?.textContent).toBe('Introduction');
     });
 
-    it('requests an open state change and translates the panel from the controlled state', () => {
-        const openStates: boolean[] = [];
-        const rendered = renderSideMenu({
-            menus,
-            maxHeight: 180,
-            open: false,
-            mode: 'side-bar',
-            onOpenChange: (open) => {
-                openStates.push(open);
-            },
-        });
-        root = rendered.root;
-        container = rendered.container;
+    it('removes closed headings from keyboard navigation and restores them when reopened', () => {
+        ({ root, container } = renderSideMenu({ open: false }));
+        const toggle = container.querySelector<HTMLButtonElement>('button[aria-expanded]')!;
+        expect(container.querySelector('nav')).toBeNull();
+        act(() => toggle.click());
+        expect(toggle.getAttribute('aria-expanded')).toBe('true');
+        expect(container.querySelector('nav')?.getAttribute('id')).toBe(toggle.getAttribute('aria-controls'));
+        expect(container.querySelectorAll('nav button')).toHaveLength(3);
+        act(() => toggle.click());
+        expect(toggle.getAttribute('aria-expanded')).toBe('false');
+        expect(container.querySelector('nav')).toBeNull();
+    });
 
-        const toggle = container.firstElementChild?.firstElementChild;
-        const panel = container.firstElementChild?.children.item(1) as HTMLElement | null;
-        if (!toggle || !panel) {
-            throw new Error('Missing side menu toggle or panel');
+    it('supports arrow, Home and End navigation and returns focus on Escape', () => {
+        ({ root, container } = renderSideMenu());
+        const buttons = container.querySelectorAll<HTMLButtonElement>('nav button');
+        buttons[0].focus();
+        for (const [key, expectedIndex] of [['ArrowDown', 1], ['End', 2], ['ArrowUp', 1], ['Home', 0]] as const) {
+            act(() => document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true })));
+            expect(document.activeElement).toBe(buttons[expectedIndex]);
         }
+        act(() => document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
+        expect(container.querySelector('nav')).toBeNull();
+        expect(document.activeElement).toBe(container.querySelector('button[aria-expanded="false"]'));
+    });
 
-        expect(panel.style.transform).toBe('translateX(-100%)');
+    it.each(['float', 'side-bar'] as const)('dismisses only floating navigation after a heading click (%s)', (mode) => {
+        const onClick = vi.fn();
+        ({ root, container } = renderSideMenu({ mode, onClick }));
+        act(() => container.querySelector<HTMLButtonElement>('button[title="Details"]')!.click());
+        expect(onClick).toHaveBeenCalledWith(menus[2]);
+        expect(container.querySelector('nav') !== null).toBe(mode === 'side-bar');
+    });
 
-        act(() => {
-            toggle.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-        });
-
-        expect(openStates).toEqual([true]);
-        expect(panel.style.transform).toBe('translateX(-100%)');
+    it.each(['float', 'side-bar'] as const)('dismisses only floating navigation on an outside pointer interaction (%s)', (mode) => {
+        ({ root, container } = renderSideMenu({ mode }));
+        act(() => document.body.dispatchEvent(new Event('pointerdown', { bubbles: true })));
+        expect(container.querySelector('nav') !== null).toBe(mode === 'side-bar');
     });
 });

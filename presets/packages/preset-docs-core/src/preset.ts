@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IUniverDocsUIConfig } from '@univerjs/docs-ui';
 import type { IPreset } from '@univerjs/presets';
 import type { IUniverUIConfig } from '@univerjs/ui';
 import { UniverDocsPlugin } from '@univerjs/docs';
@@ -30,7 +31,8 @@ export type * from '@univerjs/docs-ui/facade';
 export type * from '@univerjs/network/facade';
 
 export interface IUniverDocsCorePresetConfig extends
-    Pick<IUniverUIConfig, 'container' | 'header' | 'footer' | 'toolbar' | 'ribbonType' | 'menu' | 'contextMenu' | 'disableAutoFocus'> {
+    Pick<IUniverUIConfig, 'container' | 'header' | 'footer' | 'toolbar' | 'ribbonType' | 'menu' | 'contextMenu' | 'disableAutoFocus'>,
+    Pick<IUniverDocsUIConfig, 'toc'> {
     collaboration?: true;
 }
 
@@ -44,6 +46,7 @@ export function UniverDocsCorePreset(config: Partial<IUniverDocsCorePresetConfig
         menu,
         contextMenu,
         disableAutoFocus,
+        toc,
     } = config;
 
     return {
@@ -61,7 +64,7 @@ export function UniverDocsCorePreset(config: Partial<IUniverDocsCorePresetConfig
                 contextMenu,
                 disableAutoFocus,
             }],
-            UniverDocsUIPlugin,
+            [UniverDocsUIPlugin, { toc }],
             UniverFormulaEnginePlugin,
         ],
     };

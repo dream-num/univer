@@ -50,7 +50,7 @@ export const mount: MountExample = async (host, options) => {
         darkMode: options.darkMode,
         direction: options.direction,
         presets: [
-            UniverDocsCorePreset({ container: host, ribbonType: options.ribbonType }),
+            UniverDocsCorePreset({ container: host, ribbonType: options.ribbonType, toc: true }),
             UniverDocsDrawingPreset(),
             UniverDocsHyperLinkPreset(),
             UniverDocsThreadCommentPreset(),

@@ -47,6 +47,7 @@ export const SideMenuBasic = {
 
         return (
             <SideMenu
+                label="Document outline"
                 maxHeight={150}
                 menus={menus}
                 onClick={handleClick}
@@ -60,7 +61,7 @@ export const SideMenuBasic = {
 
 export const EmptySideMenu = {
     render() {
-        return <SideMenu maxHeight={150} />;
+        return <SideMenu label="Document outline" maxHeight={150} />;
     },
 };
 
@@ -78,7 +79,7 @@ export const CustomStyledSideMenu = {
             borderRadius: '4px',
         };
 
-        return <SideMenu maxHeight={150} menus={menus} className="custom-side-menu" style={customStyle} />;
+        return <SideMenu label="Document outline" maxHeight={150} menus={menus} className="custom-side-menu" style={customStyle} />;
     },
 };
 
@@ -97,6 +98,6 @@ export const MultiLevelSideMenu = {
         const handleClick = (_menu: ISideMenuItem) => {
         };
 
-        return <SideMenu maxHeight={150} menus={menus} onClick={handleClick} />;
+        return <SideMenu label="Document outline" maxHeight={150} menus={menus} onClick={handleClick} />;
     },
 };

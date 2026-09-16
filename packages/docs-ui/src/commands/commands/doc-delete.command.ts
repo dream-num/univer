@@ -48,6 +48,7 @@ import {
 } from '@univerjs/docs';
 import { getParagraphByGlyph, hasListGlyph, isFirstGlyph, isIndentByGlyph } from '@univerjs/engine-render';
 import { DocAutoFormatService } from '../../services/doc-auto-format.service';
+import { IEditorService } from '../../services/editor/editor-manager.service';
 import { isHorizontalLineParagraph } from '../../utils/horizontal-line';
 import { getCommandSkeleton } from '../util';
 import { CutContentCommand } from './clipboard.inner.command';
@@ -484,7 +485,7 @@ export const DeleteLeftCommand: ICommand = {
 
         const actualRange = activeRange;
         const { startOffset, collapsed } = actualRange;
-        if (collapsed && shouldResetEmptyCenteredParagraphAlignment(docDataModel)) {
+        if (collapsed && shouldResetEmptyCenteredParagraphAlignment(accessor, docDataModel)) {
             const emptyCenteredParagraph = getEmptyCenteredParagraphAtOffset(body, startOffset);
             if (emptyCenteredParagraph != null) {
                 return resetEmptyCenteredParagraphAlignment(commandService, docDataModel, segmentId ?? '', emptyCenteredParagraph, style);
@@ -711,7 +712,7 @@ export const DeleteRightCommand: ICommand = {
 
         const actualRange = activeRange;
         const { startOffset, endOffset, collapsed } = actualRange;
-        if (collapsed && shouldResetEmptyCenteredParagraphAlignment(docDataModel)) {
+        if (collapsed && shouldResetEmptyCenteredParagraphAlignment(accessor, docDataModel)) {
             const emptyCenteredParagraph = getEmptyCenteredParagraphAtOffset(body, startOffset);
             if (emptyCenteredParagraph != null) {
                 return resetEmptyCenteredParagraphAlignment(commandService, docDataModel, segmentId ?? '', emptyCenteredParagraph, style);
@@ -853,8 +854,10 @@ function getEmptyCenteredParagraphAtOffset(body: IDocumentBody, offset: number) 
     }
 }
 
-function shouldResetEmptyCenteredParagraphAlignment(docDataModel: DocumentDataModel) {
-    return !SHEET_EDITOR_UNITS.includes(docDataModel.getUnitId());
+function shouldResetEmptyCenteredParagraphAlignment(accessor: IAccessor, docDataModel: DocumentDataModel) {
+    const unitId = docDataModel.getUnitId();
+    const isEditor = accessor.has(IEditorService) && accessor.get(IEditorService).isEditor(unitId);
+    return !isEditor && !SHEET_EDITOR_UNITS.includes(unitId);
 }
 
 function resetEmptyCenteredParagraphAlignment(

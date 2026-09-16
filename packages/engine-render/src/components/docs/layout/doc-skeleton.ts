@@ -2463,7 +2463,8 @@ export class DocumentSkeleton extends Skeleton {
             publicationRevision: 0,
             didPublish: false,
             didPublishAnchor: false,
-            publishedPageCount: pages.length,
+            // Retained geometry preserves the viewport, not progress for this new layout.
+            publishedPageCount: 0,
             reason: options.reason,
             mode,
             complete: false,

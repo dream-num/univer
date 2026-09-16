@@ -15,11 +15,82 @@
  */
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
-import { DeleteDirection, DocumentFlavor, ICommandService, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService, DocStateEmitService, RichTextEditingMutation } from '@univerjs/docs';
-import { IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, RenderManagerService } from '@univerjs/engine-render';
+import {
+    DeleteDirection,
+    DocumentFlavor,
+    HorizontalAlign,
+    ICommandService,
+    IUniverInstanceService,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    DocLayoutExecutorService,
+    DocSelectionManagerService,
+    DocSkeletonManagerService,
+    DocStateEmitService,
+    RichTextEditingMutation,
+    UpdateTextCommand,
+} from '@univerjs/docs';
+import {
+    IRenderManagerService,
+    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+    RenderManagerService,
+} from '@univerjs/engine-render';
 import { describe, expect, it } from 'vitest';
-import { MergeTwoParagraphCommand } from '../doc-delete.command';
+import { EditorService, IEditorService } from '../../../services/editor/editor-manager.service';
+import { DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand } from '../doc-delete.command';
+
+describe('empty editor deletion', () => {
+    it.each([DeleteLeftCommand, DeleteRightCommand])('keeps registered embedded editor formatting for $id', async (command) => {
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        // The headless test has no canvas. Editor registration can precede render creation.
+        let skeletonManager: DocSkeletonManagerService | undefined;
+        injector.add([IRenderManagerService, { useValue: {
+            createRender: () => null,
+            getRenderUnitById: () => skeletonManager ? { with: () => skeletonManager } : undefined,
+        } as unknown as IRenderManagerService }]);
+        injector.add([DocSelectionManagerService]);
+        injector.add([DocStateEmitService]);
+        injector.add([DocLayoutExecutorService]);
+        injector.add([IEditorService, { useClass: EditorService }]);
+        const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+            id: 'shape-editor',
+            documentStyle: {},
+            body: {
+                dataStream: '\r\n',
+                paragraphs: [{ startIndex: 0, paragraphId: 'empty', paragraphStyle: { horizontalAlign: HorizontalAlign.CENTER } }],
+                textRuns: [{ st: 0, ed: 1, ts: { fs: 16, bl: 1 } }],
+            },
+        });
+        const registration = injector.get(IEditorService).register({ initialSnapshot: model.getSnapshot() }, document.createElement('div'));
+        try {
+            injector.get(IUniverInstanceService).focusUnit(model.getUnitId());
+            skeletonManager = injector.createInstance(DocSkeletonManagerService, { unit: model, unitId: model.getUnitId(), type: UniverInstanceType.UNIVER_DOC });
+            const commands = injector.get(ICommandService);
+            [command, UpdateTextCommand, RichTextEditingMutation].forEach((entry) => commands.registerCommand(entry));
+            const selections = injector.get(DocSelectionManagerService);
+            selections.__TEST_ONLY_setCurrentSelection({ unitId: model.getUnitId(), subUnitId: model.getUnitId() });
+            selections.replaceSelectionInfoWithoutRefresh({
+                textRanges: [{ startOffset: 0, endOffset: 0, collapsed: true, isActive: true }],
+                rectRanges: [],
+                segmentId: '',
+                segmentPage: 0,
+                isEditing: true,
+                style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            });
+            const before = structuredClone(model.getSnapshot());
+            expect(await commands.executeCommand(command.id)).toBe(true);
+            expect(await commands.executeCommand(command.id)).toBe(true);
+            expect(model.getSnapshot()).toEqual(before);
+        } finally {
+            registration.dispose();
+            skeletonManager?.dispose();
+            univer.dispose();
+        }
+    });
+});
 
 describe('MergeTwoParagraphCommand segment selection', () => {
     it.each([DeleteDirection.LEFT, DeleteDirection.RIGHT])('keeps the footnote caret after merging in direction %s', async (direction) => {

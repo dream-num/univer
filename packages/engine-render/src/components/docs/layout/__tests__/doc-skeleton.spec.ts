@@ -1808,6 +1808,35 @@ describe('doc skeleton', () => {
         expect(docViewModel.dispose).toHaveBeenCalled();
     });
 
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('does not count retained geometry as published Worker progress (flavor: %s)', (documentFlavor) => {
+        const univer = new Univer();
+        const model = createDocumentModelWithStyle('Retained paragraph.\r'.repeat(30), {});
+        model.updateDocumentStyle({ documentFlavor });
+        model.updateDocumentDataPageSize(240, 180);
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        skeleton.calculate();
+        const pages = skeleton.getSkeletonData()!.pages;
+        expect(pages.length).toBeGreaterThan(0);
+
+        // A new edit can supersede an external layout before its first publication.
+        for (let edit = 0; edit < 2; edit++) {
+            skeleton.beginExternalLayout({ reason: 'edit' });
+            expect(skeleton.getLayoutProgress()).toMatchObject({
+                complete: false,
+                didPublish: false,
+                processedBlockCount: 0,
+                publishedPageCount: 0,
+                pageCount: pages.length,
+                estimatedPageCount: pages.length,
+            });
+            expect(skeleton.getSkeletonData()!.pages).toBe(pages);
+        }
+
+        skeleton.dispose();
+        model.dispose();
+        univer.dispose();
+    });
+
     it('hit-tests imported sections throughout a modern page while Worker layout is pending', () => {
         const univer = new Univer();
         const content = 'Modern paragraph with an empty paragraph below.\r\r'.repeat(30);

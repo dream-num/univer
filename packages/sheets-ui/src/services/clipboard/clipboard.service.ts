@@ -15,6 +15,7 @@
  */
 
 import type {
+    ICellData,
     ICellDataWithSpanAndDisplay,
     IDisposable,
     IMutationInfo,
@@ -162,6 +163,8 @@ interface IFormulaClipboardPayload {
         row: number;
         column: number;
         f: string;
+        ft?: ICellData['ft'];
+        fd?: ICellData['fd'];
     }>;
 }
 
@@ -676,6 +679,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                         row,
                         column,
                         f: formula,
+                        ft: copyContent.matrixFragment.getValue(row, column)?.ft,
+                        fd: copyContent.matrixFragment.getValue(row, column)?.fd,
                     });
                 }
             }
@@ -845,6 +850,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                     ...getEmptyCell(),
                     ...cellMatrix.getValue(formula.row, formula.column),
                     f: formula.f,
+                    ft: formula.ft,
+                    fd: formula.fd,
                 });
             }
         });

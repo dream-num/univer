@@ -17,7 +17,9 @@
 import type { ICellData, Injector, IRange, IStyleData, Nullable, Univer, Workbook } from '@univerjs/core';
 import type { IClipboardItem } from './mock-clipboard';
 import {
+    BooleanNumber,
     CustomCommandExecutionError,
+    FormulaType,
     ICommandService,
     IPermissionService,
     IUndoRedoService,
@@ -47,7 +49,9 @@ import {
     WorkbookEditablePermission,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { SheetPermissionInterceptorClipboardController } from '../../../controllers/permission/sheet-permission-interceptor-clipboard.controller';
+import {
+    SheetPermissionInterceptorClipboardController,
+} from '../../../controllers/permission/sheet-permission-interceptor-clipboard.controller';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '../clipboard.service';
 import { COPY_TYPE } from '../type';
 import { clipboardTestBed } from './clipboard-test-bed';
@@ -173,6 +177,36 @@ describe('Test clipboard', () => {
 
     afterEach(() => {
         univer?.dispose();
+    });
+
+    it('clears formula metadata on plain-text paste and restores it on undo', async () => {
+        const previous = { f: '=A1', ft: FormulaType.ARRAY, fd: BooleanNumber.FALSE };
+        commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: { 0: { 0: previous } },
+        });
+        get(SheetsSelectionsService).setSelections('test', 'sheet1', [{
+            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+            primary: null,
+            style: null,
+        }]);
+        expect(await sheetClipboardService.paste({
+            presentationStyle: 'unspecified',
+            types: ['text/plain'],
+            getType: async () => new Blob(['=SUM(B1:B2)'], { type: 'text/plain' }),
+        })).toBe(true);
+        const assertReplaced = () => {
+            const cell = getValues(0, 0, 0, 0)?.[0][0];
+            expect(cell?.f).toBe('=SUM(B1:B2)');
+            expect(cell?.ft).toBeUndefined();
+            expect(cell?.fd).toBeUndefined();
+        };
+        assertReplaced();
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getValues(0, 0, 0, 0)?.[0][0]).toMatchObject(previous);
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        assertReplaced();
     });
 
     it('keeps the original selection while clipboard data is read asynchronously', async () => {

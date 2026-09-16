@@ -18,7 +18,9 @@ import type { Dependency, ICellData, IDisposable, IRange, IWorkbookData, Nullabl
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo } from '@univerjs/sheets-ui';
 import {
+    BooleanNumber,
     DisposableCollection,
+    FormulaType,
     ICommandService,
     ILogService,
     Inject,
@@ -472,46 +474,53 @@ describe('Test cut command with formulas', () => {
         univer.dispose();
     });
 
-    it('pastes cross-page formula payload with relative reference offsets', async () => {
-        get(SheetsSelectionsService).addSelections([
-            {
-                range: { startRow: 4, startColumn: 3, endRow: 4, endColumn: 3, rangeType: RANGE_TYPE.NORMAL },
-                primary: null,
-                style: null,
-            },
-        ]);
+    it.each([BooleanNumber.FALSE, BooleanNumber.TRUE])(
+        'pastes cross-page formula payload with relative reference offsets and array metadata (%s)',
+        async (fd) => {
+            get(SheetsSelectionsService).addSelections([
+                {
+                    range: { startRow: 4, startColumn: 3, endRow: 4, endColumn: 3, rangeType: RANGE_TYPE.NORMAL },
+                    primary: null,
+                    style: null,
+                },
+            ]);
 
-        const formulaItem = {
-            types: ['web application/x-univer-sheets-formula', 'text/html'],
-            getType: async (type: string) => {
-                if (type === 'web application/x-univer-sheets-formula') {
-                    return new Blob([JSON.stringify({
-                        rowCount: 1,
-                        columnCount: 1,
-                        origin: {
-                            row: 1,
-                            column: 1,
-                        },
-                        formulas: [
-                            {
-                                row: 0,
-                                column: 0,
-                                f: '=C2',
+            const formulaItem = {
+                types: ['web application/x-univer-sheets-formula', 'text/html'],
+                getType: async (type: string) => {
+                    if (type === 'web application/x-univer-sheets-formula') {
+                        return new Blob([JSON.stringify({
+                            rowCount: 1,
+                            columnCount: 1,
+                            origin: {
+                                row: 1,
+                                column: 1,
                             },
-                        ],
-                    })], { type });
-                }
+                            formulas: [
+                                {
+                                    row: 0,
+                                    column: 0,
+                                    f: '=C2',
+                                    ft: FormulaType.ARRAY,
+                                    fd,
+                                },
+                            ],
+                        })], { type });
+                    }
 
-                return new Blob([
-                    '<google-sheets-html-origin><table><tbody><tr><td>formula result</td></tr></tbody></table></google-sheets-html-origin>',
-                ], { type });
-            },
-        } as unknown as ClipboardItem;
+                    return new Blob([
+                        '<google-sheets-html-origin><table><tbody><tr><td>formula result</td></tr></tbody></table></google-sheets-html-origin>',
+                    ], { type });
+                },
+            } as unknown as ClipboardItem;
 
-        await sheetClipboardService.paste(formulaItem);
+            await sheetClipboardService.paste(formulaItem);
 
-        expect(getValues(4, 3, 4, 3)?.[0][0]?.f).toBe('=E5');
-    });
+            expect(getValues(4, 3, 4, 3)?.[0][0]?.f).toBe('=E5');
+            expect(getValues(4, 3, 4, 3)?.[0][0]?.ft).toBe(FormulaType.ARRAY);
+            expect(getValues(4, 3, 4, 3)?.[0][0]?.fd).toBe(fd);
+        }
+    );
 
     it('keeps non-formula html cells when formula payload restores formulas', async () => {
         get(SheetsSelectionsService).addSelections([
@@ -934,6 +943,8 @@ describe('Test paste with formula', () => {
                                 12: {
                                     3: {
                                         custom: null,
+                                        ft: null,
+                                        fd: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -1163,6 +1174,8 @@ describe('Test paste with formula', () => {
                                 5: {
                                     5: {
                                         custom: null,
+                                        ft: null,
+                                        fd: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -1172,6 +1185,8 @@ describe('Test paste with formula', () => {
                                     },
                                     6: {
                                         custom: null,
+                                        ft: null,
+                                        fd: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -1181,6 +1196,8 @@ describe('Test paste with formula', () => {
                                     },
                                     7: {
                                         custom: null,
+                                        ft: null,
+                                        fd: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -1190,6 +1207,8 @@ describe('Test paste with formula', () => {
                                     },
                                     8: {
                                         custom: null,
+                                        ft: null,
+                                        fd: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -1201,6 +1220,8 @@ describe('Test paste with formula', () => {
                                 6: {
                                     5: {
                                         custom: null,
+                                        ft: null,
+                                        fd: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -1210,6 +1231,8 @@ describe('Test paste with formula', () => {
                                     },
                                     6: {
                                         custom: null,
+                                        ft: null,
+                                        fd: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -1219,6 +1242,8 @@ describe('Test paste with formula', () => {
                                     },
                                     7: {
                                         custom: null,
+                                        ft: null,
+                                        fd: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -1228,6 +1253,8 @@ describe('Test paste with formula', () => {
                                     },
                                     8: {
                                         custom: null,
+                                        ft: null,
+                                        fd: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -1239,6 +1266,8 @@ describe('Test paste with formula', () => {
                                 7: {
                                     5: {
                                         custom: null,
+                                        ft: null,
+                                        fd: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -1248,6 +1277,8 @@ describe('Test paste with formula', () => {
                                     },
                                     6: {
                                         custom: null,
+                                        ft: null,
+                                        fd: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -1257,6 +1288,8 @@ describe('Test paste with formula', () => {
                                     },
                                     7: {
                                         custom: null,
+                                        ft: null,
+                                        fd: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -1266,6 +1299,8 @@ describe('Test paste with formula', () => {
                                     },
                                     8: {
                                         custom: null,
+                                        ft: null,
+                                        fd: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -1277,6 +1312,8 @@ describe('Test paste with formula', () => {
                                 8: {
                                     5: {
                                         custom: null,
+                                        ft: null,
+                                        fd: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -1286,6 +1323,8 @@ describe('Test paste with formula', () => {
                                     },
                                     6: {
                                         custom: null,
+                                        ft: null,
+                                        fd: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -1295,6 +1334,8 @@ describe('Test paste with formula', () => {
                                     },
                                     7: {
                                         custom: null,
+                                        ft: null,
+                                        fd: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -1304,6 +1345,8 @@ describe('Test paste with formula', () => {
                                     },
                                     8: {
                                         custom: null,
+                                        ft: null,
+                                        fd: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -1480,6 +1523,92 @@ describe('getSetCellFormulaMutations matrix branches', () => {
     function accessor() {
         return { get, has };
     }
+
+    it.each([
+        [PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE, COPY_TYPE.COPY],
+        [PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMULA, COPY_TYPE.COPY],
+        [PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE, COPY_TYPE.COPY],
+        [PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE, COPY_TYPE.CUT],
+    ])('replaces formula metadata and restores it on undo for %s / %s', (pasteType, copyType) => {
+        const commandService = get(ICommandService);
+        commandService.registerCommand(SetRangeValuesMutation);
+        const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test')!.getSheetBySheetId('sheet1')!;
+        const previous: ICellData = { f: '=OLD()', ft: FormulaType.ARRAY, fd: BooleanNumber.TRUE };
+
+        for (const source of [
+            { f: '=A1', v: 12 },
+            { f: '=A1', v: 12, ft: FormulaType.ARRAY, fd: BooleanNumber.FALSE },
+            { f: '=A1', v: 12, ft: FormulaType.ARRAY, fd: BooleanNumber.TRUE },
+        ]) {
+            commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                cellValue: { 8: { 4: previous }, 9: { 4: previous } },
+            });
+            const result = get(Injector).invoke((accessor) => getSetCellFormulaMutations(
+                'test',
+                'sheet1',
+                { rows: [8, 9], cols: [4] },
+                new ObjectMatrix<ICellDataWithSpanInfo>({ 0: { 0: source }, 1: { 0: source } }),
+                accessor,
+                { copyType, pasteType },
+                get(LexerTreeBuilder),
+                get(FormulaDataModel),
+                false,
+                { unitId: 'test', subUnitId: 'sheet1', range: { rows: [0], cols: [0] } }
+            ));
+            const keepsFormula = pasteType !== PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE;
+            for (const mutations of [result.redos, result.undos, result.redos]) {
+                mutations.forEach((mutation) => {
+                    expect(commandService.syncExecuteCommand(mutation.id, mutation.params)).toBe(true);
+                });
+                for (const row of [8, 9]) {
+                    const cell = worksheet.getCellRaw(row, 4);
+                    if (mutations === result.undos) {
+                        expect(cell).toMatchObject(previous);
+                    } else {
+                        expect(cell?.ft).toBe(keepsFormula ? source.ft : undefined);
+                        expect(cell?.fd).toBe(keepsFormula ? source.fd : undefined);
+                        if (!keepsFormula) {
+                            expect(cell?.f).toBeUndefined();
+                            expect(cell?.v).toBe(12);
+                        } else if (row === 8) {
+                            expect(cell?.f).toBe(copyType === COPY_TYPE.CUT ? '=A1' : '=E9');
+                        } else if (copyType === COPY_TYPE.COPY) {
+                            expect(cell?.si).toBeTruthy();
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    it('clears imported metadata when external formula text replaces an array formula', () => {
+        const commandService = get(ICommandService);
+        commandService.registerCommand(SetRangeValuesMutation);
+        commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: { 8: { 4: { f: '=OLD()', ft: FormulaType.ARRAY, fd: BooleanNumber.FALSE } } },
+        });
+        const result = get(Injector).invoke((accessor) => getSetCellFormulaMutations(
+            'test',
+            'sheet1',
+            { rows: [8], cols: [4] },
+            new ObjectMatrix<ICellDataWithSpanInfo>({ 0: { 0: { v: '=A1' } } }),
+            accessor,
+            { copyType: COPY_TYPE.COPY, pasteType: PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE },
+            get(LexerTreeBuilder),
+            get(FormulaDataModel),
+            false,
+            null
+        ));
+        result.redos.forEach((mutation) => commandService.syncExecuteCommand(mutation.id, mutation.params));
+        const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test')!.getSheetBySheetId('sheet1')!;
+        expect(worksheet.getCellRaw(8, 4)).toMatchObject({ f: '=A1' });
+        expect(worksheet.getCellRaw(8, 4)?.ft).toBeUndefined();
+        expect(worksheet.getCellRaw(8, 4)?.fd).toBeUndefined();
+    });
 
     it('converts pasted formula-looking text into cell formulas when there is no paste source', () => {
         const matrix = new ObjectMatrix<ICellDataWithSpanInfo>({

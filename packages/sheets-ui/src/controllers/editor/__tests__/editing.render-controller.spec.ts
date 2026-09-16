@@ -38,7 +38,7 @@ describe('imported formula metadata when editing', () => {
             const previous: ICellData = { f: '=SUM(A1:A3)', ft: FormulaType.ARRAY, fd, v: 6 };
             const parseInput = (input: string, cell: ICellData) => getCellDataByInput(
                 cell,
-                { id: 'editor', body: { dataStream: `${input}\r\n` } },
+                { id: 'editor', body: { dataStream: `${input}\r\n` }, documentStyle: {} },
                 testBed.get(LexerTreeBuilder),
                 localeService,
                 testBed.get(IFunctionService),

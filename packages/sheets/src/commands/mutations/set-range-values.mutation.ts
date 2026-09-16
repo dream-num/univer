@@ -25,7 +25,14 @@ import type {
     Styles,
     Workbook,
 } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, ObjectMatrix, Tools, UniverInstanceType } from '@univerjs/core';
+import {
+    CommandType,
+    isFormulaId,
+    IUniverInstanceService,
+    ObjectMatrix,
+    Tools,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { handleStyle, transformStyle } from '../../basics/cell-style';
 import { getCellType } from '../../basics/cell-type';
 import { getCellValue, setNull } from '../../basics/cell-value';
@@ -163,8 +170,8 @@ function mergeCellData(newValue: ICellData, oldValue: ICellData, styles: Styles,
         }
     });
 
-    // A copied cell can still contain metadata when its formula is cleared.
-    if (newValue.f === null || newValue.f === '') {
+    // Shared formula followers have no f, but still carry formula metadata.
+    if ((newValue.f === null || newValue.f === '') && !isFormulaId(newValue.si)) {
         delete oldValue.ft;
         delete oldValue.fd;
     }

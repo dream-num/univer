@@ -58,6 +58,7 @@ univer-text-gray-900 univer-outline-none univer-transition-colors univer-animate
 dark:!univer-text-gray-0 dark:hover:!univer-bg-gray-700 dark:disabled:!univer-text-gray-600
 disabled:univer-cursor-not-allowed disabled:univer-text-gray-300 disabled:hover:univer-bg-transparent
 hover:univer-bg-gray-100 whitespace-nowrap univer-w-max
+[&_svg]:univer-shrink-0
 `;
 
 export const toolbarButtonVariants = cva(toolbarButtonClassName, {

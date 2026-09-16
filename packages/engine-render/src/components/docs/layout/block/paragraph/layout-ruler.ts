@@ -1138,38 +1138,15 @@ function getListTextLineHeight(
     return Math.max(metrics.normalLineHeight, metrics.boundingBoxAscent + metrics.boundingBoxDescent);
 }
 
-function _getParagraphLineMetrics(
+function _getStructuralLineFlags(
     ctx: ILayoutContext,
     glyphGroup: IDocumentSkeletonGlyph[],
     lastPage: IDocumentSkeletonPage,
-    column: IDocumentSkeletonColumn,
-    sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
     isParagraphFirstShapedText: boolean,
-    defaultSpanMetrics?: IDefaultSpanMetrics
+    preLine: IDocumentSkeletonLine | undefined
 ) {
-    const preLine = getLastLineByColumn(column);
-
-    const { boundingBoxAscent, boundingBoxDescent, normalLineHeight: glyphNormalLineHeight } = getGlyphGroupFontBoundingBox(
-        paragraphConfig.documentCompatibilityPolicy,
-        glyphGroup
-    );
-    const glyphLineHeight = defaultSpanMetrics?.lineHeight || (boundingBoxAscent + boundingBoxDescent);
-    const hasListGlyph = isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
-        && (defaultSpanMetrics?.hasListGlyph || glyphGroup.some((glyph) => glyph.glyphType === GlyphType.LIST));
-    const normalLineHeight = Math.max(
-        defaultSpanMetrics?.normalLineHeight ?? 0,
-        hasListGlyph ? getListTextLineHeight(paragraphConfig.documentCompatibilityPolicy, glyphGroup) : glyphNormalLineHeight
-    ) || undefined;
-    const ascent = boundingBoxAscent;
-    const descent = boundingBoxDescent;
-
-    const {
-        paragraphStyle: originParagraphStyle = {},
-        paragraphNonInlineSkeDrawings,
-        skeTablesInParagraph,
-        paragraphIndex,
-    } = paragraphConfig;
+    const { paragraphStyle: originParagraphStyle = {}, paragraphNonInlineSkeDrawings, skeTablesInParagraph, paragraphIndex } = paragraphConfig;
     // Floating objects do not consume a line, but their authored paragraph mark does.
     // A temporary anchor fragment preceding text in the same paragraph has no such mark.
     const hasAuthoredParagraphMark = isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy) &&
@@ -1201,6 +1178,97 @@ function _getParagraphLineMetrics(
         paragraphConfig.bulletSkeleton == null &&
         glyphGroup.some((glyph) => glyph.raw === DataStreamTreeTokenType.PAGE_BREAK) &&
         glyphGroup.every((glyph) => glyph.raw === DataStreamTreeTokenType.PAGE_BREAK || __isStructuralTerminatorGlyph(glyph));
+    return { hasAuthoredParagraphMark, isZeroWidthNonFlowFloatingAnchorLine, isStructuralTableAnchorLine, isEmptyFramedParagraph, isStandalonePageBoundary };
+}
+
+function _isPositionedCustomBlockOnly(
+    glyphGroup: IDocumentSkeletonGlyph[],
+    paragraphNonInlineSkeDrawings: IParagraphConfig['paragraphNonInlineSkeDrawings'],
+    hasAuthoredParagraphMark: boolean
+): boolean {
+    return !hasAuthoredParagraphMark && glyphGroup.length > 0 &&
+        paragraphNonInlineSkeDrawings != null &&
+        paragraphNonInlineSkeDrawings.size > 0 &&
+        glyphGroup.every((glyph) => {
+            if (!glyph) {
+                return false;
+            }
+
+            if (glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK) {
+                return [...paragraphNonInlineSkeDrawings.values()].some((drawing) => drawing.drawingId === glyph.drawingId);
+            }
+
+            return glyph.streamType === DataStreamTreeTokenType.PARAGRAPH || glyph.raw === DataStreamTreeTokenType.PARAGRAPH;
+        });
+}
+
+function _shouldSuppressPageTopSpacing(
+    lastPage: IDocumentSkeletonPage,
+    column: IDocumentSkeletonColumn,
+    paragraphConfig: IParagraphConfig,
+    preLine: IDocumentSkeletonLine | undefined,
+    firstPageNumber: number,
+    startsSection: boolean
+): boolean {
+    return isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy!) &&
+        lastPage.pageNumber > firstPageNumber &&
+        !startsSection &&
+        lastPage.type !== DocumentSkeletonPageType.HEADER &&
+        lastPage.type !== DocumentSkeletonPageType.FOOTER &&
+        (!paragraphConfig.isInsideTable || lastPage.type === DocumentSkeletonPageType.CELL) &&
+        (preLine == null || (preLine.top === 0 && preLine.lineHeight === 0 &&
+            !__hasFlowGlyph(__getGlyphGroupByLine(preLine)))) &&
+        (column.parent?.top ?? 0) === 0;
+}
+
+function _collapseSectionBeforeSpacing(ctx: ILayoutContext, previousParagraphIndex: number, marginTop: number): number {
+    // Word collapses before-spacing against the preceding section's final paragraph.
+    for (let index = ctx.skeleton.pages.length - 1; index >= 0; index--) {
+        const previousPage = ctx.skeleton.pages[index];
+        const previousColumns = getLastSection(previousPage)?.columns ?? [];
+        const previousLine = previousColumns.slice().reverse().map(getLastLineByColumn).find((line) => line != null);
+        if (previousLine) {
+            return previousLine.paragraphIndex === previousParagraphIndex
+                ? Math.max(0, marginTop - previousLine.spaceBelowApply)
+                : marginTop;
+        }
+    }
+    return marginTop;
+}
+
+function _getParagraphLineMetrics(
+    ctx: ILayoutContext,
+    glyphGroup: IDocumentSkeletonGlyph[],
+    lastPage: IDocumentSkeletonPage,
+    column: IDocumentSkeletonColumn,
+    sectionBreakConfig: ISectionBreakConfig,
+    paragraphConfig: IParagraphConfig,
+    isParagraphFirstShapedText: boolean,
+    defaultSpanMetrics?: IDefaultSpanMetrics
+) {
+    const preLine = getLastLineByColumn(column);
+
+    const { boundingBoxAscent, boundingBoxDescent, normalLineHeight: glyphNormalLineHeight } = getGlyphGroupFontBoundingBox(
+        paragraphConfig.documentCompatibilityPolicy,
+        glyphGroup
+    );
+    const glyphLineHeight = defaultSpanMetrics?.lineHeight || (boundingBoxAscent + boundingBoxDescent);
+    const hasListGlyph = isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
+        && (defaultSpanMetrics?.hasListGlyph || glyphGroup.some((glyph) => glyph.glyphType === GlyphType.LIST));
+    const normalLineHeight = Math.max(
+        defaultSpanMetrics?.normalLineHeight ?? 0,
+        hasListGlyph ? getListTextLineHeight(paragraphConfig.documentCompatibilityPolicy, glyphGroup) : glyphNormalLineHeight
+    ) || undefined;
+    const ascent = boundingBoxAscent;
+    const descent = boundingBoxDescent;
+
+    const {
+        paragraphStyle: originParagraphStyle = {},
+        paragraphNonInlineSkeDrawings,
+        paragraphIndex,
+    } = paragraphConfig;
+    const { hasAuthoredParagraphMark, isZeroWidthNonFlowFloatingAnchorLine, isStructuralTableAnchorLine, isEmptyFramedParagraph, isStandalonePageBoundary } =
+        _getStructuralLineFlags(ctx, glyphGroup, lastPage, paragraphConfig, isParagraphFirstShapedText, preLine);
     const { namedStyleType } = originParagraphStyle;
     const namedStyle = namedStyleType !== undefined ? NAMED_STYLE_SPACE_MAP[namedStyleType] : null;
     const paragraphStyle = {
@@ -1232,20 +1300,7 @@ function _getParagraphLineMetrics(
         !hasInlineCustomBlock &&
         reachesNextDocumentGridLine(lineSpacing, getNumberUnitValue(spaceBelow, lineSpacing), linePitch) &&
         isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy!);
-    const positionedCustomBlockOnly = !hasAuthoredParagraphMark && glyphGroup.length > 0 &&
-        paragraphNonInlineSkeDrawings != null &&
-        paragraphNonInlineSkeDrawings.size > 0 &&
-        glyphGroup.every((glyph) => {
-            if (!glyph) {
-                return false;
-            }
-
-            if (glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK) {
-                return [...paragraphNonInlineSkeDrawings.values()].some((drawing) => drawing.drawingId === glyph.drawingId);
-            }
-
-            return glyph.streamType === DataStreamTreeTokenType.PARAGRAPH || glyph.raw === DataStreamTreeTokenType.PARAGRAPH;
-        });
+    const positionedCustomBlockOnly = _isPositionedCustomBlockOnly(glyphGroup, paragraphNonInlineSkeDrawings, hasAuthoredParagraphMark);
     const drawingMLLineHeight = defaultSpanMetrics?.drawingMLLineHeight ??
         getDrawingMLNominalLineHeight(glyphGroup, sectionBreakConfig, hasInlineCustomBlock);
     let { paddingTop, paddingBottom, contentHeight, lineSpacingApply } = getLineHeightMetrics(
@@ -1340,33 +1395,12 @@ function _getParagraphLineMetrics(
             spaceBelow,
             isParagraphFirstShapedText,
             preLine,
-            isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy!) &&
-            lastPage.pageNumber > firstPageNumber &&
-            !startingSection &&
-            lastPage.type !== DocumentSkeletonPageType.HEADER &&
-            lastPage.type !== DocumentSkeletonPageType.FOOTER &&
-            (!paragraphConfig.isInsideTable || lastPage.type === DocumentSkeletonPageType.CELL) &&
-            (preLine == null || (preLine.top === 0 && preLine.lineHeight === 0 &&
-                !__hasFlowGlyph(__getGlyphGroupByLine(preLine)))) &&
-            (column.parent?.top ?? 0) === 0,
+            _shouldSuppressPageTopSpacing(lastPage, column, paragraphConfig, preLine, firstPageNumber, startingSection != null),
             drawingMLLineHeight
         );
 
     if (startingSection && marginTop > 0 && isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)) {
-        // Word collapses before-spacing against the preceding section's final
-        // paragraph even though that paragraph's after-spacing stays off-page.
-        const previousParagraphIndex = startingSection.children[0].startIndex - 2;
-        for (let index = ctx.skeleton.pages.length - 1; index >= 0; index--) {
-            const previousPage = ctx.skeleton.pages[index];
-            const previousColumns = getLastSection(previousPage)?.columns ?? [];
-            const previousLine = previousColumns.slice().reverse().map(getLastLineByColumn).find((line) => line != null);
-            if (previousLine) {
-                if (previousLine.paragraphIndex === previousParagraphIndex) {
-                    marginTop = Math.max(0, marginTop - previousLine.spaceBelowApply);
-                }
-                break;
-            }
-        }
+        marginTop = _collapseSectionBeforeSpacing(ctx, startingSection.children[0].startIndex - 2, marginTop);
     }
 
     if (positionedCustomBlockOnly) {

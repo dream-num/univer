@@ -831,57 +831,15 @@ function _hasSameParagraphStyle(paragraph: IParagraph, adjacent: IParagraph | un
         paragraph.paragraphStyle?.namedStyleType === adjacent.paragraphStyle?.namedStyleType;
 }
 
-function _prepareLineBreaking(
-    ctx: ILayoutContext,
+function _applyContextualParagraphSpacing(
     viewModel: DocumentViewModel,
-    curPage: IDocumentSkeletonPage,
+    paragraph: IParagraph,
     paragraphNode: DataStreamTreeNode,
-    sectionBreakConfig: ISectionBreakConfig,
-    tableSkeleton: Nullable<IDocumentSkeletonTable>,
-    nextParagraphNode?: DataStreamTreeNode
-): IPreparedLineBreaking {
-    const { skeletonResourceReference } = ctx;
-    const {
-        lists,
-        drawings = {},
-        localeService,
-    } = sectionBreakConfig;
-    const { endIndex, blocks = [], children } = paragraphNode;
-    const { segmentId } = curPage;
-    const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0, paragraphId: 'para_render_fallback' };
-    const { paragraphStyle = {} } = paragraph;
-    const documentSnapshot = viewModel.getSnapshot?.();
-    const documentStyle = documentSnapshot?.documentStyle;
-    const documentCompatibilityPolicy = sectionBreakConfig.documentCompatibilityPolicy ??
-        getDocumentCompatibilityPolicy(documentStyle?.documentFlavor);
-    // Keep list membership in the model; a page-break-only paragraph has no displayed item.
-    const bullet = isTraditionalDocumentCompatibility(documentCompatibilityPolicy) && /^\f+\r?$/.test(paragraphNode.content ?? '')
-        ? undefined
-        : paragraph.bullet;
-    const shouldApplyDocumentDefaults = documentCompatibilityPolicy.applyDocumentDefaultParagraphStyle;
-    const useWordStyleLineHeight = documentCompatibilityPolicy.useWordStyleLineHeight;
-    const { skeHeaders, skeFooters, skeListLevel, drawingAnchor } = skeletonResourceReference;
-    const paragraphNonInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
-    const paragraphInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
-    const paragraphNonInlineSkeDrawingsByBlockId: Map<string, IDocumentSkeletonDrawing> = new Map();
-    const paragraphInlineSkeDrawingsByBlockId: Map<string, IDocumentSkeletonDrawing> = new Map();
-    let segmentDrawingAnchorCache = drawingAnchor?.get(segmentId);
-
-    if (segmentDrawingAnchorCache == null) {
-        segmentDrawingAnchorCache = new Map();
-        drawingAnchor?.set(segmentId, segmentDrawingAnchorCache);
-    }
-
-    const body = viewModel.getBody?.() ?? null;
-    const resolvedParagraphStyle = _applyBlockRangeLayoutParagraphStyle(
-        body,
-        paragraph,
-        paragraphStyle,
-        documentStyle,
-        shouldApplyDocumentDefaults,
-        documentSnapshot?.styles,
-        paragraph.styleId
-    );
+    nextParagraphNode: DataStreamTreeNode | undefined,
+    resolvedParagraphStyle: IParagraphStyle,
+    documentCompatibilityPolicy: IDocumentCompatibilityPolicy
+): void {
+    const { endIndex, children } = paragraphNode;
     if (isTraditionalDocumentCompatibility(documentCompatibilityPolicy) &&
         resolvedParagraphStyle.contextualSpacing === BooleanNumber.TRUE && children.length === 0) {
         // Contextual spacing suppresses each paragraph's own spacing, not its neighbour's.
@@ -904,6 +862,19 @@ function _prepareLineBreaking(
             resolvedParagraphStyle.spaceBelow = { v: 0 };
         }
     }
+}
+
+function _getParagraphBorderSpacing(
+    viewModel: DocumentViewModel,
+    paragraphNode: DataStreamTreeNode,
+    nextParagraphNode: DataStreamTreeNode | undefined,
+    resolvedParagraphStyle: IParagraphStyle,
+    documentCompatibilityPolicy: IDocumentCompatibilityPolicy
+): Pick<IParagraphConfig, 'borderTopSpace' | 'borderBottomSpace'> {
+    const documentSnapshot = viewModel.getSnapshot?.();
+    const documentStyle = documentSnapshot?.documentStyle;
+    const body = viewModel.getBody?.() ?? null;
+    const shouldApplyDocumentDefaults = documentCompatibilityPolicy.applyDocumentDefaultParagraphStyle;
     const borderTop = resolvedParagraphStyle.borderTop;
     const borderBottom = resolvedParagraphStyle.borderBottom;
     const borderBetween = resolvedParagraphStyle.borderBetween;
@@ -962,6 +933,67 @@ function _prepareLineBreaking(
         (!previousParagraphStyle || !hasSameParagraphBorderSet(previousParagraphStyle, resolvedParagraphStyle))
         ? Math.max(0, borderTop.padding ?? 0) + Math.max(0, borderTop.width ?? 1)
         : 0;
+    return {
+        borderTopSpace: traditionalBorders ? topBorderClearance : undefined,
+        borderBottomSpace: traditionalBorders && bottomBorder && (bottomBorder.width ?? 1) > 0
+            ? Math.max(0, bottomBorder.padding ?? 0) + Math.max(0, bottomBorder.width ?? 1)
+            : undefined,
+    };
+}
+
+function _prepareLineBreaking(
+    ctx: ILayoutContext,
+    viewModel: DocumentViewModel,
+    curPage: IDocumentSkeletonPage,
+    paragraphNode: DataStreamTreeNode,
+    sectionBreakConfig: ISectionBreakConfig,
+    tableSkeleton: Nullable<IDocumentSkeletonTable>,
+    nextParagraphNode?: DataStreamTreeNode
+): IPreparedLineBreaking {
+    const { skeletonResourceReference } = ctx;
+    const {
+        lists,
+        drawings = {},
+        localeService,
+    } = sectionBreakConfig;
+    const { endIndex, blocks = [], children } = paragraphNode;
+    const { segmentId } = curPage;
+    const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0, paragraphId: 'para_render_fallback' };
+    const { paragraphStyle = {} } = paragraph;
+    const documentSnapshot = viewModel.getSnapshot?.();
+    const documentStyle = documentSnapshot?.documentStyle;
+    const documentCompatibilityPolicy = sectionBreakConfig.documentCompatibilityPolicy ??
+        getDocumentCompatibilityPolicy(documentStyle?.documentFlavor);
+    // Keep list membership in the model; a page-break-only paragraph has no displayed item.
+    const bullet = isTraditionalDocumentCompatibility(documentCompatibilityPolicy) && /^\f+\r?$/.test(paragraphNode.content ?? '')
+        ? undefined
+        : paragraph.bullet;
+    const shouldApplyDocumentDefaults = documentCompatibilityPolicy.applyDocumentDefaultParagraphStyle;
+    const useWordStyleLineHeight = documentCompatibilityPolicy.useWordStyleLineHeight;
+    const { skeHeaders, skeFooters, skeListLevel, drawingAnchor } = skeletonResourceReference;
+    const paragraphNonInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
+    const paragraphInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
+    const paragraphNonInlineSkeDrawingsByBlockId: Map<string, IDocumentSkeletonDrawing> = new Map();
+    const paragraphInlineSkeDrawingsByBlockId: Map<string, IDocumentSkeletonDrawing> = new Map();
+    let segmentDrawingAnchorCache = drawingAnchor?.get(segmentId);
+
+    if (segmentDrawingAnchorCache == null) {
+        segmentDrawingAnchorCache = new Map();
+        drawingAnchor?.set(segmentId, segmentDrawingAnchorCache);
+    }
+
+    const body = viewModel.getBody?.() ?? null;
+    const resolvedParagraphStyle = _applyBlockRangeLayoutParagraphStyle(
+        body,
+        paragraph,
+        paragraphStyle,
+        documentStyle,
+        shouldApplyDocumentDefaults,
+        documentSnapshot?.styles,
+        paragraph.styleId
+    );
+    _applyContextualParagraphSpacing(viewModel, paragraph, paragraphNode, nextParagraphNode, resolvedParagraphStyle, documentCompatibilityPolicy);
+    const borderSpacing = _getParagraphBorderSpacing(viewModel, paragraphNode, nextParagraphNode, resolvedParagraphStyle, documentCompatibilityPolicy);
 
     const paragraphConfig: IParagraphConfig = {
         paragraphIndex: endIndex,
@@ -969,10 +1001,7 @@ function _prepareLineBreaking(
         documentCompatibilityPolicy,
         paragraphStyle: resolvedParagraphStyle,
         // Word border distances occupy space in addition to collapsed paragraph spacing.
-        borderTopSpace: traditionalBorders ? topBorderClearance : undefined,
-        borderBottomSpace: traditionalBorders && bottomBorder && (bottomBorder.width ?? 1) > 0
-            ? Math.max(0, bottomBorder.padding ?? 0) + Math.max(0, bottomBorder.width ?? 1)
-            : undefined,
+        ...borderSpacing,
         docxFallbackAnchorLeft: _getFollowingIndentedParagraphAnchorLeft(
             viewModel,
             paragraph,

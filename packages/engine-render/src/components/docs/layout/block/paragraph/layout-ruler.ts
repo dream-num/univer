@@ -1236,7 +1236,45 @@ function _collapseSectionBeforeSpacing(ctx: ILayoutContext, previousParagraphInd
     return marginTop;
 }
 
-function _getParagraphLineMetrics(
+function _snapPreviousParagraphLineToGrid(
+    preLine: IDocumentSkeletonLine | undefined,
+    paragraphConfig: IParagraphConfig,
+    lineConfig: ReturnType<typeof getLineHeightConfig>,
+    snapMultilineParagraphToWholeGrid: boolean
+) {
+    const { paragraphIndex } = paragraphConfig;
+    const { paragraphLineGapDefault, linePitch, gridType, lineSpacing, spacingRule, snapToGrid } = lineConfig;
+    if (snapMultilineParagraphToWholeGrid && preLine?.paragraphIndex === paragraphIndex) {
+        const preLineGlyphs = __getGlyphGroupByLine(preLine);
+        const preLineHasInlineCustomBlock = preLineGlyphs.some(
+            (glyph) => glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0
+        );
+        if (__hasFlowGlyph(preLineGlyphs) && !preLineHasInlineCustomBlock) {
+            const preLineMetrics = getLineHeightMetrics(
+                preLine.contentHeight,
+                paragraphLineGapDefault,
+                linePitch,
+                gridType,
+                lineSpacing,
+                spacingRule,
+                snapToGrid,
+                paragraphConfig.useWordStyleLineHeight,
+                true,
+                undefined,
+                true
+            );
+            const heightDelta = preLineMetrics.lineSpacingApply -
+                (preLine.paddingTop + preLine.contentHeight + preLine.paddingBottom);
+            if (heightDelta > LINE_LAYOUT_OVERFLOW_TOLERANCE) {
+                preLine.paddingTop += heightDelta / 2;
+                preLine.paddingBottom += heightDelta / 2;
+                preLine.lineHeight += heightDelta;
+            }
+        }
+    }
+}
+
+function _getParagraphContentMetrics(
     ctx: ILayoutContext,
     glyphGroup: IDocumentSkeletonGlyph[],
     lastPage: IDocumentSkeletonPage,
@@ -1341,34 +1379,12 @@ function _getParagraphLineMetrics(
         paddingBottom = lineSpacingApply - contentHeight - paddingTop;
     }
 
-    if (snapMultilineParagraphToWholeGrid && preLine?.paragraphIndex === paragraphIndex) {
-        const preLineGlyphs = __getGlyphGroupByLine(preLine);
-        const preLineHasInlineCustomBlock = preLineGlyphs.some(
-            (glyph) => glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0
-        );
-        if (__hasFlowGlyph(preLineGlyphs) && !preLineHasInlineCustomBlock) {
-            const preLineMetrics = getLineHeightMetrics(
-                preLine.contentHeight,
-                paragraphLineGapDefault,
-                linePitch,
-                gridType,
-                lineSpacing,
-                spacingRule,
-                snapToGrid,
-                paragraphConfig.useWordStyleLineHeight,
-                true,
-                undefined,
-                true
-            );
-            const heightDelta = preLineMetrics.lineSpacingApply -
-                (preLine.paddingTop + preLine.contentHeight + preLine.paddingBottom);
-            if (heightDelta > LINE_LAYOUT_OVERFLOW_TOLERANCE) {
-                preLine.paddingTop += heightDelta / 2;
-                preLine.paddingBottom += heightDelta / 2;
-                preLine.lineHeight += heightDelta;
-            }
-        }
-    }
+    _snapPreviousParagraphLineToGrid(
+        preLine,
+        paragraphConfig,
+        getLineHeightConfig(sectionBreakConfig, paragraphConfig),
+        snapMultilineParagraphToWholeGrid
+    );
 
     if (positionedCustomBlockOnly) {
         paddingTop = 0;
@@ -1376,6 +1392,72 @@ function _getParagraphLineMetrics(
         contentHeight = 0.01;
         lineSpacingApply = 0.01;
     }
+
+    return {
+        preLine,
+        paragraphIndex,
+        paragraphStyle,
+        spaceAbove,
+        spaceBelow,
+        spacingRule,
+        gridType,
+        snapToGrid,
+        hasInlineCustomBlock,
+        positionedCustomBlockOnly,
+        drawingMLLineHeight,
+        drawingMLBaselineHeight,
+        isZeroWidthNonFlowFloatingAnchorLine,
+        isStructuralTableAnchorLine,
+        isEmptyFramedParagraph,
+        isStandalonePageBoundary,
+        paddingTop,
+        paddingBottom,
+        contentHeight,
+        lineSpacingApply,
+        wordAutoLeading,
+    };
+}
+
+function _getParagraphLineMetrics(
+    ctx: ILayoutContext,
+    glyphGroup: IDocumentSkeletonGlyph[],
+    lastPage: IDocumentSkeletonPage,
+    column: IDocumentSkeletonColumn,
+    sectionBreakConfig: ISectionBreakConfig,
+    paragraphConfig: IParagraphConfig,
+    isParagraphFirstShapedText: boolean,
+    defaultSpanMetrics?: IDefaultSpanMetrics
+) {
+    const metrics = _getParagraphContentMetrics(
+        ctx,
+        glyphGroup,
+        lastPage,
+        column,
+        sectionBreakConfig,
+        paragraphConfig,
+        isParagraphFirstShapedText,
+        defaultSpanMetrics
+    );
+    const {
+        preLine,
+        paragraphIndex,
+        paragraphStyle,
+        spaceAbove,
+        spaceBelow,
+        spacingRule,
+        gridType,
+        snapToGrid,
+        hasInlineCustomBlock,
+        positionedCustomBlockOnly,
+        drawingMLLineHeight,
+        drawingMLBaselineHeight,
+        isZeroWidthNonFlowFloatingAnchorLine,
+        isStructuralTableAnchorLine,
+        isEmptyFramedParagraph,
+        isStandalonePageBoundary,
+        wordAutoLeading,
+    } = metrics;
+    let { paddingTop, paddingBottom, contentHeight, lineSpacingApply } = metrics;
 
     const isHiddenParagraph = isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy) &&
         glyphGroup.length > 0 && glyphGroup.every((glyph) => glyph.ts?.hidden === true);

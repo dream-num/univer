@@ -51,11 +51,13 @@ import {
     NoColorDoubleIcon,
     OrderIcon,
     PaintBucketDoubleIcon,
+    ParagraphSettingIcon,
     PasteSpecialDoubleIcon,
     ReduceDoubleIcon,
     ReduceIcon,
     RightInsertColumnDoubleIcon,
     RightJustifyingIcon,
+    SectionSettingIcon,
     ShapeIcon,
     SmileIcon,
     StrikethroughIcon,
@@ -103,10 +105,9 @@ import {
 } from '../views/Icon';
 import {
     BULLET_LIST_TYPE_COMPONENT,
-    BulletListTypePicker,
     ORDER_LIST_TYPE_COMPONENT,
-    OrderListTypePicker,
 } from '../views/list-type-picker/index';
+import { BulletListTypePicker, OrderListTypePicker } from '../views/list-type-picker/Picker';
 import { PAGE_SETTING_COMPONENT_ID, PageSettings } from '../views/PageSettings';
 import {
     DOC_PARAGRAPH_MENU_COMPONENT_KEY,
@@ -174,11 +175,13 @@ export class ComponentsController extends Disposable {
             NoColorDoubleIcon,
             OrderIcon,
             PaintBucketDoubleIcon,
+            ParagraphSettingIcon,
             PasteSpecialDoubleIcon,
             ReduceDoubleIcon,
             ReduceIcon,
             RightInsertColumnDoubleIcon,
             RightJustifyingIcon,
+            SectionSettingIcon,
             ShapeIcon,
             SmileIcon,
             StrikethroughIcon,

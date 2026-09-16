@@ -15,12 +15,13 @@
  */
 
 import { Disposable, Inject } from '@univerjs/core';
-import { AddImageIcon, AlignTextBothIcon, BoldIcon, ColumnIcon, CopyDoubleIcon, CutIcon, DeleteColumnDoubleIcon, DeleteIcon, DeleteRowDoubleIcon, DeleteTableDoubleIcon, DocSettingIcon, FontColorDoubleIcon, GridIcon, H1Icon, H2Icon, H3Icon, H4Icon, H5Icon, HeaderFooterIcon, HorizontallyIcon, InsertDoubleIcon, InsertRowAboveDoubleIcon, InsertRowBelowDoubleIcon, ItalicIcon, KeyboardIcon, LeftInsertColumnDoubleIcon, LeftJustifyingIcon, LineIndentDecreaseIcon, LineIndentIncreaseIcon, MenuIcon, MoreLeftIcon, MoreRightIcon, NoColorDoubleIcon, OrderIcon, PaintBucketDoubleIcon, PasteSpecialDoubleIcon, ReduceDoubleIcon, ReduceIcon, RightInsertColumnDoubleIcon, RightJustifyingIcon, ShapeIcon, SmileIcon, StrikethroughIcon, SubscriptIcon, SuperscriptIcon, SymbolsIcon, TextTypeIcon, TodoListDoubleIcon, UnderlineIcon, UnorderIcon } from '@univerjs/icons';
+import { AddImageIcon, AlignTextBothIcon, BoldIcon, ColumnIcon, CopyDoubleIcon, CutIcon, DeleteColumnDoubleIcon, DeleteIcon, DeleteRowDoubleIcon, DeleteTableDoubleIcon, DocSettingIcon, FontColorDoubleIcon, GridIcon, H1Icon, H2Icon, H3Icon, H4Icon, H5Icon, HeaderFooterIcon, HorizontallyIcon, InsertDoubleIcon, InsertRowAboveDoubleIcon, InsertRowBelowDoubleIcon, ItalicIcon, KeyboardIcon, LeftInsertColumnDoubleIcon, LeftJustifyingIcon, LineIndentDecreaseIcon, LineIndentIncreaseIcon, MenuIcon, MoreLeftIcon, MoreRightIcon, NoColorDoubleIcon, OrderIcon, PaintBucketDoubleIcon, ParagraphSettingIcon, PasteSpecialDoubleIcon, ReduceDoubleIcon, ReduceIcon, RightInsertColumnDoubleIcon, RightJustifyingIcon, SectionSettingIcon, ShapeIcon, SmileIcon, StrikethroughIcon, SubscriptIcon, SuperscriptIcon, SymbolsIcon, TextTypeIcon, TodoListDoubleIcon, UnderlineIcon, UnorderIcon } from '@univerjs/icons';
 import { ComponentManager, IconManager } from '@univerjs/ui';
 import { DOC_LAYOUT_RECOVERY_COMPONENT, DocLayoutRecovery } from '../../views/DocLayoutRecovery';
 import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../../views/header-footer/panel/component-name';
 import { DefaultTextColorIcon, DocParagraphBackgroundColorSwatchIcon0, DocParagraphBackgroundColorSwatchIcon1, DocParagraphBackgroundColorSwatchIcon10, DocParagraphBackgroundColorSwatchIcon11, DocParagraphBackgroundColorSwatchIcon12, DocParagraphBackgroundColorSwatchIcon13, DocParagraphBackgroundColorSwatchIcon14, DocParagraphBackgroundColorSwatchIcon15, DocParagraphBackgroundColorSwatchIcon2, DocParagraphBackgroundColorSwatchIcon3, DocParagraphBackgroundColorSwatchIcon4, DocParagraphBackgroundColorSwatchIcon5, DocParagraphBackgroundColorSwatchIcon6, DocParagraphBackgroundColorSwatchIcon7, DocParagraphBackgroundColorSwatchIcon8, DocParagraphBackgroundColorSwatchIcon9, DocParagraphTextColorSwatchIcon0, DocParagraphTextColorSwatchIcon1, DocParagraphTextColorSwatchIcon2, DocParagraphTextColorSwatchIcon3, DocParagraphTextColorSwatchIcon4, DocParagraphTextColorSwatchIcon5, DocParagraphTextColorSwatchIcon6, HeaderTextColorIcon, SubtitleTypeIcon, TitleTypeIcon } from '../../views/Icon';
-import { BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker, ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker } from '../../views/list-type-picker/index';
+import { BULLET_LIST_TYPE_COMPONENT, ORDER_LIST_TYPE_COMPONENT } from '../../views/list-type-picker/index';
+import { BulletListTypePicker, OrderListTypePicker } from '../../views/list-type-picker/Picker';
 import { MOBILE_DOC_ELEMENT_MENU, MobileDocElementMenuPopup } from '../../views/mobile-element-menu/MobileDocElementMenu';
 import { MobileHeaderFooterPanel, MobilePageSettings, MobileParagraphSettings, MobileSectionSettings } from '../../views/mobile/MobileDocSettings';
 import { PAGE_SETTING_COMPONENT_ID } from '../../views/PageSettings';
@@ -81,11 +82,13 @@ export class MobileComponentsController extends Disposable {
             NoColorDoubleIcon,
             OrderIcon,
             PaintBucketDoubleIcon,
+            ParagraphSettingIcon,
             PasteSpecialDoubleIcon,
             ReduceDoubleIcon,
             ReduceIcon,
             RightInsertColumnDoubleIcon,
             RightJustifyingIcon,
+            SectionSettingIcon,
             ShapeIcon,
             SmileIcon,
             StrikethroughIcon,

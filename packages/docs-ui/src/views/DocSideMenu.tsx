@@ -16,20 +16,23 @@
 
 import type { DocumentDataModel, IParagraph } from '@univerjs/core';
 import type { IUniverDocsUIConfig } from '../config/config';
+import type { LocaleKey } from '../locale/types';
 import type { IMutiPageParagraphBound } from '../services/doc-event-manager.service';
 import type { ISideMenuItem } from './SideMenu';
 import {
     fromEventSubject,
+    getParagraphContentStartOffsets,
     getPlainText,
     isInternalEditorID,
     IUniverInstanceService,
+    LocaleService,
     NamedStyleType,
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IWorkbenchService, useConfigValue, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useState } from 'react';
-import { debounceTime, map, startWith, throttleTime } from 'rxjs';
+import { auditTime, debounceTime, map, merge, startWith, throttleTime } from 'rxjs';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
 import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../config/config';
 import { DocEventManagerService } from '../services/doc-event-manager.service';
@@ -97,6 +100,7 @@ export function DocSideMenu() {
 
 function DocSideMenuContent() {
     const instanceService = useDependency(IUniverInstanceService);
+    const localeService = useDependency(LocaleService);
     const currentDoc = useObservable(
         () => instanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC),
         undefined,
@@ -125,12 +129,16 @@ function DocSideMenuContent() {
     const readLayout = () => ({
         left: renderer?.mainComponent?.left ?? 0,
         canvasHeight: renderer?.engine.height ?? 0,
+        canvasWidth: renderer?.engine.width ?? 0,
         scaleY: renderer?.scene.scaleY ?? 1,
     });
     const layout = useObservable(
         renderer?.engine.onTransformChange$
-            ? () => fromEventSubject(renderer.engine.onTransformChange$).pipe(
-                throttleTime(33),
+            ? () => merge(
+                fromEventSubject(renderer.engine.onTransformChange$),
+                ...(renderer.mainComponent ? [fromEventSubject(renderer.mainComponent.onTransformChange$)] : [])
+            ).pipe(
+                auditTime(33),
                 map(readLayout),
                 startWith(readLayout())
             )
@@ -139,9 +147,10 @@ function DocSideMenuContent() {
         false,
         [renderer]
     );
-    const { left, canvasHeight, scaleY } = layout;
+    const { left, canvasHeight, canvasWidth, scaleY } = layout;
 
     const paragraphs = useMemo(() => documentData?.body?.paragraphs ?? [], [documentData?.body?.paragraphs]);
+    const paragraphStarts = useMemo(() => getParagraphContentStartOffsets({ dataStream: fullDataStream, paragraphs }), [fullDataStream, paragraphs]);
     const paragraphMap = useMemo(() => {
         const map = new Map<number, IParagraph>();
         paragraphs.forEach((p) => {
@@ -149,7 +158,7 @@ function DocSideMenuContent() {
         });
         return map;
     }, [paragraphs]);
-    const mode = left < 180 ? 'float' : 'side-bar';
+    const mode = left < 240 ? 'float' : 'side-bar';
     const paragraphMenus = paragraphs
         ?.filter((p) =>
             p.paragraphStyle?.namedStyleType !== undefined &&
@@ -158,13 +167,9 @@ function DocSideMenuContent() {
         )
         .map((p) => {
             const level = transformNamedStyleTypeToLevel(p.paragraphStyle!.namedStyleType!);
-            const bound = paragraphBounds?.get(p.startIndex);
-            if (!bound) return null;
-            const { paragraphStart, paragraphEnd } = bound;
-
             return {
                 id: p.paragraphStyle!.headingId!,
-                text: getPlainText(fullDataStream.slice(paragraphStart, paragraphEnd)),
+                text: getPlainText(fullDataStream.slice(paragraphStarts.get(p.startIndex)!, p.startIndex)),
                 level,
                 isTitle: p.paragraphStyle?.namedStyleType === NamedStyleType.TITLE,
             };
@@ -217,6 +222,7 @@ function DocSideMenuContent() {
 
         if (menu.id === TITLE_ID) {
             viewport.scrollToViewportPos({ viewportScrollY: 0 });
+            setActiveId(menu.id);
             return;
         }
         const paragraph = paragraphs.find((p) => p.paragraphStyle?.headingId === menu.id);
@@ -241,15 +247,16 @@ function DocSideMenuContent() {
             className="univer-absolute univer-bottom-0 univer-left-0 univer-top-0 univer-z-[100] univer-w-[0px]"
         >
             <SideMenu
+                label={localeService.t<LocaleKey>('docs-ui.outline.title')}
                 menus={menus}
                 open={open}
                 onOpenChange={setOpen}
                 mode={mode}
-                maxWidth={mode === 'float' ? undefined : Math.floor(left) - 10}
-                wrapperClass="univer-mt-12"
+                maxWidth={Math.max(0, Math.floor(mode === 'float' ? canvasWidth : left) - 24)}
+                wrapperClass="univer-mt-4"
                 activeId={activeId}
                 onClick={handleClick}
-                maxHeight={canvasHeight - 48}
+                maxHeight={Math.max(0, canvasHeight - 32)}
             />
         </div>
     );

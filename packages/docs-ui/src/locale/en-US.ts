@@ -16,6 +16,9 @@
 
 const locale = {
     'docs-ui': {
+        outline: {
+            title: 'Outline',
+        },
         objectPermission: {
             paragraphPermission: 'Permissions',
             title: 'Permissions',

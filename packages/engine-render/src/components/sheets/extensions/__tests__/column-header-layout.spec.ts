@@ -149,6 +149,34 @@ describe('column header layout extension', () => {
         expect(ctx.fillText).toHaveBeenCalledTimes(compressedColumnCount + 1);
     });
 
+    it('clips default column labels to their header cells', () => {
+        const layout = new ColumnHeaderLayout({
+            columnsCfg: {
+                0: 'AA',
+                1: 'AB',
+            },
+        });
+        const ctx = createCtx();
+        const skeleton = {
+            rowColumnSegment: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 1 },
+            columnHeaderHeight: 20,
+            rowHeightAccumulation: [20],
+            columnWidthAccumulation: [8, 16],
+            columnTotalWidth: 16,
+            rowTotalHeight: 20,
+            worksheet: {
+                getSheetId: vi.fn(() => 'sheet-main'),
+            },
+        } as any;
+
+        layout.draw(ctx, { scaleX: 1, scaleY: 1 } as any, skeleton);
+
+        expect(ctx.fillText).toHaveBeenCalledTimes(2);
+        expect(ctx.rectByPrecision).toHaveBeenNthCalledWith(1, 0, 0, 8, 20);
+        expect(ctx.rectByPrecision).toHaveBeenNthCalledWith(2, 8, 0, 8, 20);
+        expect(ctx.clip).toHaveBeenCalledTimes(2);
+    });
+
     it('uses gapConfig default colors when drawing column gaps', () => {
         const layout = new ColumnHeaderLayout();
         const ctx = createCtx();

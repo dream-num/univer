@@ -242,18 +242,16 @@ export class ColumnHeaderLayout extends SheetExtension {
             })();
             const middleYCellRect = cellBound.height / 2 + MIDDLE_CELL_POS_MAGIC_NUMBER; // Magic number 1, because the vertical alignment appears to be off by 1 pixel
 
+            ctx.save();
+            ctx.beginPath();
             if (specStyle) {
-                ctx.save();
-                ctx.beginPath();
                 this.setStyleToCtx(ctx, curColumnCfg);
-                ctx.rectByPrecision(cellBound.left, cellBound.top, cellBound.width, cellBound.height);
-                ctx.clip();
             }
 
+            ctx.rectByPrecision(cellBound.left, cellBound.top, cellBound.width, cellBound.height);
+            ctx.clip();
             ctx.fillText(curColumnCfg.text, textX, middleYCellRect);
-            if (specStyle) {
-                ctx.restore();
-            }
+            ctx.restore();
 
             preColumnPosition = columnEndPosition;
         }

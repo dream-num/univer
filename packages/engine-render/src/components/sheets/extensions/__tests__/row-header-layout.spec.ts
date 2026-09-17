@@ -150,6 +150,34 @@ describe('row header layout extension', () => {
         expect(ctx.fillText).toHaveBeenCalledTimes(compressedRowCount + 1);
     });
 
+    it('clips default row labels to their header cells', () => {
+        const layout = new RowHeaderLayout({
+            rowsCfg: {
+                0: '10',
+                1: '11',
+            },
+        });
+        const ctx = createCtx();
+        const skeleton = {
+            rowColumnSegment: { startRow: 0, endRow: 1, startColumn: 0, endColumn: 0 },
+            rowHeaderWidth: 30,
+            rowHeightAccumulation: [8, 16],
+            columnWidthAccumulation: [30],
+            columnTotalWidth: 30,
+            rowTotalHeight: 16,
+            worksheet: {
+                getSheetId: vi.fn(() => 'sheet-main'),
+            },
+        } as any;
+
+        layout.draw(ctx, { scaleX: 1, scaleY: 1 } as any, skeleton);
+
+        expect(ctx.fillText).toHaveBeenCalledTimes(2);
+        expect(ctx.rectByPrecision).toHaveBeenNthCalledWith(1, 0, 0, 30, 8);
+        expect(ctx.rectByPrecision).toHaveBeenNthCalledWith(2, 0, 8, 30, 8);
+        expect(ctx.clip).toHaveBeenCalledTimes(2);
+    });
+
     it('uses gapConfig default colors when drawing row gaps', () => {
         const layout = new RowHeaderLayout();
         const ctx = createCtx();

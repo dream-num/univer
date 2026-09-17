@@ -191,4 +191,28 @@ describe('SheetsDataValidationValidatorService', () => {
 
         service.dispose();
     });
+
+    it('limits validation and rule lookup to the worksheet bounds', async () => {
+        const { service, model } = createService();
+        const oversizedRange = { startRow: 0, endRow: 1048575, startColumn: 0, endColumn: 16383 };
+        const getValue = vi.fn(() => undefined);
+        model.getRules = vi.fn(() => [createRule('rule-1', [oversizedRange])]);
+        model.getRuleObjectMatrix = vi.fn(() => ({ getValue }) as never);
+
+        await service.validatorRanges('unit-1', 'sheet-1', [oversizedRange]);
+        expect(model.validator).toHaveBeenCalledTimes(400);
+
+        model.validator = vi.fn((_rule: IDataValidationRule, _pos: ISheetLocation, onComplete?: (status: DataValidationStatus, changed: boolean) => void) => {
+            onComplete?.(DataValidationStatus.INVALID, true);
+            return DataValidationStatus.INVALID;
+        });
+        await service.validatorWorksheet('unit-1', 'sheet-1');
+        expect(model.validator).toHaveBeenCalledTimes(400);
+
+        service.getDataValidations('unit-1', 'sheet-1', [oversizedRange]);
+        expect(getValue).toHaveBeenCalledTimes(400);
+
+        await expect(service.validatorRanges('unit-1', 'sheet-1', [{ startRow: 20, endRow: 30, startColumn: 20, endColumn: 30 }])).resolves.toEqual([]);
+        service.dispose();
+    });
 });

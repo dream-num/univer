@@ -18,7 +18,13 @@ import type { IDataValidationRule, IRange, Nullable } from '@univerjs/core';
 import type { IAddSheetDataValidationCommandParams, IClearRangeDataValidationCommandParams } from '@univerjs/sheets-data-validation';
 import type { IDataValidationError } from './f-workbook';
 import { DataValidationStatus } from '@univerjs/core';
-import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+import {
+    AddSheetDataValidationCommand,
+    ClearRangeDataValidationCommand,
+    getRangesInWorksheet,
+    SheetDataValidationModel,
+    SheetsDataValidationValidatorService,
+} from '@univerjs/sheets-data-validation';
 import { FRange } from '@univerjs/sheets/facade';
 import { FDataValidation } from './f-data-validation';
 
@@ -246,7 +252,7 @@ export class FRangeSheetsDataValidationMixin extends FRange implements IFRangeSh
         const sheetName = worksheet.getName();
         const errors: IDataValidationError[] = [];
 
-        for (const range of ranges) {
+        for (const range of getRangesInWorksheet(ranges, worksheet)) {
             const promises: Promise<void>[] = [];
 
             for (let row = range.startRow; row <= range.endRow; row++) {

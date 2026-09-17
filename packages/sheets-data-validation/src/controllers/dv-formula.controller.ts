@@ -20,6 +20,7 @@ import { Disposable, Inject, IPermissionService, IUniverInstanceService, UniverI
 import { deserializeRangeWithSheetWithCache, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { UnitAction } from '@univerjs/protocol';
 import { WorksheetViewPermission } from '@univerjs/sheets';
+import { getRangeInWorksheet } from '../utils/range';
 
 export class DataValidationFormulaController extends Disposable {
     constructor(
@@ -57,7 +58,11 @@ export class DataValidationFormulaController extends Disposable {
             if (!targetSheet) {
                 return false;
             }
-            const { startRow, endRow, startColumn, endColumn } = sequenceGrid.range;
+            const range = getRangeInWorksheet(sequenceGrid.range, targetSheet);
+            if (!range) {
+                continue;
+            }
+            const { startRow, endRow, startColumn, endColumn } = range;
             for (let i = startRow; i <= endRow; i++) {
                 for (let j = startColumn; j <= endColumn; j++) {
                     const permission = (targetSheet.getCell(i, j) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];

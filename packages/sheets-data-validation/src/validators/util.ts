@@ -20,14 +20,25 @@ import type { ISheetLocationBase } from '@univerjs/sheets';
 import { isFormulaString, Range, UniverInstanceType } from '@univerjs/core';
 import { deserializeListOptions } from '@univerjs/sheets';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
+import { getRangeInWorksheet } from '../utils/range';
 
 export function getSheetRangeValueSet(grid: IUnitRangeName, univerInstanceService: IUniverInstanceService, currUnitId: string, currSubUnitId: string) {
     const set = new Set<string>();
     const unitId = grid.unitId || currUnitId;
-    const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET) ?? univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET) ?? univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+    if (!workbook) {
+        return [];
+    }
     const worksheet = workbook.getSheetBySheetName(grid.sheetName) ?? workbook.getSheetBySheetId(currSubUnitId) ?? workbook.getActiveSheet();
-    Range.foreach(grid.range, (row, col) => {
-        const data = worksheet?.getCellRaw(row, col);
+    if (!worksheet) {
+        return [];
+    }
+    const range = getRangeInWorksheet(grid.range, worksheet);
+    if (!range) {
+        return [];
+    }
+    Range.foreach(range, (row, col) => {
+        const data = worksheet.getCellRaw(row, col);
         if (!data) {
             return;
         }

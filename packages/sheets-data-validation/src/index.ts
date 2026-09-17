@@ -49,6 +49,7 @@ export { createDefaultNewRule } from './utils/create';
 export { getFormulaCellData, getFormulaResult } from './utils/formula';
 export { isLegalFormulaResult } from './utils/formula';
 export { getCellValueOrigin } from './utils/get-cell-data-origin';
+export { getRangesInWorksheet } from './utils/range';
 export {
     CHECKBOX_FORMULA_1,
     CHECKBOX_FORMULA_2,

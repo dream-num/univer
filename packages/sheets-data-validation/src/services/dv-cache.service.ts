@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DataValidationStatus, IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
+import type { DataValidationStatus, IRange, ISheetDataValidationRule, Nullable, Workbook } from '@univerjs/core';
 import type { IRemoveSheetMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import {
     Disposable,
@@ -29,6 +29,7 @@ import {
 import { DataValidationModel } from '@univerjs/data-validation';
 import { RemoveSheetMutation, SetRangeValuesMutation } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
+import { getRangesInWorksheet } from '../utils/range';
 
 export class DataValidationCacheService extends Disposable {
     private _cacheMatrix: Map<string, Map<string, ObjectMatrix<Nullable<DataValidationStatus>>>> = new Map();
@@ -119,9 +120,21 @@ export class DataValidationCacheService extends Disposable {
         this._deleteRange(unitId, subUnitId, rule.ranges);
     }
 
+    private _getEffectiveRanges(unitId: string, subUnitId: string, ranges: IRange[]) {
+        const worksheet = this._univerInstanceService
+            .getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
+            ?.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return [];
+        }
+
+        return getRangesInWorksheet(ranges, worksheet);
+    }
+
     markRangeDirty(unitId: string, subUnitId: string, ranges: IRange[], isSetRange?: boolean) {
         const cache = this._ensureCache(unitId, subUnitId);
-        ranges.forEach((range) => {
+        const effectiveRanges = this._getEffectiveRanges(unitId, subUnitId, ranges);
+        effectiveRanges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 if (cache.getValue(row, col) !== undefined) {
                     cache.setValue(row, col, undefined);
@@ -134,7 +147,8 @@ export class DataValidationCacheService extends Disposable {
 
     private _deleteRange(unitId: string, subUnitId: string, ranges: IRange[]) {
         const cache = this._ensureCache(unitId, subUnitId);
-        ranges.forEach((range) => {
+        const effectiveRanges = this._getEffectiveRanges(unitId, subUnitId, ranges);
+        effectiveRanges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 cache.realDeleteValue(row, col);
             });

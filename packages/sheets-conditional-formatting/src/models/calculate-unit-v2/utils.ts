@@ -21,6 +21,7 @@ import { BooleanNumber, CellValueType, ColorKit, DateSystem, excelSerialToDateTi
 import { BooleanValue, FormulaResultStatus } from '@univerjs/engine-formula';
 import { CFNumberOperator, CFValueType } from '../../base/const';
 import { ConditionalFormattingFormulaService } from '../../services/conditional-formatting-formula.service';
+import { getRangesInWorksheet } from '../../utils/range';
 import { ConditionalFormattingViewModel } from '../conditional-formatting-view-model';
 
 export function isFloatsEqual(a: number, b: number) {
@@ -143,7 +144,7 @@ export const getCacheStyleMatrix = <S = any>(unitId: string, subUnitId: string, 
     const { accessor } = context;
     const conditionalFormattingViewModel = accessor.get(ConditionalFormattingViewModel);
     const matrix = new ObjectMatrix<S>();
-    rule.ranges.forEach((range) => {
+    getRangesInWorksheet(rule.ranges, context.worksheet).forEach((range) => {
         Range.foreach(range, (row, col) => {
             const cellCfItem = conditionalFormattingViewModel.getCellCfs(unitId, subUnitId, row, col);
             if (cellCfItem) {
@@ -262,12 +263,17 @@ export const getColorScaleFromValue = (colorList: { color: ColorKit; value: numb
 
 export const filterRange = (ranges: IRange[], maxRow: number, maxCol: number): IRange[] => {
     return ranges.map((range) => {
-        if (range.startColumn > maxCol || range.startRow > maxRow) {
+        if (range.startColumn > maxCol || range.startRow > maxRow || range.endColumn < 0 || range.endRow < 0) {
             return null as unknown as IRange;
         }
         const _range = { ...range };
+        _range.startRow = Math.max(_range.startRow, 0);
+        _range.startColumn = Math.max(_range.startColumn, 0);
         _range.endRow = Math.min(_range.endRow, maxRow);
         _range.endColumn = Math.min(_range.endColumn, maxCol);
+        if (_range.startRow > _range.endRow || _range.startColumn > _range.endColumn) {
+            return null as unknown as IRange;
+        }
         return _range;
     }).filter((range) => !!range);
 };

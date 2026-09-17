@@ -52,8 +52,10 @@ describe('conditional formatting calculate utilities', () => {
         expect(filterRange([
             { startRow: 0, startColumn: 0, endRow: 10, endColumn: 10 },
             { startRow: 100, startColumn: 0, endRow: 101, endColumn: 1 },
+            { startRow: -2, startColumn: -3, endRow: 1, endColumn: 2 },
         ], 5, 6)).toEqual([
             { startRow: 0, startColumn: 0, endRow: 5, endColumn: 6 },
+            { startRow: 0, startColumn: 0, endRow: 1, endColumn: 2 },
         ]);
     });
 
@@ -148,6 +150,10 @@ describe('conditional formatting calculate utilities', () => {
                         },
                     };
                 },
+            },
+            worksheet: {
+                getMaxRows: () => 2,
+                getMaxColumns: () => 2,
             },
         } as any);
         expect(matrix.getValue(0, 0)).toBe('hit');

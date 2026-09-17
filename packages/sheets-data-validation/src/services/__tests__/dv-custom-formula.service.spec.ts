@@ -52,7 +52,15 @@ describe('DataValidationCustomFormulaService', () => {
             markRangeDirty: vi.fn(),
         } as unknown as DataValidationCacheService;
         const service = new DataValidationCustomFormulaService(
-            { getUnitType: vi.fn(() => UniverInstanceType.UNIVER_SHEET) } as unknown as IUniverInstanceService,
+            {
+                getUnitType: vi.fn(() => UniverInstanceType.UNIVER_SHEET),
+                getUnit: vi.fn(() => ({
+                    getSheetBySheetId: vi.fn(() => ({
+                        getMaxRows: () => 20,
+                        getMaxColumns: () => 20,
+                    })),
+                })),
+            } as unknown as IUniverInstanceService,
             registerOtherFormulaService,
             dataValidationModel,
             cacheService,
@@ -96,6 +104,64 @@ describe('DataValidationCustomFormulaService', () => {
         service.deleteByRuleId('unit-1', 'sheet-1', 'rule-1');
         expect(registerOtherFormulaService.deleteFormula).toHaveBeenCalledWith('unit-1', 'sheet-1', ['rule-1-=A1']);
         expect(registerOtherFormulaService.deleteFormula).toHaveBeenCalledWith('unit-1', 'sheet-1', ['rule-1-=B1']);
+
+        service.dispose();
+    });
+
+    it('clips formula registration ranges to the worksheet and skips ranges outside it', () => {
+        const registerFormulaWithRange = vi.fn(() => 'formula-1');
+        const service = new DataValidationCustomFormulaService(
+            {
+                getUnitType: vi.fn(() => UniverInstanceType.UNIVER_SHEET),
+                getUnit: vi.fn(() => ({
+                    getSheetBySheetId: vi.fn(() => ({
+                        getMaxRows: () => 20,
+                        getMaxColumns: () => 10,
+                    })),
+                })),
+            } as unknown as IUniverInstanceService,
+            {
+                formulaResult$: new Subject<any>(),
+                registerFormulaWithRange,
+                deleteFormula: vi.fn(),
+                getFormulaValue: vi.fn(),
+                getFormulaValueSync: vi.fn(),
+                markFormulaDirty: vi.fn(),
+            } as unknown as RegisterOtherFormulaService,
+            {
+                getRuleById: vi.fn(),
+                getRules: vi.fn(() => []),
+            } as unknown as DataValidationModel,
+            {
+                dirtyRanges$: new Subject<any>(),
+                markRangeDirty: vi.fn(),
+            } as unknown as DataValidationCacheService,
+            { getValidatorItem: vi.fn(() => ({ offsetFormulaByRange: true })) } as unknown as DataValidatorRegistryService
+        );
+
+        service.addRule('unit-1', 'sheet-1', {
+            uid: 'rule-1',
+            type: DataValidationType.DATE,
+            formula1: '=A1',
+            ranges: [{ startRow: 0, endRow: 1048575, startColumn: 0, endColumn: 16383 }],
+        } as any);
+        service.addRule('unit-1', 'sheet-1', {
+            uid: 'rule-2',
+            type: DataValidationType.DATE,
+            formula1: '=A1',
+            ranges: [{ startRow: 20, endRow: 30, startColumn: 10, endColumn: 20 }],
+        } as any);
+
+        expect(registerFormulaWithRange).toHaveBeenCalledTimes(1);
+        expect(registerFormulaWithRange).toHaveBeenCalledWith(
+            'unit-1',
+            'sheet-1',
+            '=A1',
+            [{ startRow: 0, endRow: 19, startColumn: 0, endColumn: 9 }],
+            { ruleId: 'rule-1' },
+            OtherFormulaBizType.DATA_VALIDATION_CUSTOM,
+            'rule-1'
+        );
 
         service.dispose();
     });

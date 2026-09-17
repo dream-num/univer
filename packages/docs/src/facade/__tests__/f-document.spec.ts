@@ -30,8 +30,9 @@ import {
     SectionType,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, InsertTextCommand } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { InsertTextCommand } from '../../commands/commands/core-editing.command';
+import { DocSelectionManagerService } from '../../services/doc-selection-manager.service';
 import { createDocumentData, createSimpleDocument, createTestBed } from './create-test-bed';
 
 describe('FDocument', () => {
@@ -98,6 +99,24 @@ describe('FDocument', () => {
         expect(document.appendParagraph('Line 1').getText()).toBe('Line 1');
         expect(document.appendParagraph('Line 2').getText()).toBe('Line 2');
         expect(document.save().body?.dataStream).toBe('Hello,\rLine 1\rLine 2\r\n');
+    });
+
+    it.each(['DOC_WORD_STYLES_PLUGIN', 'DOC_NOTE_PLUGIN'])('preserves %s through editing, save and reopening', (name) => {
+        univer.dispose();
+        const data = createSimpleDocument('word-metadata');
+        const resource = {
+            name,
+            data: JSON.stringify({ stylesXml: '<styles/>', coreProperties: { xml: '<core/>', sourceName: 'Imported' } }),
+        };
+        data.resources = [resource];
+        createDocumentFacade(data);
+        expect(document.insertText(0, 'Edited ')).toBe(true);
+        const saved = document.save();
+        expect(saved.resources?.find((item) => item.name === resource.name)).toEqual(resource);
+        expect(saved.body?.dataStream).toContain('Edited ');
+        univer.dispose();
+        createDocumentFacade(saved);
+        expect(document.save().resources?.find((item) => item.name === resource.name)).toEqual(resource);
     });
 
     it('includes current document resources in saved snapshots', () => {

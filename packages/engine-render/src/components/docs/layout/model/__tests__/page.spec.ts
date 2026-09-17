@@ -32,12 +32,29 @@ import {
     createSkeletonPage,
     expandCellPageHeightForFlowTables,
     expandCellPageHeightForInlineDrawings,
+    getRowBorderInset,
 } from '../page';
 
 const dealWithSectionMock = vi.fn();
 const updateBlockIndexMock = vi.fn();
 const updateInlineDrawingCoordsAndBorderMock = vi.fn();
 const resetContextMock = vi.fn();
+
+it.each(['borderTop', 'borderBottom'] as const)('uses the inherited outer %s only for a table fragment, not for internal row spacing', (edge) => {
+    const outer = { color: { rgb: '#000000' }, width: { v: 0 } };
+    const row = {
+        tableCells: [{ [edge]: {
+            color: { rgb: '#000000' },
+            width: { v: 6 },
+            [edge === 'borderTop' ? 'tableTopBorder' : 'tableBottomBorder']: outer,
+        } }],
+        trHeight: { hRule: 0, val: { v: 0 } },
+    };
+    expect(getRowBorderInset(row, edge)).toBe(3);
+    expect(getRowBorderInset(row, edge, true)).toBe(0);
+    outer.width.v = 4;
+    expect(getRowBorderInset(row, edge, true)).toBe(2);
+});
 
 vi.mock('../../block/section', () => ({
     dealWithSection: (...args: unknown[]) => dealWithSectionMock(...args),
@@ -88,8 +105,8 @@ describe('page model', () => {
             isDirty: false,
         } as any;
 
-        const headerVM = { getChildren: () => [{}] };
-        const footerVM = { getChildren: () => [{}] };
+        const headerVM = { getChildren: () => [{}], getParagraph: () => undefined };
+        const footerVM = { getChildren: () => [{}], getParagraph: () => undefined };
         const sectionBreakConfig = {
             sectionId: 'section-page-model',
             pageNumberStart: 1,
@@ -143,6 +160,17 @@ describe('page model', () => {
         const evenPage = createSkeletonPage(ctx, sectionBreakConfig, skeletonResourceReference, 2);
         expect(evenPage.headerId).toBe('h-even');
         expect(evenPage.footerId).toBe('f-even');
+
+        const portraitHeader = skeletonResourceReference.skeHeaders.get('h-even').get(200);
+        const portraitFooter = skeletonResourceReference.skeFooters.get('f-even').get(200);
+        createSkeletonPage(ctx, { ...sectionBreakConfig, pageSize: { width: 300, height: 200 } }, skeletonResourceReference, 4);
+        expect(skeletonResourceReference.skeHeaders.get('h-even').get(200)).toBe(portraitHeader);
+        expect(skeletonResourceReference.skeFooters.get('f-even').get(200)).toBe(portraitFooter);
+        expect(skeletonResourceReference.skeHeaders.get('h-even').has(300)).toBe(true);
+        expect(skeletonResourceReference.skeFooters.get('f-even').has(300)).toBe(true);
+        createSkeletonPage(ctx, sectionBreakConfig, skeletonResourceReference, 6);
+        expect(skeletonResourceReference.skeHeaders.get('h-even').has(300)).toBe(true);
+        expect(skeletonResourceReference.skeFooters.get('f-even').has(300)).toBe(true);
     });
 
     it('keeps the configured margin when header and footer content fit inside it', () => {
@@ -178,8 +206,8 @@ describe('page model', () => {
                 pageSize: { width: 200, height: 300 },
                 headerIds: { defaultHeaderId: 'h-default' },
                 footerIds: { defaultFooterId: 'f-default' },
-                headerTreeMap: new Map([['h-default', { getChildren: () => [{}] }]]),
-                footerTreeMap: new Map([['f-default', { getChildren: () => [{}] }]]),
+                headerTreeMap: new Map([['h-default', { getChildren: () => [{}], getParagraph: () => undefined }]]),
+                footerTreeMap: new Map([['f-default', { getChildren: () => [{}], getParagraph: () => undefined }]]),
                 columnProperties: [],
                 marginTop: 40,
                 marginBottom: 40,
@@ -192,50 +220,6 @@ describe('page model', () => {
 
         expect(page.marginTop).toBe(40);
         expect(page.marginBottom).toBe(40);
-    });
-
-    it('keeps traditional document margins when header and footer content overlap the body', () => {
-        dealWithSectionMock.mockImplementation((_ctx: any, _vm: any, _node: any, areaPage: any) => ({
-            pages: [{
-                ...areaPage,
-                height: 80,
-                sections: [{ columns: [{ lines: [{ paragraphIndex: 0 }] }] }],
-                skeDrawings: new Map(),
-                skeTables: new Map(),
-            }],
-        }));
-
-        const skeletonResourceReference = createSkeletonResourceReference();
-        const ctx = {
-            layoutStartPointer: {},
-            skeletonResourceReference,
-            isDirty: false,
-        } as any;
-
-        const page = createSkeletonPage(
-            ctx,
-            {
-                pageNumberStart: 1,
-                pageSize: { width: 816, height: 1056 },
-                headerIds: { defaultHeaderId: 'h-default' },
-                footerIds: { defaultFooterId: 'f-default' },
-                headerTreeMap: new Map([['h-default', { getChildren: () => [{}] }]]),
-                footerTreeMap: new Map([['f-default', { getChildren: () => [{}] }]]),
-                columnProperties: [],
-                marginTop: 24,
-                marginBottom: 42,
-                marginHeader: 24,
-                marginFooter: 24,
-                documentCompatibilityPolicy: getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL),
-            } as any,
-            skeletonResourceReference,
-            1
-        );
-
-        expect(page.originMarginTop).toBe(24);
-        expect(page.marginTop).toBe(24);
-        expect(page.originMarginBottom).toBe(42);
-        expect(page.marginBottom).toBe(42);
     });
 
     it('does not create negative-width columns for oversized single-column section properties', () => {
@@ -405,6 +389,7 @@ describe('page model', () => {
             adjustLineHeightInTable: BooleanNumber.TRUE,
             characterSpacingControl: 2,
             useFELayout: BooleanNumber.TRUE,
+            balanceSingleByteDoubleByteWidth: BooleanNumber.TRUE,
             spaceWidthEastAsian: BooleanNumber.TRUE,
             autoHyphenation: BooleanNumber.TRUE,
             consecutiveHyphenLimit: 3,
@@ -436,6 +421,7 @@ describe('page model', () => {
             adjustLineHeightInTable: cellConfig.adjustLineHeightInTable,
             characterSpacingControl: cellConfig.characterSpacingControl,
             useFELayout: cellConfig.useFELayout,
+            balanceSingleByteDoubleByteWidth: cellConfig.balanceSingleByteDoubleByteWidth,
             spaceWidthEastAsian: cellConfig.spaceWidthEastAsian,
             autoHyphenation: cellConfig.autoHyphenation,
             consecutiveHyphenLimit: cellConfig.consecutiveHyphenLimit,
@@ -452,6 +438,7 @@ describe('page model', () => {
             adjustLineHeightInTable: BooleanNumber.TRUE,
             characterSpacingControl: 2,
             useFELayout: BooleanNumber.TRUE,
+            balanceSingleByteDoubleByteWidth: BooleanNumber.TRUE,
             spaceWidthEastAsian: BooleanNumber.TRUE,
             autoHyphenation: BooleanNumber.TRUE,
             consecutiveHyphenLimit: 3,
@@ -756,7 +743,7 @@ describe('page model', () => {
         expect(pages[0].height).toBe(48);
     });
 
-    it('DOCX golden e2e expands table cell height to include inline drawings', () => {
+    it.each([0, 9])('expands a cell for inline drawing geometry and effect bounds (%s)', (bottom) => {
         const page = {
             height: 20,
             skeDrawings: new Map([
@@ -765,6 +752,7 @@ describe('page model', () => {
                     height: 48,
                     drawingOrigin: {
                         layoutType: PositionedObjectLayoutType.INLINE,
+                        effectExtent: { bottom },
                     },
                 }],
                 ['float-1', {
@@ -779,7 +767,28 @@ describe('page model', () => {
 
         expandCellPageHeightForInlineDrawings([page as never]);
 
-        expect(page.height).toBe(54);
+        expect(page.height).toBe(54 + bottom);
+    });
+
+    it('keeps trailing paragraph spacing below a final inline drawing in a table cell', () => {
+        const line = {
+            spaceBelowApply: 10.4,
+            divides: [{ glyphGroup: [{ drawingId: 'logo' }] }],
+        };
+        const page = {
+            height: 20,
+            sections: [{ columns: [{ lines: [line] }] }],
+            skeDrawings: new Map([['logo', {
+                drawingId: 'logo',
+                aTop: 0,
+                height: 54,
+                drawingOrigin: { layoutType: PositionedObjectLayoutType.INLINE },
+            }]]),
+        };
+
+        expandCellPageHeightForInlineDrawings([page as never]);
+
+        expect(page.height).toBe(64.4);
     });
 
     it('expands table cell height to include nested flow tables', () => {

@@ -179,6 +179,7 @@ export {
     BackgroundColorSelectorMenuItemFactory,
     BoldMenuItemFactory,
     disableMenuWhenHeaderFooterEditing,
+    disableMenuWithoutDocumentUnitPermission,
     FLOAT_TEXT_STYLE_MENU_ID,
     FLOAT_TOOLBAR_MENU_POSITION,
     FloatTextStyleMenuItemFactory,
@@ -236,6 +237,7 @@ export { convertBodyToHtml } from './services/clipboard/udm-to-html/convertor';
 export { DocHtmlExportService } from './services/clipboard/udm-to-html/doc-html-export.service';
 export type { DocHtmlExportTransformer } from './services/clipboard/udm-to-html/doc-html-export.service';
 export { DocAutoFormatService } from './services/doc-auto-format.service';
+export { DocContextualRibbonService } from './services/doc-contextual-ribbon.service';
 export {
     DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
     IDocEmbedInteractionBoundaryService,
@@ -268,6 +270,7 @@ export {
     isValidRectRange,
     NodePositionConvertToRectRange,
 } from './services/selection/convert-rect-range';
+export { findDocRangeNodePositions } from './services/selection/convert-text-range';
 export { NodePositionConvertToCursor } from './services/selection/convert-text-range';
 export { getOneTextSelectionRange } from './services/selection/convert-text-range';
 export type { IEditorInputConfig } from './services/selection/doc-selection-render.service';

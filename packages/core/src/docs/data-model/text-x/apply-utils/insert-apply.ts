@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody } from '../../../../types/interfaces';
-import { insertTextToContent } from '../../../../shared';
+import type { IDocumentBody } from '../../../../types/interfaces/i-document-data';
+import { insertTextToContent } from '../../../../shared/doc-tool';
 import {
     insertBlockRanges,
     insertColumnGroups,
@@ -39,6 +39,13 @@ export function updateAttributeByInsert(
 ) {
     const originalDataStream = body.dataStream;
     body.dataStream = insertTextToContent(body.dataStream, currentIndex, insertBody.dataStream);
+
+    if (body.renderedPageBreaks != null || insertBody.renderedPageBreaks != null) {
+        body.renderedPageBreaks = [
+            ...(body.renderedPageBreaks ?? []).map((offset) => offset >= currentIndex ? offset + textLength : offset),
+            ...(insertBody.renderedPageBreaks ?? []).map((offset) => offset + currentIndex),
+        ].sort((left, right) => left - right);
+    }
 
     insertTextRuns(body, insertBody, textLength, currentIndex);
 

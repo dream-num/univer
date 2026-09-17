@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, ICommandInfo } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, ICommandInfo, ICustomRange } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import { BuildTextUtils, CommandType, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, SHEET_EDITOR_UNITS, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
@@ -39,7 +39,6 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
 
     type: CommandType.COMMAND,
 
-    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IIMEInputCommandParams) => {
         const { unitId, newText, oldTextLen, isCompositionEnd, isCompositionStart, isCompositionCanceled } = params;
         const commandService = accessor.get(ICommandService);
@@ -135,7 +134,16 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         const defaultTextStyle = docMenuStyleService.getDefaultStyle();
         const styleCache = docMenuStyleService.getStyleCache();
         const styleOffset = replacesComplexSelection ? replacementOffset : startOffset + oldTextLen;
-        const curCustomRange = getCustomRangeAtPosition(body.customRanges ?? [], styleOffset, SHEET_EDITOR_UNITS.includes(unitId));
+        let inheritedRanges: ICustomRange[];
+        // The end caret is outside a whole-composition range. Preserve every
+        // enclosing editable wrapper, including nested controls and links.
+        if (!isCompositionStart && oldTextLen > 0) {
+            inheritedRanges = body.customRanges?.filter((range) => !range.wholeEntity &&
+                range.startIndex <= startOffset && range.endIndex >= startOffset + oldTextLen - 1) ?? [];
+        } else {
+            const range = getCustomRangeAtPosition(body.customRanges ?? [], styleOffset, SHEET_EDITOR_UNITS.includes(unitId));
+            inheritedRanges = range ? [range] : [];
+        }
         const curTextRun = getTextRunAtPosition(
             body,
             replacesComplexSelection ? replacementOffset : isCompositionStart ? endOffset : startOffset + oldTextLen,
@@ -154,13 +162,11 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
                     ed: newText.length,
                 }]
                 : [],
-            customRanges: curCustomRange
-                ? [{
-                    ...curCustomRange,
-                    startIndex: 0,
-                    endIndex: newText.length - 1,
-                }]
-                : [],
+            customRanges: inheritedRanges.map((range) => ({
+                ...range,
+                startIndex: 0,
+                endIndex: newText.length - 1,
+            })),
             customDecorations: customDecorations.map((customDecoration) => ({
                 ...customDecoration,
                 startIndex: 0,

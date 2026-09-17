@@ -74,17 +74,19 @@ class RecordingDocCanvasPopManagerService {
     readonly directions: string[] = [];
     readonly offsets: Array<[number, number] | undefined> = [];
     onDismiss?: () => void;
+    onMount?: () => () => void;
     disposedCount = 0;
 
     getRangeBounds() {
         return [{ left: 100, right: 200, top: 240, bottom: 260 }];
     }
 
-    attachPopupToRange(range: { startOffset: number; endOffset: number }, options: { direction: string; offset?: [number, number]; extraProps?: { onDismiss?: () => void } }) {
+    attachPopupToRange(range: { startOffset: number; endOffset: number }, options: { direction: string; offset?: [number, number]; extraProps?: { onDismiss?: () => void; onMount?: () => () => void } }) {
         this.ranges.push(`${range.startOffset}:${range.endOffset}`);
         this.directions.push(options.direction);
         this.offsets.push(options.offset);
         this.onDismiss = options.extraProps?.onDismiss;
+        this.onMount = options.extraProps?.onMount;
 
         return {
             dispose: () => {
@@ -265,12 +267,16 @@ describe('DocFloatMenuService', () => {
         expect(popupService.ranges).toEqual(['0:5']);
         expect(popupService.offsets).toEqual([[0, 8]]);
         expect(service.floatMenu).toMatchObject({ start: 0, end: 5 });
+        expect(layoutInteractionService.isActive).toBe(false);
+        const unmount = popupService.onMount!();
         expect(layoutInteractionService.isActive).toBe(true);
 
         const selectionRenderService = injector.get(DocSelectionRenderService) as unknown as ActiveDocSelectionRenderService;
         selectionRenderService.emitSelectionStart();
         expect(service.floatMenu).toBeNull();
         expect(popupService.disposedCount).toBe(1);
+        expect(layoutInteractionService.isActive).toBe(false);
+        unmount();
         expect(layoutInteractionService.isActive).toBe(false);
     });
 

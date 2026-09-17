@@ -17,7 +17,7 @@
 import type { IDrawingParam, IDrawingSearch, IUniverInstanceService, Nullable, Workbook } from '@univerjs/core';
 import type { IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
-import { UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, UniverInstanceType } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, DrawingGroupObject, Group } from '@univerjs/engine-render';
 import { resolveDrawingUIRotateEnabled } from '../utils/rotate-enabled';
@@ -27,7 +27,15 @@ export function getDrawingRenderObject(scene: Scene, drawingSearch: IDrawingSear
     return scene.getObjectIncludeInGroup(key) ?? null;
 }
 
-export function disposeDrawingRenderObject(scene: Scene, drawingSearch: IDrawingSearch): boolean {
+export function disposeDrawingRenderObject(scene: Scene, drawingSearch: IDrawingSearch & { isMultiTransform?: BooleanNumber }): boolean {
+    if (drawingSearch.isMultiTransform === BooleanNumber.TRUE) {
+        const key = getDrawingShapeKeyByDrawingSearch(drawingSearch);
+        const prefix = `${key}#-#`;
+        // Repeated header/footer instances have indexed keys and may still be hidden.
+        const instances = scene.getAllObjects().filter((object) => object.oKey === key || object.oKey.startsWith(prefix));
+        instances.forEach((object) => object.dispose());
+        return instances.length > 0;
+    }
     const object = getDrawingRenderObject(scene, drawingSearch);
 
     if (object == null) {

@@ -32,6 +32,7 @@ import type {
 import { shallowEqual } from '../../../../common/equal';
 import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../../shared';
 import { isSameStyleTextRun } from '../../../../shared/compare';
+import { CustomRangeType } from '../../../../types/interfaces';
 import { cloneParagraphWithId } from '../../../paragraph-id';
 import { cloneSectionBreakWithId } from '../../../section-break-id';
 import { DataStreamTreeTokenType } from '../../types';
@@ -688,31 +689,29 @@ const ID_SPLIT_SYMBOL = '$';
 const getRootId = (id: string) => id.split(ID_SPLIT_SYMBOL)[0];
 
 export function mergeContinuousRanges(ranges: ICustomRange[]): ICustomRange[] {
-    if (ranges.length <= 1) return ranges;
+    if (ranges.length <= 1) {
+        return ranges;
+    }
     ranges.sort((a, b) => a.startIndex - b.startIndex);
 
     const mergedRanges: ICustomRange[] = [];
-    let currentRange = { ...ranges[0] };
-    currentRange.rangeId = getRootId(currentRange.rangeId);
-
-    for (let i = 1; i < ranges.length; i++) {
-        const nextRange = ranges[i];
-        nextRange.rangeId = getRootId(nextRange.rangeId);
+    const latestById = new Map<string, ICustomRange>();
+    for (const range of ranges) {
+        const nextRange = { ...range, rangeId: getRootId(range.rangeId) };
+        const currentRange = latestById.get(nextRange.rangeId);
         if (
-            nextRange.rangeId === currentRange.rangeId &&
+            currentRange &&
+            nextRange.rangeType === currentRange.rangeType &&
             shallowEqual(currentRange.properties, nextRange.properties) &&
             currentRange.endIndex + 1 >= nextRange.startIndex
         ) {
-            // Merge continuous ranges with same rangeId
-            currentRange.endIndex = nextRange.endIndex;
+            // Overlapping identities can interleave fragments of the same range.
+            currentRange.endIndex = Math.max(currentRange.endIndex, nextRange.endIndex);
         } else {
-            // Push current range and start a new one
-            mergedRanges.push(currentRange);
-            currentRange = { ...nextRange };
+            mergedRanges.push(nextRange);
+            latestById.set(nextRange.rangeId, nextRange);
         }
     }
-    // Push the last range
-    mergedRanges.push(currentRange);
 
     const idMap: Record<string, number> = Object.create(null);
     for (let i = 0, len = mergedRanges.length; i < len; i++) {
@@ -730,20 +729,24 @@ export function mergeContinuousRanges(ranges: ICustomRange[]): ICustomRange[] {
 }
 
 export function splitCustomRangesByIndex(customRanges: ICustomRange[], currentIndex: number) {
-    const matchedCustomRangeIndex = customRanges.findIndex((c) => c.startIndex < currentIndex && c.endIndex >= currentIndex);
-    const matchedCustomRange = customRanges[matchedCustomRangeIndex];
+    const matches = customRanges.filter((range) =>
+        range.rangeType !== CustomRangeType.FIELD &&
+        range.rangeType !== CustomRangeType.SDT &&
+        range.rangeType !== CustomRangeType.BOOKMARK &&
+        range.startIndex < currentIndex &&
+        range.endIndex >= currentIndex
+    );
 
-    if (matchedCustomRange) {
-        customRanges.splice(matchedCustomRangeIndex, 1, {
-            ...matchedCustomRange,
-            startIndex: matchedCustomRange.startIndex,
+    for (const matched of matches) {
+        const index = customRanges.indexOf(matched);
+        customRanges.splice(index, 1, {
+            ...matched,
             endIndex: currentIndex - 1,
-            properties: { ...matchedCustomRange.properties },
+            properties: { ...matched.properties },
         }, {
-            ...matchedCustomRange,
+            ...matched,
             startIndex: currentIndex,
-            endIndex: matchedCustomRange.endIndex,
-            properties: { ...matchedCustomRange.properties },
+            properties: { ...matched.properties },
         });
     }
 }
@@ -810,6 +813,16 @@ export function insertCustomRanges(
     for (let i = 0, len = customRanges.length; i < len; i++) {
         const customRange = customRanges[i];
         const { startIndex } = customRange;
+        if (
+            (customRange.rangeType === CustomRangeType.FIELD ||
+                customRange.rangeType === CustomRangeType.SDT ||
+                customRange.rangeType === CustomRangeType.BOOKMARK) &&
+            startIndex < currentIndex &&
+            customRange.endIndex >= currentIndex
+        ) {
+            customRange.endIndex += textLength;
+            continue;
+        }
         // move custom range when insert text before it
         if (startIndex >= currentIndex) {
             customRange.startIndex += textLength;
@@ -821,6 +834,18 @@ export function insertCustomRanges(
     if (insertBody.customRanges) {
         for (let i = 0, len = insertBody.customRanges.length; i < len; i++) {
             const customRange = insertBody.customRanges[i];
+            const existingSdt = customRange.rangeType === CustomRangeType.SDT
+                ? customRanges.find((range) => range.rangeType === CustomRangeType.SDT && range.rangeId === customRange.rangeId)
+                : undefined;
+            if (existingSdt) {
+                existingSdt.startIndex = Math.min(existingSdt.startIndex, currentIndex + customRange.startIndex);
+                existingSdt.endIndex = Math.max(existingSdt.endIndex, currentIndex + customRange.endIndex);
+                existingSdt.properties = Tools.deepClone(customRange.properties);
+                existingSdt.wholeEntity = customRange.wholeEntity;
+                // An undo fragment carries its original child-before-parent order.
+                customRanges.splice(customRanges.indexOf(existingSdt), 0, ...insertRanges.splice(0));
+                continue;
+            }
             customRange.startIndex += currentIndex;
             customRange.endIndex += currentIndex;
             // new custom range
@@ -1244,7 +1269,11 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
     const removeCustomRanges: ICustomRange[] = [];
 
     if (customRanges) {
-        const newCustomRanges = [];
+        // Preserve nesting before deletion can collapse a parent and child onto identical bounds.
+        const originalSdtLengths = new Map(customRanges.filter((range) => range.rangeType === CustomRangeType.SDT)
+            .map((range) => [range, range.endIndex - range.startIndex]));
+        const coincidentSdts = new Map<string, number[]>();
+        const newCustomRanges: ICustomRange[] = [];
         for (let i = 0, len = customRanges.length; i < len; i++) {
             const customRange = customRanges[i];
             const transformed = shiftInclusiveRangeOnDelete(customRange, currentIndex, textLength);
@@ -1253,7 +1282,23 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
                 continue;
             }
             Object.assign(customRange, transformed);
+            if (customRange.rangeType === CustomRangeType.SDT) {
+                const key = `${customRange.startIndex}:${customRange.endIndex}`;
+                const positions = coincidentSdts.get(key) ?? [];
+                positions.push(newCustomRanges.length);
+                coincidentSdts.set(key, positions);
+            }
             newCustomRanges.push(customRange);
+        }
+        for (const positions of coincidentSdts.values()) {
+            if (positions.length < 2) {
+                continue;
+            }
+            const ordered = positions.map((index) => newCustomRanges[index])
+                .sort((left, right) => originalSdtLengths.get(left)! - originalSdtLengths.get(right)!);
+            positions.forEach((index, offset) => {
+                newCustomRanges[index] = ordered[offset];
+            });
         }
 
         body.customRanges = mergeContinuousRanges(newCustomRanges);

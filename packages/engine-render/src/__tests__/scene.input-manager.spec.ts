@@ -169,4 +169,15 @@ describe('InputManager click gestures', () => {
 
         expect(doubleClick).toHaveBeenCalledTimes(deviceType === DeviceType.Touch ? 1 : 0);
     });
+
+    it('uses event timestamps even when the double-click expiry callback is delayed', () => {
+        const timeStamp = vi.spyOn(Event.prototype, 'timeStamp', 'get').mockReturnValue(100);
+        click();
+        timeStamp.mockReturnValue(601);
+        click();
+        expect(doubleClick).not.toHaveBeenCalled();
+        timeStamp.mockReturnValue(700);
+        click();
+        expect(doubleClick).toHaveBeenCalledTimes(1);
+    });
 });

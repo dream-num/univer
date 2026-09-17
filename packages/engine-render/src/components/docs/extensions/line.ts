@@ -22,6 +22,7 @@ import type { IDrawInfo } from '../../extension';
 import { BaselineOffset, BooleanNumber, TextDecoration } from '@univerjs/core';
 import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING } from '../../../basics/const';
 import { calculateRectRotate } from '../../../basics/draw';
+import { GlyphType } from '../../../basics/i-document-skeleton-cached';
 import { degToRad, getScale } from '../../../basics/tools';
 import { Vector2 } from '../../../basics/vector2';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
@@ -124,7 +125,9 @@ export class Line extends docExtension {
             renderConfig = {},
         } = this.extensionOffset;
 
-        const { left, width } = glyph;
+        const isListMarker = glyph.glyphType === GlyphType.LIST;
+        const left = glyph.left + (isListMarker ? glyph.xOffset : 0);
+        const width = isListMarker ? glyph.bBox.width : glyph.width;
         const isAccounting = this._isAccounting(lineType);
         if (isAccounting && !this._isFirstAccountingGlyph(glyph)) {
             return;

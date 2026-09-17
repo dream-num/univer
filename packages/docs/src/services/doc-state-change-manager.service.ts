@@ -61,6 +61,21 @@ export class DocStateChangeManagerService extends RxDisposable {
         this._listenDocStateChange();
     }
 
+    override dispose(): void {
+        if (this._historyTimer != null) {
+            clearTimeout(this._historyTimer);
+            this._historyTimer = null;
+        }
+        if (this._changeStateCacheTimer != null) {
+            clearTimeout(this._changeStateCacheTimer);
+            this._changeStateCacheTimer = null;
+        }
+        this._historyStateCache.clear();
+        this._changeStateCache.clear();
+        this._docStateChange$.complete();
+        super.dispose();
+    }
+
     getStateCache(unitId: string) {
         return {
             history: this._historyStateCache.get(unitId) ?? [],
@@ -75,6 +90,11 @@ export class DocStateChangeManagerService extends RxDisposable {
 
     clearHistory(unitId: string): void {
         this._historyStateCache.delete(unitId);
+    }
+
+    flushPendingChanges(unitId: string): void {
+        this._pushHistory(unitId);
+        this._emitChangeState(unitId);
     }
 
     private _setChangeState(changeState: IDocStateChangeParams) {
@@ -124,7 +144,6 @@ export class DocStateChangeManagerService extends RxDisposable {
 
     private _cacheChangeState(changeState: IDocStateChangeParams, type: ChangeStateCacheType = 'history') {
         const { trigger, unitId, noHistory, debounce = false } = changeState;
-
         if (noHistory || (type === 'history' && trigger == null)) {
             return;
         }
@@ -195,6 +214,7 @@ export class DocStateChangeManagerService extends RxDisposable {
 
         const redoParams: IRichTextEditingMutationParams = {
             unitId,
+            trigger: RedoCommandId,
             actions: cacheStates.reduce((acc, cur) => JSONX.compose(acc, cur.redoState.actions), null as JSONXActions),
             textRanges: lastState.redoState.textRanges,
             segmentId: lastState.segmentId,
@@ -204,6 +224,7 @@ export class DocStateChangeManagerService extends RxDisposable {
 
         const undoParams: IRichTextEditingMutationParams = {
             unitId,
+            trigger: UndoCommandId,
             // Always need to put undoParams after redoParams, because `reverse` will change the `cacheStates` order.
             actions: cacheStates.reverse().reduce((acc, cur) => JSONX.compose(acc, cur.undoState.actions), null as JSONXActions),
             textRanges: firstState.undoState.textRanges,

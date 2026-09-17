@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IParagraph, ITable, Nullable } from '@univerjs/core';
+import type { IDocumentBody, ITable, ITableCellBorder, ITableRow, Nullable } from '@univerjs/core';
 import type {
     IDocumentSkeletonHeaderFooter,
     IDocumentSkeletonPage,
@@ -29,14 +29,14 @@ import {
     GridType,
     PageOrientType,
     PositionedObjectLayoutType,
-    SpacingRule,
     TableTextWrapType,
 } from '@univerjs/core';
 import { BreakType, DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility } from '../../document-compatibility';
 import { dealWithSection } from '../block/section';
 import {
-    reachesNextDocumentGridLine,
+    getGlyphGroupWidth,
+    getLastLine,
     resetContext,
     updateBlockIndex,
     updateInlineDrawingCoordsAndBorder,
@@ -54,7 +54,8 @@ export function createSkeletonPage(
     sectionBreakConfig: ISectionBreakConfig,
     skeletonResourceReference: ISkeletonResourceReference,
     pageNumber = 1,
-    breakType = BreakType.SECTION
+    breakType = BreakType.SECTION,
+    pageContext?: Pick<IDocumentSkeletonPage, 'type' | 'segmentId'>
 ): IDocumentSkeletonPage {
     let page: IDocumentSkeletonPage;
     if (sectionBreakConfig.cellTableId) {
@@ -62,7 +63,7 @@ export function createSkeletonPage(
     } else if (ctx.noteSegmentId) {
         page = _getNullPage(DocumentSkeletonPageType.NOTE, ctx.noteSegmentId);
     } else {
-        page = _getNullPage();
+        page = _getNullPage(pageContext?.type, pageContext?.segmentId);
     }
 
     const {
@@ -133,7 +134,9 @@ export function createSkeletonPage(
                 true
             );
 
-            skeHeaders.set(headerId, new Map([[pageWidth, header]]));
+            const widths = skeHeaders.get(headerId) ?? new Map();
+            widths.set(pageWidth, header);
+            skeHeaders.set(headerId, widths);
         }
         page.headerId = headerId;
     }
@@ -151,25 +154,17 @@ export function createSkeletonPage(
                 false
             );
 
-            skeFooters.set(footerId, new Map([[pageWidth, footer]]));
+            const widths = skeFooters.get(footerId) ?? new Map();
+            widths.set(pageWidth, footer);
+            skeFooters.set(footerId, widths);
         }
         page.footerId = footerId;
     }
 
     page.originMarginTop = marginTop;
     page.originMarginBottom = marginBottom;
-    const documentCompatibilityPolicy =
-        sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy();
-    if (isTraditionalDocumentCompatibility(documentCompatibilityPolicy)) {
-        // Word places body content at the configured page margins even when a tall
-        // header or footer overlaps that area. Expanding the margins here changes
-        // pagination and pushes page-anchored cover content into the body flow.
-        page.marginTop = marginTop;
-        page.marginBottom = marginBottom;
-    } else {
-        page.marginTop = _getVerticalMargin(marginTop, header);
-        page.marginBottom = _getVerticalMargin(marginBottom, footer);
-    }
+    page.marginTop = _getVerticalMargin(marginTop, header);
+    page.marginBottom = _getVerticalMargin(marginBottom, footer);
 
     const sections = page.sections;
     const lastSection = sections[sections.length - 1];
@@ -254,6 +249,25 @@ function _createSkeletonHeaderFooter(
         marginRight = 0,
         marginHeader = 0,
         marginFooter = 0,
+        documentCompatibilityPolicy,
+        documentTextStyle,
+        fontFamilyFallbacks,
+        paragraphLineGapDefault,
+        defaultTabStop,
+        adjustLineHeightInTable,
+        characterSpacingControl,
+        useFELayout,
+        balanceSingleByteDoubleByteWidth,
+        spaceWidthEastAsian,
+        autoHyphenation,
+        consecutiveHyphenLimit,
+        doNotHyphenateCaps,
+        hyphenationZone,
+        charSpace,
+        linePitch,
+        gridType,
+        contentDirection,
+        textDirection,
     } = sectionBreakConfig;
     const pageWidth = pageSize?.width || Number.POSITIVE_INFINITY;
     const pageHeight = pageSize?.height || Number.POSITIVE_INFINITY;
@@ -268,6 +282,25 @@ function _createSkeletonHeaderFooter(
         },
         localeService,
         drawings,
+        documentCompatibilityPolicy,
+        documentTextStyle,
+        fontFamilyFallbacks,
+        paragraphLineGapDefault,
+        defaultTabStop,
+        adjustLineHeightInTable,
+        characterSpacingControl,
+        useFELayout,
+        balanceSingleByteDoubleByteWidth,
+        spaceWidthEastAsian,
+        autoHyphenation,
+        consecutiveHyphenLimit,
+        doNotHyphenateCaps,
+        hyphenationZone,
+        charSpace,
+        linePitch,
+        gridType,
+        contentDirection,
+        textDirection,
     };
 
     if (areaPage == null) {
@@ -304,21 +337,91 @@ function _createSkeletonHeaderFooter(
         );
     }
 
+    const traditional = isTraditionalDocumentCompatibility(
+        sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy()
+    );
+    if (traditional) {
+        positionUnwrappedStoryFrames(page, headerOrFooterViewModel);
+    }
     updateBlockIndex([page], -1, sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy());
 
+    // Word reserves the complete text flow, including the final paragraph's spacing,
+    // but does not add the modern document's synthetic gap between stories.
+    const trailingSpace = traditional ? Math.max(0, getLastLine(page)?.spaceBelowApply ?? 0) : 0;
     if (isHeader) {
         Object.assign(page, {
             marginTop: marginHeader,
-            marginBottom: 5, // Space between header and content
+            marginBottom: traditional ? trailingSpace : 5,
         });
     } else {
         Object.assign(page, {
-            marginTop: 5, // Space between content and footer
-            marginBottom: marginFooter,
+            marginTop: traditional ? 0 : 5,
+            marginBottom: marginFooter + trailingSpace,
         });
     }
 
     return page;
+}
+
+function positionUnwrappedStoryFrames(page: IDocumentSkeletonHeaderFooter, viewModel: DocumentViewModel) {
+    // Positioned text-only frames share editable glyphs with their story. Wrapped
+    // frames and stories with anchored objects require the object-wrap layout path.
+    if (page.skeTables.size > 0 || page.skeDrawings.size > 0) {
+        return;
+    }
+    for (const section of page.sections) {
+        for (const column of section.columns) {
+            const { lines } = column;
+            let removedHeight = 0;
+            for (let index = 0; index < lines.length; index++) {
+                const line = lines[index];
+                const frame = viewModel.getParagraph(line.paragraphIndex)?.paragraphStyle?.paragraphFrame;
+                const y = typeof frame === 'object' ? Number(frame.y ?? 0) / 15 : 0;
+                if (frame == null || typeof frame !== 'object' || frame.wrap !== 'none'
+                    || frame.horizontalAnchor !== 'margin' || frame.verticalAnchor !== 'text'
+                    || !['left', 'center', 'right'].includes(frame.xAlign ?? '')
+                    || frame.yAlign != null || !Number.isFinite(y)) {
+                    line.top -= removedHeight;
+                    continue;
+                }
+                let end = index + 1;
+                while (end < lines.length && lines[end].paragraphIndex === line.paragraphIndex) {
+                    end++;
+                }
+                // A following flow paragraph supplies the frame's text anchor.
+                if (end === lines.length) {
+                    for (; index < end; index++) {
+                        lines[index].top -= removedHeight;
+                    }
+                    break;
+                }
+                const frameLines = lines.slice(index, end);
+                let width = 0;
+                for (const item of frameLines) {
+                    for (const divide of item.divides) {
+                        width = Math.max(width, divide.left + divide.paddingLeft + getGlyphGroupWidth(divide, true));
+                    }
+                }
+                const available = Math.max(0, column.width - width);
+                let left = 0;
+                if (frame.xAlign === 'right') {
+                    left = available;
+                } else if (frame.xAlign === 'center') {
+                    left = available / 2;
+                }
+                const occupiedHeight = lines[end].top - line.top;
+                for (const frameLine of frameLines) {
+                    frameLine.top += y - removedHeight;
+                    for (const divide of frameLine.divides) {
+                        divide.left += left;
+                        divide.width = Math.max(0, width - divide.left + left);
+                    }
+                }
+                removedHeight += occupiedHeight;
+                index = end - 1;
+            }
+        }
+    }
 }
 
 export function createNullCellPage(
@@ -342,11 +445,13 @@ export function createNullCellPage(
         drawings,
         documentCompatibilityPolicy,
         documentTextStyle,
+        fontFamilyFallbacks,
         paragraphLineGapDefault,
         defaultTabStop,
         adjustLineHeightInTable,
         characterSpacingControl,
         useFELayout,
+        balanceSingleByteDoubleByteWidth,
         spaceWidthEastAsian,
         autoHyphenation,
         consecutiveHyphenLimit,
@@ -369,6 +474,13 @@ export function createNullCellPage(
         top = { v: 5 },
         bottom = { v: 5 },
     } = cellConfig.margin ?? cellMargin ?? {};
+    if (isTraditionalDocumentCompatibility(documentCompatibilityPolicy)) {
+        // Word aligns all cells to the row's largest vertical padding and border,
+        // even when the tallest text is in a different, thinner-bordered cell.
+        top = { ...top, v: getRowVerticalInset(tableConfig, row, 'top') };
+        const lastRow = Math.min(tableRows.length - 1, row + Math.max(1, cellConfig.rowSpan ?? 1) - 1);
+        bottom = { ...bottom, v: getRowVerticalInset(tableConfig, lastRow, 'bottom') };
+    }
     const columnSpan = Math.max(1, cellConfig.columnSpan ?? 1);
     const gridColumn = getTableCellGridColumn(tableConfig, row, col);
     const pageWidth = tableColumns
@@ -383,6 +495,15 @@ export function createNullCellPage(
         end = { ...end, v: availableMarginWidth - start.v };
     }
     const pageHeight = maxCellPageHeight;
+    const isVerticalCell = cellConfig.textDirection === 'tbRlV';
+    const rowHeight = tableRows.slice(row, row + Math.max(1, cellConfig.rowSpan ?? 1))
+        .reduce((sum, tableRow) => sum + Math.max(0, tableRow.trHeight?.val.v ?? 0), 0);
+    // Shape vertical text along the row's height, then restore physical bounds for table layout.
+    // ponytail: auto-height rows start from the cell width; content-driven height feedback needs a second layout pass.
+    const layoutWidth = isVerticalCell
+        ? Math.max(1, rowHeight || (Number.isFinite(availableHeight) ? availableHeight : pageWidth))
+        : pageWidth;
+    const layoutHeight = isVerticalCell ? Number.POSITIVE_INFINITY : pageHeight;
 
     const cellSectionBreakConfig: ISectionBreakConfig = {
         sectionId,
@@ -392,22 +513,24 @@ export function createNullCellPage(
         footerTreeMap,
         headerTreeMap,
         pageSize: {
-            width: pageWidth,
-            height: pageHeight,
+            width: layoutWidth,
+            height: layoutHeight,
         },
-        marginTop: top.v,
-        marginBottom: bottom.v,
-        marginLeft: start.v,
-        marginRight: end.v,
+        marginTop: isVerticalCell ? end.v : top.v,
+        marginBottom: isVerticalCell ? start.v : bottom.v,
+        marginLeft: isVerticalCell ? top.v : start.v,
+        marginRight: isVerticalCell ? bottom.v : end.v,
         localeService,
         drawings,
         documentCompatibilityPolicy,
         documentTextStyle,
+        fontFamilyFallbacks,
         paragraphLineGapDefault,
         defaultTabStop,
         adjustLineHeightInTable: enableDocumentTableLineGrid ? adjustLineHeightInTable : undefined,
         characterSpacingControl,
         useFELayout,
+        balanceSingleByteDoubleByteWidth,
         spaceWidthEastAsian,
         autoHyphenation,
         consecutiveHyphenLimit,
@@ -426,8 +549,8 @@ export function createNullCellPage(
         // Set first page height to availableHeight.
         Object.assign({}, cellSectionBreakConfig, {
             pageSize: {
-                width: pageWidth,
-                height: Number.isFinite(availableHeight) ? availableHeight : pageHeight,
+                width: layoutWidth,
+                height: isVerticalCell ? layoutHeight : (Number.isFinite(availableHeight) ? availableHeight : pageHeight),
             },
         }),
         skeletonResourceReference
@@ -438,7 +561,48 @@ export function createNullCellPage(
     return {
         page: areaPage,
         sectionBreakConfig: cellSectionBreakConfig,
+        verticalCellWidth: isVerticalCell ? pageWidth : undefined,
     };
+}
+
+function finishVerticalCellLayout(pages: IDocumentSkeletonPage[], physicalWidth: number | undefined): void {
+    if (physicalWidth == null) {
+        return;
+    }
+    for (const page of pages) {
+        const logicalWidth = page.width;
+        page.width = page.height;
+        page.height = logicalWidth;
+        page.pageHeight = page.pageWidth;
+        page.pageWidth = physicalWidth;
+        page.cellTextDirection = 'tbRlV';
+    }
+}
+
+export function getCellBorderWidth(border: ITableCellBorder | undefined): number {
+    return border == null || border.color?.rgb === 'transparent' ? 0 : Math.max(0, border.width?.v ?? 1);
+}
+
+export function getRowBorderInset(row: ITableRow, edge: 'borderTop' | 'borderBottom', tableBoundary = false): number {
+    return row.tableCells.reduce((inset, cell) => {
+        const border = cell[edge];
+        const outer = edge === 'borderTop' ? border?.tableTopBorder : border?.tableBottomBorder;
+        const effective = tableBoundary ? outer ?? border : border;
+        return Math.max(inset, getCellBorderWidth(effective) / 2);
+    }, 0);
+}
+
+function getRowVerticalInset(table: ITable, index: number, edge: 'top' | 'bottom'): number {
+    const row = table.tableRows[index];
+    const padding = row.tableCells.reduce((max, cell) => {
+        const margin = cell.margin?.[edge] ?? table.cellMargin?.[edge] ?? { v: 5 };
+        return Math.max(max, margin.v ?? 0);
+    }, 0);
+    const borderEdge = edge === 'top' ? 'borderTop' : 'borderBottom';
+    const neighbour = table.tableRows[index + (edge === 'top' ? -1 : 1)];
+    const oppositeEdge = edge === 'top' ? 'borderBottom' : 'borderTop';
+    const border = Math.max(getRowBorderInset(row, borderEdge), neighbour ? getRowBorderInset(neighbour, oppositeEdge) : 0);
+    return padding + border;
 }
 
 function getTableCellGridColumn(table: ITable, row: number, col: number): number {
@@ -480,65 +644,30 @@ function isVerticallyCoveredGridColumn(table: ITable, row: number, gridColumn: n
     return false;
 }
 
-interface ICellLineGridCache {
-    body: IDocumentBody;
-    paragraphIndexes: number[];
-    enableDocumentTableLineGrid: boolean;
-}
-
-// A context owns one layout generation. Reuse only metadata from its current
-// body and line pitch; edits and sections with another pitch get fresh decisions.
-const cellLineGridCaches = new WeakMap<ILayoutContext, Map<number, ICellLineGridCache>>();
-
 function getCellLineGridOptions(
-    ctx: ILayoutContext,
-    cellNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig
 ): { inheritDocumentLinePitch: boolean; enableDocumentTableLineGrid: boolean } {
-    const body = ctx.dataModel?.getBody?.();
-    const linePitch = sectionBreakConfig.linePitch ?? 0;
     const usesLineGrid = sectionBreakConfig.gridType === GridType.LINES ||
         sectionBreakConfig.gridType === GridType.LINES_AND_CHARS;
     const documentCompatibilityPolicy = sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy();
     const isTraditionalLineGrid = isTraditionalDocumentCompatibility(documentCompatibilityPolicy) && usesLineGrid;
-    if (!isTraditionalLineGrid || body == null) {
-        return { enableDocumentTableLineGrid: false, inheritDocumentLinePitch: false };
-    }
-
-    let cacheByPitch = cellLineGridCaches.get(ctx);
-    if (cacheByPitch == null) {
-        cacheByPitch = new Map();
-        cellLineGridCaches.set(ctx, cacheByPitch);
-    }
-    let cache = cacheByPitch.get(linePitch);
-    if (cache?.body !== body) {
-        const usesNextDocumentGridLine = (paragraph: IParagraph) => {
-            const paragraphStyle = paragraph.paragraphStyle;
-            const lineSpacing = paragraphStyle?.lineSpacing;
-            return lineSpacing != null &&
-                paragraphStyle?.spacingRule === SpacingRule.AUTO &&
-                paragraphStyle.snapToGrid !== BooleanNumber.FALSE &&
-                reachesNextDocumentGridLine(lineSpacing, paragraphStyle.spaceBelow?.v ?? 0, linePitch);
-        };
-        const paragraphIndexes = (body.paragraphs ?? [])
-            .filter(usesNextDocumentGridLine)
-            .map((paragraph) => paragraph.startIndex);
-        cache = {
-            body,
-            paragraphIndexes,
-            enableDocumentTableLineGrid: body.tables?.some((table) => paragraphIndexes.some(
-                (index) => index > table.startIndex && index < table.endIndex
-            )) === true,
-        };
-        cacheByPitch.set(linePitch, cache);
-    }
-
+    // A cell inherits its section's grid, independently of spacing in other paragraphs.
     return {
-        enableDocumentTableLineGrid: cache.enableDocumentTableLineGrid,
-        inheritDocumentLinePitch: cache.paragraphIndexes.some(
-            (index) => index > cellNode.startIndex && index < cellNode.endIndex
-        ),
+        enableDocumentTableLineGrid: isTraditionalLineGrid,
+        inheritDocumentLinePitch: isTraditionalLineGrid,
     };
+}
+
+function resetCellDrawingAnchors(ctx: ILayoutContext, cellNode: DataStreamTreeNode, tableId: string): void {
+    const anchors = ctx.skeletonResourceReference.drawingAnchor?.get(tableId);
+    if (!anchors) {
+        return;
+    }
+    // A paginated cell replaces its earlier unbounded measurement. Do not retain
+    // provisional line references or their off-page drawing anchor positions.
+    for (const paragraph of cellNode.children[0].children) {
+        anchors.delete(paragraph.endIndex);
+    }
 }
 
 export function createSkeletonCellPages(
@@ -557,12 +686,10 @@ export function createSkeletonCellPages(
     const sectionNode = cellNode.children[0];
     const body = ctx.dataModel?.getBody?.();
     const { enableDocumentTableLineGrid, inheritDocumentLinePitch } = getCellLineGridOptions(
-        ctx,
-        cellNode,
         sectionBreakConfig
     );
 
-    const { page: areaPage, sectionBreakConfig: cellSectionBreakConfig } = createNullCellPage(
+    const { page: areaPage, sectionBreakConfig: cellSectionBreakConfig, verticalCellWidth } = createNullCellPage(
         ctx,
         sectionBreakConfig,
         tableConfig,
@@ -575,7 +702,11 @@ export function createSkeletonCellPages(
         cellPageHeights
     );
 
+    if (tableConfig.tableRows[row].tableCells[col].tcHideMark === BooleanNumber.TRUE) {
+        cellSectionBreakConfig.cellHiddenEndMarkIndex = sectionNode.children[sectionNode.children.length - 1]?.endIndex;
+    }
     const segmentId = tableConfig.tableId;
+    resetCellDrawingAnchors(ctx, cellNode, segmentId);
     const retainedPages: IDocumentSkeletonPage[] = [];
     let currentPage = areaPage;
     let pages: IDocumentSkeletonPage[] = [];
@@ -625,6 +756,7 @@ export function createSkeletonCellPages(
     updateInlineDrawingCoordsAndBorder(ctx, pages);
     expandCellPageHeightForInlineDrawings(pages);
     expandCellPageHeightForFlowTables(pages);
+    finishVerticalCellLayout(pages, verticalCellWidth);
 
     return pages;
 }
@@ -637,6 +769,7 @@ export interface ICellSkeletonBuildState {
     sectionBreakConfig: ISectionBreakConfig;
     cellSectionBreakConfig: ISectionBreakConfig;
     tableConfig: ITable;
+    verticalCellWidth?: number;
     paragraphIndex: number;
     layoutAnchor: Nullable<number>;
     pages: IDocumentSkeletonPage[];
@@ -658,11 +791,9 @@ export function startSkeletonCellPagesBuild(
 ): ICellSkeletonBuildState {
     const sectionNode = cellNode.children[0];
     const { enableDocumentTableLineGrid, inheritDocumentLinePitch } = getCellLineGridOptions(
-        ctx,
-        cellNode,
         sectionBreakConfig
     );
-    const { page, sectionBreakConfig: cellSectionBreakConfig } = createNullCellPage(
+    const { page, sectionBreakConfig: cellSectionBreakConfig, verticalCellWidth } = createNullCellPage(
         ctx,
         sectionBreakConfig,
         tableConfig,
@@ -674,8 +805,13 @@ export function startSkeletonCellPagesBuild(
         enableDocumentTableLineGrid,
         cellPageHeights
     );
+    if (tableConfig.tableRows[row].tableCells[col].tcHideMark === BooleanNumber.TRUE) {
+        cellSectionBreakConfig.cellHiddenEndMarkIndex = sectionNode.children[sectionNode.children.length - 1]?.endIndex;
+    }
     page.type = DocumentSkeletonPageType.CELL;
     page.segmentId = tableConfig.tableId;
+
+    resetCellDrawingAnchors(ctx, cellNode, tableConfig.tableId);
 
     const layoutAnchor = ctx.layoutStartPointer[tableConfig.tableId];
     ctx.layoutStartPointer[tableConfig.tableId] = null;
@@ -689,6 +825,7 @@ export function startSkeletonCellPagesBuild(
         cellSectionBreakConfig,
         tableConfig,
         paragraphIndex: 0,
+        verticalCellWidth,
         layoutAnchor,
         pages: [page],
         complete: false,
@@ -752,6 +889,7 @@ export function stepSkeletonCellPagesBuild(state: ICellSkeletonBuildState): bool
         updateInlineDrawingCoordsAndBorder(state.ctx, state.pages);
         expandCellPageHeightForInlineDrawings(state.pages);
         expandCellPageHeightForFlowTables(state.pages);
+        finishVerticalCellLayout(state.pages, state.verticalCellWidth);
         state.complete = true;
     }
 
@@ -773,12 +911,8 @@ function applyTrailingCellParagraphSpaceBelow(
     }
 
     const spaceBelow = Math.max(0, lastLine.spaceBelowApply ?? 0);
-    const linePitch = sectionBreakConfig.linePitch ?? 0;
-    const usesLineGrid = sectionBreakConfig.gridType === GridType.LINES || sectionBreakConfig.gridType === GridType.LINES_AND_CHARS;
     if (
         spaceBelow === 0 ||
-        !usesLineGrid ||
-        linePitch <= 0 ||
         !isTraditionalDocumentCompatibility(sectionBreakConfig.documentCompatibilityPolicy!)
     ) {
         return;
@@ -795,28 +929,31 @@ function applyTrailingCellParagraphSpaceBelow(
         return;
     }
 
-    const paragraphStyle = body?.paragraphs?.find((paragraph) => paragraph.startIndex === paragraphIndex)?.paragraphStyle;
-    const lineSpacing = paragraphStyle?.lineSpacing;
-    if (
-        lineSpacing == null ||
-        paragraphStyle?.spacingRule !== SpacingRule.AUTO ||
-        paragraphStyle.snapToGrid === BooleanNumber.FALSE ||
-        !reachesNextDocumentGridLine(lineSpacing, spaceBelow, linePitch)
-    ) {
+    if (body?.paragraphs?.find((paragraph) => paragraph.startIndex === paragraphIndex)?.paragraphStyle?.afterAutoSpacing === BooleanNumber.TRUE) {
+        lastLine.spaceBelowApply = 0;
         return;
     }
 
+    // Word includes the last paragraph's after-spacing in the cell's content height,
+    // except automatic spacing at the cell boundary.
     page.height += spaceBelow;
 }
 
 export function expandCellPageHeightForInlineDrawings(pages: IDocumentSkeletonPage[]) {
     for (const page of pages) {
+        const lastSection = page.sections?.[page.sections.length - 1];
+        const lastColumn = lastSection?.columns[lastSection.columns.length - 1];
+        const lastLine = lastColumn?.lines[lastColumn.lines.length - 1];
+        const trailingDrawingIds = new Set(lastLine?.divides?.flatMap((divide) =>
+            divide.glyphGroup.map((glyph) => glyph.drawingId).filter((id): id is string => id != null)) ?? []);
         page.skeDrawings?.forEach((drawing) => {
             if (drawing.drawingOrigin?.layoutType !== PositionedObjectLayoutType.INLINE) {
                 return;
             }
 
-            const drawingBottom = (drawing.aTop ?? 0) + (drawing.height ?? 0);
+            const trailingSpace = trailingDrawingIds.has(drawing.drawingId) ? (lastLine?.spaceBelowApply ?? 0) : 0;
+            const drawingBottom = (drawing.aTop ?? 0) + (drawing.height ?? 0) +
+                (drawing.drawingOrigin.effectExtent?.bottom ?? 0) + trailingSpace;
             if (drawingBottom > page.height) {
                 page.height = drawingBottom;
             }

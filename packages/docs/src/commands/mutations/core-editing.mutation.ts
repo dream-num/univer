@@ -34,9 +34,11 @@ import {
     IUniverInstanceService,
     JSON1,
     JSONX,
+    RedoCommandId,
     TextX,
     TextXActionType,
     Tools,
+    UndoCommandId,
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -44,7 +46,7 @@ import { DocSelectionManagerService } from '../../services/doc-selection-manager
 import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
 import { DocStateEmitService } from '../../services/doc-state-emit.service';
 import { RICH_TEXT_EDITING_MUTATION_ID } from './core-editing.mutation-id';
-import { validateDocStructureMutation } from './doc-structure-mutation-validation';
+import { isDocSdtMutationAllowed, validateDocStructureMutation } from './doc-structure-mutation-validation';
 
 export enum DocHistoryAction {
     DeleteChart = 'delete-chart',
@@ -150,7 +152,8 @@ function canRemoveFootnoteReference(actions: JSONXActions, references: ICustomRa
                     canRemove = true;
                     return;
                 }
-                if (action.t === TextXActionType.RETAIN && action.body?.customRanges != null) {
+                if (action.t === TextXActionType.RETAIN && (action.body?.customRanges != null ||
+                    action.rangeUpdates?.some((update) => references.some((reference) => reference.rangeId === update.rangeId)))) {
                     canRemove = true;
                     return;
                 }
@@ -191,7 +194,8 @@ function includeFootnoteCleanup(before: IDocumentData, actions: JSONXActions): J
 function applyValidatedDocumentActions(
     documentDataModel: DocumentDataModel,
     segmentId: string,
-    actions: JSONXActions
+    actions: JSONXActions,
+    isHistoryReplay = false
 ): { actions: JSONXActions; undoActions: JSONXActions; preservesStructure: boolean } {
     const before = documentDataModel.getSnapshot();
     const appliedActions = includeFootnoteCleanup(before, actions);
@@ -201,7 +205,7 @@ function applyValidatedDocumentActions(
         return {
             actions: appliedActions,
             undoActions,
-            preservesStructure: validateDocStructureMutation(documentDataModel, segmentId, appliedActions, undoActions),
+            preservesStructure: validateDocStructureMutation(documentDataModel, segmentId, appliedActions, undoActions, isHistoryReplay),
         };
     } catch (error) {
         documentDataModel.apply(undoActions);
@@ -323,10 +327,17 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             };
         }
 
+        const isHistoryReplay = trigger === UndoCommandId || trigger === RedoCommandId;
+        if (!isHistoryReplay && !isDocSdtMutationAllowed(documentDataModel, segmentId, actions)) {
+            params.actions = [];
+            return { unitId, actions: [], textRanges: docRanges };
+        }
+
         const { actions: appliedActions, undoActions, preservesStructure } = applyValidatedDocumentActions(
             documentDataModel,
             segmentId,
-            actions
+            actions,
+            isHistoryReplay
         );
 
         // Publish reference deletion and note cleanup in the same deterministic mutation.

@@ -115,7 +115,10 @@ export interface ISectionBreakConfig extends IDocStyleBase, ISectionBreakBase, I
     sectionId: string;
     /** Cell continuation pages retain their segment and physical row-slice budgets. */
     cellTableId?: string;
+    /** Absolute final paragraph mark excluded by this cell's w:hideMark property. */
+    cellHiddenEndMarkIndex?: number;
     cellPageHeights?: readonly number[];
+    fontFamilyFallbacks?: Record<string, string>;
     headerIds?: IHeaderIds;
     footerIds?: IFooterIds;
     useFirstPageHeaderFooter?: BooleanNumber;
@@ -154,6 +157,8 @@ export interface IParagraphConfig {
     // pageContentWidth: number;
     // pageContentHeight: number;
     paragraphStyle?: IParagraphStyle;
+    borderTopSpace?: number;
+    borderBottomSpace?: number;
     skeHeaders: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>;
     skeFooters: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>;
     pDrawingAnchor?: Map<number, IDocumentSkeletonDrawingAnchor>;
@@ -167,6 +172,8 @@ export interface IFontCreateConfig {
     snapToGrid: BooleanNumber;
     documentCompatibilityPolicy?: IDocumentCompatibilityPolicy;
     gridType?: GridType;
+    balanceSingleByteDoubleByteWidth?: BooleanNumber;
+    balanceSpaceWidth?: boolean;
     pageWidth?: number;
 }
 

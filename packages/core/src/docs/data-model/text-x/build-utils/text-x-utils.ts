@@ -220,11 +220,13 @@ function isIntervalCoveredBySelections(
     implicitTokens: Set<string>
 ): boolean {
     let cursor = interval.startOffset;
+    let intersectsSelection = false;
 
     for (const selection of selections) {
         if (selection.endOffset <= cursor || selection.startOffset >= interval.endOffset) {
             continue;
         }
+        intersectsSelection = true;
 
         const selectionStart = Math.max(selection.startOffset, interval.startOffset);
         const selectionEnd = Math.min(selection.endOffset, interval.endOffset);
@@ -245,7 +247,7 @@ function isIntervalCoveredBySelections(
         }
     }
 
-    return true;
+    return intersectsSelection;
 }
 
 function addCoveredIntervals(

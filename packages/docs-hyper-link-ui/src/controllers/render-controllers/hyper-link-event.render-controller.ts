@@ -65,6 +65,14 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
         }
     }
 
+    private _normalizeSegmentId(segmentId?: string): string {
+        if (!segmentId) {
+            return '';
+        }
+
+        return this._context.unit.getBody()?.tables?.some((table) => table.tableId === segmentId) ? '' : segmentId;
+    }
+
     private _initPointerDown() {
         this.disposeWithMe(
             this._docEventManagerService.pointerDownCustomRanges$.subscribe((ranges) => {
@@ -82,7 +90,7 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
                 const link = ranges.find((range) => range.range.rangeType === CustomRangeType.HYPERLINK);
                 const activeRanges = this._docSelectionManagerService.getTextRanges();
                 const currentSegmentId = activeRanges?.[0]?.segmentId;
-                if ((link?.segmentId ?? '') !== currentSegmentId) {
+                if (this._normalizeSegmentId(link?.segmentId) !== this._normalizeSegmentId(currentSegmentId)) {
                     this._hideInfoPopup();
                     return;
                 }
@@ -98,7 +106,7 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
                     };
                     this._commandService.executeCommand(
                         ToggleDocHyperLinkInfoPopupOperation.id,
-                        info
+                        { ...info, fromHover: true }
                     );
                 } else {
                     this._hideInfoPopup();

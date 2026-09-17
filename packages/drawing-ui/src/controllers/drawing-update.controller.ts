@@ -699,7 +699,7 @@ export class DrawingUpdateController extends Disposable {
         this.disposeWithMe(
             this._drawingManagerService.remove$.subscribe((params) => {
                 (params).forEach((param) => {
-                    const { unitId, subUnitId, drawingId } = param;
+                    const { unitId } = param;
 
                     const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
 
@@ -708,7 +708,7 @@ export class DrawingUpdateController extends Disposable {
                     }
                     const { scene } = renderObject;
 
-                    if (disposeDrawingRenderObject(scene, { unitId, subUnitId, drawingId })) {
+                    if (disposeDrawingRenderObject(scene, param)) {
                         scene.getTransformer()?.clearSelectedObjects();
                     }
                 });

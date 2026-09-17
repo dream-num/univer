@@ -24,6 +24,7 @@ export const menuSchema: MenuSchemaType = {
     [RibbonInsertGroup.MEDIA]: {
         [ShowDocHyperLinkEditPopupOperation.id]: {
             order: 1,
+            gridLayout: { row: 1, column: 5 },
             menuItemFactory: AddHyperLinkMenuItemFactory,
         },
     },

@@ -45,6 +45,7 @@ import {
     IDocClipboardPasteAdapterService,
 } from '../../services/clipboard/doc-paste-mutation-adapter.service';
 import { cloneClipboardNotes, omitClipboardNotes } from '../../services/clipboard/internal-fragment';
+import { IEditorService } from '../../services/editor/editor-manager.service';
 import { getCommandSkeleton } from '../util';
 import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams } from './table/table';
 
@@ -546,23 +547,36 @@ function isWholeBodySelected(
     return editableEnd > 0;
 }
 
+function createClearedBody(body: IDocumentBody, preserveFormatting: boolean): IDocumentBody {
+    const emptyBody: IDocumentBody = {
+        dataStream: DataStreamTreeTokenType.PARAGRAPH,
+        paragraphs: [{
+            ...(preserveFormatting ? Tools.deepClone(body.paragraphs?.[0]) : {}),
+            paragraphId: createParagraphId(new Set((body.paragraphs ?? []).map((paragraph) => paragraph.paragraphId))),
+            startIndex: 0,
+        }],
+    };
+    if (preserveFormatting) {
+        const firstRun = body.textRuns?.find((run) => run.st === 0);
+        if (firstRun) {
+            emptyBody.textRuns = [{ st: 0, ed: 1, ts: Tools.deepClone(firstRun.ts) }];
+        }
+    }
+    return emptyBody;
+}
+
 function getWholeBodyCutActions(
     selections: readonly ITextRangeWithStyle[],
     docDataModel: DocumentDataModel,
-    segmentId: string
+    segmentId: string,
+    preserveFormatting: boolean
 ): JSONXActions {
     const body = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
     if (!body) {
         return [];
     }
 
-    const emptyBody: IDocumentBody = {
-        dataStream: DataStreamTreeTokenType.PARAGRAPH,
-        paragraphs: [{
-            paragraphId: createParagraphId(new Set((body.paragraphs ?? []).map((paragraph) => paragraph.paragraphId))),
-            startIndex: 0,
-        }],
-    };
+    const emptyBody = createClearedBody(body, preserveFormatting);
     const deleteLength = Math.max(0, body.dataStream.length - 1);
     const textX = new TextX();
     textX.push({ t: TextXActionType.INSERT, len: emptyBody.dataStream.length, body: emptyBody });
@@ -734,7 +748,8 @@ export function getCutActionsFromDocRanges(
     docDataModel: DocumentDataModel,
     viewModel: DocumentViewModel,
     segmentId: string,
-    wholeBodySelected = false
+    wholeBodySelected = false,
+    preserveFormatting = false
 ): JSONXActions {
     let rawActions: JSONXActions = [];
     const body = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
@@ -745,7 +760,7 @@ export function getCutActionsFromDocRanges(
         Array.isArray(rectRanges) &&
         (wholeBodySelected || isWholeBodySelected(textRanges, rectRanges, body))
     ) {
-        return getWholeBodyCutActions(textRanges, docDataModel, segmentId);
+        return getWholeBodyCutActions(textRanges, docDataModel, segmentId, preserveFormatting);
     }
 
     if (Array.isArray(textRanges) && textRanges?.length !== 0) {
@@ -913,7 +928,8 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
             docDataModel,
             viewModel,
             segmentId,
-            wholeBodySelected
+            wholeBodySelected,
+            accessor.has(IEditorService) && accessor.get(IEditorService).isEditor(unitId)
         );
 
         const result = commandService.syncExecuteCommand<

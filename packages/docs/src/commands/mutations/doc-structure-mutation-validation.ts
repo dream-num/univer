@@ -14,17 +14,27 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentBody, JSONXActions, JSONXPath } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    ICustomRange,
+    IDocStructureIssue,
+    IDocumentBody,
+    IDocumentData,
+    ISdtCustomRange,
+    JSONXActions,
+    JSONXPath,
+} from '@univerjs/core';
 import {
     CustomRangeType,
     DataStreamTreeTokenType,
-
     getRichTextEditPath,
-
+    getSdtBindingKey,
+    getSdtBindingValue,
     JSON1,
-
+    JSONX,
     TextX,
     TextXActionType,
+    Tools,
     validateDocBodyStructure,
     validateDocumentStructure,
 } from '@univerjs/core';
@@ -178,7 +188,36 @@ function getSegmentType(documentDataModel: DocumentDataModel, segmentId: string)
     return 'body';
 }
 
-function assertValidDocBodyStructure(documentDataModel: DocumentDataModel, segmentId: string): void {
+function getSnapshotBody(snapshot: IDocumentData, segmentId: string): IDocumentBody | undefined {
+    if (!segmentId) {
+        return snapshot.body;
+    }
+    return snapshot.headers?.[segmentId]?.body ?? snapshot.footers?.[segmentId]?.body ?? snapshot.notes?.[segmentId]?.body;
+}
+
+function containsTextXEdit(actions: JSONXActions): boolean {
+    const cursor = JSON1.type.readCursor(actions);
+    let found = false;
+    cursor.traverse(null, (component) => {
+        if (component.et === TextX.id) found = true;
+    });
+    return found;
+}
+
+function subtractBaselineIssues(issues: IDocStructureIssue[], baseline: IDocStructureIssue[]): IDocStructureIssue[] {
+    const counts = new Map<string, number>();
+    baseline.forEach((issue) => counts.set(issue.code, (counts.get(issue.code) ?? 0) + 1));
+    return issues.filter((issue) => {
+        const count = counts.get(issue.code) ?? 0;
+        if (count === 0) {
+            return true;
+        }
+        counts.set(issue.code, count - 1);
+        return false;
+    });
+}
+
+function assertValidDocBodyStructure(documentDataModel: DocumentDataModel, segmentId: string, undoActions: JSONXActions): void {
     const segmentModel = documentDataModel.getSelfOrHeaderFooterModel(segmentId);
     const body = segmentModel?.getBody();
     if (!body) {
@@ -186,6 +225,7 @@ function assertValidDocBodyStructure(documentDataModel: DocumentDataModel, segme
     }
 
     const segmentType = getSegmentType(documentDataModel, segmentId);
+    const context = { segmentType, segmentId: segmentId || undefined };
     const note = documentDataModel.getSnapshot().notes?.[segmentId];
     const issues = note
         ? validateDocumentStructure({ notes: { [segmentId]: note } })
@@ -194,16 +234,158 @@ function assertValidDocBodyStructure(documentDataModel: DocumentDataModel, segme
         return;
     }
 
-    const detail = issues.map((issue) => `${issue.code}${issue.index == null ? '' : `@${issue.index}`}`).join(', ');
+    const snapshot = Tools.deepClone(documentDataModel.getSnapshot());
+    const restoredSnapshot = JSONX.apply(snapshot, undoActions) as unknown as IDocumentData;
+    const baselineBody = getSnapshotBody(restoredSnapshot, segmentId);
+    // ponytail: issue counts preserve editability for legacy imports; add offset-aware mapping if two
+    // defects of the same kind can be exchanged by one mutation in production.
+    const newIssues = baselineBody
+        ? subtractBaselineIssues(issues, validateDocBodyStructure(baselineBody, context))
+        : issues;
+    if (!newIssues.length) {
+        return;
+    }
+
+    const detail = newIssues.map((issue) => `${issue.code}${issue.index == null ? '' : `@${issue.index}`}`).join(', ');
     const segmentLabel = segmentId ? `${segmentType} ${segmentId}` : segmentType;
     throw new Error(`[DocStructure] ${segmentLabel}: ${detail}`);
+}
+
+function getLockedSdtContent(body: IDocumentBody, range: ICustomRange): string {
+    if (range.properties?.kind !== 'group') {
+        return body.dataStream.slice(range.startIndex, range.endIndex + 1);
+    }
+    // A Word group protects text outside its child controls. Each child retains
+    // its own lock policy; keep its identity here so deleting it is not an edit.
+    const children = (body.customRanges ?? []).filter((child) =>
+        child.rangeType === CustomRangeType.SDT && child.rangeId !== range.rangeId &&
+        child.startIndex >= range.startIndex && child.endIndex <= range.endIndex
+    ).sort((left, right) => {
+        const position = left.startIndex - right.startIndex || right.endIndex - left.endIndex;
+        if (position || left.rangeId === right.rangeId) {
+            return position;
+        }
+        return left.rangeId < right.rangeId ? -1 : 1;
+    });
+    const protectedContent: string[] = [];
+    let offset = range.startIndex;
+    for (const child of children) {
+        if (child.startIndex < offset) {
+            continue;
+        }
+        protectedContent.push(body.dataStream.slice(offset, child.startIndex), child.rangeId);
+        offset = child.endIndex + 1;
+    }
+    protectedContent.push(body.dataStream.slice(offset, range.endIndex + 1));
+    return JSON.stringify(protectedContent);
+}
+
+function getRepeatingItemIds(body: IDocumentBody, section: ICustomRange): string[] {
+    const ranges = body.customRanges ?? [];
+    const sectionIndex = ranges.indexOf(section);
+    const nestedSections = ranges.filter((range, index) => range.rangeType === CustomRangeType.SDT &&
+        range.properties?.kind === 'repeatingSection' && range.rangeId !== section.rangeId &&
+        range.startIndex >= section.startIndex && range.endIndex <= section.endIndex &&
+        (range.startIndex > section.startIndex || range.endIndex < section.endIndex || index < sectionIndex));
+    return ranges.filter((range, index) => range.rangeType === CustomRangeType.SDT &&
+        range.properties?.kind === 'repeatingSectionItem' &&
+        range.startIndex >= section.startIndex && range.endIndex <= section.endIndex &&
+        !nestedSections.some((nested) => nested.startIndex <= range.startIndex && range.endIndex <= nested.endIndex &&
+            (nested.startIndex < range.startIndex || range.endIndex < nested.endIndex || index < ranges.indexOf(nested))))
+        .map((range) => range.rangeId)
+        .sort();
+}
+
+export function isDocSdtMutationAllowed(documentDataModel: DocumentDataModel, segmentId: string, actions: JSONXActions): boolean {
+    if (!containsTextXEdit(actions) && isStructurePreservingJSONXEdit(actions, getRichTextEditPath(documentDataModel, segmentId))) {
+        return true;
+    }
+    const snapshot = documentDataModel.getSnapshot();
+    const previousBody = getSnapshotBody(snapshot, segmentId);
+    const lockedRanges = previousBody?.customRanges?.filter((range) =>
+        range.rangeType === CustomRangeType.SDT && (
+            (range.properties?.lock && range.properties.lock !== 'unlocked') ||
+            (range.properties?.kind === 'repeatingSection' && range.properties.repeatingSection?.doNotAllowInsertDelete)
+        )
+    );
+    if (!previousBody || !lockedRanges?.length) {
+        return true;
+    }
+    // Preview before applying: an inverse TextX edit can merge imported runs,
+    // so rolling back a rejected keystroke is not an exact no-op.
+    const candidate = JSONX.apply(Tools.deepClone(snapshot), actions) as unknown as IDocumentData;
+    const currentBody = getSnapshotBody(candidate, segmentId);
+
+    for (const previous of lockedRanges) {
+        const lock = previous.properties?.lock;
+        const current = currentBody?.customRanges?.find((range) => range.rangeId === previous.rangeId && range.rangeType === CustomRangeType.SDT);
+        const wrapperLocked = lock === 'sdtLocked' || lock === 'sdtContentLocked';
+        const contentLocked = lock === 'contentLocked' || lock === 'sdtContentLocked';
+        if (wrapperLocked && !current) {
+            return false;
+        }
+        if (previous.properties?.kind === 'repeatingSection' && previous.properties.repeatingSection?.doNotAllowInsertDelete &&
+            current && currentBody) {
+            const before = getRepeatingItemIds(previousBody, previous);
+            const after = getRepeatingItemIds(currentBody, current);
+            if (before.length !== after.length || before.some((id, index) => id !== after[index])) {
+                return false;
+            }
+        }
+        // Word allows deleting a contentLocked control as a whole, but not changing its contents.
+        if (contentLocked && current && currentBody) {
+            const before = getLockedSdtContent(previousBody, previous);
+            const after = getLockedSdtContent(currentBody, current);
+            // Content locking protects the value, not the control's developer properties.
+            // Word still lets the author change or clear the lock from Content Control Properties.
+            if (before !== after && !isBoundSdtValueUpdate(snapshot, candidate, previous as ISdtCustomRange, current as ISdtCustomRange, currentBody)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+function isBoundSdtValueUpdate(
+    before: IDocumentData,
+    after: IDocumentData,
+    previous: ISdtCustomRange,
+    current: ISdtCustomRange,
+    currentBody: IDocumentBody
+): boolean {
+    const key = getSdtBindingKey(previous);
+    const value = getSdtBindingValue(currentBody, current);
+    if (!key || key !== getSdtBindingKey(current) || value === undefined) {
+        return false;
+    }
+    const segments = ['', ...Object.keys(before.headers ?? {}), ...Object.keys(before.footers ?? {}), ...Object.keys(before.notes ?? {})];
+    return segments.some((segmentId) => {
+        const previousBody = getSnapshotBody(before, segmentId);
+        const nextBody = getSnapshotBody(after, segmentId);
+        if (!previousBody || !nextBody) {
+            return false;
+        }
+        return previousBody.customRanges?.some((range) => {
+            if (range.rangeType !== CustomRangeType.SDT || range.properties?.lock === 'contentLocked' ||
+                range.properties?.lock === 'sdtContentLocked' || getSdtBindingKey(range as ISdtCustomRange) !== key) {
+                return false;
+            }
+            const next = nextBody.customRanges?.find((item) => item.rangeType === CustomRangeType.SDT && item.rangeId === range.rangeId);
+            // Word updates locked mirrors through the shared XML node, but a direct
+            // edit of the locked control alone must still be rejected.
+            return next != null && getSdtBindingKey(next as ISdtCustomRange) === key &&
+                getSdtBindingValue(previousBody, range as ISdtCustomRange) !== value &&
+                getSdtBindingValue(nextBody, next as ISdtCustomRange) === value;
+        }) ?? false;
+    });
 }
 
 export function validateDocStructureMutation(
     documentDataModel: DocumentDataModel,
     segmentId: string,
     actions: JSONXActions,
-    undoActions: JSONXActions
+    undoActions: JSONXActions,
+    isHistoryReplay = false
 ): boolean {
     const editPath = getRichTextEditPath(documentDataModel, segmentId);
     const preservesStructure =
@@ -219,6 +401,11 @@ export function validateDocStructureMutation(
         }
         if (component.et === TextX.id && Array.isArray(component.e)) {
             for (const action of component.e) {
+                if (isRecord(action) && Array.isArray(action.rangeUpdates) && action.rangeUpdates.some((update) =>
+                    isRecord(update) && isRecord(update.range) &&
+                    (update.range.rangeType === CustomRangeType.FOOTNOTE || update.range.rangeType === CustomRangeType.ENDNOTE))) {
+                    changesFootnoteStructure = true;
+                }
                 const ranges: unknown = isRecord(action) && isRecord(action.body) ? action.body.customRanges : undefined;
                 if (Array.isArray(ranges) && ranges.some((range) => isRecord(range) && (range.rangeType === CustomRangeType.FOOTNOTE || range.rangeType === CustomRangeType.ENDNOTE))) {
                     changesFootnoteStructure = true;
@@ -231,8 +418,8 @@ export function validateDocStructureMutation(
         if (issues.length > 0) {
             throw new Error(`[DocStructure] ${issues.map((issue) => `${issue.code}@${issue.index ?? issue.segmentId ?? ''}`).join(', ')}`);
         }
-    } else if (!preservesStructure) {
-        assertValidDocBodyStructure(documentDataModel, segmentId);
+    } else if (!preservesStructure && !isHistoryReplay) {
+        assertValidDocBodyStructure(documentDataModel, segmentId, undoActions);
     }
     return preservesStructure && !changesFootnoteStructure;
 }

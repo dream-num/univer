@@ -44,6 +44,7 @@ export function otherHandler(
     let src = charArray;
 
     while (src.length) {
+        const config = getFontCreateConfig(index + step, viewModel, paragraphNode, sectionBreakConfig, paragraph);
         // Keep ordinary ASCII cheap, but never expose a caret stop inside a combining sequence.
         const char = src.match(/^\p{ASCII}(?![\p{Mark}\u200D])/u)?.[0] ?? getFirstGrapheme(src);
 
@@ -51,11 +52,10 @@ export function otherHandler(
             break;
         }
 
-        if (hasSpace(char) || startWithEmoji(charArray.substring(step))) {
+        if (hasSpace(char) || startWithEmoji(charArray.substring(step)) || (config.textStyle.sc && hasArabic(char))) {
             break;
         }
 
-        const config = getFontCreateConfig(index + step, viewModel, paragraphNode, sectionBreakConfig, paragraph);
         const glyph = createSkeletonLetterGlyph(char, config, getCustomRangeGlyphMetrics(index + step, viewModel, paragraphNode, config));
 
         glyphGroup.push(glyph);

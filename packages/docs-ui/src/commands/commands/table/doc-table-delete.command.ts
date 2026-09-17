@@ -88,6 +88,8 @@ export const DocTableDeleteRowsCommand: ICommand<IDocTableDeleteRowsCommandParam
                 unitId,
                 actions: [],
                 textRanges,
+                segmentId,
+                trigger: DocTableDeleteRowsCommand.id,
             },
         };
 
@@ -191,6 +193,8 @@ export const DocTableDeleteColumnsCommand: ICommand<IDocTableDeleteColumnsComman
                 unitId,
                 actions: [],
                 textRanges,
+                segmentId,
+                trigger: DocTableDeleteColumnsCommand.id,
             },
         };
 
@@ -241,6 +245,7 @@ export const DocTableDeleteColumnsCommand: ICommand<IDocTableDeleteColumnsComman
 
 export interface IDocTableDeleteTableCommandParams {
     targetRange?: ITextRangeWithStyle;
+    unitId?: string;
 }
 
 export const DocTableDeleteTableCommand: ICommand<IDocTableDeleteTableCommandParams> = {
@@ -266,7 +271,9 @@ export const DocTableDeleteTableCommand: ICommand<IDocTableDeleteTableCommandPar
 
         const { segmentId } = rangeInfo;
 
-        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const docDataModel = params?.unitId
+            ? univerInstanceService.getUnit<DocumentDataModel>(params.unitId, UniverInstanceType.UNIVER_DOC)
+            : univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
         if (docDataModel == null || body == null) {
@@ -305,6 +312,8 @@ export const DocTableDeleteTableCommand: ICommand<IDocTableDeleteTableCommandPar
                 unitId,
                 actions: [],
                 textRanges,
+                segmentId,
+                trigger: DocTableDeleteTableCommand.id,
             },
         };
 

@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICustomTable, IDocumentBody, IDocumentData, IDocumentNote } from '../../../types/interfaces/i-document-data';
+import type { ICustomRange, ICustomTable, IDocumentBody, IDocumentData, IDocumentNote } from '../../../types/interfaces/i-document-data';
 import { CustomRangeType, PositionedObjectLayoutType, TableTextWrapType } from '../../../types/interfaces/i-document-data';
 import { DataStreamTreeTokenType } from '../types';
 import {
     getBlockRangeInterval,
     getColumnGroupRangeInterval,
-    getTableRangeInterval,
     intersectsOperationalIntervals,
 } from './build-utils/range-interval';
 
@@ -54,6 +53,11 @@ export type DocStructureIssueCode =
     | 'custom-block-token-mismatch'
     | 'missing-custom-block-metadata'
     | 'duplicate-custom-block-metadata'
+    | 'custom-range-token-mismatch'
+    | 'missing-custom-range-metadata'
+    | 'duplicate-custom-range-id'
+    | 'crossing-custom-range'
+    | 'unbalanced-custom-range'
     | 'empty-column'
     | 'empty-table-cell'
     | 'unbalanced-column-group'
@@ -278,7 +282,7 @@ function scanDocumentStructuralTokens(dataStream: string): IDocumentStructuralTo
 function validateTableMetadata(body: IDocumentBody, scan: IDocumentStructuralTokenScan, issues: IDocStructureIssue[], context: IValidationContext) {
     const pairedTables = scan.tableRanges.pairs;
     const metadataStarts = new Set<number>();
-    let previousTable: ICustomTable | undefined;
+    const parents: ICustomTable[] = [];
 
     const tables = sortStructuralRanges(body.tables ?? []);
     for (const table of tables) {
@@ -307,10 +311,14 @@ function validateTableMetadata(body: IDocumentBody, scan: IDocumentStructuralTok
             ));
         }
 
-        if (previousTable && intersectsOperationalIntervals(getTableRangeInterval(previousTable), getTableRangeInterval(table))) {
-            issues.push(createIssue(context, 'overlapping-table', 'Table ranges must not overlap.', table.startIndex));
+        while (parents.length > 0 && parents[parents.length - 1].endIndex <= table.startIndex) {
+            parents.pop();
         }
-        previousTable = table;
+        const parent = parents[parents.length - 1];
+        if (parent && (table.startIndex === parent.startIndex || table.endIndex >= parent.endIndex)) {
+            issues.push(createIssue(context, 'overlapping-table', 'Table ranges may nest but must not cross or duplicate.', table.startIndex));
+        }
+        parents.push(table);
     }
 
     for (const startIndex of pairedTables.keys()) {
@@ -452,16 +460,18 @@ function validateCustomBlockMetadata(body: IDocumentBody, scan: IDocumentStructu
 function validateStructuralContainers(body: IDocumentBody, issues: IDocStructureIssue[], context: IValidationContext) {
     const columnGroupStack: number[] = [];
     const columnStack: Array<{ startIndex: number; hasChild: boolean }> = [];
-    const tableStack: number[] = [];
-    const tableRowStack: number[] = [];
-    const tableCellStack: Array<{ startIndex: number; hasParagraph: boolean; hasSectionBreak: boolean }> = [];
+    const tableStack: Array<{
+        inRow: boolean;
+        cell?: { startIndex: number; hasParagraph: boolean; hasSectionBreak: boolean };
+    }> = [];
 
     const tokenPattern = new RegExp(DOCUMENT_STRUCTURAL_TOKEN_PATTERN_SOURCE, 'g');
     for (const match of body.dataStream.matchAll(tokenPattern)) {
         const i = match.index;
         const char = match[0];
         const column = columnStack[columnStack.length - 1];
-        const cell = tableCellStack[tableCellStack.length - 1];
+        const table = tableStack[tableStack.length - 1];
+        const cell = table?.cell;
 
         if (char === DataStreamTreeTokenType.PARAGRAPH) {
             if (column) {
@@ -498,33 +508,45 @@ function validateStructuralContainers(body: IDocumentBody, issues: IDocStructure
                 columnGroupStack.pop();
             }
         } else if (char === DataStreamTreeTokenType.TABLE_START) {
-            tableStack.push(i);
+            if (table && !cell) {
+                issues.push(createIssue(context, 'unbalanced-table', 'Nested table must be inside a parent cell.', i));
+            }
+            tableStack.push({ inRow: false });
         } else if (char === DataStreamTreeTokenType.TABLE_ROW_START) {
-            tableRowStack.push(i);
+            if (!table || table.inRow) {
+                issues.push(createIssue(context, 'unbalanced-table', 'Table row must start inside a table without an open row.', i));
+            }
+            if (table) {
+                table.inRow = true;
+            }
         } else if (char === DataStreamTreeTokenType.TABLE_CELL_START) {
-            tableCellStack.push({ startIndex: i, hasParagraph: false, hasSectionBreak: false });
+            if (!table?.inRow || cell) {
+                issues.push(createIssue(context, 'unbalanced-table', 'Table cell must start inside a row without an open cell.', i));
+            }
+            if (table) {
+                table.cell = { startIndex: i, hasParagraph: false, hasSectionBreak: false };
+            }
         } else if (char === DataStreamTreeTokenType.TABLE_CELL_END) {
-            const closedCell = tableCellStack.pop();
-            if (!closedCell) {
+            if (!cell) {
                 issues.push(createIssue(context, 'unbalanced-table', 'Table cell end token has no matching start.', i));
-            } else if (!closedCell.hasParagraph || !closedCell.hasSectionBreak) {
-                issues.push(createIssue(context, 'empty-table-cell', 'Table cell must contain a paragraph and section break child.', closedCell.startIndex));
+            } else if (!cell.hasParagraph || !cell.hasSectionBreak) {
+                issues.push(createIssue(context, 'empty-table-cell', 'Table cell must contain a paragraph and section break child.', cell.startIndex));
+            }
+            if (table) {
+                table.cell = undefined;
             }
         } else if (char === DataStreamTreeTokenType.TABLE_ROW_END) {
-            if (tableCellStack.length > 0 || tableRowStack.length === 0) {
+            if (!table?.inRow || cell) {
                 issues.push(createIssue(context, 'unbalanced-table', 'Table row closes while a cell is still open.', i));
-                tableCellStack.length = 0;
-            } else {
-                tableRowStack.pop();
+            }
+            if (table) {
+                table.inRow = false;
             }
         } else if (char === DataStreamTreeTokenType.TABLE_END) {
-            if (tableCellStack.length > 0 || tableRowStack.length > 0 || tableStack.length === 0) {
+            if (!table || table.inRow || cell) {
                 issues.push(createIssue(context, 'unbalanced-table', 'Table closes while a row or cell is still open.', i));
-                tableCellStack.length = 0;
-                tableRowStack.length = 0;
-            } else {
-                tableStack.pop();
             }
+            tableStack.pop();
         }
     }
 
@@ -532,8 +554,76 @@ function validateStructuralContainers(body: IDocumentBody, issues: IDocStructure
         issues.push(createIssue(context, 'unbalanced-column-group', 'Column group or column token is not closed.', body.dataStream.length));
     }
 
-    if (tableStack.length > 0 || tableRowStack.length > 0 || tableCellStack.length > 0) {
+    if (tableStack.length > 0) {
         issues.push(createIssue(context, 'unbalanced-table', 'Table, row, or cell token is not closed.', body.dataStream.length));
+    }
+}
+
+function validateCustomRangeMetadata(body: IDocumentBody, issues: IDocStructureIssue[], context: IValidationContext) {
+    const pairs = new Map<number, number>();
+    const starts: number[] = [];
+    for (let index = 0; index < body.dataStream.length; index++) {
+        const token = body.dataStream[index];
+        if (token === DataStreamTreeTokenType.CUSTOM_RANGE_START) {
+            starts.push(index);
+        } else if (token === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
+            const start = starts.pop();
+            if (start == null) {
+                issues.push(createIssue(context, 'unbalanced-custom-range', 'Custom range end token has no matching start.', index));
+            } else {
+                pairs.set(start, index);
+            }
+        }
+    }
+    for (const start of starts) {
+        issues.push(createIssue(context, 'unbalanced-custom-range', 'Custom range start token has no matching end.', start));
+    }
+
+    const ranges = body.customRanges ?? [];
+    const ids = new Set<string>();
+    for (const range of ranges) {
+        if (ids.has(range.rangeId)) {
+            issues.push(createIssue(context, 'duplicate-custom-range-id', 'Custom range ids must be unique.', range.startIndex));
+        }
+        ids.add(range.rangeId);
+
+        if (range.rangeType !== CustomRangeType.FIELD) {
+            continue;
+        }
+        if (
+            body.dataStream[range.startIndex] !== DataStreamTreeTokenType.CUSTOM_RANGE_START ||
+            body.dataStream[range.endIndex] !== DataStreamTreeTokenType.CUSTOM_RANGE_END ||
+            pairs.get(range.startIndex) !== range.endIndex
+        ) {
+            issues.push(createIssue(
+                context,
+                'custom-range-token-mismatch',
+                'Field metadata must point to a matching custom range token pair.',
+                range.startIndex
+            ));
+        }
+    }
+
+    for (const [start, end] of pairs) {
+        if (!ranges.some((range) => range.startIndex === start && range.endIndex === end)) {
+            issues.push(createIssue(context, 'missing-custom-range-metadata', 'Custom range token pair has no metadata.', start));
+        }
+    }
+
+    const sortedFields = ranges
+        .filter((range): range is ICustomRange => range.rangeType === CustomRangeType.FIELD)
+        .slice()
+        .sort((left, right) => left.startIndex - right.startIndex || right.endIndex - left.endIndex);
+    const parents: ICustomRange[] = [];
+    for (const range of sortedFields) {
+        while (parents.length > 0 && parents[parents.length - 1].endIndex < range.startIndex) {
+            parents.pop();
+        }
+        const parent = parents[parents.length - 1];
+        if (parent && range.endIndex > parent.endIndex) {
+            issues.push(createIssue(context, 'crossing-custom-range', 'Field ranges may nest but must not cross.', range.startIndex));
+        }
+        parents.push(range);
     }
 }
 
@@ -552,6 +642,7 @@ export function validateDocBodyStructure(
     validateColumnGroupMetadata(body, scan, issues, context);
     validateCustomBlockMetadata(body, scan, issues, context);
     validateStructuralContainers(body, issues, context);
+    validateCustomRangeMetadata(body, issues, context);
 
     if (context.segmentType === 'header' || context.segmentType === 'footer') {
         for (const range of body.customRanges ?? []) {

@@ -14,6 +14,34 @@
  * limitations under the License.
  */
 
+import type { DocumentFlavor, ITable } from '@univerjs/core';
+import type { IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
+import { TableTextWrapType } from '@univerjs/core';
+import { DocumentSkeletonPageType } from '../../basics/i-document-skeleton-cached';
+import { getDocumentCompatibilityPolicy, shouldAllowImportedTableMarginOverflow } from './document-compatibility';
+
+/** Shared by the canvas renderer and interactive table viewport provider. */
+export function getDocsTableLayoutViewportWidth(
+    page: Pick<IDocumentSkeletonPage, 'pageWidth' | 'marginLeft' | 'marginRight'> & Partial<Pick<IDocumentSkeletonPage, 'type'>>,
+    tableLeft: number,
+    tableSource: unknown,
+    documentFlavor?: DocumentFlavor
+): number {
+    const { pageWidth, marginLeft = 0, marginRight = 0 } = page;
+    const policy = getDocumentCompatibilityPolicy(documentFlavor);
+    const allowMarginOverflow = shouldAllowImportedTableMarginOverflow(policy, tableSource);
+    const width = allowMarginOverflow
+        ? Math.max(0, pageWidth - Math.max(0, marginLeft + tableLeft))
+        : Math.max(0, pageWidth - marginLeft - marginRight - tableLeft);
+    const table = tableSource as Partial<ITable> | undefined;
+    if (allowMarginOverflow && page.type === DocumentSkeletonPageType.CELL && table?.textWrap === TableTextWrapType.WRAP) {
+        // A floating nested table owns its grid width, not its anchor cell's width.
+        const gridWidth = table.tableColumns?.reduce((sum, column) => sum + column.size.width.v, 0) ?? 0;
+        return Math.max(width, gridWidth);
+    }
+    return width;
+}
+
 export interface IDocsTableRenderViewport {
     contentWidth: number;
     leadingInsetLeft?: number;

@@ -33,6 +33,7 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
+    SpacingRule,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -47,6 +48,7 @@ import {
 } from '@univerjs/docs';
 import {
     CanvasColorService,
+    FontCache,
     ICanvasColorService,
     IRenderManagerService,
     RenderManagerService,
@@ -79,7 +81,7 @@ import { MobileDocBackScrollRenderController } from '../mobile/back-scroll.rende
 import { MobileDocSelectionRenderController } from '../mobile/doc-selection-render.controller';
 import { MobileDocRenderController } from '../mobile/doc.render-controller';
 
-function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout = false, documentFlavor = DocumentFlavor.TRADITIONAL, withFootnote = false, mobile = false) {
+function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout = false, documentFlavor = DocumentFlavor.TRADITIONAL, withFootnote = false, mobile = false, renderingFontsReady?: Promise<void>) {
     if (workerBeforeLayout) {
         // Model computation cost separately from fake timers so foreground work yields before Worker handoff.
         let elapsed = 0;
@@ -104,6 +106,7 @@ function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout
     // must still hand off before Main paginates the entire document.
     const registerWorker = () => injector.get(DocLayoutExecutorService).register({
         type: 'worker',
+        renderingFontsReady,
         initialize: () => new Promise<void>(() => {}),
         disposeSession: async () => {},
     } as unknown as IDocLayoutExecutor);
@@ -146,7 +149,12 @@ function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout
         notes: withFootnote
             ? { note: { type: 'footnote' as const, noteId: 'note', body: {
                 dataStream: noteStream,
-                paragraphs: [...noteStream.matchAll(/\r/g)].map((match, index) => ({ startIndex: match.index!, paragraphId: `note-${index}` })),
+                // Explicit leading guarantees a continuation page independently of mocked glyph advances.
+                paragraphs: [...noteStream.matchAll(/\r/g)].map((match, index) => ({
+                    startIndex: match.index!,
+                    paragraphId: `note-${index}`,
+                    paragraphStyle: { spacingRule: SpacingRule.EXACT, lineSpacing: 24 },
+                })),
             } } }
             : undefined,
         body: {
@@ -263,28 +271,33 @@ describe('DocRenderController bounded input publication', () => {
         const context = new Proxy({
             font: '',
             webkitBackingStorePixelRatio: 1,
-            measureText: (text: string) => ({
-                width: text.length * 8,
-                actualBoundingBoxAscent: 8,
-                actualBoundingBoxDescent: 2,
-                fontBoundingBoxAscent: 8,
-                fontBoundingBoxDescent: 2,
-            }),
+            measureText(text: string) {
+                const fontSize = /(\d+(?:\.\d+)?)(pt|px)/.exec(this.font);
+                const points = fontSize ? Number(fontSize[1]) * (fontSize[2] === 'px' ? 0.75 : 1) : 14;
+                const scale = points / 14;
+                return {
+                    width: text.length * 8 * scale,
+                    actualBoundingBoxAscent: 8 * scale,
+                    actualBoundingBoxDescent: 2 * scale,
+                    fontBoundingBoxAscent: 8 * scale,
+                    fontBoundingBoxDescent: 2 * scale,
+                };
+            },
         }, { get: (target, key) => key in target ? Reflect.get(target, key) : () => {} });
         vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(context as never);
         const getBoundingClientRect = HTMLElement.prototype.getBoundingClientRect;
         vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
             // Match the fixture's 14pt Canvas metrics; jsdom returns zero and cannot cache normal leading.
             if (this.style.visibility === 'hidden' && this.style.whiteSpace === 'pre' && this.style.lineHeight === 'normal') {
-                const fontSize = Number.parseFloat(this.style.fontSize);
-                const pointsPerUnit = this.style.fontSize.endsWith('px') ? 3 / 4 : 1;
                 const lineCount = (this.textContent ?? '').split('\n').length;
-                const metrics = context.measureText('Hg');
+                const metrics = context.measureText.call({ font: this.style.font }, 'Hg');
                 const lineHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
-                return new DOMRect(0, 0, 0, fontSize * pointsPerUnit / 14 * lineHeight * lineCount);
+                return new DOMRect(0, 0, 0, lineHeight * lineCount);
             }
             return getBoundingClientRect.call(this);
         });
+        Reflect.set(FontCache, '_context', null);
+        FontCache.invalidateMetrics(() => true);
     });
     afterEach(() => {
         vi.restoreAllMocks();
@@ -299,6 +312,7 @@ describe('DocRenderController bounded input publication', () => {
             const pages = editor.skeleton.getSkeletonData()!.pages;
             const oldPage = pages.findIndex((page) => page.notes?.some((note) => note.noteId === 'note'));
             const boundary = pages[oldPage].notes![0].page.ed;
+            expect(boundary).toBeLessThan(editor.model.getSnapshot().notes!.note.body.dataStream.length - 2);
             editor.selectionManager.replaceDocRanges([{
                 startOffset: boundary,
                 endOffset: boundary,
@@ -306,6 +320,7 @@ describe('DocRenderController bounded input publication', () => {
                 segmentPage: oldPage,
             }], { unitId: editor.unitId, subUnitId: editor.unitId }, true);
             expect(await editor.commands.executeCommand(BreakLineCommand.id)).toBe(true);
+            expect(editor.selectionManager.getActiveTextRange()?.endOffset).toBe(boundary + 1);
             for (const text of ['A', ' ', '中', 'B']) {
                 editor.input.textContent = text;
                 editor.input.dispatchEvent(new InputEvent('input', { data: text, inputType: 'insertText' }));
@@ -394,6 +409,39 @@ describe('DocRenderController bounded input publication', () => {
         } finally {
             editor.dispose();
         }
+    });
+
+    it('does not publish fallback-font pages while explicitly configured fonts are pending', async () => {
+        let finishFonts!: () => void;
+        const fontsReady = new Promise<void>((resolve) => {
+            finishFonts = resolve;
+        });
+        const editor = createEditor(1, false, true, DocumentFlavor.TRADITIONAL, false, false, fontsReady);
+        try {
+            await vi.advanceTimersByTimeAsync(1_000);
+            expect(editor.skeleton.getSkeletonData()?.pages.length ?? 0).toBe(0);
+            expect(editor.startWorkerLayout).not.toHaveBeenCalled();
+            finishFonts();
+            await vi.advanceTimersByTimeAsync(1_000);
+            expect(editor.skeleton.hasCompleteLayout()).toBe(true);
+            expect(editor.skeleton.getSkeletonData()!.pages.length).toBe(1);
+        } finally {
+            editor.dispose();
+        }
+    });
+
+    it('does not restart a disposed document when its configured fonts finish loading', async () => {
+        let finishFonts!: () => void;
+        const fontsReady = new Promise<void>((resolve) => {
+            finishFonts = resolve;
+        });
+        const editor = createEditor(1, false, true, DocumentFlavor.TRADITIONAL, false, false, fontsReady);
+        await vi.advanceTimersByTimeAsync(1_000);
+        editor.dispose();
+        finishFonts();
+        await vi.advanceTimersByTimeAsync(1_000);
+        expect(editor.startWorkerLayout).not.toHaveBeenCalled();
+        expect(editor.skeleton.getSkeletonData()?.pages.length ?? 0).toBe(0);
     });
 
     it('publishes the initial caret as soon as the first foreground page is ready', async () => {

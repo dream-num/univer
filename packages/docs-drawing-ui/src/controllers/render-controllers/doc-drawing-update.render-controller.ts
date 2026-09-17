@@ -496,7 +496,10 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                     scene.detachTransformerFrom(shape);
                     this._setTransformerEditable(shape, editable);
                     try {
-                        (shape as Image).setOpacity(isDocInteractionFocusing ? 0.5 : 1);
+                        // Repeated header/footer drawings are faded by the content cover,
+                        // never individually: an opaque picture must still hide pictures below it.
+                        const fadeBody = isDocInteractionFocusing && drawing.isMultiTransform !== BooleanNumber.TRUE;
+                        (shape as Image).setOpacity(fadeBody ? 0.5 : 1);
                     } catch {
                     }
                     if (!isDocInteractionFocusing) {

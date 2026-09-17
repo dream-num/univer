@@ -440,6 +440,15 @@ describe('DocMoveCursorController movement helpers', () => {
         expect(skipTokens).not.toContain(DataStreamTreeTokenType.COLUMN_GROUP_END);
     });
 
+    it('keeps field boundary tokens out of cursor positions', () => {
+        const controller = createControllerHarness();
+
+        const skipTokens = controller._getCursorSkipTokens();
+
+        expect(skipTokens).toContain(DataStreamTreeTokenType.CUSTOM_RANGE_START);
+        expect(skipTokens).toContain(DataStreamTreeTokenType.CUSTOM_RANGE_END);
+    });
+
     it('resolves document start and end offsets', () => {
         const controller = createControllerHarness();
 

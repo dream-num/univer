@@ -14,13 +14,76 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
-import { CustomRangeType, DocumentFlavor, ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, Univer, UniverInstanceType, validateDocumentStructure } from '@univerjs/core';
-import { DocSelectionManagerService, DocStateChangeManagerService, DocStateEmitService, RichTextEditingMutation } from '@univerjs/docs';
-import { IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, RenderManagerService } from '@univerjs/engine-render';
+import type { IDocumentData } from '@univerjs/core';
+import {
+    CustomRangeType,
+    DocumentDataModel,
+    DocumentFlavor,
+    HorizontalAlign,
+    ICommandService,
+    IUniverInstanceService,
+    JSONX,
+    RedoCommand,
+    UndoCommand,
+    Univer,
+    UniverInstanceType,
+    validateDocumentStructure,
+} from '@univerjs/core';
+import {
+    DocSelectionManagerService,
+    DocStateChangeManagerService,
+    DocStateEmitService,
+    RichTextEditingMutation,
+} from '@univerjs/docs';
+import {
+    DocumentViewModel,
+    IRenderManagerService,
+    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+    RenderManagerService,
+} from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createInternalClipboardDocData } from '../../../services/clipboard/internal-fragment';
-import { InnerPasteCommand } from '../clipboard.inner.command';
+import { getCutActionsFromDocRanges, InnerPasteCommand } from '../clipboard.inner.command';
+
+describe('getCutActionsFromDocRanges', () => {
+    it.each([false, true])('keeps formatting only for embedded-editor clearing (%s), with reversible actions', (preserveFormatting) => {
+        const model = new DocumentDataModel({
+            id: 'shape-text',
+            body: {
+                dataStream: 'AB\rCD\r\n',
+                customBlocks: [],
+                customDecorations: [],
+                customRanges: [],
+                paragraphs: [
+                    { startIndex: 2, paragraphId: 'first', paragraphStyle: { horizontalAlign: HorizontalAlign.CENTER } },
+                    { startIndex: 5, paragraphId: 'second', paragraphStyle: { horizontalAlign: HorizontalAlign.RIGHT } },
+                ],
+                textRuns: [{ st: 0, ed: 2, ts: { fs: 16, bl: 1, cl: { rgb: '#ee8800' } } }],
+            },
+        });
+        const before = structuredClone(model.getSnapshot());
+        const actions = getCutActionsFromDocRanges(
+            [{ startOffset: 0, endOffset: 6, collapsed: false }],
+            [],
+            model,
+            new DocumentViewModel(model),
+            '',
+            true,
+            preserveFormatting
+        );
+        const undo = JSONX.invertWithDoc(actions, before);
+        model.apply(actions);
+        expect(model.getBody()?.dataStream).toBe('\r\n');
+        expect(model.getBody()?.paragraphs?.[0].paragraphStyle).toEqual(preserveFormatting ? { horizontalAlign: HorizontalAlign.CENTER } : undefined);
+        expect(model.getBody()?.textRuns ?? []).toEqual(preserveFormatting ? [{ st: 0, ed: 1, ts: before.body!.textRuns![0].ts }] : []);
+        const cleared = structuredClone(model.getSnapshot());
+        model.apply(undo);
+        expect(model.getSnapshot()).toEqual(before);
+        model.apply(actions);
+        expect(model.getSnapshot()).toEqual(cleared);
+        model.dispose();
+    });
+});
 
 const SOURCE: IDocumentData = {
     id: 'source',

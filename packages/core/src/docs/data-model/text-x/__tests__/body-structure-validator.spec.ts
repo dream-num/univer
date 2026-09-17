@@ -16,11 +16,48 @@
 
 import type { IDocumentBody } from '../../../../types/interfaces';
 import { describe, expect, it } from 'vitest';
-import { DocumentBlockRangeType } from '../../../../types/interfaces';
+import { CustomRangeType, DocumentBlockRangeType } from '../../../../types/interfaces';
 import { DataStreamTreeTokenType } from '../../types';
 import { validateDocBodyStructure, validateDocumentStructure } from '../structure-validator';
 
 describe('validateDocBodyStructure', () => {
+    it.each([1, 2, 3])('accepts valid tables nested %i levels without accepting duplicate metadata', (depth) => {
+        const T = DataStreamTreeTokenType;
+        let content = 'Cell';
+        for (let level = 0; level < depth; level++) {
+            content = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}${content}${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+        }
+        const body: IDocumentBody = { dataStream: `${content}${T.PARAGRAPH}${T.SECTION_BREAK}`, tables: [] };
+        const starts: number[] = [];
+        Array.from(body.dataStream).forEach((token, index) => {
+            if (token === T.TABLE_START) {
+                starts.push(index);
+            } else if (token === T.TABLE_END) {
+                const startIndex = starts.pop()!;
+                body.tables!.push({ tableId: `table_${startIndex}`, startIndex, endIndex: index + 1 });
+            }
+        });
+
+        expect(validateDocBodyStructure(body)).toEqual([]);
+        body.tables!.push({ ...body.tables![0], tableId: 'duplicate' });
+        expect(validateDocBodyStructure(body).map((issue) => issue.code)).toContain('overlapping-table');
+    });
+
+    it('rejects misplaced table rows, cells and nested tables', () => {
+        const T = DataStreamTreeTokenType;
+        const cell = `${T.TABLE_CELL_START}Cell${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}`;
+        const table = `${T.TABLE_START}${T.TABLE_ROW_START}${cell}${T.TABLE_ROW_END}${T.TABLE_END}`;
+        for (const dataStream of [
+            `${T.TABLE_ROW_START}${cell}${T.TABLE_ROW_END}`,
+            `${T.TABLE_START}${cell}${T.TABLE_END}`,
+            `${T.TABLE_START}${table}${T.TABLE_END}`,
+            table.replace(T.TABLE_CELL_END, T.TABLE_ROW_END),
+            table.replace(T.TABLE_ROW_END, T.TABLE_CELL_END),
+        ]) {
+            expect(validateDocBodyStructure({ dataStream }).map((issue) => issue.code)).toContain('unbalanced-table');
+        }
+    });
+
     it('accepts a valid plain document body', () => {
         const body: IDocumentBody = {
             dataStream: `A${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`,
@@ -29,6 +66,24 @@ describe('validateDocBodyStructure', () => {
         };
 
         expect(validateDocBodyStructure(body)).toEqual([]);
+    });
+
+    it('accepts nested marker-backed fields and rejects crossing metadata', () => {
+        const T = DataStreamTreeTokenType;
+        const body: IDocumentBody = {
+            dataStream: `${T.CUSTOM_RANGE_START}A${T.CUSTOM_RANGE_START}1${T.CUSTOM_RANGE_END}B${T.CUSTOM_RANGE_END}${T.PARAGRAPH}${T.SECTION_BREAK}`,
+            paragraphs: [{ startIndex: 7, paragraphId: 'root' }],
+            sectionBreaks: [{ sectionId: 'section_field', startIndex: 8 }],
+            customRanges: [
+                { startIndex: 0, endIndex: 6, rangeId: 'toc', rangeType: CustomRangeType.FIELD },
+                { startIndex: 2, endIndex: 4, rangeId: 'page-ref', rangeType: CustomRangeType.FIELD },
+            ],
+        };
+
+        expect(validateDocBodyStructure(body)).toEqual([]);
+
+        body.customRanges![1].endIndex = 6;
+        expect(validateDocBodyStructure(body).map((issue) => issue.code)).toContain('custom-range-token-mismatch');
     });
 
     it('reports root bodies without a minimum paragraph and section pair', () => {

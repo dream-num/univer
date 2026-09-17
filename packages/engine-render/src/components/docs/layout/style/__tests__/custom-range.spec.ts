@@ -52,4 +52,12 @@ describe('custom range style', () => {
     it('does not style unsupported custom range types', () => {
         expect(getCustomRangeStyle({ rangeType: CustomRangeType.COMMENT } as never)).toBeNull();
     });
+
+    it.each([true, false])('leaves authored hyperlink formatting unchanged when active is %s', (active) => {
+        expect(getCustomRangeStyle({
+            rangeType: CustomRangeType.HYPERLINK,
+            active,
+            properties: { textStyleMode: 'text' },
+        } as never)).toBeNull();
+    });
 });

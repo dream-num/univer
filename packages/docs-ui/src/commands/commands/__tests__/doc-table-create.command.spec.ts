@@ -15,7 +15,7 @@
  */
 
 import type { ICommand, IDocumentData, Univer } from '@univerjs/core';
-import { awaitTime, DataStreamTreeTokenType, DocumentBlockRangeType, ICommandService } from '@univerjs/core';
+import { awaitTime, DataStreamTreeTokenType, DocumentBlockRangeType, ICommandService, UndoCommandId } from '@univerjs/core';
 import {
     DocContentInsertService,
     DocSelectionManagerService,
@@ -438,6 +438,44 @@ describe('doc table create command helpers', () => {
         expect(getDeleteTableActionParams(asRange(getOutsideTableOffset(fixture)), viewModel)).toBeNull();
     });
 
+    it('targets the innermost table for nested table commands and Tab navigation', () => {
+        const firstCell = { startIndex: 5, endIndex: 10 };
+        const secondCell = { startIndex: 11, endIndex: 19 };
+        const firstRow = { startIndex: 4, endIndex: 20, children: [firstCell, secondCell] };
+        const secondRow = { startIndex: 21, endIndex: 56, children: [{ startIndex: 22, endIndex: 30 }, { startIndex: 31, endIndex: 55 }] };
+        const innerTable = { startIndex: 3, endIndex: 57, children: [firstRow, secondRow] };
+        const outerTable = { startIndex: 0, endIndex: 100, children: [] };
+        const tables = [
+            { tableId: 'outer', startIndex: 0, endIndex: 100 },
+            { tableId: 'inner', startIndex: 3, endIndex: 57 },
+        ];
+        const vm = {
+            findTableNodeById: (tableId: string) => tableId === 'inner' ? innerTable : outerTable,
+            getBody: () => ({ tables }),
+        };
+        const viewModel = {
+            ...vm,
+            getSelfOrHeaderFooterViewModel: () => vm,
+        } as never;
+
+        expect(getDeleteTableActionParams(asRange(6), viewModel)).toEqual({
+            tableId: 'inner',
+            offset: 3,
+            len: 55,
+            cursor: 3,
+        });
+        expect(getInsertRowActionsParams(asRange(6), INSERT_ROW_POSITION.ABOVE, viewModel)).toEqual({
+            tableId: 'inner',
+            offset: 4,
+            colCount: 2,
+            insertRowIndex: 0,
+        });
+        expect(getCellOffsets(viewModel, asRange(6), CellPosition.NEXT)).toEqual({
+            startOffset: 12,
+            endOffset: 17,
+        });
+    });
+
     it('computes delete row-content params for the selected cells in one row', () => {
         const fixture = createTableFixture();
         const viewModel = createTableViewModel(fixture);
@@ -551,6 +589,9 @@ describe('doc table create command helpers', () => {
         expect(await commandService.executeCommand(DocTableDeleteRowsCommand.id)).toBe(true);
         await awaitTime(0);
         expect(rowTestBed.doc.getSnapshot().tableSource?.[TABLE_ID].tableRows).toHaveLength(2);
+        expect(await commandService.executeCommand(UndoCommandId)).toBe(true);
+        await awaitTime(0);
+        expect(rowTestBed.doc.getSnapshot().tableSource?.[TABLE_ID].tableRows).toHaveLength(3);
         rowTestBed.univer.dispose();
 
         const columnFixture = createTableFixture();
@@ -562,6 +603,10 @@ describe('doc table create command helpers', () => {
         await awaitTime(0);
         expect(columnTestBed.doc.getSnapshot().tableSource?.[TABLE_ID].tableColumns).toHaveLength(2);
         expect(columnTestBed.doc.getSnapshot().tableSource?.[TABLE_ID].tableRows.map((row) => row.tableCells.length)).toEqual([2, 2, 2]);
+        expect(await commandService.executeCommand(UndoCommandId)).toBe(true);
+        await awaitTime(0);
+        expect(columnTestBed.doc.getSnapshot().tableSource?.[TABLE_ID].tableColumns).toHaveLength(3);
+        expect(columnTestBed.doc.getSnapshot().tableSource?.[TABLE_ID].tableRows.map((row) => row.tableCells.length)).toEqual([3, 3, 3]);
         columnTestBed.univer.dispose();
 
         const tableFixture = createTableFixture();
@@ -580,6 +625,11 @@ describe('doc table create command helpers', () => {
         await awaitTime(0);
         expect(tableTestBed.doc.getBody()?.dataStream).toBe(TABLE_SUFFIX);
         expect(testBedSnapshotTableIds(tableTestBed)).toEqual([]);
+
+        expect(await commandService.executeCommand(UndoCommandId)).toBe(true);
+        await awaitTime(0);
+        expect(tableTestBed.doc.getBody()?.dataStream).toBe(tableFixture.documentData.body?.dataStream);
+        expect(testBedSnapshotTableIds(tableTestBed)).toEqual([TABLE_ID]);
     });
 
     it('creates a table at the current document selection and fits it to page content width', async () => {

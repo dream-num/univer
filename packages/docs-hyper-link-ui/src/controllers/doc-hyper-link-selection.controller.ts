@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
+import type { IRichTextEditingMutationParams, ISetTextSelectionsOperationParams } from '@univerjs/docs';
 import {
     CustomRangeType,
     Disposable,
@@ -24,10 +24,12 @@ import {
     IUniverInstanceService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { SetTextSelectionsOperation } from '@univerjs/docs';
+import { RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { DocHyperLinkPopupService } from '../services/hyper-link-popup.service';
 
 export class DocHyperLinkSelectionController extends Disposable {
+    private _selection: { unitId: string; key: string } | null = null;
+
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -36,22 +38,52 @@ export class DocHyperLinkSelectionController extends Disposable {
         super();
 
         this._initSelectionChange();
+        this.disposeWithMe(this._univerInstanceService.unitDisposed$.subscribe((unit) => {
+            if (this._selection?.unitId === unit.getUnitId()) {
+                this._selection = null;
+            }
+        }));
     }
 
     private _initSelectionChange() {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id === RichTextEditingMutation.id) {
+                    const params = commandInfo.params as IRichTextEditingMutationParams;
+                    if (params.unitId === this._docHyperLinkService.showing?.unitId) {
+                        this._docHyperLinkService.hideInfoPopup();
+                    }
+                    return;
+                }
                 if (commandInfo.id === SetTextSelectionsOperation.id) {
                     const params = commandInfo.params as ISetTextSelectionsOperationParams;
                     const { unitId, ranges, segmentId } = params;
 
                     const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
                     const primary = ranges[0];
+                    const selectionKey = JSON.stringify([
+                        unitId,
+                        segmentId ?? '',
+                        primary?.startOffset,
+                        primary?.endOffset,
+                        primary?.segmentPage,
+                    ]);
+                    const sameSelection = selectionKey === this._selection?.key;
+                    this._selection = { unitId, key: selectionKey };
                     const editing = this._docHyperLinkService.editing;
                     // Opening the editor selects its own link; that is not a user dismissal.
                     if (editing?.unitId === unitId &&
                         (editing.segmentId ?? '') === (segmentId ?? '') &&
                         primary?.startOffset === editing.startIndex && primary.endOffset === editing.endIndex + 1) {
+                        return;
+                    }
+                    if (params.isEditing) {
+                        this._docHyperLinkService.hideInfoPopup();
+                        return;
+                    }
+                    // Layout republishes the current caret. Reopening a popup here
+                    // acquires an interaction lock and can suspend Worker publication.
+                    if (sameSelection) {
                         return;
                     }
                     if (primary?.collapsed && doc) {

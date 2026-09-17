@@ -15,7 +15,7 @@
  */
 
 import type { UpdateDocsAttributeType } from '../../../shared/command-enum';
-import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
+import type { ICustomRange, IDocumentBody } from '../../../types/interfaces/i-document-data';
 
 // Internal TextX structural-replacement marker. Inserted paragraphs replace the
 // same logical paragraphs later in the operation, so their ids must stay stable.
@@ -36,6 +36,20 @@ export interface IRetainAction {
     body?: IDocumentBody;
     oldBody?: IDocumentBody;
     coverType?: UpdateDocsAttributeType;
+    /**
+     * Identity edits applied after the text operation, with absolute result-document offsets.
+     * nextRangeId restores array order by identity (null means the end), including coincident SDT nesting.
+     * Collaboration peers must support this extension; legacy TextX implementations ignore it.
+     */
+    rangeUpdates?: Array<{
+        rangeId: string;
+        range: ICustomRange | null;
+        nextRangeId?: string | null;
+        /** Only these property paths are written; missing values remove properties. Arrays are atomic. */
+        propertyPaths?: string[][];
+    }>;
+    /** Before-document values captured by makeInvertible; never persisted in a document body. */
+    oldRangeUpdates?: IRetainAction['rangeUpdates'];
 }
 
 /**
@@ -45,6 +59,8 @@ export interface IInsertAction {
     t: TextXActionType.INSERT;
     body: IDocumentBody;
     len: number;
+    /** Scalar selection intent, not snapshot data. All collaboration peers must support this extension. */
+    valueRangeId?: string;
 }
 
 /**
@@ -54,6 +70,8 @@ export interface IDeleteAction {
     t: TextXActionType.DELETE;
     len: number;
     body?: IDocumentBody; // Add a body property to make this action invertible.
+    /** Preserved through inversion so undo participates in scalar conflict resolution. */
+    valueRangeId?: string;
 }
 
 export type TextXAction = IRetainAction | IInsertAction | IDeleteAction;

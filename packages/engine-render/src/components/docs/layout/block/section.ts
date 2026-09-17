@@ -87,7 +87,9 @@ export function dealWithSection(
                     ctx,
                     sectionBreakConfig,
                     ctx.skeletonResourceReference,
-                    currentPageCache.pageNumber + 1
+                    currentPageCache.pageNumber + 1,
+                    undefined,
+                    currentPageCache
                 );
             }
             skeletonPages = dealWidthParagraph(

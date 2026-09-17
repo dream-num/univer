@@ -39,7 +39,7 @@ import { FLOAT_TEXT_STYLE_MENU_ID, FLOAT_TOOLBAR_MENU_POSITION } from '../../men
 
 interface IFloatToolbarProps {
     avaliableMenus?: Array<string | IFloatToolbarMenuConfig>;
-    popup?: { extraProps?: { onDismiss?: () => void } };
+    popup?: { extraProps?: { onDismiss?: () => void; onMount?: () => () => void } };
 }
 
 interface IFloatToolbarMenuConfig {
@@ -98,6 +98,9 @@ export function resolveFloatToolbarMenus(
 export function FloatToolbar(props: IFloatToolbarProps) {
     const { avaliableMenus = DEFAULT_AVALIABLE_MENUS } = props;
     const onDismiss = props.popup?.extraProps?.onDismiss;
+    const onMount = props.popup?.extraProps?.onMount;
+
+    useEffect(() => onMount?.(), [onMount]);
 
     const menuManagerService = useDependency(IMenuManagerService);
     const toolbarRef = useRef<HTMLDivElement>(null);

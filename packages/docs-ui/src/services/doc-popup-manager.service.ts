@@ -22,10 +22,10 @@ import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInsta
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService, pxToNum } from '@univerjs/engine-render';
 import { ICanvasPopupService } from '@univerjs/ui';
-import { BehaviorSubject, map } from 'rxjs';
+import { BehaviorSubject, filter, map } from 'rxjs';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
 import { SetDocZoomRatioOperation } from '../commands/operations/set-doc-zoom-ratio.operation';
-import { NodePositionConvertToCursor } from './selection/convert-text-range';
+import { findDocRangeNodePositions, NodePositionConvertToCursor } from './selection/convert-text-range';
 import { getLineBounding } from './selection/text-range';
 
 export function transformBound2OffsetBound(originBound: IBoundRectNoAngle, scene: Scene): IBoundRectNoAngle {
@@ -97,13 +97,11 @@ export interface IDocCanvasPopup extends Omit<IPopup, 'anchorRect$' | 'children'
 export const calcDocRangePositions = (range: ITextRangeParam, currentRender: IRender): IBoundRectNoAngle[] | undefined => {
     const { scene, mainComponent, engine } = currentRender;
     const skeleton = currentRender.with(DocSkeletonManagerService).getSkeleton();
-    const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, true, range.segmentId, range.segmentPage);
     const endIndex = range.collapsed ? range.startOffset : range.endOffset - 1;
-    // Include the last glyph in the anchor and its outside-click exclusion.
-    const endPosition = skeleton.findNodePositionByCharIndex(endIndex, range.collapsed === true, range.segmentId, range.segmentPage);
+    const positions = findDocRangeNodePositions(skeleton, range.startOffset, endIndex, range.segmentId, range.segmentPage);
     const document = mainComponent as Documents;
 
-    if (!endPosition || !startPosition) {
+    if (!positions) {
         return;
     }
 
@@ -121,7 +119,10 @@ export const calcDocRangePositions = (range: ITextRangeParam, currentRender: IRe
 
     const { scaleX, scaleY } = scene.getAncestorScale();
     const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
-    const { borderBoxPointGroup } = convertor.getRangePointData(startPosition, endPosition);
+    const { borderBoxPointGroup } = convertor.getRangePointData(
+        positions.startPosition,
+        range.collapsed ? positions.startPosition : positions.endPosition
+    );
     const bounds = getLineBounding(borderBoxPointGroup);
     const res = bounds.map((bound) => transformBound2OffsetBound(bound, scene)).map((i) => ({
         left: (i.left + docsLeft * scaleX) * scaleAdjust + left,
@@ -290,16 +291,17 @@ export class DocCanvasPopManagerService extends Disposable {
         const disposable = new DisposableCollection();
         const updatePositions = () => {
             try {
-                const position = calcDocRangePositions(range, currentRender);
-                if (position) {
-                    positions$.next(position);
-                }
+                positions$.next(calcDocRangePositions(range, currentRender) ?? []);
             } catch {
                 // The popup may outlive an embedded render while its host switches tabs.
                 // Keep the last anchor until the popup is disposed.
             }
         };
 
+        const layoutSubscription = currentRender.with(DocSkeletonManagerService).getSkeleton().dirty$?.subscribe(updatePositions);
+        if (layoutSubscription) {
+            disposable.add(layoutSubscription);
+        }
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (this._shouldUpdateForCommand(commandInfo, currentRender.unitId)) {
                 updatePositions();
@@ -415,7 +417,7 @@ export class DocCanvasPopManagerService extends Disposable {
         const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
         const popupManagerService = this._resolvePopupManagerService(popupInjector);
 
-        const { positions: bounds, positions$: bounds$, disposable } = this._createRangePositionObserver(range, currentRender);
+        const { positions$: bounds$, disposable } = this._createRangePositionObserver(range, currentRender);
         const getAnchor = (bounds: IBoundRectNoAngle[]) => {
             if (popup.rangeAnchor === 'selection-end') {
                 const backward = range.direction === 'backward';
@@ -425,34 +427,52 @@ export class DocCanvasPopManagerService extends Disposable {
             }
             return direction.includes('top') ? bounds[0] : bounds[bounds.length - 1];
         };
-        const position$ = bounds$.pipe(map(getAnchor));
+        const position$ = bounds$.pipe(filter((bounds) => bounds.length > 0), map(getAnchor));
+        let id: string | undefined;
+        let popupActivity: IDisposable | null = null;
+        const removePopup = () => {
+            if (id != null) {
+                popupManagerService.removePopup(id);
+                id = undefined;
+            }
+            popupActivity?.dispose();
+            popupActivity = null;
+        };
 
-        const id = popupManagerService.addPopup({
-            ...popup,
-            unitId,
-            subUnitId: 'default',
-            connectorInjector: popupInjector,
-            anchorRect: getAnchor(bounds),
-            anchorRect$: position$,
-            excludeRects: bounds,
-            excludeRects$: bounds$,
-            direction: (['top', 'bottom', 'horizontal'].some((i) => direction.includes(i)))
-                ? bounds.length > 1
-                    ? multipleDirection ?? direction
-                    : direction
-                : direction,
-            canvasElement: currentRender.engine.getCanvasElement(),
-        });
-        const popupActivity = popup.requiresStableLayout === false ? null : this._beginPopupActivity(unitId);
+        disposable.add(bounds$.subscribe((bounds) => {
+            if (bounds.length === 0) {
+                removePopup();
+                return;
+            }
+            if (id != null) {
+                return;
+            }
+            id = popupManagerService.addPopup({
+                ...popup,
+                unitId,
+                subUnitId: 'default',
+                connectorInjector: popupInjector,
+                anchorRect: getAnchor(bounds),
+                anchorRect$: position$,
+                excludeRects: bounds,
+                excludeRects$: bounds$,
+                direction: (['top', 'bottom', 'horizontal'].some((i) => direction.includes(i)))
+                    ? bounds.length > 1
+                        ? multipleDirection ?? direction
+                        : direction
+                    : direction,
+                canvasElement: currentRender.engine.getCanvasElement(),
+            });
+            popupActivity = popup.requiresStableLayout === false ? null : this._beginPopupActivity(unitId);
+        }));
 
         return {
             dispose: () => {
-                popupManagerService.removePopup(id);
+                removePopup();
                 bounds$.complete();
                 disposable.dispose();
-                popupActivity?.dispose();
             },
-            canDispose: () => popupManagerService.activePopupId !== id,
+            canDispose: () => id == null || popupManagerService.activePopupId !== id,
         };
     }
     // #endregion

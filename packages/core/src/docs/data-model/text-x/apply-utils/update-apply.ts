@@ -27,7 +27,7 @@ import type {
     ITextRun,
 } from '../../../../types/interfaces';
 import { Tools, UpdateDocsAttributeType } from '../../../../shared';
-import { CustomDecorationType } from '../../../../types/interfaces';
+import { CustomDecorationType, CustomRangeType } from '../../../../types/interfaces';
 import { PresetListType } from '../../preset-list-type';
 import {
     deleteBlockRanges,
@@ -628,6 +628,27 @@ function updateCustomRanges(
 
     updateDataCustomRanges.forEach((customRange) => {
         const { startIndex, endIndex } = customRange;
+        const existingSdt = customRange.rangeType === CustomRangeType.SDT
+            ? newCustomRanges.find((range) => range.rangeType === CustomRangeType.SDT && range.rangeId === customRange.rangeId)
+            : undefined;
+
+        // A retain carrying metadata can cover only one fragment of an enclosing SDT
+        // after TextX composition (for example, a value replacement between cell
+        // boundary tokens). In that case the retained range is a property update for
+        // the existing entity, not a second SDT with clipped boundaries.
+        if (existingSdt) {
+            // A clipped fragment touches the retain edge. An interior boundary is
+            // explicit (for example, undoing an extension past a paragraph mark).
+            if (startIndex > 0) {
+                existingSdt.startIndex = startIndex + currentIndex;
+            }
+            if (endIndex < textLength - 1) {
+                existingSdt.endIndex = endIndex + currentIndex;
+            }
+            existingSdt.properties = Tools.deepClone(customRange.properties);
+            existingSdt.wholeEntity = customRange.wholeEntity;
+            return;
+        }
         newCustomRanges.push({
             ...customRange,
             startIndex: startIndex + currentIndex,
@@ -635,6 +656,26 @@ function updateCustomRanges(
         });
     });
 
+    // A retained parent can shrink onto a fully replaced child. Preserve the
+    // update's nesting order only for coincident SDTs; leave other ranges alone.
+    const updateOrder = new Map(updateDataCustomRanges.map((range, index) => [range.rangeId, index]));
+    const coincidentSdts = new Map<string, number[]>();
+    newCustomRanges.forEach((range, index) => {
+        if (range.rangeType !== CustomRangeType.SDT || !updateOrder.has(range.rangeId)) {
+            return;
+        }
+        const key = `${range.startIndex}:${range.endIndex}`;
+        const positions = coincidentSdts.get(key) ?? [];
+        positions.push(index);
+        coincidentSdts.set(key, positions);
+    });
+    for (const positions of coincidentSdts.values()) {
+        const ordered = positions.map((index) => newCustomRanges[index])
+            .sort((left, right) => updateOrder.get(left.rangeId)! - updateOrder.get(right.rangeId)!);
+        positions.forEach((position, index) => {
+            newCustomRanges[position] = ordered[index];
+        });
+    }
     body.customRanges = mergeContinuousRanges(newCustomRanges);
 
     return removeCustomRanges;

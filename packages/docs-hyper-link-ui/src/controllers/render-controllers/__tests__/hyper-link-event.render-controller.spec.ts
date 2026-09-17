@@ -48,6 +48,45 @@ function createController(
 }
 
 describe('DocHyperLinkEventRenderController', () => {
+    it('treats a containing table render segment as the main document body', () => {
+        const hoverCustomRanges$ = new Subject<unknown[]>();
+        const clickCustomRanges$ = new Subject<unknown>();
+        const pointerDownCustomRanges$ = new Subject<unknown[]>();
+        const commandService = {
+            executeCommand: vi.fn(),
+        };
+        const controller = createController(
+            {
+                unitId: 'doc-unit',
+                unit: { getBody: () => ({ tables: [{ tableId: 'table-4' }] }) },
+            } as never,
+            { hoverCustomRanges$, clickCustomRanges$, pointerDownCustomRanges$ } as never,
+            commandService as never,
+            { showing: false } as never,
+            { getSkeleton: vi.fn() } as never,
+            { getTextRanges: () => [{ segmentId: 'table-4' }] } as never
+        );
+
+        hoverCustomRanges$.next([{
+            range: {
+                rangeId: 'link-1',
+                rangeType: CustomRangeType.HYPERLINK,
+                startIndex: 4,
+                endIndex: 10,
+            },
+            segmentId: '',
+            segmentPageIndex: -1,
+            rects: [],
+        }]);
+
+        expect(commandService.executeCommand).toHaveBeenCalledWith(
+            expect.any(String),
+            expect.objectContaining({ linkId: 'link-1', fromHover: true })
+        );
+
+        controller.dispose();
+    });
+
     it('keeps the mobile event controller independent from the desktop controller', () => {
         expect(MobileDocHyperLinkEventRenderController.prototype).not.toBeInstanceOf(DocHyperLinkEventRenderController);
     });

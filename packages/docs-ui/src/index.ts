@@ -237,6 +237,7 @@ export { convertBodyToHtml } from './services/clipboard/udm-to-html/convertor';
 export { DocHtmlExportService } from './services/clipboard/udm-to-html/doc-html-export.service';
 export type { DocHtmlExportTransformer } from './services/clipboard/udm-to-html/doc-html-export.service';
 export { DocAutoFormatService } from './services/doc-auto-format.service';
+export { DocContextualRibbonService } from './services/doc-contextual-ribbon.service';
 export {
     DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
     IDocEmbedInteractionBoundaryService,

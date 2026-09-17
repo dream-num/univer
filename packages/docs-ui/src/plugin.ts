@@ -178,6 +178,7 @@ import {
 } from './services/clipboard/doc-paste-mutation-adapter.service';
 import { DocHtmlExportService } from './services/clipboard/udm-to-html/doc-html-export.service';
 import { DocAutoFormatService } from './services/doc-auto-format.service';
+import { DocContextualRibbonService } from './services/doc-contextual-ribbon.service';
 import { DocEventManagerService } from './services/doc-event-manager.service';
 import { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
 import { DocIMEStateChangeInterceptorService } from './services/doc-ime-state-change-interceptor.service';
@@ -464,6 +465,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [IDocStateChangeInterceptorService, { useClass: DocIMEStateChangeInterceptorService }],
             [DocAutoFormatService],
             [DocMenuStyleService],
+            [DocContextualRibbonService],
 
         ], this._config.override);
         dependencies.forEach((d) => injector.add(d));

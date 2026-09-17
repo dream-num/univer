@@ -387,6 +387,10 @@ export class DocMoveCursorController extends Disposable {
                 return;
             }
 
+            if (this._deferUnmaterializedCursorMove(docDataModel, skeleton, cursor, normalizedSegmentId, () => this._handleMoveCursor(direction, granularity))) {
+                return;
+            }
+
             cursor = this._normalizeRenderableCursorOffset(
                 skeleton,
                 body.dataStream,
@@ -562,6 +566,40 @@ export class DocMoveCursorController extends Disposable {
 
             this._scrollToFocusNodePosition(docDataModel.getUnitId(), cursor);
         }
+    }
+
+    private _deferUnmaterializedCursorMove(
+        doc: DocumentDataModel,
+        skeleton: DocumentSkeleton,
+        offset: number,
+        segmentId: string,
+        resume: () => void
+    ): boolean {
+        if (segmentId !== '') {
+            return false;
+        }
+        const pageIndex = skeleton.findBodyPageIndexByCharIndex(offset);
+        const page = skeleton.getSkeletonData()?.pages[pageIndex];
+        if (pageIndex >= 0 && !page?.isMaterializationPlaceholder) {
+            return false;
+        }
+        const render = this._renderManagerService.getRenderUnitById(doc.getUnitId());
+        if (!render?.getInjector?.().has(DocBackScrollRenderController)) {
+            return false;
+        }
+        const selection = this._textSelectionManagerService.getActiveTextRange();
+        const dataStream = doc.getBody()?.dataStream;
+        // An offscreen page has no glyphs yet; it is not an invalid cursor target.
+        // Reuse bounded navigation and its pointer/scroll cancellation before finding caret geometry.
+        render.with(DocBackScrollRenderController).scrollToRange({ startOffset: offset, endOffset: offset, collapsed: true }, () => {
+            const current = this._textSelectionManagerService.getActiveTextRange();
+            if (doc.getBody()?.dataStream === dataStream && current?.startOffset === selection?.startOffset &&
+                current?.endOffset === selection?.endOffset && current?.segmentId === selection?.segmentId &&
+                this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)?.getUnitId() === doc.getUnitId()) {
+                resume();
+            }
+        });
+        return true;
     }
 
     private _getCursorOffsetByGranularity(

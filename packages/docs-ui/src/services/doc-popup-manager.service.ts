@@ -97,8 +97,27 @@ export interface IDocCanvasPopup extends Omit<IPopup, 'anchorRect$' | 'children'
 export const calcDocRangePositions = (range: ITextRangeParam, currentRender: IRender): IBoundRectNoAngle[] | undefined => {
     const { scene, mainComponent, engine } = currentRender;
     const skeleton = currentRender.with(DocSkeletonManagerService).getSkeleton();
-    const endIndex = range.collapsed ? range.startOffset : range.endOffset - 1;
-    const positions = findDocRangeNodePositions(skeleton, range.startOffset, endIndex, range.segmentId, range.segmentPage);
+    let positions: ReturnType<typeof findDocRangeNodePositions>;
+    if (range.collapsed) {
+        // Paragraph separators are valid caret anchors, including at the start of an empty paragraph.
+        const caretPosition = skeleton.findNodePositionByCharIndex(
+            range.startOffset,
+            true,
+            range.segmentId,
+            range.segmentPage
+        );
+        if (caretPosition) {
+            positions = { startPosition: caretPosition, endPosition: caretPosition };
+        }
+    } else {
+        positions = findDocRangeNodePositions(
+            skeleton,
+            range.startOffset,
+            range.endOffset - 1,
+            range.segmentId,
+            range.segmentPage
+        );
+    }
     const document = mainComponent as Documents;
 
     if (!positions) {

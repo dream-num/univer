@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <title>Univer</title>
+
+        <link rel="icon" type="image/x-icon" href="../favicon.svg" />
+        <link rel="stylesheet" href="./main.css" />
+        <style>
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+            }
+        </style>
+
+        <script>
+            new EventSource('/esbuild').addEventListener('change', () => {
+                console.info('reload--');
+                location.reload();
+            });
+        </script>
+    </head>
+
+    <body style="overflow: hidden">
+        <div id="app" style="height: 100%"></div>
+        <script type="module" src="./main.js"></script>
+    </body>
+</html>

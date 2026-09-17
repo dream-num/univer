@@ -44,7 +44,7 @@ import {
     ObjectMatrix,
     UniverInstanceType,
 } from '@univerjs/core';
-import { convertUnitDataToRuntime } from '../basics/runtime';
+import { convertUnitDataToRuntime, copyUnitData } from '../basics/runtime';
 import { FormulaDataModel } from '../models/formula-data.model';
 import { ISheetRowFilteredService } from './sheet-row-filtered.service';
 
@@ -143,43 +143,43 @@ export interface IFormulaCurrentConfigService {
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
-    private _unitData: IUnitData = {};
+    private _unitData: IUnitData = Object.create(null);
 
-    private _unitStylesData: IUnitStylesData = {};
+    private _unitStylesData: IUnitStylesData = Object.create(null);
 
-    private _arrayFormulaCellData: IRuntimeUnitDataType = {};
+    private _arrayFormulaCellData: IRuntimeUnitDataType = Object.create(null);
 
-    private _arrayFormulaRange: IArrayFormulaRangeType = {};
+    private _arrayFormulaRange: IArrayFormulaRangeType = Object.create(null);
 
-    private _formulaData: IFormulaData = {};
+    private _formulaData: IFormulaData = Object.create(null);
 
-    private _sheetNameMap: IUnitSheetNameMap = {};
+    private _sheetNameMap: IUnitSheetNameMap = Object.create(null);
 
-    private _unitNameMap: IFormulaUnitNameMap = {};
+    private _unitNameMap: IFormulaUnitNameMap = Object.create(null);
 
-    private _externalReferences: IFormulaExternalReferences = {};
+    private _externalReferences: IFormulaExternalReferences = Object.create(null);
 
     private _calculationGeneration = 0;
 
     private _forceCalculate: boolean = false;
 
-    private _clearDependencyTreeCache: IDirtyUnitSheetNameMap = {};
+    private _clearDependencyTreeCache: IDirtyUnitSheetNameMap = Object.create(null);
 
     private _dirtyRanges: IUnitRange[] = [];
 
-    private _dirtyNameMap: IDirtyUnitSheetNameMap = {};
+    private _dirtyNameMap: IDirtyUnitSheetNameMap = Object.create(null);
 
-    private _dirtyDefinedNameMap: IDirtyUnitDefinedNameMap = {};
+    private _dirtyDefinedNameMap: IDirtyUnitDefinedNameMap = Object.create(null);
 
-    private _dirtySuperTableMap: IDirtyUnitSuperTableMap = {};
+    private _dirtySuperTableMap: IDirtyUnitSuperTableMap = Object.create(null);
 
-    private _dirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
+    private _dirtyUnitFeatureMap: IDirtyUnitFeatureMap = Object.create(null);
 
-    private _dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {};
+    private _dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = Object.create(null);
 
     private _excludedCell: Nullable<IUnitExcludedCell>;
 
-    private _sheetIdToNameMap: IUnitSheetIdToNameMap = {};
+    private _sheetIdToNameMap: IUnitSheetIdToNameMap = Object.create(null);
 
     private _executeUnitId: Nullable<string> = '';
     private _executeSubUnitId: Nullable<string> = '';
@@ -195,23 +195,23 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     override dispose(): void {
         super.dispose();
-        this._unitData = {};
-        this._unitStylesData = {};
-        this._arrayFormulaCellData = {};
-        this._arrayFormulaRange = {};
-        this._formulaData = {};
-        this._sheetNameMap = {};
-        this._unitNameMap = {};
-        this._externalReferences = {};
-        this._clearDependencyTreeCache = {};
+        this._unitData = Object.create(null);
+        this._unitStylesData = Object.create(null);
+        this._arrayFormulaCellData = Object.create(null);
+        this._arrayFormulaRange = Object.create(null);
+        this._formulaData = Object.create(null);
+        this._sheetNameMap = Object.create(null);
+        this._unitNameMap = Object.create(null);
+        this._externalReferences = Object.create(null);
+        this._clearDependencyTreeCache = Object.create(null);
         this._dirtyRanges = [];
-        this._dirtyNameMap = {};
-        this._dirtyDefinedNameMap = {};
-        this._dirtySuperTableMap = {};
-        this._dirtyUnitFeatureMap = {};
-        this._dirtyUnitOtherFormulaMap = {};
-        this._excludedCell = {};
-        this._sheetIdToNameMap = {};
+        this._dirtyNameMap = Object.create(null);
+        this._dirtyDefinedNameMap = Object.create(null);
+        this._dirtySuperTableMap = Object.create(null);
+        this._dirtyUnitFeatureMap = Object.create(null);
+        this._dirtyUnitOtherFormulaMap = Object.create(null);
+        this._excludedCell = Object.create(null);
+        this._sheetIdToNameMap = Object.create(null);
     }
 
     getExecuteUnitId() {
@@ -307,7 +307,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     }
 
     setSheetNameMap(sheetIdToNameMap: IUnitSheetIdToNameMap) {
-        this._sheetIdToNameMap = sheetIdToNameMap;
+        this._sheetIdToNameMap = copyUnitData(sheetIdToNameMap);
     }
 
     getClearDependencyTreeCache() {
@@ -372,18 +372,18 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     load(config: IFormulaDatasetConfig) {
         this._calculationGeneration++;
         if (config.allUnitData && config.unitSheetNameMap && config.unitStylesData) {
-            this._unitData = config.allUnitData;
+            this._unitData = copyUnitData(config.allUnitData);
             this._unitStylesData = config.unitStylesData;
-            this._sheetNameMap = config.unitSheetNameMap;
+            this._sheetNameMap = copyUnitData(config.unitSheetNameMap);
             this._unitNameMap = config.unitNameMap || {};
         } else {
             const { allUnitData, unitNameMap, unitSheetNameMap, unitStylesData } = this._loadSheetData();
 
-            this._unitData = allUnitData;
+            this._unitData = copyUnitData(allUnitData);
 
             this._unitStylesData = unitStylesData;
 
-            this._sheetNameMap = unitSheetNameMap;
+            this._sheetNameMap = copyUnitData(unitSheetNameMap);
 
             this._unitNameMap = unitNameMap;
         }
@@ -425,11 +425,11 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     loadDataLite(rowData?: IUnitRowData) {
         const { allUnitData, unitNameMap, unitSheetNameMap, unitStylesData } = this._loadSheetData();
 
-        this._unitData = allUnitData;
+        this._unitData = copyUnitData(allUnitData);
 
         this._unitStylesData = unitStylesData;
 
-        this._sheetNameMap = unitSheetNameMap;
+        this._sheetNameMap = copyUnitData(unitSheetNameMap);
 
         this._unitNameMap = unitNameMap;
 
@@ -463,11 +463,11 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         /**
          * Mark dirty for expansion of array formulas, need to clear the worksheet's dirty flag.
          */
-        this._dirtyNameMap = {};
+        this._dirtyNameMap = Object.create(null);
     }
 
     registerUnitData(unitData: IUnitData) {
-        this._unitData = unitData;
+        this._unitData = copyUnitData(unitData);
     }
 
     registerFormulaData(formulaData: IFormulaData) {
@@ -475,108 +475,31 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     }
 
     registerSheetNameMap(sheetNameMap: IUnitSheetNameMap) {
-        this._sheetNameMap = sheetNameMap;
+        this._sheetNameMap = copyUnitData(sheetNameMap);
     }
 
     registerUnitNameMap(unitNameMap: IFormulaUnitNameMap) {
         this._unitNameMap = unitNameMap;
     }
 
-    // private _loadOtherFormulaData() {
-    //     const unitAllDoc = this._univerInstanceService.getAllUniverDocsInstance();
-
-    //     const unitAllSlide = this._univerInstanceService.getAllUniverSlidesInstance();
-
-    //     const otherFormulaData: IOtherFormulaData = {};
-
-    //     for (const documentDataModel of unitAllDoc) {
-    //         const unitId = documentDataModel.getUnitId();
-
-    //         if (otherFormulaData[unitId] == null) {
-    //             otherFormulaData[unitId] = {};
-    //         }
-
-    //         if (otherFormulaData[unitId][DEFAULT_DOCUMENT_SUB_COMPONENT_ID] == null) {
-    //             otherFormulaData[unitId][DEFAULT_DOCUMENT_SUB_COMPONENT_ID] = {};
-    //         }
-
-    //         const subComponent = otherFormulaData[unitId][DEFAULT_DOCUMENT_SUB_COMPONENT_ID];
-
-    //         const customRanges = documentDataModel.getBody()?.customRanges;
-
-    //         if (customRanges == null) {
-    //             continue;
-    //         }
-
-    //         for (const customRange of customRanges) {
-    //             subComponent[customRange.rangeId] = {
-    //                 f: customRange.endIndex.toString(),
-    //             };
-    //         }
-    //     }
-
-    //     for (const slide of unitAllSlide) {
-    //         const unitId = slide.getUnitId();
-
-    //         if (otherFormulaData[unitId] == null) {
-    //             otherFormulaData[unitId] = {};
-    //         }
-
-    //         if (otherFormulaData[unitId][DEFAULT_DOCUMENT_SUB_COMPONENT_ID] == null) {
-    //             otherFormulaData[unitId][DEFAULT_DOCUMENT_SUB_COMPONENT_ID] = {};
-    //         }
-
-    //         const pages = slide.getPages();
-
-    //         if (pages == null) {
-    //             continue;
-    //         }
-
-    //         const pageIds = Object.keys(pages);
-
-    //         for (const pageId of pageIds) {
-    //             const page = pages[pageId];
-
-    //             const subComponent = otherFormulaData[unitId][pageId];
-
-    //             const pageElements = page.pageElements;
-
-    //             if (pageElements == null) {
-    //                 continue;
-    //             }
-
-    //             const pageElementIds = Object.keys(pageElements);
-
-    //             for (const pageElementId of pageElementIds) {
-    //                 const pageElement = pageElements[pageElementId];
-    //                 subComponent[pageElementId] = {
-    //                     f: pageElement.title,
-    //                 };
-    //             }
-    //         }
-    //     }
-
-    //     return otherFormulaData;
-    // }
-
     private _mergeNameMap(unitSheetNameMap: IUnitSheetNameMap, dirtyNameMap: IDirtyUnitSheetNameMap) {
         Object.keys(dirtyNameMap).forEach((unitId) => {
             if (dirtyNameMap[unitId]) {
                 Object.keys(dirtyNameMap[unitId]!).forEach((sheetId) => {
                     if (unitSheetNameMap[unitId] == null) {
-                        unitSheetNameMap[unitId] = {};
+                        unitSheetNameMap[unitId] = Object.create(null);
                     }
                     unitSheetNameMap[unitId]![dirtyNameMap[unitId]![sheetId]] = sheetId;
                 });
             }
         });
 
-        this._sheetIdToNameMap = {};
+        this._sheetIdToNameMap = Object.create(null);
 
         Object.keys(unitSheetNameMap).forEach((unitId) => {
             Object.keys(unitSheetNameMap[unitId]!).forEach((sheetName) => {
                 if (this._sheetIdToNameMap[unitId] == null) {
-                    this._sheetIdToNameMap[unitId] = {};
+                    this._sheetIdToNameMap[unitId] = Object.create(null);
                 }
                 this._sheetIdToNameMap[unitId]![unitSheetNameMap[unitId]![sheetName]] = sheetName;
             });
@@ -600,18 +523,18 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
      * @param rowData
      */
     private _applyUnitRowData(rowData: IUnitRowData) {
-        for (const unitId in rowData) {
+        for (const unitId of Object.keys(rowData)) {
             if (rowData[unitId] == null) {
                 continue;
             }
 
-            for (const sheetId in rowData[unitId]) {
+            for (const sheetId of Object.keys(rowData[unitId])) {
                 if (rowData[unitId][sheetId] == null) {
                     continue;
                 }
 
                 if (this._unitData[unitId] == null) {
-                    this._unitData[unitId] = {};
+                    this._unitData[unitId] = Object.create(null);
                 }
 
                 if (this._unitData[unitId][sheetId] == null) {

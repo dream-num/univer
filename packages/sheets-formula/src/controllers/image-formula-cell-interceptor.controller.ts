@@ -77,12 +77,12 @@ export class ImageFormulaCellInterceptorController extends Disposable {
                         })
                     );
 
-                    const unitImageFormulaData: IUnitImageFormulaDataType = {};
+                    const unitImageFormulaData: IUnitImageFormulaDataType = Object.create(null);
 
                     updateRuntimeImageFormulaData.forEach((imageFormulaInfo) => {
                         const { unitId, sheetId, row, column, ...imageInfo } = imageFormulaInfo;
                         if (!unitImageFormulaData[unitId]) {
-                            unitImageFormulaData[unitId] = {};
+                            unitImageFormulaData[unitId] = Object.create(null);
                         }
                         if (!unitImageFormulaData[unitId]![sheetId]) {
                             unitImageFormulaData[unitId]![sheetId] = new ObjectMatrix<Nullable<IImageFormulaInfo>>();
@@ -99,7 +99,6 @@ export class ImageFormulaCellInterceptorController extends Disposable {
         );
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _initInterceptorCellContent() {
         this.disposeWithMe(
             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {

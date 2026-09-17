@@ -92,6 +92,23 @@ describe('ActiveDirtyController', () => {
         testBed?.univer.dispose();
     });
 
+    it.each(['__proto__', 'constructor', 'prototype', 'toString'])('keeps dirty sheet names local for special unit identifiers (%s)', (key) => {
+        testBed = createControllerTestBed();
+        testBed.injector.get(ActiveDirtyController);
+        const marker = '__formula_pollution__';
+        try {
+            const data = getDirtyData(testBed, {
+                id: RemoveSheetMutation.id,
+                params: { unitId: key, subUnitId: marker, subUnitName: 'Sheet 1' },
+            });
+            expect(data.dirtyNameMap?.[key]?.[marker]).toBe('Sheet 1');
+            expect(Object.getOwnPropertyDescriptor(Object.prototype, marker)).toBeUndefined();
+        } finally {
+            Reflect.deleteProperty(Object.prototype, marker);
+            Reflect.deleteProperty(Object, marker);
+        }
+    });
+
     it('should convert range mutations into dirty ranges and skip style-triggered updates', () => {
         testBed = createControllerTestBed();
 

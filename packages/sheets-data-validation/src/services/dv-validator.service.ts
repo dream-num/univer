@@ -40,11 +40,11 @@ export class SheetsDataValidationValidatorService extends Disposable {
             const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             const worksheet = workbook?.getActiveSheet();
 
-            const map: Record<string, Record<string, IRange[]>> = {};
+            const map: Record<string, Record<string, IRange[]>> = Object.create(null);
 
             ranges.flat().forEach((range) => {
                 if (!map[range.unitId]) {
-                    map[range.unitId] = {};
+                    map[range.unitId] = Object.create(null);
                 }
                 if (!map[range.unitId][range.subUnitId]) {
                     map[range.unitId][range.subUnitId] = [];
@@ -223,7 +223,7 @@ export class SheetsDataValidationValidatorService extends Disposable {
         const sheetIds = this._sheetDataValidationModel.getSubUnitIds(unitId);
         const results = await Promise.all(sheetIds.map((id) => this.validatorWorksheet(unitId, id)));
 
-        const map: Record<string, ObjectMatrix<Nullable<DataValidationStatus>>> = {};
+        const map: Record<string, ObjectMatrix<Nullable<DataValidationStatus>>> = Object.create(null);
 
         results.forEach((result, i) => {
             map[sheetIds[i]] = result;

@@ -85,6 +85,7 @@ function createRuntimeService() {
     const runtime = injector.get(IFormulaRuntimeService) as FormulaRuntimeService;
 
     return {
+        injector,
         runtime,
         unitDataMatrix,
         arrayFormulaCellData: currentConfigService.getArrayFormulaCellData().unit!.sheet!,
@@ -93,6 +94,26 @@ function createRuntimeService() {
 }
 
 describe('FormulaRuntimeService', () => {
+    it.each(['__proto__', 'constructor', 'prototype', 'toString'])('isolates runtime writes for special identifiers (%s)', (key) => {
+        const { injector, runtime } = createRuntimeService();
+        const marker = '__formula_pollution__';
+        try {
+            runtime.setCurrent(0, 0, 10, 10, marker, key);
+            runtime.setUnitArrayFormulaEmbeddedMap();
+            runtime.setRuntimeOtherData(marker, 0, 0, NumberValueObject.create(7));
+            expect(runtime.getUnitArrayFormulaEmbeddedMap()[key]?.[marker]?.[0]?.[0]).toBe(true);
+            expect(runtime.getRuntimeOtherData()[key]?.[marker]?.[marker]?.[0]?.[0]?.[0]?.[0]?.v).toBe(7);
+            expect(Object.getOwnPropertyDescriptor(Object.prototype, marker)).toBeUndefined();
+            runtime.reset();
+            runtime.setUnitArrayFormulaEmbeddedMap();
+            expect(runtime.getUnitArrayFormulaEmbeddedMap()[key]?.[marker]?.[0]?.[0]).toBe(true);
+        } finally {
+            Reflect.deleteProperty(Object.prototype, marker);
+            Reflect.deleteProperty(Object, marker);
+            injector.dispose();
+        }
+    });
+
     it('should manage state, counters and cycle flags', () => {
         const { runtime } = createRuntimeService();
 

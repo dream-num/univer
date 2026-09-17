@@ -207,7 +207,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         runtimeFeatureRange: { [featureId: string]: IFeatureDirtyRangeType }
     ) {
         const dirtyRanges: IUnitRange[] = [];
-        const excludedCell: IUnitExcludedCell = {};
+        const excludedCell: IUnitExcludedCell = Object.create(null);
         Object.keys(arrayFormulaRange).forEach((unitId) => {
             const sheetArrayFormulaRange = arrayFormulaRange[unitId];
 
@@ -231,7 +231,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                 });
 
                 if (excludedCell[unitId] == null) {
-                    excludedCell[unitId] = {};
+                    excludedCell[unitId] = Object.create(null);
                 }
 
                 excludedCell[unitId]![sheetId] = newCellData;
@@ -264,7 +264,6 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         return { dirtyRanges, excludedCell };
     }
 
-    // eslint-disable-next-line max-lines-per-function
     protected async _apply(isArrayFormulaState = false) {
         if (isArrayFormulaState) {
             this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START_DEPENDENCY_ARRAY_FORMULA);
@@ -412,13 +411,13 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
 
         this._runtimeService.reset();
 
-        const result: IFormulaExecuteResultMap = {};
+        const result: IFormulaExecuteResultMap = Object.create(null);
 
         for (const unitId of Object.keys(formulas)) {
             const sheetFormulas = formulas[unitId];
             if (sheetFormulas == null) continue;
 
-            result[unitId] = {};
+            result[unitId] = Object.create(null);
 
             for (const sheetId of Object.keys(sheetFormulas)) {
                 const rowFormulas = sheetFormulas[sheetId];
@@ -428,11 +427,11 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
 
                 if (sheetItem == null) continue;
 
-                result[unitId]![sheetId] = {};
+                result[unitId]![sheetId] = Object.create(null);
 
                 for (const rowString of Object.keys(rowFormulas)) {
                     const row = Number.parseInt(rowString);
-                    result[unitId]![sheetId]![row] = {};
+                    result[unitId]![sheetId]![row] = Object.create(null);
 
                     const cellData = rowFormulas[row];
                     if (!cellData) continue;

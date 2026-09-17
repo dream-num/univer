@@ -90,9 +90,9 @@ export interface IDefinedNamesService {
 
 export class DefinedNamesService extends Disposable implements IDefinedNamesService {
     // 18.2.6 definedNames (Defined Names)
-    private _definedNameMap: IDefinedNameMap = {};
+    private _definedNameMap: IDefinedNameMap = Object.create(null);
     // Cache for name-to-definition mapping, here name key is ignored case sensitivity
-    private _nameCacheMap: { [unitId: string]: { [name: string]: IDefinedNamesServiceParam } } = {};
+    private _nameCacheMap: { [unitId: string]: { [name: string]: IDefinedNamesServiceParam } } = Object.create(null);
     //
     private _definedNamesIsEmpty: boolean = true;
 
@@ -122,8 +122,8 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
 
     override dispose(): void {
         super.dispose();
-        this._definedNameMap = {};
-        this._nameCacheMap = {};
+        this._definedNameMap = Object.create(null);
+        this._nameCacheMap = Object.create(null);
         this._update$.complete();
         this._currentRange$.complete();
         this._focusRange$.complete();
@@ -157,7 +157,7 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
     }
 
     registerDefinedNames(unitId: string, params: IDefinedNameMapItem) {
-        this._definedNameMap[unitId] = params;
+        this._definedNameMap[unitId] = Object.assign(Object.create(null), params);
         this._updateCache(unitId);
 
         const definedNames = Object.values(params);
@@ -175,7 +175,7 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
     registerDefinedName(unitId: string, param: IDefinedNamesServiceParam) {
         const unitMap = this._definedNameMap[unitId];
         if (unitMap === undefined) {
-            this._definedNameMap[unitId] = {};
+            this._definedNameMap[unitId] = Object.create(null);
         }
         this._definedNameMap[unitId][param.id] = param;
 
@@ -331,7 +331,7 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
             return;
         }
 
-        this._nameCacheMap[unitId] = {};
+        this._nameCacheMap[unitId] = Object.create(null);
 
         // Cache all name mappings for this unitId
         for (const item of Object.values(nameMap)) {

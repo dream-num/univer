@@ -66,6 +66,37 @@ function createSearch(drawingId: string): IDrawingSearch {
 }
 
 describe('UnitDrawingService', () => {
+    it.each(['__proto__', 'constructor', 'prototype'])('rejects unsafe drawing identifiers (%s) before changing state', (key) => {
+        const injector = new Injector([[UnitDrawingService]]);
+        const service = injector.get(UnitDrawingService);
+        const marker = '__drawing_pollution__';
+        try {
+            expect(() => service.applyJson1(key, marker, null)).toThrow();
+            expect(() => service.applyJson1('unit', key, null)).toThrow();
+            expect(Object.getOwnPropertyDescriptor(Object.prototype, marker)).toBeUndefined();
+            expect(service.drawingManagerData).toEqual({});
+        } finally {
+            Reflect.deleteProperty(Object.prototype, marker);
+            Reflect.deleteProperty(Object, marker);
+            injector.dispose();
+        }
+    });
+
+    it('rejects unsafe snapshots and operations without partially initializing the drawing map', () => {
+        const injector = new Injector([[UnitDrawingService]]);
+        const service = injector.get(UnitDrawingService);
+        try {
+            expect(() => service.registerDrawingData('unit', JSON.parse('{"__proto__":{"data":{},"order":[]}}'))).toThrow();
+            expect(() => service.registerDrawingData('__proto__', {})).toThrow();
+            expect(() => service.applyJson1('unit', 'sheet', ['__proto__', 'polluted', { i: true }])).toThrow();
+            expect(() => service.applyJson1('unit', 'sheet', ['missing', 'nested', { i: true }])).toThrow();
+            expect(service.drawingManagerData).toEqual({});
+            expect(service.getDrawingByParam({ unitId: 'constructor', subUnitId: 'prototype', drawingId: 'data' })).toBeUndefined();
+        } finally {
+            injector.dispose();
+        }
+    });
+
     let service: UnitDrawingService<IDrawingParam>;
 
     beforeEach(() => {

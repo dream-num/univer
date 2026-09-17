@@ -27,6 +27,34 @@ describe('OtherFormulaManagerService', () => {
         service = injector.get(IOtherFormulaManagerService);
     });
 
+    it.each(['__proto__', 'constructor', 'prototype', 'toString'])('keeps special identifiers (%s) as ordinary formula data', (key) => {
+        const injector = new Injector([[OtherFormulaManagerService]]);
+        const service = injector.get(OtherFormulaManagerService);
+        const marker = '__formula_pollution__';
+        const item = { f: '=1', ranges: [] };
+        try {
+            for (const search of [
+                { unitId: key, subUnitId: marker, formulaId: marker },
+                { unitId: 'unit', subUnitId: key, formulaId: marker },
+                { unitId: 'unit', subUnitId: 'sheet', formulaId: key },
+            ]) {
+                service.register({ ...search, item });
+                expect(service.get(search)).toBe(item);
+                expect(Object.getOwnPropertyDescriptor(Object.prototype, marker)).toBeUndefined();
+                expect(Object.getOwnPropertyDescriptor(Object, marker)).toBeUndefined();
+                expect(Object.getOwnPropertyDescriptor(Object.prototype.toString, marker)).toBeUndefined();
+                service.remove(search);
+                expect(service.get(search)).toBeUndefined();
+            }
+            expect(Object.getOwnPropertyDescriptor(Object.prototype, marker)).toBeUndefined();
+        } finally {
+            Reflect.deleteProperty(Object.prototype, marker);
+            Reflect.deleteProperty(Object, marker);
+            Reflect.deleteProperty(Object.prototype.toString, marker);
+            injector.dispose();
+        }
+    });
+
     it('keeps plugin-owned formula data isolated by unit, sheet and formula id', () => {
         const item = { f: '=TABLE()', ranges: [] };
 

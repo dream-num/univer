@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.25.2](https://github.com/dream-num/univer/compare/v0.25.1...v0.25.2) (2026-09-17)
+
+
+### Bug Fixes
+
+* prevent prototype pollution in drawing and formula maps ([69e9ccc](https://github.com/dream-num/univer/commit/69e9cccec98dbf0c51042cd1f3aa370113942d73))
+
 ## [0.25.1](https://github.com/dream-num/univer/compare/v0.25.0...v0.25.1) (2026-06-27)
 
 # [0.25.0](https://github.com/dream-num/univer/compare/v0.24.0...v0.25.0) (2026-05-30)

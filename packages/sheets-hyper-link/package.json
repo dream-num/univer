@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-hyper-link",
-    "version": "0.25.1",
+    "version": "0.25.2",
     "private": false,
     "description": "Hyperlink model and commands for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

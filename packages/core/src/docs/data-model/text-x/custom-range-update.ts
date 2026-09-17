@@ -137,7 +137,7 @@ export function getRangeUpdates(actions: TextXAction[]): NonNullable<IRetainActi
 // Identity edits must never enter the positional iterator: an insertion may
 // split every character of a retain, or a deletion may consume it altogether.
 export function withoutRangeUpdates(actions: TextXAction[]): TextXAction[] {
-    return actions.flatMap((action) => {
+    return actions.flatMap((action): TextXAction[] => {
         if (action.t === TextXActionType.INSERT && action.len > 1 &&
             Array.from(action.body.dataStream).every((token) => token === DataStreamTreeTokenType.CUSTOM_RANGE_START || token === DataStreamTreeTokenType.CUSTOM_RANGE_END)) {
             return Array.from(action.body.dataStream, (_, index) => ({

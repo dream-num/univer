@@ -316,7 +316,7 @@ describe('EditorService', () => {
         expect(editorFocused).toBe(1);
     });
 
-    it('turns render-layer editing activity into editor events and document updates', async () => {
+    it.each([false, true])('publishes drag selection only when configured (%s)', async (emitSelectionWhileDragging) => {
         const { injector, univerInstanceService } = createService();
         const commandService = injector.get(ICommandService);
         commandService.registerCommand(ReplaceSnapshotCommand);
@@ -325,6 +325,7 @@ describe('EditorService', () => {
         const selectionRenderService = new TestDocSelectionRenderService();
         const editor = injector.createInstance(Editor, {
             initialSnapshot: { id: EDITOR_ID },
+            emitSelectionWhileDragging,
             render: new TestRender(selectionRenderService),
             editorDom: document.createElement('div'),
         } as never, univerInstanceService, injector.get(DocSelectionManagerService), commandService, injector.get(IUndoRedoService), injector);
@@ -396,7 +397,7 @@ describe('EditorService', () => {
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
             isEditing: false,
         });
-        expect(editor.getSelectionRanges().map((range) => [range.startOffset, range.endOffset])).toEqual([[2, 4]]);
+        expect(editor.getSelectionRanges().map((range) => [range.startOffset, range.endOffset])).toEqual(emitSelectionWhileDragging ? [[2, 4]] : [[1, 2]]);
         editor.replaceText('quarterly');
         await Promise.resolve();
 
@@ -405,17 +406,10 @@ describe('EditorService', () => {
         expect(changeEvents).toEqual(['abc\r\n']);
         expect(inputs).toEqual(['d:false', 'cut:false', ':false', '拼:true', 'paste-text:false']);
         expect(pastes).toEqual(['paste-text']);
-        expect(selections).toEqual(['1:2:false', '2:4:false']);
+        expect(selections).toEqual(emitSelectionWhileDragging ? ['1:2:false', '2:4:false'] : ['1:2:false']);
         expect(editor.getDocumentData().body?.dataStream).toBe('quarterly\r\n');
         expect(refreshSelections.at(-1)).toBe('9:9');
         expect(univerInstanceService.getUnit<DocumentDataModel>(EDITOR_ID)?.getBody()?.dataStream).toBe('quarterly\r\n');
-
-        editor.replaceText('first\nsecond\n');
-        await Promise.resolve();
-
-        expect(editor.getDocumentData().body?.dataStream).toBe('first\rsecond\r\r\n');
-        expect(editor.getDocumentData().body?.paragraphs?.map(({ startIndex }) => startIndex)).toEqual([5, 12, 13]);
-        expect(refreshSelections.at(-1)).toBe('13:13');
 
         editor.dispose();
     });

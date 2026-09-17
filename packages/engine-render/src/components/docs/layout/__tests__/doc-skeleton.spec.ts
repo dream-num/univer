@@ -317,6 +317,8 @@ describe('doc skeleton', () => {
                         },
                         renderConfig: {
                             topAlignExactLineSpacing: BooleanNumber.TRUE,
+                            useTextInkForHitTesting: BooleanNumber.TRUE,
+                            applyTextPosition: BooleanNumber.TRUE,
                             zeroWidthParagraphBreak: BooleanNumber.TRUE,
                         },
                     },
@@ -379,6 +381,7 @@ describe('doc skeleton', () => {
                 },
                 renderConfig: {
                     topAlignExactLineSpacing,
+                    useTextInkForHitTesting: topAlignExactLineSpacing,
                     zeroWidthParagraphBreak: BooleanNumber.TRUE,
                     wrapStrategy: WrapStrategy.OVERFLOW,
                 },
@@ -446,6 +449,8 @@ describe('doc skeleton', () => {
                 },
                 renderConfig: {
                     topAlignExactLineSpacing: BooleanNumber.TRUE,
+                    useTextInkForHitTesting: BooleanNumber.TRUE,
+                    applyTextPosition: BooleanNumber.TRUE,
                     zeroWidthParagraphBreak: BooleanNumber.TRUE,
                     wrapStrategy: WrapStrategy.OVERFLOW,
                 },
@@ -529,6 +534,8 @@ describe('doc skeleton', () => {
                 },
                 renderConfig: {
                     topAlignExactLineSpacing: BooleanNumber.TRUE,
+                    useTextInkForHitTesting: BooleanNumber.TRUE,
+                    applyTextPosition: BooleanNumber.TRUE,
                     zeroWidthParagraphBreak: BooleanNumber.TRUE,
                     wrapStrategy: WrapStrategy.OVERFLOW,
                 },
@@ -593,6 +600,8 @@ describe('doc skeleton', () => {
                 defaultParagraphStyle: { spacingRule: SpacingRule.EXACT, snapToGrid: BooleanNumber.FALSE },
                 renderConfig: {
                     topAlignExactLineSpacing: BooleanNumber.TRUE,
+                    useTextInkForHitTesting: BooleanNumber.TRUE,
+                    applyTextPosition: BooleanNumber.TRUE,
                     zeroWidthParagraphBreak: BooleanNumber.TRUE,
                     wrapStrategy: WrapStrategy.OVERFLOW,
                 },
@@ -671,6 +680,8 @@ describe('doc skeleton', () => {
                 },
                 renderConfig: {
                     topAlignExactLineSpacing: BooleanNumber.TRUE,
+                    useTextInkForHitTesting: BooleanNumber.TRUE,
+                    applyTextPosition: BooleanNumber.TRUE,
                     zeroWidthParagraphBreak: BooleanNumber.TRUE,
                     wrapStrategy: WrapStrategy.OVERFLOW,
                 },
@@ -760,6 +771,8 @@ describe('doc skeleton', () => {
                 defaultParagraphStyle: { spacingRule: SpacingRule.EXACT, lineSpacing: 12, snapToGrid: BooleanNumber.FALSE },
                 renderConfig: {
                     topAlignExactLineSpacing: BooleanNumber.TRUE,
+                    useTextInkForHitTesting: BooleanNumber.TRUE,
+                    applyTextPosition: BooleanNumber.TRUE,
                     zeroWidthParagraphBreak: BooleanNumber.TRUE,
                     wrapStrategy: WrapStrategy.OVERFLOW,
                 },
@@ -828,6 +841,8 @@ describe('doc skeleton', () => {
                 },
                 renderConfig: {
                     topAlignExactLineSpacing: BooleanNumber.TRUE,
+                    useTextInkForHitTesting: BooleanNumber.TRUE,
+                    applyTextPosition: BooleanNumber.TRUE,
                     zeroWidthParagraphBreak: BooleanNumber.TRUE,
                     wrapStrategy: WrapStrategy.OVERFLOW,
                 },
@@ -894,6 +909,8 @@ describe('doc skeleton', () => {
                 defaultParagraphStyle: { spacingRule: SpacingRule.EXACT, lineSpacing: 14.7113, snapToGrid: BooleanNumber.FALSE },
                 renderConfig: {
                     topAlignExactLineSpacing: BooleanNumber.TRUE,
+                    useTextInkForHitTesting: BooleanNumber.TRUE,
+                    applyTextPosition: BooleanNumber.TRUE,
                     zeroWidthParagraphBreak: BooleanNumber.TRUE,
                     wrapStrategy: WrapStrategy.OVERFLOW,
                 },

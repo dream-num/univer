@@ -213,7 +213,7 @@ function getNextBlockTop(lines: IDocumentSkeletonLine[]) {
         return 0;
     }
 
-    return lastLine.top + lastLine.lineHeight + Math.max(0, lastLine.spaceBelowApply ?? 0);
+    return lastLine.top + lastLine.lineHeight;
 }
 
 export function calculateColumnGroupLayout(source: IColumnGroup, availableWidth: number, columnHeights: number[]): IColumnGroupLayout {

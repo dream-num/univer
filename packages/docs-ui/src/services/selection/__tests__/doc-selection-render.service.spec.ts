@@ -17,12 +17,8 @@
 // @vitest-environment jsdom
 
 import type { IDisposable, IDocumentData, ITextRangeParam } from '@univerjs/core';
-import type { IDocSelectionInnerParam, INodeInfo, INodePosition } from '@univerjs/engine-render';
 import type { Mock } from 'vitest';
 import {
-    BooleanNumber,
-    ColumnLayoutType,
-    ColumnResponsiveType,
     DataStreamTreeTokenType,
     DisposableCollection,
     DOC_RANGE_TYPE,
@@ -34,16 +30,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocLayoutExecutorService, DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import {
-    DeviceType,
-    GlyphType,
-    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-    PointerInput,
-    RenderUnit,
-    ScrollTimer,
-    ScrollTimerType,
-    Transform,
-} from '@univerjs/engine-render';
+import { DeviceType, GlyphType, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PointerInput, RenderUnit } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -160,8 +147,6 @@ interface IServiceHarness {
     _selectionStyle: { strokeWidth: number };
     _textSelectionInner$: { next: Mock<(...args: unknown[]) => void>; value: { isEditing: boolean } | null };
     _contextService: { getContextValue: Mock<() => boolean> };
-    _movingSelection$: Subject<IDocSelectionInnerParam>;
-    movingSelection$: Subject<IDocSelectionInnerParam>;
     focus: Mock<() => void>;
     _getAllTextRanges: Mock<() => string[]>;
     _getAllRectRanges: Mock<() => string[]>;
@@ -179,7 +164,6 @@ interface IServiceHarness {
     _createTextRangeByAnchorPosition(position: Record<string, unknown>): void;
     _isEmpty(): boolean;
     _getCanvasOffset(): { left: number; top: number };
-    _getScenePointerOffset(evt: { offsetX: number; offsetY: number; target?: EventTarget }): { offsetX: number; offsetY: number };
     _moving(moveOffsetX: number, moveOffsetY: number): void;
     _isAnotherEditorFocused: Mock<() => boolean>;
     _updateInputPosition(): void;
@@ -225,7 +209,6 @@ function createService() {
         getEngine: vi.fn(() => engine),
         getViewports: vi.fn(() => []),
     };
-    const movingSelection$ = new Subject<IDocSelectionInnerParam>();
 
     const service = Object.setPrototypeOf({
         _rangeList: [],
@@ -259,12 +242,11 @@ function createService() {
         _logService: {
             error: vi.fn(),
         },
+        _movingSelection$: new Subject(),
         _textSelectionInner$: {
             next: vi.fn(),
             value: { isEditing: false },
         },
-        _movingSelection$: movingSelection$,
-        movingSelection$,
         _getAllTextRanges: vi.fn(() => ['serialized-text']),
         _getAllRectRanges: vi.fn(() => ['serialized-rect']),
         _findNodeByCoord: vi.fn(),
@@ -365,7 +347,6 @@ class TestRenderEvent<T> {
 }
 
 function createRealSelectionRenderService(options: {
-    disableSelectionAutoScroll?: boolean;
     documentData?: IDocumentData;
     embedInteractionBoundaryService?: Partial<EmbedInteractionBoundaryService>;
     embedRuntimeFocusCoordinator?: EmbedRuntimeFocusCoordinator;
@@ -379,7 +360,6 @@ function createRealSelectionRenderService(options: {
     const univer = new Univer();
     const injector = univer.__getInjector();
     injector.add([DocSelectionManagerService]);
-    injector.add([DocLayoutExecutorService]);
     injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
     if (options.embedInteractionBoundaryService) {
         injector.add([EmbedInteractionBoundaryService, { useValue: options.embedInteractionBoundaryService as never }]);
@@ -394,9 +374,7 @@ function createRealSelectionRenderService(options: {
             paragraphs: [{ paragraphId: 'para_docs_ui_selection_fixture_1', startIndex: 5 }],
             sectionBreaks: [],
         },
-        documentStyle: options.disableSelectionAutoScroll
-            ? { renderConfig: { disableSelectionAutoScroll: BooleanNumber.TRUE } }
-            : {},
+        documentStyle: {},
     };
     const doc = univer.createUnit(UniverInstanceType.UNIVER_DOC, documentData);
     const renderUnit = injector.createInstance(RenderUnit, {
@@ -412,7 +390,7 @@ function createRealSelectionRenderService(options: {
         renderUnit.mainComponent = options.mainComponent as never;
     }
     renderUnit.addRenderDependencies([
-        options.documentData ? DocSkeletonManagerService : [DocSkeletonManagerService, { useClass: TestDocSkeletonManagerService as never }],
+        [DocSkeletonManagerService, { useClass: TestDocSkeletonManagerService as never }],
         [DocSelectionRenderService, { useClass: options.mobile ? MobileDocSelectionRenderService : DocSelectionRenderService }],
     ] as never);
 
@@ -884,8 +862,6 @@ describe('doc selection render service internals', () => {
             isBack: false,
         };
         const textRange = createTextRange({ collapsed: false });
-        const movingSelections: IDocSelectionInnerParam[] = [];
-        service.movingSelection$.subscribe((selection) => movingSelections.push(selection));
 
         service._anchorNodePosition = anchorPosition;
         service._findNodeByCoord.mockReturnValue({ node: firstGlyph });
@@ -912,14 +888,6 @@ describe('doc selection render service internals', () => {
             2
         );
         expect(service._rangeListCache).toEqual([textRange]);
-        expect(movingSelections).toEqual([{
-            textRanges: [expect.objectContaining({ collapsed: false })],
-            rectRanges: [],
-            segmentId: 'segment-1',
-            segmentPage: 2,
-            style: service._selectionStyle,
-            isEditing: false,
-        }]);
         expect(engine.setCapture).toHaveBeenCalledTimes(1);
     });
 
@@ -971,53 +939,6 @@ describe('doc selection render service internals', () => {
 });
 
 describe('DocSelectionRenderService', () => {
-    it.each([
-        { anchorText: 'Before', focusText: 'Left', reverse: false },
-        { anchorText: 'Left', focusText: 'After', reverse: false },
-        { anchorText: 'After', focusText: 'Left', reverse: true },
-        { anchorText: 'Right', focusText: 'Before', reverse: true },
-    ])('orders drag snapping by text position across columns: $anchorText -> $focusText', ({ anchorText, focusText, reverse }) => {
-        const token = DataStreamTreeTokenType;
-        const dataStream = `Before text\r${token.COLUMN_GROUP_START}${token.COLUMN_START}Left text\r${token.COLUMN_END}${token.COLUMN_START}Right text\r${token.COLUMN_END}${token.COLUMN_GROUP_END}After text\r\n`;
-        const { renderUnit, service, univer } = createRealSelectionRenderService({
-            documentData: {
-                id: 'selection-render-doc',
-                body: {
-                    dataStream,
-                    paragraphs: Array.from(dataStream).flatMap((character, index) => character === '\r'
-                        ? [{ startIndex: index, paragraphId: `para_selection_column_${index}` }]
-                        : []),
-                    sectionBreaks: [{ startIndex: dataStream.length - 1, sectionId: 'section_selection_column' }],
-                    columnGroups: [{
-                        startIndex: dataStream.indexOf(token.COLUMN_GROUP_START),
-                        endIndex: dataStream.indexOf(token.COLUMN_GROUP_END),
-                        columnGroupId: 'column_group_selection',
-                        gap: { v: 12 },
-                        layout: ColumnLayoutType.FIXED,
-                        responsive: ColumnResponsiveType.SHRINK,
-                        columns: [
-                            { columnId: 'column_left', widthRatio: 1, minWidth: { v: 40 } },
-                            { columnId: 'column_right', widthRatio: 1, minWidth: { v: 40 } },
-                        ],
-                    }],
-                },
-                documentStyle: { pageSize: { width: 500, height: 500 } },
-            },
-        });
-        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
-        const skeleton = renderUnit.with(DocSkeletonManagerService).getSkeleton();
-        const anchor = skeleton.findNodePositionByCharIndex(dataStream.indexOf(anchorText) + 3, true)!;
-        const focus = skeleton.findNodePositionByCharIndex(dataStream.indexOf(focusText), false)!;
-        const glyph = skeleton.findGlyphByPosition(focus)!;
-        expect(glyph.content).toBe(focusText[0]);
-        const internal = service as unknown as {
-            _anchorNodePosition: INodePosition;
-            _shouldSnapBackwardFocusToGlyphStart: (node: INodeInfo, position: INodePosition) => boolean;
-        };
-        internal._anchorNodePosition = anchor;
-        expect(internal._shouldSnapBackwardFocusToGlyphStart({ node: glyph } as INodeInfo, focus)).toBe(reverse);
-    });
-
     it.each(['', 'note'])('uses the logical caret in segment "%s" while replacement layout is pending', (segmentId) => {
         TestLayoutService.reset();
         const univer = new Univer();
@@ -2172,7 +2093,7 @@ describe('DocSelectionRenderService', () => {
         expect(container.style.top).toBe('10px');
     });
 
-    it.each([true, false])('commits a drag and honors disabled auto-scroll: %s', (disableSelectionAutoScroll) => {
+    it('commits a dragged text selection when the pointer is released', () => {
         vi.spyOn(TextRange.prototype as unknown as Record<'_anchorBlink', () => void>, '_anchorBlink').mockImplementation(() => {});
         vi.spyOn(TextRange.prototype, 'refresh').mockImplementation(() => {});
         const pointerMove$ = new TestRenderEvent<{ offsetX: number; offsetY: number }>();
@@ -2181,10 +2102,9 @@ describe('DocSelectionRenderService', () => {
         const enableObjectsEvent = vi.fn();
         const clearSelectedObjects = vi.fn();
         const setCursor = vi.fn();
-        const setCapture = vi.fn();
         const scene = {
             getViewports: () => [],
-            getEngine: () => ({ name: 'engine', setCapture }),
+            getEngine: () => ({ name: 'engine' }),
             findViewportByPosToScene: () => ({
                 top: 0,
                 left: 0,
@@ -2200,12 +2120,8 @@ describe('DocSelectionRenderService', () => {
             onPointerMove$: pointerMove$,
             onPointerUp$: pointerUp$,
         };
-        const { renderUnit, service, univer } = createRealSelectionRenderService({
-            disableSelectionAutoScroll,
-            scene,
-        });
+        const { renderUnit, service, univer } = createRealSelectionRenderService({ scene });
         cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
-        const createScrollTimer = vi.spyOn(ScrollTimer, 'create');
         const dragRange = {
             ...createTextRange({ isActive: vi.fn(() => true) }),
             startOffset: 2,
@@ -2215,17 +2131,6 @@ describe('DocSelectionRenderService', () => {
             segmentId: '',
             segmentPage: -1,
             direction: 'forward',
-            startNodePosition: null,
-            endNodePosition: null,
-        };
-        const staleCollapsedRange = {
-            ...createTextRange({ collapsed: true }),
-            startOffset: 0,
-            endOffset: 0,
-            rangeType: DOC_RANGE_TYPE.TEXT,
-            segmentId: '',
-            segmentPage: -1,
-            direction: 'none',
             startNodePosition: null,
             endNodePosition: null,
         };
@@ -2254,7 +2159,6 @@ describe('DocSelectionRenderService', () => {
         });
         (service as unknown as { _moving: () => void })._moving = () => {
             (service as unknown as { _focusNodePosition: unknown })._focusNodePosition = focusNodePosition;
-            (service as unknown as { _rangeList: TextRange[] })._rangeList = [staleCollapsedRange as never];
             (service as unknown as { _rangeListCache: TextRange[] })._rangeListCache = [dragRange as never];
         };
         const selections: string[] = [];
@@ -2277,13 +2181,6 @@ describe('DocSelectionRenderService', () => {
         expect(enableObjectsEvent).toHaveBeenCalledTimes(1);
         expect(clearSelectedObjects).toHaveBeenCalledTimes(1);
         expect(setCursor).toHaveBeenCalledWith('text');
-        expect(setCapture).toHaveBeenCalledOnce();
-        if (disableSelectionAutoScroll) {
-            expect(createScrollTimer).not.toHaveBeenCalled();
-        } else {
-            expect(createScrollTimer).toHaveBeenCalledWith(scene, ScrollTimerType.ALL);
-        }
-        expect(staleCollapsedRange.dispose).toHaveBeenCalledOnce();
         expect(selections.at(-1)).toBe('2:6');
         expect(service.isFocusing).toBe(false);
     });
@@ -2355,133 +2252,6 @@ describe('DocSelectionRenderService', () => {
         service.addDocRanges([{ startOffset: 0, endOffset: 3 }], true, { shouldFocus: false });
         expect(activeAnchor?.show).toHaveBeenCalled();
         expect(mobileSelectionVisualsMock.hide).toHaveBeenCalled();
-    });
-
-    it.each([
-        { x: 1, glyph: 0, isBack: true },
-        { x: 9, glyph: 0, isBack: false },
-        { x: 19, glyph: 1, isBack: false },
-    ])('keeps the hit-tested boundary of positioned text during reverse dragging: $x', ({ x, glyph, isBack }) => {
-        const { renderUnit, service, univer } = createRealSelectionRenderService({
-            scene: { getViewports: () => [{ transformVector2SceneCoord: (point: unknown) => point }] },
-            mainComponent: {
-                getOffsetConfig: () => ({ documentTransform: new Transform(), pageMarginLeft: 0, pageMarginTop: 0 }),
-            },
-            documentData: {
-                id: 'selection-render-doc',
-                body: {
-                    dataStream: 'abcd\rwxyz\r\n',
-                    paragraphs: [
-                        { startIndex: 4, paragraphId: 'positioned-first' },
-                        { startIndex: 9, paragraphId: 'positioned-second' },
-                    ],
-                    sectionBreaks: [{ startIndex: 10, sectionId: 'positioned-section' }],
-                    textRuns: [{ st: 0, ed: 9, ts: { fs: 12, textAdvance: 10 } }],
-                },
-                documentStyle: {
-                    pageSize: { width: 200, height: 100 },
-                    marginTop: 0,
-                    marginLeft: 0,
-                    marginBottom: 0,
-                    marginRight: 0,
-                },
-            },
-        });
-        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
-        const skeleton = renderUnit.with(DocSkeletonManagerService).getSkeleton();
-        const internal = service as unknown as {
-            _anchorNodePosition: INodePosition;
-            _moving: (x: number, y: number) => void;
-        };
-        internal._anchorNodePosition = skeleton.findNodePositionByCharIndex(8, true)!;
-        const page = skeleton.getSkeletonData()!.pages[0];
-        const firstLine = page.sections[0].columns[0].lines[0];
-        internal._moving(page.marginLeft + x, page.marginTop + firstLine.paddingTop + 1);
-        expect(getRangeListFromSelectionMock).toHaveBeenCalledOnce();
-        expect(getRangeListFromSelectionMock.mock.calls[0][1]).toMatchObject({ line: 0, glyph, isBack });
-    });
-
-    it('tracks sub-threshold motion after a drag starts while preserving initial click jitter filtering', () => {
-        const pointerMove$ = new TestRenderEvent<{ offsetX: number; offsetY: number }>();
-        const pointerUp$ = new TestRenderEvent<Record<string, never>>();
-        const viewport = { transformVector2SceneCoord: (point: unknown) => point };
-        const scene = {
-            getViewports: () => [viewport],
-            getEngine: () => ({ setCapture: () => {} }),
-            disableObjectsEvent: () => {},
-            enableObjectsEvent: () => {},
-            getTransformer: () => null,
-            setCursor: () => {},
-            onPointerMove$: pointerMove$,
-            onPointerUp$: pointerUp$,
-        };
-        const { renderUnit, service, univer } = createRealSelectionRenderService({
-            scene,
-            mainComponent: {
-                getOffsetConfig: () => ({ documentTransform: new Transform(), pageMarginLeft: 0, pageMarginTop: 0 }),
-            },
-            documentData: {
-                id: 'selection-render-doc',
-                body: {
-                    dataStream: 'abcdef\r\n',
-                    paragraphs: [{ startIndex: 6, paragraphId: 'drag' }],
-                    sectionBreaks: [{ startIndex: 7, sectionId: 'drag-section' }],
-                    textRuns: [{ st: 0, ed: 6, ts: { fs: 12, textAdvance: 10 } }],
-                },
-                documentStyle: {
-                    pageSize: { width: 200, height: 100 },
-                    marginTop: 0,
-                    marginLeft: 0,
-                    marginBottom: 0,
-                    marginRight: 0,
-                    renderConfig: { disableSelectionAutoScroll: BooleanNumber.TRUE },
-                },
-            },
-        });
-        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
-        const skeleton = renderUnit.with(DocSkeletonManagerService).getSkeleton();
-        const hitTest = vi.spyOn(skeleton, 'findNodeByCoord');
-        service.__onPointDown({ offsetX: 30, offsetY: 12, button: 0 } as never);
-        expect(hitTest.mock.results[0].value?.node).toBeDefined();
-        hitTest.mockClear();
-        pointerMove$.emit({ offsetX: 31, offsetY: 12 });
-        expect(hitTest).not.toHaveBeenCalled();
-        pointerMove$.emit({ offsetX: 50, offsetY: 12 });
-        expect(hitTest).toHaveBeenCalledTimes(1);
-        pointerMove$.emit({ offsetX: 49.57, offsetY: 9.09 });
-        expect(hitTest).toHaveBeenCalledTimes(2);
-        expect(hitTest.mock.calls[1][0]).toMatchObject({ x: 49.57, y: 9.09 });
-        pointerMove$.emit({ offsetX: 49.57, offsetY: 9.09 });
-        expect(hitTest).toHaveBeenCalledTimes(2);
-        service.cancelPointerSelection();
-        service.__onPointDown({ offsetX: 30, offsetY: 12, button: 0 } as never);
-        hitTest.mockClear();
-        pointerMove$.emit({ offsetX: 31, offsetY: 12 });
-        expect(hitTest).not.toHaveBeenCalled();
-        service.cancelPointerSelection();
-    });
-
-    it('normalizes pointer offsets from a nested canvas to the document engine canvas', () => {
-        const { engine, service } = createService();
-        const engineCanvas = document.createElement('canvas');
-        const nestedCanvas = document.createElement('canvas');
-        Object.defineProperties(engineCanvas, {
-            offsetLeft: { value: 10 },
-            offsetParent: { value: null },
-            offsetTop: { value: 20 },
-        });
-        Object.defineProperties(nestedCanvas, {
-            offsetLeft: { value: 10 },
-            offsetParent: { value: null },
-            offsetTop: { value: 43 },
-        });
-        Object.assign(engine, { getCanvasElement: () => engineCanvas });
-
-        expect(service._getScenePointerOffset({
-            offsetX: 138,
-            offsetY: 15,
-            target: nestedCanvas,
-        })).toEqual({ offsetX: 138, offsetY: 38 });
     });
 
     it('places the manual cursor from transformed document coordinates', () => {

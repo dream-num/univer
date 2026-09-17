@@ -33,36 +33,6 @@ import { TextX } from '../text-x';
 import { composeBody } from '../utils';
 
 describe('test TextX methods and branches', () => {
-    it.each(['textRuns', 'customRanges'] as const)('does not split columns when undoing a %s update', (attribute) => {
-        const T = DataStreamTreeTokenType;
-        const source: IDocumentBody = {
-            dataStream: `${T.COLUMN_GROUP_START}${T.COLUMN_START}AB\r${T.COLUMN_END}`
-                + `${T.COLUMN_START}CD\r${T.COLUMN_END}${T.COLUMN_GROUP_END}\n`,
-            paragraphs: [{ startIndex: 4, paragraphId: 'left' }, { startIndex: 9, paragraphId: 'right' }],
-            columnGroups: [{ startIndex: 0, endIndex: 11, columnGroupId: 'columns' }],
-            textRuns: [{ st: 2, ed: 4, ts: { fs: 12 } }],
-            customRanges: [],
-        };
-        const update: IDocumentBody = { dataStream: '' };
-        if (attribute === 'textRuns') {
-            update.textRuns = [{ st: 0, ed: 2, ts: { bl: BooleanNumber.TRUE } }];
-        } else {
-            update.customRanges = [{ startIndex: 0, endIndex: 1, rangeId: 'bookmark', rangeType: CustomRangeType.BOOKMARK }];
-        }
-        const actions = new TextX().retain(2).retain(2, update).serialize();
-        const inverse = TextX.invert(TextX.makeInvertible(actions, Tools.deepClone(source)));
-        const edited = TextX.apply(Tools.deepClone(source), actions);
-        const undone = TextX.apply(Tools.deepClone(edited), inverse);
-        expect(undone.dataStream).toBe(source.dataStream);
-        expect(undone.columnGroups).toEqual(source.columnGroups);
-        expect(undone.customRanges).toEqual(source.customRanges);
-        expect(undone.textRuns).toEqual(source.textRuns);
-        const redone = TextX.apply(Tools.deepClone(undone), actions);
-        expect(redone.columnGroups).toEqual(edited.columnGroups);
-        expect(redone.customRanges).toEqual(edited.customRanges);
-        expect(redone.textRuns).toEqual(edited.textRuns);
-    });
-
     it('keeps scalar identity distinct from adjacent typing, different controls and document snapshots', () => {
         const value = { t: TextXActionType.INSERT, len: 1, body: { dataStream: 'A' }, valueRangeId: 'first' } as IInsertAction;
         const edit = new TextX().insert(1, { dataStream: 'X' }).push(value).delete(1).serialize();

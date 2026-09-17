@@ -1010,7 +1010,11 @@ export class Documents extends DocComponent {
         if (!this._glyphPaintSink) {
             for (const extension of extensions) {
                 extension.extensionOffset = offset;
-                extension.draw(context, parentScale, glyph, [], drawInfo ? { ...drawInfo } : undefined);
+                if (drawInfo) {
+                    extension.draw(context, parentScale, glyph, [], { ...drawInfo });
+                } else {
+                    extension.draw(context, parentScale, glyph);
+                }
             }
             return;
         }

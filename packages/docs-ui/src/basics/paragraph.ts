@@ -92,13 +92,14 @@ export function getTextRunAtInputPosition(
     position: number,
     defaultStyle: ITextStyle,
     cacheStyle: Nullable<ITextStyle>,
-    isCellEditor?: boolean
+    isCellEditor?: boolean,
+    inheritParagraphStartStyle = false
 ): ITextRun {
     const inheritedTextRun = getTextRunAtPosition(body, position, defaultStyle, cacheStyle, isCellEditor);
     const previousToken = body.dataStream[position - 1];
     const startsParagraph = previousToken === DataStreamTreeTokenType.PARAGRAPH ||
         previousToken === DataStreamTreeTokenType.COLUMN_START;
-    const nextTextRun = startsParagraph
+    const nextTextRun = inheritParagraphStartStyle && startsParagraph
         ? body.textRuns?.find((textRun) => textRun.st === position && textRun.ed > position)
         : undefined;
     const textStyle = nextTextRun

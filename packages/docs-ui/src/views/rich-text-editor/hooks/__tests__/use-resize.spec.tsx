@@ -33,7 +33,7 @@ describe('useResize', () => {
         expect(getBoundingClientRect).not.toHaveBeenCalled();
     });
 
-    it('makes the document hit area available on the first editor layout', () => {
+    it('preserves engine-owned sizing when no host dimensions are configured', () => {
         const updateDocumentDataPageSize = vi.fn();
         const sceneTransform = vi.fn();
         const documentResize = vi.fn();
@@ -64,7 +64,7 @@ describe('useResize', () => {
         resizeEditor(editor, false);
 
         expect(updateDocumentDataPageSize).toHaveBeenCalledWith(320, Infinity);
-        expect(engineResize).toHaveBeenCalledWith(320, 96);
+        expect(engineResize).not.toHaveBeenCalled();
         expect(sceneTransform).toHaveBeenCalledWith({ width: 320, height: 96 });
         expect(documentResize).toHaveBeenCalledWith(320, 96);
         expect(documentTranslate).toHaveBeenCalledWith(0, 0);

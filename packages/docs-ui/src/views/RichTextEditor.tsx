@@ -69,6 +69,10 @@ export interface IRichTextEditorProps {
     autoScroll?: boolean;
     /** Let the editor create scrollbars when its content exceeds the current layout size. */
     autoScrollbar?: boolean;
+    /** Publish transient drag ranges to the host. Defaults to false. */
+    emitSelectionWhileDragging?: boolean;
+    /** Keep host keyboard handlers active for non-collapsed selections. Defaults to false. */
+    keyboardEventsOnSelection?: boolean;
     keyboardEventConfig?: IKeyboardEventConfig;
     moveCursor?: boolean;
     style?: CSSProperties;
@@ -98,6 +102,8 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         documentLayoutSize,
         autoScroll = true,
         autoScrollbar = true,
+        emitSelectionWhileDragging,
+        keyboardEventsOnSelection = false,
         keyboardEventConfig,
         layoutSize,
         pixelRatio,
@@ -132,6 +138,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         cancelDefaultResizeListener,
         customGlyphRenderers,
         disableBackScroll: !autoScroll,
+        emitSelectionWhileDragging,
         documentLayoutSize,
         autoFocus,
         isSingle,
@@ -227,7 +234,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
 
     useLeftAndRightArrow(isFocusing && moveCursor, false, editor);
     // Undo can restore a non-collapsed selection without blurring the editor.
-    useKeyboardEvent(editorFocused, resolvedKeyboardEventConfig, editor);
+    useKeyboardEvent(keyboardEventsOnSelection ? editorFocused : isFocusing, resolvedKeyboardEventConfig, editor);
     useOnChange(editor, onChange);
 
     return (

@@ -109,7 +109,8 @@ export class FontAndBaseLine extends docExtension {
         const { cl: colorStyle, pos: position, va: baselineOffset, textFill, glow, outerShadow } = textStyle;
         const fontColor = getColorStyleForCanvas(colorStyle) || COLOR_BLACK_RGB;
 
-        if (typeof position === 'number' && Number.isFinite(position)) {
+        if (this.extensionOffset.renderConfig?.applyTextPosition === BooleanNumber.TRUE
+            && typeof position === 'number' && Number.isFinite(position)) {
             spanPointWithFont.y -= position * 4 / 3;
         }
         if (baselineOffset === BaselineOffset.SUPERSCRIPT) {
@@ -425,7 +426,7 @@ export class FontAndBaseLine extends docExtension {
             return;
         }
 
-        if (glyph.glyphType === GlyphType.TAB) {
+        if (glyph.glyphType === GlyphType.TAB && (glyph.tabLeader != null || glyph.ts?.textAdvance !== undefined)) {
             if (glyph.tabLeader != null) {
                 const leader = this._getTabLeaderCharacter(glyph.tabLeader);
                 if (leader) {
@@ -501,10 +502,10 @@ export class FontAndBaseLine extends docExtension {
                         cursor += localTextAdvance;
                     });
                     ctx.restore();
-                } else if (!isVertical && (horizontalScale !== 1 || textSkewX !== 0)) {
+                } else if (horizontalScale !== 1 || (!isVertical && textSkewX !== 0)) {
                     ctx.save();
                     ctx.translate(spanPointWithFont.x + x_offset, spanPointWithFont.y + y_offset);
-                    if (textSkewX !== 0) {
+                    if (!isVertical && textSkewX !== 0) {
                         ctx.transform(horizontalScale, 0, textSkewX, 1, 0, 0);
                     } else {
                         ctx.scale(horizontalScale, 1);
@@ -526,6 +527,10 @@ export class FontAndBaseLine extends docExtension {
         y: number
     ) {
         const requestedRenderScale = glyph.ts?.fontRenderScale;
+        if (requestedRenderScale === undefined) {
+            this._paintTextAtPoint(ctx, glyph, content, x, y);
+            return;
+        }
         const contextScaleY = ctx.getScale().scaleY;
         // Canvas.setSize retains its fractional logical width here. clientWidth rounds it,
         // which would turn backing-store density into an unintended font-size adjustment.
@@ -581,7 +586,7 @@ export class FontAndBaseLine extends docExtension {
     ) {
         const fontFamily = glyph.ts?.ff ?? glyph.fontStyle?.fontFamily ?? undefined;
         const customRenderer = getDocCustomGlyphRenderer(fontFamily);
-        const fontSizePx = canvasFontPixelSize(ctx.font);
+        const fontSizePx = customRenderer ? canvasFontPixelSize(ctx.font) : undefined;
         const bold = glyph.ts?.bl === BooleanNumber.TRUE;
         const italic = glyph.ts?.it === BooleanNumber.TRUE;
         const customRendered = customRenderer && fontSizePx !== undefined
@@ -591,7 +596,8 @@ export class FontAndBaseLine extends docExtension {
             ctx.fillText(content, x, y);
         }
         const outline = glyph.ts?.textOutline;
-        if (outline?.color && outline.width && outline.width > 0) {
+        if (this.extensionOffset.renderConfig?.paintTextOutline === BooleanNumber.TRUE
+            && outline?.color && outline.width && outline.width > 0) {
             ctx.save();
             ctx.strokeStyle = outline.color;
             ctx.lineWidth = outline.width;

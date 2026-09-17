@@ -37,7 +37,11 @@ import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed
 describe('line-adjustment', () => {
     it.each(['“内容”', '文。。文', '（二）内容'])('preserves punctuation widths when compression is disabled: %s', (text) => {
         const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(text, {
-            documentStyle: { characterSpacingControl: characterSpacingControlType.doNotCompress },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                characterSpacingControl: characterSpacingControlType.doNotCompress,
+                renderConfig: { preservePunctuationSpacing: BooleanNumber.TRUE },
+            },
         });
         const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
         const pages = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);

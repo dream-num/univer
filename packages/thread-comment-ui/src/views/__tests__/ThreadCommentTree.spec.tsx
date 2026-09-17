@@ -130,7 +130,6 @@ class TestEditor {
 
     readonly render = {
         isDisposed: () => false,
-        engine: { resizeBySize: () => undefined },
         with: () => ({
             getSkeleton: () => ({
                 getActualSize: () => ({ actualWidth: 0, actualHeight: 0 }),

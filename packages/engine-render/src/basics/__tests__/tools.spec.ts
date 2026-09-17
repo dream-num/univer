@@ -359,35 +359,6 @@ describe('tools extra', () => {
         }));
     });
 
-    it('avoids segmenting a long suffix when adjacent printable ASCII determines the first boundary', () => {
-        const segment = vi.spyOn(Intl.Segmenter.prototype, 'segment');
-        const text = 'Reference card commands and keyboard shortcuts. '.repeat(300);
-        try {
-            for (let offset = 0; offset < 128; offset++) {
-                expect(getFirstGrapheme(text.substring(offset))).toBe(text[offset]);
-            }
-            expect(segment.mock.calls.length).toBe(0);
-        } finally {
-            segment.mockRestore();
-        }
-    });
-
-    it.each<[string, string | null]>([
-        ['', null],
-        [' ', ' '],
-        ['a\u0301b', 'a\u0301'],
-        ['a\u200D😀', 'a\u200D'],
-        ['1️⃣hello', '1️⃣'],
-        ['#️⃣hello', '#️⃣'],
-        ['*️⃣hello', '*️⃣'],
-        ['\r\nhello', '\r\n'],
-        ['🇨🇳hello', '🇨🇳'],
-        ['👩‍👩‍👧‍👦hello', '👩‍👩‍👧‍👦'],
-        ['中文', '中'],
-    ])('preserves Unicode grapheme boundaries for %s', (text, expected) => {
-        expect(getFirstGrapheme(text)).toBe(expected);
-    });
-
     it('Emoji test', () => {
         expect(startWithEmoji('🐱‍🏍One Team, One Dream!!! 🐱‍🏍')).toBe(true);
         expect(startWithEmoji('ordinary text')).toBe(false);

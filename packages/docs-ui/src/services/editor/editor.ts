@@ -108,6 +108,8 @@ export interface IEditorConfigParams {
     cancelDefaultResizeListener?: boolean;
     /** Use a fixed canvas backing-store ratio for an editor managed by an external layout host. */
     pixelRatio?: number;
+    /** Publish transient drag ranges to an external editor host. Defaults to false. */
+    emitSelectionWhileDragging?: boolean;
     canvasStyle?: IEditorCanvasStyle;
     // A Boolean attribute which, if present, indicates that the editor should automatically have focus.
     // No more than one editor in the document may have the autofocus attribute.
@@ -249,12 +251,14 @@ export class Editor extends Disposable implements IEditor {
             })
         );
 
-        this.disposeWithMe(
-            docSelectionRenderService.movingSelection$.subscribe((selection) => {
-                this._movingSelectionRanges = selection.textRanges;
-                this._selectionChange$.next(selection);
-            })
-        );
+        if (this._param.emitSelectionWhileDragging) {
+            this.disposeWithMe(
+                docSelectionRenderService.movingSelection$.subscribe((selection) => {
+                    this._movingSelectionRanges = selection.textRanges;
+                    this._selectionChange$.next(selection);
+                })
+            );
+        }
     }
 
     isFocus() {
@@ -363,27 +367,18 @@ export class Editor extends Disposable implements IEditor {
 
     replaceText(text: string, resetCursor: boolean | ITextRangeWithStyle[] = true) {
         const data = this.getDocumentData();
-        const normalizedText = text.replace(/\r\n?/g, '\n');
-        const paragraphIds = new Set<string>();
-        const paragraphs = [];
-        let dataStream = '';
-        for (const line of normalizedText.split('\n')) {
-            dataStream += `${line}\r`;
-            paragraphs.push({
-                startIndex: dataStream.length - 1,
-                paragraphId: createParagraphId(paragraphIds),
-            });
-        }
-        dataStream += '\n';
 
         this.setDocumentData(
             {
                 ...data,
                 body: {
-                    dataStream,
-                    paragraphs,
+                    dataStream: `${text}\r\n`,
+                    paragraphs: [{
+                        startIndex: text.length,
+                        paragraphId: createParagraphId(new Set()),
+                    }],
                     customRanges: [],
-                    sectionBreaks: [{ sectionId: createSectionId(new Set()), startIndex: dataStream.length - 1 }],
+                    sectionBreaks: [{ sectionId: createSectionId(new Set()), startIndex: text.length + 1 }],
                     tables: [],
                     textRuns: [],
                 },
@@ -392,8 +387,8 @@ export class Editor extends Disposable implements IEditor {
                 ? resetCursor
                 : resetCursor
                     ? [{
-                        startOffset: normalizedText.length,
-                        endOffset: normalizedText.length,
+                        startOffset: text.length,
+                        endOffset: text.length,
                         collapsed: true,
                     }]
                     : null

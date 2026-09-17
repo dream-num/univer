@@ -3845,7 +3845,7 @@ export class DocumentSkeleton extends Skeleton {
         let positionedMatch: Nullable<INodeInfo>;
         let positionedDistance = Number.POSITIVE_INFINITY;
         let positionedMatchHasText = false;
-        const useContentBounds = page.renderConfig?.topAlignExactLineSpacing === BooleanNumber.TRUE;
+        const useContentBounds = page.renderConfig?.useTextInkForHitTesting === BooleanNumber.TRUE;
         const { x: originX, y: originY } = this._findLiquid;
         for (const section of page.sections) {
             for (const column of section.columns) {
@@ -3872,7 +3872,8 @@ export class DocumentSkeleton extends Skeleton {
                             const { bBox, ts } = glyph;
                             let baseline = startY + line.asc;
                             if (useContentBounds) {
-                                if (typeof ts?.pos === 'number' && Number.isFinite(ts.pos)) {
+                                if (page.renderConfig?.applyTextPosition === BooleanNumber.TRUE
+                                    && typeof ts?.pos === 'number' && Number.isFinite(ts.pos)) {
                                     baseline -= ts.pos * 4 / 3;
                                 }
                                 if (ts?.va === BaselineOffset.SUPERSCRIPT) {

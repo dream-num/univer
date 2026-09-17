@@ -188,6 +188,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
                 visible: true,
                 eventType: DeviceInputEventType.Dblclick,
                 unitId: this._context.unitId,
+                pointerPosition: { clientX: evt.clientX, clientY: evt.clientY },
             } as IEditorBridgeServiceVisibleParam);
         }));
 

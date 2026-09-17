@@ -58,6 +58,7 @@ export interface IEditorBridgeServiceVisibleParam {
     keycode?: KeyCode;
     isShift?: boolean;
     initialValue?: string;
+    pointerPosition?: { clientX: number; clientY: number };
 }
 
 export interface ICurrentEditCellParam {
@@ -324,7 +325,6 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         }
     }
 
-    // eslint-disable-next-line max-lines-per-function, complexity
     getLatestEditCellState() {
         if (!this._currentEditCell) return;
 

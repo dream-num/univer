@@ -378,7 +378,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         return true;
     }
 
-    // eslint-disable-next-line max-lines-per-function
     addDocRanges(
         ranges: ISuccinctDocRangeParam[],
         isEditing = true,
@@ -498,8 +497,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                     if (textRange) {
                         this._addTextRange(textRange);
                     }
-                    // eslint-disable-next-line unused-imports/no-unused-vars
-                } catch (_e) {
+                } catch {
                     generalAddRange(startOffset, endOffset, rangeStyle);
                 }
             } else {
@@ -615,6 +613,16 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._container.style.top = '0px';
     }
 
+    getParagraphRangeAtBlank(offsetX: number, offsetY: number): Nullable<ISuccinctDocRangeParam> {
+        const hit = this._findNodeByCoord(offsetX, offsetY, {
+            strict: false,
+            segmentId: this._currentSegmentId,
+            segmentPage: this._currentSegmentPage,
+        });
+        const paragraph = hit?.isInTrailingBlank && getParagraphInfoByGlyph(hit.node);
+        return paragraph ? { startOffset: paragraph.st, endOffset: paragraph.ed } : null;
+    }
+
     // Handler double click.
     __handleDblClick(evt: IPointerEvent | IMouseEvent, isEditing = false, shouldFocusInput = true) {
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
@@ -639,7 +647,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             return;
         }
 
-        const wordBoundary = getWordBoundaryByIndex(content, nodeIndex, st);
+        const wordBoundary = startNode.isInTrailingBlank
+            ? { startOffset: st, endOffset: paragraphInfo.ed }
+            : getWordBoundaryByIndex(content, nodeIndex, st);
 
         if (wordBoundary != null) {
             this.removeAllRanges();
@@ -691,7 +701,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     // Handle pointer down.
-    // eslint-disable-next-line max-lines-per-function, complexity
     __onPointDown(evt: IPointerEvent | IMouseEvent, shouldFocusInput = true) {
         const { scene, mainComponent } = this._context;
         const skeleton = this._docSkeletonManagerService.getSkeleton();
@@ -1471,7 +1480,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     // FIXME: listeners here are not correctly disposed
-    // eslint-disable-next-line max-lines-per-function
     private _initInputEvents() {
         this.disposeWithMe(
             fromEvent(this._input, 'keydown').subscribe((e) => {

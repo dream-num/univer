@@ -183,6 +183,7 @@ export interface IFontCreateConfig {
 
 export interface INodeInfo {
     node: IDocumentSkeletonGlyph;
+    isInTrailingBlank?: boolean;
     ratioX: number;
     ratioY: number;
     segmentId: string;

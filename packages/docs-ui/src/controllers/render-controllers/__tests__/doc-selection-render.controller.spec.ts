@@ -59,6 +59,7 @@ import {
 import { DocMobileElementMenuService } from '../../../services/doc-mobile-element-menu.service';
 import { DocCanvasPopManagerService } from '../../../services/doc-popup-manager.service';
 import { EditorService, IEditorService } from '../../../services/editor/editor-manager.service';
+import { NodePositionConvertToCursor } from '../../../services/selection/convert-text-range';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 import { DocSelectionRenderController } from '../doc-selection-render.controller';
 import { MobileDocSelectionRenderController } from '../mobile/doc-selection-render.controller';
@@ -362,7 +363,7 @@ describe('DocSelectionRenderController', () => {
         findFirstCursorOffsetMock.mockClear();
     });
 
-    it.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL])('preserves the editing selection across synchronous layout publications (flavor %s)', async (documentFlavor) => {
+    it.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL])('preserves editing selections and selects a paragraph from its trailing blank area (flavor %s)', async (documentFlavor) => {
         const componentTools = await vi.importActual<typeof import('../../../basics/component-tools')>('../../../basics/component-tools');
         const selectionTools = await vi.importActual<typeof import('../../../basics/selection')>('../../../basics/selection');
         neoGetDocObjectMock.mockImplementation(componentTools.neoGetDocObject);
@@ -434,6 +435,21 @@ describe('DocSelectionRenderController', () => {
                 expect(selections.getActiveTextRange()).toMatchObject({ startOffset, endOffset });
                 expect(selections.getSelectionInfo()?.isEditing).toBe(true);
             }
+
+            const skeleton = skeletonManager.getSkeleton();
+            const position = skeleton.findNodePositionByCharIndex(1);
+            const converter = new NodePositionConvertToCursor(documents.getOffsetConfig(), skeleton);
+            const { borderBoxPointGroup } = converter.getRangePointData(position, position);
+            const linePoints = borderBoxPointGroup[0];
+            const offsetY = (linePoints[0].y + linePoints[2].y) / 2;
+            const selectionRender = render.with(DocSelectionRenderService);
+            expect(selectionRender.getParagraphRangeAtBlank(linePoints[0].x, offsetY)).toBeNull();
+            documents.onDblclick$.emitEvent({ offsetX: linePoints[0].x, offsetY } as never);
+            expect(selections.getActiveTextRange()).toMatchObject({ startOffset: 0, endOffset: 5 });
+
+            expect(selectionRender.getParagraphRangeAtBlank(300, offsetY)).toEqual({ startOffset: 0, endOffset: 15 });
+            documents.onDblclick$.emitEvent({ offsetX: 300, offsetY } as never);
+            expect(selections.getActiveTextRange()).toMatchObject({ startOffset: 0, endOffset: 15 });
         } finally {
             univer.dispose();
             root.remove();

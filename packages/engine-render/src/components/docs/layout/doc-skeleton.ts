@@ -855,9 +855,7 @@ export interface IFindNodeRestrictions {
 function getPagePath(page: IDocumentSkeletonPage) {
     const path: (string | number)[] = [];
 
-    // eslint-disable-next-line ts/no-explicit-any
     let skeNode: any = page;
-    // eslint-disable-next-line ts/no-explicit-any
     let parent: any = skeNode.parent;
     while (parent) {
         if (parent.page === skeNode && parent.noteId && parent.parent?.notes) {
@@ -3542,7 +3540,6 @@ export class DocumentSkeleton extends Skeleton {
         y: number,
         pageLength: number,
         nestLevel: number = 0
-        // eslint-disable-next-line ts/no-explicit-any
     ): any {
         const { sections, skeTables, skeColumnGroups = new Map() } = segmentPage;
         this._findLiquid.translateSave();
@@ -3646,6 +3643,9 @@ export class DocumentSkeleton extends Skeleton {
                                 this._findLiquid.translateDivide(divide);
 
                                 const { x: startX } = this._findLiquid;
+                                const lastGlyph = glyphGroup[glyphGroup.length - 1];
+                                const isInTrailingBlank = i === divideLength - 1 && lastGlyph != null &&
+                                    x > startX + lastGlyph.left + lastGlyph.width;
 
                                 for (const glyph of glyphGroup) {
                                     if (!isHitTestAddressableGlyph(glyph)) {
@@ -3676,6 +3676,7 @@ export class DocumentSkeleton extends Skeleton {
                                         }
                                         cache.nearestNodeList.push({
                                             node: glyph,
+                                            isInTrailingBlank,
                                             segmentPage: pageType === DocumentSkeletonPageType.BODY ? -1 : pi,
                                             segmentId,
                                             ratioX: x / (startX_fin + endX_fin),

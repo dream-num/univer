@@ -366,9 +366,33 @@ export function EditorContainer({ hidden = false }: IEditorContainerProps) {
             return;
         }
 
-        cellEditorResizeService.fitTextSize();
+        let disposed = false;
+        cellEditorResizeService.fitTextSize(() => {
+            const pointer = visible.pointerPosition;
+            const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+            if (disposed || !pointer || !editor || contextService.getContextValue(FOCUSING_FX_BAR_EDITOR)) {
+                return;
+            }
+
+            const canvas = editor.render.engine.getCanvasElement();
+            const rect = canvas.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) {
+                return;
+            }
+
+            const selection = editor.render.with(DocSelectionRenderService);
+            const range = selection.getParagraphRangeAtBlank(
+                (pointer.clientX - rect.left) * canvas.clientWidth / rect.width,
+                (pointer.clientY - rect.top) * canvas.clientHeight / rect.height
+            );
+            if (range) {
+                selection.replaceDocRanges([range], false, { shouldFocus: !disableAutoFocus });
+            }
+        });
         if (contextService.getContextValue(FOCUSING_FX_BAR_EDITOR)) {
-            return;
+            return () => {
+                disposed = true;
+            };
         }
 
         const ownerDocument = rootRef.current?.ownerDocument ?? document;
@@ -425,13 +449,14 @@ export function EditorContainer({ hidden = false }: IEditorContainerProps) {
         });
 
         return () => {
+            disposed = true;
             cancelAnimationFrame(focusRetryFrame);
             cancelAnimationFrame(finalFocusRetryFrame);
             if (delayedFocusTimer != null) {
                 ownerWindow.clearTimeout(delayedFocusTimer);
             }
         };
-    }, [cellEditorResizeService, contextService, editorService, hidden, visible?.visible]);
+    }, [cellEditorResizeService, contextService, disableAutoFocus, editorService, hidden, visible?.pointerPosition, visible?.visible]);
 
     useEffect(() => {
         if (!visible?.visible || !rootRef.current || !focusCoordinator) {

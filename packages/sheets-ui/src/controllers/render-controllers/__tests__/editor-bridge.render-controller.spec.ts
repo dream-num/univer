@@ -17,10 +17,10 @@
 // @vitest-environment jsdom
 
 import type { EmbedRuntimeFocusCoordinator } from '../../../services/sheet-embed-integration.service';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET, ICommandService, IContextService, Injector, IUniverInstanceService } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { DeviceInputEventType } from '@univerjs/engine-render';
-import { ClearSelectionFormatCommand, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { ClearSelectionFormatCommand, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { DISABLE_AUTO_FOCUS_KEY } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
@@ -28,7 +28,9 @@ import { SetZoomRatioCommand } from '../../../commands/commands/set-zoom-ratio.c
 import { SetActivateCellEditOperation } from '../../../commands/operations/activate-cell-edit.operation';
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE } from '../../../services/sheet-embed-integration.service';
+import { IEditorBridgeService } from '../../../services/editor-bridge.service';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, ISheetEmbedRuntimeFocusCoordinator } from '../../../services/sheet-embed-integration.service';
+import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { EditorBridgeRenderController } from '../editor-bridge.render-controller';
 
 function createEventSubject() {
@@ -146,9 +148,8 @@ function createController(options?: {
         refreshEditCellState: vi.fn(),
     };
     commandService.syncExecuteCommand.mockReturnValue(true);
-    const controller = new EditorBridgeRenderController(
-        context as any,
-        {
+    const injector = new Injector([
+        [IUniverInstanceService, { useValue: {
             getCurrentTypeOfUnit$: vi.fn(() => workbook$),
             getFocusedUnit: vi.fn(() => ({
                 getUnitId: () => options?.focusedUnitId ?? 'unit-1',
@@ -156,10 +157,10 @@ function createController(options?: {
             getUnit: vi.fn(() => ({
                 getBody: () => ({ dataStream: '=\r\n' }),
             })),
-        } as any,
-        commandService as any,
-        editorBridgeService as any,
-        {
+        } as any }],
+        [ICommandService, { useValue: commandService as any }],
+        [IEditorBridgeService, { useValue: editorBridgeService as any }],
+        [SheetsSelectionsService, { useValue: {
             selectionMoveEnd$,
             selectionMoveStart$,
             selectionSet$,
@@ -178,14 +179,14 @@ function createController(options?: {
                     },
                 }]),
             })),
-        } as any,
-        {
+        } as any }],
+        [IContextService, { useValue: {
             getContextValue: vi.fn((key: string) => contextValues.get(key)),
             setContextValue: vi.fn((key: string, value: unknown) => contextValues.set(key, value)),
             subscribeContextValue$: vi.fn((key: string) => key === FOCUSING_SHEET ? focusingSheet$ : new Subject<unknown>()),
-        } as any,
-        renderManagerService as any,
-        {
+        } as any }],
+        [IRenderManagerService, { useValue: renderManagerService as any }],
+        [SheetSkeletonManagerService, { useValue: {
             getSkeletonParam: vi.fn(() => ({
                 skeleton: {
                     getCellWithCoordByIndex: vi.fn(() => ({
@@ -202,12 +203,13 @@ function createController(options?: {
                     })),
                 },
             })),
-        } as any,
-        {
+        } as any }],
+        [ISheetEmbedRuntimeFocusCoordinator, { useValue: {
             isChildUnitRuntimeEvent: vi.fn((unitId, target, event) => options?.isEmbedRuntimeEventImpl?.(unitId, target, event) ?? options?.isEmbedRuntimeEvent ?? false),
             isChildUnitInActiveSession: vi.fn(() => options?.isEmbedActiveSession ?? false),
-        } as unknown as EmbedRuntimeFocusCoordinator
-    );
+        } as unknown as EmbedRuntimeFocusCoordinator }],
+    ]);
+    const controller = injector.createInstance(EditorBridgeRenderController, context as never);
     workbook$.next(workbook);
 
     return {
@@ -301,11 +303,12 @@ describe('EditorBridgeRenderController business flows', () => {
         spreadsheet.onDblclick$.emit({ button: 2 });
         expect(commandService.executeCommand).not.toHaveBeenCalledWith(SetCellEditVisibleOperation.id, expect.anything());
 
-        spreadsheet.onDblclick$.emit({ button: 0 });
+        spreadsheet.onDblclick$.emit({ button: 0, clientX: 160, clientY: 625 });
         expect(commandService.executeCommand).toHaveBeenCalledWith(SetCellEditVisibleOperation.id, {
             visible: true,
             eventType: DeviceInputEventType.Dblclick,
             unitId: 'unit-1',
+            pointerPosition: { clientX: 160, clientY: 625 },
         });
 
         inputBefore$.next({ event: { data: 'A', which: 65 } });
@@ -332,11 +335,12 @@ describe('EditorBridgeRenderController business flows', () => {
         inputBefore$.next({ event: { data: 'A', which: 65 } });
         expect(commandService.syncExecuteCommand).not.toHaveBeenCalledWith(SetCellEditVisibleOperation.id, expect.anything());
 
-        spreadsheet.onDblclick$.emit({ button: 0 });
+        spreadsheet.onDblclick$.emit({ button: 0, clientX: 160, clientY: 625 });
         expect(commandService.executeCommand).toHaveBeenCalledWith(SetCellEditVisibleOperation.id, {
             visible: true,
             eventType: DeviceInputEventType.Dblclick,
             unitId: 'unit-1',
+            pointerPosition: { clientX: 160, clientY: 625 },
         });
 
         controller.dispose();

@@ -63,6 +63,7 @@ import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutati
 import { SheetDataValidationModel } from '../../models/sheet-data-validation-model';
 import { shouldOffsetFormulaByRange } from '../../utils/formula';
 import { getStringCellValue } from '../../utils/get-cell-data-origin';
+import { getRangesInWorksheet } from '../../utils/range';
 import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2 } from '../../validators';
 
 export interface IUpdateSheetDataValidationRangeCommandParams {
@@ -114,7 +115,7 @@ export function getDataValidationDiffMutations(
         if (!fillDefaultValue) {
             return;
         }
-        ranges.forEach((range) => {
+        getRangesInWorksheet(ranges, worksheet).forEach((range) => {
             Range.foreach(range, (row, column) => {
                 const cellData = worksheet.getCellRaw(row, column);
                 const value = getStringCellValue(cellData);
@@ -486,7 +487,7 @@ export const UpdateSheetDataValidationSettingCommand: ICommand<IUpdateSheetDataV
                 const { formula2: oldFormula2 = CHECKBOX_FORMULA_2, formula1: oldFormula1 = CHECKBOX_FORMULA_1 } = rule;
                 const { formula2 = CHECKBOX_FORMULA_2, formula1 = CHECKBOX_FORMULA_1 } = setting;
                 let setted = false;
-                ranges.forEach((range) => {
+                getRangesInWorksheet(ranges, worksheet).forEach((range) => {
                     Range.foreach(range, (row, column) => {
                         const cellData = worksheet.getCellRaw(row, column);
                         const value = getStringCellValue(cellData);

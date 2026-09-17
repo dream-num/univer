@@ -36,6 +36,14 @@ function createService(ruleRanges: IRange[] = [{ startRow: 1, endRow: 2, startCo
     } as unknown as ICommandService;
     const univerInstanceService = {
         unitDisposed$,
+        getUnit: vi.fn(() => ({
+            getSheetBySheetId: vi.fn((subUnitId: string) => subUnitId === 'sheet-1'
+                ? {
+                    getMaxRows: () => 3,
+                    getMaxColumns: () => 3,
+                }
+                : null),
+        })),
     } as unknown as IUniverInstanceService;
     const dataValidationModel = {
         getRules: vi.fn(() => [createRule(ruleRanges)]),
@@ -128,6 +136,49 @@ describe('DataValidationCacheService', () => {
         unitDisposed$.next({ type: 2, getUnitId: () => 'unit-1' });
 
         expect(service.ensureCache('unit-1', 'sheet-2')).not.toBe(unitCache as ObjectMatrix<any>);
+
+        service.dispose();
+    });
+
+    it('limits oversized ranges to the worksheet bounds', () => {
+        const { service } = createService();
+        const cache = service.ensureCache('unit-1', 'sheet-1');
+        const oversizedRange = [{
+            startRow: 0,
+            endRow: 1048575,
+            startColumn: 0,
+            endColumn: 16383,
+        }];
+
+        cache.setValue(0, 0, 1 as never);
+        cache.setValue(2, 2, 2 as never);
+        cache.setValue(3, 3, 3 as never);
+
+        service.markRangeDirty('unit-1', 'sheet-1', oversizedRange);
+
+        expect(service.getValue('unit-1', 'sheet-1', 0, 0)).toBeUndefined();
+        expect(service.getValue('unit-1', 'sheet-1', 2, 2)).toBeUndefined();
+        expect(service.getValue('unit-1', 'sheet-1', 3, 3)).toBe(3);
+
+        service.removeRule('unit-1', 'sheet-1', createRule(oversizedRange));
+
+        expect(cache.getMatrix()[0]).toBeUndefined();
+        expect(cache.getMatrix()[2]).toBeUndefined();
+        expect(service.getValue('unit-1', 'sheet-1', 3, 3)).toBe(3);
+
+        service.dispose();
+    });
+
+    it('skips cached cells when rule ranges are completely outside the worksheet', () => {
+        const { service } = createService();
+        const cache = service.ensureCache('unit-1', 'sheet-1');
+        const outsideRange = [{ startRow: 3, endRow: 10, startColumn: 3, endColumn: 10 }];
+
+        cache.setValue(0, 0, 1 as never);
+        service.markRangeDirty('unit-1', 'sheet-1', outsideRange);
+        service.removeRule('unit-1', 'sheet-1', createRule(outsideRange));
+
+        expect(service.getValue('unit-1', 'sheet-1', 0, 0)).toBe(1);
 
         service.dispose();
     });

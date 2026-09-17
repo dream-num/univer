@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
+import type { IRange, ISheetDataValidationRule, Workbook } from '@univerjs/core';
 import { Disposable, Inject, isFormulaString, IUniverInstanceService, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { OtherFormulaBizType, RegisterOtherFormulaService } from '@univerjs/engine-formula';
 import { getFormulaCellData, shouldOffsetFormulaByRange } from '../utils/formula';
+import { getRangesInWorksheet } from '../utils/range';
 import { DataValidationCacheService } from './dv-cache.service';
 
 interface IFormulaData {
@@ -157,12 +158,22 @@ export class DataValidationCustomFormulaService extends Disposable {
 
     private _addFormulaByRange(unitId: string, subUnitId: string, ruleId: string, formula: string | undefined, formula2: string | undefined, ranges: IRange[]) {
         const { ruleFormulaMap, ruleFormulaMap2 } = this._ensureMaps(unitId, subUnitId);
+        const worksheet = this._instanceSrv
+            .getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
+            ?.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return;
+        }
+        const effectiveRanges = getRangesInWorksheet(ranges, worksheet);
+        if (!effectiveRanges.length) {
+            return;
+        }
 
-        const originRow = ranges[0].startRow;
-        const originCol = ranges[0].startColumn;
+        const originRow = effectiveRanges[0].startRow;
+        const originCol = effectiveRanges[0].startColumn;
 
         if (formula && isFormulaString(formula)) {
-            const formulaId = this._registerFormula(unitId, subUnitId, ruleId, formula, ranges);
+            const formulaId = this._registerFormula(unitId, subUnitId, ruleId, formula, effectiveRanges);
             ruleFormulaMap.set(ruleId, {
                 formula,
                 originCol,
@@ -172,7 +183,7 @@ export class DataValidationCustomFormulaService extends Disposable {
         }
 
         if (formula2 && isFormulaString(formula2)) {
-            const formulaId2 = this._registerFormula(unitId, subUnitId, ruleId, formula2, ranges);
+            const formulaId2 = this._registerFormula(unitId, subUnitId, ruleId, formula2, effectiveRanges);
             ruleFormulaMap2.set(ruleId, {
                 formula: formula2,
                 originCol,

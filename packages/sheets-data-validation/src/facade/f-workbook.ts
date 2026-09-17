@@ -16,7 +16,11 @@
 
 import type { IDataValidationRule, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
 import { DataValidationStatus } from '@univerjs/core';
-import { SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+import {
+    getRangesInWorksheet,
+    SheetDataValidationModel,
+    SheetsDataValidationValidatorService,
+} from '@univerjs/sheets-data-validation';
 import { FWorkbook } from '@univerjs/sheets/facade';
 
 export interface IDataValidationError {
@@ -124,7 +128,7 @@ export class FWorkbookSheetsDataValidationMixin extends FWorkbook implements IFW
         const sheetName = worksheet.getName();
         const errors: IDataValidationError[] = [];
 
-        for (const range of ranges) {
+        for (const range of getRangesInWorksheet(ranges, worksheet)) {
             const promises: Promise<void>[] = [];
 
             for (let row = range.startRow; row <= range.endRow; row++) {

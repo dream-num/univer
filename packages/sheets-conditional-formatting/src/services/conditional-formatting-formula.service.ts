@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, Nullable } from '@univerjs/core';
+import type { ICellData, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IOtherFormulaResult } from '@univerjs/engine-formula';
 import type { IConditionalFormattingRuleConfig, IConditionFormattingRule } from '../models/type';
-import { BooleanNumber, CellValueType, Disposable, Inject, ObjectMatrix, RefAlias } from '@univerjs/core';
+import { BooleanNumber, CellValueType, Disposable, Inject, IUniverInstanceService, ObjectMatrix, RefAlias, UniverInstanceType } from '@univerjs/core';
 import { FormulaResultStatus, OtherFormulaBizType, RegisterOtherFormulaService } from '@univerjs/engine-formula';
 import { Subject } from 'rxjs';
 import { CFRuleType, CFSubRuleType, CFValueType } from '../base/const';
 import { ConditionalFormattingRuleModel } from '../models/conditional-formatting-rule-model';
+import { getRangesInWorksheet } from '../utils/range';
 
 // eslint-disable-next-line ts/consistent-type-definitions
 type IFormulaItem = {
@@ -43,7 +44,8 @@ export class ConditionalFormattingFormulaService extends Disposable {
 
     constructor(
         @Inject(RegisterOtherFormulaService) private _registerOtherFormulaService: RegisterOtherFormulaService,
-        @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel
+        @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
         this._initFormulaResultChange();
@@ -152,9 +154,19 @@ export class ConditionalFormattingFormulaService extends Disposable {
         if (formulaMap.getValue(cfFormulaId, ['id'])) {
             return;
         }
+        const worksheet = this._univerInstanceService
+            .getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
+            ?.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return;
+        }
+        const effectiveRanges = getRangesInWorksheet(ranges, worksheet);
+        if (!effectiveRanges.length) {
+            return;
+        }
         // Always sort ranges by top-left so the formula engine uses a consistent anchor (ranges[0])
         // regardless of the call path (e.g. rule-add event vs preComputing).
-        const sortedRanges = [...ranges].sort((a, b) =>
+        const sortedRanges = effectiveRanges.sort((a, b) =>
             a.startRow !== b.startRow ? a.startRow - b.startRow : a.startColumn - b.startColumn
         );
         const formulaId = this._registerOtherFormulaService.registerFormulaWithRange(unitId, subUnitId, formulaText, sortedRanges, undefined, OtherFormulaBizType.CONDITIONAL_FORMATTING, cfId);

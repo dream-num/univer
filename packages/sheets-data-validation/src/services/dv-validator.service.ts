@@ -18,6 +18,7 @@ import type { IDataValidationRule, IRange, Nullable, ObjectMatrix, Workbook, Wor
 import { bufferDebounceTime, DataValidationStatus, Disposable, getIntersectRange, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, Range, Tools, UniverInstanceType } from '@univerjs/core';
 import { bufferWhen, filter, skip } from 'rxjs';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
+import { getRangesInWorksheet } from '../utils/range';
 import { DataValidationCacheService } from './dv-cache.service';
 
 export class SheetsDataValidationValidatorService extends Disposable {
@@ -54,7 +55,7 @@ export class SheetsDataValidationValidatorService extends Disposable {
                 if (!worksheet) {
                     return;
                 }
-                map[range.unitId][range.subUnitId].push(...range.ranges.map((range) => Range.transformRange(range, worksheet)));
+                map[range.unitId][range.subUnitId].push(...getRangesInWorksheet(range.ranges, worksheet));
             });
 
             Object.entries(map).forEach(([unitId, subUnitMap]) => {
@@ -131,14 +132,14 @@ export class SheetsDataValidationValidatorService extends Disposable {
             throw new Error(`cannot find current worksheet, sheetId: ${subUnitId}`);
         }
 
-        const allRules = this._sheetDataValidationModel.getRules(unitId, subUnitId);
-        const ruleRanges: IRange[] = [];
-        for (const rule of allRules) {
-            ruleRanges.push(...rule.ranges);
-        }
+        const effectiveRanges = getRangesInWorksheet(ranges, worksheet);
+        const ruleRanges = getRangesInWorksheet(
+            this._sheetDataValidationModel.getRules(unitId, subUnitId).flatMap((rule) => rule.ranges),
+            worksheet
+        );
 
         const intersectRanges: IRange[] = [];
-        for (const range of ranges) {
+        for (const range of effectiveRanges) {
             for (const ruleRange of ruleRanges) {
                 const intersect = getIntersectRange(range, ruleRange);
                 if (intersect) {
@@ -201,18 +202,17 @@ export class SheetsDataValidationValidatorService extends Disposable {
         if (!worksheet) {
             throw new Error(`cannot find current worksheet, sheetId: ${subUnitId}`);
         }
-        const rules = this._sheetDataValidationModel.getRules(unitId, subUnitId);
+        const ranges = getRangesInWorksheet(
+            this._sheetDataValidationModel.getRules(unitId, subUnitId).flatMap((rule) => rule.ranges),
+            worksheet
+        );
         await Promise.all(
-            rules.map((rule) => {
-                return Promise.all(
-                    rule.ranges.map((range) => {
-                        const promises: Promise<DataValidationStatus>[] = [];
-                        Range.foreach(range, (row, col) => {
-                            promises.push(this._validatorByCell(workbook, worksheet, row, col));
-                        });
-                        return Promise.all(promises);
-                    })
-                );
+            ranges.map((range) => {
+                const promises: Promise<DataValidationStatus>[] = [];
+                Range.foreach(range, (row, col) => {
+                    promises.push(this._validatorByCell(workbook, worksheet, row, col));
+                });
+                return Promise.all(promises);
             })
         );
 
@@ -233,9 +233,16 @@ export class SheetsDataValidationValidatorService extends Disposable {
     }
 
     getDataValidations(unitId: string, subUnitId: string, ranges: IRange[]): IDataValidationRule[] {
+        const worksheet = this._univerInstanceService
+            .getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
+            ?.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return [];
+        }
+
         const ruleMatrix = this._sheetDataValidationModel.getRuleObjectMatrix(unitId, subUnitId);
         const ruleIdSet = new Set<string>();
-        ranges.forEach((range) => {
+        getRangesInWorksheet(ranges, worksheet).forEach((range) => {
             Range.foreach(range, (row, col) => {
                 const ruleId = ruleMatrix.getValue(row, col);
                 if (ruleId) {

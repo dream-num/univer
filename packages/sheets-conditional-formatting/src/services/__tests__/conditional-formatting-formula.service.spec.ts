@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CellValueType, Injector } from '@univerjs/core';
+import { CellValueType, Injector, IUniverInstanceService } from '@univerjs/core';
 import { FormulaResultStatus, RegisterOtherFormulaService } from '@univerjs/engine-formula';
 import { Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -41,6 +41,19 @@ describe('ConditionalFormattingFormulaService', () => {
         $ruleChange = ruleChange$;
     }
 
+    class TestUniverInstanceService {
+        getUnit() {
+            return {
+                getSheetBySheetId() {
+                    return {
+                        getMaxRows: () => 20,
+                        getMaxColumns: () => 10,
+                    };
+                },
+            };
+        }
+    }
+
     beforeEach(() => {
         formulaResults = new Map();
         registerFormulaWithRange = vi.fn(() => 'formula-1');
@@ -50,6 +63,7 @@ describe('ConditionalFormattingFormulaService', () => {
         const injector = new Injector();
         injector.add([RegisterOtherFormulaService, { useClass: TestRegisterOtherFormulaService as never }]);
         injector.add([ConditionalFormattingRuleModel, { useClass: TestConditionalFormattingRuleModel as never }]);
+        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
         injector.add([ConditionalFormattingFormulaService]);
         service = injector.get(ConditionalFormattingFormulaService);
     });
@@ -68,6 +82,26 @@ describe('ConditionalFormattingFormulaService', () => {
                 { startRow: 1, endRow: 1, startColumn: 2, endColumn: 2 },
                 { startRow: 5, endRow: 5, startColumn: 5, endColumn: 5 },
             ],
+            undefined,
+            expect.any(String),
+            'cf-1'
+        );
+    });
+
+    it('clips formula ranges to the worksheet and skips ranges outside it', () => {
+        service.registerFormulaWithRange('book-1', 'sheet-1', 'cf-1', '=A1>0', [
+            { startRow: 0, endRow: 1048575, startColumn: 0, endColumn: 16383 },
+        ]);
+        service.registerFormulaWithRange('book-1', 'sheet-1', 'cf-2', '=A1>0', [
+            { startRow: 20, endRow: 30, startColumn: 10, endColumn: 20 },
+        ]);
+
+        expect(registerFormulaWithRange).toHaveBeenCalledTimes(1);
+        expect(registerFormulaWithRange).toHaveBeenCalledWith(
+            'book-1',
+            'sheet-1',
+            '=A1>0',
+            [{ startRow: 0, endRow: 19, startColumn: 0, endColumn: 9 }],
             undefined,
             expect.any(String),
             'cf-1'

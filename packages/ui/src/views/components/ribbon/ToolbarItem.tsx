@@ -372,7 +372,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                         aria-disabled={hasCustomLabel ? undefined : disabled}
                         aria-label={hasCustomLabel ? undefined : selectorAriaLabel}
                         className={clsx(toolbarSelectorRootVariants({ disabled, active: activated }), {
-                            'univer-box-border univer-h-full univer-min-w-14 univer-flex-col univer-justify-center univer-gap-1 univer-px-1.5 univer-py-1 univer-text-xs [&>svg]:univer-size-8': grid && large,
+                            'univer-box-border univer-h-full univer-min-w-14 univer-flex-col univer-justify-center univer-gap-1 univer-px-1.5 univer-py-0.5 univer-text-xs [&>svg]:univer-size-8': grid && large,
                             'univer-box-border univer-h-full': grid && !large,
                             'univer-bg-gray-0 dark:!univer-bg-gray-800': grid && !large && !icon,
                             '[&>svg]:univer-size-4': grid && !large,
@@ -440,7 +440,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
           [&>svg]:univer-size-4
         `, grid && large
             ? `
-              univer-h-full univer-min-w-14 univer-flex-col univer-gap-1 univer-px-1.5 univer-py-1 univer-text-xs
+              univer-h-full univer-min-w-14 univer-flex-col univer-gap-1 univer-px-1.5 univer-py-0.5 univer-text-xs
               [&>svg]:univer-size-8
             `
             : showLabel

@@ -37,7 +37,7 @@ export function RibbonGrid({ groups, title, className, ...props }: IRibbonGridPr
             data-testid="ribbon-grid-toolbar"
             data-u-comp="ribbon-grid-toolbar"
             className={clsx(`
-              univer-box-border univer-flex univer-h-[88px] univer-overflow-x-auto univer-overflow-y-hidden
+              univer-box-border univer-flex univer-shrink-0 univer-overflow-x-auto univer-overflow-y-hidden
               univer-bg-gray-50 univer-px-2 univer-text-sm
               dark:!univer-bg-gray-900
             `, borderBottomClassName, scrollbarClassName, className)}
@@ -59,8 +59,8 @@ export function RibbonGrid({ groups, title, className, ...props }: IRibbonGridPr
                             <div
                                 data-testid="ribbon-grid-group-grid"
                                 className="
-                                  univer-grid univer-min-h-0 univer-flex-1 univer-grid-flow-col univer-grid-rows-2
-                                  univer-content-center univer-gap-2 univer-py-2
+                                  univer-grid univer-min-h-0 univer-flex-1 univer-grid-flow-col
+                                  univer-grid-rows-[24px_24px] univer-content-center univer-gap-2 univer-py-2
                                   [&>div>span>span]:univer-h-full
                                 "
                             >

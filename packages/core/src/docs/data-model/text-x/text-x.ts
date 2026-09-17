@@ -417,6 +417,10 @@ export class TextX {
 
             if (action.t === TextXActionType.RETAIN && action.body != null) {
                 const body = getBodySlice(doc, index, index + action.len, true);
+                // Attribute-only edits must not restore a clipped copy of an untouched column group.
+                if (action.body.columnGroups == null) {
+                    delete body.columnGroups;
+                }
 
                 // A partial slice clips enclosing structural ranges. Restoring
                 // those ranges would duplicate/truncate a table (or container)

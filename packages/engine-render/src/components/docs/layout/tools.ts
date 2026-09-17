@@ -2120,6 +2120,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         marginHeader: global_marginHeader = 0,
         marginFooter: global_marginFooter = 0,
 
+        characterSpacingControl,
         autoHyphenation = BooleanNumber.FALSE,
         spaceWidthEastAsian,
         doNotHyphenateCaps = BooleanNumber.FALSE,
@@ -2225,6 +2226,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         hyphenationZone,
 
         ...docsConfig,
+        characterSpacingControl,
     };
 
     return sectionBreakConfig;

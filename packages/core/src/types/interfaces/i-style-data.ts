@@ -58,12 +58,16 @@ export interface ITextDecoration {
      * lineType
      */
     t?: TextDecoration;
+    /** Additional canvas-layout offset perpendicular to the text baseline. */
+    offset?: number;
+    /** Underline offset origin. Defaults to the bottom of the line box. */
+    offsetReference?: 'line-bottom' | 'baseline';
 }
 
 /**
  * Exact keys of {@link ITextDecoration}.
  */
-export const TEXT_DECORATION_KEYS = defineExactKeys<ITextDecoration>()(['s', 'c', 'cl', 't'] as const);
+export const TEXT_DECORATION_KEYS = defineExactKeys<ITextDecoration>()(['s', 'c', 'cl', 't', 'offset', 'offsetReference'] as const);
 
 /**
  * Key union of {@link ITextDecoration}.

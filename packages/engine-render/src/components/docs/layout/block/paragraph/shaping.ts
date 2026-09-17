@@ -39,6 +39,9 @@ import {
     hasArabic,
     hasThai,
     hasTibetan,
+    isCjkCenterAlignedPunctuation,
+    isCjkLeftAlignedPunctuation,
+    isCjkRightAlignedPunctuation,
     startWithEmoji,
 } from '../../../../../basics/tools';
 import { getDocsCustomBlockRenderViewport } from '../../../custom-block-render-viewport';
@@ -84,6 +87,8 @@ function punctuationSpaceAdjustment(shapedGlyphs: IDocumentSkeletonGlyph[], incl
         if (
             (cjk.hasCJKPunctuation(content) || (includeEastAsianQuotes && /^[“”‘’]$/.test(content))) &&
             (cjk.hasCJKPunctuation(nextGlyph.content) || (includeEastAsianQuotes && /^[“”‘’]$/.test(nextGlyph.content))) &&
+            curGlyph.ts?.textAdvance === undefined &&
+            nextGlyph.ts?.textAdvance === undefined &&
             curGlyph.adjustability.shrinkability[1] + nextGlyph.adjustability.shrinkability[0] >= delta
         ) {
             const leftDelta = Math.min(curGlyph.adjustability.shrinkability[1], delta);
@@ -110,7 +115,13 @@ function addCJKLatinSpacing(shapedTextList: IShapedText[]) {
         const width = curGlyph.ts?.sc && Number.isFinite(curGlyph.ts.sc) ? curGlyph.bBox.width : curGlyph.width;
 
         // Case 1: CJ followed by a Latin character.
-        if (cjk.hasCJKText(curGlyph.content) && nextGlyph && LATIN_REG.test(nextGlyph.content)) {
+        if (
+            cjk.hasCJKText(curGlyph.content)
+            && nextGlyph
+            && LATIN_REG.test(nextGlyph.content)
+            && curGlyph.ts?.textAdvance === undefined
+            && nextGlyph.ts?.textAdvance === undefined
+        ) {
             curGlyph.autoSpacing = [0, width / 4];
             curGlyph.width += width / 4;
             curGlyph.adjustability.shrinkability[1] += width / 8;
@@ -118,7 +129,13 @@ function addCJKLatinSpacing(shapedTextList: IShapedText[]) {
         }
 
         // Case 2: Latin followed by a CJ character.
-        if (cjk.hasCJKText(curGlyph.content) && prevGlyph && LATIN_REG.test(prevGlyph.content)) {
+        if (
+            cjk.hasCJKText(curGlyph.content)
+            && prevGlyph
+            && LATIN_REG.test(prevGlyph.content)
+            && curGlyph.ts?.textAdvance === undefined
+            && prevGlyph.ts?.textAdvance === undefined
+        ) {
             curGlyph.autoSpacing = [width / 4, curGlyph.autoSpacing?.[1] ?? 0];
             curGlyph.width += width / 4;
             curGlyph.xOffset += width / 4;
@@ -460,7 +477,8 @@ function createNoteLabelGlyph(
 function appendShapedText(
     shapedTextList: IShapedText[],
     shapedGlyphs: IDocumentSkeletonGlyph[],
-    breakPointType: BreakPointType
+    breakPointType: BreakPointType,
+    fixedTabStops = false
 ): void {
     const shapedGlyphsList: IDocumentSkeletonGlyph[][] = [[]];
 
@@ -476,6 +494,9 @@ function appendShapedText(
             shapedGlyphsList.push([glyph]);
         } else {
             lastList.push(glyph);
+        }
+        if (fixedTabStops && glyph.glyphType === GlyphType.TAB && i < shapedGlyphs.length - 1) {
+            shapedGlyphsList.push([]);
         }
     }
 
@@ -630,6 +651,20 @@ export function shaping(
                     char = getFirstGrapheme(src) ?? char;
                 }
                 const newGlyph = createWhitespaceGlyph(char, config, i, viewModel, paragraphNode, sectionBreakConfig, snapToGrid, traditionalLayout);
+                if (char === DataStreamTreeTokenType.PARAGRAPH
+                    && sectionBreakConfig.renderConfig?.zeroWidthParagraphBreak === BooleanNumber.TRUE
+                    && sectionBreakConfig.renderConfig?.topAlignExactLineSpacing === BooleanNumber.TRUE) {
+                    let previousGlyph = shapedGlyphs[shapedGlyphs.length - 1];
+                    for (let index = shapedTextList.length - 1; !previousGlyph && index >= 0; index--) {
+                        const glyphs = shapedTextList[index].glyphs;
+                        previousGlyph = glyphs[glyphs.length - 1];
+                    }
+                    if (previousGlyph?.bBox.fontAscent != null && previousGlyph.bBox.fontDescent != null) {
+                        // A merged paragraph mark must not move surviving positioned text.
+                        const { ba, bd, normalLineHeight } = previousGlyph.bBox;
+                        newGlyph.bBox = { ...newGlyph.bBox, ba, bd, normalLineHeight };
+                    }
+                }
 
                 shapedGlyphs.push(newGlyph);
                 i += char.length;
@@ -655,6 +690,20 @@ export function shaping(
             }
         }
 
+        // Keep the opt-out in glyph metrics so both line fitting and edge adjustment respect it.
+        if (sectionBreakConfig.characterSpacingControl === characterSpacingControlType.doNotCompress
+            && (!traditionalLayout || sectionBreakConfig.renderConfig?.topAlignExactLineSpacing === BooleanNumber.TRUE)) {
+            for (const glyph of shapedGlyphs) {
+                if (
+                    isCjkLeftAlignedPunctuation(glyph.content)
+                    || isCjkRightAlignedPunctuation(glyph.content)
+                    || isCjkCenterAlignedPunctuation(glyph.content)
+                ) {
+                    glyph.adjustability.shrinkability = [0, 0];
+                }
+            }
+        }
+
         // With line compression enabled, Word resolves spacing for the whole line.
         // doNotCompress still retains fixed adjacent-punctuation spacing, including
         // East Asian quote/bracket pairs, independently of line justification.
@@ -662,7 +711,7 @@ export function shaping(
             punctuationSpaceAdjustment(shapedGlyphs, fixedPunctuationPairs);
         }
 
-        appendShapedText(shapedTextList, shapedGlyphs, bk.type);
+        appendShapedText(shapedTextList, shapedGlyphs, bk.type, paragraphStyle.fixedTabStops === BooleanNumber.TRUE);
 
         last = bk.position;
     }

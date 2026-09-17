@@ -403,6 +403,9 @@ export interface IDocumentSkeletonBoundingBox {
     width: number; // width
     ba: number; // boundingBoxAscent
     bd: number; // boundingBoxDescent
+    /** Font metrics retained for the caret when ba/bd are overridden for fixed line layout. */
+    fontAscent?: number;
+    fontDescent?: number;
     normalLineHeight?: number; // Normal font spacing, including leading when available, for Word AUTO spacing.
     aba: number; // actualBoundingBoxAscent
     abd: number; // actualBoundingBoxDescent

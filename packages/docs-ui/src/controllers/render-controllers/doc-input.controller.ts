@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ITextRun, Nullable } from '@univerjs/core';
 import type { IInsertTextCommandParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
 import { Disposable, ICommandService, Inject, Optional, SHEET_EDITOR_UNITS } from '@univerjs/core';
 import { DocSkeletonManagerService, InsertTextCommand } from '@univerjs/docs';
-import { getCustomDecorationAtPosition, getCustomRangeAtPosition, getTextRunAtPosition } from '../../basics/paragraph';
+import { getCustomDecorationAtPosition, getCustomRangeAtPosition, getTextRunAtInputPosition } from '../../basics/paragraph';
 import { AfterSpaceCommand } from '../../commands/commands/auto-format.command';
 import { ReplaceSelectionCommand } from '../../commands/commands/replace-content.command';
 import { IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../../services/doc-embed-integration.service';
@@ -91,19 +91,13 @@ export class DocInputController extends Disposable implements IRenderModule {
             const defaultTextStyle = this._docMenuStyleService.getDefaultStyle();
             const cacheStyle = this._docMenuStyleService.getStyleCache();
             const curCustomRange = getCustomRangeAtPosition(originBody?.customRanges ?? [], activeRange.endOffset, SHEET_EDITOR_UNITS.includes(unitId));
-            const curTextRun = getTextRunAtPosition(originBody, activeRange.endOffset, defaultTextStyle, cacheStyle, SHEET_EDITOR_UNITS.includes(unitId));
+            const curTextRun = getTextRunAtInputPosition(originBody, activeRange.endOffset, defaultTextStyle, cacheStyle, SHEET_EDITOR_UNITS.includes(unitId));
             const curCustomDecorations = getCustomDecorationAtPosition(originBody?.customDecorations ?? [], activeRange.endOffset);
 
             const insertBody = {
                 dataStream: content,
                 textRuns: curTextRun
-                    ? [
-                        {
-                            ...curTextRun,
-                            st: 0,
-                            ed: content.length,
-                        },
-                    ]
+                    ? [createInheritedInputTextRun(curTextRun, content.length)]
                     : [],
                 customRanges: curCustomRange
                     ? [{
@@ -163,4 +157,18 @@ export class DocInputController extends Disposable implements IRenderModule {
 
         return false;
     }
+}
+
+function createInheritedInputTextRun(textRun: ITextRun, length: number): ITextRun {
+    const textStyle = textRun.ts ? { ...textRun.ts } : undefined;
+    if (textStyle) {
+        delete textStyle.textAdvance;
+        delete textStyle.customGlyphKey;
+    }
+    return {
+        ...textRun,
+        st: 0,
+        ed: length,
+        ...(textStyle ? { ts: textStyle } : {}),
+    };
 }

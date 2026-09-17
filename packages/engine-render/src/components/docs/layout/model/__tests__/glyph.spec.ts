@@ -18,7 +18,7 @@ import type { ITextStyle } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
 import type { IFontCreateConfig } from '../../../../../basics/interfaces';
 import { BooleanNumber, DataStreamTreeTokenType, DocumentFlavor, GridType } from '@univerjs/core';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { GlyphType } from '../../../../../basics/i-document-skeleton-cached';
 import { getFontStyleString } from '../../../../../basics/tools';
 import { getDocumentCompatibilityPolicy } from '../../../document-compatibility';
@@ -454,6 +454,42 @@ describe('Glyph utils test cases', () => {
         });
     });
 
+    describe('test explicit text advance', () => {
+        it('keeps fixed punctuation advances out of line shrink calculations', () => {
+            const measureSpy = vi.spyOn(FontCache, 'getTextSize').mockReturnValue({
+                width: 9,
+                ba: 10,
+                bd: 2,
+                aba: 10,
+                abd: 2,
+                sp: 0,
+                sbr: 0,
+                sbo: 0,
+                spr: 0,
+                spo: 0,
+            });
+            onTestFinished(() => measureSpy.mockRestore());
+            const glyph = createSkeletonLetterGlyph('，', {
+                fontStyle: {
+                    fontString: 'normal normal 12pt Arial',
+                    fontSize: 12,
+                    originFontSize: 12,
+                    fontFamily: 'Arial',
+                    fontCache: 'normal normal 12pt Arial',
+                },
+                textStyle: { textAdvance: 12 },
+                charSpace: 0,
+                snapToGrid: 0,
+            } as IFontCreateConfig);
+
+            expect(glyph.width).toBe(12);
+            expect(glyph.adjustability).toEqual({
+                stretchability: [0, 0],
+                shrinkability: [0, 0],
+            });
+        });
+    });
+
     describe('test glyphShrinkRight', () => {
         it('should shrink right', () => {
             const glyph = {
@@ -658,6 +694,51 @@ describe('Glyph utils test cases', () => {
     });
 
     describe('test font compatibility policy', () => {
+        it.each([
+            {
+                name: 'font glyph',
+                metrics: undefined,
+                expected: { ba: 13, bd: 5, fontAscent: 30, fontDescent: 9, aba: 24, abd: 6 },
+            },
+            {
+                name: 'measured custom range',
+                metrics: { ascent: 7, descent: 2 },
+                expected: { ba: 7, bd: 2, fontAscent: undefined, fontDescent: undefined, aba: 7, abd: 2 },
+            },
+        ])('keeps caret metrics separate from fixed line metrics for a $name', ({ metrics, expected }) => {
+            const font = 'normal normal 12pt FixedLineMetricsRegression';
+            FontCache.setFontMeasureCache(font, 'A', {
+                width: 16,
+                fontBoundingBoxAscent: 30,
+                fontBoundingBoxDescent: 9,
+                actualBoundingBoxAscent: 24,
+                actualBoundingBoxDescent: 6,
+            });
+            onTestFinished(() => {
+                FontCache.clearFontMeasureCache(font);
+            });
+            const glyph = createSkeletonLetterGlyph('A', {
+                fontStyle: {
+                    fontString: font,
+                    fontSize: 12,
+                    originFontSize: 12,
+                    fontFamily: 'FixedLineMetricsRegression',
+                    fontCache: font,
+                },
+                textStyle: { lineAscent: 13, lineDescent: 5 },
+                charSpace: 0,
+                snapToGrid: 0,
+            } as IFontCreateConfig, metrics);
+
+            const { fontAscent, fontDescent, ...expectedMetrics } = expected;
+            expect(glyph.bBox).toMatchObject({
+                ...expectedMetrics,
+                normalLineHeight: 18,
+            });
+            expect(glyph.bBox.fontAscent).toBe(fontAscent);
+            expect(glyph.bBox.fontDescent).toBe(fontDescent);
+        });
+
         it('should apply traditional font metric width rules to letter glyphs only when enabled', () => {
             const config: IFontCreateConfig = {
                 fontStyle: {

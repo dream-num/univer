@@ -77,6 +77,7 @@ export class InputManager extends Disposable {
         this._currentMouseEnterPicked = null;
         this._currentObject = null;
         this._startingPosition = null as unknown as Vector2;
+        this._pointerDownPosition = null;
         clearTimeout(this._delayedTimeout);
         clearTimeout(this._delayedTripeTimeout);
 

@@ -45,11 +45,19 @@ export * from './canvas';
 export * from './components';
 export type { DocsCustomBlockRenderViewportProvider, IDocsCustomBlockRenderViewport, IDocsCustomBlockRenderViewportInput } from './components/docs/custom-block-render-viewport';
 export { getDocsCustomBlockRenderViewport, setDocsCustomBlockRenderViewportProvider } from './components/docs/custom-block-render-viewport';
+export {
+    getDocCustomGlyphRenderer,
+    registerDocCustomGlyphRenderer,
+} from './components/docs/custom-glyph-renderer';
+export type {
+    DocCustomGlyphRenderer,
+    IDocCustomGlyphRendererRegistration,
+    IDocCustomGlyphRenderInput,
+} from './components/docs/custom-glyph-renderer';
 export { DocBackground } from './components/docs/doc-background';
 export { DOCS_EXTENSION_TYPE } from './components/docs/doc-extension';
 export { Documents } from './components/docs/document';
-export type { IPageRenderConfig } from './components/docs/document';
-export type { IDocumentOffsetConfig } from './components/docs/document';
+export type { IDocumentGlyphPaint, IDocumentOffsetConfig, IPageRenderConfig } from './components/docs/document';
 export { getTableIdAndSliceIndex } from './components/docs/layout/block/table';
 export {
     measureDocumentNoWrapTextRangeWidth,

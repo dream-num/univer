@@ -19,7 +19,7 @@ import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton
 import type { IBoundRectNoAngle } from '../../../basics/vector2';
 import type { UniverRenderingContext } from '../../../context';
 import type { IDrawInfo } from '../../extension';
-import { BaselineOffset } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber } from '@univerjs/core';
 import { cjk } from '../../../basics/cjk-regexp';
 import { COLOR_BLACK_RGB } from '../../../basics/const';
 import { resolveGlowEffect, resolveOuterShadowEffect } from '../../../basics/drawing-effect';
@@ -28,6 +28,7 @@ import { getFontStyleString } from '../../../basics/tools';
 import { Vector2 } from '../../../basics/vector2';
 import { CheckboxShape, isCheckboxGlyph } from '../../../shape/checkbox';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
+import { getDocCustomGlyphRenderer, getDocCustomGlyphStrokeRenderer } from '../custom-glyph-renderer';
 import { docExtension } from '../doc-extension';
 import { getTextHorizontalScale } from '../layout/model/glyph';
 import { getColorStyleForCanvas } from '../layout/style/color';
@@ -105,9 +106,12 @@ export class FontAndBaseLine extends docExtension {
             }
         }
 
-        const { cl: colorStyle, va: baselineOffset, textFill, glow, outerShadow } = textStyle;
+        const { cl: colorStyle, pos: position, va: baselineOffset, textFill, glow, outerShadow } = textStyle;
         const fontColor = getColorStyleForCanvas(colorStyle) || COLOR_BLACK_RGB;
 
+        if (typeof position === 'number' && Number.isFinite(position)) {
+            spanPointWithFont.y -= position * 4 / 3;
+        }
         if (baselineOffset === BaselineOffset.SUPERSCRIPT) {
             spanPointWithFont.y += -bBox.spo;
         } else if (baselineOffset === BaselineOffset.SUBSCRIPT) {
@@ -421,13 +425,15 @@ export class FontAndBaseLine extends docExtension {
             return;
         }
 
-        if (glyph.glyphType === GlyphType.TAB && glyph.tabLeader != null) {
-            const leader = this._getTabLeaderCharacter(glyph.tabLeader);
-            if (leader) {
-                const leaderWidth = ctx.measureText(leader).width;
-                const count = leaderWidth > 0 ? Math.floor(width / leaderWidth) : 0;
-                if (count > 0) {
-                    ctx.fillText(leader.repeat(count), spanPointWithFont.x, spanPointWithFont.y);
+        if (glyph.glyphType === GlyphType.TAB) {
+            if (glyph.tabLeader != null) {
+                const leader = this._getTabLeaderCharacter(glyph.tabLeader);
+                if (leader) {
+                    const leaderWidth = ctx.measureText(leader).width;
+                    const count = leaderWidth > 0 ? Math.floor(width / leaderWidth) : 0;
+                    if (count > 0) {
+                        this._paintText(ctx, glyph, leader.repeat(count), spanPointWithFont.x, spanPointWithFont.y);
+                    }
                 }
             }
             return;
@@ -473,10 +479,36 @@ export class FontAndBaseLine extends docExtension {
                     x_offset = (glyph.width - glyph.bBox.width) / 2;
                     y_offset = -(glyph.width - fontHeight) / 2;
                 }
-                if (horizontalScale !== 1) {
+                const requestedTextSkewX = glyph.ts?.textSkewX;
+                const textSkewX = typeof requestedTextSkewX === 'number' && Number.isFinite(requestedTextSkewX)
+                    ? requestedTextSkewX
+                    : 0;
+                const requestedTextAdvance = glyph.ts?.textAdvance;
+                const textAdvance = typeof requestedTextAdvance === 'number'
+                    && Number.isFinite(requestedTextAdvance)
+                    && requestedTextAdvance >= 0
+                    ? requestedTextAdvance
+                    : undefined;
+                if (!isVertical && textAdvance !== undefined) {
+                    const characters = Array.from(content);
+                    const localTextAdvance = textAdvance / horizontalScale;
+                    let cursor = 0;
                     ctx.save();
                     ctx.translate(spanPointWithFont.x + x_offset, spanPointWithFont.y + y_offset);
-                    ctx.scale(horizontalScale, 1);
+                    ctx.transform(horizontalScale, 0, textSkewX, 1, 0, 0);
+                    characters.forEach((character) => {
+                        this._paintText(ctx, glyph, character, cursor, 0);
+                        cursor += localTextAdvance;
+                    });
+                    ctx.restore();
+                } else if (!isVertical && (horizontalScale !== 1 || textSkewX !== 0)) {
+                    ctx.save();
+                    ctx.translate(spanPointWithFont.x + x_offset, spanPointWithFont.y + y_offset);
+                    if (textSkewX !== 0) {
+                        ctx.transform(horizontalScale, 0, textSkewX, 1, 0, 0);
+                    } else {
+                        ctx.scale(horizontalScale, 1);
+                    }
                     this._paintGlyphText(ctx, glyph, 0, 0);
                     ctx.restore();
                 } else {
@@ -486,15 +518,112 @@ export class FontAndBaseLine extends docExtension {
         }
     }
 
+    private _paintText(
+        ctx: UniverRenderingContext,
+        glyph: IDocumentSkeletonGlyph,
+        content: string,
+        x: number,
+        y: number
+    ) {
+        const requestedRenderScale = glyph.ts?.fontRenderScale;
+        const contextScaleY = ctx.getScale().scaleY;
+        // Canvas.setSize retains its fractional logical width here. clientWidth rounds it,
+        // which would turn backing-store density into an unintended font-size adjustment.
+        const inlineWidth = ctx.canvas.style?.width;
+        const logicalWidth = inlineWidth?.endsWith('px') ? Number.parseFloat(inlineWidth) : ctx.canvas.clientWidth;
+        const pixelRatio = Number.isFinite(logicalWidth) && logicalWidth > 0
+            ? ctx.canvas.width / logicalWidth
+            : 1;
+        const logicalScaleY = contextScaleY / (Number.isFinite(pixelRatio) && pixelRatio > 0 ? pixelRatio : 1);
+        const renderScale = typeof requestedRenderScale === 'number'
+            && Number.isFinite(requestedRenderScale)
+            && requestedRenderScale > 0
+            && Number.isFinite(logicalScaleY)
+            && logicalScaleY > 0
+            ? requestedRenderScale / logicalScaleY
+            : 1;
+        if (Math.abs(renderScale - 1) > 1e-6) {
+            const originalFont = ctx.font;
+            const sourceFont = scaleCanvasFontPixelSize(originalFont, 1 / renderScale);
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(renderScale, renderScale);
+            ctx.font = sourceFont;
+            this._paintTextAtPoint(ctx, glyph, content, 0, 0);
+            ctx.restore();
+            return;
+        }
+        this._paintTextAtPoint(ctx, glyph, content, x, y);
+    }
+
+    private _paintTextAtPoint(
+        ctx: UniverRenderingContext,
+        glyph: IDocumentSkeletonGlyph,
+        content: string,
+        x: number,
+        y: number
+    ) {
+        this._paintTextAtSinglePoint(ctx, glyph, content, x, y);
+        glyph.ts?.textPaintOffsets?.forEach((offset) => {
+            if (!Number.isFinite(offset.x) || !Number.isFinite(offset.y) || (offset.x === 0 && offset.y === 0)) {
+                return;
+            }
+            this._paintTextAtSinglePoint(ctx, glyph, content, x + offset.x, y + offset.y);
+        });
+    }
+
+    private _paintTextAtSinglePoint(
+        ctx: UniverRenderingContext,
+        glyph: IDocumentSkeletonGlyph,
+        content: string,
+        x: number,
+        y: number
+    ) {
+        const fontFamily = glyph.ts?.ff ?? glyph.fontStyle?.fontFamily ?? undefined;
+        const customRenderer = getDocCustomGlyphRenderer(fontFamily);
+        const fontSizePx = canvasFontPixelSize(ctx.font);
+        const bold = glyph.ts?.bl === BooleanNumber.TRUE;
+        const italic = glyph.ts?.it === BooleanNumber.TRUE;
+        const customRendered = customRenderer && fontSizePx !== undefined
+            ? customRenderer({ bold, italic, content, context: ctx, fontSizePx, glyphKey: glyph.ts?.customGlyphKey, x, y })
+            : false;
+        if (!customRendered) {
+            ctx.fillText(content, x, y);
+        }
+        const outline = glyph.ts?.textOutline;
+        if (outline?.color && outline.width && outline.width > 0) {
+            ctx.save();
+            ctx.strokeStyle = outline.color;
+            ctx.lineWidth = outline.width;
+            if (outline.lineCap) {
+                ctx.lineCap = outline.lineCap;
+            }
+            if (outline.lineJoin) {
+                ctx.lineJoin = outline.lineJoin;
+            }
+            if (outline.miterLimit !== undefined) {
+                ctx.miterLimit = outline.miterLimit;
+            }
+            const strokeRenderer = getDocCustomGlyphStrokeRenderer(fontFamily);
+            const customStroked = strokeRenderer && fontSizePx !== undefined
+                ? strokeRenderer({ bold, italic, content, context: ctx, fontSizePx, glyphKey: glyph.ts?.customGlyphKey, x, y })
+                : false;
+            if (!customStroked) {
+                ctx.strokeText(content, x, y);
+            }
+            ctx.restore();
+        }
+    }
+
     private _paintGlyphText(ctx: UniverRenderingContext, glyph: IDocumentSkeletonGlyph, x: number, y: number): void {
         const { content, textSpacing } = glyph;
         // Field resolution can replace content after shaping; never paint offsets belonging to the old text.
         if (textSpacing?.content === content) {
             for (const segment of textSpacing.segments) {
-                ctx.fillText(segment.content, x + segment.left / getTextHorizontalScale(glyph.ts?.sa), y);
+                this._paintText(ctx, glyph, segment.content, x + segment.left / getTextHorizontalScale(glyph.ts?.sa), y);
             }
         } else {
-            ctx.fillText(content, x, y);
+            this._paintText(ctx, glyph, content, x, y);
         }
     }
 
@@ -518,6 +647,18 @@ export class FontAndBaseLine extends docExtension {
     override clearCache() {
         this._preFontColor = '';
     }
+}
+
+function scaleCanvasFontPixelSize(font: string, scale: number): string {
+    return font.replace(/(^|\s)(\d+(?:\.\d+)?)px(?=\s)/, (_match, prefix: string, size: string) => (
+        `${prefix}${Number(size) * scale}px`
+    ));
+}
+
+function canvasFontPixelSize(font: string): number | undefined {
+    const match = /(^|\s)(\d+(?:\.\d+)?)px(?=\s)/.exec(font);
+    const size = match ? Number(match[2]) : Number.NaN;
+    return Number.isFinite(size) && size > 0 ? size : undefined;
 }
 
 DocumentsSpanAndLineExtensionRegistry.add(new FontAndBaseLine());

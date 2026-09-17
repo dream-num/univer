@@ -251,6 +251,8 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     _normalizedCachedFont: string;
+    private readonly _savedFonts: string[] = [];
+
     set font(val: string) {
         this._context.font = val;
         // set font called too many times, even get font from context is time consuming.
@@ -451,6 +453,8 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      */
     reset() {
         this._transformCache = null;
+        this._normalizedCachedFont = '';
+        this._savedFonts.length = 0;
         this._context.reset();
         this._markBitmapMutation();
     }
@@ -936,8 +940,8 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      */
     restore() {
         this._transformCache = null;
-        this._normalizedCachedFont = '';
         this._context.restore();
+        this._normalizedCachedFont = this._savedFonts.pop() ?? '';
     }
 
     /**
@@ -955,6 +959,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      */
     save() {
         this._context.save();
+        this._savedFonts.push(this._normalizedCachedFont || '');
     }
 
     /**
@@ -1006,6 +1011,8 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     setTransform(...args: [any]) {
         this._transformCache = null;
         this._normalizedCachedFont = '';
+        // Canvas.setSize resets native state before applying this transform.
+        this._savedFonts.length = 0;
         this._context.setTransform(...args);
     }
 

@@ -120,7 +120,6 @@ function DropdownMenuSubTrigger({
 
 function DropdownMenuSubContent({
     className,
-    onPointerOutCapture,
     ...props
 }: ComponentProps<typeof SubContent>) {
     return (
@@ -146,12 +145,6 @@ function DropdownMenuSubContent({
                 className
             )}
             {...props}
-            onPointerOutCapture={(event) => {
-                onPointerOutCapture?.(event);
-                if (event.currentTarget.dataset.state === 'closed') {
-                    event.preventDefault();
-                }
-            }}
         />
     );
 }
@@ -159,7 +152,6 @@ function DropdownMenuSubContent({
 function DropdownMenuContent({
     className,
     sideOffset = 4,
-    onPointerOutCapture,
     ...props
 }: ComponentProps<typeof Content>) {
     return (
@@ -187,13 +179,6 @@ function DropdownMenuContent({
                     className
                 )}
                 {...props}
-                onPointerOutCapture={(event) => {
-                    onPointerOutCapture?.(event);
-                    // Exit animations retain items whose pointer-leave handler would reclaim focus.
-                    if (event.currentTarget.dataset.state === 'closed') {
-                        event.preventDefault();
-                    }
-                }}
             />
         </Portal>
     );

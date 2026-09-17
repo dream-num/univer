@@ -55,16 +55,11 @@ import {
     NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
     PageLayoutType,
     ScrollTimer,
-    ScrollTimerType,
     Vector2,
 } from '@univerjs/engine-render';
 import { ILayoutService, KeyCode } from '@univerjs/ui';
 import { BehaviorSubject, filter, fromEvent, merge, Subject, takeUntil } from 'rxjs';
-import {
-    DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
-    IDocEmbedInteractionBoundaryService,
-    IDocEmbedRuntimeFocusCoordinator,
-} from '../doc-embed-integration.service';
+import { DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../doc-embed-integration.service';
 import { compareNodePositionLogic } from './convert-text-range';
 import {
     getCanvasOffsetByEngine,
@@ -626,7 +621,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     // Handler double click.
     __handleDblClick(evt: IPointerEvent | IMouseEvent, isEditing = false, shouldFocusInput = true) {
-        const { offsetX: evtOffsetX, offsetY: evtOffsetY } = this._getScenePointerOffset(evt);
+        const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
         const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY, {
             strict: false,
@@ -761,14 +756,11 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         }
 
         scene.disableObjectsEvent();
-        scene.getEngine()?.setCapture();
 
-        const disablesEditorAutoScroll = this._context.unit
-            .getDocumentStyle()
+        const disableAutoScroll = this._context.unit.getDocumentStyle()
             .renderConfig
             ?.disableSelectionAutoScroll === BooleanNumber.TRUE;
-        // NONE still runs ScrollTimer's per-frame callback; disabled editors need no timer.
-        const scrollTimer = disablesEditorAutoScroll ? undefined : ScrollTimer.create(scene, ScrollTimerType.ALL);
+        const scrollTimer = disableAutoScroll ? undefined : ScrollTimer.create(scene);
         if (scrollTimer) {
             this._scrollTimers.push(scrollTimer);
             scrollTimer.startScroll(evtOffsetX, evtOffsetY);
@@ -781,20 +773,14 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         let preMoveOffsetX = evtOffsetX;
 
         let preMoveOffsetY = evtOffsetY;
-        let hasStartedDragging = false;
         this._onPointerEvent = true;
-        const handlePointerMove = (moveEvt: IPointerEvent | IMouseEvent) => {
-            const { offsetX: moveOffsetX, offsetY: moveOffsetY } = this._getScenePointerOffset(moveEvt);
+        this._scenePointerMoveSubs.push(scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
+            const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
             scene.setCursor(CURSOR_TYPE.TEXT);
 
-            if (moveOffsetX === preMoveOffsetX && moveOffsetY === preMoveOffsetY) {
+            if (Math.sqrt((moveOffsetX - preMoveOffsetX) ** 2 + (moveOffsetY - preMoveOffsetY) ** 2) < 3) {
                 return;
             }
-            // Filter initial click jitter only; a small later movement can cross a glyph boundary.
-            if (!hasStartedDragging && Math.hypot(moveOffsetX - evtOffsetX, moveOffsetY - evtOffsetY) < 3) {
-                return;
-            }
-            hasStartedDragging = true;
 
             this._tryMoving(moveOffsetX, moveOffsetY);
 
@@ -804,19 +790,14 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
             preMoveOffsetX = moveOffsetX;
             preMoveOffsetY = moveOffsetY;
-        };
+        }));
 
-        const handlePointerUp = () => {
+        this._scenePointerUpSubs.push(scene.onPointerUp$.subscribeEvent(() => {
             [...this._scenePointerMoveSubs, ...this._scenePointerUpSubs].forEach((e) => {
                 e.unsubscribe();
             });
             this._onPointerEvent = false;
             scene.enableObjectsEvent();
-
-            if (!evt.ctrlKey && !evt.shiftKey) {
-                this._removeAllTextRanges();
-                this._removeAllRectRanges();
-            }
 
             // Add cursor.
             if (this._anchorNodePosition && !this._focusNodePosition) {
@@ -856,10 +837,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             if (shouldFocusInput) {
                 this._updateInputPosition({ forceFocus: true });
             }
-        };
-
-        this._scenePointerMoveSubs.push(scene.onPointerMove$.subscribeEvent(handlePointerMove));
-        this._scenePointerUpSubs.push(scene.onPointerUp$.subscribeEvent(handlePointerUp));
+        }));
     }
 
     private _clearUnresolvedSelection(): void {
@@ -1276,8 +1254,16 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._addTextRangesToCache(textRanges);
         this._addRectRangesToCache(rectRanges);
 
-        this._emitMovingSelection();
-
+        if (this._movingSelection$.observed) {
+            this._movingSelection$.next({
+                textRanges: this._rangeListCache.map(serializeTextRange),
+                rectRanges: this._rectRangeListCache.map(serializeRectRange),
+                segmentId: this._currentSegmentId,
+                segmentPage: this._currentSegmentPage,
+                style: this._selectionStyle,
+                isEditing: false,
+            });
+        }
         this.deactivate();
     }
 
@@ -1289,35 +1275,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         // This is quiet ambiguous, when did the engine's canvas offset changes?
         const engine = this._context.scene?.getEngine() as Engine;
         return getCanvasOffsetByEngine(engine);
-    }
-
-    private _getScenePointerOffset(evt: IPointerEvent | IMouseEvent): { offsetX: number; offsetY: number } {
-        const rawOffset = { offsetX: evt.offsetX, offsetY: evt.offsetY };
-        const engineCanvas = this._context.scene?.getEngine()?.getCanvasElement?.();
-        const eventTarget = evt.target;
-        if (!(engineCanvas instanceof HTMLElement) || !(eventTarget instanceof HTMLElement) || eventTarget === engineCanvas) {
-            return rawOffset;
-        }
-
-        const engineOffset = this._getElementLayoutOffset(engineCanvas);
-        const targetOffset = this._getElementLayoutOffset(eventTarget);
-        return {
-            offsetX: evt.offsetX + targetOffset.left - engineOffset.left,
-            offsetY: evt.offsetY + targetOffset.top - engineOffset.top,
-        };
-    }
-
-    private _getElementLayoutOffset(element: HTMLElement): { left: number; top: number } {
-        let current: Nullable<HTMLElement> = element;
-        let left = 0;
-        let top = 0;
-        while (current) {
-            left += current.offsetLeft;
-            top += current.offsetTop;
-            current = current.offsetParent as Nullable<HTMLElement>;
-        }
-
-        return { left, top };
     }
 
     protected _updateInputPosition({ forceFocus = false, preserveFocus = false } = {}) {
@@ -1412,13 +1369,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         }
 
         const { textRanges, rectRanges } = ranges;
-        // Returning an expanded drag to its anchor must publish the collapsed range,
-        // otherwise the last non-empty selection remains visible until mouseup.
-        const collapsesMovingSelection = rectRanges.length === 0
-            && textRanges.length === 1
-            && textRanges[0].collapsed
-            && this._hasVisibleSelectionRanges(this._rangeListCache, this._rectRangeListCache);
-        if (!this._hasVisibleSelectionRanges(textRanges, rectRanges) && !collapsesMovingSelection) {
+        if (!this._hasVisibleSelectionRanges(textRanges, rectRanges)) {
             textRanges.forEach((range) => range.dispose());
             rectRanges.forEach((range) => range.dispose());
             return;
@@ -1439,22 +1390,19 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._addTextRangesToCache(textRanges);
         this._addRectRangesToCache(rectRanges);
 
-        this._emitMovingSelection();
-
+        if (this._movingSelection$.observed) {
+            this._movingSelection$.next({
+                textRanges: this._rangeListCache.map(serializeTextRange),
+                rectRanges: this._rectRangeListCache.map(serializeRectRange),
+                segmentId: this._currentSegmentId,
+                segmentPage: this._currentSegmentPage,
+                style: this._selectionStyle,
+                isEditing: false,
+            });
+        }
         this.deactivate();
 
         this._context.scene?.getEngine()?.setCapture();
-    }
-
-    private _emitMovingSelection(): void {
-        this._movingSelection$.next({
-            textRanges: this._rangeListCache.map(serializeTextRange),
-            rectRanges: this._rectRangeListCache.map(serializeRectRange),
-            segmentId: this._currentSegmentId,
-            segmentPage: this._currentSegmentPage,
-            style: this._selectionStyle,
-            isEditing: false,
-        });
     }
 
     private _hasVisibleSelectionRanges(textRanges: TextRange[], rectRanges: RectRange[]): boolean {
@@ -1462,11 +1410,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     private _shouldSnapBackwardFocusToGlyphStart(focusNode: INodeInfo, focusNodePosition: INodePosition): boolean {
-        // Positioned text already has explicit hit boundaries; snapping adds an unselected first character.
-        if (focusNode.node.ts?.textAdvance !== undefined) {
-            return false;
-        }
-
         const anchorNodePosition = this._anchorNodePosition;
         if (!anchorNodePosition || !this._isBeforeNodePosition(focusNodePosition, anchorNodePosition)) {
             return false;
@@ -1476,16 +1419,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     private _isBeforeNodePosition(left: INodePosition, right: INodePosition): boolean {
-        const leftPath = left.path ?? [];
-        const rightPath = right.path ?? [];
-        if (leftPath.length !== rightPath.length || leftPath.some((part, index) => part !== rightPath[index])) {
-            // Nested columns restart their line/glyph indexes; compare document offsets across pages.
-            const skeleton = this._docSkeletonManagerService.getSkeleton();
-            const leftOffset = skeleton.findCharIndexByPosition({ ...left, isBack: true });
-            const rightOffset = skeleton.findCharIndexByPosition({ ...right, isBack: true });
-            return leftOffset != null && rightOffset != null && leftOffset < rightOffset;
-        }
-
         if (!compareNodePositionLogic(left, right)) {
             return false;
         }

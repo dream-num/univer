@@ -41,7 +41,9 @@ export function resizeEditor(
     const docSkeletonManagerService = editor.render.with(DocSkeletonManagerService);
     const { width, height } = layoutSize ?? editor.getBoundingClientRect();
 
-    editor.render.engine.resizeBySize(width, height);
+    if (layoutSize || documentLayoutSize || pixelRatio !== undefined) {
+        editor.render.engine.resizeBySize(width, height);
+    }
     if (pixelRatio !== undefined) {
         editor.render.engine.getCanvas().setPixelRatio(pixelRatio);
     }
@@ -92,7 +94,7 @@ export const useResize = (
             const { scene, mainComponent } = editor.render;
             const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
             if (!autoScrollbar) {
-                if (!autoScroll) {
+                if (layoutSize && autoScroll === false) {
                     viewportMain?.scrollToBarPos({ x: 0, y: 0 });
                     viewportMain?.getScrollBar()?.dispose();
                 }
@@ -154,10 +156,10 @@ export const useResize = (
     }, [editor, autoScrollbar, isSingle, autoScroll, layoutSize]);
 
     useLayoutEffect(() => {
-        if (editor) {
+        if (editor && (layoutSize || documentLayoutSize || pixelRatio !== undefined)) {
             resize();
         }
-    }, [editor, resize]);
+    }, [documentLayoutSize, editor, layoutSize, pixelRatio, resize]);
 
     useEffect(() => {
         if (!autoScrollbar) return;
@@ -173,7 +175,9 @@ export const useResize = (
     }, [editor, autoScrollbar, resize, checkScrollBar]);
 
     useEffect(() => {
-        if (!autoScrollbar && autoScroll) return;
+        if (!autoScrollbar && !(layoutSize && autoScroll === false)) {
+            return;
+        }
         if (editor) {
             const d = editor.input$.subscribe(() => {
                 checkScrollBar();
@@ -182,7 +186,7 @@ export const useResize = (
                 d.unsubscribe();
             };
         }
-    }, [autoScroll, editor, autoScrollbar, checkScrollBar]);
+    }, [autoScroll, editor, autoScrollbar, checkScrollBar, layoutSize]);
 
     return { resize, checkScrollBar };
 };

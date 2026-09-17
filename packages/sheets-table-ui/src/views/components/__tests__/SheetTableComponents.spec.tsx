@@ -202,7 +202,6 @@ class TestDocSkeletonManagerService {
 class TestEditorRender {
     private _disposed = false;
     private readonly _docSkeletonManagerService = new TestDocSkeletonManagerService();
-    readonly engine = { resizeBySize: () => undefined };
     readonly components = new Map<string, { translate: (x: number, y: number) => void }>();
     readonly scene = {
         transformByState: () => {

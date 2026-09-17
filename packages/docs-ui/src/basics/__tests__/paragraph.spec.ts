@@ -35,9 +35,9 @@ describe('getTextRunAtPosition', () => {
             ],
         };
 
-        expect(getTextRunAtInputPosition(body, position, { ff: 'Heading', fs: 14 }, null).ts)
+        expect(getTextRunAtInputPosition(body, position, { ff: 'Heading', fs: 14 }, null, false, true).ts)
             .toEqual({ ff: 'Monospace', fs: 10 });
-        expect(getTextRunAtInputPosition(body, position, {}, { fs: 12 }).ts)
+        expect(getTextRunAtInputPosition(body, position, {}, { fs: 12 }, false, true).ts)
             .toEqual({ ff: 'Monospace', fs: 12 });
     });
 
@@ -109,6 +109,11 @@ describe('getTextRunAtPosition', () => {
             textAdvance: 12,
         });
         expect(getTextRunAtInputPosition(body, 2, {}, null).ts).toEqual({
+            ff: 'Previous',
+            lineAscent: 20,
+            lineDescent: 4,
+        });
+        expect(getTextRunAtInputPosition(body, 2, {}, null, false, true).ts).toEqual({
             ff: 'Following',
             lineAscent: 8,
             lineDescent: 2,

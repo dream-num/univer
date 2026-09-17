@@ -37,6 +37,7 @@ export interface IUseEditorProps {
     disableBackScroll?: boolean;
     documentLayoutSize?: Readonly<Pick<DOMRectReadOnly, 'width' | 'height'>>;
     pixelRatio?: number;
+    emitSelectionWhileDragging?: boolean;
 }
 
 export function useEditor(opts: IUseEditorProps) {
@@ -48,6 +49,7 @@ export function useEditor(opts: IUseEditorProps) {
         customGlyphRenderers,
         disableBackScroll,
         documentLayoutSize,
+        emitSelectionWhileDragging,
         editorId,
         initialValue,
         isSingle,
@@ -99,6 +101,7 @@ export function useEditor(opts: IUseEditorProps) {
                     canvasStyle,
                     disableBackScroll,
                     editorUnitId: editorId,
+                    emitSelectionWhileDragging,
                     initialSnapshot: snapshot,
                     pixelRatio,
                     preserveHostFocus,

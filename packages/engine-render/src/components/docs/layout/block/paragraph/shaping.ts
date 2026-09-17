@@ -691,8 +691,7 @@ export function shaping(
         }
 
         // Keep the opt-out in glyph metrics so both line fitting and edge adjustment respect it.
-        if (sectionBreakConfig.characterSpacingControl === characterSpacingControlType.doNotCompress
-            && (!traditionalLayout || sectionBreakConfig.renderConfig?.topAlignExactLineSpacing === BooleanNumber.TRUE)) {
+        if (sectionBreakConfig.renderConfig?.preservePunctuationSpacing === BooleanNumber.TRUE) {
             for (const glyph of shapedGlyphs) {
                 if (
                     isCjkLeftAlignedPunctuation(glyph.content)
@@ -707,7 +706,8 @@ export function shaping(
         // With line compression enabled, Word resolves spacing for the whole line.
         // doNotCompress still retains fixed adjacent-punctuation spacing, including
         // East Asian quote/bracket pairs, independently of line justification.
-        if (!traditionalLayout || fixedPunctuationPairs) {
+        if (sectionBreakConfig.renderConfig?.preservePunctuationSpacing !== BooleanNumber.TRUE
+            && (!traditionalLayout || fixedPunctuationPairs)) {
             punctuationSpaceAdjustment(shapedGlyphs, fixedPunctuationPairs);
         }
 

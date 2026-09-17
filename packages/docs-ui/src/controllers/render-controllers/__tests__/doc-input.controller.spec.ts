@@ -18,7 +18,7 @@
  * @vitest-environment jsdom
  */
 
-import { BooleanNumber, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
+import { BooleanNumber, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentDataModel } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '../../../services/doc-embed-integration.service';
@@ -38,11 +38,7 @@ describe('DocInputController', () => {
         new DocInputController(
             {
                 unitId: 'host-doc',
-                unit: {
-                    getSelfOrHeaderFooterModel: vi.fn(() => ({
-                        getBody: vi.fn(() => ({ dataStream: '\r\n' })),
-                    })),
-                },
+                unit: new DocumentDataModel({ body: ({ dataStream: '\r\n' }) }),
             } as never,
             { onInput$, getAllRectRanges: vi.fn(() => []) } as never,
             { getSkeleton: vi.fn(() => ({})) } as never,
@@ -83,11 +79,7 @@ describe('DocInputController', () => {
         new DocInputController(
             {
                 unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-                unit: {
-                    getSelfOrHeaderFooterModel: vi.fn(() => ({
-                        getBody: vi.fn(() => ({ dataStream: '\r\n' })),
-                    })),
-                },
+                unit: new DocumentDataModel({ body: ({ dataStream: '\r\n' }) }),
             } as never,
             { onInput$, getAllRectRanges: vi.fn(() => []) } as never,
             { getSkeleton: vi.fn(() => ({})) } as never,
@@ -132,11 +124,7 @@ describe('DocInputController', () => {
         new DocInputController(
             {
                 unitId: 'other-host-doc',
-                unit: {
-                    getSelfOrHeaderFooterModel: vi.fn(() => ({
-                        getBody: vi.fn(() => ({ dataStream: '\r\n' })),
-                    })),
-                },
+                unit: new DocumentDataModel({ body: ({ dataStream: '\r\n' }) }),
             } as never,
             { onInput$, getAllRectRanges: vi.fn(() => []) } as never,
             { getSkeleton: vi.fn(() => ({})) } as never,
@@ -187,11 +175,7 @@ describe('DocInputController', () => {
         new DocInputController(
             {
                 unitId: 'child-doc',
-                unit: {
-                    getSelfOrHeaderFooterModel: vi.fn(() => ({
-                        getBody: vi.fn(() => ({ dataStream: '\r\n' })),
-                    })),
-                },
+                unit: new DocumentDataModel({ body: ({ dataStream: '\r\n' }) }),
             } as never,
             { onInput$, getAllRectRanges: vi.fn(() => []) } as never,
             { getSkeleton: vi.fn(() => ({})) } as never,
@@ -241,11 +225,7 @@ describe('DocInputController', () => {
         new DocInputController(
             {
                 unitId: 'child-doc',
-                unit: {
-                    getSelfOrHeaderFooterModel: vi.fn(() => ({
-                        getBody: vi.fn(() => ({ dataStream: '\r\n' })),
-                    })),
-                },
+                unit: new DocumentDataModel({ body: ({ dataStream: '\r\n' }) }),
             } as never,
             { onInput$, getAllRectRanges: vi.fn(() => []) } as never,
             { getSkeleton: vi.fn(() => ({})) } as never,
@@ -293,11 +273,7 @@ describe('DocInputController', () => {
         new DocInputController(
             {
                 unitId: 'test-doc',
-                unit: {
-                    getSelfOrHeaderFooterModel: vi.fn(() => ({
-                        getBody: vi.fn(() => ({ dataStream: 'text\r\n' })),
-                    })),
-                },
+                unit: new DocumentDataModel({ body: ({ dataStream: 'text\r\n' }) }),
             } as never,
             {
                 onInput$,
@@ -356,11 +332,7 @@ describe('DocInputController', () => {
         new DocInputController(
             {
                 unitId: 'pdf-layout-editor',
-                unit: {
-                    getSelfOrHeaderFooterModel: vi.fn(() => ({
-                        getBody: vi.fn(() => body),
-                    })),
-                },
+                unit: new DocumentDataModel({ body }),
             } as never,
             { onInput$, getAllRectRanges: vi.fn(() => []) } as never,
             { getSkeleton: vi.fn(() => ({})) } as never,

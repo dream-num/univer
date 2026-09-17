@@ -829,6 +829,16 @@ export interface IDocumentRenderConfig {
     zeroWidthParagraphBreak?: BooleanNumber; // Override paragraph-mark width; DrawingML defaults to zero without custom glyph metrics.
     /** Keep glyphs top-aligned when exact line spacing is smaller than the glyph line box. */
     topAlignExactLineSpacing?: BooleanNumber;
+    /** Use painted glyph bounds for positioned text hit testing. Defaults to false. */
+    useTextInkForHitTesting?: BooleanNumber;
+    /** Keep punctuation advances unchanged during shaping. Defaults to false. */
+    preservePunctuationSpacing?: BooleanNumber;
+    /** Apply explicit text position offsets while painting. Defaults to false. */
+    applyTextPosition?: BooleanNumber;
+    /** Paint the configured text outline. Defaults to false. */
+    paintTextOutline?: BooleanNumber;
+    /** Inherit the following run's style when typing at a paragraph start. Defaults to false. */
+    inheritParagraphStartStyle?: BooleanNumber;
     /** Prevent pointer selection from moving the document viewport. */
     disableSelectionAutoScroll?: BooleanNumber;
     shapeTextOpticalVerticalAlign?: BooleanNumber; // Align shape text by visible glyph bounds instead of the font line box.

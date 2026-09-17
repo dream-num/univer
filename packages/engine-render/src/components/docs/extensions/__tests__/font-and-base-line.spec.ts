@@ -17,7 +17,7 @@
 import type { IScale } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../../basics/i-document-skeleton-cached';
 import type { IExtensionConfig } from '../../../extension';
-import { BaselineOffset } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { COLOR_BLACK_RGB } from '../../../../basics/const';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
@@ -264,7 +264,7 @@ describe('docs font and baseline extension', () => {
         expect(SeparatorContext.restore).toHaveBeenCalledOnce();
     });
 
-    it('does not paint the tab control character when no leader is configured', () => {
+    it('does not paint positioned tabs when no leader is configured', () => {
         const extension = new FontAndBaseLine();
         const TestContext = createContext();
         extension.extensionOffset = {
@@ -279,6 +279,7 @@ describe('docs font and baseline extension', () => {
 
         extension.draw(TestContext, DEFAULT_SCALE, createGlyph('\t', {
             glyphType: GlyphType.TAB,
+            ts: { textAdvance: 20 },
         }));
 
         expect(TestContext.fillText).not.toHaveBeenCalled();
@@ -294,10 +295,7 @@ describe('docs font and baseline extension', () => {
             spanPointWithFont: Vector2.create(12, 20),
             spanStartPoint: Vector2.create(10, 10),
             centerPoint: Vector2.create(8, 8),
-            renderConfig: {
-                vertexAngle: 0,
-                centerAngle: 0,
-            },
+            renderConfig: { paintTextOutline: BooleanNumber.TRUE, vertexAngle: 0, centerAngle: 0 },
         };
 
         extension.draw(TestContext, DEFAULT_SCALE, createGlyph('A', {
@@ -526,7 +524,7 @@ describe('docs font and baseline extension', () => {
             spanPointWithFont: Vector2.create(12, 20),
             spanStartPoint: Vector2.create(10, 10),
             centerPoint: Vector2.create(8, 8),
-            renderConfig: { vertexAngle: 0, centerAngle: 0 },
+            renderConfig: { paintTextOutline: BooleanNumber.TRUE, vertexAngle: 0, centerAngle: 0 },
         };
         const glyph = createGlyph('A', {
             ts: { fs: 12, ff: '"PdfOutline", serif', textOutline: { color: '#123456', width: 0.16 } },
@@ -693,6 +691,9 @@ describe('docs font and baseline extension', () => {
                 pos: 3,
             },
         });
+        extension.draw(TestContext, DEFAULT_SCALE, positioned);
+        expect(TestContext.fillText).toHaveBeenCalledWith('P', 12, 20);
+        extension.extensionOffset.renderConfig!.applyTextPosition = BooleanNumber.TRUE;
         extension.draw(TestContext, DEFAULT_SCALE, positioned);
         expect(TestContext.fillText).toHaveBeenCalledWith('P', 12, 16);
 

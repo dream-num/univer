@@ -40,7 +40,6 @@ export type IMessagerProps = Omit<ComponentProps<typeof Toaster>, 'id' | 'positi
 const MESSAGE_TOASTER_ID = 'univer-message-toaster';
 const DEFAULT_MESSAGE_DURATION = 3000;
 const activeMessageIds = new Set<string>();
-const pendingMessages = new Map<string, symbol>();
 const loadingIcon = <LoadingMultiIcon className="univer-animate-spin univer-text-violet-500" />;
 
 let messageCount = 0;
@@ -141,31 +140,20 @@ export const message = ({ content, duration, id, onClose, type = MessageType.Inf
     let closed = false;
 
     const handleClose = () => {
-        if (closed) {
-            return;
-        }
+        if (closed) return;
 
         closed = true;
         activeMessageIds.delete(messageId);
         onClose?.();
     };
 
-    const pendingMessage = Symbol(messageId);
-    pendingMessages.set(messageId, pendingMessage);
-    // Sibling effects may publish while the toaster is mounting or renewing its subscription.
-    queueMicrotask(() => {
-        if (pendingMessages.get(messageId) !== pendingMessage) {
-            return;
-        }
-        pendingMessages.delete(messageId);
-        method(content, {
-            id: messageId,
-            toasterId: MESSAGE_TOASTER_ID,
-            duration: duration ?? DEFAULT_MESSAGE_DURATION,
-            icon: type === MessageType.Loading ? undefined : iconMap[type],
-            onDismiss: handleClose,
-            onAutoClose: handleClose,
-        });
+    method(content, {
+        id: messageId,
+        toasterId: MESSAGE_TOASTER_ID,
+        duration: duration ?? DEFAULT_MESSAGE_DURATION,
+        icon: type === MessageType.Loading ? undefined : iconMap[type],
+        onDismiss: handleClose,
+        onAutoClose: handleClose,
     });
 
     activeMessageIds.add(messageId);
@@ -173,16 +161,14 @@ export const message = ({ content, duration, id, onClose, type = MessageType.Inf
 };
 
 export const removeMessage = (id?: string) => {
-    const messageIds = typeof id === 'undefined' ? [...activeMessageIds] : [id];
-    messageIds.forEach((messageId) => {
-        pendingMessages.delete(messageId);
-        activeMessageIds.delete(messageId);
-        // Sonner queues insertion with setTimeout, but dismissal with animation frames.
-        // Dismiss after queued insertions so a cancelled toast cannot mount afterwards.
-        setTimeout(() => {
-            if (!activeMessageIds.has(messageId)) {
-                toast.dismiss(messageId);
-            }
-        }, 0);
+    if (typeof id !== 'undefined') {
+        toast.dismiss(id);
+        activeMessageIds.delete(id);
+        return;
+    }
+
+    activeMessageIds.forEach((messageId) => {
+        toast.dismiss(messageId);
     });
+    activeMessageIds.clear();
 };

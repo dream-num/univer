@@ -18,6 +18,7 @@ import type { DocumentDataModel, ICommand, ICommandInfo, ICustomRange } from '@u
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
+    BooleanNumber,
     BuildTextUtils,
     CommandType,
     getRichTextEditPath,
@@ -164,7 +165,8 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             replacesComplexSelection ? replacementOffset : isCompositionStart ? endOffset : startOffset + oldTextLen,
             defaultTextStyle,
             styleCache,
-            SHEET_EDITOR_UNITS.includes(unitId)
+            SHEET_EDITOR_UNITS.includes(unitId),
+            docDataModel.getDocumentStyle().renderConfig?.inheritParagraphStartStyle === BooleanNumber.TRUE
         );
 
         const customDecorations = getCustomDecorationAtPosition(body.customDecorations ?? [], styleOffset);
@@ -240,7 +242,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             });
         }
 
-        if (!replacesComplexSelection && newText.length > 0) {
+        if (!replacesComplexSelection) {
             textX.push({
                 t: TextXActionType.INSERT,
                 body: insertBody,

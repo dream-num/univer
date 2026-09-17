@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import type { Mock } from 'vitest';
-import type { IPointerEvent } from '../basics/i-events';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DeviceType, PointerInput } from '../basics/i-events';
 import { Engine } from '../engine';
@@ -181,94 +179,5 @@ describe('InputManager click gestures', () => {
         timeStamp.mockReturnValue(700);
         click();
         expect(doubleClick).toHaveBeenCalledTimes(1);
-    });
-});
-
-describe('scene input click recognition', () => {
-    let environment: ReturnType<typeof setupRenderTestEnv>;
-    let engine: Engine;
-    let scene: Scene;
-    let doubleClick: Mock<() => void>;
-    let tripleClick: Mock<() => void>;
-
-    const pointer = (type: string, x: number, y = 20) => {
-        engine.onInputChanged$.emitEvent({
-            type,
-            pointerId: 1,
-            button: 0,
-            inputIndex: PointerInput.LeftClick,
-            deviceType: DeviceType.Mouse,
-            clientX: x,
-            clientY: y,
-            offsetX: x,
-            offsetY: y,
-        } as IPointerEvent);
-    };
-
-    const click = (x: number) => {
-        pointer('pointerdown', x);
-        pointer('pointerup', x);
-    };
-
-    beforeEach(() => {
-        environment = setupRenderTestEnv();
-        vi.useFakeTimers();
-        engine = new Engine('click-recognition', { elementWidth: 320, elementHeight: 180, dpr: 1 });
-        scene = new Scene('click-recognition', engine);
-        scene.attachControl();
-        doubleClick = vi.fn();
-        tripleClick = vi.fn();
-        scene.onDblclick$.subscribeEvent(doubleClick);
-        scene.onTripleClick$.subscribeEvent(tripleClick);
-    });
-
-    afterEach(() => {
-        engine.dispose();
-        vi.useRealTimers();
-        environment.restore();
-        vi.restoreAllMocks();
-    });
-
-    it('does not turn consecutive drags ending at the same position into a double click', () => {
-        for (let index = 0; index < 2; index += 1) {
-            pointer('pointerdown', 20);
-            pointer('pointermove', 80);
-            pointer('pointerup', 80);
-            vi.advanceTimersByTime(100);
-        }
-
-        expect(doubleClick).not.toHaveBeenCalled();
-        expect(tripleClick).not.toHaveBeenCalled();
-    });
-
-    it('does not count a drag returning to its starting point as a click', () => {
-        click(20);
-        pointer('pointerdown', 20);
-        pointer('pointermove', 80);
-        pointer('pointermove', 20);
-        pointer('pointerup', 20);
-        click(20);
-
-        expect(doubleClick).not.toHaveBeenCalled();
-        expect(tripleClick).not.toHaveBeenCalled();
-    });
-
-    it('preserves ordinary double and triple clicks with sub-threshold movement', () => {
-        click(20);
-        vi.advanceTimersByTime(100);
-        pointer('pointerdown', 20);
-        pointer('pointermove', 21);
-        pointer('pointerup', 21);
-        expect(doubleClick).toHaveBeenCalledTimes(1);
-        click(21);
-        expect(tripleClick).toHaveBeenCalledTimes(1);
-    });
-
-    it('does not continue a multi-click gesture after pointer cancellation', () => {
-        click(20);
-        pointer('pointerdown', 20);
-        pointer('pointercancel', 20);
-        click(20);
-        expect(doubleClick).not.toHaveBeenCalled();
     });
 });

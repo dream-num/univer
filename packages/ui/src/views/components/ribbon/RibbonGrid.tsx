@@ -47,6 +47,15 @@ export function RibbonGrid({ groups, title, className, ...props }: IRibbonGridPr
             <ToolbarDropdownProvider>
                 {groups.map((group) => {
                     const placements = placeRibbonGridItems(group.children ?? []);
+                    const independentRows = placements.every((placement) => placement.rowSpan === 1)
+                        && placements.some((placement) => placement.columnSpan > 1 && placement.width !== undefined);
+                    const rows = independentRows
+                        ? [1, 2].map((row) => ({
+                            row,
+                            items: placements.filter((placement) => placement.row === row)
+                                .sort((a, b) => a.column - b.column),
+                        }))
+                        : [{ row: 0, items: placements }];
                     return (
                         <div
                             key={group.key}
@@ -60,37 +69,50 @@ export function RibbonGrid({ groups, title, className, ...props }: IRibbonGridPr
                                 data-testid="ribbon-grid-group-grid"
                                 className="
                                   univer-grid univer-min-h-0 univer-flex-1 univer-grid-flow-col univer-grid-rows-2
-                                  univer-content-center univer-gap-x-1 univer-gap-y-2 univer-py-2
-                                  [&>div>span>span]:univer-h-full
+                                  univer-content-center univer-gap-2 univer-py-2
                                 "
                             >
-                                {placements.map((placement) => placement.item.item && (
+                                {rows.map(({ row, items }) => (
                                     <div
-                                        key={placement.item.key}
-                                        className={clsx(`
-                                          univer-flex univer-items-stretch
-                                          [&>span>button]:univer-h-full
-                                          [&>span]:univer-h-full
-                                        `, placement.width && `
-                                          [&>span>span]:univer-w-full
-                                          [&>span]:univer-w-full
-                                          [&_[data-u-command]]:univer-w-full
-                                        `)}
-                                        style={{
-                                            gridRow: `${placement.row} / span ${placement.rowSpan}`,
-                                            gridColumn: `${placement.column} / span ${placement.columnSpan}`,
-                                            width: placement.width,
-                                        }}
+                                        key={row}
+                                        className={independentRows
+                                            ? `
+                                              univer-flex univer-h-6 univer-items-stretch univer-gap-2
+                                              univer-self-center
+                                            `
+                                            : 'univer-contents'}
+                                        style={independentRows ? { gridRow: row, gridColumn: 1 } : undefined}
                                     >
-                                        <ToolbarItem
-                                            {...placement.item.item}
-                                            grid
-                                            large={placement.rowSpan > 1}
-                                            showLabel={placement.showLabel}
-                                            iconSize={placement.iconSize}
-                                            fullWidth={placement.width !== undefined}
-                                            preserveStrokeWidth
-                                        />
+                                        {items.map((placement) => placement.item.item && (
+                                            <div
+                                                key={placement.item.key}
+                                                className={clsx(`
+                                                  univer-flex univer-shrink-0 univer-items-stretch
+                                                  [&>span>button]:univer-h-full
+                                                  [&>span>span]:univer-h-full
+                                                  [&>span]:univer-h-full
+                                                `, placement.width && `
+                                                  [&>span>span]:univer-w-full
+                                                  [&>span]:univer-w-full
+                                                  [&_[data-u-command]]:univer-w-full
+                                                `, { 'univer-h-6 univer-self-center': placement.rowSpan === 1 })}
+                                                style={{
+                                                    gridRow: independentRows ? undefined : `${placement.row} / span ${placement.rowSpan}`,
+                                                    gridColumn: independentRows ? undefined : `${placement.column} / span ${placement.columnSpan}`,
+                                                    width: placement.width,
+                                                }}
+                                            >
+                                                <ToolbarItem
+                                                    {...placement.item.item}
+                                                    grid
+                                                    large={placement.rowSpan > 1}
+                                                    showLabel={placement.showLabel}
+                                                    iconSize={placement.iconSize}
+                                                    fullWidth={placement.width !== undefined}
+                                                    preserveStrokeWidth
+                                                />
+                                            </div>
+                                        ))}
                                     </div>
                                 ))}
                             </div>

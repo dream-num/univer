@@ -436,7 +436,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                 ? localeService.t(title)
                 : undefined;
         const buttonClassName = clsx(grid && !large && `
-          univer-h-full univer-min-w-8
+          univer-h-full
           [&>svg]:univer-size-4
         `, grid && large
             ? `

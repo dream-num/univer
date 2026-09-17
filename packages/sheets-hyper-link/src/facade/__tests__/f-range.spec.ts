@@ -82,8 +82,8 @@ describe('FRangeSheetsHyperlinkMixin', () => {
         expect(cell.getHyperLinks()[0].tooltip).toBe('Imported tip');
         await cell.updateHyperLink('https://docs.univer.ai', 'Edited');
         expect(cell.getHyperLinks()[0]).toMatchObject({ label: 'Edited', tooltip: 'Imported tip' });
-        await cell.updateHyperLink('https://docs.univer.ai', 'Edited', '');
-        expect(cell.getHyperLinks()[0].tooltip).toBe('');
+        await cell.updateHyperLink('https://docs.univer.ai', undefined, '');
+        expect(cell.getHyperLinks()[0]).toMatchObject({ label: 'Edited', tooltip: '' });
         const commands = univer.__getInjector().get(ICommandService);
         await commands.executeCommand(UndoCommand.id);
         expect(cell.getHyperLinks()[0].tooltip).toBe('Imported tip');

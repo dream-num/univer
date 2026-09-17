@@ -98,7 +98,7 @@ export interface IFRangeSheetsHyperlinkMixin {
     /**
      * Update the hyperlink of this range top left cell.
      * @param {string} url - The new hyperlink url, can be a URL, a range link, or a sheet link.
-     * @param {string} [label] - The new display text of the hyperlink. If omitted, the replacement display text is empty. Supply a label to keep the link visible.
+     * @param {string} [label] - The new display text of the hyperlink. If omitted, the existing hyperlink label is preserved.
      * @param {string} [tooltip] - Omit to preserve the current tooltip; use an empty string to clear it.
      *
      * @returns {Promise<boolean>} A promise resolving to whether the update succeeded.
@@ -231,7 +231,7 @@ export class FRangeSheetsHyperlinkMixin extends FRange implements IFRangeSheetsH
             column,
             payload: {
                 payload: url,
-                display: label,
+                display: label ?? hyperlink.label,
                 tooltip,
             },
         });

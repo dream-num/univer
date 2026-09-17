@@ -514,14 +514,11 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         subComponentData[formulaId][y][x] = cellDatas;
     }
 
-<<<<<<< HEAD
-=======
     markExternalReferenceUnavailable(): void {
         this._externalReferenceUnavailable = true;
     }
 
     // eslint-disable-next-line max-lines-per-function
->>>>>>> 92a188a802 (fix(sheets): preserve imported workbook semantics and formula caches)
     setRuntimeData(functionVariant: FunctionVariantType) {
         if (this._externalReferenceUnavailable) {
             const cell = this._currentConfigService.getUnitData()[this._currentUnitId]?.[this._currentSubUnitId]

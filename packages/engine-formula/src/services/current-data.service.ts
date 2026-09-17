@@ -159,6 +159,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _externalReferences: IFormulaExternalReferences = Object.create(null);
 
+    private _calculationRowData: IUnitRowData = Object.create(null);
+
     private _calculationGeneration = 0;
 
     private _forceCalculate: boolean = false;
@@ -203,6 +205,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._sheetNameMap = Object.create(null);
         this._unitNameMap = Object.create(null);
         this._externalReferences = Object.create(null);
+        this._calculationRowData = Object.create(null);
         this._clearDependencyTreeCache = Object.create(null);
         this._dirtyRanges = [];
         this._dirtyNameMap = Object.create(null);
@@ -361,7 +364,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         const filteredOutRows: number[] = [];
 
         for (let r = startRow; r <= endRow; r++) {
-            if (this._sheetRowFilteredService.getRowFiltered(unitId, sheetId, r)) {
+            if (this._calculationRowData[unitId]?.[sheetId]?.[r]?.filtered
+                || this._sheetRowFilteredService.getRowFiltered(unitId, sheetId, r)) {
                 filteredOutRows.push(r);
             }
         }
@@ -371,6 +375,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     load(config: IFormulaDatasetConfig) {
         this._calculationGeneration++;
+        this._calculationRowData = Object.create(null);
         if (config.allUnitData && config.unitSheetNameMap && config.unitStylesData) {
             this._unitData = copyUnitData(config.allUnitData);
             this._unitStylesData = config.unitStylesData;
@@ -523,6 +528,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
      * @param rowData
      */
     private _applyUnitRowData(rowData: IUnitRowData) {
+        this._calculationRowData = rowData;
         for (const unitId of Object.keys(rowData)) {
             if (rowData[unitId] == null) {
                 continue;

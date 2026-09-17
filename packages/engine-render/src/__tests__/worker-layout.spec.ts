@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentSkeletonPage } from '../basics/i-document-skeleton-cached';
-import { cpuUsage, memoryUsage, stdout } from 'node:process';
+import { cpuUsage } from 'node:process';
 import {
     BooleanNumber,
     ColumnLayoutType,
@@ -45,6 +45,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DocumentSkeleton } from '../components/docs/layout/doc-skeleton';
 import { DocumentViewModel } from '../components/docs/view-model/document-view-model';
 import { DocumentLayoutSession } from '../worker-layout';
+import { createPaginatedDocument, mockWorkerCanvas } from './worker-layout.fixture';
 
 type LayoutPublication = ReturnType<DocumentLayoutSession['step']>['publication'];
 
@@ -127,61 +128,23 @@ describe('worker document layout session', () => {
         vi.unstubAllGlobals();
     });
 
-    it('paginates and resolves a 1000-page TOC target incrementally', () => {
-        vi.stubGlobal('document', undefined);
-        vi.stubGlobal('OffscreenCanvas', class {
-            getContext() {
-                return {
-                    font: '',
-                    textBaseline: 'alphabetic',
-                    measureText(this: { font: string }, content: string) {
-                        const size = this.font.match(/([\d.]+)(px|pt)/);
-                        const points = size ? Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) : 11;
-                        return {
-                            width: content.length * 7 * points / 11,
-                            fontBoundingBoxAscent: 9 * points / 11,
-                            fontBoundingBoxDescent: 3 * points / 11,
-                            actualBoundingBoxAscent: 8 * points / 11,
-                            actualBoundingBoxDescent: 2 * points / 11,
-                        };
-                    },
-                };
-            }
+    it('paginates and resolves a 1000-page TOC target incrementally', ({ onTestFinished }) => {
+        mockWorkerCanvas();
+        const { dataModel, pageStarts } = createPaginatedDocument();
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const localeService = univer.__getInjector().get(LocaleService);
+        localeService.setLocale(LocaleType.EN_US);
+        localeService.setDirection('ltr');
+        const session = new DocumentLayoutSession(dataModel, localeService);
+        onTestFinished(() => {
+            session.dispose();
+            dataModel.dispose();
+            univer.dispose();
         });
-        const paragraphs = [];
-        const pageStarts = [];
-        let dataStream = '';
-        for (let pageIndex = 0; pageIndex < 1_000; pageIndex++) {
-            pageStarts.push(dataStream.length);
-            dataStream += `Page ${pageIndex + 1}\r`;
-            paragraphs.push({
-                startIndex: dataStream.length - 1,
-                paragraphId: `page-${pageIndex + 1}`,
-                paragraphStyle: pageIndex === 0 ? undefined : { pageBreakBefore: BooleanNumber.TRUE },
-            });
-        }
-        dataStream += '\n';
-        const dataModel = new DocumentDataModel({
-            id: 'toc-1000-page-benchmark',
-            body: {
-                dataStream,
-                paragraphs,
-                sectionBreaks: [{ startIndex: dataStream.length - 1, sectionId: 'section' }],
-            },
-            documentStyle: {
-                documentFlavor: DocumentFlavor.TRADITIONAL,
-                pageSize: { width: 240, height: 180 },
-                marginTop: 20,
-                marginBottom: 20,
-                marginLeft: 20,
-                marginRight: 20,
-            },
-        });
-        const session = new DocumentLayoutSession(dataModel, new LocaleService());
-        const heapStart = memoryUsage().heapUsed;
-        const startedAt = performance.now();
         const generation = session.start({ reason: 'initial' });
-        let result = session.step(generation, 8);
+        let result = session.step(generation, Number.POSITIVE_INFINITY, 8);
+        expect(result.progress.complete).toBe(false);
+        expect(result.progress.processedBlockCount).toBeLessThanOrEqual(8);
         let stepCount = 1;
         const publishedPages: number[] = [];
         const publicationSizes: number[] = [];
@@ -193,20 +156,12 @@ describe('worker document layout session', () => {
         };
         collectPages();
         while (!result.progress.complete && stepCount < 20_000) {
-            result = session.step(generation, 8);
+            const previousBlockCount = result.progress.processedBlockCount;
+            result = session.step(generation, Number.POSITIVE_INFINITY, 8);
+            expect(result.progress.processedBlockCount - previousBlockCount).toBeLessThanOrEqual(8);
             collectPages();
             stepCount++;
         }
-        const benchmark = {
-            elapsedMs: Math.round(performance.now() - startedAt),
-            heapDeltaMb: Math.round((memoryUsage().heapUsed - heapStart) / 1024 / 1024),
-            maxBlockMs: Math.round(result.progress.maxBlockDuration),
-            stepCount,
-        };
-        if (process.env.DOC_BENCHMARK_LOG === '1') {
-            stdout.write(`1000-page-layout ${JSON.stringify(benchmark)}\n`);
-        }
-
         expect(result.progress.complete).toBe(true);
         expect(result.progress.pageCount).toBe(1_000);
         expect(publishedPages).toEqual(Array.from({ length: 1_000 }, (_, index) => index));
@@ -217,10 +172,47 @@ describe('worker document layout session', () => {
             pageNumber: 1_000,
         });
         expect(session.getPage(999)?.pageIndex).toBe(999);
-        expect(benchmark.maxBlockMs).toBeLessThan(50);
-        session.dispose();
-        dataModel.dispose();
     }, 60_000);
+
+    it('yields after the time budget expires and resumes the remaining layout', ({ onTestFinished }) => {
+        mockWorkerCanvas();
+        const { dataModel } = createPaginatedDocument(20);
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const localeService = univer.__getInjector().get(LocaleService);
+        localeService.setLocale(LocaleType.EN_US);
+        localeService.setDirection('ltr');
+        const session = new DocumentLayoutSession(dataModel, localeService);
+        onTestFinished(() => {
+            session.dispose();
+            dataModel.dispose();
+            univer.dispose();
+        });
+        const generation = session.start({ reason: 'initial' });
+        let now = 0;
+        const clock = vi.spyOn(performance, 'now').mockImplementation(() => {
+            now += 8;
+            return now;
+        });
+        try {
+            const first = session.step(generation, 8);
+            expect(first.progress.complete).toBe(false);
+            expect(first.progress.processedBlockCount).toBe(1);
+
+            const second = session.step(generation, 8);
+            expect(second.progress.complete).toBe(false);
+            expect(second.progress.processedBlockCount).toBe(2);
+
+            let result = second;
+            for (let step = 0; step < 100 && !result.progress.complete; step++) {
+                result = session.step(generation, 8);
+            }
+            expect(result.progress.complete).toBe(true);
+            expect(result.progress.pageCount).toBe(20);
+            expect(session.getPage(19)?.pageIndex).toBe(19);
+        } finally {
+            clock.mockRestore();
+        }
+    });
 
     it.each(['initial', 'edit'] as const)('finishes a late anchor page before publishing a fresh %s session', (reason) => {
         vi.stubGlobal('document', undefined);

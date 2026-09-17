@@ -41,8 +41,8 @@ interface IColumnGroupLayout {
     columns: IColumnGroupLayoutColumn[];
 }
 
-const EMPTY_COLUMN_GROUP_MIN_HEIGHT = 72;
-const COLUMN_GROUP_HORIZONTAL_PADDING = 8;
+const DEFAULT_COLUMN_GROUP_MIN_HEIGHT = 72;
+const DEFAULT_COLUMN_GROUP_HORIZONTAL_PADDING = 8;
 
 export function createColumnGroupSkeleton(
     ctx: ILayoutContext,
@@ -62,13 +62,18 @@ export function createColumnGroupSkeleton(
         return null;
     }
 
+    const horizontalPadding = Math.max(
+        0,
+        columnGroupSource.horizontalPadding?.v ?? DEFAULT_COLUMN_GROUP_HORIZONTAL_PADDING
+    );
+    const minHeight = Math.max(0, columnGroupSource.minHeight?.v ?? DEFAULT_COLUMN_GROUP_MIN_HEIGHT);
     const columnPages = columnGroupNode.children.map((columnNode, index) => {
         const sourceColumn = columnGroupSource.columns[index];
         const width = Math.max(0, getInitialColumnWidth(columnGroupSource, sourceColumn, hostColumn.width));
 
-        return createColumnContentPage(ctx, viewModel, columnNode, sectionBreakConfig, width);
+        return createColumnContentPage(ctx, viewModel, columnNode, sectionBreakConfig, width, horizontalPadding);
     });
-    const columnHeights = columnPages.map((page) => Math.max(page.height, EMPTY_COLUMN_GROUP_MIN_HEIGHT));
+    const columnHeights = columnPages.map((page) => Math.max(page.height, minHeight));
     const layout = calculateColumnGroupLayout(columnGroupSource, hostColumn.width, columnHeights);
     const columns = layout.columns.map((layoutColumn, index): IDocumentSkeletonColumnGroupColumn => {
         const page = columnPages[index];
@@ -128,7 +133,8 @@ function createColumnContentPage(
     viewModel: DocumentViewModel,
     columnNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
-    width: number
+    width: number,
+    horizontalPadding: number
 ): IDocumentSkeletonPage {
     const columnSectionBreakConfig: ISectionBreakConfig = {
         ...sectionBreakConfig,
@@ -138,8 +144,8 @@ function createColumnContentPage(
         },
         marginTop: 0,
         marginBottom: 0,
-        marginLeft: COLUMN_GROUP_HORIZONTAL_PADDING,
-        marginRight: COLUMN_GROUP_HORIZONTAL_PADDING,
+        marginLeft: horizontalPadding,
+        marginRight: horizontalPadding,
         columnProperties: [],
     };
     const page = createSkeletonPage(ctx, columnSectionBreakConfig, ctx.skeletonResourceReference);
@@ -207,7 +213,7 @@ function getNextBlockTop(lines: IDocumentSkeletonLine[]) {
         return 0;
     }
 
-    return lastLine.top + lastLine.lineHeight;
+    return lastLine.top + lastLine.lineHeight + Math.max(0, lastLine.spaceBelowApply ?? 0);
 }
 
 export function calculateColumnGroupLayout(source: IColumnGroup, availableWidth: number, columnHeights: number[]): IColumnGroupLayout {
@@ -226,21 +232,23 @@ export function calculateColumnGroupLayout(source: IColumnGroup, availableWidth:
     if (shouldStack(columns, width, gap, source.responsive)) {
         let top = 0;
 
+        const layoutColumns = columns.map((column, index) => {
+            const topOffset = getColumnTopOffset(column);
+            const layoutColumn = {
+                columnId: column.columnId,
+                left: 0,
+                top: top + topOffset,
+                width,
+            };
+            top += Math.max(0, topOffset + (columnHeights[index] ?? 0));
+
+            return layoutColumn;
+        });
         return {
             mode: 'stack',
             width,
-            height: sumHeights(columnHeights),
-            columns: columns.map((column, index) => {
-                const layoutColumn = {
-                    columnId: column.columnId,
-                    left: 0,
-                    top,
-                    width,
-                };
-                top += Math.max(0, columnHeights[index] ?? 0);
-
-                return layoutColumn;
-            }),
+            height: top,
+            columns: layoutColumns,
         };
     }
 
@@ -248,22 +256,30 @@ export function calculateColumnGroupLayout(source: IColumnGroup, availableWidth:
     const widths = allocateHorizontalWidths(columns, contentWidth);
     let left = 0;
 
+    const layoutColumns = columns.map((column, index) => {
+        const layoutColumn = {
+            columnId: column.columnId,
+            left,
+            top: getColumnTopOffset(column),
+            width: widths[index],
+        };
+        left += widths[index] + gap;
+
+        return layoutColumn;
+    });
     return {
         mode: 'horizontal',
         width,
-        height: Math.max(0, ...columnHeights),
-        columns: columns.map((column, index) => {
-            const layoutColumn = {
-                columnId: column.columnId,
-                left,
-                top: 0,
-                width: widths[index],
-            };
-            left += widths[index] + gap;
-
-            return layoutColumn;
-        }),
+        height: Math.max(0, ...layoutColumns.map((column, index) => (
+            column.top + Math.max(0, columnHeights[index] ?? 0)
+        ))),
+        columns: layoutColumns,
     };
+}
+
+function getColumnTopOffset(column: IColumn): number {
+    const offset = column.topOffset?.v;
+    return typeof offset === 'number' && Number.isFinite(offset) ? offset : 0;
 }
 
 function shouldStack(columns: IColumn[], availableWidth: number, gap: number, responsive: ColumnResponsiveType): boolean {
@@ -320,8 +336,4 @@ function compressToFit(widths: number[], minWidths: number[], overflow: number):
 
 function getMinWidth(column: IColumn): number {
     return Math.max(0, column.minWidth?.v ?? 0);
-}
-
-function sumHeights(heights: number[]): number {
-    return heights.reduce((sum, height) => sum + Math.max(0, height), 0);
 }

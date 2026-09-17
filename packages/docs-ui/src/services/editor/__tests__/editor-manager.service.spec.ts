@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// @vitest-environment jsdom
+
+import type { IDocSelectionInnerParam } from '@univerjs/engine-render';
 import {
     CommandService,
     ConfigService,
@@ -44,7 +47,11 @@ import {
     RichTextEditingMutation,
     SetTextSelectionsOperation,
 } from '@univerjs/docs';
-import { IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, RenderManagerService } from '@univerjs/engine-render';
+import {
+    IRenderManagerService,
+    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+    RenderManagerService,
+} from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ReplaceSnapshotCommand } from '../../../commands/commands/replace-content.command';
@@ -62,6 +69,7 @@ class TestDocSelectionRenderService {
     readonly onKeydown$ = new Subject<{ event: KeyboardEvent; content?: string }>();
     readonly onCompositionupdate$ = new Subject<{ event: CompositionEvent; content?: string }>();
     readonly onCompositionend$ = new Subject<{ event: CompositionEvent; content?: string }>();
+    readonly movingSelection$ = new Subject<IDocSelectionInnerParam>();
     isFocusing = true;
     focusCount = 0;
     blurCount = 0;
@@ -119,10 +127,12 @@ class TestRegisterRender extends TestRender {
     readonly canvas = document.createElement('canvas');
     readonly viewport = new TestRegisterViewport();
     container: HTMLDivElement | null = null;
+    resizeOnMount: boolean | undefined;
     readonly engine = {
         canvasColorService: {},
-        mount: (container: HTMLDivElement) => {
+        mount: (container: HTMLDivElement, resize?: boolean) => {
             this.container = container;
+            this.resizeOnMount = resize;
         },
         getCanvas: () => ({
             getCanvasEle: () => this.canvas,
@@ -246,6 +256,23 @@ function createEditor(
 }
 
 describe('EditorService', () => {
+    it('lets an external editor layout host own the engine resize listener', () => {
+        const { service } = createService(TestRegisterRenderManagerService);
+        service.register({
+            cancelDefaultResizeListener: true,
+            initialSnapshot: {
+                id: EDITOR_ID,
+                body: {
+                    dataStream: 'abc\r\n',
+                    paragraphs: [{ startIndex: 0, paragraphId: createParagraphId(new Set()) }],
+                },
+                documentStyle: {},
+            },
+        }, document.createElement('div'));
+
+        expect(TestRegisterRenderManagerService.renders.get(EDITOR_ID)?.resizeOnMount).toBe(false);
+    });
+
     afterEach(() => {
         vi.unstubAllGlobals();
         TestRegisterRenderManagerService.renders.clear();
@@ -356,6 +383,20 @@ describe('EditorService', () => {
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
             isEditing: true,
         }, { unitId: EDITOR_ID, subUnitId: EDITOR_ID });
+        selectionRenderService.movingSelection$.next({
+            textRanges: [{
+                startOffset: 2,
+                endOffset: 4,
+                collapsed: false,
+                isActive: true,
+            }],
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            isEditing: false,
+        });
+        expect(editor.getSelectionRanges().map((range) => [range.startOffset, range.endOffset])).toEqual([[2, 4]]);
         editor.replaceText('quarterly');
         await Promise.resolve();
 
@@ -364,10 +405,17 @@ describe('EditorService', () => {
         expect(changeEvents).toEqual(['abc\r\n']);
         expect(inputs).toEqual(['d:false', 'cut:false', ':false', '拼:true', 'paste-text:false']);
         expect(pastes).toEqual(['paste-text']);
-        expect(selections).toEqual(['1:2:false']);
+        expect(selections).toEqual(['1:2:false', '2:4:false']);
         expect(editor.getDocumentData().body?.dataStream).toBe('quarterly\r\n');
         expect(refreshSelections.at(-1)).toBe('9:9');
         expect(univerInstanceService.getUnit<DocumentDataModel>(EDITOR_ID)?.getBody()?.dataStream).toBe('quarterly\r\n');
+
+        editor.replaceText('first\nsecond\n');
+        await Promise.resolve();
+
+        expect(editor.getDocumentData().body?.dataStream).toBe('first\rsecond\r\r\n');
+        expect(editor.getDocumentData().body?.paragraphs?.map(({ startIndex }) => startIndex)).toEqual([5, 12, 13]);
+        expect(refreshSelections.at(-1)).toBe('13:13');
 
         editor.dispose();
     });
@@ -523,6 +571,7 @@ describe('EditorService', () => {
             preserveHostFocus: true,
         });
         expect(render.container).toBe(container);
+        expect(render.resizeOnMount).toBe(true);
         expect(render.viewport.disposed).toBe(true);
         expect(render.viewport.scrollVal).toEqual({
             scrollX: 0,

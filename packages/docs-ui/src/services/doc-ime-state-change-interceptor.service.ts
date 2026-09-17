@@ -16,6 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { IDocStateChangeInfo, IDocStateChangeInterceptorService } from '@univerjs/docs';
+import { JSONX } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocIMEInputManagerService } from './doc-ime-input-manager.service';
 
@@ -44,6 +45,12 @@ export class DocIMEStateChangeInterceptorService implements IDocStateChangeInter
         }
 
         const { undoMutationParams, redoMutationParams, previousActiveRange, previousDocRanges, previousSelectionOptions } = historyParams;
+
+        // A canceled composition can contain intermediate edits but leave no document change.
+        // Keep selection finalization without creating an empty undo or collaboration entry.
+        if (JSONX.isNoop(redoMutationParams.actions) && JSONX.isNoop(undoMutationParams.actions)) {
+            return { ...changeStateInfo, noHistory: true };
+        }
 
         return {
             ...changeStateInfo,

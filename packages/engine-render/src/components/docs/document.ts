@@ -16,6 +16,7 @@
 
 import type {
     ICustomRange,
+    IDisposable,
     IDocumentRenderConfig,
     IParagraphBorder,
     IScale,
@@ -45,6 +46,7 @@ import type { DocumentSkeleton } from './layout/doc-skeleton';
 import type { IDocsTableRenderViewport } from './table-render-viewport';
 import type { DocumentViewModel } from './view-model/document-view-model';
 import {
+    BooleanNumber,
     CellValueType,
     ColumnSeparatorType,
     DashStyleType,
@@ -53,6 +55,7 @@ import {
     HorizontalAlign,
     TableTextWrapType,
     TabStopAlignment,
+    toDisposable,
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
@@ -297,7 +300,34 @@ export function drawSectionColumnSeparators(
     ctx.restore();
 }
 
+export interface IDocumentGlyphPaint {
+    group?: string;
+    transform: readonly [number, number, number, number, number, number];
+    draw(context: UniverRenderingContext): void;
+}
+
 export class Documents extends DocComponent {
+    private _glyphPaintSink?: (paints: readonly IDocumentGlyphPaint[]) => void;
+    private _glyphPaints: IDocumentGlyphPaint[] = [];
+
+    /** Route actual Docs glyph painters into a host's ordered compositor. */
+    setGlyphPaintSink(sink: (paints: readonly IDocumentGlyphPaint[]) => void): IDisposable {
+        this._glyphPaintSink = sink;
+        this.makeDirty(true);
+        return toDisposable(() => {
+            if (this._glyphPaintSink === sink) {
+                this._glyphPaintSink = undefined;
+                this._glyphPaints = [];
+                this.makeDirty(true);
+            }
+        });
+    }
+
+    /** Most recent glyph frame routed to the host, also used for isolated ink measurement. */
+    getGlyphPaints(): readonly IDocumentGlyphPaint[] {
+        return this._glyphPaints;
+    }
+
     private readonly _pageRender$ = new Subject<IPageRenderConfig>();
 
     readonly pageRender$ = this._pageRender$.asObservable();
@@ -319,6 +349,8 @@ export class Documents extends DocComponent {
     }
 
     override dispose() {
+        this._glyphPaintSink = undefined;
+        this._glyphPaints = [];
         super.dispose();
 
         this._pageRender$.complete();
@@ -416,6 +448,7 @@ export class Documents extends DocComponent {
             return;
         }
 
+        this._glyphPaints = [];
         this._drawLiquid.reset();
 
         const { pages, skeHeaders, skeFooters } = skeletonData;
@@ -681,6 +714,7 @@ export class Documents extends DocComponent {
             pageLeft += x;
             pageTop += y;
         }
+        this._glyphPaintSink?.(this._glyphPaints);
     }
 
     private _drawBodySections(
@@ -961,15 +995,50 @@ export class Documents extends DocComponent {
                 renderConfig,
             };
 
+            this._paintGlyph(ctx, parentScale, glyph, extensionOffset, extensions, drawInfo);
+        }
+    }
+
+    private _paintGlyph(
+        context: UniverRenderingContext,
+        parentScale: IScale,
+        glyph: IDocumentSkeletonGlyph,
+        offset: IExtensionConfig,
+        extensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
+        drawInfo?: IDrawInfo
+    ): void {
+        if (!this._glyphPaintSink) {
             for (const extension of extensions) {
-                extension.extensionOffset = extensionOffset;
-                if (drawInfo) {
-                    extension.draw(ctx, parentScale, glyph, [], { ...drawInfo });
-                } else {
-                    extension.draw(ctx, parentScale, glyph);
+                extension.extensionOffset = offset;
+                extension.draw(context, parentScale, glyph, [], drawInfo ? { ...drawInfo } : undefined);
+            }
+            return;
+        }
+        const draw = (target: UniverRenderingContext) => {
+            const replayOffset = {
+                ...offset,
+                originTranslate: offset.originTranslate?.clone(),
+                spanStartPoint: offset.spanStartPoint?.clone(),
+                spanPointWithFont: offset.spanPointWithFont?.clone(),
+                centerPoint: offset.centerPoint?.clone(),
+                alignOffset: offset.alignOffset?.clone(),
+            };
+            for (const extension of extensions) {
+                const previous = extension.extensionOffset;
+                extension.extensionOffset = replayOffset;
+                try {
+                    extension.draw(target, parentScale, glyph, [], drawInfo ? { ...drawInfo } : undefined);
+                } finally {
+                    extension.extensionOffset = previous;
                 }
             }
-        }
+        };
+        const matrix = context.getTransform();
+        this._glyphPaints.push({
+            group: glyph.ts?.customGlyphGroup,
+            transform: [matrix.a, matrix.b, matrix.c, matrix.d, matrix.e, matrix.f],
+            draw,
+        });
     }
 
     private _drawTable(
@@ -1354,15 +1423,12 @@ export class Documents extends DocComponent {
                 alignOffset
             );
 
-            for (const extension of preTextBackgroundExtensions) {
-                extension.extensionOffset = {
-                    originTranslate,
-                    spanStartPoint,
-                    centerPoint,
-                    alignOffset,
-                };
-                extension.draw(ctx, parentScale, glyph);
-            }
+            this._paintGlyph(ctx, parentScale, glyph, {
+                originTranslate,
+                spanStartPoint,
+                centerPoint,
+                alignOffset,
+            }, preTextBackgroundExtensions);
         }
 
         if (!backgroundExtension) {
@@ -1384,10 +1450,7 @@ export class Documents extends DocComponent {
                 alignOffset
             );
 
-            backgroundExtension.extensionOffset = {
-                spanStartPoint,
-            };
-            backgroundExtension.draw(ctx, parentScale, glyph);
+            this._paintGlyph(ctx, parentScale, glyph, { spanStartPoint }, [backgroundExtension]);
         }
     }
 
@@ -1505,10 +1568,12 @@ export class Documents extends DocComponent {
             drawNestedTables(floatingTables);
         }
 
-        ctx.beginPath();
-        ctx.rectByPrecision(clipOrigin.x, clipOrigin.y, pageWidth, pageHeight);
-        ctx.closePath();
-        ctx.clip();
+        if (shouldClipNestedPageContent(nestedPage)) {
+            ctx.beginPath();
+            ctx.rectByPrecision(clipOrigin.x, clipOrigin.y, pageWidth, pageHeight);
+            ctx.closePath();
+            ctx.clip();
+        }
 
         const clippedTables = floatingTables.size > 0
             ? new Map([...skeTables].filter(([id]) => !floatingTables.has(id)))
@@ -2058,6 +2123,12 @@ function isColumnGroupNestedPage(page: IDocumentSkeletonPage): boolean {
     const parent = page.parent as IDocumentSkeletonColumnGroupColumn | undefined;
 
     return parent?.columnId != null && parent.parent?.columnGroupId != null;
+}
+
+function shouldClipNestedPageContent(page: IDocumentSkeletonPage): boolean {
+    const parent = page.parent as IDocumentSkeletonColumnGroupColumn | undefined;
+    return !isColumnGroupNestedPage(page)
+        || parent?.parent?.columnGroupSource.clipContent !== BooleanNumber.FALSE;
 }
 
 function fillRectByPrecisionBounds(

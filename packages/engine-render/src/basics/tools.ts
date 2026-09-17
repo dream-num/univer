@@ -415,6 +415,14 @@ export function getFirstGrapheme(text: string): string | null {
     if (text.length <= 1) {
         return text || null;
     }
+    const first = text.charCodeAt(0);
+    const second = text.charCodeAt(1);
+    // Adjacent printable ASCII cannot share a grapheme. Keep non-ASCII followers
+    // on the Unicode path so combining marks and keycap sequences remain intact.
+    if (first >= 0x20 && first <= 0x7E
+        && (text.length === 1 || (second >= 0x20 && second <= 0x7E))) {
+        return text[0];
+    }
     const it = segmenter.segment(text)[Symbol.iterator]();
     return it.next().value?.segment ?? null;
 }

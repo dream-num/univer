@@ -15,9 +15,11 @@
  */
 
 import type { IDocumentData, Nullable } from '@univerjs/core';
+import type { IDocCustomGlyphRendererRegistration } from '@univerjs/engine-render';
 import type { RefObject } from 'react';
 import type { Editor, IEditorCanvasStyle } from '../../../services/editor/editor';
 import { createParagraphId, RichTextBuilder, Tools } from '@univerjs/core';
+import { registerDocCustomGlyphRenderer } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
 import { useLayoutEffect, useMemo, useState } from 'react';
 import { IEditorService } from '../../../services/editor/editor-manager.service';
@@ -30,13 +32,36 @@ export interface IUseEditorProps {
     autoFocus?: boolean;
     isSingle?: boolean;
     canvasStyle?: IEditorCanvasStyle;
+    customGlyphRenderers?: readonly IDocCustomGlyphRendererRegistration[];
+    cancelDefaultResizeListener?: boolean;
+    disableBackScroll?: boolean;
+    documentLayoutSize?: Readonly<Pick<DOMRectReadOnly, 'width' | 'height'>>;
+    pixelRatio?: number;
 }
 
 export function useEditor(opts: IUseEditorProps) {
-    const { editorId, initialValue, container, preserveHostFocus, autoFocus: _autoFocus, isSingle, canvasStyle } = opts;
+    const {
+        autoFocus: _autoFocus,
+        cancelDefaultResizeListener,
+        canvasStyle,
+        container,
+        customGlyphRenderers,
+        disableBackScroll,
+        documentLayoutSize,
+        editorId,
+        initialValue,
+        isSingle,
+        pixelRatio,
+        preserveHostFocus,
+    } = opts;
     const autoFocus = useMemo(() => _autoFocus ?? false, []);
     const [editor, setEditor] = useState<Editor>();
     const editorService = useDependency(IEditorService);
+
+    useLayoutEffect(() => {
+        const disposables = customGlyphRenderers?.map(registerDocCustomGlyphRenderer) ?? [];
+        return () => disposables.forEach((item) => item.dispose());
+    }, [customGlyphRenderers]);
 
     useLayoutEffect(() => {
         if (container.current) {
@@ -60,7 +85,8 @@ export function useEditor(opts: IUseEditorProps) {
                 documentStyle: {
                     ...initialDoc?.documentStyle,
                     pageSize: {
-                        width: !isSingle ? container.current.clientWidth : Infinity,
+                        // Match the first skeleton to the explicit reflow width, before resize runs.
+                        width: isSingle ? Infinity : (documentLayoutSize?.width ?? container.current.clientWidth),
                         height: Infinity,
                     },
                 },
@@ -69,9 +95,12 @@ export function useEditor(opts: IUseEditorProps) {
             const dispose = editorService.register(
                 {
                     autofocus: true,
+                    cancelDefaultResizeListener,
                     canvasStyle,
+                    disableBackScroll,
                     editorUnitId: editorId,
                     initialSnapshot: snapshot,
+                    pixelRatio,
                     preserveHostFocus,
                 },
                 container.current

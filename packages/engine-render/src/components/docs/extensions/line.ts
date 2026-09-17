@@ -60,7 +60,8 @@ export class Line extends docExtension {
         const { ul: underline, st: strikethrough, ol: overline, va: baselineOffset, bbl: bottomBorderLine } = textStyle;
 
         if (underline) {
-            const startY = asc + dsc;
+            const originY = underline.offsetReference === 'baseline' ? asc : asc + dsc;
+            const startY = originY + (underline.offset ?? 0);
             this._drawLine(ctx, glyph, underline, startY, scale, 1, more?.viewBound);
         }
 

@@ -192,9 +192,11 @@ export function createSkeletonLetterGlyph(
     if (typeof glyphMetrics === 'object' && config.textStyle.hidden !== true) {
         if (glyphMetrics.ascent != null) {
             glyph.bBox.ba = glyph.bBox.aba = glyphMetrics.ascent;
+            delete glyph.bBox.fontAscent;
         }
         if (glyphMetrics.descent != null) {
             glyph.bBox.bd = glyph.bBox.abd = glyphMetrics.descent;
+            delete glyph.bBox.fontDescent;
         }
     }
 
@@ -495,6 +497,25 @@ export function _createSkeletonWordOrLetter(
     if (spacing) {
         bBox = { ...bBox, width: spacing.inkWidth };
     }
+    const requestedLineAscent = textStyle.lineAscent;
+    const requestedLineDescent = textStyle.lineDescent;
+    if (
+        typeof requestedLineAscent === 'number'
+        && Number.isFinite(requestedLineAscent)
+        && requestedLineAscent >= 0
+        && typeof requestedLineDescent === 'number'
+        && Number.isFinite(requestedLineDescent)
+        && requestedLineDescent >= 0
+    ) {
+        bBox = {
+            ...bBox,
+            fontAscent: bBox.ba,
+            fontDescent: bBox.bd,
+            ba: requestedLineAscent,
+            bd: requestedLineDescent,
+            normalLineHeight: requestedLineAscent + requestedLineDescent,
+        };
+    }
     const { width: contentWidth = 0 } = bBox;
     let width = glyphWidth == null ? spacing?.width ?? contentWidth : glyphWidth * horizontalScale;
 
@@ -506,6 +527,23 @@ export function _createSkeletonWordOrLetter(
             xOffset = (width - contentWidth) / 2;
         }
     }
+    const requestedTextAdvance = textStyle.textAdvance;
+    const hasFixedTextAdvance = typeof requestedTextAdvance === 'number'
+        && Number.isFinite(requestedTextAdvance)
+        && requestedTextAdvance >= 0
+        && streamType !== DataStreamTreeTokenType.PARAGRAPH;
+    if (hasFixedTextAdvance) {
+        width = requestedTextAdvance * Array.from(content).length;
+    }
+
+    const adjustability = hasFixedTextAdvance
+        ? {
+            stretchability: [0, 0] as [number, number],
+            shrinkability: [0, 0] as [number, number],
+        }
+        : baseAdjustability(content, width, documentCompatibilityPolicy.mode === 'drawingml' && glyphWidth == null
+            ? fontStyle.fontSize * (96 / 72)
+            : width);
 
     if (content === DataStreamTreeTokenType.PARAGRAPH && isTraditionalDocumentCompatibility(documentCompatibilityPolicy)) {
         // The end mark retains its font height, but occupies no grid cell in Word.
@@ -524,12 +562,10 @@ export function _createSkeletonWordOrLetter(
         glyphType,
         streamType,
         isJustifiable: isJustifiable(content),
-        adjustability: baseAdjustability(content, width, documentCompatibilityPolicy.mode === 'drawingml' && glyphWidth == null
-            ? fontStyle.fontSize * (96 / 72)
-            : width),
+        adjustability,
         count: raw.length,
         raw,
-        ...(glyphWidth == null && !validationGrid(gridType, snapToGrid) && fontStyle.fontKerning === 'normal'
+        ...(!hasFixedTextAdvance && glyphWidth == null && !validationGrid(gridType, snapToGrid) && fontStyle.fontKerning === 'normal'
             ? { kerningAdjustment: 0 }
             : {}),
         ...(spacing && spacing.segments.length > 1 ? { textSpacing: spacing } : {}),

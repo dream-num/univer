@@ -15,9 +15,10 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
+import type { IDocCustomGlyphRendererRegistration } from '@univerjs/engine-render';
 import type { CSSProperties, ReactNode, RefObject } from 'react';
 import type { Editor, IEditorCanvasStyle } from '../services/editor/editor';
-import type { IKeyboardEventConfig } from './rich-text-editor/hooks';
+import type { IKeyboardEventConfig } from './rich-text-editor/hooks/use-keyboard-event';
 import {
     BuildTextUtils,
     createInternalEditorID,
@@ -37,10 +38,14 @@ import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { map, merge, startWith } from 'rxjs';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
-import { createEditorUndoRedoKeyboardConfig, useEditorClickOutside, useIsFocusing, useKeyboardEvent, useResize } from './rich-text-editor/hooks';
+import { createEditorUndoRedoKeyboardConfig } from './rich-text-editor/hooks/editor-undo-redo-keyboard';
 import { useEditor } from './rich-text-editor/hooks/use-editor';
+import { useEditorClickOutside } from './rich-text-editor/hooks/use-editor-click-outside';
+import { useIsFocusing } from './rich-text-editor/hooks/use-is-focusing';
+import { useKeyboardEvent } from './rich-text-editor/hooks/use-keyboard-event';
 import { useLeftAndRightArrow } from './rich-text-editor/hooks/use-left-and-right-arrow';
 import { useOnChange } from './rich-text-editor/hooks/use-on-change';
+import { useResize } from './rich-text-editor/hooks/use-resize';
 
 export interface IRichTextEditorProps {
     className?: string;
@@ -50,6 +55,20 @@ export interface IRichTextEditorProps {
     onClickOutside?: () => void;
     /** Keep the globally focused unit on the editor's host while this editor receives input focus. */
     preserveHostFocus?: boolean;
+    /** Let the host own engine sizing, including a fixed backing-store ratio. */
+    cancelDefaultResizeListener?: boolean;
+    /** Optional runtime glyph painters registered for the lifetime of this editor. */
+    customGlyphRenderers?: readonly IDocCustomGlyphRendererRegistration[];
+    /** Fixed canvas backing-store ratio used with a host-managed layout. */
+    pixelRatio?: number;
+    /** Use an untransformed layout size when the editor DOM is displayed through a CSS transform. */
+    layoutSize?: Readonly<Pick<DOMRectReadOnly, 'width' | 'height'>>;
+    /** Keep document reflow independent from an oversized host-managed canvas. */
+    documentLayoutSize?: Readonly<Pick<DOMRectReadOnly, 'width' | 'height'>>;
+    /** Keep the editor viewport anchored while a host expands it to fit content. */
+    autoScroll?: boolean;
+    /** Let the editor create scrollbars when its content exceeds the current layout size. */
+    autoScrollbar?: boolean;
     keyboardEventConfig?: IKeyboardEventConfig;
     moveCursor?: boolean;
     style?: CSSProperties;
@@ -74,7 +93,14 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         initialValue,
         onClickOutside: _onClickOutside,
         preserveHostFocus,
+        cancelDefaultResizeListener,
+        customGlyphRenderers,
+        documentLayoutSize,
+        autoScroll = true,
+        autoScrollbar = true,
         keyboardEventConfig,
+        layoutSize,
+        pixelRatio,
         moveCursor = true,
         style,
         isSingle,
@@ -103,8 +129,13 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         initialValue,
         container: formulaEditorContainerRef,
         preserveHostFocus,
+        cancelDefaultResizeListener,
+        customGlyphRenderers,
+        disableBackScroll: !autoScroll,
+        documentLayoutSize,
         autoFocus,
         isSingle,
+        pixelRatio,
         canvasStyle,
     });
     const direction = useObservable(localeService.direction$, localeService.getDirection());
@@ -137,7 +168,15 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         false,
         [editor]
     );
-    const { checkScrollBar } = useResize(editor, isSingle, true, true);
+    const { checkScrollBar } = useResize(
+        editor,
+        isSingle,
+        autoScrollbar,
+        autoScroll,
+        layoutSize,
+        pixelRatio,
+        documentLayoutSize
+    );
 
     useLayoutEffect(() => {
         if (!editorRef || !editor) return;
@@ -187,7 +226,8 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
     }), [commandService, editorId, keyboardEventConfig, univerInstanceService]);
 
     useLeftAndRightArrow(isFocusing && moveCursor, false, editor);
-    useKeyboardEvent(isFocusing, resolvedKeyboardEventConfig, editor);
+    // Undo can restore a non-collapsed selection without blurring the editor.
+    useKeyboardEvent(editorFocused, resolvedKeyboardEventConfig, editor);
     useOnChange(editor, onChange);
 
     return (

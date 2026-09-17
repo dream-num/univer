@@ -18,7 +18,27 @@ import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, Null
 import type { DocBackground, ISuccinctDocRangeParam, Scene } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
 import type { IEditorCanvasStyle, IEditorConfigParams } from './editor';
-import { createIdentifier, createParagraphId, DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, EDITOR_ACTIVATED, FOCUSING_COMMENT_EDITOR, FOCUSING_EDITOR_STANDALONE, HorizontalAlign, ICommandService, IContextService, Inject, Injector, isCommentEditorID, isInternalEditorID, IUndoRedoService, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
+import {
+    createIdentifier,
+    createParagraphId,
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
+    Disposable,
+    EDITOR_ACTIVATED,
+    FOCUSING_COMMENT_EDITOR,
+    FOCUSING_EDITOR_STANDALONE,
+    HorizontalAlign,
+    ICommandService,
+    IContextService,
+    Inject,
+    Injector,
+    isCommentEditorID,
+    isInternalEditorID,
+    IUndoRedoService,
+    IUniverInstanceService,
+    toDisposable,
+    UniverInstanceType,
+    VerticalAlign,
+} from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { fromEvent, Subject } from 'rxjs';
@@ -31,6 +51,7 @@ export interface IEditorRenderConfig {
     preserveHostFocus?: boolean;
     scrollBar?: boolean;
     backScrollOffset?: number;
+    disableBackScroll?: boolean;
 }
 
 /**
@@ -256,6 +277,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             canvasStyle,
             scrollBar: config.scrollBar,
             ...(config.backScrollOffset === undefined ? {} : { backScrollOffset: config.backScrollOffset }),
+            ...(config.disableBackScroll === undefined ? {} : { disableBackScroll: config.disableBackScroll }),
             ...(config.preserveHostFocus === undefined ? {} : { preserveHostFocus: config.preserveHostFocus }),
         };
         this._editorRenderConfigs.set(editorUnitId, renderConfig);
@@ -276,7 +298,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         }
 
         if (render) {
-            render.engine.mount(container);
+            render.engine.mount(container, !config.cancelDefaultResizeListener);
 
             const editor = new Editor(
                 { ...config, render, editorDom: container, canvasStyle },

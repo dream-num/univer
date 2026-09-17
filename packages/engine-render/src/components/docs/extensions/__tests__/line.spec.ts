@@ -94,6 +94,46 @@ describe('docs line extension', () => {
         expect(ctx.lineTo).toHaveBeenCalled();
     });
 
+    it('applies a custom underline offset without moving other decorations', () => {
+        const line = new Line();
+        (line as any).extensionOffset = {};
+        const ctx = createCtx();
+        const glyph = createGlyph();
+        glyph.ts.ul.offset = 2.5;
+        glyph.ts.st = undefined;
+        glyph.ts.ol = undefined;
+        glyph.ts.bbl = undefined;
+
+        line.draw(ctx, { scaleX: 1, scaleY: 1 } as any, glyph);
+
+        expect(ctx.moveTo.mock.calls[0][0]).toBeCloseTo(10);
+        expect(ctx.moveTo.mock.calls[0][1]).toBeCloseTo(10.5);
+        expect(ctx.lineTo.mock.calls[0][0]).toBeCloseTo(22);
+        expect(ctx.lineTo.mock.calls[0][1]).toBeCloseTo(10.5);
+    });
+
+    it('keeps a baseline-relative underline in place when the line descent changes', () => {
+        const line = new Line();
+        line.extensionOffset = {};
+        const ctx = createCtx();
+        const glyph = createGlyph();
+        glyph.ts.ul = { s: BooleanNumber.TRUE, offset: 2.5, offsetReference: 'baseline' };
+        glyph.ts.st = undefined;
+        glyph.ts.ol = undefined;
+        glyph.ts.bbl = undefined;
+
+        for (const descent of [0, 2, 5]) {
+            glyph.parent.parent.dsc = descent;
+            line.draw(ctx, { scaleX: 1, scaleY: 1 }, glyph);
+        }
+
+        expect(ctx.moveTo).toHaveBeenCalledTimes(3);
+        expect(ctx.lineTo).toHaveBeenCalledTimes(3);
+        for (const call of [...ctx.moveTo.mock.calls, ...ctx.lineTo.mock.calls]) {
+            expect(call[1]).toBeCloseTo(8.5);
+        }
+    });
+
     it('handles early return and baseline offset variants', () => {
         const line = new Line();
         (line as any).extensionOffset = {};

@@ -53,10 +53,9 @@ export function RibbonGridMenu({
                         title={title}
                         onClick={() => onSelectTab(group)}
                         className={clsx(`
-                          univer-relative univer-flex univer-h-9 univer-cursor-pointer univer-items-center
+                          univer-relative univer-flex univer-h-8 univer-cursor-pointer univer-items-center
                           univer-whitespace-nowrap univer-border-0 univer-border-b-[3px] univer-bg-transparent
-                          univer-px-3 univer-text-base univer-font-semibold univer-text-gray-700
-                          univer-transition-colors
+                          univer-px-3 univer-text-sm univer-font-semibold univer-text-gray-700 univer-transition-colors
                           hover:univer-text-gray-900
                           focus-visible:univer-outline-none focus-visible:univer-ring-2 focus-visible:univer-ring-inset
                           focus-visible:univer-ring-primary-500

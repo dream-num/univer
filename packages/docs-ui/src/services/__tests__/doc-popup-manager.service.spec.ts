@@ -109,7 +109,13 @@ describe('popup anchors with real document layout', () => {
         }
     });
 
-    it.each([0, 1, 3])('covers a %i-character range through its trailing edge', (length) => {
+    it.each([
+        { startOffset: 1, length: 0 },
+        { startOffset: 1, length: 1 },
+        { startOffset: 1, length: 3 },
+        { startOffset: 5, length: 0 },
+        { startOffset: 6, length: 0 },
+    ])('anchors a $length-character range at $startOffset, including paragraph-end and empty carets', ({ startOffset, length }) => {
         const context = new Proxy({
             font: '',
             webkitBackingStorePixelRatio: 1,
@@ -131,9 +137,12 @@ describe('popup anchors with real document layout', () => {
             const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
                 id: 'popup-anchor-test',
                 body: {
-                    dataStream: 'A目CDZ\r\n',
-                    paragraphs: [{ startIndex: 5, paragraphId: 'paragraph-1' }],
-                    sectionBreaks: [{ startIndex: 6, sectionId: 'body' }],
+                    dataStream: 'A目CDZ\r\r\n',
+                    paragraphs: [
+                        { startIndex: 5, paragraphId: 'paragraph-1' },
+                        { startIndex: 6, paragraphId: 'paragraph-2' },
+                    ],
+                    sectionBreaks: [{ startIndex: 7, sectionId: 'body' }],
                 },
                 documentStyle: {
                     documentFlavor: DocumentFlavor.TRADITIONAL,
@@ -155,7 +164,7 @@ describe('popup anchors with real document layout', () => {
             const documents = new Documents('popup-anchor-document', skeleton);
             render.mainComponent = documents;
             render.scene.addObject(documents);
-            const bounds = calcDocRangePositions({ startOffset: 1, endOffset: 1 + length, collapsed: length === 0 }, render)!;
+            const bounds = calcDocRangePositions({ startOffset, endOffset: startOffset + length, collapsed: length === 0 }, render)!;
             injector.add([ICanvasPopupService, { useClass: CanvasPopupService }]);
             injector.add([DocCanvasPopManagerService]);
             const pendingRange = { startOffset: 1000, endOffset: 1001, collapsed: false };
@@ -176,11 +185,12 @@ describe('popup anchors with real document layout', () => {
             skeleton.calculate();
             expect(popupService.popups).toHaveLength(0);
             pendingPopup.dispose();
-            const lastGlyph = skeleton.findNodeByCharIndex(Math.max(1, length))!;
+            const lastGlyph = skeleton.findNodeByCharIndex(startOffset + Math.max(0, length - 1))!;
             const lastGlyphBounds = calcDocGlyphPosition(lastGlyph, documents, skeleton)!;
             expect(bounds).toHaveLength(1);
             if (length === 0) {
                 expect(bounds[0].right).toBe(bounds[0].left);
+                expect(bounds[0].left).toBeCloseTo(lastGlyphBounds.left);
             } else {
                 expect(bounds[0].right).toBeCloseTo(lastGlyphBounds.right);
                 expect(bounds[0].right).toBeGreaterThan(bounds[0].left);

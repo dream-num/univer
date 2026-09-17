@@ -51,7 +51,6 @@ import {
     RichTextEditingMutation,
 } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-
 import {
     ContextMenuPanel,
     IconManager,
@@ -60,7 +59,7 @@ import {
     useDependency,
     useObservable,
 } from '@univerjs/ui';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import {
     DocCopyCommand,
@@ -819,12 +818,10 @@ export function getParagraphMenuCommandTargetRange(
 
 export function finishParagraphMenuCommand(
     docParagraphMenuService: Pick<DocParagraphMenuService, 'hideParagraphMenu'> | null | undefined,
-    layoutService: Pick<ILayoutService, 'focus'>,
     hideMenu: () => void
 ) {
-    docParagraphMenuService?.hideParagraphMenu(true);
     hideMenu();
-    layoutService.focus();
+    docParagraphMenuService?.hideParagraphMenu(true);
 }
 
 function getBlockSelectionRange(target: IDocBlockMenuTarget | null | undefined, paragraph?: IMutiPageParagraphBound | null): ITextRangeWithStyle | null {
@@ -894,6 +891,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     const iconManager = useDependency(IconManager);
     const anchorRef = useRef<HTMLDivElement>(null);
     const isMouseOver = useRef(false);
+    const focusedMenuElementRef = useRef<HTMLElement | null>(null);
     const hideTimerRef = useRef<number | null>(null);
     const handledSlashRequestNonceRef = useRef(0);
     const renderManagerService = useDependency(IRenderManagerService);
@@ -959,7 +957,25 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
         anchorRect$.next(nextAnchorRect);
     };
 
+    const restoreMenuFocus = useCallback(() => {
+        const focusedElement = focusedMenuElementRef.current;
+        focusedMenuElementRef.current = null;
+        if (!focusedElement) {
+            return;
+        }
+
+        const { activeElement, body } = focusedElement.ownerDocument;
+        // A portaled submenu can remove its focused button before the root menu closes.
+        if (activeElement === focusedElement || (!focusedElement.isConnected && activeElement === body)) {
+            layoutService.focus();
+        }
+    }, [layoutService]);
+
+    // Service-driven dismissal (for example scrolling) can unmount the entire popup.
+    useLayoutEffect(() => restoreMenuFocus, [restoreMenuFocus]);
+
     const handleHideMenu = () => {
+        restoreMenuFocus();
         setVisible(false);
         setOpenMode('pointer');
         targetRangeRef.current = null;
@@ -975,7 +991,13 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
 
     const scheduleHideMenu = () => {
         clearHideTimer();
+        if (openMode === 'slash') {
+            return;
+        }
+
+        // Retain the interaction while crossing between the trigger, panel and portaled submenus.
         hideTimerRef.current = window.setTimeout(() => {
+            hideTimerRef.current = null;
             if (!isMouseOver.current && !isDraggingRef.current) {
                 handleHideMenu();
             }
@@ -984,6 +1006,10 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
 
     const handleOpenMenu = (mode: ParagraphMenuOpenMode = 'pointer') => {
         clearHideTimer();
+        if (openMode === 'slash') {
+            return;
+        }
+
         const latestTarget = docParagraphMenuService?.activeTarget ?? activeTarget;
         setParagraphMenuInteractionActive(docParagraphMenuService, true);
         const targetRange = latestTarget
@@ -1102,7 +1128,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
             }
             await commandService.executeCommand(SetInlineFormatTextColorCommand.id, { value: themeService.getColorFromTheme('gray.900') });
             await commandService.executeCommand(SetInlineFormatTextBackgroundColorCommand.id, { value: themeService.getColorFromTheme('primary.600') });
-            finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);
+            finishParagraphMenuCommand(docParagraphMenuService, handleHideMenu);
             return;
         }
 
@@ -1119,7 +1145,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                     },
                 },
             });
-            finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);
+            finishParagraphMenuCommand(docParagraphMenuService, handleHideMenu);
             return;
         }
 
@@ -1138,7 +1164,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
             if (wrappedCommandId) {
                 await commandService.executeCommand(wrappedCommandId);
             }
-            finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);
+            finishParagraphMenuCommand(docParagraphMenuService, handleHideMenu);
             return;
         }
 
@@ -1155,13 +1181,13 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                     replaceSelection(clipboardRange);
                     await executeResolvedCommand(option, clipboardRange);
                 }
-                finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);
+                finishParagraphMenuCommand(docParagraphMenuService, handleHideMenu);
                 return;
             }
 
             if (commandId === currentBlockCommandId) {
                 await unwrapActiveBlockRange();
-                finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);
+                finishParagraphMenuCommand(docParagraphMenuService, handleHideMenu);
                 return;
             }
 
@@ -1180,7 +1206,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                         params: commandParams as Record<string, unknown> | undefined,
                     }, nextRange);
                 }
-                finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);
+                finishParagraphMenuCommand(docParagraphMenuService, handleHideMenu);
                 return;
             }
 
@@ -1193,7 +1219,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                     commandId,
                     params: commandParams as Record<string, unknown> | undefined,
                 }, blockRange);
-                finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);
+                finishParagraphMenuCommand(docParagraphMenuService, handleHideMenu);
                 return;
             }
         }
@@ -1205,7 +1231,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
             await executeResolvedCommand({
                 id: NormalTextHeadingCommand.id,
             }, targetRange);
-            finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);
+            finishParagraphMenuCommand(docParagraphMenuService, handleHideMenu);
             return;
         }
 
@@ -1238,7 +1264,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
         } finally {
             restoreTextRanges(previousTextRanges);
         }
-        finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);
+        finishParagraphMenuCommand(docParagraphMenuService, handleHideMenu);
     };
 
     const hoverBridgeStyle = visible && (menuDirection === 'left' || menuDirection === 'right')
@@ -1294,7 +1320,6 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                 }}
                 onMouseLeave={() => {
                     isMouseOver.current = false;
-                    setParagraphMenuInteractionActive(docParagraphMenuService, false);
                     cancelOpenMenu();
                     scheduleHideMenu();
                 }}
@@ -1426,7 +1451,6 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                     }}
                     onMouseLeave={() => {
                         isMouseOver.current = false;
-                        setParagraphMenuInteractionActive(docParagraphMenuService, false);
                         scheduleHideMenu();
                     }}
                 />
@@ -1438,6 +1462,12 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                     direction={menuDirection}
                 >
                     <section
+                        onFocusCapture={(event) => {
+                            focusedMenuElementRef.current = event.target;
+                        }}
+                        onBlurCapture={() => {
+                            focusedMenuElementRef.current = null;
+                        }}
                         onMouseEnter={(e) => {
                             popup.onPointerEnter?.(e);
                             setParagraphMenuInteractionActive(docParagraphMenuService, true);
@@ -1446,7 +1476,6 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                         }}
                         onMouseLeave={() => {
                             isMouseOver.current = false;
-                            setParagraphMenuInteractionActive(docParagraphMenuService, false);
                             scheduleHideMenu();
                         }}
                     >
@@ -1466,11 +1495,10 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                             }}
                             onMenuPointerLeave={() => {
                                 isMouseOver.current = false;
-                                setParagraphMenuInteractionActive(docParagraphMenuService, false);
                                 scheduleHideMenu();
                             }}
                             onCancel={() => {
-                                finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);
+                                finishParagraphMenuCommand(docParagraphMenuService, handleHideMenu);
                             }}
                             onOptionSelect={async (params) => {
                                 const targetRange = targetRangeRef.current ?? getParagraphMenuTargetRange(activeParagraphBound);
@@ -1493,14 +1521,14 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
 
                                     if (commandId === DocCopyCommand.id || commandId === DocCopyCommand.name) {
                                         await docClipboardService.copy(SliceBodyType.copy, [tableRange]);
-                                        finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);
+                                        finishParagraphMenuCommand(docParagraphMenuService, handleHideMenu);
                                         return;
                                     }
 
                                     if (commandId === DocPasteCommand.id) {
                                         docSelectionManagerService.replaceDocRanges([afterTableRange], undefined, false);
                                         await commandService.executeCommand(DocPasteCommand.id);
-                                        finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);
+                                        finishParagraphMenuCommand(docParagraphMenuService, handleHideMenu);
                                         return;
                                     }
 
@@ -1522,7 +1550,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                                                 : commandParams);
                                     }
 
-                                    finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);
+                                    finishParagraphMenuCommand(docParagraphMenuService, handleHideMenu);
                                     univerInstanceService.focusUnit(popup.unitId);
                                     return;
                                 }

@@ -14,12 +14,37 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICustomBlock, ICustomTable, IDisposable, IDocumentBlockRange, INeedCheckDisposable, Nullable } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    ICustomBlock,
+    ICustomTable,
+    IDisposable,
+    IDocumentBlockRange,
+    INeedCheckDisposable,
+    Nullable,
+} from '@univerjs/core';
 import type { IBoundRectNoAngle, IRenderContext, IRenderModule, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IMutiPageParagraphBound, ITableBound, ITableParagraphBound } from './doc-event-manager.service';
 import type { IEditorInputConfig } from './selection/doc-selection-render.service';
-import { BlockType, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DocumentBlockType, getParagraphContentStartOffset, IContextService, Inject, IPermissionService, isInternalEditorID, PresetListType } from '@univerjs/core';
-import { canEditDocumentTargets, DocSelectionManagerService, DocSkeletonManagerService, getDocumentEditTargetObjectIds } from '@univerjs/docs';
+import {
+    BlockType,
+    DataStreamTreeTokenType,
+    Disposable,
+    DOC_RANGE_TYPE,
+    DocumentBlockType,
+    getParagraphContentStartOffset,
+    IContextService,
+    Inject,
+    IPermissionService,
+    isInternalEditorID,
+    PresetListType,
+} from '@univerjs/core';
+import {
+    canEditDocumentTargets,
+    DocSelectionManagerService,
+    DocSkeletonManagerService,
+    getDocumentEditTargetObjectIds,
+} from '@univerjs/docs';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { BehaviorSubject, combineLatest, first, throttleTime } from 'rxjs';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
@@ -409,12 +434,13 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             return true;
         }
 
+        this._isSlashMenuActive = true;
+        this.setParagraphMenuActive(true);
         this._slashMenuRequest$.next({
             anchorRect: this._getSlashMenuAnchorRect(config, paragraph),
             nonce: ++this._slashMenuRequestNonce,
             target,
         });
-        this._isSlashMenuActive = true;
         return true;
     }
 

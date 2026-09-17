@@ -236,7 +236,8 @@ export function Ribbon(props: IRibbonProps) {
                 {...embedRibbonOverrideAttributes}
                 className={clsx('univer-relative univer-select-none', headerClassName, {
                     'univer-hidden': toolbarOnly,
-                    'univer-h-9': !toolbarOnly && (ribbonType === 'classic' || ribbonType === 'grid' || (headerMenuComponents && headerMenuComponents.size > 0)),
+                    'univer-h-8': !toolbarOnly && ribbonType === 'grid',
+                    'univer-h-9': !toolbarOnly && ribbonType !== 'grid' && (ribbonType === 'classic' || (headerMenuComponents && headerMenuComponents.size > 0)),
                 })}
             >
                 {!toolbarOnly && ribbonOverride?.placeholderTitle && ribbon.length === 0 && (

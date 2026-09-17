@@ -24,7 +24,7 @@ export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.NUMBER]: {
         [OpenNumfmtPanelOperator.id]: {
             order: 9,
-            gridLayout: { row: 1, column: 1, columnSpan: 4, width: 210 },
+            gridLayout: { row: 1, column: 1, columnSpan: 4, width: 160 },
             menuItemFactory: FactoryOtherMenuItem,
         },
         [SetPercentCommand.id]: {

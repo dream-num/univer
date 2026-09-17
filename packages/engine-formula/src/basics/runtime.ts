@@ -20,7 +20,7 @@ import type { IArrayFormulaUnitCellType, IRuntimeUnitDataPrimitiveType, IRuntime
 import { ObjectMatrix } from '@univerjs/core';
 
 export function convertUnitDataToRuntime(unitData: IArrayFormulaUnitCellType) {
-    const arrayFormulaCellData: IRuntimeUnitDataType = {};
+    const arrayFormulaCellData: IRuntimeUnitDataType = Object.create(null);
     Object.keys(unitData).forEach((unitId) => {
         const sheetData = unitData[unitId];
 
@@ -29,7 +29,7 @@ export function convertUnitDataToRuntime(unitData: IArrayFormulaUnitCellType) {
         }
 
         if (arrayFormulaCellData[unitId] == null) {
-            arrayFormulaCellData[unitId] = {};
+            arrayFormulaCellData[unitId] = Object.create(null);
         }
 
         Object.keys(sheetData).forEach((sheetId) => {
@@ -43,33 +43,44 @@ export function convertUnitDataToRuntime(unitData: IArrayFormulaUnitCellType) {
 }
 
 export function convertRuntimeToUnitData(unitData: IRuntimeUnitDataType) {
-    const unitPrimitiveData: IRuntimeUnitDataPrimitiveType = {};
+    const unitPrimitiveData: IRuntimeUnitDataPrimitiveType = Object.create(null);
 
-    for (const unitId in unitData) {
+    for (const unitId of Object.keys(unitData)) {
         const sheetData = unitData[unitId];
         if (sheetData == null) {
             continue;
         }
 
         if (unitPrimitiveData[unitId] == null) {
-            unitPrimitiveData[unitId] = {};
+            unitPrimitiveData[unitId] = Object.create(null);
         }
 
-        for (const sheetId in sheetData) {
+        for (const sheetId of Object.keys(sheetData)) {
             const cellData = sheetData[sheetId];
-            const primitiveData: IObjectMatrixPrimitiveType<Nullable<ICellData>> = {};
+            const primitiveData: IObjectMatrixPrimitiveType<Nullable<ICellData>> = Object.create(null);
 
             cellData.forValue((row, column, value) => {
                 if (primitiveData[row] === undefined) {
-                    primitiveData[row] = {};
+                    primitiveData[row] = Object.create(null);
                 }
 
                 primitiveData[row][column] = value;
             });
 
-            unitPrimitiveData[unitId][sheetId] = primitiveData;
+            unitPrimitiveData[unitId]![sheetId] = primitiveData;
         }
     }
 
     return unitPrimitiveData;
+}
+
+/** Copy the unit and sheet dictionaries without retaining inherited identifier keys. */
+export function copyUnitData<T>(data: { [unitId: string]: Nullable<{ [sheetId: string]: T }> }) {
+    const result: { [unitId: string]: { [sheetId: string]: T } } = Object.create(null);
+    for (const unitId of Object.keys(data)) {
+        if (data[unitId] != null) {
+            result[unitId] = Object.assign(Object.create(null), data[unitId]);
+        }
+    }
+    return result;
 }

@@ -14,60 +14,105 @@
  * limitations under the License.
  */
 
-import { ObjectMatrix } from '@univerjs/core';
+import type { ICellData } from '@univerjs/core';
+import {
+    ContextService,
+    DesktopLogService,
+    IContextService,
+    ILogService,
+    Injector,
+    IUniverInstanceService,
+    LocaleService,
+    ObjectMatrix,
+    UniverInstanceService,
+} from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../basics/error-type';
+import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
 import { createNewArray } from '../../engine/utils/array-object';
 import { NumberValueObject, StringValueObject } from '../../engine/value-object/primitive-object';
-import { FormulaExecutedStateType, FormulaExecuteStageType, FormulaRuntimeService } from '../runtime.service';
+import { FormulaDataModel } from '../../models/formula-data.model';
+import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../current-data.service';
+import { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from '../hyperlink-engine-formula.service';
+import { FormulaExecutedStateType, FormulaExecuteStageType, FormulaRuntimeService, IFormulaRuntimeService } from '../runtime.service';
+import { ISheetRowFilteredService, SheetRowFilteredService } from '../sheet-row-filtered.service';
 
 function createRuntimeService() {
-    const unitDataMatrix = new ObjectMatrix<any>();
-    const arrayFormulaCellData = new ObjectMatrix<any>();
+    const unitDataMatrix = new ObjectMatrix<ICellData>();
     const arrayFormulaRange = {
         unit: {
             sheet: {},
         },
     };
 
-    const currentConfigService = {
-        getUnitData: () => ({
+    const injector = new Injector();
+    injector.add([ILogService, { useClass: DesktopLogService }]);
+    injector.add([IContextService, { useClass: ContextService }]);
+    injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
+    injector.add([LocaleService]);
+    injector.add([LexerTreeBuilder]);
+    injector.add([FormulaDataModel]);
+    injector.add([ISheetRowFilteredService, { useClass: SheetRowFilteredService }]);
+    injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
+    injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
+    injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
+    const currentConfigService = injector.get(IFormulaCurrentConfigService);
+    currentConfigService.load({
+        allUnitData: {
             unit: {
                 sheet: {
                     cellData: unitDataMatrix,
+                    columnCount: 20,
+                    columnData: {},
+                    rowCount: 20,
+                    rowData: {},
                 },
             },
-        }),
-        getArrayFormulaCellData: () => ({
-            unit: {
-                sheet: arrayFormulaCellData,
-            },
-        }),
-        getArrayFormulaRange: () => arrayFormulaRange,
-        getDirtyRanges: () => [],
-    };
-
-    const hyperlinkEngineFormulaService = {
-        generateCellValue: (url: string, text: string) => ({
-            v: text,
-            p: { url },
-        }),
-    };
-
-    const runtime = new FormulaRuntimeService(
-        currentConfigService as never,
-        hyperlinkEngineFormulaService as never
-    );
+        },
+        unitStylesData: {},
+        unitSheetNameMap: { unit: { sheet: 'Sheet1' } },
+        formulaData: {},
+        arrayFormulaCellData: { unit: { sheet: {} } },
+        arrayFormulaRange,
+        forceCalculate: false,
+        dirtyRanges: [],
+        dirtyNameMap: {},
+        dirtyDefinedNameMap: {},
+        dirtyUnitFeatureMap: {},
+        dirtyUnitOtherFormulaMap: {},
+    });
+    const runtime = injector.get(IFormulaRuntimeService) as FormulaRuntimeService;
 
     return {
+        injector,
         runtime,
         unitDataMatrix,
-        arrayFormulaCellData,
+        arrayFormulaCellData: currentConfigService.getArrayFormulaCellData().unit!.sheet!,
         arrayFormulaRange,
     };
 }
 
 describe('FormulaRuntimeService', () => {
+    it.each(['__proto__', 'constructor', 'prototype', 'toString'])('isolates runtime writes for special identifiers (%s)', (key) => {
+        const { injector, runtime } = createRuntimeService();
+        const marker = '__formula_pollution__';
+        try {
+            runtime.setCurrent(0, 0, 10, 10, marker, key);
+            runtime.setUnitArrayFormulaEmbeddedMap();
+            runtime.setRuntimeOtherData(marker, 0, 0, NumberValueObject.create(7));
+            expect(runtime.getUnitArrayFormulaEmbeddedMap()[key]?.[marker]?.[0]?.[0]).toBe(true);
+            expect(runtime.getRuntimeOtherData()[key]?.[marker]?.[marker]?.[0]?.[0]?.[0]?.[0]?.v).toBe(7);
+            expect(Object.getOwnPropertyDescriptor(Object.prototype, marker)).toBeUndefined();
+            runtime.reset();
+            runtime.setUnitArrayFormulaEmbeddedMap();
+            expect(runtime.getUnitArrayFormulaEmbeddedMap()[key]?.[marker]?.[0]?.[0]).toBe(true);
+        } finally {
+            Reflect.deleteProperty(Object.prototype, marker);
+            Reflect.deleteProperty(Object, marker);
+            injector.dispose();
+        }
+    });
+
     it('should manage state, counters and cycle flags', () => {
         const { runtime } = createRuntimeService();
 
@@ -191,12 +236,9 @@ describe('FormulaRuntimeService', () => {
         });
         runtime.setRuntimeData(hyperlinkValue as never);
 
-        expect(runtime.getUnitData().unit?.sheet?.getValue(0, 0)).toEqual({
-            v: 'Open',
-            p: {
-                url: 'https://example.com',
-            },
-        });
+        const cell = runtime.getUnitData().unit?.sheet?.getValue(0, 0);
+        expect(cell?.p?.body?.dataStream).toBe('Open\r\n');
+        expect(cell?.p?.body?.customRanges?.[0]?.properties?.url).toBe('https://example.com');
     });
 
     it('should handle single-cell and normal array spill write', () => {

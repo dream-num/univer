@@ -40,7 +40,6 @@ import {
     SetStyleCommand,
 } from '@univerjs/sheets';
 import { afterEach, describe, expect, it } from 'vitest';
-
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
 import { ActiveDirtyController } from '../active-dirty.controller';
 
@@ -83,6 +82,23 @@ function getDirtyData(testBed: ITestBed, command: ICommandInfo) {
 }
 
 describe('ActiveDirtyController', () => {
+    it.each(['__proto__', 'constructor', 'prototype', 'toString'])('keeps dirty sheet names local for special unit identifiers (%s)', (key) => {
+        testBed = createControllerTestBed();
+        testBed.injector.get(ActiveDirtyController);
+        const marker = '__formula_pollution__';
+        try {
+            const data = getDirtyData(testBed, {
+                id: RemoveSheetMutation.id,
+                params: { unitId: key, subUnitId: marker, subUnitName: 'Sheet 1' },
+            });
+            expect(data.dirtyNameMap?.[key]?.[marker]).toBe('Sheet 1');
+            expect(Object.getOwnPropertyDescriptor(Object.prototype, marker)).toBeUndefined();
+        } finally {
+            Reflect.deleteProperty(Object.prototype, marker);
+            Reflect.deleteProperty(Object, marker);
+        }
+    });
+
     let testBed: ITestBed;
 
     afterEach(() => {

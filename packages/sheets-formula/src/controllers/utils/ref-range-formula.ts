@@ -218,8 +218,8 @@ export function getFormulaReferenceRange(oldFormulaData: IFormulaData, newFormul
  * @returns
  */
 export function refRangeFormula(oldFormulaData: IFormulaData, newFormulaData: IFormulaData, formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
-    const redoFormulaData: Record<string, Record<string, IObjectMatrixPrimitiveType<Nullable<ICellData>>>> = {};
-    const undoFormulaData: Record<string, Record<string, IObjectMatrixPrimitiveType<Nullable<ICellData>>>> = {};
+    const redoFormulaData: Record<string, Record<string, IObjectMatrixPrimitiveType<Nullable<ICellData>>>> = Object.create(null);
+    const undoFormulaData: Record<string, Record<string, IObjectMatrixPrimitiveType<Nullable<ICellData>>>> = Object.create(null);
 
     const { unitId: fromUnitId, sheetId: fromSheetId } = formulaReferenceMoveParam;
     const targetUnitId = formulaReferenceMoveParam.targetUnitId ?? fromUnitId;
@@ -260,10 +260,10 @@ export function refRangeFormula(oldFormulaData: IFormulaData, newFormulaData: IF
             const sheetUndoFormulaData = getUndoFormulaData(rangeList, oldFormulaMatrix);
 
             if (!redoFormulaData[unitId]) {
-                redoFormulaData[unitId] = {};
+                redoFormulaData[unitId] = Object.create(null);
             }
             if (!undoFormulaData[unitId]) {
-                undoFormulaData[unitId] = {};
+                undoFormulaData[unitId] = Object.create(null);
             }
 
             redoFormulaData[unitId][currentSheetId] = {

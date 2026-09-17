@@ -42,6 +42,31 @@ enum DrawingMapItemType {
     order = 'order',
 }
 
+function assertSafeDrawingKeys(...keys: string[]): void {
+    for (const key of keys) {
+        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+            throw new Error('Invalid drawing key');
+        }
+    }
+}
+
+function getOwn<T>(record: Record<string, T> | undefined, key: string): T | undefined {
+    return record != null && Object.prototype.hasOwnProperty.call(record, key) ? record[key] : undefined;
+}
+
+function validateDrawingData<T extends IDrawingParam>(data: IDrawingSubunitMap<T>): void {
+    for (const subUnitId of Object.keys(data)) {
+        assertSafeDrawingKeys(subUnitId);
+        const subUnit = data[subUnitId];
+        if (subUnit?.data) {
+            Object.keys(subUnit.data).forEach((key) => assertSafeDrawingKeys(key));
+        }
+        if (subUnit?.order) {
+            subUnit.order.forEach((key) => assertSafeDrawingKeys(key));
+        }
+    }
+}
+
 /**
  * unitId -> subUnitId -> drawingId -> drawingParam
  */
@@ -138,11 +163,11 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     }
 
     getDrawingDataForUnit(unitId: string) {
-        return this.drawingManagerData[unitId] || {};
+        return getOwn(this.drawingManagerData, unitId) || {};
     }
 
     removeDrawingDataForUnit(unitId: string) {
-        const subUnits = this.drawingManagerData[unitId];
+        const subUnits = getOwn(this.drawingManagerData, unitId);
 
         if (subUnits == null) {
             return;
@@ -167,12 +192,14 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     }
 
     registerDrawingData(unitId: string, data: IDrawingSubunitMap<T>) {
+        assertSafeDrawingKeys(unitId);
+        validateDrawingData(data);
         this.drawingManagerData[unitId] = data;
     }
 
     initializeNotification(unitId: string) {
         const drawings: T[] = [];
-        const data = this.drawingManagerData[unitId];
+        const data = getOwn(this.drawingManagerData, unitId);
 
         if (data == null) {
             return;
@@ -202,6 +229,9 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
     // Use in doc only.
     setDrawingData(unitId: string, subUnitId: string, data: IDrawingMapItemData<T>) {
+        assertSafeDrawingKeys(unitId, subUnitId);
+        Object.keys(data).forEach((key) => assertSafeDrawingKeys(key));
+        this._establishDrawingMap(unitId, subUnitId);
         this.drawingManagerData[unitId][subUnitId].data = data;
     }
 
@@ -513,33 +543,25 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     }
 
     applyJson1(unitId: string, subUnitId: string, jsonOp: JSONOp) {
-        this._establishDrawingMap(unitId, subUnitId);
-        // this._fillMissingFields(jsonOp);
-        this._oldDrawingManagerData = { ...this.drawingManagerData };
-        this.drawingManagerData = json1.type.apply(this.drawingManagerData as unknown as json1.Doc, jsonOp) as unknown as IDrawingMap<T>;
+        assertSafeDrawingKeys(unitId, subUnitId);
+        json1.type.checkValidOp(jsonOp);
+        const unitData = getOwn(this.drawingManagerData, unitId);
+        // Stage initialization locally so a rejected operation leaves both snapshots unchanged.
+        const data = {
+            ...this.drawingManagerData,
+            [unitId]: {
+                ...unitData,
+                [subUnitId]: getOwn(unitData, subUnitId) ?? { data: {}, order: [] },
+            },
+        };
+        const nextData = json1.type.apply(data as unknown as json1.Doc, jsonOp) as unknown as IDrawingMap<T>;
+        for (const id of Object.keys(nextData)) {
+            assertSafeDrawingKeys(id);
+            validateDrawingData(nextData[id]);
+        }
+        this._oldDrawingManagerData = this.drawingManagerData;
+        this.drawingManagerData = nextData;
     }
-
-    // private _fillMissingFields(jsonOp: JSONOp) {
-    //     if (jsonOp == null) {
-    //         return;
-    //     }
-
-    //     let object: { [key: string]: {} } = this.drawingManagerData;
-    //     for (let i = 0; i < jsonOp.length; i++) {
-    //         const op = jsonOp[i];
-    //         if (Array.isArray(op)) {
-    //             const opKey = op[0] as string;
-    //             if (!(opKey in object)) {
-    //                 object[opKey] = null as unknown as never;
-    //             }
-    //         } else if (typeof op === 'string') {
-    //             object = object[op];
-    //             if (object == null) {
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // }
 
     featurePluginUpdateNotification(updateParams: T[]) {
         this._featurePluginUpdate$.next(updateParams);
@@ -618,6 +640,9 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
     // Use in doc only.
     setDrawingOrder(unitId: string, subUnitId: string, order: string[]) {
+        assertSafeDrawingKeys(unitId, subUnitId);
+        order.forEach((key) => assertSafeDrawingKeys(key));
+        this._establishDrawingMap(unitId, subUnitId);
         this.drawingManagerData[unitId][subUnitId].order = order;
     }
 
@@ -752,7 +777,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             return;
         }
         const { unitId, subUnitId, drawingId } = searchParam;
-        return this.drawingManagerData[unitId]?.[subUnitId]?.data?.[drawingId] as T;
+        return getOwn(getOwn(getOwn(this.drawingManagerData, unitId), subUnitId)?.data, drawingId);
     }
 
     private _getOldBySearch(searchParam: Nullable<IDrawingSearch>): Nullable<T> {
@@ -760,15 +785,19 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             return;
         }
         const { unitId, subUnitId, drawingId } = searchParam;
-        return this._oldDrawingManagerData[unitId]?.[subUnitId]?.data?.[drawingId] as T;
+        return getOwn(getOwn(getOwn(this._oldDrawingManagerData, unitId), subUnitId)?.data, drawingId);
     }
 
     private _establishDrawingMap(unitId: string, subUnitId: string, drawingId?: string) {
-        if (!this.drawingManagerData[unitId]) {
+        assertSafeDrawingKeys(unitId, subUnitId);
+        if (drawingId != null) {
+            assertSafeDrawingKeys(drawingId);
+        }
+        if (!getOwn(this.drawingManagerData, unitId)) {
             this.drawingManagerData[unitId] = {};
         }
 
-        if (!this.drawingManagerData[unitId][subUnitId]) {
+        if (!getOwn(this.drawingManagerData[unitId], subUnitId)) {
             this.drawingManagerData[unitId][subUnitId] = {
                 data: {},
                 order: [],
@@ -778,7 +807,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         if (drawingId == null) {
             return null;
         }
-        return this.drawingManagerData[unitId][subUnitId].data?.[drawingId];
+        return getOwn(this.drawingManagerData[unitId][subUnitId].data, drawingId);
     }
 
     private _addByParam(insertParam: T): { op: JSONOp; invertOp: JSONOp } {
@@ -877,11 +906,11 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     }
 
     private _getDrawingData(unitId: string, subUnitId: string) {
-        return this.drawingManagerData[unitId]?.[subUnitId]?.data || {};
+        return getOwn(getOwn(this.drawingManagerData, unitId), subUnitId)?.data || {};
     }
 
     private _getDrawingOrder(unitId: string, subUnitId: string) {
-        return this.drawingManagerData[unitId]?.[subUnitId]?.order || [];
+        return getOwn(getOwn(this.drawingManagerData, unitId), subUnitId)?.order || [];
     }
 
     getDrawingVisible() {

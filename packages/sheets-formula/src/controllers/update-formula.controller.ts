@@ -267,7 +267,7 @@ export class UpdateFormulaController extends Disposable {
     }
 
     private _handleWorkbookAdded(unit: Workbook) {
-        const formulaData: IFormulaData = {};
+        const formulaData: IFormulaData = Object.create(null);
         const unitId = unit.getUnitId();
         const newFormulaData: IFormulaData = { [unitId]: {} };
 
@@ -296,11 +296,11 @@ export class UpdateFormulaController extends Disposable {
         // loop all sheets cell data, and get the dirty data
         const dirtyRanges: IUnitRange[] = calculationMode === CalculationMode.WHEN_EMPTY ? this._formulaDataModel.getFormulaDirtyRanges() : [];
 
-        const dirtyNameMap: IDirtyUnitSheetNameMap = {};
-        const dirtyDefinedNameMap: IDirtyUnitDefinedNameMap = {};
-        const dirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
-        const dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {};
-        const clearDependencyTreeCache: IDirtyUnitSheetNameMap = {};
+        const dirtyNameMap: IDirtyUnitSheetNameMap = Object.create(null);
+        const dirtyDefinedNameMap: IDirtyUnitDefinedNameMap = Object.create(null);
+        const dirtyUnitFeatureMap: IDirtyUnitFeatureMap = Object.create(null);
+        const dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = Object.create(null);
+        const clearDependencyTreeCache: IDirtyUnitSheetNameMap = Object.create(null);
 
         return {
             forceCalculation,
@@ -350,7 +350,6 @@ export class UpdateFormulaController extends Disposable {
         };
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _getFormulaReferenceMoveInfo(
         formulaData: IFormulaData,
         unitSheetNameMap: IUnitSheetNameMap,
@@ -362,7 +361,7 @@ export class UpdateFormulaController extends Disposable {
 
         if (formulaDataKeys.length === 0) return { newFormulaData: {} };
 
-        const newFormulaData: IFormulaData = {};
+        const newFormulaData: IFormulaData = Object.create(null);
 
         const { unitId: fromUnitId, sheetId: fromSheetId, sheetName: fromSheetName, targetUnitId, targetSheetId, type, from, to } = formulaReferenceMoveParam;
 
@@ -382,7 +381,7 @@ export class UpdateFormulaController extends Disposable {
             const sheetDataKeys = Object.keys(sheetData);
 
             if (!Tools.isDefine(newFormulaData[unitId])) {
-                newFormulaData[unitId] = {};
+                newFormulaData[unitId] = Object.create(null);
             }
 
             for (const sheetId of sheetDataKeys) {
@@ -390,7 +389,6 @@ export class UpdateFormulaController extends Disposable {
                 const newFormulaDataItem = new ObjectMatrix<IFormulaDataItem>();
                 const shouldModifySi: string[] = [];
 
-                // eslint-disable-next-line max-lines-per-function, complexity
                 matrixData.forValue((row, column, formulaDataItem) => {
                     if (!formulaDataItem) return true;
 
@@ -660,11 +658,11 @@ export class UpdateFormulaController extends Disposable {
 
         if (inCrossSheetCutRangeNewFormulas.length > 0 && targetUnitId && targetSheetId) {
             if (!newFormulaData[targetUnitId]) {
-                newFormulaData[targetUnitId] = {};
+                newFormulaData[targetUnitId] = Object.create(null);
             }
 
-            if (!newFormulaData[targetUnitId][targetSheetId]) {
-                newFormulaData[targetUnitId][targetSheetId] = {};
+            if (!newFormulaData[targetUnitId]![targetSheetId]) {
+                newFormulaData[targetUnitId]![targetSheetId] = Object.create(null);
             }
 
             for (const newFormula of inCrossSheetCutRangeNewFormulas) {
@@ -672,11 +670,11 @@ export class UpdateFormulaController extends Disposable {
                 const targetRow = fromRow + ((to?.startRow ?? 0) - (from?.startRow ?? 0));
                 const targetColumn = fromColumn + ((to?.startColumn ?? 0) - (from?.startColumn ?? 0));
 
-                if (!newFormulaData[targetUnitId][targetSheetId][targetRow]) {
-                    newFormulaData[targetUnitId][targetSheetId][targetRow] = {};
+                if (!newFormulaData[targetUnitId]![targetSheetId]![targetRow]) {
+                    newFormulaData[targetUnitId]![targetSheetId]![targetRow] = Object.create(null);
                 }
 
-                newFormulaData[targetUnitId][targetSheetId][targetRow][targetColumn] = {
+                newFormulaData[targetUnitId]![targetSheetId]![targetRow][targetColumn] = {
                     f: formulaString,
                 };
             }

@@ -463,13 +463,13 @@ export class ActiveDirtyController extends Disposable {
     }
 
     private _getRemoveSheetMutation(params: IRemoveSheetMutationParams) {
-        const dirtyNameMap: IDirtyUnitSheetNameMap = {};
+        const dirtyNameMap: IDirtyUnitSheetNameMap = Object.create(null);
         const { subUnitId: sheetId, unitId, subUnitName } = params;
 
         // const dirtyNameMap: IDirtyUnitSheetNameMap = {};
 
         if (dirtyNameMap[unitId] == null) {
-            dirtyNameMap[unitId] = {};
+            dirtyNameMap[unitId] = Object.create(null);
         }
 
         dirtyNameMap[unitId]![sheetId] = subUnitName;
@@ -478,11 +478,11 @@ export class ActiveDirtyController extends Disposable {
     }
 
     private _getInsertSheetMutation(params: IInsertSheetMutationParams) {
-        const dirtyNameMap: IDirtyUnitSheetNameMap = {};
+        const dirtyNameMap: IDirtyUnitSheetNameMap = Object.create(null);
         const { sheet, unitId } = params;
 
         if (dirtyNameMap[unitId] == null) {
-            dirtyNameMap[unitId] = {};
+            dirtyNameMap[unitId] = Object.create(null);
         }
 
         dirtyNameMap[unitId]![sheet.id] = sheet.name;

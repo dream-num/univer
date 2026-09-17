@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-import type { IDataValidationRule, IRange, IUniverInstanceService, LifecycleService, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type {
+    IDataValidationRule,
+    IRange,
+    Nullable,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
-import type { SheetDataValidationModel } from '../../models/sheet-data-validation-model';
-import type { DataValidationCacheService } from '../dv-cache.service';
-import { ObjectMatrix as CoreObjectMatrix, DataValidationStatus, LifecycleStages } from '@univerjs/core';
+import { DataValidationStatus, Injector, IUniverInstanceService, LifecycleService, LifecycleStages, ObjectMatrix } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
+import { SheetDataValidationModel } from '../../models/sheet-data-validation-model';
+import { DataValidationCacheService } from '../dv-cache.service';
 import { SheetsDataValidationValidatorService } from '../dv-validator.service';
 
 function createRule(uid: string, ranges: IRange[]): IDataValidationRule {
@@ -49,7 +56,7 @@ function createService() {
         getActiveSheet: () => worksheet,
         getSheetBySheetId: vi.fn((sheetId: string) => (sheetId === 'sheet-1' ? worksheet : null)),
     } as unknown as Workbook;
-    const cache = new CoreObjectMatrix<Nullable<DataValidationStatus>>();
+    const cache = new ObjectMatrix<Nullable<DataValidationStatus>>();
     const rule = createRule('rule-1', [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }]);
     const model = {
         getRuleByLocation: vi.fn(() => rule),
@@ -78,6 +85,13 @@ function createService() {
         stage: LifecycleStages.Rendered,
     } as unknown as LifecycleService;
 
+    const injector = new Injector([
+        [SheetsDataValidationValidatorService],
+        [IUniverInstanceService, { useValue: univerInstanceService }],
+        [SheetDataValidationModel, { useValue: model }],
+        [DataValidationCacheService, { useValue: cacheService }],
+        [LifecycleService, { useValue: lifecycleService }],
+    ]);
     return {
         dirtyRanges$,
         lifecycle$,
@@ -89,11 +103,25 @@ function createService() {
         univerInstanceService,
         lifecycleService,
         getLifecycleSubscribeCount: () => lifecycleSubscribeCount,
-        service: new SheetsDataValidationValidatorService(univerInstanceService, model, cacheService, lifecycleService),
+        service: injector.get(SheetsDataValidationValidatorService),
     };
 }
 
 describe('SheetsDataValidationValidatorService', () => {
+    it('does not pollute prototypes when buffering dirty ranges for an unknown unit', () => {
+        const { univer, injector } = createFacadeTestBed();
+        const marker = '__validation_pollution__';
+        try {
+            injector.get(SheetsDataValidationValidatorService);
+            injector.get(DataValidationCacheService).markRangeDirty('__proto__', marker, []);
+            injector.get(LifecycleService).stage = LifecycleStages.Rendered;
+            expect(Object.getOwnPropertyDescriptor(Object.prototype, marker)).toBeUndefined();
+        } finally {
+            Reflect.deleteProperty(Object.prototype, marker);
+            univer.dispose();
+        }
+    });
+
     beforeEach(() => {
         vi.useFakeTimers();
         vi.stubGlobal('requestIdleCallback', (callback: IdleRequestCallback) => {

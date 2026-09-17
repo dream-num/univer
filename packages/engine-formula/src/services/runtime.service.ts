@@ -212,21 +212,21 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     private _currentSubUnitId: string = '';
     private _currentUnitId: string = '';
 
-    private _runtimeData: IRuntimeUnitDataType = {};
+    private _runtimeData: IRuntimeUnitDataType = Object.create(null);
 
-    private _runtimeOtherData: IRuntimeOtherUnitDataType = {}; // Data returned by other businesses through formula calculation, excluding the sheet.
+    private _runtimeOtherData: IRuntimeOtherUnitDataType = Object.create(null); // Data returned by other businesses through formula calculation, excluding the sheet.
 
-    private _unitArrayFormulaRange: IArrayFormulaRangeType = {};
+    private _unitArrayFormulaRange: IArrayFormulaRangeType = Object.create(null);
 
-    private _unitArrayFormulaEmbeddedMap: IArrayFormulaEmbeddedMap = {};
+    private _unitArrayFormulaEmbeddedMap: IArrayFormulaEmbeddedMap = Object.create(null);
 
-    private _runtimeArrayFormulaCellData: IRuntimeUnitDataType = {};
+    private _runtimeArrayFormulaCellData: IRuntimeUnitDataType = Object.create(null);
 
-    private _runtimeClearArrayFormulaCellData: IRuntimeUnitDataType = {};
+    private _runtimeClearArrayFormulaCellData: IRuntimeUnitDataType = Object.create(null);
 
-    private _runtimeFeatureRange: { [featureId: string]: IFeatureDirtyRangeType } = {};
+    private _runtimeFeatureRange: { [featureId: string]: IFeatureDirtyRangeType } = Object.create(null);
 
-    private _runtimeFeatureCellData: { [featureId: string]: IRuntimeUnitDataType } = {};
+    private _runtimeFeatureCellData: { [featureId: string]: IRuntimeUnitDataType } = Object.create(null);
 
     private _runtimeImageFormulaData: IRuntimeImageFormulaDataType[] = [];
 
@@ -284,8 +284,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         super.dispose();
 
         this.reset();
-        this._runtimeFeatureCellData = {};
-        this._runtimeFeatureRange = {};
+        this._runtimeFeatureCellData = Object.create(null);
+        this._runtimeFeatureRange = Object.create(null);
         this.clearReferenceAndNumberformatCache();
     }
 
@@ -377,12 +377,12 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     reset() {
         this._formulaExecuteStage = FormulaExecuteStageType.IDLE;
-        this._runtimeData = {};
-        this._runtimeOtherData = {};
-        this._unitArrayFormulaRange = {};
-        this._unitArrayFormulaEmbeddedMap = {};
-        this._runtimeArrayFormulaCellData = {};
-        this._runtimeClearArrayFormulaCellData = {};
+        this._runtimeData = Object.create(null);
+        this._runtimeOtherData = Object.create(null);
+        this._unitArrayFormulaRange = Object.create(null);
+        this._unitArrayFormulaEmbeddedMap = Object.create(null);
+        this._runtimeArrayFormulaCellData = Object.create(null);
+        this._runtimeClearArrayFormulaCellData = Object.create(null);
         this._runtimeImageFormulaData = [];
 
         // this._runtimeFeatureCellData = {};
@@ -431,16 +431,16 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         const unitId = this._currentUnitId;
 
         if (this._runtimeOtherData[unitId] === undefined) {
-            this._runtimeOtherData[unitId] = {};
+            this._runtimeOtherData[unitId] = Object.create(null);
         }
 
         const unitData = this._runtimeOtherData[unitId]!;
 
         if (unitData[subUnitId] === undefined || unitData[subUnitId] === null) {
-            unitData[subUnitId] = {};
+            unitData[subUnitId] = Object.create(null);
         }
 
-        const subComponentData = unitData[subUnitId];
+        const subComponentData = unitData[subUnitId]!;
 
         let cellDatas: Nullable<ICellData>[][] = [];
 
@@ -466,18 +466,17 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         }
 
         if (subComponentData[formulaId] === undefined || subComponentData[formulaId] === null) {
-            subComponentData[formulaId] = {};
+            subComponentData[formulaId] = Object.create(null);
         }
 
         if (subComponentData[formulaId][y] === undefined || subComponentData[formulaId][y] === null) {
-            subComponentData[formulaId][y] = {};
+            subComponentData[formulaId][y] = Object.create(null);
         }
 
         // x represents the column offset, y represents the row offset
         subComponentData[formulaId][y][x] = cellDatas;
     }
 
-    // eslint-disable-next-line max-lines-per-function
     setRuntimeData(functionVariant: FunctionVariantType) {
         const row = this._currentRow;
         const column = this._currentColumn;
@@ -488,7 +487,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
         // Get current sheet data
         if (this._runtimeData[unitId] == null) {
-            this._runtimeData[unitId] = {};
+            this._runtimeData[unitId] = Object.create(null);
         }
 
         const unitData = this._runtimeData[unitId]!;
@@ -501,20 +500,20 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
         // Get current sheet array formula range
         if (this._unitArrayFormulaRange[unitId] == null) {
-            this._unitArrayFormulaRange[unitId] = {};
+            this._unitArrayFormulaRange[unitId] = Object.create(null);
         }
 
         const arrayFormulaRange = this._unitArrayFormulaRange[unitId]!;
 
         if (arrayFormulaRange[sheetId] === null || arrayFormulaRange[sheetId] === undefined) {
-            arrayFormulaRange[sheetId] = {};
+            arrayFormulaRange[sheetId] = Object.create(null);
         }
 
         const arrayData = new ObjectMatrix<IRange>(arrayFormulaRange[sheetId]);
 
         // Get current sheet array formula cell data
         if (this._runtimeArrayFormulaCellData[unitId] === undefined) {
-            this._runtimeArrayFormulaCellData[unitId] = {};
+            this._runtimeArrayFormulaCellData[unitId] = Object.create(null);
         }
 
         const runtimeArrayFormulaCellData = this._runtimeArrayFormulaCellData[unitId]!;
@@ -527,7 +526,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
         // Get current sheet clear array formula cell data
         if (this._runtimeClearArrayFormulaCellData[unitId] === undefined) {
-            this._runtimeClearArrayFormulaCellData[unitId] = {};
+            this._runtimeClearArrayFormulaCellData[unitId] = Object.create(null);
         }
 
         const clearArrayFormulaCellData = this._runtimeClearArrayFormulaCellData[unitId]!;
@@ -725,18 +724,18 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
         const arrayFormulaEmbeddedMap = this._unitArrayFormulaEmbeddedMap;
         if (arrayFormulaEmbeddedMap[unitId] == null) {
-            arrayFormulaEmbeddedMap[unitId] = {};
+            arrayFormulaEmbeddedMap[unitId] = Object.create(null);
         }
 
-        if (arrayFormulaEmbeddedMap[unitId][sheetId] == null) {
-            arrayFormulaEmbeddedMap[unitId][sheetId] = {};
+        if (arrayFormulaEmbeddedMap[unitId]![sheetId] == null) {
+            arrayFormulaEmbeddedMap[unitId]![sheetId] = Object.create(null);
         }
 
-        if (arrayFormulaEmbeddedMap[unitId][sheetId][rowIndex] == null) {
-            arrayFormulaEmbeddedMap[unitId][sheetId][rowIndex] = {};
+        if (arrayFormulaEmbeddedMap[unitId]![sheetId][rowIndex] == null) {
+            arrayFormulaEmbeddedMap[unitId]![sheetId][rowIndex] = Object.create(null);
         }
 
-        arrayFormulaEmbeddedMap[unitId][sheetId][rowIndex][columnIndex] = true;
+        arrayFormulaEmbeddedMap[unitId]![sheetId][rowIndex][columnIndex] = true;
     }
 
     getRuntimeOtherData() {
@@ -817,7 +816,6 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         FORMULA_REF_TO_ARRAY_CACHE.clear();
     }
 
-    // eslint-disable-next-line complexity
     private _checkIfArrayFormulaRangeHasData(
         formulaUnitId: string,
         formulaSheetId: string,

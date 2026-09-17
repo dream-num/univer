@@ -15,6 +15,7 @@
  */
 
 import type { ICellData, Injector, IWorkbookData, Nullable, Univer } from '@univerjs/core';
+import type { IFormulaData } from '../../basics/common';
 import { LocaleType, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { FormulaDataModel, initSheetFormulaData } from '../formula-data.model';
@@ -103,6 +104,25 @@ describe('Test formula data model', () => {
 
         afterEach(() => {
             univer.dispose();
+        });
+
+        it.each(['__proto__', 'constructor', 'prototype', 'toString'])('keeps loaded formula dictionaries safe when merging (%s)', (key) => {
+            const marker = '__formula_pollution__';
+            const range = { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 };
+            try {
+                formulaDataModel.setArrayFormulaRange(JSON.parse('{"normal":{}}'));
+                formulaDataModel.mergeArrayFormulaRange({ [key]: { [marker]: { 0: { 0: range } } } });
+                formulaDataModel.mergeArrayFormulaRange({ normal: { [key]: { 0: { 0: range } } } });
+                expect(formulaDataModel.getArrayFormulaRange()[key]?.[marker]?.[0]?.[0]).toEqual(range);
+                expect(formulaDataModel.getArrayFormulaRange().normal?.[key]?.[0]?.[0]).toEqual(range);
+                const data: IFormulaData = {};
+                initSheetFormulaData(data, key, marker, new ObjectMatrix({ 0: { 0: { f: '=1' } } }));
+                expect(data[key]?.[marker]?.[0]?.[0]?.f).toBe('=1');
+                expect(Object.getOwnPropertyDescriptor(Object.prototype, marker)).toBeUndefined();
+            } finally {
+                Reflect.deleteProperty(Object.prototype, marker);
+                Reflect.deleteProperty(Object, marker);
+            }
         });
 
         describe('updateFormulaData', () => {
@@ -261,7 +281,7 @@ describe('Test formula data model', () => {
                 formulaDataModel.updateArrayFormulaRange(unitId, sheetId, cellValue);
 
                 const formulaData = formulaDataModel.getArrayFormulaRange();
-                expect(formulaData).toStrictEqual(result);
+                expect(JSON.parse(JSON.stringify(formulaData))).toStrictEqual(result);
             });
         });
         describe('updateArrayFormulaCellData', () => {
@@ -321,7 +341,7 @@ describe('Test formula data model', () => {
                 formulaDataModel.updateArrayFormulaCellData(unitId, sheetId, cellValue);
 
                 const formulaData = formulaDataModel.getArrayFormulaCellData();
-                expect(formulaData).toStrictEqual(result);
+                expect(JSON.parse(JSON.stringify(formulaData))).toStrictEqual(result);
             });
 
             it('should clear only edited array formula cell data when editing a spill cell', () => {
@@ -368,7 +388,7 @@ describe('Test formula data model', () => {
                     },
                 });
 
-                expect(formulaDataModel.getArrayFormulaCellData()).toStrictEqual({
+                expect(JSON.parse(JSON.stringify(formulaDataModel.getArrayFormulaCellData()))).toStrictEqual({
                     [unitId]: {
                         [sheetId]: {
                             0: {
@@ -643,7 +663,7 @@ describe('Test formula data model', () => {
             };
 
             initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
-            expect(formulaData).toStrictEqual(result);
+            expect(JSON.parse(JSON.stringify(formulaData))).toStrictEqual(result);
         });
     });
 });

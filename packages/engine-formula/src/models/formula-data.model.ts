@@ -31,6 +31,7 @@ import type {
 } from '../basics/common';
 import type { IImageFormulaInfo } from '../engine/value-object/primitive-object';
 import { BooleanNumber, Disposable, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
+import { copyUnitData } from '../basics/runtime';
 import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
 import { clearArrayFormulaCellDataByCell, updateFormulaDataByCellValue } from './utils/formula-data-util';
 
@@ -40,11 +41,11 @@ export interface IRangeChange {
 }
 
 export class FormulaDataModel extends Disposable {
-    private _arrayFormulaRange: IArrayFormulaRangeType = {};
+    private _arrayFormulaRange: IArrayFormulaRangeType = Object.create(null);
 
-    private _arrayFormulaCellData: IArrayFormulaUnitCellType = {};
+    private _arrayFormulaCellData: IArrayFormulaUnitCellType = Object.create(null);
 
-    private _unitImageFormulaData: IUnitImageFormulaDataType = {};
+    private _unitImageFormulaData: IUnitImageFormulaDataType = Object.create(null);
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -55,9 +56,9 @@ export class FormulaDataModel extends Disposable {
 
     override dispose() {
         super.dispose();
-        this._arrayFormulaRange = {};
-        this._arrayFormulaCellData = {};
-        this._unitImageFormulaData = {};
+        this._arrayFormulaRange = Object.create(null);
+        this._arrayFormulaCellData = Object.create(null);
+        this._unitImageFormulaData = Object.create(null);
     }
 
     clearPreviousArrayFormulaCellData(clearArrayFormulaCellData: IRuntimeUnitDataType) {
@@ -117,11 +118,11 @@ export class FormulaDataModel extends Disposable {
             }
 
             if (this._arrayFormulaRange[unitId] == null) {
-                this._arrayFormulaRange[unitId] = {};
+                this._arrayFormulaRange[unitId] = Object.create(null);
             }
 
             if (this._arrayFormulaCellData[unitId] == null) {
-                this._arrayFormulaCellData[unitId] = {};
+                this._arrayFormulaCellData[unitId] = Object.create(null);
             }
 
             Object.keys(sheetData).forEach((sheetId) => {
@@ -162,7 +163,7 @@ export class FormulaDataModel extends Disposable {
     }
 
     getFormulaData(): IFormulaData {
-        const formulaData: IFormulaData = {};
+        const formulaData: IFormulaData = Object.create(null);
         const allSheets = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (allSheets.length === 0) {
             return formulaData;
@@ -170,7 +171,7 @@ export class FormulaDataModel extends Disposable {
 
         allSheets.forEach((workbook) => {
             const unitId = workbook.getUnitId();
-            formulaData[unitId] = {};
+            formulaData[unitId] = Object.create(null);
 
             const worksheets = workbook.getSheets();
             worksheets.forEach((worksheet) => {
@@ -185,13 +186,13 @@ export class FormulaDataModel extends Disposable {
     }
 
     getSheetFormulaData(unitId: string, sheetId: string) {
-        const formulaData: IFormulaData = {};
+        const formulaData: IFormulaData = Object.create(null);
         const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
         if (workbook == null) {
             return {};
         }
 
-        formulaData[unitId] = {};
+        formulaData[unitId] = Object.create(null);
 
         const worksheet = workbook.getSheetBySheetId(sheetId);
         if (worksheet == null) {
@@ -202,7 +203,7 @@ export class FormulaDataModel extends Disposable {
 
         initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
 
-        return formulaData[unitId][sheetId];
+        return formulaData[unitId]![sheetId];
     }
 
     getArrayFormulaRange(): IArrayFormulaRangeType {
@@ -210,7 +211,7 @@ export class FormulaDataModel extends Disposable {
     }
 
     setArrayFormulaRange(value: IArrayFormulaRangeType) {
-        this._arrayFormulaRange = value;
+        this._arrayFormulaRange = copyUnitData(value);
     }
 
     getArrayFormulaCellData() {
@@ -218,7 +219,7 @@ export class FormulaDataModel extends Disposable {
     }
 
     setArrayFormulaCellData(value: IArrayFormulaUnitCellType) {
-        this._arrayFormulaCellData = value;
+        this._arrayFormulaCellData = copyUnitData(value);
     }
 
     getUnitImageFormulaData() {
@@ -226,7 +227,7 @@ export class FormulaDataModel extends Disposable {
     }
 
     setUnitImageFormulaData(value: IUnitImageFormulaDataType) {
-        this._unitImageFormulaData = value;
+        this._unitImageFormulaData = copyUnitData(value);
     }
 
     mergeArrayFormulaRange(formulaData: IArrayFormulaRangeType) {
@@ -238,7 +239,7 @@ export class FormulaDataModel extends Disposable {
             }
 
             if (!this._arrayFormulaRange[unitId]) {
-                this._arrayFormulaRange[unitId] = {};
+                this._arrayFormulaRange[unitId] = Object.create(null);
             }
 
             Object.keys(sheetData).forEach((sheetId) => {
@@ -266,7 +267,7 @@ export class FormulaDataModel extends Disposable {
             if (!sheetData) continue;
 
             if (!this._unitImageFormulaData[unitId]) {
-                this._unitImageFormulaData[unitId] = {};
+                this._unitImageFormulaData[unitId] = Object.create(null);
             }
 
             const sheetIds = Object.keys(sheetData);
@@ -277,8 +278,8 @@ export class FormulaDataModel extends Disposable {
                 const imageFormulaMatrix = sheetData[sheetId];
                 if (!imageFormulaMatrix) continue;
 
-                if (!this._unitImageFormulaData[unitId][sheetId]) {
-                    this._unitImageFormulaData[unitId][sheetId] = new ObjectMatrix<Nullable<IImageFormulaInfo>>();
+                if (!this._unitImageFormulaData[unitId]![sheetId]) {
+                    this._unitImageFormulaData[unitId]![sheetId] = new ObjectMatrix<Nullable<IImageFormulaInfo>>();
                 }
 
                 imageFormulaMatrix.forValue((r, c, v) => {
@@ -306,20 +307,20 @@ export class FormulaDataModel extends Disposable {
     getCalculateData() {
         const unitAllSheet = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
 
-        const allUnitData: IUnitData = {};
+        const allUnitData: IUnitData = Object.create(null);
 
-        const unitStylesData: IUnitStylesData = {};
+        const unitStylesData: IUnitStylesData = Object.create(null);
 
-        const unitSheetNameMap: IUnitSheetNameMap = {};
+        const unitSheetNameMap: IUnitSheetNameMap = Object.create(null);
 
         for (const workbook of unitAllSheet) {
             const unitId = workbook.getUnitId();
 
             const sheets = workbook.getSheets();
 
-            const sheetData: ISheetData = {};
+            const sheetData: ISheetData = Object.create(null);
 
-            const sheetNameMap: { [sheetName: string]: string } = {};
+            const sheetNameMap: { [sheetName: string]: string } = Object.create(null);
 
             for (const sheet of sheets) {
                 const sheetId = sheet.getSheetId();
@@ -358,20 +359,20 @@ export class FormulaDataModel extends Disposable {
      */
     getHiddenRowsFiltered() {
         const unitAllSheet = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        const rowData: IUnitRowData = {};
+        const rowData: IUnitRowData = Object.create(null);
 
         for (const workbook of unitAllSheet) {
             const unitId = workbook.getUnitId();
             const sheets = workbook.getSheets();
-            rowData[unitId] = {};
+            rowData[unitId] = Object.create(null);
 
             for (const sheet of sheets) {
                 const sheetId = sheet.getSheetId();
-                rowData[unitId][sheetId] = {};
+                rowData[unitId]![sheetId] = Object.create(null);
 
                 const startRow = 0;
                 const endRow = sheet.getRowCount() - 1;
-                const sheetRowData: IObjectArrayPrimitiveType<Partial<IRowData>> = {};
+                const sheetRowData: IObjectArrayPrimitiveType<Partial<IRowData>> = Object.create(null);
 
                 for (let i = startRow; i <= endRow; i++) {
                     if (!sheet.getRowVisible(i)) {
@@ -381,7 +382,7 @@ export class FormulaDataModel extends Disposable {
                     }
                 }
 
-                rowData[unitId][sheetId] = sheetRowData;
+                rowData[unitId]![sheetId] = sheetRowData;
             }
         }
 
@@ -398,13 +399,13 @@ export class FormulaDataModel extends Disposable {
         const formulaData = this.getFormulaData();
 
         if (formulaData[unitId] == null) {
-            formulaData[unitId] = {};
+            formulaData[unitId] = Object.create(null);
         }
 
         const workbookFormulaData = formulaData[unitId]!;
 
         if (workbookFormulaData[sheetId] == null) {
-            workbookFormulaData[sheetId] = {};
+            workbookFormulaData[sheetId] = Object.create(null);
         }
 
         const sheetFormulaDataMatrix = new ObjectMatrix<Nullable<IFormulaDataItem>>(workbookFormulaData[sheetId] || {});
@@ -608,7 +609,7 @@ export class FormulaDataModel extends Disposable {
                 if (!sheetInstance) continue;
 
                 // Object to store continuous cell ranges by column
-                const columnRanges: { [column: number]: { startRow: number; endRow: number }[] } = {};
+                const columnRanges: { [column: number]: { startRow: number; endRow: number }[] } = Object.create(null);
 
                 for (const rowStr of Object.keys(sheet)) {
                     const row = Number(rowStr);
@@ -663,7 +664,7 @@ export class FormulaDataModel extends Disposable {
     }
 
     private _getSheetFormulaIdMap(unitId: string, sheetId: string) {
-        const formulaIdMap: Nullable<{ [formulaId: string]: IFormulaIdMap }> = {}; // Connect the formula and ID
+        const formulaIdMap: { [formulaId: string]: IFormulaIdMap } = Object.create(null); // Connect the formula and ID
 
         const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
         if (workbook == null) {
@@ -698,16 +699,17 @@ export function initSheetFormulaData(
     sheetId: string,
     cellMatrix: ObjectMatrix<Nullable<ICellData>>
 ): IFormulaData {
-    if (!formulaData[unitId]) {
-        formulaData[unitId] = {};
-    }
-
-    if (!formulaData[unitId][sheetId]) {
-        formulaData[unitId][sheetId] = {};
+    const unitData = Object.assign(
+        Object.create(null),
+        Object.prototype.hasOwnProperty.call(formulaData, unitId) ? formulaData[unitId] : undefined
+    );
+    Object.defineProperty(formulaData, unitId, { value: unitData, writable: true, configurable: true, enumerable: true });
+    if (!unitData[sheetId]) {
+        unitData[sheetId] = Object.create(null);
     }
 
     const formulaIdMap = new Map<string, { f: string; r: number; c: number }>(); // Connect the formula and ID
-    const sheetFormulaDataMatrix = new ObjectMatrix<Nullable<IFormulaDataItem>>(formulaData[unitId][sheetId]);
+    const sheetFormulaDataMatrix = new ObjectMatrix<Nullable<IFormulaDataItem>>(unitData[sheetId]);
 
     cellMatrix.forValue((r, c, cell) => {
         const formulaString = cell?.f || '';

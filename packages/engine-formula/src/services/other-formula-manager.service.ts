@@ -54,11 +54,11 @@ export interface IOtherFormulaManagerService {
  * thereby completing the calculation of the entire dependency tree.
  */
 export class OtherFormulaManagerService extends Disposable implements IOtherFormulaManagerService {
-    private _otherFormulaData: IOtherFormulaData = {};
+    private _otherFormulaData: IOtherFormulaData = Object.create(null);
 
     override dispose(): void {
         super.dispose();
-        this._otherFormulaData = {};
+        this._otherFormulaData = Object.create(null);
     }
 
     remove(searchParam: IOtherFormulaManagerSearchParam) {
@@ -79,11 +79,11 @@ export class OtherFormulaManagerService extends Disposable implements IOtherForm
     register(insertParam: IOtherFormulaManagerInsertParam) {
         const { unitId, subUnitId, formulaId, item } = insertParam;
         if (!this._otherFormulaData[unitId]) {
-            this._otherFormulaData[unitId] = {};
+            this._otherFormulaData[unitId] = Object.create(null);
         }
 
         if (!this._otherFormulaData[unitId]![subUnitId]) {
-            this._otherFormulaData[unitId]![subUnitId] = {};
+            this._otherFormulaData[unitId]![subUnitId] = Object.create(null);
         }
 
         this._otherFormulaData[unitId]![subUnitId]![formulaId] = item;

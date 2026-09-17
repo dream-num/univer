@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
+import { ContextService, DesktopLogService, IContextService, ILogService, Injector, IUniverInstanceService, UniverInstanceService } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { DefinedNamesService } from '../defined-names.service';
+import { DefinedNamesService, IDefinedNamesService } from '../defined-names.service';
+
+const worksheet = { id: 'sheet-a' };
+
+class TestUniverInstanceService {
+    getUnit() {
+        return {
+            getSheetBySheetName: (sheetName: string) => (sheetName === 'Sheet1' ? worksheet : null),
+        };
+    }
+}
 
 function createDefinedNamesService() {
-    const worksheet = { id: 'sheet-a' };
-    const workbook = {
-        getSheetBySheetName: (sheetName: string) => (sheetName === 'Sheet1' ? worksheet : null),
-    };
-    const univerInstanceService = {
-        getUnit: () => workbook,
-    };
-
-    const service = new DefinedNamesService(univerInstanceService as never);
+    const injector = new Injector();
+    injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+    injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+    const service = injector.get(IDefinedNamesService);
     return {
         service,
         worksheet,
@@ -34,6 +40,29 @@ function createDefinedNamesService() {
 }
 
 describe('DefinedNamesService', () => {
+    it.each(['__proto__', 'constructor', 'prototype', 'toString'])('keeps special identifiers (%s) out of the prototype chain after loading data', (key) => {
+        const injector = new Injector([
+            [DefinedNamesService],
+            [IUniverInstanceService, { useClass: UniverInstanceService }],
+            [IContextService, { useClass: ContextService }],
+            [ILogService, { useClass: DesktopLogService }],
+        ]);
+        const service = injector.get(DefinedNamesService);
+        const marker = '__formula_pollution__';
+        try {
+            service.registerDefinedName(key, { id: marker, name: 'Total', formulaOrRefString: '=1' });
+            service.registerDefinedNames('unit', JSON.parse('{}'));
+            service.registerDefinedName('unit', { id: key, name: key, formulaOrRefString: '=2' });
+            expect(service.getValueById(key, marker)?.formulaOrRefString).toBe('=1');
+            expect(service.getValueByName('unit', key)?.formulaOrRefString).toBe('=2');
+            expect(Object.getOwnPropertyDescriptor(Object.prototype, marker)).toBeUndefined();
+        } finally {
+            Reflect.deleteProperty(Object.prototype, marker);
+            Reflect.deleteProperty(Object, marker);
+            injector.dispose();
+        }
+    });
+
     it('should register/query/remove defined names and update cache', () => {
         const { service } = createDefinedNamesService();
 

@@ -264,17 +264,17 @@ export const menuSchema: MenuSchemaType = {
         },
         [SetParagraphNamedStyleCommand.id]: {
             order: 5.5,
-            gridLayout: { row: 1, column: 1, columnSpan: 2, width: 100 },
+            gridLayout: { row: 1, column: 1, columnSpan: 4, width: 120 },
             menuItemFactory: HeadingSelectorMenuItemFactory,
         },
         [SetInlineFormatFontSizeCommand.id]: {
             order: 6,
-            gridLayout: { row: 1, column: 7, width: 64 },
+            gridLayout: { row: 1, column: 9, width: 64 },
             menuItemFactory: FontSizeSelectorMenuItemFactory,
         },
         [SetInlineFormatFontFamilyCommand.id]: {
             order: 7,
-            gridLayout: { row: 1, column: 3, columnSpan: 4, width: 160 },
+            gridLayout: { row: 1, column: 5, columnSpan: 4, width: 160 },
             menuItemFactory: FontFamilySelectorMenuItemFactory,
         },
         [SetInlineFormatTextColorCommand.id]: {

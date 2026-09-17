@@ -18,6 +18,17 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        calculatedColumn: 'Cột tính toán',
+        columnFormula: 'Công thức',
+        columnFormulaHint: 'Thay ngay {0} ô dữ liệu, không gồm tiêu đề và tổng. Dừng điền tự động giữ nguyên các ô hiện có. Có thể hoàn tác.',
+        applyColumnFormula: 'Áp dụng cho toàn cột',
+        stopColumnFormula: 'Dừng điền tự động',
+        columnFormulaApplied: 'Đã áp dụng thiết lập',
+        settings: 'Cài đặt bảng',
+        showFilterButtons: 'Hiển thị nút lọc',
+        columnFilterButtons: 'Nút lọc theo cột',
+        filterButtonsHint: 'Ẩn nút vẫn giữ các điều kiện lọc hiện có.',
+        settingsError: 'Không thể lưu. Bảng có thể đã thay đổi. Hãy mở lại cài đặt và thử lại.',
         title: 'Bảng',
         selectRange: 'Chọn phạm vi bảng',
         rename: 'Đổi tên bảng',

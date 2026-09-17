@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DateSystem, getNumfmtParseValueFilter, isRealNum, numfmt, Tools } from '@univerjs/core';
+import { DateSystem, excelDateSerial, getNumfmtParseValueFilter, isRealNum, numfmt, Tools } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { reverseCompareOperator } from '../../basics/calculate';
 import { BooleanValue, ConcatenateType } from '../../basics/common';
@@ -28,6 +28,45 @@ export type PrimitiveValueType = string | boolean | number | null;
 
 export type FormulaFunctionValueType = PrimitiveValueType | PrimitiveValueType[][] | BaseValueObject;
 export type FormulaFunctionResultValueType = PrimitiveValueType | PrimitiveValueType[][];
+
+function parseCompactEnglishMonthYear(rawValue: string, dateSystem: DateSystem): number | null {
+    const match = rawValue.trim().match(/^([A-Za-z]{3,9})(\d{4})$/);
+    if (!match) {
+        return null;
+    }
+    const months: Record<string, number> = {
+        jan: 0,
+        january: 0,
+        feb: 1,
+        february: 1,
+        mar: 2,
+        march: 2,
+        apr: 3,
+        april: 3,
+        may: 4,
+        jun: 5,
+        june: 5,
+        jul: 6,
+        july: 6,
+        aug: 7,
+        august: 7,
+        sep: 8,
+        sept: 8,
+        september: 8,
+        oct: 9,
+        october: 9,
+        nov: 10,
+        november: 10,
+        dec: 11,
+        december: 11,
+    };
+    const month = months[match[1].toLowerCase()];
+    const year = Number(match[2]);
+    if (month === undefined || year < 1900 || year > 9999) {
+        return null;
+    }
+    return excelDateSerial(new Date(Date.UTC(year, month, 1)), dateSystem);
+}
 
 export class NullValueObject extends BaseValueObject {
     private static _instance: NullValueObject;
@@ -1585,6 +1624,11 @@ export class StringValueObject extends BaseValueObject {
 
         if (parseData && parseData.z) {
             return createNumberValueObjectByRawValue(parseData.v, parseData.z).withDateSystem(this.getDateSystem());
+        }
+
+        const compactMonthYear = parseCompactEnglishMonthYear(rawValue, this.getDateSystem());
+        if (compactMonthYear !== null) {
+            return createNumberValueObjectByRawValue(compactMonthYear).withDateSystem(this.getDateSystem());
         }
 
         return createNumberValueObjectByRawValue(rawValue).withDateSystem(this.getDateSystem());

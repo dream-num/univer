@@ -72,6 +72,8 @@ import {
     SHEET_TABLE_MENU,
     SHEET_TABLE_RENAME_DIALOG,
     SHEET_TABLE_RENAME_DIALOG_ID,
+    SHEET_TABLE_SETTINGS_DIALOG,
+    SHEET_TABLE_SETTINGS_DIALOG_ID,
     SHEET_TABLE_THEME_PANEL,
     SHEET_TABLE_THEME_PANEL_ID,
 } from '../const';
@@ -107,6 +109,7 @@ export class SheetTableControlsRenderController extends Disposable implements IR
     protected readonly _shape: SheetTableControlsShape;
     private readonly _topGapBaseBySkeleton = new WeakMap<SpreadsheetSkeleton, TopGapSnapshot>();
     protected _menuPopup: IDisposable | null = null;
+    private _settingsDialog: IDisposable | null = null;
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -140,6 +143,8 @@ export class SheetTableControlsRenderController extends Disposable implements IR
         this._context.scene.addObjects([this._shape], TABLE_CONTROLS_LAYER_INDEX);
         this.disposeWithMe(toDisposable(() => {
             this._closeFloatingControls();
+            this._settingsDialog?.dispose();
+            this._settingsDialog = null;
             this._context.scene.removeObjects([this._shape]);
         }));
 
@@ -346,6 +351,7 @@ export class SheetTableControlsRenderController extends Disposable implements IR
                 rename: this._localeService.t<LocaleKey>('sheets-table-ui.rename'),
                 'update-range': this._localeService.t<LocaleKey>('sheets-table-ui.updateRange'),
                 'set-theme': this._localeService.t<LocaleKey>('sheets-table-ui.setTheme'),
+                settings: this._localeService.t<LocaleKey>('sheets-table-ui.settings'),
                 delete: this._localeService.t<LocaleKey>('sheets-table-ui.removeTable'),
             },
             onSelect: (action: SheetTableMenuAction) => this._handleTableMenuAction(action, unitId, subUnitId, tableId),
@@ -381,6 +387,9 @@ export class SheetTableControlsRenderController extends Disposable implements IR
         this._closeFloatingControls();
 
         switch (action) {
+            case 'settings':
+                this._openSettingsDialog(unitId, tableId);
+                break;
             case 'rename':
                 this._openRenameDialog(unitId, tableId);
                 break;
@@ -397,6 +406,29 @@ export class SheetTableControlsRenderController extends Disposable implements IR
                 });
                 break;
         }
+    }
+
+    private _openSettingsDialog(unitId: string, tableId: string): void {
+        this._settingsDialog?.dispose();
+        this._dialogService.open({
+            id: SHEET_TABLE_SETTINGS_DIALOG_ID,
+            title: { title: this._localeService.t<LocaleKey>('sheets-table-ui.settings') },
+            draggable: true,
+            mask: true,
+            children: {
+                label: {
+                    name: SHEET_TABLE_SETTINGS_DIALOG,
+                    props: {
+                        unitId,
+                        tableId,
+                        onClose: () => this._dialogService.close(SHEET_TABLE_SETTINGS_DIALOG_ID),
+                    },
+                },
+            },
+            width: 400,
+            onClose: () => this._dialogService.close(SHEET_TABLE_SETTINGS_DIALOG_ID),
+        });
+        this._settingsDialog = toDisposable(() => this._dialogService.close(SHEET_TABLE_SETTINGS_DIALOG_ID));
     }
 
     private _openRenameDialog(unitId: string, tableId: string): void {

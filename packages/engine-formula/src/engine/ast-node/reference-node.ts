@@ -57,6 +57,7 @@ type ReferenceNodeCurrentConfigService = Pick<
 
 type ReferenceNodeRuntimeService = Pick<
     IFormulaRuntimeService,
+    | 'markExternalReferenceUnavailable'
     | 'currentColumn'
     | 'currentRow'
     | 'currentSubUnitId'
@@ -111,6 +112,7 @@ export class ReferenceNode extends BaseAstNode {
                 hostUnitId: runtimeService.currentUnitId,
                 qualifier: unitQualifier,
                 referenceKind: 'table',
+                onUnavailable: () => runtimeService.markExternalReferenceUnavailable(),
             });
             if (typeof resolution === 'string') {
                 this.setValue(ErrorValueObject.create(resolution));
@@ -138,6 +140,7 @@ export class ReferenceNode extends BaseAstNode {
                     hostUnitId: runtimeService.currentUnitId,
                     qualifier: unitQualifier,
                     referenceKind: 'a1',
+                    onUnavailable: () => runtimeService.markExternalReferenceUnavailable(),
                 });
                 if (typeof resolution === 'string') {
                     this.setValue(ErrorValueObject.create(resolution));
@@ -171,6 +174,7 @@ export class ReferenceNode extends BaseAstNode {
             hostUnitId,
             qualifier: unitQualifier,
             referenceKind,
+            onUnavailable: () => this._runtimeService.markExternalReferenceUnavailable(),
         });
         if (typeof resolution === 'string') {
             this.setValue(ErrorValueObject.create(resolution));
@@ -189,6 +193,9 @@ export class ReferenceNode extends BaseAstNode {
                 resolution,
             });
             if (error) {
+                if (error === ErrorType.NA) {
+                    this._runtimeService.markExternalReferenceUnavailable();
+                }
                 this.setValue(ErrorValueObject.create(error));
                 return AstNodePromiseType.ERROR;
             }
@@ -354,25 +361,21 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
     }
 
     private _getTableReferenceNode(tokenTrim: string, isPrepareMerge: boolean, isSuperTableDirectly: boolean = false) {
-        if (!this._checkTokenIsTableReference(tokenTrim) && !isSuperTableDirectly) {
+        if ((!tokenTrim.includes('[') || !this._checkTokenIsTableReference(tokenTrim)) && !isSuperTableDirectly) {
             return;
         }
         const { unitQualifier, tableName, columnStruct } = splitTableStructuredRef(tokenTrim);
-        const tableMap = this._getTableMap();
-        const hasLocalTable = Array.from(tableMap?.keys() || []).some((name) => name.toLocaleLowerCase() === tableName.toLocaleLowerCase());
-        if (unitQualifier || hasLocalTable) {
-            return new ReferenceNode(
-                this._currentConfigService,
-                this._formulaRuntimeService,
-                tokenTrim,
-                ReferenceObjectType.COLUMN,
-                this._unitReferenceResolver,
-                this._superTableService,
-                this._externalReferenceDataLoader,
-                isPrepareMerge,
-                { unitQualifier, tableName, columnStruct }
-            );
-        }
+        return new ReferenceNode(
+            this._currentConfigService,
+            this._formulaRuntimeService,
+            tokenTrim,
+            ReferenceObjectType.COLUMN,
+            this._unitReferenceResolver,
+            this._superTableService,
+            this._externalReferenceDataLoader,
+            isPrepareMerge,
+            { unitQualifier, tableName, columnStruct }
+        );
     }
 
     private _checkTokenIsTableReference(token: string): boolean {

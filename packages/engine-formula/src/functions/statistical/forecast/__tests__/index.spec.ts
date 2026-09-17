@@ -59,6 +59,30 @@ describe('Test forecast function', () => {
             expect(getObjectValue(result, true)).toBe(29.9520353143);
         });
 
+        it('accepts equally sized row and column ranges', () => {
+            const x = NumberValueObject.create(2.5);
+            const knownYs = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([[1, 3]]),
+                rowCount: 1,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const knownXs = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([[1], [3]]),
+                rowCount: 2,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+
+            expect(getObjectValue(testFunction.calculate(x, knownYs, knownXs))).toBe(2.5);
+        });
+
         it('X value is array', () => {
             const x = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

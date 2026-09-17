@@ -570,19 +570,9 @@ describe('Test trend function', () => {
             ]);
 
             const result4 = testFunction.calculate(knownYs2, knownXs2, newXs3, constb2);
-            expect(getObjectValue(result4)).toStrictEqual([
-                [1],
-                [2],
-                [3],
-                [4],
-                [5],
-                [6],
-                [7],
-                [8],
-                [9],
-                [10],
-                [11],
-            ]);
+            expect(getObjectValue(result4)).toStrictEqual(
+                Array.from({ length: 11 }, (_, index) => [expect.closeTo(index + 1, 11)])
+            );
 
             const knownYs3 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

@@ -14,24 +14,34 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { ICommand, IMutationInfo } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { LocaleKey } from '../../locale/types';
 import type { ITableSetConfig } from '../../types/type';
 import {
     CommandType,
     ICommandService,
     ILogService,
+    IPermissionService,
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
+    sequenceExecute,
 } from '@univerjs/core';
-import { IDefinedNamesService } from '@univerjs/engine-formula';
-import { SheetInterceptorService } from '@univerjs/sheets';
+import { IDefinedNamesService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import {
+    checkRangesEditablePermission,
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+    SheetInterceptorService,
+    WorkbookEditablePermission,
+} from '@univerjs/sheets';
 import { TableManager } from '../../models/table-manager';
 import { IRangeOperationTypeEnum } from '../../types/type';
 import { getExistingNamesSet } from '../../util';
 import { validateSheetTableName } from '../../util/table-name';
 import { SetSheetTableMutation } from '../mutations/set-sheet-table.mutation';
+import { getCalculatedColumnFillMutation } from '../utils/calculated-column';
 
 export interface ISetSheetTableCommandParams extends ITableSetConfig {
     unitId: string;
@@ -42,20 +52,80 @@ export interface ISetSheetTableCommandParams extends ITableSetConfig {
 export const SetSheetTableCommand: ICommand<ISetSheetTableCommandParams> = {
     id: 'sheet.command.set-table-config',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params) => {
         if (!params) {
             return false;
         }
 
-        const { unitId, tableId, name, updateRange, rowColOperation, theme } = params;
+        const { unitId, tableId, name, updateRange, rowColOperation, theme, filterButtons } = params;
         const tableManager = accessor.get(TableManager);
         const table = tableManager.getTableById(unitId, tableId);
 
-        if (!table) return false;
+        if (!table) {
+            return false;
+        }
 
+        const cellRedos: IMutationInfo[] = [];
+        const cellUndos: IMutationInfo[] = [];
         const oldTableConfig: ITableSetConfig = {};
         const newTableConfig: ITableSetConfig = {};
+        if (params.calculatedColumn) {
+            const { columnId, formula, formulaIsArray } = params.calculatedColumn;
+            const column = table.getColumn(columnId);
+            if (!column || typeof formula !== 'string' || (formulaIsArray !== undefined && typeof formulaIsArray !== 'boolean')) {
+                return false;
+            }
+            // Combining a structural edit and a fill would make the formula anchor ambiguous.
+            if (updateRange || rowColOperation) {
+                return false;
+            }
+            const range = table.getTableFilterRange();
+            const columnIndex = table.getTableInfo().columns.findIndex((item) => item.id === columnId);
+            const sheetColumn = range.startColumn + columnIndex;
+            const editRange = { ...range, startColumn: sheetColumn, endColumn: sheetColumn };
+            if (!checkRangesEditablePermission(accessor, unitId, table.getSubunitId(), [editRange])) {
+                return false;
+            }
+            const normalized = formula.trim();
+            if (normalized === '=') {
+                return false;
+            }
+            oldTableConfig.calculatedColumn = { columnId, formula: column.formula, formulaIsArray: column.formulaIsArray };
+            newTableConfig.calculatedColumn = {
+                columnId,
+                formula: normalized && !normalized.startsWith('=') ? `=${normalized}` : normalized,
+                formulaIsArray: normalized ? formulaIsArray ?? column.formulaIsArray : undefined,
+            };
+            const fill = getCalculatedColumnFillMutation(table, unitId, table.getSubunitId(), range.startRow, range.endRow, () => accessor.get(LexerTreeBuilder), newTableConfig.calculatedColumn);
+            if (fill) {
+                cellRedos.push(fill);
+                cellUndos.push({
+                    id: SetRangeValuesMutation.id,
+                    params: SetRangeValuesUndoMutationFactory(accessor, fill.params as ISetRangeValuesMutationParams),
+                });
+            }
+        }
+        if (filterButtons) {
+            if (accessor.get(IPermissionService).getPermissionPoint(new WorkbookEditablePermission(unitId).id)?.value === false) {
+                return false;
+            }
+            const { showAutoFilter, columns } = filterButtons;
+            if (showAutoFilter !== undefined && typeof showAutoFilter !== 'boolean') {
+                return false;
+            }
+            const entries = Object.entries(columns ?? {});
+            if (entries.some(([id, visible]) => !table.getColumn(id) || typeof visible !== 'boolean')) {
+                return false;
+            }
+            oldTableConfig.filterButtons = {
+                ...(showAutoFilter === undefined ? {} : { showAutoFilter: table.isShowAutoFilter() }),
+                columns: Object.fromEntries(entries.map(([id]) => [id, table.getColumn(id)!.isShowFilterButton()])),
+            };
+            newTableConfig.filterButtons = {
+                ...(showAutoFilter === undefined ? {} : { showAutoFilter }),
+                columns: Object.fromEntries(entries),
+            };
+        }
         const localeService = accessor.get(LocaleService);
         const existingNamesSet = getExistingNamesSet(unitId, {
             univerInstanceService: accessor.get(IUniverInstanceService),
@@ -121,18 +191,20 @@ export const SetSheetTableCommand: ICommand<ISetSheetTableCommandParams> = {
         const redos = [
             ...(interceptorCommands.preRedos ?? []),
             { id: SetSheetTableMutation.id, params: redoParams },
+            ...cellRedos,
             ...interceptorCommands.redos,
         ];
         const undos = [
             ...(interceptorCommands.preUndos ?? []),
             { id: SetSheetTableMutation.id, params: undoParams },
+            ...cellUndos,
             ...interceptorCommands.undos,
         ];
 
         const commandService = accessor.get(ICommandService);
-        redos.forEach((mutation) => {
-            commandService.executeCommand(mutation.id, mutation.params);
-        });
+        if (!sequenceExecute(redos, commandService).result) {
+            return false;
+        }
 
         const undoRedoService = accessor.get(IUndoRedoService);
         undoRedoService.pushUndoRedo({

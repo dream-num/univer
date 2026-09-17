@@ -172,7 +172,7 @@ export class TableManager extends Disposable {
         }
         const filterRanges: ITableRangeWithState[] = [];
         unitMap.forEach((table) => {
-            if (table.getSubunitId() === subUnitId && table.isShowHeader()) {
+            if (table.getSubunitId() === subUnitId && table.isShowHeader() && table.isShowAutoFilter()) {
                 filterRanges.push({
                     tableId: table.getId(),
                     range: table.getRange(),
@@ -367,9 +367,29 @@ export class TableManager extends Disposable {
     setTableByConfig(unitId: string, tableId: string, config: ITableSetConfig) {
         const unitMap = this._tableMap.get(unitId);
         const table = unitMap?.get(tableId);
-        if (!table) return;
+        if (!table) {
+            return;
+        }
         const subUnitId = table.getSubunitId();
-        const { name, updateRange, rowColOperation, theme, sortInfo, options } = config;
+        const { name, updateRange, rowColOperation, theme, sortInfo, options, filterButtons } = config;
+        if (config.calculatedColumn) {
+            const column = table.getColumn(config.calculatedColumn.columnId);
+            if (column) {
+                column.formula = config.calculatedColumn.formula;
+                column.formulaIsArray = config.calculatedColumn.formulaIsArray;
+            }
+        }
+        if (filterButtons) {
+            if (filterButtons.showAutoFilter !== undefined) {
+                table.setShowAutoFilter(filterButtons.showAutoFilter);
+            }
+            for (const [columnId, visible] of Object.entries(filterButtons.columns ?? {})) {
+                const column = table.getColumn(columnId);
+                if (column) {
+                    column.showFilterButton = visible;
+                }
+            }
+        }
         if (name) {
             const oldTableName = table.getDisplayName();
             table.setDisplayName(name);
@@ -459,6 +479,7 @@ export class TableManager extends Disposable {
             if (!tables) {
                 return;
             }
+            const cachedFilteredOutRows = data[subUnitId].tableFilteredOutRows;
             tables.forEach((table) => {
                 const header = this.getColumnHeader(unitId, subUnitId, table.range);
                 const tableInstance = new Table(table.id, table.name, table.range, header, table.options);
@@ -469,7 +490,14 @@ export class TableManager extends Disposable {
                 if (table.filters) {
                     const tableFilter = tableInstance.getTableFilters();
                     tableFilter.fromJSON(table.filters);
-                    tableFilter.doFilter(sheet, tableInstance.getTableFilterRange(), target.workbook.getDateSystem());
+                    if (Array.isArray(cachedFilteredOutRows)) {
+                        const { startRow, endRow } = tableInstance.getTableFilterRange();
+                        tableFilter.setFilterOutRows(
+                            cachedFilteredOutRows.filter((row) => row >= startRow && row <= endRow)
+                        );
+                    } else {
+                        tableFilter.doFilter(sheet, tableInstance.getTableFilterRange(), target.workbook.getDateSystem());
+                    }
                 }
                 tableInstance.setSubunitId(subUnitId);
                 unitMap.set(table.id, tableInstance);

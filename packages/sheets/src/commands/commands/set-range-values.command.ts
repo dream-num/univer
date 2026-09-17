@@ -103,6 +103,13 @@ export const SetRangeValuesCommand: ICommand = {
             subUnitId,
             cellValue: Tools.deepClone(realCellValue ?? cellValue.getMatrix()),
         };
+        // User formula replacement starts fresh; internal reference mutations retain their type.
+        new ObjectMatrix(setRangeValuesMutationRedoParams.cellValue).forValue((row, col, cell) => {
+            if (cell?.f !== undefined && cell.f !== worksheet.getCell(row, col)?.f) {
+                cell.ft ??= null;
+                cell.fd ??= null;
+            }
+        });
         const setRangeValuesMutationUndoParams = SetRangeValuesUndoMutationFactory(accessor, setRangeValuesMutationRedoParams);
         const cellHeights = mapObjectMatrix(setRangeValuesMutationRedoParams.cellValue, (row, col) => worksheet.getCellHeight(row, col) || undefined);
 

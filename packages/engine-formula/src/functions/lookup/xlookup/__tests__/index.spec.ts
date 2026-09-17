@@ -120,6 +120,25 @@ describe('Test xlookup', () => {
             expect(getObjectValue(resultObject)).toBe(0);
         });
 
+        it('Blank lookup value should match a blank cell', () => {
+            const lookupArray = ArrayValueObject.createByArray([
+                [null],
+                ['key'],
+            ]);
+            const returnArray = ArrayValueObject.createByArray([
+                ['blank-match'],
+                ['key-match'],
+            ]);
+
+            const resultObject = testFunction.calculate(
+                NullValueObject.create(),
+                lookupArray,
+                returnArray
+            ) as BaseValueObject;
+
+            expect(getObjectValue(resultObject)).toBe('blank-match');
+        });
+
         it('keeps blank, numeric zero, text zero, and empty text distinct', () => {
             const lookupArray = ArrayValueObject.create({
                 calculateValueList: [

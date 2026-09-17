@@ -17,13 +17,16 @@
 /* eslint-disable max-lines-per-function */
 
 import type { IAccessor, ICommand, IMutationInfo } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { ITableColumnJson } from '../../types/type';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
-import { getMoveRangeUndoRedoMutations, getSheetCommandTarget, InsertColMutation, InsertRowMutation, RemoveColMutation, RemoveRowMutation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import { getMoveRangeCommandMutations, getMoveRangeUndoRedoMutations, getSheetCommandTarget, InsertColMutation, InsertRowMutation, RemoveColMutation, RemoveRowMutation, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsTableController } from '../../controllers/sheets-table.controller';
 import { TableManager } from '../../models/table-manager';
 import { IRangeOperationTypeEnum, IRowColTypeEnum } from '../../types/type';
 import { SetSheetTableMutation } from '../mutations/set-sheet-table.mutation';
+import { getCalculatedColumnFillMutation } from '../utils/calculated-column';
 
 interface ISheetTableRowColOperationCommandParams {
     tableId: string;
@@ -70,15 +73,13 @@ export const SheetTableInsertRowCommand: ICommand<ISheetTableRowColOperationComm
             return false;
         }
 
-        const { workbook, worksheet, unitId, subUnitId } = target;
+        const { worksheet, unitId, subUnitId } = target;
 
         const sheetsSelectionsService = accessor.get(SheetsSelectionsService);
         const selections = sheetsSelectionsService.getCurrentSelections();
         if (!selections.length || selections.length > 1) {
             return false;
         }
-
-        const tableManager = accessor.get(TableManager);
 
         const selection = selections[0];
         const range = selection.range;
@@ -176,33 +177,47 @@ export const SheetTableInsertRowCommand: ICommand<ISheetTableRowColOperationComm
                 },
             });
 
-            const moveRangeMutations = getMoveRangeUndoRedoMutations(
+            const moveRangeMutations = getMoveRangeCommandMutations(
                 accessor,
                 {
-                    unitId,
-                    subUnitId,
-                    range: {
+                    fromUnitId: unitId,
+                    fromSubUnitId: subUnitId,
+                    toSubUnitId: subUnitId,
+                    fromRange: {
                         startRow: range.startRow,
                         endRow: rowContentIndex,
                         startColumn: oldRange.startColumn,
                         endColumn: oldRange.endColumn,
                     },
-                },
-                {
-                    unitId,
-                    subUnitId,
-                    range: {
+                    toRange: {
                         startRow: range.startRow + insertRowCount,
                         endRow: rowContentIndex + insertRowCount,
                         startColumn: oldRange.startColumn,
                         endColumn: oldRange.endColumn,
                     },
-                }
+                },
+                { includeSelection: false, includeAutoHeight: false }
             );
             if (moveRangeMutations) {
                 redos.push(...moveRangeMutations.redos);
                 undos.push(...moveRangeMutations.undos);
             }
+        }
+
+        const formulaMutation = getCalculatedColumnFillMutation(
+            table,
+            unitId,
+            subUnitId,
+            range.startRow,
+            range.endRow,
+            () => accessor.get(LexerTreeBuilder)
+        );
+        if (formulaMutation) {
+            redos.push(formulaMutation);
+            undos.push({
+                id: SetRangeValuesMutation.id,
+                params: SetRangeValuesUndoMutationFactory(accessor, formulaMutation.params as ISetRangeValuesMutationParams),
+            });
         }
 
         const commandService = accessor.get(ICommandService);
@@ -283,33 +298,49 @@ export const SheetTableInsertRowAtCommand: ICommand<ISheetTableInsertAtCommandPa
         }];
 
         const rowContentIndex = target.worksheet.getCellMatrix().getDataRange().endRow;
-        const moveRangeMutations = getMoveRangeUndoRedoMutations(
-            accessor,
-            {
-                unitId,
-                subUnitId,
-                range: {
-                    startRow: index,
-                    endRow: rowContentIndex,
-                    startColumn: oldRange.startColumn,
-                    endColumn: oldRange.endColumn,
+        const moveRangeMutations = index <= rowContentIndex
+            ? getMoveRangeCommandMutations(
+                accessor,
+                {
+                    fromUnitId: unitId,
+                    fromSubUnitId: subUnitId,
+                    toSubUnitId: subUnitId,
+                    fromRange: {
+                        startRow: index,
+                        endRow: rowContentIndex,
+                        startColumn: oldRange.startColumn,
+                        endColumn: oldRange.endColumn,
+                    },
+                    toRange: {
+                        startRow: index + count,
+                        endRow: rowContentIndex + count,
+                        startColumn: oldRange.startColumn,
+                        endColumn: oldRange.endColumn,
+                    },
                 },
-            },
-            {
-                unitId,
-                subUnitId,
-                range: {
-                    startRow: index + count,
-                    endRow: rowContentIndex + count,
-                    startColumn: oldRange.startColumn,
-                    endColumn: oldRange.endColumn,
-                },
-            }
-        );
+                { includeSelection: false, includeAutoHeight: false }
+            )
+            : null;
 
         if (moveRangeMutations) {
             redos.push(...moveRangeMutations.redos);
             undos.push(...moveRangeMutations.undos);
+        }
+
+        const formulaMutation = getCalculatedColumnFillMutation(
+            table,
+            unitId,
+            subUnitId,
+            index,
+            index + count - 1,
+            () => accessor.get(LexerTreeBuilder)
+        );
+        if (formulaMutation) {
+            redos.push(formulaMutation);
+            undos.push({
+                id: SetRangeValuesMutation.id,
+                params: SetRangeValuesUndoMutationFactory(accessor, formulaMutation.params as ISetRangeValuesMutationParams),
+            });
         }
 
         return executeTableMutationSequence(accessor, unitId, redos, undos);

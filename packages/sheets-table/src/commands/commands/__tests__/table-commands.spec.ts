@@ -17,7 +17,12 @@
 import type { ITableManualFilterItem } from '../../../types/type';
 import { ICommandService, ILogService, IUndoRedoService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
-import { AddRangeThemeMutation, RemoveRangeThemeMutation, SheetInterceptorService, SheetRangeThemeModel } from '@univerjs/sheets';
+import {
+    AddRangeThemeMutation,
+    RemoveRangeThemeMutation,
+    SheetInterceptorService,
+    SheetRangeThemeModel,
+} from '@univerjs/sheets';
 import { describe, expect, it, vi } from 'vitest';
 import { TableManager } from '../../../models/table-manager';
 import { TableColumnFilterTypeEnum } from '../../../types/enum';
@@ -209,7 +214,7 @@ describe('sheets-table commands', () => {
     });
 
     it('SetSheetTableCommand should execute mutation and build inverse undo config', () => {
-        const executeCommand = vi.fn();
+        const syncExecuteCommand = vi.fn((_id: string) => true);
         const pushUndoRedo = vi.fn();
         const onCommandExecute = vi.fn(() => ({
             preRedos: [{ id: 'formula.redo.before', params: { phase: 'pre' } }],
@@ -229,7 +234,7 @@ describe('sheets-table commands', () => {
             [LocaleService, { t: () => 'msg' }],
             [IUniverInstanceService, { getUnit: () => ({ getSheets: () => [{ getName: () => 'SheetA' }] }) }],
             [IDefinedNamesService, { getDefinedNameMap: () => ({}) }],
-            [ICommandService, { executeCommand }],
+            [ICommandService, { syncExecuteCommand }],
             [IUndoRedoService, { pushUndoRedo }],
             [ILogService, { warn: vi.fn() }],
             [SheetInterceptorService, { onCommandExecute }],
@@ -261,7 +266,7 @@ describe('sheets-table commands', () => {
                 oldTableName: 'OldName',
             }),
         });
-        expect(executeCommand.mock.calls.map(([id]) => id)).toEqual([
+        expect(syncExecuteCommand.mock.calls.map(([id]) => id)).toEqual([
             'formula.redo.before',
             SetSheetTableMutation.id,
             'formula.redo.after',
@@ -303,6 +308,7 @@ describe('sheets-table commands', () => {
             [TableManager, {
                 getTable: () => ({
                     getTableFilterColumn: () => previousFilter,
+                    getTableFilters: () => ({ getColumnFilter: () => previousFilter, getFilterOutRows: () => new Set() }),
                 }),
             }],
         ]);
@@ -333,8 +339,43 @@ describe('sheets-table commands', () => {
                     tableId: 't1',
                     column: 1,
                     tableFilter: previousFilter,
+                    filterOutRows: [],
                 },
             }],
+        }));
+    });
+
+    it('SetSheetTableFilterCommand restores the previous filter and cached filtered rows', () => {
+        const syncExecuteCommand = vi.fn(() => true);
+        const pushUndoRedo = vi.fn();
+        const previousFilter = { filterType: 'manual', values: ['original'] };
+        const previousRows = new Set([2, 5]);
+        const accessor = createAccessor([
+            [IUndoRedoService, { pushUndoRedo }],
+            [ICommandService, { syncExecuteCommand }],
+            [TableManager, {
+                getTable: () => ({
+                    getTableFilters: () => ({
+                        getColumnFilter: () => previousFilter,
+                        getFilterOutRows: () => previousRows,
+                    }),
+                }),
+            }],
+        ]);
+
+        const result = SetSheetTableFilterCommand.handler(accessor, {
+            unitId: 'u1',
+            tableId: 't1',
+            column: 0,
+            tableFilter: undefined,
+        });
+
+        expect(result).toBe(true);
+        expect(pushUndoRedo).toHaveBeenCalledWith(expect.objectContaining({
+            undoMutations: [expect.objectContaining({
+                id: SetSheetTableFilterMutation.id,
+                params: expect.objectContaining({ tableFilter: previousFilter, filterOutRows: [2, 5] }),
+            })],
         }));
     });
 

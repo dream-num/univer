@@ -119,11 +119,13 @@ describe('FRangeSheetsThreadCommentMixin', () => {
         await expect(range.addCommentAsync('Agent review', {
             id: 'agent-comment',
             personId: 'agent-user',
+            authorName: 'Imported author',
         })).resolves.toBe(true);
         expect(commandService.executeCommand).toHaveBeenCalledWith(AddCommentCommand.id, expect.objectContaining({
             comment: expect.objectContaining({
                 id: 'agent-comment',
                 personId: 'agent-user',
+                authorName: 'Imported author',
                 text: expect.objectContaining({ dataStream: 'Agent review\r\n' }),
             }),
         }));

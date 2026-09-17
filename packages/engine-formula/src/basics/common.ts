@@ -245,7 +245,8 @@ export interface IUnitExcludedCell {
 }
 
 export interface IUnitRowData {
-    [unitId: string]: Nullable<{ [sheetId: string]: IObjectArrayPrimitiveType<Partial<IRowData>> }>;
+    // Calculation transport only: distinguish filter exclusions from manually hidden rows in Workers.
+    [unitId: string]: Nullable<{ [sheetId: string]: IObjectArrayPrimitiveType<Partial<IRowData> & { filtered?: boolean }> }>;
 }
 
 export interface IFormulaDatasetConfig {

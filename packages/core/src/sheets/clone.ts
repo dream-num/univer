@@ -95,6 +95,14 @@ export function cloneCellData(cell: Nullable<ICellData>): Nullable<ICellData> {
         result.f = cell.f;
     }
 
+    if (cell.ft !== undefined) {
+        result.ft = cell.ft;
+    }
+
+    if (cell.fd !== undefined) {
+        result.fd = cell.fd;
+    }
+
     // ref - formula array reference
     if (cell.ref !== undefined) {
         result.ref = cell.ref;
@@ -129,56 +137,7 @@ export function cloneCellDataWithSpanAndDisplay(cell: Nullable<ICellDataWithSpan
         return cell;
     }
 
-    const result: ICellDataWithSpanAndDisplay = {};
-
-    // p - IDocumentData (complex object, needs deep clone)
-    if (cell.p !== undefined) {
-        result.p = cell.p === null ? null : cloneValue(cell.p);
-    }
-
-    // s - style id (string) or IStyleData (object)
-    if (cell.s !== undefined) {
-        if (cell.s === null || typeof cell.s === 'string') {
-            result.s = cell.s;
-        } else {
-            result.s = cloneValue(cell.s);
-        }
-    }
-
-    // v - primitive value (string | number | boolean)
-    if (cell.v !== undefined) {
-        result.v = cell.v;
-    }
-
-    // t - CellValueType (number enum)
-    if (cell.t !== undefined) {
-        result.t = cell.t;
-    }
-
-    // f - formula string
-    if (cell.f !== undefined) {
-        result.f = cell.f;
-    }
-
-    // ref - formula array reference
-    if (cell.ref !== undefined) {
-        result.ref = cell.ref;
-    }
-
-    // xf - Excel formula prefix
-    if (cell.xf !== undefined) {
-        result.xf = cell.xf;
-    }
-
-    // si - formula id
-    if (cell.si !== undefined) {
-        result.si = cell.si;
-    }
-
-    // custom - user stored custom fields
-    if (cell.custom !== undefined) {
-        result.custom = cell.custom === null ? null : cloneValue(cell.custom);
-    }
+    const result: ICellDataWithSpanAndDisplay = cloneCellData(cell)!;
 
     // rowSpan - span properties (primitives)
     if (cell.rowSpan !== undefined) {

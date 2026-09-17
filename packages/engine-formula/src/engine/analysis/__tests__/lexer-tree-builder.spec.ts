@@ -712,6 +712,11 @@ describe('lexer nodeMaker test', () => {
     });
 
     describe('moveFormulaRefOffset', () => {
+        it('preserves escaped quotes and reference-like text while moving cell references', () => {
+            expect(lexerTreeBuilder.moveFormulaRefOffset('=IF(A1="a""b","[@Column]","""quoted""")', 1, 1))
+                .toBe('=IF(B2="a""b","[@Column]","""quoted""")');
+        });
+
         it('move all', () => {
             const result = lexerTreeBuilder.moveFormulaRefOffset('=sum(A1:B1)', 1, 1, false);
             expect(result).toStrictEqual('=sum(B2:C2)');
@@ -990,6 +995,12 @@ describe('lexer nodeMaker test', () => {
                 const exprTreeNode = lexerTreeBuilder.getFormulaExprTree('=SUM(Table1[Column1]) + MAX(Table2[ColumnA], Table2[ColumnB])', 'mockUnitId', hasFunction, getDefinedNameName, getTable) || {};
 
                 expect(JSON.stringify(exprTreeNode)).toStrictEqual('{"value":"SUM(Table1[Column1])+MAX(Table2[ColumnA],Table2[ColumnB])","children":[{"value":"SUM(Table1[Column1])","children":[{"value":"Table1[Column1]","children":[],"startIndex":-1}],"startIndex":0},{"value":"MAX(Table2[ColumnA],Table2[ColumnB])","children":[{"value":"Table2[ColumnA]","children":[],"startIndex":-1},{"value":"Table2[ColumnB]","children":[],"startIndex":-1}],"startIndex":23}],"startIndex":-1}');
+            });
+
+            it('keeps missing table references in the expression tree', () => {
+                const exprTreeNode = lexerTreeBuilder.getFormulaExprTree('=SUM(Tout[Quantity])', 'mockUnitId', hasFunction, getDefinedNameName, getTable) || {};
+
+                expect(JSON.stringify(exprTreeNode)).toStrictEqual('{"value":"SUM(Tout[Quantity])","children":[{"value":"Tout[Quantity]","children":[],"startIndex":-1}],"startIndex":0}');
             });
 
             it('builds ExprTree with mixed defined names and table references', () => {

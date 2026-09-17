@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { Dependency, Direction, Nullable } from '@univerjs/core';
+import type { Dependency, Direction, ICellData, Nullable } from '@univerjs/core';
 import type { IAutoFillLocation } from '@univerjs/sheets';
+import { BooleanNumber, FormulaType } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { AUTO_FILL_APPLY_TYPE, AUTO_FILL_DATA_TYPE, AutoFillService, IAutoFillService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
 import { FormulaAutoFillController } from '../formula-auto-fill.controller';
 
@@ -175,4 +175,26 @@ describe('FormulaAutoFillController', () => {
             },
         ]);
     });
+
+    it.each([undefined, BooleanNumber.FALSE, BooleanNumber.TRUE])(
+        'preserves source formula metadata when filling shared followers (%s)',
+        (fd) => {
+            const source: ICellData = { f: '=A1' };
+            if (fd !== undefined) {
+                source.ft = FormulaType.ARRAY;
+                source.fd = fd;
+            }
+            const rule = testBed.injector.get(IAutoFillService).getRules().find((rule) => rule.type === AUTO_FILL_DATA_TYPE.FORMULA)!;
+            const result = rule.applyFunctions![AUTO_FILL_APPLY_TYPE.COPY]!({
+                data: [source],
+                index: [0],
+            }, 2, 2, { formula: [{ data: [source], index: [0] }] }, createLocation([0], [1, 2]));
+            expect(result[0]?.f).toBe('=A2');
+            expect(result[1]?.si).toBe(result[0]?.si);
+            for (const cell of result) {
+                expect(cell?.ft).toBe(source.ft);
+                expect(cell?.fd).toBe(fd);
+            }
+        }
+    );
 });

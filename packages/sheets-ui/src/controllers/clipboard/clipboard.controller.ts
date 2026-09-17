@@ -589,6 +589,8 @@ export class SheetClipboardController extends RxDisposable {
                     [range.rows[0]]: {
                         [range.cols[0]]: {
                             f: text,
+                            ft: null,
+                            fd: null,
                             v: null,
                             p: null,
                         },

@@ -14,9 +14,24 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, ICellDataWithSpanAndDisplay, IMutationInfo, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type {
+    IAccessor,
+    ICellData,
+    ICellDataWithSpanAndDisplay,
+    IMutationInfo,
+    IRange,
+    Nullable,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
 import type { IDiscreteRange, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import type { ICellDataWithSpanInfo, ICopyPastePayload, IPasteHookValueType, ISheetClipboardHook, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
+import type {
+    ICellDataWithSpanInfo,
+    ICopyPastePayload,
+    IPasteHookValueType,
+    ISheetClipboardHook,
+    ISheetDiscreteRangeLocation,
+} from '@univerjs/sheets-ui';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,
@@ -32,7 +47,12 @@ import {
 } from '@univerjs/core';
 import { FormulaDataModel, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
-import { COPY_TYPE, ISheetClipboardService, PREDEFINED_HOOK_NAME_COPY, PREDEFINED_HOOK_NAME_PASTE } from '@univerjs/sheets-ui';
+import {
+    COPY_TYPE,
+    ISheetClipboardService,
+    PREDEFINED_HOOK_NAME_COPY,
+    PREDEFINED_HOOK_NAME_PASTE,
+} from '@univerjs/sheets-ui';
 
 export const DEFAULT_PASTE_FORMULA = 'default-paste-formula';
 
@@ -118,10 +138,14 @@ export class FormulaClipboardController extends Disposable {
                     matrixFragment.setValue(rowIndexInMatrix, columnIndexInMatrix, {
                         ...getEmptyCell(),
                         f: formulaString,
+                        ft: cellData.ft,
+                        fd: cellData.fd,
                     });
                     plainMatrix.setValue(rowIndexInMatrix, columnIndexInMatrix, {
                         ...getEmptyCell(),
                         f: formulaString,
+                        ft: cellData.ft,
+                        fd: cellData.fd,
                         displayV: formulaString,
                     });
                 } else {
@@ -255,6 +279,25 @@ export function getSetCellFormulaMutations(
             redos: [],
         };
     }
+
+    const worksheet = accessor.get(IUniverInstanceService).getUnit<Workbook>(unitId)?.getSheetBySheetId(subUnitId);
+    matrix.forValue((row, col, source) => {
+        const targetRow = range.rows[row];
+        const targetCol = range.cols[col];
+        const value = valueMatrix.getValue(targetRow, targetCol);
+        if (!value) {
+            return;
+        }
+
+        // Paste replaces the target formula; omitted source metadata must not retain target flags.
+        const target = worksheet?.getCellRaw(targetRow, targetCol);
+        const keepsFormula = pasteFrom && copyInfo.pasteType !== PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE
+            && (isFormulaString(value.f) || isFormulaId(value.si));
+        if (source.ft != null || source.fd != null || target?.ft != null || target?.fd != null) {
+            value.ft = keepsFormula ? source.ft ?? null : null;
+            value.fd = keepsFormula ? source.fd ?? null : null;
+        }
+    });
 
     // set cell value and style
     const setValuesMutation: ISetRangeValuesMutationParams = {

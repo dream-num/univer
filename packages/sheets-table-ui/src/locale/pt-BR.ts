@@ -18,6 +18,17 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        calculatedColumn: 'Coluna calculada',
+        columnFormula: 'Fórmula',
+        columnFormulaHint: 'Substitui imediatamente {0} células de dados, exceto cabeçalho e totais. Parar mantém as células existentes. É possível desfazer.',
+        applyColumnFormula: 'Aplicar à coluna inteira',
+        stopColumnFormula: 'Parar preenchimento automático',
+        columnFormulaApplied: 'Configuração aplicada',
+        settings: 'Configurações da tabela',
+        showFilterButtons: 'Mostrar botões de filtro',
+        columnFilterButtons: 'Botões de filtro das colunas',
+        filterButtonsHint: 'Ocultar os botões mantém os critérios de filtro existentes.',
+        settingsError: 'Não foi possível salvar. A tabela pode ter mudado. Reabra as configurações.',
         title: 'Tabela',
         selectRange: 'Selecionar Intervalo da Tabela',
         rename: 'Renomear Tabela',

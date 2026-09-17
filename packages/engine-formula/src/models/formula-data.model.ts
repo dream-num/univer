@@ -497,12 +497,13 @@ export class FormulaDataModel extends Disposable {
 
                 const startRow = 0;
                 const endRow = sheet.getRowCount() - 1;
-                const sheetRowData: IObjectArrayPrimitiveType<Partial<IRowData>> = Object.create(null);
+                const sheetRowData: IObjectArrayPrimitiveType<Partial<IRowData> & { filtered?: boolean }> = Object.create(null);
 
                 for (let i = startRow; i <= endRow; i++) {
                     if (!sheet.getRowVisible(i)) {
                         sheetRowData[i] = {
                             hd: BooleanNumber.TRUE,
+                            ...(sheet.getRowFiltered(i) ? { filtered: true } : {}),
                         };
                     }
                 }

@@ -134,6 +134,15 @@ describe('Test sumproduct function', () => {
     });
 
     describe('Sumproduct', () => {
+        it.each([
+            '=SUMPRODUCT({1;2},{1;2;3})',
+            '=SUMPRODUCT({1;2;3},{1;2})',
+            '=SUMPRODUCT({1,2},{1,2,3})',
+            '=SUMPRODUCT({1,2,3},{1,2})',
+        ])('rejects different dimensions: %s', (formula) => {
+            expect(calculate(formula)).toBe(ErrorType.VALUE);
+        });
+
         it('Array1 is array, not includes error', () => {
             const array1 = ArrayValueObject.create({
                 calculateValueList: [

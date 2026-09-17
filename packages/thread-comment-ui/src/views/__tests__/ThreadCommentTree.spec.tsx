@@ -362,6 +362,7 @@ function createComment(overrides: Partial<IThreadComment>): IThreadComment {
         ref: overrides.ref ?? 'A1',
         dT: overrides.dT ?? '2026-06-17T00:00:00.000Z',
         personId: overrides.personId ?? 'owner',
+        authorName: overrides.authorName,
         text: overrides.text ?? transformTextNodes2Document([{ type: 'text', content: id }]),
         unitId: overrides.unitId ?? UNIT_ID,
         subUnitId: overrides.subUnitId ?? SHEET_ID,
@@ -682,6 +683,7 @@ describe('ThreadCommentTree', () => {
         addRootComment(testBed.threadCommentModel, createComment({
             id: 'removed-author-thread',
             personId: 'removed-user',
+            authorName: 'Imported author',
             text: transformTextNodes2Document([{ type: 'text', content: 'kept after user removal' }]),
         }));
 
@@ -690,6 +692,13 @@ describe('ThreadCommentTree', () => {
         container = rendered.container;
 
         expect(container.textContent).toContain('kept after user removal');
+        expect(container.textContent).toContain('Imported author');
+        const users = testBed.injector.get(UserManagerService);
+        act(() => users.addUser({ userID: 'removed-user', name: 'Resolved author' }));
+        expect(container.textContent).toContain('Resolved author');
+        expect(container.textContent).not.toContain('Imported author');
+        act(() => users.delete('removed-user'));
+        expect(container.textContent).toContain('Imported author');
     });
 
     it('adds a reply through the tree editor and stores it under the root thread', async () => {

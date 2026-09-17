@@ -16,14 +16,23 @@
 
 import type { ICommandInfo, IDisposable, IRange, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ITableRangeWithState } from '@univerjs/sheets-table';
+import type { ISetSheetTableMutationParams, ITableRangeWithState } from '@univerjs/sheets-table';
 import type { ISheetsTableFilterButtonShapeProps } from '../views/widgets/table-filter-button.shape';
 import { ICommandService, Inject, Injector, InterceptorEffectEnum, RxDisposable, VerticalAlign } from '@univerjs/core';
-import { INTERCEPTOR_POINT, SetVerticalTextAlignCommand, SheetInterceptorService, SheetRangeThemeModel } from '@univerjs/sheets';
-import { TableManager } from '@univerjs/sheets-table';
+import {
+    INTERCEPTOR_POINT,
+    SetVerticalTextAlignCommand,
+    SheetInterceptorService,
+    SheetRangeThemeModel,
+} from '@univerjs/sheets';
+import { SetSheetTableMutation, TableManager } from '@univerjs/sheets-table';
 import { getCoordByCell, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { map, merge, of, startWith, switchMap, takeUntil } from 'rxjs';
-import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsTableFilterButtonShape } from '../views/widgets/table-filter-button.shape';
+import {
+    FILTER_ICON_PADDING,
+    FILTER_ICON_SIZE,
+    SheetsTableFilterButtonShape,
+} from '../views/widgets/table-filter-button.shape';
 
 const SHEETS_FILTER_BUTTON_Z_INDEX = 5000;
 
@@ -119,8 +128,15 @@ export class SheetsTableFilterButtonRenderController extends RxDisposable implem
     private _initCommandExecuted() {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (command.id !== SetVerticalTextAlignCommand.id) {
+                if (command.id !== SetVerticalTextAlignCommand.id && command.id !== SetSheetTableMutation.id) {
                     return;
+                }
+                if (command.id === SetSheetTableMutation.id) {
+                    const params = command.params as ISetSheetTableMutationParams | undefined;
+                    if (!params?.config.filterButtons || params.unitId !== this._context.unitId
+                        || params.subUnitId !== this._context.unit.getActiveSheet()?.getSheetId()) {
+                        return;
+                    }
                 }
 
                 const { unit: workbook, unitId } = this._context;
@@ -160,8 +176,17 @@ export class SheetsTableFilterButtonRenderController extends RxDisposable implem
             const headerStyle = table ? this._rangeThemeModel.getRangeThemeStyle(unitId, table.getTableStyleId())?.getHeaderRowStyle() : null;
             const iconColor = headerStyle?.cl?.rgb ?? '#fff';
             const hoverIconColor = headerStyle?.bg?.rgb ?? '#202124';
-            this._interceptCellContent(unitId, worksheetId, range);
+            const visibleColumns = new Set<number>();
             for (let col = startColumn; col <= endColumn; col++) {
+                if (table?.getTableColumnByIndex(col - startColumn)?.isShowFilterButton() !== false) {
+                    visibleColumns.add(col);
+                }
+            }
+            this._interceptCellContent(unitId, worksheetId, range, visibleColumns);
+            for (let col = startColumn; col <= endColumn; col++) {
+                if (!visibleColumns.has(col)) {
+                    continue;
+                }
                 const key = `sheets-table-filter-button-${startRow}-${col}`;
                 const startPosition = getCoordByCell(startRow, col, scene, skeleton);
                 const cellStyle = worksheet.getCellStyle(startRow, col);
@@ -197,7 +222,7 @@ export class SheetsTableFilterButtonRenderController extends RxDisposable implem
         scene.makeDirty();
     }
 
-    private _interceptCellContent(workbookId: string, worksheetId: string, range: IRange): void {
+    private _interceptCellContent(workbookId: string, worksheetId: string, range: IRange, visibleColumns: Set<number>): void {
         const { startRow, startColumn, endColumn } = range;
         this._buttonRenderDisposable = this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
             effect: InterceptorEffectEnum.Style,
@@ -208,7 +233,8 @@ export class SheetsTableFilterButtonRenderController extends RxDisposable implem
                     subUnitId !== worksheetId ||
                     row !== startRow ||
                     col < startColumn ||
-                    col > endColumn
+                    col > endColumn ||
+                    !visibleColumns.has(col)
                 ) {
                     return next(cell);
                 }

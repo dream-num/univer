@@ -15,7 +15,16 @@
  */
 
 import type { IRange, IStyleData, Nullable } from '@univerjs/core';
-import type { SheetsTableButtonStateEnum, SheetsTableSortStateEnum, TableColumnDataTypeEnum, TableColumnFilterTypeEnum, TableConditionTypeEnum, TableDateCompareTypeEnum, TableNumberCompareTypeEnum, TableStringCompareTypeEnum } from './enum';
+import type {
+    SheetsTableButtonStateEnum,
+    SheetsTableSortStateEnum,
+    TableColumnDataTypeEnum,
+    TableColumnFilterTypeEnum,
+    TableConditionTypeEnum,
+    TableDateCompareTypeEnum,
+    TableNumberCompareTypeEnum,
+    TableStringCompareTypeEnum,
+} from './enum';
 
 export interface ITableRange {
     startRow: number;
@@ -35,6 +44,11 @@ export interface ITableOptions {
      * @todo not support yet
      */
     showFooter?: boolean;
+    /**
+     * Whether the table has an AutoFilter control.
+     * @default true
+     */
+    showAutoFilter?: boolean;
     /**
      * The table style id. If the property is empty, the default style will be used.
      * @default: table-default-0 ~ table-default-5
@@ -146,7 +160,24 @@ export interface ITableRangeRowColOperation {
     columnsJson?: ITableColumnJson[];
 }
 
+/** Changes button visibility without clearing existing filter criteria. */
+export interface ITableFilterButtonConfig {
+    showAutoFilter?: boolean;
+    /** Partial update keyed by stable table column ID, not worksheet column index. */
+    columns?: Record<string, boolean>;
+}
+
+/** Formula is anchored at the first data row; an empty formula stops automatic filling. */
+export interface ITableCalculatedColumnConfig {
+    columnId: string;
+    formula: string;
+    /** Preserve imported array semantics when omitted. */
+    formulaIsArray?: boolean;
+}
+
 export interface ITableSetConfig {
+    calculatedColumn?: ITableCalculatedColumnConfig;
+    filterButtons?: ITableFilterButtonConfig;
     name?: string;
     updateRange?: ITableRangeUpdate;
     rowColOperation?: ITableRangeRowColOperation;
@@ -199,6 +230,15 @@ export interface ITableColumnJson {
     id: string;
     displayName: string;
     formula: string;
+    formulaIsArray?: boolean;
+    totalsRowLabel?: string;
+    totalsRowFunction?: string;
+    totalsRowFormula?: string;
+    /**
+     * Whether to show the filter button for this table column.
+     * @default true
+     */
+    showFilterButton?: boolean;
     meta: TableMetaType;
     style: IStyleData;
 }
@@ -221,6 +261,7 @@ export interface ITableInfo {
     meta: TableMetaType;
     columns: ITableColumnJson[];
     showHeader: boolean;
+    showAutoFilter: boolean;
 }
 
 export interface ITableInfoWithUnitId extends ITableInfo {

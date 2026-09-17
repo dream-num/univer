@@ -20,6 +20,7 @@ import { ComponentManager, IconManager } from '@univerjs/ui';
 import {
     SHEET_TABLE_MOBILE_MENU,
     SHEET_TABLE_RENAME_DIALOG,
+    SHEET_TABLE_SETTINGS_DIALOG,
     SHEET_TABLE_THEME_PANEL,
     SHEETS_TABLE_FILTER_PANEL_OPENED_KEY,
     TABLE_SELECTOR_DIALOG,
@@ -28,6 +29,7 @@ import { MobileSheetTableFilterPanel } from '../../views/components/MobileSheetT
 import { MobileSheetTableMenu } from '../../views/components/MobileSheetTableMenu';
 import { MobileSheetTableRenameDialog } from '../../views/components/MobileSheetTableRenameDialog';
 import { MobileSheetTableSelector } from '../../views/components/MobileSheetTableSelector';
+import { MobileSheetTableSettingsDialog } from '../../views/components/MobileSheetTableSettingsDialog';
 import { MobileSheetTableThemePanel } from '../../views/components/MobileSheetTableThemePanel';
 
 export class MobileComponentsController extends Disposable {
@@ -41,6 +43,7 @@ export class MobileComponentsController extends Disposable {
             [SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, MobileSheetTableFilterPanel],
             [SHEET_TABLE_MOBILE_MENU, MobileSheetTableMenu],
             [SHEET_TABLE_RENAME_DIALOG, MobileSheetTableRenameDialog],
+            [SHEET_TABLE_SETTINGS_DIALOG, MobileSheetTableSettingsDialog],
             [TABLE_SELECTOR_DIALOG, MobileSheetTableSelector],
             [SHEET_TABLE_THEME_PANEL, MobileSheetTableThemePanel],
         ] as const).forEach(([key, component]) => {

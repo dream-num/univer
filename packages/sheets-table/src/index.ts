@@ -60,10 +60,12 @@ export {
     TableStringCompareTypeEnum,
 } from './types/enum';
 export type {
+    ITableCalculatedColumnConfig,
     ITableColorFilterItem,
     ITableColumnJson,
     ITableConditionFilterItem,
     ITableData,
+    ITableFilterButtonConfig,
     ITableFilterItem,
     ITableInfo,
     ITableInfoWithUnitId,

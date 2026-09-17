@@ -26,6 +26,20 @@ export enum CellValueType {
     UNRECOGNIZED = -1,
 }
 
+export enum FormulaType {
+    FORMULA_TYPE_NORMAL = 0,
+    FORMULA_TYPE_SHARED = 1,
+    FORMULA_TYPE_ARRAY = 2,
+    FORMULA_TYPE_DATA_TABLE = 3,
+    UNRECOGNIZED = -1,
+}
+
+export enum BooleanNumber {
+    BOOLEAN_NUMBER_FALSE = 0,
+    BOOLEAN_NUMBER_TRUE = 1,
+    UNRECOGNIZED = -1,
+}
+
 export interface IWorksheetMeta {
     type: number;
     id: string;
@@ -83,6 +97,12 @@ export interface ICellData {
     ref: string;
     /** New Excel formulas need to add prefixes for differentiation, e.g., _xlfn._xlws. _xlfn. _xlws. _xludf. */
     xf: string;
+    ft?:
+    | FormulaType
+    | undefined;
+    fd?:
+    | BooleanNumber
+    | undefined;
 }
 
 export interface ISheetBlock {

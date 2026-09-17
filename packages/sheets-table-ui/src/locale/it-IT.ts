@@ -18,6 +18,17 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        calculatedColumn: 'Colonna calcolata',
+        columnFormula: 'Formula',
+        columnFormulaHint: 'Sostituisce subito {0} celle dati, escluse intestazione e totali. Arrestare mantiene le celle esistenti. È possibile annullare.',
+        applyColumnFormula: 'Applica a tutta la colonna',
+        stopColumnFormula: 'Arresta riempimento automatico',
+        columnFormulaApplied: 'Impostazione applicata',
+        settings: 'Impostazioni tabella',
+        showFilterButtons: 'Mostra pulsanti filtro',
+        columnFilterButtons: 'Pulsanti filtro delle colonne',
+        filterButtonsHint: 'Nascondere i pulsanti mantiene i criteri di filtro esistenti.',
+        settingsError: 'Salvataggio non riuscito. La tabella potrebbe essere cambiata. Riapri le impostazioni.',
         title: 'Tabella',
         selectRange: 'Seleziona Intervallo Tabella',
         rename: 'Rinomina Tabella',

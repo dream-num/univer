@@ -106,7 +106,7 @@ export class CalculateResultApplyController extends Disposable {
      * @param unitId
      * @param sheetId
      * @param cellData
-     * @returns
+     * @returns Calculated cell data merged with number formats.
      */
     private _getMergedCellData(unitId: string, sheetId: string, cellData: IObjectMatrixPrimitiveType<Nullable<ICellData>>) {
         const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);

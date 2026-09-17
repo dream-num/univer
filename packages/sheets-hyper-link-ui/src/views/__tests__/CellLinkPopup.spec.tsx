@@ -57,7 +57,10 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { of } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
-import { CloseHyperLinkPopupOperation, OpenHyperLinkEditPanelOperation } from '../../commands/operations/popup.operations';
+import {
+    CloseHyperLinkPopupOperation,
+    OpenHyperLinkEditPanelOperation,
+} from '../../commands/operations/popup.operations';
 import { ISheetsHyperLinkPopupService, SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { SheetsHyperLinkSidePanelService } from '../../services/side-panel.service';
@@ -395,6 +398,22 @@ describe('CellLinkPopupPure', () => {
         currentTestBed = undefined;
     });
 
+    it.each([CellLinkPopupPure, MobileCellLinkPopupPure])('renders the tip inside the existing link card', (Popup) => {
+        currentTestBed = createPopupTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const customRange = { ...currentTestBed.customRange, properties: { ...currentTestBed.customRange.properties, tooltip: '<b>Read this first</b>' } };
+        act(() => root!.render(
+            <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                <Popup unitId={UNIT_ID} subUnitId={SUB_UNIT_ID} row={0} col={0} customRange={customRange} type={HyperLinkEditSourceType.VIEWING} editPermission copyPermission />
+            </RediContext.Provider>
+        ));
+        expect(container.textContent).toContain('<b>Read this first</b>');
+        expect(container.querySelector('b')).toBeNull();
+        expect(container.firstElementChild?.textContent).toContain('<b>Read this first</b>');
+    });
+
     it('opens the edit panel for the selected sheet hyperlink range', async () => {
         currentTestBed = createPopupTestBed();
         container = document.createElement('div');
@@ -514,9 +533,10 @@ describe('CellLinkEdit', () => {
             });
 
             const inputs = Array.from(container.querySelectorAll('input'));
-            expect(inputs).toHaveLength(2);
+            expect(inputs).toHaveLength(3);
             expect(inputs[0].hasAttribute('dir')).toBe(false);
-            expect(inputs[1].dir).toBe('ltr');
+            expect(inputs[1].hasAttribute('dir')).toBe(false);
+            expect(inputs[2].dir).toBe('ltr');
         }
     });
 
@@ -544,10 +564,11 @@ describe('CellLinkEdit', () => {
         });
 
         const inputs = Array.from(container.querySelectorAll('input'));
-        expect(inputs).toHaveLength(1);
+        expect(inputs).toHaveLength(2);
 
         await act(async () => {
-            inputText(inputs[0], 'docs.univer.ai');
+            inputText(inputs[0], 'Documentation tip');
+            inputText(inputs[1], 'docs.univer.ai');
             await Promise.resolve();
         });
         renderManagerService.enableScrollRender = true;
@@ -567,6 +588,7 @@ describe('CellLinkEdit', () => {
 
         expect(body?.dataStream).toBe('Univer\r\n');
         expect(linkRange?.properties?.url).toBe('http://docs.univer.ai');
+        expect(linkRange?.properties?.tooltip).toBe('Documentation tip');
         expect(popupService.currentEditing).toBeNull();
     });
 

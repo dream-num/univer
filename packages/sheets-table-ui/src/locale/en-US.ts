@@ -16,6 +16,17 @@
 
 const locale = {
     'sheets-table-ui': {
+        calculatedColumn: 'Calculated column',
+        columnFormula: 'Formula',
+        columnFormulaHint: 'Apply replaces all {0} data cells in this column immediately. Header and footer are excluded. Stop preserves existing cells. Changes can be undone.',
+        applyColumnFormula: 'Apply to entire column',
+        stopColumnFormula: 'Stop automatic fill',
+        columnFormulaApplied: 'Column setting applied',
+        settings: 'Table Settings',
+        showFilterButtons: 'Show filter buttons',
+        columnFilterButtons: 'Column filter buttons',
+        filterButtonsHint: 'Hiding buttons keeps existing filter criteria.',
+        settingsError: 'Unable to save. The table may have changed. Reopen settings and try again.',
         title: 'Table',
         selectRange: 'Select Table Range',
         rename: 'Rename Table',

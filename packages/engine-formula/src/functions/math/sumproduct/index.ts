@@ -84,9 +84,7 @@ export class Sumproduct extends BaseFunction {
                 const variantRowCount = arr.getRowCount();
                 const variantColumnCount = arr.getColumnCount();
 
-                // Keep original rule:
-                // only when BOTH row and column mismatch => #VALUE!
-                if (variantRowCount !== rowCount && variantColumnCount !== columnCount) {
+                if (variantRowCount !== rowCount || variantColumnCount !== columnCount) {
                     return ErrorValueObject.create(ErrorType.VALUE);
                 }
             }

@@ -57,6 +57,7 @@ export function MobileCellLinkPopupPure(props: IMobileCellLinkPopupPureProps) {
     }
 
     const linkObj = parserHyperLinkService.parseHyperLink(customRange.properties.url);
+    const tooltip = customRange.properties.tooltip ?? customRange.properties._xlsxHyperlinkTooltip;
     const isError = linkObj.type === SheetHyperLinkType.INVALID;
     const close = () => popupService.hideCurrentPopup(undefined, true);
 
@@ -74,6 +75,16 @@ export function MobileCellLinkPopupPure(props: IMobileCellLinkPopupPureProps) {
                     close();
                 }}
             />
+            {typeof tooltip === 'string' && tooltip && (
+                <div
+                    className="
+                      univer-max-h-32 univer-overflow-y-auto univer-whitespace-pre-wrap univer-break-words
+                      univer-text-sm univer-text-gray-500
+                    "
+                >
+                    {tooltip}
+                </div>
+            )}
             {copyPermission && (
                 <MobileActionRow
                     title={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.copy')}

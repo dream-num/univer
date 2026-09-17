@@ -18,6 +18,17 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        calculatedColumn: 'Vypočítaný stĺpec',
+        columnFormula: 'Vzorec',
+        columnFormulaHint: 'Okamžite nahradí {0} dátových buniek bez hlavičky a súhrnu. Zastavenie zachová existujúce bunky. Zmenu možno vrátiť späť.',
+        applyColumnFormula: 'Použiť na celý stĺpec',
+        stopColumnFormula: 'Zastaviť automatické vypĺňanie',
+        columnFormulaApplied: 'Nastavenie použité',
+        settings: 'Nastavenia tabuľky',
+        showFilterButtons: 'Zobraziť tlačidlá filtra',
+        columnFilterButtons: 'Tlačidlá filtra stĺpcov',
+        filterButtonsHint: 'Skrytie tlačidiel zachová existujúce kritériá filtra.',
+        settingsError: 'Uloženie zlyhalo. Tabuľka sa mohla zmeniť. Znova otvorte nastavenia.',
         title: 'Tabuľka',
         selectRange: 'Vyberte rozsah tabuľky',
         rename: 'Premenovať tabuľku',

@@ -15,9 +15,18 @@
  */
 
 import type { ICellData, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '../basics';
+import type {
+    IAddWorksheetMergeMutationParams,
+    IRemoveWorksheetMergeMutationParams,
+} from '../basics/interfaces/mutation-interface';
 import type { ISetRangeValuesMutationParams } from '../commands/mutations/set-range-values.mutation';
-import type { AUTO_FILL_APPLY_FUNCTIONS, IAutoFillCopyDataInType, IAutoFillCopyDataPiece, IAutoFillLocation, IAutoFillRuleConfirmedData } from '../services/auto-fill/type';
+import type {
+    AUTO_FILL_APPLY_FUNCTIONS,
+    IAutoFillCopyDataInType,
+    IAutoFillCopyDataPiece,
+    IAutoFillLocation,
+    IAutoFillRuleConfirmedData,
+} from '../services/auto-fill/type';
 import {
     Direction,
     Disposable,
@@ -30,9 +39,18 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { discreteRangeToRange } from '../basics/utils';
-import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
-import { RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
-import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../commands/mutations/set-range-values.mutation';
+import {
+    AddMergeUndoMutationFactory,
+    AddWorksheetMergeMutation,
+} from '../commands/mutations/add-worksheet-merge.mutation';
+import {
+    RemoveMergeUndoMutationFactory,
+    RemoveWorksheetMergeMutation,
+} from '../commands/mutations/remove-worksheet-merge.mutation';
+import {
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+} from '../commands/mutations/set-range-values.mutation';
 import { IAutoFillService } from '../services/auto-fill/auto-fill.service';
 import AutoFillRules from '../services/auto-fill/rules';
 import AutoFillTools from '../services/auto-fill/tools';
@@ -473,6 +491,8 @@ export class AutoFillController extends Disposable {
                     if (cellData) {
                         const old = this._beforeApplyData[rowIndex][colIndex] || {};
                         cellData.f = old.f;
+                        cellData.ft = old.ft;
+                        cellData.fd = old.fd;
                         cellData.si = old.si;
                         cellData.t = old.t;
                         cellData.v = old.v;

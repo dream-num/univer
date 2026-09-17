@@ -30,6 +30,8 @@ describe('cloneCellDataWithSpanInfo', () => {
             v: '1',
             t: 1,
             f: '=A1',
+            ft: 2,
+            fd: 0,
             ref: 'A1',
             xf: '=SUM()',
             si: 'sid',

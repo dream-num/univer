@@ -44,6 +44,7 @@ export class SheetTableControlsMobileRenderController extends SheetTableControls
                 rename: this._localeService.t<LocaleKey>('sheets-table-ui.rename'),
                 'update-range': this._localeService.t<LocaleKey>('sheets-table-ui.updateRange'),
                 'set-theme': this._localeService.t<LocaleKey>('sheets-table-ui.setTheme'),
+                settings: this._localeService.t<LocaleKey>('sheets-table-ui.settings'),
                 delete: this._localeService.t<LocaleKey>('sheets-table-ui.removeTable'),
             },
             onSelect: (action: SheetTableMenuAction) => this._handleTableMenuAction(action, unitId, subUnitId, tableId),

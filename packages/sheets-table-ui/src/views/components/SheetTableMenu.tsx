@@ -17,7 +17,7 @@
 import type { ICanvasPopup } from '@univerjs/sheets-ui';
 import { DropdownMenu } from '@univerjs/design';
 
-export type SheetTableMenuAction = 'rename' | 'update-range' | 'set-theme' | 'delete';
+export type SheetTableMenuAction = 'rename' | 'update-range' | 'set-theme' | 'settings' | 'delete';
 
 export interface ISheetTableMenuExtraProps {
     anchorWidth: number;
@@ -46,6 +46,7 @@ export function SheetTableMenu({ popup }: ISheetTableMenuProps) {
                 { type: 'item', children: menu.labels.rename, onSelect: () => menu.onSelect('rename') },
                 { type: 'item', children: menu.labels['update-range'], onSelect: () => menu.onSelect('update-range') },
                 { type: 'item', children: menu.labels['set-theme'], onSelect: () => menu.onSelect('set-theme') },
+                { type: 'item', children: menu.labels.settings, onSelect: () => menu.onSelect('settings') },
                 { type: 'item', children: menu.labels.delete, variant: 'destructive', onSelect: () => menu.onSelect('delete') },
             ]}
             open

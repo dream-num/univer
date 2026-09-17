@@ -25,7 +25,14 @@ import type {
     Styles,
     Workbook,
 } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, ObjectMatrix, Tools, UniverInstanceType } from '@univerjs/core';
+import {
+    CommandType,
+    isFormulaId,
+    IUniverInstanceService,
+    ObjectMatrix,
+    Tools,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { handleStyle, transformStyle } from '../../basics/cell-style';
 import { getCellType } from '../../basics/cell-type';
 import { getCellValue, setNull } from '../../basics/cell-value';
@@ -142,7 +149,7 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
     },
 };
 
-const overwriteCellPropertiesSet = new Set(['f', 'p', 'si', 'custom', 'ref', 'xf']);
+const overwriteCellPropertiesSet = new Set(['f', 'p', 'si', 'custom', 'ref', 'xf', 'ft', 'fd']);
 function mergeCellData(newValue: ICellData, oldValue: ICellData, styles: Styles, isOverrideStyle = false) {
     const type = getCellType(styles, newValue, oldValue);
     Object.keys(newValue).forEach((key) => {
@@ -162,6 +169,12 @@ function mergeCellData(newValue: ICellData, oldValue: ICellData, styles: Styles,
             }
         }
     });
+
+    // Shared formula followers have no f, but still carry formula metadata.
+    if ((newValue.f === null || newValue.f === '') && !isFormulaId(newValue.si)) {
+        delete oldValue.ft;
+        delete oldValue.fd;
+    }
 
     if (oldValue.v !== undefined) {
         oldValue.t = type;

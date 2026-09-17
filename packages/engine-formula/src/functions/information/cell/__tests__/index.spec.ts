@@ -50,6 +50,7 @@ const getTestWorkbookData = (): IWorkbookData => {
                         1: {
                             v: 2,
                             t: CellValueType.NUMBER,
+                            s: 'date-style',
                         },
                     },
                     1: {
@@ -150,7 +151,11 @@ const getTestWorkbookData = (): IWorkbookData => {
         locale: LocaleType.ZH_CN,
         name: '',
         sheetOrder: ['sheet1', 'sheet2'],
-        styles: {},
+        styles: {
+            'date-style': {
+                n: { pattern: 'yyyy-mm-dd' },
+            },
+        },
     };
 };
 
@@ -239,6 +244,9 @@ describe('Test cell function', () => {
 
             result = await calculate('=Cell("width", D3)');
             expect(result).toStrictEqual([[88, true]]);
+
+            result = await calculate('=Cell("format", B1)');
+            expect(result).toBe('D4');
 
             result = await calculate('=Cell("address", \'Startup Costs\'!B2)');
             expect(result).toBe("'Startup Costs'!$B$2");

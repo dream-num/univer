@@ -23,6 +23,8 @@ export interface ICellLinkContent {
      * file: file://a.xlsx
      */
     payload: string;
+    /** Optional text shown inside the hyperlink popup. Empty string clears it on update. */
+    tooltip?: string;
     /**
      * only for notify, if you wan't to read the display of text, use cell-value of cell-matrix instead
      */

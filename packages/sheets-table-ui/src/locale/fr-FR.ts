@@ -18,6 +18,17 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        calculatedColumn: 'Colonne calculée',
+        columnFormula: 'Formule',
+        columnFormulaHint: 'Remplace immédiatement les {0} cellules de données, hors en-tête et total. Arrêter conserve les cellules existantes. Annulation possible.',
+        applyColumnFormula: 'Appliquer à toute la colonne',
+        stopColumnFormula: 'Arrêter le remplissage automatique',
+        columnFormulaApplied: 'Paramètre appliqué',
+        settings: 'Paramètres du tableau',
+        showFilterButtons: 'Afficher les boutons de filtre',
+        columnFilterButtons: 'Boutons de filtre des colonnes',
+        filterButtonsHint: 'Masquer les boutons conserve les critères de filtre existants.',
+        settingsError: 'Enregistrement impossible. Le tableau a peut-être changé. Rouvrez les paramètres et réessayez.',
         title: 'Tableau',
         selectRange: 'Sélectionner la plage du tableau',
         rename: 'Renommer le tableau',

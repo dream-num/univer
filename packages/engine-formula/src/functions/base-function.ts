@@ -633,7 +633,7 @@ export class BaseFunction {
 
     createReferenceObject(reference: BaseReferenceObject, range: IRange) {
         const unitId = reference.getForcedUnitId() || reference.getDefaultUnitId() || '';
-        const sheetId = reference.getForcedSheetId() || reference.getDefaultUnitId() || '';
+        const sheetId = reference.getForcedSheetId() || reference.getDefaultSheetId() || '';
         const sheetName = reference.getForcedSheetName();
 
         const gridRangeName = {

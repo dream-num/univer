@@ -98,6 +98,13 @@ export function setNull(value: Nullable<ICellData>) {
         value.f = null;
     }
 
+    if (value.ft === undefined) {
+        value.ft = null;
+    }
+    if (value.fd === undefined) {
+        value.fd = null;
+    }
+
     if (value.si === undefined) {
         value.si = null;
     }

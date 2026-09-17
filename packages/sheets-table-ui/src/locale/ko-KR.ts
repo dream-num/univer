@@ -18,6 +18,17 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        calculatedColumn: '계산 열',
+        columnFormula: '수식',
+        columnFormulaHint: '적용하면 머리글과 합계 행을 제외한 데이터 셀 {0}개를 즉시 바꿉니다. 자동 채우기를 중지해도 기존 셀은 유지됩니다. 실행 취소할 수 있습니다.',
+        applyColumnFormula: '전체 열에 적용',
+        stopColumnFormula: '자동 채우기 중지',
+        columnFormulaApplied: '열 설정 적용됨',
+        settings: '표 설정',
+        showFilterButtons: '필터 버튼 표시',
+        columnFilterButtons: '열 필터 버튼',
+        filterButtonsHint: '버튼을 숨겨도 기존 필터 조건은 유지됩니다.',
+        settingsError: '저장하지 못했습니다. 표가 변경되었을 수 있습니다. 설정을 다시 열어 시도하세요.',
         title: '표',
         selectRange: '표 범위 선택',
         rename: '표 이름 바꾸기',

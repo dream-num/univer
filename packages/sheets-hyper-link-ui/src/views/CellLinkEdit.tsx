@@ -65,6 +65,7 @@ import { isBlankInput, resolveRangePayload } from './CellLinkEdit/utils';
 export const CellLinkEdit = () => {
     const [id, setId] = useState('');
     const [display, setDisplay] = useState('');
+    const [tooltip, setTooltip] = useState('');
     const [showLabel, setShowLabel] = useState(true);
     const [type, setType] = useState<SheetHyperLinkType | string>(SheetHyperLinkType.URL);
     const [payload, setPayload] = useState('');
@@ -128,6 +129,7 @@ export const CellLinkEdit = () => {
                     id: customRange?.rangeId ?? '',
                     display: label ?? '',
                     payload: customRange?.properties?.url ?? '',
+                    tooltip: customRange?.properties?.tooltip ?? customRange?.properties?._xlsxHyperlinkTooltip ?? '',
                     row,
                     column: col,
                 };
@@ -145,6 +147,7 @@ export const CellLinkEdit = () => {
                         id: '',
                         display: '',
                         payload: range?.properties?.url ?? '',
+                        tooltip: range?.properties?.tooltip ?? range?.properties?._xlsxHyperlinkTooltip ?? '',
                         row,
                         column: col,
                     };
@@ -160,6 +163,7 @@ export const CellLinkEdit = () => {
                         id: '',
                         display: label ?? '',
                         payload: customRange?.properties?.url ?? '',
+                        tooltip: customRange?.properties?.tooltip ?? customRange?.properties?._xlsxHyperlinkTooltip ?? '',
                         row,
                         column: col,
                     };
@@ -167,6 +171,7 @@ export const CellLinkEdit = () => {
             }
 
             setId(link.id);
+            setTooltip(link.tooltip);
             const customLink = sidePanelService.findCustomHyperLink(link);
             if (customLink) {
                 const customLinkInfo = customLink.convert(link);
@@ -377,6 +382,7 @@ export const CellLinkEdit = () => {
                     subUnitId: editing.subUnitId,
                     payload: {
                         display: showLabel ? display : '',
+                        tooltip,
                         payload: formatUrl(type, payload),
                     },
                     row: editing.row,
@@ -394,6 +400,7 @@ export const CellLinkEdit = () => {
                         column: editing.col,
                         payload: formatUrl(type, payload),
                         display: showLabel ? display : '',
+                        tooltip,
                     },
                     documentId: editorBridgeService.getCurrentEditorId(),
                 });
@@ -456,6 +463,9 @@ export const CellLinkEdit = () => {
                     </FormLayout>
                 )
                 : null}
+            <FormLayout label={localeService.t<LocaleKey>('sheets-hyper-link-ui.form.tooltip')}>
+                <Input value={tooltip} onChange={setTooltip} />
+            </FormLayout>
             <FormLayout label={localeService.t<LocaleKey>('sheets-hyper-link-ui.form.type')}>
                 <Select
                     className="univer-w-full"

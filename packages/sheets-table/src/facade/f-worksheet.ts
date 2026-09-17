@@ -20,12 +20,13 @@ import type {
     IDeleteSheetTableParams,
     ISetSheetTableCommandParams,
     ISetSheetTableParams,
+    ITableFilterButtonConfig,
     ITableFilterItem,
     ITableInfoWithUnitId,
     ITableOptions,
     ITableRange,
 } from '@univerjs/sheets-table';
-import { cellToRange, customNameCharacterCheck, LocaleService, Rectangle } from '@univerjs/core';
+import { cellToRange, customNameCharacterCheck, Rectangle } from '@univerjs/core';
 import { RangeThemeStyle } from '@univerjs/sheets';
 import {
     AddSheetTableCommand,
@@ -34,6 +35,7 @@ import {
     SetSheetTableCommand,
     SetSheetTableFilterCommand,
     SheetTableService,
+    TableManager,
 } from '@univerjs/sheets-table';
 import { FWorksheet } from '@univerjs/sheets/facade';
 
@@ -41,6 +43,23 @@ import { FWorksheet } from '@univerjs/sheets/facade';
  * @ignore
  */
 export interface IFWorksheetTableMixin {
+    /**
+     * Apply a formula to every data row of a table column, excluding header and footer.
+     * References are relative to the first data row. Empty string stops future auto-fill and preserves cells.
+     * @param tableId Table ID in this worksheet.
+     * @param columnId Stable column ID from getSubTableInfos().
+     * @param formula Formula to apply, or an empty string to stop automatic filling.
+     * @returns Whether the undoable update succeeded synchronously.
+     */
+    setTableColumnFormula(tableId: string, columnId: string, formula: string): boolean;
+    /**
+     * Update table filter button visibility without clearing filter criteria.
+     * Column overrides use stable column IDs from getSubTableInfos().
+     * @param tableId Table ID in this worksheet.
+     * @param config Partial table and column button visibility settings.
+     * @returns Whether the update succeeded synchronously.
+     */
+    setTableFilterButtons(tableId: string, config: ITableFilterButtonConfig): boolean;
     /**
      * Add a table to the worksheet
      * @param {string} tableName The table name
@@ -354,12 +373,32 @@ export interface IFWorksheetTableMixin {
 }
 
 export class FWorksheetTableMixin extends FWorksheet implements IFWorksheetTableMixin {
+    override setTableColumnFormula(tableId: string, columnId: string, formula: string): boolean {
+        const unitId = this.getWorkbook().getUnitId();
+        const table = this._injector.get(TableManager).getTableById(unitId, tableId);
+        if (!table || table.getSubunitId() !== this.getSheetId()) {
+            return false;
+        }
+        return this._commandService.syncExecuteCommand(SetSheetTableCommand.id, {
+            unitId,
+            tableId,
+            calculatedColumn: { columnId, formula },
+        });
+    }
+
+    override setTableFilterButtons(tableId: string, config: ITableFilterButtonConfig): boolean {
+        const unitId = this.getWorkbook().getUnitId();
+        const table = this._injector.get(TableManager).getTableById(unitId, tableId);
+        if (!table || table.getSubunitId() !== this.getSheetId()) {
+            return false;
+        }
+        return this._commandService.syncExecuteCommand(SetSheetTableCommand.id, { unitId, tableId, filterButtons: config });
+    }
+
     override addTable(tableName: string, rangeInfo: ITableRange, tableId?: string, options?: ITableOptions): Promise<boolean> | boolean {
         const subUnitId = this.getSheetId();
         const workbook = this.getWorkbook();
         const unitId = workbook.getUnitId();
-
-        const localeService = this._injector.get(LocaleService);
 
         const sheetNameSet = new Set<string>();
         if (workbook) {

@@ -17,6 +17,7 @@
 import type { IWorkbookData, UnitModel } from '@univerjs/core';
 import { LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
+import { SheetsTableSortStateEnum, TableColumnDataTypeEnum, TableColumnFilterTypeEnum } from '../../types/enum';
 import { TableManager } from '../table-manager';
 
 describe('TableManager', () => {
@@ -40,12 +41,15 @@ describe('TableManager', () => {
                     'sheet-1': {
                         id: 'sheet-1',
                         name: 'Sheet1',
-                        rowCount: 2,
+                        rowCount: 4,
                         columnCount: 1,
                         cellData: {
                             0: {
                                 0: { v: 'Name' },
                             },
+                            1: { 0: { v: 'renamed' } },
+                            2: { 0: { v: 'renamed' } },
+                            3: { 0: { v: 'renamed' } },
                         },
                     },
                 },
@@ -66,22 +70,44 @@ describe('TableManager', () => {
                         range: {
                             startRow: 0,
                             startColumn: 0,
-                            endRow: 1,
+                            endRow: 3,
                             endColumn: 0,
                         },
                         options: {
                             tableStyleId: 'ImportedTableStyle',
+                            showFooter: true,
+                            showAutoFilter: false,
                         },
-                        filters: {},
-                        columns: [],
+                        filters: {
+                            tableColumnFilterList: [{ filterType: TableColumnFilterTypeEnum.manual, values: ['original'] }],
+                            tableSortInfo: { columnIndex: 0, sortState: SheetsTableSortStateEnum.Asc },
+                        },
+                        columns: [{
+                            id: 'column-1',
+                            displayName: 'Name',
+                            dataType: TableColumnDataTypeEnum.String,
+                            formula: '',
+                            showFilterButton: false,
+                            meta: {},
+                            style: {},
+                        }],
                         meta: {},
                     },
                 ],
-                tableFilteredOutRows: [],
+                tableFilteredOutRows: [2],
             },
         });
 
         expect(events).toHaveLength(1);
         expect(events[0].tableStyleId).toBe('ImportedTableStyle');
+        const serialized = manager.toJSON('unit-1')['sheet-1'];
+        expect(serialized.tableFilteredOutRows).toEqual([2]);
+        expect(serialized.tables[0].options.showFooter).toBe(true);
+        expect(serialized.tables[0].options.showAutoFilter).toBe(false);
+        expect(serialized.tables[0].columns[0].showFilterButton).toBe(false);
+        expect(serialized.tables[0].filters.tableSortInfo).toEqual({
+            columnIndex: 0,
+            sortState: SheetsTableSortStateEnum.Asc,
+        });
     });
 });

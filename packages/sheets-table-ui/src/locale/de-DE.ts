@@ -18,6 +18,17 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        calculatedColumn: 'Berechnete Spalte',
+        columnFormula: 'Formel',
+        columnFormulaHint: 'Ersetzt sofort alle {0} Datenzellen ohne Kopf- und Ergebniszeile. Beim Stoppen bleiben vorhandene Zellen erhalten. Rückgängig möglich.',
+        applyColumnFormula: 'Auf ganze Spalte anwenden',
+        stopColumnFormula: 'Automatisches Ausfüllen stoppen',
+        columnFormulaApplied: 'Spalteneinstellung angewendet',
+        settings: 'Tabelleneinstellungen',
+        showFilterButtons: 'Filterschaltflächen anzeigen',
+        columnFilterButtons: 'Filterschaltflächen der Spalten',
+        filterButtonsHint: 'Beim Ausblenden bleiben vorhandene Filterkriterien erhalten.',
+        settingsError: 'Speichern fehlgeschlagen. Die Tabelle wurde möglicherweise geändert. Öffnen Sie die Einstellungen erneut.',
         title: 'Tabelle',
         selectRange: 'Tabellenbereich auswählen',
         rename: 'Tabelle umbenennen',

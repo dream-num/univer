@@ -16,22 +16,31 @@
 
 import type { ICellData, IStyleData, IWorkbookData, Univer, Workbook } from '@univerjs/core';
 import {
+    BooleanNumber,
     BorderStyleTypes,
+    FormulaType,
     ICommandService,
     IUniverInstanceService,
     LocaleType,
     RANGE_TYPE,
+    RedoCommand,
     Tools,
+    UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { AutoFillCommand, SheetCopyDownCommand, SheetCopyRightCommand } from '../../commands/commands/auto-fill.command';
+import {
+    AutoFillCommand,
+    SheetCopyDownCommand,
+    SheetCopyRightCommand,
+} from '../../commands/commands/auto-fill.command';
 import { AddWorksheetMergeMutation } from '../../commands/mutations/add-worksheet-merge.mutation';
 import { RemoveWorksheetMergeMutation } from '../../commands/mutations/remove-worksheet-merge.mutation';
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
 import { SetSelectionsOperation } from '../../commands/operations/selection.operation';
 import { createTestBase } from '../../services/__tests__/util';
 import { AutoFillService, IAutoFillService } from '../../services/auto-fill/auto-fill.service';
+import { AUTO_FILL_APPLY_TYPE } from '../../services/auto-fill/type';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { AutoFillController } from '../auto-fill.controller';
 
@@ -148,6 +157,31 @@ describe('AutoFillController copy-fill shortcuts', () => {
         expect(getCell(1, 0)?.v).toBe(123);
         expect(getCellStyle(1, 0)).toEqual(SOURCE_STYLE);
     });
+
+    it.each([BooleanNumber.FALSE, BooleanNumber.TRUE])(
+        'preserves target array metadata when filling only formatting (%s)',
+        async (fd) => {
+            const formula = { f: '=A1', ft: FormulaType.ARRAY, fd, v: 123 };
+            commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                cellValue: { 1: { 0: formula } },
+            });
+            expect(await commandService.executeCommand(AutoFillCommand.id, {
+                sourceRange: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+                targetRange: { startRow: 0, endRow: 1, startColumn: 0, endColumn: 0 },
+                applyType: AUTO_FILL_APPLY_TYPE.ONLY_FORMAT,
+            })).toBe(true);
+            expect(getCell(1, 0)).toMatchObject(formula);
+            expect(getCellStyle(1, 0)).toEqual(SOURCE_STYLE);
+            expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+            expect(getCell(1, 0)).toMatchObject(formula);
+            expect(getCellStyle(1, 0)).toEqual(TARGET_STYLE);
+            expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+            expect(getCell(1, 0)).toMatchObject(formula);
+            expect(getCellStyle(1, 0)).toEqual(SOURCE_STYLE);
+        }
+    );
 
     it('copies values and styles right with the copy-right shortcut command', async () => {
         selectRange(2, 4);

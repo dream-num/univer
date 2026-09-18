@@ -67,6 +67,7 @@ export interface IDocumentLayoutRenderConfig extends IDocumentRenderConfig {
     preservePunctuationSpacing?: BooleanNumber;
     applyTextPosition?: BooleanNumber;
     paintTextOutline?: BooleanNumber;
+    useCustomGlyphRenderer?: BooleanNumber;
 }
 
 export interface IDocumentLayoutParagraphStyle extends IParagraphStyle {

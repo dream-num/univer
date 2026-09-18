@@ -527,6 +527,13 @@ export class FontAndBaseLine extends docExtension {
         y: number
     ) {
         const requestedRenderScale = glyph.ts?.fontRenderScale;
+        const renderConfig = this.extensionOffset.renderConfig;
+        if (requestedRenderScale === undefined && !glyph.ts?.textPaintOffsets?.length
+            && renderConfig?.useCustomGlyphRenderer !== BooleanNumber.TRUE
+            && renderConfig?.paintTextOutline !== BooleanNumber.TRUE) {
+            ctx.fillText(content, x, y);
+            return;
+        }
         if (requestedRenderScale === undefined) {
             this._paintTextAtPoint(ctx, glyph, content, x, y);
             return;
@@ -585,7 +592,8 @@ export class FontAndBaseLine extends docExtension {
         y: number
     ) {
         const fontFamily = glyph.ts?.ff ?? glyph.fontStyle?.fontFamily ?? undefined;
-        const customRenderer = getDocCustomGlyphRenderer(fontFamily);
+        const useCustomGlyphRenderer = this.extensionOffset.renderConfig?.useCustomGlyphRenderer === BooleanNumber.TRUE;
+        const customRenderer = useCustomGlyphRenderer ? getDocCustomGlyphRenderer(fontFamily) : undefined;
         const fontSizePx = customRenderer ? canvasFontPixelSize(ctx.font) : undefined;
         const bold = glyph.ts?.bl === BooleanNumber.TRUE;
         const italic = glyph.ts?.it === BooleanNumber.TRUE;
@@ -610,7 +618,7 @@ export class FontAndBaseLine extends docExtension {
             if (outline.miterLimit !== undefined) {
                 ctx.miterLimit = outline.miterLimit;
             }
-            const strokeRenderer = getDocCustomGlyphStrokeRenderer(fontFamily);
+            const strokeRenderer = useCustomGlyphRenderer ? getDocCustomGlyphStrokeRenderer(fontFamily) : undefined;
             const customStroked = strokeRenderer && fontSizePx !== undefined
                 ? strokeRenderer({ bold, italic, content, context: ctx, fontSizePx, glyphKey: glyph.ts?.customGlyphKey, x, y })
                 : false;

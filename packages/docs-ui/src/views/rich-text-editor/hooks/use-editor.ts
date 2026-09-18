@@ -15,12 +15,10 @@
  */
 
 import type { IDocumentData, Nullable } from '@univerjs/core';
-import type { IDocCustomGlyphRendererRegistration } from '@univerjs/engine-render';
 import type { RefObject } from 'react';
 import type { Editor, IEditorCanvasStyle } from '../../../services/editor/editor';
 import type { IEditorRuntimeConfig } from '../../../services/editor/editor-runtime-config';
 import { createParagraphId, RichTextBuilder, Tools } from '@univerjs/core';
-import { registerDocCustomGlyphRenderer } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
 import { useLayoutEffect, useMemo, useState } from 'react';
 import { IEditorService } from '../../../services/editor/editor-manager.service';
@@ -35,7 +33,6 @@ export interface IUseEditorProps {
     autoFocus?: boolean;
     isSingle?: boolean;
     canvasStyle?: IEditorCanvasStyle;
-    customGlyphRenderers?: readonly IDocCustomGlyphRendererRegistration[];
     cancelDefaultResizeListener?: boolean;
     disableBackScroll?: boolean;
     documentLayoutSize?: Readonly<Pick<DOMRectReadOnly, 'width' | 'height'>>;
@@ -49,7 +46,6 @@ export function useEditor(opts: IUseEditorProps) {
         cancelDefaultResizeListener,
         canvasStyle,
         container,
-        customGlyphRenderers,
         disableBackScroll,
         documentLayoutSize,
         emitSelectionWhileDragging,
@@ -63,11 +59,6 @@ export function useEditor(opts: IUseEditorProps) {
     const autoFocus = useMemo(() => _autoFocus ?? false, []);
     const [editor, setEditor] = useState<Editor>();
     const editorService = useDependency(IEditorService);
-
-    useLayoutEffect(() => {
-        const disposables = customGlyphRenderers?.map(registerDocCustomGlyphRenderer) ?? [];
-        return () => disposables.forEach((item) => item.dispose());
-    }, [customGlyphRenderers]);
 
     useLayoutEffect(() => {
         if (container.current) {

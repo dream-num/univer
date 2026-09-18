@@ -472,6 +472,47 @@ describe('docs font and baseline extension', () => {
         expect(TestContext.scale).not.toHaveBeenCalled();
     });
 
+    it.each([undefined, BooleanNumber.TRUE])('isolates registered glyph painters from ordinary text (outline: %s)', (paintTextOutline) => {
+        const extension = new FontAndBaseLine();
+        const TestContext = createContext();
+        const renderer = vi.fn(() => true);
+        const strokeRenderer = vi.fn(() => true);
+        const registration = registerDocCustomGlyphRenderer({ fontFamily: 'SharedFont', renderer, strokeRenderer });
+        const glyph = createGlyph('A', {
+            ts: { fs: 12, ff: 'SharedFont', textOutline: { color: '#123456', width: 1 } },
+        });
+        const offset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+        };
+        try {
+            extension.extensionOffset = { ...offset, renderConfig: { paintTextOutline } };
+            extension.draw(TestContext, DEFAULT_SCALE, glyph);
+            expect(renderer).not.toHaveBeenCalled();
+            expect(strokeRenderer).not.toHaveBeenCalled();
+            expect(TestContext.fillText).toHaveBeenCalledWith('A', 12, 20);
+
+            extension.extensionOffset = {
+                ...offset,
+                renderConfig: { paintTextOutline, useCustomGlyphRenderer: BooleanNumber.TRUE },
+            };
+            TestContext.fillText.mockClear();
+            extension.draw(TestContext, DEFAULT_SCALE, glyph);
+            expect(renderer).toHaveBeenCalledTimes(1);
+            expect(TestContext.fillText).not.toHaveBeenCalled();
+            expect(strokeRenderer).toHaveBeenCalledTimes(paintTextOutline === BooleanNumber.TRUE ? 1 : 0);
+
+            extension.extensionOffset = { ...offset, renderConfig: { paintTextOutline } };
+            extension.draw(TestContext, DEFAULT_SCALE, glyph);
+            expect(renderer).toHaveBeenCalledTimes(1);
+            expect(strokeRenderer).toHaveBeenCalledTimes(paintTextOutline === BooleanNumber.TRUE ? 1 : 0);
+            expect(TestContext.fillText).toHaveBeenCalledWith('A', 12, 20);
+        } finally {
+            registration.dispose();
+        }
+    });
+
     it('uses a registered runtime glyph painter for the primary font family', () => {
         const extension = new FontAndBaseLine();
         const TestContext = createContext();
@@ -482,6 +523,7 @@ describe('docs font and baseline extension', () => {
             spanStartPoint: Vector2.create(10, 10),
             centerPoint: Vector2.create(8, 8),
             renderConfig: {
+                useCustomGlyphRenderer: BooleanNumber.TRUE,
                 vertexAngle: 0,
                 centerAngle: 0,
             },
@@ -524,7 +566,12 @@ describe('docs font and baseline extension', () => {
             spanPointWithFont: Vector2.create(12, 20),
             spanStartPoint: Vector2.create(10, 10),
             centerPoint: Vector2.create(8, 8),
-            renderConfig: { paintTextOutline: BooleanNumber.TRUE, vertexAngle: 0, centerAngle: 0 },
+            renderConfig: {
+                useCustomGlyphRenderer: BooleanNumber.TRUE,
+                paintTextOutline: BooleanNumber.TRUE,
+                vertexAngle: 0,
+                centerAngle: 0,
+            },
         };
         const glyph = createGlyph('A', {
             ts: { fs: 12, ff: '"PdfOutline", serif', textOutline: { color: '#123456', width: 0.16 } },
@@ -567,6 +614,7 @@ describe('docs font and baseline extension', () => {
             spanStartPoint: Vector2.create(10, 10),
             centerPoint: Vector2.create(8, 8),
             renderConfig: {
+                useCustomGlyphRenderer: BooleanNumber.TRUE,
                 vertexAngle: 0,
                 centerAngle: 0,
             },

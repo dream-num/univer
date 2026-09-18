@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 
-import type { ICustomDecoration, ICustomRange, ICustomTable, IDocumentBody, IParagraph, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
+import type {
+    ICustomDecoration,
+    ICustomRange,
+    ICustomTable,
+    IDocumentBody,
+    IParagraph,
+    ITextRun,
+    ITextStyle,
+    Nullable,
+} from '@univerjs/core';
 import { DataStreamTreeTokenType } from '@univerjs/core';
 
 export function isTopLevelStructuralGap(dataStream: string, offset: number): boolean {
@@ -109,8 +118,6 @@ export function getTextRunAtInputPosition(
             ...cacheStyle,
         }
         : { ...inheritedTextRun.ts };
-    delete textStyle.textAdvance;
-    delete textStyle.customGlyphKey;
 
     return {
         ...(nextTextRun ?? inheritedTextRun),

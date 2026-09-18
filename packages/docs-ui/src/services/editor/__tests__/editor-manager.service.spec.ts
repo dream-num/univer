@@ -14,9 +14,25 @@
  * limitations under the License.
  */
 
+import type { IDocSelectionInnerParam } from '@univerjs/engine-render';
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 // @vitest-environment jsdom
 
-import type { IDocSelectionInnerParam } from '@univerjs/engine-render';
 import {
     CommandService,
     ConfigService,
@@ -58,6 +74,7 @@ import { ReplaceSnapshotCommand } from '../../../commands/commands/replace-conte
 import { DocSelectionRenderService } from '../../selection/doc-selection-render.service';
 import { Editor } from '../editor';
 import { EditorService, IEditorService } from '../editor-manager.service';
+import { getEditorRuntimeConfig } from '../editor-runtime-config';
 
 const EDITOR_ID = 'editor-1';
 
@@ -97,7 +114,12 @@ class TestDocSelectionRenderService {
 class TestRender {
     constructor(private readonly _selectionRenderService: TestDocSelectionRenderService) {}
 
+    with(service: typeof DocSelectionRenderService): TestDocSelectionRenderService;
+    with(service: typeof DocSkeletonManagerService): { getViewModel: () => undefined };
     with(service: unknown) {
+        if (service === DocSkeletonManagerService) {
+            return { getViewModel: () => undefined };
+        }
         if (service === DocSelectionRenderService) {
             return this._selectionRenderService;
         }
@@ -588,13 +610,13 @@ describe('EditorService', () => {
     it.each([false, true])('keeps replacement resources and releases old listeners (old container disposed first: %s)', (previousFirst) => {
         const { service, univerInstanceService } = createService(TestRegisterRenderManagerService);
         const snapshot = univerInstanceService.getUnit<DocumentDataModel>(EDITOR_ID)!.getSnapshot();
-        const previousLease = service.register({ initialSnapshot: snapshot }, document.createElement('div'));
+        const previousLease = service.register({ initialSnapshot: snapshot, renderConfig: { disableSelectionAutoScroll: true } }, document.createElement('div'));
         const previousEditor = service.getEditor(EDITOR_ID)!;
         const oldInputs: string[] = [];
         previousEditor.input$.subscribe(({ content }) => oldInputs.push(content));
         service.focus(EDITOR_ID);
         const currentContainer = document.createElement('div');
-        const currentLease = service.register({ initialSnapshot: snapshot }, currentContainer);
+        const currentLease = service.register({ initialSnapshot: snapshot, renderConfig: { inheritParagraphStartStyle: true } }, currentContainer);
         const currentEditor = service.getEditor(EDITOR_ID)!;
         expect(currentEditor).not.toBe(previousEditor);
         const model = univerInstanceService.getUnit<DocumentDataModel>(EDITOR_ID)!;
@@ -607,6 +629,7 @@ describe('EditorService', () => {
         if (previousFirst) {
             previousLease.dispose();
         }
+        expect(getEditorRuntimeConfig(model)).toEqual({ inheritParagraphStartStyle: true });
         expect(service.getEditor(EDITOR_ID)).toBe(currentEditor);
         expect(univerInstanceService.getUnit(EDITOR_ID)).toBe(model);
         expect(model.getSnapshot()).toEqual(snapshot);
@@ -617,6 +640,7 @@ describe('EditorService', () => {
         currentLease.dispose();
         previousLease.dispose();
         currentLease.dispose();
+        expect(getEditorRuntimeConfig(model)).toBeUndefined();
         expect(service.getEditor(EDITOR_ID)).toBeUndefined();
         expect(univerInstanceService.getUnit(EDITOR_ID)).toBeUndefined();
         expect(TestRegisterRenderManagerService.removedRenderIds).toEqual([EDITOR_ID]);

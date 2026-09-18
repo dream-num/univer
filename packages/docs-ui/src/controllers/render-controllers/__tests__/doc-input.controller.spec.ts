@@ -18,10 +18,14 @@
  * @vitest-environment jsdom
  */
 
-import { BooleanNumber, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentDataModel } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentDataModel } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '../../../services/doc-embed-integration.service';
+import {
+    EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
+    EmbedInteractionBoundaryService,
+    EmbedRuntimeFocusCoordinator,
+} from '../../../services/doc-embed-integration.service';
 import { DocInputController } from '../doc-input.controller';
 
 describe('DocInputController', () => {
@@ -304,65 +308,5 @@ describe('DocInputController', () => {
             segmentId: '',
             body: expect.objectContaining({ dataStream: 'x' }),
         }));
-    });
-
-    it('does not inherit a source glyph advance onto newly typed text', async () => {
-        const onInput$ = new Subject<unknown>();
-        const executeCommand = vi.fn((
-            _id: string,
-            _params?: { body?: { textRuns?: Array<{ ts?: unknown }> } }
-        ) => Promise.resolve(true));
-        const body = {
-            dataStream: 'ab\r\n',
-            textRuns: [{
-                st: 0,
-                ed: 2,
-                ts: {
-                    bl: BooleanNumber.TRUE,
-                    customGlyphKey: 'source-glyph',
-                    lineAscent: 12,
-                    lineDescent: 4,
-                    sa: 0.75,
-                    sc: 2,
-                    textAdvance: 20,
-                },
-            }],
-        };
-
-        new DocInputController(
-            {
-                unitId: 'pdf-layout-editor',
-                unit: new DocumentDataModel({ body }),
-            } as never,
-            { onInput$, getAllRectRanges: vi.fn(() => []) } as never,
-            { getSkeleton: vi.fn(() => ({})) } as never,
-            { executeCommand } as never,
-            {
-                getDefaultStyle: vi.fn(() => ({})),
-                getStyleCache: vi.fn(() => ({})),
-            } as never
-        );
-
-        onInput$.next({
-            event: { defaultPrevented: false, data: 'x' },
-            content: 'x',
-            activeRange: {
-                segmentId: '',
-                startOffset: 1,
-                endOffset: 1,
-                collapsed: true,
-                isActive: true,
-            },
-        });
-        await Promise.resolve();
-
-        const insertBody = executeCommand.mock.calls[0]?.[1]?.body;
-        expect(insertBody?.textRuns?.[0]?.ts).toEqual({
-            bl: BooleanNumber.TRUE,
-            lineAscent: 12,
-            lineDescent: 4,
-            sa: 0.75,
-            sc: 2,
-        });
     });
 });

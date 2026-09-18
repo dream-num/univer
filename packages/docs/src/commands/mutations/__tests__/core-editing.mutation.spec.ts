@@ -16,7 +16,7 @@
 
 import type { IRichTextEditingMutationParams } from '../core-editing.mutation';
 import { CustomRangeType, DocumentFlavor, ICommandService, JSONX, TextX } from '@univerjs/core';
-import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
+import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE, registerDocumentLayoutPresentation } from '@univerjs/engine-render';
 import { describe, expect, it, vi } from 'vitest';
 import { createDocumentData, createTestBed } from '../../../facade/__tests__/create-test-bed';
 import { DocSelectionManagerService } from '../../../services/doc-selection-manager.service';
@@ -255,5 +255,65 @@ describe('RichTextEditingMutation selection scheduling', () => {
 
         expect(refreshSelection).not.toHaveBeenCalled();
         testBed.univer.dispose();
+    });
+});
+
+describe('host layout state at the mutation boundary', () => {
+    it('restores local layout state with undo and redo without changing the document snapshot schema', () => {
+        const bed = createTestBed(createDocumentData('runtime-history', { dataStream: 'AB\r\n' }));
+        let layoutState = { offset: 1 };
+        const runtime = registerDocumentLayoutPresentation(bed.doc, {
+            getSnapshot: (document) => document,
+            captureState: () => ({ ...layoutState }),
+            applyActions: () => { layoutState = { offset: 2 }; },
+            restoreState: (state) => { layoutState = state as typeof layoutState; },
+        });
+        try {
+            const command = bed.get(ICommandService);
+            const params: IRichTextEditingMutationParams = {
+                unitId: bed.doc.getUnitId(),
+                textRanges: null,
+                actions: JSONX.getInstance().editOp(new TextX().retain(1).insert(1, { dataStream: 'X' }).serialize()),
+            };
+            const undo = command.syncExecuteCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(RichTextEditingMutation.id, params);
+            expect(layoutState).toEqual({ offset: 2 });
+            expect(bed.doc.getBody()?.dataStream).toBe('AXB\r\n');
+            expect(bed.doc.getSnapshot()).not.toHaveProperty('layoutState');
+            const redo = command.syncExecuteCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(RichTextEditingMutation.id, undo);
+            expect(layoutState).toEqual({ offset: 1 });
+            expect(bed.doc.getBody()?.dataStream).toBe('AB\r\n');
+            command.syncExecuteCommand(RichTextEditingMutation.id, redo);
+            expect(layoutState).toEqual({ offset: 2 });
+            expect(bed.doc.getBody()?.dataStream).toBe('AXB\r\n');
+        } finally {
+            runtime.dispose();
+            bed.univer.dispose();
+        }
+    });
+
+    it('rolls back document content and host state together when layout adaptation fails', () => {
+        const bed = createTestBed(createDocumentData('runtime-failure', { dataStream: 'AB\r\n' }));
+        let layoutState = 1;
+        const runtime = registerDocumentLayoutPresentation(bed.doc, {
+            getSnapshot: (document) => document,
+            captureState: () => layoutState,
+            applyActions: () => {
+                layoutState = 2;
+                throw new Error('layout failed');
+            },
+            restoreState: (state) => { layoutState = state as number; },
+        });
+        try {
+            expect(() => bed.get(ICommandService).syncExecuteCommand(RichTextEditingMutation.id, {
+                unitId: bed.doc.getUnitId(),
+                textRanges: null,
+                actions: JSONX.getInstance().editOp(new TextX().retain(1).insert(1, { dataStream: 'X' }).serialize()),
+            })).toThrow('layout failed');
+            expect(bed.doc.getBody()?.dataStream).toBe('AB\r\n');
+            expect(layoutState).toBe(1);
+        } finally {
+            runtime.dispose();
+            bed.univer.dispose();
+        }
     });
 });

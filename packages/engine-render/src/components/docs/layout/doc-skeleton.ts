@@ -5022,7 +5022,7 @@ export class DocumentSkeleton extends Skeleton {
         const viewModel = this.getViewModel();
         const dataModel = viewModel.getDataModel();
         const { headerTreeMap, footerTreeMap } = viewModel.getHeaderFooterTreeMap();
-        const { documentStyle, drawings, lists: customLists = {} } = dataModel;
+        const { documentStyle, drawings, lists: customLists = {} } = viewModel.getSnapshot();
         const lists = {
             ...PRESET_LIST_TYPE,
             ...customLists,

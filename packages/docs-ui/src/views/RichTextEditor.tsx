@@ -18,6 +18,7 @@ import type { IDocumentData } from '@univerjs/core';
 import type { IDocCustomGlyphRendererRegistration } from '@univerjs/engine-render';
 import type { CSSProperties, ReactNode, RefObject } from 'react';
 import type { Editor, IEditorCanvasStyle } from '../services/editor/editor';
+import type { IEditorRuntimeConfig } from '../services/editor/editor-runtime-config';
 import type { IKeyboardEventConfig } from './rich-text-editor/hooks/use-keyboard-event';
 import {
     BuildTextUtils,
@@ -48,6 +49,8 @@ import { useOnChange } from './rich-text-editor/hooks/use-on-change';
 import { useResize } from './rich-text-editor/hooks/use-resize';
 
 export interface IRichTextEditorProps {
+    /** Instance-only layout and interaction settings, never persisted in the document. */
+    renderConfig?: IEditorRuntimeConfig;
     className?: string;
     autoFocus?: boolean;
     onFocusChange?: (isFocus: boolean, newValue?: string) => void;
@@ -120,6 +123,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         placeholder,
         noStyle,
         canvasStyle,
+        renderConfig,
     } = props;
 
     const commandService = useDependency(ICommandService);
@@ -133,6 +137,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
     const editor = useEditor({
         editorId,
         initialValue,
+        renderConfig,
         container: formulaEditorContainerRef,
         preserveHostFocus,
         cancelDefaultResizeListener,

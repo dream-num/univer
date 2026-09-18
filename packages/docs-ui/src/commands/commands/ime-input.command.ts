@@ -18,7 +18,6 @@ import type { DocumentDataModel, ICommand, ICommandInfo, ICustomRange } from '@u
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
-    BooleanNumber,
     BuildTextUtils,
     CommandType,
     getRichTextEditPath,
@@ -39,6 +38,7 @@ import {
 } from '../../basics/paragraph';
 import { DocIMEInputManagerService } from '../../services/doc-ime-input-manager.service';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
+import { getEditorRuntimeConfig } from '../../services/editor/editor-runtime-config';
 import { getDocRangeInsertOffset, getReplaceDocRangesActions } from './clipboard.inner.command';
 
 export interface IIMEInputCommandParams {
@@ -166,7 +166,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             defaultTextStyle,
             styleCache,
             SHEET_EDITOR_UNITS.includes(unitId),
-            docDataModel.getDocumentStyle().renderConfig?.inheritParagraphStartStyle === BooleanNumber.TRUE
+            getEditorRuntimeConfig(docDataModel)?.inheritParagraphStartStyle === true
         );
 
         const customDecorations = getCustomDecorationAtPosition(body.customDecorations ?? [], styleOffset);

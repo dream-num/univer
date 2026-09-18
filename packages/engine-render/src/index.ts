@@ -58,6 +58,16 @@ export { DocBackground } from './components/docs/doc-background';
 export { DOCS_EXTENSION_TYPE } from './components/docs/doc-extension';
 export { Documents } from './components/docs/document';
 export type { IDocumentGlyphPaint, IDocumentOffsetConfig, IPageRenderConfig } from './components/docs/document';
+export { getDocumentLayoutPresentation, registerDocumentLayoutPresentation } from './components/docs/document-layout-presentation';
+export type {
+    IDocumentLayoutBody,
+    IDocumentLayoutParagraph,
+    IDocumentLayoutParagraphStyle,
+    IDocumentLayoutPresentation,
+    IDocumentLayoutSnapshot,
+    IDocumentLayoutTextRun,
+    IDocumentLayoutTextStyle,
+} from './components/docs/document-layout-presentation';
 export { getTableIdAndSliceIndex } from './components/docs/layout/block/table';
 export {
     measureDocumentNoWrapTextRangeWidth,
@@ -138,5 +148,6 @@ export * from './scroll-timer';
 export { CanvasColorService, DumbCanvasColorService, ICanvasColorService } from './services/canvas-color.service';
 export * from './shape';
 export * from './viewport';
+
 export { DocumentLayoutSession } from './worker-layout';
 export type { IDocumentLayoutSessionStartOptions, IDocumentLayoutStepResult } from './worker-layout';

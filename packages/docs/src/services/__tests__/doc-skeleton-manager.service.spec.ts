@@ -33,8 +33,13 @@ import {
     UniverInstanceService,
     UniverInstanceType,
 } from '@univerjs/core';
+import { registerDocumentLayoutPresentation } from '@univerjs/engine-render';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { DocLayoutExecutorService, DocLayoutExecutorType, DocLayoutSessionStatus } from '../doc-layout-executor.service';
+import {
+    DocLayoutExecutorService,
+    DocLayoutExecutorType,
+    DocLayoutSessionStatus,
+} from '../doc-layout-executor.service';
 import { DocSkeletonManagerService } from '../doc-skeleton-manager.service';
 
 function createDocument(options?: { documentFlavor?: DocumentFlavor; id?: string }) {
@@ -179,6 +184,22 @@ describe('DocSkeletonManagerService', () => {
 
         expect(service.supportsIncrementalLayout()).toBe(true);
         expect(service.getSkeleton().getSkeletonData()).toBeUndefined();
+    });
+
+    it('keeps a host layout projection synchronous while ordinary Docs can use the registered executor', () => {
+        const document = createDocument({ documentFlavor: DocumentFlavor.TRADITIONAL });
+        const registration = registerDocumentLayoutPresentation(document, {
+            getSnapshot: (snapshot) => snapshot,
+            captureState: () => undefined,
+            applyActions: () => {},
+            restoreState: () => {},
+        });
+        const service = createService(document, true);
+        expect(service.supportsIncrementalLayout()).toBe(false);
+        expect(service.getSkeleton().getSkeletonData()).not.toBeNull();
+        registration.dispose();
+        expect(service.supportsIncrementalLayout()).toBe(true);
+        service.dispose();
     });
 
     it('keeps an internal editor synchronous even if its flavor is paginated', () => {

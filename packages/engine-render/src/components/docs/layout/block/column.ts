@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-import type { IColumn, IColumnGroup, Nullable } from '@univerjs/core';
-import type { IDocumentSkeletonColumnGroup, IDocumentSkeletonColumnGroupColumn, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../../../basics/i-document-skeleton-cached';
+import type { Nullable } from '@univerjs/core';
+import type {
+    IDocumentSkeletonColumnGroup,
+    IDocumentSkeletonColumnGroupColumn,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
+} from '../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../basics/interfaces';
+import type { IDocumentLayoutColumn, IDocumentLayoutColumnGroup } from '../../document-layout-presentation';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
@@ -216,7 +222,7 @@ function getNextBlockTop(lines: IDocumentSkeletonLine[]) {
     return lastLine.top + lastLine.lineHeight;
 }
 
-export function calculateColumnGroupLayout(source: IColumnGroup, availableWidth: number, columnHeights: number[]): IColumnGroupLayout {
+export function calculateColumnGroupLayout(source: IDocumentLayoutColumnGroup, availableWidth: number, columnHeights: number[]): IColumnGroupLayout {
     const width = Math.max(0, availableWidth);
     const gap = Math.max(0, source.gap?.v ?? 0);
     const columns = source.columns;
@@ -277,12 +283,12 @@ export function calculateColumnGroupLayout(source: IColumnGroup, availableWidth:
     };
 }
 
-function getColumnTopOffset(column: IColumn): number {
+function getColumnTopOffset(column: IDocumentLayoutColumn): number {
     const offset = column.topOffset?.v;
     return typeof offset === 'number' && Number.isFinite(offset) ? offset : 0;
 }
 
-function shouldStack(columns: IColumn[], availableWidth: number, gap: number, responsive: ColumnResponsiveType): boolean {
+function shouldStack(columns: IDocumentLayoutColumn[], availableWidth: number, gap: number, responsive: ColumnResponsiveType): boolean {
     if (responsive !== ColumnResponsiveType.STACK) {
         return false;
     }
@@ -292,7 +298,7 @@ function shouldStack(columns: IColumn[], availableWidth: number, gap: number, re
     return totalMinWidth > availableWidth;
 }
 
-function getInitialColumnWidth(source: IColumnGroup, column: IColumn | undefined, availableWidth: number): number {
+function getInitialColumnWidth(source: IDocumentLayoutColumnGroup, column: IDocumentLayoutColumn | undefined, availableWidth: number): number {
     if (column == null) {
         return availableWidth;
     }
@@ -303,7 +309,7 @@ function getInitialColumnWidth(source: IColumnGroup, column: IColumn | undefined
     return Math.max(getMinWidth(column), contentWidth * (Math.max(0, column.widthRatio || 0) || 1) / ratioSum);
 }
 
-function allocateHorizontalWidths(columns: IColumn[], contentWidth: number): number[] {
+function allocateHorizontalWidths(columns: IDocumentLayoutColumn[], contentWidth: number): number[] {
     const ratioSum = columns.reduce((sum, column) => sum + Math.max(0, column.widthRatio || 0), 0) || columns.length;
     const idealWidths = columns.map((column) => contentWidth * (Math.max(0, column.widthRatio || 0) || 1) / ratioSum);
     const minWidths = columns.map(getMinWidth);
@@ -334,6 +340,6 @@ function compressToFit(widths: number[], minWidths: number[], overflow: number):
     return nextWidths;
 }
 
-function getMinWidth(column: IColumn): number {
+function getMinWidth(column: IDocumentLayoutColumn): number {
     return Math.max(0, column.minWidth?.v ?? 0);
 }

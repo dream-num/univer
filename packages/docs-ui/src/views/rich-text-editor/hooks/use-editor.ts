@@ -18,6 +18,7 @@ import type { IDocumentData, Nullable } from '@univerjs/core';
 import type { IDocCustomGlyphRendererRegistration } from '@univerjs/engine-render';
 import type { RefObject } from 'react';
 import type { Editor, IEditorCanvasStyle } from '../../../services/editor/editor';
+import type { IEditorRuntimeConfig } from '../../../services/editor/editor-runtime-config';
 import { createParagraphId, RichTextBuilder, Tools } from '@univerjs/core';
 import { registerDocCustomGlyphRenderer } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
@@ -25,6 +26,8 @@ import { useLayoutEffect, useMemo, useState } from 'react';
 import { IEditorService } from '../../../services/editor/editor-manager.service';
 
 export interface IUseEditorProps {
+    /** Instance-only layout and interaction settings, never persisted in the document. */
+    renderConfig?: IEditorRuntimeConfig;
     editorId: string;
     initialValue: Nullable<IDocumentData | string>;
     container: RefObject<HTMLDivElement>;
@@ -55,6 +58,7 @@ export function useEditor(opts: IUseEditorProps) {
         isSingle,
         pixelRatio,
         preserveHostFocus,
+        renderConfig,
     } = opts;
     const autoFocus = useMemo(() => _autoFocus ?? false, []);
     const [editor, setEditor] = useState<Editor>();
@@ -103,6 +107,7 @@ export function useEditor(opts: IUseEditorProps) {
                     editorUnitId: editorId,
                     emitSelectionWhileDragging,
                     initialSnapshot: snapshot,
+                    renderConfig,
                     pixelRatio,
                     preserveHostFocus,
                 },

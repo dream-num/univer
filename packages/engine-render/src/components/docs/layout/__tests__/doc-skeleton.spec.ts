@@ -15,6 +15,7 @@
  */
 
 import type { IDocumentData, IParagraph } from '@univerjs/core';
+import type { IDocumentLayoutSnapshot } from '../../document-layout-presentation';
 import type { IDocumentLayoutPageGeometryPublication } from '../document-layout-publication';
 import {
     BooleanNumber,
@@ -54,6 +55,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DocumentSkeletonPageType, GlyphType, PageLayoutType } from '../../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../../basics/vector2';
 import { setDocsCustomBlockRenderViewportProvider } from '../../custom-block-render-viewport';
+import { registerDocumentLayoutPresentation } from '../../document-layout-presentation';
 import { setDocsTableRenderViewportProvider } from '../../table-render-viewport';
 import { DocumentViewModel } from '../../view-model/document-view-model';
 import { DocumentSkeleton } from '../doc-skeleton';
@@ -241,10 +243,44 @@ function createPage(type: DocumentSkeletonPageType, st: number, tableId = '') {
     };
 }
 
+function createPresentationModel(layout: IDocumentLayoutSnapshot): DocumentDataModel {
+    const privateKeys = new Set([
+        'fontRenderScale',
+        'textSkewX',
+        'textAdvance',
+        'customGlyphKey',
+        'customGlyphGroup',
+        'lineAscent',
+        'lineDescent',
+        'textPaintOffsets',
+        'fontMetricScaleEnabled',
+        'topAlignExactLineSpacing',
+        'useTextInkForHitTesting',
+        'preservePunctuationSpacing',
+        'applyTextPosition',
+        'paintTextOutline',
+        'fixedTabStops',
+        'horizontalPadding',
+        'minHeight',
+        'clipContent',
+        'topOffset',
+    ]);
+    const model = new DocumentDataModel(JSON.parse(JSON.stringify(layout, (key, value) => (
+        privateKeys.has(key) ? undefined : value
+    ))));
+    registerDocumentLayoutPresentation(model, {
+        getSnapshot: () => layout,
+        captureState: () => undefined,
+        applyActions: () => {},
+        restoreState: () => {},
+    });
+    return model;
+}
+
 describe('doc skeleton', () => {
     it('invalidates only requested font measurements before laying out loaded fonts again', () => {
         const univer = new Univer();
-        const model = new DocumentDataModel({
+        const model = createPresentationModel({
             id: 'font-loading-layout',
             body: {
                 dataStream: 'A\r\n',
@@ -288,7 +324,7 @@ describe('doc skeleton', () => {
 
         try {
             for (const markAscent of [12, 17]) {
-                const model = new DocumentDataModel({
+                const model = createPresentationModel({
                     id: `merged-positioned-paragraph-${markAscent}`,
                     body: {
                         dataStream: `${content}\r\n`,
@@ -329,7 +365,7 @@ describe('doc skeleton', () => {
                     const lines = skeleton.getSkeletonData()!.pages[0].sections[0].columns[0].lines;
                     expect(lines).toHaveLength(1);
                     baselines.push(lines[0].top + lines[0].asc);
-                    expect(model.getBody()?.textRuns?.slice(-1)[0].ts?.lineAscent).toBe(markAscent);
+                    expect(new DocumentViewModel(model).getBody()?.textRuns?.slice(-1)[0].ts?.lineAscent).toBe(markAscent);
                 } finally {
                     skeleton.dispose();
                 }
@@ -344,7 +380,7 @@ describe('doc skeleton', () => {
         const topAligned = topAlignExactLineSpacing === BooleanNumber.TRUE;
         const univer = new Univer();
         const injector = univer.__getInjector();
-        const documentModel = new DocumentDataModel({
+        const documentModel = createPresentationModel({
             id: 'positioned-exact-line-hit-test',
             body: {
                 dataStream: '公司航路\r公司航路名称。（可选择性输入）\r航班号\r\n',
@@ -420,7 +456,7 @@ describe('doc skeleton', () => {
             };
         });
         const univer = new Univer({ locale: LocaleType.EN_US });
-        const model = new DocumentDataModel({
+        const model = createPresentationModel({
             id: 'overlapping-advance-gap-hit-test',
             body: {
                 dataStream: 'd\r1\r\n',
@@ -502,7 +538,7 @@ describe('doc skeleton', () => {
             };
         });
         const univer = new Univer({ locale: LocaleType.EN_US });
-        const model = new DocumentDataModel({
+        const model = createPresentationModel({
             id: 'overlapping-tab-hit-test',
             body: {
                 dataStream: '\t\rT\r\n',
@@ -575,7 +611,7 @@ describe('doc skeleton', () => {
             };
         });
         const univer = new Univer({ locale: LocaleType.EN_US });
-        const model = new DocumentDataModel({
+        const model = createPresentationModel({
             id: 'positioned-leader-gap-hit-test',
             body: {
                 dataStream: '..\r电\r\n',
@@ -649,7 +685,7 @@ describe('doc skeleton', () => {
             };
         });
         const univer = new Univer({ locale: LocaleType.EN_US });
-        const model = new DocumentDataModel({
+        const model = createPresentationModel({
             id: 'narrow-subscript-drag-hit-test',
             body: {
                 dataStream: 'g (\rk\r\n',
@@ -728,7 +764,7 @@ describe('doc skeleton', () => {
             ? `${token.COLUMN_GROUP_START}${token.COLUMN_START}mod\r${token.COLUMN_END}${token.COLUMN_START}v\r√\r${token.COLUMN_END}${token.COLUMN_GROUP_END}\n`
             : 'v\r√\r\n';
         const radicandOffset = dataStream.indexOf('v');
-        const model = new DocumentDataModel({
+        const model = createPresentationModel({
             id: 'positioned-root-sign-hit-test',
             body: {
                 dataStream,
@@ -810,7 +846,7 @@ describe('doc skeleton', () => {
 
     it('hits the painted script rather than an overlapping positioned line', () => {
         const univer = new Univer({ locale: LocaleType.EN_US });
-        const model = new DocumentDataModel({
+        const model = createPresentationModel({
             id: 'overlapping-script-hit-test',
             body: {
                 dataStream: 'd23x\rmodel\r\n',
@@ -886,7 +922,7 @@ describe('doc skeleton', () => {
             };
         });
         const univer = new Univer({ locale: LocaleType.EN_US });
-        const model = new DocumentDataModel({
+        const model = createPresentationModel({
             id: 'positioned-punctuation-descender',
             body: {
                 dataStream: 'A,\rBB\r\n',

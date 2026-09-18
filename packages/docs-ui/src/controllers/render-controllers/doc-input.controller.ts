@@ -18,13 +18,21 @@ import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { IInsertTextCommandParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
-import { BooleanNumber, Disposable, ICommandService, Inject, Optional, SHEET_EDITOR_UNITS } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Optional, SHEET_EDITOR_UNITS } from '@univerjs/core';
 import { DocSkeletonManagerService, InsertTextCommand } from '@univerjs/docs';
-import { getCustomDecorationAtPosition, getCustomRangeAtPosition, getTextRunAtInputPosition } from '../../basics/paragraph';
+import {
+    getCustomDecorationAtPosition,
+    getCustomRangeAtPosition,
+    getTextRunAtInputPosition,
+} from '../../basics/paragraph';
 import { AfterSpaceCommand } from '../../commands/commands/auto-format.command';
 import { ReplaceSelectionCommand } from '../../commands/commands/replace-content.command';
-import { IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../../services/doc-embed-integration.service';
+import {
+    IDocEmbedInteractionBoundaryService,
+    IDocEmbedRuntimeFocusCoordinator,
+} from '../../services/doc-embed-integration.service';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
+import { getEditorRuntimeConfig } from '../../services/editor/editor-runtime-config';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
 export class DocInputController extends Disposable implements IRenderModule {
@@ -91,7 +99,7 @@ export class DocInputController extends Disposable implements IRenderModule {
             const defaultTextStyle = this._docMenuStyleService.getDefaultStyle();
             const cacheStyle = this._docMenuStyleService.getStyleCache();
             const curCustomRange = getCustomRangeAtPosition(originBody?.customRanges ?? [], activeRange.endOffset, SHEET_EDITOR_UNITS.includes(unitId));
-            const curTextRun = getTextRunAtInputPosition(originBody, activeRange.endOffset, defaultTextStyle, cacheStyle, SHEET_EDITOR_UNITS.includes(unitId), docDataModel.getDocumentStyle().renderConfig?.inheritParagraphStartStyle === BooleanNumber.TRUE);
+            const curTextRun = getTextRunAtInputPosition(originBody, activeRange.endOffset, defaultTextStyle, cacheStyle, SHEET_EDITOR_UNITS.includes(unitId), getEditorRuntimeConfig(docDataModel)?.inheritParagraphStartStyle === true);
             const curCustomDecorations = getCustomDecorationAtPosition(originBody?.customDecorations ?? [], activeRange.endOffset);
 
             const insertBody = {

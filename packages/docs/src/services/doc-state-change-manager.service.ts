@@ -17,7 +17,19 @@
 import type { DocumentDataModel, JSONXActions, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import type { IDocStateChangeInfo, IDocStateChangeParams } from './doc-state-emit.service';
-import { createIdentifier, ICommandService, Inject, IUndoRedoService, IUniverInstanceService, JSONX, Optional, RedoCommandId, RxDisposable, UndoCommandId, UniverInstanceType } from '@univerjs/core';
+import {
+    createIdentifier,
+    ICommandService,
+    Inject,
+    IUndoRedoService,
+    IUniverInstanceService,
+    JSONX,
+    Optional,
+    RedoCommandId,
+    RxDisposable,
+    UndoCommandId,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 import { DocStateEmitService } from './doc-state-emit.service';
 
@@ -215,6 +227,7 @@ export class DocStateChangeManagerService extends RxDisposable {
         const redoParams: IRichTextEditingMutationParams = {
             unitId,
             trigger: RedoCommandId,
+            ...(lastState.redoState.layoutState === undefined ? {} : { layoutState: lastState.redoState.layoutState }),
             actions: cacheStates.reduce((acc, cur) => JSONX.compose(acc, cur.redoState.actions), null as JSONXActions),
             textRanges: lastState.redoState.textRanges,
             segmentId: lastState.segmentId,
@@ -225,6 +238,7 @@ export class DocStateChangeManagerService extends RxDisposable {
         const undoParams: IRichTextEditingMutationParams = {
             unitId,
             trigger: UndoCommandId,
+            ...(firstState.undoState.layoutState === undefined ? {} : { layoutState: firstState.undoState.layoutState }),
             // Always need to put undoParams after redoParams, because `reverse` will change the `cacheStates` order.
             actions: cacheStates.reverse().reduce((acc, cur) => JSONX.compose(acc, cur.undoState.actions), null as JSONXActions),
             textRanges: firstState.undoState.textRanges,

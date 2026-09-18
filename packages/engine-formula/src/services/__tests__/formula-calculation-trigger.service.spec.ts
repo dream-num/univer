@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, ICommandService, IExecutionOptions } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import type { ICommandInfo, IExecutionOptions } from '@univerjs/core';
+import type { IDirtyConversionManagerParams } from '../active-dirty-manager.service';
+import { CommandType, ICommandService, Univer } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
     SetFormulaCalculationNotificationMutation,
@@ -23,27 +24,27 @@ import {
     SetFormulaCalculationStopMutation,
     SetTriggerFormulaCalculationStartMutation,
 } from '../../commands/mutations/set-formula-calculation.mutation';
-import { ActiveDirtyManagerService } from '../active-dirty-manager.service';
+import { ActiveDirtyManagerService, IActiveDirtyManagerService } from '../active-dirty-manager.service';
 import { FormulaCalculationTriggerService } from '../formula-calculation-trigger.service';
 import { FormulaExecutedStateType } from '../runtime.service';
 
 function createTestBed(start = true) {
-    let listener: ((command: ICommandInfo, options?: IExecutionOptions) => void) | undefined;
+    const univer = new Univer();
+    const injector = univer.__getInjector();
+    injector.add([IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }]);
+    injector.add([FormulaCalculationTriggerService]);
     const executed: Array<{ id: string; params: unknown; options: unknown }> = [];
-    const activeDirtyManagerService = new ActiveDirtyManagerService();
+    const activeDirtyManagerService = injector.get(IActiveDirtyManagerService);
     const conversions = activeDirtyManagerService.getDirtyConversionMap();
-    const commandService = {
-        onCommandExecuted: vi.fn((callback: typeof listener) => {
-            listener = callback;
-            return { dispose: vi.fn() };
-        }),
-        executeCommand: vi.fn(async (id: string, params: unknown, options?: IExecutionOptions) => {
+    const commandService = injector.get(ICommandService);
+    for (const id of [SetFormulaCalculationStartMutation.id, SetFormulaCalculationStopMutation.id]) {
+        commandService.registerCommand({ id, type: CommandType.MUTATION, handler: (_accessor, params, options) => {
             executed.push({ id, params, options });
-            listener?.({ id, params } as ICommandInfo, options);
             return true;
-        }),
-    } as unknown as ICommandService;
-    const service = new FormulaCalculationTriggerService(commandService, activeDirtyManagerService);
+        } });
+    }
+    const service = injector.get(FormulaCalculationTriggerService);
+    service.disposeWithMe(() => univer.dispose());
     if (start) {
         service.start();
     }
@@ -52,7 +53,12 @@ function createTestBed(start = true) {
         service,
         executed,
         conversions,
-        emit: (command: ICommandInfo, options?: IExecutionOptions) => listener?.(command, options),
+        emit: (command: ICommandInfo, options?: IExecutionOptions) => {
+            if (!commandService.hasCommand(command.id)) {
+                commandService.registerCommand({ id: command.id, type: CommandType.MUTATION, handler: () => true });
+            }
+            commandService.syncExecuteCommand(command.id, command.params, options);
+        },
     };
 }
 
@@ -61,6 +67,39 @@ describe('FormulaCalculationTriggerService', () => {
     afterEach(() => {
         vi.useRealTimers();
         vi.restoreAllMocks();
+    });
+
+    it('batches formula registrations without changing payloads or completed session maps', async () => {
+        const testBed = createTestBed();
+        const payload = Object.freeze({
+            dirtyUnitOtherFormulaMap: Object.freeze({
+                unit: Object.freeze({ sheet: Object.freeze({ first: true }) }),
+            }),
+        });
+        testBed.conversions.set('register-formula', {
+            commandId: 'register-formula',
+            getDirtyData: (command) => command.params as ReturnType<IDirtyConversionManagerParams['getDirtyData']>,
+        });
+        testBed.emit({ id: 'register-formula', params: payload });
+        for (let index = 0; index < 2000; index++) {
+            testBed.emit({ id: 'register-formula', params: {
+                dirtyUnitOtherFormulaMap: { unit: { sheet: { [`formula-${index}`]: true } } },
+            } });
+        }
+        await vi.advanceTimersByTimeAsync(10);
+        const first = testBed.executed[0].params;
+        expect(first).toMatchObject(payload);
+        expect(first).toHaveProperty('dirtyUnitOtherFormulaMap.unit.sheet.formula-1999', true);
+        testBed.emit({ id: SetFormulaCalculationNotificationMutation.id, params: {
+            functionsExecutedState: FormulaExecutedStateType.SUCCESS,
+        } });
+        testBed.emit({ id: 'register-formula', params: {
+            dirtyUnitOtherFormulaMap: { unit: { sheet: { next: true } } },
+        } });
+        await vi.advanceTimersByTimeAsync(10);
+        expect(first).not.toHaveProperty('dirtyUnitOtherFormulaMap.unit.sheet.next');
+        expect(testBed.executed[1].params).toHaveProperty('dirtyUnitOtherFormulaMap.unit.sheet', { next: true });
+        testBed.service.dispose();
     });
 
     it('collects changeset dirty data before start and merges it with the initial trigger', async () => {

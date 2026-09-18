@@ -454,6 +454,30 @@ describe('mergeVerticalRanges', () => {
 });
 
 describe('mergeRanges', () => {
+    it('matches grid union for overlapping, nested, adjacent and sparse ranges', () => {
+        let seed = 20260918;
+        const next = () => {
+            seed = (seed * 1664525 + 1013904223) >>> 0;
+            return seed % 12;
+        };
+        for (let example = 0; example < 100; example++) {
+            const ranges = Array.from({ length: 20 }, () => {
+                const startRow = next();
+                const startColumn = next();
+                return { startRow, startColumn, endRow: startRow + next(), endColumn: startColumn + next() };
+            });
+            const before = JSON.stringify(ranges);
+            const expected = mergeVerticalRanges(mergeHorizontalRanges(splitIntoGrid(ranges.map((range) => ({ ...range })))));
+            expect(stringifyRanges(mergeRanges(ranges))).toEqual(stringifyRanges(expected));
+            expect(JSON.stringify(ranges)).toBe(before);
+        }
+    });
+
+    it('keeps sparse validation ranges separated across thousands of boundaries', () => {
+        const ranges = Array.from({ length: 5000 }, (_, index) => ({ startRow: index * 2, endRow: index * 2, startColumn: index * 2, endColumn: index * 2 }));
+        expect(mergeRanges(ranges)).toEqual(ranges);
+    });
+
     it('should merge ranges correctly', () => {
         const input: IRange[] = [
             { startColumn: 1, endColumn: 5, startRow: 1, endRow: 2 },

@@ -17,15 +17,7 @@
 import type { ImageSourceType } from '../../services/image-io/image-io.service';
 import type { IResources } from '../../services/resource-manager/type';
 import type { ISize } from '../../shared/shape';
-import type {
-    BooleanNumber,
-    CellValueType,
-    HorizontalAlign,
-    LocaleType,
-    TextDirection,
-    VerticalAlign,
-    WrapStrategy,
-} from '../enum';
+import type { BooleanNumber, CellValueType, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../enum';
 import type { IDrawingParam } from './i-drawing';
 import type { IMention } from './i-mention';
 import type { IColorStyle, IGlowEffect, IShadowEffect, IStyleBase } from './i-style-data';
@@ -793,8 +785,6 @@ export interface IDocumentStyle extends IDocStyleBase, IDocumentLayout, IHeaderA
     fontFamilyFallbacks?: Record<string, string>;
     defaultParagraphStyle?: IDocumentDefaultParagraphStyle; // default style inherited by paragraphs
     background?: IDocumentBackground; // Page background image.
-    /** Enables compatibility-only font metric scaling. Defaults to true. */
-    fontMetricScaleEnabled?: BooleanNumber;
 }
 
 export interface IDocumentBackground {
@@ -827,20 +817,6 @@ export interface IDocumentRenderConfig {
     cellValueType?: CellValueType; // sheet cell type, In a spreadsheet cell, without any alignment settings applied, text should be left-aligned, numbers should be right-aligned, and Boolean values should be center-aligned.
     isRenderStyle?: BooleanNumber; // Whether to render the style(textRuns), used in formula bar editor. the default value is TRUE.
     zeroWidthParagraphBreak?: BooleanNumber; // Override paragraph-mark width; DrawingML defaults to zero without custom glyph metrics.
-    /** Keep glyphs top-aligned when exact line spacing is smaller than the glyph line box. */
-    topAlignExactLineSpacing?: BooleanNumber;
-    /** Use painted glyph bounds for positioned text hit testing. Defaults to false. */
-    useTextInkForHitTesting?: BooleanNumber;
-    /** Keep punctuation advances unchanged during shaping. Defaults to false. */
-    preservePunctuationSpacing?: BooleanNumber;
-    /** Apply explicit text position offsets while painting. Defaults to false. */
-    applyTextPosition?: BooleanNumber;
-    /** Paint the configured text outline. Defaults to false. */
-    paintTextOutline?: BooleanNumber;
-    /** Inherit the following run's style when typing at a paragraph start. Defaults to false. */
-    inheritParagraphStartStyle?: BooleanNumber;
-    /** Prevent pointer selection from moving the document viewport. */
-    disableSelectionAutoScroll?: BooleanNumber;
     shapeTextOpticalVerticalAlign?: BooleanNumber; // Align shape text by visible glyph bounds instead of the font line box.
     lineWrapTolerance?: number; // Allowed line-width overflow in layout pixels; 0 enforces the content-box boundary.
 }
@@ -1141,9 +1117,6 @@ export interface IDocTextFill {
 export interface IDocTextOutline {
     color?: string;
     width?: number;
-    lineCap?: 'butt' | 'round' | 'square';
-    lineJoin?: 'bevel' | 'miter' | 'round';
-    miterLimit?: number;
 }
 
 export interface ITextStyle extends IStyleBase {
@@ -1169,22 +1142,6 @@ export interface ITextStyle extends IStyleBase {
     sc?: number; // character spacing in points
     pos?: number; // position
     sa?: number; // Horizontal character scale in percent; omitted means 100.
-    /** Source glyph paint scale relative to its stored font size. */
-    fontRenderScale?: number;
-    /** Horizontal glyph shear applied while painting, in canvas transform units. */
-    textSkewX?: number;
-    /** Fixed advance per Unicode character in 96-DPI layout pixels. */
-    textAdvance?: number;
-    /** Optional identity consumed by a registered custom glyph renderer. */
-    customGlyphKey?: string;
-    /** Host paint group retained through rich-text edits for ordered external compositing. */
-    customGlyphGroup?: string;
-    /** Fixed line ascent in 96-DPI layout pixels. */
-    lineAscent?: number;
-    /** Fixed line descent in 96-DPI layout pixels. */
-    lineDescent?: number;
-    /** Additional relative glyph paint origins in 96-DPI layout pixels. */
-    textPaintOffsets?: Array<{ x: number; y: number }>;
     textFill?: IDocTextFill;
     textOutline?: IDocTextOutline;
     /**
@@ -1208,8 +1165,6 @@ export interface IIndentStart {
     hanging?: INumberUnit; // hanging，offset of first word except first line
     indentStart?: INumberUnit; // indentStart
     tabStops?: ITabStop[]; // tabStops
-    /** Bind each tab character to the tab stop at the same ordinal instead of skipping passed stops. */
-    fixedTabStops?: BooleanNumber;
     indentEnd?: INumberUnit; // indentEnd
 }
 
@@ -1487,12 +1442,6 @@ export interface ICustomColumnGroup {
     columnGroupId: string;
     columns?: IColumn[];
     gap?: INumberUnit;
-    /** Horizontal padding applied inside each column. Defaults to 8 px. */
-    horizontalPadding?: INumberUnit;
-    /** Minimum rendered height of each column. Defaults to 72 px. */
-    minHeight?: INumberUnit;
-    /** Whether column content is clipped to the column bounds. Defaults to true. */
-    clipContent?: BooleanNumber;
     layout?: ColumnLayoutType;
     responsive?: ColumnResponsiveType;
     version?: number;
@@ -1512,9 +1461,6 @@ export interface IColumnGroup {
     columnGroupId: string;
     columns: IColumn[];
     gap: INumberUnit;
-    horizontalPadding?: INumberUnit;
-    minHeight?: INumberUnit;
-    clipContent?: BooleanNumber;
     layout: ColumnLayoutType;
     responsive: ColumnResponsiveType;
     version?: number;
@@ -1524,8 +1470,6 @@ export interface IColumn {
     columnId: string;
     widthRatio: number;
     minWidth?: INumberUnit;
-    /** Vertical offset relative to the column group origin. Defaults to 0. */
-    topOffset?: INumberUnit;
 }
 
 /**

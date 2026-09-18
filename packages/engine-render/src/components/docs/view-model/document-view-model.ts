@@ -16,21 +16,25 @@
 
 import type {
     DocumentDataModel,
-    IColumnGroup,
     ICustomBlock,
-    ICustomColumnGroup,
     ICustomDecorationForInterceptor,
     ICustomRangeForInterceptor,
     ICustomTable,
     IDisposable,
-    IParagraph,
-    ISectionBreak,
     ITable,
-    ITextRun,
     JSONXActions,
     JSONXPath,
     Nullable,
 } from '@univerjs/core';
+import type {
+    IDocumentLayoutBody,
+    IDocumentLayoutColumnGroup,
+    IDocumentLayoutCustomColumnGroup,
+    IDocumentLayoutParagraph,
+    IDocumentLayoutSectionBreak,
+    IDocumentLayoutSnapshot,
+    IDocumentLayoutTextRun,
+} from '../document-layout-presentation';
 import {
     DataStreamTreeNodeType,
     DataStreamTreeTokenType,
@@ -41,6 +45,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
+import { getDocumentLayoutPresentation } from '../document-layout-presentation';
 import { DataStreamTreeNode } from './data-stream-tree-node';
 
 interface ITableCache {
@@ -53,7 +58,7 @@ interface ITableNodeCache {
 }
 
 interface ITextRunCacheBucket {
-    runs: ITextRun[];
+    runs: IDocumentLayoutTextRun[];
     isOrderedAndDisjoint: boolean;
 }
 
@@ -135,7 +140,7 @@ function findByStartIndex<T extends IStartIndexedItem>(
     }
 }
 
-function findOrderedTextRun(textRuns: readonly ITextRun[], index: number): ITextRun | undefined {
+function findOrderedTextRun(textRuns: readonly IDocumentLayoutTextRun[], index: number): IDocumentLayoutTextRun | undefined {
     let low = 0;
     let high = textRuns.length - 1;
     while (low <= high) {
@@ -502,8 +507,8 @@ interface ITableCoupleCache {
 }
 
 interface IColumnGroupCoupleCache {
-    columnGroup: ICustomColumnGroup;
-    columnGroupSource: IColumnGroup;
+    columnGroup: IDocumentLayoutCustomColumnGroup;
+    columnGroupSource: IDocumentLayoutColumnGroup;
 }
 
 export class DocumentViewModel implements IDisposable {
@@ -513,9 +518,9 @@ export class DocumentViewModel implements IDisposable {
 
     private _textRunsCache: Map<number, ITextRunCacheBucket> = new Map();
 
-    private _paragraphCache: Map<number, IParagraph> = new Map();
+    private _paragraphCache: Map<number, IDocumentLayoutParagraph> = new Map();
 
-    private _sectionBreakCache: Map<number, ISectionBreak> = new Map();
+    private _sectionBreakCache: Map<number, IDocumentLayoutSectionBreak> = new Map();
 
     private _customBlockCache: Map<number, ICustomBlock> = new Map();
 
@@ -547,7 +552,7 @@ export class DocumentViewModel implements IDisposable {
 
     private _columnGroupsOrdered = true;
 
-    private _lastTextRun: Nullable<ITextRun> = null;
+    private _lastTextRun: Nullable<IDocumentLayoutTextRun> = null;
 
     private _editArea: DocumentEditArea = DocumentEditArea.BODY;
 
@@ -632,12 +637,16 @@ export class DocumentViewModel implements IDisposable {
         return this._children;
     }
 
-    getBody() {
-        return this._documentDataModel.getBody();
+    getBody(): IDocumentLayoutBody | undefined {
+        const presentation = getDocumentLayoutPresentation(this._documentDataModel);
+        return presentation
+            ? presentation.getSnapshot(this._documentDataModel.getSnapshot()).body
+            : this._documentDataModel.getBody();
     }
 
-    getSnapshot() {
-        return this._documentDataModel.getSnapshot();
+    getSnapshot(): IDocumentLayoutSnapshot {
+        const snapshot = this._documentDataModel.getSnapshot();
+        return getDocumentLayoutPresentation(this._documentDataModel)?.getSnapshot(snapshot) ?? snapshot;
     }
 
     getDataModel() {
@@ -760,7 +769,7 @@ export class DocumentViewModel implements IDisposable {
         return this._paragraphCache.get(index);
     }
 
-    getTextRun(index: number): Nullable<ITextRun> {
+    getTextRun(index: number): Nullable<IDocumentLayoutTextRun> {
         if (this._metadataCachesDirty && this._textRunsOrderedAndDisjoint) {
             if (this._lastTextRun != null && index >= this._lastTextRun.st && index < this._lastTextRun.ed) {
                 return this._lastTextRun;
@@ -1117,7 +1126,7 @@ export class DocumentViewModel implements IDisposable {
 
             this._columnGroupCache.set(startIndex, {
                 columnGroup,
-                columnGroupSource: columnGroup as IColumnGroup,
+                columnGroupSource: columnGroup as IDocumentLayoutColumnGroup,
             });
         }
     }

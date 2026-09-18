@@ -17,7 +17,6 @@
 import type {
     ICustomRange,
     IDisposable,
-    IDocumentRenderConfig,
     IParagraphBorder,
     IScale,
     ITableCell,
@@ -42,6 +41,7 @@ import type { UniverRenderingContext } from '../../context';
 import type { Scene } from '../../scene';
 import type { ComponentExtension, IDrawInfo, IExtensionConfig } from '../extension';
 import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
+import type { IDocumentLayoutRenderConfig } from './document-layout-presentation';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
 import type { IDocsTableRenderViewport } from './table-render-viewport';
 import type { DocumentViewModel } from './view-model/document-view-model';
@@ -727,7 +727,7 @@ export class Documents extends DocComponent {
         alignOffsetNoAngle: Vector2,
         centerAngle: number,
         vertexAngle: number,
-        renderConfig: IDocumentRenderConfig,
+        renderConfig: IDocumentLayoutRenderConfig,
         parentScale: IScale,
         isContinuousLayout: boolean,
         pageTop: number,
@@ -953,7 +953,7 @@ export class Documents extends DocComponent {
         alignOffset: Vector2,
         centerAngle: number,
         vertexAngle: number,
-        renderConfig: IDocumentRenderConfig,
+        renderConfig: IDocumentLayoutRenderConfig,
         extensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
         drawInfo?: IDrawInfo
     ): void {
@@ -1056,7 +1056,7 @@ export class Documents extends DocComponent {
         alignOffsetNoAngle: Vector2,
         centerAngle: number,
         vertexAngle: number,
-        renderConfig: IDocumentRenderConfig,
+        renderConfig: IDocumentLayoutRenderConfig,
         parentScale: IScale,
         fieldContext?: IHeaderFooterFieldContext
     ) {
@@ -1147,7 +1147,7 @@ export class Documents extends DocComponent {
         alignOffsetNoAngle: Vector2,
         centerAngle: number,
         vertexAngle: number,
-        renderConfig: IDocumentRenderConfig,
+        renderConfig: IDocumentLayoutRenderConfig,
         parentScale: IScale
     ) {
         const drawLiquid = this._drawLiquid;
@@ -1470,7 +1470,7 @@ export class Documents extends DocComponent {
         alignOffsetNoAngle: Vector2,
         centerAngle: number,
         vertexAngle: number,
-        renderConfig: IDocumentRenderConfig,
+        renderConfig: IDocumentLayoutRenderConfig,
         parentScale: IScale,
         fieldContext?: IHeaderFooterFieldContext
     ) {
@@ -1507,7 +1507,7 @@ export class Documents extends DocComponent {
         alignOffsetNoAngle: Vector2,
         centerAngle: number,
         vertexAngle: number,
-        renderConfig: IDocumentRenderConfig,
+        renderConfig: IDocumentLayoutRenderConfig,
         parentScale: IScale,
         fieldContext?: IHeaderFooterFieldContext
     ) {
@@ -1880,7 +1880,7 @@ export class Documents extends DocComponent {
         alignOffsetNoAngle: Vector2,
         centerAngle: number,
         vertexAngle: number,
-        renderConfig: IDocumentRenderConfig,
+        renderConfig: IDocumentLayoutRenderConfig,
         parentScale: IScale,
         parentPage: IDocumentSkeletonPage,
         isHeader = true,

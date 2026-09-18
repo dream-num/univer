@@ -20,6 +20,7 @@ import { RxDisposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
 interface IDocChangeState {
+    layoutState?: unknown;
     actions: JSONXActions;
     textRanges: Nullable<ITextRangeWithStyle[]>;
     options?: { [key: string]: boolean };

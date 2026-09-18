@@ -30,7 +30,7 @@ describe('getTextRunAtPosition', () => {
                 {
                     st: position,
                     ed: position + text.length + 1,
-                    ts: { ff: 'Monospace', fs: 10, textAdvance: 7, customGlyphKey: 'original' },
+                    ts: { ff: 'Monospace', fs: 10 },
                 },
             ],
         };
@@ -86,17 +86,14 @@ describe('getTextRunAtPosition', () => {
                 {
                     st: 0,
                     ed: 2,
-                    ts: { ff: 'Previous', lineAscent: 20, lineDescent: 4, textAdvance: 12 },
+                    ts: { ff: 'Previous', fs: 20 },
                 },
                 {
                     st: 2,
                     ed: 3,
                     ts: {
-                        customGlyphKey: 'source-glyph',
                         ff: 'Following',
-                        lineAscent: 8,
-                        lineDescent: 2,
-                        textAdvance: 6,
+                        fs: 8,
                     },
                 },
             ],
@@ -104,19 +101,15 @@ describe('getTextRunAtPosition', () => {
 
         expect(getTextRunAtPosition(body, 2, {}, null).ts).toEqual({
             ff: 'Previous',
-            lineAscent: 20,
-            lineDescent: 4,
-            textAdvance: 12,
+            fs: 20,
         });
         expect(getTextRunAtInputPosition(body, 2, {}, null).ts).toEqual({
             ff: 'Previous',
-            lineAscent: 20,
-            lineDescent: 4,
+            fs: 20,
         });
         expect(getTextRunAtInputPosition(body, 2, {}, null, false, true).ts).toEqual({
             ff: 'Following',
-            lineAscent: 8,
-            lineDescent: 2,
+            fs: 8,
         });
     });
 });

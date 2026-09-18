@@ -33,6 +33,7 @@ import type {
 } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
 import type { IEditorInputConfig } from '../selection/doc-selection-render.service';
+import type { IEditorRuntimeConfig } from './editor-runtime-config';
 import { createParagraphId, createSectionId, Disposable, isInternalEditorID, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -102,6 +103,8 @@ export interface IEditorCanvasStyle {
 }
 
 export interface IEditorConfigParams {
+    /** Instance-only layout and interaction settings, never persisted in the document. */
+    renderConfig?: IEditorRuntimeConfig;
     initialSnapshot: IDocumentData;
     /** Keep the globally focused unit on the editor's host while this editor receives input focus. */
     preserveHostFocus?: boolean;

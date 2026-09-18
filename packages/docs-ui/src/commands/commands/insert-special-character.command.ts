@@ -16,10 +16,15 @@
 
 import type { DocumentDataModel, ICommand } from '@univerjs/core';
 import type { IInsertTextCommandParams } from '@univerjs/docs';
-import { BooleanNumber, CommandType, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, InsertTextCommand } from '@univerjs/docs';
-import { getCustomDecorationAtPosition, getCustomRangeAtPosition, getTextRunAtInputPosition } from '../../basics/paragraph';
+import {
+    getCustomDecorationAtPosition,
+    getCustomRangeAtPosition,
+    getTextRunAtInputPosition,
+} from '../../basics/paragraph';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
+import { getEditorRuntimeConfig } from '../../services/editor/editor-runtime-config';
 
 export const InsertSpecialCharacterCommand: ICommand<{
     value: string;
@@ -55,7 +60,7 @@ export const InsertSpecialCharacterCommand: ICommand<{
             docMenuStyleService.getDefaultStyle(),
             docMenuStyleService.getStyleCache(),
             false,
-            docDataModel.getDocumentStyle().renderConfig?.inheritParagraphStartStyle === BooleanNumber.TRUE
+            getEditorRuntimeConfig(docDataModel)?.inheritParagraphStartStyle === true
         );
         const curCustomRange = getCustomRangeAtPosition(originBody.customRanges ?? [], activeRange.endOffset);
         const curCustomDecorations = getCustomDecorationAtPosition(originBody.customDecorations ?? [], activeRange.endOffset);

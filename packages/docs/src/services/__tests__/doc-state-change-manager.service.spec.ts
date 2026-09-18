@@ -120,6 +120,29 @@ describe('DocStateChangeManagerService', () => {
         sub.unsubscribe();
     });
 
+    it('keeps host layout history local and excludes it from collaborative change events', () => {
+        const { service, emitter, undoRedoService, univerInstanceService } = createService();
+        univerInstanceService.__addUnit(new DocumentDataModel({ id: 'doc-1' }));
+        univerInstanceService.focusUnit('doc-1');
+        const changes: unknown[] = [];
+        const subscription = service.docStateChange$.subscribe((value) => changes.push(value));
+        const base = createChange();
+        const change = {
+            ...base,
+            undoState: { ...base.undoState, layoutState: { glyph: 'before' } },
+            redoState: { ...base.redoState, layoutState: { glyph: 'after' } },
+        };
+        emitter.emitStateChangeInfo(change);
+        expect(undoRedoService.pitchTopUndoElement()).toMatchObject({
+            undoMutations: [{ params: { layoutState: { glyph: 'before' } } }],
+            redoMutations: [{ params: { layoutState: { glyph: 'after' } } }],
+        });
+        expect(changes).toHaveLength(2);
+        expect(changes[1]).not.toHaveProperty('undoState.layoutState');
+        expect(changes[1]).not.toHaveProperty('redoState.layoutState');
+        subscription.unsubscribe();
+    });
+
     it('filters sync or intercepted state changes without changing caches', () => {
         const synced = createService();
         synced.emitter.emitStateChangeInfo(createChange({ isSync: true }));

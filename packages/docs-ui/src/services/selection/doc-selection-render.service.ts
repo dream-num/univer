@@ -35,7 +35,6 @@ import type {
 import type { Subscription } from 'rxjs';
 import type { RectRange } from './rect-range';
 import {
-    BooleanNumber,
     DataStreamTreeTokenType,
     DOC_RANGE_TYPE,
     IContextService,
@@ -59,7 +58,12 @@ import {
 } from '@univerjs/engine-render';
 import { ILayoutService, KeyCode } from '@univerjs/ui';
 import { BehaviorSubject, filter, fromEvent, merge, Subject, takeUntil } from 'rxjs';
-import { DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../doc-embed-integration.service';
+import {
+    DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
+    IDocEmbedInteractionBoundaryService,
+    IDocEmbedRuntimeFocusCoordinator,
+} from '../doc-embed-integration.service';
+import { getEditorRuntimeConfig } from '../editor/editor-runtime-config';
 import { compareNodePositionLogic } from './convert-text-range';
 import {
     getCanvasOffsetByEngine,
@@ -757,9 +761,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         scene.disableObjectsEvent();
 
-        const disableAutoScroll = this._context.unit.getDocumentStyle()
-            .renderConfig
-            ?.disableSelectionAutoScroll === BooleanNumber.TRUE;
+        const disableAutoScroll = getEditorRuntimeConfig(this._context.unit)?.disableSelectionAutoScroll === true;
         const scrollTimer = disableAutoScroll ? undefined : ScrollTimer.create(scene);
         if (scrollTimer) {
             this._scrollTimers.push(scrollTimer);

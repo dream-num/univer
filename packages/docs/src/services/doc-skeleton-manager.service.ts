@@ -16,8 +16,16 @@
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { DocumentFlavor, Inject, isInternalEditorID, IUniverInstanceService, LocaleService, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import { DocumentSkeleton, DocumentViewModel } from '@univerjs/engine-render';
+import {
+    DocumentFlavor,
+    Inject,
+    isInternalEditorID,
+    IUniverInstanceService,
+    LocaleService,
+    RxDisposable,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { DocumentSkeleton, DocumentViewModel, getDocumentLayoutPresentation } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 import { DocLayoutExecutorService } from './doc-layout-executor.service';
 
@@ -88,6 +96,7 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
 
         return this._docLayoutExecutorService.getExecutor() != null &&
             !isInternalEditorID(this._context.unitId) &&
+            !getDocumentLayoutPresentation(this._context.unit) &&
             (documentFlavor === DocumentFlavor.TRADITIONAL || documentFlavor === DocumentFlavor.MODERN);
     }
 

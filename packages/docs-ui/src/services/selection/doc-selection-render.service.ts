@@ -58,7 +58,12 @@ import {
 } from '@univerjs/engine-render';
 import { ILayoutService, KeyCode } from '@univerjs/ui';
 import { BehaviorSubject, filter, fromEvent, merge, Subject, takeUntil } from 'rxjs';
-import { DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../doc-embed-integration.service';
+import {
+    DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
+    IDocEmbedInteractionBoundaryService,
+    IDocEmbedRuntimeFocusCoordinator,
+} from '../doc-embed-integration.service';
+import { getEditorRuntimeConfig } from '../editor/editor-runtime-config';
 import { compareNodePositionLogic } from './convert-text-range';
 import {
     getCanvasOffsetByEngine,
@@ -113,6 +118,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     private readonly _textSelectionInner$ = new BehaviorSubject<Nullable<IDocSelectionInnerParam>>(null);
     readonly textSelectionInner$ = this._textSelectionInner$.asObservable();
+
+    private readonly _movingSelection$ = new Subject<IDocSelectionInnerParam>();
+    readonly movingSelection$ = this._movingSelection$.asObservable();
 
     private readonly _onFocus$ = new Subject<IEditorInputConfig>();
     readonly onFocus$ = this._onFocus$.asObservable();
@@ -753,9 +761,12 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         scene.disableObjectsEvent();
 
-        const scrollTimer = ScrollTimer.create(scene);
-        this._scrollTimers.push(scrollTimer);
-        scrollTimer.startScroll(evtOffsetX, evtOffsetY);
+        const disableAutoScroll = getEditorRuntimeConfig(this._context.unit)?.disableSelectionAutoScroll === true;
+        const scrollTimer = disableAutoScroll ? undefined : ScrollTimer.create(scene);
+        if (scrollTimer) {
+            this._scrollTimers.push(scrollTimer);
+            scrollTimer.startScroll(evtOffsetX, evtOffsetY);
+        }
 
         this._onSelectionStart$.next(this._getActiveRangeInstance()?.startNodePosition);
 
@@ -775,7 +786,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
             this._tryMoving(moveOffsetX, moveOffsetY);
 
-            scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
+            scrollTimer?.scrolling(moveOffsetX, moveOffsetY, () => {
                 this._tryMoving(moveOffsetX, moveOffsetY);
             });
 
@@ -1245,6 +1256,16 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._addTextRangesToCache(textRanges);
         this._addRectRangesToCache(rectRanges);
 
+        if (this._movingSelection$.observed) {
+            this._movingSelection$.next({
+                textRanges: this._rangeListCache.map(serializeTextRange),
+                rectRanges: this._rectRangeListCache.map(serializeRectRange),
+                segmentId: this._currentSegmentId,
+                segmentPage: this._currentSegmentPage,
+                style: this._selectionStyle,
+                isEditing: false,
+            });
+        }
         this.deactivate();
     }
 
@@ -1371,6 +1392,16 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._addTextRangesToCache(textRanges);
         this._addRectRangesToCache(rectRanges);
 
+        if (this._movingSelection$.observed) {
+            this._movingSelection$.next({
+                textRanges: this._rangeListCache.map(serializeTextRange),
+                rectRanges: this._rectRangeListCache.map(serializeRectRange),
+                segmentId: this._currentSegmentId,
+                segmentPage: this._currentSegmentPage,
+                style: this._selectionStyle,
+                isEditing: false,
+            });
+        }
         this.deactivate();
 
         this._context.scene?.getEngine()?.setCapture();
@@ -1854,6 +1885,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._onCompositionend$.complete();
         this._onSelectionStart$.complete();
         this._textSelectionInner$.complete();
+        this._movingSelection$.complete();
         this._onPaste$.complete();
         this._onFocus$.complete();
         this._onBlur$.complete();

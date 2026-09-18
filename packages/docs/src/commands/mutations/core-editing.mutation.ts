@@ -41,7 +41,7 @@ import {
     UndoCommandId,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { getDocumentLayoutPresentation, IRenderManagerService } from '@univerjs/engine-render';
 import { DocSelectionManagerService } from '../../services/doc-selection-manager.service';
 import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
 import { DocStateEmitService } from '../../services/doc-state-emit.service';
@@ -62,6 +62,8 @@ export enum DocHistoryAction {
 
 export interface IRichTextEditingMutationParams extends IMutationCommonParams {
     unitId: string;
+    /** Host-owned transient layout state, used only by local editor history. */
+    layoutState?: unknown;
     historyAction?: string;
     historyActions?: string[];
     actions: JSONXActions;
@@ -333,12 +335,30 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             return { unitId, actions: [], textRanges: docRanges };
         }
 
+        const presentation = getDocumentLayoutPresentation(documentDataModel);
+        const previousLayoutState = presentation?.captureState();
+
         const { actions: appliedActions, undoActions, preservesStructure } = applyValidatedDocumentActions(
             documentDataModel,
             segmentId,
             actions,
             isHistoryReplay
         );
+
+        if (presentation) {
+            try {
+                if (params.layoutState !== undefined) {
+                    presentation.restoreState(params.layoutState);
+                } else {
+                    presentation.applyActions(appliedActions, documentDataModel.getSnapshot());
+                }
+                params.layoutState = presentation.captureState();
+            } catch (error) {
+                documentDataModel.apply(undoActions);
+                presentation.restoreState(previousLayoutState);
+                throw error;
+            }
+        }
 
         // Publish reference deletion and note cleanup in the same deterministic mutation.
         params.actions = appliedActions;
@@ -354,12 +374,14 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             noHistory,
             debounce,
             redoState: {
+                ...(presentation ? { layoutState: params.layoutState } : {}),
                 actions: appliedActions,
                 textRanges,
                 options: params.options,
                 isEditing,
             },
             undoState: {
+                ...(presentation ? { layoutState: previousLayoutState } : {}),
                 actions: undoActions,
                 textRanges: prevTextRanges ?? docRanges,
                 options: selectionInfo?.options,
@@ -374,6 +396,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         return {
             unitId,
             actions: undoActions,
+            ...(presentation ? { layoutState: previousLayoutState } : {}),
             textRanges: docRanges,
         };
     },

@@ -35,6 +35,46 @@ import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 describe('line-adjustment', () => {
+    it.each(['“内容”', '文。。文', '（二）内容'])('preserves punctuation widths when compression is disabled: %s', (text) => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(text, {
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                characterSpacingControl: characterSpacingControlType.doNotCompress,
+                renderConfig: { preservePunctuationSpacing: BooleanNumber.TRUE },
+            },
+        });
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const pages = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
+
+        lineAdjustment(pages, viewModel, paragraphNode, sectionBreakConfig);
+
+        const punctuation = pages[0].sections[0].columns[0].lines[0].divides[0].glyphGroup
+            .filter((glyph) => ['“', '”', '。', '（', '）'].includes(glyph.content));
+        expect(punctuation.length).toBeGreaterThan(0);
+        for (const glyph of punctuation) {
+            expect(glyph.xOffset).toBe(0);
+            expect(glyph.width).toBeCloseTo(glyph.bBox.width);
+        }
+    });
+
+    it.each([undefined, characterSpacingControlType.compressPunctuation])(
+        'retains default punctuation compression (%s)',
+        (characterSpacingControl) => {
+            const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('“内容”', {
+                documentStyle: { characterSpacingControl },
+            });
+            const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+            const pages = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
+
+            lineAdjustment(pages, viewModel, paragraphNode, sectionBreakConfig);
+
+            const openingQuote = pages[0].sections[0].columns[0].lines[0].divides[0].glyphGroup[0];
+            expect(openingQuote.content).toBe('“');
+            expect(openingQuote.xOffset).toBeLessThan(0);
+            expect(openingQuote.width).toBeLessThan(openingQuote.bBox.width);
+        }
+    );
+
     it.each([12, 17, 22, 30].flatMap((points) => [DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].map((documentFlavor) => ({ points, documentFlavor }))))('aligns exact-spaced text like Word without changing line boxes: %j', ({ points, documentFlavor }) => {
         const measure = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
             width: text.length * 8,
@@ -486,6 +526,36 @@ describe('line-adjustment', () => {
         const pages = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
 
         expect(() => lineAdjustment(pages, viewModel, paragraphNode, sectionBreakConfig)).not.toThrow();
+    });
+
+    it('preserves authoritative advances for punctuation at line boundaries', () => {
+        const firstGlyph = createGlyph('（', 20, {
+            ts: { textAdvance: 20 },
+            adjustability: {
+                stretchability: [0, 0],
+                shrinkability: [10, 0],
+            },
+        });
+        const lastGlyph = createGlyph('）', 20, {
+            ts: { textAdvance: 20 },
+            adjustability: {
+                stretchability: [0, 0],
+                shrinkability: [0, 10],
+            },
+        });
+        const divide = {
+            width: 40,
+            isFull: false,
+            paddingLeft: 0,
+            glyphGroup: [firstGlyph, lastGlyph],
+        } as any;
+        const context = createPagesWithLine(divide, HorizontalAlign.LEFT);
+
+        lineAdjustment(context.pages, context.viewModel, context.paragraphNode, context.sectionBreakConfig);
+
+        expect(firstGlyph.xOffset).toBe(0);
+        expect(firstGlyph.width).toBe(20);
+        expect(lastGlyph.width).toBe(20);
     });
 
     it('handles horizontal align CENTER', () => {

@@ -14,6 +14,25 @@
  * limitations under the License.
  */
 
+import type { IDocSelectionInnerParam } from '@univerjs/engine-render';
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// @vitest-environment jsdom
+
 import {
     CommandService,
     ConfigService,
@@ -44,13 +63,18 @@ import {
     RichTextEditingMutation,
     SetTextSelectionsOperation,
 } from '@univerjs/docs';
-import { IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, RenderManagerService } from '@univerjs/engine-render';
+import {
+    IRenderManagerService,
+    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+    RenderManagerService,
+} from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ReplaceSnapshotCommand } from '../../../commands/commands/replace-content.command';
 import { DocSelectionRenderService } from '../../selection/doc-selection-render.service';
 import { Editor } from '../editor';
 import { EditorService, IEditorService } from '../editor-manager.service';
+import { getEditorRuntimeConfig } from '../editor-runtime-config';
 
 const EDITOR_ID = 'editor-1';
 
@@ -62,6 +86,7 @@ class TestDocSelectionRenderService {
     readonly onKeydown$ = new Subject<{ event: KeyboardEvent; content?: string }>();
     readonly onCompositionupdate$ = new Subject<{ event: CompositionEvent; content?: string }>();
     readonly onCompositionend$ = new Subject<{ event: CompositionEvent; content?: string }>();
+    readonly movingSelection$ = new Subject<IDocSelectionInnerParam>();
     isFocusing = true;
     focusCount = 0;
     blurCount = 0;
@@ -89,7 +114,12 @@ class TestDocSelectionRenderService {
 class TestRender {
     constructor(private readonly _selectionRenderService: TestDocSelectionRenderService) {}
 
+    with(service: typeof DocSelectionRenderService): TestDocSelectionRenderService;
+    with(service: typeof DocSkeletonManagerService): { getViewModel: () => undefined };
     with(service: unknown) {
+        if (service === DocSkeletonManagerService) {
+            return { getViewModel: () => undefined };
+        }
         if (service === DocSelectionRenderService) {
             return this._selectionRenderService;
         }
@@ -119,10 +149,12 @@ class TestRegisterRender extends TestRender {
     readonly canvas = document.createElement('canvas');
     readonly viewport = new TestRegisterViewport();
     container: HTMLDivElement | null = null;
+    resizeOnMount: boolean | undefined;
     readonly engine = {
         canvasColorService: {},
-        mount: (container: HTMLDivElement) => {
+        mount: (container: HTMLDivElement, resize?: boolean) => {
             this.container = container;
+            this.resizeOnMount = resize;
         },
         getCanvas: () => ({
             getCanvasEle: () => this.canvas,
@@ -246,6 +278,23 @@ function createEditor(
 }
 
 describe('EditorService', () => {
+    it('lets an external editor layout host own the engine resize listener', () => {
+        const { service } = createService(TestRegisterRenderManagerService);
+        service.register({
+            cancelDefaultResizeListener: true,
+            initialSnapshot: {
+                id: EDITOR_ID,
+                body: {
+                    dataStream: 'abc\r\n',
+                    paragraphs: [{ startIndex: 0, paragraphId: createParagraphId(new Set()) }],
+                },
+                documentStyle: {},
+            },
+        }, document.createElement('div'));
+
+        expect(TestRegisterRenderManagerService.renders.get(EDITOR_ID)?.resizeOnMount).toBe(false);
+    });
+
     afterEach(() => {
         vi.unstubAllGlobals();
         TestRegisterRenderManagerService.renders.clear();
@@ -289,7 +338,7 @@ describe('EditorService', () => {
         expect(editorFocused).toBe(1);
     });
 
-    it('turns render-layer editing activity into editor events and document updates', async () => {
+    it.each([false, true])('publishes drag selection only when configured (%s)', async (emitSelectionWhileDragging) => {
         const { injector, univerInstanceService } = createService();
         const commandService = injector.get(ICommandService);
         commandService.registerCommand(ReplaceSnapshotCommand);
@@ -298,6 +347,7 @@ describe('EditorService', () => {
         const selectionRenderService = new TestDocSelectionRenderService();
         const editor = injector.createInstance(Editor, {
             initialSnapshot: { id: EDITOR_ID },
+            emitSelectionWhileDragging,
             render: new TestRender(selectionRenderService),
             editorDom: document.createElement('div'),
         } as never, univerInstanceService, injector.get(DocSelectionManagerService), commandService, injector.get(IUndoRedoService), injector);
@@ -356,6 +406,20 @@ describe('EditorService', () => {
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
             isEditing: true,
         }, { unitId: EDITOR_ID, subUnitId: EDITOR_ID });
+        selectionRenderService.movingSelection$.next({
+            textRanges: [{
+                startOffset: 2,
+                endOffset: 4,
+                collapsed: false,
+                isActive: true,
+            }],
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            isEditing: false,
+        });
+        expect(editor.getSelectionRanges().map((range) => [range.startOffset, range.endOffset])).toEqual(emitSelectionWhileDragging ? [[2, 4]] : [[1, 2]]);
         editor.replaceText('quarterly');
         await Promise.resolve();
 
@@ -364,7 +428,7 @@ describe('EditorService', () => {
         expect(changeEvents).toEqual(['abc\r\n']);
         expect(inputs).toEqual(['d:false', 'cut:false', ':false', '拼:true', 'paste-text:false']);
         expect(pastes).toEqual(['paste-text']);
-        expect(selections).toEqual(['1:2:false']);
+        expect(selections).toEqual(emitSelectionWhileDragging ? ['1:2:false', '2:4:false'] : ['1:2:false']);
         expect(editor.getDocumentData().body?.dataStream).toBe('quarterly\r\n');
         expect(refreshSelections.at(-1)).toBe('9:9');
         expect(univerInstanceService.getUnit<DocumentDataModel>(EDITOR_ID)?.getBody()?.dataStream).toBe('quarterly\r\n');
@@ -523,6 +587,7 @@ describe('EditorService', () => {
             preserveHostFocus: true,
         });
         expect(render.container).toBe(container);
+        expect(render.resizeOnMount).toBe(true);
         expect(render.viewport.disposed).toBe(true);
         expect(render.viewport.scrollVal).toEqual({
             scrollX: 0,
@@ -545,13 +610,13 @@ describe('EditorService', () => {
     it.each([false, true])('keeps replacement resources and releases old listeners (old container disposed first: %s)', (previousFirst) => {
         const { service, univerInstanceService } = createService(TestRegisterRenderManagerService);
         const snapshot = univerInstanceService.getUnit<DocumentDataModel>(EDITOR_ID)!.getSnapshot();
-        const previousLease = service.register({ initialSnapshot: snapshot }, document.createElement('div'));
+        const previousLease = service.register({ initialSnapshot: snapshot, renderConfig: { disableSelectionAutoScroll: true } }, document.createElement('div'));
         const previousEditor = service.getEditor(EDITOR_ID)!;
         const oldInputs: string[] = [];
         previousEditor.input$.subscribe(({ content }) => oldInputs.push(content));
         service.focus(EDITOR_ID);
         const currentContainer = document.createElement('div');
-        const currentLease = service.register({ initialSnapshot: snapshot }, currentContainer);
+        const currentLease = service.register({ initialSnapshot: snapshot, renderConfig: { inheritParagraphStartStyle: true } }, currentContainer);
         const currentEditor = service.getEditor(EDITOR_ID)!;
         expect(currentEditor).not.toBe(previousEditor);
         const model = univerInstanceService.getUnit<DocumentDataModel>(EDITOR_ID)!;
@@ -564,6 +629,7 @@ describe('EditorService', () => {
         if (previousFirst) {
             previousLease.dispose();
         }
+        expect(getEditorRuntimeConfig(model)).toEqual({ inheritParagraphStartStyle: true });
         expect(service.getEditor(EDITOR_ID)).toBe(currentEditor);
         expect(univerInstanceService.getUnit(EDITOR_ID)).toBe(model);
         expect(model.getSnapshot()).toEqual(snapshot);
@@ -574,6 +640,7 @@ describe('EditorService', () => {
         currentLease.dispose();
         previousLease.dispose();
         currentLease.dispose();
+        expect(getEditorRuntimeConfig(model)).toBeUndefined();
         expect(service.getEditor(EDITOR_ID)).toBeUndefined();
         expect(univerInstanceService.getUnit(EDITOR_ID)).toBeUndefined();
         expect(TestRegisterRenderManagerService.removedRenderIds).toEqual([EDITOR_ID]);

@@ -18,6 +18,7 @@ import type { IDocumentBody, IParagraphStyle, IScale, ITable } from '@univerjs/c
 import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 import type { IExtensionConfig } from '../../extension';
 import {
+    BooleanNumber,
     ColumnSeparatorType,
     CustomRangeType,
     DashStyleType,
@@ -392,6 +393,63 @@ describe('documents render', () => {
         document.body.innerHTML = '';
         vi.restoreAllMocks();
         setDocsTableRenderViewportProvider(null);
+    });
+
+    it('routes glyphs with source groups and replays them without accumulating baseline offsets', () => {
+        const bed = createParagraphLayoutTestBed('AB', {
+            body: { textRuns: [
+                { st: 0, ed: 1, ts: { fs: 12, pos: 3, customGlyphGroup: 'first' } },
+                { st: 1, ed: 2, ts: { fs: 18, customGlyphGroup: 'second' } },
+            ] },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        const documents = new Documents('ordered-glyphs', skeleton);
+        try {
+            skeleton.calculate();
+            scene.addObject(documents, 1);
+            const context = canvas.getContext();
+            const draw = vi.spyOn(context, 'fillText');
+            documents.draw(context);
+            const original = draw.mock.calls.map((args) => [...args]);
+            expect(original.map(([text]) => text).join('').trim()).toBe('AB');
+            draw.mockClear();
+            const sink = vi.fn();
+            const subscription = documents.setGlyphPaintSink(sink);
+            documents.draw(context);
+            expect(draw).not.toHaveBeenCalled();
+            const paints = documents.getGlyphPaints();
+            expect(sink).toHaveBeenCalledWith(paints);
+            expect(paints.slice(0, 2).map((paint) => paint.group)).toEqual(['first', 'second']);
+            for (let repeat = 0; repeat < 2; repeat++) {
+                draw.mockClear();
+                for (const paint of paints) {
+                    context.save();
+                    context.setTransform(...paint.transform);
+                    paint.draw(context);
+                    context.restore();
+                }
+                expect(draw.mock.calls).toEqual(original);
+            }
+            const replacement = vi.fn();
+            const nextSubscription = documents.setGlyphPaintSink(replacement);
+            subscription.dispose();
+            documents.draw(context);
+            expect(replacement).toHaveBeenCalledOnce();
+            nextSubscription.dispose();
+            expect(documents.getGlyphPaints()).toEqual([]);
+            draw.mockClear();
+            documents.draw(context);
+            expect(draw.mock.calls).toEqual(original);
+            documents.setGlyphPaintSink(sink);
+            documents.draw(context);
+            documents.dispose();
+            expect(documents.getGlyphPaints()).toEqual([]);
+        } finally {
+            documents.dispose();
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
     });
 
     it.each(['separator', 'continuationSeparator', 'continuationNotice'] as const)('renders each note kind with its own %s fields', (kind) => {
@@ -2071,6 +2129,53 @@ describe('documents render', () => {
         );
 
         expect(ctx.rectByPrecision).toHaveBeenCalledWith(116, 226, 200, 420);
+
+        documents.dispose();
+    });
+
+    it('allows a column group to render overflowing content without clipping', () => {
+        const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
+        attachColumnGroup(bodyPage);
+        const columnGroup = bodyPage.skeColumnGroups.get('column-group-1')!;
+        columnGroup.columnGroupSource.clipContent = BooleanNumber.FALSE;
+        const nestedPage = columnGroup.columns[0].page;
+        nestedPage.sections[0].columns[0].lines = [];
+
+        const documents = new Documents('docs-column-group-overflow');
+        (documents as any)._drawLiquid = {
+            x: 12,
+            y: 20,
+            translateSave: vi.fn(),
+            translateRestore: vi.fn(),
+            translateSection: vi.fn(),
+            translateColumn: vi.fn(),
+        };
+        const ctx = {
+            beginPath: vi.fn(),
+            clip: vi.fn(),
+            closePath: vi.fn(),
+            rectByPrecision: vi.fn(),
+            restore: vi.fn(),
+            save: vi.fn(),
+        } as any;
+
+        (documents as any)._drawNestedPageContent(
+            ctx,
+            bodyPage,
+            nestedPage,
+            [],
+            null,
+            [],
+            [],
+            { x: 0, y: 0 },
+            0,
+            0,
+            {},
+            { scaleX: 1, scaleY: 1 }
+        );
+
+        expect(ctx.rectByPrecision).not.toHaveBeenCalled();
+        expect(ctx.clip).not.toHaveBeenCalled();
 
         documents.dispose();
     });

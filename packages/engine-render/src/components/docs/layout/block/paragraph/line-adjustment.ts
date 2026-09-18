@@ -331,13 +331,20 @@ function shrinkStartAndEndCJKPunctuation(line: IDocumentSkeletonLine, preserveEn
         const firstGlyph = divide.glyphGroup[0];
         const lastGlyph = divide.glyphGroup[glyphGroupLength - 1];
 
-        if (isCjkRightAlignedPunctuation(firstGlyph.content)) {
+        if (
+            firstGlyph.ts?.textAdvance === undefined
+            && isCjkRightAlignedPunctuation(firstGlyph.content)
+        ) {
             const shrinkAmount = firstGlyph.adjustability.shrinkability[0];
 
             glyphShrinkLeft(firstGlyph, shrinkAmount);
         }
 
-        if (!preserveEndSpace && isCjkLeftAlignedPunctuation(lastGlyph.content)) {
+        if (
+            !preserveEndSpace
+            && lastGlyph.ts?.textAdvance === undefined
+            && isCjkLeftAlignedPunctuation(lastGlyph.content)
+        ) {
             const shrinkAmount = lastGlyph.adjustability.shrinkability[1];
 
             glyphShrinkRight(lastGlyph, shrinkAmount);
@@ -421,6 +428,7 @@ export function lineAdjustment(
                 for (let index = low; index < lines.length && lines[index].paragraphIndex === paragraph.startIndex; index++) {
                     const line = lines[index];
                     if (traditional && resolvedParagraphStyle.spacingRule === SpacingRule.EXACT && line.contentHeight > 0.01 &&
+                        sectionBreakConfig.renderConfig?.topAlignExactLineSpacing !== BooleanNumber.TRUE &&
                         !line.divides.some((divide) => divide.glyphGroup.some((glyph) => glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width > 0))) {
                         // Word places text at 80% of the exact line box, independent of font ascent.
                         // Keep the line box unchanged so pagination and following objects do not move.

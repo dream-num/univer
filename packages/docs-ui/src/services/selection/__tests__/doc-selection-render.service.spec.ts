@@ -32,6 +32,7 @@ import {
 import { DocLayoutExecutorService, DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DeviceType, GlyphType, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PointerInput, RenderUnit } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
+import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
     EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
@@ -241,6 +242,7 @@ function createService() {
         _logService: {
             error: vi.fn(),
         },
+        _movingSelection$: new Subject(),
         _textSelectionInner$: {
             next: vi.fn(),
             value: { isEditing: false },

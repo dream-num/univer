@@ -36,4 +36,23 @@ describe('column group layout', () => {
         expect(layout.columns[1].width).toBeCloseTo(25);
         expect(layout.columns[2].width).toBeCloseTo(25);
     });
+
+    it('preserves independent column top offsets in a fixed horizontal layout', () => {
+        const layout = calculateColumnGroupLayout({
+            columnGroupId: 'column-group-1',
+            columns: [
+                { columnId: 'column-1', widthRatio: 1 },
+                { columnId: 'column-2', widthRatio: 1, topOffset: { v: -8 } },
+            ],
+            gap: { v: 20 },
+            layout: ColumnLayoutType.FIXED,
+            responsive: ColumnResponsiveType.SHRINK,
+        }, 220, [60, 60]);
+
+        expect(layout.columns).toEqual([
+            { columnId: 'column-1', left: 0, top: 0, width: 100 },
+            { columnId: 'column-2', left: 120, top: -8, width: 100 },
+        ]);
+        expect(layout.height).toBe(60);
+    });
 });

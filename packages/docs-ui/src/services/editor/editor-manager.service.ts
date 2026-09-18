@@ -18,19 +18,41 @@ import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, Null
 import type { DocBackground, ISuccinctDocRangeParam, Scene } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
 import type { IEditorCanvasStyle, IEditorConfigParams } from './editor';
-import { createIdentifier, createParagraphId, DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, EDITOR_ACTIVATED, FOCUSING_COMMENT_EDITOR, FOCUSING_EDITOR_STANDALONE, HorizontalAlign, ICommandService, IContextService, Inject, Injector, isCommentEditorID, isInternalEditorID, IUndoRedoService, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
+import {
+    createIdentifier,
+    createParagraphId,
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
+    Disposable,
+    EDITOR_ACTIVATED,
+    FOCUSING_COMMENT_EDITOR,
+    FOCUSING_EDITOR_STANDALONE,
+    HorizontalAlign,
+    ICommandService,
+    IContextService,
+    Inject,
+    Injector,
+    isCommentEditorID,
+    isInternalEditorID,
+    IUndoRedoService,
+    IUniverInstanceService,
+    toDisposable,
+    UniverInstanceType,
+    VerticalAlign,
+} from '@univerjs/core';
+import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { fromEvent, Subject } from 'rxjs';
 import { DOCS_VIEW_KEY } from '../../basics/docs-view-key';
 import { resolveDocRenderBackground } from '../doc-render-background';
 import { Editor } from './editor';
+import { getEditorRuntimeConfig, registerEditorRuntimeConfig } from './editor-runtime-config';
 
 export interface IEditorRenderConfig {
     canvasStyle: IEditorCanvasStyle;
     preserveHostFocus?: boolean;
     scrollBar?: boolean;
     backScrollOffset?: number;
+    disableBackScroll?: boolean;
 }
 
 /**
@@ -250,17 +272,18 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this.ensureNotDisposed();
         const { initialSnapshot, canvasStyle = {} } = config;
         const editorUnitId = initialSnapshot.id;
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(editorUnitId, UniverInstanceType.UNIVER_DOC);
+        const previousLayout = documentDataModel && getEditorRuntimeConfig(documentDataModel)?.layout;
         this._editors.get(editorUnitId)?.dispose(false);
         this._editors.delete(editorUnitId);
         const renderConfig: IEditorRenderConfig = {
             canvasStyle,
             scrollBar: config.scrollBar,
             ...(config.backScrollOffset === undefined ? {} : { backScrollOffset: config.backScrollOffset }),
+            ...(config.disableBackScroll === undefined ? {} : { disableBackScroll: config.disableBackScroll }),
             ...(config.preserveHostFocus === undefined ? {} : { preserveHostFocus: config.preserveHostFocus }),
         };
         this._editorRenderConfigs.set(editorUnitId, renderConfig);
-
-        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(editorUnitId, UniverInstanceType.UNIVER_DOC);
 
         if (documentDataModel == null) {
             this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(
@@ -270,52 +293,70 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             );
         }
 
+        const model = this._univerInstanceService.getUnit<DocumentDataModel>(editorUnitId, UniverInstanceType.UNIVER_DOC)!;
+        const runtime = config.renderConfig && registerEditorRuntimeConfig(model, config.renderConfig);
+
         let render = this._renderManagerService.getRenderUnitById(editorUnitId);
-        if (render == null) {
-            render = this._renderManagerService.createRender(editorUnitId);
-        }
-
-        if (render) {
-            render.engine.mount(container);
-
-            const editor = new Editor(
-                { ...config, render, editorDom: container, canvasStyle },
-                this._univerInstanceService,
-                this._docSelectionManagerService,
-                this._commandService,
-                this._undoRedoService,
-                this._injector
-            );
-
-            this._editors.set(editorUnitId, editor);
-
-            const resolvedEditorBackground = resolveDocRenderBackground({
-                canvasColorService: render.engine.canvasColorService,
-                editorBackgroundColor: canvasStyle.backgroundColor,
-                isEditor: true,
-            });
-            render.engine.getCanvas().getCanvasEle().style.backgroundColor = resolvedEditorBackground.canvasElementBackgroundColor;
-            const docBackground = render.components.get(DOCS_VIEW_KEY.BACKGROUND) as DocBackground | undefined;
-            docBackground?.setFillColors(
-                resolvedEditorBackground.docBackgroundFillColor,
-                resolvedEditorBackground.docBackgroundFillColor,
-                resolvedEditorBackground.docBackgroundFillColor,
-                resolvedEditorBackground.docBackgroundFillColor
-            );
-
-            // Delete scroll bar
-            if (!config.scrollBar) {
-                const viewport = (render.mainComponent?.getScene() as Scene)?.getViewports()?.[0];
-                viewport?.getScrollBar()?.dispose();
-                viewport?.updateScrollVal({
-                    scrollX: 0,
-                    scrollY: 0,
-                    viewportScrollX: 0,
-                    viewportScrollY: 0,
-                });
+        try {
+            if (render != null && (previousLayout || config.renderConfig?.layout)) {
+                render.with(DocSkeletonManagerService).getViewModel()?.reset(model);
             }
+            if (render == null) {
+                render = this._renderManagerService.createRender(editorUnitId);
+            }
+
+            if (render) {
+                render.engine.mount(container, !config.cancelDefaultResizeListener);
+
+                const editor = new Editor(
+                    { ...config, render, editorDom: container, canvasStyle },
+                    this._univerInstanceService,
+                    this._docSelectionManagerService,
+                    this._commandService,
+                    this._undoRedoService,
+                    this._injector
+                );
+
+                if (runtime) {
+                    editor.disposeWithMe(runtime);
+                }
+                this._editors.set(editorUnitId, editor);
+
+                const resolvedEditorBackground = resolveDocRenderBackground({
+                    canvasColorService: render.engine.canvasColorService,
+                    editorBackgroundColor: canvasStyle.backgroundColor,
+                    isEditor: true,
+                });
+                render.engine.getCanvas().getCanvasEle().style.backgroundColor = resolvedEditorBackground.canvasElementBackgroundColor;
+                const docBackground = render.components.get(DOCS_VIEW_KEY.BACKGROUND) as DocBackground | undefined;
+                docBackground?.setFillColors(
+                    resolvedEditorBackground.docBackgroundFillColor,
+                    resolvedEditorBackground.docBackgroundFillColor,
+                    resolvedEditorBackground.docBackgroundFillColor,
+                    resolvedEditorBackground.docBackgroundFillColor
+                );
+
+                // Delete scroll bar
+                if (!config.scrollBar) {
+                    const viewport = (render.mainComponent?.getScene() as Scene)?.getViewports()?.[0];
+                    viewport?.getScrollBar()?.dispose();
+                    viewport?.updateScrollVal({
+                        scrollX: 0,
+                        scrollY: 0,
+                        viewportScrollX: 0,
+                        viewportScrollY: 0,
+                    });
+                }
+            }
+        } catch (error) {
+            runtime?.dispose();
+            this._editors.get(editorUnitId)?.dispose(false);
+            this._editors.delete(editorUnitId);
+            this._editorRenderConfigs.delete(editorUnitId);
+            throw error;
         }
         return toDisposable(() => {
+            runtime?.dispose();
             // An older container may unmount after a replacement has registered the same ID.
             if (this._editorRenderConfigs.get(editorUnitId) === renderConfig) {
                 this._unRegister(editorUnitId);

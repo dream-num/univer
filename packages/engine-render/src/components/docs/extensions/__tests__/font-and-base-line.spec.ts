@@ -16,24 +16,29 @@
 
 import type { IScale } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../../basics/i-document-skeleton-cached';
-import type { UniverRenderingContext } from '../../../../context';
 import type { IExtensionConfig } from '../../../extension';
-import { BaselineOffset } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { COLOR_BLACK_RGB } from '../../../../basics/const';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import { getFontStyleString } from '../../../../basics/tools';
 import { Vector2 } from '../../../../basics/vector2';
+import { UniverRenderingContext } from '../../../../context';
 import { CheckboxShape } from '../../../../shape/checkbox';
+import { registerDocCustomGlyphRenderer } from '../../custom-glyph-renderer';
 import { FontAndBaseLine } from '../font-and-base-line';
 
 type MockRenderContext = UniverRenderingContext & {
     save: ReturnType<typeof vi.fn>;
     restore: ReturnType<typeof vi.fn>;
     fillText: ReturnType<typeof vi.fn>;
+    strokeText: ReturnType<typeof vi.fn>;
     translate: ReturnType<typeof vi.fn>;
+    transform: ReturnType<typeof vi.fn>;
     rotate: ReturnType<typeof vi.fn>;
     scale: ReturnType<typeof vi.fn>;
+    measureText: ReturnType<typeof vi.fn>;
+    getScale: ReturnType<typeof vi.fn>;
     createLinearGradient: ReturnType<typeof vi.fn>;
     createRadialGradient: ReturnType<typeof vi.fn>;
     createPattern: ReturnType<typeof vi.fn>;
@@ -73,12 +78,19 @@ function createContext(): MockRenderContext {
         shadowBlur: 0,
         shadowOffsetX: 0,
         shadowOffsetY: 0,
+        strokeStyle: '',
+        lineWidth: 1,
         save: vi.fn(),
         restore: vi.fn(),
         fillText: vi.fn(),
+        strokeText: vi.fn(),
         translate: vi.fn(),
+        transform: vi.fn(),
         rotate: vi.fn(),
         scale: vi.fn(),
+        measureText: vi.fn((text: string) => ({ width: text.length * 8 })),
+        getScale: vi.fn(() => ({ scaleX: 1, scaleY: 1 })),
+        canvas: { clientWidth: 100, width: 100 },
         createLinearGradient: vi.fn(() => gradient),
         createRadialGradient: vi.fn(() => gradient),
         createPattern: vi.fn(() => ({ setTransform: vi.fn() })),
@@ -252,6 +264,378 @@ describe('docs font and baseline extension', () => {
         expect(SeparatorContext.restore).toHaveBeenCalledOnce();
     });
 
+    it('does not paint positioned tabs when no leader is configured', () => {
+        const extension = new FontAndBaseLine();
+        const TestContext = createContext();
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: {
+                vertexAngle: 0,
+                centerAngle: 0,
+            },
+        };
+
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('\t', {
+            glyphType: GlyphType.TAB,
+            ts: { textAdvance: 20 },
+        }));
+
+        expect(TestContext.fillText).not.toHaveBeenCalled();
+    });
+
+    it('renders a text outline after the glyph fill', () => {
+        const extension = new FontAndBaseLine();
+        const TestContext = createContext();
+        const paintOrder: string[] = [];
+        TestContext.strokeText.mockImplementation(() => paintOrder.push('stroke'));
+        TestContext.fillText.mockImplementation(() => paintOrder.push('fill'));
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: { paintTextOutline: BooleanNumber.TRUE, vertexAngle: 0, centerAngle: 0 },
+        };
+
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('A', {
+            ts: {
+                fs: 12,
+                cl: { rgb: '#ff0000' },
+                textOutline: {
+                    color: '#ff0000',
+                    width: 1.25,
+                    lineCap: 'square',
+                    lineJoin: 'bevel',
+                    miterLimit: 2,
+                },
+            },
+        }));
+
+        expect(TestContext.strokeText).toHaveBeenCalledWith('A', 12, 20);
+        expect(TestContext.strokeStyle).toBe('#ff0000');
+        expect(TestContext.lineWidth).toBe(1.25);
+        expect(TestContext.lineCap).toBe('square');
+        expect(TestContext.lineJoin).toBe('bevel');
+        expect(TestContext.miterLimit).toBe(2);
+        expect(paintOrder).toEqual(['fill', 'stroke']);
+    });
+
+    it('renders characters at their fixed layout advances', () => {
+        const extension = new FontAndBaseLine();
+        const TestContext = createContext();
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: {
+                vertexAngle: 0,
+                centerAngle: 0,
+            },
+        };
+
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('AB', {
+            ts: { fs: 12, sa: 50, textAdvance: 20 },
+        }));
+
+        expect(TestContext.translate).toHaveBeenCalledWith(12, 20);
+        expect(TestContext.transform).toHaveBeenCalledWith(0.5, 0, 0, 1, 0, 0);
+        expect(TestContext.fillText).toHaveBeenNthCalledWith(1, 'A', 0, 0);
+        expect(TestContext.fillText).toHaveBeenNthCalledWith(2, 'B', 40, 0);
+    });
+
+    it('paints source glyphs with a horizontal shear without changing their advances', () => {
+        const extension = new FontAndBaseLine();
+        const TestContext = createContext();
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: {
+                vertexAngle: 0,
+                centerAngle: 0,
+            },
+        };
+
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('AB', {
+            ts: { fs: 12, textAdvance: 20, textSkewX: -0.25 },
+        }));
+
+        expect(TestContext.translate).toHaveBeenCalledWith(12, 20);
+        expect(TestContext.transform).toHaveBeenCalledWith(1, 0, -0.25, 1, 0, 0);
+        expect(TestContext.fillText).toHaveBeenNthCalledWith(1, 'A', 0, 0);
+        expect(TestContext.fillText).toHaveBeenNthCalledWith(2, 'B', 20, 0);
+    });
+
+    it('repeats glyph paint at source-relative offsets', () => {
+        const extension = new FontAndBaseLine();
+        const TestContext = createContext();
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: {
+                vertexAngle: 0,
+                centerAngle: 0,
+            },
+        };
+
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('A', {
+            ts: { fs: 12, textPaintOffsets: [{ x: 0.4, y: 0.1 }] },
+        }));
+
+        expect(TestContext.fillText).toHaveBeenNthCalledWith(1, 'A', 12, 20);
+        expect(TestContext.fillText).toHaveBeenNthCalledWith(2, 'A', 12.4, 20.1);
+    });
+
+    it('reconstructs the source glyph raster scale relative to the current document transform', () => {
+        const extension = new FontAndBaseLine();
+        const nativeContext = createContext();
+        const getTransform = vi.fn(() => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }));
+        const TestContext = new UniverRenderingContext(Object.assign(nativeContext, { getTransform }));
+        let font = nativeContext.font;
+        const fontStack: string[] = [];
+        const readFont = vi.fn(() => font);
+        const writeFont = vi.fn((value: string) => {
+            font = value;
+        });
+        Object.defineProperty(nativeContext, 'font', { get: readFont, set: writeFont });
+        nativeContext.save.mockImplementation(() => {
+            fontStack.push(font);
+        });
+        nativeContext.restore.mockImplementation(() => {
+            font = fontStack.pop() ?? font;
+        });
+        const paintedFonts: string[] = [];
+        nativeContext.fillText.mockImplementation(() => paintedFonts.push(font));
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: {
+                vertexAngle: 0,
+                centerAngle: 0,
+            },
+        };
+
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('A', {
+            ts: { fs: 12, fontRenderScale: 0.5 },
+        }));
+
+        expect(nativeContext.translate).toHaveBeenCalledWith(12, 20);
+        expect(nativeContext.scale).toHaveBeenCalledWith(0.5, 0.5);
+        expect(nativeContext.fillText).toHaveBeenCalledWith('A', 0, 0);
+        expect(paintedFonts).toEqual(['24px Arial']);
+        expect(TestContext.font).toBe('12px Arial');
+        // Native restore already restores the font; assigning it again invalidates the normalized cache.
+        expect(writeFont.mock.calls.map(([value]) => value)).toEqual(['12px Arial', '24px Arial']);
+        expect(readFont.mock.calls.length).toBe(3);
+
+        getTransform.mockReturnValue({ a: 0.5, b: 0, c: 0, d: 0.5, e: 0, f: 0 });
+        nativeContext.translate.mockClear();
+        nativeContext.scale.mockClear();
+        nativeContext.fillText.mockClear();
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('A', {
+            ts: { fs: 12, fontRenderScale: 0.5 },
+        }));
+
+        expect(nativeContext.translate).not.toHaveBeenCalled();
+        expect(nativeContext.scale).not.toHaveBeenCalled();
+        expect(nativeContext.fillText).toHaveBeenCalledWith('A', 12, 20);
+    });
+
+    it.each([1.000296950340271, 1.25, 2])('preserves the source font size at fractional canvas density %s', (pixelRatio) => {
+        const extension = new FontAndBaseLine();
+        const TestContext = createContext();
+        const canvasWidth = 721;
+        const logicalWidth = canvasWidth / pixelRatio;
+        Object.assign(TestContext.canvas, {
+            width: canvasWidth,
+            clientWidth: Math.round(logicalWidth),
+            style: { width: `${logicalWidth}px` },
+        });
+        TestContext.getScale.mockReturnValue({ scaleX: pixelRatio, scaleY: pixelRatio });
+        const paintedFonts: string[] = [];
+        TestContext.fillText.mockImplementation(() => paintedFonts.push(TestContext.font));
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: { vertexAngle: 0, centerAngle: 0 },
+        };
+
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('A', {
+            ts: { fs: 12, fontRenderScale: 1 },
+        }));
+
+        expect(paintedFonts).toEqual(['12px Arial']);
+        expect(TestContext.scale).not.toHaveBeenCalled();
+    });
+
+    it.each([undefined, BooleanNumber.TRUE])('isolates registered glyph painters from ordinary text (outline: %s)', (paintTextOutline) => {
+        const extension = new FontAndBaseLine();
+        const TestContext = createContext();
+        const renderer = vi.fn(() => true);
+        const strokeRenderer = vi.fn(() => true);
+        const registration = registerDocCustomGlyphRenderer({ fontFamily: 'SharedFont', renderer, strokeRenderer });
+        const glyph = createGlyph('A', {
+            ts: { fs: 12, ff: 'SharedFont', textOutline: { color: '#123456', width: 1 } },
+        });
+        const offset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+        };
+        try {
+            extension.extensionOffset = { ...offset, renderConfig: { paintTextOutline } };
+            extension.draw(TestContext, DEFAULT_SCALE, glyph);
+            expect(renderer).not.toHaveBeenCalled();
+            expect(strokeRenderer).not.toHaveBeenCalled();
+            expect(TestContext.fillText).toHaveBeenCalledWith('A', 12, 20);
+
+            extension.extensionOffset = {
+                ...offset,
+                renderConfig: { paintTextOutline, useCustomGlyphRenderer: BooleanNumber.TRUE },
+            };
+            TestContext.fillText.mockClear();
+            extension.draw(TestContext, DEFAULT_SCALE, glyph);
+            expect(renderer).toHaveBeenCalledTimes(1);
+            expect(TestContext.fillText).not.toHaveBeenCalled();
+            expect(strokeRenderer).toHaveBeenCalledTimes(paintTextOutline === BooleanNumber.TRUE ? 1 : 0);
+
+            extension.extensionOffset = { ...offset, renderConfig: { paintTextOutline } };
+            extension.draw(TestContext, DEFAULT_SCALE, glyph);
+            expect(renderer).toHaveBeenCalledTimes(1);
+            expect(strokeRenderer).toHaveBeenCalledTimes(paintTextOutline === BooleanNumber.TRUE ? 1 : 0);
+            expect(TestContext.fillText).toHaveBeenCalledWith('A', 12, 20);
+        } finally {
+            registration.dispose();
+        }
+    });
+
+    it('uses a registered runtime glyph painter for the primary font family', () => {
+        const extension = new FontAndBaseLine();
+        const TestContext = createContext();
+        const renderer = vi.fn(() => true);
+        const registration = registerDocCustomGlyphRenderer({ fontFamily: 'PdfOutline', renderer });
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: {
+                useCustomGlyphRenderer: BooleanNumber.TRUE,
+                vertexAngle: 0,
+                centerAngle: 0,
+            },
+        };
+
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('A', {
+            ts: { customGlyphKey: 'pdf-glyph-1', fs: 12, ff: '"PdfOutline", serif', bl: 1, it: 1 },
+        }));
+
+        expect(renderer).toHaveBeenCalledWith({
+            bold: true,
+            italic: true,
+            content: 'A',
+            context: TestContext,
+            fontSizePx: 12,
+            glyphKey: 'pdf-glyph-1',
+            x: 12,
+            y: 20,
+        });
+        expect(TestContext.fillText).not.toHaveBeenCalled();
+
+        registration.dispose();
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('A', {
+            ts: { fs: 12, ff: '"PdfOutline", serif' },
+        }));
+        expect(TestContext.fillText).toHaveBeenCalledWith('A', 12, 20);
+    });
+
+    it('strokes the registered glyph outline and releases both painters on disposal', () => {
+        const extension = new FontAndBaseLine();
+        const TestContext = createContext();
+        const renderer = vi.fn(() => true);
+        const strokeRenderer = vi.fn(() => {
+            expect(TestContext.strokeStyle).toBe('#123456');
+            expect(TestContext.lineWidth).toBe(0.16);
+            return true;
+        });
+        const registration = registerDocCustomGlyphRenderer({ fontFamily: 'PdfOutline', renderer, strokeRenderer });
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: {
+                useCustomGlyphRenderer: BooleanNumber.TRUE,
+                paintTextOutline: BooleanNumber.TRUE,
+                vertexAngle: 0,
+                centerAngle: 0,
+            },
+        };
+        const glyph = createGlyph('A', {
+            ts: { fs: 12, ff: '"PdfOutline", serif', textOutline: { color: '#123456', width: 0.16 } },
+        });
+
+        extension.draw(TestContext, DEFAULT_SCALE, glyph);
+
+        expect(strokeRenderer).toHaveBeenCalledWith({
+            bold: false,
+            italic: false,
+            content: 'A',
+            context: TestContext,
+            fontSizePx: 12,
+            x: 12,
+            y: 20,
+        });
+        expect(renderer.mock.invocationCallOrder[0]).toBeLessThan(strokeRenderer.mock.invocationCallOrder[0]);
+        expect(TestContext.fillText).not.toHaveBeenCalled();
+        expect(TestContext.strokeText).not.toHaveBeenCalled();
+
+        strokeRenderer.mockReturnValue(false);
+        extension.draw(TestContext, DEFAULT_SCALE, glyph);
+        expect(TestContext.strokeText).toHaveBeenCalledWith('A', 12, 20);
+
+        registration.dispose();
+        extension.draw(TestContext, DEFAULT_SCALE, glyph);
+        expect(renderer).toHaveBeenCalledTimes(2);
+        expect(strokeRenderer).toHaveBeenCalledTimes(2);
+        expect(TestContext.fillText).toHaveBeenCalledWith('A', 12, 20);
+        expect(TestContext.strokeText).toHaveBeenCalledTimes(2);
+    });
+
+    it('uses the resolved glyph font family when the source text style omits it', () => {
+        const extension = new FontAndBaseLine();
+        const TestContext = createContext();
+        const renderer = vi.fn(() => true);
+        const registration = registerDocCustomGlyphRenderer({ fontFamily: 'PdfOutline', renderer });
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: {
+                useCustomGlyphRenderer: BooleanNumber.TRUE,
+                vertexAngle: 0,
+                centerAngle: 0,
+            },
+        };
+
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('A', {
+            ts: { fs: 12 },
+            fontStyle: {
+                fontFamily: '"PdfOutline", serif',
+                fontSize: 12,
+                fontString: '12px "PdfOutline", serif',
+                fontCache: '12px "PdfOutline", serif',
+                originFontSize: 12,
+            },
+        }));
+
+        expect(renderer).toHaveBeenCalled();
+        expect(TestContext.fillText).not.toHaveBeenCalled();
+        registration.dispose();
+    });
+
     it('renders public glow and outer shadow behind the source text without canvas filters', () => {
         const extension = new FontAndBaseLine();
         const TestContext = createContext();
@@ -338,6 +722,28 @@ describe('docs font and baseline extension', () => {
         });
         extension.draw(TestContext, DEFAULT_SCALE, superscript);
         expect(TestContext.fillText).toHaveBeenCalledWith('S', 12, 17);
+
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: {
+                vertexAngle: 0,
+                centerAngle: 0,
+            },
+        } as IExtensionConfig;
+        const positioned = createGlyph('P', {
+            ts: {
+                fs: 12,
+                cl: { rgb: '#111111' },
+                pos: 3,
+            },
+        });
+        extension.draw(TestContext, DEFAULT_SCALE, positioned);
+        expect(TestContext.fillText).toHaveBeenCalledWith('P', 12, 20);
+        extension.extensionOffset.renderConfig!.applyTextPosition = BooleanNumber.TRUE;
+        extension.draw(TestContext, DEFAULT_SCALE, positioned);
+        expect(TestContext.fillText).toHaveBeenCalledWith('P', 12, 16);
 
         extension.extensionOffset = {
             spanPointWithFont: Vector2.create(12, 20),

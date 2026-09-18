@@ -4,12 +4,13 @@
 
 **AI エージェントのための Office Harness**
 
-スプレッドシート · ドキュメント · スライド · キャンバス · リレーショナルテーブル · PDF（近日公開）
+スプレッドシート · ドキュメント · プレゼンテーション · Bases · Boards · PDF（近日公開）
 
-組み込み型の生産性体験を構築するための、フルスタックでアイソモーフィックな Office SDK。
+高性能で自由にカスタマイズできる Office SDK
 
-プラグインアーキテクチャ、Canvas ベースのレンダリング、数式エンジン、
-ブラウザと Node.js の両方で使える統一された Facade API を備えています。
+Univer は、プラグインアーキテクチャ、Canvas ベースのレンダリング、
+数式エンジン、ブラウザと Node.js の両方で使える Facade API により、
+組み込み型の生産性体験を構築できます。
 
 [English](../../README.md) | [简体中文](./zh-CN.md) | [繁體中文](./zh-TW.md) | 日本語 | [한국어](./ko-KR.md) | [Español](./es-ES.md)
 
@@ -48,6 +49,20 @@ Univer は次のような場面に適しています。
 Univer は単なるスプレッドシートファイルビューアではありません。独自の生産性インターフェースを構築するためのフレームワークです。
 
 [Univer の製品群](https://univer.ai/)では、オフィスツールがストレージと計算のランタイムを共有します。異なるツールのコンテンツを自由に組み合わせて埋め込み、参照元の変更に合わせて関連データや参照を更新できます。人と AI エージェントは同じファイルで共同作業できます。製品の対応範囲は[機能一覧](https://univer.ai/capabilities)、このリポジトリの範囲は [Open Source と Pro](#-open-source-と-pro) を参照してください。
+
+## Univer Office SDK で構築されたプロジェクト
+
+以下のオープンソースプロジェクトは Univer Office SDK を基盤に構築されています。
+
+| プロジェクト | 説明 |
+| --- | --- |
+| [Univer Workspace](https://github.com/dream-num/univer-workspace) | 人と AI エージェントのためのオフィスワークスペース。共同編集とエージェントによる変更のレビューに対応します。 |
+| [Univer Office for DeepSeek Harness](https://github.com/dream-num/dsh-univer-office) | DeepSeek Harness 向けオフィスプラグイン。関連付けられたコンテンツ、検証、エージェントの共同作業用の独立した Worktree を提供します。 |
+| [Univer CLI](https://github.com/dream-num/univer-cli) | エージェントがオフィスコンテンツを作成、編集、検査、納品するためのローカルのコマンドラインワークスペース。 |
+| [Univer Office for WorkBuddy](https://github.com/dream-num/workbuddy-univer-office) | MCP プレビューと下書きレビューに対応する、WorkBuddy 向けローカルのオフィス統合。開発プレビュー版です。 |
+| [Univer Office for OpenClaw](https://github.com/dream-num/openclaw-univer-office) | OpenClaw でオフィスコンテンツを作成、レビュー、納品するためのツール。 |
+
+セットアップと SDK のライセンス要件は、各プロジェクトのドキュメントを参照してください。
 
 ## 🌟 Highlights
 
@@ -293,26 +308,13 @@ Boundary principles:
 - **Core SDK**：[`dream-num/univer`](https://github.com/dream-num/univer)、この monorepo です。
 - **Presets**：このリポジトリの [`presets/`](../../presets)。ブラウザと Node.js アプリ向けの curated plugin collection です。
 - **AI agent skills**：[`dream-num/univer-sdk-skills`](https://github.com/dream-num/univer-sdk-skills)、Univer 統合、Pro 機能、プラグイン開発、Node バックエンドに取り組む AI agent 向けの再利用可能な指示集です。[AI Skills guide](https://docs.univer.ai/guides/skills) も参照してください。
+- **Documentation**：[docs.univer.ai](https://docs.univer.ai)、Sheets、Docs、Slides、recipes、Pro guides を含みます。
 - **Web SDK**：[組み込みエディタとヘッドレス処理](https://docs.univer.ai/guides/sheets)をブラウザと Node.js で利用できます。
 - **Server SDK**：[共同編集とファイル変換](https://docs.univer.ai/server)を、アプリケーションのストレージ、認証、権限管理と統合します。
 - **AI SDK**：オフィスコンテンツの検査、編集、検証を行う[エージェントワークフロー](https://docs.univer.ai/ai)を構築できます。
 - **API Reference**：[docs.univer.ai/reference](https://docs.univer.ai/reference/classes/univer)、Facade API と生成された API reference。
 - **Examples and showcase**：[Univer Showcase](https://docs.univer.ai/showcase) とこのリポジトリの [`examples/`](../../examples)。
 - **AI-native spreadsheets**：[`dream-num/univer-mcp`](https://github.com/dream-num/univer-mcp)、自然言語で Univer Sheets を操作する Univer Platform / MCP 統合。
-
-### Univer Office SDK で構築されたプロジェクト
-
-以下のオープンソースプロジェクトは Univer Office SDK を基盤として、ワークスペース、コマンドラインのワークフロー、エージェント環境にオフィスツールを提供します。
-
-| プロジェクト | 説明 |
-| --- | --- |
-| [Univer Workspace](https://github.com/dream-num/univer-workspace) | 人と AI エージェントのためのオフィスワークスペース。共同編集とエージェントによる変更のレビューに対応します。 |
-| [Univer Office for DeepSeek Harness](https://github.com/dream-num/dsh-univer-office) | DeepSeek Harness 向けオフィスプラグイン。関連付けられたコンテンツ、検証、エージェントの共同作業用の独立した Worktree を提供します。 |
-| [Univer CLI](https://github.com/dream-num/univer-cli) | エージェントがオフィスコンテンツを作成、編集、検査、納品するためのローカルのコマンドラインワークスペース。 |
-| [Univer Office for WorkBuddy](https://github.com/dream-num/workbuddy-univer-office) | MCP プレビューと下書きレビューに対応する、WorkBuddy 向けローカルのオフィス統合。開発プレビュー版です。 |
-| [Univer Office for OpenClaw](https://github.com/dream-num/openclaw-univer-office) | OpenClaw でオフィスコンテンツを作成、レビュー、納品するためのツール。 |
-
-セットアップと SDK のライセンス要件は、各プロジェクトのドキュメントを参照してください。
 
 ## 📦 リポジトリ構成
 

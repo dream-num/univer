@@ -2,14 +2,18 @@
 
 <img src="../img/banner.png" alt="Univer SDK" width="800" />
 
-**用於構建試算表、文件和簡報的全端、同構辦公 SDK。**
+**面向 AI Agent 的 Office Harness**
 
-Univer 以外掛化架構、Canvas 渲染引擎、公式引擎和統一的 Facade API，
-協助你在瀏覽器和 Node.js 中構建可嵌入的生產力體驗。
+試算表 · 文件 · 簡報 · 畫布 · 關聯式表格 · PDF（即將推出）
+
+用於構建可嵌入生產力體驗的全端、同構 Office SDK。
+
+外掛化架構、Canvas 渲染引擎、公式引擎和統一的 Facade API，
+同時支援瀏覽器和 Node.js。
 
 [English](../../README.md) | [简体中文](./zh-CN.md) | 繁體中文 | [日本語](./ja-JP.md) | [한국어](./ko-KR.md) | [Español](./es-ES.md)
 
-[📖 文件](https://docs.univer.ai) | [✨ 示例](https://docs.univer.ai/showcase) | [📘 API 參考](https://docs.univer.ai/reference/classes/univer) | [📝 部落格](https://docs.univer.ai/blog)
+[🌐 官方網站](https://univer.ai/) | [📖 文件](https://docs.univer.ai) | [✨ 示例](https://docs.univer.ai/showcase) | [📘 API 參考](https://docs.univer.ai/reference/classes/univer) | [📝 部落格](https://docs.univer.ai/blog)
 
 [![Release](https://img.shields.io/github/v/release/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/releases)
 [![License](https://img.shields.io/github/license/dream-num/univer?style=flat-square)](../../LICENSE)
@@ -42,6 +46,8 @@ Univer 是一個開源 SDK，用於在你的產品中建立辦公應用。它提
 - 透過自訂外掛、命令、服務、UI 元件和 Facade API 擴充行為。
 
 Univer 不只是一個試算表檔案檢視器。它是用於構建你自己的生產力介面的框架。
+
+在 [Univer 產品家族](https://univer.ai/)中，辦公工具共用儲存與運算執行環境。不同工具的內容可以自由組合和嵌入，關聯資料與引用隨來源同步更新，人與 AI Agent 可以在同一檔案中協作。產品能力請參閱[功能矩陣](https://univer.ai/capabilities)，本倉庫的範圍請參閱[開源與 Pro](#-開源與-pro)。
 
 ## 🌟 Highlights
 
@@ -91,6 +97,16 @@ Univer 不只是一個試算表檔案檢視器。它是用於構建你自己的�
 - **Facade API**：透過更高層 API 操作活頁簿、工作表、範圍、文件、公式、命令和事件。
 - **Canvas 渲染引擎**：支援大型可編輯文件介面，並在多種文件類型之間共用渲染層。
 - **可擴充 UI**：支援 React、Vue、Web Components 和不同框架下的應用外殼整合。
+
+## 🤖 面向 AI Agent 的辦公工作流程
+
+Univer 的 AI 與協作能力將 Agent 操作、互動式編輯和人工審閱連接起來：
+
+- **程式化編輯**：Agent 透過結構化 API 檢查和修改辦公內容。
+- **結果驗證**：Agent 透過內容檢查、渲染截圖和版面配置診斷驗證結果。
+- **Worktree 協作**：Agent 在獨立草稿中工作，由人審閱修改並決定合併內容。
+
+整合詳情請參閱 [AI SDK 文件](https://docs.univer.ai/ai)。即時編輯、共用版本和 Worktree 工作流程需要相應的 Web SDK 與協作能力；不同功能所需的套件和授權有所區別。
 
 ## ⚡ 快速開始
 
@@ -277,10 +293,26 @@ Pro 功能請參考 [Univer Pro 指南](https://docs.univer.ai/guides/pro)。這
 - **核心 SDK**：[`dream-num/univer`](https://github.com/dream-num/univer)，也就是目前的 monorepo。
 - **Presets**：本倉庫的 [`presets/`](../../presets)，面向瀏覽器和 Node.js 應用的預設外掛集合。
 - **AI agent skills**：[`dream-num/univer-sdk-skills`](https://github.com/dream-num/univer-sdk-skills)，供 AI agent 使用的可重複使用說明，涵蓋 Univer 整合、Pro 功能、外掛開發和 Node 後端。參見 [AI Skills 指南](https://docs.univer.ai/guides/skills)。
-- **文件**：[docs.univer.ai](https://docs.univer.ai)，包含 Sheets、Docs、Slides、recipes 和 Pro 指南。
+- **Web SDK**：在瀏覽器和 Node.js 中提供[嵌入式編輯器與無頭處理](https://docs.univer.ai/guides/sheets)能力。
+- **Server SDK**：將[協作與檔案轉換](https://docs.univer.ai/server)接入應用的儲存、身分驗證和權限系統。
+- **AI SDK**：透過 [Agent 工作流程](https://docs.univer.ai/ai)檢查、編輯和驗證辦公內容。
 - **API 參考**：[docs.univer.ai/reference](https://docs.univer.ai/reference/classes/univer)，包含 Facade API 和生成的 API 參考。
 - **示例與展示**：[Univer Showcase](https://docs.univer.ai/showcase) 和本倉庫的 [`examples/`](../../examples)。
 - **AI-native spreadsheets**：[`dream-num/univer-mcp`](https://github.com/dream-num/univer-mcp)，用於透過自然語言驅動 Univer Sheets 的 Univer Platform / MCP 整合。
+
+### 以 Univer Office SDK 構建
+
+以下開源專案以 Univer Office SDK 構建，將辦公工具帶入工作空間、命令列工作流程和 Agent 環境：
+
+| 專案 | 說明 |
+| --- | --- |
+| [Univer Workspace](https://github.com/dream-num/univer-workspace) | 面向人與 AI Agent 的辦公工作空間，支援共同編輯和審閱 Agent 的修改。 |
+| [Univer Office for DeepSeek Harness](https://github.com/dream-num/dsh-univer-office) | 面向 DeepSeek Harness 的辦公外掛，支援關聯內容、驗證和用於 Agent 協作的獨立 Worktree。 |
+| [Univer CLI](https://github.com/dream-num/univer-cli) | 供 Agent 建立、編輯、檢查和交付辦公內容的本機命令列工作空間。 |
+| [Univer Office for WorkBuddy](https://github.com/dream-num/workbuddy-univer-office) | 面向 WorkBuddy 的本機辦公整合，支援 MCP 預覽和草稿審閱。目前為開發預覽版。 |
+| [Univer Office for OpenClaw](https://github.com/dream-num/openclaw-univer-office) | 在 OpenClaw 中建立、審閱和交付辦公內容的工具。 |
+
+各專案分別說明其安裝方式和 SDK 授權要求。
 
 ## 📦 倉庫結構
 

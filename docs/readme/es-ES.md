@@ -2,14 +2,18 @@
 
 <img src="../img/banner.png" alt="Univer SDK" width="800" />
 
-**Un SDK ofimático full-stack e isomórfico para crear hojas de cálculo, documentos y presentaciones.**
+**El Office Harness para agentes de IA**
 
-Univer ayuda a crear experiencias de productividad integrables con una arquitectura de plugins,
-renderizado basado en Canvas, un motor de fórmulas y una Facade API que funciona tanto en el navegador como en Node.js.
+Hojas de cálculo · Documentos · Presentaciones · Lienzos · Tablas relacionales · PDF (próximamente)
+
+Un Office SDK full-stack e isomórfico para crear experiencias de productividad integrables.
+
+Arquitectura de plugins, renderizado basado en Canvas, un motor de fórmulas
+y una Facade API unificada que funciona en el navegador y en Node.js.
 
 [English](../../README.md) | [简体中文](./zh-CN.md) | [繁體中文](./zh-TW.md) | [日本語](./ja-JP.md) | [한국어](./ko-KR.md) | Español
 
-[📖 Documentación](https://docs.univer.ai) | [✨ Showcase](https://docs.univer.ai/showcase) | [📘 API Reference](https://docs.univer.ai/reference/classes/univer) | [📝 Blog](https://docs.univer.ai/blog)
+[🌐 Sitio web](https://univer.ai/) | [📖 Documentación](https://docs.univer.ai) | [✨ Showcase](https://docs.univer.ai/showcase) | [📘 API Reference](https://docs.univer.ai/reference/classes/univer) | [📝 Blog](https://docs.univer.ai/blog)
 
 [![Release](https://img.shields.io/github/v/release/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/releases)
 [![License](https://img.shields.io/github/license/dream-num/univer?style=flat-square)](../../LICENSE)
@@ -42,6 +46,8 @@ Usa Univer cuando necesites:
 - Extender el comportamiento mediante plugins personalizados, comandos, servicios, componentes de UI y Facade APIs.
 
 Univer no es solo un visor de archivos de hojas de cálculo. Es un framework para crear tu propia superficie de productividad.
+
+En la [familia de productos Univer](https://univer.ai/), las herramientas ofimáticas comparten un entorno de ejecución para almacenamiento y cálculo. El contenido se puede combinar e integrar entre herramientas, y los datos y las referencias vinculados se actualizan junto con sus fuentes. Las personas y los agentes de IA pueden trabajar en los mismos archivos. Consulta la [matriz de capacidades](https://univer.ai/capabilities) para conocer los productos y [Open Source y Pro](#-open-source-y-pro) para conocer el alcance de este repositorio.
 
 ## 🌟 Highlights
 
@@ -91,6 +97,16 @@ Univer no es solo un visor de archivos de hojas de cálculo. Es un framework par
 - **Facade API**: trabaja con libros, hojas, rangos, documentos, fórmulas, comandos y eventos mediante una API de alto nivel.
 - **Motor de renderizado Canvas**: soporta superficies editables grandes y comparte la capa de renderizado entre distintos tipos de documento.
 - **UI extensible**: integración con React, Vue, Web Components y shells de aplicación específicos de cada framework.
+
+## 🤖 Flujos de trabajo ofimáticos para agentes de IA
+
+Las capacidades de IA y colaboración de Univer conectan las operaciones de los agentes con la edición interactiva y la revisión humana:
+
+- **Edición programática**: los agentes inspeccionan y modifican contenido ofimático mediante APIs estructuradas.
+- **Verificación de resultados**: los agentes comprueban el contenido, las capturas renderizadas y los diagnósticos de diseño.
+- **Colaboración con Worktree**: los agentes trabajan en borradores aislados; después, las personas revisan los cambios y deciden cuáles incorporar.
+
+Consulta la [documentación de AI SDK](https://docs.univer.ai/ai) para conocer la integración. La edición en tiempo real, las revisiones compartidas y los flujos de Worktree requieren las capacidades correspondientes de Web SDK y colaboración; los paquetes disponibles y las licencias dependen de cada función.
 
 ## ⚡ Inicio rápido
 
@@ -277,10 +293,26 @@ Principios de separación:
 - **Core SDK**: [`dream-num/univer`](https://github.com/dream-num/univer), este monorepo.
 - **Presets**: los [`presets/`](../../presets) de este repositorio, colecciones de plugins para aplicaciones en navegador y Node.js.
 - **AI agent skills**: [`dream-num/univer-sdk-skills`](https://github.com/dream-num/univer-sdk-skills), instrucciones reutilizables para agentes de IA que trabajan con integración de Univer, funciones Pro, desarrollo de plugins y backends Node. Consulta la [guía de AI Skills](https://docs.univer.ai/guides/skills).
-- **Documentación**: [docs.univer.ai](https://docs.univer.ai), con guías de Sheets, Docs, Slides, recipes y Pro.
+- **Web SDK**: [editores integrables y procesamiento sin interfaz](https://docs.univer.ai/guides/sheets) en el navegador y en Node.js.
+- **Server SDK**: [colaboración y conversión de archivos](https://docs.univer.ai/server), integradas con el almacenamiento, la autenticación y los permisos de tu aplicación.
+- **AI SDK**: [flujos de agentes](https://docs.univer.ai/ai) para inspeccionar, editar y verificar contenido ofimático.
 - **API Reference**: [docs.univer.ai/reference](https://docs.univer.ai/reference/classes/univer), Facade API y referencia de API generada.
 - **Ejemplos y showcase**: [Univer Showcase](https://docs.univer.ai/showcase) y los [`examples/`](../../examples) de este repositorio.
 - **AI-native spreadsheets**: [`dream-num/univer-mcp`](https://github.com/dream-num/univer-mcp), integración Univer Platform / MCP para controlar Univer Sheets con lenguaje natural.
+
+### Proyectos creados con Univer Office SDK
+
+Estos proyectos de código abierto se basan en Univer Office SDK para llevar herramientas ofimáticas a espacios de trabajo, flujos de línea de comandos y entornos de agentes:
+
+| Proyecto | Descripción |
+| --- | --- |
+| [Univer Workspace](https://github.com/dream-num/univer-workspace) | Un espacio de trabajo ofimático para personas y agentes de IA, con edición compartida y revisión de los cambios de los agentes. |
+| [Univer Office for DeepSeek Harness](https://github.com/dream-num/dsh-univer-office) | Un plugin ofimático para DeepSeek Harness con contenido conectado, validación y worktrees aislados para la colaboración entre agentes. |
+| [Univer CLI](https://github.com/dream-num/univer-cli) | Un espacio de trabajo local en la línea de comandos para que los agentes creen, editen, inspeccionen y entreguen contenido ofimático. |
+| [Univer Office for WorkBuddy](https://github.com/dream-num/workbuddy-univer-office) | Una integración ofimática local para WorkBuddy con vistas previas MCP y revisión de borradores. Versión preliminar de desarrollo. |
+| [Univer Office for OpenClaw](https://github.com/dream-num/openclaw-univer-office) | Herramientas para crear, revisar y entregar contenido ofimático en OpenClaw. |
+
+Cada proyecto documenta su instalación y los requisitos de licencia del SDK.
 
 ## 📦 Guía del repositorio
 

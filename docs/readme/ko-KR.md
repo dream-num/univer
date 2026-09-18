@@ -2,15 +2,18 @@
 
 <img src="../img/banner.png" alt="Univer SDK" width="800" />
 
-**스프레드시트, 문서, 프레젠테이션을 만들기 위한 풀스택 동형 오피스 SDK.**
+**AI 에이전트를 위한 Office Harness**
 
-Univer는 플러그인 아키텍처, Canvas 기반 렌더링, 수식 엔진,
-브라우저와 Node.js에서 함께 사용할 수 있는 Facade API로
-임베드 가능한 생산성 경험을 만들 수 있게 해줍니다.
+스프레드시트 · 문서 · 슬라이드 · 캔버스 · 관계형 테이블 · PDF(출시 예정)
+
+임베드 가능한 생산성 경험을 만들기 위한 풀스택 동형 Office SDK.
+
+플러그인 아키텍처, Canvas 기반 렌더링, 수식 엔진과
+브라우저 및 Node.js에서 함께 사용할 수 있는 통합 Facade API를 제공합니다.
 
 [English](../../README.md) | [简体中文](./zh-CN.md) | [繁體中文](./zh-TW.md) | [日本語](./ja-JP.md) | 한국어 | [Español](./es-ES.md)
 
-[📖 문서](https://docs.univer.ai) | [✨ 쇼케이스](https://docs.univer.ai/showcase) | [📘 API Reference](https://docs.univer.ai/reference/classes/univer) | [📝 블로그](https://docs.univer.ai/blog)
+[🌐 공식 웹사이트](https://univer.ai/) | [📖 문서](https://docs.univer.ai) | [✨ 쇼케이스](https://docs.univer.ai/showcase) | [📘 API Reference](https://docs.univer.ai/reference/classes/univer) | [📝 블로그](https://docs.univer.ai/blog)
 
 [![Release](https://img.shields.io/github/v/release/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/releases)
 [![License](https://img.shields.io/github/license/dream-num/univer?style=flat-square)](../../LICENSE)
@@ -43,6 +46,8 @@ Univer는 다음과 같은 경우에 적합합니다.
 - 커스텀 플러그인, 명령, 서비스, UI 컴포넌트, Facade API로 동작을 확장할 때.
 
 Univer는 단순한 스프레드시트 파일 뷰어가 아닙니다. 자체 생산성 화면을 구축하기 위한 프레임워크입니다.
+
+[Univer 제품군](https://univer.ai/)의 오피스 도구는 저장과 연산을 위한 런타임을 공유합니다. 서로 다른 도구의 콘텐츠를 자유롭게 조합하고 임베드하며, 원본이 바뀌면 연결된 데이터와 참조도 함께 업데이트됩니다. 사람과 AI 에이전트가 같은 파일에서 협업할 수 있습니다. 제품별 기능은 [기능 목록](https://univer.ai/capabilities)을, 이 저장소의 범위는 [Open Source와 Pro](#-open-source와-pro)를 참고하세요.
 
 ## 🌟 Highlights
 
@@ -92,6 +97,16 @@ Univer는 단순한 스프레드시트 파일 뷰어가 아닙니다. 자체 생
 - **Facade API**: 워크북, 워크시트, 범위, 문서, 수식, 명령, 이벤트를 고수준 API로 다룰 수 있습니다.
 - **Canvas 렌더링 엔진**: 큰 편집 가능한 문서 표면을 지원하고 여러 문서 타입이 렌더링 레이어를 공유합니다.
 - **확장 가능한 UI**: React, Vue, Web Components 및 프레임워크별 애플리케이션 셸에 통합할 수 있습니다.
+
+## 🤖 AI 에이전트를 위한 오피스 워크플로
+
+Univer의 AI 및 협업 기능은 에이전트 작업, 대화형 편집, 사람의 검토를 연결합니다.
+
+- **프로그래밍 방식의 편집**: 에이전트가 구조화된 API로 오피스 콘텐츠를 검사하고 수정합니다.
+- **결과 검증**: 에이전트가 콘텐츠 검사, 렌더링된 스크린샷, 레이아웃 진단으로 결과를 확인합니다.
+- **Worktree 협업**: 에이전트가 격리된 초안에서 작업한 뒤, 사람이 변경 사항을 검토하고 병합할 내용을 결정합니다.
+
+통합 방법은 [AI SDK 문서](https://docs.univer.ai/ai)를 참고하세요. 실시간 편집, 공유 리비전, Worktree 워크플로에는 해당 Web SDK 및 협업 기능이 필요하며, 패키지 제공 여부와 라이선스 요구 사항은 기능에 따라 다릅니다.
 
 ## ⚡ 빠른 시작
 
@@ -278,10 +293,26 @@ Boundary principles:
 - **Core SDK**: [`dream-num/univer`](https://github.com/dream-num/univer), 이 monorepo입니다.
 - **Presets**: 이 저장소의 [`presets/`](../../presets), 브라우저와 Node.js 앱을 위한 curated plugin collection입니다.
 - **AI agent skills**: [`dream-num/univer-sdk-skills`](https://github.com/dream-num/univer-sdk-skills), Univer 통합, Pro 기능, 플러그인 개발, Node 백엔드를 다루는 AI agent용 재사용 지침입니다. [AI Skills guide](https://docs.univer.ai/guides/skills)를 참고하세요.
-- **Documentation**: [docs.univer.ai](https://docs.univer.ai), Sheets, Docs, Slides, recipes, Pro guides를 포함합니다.
+- **Web SDK**: 브라우저와 Node.js에서 [임베드 가능한 편집기 및 헤드리스 처리](https://docs.univer.ai/guides/sheets)를 제공합니다.
+- **Server SDK**: [협업 및 파일 변환](https://docs.univer.ai/server)을 애플리케이션의 저장소, 인증, 권한 시스템과 통합합니다.
+- **AI SDK**: 오피스 콘텐츠를 검사, 편집, 검증하는 [에이전트 워크플로](https://docs.univer.ai/ai)를 구축합니다.
 - **API Reference**: [docs.univer.ai/reference](https://docs.univer.ai/reference/classes/univer), Facade API와 생성된 API reference입니다.
 - **Examples and showcase**: [Univer Showcase](https://docs.univer.ai/showcase)와 이 저장소의 [`examples/`](../../examples).
 - **AI-native spreadsheets**: [`dream-num/univer-mcp`](https://github.com/dream-num/univer-mcp), 자연어로 Univer Sheets를 제어하기 위한 Univer Platform / MCP 통합입니다.
+
+### Univer Office SDK로 만든 프로젝트
+
+다음 오픈소스 프로젝트는 Univer Office SDK를 기반으로 워크스페이스, 명령줄 워크플로, 에이전트 환경에 오피스 도구를 제공합니다.
+
+| 프로젝트 | 설명 |
+| --- | --- |
+| [Univer Workspace](https://github.com/dream-num/univer-workspace) | 사람과 AI 에이전트를 위한 오피스 워크스페이스로, 공동 편집과 에이전트 변경 사항 검토를 지원합니다. |
+| [Univer Office for DeepSeek Harness](https://github.com/dream-num/dsh-univer-office) | 연결된 콘텐츠, 검증, 에이전트 협업을 위한 격리된 Worktree를 제공하는 DeepSeek Harness용 오피스 플러그인입니다. |
+| [Univer CLI](https://github.com/dream-num/univer-cli) | 에이전트가 오피스 콘텐츠를 만들고 편집, 검사, 전달할 수 있는 로컬 명령줄 워크스페이스입니다. |
+| [Univer Office for WorkBuddy](https://github.com/dream-num/workbuddy-univer-office) | MCP 미리 보기와 초안 검토를 지원하는 WorkBuddy용 로컬 오피스 통합입니다. 개발 프리뷰 버전입니다. |
+| [Univer Office for OpenClaw](https://github.com/dream-num/openclaw-univer-office) | OpenClaw에서 오피스 콘텐츠를 만들고 검토하고 전달하기 위한 도구입니다. |
+
+설치 방법과 SDK 라이선스 요구 사항은 각 프로젝트 문서에 안내되어 있습니다.
 
 ## 📦 저장소 안내
 

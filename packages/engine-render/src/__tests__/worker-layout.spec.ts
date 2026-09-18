@@ -206,7 +206,8 @@ describe('worker document layout session', () => {
         }
         const baselineMs = percentile(baselineSamples, 0.5);
         const baselineRatio = baselineMs / 30;
-        const blockLimitMs = 50 * Math.min(1.2, Math.max(1, baselineRatio));
+        // Scale the allowance with the independent probe, without tightening it on faster machines.
+        const blockLimitMs = 50 * Math.max(1, baselineRatio);
         const heapStart = memoryUsage().heapUsed;
         const startedAt = performance.now();
         const generation = session.start({ reason: 'initial' });

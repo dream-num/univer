@@ -2,14 +2,18 @@
 
 <img src="../img/banner.png" alt="Univer SDK" width="800" />
 
-**用于构建电子表格、文档和演示文稿的全栈、同构办公 SDK。**
+**面向 AI Agent 的 Office Harness**
+
+电子表格 · 文档 · 演示文稿 · Bases · Boards · PDF（即将推出）
+
+高性能、可完全定制的 Office SDK
 
 Univer 以插件化架构、Canvas 渲染引擎、公式引擎和统一的 Facade API，
 帮助你在浏览器和 Node.js 中构建可嵌入的生产力体验。
 
 [English](../../README.md) | 简体中文 | [繁體中文](./zh-TW.md) | [日本語](./ja-JP.md) | [한국어](./ko-KR.md) | [Español](./es-ES.md)
 
-[📖 文档](https://docs.univer.ai) | [✨ 示例](https://docs.univer.ai/showcase) | [📘 API 参考](https://docs.univer.ai/reference/classes/univer) | [📝 博客](https://docs.univer.ai/blog)
+[🌐 官网](https://univer.ai/) | [📖 文档](https://docs.univer.ai) | [✨ 示例](https://docs.univer.ai/showcase) | [📘 API 参考](https://docs.univer.ai/reference/classes/univer) | [📝 博客](https://docs.univer.ai/blog)
 
 [![Release](https://img.shields.io/github/v/release/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/releases)
 [![License](https://img.shields.io/github/license/dream-num/univer?style=flat-square)](../../LICENSE)
@@ -42,6 +46,22 @@ Univer 是一个开源 SDK，用于在你的产品中创建办公应用。它提
 - 通过自定义插件、命令、服务、UI 组件和 Facade API 扩展行为。
 
 Univer 不只是一个电子表格文件查看器。它是用于构建你自己的生产力界面的框架。
+
+在 [Univer 产品家族](https://univer.ai/)中，办公工具共享存储与计算运行时。不同工具的内容可以自由组合和嵌入，关联数据与引用随来源同步更新，人与 AI Agent 可以在同一文件中协作。产品能力请参阅[能力矩阵](https://univer.ai/capabilities)，本仓库的范围请参阅[开源与 Pro](#-开源与-pro)。
+
+## 基于 Univer Office SDK 构建
+
+以下开源项目基于 Univer Office SDK 构建：
+
+| 项目 | 说明 |
+| --- | --- |
+| [Univer Workspace](https://github.com/dream-num/univer-workspace) | 面向人与 AI Agent 的办公工作空间，支持共同编辑和审阅 Agent 的修改。 |
+| [Univer Office for DeepSeek Harness](https://github.com/dream-num/dsh-univer-office) | 面向 DeepSeek Harness 的办公插件，支持关联内容、验证和用于 Agent 协作的独立 Worktree。 |
+| [Univer CLI](https://github.com/dream-num/univer-cli) | 供 Agent 创建、编辑、检查和交付办公内容的本地命令行工作空间。 |
+| [Univer Office for WorkBuddy](https://github.com/dream-num/workbuddy-univer-office) | 面向 WorkBuddy 的本地办公集成，支持 MCP 预览和草稿审阅。目前为开发预览版。 |
+| [Univer Office for OpenClaw](https://github.com/dream-num/openclaw-univer-office) | 在 OpenClaw 中创建、审阅和交付办公内容的工具。 |
+
+各项目分别说明其安装方式和 SDK 授权要求。
 
 ## 🌟 Highlights
 
@@ -91,6 +111,16 @@ Univer 不只是一个电子表格文件查看器。它是用于构建你自己�
 - **Facade API**：通过更高层 API 操作工作簿、工作表、区域、文档、公式、命令和事件。
 - **Canvas 渲染引擎**：支持大型可编辑文档界面，并在多种文档类型之间复用渲染层。
 - **可扩展 UI**：支持 React、Vue、Web Components 和不同框架下的应用外壳集成。
+
+## 🤖 面向 AI Agent 的办公工作流
+
+Univer 的 AI 与协作能力将 Agent 操作、交互式编辑和人工审阅连接起来：
+
+- **程序化编辑**：Agent 通过结构化 API 检查和修改办公内容。
+- **结果验证**：Agent 通过内容检查、渲染截图和布局诊断验证结果。
+- **Worktree 协作**：Agent 在独立草稿中工作，由人审阅修改并决定合并内容。
+
+集成详情请参阅 [AI SDK 文档](https://docs.univer.ai/ai)。实时编辑、共享版本和 Worktree 工作流需要相应的 Web SDK 与协作能力；不同功能所需的包和授权有所区别。
 
 ## ⚡ 快速开始
 
@@ -278,6 +308,9 @@ Pro 功能请参考 [Univer Pro 指南](https://docs.univer.ai/guides/pro)。这
 - **Presets**：本仓库的 [`presets/`](../../presets)，面向浏览器和 Node.js 应用的预设插件集合。
 - **AI agent skills**：[`dream-num/univer-sdk-skills`](https://github.com/dream-num/univer-sdk-skills)，供 AI agent 使用的可复用说明，覆盖 Univer 集成、Pro 功能、插件开发和 Node 后端。参见 [AI Skills 指南](https://docs.univer.ai/guides/skills)。
 - **文档**：[docs.univer.ai](https://docs.univer.ai)，包含 Sheets、Docs、Slides、recipes 和 Pro 指南。
+- **Web SDK**：在浏览器和 Node.js 中提供[嵌入式编辑器与无头处理](https://docs.univer.ai/guides/sheets)能力。
+- **Server SDK**：将[协作与文件转换](https://docs.univer.ai/server)接入应用的存储、身份认证和权限系统。
+- **AI SDK**：通过 [Agent 工作流](https://docs.univer.ai/ai)检查、编辑和验证办公内容。
 - **API 参考**：[docs.univer.ai/reference](https://docs.univer.ai/reference/classes/univer)，包含 Facade API 和生成的 API 参考。
 - **示例与展示**：[Univer Showcase](https://docs.univer.ai/showcase) 和本仓库的 [`examples/`](../../examples)。
 - **AI-native spreadsheets**：[`dream-num/univer-mcp`](https://github.com/dream-num/univer-mcp)，用于通过自然语言驱动 Univer Sheets 的 Univer Platform / MCP 集成。

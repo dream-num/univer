@@ -2,7 +2,11 @@
 
 <img src="../img/banner.png" alt="Univer SDK" width="800" />
 
-**スプレッドシート、ドキュメント、プレゼンテーションを構築するためのフルスタックでアイソモーフィックなオフィス SDK。**
+**AI エージェントのための Office Harness**
+
+スプレッドシート · ドキュメント · プレゼンテーション · Bases · Boards · PDF（近日公開）
+
+高性能で自由にカスタマイズできる Office SDK
 
 Univer は、プラグインアーキテクチャ、Canvas ベースのレンダリング、
 数式エンジン、ブラウザと Node.js の両方で使える Facade API により、
@@ -10,7 +14,7 @@ Univer は、プラグインアーキテクチャ、Canvas ベースのレンダ
 
 [English](../../README.md) | [简体中文](./zh-CN.md) | [繁體中文](./zh-TW.md) | 日本語 | [한국어](./ko-KR.md) | [Español](./es-ES.md)
 
-[📖 ドキュメント](https://docs.univer.ai) | [✨ ショーケース](https://docs.univer.ai/showcase) | [📘 API Reference](https://docs.univer.ai/reference/classes/univer) | [📝 ブログ](https://docs.univer.ai/blog)
+[🌐 公式サイト](https://univer.ai/) | [📖 ドキュメント](https://docs.univer.ai) | [✨ ショーケース](https://docs.univer.ai/showcase) | [📘 API Reference](https://docs.univer.ai/reference/classes/univer) | [📝 ブログ](https://docs.univer.ai/blog)
 
 [![Release](https://img.shields.io/github/v/release/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/releases)
 [![License](https://img.shields.io/github/license/dream-num/univer?style=flat-square)](../../LICENSE)
@@ -43,6 +47,22 @@ Univer は次のような場面に適しています。
 - カスタムプラグイン、コマンド、サービス、UI コンポーネント、Facade API で振る舞いを拡張する。
 
 Univer は単なるスプレッドシートファイルビューアではありません。独自の生産性インターフェースを構築するためのフレームワークです。
+
+[Univer の製品群](https://univer.ai/)では、オフィスツールがストレージと計算のランタイムを共有します。異なるツールのコンテンツを自由に組み合わせて埋め込み、参照元の変更に合わせて関連データや参照を更新できます。人と AI エージェントは同じファイルで共同作業できます。製品の対応範囲は[機能一覧](https://univer.ai/capabilities)、このリポジトリの範囲は [Open Source と Pro](#-open-source-と-pro) を参照してください。
+
+## Univer Office SDK で構築されたプロジェクト
+
+以下のオープンソースプロジェクトは Univer Office SDK を基盤に構築されています。
+
+| プロジェクト | 説明 |
+| --- | --- |
+| [Univer Workspace](https://github.com/dream-num/univer-workspace) | 人と AI エージェントのためのオフィスワークスペース。共同編集とエージェントによる変更のレビューに対応します。 |
+| [Univer Office for DeepSeek Harness](https://github.com/dream-num/dsh-univer-office) | DeepSeek Harness 向けオフィスプラグイン。関連付けられたコンテンツ、検証、エージェントの共同作業用の独立した Worktree を提供します。 |
+| [Univer CLI](https://github.com/dream-num/univer-cli) | エージェントがオフィスコンテンツを作成、編集、検査、納品するためのローカルのコマンドラインワークスペース。 |
+| [Univer Office for WorkBuddy](https://github.com/dream-num/workbuddy-univer-office) | MCP プレビューと下書きレビューに対応する、WorkBuddy 向けローカルのオフィス統合。開発プレビュー版です。 |
+| [Univer Office for OpenClaw](https://github.com/dream-num/openclaw-univer-office) | OpenClaw でオフィスコンテンツを作成、レビュー、納品するためのツール。 |
+
+セットアップと SDK のライセンス要件は、各プロジェクトのドキュメントを参照してください。
 
 ## 🌟 Highlights
 
@@ -92,6 +112,16 @@ Univer は単なるスプレッドシートファイルビューアではあり�
 - **Facade API**：ワークブック、ワークシート、範囲、ドキュメント、数式、コマンド、イベントを高レベル API で扱えます。
 - **Canvas レンダリングエンジン**：大規模な編集可能ドキュメント面をサポートし、複数の文書タイプでレンダリング層を共有します。
 - **拡張可能な UI**：React、Vue、Web Components、各種フレームワークのアプリケーションシェルに統合できます。
+
+## 🤖 AI エージェント向けのオフィスワークフロー
+
+Univer の AI 機能と共同編集機能は、エージェントの操作、インタラクティブな編集、人によるレビューをつなぎます。
+
+- **プログラムによる編集**：エージェントが構造化 API を通じてオフィスコンテンツを確認・変更します。
+- **結果の検証**：エージェントがコンテンツの検査、レンダリングしたスクリーンショット、レイアウト診断で結果を確認します。
+- **Worktree での共同作業**：エージェントは独立した下書きで作業し、人が変更をレビューしてマージする内容を決めます。
+
+統合の詳細は [AI SDK ドキュメント](https://docs.univer.ai/ai) を参照してください。リアルタイム編集、共有リビジョン、Worktree ワークフローには、対応する Web SDK と共同編集機能が必要です。利用できるパッケージとライセンス要件は機能によって異なります。
 
 ## ⚡ クイックスタート
 
@@ -279,6 +309,9 @@ Boundary principles:
 - **Presets**：このリポジトリの [`presets/`](../../presets)。ブラウザと Node.js アプリ向けの curated plugin collection です。
 - **AI agent skills**：[`dream-num/univer-sdk-skills`](https://github.com/dream-num/univer-sdk-skills)、Univer 統合、Pro 機能、プラグイン開発、Node バックエンドに取り組む AI agent 向けの再利用可能な指示集です。[AI Skills guide](https://docs.univer.ai/guides/skills) も参照してください。
 - **Documentation**：[docs.univer.ai](https://docs.univer.ai)、Sheets、Docs、Slides、recipes、Pro guides を含みます。
+- **Web SDK**：[組み込みエディタとヘッドレス処理](https://docs.univer.ai/guides/sheets)をブラウザと Node.js で利用できます。
+- **Server SDK**：[共同編集とファイル変換](https://docs.univer.ai/server)を、アプリケーションのストレージ、認証、権限管理と統合します。
+- **AI SDK**：オフィスコンテンツの検査、編集、検証を行う[エージェントワークフロー](https://docs.univer.ai/ai)を構築できます。
 - **API Reference**：[docs.univer.ai/reference](https://docs.univer.ai/reference/classes/univer)、Facade API と生成された API reference。
 - **Examples and showcase**：[Univer Showcase](https://docs.univer.ai/showcase) とこのリポジトリの [`examples/`](../../examples)。
 - **AI-native spreadsheets**：[`dream-num/univer-mcp`](https://github.com/dream-num/univer-mcp)、自然言語で Univer Sheets を操作する Univer Platform / MCP 統合。

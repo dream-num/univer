@@ -3841,11 +3841,64 @@ export class DocumentSkeleton extends Skeleton {
         y: number,
         nestLevel: number
     ): Nullable<INodeInfo> {
+        if (page.renderConfig?.useTextInkForHitTesting === BooleanNumber.TRUE) {
+            return this._collectNearestInkNode(page, segment, cache, x, y, nestLevel);
+        }
+        let nearestDistanceY = Number.POSITIVE_INFINITY;
+        const { x: originX, y: originY } = this._findLiquid;
+        for (const section of page.sections) {
+            for (const column of section.columns) {
+                for (const line of column.lines) {
+                    if (line.type === LineType.BLOCK) {
+                        continue;
+                    }
+                    const startY = originY + (section.top ?? 0) + line.top;
+                    const endY = startY + (line.lineHeight ?? 0);
+                    const sameLine = y >= startY && y <= endY;
+                    const distanceY = sameLine ? Number.NEGATIVE_INFINITY : Math.abs(y - endY);
+                    if (distanceY > nearestDistanceY) {
+                        continue;
+                    }
+                    for (const divide of line.divides) {
+                        const divideLeft = originX + column.left + divide.left + divide.paddingLeft;
+                        for (const glyph of divide.glyphGroup) {
+                            if (!isHitTestAddressableGlyph(glyph)) {
+                                continue;
+                            }
+                            const startX = divideLeft + glyph.left;
+                            const endX = startX + glyph.width;
+                            const node = { node: glyph, ...segment, ratioX: x / (startX + endX), ratioY: y / (startY + endY) };
+                            if (sameLine && x >= startX && x <= endX) {
+                                return node;
+                            }
+                            if (distanceY < nearestDistanceY) {
+                                nearestDistanceY = distanceY;
+                                cache.nearestNodeList = [];
+                                cache.nearestNodeDistanceList = [];
+                            }
+                            if (distanceY === nearestDistanceY) {
+                                cache.nearestNodeList.push(node);
+                                cache.nearestNodeDistanceList.push({ coordInPage: true, distance: Math.abs(x - endX), nestLevel });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private _collectNearestInkNode(
+        page: IDocumentSkeletonPage,
+        segment: Pick<INodeInfo, 'segmentId' | 'segmentPage'>,
+        cache: INearestCache,
+        x: number,
+        y: number,
+        nestLevel: number
+    ): Nullable<INodeInfo> {
         let nearestDistanceY = Number.POSITIVE_INFINITY;
         let positionedMatch: Nullable<INodeInfo>;
         let positionedDistance = Number.POSITIVE_INFINITY;
         let positionedMatchHasText = false;
-        const useContentBounds = page.renderConfig?.useTextInkForHitTesting === BooleanNumber.TRUE;
         const { x: originX, y: originY } = this._findLiquid;
         for (const section of page.sections) {
             for (const column of section.columns) {
@@ -3854,12 +3907,9 @@ export class DocumentSkeleton extends Skeleton {
                         continue;
                     }
                     const startY = originY + (section.top ?? 0) + line.top
-                        + (useContentBounds ? (line.marginTop ?? 0) + (line.paddingTop ?? 0) : 0);
-                    const endY = startY + (useContentBounds ? line.contentHeight : line.lineHeight ?? 0);
+                        + (line.marginTop ?? 0) + (line.paddingTop ?? 0);
+                    const endY = startY + line.contentHeight;
                     const hitsLine = y >= startY && y <= endY;
-                    if (!useContentBounds && !hitsLine && Math.abs(y - endY) > nearestDistanceY) {
-                        continue;
-                    }
                     for (const divide of line.divides) {
                         const divideLeft = originX + column.left + divide.left + divide.paddingLeft;
                         for (let index = 0; index < divide.glyphGroup.length; index++) {
@@ -3871,27 +3921,22 @@ export class DocumentSkeleton extends Skeleton {
                             const endX = startX + glyph.width;
                             const { bBox, ts } = glyph;
                             let baseline = startY + line.asc;
-                            if (useContentBounds) {
-                                if (page.renderConfig?.applyTextPosition === BooleanNumber.TRUE
-                                    && typeof ts?.pos === 'number' && Number.isFinite(ts.pos)) {
-                                    baseline -= ts.pos * 4 / 3;
-                                }
-                                if (ts?.va === BaselineOffset.SUPERSCRIPT) {
-                                    baseline -= bBox.spo;
-                                } else if (ts?.va === BaselineOffset.SUBSCRIPT) {
-                                    baseline += bBox.sbo;
-                                }
+                            if (page.renderConfig?.applyTextPosition === BooleanNumber.TRUE
+                                && typeof ts?.pos === 'number' && Number.isFinite(ts.pos)) {
+                                baseline -= ts.pos * 4 / 3;
                             }
-                            const hitsPaintedVerticalBounds = useContentBounds && bBox.aba + bBox.abd > 0
+                            if (ts?.va === BaselineOffset.SUPERSCRIPT) {
+                                baseline -= bBox.spo;
+                            } else if (ts?.va === BaselineOffset.SUBSCRIPT) {
+                                baseline += bBox.sbo;
+                            }
+                            const hitsPaintedVerticalBounds = bBox.aba + bBox.abd > 0
                                 && y >= baseline - bBox.aba && y <= baseline + bBox.abd;
                             const sameLine = hitsLine || hitsPaintedVerticalBounds;
                             const distanceY = sameLine ? Number.NEGATIVE_INFINITY : Math.abs(y - endY);
                             const node = { node: glyph, ...segment, ratioX: x / (startX + endX), ratioY: y / (startY + endY) };
                             const hitsGlyphAdvance = x >= startX && x <= endX;
-                            if (sameLine && !useContentBounds && hitsGlyphAdvance) {
-                                return node;
-                            }
-                            if (sameLine && useContentBounds) {
+                            if (sameLine) {
                                 const usesPositionedAdvance = ts?.textAdvance !== undefined && glyph.content.length === 1 && !ts.textSkewX;
                                 const previousGlyph = divide.glyphGroup[index - 1];
                                 const nextGlyph = divide.glyphGroup[index + 1];

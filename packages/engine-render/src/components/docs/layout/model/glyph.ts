@@ -536,6 +536,12 @@ export function _createSkeletonWordOrLetter(
         width = requestedTextAdvance * Array.from(content).length;
     }
 
+    if (content === DataStreamTreeTokenType.PARAGRAPH && isTraditionalDocumentCompatibility(documentCompatibilityPolicy)) {
+        // The end mark retains its font height, but occupies no grid cell in Word.
+        width = 0;
+        xOffset = 0;
+    }
+
     const adjustability = hasFixedTextAdvance
         ? {
             stretchability: [0, 0] as [number, number],
@@ -544,12 +550,6 @@ export function _createSkeletonWordOrLetter(
         : baseAdjustability(content, width, documentCompatibilityPolicy.mode === 'drawingml' && glyphWidth == null
             ? fontStyle.fontSize * (96 / 72)
             : width);
-
-    if (content === DataStreamTreeTokenType.PARAGRAPH && isTraditionalDocumentCompatibility(documentCompatibilityPolicy)) {
-        // The end mark retains its font height, but occupies no grid cell in Word.
-        width = 0;
-        xOffset = 0;
-    }
 
     return {
         content,

@@ -15,7 +15,6 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import type { IDocCustomGlyphRendererRegistration } from '@univerjs/engine-render';
 import type { CSSProperties, ReactNode, RefObject } from 'react';
 import type { Editor, IEditorCanvasStyle } from '../services/editor/editor';
 import type { IEditorRuntimeConfig } from '../services/editor/editor-runtime-config';
@@ -60,8 +59,6 @@ export interface IRichTextEditorProps {
     preserveHostFocus?: boolean;
     /** Let the host own engine sizing, including a fixed backing-store ratio. */
     cancelDefaultResizeListener?: boolean;
-    /** Optional runtime glyph painters registered for the lifetime of this editor. */
-    customGlyphRenderers?: readonly IDocCustomGlyphRendererRegistration[];
     /** Fixed canvas backing-store ratio used with a host-managed layout. */
     pixelRatio?: number;
     /** Use an untransformed layout size when the editor DOM is displayed through a CSS transform. */
@@ -101,7 +98,6 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         onClickOutside: _onClickOutside,
         preserveHostFocus,
         cancelDefaultResizeListener,
-        customGlyphRenderers,
         documentLayoutSize,
         autoScroll = true,
         autoScrollbar = true,
@@ -141,7 +137,6 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         container: formulaEditorContainerRef,
         preserveHostFocus,
         cancelDefaultResizeListener,
-        customGlyphRenderers,
         disableBackScroll: !autoScroll,
         emitSelectionWhileDragging,
         documentLayoutSize,

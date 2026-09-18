@@ -29,6 +29,7 @@ import {
 } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../basics/error-type';
+import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
 import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
 import { createNewArray } from '../../engine/utils/array-object';
 import { NullValueObject, NumberValueObject, StringValueObject } from '../../engine/value-object/primitive-object';
@@ -94,6 +95,25 @@ function createRuntimeService() {
 }
 
 describe('FormulaRuntimeService', () => {
+    it('indexes scalar and spilled null results as blanks, consistently with reference scans', () => {
+        const { injector, runtime } = createRuntimeService();
+        CELL_INVERTED_INDEX_CACHE.clear();
+        try {
+            runtime.setCurrent(2, 3, 20, 20, 'sheet', 'unit');
+            runtime.setRuntimeData(NumberValueObject.create(7));
+            CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache('unit', 'sheet', 3, 0, 19);
+            runtime.setRuntimeData(NullValueObject.create());
+            expect(runtime.getUnitData().unit?.sheet?.getValue(2, 3)?.v).toBeNull();
+            expect(CELL_INVERTED_INDEX_CACHE.getCellPositions('unit', 'sheet', 3, '', [[0, 19]])?.matchingRows).toEqual([2]);
+            runtime.setCurrent(4, 3, 20, 20, 'sheet', 'unit');
+            runtime.setRuntimeData(createNewArray([[NullValueObject.create()], [NumberValueObject.create(1)]], 2, 1));
+            expect(CELL_INVERTED_INDEX_CACHE.getCellPositions('unit', 'sheet', 3, '', [[0, 19]])?.matchingRows).toEqual([2, 4]);
+        } finally {
+            CELL_INVERTED_INDEX_CACHE.clear();
+            injector.dispose();
+        }
+    });
+
     it.each(['__proto__', 'constructor', 'prototype', 'toString'])('isolates runtime writes for special identifiers (%s)', (key) => {
         const { injector, runtime } = createRuntimeService();
         const marker = '__formula_pollution__';

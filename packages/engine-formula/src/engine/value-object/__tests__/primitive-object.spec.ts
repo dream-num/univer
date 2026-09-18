@@ -16,9 +16,36 @@
 
 import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
+import { compareToken } from '../../../basics/token';
 import { NumberValueObject, StringValueObject } from '../primitive-object';
 
 describe('StringValueObject', () => {
+    it.each([
+        ['ß', 'SS', true],
+        ['ẞ', 'ss', true],
+        ['straße', 'STRASSE', true],
+        ['æ', 'ae', true],
+        ['œ', 'oe', true],
+        ['ﬀ', 'ff', true],
+        ['é', 'e\u0301', true],
+        ['é', 'e', false],
+        ['İ', 'i', false],
+        ['ı', 'i', false],
+        ['İ', '?', true],
+        ['ß', '?', true],
+        ['ß', 'ss*', false],
+        ['ẞ', 'ß*', true],
+        ['😀', '?', false],
+        ['😀', '??', true],
+        ['a\nb', '*', true],
+    ])('matches Excel text comparison for %s and %s', (value, criterion, expected) => {
+        expect(StringValueObject.create(value).compare(StringValueObject.create(criterion), compareToken.EQUALS).getValue()).toBe(expected);
+    });
+
+    it('keeps case-sensitive wildcard matching case-sensitive', () => {
+        expect(StringValueObject.create('ABC').compare(StringValueObject.create('a*'), compareToken.EQUALS, true).getValue()).toBe(false);
+    });
+
     it('binds the date system in place for scalar values', () => {
         const value = NumberValueObject.create(1);
 

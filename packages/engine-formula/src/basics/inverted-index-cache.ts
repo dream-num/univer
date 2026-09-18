@@ -18,6 +18,7 @@ import type { NumericTuple } from '@flatten-js/interval-tree';
 import type { ErrorType } from './error-type';
 import IntervalTree from '@flatten-js/interval-tree';
 import { isRealNum } from '@univerjs/core';
+import { normalizeTextForComparison } from '../engine/utils/compare';
 import { ERROR_TYPE_SET } from './error-type';
 
 type ValueType = string | number | boolean;
@@ -38,12 +39,12 @@ function normalizeValue(value: ValueTypeWithNullUndefined): ValueTypeWithSymbol 
 
     if (value === null || value === undefined || value === '') {
         _value = DEFAULT_EMPTY_CELL_KEY;
-    } else if (isRealNum(value) && Number(value).toString() === value.toString()) {
+    } else if (isRealNum(value) && Number.isFinite(Number(value)) && Number(value).toString() === value.toString()) {
         // Number string that can be converted to number will be converted to number and stored in the inverted index cache, but '12a' or '012' will not be converted to number, because they are not pure number string.
         _value = Number(value) === 0 ? 0 : Number(value);
     } else if (typeof value === 'string') {
         // For string value, we will convert it to lower case to make the compare operation case-insensitive.
-        _value = value.toLowerCase();
+        _value = normalizeTextForComparison(value);
     } else {
         _value = value;
     }
@@ -67,7 +68,10 @@ export class InvertedIndexCache {
      */
     private _cache: Map<string, Map<string, Map<number, Map<ValueTypeWithSymbol, Set<number>>>>> = new Map();
 
-    private _rowValues = new WeakMap<Map<ValueTypeWithSymbol, Set<number>>, Map<number, ValueTypeWithSymbol>>();
+    private _rowValues = new WeakMap<Map<ValueTypeWithSymbol, Set<number>>, {
+        lastRow: number;
+        values?: Map<number, ValueTypeWithSymbol>;
+    }>();
 
     private _continueBuildingCache: Map<string, Map<string, Map<number, IntervalTree<NumericTuple>>>> = new Map();
 
@@ -94,17 +98,41 @@ export class InvertedIndexCache {
             sheetMap.set(column, columnMap);
         }
 
-        let rowValues = this._rowValues.get(columnMap);
-        if (rowValues == null) {
-            rowValues = new Map();
-            this._rowValues.set(columnMap, rowValues);
+        let rowIndex = this._rowValues.get(columnMap);
+        if (rowIndex == null) {
+            rowIndex = { lastRow: -1 };
+            this._rowValues.set(columnMap, rowIndex);
         }
 
-        // If is force update, we need to remove the old value from the map
-        if (isForceUpdate) {
-            const oldValue = rowValues.get(row);
+        // Ascending scans cannot overwrite an indexed row. For low-cardinality
+        // columns, bounded bucket scans avoid allocating a map entry per row.
+        if (!rowIndex.values && (isForceUpdate || row <= rowIndex.lastRow)) {
+            if (columnMap.size <= 32) {
+                for (const [key, rows] of columnMap) {
+                    if (rows.delete(row)) {
+                        if (rows.size === 0) {
+                            columnMap.delete(key);
+                        }
+                        break;
+                    }
+                }
+            } else {
+                rowIndex.values = new Map();
+                for (const [key, rows] of columnMap) {
+                    for (const indexedRow of rows) {
+                        rowIndex.values.set(indexedRow, key);
+                    }
+                }
+            }
+        }
+        if (rowIndex.values) {
+            const oldValue = rowIndex.values.get(row);
             if (oldValue !== undefined) {
-                columnMap.get(oldValue)?.delete(row);
+                const oldRows = columnMap.get(oldValue)!;
+                oldRows.delete(row);
+                if (oldRows.size === 0) {
+                    columnMap.delete(oldValue);
+                }
             }
         }
 
@@ -117,7 +145,8 @@ export class InvertedIndexCache {
         }
 
         cellList.add(row);
-        rowValues.set(row, _value);
+        rowIndex.values?.set(row, _value);
+        rowIndex.lastRow = Math.max(rowIndex.lastRow, row);
     }
 
     getCellValuePositions(unitId: string, sheetId: string, column: number) {

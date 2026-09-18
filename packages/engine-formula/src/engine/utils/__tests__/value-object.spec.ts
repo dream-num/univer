@@ -29,6 +29,39 @@ import { valueObjectCompare } from '../object-compare';
 import { convertTonNumber, filterSameValueObjectResult, isSingleValueObject, objectValueToCellValue } from '../value-object';
 
 describe('Test object cover', () => {
+    it('preserves error-looking text through runtime serialization', () => {
+        expect(objectValueToCellValue(StringValueObject.create('#REF!'))).toEqual({ v: '#REF!', t: CellValueType.FORCE_STRING });
+        expect(objectValueToCellValue(ErrorValueObject.create(ErrorType.REF))).toEqual({ v: '#REF!', t: CellValueType.STRING });
+    });
+
+    it.each([
+        ['1', '<>1', false, true],
+        ['01', '<>1', false, true],
+        ['1', '01', true, true],
+        ['1', '1.0', true, true],
+        ['1e0', '=1', true, true],
+        ['1', '>0', true, false],
+        ['\t1', '=1', true, false],
+        ['\t1', '\t1', false, true],
+        ['0x10', '0x10', false, true],
+        ['Infinity', '<>Infinity', true, false],
+        ['2026-1-1', '<>2026-1-1', true, true],
+    ])('matches Excel numeric and text criteria: %s, %s', (text, criteria, numericMatch, textMatch) => {
+        const range = ArrayValueObject.create({
+            calculateValueList: [[NumberValueObject.create(1)], [StringValueObject.create(text)]],
+            rowCount: 2,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+        const criterion = StringValueObject.create(criteria);
+        const comparison = valueObjectCompare(range, criterion) as ArrayValueObject;
+        const result = filterSameValueObjectResult(comparison, range, criterion);
+        expect(result.toValue()).toEqual([[numericMatch], [textMatch]]);
+    });
+
     it('Function convertTonNumber', () => {
         expect(convertTonNumber(BooleanValueObject.create(true)).getValue()).toBe(1);
         expect(convertTonNumber(BooleanValueObject.create(false)).getValue()).toBe(0);

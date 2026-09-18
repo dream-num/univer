@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-import type { AriaRole, PointerEvent, ReactNode, RefObject } from 'react';
+import type { AriaRole, PointerEvent, ReactNode, RefObject, TouchEvent } from 'react';
 import type { MobilePanelLayout } from '../../mobile-workbench/MobileCanvasLayout';
-import { clsx, MobileOverlayContext, resetButtonClassName, scrollbarClassName } from '@univerjs/design';
+import {
+    clsx,
+    MobileOverlayContext,
+    resetButtonClassName,
+    scrollbarClassName,
+    useMobileKeyboardViewportLayout,
+} from '@univerjs/design';
 import { createContext, useCallback, useContext, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useMobileCanvasPanel, useMobileOverlayRegistration } from '../../mobile-workbench/MobileCanvasLayout';
 import { MobileDrawerCoordinatorContext } from './MobileDrawerCoordinator';
@@ -46,7 +52,7 @@ export function resolveMobileDrawerRelease(params: {
 }): MobileDrawerRelease {
     const { snap, deltaY, durationMs, percent } = params;
     const velocity = deltaY / Math.max(durationMs, 1);
-    if ((deltaY > 48 && velocity > 0.55) || percent < 20) return 'closed';
+    if ((deltaY > 48 && (snap === 'compact' || velocity > 0.55)) || percent < 20) return 'closed';
     if (snap === 'expanded' && deltaY > 24) return 'compact';
     if (snap === 'compact' && deltaY < -24) return 'expanded';
     return percent >= 60 ? 'expanded' : 'compact';
@@ -140,11 +146,13 @@ export function MobileDrawer(props: {
         startTime: number;
         startPercent: number;
         currentPercent: number;
+        currentY: number;
         moved: boolean;
     } | null>(null);
     const drawerPercent = dragPercent ?? (snap === 'compact'
         ? MOBILE_DRAWER_COMPACT_PERCENT
         : MOBILE_DRAWER_EXPANDED_PERCENT);
+    const keyboardLayout = useMobileKeyboardViewportLayout(panelElementRef);
 
     useLayoutEffect(() => {
         if (!registerDrawer || !unregisterDrawer) {
@@ -170,6 +178,7 @@ export function MobileDrawer(props: {
             startTime: performance.now(),
             startPercent: drawerPercent,
             currentPercent: drawerPercent,
+            currentY: clientY,
             moved: false,
         };
     }
@@ -184,6 +193,7 @@ export function MobileDrawer(props: {
             drag.startPercent - deltaY / Math.max(window.innerHeight, 1) * 100
         ));
         drag.currentPercent = nextPercent;
+        drag.currentY = clientY;
         drag.moved ||= Math.abs(deltaY) > 6;
         setDragPercent(nextPercent);
     }
@@ -230,8 +240,39 @@ export function MobileDrawer(props: {
     }
 
     function handlePointerCancel() {
-        dragRef.current = null;
-        setDragPercent(null);
+        const drag = dragRef.current;
+        if (!drag?.moved) {
+            dragRef.current = null;
+            setDragPercent(null);
+            return;
+        }
+
+        endDrag(drag.currentY);
+    }
+
+    function handleTouchStart(event: TouchEvent<HTMLButtonElement>) {
+        const touch = event.touches[0];
+        if (touch) {
+            beginDrag(touch.clientY);
+        }
+    }
+
+    function handleTouchMove(event: TouchEvent<HTMLButtonElement>) {
+        const touch = event.touches[0];
+        if (touch) {
+            moveDrag(touch.clientY);
+        }
+    }
+
+    function handleTouchEnd() {
+        const drag = dragRef.current;
+        if (drag) {
+            endDrag(drag.currentY);
+        }
+    }
+
+    function handleTouchCancel() {
+        handlePointerCancel();
     }
 
     return (
@@ -283,10 +324,15 @@ export function MobileDrawer(props: {
                               univer-w-16 -univer-translate-x-1/2 univer-touch-none univer-items-center
                               univer-justify-center
                             `)}
+                            style={{ touchAction: 'none' }}
                             onPointerDown={handlePointerDown}
                             onPointerMove={handlePointerMove}
                             onPointerUp={handlePointerUp}
                             onPointerCancel={handlePointerCancel}
+                            onTouchStart={handleTouchStart}
+                            onTouchMove={handleTouchMove}
+                            onTouchEnd={handleTouchEnd}
+                            onTouchCancel={handleTouchCancel}
                             onClick={() => {
                                 if (suppressHandleClickRef.current) {
                                     suppressHandleClickRef.current = false;
@@ -311,6 +357,11 @@ export function MobileDrawer(props: {
                             scrollbarClassName,
                             contentClassName
                         )}
+                        style={{
+                            paddingBottom: keyboardLayout
+                                ? `calc(0.75rem + ${keyboardLayout.bottom}px)`
+                                : undefined,
+                        }}
                     >
                         {children}
                     </div>

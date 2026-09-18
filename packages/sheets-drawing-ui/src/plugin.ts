@@ -52,6 +52,7 @@ import { SheetDrawingUpdateController } from './controllers/sheet-drawing-update
 import { SheetDrawingUIController } from './controllers/ui.controller';
 import { touchSheetsDrawingFloatingHostCapabilityWhenReady } from './embed/floating-host';
 import { DrawingPopupMenuController } from './menu/drawing-popup-menu.controller';
+import { SheetDrawingMenuController } from './menu/sheet-drawing-menu.controller';
 import { BatchSaveImagesService, IBatchSaveImagesService } from './services/batch-save-images.service';
 import { SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
 import { DrawingContextMenuService, IDrawingContextMenuService } from './services/drawing-context-menu.service';
@@ -98,6 +99,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [SheetCanvasFloatDomManagerService],
             [SheetDrawingHitTestService],
             [SheetDrawingUIController],
+            [SheetDrawingMenuController],
             [DrawingPopupMenuController],
             [SheetDrawingPrintingController],
             [SheetDrawingPermissionController],
@@ -130,6 +132,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [SheetDrawingPermissionController],
             [SheetDrawingPrintingController],
             [SheetDrawingUIController],
+            [SheetDrawingMenuController],
             [SheetCellImageController],
             [SheetCellImageAutofillController],
         ]);

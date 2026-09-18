@@ -47,6 +47,7 @@ import { FormulaRenderManagerController } from './controllers/formula-render.con
 import { FormulaReorderController } from './controllers/formula-reorder.controller';
 import { ImageFormulaRenderController } from './controllers/image-formula-render.controller';
 import { FormulaUIController } from './controllers/ui.controller';
+import { FormulaMenuController } from './menu/formula-menu.controller';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { GlobalRangeSelectorService } from './services/range-selector.service';
 import { RefSelectionsRenderService } from './services/render-services/ref-selections.render.service';
@@ -95,6 +96,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
             [IFormulaPromptService, { useClass: FormulaPromptService }],
             [GlobalRangeSelectorService],
             [FormulaUIController],
+            [FormulaMenuController],
             [FormulaClipboardController],
             [FormulaEditorShowController],
             [FormulaRenderManagerController],
@@ -123,6 +125,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
 
         touchDependencies(this._injector, [
             [FormulaUIController], // FormulaProgressBar relies on TriggerCalculationController, but it is necessary to ensure that the formula calculation is done after rendered.
+            [FormulaMenuController],
             [FormulaClipboardController],
             [FormulaRenderManagerController],
             [ImageFormulaRenderController],

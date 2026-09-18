@@ -15,10 +15,17 @@
  */
 
 import type { Injector } from '@univerjs/core';
+import type { IMobileKeyboardViewport } from '@univerjs/design';
 import type { ComponentType } from 'react';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { LifecycleService, LifecycleStages, LocaleService, ThemeService } from '@univerjs/core';
-import { borderBottomClassName, clsx, ConfigProvider, render } from '@univerjs/design';
+import {
+    borderBottomClassName,
+    clsx,
+    ConfigProvider,
+    render,
+    revealFocusedElementInMobileViewport,
+} from '@univerjs/design';
 import { connectInjector, useDependency, useObservable } from '@wendellhu/redi/react-bindings';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { map } from 'rxjs';
@@ -98,6 +105,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
     const canvasContainerRef = useRef<HTMLDivElement>(null);
     const viewportRef = useRef<HTMLDivElement>(null);
     const [keyboardInset, setKeyboardInset] = useState(0);
+    const [keyboardViewport, setKeyboardViewport] = useState<IMobileKeyboardViewport | null>(null);
 
     const footerComponents = useComponentsOfPart(BuiltInUIPart.FOOTER);
     const headerComponents = useComponentsOfPart(BuiltInUIPart.HEADER);
@@ -168,6 +176,9 @@ export function MobileWorkbench(props: IUniverAppProps) {
             visualViewport ? visualViewport.offsetTop + visualViewport.height : window.innerHeight
         ));
         let keyboardVisible = false;
+        let initialViewportFrame: number | null = null;
+        let revealFrame: number | null = null;
+        let revealInnerFrame: number | null = null;
 
         const isEditing = () => {
             const activeElement = document.activeElement;
@@ -176,9 +187,35 @@ export function MobileWorkbench(props: IUniverAppProps) {
                 activeElement?.getAttribute('contenteditable') === 'true';
         };
 
-        const updateKeyboardInset = () => {
+        const cancelReveal = () => {
+            if (revealFrame != null) {
+                cancelAnimationFrame(revealFrame);
+                revealFrame = null;
+            }
+            if (revealInnerFrame != null) {
+                cancelAnimationFrame(revealInnerFrame);
+                revealInnerFrame = null;
+            }
+        };
+        const scheduleReveal = (viewport: IMobileKeyboardViewport | null) => {
+            cancelReveal();
+            if (!viewport) {
+                return;
+            }
+
+            revealFrame = requestAnimationFrame(() => {
+                revealFrame = null;
+                revealInnerFrame = requestAnimationFrame(() => {
+                    revealInnerFrame = null;
+                    revealFocusedElementInMobileViewport(document.body, viewport);
+                });
+            });
+        };
+        const updateKeyboardViewport = () => {
+            const visibleTop = visualViewport?.offsetTop ?? 0;
+            const visibleHeight = visualViewport?.height ?? window.innerHeight;
             const visibleBottom = visualViewport
-                ? visualViewport.offsetTop + visualViewport.height
+                ? visibleTop + visibleHeight
                 : window.innerHeight;
             const viewportInset = Math.max(0, Math.round(stableHeight - visibleBottom));
             const keyboardInset = resolveMobileKeyboardInset(stableHeight, visibleBottom, baselineInset);
@@ -201,7 +238,18 @@ export function MobileWorkbench(props: IUniverAppProps) {
                 `${keyboardVisible ? keyboardInset : 0}px`
             );
 
-            setKeyboardInset(keyboardVisible ? keyboardInset : 0);
+            const nextKeyboardInset = keyboardVisible ? keyboardInset : 0;
+            const nextKeyboardViewport = keyboardVisible
+                ? {
+                    top: Math.round(visibleTop),
+                    bottom: Math.round(visibleBottom),
+                    height: Math.round(visibleHeight),
+                    stableHeight,
+                }
+                : null;
+            setKeyboardInset(nextKeyboardInset);
+            setKeyboardViewport(nextKeyboardViewport);
+            scheduleReveal(nextKeyboardViewport);
         };
         const updateStableViewport = () => {
             const height = Math.round(mountContainer.getBoundingClientRect().height || window.innerHeight);
@@ -220,19 +268,28 @@ export function MobileWorkbench(props: IUniverAppProps) {
                 stableWidth = width;
                 viewportElement.style.height = `${stableHeight}px`;
             }
-            updateKeyboardInset();
+            updateKeyboardViewport();
         };
 
         viewportElement.style.height = `${stableHeight}px`;
-        updateKeyboardInset();
+        initialViewportFrame = requestAnimationFrame(() => {
+            initialViewportFrame = null;
+            updateKeyboardViewport();
+        });
         window.addEventListener('resize', updateStableViewport);
-        visualViewport?.addEventListener('resize', updateKeyboardInset);
-        visualViewport?.addEventListener('scroll', updateKeyboardInset);
+        visualViewport?.addEventListener('resize', updateKeyboardViewport);
+        visualViewport?.addEventListener('scroll', updateKeyboardViewport);
+        document.addEventListener('focusin', updateKeyboardViewport);
 
         return () => {
+            if (initialViewportFrame != null) {
+                cancelAnimationFrame(initialViewportFrame);
+            }
+            cancelReveal();
             window.removeEventListener('resize', updateStableViewport);
-            visualViewport?.removeEventListener('resize', updateKeyboardInset);
-            visualViewport?.removeEventListener('scroll', updateKeyboardInset);
+            visualViewport?.removeEventListener('resize', updateKeyboardViewport);
+            visualViewport?.removeEventListener('scroll', updateKeyboardViewport);
+            document.removeEventListener('focusin', updateKeyboardViewport);
         };
     }, [mountContainer]);
 
@@ -242,6 +299,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
             locale={locale?.design}
             direction={direction}
             mountContainer={portalContainer}
+            mobileKeyboardViewport={keyboardViewport}
         >
             <MobileCanvasLayoutProvider>
                 <MobileKeyboardInsetContext.Provider value={keyboardInset}>

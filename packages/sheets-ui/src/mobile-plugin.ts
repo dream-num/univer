@@ -80,6 +80,7 @@ import { HeaderFreezeRenderController } from './controllers/render-controllers/f
 import { HeaderMenuRenderController } from './controllers/render-controllers/header-menu.render-controller';
 import { HeaderMoveRenderController } from './controllers/render-controllers/header-move.render-controller';
 import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
+import { MobileCellEditRenderController } from './controllers/render-controllers/mobile/mobile-cell-edit.render-controller';
 import {
     SheetContextMenuMobileRenderController,
 } from './controllers/render-controllers/mobile/mobile-contextmenu.render-controller';
@@ -297,6 +298,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
 
             // editor
             [EditorBridgeRenderController],
+            [MobileCellEditRenderController],
 
             // permission
             [SheetPermissionInterceptorCanvasRenderController],

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICommandService, Injector, IUniverInstanceService } from '@univerjs/core';
+import type { ICommandService, ILogService, Injector, IUniverInstanceService } from '@univerjs/core';
 import type { IRPCChannelService } from '../../../services/rpc/channel.service';
 import type { IChannel } from '../../../services/rpc/rpc.service';
 import { CommandType, UniverInstanceType } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { IRemoteInstanceService, IRemoteSyncService, RemoteInstanceServiceName, RemoteSyncServiceName } from '../../../services/remote-instance/remote-instance.service';
+import { ChannelClientDisposedError } from '../../../services/rpc/rpc.service';
 import { DataSyncPrimaryController } from '../data-sync-primary.controller';
 import { DataSyncReplicaController } from '../data-sync-replica.controller';
 
@@ -110,13 +111,17 @@ describe('data-sync controllers', () => {
         const remoteSyncService = {
             syncMutation: vi.fn(async () => true),
         };
+        const logService = {
+            error: vi.fn(),
+        } as unknown as ILogService;
 
         const controller = new DataSyncPrimaryController(
             injector,
             commandService,
             univerInstanceService,
             rpcChannelService,
-            remoteSyncService as never
+            remoteSyncService as never,
+            logService
         );
 
         expect(rpcChannelService.registerChannel).toHaveBeenCalledWith(RemoteSyncServiceName, expect.any(Object));
@@ -205,6 +210,30 @@ describe('data-sync controllers', () => {
         expect(remoteInstanceImpl.syncMutation).toHaveBeenCalledTimes(3);
         unit3Disposable.dispose();
 
+        remoteInstanceImpl.createInstance.mockRejectedValueOnce(new ChannelClientDisposedError());
+        added$.next({
+            unit: {
+                getUnitId: () => 'unit-4',
+                getSnapshot: () => ({ snapshot: true }),
+            },
+        });
+        await flushPromises();
+        expect(logService.error).not.toHaveBeenCalled();
+
+        const remoteError = new Error('create failed');
+        remoteInstanceImpl.createInstance.mockRejectedValueOnce(remoteError);
+        added$.next({
+            unit: {
+                getUnitId: () => 'unit-5',
+                getSnapshot: () => ({ snapshot: true }),
+            },
+        });
+        await flushPromises();
+        expect(logService.error).toHaveBeenCalledWith(
+            '[DataSyncPrimaryController]: Failed to create the remote workbook.',
+            remoteError
+        );
+
         controller.dispose();
     });
 
@@ -262,13 +291,17 @@ describe('data-sync controllers', () => {
         const remoteSyncService = {
             syncMutation: vi.fn(async () => true),
         };
+        const logService = {
+            error: vi.fn(),
+        } as unknown as ILogService;
 
         const controller = new DataSyncPrimaryController(
             injector,
             commandService,
             univerInstanceService,
             rpcChannelService,
-            remoteSyncService as never
+            remoteSyncService as never,
+            logService
         );
 
         controller.registerSyncingMutations({ id: 'm-source' } as never);

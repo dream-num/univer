@@ -32,7 +32,12 @@ import {
 } from '@univerjs/design';
 import { MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
 import { FilterBy, SheetsFilterSyncController } from '@univerjs/sheets-filter';
-import { IMessageService, MobileDrawer, useDependency, useObservable } from '@univerjs/ui';
+import {
+    IMessageService,
+    MobileDrawer,
+    useDependency,
+    useObservable,
+} from '@univerjs/ui';
 import { useRef, useState } from 'react';
 import { map, of } from 'rxjs';
 import {

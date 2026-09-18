@@ -45,7 +45,7 @@ import { SheetsTableFilterButtonRenderController } from './controllers/sheet-tab
 import { SheetsTableRenderController } from './controllers/sheet-table-render.controller';
 import { SheetTableSelectionController } from './controllers/sheet-table-selection.controller';
 import { SheetTableThemeUIController } from './controllers/sheet-table-theme-ui.controller';
-import { SheetTableMenuController } from './menu/sheet-table-menu.controller';
+import { MobileSheetTableMenuController } from './menu/mobile-sheet-table-menu.controller';
 import { SheetsTableUiService } from './services/sheets-table-ui.service';
 
 @DependentOn(
@@ -86,7 +86,7 @@ export class UniverSheetsTableMobileUIPlugin extends Plugin {
         registerDependencies(this._injector, [
             [SheetsTableMobileComponentController],
             [SheetsTableUiService],
-            [SheetTableMenuController],
+            [MobileSheetTableMenuController],
             [SheetTableThemeUIController],
             [SheetTableSelectionController],
         ]);
@@ -96,7 +96,7 @@ export class UniverSheetsTableMobileUIPlugin extends Plugin {
         touchDependencies(this._injector, [
             [SheetsTableMobileComponentController],
             [SheetsTableUiService],
-            [SheetTableMenuController],
+            [MobileSheetTableMenuController],
             [SheetTableThemeUIController],
             [SheetTableSelectionController],
         ]);

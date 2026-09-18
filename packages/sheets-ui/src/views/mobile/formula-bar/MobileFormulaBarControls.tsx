@@ -81,7 +81,10 @@ export function MobileFormulaBarOverlays(props: IMobileFormulaBarOverlayProps) {
                               dark:!univer-text-gray-100
                               dark:active:!univer-bg-primary-900
                             "
-                            onPointerDown={(event) => event.stopPropagation()}
+                            onPointerDown={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }}
                             onClick={() => props.onOperator(operator.value)}
                         >
                             {operator.label}
@@ -101,9 +104,24 @@ export function MobileFormulaBarOverlays(props: IMobileFormulaBarOverlayProps) {
 
 export function MobileFormulaBarActions(props: IMobileFormulaBarActionProps) {
     const actions = [
-        { label: props.cancelLabel, icon: <CloseIcon />, onClick: props.onCancel, color: 'univer-text-red-600 dark:!univer-text-red-400' },
-        { label: props.confirmLabel, icon: <CheckMarkIcon />, onClick: props.onConfirm, color: 'univer-text-green-600 dark:!univer-text-green-400' },
-        { label: props.formulaLabel, icon: <FxIcon />, onClick: props.onFormula, color: 'univer-text-gray-700 dark:!univer-text-gray-100' },
+        {
+            label: props.cancelLabel,
+            icon: <CloseIcon />,
+            onClick: props.onCancel,
+            color: 'univer-text-red-600 dark:!univer-text-red-400',
+        },
+        {
+            label: props.confirmLabel,
+            icon: <CheckMarkIcon />,
+            onClick: props.onConfirm,
+            color: 'univer-text-green-600 dark:!univer-text-green-400',
+        },
+        {
+            label: props.formulaLabel,
+            icon: <FxIcon />,
+            onClick: props.onFormula,
+            color: 'univer-text-gray-700 dark:!univer-text-gray-100',
+        },
     ];
 
     if (props.expanded) {
@@ -142,6 +160,7 @@ export function MobileFormulaBarActions(props: IMobileFormulaBarActionProps) {
                       active:univer-scale-95 active:univer-bg-gray-100
                       dark:active:!univer-bg-gray-700
                     `, action.color)}
+                    onPointerDown={(event) => event.preventDefault()}
                     onClick={action.onClick}
                 >
                     {action.icon}

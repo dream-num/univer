@@ -104,10 +104,48 @@ describe('mobile drawer snap behavior', () => {
         expect(container.querySelector('section')?.style.height).toBe('40vh');
     });
 
-    it('supports expand, collapse, restore, and fast close gestures', () => {
+    it('keeps the drawer anchored and adds keyboard space only to its scroll area', () => {
+        vi.stubGlobal('CSS', { supports: () => false });
+        vi.stubGlobal('innerHeight', 768);
+        vi.stubGlobal('visualViewport', {
+            height: 448,
+            offsetTop: 0,
+            addEventListener: vi.fn(),
+            removeEventListener: vi.fn(),
+        });
+        const { container } = render(
+            <ConfigProvider
+                mountContainer={document.body}
+                mobileKeyboardViewport={{ top: 0, bottom: 448, height: 448, stableHeight: 768 }}
+            >
+                <MobileDrawer
+                    snap="compact"
+                    expandLabel="Expand drawer"
+                    collapseLabel="Collapse drawer"
+                    onSnapChange={vi.fn()}
+                    onClose={vi.fn()}
+                    floatingActions={<button type="button">Floating action</button>}
+                >
+                    Drawer content
+                </MobileDrawer>
+            </ConfigProvider>
+        );
+
+        const drawer = container.querySelector('section');
+        expect(drawer?.style.bottom).toBe('');
+        expect(drawer?.style.height).toBe('40vh');
+        expect(drawer?.style.maxHeight).toBe('');
+        expect(drawer?.querySelector<HTMLElement>('.univer-overflow-y-auto')?.style.paddingBottom)
+            .toBe('calc(0.75rem + 320px)');
+        expect(screen.getByRole('button', { name: 'Floating action' }).parentElement?.style.bottom)
+            .toBe('calc(40vh + 12px)');
+    });
+
+    it('supports expand, collapse, restore, and close gestures', () => {
         expect(resolveMobileDrawerRelease({ snap: 'compact', deltaY: -40, durationMs: 300, percent: 45 })).toBe('expanded');
         expect(resolveMobileDrawerRelease({ snap: 'expanded', deltaY: 40, durationMs: 300, percent: 75 })).toBe('compact');
         expect(resolveMobileDrawerRelease({ snap: 'compact', deltaY: 8, durationMs: 300, percent: 39 })).toBe('compact');
+        expect(resolveMobileDrawerRelease({ snap: 'compact', deltaY: 80, durationMs: 500, percent: 31 })).toBe('closed');
         expect(resolveMobileDrawerRelease({ snap: 'compact', deltaY: 120, durationMs: 150, percent: 25 })).toBe('closed');
     });
 
@@ -132,7 +170,7 @@ describe('mobile drawer snap behavior', () => {
         expect(onClose).not.toHaveBeenCalled();
     });
 
-    it('reserves the drag handle for pointer gestures and cancels without changing the drawer', () => {
+    it('cancels without changing the drawer when the pointer has not moved', () => {
         const onSnapChange = vi.fn();
         const onClose = vi.fn();
         render(createElement(MobileDrawer, {
@@ -145,12 +183,32 @@ describe('mobile drawer snap behavior', () => {
         const handle = screen.getByRole('button', { name: 'Expand drawer' });
 
         expect(handle.classList.contains('univer-touch-none')).toBe(true);
+        expect(handle.style.touchAction).toBe('none');
         fireEvent.pointerDown(handle, { pointerId: 1, clientY: 500 });
-        fireEvent.pointerMove(handle, { pointerId: 1, clientY: 450 });
         fireEvent.pointerCancel(handle, { pointerId: 1, clientY: 0 });
 
         expect(onSnapChange).not.toHaveBeenCalled();
         expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('settles an active drag at the last pointer position when the pointer is cancelled', () => {
+        const onSnapChange = vi.fn();
+        const onClose = vi.fn();
+        render(createElement(MobileDrawer, {
+            snap: 'compact',
+            expandLabel: 'Expand drawer',
+            collapseLabel: 'Collapse drawer',
+            onSnapChange,
+            onClose,
+        }, 'Drawer content'));
+        const handle = screen.getByRole('button', { name: 'Expand drawer' });
+
+        fireEvent.pointerDown(handle, { pointerId: 1, clientY: 500 });
+        fireEvent.pointerMove(handle, { pointerId: 1, clientY: 650 });
+        fireEvent.pointerCancel(handle, { pointerId: 1, clientY: 0 });
+
+        expect(onClose).toHaveBeenCalledOnce();
+        expect(onSnapChange).not.toHaveBeenCalled();
     });
 
     it('closes when the compact handle is flicked downward', () => {
@@ -168,6 +226,26 @@ describe('mobile drawer snap behavior', () => {
         fireEvent.pointerDown(handle, { pointerId: 1, clientY: 500 });
         fireEvent.pointerMove(handle, { pointerId: 1, clientY: 650 });
         fireEvent.pointerUp(handle, { pointerId: 1, clientY: 650 });
+
+        expect(onClose).toHaveBeenCalledOnce();
+        expect(onSnapChange).not.toHaveBeenCalled();
+    });
+
+    it('closes from a touch gesture without relying on pointer events', () => {
+        const onSnapChange = vi.fn();
+        const onClose = vi.fn();
+        render(createElement(MobileDrawer, {
+            snap: 'compact',
+            expandLabel: 'Expand drawer',
+            collapseLabel: 'Collapse drawer',
+            onSnapChange,
+            onClose,
+        }, 'Drawer content'));
+        const handle = screen.getByRole('button', { name: 'Expand drawer' });
+
+        fireEvent.touchStart(handle, { touches: [{ clientY: 500 }] });
+        fireEvent.touchMove(handle, { touches: [{ clientY: 570 }] });
+        fireEvent.touchEnd(handle, { changedTouches: [{ clientY: 570 }] });
 
         expect(onClose).toHaveBeenCalledOnce();
         expect(onSnapChange).not.toHaveBeenCalled();

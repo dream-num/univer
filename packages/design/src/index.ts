@@ -58,7 +58,7 @@ export {
     CommandShortcut,
 } from './components/command/Command';
 export { ConfigContext, ConfigProvider } from './components/config-provider/ConfigProvider';
-export type { IConfigProviderProps } from './components/config-provider/ConfigProvider';
+export type { IConfigProviderProps, IMobileKeyboardViewport } from './components/config-provider/ConfigProvider';
 export { Confirm } from './components/confirm/Confirm';
 export type { IConfirmProps } from './components/confirm/Confirm';
 export { MobileConfirm } from './components/confirm/MobileConfirm';
@@ -155,5 +155,11 @@ export {
 export { clsx } from './helper/clsx';
 export { isBrowser } from './helper/is-browser';
 export { render, unmount } from './helper/react-dom';
+export {
+    resolveMobileKeyboardViewportLayout,
+    revealFocusedElementInMobileViewport,
+    useMobileKeyboardViewportLayout,
+} from './hooks/use-mobile-keyboard-viewport';
+export type { IMobileKeyboardViewportLayout } from './hooks/use-mobile-keyboard-viewport';
 
 export { cva } from 'class-variance-authority';

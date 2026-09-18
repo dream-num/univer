@@ -29,6 +29,7 @@ import { SetActivateCellEditOperation } from '../../../commands/operations/activ
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
 import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE } from '../../../services/sheet-embed-integration.service';
+import { DesktopCellEditRenderController } from '../desktop-cell-edit.render-controller';
 import { EditorBridgeRenderController } from '../editor-bridge.render-controller';
 
 function createEventSubject() {
@@ -146,68 +147,89 @@ function createController(options?: {
         refreshEditCellState: vi.fn(),
     };
     commandService.syncExecuteCommand.mockReturnValue(true);
-    const controller = new EditorBridgeRenderController(
-        context as any,
-        {
-            getCurrentTypeOfUnit$: vi.fn(() => workbook$),
-            getFocusedUnit: vi.fn(() => ({
-                getUnitId: () => options?.focusedUnitId ?? 'unit-1',
-            })),
-            getUnit: vi.fn(() => ({
-                getBody: () => ({ dataStream: '=\r\n' }),
-            })),
-        } as any,
-        commandService as any,
-        editorBridgeService as any,
-        {
+    const instanceService = {
+        getCurrentTypeOfUnit$: vi.fn(() => workbook$),
+        getFocusedUnit: vi.fn(() => ({
+            getUnitId: () => options?.focusedUnitId ?? 'unit-1',
+        })),
+        getUnit: vi.fn(() => ({
+            getBody: () => ({ dataStream: '=\r\n' }),
+        })),
+    };
+    const selectionManagerService = {
+        selectionMoveEnd$,
+        selectionMoveStart$,
+        selectionSet$,
+        getWorkbookSelections: vi.fn(() => ({
             selectionMoveEnd$,
             selectionMoveStart$,
             selectionSet$,
-            getWorkbookSelections: vi.fn(() => ({
-                selectionMoveEnd$,
-                selectionMoveStart$,
-                selectionSet$,
-                getCurrentSelections: vi.fn(() => [{
-                    primary: {
-                        actualRow: 3,
-                        actualColumn: 4,
-                        startRow: 3,
-                        startColumn: 4,
-                        endRow: 3,
-                        endColumn: 4,
-                    },
-                }]),
-            })),
-        } as any,
-        {
-            getContextValue: vi.fn((key: string) => contextValues.get(key)),
-            setContextValue: vi.fn((key: string, value: unknown) => contextValues.set(key, value)),
-            subscribeContextValue$: vi.fn((key: string) => key === FOCUSING_SHEET ? focusingSheet$ : new Subject<unknown>()),
-        } as any,
-        renderManagerService as any,
-        {
-            getSkeletonParam: vi.fn(() => ({
-                skeleton: {
-                    getCellWithCoordByIndex: vi.fn(() => ({
-                        actualRow: 1,
-                        actualColumn: 2,
-                        isMerged: true,
-                        isMergedMainCell: true,
-                        mergeInfo: {
-                            startRow: 1,
-                            startColumn: 2,
-                            endRow: 4,
-                            endColumn: 5,
-                        },
-                    })),
+            getCurrentSelections: vi.fn(() => [{
+                primary: {
+                    actualRow: 3,
+                    actualColumn: 4,
+                    startRow: 3,
+                    startColumn: 4,
+                    endRow: 3,
+                    endColumn: 4,
                 },
-            })),
-        } as any,
-        {
-            isChildUnitRuntimeEvent: vi.fn((unitId, target, event) => options?.isEmbedRuntimeEventImpl?.(unitId, target, event) ?? options?.isEmbedRuntimeEvent ?? false),
-            isChildUnitInActiveSession: vi.fn(() => options?.isEmbedActiveSession ?? false),
-        } as unknown as EmbedRuntimeFocusCoordinator
+            }]),
+        })),
+    };
+    const contextService = {
+        getContextValue: vi.fn((key: string) => contextValues.get(key)),
+        setContextValue: vi.fn((key: string, value: unknown) => contextValues.set(key, value)),
+        subscribeContextValue$: vi.fn((key: string) => key === FOCUSING_SHEET ? focusingSheet$ : new Subject<unknown>()),
+    };
+    const embedRuntimeFocusCoordinator = {
+        isChildUnitRuntimeEvent: vi.fn((unitId, target, event) =>
+            options?.isEmbedRuntimeEventImpl?.(unitId, target, event) ?? options?.isEmbedRuntimeEvent ?? false),
+        isChildUnitInActiveSession: vi.fn(() => options?.isEmbedActiveSession ?? false),
+    } as unknown as EmbedRuntimeFocusCoordinator;
+    const sheetSkeletonManagerService = {
+        getSkeletonParam: vi.fn(() => ({
+            skeleton: {
+                getCellWithCoordByIndex: vi.fn(() => ({
+                    actualRow: 1,
+                    actualColumn: 2,
+                    isMerged: true,
+                    isMergedMainCell: true,
+                    mergeInfo: {
+                        startRow: 1,
+                        startColumn: 2,
+                        endRow: 4,
+                        endColumn: 5,
+                    },
+                })),
+            },
+        })),
+    };
+    const editorBridgeRenderController = new EditorBridgeRenderController(
+        context as never,
+        instanceService as never,
+        commandService as never,
+        editorBridgeService as never,
+        selectionManagerService as never,
+        sheetSkeletonManagerService as never,
+        embedRuntimeFocusCoordinator
     );
+    const desktopCellEditRenderController = new DesktopCellEditRenderController(
+        context as never,
+        instanceService as never,
+        commandService as never,
+        editorBridgeService as never,
+        selectionManagerService as never,
+        contextService as never,
+        renderManagerService as never,
+        embedRuntimeFocusCoordinator
+    );
+    const controller = {
+        dispose: () => {
+            desktopCellEditRenderController.dispose();
+            editorBridgeRenderController.dispose();
+        },
+        refreshEditorPosition: () => editorBridgeRenderController.refreshEditorPosition(),
+    };
     workbook$.next(workbook);
 
     return {
@@ -327,10 +349,15 @@ describe('EditorBridgeRenderController business flows', () => {
     });
 
     it('requires an explicit edit action when mobile auto focus is disabled', () => {
-        const { commandService, controller, inputBefore$, spreadsheet } = createController({ disableAutoFocus: true });
+        const { commandService, controller, docSelectionRenderService, inputBefore$, spreadsheet } = createController({
+            disableAutoFocus: true,
+        });
 
         inputBefore$.next({ event: { data: 'A', which: 65 } });
         expect(commandService.syncExecuteCommand).not.toHaveBeenCalledWith(SetCellEditVisibleOperation.id, expect.anything());
+
+        spreadsheet.onPointerDown$.emit({});
+        expect(docSelectionRenderService.focus).not.toHaveBeenCalled();
 
         spreadsheet.onDblclick$.emit({ button: 0 });
         expect(commandService.executeCommand).toHaveBeenCalledWith(SetCellEditVisibleOperation.id, {

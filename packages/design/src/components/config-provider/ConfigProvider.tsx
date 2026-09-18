@@ -24,6 +24,14 @@ export interface IConfigProviderProps {
     locale?: any;
     direction?: 'ltr' | 'rtl';
     mountContainer: HTMLElement | null;
+    mobileKeyboardViewport?: IMobileKeyboardViewport | null;
+}
+
+export interface IMobileKeyboardViewport {
+    top: number;
+    bottom: number;
+    height: number;
+    stableHeight: number;
 }
 
 export const ConfigContext = createContext<Omit<IConfigProviderProps, 'children'>>({
@@ -31,15 +39,16 @@ export const ConfigContext = createContext<Omit<IConfigProviderProps, 'children'
 });
 
 export function ConfigProvider(props: IConfigProviderProps) {
-    const { children, locale, mountContainer, direction } = props;
+    const { children, locale, mountContainer, direction, mobileKeyboardViewport } = props;
 
     const value = useMemo(() => {
         return {
             locale,
             direction,
             mountContainer,
+            mobileKeyboardViewport,
         };
-    }, [locale, direction, mountContainer]);
+    }, [locale, direction, mobileKeyboardViewport, mountContainer]);
 
     return (
         <ConfigContext.Provider value={value}>

@@ -18,7 +18,7 @@ import type { IChannel, IMessageProtocol } from '../rpc.service';
 import { awaitTime } from '@univerjs/core';
 import { Observable, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { ChannelClient, ChannelServer, fromModule, toModule } from '../rpc.service';
+import { ChannelClient, ChannelClientDisposedError, ChannelServer, fromModule, toModule } from '../rpc.service';
 
 const REQUEST_INITIALIZATION = 50;
 const CALL = 100;
@@ -181,6 +181,7 @@ describe('rpc.service edge cases', () => {
         client.dispose();
 
         await expect(pendingCall).rejects.toThrow('[ChannelClient]: client is disposed!');
+        await expect(pendingCall).rejects.toBeInstanceOf(ChannelClientDisposedError);
         expect(subscriptionError).toHaveBeenCalledWith(expect.objectContaining({
             message: '[ChannelClient]: client is disposed!',
         }));

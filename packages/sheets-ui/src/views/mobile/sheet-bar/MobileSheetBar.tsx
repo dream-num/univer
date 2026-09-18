@@ -16,6 +16,7 @@
 
 import type { ICommandInfo, Workbook } from '@univerjs/core';
 import type { MouseEvent } from 'react';
+import type { IUniverSheetsUIConfig } from '../../../config/config';
 import type { LocaleKey } from '../../../locale/types';
 import type { IBaseSheetBarProps } from '../../sheet-bar/sheet-bar-tabs/SheetBarItem';
 import { ICommandService, LocaleService, nameCharacterCheck } from '@univerjs/core';
@@ -42,8 +43,14 @@ import {
     SetWorksheetOrderMutation,
     SetWorksheetShowCommand,
 } from '@univerjs/sheets';
-import { ContextMenuPosition, IContextMenuService, useDependency } from '@univerjs/ui';
+import {
+    ContextMenuPosition,
+    IContextMenuService,
+    useConfigValue,
+    useDependency,
+} from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../../config/config';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import { useActiveWorkbook } from '../../hook';
 
@@ -72,6 +79,8 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
     const contextMenuService = useDependency(IContextMenuService);
     const localeService = useDependency(LocaleService);
     const sheetBarService = useDependency(ISheetBarService);
+    const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
+    const addSheetButtonShow = (config?.footer || {}).addSheetButtonConfig?.show ?? true;
 
     const updateSheetItems = useCallback(() => {
         const currentSubUnitId = workbook.getActiveSheet()!.getSheetId();
@@ -276,20 +285,22 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                         ))}
                     </div>
                 </div>
-                <button
-                    type="button"
-                    aria-label={localeService.t<LocaleKey>('sheets-ui.mobile.addSheet')}
-                    className={clsx(resetButtonClassName, borderLeftClassName, `
-                      univer-flex univer-h-10 univer-w-12 univer-shrink-0 univer-items-center univer-justify-center
-                      univer-bg-gray-100 univer-text-lg univer-text-gray-800
-                      active:univer-bg-gray-200
-                      dark:!univer-bg-gray-800 dark:!univer-text-gray-100
-                      dark:active:!univer-bg-gray-700
-                    `)}
-                    onClick={addSheet}
-                >
-                    <IncreaseIcon />
-                </button>
+                {addSheetButtonShow && (
+                    <button
+                        type="button"
+                        aria-label={localeService.t<LocaleKey>('sheets-ui.mobile.addSheet')}
+                        className={clsx(resetButtonClassName, borderLeftClassName, `
+                          univer-flex univer-h-10 univer-w-12 univer-shrink-0 univer-items-center univer-justify-center
+                          univer-bg-gray-100 univer-text-lg univer-text-gray-800
+                          active:univer-bg-gray-200
+                          dark:!univer-bg-gray-800 dark:!univer-text-gray-100
+                          dark:active:!univer-bg-gray-700
+                        `)}
+                        onClick={addSheet}
+                    >
+                        <IncreaseIcon />
+                    </button>
+                )}
             </div>
             <MobileDialog
                 open={Boolean(renameSheetId)}

@@ -49,6 +49,10 @@ export function resolveMobileCaretMenuPlacement(anchorX: number, containerLeft: 
     return { menuLeft, pointerLeft };
 }
 
+export function shouldUseFloatingMobileContextMenu(_menuType: string, context?: IContextMenuTriggerContext): boolean {
+    return context?.caretAnchor === true;
+}
+
 export function MobileContextMenu() {
     const [visible, setVisible] = useState(false);
     const [menuType, setMenuType] = useState('');
@@ -65,7 +69,7 @@ export function MobileContextMenu() {
     const localeService = useDependency(LocaleService);
     const { mountContainer } = useContext(ConfigContext);
     const isCaretAnchor = menuContext?.caretAnchor === true;
-    const isFloatingContextMenu = menuType === ContextMenuPosition.MAIN_AREA || isCaretAnchor;
+    const isFloatingContextMenu = shouldUseFloatingMobileContextMenu(menuType, menuContext);
 
     visibleRef.current = visible;
 

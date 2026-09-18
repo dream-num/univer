@@ -38,6 +38,7 @@ export const IMenuManagerService = createIdentifier<IMenuManagerService>('univer
 
 export type ContextMenuQuickLayout = 'icon' | 'tile';
 export type ContextMenuQuickLayoutVariant = 'default' | 'compact';
+export type MobileMenuLayout = 'grid' | 'list';
 
 export interface IRibbonGridLayout {
     row: number;
@@ -60,6 +61,7 @@ export interface IMenuSchema {
     quickLayout?: ContextMenuQuickLayout;
     quickColumns?: number;
     quickLayoutVariant?: ContextMenuQuickLayoutVariant;
+    mobileLayout?: MobileMenuLayout;
     tiny?: boolean;
     gridLayout?: IRibbonGridLayout;
 }
@@ -86,6 +88,7 @@ export type MenuSchemaType = {
     quickLayout?: ContextMenuQuickLayout;
     quickColumns?: number;
     quickLayoutVariant?: ContextMenuQuickLayoutVariant;
+    mobileLayout?: MobileMenuLayout;
     tiny?: boolean;
     gridLayout?: IRibbonGridLayout;
 } | {
@@ -360,6 +363,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 quickLayout: value.quickLayout,
                 quickColumns: value.quickColumns,
                 quickLayoutVariant: value.quickLayoutVariant,
+                mobileLayout: value.mobileLayout,
                 tiny: value.tiny,
                 gridLayout: value.gridLayout,
             };

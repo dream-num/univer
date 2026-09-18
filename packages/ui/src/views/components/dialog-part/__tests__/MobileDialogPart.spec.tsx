@@ -17,6 +17,8 @@
 import type { ReactElement } from 'react';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { DesktopLogService, ILogService, Injector, LocaleService, LocaleType } from '@univerjs/core';
+import { ConfigProvider } from '@univerjs/design';
+import designEnUS from '@univerjs/design/locale/en-US';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -33,7 +35,7 @@ import { MobileDialogPart } from '../MobileDialogPart';
 
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { configurable: true, value: true, writable: true });
 
-function renderWithDependencies(element: ReactElement, mobileService = false) {
+function renderWithDependencies(element: ReactElement, mobileService = false, keyboardVisible = false) {
     const injector = new Injector();
     injector.add([IUIPartsService, { useClass: UIPartsService }]);
     injector.add([IDialogService, { useClass: mobileService ? MobileDialogService : DesktopDialogService }]);
@@ -46,9 +48,17 @@ function renderWithDependencies(element: ReactElement, mobileService = false) {
 
     return {
         ...render(
-            <RediProvider value={{ injector }}>
-                <MobileDrawerCoordinatorProvider>{element}</MobileDrawerCoordinatorProvider>
-            </RediProvider>
+            <ConfigProvider
+                locale={designEnUS.design}
+                mountContainer={document.body}
+                mobileKeyboardViewport={keyboardVisible
+                    ? { top: 0, bottom: 448, height: 448, stableHeight: 768 }
+                    : null}
+            >
+                <RediProvider value={{ injector }}>
+                    <MobileDrawerCoordinatorProvider>{element}</MobileDrawerCoordinatorProvider>
+                </RediProvider>
+            </ConfigProvider>
         ),
         injector,
     };
@@ -109,6 +119,20 @@ describe('MobileDialogPart', () => {
         expect(screen.getByText('Actions')).toBeTruthy();
     });
 
+    it('keeps the active dialog anchored while the mobile keyboard is visible', () => {
+        vi.stubGlobal('innerHeight', 768);
+        const rendered = renderWithDependencies(<MobileDialogPart />, false, true);
+        const dialogService = rendered.injector.get(IDialogService);
+
+        act(() => {
+            dialogService.open({ id: 'keyboard-aware', children: { title: <input aria-label="Value" /> } });
+        });
+
+        const drawer = screen.getByRole('dialog');
+        expect(drawer.style.bottom).toBe('');
+        expect(drawer.style.maxHeight).toBe('');
+    });
+
     it('closes with the close button and invokes dialog callbacks', () => {
         const rendered = renderWithDependencies(<MobileDialogPart />);
         const dialogService = rendered.injector.get(IDialogService);
@@ -144,6 +168,30 @@ describe('MobileDialogPart', () => {
 
         fireEvent.click(screen.getAllByRole('button', { name: 'Close sidebar' })[0]);
         expect(screen.getByRole('dialog')).toBeTruthy();
+    });
+
+    it('renders legacy confirm actions in the mobile footer', () => {
+        const rendered = renderWithDependencies(<MobileDialogPart />);
+        const dialogService = rendered.injector.get(IDialogService);
+        const onCancel = vi.fn();
+        const onOk = vi.fn();
+
+        act(() => {
+            dialogService.open({
+                id: 'legacy-confirm',
+                children: { title: <span>Confirm action</span> },
+                showCancel: true,
+                showOk: true,
+                onCancel,
+                onOk,
+            });
+        });
+
+        fireEvent.click(screen.getByRole('button', { name: 'cancel' }));
+        fireEvent.click(screen.getByRole('button', { name: 'ok' }));
+
+        expect(onCancel).toHaveBeenCalledOnce();
+        expect(onOk).toHaveBeenCalledOnce();
     });
 
     it('ignores the release of the pointer that opened the dialog before accepting a backdrop tap', () => {

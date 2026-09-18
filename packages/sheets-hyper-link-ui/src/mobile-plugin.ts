@@ -47,6 +47,7 @@ import { SheetsHyperLinkMobilePopupController } from './controllers/mobile/popup
 import { SheetsHyperLinkRenderController } from './controllers/render-controllers/render.controller';
 import { SheetsHyperLinkUIController } from './controllers/ui.controller';
 import { SheetHyperLinkUrlController } from './controllers/url.controller';
+import { SheetsHyperLinkMobileMenuController } from './menu/mobile-hyper-link-menu.controller';
 import { SheetsHyperLinkMobilePopupService } from './services/mobile-popup.service';
 import { ISheetsHyperLinkPopupService } from './services/popup.service';
 import { SheetsHyperLinkResolverService } from './services/resolver.service';
@@ -91,6 +92,7 @@ export class UniverSheetsHyperLinkMobileUIPlugin extends Plugin {
             [SheetsHyperLinkSidePanelService],
             [SheetsHyperLinkMobilePopupController],
             [SheetsHyperLinkUIController],
+            [SheetsHyperLinkMobileMenuController],
             [SheetsHyperLinkAutoFillController],
             [SheetsHyperLinkCopyPasteController],
             [SheetsHyperLinkPermissionController],
@@ -114,6 +116,7 @@ export class UniverSheetsHyperLinkMobileUIPlugin extends Plugin {
         this._injector.get(SheetsHyperLinkAutoFillController);
         this._injector.get(SheetsHyperLinkCopyPasteController);
         this._injector.get(SheetsHyperLinkUIController);
+        this._injector.get(SheetsHyperLinkMobileMenuController);
     }
 
     override onRendered(): void {

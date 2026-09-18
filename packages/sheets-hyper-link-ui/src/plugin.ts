@@ -34,6 +34,7 @@ import { SheetsHyperLinkPopupController } from './controllers/popup.controller';
 import { SheetsHyperLinkRenderController } from './controllers/render-controllers/render.controller';
 import { SheetsHyperLinkUIController } from './controllers/ui.controller';
 import { SheetHyperLinkUrlController } from './controllers/url.controller';
+import { SheetsHyperLinkMenuController } from './menu/hyper-link-menu.controller';
 import { ISheetsHyperLinkPopupService, SheetsHyperLinkPopupService } from './services/popup.service';
 import { SheetsHyperLinkResolverService } from './services/resolver.service';
 import { SheetsHyperLinkSidePanelService } from './services/side-panel.service';
@@ -83,6 +84,7 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
 
             [SheetsHyperLinkPopupController],
             [SheetsHyperLinkUIController],
+            [SheetsHyperLinkMenuController],
             [SheetsHyperLinkAutoFillController],
             [SheetsHyperLinkCopyPasteController],
             [SheetsHyperLinkPermissionController],
@@ -99,6 +101,7 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
         this._injector.get(SheetsHyperLinkAutoFillController);
         this._injector.get(SheetsHyperLinkCopyPasteController);
         this._injector.get(SheetsHyperLinkUIController);
+        this._injector.get(SheetsHyperLinkMenuController);
     }
 
     override onRendered(): void {

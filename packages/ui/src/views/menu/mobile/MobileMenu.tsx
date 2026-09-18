@@ -456,7 +456,10 @@ function MobileSchemaList(props: {
                     return null;
                 }
 
-                if (schema.quickLayout) {
+                const useGridLayout = schema.mobileLayout === 'grid'
+                    || (schema.mobileLayout === undefined && Boolean(schema.quickLayout));
+
+                if (useGridLayout) {
                     return (
                         <MobileQuickSchemaGroup
                             key={schema.key}

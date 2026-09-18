@@ -15,9 +15,19 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { resolveMobileCaretMenuPlacement } from '../MobileContextMenu';
+import { ContextMenuPosition } from '../../../../services/menu/types';
+import { resolveMobileCaretMenuPlacement, shouldUseFloatingMobileContextMenu } from '../MobileContextMenu';
 
 describe('MobileContextMenu', () => {
+    it('uses a floating menu only for an explicit caret anchor', () => {
+        expect(shouldUseFloatingMobileContextMenu(ContextMenuPosition.MAIN_AREA)).toBe(false);
+        expect(shouldUseFloatingMobileContextMenu(ContextMenuPosition.MAIN_AREA, { unitId: 'sheet-1' })).toBe(false);
+        expect(shouldUseFloatingMobileContextMenu(ContextMenuPosition.MAIN_AREA, {
+            unitId: 'doc-1',
+            caretAnchor: true,
+        })).toBe(true);
+    });
+
     it('keeps the pointer aligned with the caret when the compact menu reaches viewport edges', () => {
         expect(resolveMobileCaretMenuPlacement(200, 12, 400, 180)).toEqual({
             menuLeft: 98,

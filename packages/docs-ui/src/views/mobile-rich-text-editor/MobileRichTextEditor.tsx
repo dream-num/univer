@@ -16,7 +16,7 @@
 
 import type { Editor } from '../../services/editor/editor';
 import type { IRichTextEditorProps } from '../RichTextEditor';
-import { Button, clsx } from '@univerjs/design';
+import { Button, clsx, useMobileKeyboardViewportLayout } from '@univerjs/design';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CheckMarkIcon, CloseIcon, DownIcon } from '@univerjs/icons';
 import { MobileKeyboardInsetContext, useEvent, useMobileCanvasPanel } from '@univerjs/ui';
@@ -42,6 +42,7 @@ export function MobileRichTextEditor(props: IMobileRichTextEditorProps) {
     const keyboardWasVisibleRef = useRef(false);
     const [editor, setEditor] = useState<Editor | null>(null);
     const [contentHeight, setContentHeight] = useState(0);
+    const keyboardLayout = useMobileKeyboardViewportLayout(containerRef);
     const confirmOnDismiss = useEvent(onConfirm);
     useMobileCanvasPanel(containerRef, expanded ? 'modal' : 'canvas');
 
@@ -92,7 +93,7 @@ export function MobileRichTextEditor(props: IMobileRichTextEditorProps) {
                 : 'univer-min-h-12 univer-items-center')}
             style={{
                 backgroundColor: props.canvasStyle?.backgroundColor,
-                bottom: expanded ? undefined : keyboardInset,
+                bottom: expanded ? undefined : keyboardLayout?.bottom ?? 0,
                 paddingBottom: expanded ? 'env(safe-area-inset-bottom, 0px)' : undefined,
                 paddingTop: expanded ? 'env(safe-area-inset-top, 0px)' : undefined,
             }}

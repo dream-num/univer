@@ -16,7 +16,7 @@
 
 import { Disposable, DrawingTypeEnum, ICommandService, Inject } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { IMenuManagerService, IShortcutService, ISidebarService } from '@univerjs/ui';
+import { IShortcutService, ISidebarService } from '@univerjs/ui';
 import { DeleteDrawingsCommand } from '../commands/commands/delete-drawings.command';
 import { FlipSheetDrawingCommand } from '../commands/commands/flip-drawings.command';
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
@@ -26,7 +26,6 @@ import { SaveCellImagesCommand } from '../commands/commands/save-cell-images.com
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 import { SidebarSheetDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
-import { menuSchema } from '../menu/schema';
 import { COMPONENT_SHEET_DRAWING_PANEL } from '../views/sheet-image-panel/component-name';
 import {
     DeleteDrawingsShortcutItem,
@@ -38,7 +37,6 @@ import {
 
 export class SheetDrawingUIController extends Disposable {
     constructor(
-        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
@@ -50,10 +48,6 @@ export class SheetDrawingUIController extends Disposable {
     }
 
     private _initCustomComponents(): void {
-    }
-
-    private _initMenus(): void {
-        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initCommands() {
@@ -101,7 +95,6 @@ export class SheetDrawingUIController extends Disposable {
     private _init(): void {
         this._initCommands();
         this._initCustomComponents();
-        this._initMenus();
         this._initShortcuts();
         this._initImagePanel();
     }

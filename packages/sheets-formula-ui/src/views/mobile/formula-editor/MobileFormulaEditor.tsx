@@ -352,8 +352,8 @@ export const MobileFormulaEditor = forwardRef((props: IMobileFormulaEditorProps,
         handledMobileFunctionPanelRequestRef.current = mobileFunctionPanelRequest;
         contextService.setContextValue(MOBILE_FORMULA_FUNCTION_PANEL_OPEN, true);
         setMobileFunctionPanelOpen(true);
-        editor?.blur();
-    }, [contextService, editor, mobileFunctionPanelRequest]);
+        editorService.blur();
+    }, [contextService, editorService, mobileFunctionPanelRequest]);
 
     useEffect(() => () => {
         contextService.setContextValue(MOBILE_FORMULA_FUNCTION_PANEL_OPEN, false);
@@ -525,6 +525,11 @@ export const MobileFormulaEditor = forwardRef((props: IMobileFormulaEditorProps,
         let focusRetryFrame = 0;
         let finalFocusRetryFrame = 0;
 
+        if (mobileFunctionPanelOpen) {
+            editor?.blur();
+            return undefined;
+        }
+
         const retryFocus = () => {
             if (_isFocus && !docSelectionRenderService?.isFocusing) {
                 focus();
@@ -551,7 +556,7 @@ export const MobileFormulaEditor = forwardRef((props: IMobileFormulaEditorProps,
             cancelAnimationFrame(focusRetryFrame);
             cancelAnimationFrame(finalFocusRetryFrame);
         };
-    }, [_isFocus, docSelectionRenderService, editor, focus, resetSelection, resetSelectionOnBlur]);
+    }, [_isFocus, docSelectionRenderService, editor, focus, mobileFunctionPanelOpen, resetSelection, resetSelectionOnBlur]);
 
     const { checkScrollBar } = useResize(editor, isSingle, autoScrollbar);
     useRefactorEffect(isFocus, isSelecting, unitId, editorId, disableContextMenu, true);
@@ -624,6 +629,7 @@ export const MobileFormulaEditor = forwardRef((props: IMobileFormulaEditorProps,
     const closeMobileFunctionPanel = () => {
         setMobileFunctionPanelOpen(false);
         requestAnimationFrame(() => {
+            setIsFocus(true);
             focus();
             contextService.setContextValue(MOBILE_FORMULA_FUNCTION_PANEL_OPEN, false);
         });
@@ -680,6 +686,7 @@ export const MobileFormulaEditor = forwardRef((props: IMobileFormulaEditorProps,
         const currentText = BuildTextUtils.transform.getPlainText(editor.getDocumentData().body?.dataStream ?? '');
         const currentSelection = editor.getSelectionRanges()?.[0];
         const result = buildFormulaFunctionInsertion(currentText, currentSelection, functionName);
+        setIsFocus(true);
         applyMobileInsertion(result);
         setMobileFunctionPanelOpen(false);
         requestAnimationFrame(() => {

@@ -353,9 +353,9 @@ export class Documents extends DocComponent {
         const skeleton = this.getSkeleton();
         if (super.isHit(coord)) {
             const layer = this.layer;
-            const hasDrawingBehind = layer != null && this.getScene()?.getAllObjectsByOrderForPick().some((object) =>
-                !(object instanceof DocComponent) && !object.isInGroup && object.visible && object.evented &&
-                object.layer != null && object.layer.zIndex < layer.zIndex && object.isHit(coord));
+            const hasDrawingBehind = layer != null && this.getScene()?.getLayers().some((candidate) =>
+                candidate.zIndex < layer.zIndex && candidate.getObjects().some((object) =>
+                    !(object instanceof DocComponent) && !object.isInGroup && object.visible && object.evented && object.isHit(coord)));
             if (!hasDrawingBehind || !skeleton) {
                 return true;
             }

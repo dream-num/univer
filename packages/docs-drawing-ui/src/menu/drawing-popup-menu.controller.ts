@@ -45,7 +45,7 @@ import {
     OpenImageCropOperation,
 } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { FloatingObjectToolbarPosition, IMenuManagerService, MenuItemType } from '@univerjs/ui';
+import { ContextMenuPosition, FloatingObjectToolbarPosition, IContextMenuService, IMenuManagerService, MenuItemType } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing.operation';
 import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
@@ -76,7 +76,8 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         @Inject(DocDrawingFloatingToolbarAdapterService) private readonly _floatingToolbarAdapterService: DocDrawingFloatingToolbarAdapterService,
         @ICommandService private readonly _commandService: ICommandService,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
-        @IPermissionService private readonly _permissionService: IPermissionService
+        @IPermissionService private readonly _permissionService: IPermissionService,
+        @IContextMenuService private readonly _contextMenuService: IContextMenuService
     ) {
         super();
 
@@ -296,6 +297,20 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         const transformer = scene.getTransformerByCreate();
 
         const subscriptions = [
+            transformer.changeEnd$.subscribe(({ event }) => {
+                if (event.button !== 2) {
+                    return;
+                }
+                const drawings = [...transformer.getSelectedObjectMap().values()]
+                    .map((object) => this._drawingManagerService.getDrawingOKey(object.oKey));
+                if (drawings.length === 0 || (drawings.length === 1 && drawings[0]?.drawingType !== DrawingTypeEnum.DRAWING_GROUP)) {
+                    return;
+                }
+                if (drawings.some((drawing) => !drawing || !this._canEditDrawing(drawing.unitId, drawing.drawingId))) {
+                    return;
+                }
+                this._contextMenuService.triggerContextMenu(event, ContextMenuPosition.DRAWING);
+            }),
             transformer.createControl$.subscribe(() => {
                 if (this._hasCropObject(scene)) {
                     this._clearPopups(unitId, true);

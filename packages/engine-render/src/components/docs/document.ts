@@ -350,11 +350,30 @@ export class Documents extends DocComponent {
     }
 
     override isHit(coord: Vector2): boolean {
+        const skeleton = this.getSkeleton();
         if (super.isHit(coord)) {
-            return true;
+            const layer = this.layer;
+            const hasDrawingBehind = layer != null && this.getScene()?.getAllObjectsByOrderForPick().some((object) =>
+                !(object instanceof DocComponent) && !object.isInGroup && object.visible && object.evented &&
+                object.layer != null && object.layer.zIndex < layer.zIndex && object.isHit(coord));
+            if (!hasDrawingBehind || !skeleton) {
+                return true;
+            }
+
+            // Keep text editing ahead of rear drawings, but do not let nearest-caret
+            // fallback make the entire blank page occlude those drawings.
+            const hit = skeleton.findNodeByCoord(
+                this.getInverseCoord(coord),
+                this.pageLayoutType,
+                this.pageMarginLeft,
+                this.pageMarginTop
+            );
+            if (hit?.isExactHit) {
+                return true;
+            }
         }
 
-        const skeletonData = this.getSkeleton()?.getSkeletonData();
+        const skeletonData = skeleton?.getSkeletonData();
         if (!skeletonData) {
             return false;
         }

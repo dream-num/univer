@@ -3822,7 +3822,7 @@ export class DocumentSkeleton extends Skeleton {
                             const endX = startX + glyph.width;
                             const node = { node: glyph, ...segment, ratioX: x / (startX + endX), ratioY: y / (startY + endY) };
                             if (sameLine && x >= startX && x <= endX) {
-                                return node;
+                                return { ...node, isExactHit: true };
                             }
                             if (distanceY < nearestDistanceY) {
                                 nearestDistanceY = distanceY;

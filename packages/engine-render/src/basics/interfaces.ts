@@ -190,6 +190,8 @@ export interface IFontCreateConfig {
 
 export interface INodeInfo {
     node: IDocumentSkeletonGlyph;
+    /** Whether the point is inside the glyph's layout box rather than a nearest-caret fallback. */
+    isExactHit?: boolean;
     ratioX: number;
     ratioY: number;
     segmentId: string;

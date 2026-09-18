@@ -48,9 +48,11 @@ import {
 import { Vector2 } from '../../../basics/vector2';
 import { Canvas } from '../../../canvas';
 import { UniverRenderingContext } from '../../../context';
+import { DrawingGroupObject } from '../../../drawing-group';
 import { Engine } from '../../../engine';
 import { MAIN_VIEW_PORT_KEY, Scene } from '../../../scene';
 import { Path, Rect } from '../../../shape';
+import { Image } from '../../../shape/image';
 import { Viewport } from '../../../viewport';
 import { DocBackground } from '../doc-background';
 import { DOCS_EXTENSION_TYPE } from '../doc-extension';
@@ -444,6 +446,75 @@ describe('documents render', () => {
             documents.dispose();
             skeleton.dispose();
             bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it.each(['image', 'shape', 'group'] as const)('selects a rear %s through page whitespace while preserving text hits', (kind) => {
+        const bed = createParagraphLayoutTestBed('Editable text', {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        skeleton.calculate();
+        const documents = new Documents('rear-drawing-doc', skeleton, { pageMarginLeft: 0, pageMarginTop: 0 });
+        documents.transformByState({ left: 40, top: 30, width: 400, height: 600 });
+        const drawing = kind === 'shape' ? new Rect('rear-shape') : new Image('rear-image', {});
+        drawing.transformByState({ width: 250, height: 250 });
+        const rear = kind === 'group' ? new DrawingGroupObject('rear-group', drawing) : drawing;
+        if (rear instanceof DrawingGroupObject) {
+            rear.setBaseBound({ left: 0, top: 0, width: 250, height: 250 });
+        }
+        rear.transformByState({ left: 40, top: 30, width: 250, height: 250 });
+        scene.addObject(documents, 2);
+        scene.addObject(rear, 1);
+        try {
+            const page = skeleton.getSkeletonData()!.pages[0];
+            const line = page.sections[0].columns[0].lines[0];
+            const glyph = line.divides[0].glyphGroup[0];
+            const text = Vector2.create(40 + page.marginLeft + glyph.width / 2, 30 + page.marginTop + line.top + line.lineHeight / 2);
+            const blank = Vector2.create(200, 200);
+            expect(scene.pick(text)).toBe(documents);
+            expect(scene.pick(blank)).toBe(rear);
+            // Blank space with no underlying object still places the document caret.
+            expect(scene.pick(Vector2.create(350, 300))).toBe(documents);
+            rear.hide();
+            expect(scene.pick(blank)).toBe(documents);
+            rear.show();
+            rear.evented = false;
+            expect(scene.pick(blank)).toBe(documents);
+            rear.evented = true;
+            const foreground = new Rect('front', { left: 190, top: 190, width: 30, height: 30 });
+            scene.addObject(foreground, 3);
+            expect(scene.pick(blank)).toBe(foreground);
+            foreground.dispose();
+            // Coordinate conversion must remain correct under scene zoom.
+            scene.transformByState({ scaleX: 1.5, scaleY: 1.5 });
+            expect(scene.pick(Vector2.create(300, 300))).toBe(rear);
+        } finally {
+            documents.dispose();
+            rear.dispose();
+            skeleton.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it('keeps table cell whitespace ahead of a rear drawing', () => {
+        const bed = createParagraphLayoutTestBed('Editable text');
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        skeleton.calculate();
+        attachTable(skeleton.getSkeletonData()!.pages[0]);
+        const documents = new Documents('rear-table-doc', skeleton, { pageMarginLeft: 0, pageMarginTop: 0 });
+        documents.transformByState({ width: 400, height: 600 });
+        const rear = new Image('rear-table-image', { left: 0, top: 0, width: 300, height: 250 });
+        scene.addObject(documents, 2);
+        scene.addObject(rear, 1);
+        try {
+            expect(scene.pick(Vector2.create(140, 90))).toBe(documents);
+            expect(scene.pick(Vector2.create(250, 200))).toBe(rear);
+        } finally {
+            documents.dispose();
+            rear.dispose();
+            skeleton.dispose();
             bed.dataModel.dispose();
         }
     });

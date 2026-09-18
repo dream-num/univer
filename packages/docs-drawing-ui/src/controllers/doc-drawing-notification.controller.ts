@@ -56,47 +56,27 @@ interface IAddOrRemoveDrawing {
     drawing?: IDocDrawing;
 }
 
-// Check whether drawings are added or deleted from the mutation and obtain the drawing ID.
-// eslint-disable-next-line complexity
+// Only whole drawing entries add/remove render objects; field edits are synchronized after the mutation.
 function getAddOrRemoveDrawings(actions: JSONXActions): Nullable<IAddOrRemoveDrawing[]> {
-    if (JSONX.isNoop(actions) || !Array.isArray(actions)) {
+    if (JSONX.isNoop(actions)) {
         return null;
     }
-    const drawingsOp = actions.find((action) => Array.isArray(action) && action?.[0] === 'drawings');
-
-    if (drawingsOp == null || !Array.isArray(drawingsOp) || drawingsOp.length < 3) {
-        return null;
-    }
-
-    if (typeof drawingsOp[1] === 'string' && typeof drawingsOp[2] !== 'object') {
-        return null;
-    }
-
-    if (Array.isArray(drawingsOp[1]) && typeof drawingsOp[1][1] !== 'object') {
-        return null;
-    }
-
     const drawings: IAddOrRemoveDrawing[] = [];
-
-    if (Array.isArray(drawingsOp?.[1])) {
-        for (const op of drawingsOp) {
-            if (Array.isArray(op)) {
-                drawings.push({
-                    type: (op?.[1] as any)?.i ? 'add' : 'remove',
-                    drawingId: op?.[0] as string,
-                    drawing: (op?.[1] as any)?.i,
-                });
-            }
+    const cursor = JSON1.type.readCursor(actions);
+    cursor.traverse(null, () => {
+        const path = cursor.getPath();
+        if (path.length !== 2 || path[0] !== 'drawings' || typeof path[1] !== 'string') {
+            return;
         }
-    } else {
-        drawings.push({
-            type: (drawingsOp[2] as any)?.i ? 'add' : 'remove',
-            drawingId: drawingsOp[1] as string,
-            drawing: (drawingsOp[2] as any)?.i,
-        });
-    }
-
-    return drawings;
+        const component = cursor.getComponent();
+        if (component?.r !== undefined) {
+            drawings.push({ type: 'remove', drawingId: path[1] });
+        }
+        if (component?.i !== undefined) {
+            drawings.push({ type: 'add', drawingId: path[1], drawing: component.i as IDocDrawing });
+        }
+    });
+    return drawings.length ? drawings : null;
 }
 
 // ReOrderedActions data like bellow:
@@ -386,7 +366,9 @@ export class DocDrawingAddRemoveController extends Disposable {
         const drawingManagerService = this._drawingManagerService;
         const docDrawingService = this._docDrawingService;
 
-        const jsonOp = this._docDrawingService.getBatchAddOp(drawings) as IDrawingJsonUndo1;
+        const jsonOp = this._docDrawingService.getBatchAddOp(
+            drawings.map((drawing) => ({ ...drawing, unitId, subUnitId: unitId }))
+        ) as IDrawingJsonUndo1;
 
         const { subUnitId, redo: op, objects } = jsonOp;
 
@@ -400,8 +382,13 @@ export class DocDrawingAddRemoveController extends Disposable {
     private _removeDrawings(unitId: string, drawingIds: string[]) {
         const drawingManagerService = this._drawingManagerService;
         const docDrawingService = this._docDrawingService;
+        // An earlier group removal in this mutation may already have removed these descendants.
+        const existingDrawingIds = drawingIds.filter((drawingId) => docDrawingService.getDrawingByParam({ unitId, subUnitId: unitId, drawingId }));
+        if (existingDrawingIds.length === 0) {
+            return;
+        }
 
-        const jsonOp = this._docDrawingService.getBatchRemoveOp(drawingIds.map((drawingId) => {
+        const jsonOp = this._docDrawingService.getBatchRemoveOp(existingDrawingIds.map((drawingId) => {
             return {
                 unitId,
                 subUnitId: unitId,
@@ -482,10 +469,16 @@ export class DocDrawingAddRemoveController extends Disposable {
         }
 
         const { drawings, drawingsOrder } = collectDocDrawings(documentDataModel.getSnapshot());
-        const drawingData = drawings as IDrawingMapItemData<IDocDrawing>;
+        const drawingData: IDrawingMapItemData<IDocDrawing> = Object.fromEntries(
+            Object.entries(drawings).map(([id, drawing]) => [id, { ...drawing, unitId, subUnitId: unitId }])
+        );
         const previousDrawings = this._docDrawingService.getDrawingData(unitId, unitId);
+        const previousRendered = this._drawingManagerService.getDrawingData(unitId, unitId);
+        // Removing an outer group also removes its render descendants. Ungrouping retains them in the document.
+        const missingIds = Object.keys(drawingData).filter((id) => !previousRendered[id]);
+        const synchronizedDrawingIds = [...new Set([...drawingIds, ...missingIds])];
         const orderChanged = drawingsOrder !== this._docDrawingService.getDrawingOrder(unitId, unitId) ||
-            drawingIds.some((drawingId) => {
+            synchronizedDrawingIds.some((drawingId) => {
                 const previous = previousDrawings[drawingId];
                 const current = drawingData[drawingId];
                 const wasBehind = previous?.layoutType === PositionedObjectLayoutType.WRAP_NONE &&
@@ -495,8 +488,12 @@ export class DocDrawingAddRemoveController extends Disposable {
                 return wasBehind !== isBehind;
             });
 
+        const hierarchyChanged = synchronizedDrawingIds.some((id) => previousDrawings[id]?.groupId !== drawingData[id]?.groupId);
+        if (hierarchyChanged) {
+            this._drawingManagerService.removeNotification(Object.values(this._drawingManagerService.getDrawingData(unitId, unitId)));
+        }
         const renderedDrawings = { ...this._drawingManagerService.getDrawingData(unitId, unitId) };
-        for (const drawingId of drawingIds) {
+        for (const drawingId of synchronizedDrawingIds) {
             const current = drawingData[drawingId];
             if (current) {
                 // Layout mutates render transforms. Never share the persisted drawing object or
@@ -514,7 +511,7 @@ export class DocDrawingAddRemoveController extends Disposable {
             this._drawingManagerService.setDrawingOrder(unitId, unitId, getDocDrawingRenderOrder(drawingsOrder, drawings));
         }
 
-        const objects = drawingIds
+        const objects = synchronizedDrawingIds
             .filter((drawingId) => drawingData[drawingId] != null)
             .map((drawingId) => ({ unitId, subUnitId: unitId, drawingId }));
 
@@ -522,6 +519,9 @@ export class DocDrawingAddRemoveController extends Disposable {
             return;
         }
 
+        if (hierarchyChanged) {
+            this._drawingManagerService.addNotification(Object.values(renderedDrawings));
+        }
         this._docDrawingService.updateNotification(objects);
         this._drawingManagerService.updateNotification(objects);
     }

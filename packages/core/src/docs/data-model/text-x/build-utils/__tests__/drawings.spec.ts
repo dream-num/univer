@@ -24,6 +24,39 @@ import { getRichTextEditPath } from '../../utils';
 import { addDrawing, getCustomBlockIdsInSelections, removeDrawingReferences } from '../drawings';
 
 describe('drawing build utils', () => {
+    it('deletes nested group descendants when their only document anchor is removed', () => {
+        const drawing = {
+            unitId: 'doc-group',
+            subUnitId: 'doc-group',
+            drawingId: 'root',
+            drawingType: DrawingTypeEnum.DRAWING_GROUP,
+            layoutType: PositionedObjectLayoutType.INLINE,
+            docTransform: {
+                angle: 0,
+                positionH: { relativeFrom: 0, posOffset: 0 },
+                positionV: { relativeFrom: 0, posOffset: 0 },
+                size: { width: 100, height: 100 },
+            },
+        };
+        const doc = new DocumentDataModel({
+            id: 'doc-group',
+            body: { dataStream: '\b\r\n', customBlocks: [{ startIndex: 0, blockId: 'root' }] },
+            drawings: {
+                leaf: { ...drawing, drawingId: 'leaf', drawingType: DrawingTypeEnum.DRAWING_SHAPE, groupId: 'nested' },
+                nested: { ...drawing, drawingId: 'nested', groupId: 'root' },
+                root: drawing,
+                unrelated: { ...drawing, drawingId: 'unrelated' },
+            },
+            drawingsOrder: ['root', 'nested', 'leaf', 'unrelated'],
+        });
+        const actions = removeDrawingReferences(doc.getSnapshot(), [{ startOffset: 0, endOffset: 1, collapsed: false }]);
+        for (const action of actions) {
+            doc.apply(action);
+        }
+        expect(Object.keys(doc.getDrawings()!)).toEqual(['unrelated']);
+        expect(doc.getDrawingsOrder()).toEqual(['unrelated']);
+    });
+
     it('removes drawing references in reverse order for a structural text deletion', () => {
         const doc = new DocumentDataModel({
             id: 'doc-remove-drawings',
@@ -74,7 +107,9 @@ describe('drawing build utils', () => {
         for (const action of actions.slice(1)) {
             composedActions = JSONX.compose(composedActions, action);
         }
-        if (!composedActions) throw new Error('Expected drawing removal actions');
+        if (!composedActions) {
+            throw new Error('Expected drawing removal actions');
+        }
         doc.apply(composedActions);
 
         expect(doc.getDrawings()).toEqual({});

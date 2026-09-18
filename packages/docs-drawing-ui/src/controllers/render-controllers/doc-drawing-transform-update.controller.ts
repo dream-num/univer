@@ -36,6 +36,7 @@ import {
     AlignTypeV,
     BooleanNumber,
     Disposable,
+    DrawingTypeEnum,
     fromEventSubject,
     ICommandService,
     Inject,
@@ -47,6 +48,7 @@ import {
     PositionedObjectLayoutType,
 } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { collectDocDrawings } from '@univerjs/docs-drawing';
 import { IEditorService, SetDocZoomRatioOperation } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import {
@@ -731,14 +733,15 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
+        const affectedDrawingIds = this._includeGroupChildren(drawingIds);
         const updateDrawings = Object.values(updateDrawingMap)
-            .filter((drawing) => drawingIds == null || drawingIds.has(drawing.drawingId));
+            .filter((drawing) => affectedDrawingIds == null || affectedDrawingIds.has(drawing.drawingId));
 
         for (const drawing of updateDrawings) {
             drawing.hidden = false;
         }
 
-        const staleNonMultiDrawings = this._getStaleNonMultiDrawings(unitId, updateDrawingMap, drawingIds);
+        const staleNonMultiDrawings = this._getStaleNonMultiDrawings(unitId, updateDrawingMap, affectedDrawingIds);
         const nonMultiDrawings = updateDrawings
             .filter((drawing) => !drawing.isMultiTransform)
             .concat(staleNonMultiDrawings)
@@ -754,16 +757,34 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             this._drawingManagerService.refreshTransform(nonMultiDrawings as unknown as IDrawingParam[]);
         }
 
-        const targetedMultiDrawing = drawingIds != null && [...drawingIds].some((drawingId) =>
+        const targetedMultiDrawing = affectedDrawingIds != null && [...affectedDrawingIds].some((drawingId) =>
             updateDrawingMap[drawingId]?.isMultiTransform === BooleanNumber.TRUE ||
             this._drawingManagerService.getDrawingByParam({ unitId, subUnitId: unitId, drawingId })?.isMultiTransform === BooleanNumber.TRUE);
-        if (drawingIds == null || targetedMultiDrawing) {
+        if (affectedDrawingIds == null || targetedMultiDrawing) {
             // Multi-transform drawings are recreated as a group so repeated
             // header/footer occurrences stay consistent.
             const allMultiDrawings = Object.values(updateDrawingMap)
                 .filter((drawing) => drawing.isMultiTransform);
             this._handleMultiDrawingsTransform(allMultiDrawings as unknown as IDrawingParam[]);
         }
+    }
+
+    private _includeGroupChildren(drawingIds?: ReadonlySet<string>): ReadonlySet<string> | undefined {
+        if (drawingIds == null) {
+            return;
+        }
+        const affected = new Set(drawingIds);
+        const { drawings } = collectDocDrawings(this._context.unit.getSnapshot());
+        let previousSize = -1;
+        while (previousSize !== affected.size) {
+            previousSize = affected.size;
+            for (const drawing of Object.values(drawings)) {
+                if (drawing.groupId && affected.has(drawing.groupId)) {
+                    affected.add(drawing.drawingId);
+                }
+            }
+        }
+        return affected;
     }
 
     private _collectPublishedPageDrawingPositions(
@@ -1070,6 +1091,46 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             customBlockRenderViewport: drawing.customBlockRenderViewport,
             isMultiTransform,
         });
+        if (runtimeDrawing.drawingType === DrawingTypeEnum.DRAWING_GROUP) {
+            this._collectGroupChildren(drawingId, context, behindText, isMultiTransform, new Set([drawingId]));
+        }
+    }
+
+    private _collectGroupChildren(
+        groupId: string,
+        context: IDrawingPositionContext,
+        behindText: boolean,
+        isMultiTransform: BooleanNumber,
+        visited: Set<string>
+    ): void {
+        const { drawings } = collectDocDrawings(this._context.unit.getSnapshot());
+        for (const child of Object.values(drawings)) {
+            if (child.groupId !== groupId || visited.has(child.drawingId)) {
+                continue;
+            }
+            visited.add(child.drawingId);
+            const { size, positionH, positionV, angle, flipX, flipY } = child.docTransform;
+            const transform = {
+                left: positionH.posOffset ?? 0,
+                top: positionV.posOffset ?? 0,
+                width: size.width,
+                height: size.height,
+                angle,
+                flipX,
+                flipY,
+            };
+            mergePublishedDrawing(context.updateDrawingMap, {
+                unitId: context.unitId,
+                subUnitId: context.unitId,
+                drawingId: child.drawingId,
+                behindText,
+                selectable: context.selectable,
+                transform,
+                transforms: [transform],
+                isMultiTransform,
+            });
+            this._collectGroupChildren(child.drawingId, context, behindText, isMultiTransform, visited);
+        }
     }
 
     private _calculateTableCellDrawingPositions(

@@ -46,6 +46,7 @@ export { SHEET_TABLE_CUSTOM_THEME_PREFIX, TABLE_FILTER_EMPTY_VALUE } from './con
 export { SheetsTableThemeController } from './controllers/sheet-table-theme.controller';
 export { SheetsTableController } from './controllers/sheets-table.controller';
 export { customEmptyThemeWithBorderStyle, processStyleWithBorderStyle } from './controllers/table-theme.factory';
+export { compileTableRecordFilter, getTableRecordValue, getTableRecordValueKey } from './models/filter-util/record-filter';
 export { TableManager } from './models/table-manager';
 export { UniverSheetsTablePlugin } from './plugin';
 export { SheetTableService } from './services/table.service';
@@ -73,10 +74,12 @@ export type {
     ITableOptions,
     ITableRange,
     ITableRangeWithState,
+    ITableRecordFilterItem,
     TableMetaType,
+    TableRecordValue,
     TableRelationTupleType,
 } from './types/type';
 export type { ITableJson, ITableSetConfig } from './types/type';
-export { getExistingNamesSet, isColorTableFilter, isConditionFilter, isManualTableFilter } from './util';
+export { getExistingNamesSet, isColorTableFilter, isConditionFilter, isManualTableFilter, isRecordTableFilter } from './util';
 export { validateSheetTableName } from './util/table-name';
 export type { ISheetTableNameValidationResult, SheetTableNameValidationReason } from './util/table-name';

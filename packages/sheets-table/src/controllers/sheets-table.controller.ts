@@ -33,9 +33,9 @@ export class SheetsTableController extends Disposable {
         @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService
     ) {
         super();
+        this.registerTableChangeEvent();
         this._initSnapshot();
         this._initSheetChange();
-        this.registerTableChangeEvent();
         this.registerTableHeaderInterceptor();
     }
 

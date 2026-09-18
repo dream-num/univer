@@ -18,7 +18,7 @@ import type { ISortRangeCommandParams } from '@univerjs/sheets-sort';
 import type {
     ITableColorFilterItem,
     ITableConditionFilterItem,
-    ITableManualFilterItem,
+    ITableFilterItem,
 } from '@univerjs/sheets-table';
 import type { MobileDrawerSnap } from '@univerjs/ui';
 import type { ITableFilterPanelInfo } from '../../controllers/sheet-table-component.controller';
@@ -43,7 +43,6 @@ import {
     SheetsTableSortStateEnum,
     SheetTableInsertColumnAtCommand,
     SheetTableRemoveColumnAtCommand,
-    TABLE_FILTER_EMPTY_VALUE,
     TableColumnFilterTypeEnum,
     TableDateCompareTypeEnum,
     TableManager,
@@ -104,10 +103,11 @@ function MobileSheetTableFilterPanelContent(props: IMobileSheetTableFilterPanelC
     const items = tableUiService.getTableFilterItems(unitId, subUnitId, tableId, columnIndex);
     const checkedItems = tableUiService.getTableFilterCheckedItems(unitId, tableId, columnIndex);
     const [checkedItemSet, setCheckedItemSet] = useState<Set<string>>(() => new Set(
-        tableFilter?.filterType === TableColumnFilterTypeEnum.manual
+        tableFilter?.filterType === TableColumnFilterTypeEnum.manual || tableFilter?.filterType === TableColumnFilterTypeEnum.record
             ? checkedItems
-            : items.data.map((item) => item.title)
+            : items.data.map((item) => item.valueKey ?? item.title)
     ));
+    const [selectAllRequested, setSelectAllRequested] = useState(false);
     const [conditionInfo, setConditionInfo] = useState<IConditionInfo>(
         () => getInitConditionInfo(tableFilter) as IConditionInfo
     );
@@ -185,15 +185,16 @@ function MobileSheetTableFilterPanelContent(props: IMobileSheetTableFilterPanelC
     }
 
     async function applyFilter() {
-        let filter: ITableColorFilterItem | ITableConditionFilterItem | ITableManualFilterItem | undefined;
+        let filter: ITableFilterItem | undefined;
         if (detailFilterBy === FilterByEnum.Items) {
-            const emptyLabel = localeService.t<LocaleKey>('sheets-table-ui.condition.empty');
-            const values = items.data
-                .filter((item) => checkedItemSet.has(item.title))
-                .map((item) => item.title === emptyLabel ? TABLE_FILTER_EMPTY_VALUE : item.title);
-            filter = values.length === items.data.length
-                ? undefined
-                : { filterType: TableColumnFilterTypeEnum.manual, values } satisfies ITableManualFilterItem;
+            filter = tableUiService.createItemFilter(
+                unitId,
+                tableId,
+                columnIndex,
+                items,
+                checkedItemSet,
+                selectAllRequested
+            );
         } else if (detailFilterBy === FilterByEnum.Color) {
             const cellFillColors = colors.cellFillColors.filter((item) => item.checked).map((item) => item.color);
             const cellTextColors = colors.cellTextColors.filter((item) => item.checked).map((item) => item.color);
@@ -235,10 +236,11 @@ function MobileSheetTableFilterPanelContent(props: IMobileSheetTableFilterPanelC
     function openDetail(filterBy: FilterByEnum) {
         if (filterBy === FilterByEnum.Items) {
             setCheckedItemSet(new Set(
-                tableFilter?.filterType === TableColumnFilterTypeEnum.manual
+                tableFilter?.filterType === TableColumnFilterTypeEnum.manual || tableFilter?.filterType === TableColumnFilterTypeEnum.record
                     ? checkedItems
-                    : items.data.map((item) => item.title)
+                    : items.data.map((item) => item.valueKey ?? item.title)
             ));
+            setSelectAllRequested(false);
         } else if (filterBy === FilterByEnum.Color) {
             setColors(tableUiService.getTableFilterColors(unitId, subUnitId, tableId, columnIndex));
         } else if (filterBy === FilterByEnum.Condition) {
@@ -316,6 +318,8 @@ function MobileSheetTableFilterPanelContent(props: IMobileSheetTableFilterPanelC
                             items={items}
                             checkedItemSet={checkedItemSet}
                             setCheckedItemSet={setCheckedItemSet}
+                            onSelectAllChange={setSelectAllRequested}
+                            onItemChange={() => setSelectAllRequested(false)}
                         />
                     )}
                     {detailFilterBy === FilterByEnum.Color && (

@@ -54,6 +54,7 @@ function createWorkbookData(): IWorkbookData {
                         0: { f: '=SUM(A1)' },
                         1: { f: '=SUM(A1)' },
                         2: { f: '=SKIP()', x: 1 } as unknown as never,
+                        3: {},
                     },
                 },
             },
@@ -124,6 +125,9 @@ describe('ArrayFormulaCellInterceptorController', () => {
                     2: {
                         2: { v: 7, t: CellValueType.NUMBER },
                     },
+                    3: {
+                        3: { v: '#DIV/0!', t: CellValueType.STRING },
+                    },
                 },
             },
         });
@@ -131,14 +135,22 @@ describe('ArrayFormulaCellInterceptorController', () => {
         expect(getInterceptedCell(worksheet, workbook, 0, 0, interceptorService)).toEqual({
             v: 0,
             t: CellValueType.NUMBER,
+            isInArrayFormulaRange: true,
         });
         expect(getInterceptedCell(worksheet, workbook, 1, 1, interceptorService)).toEqual({
-            v: 1.23,
+            v: 99,
             t: CellValueType.NUMBER,
+            isInArrayFormulaRange: true,
         });
         expect(getInterceptedCell(worksheet, workbook, 2, 2, interceptorService)).toEqual({
             v: 7,
             t: CellValueType.NUMBER,
+            isInArrayFormulaRange: true,
+        });
+        expect(getInterceptedCell(worksheet, workbook, 3, 3, interceptorService)).toEqual({
+            v: '#DIV/0!',
+            t: CellValueType.STRING,
+            isInArrayFormulaRange: true,
         });
         expect(getInterceptedCell(worksheet, workbook, 4, 4, interceptorService)).toBeUndefined();
     });

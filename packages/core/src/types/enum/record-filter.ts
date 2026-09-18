@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
-import { isGroupableDrawingType } from '../drawing-group';
+/** Typed record identities shared by compact Table and external report filters. */
+export enum RecordValueType {
+    Blank = 'blank',
+    String = 'string',
+    Number = 'number',
+    Date = 'date',
+    Boolean = 'boolean',
+    Error = 'error',
+}
 
-describe('drawing group', () => {
-    it('rejects drawing types that cannot join a group', () => {
-        expect(isGroupableDrawingType(DrawingTypeEnum.DRAWING_TABLE)).toBe(false);
-    });
-
-    it('lets Slicer and Timeline join normal drawing groups', () => {
-        expect(isGroupableDrawingType(DrawingTypeEnum.DRAWING_SLICER)).toBe(true);
-        expect(isGroupableDrawingType(DrawingTypeEnum.DRAWING_TIMELINE)).toBe(true);
-    });
-});
+/** Values are wire identifiers; an absent native Table filter represents All. */
+export enum FilterSelectionMode {
+    All = 'all',
+    Include = 'include',
+    Exclude = 'exclude',
+}

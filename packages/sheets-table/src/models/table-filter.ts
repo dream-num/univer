@@ -22,6 +22,7 @@ import { TABLE_FILTER_EMPTY_VALUE } from '../const';
 import { SheetsTableSortStateEnum, TableColumnFilterTypeEnum, TableConditionTypeEnum } from '../types/enum';
 import { getTableFilterState, isColorTableFilter, isConditionFilter } from '../util';
 import { getCellValueWithConditionType, getConditionExecuteFunc, isNumberDynamicFilter } from './filter-util/condition';
+import { cloneTableRecordFilter, compileTableRecordFilter, getTableRecordValue } from './filter-util/record-filter';
 
 export class TableFilters {
     private _tableColumnFilterList: (ITableFilterItem | undefined)[];
@@ -34,6 +35,8 @@ export class TableFilters {
     setColumnFilter(columnIndex: number, filter: ITableFilterItem | undefined) {
         if (!filter) {
             this._tableColumnFilterList[columnIndex] = undefined;
+        } else if (filter.filterType === TableColumnFilterTypeEnum.record) {
+            this._tableColumnFilterList[columnIndex] = cloneTableRecordFilter(filter);
         } else {
             this._tableColumnFilterList[columnIndex] = filter;
         }
@@ -48,7 +51,8 @@ export class TableFilters {
     }
 
     getColumnFilter(columnIndex: number): ITableFilterItem | undefined {
-        return this._tableColumnFilterList[columnIndex];
+        const filter = this._tableColumnFilterList[columnIndex];
+        return filter?.filterType === TableColumnFilterTypeEnum.record ? cloneTableRecordFilter(filter) : filter;
     }
 
     getFilterState(columnIndex: number): SheetsTableButtonStateEnum {
@@ -95,6 +99,15 @@ export class TableFilters {
         if (filter && sheet) {
             const { startRow, endRow, startColumn } = range;
             const column = startColumn + columnIndex;
+            if (filter.filterType === TableColumnFilterTypeEnum.record) {
+                const executeRecordFilter = compileTableRecordFilter(filter);
+                for (let row = startRow; row <= endRow; row++) {
+                    if (!executeRecordFilter(getTableRecordValue(sheet, row, column))) {
+                        filterOutRows.add(row);
+                    }
+                }
+                return;
+            }
             const executeFunc = this.getExecuteFunc(sheet, range, columnIndex, filter);
             for (let row = startRow; row <= endRow; row++) {
                 if (isColorTableFilter(filter)) {
@@ -146,6 +159,8 @@ export class TableFilters {
                 }
                 return valuesSet.has(String(value));
             };
+        } else if (filter.filterType === TableColumnFilterTypeEnum.record) {
+            return compileTableRecordFilter(filter);
         } else if (filter.filterType === TableColumnFilterTypeEnum.condition) {
             const isDynamic = isNumberDynamicFilter(filter.filterInfo.compareType);
             const calculatedOptions = isDynamic ? this._getNumberCalculatedOptions(sheet, range, columnIndex) : undefined;
@@ -172,14 +187,27 @@ export class TableFilters {
     }
 
     toJSON(): ITableFilterJSON {
+        const hasRecordFilter = this._tableColumnFilterList.some((filter) => (
+            filter?.filterType === TableColumnFilterTypeEnum.record
+        ));
         return {
-            tableColumnFilterList: this._tableColumnFilterList,
+            tableColumnFilterList: hasRecordFilter
+                ? this._tableColumnFilterList.map((filter) => (
+                    filter?.filterType === TableColumnFilterTypeEnum.record ? cloneTableRecordFilter(filter) : filter
+                ))
+                : this._tableColumnFilterList,
             tableSortInfo: this._tableSortInfo,
         };
     }
 
     fromJSON(json: ITableFilterJSON) {
-        this._tableColumnFilterList = json.tableColumnFilterList ?? [];
+        const filters = json.tableColumnFilterList ?? [];
+        if (filters.some((filter) => filter?.filterType === TableColumnFilterTypeEnum.record)) {
+            this._tableColumnFilterList = [];
+            filters.forEach((filter, index) => this.setColumnFilter(index, filter));
+        } else {
+            this._tableColumnFilterList = filters;
+        }
         if (json.tableSortInfo) {
             this._tableSortInfo = json.tableSortInfo;
         }

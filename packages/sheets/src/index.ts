@@ -395,6 +395,7 @@ export type { ISetRangeProtectionMutationParams } from './commands/mutations/set
 export { SetRangeThemeMutation } from './commands/mutations/set-range-theme.mutation';
 export type { ISetRangeThemeMutationParams } from './commands/mutations/set-range-theme.mutation';
 export {
+    prepareSetRangeValuesMutation,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
 } from './commands/mutations/set-range-values.mutation';

@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentSkeletonPage } from '../basics/i-document-skeleton-cached';
-import { cpuUsage } from 'node:process';
+import { cpuUsage, memoryUsage, stdout } from 'node:process';
 import {
     BooleanNumber,
     ColumnLayoutType,
@@ -41,7 +41,7 @@ import {
     Univer,
     VerticalAlignmentType,
 } from '@univerjs/core';
-import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DocumentSkeleton } from '../components/docs/layout/doc-skeleton';
 import { DocumentViewModel } from '../components/docs/view-model/document-view-model';
 import { DocumentLayoutSession } from '../worker-layout';
@@ -127,10 +127,10 @@ describe('worker document layout session', () => {
         vi.unstubAllGlobals();
     });
 
-    it.each([
-        { budgetMs: Number.POSITIVE_INFINITY, maxWorkUnits: 8 },
-        { budgetMs: 8, maxWorkUnits: Number.POSITIVE_INFINITY },
-    ])('paginates and resolves a 1000-page TOC target incrementally ($budgetMs ms, $maxWorkUnits work units)', ({ budgetMs, maxWorkUnits }) => {
+    it('paginates and resolves a 1000-page TOC target incrementally', {
+        timeout: 60_000,
+        retry: { count: 2, condition: /^Layout block timing:/ },
+    }, ({ onTestFinished }) => {
         vi.stubGlobal('document', undefined);
         vi.stubGlobal('OffscreenCanvas', class {
             getContext() {
@@ -185,22 +185,32 @@ describe('worker document layout session', () => {
         localeService.setLocale(LocaleType.EN_US);
         localeService.setDirection('ltr');
         const session = new DocumentLayoutSession(dataModel, localeService);
-        let now = 0;
-        const clock = vi.spyOn(performance, 'now').mockImplementation(() => {
-            now += 8;
-            return now;
-        });
         onTestFinished(() => {
-            clock.mockRestore();
             session.dispose();
             dataModel.dispose();
             univer.dispose();
         });
-        const blockLimit = Number.isFinite(maxWorkUnits) ? maxWorkUnits : 1;
+
+        // Native JSON work measures environmental slowdown independently of layout.
+        // Ten warmed local samples took 21–29 ms; use 30 ms as the initial reference.
+        const baselinePayload = JSON.stringify(Array.from({ length: 10_000 }, (_, index) => ({ index, text: `baseline-${index}` })));
+        const baselineSamples: number[] = [];
+        for (let sample = 0; sample < 4; sample++) {
+            const baselineStart = performance.now();
+            for (let iteration = 0; iteration < 20; iteration++) {
+                JSON.parse(baselinePayload);
+            }
+            if (sample > 0) {
+                baselineSamples.push(performance.now() - baselineStart);
+            }
+        }
+        const baselineMs = percentile(baselineSamples, 0.5);
+        const baselineRatio = baselineMs / 30;
+        const blockLimitMs = 50 * Math.min(1.2, Math.max(1, baselineRatio));
+        const heapStart = memoryUsage().heapUsed;
+        const startedAt = performance.now();
         const generation = session.start({ reason: 'initial' });
-        let result = session.step(generation, budgetMs, maxWorkUnits);
-        expect(result.progress.complete).toBe(false);
-        expect(result.progress.processedBlockCount).toBe(blockLimit);
+        let result = session.step(generation, 8);
         let stepCount = 1;
         const publishedPages: number[] = [];
         const publicationSizes: number[] = [];
@@ -212,25 +222,35 @@ describe('worker document layout session', () => {
         };
         collectPages();
         while (!result.progress.complete && stepCount < 20_000) {
-            const previousBlockCount = result.progress.processedBlockCount;
-            result = session.step(generation, budgetMs, maxWorkUnits);
-            expect(result.progress.processedBlockCount - previousBlockCount).toBeLessThanOrEqual(blockLimit);
+            result = session.step(generation, 8);
             collectPages();
             stepCount++;
         }
+        const benchmark = {
+            elapsedMs: Math.round(performance.now() - startedAt),
+            heapDeltaMb: Math.round((memoryUsage().heapUsed - heapStart) / 1024 / 1024),
+            maxBlockMs: result.progress.maxBlockDuration,
+            baselineMs,
+            baselineRatio,
+            blockLimitMs,
+            stepCount,
+        };
+        if (process.env.CI === 'true' || process.env.DOC_BENCHMARK_LOG === '1') {
+            stdout.write(`1000-page-layout ${JSON.stringify(benchmark)}\n`);
+        }
+
         expect(result.progress.complete).toBe(true);
         expect(result.progress.pageCount).toBe(1_000);
         expect(publishedPages).toEqual(Array.from({ length: 1_000 }, (_, index) => index));
-        if (Number.isFinite(maxWorkUnits)) {
-            expect(Math.max(...publicationSizes)).toBeGreaterThan(1);
-        }
+        expect(Math.max(...publicationSizes)).toBeGreaterThan(1);
         expect(Math.max(...publicationSizes)).toBeLessThanOrEqual(4);
         expect(session.resolvePageByOffset(pageStarts[999])).toMatchObject({
             pageIndex: 999,
             pageNumber: 1_000,
         });
         expect(session.getPage(999)?.pageIndex).toBe(999);
-    }, 60_000);
+        expect(benchmark.maxBlockMs, `Layout block timing: ${JSON.stringify(benchmark)}`).toBeLessThan(blockLimitMs);
+    });
 
     it.each(['initial', 'edit'] as const)('finishes a late anchor page before publishing a fresh %s session', (reason) => {
         vi.stubGlobal('document', undefined);

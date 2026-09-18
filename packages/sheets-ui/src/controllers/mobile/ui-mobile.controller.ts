@@ -116,7 +116,7 @@ import {
     MOBILE_FX_EDITOR_EXPANDED,
     MOBILE_KEYBOARD_VISIBLE,
 } from '../../consts/mobile-context';
-import { menuSchema } from '../../menu/schema';
+import { mobileMenuSchema } from '../../menu/mobile-schema';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { MobileSheetActionPanel } from '../../views/mobile/action-panel/MobileSheetActionPanel';
 import { MobileFormulaBar } from '../../views/mobile/formula-bar/MobileFormulaBar';
@@ -307,7 +307,7 @@ export class SheetUIMobileController extends Disposable {
     }
 
     private _initMenus(): void {
-        this._menuManagerService.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(mobileMenuSchema);
     }
 
     private _initWorkbenchParts(): void {
@@ -323,11 +323,18 @@ export class SheetUIMobileController extends Disposable {
     private _initFocusHandler(): void {
         this.disposeWithMe(
             this._layoutService.registerFocusHandler(UniverInstanceType.UNIVER_SHEET, (_unitId: string) => {
-                if (this._editorBridgeService.isVisible().visible) this._focusCellEditorInput();
+                if (
+                    this._editorBridgeService.isVisible().visible &&
+                    !this._contextService.getContextValue(MOBILE_FORMULA_FUNCTION_PANEL_OPEN)
+                ) {
+                    this._focusCellEditorInput();
+                }
             })
         );
         this.disposeWithMe(this._editorBridgeService.visible$.subscribe(({ visible }) => {
-            if (visible) this._focusCellEditorInput();
+            if (visible && !this._contextService.getContextValue(MOBILE_FORMULA_FUNCTION_PANEL_OPEN)) {
+                this._focusCellEditorInput();
+            }
         }));
     }
 

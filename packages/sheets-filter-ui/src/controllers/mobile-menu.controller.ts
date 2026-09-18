@@ -17,7 +17,7 @@
 import { Disposable, ICommandService } from '@univerjs/core';
 import { SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter';
 import { IMenuManagerService } from '@univerjs/ui';
-import { menuSchema } from '../menu/schema';
+import { mobileMenuSchema } from '../menu/mobile-schema';
 
 export class SheetsFilterMobileMenuController extends Disposable {
     constructor(
@@ -27,6 +27,6 @@ export class SheetsFilterMobileMenuController extends Disposable {
         super();
 
         this.disposeWithMe(commandService.registerCommand(SmartToggleSheetsFilterCommand));
-        menuManagerService.mergeMenu(menuSchema);
+        menuManagerService.mergeMenu(mobileMenuSchema);
     }
 }

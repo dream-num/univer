@@ -15,8 +15,15 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { conditionalFormattingRuleMenuSchema } from './schema';
+import { RibbonDataGroup } from '@univerjs/ui';
+import { OpenConditionalFormattingOperator } from '../commands/operations/open-conditional-formatting-panel';
+import { FactoryManageConditionalFormattingRule } from './manage-rule';
 
 export const mobileMenuSchema: MenuSchemaType = {
-    ...conditionalFormattingRuleMenuSchema,
+    [RibbonDataGroup.RULES]: {
+        [OpenConditionalFormattingOperator.id]: {
+            order: 1,
+            menuItemFactory: FactoryManageConditionalFormattingRule,
+        },
+    },
 };

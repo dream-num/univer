@@ -28,7 +28,7 @@ import {
     IContextService,
     LocaleService,
 } from '@univerjs/core';
-import { clsx, resetButtonClassName } from '@univerjs/design';
+import { clsx, resetButtonClassName, useMobileKeyboardViewportLayout } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { KeyboardIcon, MenuIcon, MoreLeftIcon } from '@univerjs/icons';
@@ -40,14 +40,13 @@ import {
     IMenuManagerService,
     IRibbonService,
     MobileDrawer,
-    MobileKeyboardInsetContext,
     MobileMenu,
     RibbonPosition,
     RibbonStartGroup,
     useDependency,
     useObservable,
 } from '@univerjs/ui';
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { map, startWith } from 'rxjs';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
@@ -156,7 +155,6 @@ export function MobileSheetActionPanel() {
 }
 
 function MobileSheetActionPanelContent() {
-    const keyboardInset = useContext(MobileKeyboardInsetContext);
     const workbook = useActiveWorkbook();
     const commandService = useDependency(ICommandService);
     const contextService = useDependency(IContextService);
@@ -204,8 +202,10 @@ function MobileSheetActionPanelContent() {
     const [styleViewStack, setStyleViewStack] = useState<MobileStyleView[]>([]);
     const [menuNavigation, setMenuNavigation] = useState<IMobileMenuNavigation | null>(null);
     const [recentColors, setRecentColors] = useState<string[]>([]);
+    const editingMenuRef = useRef<HTMLButtonElement>(null);
     const panelRef = useRef<HTMLElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
+    const keyboardLayout = useMobileKeyboardViewportLayout(editingMenuRef);
     const currentStyleView = styleViewStack[styleViewStack.length - 1] ?? null;
     const nestedTitle = currentStyleView?.title ?? menuNavigation?.title;
 
@@ -379,6 +379,7 @@ function MobileSheetActionPanelContent() {
     if (editing) {
         return (
             <button
+                ref={editingMenuRef}
                 type="button"
                 aria-label={localeService.t<LocaleKey>('sheets-ui.mobile.openTools')}
                 className={clsx(resetButtonClassName, `
@@ -388,7 +389,7 @@ function MobileSheetActionPanelContent() {
                   active:univer-bg-primary-700
                 `)}
                 style={{
-                    bottom: keyboardInset + getMobileEditingMenuBottomOffset(formulaOperatorsVisible),
+                    bottom: (keyboardLayout?.bottom ?? 0) + getMobileEditingMenuBottomOffset(formulaOperatorsVisible),
                 }}
                 onClick={() => openTools().catch(() => undefined)}
             >

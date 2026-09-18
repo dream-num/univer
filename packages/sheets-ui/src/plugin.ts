@@ -76,6 +76,7 @@ import {
 } from './controllers/permission/sheet-permission-render.controller';
 import { ClipboardRenderController } from './controllers/render-controllers/clipboard.render-controller';
 import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
+import { DesktopCellEditRenderController } from './controllers/render-controllers/desktop-cell-edit.render-controller';
 import { EditorBridgeRenderController } from './controllers/render-controllers/editor-bridge.render-controller';
 import { FormatPainterRenderController } from './controllers/render-controllers/format-painter.render-controller';
 import { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
@@ -302,6 +303,7 @@ export class UniverSheetsUIPlugin extends Plugin {
 
             // editor
             [EditorBridgeRenderController],
+            [DesktopCellEditRenderController],
 
             // permission
             [SheetPermissionInterceptorCanvasRenderController],

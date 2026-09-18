@@ -25,7 +25,7 @@ import {
     IPermissionService,
     LocaleService,
 } from '@univerjs/core';
-import { borderBottomClassName, clsx } from '@univerjs/design';
+import { borderBottomClassName, clsx, useMobileKeyboardViewportLayout } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { DownIcon } from '@univerjs/icons';
@@ -44,13 +44,12 @@ import {
     ComponentContainer,
     ComponentManager,
     KeyCode,
-    MobileKeyboardInsetContext,
     useComponentsOfPart,
     useConfigValue,
     useDependency,
     useObservable,
 } from '@univerjs/ui';
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { EMPTY, map, merge, of, switchMap } from 'rxjs';
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../../common/keys';
@@ -110,7 +109,6 @@ export function MobileFormulaBar() {
 }
 
 function MobileFormulaBarEditor() {
-    const keyboardInset = useContext(MobileKeyboardInsetContext);
     const commandService = useDependency(ICommandService);
     const contextService = useDependency(IContextService);
     const editorBridgeService = useDependency(IEditorBridgeService);
@@ -142,6 +140,7 @@ function MobileFormulaBarEditor() {
     const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
     const disableEdit = config?.disableEdit;
     const editorRef = useRef<HTMLDivElement>(null);
+    const formulaBarRef = useRef<HTMLDivElement>(null);
     const shouldSkipFocusRef = useRef(false);
     const [expanded, setExpanded] = useState(false);
     const [mobileFxRequest, setMobileFxRequest] = useState(0);
@@ -149,6 +148,7 @@ function MobileFormulaBarEditor() {
     const [mobileFormulaActive, setMobileFormulaActive] = useState(false);
     const [mobileOperatorRequest, setMobileOperatorRequest] = useState({ id: 0, value: '' });
     const mobileFormulaOperatorsVisible = mobileFormulaActive && !expanded;
+    const keyboardLayout = useMobileKeyboardViewportLayout(formulaBarRef);
 
     const disableInfo = useObservable(
         () => {
@@ -266,6 +266,14 @@ function MobileFormulaBarEditor() {
     async function handleConfirmBtnClick() {
         const submitted = await commandService.executeCommand(MOBILE_FORMULA_BAR_SUBMIT_COMMAND_ID);
         if (submitted) {
+            const visibleState = editorBridgeService.isVisible();
+            if (visibleState.visible) {
+                await commandService.executeCommand(SetCellEditVisibleOperation.id, {
+                    ...visibleState,
+                    visible: false,
+                    eventType: DeviceInputEventType.PointerDown,
+                });
+            }
             contextService.setContextValue(MOBILE_FX_EDITOR_EXPANDED, false);
             setExpanded(false);
         }
@@ -277,6 +285,7 @@ function MobileFormulaBarEditor() {
         if (formulaText.startsWith('=')) {
             setMobileFxRequest((value) => value + 1);
             setMobileFunctionPanelRequest((value) => value + 1);
+            return;
         }
         formulaEditorManagerService.handleFxBtnClick(true);
     }
@@ -333,6 +342,7 @@ function MobileFormulaBarEditor() {
 
     return (
         <div
+            ref={formulaBarRef}
             data-u-comp="mobile-formula-bar"
             data-expanded={expanded}
             className={clsx(`
@@ -340,7 +350,7 @@ function MobileFormulaBarEditor() {
               dark:!univer-bg-gray-800
             `, expanded ? 'univer-fixed univer-top-0 univer-z-50' : 'univer-absolute')}
             style={{
-                bottom: keyboardInset,
+                bottom: keyboardLayout?.bottom ?? 0,
                 paddingBottom: expanded ? undefined : 'env(safe-area-inset-bottom, 0px)',
                 paddingTop: expanded ? 'env(safe-area-inset-top, 0px)' : undefined,
             }}

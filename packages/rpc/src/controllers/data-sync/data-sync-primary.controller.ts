@@ -19,6 +19,7 @@ import type { IRemoteSyncMutationOptions } from '../../services/remote-instance/
 import {
     CommandType,
     ICommandService,
+    ILogService,
     Inject,
     Injector,
     IUniverInstanceService,
@@ -34,7 +35,7 @@ import {
     RemoteSyncServiceName,
 } from '../../services/remote-instance/remote-instance.service';
 import { IRPCChannelService } from '../../services/rpc/channel.service';
-import { fromModule, toModule } from '../../services/rpc/rpc.service';
+import { ChannelClientDisposedError, fromModule, toModule } from '../../services/rpc/rpc.service';
 
 /**
  * This controller is responsible for syncing data from the primary thread to
@@ -58,7 +59,8 @@ export class DataSyncPrimaryController extends RxDisposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRPCChannelService private readonly _rpcChannelService: IRPCChannelService,
-        @IRemoteSyncService private readonly _remoteSyncService: IRemoteSyncService
+        @IRemoteSyncService private readonly _remoteSyncService: IRemoteSyncService,
+        @ILogService private readonly _logService: ILogService
     ) {
         super();
 
@@ -80,11 +82,11 @@ export class DataSyncPrimaryController extends RxDisposable {
         const unit = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
             ?? this._univerInstanceService.getUnit<BaseDataModel>(unitId, UniverInstanceType.UNIVER_BASE);
         if (!alreadySyncing && unit) {
-            this._remoteInstanceService.createInstance({
+            this._handleRemoteRequest(this._remoteInstanceService.createInstance({
                 unitID: unit.getUnitId(),
                 type: unit.type,
                 snapshot: unit.getSnapshot(),
-            });
+            }), 'create the remote unit');
         }
 
         return toDisposable(() => {
@@ -92,9 +94,9 @@ export class DataSyncPrimaryController extends RxDisposable {
                 this._syncingUnits.delete(unitId);
             }
             if (!alreadySyncing && unit) {
-                this._remoteInstanceService.disposeInstance({
+                this._handleRemoteRequest(this._remoteInstanceService.disposeInstance({
                     unitID: unit.getUnitId(),
-                });
+                }), 'dispose the remote unit');
             }
         });
     }
@@ -135,6 +137,7 @@ export class DataSyncPrimaryController extends RxDisposable {
         ]);
         this._remoteInstanceService = this._injector.get(IRemoteInstanceService);
         this._remoteReady = this._remoteInstanceService.whenReady();
+        this._handleRemoteRequest(this._remoteReady, 'initialize the remote instance service');
     }
 
     private _init(): void {
@@ -143,19 +146,19 @@ export class DataSyncPrimaryController extends RxDisposable {
             this._syncingUnits.add(sheet.getUnitId());
 
             // If a sheet is created, it should sync the data to the worker thread.
-            this._remoteInstanceService.createInstance({
+            this._handleRemoteRequest(this._remoteInstanceService.createInstance({
                 unitID: sheet.getUnitId(),
                 type: UniverInstanceType.UNIVER_SHEET,
                 snapshot: sheet.getSnapshot(),
-            });
+            }), 'create the remote workbook');
         });
 
         this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => {
             this._syncingUnits.delete(workbook.getUnitId());
             // If a sheet is disposed, it should sync the data to the worker thread.
-            this._remoteInstanceService.disposeInstance({
+            this._handleRemoteRequest(this._remoteInstanceService.disposeInstance({
                 unitID: workbook.getUnitId(),
-            });
+            }), 'dispose the remote workbook');
         });
 
         // Mutations executed on the main thread should be synced to the worker thread.
@@ -170,8 +173,21 @@ export class DataSyncPrimaryController extends RxDisposable {
                 !(options as IRemoteSyncMutationOptions)?.fromSync &&
                 // do not sync mutations those are not meant to be synced
                 this._syncingMutations.has(id)) {
-                void this.syncMutation(commandInfo as IMutationInfo, options);
+                this._handleRemoteRequest(
+                    this.syncMutation(commandInfo as IMutationInfo, options),
+                    `sync mutation ${id}`
+                );
             }
         }));
+    }
+
+    private _handleRemoteRequest(request: Promise<unknown>, operation: string): void {
+        request.catch((error: unknown) => {
+            if (error instanceof ChannelClientDisposedError) {
+                return;
+            }
+
+            this._logService.error(`[DataSyncPrimaryController]: Failed to ${operation}.`, error);
+        });
     }
 }

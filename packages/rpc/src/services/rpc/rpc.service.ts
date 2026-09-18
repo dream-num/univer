@@ -124,6 +124,15 @@ export interface IChannelServer {
     registerChannel<T extends IChannel>(channelName: string, channel: T): void;
 }
 
+const CHANNEL_CLIENT_DISPOSED_ERROR_MESSAGE = '[ChannelClient]: client is disposed!';
+
+export class ChannelClientDisposedError extends Error {
+    constructor() {
+        super(CHANNEL_CLIENT_DISPOSED_ERROR_MESSAGE);
+        this.name = 'ChannelClientDisposedError';
+    }
+}
+
 enum RequestType {
     /**
      * In Univer, we cannot make sure that when IPCServer constructs, the process (or thread)
@@ -204,7 +213,7 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
             return;
         }
 
-        const error = new Error('[ChannelClient]: client is disposed!');
+        const error = new ChannelClientDisposedError();
         this._initialized.error(error);
         for (const responseHandler of this._pendingRequests.values()) {
             responseHandler.dispose(error);
@@ -217,14 +226,14 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
         return {
             call: (method: string, args?: any) => {
                 if (this._disposed) {
-                    return Promise.reject(new Error('[ChannelClient]: client is disposed!'));
+                    return Promise.reject(new ChannelClientDisposedError());
                 }
 
                 return this._remoteCall(channelName, method, args);
             },
             subscribe: (eventMethod: string, args?: any) => {
                 if (this._disposed) {
-                    throw new Error('[ChannelClient]: client is disposed!');
+                    throw new ChannelClientDisposedError();
                 }
 
                 return this._remoteSubscribe(channelName, eventMethod, args);

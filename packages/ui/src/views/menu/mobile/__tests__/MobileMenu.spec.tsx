@@ -188,6 +188,31 @@ describe('MobileMenu', () => {
         expect(onOptionSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'image' }));
     });
 
+    it('uses an explicit mobile list layout even when the desktop quick layout is present', () => {
+        renderWithDependencies([{
+            key: 'quick',
+            order: 0,
+            quickLayout: 'tile',
+            mobileLayout: 'list',
+            children: [{
+                key: 'copy',
+                order: 0,
+                item: { id: 'copy', type: MenuItemType.BUTTON, title: 'Copy' },
+            }, {
+                key: 'cut',
+                order: 1,
+                item: { id: 'cut', type: MenuItemType.BUTTON, title: 'Cut' },
+            }],
+        }], vi.fn());
+
+        const copy = screen.getByRole('button', { name: 'Copy' });
+        const cut = screen.getByRole('button', { name: 'Cut' });
+        expect(copy.className).toContain('univer-min-h-12');
+        expect(cut.className).toContain('univer-min-h-12');
+        expect(copy.parentElement?.className).toContain('univer-grid');
+        expect(copy.parentElement?.getAttribute('style')).toBeNull();
+    });
+
     it('renders grouped context menu items as a horizontal text-only bar', () => {
         const onOptionSelect = vi.fn();
         renderWithDependencies([{

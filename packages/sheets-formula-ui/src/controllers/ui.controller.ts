@@ -18,14 +18,13 @@ import type { Dependency } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, Injector, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsUIPart } from '@univerjs/sheets-ui';
-import { connectInjector, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { connectInjector, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { SheetCopyFormulaOnlyCommand, SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
 import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
-import { menuSchema } from '../menu/schema';
 import { FormulaProgressBar } from '../views/formula-progress/FormulaProgress';
 import { FormulaEditorShowController } from './formula-editor-show.controller';
 import { ChangeRefToAbsoluteShortcut } from './shortcuts/prompt.shortcut';
@@ -34,7 +33,6 @@ import { QuickSumShortcut } from './shortcuts/quick-sum.shortcut';
 export class FormulaUIController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
-        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @IUIPartsService private readonly _uiPartsService: IUIPartsService,
@@ -47,14 +45,9 @@ export class FormulaUIController extends Disposable {
 
     private _initialize(): void {
         this._registerCommands();
-        this._registerMenus();
         this._registerShortcuts();
         this._registerComponents();
         this._registerRenderModules();
-    }
-
-    private _registerMenus(): void {
-        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _registerCommands(): void {

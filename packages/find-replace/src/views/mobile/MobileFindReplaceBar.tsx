@@ -17,10 +17,10 @@
 import type { ReactNode } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { clsx, Input, resetButtonClassName } from '@univerjs/design';
+import { clsx, Input, resetButtonClassName, useMobileKeyboardViewportLayout } from '@univerjs/design';
 import { ArrowDownIcon, ArrowUpIcon, CloseIcon, ConfigureTabIcon, SearchIcon } from '@univerjs/icons';
-import { IDialogService, MobileKeyboardInsetContext, useDependency, useObservable } from '@univerjs/ui';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { IDialogService, useDependency, useObservable } from '@univerjs/ui';
+import { useEffect, useRef, useState } from 'react';
 import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../../commands/commands/replace.command';
 import {
     CloseFindDialogOperation,
@@ -47,7 +47,6 @@ export function MobileFindReplaceBar() {
 }
 
 function MobileFindReplaceBarContent() {
-    const keyboardInset = useContext(MobileKeyboardInsetContext);
     const commandService = useDependency(ICommandService);
     const dialogService = useDependency(IDialogService);
     const findReplaceService = useDependency(IFindReplaceService);
@@ -57,9 +56,11 @@ function MobileFindReplaceBarContent() {
     const replaceables = useObservable(findReplaceService.replaceables$, [], true);
     const [findValue, setFindValue] = useState(() =>
         state.replaceRevealed ? state.inputtingFindString : state.findString);
+    const barRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const suppressNextFocusRef = useRef(false);
+    const keyboardLayout = useMobileKeyboardViewportLayout(barRef);
 
     useEffect(() => {
         const frame = requestAnimationFrame(() => inputRef.current?.focus());
@@ -159,6 +160,7 @@ function MobileFindReplaceBarContent() {
 
     return (
         <div
+            ref={barRef}
             data-u-comp="mobile-find-replace-bar"
             className="
               univer-fixed univer-inset-x-0 univer-z-40 univer-grid univer-gap-2 univer-bg-gray-0 univer-px-2
@@ -166,7 +168,7 @@ function MobileFindReplaceBarContent() {
               dark:!univer-bg-gray-800
             "
             style={{
-                bottom: keyboardInset,
+                bottom: keyboardLayout?.bottom ?? 0,
                 paddingBottom: 'calc(6px + env(safe-area-inset-bottom, 0px))',
             }}
         >

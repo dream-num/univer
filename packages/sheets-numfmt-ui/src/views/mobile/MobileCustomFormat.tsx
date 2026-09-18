@@ -16,8 +16,7 @@
 
 import type { LocaleKey } from '../../locale/types';
 import { LocaleService } from '@univerjs/core';
-import { Button, clsx, Input, MobileActionRow, MobileActionRowGroup, scrollbarClassName } from '@univerjs/design';
-import { CheckMarkIcon } from '@univerjs/icons';
+import { Button, Input, MobileActionRowGroup, MobileSelect } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
 
@@ -45,39 +44,22 @@ export function MobileCustomFormat(props: IMobileCustomFormatProps) {
                 placeholder={title}
                 onChange={setPattern}
             />
+            <MobileSelect
+                className="
+                  univer-w-full univer-shrink-0
+                  [&>div]:univer-font-mono
+                "
+                value={pattern || title}
+                options={patterns.map((item) => ({ label: item, value: item }))}
+                onChange={setPattern}
+            />
             <div
-                data-u-comp="mobile-custom-format-scroller"
-                className={clsx('univer-min-h-0 univer-flex-1 univer-overflow-y-auto', scrollbarClassName)}
+                className="
+                  univer-flex-1 univer-px-1 univer-text-sm univer-text-gray-600
+                  dark:!univer-text-gray-200
+                "
             >
-                <div
-                    className="
-                      univer-overflow-hidden univer-rounded-xl univer-bg-gray-0
-                      dark:!univer-bg-gray-800
-                    "
-                >
-                    {patterns.map((item, index) => (
-                        <MobileActionRow
-                            key={item}
-                            aria-label={item}
-                            aria-pressed={pattern === item}
-                            title={<span className="univer-break-all univer-font-mono univer-text-sm">{item}</span>}
-                            trailing={pattern === item
-                                ? <CheckMarkIcon className="univer-shrink-0 univer-text-primary-600" />
-                                : undefined}
-                            bordered={index !== patterns.length - 1}
-                            className="!univer-rounded-none !univer-font-normal"
-                            onClick={() => setPattern(item)}
-                        />
-                    ))}
-                </div>
-                <div
-                    className="
-                      univer-mt-4 univer-px-1 univer-text-sm univer-text-gray-600
-                      dark:!univer-text-gray-200
-                    "
-                >
-                    {localeService.t<LocaleKey>('sheets-numfmt-ui.customFormatDes')}
-                </div>
+                {localeService.t<LocaleKey>('sheets-numfmt-ui.customFormatDes')}
             </div>
             <MobileActionRowGroup className="univer-shrink-0">
                 <Button variant="primary" disabled={!pattern.trim()} onClick={() => onConfirm(pattern.trim())}>

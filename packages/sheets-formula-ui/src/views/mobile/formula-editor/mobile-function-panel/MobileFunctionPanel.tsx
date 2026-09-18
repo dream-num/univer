@@ -20,7 +20,7 @@ import { LocaleService } from '@univerjs/core';
 import { clsx, scrollbarClassName } from '@univerjs/design';
 import { FunctionType, IDescriptionService } from '@univerjs/engine-formula';
 import { useDependency } from '@univerjs/ui';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { getFunctionTypeValues } from '../../../../services/utils';
 
 const RECENT_FUNCTIONS_KEY = 'univer-mobile-recent-formula-functions';
@@ -69,12 +69,22 @@ export function MobileFunctionPanel(props: {
     const [category, setCategory] = useState<MobileFunctionCategory>('recommended');
     const [details, setDetails] = useState<IFunctionInfo | null>(null);
     const [recentVersion, setRecentVersion] = useState(0);
+    const panelRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
         if (!open) return;
         setQuery('');
         setCategory('recommended');
         setDetails(null);
+    }, [open]);
+
+    useLayoutEffect(() => {
+        if (!open) return undefined;
+
+        const focusPanel = () => panelRef.current?.focus({ preventScroll: true });
+        focusPanel();
+        const focusFrame = requestAnimationFrame(focusPanel);
+        return () => cancelAnimationFrame(focusFrame);
     }, [open]);
 
     const categories = useMemo(() => {
@@ -128,8 +138,10 @@ export function MobileFunctionPanel(props: {
             onPointerDown={(event) => event.stopPropagation()}
         >
             <section
+                ref={panelRef}
                 role="dialog"
                 aria-label={copy.title}
+                tabIndex={-1}
                 className="
                   univer-absolute univer-inset-x-0 univer-bottom-0 univer-flex univer-h-[80vh] univer-flex-col
                   univer-overflow-hidden univer-rounded-t-2xl univer-bg-gray-0 univer-shadow-lg

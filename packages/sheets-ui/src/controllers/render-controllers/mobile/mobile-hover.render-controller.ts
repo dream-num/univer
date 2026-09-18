@@ -37,6 +37,7 @@ import { SheetScrollManagerService } from '../../../services/scroll-manager.serv
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 
 const TAP_MOVE_THRESHOLD = 10;
+const DOUBLE_TAP_DELAY = 500;
 
 interface IMobileTapState {
     offsetX: number;
@@ -57,6 +58,10 @@ function isPrimaryPointer(event: MobilePointerEvent): boolean {
 export class MobileHoverRenderController extends Disposable implements IRenderModule {
     private _active = false;
     private _tapState: Nullable<IMobileTapState> = null;
+    private _lastCompletedTap: Nullable<IMobileTapState> = null;
+    private _completedTapTimer: Nullable<ReturnType<typeof setTimeout>> = null;
+    private _suppressEngineDoubleClick = false;
+    private _suppressEngineDoubleClickTimer: Nullable<ReturnType<typeof setTimeout>> = null;
 
     get active(): boolean {
         return this._active;
@@ -75,10 +80,17 @@ export class MobileHoverRenderController extends Disposable implements IRenderMo
         this._initScrollEvent();
     }
 
+    override dispose(): void {
+        this._resetTapSequence();
+        this._clearEngineDoubleClickSuppression();
+        super.dispose();
+    }
+
     private _initPointerEvent(): void {
         const disposeSet = new DisposableCollection();
         const handleSkeletonChange = (skeletonParam: Nullable<ISheetSkeletonManagerParam>) => {
             disposeSet.dispose();
+            this._resetTapSequence();
 
             if (!skeletonParam) {
                 return;
@@ -102,6 +114,7 @@ export class MobileHoverRenderController extends Disposable implements IRenderMo
 
         handleSkeletonChange(this._sheetSkeletonManagerService.getCurrentParam());
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe(handleSkeletonChange));
+        this.disposeWithMe(this._context.scene.onPointerCancel$.subscribeEvent(() => this._resetTapSequence()));
         this.disposeWithMe(disposeSet);
     }
 
@@ -122,10 +135,22 @@ export class MobileHoverRenderController extends Disposable implements IRenderMo
             this._hoverManagerService.triggerPointerUp(unitId, event);
             if (this._finishTap(event)) {
                 this._hoverManagerService.triggerClick(unitId, event.offsetX, event.offsetY);
+                this._completeTap(unitId, event);
             }
         }));
-        disposeSet.add(mainComponent.onDblclick$.subscribeEvent((event) => {
-            this._hoverManagerService.triggerDbClick(unitId, event.offsetX, event.offsetY);
+        disposeSet.add(mainComponent.onDblclick$.subscribeEvent({
+            next: ([event, state]) => {
+                state.stopPropagation();
+                state.skipNextObservers = true;
+                if (this._suppressEngineDoubleClick) {
+                    this._clearEngineDoubleClickSuppression();
+                    return;
+                }
+
+                this._resetCompletedTap();
+                this._hoverManagerService.triggerDbClick(unitId, event.offsetX, event.offsetY);
+            },
+            priority: -1,
         }));
         disposeSet.add(mainComponent.onPointerLeave$.subscribeEvent(() => {
             this._active = false;
@@ -179,7 +204,7 @@ export class MobileHoverRenderController extends Disposable implements IRenderMo
             this._contextService.getContextValue(MOBILE_PINCH_ZOOMING) ||
             this._contextService.getContextValue(MOBILE_EXPANDING_SELECTION)
         ) {
-            this._tapState = null;
+            this._resetTapSequence();
             return;
         }
 
@@ -200,7 +225,7 @@ export class MobileHoverRenderController extends Disposable implements IRenderMo
             Math.abs(event.offsetX - this._tapState.offsetX) > TAP_MOVE_THRESHOLD ||
             Math.abs(event.offsetY - this._tapState.offsetY) > TAP_MOVE_THRESHOLD
         ) {
-            this._tapState = null;
+            this._resetTapSequence();
         }
     }
 
@@ -209,19 +234,72 @@ export class MobileHoverRenderController extends Disposable implements IRenderMo
         this._tapState = null;
         const pointerId = getPointerId(event);
         if (!tapState || (pointerId != null && pointerId !== tapState.pointerId)) {
+            this._resetCompletedTap();
             return false;
         }
 
-        return Math.abs(event.offsetX - tapState.offsetX) <= TAP_MOVE_THRESHOLD
+        const completed = Math.abs(event.offsetX - tapState.offsetX) <= TAP_MOVE_THRESHOLD
             && Math.abs(event.offsetY - tapState.offsetY) <= TAP_MOVE_THRESHOLD
             && !this._contextService.getContextValue(MOBILE_PINCH_ZOOMING)
             && !this._contextService.getContextValue(MOBILE_EXPANDING_SELECTION)
             && !this._contextService.getContextValue(MOBILE_TRIGGER_CONTEXT_MENU);
+        if (!completed) {
+            this._resetCompletedTap();
+        }
+
+        return completed;
+    }
+
+    private _completeTap(unitId: string, event: MobilePointerEvent): void {
+        const lastCompletedTap = this._lastCompletedTap;
+        if (
+            lastCompletedTap &&
+            Math.abs(event.offsetX - lastCompletedTap.offsetX) <= TAP_MOVE_THRESHOLD &&
+            Math.abs(event.offsetY - lastCompletedTap.offsetY) <= TAP_MOVE_THRESHOLD
+        ) {
+            this._resetCompletedTap();
+            this._suppressEngineDoubleClick = true;
+            this._suppressEngineDoubleClickTimer = setTimeout(() => {
+                this._suppressEngineDoubleClick = false;
+                this._suppressEngineDoubleClickTimer = null;
+            });
+            this._hoverManagerService.triggerDbClick(unitId, event.offsetX, event.offsetY);
+            return;
+        }
+
+        this._resetCompletedTap();
+        this._lastCompletedTap = {
+            offsetX: event.offsetX,
+            offsetY: event.offsetY,
+            pointerId: getPointerId(event),
+        };
+        this._completedTapTimer = setTimeout(() => this._resetCompletedTap(), DOUBLE_TAP_DELAY);
+    }
+
+    private _resetCompletedTap(): void {
+        if (this._completedTapTimer != null) {
+            clearTimeout(this._completedTapTimer);
+            this._completedTapTimer = null;
+        }
+        this._lastCompletedTap = null;
+    }
+
+    private _resetTapSequence(): void {
+        this._tapState = null;
+        this._resetCompletedTap();
+    }
+
+    private _clearEngineDoubleClickSuppression(): void {
+        if (this._suppressEngineDoubleClickTimer != null) {
+            clearTimeout(this._suppressEngineDoubleClickTimer);
+            this._suppressEngineDoubleClickTimer = null;
+        }
+        this._suppressEngineDoubleClick = false;
     }
 
     private _initScrollEvent(): void {
         this.disposeWithMe(this._scrollManagerService.validViewportScrollInfo$.subscribe(() => {
-            this._tapState = null;
+            this._resetTapSequence();
             this._hoverManagerService.triggerScroll();
         }));
     }

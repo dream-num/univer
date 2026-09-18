@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
-import { IMenuManagerService, IShortcutService } from '@univerjs/ui';
+import { IShortcutService } from '@univerjs/ui';
 import {
     CloseHyperLinkPopupOperation,
     InsertHyperLinkOperation,
@@ -23,17 +23,14 @@ import {
     OpenHyperLinkEditPanelOperation,
 } from '../commands/operations/popup.operations';
 import { InsertLinkShortcut } from '../menu/menu';
-import { menuSchema } from '../menu/schema';
 
 export class SheetsHyperLinkUIController extends Disposable {
     constructor(
-        @ICommandService private _commandService: ICommandService,
-        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
-        @Inject(IShortcutService) private _shortcutService: IShortcutService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(IShortcutService) private readonly _shortcutService: IShortcutService
     ) {
         super();
         this._initCommands();
-        this._initMenus();
         this._initShortCut();
     }
 
@@ -44,15 +41,11 @@ export class SheetsHyperLinkUIController extends Disposable {
             InsertHyperLinkOperation,
             InsertHyperLinkToolbarOperation,
         ].forEach((command) => {
-            this._commandService.registerCommand(command);
+            this.disposeWithMe(this._commandService.registerCommand(command));
         });
     }
 
-    private _initMenus() {
-        this._menuManagerService.mergeMenu(menuSchema);
-    }
-
     private _initShortCut() {
-        this._shortcutService.registerShortcut(InsertLinkShortcut);
+        this.disposeWithMe(this._shortcutService.registerShortcut(InsertLinkShortcut));
     }
 }

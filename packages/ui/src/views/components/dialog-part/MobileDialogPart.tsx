@@ -20,9 +20,9 @@ import type { MobilePanelLayout } from '../../mobile-workbench/MobileCanvasLayou
 import type { MobileDrawerSnap } from '../mobile-drawer/MobileDrawer';
 import type { IDialogPartMethodOptions } from './interface';
 import { LocaleService } from '@univerjs/core';
-import { MobileActionRowGroup } from '@univerjs/design';
+import { Button, ConfigContext, MobileActionRowGroup } from '@univerjs/design';
 import { CloseIcon } from '@univerjs/icons';
-import { useMemo, useRef, useState } from 'react';
+import { useContext, useMemo, useRef, useState } from 'react';
 import { IDialogService } from '../../../services/dialog/dialog.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
@@ -51,6 +51,7 @@ function toMobileDialogOptions(options: IMobileDialogPartMethodOptions): IMobile
 export function MobileDialogPart() {
     const dialogService = useDependency(IDialogService);
     const localeService = useDependency(LocaleService);
+    const { locale } = useContext(ConfigContext);
     const dialogOptions = useObservable(dialogService.getDialogs$(), []);
     const options = useMemo(() => {
         const activeDialogs = dialogOptions.filter((item) => item.open !== false);
@@ -65,6 +66,14 @@ export function MobileDialogPart() {
         return null;
     }
     const defaultSnap = options.layout === 'canvas' ? 'compact' : 'expanded';
+    const footer = options.footer ?? (options.showOk || options.showCancel
+        ? (
+            <>
+                {options.showCancel && <Button onClick={options.onCancel}>{locale?.Confirm.cancel}</Button>}
+                {options.showOk && <Button variant="primary" onClick={options.onOk}>{locale?.Confirm.confirm}</Button>}
+            </>
+        )
+        : null);
 
     const close = () => {
         dialogService.close(options.id);
@@ -147,7 +156,7 @@ export function MobileDialogPart() {
                         )}
                     </header>
                 )}
-                footer={options.footer
+                footer={footer
                     ? (
                         <footer
                             className="
@@ -156,7 +165,7 @@ export function MobileDialogPart() {
                               dark:!univer-border-gray-700
                             "
                         >
-                            <MobileActionRowGroup>{options.footer}</MobileActionRowGroup>
+                            <MobileActionRowGroup>{footer}</MobileActionRowGroup>
                         </footer>
                     )
                     : undefined}

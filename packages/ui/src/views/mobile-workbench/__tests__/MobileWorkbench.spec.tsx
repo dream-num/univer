@@ -34,6 +34,7 @@ import {
     ThemeService,
     UniverInstanceService,
 } from '@univerjs/core';
+import { ConfigContext } from '@univerjs/design';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { useContext } from 'react';
 import { createPortal } from 'react-dom';
@@ -48,7 +49,14 @@ import { MobileWorkbench, resolveMobileKeyboardInset, shouldUpdateMobileStableHe
 
 function KeyboardBar() {
     const bottom = useContext(MobileKeyboardInsetContext);
-    return <div data-testid="keyboard-bar" style={{ bottom }} />;
+    const { mobileKeyboardViewport } = useContext(ConfigContext);
+    return (
+        <div
+            data-testid="keyboard-bar"
+            data-viewport={JSON.stringify(mobileKeyboardViewport)}
+            style={{ bottom }}
+        />
+    );
 }
 
 describe('MobileWorkbench keyboard positioning', () => {
@@ -130,6 +138,8 @@ describe('MobileWorkbench keyboard positioning', () => {
         expect(secondBar.style.bottom).toBe('100px');
         expect(portalBars[0].style.bottom).toBe('300px');
         expect(portalBars[1].style.bottom).toBe('100px');
+        expect(firstBar.dataset.viewport).toBe(JSON.stringify({ top: 0, bottom: 500, height: 500, stableHeight: 800 }));
+        expect(secondBar.dataset.viewport).toBe(JSON.stringify({ top: 0, bottom: 500, height: 500, stableHeight: 600 }));
 
         act(() => {
             viewport.offsetTop = 20;
@@ -137,6 +147,7 @@ describe('MobileWorkbench keyboard positioning', () => {
         });
         expect(firstBar.style.bottom).toBe('280px');
         expect(secondBar.style.bottom).toBe('80px');
+        expect(firstBar.dataset.viewport).toBe(JSON.stringify({ top: 20, bottom: 520, height: 500, stableHeight: 800 }));
 
         act(() => {
             viewport.height = 800;

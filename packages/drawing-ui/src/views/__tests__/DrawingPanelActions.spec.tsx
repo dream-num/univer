@@ -435,6 +435,59 @@ describe('drawing panel actions', () => {
         expect(document.querySelector('[role="dialog"]')).toBeNull();
     });
 
+    it('renders button-only drawing dialogs with mobile action rows', async () => {
+        const executedCommands: ICommandInfo[] = [];
+        commandService.onCommandExecuted((command) => executedCommands.push(command));
+
+        const rendered = renderWithRediContext(
+            univer.__getInjector(),
+            <ConfigProvider mountContainer={document.body}>
+                <MobileImagePopupMenu
+                    popup={{
+                        extraProps: {
+                            menuItems: [{
+                                label: 'drawing.edit',
+                                index: 0,
+                                commandId: chartEditCommandId,
+                                commandParams: { source: 'first-action' },
+                                disable: false,
+                            }, {
+                                label: 'drawing.delete',
+                                index: 1,
+                                commandId: chartEditCommandId,
+                                commandParams: { source: 'second-action' },
+                                disable: false,
+                            }],
+                        },
+                    }}
+                />
+            </ConfigProvider>
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        const edit = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'drawing.edit');
+        if (!edit) {
+            throw new Error('The mobile drawing action row was not found');
+        }
+        expect(edit.classList.contains('univer-rounded-xl')).toBe(true);
+        expect(edit.classList.contains('univer-bg-gray-100')).toBe(true);
+
+        const deleteAction = Array.from(container.querySelectorAll('button'))
+            .find((button) => button.textContent === 'drawing.delete');
+        if (!deleteAction) {
+            throw new Error('The second mobile drawing action row was not found');
+        }
+        clickElement(deleteAction);
+        await flushPendingCommands();
+
+        expect(executedCommands).toContainEqual({
+            id: chartEditCommandId,
+            type: CommandType.OPERATION,
+            params: { source: 'second-action' },
+        });
+    });
+
     it('executes select options from the shared mobile drawing drawer', async () => {
         const executedCommands: ICommandInfo[] = [];
         commandService.onCommandExecuted((command) => executedCommands.push(command));

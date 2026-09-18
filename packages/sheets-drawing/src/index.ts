@@ -63,4 +63,5 @@ export type {
     ISheetFloatDom,
     ISheetImage,
     ISheetShape,
+    ISheetSlicerDrawing,
 } from './services/sheet-drawing.service';

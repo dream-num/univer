@@ -73,6 +73,9 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
                     if (!cell || cell === location.rawData) {
                         cell = { ...location.rawData };
                     }
+                    cell.v = cellData.v;
+                    cell.t = cellData.t;
+                    cell.isInArrayFormulaRange = true;
 
                     // The cell in the upper left corner of the array formula also triggers the default value determination
                     if (cellData.v == null && cellData.t == null) {
@@ -90,9 +93,6 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
                         cell.v = stripErrorMargin(Number(cell.v));
                         return next(cell);
                     }
-
-                    cell.v = cellData.v;
-                    cell.t = cellData.t;
 
                     return next(cell);
                 },

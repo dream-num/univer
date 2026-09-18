@@ -22,6 +22,7 @@ import type {
     ITableConditionFilterItem,
     ITableFilterItem,
     ITableManualFilterItem,
+    ITableRecordFilterItem,
 } from './types/type';
 import { CellValueType, UniverInstanceType } from '@univerjs/core';
 import { SheetsTableButtonStateEnum, SheetsTableSortStateEnum, TableColumnFilterTypeEnum } from './types/enum';
@@ -110,6 +111,13 @@ export function isColorTableFilter(filter: ITableFilterItem | undefined): filter
         return false;
     }
     return filter.filterType === TableColumnFilterTypeEnum.color;
+}
+
+export function isRecordTableFilter(filter: ITableFilterItem | undefined): filter is ITableRecordFilterItem {
+    if (!filter) {
+        return false;
+    }
+    return filter.filterType === TableColumnFilterTypeEnum.record;
 }
 
 /**

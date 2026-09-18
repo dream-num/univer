@@ -20,7 +20,7 @@ import { reverseCompareOperator } from '../../basics/calculate';
 import { BooleanValue, ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
-import { compareWithWildcard, isWildcard } from '../utils/compare';
+import { compareWithWildcard, isWildcard, normalizeTextForComparison } from '../utils/compare';
 import { ceil, divide, equals, floor, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals, minus, mod, multiply, plus, pow, round, sqrt } from '../utils/math-kit';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
@@ -1532,10 +1532,6 @@ export class StringValueObject extends BaseValueObject {
 
     override compare(valueObject: BaseValueObject, operator: compareToken, isCaseSensitive?: boolean): BaseValueObject {
         if (valueObject.isArray()) {
-            // const o = valueObject.getReciprocal();
-            // if (o.isError()) {
-            //     return o;
-            // }
             return valueObject.compare(this, reverseCompareOperator(operator), isCaseSensitive);
         }
         return this.compareBy(valueObject.getValue(), operator, isCaseSensitive);
@@ -1546,17 +1542,16 @@ export class StringValueObject extends BaseValueObject {
         let result = false;
 
         if (typeof value === 'string') {
+            if (isWildcard(value)) {
+                return this._checkWildcard(value, operator, isCaseSensitive);
+            }
             // Case sensitivity needs to be considered, most functions are case-insensitive, like VLOOKUP/HLOOKUP/XLOOKUP/MATCH/COUNTIF/COUNTIFS/SUMIF/SUMIFS/SEARCH/FIND(in SUBSTITUTE)
             // A few functions are case-sensitive, like EXACT/FIND/FINDB/REPLACE/REPLACEB/MIDB
             let _value = value;
 
             if (!isCaseSensitive) {
-                currentValue = currentValue.toLocaleLowerCase();
-                _value = _value.toLocaleLowerCase();
-            }
-
-            if (isWildcard(_value)) {
-                return this._checkWildcard(_value, operator);
+                currentValue = normalizeTextForComparison(currentValue);
+                _value = normalizeTextForComparison(_value);
             }
 
             result = this._compareString(currentValue, _value, operator);
@@ -1638,9 +1633,8 @@ export class StringValueObject extends BaseValueObject {
         return BooleanValueObject.create(true);
     }
 
-    private _checkWildcard(value: string, operator: compareToken) {
-        const currentValue = this.getValue().toLocaleLowerCase();
-        const result = compareWithWildcard(currentValue, value, operator);
+    private _checkWildcard(value: string, operator: compareToken, isCaseSensitive: boolean) {
+        const result = compareWithWildcard(this.getValue(), value, operator, isCaseSensitive);
 
         return BooleanValueObject.create(result);
     }

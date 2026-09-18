@@ -18,6 +18,59 @@ import { describe, expect, it } from 'vitest';
 import { DEFAULT_EMPTY_CELL_KEY, InvertedIndexCache } from '../inverted-index-cache';
 
 describe('InvertedIndexCache', () => {
+    it('keeps updates correct as distinct values grow, shrink and grow again', () => {
+        const cache = new InvertedIndexCache();
+        for (let row = 0; row < 100; row++) {
+            cache.set('unit', 'sheet', 0, row, row);
+        }
+        cache.setContinueBuildingCache('unit', 'sheet', 0, 0, 99);
+        for (let cycle = 0; cycle < 3; cycle++) {
+            for (let row = 99; row >= 0; row--) {
+                cache.set('unit', 'sheet', 0, 'same', row, true);
+            }
+            expect(cache.getCellValuePositions('unit', 'sheet', 0)?.size).toBe(1);
+            expect(cache.getCellPositions('unit', 'sheet', 0, 'same', [[0, 99]])?.matchingRows).toHaveLength(100);
+            for (let row = 0; row < 100; row++) {
+                cache.set('unit', 'sheet', 0, row, row, true);
+                expect(cache.getCellPositions('unit', 'sheet', 0, row, [[0, 99]])?.matchingRows).toEqual([row]);
+            }
+            expect(cache.getCellPositions('unit', 'sheet', 0, 'same', [[0, 99]])?.matchingRows).toEqual([]);
+        }
+    });
+
+    it('replaces repeated uncovered writes and drops obsolete value buckets', () => {
+        const cache = new InvertedIndexCache();
+        cache.set('unit', 'sheet', 0, 'A', 0);
+        cache.set('unit', 'sheet', 0, 'B', 0);
+        cache.set('unit', 'sheet', 0, 'C', 0, true);
+        expect([...cache.getCellValuePositions('unit', 'sheet', 0)!.keys()]).toEqual(['c']);
+        expect(cache.getCellPositions('unit', 'sheet', 0, 'C', [[0, 0]])?.matchingRows).toEqual([0]);
+    });
+
+    it('keeps out-of-order range builds and later updates consistent', () => {
+        const cache = new InvertedIndexCache();
+        for (const row of [10, 11, 3, 4, 7, 8]) {
+            cache.set('unit', 'sheet', 0, row, row);
+        }
+        cache.set('unit', 'sheet', 0, 'changed', 4, true);
+        expect(cache.getCellPositions('unit', 'sheet', 0, 4, [[0, 20]])?.matchingRows).toEqual([]);
+        for (const row of [10, 11, 3, 7, 8]) {
+            expect(cache.getCellPositions('unit', 'sheet', 0, row, [[0, 20]])?.matchingRows).toEqual([row]);
+        }
+        expect(cache.getCellPositions('unit', 'sheet', 0, 'changed', [[0, 20]])?.matchingRows).toEqual([4]);
+    });
+
+    it('uses the same linguistic equality for indexed text and lookup text', () => {
+        const cache = new InvertedIndexCache();
+        cache.set('unit', 'sheet', 0, 'straße', 0);
+        cache.set('unit', 'sheet', 0, 'é', 1);
+        cache.set('unit', 'sheet', 0, 'Infinity', 2);
+        expect(cache.getCellPositions('unit', 'sheet', 0, 'STRASSE', [[0, 1]])?.matchingRows).toEqual([0]);
+        expect(cache.getCellPositions('unit', 'sheet', 0, 'e\u0301', [[0, 1]])?.matchingRows).toEqual([1]);
+        expect(cache.getCellPositions('unit', 'sheet', 0, 'e', [[0, 1]])?.matchingRows).toEqual([]);
+        expect(cache.getCellPositions('unit', 'sheet', 0, 'INFINITY', [[0, 2]])?.matchingRows).toEqual([2]);
+    });
+
     it('replaces every supported value kind without leaving a row in its previous bucket', () => {
         const values = [undefined, null, '', 0, -0, '0', 12, '12', '012', 'OLD', 'old', true, false, '#REF!', '#VALUE!'];
         const keys = [DEFAULT_EMPTY_CELL_KEY, DEFAULT_EMPTY_CELL_KEY, DEFAULT_EMPTY_CELL_KEY, 0, 0, 0, 12, 12, '012', 'old', 'old', true, false, '#ref!', '#value!'];

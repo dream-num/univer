@@ -20,6 +20,14 @@ import { CellReferenceObject } from '../cell-reference-object';
 import { RangeReferenceObject } from '../range-reference-object';
 
 describe('CellReferenceObject', () => {
+    it('distinguishes forced error-looking text from a calculated error', () => {
+        const reference = new CellReferenceObject('A1');
+        const text = reference.getCellValueObject({ v: '#REF!', t: CellValueType.FORCE_STRING });
+        const error = reference.getCellValueObject({ v: '#REF!', t: CellValueType.STRING });
+        expect(text.isString()).toBe(true);
+        expect(error.isError()).toBe(true);
+    });
+
     it('should allow blank cells inside the Excel grid even when they are outside snapshot row data', () => {
         const reference = new CellReferenceObject('Sheet2!A151');
 

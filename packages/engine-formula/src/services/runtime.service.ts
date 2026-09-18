@@ -710,7 +710,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                         unitId,
                         sheetId,
                         column - startColumn + columnIndex,
-                        !valueObject ? 0 : valueObject.getValue(),
+                        valueObject == null || valueObject.isNull() ? null : valueObject.getValue(),
                         row - startRow + rowIndex,
                         true
                     );
@@ -758,7 +758,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 unitId,
                 sheetId,
                 column,
-                (functionVariant as BaseValueObject).getValue(),
+                (functionVariant as BaseValueObject).isNull() ? null : (functionVariant as BaseValueObject).getValue(),
                 row,
                 true
             );

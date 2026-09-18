@@ -28,6 +28,7 @@ import {
     LocaleService,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
+    SpacingRule,
     TableAlignmentType,
     TableRowHeightRule,
     TableSizeType,
@@ -59,6 +60,7 @@ import { DOCS_EXTENSION_TYPE } from '../doc-extension';
 import { Documents, drawSectionColumnSeparators, resolveHeaderFooterFieldGlyph } from '../document';
 import { createParagraphLayoutTestBed } from '../layout/block/paragraph/__tests__/create-paragraph-layout-test-bed';
 import { DocumentSkeleton } from '../layout/doc-skeleton';
+import { FontCache } from '../layout/shaping-engine/font-cache';
 import { setDocsTableRenderViewportProvider } from '../table-render-viewport';
 import { DocumentEditArea, DocumentViewModel } from '../view-model/document-view-model';
 
@@ -495,6 +497,69 @@ describe('documents render', () => {
             rear.dispose();
             skeleton.dispose();
             bed.dataModel.dispose();
+        }
+    });
+
+    it.each([0, 48])('keeps painted text above rear drawings with %s pt paragraph spacing', (spaceAbove) => {
+        const measuringContext = document.createElement('canvas').getContext('2d')!;
+        vi.spyOn(measuringContext, 'measureText').mockImplementation((text) => ({
+            width: text.length * 8,
+            fontBoundingBoxAscent: 8,
+            fontBoundingBoxDescent: 2,
+            actualBoundingBoxAscent: 8,
+            actualBoundingBoxDescent: 2,
+        } as TextMetrics));
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(measuringContext);
+        Reflect.set(FontCache, '_context', null);
+        FontCache.invalidateMetrics(() => true);
+        const content = 'Intro\rEditable text';
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+            body: {
+                paragraphs: [5, content.length].map((startIndex) => ({
+                    startIndex,
+                    paragraphStyle: { spaceAbove: { v: spaceAbove }, lineSpacing: 60, spacingRule: SpacingRule.EXACT },
+                })),
+            },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        skeleton.calculate();
+        const documents = new Documents('spaced-text-doc', skeleton, { pageMarginLeft: 0, pageMarginTop: 0 });
+        documents.transformByState({ left: 40, top: 30, width: 400, height: 600 });
+        const rear = new Rect('spaced-text-rear', { left: 40, top: 30, width: 300, height: 350 });
+        scene.addObject(documents, 2);
+        scene.addObject(rear, 1);
+        try {
+            const line = skeleton.getSkeletonData()!.pages[0].sections[0].columns[0].lines[1];
+            const glyph = line.divides[0].glyphGroup[0];
+            expect(line.contentHeight).toBeGreaterThan(0);
+            const font = documents.extensions.get('DefaultDocsFontAndBaseLineExtension')!;
+            const draw = font.draw.bind(font);
+            let paintedStart: Vector2 | undefined;
+            vi.spyOn(font, 'draw').mockImplementation((...args) => {
+                if (args[2] === glyph) {
+                    paintedStart = font.extensionOffset.spanStartPoint!.clone();
+                }
+                draw(...args);
+            });
+            documents.draw(canvas.getContext());
+            expect(paintedStart).toBeDefined();
+            const text = documents.transform.applyPoint(Vector2.create(paintedStart!.x + glyph.width / 2, paintedStart!.y + line.contentHeight / 2));
+            expect(scene.pick(text)).toBe(documents);
+            const padding = documents.transform.applyPoint(Vector2.create(paintedStart!.x + glyph.width / 2, paintedStart!.y - 4));
+            expect(scene.pick(padding)).toBe(rear);
+            scene.getTransformerByCreate().setSelectedControl(rear);
+            expect(scene.pick(text)).toBe(documents);
+            scene.transformByState({ scaleX: 1.5, scaleY: 1.5 });
+            expect(scene.pick(Vector2.create(text.x * 1.5, text.y * 1.5))).toBe(documents);
+        } finally {
+            documents.dispose();
+            rear.dispose();
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+            Reflect.set(FontCache, '_context', null);
+            FontCache.invalidateMetrics(() => true);
         }
     });
 

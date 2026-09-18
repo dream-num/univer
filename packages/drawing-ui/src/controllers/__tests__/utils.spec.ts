@@ -55,7 +55,7 @@ vi.mock('@univerjs/drawing', async (importOriginal) => {
 
     return {
         ...actual,
-        getDrawingShapeKeyByDrawingSearch: vi.fn(({ drawingId }) => `group-${drawingId}`),
+        getDrawingShapeKeyByDrawingSearch: vi.fn(({ drawingId }, index?: number) => `group-${drawingId}${index == null ? '' : `-${index}`}`),
     };
 });
 
@@ -66,6 +66,48 @@ vi.mock('@univerjs/engine-render', () => ({
 }));
 
 describe('drawing controller utils', () => {
+    it('keeps repeated document groups separate and preserves their page layer and stacking order', () => {
+        const scene = {
+            objects: new Map<string, InstanceType<typeof MockGroup>>(),
+            getObjectIncludeInGroup(key: string) {
+                return this.objects.get(key);
+            },
+            addObject: vi.fn((group: InstanceType<typeof MockGroup>, _layer: number) => {
+                scene.objects.set(group.oKey, group);
+                return { attachTransformerTo: vi.fn() };
+            }),
+        };
+        const drawingManagerService = {
+            getDrawingByParam: vi.fn(() => ({
+                drawingType: DrawingTypeEnum.DRAWING_GROUP,
+                transforms: [
+                    { left: 20, top: 30, width: 100, height: 40, flipX: true },
+                    { left: 20, top: 830, width: 100, height: 40, flipY: true },
+                ],
+            })),
+            getDrawingOrder: vi.fn(() => ['background', 'header']),
+            getDrawingsByGroup: vi.fn(() => []),
+        };
+        for (const index of [0, 1]) {
+            insertGroupObject(
+                { unitId: 'doc', subUnitId: 'doc', drawingId: 'header' },
+                { oKey: `child-${index}`, layer: { zIndex: 7 } } as never,
+                scene as never,
+                drawingManagerService as never,
+                index
+            );
+        }
+        const first = scene.objects.get('group-header-0')!;
+        const second = scene.objects.get('group-header-1')!;
+        expect(first).not.toBe(second);
+        expect(first.getObjects()).toHaveLength(1);
+        expect(second.getObjects()).toHaveLength(1);
+        expect(first).toMatchObject({ zIndex: 1 });
+        expect(scene.addObject).toHaveBeenCalledWith(second, 7);
+        expect(first.transformByState).toHaveBeenCalledWith(expect.objectContaining({ top: 30, flipX: true }));
+        expect(second.transformByState).toHaveBeenCalledWith(expect.objectContaining({ top: 830, flipY: true }));
+    });
+
     it('creates a new drawing group, attaches it to the scene, and avoids duplicate children', () => {
         const object = { oKey: 'child-1' };
         const attachTransformerTo = vi.fn();
@@ -93,17 +135,18 @@ describe('drawing controller utils', () => {
                 transform: { left: 10, top: 20, width: 30, height: 40, angle: 15 },
                 groupBaseBound: { left: 1, top: 2, width: 3, height: 4 },
             })),
+            getDrawingOrder: vi.fn(() => ['background', 'group-1']),
             getDrawingsByGroup: vi.fn(() => []),
         };
 
         insertGroupObject({ drawingId: 'group-1' } as never, object as never, scene as never, drawingManagerService as never);
 
         const group = scene.getObject('group-group-1') as InstanceType<typeof MockGroup>;
-        expect(getDrawingShapeKeyByDrawingSearch).toHaveBeenCalledWith({ drawingId: 'group-1' });
+        expect(getDrawingShapeKeyByDrawingSearch).toHaveBeenCalledWith({ drawingId: 'group-1' }, undefined);
         expect(group).toBeInstanceOf(DrawingGroupObject as unknown as typeof MockGroup);
         expect(group.getObjects()).toEqual([object]);
         expect(group.setBaseBound).toHaveBeenCalledWith({ left: 1, top: 2, width: 3, height: 4 });
-        expect(group.transformByState).toHaveBeenCalledWith({ left: 10, top: 20, width: 30, height: 40, angle: 15 });
+        expect(group.transformByState).toHaveBeenCalledWith({ left: 10, top: 20, width: 30, height: 40, angle: 15, flipX: undefined, flipY: undefined });
         expect(attachTransformerTo).toHaveBeenCalledWith(group);
 
         insertGroupObject({ drawingId: 'group-1' } as never, object as never, scene as never, drawingManagerService as never);
@@ -140,6 +183,7 @@ describe('drawing controller utils', () => {
                 groupId: param.drawingId === 'child-group' ? 'parent-group' : undefined,
                 transform: { left: 0, top: 0, width: 10, height: 10 },
             })),
+            getDrawingOrder: vi.fn(() => ['background', 'group-1']),
             getDrawingsByGroup: vi.fn(() => []),
         };
 
@@ -176,6 +220,7 @@ describe('drawing controller utils', () => {
                 drawingType: DrawingTypeEnum.DRAWING_GROUP,
                 transform: { left: 10, top: 20, width: 30, height: 40, angle: 30 },
             })),
+            getDrawingOrder: vi.fn(() => ['background', 'group-1']),
             getDrawingsByGroup: vi.fn(() => [{
                 unitId: 'unit-1',
                 subUnitId: 'sheet-1',
@@ -190,7 +235,7 @@ describe('drawing controller utils', () => {
 
         const group = scene.getObject('group-group-1') as InstanceType<typeof MockGroup>;
         expect(group.transformerConfig?.rotateEnabled).toBe(false);
-        expect(group.transformByState).toHaveBeenCalledWith({ left: 10, top: 20, width: 30, height: 40, angle: 30 });
+        expect(group.transformByState).toHaveBeenCalledWith({ left: 10, top: 20, width: 30, height: 40, angle: 30, flipX: undefined, flipY: undefined });
     });
 
     it('uses explicit children when synchronizing group rotation state', () => {
@@ -199,6 +244,7 @@ describe('drawing controller utils', () => {
             getObjectIncludeInGroup: vi.fn(() => null),
         };
         const drawingManagerService = {
+            getDrawingOrder: vi.fn(() => ['background', 'group-1']),
             getDrawingsByGroup: vi.fn(() => []),
         };
 
@@ -226,6 +272,7 @@ describe('drawing controller utils', () => {
         };
         const drawingManagerService = {
             getDrawingByParam: vi.fn(() => ({ transform: { left: 0, top: 0, width: 10, height: 10 } })),
+            getDrawingOrder: vi.fn(() => ['background', 'group-1']),
             getDrawingsByGroup: vi.fn(() => []),
         };
 
@@ -235,6 +282,7 @@ describe('drawing controller utils', () => {
 
         insertGroupObject({ drawingId: 'missing-group' } as never, { oKey: 'child-3' } as never, scene as never, {
             getDrawingByParam: vi.fn(() => null),
+            getDrawingOrder: vi.fn(() => ['background', 'group-1']),
             getDrawingsByGroup: vi.fn(() => []),
         } as never);
 

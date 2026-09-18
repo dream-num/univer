@@ -94,16 +94,25 @@ export const RemoveDocDrawingCommand: ICommand = {
 
         const drawings = source.drawings ?? {};
         const removeDrawingParamById = new Map(removeDrawings.map((drawing) => [drawing.drawingId, drawing]));
-        const removeDrawingSnapshots = removeCustomBlocks
-            .map((block) => drawings[block!.blockId] as IDocDrawing | undefined)
+        const removeIds = new Set(removeCustomBlocks.map((block) => block!.blockId));
+        let previousSize = -1;
+        while (previousSize !== removeIds.size) {
+            previousSize = removeIds.size;
+            for (const drawing of Object.values(drawings)) {
+                if (drawing.groupId && removeIds.has(drawing.groupId)) {
+                    removeIds.add(drawing.drawingId);
+                }
+            }
+        }
+        const removeDrawingSnapshots = [...removeIds]
+            .map((id) => drawings[id] as IDocDrawing | undefined)
             .filter((drawing): drawing is IDocDrawing => drawing != null);
 
         const resourceRedoMutations: IMutationInfo[] = [];
         const resourceUndoMutations: IMutationInfo[] = [];
         const resourceMutationGroups: Array<{ redoMutations: IMutationInfo[]; undoMutations: IMutationInfo[] }> = [];
 
-        for (const block of removeCustomBlocks) {
-            const { blockId } = block!;
+        for (const blockId of removeIds) {
             const drawing = drawings[blockId] as IDocDrawing | undefined;
             if (drawing == null) {
                 continue;
@@ -164,11 +173,8 @@ export const RemoveDocDrawingCommand: ICommand = {
         rawActions.push(jsonX.editOp(textX.serialize(), getRichTextEditPath(documentDataModel, segmentId))!);
 
         const drawingOrder = source.drawingsOrder ?? [];
-        const resourceBlocks = [...removeCustomBlocks].sort((left, right) =>
-            drawingOrder.indexOf(right!.blockId) - drawingOrder.indexOf(left!.blockId)
-        );
-        for (const block of resourceBlocks) {
-            const { blockId } = block!;
+        const resourceIds = [...removeIds].sort((left, right) => drawingOrder.indexOf(right) - drawingOrder.indexOf(left));
+        for (const blockId of resourceIds) {
             const drawingIndex = drawingOrder.indexOf(blockId);
             if (drawings[blockId]) {
                 rawActions.push(jsonX.removeOp([...prefix, 'drawings', blockId], drawings[blockId])!);

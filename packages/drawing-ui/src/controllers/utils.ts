@@ -73,13 +73,13 @@ export function syncGroupRotateEnabled(
     };
 }
 
-export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObject, scene: Scene, drawingManagerService: IDrawingManagerService) {
+export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObject, scene: Scene, drawingManagerService: IDrawingManagerService, transformIndex?: number) {
     const groupParam = drawingManagerService.getDrawingByParam(objectParam);
     if (groupParam == null) {
         return;
     }
 
-    const groupKey = getDrawingShapeKeyByDrawingSearch(objectParam);
+    const groupKey = getDrawingShapeKeyByDrawingSearch(objectParam, transformIndex);
     const groupObject = scene.getObjectIncludeInGroup(groupKey);
 
     if (groupObject && !(groupObject instanceof Group)) {
@@ -99,13 +99,16 @@ export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObjec
     }
 
     const group = new DrawingGroupObject(groupKey);
+    const order = drawingManagerService.getDrawingOrder(objectParam.unitId, objectParam.subUnitId);
+    group.zIndex = Math.max(0, order.indexOf(objectParam.drawingId));
 
-    scene.addObject(group, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(group);
+    scene.addObject(group, object.layer?.zIndex ?? DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(group);
 
     group.addObject(object);
     syncGroupRotateEnabled(group, groupParam, scene, drawingManagerService);
 
-    const { transform, groupBaseBound } = groupParam;
+    const { groupBaseBound } = groupParam;
+    const transform = transformIndex == null ? groupParam.transform : groupParam.transforms?.[transformIndex];
 
     if (groupBaseBound) {
         group.setBaseBound(groupBaseBound);
@@ -117,7 +120,8 @@ export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObjec
             { drawingId: groupParam.groupId, unitId: objectParam.unitId, subUnitId: objectParam.subUnitId },
             group,
             scene,
-            drawingManagerService
+            drawingManagerService,
+            transformIndex
         );
     }
 
@@ -128,6 +132,8 @@ export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObjec
             angle: transform.angle,
             width: transform.width,
             height: transform.height,
+            flipX: transform.flipX,
+            flipY: transform.flipY,
         }
     );
 }

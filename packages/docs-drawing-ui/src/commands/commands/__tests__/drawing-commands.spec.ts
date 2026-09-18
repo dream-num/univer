@@ -67,8 +67,10 @@ import { DocDrawingUpdateRenderController } from '../../../controllers/render-co
 import { DocRefreshDrawingsService } from '../../../services/doc-refresh-drawings.service';
 import { ClearDocDrawingTransformerOperation } from '../../operations/clear-drawing-transformer.operation';
 import { DeleteDocDrawingsCommand } from '../delete-doc-drawing.command';
+import { GroupDocDrawingCommand } from '../group-doc-drawing.command';
 import { InsertDocImageCommand } from '../insert-image.command';
 import { MoveDocDrawingsCommand } from '../move-drawings.command';
+import { UngroupDocDrawingCommand } from '../ungroup-doc-drawing.command';
 import {
     IMoveInlineDrawingCommand,
     ITransformNonInlineDrawingCommand,
@@ -352,6 +354,8 @@ function setupDrawingTestBed(docData: IDocumentData, dependencies: Dependency[] 
 
     const commandService = get(ICommandService);
     [
+        GroupDocDrawingCommand,
+        UngroupDocDrawingCommand,
         DeleteDocDrawingsCommand,
         MoveDocDrawingsCommand,
         ClearDocDrawingTransformerOperation,
@@ -389,6 +393,84 @@ function setupDrawingTestBed(docData: IDocumentData, dependencies: Dependency[] 
 describe('docs drawing commands integration', () => {
     afterEach(() => {
         vi.restoreAllMocks();
+    });
+
+    it('groups and ungroups native objects with document anchors and symmetric undo/redo', async () => {
+        const data = createBaseDocData();
+        data.body = {
+            dataStream: 'A\bB\bC\r\n',
+            customBlocks: [{ startIndex: 1, blockId: 'a' }, { startIndex: 3, blockId: 'b' }],
+            paragraphs: [{ startIndex: 5, paragraphId: 'group-paragraph' }],
+        };
+        const drawings = [10, 80].map((left, index) => ({
+            unitId: data.id,
+            subUnitId: data.id,
+            drawingId: index === 0 ? 'a' : 'b',
+            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+            title: `Rich text shape ${index}`,
+            layoutType: PositionedObjectLayoutType.WRAP_NONE,
+            transform: { left, top: 20, width: 50, height: 40, angle: 0 },
+            docTransform: {
+                positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: left },
+                positionV: { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 20 },
+                size: { width: 50, height: 40 },
+                angle: 0,
+            },
+        }));
+        data.drawings = Object.fromEntries(drawings.map((drawing) => [drawing.drawingId, { ...drawing, unitId: 'imported-unit', subUnitId: 'imported-unit' }]));
+        data.drawings.b.drawingType = DrawingTypeEnum.DRAWING_GROUP;
+        data.drawings.b.groupBaseBound = { left: 0, top: 0, width: 50, height: 40 };
+        data.drawings.c = { ...data.drawings.a, drawingId: 'c', groupId: 'b' };
+        data.drawingsOrder = ['a', 'b', 'c'];
+        const testBed = setupDrawingTestBed(data);
+        const { commandService, get, univer, drawingManagerService } = testBed;
+        const model = get(IUniverInstanceService).getUnit<DocumentDataModel>(data.id)!;
+        const before = structuredClone(model.getSnapshot());
+        const parent = {
+            unitId: data.id,
+            subUnitId: data.id,
+            drawingId: 'group',
+            drawingType: DrawingTypeEnum.DRAWING_GROUP,
+            transform: { left: 10, top: 20, width: 120, height: 40, angle: 0 },
+        };
+        try {
+            expect(await commandService.executeCommand(GroupDocDrawingCommand.id, [{ parent, children: drawings }])).toBe(true);
+            expect(model.getBody()!.dataStream).toBe('A\bBC\r\n');
+            expect(model.getBody()!.customBlocks).toEqual([{ startIndex: 1, blockId: 'group' }]);
+            expect(model.getSnapshot().drawings!.b.groupId).toBe('group');
+            expect(model.getSnapshot().drawings!.b.docTransform.positionH.posOffset).toBe(70);
+            expect(model.getSnapshot().drawings!.b.title).toBe('Rich text shape 1');
+            expect(drawingManagerService.getDrawingByParam(drawings[1])!.groupId).toBe('group');
+            await awaitTime(350);
+            expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+            expect(model.getBody()).toMatchObject(before.body!);
+            expect(model.getSnapshot().drawings).toEqual(before.drawings);
+            expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+            const grouped = structuredClone(model.getSnapshot());
+            expect(await commandService.executeCommand(UngroupDocDrawingCommand.id, [{ parent, children: drawings }])).toBe(true);
+            expect(model.getBody()!.customBlocks).toEqual([{ startIndex: 1, blockId: 'a' }, { startIndex: 2, blockId: 'b' }]);
+            expect(model.getSnapshot().drawings!.group).toBeUndefined();
+            expect(model.getSnapshot().drawings!.b.groupId).toBeUndefined();
+            expect(model.getSnapshot().drawings!.b.docTransform.positionH.posOffset).toBe(80);
+            expect(drawingManagerService.getDrawingByParam({ unitId: data.id, subUnitId: data.id, drawingId: 'c' })?.groupId).toBe('b');
+            await awaitTime(350);
+            expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+            expect(model.getBody()).toMatchObject(grouped.body!);
+            expect(model.getSnapshot().drawings).toEqual(grouped.drawings);
+            expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+            expect(model.getSnapshot().drawings!.b.groupId).toBeUndefined();
+            await commandService.executeCommand(UndoCommand.id);
+            expect(await commandService.executeCommand(RemoveDocDrawingCommand.id, { unitId: data.id, drawings: [parent] })).toBe(true);
+            expect(model.getSnapshot().drawings).toEqual({});
+            expect(model.getSnapshot().drawingsOrder).toEqual([]);
+            await awaitTime(350);
+            expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+            expect(model.getSnapshot().drawings).toEqual(grouped.drawings);
+            expect(drawingManagerService.getDrawingByParam(drawings[1])!.unitId).toBe(data.id);
+            expect(drawingManagerService.getDrawingByParam({ unitId: data.id, subUnitId: data.id, drawingId: 'c' })?.groupId).toBe('b');
+        } finally {
+            univer.dispose();
+        }
     });
 
     it('inserts a drawing through the real mutation chain and synchronizes drawing services', async () => {

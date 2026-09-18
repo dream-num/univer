@@ -70,8 +70,17 @@ export function removeDrawingReferences(
     const prefix = footnote ? ['notes', segmentId] : [];
     const drawings = source.drawings ?? {};
     const drawingOrder = source.drawingsOrder ?? [];
-    const blockIds = [...new Set(getCustomBlockIdsInSelections(body, selections))]
-        .sort((left, right) => drawingOrder.indexOf(right) - drawingOrder.indexOf(left));
+    const removedIds = new Set(getCustomBlockIdsInSelections(body, selections));
+    let previousSize = -1;
+    while (previousSize !== removedIds.size) {
+        previousSize = removedIds.size;
+        for (const drawing of Object.values(drawings)) {
+            if (drawing.groupId && removedIds.has(drawing.groupId)) {
+                removedIds.add(drawing.drawingId);
+            }
+        }
+    }
+    const blockIds = [...removedIds].sort((left, right) => drawingOrder.indexOf(right) - drawingOrder.indexOf(left));
     const jsonX = JSONX.getInstance();
     const actions: JSONXActions[] = [];
 

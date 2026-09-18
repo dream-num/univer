@@ -34,7 +34,7 @@ import { IDrawingManagerService } from '@univerjs/drawing';
 import { COMPONENT_MOBILE_IMAGE_POPUP_MENU, OpenImageCropOperation } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
-import { IMenuManagerService } from '@univerjs/ui';
+import { ContextMenuPosition, IContextMenuService, IMenuManagerService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -50,6 +50,7 @@ function createControllerHarness(drawingType = DrawingTypeEnum.DRAWING_IMAGE, mo
     const createControl$ = new Subject<void>();
     const clearControl$ = new Subject<boolean>();
     const changing$ = new Subject<void>();
+    const changeEnd$ = new Subject<{ event: { button: number } }>();
     const focus$ = new Subject<never[]>();
     const remove$ = new Subject<IDrawingSearch[]>();
     const currentDocument$ = new Subject<never>();
@@ -79,6 +80,7 @@ function createControllerHarness(drawingType = DrawingTypeEnum.DRAWING_IMAGE, mo
         createControl$,
         clearControl$,
         changing$,
+        changeEnd$,
         getSelectedObjectMap: () => selectedObjects,
         clearSelectedObjects: vi.fn(),
     };
@@ -88,6 +90,8 @@ function createControllerHarness(drawingType = DrawingTypeEnum.DRAWING_IMAGE, mo
     };
 
     const executeCommand = vi.fn();
+    const triggerContextMenu = vi.fn();
+    injector.add([IContextMenuService, { useValue: { triggerContextMenu } as never }]);
     injector.add([ICommandService, {
         useValue: {
             executeCommand,
@@ -153,6 +157,8 @@ function createControllerHarness(drawingType = DrawingTypeEnum.DRAWING_IMAGE, mo
 
     return {
         clearControl$,
+        changeEnd$,
+        triggerContextMenu,
         createControl$,
         contextService,
         controller,
@@ -167,6 +173,20 @@ function createControllerHarness(drawingType = DrawingTypeEnum.DRAWING_IMAGE, mo
 }
 
 describe('DocDrawingPopupMenuController', () => {
+    it('opens the shared drawing menu for a selected native group', () => {
+        const harness = createControllerHarness(DrawingTypeEnum.DRAWING_GROUP);
+        try {
+            const event = { button: 2 };
+            harness.changeEnd$.next({ event });
+            expect(harness.triggerContextMenu).toHaveBeenCalledWith(event, ContextMenuPosition.DRAWING);
+            harness.controller.dispose();
+            harness.changeEnd$.next({ event });
+            expect(harness.triggerContextMenu).toHaveBeenCalledTimes(1);
+        } finally {
+            harness.injector.dispose();
+        }
+    });
+
     it('keeps the mobile popup controller independent from the desktop controller', () => {
         expect(MobileDocDrawingPopupMenuController.prototype).not.toBeInstanceOf(DocDrawingPopupMenuController);
     });

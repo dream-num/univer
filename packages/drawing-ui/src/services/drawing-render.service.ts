@@ -195,7 +195,7 @@ export class DrawingRenderService {
                 scene.attachTransformerTo(image);
             }
 
-            groupId && insertGroupObject({ drawingId: groupId, unitId, subUnitId }, image, scene, this._drawingManagerService);
+            groupId && insertGroupObject({ drawingId: groupId, unitId, subUnitId }, image, scene, this._drawingManagerService, isMultiTransform ? index : undefined);
 
             if (prstGeom != null) {
                 image.setPrstGeom(prstGeom);

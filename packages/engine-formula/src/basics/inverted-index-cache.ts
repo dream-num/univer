@@ -67,6 +67,8 @@ export class InvertedIndexCache {
      */
     private _cache: Map<string, Map<string, Map<number, Map<ValueTypeWithSymbol, Set<number>>>>> = new Map();
 
+    private _rowValues = new WeakMap<Map<ValueTypeWithSymbol, Set<number>>, Map<number, ValueTypeWithSymbol>>();
+
     private _continueBuildingCache: Map<string, Map<string, Map<number, IntervalTree<NumericTuple>>>> = new Map();
 
     set(unitId: string, sheetId: string, column: number, value: ValueTypeWithNullUndefined, row: number, isForceUpdate: boolean = false) {
@@ -92,13 +94,17 @@ export class InvertedIndexCache {
             sheetMap.set(column, columnMap);
         }
 
+        let rowValues = this._rowValues.get(columnMap);
+        if (rowValues == null) {
+            rowValues = new Map();
+            this._rowValues.set(columnMap, rowValues);
+        }
+
         // If is force update, we need to remove the old value from the map
         if (isForceUpdate) {
-            for (const [_, _cellList] of columnMap) {
-                if (_cellList.has(row)) {
-                    _cellList.delete(row);
-                    break;
-                }
+            const oldValue = rowValues.get(row);
+            if (oldValue !== undefined) {
+                columnMap.get(oldValue)?.delete(row);
             }
         }
 
@@ -111,6 +117,7 @@ export class InvertedIndexCache {
         }
 
         cellList.add(row);
+        rowValues.set(row, _value);
     }
 
     getCellValuePositions(unitId: string, sheetId: string, column: number) {

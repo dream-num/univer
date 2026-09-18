@@ -18,6 +18,25 @@ import { describe, expect, it } from 'vitest';
 import { InvertedIndexCache } from '../inverted-index-cache';
 
 describe('InvertedIndexCache', () => {
+    it('moves updated rows between normalized value buckets and resets them on clear', () => {
+        const cache = new InvertedIndexCache();
+        const rows: [number, number][] = [[0, 3]];
+        cache.set('unit', 'sheet', 0, 'OLD', 0);
+        cache.set('unit', 'sheet', 0, 'old', 1);
+        cache.setContinueBuildingCache('unit', 'sheet', 0, 0, 3);
+        cache.set('unit', 'sheet', 0, 0, 0, true);
+        cache.set('unit', 'sheet', 0, null, 0, true);
+        cache.set('unit', 'sheet', 0, 'NEW', 0, true);
+        expect(cache.getCellPositions('unit', 'sheet', 0, 'old', rows)?.matchingRows).toEqual([1]);
+        expect(cache.getCellPositions('unit', 'sheet', 0, 0, rows)?.matchingRows).toEqual([]);
+        expect(cache.getCellPositions('unit', 'sheet', 0, 'new', rows)?.matchingRows).toEqual([0]);
+        cache.set('unit', 'other', 0, 'old', 0, true);
+        expect(cache.getCellPositions('unit', 'other', 0, 'old', rows)?.matchingRows).toEqual([0]);
+        cache.clear();
+        cache.set('unit', 'sheet', 0, 'fresh', 0, true);
+        expect(cache.getCellPositions('unit', 'sheet', 0, 'new', rows)?.matchingRows).toEqual([]);
+        expect(cache.getCellPositions('unit', 'sheet', 0, 'fresh', rows)?.matchingRows).toEqual([0]);
+    });
     it('keeps empty string lookups distinct from numeric zero lookups', () => {
         const cache = new InvertedIndexCache();
         const unitId = 'unit';

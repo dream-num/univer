@@ -16,7 +16,9 @@
 
 import type { ICommandInfo, IUnitRange, Nullable } from '@univerjs/core';
 import type { IDirtyUnitFeatureMap } from '../basics/common';
-import type { ISetFormulaCalculationNotificationMutation } from '../commands/mutations/set-formula-calculation.mutation';
+import type {
+    ISetFormulaCalculationNotificationMutation,
+} from '../commands/mutations/set-formula-calculation.mutation';
 import type { IFormulaDirtyData } from './current-data.service';
 import { Disposable, ICommandService, Rectangle } from '@univerjs/core';
 import {
@@ -186,10 +188,15 @@ export class FormulaCalculationTriggerService extends Disposable {
     }
 
     private _generateDirty(commands: ICommandInfo[]): IFormulaDirtyData {
-        return commands.reduce<IFormulaDirtyData>((result, command) => {
+        const result = createEmptyDirtyData();
+        const rangeKeys = new Set<string>();
+        for (const command of commands) {
             const conversion = this._activeDirtyManagerService.get(command.id);
-            return conversion ? mergeDirtyData(result, conversion.getDirtyData(command)) : result;
-        }, createEmptyDirtyData());
+            if (conversion) {
+                appendDirtyData(result, conversion.getDirtyData(command), rangeKeys);
+            }
+        }
+        return result;
     }
 }
 
@@ -197,32 +204,36 @@ function createEmptyDirtyData(): IFormulaDirtyData {
     return {
         forceCalculation: false,
         dirtyRanges: [],
-        dirtyNameMap: {},
-        dirtyDefinedNameMap: {},
-        dirtySuperTableMap: {},
-        dirtyUnitFeatureMap: {},
-        dirtyUnitOtherFormulaMap: {},
-        clearDependencyTreeCache: {},
+        dirtyNameMap: Object.create(null),
+        dirtyDefinedNameMap: Object.create(null),
+        dirtySuperTableMap: Object.create(null),
+        dirtyUnitFeatureMap: Object.create(null),
+        dirtyUnitOtherFormulaMap: Object.create(null),
+        clearDependencyTreeCache: Object.create(null),
     };
 }
 
 function mergeDirtyData(left: IFormulaDirtyData, right: Partial<IFormulaDirtyData>): IFormulaDirtyData {
-    const dirtyRanges = [...left.dirtyRanges];
-    mergeDirtyRanges(dirtyRanges, right.dirtyRanges ?? []);
-    return {
-        dirtyRanges,
-        dirtyNameMap: mergeDirtyUnitStringMap(left.dirtyNameMap, right.dirtyNameMap),
-        dirtyDefinedNameMap: mergeDirtyUnitStringMap(left.dirtyDefinedNameMap, right.dirtyDefinedNameMap),
-        dirtySuperTableMap: mergeDirtyUnitStringMap(left.dirtySuperTableMap ?? {}, right.dirtySuperTableMap),
-        dirtyUnitFeatureMap: mergeDirtyUnitNestedMap(left.dirtyUnitFeatureMap, right.dirtyUnitFeatureMap),
-        dirtyUnitOtherFormulaMap: mergeDirtyUnitNestedMap(left.dirtyUnitOtherFormulaMap, right.dirtyUnitOtherFormulaMap),
-        clearDependencyTreeCache: mergeDirtyUnitStringMap(left.clearDependencyTreeCache, right.clearDependencyTreeCache),
-        forceCalculation: left.forceCalculation || Boolean(right.forceCalculation),
-    };
+    const result = createEmptyDirtyData();
+    const rangeKeys = new Set<string>();
+    appendDirtyData(result, left, rangeKeys);
+    appendDirtyData(result, right, rangeKeys);
+    return result;
 }
 
-function mergeDirtyRanges(target: IUnitRange[], source: IUnitRange[]): void {
-    const keys = new Set(target.map(getDirtyRangeKey));
+// The accumulator owns its nested maps; command payloads and running sessions stay unchanged.
+function appendDirtyData(target: IFormulaDirtyData, source: Partial<IFormulaDirtyData>, rangeKeys: Set<string>): void {
+    mergeDirtyRanges(target.dirtyRanges, source.dirtyRanges ?? [], rangeKeys);
+    mergeDirtyUnitStringMap(target.dirtyNameMap, source.dirtyNameMap);
+    mergeDirtyUnitStringMap(target.dirtyDefinedNameMap, source.dirtyDefinedNameMap);
+    mergeDirtyUnitStringMap(target.dirtySuperTableMap ??= Object.create(null), source.dirtySuperTableMap);
+    mergeDirtyUnitNestedMap(target.dirtyUnitFeatureMap, source.dirtyUnitFeatureMap);
+    mergeDirtyUnitNestedMap(target.dirtyUnitOtherFormulaMap, source.dirtyUnitOtherFormulaMap);
+    mergeDirtyUnitStringMap(target.clearDependencyTreeCache, source.clearDependencyTreeCache);
+    target.forceCalculation = target.forceCalculation || Boolean(source.forceCalculation);
+}
+
+function mergeDirtyRanges(target: IUnitRange[], source: IUnitRange[], keys: Set<string>): void {
     source.forEach((range) => {
         const key = getDirtyRangeKey(range);
         if (!keys.has(key)) {
@@ -236,24 +247,19 @@ function getDirtyRangeKey({ unitId, sheetId, range }: IUnitRange): string {
     return JSON.stringify([unitId, sheetId, range.startRow, range.startColumn, range.endRow, range.endColumn, range.rangeType]);
 }
 
-function mergeDirtyUnitStringMap(left: IDirtyUnitStringMap, right?: IDirtyUnitStringMap): IDirtyUnitStringMap {
-    const result: IDirtyUnitStringMap = { ...left };
+function mergeDirtyUnitStringMap(target: IDirtyUnitStringMap, right?: IDirtyUnitStringMap): void {
     Object.entries(right ?? {}).forEach(([unitId, values]) => {
-        result[unitId] = { ...result[unitId], ...values };
+        Object.assign(target[unitId] ??= Object.create(null), values);
     });
-    return result;
 }
 
-function mergeDirtyUnitNestedMap(left: IDirtyUnitFeatureMap, right?: IDirtyUnitFeatureMap): IDirtyUnitFeatureMap {
-    const result: IDirtyUnitFeatureMap = { ...left };
+function mergeDirtyUnitNestedMap(target: IDirtyUnitFeatureMap, right?: IDirtyUnitFeatureMap): void {
     Object.entries(right ?? {}).forEach(([unitId, sheets]) => {
-        const unitResult: NonNullable<IDirtyUnitFeatureMap[string]> = { ...result[unitId] };
+        const unitResult = target[unitId] ??= Object.create(null);
         Object.entries(sheets ?? {}).forEach(([sheetId, values]) => {
-            unitResult[sheetId] = { ...unitResult[sheetId], ...values };
+            Object.assign(unitResult[sheetId] ??= Object.create(null), values);
         });
-        result[unitId] = unitResult;
     });
-    return result;
 }
 
 function hasDirtyData(dirtyData: IFormulaDirtyData): boolean {

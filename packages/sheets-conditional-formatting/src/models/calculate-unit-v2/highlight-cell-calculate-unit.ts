@@ -15,14 +15,29 @@
  */
 
 import type { IStyleData, Nullable } from '@univerjs/core';
-import type { IAverageHighlightCell, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../type';
+import type {
+    IAverageHighlightCell,
+    IFormulaHighlightCell,
+    IHighlightCell,
+    INumberHighlightCell,
+    IRankHighlightCell,
+    ITextHighlightCell,
+    ITimePeriodHighlightCell,
+} from '../type';
 import type { IContext } from './base-calculate-unit';
 import { CellValueType, dateKit, Range, Tools } from '@univerjs/core';
 import { ERROR_TYPE_SET, FormulaResultStatus } from '@univerjs/engine-formula';
 import { CFNumberOperator, CFSubRuleType, CFTextOperator, CFTimePeriodOperator } from '../../base/const';
 import { ConditionalFormattingFormulaService } from '../../services/conditional-formatting-formula.service';
 import { BaseCalculateUnit, CalculateEmitStatus } from './base-calculate-unit';
-import { compareWithNumber, filterRange, getCellValue, isFloatsEqual, isNullable, serialTimeToTimestamp } from './utils';
+import {
+    compareWithNumber,
+    filterRange,
+    getCellValue,
+    isFloatsEqual,
+    isNullable,
+    serialTimeToTimestamp,
+} from './utils';
 
 interface IConfig {
     value: any;
@@ -240,21 +255,17 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
         const run = () => {
             switch (ruleConfig.subType) {
                 case CFSubRuleType.number: {
-                    const v = cellValue && Number(cellValue.v);
-                    const isNumber = cellValue?.t === CellValueType.NUMBER;
                     const subRuleConfig = ruleConfig as INumberHighlightCell;
-                    if (!isNumber) {
-                        if ([CFNumberOperator.notEqual, CFNumberOperator.notBetween].includes(subRuleConfig.operator)) {
-                            return true;
-                        }
+                    const value = cellValue?.v;
+                    if (cellValue?.t !== CellValueType.FORCE_STRING && (ERROR_TYPE_SET as Set<unknown>).has(value)) {
                         return false;
                     }
-
-                    if (isNullable(v) || Number.isNaN(v)) {
-                        return;
+                    // Excel compares an empty cell as zero. Text (including a formula's
+                    // empty string) and booleans sort above numbers without coercion.
+                    if (value != null && (cellValue?.t === CellValueType.BOOLEAN || (cellValue?.t !== CellValueType.NUMBER && typeof value !== 'number'))) {
+                        return [CFNumberOperator.notEqual, CFNumberOperator.notBetween, CFNumberOperator.greaterThan, CFNumberOperator.greaterThanOrEqual].includes(subRuleConfig.operator);
                     }
-
-                    return compareWithNumber({ operator: subRuleConfig.operator, value: subRuleConfig.value || 0 }, v || 0);
+                    return compareWithNumber({ operator: subRuleConfig.operator, value: subRuleConfig.value ?? 0 }, Number(value ?? 0));
                 }
                 case CFSubRuleType.text: {
                     const subRuleConfig = ruleConfig as ITextHighlightCell;

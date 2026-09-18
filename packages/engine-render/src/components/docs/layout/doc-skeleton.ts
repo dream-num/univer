@@ -3822,14 +3822,7 @@ export class DocumentSkeleton extends Skeleton {
                             const endX = startX + glyph.width;
                             const node = { node: glyph, ...segment, ratioX: x / (startX + endX), ratioY: y / (startY + endY) };
                             if (sameLine && x >= startX && x <= endX) {
-                                // Caret placement includes paragraph spacing and line padding;
-                                // only the painted text band should occlude drawings behind it.
-                                const contentTop = startY + (line.marginTop ?? 0) + (line.paddingTop ?? 0);
-                                const contentBottom = contentTop + line.contentHeight;
-                                return {
-                                    ...node,
-                                    isExactHit: Boolean(glyph.content?.trim()) && y >= contentTop && y <= contentBottom,
-                                };
+                                return node;
                             }
                             if (distanceY < nearestDistanceY) {
                                 nearestDistanceY = distanceY;

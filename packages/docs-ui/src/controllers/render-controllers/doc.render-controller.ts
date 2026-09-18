@@ -76,6 +76,7 @@ import {
     DOCS_VIEW_KEY,
     VIEWPORT_KEY,
 } from '../../basics/docs-view-key';
+import { DocPageRenderComponent } from '../../components/doc-page-render-component';
 import { DocLayoutCoordinatorService } from '../../services/doc-layout-coordinator.service';
 import { DocLayoutInteractionService } from '../../services/doc-layout-interaction.service';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
@@ -1680,7 +1681,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             ...this._getEditorBackgroundConfig(),
         };
 
-        const documents = new Documents(DOCS_VIEW_KEY.MAIN, undefined, config);
+        const DocumentComponent = this._isEditorRenderUnit(documentModel.getUnitId()) ? Documents : DocPageRenderComponent;
+        const documents = new DocumentComponent(DOCS_VIEW_KEY.MAIN, undefined, config);
         documents.zIndex = DOCS_COMPONENT_DEFAULT_Z_INDEX;
         const docBackground = new DocBackground(DOCS_VIEW_KEY.BACKGROUND, undefined, config);
         docBackground.zIndex = DOCS_COMPONENT_DEFAULT_Z_INDEX;

@@ -16,9 +16,11 @@
 
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import { Direction, DrawingTypeEnum, ImageSourceType } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
+import { insertGroupObject } from '@univerjs/drawing-ui';
+import { DrawingGroupObject, Engine, Image, IRenderManagerService, MAIN_VIEW_PORT_KEY, Rect, Scene, Vector2, Viewport } from '@univerjs/engine-render';
 import { InsertSheetDrawingCommand, ISheetDrawingService } from '@univerjs/sheets-drawing';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createSheetsDrawingUiTestBed } from '../../../__tests__/create-sheets-drawing-ui-test-bed';
 import { FlipSheetDrawingCommand } from '../flip-drawings.command';
 import { GroupSheetDrawingCommand } from '../group-sheet-drawing.command';
@@ -91,6 +93,61 @@ class TestRenderManagerService {
 }
 
 describe('sheet drawing UI commands', () => {
+    it.each([[false, false], [true, false], [false, true], [true, true]])('restores sheet group picking and stacking with flips %s/%s', async (flipX, flipY) => {
+        const contextSpy = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
+            return { canvas: this, setTransform: vi.fn(), clearRect: vi.fn() } as unknown as CanvasRenderingContext2D;
+        });
+        const testBed = createSheetsDrawingUiTestBed();
+        const engine = new Engine('group-engine', { elementWidth: 800, elementHeight: 500, dpr: 1 });
+        const scene = new Scene('group-scene', engine);
+        const viewport = new Viewport(MAIN_VIEW_PORT_KEY, scene, { left: 0, top: 0, width: 800, height: 500, active: true });
+        try {
+            testBed.commandService.registerCommand(GroupSheetDrawingCommand);
+            const children = [createSheetDrawing('child-1', 0, 0), createSheetDrawing('child-2', 100, 80)];
+            await insertDrawings(testBed, [createSheetDrawing('background', 0, 0), ...children]);
+            const parent = {
+                unitId: testBed.unitId,
+                subUnitId: testBed.subUnitId,
+                drawingId: 'group-1',
+                drawingType: DrawingTypeEnum.DRAWING_GROUP,
+                transform: { left: 100, top: 100, width: 200, height: 160, flipX, flipY },
+                groupBaseBound: { left: 0, top: 0, width: 200, height: 160 },
+            };
+            expect(await testBed.commandService.executeCommand(GroupSheetDrawingCommand.id, [{
+                parent,
+                children: children.map((child) => ({ ...child, groupId: parent.drawingId })),
+            }])).toBe(true);
+            const manager = testBed.get(IDrawingManagerService);
+            for (const child of children) {
+                const object = new Image(getDrawingShapeKeyByDrawingSearch(child), { ...child.transform });
+                scene.addObject(object, 7);
+                insertGroupObject(parent, object, scene, manager);
+            }
+            const group = scene.getObjectIncludeInGroup(getDrawingShapeKeyByDrawingSearch(parent)) as DrawingGroupObject;
+            expect(group).toBeInstanceOf(DrawingGroupObject);
+            expect(group.getObjects()).toHaveLength(2);
+            expect(group.layer?.zIndex).toBe(7);
+            expect(group.zIndex).toBe(manager.getDrawingOrder(parent.unitId, parent.subUnitId).indexOf(parent.drawingId));
+            const point = new Vector2(flipX ? 275 : 125, flipY ? 240 : 120);
+            expect(scene.pick(point)).toBe(group);
+            const overlay = new Rect('overlay', { left: 100, top: 100, width: 200, height: 160, fill: '#993333' });
+            overlay.zIndex = group.zIndex + 1;
+            scene.addObject(overlay, 7);
+            expect(scene.pick(point)).toBe(overlay);
+            overlay.zIndex = group.zIndex - 1;
+            expect(scene.pick(point)).toBe(group);
+            if (flipX !== flipY) {
+                expect(group.isHit(new Vector2(125, 120))).toBe(false);
+            }
+        } finally {
+            viewport.dispose();
+            scene.dispose();
+            engine.dispose();
+            testBed.univer.dispose();
+            contextSpy.mockRestore();
+        }
+    });
+
     afterEach(() => {
         // each test disposes its own univer instance
     });

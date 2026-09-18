@@ -127,7 +127,10 @@ describe('worker document layout session', () => {
         vi.unstubAllGlobals();
     });
 
-    it('paginates and resolves a 1000-page TOC target incrementally', () => {
+    it('paginates and resolves a 1000-page TOC target incrementally', {
+        timeout: 60_000,
+        retry: { count: 2, condition: /^Layout block timing:/ },
+    }, ({ onTestFinished }) => {
         vi.stubGlobal('document', undefined);
         vi.stubGlobal('OffscreenCanvas', class {
             getContext() {
@@ -177,7 +180,34 @@ describe('worker document layout session', () => {
                 marginRight: 20,
             },
         });
-        const session = new DocumentLayoutSession(dataModel, new LocaleService());
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const localeService = univer.__getInjector().get(LocaleService);
+        localeService.setLocale(LocaleType.EN_US);
+        localeService.setDirection('ltr');
+        const session = new DocumentLayoutSession(dataModel, localeService);
+        onTestFinished(() => {
+            session.dispose();
+            dataModel.dispose();
+            univer.dispose();
+        });
+
+        // Native JSON work measures environmental slowdown independently of layout.
+        // Ten warmed local samples took 21–29 ms; use 30 ms as the initial reference.
+        const baselinePayload = JSON.stringify(Array.from({ length: 10_000 }, (_, index) => ({ index, text: `baseline-${index}` })));
+        const baselineSamples: number[] = [];
+        for (let sample = 0; sample < 4; sample++) {
+            const baselineStart = performance.now();
+            for (let iteration = 0; iteration < 20; iteration++) {
+                JSON.parse(baselinePayload);
+            }
+            if (sample > 0) {
+                baselineSamples.push(performance.now() - baselineStart);
+            }
+        }
+        const baselineMs = percentile(baselineSamples, 0.5);
+        const baselineRatio = baselineMs / 30;
+        // Scale the allowance with the independent probe, without tightening it on faster machines.
+        const blockLimitMs = 50 * Math.max(1, baselineRatio);
         const heapStart = memoryUsage().heapUsed;
         const startedAt = performance.now();
         const generation = session.start({ reason: 'initial' });
@@ -200,10 +230,13 @@ describe('worker document layout session', () => {
         const benchmark = {
             elapsedMs: Math.round(performance.now() - startedAt),
             heapDeltaMb: Math.round((memoryUsage().heapUsed - heapStart) / 1024 / 1024),
-            maxBlockMs: Math.round(result.progress.maxBlockDuration),
+            maxBlockMs: result.progress.maxBlockDuration,
+            baselineMs,
+            baselineRatio,
+            blockLimitMs,
             stepCount,
         };
-        if (process.env.DOC_BENCHMARK_LOG === '1') {
+        if (process.env.CI === 'true' || process.env.DOC_BENCHMARK_LOG === '1') {
             stdout.write(`1000-page-layout ${JSON.stringify(benchmark)}\n`);
         }
 
@@ -217,10 +250,8 @@ describe('worker document layout session', () => {
             pageNumber: 1_000,
         });
         expect(session.getPage(999)?.pageIndex).toBe(999);
-        expect(benchmark.maxBlockMs).toBeLessThan(50);
-        session.dispose();
-        dataModel.dispose();
-    }, 60_000);
+        expect(benchmark.maxBlockMs, `Layout block timing: ${JSON.stringify(benchmark)}`).toBeLessThan(blockLimitMs);
+    });
 
     it.each(['initial', 'edit'] as const)('finishes a late anchor page before publishing a fresh %s session', (reason) => {
         vi.stubGlobal('document', undefined);

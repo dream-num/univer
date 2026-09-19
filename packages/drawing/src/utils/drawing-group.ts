@@ -21,6 +21,8 @@ export const DRAWING_GROUPABLE_TYPES = [
     DrawingTypeEnum.DRAWING_IMAGE,
     DrawingTypeEnum.DRAWING_SHAPE,
     DrawingTypeEnum.DRAWING_CHART,
+    DrawingTypeEnum.DRAWING_SLICER,
+    DrawingTypeEnum.DRAWING_TIMELINE,
     DrawingTypeEnum.DRAWING_GROUP,
 ] as const;
 

@@ -16,30 +16,47 @@
 
 import type { Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import type { ISetSheetTableParams, ITableFilterItem } from '@univerjs/sheets-table';
+import type {
+    ISetSheetTableParams,
+    ITableFilterItem,
+    ITableManualFilterItem,
+    ITableRecordFilterItem,
+} from '@univerjs/sheets-table';
 import type { LocaleKey } from '../locale/types';
-import type { IFilterByValueWithTreeItem, ITableFilterColorList, ITableFilterItemList } from '../types';
+import type {
+    IFilterByValueWithTreeItem,
+    ITableFilterColorList,
+    ITableFilterItemList,
+} from '../types';
 import {
     cellToRange,
     ColorKit,
     DEFAULT_STYLES,
     Disposable,
+    FilterSelectionMode,
     getColorStyle,
     ICommandService,
     Inject,
     IUniverInstanceService,
     LocaleService,
     ObjectMatrix,
+    RecordValueType,
     Rectangle,
 } from '@univerjs/core';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
 import {
+    compileTableRecordFilter,
+    getTableRecordValue,
+    getTableRecordValueKey,
     isColorTableFilter,
     isConditionFilter,
     isManualTableFilter,
+    isRecordTableFilter,
     SetSheetTableFilterCommand,
+    SetSheetTableFilterMutation,
     SheetTableService,
     TABLE_FILTER_EMPTY_VALUE,
+    TableColumnFilterTypeEnum,
     TableManager,
 } from '@univerjs/sheets-table';
 import { FilterByEnum } from '../types';
@@ -67,7 +84,7 @@ export class SheetsTableUiService extends Disposable {
     }
 
     private _registerTableFilterChangeEvent() {
-        this._commandService.onCommandExecuted((command) => {
+        this.disposeWithMe(this._commandService.onCommandExecuted((command) => {
             if (command.id === SetRangeValuesMutation.id) {
                 const { unitId, subUnitId, cellValue } = command.params as ISetRangeValuesMutationParams;
                 const tables = this._tableManager.getTablesBySubunitId(unitId, subUnitId);
@@ -83,10 +100,10 @@ export class SheetsTableUiService extends Disposable {
                     });
                     if (overlapTable) {
                         const colIndex = col - overlapTable.getRange().startColumn;
-                        this._itemsCache.delete(overlapTable.getId() + colIndex);
+                        this._itemsCache.delete(this._getItemsCacheKey(unitId, overlapTable.getId(), colIndex));
                     }
                 });
-            } else if (command.id === SetSheetTableFilterCommand.id) {
+            } else if (command.id === SetSheetTableFilterMutation.id) {
                 const { unitId, tableId } = command.params as ISetSheetTableParams;
                 const table = this._tableManager.getTable(unitId, tableId);
                 if (!table) {
@@ -95,13 +112,12 @@ export class SheetsTableUiService extends Disposable {
                 const subUnitId = table.getSubunitId();
                 const allSubTables = this._tableManager.getTablesBySubunitId(unitId, subUnitId);
                 allSubTables.forEach((table) => {
-                    const range = table.getRange();
-                    for (let i = range.startColumn; i <= range.endColumn; i++) {
-                        this._itemsCache.delete(table.getId() + i);
+                    for (let columnIndex = 0; columnIndex < table.getColumnsCount(); columnIndex++) {
+                        this._itemsCache.delete(this._getItemsCacheKey(unitId, table.getId(), columnIndex));
                     }
                 });
             }
-        });
+        }));
     }
 
     getTableFilterPanelInitProps(unitId: string, subUnitId: string, tableId: string, column: number): ISheetTableFilterPanelProps {
@@ -121,16 +137,77 @@ export class SheetsTableUiService extends Disposable {
         };
     }
 
-    getTableFilterCheckedItems(unitId: string, tableId: string, columnIndex: number): string[] {
+    getTableFilterCheckedItems(
+        unitId: string,
+        tableId: string,
+        columnIndex: number
+    ): string[] {
         const table = this._tableManager.getTable(unitId, tableId);
         const checkedItems: string[] = [];
         if (table) {
             const filter = table.getTableFilterColumn(columnIndex);
-            if (filter && isManualTableFilter(filter)) {
+            if (isManualTableFilter(filter)) {
                 checkedItems.push(...filter.values.map((value) => value === TABLE_FILTER_EMPTY_VALUE ? this._localeService.t<LocaleKey>('sheets-table-ui.condition.empty') : value));
+            } else if (isRecordTableFilter(filter)) {
+                const accepts = compileTableRecordFilter(filter);
+                const items = this.getTableFilterItems(unitId, table.getSubunitId(), tableId, columnIndex);
+                checkedItems.push(...items.data
+                    .filter((item) => item.recordValue && accepts(item.recordValue))
+                    .map((item) => item.valueKey!));
             }
         }
         return checkedItems;
+    }
+
+    createItemFilter(
+        unitId: string,
+        tableId: string,
+        columnIndex: number,
+        items: ITableFilterItemList,
+        checkedItemSet: Set<string>,
+        selectAllRequested: boolean
+    ): ITableManualFilterItem | ITableRecordFilterItem | undefined {
+        const table = this._tableManager.getTable(unitId, tableId);
+        const currentFilter = table?.getTableFilterColumn(columnIndex);
+        if (selectAllRequested) {
+            return undefined;
+        }
+        if (!isRecordTableFilter(currentFilter)) {
+            const emptyLabel = this._localeService.t<LocaleKey>('sheets-table-ui.condition.empty');
+            const values = items.data
+                .filter((item) => checkedItemSet.has(item.valueKey ?? item.title))
+                .map((item) => item.title === emptyLabel ? TABLE_FILTER_EMPTY_VALUE : item.title) as string[];
+            return values.length === items.data.length
+                ? undefined
+                : { filterType: TableColumnFilterTypeEnum.manual, values };
+        }
+        const accepts = compileTableRecordFilter(currentFilter);
+        const recordItems = items.data.filter((item) => item.valueKey && item.recordValue);
+        const unchanged = recordItems.every((item) => (
+            checkedItemSet.has(item.valueKey!) === accepts(item.recordValue!)
+        ));
+        if (unchanged) {
+            return currentFilter;
+        }
+
+        const candidateKeys = new Set(recordItems.map((item) => item.valueKey!));
+        const values = currentFilter.values
+            .filter((value) => !candidateKeys.has(getTableRecordValueKey(value)))
+            .map((value) => value.type === RecordValueType.Blank ? { type: RecordValueType.Blank } as const : { ...value });
+        recordItems.forEach((item) => {
+            const selected = checkedItemSet.has(item.valueKey!);
+            if ((currentFilter.mode === FilterSelectionMode.Include) === selected) {
+                values.push(item.recordValue!);
+            }
+        });
+        if (currentFilter.mode === FilterSelectionMode.Exclude && values.length === 0) {
+            return undefined;
+        }
+        return {
+            filterType: TableColumnFilterTypeEnum.record,
+            mode: currentFilter.mode,
+            values,
+        };
     }
 
     async setTableFilter(
@@ -208,12 +285,13 @@ export class SheetsTableUiService extends Disposable {
     }
 
     getTableFilterItems(unitId: string, subUnitId: string, tableId: string, columnIndex: number): ITableFilterItemList {
-        if (this._itemsCache.has(tableId + columnIndex)) {
-            return this._itemsCache.get(tableId + columnIndex) || { data: [], itemsCountMap: new Map(), allItemsCount: 0 };
-        }
         const table = this._tableManager.getTable(unitId, tableId);
         if (!table) {
             return { data: [], itemsCountMap: new Map(), allItemsCount: 0 };
+        }
+        const cacheKey = this._getItemsCacheKey(unitId, tableId, columnIndex);
+        if (this._itemsCache.has(cacheKey)) {
+            return this._itemsCache.get(cacheKey) || { data: [], itemsCountMap: new Map(), allItemsCount: 0 };
         }
         const tableRange = table.getTableFilterRange();
         const { startRow, endRow, startColumn } = tableRange;
@@ -226,6 +304,8 @@ export class SheetsTableUiService extends Disposable {
         const data: IFilterByValueWithTreeItem[] = [];
 
         const map = new Map<string, number>();
+        const currentFilter = table.getTableFilterColumn(columnIndex);
+        const useRecordValues = isRecordTableFilter(currentFilter);
         const filteredRowsByOtherColumns = this._getFilteredRowsByOtherColumns(
             worksheet,
             tableId,
@@ -243,19 +323,32 @@ export class SheetsTableUiService extends Disposable {
             if (stringItem == null) {
                 stringItem = this._localeService.t<LocaleKey>('sheets-table-ui.condition.empty');
             }
+            if (useRecordValues && typeof stringItem !== 'string') {
+                stringItem = String(stringItem);
+            }
 
-            if (!map.has(stringItem)) {
+            const recordValue = useRecordValues ? getTableRecordValue(worksheet, row, column) : undefined;
+            const valueKey = recordValue ? getTableRecordValueKey(recordValue) : undefined;
+            const itemKey = valueKey ?? stringItem;
+            if (!map.has(itemKey)) {
                 data.push({
                     title: stringItem,
-                    key: `${column}_${row}`,
+                    key: valueKey ?? `${column}_${row}`,
                     leaf: true,
+                    valueKey,
+                    recordValue,
                 });
             }
             allItemsCount++;
-            map.set(stringItem, (map.get(stringItem) || 0) + 1);
+            map.set(itemKey, (map.get(itemKey) || 0) + 1);
         }
-        this._itemsCache.set(tableId + columnIndex, { data, itemsCountMap: map, allItemsCount });
+        this._itemsCache.set(cacheKey, { data, itemsCountMap: map, allItemsCount });
         return { data, itemsCountMap: map, allItemsCount };
+    }
+
+    private _getItemsCacheKey(unitId: string, tableId: string, columnIndex: number): string {
+        const columnId = this._tableManager.getTable(unitId, tableId)?.getTableColumnByIndex(columnIndex)?.id;
+        return JSON.stringify([unitId, tableId, columnId ?? columnIndex]);
     }
 
     private _getFilteredRowsByOtherColumns(

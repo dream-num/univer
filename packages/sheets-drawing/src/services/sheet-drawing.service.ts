@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam, IRotationSkewFlipTransform, Serializable } from '@univerjs/core';
+import type { DrawingTypeEnum, IDrawingParam, IRotationSkewFlipTransform, Serializable } from '@univerjs/core';
 import type { IDrawingJsonUndo1, IImageData, IUnitDrawingService } from '@univerjs/drawing';
 import type { ISheetOverGridPosition } from '@univerjs/sheets';
 import { createIdentifier } from '@univerjs/core';
@@ -61,6 +61,12 @@ export interface ISheetShape extends IDrawingParam, ISheetDrawingBase {
 
 }
 
+/** Canvas-hosted spreadsheet filter whose business definition lives in its owning feature resource. */
+export interface ISheetSlicerDrawing extends IDrawingParam, ISheetDrawingBase {
+    drawingType: DrawingTypeEnum.DRAWING_SLICER | DrawingTypeEnum.DRAWING_TIMELINE;
+    slicerViewId: string;
+}
+
 export interface IFloatDomData extends IDrawingParam {
     componentKey: string;
     data?: Serializable;
@@ -74,7 +80,7 @@ export interface IFloatDomData extends IDrawingParam {
 // TODO@wzhudev: this shouldn't be here. It should be in the sheets package
 export interface ISheetFloatDom extends IFloatDomData, ISheetDrawingBase { }
 
-export type ISheetDrawing = ISheetImage | ISheetShape | ISheetFloatDom;
+export type ISheetDrawing = ISheetImage | ISheetShape | ISheetFloatDom | ISheetSlicerDrawing;
 
 type OptionalField<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export type ISheetUpdateDrawing = OptionalField<ISheetImage | ISheetShape, 'sheetTransform'>;

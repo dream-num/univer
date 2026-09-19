@@ -157,8 +157,9 @@ describe('drawing controller utils', () => {
         expect(group.getObjects()).toEqual([object, nextObject]);
     });
 
-    it('inserts nested groups into their parent group', () => {
+    it.each([true, false])('inserts nested groups into their parent with Transformer attachment %s', (attachTransformer) => {
         const object = { oKey: 'child-1' };
+        const attachTransformerTo = vi.fn();
         const scene = {
             objects: new Map<string, InstanceType<typeof MockGroup> | { oKey: string }>(),
             getObject(key: string) {
@@ -167,7 +168,7 @@ describe('drawing controller utils', () => {
             addObject(group: InstanceType<typeof MockGroup>) {
                 this.objects.set(group.oKey, group);
                 return {
-                    attachTransformerTo: vi.fn(),
+                    attachTransformerTo,
                 };
             },
             getObjectIncludeInGroup(key: string) {
@@ -187,12 +188,20 @@ describe('drawing controller utils', () => {
             getDrawingsByGroup: vi.fn(() => []),
         };
 
-        insertGroupObject({ unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'child-group' }, object as never, scene as never, drawingManagerService as never);
+        insertGroupObject(
+            { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'child-group' },
+            object as never,
+            scene as never,
+            drawingManagerService as never,
+            undefined,
+            attachTransformer
+        );
 
         const childGroup = scene.getObject('group-child-group') as InstanceType<typeof MockGroup> & { isInGroup?: boolean };
         const parentGroup = scene.getObject('group-parent-group') as InstanceType<typeof MockGroup>;
         expect(childGroup.isInGroup).toBe(true);
         expect(parentGroup.getObjects()).toEqual([childGroup]);
+        expect(attachTransformerTo).toHaveBeenCalledTimes(attachTransformer ? 2 : 0);
     });
 
     it('disables restored group rotation when descendants include an old chart drawing', () => {

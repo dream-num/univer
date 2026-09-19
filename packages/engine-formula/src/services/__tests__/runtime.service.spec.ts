@@ -17,6 +17,7 @@
 import type { ICellData, Nullable } from '@univerjs/core';
 import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
 import {
+    CellValueType,
     ContextService,
     DesktopLogService,
     IContextService,
@@ -381,6 +382,32 @@ describe('FormulaRuntimeService', () => {
         runtime.setRuntimeData(twoByTwo as never);
         expect(runtime.getUnitData().unit?.sheet?.getValue(3, 3)?.v).toBe(11);
         expect(runtime.getRuntimeArrayFormulaCellData().unit?.sheet?.getValue(3, 4)?.v).toBe(12);
+    });
+
+    it.each([
+        { cell: { v: '12', t: CellValueType.NUMBER }, blocked: false },
+        { cell: { v: '1.2e1', t: CellValueType.NUMBER }, blocked: false },
+        { cell: { v: '13', t: CellValueType.NUMBER }, blocked: true },
+        { cell: { v: '12', t: CellValueType.STRING }, blocked: true },
+        { cell: { v: '12', t: CellValueType.FORCE_STRING }, blocked: true },
+        { cell: { v: 'invalid', t: CellValueType.NUMBER }, blocked: true },
+    ])('recognizes imported numeric array results without overwriting real blockers: $cell', ({ cell, blocked }) => {
+        const { injector, runtime, unitDataMatrix, arrayFormulaCellData, arrayFormulaRange } = createRuntimeService();
+        try {
+            arrayFormulaRange.unit.sheet = {
+                3: { 3: { startRow: 3, startColumn: 3, endRow: 3, endColumn: 4 } },
+            };
+            unitDataMatrix.setValue(3, 4, { ...cell });
+            arrayFormulaCellData.setValue(3, 4, { v: 12, t: CellValueType.NUMBER });
+            runtime.setCurrent(3, 3, 10, 10, 'sheet', 'unit');
+            runtime.setRuntimeData(createNewArray([[NumberValueObject.create(11), NumberValueObject.create(12)]], 1, 2));
+            expect(runtime.getUnitData().unit?.sheet?.getValue(3, 3)?.v).toBe(blocked ? ErrorType.SPILL : 11);
+            if (blocked) {
+                expect(unitDataMatrix.getValue(3, 4)).toEqual(cell);
+            }
+        } finally {
+            injector.dispose();
+        }
     });
 
     it('should return #SPILL when a real value is entered into the previous array formula range', () => {

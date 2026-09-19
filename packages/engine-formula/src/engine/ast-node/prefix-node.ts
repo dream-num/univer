@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { IUnitRange, Nullable } from '@univerjs/core';
 import type { BaseFunction } from '../../functions/base-function';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
@@ -34,6 +34,12 @@ import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast
 import { NODE_ORDER_MAP, NodeType } from './node-type';
 
 export class PrefixNode extends BaseAstNode {
+    private _referenceRanges: IUnitRange[] | null = null;
+
+    getReferenceRanges(): IUnitRange[] | null {
+        return this._referenceRanges;
+    }
+
     constructor(
         private _runtimeService: IFormulaRuntimeService,
         private _operatorString: string,
@@ -47,6 +53,7 @@ export class PrefixNode extends BaseAstNode {
     }
 
     override execute(dateSystem: DateSystem = DateSystem.Date1900) {
+        this._referenceRanges = null;
         const children = this.getChildren();
         let value = children[0].getValue();
         let result: FunctionVariantType;
@@ -81,9 +88,10 @@ export class PrefixNode extends BaseAstNode {
         }
 
         const currentValue = value as BaseReferenceObject;
+        this._referenceRanges = [];
 
         if (currentValue.isCell()) {
-            return currentValue.getCellByPosition();
+            return this._getReferencedCell(currentValue);
         }
 
         if (this._preserveAtRangeForFormula2LookupArray()) {
@@ -109,16 +117,33 @@ export class PrefixNode extends BaseAstNode {
 
         // @ projection to current
         if (endRow === startRow && currentColumn >= startColumn && currentColumn <= endColumn) {
-            return currentValue.getCellByColumn(currentColumn);
+            return this._getReferencedCell(currentValue, undefined, currentColumn);
         } else if (startColumn === endColumn && currentRow >= startRow && currentRow <= endRow) {
-            return currentValue.getCellByRow(currentRow);
+            return this._getReferencedCell(currentValue, currentRow);
         }
 
         if (currentValue.isTable()) {
-            return currentValue.getCellByPosition(currentRow);
+            return this._getReferencedCell(currentValue, currentRow);
         }
 
         return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    private _getReferencedCell(reference: BaseReferenceObject, row?: number, column?: number) {
+        const position = reference.getRangePosition();
+        const selectedRow = row ?? position.startRow;
+        const selectedColumn = column ?? position.startColumn;
+        this._referenceRanges = reference.toUnitRanges().map((range) => ({
+            unitId: range.unitId,
+            sheetId: range.sheetId,
+            range: {
+                startRow: selectedRow,
+                endRow: selectedRow,
+                startColumn: selectedColumn,
+                endColumn: selectedColumn,
+            },
+        }));
+        return reference.getCellByPosition(selectedRow, selectedColumn);
     }
 
     private _preserveAtRangeForFormula2LookupArray(): boolean {

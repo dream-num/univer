@@ -15,7 +15,6 @@
  */
 
 import type { ICellData, IRange, Nullable } from '@univerjs/core';
-
 import type {
     IArrayFormulaEmbeddedMap,
     IArrayFormulaRangeType,
@@ -30,7 +29,7 @@ import type { BaseReferenceObject, FunctionVariantType } from '../engine/referen
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { StringValueObject } from '../engine/value-object/primitive-object';
-import { createIdentifier, Disposable, isNullCell, ObjectMatrix } from '@univerjs/core';
+import { CellValueType, createIdentifier, Disposable, isNullCell, isRealNum, ObjectMatrix } from '@univerjs/core';
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
@@ -1020,7 +1019,16 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     }
 
     private _isSameCellValue(cell: Nullable<ICellData>, arrayDataCell: Nullable<ICellData>) {
-        return cell?.v === arrayDataCell?.v && cell?.t === arrayDataCell?.t;
+        if (cell?.t !== arrayDataCell?.t) {
+            return false;
+        }
+        if (cell?.v === arrayDataCell?.v) {
+            return true;
+        }
+        // Imported numeric caches may store strings; calculation results store numbers.
+        return cell?.t === CellValueType.NUMBER &&
+            isRealNum(cell.v) && isRealNum(arrayDataCell?.v) &&
+            Number(cell.v) === Number(arrayDataCell?.v);
     }
 
     private _checkIfArrayFormulaExceeded(rowCount: number, columnCount: number, arrayRange: IRange) {

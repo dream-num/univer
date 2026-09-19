@@ -161,14 +161,10 @@ export class Vlookup extends BaseFunction {
         let colIndexNumValue = this.getIndexNumValue(colIndexNum);
 
         if (colIndexNumValue instanceof ErrorValueObject) {
-            return colIndexNumValue;
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         colIndexNumValue = Math.floor(colIndexNumValue);
-
-        if (colIndexNumValue < 1) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
 
         const searchArray = (tableArray as ArrayValueObject).slice(undefined, [0, 1]);
 
@@ -178,10 +174,9 @@ export class Vlookup extends BaseFunction {
 
         const resultArray = (tableArray as ArrayValueObject).slice(undefined, [colIndexNumValue - 1, colIndexNumValue]);
 
-        // The error reporting priority of lookupValue in Excel is higher than colIndexNum. It is required to execute the query from the first column first, and then take the value of colIndexNum column from the query result.
-        // Here we will first throw the colIndexNum error to avoid unnecessary queries and improve performance.
-        if (resultArray == null) {
-            return ErrorValueObject.create(ErrorType.REF);
+        if (resultArray == null || colIndexNumValue < 1) {
+            const match = this._handleSingleObject(lookupValue, searchArray, searchArray, rangeLookupValue);
+            return match.isError() ? match : ErrorValueObject.create(colIndexNumValue < 1 ? ErrorType.VALUE : ErrorType.REF);
         }
 
         return this._handleSingleObject(lookupValue, searchArray, resultArray, rangeLookupValue);

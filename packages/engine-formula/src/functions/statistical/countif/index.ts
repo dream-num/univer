@@ -47,7 +47,10 @@ export class Countif extends BaseFunction {
         }
 
         if (_criteria.isArray()) {
-            const resultArray = (_criteria as ArrayValueObject).mapValue((criteriaObject) => this._handleSingleObject(range, criteriaObject));
+            const resultArray = (_criteria as ArrayValueObject).mapValue((criteriaObject) => this._handleSingleObject(
+                range,
+                criteria.isReferenceObject() && criteriaObject.isNull() ? NumberValueObject.create(0) : criteriaObject
+            ));
 
             if ((resultArray as ArrayValueObject).getRowCount() === 1 && (resultArray as ArrayValueObject).getColumnCount() === 1) {
                 return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;

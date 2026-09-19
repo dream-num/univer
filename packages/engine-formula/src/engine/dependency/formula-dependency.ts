@@ -32,8 +32,10 @@ import type {
     IFeatureCalculationManagerParam,
 } from '../../services/feature-calculation-manager.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
-import type { FunctionNode, PrefixNode, SuffixNode } from '../ast-node';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
+import type { FunctionNode } from '../ast-node/function-node';
+import type { PrefixNode } from '../ast-node/prefix-node';
+import type { SuffixNode } from '../ast-node/suffix-node';
 import type { FunctionVariantType } from '../reference-object/base-reference-object';
 import type { IExecuteAstNodeData } from '../utils/ast-node-tool';
 import type { PreCalculateNodeType } from '../utils/node-type';
@@ -961,7 +963,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
      * including references and location functions (such as OFFSET, INDIRECT, INDEX, etc.).
      * @param node
      */
-    protected async _getRangeListByNode(nodeData: IExecuteAstNodeData) {
+    protected async _getRangeListByNode(nodeData: IExecuteAstNodeData): Promise<IUnitRange[]> {
         // ref function in offset indirect INDEX
         const preCalculateNodeList: PreCalculateNodeType[] = [];
 
@@ -983,6 +985,11 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
 
             if (value != null) {
                 rangeList.push(...value.toUnitRanges());
+            } else if (node.nodeType === NodeType.PREFIX) {
+                const intersectionRanges = (node as PrefixNode).getReferenceRanges();
+                // Preserve the selected cell for reference operands; scalar expressions
+                // instead depend on the references inside their expression.
+                rangeList.push(...intersectionRanges ?? await this._getRangeListByNode({ node, refOffsetX, refOffsetY }));
             }
 
             node.setValue(null);

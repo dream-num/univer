@@ -18,6 +18,15 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'docs-ui': {
+        pasteOptions: {
+            title: 'خيارات اللصق',
+            source: 'الاحتفاظ بتنسيق المصدر',
+            destination: 'مطابقة تنسيق الوجهة',
+            text: 'الاحتفاظ بالنص فقط',
+            useKeyboard: 'تعذر الوصول إلى الحافظة. استخدم Ctrl+V (Mac: ⌘V)، أو Ctrl+Shift+V (Mac: ⌘⇧V) للصق النص فقط.',
+            useSystemPaste: 'تعذر الوصول إلى الحافظة. استخدم وظيفة اللصق في جهازك أو لوحة المفاتيح، ثم غيّر التنسيق من خيارات اللصق.',
+            failed: 'تعذر تغيير تنسيق اللصق.',
+        },
         outline: {
             title: 'مخطط المستند',
         },

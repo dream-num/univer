@@ -18,6 +18,15 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'docs-ui': {
+        pasteOptions: {
+            title: 'Opzioni di incolla',
+            source: 'Mantieni formattazione originale',
+            destination: 'Adatta alla formattazione di destinazione',
+            text: 'Mantieni solo testo',
+            useKeyboard: 'Accesso agli appunti non disponibile. Usa Ctrl+V (Mac: ⌘V), oppure Ctrl+Maiusc+V (Mac: ⌘⇧V) per incollare solo testo.',
+            useSystemPaste: 'Impossibile accedere agli appunti. Usa la funzione Incolla del dispositivo o della tastiera, poi cambia il formato con le opzioni di incolla.',
+            failed: 'Impossibile modificare il formato di incolla.',
+        },
         outline: {
             title: 'Struttura del documento',
         },

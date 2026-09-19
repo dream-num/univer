@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentBody, IDocumentData } from '@univerjs/core';
+import type { IDocumentBody, IDocumentData } from '@univerjs/core';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDocClipboardPasteAdapter } from '../doc-paste-mutation-adapter.service';
 import {
@@ -22,9 +22,11 @@ import {
     DataStreamTreeTokenType,
     DOC_RANGE_TYPE,
     DocumentBlockRangeType,
+    DocumentDataModel,
     ICommandService,
     ImageSourceType,
     IPermissionService,
+    IUndoRedoService,
     IUniverInstanceService,
     RedoCommand,
     SliceBodyType,
@@ -1624,5 +1626,304 @@ describe('DocClipboardService copy text hooks', () => {
         expect(mapping.targetRange.rangeId).not.toBe('source-range');
 
         testBed.univer.dispose();
+    });
+});
+
+describe('DocClipboardService paste options', () => {
+    function setup() {
+        const bed = createCommandTestBed({
+            id: 'paste-options',
+            body: {
+                dataStream: 'Before selected after\r\n',
+                customBlocks: [],
+                customRanges: [],
+                customDecorations: [],
+                paragraphs: [{ startIndex: 21, paragraphId: 'target', paragraphStyle: { spaceAbove: { v: 6 } } }],
+                textRuns: [{ st: 0, ed: 21, ts: { ff: 'Arial', fs: 12 } }],
+            },
+            documentStyle: {},
+        }, [
+            [IClipboardInterfaceService, { useClass: TestClipboardInterfaceService }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
+        ]);
+        const commands = bed.get(ICommandService);
+        [InnerPasteCommand, RichTextEditingMutation, SetTextSelectionsOperation].forEach((command) => commands.registerCommand(command));
+        const selection = bed.get(DocSelectionManagerService);
+        selection.__TEST_ONLY_setCurrentSelection({ unitId: 'paste-options', subUnitId: '' });
+        selection.__TEST_ONLY_add([{ startOffset: 7, endOffset: 15, collapsed: false, isActive: true, segmentId: '' }]);
+        const clipboard = bed.get(IDocClipboardService);
+        const source: Partial<IDocumentData> = {
+            body: {
+                dataStream: 'Rich text',
+                textRuns: [{ st: 0, ed: 4, ts: { bl: BooleanNumber.TRUE, ff: 'Courier New', fs: 28 } }],
+            },
+        };
+        const payload = { html: '<b>Rich</b> text', text: 'Rich text', internalJson: createInternalClipboardFragment(source), files: [] };
+        return { ...bed, commands, selection, clipboard, payload };
+    }
+
+    it('switches formats repeatedly and keeps the whole paste as one undoable edit', async () => {
+        const bed = setup();
+        try {
+            const before = Tools.deepClone(bed.doc.getBody());
+            expect(await bed.clipboard.legacyPaste(bed.payload)).toBe(true);
+            expect(bed.doc.getBody()?.dataStream).toBe('Before Rich text after\r\n');
+            expect(await bed.clipboard.changePasteMode('destination')).toBe(true);
+            expect(bed.doc.getBody()?.textRuns).toContainEqual(expect.objectContaining({ ts: expect.objectContaining({ ff: 'Arial', fs: 12, bl: BooleanNumber.TRUE }) }));
+            expect(await bed.clipboard.changePasteMode('text')).toBe(true);
+            expect(bed.doc.getBody()?.dataStream).toBe('Before Rich text after\r\n');
+            expect(bed.doc.getBody()?.textRuns?.some((run) => run.ts?.bl === BooleanNumber.TRUE)).toBe(false);
+            expect(await bed.clipboard.changePasteMode('source')).toBe(true);
+            const after = Tools.deepClone(bed.doc.getBody());
+            expect(bed.get(IUndoRedoService).getUndoRedoStatus('paste-options').undos).toBe(1);
+            expect(await bed.commands.executeCommand(UndoCommand.id)).toBe(true);
+            expect(bed.doc.getBody()).toEqual(before);
+            expect(await bed.commands.executeCommand(RedoCommand.id)).toBe(true);
+            expect(bed.doc.getBody()).toEqual(after);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('emits mutations that reproduce format switches in a collaborating document', async () => {
+        const bed = setup();
+        const remote = new DocumentDataModel(Tools.deepClone(bed.doc.getSnapshot()));
+        const listener = bed.commands.onMutationExecutedForCollab((command) => {
+            if (command.id === RichTextEditingMutation.id) {
+                const params = command.params as { actions: Parameters<DocumentDataModel['apply']>[0] };
+                remote.apply(params.actions);
+            }
+        });
+        try {
+            expect(await bed.clipboard.legacyPaste(bed.payload)).toBe(true);
+            expect(await bed.clipboard.changePasteMode('text')).toBe(true);
+            expect(remote.getBody()).toEqual(bed.doc.getBody());
+            expect(await bed.clipboard.changePasteMode('source')).toBe(true);
+            expect(remote.getBody()).toEqual(bed.doc.getBody());
+        } finally {
+            listener.dispose();
+            remote.dispose();
+            bed.univer.dispose();
+        }
+    });
+
+    it.each(['source', 'destination', 'text'] as const)('preserves Unicode and paragraph breaks through every transition starting with %s', async (initialMode) => {
+        const bed = setup();
+        try {
+            const before = Tools.deepClone(bed.doc.getBody());
+            const text = '中文🙂 café\n第二段';
+            const payload = {
+                html: '<p><b>中文🙂 café</b></p><p><i>第二段</i></p>',
+                text,
+                files: [],
+                mode: initialMode,
+            };
+            expect(await bed.clipboard.legacyPaste(payload)).toBe(true);
+            let currentMode = initialMode;
+            for (const mode of ['text', 'destination', 'source', 'destination', 'text', 'source'] as const) {
+                expect(await bed.clipboard.changePasteMode(mode)).toBe(mode !== currentMode);
+                currentMode = mode;
+                const body = bed.doc.getBody()!;
+                expect(body.dataStream.replace(/\r+/g, '\n')).toContain(text);
+                expect(body.dataStream.startsWith('Before ')).toBe(true);
+                expect(body.dataStream.endsWith(' after\r\n')).toBe(true);
+                expect(body.dataStream.match(/中文🙂 café/g)).toHaveLength(1);
+                expect(body.textRuns?.some((run) => run.ts?.bl === BooleanNumber.TRUE)).toBe(mode !== 'text');
+            }
+            expect(bed.get(IUndoRedoService).getUndoRedoStatus('paste-options').undos).toBe(1);
+            const after = Tools.deepClone(bed.doc.getBody());
+            expect(await bed.commands.executeCommand(UndoCommand.id)).toBe(true);
+            expect(bed.doc.getBody()).toEqual(before);
+            expect(await bed.commands.executeCommand(RedoCommand.id)).toBe(true);
+            expect(bed.doc.getBody()).toEqual(after);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('switches a table to text and restores its cells and resources without duplicating surrounding content', async () => {
+        const bed = setup();
+        try {
+            const before = Tools.deepClone(bed.doc.getSnapshot());
+            expect(await bed.clipboard.legacyPaste({
+                html: '<table><tr><td><b>A</b></td><td>B</td></tr><tr><td>C</td><td>D</td></tr></table>',
+                text: 'A\tB\nC\tD',
+                files: [],
+            })).toBe(true);
+            for (const mode of ['text', 'destination', 'text', 'source'] as const) {
+                expect(await bed.clipboard.changePasteMode(mode)).toBe(true);
+                const body = bed.doc.getBody()!;
+                expect(body.dataStream.match(/Before /g)).toHaveLength(1);
+                expect(body.dataStream.match(/ after/g)).toHaveLength(1);
+                if (mode === 'text') {
+                    expect(body.dataStream).toContain('A\tB\rC\tD');
+                    expect(body.tables ?? []).toHaveLength(0);
+                } else {
+                    expect(body.tables).toHaveLength(1);
+                    expect(bed.doc.getSnapshot().tableSource?.[body.tables![0].tableId]).toBeDefined();
+                }
+            }
+            expect(bed.get(IUndoRedoService).getUndoRedoStatus('paste-options').undos).toBe(1);
+            const after = Tools.deepClone(bed.doc.getSnapshot());
+            expect(await bed.commands.executeCommand(UndoCommand.id)).toBe(true);
+            expect(bed.doc.getBody()).toEqual({ ...before.body, tables: [], sectionBreaks: [] });
+            expect(await bed.commands.executeCommand(RedoCommand.id)).toBe(true);
+            expect(bed.doc.getBody()).toEqual(after.body);
+            expect(bed.doc.getSnapshot().tableSource).toEqual(after.tableSource);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('only changes the latest paste and does not undo a preceding paste', async () => {
+        const bed = setup();
+        try {
+            expect(await bed.clipboard.legacyPaste(bed.payload)).toBe(true);
+            const firstPaste = Tools.deepClone(bed.doc.getBody());
+            bed.selection.replaceSelectionInfoWithoutRefresh({
+                ...bed.selection.getSelectionInfo()!,
+                textRanges: [{ startOffset: 16, endOffset: 16, collapsed: true, isActive: true, segmentId: '' }],
+            });
+            bed.selection.refreshSelection();
+            expect(await bed.clipboard.legacyPaste({ html: '<i>Next</i>', text: 'Next', files: [] })).toBe(true);
+            expect(await bed.clipboard.changePasteMode('text')).toBe(true);
+            expect(bed.doc.getBody()?.dataStream).toBe('Before Rich textNext after\r\n');
+            expect(bed.get(IUndoRedoService).getUndoRedoStatus('paste-options').undos).toBe(2);
+            expect(await bed.commands.executeCommand(UndoCommand.id)).toBe(true);
+            expect(bed.doc.getBody()).toEqual(firstPaste);
+            expect(await bed.clipboard.changePasteMode('source')).toBe(false);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('serializes competing switches without undoing another replacement', async () => {
+        const bed = setup();
+        try {
+            expect(await bed.clipboard.legacyPaste(bed.payload)).toBe(true);
+            expect(await Promise.all([
+                bed.clipboard.changePasteMode('text'),
+                bed.clipboard.changePasteMode('destination'),
+            ])).toEqual([true, false]);
+            expect(bed.doc.getBody()?.dataStream).toBe('Before Rich text after\r\n');
+            expect(bed.doc.getBody()?.textRuns?.some((run) => run.ts?.bl === BooleanNumber.TRUE)).toBe(false);
+            expect(bed.get(IUndoRedoService).getUndoRedoStatus('paste-options').undos).toBe(1);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('does not upload images for text-only paste and can restore the original rich content', async () => {
+        const bed = setup();
+        try {
+            const upload = vi.fn(async () => null);
+            bed.clipboard.addClipboardHook({ onBeforePasteImage: upload });
+            expect(await bed.clipboard.legacyPaste({ ...bed.payload, mode: 'text', html: '<b>Rich</b> text<img src="data:image/png;base64,AA==">' })).toBe(true);
+            expect(upload).not.toHaveBeenCalled();
+            expect(bed.doc.getBody()?.textRuns?.some((run) => run.ts?.bl === BooleanNumber.TRUE)).toBe(false);
+            expect(await bed.clipboard.changePasteMode('source')).toBe(true);
+            expect(bed.doc.getBody()?.textRuns?.some((run) => run.ts?.bl === BooleanNumber.TRUE)).toBe(true);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('keeps options when layout fills in selection metadata without moving the caret', async () => {
+        const bed = setup();
+        try {
+            expect(await bed.clipboard.legacyPaste(bed.payload)).toBe(true);
+            const info = bed.selection.getSelectionInfo()!;
+            bed.selection.replaceSelectionInfoWithoutRefresh({
+                ...info,
+                textRanges: info.textRanges.map((range) => ({
+                    ...range,
+                    segmentId: '',
+                    segmentPage: -1,
+                    rangeType: DOC_RANGE_TYPE.TEXT,
+                })),
+            });
+            bed.selection.refreshSelection();
+            expect(await bed.clipboard.changePasteMode('text')).toBe(true);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('rejects a stale switch after moving the selection', async () => {
+        const bed = setup();
+        try {
+            await bed.clipboard.legacyPaste(bed.payload);
+            bed.selection.__TEST_ONLY_add([{ startOffset: 0, endOffset: 0, collapsed: true, isActive: true, segmentId: '' }]);
+            const snapshot = Tools.deepClone(bed.doc.getBody());
+            expect(await bed.clipboard.changePasteMode('text')).toBe(false);
+            expect(bed.doc.getBody()).toEqual(snapshot);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('invalidates options on a remote mutation without undoing that mutation', async () => {
+        const bed = setup();
+        try {
+            await bed.clipboard.legacyPaste(bed.payload);
+            expect(bed.commands.syncExecuteCommand(RichTextEditingMutation.id, {
+                unitId: 'paste-options',
+                segmentId: '',
+                textRanges: null,
+                actions: [],
+                isSync: true,
+            })).toBeTruthy();
+            const snapshot = Tools.deepClone(bed.doc.getBody());
+            expect(await bed.clipboard.changePasteMode('text')).toBe(false);
+            expect(bed.doc.getBody()).toEqual(snapshot);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('does not paste at a different selection after waiting for clipboard permission', async () => {
+        const bed = setup();
+        try {
+            let resolveRead: ((items: ClipboardItem[]) => void) | undefined;
+            vi.spyOn(bed.get(IClipboardInterfaceService), 'read').mockImplementation(() => new Promise((resolve) => {
+                resolveRead = resolve;
+            }));
+            const pending = bed.clipboard.pasteFromClipboard('text');
+            bed.selection.__TEST_ONLY_add([{ startOffset: 0, endOffset: 0, collapsed: true, isActive: true, segmentId: '' }]);
+            resolveRead!([]);
+            expect(await pending).toBe(false);
+            expect(bed.doc.getBody()?.dataStream).toBe('Before selected after\r\n');
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('does not replace another history entry even if the selection has not changed', async () => {
+        const bed = setup();
+        try {
+            await bed.clipboard.legacyPaste(bed.payload);
+            bed.get(IUndoRedoService).pushUndoRedo({ unitID: 'paste-options', undoMutations: [], redoMutations: [] });
+            expect(await bed.clipboard.changePasteMode('text')).toBe(false);
+            expect(bed.doc.getBody()?.dataStream).toBe('Before Rich text after\r\n');
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('restores the previous paste if the replacement fails', async () => {
+        const bed = setup();
+        try {
+            await bed.clipboard.legacyPaste(bed.payload);
+            const snapshot = Tools.deepClone(bed.doc.getBody());
+            bed.clipboard.addClipboardHook({
+                onBeforePaste: () => {
+                    throw new Error('Rejected paste');
+                },
+            });
+            await expect(bed.clipboard.changePasteMode('text')).rejects.toThrow('Rejected paste');
+            expect(bed.doc.getBody()).toEqual(snapshot);
+        } finally {
+            bed.univer.dispose();
+        }
     });
 });

@@ -16,6 +16,15 @@
 
 const locale = {
     'docs-ui': {
+        pasteOptions: {
+            title: 'Paste options',
+            source: 'Keep source formatting',
+            destination: 'Match destination formatting',
+            text: 'Keep text only',
+            useKeyboard: 'Clipboard access is unavailable. Use Ctrl+V (Mac: ⌘V), or Ctrl+Shift+V (Mac: ⌘⇧V) to paste text only.',
+            useSystemPaste: 'Clipboard access is unavailable. Use your device or keyboard’s paste action, then change the format with Paste options.',
+            failed: 'Could not change the paste format.',
+        },
         outline: {
             title: 'Outline',
         },

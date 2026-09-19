@@ -41,11 +41,13 @@ import pkg from '../package.json';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands/auto-format.command';
 import { BreakLineCommand } from './commands/commands/break-line.command';
 import {
+    DocChangePasteModeCommand,
     DocCopyCommand,
     DocCopyCurrentParagraphCommand,
     DocCutCommand,
     DocCutCurrentParagraphCommand,
     DocPasteCommand,
+    DocPasteSpecialCommand,
 } from './commands/commands/clipboard.command';
 import { CutContentCommand, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
 import { MoveDocBlockCommand } from './commands/commands/doc-block-move.command';
@@ -142,7 +144,10 @@ import { DocTableTabCommand } from './commands/commands/table/doc-table-tab.comm
 import { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/doc-cursor.operation';
 import { DocParagraphSettingPanelOperation } from './commands/operations/doc-paragraph-setting-panel.operation';
 import { DocSectionSettingPanelOperation } from './commands/operations/doc-section-setting-panel.operation';
-import { InsertDocumentColumnBreakOperation, InsertDocumentSectionBreakOperation } from './commands/operations/insert-break.operation';
+import {
+    InsertDocumentColumnBreakOperation,
+    InsertDocumentSectionBreakOperation,
+} from './commands/operations/insert-break.operation';
 import { DocOpenPageSettingCommand } from './commands/operations/open-page-setting.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { defaultPluginConfig, DOCS_UI_PLUGIN_CONFIG_KEY, DOCS_UI_PLUGIN_NAME } from './config/config';
@@ -154,18 +159,25 @@ import { DocParagraphSettingController } from './controllers/doc-paragraph-setti
 import { DocSectionSettingController } from './controllers/doc-section-setting.controller';
 import { DocTableController } from './controllers/doc-table.controller';
 import { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
-import { DocCanvasPopupLayoutInteractionController } from './controllers/render-controllers/doc-canvas-popup-layout-interaction.controller';
+import {
+    DocCanvasPopupLayoutInteractionController,
+} from './controllers/render-controllers/doc-canvas-popup-layout-interaction.controller';
 import { DocChecklistRenderController } from './controllers/render-controllers/doc-checklist.render-controller';
 import { DocClipboardController } from './controllers/render-controllers/doc-clipboard.controller';
 import { DocContextMenuRenderController } from './controllers/render-controllers/doc-contextmenu.render-controller';
 import { DocEditorBridgeController } from './controllers/render-controllers/doc-editor-bridge.controller';
 import { DocIMEInputController } from './controllers/render-controllers/doc-ime-input.controller';
 import { DocInputController } from './controllers/render-controllers/doc-input.controller';
-import { DocLayoutProgressRenderController } from './controllers/render-controllers/doc-layout-progress.render-controller';
-import { DocLayoutRecoveryRenderController } from './controllers/render-controllers/doc-layout-recovery.render-controller';
+import {
+    DocLayoutProgressRenderController,
+} from './controllers/render-controllers/doc-layout-progress.render-controller';
+import {
+    DocLayoutRecoveryRenderController,
+} from './controllers/render-controllers/doc-layout-recovery.render-controller';
 import {
     DocParagraphPlaceholderRenderController,
 } from './controllers/render-controllers/doc-paragraph-placeholder.render-controller';
+import { DocPasteOptionsRenderController } from './controllers/render-controllers/doc-paste-options.render-controller';
 import { DocResizeRenderController } from './controllers/render-controllers/doc-resize.render-controller';
 import { DocSelectionRenderController } from './controllers/render-controllers/doc-selection-render.controller';
 import { DocRenderController } from './controllers/render-controllers/doc.render-controller';
@@ -374,6 +386,8 @@ export class UniverDocsUIPlugin extends Plugin {
             InsertSpecialCharacterCommand,
             SetParagraphNamedStyleCommand,
             QuickHeadingCommand,
+            DocPasteSpecialCommand,
+            DocChangePasteModeCommand,
             DocCopyCurrentParagraphCommand,
             DocCutCurrentParagraphCommand,
             H1HeadingCommand,
@@ -510,6 +524,7 @@ export class UniverDocsUIPlugin extends Plugin {
         ([
             [DocEventManagerService],
             [DocFloatMenuService],
+            [DocPasteOptionsRenderController],
             [DocParagraphMenuService],
             [DocHeaderFooterController],
             [DocResizeRenderController],

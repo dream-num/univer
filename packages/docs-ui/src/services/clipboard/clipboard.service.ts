@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, IUndoRedoItem } from '@univerjs/core';
 import type { IDocImage } from '@univerjs/docs-drawing';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { Observable } from 'rxjs';
+import type { DocPasteMode, IDocPasteStyle } from './paste-options';
 import {
     BuildTextUtils,
+    CommandType,
     createIdentifier,
     createParagraphId,
     createSectionId,
@@ -36,20 +39,26 @@ import {
     ImageSourceType,
     Inject,
     IPermissionService,
+    isInternalEditorID,
+    IUndoRedoService,
     IUniverInstanceService,
+    NAMED_STYLE_MAP,
     normalizeBody,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
+    RedoCommand,
     SliceBodyType,
     toDisposable,
     Tools,
+    UndoCommand,
     UniverInstanceType,
     validateDocBodyStructure,
 } from '@univerjs/core';
 import {
     canEditDocumentTargets,
     DocSelectionManagerService,
+    DocStateChangeManagerService,
     getDocumentEditTargetObjectIds,
     getDocumentPermissionValue,
 } from '@univerjs/docs';
@@ -63,9 +72,12 @@ import {
     IClipboardInterfaceService,
     PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
 } from '@univerjs/ui';
+import { BehaviorSubject } from 'rxjs';
 import { isTopLevelStructuralGap } from '../../basics/paragraph';
 import { CutContentCommand, InnerPasteCommand } from '../../commands/commands/clipboard.inner.command';
 import { getCursorWhenDelete } from '../../commands/commands/doc-delete.command';
+import { getStyleInTextRange } from '../../commands/commands/inline-format.command';
+import { DocMenuStyleService } from '../doc-menu-style.service';
 import { copyContentCache, extractId } from './copy-content-cache';
 import { HtmlToUDMService } from './html-to-udm/converter';
 import LarkPastePlugin from './html-to-udm/paste-plugins/plugin-lark';
@@ -82,6 +94,7 @@ import {
     parseInternalClipboardFragment,
     wrapClipboardHtml,
 } from './internal-fragment';
+import { applyDocPasteMode, getClipboardPlainText } from './paste-options';
 import { UDMToHtmlService } from './udm-to-html/convertor';
 import { DocHtmlExportService } from './udm-to-html/doc-html-export.service';
 
@@ -190,11 +203,39 @@ export interface IDocClipboardHook {
     onBeforePasteImage?: (file: File) => Promise<{ source: string; imageSourceType: ImageSourceType } | null>;
 }
 
+export interface IDocClipboardPayload {
+    html?: string;
+    text?: string;
+    internalJson?: string;
+    files: File[];
+    unitId?: string;
+    mode?: DocPasteMode;
+}
+
+export interface IDocPasteOptionsState {
+    unitId: string;
+    mode: DocPasteMode;
+    range: ITextRangeWithStyle;
+}
+
+interface IDocPasteSession {
+    payload: IDocClipboardPayload;
+    source?: Partial<IDocumentData>;
+    style: IDocPasteStyle;
+    history: IUndoRedoItem;
+    selectionKey: string;
+}
+
 export interface IDocClipboardService {
     copy(sliceType?: SliceBodyType, ranges?: ITextRangeWithStyle[]): Promise<boolean>;
     cut(ranges?: ITextRangeWithStyle[]): Promise<boolean>;
-    paste(items?: ClipboardItem[]): Promise<boolean>;
-    legacyPaste(options: { html?: string; text?: string; internalJson?: string; files: File[]; unitId?: string }): Promise<boolean>;
+    paste(items?: ClipboardItem[], mode?: DocPasteMode): Promise<boolean>;
+    pasteFromClipboard(mode?: DocPasteMode): Promise<boolean>;
+    legacyPaste(options: IDocClipboardPayload): Promise<boolean>;
+    readonly pasteOptions$: Observable<IDocPasteOptionsState | null>;
+    setNextPasteMode(mode: DocPasteMode): void;
+    dismissPasteOptions(): void;
+    changePasteMode(mode: DocPasteMode): Promise<boolean>;
     addClipboardHook(hook: IDocClipboardHook): IDisposable;
 }
 
@@ -250,6 +291,14 @@ function getTableCellContentClipboardBodySlice(body: IDocumentBody, start: numbe
 export const IDocClipboardService = createIdentifier<IDocClipboardService>('doc.clipboard-service');
 
 export class DocClipboardService extends Disposable implements IDocClipboardService {
+    private readonly _pasteOptions$ = new BehaviorSubject<IDocPasteOptionsState | null>(null);
+    readonly pasteOptions$ = this._pasteOptions$.asObservable();
+    private _pasteSession: IDocPasteSession | null = null;
+    private _applyingPaste = false;
+    private _pasteGeneration = 0;
+    private _nextPasteMode: DocPasteMode = 'source';
+    private _lastSelectionKey = '';
+
     private _clipboardHooks: IDocClipboardHook[] = [];
     private _memoryClipboardData: Partial<IDocumentData> | null = null;
 
@@ -264,10 +313,36 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
         @Inject(ErrorService) private readonly _errorService: ErrorService,
         @Inject(DocHtmlExportService) docHtmlExportService: DocHtmlExportService,
-        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService
+        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
+        @Inject(DocStateChangeManagerService) private readonly _stateChangeManager: DocStateChangeManagerService,
+        @Inject(DocMenuStyleService) private readonly _menuStyleService: DocMenuStyleService,
+        @IUndoRedoService private readonly _undoRedoService: IUndoRedoService
     ) {
         super();
         this._umdToHtml = new UDMToHtmlService(docHtmlExportService);
+        this.disposeWithMe(this._commandService.beforeCommandExecuted((command) => {
+            if (!this._applyingPaste && command.type === CommandType.MUTATION) {
+                this.dismissPasteOptions();
+            }
+        }));
+        const invalidateSelection = () => {
+            const key = this._getPasteSelectionKey();
+            if (key !== this._lastSelectionKey) {
+                this._lastSelectionKey = key;
+                if (!this._applyingPaste) {
+                    this.dismissPasteOptions();
+                }
+            }
+        };
+        this.disposeWithMe(this._docSelectionManagerService.textSelection$.subscribe(invalidateSelection));
+        this.disposeWithMe(this._docSelectionManagerService.refreshSelection$.subscribe(invalidateSelection));
+        this.disposeWithMe(this._univerInstanceService.focused$.subscribe(() => this.dismissPasteOptions()));
+        this.disposeWithMe(this._univerInstanceService.unitDisposed$.subscribe(() => this.dismissPasteOptions()));
+        this.disposeWithMe(this._permissionService.permissionPointUpdate$.subscribe(() => this.dismissPasteOptions()));
+        this.disposeWithMe(() => {
+            this.dismissPasteOptions();
+            this._pasteOptions$.complete();
+        });
     }
 
     async copy(sliceType: SliceBodyType = SliceBodyType.copy, ranges?: ITextRangeWithStyle[]): Promise<boolean> {
@@ -312,59 +387,212 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         return this._cut(ranges);
     }
 
-    async paste(items?: ClipboardItem[]): Promise<boolean> {
-        const targetUnitId = this._getCurrentDocumentUnitId();
-        if (!targetUnitId || !this._canEditTargets(targetUnitId)) {
+    async pasteFromClipboard(mode: DocPasteMode = 'source'): Promise<boolean> {
+        const generation = this._pasteGeneration;
+        const selectionKey = this._getPasteSelectionKey();
+        if (!this._clipboardInterfaceService.supportClipboard) {
+            if (this._memoryClipboardData) {
+                return this.paste(undefined, mode);
+            }
+            throw new Error('Clipboard read unavailable');
+        }
+        const items = await this._clipboardInterfaceService.read();
+        if (generation !== this._pasteGeneration || selectionKey !== this._getPasteSelectionKey()) {
             return false;
         }
-        if (!items?.length) {
-            return this._memoryClipboardData ? this._paste(Tools.deepClone(this._memoryClipboardData), targetUnitId) : false;
-        }
-
-        const partDocData = await this._genDocDataFromClipboardItems(items);
-        if (!this._canEditTargets(targetUnitId)) {
-            return false;
-        }
-
-        return this._paste(partDocData, targetUnitId);
+        return this.paste(items, mode);
     }
 
-    async legacyPaste(options: {
-        html?: string;
-        internalJson?: string;
-        text?: string;
-        files: File[];
-        unitId?: string;
-    }): Promise<boolean> {
-        const docUnitId = options.unitId ?? this._getCurrentDocumentUnitId() ?? '';
-        if (!docUnitId || !this._canEditTargets(docUnitId)) {
+    async paste(items?: ClipboardItem[], mode: DocPasteMode = 'source'): Promise<boolean> {
+        if (!items?.length) {
+            return this._memoryClipboardData
+                ? this._pasteWithOptions({ files: [], mode }, Tools.deepClone(this._memoryClipboardData))
+                : false;
+        }
+        const generation = this._pasteGeneration;
+        const payload = await this._readClipboardItems(items);
+        if (generation !== this._pasteGeneration) {
             return false;
         }
-        let { html, internalJson, text, files } = options;
-        if (!html && !text && files.length) {
-            html = await this._createImagePasteHtml(files);
-        } else if (html && files.length) {
-            html += await this._createImagePasteHtml(files);
+        return this.legacyPaste({ ...payload, mode });
+    }
+
+    setNextPasteMode(mode: DocPasteMode): void {
+        this._nextPasteMode = mode;
+    }
+
+    async legacyPaste(options: IDocClipboardPayload): Promise<boolean> {
+        const mode = options.mode ?? this._nextPasteMode;
+        this._nextPasteMode = 'source';
+        return this._pasteWithOptions({ ...options, mode });
+    }
+
+    dismissPasteOptions(): void {
+        this._pasteGeneration++;
+        this._pasteSession = null;
+        if (this._pasteOptions$.value) {
+            this._pasteOptions$.next(null);
+        }
+    }
+
+    async changePasteMode(mode: DocPasteMode): Promise<boolean> {
+        const session = this._pasteSession;
+        const state = this._pasteOptions$.value;
+        if (!session || !state || state.mode === mode) {
+            return false;
+        }
+        const generation = this._pasteGeneration;
+        const source = await this._preparePaste(session.payload, mode, session.source);
+        // Both history identity and the invalidation generation must still match after asynchronous image loading.
+        if (generation !== this._pasteGeneration || session !== this._pasteSession ||
+            this._undoRedoService.pitchTopUndoElement() !== session.history ||
+            this._getPasteSelectionKey() !== session.selectionKey ||
+            this._getCurrentDocumentUnitId() !== state.unitId || !this._canEditTargets(state.unitId)) {
+            return false;
+        }
+        const doc = applyDocPasteMode(source, mode, session.style, session.payload.text);
+        if (!doc.body?.dataStream) {
+            return false;
+        }
+        this._applyingPaste = true;
+        try {
+            // This synchronous transaction can only replace the exact, still-current paste history entry.
+            if (!this._commandService.syncExecuteCommand(UndoCommand.id)) {
+                this.dismissPasteOptions();
+                return false;
+            }
+            try {
+                if (!this._paste(doc, state.unitId)) {
+                    this._commandService.syncExecuteCommand(RedoCommand.id);
+                    this.dismissPasteOptions();
+                    return false;
+                }
+            } catch (error) {
+                this._commandService.syncExecuteCommand(RedoCommand.id);
+                this.dismissPasteOptions();
+                throw error;
+            }
+            this._savePasteSession(session.payload, mode === 'text' ? session.source : source, session.style, mode, state.unitId);
+            return true;
+        } finally {
+            this._applyingPaste = false;
+        }
+    }
+
+    private async _preparePaste(
+        payload: IDocClipboardPayload,
+        mode: DocPasteMode,
+        source?: Partial<IDocumentData>
+    ): Promise<Partial<IDocumentData>> {
+        if (source) {
+            return source;
+        }
+        if (mode === 'text') {
+            const internal = parseInternalClipboardFragment(payload.internalJson) ?? extractInternalClipboardFragmentFromHtml(payload.html);
+            if (internal?.body) {
+                return internal;
+            }
+            if (payload.text !== undefined) {
+                return { body: BuildTextUtils.transform.fromPlainText(payload.text) };
+            }
+            return this._genDocDataFromHtmlAndText(payload.html, payload.text, payload.unitId, payload.internalJson);
+        }
+        let html = payload.html;
+        if (payload.files.length && !payload.text && !html) {
+            html = await this._createImagePasteHtml(payload.files);
+        } else if (html && payload.files.length) {
+            html += await this._createImagePasteHtml(payload.files);
         }
         html = await this._uploadBase64ImagesInHtml(html);
-        if (!this._canEditTargets(docUnitId)) {
+        return this._genDocDataFromHtmlAndText(html, payload.text, payload.unitId, payload.internalJson);
+    }
+
+    private async _pasteWithOptions(payload: IDocClipboardPayload, cachedSource?: Partial<IDocumentData>): Promise<boolean> {
+        this.dismissPasteOptions();
+        const unitId = payload.unitId ?? this._getCurrentDocumentUnitId();
+        if (!unitId || !this._canEditTargets(unitId)) {
             return false;
         }
-        if (!html && !text) {
-            this._logService.warn('[DocClipboardController] html and text cannot be both empty!');
+        if (!cachedSource && !payload.html && !payload.text && !payload.internalJson && !payload.files.length) {
             return false;
         }
-        const partDocData = this._genDocDataFromHtmlAndText(html, text, docUnitId, internalJson);
-        // Paste in sheet editing mode without paste style, so we give textRuns empty array;
-        if (docUnitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
-            if (text) {
-                const textDocData = BuildTextUtils.transform.fromPlainText(text);
-                return this._paste({ body: textDocData }, docUnitId);
-            } else {
-                partDocData.body!.textRuns = [];
+        const generation = this._pasteGeneration;
+        const mode = unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY ? 'text' : payload.mode ?? 'source';
+        const style = this._getPasteStyle(unitId);
+        const source = await this._preparePaste(payload, mode, cachedSource);
+        if (generation !== this._pasteGeneration || !this._canEditTargets(unitId)) {
+            return false;
+        }
+        let doc = applyDocPasteMode(source, mode, style, payload.text);
+        if (unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+            doc = { ...source, body: { ...source.body!, textRuns: [] } };
+            if (payload.text) {
+                doc = { body: BuildTextUtils.transform.fromPlainText(payload.text) };
             }
         }
-        return this._paste(partDocData, docUnitId);
+        if (!doc.body?.dataStream) {
+            return false;
+        }
+        this._applyingPaste = true;
+        try {
+            // Keep preceding debounced typing out of the paste's undo entry.
+            this._stateChangeManager.flushPendingChanges(unitId);
+            const result = this._paste(doc, unitId);
+            if (result && !isInternalEditorID(unitId)) {
+                this._savePasteSession(payload, mode === 'text' ? cachedSource : source, style, mode, unitId);
+            }
+            return result;
+        } finally {
+            this._applyingPaste = false;
+        }
+    }
+
+    private _getPasteStyle(unitId: string): IDocPasteStyle {
+        const model = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC)!;
+        const ranges = this._docSelectionManagerService.getTextRanges(this._getSelectionParams(unitId)) ?? [];
+        const range = ranges.find((item) => item.isActive) ?? ranges[0];
+        const body = model.getSelfOrHeaderFooterModel(range?.segmentId ?? '')?.getBody();
+        const paragraph = body?.paragraphs?.find((item) => item.startIndex >= (range?.startOffset ?? 0));
+        const textStyle = body && range ? getStyleInTextRange(body, range, {}) : {};
+        Tools.deleteNull(textStyle);
+        const namedStyle = paragraph?.paragraphStyle?.namedStyleType;
+        const headingStyle = namedStyle ? NAMED_STYLE_MAP[namedStyle] : {};
+        return Tools.deepClone({
+            textStyle: { ...this._menuStyleService.getDefaultStyle(), ...headingStyle, ...paragraph?.paragraphStyle?.textStyle, ...textStyle, ...this._menuStyleService.getStyleCache() },
+            paragraphStyle: paragraph?.paragraphStyle,
+        });
+    }
+
+    private _getPasteSelectionKey(): string {
+        return JSON.stringify(this._docSelectionManagerService.getDocRanges().map((range) => [
+            range.startOffset,
+            range.endOffset,
+            range.segmentId ?? '',
+            range.rangeType ?? DOC_RANGE_TYPE.TEXT,
+        ]));
+    }
+
+    private _savePasteSession(
+        payload: IDocClipboardPayload,
+        source: Partial<IDocumentData> | undefined,
+        style: IDocPasteStyle,
+        mode: DocPasteMode,
+        unitId: string
+    ): void {
+        if (!source && !payload.html && !payload.internalJson) {
+            this.dismissPasteOptions();
+            return;
+        }
+        this._stateChangeManager.flushPendingChanges(unitId);
+        const history = this._undoRedoService.pitchTopUndoElement();
+        const ranges = this._docSelectionManagerService.getTextRanges(this._getSelectionParams(unitId));
+        const range = ranges?.find((item) => item.isActive) ?? ranges?.[0];
+        if (!history || history.unitID !== unitId || !range) {
+            return;
+        }
+        this._lastSelectionKey = this._getPasteSelectionKey();
+        this._pasteSession = { payload: { ...payload, text: payload.text ?? (source ? getClipboardPlainText(source) : undefined) }, source, style, history, selectionKey: this._getPasteSelectionKey() };
+        this._pasteOptions$.next({ unitId, mode, range: { ...range, collapsed: true } });
     }
 
     private _getCurrentDocumentUnitId(): string | null {
@@ -475,7 +703,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
     }
 
-    private async _paste(docData: Partial<IDocumentData>, expectedUnitId?: string): Promise<boolean> {
+    private _paste(docData: Partial<IDocumentData>, expectedUnitId?: string): boolean {
         const { body: _body } = docData;
 
         if (_body == null) {
@@ -567,7 +795,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 },
             ];
 
-            return this._commandService.executeCommand(InnerPasteCommand.id, {
+            return this._commandService.syncExecuteCommand(InnerPasteCommand.id, {
                 unitId,
                 doc: {
                     ...docData,
@@ -739,10 +967,10 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         };
     }
 
-    private async _genDocDataFromClipboardItems(items: ClipboardItem[]): Promise<Partial<IDocumentData>> {
+    private async _readClipboardItems(items: ClipboardItem[]): Promise<IDocClipboardPayload> {
         try {
             let html = '';
-            let text = '';
+            let text: string | undefined;
             let internalJson = '';
             const files: File[] = [];
             for (const clipboardItem of items) {
@@ -772,12 +1000,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                     }
                 }
             }
-            if (!html && !text && files.length) {
-                html = await this._createImagePasteHtml(files);
-            }
-            html = await this._uploadBase64ImagesInHtml(html) ?? '';
-
-            return this._genDocDataFromHtmlAndText(html, text, undefined, internalJson);
+            return { html, text, internalJson, files };
         } catch (e) {
             return Promise.reject(e);
         }

@@ -14,12 +14,30 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, ICommand, ICustomTable, IDisposable, IDocumentBody, IDocumentData, IDrawingParam, IMutationInfo, ITextRange, JSONXActions, Nullable } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    IAccessor,
+    ICommand,
+    ICustomTable,
+    IDisposable,
+    IDocumentBody,
+    IDocumentData,
+    IDrawingParam,
+    IMutationInfo,
+    ITextRange,
+    JSONXActions,
+    Nullable,
+} from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentViewModel, IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IDocClipboardPasteBlockRangeMapping, IDocClipboardPasteCustomBlockMapping, IDocClipboardPasteCustomRangeMapping } from '../../services/clipboard/doc-paste-mutation-adapter.service';
+import type {
+    IDocClipboardPasteBlockRangeMapping,
+    IDocClipboardPasteCustomBlockMapping,
+    IDocClipboardPasteCustomRangeMapping,
+} from '../../services/clipboard/doc-paste-mutation-adapter.service';
 import {
     BuildTextUtils,
+    cloneBodyWithFreshParagraphIds,
     CommandType,
     createParagraphId,
     DataStreamTreeTokenType,
@@ -33,6 +51,7 @@ import {
     IUniverInstanceService,
     JSONX,
     MemoryCursor,
+    PRESERVE_INSERTED_PARAGRAPH_IDS,
     SHEET_EDITOR_UNITS,
     TextX,
     TextXActionType,
@@ -71,8 +90,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
     id: 'doc.command.inner-paste',
     type: CommandType.COMMAND,
 
-    // eslint-disable-next-line max-lines-per-function, complexity
-    handler: async (accessor, params: IInnerPasteCommandParams) => {
+    handler: (accessor, params: IInnerPasteCommandParams) => {
         const {
             customRangeMappings = [],
             segmentId,
@@ -195,7 +213,10 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
 
             const len = startOffset - memoryCursor.cursor;
 
-            const cloneBody = Tools.deepClone(body);
+            const cloneBody = cloneBodyWithFreshParagraphIds(body, { unitId, segmentId });
+            // Pasted paragraphs own fresh identities. Keep them explicit so undo/redo
+            // does not swap the surviving destination paragraph's identity on a split.
+            Reflect.set(cloneBody, PRESERVE_INSERTED_PARAGRAPH_IDS, true);
             const blockRangeMappings: IDocClipboardPasteBlockRangeMapping[] = [];
             const customBlockMappings: IDocClipboardPasteCustomBlockMapping[] = [];
             const selectionCustomRangeMappings = (body.customRanges ?? []).map((range) => ({
@@ -356,10 +377,10 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             return false;
         }
 
-        const historyId = `doc-paste-resource:${unitId}:${Date.now()}`;
+        const historyId = `doc-paste-resource:${unitId}:${generateRandomId()}`;
         let batchingDisposable: IDisposable | null = null;
         if (resourceRedoMutations.length > 0 || resourceUndoMutations.length > 0) {
-            batchingDisposable = undoRedoService.__tempBatchingUndoRedo(unitId);
+            batchingDisposable = undoRedoService.beginUndoRedoGroup(unitId, historyId, 'append');
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 redoMutations: resourceRedoMutations,

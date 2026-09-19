@@ -18,6 +18,15 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'docs-ui': {
+        pasteOptions: {
+            title: 'Opcions d’enganxament',
+            source: 'Mantén el format d’origen',
+            destination: 'Adapta al format de destinació',
+            text: 'Mantén només el text',
+            useKeyboard: 'No es pot accedir al porta-retalls. Fes servir Ctrl+V (Mac: ⌘V), o Ctrl+Maj+V (Mac: ⌘⇧V) per enganxar només text.',
+            useSystemPaste: 'No es pot accedir al porta-retalls. Utilitza la funció d’enganxar del dispositiu o teclat i canvia el format amb les opcions d’enganxament.',
+            failed: 'No s’ha pogut canviar el format d’enganxament.',
+        },
         outline: {
             title: 'Esquema del document',
         },

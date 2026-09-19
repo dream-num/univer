@@ -14,9 +14,20 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IContextService, IMultiCommand } from '@univerjs/core';
-import { CommandType, DOC_RANGE_TYPE, EDITOR_ACTIVATED, FOCUSING_DOC, SliceBodyType } from '@univerjs/core';
-import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand } from '@univerjs/ui';
+import type { IAccessor, ICommand, IMultiCommand } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
+import type { DocPasteMode } from '../../services/clipboard/paste-options';
+import {
+    CommandType,
+    DOC_RANGE_TYPE,
+    EDITOR_ACTIVATED,
+    FOCUSING_DOC,
+    IContextService,
+    LocaleService,
+    SliceBodyType,
+} from '@univerjs/core';
+import { MessageType } from '@univerjs/design';
+import { CopyCommand, CutCommand, IMessageService, MOBILE_UI_MODE, PasteCommand } from '@univerjs/ui';
 import { IDocClipboardService } from '../../services/clipboard/clipboard.service';
 import { getCurrentParagraph } from './util';
 
@@ -101,6 +112,29 @@ export const DocCutCurrentParagraphCommand = {
     },
 };
 
+export const DocPasteSpecialCommand: ICommand<{ value: DocPasteMode }> = {
+    id: 'doc.command.paste-special',
+    type: CommandType.COMMAND,
+    handler: async (accessor, params) => {
+        if (!params || !['source', 'destination', 'text'].includes(params.value)) {
+            return false;
+        }
+        const service = accessor.get(IDocClipboardService);
+        try {
+            return await service.pasteFromClipboard(params.value);
+        } catch {
+            const localeService = accessor.get(LocaleService);
+            accessor.get(IMessageService).show({
+                type: MessageType.Info,
+                content: localeService.t<LocaleKey>(accessor.get(IContextService).getContextValue(MOBILE_UI_MODE)
+                    ? 'docs-ui.pasteOptions.useSystemPaste'
+                    : 'docs-ui.pasteOptions.useKeyboard'),
+            });
+            return false;
+        }
+    },
+};
+
 export const DocPasteCommand: IMultiCommand = {
     id: PasteCommand.id,
     name: 'doc.command.paste',
@@ -108,13 +142,26 @@ export const DocPasteCommand: IMultiCommand = {
     multi: true,
     priority: DOC_CLIPBOARD_PRIORITY,
     preconditions: whenDocOrEditor,
-    handler: async (accessor: IAccessor) => {
-        const docClipboardService = accessor.get(IDocClipboardService);
-        const clipboardInterfaceService = accessor.get(IClipboardInterfaceService);
-        const clipboardItems = clipboardInterfaceService.supportClipboard
-            ? await clipboardInterfaceService.read()
-            : [];
+    handler: (accessor: IAccessor) => DocPasteSpecialCommand.handler(accessor, { value: 'source' }),
+};
 
-        return docClipboardService.paste(clipboardItems);
+export const DocChangePasteModeCommand: ICommand<{ value: DocPasteMode }> = {
+    id: 'doc.command.change-paste-mode',
+    type: CommandType.COMMAND,
+    handler: async (accessor, params) => {
+        if (!params || !['source', 'destination', 'text'].includes(params.value)) {
+            return false;
+        }
+        try {
+            return await accessor.get(IDocClipboardService).changePasteMode(params.value);
+        } catch {
+            accessor.get(IDocClipboardService).dismissPasteOptions();
+            const localeService = accessor.get(LocaleService);
+            accessor.get(IMessageService).show({
+                type: MessageType.Error,
+                content: localeService.t<LocaleKey>('docs-ui.pasteOptions.failed'),
+            });
+            return false;
+        }
     },
 };

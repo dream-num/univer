@@ -18,6 +18,15 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'docs-ui': {
+        pasteOptions: {
+            title: 'Einfügeoptionen',
+            source: 'Ursprüngliche Formatierung beibehalten',
+            destination: 'Zielformatierung übernehmen',
+            text: 'Nur Text übernehmen',
+            useKeyboard: 'Kein Zugriff auf die Zwischenablage. Verwenden Sie Strg+V (Mac: ⌘V) oder Strg+Umschalt+V (Mac: ⌘⇧V) für reinen Text.',
+            useSystemPaste: 'Kein Zugriff auf die Zwischenablage. Verwenden Sie die Einfügefunktion Ihres Geräts oder Ihrer Tastatur und ändern Sie das Format über die Einfügeoptionen.',
+            failed: 'Das Einfügeformat konnte nicht geändert werden.',
+        },
         outline: {
             title: 'Dokumentgliederung',
         },

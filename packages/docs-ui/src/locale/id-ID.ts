@@ -18,6 +18,15 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'docs-ui': {
+        pasteOptions: {
+            title: 'Opsi tempel',
+            source: 'Pertahankan format sumber',
+            destination: 'Sesuaikan format tujuan',
+            text: 'Simpan teks saja',
+            useKeyboard: 'Papan klip tidak dapat diakses. Gunakan Ctrl+V (Mac: ⌘V), atau Ctrl+Shift+V (Mac: ⌘⇧V) untuk menempel teks saja.',
+            useSystemPaste: 'Papan klip tidak dapat diakses. Gunakan fungsi tempel perangkat atau papan ketik, lalu ubah format melalui Opsi tempel.',
+            failed: 'Format tempel tidak dapat diubah.',
+        },
         outline: {
             title: 'Kerangka dokumen',
         },

@@ -18,6 +18,15 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'docs-ui': {
+        pasteOptions: {
+            title: 'گزینه‌های چسباندن',
+            source: 'حفظ قالب‌بندی مبدأ',
+            destination: 'تطبیق با قالب‌بندی مقصد',
+            text: 'فقط متن',
+            useKeyboard: 'دسترسی به کلیپ‌بورد ممکن نیست. از Ctrl+V (Mac: ⌘V) یا برای چسباندن فقط متن از Ctrl+Shift+V (Mac: ⌘⇧V) استفاده کنید.',
+            useSystemPaste: 'دسترسی به کلیپ‌بورد امکان‌پذیر نیست. از قابلیت چسباندن دستگاه یا صفحه‌کلید استفاده کنید، سپس قالب را از گزینه‌های چسباندن تغییر دهید.',
+            failed: 'تغییر قالب چسباندن ممکن نشد.',
+        },
         outline: {
             title: 'طرح کلی سند',
         },

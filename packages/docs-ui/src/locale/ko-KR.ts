@@ -18,6 +18,15 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'docs-ui': {
+        pasteOptions: {
+            title: '붙여넣기 옵션',
+            source: '원본 서식 유지',
+            destination: '대상 서식에 맞추기',
+            text: '텍스트만 유지',
+            useKeyboard: '클립보드에 접근할 수 없습니다. Ctrl+V(Mac: ⌘V) 또는 텍스트만 붙여넣으려면 Ctrl+Shift+V(Mac: ⌘⇧V)를 누르세요.',
+            useSystemPaste: '클립보드에 접근할 수 없습니다. 기기 또는 키보드의 붙여넣기를 사용한 후 붙여넣기 옵션에서 서식을 변경하세요.',
+            failed: '붙여넣기 서식을 변경할 수 없습니다.',
+        },
         outline: {
             title: '문서 개요',
         },

@@ -18,6 +18,15 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'docs-ui': {
+        pasteOptions: {
+            title: 'Opções de colagem',
+            source: 'Manter formatação original',
+            destination: 'Usar formatação de destino',
+            text: 'Manter somente texto',
+            useKeyboard: 'Não foi possível acessar a área de transferência. Use Ctrl+V (Mac: ⌘V) ou Ctrl+Shift+V (Mac: ⌘⇧V) para colar somente texto.',
+            useSystemPaste: 'Não é possível acessar a área de transferência. Use a função de colar do dispositivo ou teclado e altere o formato nas opções de colagem.',
+            failed: 'Não foi possível alterar o formato da colagem.',
+        },
         outline: {
             title: 'Estrutura do documento',
         },

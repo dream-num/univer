@@ -292,6 +292,11 @@ describe('Test countif function', () => {
             expect(result).toBe(0);
         });
 
+        it('Treats blank referenced array criteria as zero without changing empty strings', async () => {
+            expect(await calculate('=COUNTIF(F1:F3,F1:F2)')).toStrictEqual([[2], [0]]);
+            expect(await calculate('=COUNTIF(F1:F3,{"";0})')).toStrictEqual([[2], [0]]);
+        });
+
         it('Does not match incomplete inequality criteria', async () => {
             expect(await calculate('=COUNTIF(F1:F3,">")')).toBe(0);
             expect(await calculate('=COUNTIF(F1:F3,">=")')).toBe(0);

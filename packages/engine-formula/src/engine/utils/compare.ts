@@ -47,6 +47,28 @@ export function isWildcard(str: string) {
     return str.indexOf('*') > -1 || str.indexOf('?') > -1;
 }
 
+const TEXT_LIGATURES: Record<string, string> = {
+    ß: 'ss',
+    æ: 'ae',
+    œ: 'oe',
+    ﬀ: 'ff',
+    ﬁ: 'fi',
+    ﬂ: 'fl',
+    ﬃ: 'ffi',
+    ﬄ: 'ffl',
+    ﬅ: 'st',
+    ﬆ: 'st',
+};
+
+export function normalizeTextForComparison(value: string): string {
+    const lower = value.toLowerCase();
+    // Excel's literal comparisons equate linguistic ligatures, while retaining
+    // accents and the distinction between dotted/dotless I.
+    return /[\u0080-\uFFFF]/.test(lower)
+        ? lower.normalize('NFC').replace(/[ßæœﬀ-ﬆ]/g, (character) => TEXT_LIGATURES[character])
+        : lower;
+}
+
 export function isMatchWildcard(currentValue: string, value: string) {
     const pattern = escapeRegExpForWildcard(value).replace(/~?[*?]/g, (match) => {
         if (match.startsWith('~')) {
@@ -60,7 +82,7 @@ export function isMatchWildcard(currentValue: string, value: string) {
         }
         return match;
     });
-    const regex = new RegExp(`^${pattern}$`);
+    const regex = new RegExp(`^${pattern}$`, 's');
     return regex.test(currentValue);
 }
 
@@ -73,25 +95,42 @@ export function replaceWildcard(value: string) {
     });
 }
 
-export function compareWithWildcard(currentValue: string, value: string, operator: compareToken) {
+export function compareWithWildcard(currentValue: string, value: string, operator: compareToken, isCaseSensitive = true) {
+    let currentText = currentValue;
+    let pattern = value;
+    if (!isCaseSensitive) {
+        // Wildcards count UTF-16 characters in Excel. Folding must not expand
+        // a character (for example, İ into i plus a combining dot, or ß into ss).
+        const fold = (text: string) => {
+            if (!/[\u0080-\uFFFF]/.test(text)) {
+                return text.toLowerCase();
+            }
+            return text.replace(/[\s\S]/g, (character) => {
+                const lower = character.toLowerCase();
+                return lower.length === 1 ? lower : character;
+            });
+        };
+        currentText = fold(currentText);
+        pattern = fold(pattern);
+    }
     let result = false;
 
     switch (operator) {
         case compareToken.EQUALS:
-            result = isMatchWildcard(currentValue, value);
+            result = isMatchWildcard(currentText, pattern);
             break;
         case compareToken.NOT_EQUAL:
-            result = !isMatchWildcard(currentValue, value);
+            result = !isMatchWildcard(currentText, pattern);
             break;
         case compareToken.GREATER_THAN:
         case compareToken.GREATER_THAN_OR_EQUAL:
-            result = isMatchWildcard(currentValue, value) || currentValue > replaceWildcard(value);
+            result = isMatchWildcard(currentText, pattern) || currentText > replaceWildcard(pattern);
 
             break;
 
         case compareToken.LESS_THAN:
         case compareToken.LESS_THAN_OR_EQUAL:
-            result = currentValue < replaceWildcard(value);
+            result = currentText < replaceWildcard(pattern);
             break;
 
         default:

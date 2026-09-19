@@ -17,6 +17,7 @@
 import type { ICellData, Nullable } from '@univerjs/core';
 import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
 import {
+    CellValueType,
     ContextService,
     DesktopLogService,
     IContextService,
@@ -29,6 +30,7 @@ import {
 } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../basics/error-type';
+import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
 import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
 import { createNewArray } from '../../engine/utils/array-object';
 import { NullValueObject, NumberValueObject, StringValueObject } from '../../engine/value-object/primitive-object';
@@ -94,6 +96,25 @@ function createRuntimeService() {
 }
 
 describe('FormulaRuntimeService', () => {
+    it('indexes scalar and spilled null results as blanks, consistently with reference scans', () => {
+        const { injector, runtime } = createRuntimeService();
+        CELL_INVERTED_INDEX_CACHE.clear();
+        try {
+            runtime.setCurrent(2, 3, 20, 20, 'sheet', 'unit');
+            runtime.setRuntimeData(NumberValueObject.create(7));
+            CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache('unit', 'sheet', 3, 0, 19);
+            runtime.setRuntimeData(NullValueObject.create());
+            expect(runtime.getUnitData().unit?.sheet?.getValue(2, 3)?.v).toBeNull();
+            expect(CELL_INVERTED_INDEX_CACHE.getCellPositions('unit', 'sheet', 3, '', [[0, 19]])?.matchingRows).toEqual([2]);
+            runtime.setCurrent(4, 3, 20, 20, 'sheet', 'unit');
+            runtime.setRuntimeData(createNewArray([[NullValueObject.create()], [NumberValueObject.create(1)]], 2, 1));
+            expect(CELL_INVERTED_INDEX_CACHE.getCellPositions('unit', 'sheet', 3, '', [[0, 19]])?.matchingRows).toEqual([2, 4]);
+        } finally {
+            CELL_INVERTED_INDEX_CACHE.clear();
+            injector.dispose();
+        }
+    });
+
     it.each(['__proto__', 'constructor', 'prototype', 'toString'])('isolates runtime writes for special identifiers (%s)', (key) => {
         const { injector, runtime } = createRuntimeService();
         const marker = '__formula_pollution__';
@@ -361,6 +382,32 @@ describe('FormulaRuntimeService', () => {
         runtime.setRuntimeData(twoByTwo as never);
         expect(runtime.getUnitData().unit?.sheet?.getValue(3, 3)?.v).toBe(11);
         expect(runtime.getRuntimeArrayFormulaCellData().unit?.sheet?.getValue(3, 4)?.v).toBe(12);
+    });
+
+    it.each([
+        { cell: { v: '12', t: CellValueType.NUMBER }, blocked: false },
+        { cell: { v: '1.2e1', t: CellValueType.NUMBER }, blocked: false },
+        { cell: { v: '13', t: CellValueType.NUMBER }, blocked: true },
+        { cell: { v: '12', t: CellValueType.STRING }, blocked: true },
+        { cell: { v: '12', t: CellValueType.FORCE_STRING }, blocked: true },
+        { cell: { v: 'invalid', t: CellValueType.NUMBER }, blocked: true },
+    ])('recognizes imported numeric array results without overwriting real blockers: $cell', ({ cell, blocked }) => {
+        const { injector, runtime, unitDataMatrix, arrayFormulaCellData, arrayFormulaRange } = createRuntimeService();
+        try {
+            arrayFormulaRange.unit.sheet = {
+                3: { 3: { startRow: 3, startColumn: 3, endRow: 3, endColumn: 4 } },
+            };
+            unitDataMatrix.setValue(3, 4, { ...cell });
+            arrayFormulaCellData.setValue(3, 4, { v: 12, t: CellValueType.NUMBER });
+            runtime.setCurrent(3, 3, 10, 10, 'sheet', 'unit');
+            runtime.setRuntimeData(createNewArray([[NumberValueObject.create(11), NumberValueObject.create(12)]], 1, 2));
+            expect(runtime.getUnitData().unit?.sheet?.getValue(3, 3)?.v).toBe(blocked ? ErrorType.SPILL : 11);
+            if (blocked) {
+                expect(unitDataMatrix.getValue(3, 4)).toEqual(cell);
+            }
+        } finally {
+            injector.dispose();
+        }
     });
 
     it('should return #SPILL when a real value is entered into the previous array formula range', () => {

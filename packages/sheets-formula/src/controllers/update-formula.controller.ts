@@ -164,8 +164,8 @@ export class UpdateFormulaController extends Disposable {
             },
         };
 
-        // update core snapshot
-        this._commandService.executeCommand(
+        // Finish this nested mutation before the caller so replicas replay the same write order.
+        this._commandService.syncExecuteCommand(
             SetRangeValuesMutation.id,
             {
                 unitId,

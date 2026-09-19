@@ -200,7 +200,7 @@ describe('Test vlookup', () => {
                 }`),
                 NumberValueObject.create(0)
             ) as BaseValueObject;
-            expect(getObjectValue(resultObject)).toStrictEqual(ErrorType.REF); // Excel reports #N/A
+            expect(getObjectValue(resultObject)).toStrictEqual(ErrorType.NA);
         });
 
         it('LookupValue is single cell, colIndexNum is array and gets rangeLookup error', async () => {
@@ -239,7 +239,7 @@ describe('Test vlookup', () => {
                 }`)
             ) as BaseValueObject;
             expect(getObjectValue(resultObject)).toStrictEqual([
-                [ErrorType.REF],
+                [ErrorType.NA],
                 [ErrorType.REF],
             ]); // Excel reports [[ErrorType.NA], [ErrorType.REF]]
         });
@@ -398,5 +398,29 @@ describe('Test vlookup', () => {
                 [2],
             ]);
         });
+    });
+});
+
+describe('Excel lookup error precedence', () => {
+    it.each([
+        [1, 0, '#N/A', '#N/A'],
+        [1, 2, '#N/A', '#N/A'],
+        [8, 0, '#VALUE!', '#VALUE!'],
+        [8, -1, '#VALUE!', '#VALUE!'],
+        [8, 2, '#REF!', '#REF!'],
+        [8, 2.9, '#REF!', '#REF!'],
+        [9, 2, '#N/A', '#REF!'],
+        [20, 2, '#N/A', '#REF!'],
+    ])('looks up %s before validating index %s', (key, index, exact, approximate) => {
+        const fn = new Vlookup(FUNCTION_NAMES_LOOKUP.VLOOKUP);
+        for (const [mode, expected] of [[0, exact], [1, approximate]] as const) {
+            const result = fn.calculate(
+                NumberValueObject.create(key as number),
+                ArrayValueObject.create('{8;10;12}'),
+                NumberValueObject.create(index as number),
+                NumberValueObject.create(mode)
+            );
+            expect(getObjectValue(result)).toEqual([[expected]]);
+        }
     });
 });

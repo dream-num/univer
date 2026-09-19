@@ -17,10 +17,30 @@
 import type { DateSystem } from '@univerjs/core';
 import type { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
+import { isRealNum } from '@univerjs/core';
 import { compareToken } from '../../basics/token';
 import { ValueObjectFactory } from '../value-object/array-value-object';
-import { BooleanValueObject, createBooleanValueObjectByRawValue } from '../value-object/primitive-object';
+import {
+    BooleanValueObject,
+    createBooleanValueObjectByRawValue,
+    NumberValueObject,
+    StringValueObject,
+} from '../value-object/primitive-object';
 import { expandArrayValueObject } from './array-object';
+
+export function createCriteriaValueObject(content: string, dateSystem?: DateSystem): BaseValueObject {
+    if (isRealNum(content)) {
+        const number = Number(content);
+        // Excel accepts decimal/scientific notation and spaces, but not JS
+        // radix prefixes, control whitespace or infinities.
+        if (!/^ *[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)? *$/i.test(content) || !Number.isFinite(number)) {
+            return StringValueObject.create(content);
+        }
+        // Excel flushes subnormal decimal values to zero.
+        return NumberValueObject.create(Math.abs(number) < 2 ** -1022 ? 0 : number);
+    }
+    return ValueObjectFactory.create(content, false, dateSystem);
+}
 
 export function findCompareToken(str: string, dateSystem?: DateSystem): [compareToken, BaseValueObject] {
     const comparisonTokens: compareToken[] = [
@@ -32,14 +52,19 @@ export function findCompareToken(str: string, dateSystem?: DateSystem): [compare
         compareToken.LESS_THAN,
     ];
 
+    let operator = compareToken.EQUALS;
+    let content = str;
     for (const token of comparisonTokens) {
         if (str.startsWith(token)) {
-            const content = str.substring(token.length);
-            return [token, ValueObjectFactory.create(content, false, dateSystem) as BaseValueObject];
+            operator = token;
+            content = str.substring(token.length);
+            break;
         }
     }
 
-    return [compareToken.EQUALS, ValueObjectFactory.create(str, false, dateSystem) as BaseValueObject];
+    // Criteria accept numeric text such as "01" and "1.0" even though a
+    // worksheet cell containing that text must retain its string type.
+    return [operator, createCriteriaValueObject(content, dateSystem)];
 }
 
 /**

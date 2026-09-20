@@ -990,7 +990,8 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Returns the horizontal alignment of the text (left/center/right) of the top-left cell in the range.
+     * Returns the horizontal alignment of the text (left/center/normal/general) of the top-left cell in the range.
+     * Right alignment is returned as `normal` for compatibility; `general` indicates the default alignment.
      * @returns {string} The horizontal alignment of the text in the cell.
      * @example
      * ```ts
@@ -1008,6 +1009,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Returns the horizontal alignments of the cells in the range.
+     * Right alignment is returned as `normal` for compatibility; `general` indicates the default alignment.
      * @returns {string[][]} A two-dimensional array of horizontal alignments of text associated with cells in the range.
      * @example
      * ```ts
@@ -1573,6 +1575,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Set the horizontal (left to right) alignment for the given range (left/center/right).
+     * The legacy value `normal` is also accepted as an alias for `right`.
      * @param {FHorizontalAlignment} alignment The horizontal alignment
      * @returns {FRange} this range, for chaining
      * @example
@@ -1581,7 +1584,7 @@ export class FRange extends FBaseInitialable {
      * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
      * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:B2');
-     * fRange.setHorizontalAlignment('left');
+     * fRange.setHorizontalAlignment('right');
      * ```
      */
     setHorizontalAlignment(alignment: FHorizontalAlignment): FRange {

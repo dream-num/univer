@@ -688,6 +688,19 @@ describe('Test FRange', () => {
         expect(getStyleByPosition(0, 0, 0, 0)?.tb).toBe(WrapStrategy.CLIP);
     });
 
+    it.each(['right', 'normal'] as const)('sets right alignment using "%s" and preserves legacy getter values', (alignment) => {
+        const range = univerAPI.getActiveWorkbook()!.getActiveSheet()!.getRange('A1:B2');
+
+        expect(range.setHorizontalAlignment(alignment)).toBe(range);
+        expect(getStyleByPosition(0, 0, 0, 0)?.ht).toBe(HorizontalAlign.RIGHT);
+        expect(getStyleByPosition(1, 1, 1, 1)?.ht).toBe(HorizontalAlign.RIGHT);
+        expect(range.getHorizontalAlignment()).toBe('normal');
+        expect(range.getHorizontalAlignments()).toEqual([
+            ['normal', 'normal'],
+            ['normal', 'normal'],
+        ]);
+    });
+
     it('gets and sets shrink to fit', () => {
         const range = univerAPI.getActiveWorkbook()!.getActiveSheet()!.getRange('A1');
 

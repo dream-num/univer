@@ -95,6 +95,7 @@ describe('Test utils', () => {
     it('transforms facade alignment values to core values and back', () => {
         expect(transformFacadeHorizontalAlignment('left')).toBe(HorizontalAlign.LEFT);
         expect(transformFacadeHorizontalAlignment('center')).toBe(HorizontalAlign.CENTER);
+        expect(transformFacadeHorizontalAlignment('right')).toBe(HorizontalAlign.RIGHT);
         expect(transformFacadeHorizontalAlignment('normal')).toBe(HorizontalAlign.RIGHT);
         expect(() => transformFacadeHorizontalAlignment('invalid' as never)).toThrowError('Invalid horizontal alignment: invalid');
 

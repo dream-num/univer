@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum, UniverInstanceType } from '@univerjs/core';
+import { DrawingTypeEnum, ICommandService, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { InsertDocDrawingCommand } from '@univerjs/docs-drawing';
 import { SetDocZoomRatioOperation } from '@univerjs/docs-ui';
-import { Rect } from '@univerjs/engine-render';
+import { IDrawingManagerService } from '@univerjs/drawing';
+import { DrawingRenderService } from '@univerjs/drawing-ui';
+import { IRenderManagerService, Rect } from '@univerjs/engine-render';
+import { CanvasFloatDomService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
@@ -44,7 +47,14 @@ function createController(options: {
     page?: any;
     renderType?: UniverInstanceType;
     refreshDrawingOnAdd?: { left: number; top: number; width: number; height: number; angle: number };
-    resolveRefreshDrawing?: () => { left: number; top: number; width: number; height: number; angle: number } | undefined;
+    resolveRefreshDrawing?: () => {
+        left: number;
+        top: number;
+        width: number;
+        height: number;
+        angle: number;
+    } | undefined;
+    notifyMissingDrawingBeforeGeometry?: boolean;
 } = {}) {
     const add$ = new Subject<any[]>();
     const remove$ = new Subject<any[]>();
@@ -56,7 +66,8 @@ function createController(options: {
     const commandHandlers: Array<(command: { id: string; params?: unknown }) => void> = [];
     const scene = createScene();
     const canvas = { dispatchEvent: vi.fn() };
-    const docRefreshDrawingsService = new DocRefreshDrawingsService();
+    const injector = new Injector([[DocRefreshDrawingsService], [DocFloatDomController]]);
+    const docRefreshDrawingsService = injector.get(DocRefreshDrawingsService);
     const refreshDrawings = vi.spyOn(docRefreshDrawingsService, 'refreshDrawings');
     docRefreshDrawingsService.refreshDrawings$.subscribe((skeleton) => {
         const transform = options.resolveRefreshDrawing?.() ?? options.refreshDrawingOnAdd;
@@ -71,7 +82,9 @@ function createController(options: {
     });
     const skeleton = {
         dirty$: skeletonDirty$,
-        getSkeletonData: () => ({ pages: [options.page ?? { pageWidth: 240, marginLeft: 20, marginRight: 30 }] }),
+        getSkeletonData: () => ({
+            pages: [options.page ?? { pageWidth: 240, marginLeft: 20, marginRight: 30 }],
+        }),
     };
     const renderUnit = {
         unitId: 'doc-1',
@@ -135,15 +148,20 @@ function createController(options: {
         syncExecuteCommand: vi.fn(),
     };
 
-    const controller = new DocFloatDomController(
-        renderManagerService as never,
-        drawingManagerService as never,
-        drawingRenderService as never,
-        canvasFloatDomService as never,
-        univerInstanceService as never,
-        commandService as never,
-        docRefreshDrawingsService
-    );
+    if (options.notifyMissingDrawingBeforeGeometry) {
+        // DrawingUpdateController can request insertion before this controller receives the runtime geometry.
+        const subscription = refreshTransform$.subscribe((params) => {
+            subscription.unsubscribe();
+            add$.next(params.map(({ unitId, subUnitId, drawingId }) => ({ unitId, subUnitId, drawingId })));
+        });
+    }
+    injector.add([IRenderManagerService, { useValue: renderManagerService as never }]);
+    injector.add([IDrawingManagerService, { useValue: drawingManagerService as never }]);
+    injector.add([DrawingRenderService, { useValue: drawingRenderService as never }]);
+    injector.add([CanvasFloatDomService, { useValue: canvasFloatDomService as never }]);
+    injector.add([IUniverInstanceService, { useValue: univerInstanceService as never }]);
+    injector.add([ICommandService, { useValue: commandService as never }]);
+    const controller = injector.get(DocFloatDomController);
 
     return {
         controller,
@@ -180,9 +198,27 @@ function publishEmbedRuntimeGeometry(
 describe('DocFloatDomController', () => {
     it('preserves existing props while adding custom block runtime viewport', () => {
         expect(mergeDocFloatDomRuntimeProps({ keep: true }, {
-            customBlockRenderViewport: { bleedLeft: 96, bleedWidth: 1440, contentHeight: 720, contentWidth: 1280, height: 480, pageContentWidth: 1008, viewScale: 1.5, viewportHeight: 320 },
+            customBlockRenderViewport: {
+                bleedLeft: 96,
+                bleedWidth: 1440,
+                contentHeight: 720,
+                contentWidth: 1280,
+                height: 480,
+                pageContentWidth: 1008,
+                viewScale: 1.5,
+                viewportHeight: 320,
+            },
         } as never)).toEqual({
-            customBlockRenderViewport: { bleedLeft: 96, bleedWidth: 1440, contentHeight: 720, contentWidth: 1280, height: 480, pageContentWidth: 1008, viewScale: 1.5, viewportHeight: 320 },
+            customBlockRenderViewport: {
+                bleedLeft: 96,
+                bleedWidth: 1440,
+                contentHeight: 720,
+                contentWidth: 1280,
+                height: 480,
+                pageContentWidth: 1008,
+                viewScale: 1.5,
+                viewportHeight: 320,
+            },
             keep: true,
         });
     });
@@ -378,6 +414,39 @@ describe('DocFloatDomController', () => {
         });
 
         controller.dispose();
+    });
+
+    it('mounts a pending embed without requesting recursive geometry and still accepts later layout changes', () => {
+        const rect = new Rect('dom-rect', { left: 10, top: 20, width: 50, height: 40 });
+        const { controller, add$, remove$, refreshTransform$, refreshDrawings, canvasFloatDomService } = createController({
+            rects: [rect],
+            drawing: { data: { version: 1, embedId: 'embed-1', hostAnchorId: 'anchor-1' } },
+            refreshDrawingOnAdd: { left: 300, top: 500, width: 50, height: 40, angle: 0 },
+            notifyMissingDrawingBeforeGeometry: true,
+        });
+
+        try {
+            const drawing = { unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' };
+            add$.next([drawing]);
+
+            expect(refreshDrawings).toHaveBeenCalledOnce();
+            expect(canvasFloatDomService.addFloatDom).toHaveBeenCalledOnce();
+            const position$ = canvasFloatDomService.addFloatDom.mock.calls[0][0].position$;
+            expect(position$.getValue()).toMatchObject({ startX: 580, startY: 1440 });
+
+            publishEmbedRuntimeGeometry(refreshTransform$, { left: 400, top: 600, width: 50, height: 40, angle: 0 });
+            expect(position$.getValue()).toMatchObject({ startX: 780, startY: 1740 });
+
+            remove$.next([drawing]);
+            add$.next([drawing]);
+            expect(canvasFloatDomService.addFloatDom).toHaveBeenCalledTimes(2);
+            expect(canvasFloatDomService.addFloatDom.mock.calls[1][0].position$.getValue()).toMatchObject({
+                startX: 580,
+                startY: 1440,
+            });
+        } finally {
+            controller.dispose();
+        }
     });
 
     it('does not resolve layout services from a disposed render unit', () => {

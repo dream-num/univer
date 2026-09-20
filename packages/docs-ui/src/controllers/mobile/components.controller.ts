@@ -63,9 +63,11 @@ import {
     SmileIcon,
     StrikethroughIcon,
     SubscriptIcon,
+    SubtitleTypeIcon,
     SuperscriptIcon,
     SymbolsIcon,
     TextTypeIcon,
+    TitleTypeIcon,
     TodoListDoubleIcon,
     UnderlineIcon,
     UnorderIcon,
@@ -100,8 +102,6 @@ import {
     DocParagraphTextColorSwatchIcon5,
     DocParagraphTextColorSwatchIcon6,
     HeaderTextColorIcon,
-    SubtitleTypeIcon,
-    TitleTypeIcon,
 } from '../../views/Icon';
 import { BULLET_LIST_TYPE_COMPONENT, ORDER_LIST_TYPE_COMPONENT } from '../../views/list-type-picker/index';
 import { BulletListTypePicker, OrderListTypePicker } from '../../views/list-type-picker/Picker';

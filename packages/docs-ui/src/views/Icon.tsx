@@ -16,107 +16,15 @@
 
 import type { IconType, IIconProps } from '@univerjs/ui';
 import { ThemeService } from '@univerjs/core';
+import { TextColorSwatchDoubleIcon } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { map } from 'rxjs';
+
 import { getHighlightBackgroundColor } from './paragraph-menu/theme-color';
 
 type ColorSwatchIconProps = IIconProps & {
     color: string;
 };
-
-export function TitleTypeIcon({ className, style, onClick }: IIconProps) {
-    return (
-        <svg
-            className={className}
-            style={style}
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            aria-hidden="true"
-            onClick={onClick}
-        >
-            <text
-                x={2}
-                y={19}
-                fontFamily="Arial, sans-serif"
-                fontSize={19}
-                fontWeight={500}
-            >
-                T
-            </text>
-            <text
-                x={15}
-                y={19}
-                fontFamily="Arial, sans-serif"
-                fontSize={13}
-                fontWeight={500}
-            >
-                t
-            </text>
-        </svg>
-    );
-}
-
-export function SubtitleTypeIcon({ className, style, onClick }: IIconProps) {
-    return (
-        <svg
-            className={className}
-            style={style}
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            aria-hidden="true"
-            onClick={onClick}
-        >
-            <text
-                x={5}
-                y={19}
-                fontFamily="Arial, sans-serif"
-                fontSize={19}
-                fontWeight={500}
-            >
-                S
-            </text>
-        </svg>
-    );
-}
-
-export function TextColorSwatchIcon({ className, style, onClick, color }: ColorSwatchIconProps) {
-    return (
-        <svg
-            className={className}
-            style={style}
-            viewBox="0 0 24 24"
-            width="1em"
-            height="1em"
-            fill="none"
-            aria-hidden="true"
-            onClick={onClick}
-        >
-            <rect
-                x={1}
-                y={1}
-                width={22}
-                height={22}
-                rx={2.5}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1}
-                strokeOpacity={0.12}
-            />
-            <text
-                x={12}
-                y={17.25}
-                direction="ltr"
-                fontFamily="Arial, sans-serif"
-                fontSize={15}
-                fontWeight={400}
-                fill={color}
-                textAnchor="middle"
-            >
-                A
-            </text>
-        </svg>
-    );
-}
 
 export function BackgroundColorSwatchIcon({ className, style, onClick, color }: ColorSwatchIconProps) {
     return (
@@ -148,29 +56,31 @@ export function HeaderTextColorIcon({ className, style, onClick, extend }: IIcon
     const color = extend?.colorChannel1 ?? 'currentColor';
 
     return (
-        <TextColorSwatchIcon
+        <TextColorSwatchDoubleIcon
             className={className}
             style={style}
             onClick={onClick}
-            color={color}
+            extend={{ colorChannel1: color }}
+            aria-hidden="true"
         />
     );
 }
 
 export function DefaultTextColorIcon({ className, style, onClick }: IIconProps) {
     return (
-        <TextColorSwatchIcon
+        <TextColorSwatchDoubleIcon
             className={className}
             style={style}
             onClick={onClick}
-            color="#000000"
+            extend={{ colorChannel1: '#000000' }}
+            aria-hidden="true"
         />
     );
 }
 
 function createTextColorSwatchIcon(color: string): IconType {
     return function DocParagraphTextColorSwatchIcon(props: IIconProps) {
-        return <TextColorSwatchIcon {...props} color={color} />;
+        return <TextColorSwatchDoubleIcon {...props} extend={{ colorChannel1: color }} aria-hidden="true" />;
     };
 }
 

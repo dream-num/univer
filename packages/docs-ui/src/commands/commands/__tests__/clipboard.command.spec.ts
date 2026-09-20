@@ -45,9 +45,15 @@ import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsO
 import {
     IClipboardInterfaceService,
     IMessageService,
+    IPlatformService,
     IShortcutService,
+    IUIRuntimeScopeService,
+    KeyCode,
+    MetaKeys,
     MOBILE_UI_MODE,
     PasteCommand,
+    ShortcutService,
+    UIRuntimeScopeService,
 } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import zhCN from '../../../locale/zh-CN';
@@ -1352,17 +1358,21 @@ describe('test cases in clipboard', () => {
         });
 
         it.each([
-            [true, 'Ctrl+V'],
-            [false, 'Ctrl+V'],
-            [false, '⌘+V'],
-            [false, 'Alt+P'],
-            [false, null],
-        ] as const)('preserves the document and shows configured paste guidance (mobile: %s, shortcut: %s)', async (mobile, shortcut) => {
+            { mobile: true, isMac: false, binding: MetaKeys.CTRL_COMMAND | KeyCode.V, shortcut: 'Ctrl+V' },
+            { mobile: false, isMac: false, binding: MetaKeys.CTRL_COMMAND | KeyCode.V, shortcut: 'Ctrl+V' },
+            { mobile: false, isMac: true, binding: MetaKeys.CTRL_COMMAND | KeyCode.V, shortcut: '⌘+V' },
+            { mobile: false, isMac: false, binding: MetaKeys.ALT | KeyCode.P, shortcut: 'Alt+P' },
+            { mobile: false, isMac: false, binding: null, shortcut: null },
+        ])('preserves the document and shows configured paste guidance (mobile: $mobile, shortcut: $shortcut)', async ({ mobile, isMac, binding, shortcut }) => {
             const show = vi.fn<IMessageService['show']>(() => ({ dispose: () => {} }));
             injector.add([IMessageService, { useValue: { show, remove: vi.fn(), removeAll: vi.fn() } }]);
-            injector.add([IShortcutService, { useValue: {
-                getShortcutDisplayOfCommand: (id: string) => id === PasteCommand.id ? shortcut : null,
-            } }]);
+            injector.add([IPlatformService, { useValue: { isMac, isWindows: !isMac, isLinux: false } }]);
+            injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
+            injector.add([IShortcutService, { useClass: ShortcutService }]);
+            const shortcutService = get(IShortcutService);
+            if (binding !== null) {
+                shortcutService.registerShortcut({ id: PasteCommand.id, binding });
+            }
             const localeService = get(LocaleService);
             localeService.load({ [LocaleType.ZH_CN]: zhCN });
             localeService.setLocale(LocaleType.ZH_CN);

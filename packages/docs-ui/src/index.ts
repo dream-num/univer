@@ -264,6 +264,7 @@ export type { IDocPrintComponentContext, IDocPrintContext } from './services/doc
 export { DocsRenderService } from './services/docs-render.service';
 export { Editor } from './services/editor/editor';
 export { EditorService, IEditorService } from './services/editor/editor-manager.service';
+export type { IEditorRuntimeConfig } from './services/editor/editor-runtime-config';
 export { DocFloatMenuService } from './services/float-menu.service';
 export {
     isInSameTableCell,
@@ -303,4 +304,5 @@ export type {
     IKeyboardEventConfig,
 } from './views/rich-text-editor/hooks';
 export { RichTextEditor } from './views/RichTextEditor';
+
 export type { IRichTextEditorProps } from './views/RichTextEditor';

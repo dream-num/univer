@@ -45,7 +45,7 @@ import {
     RichTextEditingMutation,
     SetTextSelectionsOperation,
 } from '@univerjs/docs';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { DocumentViewModel, IRenderManagerService } from '@univerjs/engine-render';
 import {
     IPlatformService,
     IShortcutService,
@@ -77,6 +77,7 @@ class TestEditorRender extends Disposable {
         onCompositionupdate$: new Subject(),
         onCompositionend$: new Subject(),
         textSelectionInner$: new Subject(),
+        movingSelection$: new Subject(),
         isFocusing: false,
     };
 
@@ -86,7 +87,24 @@ class TestEditorRender extends Disposable {
         canvasColorService: {},
         mount: (container: HTMLDivElement) => container.appendChild(this.canvas),
         getCanvas: () => ({ getCanvasEle: () => this.canvas }),
+        resizeBySize: (width: number, height: number) => {
+            this.canvas.width = width;
+            this.canvas.height = height;
+        },
     };
+
+    readonly scene = { transformByState: () => undefined, getViewport: () => undefined };
+    private readonly _viewModel: DocumentViewModel;
+
+    constructor(model: DocumentDataModel) {
+        super();
+        this._viewModel = new DocumentViewModel(model);
+        this.disposeWithMe(this._viewModel);
+    }
+
+    isDisposed() {
+        return this._disposed;
+    }
 
     with(token: unknown) {
         if (token === DocSelectionRenderService) {
@@ -94,7 +112,7 @@ class TestEditorRender extends Disposable {
         }
         if (token === DocSkeletonManagerService) {
             return {
-                getViewModel: () => undefined,
+                getViewModel: () => this._viewModel,
                 getSkeleton: () => ({ getActualSize: () => ({ actualWidth: 100, actualHeight: 20 }) }),
             };
         }
@@ -115,8 +133,12 @@ class TestEditorRender extends Disposable {
 class TestRenderManagerService extends Disposable {
     private readonly _renders = new Map<string, TestEditorRender>();
 
+    constructor(@IUniverInstanceService private readonly _instanceService: IUniverInstanceService) {
+        super();
+    }
+
     createRender(id: string) {
-        const render = new TestEditorRender();
+        const render = new TestEditorRender(this._instanceService.getUnit<DocumentDataModel>(id)!);
         this._renders.set(id, render);
         this.disposeWithMe(render);
         return render;

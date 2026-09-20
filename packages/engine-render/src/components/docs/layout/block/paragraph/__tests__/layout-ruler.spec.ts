@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDocumentSkeletonDivide, IDocumentSkeletonGlyph } from '../../../../../../basics/i-document-skeleton-cached';
+import type {
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonGlyph,
+} from '../../../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig } from '../../../../../../basics/interfaces';
 import {
     AlignTypeH,
@@ -41,11 +44,7 @@ import {
     WrapTextType,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-    DocumentSkeletonPageType,
-    GlyphType,
-    LineType,
-} from '../../../../../../basics/i-document-skeleton-cached';
+import { DocumentSkeletonPageType, GlyphType, LineType } from '../../../../../../basics/i-document-skeleton-cached';
 import { setDocsCustomBlockRenderViewportProvider } from '../../../../custom-block-render-viewport';
 import { getDocumentCompatibilityPolicy } from '../../../../document-compatibility';
 import { DocumentSkeleton } from '../../../doc-skeleton';
@@ -63,6 +62,46 @@ import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed
 import issue1207Snapshot from './fixtures/issue-1207-bullet-style.snapshot.json';
 
 describe('layout-ruler', () => {
+    it('does not skip a fixed tab stop after preceding text crosses it', () => {
+        const tab = createGlyph(DataStreamTreeTokenType.TAB, 36);
+        tab.glyphType = GlyphType.TAB;
+        tab.left = 120;
+        const divide = { glyphGroup: [tab], width: 580 } as IDocumentSkeletonDivide;
+        const paragraphConfig = {
+            paragraphStyle: {
+                tabStops: [{ offset: 100, alignment: 1 }, { offset: 200, alignment: 1 }],
+                fixedTabStops: BooleanNumber.TRUE,
+            },
+        } as IParagraphConfig;
+
+        __testing.adjustExplicitTabStop(divide, [], paragraphConfig);
+
+        expect(tab.width).toBe(0);
+        expect(tab.bBox.width).toBe(0);
+    });
+
+    it('top-aligns glyphs in compact exact line boxes when requested by an embedded editor', () => {
+        const metrics = getLineHeightMetrics(
+            18,
+            0,
+            15.6,
+            GridType.LINES,
+            14,
+            SpacingRule.EXACT,
+            BooleanNumber.FALSE,
+            true,
+            true,
+            undefined,
+            false,
+            undefined,
+            true
+        );
+
+        expect(metrics.paddingTop).toBe(0);
+        expect(metrics.paddingBottom).toBe(-4);
+        expect(getLineBoxHeight(metrics)).toBe(14);
+    });
+
     beforeEach(() => {
         clearFontCreateConfigCache();
         vi.stubGlobal('document', {

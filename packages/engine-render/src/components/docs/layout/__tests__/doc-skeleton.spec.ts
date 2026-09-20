@@ -15,9 +15,12 @@
  */
 
 import type { IDocumentData, IParagraph } from '@univerjs/core';
+import type { IDocumentLayoutSnapshot } from '../../document-layout-presentation';
 import type { IDocumentLayoutPageGeometryPublication } from '../document-layout-publication';
 import {
     BooleanNumber,
+    ColumnLayoutType,
+    ColumnResponsiveType,
     ColumnSeparatorType,
     createDocumentModelWithStyle,
     CustomRangeType,
@@ -29,6 +32,7 @@ import {
     GridType,
     HorizontalAlign,
     LocaleService,
+    LocaleType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PageOrientType,
@@ -44,16 +48,14 @@ import {
     TabStopLeader,
     Univer,
     VerticalAlignmentType,
+    WrapStrategy,
     WrapTextType,
 } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import {
-    DocumentSkeletonPageType,
-    GlyphType,
-    PageLayoutType,
-} from '../../../../basics/i-document-skeleton-cached';
+import { DocumentSkeletonPageType, GlyphType, PageLayoutType } from '../../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../../basics/vector2';
 import { setDocsCustomBlockRenderViewportProvider } from '../../custom-block-render-viewport';
+import { registerDocumentLayoutPresentation } from '../../document-layout-presentation';
 import { setDocsTableRenderViewportProvider } from '../../table-render-viewport';
 import { DocumentViewModel } from '../../view-model/document-view-model';
 import { DocumentSkeleton } from '../doc-skeleton';
@@ -241,7 +243,838 @@ function createPage(type: DocumentSkeletonPageType, st: number, tableId = '') {
     };
 }
 
+function createPresentationModel(layout: IDocumentLayoutSnapshot): DocumentDataModel {
+    const privateKeys = new Set([
+        'fontRenderScale',
+        'textSkewX',
+        'textAdvance',
+        'customGlyphKey',
+        'customGlyphGroup',
+        'lineAscent',
+        'lineDescent',
+        'textPaintOffsets',
+        'fontMetricScaleEnabled',
+        'topAlignExactLineSpacing',
+        'useTextInkForHitTesting',
+        'preservePunctuationSpacing',
+        'applyTextPosition',
+        'paintTextOutline',
+        'fixedTabStops',
+        'horizontalPadding',
+        'minHeight',
+        'clipContent',
+        'topOffset',
+    ]);
+    const model = new DocumentDataModel(JSON.parse(JSON.stringify(layout, (key, value) => (
+        privateKeys.has(key) ? undefined : value
+    ))));
+    registerDocumentLayoutPresentation(model, {
+        getSnapshot: () => layout,
+        captureState: () => undefined,
+        applyActions: () => {},
+        restoreState: () => {},
+    });
+    return model;
+}
+
 describe('doc skeleton', () => {
+    it('invalidates only requested font measurements before laying out loaded fonts again', () => {
+        const univer = new Univer();
+        const model = createPresentationModel({
+            id: 'font-loading-layout',
+            body: {
+                dataStream: 'A\r\n',
+                paragraphs: [{ startIndex: 1, paragraphId: 'font-loading-paragraph' }],
+                sectionBreaks: [{ startIndex: 2, sectionId: 'font-loading-section' }],
+            },
+            documentStyle: { pageSize: { width: 200, height: 200 }, textStyle: { ff: 'FontLoadingRegression', fs: 12 } },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        const getGlyph = () => skeleton.getSkeletonData()!.pages[0].sections[0].columns[0].lines[0].divides[0].glyphGroup[0];
+        try {
+            skeleton.calculate();
+            const glyph = getGlyph();
+            const fontStyle = glyph.fontStyle!.fontString;
+            const originalWidth = glyph.width;
+            const fresh = FontCache.getMeasureText('A', fontStyle);
+            const stale = { ...fresh, width: 99, fontBoundingBoxAscent: 77, fontBoundingBoxDescent: 33 };
+            FontCache.setFontMeasureCache(fontStyle, 'A', stale);
+            FontCache.setFontMeasureCache('unrelated-font', 'A', stale);
+            skeleton.makeDirty(false);
+
+            skeleton.invalidateFontMetrics([fontStyle]);
+
+            expect(skeleton.dirty).toBe(true);
+            expect(FontCache.getFontMeasureCache(fontStyle, 'A')).toBeUndefined();
+            expect(FontCache.getFontMeasureCache('unrelated-font', 'A')).toEqual(stale);
+            skeleton.calculate();
+            expect(getGlyph().width).toBe(originalWidth);
+            expect(model.getBody()?.dataStream).toBe('A\r\n');
+        } finally {
+            FontCache.clearFontMeasureCache('unrelated-font');
+            skeleton.dispose();
+            univer.dispose();
+        }
+    });
+    it('keeps the surviving line baseline when a deleted paragraph contributes its final mark', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const content = 'that require complex patterns of tool us';
+        const baselines: number[] = [];
+
+        try {
+            for (const markAscent of [12, 17]) {
+                const model = createPresentationModel({
+                    id: `merged-positioned-paragraph-${markAscent}`,
+                    body: {
+                        dataStream: `${content}\r\n`,
+                        paragraphs: [{ startIndex: content.length, paragraphId: 'surviving-paragraph' }],
+                        textRuns: [
+                            { st: 0, ed: content.length, ts: { lineAscent: 12, lineDescent: 4 } },
+                            { st: content.length, ed: content.length + 1, ts: { lineAscent: markAscent, lineDescent: 0 } },
+                        ],
+                        sectionBreaks: [{ startIndex: content.length + 1, sectionId: 'positioned-section' }],
+                    },
+                    documentStyle: {
+                        documentFlavor: DocumentFlavor.TRADITIONAL,
+                        fontMetricScaleEnabled: BooleanNumber.FALSE,
+                        pageSize: { width: 500, height: 200 },
+                        marginTop: 0,
+                        marginBottom: 0,
+                        marginLeft: 0,
+                        marginRight: 0,
+                        textStyle: { fs: 9, textAdvance: 10 },
+                        defaultParagraphStyle: {
+                            spacingRule: SpacingRule.EXACT,
+                            lineSpacing: markAscent,
+                            snapToGrid: BooleanNumber.FALSE,
+                            spaceAbove: { v: 0 },
+                            spaceBelow: { v: 0 },
+                        },
+                        renderConfig: {
+                            topAlignExactLineSpacing: BooleanNumber.TRUE,
+                            useTextInkForHitTesting: BooleanNumber.TRUE,
+                            applyTextPosition: BooleanNumber.TRUE,
+                            zeroWidthParagraphBreak: BooleanNumber.TRUE,
+                        },
+                    },
+                });
+                const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), localeService);
+                try {
+                    skeleton.calculate();
+                    const lines = skeleton.getSkeletonData()!.pages[0].sections[0].columns[0].lines;
+                    expect(lines).toHaveLength(1);
+                    baselines.push(lines[0].top + lines[0].asc);
+                    expect(new DocumentViewModel(model).getBody()?.textRuns?.slice(-1)[0].ts?.lineAscent).toBe(markAscent);
+                } finally {
+                    skeleton.dispose();
+                }
+            }
+            expect(baselines).toEqual([12, 12]);
+        } finally {
+            univer.dispose();
+        }
+    });
+
+    it.each([BooleanNumber.TRUE, BooleanNumber.FALSE])('hit-tests positioned glyphs with top-aligned exact spacing %s', (topAlignExactLineSpacing) => {
+        const topAligned = topAlignExactLineSpacing === BooleanNumber.TRUE;
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        const documentModel = createPresentationModel({
+            id: 'positioned-exact-line-hit-test',
+            body: {
+                dataStream: '公司航路\r公司航路名称。（可选择性输入）\r航班号\r\n',
+                paragraphs: [
+                    { startIndex: 4, paragraphId: 'positioned-label', paragraphStyle: { lineSpacing: 15 } },
+                    {
+                        startIndex: 20,
+                        paragraphId: 'positioned-description',
+                        paragraphStyle: { lineSpacing: topAligned ? 5 : 15, spaceAbove: { v: 5 } },
+                    },
+                    { startIndex: 24, paragraphId: 'positioned-field', paragraphStyle: { indentStart: { v: 468 } } },
+                ],
+                textRuns: [
+                    { st: 0, ed: 5, ts: { lineAscent: 15, lineDescent: 0 } },
+                    { st: 5, ed: 25, ts: { lineAscent: 10.8, lineDescent: 3.6 } },
+                ],
+                sectionBreaks: [{ startIndex: 25, sectionId: 'positioned-section' }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                fontMetricScaleEnabled: BooleanNumber.FALSE,
+                pageSize: { width: 600, height: 200 },
+                marginTop: 7,
+                marginBottom: 0,
+                marginLeft: 0,
+                marginRight: 0,
+                textStyle: { fs: 9, textAdvance: 12 },
+                defaultParagraphStyle: {
+                    spacingRule: SpacingRule.EXACT,
+                    lineSpacing: 14.4,
+                    snapToGrid: BooleanNumber.FALSE,
+                    spaceAbove: { v: 0 },
+                    spaceBelow: { v: 0 },
+                },
+                renderConfig: {
+                    topAlignExactLineSpacing,
+                    useTextInkForHitTesting: topAlignExactLineSpacing,
+                    zeroWidthParagraphBreak: BooleanNumber.TRUE,
+                    wrapStrategy: WrapStrategy.OVERFLOW,
+                },
+            },
+        });
+        const skeleton = DocumentSkeleton.create(
+            new DocumentViewModel(documentModel),
+            injector.get(LocaleService)
+        );
+
+        try {
+            skeleton.calculate();
+            // Short advances can overlap the labels vertically without overlapping their painted horizontal bounds.
+            expect(skeleton.findNodeByCoord(Vector2.FromArray([37, 33]), PageLayoutType.VERTICAL, 0, 0)?.node.content)
+                .toBe('路');
+            expect(skeleton.findNodeByCoord(Vector2.FromArray([133, 38]), PageLayoutType.VERTICAL, 0, 0)?.node.content)
+                .toBe('性');
+            expect(skeleton.findNodeByCoord(Vector2.FromArray([481, topAligned ? 38 : 48]), PageLayoutType.VERTICAL, 0, 0)?.node.content)
+                .toBe('班');
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each([[1, 0.75], [1.5, 0.75], [1, 0.95]])('hits overlapping text at scale %s and advance ratio %s', (scale, ratio) => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text, font) => {
+            const small = text === '1';
+            const metricScale = font.includes('1024px') ? 1024 / ((small ? 7 : 10) * 4 / 3) : 1;
+            return {
+                width: text.length * (small ? 4.645 : 6.64) * metricScale,
+                actualBoundingBoxAscent: small ? 6.278 : 9.221,
+                actualBoundingBoxDescent: small ? 0 : 0.182,
+                fontBoundingBoxAscent: (small ? 8 : 12) * metricScale,
+                fontBoundingBoxDescent: (small ? 2 : 3) * metricScale,
+            };
+        });
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const model = createPresentationModel({
+            id: 'overlapping-advance-gap-hit-test',
+            body: {
+                dataStream: 'd\r1\r\n',
+                paragraphs: [
+                    { startIndex: 1, paragraphId: 'upper' },
+                    { startIndex: 3, paragraphId: 'lower', paragraphStyle: { indentStart: { v: 50 } } },
+                ],
+                textRuns: [
+                    { st: 0, ed: 2, ts: { fs: 10, sa: scale * 100, textAdvance: 100, lineAscent: 14, lineDescent: 4 } },
+                    { st: 2, ed: 4, ts: { fs: 7, textAdvance: 5, lineAscent: 8.4, lineDescent: 2.8 } },
+                ],
+                sectionBreaks: [{ startIndex: 4, sectionId: 'scripts' }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                fontMetricScaleEnabled: BooleanNumber.FALSE,
+                pageSize: { width: 200, height: 100 },
+                marginTop: 7,
+                marginBottom: 0,
+                marginLeft: 3,
+                marginRight: 0,
+                defaultParagraphStyle: {
+                    spacingRule: SpacingRule.EXACT,
+                    lineSpacing: 5.6,
+                    snapToGrid: BooleanNumber.FALSE,
+                },
+                renderConfig: {
+                    topAlignExactLineSpacing: BooleanNumber.TRUE,
+                    useTextInkForHitTesting: BooleanNumber.TRUE,
+                    applyTextPosition: BooleanNumber.TRUE,
+                    zeroWidthParagraphBreak: BooleanNumber.TRUE,
+                    wrapStrategy: WrapStrategy.OVERFLOW,
+                },
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        try {
+            skeleton.calculate();
+            const page = skeleton.getSkeletonData()!.pages[0];
+            const column = page.sections[0].columns[0];
+            const [upper, lower] = column.lines;
+            const glyph = lower.divides[0].glyphGroup[0];
+            const x = page.marginLeft + lower.divides[0].left + lower.divides[0].paddingLeft + glyph.left + glyph.width * ratio;
+            const y = page.marginTop + lower.top + lower.marginTop + lower.paddingTop + lower.asc
+                - (glyph.bBox.aba - glyph.bBox.abd) / 2;
+            expect(lower.top).toBeLessThan(upper.top + upper.contentHeight);
+            expect(x - page.marginLeft).toBeLessThan(upper.divides[0].glyphGroup[0].width);
+            expect(skeleton.findNodeByCoord(Vector2.FromArray([x, y]), PageLayoutType.VERTICAL, 0, 0)?.node)
+                .toBe(glyph);
+            const upperGlyph = upper.divides[0].glyphGroup[0];
+            const upperY = page.marginTop + upper.top + upper.marginTop + upper.paddingTop + upper.asc
+                - (upperGlyph.bBox.aba - upperGlyph.bBox.abd) / 2;
+            expect(skeleton.findNodeByCoord(
+                Vector2.FromArray([page.marginLeft + upperGlyph.bBox.width * scale / 2, upperY]),
+                PageLayoutType.VERTICAL,
+                0,
+                0
+            )?.node).toBe(upperGlyph);
+            // The same advance remains selectable when no other line paints under the pointer.
+            expect(skeleton.findNodeByCoord(Vector2.FromArray([page.marginLeft + 90, upperY]), PageLayoutType.VERTICAL, 0, 0)?.node)
+                .toBe(upperGlyph);
+        } finally {
+            skeleton.dispose();
+            model.dispose();
+            univer.dispose();
+            measureSpy.mockRestore();
+        }
+    });
+
+    it('hits visible text through a positioned tab while keeping blank space selectable', () => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text, font) => {
+            const metricScale = font.includes('1024px') ? 1024 / (8 * 4 / 3) : 1;
+            return {
+                width: 6.5 * metricScale,
+                actualBoundingBoxAscent: text.trim() ? 7 : 0,
+                actualBoundingBoxDescent: 0,
+                fontBoundingBoxAscent: 10 * metricScale,
+                fontBoundingBoxDescent: 2 * metricScale,
+            };
+        });
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const model = createPresentationModel({
+            id: 'overlapping-tab-hit-test',
+            body: {
+                dataStream: '\t\rT\r\n',
+                paragraphs: [
+                    { startIndex: 1, paragraphId: 'tab', paragraphStyle: {
+                        tabStops: [{ offset: 521, alignment: TabStopAlignment.START }],
+                        fixedTabStops: BooleanNumber.TRUE,
+                    } },
+                    { startIndex: 3, paragraphId: 'text', paragraphStyle: { indentStart: { v: 350 } } },
+                ],
+                textRuns: [
+                    { st: 0, ed: 2, ts: { fs: 8, textAdvance: 521, lineAscent: 13.283, lineDescent: 4, pos: -2.649 } },
+                    { st: 2, ed: 4, ts: { fs: 8, textAdvance: 8, lineAscent: 13.283, lineDescent: 0 } },
+                ],
+                sectionBreaks: [{ startIndex: 4, sectionId: 'positioned' }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                fontMetricScaleEnabled: BooleanNumber.FALSE,
+                pageSize: { width: 600, height: 100 },
+                marginTop: 0,
+                marginBottom: 0,
+                marginLeft: 0,
+                marginRight: 0,
+                defaultParagraphStyle: {
+                    spacingRule: SpacingRule.EXACT,
+                    lineSpacing: 6.8,
+                    snapToGrid: BooleanNumber.FALSE,
+                },
+                renderConfig: {
+                    topAlignExactLineSpacing: BooleanNumber.TRUE,
+                    useTextInkForHitTesting: BooleanNumber.TRUE,
+                    applyTextPosition: BooleanNumber.TRUE,
+                    zeroWidthParagraphBreak: BooleanNumber.TRUE,
+                    wrapStrategy: WrapStrategy.OVERFLOW,
+                },
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        try {
+            skeleton.calculate();
+            const [upper, lower] = skeleton.getSkeletonData()!.pages[0].sections[0].columns[0].lines;
+            const tab = upper.divides[0].glyphGroup[0];
+            const glyph = lower.divides[0].glyphGroup[0];
+            const y = lower.top + lower.marginTop + lower.paddingTop + lower.asc - glyph.bBox.aba / 2;
+            const x = lower.divides[0].left + glyph.left + glyph.width - 0.25;
+            expect(x).toBeLessThan(tab.width);
+            expect(x).toBeGreaterThan(lower.divides[0].left + glyph.left + glyph.bBox.width);
+            expect(skeleton.findNodeByCoord(Vector2.FromArray([x, y]), PageLayoutType.VERTICAL, 0, 0)?.node)
+                .toBe(glyph);
+            expect(skeleton.findNodeByCoord(Vector2.FromArray([100, y]), PageLayoutType.VERTICAL, 0, 0)?.node)
+                .toBe(tab);
+        } finally {
+            skeleton.dispose();
+            model.dispose();
+            univer.dispose();
+            measureSpy.mockRestore();
+        }
+    });
+
+    it('keeps a leader-gap hit beside the nearer same-line dot instead of a lower positioned line', () => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text, font) => {
+            const metricScale = font.includes('1024px') ? 1024 / (8.9664 * 4 / 3) : 1;
+            return {
+                width: (text.length * (text === '.' ? 3.308 : 11.95)) * metricScale,
+                actualBoundingBoxAscent: text === '.' ? 1.64 : 10.089,
+                actualBoundingBoxDescent: text === '.' ? 0.193 : 0.321,
+                fontBoundingBoxAscent: (12) * metricScale,
+                fontBoundingBoxDescent: (3) * metricScale,
+            };
+        });
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const model = createPresentationModel({
+            id: 'positioned-leader-gap-hit-test',
+            body: {
+                dataStream: '..\r电\r\n',
+                paragraphs: [
+                    { startIndex: 2, paragraphId: 'leaders', paragraphStyle: { lineSpacing: 9.233 } },
+                    { startIndex: 4, paragraphId: 'lower', paragraphStyle: { indentStart: { v: 6.785 }, lineSpacing: 16.604 } },
+                ],
+                textRuns: [
+                    { st: 0, ed: 3, ts: { fs: 8.9664, textAdvance: 13.283, lineAscent: 14.944, lineDescent: 0 } },
+                    { st: 3, ed: 5, ts: { fs: 8.9664, textAdvance: 12.408, lineAscent: 16.604, lineDescent: 0, pos: -4.682 } },
+                ],
+                sectionBreaks: [{ startIndex: 5, sectionId: 'positioned' }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                fontMetricScaleEnabled: BooleanNumber.FALSE,
+                pageSize: { width: 200, height: 100 },
+                marginTop: 7,
+                marginBottom: 0,
+                marginLeft: 3,
+                marginRight: 0,
+                defaultParagraphStyle: { spacingRule: SpacingRule.EXACT, snapToGrid: BooleanNumber.FALSE },
+                renderConfig: {
+                    topAlignExactLineSpacing: BooleanNumber.TRUE,
+                    useTextInkForHitTesting: BooleanNumber.TRUE,
+                    applyTextPosition: BooleanNumber.TRUE,
+                    zeroWidthParagraphBreak: BooleanNumber.TRUE,
+                    wrapStrategy: WrapStrategy.OVERFLOW,
+                },
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        try {
+            skeleton.calculate();
+            const page = skeleton.getSkeletonData()!.pages[0];
+            const [upper, lower] = page.sections[0].columns[0].lines;
+            const [firstDot, nextDot] = upper.divides[0].glyphGroup;
+            const dotY = page.marginTop + upper.top + upper.marginTop + upper.paddingTop + upper.asc
+                - (firstDot.bBox.aba - firstDot.bBox.abd) / 2;
+            const x = page.marginLeft + nextDot.left - 0.25;
+            const nearest = skeleton.findNodeByCoord(Vector2.FromArray([x, dotY]), PageLayoutType.VERTICAL, 0, 0);
+            expect(nearest?.node).toBe(nextDot);
+            expect(nearest?.ratioX).toBeLessThan(0.5);
+            const lowerGlyph = lower.divides[0].glyphGroup[0];
+            const lowerX = page.marginLeft + lower.divides[0].left + lowerGlyph.left + lowerGlyph.width / 2;
+            const lowerY = page.marginTop + lower.top + lower.marginTop + lower.paddingTop + lower.asc
+                + 4.682 * 4 / 3 - (lowerGlyph.bBox.aba - lowerGlyph.bBox.abd) / 2;
+            expect(skeleton.findNodeByCoord(Vector2.FromArray([lowerX, lowerY]), PageLayoutType.VERTICAL, 0, 0)?.node)
+                .toBe(lowerGlyph);
+        } finally {
+            skeleton.dispose();
+            model.dispose();
+            univer.dispose();
+            measureSpy.mockRestore();
+        }
+    });
+
+    it('keeps an in-glyph subscript drag on the script beside an overlapping upper-line space', () => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text, font) => {
+            const small = text === 'k';
+            const metricScale = font.includes('1024px') ? 1024 / ((small ? 7 : 10) * 4 / 3) : 1;
+            const space = text === ' ';
+            const ascent = small ? 6.45 : 9.22;
+            const width = small ? 4.645 : 6.64;
+            return {
+                width: (space ? 3.32 : text.length * width) * metricScale,
+                actualBoundingBoxAscent: space ? 0 : ascent,
+                actualBoundingBoxDescent: space || small ? 0 : 2.84,
+                fontBoundingBoxAscent: (small ? 8 : 12) * metricScale,
+                fontBoundingBoxDescent: (small ? 2 : 3) * metricScale,
+            };
+        });
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const model = createPresentationModel({
+            id: 'narrow-subscript-drag-hit-test',
+            body: {
+                dataStream: 'g (\rk\r\n',
+                paragraphs: [
+                    { startIndex: 3, paragraphId: 'upper', paragraphStyle: { spaceAbove: { v: 1.9874 } } },
+                    { startIndex: 5, paragraphId: 'script', paragraphStyle: { indentStart: { v: 6.332 }, lineSpacing: 4.3163 } },
+                ],
+                textRuns: [
+                    { st: 0, ed: 1, ts: { fs: 10, textAdvance: 6.3362, lineAscent: 13.1887, lineDescent: 3.9851 } },
+                    { st: 1, ed: 2, ts: { fs: 10, textAdvance: 6.5319, lineAscent: 13.1887, lineDescent: 3.9851 } },
+                    { st: 2, ed: 4, ts: { fs: 10, textAdvance: 5.1653, lineAscent: 13.1887, lineDescent: 3.9851 } },
+                    { st: 4, ed: 6, ts: { fs: 7, textAdvance: 5.6469, lineAscent: 8.3686, lineDescent: 2.7895 } },
+                ],
+                sectionBreaks: [{ startIndex: 6, sectionId: 'scripts' }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                fontMetricScaleEnabled: BooleanNumber.FALSE,
+                pageSize: { width: 200, height: 100 },
+                marginTop: 7,
+                marginBottom: 0,
+                marginLeft: 3,
+                marginRight: 0,
+                defaultParagraphStyle: {
+                    spacingRule: SpacingRule.EXACT,
+                    lineSpacing: 8.8007,
+                    snapToGrid: BooleanNumber.FALSE,
+                },
+                renderConfig: {
+                    topAlignExactLineSpacing: BooleanNumber.TRUE,
+                    useTextInkForHitTesting: BooleanNumber.TRUE,
+                    applyTextPosition: BooleanNumber.TRUE,
+                    zeroWidthParagraphBreak: BooleanNumber.TRUE,
+                    wrapStrategy: WrapStrategy.OVERFLOW,
+                },
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        try {
+            skeleton.calculate();
+            const page = skeleton.getSkeletonData()!.pages[0];
+            const [upper, lower] = page.sections[0].columns[0].lines;
+            const divide = lower.divides[0];
+            const glyph = divide.glyphGroup[0];
+            const left = page.marginLeft + divide.left + divide.paddingLeft + glyph.left;
+            const y = page.marginTop + lower.top + lower.marginTop + lower.paddingTop + lower.asc
+                - (glyph.bBox.aba - glyph.bBox.abd) / 2;
+            expect(lower.top).toBeLessThan(upper.top + upper.contentHeight);
+            expect(glyph.width - 0.5).toBeGreaterThan(3);
+            for (const x of [left + 0.25, left + glyph.width - 0.25]) {
+                expect(skeleton.findNodeByCoord(Vector2.FromArray([x, y]), PageLayoutType.VERTICAL, 0, 0)?.node)
+                    .toBe(glyph);
+            }
+        } finally {
+            skeleton.dispose();
+            model.dispose();
+            univer.dispose();
+            measureSpy.mockRestore();
+        }
+    });
+
+    it.each([false, true])('hits a positioned root sign beside an overlapping radicand, nested: %s', (nested) => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text, font) => {
+            const metricScale = font.includes('1024px') ? 1024 / (11.04 * 4 / 3) : 1;
+            return {
+                width: (text === '√' ? 9.66717529296875 : 7.4174957275390625) * metricScale,
+                actualBoundingBoxAscent: text === '√' ? 13.555624961853027 : 6.871250152587891,
+                actualBoundingBoxDescent: text === '√' ? 0.6109380722045898 : 0.07187557220458984,
+                fontBoundingBoxAscent: (11) * metricScale,
+                fontBoundingBoxDescent: (3) * metricScale,
+            };
+        });
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const token = DataStreamTreeTokenType;
+        const dataStream = nested
+            ? `${token.COLUMN_GROUP_START}${token.COLUMN_START}mod\r${token.COLUMN_END}${token.COLUMN_START}v\r√\r${token.COLUMN_END}${token.COLUMN_GROUP_END}\n`
+            : 'v\r√\r\n';
+        const radicandOffset = dataStream.indexOf('v');
+        const model = createPresentationModel({
+            id: 'positioned-root-sign-hit-test',
+            body: {
+                dataStream,
+                paragraphs: [
+                    ...(nested ? [{ startIndex: dataStream.indexOf('\r'), paragraphId: 'label' }] : []),
+                    { startIndex: radicandOffset + 1, paragraphId: 'radicand', paragraphStyle: { indentStart: { v: 9.6 }, lineSpacing: 1.04 } },
+                    { startIndex: radicandOffset + 3, paragraphId: 'root' },
+                ],
+                textRuns: [
+                    { st: radicandOffset, ed: radicandOffset + 2, ts: { fs: 11.04, textAdvance: 8, lineAscent: 14.127979002624672, lineDescent: 4.415958005249342 } },
+                    { st: radicandOffset + 2, ed: radicandOffset + 4, ts: { fs: 11.04, textAdvance: 9.67104, lineAscent: 13.247979002624671, lineDescent: 4.415958005249344 } },
+                ],
+                sectionBreaks: [{ startIndex: dataStream.length - 1, sectionId: 'root-sign' }],
+                columnGroups: nested
+                    ? [{
+                        startIndex: 0,
+                        endIndex: dataStream.indexOf(token.COLUMN_GROUP_END),
+                        columnGroupId: 'root-sign-columns',
+                        columns: [
+                            { columnId: 'label', widthRatio: 36.74404199475065, minWidth: { v: 0 } },
+                            { columnId: 'formula', widthRatio: 420.99202099737533, minWidth: { v: 0 } },
+                        ],
+                        gap: { v: 39.93595800524935 },
+                        horizontalPadding: { v: 0 },
+                        clipContent: BooleanNumber.FALSE,
+                        layout: ColumnLayoutType.FIXED,
+                        minHeight: { v: 0 },
+                        responsive: ColumnResponsiveType.SHRINK,
+                    }]
+                    : undefined,
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                fontMetricScaleEnabled: BooleanNumber.FALSE,
+                pageSize: { width: 497.67202099737534, height: 100 },
+                marginTop: 8,
+                marginBottom: 0,
+                marginLeft: 0,
+                marginRight: 0,
+                defaultParagraphStyle: { spacingRule: SpacingRule.EXACT, lineSpacing: 12, snapToGrid: BooleanNumber.FALSE },
+                renderConfig: {
+                    topAlignExactLineSpacing: BooleanNumber.TRUE,
+                    useTextInkForHitTesting: BooleanNumber.TRUE,
+                    applyTextPosition: BooleanNumber.TRUE,
+                    zeroWidthParagraphBreak: BooleanNumber.TRUE,
+                    wrapStrategy: WrapStrategy.OVERFLOW,
+                },
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        try {
+            skeleton.calculate();
+            const page = skeleton.getSkeletonData()!.pages[0];
+            const group = Array.from(page.skeColumnGroups.values())[0];
+            const nestedColumn = group?.columns[1];
+            const contentPage = nestedColumn?.page ?? page;
+            const offsetX = nestedColumn ? page.marginLeft + group.left + nestedColumn.left : 0;
+            const offsetY = nestedColumn ? page.marginTop + group.top + nestedColumn.top : 0;
+            const [radicand, root] = contentPage.sections[0].columns[0].lines;
+            const glyph = root.divides[0].glyphGroup[0];
+            expect(Boolean(nestedColumn)).toBe(nested);
+            expect(radicand.divides[0].left + radicand.divides[0].paddingLeft).toBeCloseTo(9.6);
+            expect(root.top - radicand.top).toBeCloseTo(1.04);
+            const left = offsetX + contentPage.marginLeft + root.divides[0].left + root.divides[0].paddingLeft + glyph.left;
+            const y = offsetY + contentPage.marginTop + root.top + root.marginTop + root.paddingTop + root.asc
+                - (glyph.bBox.aba - glyph.bBox.abd) / 2;
+            expect(root.top).toBeLessThan(radicand.top + radicand.contentHeight);
+            for (const x of [left + 0.25, left + glyph.width / 2, left + glyph.width - 0.25]) {
+                expect(skeleton.findNodeByCoord(Vector2.FromArray([x, y]), PageLayoutType.VERTICAL, 0, 0)?.node)
+                    .toBe(glyph);
+            }
+        } finally {
+            skeleton.dispose();
+            model.dispose();
+            univer.dispose();
+            measureSpy.mockRestore();
+        }
+    });
+
+    it('hits the painted script rather than an overlapping positioned line', () => {
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const model = createPresentationModel({
+            id: 'overlapping-script-hit-test',
+            body: {
+                dataStream: 'd23x\rmodel\r\n',
+                paragraphs: [
+                    { startIndex: 4, paragraphId: 'upper' },
+                    { startIndex: 10, paragraphId: 'lower', paragraphStyle: { indentStart: { v: 7 } } },
+                ],
+                textRuns: [
+                    { st: 0, ed: 1, ts: { fs: 10, textAdvance: 7, lineAscent: 14, lineDescent: 4 } },
+                    { st: 1, ed: 3, ts: { fs: 7, textAdvance: 5, pos: 4.25, lineAscent: 8.4, lineDescent: 2.8 } },
+                    { st: 3, ed: 5, ts: { fs: 10, textAdvance: 7, lineAscent: 14, lineDescent: 4 } },
+                    { st: 5, ed: 11, ts: { fs: 7, textAdvance: 5, lineAscent: 8.4, lineDescent: 2.8 } },
+                ],
+                sectionBreaks: [{ startIndex: 11, sectionId: 'scripts' }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                fontMetricScaleEnabled: BooleanNumber.FALSE,
+                pageSize: { width: 200, height: 100 },
+                marginTop: 7,
+                marginBottom: 0,
+                marginLeft: 3,
+                marginRight: 0,
+                defaultParagraphStyle: {
+                    spacingRule: SpacingRule.EXACT,
+                    lineSpacing: 9.5,
+                    snapToGrid: BooleanNumber.FALSE,
+                },
+                renderConfig: {
+                    topAlignExactLineSpacing: BooleanNumber.TRUE,
+                    useTextInkForHitTesting: BooleanNumber.TRUE,
+                    applyTextPosition: BooleanNumber.TRUE,
+                    zeroWidthParagraphBreak: BooleanNumber.TRUE,
+                    wrapStrategy: WrapStrategy.OVERFLOW,
+                },
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        try {
+            skeleton.calculate();
+            const page = skeleton.getSkeletonData()!.pages[0];
+            const column = page.sections[0].columns[0];
+            const [upper, lower] = column.lines;
+            expect(lower.top).toBeLessThan(upper.top + upper.contentHeight);
+            for (const line of [upper, lower]) {
+                const divide = line.divides[0];
+                for (const glyph of divide.glyphGroup.filter((glyph) => glyph.content.trim())) {
+                    const baseline = page.marginTop + line.top + line.marginTop + line.paddingTop + line.asc
+                        - (glyph.ts?.pos ?? 0) * 4 / 3;
+                    const point = Vector2.FromArray([
+                        page.marginLeft + column.left + divide.left + divide.paddingLeft + glyph.left + glyph.width / 2,
+                        baseline - (glyph.bBox.aba - glyph.bBox.abd) / 2,
+                    ]);
+                    expect(skeleton.findNodeByCoord(point, PageLayoutType.VERTICAL, 0, 0)?.node).toBe(glyph);
+                }
+            }
+        } finally {
+            skeleton.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
+    it('hits punctuation below a positioned line with zero nominal descent', () => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text, font) => {
+            const metricScale = font.includes('1024px') ? 1024 / (10 * 4 / 3) : 1;
+            return {
+                width: (text.length * (text === ',' ? 3.2536 : 8)) * metricScale,
+                actualBoundingBoxAscent: text === ',' ? 1.296875 : 9,
+                actualBoundingBoxDescent: text === ',' ? 2.211172 : 0,
+                fontBoundingBoxAscent: (12) * metricScale,
+                fontBoundingBoxDescent: (3) * metricScale,
+            };
+        });
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const model = createPresentationModel({
+            id: 'positioned-punctuation-descender',
+            body: {
+                dataStream: 'A,\rBB\r\n',
+                paragraphs: [{ startIndex: 2, paragraphId: 'upper' }, { startIndex: 5, paragraphId: 'lower' }],
+                textRuns: [
+                    { st: 0, ed: 1, ts: { fs: 10, textAdvance: 8, lineAscent: 16.6043, lineDescent: 0 } },
+                    { st: 1, ed: 2, ts: { fs: 10, textAdvance: 3.2544, lineAscent: 16.6043, lineDescent: 0 } },
+                    { st: 3, ed: 5, ts: { fs: 10, textAdvance: 8, lineAscent: 16.6043, lineDescent: 0 } },
+                ],
+                sectionBreaks: [{ startIndex: 6, sectionId: 'references' }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                fontMetricScaleEnabled: BooleanNumber.FALSE,
+                pageSize: { width: 200, height: 100 },
+                marginTop: 7.6237,
+                marginBottom: 0,
+                marginLeft: 0,
+                marginRight: 0,
+                defaultParagraphStyle: { spacingRule: SpacingRule.EXACT, lineSpacing: 14.7113, snapToGrid: BooleanNumber.FALSE },
+                renderConfig: {
+                    topAlignExactLineSpacing: BooleanNumber.TRUE,
+                    useTextInkForHitTesting: BooleanNumber.TRUE,
+                    applyTextPosition: BooleanNumber.TRUE,
+                    zeroWidthParagraphBreak: BooleanNumber.TRUE,
+                    wrapStrategy: WrapStrategy.OVERFLOW,
+                },
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        try {
+            skeleton.calculate();
+            const page = skeleton.getSkeletonData()!.pages[0];
+            const [upper, lower] = page.sections[0].columns[0].lines;
+            const punctuation = upper.divides[0].glyphGroup[1];
+            const baseline = page.marginTop + upper.top + upper.marginTop + upper.paddingTop + upper.asc;
+            const y = baseline - (punctuation.bBox.aba - punctuation.bBox.abd) / 2;
+            expect(y).toBeGreaterThan(page.marginTop + upper.top + upper.contentHeight);
+            for (const ratio of [0.1, 0.5, 0.9]) {
+                const point = new Vector2(punctuation.left + punctuation.width * ratio, y);
+                for (const restrictions of [undefined, { strict: true, segmentId: '', segmentPage: -1 }]) {
+                    expect(skeleton.findNodeByCoord(point, PageLayoutType.VERTICAL, 0, 0, restrictions)?.node)
+                        .toBe(punctuation);
+                }
+            }
+            const lowerGlyph = lower.divides[0].glyphGroup[1];
+            const lowerY = page.marginTop + lower.top + lower.asc - lowerGlyph.bBox.aba / 2;
+            expect(skeleton.findNodeByCoord(new Vector2(lowerGlyph.left + lowerGlyph.width / 2, lowerY), PageLayoutType.VERTICAL, 0, 0)?.node)
+                .toBe(lowerGlyph);
+        } finally {
+            skeleton.dispose();
+            model.dispose();
+            univer.dispose();
+            measureSpy.mockRestore();
+        }
+    });
+
+    it.each([
+        { clipContent: undefined, glyphLeft: 0, lineTop: 0, pointerOffset: 0, hit: true },
+        { clipContent: undefined, glyphLeft: 110, lineTop: 0, pointerOffset: 0, hit: false },
+        { clipContent: BooleanNumber.TRUE, glyphLeft: 110, lineTop: 0, pointerOffset: 0, hit: false },
+        { clipContent: BooleanNumber.FALSE, glyphLeft: 110, lineTop: 0, pointerOffset: 0, hit: true },
+        { clipContent: BooleanNumber.FALSE, glyphLeft: 150, lineTop: 0, pointerOffset: 0, hit: true },
+        { clipContent: BooleanNumber.FALSE, glyphLeft: -20, lineTop: 0, pointerOffset: 0, hit: true },
+        { clipContent: BooleanNumber.FALSE, glyphLeft: 0, lineTop: 110, pointerOffset: 0, hit: true },
+        { clipContent: BooleanNumber.FALSE, glyphLeft: 150, lineTop: 0, pointerOffset: 20, hit: false },
+    ])('hits painted column text within its clipping policy: %o', ({ clipContent, glyphLeft, lineTop, pointerOffset, hit }) => {
+        const body = createPage(DocumentSkeletonPageType.BODY, 0);
+        const columnPage = createPage(DocumentSkeletonPageType.CELL, 100);
+        body.column.lines = [];
+        body.page.ed = 110;
+        body.section.ed = 110;
+        body.column.ed = 110;
+        columnPage.page.pageWidth = 100;
+        columnPage.page.pageHeight = 80;
+        columnPage.page.marginLeft = 0;
+        columnPage.page.marginTop = 0;
+        columnPage.page.marginRight = 0;
+        columnPage.page.marginBottom = 0;
+        columnPage.glyphs.glyphA.left = glyphLeft;
+        columnPage.glyphs.glyphA.width = 10;
+        columnPage.line.top = lineTop;
+        columnPage.divide.glyphGroup = [columnPage.glyphs.glyphA];
+
+        const columnGroup = {
+            columns: [
+                {
+                    columnId: 'col-1',
+                    left: 60,
+                    top: 0,
+                    width: 100,
+                    height: 80,
+                    st: 100,
+                    ed: 110,
+                    page: columnPage.page,
+                },
+            ],
+            width: 180,
+            height: 80,
+            top: 30,
+            left: 20,
+            st: 90,
+            ed: 110,
+            columnGroupId: 'cg-1',
+            columnGroupSource: { clipContent },
+            parent: body.page,
+        } as any;
+        columnGroup.columns[0].parent = columnGroup;
+        columnPage.page.parent = columnGroup.columns[0];
+        body.page.skeColumnGroups.set('cg-1', columnGroup);
+
+        const docViewModel = {
+            getDataModel: () => ({
+                documentStyle: {
+                    pageSize: { width: 210, height: 297 },
+                },
+            }),
+            getHeaderFooterTreeMap: () => ({
+                headerTreeMap: new Map(),
+                footerTreeMap: new Map(),
+            }),
+            dispose: vi.fn(),
+        } as any;
+        const skeleton = new DocumentSkeleton(docViewModel, {} as any);
+        const skeletonData = {
+            pages: [body.page],
+            skeHeaders: new Map(),
+            skeFooters: new Map(),
+        };
+        body.page.parent = skeletonData as any;
+        (skeleton as any)._skeletonData = skeletonData;
+
+        const node = skeleton.findNodeByCoord(
+            Vector2.FromArray([90 + glyphLeft + pointerOffset, 45 + lineTop]),
+            PageLayoutType.VERTICAL,
+            0,
+            0
+        );
+
+        expect(node?.node).toBe(hit ? columnPage.glyphs.glyphA : undefined);
+        expect(skeleton.findNodeByCharIndex(100)).toBe(columnPage.glyphs.glyphA);
+        expect(skeleton.findNodePositionByCharIndex(110)?.path).toEqual([
+            'pages',
+            0,
+            'skeColumnGroups',
+            'cg-1',
+            'columns',
+            0,
+            'page',
+        ]);
+    });
+
     it('uses the largest DrawingML text size across runs, without changing snapshots or document defaults', () => {
         const measure = vi.spyOn(FontCache, 'getMeasureText').mockReturnValue({
             width: 6.1572265625,

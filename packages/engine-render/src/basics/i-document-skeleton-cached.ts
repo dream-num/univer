@@ -19,19 +19,21 @@ import type {
     ColumnSeparatorType,
     DataStreamTreeTokenType,
     IColorStyle,
-    IColumnGroup,
     IDocDrawingBase,
-    IDocumentRenderConfig,
     INestingLevel,
-    IParagraph,
     IParagraphBorder,
     IParagraphProperties,
     ITable,
     ITableRow,
-    ITextStyle,
     PageOrientType,
     TabStopLeader,
 } from '@univerjs/core';
+import type {
+    IDocumentLayoutColumnGroup,
+    IDocumentLayoutParagraph,
+    IDocumentLayoutRenderConfig,
+    IDocumentLayoutTextStyle,
+} from '../components/docs/document-layout-presentation';
 import type { BreakPointType } from '../components/docs/layout/line-breaker/break';
 
 export interface IDocumentSkeletonCached extends ISkeletonResourceReference {
@@ -45,7 +47,7 @@ export interface IDocumentSkeletonCached extends ISkeletonResourceReference {
 
 export interface IParagraphList {
     bullet: IDocumentSkeletonBullet;
-    paragraph: IParagraph;
+    paragraph: IDocumentLayoutParagraph;
 }
 
 export interface IDocumentSkeletonParagraphBorders {
@@ -143,7 +145,7 @@ export interface IDocumentSkeletonPage {
     skeColumnGroups: Map<string, IDocumentSkeletonColumnGroup>; // column group skeletons in the page
     segmentId: string; // header/footer id if header/footer, empty string if body page
     type: DocumentSkeletonPageType; // page type: header, footer, body, or cell
-    renderConfig?: IDocumentRenderConfig;
+    renderConfig?: IDocumentLayoutRenderConfig;
     parent?: IDocumentSkeletonCached | IDocumentSkeletonRow | IDocumentSkeletonColumnGroupColumn | IDocumentSkeletonNote;
 }
 
@@ -214,7 +216,7 @@ export interface IDocumentSkeletonColumnGroup {
     st: number;
     ed: number;
     columnGroupId: string;
-    columnGroupSource: IColumnGroup;
+    columnGroupSource: IDocumentLayoutColumnGroup;
     parent?: IDocumentSkeletonPage;
 }
 
@@ -327,8 +329,8 @@ export interface IDocumentSkeletonGlyph {
     raw: string;
     adjustability: IAdjustability; // The adjustability of the glyph.
     isJustifiable: boolean; // Whether this glyph is justifiable for CJK scripts.
-    ts?: ITextStyle; // text style
-    fontStyle?: IDocumentSkeletonFontStyle; // fontStyle : ITextStyle convert to canvas font
+    ts?: IDocumentLayoutTextStyle; // text style
+    fontStyle?: IDocumentSkeletonFontStyle; // fontStyle : IDocumentLayoutTextStyle convert to canvas font
     parent?: IDocumentSkeletonDivide;
     url?: string; // image url
     featureId?: string; // support interaction for feature ,eg. hyperLine person
@@ -347,8 +349,8 @@ export interface IDocumentSkeletonGlyph {
 export interface IDocumentSkeletonBullet {
     listId: string; // listId
     symbol: string; // symbol list content
-    ts: ITextStyle; // text style
-    fontStyle?: IDocumentSkeletonFontStyle; // fontStyle converted from ITextStyle to canvas font
+    ts: IDocumentLayoutTextStyle; // text style
+    fontStyle?: IDocumentSkeletonFontStyle; // fontStyle converted from IDocumentLayoutTextStyle to canvas font
     startIndexItem: number; // startIndexItem, list start index
     startNumber?: number; // zero-based start number retained across a restarted sequence
     // bBox: IDocumentSkeletonBoundingBox; // bBox text position information
@@ -403,6 +405,9 @@ export interface IDocumentSkeletonBoundingBox {
     width: number; // width
     ba: number; // boundingBoxAscent
     bd: number; // boundingBoxDescent
+    /** Font metrics retained for the caret when ba/bd are overridden for fixed line layout. */
+    fontAscent?: number;
+    fontDescent?: number;
     normalLineHeight?: number; // Normal font spacing, including leading when available, for Word AUTO spacing.
     aba: number; // actualBoundingBoxAscent
     abd: number; // actualBoundingBoxDescent

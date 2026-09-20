@@ -23,6 +23,7 @@ import {
     DocumentFlavor,
     NamedStyleType,
     PositionedObjectLayoutType,
+    TabStopAlignment,
 } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { getFontStyleString } from '../../../../../../basics/tools';
@@ -33,10 +34,88 @@ import { BreakPointType } from '../../../line-breaker/break';
 import { createSkeletonLetterGlyph } from '../../../model/glyph';
 import { FontCache } from '../../../shaping-engine/font-cache';
 import { clearFontCreateConfigCache } from '../../../tools';
+import { lineBreaking } from '../linebreaking';
 import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 describe('shaping', () => {
+    it.each([
+        { content: '/\t/\t/\t/', positions: [0, 100, 200, 300] },
+        { content: '/\t/1\t/\t/', positions: [0, 100, 200, 300] },
+        { content: '/1\t/1\t/1\t/', positions: [0, 100, 200, 300] },
+        { content: '\t/\t/\t/', positions: [100, 200, 300] },
+        { content: '/\t\t/\t/', positions: [0, 200, 300] },
+    ])(
+        'keeps fixed tab anchors after preceding text changes: $content',
+        ({ content, positions }) => {
+            const testBed = createParagraphLayoutTestBed(content, {
+                documentStyle: { pageSize: { width: 800, height: 600 } },
+                body: {
+                    textRuns: Array.from(content, (character, index) => ({
+                        st: index,
+                        ed: index + 1,
+                        ts: { textAdvance: character === '\t' ? 92 : 8 },
+                    })),
+                    paragraphs: [{
+                        startIndex: content.length,
+                        paragraphStyle: {
+                            tabStops: [100, 200, 300].map((offset) => ({ offset, alignment: TabStopAlignment.START })),
+                            fixedTabStops: BooleanNumber.TRUE,
+                        },
+                    }],
+                },
+            });
+            const { ctx, paragraphNode, viewModel, sectionBreakConfig, curPage } = testBed;
+            const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+            const pages = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, null);
+            const glyphs = pages[0].sections[0].columns[0].lines[0].divides[0].glyphGroup;
+
+            expect(glyphs.filter((glyph) => glyph.content === '/').map((glyph) => glyph.left))
+                .toEqual(positions);
+        }
+    );
+
+    it.each([
+        { content: 'that require tool us', fixed: true, expectedAscent: 12, expectedDescent: 4 },
+        { content: 'that require tool us ', fixed: true, expectedAscent: 12, expectedDescent: 4 },
+        { content: '', fixed: true, expectedAscent: 17, expectedDescent: 0 },
+        { content: 'that require tool us', fixed: false, expectedAscent: 17, expectedDescent: 0 },
+    ])('preserves surviving positioned text metrics after paragraph merging: $content / $fixed', ({
+        content,
+        fixed,
+        expectedAscent,
+        expectedDescent,
+    }) => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content, {
+            body: {
+                paragraphs: [{
+                    startIndex: content.length,
+                    paragraphId: 'merged-positioned-paragraph',
+                    paragraphStyle: { textStyle: { lineAscent: 17, lineDescent: 0 } },
+                }],
+                textRuns: [
+                    ...(content.length ? [{ st: 0, ed: content.length, ts: { lineAscent: 12, lineDescent: 4 } }] : []),
+                    { st: content.length, ed: content.length + 1, ts: { lineAscent: 17, lineDescent: 0 } },
+                ],
+            },
+            documentStyle: {
+                renderConfig: {
+                    zeroWidthParagraphBreak: BooleanNumber.TRUE,
+                    topAlignExactLineSpacing: fixed ? BooleanNumber.TRUE : BooleanNumber.FALSE,
+                },
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+            },
+        });
+        const glyphs = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig)
+            .flatMap((item) => item.glyphs);
+        const paragraphMark = glyphs.find((glyph) => glyph.content === '\r');
+
+        expect(paragraphMark?.bBox.ba).toBe(expectedAscent);
+        expect(paragraphMark?.bBox.bd).toBe(expectedDescent);
+        expect(viewModel.getDataModel().getBody()?.textRuns?.slice(-1)[0].ts)
+            .toEqual({ lineAscent: 17, lineDescent: 0 });
+    });
+
     it.each(['…', '….', '....', ',...'])('keeps spaced trailing punctuation with its preceding Word token (%s)', (punctuation) => {
         const content = `Before word ${punctuation} after`;
         const { dataModel, viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content, {
@@ -756,6 +835,23 @@ describe('shaping', () => {
         }
     });
 
+    it('preserves authoritative advances for consecutive CJK punctuation', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('）：', {
+            body: {
+                textRuns: [{
+                    st: 0,
+                    ed: 2,
+                    ts: { textAdvance: 10 },
+                }],
+            },
+        });
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const glyphs = result.flatMap((item) => item.glyphs).filter((glyph) => glyph.content && glyph.content !== '\r');
+
+        expect(glyphs.map((glyph) => glyph.width)).toEqual([10, 10]);
+        expect(glyphs.map((glyph) => glyph.xOffset)).toEqual([0, 0]);
+    });
+
     it('adds CJK Latin spacing for mixed text', () => {
         const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('A好B');
 
@@ -764,6 +860,31 @@ describe('shaping', () => {
         expect(result.length).toBeGreaterThan(0);
         const allGlyphs = result.flatMap((r) => r.glyphs);
         expect(allGlyphs.length).toBeGreaterThan(0);
+    });
+
+    it('does not add CJK Latin spacing when fixed advances define the source layout', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('好5号', {
+            body: {
+                textRuns: [{
+                    st: 0,
+                    ed: 3,
+                    ts: { textAdvance: 10 },
+                }],
+            },
+        });
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const allGlyphs = result.flatMap((item) => item.glyphs).filter((glyph) => glyph.content && glyph.content !== '\r');
+
+        expect(allGlyphs.map((glyph) => ({
+            content: glyph.content,
+            width: glyph.width,
+            xOffset: glyph.xOffset,
+        }))).toEqual([
+            { content: '好', width: 10, xOffset: 0 },
+            { content: '5', width: 10, xOffset: 0 },
+            { content: '号', width: 10, xOffset: 0 },
+        ]);
     });
 
     it('shapes paragraph break with zero width when configured', () => {

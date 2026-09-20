@@ -354,6 +354,9 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
         let offsetX = 0;
 
         const editorRenderConfig = this._editorService.getEditorRenderConfig(unitId);
+        if (editorRenderConfig?.disableBackScroll) {
+            return;
+        }
         const delta = editorRenderConfig ? editorRenderConfig.backScrollOffset ?? 0 : 100;
         offsetY = this._getVerticalScrollDelta(top, height, boundTop, boundBottom, delta);
 

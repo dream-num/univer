@@ -929,7 +929,8 @@ function _getExpandedLineMetrics(
             ? undefined
             : normalLineHeight || undefined,
         false,
-        drawingMLLineHeight
+        drawingMLLineHeight,
+        sectionBreakConfig.renderConfig?.topAlignExactLineSpacing === BooleanNumber.TRUE
     );
 
     // Extra font leading can change the line extent without changing its
@@ -1084,13 +1085,15 @@ function _adjustExplicitTabStop(
         return;
     }
 
-    const origin = isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
+    const usesFixedTabStops = paragraphConfig.paragraphStyle?.fixedTabStops === BooleanNumber.TRUE;
+    const origin = !usesFixedTabStops && isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
         ? divide.left + divide.paddingLeft
         : 0;
     const tabLeft = origin + tabGlyph.left;
-    const tabStop = [...tabStops]
-        .sort((left, right) => left.offset - right.offset)
-        .find(({ offset, clear }) => !clear && offset > tabLeft);
+    const sortedTabStops = [...tabStops].filter(({ clear }) => !clear).sort((left, right) => left.offset - right.offset);
+    const tabStop = usesFixedTabStops
+        ? sortedTabStops[divide.glyphGroup.filter((glyph) => glyph.glyphType === GlyphType.TAB).length - 1]
+        : sortedTabStops.find(({ offset }) => offset > tabLeft);
     if (!tabStop) {
         return;
     }
@@ -1106,6 +1109,11 @@ function _adjustExplicitTabStop(
     const targetOffset = Math.min(tabStop.offset, origin + divide.width);
     const width = targetOffset - tabLeft - alignmentOffset;
     if (width <= 0) {
+        if (usesFixedTabStops) {
+            tabGlyph.width = 0;
+            tabGlyph.bBox.width = 0;
+            tabGlyph.tabLeader = tabStop.leader;
+        }
         return;
     }
 
@@ -1357,7 +1365,8 @@ function _getParagraphContentMetrics(
         snapMultilineParagraphToWholeGrid || (
             hasInlineCustomBlock && isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy!)
         ),
-        drawingMLLineHeight
+        drawingMLLineHeight,
+        sectionBreakConfig.renderConfig?.topAlignExactLineSpacing === BooleanNumber.TRUE
     );
     const wordAutoLeading = isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
         && spacingRule === SpacingRule.AUTO && lineSpacing > 1 && !hasInlineCustomBlock
@@ -2813,7 +2822,8 @@ export function getLineHeightMetrics(
     scaleAutoLineSpacingByGlyphHeight = true,
     normalLineHeight?: number,
     snapAutoLineSpacingToWholeGridLines = false,
-    drawingMLLineHeight?: number
+    drawingMLLineHeight?: number,
+    topAlignExactLineSpacing = false
 ) {
     const usesLineGridType = gridType === GridType.LINES || gridType === GridType.LINES_AND_CHARS;
     const hasNoLineGrid = !usesLineGridType || snapToGrid === BooleanNumber.FALSE;
@@ -2935,8 +2945,8 @@ export function getLineHeightMetrics(
     const exactPadding = (exactLineSpacingApply - glyphLineHeight) / 2;
 
     return {
-        paddingTop: exactPadding,
-        paddingBottom: exactPadding,
+        paddingTop: topAlignExactLineSpacing ? 0 : exactPadding,
+        paddingBottom: topAlignExactLineSpacing ? exactLineSpacingApply - glyphLineHeight : exactPadding,
         contentHeight: glyphLineHeight,
         lineSpacingApply: exactLineSpacingApply,
     };

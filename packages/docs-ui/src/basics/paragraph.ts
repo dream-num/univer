@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 
-import type { ICustomDecoration, ICustomRange, ICustomTable, IDocumentBody, IParagraph, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
+import type {
+    ICustomDecoration,
+    ICustomRange,
+    ICustomTable,
+    IDocumentBody,
+    IParagraph,
+    ITextRun,
+    ITextStyle,
+    Nullable,
+} from '@univerjs/core';
 import { DataStreamTreeTokenType } from '@univerjs/core';
 
 export function isTopLevelStructuralGap(dataStream: string, offset: number): boolean {
@@ -85,6 +94,38 @@ export function getTextRunAtPosition(
     }
 
     return retTextRun;
+}
+
+export function getTextRunAtInputPosition(
+    body: IDocumentBody,
+    position: number,
+    defaultStyle: ITextStyle,
+    cacheStyle: Nullable<ITextStyle>,
+    isCellEditor?: boolean,
+    inheritParagraphStartStyle = false
+): ITextRun {
+    if (!inheritParagraphStartStyle) {
+        return getTextRunAtPosition(body, position, defaultStyle, cacheStyle, isCellEditor);
+    }
+    const inheritedTextRun = getTextRunAtPosition(body, position, defaultStyle, cacheStyle, isCellEditor);
+    const previousToken = body.dataStream[position - 1];
+    const startsParagraph = previousToken === DataStreamTreeTokenType.PARAGRAPH ||
+        previousToken === DataStreamTreeTokenType.COLUMN_START;
+    const nextTextRun = startsParagraph
+        ? body.textRuns?.find((textRun) => textRun.st === position && textRun.ed > position)
+        : undefined;
+    const textStyle = nextTextRun
+        ? {
+            ...(!defaultStyle.cl ? {} : { cl: { ...defaultStyle.cl } }),
+            ...nextTextRun.ts,
+            ...cacheStyle,
+        }
+        : { ...inheritedTextRun.ts };
+
+    return {
+        ...(nextTextRun ?? inheritedTextRun),
+        ts: textStyle,
+    };
 }
 
 export function getCustomRangeAtPosition(customRanges: ICustomRange[], position: number, extendRange?: boolean) {

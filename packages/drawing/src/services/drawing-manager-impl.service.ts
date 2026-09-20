@@ -151,14 +151,15 @@ function appendJsonUpdateOps(
         hasOnlyEnumerableOwnProperties(oldValue) &&
         hasOnlyEnumerableOwnProperties(newValue)
     ) {
-        const keys = new Set([...Object.keys(oldValue), ...Object.keys(newValue)]);
-        keys.forEach((key) => appendJsonUpdateOps(
-            ops,
-            [...path, key],
-            newValue[key],
-            oldValue[key],
-            Object.prototype.hasOwnProperty.call(oldValue, key) && oldValue[key] !== undefined
-        ));
+        for (const key of new Set([...Object.keys(oldValue), ...Object.keys(newValue)])) {
+            appendJsonUpdateOps(
+                ops,
+                [...path, key],
+                newValue[key],
+                oldValue[key],
+                Object.prototype.hasOwnProperty.call(oldValue, key) && oldValue[key] !== undefined
+            );
+        }
         return;
     }
 

@@ -50,9 +50,15 @@ export function applyDocPasteMode(
     if (mode === 'source') {
         return Tools.deepClone(source);
     }
-    const doc = mode === 'text'
-        ? { body: BuildTextUtils.transform.fromPlainText(source.body?.tables?.length ? getClipboardPlainText(source) : text ?? getClipboardPlainText(source)) }
-        : Tools.deepClone(source);
+    let doc: Partial<IDocumentData>;
+    if (mode === 'text') {
+        const plainText = source.body?.tables?.length
+            ? getClipboardPlainText(source)
+            : text ?? getClipboardPlainText(source);
+        doc = { body: BuildTextUtils.transform.fromPlainText(plainText) };
+    } else {
+        doc = Tools.deepClone(source);
+    }
     const body = doc.body;
     if (!body) {
         return doc;

@@ -1,11 +1,23 @@
 # @univerjs/docs-toc
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/docs-toc?style=flat-square)](https://npmjs.com/package/@univerjs/docs-toc)
+[![license](https://img.shields.io/npm/l/@univerjs/docs-toc?style=flat-square)](https://npmjs.com/package/@univerjs/docs-toc)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/docs-toc?style=flat-square)](https://npmjs.com/package/@univerjs/docs-toc)
+
 `@univerjs/docs-toc` provides table-of-contents insertion, update, deletion, and FIELD-range lookup for Univer Docs.
+
+## Package Overview
+
+| Package | UMD global | CSS | Locales | Facade entry |
+| --- | --- | :---: | :---: | :---: |
+| `@univerjs/docs-toc` | `UniverDocsToc` | No | No | No |
 
 ## Installation
 
 ```sh
 pnpm add @univerjs/docs-toc
+# or
+npm install @univerjs/docs-toc
 ```
 
 Keep all `@univerjs/*` packages on the same version.
@@ -25,4 +37,5 @@ The updater currently evaluates outline-based TOC instructions (`\\o`). Other Wo
 ## Resources
 
 - [Documentation](https://docs.univer.ai)
+- [NPM package](https://npmjs.com/package/@univerjs/docs-toc)
 - [GitHub repository](https://github.com/dream-num/univer)

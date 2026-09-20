@@ -18,6 +18,15 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'docs-ui': {
+        pasteOptions: {
+            title: 'Options de collage',
+            source: 'Conserver la mise en forme source',
+            destination: 'Adapter à la mise en forme de destination',
+            text: 'Conserver uniquement le texte',
+            useKeyboard: 'Le presse-papiers est inaccessible. Utilisez {0} pour coller, puis les options de collage pour changer le format.',
+            useSystemPaste: 'Le presse-papiers est inaccessible. Utilisez la fonction de collage de votre appareil ou clavier, puis les options de collage pour changer le format.',
+            failed: 'Impossible de modifier le format de collage.',
+        },
         outline: {
             title: 'Plan du document',
         },

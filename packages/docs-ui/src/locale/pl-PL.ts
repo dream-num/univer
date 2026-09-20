@@ -18,6 +18,15 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'docs-ui': {
+        pasteOptions: {
+            title: 'Opcje wklejania',
+            source: 'Zachowaj formatowanie źródłowe',
+            destination: 'Dopasuj formatowanie docelowe',
+            text: 'Zachowaj tylko tekst',
+            useKeyboard: 'Brak dostępu do schowka. Użyj {0}, aby wkleić, a następnie zmień format w opcjach wklejania.',
+            useSystemPaste: 'Brak dostępu do schowka. Użyj funkcji wklejania urządzenia lub klawiatury, a następnie zmień format w opcjach wklejania.',
+            failed: 'Nie udało się zmienić formatu wklejania.',
+        },
         outline: {
             title: 'Konspekt dokumentu',
         },

@@ -15,15 +15,107 @@
  */
 
 import { Disposable, Inject } from '@univerjs/core';
-import { AddImageIcon, AlignTextBothIcon, BoldIcon, ColumnIcon, CopyDoubleIcon, CutIcon, DeleteColumnDoubleIcon, DeleteIcon, DeleteRowDoubleIcon, DeleteTableDoubleIcon, DocSettingIcon, FontColorDoubleIcon, GridIcon, H1Icon, H2Icon, H3Icon, H4Icon, H5Icon, HeaderFooterIcon, HorizontallyIcon, InsertDoubleIcon, InsertRowAboveDoubleIcon, InsertRowBelowDoubleIcon, ItalicIcon, KeyboardIcon, LeftInsertColumnDoubleIcon, LeftJustifyingIcon, LineIndentDecreaseIcon, LineIndentIncreaseIcon, MenuIcon, MoreLeftIcon, MoreRightIcon, NoColorDoubleIcon, OrderIcon, PaintBucketDoubleIcon, ParagraphSettingIcon, PasteSpecialDoubleIcon, ReduceDoubleIcon, ReduceIcon, RightInsertColumnDoubleIcon, RightJustifyingIcon, SectionSettingIcon, ShapeIcon, SmileIcon, StrikethroughIcon, SubscriptIcon, SubtitleTypeIcon, SuperscriptIcon, SymbolsIcon, TextTypeIcon, TitleTypeIcon, TodoListDoubleIcon, UnderlineIcon, UnorderIcon } from '@univerjs/icons';
+import {
+    AddImageIcon,
+    AlignTextBothIcon,
+    BoldIcon,
+    ColumnIcon,
+    CopyDoubleIcon,
+    CutIcon,
+    DeleteColumnDoubleIcon,
+    DeleteIcon,
+    DeleteRowDoubleIcon,
+    DeleteTableDoubleIcon,
+    DocPasteOptionsIcon,
+    DocSettingIcon,
+    FontColorDoubleIcon,
+    GridIcon,
+    H1Icon,
+    H2Icon,
+    H3Icon,
+    H4Icon,
+    H5Icon,
+    HeaderFooterIcon,
+    HorizontallyIcon,
+    InsertDoubleIcon,
+    InsertRowAboveDoubleIcon,
+    InsertRowBelowDoubleIcon,
+    ItalicIcon,
+    KeyboardIcon,
+    LeftInsertColumnDoubleIcon,
+    LeftJustifyingIcon,
+    LineIndentDecreaseIcon,
+    LineIndentIncreaseIcon,
+    MenuIcon,
+    MoreLeftIcon,
+    MoreRightIcon,
+    NoColorDoubleIcon,
+    OrderIcon,
+    PaintBucketDoubleIcon,
+    ParagraphSettingIcon,
+    PasteSpecialDoubleIcon,
+    ReduceDoubleIcon,
+    ReduceIcon,
+    RightInsertColumnDoubleIcon,
+    RightJustifyingIcon,
+    SectionSettingIcon,
+    ShapeIcon,
+    SmileIcon,
+    StrikethroughIcon,
+    SubscriptIcon,
+    SubtitleTypeIcon,
+    SuperscriptIcon,
+    SymbolsIcon,
+    TextTypeIcon,
+    TitleTypeIcon,
+    TodoListDoubleIcon,
+    UnderlineIcon,
+    UnorderIcon,
+} from '@univerjs/icons';
 import { ComponentManager, IconManager } from '@univerjs/ui';
 import { DOC_LAYOUT_RECOVERY_COMPONENT, DocLayoutRecovery } from '../../views/DocLayoutRecovery';
+import { DOC_PASTE_OPTIONS_COMPONENT } from '../../views/DocPasteOptions';
 import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../../views/header-footer/panel/component-name';
-import { DefaultTextColorIcon, DocParagraphBackgroundColorSwatchIcon0, DocParagraphBackgroundColorSwatchIcon1, DocParagraphBackgroundColorSwatchIcon10, DocParagraphBackgroundColorSwatchIcon11, DocParagraphBackgroundColorSwatchIcon12, DocParagraphBackgroundColorSwatchIcon13, DocParagraphBackgroundColorSwatchIcon14, DocParagraphBackgroundColorSwatchIcon15, DocParagraphBackgroundColorSwatchIcon2, DocParagraphBackgroundColorSwatchIcon3, DocParagraphBackgroundColorSwatchIcon4, DocParagraphBackgroundColorSwatchIcon5, DocParagraphBackgroundColorSwatchIcon6, DocParagraphBackgroundColorSwatchIcon7, DocParagraphBackgroundColorSwatchIcon8, DocParagraphBackgroundColorSwatchIcon9, DocParagraphTextColorSwatchIcon0, DocParagraphTextColorSwatchIcon1, DocParagraphTextColorSwatchIcon2, DocParagraphTextColorSwatchIcon3, DocParagraphTextColorSwatchIcon4, DocParagraphTextColorSwatchIcon5, DocParagraphTextColorSwatchIcon6, HeaderTextColorIcon } from '../../views/Icon';
+import {
+    DefaultTextColorIcon,
+    DocParagraphBackgroundColorSwatchIcon0,
+    DocParagraphBackgroundColorSwatchIcon1,
+    DocParagraphBackgroundColorSwatchIcon10,
+    DocParagraphBackgroundColorSwatchIcon11,
+    DocParagraphBackgroundColorSwatchIcon12,
+    DocParagraphBackgroundColorSwatchIcon13,
+    DocParagraphBackgroundColorSwatchIcon14,
+    DocParagraphBackgroundColorSwatchIcon15,
+    DocParagraphBackgroundColorSwatchIcon2,
+    DocParagraphBackgroundColorSwatchIcon3,
+    DocParagraphBackgroundColorSwatchIcon4,
+    DocParagraphBackgroundColorSwatchIcon5,
+    DocParagraphBackgroundColorSwatchIcon6,
+    DocParagraphBackgroundColorSwatchIcon7,
+    DocParagraphBackgroundColorSwatchIcon8,
+    DocParagraphBackgroundColorSwatchIcon9,
+    DocParagraphTextColorSwatchIcon0,
+    DocParagraphTextColorSwatchIcon1,
+    DocParagraphTextColorSwatchIcon2,
+    DocParagraphTextColorSwatchIcon3,
+    DocParagraphTextColorSwatchIcon4,
+    DocParagraphTextColorSwatchIcon5,
+    DocParagraphTextColorSwatchIcon6,
+    HeaderTextColorIcon,
+} from '../../views/Icon';
 import { BULLET_LIST_TYPE_COMPONENT, ORDER_LIST_TYPE_COMPONENT } from '../../views/list-type-picker/index';
 import { BulletListTypePicker, OrderListTypePicker } from '../../views/list-type-picker/Picker';
-import { MOBILE_DOC_ELEMENT_MENU, MobileDocElementMenuPopup } from '../../views/mobile-element-menu/MobileDocElementMenu';
-import { MobileHeaderFooterPanel, MobilePageSettings, MobileParagraphSettings, MobileSectionSettings } from '../../views/mobile/MobileDocSettings';
+import {
+    MOBILE_DOC_ELEMENT_MENU,
+    MobileDocElementMenuPopup,
+} from '../../views/mobile-element-menu/MobileDocElementMenu';
+import { MobileDocPasteOptions } from '../../views/mobile/MobileDocPasteOptions';
+import {
+    MobileHeaderFooterPanel,
+    MobilePageSettings,
+    MobileParagraphSettings,
+    MobileSectionSettings,
+} from '../../views/mobile/MobileDocSettings';
 import { PAGE_SETTING_COMPONENT_ID } from '../../views/PageSettings';
 import { DOC_SECTION_SETTING_COMPONENT } from '../../views/section-setting/component-name';
 import { COMPONENT_DOC_CREATE_TABLE_CONFIRM } from '../../views/table/create/component-name';
@@ -44,10 +136,12 @@ export class MobileComponentsController extends Disposable {
     private _registerParts(): void {
         const componentManager = this._componentManager;
         this.disposeWithMe(componentManager.register(COMPONENT_DOC_CREATE_TABLE_CONFIRM, DocCreateTableConfirm));
+        this.disposeWithMe(componentManager.register(DOC_PASTE_OPTIONS_COMPONENT, MobileDocPasteOptions));
     }
 
     private _registerIcons(): void {
         this.disposeWithMe(this._iconManager.register({
+            DocPasteOptionsIcon,
             AlignTextBothIcon,
             AddImageIcon,
             BoldIcon,

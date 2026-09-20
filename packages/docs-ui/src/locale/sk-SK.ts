@@ -18,6 +18,15 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'docs-ui': {
+        pasteOptions: {
+            title: 'Možnosti prilepenia',
+            source: 'Zachovať zdrojové formátovanie',
+            destination: 'Prispôsobiť cieľovému formátovaniu',
+            text: 'Zachovať iba text',
+            useKeyboard: 'Schránka nie je dostupná. Použite {0} na prilepenie a potom zmeňte formát v možnostiach prilepenia.',
+            useSystemPaste: 'Schránka nie je dostupná. Použite funkciu prilepenia zariadenia alebo klávesnice a potom zmeňte formát v možnostiach prilepenia.',
+            failed: 'Formát prilepenia sa nepodarilo zmeniť.',
+        },
         outline: {
             title: 'Osnova dokumentu',
         },

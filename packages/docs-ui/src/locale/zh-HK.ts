@@ -18,6 +18,15 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'docs-ui': {
+        pasteOptions: {
+            title: '貼上選項',
+            source: '保留來源格式',
+            destination: '符合目標格式',
+            text: '只保留文字',
+            useKeyboard: '無法讀取剪貼簿。請按 {0} 貼上，再透過「貼上選項」切換格式。',
+            useSystemPaste: '無法存取剪貼簿。請使用裝置或鍵盤提供的貼上操作，再透過「貼上選項」切換格式。',
+            failed: '無法切換貼上格式。',
+        },
         outline: {
             title: '文件大綱',
         },

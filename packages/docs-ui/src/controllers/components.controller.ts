@@ -26,6 +26,7 @@ import {
     DeleteIcon,
     DeleteRowDoubleIcon,
     DeleteTableDoubleIcon,
+    DocPasteOptionsIcon,
     DocSettingIcon,
     FontColorDoubleIcon,
     GridIcon,
@@ -73,6 +74,7 @@ import {
 } from '@univerjs/icons';
 import { ComponentManager, IconManager } from '@univerjs/ui';
 import { DOC_LAYOUT_RECOVERY_COMPONENT, DocLayoutRecovery } from '../views/DocLayoutRecovery';
+import { DOC_PASTE_OPTIONS_COMPONENT, DocPasteOptions } from '../views/DocPasteOptions';
 import { FLOAT_MENU_COMPONENT_KEY, FloatToolbar } from '../views/float-toolbar/FloatToolbar';
 import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../views/header-footer/panel/component-name';
 import { DocHeaderFooterPanel } from '../views/header-footer/panel/DocHeaderFooterPanel';
@@ -136,6 +138,7 @@ export class ComponentsController extends Disposable {
 
     private _registerParts(): void {
         const componentManager = this._componentManager;
+        this.disposeWithMe(componentManager.register(DOC_PASTE_OPTIONS_COMPONENT, DocPasteOptions));
         this.disposeWithMe(componentManager.register(COMPONENT_DOC_CREATE_TABLE_CONFIRM, DocCreateTableConfirm));
     }
 
@@ -177,6 +180,7 @@ export class ComponentsController extends Disposable {
             PaintBucketDoubleIcon,
             ParagraphSettingIcon,
             PasteSpecialDoubleIcon,
+            DocPasteOptionsIcon,
             ReduceDoubleIcon,
             ReduceIcon,
             RightInsertColumnDoubleIcon,

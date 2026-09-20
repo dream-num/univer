@@ -22,6 +22,7 @@ import {
     DocCutCommand,
     DocCutCurrentParagraphCommand,
     DocPasteCommand,
+    DocPasteSpecialCommand,
 } from '../commands/commands/clipboard.command';
 import { DeleteCurrentParagraphCommand, DeleteLeftCommand } from '../commands/commands/doc-delete.command';
 import { OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
@@ -94,6 +95,7 @@ import {
     InsertRowBeforeMenuItemFactory,
     ParagraphSettingMenuFactory,
     PasteMenuFactory,
+    PasteSpecialMenuFactory,
     SectionSettingMenuFactory,
     TABLE_DELETE_MENU_ID,
     TABLE_INSERT_MENU_ID,
@@ -225,6 +227,11 @@ export const floatToolbarMenuSchema: MenuSchemaType = {
 export const menuSchema: MenuSchemaType = {
     ...floatToolbarMenuSchema,
     [RibbonStartGroup.OTHERS]: {
+        [DocPasteSpecialCommand.id]: {
+            order: -1,
+            gridLayout: { row: 1, column: 2, rowSpan: 2, showLabel: true },
+            menuItemFactory: PasteSpecialMenuFactory,
+        },
         [OpenDocPermissionPanelOperation.id]: {
             order: 0,
             gridLayout: { row: 1, column: 1, rowSpan: 2, showLabel: true },
@@ -407,6 +414,10 @@ export const menuSchema: MenuSchemaType = {
             [DocPasteCommand.id]: {
                 order: 2,
                 menuItemFactory: PasteMenuFactory,
+            },
+            [DocPasteSpecialCommand.id]: {
+                order: 3,
+                menuItemFactory: PasteSpecialMenuFactory,
             },
         } as MenuSchemaType),
         [ContextMenuGroup.FORMAT]: {

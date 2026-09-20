@@ -18,6 +18,7 @@ import type { LocaleKey } from '../locale/types';
 import type { DocPasteMode } from '../services/clipboard/paste-options';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button, DropdownMenu } from '@univerjs/design';
+import { DocPasteOptionsIcon } from '@univerjs/icons';
 import { ILayoutService, useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
 import { DocChangePasteModeCommand } from '../commands/commands/clipboard.command';
@@ -25,17 +26,6 @@ import { IDocClipboardService } from '../services/clipboard/clipboard.service';
 import { DOC_PASTE_OPTIONS } from '../services/clipboard/paste-options';
 
 export const DOC_PASTE_OPTIONS_COMPONENT = 'docs-ui.paste-options';
-
-export function DocPasteOptionsIcon() {
-    return (
-        <svg className="!univer-size-5" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="3" y="4" width="13" height="17" rx="2" fill="var(--univer-yellow-200)" stroke="var(--univer-gray-600)" />
-            <path d="M7 4V3h1a2 2 0 0 1 4 0h1v3H7V4Z" fill="var(--univer-gray-300)" stroke="var(--univer-gray-600)" />
-            <rect x="10" y="9" width="11" height="13" rx="1" fill="var(--univer-gray-0)" stroke="var(--univer-gray-600)" />
-            <path d="M13 12h5m-5 3h5m-5 3h5" stroke="var(--univer-gray-600)" strokeLinecap="round" />
-        </svg>
-    );
-}
 
 export function DocPasteOptions() {
     const clipboard = useDependency(IDocClipboardService);
@@ -93,7 +83,7 @@ export function DocPasteOptions() {
                 }}
                 className="univer-shadow-sm"
             >
-                <DocPasteOptionsIcon />
+                <DocPasteOptionsIcon className="!univer-size-5" aria-hidden="true" />
                 <svg className="!univer-size-2" width="8" height="8" viewBox="0 0 8 8" aria-hidden="true">
                     <path d="m1 2 3 4 3-4Z" fill="currentColor" />
                 </svg>

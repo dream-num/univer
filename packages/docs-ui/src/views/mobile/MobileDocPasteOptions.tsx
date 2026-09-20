@@ -21,14 +21,14 @@ import type { MobileDocSelectionRenderService } from '../../services/mobile/doc-
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { CheckMarkIcon } from '@univerjs/icons';
+
+import { CheckMarkIcon, DocPasteOptionsIcon } from '@univerjs/icons';
 import { MobileDrawer, useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
 import { DocChangePasteModeCommand } from '../../commands/commands/clipboard.command';
 import { IDocClipboardService } from '../../services/clipboard/clipboard.service';
 import { DOC_PASTE_OPTIONS } from '../../services/clipboard/paste-options';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
-import { DocPasteOptionsIcon } from '../DocPasteOptions';
 
 export function MobileDocPasteOptions({ popup }: { popup: IPopupWithExtraProps<{ unitId: string }> }) {
     const { unitId } = popup.extraProps;
@@ -78,7 +78,7 @@ export function MobileDocPasteOptions({ popup }: { popup: IPopupWithExtraProps<{
                     setOpen(true);
                 }}
             >
-                <DocPasteOptionsIcon />
+                <DocPasteOptionsIcon aria-hidden="true" />
             </Button>
             {open && (
                 <div

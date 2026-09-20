@@ -26,6 +26,7 @@ import {
     DeleteIcon,
     DeleteRowDoubleIcon,
     DeleteTableDoubleIcon,
+    DocPasteOptionsIcon,
     DocSettingIcon,
     FontColorDoubleIcon,
     GridIcon,
@@ -71,7 +72,7 @@ import {
 } from '@univerjs/icons';
 import { ComponentManager, IconManager } from '@univerjs/ui';
 import { DOC_LAYOUT_RECOVERY_COMPONENT, DocLayoutRecovery } from '../../views/DocLayoutRecovery';
-import { DOC_PASTE_OPTIONS_COMPONENT, DocPasteOptionsIcon } from '../../views/DocPasteOptions';
+import { DOC_PASTE_OPTIONS_COMPONENT } from '../../views/DocPasteOptions';
 import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../../views/header-footer/panel/component-name';
 import {
     DefaultTextColorIcon,

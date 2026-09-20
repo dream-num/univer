@@ -23,7 +23,7 @@ const locale: typeof enUS = {
             source: 'Giữ định dạng nguồn',
             destination: 'Khớp định dạng đích',
             text: 'Chỉ giữ văn bản',
-            useKeyboard: 'Không thể truy cập bảng nhớ tạm. Dùng Ctrl+V (Mac: ⌘V), hoặc Ctrl+Shift+V (Mac: ⌘⇧V) để chỉ dán văn bản.',
+            useKeyboard: 'Không thể truy cập bảng nhớ tạm. Dùng {0} để dán, rồi đổi định dạng trong Tùy chọn dán.',
             useSystemPaste: 'Không thể truy cập bảng nhớ tạm. Hãy dùng chức năng dán của thiết bị hoặc bàn phím, rồi đổi định dạng trong Tùy chọn dán.',
             failed: 'Không thể thay đổi định dạng dán.',
         },

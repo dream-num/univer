@@ -27,7 +27,7 @@ import {
     SliceBodyType,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
-import { CopyCommand, CutCommand, IMessageService, MOBILE_UI_MODE, PasteCommand } from '@univerjs/ui';
+import { CopyCommand, CutCommand, IMessageService, IShortcutService, MOBILE_UI_MODE, PasteCommand } from '@univerjs/ui';
 import { IDocClipboardService } from '../../services/clipboard/clipboard.service';
 import { getCurrentParagraph } from './util';
 
@@ -124,11 +124,14 @@ export const DocPasteSpecialCommand: ICommand<{ value: DocPasteMode }> = {
             return await service.pasteFromClipboard(params.value);
         } catch {
             const localeService = accessor.get(LocaleService);
+            const pasteShortcut = accessor.get(IContextService).getContextValue(MOBILE_UI_MODE)
+                ? null
+                : accessor.get(IShortcutService).getShortcutDisplayOfCommand(PasteCommand.id);
             accessor.get(IMessageService).show({
                 type: MessageType.Info,
-                content: localeService.t<LocaleKey>(accessor.get(IContextService).getContextValue(MOBILE_UI_MODE)
-                    ? 'docs-ui.pasteOptions.useSystemPaste'
-                    : 'docs-ui.pasteOptions.useKeyboard'),
+                content: pasteShortcut
+                    ? localeService.t<LocaleKey>('docs-ui.pasteOptions.useKeyboard', pasteShortcut)
+                    : localeService.t<LocaleKey>('docs-ui.pasteOptions.useSystemPaste'),
             });
             return false;
         }

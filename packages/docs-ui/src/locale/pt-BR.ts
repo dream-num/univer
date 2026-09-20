@@ -23,7 +23,7 @@ const locale: typeof enUS = {
             source: 'Manter formatação original',
             destination: 'Usar formatação de destino',
             text: 'Manter somente texto',
-            useKeyboard: 'Não foi possível acessar a área de transferência. Use Ctrl+V (Mac: ⌘V) ou Ctrl+Shift+V (Mac: ⌘⇧V) para colar somente texto.',
+            useKeyboard: 'Não é possível acessar a área de transferência. Use {0} para colar e altere o formato nas opções de colagem.',
             useSystemPaste: 'Não é possível acessar a área de transferência. Use a função de colar do dispositivo ou teclado e altere o formato nas opções de colagem.',
             failed: 'Não foi possível alterar o formato da colagem.',
         },

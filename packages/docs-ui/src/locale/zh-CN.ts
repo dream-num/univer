@@ -23,7 +23,7 @@ const locale: typeof enUS = {
             source: '保留源格式',
             destination: '匹配目标格式',
             text: '仅保留文本',
-            useKeyboard: '无法读取剪贴板。请按 Ctrl+V（Mac：⌘V）粘贴，或按 Ctrl+Shift+V（Mac：⌘⇧V）仅粘贴文本。',
+            useKeyboard: '无法读取剪贴板。请按 {0} 粘贴，再通过“粘贴选项”切换格式。',
             useSystemPaste: '无法访问剪贴板。请使用设备或键盘提供的粘贴操作，再通过“粘贴选项”切换格式。',
             failed: '无法切换粘贴格式。',
         },

@@ -23,7 +23,7 @@ const locale: typeof enUS = {
             source: 'Conserver la mise en forme source',
             destination: 'Adapter à la mise en forme de destination',
             text: 'Conserver uniquement le texte',
-            useKeyboard: 'Accès au presse-papiers indisponible. Utilisez Ctrl+V (Mac : ⌘V), ou Ctrl+Maj+V (Mac : ⌘⇧V) pour coller uniquement le texte.',
+            useKeyboard: 'Le presse-papiers est inaccessible. Utilisez {0} pour coller, puis les options de collage pour changer le format.',
             useSystemPaste: 'Le presse-papiers est inaccessible. Utilisez la fonction de collage de votre appareil ou clavier, puis les options de collage pour changer le format.',
             failed: 'Impossible de modifier le format de collage.',
         },

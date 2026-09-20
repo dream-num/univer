@@ -23,7 +23,7 @@ const locale: typeof enUS = {
             source: 'Zachovať zdrojové formátovanie',
             destination: 'Prispôsobiť cieľovému formátovaniu',
             text: 'Zachovať iba text',
-            useKeyboard: 'Schránka nie je dostupná. Použite Ctrl+V (Mac: ⌘V), alebo Ctrl+Shift+V (Mac: ⌘⇧V) na prilepenie iba textu.',
+            useKeyboard: 'Schránka nie je dostupná. Použite {0} na prilepenie a potom zmeňte formát v možnostiach prilepenia.',
             useSystemPaste: 'Schránka nie je dostupná. Použite funkciu prilepenia zariadenia alebo klávesnice a potom zmeňte formát v možnostiach prilepenia.',
             failed: 'Formát prilepenia sa nepodarilo zmeniť.',
         },

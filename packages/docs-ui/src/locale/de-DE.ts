@@ -23,7 +23,7 @@ const locale: typeof enUS = {
             source: 'Ursprüngliche Formatierung beibehalten',
             destination: 'Zielformatierung übernehmen',
             text: 'Nur Text übernehmen',
-            useKeyboard: 'Kein Zugriff auf die Zwischenablage. Verwenden Sie Strg+V (Mac: ⌘V) oder Strg+Umschalt+V (Mac: ⌘⇧V) für reinen Text.',
+            useKeyboard: 'Kein Zugriff auf die Zwischenablage. Verwenden Sie {0} zum Einfügen und ändern Sie das Format über die Einfügeoptionen.',
             useSystemPaste: 'Kein Zugriff auf die Zwischenablage. Verwenden Sie die Einfügefunktion Ihres Geräts oder Ihrer Tastatur und ändern Sie das Format über die Einfügeoptionen.',
             failed: 'Das Einfügeformat konnte nicht geändert werden.',
         },

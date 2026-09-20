@@ -42,7 +42,13 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
-import { IClipboardInterfaceService, IMessageService, MOBILE_UI_MODE } from '@univerjs/ui';
+import {
+    IClipboardInterfaceService,
+    IMessageService,
+    IShortcutService,
+    MOBILE_UI_MODE,
+    PasteCommand,
+} from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import zhCN from '../../../locale/zh-CN';
 import { DocClipboardService, IDocClipboardService } from '../../../services/clipboard/clipboard.service';
@@ -1345,9 +1351,18 @@ describe('test cases in clipboard', () => {
             expect(getDocumentSnapshot()?.body?.dataStream).toContain('External');
         });
 
-        it.each([true, false])('preserves the document and provides suitable localized guidance when clipboard access is denied (mobile: %s)', async (mobile) => {
+        it.each([
+            [true, 'Ctrl+V'],
+            [false, 'Ctrl+V'],
+            [false, '⌘+V'],
+            [false, 'Alt+P'],
+            [false, null],
+        ] as const)('preserves the document and shows configured paste guidance (mobile: %s, shortcut: %s)', async (mobile, shortcut) => {
             const show = vi.fn<IMessageService['show']>(() => ({ dispose: () => {} }));
             injector.add([IMessageService, { useValue: { show, remove: vi.fn(), removeAll: vi.fn() } }]);
+            injector.add([IShortcutService, { useValue: {
+                getShortcutDisplayOfCommand: (id: string) => id === PasteCommand.id ? shortcut : null,
+            } }]);
             const localeService = get(LocaleService);
             localeService.load({ [LocaleType.ZH_CN]: zhCN });
             localeService.setLocale(LocaleType.ZH_CN);
@@ -1362,11 +1377,12 @@ describe('test cases in clipboard', () => {
             expect(show).toHaveBeenCalledOnce();
             const message = show.mock.calls[0][0].content;
             expect(message).not.toContain('docs-ui.');
-            if (mobile) {
+            if (mobile || !shortcut) {
                 expect(message).toContain('设备或键盘');
                 expect(message).not.toMatch(/Ctrl|Cmd/);
             } else {
-                expect(message).toMatch(/Ctrl|Cmd/);
+                expect(message).toContain(shortcut);
+                expect(message).not.toContain('{0}');
             }
         });
 

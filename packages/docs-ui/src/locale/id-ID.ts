@@ -23,7 +23,7 @@ const locale: typeof enUS = {
             source: 'Pertahankan format sumber',
             destination: 'Sesuaikan format tujuan',
             text: 'Simpan teks saja',
-            useKeyboard: 'Papan klip tidak dapat diakses. Gunakan Ctrl+V (Mac: ⌘V), atau Ctrl+Shift+V (Mac: ⌘⇧V) untuk menempel teks saja.',
+            useKeyboard: 'Papan klip tidak dapat diakses. Gunakan {0} untuk menempel, lalu ubah format melalui Opsi tempel.',
             useSystemPaste: 'Papan klip tidak dapat diakses. Gunakan fungsi tempel perangkat atau papan ketik, lalu ubah format melalui Opsi tempel.',
             failed: 'Format tempel tidak dapat diubah.',
         },

@@ -23,6 +23,14 @@ import { describe, expect, it } from 'vitest';
 import * as numfmt from '../api';
 
 describe('local numfmt API', () => {
+    it.each(['\n', '\r', '\u2028', '\u2029'])('preserves escaped line separators in Excel formats (%j)', (separator) => {
+        const pattern = `[$-409]m/d\\${separator}h:mm;@`;
+        expect(numfmt.isValidFormat(pattern)).toBe(true);
+        expect(numfmt.format(pattern, 44137.5)).toBe(`11/2${separator}12:00`);
+        expect(numfmt.format(`0\\${separator}0`, 12)).toBe(`1${separator}2`);
+        expect(numfmt.format('0\\n', 12)).toBe('12n');
+    });
+
     it('exposes only the planned runtime surface', () => {
         expect(Object.keys(numfmt).sort()).toEqual([
             'addLocale',

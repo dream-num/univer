@@ -89,7 +89,7 @@ const tokenHandlers: readonly TokenHandler[] = [
     // conditionally allow these open ended directions?
     [TOKEN_MODIFIER, /^\[([^\]]+)\]/, 1],
     [TOKEN_AMPM, /^(?:AM\/PM|am\/pm|A\/P)/, 0],
-    [TOKEN_ESCAPED, /^\\(.)/, 1],
+    [TOKEN_ESCAPED, /^\\([\s\S])/, 1],
     [TOKEN_STRING, /^"([^"]*?)"/, 1],
     [TOKEN_SKIP, /^_(\\.|.)/, 1],
     // Google Sheets and Excel diverge on "e": Excel only accepts E.

@@ -470,12 +470,12 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (!target) {
             return false;
         }
-        const isFromExcel = htmlIsFromExcel(html ?? '');
+        const shouldUseHTMLPaste = !files?.length || !htmlContainsImage(html ?? '');
 
-        if (files && !isFromExcel) {
-            return this._pasteFiles(files, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE, target);
-        } else if (html) {
+        if (html && shouldUseHTMLPaste) {
             return this._pasteHTML(html, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE, formulaClipboardPayload, target);
+        } else if (files?.length) {
+            return this._pasteFiles(files, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE, target);
         } else if (text) {
             // Converts text with tabs and newlines into an HTML table
             if (/[\n\t]/.test(text)) {

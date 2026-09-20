@@ -33,7 +33,7 @@ import { Canvas } from '../../canvas';
 import { Documents } from '../docs/document';
 import { SpreadsheetExtensionRegistry } from '../extension';
 import { sheetContentViewportKeys, sheetHeaderViewportKeys } from './constants';
-import { SHEET_EXTENSION_PREFIX } from './extensions/sheet-extension';
+import { SHEET_EXTENSION_PREFIX, SHEET_EXTENSION_TYPE } from './extensions/sheet-extension';
 import { SheetComponent } from './sheet-component';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
@@ -344,7 +344,6 @@ export class Spreadsheet extends SheetComponent {
             return;
         }
         const hasMergeData = spreadsheetSkeleton.worksheet.getMergeData().length > 0;
-        this._drawAuxiliary(ctx, hasMergeData);
         const parentScale = this.getParentScale();
 
         const diffRanges = this._refreshIncrementalState && viewportInfo.diffBounds
@@ -363,13 +362,32 @@ export class Spreadsheet extends SheetComponent {
             }))
             : viewRanges;
         const extensions = this.getExtensionsByOrder();
-        const sparseExtensionFeatures = !isMergeRepair && hasSparseExtension(extensions)
+        const backgroundExtensions = extensions.filter((extension) => extension.type === SHEET_EXTENSION_TYPE.BACKGROUND);
+        const gridExtensions = extensions.filter((extension) => extension.type !== SHEET_EXTENSION_TYPE.BACKGROUND);
+        const sparseExtensionFeatures = !isMergeRepair && hasSparseExtension(gridExtensions)
             ? scanSparseExtensionFeatures(spreadsheetSkeleton, viewRanges)
             : null;
         // At this moment, ctx.transform is at topLeft of sheet content, cell(0, 0)
 
         const scene = this.getScene();
-        for (const extension of extensions) {
+        for (const extension of backgroundExtensions) {
+            const timeKey = `${SHEET_EXTENSION_PREFIX}${extension.uKey}`;
+            const st = Tools.now();
+            extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges, {
+                viewRanges,
+                checkOutOfViewBound: true,
+                hasMergeData,
+                viewportKey: viewportInfo.viewportKey,
+                viewBound: viewportInfo.cacheBound,
+                diffBounds: viewportInfo.diffBounds,
+            } as IDrawInfo);
+            const cost = Tools.now() - st;
+            this.addRenderFrameTimeMetricToScene(timeKey, cost, scene);
+        }
+
+        this._drawAuxiliary(ctx, hasMergeData);
+
+        for (const extension of gridExtensions) {
             if (shouldSkipSparseExtension(extension.uKey, sparseExtensionFeatures)) {
                 continue;
             }

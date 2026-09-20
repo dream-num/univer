@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS } from '@univerjs/core';
+import { DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ImageSourceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { SetDrawingSelectedOperation } from '@univerjs/drawing';
-import { SetDrawingArrangeCommand, SetSheetDrawingCommand } from '@univerjs/sheets-drawing';
+import { SetDrawingArrangeCommand, SetSheetDrawingCommand, SetWorksheetBackgroundImageCommand } from '@univerjs/sheets-drawing';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { GroupSheetDrawingCommand } from '../../commands/commands/group-sheet-drawing.command';
@@ -49,7 +49,7 @@ function createSkeleton() {
     };
 }
 
-function createController(options?: { openFiles?: unknown[] }) {
+function createController(options?: { imageParam?: unknown; openFiles?: unknown[] }) {
     const featurePluginOrderUpdate$ = new Subject<any>();
     const featurePluginUpdate$ = new Subject<any[]>();
     const featurePluginGroupUpdate$ = new Subject<any[]>();
@@ -81,6 +81,10 @@ function createController(options?: { openFiles?: unknown[] }) {
             getCurrentLastSelection: vi.fn(() => undefined),
         })),
     };
+    const imageIoService = {
+        saveImage: vi.fn(async () => options?.imageParam),
+        addImageSourceCache: vi.fn(),
+    };
     const controller = new SheetDrawingUpdateController(
         {
             unitId: 'unit-1',
@@ -93,7 +97,7 @@ function createController(options?: { openFiles?: unknown[] }) {
         commandService as never,
         { interceptAfterCommand: vi.fn(() => ({ dispose: vi.fn() })) } as never,
         { getCellWithCoordByOffset: vi.fn() } as never,
-        { saveImage: vi.fn(), addImageSourceCache: vi.fn() } as never,
+        imageIoService as never,
         { openFile: vi.fn(async () => options?.openFiles ?? []) } as never,
         sheetDrawingService as never,
         {
@@ -118,6 +122,7 @@ function createController(options?: { openFiles?: unknown[] }) {
     return {
         controller,
         commandService,
+        imageIoService,
         sheetDrawingService,
         featurePluginOrderUpdate$,
         featurePluginUpdate$,
@@ -128,6 +133,29 @@ function createController(options?: { openFiles?: unknown[] }) {
 }
 
 describe('SheetDrawingUpdateController', () => {
+    it('uploads and sets a worksheet background image', async () => {
+        const file = { name: 'background.png' };
+        const imageParam = {
+            source: 'data:image/png;base64,background',
+            imageSourceType: ImageSourceType.BASE64,
+        };
+        const { controller, commandService, imageIoService } = createController({
+            openFiles: [file],
+            imageParam,
+        });
+        commandService.executeCommand.mockResolvedValue(true);
+
+        await expect(controller.setWorksheetBackgroundImage()).resolves.toBe(true);
+        expect(imageIoService.saveImage).toHaveBeenCalledWith(file);
+        expect(commandService.executeCommand).toHaveBeenCalledWith(SetWorksheetBackgroundImageCommand.id, {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            backgroundImage: imageParam,
+        });
+
+        controller.dispose();
+    });
+
     it('reports empty and over-limit file selections without inserting images', async () => {
         const empty = createController({ openFiles: [] });
 

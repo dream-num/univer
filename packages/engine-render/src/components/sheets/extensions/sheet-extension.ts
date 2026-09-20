@@ -20,6 +20,7 @@ import { Rectangle } from '@univerjs/core';
 import { ComponentExtension } from '../../extension';
 
 export enum SHEET_EXTENSION_TYPE {
+    BACKGROUND,
     GRID,
 }
 

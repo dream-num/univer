@@ -19,6 +19,11 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-drawing-ui': {
         title: '画像',
+        backgroundImage: {
+            title: '背景画像',
+            add: '背景画像を追加',
+            delete: '背景画像を削除',
+        },
         uploadLoading: {
             loading: '読み込み中...',
         },

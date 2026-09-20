@@ -26,7 +26,9 @@ import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-dra
 import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
 import { SetSheetDrawingPlacementCommand } from '../commands/commands/set-sheet-drawing-placement.command';
 import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
+import { SetWorksheetBackgroundImageCommand } from '../commands/commands/set-worksheet-background-image.command';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
+import { SetWorksheetBackgroundImageMutation } from '../commands/mutations/set-worksheet-background-image.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
 import { ISheetDrawingService } from '../services/sheet-drawing.service';
 
@@ -69,6 +71,7 @@ export class SheetsDrawingLoadController extends Disposable {
         this._initSheetChange();
 
         this.disposeWithMe(this._commandService.registerCommand(SetDrawingApplyMutation));
+        this.disposeWithMe(this._commandService.registerCommand(SetWorksheetBackgroundImageMutation));
     }
 
     private _initCommands() {
@@ -78,6 +81,7 @@ export class SheetsDrawingLoadController extends Disposable {
             RemoveSheetDrawingCommand,
             SetDrawingArrangeCommand,
             SetSheetDrawingPlacementCommand,
+            SetWorksheetBackgroundImageCommand,
             ClearSheetDrawingTransformerOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }

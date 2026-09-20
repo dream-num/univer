@@ -72,6 +72,7 @@ import {
     ISheetDrawingService,
     SetDrawingArrangeCommand,
     SetSheetDrawingCommand,
+    SetWorksheetBackgroundImageCommand,
     transformToAxisAlignPosition,
     transformToDrawingPosition,
 } from '@univerjs/sheets-drawing';
@@ -197,6 +198,55 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             return true;
         }
         return false;
+    }
+
+    async setWorksheetBackgroundImage(files?: Nullable<File[]>): Promise<boolean> {
+        const selectedFiles = files ?? await this._fileOpenerService.openFile({
+            multiple: false,
+            accept: DRAWING_IMAGE_ALLOW_IMAGE_LIST.map((image) => `.${image.replace('image/', '')}`).join(','),
+        });
+        const file = selectedFiles[0];
+        if (!file) {
+            return false;
+        }
+
+        let imageParam: Nullable<IImageIoServiceParam>;
+        try {
+            imageParam = await this._imageIoService.saveImage(file);
+        } catch (error) {
+            const type = (error as Error).message;
+            if (type === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
+                this._messageService.show({
+                    type: MessageType.Error,
+                    content: this._localeService.t<LocaleKey>('sheets-drawing-ui.update-status.exceedMaxSize', String(getDrawingImageAllowSize() / (1024 * 1024))),
+                });
+            } else if (type === ImageUploadStatusType.ERROR_IMAGE_TYPE) {
+                this._messageService.show({
+                    type: MessageType.Error,
+                    content: this._localeService.t<LocaleKey>('sheets-drawing-ui.update-status.invalidImageType'),
+                });
+            } else if (type === ImageUploadStatusType.ERROR_IMAGE) {
+                this._messageService.show({
+                    type: MessageType.Error,
+                    content: this._localeService.t<LocaleKey>('sheets-drawing-ui.update-status.invalidImage'),
+                });
+            }
+            return false;
+        }
+
+        if (!imageParam) {
+            return false;
+        }
+
+        const { unitId, subUnitId } = this._getUnitInfo();
+        return this._commandService.executeCommand(SetWorksheetBackgroundImageCommand.id, {
+            unitId,
+            subUnitId,
+            backgroundImage: {
+                source: imageParam.source,
+                imageSourceType: imageParam.imageSourceType,
+            },
+        });
     }
 
     insertCellImageByFile(file: File, location?: ISheetLocationBase) {

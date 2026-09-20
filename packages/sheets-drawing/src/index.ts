@@ -29,8 +29,12 @@ export { SetSheetDrawingPlacementCommand } from './commands/commands/set-sheet-d
 export type { ISetSheetDrawingPlacementCommandParams } from './commands/commands/set-sheet-drawing-placement.command';
 export { SetSheetDrawingCommand } from './commands/commands/set-sheet-drawing.command';
 export type { ISetDrawingCommandParams } from './commands/commands/set-sheet-drawing.command';
+export { SetWorksheetBackgroundImageCommand } from './commands/commands/set-worksheet-background-image.command';
+export type { ISetWorksheetBackgroundImageCommandParams } from './commands/commands/set-worksheet-background-image.command';
 export { DrawingApplyType, SetDrawingApplyMutation } from './commands/mutations/set-drawing-apply.mutation';
 export type { ISetDrawingApplyMutationParams } from './commands/mutations/set-drawing-apply.mutation';
+export { SetWorksheetBackgroundImageMutation } from './commands/mutations/set-worksheet-background-image.mutation';
+export type { ISetWorksheetBackgroundImageMutationParams } from './commands/mutations/set-worksheet-background-image.mutation';
 export { ClearSheetDrawingTransformerOperation } from './commands/operations/clear-drawing-transformer.operation';
 export { isKnownSheetNonRotatableDrawingType, resolveSheetDrawingRotateEnabled } from './common/rotate-enabled';
 export type { IUniverSheetsDrawingConfig } from './config/config';

@@ -19,6 +19,11 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-drawing-ui': {
         title: 'Imatge',
+        backgroundImage: {
+            title: 'Imatge de fons',
+            add: 'Afegeix una imatge de fons',
+            delete: 'Suprimeix la imatge de fons',
+        },
         uploadLoading: {
             loading: 'S\'està carregant..., restant',
         },

@@ -23,6 +23,11 @@ export type { IInsertImageCommandParams } from './commands/commands/insert-image
 export { MoveDrawingsCommand } from './commands/commands/move-drawings.command';
 export { SaveCellImagesCommand } from './commands/commands/save-cell-images.command';
 export { UngroupSheetDrawingCommand } from './commands/commands/ungroup-sheet-drawing.command';
+export {
+    AddWorksheetBackgroundImageCommand,
+    DeleteWorksheetBackgroundImageCommand,
+} from './commands/commands/worksheet-background-image.command';
+export type { IAddWorksheetBackgroundImageCommandParams } from './commands/commands/worksheet-background-image.command';
 export { EditSheetDrawingOperation } from './commands/operations/edit-sheet-drawing.operation';
 export { SidebarSheetDrawingOperation } from './commands/operations/open-drawing-panel.operation';
 export type { IUniverSheetsDrawingUIConfig } from './config/config';

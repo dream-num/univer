@@ -21,7 +21,6 @@ import type { MobileDocSelectionRenderService } from '../../services/mobile/doc-
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
-
 import { CheckMarkIcon, DocPasteOptionsIcon } from '@univerjs/icons';
 import { MobileDrawer, useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';

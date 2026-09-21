@@ -58,6 +58,11 @@ export class WorksheetBackgroundImageExtension extends SheetExtension {
         if (!pattern) {
             return;
         }
+        const scaleX = backgroundImage.scaleX ?? 1;
+        const scaleY = backgroundImage.scaleY ?? 1;
+        if (scaleX !== 1 || scaleY !== 1) {
+            pattern.setTransform({ a: scaleX, d: scaleY });
+        }
 
         const ranges = diffRanges.length > 0 ? diffRanges : drawInfo.viewRanges;
         const { columnWidthAccumulation, rowHeightAccumulation } = spreadsheetSkeleton;

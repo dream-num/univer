@@ -297,6 +297,8 @@ export function cloneWorksheetData(worksheet: IWorksheetData): IWorksheetData {
             ? {
                 source: worksheet.backgroundImage.source,
                 imageSourceType: worksheet.backgroundImage.imageSourceType,
+                scaleX: worksheet.backgroundImage.scaleX,
+                scaleY: worksheet.backgroundImage.scaleY,
             }
             : undefined,
 

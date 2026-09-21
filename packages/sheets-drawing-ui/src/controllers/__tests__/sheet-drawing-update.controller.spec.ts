@@ -136,8 +136,9 @@ describe('SheetDrawingUpdateController', () => {
     it('uploads and sets a worksheet background image', async () => {
         const file = { name: 'background.png' };
         const imageParam = {
-            source: 'data:image/png;base64,background',
-            imageSourceType: ImageSourceType.BASE64,
+            source: 'uploaded-file-id',
+            imageSourceType: ImageSourceType.UUID,
+            base64Cache: 'data:image/png;base64,background',
         };
         const { controller, commandService, imageIoService } = createController({
             openFiles: [file],
@@ -150,7 +151,10 @@ describe('SheetDrawingUpdateController', () => {
         expect(commandService.executeCommand).toHaveBeenCalledWith(SetWorksheetBackgroundImageCommand.id, {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
-            backgroundImage: imageParam,
+            backgroundImage: {
+                source: imageParam.base64Cache,
+                imageSourceType: ImageSourceType.BASE64,
+            },
         });
 
         controller.dispose();

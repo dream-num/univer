@@ -104,6 +104,10 @@ export enum WorksheetHiddenState {
 export interface IWorksheetBackgroundImage {
     source: string;
     imageSourceType: ImageSourceType;
+    /** Horizontal scale from source pixels to 96-DPI worksheet layout pixels. */
+    scaleX?: number;
+    /** Vertical scale from source pixels to 96-DPI worksheet layout pixels. */
+    scaleY?: number;
 }
 
 /**

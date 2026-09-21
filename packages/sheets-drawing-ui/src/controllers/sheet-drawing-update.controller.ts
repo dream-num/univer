@@ -80,6 +80,7 @@ import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univ
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
+import { getWorksheetBackgroundImageScale } from '../utils/worksheet-background-image';
 
 /**
  * Calculate the bounding box after rotation
@@ -239,12 +240,15 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }
 
         const { unitId, subUnitId } = this._getUnitInfo();
+        const source = imageParam.base64Cache || imageParam.source;
+        const scale = getWorksheetBackgroundImageScale(source);
         return this._commandService.executeCommand(SetWorksheetBackgroundImageCommand.id, {
             unitId,
             subUnitId,
             backgroundImage: {
-                source: imageParam.source,
-                imageSourceType: imageParam.imageSourceType,
+                source,
+                imageSourceType: imageParam.base64Cache ? ImageSourceType.BASE64 : imageParam.imageSourceType,
+                ...scale,
             },
         });
     }

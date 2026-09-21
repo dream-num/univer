@@ -1152,6 +1152,10 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         error: unknown,
         preserveCompletedLayout: boolean
     ): void {
+        if (this._disposed || layoutRequestId !== this._layoutRequestId) {
+            return;
+        }
+
         if (!allowRecovery) {
             this._logService.error('[DocRenderController]: Worker layout failed; using main-thread layout.', error);
             this._layoutCoordinator.schedule(skeleton, options, mainThreadCallbacks);
@@ -1179,6 +1183,9 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                 preserveCompletedLayout
             );
         }).catch((recoveryError: unknown) => {
+            if (this._disposed || layoutRequestId !== this._layoutRequestId) {
+                return;
+            }
             this._logService.error('[DocRenderController]: document layout Worker recovery failed; using main-thread layout.', recoveryError);
             this._layoutCoordinator.schedule(skeleton, options, mainThreadCallbacks);
         });

@@ -81,7 +81,7 @@ import { MobileDocBackScrollRenderController } from '../mobile/back-scroll.rende
 import { MobileDocSelectionRenderController } from '../mobile/doc-selection-render.controller';
 import { MobileDocRenderController } from '../mobile/doc.render-controller';
 
-function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout = false, documentFlavor = DocumentFlavor.TRADITIONAL, withFootnote = false, mobile = false, renderingFontsReady?: Promise<void>) {
+function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout = false, documentFlavor = DocumentFlavor.TRADITIONAL, withFootnote = false, mobile = false, renderingFontsReady?: Promise<void>, worker?: Partial<IDocLayoutExecutor>) {
     if (workerBeforeLayout) {
         // Model computation cost separately from fake timers so foreground work yields before Worker handoff.
         let elapsed = 0;
@@ -109,6 +109,7 @@ function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout
         renderingFontsReady,
         initialize: () => new Promise<void>(() => {}),
         disposeSession: async () => {},
+        ...worker,
     } as unknown as IDocLayoutExecutor);
     let registration = workerBeforeLayout ? registerWorker() : undefined;
     const startWorkerLayout = vi.spyOn(injector.get(DocLayoutExecutorService), 'startLayout');
@@ -406,6 +407,60 @@ describe('DocRenderController bounded input publication', () => {
             expect(pages.length).toBeGreaterThan(0);
             expect(pages.length).toBeLessThanOrEqual(5);
             expect(pages.every((page) => page.sections.length > 0)).toBe(true);
+        } finally {
+            editor.dispose();
+        }
+    });
+
+    it('does not recover a disposed render after its Worker mount cleanup rejects', async () => {
+        let rejectCleanup!: (error: Error) => void;
+        const disposeLayoutMount = vi.fn(() => new Promise<void>((_resolve, reject) => {
+            rejectCleanup = reject;
+        }));
+        const recover = vi.fn(async () => {});
+        const editor = createEditor(500, false, true, DocumentFlavor.TRADITIONAL, false, false, undefined, {
+            disposeLayoutMount,
+            recover,
+        });
+        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+        try {
+            await vi.advanceTimersByTimeAsync(1_000);
+            expect(editor.startWorkerLayout).toHaveBeenCalledOnce();
+            editor.render.dispose();
+            expect(disposeLayoutMount).toHaveBeenCalledOnce();
+            rejectCleanup(new Error('Worker transport closed'));
+            await vi.advanceTimersByTimeAsync(1_000);
+            expect(recover).not.toHaveBeenCalled();
+            expect(error).not.toHaveBeenCalled();
+        } finally {
+            editor.dispose();
+        }
+    });
+
+    it('does not fall back to Main when a pending Worker recovery rejects after disposal', async () => {
+        let rejectRecovery!: (error: Error) => void;
+        const recover = vi.fn(() => new Promise<void>((_resolve, reject) => {
+            rejectRecovery = reject;
+        }));
+        const editor = createEditor(500, false, true, DocumentFlavor.TRADITIONAL, false, false, undefined, {
+            initialize: async () => {},
+            createSession: async () => {},
+            startLayout: async () => { throw new Error('Worker failed'); },
+            disposeLayoutMount: async () => {},
+            recover,
+        });
+        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const startMain = vi.spyOn(editor.skeleton, 'startIncrementalLayout');
+        try {
+            await vi.advanceTimersByTimeAsync(1_000);
+            expect(recover).toHaveBeenCalledOnce();
+            editor.render.dispose();
+            const errorsBeforeRejection = error.mock.calls.length;
+            const layoutsBeforeRejection = startMain.mock.calls.length;
+            rejectRecovery(new Error('Worker transport closed'));
+            await vi.advanceTimersByTimeAsync(1_000);
+            expect(error).toHaveBeenCalledTimes(errorsBeforeRejection);
+            expect(startMain).toHaveBeenCalledTimes(layoutsBeforeRejection);
         } finally {
             editor.dispose();
         }

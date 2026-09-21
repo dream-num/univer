@@ -15,7 +15,7 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import type { IMenuButtonItem, IMenuItem, MenuSchemaType } from '@univerjs/ui';
+import type { IMenuButtonItem, IMenuItem, IRibbonGridLayout, MenuSchemaType } from '@univerjs/ui';
 import { CommandType, generateRandomId, ICommandService, Inject, Injector } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
 import { IMenuManagerService, MenuItemType, MenuManagerPosition, RibbonPosition, RibbonStartGroup } from '@univerjs/ui';
@@ -49,6 +49,8 @@ export interface IFacadeMenuItem {
      * The order of the menu item in the submenu.
      */
     order?: number;
+    /** Placement within a ribbon group when ribbonType is 'grid'. */
+    gridLayout?: IRibbonGridLayout;
 }
 
 /**
@@ -75,6 +77,8 @@ export interface IFacadeSubmenuItem {
      * The order of the menu item in the submenu.
      */
     order?: number;
+    /** Placement within a ribbon group when ribbonType is 'grid'. */
+    gridLayout?: IRibbonGridLayout;
 }
 
 /**
@@ -156,6 +160,7 @@ export class FMenu extends FMenuBase {
     private _commandToRegister = new Map<string, (accessor: IAccessor) => void>();
     private _buildingSchema: {
         order?: number;
+        gridLayout?: IRibbonGridLayout;
         menuItemFactory?: (accessor: IAccessor) => IMenuItem;
     };
 
@@ -185,6 +190,10 @@ export class FMenu extends FMenuBase {
 
         if (typeof _item.order !== 'undefined') {
             this._buildingSchema.order = _item.order;
+        }
+
+        if (_item.gridLayout) {
+            this._buildingSchema.gridLayout = _item.gridLayout;
         }
     }
 
@@ -222,6 +231,7 @@ export class FSubmenu extends FMenuBase {
 
     private _buildingSchema: {
         order?: number;
+        gridLayout?: IRibbonGridLayout;
         menuItemFactory?: (accessor: IAccessor) => IMenuItem;
     };
 
@@ -244,6 +254,10 @@ export class FSubmenu extends FMenuBase {
 
         if (typeof _item.order !== 'undefined') {
             this._buildingSchema.order = _item.order;
+        }
+
+        if (_item.gridLayout) {
+            this._buildingSchema.gridLayout = _item.gridLayout;
         }
     }
 

@@ -14,42 +14,43 @@
  * limitations under the License.
  */
 
-import type { MenuSchemaType } from '../menu-manager.service';
+import type { MenuConfig } from '../menu';
 import { ConfigService, IConfigService, Injector } from '@univerjs/core';
+
 import { describe, expect, it } from 'vitest';
 import { isMenuButtonSelectorItem, isMenuSelectorItem, MenuItemType } from '../menu';
 import { IMenuManagerService, MenuManagerService } from '../menu-manager.service';
-import { FloatingObjectToolbarPosition } from '../types';
+import { FloatingObjectToolbarPosition, MenuManagerPosition, RibbonPosition, RibbonStartGroup } from '../types';
 
-function createService(): IMenuManagerService {
+function createInjector(): Injector {
     const injector = new Injector();
     injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([IMenuManagerService, { useClass: MenuManagerService }]);
-    return injector.get(IMenuManagerService);
+    return injector;
 }
 
 describe('MenuManagerService', () => {
     it('appends command menus and returns them in display order', () => {
-        const service = createService();
+        const service = createInjector().get(IMenuManagerService);
 
         service.appendRootMenu({
             testPosition: {
-                second: { order: 2, menuItemFactory: () => ({ id: 'second' }) },
-                first: { order: 1, menuItemFactory: () => ({ id: 'first' }) },
+                second: { order: 2, menuItemFactory: () => ({ id: 'second', type: MenuItemType.BUTTON }) },
+                first: { order: 1, menuItemFactory: () => ({ id: 'first', type: MenuItemType.BUTTON }) },
             },
-        } as MenuSchemaType);
+        });
 
         expect(service.getMenuByPositionKey('testPosition').map((item) => item.key)).toEqual(['first', 'second']);
         expect(service.getFlatMenuByPositionKey('testPosition').map((item) => item.item?.id)).toEqual(['first', 'second']);
     });
 
     it('merges menu contributions into existing positions and emits a change event', () => {
-        const service = createService();
+        const service = createInjector().get(IMenuManagerService);
         const changes: void[] = [];
         const sub = service.menuChanged$.subscribe((value) => changes.push(value));
 
-        service.appendRootMenu({ testMerge: { group: { order: 1 } } } as MenuSchemaType);
-        service.mergeMenu({ group: { command: { order: 1, menuItemFactory: () => ({ id: 'command' }) } } } as MenuSchemaType);
+        service.appendRootMenu({ testMerge: { group: { order: 1 } } });
+        service.mergeMenu({ group: { command: { order: 1, menuItemFactory: () => ({ id: 'command', type: MenuItemType.BUTTON }) } } });
 
         expect(service.getFlatMenuByPositionKey('testMerge').map((item) => item.key)).toEqual(['group', 'command']);
         expect(changes.length).toBeGreaterThanOrEqual(2);
@@ -57,11 +58,11 @@ describe('MenuManagerService', () => {
     });
 
     it.each(Object.values(FloatingObjectToolbarPosition))('accepts contributions for %s', (position) => {
-        const service = createService();
+        const service = createInjector().get(IMenuManagerService);
 
         service.mergeMenu({
             [position]: {
-                comment: { order: 1, menuItemFactory: () => ({ id: 'comment' }) },
+                comment: { order: 1, menuItemFactory: () => ({ id: 'comment', type: MenuItemType.BUTTON }) },
             },
         });
 
@@ -69,7 +70,7 @@ describe('MenuManagerService', () => {
     });
 
     it('returns an empty array for missing menu positions', () => {
-        const service = createService();
+        const service = createInjector().get(IMenuManagerService);
 
         expect(service.getMenuByPositionKey('missing-position')).toEqual([]);
         expect(service.getFlatMenuByPositionKey('missing-position')).toEqual([]);
@@ -80,5 +81,49 @@ describe('MenuManagerService', () => {
         expect(isMenuSelectorItem({ id: 'more-actions', type: MenuItemType.SUBITEMS })).toBe(true);
         expect(isMenuSelectorItem({ id: 'copy', type: MenuItemType.BUTTON })).toBe(false);
         expect(isMenuButtonSelectorItem({ id: 'fill-color', type: MenuItemType.BUTTON_SELECTOR })).toBe(true);
+    });
+
+    it('applies configured tab, group, and item order to menus registered later', () => {
+        const injector = createInjector();
+        const service = injector.get(IMenuManagerService);
+        injector.get(IConfigService).setConfig('menu', {
+            [RibbonPosition.INSERT]: { order: -1 },
+            [RibbonStartGroup.FORMAT]: { order: -1 },
+            font: { order: 2, gridLayout: { row: 2, column: 1, width: 120 } },
+        } satisfies MenuConfig);
+
+        service.mergeMenu({
+            [RibbonPosition.START]: {
+                [RibbonStartGroup.HISTORY]: {
+                    undo: { order: 0, menuItemFactory: () => ({ id: 'undo', type: MenuItemType.BUTTON }) },
+                },
+                [RibbonStartGroup.FORMAT]: {
+                    fontMenu: {
+                        order: 0,
+                        gridLayout: { row: 1, column: 1, columnSpan: 2, showLabel: true, width: 180 },
+                        menuItemFactory: () => ({ id: 'font', type: MenuItemType.SELECTOR }),
+                    },
+                    bold: { order: 1, menuItemFactory: () => ({ id: 'bold', type: MenuItemType.BUTTON }) },
+                },
+            },
+            [RibbonPosition.INSERT]: {
+                custom: {
+                    order: 0,
+                    image: { order: 0, menuItemFactory: () => ({ id: 'image', type: MenuItemType.BUTTON }) },
+                },
+            },
+        });
+
+        expect(service.getMenuByPositionKey(MenuManagerPosition.RIBBON).map((tab) => tab.key)).toEqual([
+            RibbonPosition.INSERT,
+            RibbonPosition.START,
+        ]);
+        expect(service.getMenuByPositionKey(RibbonPosition.START).map((group) => group.key)).toEqual([
+            RibbonStartGroup.FORMAT,
+            RibbonStartGroup.HISTORY,
+        ]);
+        const items = service.getMenuByPositionKey(RibbonStartGroup.FORMAT);
+        expect(items.map((item) => item.key)).toEqual(['bold', 'fontMenu']);
+        expect(items[1].gridLayout).toEqual({ row: 2, column: 1, columnSpan: 2, showLabel: true, width: 120 });
     });
 });

@@ -90,6 +90,8 @@ function createTestWorksheetData(rowCount: number, colCount: number): IWorksheet
         backgroundImage: {
             source: 'data:image/png;base64,background',
             imageSourceType: ImageSourceType.BASE64,
+            scaleX: 0.8,
+            scaleY: 0.8,
         },
         rightToLeft: BooleanNumber.FALSE,
     };

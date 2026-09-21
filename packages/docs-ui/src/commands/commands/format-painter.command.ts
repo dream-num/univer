@@ -14,7 +14,18 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IBullet, ICommand, IDocumentBody, IDocumentData, IListData, IParagraph, IParagraphStyle, ITextRangeParam, ITextStyle } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    IBullet,
+    ICommand,
+    IDocumentBody,
+    IDocumentData,
+    IListData,
+    IParagraph,
+    IParagraphStyle,
+    ITextRangeParam,
+    ITextStyle,
+} from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import {
     BaselineOffset,

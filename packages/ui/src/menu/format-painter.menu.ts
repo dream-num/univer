@@ -17,7 +17,11 @@
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem } from '../services/menu/menu';
 import { map } from 'rxjs';
-import { ActivateFormatPainterOperation, ClearFormattingCommand, ContinuousFormatPainterOperation } from '../controllers/format-painter.controller';
+import {
+    ActivateFormatPainterOperation,
+    ClearFormattingCommand,
+    ContinuousFormatPainterOperation,
+} from '../controllers/format-painter.controller';
 import { FormatPainterSessionService } from '../services/format-painter/format-painter-session.service';
 import { MenuItemType } from '../services/menu/menu';
 

@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, IStyleBase, ITextDecoration, ITextStyle, Nullable } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    ICommand,
+    IDocumentBody,
+    IMutationInfo,
+    IStyleBase,
+    ITextDecoration,
+    ITextStyle,
+    Nullable,
+} from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import {

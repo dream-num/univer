@@ -15,7 +15,17 @@
  */
 
 import type { ICommand, IDocumentBody, IDocumentData, IListData } from '@univerjs/core';
-import { BooleanNumber, BulletAlignment, DocStyleType, HorizontalAlign, ICommandService, NamedStyleType, RedoCommand, Tools, UndoCommand } from '@univerjs/core';
+import {
+    BooleanNumber,
+    BulletAlignment,
+    DocStyleType,
+    HorizontalAlign,
+    ICommandService,
+    NamedStyleType,
+    RedoCommand,
+    Tools,
+    UndoCommand,
+} from '@univerjs/core';
 import { RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { describe, expect, it, vi } from 'vitest';
 import { ApplyTextFormatPainterCommand, captureTextFormat } from '../format-painter.command';

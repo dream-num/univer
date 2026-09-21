@@ -15,6 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommand } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import { CommandType, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { getDocumentParagraphPermissionObjectId, SetDocumentPermissionCommand } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -39,7 +40,7 @@ export const OpenDocParagraphPermissionOperation: ICommand = {
         }
         return openObjectPermissionDialog(accessor, {
             target: { unitId, objectId: getDocumentParagraphPermissionObjectId(segmentId, paragraphId), objectType: UnitObject.DocumentParagraph },
-            name: accessor.get(LocaleService).t('docs-ui.objectPermission.paragraph'),
+            name: accessor.get(LocaleService).t<LocaleKey>('docs-ui.objectPermission.paragraph'),
             commandId: SetDocumentPermissionCommand.id,
             exists,
         });

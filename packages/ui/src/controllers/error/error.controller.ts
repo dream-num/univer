@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { LocaleKey } from '../../locale/types';
 import { Disposable, ErrorService, Inject, IPermissionService, LocaleService } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { IMessageService } from '../../services/message/message.service';
@@ -46,7 +47,7 @@ export class ErrorController extends Disposable {
                 if (!repeated) {
                     this._messageService.show({
                         id: PERMISSION_MESSAGE_ID,
-                        content: this._localeService.t('ui.objectPermission.operationDenied'),
+                        content: this._localeService.t<LocaleKey>('ui.objectPermission.operationDenied'),
                         type: MessageType.Warning,
                         duration: PERMISSION_MESSAGE_DURATION,
                     });

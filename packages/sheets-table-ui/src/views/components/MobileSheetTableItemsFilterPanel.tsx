@@ -26,10 +26,12 @@ interface IMobileSheetTableItemsFilterPanelProps {
     items: ITableFilterItemList;
     checkedItemSet: Set<string>;
     setCheckedItemSet: Dispatch<SetStateAction<Set<string>>>;
+    onSelectAllChange?: (selected: boolean) => void;
+    onItemChange?: () => void;
 }
 
 export function MobileSheetTableItemsFilterPanel(props: IMobileSheetTableItemsFilterPanelProps) {
-    const { items, checkedItemSet, setCheckedItemSet } = props;
+    const { items, checkedItemSet, setCheckedItemSet, onSelectAllChange, onItemChange } = props;
     const localeService = useDependency(LocaleService);
     const [searchText, setSearchText] = useState('');
     const displayItems = useMemo(() => {
@@ -39,30 +41,33 @@ export function MobileSheetTableItemsFilterPanel(props: IMobileSheetTableItemsFi
             : items.data;
     }, [items.data, searchText]);
     const allDisplayedChecked = displayItems.length > 0
-        && displayItems.every((item) => checkedItemSet.has(item.title));
-    const someDisplayedChecked = displayItems.some((item) => checkedItemSet.has(item.title));
+        && displayItems.every((item) => checkedItemSet.has(item.valueKey ?? item.title));
+    const someDisplayedChecked = displayItems.some((item) => checkedItemSet.has(item.valueKey ?? item.title));
 
     function toggleAllDisplayed() {
         setCheckedItemSet((current) => {
             const next = new Set(current);
             for (const item of displayItems) {
+                const itemKey = item.valueKey ?? item.title;
                 if (allDisplayedChecked) {
-                    next.delete(item.title);
+                    next.delete(itemKey);
                 } else {
-                    next.add(item.title);
+                    next.add(itemKey);
                 }
             }
             return next;
         });
+        onSelectAllChange?.(!allDisplayedChecked && searchText === '');
     }
 
-    function toggleItem(title: string) {
+    function toggleItem(itemKey: string) {
+        onItemChange?.();
         setCheckedItemSet((current) => {
             const next = new Set(current);
-            if (next.has(title)) {
-                next.delete(title);
+            if (next.has(itemKey)) {
+                next.delete(itemKey);
             } else {
-                next.add(title);
+                next.add(itemKey);
             }
             return next;
         });
@@ -97,29 +102,36 @@ export function MobileSheetTableItemsFilterPanel(props: IMobileSheetTableItemsFi
                         {localeService.t<LocaleKey>('sheets-table-ui.filter.select-all')}
                     </Checkbox>
                 </div>
-                {displayItems.map((item) => (
-                    <div
-                        key={item.key}
-                        className="
-                          univer-border-0 univer-border-b univer-border-solid univer-border-gray-200 univer-px-4
-                          last:univer-border-b-0
-                          dark:!univer-border-gray-700
-                        "
-                    >
-                        <Checkbox
-                            className="univer-flex univer-min-h-12 univer-items-center"
-                            checked={checkedItemSet.has(item.title)}
-                            onChange={() => toggleItem(item.title)}
+                {displayItems.map((item) => {
+                    const itemKey = item.valueKey ?? item.title;
+                    return (
+                        <div
+                            key={item.key}
+                            className="
+                              univer-border-0 univer-border-b univer-border-solid univer-border-gray-200 univer-px-4
+                              last:univer-border-b-0
+                              dark:!univer-border-gray-700
+                            "
                         >
-                            <span className="univer-flex univer-min-w-0 univer-flex-1 univer-items-center univer-gap-2">
-                                <span className="univer-min-w-0 univer-flex-1 univer-truncate">{item.title}</span>
-                                <span className="univer-shrink-0 univer-text-gray-400">
-                                    {`(${items.itemsCountMap.get(item.title) ?? 0})`}
+                            <Checkbox
+                                className="univer-flex univer-min-h-12 univer-items-center"
+                                checked={checkedItemSet.has(itemKey)}
+                                onChange={() => toggleItem(itemKey)}
+                            >
+                                <span
+                                    className="
+                                      univer-flex univer-min-w-0 univer-flex-1 univer-items-center univer-gap-2
+                                    "
+                                >
+                                    <span className="univer-min-w-0 univer-flex-1 univer-truncate">{item.title}</span>
+                                    <span className="univer-shrink-0 univer-text-gray-400">
+                                        {`(${items.itemsCountMap.get(itemKey) ?? 0})`}
+                                    </span>
                                 </span>
-                            </span>
-                        </Checkbox>
-                    </div>
-                ))}
+                            </Checkbox>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );

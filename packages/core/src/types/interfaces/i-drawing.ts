@@ -88,6 +88,14 @@ export enum DrawingTypeEnum {
      * Block element, allows host products to place embeddable unit-backed blocks as drawing objects.
      */
     DRAWING_BLOCK = 9,
+    /**
+     * Spreadsheet Slicer control.
+     */
+    DRAWING_SLICER = 10,
+    /**
+     * Spreadsheet Timeline control.
+     */
+    DRAWING_TIMELINE = 11,
 }
 
 export type DrawingType = DrawingTypeEnum | number;

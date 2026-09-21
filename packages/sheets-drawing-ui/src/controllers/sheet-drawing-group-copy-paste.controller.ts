@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDrawingGroupNestedParam, IMutationInfo, Nullable } from '@univerjs/core';
+import type { IDisposable, IDrawingGroupNestedParam, IMutationInfo, Nullable } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import type { IPasteHookValueType, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
-import { Disposable, DrawingTypeEnum, Inject } from '@univerjs/core';
+import { Disposable, DrawingTypeEnum, Inject, toDisposable } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { attachRangeWithCoord, discreteRangeToRange, SheetSkeletonService } from '@univerjs/sheets';
@@ -41,7 +41,15 @@ export interface IGroupFeaturePasteHookParams {
     cloned: IDrawingGroupNestedParam;
 }
 
-export type GroupFeaturePasteHook = (params: IGroupFeaturePasteHookParams) => { redos: IMutationInfo[]; undos: IMutationInfo[] };
+export type GroupFeaturePasteHook = (params: IGroupFeaturePasteHookParams) => {
+    redos: IMutationInfo[];
+    undos: IMutationInfo[];
+    cancel?: boolean;
+};
+
+export interface IGroupFeaturePasteHookOptions {
+    beforeDrawing?: boolean;
+}
 
 const specialPastes: IPasteHookValueType[] = [
     PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_COL_WIDTH,
@@ -51,7 +59,10 @@ const specialPastes: IPasteHookValueType[] = [
 ];
 
 export class SheetsDrawingGroupCopyPasteController extends Disposable {
-    private readonly _featurePasteHooks: GroupFeaturePasteHook[] = [];
+    private readonly _featurePasteHooks: Array<{
+        hook: GroupFeaturePasteHook;
+        beforeDrawing: boolean;
+    }> = [];
 
     private _copyInfo: Nullable<{
         unitId: string;
@@ -114,19 +125,36 @@ export class SheetsDrawingGroupCopyPasteController extends Disposable {
         });
     }
 
-    public registerFeaturePasteHook(hook: GroupFeaturePasteHook): void {
-        this._featurePasteHooks.push(hook);
+    public registerFeaturePasteHook(hook: GroupFeaturePasteHook): void;
+    public registerFeaturePasteHook(hook: GroupFeaturePasteHook, options: IGroupFeaturePasteHookOptions): IDisposable;
+    public registerFeaturePasteHook(hook: GroupFeaturePasteHook, options?: IGroupFeaturePasteHookOptions): IDisposable {
+        const entry = { hook, beforeDrawing: options?.beforeDrawing === true };
+        this._featurePasteHooks.push(entry);
+        return toDisposable(() => {
+            const index = this._featurePasteHooks.indexOf(entry);
+            if (index >= 0) {
+                this._featurePasteHooks.splice(index, 1);
+            }
+        });
     }
 
-    private _getGroupFeaturePasteMutations(params: IGroupFeaturePasteHookParams): { redos: IMutationInfo[]; undos: IMutationInfo[] } {
+    private _getGroupFeaturePasteMutations(
+        params: IGroupFeaturePasteHookParams,
+        beforeDrawing: boolean
+    ): { redos: IMutationInfo[]; undos: IMutationInfo[]; cancel: boolean } {
         const redos: IMutationInfo[] = [];
         const undos: IMutationInfo[] = [];
-        for (const hook of this._featurePasteHooks) {
-            const result = hook(params);
+        let cancel = false;
+        for (const entry of this._featurePasteHooks) {
+            if (entry.beforeDrawing !== beforeDrawing) {
+                continue;
+            }
+            const result = entry.hook(params);
             redos.push(...result.redos);
             undos.push(...result.undos);
+            cancel = cancel || result.cancel === true;
         }
-        return { redos, undos };
+        return { redos, undos, cancel };
     }
 
     private _generateGroupPasteMutations(pasteTo: ISheetDiscreteRangeLocation): { redos: IMutationInfo[]; undos: IMutationInfo[] } {
@@ -139,16 +167,23 @@ export class SheetsDrawingGroupCopyPasteController extends Disposable {
         if (!pasteToSkeleton) {
             return { redos: [], undos: [] };
         }
-
         const { groupNestedParam } = this._copyInfo;
-        // Root group is the last element of the post-order groups array.
         const origRootGroup = groupNestedParam.groups[groupNestedParam.groups.length - 1] as ISheetDrawing;
-
-        // Clone all drawing IDs.
         const { cloned, idMap } = cloneGroupParams(groupNestedParam);
         const newRootGroupId = cloned.groups[cloned.groups.length - 1].drawingId;
+        const featureParams = {
+            fromUnitId: this._copyInfo.unitId,
+            fromSubUnitId: this._copyInfo.subUnitId,
+            toUnitId: unitId,
+            toSubUnitId: subUnitId,
+            idMap,
+            cloned,
+        };
+        const beforeDrawingMutations = this._getGroupFeaturePasteMutations(featureParams, true);
+        if (beforeDrawingMutations.cancel) {
+            return { redos: [], undos: [] };
+        }
 
-        // Resolve the paste destination rectangle.
         const pasteRange = discreteRangeToRange(range);
         const pasteRect = attachRangeWithCoord(pasteToSkeleton, {
             startRow: pasteRange.startRow,
@@ -183,27 +218,22 @@ export class SheetsDrawingGroupCopyPasteController extends Disposable {
         // for each shape's groupId, which automatically reconstructs the full group hierarchy in
         // the scene from the data that was just written by applyJson1.
         const { undo: removeOp, redo: insertOp, objects } = this._sheetDrawingService.getBatchAddOp(allDrawings) as IDrawingJsonUndo1;
+        const afterDrawingMutations = this._getGroupFeaturePasteMutations(featureParams, false);
+        if (afterDrawingMutations.cancel) {
+            return { redos: [], undos: [] };
+        }
 
-        const redos: IMutationInfo[] = [{
+        const drawingRedo: IMutationInfo = {
             id: SetDrawingApplyMutation.id,
             params: { op: insertOp, unitId, subUnitId, objects, type: DrawingApplyType.INSERT },
-        }];
+        };
 
-        const undos: IMutationInfo[] = [{
+        const drawingUndo: IMutationInfo = {
             id: SetDrawingApplyMutation.id,
             params: { op: removeOp, unitId, subUnitId, objects, type: DrawingApplyType.REMOVE },
-        }];
-
-        const featureMutations = this._getGroupFeaturePasteMutations({
-            fromUnitId: this._copyInfo.unitId,
-            fromSubUnitId: this._copyInfo.subUnitId,
-            toUnitId: unitId,
-            toSubUnitId: subUnitId,
-            idMap,
-            cloned,
-        });
-        redos.push(...featureMutations.redos);
-        undos.push(...featureMutations.undos);
+        };
+        const redos = [...beforeDrawingMutations.redos, drawingRedo, ...afterDrawingMutations.redos];
+        const undos = [drawingUndo, ...beforeDrawingMutations.undos, ...afterDrawingMutations.undos];
 
         return { redos, undos };
     }

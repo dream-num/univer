@@ -17,7 +17,9 @@
 import type { ICommand, IMutationInfo } from '@univerjs/core';
 import type { ISetSheetTableParams } from '../mutations/set-table-filter.mutation';
 import { CommandType, generateRandomId, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
+import { cloneTableRecordFilter } from '../../models/filter-util/record-filter';
 import { TableManager } from '../../models/table-manager';
+import { TableColumnFilterTypeEnum } from '../../types/enum';
 import { SetSheetTableFilterMutation } from '../mutations/set-table-filter.mutation';
 
 export const SetSheetTableFilterCommand: ICommand<ISetSheetTableParams> = {
@@ -32,16 +34,19 @@ export const SetSheetTableFilterCommand: ICommand<ISetSheetTableParams> = {
         const tableManager = accessor.get(TableManager);
         const tableId = params.tableId || generateRandomId();
         const tableFilters = tableManager.getTable(params.unitId, tableId)?.getTableFilters();
-        const oldTableFilter = tableFilters?.getColumnFilter(params.column);
-        const oldFilterOutRows = [...(tableFilters?.getFilterOutRows() ?? [])];
+        const previousFilter = tableFilters?.getColumnFilter(params.column);
+        const previousFilterOutRows = [...(tableFilters?.getFilterOutRows() ?? [])];
+        const tableFilter = params.tableFilter?.filterType === TableColumnFilterTypeEnum.record
+            ? cloneTableRecordFilter(params.tableFilter)
+            : params.tableFilter;
 
         const redos: IMutationInfo[] = [];
         const undos: IMutationInfo[] = [];
 
-        redos.push({ id: SetSheetTableFilterMutation.id, params: { ...params, tableId } });
+        redos.push({ id: SetSheetTableFilterMutation.id, params: { ...params, tableId, tableFilter } });
         undos.push({
             id: SetSheetTableFilterMutation.id,
-            params: { ...params, tableId, tableFilter: oldTableFilter, filterOutRows: oldFilterOutRows },
+            params: { ...params, tableId, tableFilter: previousFilter, filterOutRows: previousFilterOutRows },
         });
 
         const res = sequenceExecute(redos, commandService);

@@ -15,11 +15,7 @@
  */
 
 import type { ISortRangeCommandParams } from '@univerjs/sheets-sort';
-import type {
-    ITableColorFilterItem,
-    ITableConditionFilterItem,
-    ITableManualFilterItem,
-} from '@univerjs/sheets-table';
+import type { ITableFilterItem } from '@univerjs/sheets-table';
 import type { LocaleKey } from '../../locale/types';
 import type { ITableFilterColorList } from '../../types';
 import type { IConditionInfo } from './type';
@@ -40,7 +36,6 @@ import {
     SheetsTableSortStateEnum,
     SheetTableInsertColumnAtCommand,
     SheetTableRemoveColumnAtCommand,
-    TABLE_FILTER_EMPTY_VALUE,
     TableColumnFilterTypeEnum,
     TableDateCompareTypeEnum,
     TableManager,
@@ -84,9 +79,12 @@ export function SheetTableFilterPanel() {
     const { data } = tableUiService.getTableFilterItems(unitId, subUnitId, tableId, columnIndex);
     const checkedItems = tableUiService.getTableFilterCheckedItems(unitId, tableId, columnIndex);
 
-    const [checkedItemSet, setCheckedItemSet] = useState<Set<string>>(() => new Set<string>(
-        isManualTableFilter(tableFilter) ? checkedItems : data.map((item) => item.title)
+    const [checkedItemSet, setCheckedItemSet] = useState<Set<string>>(() => new Set(
+        tableFilter?.filterType === TableColumnFilterTypeEnum.manual || tableFilter?.filterType === TableColumnFilterTypeEnum.record
+            ? checkedItems
+            : data.map((item) => item.valueKey ?? item.title)
     ));
+    const [selectAllRequested, setSelectAllRequested] = useState(false);
     const [filterBy, setFilterBy] = useState(currentFilterBy || FilterByEnum.Items);
 
     const [conditionInfo, setConditionInfo] = useState<IConditionInfo>(() => {
@@ -173,33 +171,27 @@ export function SheetTableFilterPanel() {
     };
 
     const onApply = async () => {
-        let filter: ITableColorFilterItem | ITableConditionFilterItem | ITableManualFilterItem | undefined;
+        let filter: ITableFilterItem | undefined;
         if (filterBy === FilterByEnum.Items) {
-            // do items
-            const filteredItems: string[] = [];
-            const emptyLabel = localeService.t<LocaleKey>('sheets-table-ui.condition.empty');
-            for (const itemInfo of data) {
-                if (checkedItemSet.has(itemInfo.title)) {
-                    filteredItems.push(itemInfo.title === emptyLabel ? TABLE_FILTER_EMPTY_VALUE : itemInfo.title);
-                }
-            }
+            filter = tableUiService.createItemFilter(
+                unitId,
+                tableId,
+                columnIndex,
+                tableUiService.getTableFilterItems(unitId, subUnitId, tableId, columnIndex),
+                checkedItemSet,
+                selectAllRequested
+            );
             const originFilter = table.getTableFilterColumn(columnIndex);
-            if (isManualTableFilter(originFilter)) {
+            if (isManualTableFilter(originFilter) && isManualTableFilter(filter)) {
                 const originValue = originFilter.values;
-                if (originValue.join(',') === filteredItems.join(',')) {
+                if (originValue.join(',') === filter.values.join(',')) {
                     closeDialog();
                     return;
                 }
-            } else if (filteredItems.length === data.length && !originFilter) {
+            } else if (!filter && !originFilter) {
                 closeDialog();
                 return;
             }
-            filter = filteredItems.length === data.length
-                ? undefined
-                : {
-                    filterType: TableColumnFilterTypeEnum.manual,
-                    values: filteredItems,
-                };
         } else if (filterBy === FilterByEnum.Color) {
             const cellFillColors = colors.cellFillColors.filter((item) => item.checked).map((item) => item.color);
             const cellTextColors = colors.cellTextColors.filter((item) => item.checked).map((item) => item.color);
@@ -341,6 +333,8 @@ export function SheetTableFilterPanel() {
                             columnIndex={columnIndex}
                             checkedItemSet={checkedItemSet}
                             setCheckedItemSet={setCheckedItemSet}
+                            onSelectAllChange={setSelectAllRequested}
+                            onItemChange={() => setSelectAllRequested(false)}
                         />
                     )}
                     {filterBy === FilterByEnum.Color && (

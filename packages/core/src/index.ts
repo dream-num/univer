@@ -187,6 +187,7 @@ export { DataValidationOperator } from './types/enum/data-validation-operator';
 export { DataValidationRenderMode } from './types/enum/data-validation-render-mode';
 export { DataValidationStatus } from './types/enum/data-validation-status';
 export { DataValidationType } from './types/enum/data-validation-type';
+export { FilterSelectionMode, RecordValueType } from './types/enum/record-filter';
 export * from './types/interfaces';
 export type { ICellCustomRender, ICellRenderContext } from './types/interfaces/i-cell-custom-render';
 export type {

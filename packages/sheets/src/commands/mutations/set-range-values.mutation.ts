@@ -21,8 +21,8 @@ import type {
     IMutationCommonParams,
     IObjectMatrixPrimitiveType,
     IRange,
+    IStyleData,
     Nullable,
-    Styles,
     Workbook,
 } from '@univerjs/core';
 import {
@@ -30,6 +30,7 @@ import {
     isFormulaId,
     IUniverInstanceService,
     ObjectMatrix,
+    Styles,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -56,6 +57,45 @@ export interface ISetRangeValuesMutationParams extends IMutationCommonParams {
 
 export interface ISetRangeValuesRangeMutationParams extends ISetRangeValuesMutationParams {
     range: IRange[];
+}
+
+/**
+ * Read-only native value preparation for caller-owned atomic model staging. The resulting style IDs
+ * must travel with the prepared cells; replay installs them and must not allocate replacement IDs.
+ * This does not execute handlers, publish notifications, or own style garbage collection.
+ */
+export function prepareSetRangeValuesMutation(
+    cells: ObjectMatrix<Nullable<ICellData>>,
+    styles: Styles,
+    params: Pick<ISetRangeValuesMutationParams, 'cellValue' | 'isOverrideStyle'>
+): {
+    before: IObjectMatrixPrimitiveType<Nullable<ICellData>>;
+    after: IObjectMatrixPrimitiveType<Nullable<ICellData>>;
+    styles: Record<string, IStyleData>;
+} {
+    const detachedStyles = new Styles(Tools.deepClone(styles.toJSON()));
+    const before = new ObjectMatrix<Nullable<ICellData>>();
+    const after = new ObjectMatrix<Nullable<ICellData>>();
+    new ObjectMatrix(Tools.deepClone(params.cellValue)).forValue((row, column, value) => {
+        const original = Tools.deepClone(cells.getValue(row, column) ?? null);
+        before.setValue(row, column, original);
+        const next = value ? mergeCellData(value, Tools.deepClone(original ?? {}), detachedStyles, !!params.isOverrideStyle) : null;
+        after.setValue(row, column, next && !Tools.isEmptyObject(next) ? next : null);
+    });
+    const addedStyles: Record<string, IStyleData> = {};
+    for (const [id, style] of Object.entries(detachedStyles.toJSON())) {
+        if (!style) {
+            continue;
+        }
+        const current = styles.get(id);
+        if (current && !Tools.diffValue(current, style)) {
+            throw new TypeError('Prepared style ID collides with an existing style.');
+        }
+        if (!current) {
+            addedStyles[id] = Tools.deepClone(style);
+        }
+    }
+    return { before: before.getMatrix(), after: after.getMatrix(), styles: addedStyles };
 }
 
 /**

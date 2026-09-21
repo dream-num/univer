@@ -152,8 +152,8 @@ describe('SheetDrawingUpdateController', () => {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             backgroundImage: {
-                source: imageParam.base64Cache,
-                imageSourceType: ImageSourceType.BASE64,
+                source: imageParam.source,
+                imageSourceType: imageParam.imageSourceType,
             },
         });
 

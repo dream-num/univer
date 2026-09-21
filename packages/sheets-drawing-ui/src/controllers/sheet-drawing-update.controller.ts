@@ -240,14 +240,13 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }
 
         const { unitId, subUnitId } = this._getUnitInfo();
-        const source = imageParam.base64Cache || imageParam.source;
-        const scale = getWorksheetBackgroundImageScale(source);
+        const scale = getWorksheetBackgroundImageScale(imageParam.base64Cache || imageParam.source);
         return this._commandService.executeCommand(SetWorksheetBackgroundImageCommand.id, {
             unitId,
             subUnitId,
             backgroundImage: {
-                source,
-                imageSourceType: imageParam.base64Cache ? ImageSourceType.BASE64 : imageParam.imageSourceType,
+                source: imageParam.source,
+                imageSourceType: imageParam.imageSourceType,
                 ...scale,
             },
         });

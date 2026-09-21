@@ -56,8 +56,8 @@ export const menuSchema: MenuSchemaType = {
     [RibbonPosition.VIEW]: {
         [RibbonViewGroup.DISPLAY]: {
             [WORKSHEET_BACKGROUND_IMAGE_MENU_ID]: {
-                order: 3,
-                gridLayout: { row: 1, column: 3, rowSpan: 2, showLabel: true },
+                order: 0.5,
+                gridLayout: { row: 1, column: 2, rowSpan: 2, showLabel: true },
                 menuItemFactory: WorksheetBackgroundImageMenuFactory,
                 [AddWorksheetBackgroundImageCommand.id]: {
                     order: 0,

@@ -135,7 +135,6 @@ function createMenuManager(entries: Array<[string, IMenuSchema[]]>): IMenuManage
     return {
         menuChanged$: new Subject<void>(),
         mergeMenu: () => undefined,
-        updateMenuConfig: () => undefined,
         appendRootMenu: () => undefined,
         updateMenuConfig: () => undefined,
         getMenuByPositionKey: (position) => schemas.get(position) ?? [],

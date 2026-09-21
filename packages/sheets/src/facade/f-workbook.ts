@@ -73,6 +73,9 @@ import { FWorkbookPermission } from './permission/f-workbook-permission';
  * @hideconstructor
  */
 export class FWorkbook extends FBaseInitialable {
+    /**
+     * The workbook unit id used to identify this workbook in commands and snapshots.
+     */
     readonly id: string;
 
     constructor(

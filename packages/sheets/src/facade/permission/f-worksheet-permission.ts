@@ -449,6 +449,7 @@ export class FWorksheetPermission extends FBase {
      * if (fWorksheet.getWorksheetPermission().canView()) {
      *   console.log('Worksheet is viewable');
      * }
+     * ```
      */
     canView(): boolean {
         return this.getPoint(WorksheetPermissionPoint.View);

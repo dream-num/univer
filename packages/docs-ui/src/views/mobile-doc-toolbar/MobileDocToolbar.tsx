@@ -16,6 +16,7 @@
 
 import type { IMenuSchema, IValueOption, MobileDrawerSnap } from '@univerjs/ui';
 import type { ReactNode } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import type { MobileDocSelectionRenderService } from '../../services/mobile/doc-selection-render.service';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { clsx, resetButtonClassName } from '@univerjs/design';
@@ -209,7 +210,7 @@ export function MobileDocEditDoneButton() {
     return (
         <button
             type="button"
-            aria-label={localeService.t('docs-ui.mobile.done')}
+            aria-label={localeService.t<LocaleKey>('docs-ui.mobile.done')}
             className={clsx(resetButtonClassName, `
               univer-flex univer-size-10 univer-items-center univer-justify-center univer-rounded-lg
               univer-text-primary-600
@@ -276,7 +277,7 @@ export function MobileDocToolbar() {
         return (
             <button
                 type="button"
-                aria-label={localeService.t('docs-ui.mobile.edit')}
+                aria-label={localeService.t<LocaleKey>('docs-ui.mobile.edit')}
                 className={clsx(resetButtonClassName, `
                   univer-pointer-events-auto univer-absolute univer-bottom-4 univer-z-30 univer-flex univer-size-14
                   univer-items-center univer-justify-center univer-rounded-full univer-bg-primary-600 univer-text-2xl
@@ -382,37 +383,37 @@ export function MobileDocToolbar() {
                 >
                     <MobileDocToolbarButton
                         active={false}
-                        label={localeService.t('docs-ui.mobile.insert')}
+                        label={localeService.t<LocaleKey>('docs-ui.mobile.insert')}
                         icon={<QuickAddIcon />}
                         onClick={() => openDrawer('insert')}
                     />
                     <MobileDocToolbarButton
                         active={quickMenu === 'block'}
-                        label={localeService.t('docs-ui.toolbar.heading.tooltip')}
+                        label={localeService.t<LocaleKey>('docs-ui.toolbar.heading.tooltip')}
                         icon={<TextTypeIcon />}
                         onClick={() => toggleQuickMenu('block')}
                     />
                     <MobileDocToolbarButton
                         active={false}
-                        label={localeService.t('docs-ui.mobile.format')}
+                        label={localeService.t<LocaleKey>('docs-ui.mobile.format')}
                         icon={<TextIcon />}
                         onClick={() => openDrawer('format')}
                     />
                     <MobileDocToolbarButton
                         active={quickMenu === 'align'}
-                        label={localeService.t('docs-ui.paragraphMenu.alignAndIndent')}
+                        label={localeService.t<LocaleKey>('docs-ui.paragraphMenu.alignAndIndent')}
                         icon={<AlignTextBothIcon />}
                         onClick={() => toggleQuickMenu('align')}
                     />
                     <MobileDocToolbarButton
                         active={false}
-                        label={localeService.t('docs-ui.mobile.more')}
+                        label={localeService.t<LocaleKey>('docs-ui.mobile.more')}
                         icon={<MoreHorizontalIcon />}
                         onClick={() => openDrawer('more')}
                     />
                     <MobileDocToolbarButton
                         active={false}
-                        label={localeService.t('docs-ui.mobile.hideKeyboard')}
+                        label={localeService.t<LocaleKey>('docs-ui.mobile.hideKeyboard')}
                         icon={<CloseIcon />}
                         onClick={hideKeyboard}
                     />
@@ -423,8 +424,8 @@ export function MobileDocToolbar() {
                 <MobileDrawer
                     componentName="mobile-doc-toolbar-drawer"
                     snap={drawerSnap}
-                    expandLabel={localeService.t('docs-ui.mobile.expand')}
-                    collapseLabel={localeService.t('docs-ui.mobile.collapse')}
+                    expandLabel={localeService.t<LocaleKey>('docs-ui.mobile.expand')}
+                    collapseLabel={localeService.t<LocaleKey>('docs-ui.mobile.collapse')}
                     onSnapChange={setDrawerSnap}
                     onClose={closeDrawer}
                     header={(
@@ -438,7 +439,7 @@ export function MobileDocToolbar() {
                                 {navigation && (
                                     <button
                                         type="button"
-                                        aria-label={localeService.t('docs-ui.mobile.back')}
+                                        aria-label={localeService.t<LocaleKey>('docs-ui.mobile.back')}
                                         className={clsx(resetButtonClassName, `
                                           univer-flex univer-size-12 univer-items-center univer-justify-center
                                           univer-rounded-lg univer-text-2xl univer-text-gray-700
@@ -463,7 +464,7 @@ export function MobileDocToolbar() {
                             </div>
                             <button
                                 type="button"
-                                aria-label={localeService.t('docs-ui.mobile.close')}
+                                aria-label={localeService.t<LocaleKey>('docs-ui.mobile.close')}
                                 className={clsx(resetButtonClassName, `
                                   univer-flex univer-size-12 univer-items-center univer-justify-center univer-rounded-lg
                                   univer-text-2xl univer-text-gray-700
@@ -480,7 +481,7 @@ export function MobileDocToolbar() {
                     floatingActions={(
                         <button
                             type="button"
-                            aria-label={localeService.t('docs-ui.mobile.keyboard')}
+                            aria-label={localeService.t<LocaleKey>('docs-ui.mobile.keyboard')}
                             className={clsx(resetButtonClassName, `
                               univer-pointer-events-auto univer-flex univer-size-12 univer-items-center
                               univer-justify-center univer-rounded-full univer-bg-gray-0 univer-text-xl

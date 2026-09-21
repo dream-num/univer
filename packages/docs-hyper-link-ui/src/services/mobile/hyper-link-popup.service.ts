@@ -15,6 +15,7 @@
  */
 
 import type { IDisposable, ITextRangeParam } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import type { ILinkInfo } from '../hyper-link-popup.service';
 import { MOBILE_DOC_ELEMENT_MENU } from '@univerjs/docs-ui';
 import { MobileDocHyperLinkEdit } from '../../views/MobileDocHyperLinkEdit';
@@ -25,7 +26,7 @@ export class MobileDocHyperLinkPopupService extends DocHyperLinkPopupService {
     protected override _openEditSurface(_activeRange: ITextRangeParam, _unitId: string): IDisposable {
         return this._dialogService.open({
             id: 'doc-mobile-hyper-link-editor',
-            title: { title: this._localeService.t('docs-hyper-link-ui.menu.tooltip') },
+            title: { title: this._localeService.t<LocaleKey>('docs-hyper-link-ui.menu.tooltip') },
             children: { label: MobileDocHyperLinkEdit.componentKey },
             maskClosable: false,
             onClose: () => this.hideEditPopup(),
@@ -38,7 +39,7 @@ export class MobileDocHyperLinkPopupService extends DocHyperLinkPopupService {
         }
         return this._dialogService.open({
             id: 'doc-mobile-hyper-link-viewer',
-            title: { title: this._localeService.t('docs-hyper-link-ui.menu.tooltip') },
+            title: { title: this._localeService.t<LocaleKey>('docs-hyper-link-ui.menu.tooltip') },
             children: { label: MobileDocLinkPopup.componentKey },
             onClose: () => this.hideInfoPopup(),
         });

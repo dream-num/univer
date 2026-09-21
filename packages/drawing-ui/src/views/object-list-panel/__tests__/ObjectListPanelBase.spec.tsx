@@ -24,7 +24,7 @@ import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import enUS from '../../../locale/en-US';
 import { MobileObjectListPanel } from '../MobileObjectListPanel';
-import { getObjectListPanelLabels, ObjectListPanelBase } from '../ObjectListPanelBase';
+import { ObjectListPanelBase } from '../ObjectListPanelBase';
 
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, configurable: true });
 
@@ -40,6 +40,7 @@ describe.each([
 
     beforeEach(() => {
         univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: enUS } });
+        univer.__getInjector().get(LocaleService).setDirection('ltr');
         container = document.createElement('div');
         document.body.appendChild(container);
         root = createRoot(container);
@@ -75,9 +76,9 @@ describe.each([
         return (
             <RediContext.Provider value={{ injector }}>
                 <PanelComponent
+                    labels={enUS['drawing-ui'].objectListPanel}
                     items={items}
                     selectedIds={[]}
-                    labels={getObjectListPanelLabels(injector.get(LocaleService))}
                     onSelect={() => {}}
                     onCommitName={() => {}}
                     onCommitDescription={() => {}}

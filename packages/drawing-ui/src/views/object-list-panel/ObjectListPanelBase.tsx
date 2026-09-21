@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { LocaleService } from '@univerjs/core';
 import type { ComponentProps, ComponentType, DragEvent, FocusEvent, KeyboardEvent, MouseEvent, ReactNode } from 'react';
 import { Button, clsx, Input, StateIconButton } from '@univerjs/design';
 import {
@@ -110,46 +109,6 @@ export type ObjectListPanelTypeNameKey =
     | 'text'
     | 'unit'
     | 'video';
-
-export function getObjectListPanelLabels(localeService: LocaleService): IObjectListPanelLabels {
-    return {
-        title: localeService.t('drawing-ui.objectListPanel.title'),
-        empty: localeService.t('drawing-ui.objectListPanel.empty'),
-        showAll: localeService.t('drawing-ui.objectListPanel.showAll'),
-        hideAll: localeService.t('drawing-ui.objectListPanel.hideAll'),
-        lockAll: localeService.t('drawing-ui.objectListPanel.lockAll'),
-        unlockAll: localeService.t('drawing-ui.objectListPanel.unlockAll'),
-        moveForward: localeService.t('drawing-ui.objectListPanel.moveForward'),
-        moveBackward: localeService.t('drawing-ui.objectListPanel.moveBackward'),
-        close: localeService.t('drawing-ui.objectListPanel.close'),
-        show: localeService.t('drawing-ui.objectListPanel.show'),
-        hide: localeService.t('drawing-ui.objectListPanel.hide'),
-        lock: localeService.t('drawing-ui.objectListPanel.lock'),
-        unlock: localeService.t('drawing-ui.objectListPanel.unlock'),
-        lockHint: localeService.t('drawing-ui.objectListPanel.lockHint'),
-        unlockHint: localeService.t('drawing-ui.objectListPanel.unlockHint'),
-        name: localeService.t('drawing-ui.objectListPanel.name'),
-        nameInput: localeService.t('drawing-ui.objectListPanel.nameInput'),
-        description: localeService.t('drawing-ui.objectListPanel.description'),
-        descriptionPlaceholder: localeService.t('drawing-ui.objectListPanel.descriptionPlaceholder'),
-        details: localeService.t('drawing-ui.objectListPanel.details'),
-        noSelection: localeService.t('drawing-ui.objectListPanel.noSelection'),
-        locate: localeService.t('drawing-ui.objectListPanel.locate'),
-        expand: localeService.t('drawing-ui.objectListPanel.expand'),
-        collapse: localeService.t('drawing-ui.objectListPanel.collapse'),
-        dragToReorder: localeService.t('drawing-ui.objectListPanel.dragToReorder'),
-        search: localeService.t('drawing-ui.objectListPanel.search'),
-        filterAll: localeService.t('drawing-ui.objectListPanel.filterAll'),
-        filterHidden: localeService.t('drawing-ui.objectListPanel.filterHidden'),
-        filterLocked: localeService.t('drawing-ui.objectListPanel.filterLocked'),
-        sectionCanvas: localeService.t('drawing-ui.objectListPanel.sectionCanvas'),
-        sectionFloating: localeService.t('drawing-ui.objectListPanel.sectionFloating'),
-    };
-}
-
-export function getObjectListPanelTypeName(localeService: LocaleService, typeName: ObjectListPanelTypeNameKey): string {
-    return localeService.t(`drawing-ui.objectListPanel.typeNames.${typeName}`);
-}
 
 export interface IObjectListPanelBaseProps {
     items: IObjectListPanelItem[];

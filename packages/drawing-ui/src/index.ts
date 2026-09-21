@@ -76,8 +76,6 @@ export {
 } from './views/object-list-panel/object-list-panel-layer';
 export type { ObjectListPanelSectionId } from './views/object-list-panel/object-list-panel-layer';
 export {
-    getObjectListPanelLabels,
-    getObjectListPanelTypeName,
     ObjectListPanelBase,
 } from './views/object-list-panel/ObjectListPanelBase';
 export type {

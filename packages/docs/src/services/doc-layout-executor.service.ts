@@ -540,16 +540,18 @@ export class DocLayoutExecutorService extends Disposable {
             this._executorReady = executorReady;
             await executorReady;
         } catch (error) {
-            const recoveryDiagnostic = error instanceof Error ? error.message : String(error);
-            this._executor = null;
-            this._executorReady = null;
-            this._recoveryFailure = { diagnostic: recoveryDiagnostic, unitId };
-            this._executorStatus$.next({
-                state: DocLayoutExecutorState.RECOVERING,
-                executor: executor.type,
-                diagnostic: recoveryDiagnostic,
-                recoveryUnitId: unitId,
-            });
+            if (this._executor === executor) {
+                const recoveryDiagnostic = error instanceof Error ? error.message : String(error);
+                this._executor = null;
+                this._executorReady = null;
+                this._recoveryFailure = { diagnostic: recoveryDiagnostic, unitId };
+                this._executorStatus$.next({
+                    state: DocLayoutExecutorState.RECOVERING,
+                    executor: executor.type,
+                    diagnostic: recoveryDiagnostic,
+                    recoveryUnitId: unitId,
+                });
+            }
             throw error;
         }
     }
@@ -591,7 +593,14 @@ export class DocLayoutExecutorService extends Disposable {
             session = await this._replaceSession(dataModel);
         }
 
+        if (session.disposed || this._executor !== executor || this._getEligibleModel(unitId) !== dataModel) {
+            return null;
+        }
+
         let result = await this._startSynchronizedLayout(executor, session, identity, options, budgetMs);
+        if (session.disposed || this._executor !== executor || this._getEligibleModel(unitId) !== dataModel) {
+            return null;
+        }
         if (
             result.status === DocLayoutSessionStatus.NOT_FOUND ||
             result.status === DocLayoutSessionStatus.RESNAPSHOT_REQUIRED
@@ -643,7 +652,9 @@ export class DocLayoutExecutorService extends Disposable {
             for (const [unitId, session] of this._sessions) {
                 this._markSessionDisposed(session);
                 executor.disposeSession({ unitId, sessionEpoch: session.sessionEpoch }).catch((error: unknown) => {
-                    this._logService.error('[DocLayoutExecutorService]: failed to dispose a Worker session.', error);
+                    if (this._executor === executor) {
+                        this._logService.error('[DocLayoutExecutorService]: failed to dispose a Worker session.', error);
+                    }
                 });
             }
         }
@@ -771,6 +782,9 @@ export class DocLayoutExecutorService extends Disposable {
         session.queue = startTask.then(
             () => undefined,
             (error: unknown) => {
+                if (session.disposed || this._executor !== executor) {
+                    return;
+                }
                 session.needsResnapshot = true;
                 this._logService.error('[DocLayoutExecutorService]: synchronized layout start failed.', error);
             }
@@ -839,8 +853,10 @@ export class DocLayoutExecutorService extends Disposable {
         try {
             await createTask;
         } catch (error) {
-            session.needsResnapshot = true;
-            throw error;
+            if (!session.disposed && this._executor === executor) {
+                session.needsResnapshot = true;
+                throw error;
+            }
         }
         return session;
     }
@@ -854,8 +870,11 @@ export class DocLayoutExecutorService extends Disposable {
         this._markSessionDisposed(session);
         this._sessions.delete(unitId);
         this._hydrationSamples.delete(unitId);
-        this._executor?.disposeSession({ unitId, sessionEpoch: session.sessionEpoch }).catch((error: unknown) => {
-            this._logService.error('[DocLayoutExecutorService]: failed to dispose a Worker session.', error);
+        const executor = this._executor;
+        executor?.disposeSession({ unitId, sessionEpoch: session.sessionEpoch }).catch((error: unknown) => {
+            if (this._executor === executor) {
+                this._logService.error('[DocLayoutExecutorService]: failed to dispose a Worker session.', error);
+            }
         });
     }
 

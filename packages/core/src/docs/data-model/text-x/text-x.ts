@@ -427,6 +427,26 @@ export class TextX {
                     }
                 }
 
+                // Text-only formatting must not recreate paragraph identities on undo.
+                if (action.body.paragraphs == null) {
+                    delete body.paragraphs;
+                } else {
+                    const previousParagraphs = new Map(body.paragraphs?.map((paragraph) => [paragraph.startIndex, paragraph]));
+                    action.body.paragraphs = action.body.paragraphs.map((paragraph) => {
+                        const previous = previousParagraphs.get(paragraph.startIndex);
+                        if (!previous || (paragraph.paragraphId != null && paragraph.paragraphId !== previous.paragraphId)) {
+                            return paragraph;
+                        }
+
+                        // Unchanged identities are not formatting intent. Keeping them in
+                        // either direction would overwrite a concurrent split's new id.
+                        const formatting = { ...paragraph };
+                        Reflect.deleteProperty(formatting, 'paragraphId');
+                        Reflect.deleteProperty(previous, 'paragraphId');
+                        return formatting;
+                    });
+                }
+
                 action.oldBody = {
                     ...body,
                     dataStream: '',

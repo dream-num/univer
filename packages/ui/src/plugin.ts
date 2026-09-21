@@ -39,6 +39,7 @@ import { defaultPluginConfig, UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
 import { ErrorController } from './controllers/error/error.controller';
 import { FeatureSearchController } from './controllers/feature-search/feature-search.controller';
+import { FormatPainterController } from './controllers/format-painter.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
 import { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
@@ -52,6 +53,7 @@ import { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 import { IDialogService } from './services/dialog/dialog.service';
 import { CanvasFloatDomPreviewService, CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
 import { FontService, IFontService } from './services/font.service';
+import { FormatPainterSessionService } from './services/format-painter/format-painter-session.service';
 import { DesktopGalleryService } from './services/gallery/desktop-gallery.service';
 import { IGalleryService } from './services/gallery/gallery.service';
 import { DesktopLayoutService, ILayoutService } from './services/layout/layout.service';
@@ -158,6 +160,8 @@ export class UniverUIPlugin extends Plugin {
                 useFactory: (injector: Injector) => injector.createInstance(DesktopUIController, this._config),
                 deps: [Injector],
             }],
+            [FormatPainterSessionService],
+            [FormatPainterController],
             [SharedController],
             [ErrorController],
             [FeatureSearchController],
@@ -174,6 +178,7 @@ export class UniverUIPlugin extends Plugin {
     override onReady(): void {
         touchDependencies(this._injector, [
             [SharedController],
+            [FormatPainterController],
             [FeatureSearchController],
         ]);
     }

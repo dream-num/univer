@@ -36,6 +36,7 @@ import {
     SetRangeValuesMutation,
     SetSelectionsOperation,
 } from '@univerjs/sheets';
+import { FormatPainterSessionService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { FormatPainterController } from '../../../controllers/format-painter/format-painter.controller';
@@ -215,6 +216,7 @@ describe('Test format painter rules in controller', () => {
             [ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }],
             [IRenderManagerService, { useClass: RenderManagerService }],
             [FormatPainterController],
+            [FormatPainterSessionService],
         ]);
 
         univer = testBed.univer;
@@ -257,6 +259,13 @@ describe('Test format painter rules in controller', () => {
 
             expect(await commandService.executeCommand(SetOnceFormatPainterCommand.id)).toBeTruthy();
             expect(formatPainterService.getStatus()).toBe(FormatPainterStatus.OFF);
+        });
+
+        it('upgrades a single-use legacy brush when the ribbon double-click arrives', async () => {
+            const service = get(IFormatPainterService);
+            await commandService.executeCommand(SetOnceFormatPainterCommand.id);
+            await commandService.executeCommand(SetInfiniteFormatPainterCommand.id);
+            expect(service.getStatus()).toBe(FormatPainterStatus.INFINITE);
         });
 
         describe('format painter the numbers', async () => {

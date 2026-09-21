@@ -21,7 +21,7 @@ import { DocSelectionManagerService, InsertTextCommand } from '@univerjs/docs';
 import {
     getCustomDecorationAtPosition,
     getCustomRangeAtPosition,
-    getTextRunAtInputPosition,
+    getTextRunForSelection,
 } from '../../basics/paragraph';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { getEditorRuntimeConfig } from '../../services/editor/editor-runtime-config';
@@ -54,9 +54,9 @@ export const InsertSpecialCharacterCommand: ICommand<{
         }
 
         const { value } = params;
-        const curTextRun = getTextRunAtInputPosition(
+        const curTextRun = getTextRunForSelection(
             originBody,
-            activeRange.endOffset,
+            activeRange,
             docMenuStyleService.getDefaultStyle(),
             docMenuStyleService.getStyleCache(),
             false,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, IStyleBase, ITextDecoration, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, IStyleBase, ITextDecoration, ITextStyle, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
@@ -36,6 +36,7 @@ import {
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { getTextRunAtPosition } from '../../basics/paragraph';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 
@@ -481,6 +482,12 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             memoryCursor.moveCursor(endOffset);
         }
 
+        // A collapsed selection only changes input formatting. An empty document
+        // mutation can refresh the selection and discard that transient style.
+        if (textX.serialize().length === 0) {
+            return true;
+        }
+
         const path = getRichTextEditPath(docDataModel, segmentId);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
@@ -538,18 +545,7 @@ export function getStyleInTextRange(
     const { startOffset, endOffset, collapsed } = textRange;
 
     if (collapsed) {
-        const textRuns = body.textRuns ?? [];
-        let textRun: Nullable<ITextRun> = null;
-
-        for (let i = textRuns.length - 1; i >= 0; i--) {
-            const curTextRun = textRuns[i];
-            if (curTextRun.st < startOffset && startOffset <= curTextRun.ed) {
-                textRun = curTextRun;
-                break;
-            }
-        }
-
-        return textRun?.ts ? { ...defaultStyle, ...textRun.ts } : defaultStyle;
+        return { ...defaultStyle, ...getTextRunAtPosition(body, startOffset, defaultStyle, null).ts };
     }
 
     // Menu state only reads text style. Building a full body slice also scans and

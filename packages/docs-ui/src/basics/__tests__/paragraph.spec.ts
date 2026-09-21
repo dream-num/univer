@@ -16,7 +16,7 @@
 
 import { DataStreamTreeTokenType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { getTextRunAtInputPosition, getTextRunAtPosition } from '../paragraph';
+import { getTextRunAtInputPosition, getTextRunAtPosition, getTextRunForSelection } from '../paragraph';
 
 describe('getTextRunAtPosition', () => {
     it.each(['i', ''])('inherits the first column paragraph style when inserting before %j', (text) => {
@@ -111,5 +111,44 @@ describe('getTextRunAtPosition', () => {
             ff: 'Following',
             fs: 8,
         });
+    });
+});
+
+describe('document insertion style boundaries', () => {
+    const red = { cl: { rgb: '#ff0000' }, fs: 14, bl: 1 as const };
+    const blue = { cl: { rgb: '#0000ff' }, fs: 20, it: 1 as const };
+    const green = { cl: { rgb: '#008000' }, fs: 26 };
+
+    it('replaces a mixed selection using its first character without changing caret or sheet editor affinity', () => {
+        const body = {
+            dataStream: '123456789\r\n',
+            textRuns: [{ st: 0, ed: 3, ts: red }, { st: 3, ed: 6, ts: blue }, { st: 6, ed: 9, ts: green }],
+        };
+        expect(getTextRunForSelection(body, { startOffset: 3, endOffset: 7 }, {}, null).ts).toEqual(blue);
+        expect(getTextRunForSelection(body, { startOffset: 2, endOffset: 5 }, {}, null).ts).toEqual(red);
+        expect(getTextRunForSelection(body, { startOffset: 3, endOffset: 3 }, {}, null).ts).toEqual(red);
+        expect(getTextRunForSelection(body, { startOffset: 3, endOffset: 7 }, {}, null, true).ts).toEqual(green);
+    });
+
+    it('uses a persisted empty paragraph mark while allowing a transient input override', () => {
+        const body = {
+            dataStream: 'A\r\rC\r\n',
+            textRuns: [{ st: 0, ed: 2, ts: red }, { st: 3, ed: 4, ts: red }],
+            paragraphs: [{ paragraphId: 'paragraph-1', startIndex: 1 }, { paragraphId: 'paragraph-2', startIndex: 2, paragraphStyle: { paragraphMarkTextStyle: green } }, { paragraphId: 'paragraph-4', startIndex: 4 }],
+        };
+        expect(getTextRunAtPosition(body, 2, {}, null).ts).toEqual(green);
+        expect(getTextRunAtPosition(body, 2, {}, blue).ts).toEqual(blue);
+        expect(getTextRunAtPosition(JSON.parse(JSON.stringify(body)), 2, {}, null).ts).toEqual(green);
+        expect(body.paragraphs[1].paragraphStyle?.paragraphMarkTextStyle).toEqual(green);
+    });
+
+    it('inherits the first character at a paragraph or table cell start instead of the preceding paragraph', () => {
+        const body = {
+            dataStream: 'A\rB\r\n',
+            textRuns: [{ st: 0, ed: 2, ts: red }, { st: 2, ed: 3, ts: blue }],
+            paragraphs: [{ paragraphId: 'paragraph-1', startIndex: 1 }, { paragraphId: 'paragraph-3', startIndex: 3 }],
+        };
+        expect(getTextRunAtPosition(body, 2, {}, null).ts).toEqual(blue);
+        expect(getTextRunAtPosition(body, 2, {}, null, true).ts).toEqual(red);
     });
 });

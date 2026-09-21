@@ -38,6 +38,7 @@ import { ZIndexManager } from './common/z-index-manager';
 import { defaultPluginConfig, UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { MOBILE_UI_MODE } from './const';
 import { ErrorController } from './controllers/error/error.controller';
+import { FormatPainterController } from './controllers/format-painter.controller';
 import { MobileComponentsController } from './controllers/mobile/components.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
 import { MobileUIController } from './controllers/ui/ui-mobile.controller';
@@ -51,6 +52,7 @@ import { IDialogService } from './services/dialog/dialog.service';
 import { MobileDialogService } from './services/dialog/mobile-dialog.service';
 import { CanvasFloatDomPreviewService, CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
 import { FontService, IFontService } from './services/font.service';
+import { FormatPainterSessionService } from './services/format-painter/format-painter-session.service';
 import { DesktopGalleryService } from './services/gallery/desktop-gallery.service';
 import { IGalleryService } from './services/gallery/gallery.service';
 import { DesktopLayoutService, ILayoutService } from './services/layout/layout.service';
@@ -159,6 +161,8 @@ export class UniverMobileUIPlugin extends Plugin {
                     deps: [Injector],
                 },
             ],
+            [FormatPainterSessionService],
+            [FormatPainterController],
             [SharedController],
             [ErrorController],
         ], this._config.override));
@@ -173,6 +177,7 @@ export class UniverMobileUIPlugin extends Plugin {
     override onReady(): void {
         touchDependencies(this._injector, [
             [SharedController],
+            [FormatPainterController],
         ]);
     }
 }

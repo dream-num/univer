@@ -19,6 +19,8 @@ import emojiLocale from './emoji-locale/fr-FR.generated';
 
 const locale: typeof enUS = {
     ui: {
+        clearFormatting: 'Effacer la mise en forme',
+        formatPainter: 'Reproduire la mise en forme',
         accessibility: {
             menu: 'Menu',
             zoom: 'Zoom',

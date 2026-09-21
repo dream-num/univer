@@ -187,6 +187,9 @@ function getBodyMutationInvalidation(
     let oldOffset = 0;
     let newOffset = 0;
     let invalidation: IDocumentLayoutInvalidation | undefined;
+    const preservesOffsets = textActions.every((action) =>
+        typeof action === 'object' && action != null && 't' in action && action.t === TextXActionType.RETAIN
+    );
     let sawTrailingRetain = false;
     for (const action of textActions) {
         const length = getTextXActionLength(action);
@@ -200,8 +203,10 @@ function getBodyMutationInvalidation(
             sawTrailingRetain ||= invalidation != null;
             continue;
         }
-        if (sawTrailingRetain) {
-            // Multiple disjoint edits need more than one offset transform. Fall
+        if (sawTrailingRetain && !preservesOffsets) {
+            // Disjoint formatting retains preserve offsets, so one enclosing range
+            // safely invalidates every changed paragraph, including the gaps.
+            // Multiple disjoint text edits need more than one offset transform. Fall
             // back to ordinary suffix pagination instead of reusing a wrong tail.
             return undefined;
         }

@@ -214,7 +214,7 @@ export const DeleteTextCommand: ICommand<IDeleteTextCommandParams> = {
             startOffset: start,
             endOffset: end + 1,
             collapsed: false,
-        }], body));
+        }], body, 0, null, true, docDataModel.getDocumentStyle().documentFlavor));
 
         const path = getRichTextEditPath(docDataModel, segmentId);
         doMutation.params.actions = appendRemovedDrawingActions(

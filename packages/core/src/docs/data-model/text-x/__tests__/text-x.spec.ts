@@ -607,6 +607,23 @@ describe('test TextX methods and branches', () => {
     });
 
     describe('test TextX static methods', () => {
+        it('keeps paragraph identity when undoing text formatting on its ending character', () => {
+            const body: IDocumentBody = {
+                dataStream: 'G\r\n',
+                paragraphs: [{ startIndex: 1, paragraphId: 'kept', paragraphStyle: { spaceAbove: { v: 12 } } }],
+                textRuns: [{ st: 0, ed: 2, ts: { cl: { rgb: '#ff0000' } } }],
+            };
+            const original = JSON.parse(JSON.stringify(body)) as IDocumentBody;
+            const actions = new TextX().retain(1).retain(1, {
+                dataStream: '',
+                textRuns: [{ st: 0, ed: 1, ts: { cl: { rgb: '#008000' } } }],
+            }).serialize();
+            TextX.makeInvertible(actions, body);
+            TextX.apply(body, actions);
+            TextX.apply(body, TextX.invert(actions));
+            expect(body).toMatchObject(original);
+        });
+
         it.each([
             {
                 name: 'column group',

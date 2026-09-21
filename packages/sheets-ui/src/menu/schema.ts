@@ -94,7 +94,6 @@ import {
 } from '../commands/commands/range-protection.command';
 import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../commands/commands/remove-row-col-confirm.command';
 import { RemoveSheetConfirmCommand } from '../commands/commands/remove-sheet-confirm.command';
-import { SetOnceFormatPainterCommand } from '../commands/commands/set-format-painter.command';
 import {
     SetColumnFrozenCommand,
     SetFirstColumnFrozenCommand,
@@ -113,7 +112,6 @@ import { CellBorderSelectorMenuItemFactory } from './border.menu';
 import {
     CLEAR_SELECTION_MENU_ID,
     ClearSelectionAllMenuItemFactory,
-    ClearSelectionAllToolbarMenuItemFactory,
     ClearSelectionContentMenuItemFactory,
     ClearSelectionFormatMenuItemFactory,
     ClearSelectionMenuItemFactory,
@@ -171,7 +169,6 @@ import {
     CutMenuItemFactory,
     FitContentMenuItemFactory,
     FontFamilySelectorMenuItemFactory,
-    FormatPainterMenuItemFactory,
     HideColMenuItemFactory,
     HideRowMenuItemFactory,
     HorizontalAlignMenuItemFactory,
@@ -230,18 +227,6 @@ import { ZOOM_RATIO_MENU_ID, ZoomRatioMenuItemFactory } from './zoom.menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonPosition.START]: {
-        [RibbonStartGroup.HISTORY]: {
-            [SetOnceFormatPainterCommand.id]: {
-                order: 2,
-                gridLayout: { row: 1, column: 2, showLabel: true },
-                menuItemFactory: FormatPainterMenuItemFactory,
-            },
-            [ClearSelectionAllCommand.id]: {
-                order: 3,
-                gridLayout: { row: 2, column: 2, showLabel: true },
-                menuItemFactory: ClearSelectionAllToolbarMenuItemFactory,
-            },
-        },
         [RibbonStartGroup.FORMAT]: {
             [SetRangeFontFamilyCommand.id]: {
                 order: 1,

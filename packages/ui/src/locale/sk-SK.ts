@@ -19,6 +19,8 @@ import emojiLocale from './emoji-locale/sk-SK.generated';
 
 const locale: typeof enUS = {
     ui: {
+        clearFormatting: 'Vymazať formátovanie',
+        formatPainter: 'Kopírovať formát',
         accessibility: {
             menu: 'Ponuka',
             zoom: 'Priblíženie',

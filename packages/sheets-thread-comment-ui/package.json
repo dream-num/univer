@@ -78,7 +78,7 @@
         "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "1.42.0",
+        "@univerjs/icons": "1.43.0",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-thread-comment": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",

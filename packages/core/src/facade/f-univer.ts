@@ -122,6 +122,13 @@ export class FUniver extends Disposable {
 
     protected _eventRegistry = new FEventRegistry();
 
+    /**
+     * Registers a factory for the subscription that produces an event.
+     * The factory starts when listeners exist and its subscription is disposed when the last listener is removed.
+     * @param event The event name.
+     * @param handler Creates the underlying event subscription.
+     * @returns A disposable that unregisters the factory and disposes its active subscription.
+     */
     registerEventHandler = (event: string, handler: () => IDisposable | Subscription): IDisposable => {
         return this._eventRegistry.registerEventHandler(event, handler);
     };

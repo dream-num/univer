@@ -153,8 +153,17 @@ abstract class FMenuBase extends FBase {
  * @hideconstructor
  */
 export class FMenu extends FMenuBase {
+    /**
+     * Built-in group identifiers for placing items on the Start ribbon tab.
+     */
     static RibbonStartGroup = RibbonStartGroup;
+    /**
+     * Built-in ribbon tab identifiers for menu placement.
+     */
     static RibbonPosition = RibbonPosition;
+    /**
+     * Top-level menu placement identifiers for the ribbon and context menu.
+     */
     static MenuManagerPosition = MenuManagerPosition;
 
     private _commandToRegister = new Map<string, (accessor: IAccessor) => void>();

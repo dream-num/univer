@@ -966,6 +966,7 @@ export class FRange extends FBaseInitialable {
      * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:B2');
      * console.log(fRange.getWraps());
+     * ```
      */
     getWraps(): boolean[][] {
         const cells = this.getCellDatas();
@@ -990,7 +991,8 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Returns the horizontal alignment of the text (left/center/right) of the top-left cell in the range.
+     * Returns the horizontal alignment of the top-left cell as `left`, `center`, or `normal` (right alignment).
+     * Default and other core alignment values return `general`, which is not accepted by `setHorizontalAlignment()`.
      * @returns {string} The horizontal alignment of the text in the cell.
      * @example
      * ```ts
@@ -1007,7 +1009,8 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Returns the horizontal alignments of the cells in the range.
+     * Returns a two-dimensional array of horizontal alignments: `left`, `center`, or `normal` (right alignment).
+     * Default and other core alignment values return `general`, which is not accepted by `setHorizontalAlignment()`.
      * @returns {string[][]} A two-dimensional array of horizontal alignments of text associated with cells in the range.
      * @example
      * ```ts
@@ -1024,7 +1027,8 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Returns the vertical alignment (top/middle/bottom) of the top-left cell in the range.
+     * Returns `top`, `middle`, or `bottom` for the top-left cell; unspecified alignment returns `general`.
+     * `general` is a getter result and is not accepted by `setVerticalAlignment()`.
      * @returns {string} The vertical alignment of the text in the cell.
      * @example
      * ```ts
@@ -1040,7 +1044,8 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Returns the vertical alignments of the cells in the range.
+     * Returns a two-dimensional array of `top`, `middle`, or `bottom` values; unspecified alignment returns `general`.
+     * `general` is a getter result and is not accepted by `setVerticalAlignment()`.
      * @returns {string[][]} A two-dimensional array of vertical alignments of text associated with cells in the range.
      * @example
      * ```ts
@@ -1123,7 +1128,7 @@ export class FRange extends FBaseInitialable {
      * Returns the custom meta data for the cell at the start of this range.
      * @returns {CustomData | null} The custom meta data
      * @example
-     * ```
+     * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
      * if (!fWorksheet) return;
@@ -1142,7 +1147,7 @@ export class FRange extends FBaseInitialable {
      * Returns the custom meta data for the cells in the range.
      * @returns {Nullable<CustomData>[][]} A two-dimensional array of custom metadata, with `null` for cells without metadata.
      * @example
-     * ```
+     * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
      * if (!fWorksheet) return;
@@ -1404,7 +1409,7 @@ export class FRange extends FBaseInitialable {
      * @param {RichTextValue | IDocumentData} value The rich text value
      * @returns {FRange} The range
      * @example
-     * ```
+     * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
      * if (!fWorksheet) return;
@@ -1572,8 +1577,9 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Set the horizontal (left to right) alignment for the given range (left/center/right).
-     * @param {FHorizontalAlignment} alignment The horizontal alignment
+     * Sets the horizontal alignment for the range using `left`, `center`, or `normal`.
+     * These parameter names follow Google Apps Script. In Univer, `normal` means right alignment; `right` is not accepted.
+     * @param {FHorizontalAlignment} alignment The horizontal alignment: `left`, `center`, or `normal` (right alignment).
      * @returns {FRange} this range, for chaining
      * @example
      * ```ts
@@ -1581,7 +1587,7 @@ export class FRange extends FBaseInitialable {
      * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
      * if (!fWorksheet) return;
      * const fRange = fWorksheet.getRange('A1:B2');
-     * fRange.setHorizontalAlignment('left');
+     * fRange.setHorizontalAlignment('normal'); // Align right
      * ```
      */
     setHorizontalAlignment(alignment: FHorizontalAlignment): FRange {

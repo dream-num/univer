@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IAccessor, Nullable } from '@univerjs/core';
+import type { IAccessor } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import type { IMenuItem } from './menu';
+import type { IMenuItem, MenuConfig } from './menu';
 import { createIdentifier, Disposable, IConfigService, Inject, Injector, merge } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { mergeMenuConfigs } from '../../common/menu-merge-configs';
@@ -41,12 +41,19 @@ export type ContextMenuQuickLayoutVariant = 'default' | 'compact';
 export type MobileMenuLayout = 'grid' | 'list';
 
 export interface IRibbonGridLayout {
+    /** 1-based row within the ribbon group's two rows. */
     row: number;
+    /** 1-based column within the ribbon group. */
     column: number;
+    /** Number of rows occupied. Defaults to 1; use 2 for a large button. */
     rowSpan?: number;
+    /** Number of columns occupied. Defaults to 1. */
     columnSpan?: number;
+    /** Whether to display the menu title alongside its icon. */
     showLabel?: boolean;
+    /** Width in pixels. */
     width?: number;
+    /** Icon size in pixels. */
     iconSize?: number;
 }
 
@@ -72,6 +79,8 @@ export interface IMenuManagerService {
     mergeMenu(source: MenuSchemaType, target?: MenuSchemaType): void;
 
     appendRootMenu(source: MenuSchemaType): void;
+
+    updateMenuConfig(config: MenuConfig): void;
 
     getMenuByPositionKey(position: string): IMenuSchema[];
 
@@ -302,6 +311,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
 
     override dispose(): void {
         this.menuChanged$.complete();
+        super.dispose();
     }
 
     /**
@@ -330,18 +340,23 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
         this.menuChanged$.next();
     }
 
+    updateMenuConfig(config: MenuConfig): void {
+        this._configService.setConfig('menu', config, { merge: true });
+        this.menuChanged$.next();
+    }
+
     createScoped(injector: Injector): IMenuManagerService {
-        const root = this;
         const createScopedBuilder = () => {
-            const service = new MenuManagerService(injector, root._configService);
-            service._menu = root._menu;
+            const service = new MenuManagerService(injector, this._configService);
+            service._menu = this._menu;
             return service;
         };
 
         return {
-            menuChanged$: root.menuChanged$,
-            mergeMenu: (source: MenuSchemaType, target?: MenuSchemaType) => root.mergeMenu(source, target),
-            appendRootMenu: (source: MenuSchemaType) => root.appendRootMenu(source),
+            menuChanged$: this.menuChanged$,
+            mergeMenu: (source: MenuSchemaType, target?: MenuSchemaType) => this.mergeMenu(source, target),
+            appendRootMenu: (source: MenuSchemaType) => this.appendRootMenu(source),
+            updateMenuConfig: (config: MenuConfig) => this.updateMenuConfig(config),
             getMenuByPositionKey: (position: string) => createScopedBuilder().getMenuByPositionKey(position),
             getFlatMenuByPositionKey: (position: string) => createScopedBuilder().getFlatMenuByPositionKey(position),
         };
@@ -349,15 +364,18 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
 
     private _buildMenuSchema(data: MenuSchemaType): IMenuSchema[] {
         const result: IMenuSchema[] = [];
+        const menuConfig = this._configService.getConfig<MenuConfig>('menu');
 
         for (const [key, value] of Object.entries(data)) {
             if (key === 'replace') {
                 continue;
             }
 
+            const item: IMenuItem | undefined = value.menuItemFactory ? this._injector.invoke(value.menuItemFactory) : undefined;
+            const config = menuConfig?.[item?.id ?? key];
             const menuItem: Partial<IMenuSchema> = {
                 key,
-                order: value.order,
+                order: config?.order ?? value.order,
                 title: value.title,
                 contextual: value.contextual,
                 quickLayout: value.quickLayout,
@@ -365,22 +383,11 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 quickLayoutVariant: value.quickLayoutVariant,
                 mobileLayout: value.mobileLayout,
                 tiny: value.tiny,
-                gridLayout: value.gridLayout,
+                gridLayout: config?.gridLayout ? { ...value.gridLayout, ...config.gridLayout } : value.gridLayout,
             };
 
-            if (value.menuItemFactory) {
-                const item: IMenuItem = this._injector.invoke(value.menuItemFactory);
-
-                if (item) {
-                    const menuItemConfig: Nullable<IMenuItem> = this._configService.getConfig<IMenuItem>('menu');
-
-                    if (menuItemConfig && item.id in menuItemConfig) {
-                        const _key = item.id as keyof IMenuItem;
-                        menuItem.item = mergeMenuConfigs(item, menuItemConfig[_key] as any);
-                    } else {
-                        menuItem.item = item;
-                    }
-                }
+            if (item) {
+                menuItem.item = config ? mergeMenuConfigs(item, config) : item;
             }
             if (value.headerActionMenuItemFactory) {
                 menuItem.headerActionItem = this._injector.invoke(value.headerActionMenuItemFactory);

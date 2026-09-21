@@ -17,6 +17,8 @@
 import type { IAccessor } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 
+import type { IRibbonGridLayout } from './menu-manager.service';
+
 export type OneOrMany<T> = T | T[];
 
 export enum MenuItemType {
@@ -144,6 +146,11 @@ export type MenuItemConfig<TLocaleKey extends string = string> = Partial<Omit<IM
     hidden?: boolean;
     disabled?: boolean;
     activated?: boolean;
+    /** Display order among sibling menu items, ribbon tabs, or groups. Lower values come first. */
+    order?: number;
+    /** Placement within a ribbon group when ribbonType is 'grid'. Rows and columns start at 1. */
+    gridLayout?: IRibbonGridLayout;
 }>;
+/** Overrides keyed by menu item ID, ribbon tab key, or ribbon group key. */
 export type MenuConfig<TLocaleKey extends string = string> = Record<string, MenuItemConfig<TLocaleKey>>;
 export type IMenuItemFactory<TLocaleKey extends string = string> = (accessor: IAccessor, menuConfig?: MenuConfig<TLocaleKey>) => IMenuItem<TLocaleKey>;

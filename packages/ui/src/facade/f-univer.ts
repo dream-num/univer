@@ -16,13 +16,33 @@
 
 import type { IDisposable } from '@univerjs/core';
 import type { IMessageProps } from '@univerjs/design';
-import type { BuiltInUIPart, ComponentType, IComponentOptions, IDialogPartMethodOptions, IFontConfig, ISidebarMethodOptions, RibbonType } from '@univerjs/ui';
+import type {
+    BuiltInUIPart,
+    ComponentType,
+    IComponentOptions,
+    IDialogPartMethodOptions,
+    IFontConfig,
+    ISidebarMethodOptions,
+    MenuConfig,
+    RibbonType,
+} from '@univerjs/ui';
 import type { IFacadeMenuItem, IFacadeSubmenuItem } from './f-menu-builder';
 import { IConfigService } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { IRenderManagerService } from '@univerjs/engine-render';
-
-import { ComponentManager, connectInjector, CopyCommand, IDialogService, IFontService, IMessageService, ISidebarService, IUIPartsService, PasteCommand, UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
+import {
+    ComponentManager,
+    connectInjector,
+    CopyCommand,
+    IDialogService,
+    IFontService,
+    IMenuManagerService,
+    IMessageService,
+    ISidebarService,
+    IUIPartsService,
+    PasteCommand,
+    UI_PLUGIN_CONFIG_KEY,
+} from '@univerjs/ui';
 import { FMenu, FSubmenu } from './f-menu-builder';
 import { FShortcut } from './f-shortcut';
 
@@ -224,6 +244,30 @@ export interface IFUniverUIMixin {
      * ```
      */
     createSubmenu(submenuItem: IFacadeSubmenuItem): FSubmenu;
+
+    /**
+     * Merge menu overrides and refresh the UI immediately. Overrides also apply to menus registered later.
+     * Use the same configuration as the UI plugin or preset's `menu` option.
+     * @param {MenuConfig} config Overrides keyed by menu item ID, ribbon tab key, or ribbon group key.
+     * Unspecified properties keep their current values. Lower `order` values come first among siblings.
+     * `gridLayout` applies only to the grid ribbon and uses 1-based positions within a two-row group.
+     * @returns the {@link FUniver} instance for chaining
+     * @example
+     * ```ts
+     * univerAPI.updateMenuConfig({
+     *   'ribbon.insert': { order: -1 },
+     *   'ribbon.start.format': { order: -1 },
+     *   'sheet.command.set-range-bold': {
+     *     order: 0,
+     *     gridLayout: { row: 2, column: 2, showLabel: true, width: 80 },
+     *   },
+     *   'sheet.command.set-range-italic': {
+     *     gridLayout: { row: 2, column: 1 },
+     *   },
+     * });
+     * ```
+     */
+    updateMenuConfig(config: MenuConfig): FUniver;
 
     /**
      * Open a sidebar.
@@ -477,6 +521,11 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
 
     override createSubmenu(submenuItem: IFacadeSubmenuItem): FSubmenu {
         return this._injector.createInstance(FSubmenu, submenuItem);
+    }
+
+    override updateMenuConfig(config: MenuConfig): FUniver {
+        this._injector.get(IMenuManagerService).updateMenuConfig(config);
+        return this;
     }
 
     override openSidebar(params: ISidebarMethodOptions): IDisposable {

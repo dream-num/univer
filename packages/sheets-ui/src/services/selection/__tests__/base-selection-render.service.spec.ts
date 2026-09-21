@@ -125,6 +125,26 @@ class TestSelectionRenderService extends BaseSelectionRenderService {
         this._makeSelectionByTwoCells(currentCell as never, activeControl.model as never, this._skeleton, RANGE_TYPE.NORMAL, activeControl);
     }
 
+    extendSelectionWithMergedAnchorForTest(
+        actualRow: number,
+        actualColumn: number,
+        mergeRange: { startRow: number; startColumn: number; endRow: number; endColumn: number },
+        pointerRange: { startRow: number; startColumn: number; endRow: number; endColumn: number },
+        rangeType: RANGE_TYPE
+    ) {
+        const activeControl = this.getActiveSelectionControl()!;
+        const currentCell = {
+            ...mergeRange,
+            actualRow,
+            actualColumn,
+            isMerged: true,
+            isMergedMainCell: false,
+            mergeInfo: mergeRange,
+        };
+        this._rangeType = rangeType;
+        this._makeSelectionByTwoCells(currentCell as never, pointerRange as never, this._skeleton, rangeType, activeControl);
+    }
+
     addExternalEndingListenersForTest(activeScene: { onPointerDown$: unknown; onPointerUp$: unknown }) {
         (this._scene as never as { getEngine: () => { activeScene: unknown } }).getEngine = () => ({ activeScene });
         this._addEndingListeners();
@@ -424,6 +444,56 @@ describe('BaseSelectionRenderService', () => {
             endRow: 4,
             endColumn: 5,
         });
+    });
+
+    it.each([
+        {
+            rangeType: RANGE_TYPE.ROW,
+            actualRow: 7,
+            actualColumn: 0,
+            mergeRange: { startRow: 6, startColumn: 0, endRow: 11, endColumn: 0 },
+            pointerRange: { startRow: 6, startColumn: 0, endRow: 6, endColumn: 9 },
+            expectedRange: { startRow: 6, startColumn: 0, endRow: 7, endColumn: 9 },
+        },
+        {
+            rangeType: RANGE_TYPE.COLUMN,
+            actualRow: 0,
+            actualColumn: 7,
+            mergeRange: { startRow: 0, startColumn: 6, endRow: 0, endColumn: 11 },
+            pointerRange: { startRow: 0, startColumn: 6, endRow: 19, endColumn: 6 },
+            expectedRange: { startRow: 0, startColumn: 6, endRow: 19, endColumn: 7 },
+        },
+    ])('does not expand a $rangeType header selection to merged-cell boundaries', ({
+        rangeType,
+        actualRow,
+        actualColumn,
+        mergeRange,
+        pointerRange,
+        expectedRange,
+    }) => {
+        const { service } = createSelectionRenderService();
+        const { skeleton } = service.changeRuntimeForTest();
+        const expandRangeByMerge = vi.fn(() => ({
+            startRow: 0,
+            startColumn: 0,
+            endRow: 19,
+            endColumn: 9,
+        }));
+        (skeleton as never as {
+            expandRangeByMerge: typeof expandRangeByMerge;
+        }).expandRangeByMerge = expandRangeByMerge;
+        service.resetSelectionsByModelData([selections[0]]);
+
+        service.extendSelectionWithMergedAnchorForTest(
+            actualRow,
+            actualColumn,
+            mergeRange,
+            pointerRange,
+            rangeType
+        );
+
+        expect(service.getActiveRange()).toEqual(expectedRange);
+        expect(expandRangeByMerge).not.toHaveBeenCalled();
     });
 
     it('updates the active selection through the pointer-move listener during drag', () => {

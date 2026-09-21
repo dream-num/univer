@@ -19,6 +19,8 @@ import emojiLocale from './emoji-locale/id-ID.generated';
 
 const locale: typeof enUS = {
     ui: {
+        clearFormatting: 'Hapus pemformatan',
+        formatPainter: 'Salin Format',
         accessibility: {
             menu: 'Menu',
             zoom: 'Zoom',

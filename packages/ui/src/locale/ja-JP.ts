@@ -19,6 +19,8 @@ import emojiLocale from './emoji-locale/ja-JP.generated';
 
 const locale: typeof enUS = {
     ui: {
+        clearFormatting: '書式をクリア',
+        formatPainter: '書式のコピー',
         accessibility: {
             menu: 'メニュー',
             zoom: 'ズーム',

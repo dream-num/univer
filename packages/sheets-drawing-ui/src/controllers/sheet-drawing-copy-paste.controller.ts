@@ -19,11 +19,18 @@ import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { IDiscreteRange } from '@univerjs/sheets';
 import type { IRemoveSheetDrawingCommandParams, ISheetDrawing, ISheetImage } from '@univerjs/sheets-drawing';
 import type { IPasteHookValueType, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
-import { Disposable, DrawingTypeEnum, generateRandomId, ICommandService, ImageSourceType, Inject } from '@univerjs/core';
+import { DrawingTypeEnum, generateRandomId, ICommandService, ImageSourceType, Inject, RxDisposable } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { attachRangeWithCoord, discreteRangeToRange, SheetSkeletonService } from '@univerjs/sheets';
-import { DrawingApplyType, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SheetDrawingAnchorType, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
+import {
+    DrawingApplyType,
+    RemoveSheetDrawingCommand,
+    SetDrawingApplyMutation,
+    SheetDrawingAnchorType,
+    transformToAxisAlignPosition,
+    transformToDrawingPosition,
+} from '@univerjs/sheets-drawing';
 import {
     COPY_TYPE,
     ISheetClipboardService,
@@ -31,6 +38,7 @@ import {
     virtualizeDiscreteRanges,
 } from '@univerjs/sheets-ui';
 import { IClipboardInterfaceService } from '@univerjs/ui';
+import { takeUntil, timer } from 'rxjs';
 import { InsertFloatImageCommand } from '../commands/commands/insert-image.command';
 
 const IMAGE_PNG_MIME_TYPE = 'image/png';
@@ -87,7 +95,7 @@ const specialPastes: IPasteHookValueType[] = [
     PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMULA,
 ];
 
-export class SheetsDrawingCopyPasteController extends Disposable {
+export class SheetsDrawingCopyPasteController extends RxDisposable {
     private _copyInfo: Nullable<{
         drawings: ISheetDrawing[];
         copyRange?: IRange;
@@ -111,9 +119,8 @@ export class SheetsDrawingCopyPasteController extends Disposable {
         return this._drawingService.getFocusDrawings() as ISheetDrawing[];
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _initCopyPaste() {
-        this._sheetClipboardService.addClipboardHook({
+        this.disposeWithMe(this._sheetClipboardService.addClipboardHook({
             id: 'SHEET_IMAGE_UI_PLUGIN',
 
             onBeforeCopyFocusedObject: (unitId, _subUnitId, copyType) => {
@@ -135,7 +142,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
                     this._commandService.executeCommand<IRemoveSheetDrawingCommandParams>(RemoveSheetDrawingCommand.id, params);
                 }
 
-                setTimeout(() => {
+                timer(200).pipe(takeUntil(this.dispose$)).subscribe(() => {
                     // Rewrite the clipboard content to prevent the default copy behavior, prevent to call the 'onPasteCells'
                     const dispose = focusDocument();
                     if (drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE
@@ -145,7 +152,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
                         this._clipboardInterfaceService.writeText('');
                     }
                     dispose();
-                }, 200);
+                });
 
                 this._copyInfo = {
                     unitId: drawing.unitId,
@@ -221,7 +228,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
 
                 return { undos: [], redos: [] };
             },
-        });
+        }));
     }
 
     private _createDrawingsCopyInfoByRange(unitId: string, subUnitId: string, range: IRange) {

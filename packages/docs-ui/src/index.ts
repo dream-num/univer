@@ -60,6 +60,7 @@ export type {
 export { getCursorWhenDelete } from './commands/commands/doc-delete.command';
 export { HorizontalLineCommand } from './commands/commands/doc-horizontal-line.command';
 export { DocSelectAllCommand } from './commands/commands/doc-select-all.command';
+export { captureTextFormat } from './commands/commands/format-painter.command';
 export { IMEInputCommand } from './commands/commands/ime-input.command';
 export type { IIMEInputCommandParams } from './commands/commands/ime-input.command';
 export {

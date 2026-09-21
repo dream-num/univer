@@ -19,9 +19,12 @@ import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import {
     Disposable,
     ICommandService,
+    Inject,
     toDisposable,
 } from '@univerjs/core';
-import { CURSOR_TYPE } from '@univerjs/engine-render';
+import { CURSOR_TYPE, Vector2 } from '@univerjs/engine-render';
+import { SheetsSelectionsService } from '@univerjs/sheets';
+import { bindFormatPainterCanvas, FormatPainterSessionService } from '@univerjs/ui';
 
 import { ApplyFormatPainterCommand, SetOnceFormatPainterCommand } from '../../commands/commands/set-format-painter.command';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
@@ -32,10 +35,25 @@ export class FormatPainterRenderController extends Disposable implements IRender
         private readonly _context: IRenderContext<Workbook>,
         @IFormatPainterService private readonly _formatPainterService: IFormatPainterService,
         @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService,
+        @Inject(FormatPainterSessionService) private readonly _session: FormatPainterSessionService,
+        @Inject(SheetsSelectionsService) private readonly _selections: SheetsSelectionsService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
         this._initialize();
+        this.disposeWithMe(bindFormatPainterCanvas(this._context.engine.getCanvasElement(), this._session, {
+            adapterId: 'sheet-cells',
+            unitId: this._context.unitId,
+            intercept: false,
+            getTarget: (event) => {
+                const picked = this._context.scene.pick(new Vector2(event.offsetX, event.offsetY));
+                if (picked && picked !== this._context.mainComponent) {
+                    return null;
+                }
+                const range = this._selections.getCurrentLastSelection()?.range;
+                return range ? { unitId: this._context.unitId, subUnitId: this._context.unit.getActiveSheet()?.getSheetId(), range } : null;
+            },
+        }));
     }
 
     private _initialize() {
@@ -45,6 +63,9 @@ export class FormatPainterRenderController extends Disposable implements IRender
 
     private _commandExecutedListener() {
         this.disposeWithMe(this._selectionRenderService.selectionMoveEnd$.subscribe((selections) => {
+            if (this._session.isActive('sheet-cells')) {
+                return;
+            }
             if (this._formatPainterService.getStatus() !== FormatPainterStatus.OFF) {
                 const { rangeWithCoord } = selections[selections.length - 1];
                 this._commandService.executeCommand(ApplyFormatPainterCommand.id, {

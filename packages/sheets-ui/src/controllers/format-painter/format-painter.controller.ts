@@ -33,6 +33,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
+    ClearSelectionFormatCommand,
     getAddMergeMutationRangeByType,
     getClearContentMutationParamsForRanges,
     RemoveMergeUndoMutationFactory,
@@ -46,6 +47,8 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
+import { FormatPainterSessionService } from '@univerjs/ui';
+import { ApplyFormatPainterCommand } from '../../commands/commands/set-format-painter.command';
 import { checkCellContentInRanges } from '../../common/utils';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 
@@ -66,6 +69,40 @@ export class FormatPainterController extends Disposable {
 
     private _initialize() {
         this._addDefaultHook();
+        const session = this._injector.get(FormatPainterSessionService);
+        this.disposeWithMe(session.register({
+            id: 'sheet-cells',
+            priority: 0,
+            clear: () => this._commandService.executeCommand(ClearSelectionFormatCommand.id),
+            changes$: this._selectionManagerService.selectionMoveEnd$,
+            isActive: () => this._univerInstanceService.getFocusedUnit()?.type === UniverInstanceType.UNIVER_SHEET,
+            canStart: () => !!this._selectionManagerService.getCurrentLastSelection(),
+            capture: () => {
+                const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                const format = this._collectSelectionRangeFormat();
+                if (!workbook || !format) {
+                    return null;
+                }
+                this._formatPainterService.setSelectionFormat(format);
+                return {
+                    unitId: workbook.getUnitId(),
+                    apply: (target) => !!target.subUnitId && !!target.range && this._commandService.executeCommand(
+                        ApplyFormatPainterCommand.id,
+                        target
+                    ),
+                    onModeChange: (mode) => this._formatPainterService.setStatus({
+                        off: FormatPainterStatus.OFF,
+                        once: FormatPainterStatus.ONCE,
+                        continuous: FormatPainterStatus.INFINITE,
+                    }[mode]),
+                };
+            },
+        }));
+        this.disposeWithMe(this._formatPainterService.status$.subscribe((status) => {
+            if (status === FormatPainterStatus.OFF && session.isActive('sheet-cells')) {
+                session.cancel();
+            }
+        }));
     }
 
     private _addDefaultHook() {
@@ -74,7 +111,7 @@ export class FormatPainterController extends Disposable {
             priority: 0,
             isDefaultHook: true,
             onStatusChange: (status: FormatPainterStatus) => {
-                if (status !== FormatPainterStatus.OFF) {
+                if (status !== FormatPainterStatus.OFF && !this._injector.get(FormatPainterSessionService).isActive('sheet-cells')) {
                     const format = this._collectSelectionRangeFormat();
                     if (format) {
                         this._formatPainterService.setSelectionFormat(format);
@@ -104,7 +141,7 @@ export class FormatPainterController extends Disposable {
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
                 const cell = cellData.getValue(r, c) as ICellData;
-                stylesMatrix.setValue(r, c, styles.getStyleByCell(cell) || {});
+                stylesMatrix.setValue(r, c, Tools.deepClone(styles.getStyleByCell(cell) || {}));
                 const { isMergedMainCell, ...mergeInfo } = worksheet.getCellInfoInMergeData(r, c);
                 if (isMergedMainCell) {
                     merges.push({

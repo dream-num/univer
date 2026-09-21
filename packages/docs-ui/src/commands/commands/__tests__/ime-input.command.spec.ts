@@ -90,3 +90,43 @@ describe('IME composition range preservation', () => {
         }
     });
 });
+
+describe('IME selection typing style', () => {
+    it('uses the first selected style throughout a mixed-style composition', async () => {
+        const bed = createCommandTestBed({
+            id: 'ime-style',
+            documentStyle: {},
+            body: {
+                dataStream: '123456789\r\n',
+                paragraphs: [{ paragraphId: 'paragraph-9', startIndex: 9 }],
+                textRuns: [
+                    { st: 0, ed: 3, ts: { cl: { rgb: '#ff0000' }, bl: 1 } },
+                    { st: 3, ed: 6, ts: { cl: { rgb: '#0000ff' }, fs: 20, it: 1 } },
+                    { st: 6, ed: 9, ts: { cl: { rgb: '#008000' }, st: { s: 1 } } },
+                ],
+            },
+        });
+        try {
+            const commands = bed.get(ICommandService);
+            commands.registerCommand(IMEInputCommand);
+            commands.registerCommand(RichTextEditingMutation);
+            const ime = bed.get(DocIMEInputManagerService);
+            ime.setActiveRange({ startOffset: 3, endOffset: 7, collapsed: false, segmentId: '' });
+            for (const [index, newText] of ['中', '中文'].entries()) {
+                expect(await commands.executeCommand(IMEInputCommand.id, {
+                    unitId: bed.doc.getUnitId(),
+                    newText,
+                    oldTextLen: index,
+                    isCompositionStart: index === 0,
+                    isCompositionEnd: index === 1,
+                })).toBe(true);
+                const body = bed.doc.getBody()!;
+                expect(body.dataStream).toBe(`123${newText}89\r\n`);
+                expect(body.textRuns?.find((run) => run.st <= 3 && run.ed > 3)?.ts)
+                    .toEqual({ cl: { rgb: '#0000ff' }, fs: 20, it: 1 });
+            }
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});

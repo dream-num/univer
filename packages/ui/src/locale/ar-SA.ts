@@ -19,6 +19,8 @@ import emojiLocale from './emoji-locale/ar-SA.generated';
 
 const locale: typeof enUS = {
     ui: {
+        clearFormatting: 'مسح التنسيق',
+        formatPainter: 'نسخ التنسيق',
         accessibility: {
             menu: 'القائمة',
             zoom: 'التكبير والتصغير',

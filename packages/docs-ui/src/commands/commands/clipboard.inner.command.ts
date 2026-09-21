@@ -478,7 +478,14 @@ function getCutActionsFromTextRanges(
 
     const { tables = [] } = originBody;
     const adjustedSelections = selections.map((selection) => adjustSelectionByTable(selection, tables));
-    textX.push(...BuildTextUtils.selection.delete(adjustedSelections, originBody, 0, null, false));
+    textX.push(...BuildTextUtils.selection.delete(
+        adjustedSelections,
+        originBody,
+        0,
+        null,
+        false,
+        docDataModel.getDocumentStyle().documentFlavor
+    ));
 
     const path = getRichTextEditPath(docDataModel, segmentId);
     rawActions.push(jsonX.editOp(textX.serialize(), path)!);

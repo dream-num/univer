@@ -34,7 +34,7 @@ export const SetInfiniteFormatPainterCommand: ICommand = {
         const formatPainterService = accessor.get(IFormatPainterService);
         const status = formatPainterService.getStatus();
         let newStatus: FormatPainterStatus;
-        if (status !== FormatPainterStatus.OFF) {
+        if (status === FormatPainterStatus.INFINITE) {
             newStatus = FormatPainterStatus.OFF;
         } else {
             newStatus = FormatPainterStatus.INFINITE;

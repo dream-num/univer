@@ -158,6 +158,7 @@ import { DocMoveCursorController } from './controllers/doc-move-cursor.controlle
 import { DocParagraphSettingController } from './controllers/doc-paragraph-setting.controller';
 import { DocSectionSettingController } from './controllers/doc-section-setting.controller';
 import { DocTableController } from './controllers/doc-table.controller';
+import { DocFormatPainterController } from './controllers/format-painter.controller';
 import { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 import {
     DocCanvasPopupLayoutInteractionController,
@@ -181,6 +182,7 @@ import { DocPasteOptionsRenderController } from './controllers/render-controller
 import { DocResizeRenderController } from './controllers/render-controllers/doc-resize.render-controller';
 import { DocSelectionRenderController } from './controllers/render-controllers/doc-selection-render.controller';
 import { DocRenderController } from './controllers/render-controllers/doc.render-controller';
+import { DocFormatPainterRenderController } from './controllers/render-controllers/format-painter.render-controller';
 import { DocZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { DocUIController } from './controllers/ui.controller';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
@@ -479,6 +481,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [IDocStateChangeInterceptorService, { useClass: DocIMEStateChangeInterceptorService }],
             [DocAutoFormatService],
             [DocMenuStyleService],
+            [DocFormatPainterController],
             [DocContextualRibbonService],
 
         ], this._config.override);
@@ -501,6 +504,7 @@ export class UniverDocsUIPlugin extends Plugin {
     }
 
     private _initRenderBasics() {
+        this._injector.get(DocFormatPainterController);
         ([
             [DocSkeletonManagerService],
             [DocSelectionRenderService],
@@ -515,6 +519,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocZoomRenderController],
             [DocBackScrollRenderController],
             [DocSelectionRenderController],
+            [DocFormatPainterRenderController],
         ] as Dependency[]).forEach((m) => {
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
         });

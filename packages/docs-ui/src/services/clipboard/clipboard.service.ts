@@ -196,6 +196,8 @@ export interface IDocClipboardPasteContext {
 }
 
 export interface IDocClipboardHook {
+    /** Supply a rich fragment for selections owned by a plugin rather than native text ranges. */
+    onCopySelection?(unitId: string): { documentData: IDocumentData; plainText: string } | undefined;
     onCopyDocData?(doc: Partial<IDocumentData>, context: IDocClipboardCopyDocDataContext): Partial<IDocumentData>;
     onCopyProperty?(start: number, end: number): IClipboardPropertyItem;
     onCopyContent?(start: number, end: number, context: IDocClipboardCopyContentContext): string;
@@ -354,6 +356,20 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             UnitAction.Copy
         )) {
             return false;
+        }
+        if (sliceType === SliceBodyType.copy && ranges == null) {
+            try {
+                for (const hook of this._clipboardHooks) {
+                    const selection = hook.onCopySelection?.(document.getUnitId());
+                    if (selection) {
+                        await this._setClipboardData([selection.documentData], true, [selection.plainText]);
+                        return true;
+                    }
+                }
+            } catch (error) {
+                this._logService.error('[DocClipboardService] copy selection failed', error);
+                return false;
+            }
         }
         const {
             newSnapshotList = [],

@@ -38,12 +38,13 @@ import {
     LocaleService,
     NAMED_STYLE_MAP,
     NamedStyleType,
+    ThemeService,
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { getDocsTableRenderViewport, getDocsTableViewportLeft, getTableIdAndSliceIndex } from '@univerjs/engine-render';
 import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 
-const PLACEHOLDER_COLOR = 'gray.400';
+const PLACEHOLDER_COLOR = 'gray.300';
 const DEFAULT_PLACEHOLDER_FONT_SIZE = 12;
 const MIN_BODY_TEXT_PLACEHOLDER_FONT_SIZE = 16;
 const DEFAULT_PLACEHOLDER_FONT_FAMILY = 'Arial';
@@ -88,7 +89,8 @@ export class DocParagraphPlaceholderRenderController extends Disposable implemen
         private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
-        @IConfigService private readonly _configService: IConfigService
+        @IConfigService private readonly _configService: IConfigService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
 
@@ -148,7 +150,8 @@ export class DocParagraphPlaceholderRenderController extends Disposable implemen
             return;
         }
 
-        drawParagraphPlaceholders(ctx, placeholders);
+        // The canvas inverts theme colors in dark mode; keep its existing contrast.
+        drawParagraphPlaceholders(ctx, placeholders, this._themeService.darkMode ? 'gray.400' : PLACEHOLDER_COLOR);
     }
 
     private _getLocale(): IParagraphPlaceholderLocale {
@@ -412,9 +415,13 @@ function getLineFontFamily(line: IDocumentSkeletonLine): Nullable<string> {
     return null;
 }
 
-export function drawParagraphPlaceholders(ctx: UniverRenderingContext, placeholders: IParagraphPlaceholderLayout[]): void {
+export function drawParagraphPlaceholders(
+    ctx: UniverRenderingContext,
+    placeholders: IParagraphPlaceholderLayout[],
+    color = PLACEHOLDER_COLOR
+): void {
     ctx.save();
-    ctx.fillStyle = PLACEHOLDER_COLOR;
+    ctx.fillStyle = color;
     ctx.textBaseline = 'alphabetic';
 
     for (const placeholder of placeholders) {

@@ -34,6 +34,33 @@ univer.registerPlugin(UniverDocsUIPlugin);
 // Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
+## Format painter
+
+Use the shared Start ribbon format painter to copy character formatting. Include a paragraph
+mark in the source selection to also copy paragraph formatting and list formatting. Drag over
+a target selection or click a word to apply. Text, paragraph identities, and embedded entities
+are retained, and each application is undoable. The same text command serves embedded Shape
+text editors. The source format is captured when the brush is activated.
+The clear-formatting icon resets the selected text and paragraphs to default formatting,
+retains their content and identities, and supports undo.
+
+## Typing format at text boundaries
+
+Backspace in ordinary document text retains the removed character's formatting for immediate
+input. Forward Delete and Cut resolve formatting at the surviving caret. Replacing a text
+selection uses its first character's format, regardless of selection direction. In table cells,
+character-by-character Backspace resolves the surviving caret format; selection Backspace retains
+the first selected character's format.
+
+Retained typing format is transient and clears on explicit selection changes or document switches.
+Formatting commands such as Bold update this input format without clearing it.
+It is not serialized as an empty text run. Explicit `paragraphMarkTextStyle` remains authoritative
+after repositioning or reopening; deletion does not overwrite this explicit paragraph style.
+Modern paragraphs, including list items, retain their first character's formatting on the existing
+paragraph-ending character when all text is deleted. This keeps empty-paragraph input and list
+markers stable after editing elsewhere, undo/redo and reopening. Explicit list-marker and
+paragraph-mark style overrides retain their precedence.
+
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

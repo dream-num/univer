@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentBody } from '../../../../types/interfaces';
-import type { TextXAction } from '../../index';
+import type { TextXAction } from '../action-types';
 import { describe, expect, it } from 'vitest';
 import { UpdateDocsAttributeType } from '../../../../shared';
 import { DataStreamTreeTokenType } from '../../types';
@@ -209,7 +209,7 @@ describe('TextX paragraph ids', () => {
         TextX.makeInvertible(actions, body);
         TextX.apply(body, actions);
 
-        expect(actions[1].body?.paragraphs?.[0].paragraphId).toBe('para_original');
+        expect(actions[1].body?.paragraphs?.[0].paragraphId).toBe(body.paragraphs?.[1].paragraphId);
         expect(body.paragraphs?.[0]).toEqual({ startIndex: 1, paragraphId: 'para_original' });
         expect(body.paragraphs?.[1].startIndex).toBe(3);
         expect(body.paragraphs?.[1].paragraphId).toMatch(PARAGRAPH_ID_PATTERN);
@@ -326,6 +326,186 @@ describe('TextX paragraph ids', () => {
 
         expect(body.dataStream).toBe('AB\r\n');
         expect(body.paragraphs).toEqual([{ startIndex: 2, paragraphId: 'para_second' }]);
+    });
+
+    it.each([UpdateDocsAttributeType.REPLACE, UpdateDocsAttributeType.COVER])('keeps adjacent paragraph identities during disjoint formatting with cover type %s', (coverType) => {
+        const body: IDocumentBody = {
+            dataStream: 'Before\rAlpha\rBravo\rCharlie\rAfter\r\n',
+            paragraphs: [6, 12, 18, 26, 32].map((startIndex, index) => ({ startIndex, paragraphId: `para_original_${index}` })),
+        };
+        const original = JSON.parse(JSON.stringify(body)) as IDocumentBody;
+        const textX = new TextX();
+        let cursor = 0;
+        for (const startIndex of [12, 18, 26]) {
+            textX.retain(startIndex - cursor);
+            textX.retain(1, {
+                dataStream: '',
+                paragraphs: [{ startIndex: 0, paragraphId: original.paragraphs!.find((paragraph) => paragraph.startIndex === startIndex)!.paragraphId, paragraphStyle: { lineSpacing: 2 } }],
+            }, coverType);
+            cursor = startIndex + 1;
+        }
+        const actions = textX.serialize();
+        TextX.makeInvertible(actions, body);
+        TextX.apply(body, actions);
+
+        expect(body.paragraphs?.map((paragraph) => paragraph.paragraphId)).toEqual(original.paragraphs?.map((paragraph) => paragraph.paragraphId));
+        expect(body.paragraphs?.map((paragraph) => paragraph.startIndex)).toEqual([6, 12, 18, 26, 32]);
+        expect(body.paragraphs?.slice(1, 4).map((paragraph) => paragraph.paragraphStyle?.lineSpacing)).toEqual([2, 2, 2]);
+        TextX.apply(body, TextX.invert(actions));
+        expect(body.paragraphs).toEqual(original.paragraphs);
+    });
+
+    it.each(['typing', 'deletion', 'split', 'join', 'formatting'])('converges multi-paragraph formatting with concurrent %s', (scenario) => {
+        const original: IDocumentBody = {
+            dataStream: 'AA\rBB\rCC\r\n',
+            paragraphs: [2, 5, 8].map((startIndex, index) => ({ startIndex, paragraphId: `para_concurrent_${index}` })),
+        };
+        const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value));
+        const formatting = new TextX();
+        for (const paragraph of original.paragraphs!) {
+            formatting.retain(2);
+            formatting.retain(1, {
+                dataStream: '',
+                paragraphs: [{ ...paragraph, startIndex: 0, paragraphStyle: {}, bullet: { listId: 'list', listType: 'BULLET_LIST', nestingLevel: 0 } }],
+            }, UpdateDocsAttributeType.REPLACE);
+        }
+        const editing = new TextX();
+        editing.retain(scenario === 'join' ? 2 : scenario === 'formatting' ? 5 : 4);
+        if (scenario === 'typing') {
+            editing.insert(1, { dataStream: 'X' });
+        } else if (scenario === 'split') {
+            editing.insert(1, { dataStream: '\r', paragraphs: [{ startIndex: 0, paragraphId: 'para_split' }] });
+        } else if (scenario === 'formatting') {
+            editing.retain(1, { dataStream: '', paragraphs: [{ startIndex: 0, paragraphId: 'para_concurrent_1', paragraphStyle: { lineSpacing: 2 } }] }, UpdateDocsAttributeType.REPLACE);
+        } else {
+            editing.delete(1);
+        }
+        const left = formatting.serialize();
+        const right = editing.serialize();
+        TextX.makeInvertible(left, clone(original));
+        TextX.makeInvertible(right, clone(original));
+        const alice = TextX.apply(TextX.apply(clone(original), clone(left)), TextX.transform(clone(right), clone(left), 'left'));
+        const bob = TextX.apply(TextX.apply(clone(original), clone(right)), TextX.transform(clone(left), clone(right), 'right'));
+        expect(alice).toEqual(bob);
+        const ids = alice.paragraphs?.map((paragraph) => paragraph.paragraphId);
+        expect(new Set(ids).size).toBe(ids?.length);
+    });
+
+    it.each([UpdateDocsAttributeType.COVER, UpdateDocsAttributeType.REPLACE])('keeps formatting undo and redo identities stable across splits (%s)', (coverType) => {
+        const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value));
+        for (const offset of [3, 4, 5]) {
+            for (const priority of ['left', 'right'] as const) {
+                const original: IDocumentBody = {
+                    dataStream: 'AA\rBB\rCC\r\n',
+                    paragraphs: [2, 5, 8].map((startIndex, index) => ({ startIndex, paragraphId: `para_${index}`, paragraphStyle: {} })),
+                };
+                const formatting = new TextX();
+                for (const paragraph of original.paragraphs!) {
+                    formatting.retain(2).retain(1, {
+                        dataStream: '',
+                        paragraphs: [{ ...paragraph, startIndex: 0, paragraphStyle: { lineSpacing: 2 } }],
+                    }, coverType);
+                }
+                const format = formatting.serialize();
+                const split = new TextX().retain(offset).insert(1, {
+                    dataStream: '\r',
+                    paragraphs: [{ startIndex: 0, paragraphId: 'para_split', paragraphStyle: {} }],
+                }).serialize();
+                TextX.makeInvertible(format, original);
+                TextX.makeInvertible(split, original);
+                const splitOnly = TextX.apply(clone(original), clone(split));
+                const rebasedFormat = TextX.transform(clone(format), clone(split), priority);
+                const rebasedSplit = TextX.transform(clone(split), clone(format), priority === 'left' ? 'right' : 'left');
+                const alice = TextX.apply(TextX.apply(clone(original), clone(format)), rebasedSplit);
+                const bob = TextX.apply(clone(splitOnly), clone(rebasedFormat));
+                expect(alice).toEqual(bob);
+                const identities = splitOnly.paragraphs!.map((paragraph) => paragraph.paragraphId);
+                expect(alice.paragraphs!.map((paragraph) => paragraph.paragraphId)).toEqual(identities);
+                expect(new Set(identities).size).toBe(4);
+
+                const undo = TextX.transform(TextX.invert(clone(format)), clone(split), priority);
+                TextX.apply(alice, undo);
+                expect(alice.paragraphs).toEqual(splitOnly.paragraphs);
+                // History replay captures inverse data again against the rebased model.
+                TextX.makeInvertible(undo, bob);
+                TextX.apply(alice, TextX.invert(undo));
+                expect(alice).toEqual(bob);
+            }
+        }
+    });
+
+    it.each([undefined, 'para_original'])('allocates one shared split identity before replay when the payload id is %s', (paragraphId) => {
+        const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value));
+        const original: IDocumentBody = {
+            dataStream: 'AB\r\n',
+            paragraphs: [{ startIndex: 2, paragraphId: 'para_original' }],
+        };
+        const split = new TextX().retain(1).insert(1, {
+            dataStream: '\r',
+            paragraphs: [{ startIndex: 0, paragraphId } as never],
+        }).serialize();
+        TextX.makeInvertible(split, original);
+        const alice = TextX.apply(clone(original), split);
+        const received = clone(split);
+        // The real mutation captures undo on the receiving client as well.
+        TextX.makeInvertible(received, clone(original));
+        const bob = TextX.apply(clone(original), received);
+        expect(alice).toEqual(bob);
+        expect(alice.paragraphs?.[0].paragraphId).toBe('para_original');
+        expect(alice.paragraphs?.[1].paragraphId).not.toBe('para_original');
+        expect(alice.paragraphs?.[1].paragraphId).toBe(split[1].body?.paragraphs?.[0].paragraphId);
+        expect(original.paragraphs?.[0].paragraphId).toBe('para_original');
+    });
+
+    it('preserves explicit identity replacement through normalization, undo and redo', () => {
+        const original: IDocumentBody = {
+            dataStream: 'A\r\n',
+            paragraphs: [{ startIndex: 1, paragraphId: 'para_original', paragraphStyle: {} }],
+        };
+        const body = JSON.parse(JSON.stringify(original));
+        const actions = new TextX().retain(2, {
+            dataStream: '',
+            paragraphs: [{ startIndex: 1, paragraphId: 'para_replacement', paragraphStyle: { lineSpacing: 2 } }],
+        }, UpdateDocsAttributeType.REPLACE).serialize();
+        TextX.makeInvertible(actions, original);
+        TextX.apply(body, actions);
+        expect(body.paragraphs[0].paragraphId).toBe('para_replacement');
+        TextX.apply(body, TextX.invert(actions));
+        expect(body.paragraphs).toEqual(original.paragraphs);
+        TextX.apply(body, actions);
+        expect(body.paragraphs[0].paragraphId).toBe('para_replacement');
+    });
+
+    it('composes paragraph formatting without restoring stale identities after a split', () => {
+        const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value));
+        const original: IDocumentBody = {
+            dataStream: 'AB\r\n',
+            paragraphs: [{ startIndex: 2, paragraphId: 'para_original', paragraphStyle: {} }],
+        };
+        const format = new TextX().retain(3, {
+            dataStream: '',
+            paragraphs: [{ startIndex: 2, paragraphId: 'para_original', paragraphStyle: { lineSpacing: 2 } }],
+        }, UpdateDocsAttributeType.COVER).serialize();
+        TextX.makeInvertible(format, original);
+        const formatted = TextX.apply(clone(original), format);
+        const second = new TextX().retain(3, {
+            dataStream: '',
+            paragraphs: [{ startIndex: 2, paragraphId: 'para_original', paragraphStyle: { spaceAbove: { v: 8 } } }],
+        }, UpdateDocsAttributeType.COVER).serialize();
+        TextX.makeInvertible(second, formatted);
+        const composed = TextX.compose(format, second);
+        TextX.makeInvertible(composed, original);
+        const split = new TextX().retain(1).insert(1, {
+            dataStream: '\r',
+            paragraphs: [{ startIndex: 0, paragraphId: 'para_split', paragraphStyle: {} }],
+        }).serialize();
+        TextX.makeInvertible(split, original);
+        const alice = TextX.apply(TextX.apply(clone(original), composed), TextX.transform(clone(split), clone(composed), 'left'));
+        const bob = TextX.apply(TextX.apply(clone(original), split), TextX.transform(clone(composed), clone(split), 'right'));
+        expect(alice).toEqual(bob);
+        expect(alice.paragraphs!.map((paragraph) => paragraph.paragraphId)).toEqual(['para_original', 'para_split']);
+        TextX.apply(alice, TextX.transform(TextX.invert(composed), split, 'right'));
+        expect(alice.paragraphs).toEqual(TextX.apply(clone(original), split).paragraphs);
     });
 
     it('preserves target paragraph id when retain metadata omits one', () => {

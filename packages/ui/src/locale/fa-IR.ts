@@ -19,6 +19,8 @@ import emojiLocale from './emoji-locale/fa-IR.generated';
 
 const locale: typeof enUS = {
     ui: {
+        clearFormatting: 'پاک کردن قالب\u200Cبندی',
+        formatPainter: 'کپی قالب‌بندی',
         accessibility: {
             menu: 'منو',
             zoom: 'بزرگ‌نمایی',

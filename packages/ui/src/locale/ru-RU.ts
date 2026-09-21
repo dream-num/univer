@@ -19,6 +19,8 @@ import emojiLocale from './emoji-locale/ru-RU.generated';
 
 const locale: typeof enUS = {
     ui: {
+        clearFormatting: 'Очистить форматирование',
+        formatPainter: 'Формат по образцу',
         accessibility: {
             menu: 'Меню',
             zoom: 'Масштаб',

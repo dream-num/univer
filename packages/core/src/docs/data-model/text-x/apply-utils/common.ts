@@ -185,7 +185,7 @@ export function insertParagraphs(
     insertBody: IDocumentBody,
     textLength: number,
     currentIndex: number,
-    preserveMissingParagraphIds = false,
+    isUpdate = false,
     originalDataStream = body.dataStream
 ) {
     if (!body.paragraphs && !insertBody.paragraphs?.length) {
@@ -196,13 +196,17 @@ export function insertParagraphs(
     const { paragraphs } = body;
 
     const { paragraphs: insertParagraphs } = insertBody;
-    normalizeInsertedParagraphIdsForDocument(paragraphs, insertParagraphs, currentIndex, {
-        freshenSplitParagraph: true,
-        preserveMissingParagraphIds,
-        preserveExplicitSplitParagraphIds: Boolean((insertBody as unknown as Record<string, unknown>)[RESTORE_INSERTED_PARAGRAPH_IDS]),
-        preserveExplicitParagraphIds: Boolean((insertBody as unknown as Record<string, unknown>)[PRESERVE_INSERTED_PARAGRAPH_IDS]),
-        dataStream: originalDataStream,
-    });
+    // Formatting temporarily removes and reinserts metadata without splitting text.
+    // Its paragraph ids are already resolved by updateParagraphs; insertion would
+    // otherwise transfer the next paragraph's identity to the formatted paragraph.
+    if (!isUpdate) {
+        normalizeInsertedParagraphIdsForDocument(paragraphs, insertParagraphs, currentIndex, {
+            freshenSplitParagraph: true,
+            preserveExplicitSplitParagraphIds: Boolean((insertBody as unknown as Record<string, unknown>)[RESTORE_INSERTED_PARAGRAPH_IDS]),
+            preserveExplicitParagraphIds: Boolean((insertBody as unknown as Record<string, unknown>)[PRESERVE_INSERTED_PARAGRAPH_IDS]),
+            dataStream: originalDataStream,
+        });
+    }
 
     const paragraphIndexList = [];
     let firstInsertParagraphNextIndex = -1;
@@ -302,7 +306,10 @@ export function normalizeInsertedParagraphIdsForDocument(
             continue;
         }
 
-        insertParagraphs[i] = options.freshenSplitParagraph || firstInsertedParagraphId == null || firstInsertedParagraphId === splitParagraphId
+        // Resolve the remainder's fresh identity in the outgoing operation, even
+        // when a replay reuses the current paragraph id. Apply must not allocate
+        // a different remainder id on each collaboration peer.
+        insertParagraphs[i] = options.freshenSplitParagraph
             ? cloneParagraphWithId({
                 ...insertParagraphs[i],
                 paragraphId: splitParagraphId,

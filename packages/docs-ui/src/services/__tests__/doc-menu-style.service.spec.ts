@@ -198,4 +198,15 @@ describe('DocMenuStyleService', () => {
 
         expect(service.getStyleCache()).toBeNull();
     });
+    it('clears transient input formatting when switching documents', () => {
+        const { injector, service } = createStyleTestBed();
+        const instances = injector.get(IUniverInstanceService) as UniverInstanceService;
+        instances.__addUnit(new DocumentDataModel({ id: 'other-doc', body: { dataStream: '\r\n' } }));
+        instances.setCurrentUnitForType('doc-menu-style');
+        service.setStyleCache({ cl: { rgb: '#0000ff' }, it: 1 });
+        instances.setCurrentUnitForType('other-doc');
+        expect(service.getStyleCache()).toBeNull();
+        instances.setCurrentUnitForType('doc-menu-style');
+        expect(service.getStyleCache()).toBeNull();
+    });
 });

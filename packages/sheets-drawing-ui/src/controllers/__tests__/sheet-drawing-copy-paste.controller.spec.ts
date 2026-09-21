@@ -101,10 +101,12 @@ function createController(options?: { focusedDrawings?: IImageDrawing[]; drawing
     const commandService = {
         executeCommand: vi.fn(),
     };
+    const clipboardInterfaceService = { writeText: vi.fn() };
+    const hookDisposable = { dispose: vi.fn() };
     const sheetClipboardService = {
         addClipboardHook: vi.fn((config: ISheetClipboardHook) => {
             hook = config;
-            return { dispose: vi.fn() };
+            return hookDisposable;
         }),
     };
 
@@ -113,16 +115,87 @@ function createController(options?: { focusedDrawings?: IImageDrawing[]; drawing
         [IRenderManagerService, { useValue: {} }],
         [SheetSkeletonService, { useValue: { getSkeleton: vi.fn(() => skeleton) } }],
         [IDrawingManagerService, { useValue: drawingService }],
-        [IClipboardInterfaceService, { useValue: { writeText: vi.fn() } }],
+        [IClipboardInterfaceService, { useValue: clipboardInterfaceService }],
         [ICommandService, { useValue: commandService }],
         [SheetsDrawingCopyPasteController],
     ]);
     const controller = injector.get(SheetsDrawingCopyPasteController);
 
-    return { controller, hook: hook as ITestClipboardHook, skeleton, drawingService, commandService };
+    return {
+        controller,
+        hook: hook as ITestClipboardHook,
+        skeleton,
+        drawingService,
+        commandService,
+        clipboardInterfaceService,
+        hookDisposable,
+    };
 }
 
 describe('SheetsDrawingCopyPasteController', () => {
+    it('cancels all pending clipboard writes when disposed', () => {
+        vi.useFakeTimers();
+        const { controller, hook, clipboardInterfaceService } = createController({
+            focusedDrawings: [createImageDrawing({ imageSourceType: ImageSourceType.URL })],
+        });
+        const activeElement = document.activeElement;
+        const childCount = document.body.childElementCount;
+
+        try {
+            expect(hook.onBeforeCopyFocusedObject?.('unit-1', 'sheet-1', COPY_TYPE.COPY)).toBe(true);
+            expect(hook.onBeforeCopyFocusedObject?.('unit-1', 'sheet-1', COPY_TYPE.CUT)).toBe(true);
+            controller.dispose();
+            vi.runAllTimers();
+
+            expect(clipboardInterfaceService.writeText).not.toHaveBeenCalled();
+            expect(document.activeElement).toBe(activeElement);
+            expect(document.body.childElementCount).toBe(childCount);
+        } finally {
+            controller.dispose();
+            vi.clearAllTimers();
+            vi.useRealTimers();
+        }
+    });
+
+    it('releases the clipboard hook exactly once when disposed', () => {
+        const { controller, hookDisposable } = createController();
+
+        controller.dispose();
+        controller.dispose();
+
+        expect(hookDisposable.dispose).toHaveBeenCalledTimes(1);
+    });
+
+    it('rewrites the clipboard while active and restores document focus', () => {
+        vi.useFakeTimers();
+        const { controller, hook, clipboardInterfaceService } = createController({
+            focusedDrawings: [createImageDrawing({ imageSourceType: ImageSourceType.URL })],
+        });
+        const input = document.createElement('input');
+        document.body.appendChild(input);
+        input.focus();
+        const childCount = document.body.childElementCount;
+
+        try {
+            hook.onBeforeCopyFocusedObject?.('unit-1', 'sheet-1', COPY_TYPE.COPY);
+            expect(clipboardInterfaceService.writeText).not.toHaveBeenCalled();
+            vi.advanceTimersByTime(200);
+
+            expect(clipboardInterfaceService.writeText).toHaveBeenCalledExactlyOnceWith('');
+            expect(document.activeElement).toBe(input);
+            expect(document.body.childElementCount).toBe(childCount);
+
+            controller.dispose();
+            vi.runAllTimers();
+            expect(clipboardInterfaceService.writeText).toHaveBeenCalledTimes(1);
+        } finally {
+            controller.dispose();
+            input.remove();
+            vi.clearAllTimers();
+            vi.useRealTimers();
+        }
+    });
+
     it('copies default position-anchored images contained in a cell range', () => {
         const positionOnlyDrawing = createImageDrawing({
             drawingId: 'position-only',

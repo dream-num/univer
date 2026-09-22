@@ -49,6 +49,7 @@ export class DocIMEStateChangeInterceptorService implements IDocStateChangeInter
             ...changeStateInfo,
             redoState: {
                 ...changeStateInfo.redoState,
+                ...(redoMutationParams.layoutState === undefined ? {} : { layoutState: redoMutationParams.layoutState }),
                 actions: redoMutationParams.actions,
                 textRanges: redoMutationParams.textRanges,
                 options: redoMutationParams.options,
@@ -56,6 +57,7 @@ export class DocIMEStateChangeInterceptorService implements IDocStateChangeInter
             },
             undoState: {
                 ...changeStateInfo.undoState,
+                ...(undoMutationParams.layoutState === undefined ? {} : { layoutState: undoMutationParams.layoutState }),
                 actions: undoMutationParams.actions,
                 textRanges: previousDocRanges.length ? previousDocRanges : [previousActiveRange],
                 options: previousSelectionOptions ?? undefined,

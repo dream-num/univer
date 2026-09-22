@@ -66,7 +66,8 @@ export function collectBackgroundGlyphRuns(glyphGroup: IDocumentSkeletonGlyph[])
         const glyphLeft = glyph.left;
         const glyphRight = glyph.left + glyph.width;
 
-        if (activeGlyph && activeColor === backgroundColor) {
+        if (activeGlyph && activeColor === backgroundColor
+            && activeGlyph.ts?.customGlyphGroup === glyph.ts?.customGlyphGroup) {
             activeRight = Math.max(activeRight, glyphRight);
             continue;
         }

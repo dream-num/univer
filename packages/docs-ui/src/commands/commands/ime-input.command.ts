@@ -17,12 +17,29 @@
 import type { DocumentDataModel, ICommand, ICommandInfo, ICustomRange } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
-import { BuildTextUtils, CommandType, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, SHEET_EDITOR_UNITS, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
+import {
+    BuildTextUtils,
+    CommandType,
+    getRichTextEditPath,
+    ICommandService,
+    IUniverInstanceService,
+    JSONX,
+    SHEET_EDITOR_UNITS,
+    TextX,
+    TextXActionType,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { getCustomDecorationAtPosition, getCustomRangeAtPosition, getTextRunAtPosition } from '../../basics/paragraph';
+import {
+    getCustomDecorationAtPosition,
+    getCustomRangeAtPosition,
+    getTextRunAtInputPosition,
+    getTextRunForSelection,
+} from '../../basics/paragraph';
 import { DocIMEInputManagerService } from '../../services/doc-ime-input-manager.service';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
+import { getEditorRuntimeConfig } from '../../services/editor/editor-runtime-config';
 import { getDocRangeInsertOffset, getReplaceDocRangesActions } from './clipboard.inner.command';
 
 export interface IIMEInputCommandParams {
@@ -144,13 +161,16 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             const range = getCustomRangeAtPosition(body.customRanges ?? [], styleOffset, SHEET_EDITOR_UNITS.includes(unitId));
             inheritedRanges = range ? [range] : [];
         }
-        const curTextRun = getTextRunAtPosition(
-            body,
-            replacesComplexSelection ? replacementOffset : isCompositionStart ? endOffset : startOffset + oldTextLen,
-            defaultTextStyle,
-            styleCache,
-            SHEET_EDITOR_UNITS.includes(unitId)
-        );
+        const curTextRun = isCompositionStart && !replacesComplexSelection
+            ? getTextRunForSelection(body, { startOffset, endOffset }, defaultTextStyle, styleCache, SHEET_EDITOR_UNITS.includes(unitId), getEditorRuntimeConfig(docDataModel)?.inheritParagraphStartStyle === true)
+            : getTextRunAtInputPosition(
+                body,
+                replacesComplexSelection ? replacementOffset : startOffset + oldTextLen,
+                defaultTextStyle,
+                styleCache,
+                SHEET_EDITOR_UNITS.includes(unitId),
+                getEditorRuntimeConfig(docDataModel)?.inheritParagraphStartStyle === true
+            );
 
         const customDecorations = getCustomDecorationAtPosition(body.customDecorations ?? [], styleOffset);
         const insertBody = {

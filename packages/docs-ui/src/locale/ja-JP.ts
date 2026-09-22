@@ -18,6 +18,15 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'docs-ui': {
+        pasteOptions: {
+            title: '貼り付けのオプション',
+            source: '元の書式を保持',
+            destination: '貼り付け先の書式に合わせる',
+            text: 'テキストのみ保持',
+            useKeyboard: 'クリップボードにアクセスできません。{0} で貼り付けてから、貼り付けのオプションで書式を変更してください。',
+            useSystemPaste: 'クリップボードにアクセスできません。端末またはキーボードの貼り付け操作を使用し、貼り付けのオプションで書式を変更してください。',
+            failed: '貼り付けの書式を変更できませんでした。',
+        },
         outline: {
             title: 'ドキュメントのアウトライン',
         },

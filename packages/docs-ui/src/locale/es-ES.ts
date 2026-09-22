@@ -18,6 +18,15 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'docs-ui': {
+        pasteOptions: {
+            title: 'Opciones de pegado',
+            source: 'Mantener formato de origen',
+            destination: 'Adaptar al formato de destino',
+            text: 'Conservar solo texto',
+            useKeyboard: 'No se puede acceder al portapapeles. Usa {0} para pegar y cambia el formato con las opciones de pegado.',
+            useSystemPaste: 'No se puede acceder al portapapeles. Usa la función de pegar del dispositivo o teclado y cambia el formato con las opciones de pegado.',
+            failed: 'No se pudo cambiar el formato de pegado.',
+        },
         outline: {
             title: 'Esquema del documento',
         },

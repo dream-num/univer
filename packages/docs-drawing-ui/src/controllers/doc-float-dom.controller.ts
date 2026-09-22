@@ -35,7 +35,11 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { docDrawingPositionToTransform, DocSkeletonManagerService, isSheetLikeDocsCustomBlockChildType } from '@univerjs/docs';
+import {
+    docDrawingPositionToTransform,
+    DocSkeletonManagerService,
+    isSheetLikeDocsCustomBlockChildType,
+} from '@univerjs/docs';
 import { InsertDocDrawingCommand } from '@univerjs/docs-drawing';
 import { SetDocZoomRatioOperation, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
@@ -234,6 +238,10 @@ export class DocFloatDomController extends Disposable {
                         isEmbedFloatDomRuntimeParam(drawing) &&
                         this._univerInstanceService.getUnit(param.unitId, UniverInstanceType.UNIVER_DOC) != null
                     ) {
+                        // A missing-shape notification can re-enter before the pending geometry is delivered.
+                        if (this._pendingRuntimeGeometryInsert.has(param.drawingId)) {
+                            continue;
+                        }
                         this._pendingRuntimeGeometryInsert.set(param.drawingId, param);
                         refreshUnitIds.add(param.unitId);
                         if (this._pendingRuntimeGeometry.has(param.drawingId)) {

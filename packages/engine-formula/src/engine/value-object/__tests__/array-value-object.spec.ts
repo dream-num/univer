@@ -19,12 +19,47 @@ import type { BaseValueObject } from '../base-value-object';
 import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
+import { CELL_INVERTED_INDEX_CACHE } from '../../../basics/inverted-index-cache';
+import { compareToken } from '../../../basics/token';
 import { getObjectValue } from '../../../functions/util';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../array-value-object';
 import { ErrorValueObject } from '../base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../primitive-object';
 
 describe('arrayValueObject test', () => {
+    it('matches uncached comparisons after repeated formula-result updates', () => {
+        const values = [[1], [3], [5], [7], [9]];
+        const createArray = (useInvertedIndexCache: boolean): ArrayValueObject => ArrayValueObject.create({
+            calculateValueList: transformToValueObject(values),
+            rowCount: values.length,
+            columnCount: 1,
+            unitId: 'updated-formulas',
+            sheetId: 'sheet',
+            row: 10,
+            column: 2,
+            useInvertedIndexCache,
+        });
+        CELL_INVERTED_INDEX_CACHE.clear();
+        try {
+            createArray(true).compare(NumberValueObject.create(3), compareToken.EQUALS);
+            for (let update = 0; update < 100; update++) {
+                const row = update % values.length;
+                values[row][0] = (update * 7) % 11;
+                CELL_INVERTED_INDEX_CACHE.set('updated-formulas', 'sheet', 2, values[row][0], row + 10, true);
+                for (const operator of Object.values(compareToken)) {
+                    const criterion = NumberValueObject.create(update % 11);
+                    const cached = createArray(true).compare(criterion, operator);
+                    const uncached = createArray(false).compare(criterion, operator);
+                    for (let index = 0; index < values.length; index++) {
+                        expect(cached.getValueOrDefault(index, 0)!.getValue()).toEqual(uncached.getValueOrDefault(index, 0)!.getValue());
+                    }
+                }
+            }
+        } finally {
+            CELL_INVERTED_INDEX_CACHE.clear();
+        }
+    });
+
     const originArrayValueObject = ArrayValueObject.create({
         calculateValueList: transformToValueObject([
             [1, 2, 3, 4, 5],

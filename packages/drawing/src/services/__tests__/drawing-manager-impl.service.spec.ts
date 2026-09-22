@@ -179,6 +179,35 @@ describe('UnitDrawingService', () => {
         });
     });
 
+    it('updates and restores nested chart coordinates without losing the drawing operation', () => {
+        const drawing = {
+            ...createDrawing('chart', { drawingType: DrawingTypeEnum.DRAWING_CHART }),
+            transform: { left: 100, top: 100, width: 200, height: 80, angle: 15 },
+            sheetTransform: {
+                from: { column: 1, columnOffset: 10, row: 2, rowOffset: 20 },
+                to: { column: 4, columnOffset: 30, row: 6, rowOffset: 40 },
+            },
+        };
+        const updated = {
+            ...drawing,
+            transform: { left: 360, top: 200, width: 240, height: 80, flipX: true },
+            sheetTransform: {
+                from: { column: 5, columnOffset: 15, row: 4, rowOffset: 25 },
+                to: { column: 9, columnOffset: 35, row: 8, rowOffset: 45 },
+            },
+        };
+        service.applyJson1(unitId, subUnitId, service.getBatchAddOp([drawing]).redo);
+
+        const updateOp = service.getBatchUpdateOp([updated]);
+
+        expect(updateOp.objects).toEqual([createSearch('chart')]);
+        service.applyJson1(unitId, subUnitId, updateOp.redo);
+        expect(service.getDrawingByParam(createSearch('chart'))).toEqual(updated);
+
+        service.applyJson1(unitId, subUnitId, updateOp.undo);
+        expect(service.getDrawingByParam(createSearch('chart'))).toEqual(drawing);
+    });
+
     it('preserves disjoint nested fields across concurrent drawing updates', () => {
         const base: NestedDrawingTestParam = {
             ...createDrawing('shape-1'),

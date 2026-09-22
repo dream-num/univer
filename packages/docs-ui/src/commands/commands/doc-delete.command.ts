@@ -14,8 +14,25 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, ICommand, IDocumentBlockRange, IDocumentBody, IMultiCommand, IMutationInfo, IParagraph, ITextRange, JSONXActions, Nullable } from '@univerjs/core';
-import type { IDeleteTextCommandParams, IRichTextEditingMutationParams, IUpdateTextCommandParams } from '@univerjs/docs';
+import type {
+    DocumentDataModel,
+    IAccessor,
+    ICommand,
+    IDocumentBlockRange,
+    IDocumentBody,
+    IMultiCommand,
+    IMutationInfo,
+    IParagraph,
+    ITextRange,
+    ITextStyle,
+    JSONXActions,
+    Nullable,
+} from '@univerjs/core';
+import type {
+    IDeleteTextCommandParams,
+    IRichTextEditingMutationParams,
+    IUpdateTextCommandParams,
+} from '@univerjs/docs';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
     BlockType,
@@ -48,10 +65,12 @@ import {
 } from '@univerjs/docs';
 import { getParagraphByGlyph, hasListGlyph, isFirstGlyph, isIndentByGlyph } from '@univerjs/engine-render';
 import { DocAutoFormatService } from '../../services/doc-auto-format.service';
+import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { isHorizontalLineParagraph } from '../../utils/horizontal-line';
 import { getCommandSkeleton } from '../util';
 import { CutContentCommand } from './clipboard.inner.command';
+import { captureTextFormat } from './format-painter.command';
 import { getCurrentParagraph } from './util';
 
 export interface IDeleteCustomBlockParams {
@@ -483,6 +502,8 @@ export const DeleteLeftCommand: ICommand = {
             return false;
         }
 
+        const originalLength = body.dataStream.length;
+        const typingStyle = captureDeletedTypingStyle(accessor, docDataModel, body, activeRange);
         const actualRange = activeRange;
         const { startOffset, collapsed } = actualRange;
         if (collapsed && shouldResetEmptyCenteredParagraphAlignment(accessor, docDataModel)) {
@@ -653,6 +674,9 @@ export const DeleteLeftCommand: ICommand = {
             }
         }
 
+        if (result && typingStyle && docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.dataStream.length !== originalLength) {
+            accessor.get(DocMenuStyleService).setStyleCache(typingStyle);
+        }
         return result;
     },
 };
@@ -797,6 +821,35 @@ export const DeleteRightCommand: ICommand = {
         return result;
     },
 };
+
+/** Preserve input formatting when deleting the final character of a run or paragraph. */
+function captureDeletedTypingStyle(
+    accessor: IAccessor,
+    document: DocumentDataModel,
+    body: IDocumentBody,
+    range: ITextRangeWithStyle
+): ITextStyle | undefined {
+    if (!accessor.has(DocMenuStyleService) || SHEET_EDITOR_UNITS.includes(document.getUnitId())) {
+        return;
+    }
+    // Word resolves the surviving caret style for character-by-character deletion in tables.
+    // Selection Backspace still retains the first selected character's style.
+    if (range.collapsed && body.tables?.some((table) => range.startOffset > table.startIndex && range.startOffset <= table.endIndex)) {
+        return;
+    }
+    const offset = range.collapsed ? range.startOffset - 1 : range.startOffset;
+    // Paragraph merging, drawing removal and structural tokens have their own semantics.
+    if (offset < 0 || !body.dataStream[offset] || body.dataStream.charCodeAt(offset) < 32) {
+        return;
+    }
+    const service = accessor.get(DocMenuStyleService);
+    const snapshot = document.getSnapshot();
+    const style = captureTextFormat(body, { startOffset: offset, endOffset: offset + 1 }, service.getDefaultStyle(), snapshot.lists, snapshot).textStyle;
+    const previousStyle = body.textRuns?.find((run) => run.st < offset && run.ed >= offset)?.ts;
+    // Undefined properties deliberately mask formatting inherited from the surviving left run.
+    const resetStyle = Object.fromEntries(Object.keys(previousStyle ?? {}).map((key) => [key, undefined]));
+    return { ...resetStyle, ...style };
+}
 
 async function executeDeleteAutoFormat(accessor: IAccessor, commandId: string): Promise<boolean | null> {
     if (!accessor.has(DocAutoFormatService)) {

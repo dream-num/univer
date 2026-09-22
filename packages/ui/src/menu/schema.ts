@@ -18,13 +18,25 @@ import type { MenuSchemaType } from '../services/menu/menu-manager.service';
 import { RedoCommand, UndoCommand } from '@univerjs/core';
 import { OpenFeatureSearchOperation } from '../commands/operations/open-feature-search.operation';
 import { ToggleShortcutPanelOperation } from '../commands/operations/toggle-shortcut-panel.operation';
+import { ActivateFormatPainterOperation, ClearFormattingCommand } from '../controllers/format-painter.controller';
 import { RibbonStartGroup } from '../services/menu/types';
 import { FeatureSearchMenuItemFactory } from './feature-search.menu';
+import { ClearFormattingMenuItemFactory, FormatPainterMenuItemFactory } from './format-painter.menu';
 import { RedoMenuItemFactory, UndoMenuItemFactory } from './history.menu';
 import { ShortcutPanelMenuItemFactory } from './shortcut-panel.menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.HISTORY]: {
+        [ActivateFormatPainterOperation.id]: {
+            order: 2,
+            gridLayout: { row: 1, column: 2, showLabel: false },
+            menuItemFactory: FormatPainterMenuItemFactory,
+        },
+        [ClearFormattingCommand.id]: {
+            order: 3,
+            gridLayout: { row: 2, column: 2, showLabel: false },
+            menuItemFactory: ClearFormattingMenuItemFactory,
+        },
         [UndoCommand.id]: {
             order: 0,
             gridLayout: { row: 1, column: 1, iconSize: 18 },

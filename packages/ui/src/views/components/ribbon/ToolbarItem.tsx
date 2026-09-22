@@ -481,8 +481,13 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                 style={buttonStyle}
                 noIcon={!icon}
                 active={activated}
+                aria-pressed={props.activated$ ? activated : undefined}
                 disabled={disabled}
-                onClick={() => {
+                onClick={(event) => {
+                    // A double-click upgrades the first click's action; do not execute its toggle twice.
+                    if (props.subId && event.detail > 1) {
+                        return;
+                    }
                     const commandParams = typeof params === 'function' ? params() : params;
                     executeCommand(props.commandId ?? props.id, commandParams ?? (typeof value === 'undefined' ? undefined : { value }));
                 }}

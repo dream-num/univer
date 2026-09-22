@@ -17,6 +17,11 @@
 const locale = {
     'sheets-drawing-ui': {
         title: 'Image',
+        backgroundImage: {
+            title: 'Background Image',
+            add: 'Add Background Image',
+            delete: 'Delete Background Image',
+        },
         uploadLoading: {
             loading: 'Loading..., remaining',
         },

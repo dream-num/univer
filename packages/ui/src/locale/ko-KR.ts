@@ -19,6 +19,8 @@ import emojiLocale from './emoji-locale/ko-KR.generated';
 
 const locale: typeof enUS = {
     ui: {
+        clearFormatting: '서식 지우기',
+        formatPainter: '서식 복사',
         accessibility: {
             menu: '메뉴',
             zoom: '확대/축소',

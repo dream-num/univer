@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ImageSourceType } from '../services/image-io/image-io.service';
 import type { IResources } from '../services/resource-manager/type';
 import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { BooleanNumber } from '../types/enum';
@@ -99,6 +100,16 @@ export enum WorksheetHiddenState {
     VERY_HIDDEN = 2,
 }
 
+/** Image displayed behind the worksheet grid. */
+export interface IWorksheetBackgroundImage {
+    source: string;
+    imageSourceType: ImageSourceType;
+    /** Horizontal scale from source pixels to 96-DPI worksheet layout pixels. */
+    scaleX?: number;
+    /** Vertical scale from source pixels to 96-DPI worksheet layout pixels. */
+    scaleY?: number;
+}
+
 /**
  * Snapshot of a worksheet.
  */
@@ -159,6 +170,9 @@ export interface IWorksheetData {
      * Color of the gridlines.
      */
     gridlinesColor?: string;
+
+    /** Image tiled behind the worksheet grid. It is not included when printing. */
+    backgroundImage?: IWorksheetBackgroundImage;
 
     rightToLeft: BooleanNumber;
 

@@ -63,6 +63,12 @@ const sheetStyleRules: string[] =
         '--data-rotate',
     ];
 
+const DEFAULT_WINDOW_TEXT_COLOR = '#000000';
+
+function normalizeLegacySystemColors(cssText: string) {
+    return cssText.replace(/\bwindowtext\b/gi, DEFAULT_WINDOW_TEXT_COLOR);
+}
+
 function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {
     const tagName = node.tagName.toLowerCase();
 
@@ -138,7 +144,12 @@ export class HtmlToUSMService {
         const style = this._dom.querySelector('style');
         if (style) {
             // Must read textContent BEFORE shadow DOM moves the element, because browsers discard mso-* properties during CSS parsing.
-            this._parseMsoNumfmtFromCssText(style.textContent ?? '');
+            const rawStyleText = style.textContent ?? '';
+            this._parseMsoNumfmtFromCssText(rawStyleText);
+
+            // Excel emits the deprecated `windowtext` system color, which CSSOM may discard with its border declaration.
+            // Normalize it before reading cssRules so imported borders retain a stable workbook color.
+            style.textContent = normalizeLegacySystemColors(rawStyleText);
 
             const shadowHost = document.createElement('div');
             const shadowRoot = shadowHost.attachShadow({ mode: 'open' });
@@ -577,7 +588,9 @@ export class HtmlToUSMService {
         return cellMatrix;
     }
 
-    private _parseCellHtml(parent: Nullable<ChildNode>, nodes: NodeListOf<ChildNode>, doc: IDocumentBody, styleCache: Map<ChildNode, ITextStyle> = new Map(), styleStr: string) {
+    private _parseCellHtml(parent: Nullable<ChildNode>, nodes: NodeListOf<ChildNode>, doc: IDocumentBody, styleCache: Map<ChildNode, ITextStyle> = new Map(), styleStr: string): boolean {
+        let hasTrailingPluginParagraph = false;
+
         for (const node of nodes) {
             if (node.nodeType === Node.TEXT_NODE) {
                 const text = node.nodeValue?.replace(/[\r\n]/g, '');
@@ -588,6 +601,9 @@ export class HtmlToUSMService {
                 }
 
                 doc.dataStream += text;
+                if (text) {
+                    hasTrailingPluginParagraph = false;
+                }
 
                 if (style && Object.getOwnPropertyNames(style).length) {
                     doc.textRuns!.push({
@@ -607,6 +623,7 @@ export class HtmlToUSMService {
                     paragraphId: createParagraphId(new Set(doc.paragraphs.map((paragraph) => paragraph.paragraphId))),
                 });
                 doc.dataStream += '\r';
+                hasTrailingPluginParagraph = false;
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 const currentNodeStyle = this._getStyle(node as HTMLElement, styleStr);
                 const parentStyles = parent ? styleCache.get(parent) : {};
@@ -615,9 +632,27 @@ export class HtmlToUSMService {
 
                 styleCache.set(node, { ...parentStyles, ...nodeStyles });
                 const { childNodes } = node;
-                this._parseCellHtml(node, childNodes, doc, styleCache, currentNodeStyle);
+                const dataStreamLengthBeforeChildren = doc.dataStream.length;
+                const childHasTrailingPluginParagraph = this._parseCellHtml(node, childNodes, doc, styleCache, currentNodeStyle);
+                if (doc.dataStream.length > dataStreamLengthBeforeChildren) {
+                    hasTrailingPluginParagraph = childHasTrailingPluginParagraph;
+                }
+
+                const afterProcessRule = this._afterProcessRules.find(({ filter }) =>
+                    matchFilter(node as HTMLElement, filter)
+                );
+
+                if (afterProcessRule) {
+                    const dataStreamLengthBeforeRule = doc.dataStream.length;
+                    afterProcessRule.handler(doc, node as HTMLElement);
+                    if (doc.dataStream.length > dataStreamLengthBeforeRule) {
+                        hasTrailingPluginParagraph = doc.dataStream.endsWith('\r');
+                    }
+                }
             }
         }
+
+        return hasTrailingPluginParagraph;
     }
 
     private _getCellTextAndRichText(cell: Element, styleStr: string, skeleton?: SpreadsheetSkeleton) {
@@ -656,10 +691,13 @@ export class HtmlToUSMService {
                 textRuns: [],
             };
             // Rich text parsing method, refer to the doc
-            this._parseCellHtml(null, cell.childNodes, newDocBody, undefined, styleStr);
+            const hasTrailingPluginParagraph = this._parseCellHtml(null, cell.childNodes, newDocBody, undefined, styleStr);
+            const cellDataStream = hasTrailingPluginParagraph
+                ? newDocBody.dataStream.slice(0, -1)
+                : newDocBody.dataStream;
             const documentModel = createDocumentModelWithStyle('', {});
             const p = documentModel?.getSnapshot();
-            const singleDataStream = `${newDocBody.dataStream}\r\n`;
+            const singleDataStream = `${cellDataStream}\r\n`;
             const documentData = {
                 ...p,
                 ...{
@@ -672,7 +710,7 @@ export class HtmlToUSMService {
             };
             documentModel?.reset(documentData);
             cellRichStyle = documentModel?.getSnapshot();
-            cellText = newDocBody.dataStream;
+            cellText = cellDataStream;
         } else {
             cellText = decodeHTMLEntities(cellHtml.replace(/[\r\n]/g, ''));
         }

@@ -63,6 +63,7 @@ import type {
 } from './document-layout-types';
 import type { IDocumentPaginationMetrics, ILayoutContext } from './tools';
 import {
+    BaselineOffset,
     BooleanNumber,
     DataStreamTreeNodeType,
     DataStreamTreeTokenType,
@@ -111,6 +112,7 @@ import { LanguageDetector } from './hyphenation/language-detector';
 import { createSkeletonPage } from './model/page';
 import { createSkeletonSection } from './model/section';
 import { resolveNoteReferences } from './note-numbering';
+import { FontCache } from './shaping-engine/font-cache';
 import {
     getLastNotFullColumnInfo,
     getLastPage,
@@ -943,6 +945,34 @@ function getBoundaryGlyphInPage(page: IDocumentSkeletonPage, useLast: boolean) {
 function isHitTestAddressableGlyph(glyph: IDocumentSkeletonGlyph): boolean {
     return Boolean(glyph.content?.length) ||
         (glyph.streamType === DataStreamTreeTokenType.PARAGRAPH && glyph.count > 0);
+}
+
+function resolveUnclippedColumnHitBounds(column: IDocumentSkeletonColumnGroupColumn) {
+    const bounds = { left: 0, top: 0, right: column.width, bottom: column.height };
+    const page = column.page;
+    for (const section of page.sections) {
+        for (const nestedColumn of section.columns) {
+            for (const line of nestedColumn.lines) {
+                if (line.type === LineType.BLOCK) {
+                    continue;
+                }
+                const top = page.marginTop + section.top + line.top;
+                bounds.top = Math.min(bounds.top, top);
+                bounds.bottom = Math.max(bounds.bottom, top + line.lineHeight);
+                for (const divide of line.divides) {
+                    const left = page.marginLeft + nestedColumn.left + (divide.left ?? 0) + (divide.paddingLeft ?? 0);
+                    for (const glyph of divide.glyphGroup) {
+                        if (!isHitTestAddressableGlyph(glyph)) {
+                            continue;
+                        }
+                        bounds.left = Math.min(bounds.left, left + glyph.left);
+                        bounds.right = Math.max(bounds.right, left + glyph.left + glyph.width);
+                    }
+                }
+            }
+        }
+    }
+    return bounds;
 }
 
 function getFirstBodyFlowCharIndex(page: IDocumentSkeletonPage): number {
@@ -2504,6 +2534,14 @@ export class DocumentSkeleton extends Skeleton {
         return this._skeletonData;
     }
 
+    /** Invalidate measurements captured before the requested fonts finished loading. */
+    invalidateFontMetrics(fontStyles: readonly string[]): void {
+        for (const fontStyle of new Set(fontStyles)) {
+            FontCache.clearFontMeasureCache(fontStyle);
+        }
+        this.makeDirty(true);
+    }
+
     /**
      * Refreshes Custom Block viewport-only metrics without rebuilding document flow.
      * Pure presentation metrics are published as one batch. Flow metrics are only
@@ -3547,16 +3585,17 @@ export class DocumentSkeleton extends Skeleton {
         x: number,
         y: number,
         pageLength: number,
-        nestLevel: number = 0
+        nestLevel: number = 0,
+        allowPageOverflow = false
     ): Nullable<INodeInfo> {
         this._findLiquid.translateSave();
         const { bounds, paddingLeft, paddingTop } = this._getHitTestPageLayout(segmentPage, pageType, page);
         const { left: pageLeft, right: pageRight, top: pageTop, bottom: pageBottom } = bounds;
 
-        let pointInPage = x >= pageLeft
+        let pointInPage = allowPageOverflow || (x >= pageLeft
             && x <= pageRight
             && y >= pageTop
-            && y <= pageBottom;
+            && y <= pageBottom);
 
         // Handle the outmost page.
         if (nestLevel === 0 && pageType === DocumentSkeletonPageType.BODY) {
@@ -3732,12 +3771,13 @@ export class DocumentSkeleton extends Skeleton {
                 const { top: columnGroupTop, left: columnGroupLeft, width: columnGroupWidth, height: columnGroupHeight, columns } = columnGroup;
                 const absoluteColumnGroupLeft = this._findLiquid.x + columnGroupLeft;
                 const absoluteColumnGroupTop = this._findLiquid.y + columnGroupTop;
+                const allowOverflow = columnGroup.columnGroupSource?.clipContent === BooleanNumber.FALSE;
 
                 if (
-                    x < absoluteColumnGroupLeft ||
+                    !allowOverflow && (x < absoluteColumnGroupLeft ||
                     x > absoluteColumnGroupLeft + columnGroupWidth ||
                     y < absoluteColumnGroupTop ||
-                    y > absoluteColumnGroupTop + columnGroupHeight
+                    y > absoluteColumnGroupTop + columnGroupHeight)
                 ) {
                     continue;
                 }
@@ -3748,12 +3788,15 @@ export class DocumentSkeleton extends Skeleton {
                 for (const column of columns) {
                     const absoluteColumnLeft = absoluteColumnGroupLeft + column.left;
                     const absoluteColumnTop = absoluteColumnGroupTop + column.top;
+                    const bounds = allowOverflow
+                        ? resolveUnclippedColumnHitBounds(column)
+                        : { left: 0, top: 0, right: column.width, bottom: column.height };
 
                     if (
-                        x < absoluteColumnLeft ||
-                        x > absoluteColumnLeft + column.width ||
-                        y < absoluteColumnTop ||
-                        y > absoluteColumnTop + column.height
+                        x < absoluteColumnLeft + bounds.left ||
+                        x > absoluteColumnLeft + bounds.right ||
+                        y < absoluteColumnTop + bounds.top ||
+                        y > absoluteColumnTop + bounds.bottom
                     ) {
                         continue;
                     }
@@ -3776,7 +3819,8 @@ export class DocumentSkeleton extends Skeleton {
                         x,
                         y,
                         pageLength,
-                        nestLevel + 1
+                        nestLevel + 1,
+                        allowOverflow
                     ) ?? this._getNearestNode(nestedCache.nearestNodeList, nestedCache.nearestNodeDistanceList);
 
                     this._findLiquid.translateRestore();
@@ -3797,6 +3841,9 @@ export class DocumentSkeleton extends Skeleton {
         y: number,
         nestLevel: number
     ): Nullable<INodeInfo> {
+        if (page.renderConfig?.useTextInkForHitTesting === BooleanNumber.TRUE) {
+            return this._collectNearestInkNode(page, segment, cache, x, y, nestLevel);
+        }
         let nearestDistanceY = Number.POSITIVE_INFINITY;
         const { x: originX, y: originY } = this._findLiquid;
         for (const section of page.sections) {
@@ -3838,6 +3885,102 @@ export class DocumentSkeleton extends Skeleton {
                 }
             }
         }
+    }
+
+    private _collectNearestInkNode(
+        page: IDocumentSkeletonPage,
+        segment: Pick<INodeInfo, 'segmentId' | 'segmentPage'>,
+        cache: INearestCache,
+        x: number,
+        y: number,
+        nestLevel: number
+    ): Nullable<INodeInfo> {
+        let nearestDistanceY = Number.POSITIVE_INFINITY;
+        let positionedMatch: Nullable<INodeInfo>;
+        let positionedDistance = Number.POSITIVE_INFINITY;
+        let positionedMatchHasText = false;
+        const { x: originX, y: originY } = this._findLiquid;
+        for (const section of page.sections) {
+            for (const column of section.columns) {
+                for (const line of column.lines) {
+                    if (line.type === LineType.BLOCK) {
+                        continue;
+                    }
+                    const startY = originY + (section.top ?? 0) + line.top
+                        + (line.marginTop ?? 0) + (line.paddingTop ?? 0);
+                    const endY = startY + line.contentHeight;
+                    const hitsLine = y >= startY && y <= endY;
+                    for (const divide of line.divides) {
+                        const divideLeft = originX + column.left + divide.left + divide.paddingLeft;
+                        for (let index = 0; index < divide.glyphGroup.length; index++) {
+                            const glyph = divide.glyphGroup[index];
+                            if (!isHitTestAddressableGlyph(glyph)) {
+                                continue;
+                            }
+                            const startX = divideLeft + glyph.left;
+                            const endX = startX + glyph.width;
+                            const { bBox, ts } = glyph;
+                            let baseline = startY + line.asc;
+                            if (page.renderConfig?.applyTextPosition === BooleanNumber.TRUE
+                                && typeof ts?.pos === 'number' && Number.isFinite(ts.pos)) {
+                                baseline -= ts.pos * 4 / 3;
+                            }
+                            if (ts?.va === BaselineOffset.SUPERSCRIPT) {
+                                baseline -= bBox.spo;
+                            } else if (ts?.va === BaselineOffset.SUBSCRIPT) {
+                                baseline += bBox.sbo;
+                            }
+                            const hitsPaintedVerticalBounds = bBox.aba + bBox.abd > 0
+                                && y >= baseline - bBox.aba && y <= baseline + bBox.abd;
+                            const sameLine = hitsLine || hitsPaintedVerticalBounds;
+                            const distanceY = sameLine ? Number.NEGATIVE_INFINITY : Math.abs(y - endY);
+                            const node = { node: glyph, ...segment, ratioX: x / (startX + endX), ratioY: y / (startY + endY) };
+                            const hitsGlyphAdvance = x >= startX && x <= endX;
+                            if (sameLine) {
+                                const usesPositionedAdvance = ts?.textAdvance !== undefined && glyph.content.length === 1 && !ts.textSkewX;
+                                const previousGlyph = divide.glyphGroup[index - 1];
+                                const nextGlyph = divide.glyphGroup[index + 1];
+                                // Leader gaps should follow the nearer adjacent ink without attracting distant inline gaps.
+                                const hitsNeighborAdvance = usesPositionedAdvance && glyph.content.trim().length > 0 && bBox.width > 0 && (
+                                    (previousGlyph && x >= divideLeft + previousGlyph.left && x <= divideLeft + previousGlyph.left + previousGlyph.width)
+                                    || (nextGlyph && x >= divideLeft + nextGlyph.left && x <= divideLeft + nextGlyph.left + nextGlyph.width)
+                                );
+                                if (hitsGlyphAdvance || hitsNeighborAdvance) {
+                                    const glyphDistanceY = Math.max(baseline - bBox.aba - y, y - baseline - bBox.abd, 0);
+                                    const paintedLeft = startX + (glyph.xOffset ?? 0);
+                                    // bBox.width already includes the horizontal character scale.
+                                    const glyphDistanceX = usesPositionedAdvance
+                                        ? Math.max(paintedLeft - x, x - paintedLeft - bBox.width, 0)
+                                        : 0;
+                                    const distance = Math.hypot(glyphDistanceX, glyphDistanceY);
+                                    const hasText = glyph.content.trim().length > 0;
+                                    if (distance === 0 && hitsGlyphAdvance && hasText) {
+                                        return node;
+                                    }
+                                    // Empty advances remain selectable, but must not steal overlapping visible text.
+                                    if ((hasText && !positionedMatchHasText)
+                                        || (hasText === positionedMatchHasText && distance < positionedDistance)) {
+                                        positionedMatch = node;
+                                        positionedDistance = distance;
+                                        positionedMatchHasText = hasText;
+                                    }
+                                }
+                            }
+                            if (distanceY < nearestDistanceY) {
+                                nearestDistanceY = distanceY;
+                                cache.nearestNodeList = [];
+                                cache.nearestNodeDistanceList = [];
+                            }
+                            if (distanceY === nearestDistanceY) {
+                                cache.nearestNodeList.push(node);
+                                cache.nearestNodeDistanceList.push({ coordInPage: true, distance: Math.abs(x - endX), nestLevel });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return positionedMatch;
     }
 
     private _getNearestNode(nearestNodeList: INodeInfo[], nearestNodeDistanceList: IDistance[]) {
@@ -4924,7 +5067,7 @@ export class DocumentSkeleton extends Skeleton {
         const viewModel = this.getViewModel();
         const dataModel = viewModel.getDataModel();
         const { headerTreeMap, footerTreeMap } = viewModel.getHeaderFooterTreeMap();
-        const { documentStyle, drawings, lists: customLists = {} } = dataModel;
+        const { documentStyle, drawings, lists: customLists = {} } = viewModel.getSnapshot();
         const lists = {
             ...PRESET_LIST_TYPE,
             ...customLists,
@@ -4943,7 +5086,10 @@ export class DocumentSkeleton extends Skeleton {
             drawings,
 
             localeService: this._localeService,
-            documentCompatibilityPolicy: getDocumentCompatibilityPolicy(documentStyle.documentFlavor),
+            documentCompatibilityPolicy: getDocumentCompatibilityPolicy(
+                documentStyle.documentFlavor,
+                documentStyle.fontMetricScaleEnabled !== BooleanNumber.FALSE
+            ),
             paragraphLineGapDefault,
             defaultTabStop,
             documentTextStyle: textStyle,

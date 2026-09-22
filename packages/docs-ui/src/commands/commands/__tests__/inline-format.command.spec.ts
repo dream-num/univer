@@ -30,6 +30,7 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { DocMenuStyleService } from '../../../services/doc-menu-style.service';
 import {
     getStyleInTextRange,
     ResetInlineFormatTextBackgroundColorCommand,
@@ -50,6 +51,19 @@ import {
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('getStyleInTextRange', () => {
+    it('reports the empty paragraph mark style instead of the preceding paragraph in the toolbar', () => {
+        const body: IDocumentBody = {
+            dataStream: 'A\r\r\n',
+            textRuns: [{ st: 0, ed: 2, ts: { cl: { rgb: '#ff0000' }, fs: 14, bl: 1 } }],
+            paragraphs: [
+                { paragraphId: 'first', startIndex: 1 },
+                { paragraphId: 'empty', startIndex: 2, paragraphStyle: { paragraphMarkTextStyle: { cl: { rgb: '#008000' }, fs: 26 } } },
+            ],
+        };
+        expect(getStyleInTextRange(body, { startOffset: 2, endOffset: 2, collapsed: true }, {}))
+            .toEqual({ cl: { rgb: '#008000' }, fs: 26 });
+    });
+
     it('reads an expanded selection without cloning unrelated text runs', () => {
         const body = {
             dataStream: 'x'.repeat(10_000),
@@ -218,6 +232,32 @@ describe('Test inline format commands', () => {
                 }
             }
         });
+    });
+
+    it('keeps retained typing style when toggling bold at a collapsed caret without a document mutation', async () => {
+        const selections = get(DocSelectionManagerService);
+        selections.replaceSelectionInfoWithoutRefresh({
+            ...selections.getSelectionInfo()!,
+            textRanges: [{ startOffset: 3, endOffset: 3, collapsed: true, isActive: true }],
+            rectRanges: [],
+        });
+        const menuStyle = get(DocMenuStyleService);
+        const retainedStyle = { cl: { rgb: '#0000ff' }, fs: 20, bl: 0 as const, it: 1 as const, ul: { s: 1 as const } };
+        menuStyle.setStyleCache(retainedStyle);
+        const mutations: string[] = [];
+        const listener = commandService.onCommandExecuted((command) => {
+            if (command.id === RichTextEditingMutation.id) mutations.push(command.id);
+        });
+
+        try {
+            expect(await commandService.executeCommand(SetInlineFormatBoldCommand.id)).toBe(true);
+            expect(menuStyle.getStyleCache()).toEqual({ ...retainedStyle, bl: 1 });
+            expect(await commandService.executeCommand(SetInlineFormatBoldCommand.id)).toBe(true);
+            expect(menuStyle.getStyleCache()).toEqual(retainedStyle);
+            expect(mutations).toEqual([]);
+        } finally {
+            listener.dispose();
+        }
     });
 
     describe('Set Bold by SetInlineFormatCommand', () => {

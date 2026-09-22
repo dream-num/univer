@@ -1,5 +1,9 @@
 # @univerjs/docs-thread-comment
 
+[![npm version](https://img.shields.io/npm/v/@univerjs/docs-thread-comment?style=flat-square)](https://npmjs.com/package/@univerjs/docs-thread-comment)
+[![license](https://img.shields.io/npm/l/@univerjs/docs-thread-comment?style=flat-square)](https://npmjs.com/package/@univerjs/docs-thread-comment)
+[![downloads](https://img.shields.io/npm/dm/@univerjs/docs-thread-comment?style=flat-square)](https://npmjs.com/package/@univerjs/docs-thread-comment)
+
 `@univerjs/docs-thread-comment` provides model commands and Facade APIs for comments anchored to fixed document text ranges. It has no UI or rendering dependency and can be used in Node environments.
 
 ## Package Overview

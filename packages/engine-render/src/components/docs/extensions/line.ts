@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { IScale, ITextDecoration } from '@univerjs/core';
+import type { IScale } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 import type { IBoundRectNoAngle } from '../../../basics/vector2';
 import type { UniverRenderingContext } from '../../../context';
 import type { IDrawInfo } from '../../extension';
+import type { IDocumentLayoutTextDecoration } from '../document-layout-presentation';
 import { BaselineOffset, BooleanNumber, TextDecoration } from '@univerjs/core';
 import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING } from '../../../basics/const';
 import { calculateRectRotate } from '../../../basics/draw';
@@ -60,7 +61,8 @@ export class Line extends docExtension {
         const { ul: underline, st: strikethrough, ol: overline, va: baselineOffset, bbl: bottomBorderLine } = textStyle;
 
         if (underline) {
-            const startY = asc + dsc;
+            const originY = underline.offsetReference === 'baseline' ? asc : asc + dsc;
+            const startY = originY + (underline.offset ?? 0);
             this._drawLine(ctx, glyph, underline, startY, scale, 1, more?.viewBound);
         }
 
@@ -103,7 +105,7 @@ export class Line extends docExtension {
     private _drawLine(
         ctx: UniverRenderingContext,
         glyph: IDocumentSkeletonGlyph,
-        line: ITextDecoration,
+        line: IDocumentLayoutTextDecoration,
         startY: number,
         _scale: number,
         lineWidth = 1,

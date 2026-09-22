@@ -24,11 +24,13 @@ import type { TextXSelection } from '../text-x';
 import type { IDocOperationalInterval } from './range-interval';
 import fastDiff from 'fast-diff';
 import { Tools, UpdateDocsAttributeType } from '../../../../shared';
+import { DocumentFlavor } from '../../../../types/interfaces/i-document-data';
 import { DataStreamTreeTokenType } from '../../types';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
 import { getBodySlice, getBodySliceForTextXAction, getTextRunSlice } from '../utils';
 import { excludePointsFromRange, getIntersectingCustomRanges, getSelectionForAddCustomRange } from './custom-range';
+import { getParagraphContentStartOffset } from './paragraph';
 import { getBlockRangeInterval, getColumnGroupRangeInterval, getCustomRangeInterval } from './range-interval';
 
 export interface IDeleteCustomRangeParam {
@@ -581,7 +583,8 @@ export function deleteSelectionTextX(
     body: IDocumentBody,
     memoryCursor: number = 0,
     insertBody: Nullable<IDocumentBody> = null,
-    keepBullet: boolean = true
+    keepBullet: boolean = true,
+    documentFlavor?: DocumentFlavor
 ): Array<TextXAction> {
     const normalizedSelections = normalizeSelectionsForStructuralSentinels(
         [...selections].sort((a, b) => a.startOffset - b.startOffset),
@@ -611,6 +614,27 @@ export function deleteSelectionTextX(
                 len: endOffset - cursor,
             });
             cursor = endOffset;
+        }
+
+        // Keep an emptied modern paragraph's own formatting on its surviving
+        // mark so input and list markers stay stable after leaving or reopening.
+        const emptiedParagraph = documentFlavor === DocumentFlavor.MODERN && normalizedSelections.length === 1 && !insertBody && startOffset < endOffset
+            ? paragraphs.find((paragraph) => paragraph.startIndex === endOffset &&
+                getParagraphContentStartOffset(body, paragraph) === startOffset)
+            : undefined;
+        // An explicit mark also depends on its existing run for unspecified attributes.
+        if (emptiedParagraph && emptiedParagraph.paragraphStyle?.paragraphMarkTextStyle == null) {
+            const textStyle = body.textRuns?.find((run) => run.st <= startOffset && run.ed > startOffset)?.ts ?? {};
+            dos.push({
+                t: TextXActionType.RETAIN,
+                len: 1,
+                body: {
+                    dataStream: '',
+                    textRuns: [{ st: 0, ed: 1, ts: { ...textStyle } }],
+                },
+                coverType: UpdateDocsAttributeType.REPLACE,
+            });
+            cursor++;
         }
     });
 

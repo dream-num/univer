@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, IStyleData, Nullable } from '@univerjs/core';
+import type { FilterSelectionMode, IRange, IStyleData, Nullable, RecordValueType } from '@univerjs/core';
 import type {
     SheetsTableButtonStateEnum,
     SheetsTableSortStateEnum,
@@ -74,7 +74,18 @@ export interface ITableFilterJSON {
     tableSortInfo?: { columnIndex: number; sortState: SheetsTableSortStateEnum };
 }
 
-export type ITableFilterItem = ITableManualFilterItem | ITableConditionFilterItem | ITableColorFilterItem;
+export type TableRecordValue =
+    | { type: RecordValueType.Blank }
+    | { type: RecordValueType.String; value: string }
+    | { type: RecordValueType.Number | RecordValueType.Date; value: number }
+    | { type: RecordValueType.Boolean; value: boolean }
+    | { type: RecordValueType.Error; value: string };
+
+export type ITableFilterItem =
+    | ITableManualFilterItem
+    | ITableConditionFilterItem
+    | ITableColorFilterItem
+    | ITableRecordFilterItem;
 export type TableMetaType = Record<string, any>;
 
 /**
@@ -101,6 +112,15 @@ export interface ITableColorFilterItem {
     filterType: TableColumnFilterTypeEnum.color;
     cellFillColors?: Array<string | null>;
     cellTextColors?: Array<string | null>;
+}
+
+/**
+ * Represents a compact typed value filter. An absent filter represents all values.
+ */
+export interface ITableRecordFilterItem {
+    filterType: TableColumnFilterTypeEnum.record;
+    mode: FilterSelectionMode.Include | FilterSelectionMode.Exclude;
+    values: TableRecordValue[];
 }
 
 export interface ITableDateFilterInfo {

@@ -315,6 +315,17 @@ describe('ToolbarItem', () => {
         expect(getByText('Protect')).toBeTruthy();
     });
 
+    it('executes the primary action once before a native double-click secondary action', () => {
+        const { getByRole, commandService } = renderWithDependencies(
+            <ToolbarItem id="paint-once" subId="paint-continuous" type={MenuItemType.BUTTON} title="Paint" />
+        );
+        const button = getByRole('button', { name: 'Paint' });
+        fireEvent.click(button, { detail: 1 });
+        fireEvent.click(button, { detail: 2 });
+        fireEvent.doubleClick(button, { detail: 2 });
+        expect(commandService.calls.map((call) => call.commandId)).toEqual(['paint-once', 'paint-continuous']);
+    });
+
     it('resolves menu params when clicking a button', () => {
         const { getByRole, commandService } = renderWithDependencies(
             <ToolbarItem

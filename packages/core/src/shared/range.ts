@@ -243,8 +243,41 @@ export function mergeVerticalRanges(ranges: IRange[]): IRange[] {
  * @returns ranges
  */
 export function mergeRanges(ranges: IRange[]): IRange[] {
-    const split = splitIntoGrid(ranges);
-    const horizontalMerged = mergeHorizontalRanges(split);
+    // Sweep row boundaries and merge the occupied column intervals directly.
+    // Building every grid cell first makes sparse validation ranges cubic in
+    // the number of row/column boundaries and source ranges.
+    const events = new Map<number, Array<{ range: IRange; add: boolean }>>();
+    for (const range of ranges) {
+        for (const [row, add] of [[range.startRow, true], [range.endRow + 1, false]] as const) {
+            const entries = events.get(row) ?? [];
+            entries.push({ range, add });
+            events.set(row, entries);
+        }
+    }
+    const rows = [...events.keys()].sort((a, b) => a - b);
+    const active = new Set<IRange>();
+    const horizontalMerged: IRange[] = [];
+    for (let index = 0; index < rows.length - 1; index++) {
+        const startRow = rows[index];
+        const endRow = rows[index + 1] - 1;
+        for (const { range, add } of events.get(startRow)!) {
+            if (add) {
+                active.add(range);
+            } else {
+                active.delete(range);
+            }
+        }
+        const intervals = [...active].sort((a, b) => a.startColumn - b.startColumn || a.endColumn - b.endColumn);
+        let current: IRange | undefined;
+        for (const range of intervals) {
+            if (current && range.startColumn <= current.endColumn + 1) {
+                current.endColumn = Math.max(current.endColumn, range.endColumn);
+            } else {
+                current = { startRow, endRow, startColumn: range.startColumn, endColumn: range.endColumn };
+                horizontalMerged.push(current);
+            }
+        }
+    }
     return mergeVerticalRanges(horizontalMerged);
 }
 
@@ -322,10 +355,10 @@ function getOverlap1D(
     end2: number
 ): [number, number] | null {
     // Treat NaN as unbounded (-Infinity to +Infinity)
-    const s1 = isNaN(start1) ? -Infinity : start1;
-    const e1 = isNaN(end1) ? Infinity : end1;
-    const s2 = isNaN(start2) ? -Infinity : start2;
-    const e2 = isNaN(end2) ? Infinity : end2;
+    const s1 = Number.isNaN(start1) ? -Infinity : start1;
+    const e1 = Number.isNaN(end1) ? Infinity : end1;
+    const s2 = Number.isNaN(start2) ? -Infinity : start2;
+    const e2 = Number.isNaN(end2) ? Infinity : end2;
 
     const start = Math.max(s1, s2);
     const end = Math.min(e1, e2);
@@ -397,8 +430,8 @@ function inferRangeType(
     startColumn: number,
     endColumn: number
 ): RANGE_TYPE {
-    const hasRow = !isNaN(startRow) && !isNaN(endRow);
-    const hasColumn = !isNaN(startColumn) && !isNaN(endColumn);
+    const hasRow = !Number.isNaN(startRow) && !Number.isNaN(endRow);
+    const hasColumn = !Number.isNaN(startColumn) && !Number.isNaN(endColumn);
 
     if (hasRow && hasColumn) {
         return RANGE_TYPE.NORMAL;

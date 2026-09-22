@@ -15,11 +15,21 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { ContextMenuGroup, ContextMenuPosition, RibbonInsertGroup } from '@univerjs/ui';
+import { ContextMenuGroup, ContextMenuPosition, RibbonDataGroup, RibbonInsertGroup } from '@univerjs/ui';
 import { InsertCellImageCommand, InsertFloatImageCommand } from '../commands/commands/insert-image.command';
 import { SaveCellImagesCommand } from '../commands/commands/save-cell-images.command';
+import {
+    AddWorksheetBackgroundImageCommand,
+    DeleteWorksheetBackgroundImageCommand,
+} from '../commands/commands/worksheet-background-image.command';
 import { ImageMenuFactory, SHEETS_IMAGE_MENU_ID, UploadCellImageMenuFactory, UploadFloatImageMenuFactory } from './image.menu';
 import { SaveCellImagesMenuFactory } from './save-images.menu';
+import {
+    AddWorksheetBackgroundImageMenuFactory,
+    DeleteWorksheetBackgroundImageMenuFactory,
+    WORKSHEET_BACKGROUND_IMAGE_MENU_ID,
+    WorksheetBackgroundImageMenuFactory,
+} from './worksheet-background-image.menu';
 
 export const mobileMenuSchema: MenuSchemaType = {
     [RibbonInsertGroup.MEDIA]: {
@@ -33,6 +43,20 @@ export const mobileMenuSchema: MenuSchemaType = {
             [InsertCellImageCommand.id]: {
                 order: 1,
                 menuItemFactory: UploadCellImageMenuFactory,
+            },
+        },
+    },
+    [RibbonDataGroup.ORGANIZATION]: {
+        [WORKSHEET_BACKGROUND_IMAGE_MENU_ID]: {
+            order: 22,
+            menuItemFactory: WorksheetBackgroundImageMenuFactory,
+            [AddWorksheetBackgroundImageCommand.id]: {
+                order: 0,
+                menuItemFactory: AddWorksheetBackgroundImageMenuFactory,
+            },
+            [DeleteWorksheetBackgroundImageCommand.id]: {
+                order: 1,
+                menuItemFactory: DeleteWorksheetBackgroundImageMenuFactory,
             },
         },
     },

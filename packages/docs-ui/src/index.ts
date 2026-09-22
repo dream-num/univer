@@ -60,6 +60,7 @@ export type {
 export { getCursorWhenDelete } from './commands/commands/doc-delete.command';
 export { HorizontalLineCommand } from './commands/commands/doc-horizontal-line.command';
 export { DocSelectAllCommand } from './commands/commands/doc-select-all.command';
+export { captureTextFormat } from './commands/commands/format-painter.command';
 export { IMEInputCommand } from './commands/commands/ime-input.command';
 export type { IIMEInputCommandParams } from './commands/commands/ime-input.command';
 export {
@@ -264,6 +265,7 @@ export type { IDocPrintComponentContext, IDocPrintContext } from './services/doc
 export { DocsRenderService } from './services/docs-render.service';
 export { Editor } from './services/editor/editor';
 export { EditorService, IEditorService } from './services/editor/editor-manager.service';
+export type { IEditorRuntimeConfig } from './services/editor/editor-runtime-config';
 export { DocFloatMenuService } from './services/float-menu.service';
 export {
     isInSameTableCell,
@@ -303,4 +305,5 @@ export type {
     IKeyboardEventConfig,
 } from './views/rich-text-editor/hooks';
 export { RichTextEditor } from './views/RichTextEditor';
+
 export type { IRichTextEditorProps } from './views/RichTextEditor';

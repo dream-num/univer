@@ -16,6 +16,7 @@
 
 import type { IWorksheetData } from '../typedef';
 import { describe, expect, it } from 'vitest';
+import { ImageSourceType } from '../../services/image-io/image-io.service';
 import { Tools } from '../../shared/tools';
 import { BooleanNumber } from '../../types/enum';
 import { cloneWorksheetData } from '../clone';
@@ -86,6 +87,12 @@ function createTestWorksheetData(rowCount: number, colCount: number): IWorksheet
             hidden: BooleanNumber.FALSE,
         },
         showGridlines: BooleanNumber.TRUE,
+        backgroundImage: {
+            source: 'data:image/png;base64,background',
+            imageSourceType: ImageSourceType.BASE64,
+            scaleX: 0.8,
+            scaleY: 0.8,
+        },
         rightToLeft: BooleanNumber.FALSE,
     };
 }
@@ -117,6 +124,8 @@ describe('cloneWorksheetData', () => {
         expect(cloned).not.toHaveProperty('visibility');
         expect(cloned.rowCount).toBe(original.rowCount);
         expect(cloned.columnCount).toBe(original.columnCount);
+        expect(cloned.backgroundImage).toEqual(original.backgroundImage);
+        expect(cloned.backgroundImage).not.toBe(original.backgroundImage);
 
         // Verify freeze is deeply cloned
         expect(cloned.freeze).toEqual(original.freeze);

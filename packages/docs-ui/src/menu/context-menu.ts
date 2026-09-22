@@ -24,7 +24,12 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 import { UnitAction } from '@univerjs/protocol';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, map, Observable } from 'rxjs';
-import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
+import {
+    DocCopyCommand,
+    DocCutCommand,
+    DocPasteCommand,
+    DocPasteSpecialCommand,
+} from '../commands/commands/clipboard.command';
 import { DeleteLeftCommand } from '../commands/commands/doc-delete.command';
 import { DocSelectAllCommand, DocSelectWordCommand } from '../commands/commands/doc-select-all.command';
 import {
@@ -40,6 +45,7 @@ import {
 } from '../commands/commands/table/doc-table-insert.command';
 import { DocParagraphSettingPanelOperation } from '../commands/operations/doc-paragraph-setting-panel.operation';
 import { DocSectionSettingPanelOperation } from '../commands/operations/doc-section-setting-panel.operation';
+import { DOC_PASTE_OPTIONS } from '../services/clipboard/paste-options';
 import { disableMenuWithoutDocumentUnitPermission } from './menu';
 
 const getDisableOnCollapsedObservable = (accessor: IAccessor) => {
@@ -379,6 +385,19 @@ export function DeleteTableMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             getDisableWhenSelectionNotInTableObservable(accessor),
             disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit)
         ),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
+
+export function PasteSpecialMenuFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
+    return {
+        id: DocPasteSpecialCommand.id,
+        type: MenuItemType.SELECTOR,
+        icon: 'DocPasteOptionsIcon',
+        title: 'docs-ui.pasteOptions.title',
+        tooltip: 'docs-ui.pasteOptions.title',
+        selections: DOC_PASTE_OPTIONS.map((option) => ({ ...option })),
+        disabled$: disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }

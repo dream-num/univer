@@ -53,6 +53,21 @@ describe('DocIMEInputManagerService', () => {
         });
     });
 
+    it('keeps the pre-composition and final host layout state across multiple IME updates', () => {
+        const service = createService();
+        service.setActiveRange({ startOffset: 0, endOffset: 0, collapsed: true });
+        for (const [before, after] of [[0, 1], [1, 2], [2, 3]]) {
+            service.pushUndoRedoMutationParams(
+                { unitId: 'doc-1', actions: JSONX.getInstance().replaceOp(['revision'], after, before), textRanges: [], layoutState: before },
+                { unitId: 'doc-1', actions: JSONX.getInstance().replaceOp(['revision'], before, after), textRanges: [], layoutState: after }
+            );
+        }
+        expect(service.fetchComposedUndoRedoMutationParams()).toMatchObject({
+            undoMutationParams: { layoutState: 0 },
+            redoMutationParams: { layoutState: 3 },
+        });
+    });
+
     it('clears cached IME mutation params', () => {
         const service = createService();
         service.setUndoRedoMutationParamsCache({

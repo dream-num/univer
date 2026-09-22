@@ -73,7 +73,14 @@ export function syncGroupRotateEnabled(
     };
 }
 
-export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObject, scene: Scene, drawingManagerService: IDrawingManagerService, transformIndex?: number) {
+export function insertGroupObject(
+    objectParam: IDrawingSearch,
+    object: BaseObject,
+    scene: Scene,
+    drawingManagerService: IDrawingManagerService,
+    transformIndex?: number,
+    attachTransformer = true
+) {
     const groupParam = drawingManagerService.getDrawingByParam(objectParam);
     if (groupParam == null) {
         return;
@@ -102,7 +109,10 @@ export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObjec
     const order = drawingManagerService.getDrawingOrder(objectParam.unitId, objectParam.subUnitId);
     group.zIndex = Math.max(0, order.indexOf(objectParam.drawingId));
 
-    scene.addObject(group, object.layer?.zIndex ?? DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(group);
+    const groupScene = scene.addObject(group, object.layer?.zIndex ?? DRAWING_OBJECT_LAYER_INDEX);
+    if (attachTransformer) {
+        groupScene.attachTransformerTo(group);
+    }
 
     group.addObject(object);
     syncGroupRotateEnabled(group, groupParam, scene, drawingManagerService);
@@ -121,7 +131,8 @@ export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObjec
             group,
             scene,
             drawingManagerService,
-            transformIndex
+            transformIndex,
+            attachTransformer
         );
     }
 

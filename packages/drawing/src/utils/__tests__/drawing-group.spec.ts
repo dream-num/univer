@@ -22,4 +22,9 @@ describe('drawing group', () => {
     it('rejects drawing types that cannot join a group', () => {
         expect(isGroupableDrawingType(DrawingTypeEnum.DRAWING_TABLE)).toBe(false);
     });
+
+    it('lets Slicer and Timeline join normal drawing groups', () => {
+        expect(isGroupableDrawingType(DrawingTypeEnum.DRAWING_SLICER)).toBe(true);
+        expect(isGroupableDrawingType(DrawingTypeEnum.DRAWING_TIMELINE)).toBe(true);
+    });
 });

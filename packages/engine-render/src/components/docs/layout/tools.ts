@@ -23,11 +23,7 @@ import type {
     INumberUnit,
     IObjectPositionH,
     IObjectPositionV,
-    IParagraph,
     IParagraphBorder,
-    IParagraphStyle,
-    ISectionBreak,
-    ITextStyle,
     Nullable,
     PositionedObjectLayoutType,
 } from '@univerjs/core';
@@ -48,6 +44,13 @@ import type {
 import type { IDocsConfig, IParagraphConfig, ISectionBreakConfig } from '../../../basics/interfaces';
 import type { IBoundRectNoAngle } from '../../../basics/vector2';
 import type { IDocumentCompatibilityPolicy } from '../document-compatibility';
+import type {
+    IDocumentLayoutParagraph,
+    IDocumentLayoutParagraphStyle,
+    IDocumentLayoutSectionBreak,
+    IDocumentLayoutStyle,
+    IDocumentLayoutTextStyle,
+} from '../document-layout-presentation';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { DocumentEndnoteLayout } from './endnote-layout';
@@ -85,6 +88,7 @@ import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../basics/const';
 import { GlyphType, LineType } from '../../../basics/i-document-skeleton-cached';
 import { getFontStyleString, isFunction, ptToPixel } from '../../../basics/tools';
 import { getDocumentCompatibilityPolicy } from '../document-compatibility';
+import { getDocumentLayoutPresentation } from '../document-layout-presentation';
 import {
     getDocsTableRenderViewport,
     getDocsTableViewportLeft,
@@ -769,7 +773,7 @@ export function updateParagraphBorders(
         segmentId?: string;
         target: boolean;
     }> = [];
-    const bordersByParagraphStyle = new Map<IParagraphStyle, IDocumentSkeletonParagraphBorders>();
+    const bordersByParagraphStyle = new Map<IDocumentLayoutParagraphStyle, IDocumentSkeletonParagraphBorders>();
 
     lineIterator(pages, (line, _, __, page) => {
         const { segmentId } = page;
@@ -1677,7 +1681,7 @@ export function getGlyphGroupWidth(divide: IDocumentSkeletonDivide, excludeTrail
 interface IFontCreateConfig {
     documentCompatibilityPolicy?: IDocumentCompatibilityPolicy;
     fontStyle: IDocumentSkeletonFontStyle;
-    textStyle: ITextStyle;
+    textStyle: IDocumentLayoutTextStyle;
     charSpace: number;
     gridType: GridType;
     snapToGrid: BooleanNumber;
@@ -1694,7 +1698,7 @@ export function clearFontCreateConfigCache() {
 export function getFontConfigFromLastGlyph(
     glyph: IDocumentSkeletonGlyph,
     sectionBreakConfig: ISectionBreakConfig,
-    paragraphStyle: IParagraphStyle
+    paragraphStyle: IDocumentLayoutParagraphStyle
 ) {
     const { ts, fontStyle } = glyph;
     const {
@@ -1738,7 +1742,7 @@ export function getFontCreateConfig(
     viewModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
-    paragraph: IParagraph
+    paragraph: IDocumentLayoutParagraph
 ) {
     const {
         gridType = GridType.LINES,
@@ -1769,7 +1773,7 @@ export function getFontCreateConfig(
     const customRangeStyle = showCustomRange ? getCustomRangeStyle(customRange) : null;
     const hasAddonStyle = showCustomRange || showCustomDecoration || !!bullet || paragraphStyle?.namedStyleType || paragraphStyle?.textStyle != null || paragraphStyle?.paragraphMarkTextStyle != null;
     const { st, ed } = textRun;
-    let textStyle: ITextStyle = textRun.ts ?? {};
+    let textStyle: IDocumentLayoutTextStyle = textRun.ts ?? {};
     const cache = fontCreateConfigCache.getValue(st, ed);
     if (cache && !hasAddonStyle && originTextRun) {
         return cache;
@@ -1800,7 +1804,7 @@ export function getFontCreateConfig(
         }
         : textStyle, sectionBreakConfig.fontFamilyFallbacks);
 
-    const mixTextStyle: ITextStyle = {
+    const mixTextStyle: IDocumentLayoutTextStyle = {
         ...documentTextStyle,
         ...textStyle,
     };
@@ -1955,7 +1959,7 @@ export interface ILayoutContext {
     endnoteLayout?: DocumentEndnoteLayout;
     /** Virtual marker in a note body; it never consumes a persisted character. */
     noteLabel?: string;
-    noteReferenceTextStyle?: ITextStyle;
+    noteReferenceTextStyle?: IDocumentLayoutTextStyle;
     /** Preserve the local note segment when the paragraph/table pipeline opens a continuation page. */
     noteSegmentId?: string;
     footnoteFirstColumn?: { index: number; top: number };
@@ -2009,7 +2013,7 @@ export interface ILayoutContext {
     languageDetector: LanguageDetector;
 }
 
-const DEFAULT_SECTION_BREAK: ISectionBreak = {
+const DEFAULT_SECTION_BREAK: IDocumentLayoutSectionBreak = {
     sectionId: 'section_render_default',
     columnProperties: [],
     columnSeparatorType: ColumnSeparatorType.NONE,
@@ -2048,7 +2052,7 @@ const DEFAULT_MODERN_DOCUMENT_STYLE: IDocumentStyle = {
     marginFooter: 0,
 };
 
-const DEFAULT_MODERN_SECTION_BREAK: Partial<ISectionBreak> = {
+const DEFAULT_MODERN_SECTION_BREAK: Partial<IDocumentLayoutSectionBreak> = {
     columnProperties: [],
     columnSeparatorType: ColumnSeparatorType.NONE,
     sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
@@ -2065,7 +2069,10 @@ const DEFAULT_MODERN_SECTION_BREAK: Partial<ISectionBreak> = {
 export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number) {
     const { viewModel, dataModel, docsConfig } = ctx;
     const sectionNode = viewModel.getChildren()[nodeIndex];
-    let { documentStyle } = dataModel;
+    const presentation = getDocumentLayoutPresentation(dataModel);
+    let documentStyle: IDocumentLayoutStyle = presentation
+        ? presentation.getSnapshot(dataModel.getSnapshot()).documentStyle
+        : dataModel.documentStyle;
     const { documentFlavor } = documentStyle;
     const explicitSectionBreak = viewModel.getSectionBreak(sectionNode.endIndex);
     let sectionBreak = explicitSectionBreak || DEFAULT_SECTION_BREAK;

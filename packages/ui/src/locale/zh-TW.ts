@@ -19,6 +19,8 @@ import emojiLocale from './emoji-locale/zh-TW.generated';
 
 const locale: typeof enUS = {
     ui: {
+        clearFormatting: '清除格式',
+        formatPainter: '複製格式',
         accessibility: {
             menu: '選單',
             zoom: '縮放',

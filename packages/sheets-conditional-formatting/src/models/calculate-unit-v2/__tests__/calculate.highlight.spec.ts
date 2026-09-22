@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-import type { IAverageHighlightCell, IConditionFormattingRule, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell } from '../../type';
+import type { ICellData, Workbook } from '@univerjs/core';
+import type {
+    IAverageHighlightCell,
+    IConditionFormattingRule,
+    INumberHighlightCell,
+    IRankHighlightCell,
+    ITextHighlightCell,
+} from '../../type';
+import { CellValueType } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator } from '../../../base/const';
 import { createTestBed } from './test.util';
@@ -29,6 +37,41 @@ describe('Test conditional formatting highlight', () => {
     });
 
     describe('Test Number', async () => {
+        // Expected results recorded with Excel COM DisplayFormat for cellIs rules.
+        it.each<{ name: string; cell: ICellData; matches: boolean[] }>([
+            { name: 'blank', cell: {}, matches: [true, false, true, false, false, true, true, true] },
+            { name: 'formula empty string', cell: { f: '=IF(TRUE,"",1)', v: '', t: CellValueType.STRING }, matches: [false, true, false, true, true, false, true, false] },
+            { name: 'text', cell: { v: 'abc', t: CellValueType.STRING }, matches: [false, true, false, true, true, false, true, false] },
+            { name: 'numeric text', cell: { v: '5', t: CellValueType.FORCE_STRING }, matches: [false, true, false, true, true, false, true, false] },
+            { name: 'zero', cell: { v: 0, t: CellValueType.NUMBER }, matches: [true, false, true, false, false, true, true, true] },
+            { name: 'five', cell: { v: 5, t: CellValueType.NUMBER }, matches: [true, false, false, true, true, true, true, true] },
+            { name: 'true', cell: { v: 1, t: CellValueType.BOOLEAN }, matches: [false, true, false, true, true, false, true, false] },
+            { name: 'false', cell: { v: 0, t: CellValueType.BOOLEAN }, matches: [false, true, false, true, true, false, true, false] },
+            { name: 'error', cell: { f: '=1/0', v: '#DIV/0!', t: CellValueType.STRING }, matches: [false, false, false, false, false, false, false, false] },
+        ])('matches Excel number comparisons for $name', ({ cell, matches }) => {
+            const comparisons: [CFNumberOperator, number | [number, number]][] = [
+                [CFNumberOperator.between, [0, 10]],
+                [CFNumberOperator.notBetween, [0, 10]],
+                [CFNumberOperator.equal, 0],
+                [CFNumberOperator.notEqual, 0],
+                [CFNumberOperator.greaterThan, 0],
+                [CFNumberOperator.lessThan, 10],
+                [CFNumberOperator.greaterThanOrEqual, 0],
+                [CFNumberOperator.lessThanOrEqual, 10],
+            ];
+            for (const [column, [operator, value]] of comparisons.entries()) {
+                (testBed.workbook as Workbook).getSheetBySheetId(testBed.subUnitId)!.getCellMatrix().setValue(0, column, cell);
+                testBed.getConditionalFormattingRuleModel().addRule(testBed.unitId, testBed.subUnitId, {
+                    ranges: [{ startRow: 0, endRow: 0, startColumn: column, endColumn: column }],
+                    cfId: `comparison-${column}`,
+                    stopIfTrue: false,
+                    rule: { type: CFRuleType.highlightCell, subType: CFSubRuleType.number, operator, value, style: { bl: 1 } } as INumberHighlightCell,
+                });
+                expect(testBed.getConditionalFormattingService().composeStyle(testBed.unitId, testBed.subUnitId, 0, column))
+                    .toEqual({ style: matches[column] ? { bl: 1 } : {} });
+            }
+        });
+
         it('Should apply higher-priority rule style when multiple rules are matched', () => {
             const lowerPriorityRule: IConditionFormattingRule<INumberHighlightCell> = {
                 ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],

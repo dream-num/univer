@@ -20,20 +20,28 @@ import { UnitAction } from '@univerjs/protocol';
 import { ContextMenuGroup } from '@univerjs/ui';
 import { firstValueFrom, of } from 'rxjs';
 import { describe, expect, it } from 'vitest';
-import { DocPasteCommand } from '../../commands/commands/clipboard.command';
+import { DocPasteCommand, DocPasteSpecialCommand } from '../../commands/commands/clipboard.command';
 import { DocSelectAllCommand, DocSelectWordCommand } from '../../commands/commands/doc-select-all.command';
 import { DOC_CARET_MENU_ID } from '../../consts/mobile-context';
-import { CopyMenuFactory, ParagraphSettingMenuFactory, PasteMenuFactory, SelectAllMenuFactory, SelectWordMenuFactory } from '../context-menu';
+import {
+    CopyMenuFactory,
+    ParagraphSettingMenuFactory,
+    PasteMenuFactory,
+    PasteSpecialMenuFactory,
+    SelectAllMenuFactory,
+    SelectWordMenuFactory,
+} from '../context-menu';
 import { mobileMenuSchema } from '../mobile-schema';
 
 describe('settings context menu factories', () => {
-    it('registers a dedicated three-action mobile caret menu', () => {
+    it('registers a mobile caret menu with both paste and format choices', () => {
         const caretMenu = Object.entries(mobileMenuSchema).find(([position]) => position === DOC_CARET_MENU_ID)?.[1];
 
         expect(caretMenu).toEqual({
             [ContextMenuGroup.QUICK]: {
                 quickLayout: 'tile',
                 [DocPasteCommand.id]: { order: 0, menuItemFactory: PasteMenuFactory },
+                [DocPasteSpecialCommand.id]: { order: 0.5, menuItemFactory: PasteSpecialMenuFactory },
                 [DocSelectWordCommand.id]: { order: 1, menuItemFactory: SelectWordMenuFactory },
                 [DocSelectAllCommand.id]: { order: 2, menuItemFactory: SelectAllMenuFactory },
             },

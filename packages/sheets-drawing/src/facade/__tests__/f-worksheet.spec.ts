@@ -391,6 +391,34 @@ describe('FWorksheetDrawingMixin group drawings', () => {
     });
 });
 
+describe('FWorksheetDrawingMixin background image', () => {
+    let univer: Univer;
+    let injector: Injector;
+
+    beforeEach(() => {
+        const testBed = createSheetsDrawingTestBed();
+        univer = testBed.univer;
+        injector = testBed.injector;
+    });
+
+    afterEach(() => {
+        univer.dispose();
+    });
+
+    it('sets, returns, and deletes the worksheet background image', () => {
+        const fWorksheet = createFacade(injector);
+
+        expect(fWorksheet.getBackgroundImage()).toBeNull();
+        expect(fWorksheet.setBackgroundImage('https://example.com/background.png')).toBe(fWorksheet);
+        expect(fWorksheet.getBackgroundImage()).toEqual({
+            source: 'https://example.com/background.png',
+            imageSourceType: ImageSourceType.URL,
+        });
+        expect(fWorksheet.deleteBackgroundImage()).toBe(fWorksheet);
+        expect(fWorksheet.getBackgroundImage()).toBeNull();
+    });
+});
+
 function createFacade(injector: Injector): FWorksheetDrawingMixin {
     const workbook = injector.get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const worksheet = workbook.getSheetBySheetId('sheet1')!;

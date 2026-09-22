@@ -14,8 +14,18 @@
  * limitations under the License.
  */
 
-import type { ICustomDecoration, ICustomRange, ICustomTable, IDocumentBody, IParagraph, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
-import { DataStreamTreeTokenType } from '@univerjs/core';
+import type {
+    ICustomDecoration,
+    ICustomRange,
+    ICustomTable,
+    IDocumentBody,
+    IParagraph,
+    ITextRange,
+    ITextRun,
+    ITextStyle,
+    Nullable,
+} from '@univerjs/core';
+import { DataStreamTreeTokenType, getParagraphContentStartOffset } from '@univerjs/core';
 
 export function isTopLevelStructuralGap(dataStream: string, offset: number): boolean {
     const previousToken = dataStream[offset - 1];
@@ -52,11 +62,16 @@ export function getTextRunAtPosition(
         return retTextRun;
     }
 
+    const paragraph = !isCellEditor ? body.paragraphs?.find((item) => item.startIndex >= position) : undefined;
+    const atParagraphStart = paragraph && getParagraphContentStartOffset(body, paragraph) === position;
+    // At a paragraph start, inherit its first character/mark instead of the preceding paragraph.
+    const samplePosition = atParagraphStart || position === 0 ? position + 1 : position;
+
     for (let i = textRuns.length - 1; i >= 0; i--) {
         const textRun = textRuns[i];
         const { st, ed } = textRun;
 
-        if (position > st && position <= ed) {
+        if (samplePosition > st && samplePosition <= ed) {
             retTextRun.st = st;
             retTextRun.ed = ed;
 
@@ -67,14 +82,13 @@ export function getTextRunAtPosition(
         }
     }
 
-    if (position === 0) {
-        const textRun = textRuns?.[0];
-        if (textRun && textRun.st === 0) {
-            retTextRun.ts = {
-                ...retTextRun.ts,
-                ...textRun.ts,
-            };
-        }
+    if (atParagraphStart && paragraph.startIndex === position) {
+        retTextRun.ts = {
+            ...(!defaultStyle.cl ? {} : { cl: { ...defaultStyle.cl } }),
+            ...paragraph.paragraphStyle?.textStyle,
+            ...textRuns.find((run) => run.st <= position && run.ed > position)?.ts,
+            ...paragraph.paragraphStyle?.paragraphMarkTextStyle,
+        };
     }
 
     if (cacheStyle) {
@@ -85,6 +99,51 @@ export function getTextRunAtPosition(
     }
 
     return retTextRun;
+}
+
+export function getTextRunAtInputPosition(
+    body: IDocumentBody,
+    position: number,
+    defaultStyle: ITextStyle,
+    cacheStyle: Nullable<ITextStyle>,
+    isCellEditor?: boolean,
+    inheritParagraphStartStyle = false
+): ITextRun {
+    if (!inheritParagraphStartStyle) {
+        return getTextRunAtPosition(body, position, defaultStyle, cacheStyle, isCellEditor);
+    }
+    const inheritedTextRun = getTextRunAtPosition(body, position, defaultStyle, cacheStyle, isCellEditor);
+    const previousToken = body.dataStream[position - 1];
+    const startsParagraph = previousToken === DataStreamTreeTokenType.PARAGRAPH ||
+        previousToken === DataStreamTreeTokenType.COLUMN_START;
+    const nextTextRun = startsParagraph
+        ? body.textRuns?.find((textRun) => textRun.st === position && textRun.ed > position)
+        : undefined;
+    const textStyle = nextTextRun
+        ? {
+            ...(!defaultStyle.cl ? {} : { cl: { ...defaultStyle.cl } }),
+            ...nextTextRun.ts,
+            ...cacheStyle,
+        }
+        : { ...inheritedTextRun.ts };
+
+    return {
+        ...(nextTextRun ?? inheritedTextRun),
+        ts: textStyle,
+    };
+}
+
+/** Replacing a selection uses its first character; a caret normally uses its left neighbor. */
+export function getTextRunForSelection(
+    body: IDocumentBody,
+    range: Pick<ITextRange, 'startOffset' | 'endOffset'>,
+    defaultStyle: ITextStyle,
+    cacheStyle: Nullable<ITextStyle>,
+    isCellEditor?: boolean,
+    inheritParagraphStartStyle = false
+): ITextRun {
+    const position = !isCellEditor && range.startOffset !== range.endOffset ? range.startOffset + 1 : range.endOffset;
+    return getTextRunAtInputPosition(body, position, defaultStyle, cacheStyle, isCellEditor, inheritParagraphStartStyle);
 }
 
 export function getCustomRangeAtPosition(customRanges: ICustomRange[], position: number, extendRange?: boolean) {

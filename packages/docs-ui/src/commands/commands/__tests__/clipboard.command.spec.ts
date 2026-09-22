@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand, ICommandInfo, IDisposable, IDocumentData, Injector, IStyleBase, JSONXActions, Univer } from '@univerjs/core';
+import type { ICommand, ICommandInfo, IDocumentData, Injector, IStyleBase, JSONXActions, Univer } from '@univerjs/core';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IDocClipboardHook } from '../../../services/clipboard/clipboard.service';
 import type { IInnerCutCommandParams, IInnerPasteCommandParams } from '../clipboard.inner.command';
 import {
     BooleanNumber,
@@ -32,19 +31,33 @@ import {
     ICommandService,
     IContextService,
     IUniverInstanceService,
+    LocaleService,
+    LocaleType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
     RedoCommand,
-    SliceBodyType,
     Tools,
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
-import { IClipboardInterfaceService } from '@univerjs/ui';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { IDocClipboardService } from '../../../services/clipboard/clipboard.service';
+import {
+    IClipboardInterfaceService,
+    IMessageService,
+    IPlatformService,
+    IShortcutService,
+    IUIRuntimeScopeService,
+    KeyCode,
+    MetaKeys,
+    MOBILE_UI_MODE,
+    PasteCommand,
+    ShortcutService,
+    UIRuntimeScopeService,
+} from '@univerjs/ui';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import zhCN from '../../../locale/zh-CN';
+import { DocClipboardService, IDocClipboardService } from '../../../services/clipboard/clipboard.service';
 import {
     DocCopyCommand,
     DocCopyCurrentParagraphCommand,
@@ -58,44 +71,9 @@ import { CutContentCommand, InnerPasteCommand } from '../clipboard.inner.command
 import { genEmptyTable, genTableSource } from '../table/table';
 import { createCommandTestBed } from './create-command-test-bed';
 
-class TestDocClipboardService {
-    readonly copies: Array<{ sliceType?: SliceBodyType; ranges?: ITextRangeWithStyle[] }> = [];
-    readonly cuts: Array<{ ranges?: ITextRangeWithStyle[] }> = [];
-    readonly pastes: ClipboardItem[][] = [];
-    memoryPasteResult = false;
-    memoryPastes = 0;
-
-    async copy(sliceType?: SliceBodyType, ranges?: ITextRangeWithStyle[]): Promise<boolean> {
-        this.copies.push({ sliceType, ranges });
-        return true;
-    }
-
-    async cut(ranges?: ITextRangeWithStyle[]): Promise<boolean> {
-        this.cuts.push({ ranges });
-        return true;
-    }
-
-    async paste(items?: ClipboardItem[]): Promise<boolean> {
-        if (!items?.length) {
-            this.memoryPastes++;
-            return this.memoryPasteResult;
-        }
-
-        this.pastes.push(items);
-        return true;
-    }
-
-    async legacyPaste(): Promise<boolean> {
-        return false;
-    }
-
-    addClipboardHook(_hook: IDocClipboardHook): IDisposable {
-        return { dispose() {} };
-    }
-}
-
 class TestClipboardInterfaceService {
-    items: ClipboardItem[] = [{ types: ['text/plain'] } as unknown as ClipboardItem];
+    items: ClipboardItem[] = [];
+    readonly writes: Array<{ text: string; html: string }> = [];
     supported = true;
     reads = 0;
 
@@ -104,7 +82,10 @@ class TestClipboardInterfaceService {
     }
 
     async writeText(): Promise<void> {}
-    async write(): Promise<void> {}
+    async write(text: string, html: string): Promise<void> {
+        this.writes.push({ text, html });
+    }
+
     async readText(): Promise<string> { return ''; }
     async read(): Promise<ClipboardItem[]> {
         this.reads++;
@@ -1299,8 +1280,13 @@ describe('test cases in clipboard', () => {
     });
 
     describe('Test public doc clipboard commands', () => {
+        function selectRanges(textRanges: ITextRangeWithStyle[]) {
+            const selection = get(DocSelectionManagerService);
+            selection.replaceSelectionInfoWithoutRefresh({ ...selection.getSelectionInfo()!, textRanges, rectRanges: [] });
+        }
+
         beforeEach(() => {
-            injector.add([IDocClipboardService, { useClass: TestDocClipboardService }]);
+            injector.add([IDocClipboardService, { useClass: DocClipboardService }]);
             injector.add([IClipboardInterfaceService, { useClass: TestClipboardInterfaceService }]);
 
             commandService.registerMultipleCommand(DocCopyCommand);
@@ -1327,69 +1313,98 @@ describe('test cases in clipboard', () => {
             expect(whenFocusEditor(contextService)).toBe(true);
         });
 
-        it('Should route document copy and cut commands to the docs clipboard service', async () => {
-            const docClipboardService = get(IDocClipboardService) as unknown as TestDocClipboardService;
-
-            await commandService.executeCommand(DocCopyCommand.id);
-            await commandService.executeCommand(DocCutCommand.id);
-
-            expect(docClipboardService.copies).toEqual([{ sliceType: undefined, ranges: undefined }]);
-            expect(docClipboardService.cuts).toEqual([{ ranges: undefined }]);
+        it('copies selected text and cuts it through the public commands', async () => {
+            selectRanges([{
+                startOffset: 0,
+                endOffset: 5,
+                collapsed: false,
+                isActive: true,
+                segmentId: '',
+            }]);
+            const clipboard = get(IClipboardInterfaceService) as unknown as TestClipboardInterfaceService;
+            expect(await commandService.executeCommand(DocCopyCommand.id)).toBe(true);
+            expect(clipboard.writes[0].text).toBe('What’');
+            const before = getDocumentSnapshot()?.body?.dataStream ?? '';
+            expect(await commandService.executeCommand(DocCutCommand.id)).toBe(true);
+            expect(getDocumentSnapshot()?.body?.dataStream).toBe(before.slice(5));
         });
 
-        it('Should route current paragraph copy and cut with paragraph document ranges', async () => {
-            const selectionManager = get(DocSelectionManagerService);
-            selectionManager.__TEST_ONLY_add([{
+        it('copies and cuts the paragraph containing the cursor', async () => {
+            selectRanges([{
                 startOffset: 3,
                 endOffset: 3,
                 collapsed: true,
                 isActive: true,
                 segmentId: '',
-                style: null as never,
             }]);
-            const docClipboardService = get(IDocClipboardService) as unknown as TestDocClipboardService;
-
-            await commandService.executeCommand(DocCopyCurrentParagraphCommand.id);
-            await commandService.executeCommand(DocCutCurrentParagraphCommand.id);
-
-            expect(docClipboardService.copies[0].sliceType).toBe(SliceBodyType.copy);
-            expect(docClipboardService.copies[0].ranges?.[0]).toMatchObject({
-                startOffset: 0,
-                endOffset: 23,
-                collapsed: false,
-            });
-            expect(docClipboardService.cuts[0].ranges?.[0]).toMatchObject({
-                startOffset: 0,
-                endOffset: 23,
-                collapsed: false,
-                rangeType: DOC_RANGE_TYPE.TEXT,
-            });
+            const clipboard = get(IClipboardInterfaceService) as unknown as TestClipboardInterfaceService;
+            expect(await commandService.executeCommand(DocCopyCurrentParagraphCommand.id)).toBe(true);
+            expect(clipboard.writes[0].text).toContain('What’s New in the 2022');
+            expect(await commandService.executeCommand(DocCutCurrentParagraphCommand.id)).toBe(true);
+            expect(getDocumentSnapshot()?.body?.dataStream).not.toContain('What’s New in the 2022');
         });
 
-        it('Should read browser clipboard items before pasting into the document', async () => {
-            const docClipboardService = get(IDocClipboardService) as unknown as TestDocClipboardService;
-            const clipboardInterfaceService = get(IClipboardInterfaceService) as unknown as TestClipboardInterfaceService;
-
-            clipboardInterfaceService.items = [];
-            const emptyResult = await commandService.executeCommand(DocPasteCommand.id);
-            expect(emptyResult).toBe(false);
-            expect(docClipboardService.pastes).toHaveLength(0);
-
-            clipboardInterfaceService.items = [{ types: ['text/html'] } as unknown as ClipboardItem];
-            await commandService.executeCommand(DocPasteCommand.id);
-
-            expect(docClipboardService.pastes).toEqual([clipboardInterfaceService.items]);
-        });
-
-        it('Should paste the internal copy when browser clipboard reads are unsupported', async () => {
-            const docClipboardService = get(IDocClipboardService) as unknown as TestDocClipboardService;
-            const clipboardInterfaceService = get(IClipboardInterfaceService) as unknown as TestClipboardInterfaceService;
-            docClipboardService.memoryPasteResult = true;
-            clipboardInterfaceService.supported = false;
-
+        it('reads browser clipboard items and pastes their content', async () => {
+            const clipboard = get(IClipboardInterfaceService) as unknown as TestClipboardInterfaceService;
+            expect(await commandService.executeCommand(DocPasteCommand.id)).toBe(false);
+            clipboard.items = [{
+                types: ['text/html', 'text/plain'],
+                presentationStyle: 'unspecified',
+                getType: async (type: string) => ({ text: async () => type === 'text/html' ? '<b>External</b>' : 'External' }) as Blob,
+            } as ClipboardItem];
             expect(await commandService.executeCommand(DocPasteCommand.id)).toBe(true);
-            expect(docClipboardService.memoryPastes).toBe(1);
-            expect(clipboardInterfaceService.reads).toBe(0);
+            expect(clipboard.reads).toBe(2);
+            expect(getDocumentSnapshot()?.body?.dataStream).toContain('External');
+        });
+
+        it.each([
+            { mobile: true, isMac: false, binding: MetaKeys.CTRL_COMMAND | KeyCode.V, shortcut: 'Ctrl+V' },
+            { mobile: false, isMac: false, binding: MetaKeys.CTRL_COMMAND | KeyCode.V, shortcut: 'Ctrl+V' },
+            { mobile: false, isMac: true, binding: MetaKeys.CTRL_COMMAND | KeyCode.V, shortcut: '⌘+V' },
+            { mobile: false, isMac: false, binding: MetaKeys.ALT | KeyCode.P, shortcut: 'Alt+P' },
+            { mobile: false, isMac: false, binding: null, shortcut: null },
+        ])('preserves the document and shows configured paste guidance (mobile: $mobile, shortcut: $shortcut)', async ({ mobile, isMac, binding, shortcut }) => {
+            const show = vi.fn<IMessageService['show']>(() => ({ dispose: () => {} }));
+            injector.add([IMessageService, { useValue: { show, remove: vi.fn(), removeAll: vi.fn() } }]);
+            injector.add([IPlatformService, { useValue: { isMac, isWindows: !isMac, isLinux: false } }]);
+            injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
+            injector.add([IShortcutService, { useClass: ShortcutService }]);
+            const shortcutService = get(IShortcutService);
+            if (binding !== null) {
+                shortcutService.registerShortcut({ id: PasteCommand.id, binding });
+            }
+            const localeService = get(LocaleService);
+            localeService.load({ [LocaleType.ZH_CN]: zhCN });
+            localeService.setLocale(LocaleType.ZH_CN);
+            localeService.setDirection('ltr');
+            get(IContextService).setContextValue(MOBILE_UI_MODE, mobile);
+            const clipboard = get(IClipboardInterfaceService);
+            vi.spyOn(clipboard, 'read').mockRejectedValue(new DOMException('Permission denied', 'NotAllowedError'));
+            const before = Tools.deepClone(getRequiredDocumentSnapshot());
+
+            expect(await commandService.executeCommand(DocPasteCommand.id)).toBe(false);
+            expect(getRequiredDocumentSnapshot()).toEqual(before);
+            expect(show).toHaveBeenCalledOnce();
+            const message = show.mock.calls[0][0].content;
+            expect(message).not.toContain('docs-ui.');
+            if (mobile || !shortcut) {
+                expect(message).toContain('设备或键盘');
+                expect(message).not.toMatch(/Ctrl|Cmd/);
+            } else {
+                expect(message).toContain(shortcut);
+                expect(message).not.toContain('{0}');
+            }
+        });
+
+        it('pastes an internal copy when browser reads are unsupported', async () => {
+            selectRanges([{ startOffset: 0, endOffset: 5, collapsed: false, isActive: true, segmentId: '' }]);
+            expect(await commandService.executeCommand(DocCopyCommand.id)).toBe(true);
+            selectRanges([{ startOffset: 0, endOffset: 0, collapsed: true, isActive: true, segmentId: '' }]);
+            const clipboard = get(IClipboardInterfaceService) as unknown as TestClipboardInterfaceService;
+            clipboard.supported = false;
+            expect(await commandService.executeCommand(DocPasteCommand.id)).toBe(true);
+            expect(clipboard.reads).toBe(0);
+            expect(getDocumentSnapshot()?.body?.dataStream).toMatch(/^What’What’s/);
         });
     });
 });

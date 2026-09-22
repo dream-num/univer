@@ -19,8 +19,9 @@ import type { Dispatch, SetStateAction } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { borderClassName, Checkbox, clsx, Input, scrollbarClassName } from '@univerjs/design';
+import { isRecordTableFilter } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { SheetsTableUiService } from '../../services/sheets-table-ui.service';
 
 interface ISheetTableItemsFilterPanelProps {
@@ -31,6 +32,8 @@ interface ISheetTableItemsFilterPanelProps {
     columnIndex: number;
     checkedItemSet: Set<string>;
     setCheckedItemSet: Dispatch<SetStateAction<Set<string>>>;
+    onSelectAllChange?: (selected: boolean) => void;
+    onItemChange?: () => void;
 }
 
 const getCheckedItemCount = (map: Map<string, number>, checkedItemSet: Set<string>) => {
@@ -42,7 +45,17 @@ const getCheckedItemCount = (map: Map<string, number>, checkedItemSet: Set<strin
 };
 
 export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelProps) {
-    const { unitId, tableId, subUnitId, columnIndex, checkedItemSet, setCheckedItemSet, tableFilter } = props;
+    const {
+        unitId,
+        tableId,
+        subUnitId,
+        columnIndex,
+        checkedItemSet,
+        setCheckedItemSet,
+        tableFilter,
+        onSelectAllChange,
+        onItemChange,
+    } = props;
     const localeService = useDependency(LocaleService);
     const tableService = useDependency(SheetsTableUiService);
 
@@ -58,48 +71,91 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
 
     const displayItems = useMemo(() => {
         return searchText
-            ? items.filter((item: { title: string }) => {
+            ? items.filter((item) => {
                 return String(item.title).toLowerCase().includes(searchText.toLowerCase());
             })
             : items;
     }, [searchText, items]);
+    const recordFilter = isRecordTableFilter(tableFilter);
+    const allDisplayedChecked = displayItems.length > 0 && displayItems.every((item) => (
+        checkedItemSet.has(item.valueKey ?? item.title)
+    ));
+    const someDisplayedChecked = displayItems.some((item) => checkedItemSet.has(item.valueKey ?? item.title));
+    const displayedAllChecked = recordFilter ? allDisplayedChecked : allChecked;
+    const displayedIndeterminate = recordFilter ? !allDisplayedChecked && someDisplayedChecked : indeterminate;
 
-    const onCheckAllToggled = useCallback(() => {
+    const onCheckAllToggled = () => {
+        if (recordFilter) {
+            const next = new Set(checkedItemSet);
+            displayItems.forEach((item) => {
+                const itemKey = item.valueKey ?? item.title;
+                if (allDisplayedChecked) {
+                    next.delete(itemKey);
+                } else {
+                    next.add(itemKey);
+                }
+            });
+            setCheckedItemSet(next);
+            setCheckedCount(getCheckedItemCount(itemsCountMap, next));
+            onSelectAllChange?.(!allDisplayedChecked && searchText === '');
+            return;
+        }
         if (allChecked) {
             checkedItemSet.clear();
             setCheckedItemSet(new Set(checkedItemSet));
             setAllChecked(false);
+            onSelectAllChange?.(false);
         } else {
             displayItems.forEach((item) => {
-                checkedItemSet.add(item.title);
+                checkedItemSet.add(item.valueKey ?? item.title);
             });
             setCheckedItemSet(new Set(checkedItemSet));
             setAllChecked(true);
+            onSelectAllChange?.(items.every((item) => checkedItemSet.has(item.valueKey ?? item.title)));
         }
-    }, [allChecked]);
+    };
 
-    const onSearchValueChange = useCallback((str: string) => {
+    const onSearchValueChange = (str: string) => {
+        if (recordFilter) {
+            setSearchText(str);
+            return;
+        }
         if (str === '') {
             setAllChecked(true);
             items.forEach((item) => {
-                checkedItemSet.add(item.title);
+                checkedItemSet.add(item.valueKey ?? item.title);
             });
             setCheckedCount(allItemsCount);
+            onSelectAllChange?.(true);
         } else {
             checkedItemSet.clear();
             setAllChecked(false);
             setCheckedCount(0);
+            onSelectAllChange?.(false);
         }
         setSearchText(str);
-    }, []);
+    };
 
     const onCheckItemToggled = (key: string) => {
+        onItemChange?.();
+        if (recordFilter) {
+            const next = new Set(checkedItemSet);
+            if (next.has(key)) {
+                next.delete(key);
+            } else {
+                next.add(key);
+            }
+            setCheckedCount(getCheckedItemCount(itemsCountMap, next));
+            setCheckedItemSet(next);
+            return;
+        }
         if (allChecked) {
             setAllChecked(false);
             const newSet = new Set<string>();
-            for (const { title } of items) {
-                if (key !== title) {
-                    newSet.add(title);
+            for (const item of items) {
+                const itemKey = item.valueKey ?? item.title;
+                if (key !== itemKey) {
+                    newSet.add(itemKey);
                 }
             }
             setCheckedCount(allItemsCount - itemsCountMap.get(key)!);
@@ -133,9 +189,9 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
                             <Checkbox
                                 className="univer-min-w-0 univer-flex-1"
                                 contentClassName="univer-flex-1 univer-min-w-0"
-                                indeterminate={indeterminate}
+                                indeterminate={displayedIndeterminate}
                                 disabled={items.length === 0}
-                                checked={allChecked}
+                                checked={displayedAllChecked}
                                 onChange={onCheckAllToggled}
                             >
                                 <div className="univer-flex univer-h-5 univer-flex-1 univer-items-center univer-text-sm">
@@ -145,6 +201,7 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
                             </Checkbox>
                         </div>
                         {displayItems.map((item) => {
+                            const itemKey = item.valueKey ?? item.title;
                             return (
                                 <div
                                     key={item.key}
@@ -153,8 +210,8 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
                                     <Checkbox
                                         className="univer-min-w-0 univer-flex-1"
                                         contentClassName="univer-flex-1 univer-min-w-0"
-                                        checked={allChecked || checkedItemSet.has(item.title)}
-                                        onChange={() => { onCheckItemToggled(item.title); }}
+                                        checked={displayedAllChecked || checkedItemSet.has(itemKey)}
+                                        onChange={() => { onCheckItemToggled(itemKey); }}
                                     >
                                         <span
                                             className={`
@@ -170,7 +227,7 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
                                                   univer-text-gray-400
                                                 `}
                                             >
-                                                {`(${itemsCountMap.get(item.title) || 0})`}
+                                                {`(${itemsCountMap.get(itemKey) || 0})`}
                                             </span>
                                         </span>
                                     </Checkbox>

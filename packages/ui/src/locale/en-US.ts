@@ -18,6 +18,8 @@ import emojiLocale from './emoji-locale/en-US.generated';
 
 const locale = {
     ui: {
+        clearFormatting: 'Clear formatting',
+        formatPainter: 'Format Painter',
         accessibility: {
             menu: 'Menu',
             zoom: 'Zoom',

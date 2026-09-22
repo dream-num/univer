@@ -34,9 +34,9 @@ export class DesktopNotificationService extends Disposable implements INotificat
     }
 
     show(params: INotificationOptions): IDisposable {
-        notification.show(params);
+        const notificationID = notification.show(params);
 
-        return toDisposable(() => { /* empty */ });
+        return toDisposable(() => notification.dismiss(notificationID));
     }
 
     protected _initUIPart(): void {

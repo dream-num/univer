@@ -33,6 +33,7 @@ import type {
 } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
 import type { IEditorInputConfig } from '../selection/doc-selection-render.service';
+import type { IEditorRuntimeConfig } from './editor-runtime-config';
 import { createParagraphId, createSectionId, Disposable, isInternalEditorID, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -102,10 +103,16 @@ export interface IEditorCanvasStyle {
 }
 
 export interface IEditorConfigParams {
+    /** Instance-only layout and interaction settings, never persisted in the document. */
+    renderConfig?: IEditorRuntimeConfig;
     initialSnapshot: IDocumentData;
     /** Keep the globally focused unit on the editor's host while this editor receives input focus. */
     preserveHostFocus?: boolean;
     cancelDefaultResizeListener?: boolean;
+    /** Use a fixed canvas backing-store ratio for an editor managed by an external layout host. */
+    pixelRatio?: number;
+    /** Publish transient drag ranges to an external editor host. Defaults to false. */
+    emitSelectionWhileDragging?: boolean;
     canvasStyle?: IEditorCanvasStyle;
     // A Boolean attribute which, if present, indicates that the editor should automatically have focus.
     // No more than one editor in the document may have the autofocus attribute.
@@ -115,6 +122,7 @@ export interface IEditorConfigParams {
     readonly?: boolean;
 
     backScrollOffset?: number;
+    disableBackScroll?: boolean;
     // The unique id of editor.
     editorUnitId?: string;
 
@@ -151,6 +159,7 @@ export class Editor extends Disposable implements IEditor {
     // Emit when doc selection changed.
     private readonly _selectionChange$ = new Subject<IDocSelectionInnerParam>();
     selectionChange$: Observable<IDocSelectionInnerParam> = this._selectionChange$.asObservable();
+    private _movingSelectionRanges?: ITextRangeWithStyle[];
 
     constructor(
         private _param: IEditorOptions,
@@ -174,6 +183,7 @@ export class Editor extends Disposable implements IEditor {
 
         this.disposeWithMe(
             docSelectionRenderService.onBlur$.subscribe((e) => {
+                this._movingSelectionRanges = undefined;
                 this._blur$.next(e);
 
                 const data = this.getDocumentData();
@@ -238,10 +248,20 @@ export class Editor extends Disposable implements IEditor {
                 const editorId = this.getEditorId();
 
                 if (unitId === editorId) {
+                    this._movingSelectionRanges = undefined;
                     this._selectionChange$.next(params);
                 }
             })
         );
+
+        if (this._param.emitSelectionWhileDragging) {
+            this.disposeWithMe(
+                docSelectionRenderService.movingSelection$.subscribe((selection) => {
+                    this._movingSelectionRanges = selection.textRanges;
+                    this._selectionChange$.next(selection);
+                })
+            );
+        }
     }
 
     isFocus() {
@@ -293,6 +313,7 @@ export class Editor extends Disposable implements IEditor {
 
     // Selects the specified range of characters within editor.
     setSelectionRanges(ranges: ISuccinctDocRangeParam[], shouldFocus = true): void {
+        this._movingSelectionRanges = undefined;
         const editorUnitId = this.getEditorId();
         const params = {
             unitId: editorUnitId,
@@ -304,6 +325,9 @@ export class Editor extends Disposable implements IEditor {
 
     // Get current doc ranges. include text range and rect range.
     getSelectionRanges(): ITextRangeWithStyle[] {
+        if (this._movingSelectionRanges) {
+            return this._movingSelectionRanges;
+        }
         const editorUnitId = this.getEditorId();
         const params = {
             unitId: editorUnitId,

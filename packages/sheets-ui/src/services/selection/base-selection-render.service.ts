@@ -875,25 +875,32 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         activeControl: SelectionControl
     ): void {
         const { actualRow, actualColumn, mergeInfo: actualMergeInfo } = currentCell;
-        this._startRangeWhenPointerDown = { ...currentCell.mergeInfo };
+        const anchorRange = { ...actualMergeInfo };
+        if (rangeType === RANGE_TYPE.ROW) {
+            anchorRange.startRow = actualRow;
+            anchorRange.endRow = actualRow;
+        } else if (rangeType === RANGE_TYPE.COLUMN) {
+            anchorRange.startColumn = actualColumn;
+            anchorRange.endColumn = actualColumn;
+        }
+        this._startRangeWhenPointerDown = anchorRange;
 
         // Get the maximum range selected based on the two cells selected with Shift key.
-        const newStartRow = Math.min(actualRow, startSelectionRange.startRow, actualMergeInfo.startRow);
-        const newEndRow = Math.max(actualRow, startSelectionRange.endRow, actualMergeInfo.endRow);
-        const newStartColumn = Math.min(actualColumn, startSelectionRange.startColumn, actualMergeInfo.startColumn);
-        const newEndColumn = Math.max(actualColumn, startSelectionRange.endColumn, actualMergeInfo.endColumn);
+        const newStartRow = Math.min(startSelectionRange.startRow, anchorRange.startRow);
+        const newEndRow = Math.max(startSelectionRange.endRow, anchorRange.endRow);
+        const newStartColumn = Math.min(startSelectionRange.startColumn, anchorRange.startColumn);
+        const newEndColumn = Math.max(startSelectionRange.endColumn, anchorRange.endColumn);
 
-        /**
-         * Calculate whether there are merged cells within the range. If there are, recursively expand the selection again.
-         */
-        const range = skeleton.expandRangeByMerge({
+        const range = {
             startRow: newStartRow,
             startColumn: newStartColumn,
             endRow: newEndRow,
             endColumn: newEndColumn,
-        });
+        };
+        // Header selections keep exact row/column boundaries; normal selections include intersecting merged cells.
+        const rangeWithMergedCells = this._shouldDetectMergedCells ? skeleton.expandRangeByMerge(range) : range;
         const selectionWithStyle = {
-            range,
+            range: rangeWithMergedCells,
             primary: convertPrimaryWithCoordToPrimary(currentCell),
             style: null,
         };

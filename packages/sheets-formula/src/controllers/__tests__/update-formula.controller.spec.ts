@@ -15,6 +15,7 @@
  */
 
 import type { Dependency, ICellData, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { CellValueType, ICommandService, IConfigService, IUniverInstanceService, LocaleType, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import {
     FormulaDataModel,
@@ -695,6 +696,49 @@ describe('UpdateFormulaController', () => {
         expect(getDefinedNameRef()).toBe('=SUM(Sheet1!$C$1:$C$2)');
         expect(getFormula()).toBe('=RANGE_NAME+SUM(RANGE_NAME)');
         expect(getCellFormula()).toBe('=RANGE_NAME+SUM(RANGE_NAME)');
+    });
+
+    it.each(['0', '1', 'TRUE'])('preserves text %s when replaying formula edits and undo on a replica', async (text) => {
+        const replica = createFacadeTestBed(createWorkbookData());
+        const replicaCommands = replica.injector.get(ICommandService);
+        replicaCommands.registerCommand(SetRangeValuesMutation);
+        const mutations: ISetRangeValuesMutationParams[] = [];
+        const subscription = commandService.onCommandExecuted((command) => {
+            if (command.id === SetRangeValuesMutation.id) {
+                mutations.push(structuredClone(command.params as ISetRangeValuesMutationParams));
+            }
+        });
+        const getCell = (bed: typeof testBed): Nullable<ICellData> => bed.injector
+            .get(IUniverInstanceService)
+            .getUnit<Workbook>('test')
+            ?.getSheetBySheetId('sheet1')
+            ?.getCellMatrix()
+            .getValue(5, 2);
+        const replay = (): void => {
+            for (const params of mutations.splice(0)) {
+                replicaCommands.syncExecuteCommand(SetRangeValuesMutation.id, params, { onlyLocal: true });
+            }
+            expect(getCell(replica)).toEqual(getCell(testBed));
+        };
+
+        try {
+            await commandService.executeCommand(SetRangeValuesCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: { startRow: 5, endRow: 5, startColumn: 2, endColumn: 2 },
+                value: { v: text, t: CellValueType.STRING, f: null, si: null },
+            });
+            replay();
+            expect(getCell(replica)).toMatchObject({ v: text, t: CellValueType.STRING });
+            await commandService.executeCommand(UndoCommand.id);
+            replay();
+            await commandService.executeCommand(RedoCommand.id);
+            replay();
+            expect(getCell(replica)).toMatchObject({ v: text, t: CellValueType.STRING });
+        } finally {
+            subscription.dispose();
+            replica.univer.dispose();
+        }
     });
 
     it('should sync formula data for value mutations and ignore style-only updates', async () => {

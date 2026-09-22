@@ -28,6 +28,7 @@ export enum TableColumnFilterTypeEnum {
     manual = 'manual',
     condition = 'condition',
     color = 'color',
+    record = 'record',
 }
 
 export enum TableConditionTypeEnum {

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IMenuSchema } from '@univerjs/ui';
 import {
     CommandType,
     ICommandService,
@@ -33,6 +34,7 @@ import {
     CopyCommand,
     DesktopDialogService,
     DesktopMessageService,
+    DesktopRibbonService,
     DesktopSidebarService,
     FontService,
     IDialogService,
@@ -40,6 +42,7 @@ import {
     IMenuManagerService,
     IMessageService,
     IPlatformService,
+    IRibbonService,
     IShortcutService,
     ISidebarService,
     IUIPartsService,
@@ -48,6 +51,7 @@ import {
     MenuManagerService,
     PasteCommand,
     PlatformService,
+    RibbonStartGroup,
     ShortcutService,
     UI_PLUGIN_CONFIG_KEY,
     UIPartsService,
@@ -151,6 +155,53 @@ describe('ui facade', () => {
         expect(menuKeys).toContain('custom-submenu');
         expect(menuKeys).toContain('first-action');
         expect(menuKeys).toContain('second-action');
+    });
+
+    it('updates ribbon menu order and grid layout while preserving menu actions and earlier overrides', async () => {
+        const injector = univer.__getInjector();
+        injector.add([IRibbonService, { useClass: DesktopRibbonService }]);
+        const ribbonService = injector.get(IRibbonService);
+        const actionCalls: string[] = [];
+        let ribbon: IMenuSchema[] = [];
+        const subscription = ribbonService.ribbon$.subscribe((value) => {
+            ribbon = value;
+        });
+
+        univerAPI.updateMenuConfig({
+            first: { title: 'Renamed', gridLayout: { row: 1, column: 1, width: 80 } },
+        });
+        univerAPI.createMenu({
+            id: 'first',
+            title: 'First',
+            action: () => actionCalls.push('clicked'),
+            order: 0,
+            gridLayout: { row: 1, column: 1, showLabel: true },
+        }).appendTo(RibbonStartGroup.FORMAT);
+        univerAPI.createSubmenu({
+            id: 'second',
+            title: 'Second',
+            order: 1,
+            gridLayout: { row: 2, column: 1 },
+        }).addSubmenu(univerAPI.createMenu({ id: 'child', title: 'Child', action: 'child.command' })).appendTo(RibbonStartGroup.FORMAT);
+
+        expect(ribbon[0].children?.[0].children?.map((item) => [item.key, item.gridLayout?.row])).toEqual([
+            ['first', 1],
+            ['second', 2],
+        ]);
+        expect(univerAPI.updateMenuConfig({
+            first: { order: 2, gridLayout: { row: 2, column: 1 } },
+            second: { order: 0, gridLayout: { row: 1, column: 1 } },
+        })).toBe(univerAPI);
+
+        const items = ribbon[0].children![0].children!;
+        expect(items.map((item) => item.key)).toEqual(['second', 'first']);
+        expect(items[0].gridLayout).toEqual({ row: 1, column: 1 });
+        expect(items[1].gridLayout).toEqual({ row: 2, column: 1, showLabel: true, width: 80 });
+        expect(items[1].item?.title).toBe('Renamed');
+        await injector.get(ICommandService).executeCommand(items[1].item!.commandId!);
+        expect(actionCalls).toEqual(['clicked']);
+
+        subscription.unsubscribe();
     });
 
     it('registers UI parts, toggles visibility, and exposes UI enums from the facade', () => {

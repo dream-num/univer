@@ -17,6 +17,8 @@
 import { Disposable, Inject } from '@univerjs/core';
 import { ColorPicker } from '@univerjs/design';
 import {
+    BrushIcon,
+    ClearFormatDoubleIcon,
     ExpandIcon,
     FeatureSearchIcon,
     IncreaseIcon,
@@ -63,6 +65,8 @@ export class ComponentsController extends Disposable {
 
     private _registerIcons(): void {
         this.disposeWithMe(this._iconManager.register({
+            BrushIcon,
+            ClearFormatDoubleIcon,
             ExpandIcon,
             IncreaseIcon,
             KeyboardIcon,

@@ -40,6 +40,7 @@ import { ComponentsController } from './controllers/components.controller';
 import { DrawingContextMenuController } from './controllers/drawing-context-menu.controller';
 import { SheetCellImageHoverRenderController } from './controllers/render-controllers/sheet-celll-image-hover.render-controller';
 import { SheetsDrawingRenderController } from './controllers/render-controllers/sheet-drawing.render-controller';
+import { WorksheetBackgroundRenderController } from './controllers/render-controllers/worksheet-background.render-controller';
 import { SheetCellImageAutofillController } from './controllers/sheet-cell-image-autofill.controller';
 import { SheetCellImageCopyPasteController } from './controllers/sheet-cell-image-copy-paste.controller';
 import { SheetCellImageController } from './controllers/sheet-cell-image.controller';
@@ -149,6 +150,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [SheetDrawingActiveRenderController],
             [SheetsDrawingRenderController],
             [SheetCellImageHoverRenderController],
+            [WorksheetBackgroundRenderController],
         ] as Dependency[]).forEach((m) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
         });

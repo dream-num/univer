@@ -19,6 +19,11 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-drawing-ui': {
         title: 'Obraz',
+        backgroundImage: {
+            title: 'Obraz tła',
+            add: 'Dodaj obraz tła',
+            delete: 'Usuń obraz tła',
+        },
         uploadLoading: {
             loading: 'Ładowanie..., pozostało',
         },

@@ -77,6 +77,9 @@ export type {
 } from './services/dom/canvas-dom-layer.service';
 export { FontService, IFontService } from './services/font.service';
 export type { IFontConfig } from './services/font.service';
+export { bindFormatPainterCanvas } from './services/format-painter/format-painter-canvas';
+export { FormatPainterSessionService } from './services/format-painter/format-painter-session.service';
+export type { IFormatPainterTarget } from './services/format-painter/format-painter-session.service';
 export { DesktopGalleryService } from './services/gallery/desktop-gallery.service';
 export { IGalleryService } from './services/gallery/gallery.service';
 export { DesktopLayoutService, ILayoutService } from './services/layout/layout.service';

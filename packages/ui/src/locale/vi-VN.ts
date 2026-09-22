@@ -19,6 +19,8 @@ import emojiLocale from './emoji-locale/vi-VN.generated';
 
 const locale: typeof enUS = {
     ui: {
+        clearFormatting: 'Xóa định dạng',
+        formatPainter: 'Sao chép định dạng',
         accessibility: {
             menu: 'Trình đơn',
             zoom: 'Thu phóng',

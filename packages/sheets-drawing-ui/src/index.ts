@@ -23,10 +23,16 @@ export type { IInsertImageCommandParams } from './commands/commands/insert-image
 export { MoveDrawingsCommand } from './commands/commands/move-drawings.command';
 export { SaveCellImagesCommand } from './commands/commands/save-cell-images.command';
 export { UngroupSheetDrawingCommand } from './commands/commands/ungroup-sheet-drawing.command';
+export {
+    AddWorksheetBackgroundImageCommand,
+    DeleteWorksheetBackgroundImageCommand,
+} from './commands/commands/worksheet-background-image.command';
+export type { IAddWorksheetBackgroundImageCommandParams } from './commands/commands/worksheet-background-image.command';
 export { EditSheetDrawingOperation } from './commands/operations/edit-sheet-drawing.operation';
 export { SidebarSheetDrawingOperation } from './commands/operations/open-drawing-panel.operation';
 export type { IUniverSheetsDrawingUIConfig } from './config/config';
 export { SheetsDrawingGroupCopyPasteController } from './controllers/sheet-drawing-group-copy-paste.controller';
+export type { IGroupFeaturePasteHookParams } from './controllers/sheet-drawing-group-copy-paste.controller';
 export { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 export { registerSheetsDrawingFloatingHostCapability, SHEETS_DRAWING_FLOATING_HOST_DEPENDENCIES } from './embed';
 export { SHEETS_IMAGE_MENU_ID } from './menu/image.menu';

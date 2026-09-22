@@ -18,10 +18,14 @@
  * @vitest-environment jsdom
  */
 
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentDataModel } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '../../../services/doc-embed-integration.service';
+import {
+    EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
+    EmbedInteractionBoundaryService,
+    EmbedRuntimeFocusCoordinator,
+} from '../../../services/doc-embed-integration.service';
 import { DocInputController } from '../doc-input.controller';
 
 describe('DocInputController', () => {
@@ -38,11 +42,7 @@ describe('DocInputController', () => {
         new DocInputController(
             {
                 unitId: 'host-doc',
-                unit: {
-                    getSelfOrHeaderFooterModel: vi.fn(() => ({
-                        getBody: vi.fn(() => ({ dataStream: '\r\n' })),
-                    })),
-                },
+                unit: new DocumentDataModel({ body: ({ dataStream: '\r\n' }) }),
             } as never,
             { onInput$, getAllRectRanges: vi.fn(() => []) } as never,
             { getSkeleton: vi.fn(() => ({})) } as never,
@@ -83,11 +83,7 @@ describe('DocInputController', () => {
         new DocInputController(
             {
                 unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-                unit: {
-                    getSelfOrHeaderFooterModel: vi.fn(() => ({
-                        getBody: vi.fn(() => ({ dataStream: '\r\n' })),
-                    })),
-                },
+                unit: new DocumentDataModel({ body: ({ dataStream: '\r\n' }) }),
             } as never,
             { onInput$, getAllRectRanges: vi.fn(() => []) } as never,
             { getSkeleton: vi.fn(() => ({})) } as never,
@@ -132,11 +128,7 @@ describe('DocInputController', () => {
         new DocInputController(
             {
                 unitId: 'other-host-doc',
-                unit: {
-                    getSelfOrHeaderFooterModel: vi.fn(() => ({
-                        getBody: vi.fn(() => ({ dataStream: '\r\n' })),
-                    })),
-                },
+                unit: new DocumentDataModel({ body: ({ dataStream: '\r\n' }) }),
             } as never,
             { onInput$, getAllRectRanges: vi.fn(() => []) } as never,
             { getSkeleton: vi.fn(() => ({})) } as never,
@@ -187,11 +179,7 @@ describe('DocInputController', () => {
         new DocInputController(
             {
                 unitId: 'child-doc',
-                unit: {
-                    getSelfOrHeaderFooterModel: vi.fn(() => ({
-                        getBody: vi.fn(() => ({ dataStream: '\r\n' })),
-                    })),
-                },
+                unit: new DocumentDataModel({ body: ({ dataStream: '\r\n' }) }),
             } as never,
             { onInput$, getAllRectRanges: vi.fn(() => []) } as never,
             { getSkeleton: vi.fn(() => ({})) } as never,
@@ -241,11 +229,7 @@ describe('DocInputController', () => {
         new DocInputController(
             {
                 unitId: 'child-doc',
-                unit: {
-                    getSelfOrHeaderFooterModel: vi.fn(() => ({
-                        getBody: vi.fn(() => ({ dataStream: '\r\n' })),
-                    })),
-                },
+                unit: new DocumentDataModel({ body: ({ dataStream: '\r\n' }) }),
             } as never,
             { onInput$, getAllRectRanges: vi.fn(() => []) } as never,
             { getSkeleton: vi.fn(() => ({})) } as never,
@@ -278,7 +262,10 @@ describe('DocInputController', () => {
 
     it('routes input over mixed text and table ranges through structural replacement', async () => {
         const onInput$ = new Subject<unknown>();
-        const executeCommand = vi.fn(() => Promise.resolve(true));
+        const executeCommand = vi.fn((
+            _id: string,
+            _params?: { body?: { textRuns?: Array<{ ts?: unknown }> } }
+        ) => Promise.resolve(true));
         const activeRange = {
             segmentId: '',
             startOffset: 0,
@@ -290,11 +277,7 @@ describe('DocInputController', () => {
         new DocInputController(
             {
                 unitId: 'test-doc',
-                unit: {
-                    getSelfOrHeaderFooterModel: vi.fn(() => ({
-                        getBody: vi.fn(() => ({ dataStream: 'text\r\n' })),
-                    })),
-                },
+                unit: new DocumentDataModel({ body: ({ dataStream: 'text\r\n' }) }),
             } as never,
             {
                 onInput$,

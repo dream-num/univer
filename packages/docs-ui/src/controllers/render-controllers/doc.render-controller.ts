@@ -187,6 +187,9 @@ function getBodyMutationInvalidation(
     let oldOffset = 0;
     let newOffset = 0;
     let invalidation: IDocumentLayoutInvalidation | undefined;
+    const preservesOffsets = textActions.every((action) =>
+        typeof action === 'object' && action != null && 't' in action && action.t === TextXActionType.RETAIN
+    );
     let sawTrailingRetain = false;
     for (const action of textActions) {
         const length = getTextXActionLength(action);
@@ -200,8 +203,10 @@ function getBodyMutationInvalidation(
             sawTrailingRetain ||= invalidation != null;
             continue;
         }
-        if (sawTrailingRetain) {
-            // Multiple disjoint edits need more than one offset transform. Fall
+        if (sawTrailingRetain && !preservesOffsets) {
+            // Disjoint formatting retains preserve offsets, so one enclosing range
+            // safely invalidates every changed paragraph, including the gaps.
+            // Multiple disjoint text edits need more than one offset transform. Fall
             // back to ordinary suffix pagination instead of reusing a wrong tail.
             return undefined;
         }
@@ -1152,6 +1157,10 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         error: unknown,
         preserveCompletedLayout: boolean
     ): void {
+        if (this._disposed || layoutRequestId !== this._layoutRequestId) {
+            return;
+        }
+
         if (!allowRecovery) {
             this._logService.error('[DocRenderController]: Worker layout failed; using main-thread layout.', error);
             this._layoutCoordinator.schedule(skeleton, options, mainThreadCallbacks);
@@ -1179,6 +1188,9 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                 preserveCompletedLayout
             );
         }).catch((recoveryError: unknown) => {
+            if (this._disposed || layoutRequestId !== this._layoutRequestId) {
+                return;
+            }
             this._logService.error('[DocRenderController]: document layout Worker recovery failed; using main-thread layout.', recoveryError);
             this._layoutCoordinator.schedule(skeleton, options, mainThreadCallbacks);
         });

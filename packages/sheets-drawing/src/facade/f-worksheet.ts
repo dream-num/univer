@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam, IGroupBaseBound } from '@univerjs/core';
+import type { IDrawingParam, IGroupBaseBound, IWorksheetBackgroundImage, Nullable } from '@univerjs/core';
 import type { IFBlobSource } from '@univerjs/core/facade';
 import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { ISheetDrawing, ISheetDrawingPlacement, ISheetDrawingPlacementInput, ISheetImage } from '@univerjs/sheets-drawing';
@@ -22,7 +22,7 @@ import { DrawingTypeEnum, generateRandomId, ImageSourceType, IUndoRedoService } 
 import { isGroupableDrawingType } from '@univerjs/drawing';
 import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
 import { SheetSkeletonService } from '@univerjs/sheets';
-import { DrawingApplyType, getSheetDrawingPlacement, InsertSheetDrawingCommand, ISheetDrawingService, normalizeSheetDrawingPlacement, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetSheetDrawingCommand, SetSheetDrawingPlacementCommand, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
+import { DrawingApplyType, getSheetDrawingPlacement, InsertSheetDrawingCommand, ISheetDrawingService, normalizeSheetDrawingPlacement, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetSheetDrawingCommand, SetSheetDrawingPlacementCommand, SetWorksheetBackgroundImageCommand, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { FOverGridImage, FOverGridImageBuilder } from './f-over-grid-image';
 
@@ -47,6 +47,26 @@ export interface ISheetDrawingLayout {
  * @ignore
  */
 export interface IFWorksheetDrawingMixin {
+    /**
+     * Returns the image tiled behind the worksheet grid.
+     * @returns {IWorksheetBackgroundImage | null} The worksheet background image, or `null` when absent.
+     */
+    getBackgroundImage(): Nullable<IWorksheetBackgroundImage>;
+
+    /**
+     * Sets the image tiled behind the worksheet grid. Worksheet background images are not printed.
+     * @param {string} source Image source.
+     * @param {ImageSourceType} imageSourceType Image source type.
+     * @returns The current worksheet instance for chaining.
+     */
+    setBackgroundImage(source: string, imageSourceType?: ImageSourceType): this;
+
+    /**
+     * Deletes the image tiled behind the worksheet grid.
+     * @returns The current worksheet instance for chaining.
+     */
+    deleteBackgroundImage(): this;
+
     /**
      * Insert an image to the sheet
      * @param {string} url - The image url
@@ -519,6 +539,29 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
 
     private get _undoRedoService(): IUndoRedoService {
         return this._injector.get(IUndoRedoService);
+    }
+
+    override getBackgroundImage(): Nullable<IWorksheetBackgroundImage> {
+        const backgroundImage = this._worksheet.getConfig().backgroundImage;
+        return backgroundImage ? { ...backgroundImage } : null;
+    }
+
+    override setBackgroundImage(source: string, imageSourceType: ImageSourceType = ImageSourceType.URL): this {
+        this._commandService.syncExecuteCommand(SetWorksheetBackgroundImageCommand.id, {
+            unitId: this._fWorkbook.getId(),
+            subUnitId: this.getSheetId(),
+            backgroundImage: { source, imageSourceType },
+        });
+        return this;
+    }
+
+    override deleteBackgroundImage(): this {
+        this._commandService.syncExecuteCommand(SetWorksheetBackgroundImageCommand.id, {
+            unitId: this._fWorkbook.getId(),
+            subUnitId: this.getSheetId(),
+            backgroundImage: null,
+        });
+        return this;
     }
 
     override async insertImage(url: IFBlobSource | string, column?: number, row?: number, offsetX?: number, offsetY?: number): Promise<boolean> {

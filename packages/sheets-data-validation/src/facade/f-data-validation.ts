@@ -45,6 +45,9 @@ import { FDataValidationBuilder } from './f-data-validation-builder';
  * @hideconstructor
  */
 export class FDataValidation {
+    /**
+     * The underlying validation rule data. Use the Facade setters to update a rule attached to a worksheet.
+     */
     rule: IDataValidationRule;
     private _worksheet: Worksheet | undefined;
     private _injector: Injector | undefined;

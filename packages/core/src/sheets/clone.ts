@@ -293,6 +293,14 @@ export function cloneWorksheetData(worksheet: IWorksheetData): IWorksheetData {
         defaultRowHeight: worksheet.defaultRowHeight,
         showGridlines: worksheet.showGridlines,
         rightToLeft: worksheet.rightToLeft,
+        backgroundImage: worksheet.backgroundImage
+            ? {
+                source: worksheet.backgroundImage.source,
+                imageSourceType: worksheet.backgroundImage.imageSourceType,
+                scaleX: worksheet.backgroundImage.scaleX,
+                scaleY: worksheet.backgroundImage.scaleY,
+            }
+            : undefined,
 
         // Freeze - simple object with primitive values
         freeze: {

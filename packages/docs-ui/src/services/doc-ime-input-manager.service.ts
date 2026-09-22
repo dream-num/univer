@@ -107,7 +107,7 @@ export class DocIMEInputManagerService extends RxDisposable implements IRenderMo
 
         const { unitId } = this._undoMutationParamsCache[0];
         const firstUndoParams = this._undoMutationParamsCache[0];
-        const lastRedoParams = this._redoMutationParamsCache.at(-1);
+        const lastRedoParams = this._redoMutationParamsCache[this._redoMutationParamsCache.length - 1];
 
         const undoMutationParams: IRichTextEditingMutationParams = {
             unitId,
@@ -116,6 +116,7 @@ export class DocIMEInputManagerService extends RxDisposable implements IRenderMo
             }, null as JSONXActions),
             textRanges: [], // Add empty array, will never use, just fix type error
             segmentId: firstUndoParams.segmentId,
+            ...(firstUndoParams.layoutState === undefined ? {} : { layoutState: firstUndoParams.layoutState }),
         };
 
         const redoMutationParams: IRichTextEditingMutationParams = {
@@ -125,6 +126,7 @@ export class DocIMEInputManagerService extends RxDisposable implements IRenderMo
             }, null as JSONXActions),
             textRanges: lastRedoParams?.textRanges ?? [],
             segmentId: lastRedoParams?.segmentId,
+            ...(lastRedoParams?.layoutState === undefined ? {} : { layoutState: lastRedoParams.layoutState }),
             options: lastRedoParams?.options,
             isEditing: lastRedoParams?.isEditing,
         };

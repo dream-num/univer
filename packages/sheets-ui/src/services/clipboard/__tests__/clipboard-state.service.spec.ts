@@ -434,6 +434,49 @@ describe('SheetClipboardService', () => {
         expect(pastedFiles).toEqual([{ name: 'clipboard-image.png', pasteType: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMAT }]);
     });
 
+    it('uses the same HTML and image precedence for ClipboardItem and legacy paste', async () => {
+        const { injector, service } = createTestContext();
+        selectCell(injector);
+        const pastedCells: string[] = [];
+        const pastedFiles: string[] = [];
+        const target = service.capturePasteTarget();
+
+        service.addClipboardHook({
+            id: 'html-image-precedence',
+            onPasteCells() {
+                pastedCells.push('html');
+                return { redos: [], undos: [] };
+            },
+            onPasteFiles(_payload: unknown, files: File[]) {
+                pastedFiles.push(files[0].name);
+                return { redos: [], undos: [] };
+            },
+        } as never);
+
+        const tableHTML = '<table><tbody><tr><td>North</td><td>South</td></tr></tbody></table>';
+        const preview = new File(['preview'], 'preview.png', { type: 'image/png' });
+        const tableItem = new MockClipboardItem({
+            'text/html': tableHTML,
+            'image/png': 'preview',
+        });
+
+        expect(await service.paste(tableItem as unknown as ClipboardItem, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE, target)).toBe(true);
+        expect(await service.legacyPaste(tableHTML, undefined, [preview], undefined, target)).toBe(true);
+        expect(pastedCells).toEqual(['html', 'html']);
+        expect(pastedFiles).toEqual([]);
+
+        const imageHTML = '<img src="data:image/png;base64,cHJldmlldw==">';
+        const imageItem = new MockClipboardItem({
+            'text/html': imageHTML,
+            'image/png': 'preview',
+        });
+
+        expect(await service.paste(imageItem as unknown as ClipboardItem, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE, target)).toBe(true);
+        expect(await service.legacyPaste(imageHTML, undefined, [preview], undefined, target)).toBe(true);
+        expect(pastedCells).toEqual(['html', 'html']);
+        expect(pastedFiles).toEqual(['clipboard-image.png', 'preview.png']);
+    });
+
     it('routes formula clipboard payload to structured paste before html fallback', async () => {
         const { injector, service } = createTestContext();
         selectCell(injector, 5, 6);

@@ -50,6 +50,11 @@ export class DocMenuStyleService extends Disposable {
 
     private _init() {
         this._listenDocRangeChange();
+        this.disposeWithMe(
+            this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC).subscribe(() => {
+                this._clearStyleCache();
+            })
+        );
     }
 
     private _listenDocRangeChange() {

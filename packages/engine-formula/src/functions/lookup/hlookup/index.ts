@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
@@ -45,7 +46,7 @@ export class Hlookup extends BaseFunction {
         }
 
         if (rowIndexNum.isError()) {
-            return ErrorValueObject.create(ErrorType.NA);
+            return rowIndexNum;
         }
 
         if (rangeLookup?.isError()) {
@@ -61,30 +62,38 @@ export class Hlookup extends BaseFunction {
         const rowIndexNumValue = this.getIndexNumValue(rowIndexNum);
 
         if (rowIndexNumValue instanceof ErrorValueObject) {
-            return rowIndexNumValue;
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
+
+        const rowIndex = Math.floor(rowIndexNumValue);
 
         const searchArray = (tableArray as ArrayValueObject).slice([0, 1]);
 
-        const resultArray = (tableArray as ArrayValueObject).slice([rowIndexNumValue - 1, rowIndexNumValue]);
+        const resultArray = (tableArray as ArrayValueObject).slice([rowIndex - 1, rowIndex]);
 
-        if (searchArray == null || resultArray == null) {
+        if (searchArray == null) {
             return ErrorValueObject.create(ErrorType.REF);
         }
 
         if (lookupValue.isArray()) {
-            return lookupValue.map((value) => this._handleSingleObject(value, searchArray, resultArray, rangeLookupValue));
+            return lookupValue.map((value) => this._handleSingleObject(value, searchArray, resultArray, rangeLookupValue, rowIndex));
         }
 
-        return this._handleSingleObject(lookupValue, searchArray, resultArray, rangeLookupValue);
+        return this._handleSingleObject(lookupValue, searchArray, resultArray, rangeLookupValue, rowIndex);
     }
 
     private _handleSingleObject(
         value: BaseValueObject,
         searchArray: ArrayValueObject,
-        resultArray: ArrayValueObject,
-        rangeLookupValue: number
-    ) {
+        resultArray: Nullable<ArrayValueObject>,
+        rangeLookupValue: number,
+        rowIndex: number
+    ): BaseValueObject {
+        if (resultArray == null || rowIndex < 1) {
+            const match = this._handleSingleObject(value, searchArray, searchArray, rangeLookupValue, 1);
+            return match.isError() ? match : ErrorValueObject.create(rowIndex < 1 ? ErrorType.VALUE : ErrorType.REF);
+        }
+
         if (rangeLookupValue === 0) {
             return this._blankResultAsZero(this.equalSearch(value, searchArray, resultArray));
         }

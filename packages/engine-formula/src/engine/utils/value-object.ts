@@ -18,7 +18,7 @@ import type { ICellData, Nullable } from '@univerjs/core';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import { CellValueType } from '@univerjs/core';
-import { ErrorType } from '../../basics/error-type';
+import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
 import { CellReferenceObject } from '../reference-object/cell-reference-object';
 import { ColumnReferenceObject } from '../reference-object/column-reference-object';
@@ -28,7 +28,12 @@ import { ErrorValueObject } from '../value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
 import { expandArrayValueObject } from './array-object';
 import { isWildcard } from './compare';
-import { booleanObjectIntersection, findCompareToken, valueObjectCompare } from './object-compare';
+import {
+    booleanObjectIntersection,
+    createCriteriaValueObject,
+    findCompareToken,
+    valueObjectCompare,
+} from './object-compare';
 
 export function convertTonNumber(valueObject: BaseValueObject) {
     const currentValue = valueObject.getValue();
@@ -124,12 +129,11 @@ export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): 
                 ...cellWithCustomData,
             };
         }
-        // String "00"
-        // =IF(1,"0") evaluates to "0", which should be a normal string (regardless of whether it is a number or not). Forced strings only appear when preceded by single quotes
+        // Error-looking text must remain distinct from actual errors when read back.
         if (vo.isString()) {
             return {
                 v,
-                t: CellValueType.STRING,
+                t: ERROR_TYPE_SET.has(v as ErrorType) ? CellValueType.FORCE_STRING : CellValueType.STRING,
                 ...cellWithStyle,
                 ...cellWithCustomData,
             };
@@ -496,14 +500,14 @@ export function filterSameValueObjectResult(
         }
 
         if (rangeValueObject?.isNumber() && criteriaObject.isString()) {
-            const criteriaNumber = criteriaObject.convertToNumberObjectValue();
+            const criteriaNumber = createCriteriaValueObject(`${criteriaObject.getValue()}`, criteriaObject.getDateSystem());
 
             if (criteriaNumber.isNumber()) {
                 return rangeValueObject.compare(criteriaNumber, operator);
             }
         }
 
-        if (criteriaObject.isNumber() && criteriaObject.isDateFormat() && rangeValueObject?.isString()) {
+        if (operator !== compareToken.NOT_EQUAL && criteriaObject.isNumber() && criteriaObject.isDateFormat() && rangeValueObject?.isString()) {
             const rangeNumber = rangeValueObject.convertToNumberObjectValue();
 
             if (rangeNumber.isNumber()) {
@@ -520,7 +524,8 @@ export function filterSameValueObjectResult(
         }
 
         /**
-         * If the operator is '=' or '<>', we can compare string numbers against numeric criteria directly in COUNTIF, COUNTIFS, SUMIF, SUMIFS, etc.
+         * Equality criteria coerce numeric text; numeric inequality criteria
+         * retain the distinction between text cells and numeric cells.
          * Other operators require both valueObjects to be of the same type.
          * For example:
          * | A1    | B1  |
@@ -532,8 +537,8 @@ export function filterSameValueObjectResult(
          * =COUNTIF(A1:B1, '<=123') will return 1
          */
         if (operator === compareToken.EQUALS || operator === compareToken.NOT_EQUAL) {
-            if (criteriaObject.isNumber() && rangeValueObject?.isString()) {
-                const rangeNumber = rangeValueObject.convertToNumberObjectValue();
+            if (operator === compareToken.EQUALS && criteriaObject.isNumber() && rangeValueObject?.isString()) {
+                const rangeNumber = createCriteriaValueObject(`${rangeValueObject.getValue()}`, rangeValueObject.getDateSystem());
 
                 if (rangeNumber.isNumber()) {
                     return rangeNumber.compare(criteriaObject, operator);

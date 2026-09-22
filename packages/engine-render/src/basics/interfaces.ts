@@ -20,16 +20,19 @@ import type {
     IDocStyleBase,
     IDocumentLayout,
     IOffset,
-    IParagraphStyle,
     IReferenceSource,
     IScale,
     ISectionBreakBase,
     ISize,
-    ITextStyle,
     ITransformState,
     LocaleService,
 } from '@univerjs/core';
 import type { IDocumentCompatibilityPolicy } from '../components/docs/document-compatibility';
+import type {
+    IDocumentLayoutParagraphStyle,
+    IDocumentLayoutRenderConfig,
+    IDocumentLayoutTextStyle,
+} from '../components/docs/document-layout-presentation';
 import type { DataStreamTreeNode } from '../components/docs/view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../components/docs/view-model/document-view-model';
 import type {
@@ -93,7 +96,7 @@ export interface IFontLocale {
 
 export interface IDocsConfig extends IReferenceSource, IDocumentLayout {
     localeService: LocaleService;
-    documentTextStyle?: ITextStyle;
+    documentTextStyle?: IDocumentLayoutTextStyle;
     documentCompatibilityPolicy?: IDocumentCompatibilityPolicy;
     headerTreeMap: Map<string, DocumentViewModel>;
     footerTreeMap: Map<string, DocumentViewModel>;
@@ -112,6 +115,7 @@ export interface IFooterIds {
 }
 
 export interface ISectionBreakConfig extends IDocStyleBase, ISectionBreakBase, IDocsConfig {
+    renderConfig?: IDocumentLayoutRenderConfig;
     sectionId: string;
     /** Cell continuation pages retain their segment and physical row-slice budgets. */
     cellTableId?: string;
@@ -147,7 +151,7 @@ export interface IParagraphConfig {
     pptxEmptyParagraphFontSize?: number;
     pptxHasExplicitEndParaFontSize?: boolean;
     sumPptxParagraphSpacing?: boolean;
-    docxFallbackAnchorLeft?: IParagraphStyle['indentStart'];
+    docxFallbackAnchorLeft?: IDocumentLayoutParagraphStyle['indentStart'];
     paragraphNonInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
     paragraphInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
     topBottomCustomBlockFlowBottom?: number;
@@ -156,7 +160,7 @@ export interface IParagraphConfig {
     bulletSkeleton?: IDocumentSkeletonBullet;
     // pageContentWidth: number;
     // pageContentHeight: number;
-    paragraphStyle?: IParagraphStyle;
+    paragraphStyle?: IDocumentLayoutParagraphStyle;
     borderTopSpace?: number;
     borderBottomSpace?: number;
     skeHeaders: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>;
@@ -167,7 +171,7 @@ export interface IParagraphConfig {
 
 export interface IFontCreateConfig {
     fontStyle: IDocumentSkeletonFontStyle;
-    textStyle: ITextStyle;
+    textStyle: IDocumentLayoutTextStyle;
     charSpace: number;
     snapToGrid: BooleanNumber;
     documentCompatibilityPolicy?: IDocumentCompatibilityPolicy;

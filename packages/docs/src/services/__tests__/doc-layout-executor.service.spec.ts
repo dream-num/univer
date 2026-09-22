@@ -155,6 +155,7 @@ describe('DocLayoutExecutorService', () => {
 
     afterEach(() => {
         univer.dispose();
+        vi.restoreAllMocks();
     });
 
     it('owns Worker sessions only for paginated and modern documents', async () => {
@@ -223,6 +224,114 @@ describe('DocLayoutExecutorService', () => {
             sessionEpoch: expect.any(Number),
         });
         registration.dispose();
+    });
+
+    it.each(['create', 'start'] as const)('ignores a rejected %s request after its document session is disposed', async (operation) => {
+        const injector = univer.__getInjector();
+        const service = injector.get(DocLayoutExecutorService);
+        const executor = createExecutor();
+        let rejectRequest!: (error: Error) => void;
+        const pending = new Promise<never>((_resolve, reject) => {
+            rejectRequest = reject;
+        });
+        if (operation === 'create') {
+            vi.mocked(executor.createSession).mockReturnValue(pending);
+        } else {
+            vi.mocked(executor.startLayout).mockReturnValue(pending);
+        }
+        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+        service.register(executor);
+        univer.createUnit<IDocumentData, DocumentDataModel>(
+            UniverInstanceType.UNIVER_DOC,
+            createDocumentData('traditional-doc', DocumentFlavor.TRADITIONAL)
+        );
+        await vi.waitFor(() => expect(executor.createSession).toHaveBeenCalledOnce());
+        const started = service.startLayout(createMountIdentity(), { reason: 'initial' }, 32);
+        const settled = started.catch(() => null);
+        if (operation === 'start') {
+            await vi.waitFor(() => expect(executor.startLayout).toHaveBeenCalledOnce());
+        }
+        injector.get(IUniverInstanceService).disposeUnit('traditional-doc');
+        rejectRequest(new Error('Worker transport closed'));
+        await settled;
+        expect(error).not.toHaveBeenCalled();
+    });
+
+    it.each(['unregister', 'dispose', 'active'] as const)('handles rejected session cleanup while the executor is %s', async (state) => {
+        const injector = univer.__getInjector();
+        const service = injector.get(DocLayoutExecutorService);
+        const executor = createExecutor();
+        let rejectCleanup!: (error: Error) => void;
+        vi.mocked(executor.disposeSession).mockReturnValue(new Promise<void>((_resolve, reject) => {
+            rejectCleanup = reject;
+        }));
+        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const registration = service.register(executor);
+        univer.createUnit<IDocumentData, DocumentDataModel>(
+            UniverInstanceType.UNIVER_DOC,
+            createDocumentData('traditional-doc', DocumentFlavor.TRADITIONAL)
+        );
+        await vi.waitFor(() => expect(executor.createSession).toHaveBeenCalledOnce());
+        if (state === 'dispose') {
+            service.dispose();
+        } else {
+            injector.get(IUniverInstanceService).disposeUnit('traditional-doc');
+            if (state === 'unregister') {
+                registration.dispose();
+            }
+        }
+        expect(executor.disposeSession).toHaveBeenCalledOnce();
+        const failure = new Error('Worker transport closed');
+        rejectCleanup(failure);
+        await Promise.resolve();
+        if (state === 'active') {
+            expect(error).toHaveBeenCalledWith(expect.stringContaining('failed to dispose a Worker session'), failure);
+        } else {
+            expect(error).not.toHaveBeenCalled();
+        }
+    });
+
+    it('does not recreate a disposed document after a late Worker result requests a new snapshot', async () => {
+        const injector = univer.__getInjector();
+        const service = injector.get(DocLayoutExecutorService);
+        const executor = createExecutor();
+        let finishStart!: (result: IDocLayoutStartResult) => void;
+        vi.mocked(executor.startLayout).mockReturnValue(new Promise((resolve) => {
+            finishStart = resolve;
+        }));
+        service.register(executor);
+        univer.createUnit<IDocumentData, DocumentDataModel>(
+            UniverInstanceType.UNIVER_DOC,
+            createDocumentData('traditional-doc', DocumentFlavor.TRADITIONAL)
+        );
+        const started = service.startLayout(createMountIdentity(), { reason: 'initial' }, 32);
+        await vi.waitFor(() => expect(executor.startLayout).toHaveBeenCalledOnce());
+        injector.get(IUniverInstanceService).disposeUnit('traditional-doc');
+        finishStart({ status: DocLayoutSessionStatus.NOT_FOUND });
+        await expect(started).resolves.toBeNull();
+        expect(executor.createSession).toHaveBeenCalledOnce();
+        expect(executor.startLayout).toHaveBeenCalledOnce();
+    });
+
+    it('keeps a replacement executor active when the previous recovery rejects', async () => {
+        const service = univer.__getInjector().get(DocLayoutExecutorService);
+        const executor = createExecutor();
+        let rejectRecovery!: (error: Error) => void;
+        vi.mocked(executor.recover).mockReturnValue(new Promise<void>((_resolve, reject) => {
+            rejectRecovery = reject;
+        }));
+        const registration = service.register(executor);
+        const recovery = service.recoverExecutor('traditional-doc', 'Worker failed');
+        const settled = recovery.catch((error: unknown) => error);
+        registration.dispose();
+        const replacement = createExecutor();
+        service.register(replacement);
+        await vi.waitFor(() => expect(service.getExecutorStatus().state).toBe(DocLayoutExecutorState.ACTIVE));
+        const failure = new Error('Old Worker closed');
+        rejectRecovery(failure);
+        expect(await settled).toBe(failure);
+        expect(service.getExecutor()).toBe(replacement);
+        expect(service.getExecutorStatus().state).toBe(DocLayoutExecutorState.ACTIVE);
     });
 
     it('cancels a deferred snapshot transfer when the document is disposed in the same task', async () => {

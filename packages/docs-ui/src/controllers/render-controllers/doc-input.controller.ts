@@ -20,11 +20,19 @@ import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
 import { Disposable, ICommandService, Inject, Optional, SHEET_EDITOR_UNITS } from '@univerjs/core';
 import { DocSkeletonManagerService, InsertTextCommand } from '@univerjs/docs';
-import { getCustomDecorationAtPosition, getCustomRangeAtPosition, getTextRunAtPosition } from '../../basics/paragraph';
+import {
+    getCustomDecorationAtPosition,
+    getCustomRangeAtPosition,
+    getTextRunForSelection,
+} from '../../basics/paragraph';
 import { AfterSpaceCommand } from '../../commands/commands/auto-format.command';
 import { ReplaceSelectionCommand } from '../../commands/commands/replace-content.command';
-import { IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../../services/doc-embed-integration.service';
+import {
+    IDocEmbedInteractionBoundaryService,
+    IDocEmbedRuntimeFocusCoordinator,
+} from '../../services/doc-embed-integration.service';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
+import { getEditorRuntimeConfig } from '../../services/editor/editor-runtime-config';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
 export class DocInputController extends Disposable implements IRenderModule {
@@ -91,19 +99,13 @@ export class DocInputController extends Disposable implements IRenderModule {
             const defaultTextStyle = this._docMenuStyleService.getDefaultStyle();
             const cacheStyle = this._docMenuStyleService.getStyleCache();
             const curCustomRange = getCustomRangeAtPosition(originBody?.customRanges ?? [], activeRange.endOffset, SHEET_EDITOR_UNITS.includes(unitId));
-            const curTextRun = getTextRunAtPosition(originBody, activeRange.endOffset, defaultTextStyle, cacheStyle, SHEET_EDITOR_UNITS.includes(unitId));
+            const curTextRun = getTextRunForSelection(originBody, activeRange, defaultTextStyle, cacheStyle, SHEET_EDITOR_UNITS.includes(unitId), getEditorRuntimeConfig(docDataModel)?.inheritParagraphStartStyle === true);
             const curCustomDecorations = getCustomDecorationAtPosition(originBody?.customDecorations ?? [], activeRange.endOffset);
 
             const insertBody = {
                 dataStream: content,
                 textRuns: curTextRun
-                    ? [
-                        {
-                            ...curTextRun,
-                            st: 0,
-                            ed: content.length,
-                        },
-                    ]
+                    ? [{ ...curTextRun, st: 0, ed: content.length }]
                     : [],
                 customRanges: curCustomRange
                     ? [{

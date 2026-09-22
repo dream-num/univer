@@ -84,6 +84,9 @@ export type IFDocumentInsertSectionBreakOptions = Partial<Omit<ISectionBreak, 's
  * @hideconstructor
  */
 export class FDocument extends FBaseInitialable {
+    /**
+     * The document unit id used to identify this document in commands and snapshots.
+     */
     readonly id: string;
 
     constructor(

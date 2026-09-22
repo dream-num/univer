@@ -22,6 +22,7 @@ import {
 } from '@univerjs/core';
 
 export type FDefaultAlignment = 'general';
+/** Horizontal alignment accepted by the Facade API. `normal` means right alignment. */
 export type FHorizontalAlignment = 'left' | 'center' | 'normal';
 export type FVerticalAlignment = 'top' | 'middle' | 'bottom';
 

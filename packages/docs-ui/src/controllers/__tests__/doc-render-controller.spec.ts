@@ -1806,6 +1806,43 @@ describe('doc render controller', () => {
         expect(backScrollController.scrollToRange).not.toHaveBeenCalled();
     });
 
+    it.each([
+        { useWorker: false, remoteCaret: undefined },
+        { useWorker: true, remoteCaret: undefined },
+        { useWorker: true, remoteCaret: 18 },
+        { useWorker: true, remoteCaret: 9_000 },
+    ])('invalidates disjoint paragraph formats with $useWorker Worker and remote caret $remoteCaret', ({ useWorker, remoteCaret }) => {
+        const { commandCallbacks, controller, skeletonManager } = createControllerFixture({
+            useWorker,
+            activeRange: remoteCaret == null ? undefined : { startOffset: remoteCaret, endOffset: remoteCaret, isActive: true },
+        });
+        commandCallbacks[0]({
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId: 'doc-unit',
+                textRanges: [{ startOffset: 7, endOffset: 26, collapsed: false, isActive: true }],
+                actions: ['body', {
+                    et: 'text-x',
+                    e: [
+                        { t: 'r', len: 12 },
+                        { t: 'r', len: 1, body: { dataStream: '', paragraphs: [{ startIndex: 0, bullet: { listId: 'list', listType: 'BULLET_LIST', nestingLevel: 0 } }] } },
+                        { t: 'r', len: 5 },
+                        { t: 'r', len: 1, body: { dataStream: '', paragraphs: [{ startIndex: 0, bullet: { listId: 'list', listType: 'BULLET_LIST', nestingLevel: 0 } }] } },
+                        { t: 'r', len: 7 },
+                        { t: 'r', len: 1, body: { dataStream: '', paragraphs: [{ startIndex: 0, bullet: { listId: 'list', listType: 'BULLET_LIST', nestingLevel: 0 } }] } },
+                        { t: 'r', len: 6 },
+                    ],
+                }],
+            },
+        } satisfies ICommandInfo, remoteCaret == null ? undefined : { fromCollab: true });
+
+        expect(skeletonManager.getSkeleton().startIncrementalLayout).toHaveBeenCalledWith(expect.objectContaining({
+            anchor: remoteCaret != null && remoteCaret > 27 ? remoteCaret : 12,
+            invalidation: { oldStart: 12, oldEnd: 27, newEnd: 27 },
+        }));
+        controller.dispose();
+    });
+
     it('derives the incremental invalidation from a body TextX edit composed with table metadata', () => {
         const { commandCallbacks, skeletonManager } = createControllerFixture({
             snapshot: {

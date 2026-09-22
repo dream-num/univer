@@ -1135,7 +1135,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2MY2: {
-        label: 'SUMPRODUKT',
+        label: 'SUMX2MY2',
         description: 'Diese Excel-Funktion gibt die Summe der Differenz der Quadrate der entsprechenden Werte in zwei Arrays zurück.',
         abstract: 'Diese Excel-Funktion gibt die Summe der Differenz der Quadrate der entsprechenden Werte in zwei Arrays zurück.',
         links: [
@@ -1150,7 +1150,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2PY2: {
-        label: 'SUMPRODUKT',
+        label: 'SUMX2PY2',
         description: 'Summiert für zusammengehörige Komponenten zweier Matrizen die Summen der Quadrate. Die Gesamtsumme aus der Summe von Quadratzahlen ist ein Ausdruck, der häufig in statistischen Berechnungen verwendet wird.',
         abstract: 'Summiert für zusammengehörige Komponenten zweier Matrizen die Summen der Quadrate. Die Gesamtsumme aus der Summe von Quadratzahlen ist ein Ausdruck, der häufig in statistischen Berechnungen verwendet wird.',
         links: [
@@ -1165,7 +1165,7 @@ const locale: typeof enUS = {
         },
     },
     SUMXMY2: {
-        label: 'SUMPRODUKT',
+        label: 'SUMXMY2',
         description: 'Die SUMXMY2-Funktion gibt die Summe der Quadrate der Unterschiede der entsprechenden Werte in zwei Arrays zurück.',
         abstract: 'Die SUMXMY2-Funktion gibt die Summe der Quadrate der Unterschiede der entsprechenden Werte in zwei Arrays zurück.',
         links: [

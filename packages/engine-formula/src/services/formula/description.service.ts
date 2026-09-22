@@ -203,8 +203,15 @@ export class DescriptionService extends Disposable implements IDescriptionServic
         const localeLabels = getLocaleLabels(currentLocale);
 
         const functionListLocale = Array.from(this._descriptions.values()).map((functionInfo) => {
+            // Determine if this is a built-in function or a custom function
+            const isBuiltIn = ALL_IMPLEMENTED_FUNCTIONS_SET.has(functionInfo.functionName);
+
             const result: any = {
-                functionName: functionInfo.functionName,
+                // For built-in functions, always use canonical name
+                // For custom functions with aliasFunctionName, use localized alias as functionName
+                functionName: isBuiltIn
+                    ? functionInfo.functionName
+                    : getFunctionName(functionInfo, localeService),
                 functionType: functionInfo.functionType,
                 description: localeService.t(functionInfo.description),
                 abstract: localeService.t(functionInfo.abstract),
@@ -217,11 +224,20 @@ export class DescriptionService extends Disposable implements IDescriptionServic
                 })),
             };
 
-            // Add locale-specific label from locale file if available
-            if (localeLabels) {
+            // Add locale-specific label from locale file if available (for built-in functions)
+            if (isBuiltIn && localeLabels) {
                 const localeEntry = localeLabels[functionInfo.functionName];
                 if (localeEntry && localeEntry.label) {
                     result.label = localeEntry.label;
+                }
+            }
+
+            // For built-in functions with aliasFunctionName, also add localized alias as label
+            if (isBuiltIn && !result.label && functionInfo.aliasFunctionName) {
+                const localizedAlias = localeService.t(functionInfo.aliasFunctionName);
+                // Only use as label if it's different from the canonical function name
+                if (localizedAlias !== functionInfo.functionName) {
+                    result.label = localizedAlias;
                 }
             }
 
@@ -239,19 +255,32 @@ export class DescriptionService extends Disposable implements IDescriptionServic
     private _registerDescriptions(descriptions: IFunctionInfo[]) {
         const localeService = this._localeService;
 
-        const functionListLocale = descriptions.map((functionInfo) => ({
-            functionName: getFunctionName(functionInfo, localeService),
-            functionType: functionInfo.functionType,
-            description: localeService.t(functionInfo.description),
-            abstract: localeService.t(functionInfo.abstract),
-            functionParameter: functionInfo.functionParameter.map((item) => ({
-                name: localeService.t(item.name),
-                detail: localeService.t(item.detail),
-                example: item.example,
-                require: item.require,
-                repeat: item.repeat,
-            })),
-        }));
+        const functionListLocale = descriptions.map((functionInfo) => {
+            const result: any = {
+                functionName: getFunctionName(functionInfo, localeService),
+                functionType: functionInfo.functionType,
+                description: localeService.t(functionInfo.description),
+                abstract: localeService.t(functionInfo.abstract),
+                functionParameter: functionInfo.functionParameter.map((item) => ({
+                    name: localeService.t(item.name),
+                    detail: localeService.t(item.detail),
+                    example: item.example,
+                    require: item.require,
+                    repeat: item.repeat,
+                })),
+            };
+
+            // For custom descriptions with aliasFunctionName, add localized alias as label
+            if (functionInfo.aliasFunctionName) {
+                const localizedAlias = localeService.t(functionInfo.aliasFunctionName);
+                // Only use as label if it's different from the canonical function name
+                if (localizedAlias !== functionInfo.functionName) {
+                    result.label = localizedAlias;
+                }
+            }
+
+            return result;
+        });
 
         this._functionService.registerDescriptions(...functionListLocale);
     }

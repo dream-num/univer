@@ -15,7 +15,8 @@
  */
 
 import { Injector } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { toast } from '@univerjs/design';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { BuiltInUIPart, IUIPartsService, UIPartsService } from '../../parts/parts.service';
 import { DesktopNotificationService } from '../desktop-notification.service';
 import { INotificationService } from '../notification.service';
@@ -28,12 +29,42 @@ function createService(): INotificationService {
 }
 
 describe('DesktopNotificationService', () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
     it('shows a notification and returns a disposable close handle', () => {
         const service = createService();
+        const onClick = vi.fn();
+        const showToast = vi.spyOn(toast, 'error').mockReturnValue('conflict-toast');
+        const dismissToast = vi.spyOn(toast, 'dismiss');
 
-        const disposable = service.show({ title: 'Saved', content: 'Workbook saved', type: 'success' });
+        const disposable = service.show({
+            title: 'Conflict',
+            content: 'Reload the page',
+            type: 'error',
+            duration: Infinity,
+            closable: false,
+            dismissible: false,
+            action: {
+                label: 'Reload page',
+                onClick,
+            },
+        });
 
-        expect(() => disposable.dispose()).not.toThrow();
+        expect(showToast).toHaveBeenCalledWith('Conflict', {
+            position: 'top-right',
+            description: 'Reload the page',
+            duration: Infinity,
+            closeButton: false,
+            dismissible: false,
+            action: {
+                label: 'Reload page',
+                onClick,
+            },
+        });
+        disposable.dispose();
+        expect(dismissToast).toHaveBeenCalledWith('conflict-toast');
     });
 
     it('registers the notification UI part when constructed', () => {

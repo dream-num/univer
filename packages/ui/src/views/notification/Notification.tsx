@@ -51,6 +51,12 @@ export interface INotificationOptions {
     icon?: React.ReactNode;
 
     closable?: boolean;
+
+    /** Whether the notification can be dismissed by user interaction */
+    dismissible?: boolean;
+
+    /** An action rendered inside the notification */
+    action?: NonNullable<Parameters<typeof toast>[1]>['action'];
 }
 
 export const notification = {
@@ -61,14 +67,19 @@ export const notification = {
             content,
             duration,
             closable = true,
+            dismissible = true,
             position = 'top-right',
+            action,
         } = options;
 
-        toast[type](title, {
+        return toast[type](title, {
             position,
             description: content,
             duration,
             closeButton: closable,
+            dismissible,
+            action,
         });
     },
+    dismiss: (id: string | number) => toast.dismiss(id),
 };

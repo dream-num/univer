@@ -20,6 +20,23 @@ import { createIdentifier, Disposable, Inject, LocaleService, toDisposable } fro
 import { FunctionType } from '../../basics/function';
 import { isReferenceStrings } from '../../engine/utils/reference';
 import { ALL_IMPLEMENTED_FUNCTIONS_SET } from '../../functions';
+import arSaLocale from '../../locale/function-list/math/ar-SA';
+import caEsLocale from '../../locale/function-list/math/ca-ES';
+import deDeLocale from '../../locale/function-list/math/de-DE';
+import enUsLocale from '../../locale/function-list/math/en-US';
+import esEsLocale from '../../locale/function-list/math/es-ES';
+import frFrLocale from '../../locale/function-list/math/fr-FR';
+import idIdLocale from '../../locale/function-list/math/id-ID';
+import itItLocale from '../../locale/function-list/math/it-IT';
+import jaJpLocale from '../../locale/function-list/math/ja-JP';
+import koKrLocale from '../../locale/function-list/math/ko-KR';
+import plPlLocale from '../../locale/function-list/math/pl-PL';
+import ptBrLocale from '../../locale/function-list/math/pt-BR';
+import ruRuLocale from '../../locale/function-list/math/ru-RU';
+import skSkLocale from '../../locale/function-list/math/sk-SK';
+import viVnLocale from '../../locale/function-list/math/vi-VN';
+import zhCnLocale from '../../locale/function-list/math/zh-CN';
+import zhTwLocale from '../../locale/function-list/math/zh-TW';
 import { IFunctionService } from '../function.service';
 import { FUNCTION_LIST } from './function-list/function-list';
 import { getFunctionName } from './utils';
@@ -89,6 +106,48 @@ export interface IDescriptionService {
 
 export const IDescriptionService = createIdentifier<IDescriptionService>('formula.description-service');
 
+// Map of locale identifiers to their locale data
+const LOCALE_FUNCTION_LABELS: Record<string, Record<string, any>> = {
+    arSA: arSaLocale as any,
+    'ar-SA': arSaLocale as any,
+    caES: caEsLocale as any,
+    'ca-ES': caEsLocale as any,
+    deDE: deDeLocale as any,
+    'de-DE': deDeLocale as any,
+    enUS: enUsLocale as any,
+    'en-US': enUsLocale as any,
+    esES: esEsLocale as any,
+    'es-ES': esEsLocale as any,
+    frFR: frFrLocale as any,
+    'fr-FR': frFrLocale as any,
+    idID: idIdLocale as any,
+    'id-ID': idIdLocale as any,
+    itIT: itItLocale as any,
+    'it-IT': itItLocale as any,
+    jaJP: jaJpLocale as any,
+    'ja-JP': jaJpLocale as any,
+    koKR: koKrLocale as any,
+    'ko-KR': koKrLocale as any,
+    plPL: plPlLocale as any,
+    'pl-PL': plPlLocale as any,
+    ptBR: ptBrLocale as any,
+    'pt-BR': ptBrLocale as any,
+    ruRU: ruRuLocale as any,
+    'ru-RU': ruRuLocale as any,
+    skSK: skSkLocale as any,
+    'sk-SK': skSkLocale as any,
+    viVN: viVnLocale as any,
+    'vi-VN': viVnLocale as any,
+    zhCN: zhCnLocale as any,
+    'zh-CN': zhCnLocale as any,
+    zhTW: zhTwLocale as any,
+    'zh-TW': zhTwLocale as any,
+};
+
+function getLocaleLabels(locale: string): Record<string, any> | undefined {
+    return LOCALE_FUNCTION_LABELS[locale];
+}
+
 export class DescriptionService extends Disposable implements IDescriptionService {
     private _descriptions: Map<IFunctionNames, IFunctionInfo> = new Map();
 
@@ -115,12 +174,16 @@ export class DescriptionService extends Disposable implements IDescriptionServic
 
                     this._descriptions = newDescriptions;
                     this._initRegisterDescriptions();
+                    // Rebuild alias map when locale changes
+                    this._functionService.buildFunctionAliasMap();
                 })
             )
         );
 
         this._initDescriptions();
         this._initRegisterDescriptions();
+        // Initial alias map build
+        this._functionService.buildFunctionAliasMap();
     }
 
     private _initDescriptions() {
@@ -136,20 +199,39 @@ export class DescriptionService extends Disposable implements IDescriptionServic
 
     private _initRegisterDescriptions() {
         const localeService = this._localeService;
+        const currentLocale = localeService.getCurrentLocale();
+        const localeLabels = getLocaleLabels(currentLocale);
 
-        const functionListLocale = Array.from(this._descriptions.values()).map((functionInfo) => ({
-            functionName: getFunctionName(functionInfo, localeService),
-            functionType: functionInfo.functionType,
-            description: localeService.t(functionInfo.description),
-            abstract: localeService.t(functionInfo.abstract),
-            functionParameter: functionInfo.functionParameter.map((item) => ({
-                name: localeService.t(item.name),
-                detail: localeService.t(item.detail),
-                example: item.example,
-                require: item.require,
-                repeat: item.repeat,
-            })),
-        }));
+        const functionListLocale = Array.from(this._descriptions.values()).map((functionInfo) => {
+            const result: any = {
+                functionName: functionInfo.functionName,
+                functionType: functionInfo.functionType,
+                description: localeService.t(functionInfo.description),
+                abstract: localeService.t(functionInfo.abstract),
+                functionParameter: functionInfo.functionParameter.map((item) => ({
+                    name: localeService.t(item.name),
+                    detail: localeService.t(item.detail),
+                    example: item.example,
+                    require: item.require,
+                    repeat: item.repeat,
+                })),
+            };
+
+            // Add locale-specific label from locale file if available
+            if (localeLabels) {
+                const localeEntry = localeLabels[functionInfo.functionName];
+                if (localeEntry && localeEntry.label) {
+                    result.label = localeEntry.label;
+                }
+            }
+
+            // Fallback: also check if the original function info has a label
+            if (!result.label && (functionInfo as any).label) {
+                result.label = (functionInfo as any).label;
+            }
+
+            return result;
+        });
 
         this._functionService.registerDescriptions(...functionListLocale);
     }
@@ -185,11 +267,13 @@ export class DescriptionService extends Disposable implements IDescriptionServic
     }
 
     hasFunction(searchText: string) {
-        return this._descriptions.has(searchText.toUpperCase());
+        const resolvedName = (this._functionService.resolveFunctionName(searchText)).toString();
+        return this._descriptions.has(resolvedName.toUpperCase());
     }
 
     getFunctionInfo(searchText: string) {
-        const item = this._descriptions.get(searchText.toUpperCase());
+        const resolvedName = (this._functionService.resolveFunctionName(searchText)).toString();
+        const item = this._descriptions.get(resolvedName.toUpperCase());
         if (!item) {
             return;
         }
@@ -204,9 +288,11 @@ export class DescriptionService extends Disposable implements IDescriptionServic
 
         functionList.forEach((item) => {
             const { functionName, abstract, functionType } = item;
+            // Get localized name (label if available, otherwise functionName)
+            const displayName = (item as any).label || functionName;
             // Exclude DefinedName
-            if ((functionName.toUpperCase().indexOf(_searchText) > -1) && functionType !== FunctionType.DefinedName) {
-                searchList.push({ name: functionName, desc: abstract });
+            if ((displayName.toUpperCase().indexOf(_searchText) > -1 || functionName.toUpperCase().indexOf(_searchText) > -1) && functionType !== FunctionType.DefinedName) {
+                searchList.push({ name: displayName, desc: abstract });
             }
         });
 
@@ -221,8 +307,10 @@ export class DescriptionService extends Disposable implements IDescriptionServic
 
         functionList.forEach((item) => {
             const { functionName, abstract, functionType } = item;
-            if (functionName.toUpperCase().indexOf(_searchText) === 0) {
-                searchList.push({ name: functionName, desc: abstract, functionType });
+            // Get localized name (label if available, otherwise functionName)
+            const displayName = (item as any).label || functionName;
+            if (displayName.toUpperCase().indexOf(_searchText) === 0) {
+                searchList.push({ name: displayName, desc: abstract, functionType });
             }
         });
 
@@ -236,9 +324,11 @@ export class DescriptionService extends Disposable implements IDescriptionServic
 
         functionList.forEach((item) => {
             const { functionName, functionType, abstract } = item;
+            // Get localized name (label if available, otherwise functionName)
+            const displayName = (item as any).label || functionName;
             // Exclude DefinedName
             if ((functionType === type || type === -1) && functionType !== FunctionType.DefinedName) {
-                searchList.push({ name: functionName, desc: abstract });
+                searchList.push({ name: displayName, desc: abstract });
             }
         });
 
@@ -280,11 +370,13 @@ export class DescriptionService extends Disposable implements IDescriptionServic
     }
 
     hasDescription(name: string) {
-        return this._descriptions.has(name.toUpperCase());
+        const resolvedName = (this._functionService.resolveFunctionName(name)).toString();
+        return this._descriptions.has(resolvedName.toUpperCase());
     }
 
     hasDefinedNameDescription(name: string) {
-        const item = this._descriptions.get(name.toUpperCase());
+        const resolvedName = (this._functionService.resolveFunctionName(name)).toString();
+        const item = this._descriptions.get(resolvedName.toUpperCase());
         if (!item) {
             return false;
         }

@@ -530,7 +530,16 @@ describe('SheetCanvasPopManagerService', () => {
     });
 
     it('updates cell and range anchors when sheet geometry changes', () => {
-        const { service, popupService, commandService, clientRect$, transformChange$, refRangeService, viewport } = createSheetHarness();
+        const {
+            service,
+            popupService,
+            commandService,
+            clientRect$,
+            transformChange$,
+            refRangeService,
+            viewport,
+            viewMainScrollAfter$,
+        } = createSheetHarness();
 
         service.attachPopupToCell(1, 1, { componentKey: 'cell-action' } as never, 'unit-1', 'sheet-1', viewport as never);
         const cellPopup = popupService.lastPopup()!;
@@ -553,16 +562,21 @@ describe('SheetCanvasPopManagerService', () => {
         const rangePositions: unknown[] = [];
         rangePopup.anchorRect$!.subscribe((position) => rangePositions.push(position));
 
+        viewport.viewportScrollX = 5;
+        viewport.viewportScrollY = 4;
+        viewMainScrollAfter$.emit({});
+        expect(rangePositions[rangePositions.length - 1]).toEqual({ left: 0, right: 120, top: 12, bottom: 92 });
+
         commandService.emit(SetScrollOperation.id);
         commandService.emit(SetFrozenMutation.id);
-        expect(rangePositions[rangePositions.length - 1]).toEqual({ left: 10, right: 130, top: 20, bottom: 100 });
+        expect(rangePositions[rangePositions.length - 1]).toEqual({ left: 0, right: 120, top: 12, bottom: 92 });
 
         const rangeWatch = refRangeService.watchedRanges[1];
         rangeWatch.callback(
             { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 },
             { startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 }
         );
-        expect(rangePositions[rangePositions.length - 1]).toEqual({ left: 70, right: 190, top: 60, bottom: 140 });
+        expect(rangePositions[rangePositions.length - 1]).toEqual({ left: 60, right: 180, top: 52, bottom: 132 });
 
         rangeWatch.callback(
             { startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 },

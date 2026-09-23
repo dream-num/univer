@@ -14,25 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
+import { ICommandService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, DropdownMenu } from '@univerjs/design';
-import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
 import { AutofillDoubleIcon, MoreDownIcon } from '@univerjs/icons';
 import { AUTO_FILL_APPLY_TYPE, IAutoFillService, RefillCommand } from '@univerjs/sheets';
 import { ILayoutService, useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useMemo, useReducer, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { map } from 'rxjs';
-import { SetScrollOperation } from '../../commands/operations/scroll.operation';
-import { getViewportByCell } from '../../common/utils';
-import { getSheetObject } from '../../controllers/utils/component-tools';
-import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
-import { useActiveWorkbook } from '../hook';
-
-export interface IAnchorPoint {
-    row: number;
-    col: number;
-}
 
 export interface IAutoFillPopupMenuItem {
     label: string;
@@ -47,8 +35,6 @@ export interface IAutoFillPopupMenuProps {
 
 export function AutoFillPopupMenu({ DropdownMenuComponent = DropdownMenu }: IAutoFillPopupMenuProps = {}) {
     const commandService = useDependency(ICommandService);
-    const univerInstanceService = useDependency(IUniverInstanceService);
-    const renderManagerService = useDependency(IRenderManagerService);
     const autoFillService = useDependency(IAutoFillService);
     const layoutService = useDependency(ILayoutService);
     const localeService = useDependency(LocaleService);
@@ -62,34 +48,8 @@ export function AutoFillPopupMenu({ DropdownMenuComponent = DropdownMenu }: IAut
         [autoFillService]
     );
     const [visible, setVisible] = useState(false);
-    const anchor = useObservable(
-        () => autoFillService.showMenu$.pipe(map((show) => {
-            const { source, target } = autoFillService.autoFillLocation || { source: null, target: null };
-            if (!show || !source || !target) {
-                return { row: -1, col: -1 };
-            }
-
-            return {
-                row: Math.max(source.rows[source.rows.length - 1], target.rows[target.rows.length - 1]),
-                col: Math.max(source.cols[source.cols.length - 1], target.cols[target.cols.length - 1]),
-            };
-        })),
-        { row: -1, col: -1 },
-        false,
-        [autoFillService]
-    );
     const selected = useObservable(autoFillService.applyType$, AUTO_FILL_APPLY_TYPE.SERIES);
     const [isHovered, setIsHovered] = useState(false);
-    const [, forceUpdate] = useReducer((version: number) => version + 1, 0);
-    const workbook = useActiveWorkbook();
-    const sheetSkeletonManagerService = useMemo(() => {
-        if (workbook) {
-            const ru = renderManagerService.getRenderUnitById(workbook.getUnitId());
-            return ru?.with(SheetSkeletonManagerService);
-        }
-
-        return null;
-    }, [workbook, renderManagerService]);
 
     const handleMouseEnter = () => {
         setIsHovered(true);
@@ -98,26 +58,6 @@ export function AutoFillPopupMenu({ DropdownMenuComponent = DropdownMenu }: IAut
     const handleMouseLeave = () => {
         setIsHovered(false);
     };
-
-    useEffect(() => {
-        const disposable = commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (command.id === SetScrollOperation.id) {
-                forceUpdate();
-            }
-        });
-        return disposable.dispose;
-    }, [forceUpdate, commandService]);
-
-    useEffect(() => {
-        const disposable = sheetSkeletonManagerService && toDisposable(
-            sheetSkeletonManagerService.currentSkeleton$.subscribe((skeleton) => {
-                if (skeleton) {
-                    forceUpdate();
-                }
-            })
-        );
-        return disposable?.dispose;
-    }, [sheetSkeletonManagerService, forceUpdate]);
 
     useEffect(() => {
         function handleClose() {
@@ -129,29 +69,8 @@ export function AutoFillPopupMenu({ DropdownMenuComponent = DropdownMenu }: IAut
         return () => {
             document.removeEventListener('wheel', handleClose);
         };
-    }, [visible]);
+    }, []);
 
-    if (anchor.col < 0 || anchor.row < 0) {
-        return null;
-    }
-
-    const sheetObject = getSheetObject(univerInstanceService, renderManagerService);
-    if (!sheetObject || !workbook) return null;
-
-    const { scene } = sheetObject;
-    const skeleton = sheetSkeletonManagerService?.getCurrentSkeleton();
-    const viewport = getViewportByCell(anchor.row, anchor.col, scene, workbook.getActiveSheet());
-    if (!viewport) return null;
-    const scaleX = scene?.scaleX;
-    const scaleY = scene?.scaleY;
-    const scrollXY = scene?.getViewportScrollXY(viewport);
-    if (!scaleX || !scene || !scaleX || !scaleY || !scrollXY) return null;
-    const x = skeleton?.getNoMergeCellWithCoordByIndex(anchor.row, anchor.col).endX || 0;
-    const y = skeleton?.getNoMergeCellWithCoordByIndex(anchor.row, anchor.col).endY || 0;
-    const relativeX = convertTransformToOffsetX(x, scaleX, scrollXY);
-    const relativeY = convertTransformToOffsetY(y, scaleY, scrollXY);
-
-    if (relativeX == null || relativeY == null) return null;
     const onVisibleChange = (visible: boolean) => {
         setVisible(visible);
     };
@@ -165,13 +84,8 @@ export function AutoFillPopupMenu({ DropdownMenuComponent = DropdownMenu }: IAut
     const availableMenu = menu.filter((item) => !item.disable);
 
     return (
-        <div className="univer-absolute univer-z-10 univer-size-0" style={{ left: 0, top: 0 }}>
-            <div
-                className="univer-absolute"
-                style={{ left: `${relativeX + 2}px`, top: `${relativeY + 2}px` }}
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-            >
+        <div className="univer-relative univer-size-0">
+            <div className="univer-absolute univer-left-0 univer-top-0">
                 <DropdownMenuComponent
                     align="start"
                     onCloseAutoFocus={(event) => {
@@ -188,6 +102,8 @@ export function AutoFillPopupMenu({ DropdownMenuComponent = DropdownMenu }: IAut
                     onOpenChange={onVisibleChange}
                 >
                     <div
+                        onMouseEnter={handleMouseEnter}
+                        onMouseLeave={handleMouseLeave}
                         className={clsx(`
                           univer-flex univer-items-center univer-gap-2 univer-rounded univer-p-1
                           hover:univer-bg-gray-100

@@ -30,7 +30,6 @@ import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { getEmbedSheetsTabCustomData } from '../../embed-tab-anchor';
 import { ISheetEmbedRuntimeFocusCoordinator } from '../../services/sheet-embed-integration.service';
 import { ISheetEmbedRuntimeService } from '../../services/sheet-embed-runtime.service';
-import { AutoFillPopupMenu } from '../auto-fill-popup-menu/AutoFillPopupMenu';
 import { EditorContainer } from '../editor-container/EditorContainer';
 import { FormulaBar } from '../formula-bar/FormulaBar';
 import { useActiveWorkbook, useActiveWorksheet } from '../hook';
@@ -113,14 +112,7 @@ export function RenderSheetHeader() {
     return null;
 }
 
-/**
- * We should not write into this component anymore.
- */
-export interface IRenderSheetContentProps {
-    AutoFillPopupMenuComponent?: typeof AutoFillPopupMenu | null;
-}
-
-export function RenderSheetContent({ AutoFillPopupMenuComponent = AutoFillPopupMenu }: IRenderSheetContentProps = {}) {
+export function RenderSheetContent() {
     const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
     const componentManager = useDependency(ComponentManager);
     const activeWorkbook = useActiveWorkbook();
@@ -183,7 +175,6 @@ export function RenderSheetContent({ AutoFillPopupMenuComponent = AutoFillPopupM
         <>
             {ShapeTextEditorContainer && <ShapeTextEditorContainer />}
             {!config?.disableEdit && <CellEditorContainer />}
-            {AutoFillPopupMenuComponent && <AutoFillPopupMenuComponent />}
         </>
     );
 }

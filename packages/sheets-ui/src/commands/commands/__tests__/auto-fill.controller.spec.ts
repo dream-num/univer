@@ -38,13 +38,14 @@ import {
     AutoFillService,
     IAutoFillService,
     RefillCommand,
+    RefRangeService,
     RemoveWorksheetMergeMutation,
     SetRangeValuesMutation,
     SetSelectionsOperation,
     SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
+import { CanvasPopupService, ICanvasPopupService, IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AutoFillRenderController, AutoFillUIController, detectAutoFillRange } from '../../../controllers/auto-fill-ui.controller';
@@ -357,6 +358,8 @@ describe('Test auto fill rules in controller', () => {
             [IEditorService, { useClass: EditorService }],
             [IRenderManagerService, { useClass: RenderManagerService }],
             [SheetsRenderService, { useClass: mockSheetsRenderService }],
+            [RefRangeService],
+            [ICanvasPopupService, { useClass: CanvasPopupService }],
             [SheetSkeletonManagerService],
             [SheetCanvasPopManagerService],
             [AutoFillController],

@@ -16,7 +16,8 @@
 
 import type { ICommandInfo, IDisposable } from '@univerjs/core';
 import { ICommandService, Injector, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
-import { AutoFillController, IAutoFillService } from '@univerjs/sheets';
+import { AutoFillController, IAutoFillService, RefRangeService } from '@univerjs/sheets';
+import { CanvasPopupService, ICanvasPopupService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
@@ -65,6 +66,8 @@ describe('AutoFillUIController', () => {
                     registerSkeletonChangingMutations: () => ({ dispose: () => undefined }),
                 },
             }],
+            [RefRangeService],
+            [ICanvasPopupService, { useClass: CanvasPopupService }],
             [SheetCanvasPopManagerService, { useValue: { attachRangePopup } }],
             [AutoFillUIController],
         ]);

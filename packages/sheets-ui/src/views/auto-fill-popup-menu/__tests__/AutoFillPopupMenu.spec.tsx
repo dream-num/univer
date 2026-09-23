@@ -25,14 +25,12 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { AUTO_FILL_APPLY_TYPE, IAutoFillService, RefillCommand } from '@univerjs/sheets';
 import { ILayoutService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
-import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { AutoFillPopupMenu } from '../AutoFillPopupMenu';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -48,74 +46,15 @@ class TestAutoFillService {
 
     readonly menu$ = this._menu$.asObservable();
 
-    private readonly _showMenu$ = new BehaviorSubject(false);
-    readonly showMenu$ = this._showMenu$.asObservable();
-
     private readonly _applyType$ = new BehaviorSubject(AUTO_FILL_APPLY_TYPE.SERIES);
     readonly applyType$ = this._applyType$.asObservable();
 
-    autoFillLocation = {
-        source: { rows: [0], cols: [0] },
-        target: { rows: [0, 1], cols: [0, 1] },
-        unitId: UNIT_ID,
-        subUnitId: SHEET_ID,
-    };
-
     readonly refillTypes: AUTO_FILL_APPLY_TYPE[] = [];
-
-    setShowMenu(show: boolean): void {
-        this._showMenu$.next(show);
-    }
 
     fillData(type: AUTO_FILL_APPLY_TYPE): boolean {
         this.refillTypes.push(type);
         this._applyType$.next(type);
         return true;
-    }
-}
-
-class TestSheetSkeletonManagerService {
-    readonly currentSkeleton$ = new BehaviorSubject({});
-
-    getCurrentSkeleton() {
-        return {
-            getNoMergeCellWithCoordByIndex: () => ({ endX: 80, endY: 40 }),
-        };
-    }
-}
-
-class TestRenderUnit {
-    readonly components = new Map();
-    readonly mainComponent = {};
-    readonly engine = {};
-    readonly sheetSkeletonManagerService = new TestSheetSkeletonManagerService();
-    readonly scene = {
-        scaleX: 1,
-        scaleY: 1,
-        getViewport: () => ({}),
-        getViewportScrollXY: () => ({ x: 0, y: 0 }),
-        getEngine: () => ({
-            getCanvas: () => ({
-                getWidth: () => 400,
-                getHeight: () => 300,
-            }),
-        }),
-    };
-
-    with(token: unknown): unknown {
-        if (token === SheetSkeletonManagerService) {
-            return this.sheetSkeletonManagerService;
-        }
-
-        return null;
-    }
-}
-
-class TestRenderManagerService {
-    readonly renderUnit = new TestRenderUnit();
-
-    getRenderUnitById(): TestRenderUnit {
-        return this.renderUnit;
     }
 }
 
@@ -151,7 +90,6 @@ function createAutoFillPopupTestBed() {
     const univer = new Univer();
     const injector = univer.__getInjector();
 
-    injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
     injector.add([IAutoFillService, { useClass: TestAutoFillService as never }]);
     injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
 
@@ -228,10 +166,6 @@ describe('AutoFillPopupMenu', () => {
         root = rendered.root;
         container = rendered.container;
 
-        act(() => {
-            autoFillService.setShowMenu(true);
-        });
-
         const trigger = rendered.container.querySelector('[data-slot="dropdown-menu-trigger"]');
         if (!(trigger instanceof HTMLElement)) {
             throw new TypeError('Auto fill menu trigger not found');
@@ -245,15 +179,10 @@ describe('AutoFillPopupMenu', () => {
 
     it('restores focus after selecting an auto fill option', async () => {
         currentBed = createAutoFillPopupTestBed();
-        const autoFillService = currentBed.injector.get(IAutoFillService) as unknown as TestAutoFillService;
         const layoutService = currentBed.injector.get(ILayoutService) as unknown as TestLayoutService;
         const rendered = renderWithDependencies(<AutoFillPopupMenu />, currentBed.injector);
         root = rendered.root;
         container = rendered.container;
-
-        act(() => {
-            autoFillService.setShowMenu(true);
-        });
 
         const trigger = rendered.container.querySelector('[data-slot="dropdown-menu-trigger"]');
         if (!(trigger instanceof HTMLElement)) {
@@ -265,31 +194,5 @@ describe('AutoFillPopupMenu', () => {
 
         await expect.poll(() => layoutService.focusCount).toBe(1);
         expect(layoutService.menuOpenWhenFocused).toBe(false);
-    });
-
-    it('keeps the overlay origin on the physical left edge in rtl', () => {
-        currentBed = createAutoFillPopupTestBed();
-        currentBed.injector.get(LocaleService).setDirection('rtl');
-        const autoFillService = currentBed.injector.get(IAutoFillService) as unknown as TestAutoFillService;
-        const rendered = renderWithDependencies(<AutoFillPopupMenu />, currentBed.injector);
-        root = rendered.root;
-        container = rendered.container;
-
-        act(() => {
-            autoFillService.setShowMenu(true);
-        });
-
-        const trigger = rendered.container.querySelector('[data-slot="dropdown-menu-trigger"]');
-        if (!(trigger instanceof HTMLElement)) {
-            throw new TypeError('Auto fill menu trigger not found');
-        }
-
-        const overlay = trigger.parentElement?.parentElement;
-        if (!(overlay instanceof HTMLElement)) {
-            throw new TypeError('Auto fill menu overlay not found');
-        }
-
-        expect(overlay.style.left).toBe('0px');
-        expect(overlay.style.right).toBe('');
     });
 });

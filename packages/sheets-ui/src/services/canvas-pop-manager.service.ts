@@ -538,7 +538,7 @@ export class SheetCanvasPopManagerService extends Disposable {
      * @param _unitId
      * @param _subUnitId
      * @param viewport
-     * @returns
+     * @returns A disposable that detaches the popup, or `null` if it cannot be attached.
      */
     attachPopupToCell(row: number, col: number, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string, viewport?: Viewport): Nullable<INeedCheckDisposable> {
         let workbook = _unitId
@@ -847,8 +847,7 @@ export class SheetCanvasPopManagerService extends Disposable {
 
     /**
      * Unlike _createCellPositionObserver, this accept a range not a single cell.
-     * @param initialRow
-     * @param initialCol
+     * @param range
      * @param currentRender
      * @param skeleton
      * @param activeViewport
@@ -892,6 +891,8 @@ export class SheetCanvasPopManagerService extends Disposable {
                 updatePosition();
             }
         }));
+
+        disposable.add(activeViewport.onScrollAfter$.subscribeEvent(() => updatePosition()));
 
         const updateRange = (newRange: IRange) => {
             startRow = newRange.startRow;

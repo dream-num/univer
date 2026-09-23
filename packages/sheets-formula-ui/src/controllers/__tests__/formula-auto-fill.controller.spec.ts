@@ -33,6 +33,7 @@ import {
     IAutoFillService,
     RangeProtectionRenderModel,
     RangeProtectionService,
+    RefRangeService,
     RemoveWorksheetMergeMutation,
     SetRangeValuesMutation,
     SetSelectionsOperation,
@@ -42,10 +43,11 @@ import { FormulaAutoFillController } from '@univerjs/sheets-formula';
 import {
     AutoFillUIController,
     ISheetSelectionRenderService,
+    SheetCanvasPopManagerService,
     SheetSelectionRenderService,
     SheetsRenderService,
 } from '@univerjs/sheets-ui';
-import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
+import { CanvasPopupService, ICanvasPopupService, IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -73,6 +75,9 @@ describe('Test auto fill with formula', () => {
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
             [SheetsRenderService, { useClass: mockSheetsRenderService }],
+            [RefRangeService],
+            [ICanvasPopupService, { useClass: CanvasPopupService }],
+            [SheetCanvasPopManagerService],
             [AutoFillController],
             [AutoFillUIController],
             [FormulaAutoFillController],

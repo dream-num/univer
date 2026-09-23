@@ -14,7 +14,17 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IExecutionOptions, IMutationCommonParams, IRange, Nullable, UnitModel, Workbook, Worksheet } from '@univerjs/core';
+import type {
+    ICommandInfo,
+    IDisposable,
+    IExecutionOptions,
+    IMutationCommonParams,
+    IRange,
+    Nullable,
+    UnitModel,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IAutoFillLocation, IRemoveSheetMutationParams } from '@univerjs/sheets';
 import {
@@ -23,6 +33,7 @@ import {
     ICommandService,
     Inject,
     IUniverInstanceService,
+    Rectangle,
 } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import {
@@ -30,6 +41,7 @@ import {
     AutoClearContentCommand,
     AutoFillCommand,
     AutoFillController,
+    discreteRangeToRange,
     IAutoFillService,
     InsertColMutation,
     InsertRowMutation,
@@ -49,19 +61,23 @@ import {
 } from '@univerjs/sheets';
 import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
+import { SheetCanvasPopManagerService } from '../services/canvas-pop-manager.service';
 import { IEditorBridgeService } from '../services/editor-bridge.service';
 import { ISheetSelectionRenderService } from '../services/selection/base-selection-render.service';
 import { SheetsRenderService } from '../services/sheets-render.service';
+import { AUTO_FILL_POPUP_MENU_COMPONENT } from '../views/auto-fill-popup-menu/component-name';
 
 export class AutoFillUIController extends Disposable {
     private _currentLocation: Nullable<IAutoFillLocation> = null;
+    private _popupDisposable: Nullable<IDisposable> = null;
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IAutoFillService private readonly _autoFillService: IAutoFillService,
         @Inject(AutoFillController) private _autoFillController: AutoFillController,
-        @Inject(SheetsRenderService) private _sheetsRenderService: SheetsRenderService
+        @Inject(SheetsRenderService) private _sheetsRenderService: SheetsRenderService,
+        @Inject(SheetCanvasPopManagerService) private readonly _sheetCanvasPopManagerService: SheetCanvasPopManagerService
     ) {
         super();
 
@@ -70,8 +86,39 @@ export class AutoFillUIController extends Disposable {
 
     private _init() {
         this._initDefaultHook();
+        this._initPopup();
         this._initQuitListener();
         this._initSkeletonChange();
+    }
+
+    private _initPopup(): void {
+        this.disposeWithMe(this._autoFillService.showMenu$.subscribe((show) => {
+            this._disposePopup();
+            if (!show) {
+                return;
+            }
+
+            const location = this._autoFillService.autoFillLocation;
+            if (!location) {
+                return;
+            }
+
+            const range = Rectangle.union(
+                discreteRangeToRange(location.source),
+                discreteRangeToRange(location.target)
+            );
+            this._popupDisposable = this._sheetCanvasPopManagerService.attachRangePopup(range, {
+                componentKey: AUTO_FILL_POPUP_MENU_COMPONENT,
+                constrainToCanvas: true,
+                direction: 'bottom-right',
+                offset: [2, 2],
+            }, location.unitId, location.subUnitId);
+        }));
+    }
+
+    private _disposePopup(): void {
+        this._popupDisposable?.dispose();
+        this._popupDisposable = null;
     }
 
     private _initSkeletonChange() {
@@ -137,9 +184,15 @@ export class AutoFillUIController extends Disposable {
     }
 
     private _quit() {
+        this._disposePopup();
         this._currentLocation = null;
         this._autoFillController.quit();
         this._autoFillService.setShowMenu(false);
+    }
+
+    override dispose(): void {
+        this._disposePopup();
+        super.dispose();
     }
 }
 

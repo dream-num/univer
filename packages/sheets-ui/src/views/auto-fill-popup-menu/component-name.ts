@@ -14,8 +14,4 @@
  * limitations under the License.
  */
 
-import { RenderSheetContent } from '../../sheet-container/SheetContainer';
-
-export function MobileRenderSheetContent() {
-    return <RenderSheetContent />;
-}
+export const AUTO_FILL_POPUP_MENU_COMPONENT = 'sheets.component.auto-fill-popup-menu';

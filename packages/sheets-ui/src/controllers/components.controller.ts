@@ -24,6 +24,8 @@ import {
     UNIVER_SHEET_PERMISSION_USER_DIALOG,
     UNIVER_SHEET_PERMISSION_USER_PART,
 } from '../consts/permission';
+import { AutoFillPopupMenu } from '../views/auto-fill-popup-menu/AutoFillPopupMenu';
+import { AUTO_FILL_POPUP_MENU_COMPONENT } from '../views/auto-fill-popup-menu/component-name';
 import { BorderPanel } from '../views/border-panel/BorderPanel';
 import { BORDER_PANEL_COMPONENT } from '../views/border-panel/interface';
 import { CELL_ALERT_KEY } from '../views/cell-alert';
@@ -94,6 +96,7 @@ export class ComponentsController extends Disposable {
         this.disposeWithMe(componentManager.register(BORDER_PANEL_COMPONENT, BorderPanel));
         this.disposeWithMe(componentManager.register(DEFINED_NAME_CONTAINER, DefinedNameContainer));
         this.disposeWithMe(componentManager.register(CELL_POPUP_COMPONENT_KEY, CellPopup));
+        this.disposeWithMe(componentManager.register(AUTO_FILL_POPUP_MENU_COMPONENT, AutoFillPopupMenu));
         Object.values(dropdownMap).forEach((component) => {
             this.disposeWithMe(componentManager.register(component.componentKey, component));
         });

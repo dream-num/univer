@@ -50,13 +50,31 @@ Univer は単なるスプレッドシートファイルビューアではあり�
 
 [Univer の製品群](https://univer.ai/)では、オフィスツールがストレージと計算のランタイムを共有します。異なるツールのコンテンツを自由に組み合わせて埋め込み、参照元の変更に合わせて関連データや参照を更新できます。人と AI エージェントは同じファイルで共同作業できます。製品の対応範囲は[機能一覧](https://univer.ai/capabilities)、このリポジトリの範囲は [Open Source と Pro](#-open-source-と-pro) を参照してください。
 
+### Univer Office SDK でコラボレーションツールを構築
+
+[![Univer Office SDK でコラボレーションツールを構築](https://i.ytimg.com/vi/1p-SMEiK6Kg/maxresdefault.jpg)](https://www.youtube.com/watch?v=1p-SMEiK6Kg)
+
+[デモを見る](https://www.youtube.com/watch?v=1p-SMEiK6Kg)
+
 ## Univer Office SDK で構築されたプロジェクト
+
+### 注目の事例：Univer Workspace
+
+[Univer Workspace](https://github.com/dream-num/univer-workspace) は Univer Office SDK を基盤に構築された、セルフホスト可能なオープンソースのワークスペースです。人と AI エージェントがオフィスコンテンツを作成し、共同作業やレビューを行えます。開発者は完全な実装を参考にして SDK の組み込み方を学び、独自のプロダクトを構築できます。
+
+[![連携するスプレッドシートと並んで表示された Workspace のミニアプリ。指標、グラフ、コントロールはセルに紐付いています](../img/workspace-mini-app.png)](https://github.com/dream-num/univer-workspace)
+
+- エージェントは、意思決定ダッシュボード、インタラクティブなレポート、業務ダッシュボードなど、スプレッドシートを基盤とするミニアプリを生成できます。
+- Web ページ上の指標、グラフ、コントロールはセルに紐付き、データの読み取り、書き込み、共同更新に対応します。
+
+[Univer Workspace を見る](https://github.com/dream-num/univer-workspace)
+
+### その他の事例
 
 以下のオープンソースプロジェクトは Univer Office SDK を基盤に構築されています。
 
 | プロジェクト | 説明 |
 | --- | --- |
-| [Univer Workspace](https://github.com/dream-num/univer-workspace) | 人と AI エージェントのためのオフィスワークスペース。共同編集とエージェントによる変更のレビューに対応します。 |
 | [Univer Office for DeepSeek Harness](https://github.com/dream-num/dsh-univer-office) | DeepSeek Harness 向けオフィスプラグイン。関連付けられたコンテンツ、検証、エージェントの共同作業用の独立した Worktree を提供します。 |
 | [Univer CLI](https://github.com/dream-num/univer-cli) | エージェントがオフィスコンテンツを作成、編集、検査、納品するためのローカルのコマンドラインワークスペース。 |
 | [Univer Office for WorkBuddy](https://github.com/dream-num/workbuddy-univer-office) | MCP プレビューと下書きレビューに対応する、WorkBuddy 向けローカルのオフィス統合。開発プレビュー版です。 |

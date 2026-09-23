@@ -49,13 +49,31 @@ Univer 不只是一个电子表格文件查看器。它是用于构建你自己�
 
 在 [Univer 产品家族](https://univer.ai/)中，办公工具共享存储与计算运行时。不同工具的内容可以自由组合和嵌入，关联数据与引用随来源同步更新，人与 AI Agent 可以在同一文件中协作。产品能力请参阅[能力矩阵](https://univer.ai/capabilities)，本仓库的范围请参阅[开源与 Pro](#-开源与-pro)。
 
+### 使用 Univer Office SDK 构建协作工具
+
+[![使用 Univer Office SDK 构建协作工具](https://i.ytimg.com/vi/1p-SMEiK6Kg/maxresdefault.jpg)](https://www.youtube.com/watch?v=1p-SMEiK6Kg)
+
+[观看演示](https://www.youtube.com/watch?v=1p-SMEiK6Kg)
+
 ## 基于 Univer Office SDK 构建
+
+### 重点案例：Univer Workspace
+
+[Univer Workspace](https://github.com/dream-num/univer-workspace) 是基于 Univer Office SDK 构建、支持自行部署的开源工作空间，人与 AI Agent 可以在其中创建、协作处理和审阅办公内容。开发者可以参考完整实现，学习如何集成 SDK，并构建自己的产品。
+
+[![Workspace Mini App 与其关联的电子表格并排显示，指标、图表和控件绑定到单元格](../img/workspace-mini-app.png)](https://github.com/dream-num/univer-workspace)
+
+- Agent 可以生成基于电子表格的 Mini App，例如决策看板、交互式报告和业务看板。
+- 网页上的指标、图表和控件与单元格绑定，支持数据读取、写入和协同更新。
+
+[了解 Univer Workspace](https://github.com/dream-num/univer-workspace)
+
+### 其他案例
 
 以下开源项目基于 Univer Office SDK 构建：
 
 | 项目 | 说明 |
 | --- | --- |
-| [Univer Workspace](https://github.com/dream-num/univer-workspace) | 面向人与 AI Agent 的办公工作空间，支持共同编辑和审阅 Agent 的修改。 |
 | [Univer Office for DeepSeek Harness](https://github.com/dream-num/dsh-univer-office) | 面向 DeepSeek Harness 的办公插件，支持关联内容、验证和用于 Agent 协作的独立 Worktree。 |
 | [Univer CLI](https://github.com/dream-num/univer-cli) | 供 Agent 创建、编辑、检查和交付办公内容的本地命令行工作空间。 |
 | [Univer Office for WorkBuddy](https://github.com/dream-num/workbuddy-univer-office) | 面向 WorkBuddy 的本地办公集成，支持 MCP 预览和草稿审阅。目前为开发预览版。 |

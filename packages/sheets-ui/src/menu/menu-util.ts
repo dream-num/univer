@@ -89,23 +89,29 @@ export function getCurrentExclusiveRangeInterest$(accessor: IAccessor, disableGr
             if (!workbook) {
                 return of(false);
             }
-            return combineLatest([selectionManagerService.selectionMoveEnd$, workbook.activeSheet$]).pipe(
-                switchMap(([selections, worksheet]) => {
+            return workbook.activeSheet$.pipe(
+                switchMap((worksheet) => {
                     if (!worksheet) {
                         return of(false);
                     }
-                    if (selections.length === 0) {
-                        return of(false);
-                    }
 
-                    const interestGroupIds = exclusiveRangeService.getInterestGroupId(selections);
-                    // if disableGroupSet is provided, check if the interestGroupIds contains any of the disableGroupSet
-                    if (disableGroupSet) {
-                        const disableGroup = interestGroupIds.filter((groupId) => disableGroupSet.has(groupId));
-                        return of(disableGroup.length > 0);
-                    } else {
-                        return of(interestGroupIds.length > 0);
-                    }
+                    return selectionManagerService.selectionMoveEnd$.pipe(
+                        map(() => selectionManagerService.getCurrentSelections()),
+                        startWith(selectionManagerService.getCurrentSelections()),
+                        map((selections) => {
+                            if (selections.length === 0) {
+                                return false;
+                            }
+
+                            const interestGroupIds = exclusiveRangeService.getInterestGroupId([...selections]);
+                            // if disableGroupSet is provided, check if the interestGroupIds contains any of the disableGroupSet
+                            if (disableGroupSet) {
+                                return interestGroupIds.some((groupId) => disableGroupSet.has(groupId));
+                            }
+
+                            return interestGroupIds.length > 0;
+                        })
+                    );
                 })
             );
         })

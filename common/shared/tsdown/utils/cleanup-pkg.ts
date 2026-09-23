@@ -31,6 +31,8 @@ interface IDerivedDependencyGroups {
 const SOURCE_EXTS = new Set(['.ts', '.tsx']);
 const TEST_FILE_RE = /\.(spec|test)\.[cm]?tsx?$/;
 const IMMUTABLE_MANAGED_DEPENDENCIES = new Set(['@univerjs/icons', '@univerjs/icons-svg']);
+const WILDCARD_EXPORT = './*';
+const LIB_WILDCARD_EXPORT = './lib/*';
 
 function filterPackageName(packageName: string): string {
     if (packageName.startsWith('@univerjs/')) {
@@ -359,23 +361,29 @@ function deriveDependencyGroups(packageDir: string, packageJson: IPackageJson): 
 function applyPublishManifest(pkg: CleanupPackageJson, packageDir: string) {
     const hasLocales = fs.existsSync(path.resolve(packageDir, 'src/locale'));
     const hasFacade = fs.existsSync(path.resolve(packageDir, 'src/facade/index.ts'));
+    const hasWildcardExport = pkg.exports?.[WILDCARD_EXPORT] !== undefined || pkg.publishConfig?.exports?.[WILDCARD_EXPORT] !== undefined;
+    const hasLibWildcardExport = hasWildcardExport || pkg.publishConfig?.exports?.[LIB_WILDCARD_EXPORT] !== undefined;
+    const publishExports: Record<string, unknown> = {
+        '.': {
+            import: './lib/es/index.js',
+            require: './lib/cjs/index.js',
+            types: './lib/types/index.d.ts',
+        },
+    };
+
+    if (hasWildcardExport) {
+        publishExports[WILDCARD_EXPORT] = {
+            import: './lib/es/*',
+            require: './lib/cjs/*',
+            types: './lib/types/index.d.ts',
+        };
+    }
 
     pkg.publishConfig = {
         access: 'public',
         main: './lib/es/index.js',
         module: './lib/es/index.js',
-        exports: {
-            '.': {
-                import: './lib/es/index.js',
-                require: './lib/cjs/index.js',
-                types: './lib/types/index.d.ts',
-            },
-            './*': {
-                import: './lib/es/*',
-                require: './lib/cjs/*',
-                types: './lib/types/index.d.ts',
-            },
-        },
+        exports: publishExports,
     };
 
     pkg.exports ||= {};
@@ -399,7 +407,9 @@ function applyPublishManifest(pkg: CleanupPackageJson, packageDir: string) {
         pkg.publishConfig.exports['./lib/facade'] = pkg.publishConfig.exports['./facade'];
     }
 
-    pkg.publishConfig.exports['./lib/*'] = './lib/*';
+    if (hasLibWildcardExport) {
+        pkg.publishConfig.exports[LIB_WILDCARD_EXPORT] = LIB_WILDCARD_EXPORT;
+    }
 }
 
 function assignPeerDependencies(pkg: CleanupPackageJson, peerDeps: StringMap) {

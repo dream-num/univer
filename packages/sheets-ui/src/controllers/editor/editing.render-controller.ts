@@ -662,7 +662,7 @@ export class EditingRenderController extends Disposable {
             } else {
                 this._textSelectionManagerService.replaceDocRanges([
                     {
-                        startOffset: cursor,
+                        startOffset: 0,
                         endOffset: cursor,
                     },
                 ]);

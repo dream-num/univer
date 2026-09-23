@@ -49,13 +49,31 @@ Univer is not a spreadsheet file viewer only. It is a framework for building you
 
 Across the [Univer product family](https://univer.ai/), Office tools share a runtime for storage and computation. Content can be composed and embedded across tools, with linked data and references updating together. People and AI agents can work in the same files. See the [capability matrix](https://univer.ai/capabilities) for product coverage and [Open Source and Pro](#-open-source-and-pro) for this repository's scope.
 
+### Build a collaborative tool with Univer Office SDK
+
+[![Build a collaborative tool with Univer Office SDK](https://i.ytimg.com/vi/1p-SMEiK6Kg/maxresdefault.jpg)](https://www.youtube.com/watch?v=1p-SMEiK6Kg)
+
+[Watch the demo](https://www.youtube.com/watch?v=1p-SMEiK6Kg)
+
 ## Built with Univer Office SDK
+
+### Featured example: Univer Workspace
+
+[Univer Workspace](https://github.com/dream-num/univer-workspace) is an open-source, self-hostable workspace built on Univer Office SDK, where people and AI agents create, collaborate on, and review Office content. Developers can use the complete implementation as a reference, learn how to integrate the SDK, and build their own products.
+
+[![A Workspace mini-app beside its linked spreadsheet, with metrics, charts, and controls bound to cells](./docs/img/workspace-mini-app.png)](https://github.com/dream-num/univer-workspace)
+
+- Agents can generate spreadsheet-based mini-apps, such as decision-making dashboards, interactive reports, and business dashboards.
+- Metrics, charts, and controls on the web page are bound to cells, supporting data reads, writes, and collaborative updates.
+
+[Explore Univer Workspace](https://github.com/dream-num/univer-workspace)
+
+### Other examples
 
 These open-source projects are built with Univer Office SDK:
 
 | Project | Description |
 | --- | --- |
-| [Univer Workspace](https://github.com/dream-num/univer-workspace) | An Office workspace for people and AI agents, with shared editing and review of agent changes. |
 | [Univer Office for DeepSeek Harness](https://github.com/dream-num/dsh-univer-office) | An Office plugin for DeepSeek Harness with connected content, validation, and isolated worktrees for agent collaboration. |
 | [Univer CLI](https://github.com/dream-num/univer-cli) | A local command-line workspace for agents to create, edit, inspect, and deliver Office content. |
 | [Univer Office for WorkBuddy](https://github.com/dream-num/workbuddy-univer-office) | A local Office integration for WorkBuddy with MCP previews and draft review. Development preview. |

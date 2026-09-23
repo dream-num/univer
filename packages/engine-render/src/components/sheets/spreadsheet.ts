@@ -370,22 +370,27 @@ export class Spreadsheet extends SheetComponent {
         // At this moment, ctx.transform is at topLeft of sheet content, cell(0, 0)
 
         const scene = this.getScene();
-        for (const extension of backgroundExtensions) {
-            const timeKey = `${SHEET_EXTENSION_PREFIX}${extension.uKey}`;
-            const st = Tools.now();
-            extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges, {
-                viewRanges,
-                checkOutOfViewBound: true,
-                hasMergeData,
-                viewportKey: viewportInfo.viewportKey,
-                viewBound: viewportInfo.cacheBound,
-                diffBounds: viewportInfo.diffBounds,
-            } as IDrawInfo);
-            const cost = Tools.now() - st;
-            this.addRenderFrameTimeMetricToScene(timeKey, cost, scene);
-        }
+        const drawBackgroundExtensions = (backgroundDiffRanges: IRange[], backgroundViewRanges: IRange[]) => {
+            for (const extension of backgroundExtensions) {
+                const timeKey = `${SHEET_EXTENSION_PREFIX}${extension.uKey}`;
+                const st = Tools.now();
+                extension.draw(ctx, parentScale, spreadsheetSkeleton, backgroundDiffRanges, {
+                    viewRanges: backgroundViewRanges,
+                    checkOutOfViewBound: true,
+                    hasMergeData,
+                    viewportKey: viewportInfo.viewportKey,
+                    viewBound: viewportInfo.cacheBound,
+                    diffBounds: viewportInfo.diffBounds,
+                } as IDrawInfo);
+                const cost = Tools.now() - st;
+                this.addRenderFrameTimeMetricToScene(timeKey, cost, scene);
+            }
+        };
 
-        this._drawAuxiliary(ctx, hasMergeData);
+        drawBackgroundExtensions(diffRanges, viewRanges);
+        this._drawAuxiliary(ctx, hasMergeData, (clearedRanges) => {
+            drawBackgroundExtensions(clearedRanges, clearedRanges);
+        });
 
         for (const extension of gridExtensions) {
             if (shouldSkipSparseExtension(extension.uKey, sparseExtensionFeatures)) {
@@ -922,7 +927,11 @@ export class Spreadsheet extends SheetComponent {
      * @param ctx
      */
     // eslint-disable-next-line max-lines-per-function, complexity
-    private _drawAuxiliary(ctx: UniverRenderingContext2D, hasMergeData = true) {
+    private _drawAuxiliary(
+        ctx: UniverRenderingContext2D,
+        hasMergeData = true,
+        redrawBackgrounds?: (ranges: IRange[]) => void
+    ) {
         const spreadsheetSkeleton = this.getSkeleton();
         if (spreadsheetSkeleton == null) {
             return;
@@ -1043,10 +1052,16 @@ export class Spreadsheet extends SheetComponent {
                 mergeCellRanges.push(...mergeRangeInVisible);
             }
         }
-        this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, mergeCellRanges);
+        this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, mergeCellRanges, redrawBackgrounds);
 
         // clear line of overflow cell
-        this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, overflowCache.toNativeArray());
+        this._clearRectangle(
+            ctx,
+            rowHeightAccumulation,
+            columnWidthAccumulation,
+            overflowCache.toNativeArray(),
+            redrawBackgrounds
+        );
 
         // Draw gap areas AFTER merge/overflow clearing so gap visuals are always on top
         this._drawGapAreas(ctx, spreadsheetSkeleton, rowStart, rowEnd, columnStart, columnEnd, startX, endX, startY, endY);
@@ -1061,11 +1076,13 @@ export class Spreadsheet extends SheetComponent {
         ctx: UniverRenderingContext2D,
         rowHeightAccumulation: number[],
         columnWidthAccumulation: number[],
-        cellRanges?: IRange[]
+        cellRanges?: IRange[],
+        redrawBackgrounds?: (ranges: IRange[]) => void
     ) {
-        if (cellRanges == null) {
+        if (!cellRanges?.length) {
             return;
         }
+        const bounds: IBoundRectNoAngle[] = [];
         for (const range of cellRanges) {
             const { startRow, endRow, startColumn, endColumn } = range;
 
@@ -1077,14 +1094,19 @@ export class Spreadsheet extends SheetComponent {
                 columnWidthAccumulation[endColumn] ?? columnWidthAccumulation[columnWidthAccumulation.length - 1];
 
             ctx.clearRectByPrecision(startX, startY, endX - startX, endY - startY);
+            bounds.push({ left: startX, top: startY, right: endX, bottom: endY });
+        }
 
+        redrawBackgrounds?.(cellRanges);
+
+        for (const { left, top, right, bottom } of bounds) {
             // After ClearRect, the lines will become thinner, and the lines will be repaired below.
             ctx.beginPath();
-            ctx.moveToByPrecision(startX, startY);
-            ctx.lineToByPrecision(endX, startY);
-            ctx.lineToByPrecision(endX, endY);
-            ctx.lineToByPrecision(startX, endY);
-            ctx.lineToByPrecision(startX, startY);
+            ctx.moveToByPrecision(left, top);
+            ctx.lineToByPrecision(right, top);
+            ctx.lineToByPrecision(right, bottom);
+            ctx.lineToByPrecision(left, bottom);
+            ctx.lineToByPrecision(left, top);
             ctx.stroke();
             ctx.closePath();
         }

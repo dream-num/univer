@@ -46,6 +46,7 @@ import { Engine } from '../../../engine';
 import { MAIN_VIEW_PORT_KEY, Scene } from '../../../scene';
 import { Viewport } from '../../../viewport';
 import { Font } from '../extensions/font';
+import { SHEET_EXTENSION_TYPE } from '../extensions/sheet-extension';
 import { SHEET_VIEWPORT_KEY } from '../interfaces';
 import {
     convertTransformToOffsetX,
@@ -757,6 +758,38 @@ describe('spreadsheet integration', () => {
 
         expect(getMergeRangesSpy).not.toHaveBeenCalled();
         expect(extensionDraw.mock.calls.at(-1)?.[4].hasMergeData).toBe(false);
+    });
+
+    it('repaints background extensions after clearing merged cell gridlines', () => {
+        const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
+        const context = mainCanvas.getContext();
+        const backgroundDraw = vi.fn();
+        const gridDraw = vi.fn();
+        const clearRectSpy = vi.spyOn(context, 'clearRectByPrecision');
+        const mergedRange = { startRow: 2, endRow: 3, startColumn: 2, endColumn: 3, rangeType: RANGE_TYPE.NORMAL };
+        vi.spyOn(skeleton, 'getCurrentRowColumnSegmentMergeData').mockReturnValue([mergedRange]);
+        vi.spyOn(skeleton.overflowCache, 'toNativeArray').mockReturnValue([]);
+        vi.spyOn(spreadsheet as unknown as { getExtensionsByOrder: () => unknown[] }, 'getExtensionsByOrder').mockReturnValue([
+            {
+                type: SHEET_EXTENSION_TYPE.BACKGROUND,
+                uKey: 'MockBackgroundExtension',
+                draw: backgroundDraw,
+            },
+            {
+                type: SHEET_EXTENSION_TYPE.GRID,
+                uKey: 'MockGridExtension',
+                draw: gridDraw,
+            },
+        ]);
+
+        const viewportInfo = createViewportInfo(scene, cacheCanvas);
+        skeleton.setStylesCache(viewportInfo);
+        spreadsheet.draw(context, viewportInfo);
+
+        expect(backgroundDraw).toHaveBeenCalledTimes(2);
+        expect(backgroundDraw.mock.calls[1][3]).toEqual(expect.arrayContaining([mergedRange]));
+        expect(clearRectSpy.mock.invocationCallOrder[0]).toBeLessThan(backgroundDraw.mock.invocationCallOrder[1]);
+        expect(backgroundDraw.mock.invocationCallOrder[1]).toBeLessThan(gridDraw.mock.invocationCallOrder[0]);
     });
 
     it('skips sparse extensions outside merge repair bounds on sheets with merged cells', () => {

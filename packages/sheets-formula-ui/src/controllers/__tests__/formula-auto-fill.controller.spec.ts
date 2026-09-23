@@ -42,6 +42,7 @@ import { FormulaAutoFillController } from '@univerjs/sheets-formula';
 import {
     AutoFillUIController,
     ISheetSelectionRenderService,
+    SheetCanvasPopManagerService,
     SheetSelectionRenderService,
     SheetsRenderService,
 } from '@univerjs/sheets-ui';
@@ -73,6 +74,7 @@ describe('Test auto fill with formula', () => {
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
             [SheetsRenderService, { useClass: mockSheetsRenderService }],
+            [SheetCanvasPopManagerService],
             [AutoFillController],
             [AutoFillUIController],
             [FormulaAutoFillController],

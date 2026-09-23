@@ -49,6 +49,7 @@ import { Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AutoFillRenderController, AutoFillUIController, detectAutoFillRange } from '../../../controllers/auto-fill-ui.controller';
 import { createRenderTestBed } from '../../../controllers/render-controllers/__tests__/render-test-bed';
+import { SheetCanvasPopManagerService } from '../../../services/canvas-pop-manager.service';
 import { EditorBridgeService, IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 import { SheetSelectionRenderService } from '../../../services/selection/selection-render.service';
@@ -357,6 +358,7 @@ describe('Test auto fill rules in controller', () => {
             [IRenderManagerService, { useClass: RenderManagerService }],
             [SheetsRenderService, { useClass: mockSheetsRenderService }],
             [SheetSkeletonManagerService],
+            [SheetCanvasPopManagerService],
             [AutoFillController],
             [AutoFillUIController],
         ]);

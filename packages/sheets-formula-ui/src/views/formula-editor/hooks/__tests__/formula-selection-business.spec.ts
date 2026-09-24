@@ -321,10 +321,14 @@ describe('formula selection update helpers', () => {
         expect(shouldAddFormulaReference('=', 1)).toBe(true);
         expect(shouldAddFormulaReference('=SUM(', 5)).toBe(true);
         expect(shouldAddFormulaReference('=SUM(A1,', 8)).toBe(true);
+        expect(shouldAddFormulaReference('=SUM(A1, ', 9)).toBe(true);
+        expect(shouldAddFormulaReference('=SUM(A1,\r', 9)).toBe(true);
+        expect(shouldAddFormulaReference('=SUM(A1,\n', 9)).toBe(true);
         expect(shouldAddFormulaReference('=A1+', 4)).toBe(true);
         expect(shouldAddFormulaReference('=Sheet1!', 8)).toBe(true);
         expect(shouldAddFormulaReference('=SUM', 4)).toBe(false);
         expect(shouldAddFormulaReference('=A1', 3)).toBe(false);
+        expect(shouldAddFormulaReference('=SUM(A1, A2', 9)).toBe(false);
     });
 
     it('reorders the active selection into the formula reference being edited and keeps ctrl-added ranges separate', () => {
@@ -438,7 +442,12 @@ describe('formula selection update helpers', () => {
         expect(isFormulaReferenceAddingContext(nodes, 3)).toBe(false);
         expect(isFormulaReferenceAddingContext(nodes, 4)).toBe(true);
         expect(isFormulaReferenceAddingTextContext('M28,', 4)).toBe(true);
+        expect(isFormulaReferenceAddingTextContext('M28, ', 5)).toBe(true);
+        expect(isFormulaReferenceAddingTextContext('M28,\r', 5)).toBe(true);
+        expect(isFormulaReferenceAddingTextContext('M28,\n', 5)).toBe(true);
         expect(insertFormulaReferenceText('M28,', 'M27', 4)).toBe('M28,M27');
+        expect(insertFormulaReferenceText('M28, ', 'M27', 5)).toBe('M28, M27');
+        expect(insertFormulaReferenceText('M28,\r', 'M27', 5)).toBe('M28,\rM27');
     });
 
     it('skips stale non-add formula selection updates when no rendered reference exists', () => {

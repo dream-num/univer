@@ -90,7 +90,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "1.43.0",
+        "@univerjs/icons": "1.43.1",
         "@univerjs/protocol": "workspace:*",
         "@wendellhu/redi": "1.1.3"
     },

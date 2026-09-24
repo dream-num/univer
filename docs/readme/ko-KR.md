@@ -50,13 +50,31 @@ Univer는 단순한 스프레드시트 파일 뷰어가 아닙니다. 자체 생
 
 [Univer 제품군](https://univer.ai/)의 오피스 도구는 저장과 연산을 위한 런타임을 공유합니다. 서로 다른 도구의 콘텐츠를 자유롭게 조합하고 임베드하며, 원본이 바뀌면 연결된 데이터와 참조도 함께 업데이트됩니다. 사람과 AI 에이전트가 같은 파일에서 협업할 수 있습니다. 제품별 기능은 [기능 목록](https://univer.ai/capabilities)을, 이 저장소의 범위는 [Open Source와 Pro](#-open-source와-pro)를 참고하세요.
 
+### Univer Office SDK로 협업 도구 만들기
+
+[![Univer Office SDK로 협업 도구 만들기](https://i.ytimg.com/vi/1p-SMEiK6Kg/maxresdefault.jpg)](https://www.youtube.com/watch?v=1p-SMEiK6Kg)
+
+[데모 보기](https://www.youtube.com/watch?v=1p-SMEiK6Kg)
+
 ## Univer Office SDK로 만든 프로젝트
+
+### 주요 사례: Univer Workspace
+
+[Univer Workspace](https://github.com/dream-num/univer-workspace)는 Univer Office SDK를 기반으로 구축된 오픈소스 워크스페이스로, 직접 호스팅할 수 있습니다. 사람과 AI 에이전트가 오피스 콘텐츠를 만들고, 함께 작업하며, 검토할 수 있습니다. 개발자는 전체 구현을 참고하여 SDK 통합 방법을 배우고 자체 제품을 만들 수 있습니다.
+
+[![연결된 스프레드시트 옆에 표시된 Workspace 미니 앱. 지표, 차트, 컨트롤이 셀에 연결되어 있습니다](../img/workspace-mini-app.png)](https://github.com/dream-num/univer-workspace)
+
+- 에이전트는 의사결정 대시보드, 대화형 보고서, 비즈니스 대시보드 등 스프레드시트 기반 미니 앱을 생성할 수 있습니다.
+- 웹 페이지의 지표, 차트, 컨트롤은 셀에 연결되어 데이터 읽기, 쓰기, 공동 업데이트를 지원합니다.
+
+[Univer Workspace 살펴보기](https://github.com/dream-num/univer-workspace)
+
+### 다른 사례
 
 다음 오픈소스 프로젝트는 Univer Office SDK를 기반으로 만들어졌습니다.
 
 | 프로젝트 | 설명 |
 | --- | --- |
-| [Univer Workspace](https://github.com/dream-num/univer-workspace) | 사람과 AI 에이전트를 위한 오피스 워크스페이스로, 공동 편집과 에이전트 변경 사항 검토를 지원합니다. |
 | [Univer Office for DeepSeek Harness](https://github.com/dream-num/dsh-univer-office) | 연결된 콘텐츠, 검증, 에이전트 협업을 위한 격리된 Worktree를 제공하는 DeepSeek Harness용 오피스 플러그인입니다. |
 | [Univer CLI](https://github.com/dream-num/univer-cli) | 에이전트가 오피스 콘텐츠를 만들고 편집, 검사, 전달할 수 있는 로컬 명령줄 워크스페이스입니다. |
 | [Univer Office for WorkBuddy](https://github.com/dream-num/workbuddy-univer-office) | MCP 미리 보기와 초안 검토를 지원하는 WorkBuddy용 로컬 오피스 통합입니다. 개발 프리뷰 버전입니다. |

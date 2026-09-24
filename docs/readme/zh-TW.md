@@ -49,13 +49,31 @@ Univer 不只是一個試算表檔案檢視器。它是用於構建你自己的�
 
 在 [Univer 產品家族](https://univer.ai/)中，辦公工具共用儲存與運算執行環境。不同工具的內容可以自由組合和嵌入，關聯資料與引用隨來源同步更新，人與 AI Agent 可以在同一檔案中協作。產品能力請參閱[功能矩陣](https://univer.ai/capabilities)，本倉庫的範圍請參閱[開源與 Pro](#-開源與-pro)。
 
+### 使用 Univer Office SDK 建立協作工具
+
+[![使用 Univer Office SDK 建立協作工具](https://i.ytimg.com/vi/1p-SMEiK6Kg/maxresdefault.jpg)](https://www.youtube.com/watch?v=1p-SMEiK6Kg)
+
+[觀看示範](https://www.youtube.com/watch?v=1p-SMEiK6Kg)
+
 ## 以 Univer Office SDK 構建
+
+### 重點案例：Univer Workspace
+
+[Univer Workspace](https://github.com/dream-num/univer-workspace) 是以 Univer Office SDK 建立、支援自行部署的開源工作空間，人與 AI Agent 可以在其中建立、協作處理和審閱辦公內容。開發者可以參考完整實作，學習如何整合 SDK，並建立自己的產品。
+
+[![Workspace Mini App 與其關聯的試算表並排顯示，指標、圖表和控制項綁定至儲存格](../img/workspace-mini-app.png)](https://github.com/dream-num/univer-workspace)
+
+- Agent 可以產生以試算表為基礎的 Mini App，例如決策儀表板、互動式報告和業務儀表板。
+- 網頁上的指標、圖表和控制項與儲存格綁定，支援資料讀取、寫入和協同更新。
+
+[探索 Univer Workspace](https://github.com/dream-num/univer-workspace)
+
+### 其他案例
 
 以下開源專案以 Univer Office SDK 構建：
 
 | 專案 | 說明 |
 | --- | --- |
-| [Univer Workspace](https://github.com/dream-num/univer-workspace) | 面向人與 AI Agent 的辦公工作空間，支援共同編輯和審閱 Agent 的修改。 |
 | [Univer Office for DeepSeek Harness](https://github.com/dream-num/dsh-univer-office) | 面向 DeepSeek Harness 的辦公外掛，支援關聯內容、驗證和用於 Agent 協作的獨立 Worktree。 |
 | [Univer CLI](https://github.com/dream-num/univer-cli) | 供 Agent 建立、編輯、檢查和交付辦公內容的本機命令列工作空間。 |
 | [Univer Office for WorkBuddy](https://github.com/dream-num/workbuddy-univer-office) | 面向 WorkBuddy 的本機辦公整合，支援 MCP 預覽和草稿審閱。目前為開發預覽版。 |

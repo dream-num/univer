@@ -49,13 +49,31 @@ Univer no es solo un visor de archivos de hojas de cálculo. Es un framework par
 
 En la [familia de productos Univer](https://univer.ai/), las herramientas ofimáticas comparten un entorno de ejecución para almacenamiento y cálculo. El contenido se puede combinar e integrar entre herramientas, y los datos y las referencias vinculados se actualizan junto con sus fuentes. Las personas y los agentes de IA pueden trabajar en los mismos archivos. Consulta la [matriz de capacidades](https://univer.ai/capabilities) para conocer los productos y [Open Source y Pro](#-open-source-y-pro) para conocer el alcance de este repositorio.
 
+### Crea una herramienta colaborativa con Univer Office SDK
+
+[![Crea una herramienta colaborativa con Univer Office SDK](https://i.ytimg.com/vi/1p-SMEiK6Kg/maxresdefault.jpg)](https://www.youtube.com/watch?v=1p-SMEiK6Kg)
+
+[Ver la demo](https://www.youtube.com/watch?v=1p-SMEiK6Kg)
+
 ## Proyectos creados con Univer Office SDK
+
+### Ejemplo destacado: Univer Workspace
+
+[Univer Workspace](https://github.com/dream-num/univer-workspace) es un espacio de trabajo de código abierto, creado con Univer Office SDK y que se puede alojar en infraestructura propia, donde las personas y los agentes de IA crean, colaboran y revisan contenido ofimático. Los desarrolladores pueden usar la implementación completa como referencia, aprender a integrar el SDK y crear sus propios productos.
+
+[![Una miniaplicación de Workspace junto a su hoja de cálculo vinculada, con métricas, gráficos y controles vinculados a las celdas](../img/workspace-mini-app.png)](https://github.com/dream-num/univer-workspace)
+
+- Los agentes pueden generar miniaplicaciones basadas en hojas de cálculo, como paneles para la toma de decisiones, informes interactivos y paneles de negocio.
+- Las métricas, los gráficos y los controles de la página web están vinculados a celdas y permiten leer y escribir datos, así como actualizarlos de forma colaborativa.
+
+[Explorar Univer Workspace](https://github.com/dream-num/univer-workspace)
+
+### Otros ejemplos
 
 Estos proyectos de código abierto están creados con Univer Office SDK:
 
 | Proyecto | Descripción |
 | --- | --- |
-| [Univer Workspace](https://github.com/dream-num/univer-workspace) | Un espacio de trabajo ofimático para personas y agentes de IA, con edición compartida y revisión de los cambios de los agentes. |
 | [Univer Office for DeepSeek Harness](https://github.com/dream-num/dsh-univer-office) | Un plugin ofimático para DeepSeek Harness con contenido conectado, validación y worktrees aislados para la colaboración entre agentes. |
 | [Univer CLI](https://github.com/dream-num/univer-cli) | Un espacio de trabajo local en la línea de comandos para que los agentes creen, editen, inspeccionen y entreguen contenido ofimático. |
 | [Univer Office for WorkBuddy](https://github.com/dream-num/workbuddy-univer-office) | Una integración ofimática local para WorkBuddy con vistas previas MCP y revisión de borradores. Versión preliminar de desarrollo. |

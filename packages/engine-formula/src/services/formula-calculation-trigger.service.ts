@@ -224,6 +224,10 @@ function mergeDirtyData(left: IFormulaDirtyData, right: Partial<IFormulaDirtyDat
 // The accumulator owns its nested maps; command payloads and running sessions stay unchanged.
 function appendDirtyData(target: IFormulaDirtyData, source: Partial<IFormulaDirtyData>, rangeKeys: Set<string>): void {
     mergeDirtyRanges(target.dirtyRanges, source.dirtyRanges ?? [], rangeKeys);
+    if (source.dirtyOtherFormulaRanges?.length) {
+        const ranges = target.dirtyOtherFormulaRanges ??= [];
+        mergeDirtyRanges(ranges, source.dirtyOtherFormulaRanges, new Set(ranges.map(getDirtyRangeKey)));
+    }
     mergeDirtyUnitStringMap(target.dirtyNameMap, source.dirtyNameMap);
     mergeDirtyUnitStringMap(target.dirtyDefinedNameMap, source.dirtyDefinedNameMap);
     mergeDirtyUnitStringMap(target.dirtySuperTableMap ??= Object.create(null), source.dirtySuperTableMap);
@@ -265,6 +269,7 @@ function mergeDirtyUnitNestedMap(target: IDirtyUnitFeatureMap, right?: IDirtyUni
 function hasDirtyData(dirtyData: IFormulaDirtyData): boolean {
     return dirtyData.forceCalculation ||
         dirtyData.dirtyRanges.length > 0 ||
+        (dirtyData.dirtyOtherFormulaRanges?.length ?? 0) > 0 ||
         hasNestedValue(dirtyData.dirtyNameMap) ||
         hasNestedValue(dirtyData.dirtyDefinedNameMap) ||
         hasNestedValue(dirtyData.dirtySuperTableMap) ||
@@ -288,7 +293,9 @@ function dirtyDataIntersects(left: IFormulaDirtyData, right: IFormulaDirtyData):
         return true;
     }
 
-    const rangesIntersect = left.dirtyRanges.some((leftRange) => right.dirtyRanges.some((rightRange) =>
+    const leftRanges = [...left.dirtyRanges, ...left.dirtyOtherFormulaRanges ?? []];
+    const rightRanges = [...right.dirtyRanges, ...right.dirtyOtherFormulaRanges ?? []];
+    const rangesIntersect = leftRanges.some((leftRange) => rightRanges.some((rightRange) =>
         leftRange.unitId === rightRange.unitId &&
         leftRange.sheetId === rightRange.sheetId &&
         Rectangle.intersects(leftRange.range, rightRange.range)
@@ -310,7 +317,9 @@ function dirtyDataIntersects(left: IFormulaDirtyData, right: IFormulaDirtyData):
 function clearedSheetIntersects(cleared: IFormulaDirtyData, dirty: IFormulaDirtyData): boolean {
     return Object.entries(cleared.clearDependencyTreeCache).some(([unitId, sheets]) =>
         Object.keys(sheets ?? {}).some((sheetId) =>
-            dirty.dirtyRanges.some((range) => range.unitId === unitId && range.sheetId === sheetId) ||
+            [...dirty.dirtyRanges, ...dirty.dirtyOtherFormulaRanges ?? []].some((range) =>
+                range.unitId === unitId && range.sheetId === sheetId
+            ) ||
             dirty.dirtyNameMap[unitId]?.[sheetId] != null ||
             dirty.dirtyUnitFeatureMap[unitId]?.[sheetId] != null ||
             dirty.dirtyUnitOtherFormulaMap[unitId]?.[sheetId] != null

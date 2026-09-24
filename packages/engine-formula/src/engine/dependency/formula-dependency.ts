@@ -496,6 +496,12 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
             treeIds.add(addressSearchResult);
         }
 
+        const otherRanges = this._currentConfigService.getDirtyData().dirtyOtherFormulaRanges ?? [];
+        const otherTreeIds = this._dependencyManagerService.searchDependency(otherRanges);
+        for (const treeId of this._dependencyRTreeCacheForAddressFunction.bulkSearch(otherRanges) as Set<number>) {
+            otherTreeIds.add(treeId);
+        }
+
         for (const [treeId, tree] of this._dependencyTreeCache) {
             // const tree = allTree[i];
 
@@ -508,6 +514,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
                 (
                     forceCalculate ||
                     tree.isDirty ||
+                    (tree.formulaId != null && otherTreeIds.has(treeId)) ||
                     tree.dependencySheetName(this._currentConfigService.getDirtyNameMap()) || //O(n) n=tree.rangeList.length
                     (
                         treeIds.has(treeId)// O(1)

@@ -22,11 +22,12 @@ import { Index } from '../../../functions/lookup/index/index';
 import { Sum } from '../../../functions/math/sum';
 import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import { IFunctionService } from '../../../services/function.service';
+import { IOtherFormulaManagerService } from '../../../services/other-formula-manager.service';
 import { IFormulaRuntimeService } from '../../../services/runtime.service';
 import { createCommandTestBed } from '../../analysis/__tests__/create-command-test-bed';
 import { Lexer } from '../../analysis/lexer';
 import { AstTreeBuilder } from '../../analysis/parser';
-import { FormulaDependencyGenerator } from '../formula-dependency';
+import { FormulaDependencyGenerator, IFormulaDependencyGenerator } from '../formula-dependency';
 
 class TestFormulaDependencyGenerator extends FormulaDependencyGenerator {
     collectRanges(node: BaseAstNode) {
@@ -69,6 +70,58 @@ describe('Implicit intersection dependencies', () => {
             expect(Math.min(...ranges.map((range) => range.startRow))).toBe(expectedRows[0]);
             expect(Math.max(...ranges.map((range) => range.endRow))).toBe(expectedRows[1]);
             expect(ranges.every((range) => range.startColumn === 0 && range.endColumn === 0)).toBe(true);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
+
+describe('Applied source result dependencies', () => {
+    it('selects only OtherFormula entries referencing the applied range, preserving source cell formulas', async () => {
+        const bed = createCommandTestBed();
+        try {
+            const { unitId, sheetId } = bed;
+            const config = bed.get(IFormulaCurrentConfigService);
+            const generator = bed.get(IFormulaDependencyGenerator);
+            const formulas = bed.get(IOtherFormulaManagerService);
+            for (const [formulaId, f] of [['amount', '=C1'], ['unrelated', '=B1']]) {
+                formulas.register({
+                    unitId,
+                    subUnitId: sheetId,
+                    formulaId,
+                    item: { f, ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }] },
+                });
+            }
+            const dataset = {
+                formulaData: { [unitId]: { [sheetId]: { 0: { 2: { f: '=A1*B1' }, 3: { f: '=C1*2' } } } } },
+                arrayFormulaCellData: {},
+                arrayFormulaRange: {},
+                forceCalculate: true,
+                dirtyRanges: [],
+                dirtyNameMap: {},
+                dirtyDefinedNameMap: {},
+                dirtyUnitFeatureMap: {},
+                dirtyUnitOtherFormulaMap: {},
+                excludedCell: {},
+                allUnitData: { [unitId]: bed.sheetData },
+            };
+            config.load(dataset);
+            expect(await generator.generate()).toHaveLength(4);
+
+            config.load({
+                ...dataset,
+                forceCalculate: false,
+                dirtyOtherFormulaRanges: [{ unitId, sheetId, range: { startRow: 0, endRow: 0, startColumn: 2, endColumn: 2 } }],
+            });
+            const affected = await generator.generate();
+            expect(affected.map((tree) => tree.formulaId)).toEqual(['amount']);
+
+            config.load({
+                ...dataset,
+                forceCalculate: false,
+                dirtyOtherFormulaRanges: [{ unitId, sheetId, range: { startRow: 0, endRow: 0, startColumn: 4, endColumn: 4 } }],
+            });
+            expect(await generator.generate()).toEqual([]);
         } finally {
             bed.univer.dispose();
         }

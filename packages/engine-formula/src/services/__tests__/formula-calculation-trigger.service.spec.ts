@@ -69,6 +69,32 @@ describe('FormulaCalculationTriggerService', () => {
         vi.restoreAllMocks();
     });
 
+    it('batches applied-result ranges separately and restarts when a newer result overlaps', async () => {
+        const bed = createTestBed();
+        const range = { unitId: 'source', sheetId: 'data', range: { startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 } };
+        try {
+            for (let i = 0; i < 2; i++) {
+                bed.emit({ id: SetTriggerFormulaCalculationStartMutation.id, params: { dirtyOtherFormulaRanges: [range] } });
+            }
+            await vi.advanceTimersByTimeAsync(10);
+            expect(bed.executed).toHaveLength(1);
+            expect(bed.executed[0].params).toMatchObject({ dirtyRanges: [], dirtyOtherFormulaRanges: [range] });
+            bed.emit({ id: SetTriggerFormulaCalculationStartMutation.id, params: {
+                dirtyRanges: [range],
+                dirtyOtherFormulaRanges: [range],
+            } });
+            await vi.advanceTimersByTimeAsync(10);
+            expect(bed.executed[1].id).toBe(SetFormulaCalculationStopMutation.id);
+            bed.emit({ id: SetFormulaCalculationNotificationMutation.id, params: {
+                functionsExecutedState: FormulaExecutedStateType.STOP_EXECUTION,
+            } });
+            await vi.advanceTimersByTimeAsync(10);
+            expect(bed.executed[2].params).toMatchObject({ dirtyRanges: [range], dirtyOtherFormulaRanges: [range] });
+        } finally {
+            bed.service.dispose();
+        }
+    });
+
     it('batches formula registrations without changing payloads or completed session maps', async () => {
         const testBed = createTestBed();
         const payload = Object.freeze({

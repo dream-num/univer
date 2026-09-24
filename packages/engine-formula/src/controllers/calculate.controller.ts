@@ -108,6 +108,7 @@ export class CalculateController extends Disposable {
         const {
             forceCalculation: forceCalculate = false,
             dirtyRanges = [],
+            dirtyOtherFormulaRanges = [],
             dirtyNameMap = {},
             dirtyDefinedNameMap = {},
             dirtySuperTableMap = {},
@@ -131,6 +132,7 @@ export class CalculateController extends Disposable {
             arrayFormulaRange,
             forceCalculate,
             dirtyRanges,
+            dirtyOtherFormulaRanges,
             dirtyNameMap,
             dirtyDefinedNameMap,
             dirtySuperTableMap,

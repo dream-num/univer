@@ -255,6 +255,8 @@ export interface IFormulaDatasetConfig {
     arrayFormulaRange: IArrayFormulaRangeType;
     forceCalculate: boolean;
     dirtyRanges: IUnitRange[];
+    /** Applied source ranges whose dependent non-cell formulas need recalculation. */
+    dirtyOtherFormulaRanges?: IUnitRange[];
     dirtyNameMap: IDirtyUnitSheetNameMap;
     dirtyDefinedNameMap: IDirtyUnitDefinedNameMap;
     dirtySuperTableMap?: IDirtyUnitSuperTableMap;

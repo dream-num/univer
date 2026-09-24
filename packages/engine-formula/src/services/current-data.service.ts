@@ -51,6 +51,8 @@ import { ISheetRowFilteredService } from './sheet-row-filtered.service';
 export interface IFormulaDirtyData {
     forceCalculation: boolean;
     dirtyRanges: IUnitRange[];
+    /** Applied source ranges; invalidate dependent OtherFormula entries, not source cell formulas. */
+    dirtyOtherFormulaRanges?: IUnitRange[];
     dirtyNameMap: IDirtyUnitSheetNameMap;
     dirtyDefinedNameMap: IDirtyUnitDefinedNameMap;
     dirtySuperTableMap?: IDirtyUnitSuperTableMap;
@@ -169,6 +171,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _dirtyRanges: IUnitRange[] = [];
 
+    private _dirtyOtherFormulaRanges: IUnitRange[] = [];
+
     private _dirtyNameMap: IDirtyUnitSheetNameMap = Object.create(null);
 
     private _dirtyDefinedNameMap: IDirtyUnitDefinedNameMap = Object.create(null);
@@ -208,6 +212,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._calculationRowData = Object.create(null);
         this._clearDependencyTreeCache = Object.create(null);
         this._dirtyRanges = [];
+        this._dirtyOtherFormulaRanges = [];
         this._dirtyNameMap = Object.create(null);
         this._dirtyDefinedNameMap = Object.create(null);
         this._dirtySuperTableMap = Object.create(null);
@@ -409,6 +414,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._clearDependencyTreeCache = config.clearDependencyTreeCache || {};
 
         this._dirtyRanges = config.dirtyRanges;
+        this._dirtyOtherFormulaRanges = config.dirtyOtherFormulaRanges ?? [];
 
         this._dirtyNameMap = config.dirtyNameMap;
 
@@ -450,6 +456,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return {
             forceCalculation: this._forceCalculate,
             dirtyRanges: this._dirtyRanges,
+            dirtyOtherFormulaRanges: this._dirtyOtherFormulaRanges,
             dirtyNameMap: this._dirtyNameMap,
             dirtyDefinedNameMap: this._dirtyDefinedNameMap,
             dirtySuperTableMap: this._dirtySuperTableMap,

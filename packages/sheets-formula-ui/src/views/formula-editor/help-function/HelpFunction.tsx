@@ -140,7 +140,7 @@ export function HelpFunction(props: {
                             }}
                         >
                             <Help
-                                prefix={functionInfo.functionName}
+                                prefix={(functionInfo as any).label || functionInfo.functionName}
                                 value={functionInfo.functionParameter}
                                 active={paramIndex}
                                 onClick={handleSwitchActive}
@@ -187,7 +187,7 @@ export function HelpFunction(props: {
                             <div className="univer-mt-3">
                                 <Params
                                     title={localeService.t<LocaleKey>('sheets-formula-ui.prompt.helpExample')}
-                                    value={`${functionInfo.functionName}(${functionInfo.functionParameter
+                                    value={`${(functionInfo as any).label || functionInfo.functionName}(${functionInfo.functionParameter
                                         .map((item) => item.example)
                                         .join(',')})`}
                                 />

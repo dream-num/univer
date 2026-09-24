@@ -257,6 +257,7 @@ const locale: typeof enUS = {
         },
     },
     DELTA: {
+        label: '差值',
         description: '檢驗兩個值是否相等',
         abstract: '檢驗兩個值是否相等',
         links: [

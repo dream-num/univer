@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ABS: {
+        label: 'ABS',
         description: 'Trả về giá trị tuyệt đối của một số. Giá trị tuyệt đối của một số là số đó không có dấu.',
         abstract: 'Trả về giá trị tuyệt đối của một số.',
         links: [
@@ -31,6 +32,7 @@ const locale: typeof enUS = {
         },
     },
     ACOS: {
+        label: 'ACOS',
         description: 'Trả về arccosin, hay cosin nghịch đảo, của một số. Arccosin là góc mà cosin của nó là số. Góc được trả về được tính bằng radian trong phạm vi từ 0 (không) đến pi.',
         abstract: 'Trả về cung cosin của một số',
         links: [
@@ -44,6 +46,7 @@ const locale: typeof enUS = {
         },
     },
     ACOSH: {
+        label: 'ACOSH',
         description: 'Trả về cosin hyperbolic nghịch đảo của một số. Số đó phải lớn hơn hoặc bằng 1. Cosin hyperbolic nghịch đảo là giá trị mà cosin hyperbolic của nó là số, vì vậy ACOSH(COSH(number)) bằng số.',
         abstract: 'Trả về cosin hyperbolic nghịch đảo của một số.',
         links: [
@@ -57,6 +60,7 @@ const locale: typeof enUS = {
         },
     },
     ACOT: {
+        label: 'ACOT',
         description: 'Trả về giá trị chính của arccotang hoặc nghịch đảo cotang của một số.',
         abstract: 'Trả về cotang nghịch đảo của một số',
         links: [
@@ -70,6 +74,7 @@ const locale: typeof enUS = {
         },
     },
     ACOTH: {
+        label: 'ACOTH',
         description: 'Trả về nghịch đảo cotang hyperbol của một số.',
         abstract: 'Trả về nghịch đảo cotang hyperbol của một số.',
         links: [
@@ -83,6 +88,7 @@ const locale: typeof enUS = {
         },
     },
     AGGREGATE: {
+        label: 'TỔNG_HỢP',
         description: 'Trả về tổng gộp trong một danh sách hoặc một cơ sở dữ liệu.',
         abstract: 'Trả về tổng gộp trong một danh sách hoặc một cơ sở dữ liệu.',
         links: [
@@ -99,6 +105,7 @@ const locale: typeof enUS = {
         },
     },
     ARABIC: {
+        label: 'TIẾNG_Ả_RẬP',
         description: 'Chuyển đổi một chữ số La Mã sang một chữ số Ả-rập.',
         abstract: 'Chuyển đổi một chữ số La Mã sang một chữ số Ả-rập.',
         links: [
@@ -112,6 +119,7 @@ const locale: typeof enUS = {
         },
     },
     ASIN: {
+        label: 'ASIN',
         description: 'Trả về arcsin, hayine nghịch đảo của một số.',
         abstract: 'Trả về arcsin, hayine nghịch đảo của một số.',
         links: [
@@ -125,6 +133,7 @@ const locale: typeof enUS = {
         },
     },
     ASINH: {
+        label: 'ASINH',
         description: 'Trả về sin hyperbolic nghịch đảo của một số.',
         abstract: 'Trả về sin hyperbolic nghịch đảo của một số.',
         links: [
@@ -138,6 +147,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN: {
+        label: 'ATAN',
         description: 'Trả về arctang, hay tang nghịch đảo của một số.',
         abstract: 'Trả về arctang, hay tang nghịch đảo của một số.',
         links: [
@@ -151,6 +161,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN2: {
+        label: 'ATAN2',
         description: 'Trả về arctang, hay tang nghịch đảo của tọa độ x và tọa độ y đã xác định. Arctang là góc từ trục x đến đường thẳng chứa tọa độ gốc (0, 0) và một điểm có tọa độ (x_num, y_num). Góc được tính bằng radian và có giá trị từ -pi đến pi, không bao gồm -pi.',
         abstract: 'Trả về arctang, hay tang nghịch đảo của tọa độ x và tọa độ y đã xác định. Arctang là góc từ trục x đến đường thẳng chứa tọa độ gốc (0, 0) và một điểm có tọa độ (x_num, y_num). Góc được tính bằng radian và có giá trị từ -pi đến pi, không bao gồm -pi.',
         links: [
@@ -165,6 +176,7 @@ const locale: typeof enUS = {
         },
     },
     ATANH: {
+        label: 'ATANH',
         description: 'Trả về tang hyperbolic nghịch đảo của một số. Số phải từ -1 đến 1 (không bao gồm -1 và 1). Tang hyperbolic nghịch đảo là giá trị mà tang hyperbolic của nó là số , vì vậy ATANH(TANH(number)) bằng số .',
         abstract: 'Trả về tang hyperbolic nghịch đảo của một số. Số phải từ -1 đến 1 (không bao gồm -1 và 1). Tang hyperbolic nghịch đảo là giá trị mà tang hyperbolic của nó là số , vì vậy ATANH(TANH(number)) bằng số .',
         links: [
@@ -178,6 +190,7 @@ const locale: typeof enUS = {
         },
     },
     BASE: {
+        label: 'CƠ_SỐ',
         description: 'Chuyển một số sang dạng trình bày văn bản với cơ số cho trước.',
         abstract: 'Chuyển một số sang dạng trình bày văn bản với cơ số cho trước.',
         links: [
@@ -193,6 +206,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING: {
+        label: 'TRẦN_NHÀ',
         description: 'Trả về số được làm tròn lên, xa số không, đến bội số có nghĩa gần nhất.',
         abstract: 'Trả về số được làm tròn lên, xa số không, đến bội số có nghĩa gần nhất.',
         links: [
@@ -207,6 +221,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_MATH: {
+        label: 'TRẦN_NHÀ_TOÁN',
         description: 'Làm tròn số lên số nguyên gần nhất hoặc bội số có nghĩa gần nhất.',
         abstract: 'Làm tròn số lên số nguyên gần nhất hoặc bội số có nghĩa gần nhất.',
         links: [
@@ -222,6 +237,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_PRECISE: {
+        label: 'TRẦN_NHÀ_CHÍNH_XÁC',
         description: 'Trả về một số được làm tròn lên tới số nguyên gần nhất hoặc tới bội số có nghĩa gần nhất. Bất chấp dấu của số, số sẽ được làm tròn lên.',
         abstract: 'Trả về một số được làm tròn lên tới số nguyên gần nhất hoặc tới bội số có nghĩa gần nhất.',
         links: [
@@ -236,6 +252,7 @@ const locale: typeof enUS = {
         },
     },
     COMBIN: {
+        label: 'TỔ_HỢP',
         description: 'Trả về số tổ hợp cho số mục nhất định.',
         abstract: 'Trả về số tổ hợp cho số mục nhất định.',
         links: [
@@ -250,6 +267,7 @@ const locale: typeof enUS = {
         },
     },
     COMBINA: {
+        label: 'TỔ_HỢP.A',
         description: 'Trả về số lần kết hợp (có kèm những lần lặp lại) đối với số lượng mục cho trước.',
         abstract: 'Trả về số lần kết hợp (có kèm những lần lặp lại) đối với số lượng mục cho trước.',
         links: [
@@ -264,6 +282,7 @@ const locale: typeof enUS = {
         },
     },
     COS: {
+        label: 'COS',
         description: 'Trả về cosin của góc đã cho.',
         abstract: 'Trả về cosin của góc đã cho.',
         links: [
@@ -277,6 +296,7 @@ const locale: typeof enUS = {
         },
     },
     COSH: {
+        label: 'COSH',
         description: 'Trả về cosin hyperbolic của một số.',
         abstract: 'Trả về cosin hyperbolic của một số.',
         links: [
@@ -290,6 +310,7 @@ const locale: typeof enUS = {
         },
     },
     COT: {
+        label: 'COT',
         description: 'Trả về giá trị cotang của góc được đo bằng radian.',
         abstract: 'Trả về giá trị cotang của góc được đo bằng radian.',
         links: [
@@ -303,6 +324,7 @@ const locale: typeof enUS = {
         },
     },
     COTH: {
+        label: 'COTH',
         description: 'Trả về cotang hyperbolic của một góc hyperbolic.',
         abstract: 'Trả về cotang hyperbolic của một góc hyperbolic.',
         links: [
@@ -316,6 +338,7 @@ const locale: typeof enUS = {
         },
     },
     CSC: {
+        label: 'CSC',
         description: 'Trả về cosec của một góc được tính bằng radian.',
         abstract: 'Trả về cosec của một góc được tính bằng radian.',
         links: [
@@ -329,6 +352,7 @@ const locale: typeof enUS = {
         },
     },
     CSCH: {
+        label: 'CSCH',
         description: 'Trả về cosec hyperbolic của một góc được tính bằng radian.',
         abstract: 'Trả về cosec hyperbolic của một góc được tính bằng radian.',
         links: [
@@ -342,6 +366,7 @@ const locale: typeof enUS = {
         },
     },
     DECIMAL: {
+        label: 'THẬP_PHÂN',
         description: 'Chuyển đổi dạng biểu thị số bằng văn bản theo một cơ số đã cho thành một số thập phân.',
         abstract: 'Chuyển đổi dạng biểu thị số bằng văn bản theo một cơ số đã cho thành một số thập phân.',
         links: [
@@ -356,6 +381,7 @@ const locale: typeof enUS = {
         },
     },
     DEGREES: {
+        label: 'ĐỘ',
         description: 'Chuyển đổi radian sang độ.',
         abstract: 'Chuyển đổi radian sang độ.',
         links: [
@@ -369,6 +395,7 @@ const locale: typeof enUS = {
         },
     },
     EVEN: {
+        label: 'CHẴN',
         description: 'Trả về số được làm tròn lên đến số nguyên chẵn gần nhất.',
         abstract: 'Trả về số được làm tròn lên đến số nguyên chẵn gần nhất.',
         links: [
@@ -382,6 +409,7 @@ const locale: typeof enUS = {
         },
     },
     EXP: {
+        label: 'EXP',
         description: 'Trả về lũy thừa của số e với một số mũ nào đó.',
         abstract: 'Trả về lũy thừa của số e với một số mũ nào đó.',
         links: [
@@ -395,6 +423,7 @@ const locale: typeof enUS = {
         },
     },
     FACT: {
+        label: 'GIAI_THỪA',
         description: 'Trả về giai thừa của một số.',
         abstract: 'Trả về giai thừa của một số.',
         links: [
@@ -408,6 +437,7 @@ const locale: typeof enUS = {
         },
     },
     FACTDOUBLE: {
+        label: 'GIAI_THỪA_ĐÔI',
         description: 'Trả về giai thừa kép của một số.',
         abstract: 'Trả về giai thừa kép của một số.',
         links: [
@@ -421,6 +451,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR: {
+        label: 'SÀN_NHÀ',
         description: 'Làm tròn số theo giá trị tuyệt đối giảm dần',
         abstract: 'Làm tròn số theo giá trị tuyệt đối giảm dần',
         links: [
@@ -435,6 +466,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_MATH: {
+        label: 'SÀN_NHÀ_TOÁN',
         description: 'Làm tròn một số xuống số nguyên gần nhất hay tới bội số gần nhất của một số có nghĩa.',
         abstract: 'Làm tròn một số xuống số nguyên gần nhất hay tới bội số gần nhất của một số có nghĩa.',
         links: [
@@ -450,6 +482,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_PRECISE: {
+        label: 'SÀN_NHÀ_CHÍNH_XÁC',
         description: 'Trả về một số được làm tròn xuống tới số nguyên gần nhất hoặc tới bội số có nghĩa gần nhất. Bất chấp dấu của số, số sẽ được làm tròn xuống.',
         abstract: 'Trả về một số được làm tròn xuống tới số nguyên gần nhất hoặc tới bội số có nghĩa gần nhất.',
         links: [
@@ -464,6 +497,7 @@ const locale: typeof enUS = {
         },
     },
     GCD: {
+        label: 'GCD',
         description: 'Trả về ước số chung lớn nhất của hai hoặc nhiều số nguyên.',
         abstract: 'Trả về ước số chung lớn nhất của hai hoặc nhiều số nguyên.',
         links: [
@@ -478,6 +512,7 @@ const locale: typeof enUS = {
         },
     },
     INT: {
+        label: 'INT',
         description: 'Làm tròn số xuống tới số nguyên gần nhất.',
         abstract: 'Làm tròn số xuống tới số nguyên gần nhất.',
         links: [
@@ -491,6 +526,7 @@ const locale: typeof enUS = {
         },
     },
     ISO_CEILING: {
+        label: 'ISO_TRẦN',
         description: 'Trả về một số được làm tròn lên tới số nguyên gần nhất hoặc tới bội số có nghĩa gần nhất. Bất chấp dấu của số, số sẽ được làm tròn lên. Tuy nhiên, nếu đối số số hoặc đối số số có nghĩa là không, thì kết quả là không.',
         abstract: 'Trả về một số được làm tròn lên tới số nguyên gần nhất hoặc tới bội số có nghĩa gần nhất. Bất chấp dấu của số, số sẽ được làm tròn lên. Tuy nhiên, nếu đối số số hoặc đối số số có nghĩa là không, thì kết quả là không.',
         links: [
@@ -505,6 +541,7 @@ const locale: typeof enUS = {
         },
     },
     LCM: {
+        label: 'LCM',
         description: 'Trả về bội số chung ít nhất của các số nguyên.',
         abstract: 'Trả về bội số chung ít nhất của các số nguyên.',
         links: [
@@ -519,6 +556,7 @@ const locale: typeof enUS = {
         },
     },
     LN: {
+        label: 'LN',
         description: 'Trả về lô-ga-rit tự nhiên của một số.',
         abstract: 'Trả về lô-ga-rit tự nhiên của một số.',
         links: [
@@ -532,6 +570,7 @@ const locale: typeof enUS = {
         },
     },
     LOG: {
+        label: 'LOG',
         description: 'Trả về lô-ga-rit của một số tới một cơ số do bạn chỉ định.',
         abstract: 'Trả về lô-ga-rit của một số tới một cơ số do bạn chỉ định.',
         links: [
@@ -546,6 +585,7 @@ const locale: typeof enUS = {
         },
     },
     LOG10: {
+        label: 'LOG10',
         description: 'Trả về lô-ga-rit cơ số 10 của một số.',
         abstract: 'Trả về lô-ga-rit cơ số 10 của một số.',
         links: [
@@ -559,6 +599,7 @@ const locale: typeof enUS = {
         },
     },
     MDETERM: {
+        label: 'MDETERM',
         description: 'Trả về định thức ma trận của một mảng.',
         abstract: 'Trả về định thức ma trận của một mảng.',
         links: [
@@ -572,6 +613,7 @@ const locale: typeof enUS = {
         },
     },
     MINVERSE: {
+        label: 'MINVERSE',
         description: 'Trả về ma trận nghịch đảo của một mảng',
         abstract: 'Trả về ma trận nghịch đảo của một mảng',
         links: [
@@ -585,6 +627,7 @@ const locale: typeof enUS = {
         },
     },
     MMULT: {
+        label: 'MMULT',
         description: 'Trả về tích ma trận của hai mảng',
         abstract: 'Trả về tích ma trận của hai mảng',
         links: [
@@ -599,6 +642,7 @@ const locale: typeof enUS = {
         },
     },
     MOD: {
+        label: 'MOD',
         description: 'Trả về số dư sau khi chia một số cho ước số. Kết quả có cùng dấu với ước số.',
         abstract: 'Trả về số dư sau khi chia một số cho ước số.',
         links: [
@@ -613,6 +657,7 @@ const locale: typeof enUS = {
         },
     },
     MROUND: {
+        label: 'MROUND',
         description: 'trả về một số được làm tròn đến bội số mong muốn.',
         abstract: 'trả về một số được làm tròn đến bội số mong muốn.',
         links: [
@@ -627,6 +672,7 @@ const locale: typeof enUS = {
         },
     },
     MULTINOMIAL: {
+        label: 'MULTINOMIAL',
         description: 'Trả về đa thức của một tập hợp số',
         abstract: 'Trả về đa thức của một tập hợp số',
         links: [
@@ -641,6 +687,7 @@ const locale: typeof enUS = {
         },
     },
     MUNIT: {
+        label: 'MUNIT',
         description: 'Trả về ma trận đơn vị cho chiều đã xác định.',
         abstract: 'Trả về ma trận đơn vị cho chiều đã xác định.',
         links: [
@@ -654,6 +701,7 @@ const locale: typeof enUS = {
         },
     },
     ODD: {
+        label: 'LẺ',
         description: 'Trả về số được làm tròn lên tới số nguyên lẻ gần nhất.',
         abstract: 'Trả về số được làm tròn lên tới số nguyên lẻ gần nhất.',
         links: [
@@ -667,6 +715,7 @@ const locale: typeof enUS = {
         },
     },
     PI: {
+        label: 'PI',
         description: 'Trả về giá trị của pi',
         abstract: 'Trả về giá trị của pi',
         links: [
@@ -679,6 +728,7 @@ const locale: typeof enUS = {
         },
     },
     POWER: {
+        label: 'LŨY_THỪA',
         description: 'Trả về kết quả của một số được nâng theo một lũy thừa.',
         abstract: 'Trả về kết quả của một số được nâng theo một lũy thừa.',
         links: [
@@ -693,6 +743,7 @@ const locale: typeof enUS = {
         },
     },
     PRODUCT: {
+        label: 'TÍCH',
         description: 'Nhân tất cả các đối số đã cho với nhau và trả về tích của chúng.',
         abstract: 'Nhân các tham số của nó',
         links: [
@@ -707,6 +758,7 @@ const locale: typeof enUS = {
         },
     },
     QUOTIENT: {
+        label: 'THƯƠNG',
         description: 'Trả về phần nguyên của một phép chia.',
         abstract: 'Trả về phần nguyên của một phép chia.',
         links: [
@@ -721,6 +773,7 @@ const locale: typeof enUS = {
         },
     },
     RADIANS: {
+        label: 'RADIAN',
         description: 'Chuyển đổi độ thành radian.',
         abstract: 'Chuyển đổi độ thành radian.',
         links: [
@@ -734,6 +787,7 @@ const locale: typeof enUS = {
         },
     },
     RAND: {
+        label: 'NGẪU_NHIÊN',
         description: 'Trả về một số ngẫu nhiên trong khoảng từ 0 đến 1',
         abstract: 'Trả về một số ngẫu nhiên trong khoảng từ 0 đến 1',
         links: [
@@ -746,6 +800,7 @@ const locale: typeof enUS = {
         },
     },
     RANDARRAY: {
+        label: 'MẢNG_NGẪU_NHIÊN',
         description: 'Hàm RANDARRAY trả về một mảng các số ngẫu nhiên trong khoảng từ 0 đến 1. Tuy nhiên, bạn có thể chỉ định số hàng và cột cần điền, giá trị tối thiểu và tối đa cũng như trả về số nguyên hay giá trị thập phân.',
         abstract: 'Hàm RANDARRAY trả về một mảng các số ngẫu nhiên trong khoảng từ 0 đến 1.',
         links: [
@@ -763,6 +818,7 @@ const locale: typeof enUS = {
         },
     },
     RANDBETWEEN: {
+        label: 'NGẪU_NHIÊN.GIỮA',
         description: 'Trả về một số nguyên ngẫu nhiên nằm giữa các số do bạn chỉ định.',
         abstract: 'Trả về một số nguyên ngẫu nhiên nằm giữa các số do bạn chỉ định.',
         links: [
@@ -777,6 +833,7 @@ const locale: typeof enUS = {
         },
     },
     ROMAN: {
+        label: 'LA_MÃ',
         description: 'Chuyển đổi số Ả-rập thành số La Mã, dạng văn bản.',
         abstract: 'Chuyển đổi số Ả-rập thành số La Mã, dạng văn bản.',
         links: [
@@ -791,6 +848,7 @@ const locale: typeof enUS = {
         },
     },
     ROUND: {
+        label: 'LÀM_TRÒN',
         description: 'làm tròn một số tới một số chữ số đã xác định.',
         abstract: 'làm tròn một số tới một số chữ số đã xác định.',
         links: [
@@ -805,6 +863,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDBANK: {
+        label: 'LÀM_TRÒN.NGÂN_HÀNG',
         description: 'Làm tròn một số theo cách làm tròn của ngân hàng.',
         abstract: 'Làm tròn một số theo cách làm tròn của ngân hàng.',
         links: [
@@ -819,6 +878,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDDOWN: {
+        label: 'LÀM_TRÒN.XUỐNG',
         description: 'Làm tròn số xuống, tiến tới không.',
         abstract: 'Làm tròn số xuống, tiến tới không.',
         links: [
@@ -833,6 +893,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDUP: {
+        label: 'LÀM_TRÒN.LÊN',
         description: 'Làm tròn một số lên, ra xa số 0 (không).',
         abstract: 'Làm tròn một số lên, ra xa số 0 (không).',
         links: [
@@ -847,6 +908,7 @@ const locale: typeof enUS = {
         },
     },
     SEC: {
+        label: 'SEC',
         description: 'Trả về sec của một góc.',
         abstract: 'Trả về sec của một góc.',
         links: [
@@ -860,6 +922,7 @@ const locale: typeof enUS = {
         },
     },
     SECH: {
+        label: 'SECH',
         description: 'Trả về sec hyperbolic của một góc.',
         abstract: 'Trả về sec hyperbolic của một góc.',
         links: [
@@ -873,6 +936,7 @@ const locale: typeof enUS = {
         },
     },
     SERIESSUM: {
+        label: 'TỔNG_CHUỖI_LŨY_THỪA',
         description: 'Trả về tổng của một chuỗi lũy thừa dựa trên công thức.',
         abstract: 'Trả về tổng của một chuỗi lũy thừa dựa trên công thức.',
         links: [
@@ -889,6 +953,7 @@ const locale: typeof enUS = {
         },
     },
     SEQUENCE: {
+        label: 'SEQUENCE',
         description: 'Hàm SEQUENCE cho phép bạn tạo một danh sách các số liên tiếp trong một mảng, chẳng hạn như 1, 2, 3, 4.',
         abstract: 'Hàm SEQUENCE cho phép bạn tạo một danh sách các số liên tiếp trong một mảng, chẳng hạn như 1, 2, 3, 4.',
         links: [
@@ -905,6 +970,7 @@ const locale: typeof enUS = {
         },
     },
     SIGN: {
+        label: 'DẤU',
         description: 'Xác định dấu của một số.',
         abstract: 'Xác định dấu của một số.',
         links: [
@@ -918,6 +984,7 @@ const locale: typeof enUS = {
         },
     },
     SIN: {
+        label: 'SIN',
         description: 'Trả về sin của một góc đã cho.',
         abstract: 'Trả về sin của một góc đã cho.',
         links: [
@@ -931,6 +998,7 @@ const locale: typeof enUS = {
         },
     },
     SINH: {
+        label: 'SINH',
         description: 'Trả về sin hyperbolic của một số.',
         abstract: 'Trả về sin hyperbolic của một số.',
         links: [
@@ -944,6 +1012,7 @@ const locale: typeof enUS = {
         },
     },
     SQRT: {
+        label: 'CĂN_BẬC_HAI',
         description: 'Trả về căn bậc hai của số dương.',
         abstract: 'Trả về căn bậc hai của số dương.',
         links: [
@@ -957,6 +1026,7 @@ const locale: typeof enUS = {
         },
     },
     SQRTPI: {
+        label: 'CĂN_BẬC_HAI.PI',
         description: 'Trả về căn bậc hai của (số * pi).',
         abstract: 'Trả về căn bậc hai của (số * pi).',
         links: [
@@ -970,6 +1040,7 @@ const locale: typeof enUS = {
         },
     },
     SUBTOTAL: {
+        label: 'TỔNG_PHỤ',
         description: 'Trả về tổng phụ trong một danh sách hoặc cơ sở dữ liệu.',
         abstract: 'Trả về tổng phụ trong một danh sách hoặc cơ sở dữ liệu.',
         links: [
@@ -985,6 +1056,7 @@ const locale: typeof enUS = {
         },
     },
     SUM: {
+        label: 'TỔNG',
         description: 'Thêm các giá trị đơn lẻ, tham chiếu ô, phạm vi hoặc kết hợp cả ba.',
         abstract: 'Tìm tổng các tham số',
         links: [
@@ -1005,6 +1077,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIF: {
+        label: 'TỔNG.NẾU',
         description: 'để tính tổng các giá trị trong một phạm vi đáp ứng tiêu chí mà bạn xác định. ',
         abstract: 'để tính tổng các giá trị trong một phạm vi đáp ứng tiêu chí mà bạn xác định. ',
         links: [
@@ -1029,6 +1102,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIFS: {
+        label: 'TỔNG.NẾU.NHIỀU',
         description: 'cộng tất cả các đối số của nó mà đáp ứng nhiều tiêu chí.',
         abstract: 'cộng tất cả các đối số của nó mà đáp ứng nhiều tiêu chí.',
         links: [
@@ -1046,6 +1120,7 @@ const locale: typeof enUS = {
         },
     },
     SUMPRODUCT: {
+        label: 'TỔNG.TÍCH',
         description: 'trả về tổng tích của các dải ô hoặc mảng tương ứng.',
         abstract: 'trả về tổng tích của các dải ô hoặc mảng tương ứng.',
         links: [
@@ -1060,6 +1135,7 @@ const locale: typeof enUS = {
         },
     },
     SUMSQ: {
+        label: 'TỔNG.BÌNH_PHƯƠNG',
         description: 'Trả về tổng của bình phương của các đối số.',
         abstract: 'Trả về tổng của bình phương của các đối số.',
         links: [
@@ -1074,6 +1150,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2MY2: {
+        label: 'SUMX2MY2',
         description: 'Trả về tổng của hiệu các bình phương của các giá trị tương ứng trong hai mảng.',
         abstract: 'Trả về tổng của hiệu các bình phương của các giá trị tương ứng trong hai mảng.',
         links: [
@@ -1088,6 +1165,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2PY2: {
+        label: 'SUMX2PY2',
         description: 'Trả về tổng của tổng các bình phương của các giá trị tương ứng trong hai mảng.',
         abstract: 'Trả về tổng của tổng các bình phương của các giá trị tương ứng trong hai mảng.',
         links: [
@@ -1102,6 +1180,7 @@ const locale: typeof enUS = {
         },
     },
     SUMXMY2: {
+        label: 'SUMXMY2',
         description: 'Trả về tổng của các bình phương của hiệu của các giá trị tương ứng trong hai mảng.',
         abstract: 'Trả về tổng của các bình phương của hiệu của các giá trị tương ứng trong hai mảng.',
         links: [
@@ -1116,6 +1195,7 @@ const locale: typeof enUS = {
         },
     },
     TAN: {
+        label: 'TAN',
         description: 'Trả về tang của góc đã cho.',
         abstract: 'Trả về tang của góc đã cho.',
         links: [
@@ -1129,6 +1209,7 @@ const locale: typeof enUS = {
         },
     },
     TANH: {
+        label: 'TANH',
         description: 'Trả về tang hyperbolic của một số.',
         abstract: 'Trả về tang hyperbolic của một số.',
         links: [
@@ -1142,6 +1223,7 @@ const locale: typeof enUS = {
         },
     },
     TRUNC: {
+        label: 'CẮT_NGẮN',
         description: 'Làm tròn một số thành số nguyên bằng cách loại bỏ phần thập phân của nó.',
         abstract: 'Làm tròn một số thành số nguyên bằng cách loại bỏ phần thập phân của nó.',
         links: [

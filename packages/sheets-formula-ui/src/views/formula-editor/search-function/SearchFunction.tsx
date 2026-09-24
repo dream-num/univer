@@ -18,6 +18,7 @@ import type { Editor } from '@univerjs/docs-ui';
 import type { FunctionType, ISequenceNode } from '@univerjs/engine-formula';
 import { CommandType, DisposableCollection, ICommandService, noop } from '@univerjs/core';
 import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
+import { IDescriptionService } from '@univerjs/engine-formula';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { IShortcutService, KeyCode, RectPopup, useDependency } from '@univerjs/ui';
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
@@ -42,6 +43,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
     const editorId = editor.getEditorId();
     const shortcutService = useDependency(IShortcutService);
     const commandService = useDependency(ICommandService);
+    const descriptionService = useDependency(IDescriptionService);
     const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(isFocus, sequenceNodes, editor);
     const visible = searchList.length > 0;
     const ulRef = useRef<HTMLUListElement>(undefined);
@@ -51,6 +53,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
     const stateRef = useStateRef({ searchList, active });
 
     const handleFunctionSelect = (v: string, functionType: FunctionType) => {
+        // Parser handles German name resolution automatically via resolveFunctionName()
         const res = handlerFormulaReplace(v, functionType);
         if (res) {
             resetFormulaSearch();

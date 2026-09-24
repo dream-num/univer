@@ -19,7 +19,7 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "1.43.0",
+        "@univerjs/icons": "1.43.1",
         "@univerjs/preset-docs-core": "workspace:*",
         "@univerjs/preset-docs-drawing": "workspace:*",
         "@univerjs/preset-docs-hyper-link": "workspace:*",

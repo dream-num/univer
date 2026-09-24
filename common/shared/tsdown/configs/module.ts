@@ -35,6 +35,7 @@ export function createModuleConfig(options: ICreateModuleConfigOptions): UserCon
         ...baseConfig,
         deps: {
             neverBundle,
+            resolveDepSubpath: true,
         },
         dts: false,
         entry: Object.fromEntries(entries.map((entry) => [entry.key, entry.path])),

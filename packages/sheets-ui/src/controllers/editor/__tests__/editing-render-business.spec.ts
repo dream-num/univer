@@ -596,4 +596,18 @@ describe('EditingRenderController business methods', () => {
         expect(cellEditorSelectionSync).toHaveBeenCalledTimes(1);
         expect(hostSelectionSync).not.toHaveBeenCalled();
     });
+
+    it('selects the entire cell content on double-click', () => {
+        const { controller } = createController('hello\r\n', false);
+
+        controller._handleEditorVisible({
+            visible: true,
+            eventType: DeviceInputEventType.Dblclick,
+            unitId: 'unit-1',
+        });
+
+        expect(controller._textSelectionManagerService.replaceDocRanges).toHaveBeenLastCalledWith(
+            [{ startOffset: 0, endOffset: 5 }]
+        );
+    });
 });

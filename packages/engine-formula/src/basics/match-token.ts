@@ -56,7 +56,9 @@ export function matchRefDrawToken(char: string) {
                 char !== matchToken.CLOSE_BRACKET &&
                 char !== matchToken.SINGLE_QUOTATION &&
                 char !== matchToken.DOUBLE_QUOTATION) ||
-            char === ' '
+            char === ' ' ||
+            char === '\r' ||
+            char === '\n'
     );
 }
 

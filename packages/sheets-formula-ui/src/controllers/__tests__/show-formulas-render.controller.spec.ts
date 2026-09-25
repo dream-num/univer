@@ -81,7 +81,7 @@ describe('ShowFormulasRenderController', () => {
 
         expect(sheetInterceptorService.intercept).toHaveBeenCalledWith(
             INTERCEPTOR_POINT.CELL_CONTENT,
-            expect.objectContaining({ priority: -1, effect: InterceptorEffectEnum.Value })
+            expect.objectContaining({ priority: 1, effect: InterceptorEffectEnum.Value })
         );
 
         controller.dispose();

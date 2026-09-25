@@ -41,9 +41,10 @@ export class ShowFormulasRenderController extends Disposable {
 
     private _initInterceptor(): void {
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
-            // Run after number format, array formula and other value interceptors so the
-            // formula text is what ends up on screen while their style contributions are kept.
-            priority: -1,
+            // Run after the built-in value interceptors (array formula 100, number format 10,
+            // data validation 9) so the formula text is what ends up on screen while their
+            // style contributions are kept. Must stay above the default -1 terminator.
+            priority: 1,
             effect: InterceptorEffectEnum.Value,
             handler: (cell, pos, next) => {
                 const { unitId, subUnitId, row, col, rawData } = pos;

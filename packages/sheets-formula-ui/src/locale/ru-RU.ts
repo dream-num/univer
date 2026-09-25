@@ -20,6 +20,10 @@ const locale: typeof enUS = {
     'sheets-formula-ui': {
         shortcut: {
             'quick-sum': 'Быстрая сумма',
+            'toggle-show-formulas': 'Показать формулы',
+        },
+        showFormulas: {
+            tooltip: 'Показать формулы',
         },
 
         insert: {

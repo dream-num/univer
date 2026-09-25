@@ -16,10 +16,11 @@
 
 import type { MenuSchemaType } from '@univerjs/ui';
 import { COPY_SPECIAL_MENU_ID, PASTE_SPECIAL_MENU_ID } from '@univerjs/sheets-ui';
-import { RibbonFormulasGroup } from '@univerjs/ui';
+import { RibbonFormulasGroup, RibbonViewGroup } from '@univerjs/ui';
 import { SheetCopyFormulaOnlyCommand, SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
+import { ToggleShowFormulasOperation } from '../commands/operations/toggle-show-formulas.operation';
 import {
     AllFunctionsMenuItemFactory,
     CopyFormulaOnlyMenuItemFactory,
@@ -36,8 +37,16 @@ import {
     InsertTextFunctionMenuItemFactory,
     PasteFormulaMenuItemFactory,
 } from './menu';
+import { ShowFormulasMenuItemFactory } from './show-formulas.menu';
 
 export const menuSchema: MenuSchemaType = {
+    [RibbonViewGroup.VISIBILITY]: {
+        [ToggleShowFormulasOperation.id]: {
+            order: 2,
+            gridLayout: { row: 1, column: 2, showLabel: true },
+            menuItemFactory: ShowFormulasMenuItemFactory,
+        },
+    },
     [RibbonFormulasGroup.BASIC]: {
         [`${InsertFunctionOperation.id}.common`]: {
             order: 0,

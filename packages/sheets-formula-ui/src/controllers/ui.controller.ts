@@ -25,10 +25,12 @@ import { InsertFunctionOperation } from '../commands/operations/insert-function.
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
 import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
+import { ToggleShowFormulasOperation } from '../commands/operations/toggle-show-formulas.operation';
 import { FormulaProgressBar } from '../views/formula-progress/FormulaProgress';
 import { FormulaEditorShowController } from './formula-editor-show.controller';
 import { ChangeRefToAbsoluteShortcut } from './shortcuts/prompt.shortcut';
 import { QuickSumShortcut } from './shortcuts/quick-sum.shortcut';
+import { ToggleShowFormulasShortcut } from './shortcuts/show-formulas.shortcut';
 
 export class FormulaUIController extends Disposable {
     constructor(
@@ -59,6 +61,7 @@ export class FormulaUIController extends Disposable {
             SearchFunctionOperation,
             HelpFunctionOperation,
             ReferenceAbsoluteOperation,
+            ToggleShowFormulasOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
@@ -66,6 +69,7 @@ export class FormulaUIController extends Disposable {
         [
             QuickSumShortcut,
             ChangeRefToAbsoluteShortcut,
+            ToggleShowFormulasShortcut,
         ].forEach((item) => {
             this.disposeWithMe(this._shortcutService.registerShortcut(item));
         });

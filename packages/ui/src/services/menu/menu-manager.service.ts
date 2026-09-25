@@ -80,6 +80,13 @@ export interface IMenuManagerService {
 
     appendRootMenu(source: MenuSchemaType): void;
 
+    /**
+     * Remove every menu node registered under the given key, including its children.
+     * @param key A menu item id or a group / position key.
+     * @returns `true` if at least one node was removed.
+     */
+    removeMenu(key: string): boolean;
+
     updateMenuConfig(config: MenuConfig): void;
 
     getMenuByPositionKey(position: string): IMenuSchema[];
@@ -340,6 +347,15 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
         this.menuChanged$.next();
     }
 
+    removeMenu(key: string): boolean {
+        const removed = removeMenuSchemaNode(this._menu, key);
+        if (removed) {
+            this.menuChanged$.next();
+        }
+
+        return removed;
+    }
+
     updateMenuConfig(config: MenuConfig): void {
         this._configService.setConfig('menu', config, { merge: true });
         this.menuChanged$.next();
@@ -356,6 +372,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
             menuChanged$: this.menuChanged$,
             mergeMenu: (source: MenuSchemaType, target?: MenuSchemaType) => this.mergeMenu(source, target),
             appendRootMenu: (source: MenuSchemaType) => this.appendRootMenu(source),
+            removeMenu: (key: string) => this.removeMenu(key),
             updateMenuConfig: (config: MenuConfig) => this.updateMenuConfig(config),
             getMenuByPositionKey: (position: string) => createScopedBuilder().getMenuByPositionKey(position),
             getFlatMenuByPositionKey: (position: string) => createScopedBuilder().getFlatMenuByPositionKey(position),
@@ -478,6 +495,26 @@ function cloneMenuSchemaNode<T>(source: T, preserveReplace = false): T {
     }
 
     return result as T;
+}
+
+function removeMenuSchemaNode(node: unknown, key: string): boolean {
+    if (!isMenuSchemaRecord(node)) {
+        return false;
+    }
+
+    let removed = false;
+    if (key in node) {
+        delete node[key];
+        removed = true;
+    }
+
+    for (const value of Object.values(node)) {
+        if (removeMenuSchemaNode(value, key)) {
+            removed = true;
+        }
+    }
+
+    return removed;
 }
 
 function mergeMenuSchemaNode(target: unknown, source: unknown): unknown {

@@ -99,7 +99,7 @@ export function HelpFunction(props: {
     const required = localeService.t<LocaleKey>('sheets-formula-ui.prompt.required');
     const optional = localeService.t<LocaleKey>('sheets-formula-ui.prompt.optional');
     const editorId = editor.getEditorId();
-    const [position$] = useEditorPosition(editorId, !!functionInfo, [functionInfo, paramIndex]);
+    const [position$] = useEditorPosition(editorId, !!functionInfo, [functionInfo, paramIndex, formulaText]);
     function handleSwitchActive(paramIndex: number) {
         onParamsSwitch && onParamsSwitch(paramIndex);
     }

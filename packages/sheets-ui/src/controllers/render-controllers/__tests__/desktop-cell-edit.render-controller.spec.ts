@@ -19,7 +19,7 @@
 import type { EmbedRuntimeFocusCoordinator } from '../../../services/sheet-embed-integration.service';
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET, ICommandService, IContextService, Injector, IUniverInstanceService } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { DeviceInputEventType, IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { ClearSelectionFormatCommand, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { DISABLE_AUTO_FOCUS_KEY } from '@univerjs/ui';
 import { Subject } from 'rxjs';
@@ -92,8 +92,11 @@ function createController(options?: {
     const spreadsheetRowHeader = { onPointerDown$: createEventSubject() };
     const spreadsheetColumnHeader = { onPointerDown$: createEventSubject() };
     const spreadsheetLeftTopPlaceholder = { onPointerDown$: createEventSubject() };
-    const scene = {};
-    const engine = {};
+    const viewportMain = { onScrollEnd$: createEventSubject() };
+    const scene = {
+        getViewport: vi.fn((key: string) => key === SHEET_VIEWPORT_KEY.VIEW_MAIN ? viewportMain : null),
+    };
+    const engine = { width: 800, height: 600 };
     const worksheet = { getSheetId: vi.fn(() => 'sheet-1') };
     const workbook = {
         getUnitId: vi.fn(() => 'unit-1'),
@@ -147,6 +150,7 @@ function createController(options?: {
         isVisible: vi.fn(() => ({ visible: editorVisible })),
         isForceKeepVisible: vi.fn(() => options?.forceKeepVisible ?? false),
         refreshEditCellState: vi.fn(),
+        refreshEditCellPosition: vi.fn(),
     };
     commandService.syncExecuteCommand.mockReturnValue(true);
     const instanceService = {
@@ -241,6 +245,7 @@ function createController(options?: {
         spreadsheetColumnHeader,
         spreadsheetLeftTopPlaceholder,
         spreadsheetRowHeader,
+        viewportMain,
         workbook,
         workbook$,
     };
@@ -382,6 +387,32 @@ describe('DesktopCellEditRenderController integration with the editor bridge', (
         }]);
 
         expect(docSelectionRenderService.setInputPosition).toHaveBeenCalledWith(150, 100);
+
+        controller.dispose();
+    });
+
+    it('keeps the hidden input on the selected cell after the sheet scrolls', () => {
+        const { controller, docSelectionRenderService, editorBridgeService, viewportMain } = createController();
+
+        editorBridgeService.getEditCellLayout.mockReturnValue({
+            position: { startX: 60, startY: 40 },
+            canvasOffset: { left: 30, top: 20 },
+        });
+        viewportMain.onScrollEnd$.emit({});
+
+        expect(editorBridgeService.refreshEditCellPosition).toHaveBeenCalledWith(false);
+        expect(docSelectionRenderService.setInputPosition).toHaveBeenCalledWith(90, 60);
+
+        controller.dispose();
+    });
+
+    it('does not move the hidden input on scroll while the cell editor is visible', () => {
+        const { controller, docSelectionRenderService, editorBridgeService, viewportMain } = createController({ editorVisible: true });
+
+        viewportMain.onScrollEnd$.emit({});
+
+        expect(editorBridgeService.refreshEditCellPosition).not.toHaveBeenCalled();
+        expect(docSelectionRenderService.setInputPosition).not.toHaveBeenCalled();
 
         controller.dispose();
     });

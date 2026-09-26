@@ -34,7 +34,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { DeviceInputEventType, IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { isCellImage, SheetsSelectionsService } from '@univerjs/sheets';
 import { DISABLE_AUTO_FOCUS_KEY, getEmbedChildUnitId } from '@univerjs/ui';
 import { filter } from 'rxjs';
@@ -44,6 +44,7 @@ import {
     ISheetEmbedRuntimeFocusCoordinator,
     SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
 } from '../../services/sheet-embed-integration.service';
+import { getEditCellInputPosition } from '../editor/utils/get-edit-cell-input-position';
 import { getSheetObject } from '../utils/component-tools';
 
 export class DesktopCellEditRenderController extends RxDisposable implements IRenderModule {
@@ -204,6 +205,19 @@ export class DesktopCellEditRenderController extends RxDisposable implements IRe
                 this._updateInputPosition();
             }
         }));
+
+        // The selected cell moves with the viewport, keep the hidden input (and the IME candidate window) on it.
+        const viewportMain = this._context.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        if (viewportMain) {
+            d.add(viewportMain.onScrollEnd$.subscribeEvent(() => {
+                if (this._editorBridgeService.isVisible().visible) {
+                    return;
+                }
+
+                this._editorBridgeService.refreshEditCellPosition(false);
+                this._updateInputPosition();
+            }));
+        }
     }
 
     private _updateInputPosition(): void {
@@ -219,11 +233,8 @@ export class DesktopCellEditRenderController extends RxDisposable implements IRe
             return;
         }
 
-        const { position, canvasOffset } = layout;
-        docSelectionRenderService.setInputPosition(
-            canvasOffset.left + position.startX,
-            canvasOffset.top + position.startY
-        );
+        const { x, y } = getEditCellInputPosition(layout, this._context.engine);
+        docSelectionRenderService.setInputPosition(x, y);
     }
 
     private _focusCellEditorInput(): void {

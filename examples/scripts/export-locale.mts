@@ -1,5 +1,7 @@
 import process from 'node:process';
 
+import { resolveLocaleModuleUrl } from './locale-module-url.mts';
+
 interface ILocaleModule {
     default?: unknown;
 }
@@ -90,7 +92,12 @@ if (!isLocaleProduct(product) || !locale || !LOCALE_TAGS.has(locale)) {
 
 const source = LOCALE_SOURCES[product];
 const packs = await Promise.all(source.packages.map(async (packageName) => {
-    const module = await import(`${packageName}/${source.directory}/${locale}`) as ILocaleModule;
+    // Import the resolved file:// URL instead of the bare specifier: on
+    // Windows a bare dynamic import can degrade to a raw absolute path
+    // (`C:\...`), which Node's ESM loader rejects with
+    // ERR_UNSUPPORTED_ESM_URL_SCHEME.
+    const moduleUrl = resolveLocaleModuleUrl(`${packageName}/${source.directory}/${locale}`);
+    const module = await import(moduleUrl) as ILocaleModule;
     return unwrapDefault(module);
 }));
 

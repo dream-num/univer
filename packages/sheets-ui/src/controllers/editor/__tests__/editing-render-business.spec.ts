@@ -596,4 +596,42 @@ describe('EditingRenderController business methods', () => {
         expect(cellEditorSelectionSync).toHaveBeenCalledTimes(1);
         expect(hostSelectionSync).not.toHaveBeenCalled();
     });
+
+    it('keeps the hidden editor input on the selected cell before editing starts', () => {
+        const { controller, docModel, documentModel } = createController();
+        const currentEditCellState$ = new Subject<unknown>();
+        const cellEditorSelectionRender = { canFocusing: true, activate: vi.fn(), setInputPosition: vi.fn() };
+        const disposableCollection = { add: vi.fn() };
+
+        controller._configService = { getConfig: vi.fn(() => ({})) };
+        controller._editorBridgeService.currentEditCellState$ = currentEditCellState$;
+        controller._editorBridgeService.getEditCellState.mockReturnValue({
+            unitId: 'unit-1',
+            sheetId: 'sheet-1',
+            row: 2,
+            column: 3,
+            documentLayoutObject: { documentModel },
+            editorUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            position: { startX: 120, startY: 80, endX: 220, endY: 100 },
+            canvasOffset: { left: 30, top: 20 },
+            scaleX: 1,
+            scaleY: 1,
+        });
+        Object.assign(docModel, { updateDocumentDataPageSize: vi.fn() });
+        controller._renderManagerService.getRenderUnitById.mockImplementation((unitId: string) => {
+            if (unitId === 'unit-1') {
+                return { engine: { width: 800, height: 600 } };
+            }
+
+            return {
+                with: vi.fn(() => unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY ? cellEditorSelectionRender : { canFocusing: false }),
+            };
+        });
+
+        controller._subscribeToCurrentCell(disposableCollection);
+        currentEditCellState$.next({ unitId: 'unit-1' });
+
+        expect(cellEditorSelectionRender.activate).toHaveBeenCalledWith(150, 100, true);
+        expect(cellEditorSelectionRender.setInputPosition).not.toHaveBeenCalled();
+    });
 });

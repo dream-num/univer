@@ -124,6 +124,7 @@ import { EditorBridgeRenderController } from '../render-controllers/editor-bridg
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
 import { extractStringFromForceString, isForceString } from '../utils/cell-tools';
 import { normalizeString } from '../utils/char-tools';
+import { getEditCellInputPosition } from './utils/get-edit-cell-input-position';
 import { isRangeSelector } from './utils/is-range-selector';
 
 const HIDDEN_EDITOR_POSITION = -1000;
@@ -417,11 +418,10 @@ export class EditingRenderController extends Disposable {
                 if (this._contextService.getContextValue(DISABLE_AUTO_FOCUS_KEY)) {
                     cellSelectionRenderManager?.setInputPosition(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
                 } else {
-                    cellSelectionRenderManager?.activate(
-                        HIDDEN_EDITOR_POSITION,
-                        HIDDEN_EDITOR_POSITION,
-                        true
-                    );
+                    // Keep the hidden input on the selected cell, so the IME candidate window opens next to it
+                    // when the user starts typing before the cell editor is visible.
+                    const { x, y } = getEditCellInputPosition(state, this._renderManagerService.getRenderUnitById(state.unitId)?.engine);
+                    cellSelectionRenderManager?.activate(x, y, true);
                 }
             }
         }));

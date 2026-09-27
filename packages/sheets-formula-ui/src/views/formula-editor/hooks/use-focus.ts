@@ -29,13 +29,14 @@ export function focusFormulaEditor(
         return;
     }
 
+    // Blurring the previous editor can publish its stale rendered selection.
+    const selections = [...editor.getSelectionRanges()];
     editorService.focus(editor.getEditorId());
     focusFormulaEditorElement(editor);
     if (editor.docSelectionRenderService.isOnPointerEvent) {
         return;
     }
 
-    const selections = [...editor.getSelectionRanges()];
     if (Tools.isDefine(offset)) {
         editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
     } else if (!selections.length) {

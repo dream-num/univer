@@ -204,6 +204,13 @@ describe('Test averageif function', () => {
     });
 
     describe('Averageif', () => {
+        it.each(['E1:E4', 'E1:E2'])('preserves mixed array criteria with aggregate range %s', async (targetRange) => {
+            const criteria = ['1', '4', '\"test*\"', '\">4\"', '\"\"', '#N/A'];
+            const expected = await Promise.all(criteria.map((criterion) => calculate(`=AVERAGEIF(A1:A4,${criterion},${targetRange})`)));
+            const result = await calculate(`=AVERAGEIF(A1:A4,{${criteria.join(';')}},${targetRange})`);
+            expect(result).toEqual(expected.map((value) => [value]));
+        });
+
         it('Range and criteria', async () => {
             const result = await calculate('=AVERAGEIF(A1:A4,">40")');
             expect(result).toBe(244);

@@ -19,7 +19,7 @@ import type { ArrayValueObject } from '../../../engine/value-object/array-value-
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { valueObjectCompare } from '../../../engine/utils/object-compare';
-import { filterSameValueObjectResult } from '../../../engine/utils/value-object';
+import { filterSameValueObjectResult, getPairedRangeAndCriteriaResult } from '../../../engine/utils/value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -47,6 +47,21 @@ export class Countif extends BaseFunction {
         }
 
         if (_criteria.isArray()) {
+            const criteriaArray = _criteria as ArrayValueObject;
+            const rangeArray = (range as BaseReferenceObject).toArrayValueObject();
+            if (criteriaArray.getRowCount() * criteriaArray.getColumnCount() > 1) {
+                const normalized = criteria.isReferenceObject()
+                    ? criteriaArray.mapValue((value) => value.isNull() ? NumberValueObject.create(0) : value)
+                    : criteriaArray;
+                const values = getPairedRangeAndCriteriaResult([rangeArray, normalized], {
+                    formulaName: 'COUNTIFS',
+                    maxRowLength: criteriaArray.getRowCount(),
+                    maxColumnLength: criteriaArray.getColumnCount(),
+                    isNumberSensitive: true,
+                });
+                return criteriaArray.mapValue((_, row, column) => values[row][column]);
+            }
+
             const resultArray = (_criteria as ArrayValueObject).mapValue((criteriaObject) => this._handleSingleObject(
                 range,
                 criteria.isReferenceObject() && criteriaObject.isNull() ? NumberValueObject.create(0) : criteriaObject

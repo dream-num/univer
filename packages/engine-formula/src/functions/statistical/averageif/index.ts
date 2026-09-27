@@ -19,7 +19,7 @@ import type { ArrayValueObject } from '../../../engine/value-object/array-value-
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { valueObjectCompare } from '../../../engine/utils/object-compare';
-import { filterSameValueObjectResult } from '../../../engine/utils/value-object';
+import { filterSameValueObjectResult, getPairedRangeAndCriteriaResult } from '../../../engine/utils/value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
@@ -42,6 +42,22 @@ export class Averageif extends BaseFunction {
         }
 
         if (_criteria.isArray()) {
+            const criteriaArray = _criteria as ArrayValueObject;
+            const rangeArray = (range as BaseReferenceObject).toArrayValueObject();
+            const targetArray = averageRange ? (averageRange as BaseReferenceObject).toArrayValueObject() : rangeArray;
+            if (criteriaArray.getRowCount() * criteriaArray.getColumnCount() > 1 &&
+                rangeArray.getRowCount() === targetArray.getRowCount() &&
+                rangeArray.getColumnCount() === targetArray.getColumnCount()) {
+                const values = getPairedRangeAndCriteriaResult([rangeArray, criteriaArray], {
+                    formulaName: 'AVERAGEIFS',
+                    maxRowLength: criteriaArray.getRowCount(),
+                    maxColumnLength: criteriaArray.getColumnCount(),
+                    isNumberSensitive: true,
+                    targetRange: targetArray,
+                });
+                return criteriaArray.mapValue((_, row, column) => values[row][column]);
+            }
+
             const resultArray = (_criteria as ArrayValueObject).mapValue((criteriaObject) => this._handleSingleObject(range, criteriaObject, averageRange));
 
             if ((resultArray as ArrayValueObject).getRowCount() === 1 && (resultArray as ArrayValueObject).getColumnCount() === 1) {

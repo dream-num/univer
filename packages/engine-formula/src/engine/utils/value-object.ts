@@ -27,7 +27,8 @@ import { ArrayValueObject } from '../value-object/array-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
 import { expandArrayValueObject } from './array-object';
-import { isWildcard } from './compare';
+import { isWildcard, normalizeTextForComparison } from './compare';
+import { stripErrorMargin } from './math-kit';
 import {
     booleanObjectIntersection,
     createCriteriaValueObject,
@@ -315,6 +316,150 @@ export function baseValueObjectToArrayValueObject(valueObject: BaseValueObject):
     return ArrayValueObject.createByArray([[valueObject.getValue()]]);
 }
 
+function getEqualityValueKeys(value: BaseValueObject): Array<string | number> {
+    const keys: Array<string | number> = [];
+    if (value.isString()) {
+        keys.push(normalizeTextForComparison(String(value.getValue())));
+    } else if (!value.isNumber()) {
+        return keys;
+    }
+
+    const number = value.isNumber() ? value : createCriteriaValueObject(String(value.getValue()), value.getDateSystem());
+    if (number.isNumber() && Number.isFinite(Number(number.getValue()))) {
+        keys.push(stripErrorMargin(Number(number.getValue())));
+    }
+    return keys;
+}
+
+function buildEqualityIndex(range: ArrayValueObject): Map<string | number, Array<[number, number]>> {
+    const index = new Map<string | number, Array<[number, number]>>();
+    range.iterator((value, row, column) => {
+        if (!value) {
+            return;
+        }
+        const position: [number, number] = [row, column];
+        for (const key of getEqualityValueKeys(value)) {
+            let matches = index.get(key);
+            if (!matches) {
+                matches = [];
+                index.set(key, matches);
+            }
+            matches.push(position);
+        }
+    });
+    return index;
+}
+
+function getIndexedPositions(
+    index: Map<string | number, Array<[number, number]>>,
+    keys: Array<string | number>,
+    range: ArrayValueObject
+): Array<[number, number]> | undefined {
+    const buckets = keys.map((key) => index.get(key) ?? []);
+    const candidateCount = buckets.reduce((count, bucket) => count + bucket.length, 0);
+    // ponytail: conservatively bound candidate copies; refine overlapping buckets only if profiling warrants it.
+    if (candidateCount >= range.getRowCount() * range.getColumnCount() / 2) {
+        return undefined;
+    }
+    if (buckets.length === 1) {
+        return buckets[0];
+    }
+    return Array.from(new Set(buckets.flat())).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+}
+
+function pickRangePositions(range: ArrayValueObject, positions: Array<[number, number]>): ArrayValueObject {
+    return ArrayValueObject.create({
+        calculateValueList: positions.map(([row, column]) => [range.get(row, column)]),
+        rowCount: positions.length,
+        columnCount: 1,
+        unitId: '',
+        sheetId: '',
+        row: -1,
+        column: -1,
+    });
+}
+
+function getExactCriteriaKeys(criteria: Nullable<BaseValueObject>): Array<string | number> | undefined {
+    if (!criteria || (!criteria.isString() && !criteria.isNumber())) {
+        return undefined;
+    }
+
+    const [operator, value] = criteria.isString()
+        ? findCompareToken(String(criteria.getValue()), criteria.getDateSystem())
+        : [compareToken.EQUALS, criteria];
+    if (operator !== compareToken.EQUALS || value.isDateFormat()) {
+        return undefined;
+    }
+
+    // Blanks and wildcard patterns retain the full comparison path.
+    if (value.isString() && (value.getValue() === '' || isWildcard(String(value.getValue())))) {
+        return undefined;
+    }
+
+    const keys = getEqualityValueKeys(value);
+    return keys.length > 0 ? keys : undefined;
+}
+
+function getCriteriaCacheKey(criteria: Array<Nullable<BaseValueObject>>): string | number | undefined {
+    if (criteria.length === 0 || criteria.some((value) => getExactCriteriaKeys(value) === undefined)) {
+        return undefined;
+    }
+    const values = criteria.map((value) => value!.getValue());
+    return values.length === 1 ? values[0] as string | number : JSON.stringify(values);
+}
+
+function getCriteriaPositions(
+    pairs: Array<{ range: ArrayValueObject; criteriaArray: ArrayValueObject }>,
+    indexes: Map<ArrayValueObject, Map<string | number, Array<[number, number]>>>,
+    row: number,
+    column: number
+): Array<[number, number]> | undefined {
+    for (const { range, criteriaArray } of pairs) {
+        const keys = getExactCriteriaKeys(criteriaArray.get(row, column));
+        if (!keys) {
+            continue;
+        }
+        let index = indexes.get(range);
+        if (!index) {
+            index = buildEqualityIndex(range);
+            indexes.set(range, index);
+        }
+        const positions = getIndexedPositions(index, keys, range);
+        // ponytail: stop at the first selective index; compare all criteria on its candidates.
+        if (positions !== undefined) {
+            return positions;
+        }
+    }
+}
+
+function getConditionalAggregateResult(
+    formulaName: string,
+    comparison: ArrayValueObject,
+    targetRange?: ArrayValueObject
+): BaseValueObject | undefined {
+    if (formulaName === 'COUNTIFS') {
+        let count = 0;
+        comparison.iterator((value) => {
+            if (value?.isBoolean() && value.getValue() === true) {
+                count++;
+            }
+        });
+        return NumberValueObject.create(count);
+    }
+
+    const picked = targetRange?.pick(comparison);
+    switch (formulaName) {
+        case 'SUMIFS':
+            return picked!.sum();
+        case 'AVERAGEIFS':
+            return picked!.sum().divided(picked!.count());
+        case 'MAXIFS':
+            return picked!.getColumnCount() === 0 ? NumberValueObject.create(0) : picked!.max();
+        case 'MINIFS':
+            return picked!.getColumnCount() === 0 ? NumberValueObject.create(0) : picked!.min();
+    }
+}
+
 /**
  * Get the paired range and criteria result for COUNTIFS, SUMIFS, etc.
  */
@@ -338,7 +483,9 @@ export function getPairedRangeAndCriteriaResult(
     }> = [];
 
     for (let i = 0; i < variants.length; i++) {
-        if (i % 2 === 1) continue;
+        if (i % 2 === 1) {
+            continue;
+        }
 
         const range = variants[i] as ArrayValueObject;
         const criteria = variants[i + 1];
@@ -350,9 +497,19 @@ export function getPairedRangeAndCriteriaResult(
         });
     }
 
-    if (rangeAndCriteriaArrays.length === 0) return [];
+    if (rangeAndCriteriaArrays.length === 0) {
+        return [];
+    }
 
     const results: BaseValueObject[][] = [];
+    const arrayPairs = rangeAndCriteriaArrays.filter((_, index) => {
+        const criteria = variants[index * 2 + 1];
+        return criteria.isArray() &&
+            (criteria as ArrayValueObject).getRowCount() * (criteria as ArrayValueObject).getColumnCount() > 1;
+    });
+    const useEqualityIndex = isNumberSensitive && maxRowLength * maxColumnLength > 1 && arrayPairs.length > 0;
+    const repeatedResults = new Map<string | number, BaseValueObject>();
+    const equalityIndexes = new Map<ArrayValueObject, Map<string | number, Array<[number, number]>>>();
 
     /**
      * Iterate through all criteria values for each dimension, calculate the comparison result with the corresponding range, and then calculate the Boolean intersection of all comparison results as the final result for that dimension criteria value.
@@ -360,15 +517,38 @@ export function getPairedRangeAndCriteriaResult(
      * This avoiding store the all dimension comparison result in memory and then calculating all dimension criteria value's result, which may cause memory overflow when the range is large and there are multiple dimension criteria.
      * For example, `=COUNTIFS(Q$3:Q$10002,C$3:C$5002,R$3:R$10002,L6)`.
      */
-    rangeAndCriteriaArrays[0].criteriaArray.iterator((_, rowIndex, columnIndex) => {
+    const firstPair = rangeAndCriteriaArrays[0];
+    firstPair.criteriaArray.iterator((_, rowIndex, columnIndex) => {
         let finalCompareResult: ArrayValueObject | undefined;
+        let positions: Array<[number, number]> | undefined;
+        const cacheKey = useEqualityIndex
+            ? getCriteriaCacheKey(arrayPairs.map(({ criteriaArray }) => criteriaArray.get(rowIndex, columnIndex)))
+            : undefined;
+        const cached = cacheKey === undefined ? undefined : repeatedResults.get(cacheKey);
+        if (cached) {
+            results[rowIndex] ??= [];
+            results[rowIndex][columnIndex] = cached;
+            return;
+        }
 
-        for (let i = 0; i < rangeAndCriteriaArrays.length; i++) {
-            const { range, criteriaArray } = rangeAndCriteriaArrays[i];
+        if (useEqualityIndex) {
+            positions = getCriteriaPositions(arrayPairs, equalityIndexes, rowIndex, columnIndex);
+            if (positions?.length === 0) {
+                results[rowIndex] ??= [];
+                results[rowIndex][columnIndex] = formulaName === 'AVERAGEIFS'
+                    ? ErrorValueObject.create(ErrorType.DIV_BY_ZERO)
+                    : NumberValueObject.create(0);
+                return;
+            }
+        }
+
+        rangeAndCriteriaArrays.forEach(({ range: sourceRange, criteriaArray }) => {
+            // Preserve paired row/column offsets and reuse the existing comparison semantics.
+            const range = positions === undefined ? sourceRange : pickRangePositions(sourceRange, positions);
             const criteriaValueObject = criteriaArray.get(rowIndex, columnIndex);
 
             if (!criteriaValueObject) {
-                continue;
+                return;
             }
 
             // range must be an ArrayValueObject, criteria must be a BaseValueObject
@@ -381,50 +561,23 @@ export function getPairedRangeAndCriteriaResult(
 
             if (finalCompareResult === undefined) {
                 finalCompareResult = compareResult;
-                continue;
+                return;
             }
 
             finalCompareResult = booleanObjectIntersection(finalCompareResult, compareResult);
-        }
+        });
 
-        let result: BaseValueObject | undefined;
-
-        if (formulaName === 'COUNTIFS') {
-            let count = 0;
-            (finalCompareResult as ArrayValueObject).iterator((value) => {
-                if (value?.isBoolean() && value.getValue() === true) {
-                    count++;
-                }
-            });
-            result = NumberValueObject.create(count);
-        } else if (formulaName === 'SUMIFS') {
-            result = targetRange!.pick(finalCompareResult as ArrayValueObject).sum();
-        } else if (formulaName === 'AVERAGEIFS') {
-            const picked = targetRange!.pick(finalCompareResult as ArrayValueObject);
-            const sum = picked.sum();
-            const count = picked.count();
-            result = sum.divided(count);
-        } else if (formulaName === 'MAXIFS') {
-            const picked = targetRange!.pick(finalCompareResult as ArrayValueObject);
-            if (picked.getColumnCount() === 0) {
-                result = NumberValueObject.create(0);
-            } else {
-                result = picked.max();
-            }
-        } else if (formulaName === 'MINIFS') {
-            const picked = targetRange!.pick(finalCompareResult as ArrayValueObject);
-            if (picked.getColumnCount() === 0) {
-                result = NumberValueObject.create(0);
-            } else {
-                result = picked.min();
-            }
-        }
+        const aggregateRange = positions === undefined || !targetRange ? targetRange : pickRangePositions(targetRange, positions);
+        const result = getConditionalAggregateResult(formulaName, finalCompareResult as ArrayValueObject, aggregateRange);
 
         if (!results[rowIndex]) {
             results[rowIndex] = [];
         }
 
         results[rowIndex][columnIndex] = result as BaseValueObject;
+        if (cacheKey !== undefined && result) {
+            repeatedResults.set(cacheKey, result);
+        }
     });
 
     return results;

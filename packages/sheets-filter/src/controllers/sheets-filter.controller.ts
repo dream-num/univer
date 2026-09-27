@@ -54,6 +54,7 @@ import {
     moveMatrixArray,
     Optional,
     Rectangle,
+    UndoCommandId,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
@@ -912,7 +913,8 @@ export class SheetsFilterController extends Disposable {
             }
 
             // extend filter range when set range values
-            if (command.id === SetRangeValuesMutation.id && !options?.onlyLocal) {
+            const trigger = (command.params as ISetRangeValuesMutationParams | undefined)?.trigger;
+            if (command.id === SetRangeValuesMutation.id && !options?.onlyLocal && trigger !== UndoCommandId) {
                 const extendRegion = this._getExtendRegion(unitId, subUnitId);
                 if (extendRegion) {
                     const cellValue = (command.params as ISetRangeValuesMutationParams).cellValue;

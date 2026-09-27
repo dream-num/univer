@@ -929,7 +929,9 @@ export class SheetsFilterController extends Disposable {
                                         ...filterRange,
                                         endRow: extendedRange.endRow,
                                     });
+                                    this._commandService.syncExecuteCommand(ReCalcSheetsFilterMutation.id, { unitId, subUnitId });
                                     this._registerRefRange(unitId, subUnitId);
+                                    break;
                                 }
                             }
                         }

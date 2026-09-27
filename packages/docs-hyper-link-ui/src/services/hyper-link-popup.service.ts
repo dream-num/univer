@@ -25,7 +25,12 @@ import {
     LocaleService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { canEditDocumentTargets, DocSelectionManagerService, getDocumentEntityParentPermissionObjectIds, getDocumentEntityPermissionObjectId } from '@univerjs/docs';
+import {
+    canEditDocumentTargets,
+    DocSelectionManagerService,
+    getDocumentEntityParentPermissionObjectIds,
+    getDocumentEntityPermissionObjectId,
+} from '@univerjs/docs';
 import { DocCanvasPopManagerService, getEditorRuntimeConfig } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IDialogService } from '@univerjs/ui';

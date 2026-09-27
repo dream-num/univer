@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel } from '@univerjs/core';
 import {
     IPermissionService,
+    IUniverInstanceService,
     toDisposable,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, setDocumentPermissionValue } from '@univerjs/docs';
-import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import { DocCanvasPopManagerService, registerEditorRuntimeConfig } from '@univerjs/docs-ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
 import { IDialogService } from '@univerjs/ui';
@@ -65,6 +67,8 @@ function createService() {
     const renderManagerService = injector.get(IRenderManagerService);
 
     return {
+        registerCustomHyperLinkUI: () => registerEditorRuntimeConfig(injector.get(IUniverInstanceService).getUnit<DocumentDataModel>('doc-1', UniverInstanceType.UNIVER_DOC)!, { customHyperLinkUI: true }),
+        dispose: () => univer.dispose(),
         service: injector.get(DocHyperLinkPopupService),
         selectionManager,
         attached: popupManager.attached,
@@ -85,6 +89,28 @@ function createService() {
 }
 
 describe('DocHyperLinkPopupService', () => {
+    it('leaves hyperlink menus to the host editor and restores default behavior after unregistering', () => {
+        const { service, attached, registerCustomHyperLinkUI, dispose } = createService();
+        const ownership = registerCustomHyperLinkUI();
+        const link = { unitId: 'doc-1', linkId: 'link-1', startIndex: 0, endIndex: 3 };
+        try {
+            service.showInfoPopup(link);
+            service.showInfoPopupFromHover(link);
+            service.showInfoPopup(link, { pinned: true });
+            service.showEditPopup('doc-1', link);
+            expect(attached).toHaveLength(0);
+            expect(service.showing).toBeNull();
+            expect(service.editing).toBeNull();
+            ownership.dispose();
+            service.showInfoPopup(link);
+            expect(attached).toHaveLength(1);
+            expect(service.showing?.linkId).toBe('link-1');
+        } finally {
+            ownership.dispose();
+            dispose();
+        }
+    });
+
     it('closes link popups only when their owning Render is disposed', () => {
         const { service, disposed, disposeRender } = createService();
         const link = {

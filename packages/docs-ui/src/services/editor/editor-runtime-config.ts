@@ -23,6 +23,8 @@ export interface IEditorRuntimeConfig {
     layout?: IDocumentLayoutPresentation;
     inheritParagraphStartStyle?: boolean;
     disableSelectionAutoScroll?: boolean;
+    /** The host editor provides its own hyperlink menus and pointer interaction. */
+    customHyperLinkUI?: boolean;
 }
 
 const configs = new WeakMap<DocumentDataModel, { config: IEditorRuntimeConfig }>();

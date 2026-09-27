@@ -24,7 +24,7 @@ import {
     Inject,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { DocEventManagerService } from '@univerjs/docs-ui';
+import { DocEventManagerService, getEditorRuntimeConfig } from '@univerjs/docs-ui';
 import {
     ClickDocHyperLinkOperation,
     ToggleDocHyperLinkInfoPopupOperation,
@@ -46,7 +46,7 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
     ) {
         super();
 
-        if (this._context.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+        if (this._context.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY || getEditorRuntimeConfig(this._context.unit)?.customHyperLinkUI) {
             return;
         }
 

@@ -71,7 +71,7 @@ export const MergeInterceptorFactory = <T, C>(config: {
         distributeResult?: (result: C, list: T[]) => { config: T; result: C }[];
     } = {}) => {
     interface IBatch { hooks: IHook[]; subscription?: Subscription };
-    interface IHook { next: (v: HTTPResponse<C>) => void; config: T; error: (error: string) => void; active: boolean; batch?: IBatch };
+    interface IHook { next: (v: HTTPResponse<C>) => void; config: T; error: (error: unknown) => void; complete: () => void; active: boolean; batch?: IBatch };
 
     const { isMatch, getParamsFromRequest, mergeParamsToRequest } = config;
     const { fetchCheck = createDefaultFetchCheck(300), distributeResult = createDistributeResult() } = options;
@@ -87,6 +87,7 @@ export const MergeInterceptorFactory = <T, C>(config: {
             const hook: IHook = {
                 next: (v) => observer.next(v),
                 error: (error) => observer.error(error),
+                complete: () => observer.complete(),
                 config: params,
                 active: true,
             };
@@ -135,8 +136,8 @@ export const MergeInterceptorFactory = <T, C>(config: {
                                 });
                             }
                         },
-                        complete: () => observer.complete(),
-                        error: (e) => observer.error(e),
+                        complete: () => currentHookList.forEach((hookItem) => hookItem.complete()),
+                        error: (e) => currentHookList.forEach((hookItem) => hookItem.error(e)),
                     });
                 }
             });

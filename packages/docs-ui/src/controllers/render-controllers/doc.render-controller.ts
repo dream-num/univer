@@ -1493,6 +1493,10 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                         Tools.now() - hydrationStartedAt
                     );
                 }
+                this._textSelectionManagerService.refreshSelection(
+                    { unitId: this._context.unitId, subUnitId: this._context.unitId },
+                    false
+                );
                 this._markDocumentRenderDirty();
             }
         }

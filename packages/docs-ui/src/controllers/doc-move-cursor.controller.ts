@@ -201,6 +201,10 @@ export class DocMoveCursorController extends Disposable {
                 return;
             }
 
+            if (this._deferUnmaterializedCursorMove(docDataModel, skeleton, nextOffset, normalizedSegmentId, () => this._handleShiftMoveSelection(direction, granularity))) {
+                return;
+            }
+
             const normalizedNextOffset = this._normalizeRenderableCursorOffset(
                 skeleton,
                 body.dataStream,

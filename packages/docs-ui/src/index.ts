@@ -266,6 +266,7 @@ export { DocsRenderService } from './services/docs-render.service';
 export { Editor } from './services/editor/editor';
 export { EditorService, IEditorService } from './services/editor/editor-manager.service';
 export type { IEditorRuntimeConfig } from './services/editor/editor-runtime-config';
+export { getEditorRuntimeConfig, registerEditorRuntimeConfig } from './services/editor/editor-runtime-config';
 export { DocFloatMenuService } from './services/float-menu.service';
 export {
     isInSameTableCell,

@@ -25,8 +25,13 @@ import {
     LocaleService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { canEditDocumentTargets, DocSelectionManagerService, getDocumentEntityParentPermissionObjectIds, getDocumentEntityPermissionObjectId } from '@univerjs/docs';
-import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import {
+    canEditDocumentTargets,
+    DocSelectionManagerService,
+    getDocumentEntityParentPermissionObjectIds,
+    getDocumentEntityPermissionObjectId,
+} from '@univerjs/docs';
+import { DocCanvasPopManagerService, getEditorRuntimeConfig } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IDialogService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
@@ -128,6 +133,10 @@ export class DocHyperLinkPopupService extends Disposable {
     }
 
     showEditPopup(unitId: string, linkInfo: ILinkInfo | null): IDisposable | null {
+        const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        if (doc && getEditorRuntimeConfig(doc)?.customHyperLinkUI) {
+            return null;
+        }
         if (!this.canEditLink(unitId, linkInfo)) {
             return null;
         }
@@ -174,6 +183,10 @@ export class DocHyperLinkPopupService extends Disposable {
     }
 
     showInfoPopup(info: ILinkInfo, options?: { pinned?: boolean }): IDisposable | null | undefined {
+        const doc = this._univerInstanceService.getUnit(info.unitId, UniverInstanceType.UNIVER_DOC);
+        if (!(doc instanceof DocumentDataModel) || getEditorRuntimeConfig(doc)?.customHyperLinkUI) {
+            return;
+        }
         this.cancelScheduledHideInfoPopup();
         if (this._infoPopupSuppressed) {
             return;
@@ -191,10 +204,6 @@ export class DocHyperLinkPopupService extends Disposable {
         if (this._infoPopup) {
             this._infoPopup.dispose();
             this._infoPopup = null;
-        }
-        const doc = this._univerInstanceService.getUnit(unitId, UniverInstanceType.UNIVER_DOC);
-        if (!(doc instanceof DocumentDataModel)) {
-            return;
         }
         this._infoPopupPinned = options?.pinned ?? false;
         this._showingLink$.next({ unitId, linkId, segmentId, segmentPage, startIndex, endIndex });

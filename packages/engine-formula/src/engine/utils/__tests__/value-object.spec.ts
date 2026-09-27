@@ -178,7 +178,79 @@ describe('COUNTIFS array criteria', () => {
     });
 });
 
-describe('COUNTIFS indexed equality semantics', () => {
+describe('Conditional aggregate indexed equality semantics', () => {
+    it.each(['COUNTIFS', 'SUMIFS', 'AVERAGEIFS', 'MINIFS', 'MAXIFS'])(
+        '%s narrows array criteria after a broad scalar condition and reuses repeated dense results',
+        (formulaName) => {
+            const size = 200;
+            const keys = ArrayValueObject.createByArray(Array.from({ length: size }, (_, i) => [`00${i}`]));
+            const groups = ArrayValueObject.createByArray(Array.from({ length: size }, () => ['keep']));
+            const amounts = ArrayValueObject.createByArray(Array.from({ length: size }, (_, i) => [i + 1]));
+            const criteria = ArrayValueObject.createByArray(Array.from({ length: 100 }, (_, i) => [i]));
+            const params = { formulaName, maxColumnLength: 1, maxRowLength: 100, isNumberSensitive: true, targetRange: amounts };
+            const reads = vi.spyOn(ArrayValueObject.prototype, 'get');
+            try {
+                const sparse = getPairedRangeAndCriteriaResult([
+                    groups,
+                    ArrayValueObject.createByArray([['keep']]),
+                    keys,
+                    criteria,
+                ], params);
+                expect(sparse.map((row) => row[0].getValue())).toEqual(
+                    Array.from({ length: 100 }, (_, i) => formulaName === 'COUNTIFS' ? 1 : i + 1)
+                );
+                expect(reads.mock.calls.length).toBeLessThan(6000);
+                reads.mockClear();
+                const dense = getPairedRangeAndCriteriaResult([
+                    groups,
+                    ArrayValueObject.createByArray(Array.from({ length: 100 }, () => ['keep'])),
+                ], params);
+                const expected: Record<string, number> = { COUNTIFS: size, SUMIFS: 20100, AVERAGEIFS: 100.5, MINIFS: 1, MAXIFS: size };
+                expect(dense.map((row) => row[0].getValue())).toEqual(new Array(100).fill(expected[formulaName]));
+                expect(reads.mock.calls.length).toBeLessThan(6000);
+            } finally {
+                reads.mockRestore();
+            }
+        }
+    );
+
+    it.each(['COUNTIFS', 'SUMIFS', 'AVERAGEIFS', 'MINIFS', 'MAXIFS'])(
+        '%s preserves row order, errors, blanks and paired array criteria',
+        (formulaName) => {
+            const range = ArrayValueObject.createByArray([
+                ['01', 1, '1.0', 2],
+                ['x', 'X', '', 0],
+                [true, null, 'a*b', 'x'],
+                ['other', 'other', 'other', 'other'],
+                ['other', 'other', 'other', 'other'],
+            ]);
+            const amounts = ArrayValueObject.createByArray([
+                [1e16, 1, -1e16, 0.1],
+                [2, 3, 4, 5],
+                [6, 7, 8, 9],
+                [10, 11, 12, 13],
+                [14, 15, 16, 17],
+            ]);
+            amounts.set(2, 3, ErrorValueObject.create(ErrorType.NA));
+            const criteria = ArrayValueObject.createByArray([[1, 'x', '', 'a~*b'], ['missing', '>=0', '*', 0]]);
+            const groups = ArrayValueObject.createByArray(Array.from({ length: 5 }, () => [1, 1, 1, 1]));
+            const groupCriteria = ArrayValueObject.createByArray([[1, 1, 1, 1], [1, 1, 2, 1]]);
+            const params = { formulaName, isNumberSensitive: true, targetRange: amounts };
+            const result = getPairedRangeAndCriteriaResult([range, criteria, groups, groupCriteria], {
+                ...params,
+                maxRowLength: 2,
+                maxColumnLength: 4,
+            });
+            const expected = criteria.mapValue((criterion, row, column) => getPairedRangeAndCriteriaResult([
+                range,
+                criterion,
+                groups,
+                groupCriteria.get(row, column)!,
+            ], { ...params, maxRowLength: 1, maxColumnLength: 1 })[0][0]);
+            expect(result.map((row) => row.map((value) => value.getValue()))).toEqual(expected.toValue());
+        }
+    );
+
     it('preserves duplicates, numeric text, paired two-dimensional criteria and fallback comparisons', () => {
         const range = ArrayValueObject.create({
             calculateValueList: [

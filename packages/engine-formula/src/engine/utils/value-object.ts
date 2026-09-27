@@ -350,6 +350,20 @@ function buildEqualityIndex(range: ArrayValueObject): Map<string | number, Array
     return index;
 }
 
+function getIndexedPositions(
+    index: Map<string | number, Array<[number, number]>>,
+    keys: Array<string | number>,
+    range: ArrayValueObject
+): Array<[number, number]> | undefined {
+    const buckets = keys.map((key) => index.get(key) ?? []);
+    const candidateCount = buckets.reduce((count, bucket) => count + bucket.length, 0);
+    // ponytail: conservatively bound candidate copies; refine overlapping buckets only if profiling warrants it.
+    if (candidateCount >= range.getRowCount() * range.getColumnCount() / 2) {
+        return undefined;
+    }
+    return Array.from(new Set(buckets.flat()));
+}
+
 function pickRangePositions(range: ArrayValueObject, positions: Array<[number, number]>): ArrayValueObject {
     return ArrayValueObject.create({
         calculateValueList: positions.map(([row, column]) => [range.get(row, column)]),
@@ -442,8 +456,8 @@ export function getPairedRangeAndCriteriaResult(
 
         if (keys !== undefined) {
             equalityIndex ??= buildEqualityIndex(firstPair.range);
-            positions = Array.from(new Set(keys.flatMap((key) => equalityIndex!.get(key) ?? [])));
-            if (positions.length === 0) {
+            positions = getIndexedPositions(equalityIndex, keys, firstPair.range);
+            if (positions?.length === 0) {
                 results[rowIndex] ??= [];
                 results[rowIndex][columnIndex] = NumberValueObject.create(0);
                 return;

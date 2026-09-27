@@ -126,6 +126,36 @@ describe('Test object cover', () => {
 });
 
 describe('COUNTIFS array criteria', () => {
+    it.each(['text', 'numeric'])('avoids copying densely matched %s ranges', (kind) => {
+        const size = 200;
+        const [common, rare] = kind === 'text' ? ['common', 'rare'] : ['1', '2'];
+        const range = ArrayValueObject.createByArray(Array.from({ length: size }, (_, i) => [i < 180 ? common : rare]));
+        const groups = ArrayValueObject.createByArray(Array.from({ length: size }, (_, i) => [i % 2]));
+        const criterion = kind === 'text' ? StringValueObject.create('common') : NumberValueObject.create(1);
+        const criteria = ArrayValueObject.createByArray(Array.from({ length: 20 }, () => [criterion.getValue()]));
+        const params = { formulaName: 'COUNTIFS', maxColumnLength: 1, isNumberSensitive: true };
+        const reads = vi.spyOn(ArrayValueObject.prototype, 'get');
+        try {
+            for (let i = 0; i < 20; i++) {
+                expect(getPairedRangeAndCriteriaResult([range, criterion, groups, NumberValueObject.create(1)], {
+                    ...params,
+                    maxRowLength: 1,
+                })[0][0].getValue()).toBe(90);
+            }
+            const fullScanReads = reads.mock.calls.length;
+            reads.mockClear();
+            const result = getPairedRangeAndCriteriaResult([range, criteria, groups, NumberValueObject.create(1)], {
+                ...params,
+                maxRowLength: 20,
+            });
+            expect(result.map((row) => row[0].getValue())).toEqual(new Array(20).fill(90));
+            // Index construction may scan once, but must not add range copies for every output.
+            expect(reads.mock.calls.length).toBeLessThanOrEqual(fullScanReads + size * 2);
+        } finally {
+            reads.mockRestore();
+        }
+    });
+
     it.each(['text', 'numeric'])('does not rescan the entire lookup range for each %s criterion', (kind) => {
         const range = ArrayValueObject.createByArray(Array.from({ length: 200 }, (_, i) => [kind === 'text' ? `ID-${i}` : `${10000000000 + i}`]));
         const criteria = ArrayValueObject.createByArray(Array.from({ length: 100 }, (_, i) => [kind === 'text' ? `id-${i}` : 10000000000 + i]));

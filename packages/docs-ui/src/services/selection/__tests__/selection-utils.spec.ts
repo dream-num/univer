@@ -400,6 +400,7 @@ describe('selection utils', () => {
 
     it('does not create ranges when a character boundary cannot be resolved', () => {
         const skeleton = {
+            getSkeletonData: () => undefined,
             findNodePositionByCharIndex: vi.fn(() => undefined),
         };
         const document = createDocument();

@@ -35,6 +35,8 @@ import {
     SetRangeValuesCommand,
     SetRangeValuesMutation,
     SetSelectionsOperation,
+    WorkbookPermissionService,
+    WorksheetPermissionService,
 } from '@univerjs/sheets';
 import { FormatPainterSessionService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
@@ -228,6 +230,8 @@ describe('Test format painter rules in controller', () => {
         const newTheme = set(theme, 'gray.1000', '#35322b');
         themeService.setTheme(newTheme);
 
+        get(WorkbookPermissionService);
+        get(WorksheetPermissionService);
         get(FormatPainterController);
         commandService.registerCommand(SetFormatPainterOperation);
         commandService.registerCommand(SetInfiniteFormatPainterCommand);

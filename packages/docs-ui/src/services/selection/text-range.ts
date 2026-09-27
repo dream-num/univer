@@ -26,11 +26,26 @@ import type {
     Scene,
 } from '@univerjs/engine-render';
 import type { IDocRange } from './range-interface';
-import { BooleanNumber, ColorKit, COLORS, DOC_RANGE_TYPE, generateRandomId, getColorStyle, RANGE_DIRECTION } from '@univerjs/core';
-import { DocumentSkeletonPageType, getColor, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, Rect, RegularPolygon } from '@univerjs/engine-render';
+import {
+    BooleanNumber,
+    ColorKit,
+    COLORS,
+    DOC_RANGE_TYPE,
+    generateRandomId,
+    getColorStyle,
+    RANGE_DIRECTION,
+} from '@univerjs/core';
+import {
+    DocumentSkeletonPageType,
+    getColor,
+    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+    Rect,
+    RegularPolygon,
+} from '@univerjs/engine-render';
 import {
     compareNodePosition,
     compareNodePositionLogic,
+    findDocRangeNodePositions,
     getOneTextSelectionRange,
     NodePositionConvertToCursor,
     NodePositionMap,
@@ -131,7 +146,8 @@ export class TextRange implements IDocRange {
         public focusNodePosition?: Nullable<INodePosition>,
         public style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
         private _segmentId: string = '',
-        private _segmentPage: number = -1
+        private _segmentPage: number = -1,
+        private _logicalRange?: { startOffset: number; endOffset: number }
     ) {
         this._anchorBlink();
 
@@ -162,6 +178,9 @@ export class TextRange implements IDocRange {
 
     // The start position of the range
     get startOffset() {
+        if (this._logicalRange) {
+            return Math.min(this._logicalRange.startOffset, this._logicalRange.endOffset);
+        }
         const { startOffset } = getOneTextSelectionRange(this._cursorList) ?? {};
         const body = this._docSkeleton
             .getViewModel()
@@ -180,6 +199,9 @@ export class TextRange implements IDocRange {
 
     // The end position of the range
     get endOffset() {
+        if (this._logicalRange) {
+            return Math.max(this._logicalRange.startOffset, this._logicalRange.endOffset);
+        }
         const { endOffset } = getOneTextSelectionRange(this._cursorList) ?? {};
         const body = this._docSkeleton
             .getViewModel()
@@ -231,6 +253,11 @@ export class TextRange implements IDocRange {
     }
 
     get direction() {
+        if (this._logicalRange) {
+            return this._logicalRange.startOffset <= this._logicalRange.endOffset
+                ? RANGE_DIRECTION.FORWARD
+                : RANGE_DIRECTION.BACKWARD;
+        }
         const { collapsed, anchorNodePosition, focusNodePosition } = this;
 
         if (collapsed || anchorNodePosition == null || focusNodePosition == null) {
@@ -359,6 +386,7 @@ export class TextRange implements IDocRange {
 
     // render cursor and selection.
     refresh() {
+        this._refreshLogicalRangePositions();
         const { _document, _docSkeleton } = this;
         const anchor = this.anchorNodePosition;
         const focus = this.focusNodePosition;
@@ -396,6 +424,38 @@ export class TextRange implements IDocRange {
         if (borderBoxPointGroup.length > 0) {
             this._createOrUpdateRange(borderBoxPointGroup, docsLeft, docsTop);
         }
+    }
+
+    private _refreshLogicalRangePositions(): void {
+        const range = this._logicalRange;
+        if (!range) {
+            return;
+        }
+        // Keep the full selection in document offsets; only its visible geometry
+        // depends on the bounded page window retained by the layout worker.
+        const start = Math.min(range.startOffset, range.endOffset);
+        const end = Math.max(range.startOffset, range.endOffset);
+        let first: Nullable<INodePosition>;
+        let last: Nullable<INodePosition>;
+        for (const page of this._docSkeleton.getSkeletonData()?.pages ?? []) {
+            if (page.isLayoutPlaceholder || page.isMaterializationPlaceholder || page.ed < start || page.st >= end) {
+                continue;
+            }
+            const positions = findDocRangeNodePositions(
+                this._docSkeleton,
+                Math.max(start, page.st),
+                Math.min(end - 1, page.ed),
+                this._segmentId,
+                this._segmentPage
+            );
+            if (positions) {
+                first ??= positions.startPosition;
+                last = positions.endPosition;
+            }
+        }
+        const forward = range.startOffset <= range.endOffset;
+        this.anchorNodePosition = forward ? first : last;
+        this.focusNodePosition = forward ? last : first;
     }
 
     private _isEmpty() {

@@ -15,7 +15,7 @@
  */
 
 import { cellToRange, CellValueType, DateSystem } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
 import { compareToken } from '../../../basics/token';
 import { CellReferenceObject } from '../../reference-object/cell-reference-object';
@@ -26,7 +26,13 @@ import { ArrayValueObject } from '../../value-object/array-value-object';
 import { ErrorValueObject } from '../../value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../value-object/primitive-object';
 import { valueObjectCompare } from '../object-compare';
-import { convertTonNumber, filterSameValueObjectResult, isSingleValueObject, objectValueToCellValue } from '../value-object';
+import {
+    convertTonNumber,
+    filterSameValueObjectResult,
+    getPairedRangeAndCriteriaResult,
+    isSingleValueObject,
+    objectValueToCellValue,
+} from '../value-object';
 
 describe('Test object cover', () => {
     it('preserves error-looking text through runtime serialization', () => {
@@ -116,5 +122,146 @@ describe('Test object cover', () => {
         expect(objectValueToCellValue(null)).toStrictEqual({ v: null });
         expect(objectValueToCellValue(ErrorValueObject.create(ErrorType.VALUE))).toStrictEqual({ v: ErrorType.VALUE, t: CellValueType.STRING });
         expect(objectValueToCellValue(StringValueObject.create('0').withCustomData({ test: 'abc' }))).toStrictEqual({ v: '0', t: CellValueType.STRING, custom: { test: 'abc' } });
+    });
+});
+
+describe('COUNTIFS array criteria', () => {
+    it.each(['text', 'numeric'])('does not rescan the entire lookup range for each %s criterion', (kind) => {
+        const range = ArrayValueObject.createByArray(Array.from({ length: 200 }, (_, i) => [kind === 'text' ? `ID-${i}` : `${10000000000 + i}`]));
+        const criteria = ArrayValueObject.createByArray(Array.from({ length: 100 }, (_, i) => [kind === 'text' ? `id-${i}` : 10000000000 + i]));
+        const roles = ArrayValueObject.createByArray(Array.from({ length: 200 }, (_, i) => [i % 2 ? 'Staff' : 'Manager']));
+        const reads = vi.spyOn(range, 'get');
+        try {
+            const result = getPairedRangeAndCriteriaResult([range, criteria, roles, StringValueObject.create('Manager')], {
+                formulaName: 'COUNTIFS',
+                maxRowLength: 100,
+                maxColumnLength: 1,
+                isNumberSensitive: true,
+            });
+            expect(result.map((row) => row.map((value) => value.getValue())))
+                .toEqual(Array.from({ length: 100 }, (_, i) => [i % 2 ? 0 : 1]));
+            // A larger input must not turn each criterion into a full-range scan.
+            expect(reads.mock.calls.length).toBeLessThan(1000);
+        } finally {
+            reads.mockRestore();
+        }
+    });
+});
+
+describe('COUNTIFS indexed equality semantics', () => {
+    it('preserves duplicates, numeric text, paired two-dimensional criteria and fallback comparisons', () => {
+        const range = ArrayValueObject.create({
+            calculateValueList: [
+                [StringValueObject.create('Alpha'), StringValueObject.create('ALPHA'), NumberValueObject.create(1)],
+                [StringValueObject.create('1'), StringValueObject.create('01'), StringValueObject.create('Beta')],
+                [NullValueObject.create(), StringValueObject.create(''), ErrorValueObject.create(ErrorType.NA)],
+                [BooleanValueObject.create(true), NumberValueObject.create(0.1 + 0.2), StringValueObject.create('a*b')],
+            ],
+            rowCount: 4,
+            columnCount: 3,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+        const groups = ArrayValueObject.createByArray([[1, 2, 1], [1, 1, 2], [1, 1, 1], [1, 1, 1]]);
+        const criteria = [
+            [StringValueObject.create('=alpha'), NumberValueObject.create(1), StringValueObject.create('01')],
+            [StringValueObject.create('a*'), StringValueObject.create('>0'), NumberValueObject.create(0.3)],
+            [StringValueObject.create(''), ErrorValueObject.create(ErrorType.NA), BooleanValueObject.create(true)],
+            [StringValueObject.create('missing'), StringValueObject.create('a~*b'), StringValueObject.create('<>Beta')],
+        ];
+        const criteriaArray = ArrayValueObject.create({
+            calculateValueList: criteria,
+            rowCount: 4,
+            columnCount: 3,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+        const groupCriteria = ArrayValueObject.createByArray([[1, 1, 1], [1, 1, 1], [1, 1, 1], [2, 1, 1]]);
+        const result = getPairedRangeAndCriteriaResult([range, criteriaArray, groups, groupCriteria], {
+            formulaName: 'COUNTIFS',
+            maxRowLength: 4,
+            maxColumnLength: 3,
+            isNumberSensitive: true,
+        });
+        const expected = criteria.map((row, r) => row.map((criterion, c) => getPairedRangeAndCriteriaResult([
+            range,
+            criterion,
+            groups,
+            groupCriteria.get(r, c)!,
+        ], {
+            formulaName: 'COUNTIFS',
+            maxRowLength: 1,
+            maxColumnLength: 1,
+            isNumberSensitive: true,
+        })[0][0].getValue()));
+        expect(result.map((row) => row.map((value) => value.getValue()))).toEqual(expected);
+        expect(expected[0]).toEqual([1, 3, 3]);
+        expect(expected[1][2]).toBe(1);
+    });
+
+    it.each([DateSystem.Date1900, DateSystem.Date1904])('preserves text normalization and date-system %s criteria', (dateSystem) => {
+        const values = [
+            StringValueObject.create('Straße'),
+            StringValueObject.create('STRASSE'),
+            StringValueObject.create('é'),
+            StringValueObject.create('e\u0301'),
+            StringValueObject.create('1e-310'),
+            NumberValueObject.create(0),
+            StringValueObject.create('\t1'),
+            StringValueObject.create('0x10'),
+            NumberValueObject.create(1),
+            NumberValueObject.create(16),
+            StringValueObject.create('1904-1-1').withDateSystem(dateSystem),
+            NumberValueObject.create(44561.99999999999, 'yyyy-mm-dd').withDateSystem(dateSystem),
+        ];
+        const range = ArrayValueObject.create({
+            calculateValueList: values.map((value) => [value]),
+            rowCount: values.length,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+        const criteria = [
+            StringValueObject.create('strasse'),
+            StringValueObject.create('é'),
+            NumberValueObject.create(0),
+            StringValueObject.create('1e-310'),
+            NumberValueObject.create(1),
+            StringValueObject.create('0x10'),
+            StringValueObject.create('1904-1-1').withDateSystem(dateSystem),
+            NumberValueObject.create(44562, 'yyyy-mm-dd').withDateSystem(dateSystem),
+        ];
+        const criteriaArray = ArrayValueObject.create({
+            calculateValueList: criteria.map((value) => [value]),
+            rowCount: criteria.length,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+        const params = { formulaName: 'COUNTIFS', maxRowLength: criteria.length, maxColumnLength: 1, isNumberSensitive: true };
+        const result = getPairedRangeAndCriteriaResult([range, criteriaArray], params);
+        const expected = criteria.map((criterion) => getPairedRangeAndCriteriaResult([range, criterion], { ...params, maxRowLength: 1 })[0][0].getValue());
+        expect(result.map((row) => row[0].getValue())).toEqual(expected);
+        expect(expected.slice(0, 2)).toEqual([2, 2]);
+        const zeroMatches = dateSystem === DateSystem.Date1904 ? 3 : 2;
+        expect(expected.slice(2, 4)).toEqual([zeroMatches, zeroMatches]);
+        expect(expected[7]).toBe(1);
+    });
+
+    it('rebuilds its lookup after range data changes', () => {
+        const range = ArrayValueObject.createByArray([['Alpha'], ['Beta']]);
+        const criteria = ArrayValueObject.createByArray([['Alpha'], ['Beta']]);
+        const params = { formulaName: 'COUNTIFS', maxRowLength: 2, maxColumnLength: 1, isNumberSensitive: true };
+        expect(getPairedRangeAndCriteriaResult([range, criteria], params).map((row) => row[0].getValue())).toEqual([1, 1]);
+        range.set(0, 0, StringValueObject.create('Beta'));
+        expect(getPairedRangeAndCriteriaResult([range, criteria], params).map((row) => row[0].getValue())).toEqual([0, 2]);
     });
 });

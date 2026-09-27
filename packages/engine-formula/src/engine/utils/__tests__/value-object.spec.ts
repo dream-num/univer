@@ -180,6 +180,81 @@ describe('COUNTIFS array criteria', () => {
 
 describe('Conditional aggregate indexed equality semantics', () => {
     it.each(['COUNTIFS', 'SUMIFS', 'AVERAGEIFS', 'MINIFS', 'MAXIFS'])(
+        '%s preserves broadcast row and column criteria when reusing tuples',
+        (formulaName) => {
+            const keys = ArrayValueObject.createByArray([['a'], ['a'], ['b'], ['b']]);
+            const groups = ArrayValueObject.createByArray([[1], [2], [1], [2]]);
+            const amounts = ArrayValueObject.createByArray([[10], [20], [30], [40]]);
+            const criteria = ArrayValueObject.createByArray([['a'], ['b'], ['a']]);
+            const groupCriteria = ArrayValueObject.createByArray([[1, 2, 1]]);
+            const params = { formulaName, isNumberSensitive: true, targetRange: amounts };
+            const result = getPairedRangeAndCriteriaResult([keys, criteria, groups, groupCriteria], {
+                ...params,
+                maxRowLength: 3,
+                maxColumnLength: 3,
+            });
+            const expected = ['a', 'b', 'a'].map((key) => [1, 2, 1].map((group) => getPairedRangeAndCriteriaResult([
+                keys,
+                StringValueObject.create(key),
+                groups,
+                NumberValueObject.create(group),
+            ], { ...params, maxRowLength: 1, maxColumnLength: 1 })[0][0].getValue()));
+            expect(result.map((row) => row.map((value) => value.getValue()))).toEqual(expected);
+        }
+    );
+
+    it.each(['COUNTIFS', 'SUMIFS', 'AVERAGEIFS', 'MINIFS', 'MAXIFS'])(
+        '%s narrows later array conditions and reuses complete condition tuples',
+        (formulaName) => {
+            const size = 200;
+            const keys = ArrayValueObject.createByArray(Array.from({ length: size }, (_, i) => [i]));
+            const groups = ArrayValueObject.createByArray(Array.from({ length: size }, (_, i) => [i % 3 ? 'major' : 'minor']));
+            const amounts = ArrayValueObject.createByArray(Array.from({ length: size }, (_, i) => [i - 50]));
+            const criteria = ArrayValueObject.createByArray(Array.from({ length: 100 }, (_, i) => [i]));
+            const groupCriteria = ArrayValueObject.createByArray(Array.from({ length: 100 }, () => ['major']));
+            const params = { formulaName, maxColumnLength: 1, maxRowLength: 100, isNumberSensitive: true, targetRange: amounts };
+            const reads = vi.spyOn(ArrayValueObject.prototype, 'get');
+            try {
+                const sparse = getPairedRangeAndCriteriaResult([groups, groupCriteria, keys, criteria], params);
+                const sparseReads = reads.mock.calls.length;
+                const expected = criteria.mapValue((criterion) => getPairedRangeAndCriteriaResult([
+                    groups,
+                    StringValueObject.create('major'),
+                    keys,
+                    criterion,
+                ], { ...params, maxRowLength: 1 })[0][0]);
+                expect(sparse.map((row) => row[0].getValue())).toEqual(expected.toValue().map((row) => row[0]));
+                expect(sparseReads).toBeLessThan(6000);
+
+                const parity = ArrayValueObject.createByArray(Array.from({ length: size }, (_, i) => [i % 2]));
+                const pairCriteria = ArrayValueObject.createByArray(Array.from({ length: 100 }, (_, i) => [i % 2]));
+                const repeatedGroups = ArrayValueObject.createByArray(Array.from({ length: 100 }, (_, i) => [i % 4 < 2 ? 'major' : 'minor']));
+                reads.mockClear();
+                const repeated = getPairedRangeAndCriteriaResult([groups, repeatedGroups, parity, pairCriteria], params);
+                const repeatedReads = reads.mock.calls.length;
+                const expectedRepeated = pairCriteria.mapValue((criterion, row) => getPairedRangeAndCriteriaResult([
+                    groups,
+                    repeatedGroups.get(row, 0)!,
+                    parity,
+                    criterion,
+                ], { ...params, maxRowLength: 1 })[0][0]);
+                expect(repeated.map((row) => row[0].getValue())).toEqual(expectedRepeated.toValue().map((row) => row[0]));
+                expect(repeatedReads).toBeLessThan(20000);
+                amounts.set(1, 0, NumberValueObject.create(999));
+                const recalculated = getPairedRangeAndCriteriaResult([groups, repeatedGroups, parity, pairCriteria], params);
+                expect(recalculated[1][0].getValue()).toEqual(getPairedRangeAndCriteriaResult([
+                    groups,
+                    StringValueObject.create('major'),
+                    parity,
+                    NumberValueObject.create(1),
+                ], { ...params, maxRowLength: 1 })[0][0].getValue());
+            } finally {
+                reads.mockRestore();
+            }
+        }
+    );
+
+    it.each(['COUNTIFS', 'SUMIFS', 'AVERAGEIFS', 'MINIFS', 'MAXIFS'])(
         '%s narrows array criteria after a broad scalar condition and reuses repeated dense results',
         (formulaName) => {
             const size = 200;

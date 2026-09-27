@@ -400,6 +400,38 @@ function getExactCriteriaKeys(criteria: Nullable<BaseValueObject>): Array<string
     return keys.length > 0 ? keys : undefined;
 }
 
+function getCriteriaCacheKey(criteria: Array<Nullable<BaseValueObject>>): string | number | undefined {
+    if (criteria.length === 0 || criteria.some((value) => getExactCriteriaKeys(value) === undefined)) {
+        return undefined;
+    }
+    const values = criteria.map((value) => value!.getValue());
+    return values.length === 1 ? values[0] as string | number : JSON.stringify(values);
+}
+
+function getCriteriaPositions(
+    pairs: Array<{ range: ArrayValueObject; criteriaArray: ArrayValueObject }>,
+    indexes: Map<ArrayValueObject, Map<string | number, Array<[number, number]>>>,
+    row: number,
+    column: number
+): Array<[number, number]> | undefined {
+    for (const { range, criteriaArray } of pairs) {
+        const keys = getExactCriteriaKeys(criteriaArray.get(row, column));
+        if (!keys) {
+            continue;
+        }
+        let index = indexes.get(range);
+        if (!index) {
+            index = buildEqualityIndex(range);
+            indexes.set(range, index);
+        }
+        const positions = getIndexedPositions(index, keys, range);
+        // ponytail: stop at the first selective index; compare all criteria on its candidates.
+        if (positions !== undefined) {
+            return positions;
+        }
+    }
+}
+
 function getConditionalAggregateResult(
     formulaName: string,
     comparison: ArrayValueObject,
@@ -475,11 +507,9 @@ export function getPairedRangeAndCriteriaResult(
         return criteria.isArray() &&
             (criteria as ArrayValueObject).getRowCount() * (criteria as ArrayValueObject).getColumnCount() > 1;
     });
-    const indexPair = arrayPairs[0];
-    const useEqualityIndex = isNumberSensitive && maxRowLength * maxColumnLength > 1 && indexPair !== undefined;
-    // ponytail: reuse results for one varying criterion; add tuple reuse only if profiling warrants it.
+    const useEqualityIndex = isNumberSensitive && maxRowLength * maxColumnLength > 1 && arrayPairs.length > 0;
     const repeatedResults = new Map<string | number, BaseValueObject>();
-    let equalityIndex: Map<string | number, Array<[number, number]>> | undefined;
+    const equalityIndexes = new Map<ArrayValueObject, Map<string | number, Array<[number, number]>>>();
 
     /**
      * Iterate through all criteria values for each dimension, calculate the comparison result with the corresponding range, and then calculate the Boolean intersection of all comparison results as the final result for that dimension criteria value.
@@ -491,9 +521,9 @@ export function getPairedRangeAndCriteriaResult(
     firstPair.criteriaArray.iterator((_, rowIndex, columnIndex) => {
         let finalCompareResult: ArrayValueObject | undefined;
         let positions: Array<[number, number]> | undefined;
-        const criterion = indexPair?.criteriaArray.get(rowIndex, columnIndex);
-        const keys = useEqualityIndex ? getExactCriteriaKeys(criterion) : undefined;
-        const cacheKey = keys && arrayPairs.length === 1 ? criterion?.getValue() as string | number : undefined;
+        const cacheKey = useEqualityIndex
+            ? getCriteriaCacheKey(arrayPairs.map(({ criteriaArray }) => criteriaArray.get(rowIndex, columnIndex)))
+            : undefined;
         const cached = cacheKey === undefined ? undefined : repeatedResults.get(cacheKey);
         if (cached) {
             results[rowIndex] ??= [];
@@ -501,9 +531,8 @@ export function getPairedRangeAndCriteriaResult(
             return;
         }
 
-        if (keys !== undefined) {
-            equalityIndex ??= buildEqualityIndex(indexPair.range);
-            positions = getIndexedPositions(equalityIndex, keys, indexPair.range);
+        if (useEqualityIndex) {
+            positions = getCriteriaPositions(arrayPairs, equalityIndexes, rowIndex, columnIndex);
             if (positions?.length === 0) {
                 results[rowIndex] ??= [];
                 results[rowIndex][columnIndex] = formulaName === 'AVERAGEIFS'

@@ -48,8 +48,10 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { FormatPainterSessionService } from '@univerjs/ui';
+import { tap } from 'rxjs';
 import { ApplyFormatPainterCommand } from '../../commands/commands/set-format-painter.command';
 import { checkCellContentInRanges } from '../../common/utils';
+import { ClearSelectionFormatMenuItemFactory } from '../../menu/clear.menu';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 
 export class FormatPainterController extends Disposable {
@@ -70,13 +72,15 @@ export class FormatPainterController extends Disposable {
     private _initialize() {
         this._addDefaultHook();
         const session = this._injector.get(FormatPainterSessionService);
+        let disabled = true;
+        const disabled$ = this._injector.invoke(ClearSelectionFormatMenuItemFactory).disabled$!;
         this.disposeWithMe(session.register({
             id: 'sheet-cells',
             priority: 0,
             clear: () => this._commandService.executeCommand(ClearSelectionFormatCommand.id),
-            changes$: this._selectionManagerService.selectionMoveEnd$,
+            changes$: disabled$.pipe(tap((value) => { disabled = value; })),
             isActive: () => this._univerInstanceService.getFocusedUnit()?.type === UniverInstanceType.UNIVER_SHEET,
-            canStart: () => !!this._selectionManagerService.getCurrentLastSelection(),
+            canStart: () => !disabled && !!this._selectionManagerService.getCurrentLastSelection(),
             capture: () => {
                 const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
                 const format = this._collectSelectionRangeFormat();

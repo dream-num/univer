@@ -177,7 +177,7 @@ importers:
         version: 1.2.0
       '@antfu/eslint-config':
         specifier: ^9.2.0
-        version: 9.2.0(@eslint-react/eslint-plugin@5.18.1(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(@typescript-eslint/typescript-estree@8.65.0(supports-color@8.1.1)(typescript@6.0.3))(@typescript-eslint/utils@8.65.0(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(@vue/compiler-sfc@3.5.42)(eslint-plugin-format@2.0.1(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1)))(eslint-plugin-react-refresh@0.5.3(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1)))(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(ts-declaration-location@1.0.7(typescript@6.0.3))(typescript@6.0.3)(vitest@5.0.0)
+        version: 9.2.0(@eslint-react/eslint-plugin@5.18.1(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(@typescript-eslint/typescript-estree@8.65.0(supports-color@8.1.1)(typescript@6.0.3))(@typescript-eslint/utils@8.65.0(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(@vue/compiler-sfc@3.5.42)(eslint-plugin-format@2.0.1(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1)))(eslint-plugin-react-refresh@0.5.3(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1)))(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(ts-declaration-location@1.0.7(typescript@6.0.3))(typescript@6.0.3)(vitest@5.0.1)
       '@commitlint/cli':
         specifier: ^21.2.2
         version: 21.2.2(@types/node@26.1.2)(typescript@6.0.3)
@@ -245,8 +245,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.1.2)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.1.2)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   common/debugger:
     dependencies:
@@ -313,7 +313,7 @@ importers:
         version: 8.65.0(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)
       '@vitest/coverage-istanbul':
         specifier: ^5.0.0
-        version: 5.0.0(vitest@5.0.0)
+        version: 5.0.0(vitest@5.0.1)
       autoprefixer:
         specifier: ^10.6.0
         version: 10.6.0(postcss@8.5.28)
@@ -357,8 +357,8 @@ importers:
         specifier: ^7.2.0
         version: 7.2.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(vue@3.5.42(typescript@6.0.3))(yaml@2.9.0)
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
     devDependencies:
       '@univerjs/icons':
         specifier: 1.43.1
@@ -561,8 +561,8 @@ importers:
         specifier: ^8.3.0
         version: 8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0)
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/action-recorder:
     dependencies:
@@ -604,8 +604,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/core:
     dependencies:
@@ -656,8 +656,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/data-validation:
     dependencies:
@@ -681,8 +681,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/design:
     dependencies:
@@ -722,7 +722,7 @@ importers:
     devDependencies:
       '@testing-library/jest-dom':
         specifier: 7.0.1
-        version: 7.0.1(@testing-library/dom@10.4.0)(vitest@5.0.0)
+        version: 7.0.1(@testing-library/dom@10.4.0)(vitest@5.0.1)
       '@testing-library/react':
         specifier: ^16.3.3
         version: 16.3.3(@testing-library/dom@10.4.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -751,8 +751,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/docs:
     dependencies:
@@ -779,8 +779,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/docs-drawing:
     dependencies:
@@ -804,8 +804,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/docs-drawing-ui:
     dependencies:
@@ -865,8 +865,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/docs-find-replace:
     dependencies:
@@ -902,8 +902,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/docs-hyper-link:
     dependencies:
@@ -918,8 +918,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/docs-hyper-link-ui:
     dependencies:
@@ -970,8 +970,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/docs-thread-comment:
     dependencies:
@@ -995,8 +995,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/docs-thread-comment-ui:
     dependencies:
@@ -1053,8 +1053,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/docs-toc:
     dependencies:
@@ -1078,8 +1078,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.2.0)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.2.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/docs-toc-ui:
     dependencies:
@@ -1130,8 +1130,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.2.0)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.2.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/docs-ui:
     dependencies:
@@ -1188,8 +1188,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/drawing:
     dependencies:
@@ -1207,8 +1207,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/drawing-ui:
     dependencies:
@@ -1250,8 +1250,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/engine-formula:
     dependencies:
@@ -1278,8 +1278,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/engine-render:
     dependencies:
@@ -1315,8 +1315,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/find-replace:
     dependencies:
@@ -1355,8 +1355,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/network:
     dependencies:
@@ -1374,8 +1374,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/protocol:
     dependencies:
@@ -1393,8 +1393,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/rpc:
     dependencies:
@@ -1412,8 +1412,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/rpc-node:
     dependencies:
@@ -1434,8 +1434,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets:
     dependencies:
@@ -1468,8 +1468,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-conditional-formatting:
     dependencies:
@@ -1502,8 +1502,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-conditional-formatting-ui:
     dependencies:
@@ -1560,8 +1560,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-crosshair-highlight:
     dependencies:
@@ -1606,8 +1606,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-data-validation:
     dependencies:
@@ -1640,8 +1640,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-data-validation-ui:
     dependencies:
@@ -1707,8 +1707,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-drawing:
     dependencies:
@@ -1732,8 +1732,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-drawing-ui:
     dependencies:
@@ -1793,8 +1793,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-filter:
     dependencies:
@@ -1824,8 +1824,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-filter-ui:
     dependencies:
@@ -1876,8 +1876,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-find-replace:
     dependencies:
@@ -1907,8 +1907,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-formula:
     dependencies:
@@ -1941,8 +1941,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-formula-ui:
     dependencies:
@@ -2002,8 +2002,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-hyper-link:
     dependencies:
@@ -2030,8 +2030,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-hyper-link-ui:
     dependencies:
@@ -2094,8 +2094,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-note:
     dependencies:
@@ -2125,8 +2125,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-note-ui:
     dependencies:
@@ -2174,8 +2174,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-numfmt:
     dependencies:
@@ -2199,8 +2199,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-numfmt-ui:
     dependencies:
@@ -2251,8 +2251,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-sort:
     dependencies:
@@ -2273,8 +2273,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-sort-ui:
     dependencies:
@@ -2325,8 +2325,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-table:
     dependencies:
@@ -2356,8 +2356,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-table-ui:
     dependencies:
@@ -2417,8 +2417,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-thread-comment:
     dependencies:
@@ -2445,8 +2445,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-thread-comment-ui:
     dependencies:
@@ -2503,8 +2503,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/sheets-ui:
     dependencies:
@@ -2564,8 +2564,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/slides:
     dependencies:
@@ -2586,8 +2586,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/slides-ui:
     dependencies:
@@ -2638,8 +2638,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/telemetry:
     dependencies:
@@ -2654,8 +2654,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/themes:
     devDependencies:
@@ -2679,8 +2679,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/thread-comment-ui:
     dependencies:
@@ -2725,8 +2725,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/ui:
     dependencies:
@@ -2780,8 +2780,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/ui-adapter-vue3:
     dependencies:
@@ -2799,8 +2799,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
       vue:
         specifier: ^3.5.42
         version: 3.5.42(typescript@6.0.3)
@@ -2821,8 +2821,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/watermark:
     dependencies:
@@ -2843,8 +2843,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   presets:
     dependencies:
@@ -3549,8 +3549,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
 packages:
 
@@ -6885,8 +6885,8 @@ packages:
     resolution: {integrity: sha512-3/9S3YuBDg2X2+gM40jUTfwV66w8LrDUF/YPdqVElDwh/541cKSb8A7Eqd0N/Fza1FXeMp6XGzilLDEMOhk6Eg==}
     engines: {node: '>=22'}
 
-  '@vitest/mocker@5.0.0':
-    resolution: {integrity: sha512-66PGTMIiVJP3t4a5yxU9qPtf7MdTBs8jmToMvy+HVflB3Yy13WJZTtPePdvU+wjRV02SKK5doLbSA6o9pwOmiA==}
+  '@vitest/mocker@5.0.1':
+    resolution: {integrity: sha512-6K1DoBNAPGvuOcSsGA4D6x+5zEEff/KmOOP3uetT2TrGpVfI+HRHRnJJfKi5ib/g1vx8IYHQD8s0pbJz8WQI7Q==}
     peerDependencies:
       msw: ^2.4.9
       vite: ^6.0.0 || ^7.0.0 || ^8.0.0
@@ -6902,8 +6902,8 @@ packages:
   '@vitest/spy@3.2.4':
     resolution: {integrity: sha512-vAfasCOe6AIK70iP5UD11Ac4siNUNJ9i/9PZ3NKx07sG6sUxeag1LWdNrMWeKKYBLlzuK+Gn65Yd5nyL6ds+nw==}
 
-  '@vitest/spy@5.0.0':
-    resolution: {integrity: sha512-uy+luWBAPw9XfthoHi5AkfHUnuPYEESjl0p/r+meoBnU8bxg5GDQ3Ey8MjcJ6sqahkL4PFyrvfMJJBw7LbU06g==}
+  '@vitest/spy@5.0.1':
+    resolution: {integrity: sha512-rbto/mF/SGERxEgYOek7Xm6B9b+y+mVoo+f4b2LymYO8zM1b7uB5nHuhVMTP2hxdzgxvGiZYGxGIaMvL5y180Q==}
 
   '@vitest/utils@3.2.4':
     resolution: {integrity: sha512-fB2V0JFrQSMsCo9HiSq3Ezpdv4iYaXRG1Sx8edX3MwxfyNn83mKiGzOcH+Fkxt4MHxr3y42fQi1oeAInqgX2QA==}
@@ -9604,10 +9604,6 @@ packages:
   obug@2.1.1:
     resolution: {integrity: sha512-uTqF9MuPraAQ+IsnPf366RG4cP9RtUi7MLO1N3KEc+wb0a6yKpeL0lmk2IB1jY5KHPAlTc6T/JRdC/YqxHNwkQ==}
 
-  obug@2.1.4:
-    resolution: {integrity: sha512-4a+OsYv9UktOJKE+l1A4OufDgdRF9PifWj+tJnHURo/P+WOxpG4GzUFL9qCalmWauao6ogiG+QvnCovwPoyAWA==}
-    engines: {node: '>=12.20.0'}
-
   obug@2.2.1:
     resolution: {integrity: sha512-XrsrhT5sybtKI6wakr2SPOlGZWWYbUXZ7a0jT8/QOeAPau+1X/bSegNe5YR75oJmEZQbKningirmGOEJCIk61Q==}
     engines: {node: '>=12.20.0'}
@@ -11153,20 +11149,20 @@ packages:
       yaml:
         optional: true
 
-  vitest@5.0.0:
-    resolution: {integrity: sha512-gpsMNoRhMjMktVxPtstOH4/PJuPyovVaMDr4oDilXaGH1EcqM2OE96SoHT2VIQ6fTGtTjqmHDrEu2X9RQiXf8Q==}
+  vitest@5.0.1:
+    resolution: {integrity: sha512-iA95lQbKEkvrtTkdAgnWbXfbipWiiWe/hDl2P5tMi6WFwD76G0NxXAGp/M9EOcYupeGJRr6wppMc7CoA41TQjg==}
     engines: {node: ^22.12.0 || ^24.0.0 || >=26.0.0}
     hasBin: true
     peerDependencies:
       '@edge-runtime/vm': '*'
       '@opentelemetry/api': ^1.9.0
       '@types/node': ^22.0.0 || >=24.0.0
-      '@vitest/browser-playwright': 5.0.0
-      '@vitest/browser-preview': 5.0.0
+      '@vitest/browser-playwright': 5.0.1
+      '@vitest/browser-preview': 5.0.1
       '@vitest/browser-webdriverio': ^5.0.0-beta.5 || >=5.0.0
-      '@vitest/coverage-istanbul': 5.0.0
-      '@vitest/coverage-v8': 5.0.0
-      '@vitest/ui': 5.0.0
+      '@vitest/coverage-istanbul': 5.0.1
+      '@vitest/coverage-v8': 5.0.1
+      '@vitest/ui': 5.0.1
       happy-dom: '*'
       jsdom: '*'
       vite: ^6.4.0 || ^7.0.0 || ^8.0.0
@@ -11460,7 +11456,7 @@ snapshots:
       '@amamo/verso-linux-x64': 1.2.0
       '@amamo/verso-win32-x64': 1.2.0
 
-  '@antfu/eslint-config@9.2.0(@eslint-react/eslint-plugin@5.18.1(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(@typescript-eslint/typescript-estree@8.65.0(supports-color@8.1.1)(typescript@6.0.3))(@typescript-eslint/utils@8.65.0(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(@vue/compiler-sfc@3.5.42)(eslint-plugin-format@2.0.1(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1)))(eslint-plugin-react-refresh@0.5.3(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1)))(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(ts-declaration-location@1.0.7(typescript@6.0.3))(typescript@6.0.3)(vitest@5.0.0)':
+  '@antfu/eslint-config@9.2.0(@eslint-react/eslint-plugin@5.18.1(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(@typescript-eslint/typescript-estree@8.65.0(supports-color@8.1.1)(typescript@6.0.3))(@typescript-eslint/utils@8.65.0(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(@vue/compiler-sfc@3.5.42)(eslint-plugin-format@2.0.1(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1)))(eslint-plugin-react-refresh@0.5.3(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1)))(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(ts-declaration-location@1.0.7(typescript@6.0.3))(typescript@6.0.3)(vitest@5.0.1)':
     dependencies:
       '@antfu/install-pkg': 1.1.0
       '@clack/prompts': 1.7.0
@@ -11470,7 +11466,7 @@ snapshots:
       '@stylistic/eslint-plugin': 5.10.0(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))
       '@typescript-eslint/eslint-plugin': 8.65.0(@typescript-eslint/parser@8.65.0(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)
       '@typescript-eslint/parser': 8.65.0(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)
-      '@vitest/eslint-plugin': 1.6.24(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)(vitest@5.0.0)
+      '@vitest/eslint-plugin': 1.6.24(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)(vitest@5.0.1)
       ansis: 4.3.1
       cac: 7.0.0
       eslint: 10.8.0(jiti@2.7.0)(supports-color@8.1.1)
@@ -14026,7 +14022,7 @@ snapshots:
       picocolors: 1.1.1
       redent: 3.0.0
 
-  '@testing-library/jest-dom@7.0.1(@testing-library/dom@10.4.0)(vitest@5.0.0)':
+  '@testing-library/jest-dom@7.0.1(@testing-library/dom@10.4.0)(vitest@5.0.1)':
     dependencies:
       '@adobe/css-tools': 4.5.0
       '@testing-library/dom': 10.4.0
@@ -14036,7 +14032,7 @@ snapshots:
       picocolors: 1.1.1
       redent: 3.0.0
     optionalDependencies:
-      vitest: 5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+      vitest: 5.0.1(@types/node@26.5.1)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
   '@testing-library/react@16.3.3(@testing-library/dom@10.4.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
     dependencies:
@@ -14392,7 +14388,7 @@ snapshots:
       '@vercel/cli-exec': 1.0.1
       jose: 5.10.0
 
-  '@vitest/coverage-istanbul@5.0.0(vitest@5.0.0)':
+  '@vitest/coverage-istanbul@5.0.0(vitest@5.0.1)':
     dependencies:
       '@jridgewell/gen-mapping': 0.3.13
       '@jridgewell/trace-mapping': 0.3.31
@@ -14403,9 +14399,9 @@ snapshots:
       magicast: 0.5.4
       obug: 2.2.1
       tinyrainbow: 3.1.1
-      vitest: 5.0.0(@types/node@26.1.2)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+      vitest: 5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
 
-  '@vitest/eslint-plugin@1.6.24(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)(vitest@5.0.0)':
+  '@vitest/eslint-plugin@1.6.24(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)(vitest@5.0.1)':
     dependencies:
       '@typescript-eslint/scope-manager': 8.65.0
       '@typescript-eslint/utils': 8.63.0(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)
@@ -14413,7 +14409,7 @@ snapshots:
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 8.65.0(@typescript-eslint/parser@8.65.0(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint@10.8.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)
       typescript: 6.0.3
-      vitest: 5.0.0(@types/node@26.1.2)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+      vitest: 5.0.1(@types/node@26.1.2)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
     transitivePeerDependencies:
       - supports-color
 
@@ -14445,28 +14441,28 @@ snapshots:
       '@vitest/istanbul-lib-coverage': 1.0.1
       obug: 2.2.1
 
-  '@vitest/mocker@5.0.0(vite@8.3.0(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))':
+  '@vitest/mocker@5.0.1(vite@8.3.0(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
-      '@vitest/spy': 5.0.0
+      '@vitest/spy': 5.0.1
       estree-walker: 3.0.3
       magic-string: 1.2.3
     optionalDependencies:
       vite: 8.3.0(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0)
 
-  '@vitest/mocker@5.0.0(vite@8.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))':
+  '@vitest/mocker@5.0.1(vite@8.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
-      '@vitest/spy': 5.0.0
+      '@vitest/spy': 5.0.1
       estree-walker: 3.0.3
       magic-string: 1.2.3
     optionalDependencies:
       vite: 8.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0)
 
-  '@vitest/mocker@5.0.0(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))':
+  '@vitest/mocker@5.0.1(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
-      '@vitest/spy': 5.0.0
+      '@vitest/spy': 5.0.1
       estree-walker: 3.0.3
       magic-string: 1.2.3
     optionalDependencies:
@@ -14480,7 +14476,7 @@ snapshots:
     dependencies:
       tinyspy: 4.0.4
 
-  '@vitest/spy@5.0.0': {}
+  '@vitest/spy@5.0.1': {}
 
   '@vitest/utils@3.2.4':
     dependencies:
@@ -17575,8 +17571,6 @@ snapshots:
 
   obug@2.1.1: {}
 
-  obug@2.1.4: {}
-
   obug@2.2.1: {}
 
   ohash@2.0.11: {}
@@ -19392,15 +19386,15 @@ snapshots:
       tsx: 4.23.13
       yaml: 2.9.0
 
-  vitest@5.0.0(@types/node@26.1.2)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0)):
+  vitest@5.0.1(@types/node@26.1.2)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0)):
     dependencies:
       '@types/chai': 5.2.3
-      '@vitest/mocker': 5.0.0(vite@8.3.0(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+      '@vitest/mocker': 5.0.1(vite@8.3.0(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
       chai: 6.2.2
       es-module-lexer: 2.3.2
       expect-type: 1.4.0
       magic-string: 1.2.3
-      obug: 2.1.4
+      obug: 2.2.1
       picomatch: 4.0.7
       std-env: 4.2.0
       tinybench: 6.1.4
@@ -19410,21 +19404,20 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 26.1.2
-      '@vitest/coverage-istanbul': 5.0.0(vitest@5.0.0)
       happy-dom: 20.14.5
       jsdom: 29.1.1
     transitivePeerDependencies:
       - msw
 
-  vitest@5.0.0(@types/node@26.2.0)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0)):
+  vitest@5.0.1(@types/node@26.2.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0)):
     dependencies:
       '@types/chai': 5.2.3
-      '@vitest/mocker': 5.0.0(vite@8.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+      '@vitest/mocker': 5.0.1(vite@8.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
       chai: 6.2.2
       es-module-lexer: 2.3.2
       expect-type: 1.4.0
       magic-string: 1.2.3
-      obug: 2.1.4
+      obug: 2.2.1
       picomatch: 4.0.7
       std-env: 4.2.0
       tinybench: 6.1.4
@@ -19434,21 +19427,20 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 26.2.0
-      '@vitest/coverage-istanbul': 5.0.0(vitest@5.0.0)
       happy-dom: 20.14.5
       jsdom: 29.1.1
     transitivePeerDependencies:
       - msw
 
-  vitest@5.0.0(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0)):
+  vitest@5.0.1(@types/node@26.5.1)(@vitest/coverage-istanbul@5.0.0)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0)):
     dependencies:
       '@types/chai': 5.2.3
-      '@vitest/mocker': 5.0.0(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+      '@vitest/mocker': 5.0.1(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
       chai: 6.2.2
       es-module-lexer: 2.3.2
       expect-type: 1.4.0
       magic-string: 1.2.3
-      obug: 2.1.4
+      obug: 2.2.1
       picomatch: 4.0.7
       std-env: 4.2.0
       tinybench: 6.1.4
@@ -19458,11 +19450,35 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 26.5.1
-      '@vitest/coverage-istanbul': 5.0.0(vitest@5.0.0)
+      '@vitest/coverage-istanbul': 5.0.0(vitest@5.0.1)
       happy-dom: 20.14.5
       jsdom: 29.1.1
     transitivePeerDependencies:
       - msw
+
+  vitest@5.0.1(@types/node@26.5.1)(happy-dom@20.14.5)(jsdom@29.1.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0)):
+    dependencies:
+      '@types/chai': 5.2.3
+      '@vitest/mocker': 5.0.1(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
+      chai: 6.2.2
+      es-module-lexer: 2.3.2
+      expect-type: 1.4.0
+      magic-string: 1.2.3
+      obug: 2.2.1
+      picomatch: 4.0.7
+      std-env: 4.2.0
+      tinybench: 6.1.4
+      tinyexec: 1.3.0
+      tinyglobby: 0.2.17
+      vite: 8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/node': 26.5.1
+      happy-dom: 20.14.5
+      jsdom: 29.1.1
+    transitivePeerDependencies:
+      - msw
+    optional: true
 
   vscode-uri@3.1.0: {}
 

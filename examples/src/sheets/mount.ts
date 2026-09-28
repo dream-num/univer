@@ -1,21 +1,28 @@
+import type { Plugin, PluginCtor } from '@univerjs/core';
 import type { MountExample } from '../mount-example';
 import type { IWorkbenchMountOptions } from '../workbench-settings';
 import { LocaleType } from '@univerjs/core';
-import { UniverSheetsConditionalFormattingPreset } from '@univerjs/preset-sheets-conditional-formatting';
-import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core';
-import { UniverSheetsDataValidationPreset } from '@univerjs/preset-sheets-data-validation';
-import { UniverSheetsDrawingPreset } from '@univerjs/preset-sheets-drawing';
-import { UniverSheetsFilterPreset } from '@univerjs/preset-sheets-filter';
-import { UniverSheetsFindReplacePreset } from '@univerjs/preset-sheets-find-replace';
-import { UniverSheetsHyperLinkPreset } from '@univerjs/preset-sheets-hyper-link';
+import { UniverSheetsConditionalFormattingMobileUIPlugin, UniverSheetsConditionalFormattingPreset } from '@univerjs/preset-sheets-conditional-formatting';
+import {
+    UniverSheetsCorePreset,
+    UniverSheetsFormulaMobileUIPlugin,
+    UniverSheetsMobileUIPlugin,
+    UniverSheetsNumfmtMobileUIPlugin,
+} from '@univerjs/preset-sheets-core';
+import { UniverSheetsDataValidationMobileUIPlugin, UniverSheetsDataValidationPreset } from '@univerjs/preset-sheets-data-validation';
+import { UniverDrawingMobileUIPlugin, UniverSheetsDrawingMobileUIPlugin, UniverSheetsDrawingPreset } from '@univerjs/preset-sheets-drawing';
+import { UniverSheetsFilterMobileUIPlugin, UniverSheetsFilterPreset } from '@univerjs/preset-sheets-filter';
+import { UniverFindReplaceMobileUIPlugin, UniverSheetsFindReplaceMobileUIPlugin, UniverSheetsFindReplacePreset } from '@univerjs/preset-sheets-find-replace';
+import { UniverSheetsHyperLinkMobileUIPlugin, UniverSheetsHyperLinkPreset } from '@univerjs/preset-sheets-hyper-link';
 import { UniverSheetsNotePreset } from '@univerjs/preset-sheets-note';
-import { UniverSheetsSortPreset } from '@univerjs/preset-sheets-sort';
-import { UniverSheetsTablePreset } from '@univerjs/preset-sheets-table';
-import { UniverSheetsThreadCommentPreset } from '@univerjs/preset-sheets-thread-comment';
-
+import { UniverSheetsSortMobileUIPlugin, UniverSheetsSortPreset } from '@univerjs/preset-sheets-sort';
+import { UniverSheetsTableMobileUIPlugin, UniverSheetsTablePreset } from '@univerjs/preset-sheets-table';
+import { UniverSheetsThreadCommentMobileUIPlugin, UniverSheetsThreadCommentPreset, UniverThreadCommentMobileUIPlugin } from '@univerjs/preset-sheets-thread-comment';
 import { createUniver } from '@univerjs/presets';
+
+import { UniverMobileUIPlugin, UniverUIPlugin } from '@univerjs/ui';
 import { loadSheetLocale } from 'virtual:univer-examples-sheet-locale';
-import { applyWorkbenchUIChrome, createMountedUniver } from '../mount-example';
+import { applyWorkbenchUIChrome, createMountedUniver, replacePresetPlugins } from '../mount-example';
 import { getEffectiveWorkbenchRegion } from '../workbench-settings';
 import { applyWorkbookZoom } from './apply-workbook-zoom';
 import { createSheetFixture } from './create-sheet-fixture';
@@ -43,10 +50,42 @@ const UNIVER_LOCALES = {
     [LocaleType.PL_PL]: LocaleType.PL_PL,
 } satisfies Record<IWorkbenchMountOptions['locale'], LocaleType>;
 
+const MOBILE_PLUGINS = new Map<string, PluginCtor<Plugin>>([
+    UniverSheetsMobileUIPlugin,
+    UniverSheetsFormulaMobileUIPlugin,
+    UniverSheetsNumfmtMobileUIPlugin,
+    UniverDrawingMobileUIPlugin,
+    UniverSheetsDrawingMobileUIPlugin,
+    UniverSheetsConditionalFormattingMobileUIPlugin,
+    UniverSheetsFilterMobileUIPlugin,
+    UniverSheetsHyperLinkMobileUIPlugin,
+    UniverSheetsDataValidationMobileUIPlugin,
+    UniverFindReplaceMobileUIPlugin,
+    UniverSheetsFindReplaceMobileUIPlugin,
+    UniverSheetsSortMobileUIPlugin,
+    UniverSheetsTableMobileUIPlugin,
+    UniverThreadCommentMobileUIPlugin,
+    UniverSheetsThreadCommentMobileUIPlugin,
+].map((plugin) => [plugin.pluginName, plugin]));
+MOBILE_PLUGINS.set(UniverUIPlugin.pluginName, UniverMobileUIPlugin);
+
 export const mount: MountExample = async (host, options) => {
     const { darkMode, direction, locale, ribbonType, theme, zoomRatio } = options;
     const univerLocale = UNIVER_LOCALES[locale];
     const localePack = await loadSheetLocale(locale);
+    const presets = [
+        UniverSheetsCorePreset({ container: host, ribbonType }),
+        UniverSheetsDrawingPreset(),
+        UniverSheetsConditionalFormattingPreset(),
+        UniverSheetsFilterPreset(),
+        UniverSheetsHyperLinkPreset(),
+        UniverSheetsDataValidationPreset(),
+        UniverSheetsFindReplacePreset(),
+        UniverSheetsNotePreset(),
+        UniverSheetsSortPreset(),
+        UniverSheetsTablePreset(),
+        UniverSheetsThreadCommentPreset(),
+    ];
     const { univer, univerAPI } = createUniver({
         locale: univerLocale,
         region: UNIVER_LOCALES[getEffectiveWorkbenchRegion(options)],
@@ -56,19 +95,7 @@ export const mount: MountExample = async (host, options) => {
         theme,
         darkMode,
         direction,
-        presets: [
-            UniverSheetsCorePreset({ container: host, ribbonType }),
-            UniverSheetsDrawingPreset(),
-            UniverSheetsConditionalFormattingPreset(),
-            UniverSheetsFilterPreset(),
-            UniverSheetsHyperLinkPreset(),
-            UniverSheetsDataValidationPreset(),
-            UniverSheetsFindReplacePreset(),
-            UniverSheetsNotePreset(),
-            UniverSheetsSortPreset(),
-            UniverSheetsTablePreset(),
-            UniverSheetsThreadCommentPreset(),
-        ],
+        presets: options.device === 'mobile' ? replacePresetPlugins(presets, MOBILE_PLUGINS) : presets,
     });
 
     try {

@@ -1,6 +1,7 @@
 import type { IDropdownMenuProps } from '@univerjs/design';
 import type {
     IWorkbenchSettings,
+    WorkbenchDevice,
     WorkbenchDirection,
     WorkbenchLocale,
     WorkbenchRegion,
@@ -13,6 +14,7 @@ import { Button, ConfigProvider, DropdownMenu, render, unmount } from '@univerjs
 
 import { MoreDownIcon } from '@univerjs/icons';
 import {
+    WORKBENCH_DEVICES,
     WORKBENCH_DIRECTIONS,
     WORKBENCH_LOCALE_META,
     WORKBENCH_LOCALES,
@@ -22,6 +24,8 @@ import {
     WORKBENCH_UI_CHROME_MODES,
     WORKBENCH_ZOOM_RATIOS,
 } from './workbench-settings';
+
+const DEVICE_LABELS = { desktop: 'Desktop', mobile: 'Mobile' } satisfies Record<WorkbenchDevice, string>;
 
 const LOCALE_LABELS = {
     arSA: 'العربية',
@@ -93,6 +97,8 @@ const UI_CHROME_LABELS = {
 
 interface IWorkbenchSettingsControlProps {
     settings: IWorkbenchSettings;
+    supportsMobile: boolean;
+    onDeviceChange: (device: WorkbenchDevice) => Promise<void>;
     onLocaleChange: (locale: WorkbenchLocale) => Promise<void>;
     onRegionChange: (region: WorkbenchRegion) => Promise<void>;
     onDirectionChange: (direction: WorkbenchDirection) => Promise<void>;
@@ -107,7 +113,9 @@ interface IWorkbenchSettingsControlProps {
 function WorkbenchSettingsControl(props: IWorkbenchSettingsControlProps) {
     const {
         settings,
+        supportsMobile,
         onDarkModeChange,
+        onDeviceChange,
         onDirectionChange,
         onLocaleChange,
         onRegionChange,
@@ -128,6 +136,22 @@ function WorkbenchSettingsControl(props: IWorkbenchSettingsControlProps) {
     }
 
     const items: IDropdownMenuProps['items'] = [
+        {
+            type: 'item',
+            children: renderSettingLabel('Device', supportsMobile ? 'Restarts example' : 'Desktop only'),
+            disabled: true,
+        },
+        {
+            type: 'radio',
+            value: supportsMobile ? settings.device : 'desktop',
+            options: WORKBENCH_DEVICES.map((value) => ({
+                value,
+                label: DEVICE_LABELS[value],
+                disabled: !supportsMobile,
+            })),
+            onSelect: (value) => onDeviceChange(value as WorkbenchDevice),
+        },
+        { type: 'separator' },
         {
             type: 'subItem',
             children: renderSettingLabel('Language', LOCALE_LABELS[settings.locale]),

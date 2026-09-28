@@ -1,5 +1,6 @@
-import type { Univer } from '@univerjs/core';
+import type { Plugin, PluginCtor, Univer } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
+import type { IPreset } from '@univerjs/presets';
 
 import type { IWorkbenchMountOptions, WorkbenchLocale, WorkbenchUIChromeMode } from './workbench-settings';
 import { getEffectiveWorkbenchRegion, getWorkbenchUIChromeVisibility } from './workbench-settings';
@@ -37,6 +38,16 @@ interface IAppliedWorkbenchSettings {
 interface IPendingExampleLocale {
     locale: WorkbenchLocale;
     pack: Awaited<ReturnType<LoadExampleLocale>>;
+}
+
+export function replacePresetPlugins(presets: IPreset[], replacements: Map<string, PluginCtor<Plugin>>): IPreset[] {
+    return presets.map((preset) => ({
+        ...preset,
+        plugins: preset.plugins.map((entry) => {
+            const [plugin, config] = Array.isArray(entry) ? entry : [entry];
+            return [replacements.get(plugin.pluginName) ?? plugin, config];
+        }),
+    }));
 }
 
 export function createUniverDisposer(host: HTMLElement, univer: Univer, univerAPI?: FUniver): DisposeExample {
@@ -178,6 +189,7 @@ export function createMountedUniver(
 
 export function createExampleSwitcher<T extends string>(host: HTMLElement, loaders: Record<T, ExampleLoader>) {
     let generation = 0;
+    let currentTarget: T | undefined;
     let current: IMountedExample | undefined;
     let latestSettings: IWorkbenchMountOptions | undefined;
     let mountQueue = Promise.resolve();
@@ -191,65 +203,62 @@ export function createExampleSwitcher<T extends string>(host: HTMLElement, loade
     }
 
     return {
-        async open(target: T, options: IWorkbenchMountOptions) {
+        async open(target: T, options: IWorkbenchMountOptions): Promise<void> {
             const request = ++generation;
+            currentTarget = target;
             latestSettings = options;
             const previous = current;
             current = undefined;
             previous?.dispose();
 
-            const openTask = (async () => {
-                try {
-                    const { mount } = await loaders[target]();
+            const openTask = loaders[target]().then(({ mount }) => {
+                if (request !== generation) {
+                    return;
+                }
+
+                const mountTask = mountQueue.then(async () => {
                     if (request !== generation) {
                         return;
                     }
 
-                    const mountTask = mountQueue.then(async () => {
-                        if (request !== generation) {
-                            return;
-                        }
-
-                        const mounted = await mount(host, options);
-                        if (request === generation) {
-                            current = mounted;
-                            if (latestSettings && latestSettings !== options) {
-                                await enqueueSettingsUpdate(mounted, latestSettings);
-                            }
-                        } else {
-                            mounted.dispose();
-                        }
-                    });
-                    mountQueue = mountTask.catch(() => undefined);
-                    await mountTask;
-                } catch (error) {
+                    const mounted = await mount(host, options);
                     if (request === generation) {
-                        throw error;
+                        current = mounted;
+                        if (latestSettings && latestSettings !== options) {
+                            await enqueueSettingsUpdate(mounted, latestSettings);
+                        }
+                    } else {
+                        mounted.dispose();
                     }
+                });
+                mountQueue = mountTask.catch(() => undefined);
+                return mountTask;
+            }).catch((error) => {
+                if (request === generation) {
+                    latestSettings = undefined;
+                    throw error;
                 }
-            })();
+            });
             pendingOpen = openTask;
 
-            try {
-                await openTask;
-            } finally {
+            return openTask.finally(() => {
                 if (pendingOpen === openTask) {
                     pendingOpen = undefined;
                 }
-            }
+            });
         },
-        async updateSettings(options: IWorkbenchMountOptions) {
-            latestSettings = options;
-            const mounted = current;
-            if (!mounted) {
-                await pendingOpen;
-                return;
+        async updateSettings(options: IWorkbenchMountOptions): Promise<void> {
+            if (currentTarget !== undefined && options.device !== latestSettings?.device) {
+                return this.open(currentTarget, options);
             }
 
-            await enqueueSettingsUpdate(mounted, options);
+            latestSettings = options;
+            const mounted = current;
+            await (mounted ? enqueueSettingsUpdate(mounted, options) : pendingOpen);
         },
         dispose() {
             generation += 1;
+            currentTarget = undefined;
             const mounted = current;
             current = undefined;
             mounted?.dispose();

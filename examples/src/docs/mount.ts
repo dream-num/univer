@@ -1,15 +1,17 @@
+import type { Plugin, PluginCtor } from '@univerjs/core';
 import type { MountExample } from '../mount-example';
 import type { IWorkbenchMountOptions } from '../workbench-settings';
 import { UniverDocsLayoutWorkerPlugin } from '@univerjs/docs';
-import { SetDocZoomRatioOperation } from '@univerjs/docs-ui';
+import { SetDocZoomRatioOperation, UniverDocsMobileUIPlugin } from '@univerjs/docs-ui';
 import { UniverDocsCorePreset } from '@univerjs/preset-docs-core';
-import { UniverDocsDrawingPreset } from '@univerjs/preset-docs-drawing';
-import { UniverDocsHyperLinkPreset } from '@univerjs/preset-docs-hyper-link';
-import { UniverDocsThreadCommentPreset } from '@univerjs/preset-docs-thread-comment';
+import { UniverDocsDrawingMobileUIPlugin, UniverDocsDrawingPreset, UniverDrawingMobileUIPlugin } from '@univerjs/preset-docs-drawing';
+import { UniverDocsHyperLinkMobileUIPlugin, UniverDocsHyperLinkPreset } from '@univerjs/preset-docs-hyper-link';
+import { UniverDocsThreadCommentMobileUIPlugin, UniverDocsThreadCommentPreset, UniverThreadCommentMobileUIPlugin } from '@univerjs/preset-docs-thread-comment';
 import { createUniver, LocaleType, UniverInstanceType } from '@univerjs/presets';
 
+import { UniverMobileUIPlugin, UniverUIPlugin } from '@univerjs/ui';
 import { loadDocumentLocale } from 'virtual:univer-examples-document-locale';
-import { applyWorkbenchUIChrome, createMountedUniver } from '../mount-example';
+import { applyWorkbenchUIChrome, createMountedUniver, replacePresetPlugins } from '../mount-example';
 import { getEffectiveWorkbenchRegion } from '../workbench-settings';
 import { createDocumentFixture } from './create-document-fixture';
 import '@univerjs/ui/facade';
@@ -37,9 +39,25 @@ const UNIVER_LOCALES = {
     [LocaleType.PL_PL]: LocaleType.PL_PL,
 } satisfies Record<IWorkbenchMountOptions['locale'], LocaleType>;
 
+const MOBILE_PLUGINS = new Map<string, PluginCtor<Plugin>>([
+    UniverDocsMobileUIPlugin,
+    UniverDrawingMobileUIPlugin,
+    UniverDocsDrawingMobileUIPlugin,
+    UniverDocsHyperLinkMobileUIPlugin,
+    UniverThreadCommentMobileUIPlugin,
+    UniverDocsThreadCommentMobileUIPlugin,
+].map((plugin) => [plugin.pluginName, plugin]));
+MOBILE_PLUGINS.set(UniverUIPlugin.pluginName, UniverMobileUIPlugin);
+
 export const mount: MountExample = async (host, options) => {
     const locale = await loadDocumentLocale(options.locale);
     const localeType = UNIVER_LOCALES[options.locale];
+    const presets = [
+        UniverDocsCorePreset({ container: host, ribbonType: options.ribbonType, toc: true }),
+        UniverDocsDrawingPreset(),
+        UniverDocsHyperLinkPreset(),
+        UniverDocsThreadCommentPreset(),
+    ];
     const { univer, univerAPI } = createUniver({
         locale: localeType,
         region: UNIVER_LOCALES[getEffectiveWorkbenchRegion(options)],
@@ -49,12 +67,7 @@ export const mount: MountExample = async (host, options) => {
         theme: options.theme,
         darkMode: options.darkMode,
         direction: options.direction,
-        presets: [
-            UniverDocsCorePreset({ container: host, ribbonType: options.ribbonType, toc: true }),
-            UniverDocsDrawingPreset(),
-            UniverDocsHyperLinkPreset(),
-            UniverDocsThreadCommentPreset(),
-        ],
+        presets: options.device === 'mobile' ? replacePresetPlugins(presets, MOBILE_PLUGINS) : presets,
     });
     univer.registerPlugin(UniverDocsLayoutWorkerPlugin, {
         workerFactory: () => new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' }),

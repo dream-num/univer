@@ -49,14 +49,6 @@ export const menuSchema: MenuSchemaType = {
             menuItemFactory: AddDocDrawingCommentMenuItemFactory,
         },
     },
-    [ContextMenuPosition.MAIN_AREA]: {
-        [ContextMenuGroup.DATA]: {
-            [StartAddCommentOperation.id]: {
-                order: 1,
-                menuItemFactory: AddDocCommentMenuItemFactory,
-            },
-        },
-    },
     [ContextMenuPosition.DRAWING]: {
         [ContextMenuGroup.DATA]: {
             [AddDocDrawingCommentOperation.id]: {

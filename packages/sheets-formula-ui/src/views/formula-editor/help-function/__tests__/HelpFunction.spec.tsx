@@ -173,17 +173,13 @@ function renderWithInjector(root: Root, injector: Injector, element: React.React
     });
 }
 
-async function moveCursor(editor: Editor, offset: number) {
+async function showHelpForSum(editor: Editor) {
     await act(async () => {
         (editor.selectionChange$ as unknown as Subject<{ textRanges: Array<{ startOffset: number; endOffset: number; collapsed: boolean }> }>).next({
-            textRanges: [{ startOffset: offset, endOffset: offset, collapsed: true }],
+            textRanges: [{ startOffset: 4, endOffset: 4, collapsed: true }],
         });
         await new Promise((resolve) => setTimeout(resolve, 80));
     });
-}
-
-async function showHelpForSum(editor: Editor) {
-    await moveCursor(editor, 4);
 }
 
 function getHelpPopupTop(): string {
@@ -193,6 +189,12 @@ function getHelpPopupTop(): string {
     }
 
     return popup.style.top;
+}
+
+async function waitForPopupLayout(): Promise<void> {
+    await act(async () => {
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    });
 }
 
 function getHelpControls(): HTMLElement[] {
@@ -370,8 +372,8 @@ describe('HelpFunction', () => {
                 />
             ));
 
-        renderHelp('=SUM(1');
-        await moveCursor(editor, 6);
+        renderHelp('=SUM(');
+        await showHelpForSum(editor);
 
         expect(document.body.textContent).toContain('SUM(number1,[number2,...])');
         // Editor top is 20 and a single line is 24px high, so the card sits below y = 44 (+1 gap).
@@ -382,7 +384,7 @@ describe('HelpFunction', () => {
         HelpState.pageHeight = 72;
         const longFormula = `=SUM(${'1'.repeat(40)}`;
         renderHelp(longFormula);
-        await moveCursor(editor, longFormula.length);
+        await waitForPopupLayout();
 
         expect(getHelpPopupTop()).toBe('93px');
     });

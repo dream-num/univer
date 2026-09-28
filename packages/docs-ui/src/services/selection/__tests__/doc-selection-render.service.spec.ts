@@ -1864,46 +1864,42 @@ describe('DocSelectionRenderService', () => {
                 pageMarginTop: 0,
             }),
         };
-        const { renderUnit, service, univer } = createRealSelectionRenderService({ mainComponent, scene });
+        const { renderUnit, service, univer } = createRealSelectionRenderService({
+            mainComponent,
+            scene,
+            documentData: {
+                id: 'word-selection-doc',
+                body: { dataStream: 'Hello world\r\n', paragraphs: [{ startIndex: 11, paragraphId: 'word-selection-paragraph' }] },
+                documentStyle: {},
+            },
+        });
         cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
         const column = { lines: [] as unknown[] };
-        const line = { paragraphIndex: 5, st: 0, parent: column, divides: [] as unknown[] };
+        const line = { paragraphIndex: 11, st: 0, parent: column, divides: [] as unknown[] };
         const divide = { parent: line, glyphGroup: [] as Array<{ content: string; count: number; glyphType: GlyphType; parent?: unknown }> };
         const glyphs: Array<{ content: string; count: number; glyphType: GlyphType; parent?: unknown }> = [];
-        for (const content of ['H', 'e', 'l', 'l', 'o']) {
+        for (const content of 'Hello world') {
             glyphs.push({ content, count: 1, glyphType: GlyphType.WORD, parent: divide });
         }
         divide.glyphGroup = glyphs;
         line.divides = [divide];
         column.lines = [line];
-        (service as unknown as { _findNodeByCoord: () => unknown })._findNodeByCoord = () => ({ node: glyphs[1], ratioX: 0.4, segmentPage: -1 });
-        const wordRange = {
-            ...createTextRange({ isActive: vi.fn(() => true) }),
-            startOffset: 0,
-            endOffset: 5,
-            collapsed: false,
-            rangeType: DOC_RANGE_TYPE.TEXT,
-            segmentId: '',
-            segmentPage: -1,
-            direction: 'forward',
-            startNodePosition: null,
-            endNodePosition: null,
-        };
-        const paragraphRange = {
-            ...createTextRange({ isActive: vi.fn(() => true) }),
-            startOffset: 0,
-            endOffset: 5,
-            collapsed: false,
-            rangeType: DOC_RANGE_TYPE.TEXT,
-            segmentId: '',
-            segmentPage: -1,
-            direction: 'forward',
-            startNodePosition: null,
-            endNodePosition: null,
-        };
-        getRangeListFromCharIndexMock
-            .mockReturnValueOnce({ textRanges: [wordRange], rectRanges: [] })
-            .mockReturnValueOnce({ textRanges: [paragraphRange], rectRanges: [] });
+        (service as unknown as { _findNodeByCoord: () => unknown })._findNodeByCoord = () => ({ node: glyphs[7], ratioX: 0.4, segmentPage: -1 });
+        getRangeListFromCharIndexMock.mockImplementation((startOffset, endOffset) => ({
+            textRanges: [{
+                ...createTextRange({ isActive: vi.fn(() => true) }),
+                startOffset,
+                endOffset,
+                collapsed: startOffset === endOffset,
+                rangeType: DOC_RANGE_TYPE.TEXT,
+                segmentId: '',
+                segmentPage: -1,
+                direction: 'forward',
+                startNodePosition: null,
+                endNodePosition: null,
+            }],
+            rectRanges: [],
+        }));
         const selections: string[] = [];
         const subscription = service.textSelectionInner$.subscribe((selection) => {
             if (!selection) {
@@ -1918,7 +1914,7 @@ describe('DocSelectionRenderService', () => {
         service.__handleDblClick({ offsetX: 10, offsetY: 12 } as never);
         service.__handleTripleClick({ offsetX: 10, offsetY: 12 } as never);
 
-        expect(selections).toEqual(['0:5', '0:5']);
+        expect(selections).toEqual(['6:11', '0:11']);
     });
 
     it('moves the hidden editor to the active visible selection when syncing canvas selection to DOM input', () => {

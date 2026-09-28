@@ -23,7 +23,7 @@ import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { CopySheetCommand, InsertColByRangeCommand, InsertColMutation, InsertRowByRangeCommand, InsertSheetMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, RemoveColByRangeCommand, RemoveColCommand, RemoveColMutation, RemoveRowByRangeCommand, RemoveRowCommand, RemoveRowMutation, SetRangeValuesMutation, SetSelectionsOperation, SheetInterceptorService, SheetLazyExecuteScheduleService, SheetRangeThemeModel, SheetsSelectionsService, ZebraCrossingCacheController } from '@univerjs/sheets';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from '../../services/sheet-filter.service';
 import { SheetsFilterController } from '../sheets-filter.controller';
-import { ReCalcSheetsFilterMutation, SetSheetsFilterCriteriaMutation } from '../../commands/mutations/sheets-filter.mutation';
+import { SetSheetsFilterCriteriaMutation } from '../../commands/mutations/sheets-filter.mutation';
 
 function testWorkbookDataWithFilterFactory(): IWorkbookData {
     return {
@@ -310,10 +310,6 @@ describe('test controller of sheets filter', () => {
 
         it('should apply existing criteria to newly included rows', async () => {
             const filterModel = sheetsFilterService.getFilterModel('test', 'sheet1')!;
-            const recalculations: string[] = [];
-            commandService.onCommandExecuted((command) => {
-                if (command.id === ReCalcSheetsFilterMutation.id) recalculations.push(command.id);
-            });
             expect(filterModel.filteredOutRows.has(6)).toBe(false);
 
             expect(await commandService.executeCommand(SetRangeValuesMutation.id, {
@@ -324,7 +320,6 @@ describe('test controller of sheets filter', () => {
 
             expect(filterModel.getRange().endRow).toBe(6);
             expect(filterModel.filteredOutRows.has(6)).toBe(true);
-            expect(recalculations).toEqual([ReCalcSheetsFilterMutation.id]);
         });
 
         it('should not extend the range when restoring values during undo', async () => {

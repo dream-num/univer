@@ -205,21 +205,28 @@ describe('ToolbarItem', () => {
         expect(getByRole('button', { name: 'Undo' })).toBeTruthy();
     });
 
-    it('shows a title for a large Grid button selector', () => {
-        const { getByText } = renderWithDependencies(
+    it('executes the large Grid primary action and opens format choices independently from the keyboard', async () => {
+        const { getByRole, findByText, commandService } = renderWithDependencies(
             <ToolbarItem
-                id="test-grid-selector"
+                id="paste"
                 type={MenuItemType.BUTTON_SELECTOR}
                 icon="TestIcon"
-                title="Insert"
-                selections={[{ label: 'Image', value: 'image' }]}
+                title="Paste"
+                tooltip="Paste options"
+                selectionsCommandId="paste-special"
+                selections={[{ label: 'Keep text only', value: 'text' }]}
                 grid
                 large
                 showLabel
             />
         );
 
-        expect(getByText('Insert')).toBeTruthy();
+        fireEvent.keyDown(getByRole('button', { name: 'Paste' }), { key: 'Enter' });
+        expect(commandService.calls).toEqual([{ commandId: 'paste', params: { value: undefined } }]);
+        fireEvent.keyDown(getByRole('button', { name: 'Paste options' }), { key: 'ArrowDown' });
+        expect(commandService.calls).toHaveLength(1);
+        fireEvent.click(await findByText('Keep text only'));
+        expect(commandService.calls[1]).toEqual({ commandId: 'paste-special', params: { value: 'text' } });
     });
 
     it('hides the title of a large Grid selector when showLabel is false', () => {

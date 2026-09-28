@@ -181,10 +181,13 @@ export function CutMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> 
     };
 };
 
-export function PasteMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+export function PasteMenuFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     return {
         id: DocPasteCommand.id,
-        type: MenuItemType.BUTTON,
+        type: MenuItemType.BUTTON_SELECTOR,
+        selectionsCommandId: DocPasteSpecialCommand.id,
+        selections: DOC_PASTE_OPTIONS.map((option) => ({ ...option })),
+        tooltip: 'docs-ui.pasteOptions.title',
         icon: 'PasteSpecialDoubleIcon',
         title: 'docs-ui.rightClick.paste',
         disabled$: disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit),
@@ -385,19 +388,6 @@ export function DeleteTableMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             getDisableWhenSelectionNotInTableObservable(accessor),
             disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit)
         ),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-    };
-}
-
-export function PasteSpecialMenuFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
-    return {
-        id: DocPasteSpecialCommand.id,
-        type: MenuItemType.SELECTOR,
-        icon: 'DocPasteOptionsIcon',
-        title: 'docs-ui.pasteOptions.title',
-        tooltip: 'docs-ui.pasteOptions.title',
-        selections: DOC_PASTE_OPTIONS.map((option) => ({ ...option })),
-        disabled$: disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }

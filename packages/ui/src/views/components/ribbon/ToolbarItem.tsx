@@ -109,9 +109,8 @@ const toolbarButtonSelectorMainVariants = cva(
 
 const toolbarButtonSelectorTriggerVariants = cva(
     `
-      univer-toolbar-button-selector-trigger univer-absolute univer-right-0 univer-top-0 univer-z-[2] univer-box-border
-      univer-flex univer-h-6 univer-w-5 univer-items-center univer-justify-center univer-rounded-r
-      univer-transition-colors
+      univer-toolbar-button-selector-trigger univer-absolute univer-right-0 univer-top-0 univer-box-border univer-flex
+      univer-h-6 univer-w-5 univer-items-center univer-justify-center univer-rounded-r univer-transition-colors
       hover:univer-bg-gray-200
       rtl:univer-left-0 rtl:univer-right-auto rtl:univer-rounded-l rtl:univer-rounded-r-none
       dark:hover:!univer-bg-gray-600
@@ -308,32 +307,22 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                     data-disabled={disabled}
                     aria-disabled={disabled}
                     className={clsx(toolbarButtonSelectorRootVariants({ disabled }), {
-                        'univer-box-border univer-h-full univer-min-w-14 univer-flex-col univer-justify-center univer-gap-1 univer-px-1.5 univer-py-1 univer-text-xs': grid && large,
+                        'univer-box-border univer-h-full univer-min-w-14 univer-flex-col !univer-pr-0': grid && large,
                         'univer-box-border univer-h-full': grid && !large,
                     })}
                 >
                     <div
                         className={clsx(toolbarButtonSelectorMainVariants({ active: activated, disabled }), {
-                            'univer-h-6 univer-w-full univer-justify-center univer-rounded !univer-px-0 [&>svg]:univer-size-6': grid && large,
+                            'univer-h-full univer-w-full univer-flex-col univer-justify-center univer-rounded univer-px-1 univer-pb-4 [&>svg]:univer-size-6': grid && large,
                             '[&>svg]:univer-size-4': grid && !large,
                         })}
-                        role={hasCustomLabel ? undefined : 'button'}
-                        tabIndex={hasCustomLabel || disabled ? -1 : 0}
-                        aria-disabled={disabled}
-                        aria-label={typeof title === 'string' ? localeService.t(title) : selectorAriaLabel}
                         onClick={handleClick}
-                        onKeyDown={(event) => {
-                            if (!hasCustomLabel && (event.key === 'Enter' || event.key === ' ')) {
-                                event.preventDefault();
-                                handleClick();
-                            }
-                        }}
                     >
                         <CustomLabel
                             icon={iconToDisplay}
                             iconSize={iconSize}
                             preserveStrokeWidth={preserveStrokeWidth}
-                            title={grid && large ? undefined : titleToDisplay}
+                            title={titleToDisplay}
                             value={iconColor ?? value}
                             label={label}
                             onChange={handleSelectionsValueChange}
@@ -353,16 +342,11 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                     >
                         <div
                             className={clsx(toolbarButtonSelectorTriggerVariants({ disabled, active: activated }), {
-                                '!univer-relative !univer-inset-auto univer-h-4 univer-w-auto univer-gap-0.5 univer-rounded': grid && large,
+                                '!univer-top-auto univer-bottom-0 univer-h-4 univer-w-full univer-rounded-b univer-rounded-t-none': grid && large,
                                 'univer-h-full': grid && !large,
                             })}
-                            role="button"
-                            tabIndex={disabled ? -1 : 0}
-                            aria-disabled={disabled}
-                            aria-label={selectorAriaLabel}
                             data-disabled={disabled}
                         >
-                            {grid && large && <CustomLabel title={titleToDisplay} />}
                             <MoreDownIcon preserveStrokeWidth={preserveStrokeWidth} />
                         </div>
                     </DropdownMenuWrapper>

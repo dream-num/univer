@@ -16,10 +16,10 @@
 
 import type { MenuSchemaType } from '@univerjs/ui';
 import { ContextMenuGroup, ContextMenuPosition } from '@univerjs/ui';
-import { DocPasteCommand } from '../commands/commands/clipboard.command';
+import { DocPasteCommand, DocPasteSpecialCommand } from '../commands/commands/clipboard.command';
 import { DocSelectAllCommand, DocSelectWordCommand } from '../commands/commands/doc-select-all.command';
 import { DOC_CARET_MENU_ID } from '../consts/mobile-context';
-import { PasteMenuFactory, SelectAllMenuFactory, SelectWordMenuFactory } from './context-menu';
+import { PasteMenuFactory, PasteSpecialMenuFactory, SelectAllMenuFactory, SelectWordMenuFactory } from './context-menu';
 
 export const mobileMenuSchema: MenuSchemaType = {
     [ContextMenuPosition.MAIN_AREA]: {
@@ -42,6 +42,13 @@ export const mobileMenuSchema: MenuSchemaType = {
             [DocSelectAllCommand.id]: {
                 order: 2,
                 menuItemFactory: SelectAllMenuFactory,
+            },
+        },
+        [ContextMenuGroup.FORMAT]: {
+            order: 1,
+            [DocPasteSpecialCommand.id]: {
+                order: 0,
+                menuItemFactory: PasteSpecialMenuFactory,
             },
         },
     },

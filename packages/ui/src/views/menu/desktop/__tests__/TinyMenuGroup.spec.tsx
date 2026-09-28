@@ -17,20 +17,14 @@
 import type { ComponentType, ReactElement } from 'react';
 import type { IValueOption } from '../../../../services/menu/menu';
 import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
-import { act, fireEvent, render, screen } from '@testing-library/react';
-import { DesktopLogService, ILogService, Injector, LocaleService, LocaleType } from '@univerjs/core';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { ILogService, Injector, LocaleService } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
-import { describe, expect, it, onTestFinished, vi } from 'vitest';
-import { ComponentManager } from '../../../../common/component-manager';
+import { describe, expect, it } from 'vitest';
 import { IconManager } from '../../../../common/icon-manager';
 import { MenuItemType } from '../../../../services/menu/menu';
 import { connectInjector } from '../../../../utils/di';
-import {
-    getVisibleTinyMenuChildren,
-    resolveMenuItemActiveState,
-    UIQuickTileMenuGroup,
-    UITinyMenuGroup,
-} from '../TinyMenuGroup';
+import { getVisibleTinyMenuChildren, resolveMenuItemActiveState, UITinyMenuGroup } from '../TinyMenuGroup';
 
 class TestLocaleService {
     readonly direction$ = new BehaviorSubject<'ltr'>('ltr');
@@ -201,52 +195,5 @@ describe('TinyMenuGroup', () => {
         const group = container.querySelector('.univer-menu-item-group') as HTMLElement;
         expect(group.style.gridTemplateColumns).toBe('repeat(8, max-content)');
         expect(hasClassToken(screen.getByRole('button', { name: 'black' }), 'univer-rounded-sm')).toBe(true);
-    });
-});
-
-describe('quick tile paste menu', () => {
-    it('keeps the primary action separate from format choices and disables both in read-only mode', async () => {
-        const injector = new Injector([
-            [LocaleService],
-            [ILogService, { useClass: DesktopLogService }],
-            [IconManager],
-            [ComponentManager],
-        ]);
-        onTestFinished(() => injector.dispose());
-        const locale = injector.get(LocaleService);
-        locale.load({ [LocaleType.EN_US]: { paste: 'Paste', options: 'Paste options', source: 'Keep source formatting', destination: 'Match destination formatting', text: 'Keep text only' } });
-        locale.setLocale(LocaleType.EN_US);
-        locale.setDirection('ltr');
-        const disabled$ = new BehaviorSubject(false);
-        const onOptionSelect = vi.fn();
-        const item = createGroup([{
-            key: 'paste',
-            order: 0,
-            item: {
-                id: 'paste',
-                type: MenuItemType.BUTTON_SELECTOR,
-                title: 'paste',
-                tooltip: 'options',
-                disabled$,
-                selectionsCommandId: 'paste-special',
-                selections: ['source', 'destination', 'text'].map((value) => ({ value, label: value })),
-            },
-        }]);
-        const Root = connectInjector(() => <UIQuickTileMenuGroup item={item} onOptionSelect={onOptionSelect} />, injector);
-        const view = render(<Root />);
-        onTestFinished(() => view.unmount());
-        fireEvent.click(screen.getByRole('button', { name: 'Paste' }));
-        expect(onOptionSelect).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'paste', value: undefined }));
-        onOptionSelect.mockClear();
-        for (const [name, value] of [['Keep source formatting', 'source'], ['Match destination formatting', 'destination'], ['Keep text only', 'text']]) {
-            fireEvent.pointerDown(screen.getByRole('button', { name: 'Paste options' }), { button: 0, ctrlKey: false });
-            expect(onOptionSelect).not.toHaveBeenCalled();
-            fireEvent.click(await screen.findByRole('menuitem', { name }));
-            expect(onOptionSelect).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ commandId: 'paste-special', value }));
-            onOptionSelect.mockClear();
-        }
-        act(() => disabled$.next(true));
-        expect((screen.getByRole('button', { name: 'Paste' }) as HTMLButtonElement).disabled).toBe(true);
-        expect((screen.getByRole('button', { name: 'Paste options' }) as HTMLButtonElement).disabled).toBe(true);
     });
 });

@@ -19,6 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         pasteOptions: {
+            special: 'Dán đặc biệt',
             title: 'Tùy chọn dán',
             source: 'Giữ định dạng nguồn',
             destination: 'Khớp định dạng đích',

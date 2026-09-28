@@ -14,24 +14,15 @@
  * limitations under the License.
  */
 
-import type {
-    IDisplayMenuItem,
-    IMenuItem,
-    IMenuSelectorItem,
-    IValueOption,
-    MenuItemDefaultValueType,
-} from '../../../services/menu/menu';
+import type { IDisplayMenuItem, IMenuItem, IValueOption, MenuItemDefaultValueType } from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import type { TinyMenuLayoutVariant, TinyMenuSizeVariant } from './DesignTinyMenuGroup';
 import { LocaleService } from '@univerjs/core';
-import { Button, cva, DropdownMenu } from '@univerjs/design';
-import { MoreDownIcon } from '@univerjs/icons';
+import { cva } from '@univerjs/design';
 import { useMemo } from 'react';
-import { combineLatest, isObservable, map, of, startWith } from 'rxjs';
-import { IconManager } from '../../../common/icon-manager';
-import { MenuItemType } from '../../../services/menu/menu';
+import { combineLatest, map, of, startWith } from 'rxjs';
+import { IconManager } from '../../../common';
 import { useDependency, useObservable } from '../../../utils/di';
-import { CustomLabel } from '../../custom-label/CustomLabel';
 import { DesignTinyMenuGroup } from './DesignTinyMenuGroup';
 
 interface IUIQuickMenuGroupProps {
@@ -116,11 +107,6 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
     const disabled = useObservable<boolean>(menuItem?.disabled$, false);
     const hidden = useObservable<boolean>(menuItem?.hidden$, false);
     const activated = useObservable<boolean>(menuItem?.activated$, false);
-    const selectorItem = menuItem?.type === MenuItemType.BUTTON_SELECTOR
-        ? menuItem as IDisplayMenuItem<IMenuSelectorItem>
-        : undefined;
-    const observedSelections = useObservable(isObservable(selectorItem?.selections) ? selectorItem.selections : undefined);
-    const selections = observedSelections ?? (Array.isArray(selectorItem?.selections) ? selectorItem.selections : []);
 
     if (!menuItem || hidden) {
         return null;
@@ -129,7 +115,7 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
     const Icon = menuItem.icon ? iconManager.get(menuItem.icon as string) : null;
     const active = resolveMenuItemActiveState(menuItem.id, activated, activeItemIds);
 
-    const button = (
+    return (
         <button
             type="button"
             className={quickTileMenuButtonVariants({ disabled, active })}
@@ -162,42 +148,6 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
             </span>
         </button>
     );
-
-    if (!selectorItem || !selections.length) {
-        return button;
-    }
-
-    return (
-        <div className="univer-flex univer-items-center">
-            {button}
-            <DropdownMenu
-                disabled={disabled}
-                align="end"
-                data-u-context-menu-submenu="true"
-                onCloseAutoFocus={(event) => event.preventDefault()}
-                items={selections.map((option) => ({
-                    type: 'item',
-                    disabled: disabled || option.disabled,
-                    children: <CustomLabel label={option.label} icon={option.icon} />,
-                    onSelect: () => onOptionSelect?.({
-                        ...option,
-                        label: menuItem.id,
-                        commandId: option.commandId ?? option.id ?? selectorItem.selectionsCommandId ?? menuItem.commandId,
-                        params: typeof option.params === 'function' ? option.params(option.value) : option.params,
-                    }),
-                }))}
-            >
-                <Button
-                    variant="text"
-                    disabled={disabled}
-                    aria-label={localeService.t(menuItem.tooltip ?? menuItem.title ?? menuSchema.key)}
-                    className="univer-h-12 univer-shrink-0 !univer-px-1"
-                >
-                    <MoreDownIcon className="univer-size-3" />
-                </Button>
-            </DropdownMenu>
-        </div>
-    );
 }
 
 export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
@@ -223,9 +173,7 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
         [hiddenItemIds, hiddenItems, item.children]
     );
 
-    if (!item.children) {
-        return null;
-    }
+    if (!item.children) return null;
 
     const items = visibleChildren
         .map((child) => {

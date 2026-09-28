@@ -19,6 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         pasteOptions: {
+            special: 'چسباندن ویژه',
             title: 'گزینه‌های چسباندن',
             source: 'حفظ قالب‌بندی مبدأ',
             destination: 'تطبیق با قالب‌بندی مقصد',

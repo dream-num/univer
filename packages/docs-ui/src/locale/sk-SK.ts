@@ -19,6 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         pasteOptions: {
+            special: 'Prilepiť špeciálne',
             title: 'Možnosti prilepenia',
             source: 'Zachovať zdrojové formátovanie',
             destination: 'Prispôsobiť cieľovému formátovaniu',

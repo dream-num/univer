@@ -19,6 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         pasteOptions: {
+            special: '形式を選択して貼り付け',
             title: '貼り付けのオプション',
             source: '元の書式を保持',
             destination: '貼り付け先の書式に合わせる',

@@ -57,6 +57,9 @@ export interface INotificationOptions {
 
     /** An action rendered inside the notification */
     action?: NonNullable<Parameters<typeof toast>[1]>['action'];
+
+    /** Classes applied to parts of this notification */
+    classNames?: NonNullable<Parameters<typeof toast>[1]>['classNames'];
 }
 
 export const notification = {
@@ -70,6 +73,7 @@ export const notification = {
             dismissible = true,
             position = 'top-right',
             action,
+            classNames,
         } = options;
 
         return toast[type](title, {
@@ -79,6 +83,7 @@ export const notification = {
             closeButton: closable,
             dismissible,
             action,
+            ...(classNames ? { classNames } : {}),
         });
     },
     dismiss: (id: string | number) => toast.dismiss(id),

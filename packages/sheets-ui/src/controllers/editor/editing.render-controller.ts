@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable max-lines-per-function */
-
 import type {
     DocumentDataModel,
     ICellData,
@@ -148,18 +146,17 @@ function getPercentEditorSelection(
     }
 
     const { eventType, initialValue, keycode } = visibleParam;
-    if (
-        eventType === DeviceInputEventType.Dblclick ||
-        (eventType === DeviceInputEventType.Keyboard && keycode === KeyCode.F2)
-    ) {
+    if (eventType === DeviceInputEventType.Keyboard && keycode === KeyCode.F2) {
         return { startOffset: percentOffset, endOffset: percentOffset, collapsed: true };
     }
 
     if (
-        eventType !== DeviceInputEventType.Keyboard ||
-        keycode === KeyCode.BACKSPACE ||
-        keycode === KeyCode.DELETE ||
-        !/^\d/.test(initialValue ?? '')
+        eventType !== DeviceInputEventType.Dblclick && (
+            eventType !== DeviceInputEventType.Keyboard ||
+            keycode === KeyCode.BACKSPACE ||
+            keycode === KeyCode.DELETE ||
+            !/^\d/.test(initialValue ?? '')
+        )
     ) {
         return null;
     }
@@ -528,7 +525,6 @@ export class EditingRenderController extends Disposable {
     }
 
     // You can double-click on the cell or input content by keyboard to put the cell into the edit state.
-    // eslint-disable-next-line complexity
     private _handleEditorVisible(param: IEditorBridgeServiceVisibleParam) {
         const { eventType, keycode } = param;
         // Change `CursorChange` to changed status, when formula bar clicked.
@@ -603,6 +599,7 @@ export class EditingRenderController extends Disposable {
             );
         };
         const replaceSelection = (selection: ITextRange) => {
+            // An embedded sheet may open its editor while the host document retains global focus.
             this._textSelectionManagerService.replaceDocRanges(
                 [selection],
                 {
@@ -620,27 +617,9 @@ export class EditingRenderController extends Disposable {
         } else if (eventType === DeviceInputEventType.Keyboard && keycode === KeyCode.F2) {
             // f2, continue to edit
             document.makeDirty();
-            this._textSelectionManagerService.replaceDocRanges([
-                {
-                    startOffset: 0,
-                    endOffset: 0,
-                },
-            ]);
+            replaceSelection({ startOffset: 0, endOffset: 0, collapsed: true });
             const endOffset = (documentDataModel.getBody()?.dataStream.length ?? 2) - 2;
-            if (percentSelection) {
-                replaceSelection(percentSelection);
-            } else {
-                this._textSelectionManagerService.replaceDocRanges(
-                    [{
-                        startOffset: endOffset,
-                        endOffset,
-                    }],
-                    {
-                        unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-                        subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-                    }
-                );
-            }
+            replaceSelection(percentSelection ?? { startOffset: endOffset, endOffset, collapsed: true });
         } else if (
             // clear and edit
             eventType === DeviceInputEventType.Keyboard ||
@@ -656,17 +635,8 @@ export class EditingRenderController extends Disposable {
                 return;
             }
 
-            const cursor = documentDataModel.getBody()!.dataStream.length - 2 || 0;
-            if (percentSelection) {
-                replaceSelection(percentSelection);
-            } else {
-                this._textSelectionManagerService.replaceDocRanges([
-                    {
-                        startOffset: cursor,
-                        endOffset: cursor,
-                    },
-                ]);
-            }
+            const endOffset = documentDataModel.getBody()!.dataStream.length - 2 || 0;
+            replaceSelection(percentSelection ?? { startOffset: 0, endOffset, collapsed: endOffset === 0 });
         }
 
         this._renderManagerService.getRenderUnitById(unitId)?.scene.resetCursor();
@@ -1028,7 +998,6 @@ export class EditingRenderController extends Disposable {
     }
 }
 
-// eslint-disable-next-line complexity
 export function getCellDataByInput(
     cellData: ICellData,
     snapshot: Nullable<IDocumentData>,

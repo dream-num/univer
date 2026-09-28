@@ -48,10 +48,11 @@ import {
     SheetsSelectionsService,
     WorkbookEditablePermission,
 } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
     SheetPermissionInterceptorClipboardController,
 } from '../../../controllers/permission/sheet-permission-interceptor-clipboard.controller';
+import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '../clipboard.service';
 import { COPY_TYPE } from '../type';
 import { clipboardTestBed } from './clipboard-test-bed';
@@ -241,6 +242,67 @@ describe('Test clipboard', () => {
         expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
         expect(getValues(0, 0, 0, 0)).toEqual(originalSource);
         expect(getValues(0, 1, 0, 1)).toEqual(originalPeer);
+    });
+
+    it('recalculates auto height when pasting into a row that already has a measured auto height', async () => {
+        const row = 30;
+        const worksheet = get(IUniverInstanceService)
+            .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!
+            .getSheetBySheetId('sheet1')!;
+        worksheet.getRowManager().getRowOrCreate(row).ah = 24;
+        const skeleton = get(SheetSkeletonManagerService).ensureSkeleton('sheet1')!;
+        vi.spyOn(skeleton, 'calculateAutoHeightInRange').mockReturnValue([{ row, autoHeight: 34 }]);
+        const copyId = 'existing-auto-height';
+        sheetClipboardService.copyContentCache().set(copyId, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { rows: [0], cols: [0] },
+            matrix: new ObjectMatrix({ 0: { 0: { v: 'line 1\nline 2' } } }),
+            copyType: COPY_TYPE.COPY,
+        });
+
+        expect(await sheetClipboardService.pasteByCopyId(copyId, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { startRow: row, endRow: row, startColumn: 0, endColumn: 0 },
+        })).toBe(true);
+        expect(worksheet.getRowManager().getRow(row)?.ah).toBe(34);
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(worksheet.getRowManager().getRow(row)?.ah).toBe(24);
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(worksheet.getRowManager().getRow(row)?.ah).toBe(34);
+    });
+
+    it.each([
+        { name: 'explicit', row: 31, isLegacy: false },
+        { name: 'legacy', row: 32, isLegacy: true },
+    ])('preserves a $name manually sized row when pasting', async ({ row, isLegacy }) => {
+        const worksheet = get(IUniverInstanceService)
+            .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!
+            .getSheetBySheetId('sheet1')!;
+        const rowData = worksheet.getRowManager().getRowOrCreate(row);
+        rowData.h = 40;
+        if (!isLegacy) {
+            rowData.ia = BooleanNumber.FALSE;
+        }
+        const skeleton = get(SheetSkeletonManagerService).ensureSkeleton('sheet1')!;
+        const calculateAutoHeight = vi.spyOn(skeleton, 'calculateAutoHeightInRange');
+        const copyId = 'manual-row-height';
+        sheetClipboardService.copyContentCache().set(copyId, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { rows: [0], cols: [0] },
+            matrix: new ObjectMatrix({ 0: { 0: { v: 'line 1\nline 2' } } }),
+            copyType: COPY_TYPE.COPY,
+        });
+
+        expect(await sheetClipboardService.pasteByCopyId(copyId, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { startRow: row, endRow: row, startColumn: 0, endColumn: 0 },
+        })).toBe(true);
+        expect(calculateAutoHeight).not.toHaveBeenCalled();
+        expect(worksheet.getRowHeight(row)).toBe(40);
     });
 
     it.each(['disposed', 'read-only'] as const)('does not redirect a delayed paste when its source becomes %s', async (state) => {

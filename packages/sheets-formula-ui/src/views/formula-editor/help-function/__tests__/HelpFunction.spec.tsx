@@ -101,10 +101,12 @@ class HelpState {
     static editor: Editor;
     static switched: number[] = [];
     static closed = 0;
+    static pageHeight = 24;
 
     static reset(): void {
         this.switched = [];
         this.closed = 0;
+        this.pageHeight = 24;
     }
 }
 
@@ -118,7 +120,7 @@ function createEditor(): Editor {
         getDocumentData: () => ({ documentStyle: { marginTop: 0, marginBottom: 0 } }),
         getSkeleton: () => ({
             getSkeletonData: () => ({
-                pages: [{ height: 24 }],
+                pages: [{ height: HelpState.pageHeight }],
             }),
         }),
     } as unknown as Editor;
@@ -177,6 +179,21 @@ async function showHelpForSum(editor: Editor) {
             textRanges: [{ startOffset: 4, endOffset: 4, collapsed: true }],
         });
         await new Promise((resolve) => setTimeout(resolve, 80));
+    });
+}
+
+function getHelpPopupTop(): string {
+    const popup = document.body.querySelector<HTMLElement>('[data-u-comp="rect-popup"]');
+    if (!popup) {
+        throw new TypeError('Help popup was not rendered');
+    }
+
+    return popup.style.top;
+}
+
+async function waitForPopupLayout(): Promise<void> {
+    await act(async () => {
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
     });
 }
 
@@ -341,5 +358,34 @@ describe('HelpFunction', () => {
 
         expect(editorBridgeService.helpFunctionVisible$.getValue()).toBe(true);
         expect(document.body.textContent).toContain('SUM(number1,[number2,...])');
+    });
+
+    it('moves the help card down when the formula wraps onto another line', async () => {
+        const { injector, editor } = createHelpFunctionTestBed();
+        const renderHelp = (formulaText: string) => renderWithInjector(
+            root,
+            injector, (
+                <HelpFunction
+                    isFocus
+                    editor={editor}
+                    formulaText={formulaText}
+                />
+            ));
+
+        renderHelp('=SUM(');
+        await showHelpForSum(editor);
+
+        expect(document.body.textContent).toContain('SUM(number1,[number2,...])');
+        // Editor top is 20 and a single line is 24px high, so the card sits below y = 44 (+1 gap).
+        expect(getHelpPopupTop()).toBe('45px');
+
+        // Keep typing inside the same argument until the text wraps and the editor grows to three lines.
+        // The function and the active parameter stay the same.
+        HelpState.pageHeight = 72;
+        const longFormula = `=SUM(${'1'.repeat(40)}`;
+        renderHelp(longFormula);
+        await waitForPopupLayout();
+
+        expect(getHelpPopupTop()).toBe('93px');
     });
 });

@@ -30,6 +30,7 @@ import type {
     Workbook,
 } from '@univerjs/core';
 import type { IInsertTextCommandParams, IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IInnerPasteCommandParams } from '@univerjs/docs-ui';
 import type {
     ISetRangeValuesCommandParams,
     ISetWorksheetActivateCommandParams,
@@ -76,6 +77,7 @@ import {
 import {
     DocSelectionRenderService,
     IEditorService,
+    InnerPasteCommand,
     MoveCursorOperation,
     MoveSelectionOperation,
     ReplaceSnapshotCommand,
@@ -106,6 +108,7 @@ import {
 } from '@univerjs/sheets';
 import { DISABLE_AUTO_FOCUS_KEY, KeyCode, MetaKeys } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
+
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
 import {
@@ -146,6 +149,11 @@ function getPercentEditorSelection(
     }
 
     const { eventType, initialValue, keycode } = visibleParam;
+    // A formula's trailing percent sign is an operator, not a retained number-format suffix.
+    if (isFormulaString(dataStream) && (eventType === DeviceInputEventType.Dblclick || keycode === KeyCode.F2)) {
+        return null;
+    }
+
     if (eventType === DeviceInputEventType.Keyboard && keycode === KeyCode.F2) {
         return { startOffset: percentOffset, endOffset: percentOffset, collapsed: true };
     }
@@ -429,14 +437,16 @@ export class EditingRenderController extends Disposable {
      */
     private _commandExecutedListener(d: DisposableCollection) {
         d.add(this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
-            if (command.id !== InsertTextCommand.id) {
+            if (command.id !== InsertTextCommand.id && command.id !== InnerPasteCommand.id) {
                 return;
             }
 
-            const params = command.params as IInsertTextCommandParams;
+            const insertParams = command.id === InsertTextCommand.id ? command.params as IInsertTextCommandParams : null;
+            const pasteParams = command.id === InnerPasteCommand.id ? command.params as IInnerPasteCommandParams : null;
+            const unitId = insertParams?.unitId ?? pasteParams?.unitId;
             const visibleParam = this._editorBridgeService.isVisible();
             const editCellState = this._editorBridgeService.getEditLocation();
-            if (params.unitId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY || !visibleParam.visible || editCellState == null) {
+            if (unitId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY || !visibleParam.visible || editCellState == null) {
                 return;
             }
 
@@ -446,27 +456,42 @@ export class EditingRenderController extends Disposable {
             }
 
             const percentOffset = getPercentOffset(editCellState, dataStream);
-            // The input event captures its range before the editor opens, so the first digit still carries a stale range.
-            if (
-                percentOffset != null &&
-                !this._editorBridgeService.getEditorDirty() &&
-                visibleParam.eventType === DeviceInputEventType.Keyboard &&
-                /^\d/.test(visibleParam.initialValue ?? '') &&
-                /^\d/.test(params.body.dataStream)
-            ) {
-                params.range = { startOffset: 0, endOffset: percentOffset, collapsed: false };
+            if (percentOffset == null) {
                 return;
             }
 
-            // Overtype the preserved suffix so entering `35%` does not produce `35%%`.
+            // The input event captures its range before the editor opens, so the first digit still carries a stale range.
             if (
-                percentOffset != null &&
-                params.body.dataStream === '%' &&
-                params.range.collapsed &&
-                params.range.startOffset === percentOffset &&
-                params.range.endOffset === percentOffset
+                insertParams &&
+                !this._editorBridgeService.getEditorDirty() &&
+                visibleParam.eventType === DeviceInputEventType.Keyboard &&
+                /^\d/.test(visibleParam.initialValue ?? '') &&
+                /^\d/.test(insertParams.body.dataStream)
             ) {
-                params.range = { ...params.range, endOffset: percentOffset + 1, collapsed: false };
+                insertParams.range = {
+                    startOffset: 0,
+                    endOffset: percentOffset + (insertParams.body.dataStream.endsWith('%') ? 1 : 0),
+                    collapsed: false,
+                };
+            }
+
+            const selectionParams = { unitId, subUnitId: unitId };
+            const ranges = insertParams ? [insertParams.range] : this._textSelectionManagerService.getTextRanges(selectionParams);
+            const input = insertParams?.body.dataStream ?? pasteParams?.doc.body?.dataStream;
+            // Overtype the preserved suffix for typed and pasted percentages, but keep formula operators.
+            if (
+                !isFormulaString(dataStream) &&
+                input?.endsWith('%') &&
+                ranges?.length === 1 &&
+                ranges[0].endOffset === percentOffset &&
+                (!pasteParams || !this._textSelectionManagerService.getRectRanges(selectionParams)?.length)
+            ) {
+                const range = { ...ranges[0], endOffset: percentOffset + 1, collapsed: false };
+                if (insertParams) {
+                    insertParams.range = range;
+                } else if (pasteParams) {
+                    pasteParams.selections = [range];
+                }
             }
         }));
 

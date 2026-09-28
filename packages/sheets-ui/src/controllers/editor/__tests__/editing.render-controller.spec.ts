@@ -40,10 +40,11 @@ import {
     LocaleType,
     Styles,
     Tools,
+    UndoCommandId,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocStateChangeManagerService, DocStateEmitService, InsertTextCommand, RichTextEditingMutation } from '@univerjs/docs';
-import { IEditorService, MoveCursorOperation, MoveSelectionOperation, SetDocInputStyleCommand, VIEWPORT_KEY } from '@univerjs/docs-ui';
+import { IEditorService, InnerPasteCommand, MoveCursorOperation, MoveSelectionOperation, SetDocInputStyleCommand, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { FunctionService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { DeviceInputEventType, IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
 import { SetRangeValuesCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
@@ -318,6 +319,7 @@ function createController(initialDataStream = 'new value\r\n', isPercentFormat =
     }
     const commandService = injector.get(ICommandService);
     commandService.registerCommand(InsertTextCommand);
+    commandService.registerCommand(InnerPasteCommand);
     commandService.registerCommand(RichTextEditingMutation);
     const syncExecuteCommand = commandService.syncExecuteCommand.bind(commandService);
     vi.spyOn(commandService, 'syncExecuteCommand').mockImplementation((id, params, options) =>
@@ -354,6 +356,7 @@ function createController(initialDataStream = 'new value\r\n', isPercentFormat =
         commandService,
         selectionManager,
         docModel,
+        docStateEmitService: injector.get(DocStateEmitService),
         formulaBarEditor,
         documentModel,
         getFormulaSnapshot: () => formulaDocModel.getSnapshot(),
@@ -616,10 +619,12 @@ describe('EditingRenderController business methods', () => {
 
     it.each([
         { content: '25%', percent: true, input: '3', expected: '3%' },
+        { content: '25%', percent: true, input: '7%', expected: '7%' },
         { content: '-12.5%', percent: true, input: '3', expected: '3%' },
         { content: 'hello world', percent: false, input: '3', expected: '3' },
         { content: '=SUM(A1:A3)', percent: false, input: '=2+3', expected: '=2+3' },
         { content: '=1/4', percent: true, input: '=2+3', expected: '=2+3' },
+        { content: '=25%', percent: true, input: '=30%', expected: '=30%' },
         { content: 'hello\rworld', percent: false, input: '3', expected: '3' },
         { content: '25%', percent: false, input: '3', expected: '3' },
         { content: '', percent: false, input: '3', expected: '3' },
@@ -641,9 +646,10 @@ describe('EditingRenderController business methods', () => {
     });
 
     it.each([
-        { content: '25%', percent: true, expected: '253%' },
-        { content: 'hello', percent: false, expected: 'hello3' },
-    ])('keeps the insertion caret for F2 editing of "$content"', ({ content, percent, expected }) => {
+        { content: '25%', percent: true, input: '3', expected: '253%' },
+        { content: 'hello', percent: false, input: '3', expected: 'hello3' },
+        { content: '=25%', percent: true, input: '+1', expected: '=25%+1' },
+    ])('keeps the insertion caret for F2 editing of "$content"', ({ content, percent, input, expected }) => {
         const { controller, commandService, docModel, selectionManager } = createController(`${content}\r\n`, percent);
 
         controller._editorBridgeService.visible$.next({
@@ -654,8 +660,31 @@ describe('EditingRenderController business methods', () => {
         });
         commandService.syncExecuteCommand(InsertTextCommand.id, {
             unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-            body: { dataStream: '3' },
+            body: { dataStream: input },
             range: selectionManager.getActiveTextRange(),
+        });
+
+        expect(docModel.getBody()?.dataStream).toBe(`${expected}\r\n`);
+    });
+
+    it.each([
+        { content: '25%', percent: true, input: '7%', expected: '7%' },
+        { content: '25%', percent: true, input: '7', expected: '7%' },
+        { content: '=25%', percent: true, input: '=30%', expected: '=30%' },
+        { content: '25%', percent: false, input: '7%', expected: '7%' },
+    ])('pastes "$input" over the double-click selection of "$content" (percent=$percent)', ({ content, percent, input, expected }) => {
+        const { controller, commandService, docModel } = createController(`${content}\r\n`, percent);
+        controller._editorBridgeService.visible$.next({
+            visible: true,
+            eventType: DeviceInputEventType.Dblclick,
+            unitId: 'unit-1',
+        });
+
+        commandService.syncExecuteCommand(InnerPasteCommand.id, {
+            unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            segmentId: '',
+            doc: { body: { dataStream: input } },
+            textRanges: [{ startOffset: input.length, endOffset: input.length, collapsed: true }],
         });
 
         expect(docModel.getBody()?.dataStream).toBe(`${expected}\r\n`);
@@ -692,6 +721,35 @@ describe('EditingRenderController business methods', () => {
         expect(selectionManager.getTextRanges(host)).toEqual([hostRange]);
     });
 
+    it('keeps percentage replacement after undoing a paste inside the editor', () => {
+        const { controller, commandService, docModel, docStateEmitService, selectionManager } = createController('25%\r\n', true);
+        const emit = vi.spyOn(docStateEmitService, 'emitStateChangeInfo');
+        controller._editorBridgeService.visible$.next({
+            visible: true,
+            eventType: DeviceInputEventType.Dblclick,
+            unitId: 'unit-1',
+        });
+        commandService.syncExecuteCommand(InnerPasteCommand.id, {
+            unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            segmentId: '',
+            doc: { body: { dataStream: '7%' } },
+            textRanges: [{ startOffset: 2, endOffset: 2, collapsed: true }],
+        });
+        const { undoState } = emit.mock.calls[0][0];
+        commandService.syncExecuteCommand(RichTextEditingMutation.id, {
+            ...undoState,
+            unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            trigger: UndoCommandId,
+        });
+        commandService.syncExecuteCommand(InsertTextCommand.id, {
+            unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            body: { dataStream: '3' },
+            range: selectionManager.getActiveTextRange(),
+        });
+
+        expect(docModel.getBody()?.dataStream).toBe('3%\r\n');
+    });
+
     it('keeps one percent suffix when typing a complete percentage after double click', () => {
         const { controller, commandService, docModel, selectionManager } = createController('25%\r\n', true);
         controller._editorBridgeService.visible$.next({
@@ -709,51 +767,51 @@ describe('EditingRenderController business methods', () => {
         expect(docModel.getBody()?.dataStream).toBe('3%\r\n');
     });
 
-    it('overtypes a preserved percent suffix on subsequent percent input', () => {
-        const { controller } = createController('0.35%\r\n', true);
-        const beforeCommandListeners: Array<(command: { id: string; params: unknown }) => void> = [];
-        controller._commandService.beforeCommandExecuted = vi.fn((listener) => {
-            beforeCommandListeners.push(listener);
-            return { dispose: vi.fn() };
-        });
-        controller._commandService.onCommandExecuted = vi.fn(() => ({ dispose: vi.fn() }));
-        controller._commandExecutedListener({ add: vi.fn() });
-        const params = {
-            unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-            body: { dataStream: '%' },
-            range: { startOffset: 4, endOffset: 4, collapsed: true },
-        };
-
-        beforeCommandListeners[0]({ id: InsertTextCommand.id, params });
-
-        expect(params.range).toEqual({ startOffset: 4, endOffset: 5, collapsed: false });
-    });
-
-    it('overtypes the original percent value on initial digit input', () => {
-        const { controller } = createController('25%\r\n', true);
-        controller._editorBridgeService.getEditorDirty.mockReturnValue(false);
-        const beforeCommandListeners: Array<(command: { id: string; params: unknown }) => void> = [];
-        controller._editorBridgeService.isVisible.mockReturnValue({
+    it('inserts percent operators inside a formula without overtyping an existing operator', () => {
+        const { controller, commandService, docModel, selectionManager } = createController('=25%\r\n', true);
+        controller._editorBridgeService.visible$.next({
             visible: true,
             eventType: DeviceInputEventType.Keyboard,
-            initialValue: '3',
+            keycode: KeyCode.F2,
             unitId: 'unit-1',
         });
-        controller._commandService.beforeCommandExecuted = vi.fn((listener) => {
-            beforeCommandListeners.push(listener);
-            return { dispose: vi.fn() };
-        });
-        controller._commandService.onCommandExecuted = vi.fn(() => ({ dispose: vi.fn() }));
-        controller._commandExecutedListener({ add: vi.fn() });
-        const params = {
+        selectionManager.replaceDocRanges([{ startOffset: 3, endOffset: 3, collapsed: true }], {
             unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-            body: { dataStream: '3' },
-            range: { startOffset: 0, endOffset: 0, collapsed: true },
+            subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+        });
+        commandService.syncExecuteCommand(InsertTextCommand.id, {
+            unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            body: { dataStream: '%' },
+            range: selectionManager.getActiveTextRange(),
+        });
+
+        expect(docModel.getBody()?.dataStream).toBe('=25%%\r\n');
+    });
+
+    it.each([
+        { content: '25%', input: '3', expected: '3%' },
+        { content: '25%', input: '35%', expected: '35%' },
+        { content: '=25%', input: '3', expected: '3%' },
+        { content: '=25%', input: '35%', expected: '35%' },
+    ])('replaces "$content" on initial digit input "$input" despite the stale input range', ({ content, input, expected }) => {
+        const { controller, commandService, docModel } = createController(`${content}\r\n`, true);
+        const visible = {
+            visible: true,
+            eventType: DeviceInputEventType.Keyboard,
+            initialValue: input,
+            unitId: 'unit-1',
         };
+        controller._editorBridgeService.getEditorDirty.mockReturnValue(false);
+        controller._editorBridgeService.isVisible.mockReturnValue(visible);
+        controller._editorBridgeService.visible$.next(visible);
 
-        beforeCommandListeners[0]({ id: InsertTextCommand.id, params });
+        commandService.syncExecuteCommand(InsertTextCommand.id, {
+            unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            body: { dataStream: input },
+            range: { startOffset: 0, endOffset: 0, collapsed: true },
+        });
 
-        expect(params.range).toEqual({ startOffset: 0, endOffset: 2, collapsed: false });
+        expect(docModel.getBody()?.dataStream).toBe(`${expected}\r\n`);
     });
 
     it('syncs the active sheet editor selection instead of the host document selection on focus', () => {

@@ -19,11 +19,11 @@ import type { IRectRangeWithStyle } from '@univerjs/engine-render';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { Subscriber } from 'rxjs';
 import type { LocaleKey } from '../locale/types';
-import { DOC_RANGE_TYPE, DocumentFlavor, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DOC_RANGE_TYPE, DocumentFlavor, FOCUSING_SHAPE_TEXT_EDITOR, IContextService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { UnitAction } from '@univerjs/protocol';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { combineLatest, map, Observable } from 'rxjs';
+import { combineLatest, map, Observable, startWith } from 'rxjs';
 import {
     DocCopyCommand,
     DocCutCommand,
@@ -406,5 +406,9 @@ export function PasteRibbonMenuFactory(accessor: IAccessor): IMenuSelectorItem<L
     return {
         ...PasteSpecialMenuFactory(accessor),
         title: 'docs-ui.rightClick.paste',
+        hidden$: combineLatest([
+            getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+            accessor.get(IContextService).subscribeContextValue$(FOCUSING_SHAPE_TEXT_EDITOR).pipe(startWith(false)),
+        ]).pipe(map(([hidden, editing]) => hidden || editing)),
     };
 }

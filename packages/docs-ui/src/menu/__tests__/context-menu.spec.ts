@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injector, IPermissionService, IUniverInstanceService, PermissionService } from '@univerjs/core';
+import { ContextService, IContextService, Injector, IPermissionService, IUniverInstanceService, PermissionService } from '@univerjs/core';
 import { DocSelectionManagerService, setDocumentPermissionValue } from '@univerjs/docs';
 import { UnitAction } from '@univerjs/protocol';
 import { ContextMenuGroup, ContextMenuPosition, MenuItemType, RibbonStartGroup } from '@univerjs/ui';
@@ -64,6 +64,7 @@ describe('settings context menu factories', () => {
 
     it('disables copy without Unit Copy while keeping copy available in read-only mode', async () => {
         const accessor = new Injector([
+            [IContextService, { useClass: ContextService }],
             [DocSelectionManagerService, {
                 useValue: {
                     textSelection$: of({}),
@@ -95,6 +96,7 @@ describe('settings context menu factories', () => {
 
     it('disables mutating context-menu actions in read-only mode', async () => {
         const accessor = new Injector([
+            [IContextService, { useClass: ContextService }],
             [IUniverInstanceService, {
                 useValue: {
                     getCurrentTypeOfUnit$: () => of({ getUnitId: () => 'doc-1' }),

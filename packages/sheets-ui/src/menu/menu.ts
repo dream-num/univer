@@ -1064,6 +1064,10 @@ export function PasteRibbonMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
         ...PasteSpacialMenuItemFactory(accessor),
         id: PASTE_RIBBON_MENU_ID,
         title: 'sheets-ui.rightClick.paste',
+        hidden$: combineLatest([
+            getObservableWithExclusiveRange$(accessor, getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET)),
+            accessor.get(IContextService).subscribeContextValue$(FOCUSING_SHAPE_TEXT_EDITOR).pipe(startWith(false)),
+        ]).pipe(map(([hidden, editing]) => hidden || editing)),
     };
 }
 

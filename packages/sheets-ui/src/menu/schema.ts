@@ -173,11 +173,13 @@ import {
     HideRowMenuItemFactory,
     HorizontalAlignMenuItemFactory,
     ItalicMenuItemFactory,
+    PASTE_RIBBON_MENU_ID,
     PASTE_SPECIAL_MENU_ID,
     PasteBesidesBorderMenuItemFactory,
     PasteColWidthMenuItemFactory,
     PasteFormatMenuItemFactory,
     PasteMenuItemFactory,
+    PasteRibbonMenuItemFactory,
     PasteSpacialMenuItemFactory,
     PasteValueMenuItemFactory,
     ResetBackgroundColorMenuItemFactory,
@@ -227,6 +229,33 @@ import { ZOOM_RATIO_MENU_ID, ZoomRatioMenuItemFactory } from './zoom.menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonPosition.START]: {
+        [RibbonStartGroup.HISTORY]: {
+            [PASTE_RIBBON_MENU_ID]: {
+                order: 4,
+                gridLayout: { row: 1, column: 3, rowSpan: 2, showLabel: true },
+                menuItemFactory: PasteRibbonMenuItemFactory,
+                [SheetPasteCommand.name]: {
+                    order: 0,
+                    menuItemFactory: PasteMenuItemFactory,
+                },
+                [SheetPasteValueCommand.id]: {
+                    order: 1,
+                    menuItemFactory: PasteValueMenuItemFactory,
+                },
+                [SheetPasteFormatCommand.id]: {
+                    order: 2,
+                    menuItemFactory: PasteFormatMenuItemFactory,
+                },
+                [SheetPasteColWidthCommand.id]: {
+                    order: 3,
+                    menuItemFactory: PasteColWidthMenuItemFactory,
+                },
+                [SheetPasteBesidesBorderCommand.id]: {
+                    order: 4,
+                    menuItemFactory: PasteBesidesBorderMenuItemFactory,
+                },
+            },
+        },
         [RibbonStartGroup.FORMAT]: {
             [SetRangeFontFamilyCommand.id]: {
                 order: 1,

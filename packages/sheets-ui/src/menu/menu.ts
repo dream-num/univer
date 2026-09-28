@@ -1058,6 +1058,15 @@ export function PasteSpacialMenuItemFactory(accessor: IAccessor): IMenuSelectorI
     };
 }
 
+export const PASTE_RIBBON_MENU_ID = 'sheet.menu.paste';
+export function PasteRibbonMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
+    return {
+        ...PasteSpacialMenuItemFactory(accessor),
+        id: PASTE_RIBBON_MENU_ID,
+        title: 'sheets-ui.rightClick.paste',
+    };
+}
+
 export function PasteValueMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey, string> {
     return {
         id: SheetPasteValueCommand.id,

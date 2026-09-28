@@ -21,6 +21,7 @@ function readStoredSettings(value: unknown) {
 describe('readWorkbenchSettings', () => {
     it('keeps supported settings and rejects unknown stored values', () => {
         expect(readStoredSettings({
+            device: 'mobile',
             locale: 'arSA',
             region: 'frFR',
             direction: 'rtl',
@@ -30,6 +31,7 @@ describe('readWorkbenchSettings', () => {
             uiChrome: 'no-ribbon',
             zoomRatio: 1.25,
         })).toEqual({
+            device: 'mobile',
             locale: 'arSA',
             region: 'frFR',
             direction: 'rtl',
@@ -40,6 +42,7 @@ describe('readWorkbenchSettings', () => {
             zoomRatio: 1.25,
         });
         expect(readStoredSettings({
+            device: 'tablet',
             locale: 'unknown',
             region: 'moon',
             direction: 'sideways',
@@ -72,6 +75,7 @@ describe('readWorkbenchSettings', () => {
             },
         };
         const settings = {
+            device: 'mobile',
             locale: 'enUS',
             region: 'frFR',
             direction: 'rtl',

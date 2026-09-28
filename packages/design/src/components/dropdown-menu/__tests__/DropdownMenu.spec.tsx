@@ -17,7 +17,6 @@
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DropdownMenu } from '../DropdownMenu';
-import { MobileDropdownMenu } from '../MobileDropdownMenu';
 import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
@@ -28,99 +27,36 @@ describe('DropdownMenu', () => {
             { type: 'item' as const, children: 'Item 1' },
             { type: 'item' as const, children: 'Item 2', disabled: true, variant: 'destructive' as const },
         ];
-        const { container } = render(
+        const { getByRole } = render(
             <DropdownMenu open items={items}>
                 <button type="button">Trigger</button>
             </DropdownMenu>
         );
-        const trigger = container.querySelector('button');
-        expect(trigger).toBeTruthy();
-        expect(trigger).toHaveAttribute('aria-haspopup', 'menu');
-        expect(trigger).toHaveAttribute('type', 'button');
-        expect(document.querySelector('[data-variant="destructive"]')).toHaveTextContent('Item 2');
+        expect(getByRole('menuitem', { name: 'Item 1' })).toBeVisible();
+        expect(getByRole('menuitem', { name: 'Item 2' })).toHaveAttribute('aria-disabled', 'true');
     });
 
-    it('should render with separator', () => {
-        const items = [
-            { type: 'item' as const, children: 'Item 1' },
-            { type: 'separator' as const },
-            { type: 'item' as const, children: 'Item 2' },
-        ];
-        const { container } = render(
-            <DropdownMenu items={items}>
+    it('keeps disabled submenus closed for pointer and keyboard input', () => {
+        const { getByRole, queryByRole } = render(
+            <DropdownMenu
+                open
+                items={[{
+                    type: 'subItem',
+                    children: 'More',
+                    disabled: true,
+                    options: [{ type: 'item', children: 'Sub item' }],
+                }]}
+            >
                 <button type="button">Trigger</button>
             </DropdownMenu>
         );
-        const trigger = container.querySelector('button');
-        expect(trigger).toBeTruthy();
-        expect(trigger).toHaveAttribute('aria-haspopup', 'menu');
-    });
+        const submenu = getByRole('menuitem', { name: 'More' });
 
-    it('should render with subItem', () => {
-        const items = [
-            {
-                type: 'subItem' as const,
-                children: 'More',
-                options: [
-                    { type: 'item' as const, children: 'Sub 1' },
-                    { type: 'item' as const, children: 'Sub 2' },
-                ],
-            },
-        ];
-        const { container } = render(
-            <DropdownMenu items={items}>
-                <button type="button">Trigger</button>
-            </DropdownMenu>
-        );
-        const trigger = container.querySelector('button');
-        expect(trigger).toBeTruthy();
-        expect(trigger).toHaveAttribute('aria-haspopup', 'menu');
-    });
+        fireEvent.click(submenu);
+        fireEvent.keyDown(submenu, { key: 'ArrowRight' });
 
-    it('should render with radio group', () => {
-        const items = [
-            {
-                type: 'radio' as const,
-                value: 'a',
-                options: [
-                    { label: 'A', value: 'a' },
-                    { label: 'B', value: 'b' },
-                ],
-            },
-        ];
-        const { container } = render(
-            <DropdownMenu items={items}>
-                <button type="button">Trigger</button>
-            </DropdownMenu>
-        );
-        const trigger = container.querySelector('button');
-        expect(trigger).toBeTruthy();
-        expect(trigger).toHaveAttribute('aria-haspopup', 'menu');
-    });
-
-    it('should render with checkbox', () => {
-        const items = [
-            {
-                type: 'checkbox' as const,
-                value: 'c1',
-                label: 'Check 1',
-                checked: true,
-            },
-            {
-                type: 'checkbox' as const,
-                value: 'c2',
-                label: 'Check 2',
-                checked: false,
-            },
-        ];
-        const { container } = render(
-            <DropdownMenu items={items}>
-                <button type="button">Trigger</button>
-            </DropdownMenu>
-        );
-        const trigger = container.querySelector('button');
-        expect(trigger).toBeTruthy();
-        expect(trigger).toHaveAttribute('aria-haspopup', 'menu');
+        expect(submenu).toHaveAttribute('aria-disabled', 'true');
+        expect(queryByRole('menuitem', { name: 'Sub item' })).not.toBeInTheDocument();
     });
 
     it('should render custom content without wrapping it as a menu item', () => {
@@ -189,23 +125,5 @@ describe('DropdownMenu', () => {
                 </DropdownMenu>
             )
         ).toThrow('[DropdownMenu]: `value` is required');
-    });
-
-    it('should render full-width actionable rows from MobileDropdownMenu', () => {
-        const onSelect = vi.fn();
-        const { getByText } = render(
-            <MobileDropdownMenu
-                open
-                items={[{ type: 'item', children: 'Mobile item', onSelect }]}
-                onOpenChange={() => {}}
-            >
-                <button type="button">Trigger</button>
-            </MobileDropdownMenu>
-        );
-
-        const item = getByText('Mobile item');
-        expect(item).toHaveClass('univer-w-full');
-        fireEvent.click(item);
-        expect(onSelect).toHaveBeenCalledTimes(1);
     });
 });

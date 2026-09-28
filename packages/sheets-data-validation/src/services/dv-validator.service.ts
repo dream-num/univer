@@ -61,10 +61,13 @@ export class SheetsDataValidationValidatorService extends Disposable {
             Object.entries(map).forEach(([unitId, subUnitMap]) => {
                 Object.entries(subUnitMap).forEach(([subUnitId, ranges]) => {
                     if (workbook?.getUnitId() === unitId && worksheet?.getSheetId() === subUnitId) {
-                        this.validatorRanges(unitId, subUnitId, ranges);
+                        this.validatorRanges(unitId, subUnitId, ranges).catch(console.error);
                     } else {
-                        requestIdleCallback(() => {
-                            this.validatorRanges(unitId, subUnitId, ranges);
+                        let idleCallback: number;
+                        const disposeIdleCallback = this.disposeWithMe(() => cancelIdleCallback(idleCallback));
+                        idleCallback = requestIdleCallback(() => {
+                            disposeIdleCallback.dispose();
+                            this.validatorRanges(unitId, subUnitId, ranges).catch(console.error);
                         });
                     }
                 });

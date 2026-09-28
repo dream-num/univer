@@ -1,5 +1,6 @@
 import type { ExampleLoader } from './mount-example';
 import type {
+    WorkbenchDevice,
     WorkbenchDirection,
     WorkbenchLocale,
     WorkbenchRegion,
@@ -88,6 +89,8 @@ function renderWorkbenchSettings(currentSettings = settings) {
     document.documentElement.style.setProperty('--workbench-accent', theme.primary[600]);
     renderWorkbenchSettingsControl(settingsContainer, {
         settings: currentSettings,
+        supportsMobile: getExampleName() !== 'slides',
+        onDeviceChange,
         onLocaleChange,
         onRegionChange,
         onDirectionChange,
@@ -187,6 +190,10 @@ async function onLocaleChange(locale: WorkbenchLocale) {
         locale,
         direction: WORKBENCH_LOCALE_META[locale].direction,
     });
+}
+
+async function onDeviceChange(device: WorkbenchDevice) {
+    await updateWorkbenchSettings({ ...settings, device });
 }
 
 async function onDirectionChange(direction: WorkbenchDirection) {

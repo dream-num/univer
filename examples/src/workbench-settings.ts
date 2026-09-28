@@ -32,6 +32,7 @@ export const WORKBENCH_LOCALES = [
     'arSA',
 ] as const;
 export const WORKBENCH_DIRECTIONS = ['ltr', 'rtl'] as const;
+export const WORKBENCH_DEVICES = ['desktop', 'mobile'] as const;
 export const WORKBENCH_THEMES = ['blue', 'green', 'orange', 'purple', 'red', 'yellow', 'dark-blue'] as const;
 export const WORKBENCH_RIBBON_TYPES = ['grid', 'classic', 'collapsed', 'simple'] as const satisfies readonly RibbonType[];
 export const WORKBENCH_REGIONS = ['auto', ...WORKBENCH_LOCALES] as const;
@@ -41,6 +42,7 @@ export const WORKBENCH_SETTINGS_STORAGE_KEY = 'univer.examples.workbench.setting
 
 export type WorkbenchLocale = (typeof WORKBENCH_LOCALES)[number];
 export type WorkbenchDirection = (typeof WORKBENCH_DIRECTIONS)[number];
+export type WorkbenchDevice = (typeof WORKBENCH_DEVICES)[number];
 export type WorkbenchTheme = (typeof WORKBENCH_THEMES)[number];
 export type WorkbenchRibbonType = (typeof WORKBENCH_RIBBON_TYPES)[number];
 export type WorkbenchRegion = (typeof WORKBENCH_REGIONS)[number];
@@ -48,6 +50,7 @@ export type WorkbenchUIChromeMode = (typeof WORKBENCH_UI_CHROME_MODES)[number];
 export type WorkbenchZoomRatio = (typeof WORKBENCH_ZOOM_RATIOS)[number];
 
 export interface IWorkbenchSettings {
+    device: WorkbenchDevice;
     locale: WorkbenchLocale;
     region: WorkbenchRegion;
     direction: WorkbenchDirection;
@@ -147,6 +150,7 @@ export function readWorkbenchSettings(storage: Pick<Storage, 'getItem'>): IWorkb
     const locale = getAllowedValue(value.locale, WORKBENCH_LOCALES, defaults.locale);
 
     return {
+        device: getAllowedValue(value.device, WORKBENCH_DEVICES, defaults.device),
         locale,
         region: getAllowedValue(value.region, WORKBENCH_REGIONS, defaults.region),
         direction: getAllowedValue(value.direction, WORKBENCH_DIRECTIONS, WORKBENCH_LOCALE_META[locale].direction),
@@ -160,6 +164,7 @@ export function readWorkbenchSettings(storage: Pick<Storage, 'getItem'>): IWorkb
 
 export function getDefaultWorkbenchSettings(): IWorkbenchSettings {
     return {
+        device: 'desktop',
         locale: 'zhCN',
         region: 'auto',
         direction: 'ltr',

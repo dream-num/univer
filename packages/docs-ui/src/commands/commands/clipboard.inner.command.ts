@@ -59,6 +59,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+
 import { getCustomDecorationAtPosition, getCustomRangeAtPosition } from '../../basics/paragraph';
 import {
     IDocClipboardPasteAdapterService,
@@ -80,6 +81,8 @@ export interface IInnerPasteCommandParams {
     unitId?: string;
     segmentId: string;
     doc: Partial<IDocumentData>;
+    /** Ranges to replace, without changing the selection recorded for undo. */
+    selections?: ITextRangeWithStyle[];
     textRanges: ITextRangeWithStyle[];
     customRangeMappings?: IDocClipboardPasteCustomRangeMapping[];
 }
@@ -110,7 +113,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                 ? currentSelection
                 : { unitId: targetUnitId, subUnitId: targetUnitId };
         }
-        const selections = docSelectionManagerService.getTextRanges(selectionParams) ?? [];
+        const selections = params.selections ?? docSelectionManagerService.getTextRanges(selectionParams) ?? [];
         const rectRanges = docSelectionManagerService.getRectRanges(selectionParams) ?? [];
         const selectionInfo = docSelectionManagerService.getSelectionInfo(selectionParams);
         const { body: sourceBody, tableSource, drawings } = doc;

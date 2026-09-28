@@ -4,7 +4,7 @@
 
 **AI 에이전트를 위한 Office Harness**
 
-스프레드시트 · 문서 · 프레젠테이션 · Bases · Boards · PDF(출시 예정)
+스프레드시트 · 문서 · 프레젠테이션 · Bases · Boards · PDF
 
 고성능, 완전한 커스터마이징을 지원하는 Office SDK
 
@@ -292,12 +292,12 @@ API 호환성 기대치, experimental APIs, internal APIs, deprecation rules는 
 | --- | --- | --- |
 | **Sheets** | 워크북, 워크시트, 범위, 선택, 수식, 숫자 서식, 필터링, 정렬, 데이터 유효성 검사, 조건부 서식, 하이퍼링크, 댓글, 찾기/바꾸기, 노트, 테이블, drawing integration, 확장 가능한 UI 플러그인. | 실시간 협업, 편집 기록, import/export, printing, charts, pivot tables, sparklines, outlines, shapes, in-cell graphics, data connectors, server-side calculation, 향상된 formula 기능. |
 | **Docs** | 리치 문서 모델, 편집 UI, 목록, 하이퍼링크, drawing integration, 댓글, quick insert, 공유 문서 아키텍처. | 협업, import/export, printing, 향상된 tables/lists, columns, callouts, code blocks, quotes, shapes, remote comment resources. |
-| **Slides** | 프레젠테이션 데이터 모델과 UI 패키지. 현재 활발히 개발 중입니다. | Pro slide model/UI, slide import/export, chart/table model 및 UI plugins, 공유 shape editing infrastructure. |
+| **Slides** | 프레젠테이션 데이터 모델과 편집 UI 패키지. | Pro slide model/UI, slide import/export, chart/table model 및 UI plugins, 공유 shape editing infrastructure. |
 | **Bases** | Univer의 plugin, command, model 아키텍처 위에서 커스텀 structured-data 경험을 만들 수 있습니다. | Base database model, commands, formula integration, workbench UI, field editors, render-engine views. |
 | **Runtime** | 브라우저 앱, Node.js headless 사용, Web Worker/RPC 패턴, multi-instance 사용, 서버 지향 자동화. | Collaboration client/server packages, Node.js collaboration client, Pro server services, SSR, computing delegation, server-side calculation, changeset replay tooling. |
 | **Integrations** | React, Vue, Web Components, 프레임워크 템플릿, 테마, 로컬라이제이션, 커스텀 플러그인. | Pro presets, enterprise deployment packages. |
 
-Sheets는 현재 가장 성숙한 제품 영역입니다. Docs와 Slides는 Univer의 아키텍처를 공유하며 같은 SDK 안에서 계속 발전하고 있습니다.
+Sheets, Docs, Slides는 Univer의 공통 아키텍처를 기반으로 스프레드시트, 문서, 프레젠테이션 편집 기능을 제공하며, 일관된 플러그인 시스템, 명령 시스템, Facade API를 사용합니다.
 
 ## 🔓 Open Source와 Pro
 

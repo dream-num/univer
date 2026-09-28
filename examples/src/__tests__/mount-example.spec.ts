@@ -236,6 +236,38 @@ describe('mounted Univer lifecycle', () => {
 });
 
 describe('createExampleSwitcher', () => {
+    it('restarts the active example when its device changes and keeps other settings', async () => {
+        const host = {} as HTMLElement;
+        const options = { device: 'desktop', locale: 'frFR', darkMode: true } as IWorkbenchMountOptions;
+        const events: string[] = [];
+        const mount: MountExample = (_host, settings) => {
+            events.push(`mount ${settings.device} ${settings.locale} ${settings.darkMode}`);
+            return {
+                dispose: () => events.push(`dispose ${settings.device}`),
+                updateSettings: async (settings) => {
+                    events.push(`update ${settings.device} ${settings.darkMode}`);
+                },
+            };
+        };
+        const switcher = createExampleSwitcher(host, { sheets: async () => ({ mount }) });
+
+        await switcher.open('sheets', options);
+        await switcher.updateSettings({ ...options, device: 'mobile' });
+        await switcher.updateSettings({ ...options, device: 'mobile', darkMode: false });
+        await switcher.updateSettings(options);
+        switcher.dispose();
+
+        expect(events).toEqual([
+            'mount desktop frFR true',
+            'dispose desktop',
+            'mount mobile frFR true',
+            'update mobile false',
+            'dispose mobile',
+            'mount desktop frFR true',
+            'dispose desktop',
+        ]);
+    });
+
     it('mounts only the latest requested example', async () => {
         const host = {} as HTMLElement;
         const docsDispose = vi.fn();

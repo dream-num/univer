@@ -17,7 +17,7 @@
 /* eslint-disable perfectionist/sort-imports */
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
-import { ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, Plugin, RANGE_TYPE, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, Plugin, RANGE_TYPE, RedoCommandId, UndoCommand, UndoCommandId, Univer, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { CopySheetCommand, InsertColByRangeCommand, InsertColMutation, InsertRowByRangeCommand, InsertSheetMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, RemoveColByRangeCommand, RemoveColCommand, RemoveColMutation, RemoveRowByRangeCommand, RemoveRowCommand, RemoveRowMutation, SetRangeValuesMutation, SetSelectionsOperation, SheetInterceptorService, SheetLazyExecuteScheduleService, SheetRangeThemeModel, SheetsSelectionsService, ZebraCrossingCacheController } from '@univerjs/sheets';
@@ -306,6 +306,50 @@ describe('test controller of sheets filter', () => {
             } as ISetRangeValuesMutationParams)).toBeTruthy();
             expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getRange())
                 .toEqual({ startRow: 3, startColumn: 0, endRow: 6, endColumn: 5 });
+        });
+
+        it('should apply existing criteria to newly included rows', async () => {
+            const filterModel = sheetsFilterService.getFilterModel('test', 'sheet1')!;
+            expect(filterModel.filteredOutRows.has(6)).toBe(false);
+
+            expect(await commandService.executeCommand(SetRangeValuesMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                cellValue: { 6: { 0: { v: 'test' } } },
+            } as ISetRangeValuesMutationParams)).toBeTruthy();
+
+            expect(filterModel.getRange().endRow).toBe(6);
+            expect(filterModel.filteredOutRows.has(6)).toBe(true);
+        });
+
+        it('should not extend the range when restoring values during undo', async () => {
+            const filterModel = sheetsFilterService.getFilterModel('test', 'sheet1')!;
+            const originalRange = { ...filterModel.getRange() };
+            const originalFilteredRows = [...filterModel.filteredOutRows];
+
+            expect(await commandService.executeCommand(SetRangeValuesMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                cellValue: { 6: { 0: { v: 'test' } } },
+                trigger: UndoCommandId,
+            } as ISetRangeValuesMutationParams)).toBeTruthy();
+
+            expect(filterModel.getRange()).toEqual(originalRange);
+            expect([...filterModel.filteredOutRows]).toEqual(originalFilteredRows);
+        });
+
+        it('should apply criteria when redo extends the range', async () => {
+            const filterModel = sheetsFilterService.getFilterModel('test', 'sheet1')!;
+
+            expect(await commandService.executeCommand(SetRangeValuesMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                cellValue: { 6: { 0: { v: 'test' } } },
+                trigger: RedoCommandId,
+            } as ISetRangeValuesMutationParams)).toBeTruthy();
+
+            expect(filterModel.getRange().endRow).toBe(6);
+            expect(filterModel.filteredOutRows.has(6)).toBe(true);
         });
     });
 

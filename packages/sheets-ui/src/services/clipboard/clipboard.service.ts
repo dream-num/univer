@@ -48,6 +48,7 @@ import type {
     IUniverSheetCopyDataModel,
 } from './type';
 import {
+    BooleanNumber,
     CellModeEnum,
     cloneCellDataWithSpanAndDisplay,
     createIdentifier,
@@ -1226,11 +1227,13 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const pasteRangeStartColumn = cols[0];
         const pasteRangeEndColumn = cols[cols.length - 1];
 
-        // If there are rows without row height set in the pasted range, we need to set them to auto height
+        // Recalculate auto-height rows while preserving explicit and legacy manual row heights.
         const needAutoHeight: IRowAutoHeightInfo[] = [];
         for (let r = pasteRangeStartRow; r <= pasteRangeEndRow; r++) {
             const rowData = rowManager.getRow(r);
-            if (!rowData) {
+            const hasLegacyManualHeight = rowData?.ia == null && rowData?.ah == null && typeof rowData?.h === 'number';
+            const isManualHeight = rowData?.ia === BooleanNumber.FALSE || hasLegacyManualHeight;
+            if (!isManualHeight) {
                 const autoHeight = skeleton.calculateAutoHeightInRange([
                     {
                         startRow: r,

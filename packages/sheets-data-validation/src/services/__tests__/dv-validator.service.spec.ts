@@ -23,7 +23,7 @@ import type {
 } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { DataValidationStatus, Injector, IUniverInstanceService, LifecycleService, LifecycleStages, ObjectMatrix } from '@univerjs/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, defer, Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
 import { SheetDataValidationModel } from '../../models/sheet-data-validation-model';
@@ -38,12 +38,6 @@ function createService() {
     const dirtyRanges$ = new Subject<{ unitId: string; subUnitId: string; ranges: IRange[] }>();
     const lifecycle$ = new BehaviorSubject(LifecycleStages.Rendered);
     let lifecycleSubscribeCount = 0;
-    const lifecycleSubject = lifecycle$ as any;
-    const originalSubscribe = lifecycleSubject._subscribe.bind(lifecycleSubject);
-    lifecycleSubject._subscribe = (...args: unknown[]) => {
-        lifecycleSubscribeCount++;
-        return originalSubscribe(...args);
-    };
     const worksheet = {
         getSheetId: () => 'sheet-1',
         getMergedCell: vi.fn(() => null),
@@ -81,7 +75,10 @@ function createService() {
         getCurrentUnitOfType: vi.fn(() => workbook),
     } as unknown as IUniverInstanceService;
     const lifecycleService = {
-        lifecycle$,
+        lifecycle$: defer(() => {
+            lifecycleSubscribeCount++;
+            return lifecycle$;
+        }),
         stage: LifecycleStages.Rendered,
     } as unknown as LifecycleService;
 
@@ -103,7 +100,7 @@ function createService() {
         univerInstanceService,
         lifecycleService,
         getLifecycleSubscribeCount: () => lifecycleSubscribeCount,
-        service: injector.get(SheetsDataValidationValidatorService),
+        injector,
     };
 }
 
@@ -124,10 +121,10 @@ describe('SheetsDataValidationValidatorService', () => {
 
     beforeEach(() => {
         vi.useFakeTimers();
-        vi.stubGlobal('requestIdleCallback', (callback: IdleRequestCallback) => {
+        vi.stubGlobal('requestIdleCallback', vi.fn((callback: IdleRequestCallback) => setTimeout(() => {
             callback({ didTimeout: false, timeRemaining: () => 1 } as IdleDeadline);
-            return 1;
-        });
+        }, 50)));
+        vi.stubGlobal('cancelIdleCallback', clearTimeout);
     });
 
     afterEach(() => {
@@ -136,7 +133,8 @@ describe('SheetsDataValidationValidatorService', () => {
     });
 
     it('does not recursively reopen dirty range buffer when created after render', () => {
-        const { service, getLifecycleSubscribeCount } = createService();
+        const { injector, getLifecycleSubscribeCount } = createService();
+        const service = injector.get(SheetsDataValidationValidatorService);
 
         expect(getLifecycleSubscribeCount()).toBe(1);
 
@@ -144,7 +142,8 @@ describe('SheetsDataValidationValidatorService', () => {
     });
 
     it('validates single cells, merged cells, ranges, worksheets, and workbooks', async () => {
-        const { service, worksheet, model, cacheService } = createService();
+        const { injector, worksheet, model, cacheService } = createService();
+        const service = injector.get(SheetsDataValidationValidatorService);
 
         await expect(service.validatorCell('missing', 'sheet-1', 0, 0)).rejects.toThrow('cannot find current workbook');
         await expect(service.validatorCell('unit-1', 'missing', 0, 0)).rejects.toThrow('cannot find current worksheet');
@@ -168,7 +167,8 @@ describe('SheetsDataValidationValidatorService', () => {
     });
 
     it('returns matched data validations and reacts to dirty ranges after render', async () => {
-        const { service, dirtyRanges$, lifecycle$, model } = createService();
+        const { injector, dirtyRanges$, lifecycle$, model } = createService();
+        const service = injector.get(SheetsDataValidationValidatorService);
         const validatorRangesSpy = vi.spyOn(service, 'validatorRanges').mockResolvedValue([]);
 
         expect(service.getDataValidations('unit-1', 'sheet-1', [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }])).toEqual([
@@ -193,7 +193,8 @@ describe('SheetsDataValidationValidatorService', () => {
     });
 
     it('limits validation and rule lookup to the worksheet bounds', async () => {
-        const { service, model } = createService();
+        const { injector, model } = createService();
+        const service = injector.get(SheetsDataValidationValidatorService);
         const oversizedRange = { startRow: 0, endRow: 1048575, startColumn: 0, endColumn: 16383 };
         const getValue = vi.fn(() => undefined);
         model.getRules = vi.fn(() => [createRule('rule-1', [oversizedRange])]);
@@ -214,5 +215,25 @@ describe('SheetsDataValidationValidatorService', () => {
 
         await expect(service.validatorRanges('unit-1', 'sheet-1', [{ startRow: 20, endRow: 30, startColumn: 20, endColumn: 30 }])).resolves.toEqual([]);
         service.dispose();
+    });
+
+    it('cancels queued validation before the workbook is disposed', async () => {
+        const { injector, dirtyRanges$, univerInstanceService, model } = createService();
+        const service = injector.get(SheetsDataValidationValidatorService);
+        vi.mocked(univerInstanceService.getCurrentUnitOfType).mockReturnValue(null);
+        dirtyRanges$.next({
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
+        });
+        await vi.advanceTimersByTimeAsync(20);
+        expect(requestIdleCallback).toHaveBeenCalledOnce();
+
+        service.dispose();
+        vi.mocked(univerInstanceService.getUnit).mockClear().mockReturnValue(null);
+        await vi.runAllTimersAsync();
+
+        expect(univerInstanceService.getUnit).not.toHaveBeenCalled();
+        expect(model.validator).not.toHaveBeenCalled();
     });
 });

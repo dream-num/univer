@@ -97,7 +97,10 @@ export class HTTPService extends Disposable {
 
         this._pipe = null;
 
-        return toDisposable(() => remove(this._interceptors, interceptor));
+        return toDisposable(() => {
+            remove(this._interceptors, interceptor);
+            this._pipe = null;
+        });
     }
 
     get<T>(url: string, params?: IRequestParams): Promise<HTTPResponse<T>> {

@@ -196,7 +196,7 @@ export function DropdownMenu(props: IDropdownMenuProps) {
         } else if (type === 'subItem') {
             return (
                 <DropdownMenuSub key={index}>
-                    <DropdownMenuSubTrigger>{item.children}</DropdownMenuSubTrigger>
+                    <DropdownMenuSubTrigger disabled={item.disabled}>{item.children}</DropdownMenuSubTrigger>
                     <DropdownMenuPortal>
                         <DropdownMenuSubContent sideOffset={12}>
                             {item.options?.map((subItem, subIndex) => (

@@ -18,7 +18,7 @@ import type { Injector } from '@univerjs/core';
 import type { MockHTTPImplementation } from '../../__tests__/http-testing-utils';
 import type { HTTPHandlerFn } from '../../interceptor';
 import type { HTTPEvent } from '../../response';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
 import { createHTTPTestBed } from '../../__tests__/http-testing-utils';
 import { HTTPHeaders } from '../../headers';
@@ -129,6 +129,56 @@ describe('test "HTTPMergeInterceptor"', () => {
         await Promise.resolve();
 
         expect(next).not.toHaveBeenCalled();
+    });
+
+    it('forwards a merged request error to every subscriber', async () => {
+        const source = new Subject<HTTPEvent<unknown>>();
+        const next: HTTPHandlerFn = vitest.fn(() => source);
+        const fetchCheck = vitest.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+        const interceptor = MergeInterceptorFactory<string, unknown>({
+            isMatch: () => true,
+            getParamsFromRequest: (request) => request.url,
+            mergeParamsToRequest: (_list, request) => request,
+        }, { fetchCheck });
+        const firstError = vitest.fn();
+        const secondError = vitest.fn();
+
+        interceptor(new HTTPRequest('GET', 'http://example.com/first'), next).subscribe({ error: firstError });
+        interceptor(new HTTPRequest('GET', 'http://example.com/second'), next).subscribe({ error: secondError });
+        await Promise.resolve();
+        expect(next).toHaveBeenCalledOnce();
+
+        const error = new Error('request failed');
+        source.error(error);
+        expect(firstError).toHaveBeenCalledWith(error);
+        expect(secondError).toHaveBeenCalledWith(error);
+    });
+
+    it('completes every subscriber when a merged request completes', async () => {
+        const source = new Subject<HTTPEvent<unknown>>();
+        const next: HTTPHandlerFn = vitest.fn(() => source);
+        const fetchCheck = vitest.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+        const interceptor = MergeInterceptorFactory<string, unknown>({
+            isMatch: () => true,
+            getParamsFromRequest: (request) => request.url,
+            mergeParamsToRequest: (_list, request) => request,
+        }, { fetchCheck });
+        const firstNext = vitest.fn();
+        const secondNext = vitest.fn();
+        const firstComplete = vitest.fn();
+        const secondComplete = vitest.fn();
+
+        interceptor(new HTTPRequest('GET', 'http://example.com/first'), next).subscribe({ next: firstNext, complete: firstComplete });
+        interceptor(new HTTPRequest('GET', 'http://example.com/second'), next).subscribe({ next: secondNext, complete: secondComplete });
+        await Promise.resolve();
+        expect(next).toHaveBeenCalledOnce();
+
+        source.next(new HTTPResponse({ body: 'ok', headers: new HTTPHeaders(), status: 200, statusText: 'OK' }));
+        expect(firstNext).toHaveBeenCalledOnce();
+        expect(secondNext).toHaveBeenCalledOnce();
+        source.complete();
+        expect(firstComplete).toHaveBeenCalledOnce();
+        expect(secondComplete).toHaveBeenCalledOnce();
     });
 
     it('cancels an active merged request when its subscriber unsubscribes', async () => {

@@ -22,7 +22,11 @@ import {
     StartAddCommentOperation,
     ToggleCommentPanelOperation,
 } from '../commands/operations/show-comment-panel.operation';
-import { AddDocCommentMenuItemFactory, AddDocDrawingCommentMenuItemFactory, ToolbarDocCommentMenuItemFactory } from './menu';
+import {
+    AddDocCommentMenuItemFactory,
+    AddDocDrawingCommentMenuItemFactory,
+    ToolbarDocCommentMenuItemFactory,
+} from './menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonInsertGroup.OTHERS]: {

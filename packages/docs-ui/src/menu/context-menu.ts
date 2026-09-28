@@ -19,7 +19,14 @@ import type { IRectRangeWithStyle } from '@univerjs/engine-render';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { Subscriber } from 'rxjs';
 import type { LocaleKey } from '../locale/types';
-import { DOC_RANGE_TYPE, DocumentFlavor, FOCUSING_SHAPE_TEXT_EDITOR, IContextService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import {
+    DOC_RANGE_TYPE,
+    DocumentFlavor,
+    FOCUSING_SHAPE_TEXT_EDITOR,
+    IContextService,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { UnitAction } from '@univerjs/protocol';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';

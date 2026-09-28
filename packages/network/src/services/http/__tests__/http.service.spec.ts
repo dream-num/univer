@@ -130,6 +130,42 @@ describe('test "HTTPService"', () => {
         await expect(secondRequest).resolves.toMatchObject({ body: { step: 2 } });
     });
 
+    it('stops invoking an interceptor after its registration is disposed', async () => {
+        const interceptedUrls: string[] = [];
+        const registration = httpService.registerHTTPInterceptor({
+            interceptor: (request, next) => {
+                interceptedUrls.push(request.url);
+                return next(request);
+            },
+        });
+
+        const firstSentRequestPromise = firstValueFrom(httpImplementation.newRequest$);
+        const firstRequest = httpService.get('http://example.com/first');
+        const firstSentRequest = await firstSentRequestPromise;
+        httpImplementation.getHandler(firstSentRequest.uid).emitResponse(new HTTPResponse({
+            headers: new HTTPHeaders(),
+            status: 200,
+            statusText: 'OK',
+            body: null,
+        }));
+        await firstRequest;
+
+        registration.dispose();
+
+        const secondSentRequestPromise = firstValueFrom(httpImplementation.newRequest$);
+        const secondRequest = httpService.get('http://example.com/second');
+        const secondSentRequest = await secondSentRequestPromise;
+        httpImplementation.getHandler(secondSentRequest.uid).emitResponse(new HTTPResponse({
+            headers: new HTTPHeaders(),
+            status: 200,
+            statusText: 'OK',
+            body: null,
+        }));
+        await secondRequest;
+
+        expect(interceptedUrls).toEqual(['http://example.com/first']);
+    });
+
     it('streams progress events before the final response', async () => {
         const sentRequestPromise = firstValueFrom(httpImplementation.newRequest$);
         const eventsPromise = firstValueFrom(httpService.stream<string>('GET', 'http://example.com/sse'));

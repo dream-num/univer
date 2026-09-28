@@ -236,7 +236,7 @@ export const menuSchema: MenuSchemaType = {
                 menuItemFactory: PasteRibbonMenuItemFactory,
                 [SheetPasteCommand.name]: {
                     order: 0,
-                    menuItemFactory: PasteMenuItemFactory,
+                    menuItemFactory: (accessor) => ({ ...PasteMenuItemFactory(accessor), icon: undefined }),
                 },
                 [SheetPasteValueCommand.id]: {
                     order: 1,

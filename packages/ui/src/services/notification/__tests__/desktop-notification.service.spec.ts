@@ -50,6 +50,10 @@ describe('DesktopNotificationService', () => {
                 label: 'Reload page',
                 onClick,
             },
+            classNames: {
+                toast: 'notification-toast',
+                actionButton: 'notification-action',
+            },
         });
 
         expect(showToast).toHaveBeenCalledWith('Conflict', {
@@ -61,6 +65,10 @@ describe('DesktopNotificationService', () => {
             action: {
                 label: 'Reload page',
                 onClick,
+            },
+            classNames: {
+                toast: 'notification-toast',
+                actionButton: 'notification-action',
             },
         });
         disposable.dispose();

@@ -15,12 +15,14 @@
  */
 
 import type { Injector, Univer, Workbook, Worksheet } from '@univerjs/core';
+import type { ICopySheetCommandInterceptorParams } from '../copy-worksheet.command';
 import { ICommandService, IConfigService, IUniverInstanceService, LocaleService, LocaleType, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SHEETS_PLUGIN_CONFIG_KEY } from '../../../config/config';
 import enUS from '../../../locale/en-US';
 import zhCN from '../../../locale/zh-CN';
 import { SheetLazyExecuteScheduleService } from '../../../services/lazy-execute-schedule.service';
+import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
 import { CopyWorksheetEndMutation } from '../../mutations/copy-worksheet-end.mutation';
 import { InsertSheetMutation } from '../../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../../mutations/remove-sheet.mutation';
@@ -121,6 +123,33 @@ describe('Test copy worksheet commands', () => {
                 workbook.addWorksheet('sheet1-copy', 0, { name: 'Sheet1 (Copy)' });
 
                 expect(getCopyUniqueSheetName(workbook, localeService, name)).toBe('Sheet1 (Copy2)');
+            });
+
+            it('provides the generated sheet id and name to copy interceptors', async () => {
+                const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const interceptedParams: ICopySheetCommandInterceptorParams[] = [];
+                get(SheetInterceptorService).interceptCommand({
+                    getMutations: (commandInfo) => {
+                        if (commandInfo.id === CopySheetCommand.id) {
+                            interceptedParams.push(commandInfo.params as ICopySheetCommandInterceptorParams);
+                        }
+                        return { redos: [], undos: [] };
+                    },
+                });
+
+                expect(commandService.syncExecuteCommand(CopySheetCommand.id, {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                })).toBeTruthy();
+
+                const copiedSheet = workbook.getSheets()[1];
+                expect(interceptedParams).toHaveLength(1);
+                expect(interceptedParams[0]).toMatchObject({
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    targetSubUnitId: copiedSheet.getSheetId(),
+                    targetSubUnitName: copiedSheet.getName(),
+                });
             });
 
             it('split large sheet copy should schedule remaining mutations and disable redo', async () => {

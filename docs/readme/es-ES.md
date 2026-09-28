@@ -4,7 +4,7 @@
 
 **El Office Harness para agentes de IA**
 
-Hojas de cálculo · Documentos · Presentaciones · Bases · Boards · PDF (próximamente)
+Hojas de cálculo · Documentos · Presentaciones · Bases · Boards · PDF
 
 Office SDK de alto rendimiento y totalmente personalizable
 
@@ -291,12 +291,12 @@ Para expectativas de compatibilidad de API, APIs experimentales, APIs internas y
 | --- | --- | --- |
 | **Sheets** | Libros, hojas, rangos, selección, fórmulas, formato numérico, filtros, ordenación, validación de datos, formato condicional, hipervínculos, comentarios, buscar y reemplazar, notas, tablas, integración de dibujo y plugins de UI extensibles. | Colaboración en tiempo real, historial de edición, importación/exportación, impresión, gráficos, tablas dinámicas, sparklines, esquemas, formas, gráficos dentro de celdas, conectores de datos, cálculo del lado del servidor y funciones de fórmulas mejoradas. |
 | **Docs** | Modelo de documento enriquecido, UI de edición, listas, hipervínculos, integración de dibujo, comentarios, inserción rápida y arquitectura compartida de documentos. | Colaboración, importación/exportación, impresión, tablas y listas mejoradas, columnas, callouts, bloques de código, citas, formas y recursos remotos de comentarios. |
-| **Slides** | Modelo de datos de presentaciones y paquetes de UI en desarrollo activo. | Modelo y UI Pro para presentaciones, importación/exportación de slides, plugins de modelo/UI para gráficos y tablas, e infraestructura compartida de edición de formas. |
+| **Slides** | Modelo de datos de presentaciones y paquetes de UI de edición. | Modelo y UI Pro para presentaciones, importación/exportación de slides, plugins de modelo/UI para gráficos y tablas, e infraestructura compartida de edición de formas. |
 | **Bases** | Experiencias de datos estructurados personalizadas sobre la arquitectura de plugins, comandos y modelos de Univer. | Modelo de base de datos Base, comandos, integración de fórmulas, UI de workbench, editores de campos y vistas del motor de renderizado. |
 | **Runtime** | Aplicaciones en navegador, uso headless en Node.js, patrones Web Worker/RPC, múltiples instancias y automatización orientada al servidor. | Paquetes de cliente/servidor de colaboración, cliente de colaboración para Node.js, servicios Pro de servidor, SSR, delegación de cómputo, cálculo del lado del servidor y herramientas de replay de changesets. |
 | **Integrations** | React, Vue, Web Components, plantillas de frameworks, temas, localización y plugins personalizados. | Presets Pro y paquetes de despliegue empresarial. |
 
-Sheets es actualmente la superficie de producto más madura. Docs y Slides comparten la arquitectura de Univer y siguen evolucionando dentro del mismo SDK.
+Sheets, Docs y Slides ofrecen edición de hojas de cálculo, documentos y presentaciones sobre la arquitectura compartida de Univer, con un sistema de plugins, un sistema de comandos y una API Facade coherentes.
 
 ## 🔓 Open Source y Pro
 

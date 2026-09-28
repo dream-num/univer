@@ -4,7 +4,7 @@
 
 **The Office Harness for AI Agents**
 
-Spreadsheets · Documents · Presentations · Bases · Boards · PDFs (coming soon)
+Spreadsheets · Documents · Presentations · Bases · Boards · PDFs
 
 High-performance, fully customizable Office SDK
 
@@ -291,12 +291,12 @@ For API compatibility expectations, experimental APIs, internal APIs, and deprec
 | --- | --- | --- |
 | **Sheets** | Workbooks, worksheets, ranges, selection, formulas, number formatting, filtering, sorting, data validation, conditional formatting, hyperlinks, comments, find and replace, notes, tables, drawing integration, and extensible UI plugins. | Real-time collaboration, edit history, import/export, printing, charts, pivot tables, sparklines, outlines, shapes, in-cell graphics, data connectors, server-side calculation, and performance-enhanced formula features. |
 | **Docs** | Rich document model, editing UI, lists, hyperlinks, drawing integration, comments, quick insert, and shared document architecture. | Collaboration, import/export, printing, enhanced tables and lists, columns, callouts, code blocks, quotes, shapes, and remote comment resources. |
-| **Slides** | Presentation data model and UI packages under active development. | Pro slide model and UI, slide import/export, chart and table model/UI plugins, and shared shape-editing infrastructure. |
+| **Slides** | Presentation data model and editing UI packages. | Pro slide model and UI, slide import/export, chart and table model/UI plugins, and shared shape-editing infrastructure. |
 | **Bases** | Build custom structured-data experiences on top of Univer's plugin, command, and model architecture. | Base database model, commands, formula integration, workbench UI, field editors, and render-engine views. |
 | **Runtime** | Browser apps, Node.js headless usage, Web Worker/RPC patterns, multi-instance usage, and server-oriented automation. | Collaboration client/server packages, Node.js collaboration client, Pro server services, SSR, computing delegation, server-side calculation, and changeset replay tooling. |
 | **Integrations** | React, Vue, Web Components, framework templates, theming, localization, and custom plugins. | Pro presets and enterprise deployment packages. |
 
-Sheets are the most mature product surface today. Docs and Slides share Univer's architecture and continue to evolve in the same SDK.
+Sheets, Docs, and Slides provide spreadsheet, document, and presentation editing on Univer's shared architecture, with a consistent plugin system, command system, and Facade API.
 
 ## 🔓 Open Source and Pro
 

@@ -24,12 +24,13 @@ import { ErrorCode } from './ts/univer/constants/errors';
  * @returns if the response is an error
  */
 export function isError(error?: IError) {
-    // WTF: sometimes returns from Universer does not have error.code
-    // WTF: error code from HTTP is a string not a number
-    // @ts-expect-error error code from HTTP is a string not a number
-    if (error && error.code && error.code !== ErrorCode.OK && error.code !== 'OK') {
-        return true;
+    // WTF: sometimes responses from Universer do not have error.code
+    if (error == null || error.code == null) {
+        return false;
     }
 
-    return false;
+    // WTF: error code from HTTP is a string, not a number — compare normalized
+    // so that falsy code 0 (ErrorCode.UNDEFINED) is still treated as an error.
+    const code = `${error.code}`;
+    return code !== `${ErrorCode.OK}` && code !== 'OK';
 }

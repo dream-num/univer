@@ -51,7 +51,7 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
                     skeletonParam &&
                     drawingData.sheetTransform &&
                     !drawingData.groupId &&
-                    drawingData.anchorType !== SheetDrawingAnchorType.None
+                    (drawingData.anchorType ?? SheetDrawingAnchorType.None) !== SheetDrawingAnchorType.None
                 ) {
                     const transform = drawingPositionToTransform(drawingData.sheetTransform, skeletonParam);
                     drawingData.transform = transform && drawingData.drawingType === DrawingTypeEnum.DRAWING_GROUP

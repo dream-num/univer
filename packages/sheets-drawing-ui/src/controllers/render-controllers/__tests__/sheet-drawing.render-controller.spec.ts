@@ -15,26 +15,21 @@
  */
 
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
-import { DrawingTypeEnum } from '@univerjs/core';
-import { drawingPositionToTransform, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
+import { DrawingTypeEnum, Injector } from '@univerjs/core';
+import { IDrawingManagerService } from '@univerjs/drawing';
+import { SheetSkeletonService } from '@univerjs/sheets';
+import { ISheetDrawingService, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { describe, expect, it, vi } from 'vitest';
+
 import { SheetsDrawingRenderController } from '../sheet-drawing.render-controller';
 
-vi.mock('@univerjs/sheets-drawing', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('@univerjs/sheets-drawing')>();
-
-    return {
-        ...actual,
-        drawingPositionToTransform: vi.fn(() => ({ left: 24, top: 36, width: 120, height: 80 })),
-    };
-});
-
 describe('SheetsDrawingRenderController', () => {
-    it('initializes sheet drawing data and materializes sheet transforms for render objects', () => {
+    it('preserves default absolute bounds while rendering cell-anchored drawings', () => {
         const drawingWithSheetTransform: Partial<ISheetDrawing> = {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             drawingId: 'drawing-1',
+            anchorType: SheetDrawingAnchorType.Position,
             sheetTransform: {
                 from: { row: 1, column: 2, rowOffset: 0, columnOffset: 0 },
                 to: { row: 3, column: 4, rowOffset: 0, columnOffset: 0 },
@@ -44,6 +39,7 @@ describe('SheetsDrawingRenderController', () => {
             unitId: 'unit-1',
             subUnitId: 'missing-sheet',
             drawingId: 'drawing-2',
+            anchorType: SheetDrawingAnchorType.Both,
             sheetTransform: {
                 from: { row: 5, column: 6, rowOffset: 0, columnOffset: 0 },
                 to: { row: 7, column: 8, rowOffset: 0, columnOffset: 0 },
@@ -54,6 +50,7 @@ describe('SheetsDrawingRenderController', () => {
             subUnitId: 'sheet-1',
             drawingId: 'drawing-4',
             groupId: 'group-1',
+            anchorType: SheetDrawingAnchorType.Position,
             transform: { left: 2, top: 3, width: 40, height: 50 },
             sheetTransform: {
                 from: { row: 1, column: 2, rowOffset: 0, columnOffset: 0 },
@@ -65,6 +62,7 @@ describe('SheetsDrawingRenderController', () => {
             subUnitId: 'sheet-1',
             drawingId: 'drawing-5',
             drawingType: DrawingTypeEnum.DRAWING_GROUP,
+            anchorType: SheetDrawingAnchorType.Both,
             sheetTransform: {
                 from: { row: 1, column: 2, rowOffset: 0, columnOffset: 0 },
                 to: { row: 3, column: 4, rowOffset: 0, columnOffset: 0 },
@@ -74,7 +72,6 @@ describe('SheetsDrawingRenderController', () => {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             drawingId: 'drawing-6',
-            anchorType: SheetDrawingAnchorType.None,
             transform: { left: 240, top: 96, width: 120, height: 80 },
             sheetTransform: {
                 from: { row: 0, column: 0, rowOffset: 96, columnOffset: 240 },
@@ -107,7 +104,16 @@ describe('SheetsDrawingRenderController', () => {
         };
         const skeletonParam = {
             skeleton: {
-                id: 'skeleton-1',
+                getNoMergeCellWithCoordByIndex: (row: number, column: number) => ({
+                    startX: column * 12,
+                    endX: (column + 1) * 12,
+                    startY: row * 36,
+                    endY: (row + 1) * 36,
+                }),
+                rowHeaderWidth: 10,
+                columnHeaderHeight: 20,
+                columnTotalWidth: 1000,
+                rowTotalHeight: 2000,
                 rowHeaderWidthAndMarginLeft: 10,
                 columnHeaderHeightAndMarginTop: 20,
             },
@@ -122,24 +128,23 @@ describe('SheetsDrawingRenderController', () => {
             }),
         };
 
-        const controller = new SheetsDrawingRenderController(
-            { unitId: 'unit-1' } as never,
-            sheetDrawingService as never,
-            drawingManagerService as never,
-            sheetSkeletonService as never
-        );
+        const injector = new Injector([
+            [ISheetDrawingService, { useValue: sheetDrawingService }],
+            [IDrawingManagerService, { useValue: drawingManagerService }],
+            [SheetSkeletonService, { useValue: sheetSkeletonService }],
+        ]);
+        const controller = injector.createInstance(SheetsDrawingRenderController, { unitId: 'unit-1' } as never);
 
         expect(sheetDrawingService.initializeNotification).toHaveBeenCalledWith('unit-1');
-        expect(drawingPositionToTransform).toHaveBeenCalledWith(drawingWithSheetTransform.sheetTransform, skeletonParam);
-        expect(drawingWithSheetTransform.transform).toEqual({ left: 24, top: 36, width: 120, height: 80 });
-        expect(drawingGroup.transform).toEqual({ left: 14, top: 16, width: 120, height: 80 });
+        expect(drawingWithSheetTransform.transform).toMatchObject({ left: 24, top: 36, width: 24, height: 72 });
+        expect(drawingGroup.transform).toMatchObject({ left: 14, top: 16, width: 24, height: 72 });
         expect(groupedDrawing.transform).toEqual({ left: 2, top: 3, width: 40, height: 50 });
         expect(absoluteDrawing.transform).toEqual({ left: 240, top: 96, width: 120, height: 80 });
-        expect(drawingPositionToTransform).not.toHaveBeenCalledWith(absoluteDrawing.sheetTransform, skeletonParam);
         expect(drawingWithoutSkeleton).not.toHaveProperty('transform');
         expect(drawingManagerService.registerDrawingData).toHaveBeenCalledWith('unit-1', drawingData);
         expect(drawingManagerService.initializeNotification).toHaveBeenCalledWith('unit-1');
 
         controller.dispose();
+        injector.dispose();
     });
 });

@@ -23,6 +23,7 @@ import type {
     ISheetFloatDom,
     ISheetImage,
 } from './sheet-drawing.service';
+
 import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute } from '@univerjs/sheets';
 import { transformToAxisAlignPosition, transformToDrawingPosition } from '../basics/transform-position';
 import {
@@ -96,7 +97,7 @@ export interface ISheetDrawingPlacementByBounds {
 export type ISheetDrawingPlacementInput = ISheetDrawingPlacement | ISheetDrawingPlacementByBounds;
 
 export function getSheetDrawingPlacement(drawing: ISheetDrawing): ISheetDrawingPlacement {
-    const anchorType = drawing.anchorType ?? SheetDrawingAnchorType.Position;
+    const anchorType = drawing.anchorType ?? SheetDrawingAnchorType.None;
     if (anchorType === SheetDrawingAnchorType.None) {
         return {
             kind: SheetDrawingAnchorType.None,

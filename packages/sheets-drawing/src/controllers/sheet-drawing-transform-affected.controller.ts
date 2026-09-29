@@ -20,8 +20,6 @@ import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type {
     IDeleteRangeMoveLeftCommandParams,
     IDeleteRangeMoveUpCommandParams,
-    IDeltaColumnWidthCommandParams,
-    IDeltaRowHeightCommandParams,
     IInsertColCommandParams,
     IInsertRangeMoveDownCommandParams,
     IInsertRangeMoveRightCommandParams,
@@ -33,8 +31,6 @@ import type {
     ISetColHiddenCommandParams,
     ISetColHiddenMutationParams,
     ISetColVisibleMutationParams,
-    ISetColWidthCommandParams,
-    ISetRowHeightCommandParams,
     ISetRowHiddenCommandParams,
     ISetRowHiddenMutationParams,
     ISetRowVisibleMutationParams,
@@ -49,6 +45,7 @@ import type {
 import type { ISheetDrawingTransformExtensionResult, ISheetDrawingTransformPlan } from '../services/sheet-drawing-transform-plan.service';
 import type { ISheetDrawing, ISheetDrawingPosition } from '../services/sheet-drawing.service';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, RANGE_TYPE, Rectangle } from '@univerjs/core';
+
 import { IDrawingManagerService } from '@univerjs/drawing';
 import {
     attachRangeWithCoord,
@@ -87,6 +84,7 @@ import {
 import { drawingPositionToTransform, transformToAxisAlignPosition, transformToDrawingPosition } from '../basics/transform-position';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
+import { applySheetDrawingPlacement, getSheetDrawingPlacement } from '../services/sheet-drawing-placement';
 import { SheetDrawingTransformPlanService } from '../services/sheet-drawing-transform-plan.service';
 import { ISheetDrawingService, SheetDrawingAnchorType } from '../services/sheet-drawing.service';
 
@@ -152,11 +150,9 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         this._sheetRefreshListener();
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _sheetInterceptorListener() {
         this.disposeWithMe(
             this._sheetInterceptorService.interceptAfterCommand({
-                // eslint-disable-next-line max-lines-per-function,complexity
                 getMutations: (commandInfo) => {
                     const { id, params } = commandInfo;
 
@@ -240,46 +236,18 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                         }
 
                         return this._getDrawingUndoForColVisible(unitId, subUnitId, ranges);
-                    } else if (id === DeltaRowHeightCommand.id || id === DeltaColumnWidthCommand.id) {
-                        const target = getSheetCommandTarget(this._univerInstanceService);
-                        if (!target) {
-                            return { redos: [], undos: [] };
-                        }
-
-                        const { unitId, subUnitId, worksheet } = target;
-                        const ranges: IRange[] = [];
-
-                        if (id === DeltaRowHeightCommand.id) {
-                            ranges.push({
-                                startRow: (params as IDeltaRowHeightCommandParams).anchorRow,
-                                endRow: (params as IDeltaRowHeightCommandParams).anchorRow,
-                                startColumn: 0,
-                                endColumn: worksheet.getColumnCount() - 1,
-                            });
-                        } else {
-                            ranges.push({
-                                startRow: 0,
-                                endRow: worksheet.getRowCount() - 1,
-                                startColumn: (params as IDeltaColumnWidthCommandParams).anchorCol,
-                                endColumn: (params as IDeltaColumnWidthCommandParams).anchorCol,
-                            });
-                        }
-
-                        return this._getDrawingUndoForRowAndColSize(unitId, subUnitId, ranges);
-                    } else if (id === SetRowHeightCommand.id || id === SetColWidthCommand.id) {
-                        const _params = params as ISetRowHeightCommandParams | ISetColWidthCommandParams;
+                    } else if (
+                        id === DeltaRowHeightCommand.id || id === DeltaColumnWidthCommand.id
+                        || id === SetRowHeightCommand.id || id === SetColWidthCommand.id
+                    ) {
+                        const _params = params as ISetWorksheetRowHeightMutationParams | ISetWorksheetColWidthMutationParams;
                         const target = getSheetCommandTarget(this._univerInstanceService, _params);
                         if (!target) {
                             return { redos: [], undos: [] };
                         }
 
                         const { unitId, subUnitId } = target;
-                        const ranges = _params.ranges || this._selectionManagerService.getCurrentSelections()?.map((s) => s.range);
-                        if (!ranges || ranges.length === 0) {
-                            return { redos: [], undos: [] };
-                        }
-
-                        return this._getDrawingUndoForRowAndColSize(unitId, subUnitId, ranges);
+                        return this._getDrawingUndoForRowAndColSize(unitId, subUnitId, _params.ranges);
                     }
 
                     return { redos: [], undos: [] };
@@ -405,15 +373,14 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         return this._finalizePlan(unitId, subUnitId, updateDrawings, deleteDrawings);
     }
 
-    // eslint-disable-next-line max-lines-per-function,complexity
     private _getUpdateOrDeleteDrawings(range: IRange, type: RangeMoveUndoType, drawing: ISheetDrawing) {
         const updateDrawings: Partial<ISheetDrawing>[] = [];
         const deleteDrawings: Partial<ISheetDrawing>[] = [];
 
-        const { sheetTransform, anchorType = SheetDrawingAnchorType.Position, transform, unitId, subUnitId, drawingId } = drawing;
+        const { sheetTransform, anchorType = SheetDrawingAnchorType.None, transform, unitId, subUnitId, drawingId } = drawing;
         const sheetSkeletonParam = this._sheetSkeletonService.getSkeletonParam(unitId, subUnitId);
 
-        if (!sheetTransform || !transform || !sheetSkeletonParam) {
+        if (anchorType === SheetDrawingAnchorType.None || !sheetTransform || !transform || !sheetSkeletonParam) {
             return {
                 updateDrawings,
                 deleteDrawings,
@@ -503,7 +470,6 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         }
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _getDrawingUndoForColVisible(unitId: string, subUnitId: string, ranges: IRange[]) {
         const sheetSkeletonParam = this._getCalculatedSkeletonParam(unitId, subUnitId);
         if (!sheetSkeletonParam) {
@@ -515,10 +481,9 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         const updateDrawings: ISheetDrawing[] = [];
         const preUpdateDrawings: ISheetDrawing[] = [];
 
-        // eslint-disable-next-line complexity, max-lines-per-function
         Object.keys(drawingData).forEach((drawingId) => {
             const drawing = drawingData[drawingId] as ISheetDrawing;
-            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = drawing;
+            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.None } = drawing;
 
             if (anchorType === SheetDrawingAnchorType.None) {
                 this._remainDrawingSize(transform, updateDrawings, drawing, skeleton);
@@ -634,7 +599,6 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         return this._finalizePlan(unitId, subUnitId, updateDrawings);
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _getDrawingUndoForRowVisible(unitId: string, subUnitId: string, ranges: IRange[]) {
         const sheetSkeletonParam = this._getCalculatedSkeletonParam(unitId, subUnitId);
         if (!sheetSkeletonParam) {
@@ -646,10 +610,9 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         const updateDrawings: ISheetDrawing[] = [];
         const preUpdateDrawings: ISheetDrawing[] = [];
 
-        // eslint-disable-next-line complexity, max-lines-per-function
         Object.keys(drawingData).forEach((drawingId) => {
             const drawing = drawingData[drawingId] as ISheetDrawing;
-            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = drawing;
+            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.None } = drawing;
 
             if (anchorType === SheetDrawingAnchorType.None) {
                 this._remainDrawingSize(transform, updateDrawings, drawing, skeleton);
@@ -773,28 +736,24 @@ export class SheetDrawingTransformAffectedController extends Disposable {
 
         Object.keys(drawingData).forEach((drawingId) => {
             const drawing = drawingData[drawingId] as ISheetDrawing;
-            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = drawing;
+            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.None } = drawing;
 
             if (anchorType === SheetDrawingAnchorType.None) {
                 this._remainDrawingSize(transform, updateDrawings, drawing, skeleton);
             } else {
-                const { from, to } = sheetTransform;
-                const { row: fromRow, column: fromColumn } = from;
-                const { row: toRow, column: toColumn } = to;
+                const { row: toRow, column: toColumn } = sheetTransform.to;
 
                 for (let i = 0; i < ranges.length; i++) {
                     const range = ranges[i];
-                    const { startRow, endRow, startColumn, endColumn } = range;
+                    const { startRow, startColumn } = range;
 
                     if (toRow < startRow || toColumn < startColumn) {
                         continue;
                     }
 
                     if (anchorType === SheetDrawingAnchorType.Position) {
-                        if ((fromRow <= startRow && toRow >= endRow) || (fromColumn <= startColumn && toColumn >= endColumn)) {
-                            this._remainDrawingSize(transform, updateDrawings, drawing, skeleton);
-                            continue;
-                        }
+                        updateDrawings.push(applySheetDrawingPlacement(drawing, getSheetDrawingPlacement(drawing), skeleton));
+                        break;
                     }
 
                     const newTransform = drawingPositionToTransform({ ...sheetTransform }, sheetSkeletonParam);
@@ -918,7 +877,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
 
         Object.keys(data).forEach((drawingId) => {
             const drawing = data[drawingId];
-            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = drawing;
+            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.None } = drawing;
             if (!sheetTransform || !transform) {
                 return;
             }
@@ -991,7 +950,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
 
         Object.keys(data).forEach((drawingId) => {
             const drawing = data[drawingId];
-            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = drawing;
+            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.None } = drawing;
 
             if (!sheetTransform || !transform) {
                 return;
@@ -1052,7 +1011,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             anchorType: SheetDrawingAnchorType;
         }
     ) {
-        const { sheetSkeletonParam, sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = options;
+        const { sheetSkeletonParam, sheetTransform, transform, anchorType } = options;
         const { skeleton } = sheetSkeletonParam;
         const colCount = colEndIndex - colStartIndex + 1;
         const { from, to } = sheetTransform;
@@ -1110,7 +1069,6 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         return null;
     }
 
-    // eslint-disable-next-line max-lines-per-function, complexity
     private _shrinkCol(
         colStartIndex: number,
         colEndIndex: number,
@@ -1121,7 +1079,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             anchorType: SheetDrawingAnchorType;
         }
     ) {
-        const { sheetSkeletonParam, sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = options;
+        const { sheetSkeletonParam, sheetTransform, transform, anchorType } = options;
         const { skeleton } = sheetSkeletonParam;
         const colCount = colEndIndex - colStartIndex + 1;
         const { from, to } = sheetTransform;
@@ -1225,7 +1183,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             anchorType: SheetDrawingAnchorType;
         }
     ) {
-        const { sheetSkeletonParam, sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = options;
+        const { sheetSkeletonParam, sheetTransform, transform, anchorType } = options;
         const { skeleton } = sheetSkeletonParam;
         const rowCount = rowEndIndex - rowStartIndex + 1;
         const { from, to } = sheetTransform;
@@ -1286,7 +1244,6 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         return null;
     }
 
-    // eslint-disable-next-line max-lines-per-function, complexity
     private _shrinkRow(
         rowStartIndex: number,
         rowEndIndex: number,
@@ -1297,7 +1254,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             anchorType: SheetDrawingAnchorType;
         }
     ) {
-        const { sheetSkeletonParam, sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = options;
+        const { sheetSkeletonParam, sheetTransform, transform, anchorType } = options;
         const { skeleton } = sheetSkeletonParam;
         const rowCount = rowEndIndex - rowStartIndex + 1;
         const { from, to } = sheetTransform;
@@ -1432,12 +1389,14 @@ export class SheetDrawingTransformAffectedController extends Disposable {
 
     private _refreshDrawingTransform(command: ICommandInfo, unitId: string, subUnitId: string, ranges: IRange[]) {
         const sheetSkeletonParam = this._getCalculatedSkeletonParam(unitId, subUnitId);
+        if (!sheetSkeletonParam) return;
+
         const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId) ?? {};
         const updateDrawings: ISheetDrawing[] = [];
 
         Object.keys(drawingData).forEach((drawingId) => {
             const drawing = drawingData[drawingId] as ISheetDrawing;
-            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = drawing;
+            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.None } = drawing;
             if (anchorType === SheetDrawingAnchorType.None) {
                 return true;
             }
@@ -1465,7 +1424,11 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                         endColumn: toColumn,
                     }
                 ) || fromRow > endRow || fromColumn > endColumn) {
-                    const isPositionAnchor = anchorType === SheetDrawingAnchorType.Position;
+                    if (anchorType === SheetDrawingAnchorType.Position) {
+                        updateDrawings.push(applySheetDrawingPlacement(drawing, getSheetDrawingPlacement(drawing), sheetSkeletonParam.skeleton));
+                        break;
+                    }
+
                     const newTransform = drawingPositionToTransform(sheetTransform, sheetSkeletonParam);
                     updateDrawings.push({
                         ...drawing,
@@ -1473,8 +1436,8 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                             ...transform,
                             left: newTransform?.left,
                             top: newTransform?.top,
-                            width: isPositionAnchor ? transform?.width : newTransform?.width,
-                            height: isPositionAnchor ? transform?.height : newTransform?.height,
+                            width: newTransform?.width,
+                            height: newTransform?.height,
                         },
                     });
                     break;

@@ -1953,7 +1953,10 @@ export class ArrayValueObject extends BaseValueObject {
             const row: BaseValueObject[] = [];
             for (let c = 0; c < columnArrayCount; c++) {
                 const cellRaw = columnArray[c].trim();
-                row.push(ValueObjectFactory.create(cellRaw, false, dateSystem));
+                row.push(
+                    ValueObjectFactory.createNumberLiteral(cellRaw, dateSystem) ??
+                    ValueObjectFactory.create(cellRaw, false, dateSystem)
+                );
             }
             result.push(row);
         }
@@ -1990,6 +1993,8 @@ export class ArrayValueObject extends BaseValueObject {
         return ArrayValueObject.create(arrayValueObjectData, this.getDateSystem());
     }
 }
+
+const NUMBER_LITERAL_REGEX = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i;
 
 export class ValueObjectFactory {
     static create(
@@ -2041,6 +2046,23 @@ export class ValueObjectFactory {
             return createNumberValueObjectByRawValue(rawValue).withDateSystem(dateSystem);
         }
         return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    /**
+     * Create a number from a number literal written in formula source, such as `12.50`, `.5`, `007` or `1E3`.
+     * Unlike cell text, where "000123456" must stay a string, a number literal in a formula is always a number.
+     *
+     * @param token The unquoted token from the formula source.
+     * @param dateSystem The workbook date system.
+     * @returns The number value object, or null when the token is not a number literal.
+     */
+    static createNumberLiteral(token: string, dateSystem: DateSystem = DateSystem.Date1900): Nullable<BaseValueObject> {
+        const tokenTrim = token.trim();
+        if (!NUMBER_LITERAL_REGEX.test(tokenTrim)) {
+            return null;
+        }
+
+        return NumberValueObject.create(Number(tokenTrim)).withDateSystem(dateSystem);
     }
 }
 

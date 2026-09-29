@@ -31,6 +31,7 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { InsertSheetMutation } from '../../mutations/insert-sheet.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
@@ -691,6 +692,70 @@ describe("Test commands used for updating cells' styles", () => {
     });
 
     describe('shrink to fit', () => {
+        it.each([
+            [SetTextWrapCommand.id, WrapStrategy.WRAP, { tb: WrapStrategy.UNSPECIFIED, stf: BooleanNumber.TRUE }, { tb: WrapStrategy.WRAP, stf: BooleanNumber.FALSE }],
+            [SetShrinkToFitCommand.id, BooleanNumber.TRUE, { tb: WrapStrategy.WRAP, stf: BooleanNumber.FALSE }, { tb: WrapStrategy.UNSPECIFIED, stf: BooleanNumber.TRUE }],
+        ])('keeps wrapping and shrink to fit mutually exclusive through %s, undo and redo', async (commandId, value, before, after) => {
+            const range = { startRow: 0, startColumn: 0, endRow: 0, endColumn: 1 };
+            const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test')!.getSheetBySheetId('sheet1')!;
+            commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                cellValue: { 0: { 0: { s: before }, 1: { s: before } } },
+            });
+
+            await commandService.executeCommand(commandId, { range, value });
+            expect([0, 1].map((column) => worksheet.getComposedCellStyle(0, column))).toEqual([after, after]);
+
+            await commandService.executeCommand(UndoCommand.id);
+            expect([0, 1].map((column) => worksheet.getComposedCellStyle(0, column))).toEqual([before, before]);
+
+            await commandService.executeCommand(RedoCommand.id);
+            expect([0, 1].map((column) => worksheet.getComposedCellStyle(0, column))).toEqual([after, after]);
+        });
+
+        it('keeps per-cell wrap and shrink settings mutually exclusive when applying style matrices', () => {
+            const range = { startRow: 0, startColumn: 0, endRow: 0, endColumn: 1 };
+            const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test')!.getSheetBySheetId('sheet1')!;
+            commandService.syncExecuteCommand(SetTextWrapCommand.id, { range, value: WrapStrategy.WRAP });
+            commandService.syncExecuteCommand(SetStyleCommand.id, {
+                range,
+                style: { type: 'stf', value: [[BooleanNumber.TRUE, BooleanNumber.FALSE]] },
+            });
+            expect(worksheet.getComposedCellStyle(0, 0)).toEqual({ tb: WrapStrategy.UNSPECIFIED, stf: BooleanNumber.TRUE });
+            expect(worksheet.getComposedCellStyle(0, 1)).toEqual({ tb: WrapStrategy.WRAP, stf: BooleanNumber.FALSE });
+
+            commandService.syncExecuteCommand(SetStyleCommand.id, {
+                range,
+                style: { type: 'tb', value: [[WrapStrategy.WRAP, WrapStrategy.CLIP]] },
+            });
+            expect(worksheet.getComposedCellStyle(0, 0)).toEqual({ tb: WrapStrategy.WRAP, stf: BooleanNumber.FALSE });
+            expect(worksheet.getComposedCellStyle(0, 1)).toEqual({ tb: WrapStrategy.CLIP, stf: BooleanNumber.FALSE });
+        });
+
+        it('preserves clipping and overflow when toggling shrink to fit across mixed cells', () => {
+            const range = { startRow: 0, startColumn: 0, endRow: 0, endColumn: 2 };
+            const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test')!.getSheetBySheetId('sheet1')!;
+            commandService.syncExecuteCommand(SetStyleCommand.id, {
+                range,
+                style: { type: 'tb', value: [[WrapStrategy.OVERFLOW, WrapStrategy.CLIP, WrapStrategy.WRAP]] },
+            });
+
+            commandService.syncExecuteCommand(SetShrinkToFitCommand.id, { range, value: BooleanNumber.TRUE });
+            expect([0, 1, 2].map((column) => worksheet.getComposedCellStyle(0, column))).toEqual([
+                { tb: WrapStrategy.OVERFLOW, stf: BooleanNumber.TRUE },
+                { tb: WrapStrategy.CLIP, stf: BooleanNumber.TRUE },
+                { tb: WrapStrategy.UNSPECIFIED, stf: BooleanNumber.TRUE },
+            ]);
+
+            commandService.syncExecuteCommand(SetShrinkToFitCommand.id, { range, value: BooleanNumber.FALSE });
+            expect([0, 1, 2].map((column) => worksheet.getComposedCellStyle(0, column))).toEqual([
+                { tb: WrapStrategy.OVERFLOW, stf: BooleanNumber.FALSE },
+                { tb: WrapStrategy.CLIP, stf: BooleanNumber.FALSE },
+                { tb: WrapStrategy.UNSPECIFIED, stf: BooleanNumber.FALSE },
+            ]);
+        });
+
         it('changes shrink to fit with undo and redo', async () => {
             const selectionManager = get(SheetsSelectionsService);
             selectionManager.addSelections([

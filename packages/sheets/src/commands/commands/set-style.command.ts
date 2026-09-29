@@ -25,7 +25,7 @@ import type {
     IStyleData,
     ITextRotation,
     VerticalAlign,
-    WrapStrategy,
+    Worksheet,
 } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import type { ISheetCommandSharedParams } from '../utils/interface';
@@ -40,7 +40,9 @@ import {
     ObjectMatrix,
     sequenceExecute,
     Tools,
+    WrapStrategy,
 } from '@univerjs/core';
+
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SheetSkeletonService } from '../../skeleton/skeleton.service';
@@ -64,6 +66,41 @@ export interface ISetStyleCommandParams<T> extends ISetStyleCommonParams {
 
 export const AFFECT_LAYOUT_STYLES = ['ff', 'fs', 'stf', 'tr', 'tb'];
 
+function createStyleCellValue<T>(worksheet: Worksheet, ranges: IRange[], style: IStyleTypeValue<T>): ObjectMatrix<ICellData> {
+    const cellValue = new ObjectMatrix<ICellData>();
+    const iterator = createRangeIteratorWithSkipFilteredRows(worksheet);
+
+    if (Tools.isArray(style.value)) {
+        for (let i = 0; i < ranges.length; i++) {
+            iterator.forOperableEach(ranges[i], (r, c, range) => {
+                cellValue.setValue(r, c, {
+                    s: {
+                        [style.type]: (style.value as T[][])[r - range.startRow][c - range.startColumn],
+                    },
+                });
+            });
+        }
+    } else {
+        const styleObj: ICellData = { s: { [style.type]: style.value } };
+        for (let i = 0; i < ranges.length; i++) {
+            iterator.forOperableEach(ranges[i], (r, c) => cellValue.setValue(r, c, styleObj));
+        }
+    }
+
+    if (style.type === 'tb' || style.type === 'stf') {
+        cellValue.forValue((row, column, cell) => {
+            const cellStyle = cell.s as IStyleData;
+            if (cellStyle.tb === WrapStrategy.WRAP) {
+                cellStyle.stf = BooleanNumber.FALSE;
+            } else if (cellStyle.stf === BooleanNumber.TRUE && worksheet.getComposedCellStyle(row, column)?.tb === WrapStrategy.WRAP) {
+                cellValue.setValue(row, column, { s: { ...cellStyle, tb: WrapStrategy.UNSPECIFIED } });
+            }
+        });
+    }
+
+    return cellValue;
+}
+
 /**
  * The command to set cell style.
  * Set style to a bunch of ranges.
@@ -72,7 +109,6 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-style',
 
-    // eslint-disable-next-line max-lines-per-function
     handler: <T>(accessor: IAccessor, params: ISetStyleCommandParams<T>) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
@@ -86,39 +122,12 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
 
         const ranges = range ? [range] : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
-        if (!ranges?.length) {
-            return false;
-        }
-
-        const cellValue = new ObjectMatrix<ICellData>();
-
-        const iterator = createRangeIteratorWithSkipFilteredRows(worksheet);
-
-        if (Tools.isArray(style.value)) {
-            for (let i = 0; i < ranges.length; i++) {
-                iterator.forOperableEach(ranges[i], (r, c, range) => {
-                    cellValue.setValue(r, c, {
-                        s: {
-                            [style.type]: (style.value as T[][])[r - range.startRow][c - range.startColumn],
-                        },
-                    });
-                });
-            }
-        } else {
-            for (let i = 0; i < ranges.length; i++) {
-                const styleObj: ICellData = {
-                    s: {
-                        [style.type]: style.value,
-                    },
-                };
-                iterator.forOperableEach(ranges[i], (r, c) => cellValue.setValue(r, c, styleObj));
-            }
-        }
+        if (!ranges?.length) return false;
 
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
-            cellValue: cellValue.getMatrix(),
+            cellValue: createStyleCellValue(worksheet, ranges, style).getMatrix(),
         };
 
         const skeleton = accessor.get(SheetSkeletonService).getSkeleton(unitId, subUnitId);

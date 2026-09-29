@@ -39,7 +39,7 @@ export { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands
 export type { ITabCommandParams } from './commands/commands/auto-format.command';
 export { BreakLineCommand } from './commands/commands/break-line.command';
 export { generateParagraphs } from './commands/commands/break-line.command';
-export { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/commands/clipboard.command';
+export { DocChangePasteModeCommand, DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/commands/clipboard.command';
 export { CutContentCommand, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
 export type { IInnerPasteCommandParams } from './commands/commands/clipboard.inner.command';
 export type { IInnerCutCommandParams } from './commands/commands/clipboard.inner.command';

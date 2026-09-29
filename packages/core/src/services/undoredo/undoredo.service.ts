@@ -56,13 +56,13 @@ export interface IUndoRedoService {
      */
     beginUndoRedoGroup(unitId: string, groupId: string, mode?: 'replace' | 'append'): IDisposable;
 
-    /** Pitch the top redo element of the currently focused Univer document instance. */
-    pitchTopUndoElement(): Nullable<IUndoRedoItem>;
-    /** Pitch the top undo element of the currently focused Univer document instance. */
-    pitchTopRedoElement(): Nullable<IUndoRedoItem>;
+    /** Read the top undo entry for a unit, defaulting to the focused unit. */
+    pitchTopUndoElement(unitId?: string): Nullable<IUndoRedoItem>;
+    /** Read the top redo entry for a unit, defaulting to the focused unit. */
+    pitchTopRedoElement(unitId?: string): Nullable<IUndoRedoItem>;
 
-    popUndoToRedo(): void;
-    popRedoToUndo(): void;
+    popUndoToRedo(unitId?: string): void;
+    popRedoToUndo(unitId?: string): void;
 
     rollback(id: string, unitId?: string): void;
 
@@ -129,9 +129,9 @@ export const UndoCommand = new (class extends MultiImplementationCommand impleme
 
     readonly id = UndoCommandId;
 
-    handler(accessor: IAccessor) {
+    handler(accessor: IAccessor, params?: { unitId?: string }) {
         const undoRedoService = accessor.get(IUndoRedoService);
-        const element = undoRedoService.pitchTopUndoElement();
+        const element = undoRedoService.pitchTopUndoElement(params?.unitId);
 
         if (!element) {
             return false;
@@ -140,7 +140,7 @@ export const UndoCommand = new (class extends MultiImplementationCommand impleme
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(element.undoMutations, commandService);
         if (result.result) {
-            undoRedoService.popUndoToRedo();
+            undoRedoService.popUndoToRedo(params?.unitId);
 
             return true;
         }
@@ -154,9 +154,9 @@ export const RedoCommand = new (class extends MultiImplementationCommand impleme
 
     readonly id = RedoCommandId;
 
-    handler(accessor: IAccessor) {
+    handler(accessor: IAccessor, params?: { unitId?: string }) {
         const undoRedoService = accessor.get(IUndoRedoService);
-        const element = undoRedoService.pitchTopRedoElement();
+        const element = undoRedoService.pitchTopRedoElement(params?.unitId);
         if (!element) {
             return false;
         }
@@ -164,7 +164,7 @@ export const RedoCommand = new (class extends MultiImplementationCommand impleme
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(element.redoMutations, commandService);
         if (result.result) {
-            undoRedoService.popRedoToUndo();
+            undoRedoService.popRedoToUndo(params?.unitId);
 
             return true;
         }
@@ -289,14 +289,12 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         this._updateStatus();
     }
 
-    pitchTopUndoElement(): Nullable<IUndoRedoItem> {
-        const unitID = this._getFocusedUnitId();
-        return this._pitchUndoElement(unitID);
+    pitchTopUndoElement(unitId?: string): Nullable<IUndoRedoItem> {
+        return this._pitchUndoElement(unitId ?? this._getFocusedUnitId());
     }
 
-    pitchTopRedoElement(): Nullable<IUndoRedoItem> {
-        const unitID = this._getFocusedUnitId();
-        return this._pitchRedoElement(unitID);
+    pitchTopRedoElement(unitId?: string): Nullable<IUndoRedoItem> {
+        return this._pitchRedoElement(unitId ?? this._getFocusedUnitId());
     }
 
     private _pitchUndoElement(unitId: string): Nullable<IUndoRedoItem> {
@@ -309,26 +307,26 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         return stack?.length ? stack[stack.length - 1] : null;
     }
 
-    popUndoToRedo(): void {
-        const undoStack = this._getUndoStackForFocused();
+    popUndoToRedo(unitId?: string): void {
+        const undoStack = unitId ? this._getUndoStack(unitId, true) : this._getUndoStackForFocused();
         const element = undoStack.pop();
         if (element) {
             this._itemGroups.delete(element);
             // Only push to redo stack if redoMutations is not empty
             if (element.redoMutations.length > 0) {
-                const redoStack = this._getRedoStackForFocused();
+                const redoStack = unitId ? this._getRedoStack(unitId, true) : this._getRedoStackForFocused();
                 redoStack.push(element);
             }
             this._updateStatus();
         }
     }
 
-    popRedoToUndo(): void {
-        const redoStack = this._getRedoStackForFocused();
+    popRedoToUndo(unitId?: string): void {
+        const redoStack = unitId ? this._getRedoStack(unitId, true) : this._getRedoStackForFocused();
         const element = redoStack.pop();
         if (element) {
             this._itemGroups.delete(element);
-            const undoStack = this._getUndoStackForFocused();
+            const undoStack = unitId ? this._getUndoStack(unitId, true) : this._getUndoStackForFocused();
             undoStack.push(element);
             this._updateStatus();
         }

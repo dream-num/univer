@@ -196,6 +196,8 @@ export interface IDocClipboardPasteContext {
 }
 
 export interface IDocClipboardHook {
+    /** Opt an internal rich-text editor into the post-paste format menu. */
+    supportsPasteOptions?(unitId: string): boolean;
     /** Supply a rich fragment for selections owned by a plugin rather than native text ranges. */
     onCopySelection?(unitId: string): { documentData: IDocumentData; plainText: string } | undefined;
     onCopyDocData?(doc: Partial<IDocumentData>, context: IDocClipboardCopyDocDataContext): Partial<IDocumentData>;
@@ -235,6 +237,7 @@ export interface IDocClipboardService {
     pasteFromClipboard(mode?: DocPasteMode): Promise<boolean>;
     legacyPaste(options: IDocClipboardPayload): Promise<boolean>;
     readonly pasteOptions$: Observable<IDocPasteOptionsState | null>;
+    isPasteOptionsEnabled(unitId: string): boolean;
     setNextPasteMode(mode: DocPasteMode): void;
     dismissPasteOptions(): void;
     changePasteMode(mode: DocPasteMode): Promise<boolean>;
@@ -433,6 +436,10 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         return this.legacyPaste({ ...payload, mode });
     }
 
+    isPasteOptionsEnabled(unitId: string): boolean {
+        return !isInternalEditorID(unitId) || this._clipboardHooks.some((hook) => hook.supportsPasteOptions?.(unitId));
+    }
+
     setNextPasteMode(mode: DocPasteMode): void {
         this._nextPasteMode = mode;
     }
@@ -461,7 +468,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         const source = await this._preparePaste(session.payload, mode, session.source);
         // Both history identity and the invalidation generation must still match after asynchronous image loading.
         if (generation !== this._pasteGeneration || session !== this._pasteSession ||
-            this._undoRedoService.pitchTopUndoElement() !== session.history ||
+            this._undoRedoService.pitchTopUndoElement(state.unitId) !== session.history ||
             this._getPasteSelectionKey() !== session.selectionKey ||
             this._getCurrentDocumentUnitId() !== state.unitId || !this._canEditTargets(state.unitId)) {
             return false;
@@ -473,18 +480,18 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         this._applyingPaste = true;
         try {
             // This synchronous transaction can only replace the exact, still-current paste history entry.
-            if (!this._commandService.syncExecuteCommand(UndoCommand.id)) {
+            if (!this._commandService.syncExecuteCommand(UndoCommand.id, { unitId: state.unitId })) {
                 this.dismissPasteOptions();
                 return false;
             }
             try {
                 if (!this._paste(doc, state.unitId)) {
-                    this._commandService.syncExecuteCommand(RedoCommand.id);
+                    this._commandService.syncExecuteCommand(RedoCommand.id, { unitId: state.unitId });
                     this.dismissPasteOptions();
                     return false;
                 }
             } catch (error) {
-                this._commandService.syncExecuteCommand(RedoCommand.id);
+                this._commandService.syncExecuteCommand(RedoCommand.id, { unitId: state.unitId });
                 this.dismissPasteOptions();
                 throw error;
             }
@@ -554,7 +561,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             // Keep preceding debounced typing out of the paste's undo entry.
             this._stateChangeManager.flushPendingChanges(unitId);
             const result = this._paste(doc, unitId);
-            if (result && !isInternalEditorID(unitId)) {
+            if (result && this.isPasteOptionsEnabled(unitId)) {
                 this._savePasteSession(payload, mode === 'text' ? cachedSource : source, style, mode, unitId);
             }
             return result;
@@ -600,7 +607,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             return;
         }
         this._stateChangeManager.flushPendingChanges(unitId);
-        const history = this._undoRedoService.pitchTopUndoElement();
+        const history = this._undoRedoService.pitchTopUndoElement(unitId);
         const ranges = this._docSelectionManagerService.getTextRanges(this._getSelectionParams(unitId));
         const range = ranges?.find((item) => item.isActive) ?? ranges?.[0];
         if (!history || history.unitID !== unitId || !range) {
@@ -894,6 +901,10 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
             if (index > -1) {
                 this._clipboardHooks.splice(index, 1);
+                const state = this._pasteOptions$.value;
+                if (state && !this.isPasteOptionsEnabled(state.unitId)) {
+                    this.dismissPasteOptions();
+                }
             }
         });
     }

@@ -70,6 +70,7 @@ export function DocPasteOptions() {
             }))}
         >
             <Button
+                data-u-command={DocChangePasteModeCommand.id}
                 size="small"
                 disabled={busy}
                 aria-label={localeService.t<LocaleKey>('docs-ui.pasteOptions.title')}

@@ -37,6 +37,7 @@ import {
 } from '@univerjs/docs';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { IShortcutService } from '@univerjs/ui';
+
 import pkg from '../package.json';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands/auto-format.command';
 import { BreakLineCommand } from './commands/commands/break-line.command';
@@ -213,7 +214,11 @@ import {
     BreakLineShortcut,
     CloseHeaderFooterShortcut,
     DeleteLeftShortcut,
+    DeleteLineEndShortcut,
+    DeleteLineStartShortcut,
     DeleteRightShortcut,
+    DeleteWordLeftShortcut,
+    DeleteWordRightShortcut,
     SoftBreakLineShortcut,
 } from './shortcuts/core-editing.shortcut';
 import {
@@ -311,7 +316,6 @@ export class UniverDocsUIPlugin extends Plugin {
         ]);
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _initCommand() {
         [
             DeleteLeftCommand,
@@ -441,6 +445,10 @@ export class UniverDocsUIPlugin extends Plugin {
             MoveSelectionWordRightShortcut,
             SelectAllShortcut,
             DeleteLeftShortcut,
+            DeleteWordLeftShortcut,
+            DeleteWordRightShortcut,
+            DeleteLineStartShortcut,
+            DeleteLineEndShortcut,
             DeleteRightShortcut,
             CloseHeaderFooterShortcut,
             BreakLineShortcut,

@@ -21,13 +21,18 @@ import {
     HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
+    RANGE_DIRECTION,
+    RedoCommand,
+    UndoCommand,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
 import {
+    DeleteTextCommand,
     DocLayoutExecutorService,
     DocSelectionManagerService,
     DocSkeletonManagerService,
+    DocStateChangeManagerService,
     DocStateEmitService,
     RichTextEditingMutation,
     UpdateTextCommand,
@@ -38,7 +43,11 @@ import {
     RenderManagerService,
 } from '@univerjs/engine-render';
 import { describe, expect, it } from 'vitest';
+
+import { DocMoveCursorController } from '../../../controllers/doc-move-cursor.controller';
 import { EditorService, IEditorService } from '../../../services/editor/editor-manager.service';
+import { MoveSelectionOperation } from '../../operations/doc-cursor.operation';
+import { CutContentCommand } from '../clipboard.inner.command';
 import { DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand } from '../doc-delete.command';
 
 describe('empty editor deletion', () => {
@@ -130,6 +139,76 @@ describe('MergeTwoParagraphCommand segment selection', () => {
             expect(model.getSnapshot().body!.dataStream).toBe('Body\r\n');
             expect(selections.getActiveTextRange()).toMatchObject({ segmentId: 'note', startOffset: 5, endOffset: 5 });
         } finally {
+            univer.dispose();
+        }
+    });
+});
+
+describe('boundary deletion', () => {
+    it.each([
+        { command: DeleteLeftCommand, granularity: 'word', start: 16, end: 16, expected: 'alpha beta \rdelta epsilon zeta\r\n' },
+        { command: DeleteLeftCommand, granularity: 'line', start: 16, end: 16, expected: '\rdelta epsilon zeta\r\n' },
+        { command: DeleteRightCommand, granularity: 'word', start: 6, end: 6, expected: 'alpha  gamma\rdelta epsilon zeta\r\n' },
+        { command: DeleteRightCommand, granularity: 'line', start: 6, end: 6, expected: 'alpha \rdelta epsilon zeta\r\n' },
+        { command: DeleteLeftCommand, granularity: 'line', start: 0, end: 0, expected: 'alpha beta gamma\rdelta epsilon zeta\r\n' },
+        { command: DeleteRightCommand, granularity: 'line', start: 16, end: 16, expected: 'alpha beta gamma\rdelta epsilon zeta\r\n' },
+        { command: DeleteLeftCommand, granularity: 'word', start: 2, end: 8, expected: 'alta gamma\rdelta epsilon zeta\r\n' },
+    ])('$command.id at $start:$end deletes by $granularity', async ({ command, granularity, start, end, expected }) => {
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        let skeletonManager: DocSkeletonManagerService | undefined;
+        injector.add([IRenderManagerService, { useValue: {
+            getRenderUnitById: () => ({
+                components: new Map(),
+                with: (token: unknown) => token === DocSkeletonManagerService ? skeletonManager : undefined,
+            }),
+        } as unknown as IRenderManagerService }]);
+        injector.add([DocSelectionManagerService]);
+        injector.add([DocStateEmitService]);
+        injector.add([DocStateChangeManagerService]);
+        injector.add([DocLayoutExecutorService]);
+        injector.add([DocMoveCursorController]);
+        const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+            id: 'boundary-editor',
+            documentStyle: { pageSize: { width: 600, height: 400 } },
+            body: {
+                dataStream: 'alpha beta gamma\rdelta epsilon zeta\r\n',
+                paragraphs: [{ startIndex: 16, paragraphId: 'first' }, { startIndex: 35, paragraphId: 'second' }],
+            },
+        });
+        try {
+            injector.get(IUniverInstanceService).focusUnit(model.getUnitId());
+            skeletonManager = injector.createInstance(DocSkeletonManagerService, { unit: model, unitId: model.getUnitId(), type: UniverInstanceType.UNIVER_DOC });
+            const commands = injector.get(ICommandService);
+            [command, MoveSelectionOperation, CutContentCommand, DeleteTextCommand, MergeTwoParagraphCommand, RichTextEditingMutation].forEach((entry) => commands.registerCommand(entry));
+            injector.get(DocMoveCursorController);
+            injector.get(DocStateChangeManagerService);
+            const selections = injector.get(DocSelectionManagerService);
+            selections.__TEST_ONLY_setCurrentSelection({ unitId: model.getUnitId(), subUnitId: model.getUnitId() });
+            // The headless render boundary records ranges produced by the real cursor controller.
+            const refresh = selections.refreshSelection$.subscribe((value) => {
+                if (!value) return;
+                selections.replaceSelectionInfoWithoutRefresh({ textRanges: value.docRanges.map((range) => ({
+                    startOffset: Math.min(range.startOffset!, range.endOffset!),
+                    endOffset: Math.max(range.startOffset!, range.endOffset!),
+                    collapsed: range.startOffset === range.endOffset,
+                    direction: range.startOffset! <= range.endOffset! ? RANGE_DIRECTION.FORWARD : RANGE_DIRECTION.BACKWARD,
+                    isActive: true,
+                })), rectRanges: [], segmentId: '', segmentPage: -1, isEditing: true, style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE });
+            });
+            selections.__TEST_ONLY_add([{ startOffset: start, endOffset: end, collapsed: start === end, isActive: true }]);
+            const before = model.getBody()!.dataStream;
+            await commands.executeCommand(command.id, { granularity });
+            expect(model.getBody()!.dataStream).toBe(expected);
+            if (expected !== before) {
+                await commands.executeCommand(UndoCommand.id);
+                expect(model.getBody()!.dataStream).toBe(before);
+                await commands.executeCommand(RedoCommand.id);
+                expect(model.getBody()!.dataStream).toBe(expected);
+            }
+            refresh.unsubscribe();
+        } finally {
+            skeletonManager?.dispose();
             univer.dispose();
         }
     });

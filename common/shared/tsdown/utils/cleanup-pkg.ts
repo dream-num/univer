@@ -1,8 +1,9 @@
-/* eslint-disable max-lines-per-function */
 import type { IPackageJson } from '../types.ts';
+import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import sortKeys from 'sort-keys';
+
 import * as ts from 'typescript';
 import { peerDepsMap } from '../data/peer-deps.ts';
 
@@ -423,7 +424,18 @@ function readJsonFile<T>(filePath: string): T {
 }
 
 function writeJsonFile(filePath: string, value: unknown) {
-    fs.writeFileSync(filePath, `${JSON.stringify(value, null, 4)}\n`);
+    const content = `${JSON.stringify(value, null, 4)}\n`;
+    if (fs.readFileSync(filePath, 'utf8') === content) {
+        return;
+    }
+
+    const temporaryPath = `${filePath}.${randomUUID()}.tmp`;
+    try {
+        fs.writeFileSync(temporaryPath, content);
+        fs.renameSync(temporaryPath, filePath);
+    } finally {
+        fs.rmSync(temporaryPath, { force: true });
+    }
 }
 
 export function cleanupPackageJson(packageDir: string, packageJson: IPackageJson) {

@@ -18,14 +18,14 @@ import type { ICellWithCoord, IRangeWithCoord, Nullable, ThemeService } from '@u
 import type { IObjectFullState, IRectProps, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoord } from '@univerjs/sheets';
 import type { ISelectionShapeExtensionOption } from './selection-shape-extension';
-import { ColorKit, Disposable, RANGE_TYPE, toDisposable } from '@univerjs/core';
+import { ColorKit, Disposable, RANGE_TYPE, Rectangle, toDisposable, Tools } from '@univerjs/core';
 import { cancelRequestFrame, DashedRect, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect, requestNewFrame, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import {
     SELECTION_CONTROL_BORDER_BUFFER_COLOR,
     SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
 } from '@univerjs/sheets';
-
 import { BehaviorSubject, Subject } from 'rxjs';
+
 import { SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX, SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { genNormalSelectionStyle } from './const';
 import { SelectionRenderModel } from './selection-render-model';
@@ -70,11 +70,16 @@ export enum SELECTION_MANAGER_KEY {
 }
 
 const SELECTION_TITLE_HIGHLIGHT_ALPHA = 0.3;
+const SELECTION_MOVE_DURATION = 120;
 
 /**
  * The main selection canvas component, includes leftControl,rightControl,topControl,bottomControl,backgroundControlTop,backgroundControlMiddleLeft,backgroundControlMiddleRight,backgroundControlBottom,fillControl
  */
 export class SelectionControl extends Disposable {
+    private _moveAnimationFrame = -1;
+    private _animatedRange: IRangeWithCoord | null = null;
+    private _restoreMoveEvents: (() => void) | null = null;
+
     private _isHelperSelection: boolean = true;
 
     /**
@@ -260,6 +265,7 @@ export class SelectionControl extends Disposable {
                         return;
                     }
 
+                    this._stopMoveAnimation();
                     this._updateLayoutOfSelectionControl(this._currentStyle);
                     this._updateControlCoord();
                 })
@@ -515,6 +521,11 @@ export class SelectionControl extends Disposable {
     }
 
     setEvent(state: boolean): void {
+        if (this._animatedRange) {
+            this._stopMoveAnimation();
+            this._updateLayoutOfSelectionControl();
+            this._updateControlCoord();
+        }
         this.leftControl.evented = state;
         this.rightControl.evented = state;
         this.topControl.evented = state;
@@ -555,7 +566,7 @@ export class SelectionControl extends Disposable {
         const fixOnePixelBlurOffset = FIX_ONE_PIXEL_BLUR_OFFSET / scale;
 
         // startX startY shares same coordinate with viewport.(include row & col header)
-        const { startX, startY, endX, endY } = this._selectionRenderModel;
+        const { startX, startY, endX, endY } = this._animatedRange ?? this._selectionRenderModel;
         this.leftControl.transformByState({
             height: endY - startY,
             left: -leftAdjustWidth + fixOnePixelBlurOffset,
@@ -655,7 +666,9 @@ export class SelectionControl extends Disposable {
         }
 
         this._updateBackgroundControl(currentStyle);
-        this._updateHeaderBackground(currentStyle);
+        if (!this._animatedRange) {
+            this._updateHeaderBackground(currentStyle);
+        }
         this._updateWidgets(currentStyle);
     }
 
@@ -663,13 +676,14 @@ export class SelectionControl extends Disposable {
      * update selection control coordination by curr selection model
      */
     protected _updateControlCoord(): void {
-        const { startX, startY } = this._selectionRenderModel;
+        const { startX, startY } = this._animatedRange ?? this._selectionRenderModel;
         this.selectionShapeGroup.show();
         this.selectionShapeGroup.translate(startX, startY);
         this.selectionShapeGroup.makeDirtyNoDebounce(true);
     }
 
     updateStyle(style: Partial<ISelectionStyle>): void {
+        this._stopMoveAnimation();
         this._updateLayoutOfSelectionControl(style);
         this._updateControlCoord();
     }
@@ -684,6 +698,7 @@ export class SelectionControl extends Disposable {
      * @param primaryWithCoord
      */
     updateRange(rangeWithCoord: IRangeWithCoord, primaryWithCoord: Nullable<ICellWithCoord>): void {
+        this._stopMoveAnimation();
         this._selectionRenderModel.setValue(rangeWithCoord, primaryWithCoord);
         this._showAutoFill = primaryWithCoord !== null;
         this._updateLayoutOfSelectionControl();
@@ -694,7 +709,15 @@ export class SelectionControl extends Disposable {
      * Update range and primary range and style.
      * @param selectionWthCoord
      */
-    updateRangeBySelectionWithCoord(selectionWthCoord: ISelectionWithCoord, sk?: SpreadsheetSkeleton) {
+    updateRangeBySelectionWithCoord(selectionWthCoord: ISelectionWithCoord, sk?: SpreadsheetSkeleton, animate = false) {
+        const previousRange = this._animatedRange ?? this.getRange();
+        const targetRange = selectionWthCoord.rangeWithCoord;
+        const rangeChanged = !Rectangle.equals(this.model, targetRange) ||
+            this.model.startX !== targetRange.startX || this.model.startY !== targetRange.startY ||
+            this.model.endX !== targetRange.endX || this.model.endY !== targetRange.endY;
+        if (animate || rangeChanged || selectionWthCoord.primaryWithCoord === null) {
+            this._stopMoveAnimation();
+        }
         if (sk) {
             // do not get header size from workbook, that is default value.
             // if row is over one million, row header width would be bigger than default value.
@@ -708,6 +731,58 @@ export class SelectionControl extends Disposable {
         this._showAutoFill = selectionWthCoord.primaryWithCoord !== null;
         this._updateLayoutOfSelectionControl(selectionWthCoord.style);
         this._updateControlCoord();
+
+        if (animate && rangeChanged && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            this._animateMove(previousRange);
+        }
+    }
+
+    private _animateMove(from: IRangeWithCoord): void {
+        const target = this.getRange();
+        const startedAt = Tools.now();
+        // A moving border must not intercept the next click as a range move or autofill gesture.
+        const eventedShapes = this.selectionShapeGroup.getObjects().filter((shape) => shape.evented);
+        eventedShapes.forEach((shape) => {
+            shape.evented = false;
+        });
+        this._restoreMoveEvents = () => eventedShapes.forEach((shape) => {
+            shape.evented = true;
+        });
+        this._animatedRange = from;
+        this._updateLayoutOfSelectionControl();
+        this._updateControlCoord();
+
+        const frame = () => {
+            const progress = Math.min(1, (Tools.now() - startedAt) / SELECTION_MOVE_DURATION);
+            const eased = 1 - (1 - progress) ** 3;
+            if (progress === 1) {
+                this._stopMoveAnimation();
+            }
+            // Only interpolate the selection geometry; the model and worksheet caches stay at the destination.
+            this._animatedRange = progress < 1
+                ? {
+                    ...target,
+                    startX: from.startX + (target.startX - from.startX) * eased,
+                    startY: from.startY + (target.startY - from.startY) * eased,
+                    endX: from.endX + (target.endX - from.endX) * eased,
+                    endY: from.endY + (target.endY - from.endY) * eased,
+                }
+                : null;
+            this._updateLayoutOfSelectionControl();
+            this._updateControlCoord();
+            this._moveAnimationFrame = progress < 1 ? requestNewFrame(frame) : -1;
+        };
+        this._moveAnimationFrame = requestNewFrame(frame);
+    }
+
+    private _stopMoveAnimation(): void {
+        if (this._moveAnimationFrame !== -1) {
+            cancelRequestFrame(this._moveAnimationFrame);
+            this._moveAnimationFrame = -1;
+        }
+        this._animatedRange = null;
+        this._restoreMoveEvents?.();
+        this._restoreMoveEvents = null;
     }
 
     /**
@@ -727,46 +802,24 @@ export class SelectionControl extends Disposable {
     }
 
     clearHighlight(): void {
+        this._stopMoveAnimation();
         // in multiple selection shape, only shape with highlight has auto fill.
         this._showAutoFill = false;
         this._selectionRenderModel.clearCurrentCell();
         this._updateLayoutOfSelectionControl(this._currentStyle);
+        this._updateControlCoord();
     }
 
     getScene(): Scene {
         return this._scene;
     }
 
-    // eslint-disable-next-line complexity
     override dispose(): void {
-        this._leftBorder?.dispose();
-        this._rightBorder?.dispose();
-        this._topBorder?.dispose();
-        this._bottomBorder?.dispose();
-        this._backgroundControlTop?.dispose();
-        this._backgroundControlMiddleLeft?.dispose();
-        this._backgroundControlMiddleRight?.dispose();
-        this._backgroundControlBottom?.dispose();
-        this._autoFillControl.dispose();
-        this._selectionShapeGroup?.dispose();
-
-        this._rowHeaderBackground?.dispose();
-        this._rowHeaderBorder?.dispose();
-        this._rowHeaderGroup?.dispose();
-        this._rowHeaderBackground?.dispose();
-        this._columnHeaderBackground?.dispose();
-        this._columnHeaderBorder?.dispose();
-        this._columnHeaderGroup?.dispose();
-
-        this._topLeftWidget?.dispose();
-        this._topCenterWidget?.dispose();
-        this._topRightWidget?.dispose();
-        this._middleLeftWidget?.dispose();
-        this._middleRightWidget?.dispose();
-        this._bottomLeftWidget?.dispose();
-        this._bottomCenterWidget?.dispose();
-        this._bottomRightWidget?.dispose();
-
+        this._stopMoveAnimation();
+        this._stopAntLineAnimation();
+        this._selectionShapeGroup.dispose();
+        this._rowHeaderGroup.dispose();
+        this._columnHeaderGroup.dispose();
         this._controlExtension?.dispose();
 
         super.dispose();
@@ -916,13 +969,13 @@ export class SelectionControl extends Disposable {
     }
 
     private _updateBackgroundControl(style: ISelectionStyle): void {
-        const { startX, startY, endX, endY } = this._selectionRenderModel;
+        const { startX, startY, endX, endY } = this._animatedRange ?? this._selectionRenderModel;
 
         const scale = this._getScale();
         const { fill = style.fill! } = style;
         let { strokeWidth } = style;
         strokeWidth /= scale;
-        const highlightSelection = this._selectionRenderModel.highlightToSelection();
+        const highlightSelection = this._animatedRange ?? this._selectionRenderModel.highlightToSelection();
 
         if (!highlightSelection) {
             this._backgroundControlTop.resize(endX - startX, endY - startY);
@@ -991,7 +1044,7 @@ export class SelectionControl extends Disposable {
     }
 
     private _updateWidgets(style: Required<ISelectionStyle>): void {
-        const { startX, startY, endX, endY } = this._selectionRenderModel;
+        const { startX, startY, endX, endY } = this._animatedRange ?? this._selectionRenderModel;
 
         const { stroke = style.stroke!, widgets = style.widgets!, widgetStroke = style.widgetStroke! } = style;
         const scale = this._getScale();

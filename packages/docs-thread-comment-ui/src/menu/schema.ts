@@ -22,7 +22,11 @@ import {
     StartAddCommentOperation,
     ToggleCommentPanelOperation,
 } from '../commands/operations/show-comment-panel.operation';
-import { AddDocCommentMenuItemFactory, AddDocDrawingCommentMenuItemFactory, ToolbarDocCommentMenuItemFactory } from './menu';
+import {
+    AddDocCommentMenuItemFactory,
+    AddDocDrawingCommentMenuItemFactory,
+    ToolbarDocCommentMenuItemFactory,
+} from './menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonInsertGroup.OTHERS]: {
@@ -47,14 +51,6 @@ export const menuSchema: MenuSchemaType = {
         [AddDocDrawingCommentOperation.id]: {
             order: 10,
             menuItemFactory: AddDocDrawingCommentMenuItemFactory,
-        },
-    },
-    [ContextMenuPosition.MAIN_AREA]: {
-        [ContextMenuGroup.DATA]: {
-            [StartAddCommentOperation.id]: {
-                order: 1,
-                menuItemFactory: AddDocCommentMenuItemFactory,
-            },
         },
     },
     [ContextMenuPosition.DRAWING]: {

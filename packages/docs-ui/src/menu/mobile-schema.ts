@@ -35,10 +35,6 @@ export const mobileMenuSchema: MenuSchemaType = {
                 order: 0,
                 menuItemFactory: PasteMenuFactory,
             },
-            [DocPasteSpecialCommand.id]: {
-                order: 0.5,
-                menuItemFactory: PasteSpecialMenuFactory,
-            },
             [DocSelectWordCommand.id]: {
                 order: 1,
                 menuItemFactory: SelectWordMenuFactory,
@@ -46,6 +42,13 @@ export const mobileMenuSchema: MenuSchemaType = {
             [DocSelectAllCommand.id]: {
                 order: 2,
                 menuItemFactory: SelectAllMenuFactory,
+            },
+        },
+        [ContextMenuGroup.FORMAT]: {
+            order: 1,
+            [DocPasteSpecialCommand.id]: {
+                order: 0,
+                menuItemFactory: PasteSpecialMenuFactory,
             },
         },
     },

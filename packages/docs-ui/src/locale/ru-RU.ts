@@ -19,6 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         pasteOptions: {
+            special: 'Специальная вставка',
             title: 'Параметры вставки',
             source: 'Сохранить исходное форматирование',
             destination: 'Использовать форматирование назначения',

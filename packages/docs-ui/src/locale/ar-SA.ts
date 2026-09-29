@@ -19,6 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         pasteOptions: {
+            special: 'لصق خاص',
             title: 'خيارات اللصق',
             source: 'الاحتفاظ بتنسيق المصدر',
             destination: 'مطابقة تنسيق الوجهة',

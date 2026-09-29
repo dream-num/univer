@@ -19,6 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         pasteOptions: {
+            special: 'Tempel khusus',
             title: 'Opsi tempel',
             source: 'Pertahankan format sumber',
             destination: 'Sesuaikan format tujuan',

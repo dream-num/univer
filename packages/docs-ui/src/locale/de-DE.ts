@@ -19,6 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         pasteOptions: {
+            special: 'Inhalte einfügen',
             title: 'Einfügeoptionen',
             source: 'Ursprüngliche Formatierung beibehalten',
             destination: 'Zielformatierung übernehmen',

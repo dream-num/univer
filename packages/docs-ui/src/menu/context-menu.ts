@@ -19,11 +19,18 @@ import type { IRectRangeWithStyle } from '@univerjs/engine-render';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { Subscriber } from 'rxjs';
 import type { LocaleKey } from '../locale/types';
-import { DOC_RANGE_TYPE, DocumentFlavor, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import {
+    DOC_RANGE_TYPE,
+    DocumentFlavor,
+    FOCUSING_SHAPE_TEXT_EDITOR,
+    IContextService,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { UnitAction } from '@univerjs/protocol';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { combineLatest, map, Observable } from 'rxjs';
+import { combineLatest, map, Observable, startWith } from 'rxjs';
 import {
     DocCopyCommand,
     DocCutCommand,
@@ -394,10 +401,21 @@ export function PasteSpecialMenuFactory(accessor: IAccessor): IMenuSelectorItem<
         id: DocPasteSpecialCommand.id,
         type: MenuItemType.SELECTOR,
         icon: 'DocPasteOptionsIcon',
-        title: 'docs-ui.pasteOptions.title',
-        tooltip: 'docs-ui.pasteOptions.title',
+        title: 'docs-ui.pasteOptions.special',
+        tooltip: 'docs-ui.pasteOptions.special',
         selections: DOC_PASTE_OPTIONS.map((option) => ({ ...option })),
         disabled$: disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
+
+export function PasteRibbonMenuFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
+    return {
+        ...PasteSpecialMenuFactory(accessor),
+        title: 'docs-ui.rightClick.paste',
+        hidden$: combineLatest([
+            getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+            accessor.get(IContextService).subscribeContextValue$(FOCUSING_SHAPE_TEXT_EDITOR).pipe(startWith(false)),
+        ]).pipe(map(([hidden, editing]) => hidden || editing)),
     };
 }

@@ -95,6 +95,7 @@ import {
     InsertRowBeforeMenuItemFactory,
     ParagraphSettingMenuFactory,
     PasteMenuFactory,
+    PasteRibbonMenuFactory,
     PasteSpecialMenuFactory,
     SectionSettingMenuFactory,
     TABLE_DELETE_MENU_ID,
@@ -226,12 +227,14 @@ export const floatToolbarMenuSchema: MenuSchemaType = {
 
 export const menuSchema: MenuSchemaType = {
     ...floatToolbarMenuSchema,
-    [RibbonStartGroup.OTHERS]: {
+    [RibbonStartGroup.HISTORY]: {
         [DocPasteSpecialCommand.id]: {
-            order: -1,
-            gridLayout: { row: 1, column: 2, rowSpan: 2, showLabel: true },
-            menuItemFactory: PasteSpecialMenuFactory,
+            order: 4,
+            gridLayout: { row: 1, column: 3, rowSpan: 2, showLabel: true },
+            menuItemFactory: PasteRibbonMenuFactory,
         },
+    },
+    [RibbonStartGroup.OTHERS]: {
         [OpenDocPermissionPanelOperation.id]: {
             order: 0,
             gridLayout: { row: 1, column: 1, rowSpan: 2, showLabel: true },
@@ -415,12 +418,12 @@ export const menuSchema: MenuSchemaType = {
                 order: 2,
                 menuItemFactory: PasteMenuFactory,
             },
-            [DocPasteSpecialCommand.id]: {
-                order: 3,
-                menuItemFactory: PasteSpecialMenuFactory,
-            },
         } as MenuSchemaType),
         [ContextMenuGroup.FORMAT]: {
+            [DocPasteSpecialCommand.id]: {
+                order: -1,
+                menuItemFactory: PasteSpecialMenuFactory,
+            },
             [DeleteLeftCommand.id]: {
                 order: 0,
                 menuItemFactory: DeleteMenuFactory,

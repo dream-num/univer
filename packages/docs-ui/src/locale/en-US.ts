@@ -17,6 +17,7 @@
 const locale = {
     'docs-ui': {
         pasteOptions: {
+            special: 'Paste special',
             title: 'Paste options',
             source: 'Keep source formatting',
             destination: 'Match destination formatting',

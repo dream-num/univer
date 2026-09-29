@@ -19,6 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         pasteOptions: {
+            special: 'Colar especial',
             title: 'Opções de colagem',
             source: 'Manter formatação original',
             destination: 'Usar formatação de destino',

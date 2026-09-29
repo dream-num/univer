@@ -105,7 +105,7 @@ export function EmojiPicker(props: IEmojiPickerProps) {
     const deferredQuery = useDeferredValue(query);
     const emojiLocaleData = getEmojiLocaleData(localeService);
     const searchResults = useMemo(
-        () => searchEmojis(deferredQuery, emojiLocaleData.emojiSearchIndex),
+        () => searchEmojis(deferredQuery, emojiLocaleData),
         [deferredQuery, emojiLocaleData]
     );
     const recentStorageKey = extraProps?.recentStorageKey ?? RECENTS_STORAGE_KEY;

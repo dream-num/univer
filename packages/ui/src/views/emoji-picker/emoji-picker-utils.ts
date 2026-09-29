@@ -82,13 +82,13 @@ export function getAllEmojis(): IEmojiItem[] {
     return getEmojiFamilies().flatMap((family) => [family, ...(family.skinToneVariants ?? [])]);
 }
 
-export function searchEmojis(keyword: string, searchIndex?: Record<string, string>): IEmojiItem[] {
+export function searchEmojis(keyword: string, localeData?: IEmojiLocaleData): IEmojiItem[] {
     const query = keyword.trim().toLowerCase();
     if (!query) {
         return [];
     }
 
-    return getEmojiFamilies().filter((item) => getEmojiSearchText(item, searchIndex).includes(query));
+    return getEmojiFamilies().filter((item) => getEmojiSearchText(item, localeData).includes(query));
 }
 
 export function promoteRecentEmoji(recents: IEmojiItem[], item: IEmojiItem): IEmojiItem[] {
@@ -178,9 +178,12 @@ export function getEmojiLocaleData(localeService: Pick<LocaleService, 'getLocale
     return emojiPicker as IEmojiLocaleData;
 }
 
-function getEmojiSearchText(item: IEmojiItem, searchIndex?: Record<string, string>): string {
-    return [item, ...(item.skinToneVariants ?? [])]
-        .flatMap((candidate) => [candidate.title, searchIndex?.[candidate.emoji]])
+function getEmojiSearchText(item: IEmojiItem, localeData?: IEmojiLocaleData): string {
+    return [
+        ...[item, ...(item.skinToneVariants ?? [])]
+            .flatMap((candidate) => [candidate.title, localeData?.emojiTitles?.[candidate.emoji]]),
+        localeData?.emojiSearchIndex?.[item.emoji],
+    ]
         .filter(Boolean)
         .join(' ')
         .toLowerCase();

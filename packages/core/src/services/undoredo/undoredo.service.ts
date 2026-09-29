@@ -422,9 +422,10 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
 
         const isFocusSheet = this._contextService.getContextValue(FOCUSING_SHEET);
         const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
+        const isFocusShapeEditor = this._contextService.getContextValue(FOCUSING_SHAPE_TEXT_EDITOR);
         const isFocusEditor = this._contextService.getContextValue(EDITOR_ACTIVATED);
 
-        if (isFocusEditor && this._contextService.getContextValue(FOCUSING_SHAPE_TEXT_EDITOR)) {
+        if (isFocusEditor && isFocusShapeEditor) {
             return this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC)?.getUnitId() ?? '';
         }
 

@@ -21,6 +21,7 @@ import { ILocalStorageService, Injector, LocaleService, LocaleType } from '@univ
 import { scrollbarClassName } from '@univerjs/design';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../locale/en-US';
+import zhCN from '../../../locale/zh-CN';
 import { connectInjector } from '../../../utils/di';
 import { SymbolPicker } from '../../symbol-picker/SymbolPicker';
 import { EmojiPicker } from '../EmojiPicker';
@@ -59,14 +60,14 @@ class TestResizeObserver {
     unobserve(): void {}
 }
 
-function renderWithDependencies(element: ReactElement) {
+function renderWithDependencies(element: ReactElement, locale = LocaleType.EN_US) {
     const injector = new Injector();
     injector.add([LocaleService]);
     injector.add([ILocalStorageService, { useClass: TestLocalStorageService }]);
 
     const localeService = injector.get(LocaleService);
-    localeService.load({ [LocaleType.EN_US]: enUS });
-    localeService.setLocale(LocaleType.EN_US);
+    localeService.load({ [LocaleType.EN_US]: enUS, [LocaleType.ZH_CN]: zhCN });
+    localeService.setLocale(locale);
 
     const ConnectedTestRoot = connectInjector(() => element, injector) as ComponentType;
     return render(<ConnectedTestRoot />);
@@ -137,6 +138,18 @@ describe('picker callbacks', () => {
         for (const className of scrollbarClassName.split(' ')) {
             expect(scrollContainer?.classList.contains(className)).toBe(true);
         }
+    });
+
+    it('finds localized titles and aliases with the compact locale data', async () => {
+        const onChange = vi.fn();
+        const { getByRole } = renderWithDependencies(<EmojiPicker onChange={onChange} />, LocaleType.ZH_CN);
+
+        for (const query of ['主意', '灯泡']) {
+            fireEvent.change(getByRole('textbox'), { target: { value: query } });
+            await waitFor(() => expect(getByRole('button', { name: '灯泡' })).toBeTruthy());
+        }
+        fireEvent.click(getByRole('button', { name: '灯泡' }));
+        expect(onChange).toHaveBeenCalledWith('💡');
     });
 
     it('keeps the mounted emoji buttons bounded while scrolling', async () => {

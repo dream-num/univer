@@ -106,17 +106,13 @@ describe('emoji picker utils', () => {
         expect(result.some((item) => item.emoji === '💡')).toBe(true);
     });
 
-    it('searches localized emoji titles', () => {
-        const result = searchEmojis('灯泡', { '💡': '灯泡 电灯泡 主意' });
-
-        expect(result.some((item) => item.emoji === '💡')).toBe(true);
-    });
-
-    it('keeps generated locale search indexes aligned with generated emojis', async () => {
-        const allEmojis = [...new Set(Object.values(emojis).flat().map((item) => item.emoji))];
+    it('searches localized titles, aliases and skin tone names with the compact index', async () => {
         const { default: zhCNEmojiLocale } = await import('../../../locale/emoji-locale/zh-CN.generated');
-        const { emojiSearchIndex } = zhCNEmojiLocale;
 
-        expect(allEmojis.every((emoji) => typeof emojiSearchIndex[emoji] === 'string' && emojiSearchIndex[emoji].length > 0)).toBe(true);
+        for (const query of ['灯泡', '主意', ' LIGHT BULB ']) {
+            expect(searchEmojis(query, zhCNEmojiLocale).some((item) => item.emoji === '💡')).toBe(true);
+        }
+        expect(searchEmojis('挥手: 较浅肤色', zhCNEmojiLocale).map((item) => item.emoji)).toEqual(['👋']);
+        expect(searchEmojis('   ', zhCNEmojiLocale)).toEqual([]);
     });
 });

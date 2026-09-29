@@ -198,31 +198,38 @@ export function groupSkinToneVariants(items: IEmojiItem[]): IEmojiItem[] {
         });
 }
 
-export function buildEmojiSearchIndexFromCldrAnnotations(emojis: Array<string | IEmojiItem>, ...sources: ICldrAnnotationsData[]): IGeneratedEmojiLocale {
+export function buildEmojiSearchIndexFromCldrAnnotations(emojis: IEmojiItem[], ...sources: ICldrAnnotationsData[]): IGeneratedEmojiLocale {
     const emojiTitles: Record<string, string> = {};
     const emojiSearchIndex: Record<string, string> = {};
 
-    emojis.forEach((entry) => {
-        const emoji = typeof entry === 'string' ? entry : entry.emoji;
-        const fallbackTitle = typeof entry === 'string' ? undefined : entry.title;
-        const annotations = sources
-            .map((source) => getCldrAnnotation(source, emoji))
-            .filter((annotation): annotation is NonNullable<ReturnType<typeof getCldrAnnotation>> => Boolean(annotation));
+    emojis.forEach((family) => {
+        const titles: string[] = [];
+        const keywords = new Set<string>();
 
-        const title = annotations.find((annotation) => annotation.tts?.[0])?.tts?.[0] ?? fallbackTitle;
-        const keywords = [...new Set(annotations.flatMap((annotation) => [
-            ...(annotation.tts ?? []),
-            ...(annotation.default ?? []),
-        ]).filter(Boolean))];
-        if (!keywords.length && fallbackTitle) {
-            keywords.push(fallbackTitle);
-        }
+        [family, ...(family.skinToneVariants ?? [])].forEach((item) => {
+            const annotations = sources
+                .map((source) => getCldrAnnotation(source, item.emoji))
+                .filter((annotation): annotation is NonNullable<ReturnType<typeof getCldrAnnotation>> => Boolean(annotation));
+            const title = annotations.find((annotation) => annotation.tts?.[0])?.tts?.[0] ?? item.title;
+            emojiTitles[item.emoji] = title;
+            titles.push(item.title.toLowerCase(), title.toLowerCase());
 
-        if (title) {
-            emojiTitles[emoji] = title;
-        }
-        if (keywords.length) {
-            emojiSearchIndex[emoji] = keywords.join(' ');
+            annotations.forEach((annotation) => {
+                [...(annotation.tts ?? []), ...(annotation.default ?? [])].forEach((keyword) => {
+                    if (keyword) {
+                        keywords.add(keyword.toLowerCase());
+                    }
+                });
+            });
+        });
+
+        // Search returns families and already checks their English and localized titles.
+        const aliases = [...keywords].filter((keyword) => !titles.some((title) => title.includes(keyword)));
+        const searchText = aliases
+            .filter((keyword) => !aliases.some((alias) => alias !== keyword && alias.includes(keyword)))
+            .join(' ');
+        if (searchText) {
+            emojiSearchIndex[family.emoji] = searchText;
         }
     });
 
@@ -473,14 +480,7 @@ function writeGeneratedEmojiLocale(locale: string, data: IGeneratedEmojiLocale):
 async function generate(): Promise<void> {
     const emojiTest = await downloadUnicodeEmojiTest();
     const emojis = buildEmojisFromEmojiTest(emojiTest);
-    const allEmojis = [
-        ...new Map(
-            Object.values(emojis)
-                .flat()
-                .flatMap((item) => [item, ...(item.skinToneVariants ?? [])])
-                .map((item) => [item.emoji, item])
-        ).values(),
-    ];
+    const emojiFamilies = emojiCategories.flatMap((category) => emojis[category]);
 
     writeGeneratedEmojis(outputPath, emojis);
 
@@ -488,7 +488,7 @@ async function generate(): Promise<void> {
         const annotations = await downloadJson<ICldrAnnotationsData>(getCldrAnnotationsUrl(cldrLocale, 'annotations'));
         const annotationsDerived = await downloadJson<ICldrAnnotationsData>(getCldrAnnotationsUrl(cldrLocale, 'annotationsDerived'));
 
-        writeGeneratedEmojiLocale(locale, buildEmojiSearchIndexFromCldrAnnotations(allEmojis, annotations, annotationsDerived));
+        writeGeneratedEmojiLocale(locale, buildEmojiSearchIndexFromCldrAnnotations(emojiFamilies, annotations, annotationsDerived));
     });
 }
 

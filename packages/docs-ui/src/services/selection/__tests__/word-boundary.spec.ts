@@ -16,7 +16,7 @@
 
 import { Direction } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { getNextWordBoundaryOffset, getWordBoundaryByIndex } from '../word-boundary';
+import { getNextWordBoundaryOffset, getWordBoundaryByIndex, getWordSelectionByIndex } from '../word-boundary';
 
 describe('word boundary helpers', () => {
     it('finds the word under an English character', () => {
@@ -36,6 +36,24 @@ describe('word boundary helpers', () => {
     it('ignores punctuation and whitespace for direct word lookup', () => {
         expect(getWordBoundaryByIndex('hello, world', 5, 0)).toBeNull();
         expect(getWordBoundaryByIndex('hello world', 5, 0)).toBeNull();
+    });
+
+    it.each([
+        { content: 'alpha beta gamma\r', index: 0, isBack: true, selected: 'alpha' },
+        { content: 'alpha beta gamma\r', index: 16, isBack: false, selected: 'gamma' },
+        { content: 'alpha beta gamma\r', index: 8, isBack: false, selected: 'beta' },
+        { content: 'alpha    beta gamma!\r', index: 6, isBack: false, selected: 'alpha  ' },
+        { content: 'alpha    beta gamma!\r', index: 20, isBack: false, selected: '!' },
+        { content: '中文测试\r', index: 4, isBack: false, selected: '测试' },
+        { content: '25%\r', index: 3, isBack: false, selected: '%' },
+    ])('selects "$selected" when double clicking "$content" at $index', ({ content, index, isBack, selected }) => {
+        const range = getWordSelectionByIndex(content, index, 10, isBack)!;
+
+        expect(content.slice(range.startOffset - 10, range.endOffset - 10)).toBe(selected);
+    });
+
+    it('keeps an empty paragraph unselected on double click', () => {
+        expect(getWordSelectionByIndex('\r', 0, 0, true)).toBeNull();
     });
 
     it('moves to previous and next English word boundaries', () => {

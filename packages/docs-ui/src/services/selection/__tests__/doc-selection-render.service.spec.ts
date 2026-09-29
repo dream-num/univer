@@ -22,6 +22,7 @@ import {
     DataStreamTreeTokenType,
     DisposableCollection,
     DOC_RANGE_TYPE,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentDataModel,
     DocumentFlavor,
@@ -1841,7 +1842,13 @@ describe('DocSelectionRenderService', () => {
         ]);
     });
 
-    it('selects the current word on double click and the paragraph on triple click', () => {
+    it.each([
+        { unitId: 'word-selection-doc', glyphIndex: 7, word: '6:11' },
+        { unitId: 'word-selection-doc', glyphIndex: 11, word: null },
+        { unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY, glyphIndex: 0, word: '0:5' },
+        { unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY, glyphIndex: 11, word: '6:11' },
+        { unitId: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, glyphIndex: 11, word: '6:11' },
+    ])('selects the nearest sheet-editor word on double click ($unitId, glyph=$glyphIndex)', ({ unitId, glyphIndex, word }) => {
         const viewport = {
             transformVector2SceneCoord: () => ({ x: 8, y: 12 }),
             getAbsoluteVector: () => ({ x: 16, y: 24 }),
@@ -1868,7 +1875,7 @@ describe('DocSelectionRenderService', () => {
             mainComponent,
             scene,
             documentData: {
-                id: 'word-selection-doc',
+                id: unitId,
                 body: { dataStream: 'Hello world\r\n', paragraphs: [{ startIndex: 11, paragraphId: 'word-selection-paragraph' }] },
                 documentStyle: {},
             },
@@ -1878,13 +1885,13 @@ describe('DocSelectionRenderService', () => {
         const line = { paragraphIndex: 11, st: 0, parent: column, divides: [] as unknown[] };
         const divide = { parent: line, glyphGroup: [] as Array<{ content: string; count: number; glyphType: GlyphType; parent?: unknown }> };
         const glyphs: Array<{ content: string; count: number; glyphType: GlyphType; parent?: unknown }> = [];
-        for (const content of 'Hello world') {
+        for (const content of 'Hello world\r') {
             glyphs.push({ content, count: 1, glyphType: GlyphType.WORD, parent: divide });
         }
         divide.glyphGroup = glyphs;
         line.divides = [divide];
         column.lines = [line];
-        (service as unknown as { _findNodeByCoord: () => unknown })._findNodeByCoord = () => ({ node: glyphs[7], ratioX: 0.4, segmentPage: -1 });
+        (service as unknown as { _findNodeByCoord: () => unknown })._findNodeByCoord = () => ({ node: glyphs[glyphIndex], ratioX: 0.4, segmentPage: -1 });
         getRangeListFromCharIndexMock.mockImplementation((startOffset, endOffset) => ({
             textRanges: [{
                 ...createTextRange({ isActive: vi.fn(() => true) }),
@@ -1914,7 +1921,7 @@ describe('DocSelectionRenderService', () => {
         service.__handleDblClick({ offsetX: 10, offsetY: 12 } as never);
         service.__handleTripleClick({ offsetX: 10, offsetY: 12 } as never);
 
-        expect(selections).toEqual(['6:11', '0:11']);
+        expect(selections).toEqual(word ? [word, '0:11'] : ['0:11']);
     });
 
     it('moves the hidden editor to the active visible selection when syncing canvas selection to DOM input', () => {

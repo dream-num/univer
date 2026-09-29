@@ -45,10 +45,11 @@ export class MobileCellEditRenderController extends Disposable implements IRende
                 return;
             }
 
-            this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
+            this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
                 visible: true,
                 eventType: DeviceInputEventType.Dblclick,
                 unitId: this._context.unitId,
+                pointerPosition: { x: cell.event.clientX, y: cell.event.clientY },
             } as IEditorBridgeServiceVisibleParam);
         }));
 

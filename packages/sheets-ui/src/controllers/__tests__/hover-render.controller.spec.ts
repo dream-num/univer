@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
+import { Injector } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { SHEET_VIEW_KEY } from '../../common/keys';
+import { HoverManagerService } from '../../services/hover-manager.service';
+import { SheetScrollManagerService } from '../../services/scroll-manager.service';
+import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { HoverRenderController } from '../hover-render.controller';
 
 function createEventSubject() {
@@ -74,22 +78,22 @@ describe('HoverRenderController', () => {
             triggerColHeaderDbClick: vi.fn(),
             triggerScroll: vi.fn(),
         };
-        const controller = new HoverRenderController(
-            {
-                unitId: 'unit-1',
-                mainComponent,
-                components: new Map([
-                    [SHEET_VIEW_KEY.ROW, rowHeader],
-                    [SHEET_VIEW_KEY.COLUMN, colHeader],
-                ]),
-            } as never,
-            hoverManagerService as never,
-            {
+        const injector = new Injector([
+            [HoverManagerService, { useValue: hoverManagerService }],
+            [SheetSkeletonManagerService, { useValue: {
                 getCurrentParam: vi.fn(() => ({ skeleton: {} })),
                 currentSkeleton$,
-            } as never,
-            { validViewportScrollInfo$ } as never
-        );
+            } }],
+            [SheetScrollManagerService, { useValue: { validViewportScrollInfo$ } }],
+        ]);
+        const controller = injector.createInstance(HoverRenderController, {
+            unitId: 'unit-1',
+            mainComponent,
+            components: new Map([
+                [SHEET_VIEW_KEY.ROW, rowHeader],
+                [SHEET_VIEW_KEY.COLUMN, colHeader],
+            ]),
+        } as never);
 
         mainComponent.onPointerEnter$.emit({});
         expect(controller.active).toBe(true);
@@ -108,12 +112,13 @@ describe('HoverRenderController', () => {
         expect(hoverManagerService.triggerPointerDown).toHaveBeenCalledWith('unit-1', { offsetX: 11, offsetY: 21 });
         expect(hoverManagerService.triggerPointerUp).toHaveBeenCalledWith('unit-1', { offsetX: 12, offsetY: 22 });
         expect(hoverManagerService.triggerClick).toHaveBeenCalledWith('unit-1', 13, 23);
-        expect(hoverManagerService.triggerDbClick).toHaveBeenCalledWith('unit-1', 14, 24);
+        expect(hoverManagerService.triggerDbClick).toHaveBeenCalledWith('unit-1', { offsetX: 14, offsetY: 24 });
         expect(hoverManagerService.triggerRowHeaderPoniterUp).toHaveBeenCalledWith('unit-1', 1, 2);
         expect(hoverManagerService.triggerRowHeaderClick).toHaveBeenCalledWith('unit-1', 1, 2);
         expect(hoverManagerService.triggerColHeaderDbClick).toHaveBeenCalledWith('unit-1', 3, 4);
         expect(hoverManagerService.triggerScroll).toHaveBeenCalled();
 
         controller.dispose();
+        injector.dispose();
     });
 });

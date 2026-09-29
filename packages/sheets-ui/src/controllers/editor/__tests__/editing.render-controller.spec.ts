@@ -44,7 +44,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocStateChangeManagerService, DocStateEmitService, InsertTextCommand, RichTextEditingMutation } from '@univerjs/docs';
-import { IEditorService, InnerPasteCommand, MoveCursorOperation, MoveSelectionOperation, SetDocInputStyleCommand, VIEWPORT_KEY } from '@univerjs/docs-ui';
+import { DocSelectionRenderService, IEditorService, InnerPasteCommand, MoveCursorOperation, MoveSelectionOperation, SetDocInputStyleCommand, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { FunctionService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { DeviceInputEventType, IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
 import { SetRangeValuesCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
@@ -367,6 +367,43 @@ function createController(initialDataStream = 'new value\r\n', isPercentFormat =
 }
 
 describe('EditingRenderController business methods', () => {
+    it.each([
+        { content: 'hello world', percent: false, offset: 5, scale: 1, expected: 'hello! world' },
+        { content: 'hello world', percent: false, offset: 5, scale: 2, expected: 'hello! world' },
+        { content: '25%', percent: true, offset: 1, scale: 1, expected: '2!5%' },
+        { content: '=SUM(A1:A3)', percent: false, offset: 4, scale: 1, expected: '=SUM!(A1:A3)' },
+        { content: 'hello\rworld', percent: false, offset: 7, scale: 1, expected: 'hello\rw!orld' },
+    ])('inserts text at the double-click position in "$content" after layout (scale=$scale)', ({ content, percent, offset, scale, expected }) => {
+        const { controller, commandService, docModel, selectionManager } = createController(`${content}\r\n`, percent);
+        const visible = {
+            visible: true,
+            eventType: DeviceInputEventType.Dblclick,
+            unitId: 'unit-1',
+            pointerPosition: { x: 100 + 45 * scale, y: 200 + 30 * scale },
+        };
+        controller._editorBridgeService.isVisible.mockReturnValue(visible);
+        controller._sheetCellEditorResizeService.fitTextSize.mockImplementation(() => undefined);
+        const render = controller._renderManagerService.getRenderUnitById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        const setCursorManually = vi.fn(() => selectionManager.replaceDocRanges([
+            { startOffset: offset, endOffset: offset, collapsed: true },
+        ], { unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY, subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY }));
+        render.engine = { width: 300, height: 100, getCanvasElement: () => ({ getBoundingClientRect: () => ({ left: 100, top: 200, width: 300 * scale, height: 100 * scale }) }) };
+        const originalWith = render.with;
+        render.with = (token: unknown) => token === DocSelectionRenderService ? { setCursorManually } : originalWith(token);
+        controller._renderManagerService.getRenderUnitById.mockReturnValue(render);
+
+        controller._editorBridgeService.visible$.next(visible);
+        controller._sheetCellEditorResizeService.fitTextSize.mock.calls.at(-1)[0]();
+        commandService.syncExecuteCommand(InsertTextCommand.id, {
+            unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            body: { dataStream: '!' },
+            range: selectionManager.getActiveTextRange(),
+        });
+
+        expect(docModel.getBody()?.dataStream).toBe(`${expected}\r\n`);
+        expect(setCursorManually).toHaveBeenCalledWith(45, 30, true, true, { strict: false });
+    });
+
     it('bypasses parsing, interceptors, and commands when the editor is clean', async () => {
         const { controller, worksheet } = createController();
         controller._editorBridgeService.getEditorDirty.mockReturnValue(false);
@@ -618,17 +655,17 @@ describe('EditingRenderController business methods', () => {
     });
 
     it.each([
-        { content: '25%', percent: true, input: '3', expected: '3%' },
-        { content: '25%', percent: true, input: '7%', expected: '7%' },
-        { content: '-12.5%', percent: true, input: '3', expected: '3%' },
-        { content: 'hello world', percent: false, input: '3', expected: '3' },
-        { content: '=SUM(A1:A3)', percent: false, input: '=2+3', expected: '=2+3' },
-        { content: '=1/4', percent: true, input: '=2+3', expected: '=2+3' },
-        { content: '=25%', percent: true, input: '=30%', expected: '=30%' },
-        { content: 'hello\rworld', percent: false, input: '3', expected: '3' },
-        { content: '25%', percent: false, input: '3', expected: '3' },
+        { content: '25%', percent: true, input: '3', expected: '253%' },
+        { content: '25%', percent: true, input: '7%', expected: '257%' },
+        { content: '-12.5%', percent: true, input: '3', expected: '-12.53%' },
+        { content: 'hello world', percent: false, input: '3', expected: 'hello world3' },
+        { content: '=SUM(A1:A3)', percent: false, input: '+1', expected: '=SUM(A1:A3)+1' },
+        { content: '=1/4', percent: true, input: '+1', expected: '=1/4+1' },
+        { content: '=25%', percent: true, input: '+1', expected: '=25%+1' },
+        { content: 'hello\rworld', percent: false, input: '3', expected: 'hello\rworld3' },
+        { content: '25%', percent: false, input: '3', expected: '25%3' },
         { content: '', percent: false, input: '3', expected: '3' },
-    ])('replaces the editable content of "$content" on double click', ({ content, percent, input, expected }) => {
+    ])('keeps an insertion caret for "$content" when editing starts without a pointer position', ({ content, percent, input, expected }) => {
         const { controller, commandService, docModel, selectionManager } = createController(`${content}\r\n`, percent);
 
         controller._editorBridgeService.visible$.next({
@@ -668,11 +705,11 @@ describe('EditingRenderController business methods', () => {
     });
 
     it.each([
-        { content: '25%', percent: true, input: '7%', expected: '7%' },
-        { content: '25%', percent: true, input: '7', expected: '7%' },
-        { content: '=25%', percent: true, input: '=30%', expected: '=30%' },
-        { content: '25%', percent: false, input: '7%', expected: '7%' },
-    ])('pastes "$input" over the double-click selection of "$content" (percent=$percent)', ({ content, percent, input, expected }) => {
+        { content: '25%', percent: true, input: '7%', expected: '257%' },
+        { content: '25%', percent: true, input: '7', expected: '257%' },
+        { content: '=25%', percent: true, input: '+30%', expected: '=25%+30%' },
+        { content: '25%', percent: false, input: '7%', expected: '25%7%' },
+    ])('pastes "$input" at the insertion caret in "$content" (percent=$percent)', ({ content, percent, input, expected }) => {
         const { controller, commandService, docModel } = createController(`${content}\r\n`, percent);
         controller._editorBridgeService.visible$.next({
             visible: true,
@@ -691,8 +728,8 @@ describe('EditingRenderController business methods', () => {
     });
 
     it.each([
-        { eventType: DeviceInputEventType.Dblclick, percent: false, expected: '3' },
-        { eventType: DeviceInputEventType.Dblclick, percent: true, expected: '3%' },
+        { eventType: DeviceInputEventType.Dblclick, percent: false, expected: 'hello3' },
+        { eventType: DeviceInputEventType.Dblclick, percent: true, expected: '253%' },
         { eventType: DeviceInputEventType.Keyboard, percent: false, expected: 'hello3' },
         { eventType: DeviceInputEventType.Keyboard, percent: true, expected: '253%' },
     ])('preserves the host Docs selection when opening an embedded cell editor ($eventType, percent=$percent)', ({ eventType, percent, expected }) => {
@@ -721,7 +758,7 @@ describe('EditingRenderController business methods', () => {
         expect(selectionManager.getTextRanges(host)).toEqual([hostRange]);
     });
 
-    it('keeps percentage replacement after undoing a paste inside the editor', () => {
+    it('restores the insertion caret after undoing a percentage paste inside the editor', () => {
         const { controller, commandService, docModel, docStateEmitService, selectionManager } = createController('25%\r\n', true);
         const emit = vi.spyOn(docStateEmitService, 'emitStateChangeInfo');
         controller._editorBridgeService.visible$.next({
@@ -747,7 +784,7 @@ describe('EditingRenderController business methods', () => {
             range: selectionManager.getActiveTextRange(),
         });
 
-        expect(docModel.getBody()?.dataStream).toBe('3%\r\n');
+        expect(docModel.getBody()?.dataStream).toBe('253%\r\n');
     });
 
     it('keeps one percent suffix when typing a complete percentage after double click', () => {
@@ -764,7 +801,7 @@ describe('EditingRenderController business methods', () => {
                 range: selectionManager.getActiveTextRange(),
             });
         }
-        expect(docModel.getBody()?.dataStream).toBe('3%\r\n');
+        expect(docModel.getBody()?.dataStream).toBe('253%\r\n');
     });
 
     it('inserts percent operators inside a formula without overtyping an existing operator', () => {

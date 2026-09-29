@@ -468,7 +468,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         const source = await this._preparePaste(session.payload, mode, session.source);
         // Both history identity and the invalidation generation must still match after asynchronous image loading.
         if (generation !== this._pasteGeneration || session !== this._pasteSession ||
-            this._undoRedoService.pitchTopUndoElement(state.unitId) !== session.history ||
+            this._undoRedoService.pitchTopUndoElement() !== session.history ||
             this._getPasteSelectionKey() !== session.selectionKey ||
             this._getCurrentDocumentUnitId() !== state.unitId || !this._canEditTargets(state.unitId)) {
             return false;
@@ -480,18 +480,18 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         this._applyingPaste = true;
         try {
             // This synchronous transaction can only replace the exact, still-current paste history entry.
-            if (!this._commandService.syncExecuteCommand(UndoCommand.id, { unitId: state.unitId })) {
+            if (!this._commandService.syncExecuteCommand(UndoCommand.id)) {
                 this.dismissPasteOptions();
                 return false;
             }
             try {
                 if (!this._paste(doc, state.unitId)) {
-                    this._commandService.syncExecuteCommand(RedoCommand.id, { unitId: state.unitId });
+                    this._commandService.syncExecuteCommand(RedoCommand.id);
                     this.dismissPasteOptions();
                     return false;
                 }
             } catch (error) {
-                this._commandService.syncExecuteCommand(RedoCommand.id, { unitId: state.unitId });
+                this._commandService.syncExecuteCommand(RedoCommand.id);
                 this.dismissPasteOptions();
                 throw error;
             }
@@ -607,7 +607,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             return;
         }
         this._stateChangeManager.flushPendingChanges(unitId);
-        const history = this._undoRedoService.pitchTopUndoElement(unitId);
+        const history = this._undoRedoService.pitchTopUndoElement();
         const ranges = this._docSelectionManagerService.getTextRanges(this._getSelectionParams(unitId));
         const range = ranges?.find((item) => item.isActive) ?? ranges?.[0];
         if (!history || history.unitID !== unitId || !range) {

@@ -24,7 +24,10 @@ import {
     DOC_RANGE_TYPE,
     DocumentBlockRangeType,
     DocumentDataModel,
+    EDITOR_ACTIVATED,
+    FOCUSING_SHAPE_TEXT_EDITOR,
     ICommandService,
+    IContextService,
     ImageSourceType,
     IPermissionService,
     IUndoRedoService,
@@ -1955,6 +1958,9 @@ describe('internal editor paste options', () => {
         const instanceService = injector.get(IUniverInstanceService);
         instanceService.focusUnit(host.getUnitId());
         instanceService.setCurrentUnitForType(unitId);
+        const context = injector.get(IContextService);
+        context.setContextValue(EDITOR_ACTIVATED, true);
+        context.setContextValue(FOCUSING_SHAPE_TEXT_EDITOR, true);
         const selection = injector.get(DocSelectionManagerService);
         selection.__TEST_ONLY_setCurrentSelection({ unitId, subUnitId: '' });
         selection.__TEST_ONLY_add([{ startOffset: 6, endOffset: 6, collapsed: true, isActive: true, segmentId: '' }]);
@@ -1981,11 +1987,13 @@ describe('internal editor paste options', () => {
             expect(history.getUndoRedoStatus(unitId).undos).toBe(2);
             expect(history.getUndoRedoStatus(host.getUnitId()).undos).toBe(0);
             expect(instanceService.getFocusedUnit()).toBe(host);
-            expect(commands.syncExecuteCommand(UndoCommand.id, { unitId })).toBe(true);
+            expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true);
             expect(doc.getBody()).toEqual(before);
-            expect(commands.syncExecuteCommand(RedoCommand.id, { unitId })).toBe(true);
+            expect(commands.syncExecuteCommand(RedoCommand.id)).toBe(true);
             expect(doc.getBody()).toEqual(source);
             expect(await clipboard.legacyPaste(payload)).toBe(true);
+            context.setContextValue(FOCUSING_SHAPE_TEXT_EDITOR, false);
+            context.setContextValue(EDITOR_ACTIVATED, false);
             hook.dispose();
             expect(await firstValueFrom(clipboard.pasteOptions$)).toBeNull();
             expect(await clipboard.changePasteMode('text')).toBe(false);

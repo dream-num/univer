@@ -21,10 +21,11 @@ import type { ICommand, IMutationInfo } from '../command/command.service';
 import { BehaviorSubject } from 'rxjs';
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '../../common/const';
 import { createIdentifier } from '../../common/di';
+import { UniverInstanceType } from '../../common/unit';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 import { CommandType, ICommandService, sequenceExecute } from '../command/command.service';
 import { IConfigService } from '../config/config.service';
-import { EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET } from '../context/context';
+import { EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHAPE_TEXT_EDITOR, FOCUSING_SHEET } from '../context/context';
 import { IContextService } from '../context/context.service';
 import { IUniverInstanceService } from '../instance/instance.service';
 
@@ -56,13 +57,13 @@ export interface IUndoRedoService {
      */
     beginUndoRedoGroup(unitId: string, groupId: string, mode?: 'replace' | 'append'): IDisposable;
 
-    /** Read the top undo entry for a unit, defaulting to the focused unit. */
-    pitchTopUndoElement(unitId?: string): Nullable<IUndoRedoItem>;
-    /** Read the top redo entry for a unit, defaulting to the focused unit. */
-    pitchTopRedoElement(unitId?: string): Nullable<IUndoRedoItem>;
+    /** Read the top undo entry for the focused editor or unit. */
+    pitchTopUndoElement(): Nullable<IUndoRedoItem>;
+    /** Read the top redo entry for the focused editor or unit. */
+    pitchTopRedoElement(): Nullable<IUndoRedoItem>;
 
-    popUndoToRedo(unitId?: string): void;
-    popRedoToUndo(unitId?: string): void;
+    popUndoToRedo(): void;
+    popRedoToUndo(): void;
 
     rollback(id: string, unitId?: string): void;
 
@@ -129,9 +130,9 @@ export const UndoCommand = new (class extends MultiImplementationCommand impleme
 
     readonly id = UndoCommandId;
 
-    handler(accessor: IAccessor, params?: { unitId?: string }) {
+    handler(accessor: IAccessor) {
         const undoRedoService = accessor.get(IUndoRedoService);
-        const element = undoRedoService.pitchTopUndoElement(params?.unitId);
+        const element = undoRedoService.pitchTopUndoElement();
 
         if (!element) {
             return false;
@@ -140,7 +141,7 @@ export const UndoCommand = new (class extends MultiImplementationCommand impleme
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(element.undoMutations, commandService);
         if (result.result) {
-            undoRedoService.popUndoToRedo(params?.unitId);
+            undoRedoService.popUndoToRedo();
 
             return true;
         }
@@ -154,9 +155,9 @@ export const RedoCommand = new (class extends MultiImplementationCommand impleme
 
     readonly id = RedoCommandId;
 
-    handler(accessor: IAccessor, params?: { unitId?: string }) {
+    handler(accessor: IAccessor) {
         const undoRedoService = accessor.get(IUndoRedoService);
-        const element = undoRedoService.pitchTopRedoElement(params?.unitId);
+        const element = undoRedoService.pitchTopRedoElement();
         if (!element) {
             return false;
         }
@@ -164,7 +165,7 @@ export const RedoCommand = new (class extends MultiImplementationCommand impleme
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(element.redoMutations, commandService);
         if (result.result) {
-            undoRedoService.popRedoToUndo(params?.unitId);
+            undoRedoService.popRedoToUndo();
 
             return true;
         }
@@ -289,12 +290,14 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         this._updateStatus();
     }
 
-    pitchTopUndoElement(unitId?: string): Nullable<IUndoRedoItem> {
-        return this._pitchUndoElement(unitId ?? this._getFocusedUnitId());
+    pitchTopUndoElement(): Nullable<IUndoRedoItem> {
+        const unitID = this._getFocusedUnitId();
+        return this._pitchUndoElement(unitID);
     }
 
-    pitchTopRedoElement(unitId?: string): Nullable<IUndoRedoItem> {
-        return this._pitchRedoElement(unitId ?? this._getFocusedUnitId());
+    pitchTopRedoElement(): Nullable<IUndoRedoItem> {
+        const unitID = this._getFocusedUnitId();
+        return this._pitchRedoElement(unitID);
     }
 
     private _pitchUndoElement(unitId: string): Nullable<IUndoRedoItem> {
@@ -307,26 +310,26 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         return stack?.length ? stack[stack.length - 1] : null;
     }
 
-    popUndoToRedo(unitId?: string): void {
-        const undoStack = unitId ? this._getUndoStack(unitId, true) : this._getUndoStackForFocused();
+    popUndoToRedo(): void {
+        const undoStack = this._getUndoStackForFocused();
         const element = undoStack.pop();
         if (element) {
             this._itemGroups.delete(element);
             // Only push to redo stack if redoMutations is not empty
             if (element.redoMutations.length > 0) {
-                const redoStack = unitId ? this._getRedoStack(unitId, true) : this._getRedoStackForFocused();
+                const redoStack = this._getRedoStackForFocused();
                 redoStack.push(element);
             }
             this._updateStatus();
         }
     }
 
-    popRedoToUndo(unitId?: string): void {
-        const redoStack = unitId ? this._getRedoStack(unitId, true) : this._getRedoStackForFocused();
+    popRedoToUndo(): void {
+        const redoStack = this._getRedoStackForFocused();
         const element = redoStack.pop();
         if (element) {
             this._itemGroups.delete(element);
-            const undoStack = unitId ? this._getUndoStack(unitId, true) : this._getUndoStackForFocused();
+            const undoStack = this._getUndoStackForFocused();
             undoStack.push(element);
             this._updateStatus();
         }
@@ -420,6 +423,10 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         const isFocusSheet = this._contextService.getContextValue(FOCUSING_SHEET);
         const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
         const isFocusEditor = this._contextService.getContextValue(EDITOR_ACTIVATED);
+
+        if (isFocusEditor && this._contextService.getContextValue(FOCUSING_SHAPE_TEXT_EDITOR)) {
+            return this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC)?.getUnitId() ?? '';
+        }
 
         if (isFocusSheet) {
             if (isFocusFormulaEditor && isFocusEditor) {

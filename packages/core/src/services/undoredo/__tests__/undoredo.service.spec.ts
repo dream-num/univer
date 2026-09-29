@@ -19,11 +19,12 @@ import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '../../../common/const';
 import { Injector } from '../../../common/di';
+import { UniverInstanceType } from '../../../common/unit';
 import { DocumentDataModel } from '../../../docs/data-model/document-data-model';
 import { Univer } from '../../../univer';
 import { CommandService, CommandType, ICommandService } from '../../command/command.service';
 import { ConfigService, IConfigService } from '../../config/config.service';
-import { EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET } from '../../context/context';
+import { EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHAPE_TEXT_EDITOR, FOCUSING_SHEET } from '../../context/context';
 import { ContextService, IContextService } from '../../context/context.service';
 import { IUniverInstanceService } from '../../instance/instance.service';
 import { DesktopLogService, ILogService, LogLevel } from '../../log/log.service';
@@ -75,6 +76,64 @@ describe('unit-specific undo redo status', () => {
             univer.dispose();
         }
     });
+});
+
+describe('shape editor undo routing', () => {
+    it.each([UniverInstanceType.UNIVER_DOC, UniverInstanceType.UNIVER_SHEET])(
+        'uses the active shape history and returns to host history after editing in unit type %s',
+        (hostType) => {
+            const univer = new Univer();
+            const injector = univer.__getInjector();
+            const host = univer.createUnit(hostType, { id: 'host' });
+            const editor = univer.createUnit(UniverInstanceType.UNIVER_DOC, { id: 'shape-editor' });
+            const instances = injector.get(IUniverInstanceService);
+            const context = injector.get(IContextService);
+            const history = injector.get(IUndoRedoService);
+            const commands = injector.get(ICommandService);
+            const mutations: string[] = [];
+            commands.registerCommand({
+                id: MUTATION_ID,
+                type: CommandType.MUTATION,
+                handler: (_accessor, params?: { label: string }) => {
+                    mutations.push(params!.label);
+                    return true;
+                },
+            });
+            try {
+                instances.focusUnit(host.getUnitId());
+                instances.setCurrentUnitForType(editor.getUnitId());
+                for (const unitID of [host.getUnitId(), editor.getUnitId(), DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY]) {
+                    history.pushUndoRedo({
+                        unitID,
+                        undoMutations: [{ id: MUTATION_ID, params: { label: `${unitID}-undo` } }],
+                        redoMutations: [{ id: MUTATION_ID, params: { label: `${unitID}-redo` } }],
+                    });
+                }
+                context.setContextValue(EDITOR_ACTIVATED, true);
+                context.setContextValue(FOCUSING_SHAPE_TEXT_EDITOR, true);
+                // Shape text takes precedence over the sheet editor and formula-bar contexts.
+                for (const formulaBarFocused of [false, true]) {
+                    context.setContextValue(FOCUSING_FX_BAR_EDITOR, formulaBarFocused);
+                    expect(history.pitchTopUndoElement()?.unitID).toBe(editor.getUnitId());
+                    expect(commands.syncExecuteCommand(UndoCommandId)).toBe(true);
+                    expect(history.pitchTopRedoElement()?.unitID).toBe(editor.getUnitId());
+                    expect(commands.syncExecuteCommand(RedoCommandId)).toBe(true);
+                }
+                expect(mutations).toEqual(['shape-editor-undo', 'shape-editor-redo', 'shape-editor-undo', 'shape-editor-redo']);
+                expect(history.getUndoRedoStatus(host.getUnitId())).toEqual({ undos: 1, redos: 0 });
+                expect(instances.getFocusedUnit()).toBe(host);
+
+                context.setContextValue(EDITOR_ACTIVATED, false);
+                expect(history.pitchTopUndoElement()?.unitID).toBe(host.getUnitId());
+                context.setContextValue(FOCUSING_SHAPE_TEXT_EDITOR, false);
+                expect(commands.syncExecuteCommand(UndoCommandId)).toBe(true);
+                expect(commands.syncExecuteCommand(RedoCommandId)).toBe(true);
+                expect(mutations.slice(-2)).toEqual(['host-undo', 'host-redo']);
+            } finally {
+                univer.dispose();
+            }
+        }
+    );
 });
 
 class FocusedUnit {

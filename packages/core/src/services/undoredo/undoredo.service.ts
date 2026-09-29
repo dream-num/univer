@@ -21,10 +21,11 @@ import type { ICommand, IMutationInfo } from '../command/command.service';
 import { BehaviorSubject } from 'rxjs';
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '../../common/const';
 import { createIdentifier } from '../../common/di';
+import { UniverInstanceType } from '../../common/unit';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 import { CommandType, ICommandService, sequenceExecute } from '../command/command.service';
 import { IConfigService } from '../config/config.service';
-import { EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET } from '../context/context';
+import { EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHAPE_TEXT_EDITOR, FOCUSING_SHEET } from '../context/context';
 import { IContextService } from '../context/context.service';
 import { IUniverInstanceService } from '../instance/instance.service';
 
@@ -56,9 +57,9 @@ export interface IUndoRedoService {
      */
     beginUndoRedoGroup(unitId: string, groupId: string, mode?: 'replace' | 'append'): IDisposable;
 
-    /** Pitch the top redo element of the currently focused Univer document instance. */
+    /** Read the top undo entry for the focused editor or unit. */
     pitchTopUndoElement(): Nullable<IUndoRedoItem>;
-    /** Pitch the top undo element of the currently focused Univer document instance. */
+    /** Read the top redo entry for the focused editor or unit. */
     pitchTopRedoElement(): Nullable<IUndoRedoItem>;
 
     popUndoToRedo(): void;
@@ -421,7 +422,12 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
 
         const isFocusSheet = this._contextService.getContextValue(FOCUSING_SHEET);
         const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
+        const isFocusShapeEditor = this._contextService.getContextValue(FOCUSING_SHAPE_TEXT_EDITOR);
         const isFocusEditor = this._contextService.getContextValue(EDITOR_ACTIVATED);
+
+        if (isFocusEditor && isFocusShapeEditor) {
+            return this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC)?.getUnitId() ?? '';
+        }
 
         if (isFocusSheet) {
             if (isFocusFormulaEditor && isFocusEditor) {

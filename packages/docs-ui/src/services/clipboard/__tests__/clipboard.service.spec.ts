@@ -19,11 +19,15 @@ import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-
 import type { IDocClipboardPasteAdapter } from '../doc-paste-mutation-adapter.service';
 import {
     BooleanNumber,
+    createInternalEditorID,
     DataStreamTreeTokenType,
     DOC_RANGE_TYPE,
     DocumentBlockRangeType,
     DocumentDataModel,
+    EDITOR_ACTIVATED,
+    FOCUSING_SHAPE_TEXT_EDITOR,
     ICommandService,
+    IContextService,
     ImageSourceType,
     IPermissionService,
     IUndoRedoService,
@@ -32,6 +36,7 @@ import {
     SliceBodyType,
     Tools,
     UndoCommand,
+    Univer,
     UniverInstanceType,
     validateDocBodyStructure,
 } from '@univerjs/core';
@@ -41,12 +46,16 @@ import {
     RichTextEditingMutation,
     setDocumentPermissionValue,
     SetTextSelectionsOperation,
+    UniverDocsPlugin,
 } from '@univerjs/docs';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
 import { IClipboardInterfaceService } from '@univerjs/ui';
+import { firstValueFrom } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { createCommandTestBed } from '../../../commands/commands/__tests__/create-command-test-bed';
 import { CutContentCommand, InnerPasteCommand } from '../../../commands/commands/clipboard.inner.command';
+import { DocMenuStyleService } from '../../doc-menu-style.service';
 import {
     convertClipboardHtmlToDocumentData,
     DocClipboardService,
@@ -64,6 +73,7 @@ import {
     DOC_INTERNAL_FRAGMENT_MIME,
     parseInternalClipboardFragment,
 } from '../internal-fragment';
+import { DocHtmlExportService } from '../udm-to-html/doc-html-export.service';
 
 class TestClipboardInterfaceService {
     readonly writes: Array<{ text: string; html: string; custom?: Record<string, string> }> = [];
@@ -1924,6 +1934,79 @@ describe('DocClipboardService paste options', () => {
             expect(bed.doc.getBody()).toEqual(snapshot);
         } finally {
             bed.univer.dispose();
+        }
+    });
+});
+
+describe('internal editor paste options', () => {
+    it('opts in only the active editor, switches its own history, and clears options when editing ends', async () => {
+        const univer = new Univer();
+        univer.registerPlugin(UniverDocsPlugin);
+        const injector = univer.__getInjector();
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        injector.add([DocMenuStyleService]);
+        injector.add([DocHtmlExportService]);
+        injector.add([IClipboardInterfaceService, { useClass: TestClipboardInterfaceService }]);
+        injector.add([IDocClipboardService, { useClass: DocClipboardService }]);
+        const host = univer.createUnit(UniverInstanceType.UNIVER_DOC, { id: 'host', body: { dataStream: 'Host\r\n' } });
+        const unitId = createInternalEditorID('shape-paste');
+        const doc = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+            id: unitId,
+            body: { dataStream: 'Before\r\n', paragraphs: [{ startIndex: 6, paragraphId: 'target' }], customBlocks: [] },
+            documentStyle: {},
+        });
+        const instanceService = injector.get(IUniverInstanceService);
+        instanceService.focusUnit(host.getUnitId());
+        instanceService.setCurrentUnitForType(unitId);
+        const context = injector.get(IContextService);
+        context.setContextValue(EDITOR_ACTIVATED, true);
+        context.setContextValue(FOCUSING_SHAPE_TEXT_EDITOR, true);
+        const selection = injector.get(DocSelectionManagerService);
+        selection.__TEST_ONLY_setCurrentSelection({ unitId, subUnitId: '' });
+        selection.__TEST_ONLY_add([{ startOffset: 6, endOffset: 6, collapsed: true, isActive: true, segmentId: '' }]);
+        const commands = injector.get(ICommandService);
+        commands.registerCommand(InnerPasteCommand);
+        const clipboard = injector.get(IDocClipboardService);
+        const history = injector.get(IUndoRedoService);
+        const payload = { unitId, files: [], html: '<b>Rich</b>', text: 'Rich' };
+        try {
+            expect(clipboard.isPasteOptionsEnabled(unitId)).toBe(false);
+            expect(await clipboard.legacyPaste(payload)).toBe(true);
+            expect(await firstValueFrom(clipboard.pasteOptions$)).toBeNull();
+            const hook = clipboard.addClipboardHook({ supportsPasteOptions: (id) => id === unitId });
+            expect(clipboard.isPasteOptionsEnabled(createInternalEditorID('other'))).toBe(false);
+            const before = Tools.deepClone(doc.getBody());
+            expect(await clipboard.legacyPaste(payload)).toBe(true);
+            expect(await firstValueFrom(clipboard.pasteOptions$)).toMatchObject({ unitId, mode: 'source' });
+            const source = Tools.deepClone(doc.getBody());
+            commands.syncExecuteCommand(RichTextEditingMutation.id, {
+                unitId: host.getUnitId(),
+                actions: [],
+                textRanges: null,
+                isSync: true,
+            });
+            expect(await firstValueFrom(clipboard.pasteOptions$)).toMatchObject({ unitId, mode: 'source' });
+            expect(await clipboard.changePasteMode('text')).toBe(true);
+            expect(doc.getBody()?.dataStream).toBe(source?.dataStream);
+            expect(await clipboard.changePasteMode('destination')).toBe(true);
+            expect(await clipboard.changePasteMode('source')).toBe(true);
+            expect(doc.getBody()).toEqual(source);
+            expect(history.getUndoRedoStatus(unitId).undos).toBe(2);
+            expect(history.getUndoRedoStatus(host.getUnitId()).undos).toBe(0);
+            expect(instanceService.getFocusedUnit()).toBe(host);
+            expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true);
+            expect(doc.getBody()).toEqual(before);
+            expect(commands.syncExecuteCommand(RedoCommand.id)).toBe(true);
+            expect(doc.getBody()).toEqual(source);
+            expect(await clipboard.legacyPaste(payload)).toBe(true);
+            context.setContextValue(FOCUSING_SHAPE_TEXT_EDITOR, false);
+            context.setContextValue(EDITOR_ACTIVATED, false);
+            hook.dispose();
+            expect(await firstValueFrom(clipboard.pasteOptions$)).toBeNull();
+            expect(await clipboard.changePasteMode('text')).toBe(false);
+            expect(clipboard.isPasteOptionsEnabled(unitId)).toBe(false);
+        } finally {
+            univer.dispose();
         }
     });
 });

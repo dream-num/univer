@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, IDisposable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Disposable, IContextService, Inject, isInternalEditorID } from '@univerjs/core';
+import { Disposable, IContextService, Inject } from '@univerjs/core';
 import { MOBILE_UI_MODE } from '@univerjs/ui';
 import { IDocClipboardService } from '../../services/clipboard/clipboard.service';
 import { DocCanvasPopManagerService } from '../../services/doc-popup-manager.service';
@@ -34,11 +34,11 @@ export class DocPasteOptionsRenderController extends Disposable implements IRend
         @IContextService contextService: IContextService
     ) {
         super();
-        if (isInternalEditorID(_context.unitId)) {
-            return;
-        }
         const mobile = contextService.getContextValue(MOBILE_UI_MODE) === true;
         this.disposeWithMe(selection.onKeydown$.subscribe(({ event }) => {
+            if (!this._clipboard.isPasteOptionsEnabled(this._context.unitId)) {
+                return;
+            }
             const key = event as KeyboardEvent;
             if ((key.ctrlKey || key.metaKey) && key.shiftKey && key.key.toLowerCase() === 'v') {
                 this._clipboard.setNextPasteMode('text');
@@ -47,8 +47,15 @@ export class DocPasteOptionsRenderController extends Disposable implements IRend
                 this._clipboard.dismissPasteOptions();
             }
         }));
-        this.disposeWithMe(selection.onInputBefore$.subscribe(() => this._clipboard.dismissPasteOptions()));
+        this.disposeWithMe(selection.onInputBefore$.subscribe(() => {
+            if (this._clipboard.isPasteOptionsEnabled(this._context.unitId)) {
+                this._clipboard.dismissPasteOptions();
+            }
+        }));
         this.disposeWithMe(selection.onPointerDown$.subscribe(() => {
+            if (!this._clipboard.isPasteOptionsEnabled(this._context.unitId)) {
+                return;
+            }
             this._clipboard.setNextPasteMode('source');
             // A mobile pointer-down may start a pan. Actual selection changes
             // already invalidate the session in the clipboard service.
@@ -56,7 +63,11 @@ export class DocPasteOptionsRenderController extends Disposable implements IRend
                 this._clipboard.dismissPasteOptions();
             }
         }));
-        this.disposeWithMe(selection.onBlur$.subscribe(() => this._clipboard.setNextPasteMode('source')));
+        this.disposeWithMe(selection.onBlur$.subscribe(() => {
+            if (this._clipboard.isPasteOptionsEnabled(this._context.unitId)) {
+                this._clipboard.setNextPasteMode('source');
+            }
+        }));
         this.disposeWithMe(this._clipboard.pasteOptions$.subscribe((state) => {
             this._popup?.dispose();
             this._popup = undefined;
@@ -76,7 +87,9 @@ export class DocPasteOptionsRenderController extends Disposable implements IRend
         }));
         this.disposeWithMe(() => {
             this._popup?.dispose();
-            this._clipboard.dismissPasteOptions();
+            if (this._popup) {
+                this._clipboard.dismissPasteOptions();
+            }
         });
     }
 }

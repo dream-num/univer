@@ -496,9 +496,12 @@ export class DocDrawingAddRemoveController extends Disposable {
         for (const drawingId of synchronizedDrawingIds) {
             const current = drawingData[drawingId];
             if (current) {
-                // Layout mutates render transforms. Never share the persisted drawing object or
-                // replace unrelated drawings whose published positions are still authoritative.
-                renderedDrawings[drawingId] = { ...current };
+                // Layout may publish before this listener runs. Preserve its canvas coordinates;
+                // persisted transforms do not include the document's page and anchor offsets.
+                renderedDrawings[drawingId] = {
+                    ...current,
+                    transform: renderedDrawings[drawingId]?.transform ?? current.transform,
+                };
             } else {
                 delete renderedDrawings[drawingId];
             }

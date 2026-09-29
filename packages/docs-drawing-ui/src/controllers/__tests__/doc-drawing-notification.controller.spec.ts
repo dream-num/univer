@@ -193,6 +193,22 @@ describe('DocDrawingAddRemoveController with real commands and services', () => 
         expect(model.getDrawings()!.a.transform).toEqual(original);
     });
 
+    it('preserves published canvas coordinates when synchronizing updated drawing metadata', () => {
+        const transform = { left: 320, top: 180, width: 40, height: 30 };
+        manager.refreshTransform([{ ...drawing('a'), transform }]);
+
+        resize();
+
+        const rendered = manager.getDrawingByParam({ unitId, subUnitId: unitId, drawingId: 'a' });
+        expect(rendered?.transform).toEqual(transform);
+        expect(rendered).toMatchObject({ docTransform: { size: { width: 60, height: 45 } } });
+        expect(model.getDrawings()!.a.transform).not.toEqual(transform);
+
+        const resizedTransform = { ...transform, width: 60, height: 45 };
+        manager.refreshTransform([{ ...drawing('a'), transform: resizedTransform }]);
+        expect(manager.getDrawingByParam({ unitId, subUnitId: unitId, drawingId: 'a' })?.transform).toEqual(resizedTransform);
+    });
+
     it('keeps a thousand-drawing document stable during repeated single-image resizing', ({ task }) => {
         const extraDrawings = Array.from({ length: 998 }, (_, index) => drawing(`extra-${index}`));
         expect(commands.syncExecuteCommand(InsertDocDrawingCommand.id, {

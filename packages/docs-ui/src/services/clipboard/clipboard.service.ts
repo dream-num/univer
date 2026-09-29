@@ -196,6 +196,8 @@ export interface IDocClipboardPasteContext {
 }
 
 export interface IDocClipboardHook {
+    /** Opt an internal rich-text editor into the post-paste format menu. */
+    supportsPasteOptions?(unitId: string): boolean;
     /** Supply a rich fragment for selections owned by a plugin rather than native text ranges. */
     onCopySelection?(unitId: string): { documentData: IDocumentData; plainText: string } | undefined;
     onCopyDocData?(doc: Partial<IDocumentData>, context: IDocClipboardCopyDocDataContext): Partial<IDocumentData>;
@@ -235,6 +237,7 @@ export interface IDocClipboardService {
     pasteFromClipboard(mode?: DocPasteMode): Promise<boolean>;
     legacyPaste(options: IDocClipboardPayload): Promise<boolean>;
     readonly pasteOptions$: Observable<IDocPasteOptionsState | null>;
+    isPasteOptionsEnabled(unitId: string): boolean;
     setNextPasteMode(mode: DocPasteMode): void;
     dismissPasteOptions(): void;
     changePasteMode(mode: DocPasteMode): Promise<boolean>;
@@ -323,7 +326,12 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         super();
         this._umdToHtml = new UDMToHtmlService(docHtmlExportService);
         this.disposeWithMe(this._commandService.beforeCommandExecuted((command) => {
-            if (!this._applyingPaste && command.type === CommandType.MUTATION) {
+            if (this._applyingPaste || command.type !== CommandType.MUTATION) {
+                return;
+            }
+            const unitId = (command.params as { unitId?: string } | undefined)?.unitId;
+            const pasteUnitId = this._pasteOptions$.value?.unitId ?? this._getCurrentDocumentUnitId();
+            if (!unitId || unitId === pasteUnitId) {
                 this.dismissPasteOptions();
             }
         }));
@@ -431,6 +439,10 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             return false;
         }
         return this.legacyPaste({ ...payload, mode });
+    }
+
+    isPasteOptionsEnabled(unitId: string): boolean {
+        return !isInternalEditorID(unitId) || this._clipboardHooks.some((hook) => hook.supportsPasteOptions?.(unitId));
     }
 
     setNextPasteMode(mode: DocPasteMode): void {
@@ -554,7 +566,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             // Keep preceding debounced typing out of the paste's undo entry.
             this._stateChangeManager.flushPendingChanges(unitId);
             const result = this._paste(doc, unitId);
-            if (result && !isInternalEditorID(unitId)) {
+            if (result && this.isPasteOptionsEnabled(unitId)) {
                 this._savePasteSession(payload, mode === 'text' ? cachedSource : source, style, mode, unitId);
             }
             return result;
@@ -894,6 +906,10 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
             if (index > -1) {
                 this._clipboardHooks.splice(index, 1);
+                const state = this._pasteOptions$.value;
+                if (state && !this.isPasteOptionsEnabled(state.unitId)) {
+                    this.dismissPasteOptions();
+                }
             }
         });
     }

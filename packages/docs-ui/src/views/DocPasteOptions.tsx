@@ -24,6 +24,7 @@ import { useState } from 'react';
 import { DocChangePasteModeCommand } from '../commands/commands/clipboard.command';
 import { IDocClipboardService } from '../services/clipboard/clipboard.service';
 import { DOC_PASTE_OPTIONS } from '../services/clipboard/paste-options';
+import { IEditorService } from '../services/editor/editor-manager.service';
 
 export const DOC_PASTE_OPTIONS_COMPONENT = 'docs-ui.paste-options';
 
@@ -32,9 +33,19 @@ export function DocPasteOptions() {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const layoutService = useDependency(ILayoutService);
+    const editorService = useDependency(IEditorService);
     const state = useObservable(clipboard.pasteOptions$, null);
     const [busy, setBusy] = useState(false);
     const [open, setOpen] = useState(false);
+
+    const focusEditor = () => {
+        const editor = state && clipboard.isPasteOptionsEnabled(state.unitId) && editorService.getEditor(state.unitId);
+        if (editor) {
+            editor.focus();
+        } else {
+            layoutService.focus();
+        }
+    };
 
     const changeMode = async (value: DocPasteMode) => {
         setBusy(true);
@@ -42,7 +53,7 @@ export function DocPasteOptions() {
             await commandService.executeCommand(DocChangePasteModeCommand.id, { value });
         } finally {
             setBusy(false);
-            layoutService.focus();
+            focusEditor();
         }
     };
 
@@ -52,12 +63,13 @@ export function DocPasteOptions() {
 
     return (
         <DropdownMenu
+            data-u-editor-interaction-boundary="true"
             align="start"
             open={open}
             onOpenChange={setOpen}
             onCloseAutoFocus={(event) => {
                 event.preventDefault();
-                layoutService.focus();
+                focusEditor();
             }}
             onEscapeKeyDown={() => clipboard.dismissPasteOptions()}
             items={DOC_PASTE_OPTIONS.map((option) => ({
@@ -70,6 +82,7 @@ export function DocPasteOptions() {
             }))}
         >
             <Button
+                data-u-editor-interaction-boundary="true"
                 size="small"
                 disabled={busy}
                 aria-label={localeService.t<LocaleKey>('docs-ui.pasteOptions.title')}
@@ -78,7 +91,7 @@ export function DocPasteOptions() {
                 onKeyDown={(event) => {
                     if (event.key === 'Escape') {
                         clipboard.dismissPasteOptions();
-                        layoutService.focus();
+                        focusEditor();
                     }
                 }}
                 className="univer-shadow-sm"

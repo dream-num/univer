@@ -59,7 +59,6 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-
 import { getCustomDecorationAtPosition, getCustomRangeAtPosition } from '../../basics/paragraph';
 import {
     IDocClipboardPasteAdapterService,
@@ -942,13 +941,19 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         }
 
         const viewModel = docSkeletonManagerService.getViewModel();
+        const body = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
+        const clearsBody = wholeBodySelected || (body != null && isWholeBodySelected(selections, rectRanges, body));
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
                 actions: [],
-                textRanges,
+                // Whole-document selection can contain several ranges with the last one active.
+                // Clearing the body must place the caret at its new start, not that last range.
+                textRanges: clearsBody
+                    ? [{ ...textRanges[0], startOffset: 0, endOffset: 0, collapsed: true }]
+                    : textRanges,
                 trigger: CutContentCommand.id,
             },
         };

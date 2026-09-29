@@ -31,22 +31,26 @@ import {
     validateDocumentStructure,
 } from '@univerjs/core';
 import {
+    DocLayoutExecutorService,
     DocSelectionManagerService,
+    DocSkeletonManagerService,
     DocStateChangeManagerService,
     DocStateEmitService,
     InsertTextCommand,
     RichTextEditingMutation,
+    SetTextSelectionsOperation,
 } from '@univerjs/docs';
 import {
+    CanvasColorService,
     DocumentViewModel,
+    ICanvasColorService,
     IRenderManagerService,
     NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
     RenderManagerService,
 } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { createInternalClipboardDocData } from '../../../services/clipboard/internal-fragment';
-import { getCutActionsFromDocRanges, InnerPasteCommand } from '../clipboard.inner.command';
+import { CutContentCommand, getCutActionsFromDocRanges, InnerPasteCommand } from '../clipboard.inner.command';
 
 describe('getCutActionsFromDocRanges', () => {
     it.each([false, true])('keeps formatting only for embedded-editor clearing (%s), with reversible actions', (preserveFormatting) => {
@@ -225,5 +229,69 @@ describe('InnerPasteCommand', () => {
         const id = Object.keys(before.notes!)[0];
         expect(await paste(0, id)).toBe(false);
         expect(document.getSnapshot()).toEqual(before);
+    });
+});
+
+describe('CutContentCommand whole-document selection', () => {
+    it('collapses the caret at zero and preserves selection through undo/redo when the last paragraph was active', async () => {
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        injector.add([DocSelectionManagerService]);
+        injector.add([DocStateEmitService]);
+        injector.add([DocStateChangeManagerService]);
+        injector.add([DocLayoutExecutorService]);
+        injector.get(DocStateChangeManagerService);
+        const doc = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+            id: 'clear-selection',
+            body: {
+                dataStream: 'First\rLast\r\n',
+                paragraphs: [{ paragraphId: 'first', startIndex: 5 }, { paragraphId: 'last', startIndex: 10 }],
+                customBlocks: [],
+                customRanges: [],
+                customDecorations: [],
+            },
+        });
+        const renderManager = injector.get(IRenderManagerService);
+        renderManager.registerRenderModule(UniverInstanceType.UNIVER_DOC, [DocSkeletonManagerService]);
+        renderManager.createRender(doc.getUnitId());
+        const commands = injector.get(ICommandService);
+        [CutContentCommand, RichTextEditingMutation, SetTextSelectionsOperation].forEach((command) => commands.registerCommand(command));
+        injector.get(IUniverInstanceService).focusUnit(doc.getUnitId());
+        const selections = injector.get(DocSelectionManagerService);
+        selections.__TEST_ONLY_setCurrentSelection({ unitId: doc.getUnitId(), subUnitId: doc.getUnitId() });
+        const ranges = [
+            { startOffset: 0, endOffset: 6, collapsed: false, isActive: false },
+            { startOffset: 6, endOffset: 11, collapsed: false, isActive: true },
+        ];
+        selections.replaceSelectionInfoWithoutRefresh({
+            textRanges: ranges,
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            isEditing: true,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            options: { wholeDocument: true },
+        });
+        try {
+            const before = structuredClone(doc.getBody());
+            expect(await commands.executeCommand(CutContentCommand.id, {
+                segmentId: '',
+                selections: [ranges[1]],
+                textRanges: [{ startOffset: 6, endOffset: 6, collapsed: true }],
+            })).toBe(true);
+            expect(doc.getBody()?.dataStream).toBe('\r\n');
+            expect(selections.getActiveTextRange()).toMatchObject({ startOffset: 0, endOffset: 0, collapsed: true });
+            injector.get(DocStateChangeManagerService).flushPendingChanges(doc.getUnitId());
+            expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+            expect(doc.getBody()).toEqual(before);
+            expect(selections.getTextRanges()?.map(({ startOffset, endOffset }) => [startOffset, endOffset])).toEqual([[0, 6], [6, 11]]);
+            expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+            expect(doc.getBody()?.dataStream).toBe('\r\n');
+            expect(selections.getActiveTextRange()).toMatchObject({ startOffset: 0, endOffset: 0, collapsed: true });
+        } finally {
+            univer.dispose();
+        }
     });
 });

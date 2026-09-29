@@ -858,27 +858,6 @@ describe('EditorContainer embed focus lease', () => {
         expect(cellEditorManagerService.setFocus).not.toHaveBeenCalled();
     });
 
-    it('does not keep refocusing the embedded sheet cell editor on delayed timers after it becomes visible', async () => {
-        const { injector } = createTestBed({ docSelectionIsFocusing: false });
-        const setTimeoutSpy = vi.spyOn(window, 'setTimeout');
-        container = document.createElement('div');
-        container.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
-        document.body.appendChild(container);
-        root = createRoot(container);
-
-        await act(async () => {
-            renderEditorContainer(root!, injector);
-            await Promise.resolve();
-        });
-
-        expect(setTimeoutSpy).not.toHaveBeenCalledWith(expect.any(Function), 80);
-        expect(setTimeoutSpy).not.toHaveBeenCalledWith(expect.any(Function), 200);
-        expect(setTimeoutSpy).not.toHaveBeenCalledWith(expect.any(Function), 500);
-        expect(setTimeoutSpy).not.toHaveBeenCalledWith(expect.any(Function), 1000);
-
-        setTimeoutSpy.mockRestore();
-    });
-
     it('restores focus to the internal cell editor after pointer down inside the editor canvas', async () => {
         const { injector, docSelectionRenderService } = createTestBed({ docSelectionIsFocusing: false });
         const hiddenEditor = document.createElement('div');

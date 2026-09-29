@@ -1979,6 +1979,13 @@ describe('internal editor paste options', () => {
             expect(await clipboard.legacyPaste(payload)).toBe(true);
             expect(await firstValueFrom(clipboard.pasteOptions$)).toMatchObject({ unitId, mode: 'source' });
             const source = Tools.deepClone(doc.getBody());
+            commands.syncExecuteCommand(RichTextEditingMutation.id, {
+                unitId: host.getUnitId(),
+                actions: [],
+                textRanges: null,
+                isSync: true,
+            });
+            expect(await firstValueFrom(clipboard.pasteOptions$)).toMatchObject({ unitId, mode: 'source' });
             expect(await clipboard.changePasteMode('text')).toBe(true);
             expect(doc.getBody()?.dataStream).toBe(source?.dataStream);
             expect(await clipboard.changePasteMode('destination')).toBe(true);

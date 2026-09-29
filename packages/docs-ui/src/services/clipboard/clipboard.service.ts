@@ -326,7 +326,12 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         super();
         this._umdToHtml = new UDMToHtmlService(docHtmlExportService);
         this.disposeWithMe(this._commandService.beforeCommandExecuted((command) => {
-            if (!this._applyingPaste && command.type === CommandType.MUTATION) {
+            if (this._applyingPaste || command.type !== CommandType.MUTATION) {
+                return;
+            }
+            const unitId = (command.params as { unitId?: string } | undefined)?.unitId;
+            const pasteUnitId = this._pasteOptions$.value?.unitId ?? this._getCurrentDocumentUnitId();
+            if (!unitId || unitId === pasteUnitId) {
                 this.dismissPasteOptions();
             }
         }));

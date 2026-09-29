@@ -53,7 +53,7 @@ export interface IBaseToolbarButtonProps {
 
 export const toolbarButtonClassName = `
 univer-box-border univer-flex univer-h-6 univer-min-w-6 univer-cursor-pointer univer-items-center
-univer-justify-center univer-rounded univer-border-none univer-bg-transparent univer-p-0
+univer-justify-center univer-rounded univer-border-none univer-bg-transparent univer-px-0 univer-py-0
 univer-text-gray-900 univer-outline-none univer-transition-colors univer-animate-in univer-fade-in
 dark:!univer-text-gray-0 dark:hover:!univer-bg-gray-700 dark:disabled:!univer-text-gray-600
 disabled:univer-cursor-not-allowed disabled:univer-text-gray-300 disabled:hover:univer-bg-transparent

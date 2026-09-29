@@ -890,7 +890,7 @@ describe('linebreaking', () => {
         vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text, font) => {
             const size = /([\d.]+)(px|pt)/.exec(font)!;
             const scale = Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) / 11;
-            return { width: text.length * 8 * scale, fontBoundingBoxAscent: 10 * scale, fontBoundingBoxDescent: 4 * scale, actualBoundingBoxAscent: 10 * scale, actualBoundingBoxDescent: 4 * scale };
+            return { width: text.length * 8 * scale, fontBoundingBoxAscent: 10 * scale, fontBoundingBoxDescent: 4 * scale, actualBoundingBoxAscent: 10 * scale, actualBoundingBoxDescent: 4 * scale, actualBoundingBoxLeft: 0, actualBoundingBoxRight: 0 };
         });
         vi.spyOn(FontCache, 'getNormalLineHeight').mockReturnValue(14.8);
         const text = 'One two three four five six seven eight nine ten eleven twelve';
@@ -1595,7 +1595,7 @@ describe('linebreaking', () => {
         vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text, font) => {
             const size = /([\d.]+)(px|pt)/.exec(font)!;
             const scale = Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) / 11;
-            return { width: text.length * 8 * scale, fontBoundingBoxAscent: 10 * scale, fontBoundingBoxDescent: 4 * scale, actualBoundingBoxAscent: 10 * scale, actualBoundingBoxDescent: 4 * scale };
+            return { width: text.length * 8 * scale, fontBoundingBoxAscent: 10 * scale, fontBoundingBoxDescent: 4 * scale, actualBoundingBoxAscent: 10 * scale, actualBoundingBoxDescent: 4 * scale, actualBoundingBoxLeft: 0, actualBoundingBoxRight: 0 };
         });
         const content = 'One two three four five six seven eight nine ten eleven twelve';
         const widowBed = createParagraphLayoutTestBed(content, {

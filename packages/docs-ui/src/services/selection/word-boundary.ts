@@ -58,6 +58,29 @@ export function getWordBoundaryByIndex(
     };
 }
 
+export function getWordSelectionByIndex(
+    content: string,
+    nodeIndex: number,
+    paragraphStartOffset: number,
+    isBack: boolean
+): IWordBoundary | null {
+    const text = content.replace(/[\r\n]+$/, '');
+    if (!text.length || nodeIndex < 0) {
+        return null;
+    }
+
+    const index = Math.min(nodeIndex, text.length - 1);
+    const segments = Array.from(new Intl.Segmenter(undefined, { granularity: 'word' }).segment(text));
+    const segmentIndex = segments.findIndex((segment) => segment.index <= index && index < segment.index + segment.segment.length);
+    const segment = segments[segmentIndex];
+    const whitespace = /^\s+$/.test(segment.segment);
+
+    return {
+        startOffset: paragraphStartOffset + (whitespace ? (segments[segmentIndex - 1]?.index ?? segment.index) : segment.index),
+        endOffset: paragraphStartOffset + (whitespace ? Math.min(nodeIndex + (isBack ? 0 : 1), text.length) : segment.index + segment.segment.length),
+    };
+}
+
 export function getNextWordBoundaryOffset(
     content: string,
     nodeIndex: number,

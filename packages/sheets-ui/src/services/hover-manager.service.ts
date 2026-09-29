@@ -130,7 +130,7 @@ export class HoverManagerService extends Disposable {
     private _currentCell$ = new BehaviorSubject<Nullable<IHoverCellPosition>>(null);
     private _currentRichText$ = new BehaviorSubject<Nullable<IHoverRichTextInfo>>(null);
     private _currentClickedCell$ = new Subject<IHoverRichTextInfo>();
-    private _currentDbClickedCell$ = new Subject<IHoverRichTextInfo>();
+    private _currentDbClickedCell$ = new Subject<IHoverRichTextInfo & ICellWithEvent>();
 
     private _currentCellWithEvent$ = new Subject<Nullable<ICellWithEvent>>();
     private _currentPointerDownCell$ = new Subject<ICellPosWithEvent>();
@@ -175,7 +175,6 @@ export class HoverManagerService extends Disposable {
     // Notify when hovering over different cells and different custom range or bullet
     currentRichText$ = this._currentRichText$.pipe(
         distinctUntilChanged(
-            // eslint-disable-next-line complexity
             (pre, aft) => (
                 pre?.location?.unitId === aft?.location?.unitId
                 && pre?.location?.subUnitId === aft?.location?.subUnitId
@@ -514,17 +513,18 @@ export class HoverManagerService extends Disposable {
         }
     }
 
-    triggerDbClick(unitId: string, offsetX: number, offsetY: number) {
+    triggerDbClick(unitId: string, event: IPointerEvent | IMouseEvent) {
         const deps = this._getCalcDeps(unitId);
         if (!deps) {
             return;
         }
         const { currentRender, workbook, worksheet, skeletonParam } = deps;
-        const activeCell = this._calcActiveCell(currentRender, workbook, worksheet, skeletonParam, offsetX, offsetY);
+        const activeCell = this._calcActiveCell(currentRender, workbook, worksheet, skeletonParam, event.offsetX, event.offsetY);
         if (activeCell) {
             this._currentDbClickedCell$.next({
                 ...activeCell,
                 location: getLocationBase(activeCell.location),
+                event,
             });
         }
     }

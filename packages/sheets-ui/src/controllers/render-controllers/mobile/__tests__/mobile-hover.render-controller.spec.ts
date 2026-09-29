@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-import { EventSubject } from '@univerjs/core';
+import { EventSubject, IContextService, Injector } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { HoverManagerService } from '../../../../services/hover-manager.service';
+import { SheetScrollManagerService } from '../../../../services/scroll-manager.service';
+import { SheetSkeletonManagerService } from '../../../../services/sheet-skeleton-manager.service';
 import { MobileHoverRenderController } from '../mobile-hover.render-controller';
 
 interface IMobilePointerTestEvent {
+    clientX: number;
+    clientY: number;
     isPrimary: boolean;
     offsetX: number;
     offsetY: number;
@@ -44,28 +49,29 @@ function createController() {
         triggerDbClick: vi.fn(),
         triggerScroll: vi.fn(),
     };
-    const controller = new MobileHoverRenderController(
-        {
-            mainComponent: {
-                onPointerEnter$,
-                onPointerMove$,
-                onPointerDown$,
-                onPointerUp$,
-                onDblclick$,
-                onPointerLeave$,
-            },
-            components: new Map(),
-            scene: { onPointerCancel$ },
-            unitId: 'unit-1',
-        } as never,
-        hoverManagerService as never,
-        {
+    const injector = new Injector([
+        [HoverManagerService, { useValue: hoverManagerService }],
+        [SheetSkeletonManagerService, { useValue: {
             getCurrentParam: vi.fn(() => ({})),
             currentSkeleton$: new Subject(),
-        } as never,
-        { validViewportScrollInfo$ } as never,
-        { getContextValue: vi.fn((key: string) => contextValues.get(key) ?? false) } as never
-    );
+        } }],
+        [SheetScrollManagerService, { useValue: { validViewportScrollInfo$ } }],
+        [IContextService, { useValue: { getContextValue: vi.fn((key: string) => contextValues.get(key) ?? false) } }],
+    ]);
+    const controller = injector.createInstance(MobileHoverRenderController, {
+        mainComponent: {
+            onPointerEnter$,
+            onPointerMove$,
+            onPointerDown$,
+            onPointerUp$,
+            onDblclick$,
+            onPointerLeave$,
+        },
+        components: new Map(),
+        scene: { onPointerCancel$ },
+        unitId: 'unit-1',
+    } as never);
+    controller.disposeWithMe(injector);
 
     return {
         controller,
@@ -82,7 +88,7 @@ function createController() {
 }
 
 function pointer(offsetX: number, offsetY: number, pointerId = 1): IMobilePointerTestEvent {
-    return { isPrimary: true, offsetX, offsetY, pointerId };
+    return { isPrimary: true, offsetX, offsetY, clientX: offsetX + 100, clientY: offsetY + 200, pointerId };
 }
 
 describe('MobileHoverRenderController', () => {
@@ -114,7 +120,7 @@ describe('MobileHoverRenderController', () => {
         onPointerUp$.emitEvent(pointer(34, 20));
 
         expect(hoverManagerService.triggerClick).toHaveBeenCalledTimes(2);
-        expect(hoverManagerService.triggerDbClick).toHaveBeenCalledExactlyOnceWith('unit-1', 34, 20);
+        expect(hoverManagerService.triggerDbClick).toHaveBeenCalledExactlyOnceWith('unit-1', pointer(34, 20));
 
         controller.dispose();
     });
@@ -150,7 +156,7 @@ describe('MobileHoverRenderController', () => {
 
         const result = onDblclick$.emitEvent(pointer(20, 20));
 
-        expect(hoverManagerService.triggerDbClick).toHaveBeenCalledExactlyOnceWith('unit-1', 20, 20);
+        expect(hoverManagerService.triggerDbClick).toHaveBeenCalledExactlyOnceWith('unit-1', pointer(20, 20));
         expect(laterObserver).not.toHaveBeenCalled();
         expect(result.stopPropagation).toBe(true);
 

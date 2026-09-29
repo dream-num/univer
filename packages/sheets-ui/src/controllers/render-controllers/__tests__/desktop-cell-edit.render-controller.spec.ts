@@ -17,10 +17,10 @@
 // @vitest-environment jsdom
 
 import type { EmbedRuntimeFocusCoordinator } from '../../../services/sheet-embed-integration.service';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET, ICommandService, IContextService, Injector, IUniverInstanceService } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { DeviceInputEventType } from '@univerjs/engine-render';
-import { ClearSelectionFormatCommand, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { ClearSelectionFormatCommand, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { DISABLE_AUTO_FOCUS_KEY } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
@@ -28,7 +28,9 @@ import { SetZoomRatioCommand } from '../../../commands/commands/set-zoom-ratio.c
 import { SetActivateCellEditOperation } from '../../../commands/operations/activate-cell-edit.operation';
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE } from '../../../services/sheet-embed-integration.service';
+import { IEditorBridgeService } from '../../../services/editor-bridge.service';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, ISheetEmbedRuntimeFocusCoordinator } from '../../../services/sheet-embed-integration.service';
+import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { DesktopCellEditRenderController } from '../desktop-cell-edit.render-controller';
 import { EditorBridgeRenderController } from '../editor-bridge.render-controller';
 
@@ -204,29 +206,23 @@ function createController(options?: {
             },
         })),
     };
-    const editorBridgeRenderController = new EditorBridgeRenderController(
-        context as never,
-        instanceService as never,
-        commandService as never,
-        editorBridgeService as never,
-        selectionManagerService as never,
-        sheetSkeletonManagerService as never,
-        embedRuntimeFocusCoordinator
-    );
-    const desktopCellEditRenderController = new DesktopCellEditRenderController(
-        context as never,
-        instanceService as never,
-        commandService as never,
-        editorBridgeService as never,
-        selectionManagerService as never,
-        contextService as never,
-        renderManagerService as never,
-        embedRuntimeFocusCoordinator
-    );
+    const injector = new Injector([
+        [IUniverInstanceService, { useValue: instanceService }],
+        [ICommandService, { useValue: commandService }],
+        [IEditorBridgeService, { useValue: editorBridgeService }],
+        [SheetsSelectionsService, { useValue: selectionManagerService }],
+        [SheetSkeletonManagerService, { useValue: sheetSkeletonManagerService }],
+        [ISheetEmbedRuntimeFocusCoordinator, { useValue: embedRuntimeFocusCoordinator }],
+        [IContextService, { useValue: contextService }],
+        [IRenderManagerService, { useValue: renderManagerService }],
+    ]);
+    const editorBridgeRenderController = injector.createInstance(EditorBridgeRenderController, context as never);
+    const desktopCellEditRenderController = injector.createInstance(DesktopCellEditRenderController, context as never);
     const controller = {
         dispose: () => {
             desktopCellEditRenderController.dispose();
             editorBridgeRenderController.dispose();
+            injector.dispose();
         },
         refreshEditorPosition: () => editorBridgeRenderController.refreshEditorPosition(),
     };
@@ -250,7 +246,7 @@ function createController(options?: {
     };
 }
 
-describe('EditorBridgeRenderController business flows', () => {
+describe('DesktopCellEditRenderController integration with the editor bridge', () => {
     it('moves the sheet editor to the latest selected cell and respects merged-cell coordinates', () => {
         const { commandService, controller, selectionMoveEnd$ } = createController();
 
@@ -321,18 +317,19 @@ describe('EditorBridgeRenderController business flows', () => {
         const { commandService, controller, editorBridgeService, inputBefore$, spreadsheet } = createController();
 
         spreadsheet.onDblclick$.emit({ button: 2 });
-        expect(commandService.executeCommand).not.toHaveBeenCalledWith(SetCellEditVisibleOperation.id, expect.anything());
+        expect(commandService.syncExecuteCommand).not.toHaveBeenCalledWith(SetCellEditVisibleOperation.id, expect.anything());
 
-        spreadsheet.onDblclick$.emit({ button: 0 });
-        expect(commandService.executeCommand).toHaveBeenCalledWith(SetCellEditVisibleOperation.id, {
+        spreadsheet.onDblclick$.emit({ button: 0, clientX: 150, clientY: 180 });
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(SetCellEditVisibleOperation.id, {
             visible: true,
             eventType: DeviceInputEventType.Dblclick,
             unitId: 'unit-1',
+            pointerPosition: { x: 150, y: 180 },
         });
 
         inputBefore$.next({ event: { data: 'A', which: 65 } });
         inputBefore$.next({ event: { inputType: 'deleteContentBackward', which: 8 } });
-        expect(commandService.syncExecuteCommand).toHaveBeenCalledTimes(1);
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledTimes(2);
         expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(SetCellEditVisibleOperation.id, {
             visible: true,
             eventType: DeviceInputEventType.Keyboard,
@@ -359,11 +356,12 @@ describe('EditorBridgeRenderController business flows', () => {
         spreadsheet.onPointerDown$.emit({});
         expect(docSelectionRenderService.focus).not.toHaveBeenCalled();
 
-        spreadsheet.onDblclick$.emit({ button: 0 });
-        expect(commandService.executeCommand).toHaveBeenCalledWith(SetCellEditVisibleOperation.id, {
+        spreadsheet.onDblclick$.emit({ button: 0, clientX: 150, clientY: 180 });
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(SetCellEditVisibleOperation.id, {
             visible: true,
             eventType: DeviceInputEventType.Dblclick,
             unitId: 'unit-1',
+            pointerPosition: { x: 150, y: 180 },
         });
 
         controller.dispose();

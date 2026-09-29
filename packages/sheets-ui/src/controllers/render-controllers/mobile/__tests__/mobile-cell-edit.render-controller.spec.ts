@@ -14,37 +14,41 @@
  * limitations under the License.
  */
 
-import { EventSubject } from '@univerjs/core';
+import { EventSubject, ICommandService, Injector } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { SetCellEditVisibleOperation } from '../../../../commands/operations/cell-edit.operation';
 import { SHEET_VIEW_KEY } from '../../../../common/keys';
+import { IEditorBridgeService } from '../../../../services/editor-bridge.service';
+import { HoverManagerService } from '../../../../services/hover-manager.service';
 import { MobileCellEditRenderController } from '../mobile-cell-edit.render-controller';
 
 describe('MobileCellEditRenderController', () => {
     it('opens the current sheet editor from a mobile double tap', () => {
-        const currentDbClickedCell$ = new Subject<{ location: { unitId: string } }>();
+        const currentDbClickedCell$ = new Subject<{ location: { unitId: string }; event: { clientX: number; clientY: number } }>();
         const currentPointerDownCell$ = new Subject<never>();
-        const commandService = { executeCommand: vi.fn() };
-        const controller = new MobileCellEditRenderController(
-            { unitId: 'unit-1' } as never,
-            commandService as never,
-            { getEditCellState: vi.fn(() => null) } as never,
-            { currentDbClickedCell$, currentPointerDownCell$ } as never
-        );
+        const commandService = { syncExecuteCommand: vi.fn() };
+        const injector = new Injector([
+            [ICommandService, { useValue: commandService }],
+            [IEditorBridgeService, { useValue: { getEditCellState: vi.fn(() => null) } }],
+            [HoverManagerService, { useValue: { currentDbClickedCell$, currentPointerDownCell$ } }],
+        ]);
+        const controller = injector.createInstance(MobileCellEditRenderController, { unitId: 'unit-1' } as never);
 
-        currentDbClickedCell$.next({ location: { unitId: 'unit-2' } });
-        expect(commandService.executeCommand).not.toHaveBeenCalled();
+        currentDbClickedCell$.next({ location: { unitId: 'unit-2' }, event: { clientX: 150, clientY: 180 } });
+        expect(commandService.syncExecuteCommand).not.toHaveBeenCalled();
 
-        currentDbClickedCell$.next({ location: { unitId: 'unit-1' } });
-        expect(commandService.executeCommand).toHaveBeenCalledExactlyOnceWith(SetCellEditVisibleOperation.id, {
+        currentDbClickedCell$.next({ location: { unitId: 'unit-1' }, event: { clientX: 150, clientY: 180 } });
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledExactlyOnceWith(SetCellEditVisibleOperation.id, {
             visible: true,
             eventType: DeviceInputEventType.Dblclick,
             unitId: 'unit-1',
+            pointerPosition: { x: 150, y: 180 },
         });
 
         controller.dispose();
+        injector.dispose();
     });
 
     it('keeps editing the current cell and closes the editor when another cell is pressed', () => {
@@ -64,34 +68,29 @@ describe('MobileCellEditRenderController', () => {
             executeCommand: vi.fn(),
             syncExecuteCommand: vi.fn(),
         };
-        const controller = new MobileCellEditRenderController(
-            {
-                unitId: 'unit-1',
-                isMainScene: true,
-                unit: { getCurrentUnitOfType: vi.fn(() => workbook) },
-                mainComponent: { onPointerDown$: spreadsheetPointerDown$ },
-                components: new Map([
-                    [SHEET_VIEW_KEY.ROW, { onPointerDown$: rowHeaderPointerDown$ }],
-                    [SHEET_VIEW_KEY.COLUMN, { onPointerDown$: columnHeaderPointerDown$ }],
-                    [SHEET_VIEW_KEY.LEFT_TOP, { onPointerDown$: leftTopPointerDown$ }],
-                ]),
-                scene: {},
-                engine: {},
-            } as never,
-            commandService as never,
-            {
+        const injector = new Injector([
+            [ICommandService, { useValue: commandService }],
+            [IEditorBridgeService, { useValue: {
                 getEditCellState: vi.fn(() => null),
-                getEditLocation: vi.fn(() => ({
-                    unitId: 'unit-1',
-                    sheetId: 'sheet-1',
-                    row: 5,
-                    column: 0,
-                })),
+                getEditLocation: vi.fn(() => ({ unitId: 'unit-1', sheetId: 'sheet-1', row: 5, column: 0 })),
                 isForceKeepVisible: vi.fn(() => false),
                 isVisible: vi.fn(() => ({ visible: true })),
-            } as never,
-            { currentDbClickedCell$, currentPointerDownCell$ } as never
-        );
+            } }],
+            [HoverManagerService, { useValue: { currentDbClickedCell$, currentPointerDownCell$ } }],
+        ]);
+        const controller = injector.createInstance(MobileCellEditRenderController, {
+            unitId: 'unit-1',
+            isMainScene: true,
+            unit: { getCurrentUnitOfType: vi.fn(() => workbook) },
+            mainComponent: { onPointerDown$: spreadsheetPointerDown$ },
+            components: new Map([
+                [SHEET_VIEW_KEY.ROW, { onPointerDown$: rowHeaderPointerDown$ }],
+                [SHEET_VIEW_KEY.COLUMN, { onPointerDown$: columnHeaderPointerDown$ }],
+                [SHEET_VIEW_KEY.LEFT_TOP, { onPointerDown$: leftTopPointerDown$ }],
+            ]),
+            scene: {},
+            engine: {},
+        } as never);
 
         currentPointerDownCell$.next({
             unitId: 'unit-1',
@@ -118,5 +117,6 @@ describe('MobileCellEditRenderController', () => {
         );
 
         controller.dispose();
+        injector.dispose();
     });
 });

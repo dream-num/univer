@@ -148,7 +148,7 @@ export class MobileHoverRenderController extends Disposable implements IRenderMo
                 }
 
                 this._resetCompletedTap();
-                this._hoverManagerService.triggerDbClick(unitId, event.offsetX, event.offsetY);
+                this._hoverManagerService.triggerDbClick(unitId, event);
             },
             priority: -1,
         }));
@@ -263,7 +263,7 @@ export class MobileHoverRenderController extends Disposable implements IRenderMo
                 this._suppressEngineDoubleClick = false;
                 this._suppressEngineDoubleClickTimer = null;
             });
-            this._hoverManagerService.triggerDbClick(unitId, event.offsetX, event.offsetY);
+            this._hoverManagerService.triggerDbClick(unitId, event);
             return;
         }
 

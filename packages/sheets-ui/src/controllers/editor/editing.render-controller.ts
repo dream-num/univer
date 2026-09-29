@@ -36,6 +36,7 @@ import type {
     ISetWorksheetActivateCommandParams,
     MutationsAffectRange,
 } from '@univerjs/sheets';
+import type { IDocObjectParam } from '../../basics/editor/get-editor-object';
 import type { IUniverSheetsUIConfig } from '../../config/config';
 import type { ICellEditorState, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
@@ -144,28 +145,21 @@ function getPercentEditorSelection(
     dataStream: string | undefined
 ): Nullable<ITextRange> {
     const percentOffset = getPercentOffset(editCellState, dataStream);
-    if (percentOffset == null) {
+    if (percentOffset == null || visibleParam.eventType !== DeviceInputEventType.Keyboard) {
         return null;
     }
 
-    const { eventType, initialValue, keycode } = visibleParam;
+    const { initialValue, keycode } = visibleParam;
     // A formula's trailing percent sign is an operator, not a retained number-format suffix.
-    if (isFormulaString(dataStream) && (eventType === DeviceInputEventType.Dblclick || keycode === KeyCode.F2)) {
+    if (isFormulaString(dataStream) && keycode === KeyCode.F2) {
         return null;
     }
 
-    if (eventType === DeviceInputEventType.Keyboard && keycode === KeyCode.F2) {
+    if (keycode === KeyCode.F2) {
         return { startOffset: percentOffset, endOffset: percentOffset, collapsed: true };
     }
 
-    if (
-        eventType !== DeviceInputEventType.Dblclick && (
-            eventType !== DeviceInputEventType.Keyboard ||
-            keycode === KeyCode.BACKSPACE ||
-            keycode === KeyCode.DELETE ||
-            !/^\d/.test(initialValue ?? '')
-        )
-    ) {
+    if (keycode === KeyCode.BACKSPACE || keycode === KeyCode.DELETE || !/^\d/.test(initialValue ?? '')) {
         return null;
     }
 
@@ -584,7 +578,7 @@ export class EditingRenderController extends Disposable {
             return;
         }
 
-        const { document, scene } = editorObject;
+        const { document } = editorObject;
 
         this._contextService.setContextValue(EDITOR_ACTIVATED, true);
 
@@ -594,13 +588,7 @@ export class EditingRenderController extends Disposable {
             return;
         }
 
-        this._sheetCellEditorResizeService?.fitTextSize(() => {
-            const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
-            viewMain?.scrollToViewportPos({
-                viewportScrollX: Number.POSITIVE_INFINITY,
-                viewportScrollY: Number.POSITIVE_INFINITY,
-            });
-        });
+        this._resizeEditorOnOpen(param, editorObject, !!isInArrayFormulaRange);
 
         const clearAndEdit = () => {
             this._emptyDocumentDataModel(documentDataModel.getSnapshot().documentStyle, !!isInArrayFormulaRange);
@@ -660,11 +648,41 @@ export class EditingRenderController extends Disposable {
                 return;
             }
 
-            const endOffset = documentDataModel.getBody()!.dataStream.length - 2 || 0;
-            replaceSelection(percentSelection ?? { startOffset: 0, endOffset, collapsed: endOffset === 0 });
+            const dataStream = documentDataModel.getBody()!.dataStream;
+            const endOffset = (!isFormulaString(dataStream) ? getPercentOffset(editCellState, dataStream) : null) ?? dataStream.length - 2;
+            replaceSelection({ startOffset: endOffset, endOffset, collapsed: true });
         }
 
         this._renderManagerService.getRenderUnitById(unitId)?.scene.resetCursor();
+    }
+
+    private _resizeEditorOnOpen(param: IEditorBridgeServiceVisibleParam, editorObject: IDocObjectParam, isInArrayFormulaRange: boolean) {
+        const pointerPosition = param.eventType === DeviceInputEventType.Dblclick ? param.pointerPosition : undefined;
+        this._sheetCellEditorResizeService?.fitTextSize(() => {
+            if (pointerPosition && this._editorBridgeService.isVisible() !== param) {
+                return;
+            }
+
+            const { engine, scene } = editorObject;
+            scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)?.scrollToViewportPos({
+                viewportScrollX: pointerPosition ? 0 : Number.POSITIVE_INFINITY,
+                viewportScrollY: pointerPosition ? 0 : Number.POSITIVE_INFINITY,
+            });
+            if (!pointerPosition || isInArrayFormulaRange) {
+                return;
+            }
+
+            const rect = engine.getCanvasElement().getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+                this._renderManagerService.getRenderUnitById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService).setCursorManually(
+                    (pointerPosition.x - rect.left) * engine.width / rect.width,
+                    (pointerPosition.y - rect.top) * engine.height / rect.height,
+                    true,
+                    true,
+                    { strict: false }
+                );
+            }
+        });
     }
 
     private _cacheEmptyCellTextStyle(): void {

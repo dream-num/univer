@@ -107,10 +107,11 @@ export class DesktopCellEditRenderController extends RxDisposable implements IRe
                 return;
             }
 
-            this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
+            this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
                 visible: true,
                 eventType: DeviceInputEventType.Dblclick,
                 unitId: this._context.unitId,
+                pointerPosition: { x: evt.clientX, y: evt.clientY },
             } as IEditorBridgeServiceVisibleParam);
         }));
 

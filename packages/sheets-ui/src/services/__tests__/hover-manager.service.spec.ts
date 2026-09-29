@@ -309,12 +309,12 @@ describe('HoverManagerService', () => {
         const colPointerUps: any[] = [];
         service.currentColHeaderPointerUp$.subscribe((v) => colPointerUps.push(v));
 
-        const event = { offsetX: 150, offsetY: 30 } as any;
+        const event = { offsetX: 150, offsetY: 30, clientX: 170, clientY: 60 } as never;
         service.triggerMouseMove('u-1', event);
         service.triggerPointerDown('u-1', event);
         service.triggerPointerUp('u-1', event);
         service.triggerClick('u-1', 150, 30);
-        service.triggerDbClick('u-1', 150, 30);
+        service.triggerDbClick('u-1', event);
         service.triggerMouseMove('u-1', event);
 
         expect(currentCellWithEvent).toEqual(
@@ -332,7 +332,7 @@ describe('HoverManagerService', () => {
         expect(pointerDowns.at(-1)).toEqual(expect.objectContaining({ unitId: 'u-1', row: 1, col: 1 }));
         expect(pointerUps.at(-1)).toEqual(expect.objectContaining({ unitId: 'u-1', row: 1, col: 1 }));
         expect(clicks.at(-1)).toEqual(expect.objectContaining({ location: expect.objectContaining({ row: 1, col: 1 }) }));
-        expect(dbClicks.at(-1)).toEqual(expect.objectContaining({ location: expect.objectContaining({ row: 1, col: 1 }) }));
+        expect(dbClicks.at(-1)).toEqual(expect.objectContaining({ location: expect.objectContaining({ row: 1, col: 1 }), event }));
 
         service.triggerMouseMove('u-1', { offsetX: 150, offsetY: 40 } as never);
         expect(richTextNoDistinct.at(-1)?.drawing).toBeUndefined();

@@ -351,13 +351,9 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
                 const { columnTotalWidth, rowHeaderWidthAndMarginLeft, rowTotalHeight, columnHeaderHeightAndMarginTop } = skeleton;
 
-                const shapeWidth = canvasMaxWidth > columnTotalWidth + rowHeaderWidthAndMarginLeft
-                    ? canvasMaxWidth
-                    : columnTotalWidth + rowHeaderWidthAndMarginLeft;
+                const shapeWidth = Math.max(canvasMaxWidth / scaleX, columnTotalWidth + rowHeaderWidthAndMarginLeft);
 
-                const shapeHeight = canvasMaxHeight > rowTotalHeight + columnHeaderHeightAndMarginTop
-                    ? canvasMaxHeight
-                    : rowTotalHeight + columnHeaderHeightAndMarginTop;
+                const shapeHeight = Math.max(canvasMaxHeight / scaleY, rowTotalHeight + columnHeaderHeightAndMarginTop);
 
                 const scale = Math.max(scaleX, scaleY);
 
@@ -411,9 +407,15 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                         isStartMove = true;
                     }
 
+                    // Canvas and scrollbar sizes are in screen pixels, while cell offsets and scroll values are in
+                    // scene units, so convert the visible area to scene units before clamping.
+                    // https://github.com/dream-num/univer/issues/5483
+                    const visibleSceneBottom = (canvasMaxHeight - scrollBarHorizontalHeight) / scaleY + scrollXY.y;
+                    const visibleSceneRight = (canvasMaxWidth - scrollBarVerticalWidth) / scaleX + scrollXY.x;
+
                     if (initialType === HEADER_RESIZE_TYPE.ROW) {
-                        if (moveChangeY > canvasMaxHeight - scrollBarHorizontalHeight + scrollXY.y - cell.startY) {
-                            moveChangeY = canvasMaxHeight - scrollBarHorizontalHeight + scrollXY.y - cell.startY;
+                        if (moveChangeY > visibleSceneBottom - cell.startY) {
+                            moveChangeY = visibleSceneBottom - cell.startY;
                         }
 
                         if (moveChangeY < -(cell.endY - cell.startY) + 2) {
@@ -434,8 +436,8 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                             scene.setCursor(CURSOR_TYPE.ROW_RESIZE);
                         }
                     } else {
-                        if (moveChangeX > canvasMaxWidth - scrollBarVerticalWidth + scrollXY.x - cell.startX) {
-                            moveChangeX = canvasMaxWidth - scrollBarVerticalWidth + scrollXY.x - cell.startX;
+                        if (moveChangeX > visibleSceneRight - cell.startX) {
+                            moveChangeX = visibleSceneRight - cell.startX;
                         }
 
                         if (moveChangeX < -(cell.endX - cell.startX) + 2) {

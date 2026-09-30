@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDocDrawingBase, IDrawingParam, IExecutionOptions, ITransformState } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    ICommandInfo,
+    IDocDrawingBase,
+    IDrawingParam,
+    IExecutionOptions,
+    ITransformState,
+} from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type {
     DocumentSkeleton,
@@ -318,6 +325,7 @@ export function getDocsPageRelativeDrawingLeft(config: {
     positionH: {
         align?: AlignTypeH;
         posOffset?: number;
+        percent?: number;
         relativeFrom?: ObjectRelativeFromH;
     };
     width: number;
@@ -333,11 +341,14 @@ export function getDocsPageRelativeDrawingLeft(config: {
     if (positionH.align === AlignTypeH.CENTER) {
         return hostPage.pageWidth / 2 - width / 2;
     }
+    if (positionH.align != null) {
+        return 0;
+    }
     if (positionH.posOffset != null) {
         return positionH.posOffset;
     }
 
-    return 0;
+    return positionH.percent ? positionH.percent * hostPage.pageWidth : 0;
 }
 
 export function getDocsPageRelativeDrawingTop(config: {
@@ -345,6 +356,7 @@ export function getDocsPageRelativeDrawingTop(config: {
     positionV: {
         align?: AlignTypeV;
         posOffset?: number;
+        percent?: number;
         relativeFrom?: ObjectRelativeFromV;
     };
     height: number;
@@ -360,11 +372,14 @@ export function getDocsPageRelativeDrawingTop(config: {
     if (positionV.align === AlignTypeV.CENTER) {
         return hostPage.pageHeight / 2 - height / 2;
     }
+    if (positionV.align != null) {
+        return 0;
+    }
     if (positionV.posOffset != null) {
         return positionV.posOffset;
     }
 
-    return 0;
+    return positionV.percent ? positionV.percent * hostPage.pageHeight : 0;
 }
 
 export function getDocsPageRelativeDrawingAnchorPage(config: {

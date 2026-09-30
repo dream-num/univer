@@ -710,6 +710,19 @@ export class DrawingUpdateController extends Disposable {
 
                     if (disposeDrawingRenderObject(scene, param)) {
                         scene.getTransformer()?.clearSelectedObjects();
+                    } else {
+                        // A drawing-specific renderer may have removed the object before this subscriber runs.
+                        const transformer = scene.getTransformer();
+                        const key = getDrawingShapeKeyByDrawingSearch(param);
+                        const selectedKeys = [...(transformer?.getSelectedObjectMap().keys() ?? [])]
+                            .filter((selectedKey) => selectedKey === key || selectedKey.startsWith(`${key}#-#`));
+                        if (selectedKeys.length > 0) {
+                            if (selectedKeys.length === transformer?.getSelectedObjectMap().size) {
+                                transformer.clearSelectedObjects();
+                            } else {
+                                transformer?.clearControlByIds(selectedKeys);
+                            }
+                        }
                     }
                 });
             })

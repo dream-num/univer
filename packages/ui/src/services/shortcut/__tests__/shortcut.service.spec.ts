@@ -31,6 +31,7 @@ import {
     Injector,
 } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import { EMBED_CHILD_UNIT_ID_ATTRIBUTE } from '../../../utils/embed-boundary';
 import { ILayoutService } from '../../layout/layout.service';
 import { IPlatformService, PlatformService } from '../../platform/platform.service';
@@ -286,6 +287,65 @@ describe('ShortcutService', () => {
             await expect.poll(() => executionCount).toBe(1);
             expect(regularEvent.defaultPrevented).toBe(true);
         } finally {
+            injector.dispose();
+        }
+    });
+
+    it('keeps EVKey replacement keys in the editor while preserving physical and programmatic navigation', async () => {
+        const injector = new Injector([
+            [ICommandService, { useClass: CommandService }],
+            [IConfigService, { useClass: ConfigService }],
+            [IContextService, { useClass: ContextService }],
+            [ILogService, { useClass: DesktopLogService }],
+            [IPlatformService, { useClass: PlatformService }],
+            [IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }],
+            [ShortcutService],
+        ]);
+        const editor = document.createElement('div');
+        editor.contentEditable = 'true';
+        Object.defineProperty(editor, 'isContentEditable', { get: () => true });
+        const canvas = document.createElement('canvas');
+        document.body.append(editor, canvas);
+        const platform = vi.spyOn(injector.get(IPlatformService), 'isWindows', 'get').mockReturnValue(true);
+        try {
+            const service = injector.get(ShortcutService);
+            const commandService = injector.get(ICommandService);
+            const commands: string[] = [];
+            for (const [id, binding] of [['test.move-left', KeyCode.ARROW_LEFT], ['test.delete-left', KeyCode.BACKSPACE]] as const) {
+                commandService.registerCommand({
+                    id,
+                    type: CommandType.OPERATION,
+                    handler: () => {
+                        commands.push(id);
+                        return true;
+                    },
+                });
+                service.registerShortcut({ id, binding });
+            }
+
+            // EVKey's hook sends Left without a scan code before Backspace + replacement text.
+            const injectedLeft = new KeyboardEvent('keydown', {
+                bubbles: true,
+                cancelable: true,
+                key: 'ArrowLeft',
+                keyCode: KeyCode.ARROW_LEFT,
+                code: '',
+                isComposing: false,
+            });
+            editor.dispatchEvent(injectedLeft);
+            expect(service.dispatch(injectedLeft)).toBeUndefined();
+            expect(injectedLeft.defaultPrevented).toBe(false);
+
+            editor.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, keyCode: KeyCode.BACKSPACE, code: '' }));
+            for (const code of ['ArrowLeft', 'Numpad4']) {
+                editor.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, keyCode: KeyCode.ARROW_LEFT, code }));
+            }
+            canvas.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, keyCode: KeyCode.ARROW_LEFT }));
+            await expect.poll(() => commands).toEqual(['test.delete-left', 'test.move-left', 'test.move-left', 'test.move-left']);
+        } finally {
+            platform.mockRestore();
+            editor.remove();
+            canvas.remove();
             injector.dispose();
         }
     });

@@ -18,6 +18,7 @@ import type { IDisposable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { createIdentifier, Disposable, ICommandService, IContextService, Optional, toDisposable } from '@univerjs/core';
 import { Subject } from 'rxjs';
+
 import { fromGlobalEvent } from '../../common/lifecycle';
 import { getEmbedChildUnitId, isEmbedBoundaryTarget } from '../../utils/embed-boundary';
 import { ILayoutService } from '../layout/layout.service';
@@ -324,12 +325,7 @@ export class ShortcutService extends Disposable implements IShortcutService {
         }
 
         // Scoped editor context can remain active while a portalled menu owns DOM focus.
-        if (
-            !e.ctrlKey && !e.metaKey && !e.altKey && MENU_NAVIGATION_KEYS.has(e.keyCode) &&
-            e.target instanceof HTMLElement &&
-            (e.target.matches('button[data-u-command], [data-u-command][role="button"], [data-embed-floating-menu="true"] button, [data-u-command] input') ||
-                e.target.closest('[role="menu"]'))
-        ) {
+        if (this._shouldLetMenuHandleShortcut(e)) {
             return;
         }
 
@@ -412,7 +408,25 @@ export class ShortcutService extends Disposable implements IShortcutService {
             binding |= MetaKeys.MAC_CTRL;
         }
 
+        // Hook-based IMEs such as EVKey can inject Left without a physical key code before replacing text.
+        // Let the native input handle it instead of moving the document caret or committing a sheet cell.
+        if (
+            binding === KeyCode.ARROW_LEFT && e.code === '' && !metaKey && this._platformService.isWindows &&
+            e.target instanceof HTMLElement && e.target.isContentEditable
+        ) {
+            return null;
+        }
+
         return binding;
+    }
+
+    private _shouldLetMenuHandleShortcut(e: KeyboardEvent): boolean {
+        if (e.ctrlKey || e.metaKey || e.altKey || !MENU_NAVIGATION_KEYS.has(e.keyCode) || !(e.target instanceof HTMLElement)) {
+            return false;
+        }
+
+        return e.target.matches('button[data-u-command], [data-u-command][role="button"], [data-embed-floating-menu="true"] button, [data-u-command] input') ||
+            e.target.closest('[role="menu"]') !== null;
     }
 
     private _shouldLetEmbedTextEditorHandleNativeShortcut(e: KeyboardEvent, binding: number): boolean {

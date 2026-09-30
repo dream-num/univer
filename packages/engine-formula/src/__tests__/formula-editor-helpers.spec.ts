@@ -20,6 +20,7 @@ import {
     findFormulaStructuredReferences,
     getFormulaHighlightDataStream,
     getFormulaReplaceResult,
+    isFormulaReferenceAddingTextContext,
     resolveFormulaReferenceEditingContext,
 } from '../formula-editor-helpers';
 
@@ -127,5 +128,32 @@ describe('formula editor helpers', () => {
             startIndex: 4,
             endIndex: 30,
         }]);
+    });
+
+    // https://github.com/dream-num/univer/issues/7676
+    it('allows adding a reference after a space following a comma', () => {
+        expect(isFormulaReferenceAddingTextContext('SUM(A1, ', 8)).toBe(true);
+    });
+
+    // https://github.com/dream-num/univer/issues/7676
+    it('allows adding a reference after a line break', () => {
+        expect(isFormulaReferenceAddingTextContext('IF(\r\n', 5)).toBe(true);
+        expect(isFormulaReferenceAddingTextContext('IF(\n', 4)).toBe(true);
+        expect(isFormulaReferenceAddingTextContext('IF(\r\n  ', 7)).toBe(true);
+    });
+
+    // https://github.com/dream-num/univer/issues/7676
+    it('does not allow adding a reference after a completed formula on a new line', () => {
+        expect(isFormulaReferenceAddingTextContext('SUM(A1)\r\n', 9)).toBe(false);
+        expect(isFormulaReferenceAddingTextContext('SUM(A1) ', 9)).toBe(true);
+    });
+
+    // https://github.com/dream-num/univer/issues/7676
+    it('resolves add mode when the cursor is after a line break', () => {
+        expect(resolveFormulaReferenceEditingContext({
+            formulaText: 'IF(\r\n',
+            sequenceNodes: ['IF', '('],
+            offset: 5,
+        })).toMatchObject({ mode: 'add', referenceIndex: -1 });
     });
 });

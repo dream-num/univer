@@ -1930,6 +1930,10 @@ function _lineOperator(
     // A leading page break is not the paragraph's content anchor on the destination page.
     if (!isStandalonePageBoundary) {
         createAndUpdateBlockAnchor(paragraphIndex, newLine, blockAnchorTop, pDrawingAnchor);
+        const paragraphDrawingAnchor = pDrawingAnchor?.get(paragraphIndex);
+        if (paragraphDrawingAnchor) {
+            paragraphDrawingAnchor.left = paragraphAnchorLeft;
+        }
     }
     if (deferredTopBottomAnchorDrawings.length > 0) {
         __updateAndPositionDrawings(ctx, newLineTop, lineHeight, column, deferredTopBottomAnchorDrawings, paragraphConfig.paragraphIndex, isParagraphFirstShapedText, blockAnchorTop, paragraphAnchorLeft, false, true);
@@ -1983,6 +1987,12 @@ function __updateAndPositionDrawings(
 
     if (drawings == null || drawings.size === 0) {
         return;
+    }
+
+    for (const drawing of drawings.values()) {
+        if (drawing.drawingOrigin.docTransform.positionV.relativeFrom === ObjectRelativeFromV.LINE) {
+            drawing.blockAnchorLeft = ctx.skeletonResourceReference?.drawingAnchor?.get(column.parent!.parent!.segmentId)?.get(paragraphIndex)?.left ?? drawing.blockAnchorLeft;
+        }
     }
 
     const floatObjects: IFloatObject[] = [...drawings.values()]
@@ -2962,7 +2972,9 @@ export function updateInlineDrawingPosition(
     unitId = '',
     blockAnchorTop?: number,
     paragraphNonInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>,
-    documentCompatibilityPolicy?: IParagraphConfig['documentCompatibilityPolicy']
+    documentCompatibilityPolicy?: IParagraphConfig['documentCompatibilityPolicy'],
+    blockAnchorLeft = 0,
+    normalizeTraditionalColumnAnchor = false
 ) {
     const column = line.parent;
     const section = column?.parent;
@@ -3074,6 +3086,9 @@ export function updateInlineDrawingPosition(
                 drawing.lineTop = lineTop;
                 drawing.columnLeft = column.left;
                 drawing.blockAnchorTop = blockAnchorTop == null ? lineTop : sectionTop + blockAnchorTop;
+                drawing.blockAnchorLeft = blockAnchorLeft;
+                drawing.normalizeTraditionalColumnAnchor = normalizeTraditionalColumnAnchor;
+                drawing.pageAnchorLeft = normalizeTraditionalColumnAnchor ? page.marginLeft : 0;
                 drawing.lineHeight = line.lineHeight;
 
                 drawings.set(drawing.drawingId, drawing);
@@ -3187,6 +3202,10 @@ function __getDrawingPosition(
             : undefined;
         drawing.initialState = true;
         drawing.columnLeft = column.left;
+        drawing.blockAnchorLeft = blockAnchorLeft;
+        drawing.normalizeTraditionalColumnAnchor = normalizeTraditionalColumnAnchor &&
+            ctx.dataModel.documentStyle.documentFlavor === DocumentFlavor.TRADITIONAL;
+        drawing.pageAnchorLeft = ctx.dataModel.documentStyle.documentFlavor === DocumentFlavor.TRADITIONAL ? page.marginLeft : 0;
         drawing.lineTop = absoluteLineTop;
         drawing.lineHeight = lineHeight;
         drawing.isPageBreak = isPageBreak;

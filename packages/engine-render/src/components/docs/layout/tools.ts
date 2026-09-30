@@ -747,7 +747,9 @@ export function updateInlineDrawingCoordsAndBorder(ctx: ILayoutContext, pages: I
                 ctx.dataModel.getUnitId?.() ?? '',
                 drawingAnchor?.top,
                 affectNonInlineDrawings,
-                paragraphConfig?.documentCompatibilityPolicy
+                paragraphConfig?.documentCompatibilityPolicy,
+                drawingAnchor?.left,
+                ctx.dataModel.documentStyle.documentFlavor === DocumentFlavor.TRADITIONAL
             );
         }
 

@@ -14,10 +14,31 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, IDrawingParam, IImageIoServiceParam, ITextRangeParam, Nullable } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    ICommandInfo,
+    IDocDrawingPosition,
+    IDrawingParam,
+    IImageIoServiceParam,
+    ITextRangeParam,
+    Nullable,
+} from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IDocDrawing, IDrawingDocTransform, IInsertDocDrawingCommandParams, ISetDocDrawingArrangeCommandParams, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
-import type { BaseObject, Documents, Image, IRenderContext, IRenderModule, ITransformerConfig } from '@univerjs/engine-render';
+import type {
+    IDocDrawing,
+    IDrawingDocTransform,
+    IInsertDocDrawingCommandParams,
+    ISetDocDrawingArrangeCommandParams,
+    IUpdateDrawingDocTransformCommandParams,
+} from '@univerjs/docs-drawing';
+import type {
+    BaseObject,
+    Documents,
+    Image,
+    IRenderContext,
+    IRenderModule,
+    ITransformerConfig,
+} from '@univerjs/engine-render';
 import type { LocaleKey } from '../../locale/types';
 import {
     BooleanNumber,
@@ -47,7 +68,14 @@ import {
     getDocumentEntityPermissionObjectId,
     RichTextEditingMutation,
 } from '@univerjs/docs';
-import { collectDocDrawings, findDocDrawing, IDocDrawingService, InsertDocDrawingCommand, SetDocDrawingArrangeCommand, UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
+import {
+    collectDocDrawings,
+    findDocDrawing,
+    IDocDrawingService,
+    InsertDocDrawingCommand,
+    SetDocDrawingArrangeCommand,
+    UpdateDrawingDocTransformCommand,
+} from '@univerjs/docs-drawing';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import {
     DRAWING_IMAGE_ALLOW_IMAGE_LIST,
@@ -65,6 +93,7 @@ import { debounceTime } from 'rxjs';
 import { GroupDocDrawingCommand } from '../../commands/commands/group-doc-drawing.command';
 import { UngroupDocDrawingCommand } from '../../commands/commands/ungroup-doc-drawing.command';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
+import { getDrawingTextRanges } from '../../utils/drawing-text-anchor';
 import { getDocImageCropUpdates } from './doc-drawing-crop';
 import { getDocMutationAffectedDrawingIds } from './doc-drawing-mutation';
 
@@ -692,12 +721,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
 
     private _setDrawingSelections(params: IDrawingParam[]) {
         const { unit } = this._context;
-        const ranges = params.flatMap((item) => {
-            const segmentId = getDocumentDrawingSegmentId(unit, item.drawingId);
-            const body = unit.getSelfOrHeaderFooterModel(segmentId)?.getBody();
-            const block = body?.customBlocks?.find((block) => block.blockId === item.drawingId);
-            return block ? [{ startOffset: block.startIndex, endOffset: block.startIndex + 1, segmentId }] : [];
-        });
+        const ranges = getDrawingTextRanges(unit.getSnapshot(), params.map(({ drawingId }) => drawingId));
         this._docSelectionManagerService.replaceDocRanges(ranges);
     }
 }

@@ -99,11 +99,15 @@ class TestDocSkeletonManagerService {
                     skeDrawings: new Map([
                         [DRAWING_ID, {
                             drawingId: DRAWING_ID,
-                            aLeft: 24,
-                            aTop: 42,
+                            aLeft: 0,
+                            aTop: 32,
+                            width: 120,
+                            height: 60,
+                            drawingOrigin: createDocData().drawings![DRAWING_ID],
                             columnLeft: 8,
+                            pageAnchorLeft: 90,
                             lineTop: 10,
-                            blockAnchorTop: 12,
+                            blockAnchorTop: 20,
                         }],
                     ]),
                     skeTables: new Map(),

@@ -45,6 +45,8 @@ import {
     isInternalEditorID,
     IUniverInstanceService,
     JSON1,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
     PositionedObjectLayoutType,
     RxDisposable,
     TextXActionType,
@@ -481,7 +483,8 @@ export function doesDocMutationRequireLayout(
     }
 
     for (const [drawingId, transition] of transitions) {
-        const currentLayoutType = drawings?.[drawingId]?.layoutType;
+        const currentDrawing = drawings?.[drawingId];
+        const currentLayoutType = currentDrawing?.layoutType;
         const before = transition.before ?? currentLayoutType;
         const after = transition.after ?? currentLayoutType;
         if (
@@ -490,6 +493,12 @@ export function doesDocMutationRequireLayout(
             before !== PositionedObjectLayoutType.WRAP_NONE ||
             after !== PositionedObjectLayoutType.WRAP_NONE
         ) {
+            return true;
+        }
+        // Only physical page coordinates are resolved directly from the current model by the drawing renderer.
+        // Other references still require a fresh skeleton position, even without text wrapping.
+        if (currentDrawing?.docTransform?.positionH.relativeFrom !== ObjectRelativeFromH.PAGE ||
+            currentDrawing?.docTransform?.positionV.relativeFrom !== ObjectRelativeFromV.PAGE) {
             return true;
         }
     }

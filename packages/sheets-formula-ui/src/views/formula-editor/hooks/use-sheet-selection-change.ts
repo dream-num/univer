@@ -308,7 +308,11 @@ export const useSheetSelectionChange = (
             isFormulaReferenceAddingTextContext(formulaText, offset);
         if (isAddingReference) {
             if (offset !== 0) {
-                if (nodeIndex === -1 && sequenceNodes.length) {
+                // The lexer drops trailing whitespace (e.g. a space or line break typed after `,`),
+                // so the cursor can sit past the last sequence node. The text-based insertion below
+                // only needs the raw formula text, so keep going when it allows adding a reference.
+                // See https://github.com/dream-num/univer/issues/7676
+                if (nodeIndex === -1 && sequenceNodes.length && !isFormulaReferenceAddingTextContext(formulaText, offset)) {
                     return;
                 }
                 const range = getLastFormulaSelection(selections);

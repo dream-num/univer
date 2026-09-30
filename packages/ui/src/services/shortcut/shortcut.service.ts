@@ -325,7 +325,12 @@ export class ShortcutService extends Disposable implements IShortcutService {
         }
 
         // Scoped editor context can remain active while a portalled menu owns DOM focus.
-        if (this._shouldLetMenuHandleShortcut(e)) {
+        if (
+            !e.ctrlKey && !e.metaKey && !e.altKey && MENU_NAVIGATION_KEYS.has(e.keyCode) &&
+            e.target instanceof HTMLElement &&
+            (e.target.matches('button[data-u-command], [data-u-command][role="button"], [data-embed-floating-menu="true"] button, [data-u-command] input') ||
+                e.target.closest('[role="menu"]'))
+        ) {
             return;
         }
 
@@ -343,10 +348,6 @@ export class ShortcutService extends Disposable implements IShortcutService {
             return;
         }
         const binding = this._deriveBindingFromEvent(e);
-        if (binding === null) {
-            return undefined;
-        }
-
         const shortcuts = this._shortCutMapping.get(binding);
         if (shortcuts === undefined) {
             return undefined;
@@ -386,7 +387,7 @@ export class ShortcutService extends Disposable implements IShortcutService {
         return item.binding;
     }
 
-    private _deriveBindingFromEvent(e: KeyboardEvent): number | null {
+    private _deriveBindingFromEvent(e: KeyboardEvent): number {
         const { shiftKey, metaKey, altKey, keyCode } = e;
 
         let binding = keyCode;
@@ -409,24 +410,14 @@ export class ShortcutService extends Disposable implements IShortcutService {
         }
 
         // Hook-based IMEs such as EVKey can inject Left without a physical key code before replacing text.
-        // Let the native input handle it instead of moving the document caret or committing a sheet cell.
+        // Ignore that native auxiliary key, while preserving physical keys and programmatic dispatch.
         if (
-            binding === KeyCode.ARROW_LEFT && e.code === '' && !metaKey && this._platformService.isWindows &&
-            e.target instanceof HTMLElement && e.target.isContentEditable
+            binding === KeyCode.ARROW_LEFT && e.code === '' && e.isTrusted && !metaKey && this._platformService.isWindows
         ) {
-            return null;
+            return KeyCode.UNKNOWN;
         }
 
         return binding;
-    }
-
-    private _shouldLetMenuHandleShortcut(e: KeyboardEvent): boolean {
-        if (e.ctrlKey || e.metaKey || e.altKey || !MENU_NAVIGATION_KEYS.has(e.keyCode) || !(e.target instanceof HTMLElement)) {
-            return false;
-        }
-
-        return e.target.matches('button[data-u-command], [data-u-command][role="button"], [data-embed-floating-menu="true"] button, [data-u-command] input') ||
-            e.target.closest('[role="menu"]') !== null;
     }
 
     private _shouldLetEmbedTextEditorHandleNativeShortcut(e: KeyboardEvent, binding: number): boolean {

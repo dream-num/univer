@@ -291,62 +291,23 @@ describe('ShortcutService', () => {
         }
     });
 
-    it('keeps EVKey replacement keys in the editor while preserving physical and programmatic navigation', async () => {
-        const injector = new Injector([
-            [ICommandService, { useClass: CommandService }],
-            [IConfigService, { useClass: ConfigService }],
-            [IContextService, { useClass: ContextService }],
-            [ILogService, { useClass: DesktopLogService }],
-            [IPlatformService, { useClass: PlatformService }],
-            [IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }],
-            [ShortcutService],
-        ]);
-        const editor = document.createElement('div');
-        editor.contentEditable = 'true';
-        Object.defineProperty(editor, 'isContentEditable', { get: () => true });
-        const canvas = document.createElement('canvas');
-        document.body.append(editor, canvas);
-        const platform = vi.spyOn(injector.get(IPlatformService), 'isWindows', 'get').mockReturnValue(true);
+    it.each([
+        { name: 'EVKey auxiliary Left', code: '', isTrusted: true, isWindows: true, handled: false },
+        { name: 'physical Left', code: 'ArrowLeft', isTrusted: true, isWindows: true, handled: true },
+        { name: 'numpad Left', code: 'Numpad4', isTrusted: true, isWindows: true, handled: true },
+        { name: 'programmatic Left', code: '', isTrusted: false, isWindows: true, handled: true },
+        { name: 'non-Windows Left', code: '', isTrusted: true, isWindows: false, handled: true },
+        { name: 'EVKey replacement Backspace', keyCode: KeyCode.BACKSPACE, code: '', isTrusted: true, isWindows: true, handled: true },
+    ])('handles $name without inspecting an editor element', ({ keyCode = KeyCode.ARROW_LEFT, code, isTrusted, isWindows, handled }) => {
+        const { service } = createService({ isWindows });
         try {
-            const service = injector.get(ShortcutService);
-            const commandService = injector.get(ICommandService);
-            const commands: string[] = [];
-            for (const [id, binding] of [['test.move-left', KeyCode.ARROW_LEFT], ['test.delete-left', KeyCode.BACKSPACE]] as const) {
-                commandService.registerCommand({
-                    id,
-                    type: CommandType.OPERATION,
-                    handler: () => {
-                        commands.push(id);
-                        return true;
-                    },
-                });
-                service.registerShortcut({ id, binding });
-            }
+            service.registerShortcut({ id: 'test.shortcut', binding: keyCode });
 
-            // EVKey's hook sends Left without a scan code before Backspace + replacement text.
-            const injectedLeft = new KeyboardEvent('keydown', {
-                bubbles: true,
-                cancelable: true,
-                key: 'ArrowLeft',
-                keyCode: KeyCode.ARROW_LEFT,
-                code: '',
-                isComposing: false,
-            });
-            editor.dispatchEvent(injectedLeft);
-            expect(service.dispatch(injectedLeft)).toBeUndefined();
-            expect(injectedLeft.defaultPrevented).toBe(false);
-
-            editor.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, keyCode: KeyCode.BACKSPACE, code: '' }));
-            for (const code of ['ArrowLeft', 'Numpad4']) {
-                editor.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, keyCode: KeyCode.ARROW_LEFT, code }));
-            }
-            canvas.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, keyCode: KeyCode.ARROW_LEFT }));
-            await expect.poll(() => commands).toEqual(['test.delete-left', 'test.move-left', 'test.move-left', 'test.move-left']);
+            // isTrusted is browser-owned and cannot be set on a constructed KeyboardEvent.
+            const event = { keyCode, code, isTrusted } as KeyboardEvent;
+            expect(service.dispatch(event)?.id).toBe(handled ? 'test.shortcut' : undefined);
         } finally {
-            platform.mockRestore();
-            editor.remove();
-            canvas.remove();
-            injector.dispose();
+            service.dispose();
         }
     });
 

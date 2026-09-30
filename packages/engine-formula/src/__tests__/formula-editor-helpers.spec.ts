@@ -22,6 +22,7 @@ import {
     getFormulaReplaceResult,
     isFormulaReferenceAddingTextContext,
     resolveFormulaReferenceEditingContext,
+    shouldSkipReferenceInsertion,
 } from '../formula-editor-helpers';
 
 describe('formula editor helpers', () => {
@@ -155,5 +156,21 @@ describe('formula editor helpers', () => {
             sequenceNodes: ['IF', '('],
             offset: 5,
         })).toMatchObject({ mode: 'add', referenceIndex: -1 });
+    });
+
+    // https://github.com/dream-num/univer/issues/7676
+    it('does not skip insertion when the cursor is past the last node but the text allows a reference', () => {
+        expect(shouldSkipReferenceInsertion(-1, 2, 'SUM(A1, ', 8)).toBe(false);
+        expect(shouldSkipReferenceInsertion(-1, 2, 'IF(\r\n', 5)).toBe(false);
+    });
+
+    // https://github.com/dream-num/univer/issues/7676
+    it('skips insertion when the cursor is past the last node and the text disallows a reference', () => {
+        expect(shouldSkipReferenceInsertion(-1, 2, 'SUM(A1)\r\n', 9)).toBe(true);
+    });
+
+    it('does not skip insertion when the cursor is on a sequence node or there are no nodes', () => {
+        expect(shouldSkipReferenceInsertion(0, 2, 'SUM(A1)\r\n', 9)).toBe(false);
+        expect(shouldSkipReferenceInsertion(-1, 0, 'SUM(A1, ', 8)).toBe(false);
     });
 });

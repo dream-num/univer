@@ -179,6 +179,25 @@ export function isFormulaReferenceAddingTextContext(formulaText: string, offset:
     );
 }
 
+/**
+ * Whether the selection-change handler should bail out before the text-based
+ * reference insertion when the cursor sits past the last sequence node.
+ *
+ * The lexer drops trailing whitespace from sequence nodes, so `nodeIndex` can be
+ * -1 while the raw formula text still allows adding a reference. The text-based
+ * insertion only needs the formula text and offset, so bailing out is only
+ * correct when the text context itself disallows adding a reference.
+ * See https://github.com/dream-num/univer/issues/7676
+ */
+export function shouldSkipReferenceInsertion(
+    nodeIndex: number,
+    sequenceNodeCount: number,
+    formulaText: string,
+    offset: number
+): boolean {
+    return nodeIndex === -1 && sequenceNodeCount > 0 && !isFormulaReferenceAddingTextContext(formulaText, offset);
+}
+
 export function resolveFormulaReferenceEditingContext(options: {
     formulaText: string;
     sequenceNodes: FormulaSequenceNode[];

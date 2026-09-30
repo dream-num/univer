@@ -169,5 +169,27 @@ describe('HeaderResizeRenderController', () => {
 
             testBed.univer.dispose();
         });
+
+        it('clamps the row resize to the visible area in scene units when zoomed in', () => {
+            const { testBed, context, controller, executeSpy } = setup(2);
+
+            // Screen y 79 maps to scene y 39.5, the bottom edge of row 1 (scene y 20-40).
+            const rowHeader = context.components.get(SHEET_VIEW_KEY.ROW) as any;
+            rowHeader.onPointerMove$.emit({ offsetX: 10, offsetY: 79, button: 0 }, {});
+
+            const rowResizeRect = (controller as any)._rowResizeRect;
+            rowResizeRect.onPointerDown$.emitEvent({ offsetX: 10, offsetY: 79, button: 0 } as any);
+            // Drag past the canvas edge.
+            (context.scene as any).onPointerMove$.emit({ offsetX: 10, offsetY: 1000, button: 0 }, {});
+            (context.scene as any).onPointerUp$.emit({ offsetX: 10, offsetY: 1000, button: 0 }, {});
+
+            // The visible bottom edge is (600 - 10) / 2 = 295 in scene units, so the delta is capped at 295 - 20.
+            expect(executeSpy).toHaveBeenCalledWith(DeltaRowHeightCommand.id, {
+                deltaY: 275,
+                anchorRow: 1,
+            });
+
+            testBed.univer.dispose();
+        });
     });
 });

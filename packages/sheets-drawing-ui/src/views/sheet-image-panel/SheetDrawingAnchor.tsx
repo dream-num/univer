@@ -15,7 +15,6 @@
  */
 
 import type { IDrawingParam, Nullable } from '@univerjs/core';
-import type { BaseObject } from '@univerjs/engine-render';
 import type {
     ISheetDrawing,
     ISheetDrawingPlacementInput,
@@ -26,11 +25,11 @@ import { clsx, Radio, RadioGroup } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
-    getSheetDrawingPlacement,
     SetSheetDrawingPlacementCommand,
     SheetDrawingAnchorType,
 } from '@univerjs/sheets-drawing';
 import { useDependency } from '@univerjs/ui';
+
 import { useEffect, useState } from 'react';
 
 export interface ISheetDrawingAnchorProps {
@@ -38,6 +37,21 @@ export interface ISheetDrawingAnchorProps {
 }
 
 export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
+    function isSheetDrawing(drawing: Nullable<IDrawingParam>): drawing is ISheetDrawing {
+        return Boolean(drawing && 'sheetTransform' in drawing && 'axisAlignSheetTransform' in drawing);
+    }
+
+    function getAnchorKind(value: string | number | boolean): SheetDrawingAnchorType | null {
+        if (
+            value === SheetDrawingAnchorType.Position ||
+            value === SheetDrawingAnchorType.Both ||
+            value === SheetDrawingAnchorType.None
+        ) {
+            return value;
+        }
+        return null;
+    }
+
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);
@@ -52,43 +66,8 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
 
     const [anchorShow, setAnchorShow] = useState(true);
 
-    const type = drawingParam
-        ? getSheetDrawingPlacement(drawingParam).kind
-        : SheetDrawingAnchorType.Position;
+    const type = drawingParam?.anchorType ?? SheetDrawingAnchorType.None;
     const [value, setValue] = useState(type);
-
-    function getUpdateParams(objects: Map<string, BaseObject>, drawingManagerService: IDrawingManagerService): Nullable<ISheetDrawing>[] {
-        const params: Nullable<ISheetDrawing>[] = [];
-        objects.forEach((object) => {
-            const { oKey } = object;
-
-            const searchParam = drawingManagerService.getDrawingOKey(oKey);
-
-            if (searchParam == null) {
-                params.push(null);
-                return true;
-            }
-
-            if (!isSheetDrawing(searchParam)) {
-                params.push(null);
-                return true;
-            }
-
-            const { unitId, subUnitId, drawingId, drawingType, anchorType, sheetTransform, axisAlignSheetTransform } = searchParam;
-
-            params.push({
-                unitId,
-                subUnitId,
-                drawingId,
-                anchorType,
-                sheetTransform,
-                drawingType,
-                axisAlignSheetTransform,
-            });
-        });
-
-        return params;
-    }
 
     useEffect(() => {
         if (!transformer) {
@@ -103,16 +82,14 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
 
         const onChangeStartObserver = transformer.changeStart$.subscribe((state) => {
             const { objects } = state;
-            const params = getUpdateParams(objects, drawingManagerService);
+            const params = Array.from(objects.values(), ({ oKey }) => drawingManagerService.getDrawingOKey(oKey));
 
             if (params.length === 0) {
                 setAnchorShow(false);
             } else if (params.length >= 1) {
                 setAnchorShow(true);
-                const drawing = params[0];
-                setValue(drawing
-                    ? getSheetDrawingPlacement(drawing).kind
-                    : SheetDrawingAnchorType.Position);
+                const drawing = params[0] as Nullable<ISheetDrawing>;
+                setValue(drawing?.anchorType ?? SheetDrawingAnchorType.None);
             }
         });
 
@@ -203,18 +180,3 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
         </div>
     );
 };
-
-function isSheetDrawing(drawing: IDrawingParam | undefined): drawing is ISheetDrawing {
-    return Boolean(drawing && 'sheetTransform' in drawing && 'axisAlignSheetTransform' in drawing);
-}
-
-function getAnchorKind(value: string | number | boolean): SheetDrawingAnchorType | null {
-    if (
-        value === SheetDrawingAnchorType.Position ||
-        value === SheetDrawingAnchorType.Both ||
-        value === SheetDrawingAnchorType.None
-    ) {
-        return value;
-    }
-    return null;
-}

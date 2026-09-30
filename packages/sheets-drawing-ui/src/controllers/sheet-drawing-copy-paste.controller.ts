@@ -39,6 +39,7 @@ import {
 } from '@univerjs/sheets-ui';
 import { IClipboardInterfaceService } from '@univerjs/ui';
 import { takeUntil, timer } from 'rxjs';
+
 import { InsertFloatImageCommand } from '../commands/commands/insert-image.command';
 
 const IMAGE_PNG_MIME_TYPE = 'image/png';
@@ -248,7 +249,7 @@ export class SheetsDrawingCopyPasteController extends RxDisposable {
             if (drawing.drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
                 return;
             }
-            const anchorType = (drawing as ISheetDrawing).anchorType ?? SheetDrawingAnchorType.Position;
+            const anchorType = (drawing as ISheetDrawing).anchorType ?? SheetDrawingAnchorType.None;
             if (anchorType === SheetDrawingAnchorType.None) {
                 return;
             }
@@ -411,7 +412,6 @@ export class SheetsDrawingCopyPasteController extends RxDisposable {
         return { redos, undos };
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _generateRangeDrawingsPasteMutations(
         pasteContext: {
             unitId: string;

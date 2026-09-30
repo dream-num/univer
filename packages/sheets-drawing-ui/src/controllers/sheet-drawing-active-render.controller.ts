@@ -97,7 +97,7 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
                     Object.keys(drawingData).forEach((drawingId) => {
                         if (unitId === showUnitId && subUnitId === showSubunitId) {
                             const drawing = drawingData[drawingId] as ISheetDrawing;
-                            if (drawing.sheetTransform && drawing.anchorType !== SheetDrawingAnchorType.None) {
+                            if (drawing.sheetTransform && (drawing.anchorType ?? SheetDrawingAnchorType.None) !== SheetDrawingAnchorType.None) {
                                 drawing.transform = drawingPositionToTransform(drawing.sheetTransform, sheetSkeletonParam);
                             }
                             insertDrawings.push(drawingData[drawingId]);

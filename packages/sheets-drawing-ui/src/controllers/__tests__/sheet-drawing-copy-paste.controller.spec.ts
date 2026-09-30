@@ -24,6 +24,7 @@ import { RemoveSheetDrawingCommand, SheetDrawingAnchorType } from '@univerjs/she
 import { COPY_TYPE, ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '@univerjs/sheets-ui';
 import { IClipboardInterfaceService } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
+
 import { InsertFloatImageCommand } from '../../commands/commands/insert-image.command';
 import { SheetsDrawingCopyPasteController } from '../sheet-drawing-copy-paste.controller';
 
@@ -196,14 +197,14 @@ describe('SheetsDrawingCopyPasteController', () => {
         }
     });
 
-    it('copies default position-anchored images contained in a cell range', () => {
-        const positionOnlyDrawing = createImageDrawing({
-            drawingId: 'position-only',
+    it('does not copy default absolute images with a cell range', () => {
+        const defaultDrawing = createImageDrawing({
+            drawingId: 'default-anchor',
             anchorType: undefined,
         });
         const { controller, hook, drawingService } = createController({
             drawingData: {
-                [positionOnlyDrawing.drawingId]: positionOnlyDrawing,
+                [defaultDrawing.drawingId]: defaultDrawing,
             },
         });
 
@@ -228,12 +229,7 @@ describe('SheetsDrawingCopyPasteController', () => {
             { copyId: 'range-copy', copyType: COPY_TYPE.COPY, pasteType: PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE }
         );
 
-        expect(drawingService.getBatchAddOp).toHaveBeenCalledTimes(1);
-        expect(drawingService.getBatchAddOp.mock.calls[0][0]).toMatchObject([{
-            unitId: 'unit-2',
-            subUnitId: 'sheet-2',
-            transform: { left: 35, top: 45, width: 10, height: 20 },
-        }]);
+        expect(drawingService.getBatchAddOp).not.toHaveBeenCalled();
 
         controller.dispose();
     });
@@ -310,7 +306,6 @@ describe('SheetsDrawingCopyPasteController', () => {
             focusedDrawings: [focusedDrawing],
         });
 
-        expect(hook.onBeforeCopyFocusedObject).toBeTypeOf('function');
         expect(hook.onBeforeCopyFocusedObject?.('unit-1', 'sheet-1', COPY_TYPE.CUT)).toBe(true);
         expect(commandService.executeCommand).toHaveBeenCalledWith(RemoveSheetDrawingCommand.id, {
             unitId: 'unit-1',

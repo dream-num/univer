@@ -17,9 +17,10 @@
 import type { IShortcutItem } from '@univerjs/ui';
 import { Direction, EDITOR_ACTIVATED, FOCUSING_DOC, FOCUSING_UNIVER_EDITOR } from '@univerjs/core';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
+
 import { DocSelectAllCommand } from '../commands/commands/doc-select-all.command';
 import { MoveCursorOperation, MoveSelectionOperation } from '../commands/operations/doc-cursor.operation';
-import { whenDocAndEditorFocused } from './utils';
+import { whenDocAndEditorFocused, whenTextEditorFocused } from './utils';
 
 function moveCursorShortcut(
     direction: Direction,
@@ -35,7 +36,7 @@ function moveCursorShortcut(
         mac,
         win,
         linux,
-        preconditions: whenDocAndEditorFocused,
+        preconditions: whenTextEditorFocused,
         staticParameters: {
             direction,
             granularity,
@@ -57,7 +58,7 @@ function moveSelectionShortcut(
         mac,
         win,
         linux,
-        preconditions: whenDocAndEditorFocused,
+        preconditions: whenTextEditorFocused,
         staticParameters: {
             direction,
             granularity,

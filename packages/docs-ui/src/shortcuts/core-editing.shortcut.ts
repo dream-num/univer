@@ -16,11 +16,12 @@
 
 import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
+
 import { EnterCommand } from '../commands/commands/auto-format.command';
 import { BreakLineCommand } from '../commands/commands/break-line.command';
 import { DeleteLeftCommand, DeleteRightCommand } from '../commands/commands/doc-delete.command';
 import { CloseHeaderFooterCommand } from '../commands/commands/doc-header-footer.command';
-import { whenDocAndEditorFocused, whenDocAndEditorFocusedWithBreakLine } from './utils';
+import { whenDocAndEditorFocused, whenDocAndEditorFocusedWithBreakLine, whenTextEditorFocused } from './utils';
 
 export const BreakLineShortcut: IShortcutItem = {
     id: EnterCommand.id,
@@ -52,14 +53,32 @@ export const CloseHeaderFooterShortcut: IShortcutItem = {
     binding: KeyCode.ESC,
 };
 
-// export const TabShortcut: IShortcutItem = {
-//     id: DocTabCommand.id,
-//     preconditions: whenDocAndEditorFocused,
-//     binding: KeyCode.TAB,
-// };
+export const DeleteWordLeftShortcut: IShortcutItem = {
+    id: DeleteLeftCommand.id,
+    preconditions: whenTextEditorFocused,
+    binding: KeyCode.BACKSPACE | MetaKeys.CTRL_COMMAND,
+    mac: KeyCode.BACKSPACE | MetaKeys.ALT,
+    staticParameters: { granularity: 'word' },
+};
 
-// export const ShiftTabShortcut: IShortcutItem = {
-//     id: DocShiftTabCommand.id,
-//     preconditions: whenDocAndEditorFocused,
-//     binding: KeyCode.TAB | MetaKeys.SHIFT,
-// };
+export const DeleteWordRightShortcut: IShortcutItem = {
+    id: DeleteRightCommand.id,
+    preconditions: whenTextEditorFocused,
+    mac: KeyCode.DELETE | MetaKeys.ALT,
+    staticParameters: { granularity: 'word' },
+};
+
+export const DeleteLineStartShortcut: IShortcutItem = {
+    id: DeleteLeftCommand.id,
+    preconditions: whenTextEditorFocused,
+    mac: KeyCode.BACKSPACE | MetaKeys.CTRL_COMMAND,
+    staticParameters: { granularity: 'line' },
+};
+
+export const DeleteLineEndShortcut: IShortcutItem = {
+    id: DeleteRightCommand.id,
+    preconditions: whenTextEditorFocused,
+    binding: KeyCode.DELETE | MetaKeys.CTRL_COMMAND,
+    mac: KeyCode.DELETE | MetaKeys.MAC_CTRL,
+    staticParameters: { granularity: 'line' },
+};

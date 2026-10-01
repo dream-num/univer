@@ -531,7 +531,8 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                         (shape as Image).setOpacity(fadeBody ? 0.5 : 1);
                     } catch {
                     }
-                    if (!isDocInteractionFocusing) {
+                    // Main scenes must accept the first click; embedded scenes keep their focus boundary.
+                    if (!isDocInteractionFocusing && !this._context.isMainScene) {
                         continue;
                     }
                     if (

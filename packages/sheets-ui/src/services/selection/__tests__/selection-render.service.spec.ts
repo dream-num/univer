@@ -33,6 +33,7 @@ import {
     RenderManagerService,
     SHEET_VIEWPORT_KEY,
     Spreadsheet,
+    Vector2,
     Viewport,
 } from '@univerjs/engine-render';
 import {
@@ -51,7 +52,7 @@ import {
 } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { SHEET_VIEW_KEY } from '../../../common/keys';
+import { SHEET_COMPONENT_MAIN_LAYER_INDEX, SHEET_VIEW_KEY } from '../../../common/keys';
 import { createRenderTestBed } from '../../../controllers/render-controllers/__tests__/render-test-bed';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { SheetSelectionRenderService } from '../selection-render.service';
@@ -271,7 +272,7 @@ describe('SheetSelectionRenderService', () => {
     });
 });
 
-describe('SheetSelectionRenderService additive pointer modifiers with real render providers', () => {
+describe('SheetSelectionRenderService pointer gestures with real render providers', () => {
     let univer: Univer;
 
     beforeEach(() => {
@@ -304,13 +305,13 @@ describe('SheetSelectionRenderService additive pointer modifiers with real rende
         vi.useRealTimers();
     });
 
-    function createSelectionTestBed(mergeData: IRange[] = []) {
+    function createSelectionTestBed(mergeData: IRange[] = [], rowCount = 20) {
         const injector = univer.__getInjector();
         const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
             id: 'pointer-modifiers',
             name: 'Pointer modifiers',
             sheetOrder: ['sheet1'],
-            sheets: { sheet1: { id: 'sheet1', name: 'Sheet 1', rowCount: 20, columnCount: 10, cellData: {}, mergeData } },
+            sheets: { sheet1: { id: 'sheet1', name: 'Sheet 1', rowCount, columnCount: 10, cellData: {}, mergeData } },
         });
         const renderManager = injector.get(IRenderManagerService);
         const render = renderManager.createRender(workbook.getUnitId());
@@ -344,6 +345,130 @@ describe('SheetSelectionRenderService additive pointer modifiers with real rende
         };
         return { injector, workbook, render, spreadsheet, service, skeleton, getSelections, eventAt, click };
     }
+
+    it.each([20, 1_000_000])('animates clicks without delaying selection or invalidating sheet content with %i rows', (rowCount) => {
+        const { click, service, skeleton, render, getSelections } = createSelectionTestBed([], rowCount);
+        click(1, 1);
+        vi.advanceTimersByTime(160);
+        const control = service.getActiveSelectionControl()!;
+        const from = control.getRange();
+
+        click(5, 4);
+        const target = control.getRange();
+        expect(service.getActiveSelectionControl()).toBe(control);
+        expect(getSelections()[0].range).toMatchObject({ startRow: 5, endRow: 5, startColumn: 4, endColumn: 4 });
+
+        const mainLayer = render.scene.getLayer(SHEET_COMPONENT_MAIN_LAYER_INDEX);
+        mainLayer.makeDirty(false);
+        const calculate = vi.spyOn(skeleton, 'calculate');
+        const getCell = vi.spyOn(skeleton, 'getCellWithMergeInfoByIndex');
+        vi.advanceTimersByTime(48);
+        expect(control.selectionShape.left).toBeGreaterThan(from.startX);
+        expect(control.selectionShape.left).toBeLessThan(target.startX);
+        expect(control.selectionShape.top).toBeGreaterThan(from.startY);
+        expect(control.selectionShape.top).toBeLessThan(target.startY);
+        const borderPosition = () => new Vector2(control.selectionShape.left + control.leftControl.left, control.selectionShape.top + 10);
+        expect(render.scene.pick(borderPosition())).not.toBe(control.leftControl);
+        expect(control.getRange()).toEqual(target);
+        vi.advanceTimersByTime(160);
+        expect(control.selectionShape.left).toBe(target.startX);
+        expect(control.selectionShape.top).toBe(target.startY);
+        expect(render.scene.pick(borderPosition())).toBe(control.leftControl);
+        expect(mainLayer.isDirty()).toBe(false);
+        expect(calculate).not.toHaveBeenCalled();
+        expect(getCell).not.toHaveBeenCalled();
+
+        const translate = vi.spyOn(control.selectionShape, 'translate');
+        vi.advanceTimersByTime(300);
+        expect(translate).not.toHaveBeenCalled();
+    });
+
+    it('retargets from the visible position and cancels motion when dragging or disposing', () => {
+        const { click, service, eventAt, spreadsheet, render } = createSelectionTestBed();
+        click(1, 1);
+        vi.advanceTimersByTime(160);
+        click(5, 4);
+        vi.advanceTimersByTime(32);
+        const control = service.getActiveSelectionControl()!;
+        const visibleLeft = control.selectionShape.left;
+        click(8, 6);
+        expect(control.selectionShape.left).toBe(visibleLeft);
+        vi.advanceTimersByTime(160);
+        expect(control.selectionShape.left).toBe(control.getRange().startX);
+
+        spreadsheet.onPointerDown$.emitEvent(eventAt(2, 2));
+        render.scene.onPointerMove$.emitEvent(eventAt(4, 3));
+        render.scene.onPointerUp$.emitEvent(eventAt(4, 3));
+        const dragged = control.getRange();
+        vi.advanceTimersByTime(160);
+        expect(control.selectionShape.left).toBe(dragged.startX);
+        expect(control.selectionShape.top).toBe(dragged.startY);
+        expect(dragged).toMatchObject({ startRow: 2, endRow: 4, startColumn: 2, endColumn: 3 });
+
+        click(1, 1);
+        click(5, 4);
+        const disposedControl = service.getActiveSelectionControl()!;
+        const translate = vi.spyOn(disposedControl.selectionShape, 'translate');
+        service.disableSelection();
+        vi.advanceTimersByTime(160);
+        expect(translate).not.toHaveBeenCalled();
+        expect(service.getSelectionControls()).toHaveLength(0);
+    });
+
+    it('resizes merged cell outlines at constant stroke width and respects reduced motion', () => {
+        const { click, service } = createSelectionTestBed([{ startRow: 3, endRow: 4, startColumn: 3, endColumn: 5 }]);
+        click(1, 1);
+        vi.advanceTimersByTime(160);
+        const control = service.getActiveSelectionControl()!;
+        const width = control.topControl.width;
+        const stroke = control.leftControl.width;
+        click(3, 3);
+        vi.advanceTimersByTime(48);
+        const target = control.getRange();
+        expect(control.topControl.width).toBeGreaterThan(width);
+        expect(control.topControl.width).toBeLessThan(target.endX - target.startX + stroke);
+        expect(control.leftControl.width).toBe(stroke);
+        vi.advanceTimersByTime(160);
+        expect(control.topControl.width).toBe(target.endX - target.startX + stroke);
+
+        vi.spyOn(window, 'matchMedia').mockReturnValue({ matches: true } as MediaQueryList);
+        click(7, 2);
+        expect(control.selectionShape.left).toBe(control.getRange().startX);
+        expect(control.selectionShape.top).toBe(control.getRange().startY);
+        const translate = vi.spyOn(control.selectionShape, 'translate');
+        vi.advanceTimersByTime(160);
+        expect(translate).not.toHaveBeenCalled();
+    });
+
+    it('settles immediately across frozen panes, on zoom, and when switching worksheets', () => {
+        const { click, service, workbook, render } = createSelectionTestBed();
+        workbook.getActiveSheet().getSnapshot().freeze = { startRow: 2, startColumn: 0, xSplit: 0, ySplit: 2 };
+        click(1, 1);
+        vi.advanceTimersByTime(160);
+        click(4, 4);
+        const control = service.getActiveSelectionControl()!;
+        expect(control.selectionShape.left).toBe(control.getRange().startX);
+        expect(control.selectionShape.top).toBe(control.getRange().startY);
+
+        click(6, 5);
+        render.scene.scale(1.5, 1.5);
+        vi.advanceTimersByTime(160);
+        expect(control.selectionShape.left).toBe(control.getRange().startX);
+        expect(control.selectionShape.top).toBe(control.getRange().startY);
+
+        render.scene.scale(1, 1);
+        click(4, 2);
+        const translate = vi.spyOn(control.selectionShape, 'translate');
+        workbook.addWorksheet('sheet2', 1, { id: 'sheet2', name: 'Sheet 2', rowCount: 20, columnCount: 10 });
+        workbook.setActiveSheet(workbook.getSheetBySheetId('sheet2')!);
+        render.with(SheetSkeletonManagerService).setCurrent({ sheetId: 'sheet2' });
+        vi.advanceTimersByTime(160);
+        const nextControl = service.getActiveSelectionControl()!;
+        expect(translate).not.toHaveBeenCalled();
+        expect(nextControl).not.toBe(control);
+        expect(nextControl.selectionShape.left).toBe(nextControl.getRange().startX);
+        expect(nextControl.selectionShape.top).toBe(nextControl.getRange().startY);
+    });
 
     for (const single of [false, true]) {
         for (const modifier of ['none', 'ctrlKey', 'metaKey', 'shiftKey'] as const) {

@@ -48,6 +48,7 @@ import {
 } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, merge, startWith } from 'rxjs';
+
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -296,7 +297,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             convertSelectionDataToRange(selectionDataWithStyle)
         );
 
-        this._commandService.executeCommand(SetSelectionsOperation.id, {
+        this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
             unitId,
             subUnitId: sheetId,
             type,
@@ -322,6 +323,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             this._changeRuntime(skeleton, scene, viewportMain);
 
             if (prevSheetId !== skeleton.worksheet.getSheetId()) {
+                this._reset();
                 // If there is no initial selection, add one by default in the top left corner.
                 const selections = this._workbookSelections.getCurrentSelections();
                 // WARNING: SetSelectionsOperation with type=null would clear all exists selections
@@ -450,6 +452,10 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         }
 
         let activeControl = this.getActiveSelectionControl();
+        if (activeControl && this._canAnimateSelection(evt, activeControl, cursorRange)) {
+            activeControl.updateRangeBySelectionWithCoord(selectionWithCoord, this._skeleton, true);
+            return activeControl;
+        }
         this._checkClearPreviousControls(evt);
         const currentCell = activeControl?.model.currentCell;
         if (evt.shiftKey && currentCell && activeControl) {
@@ -461,6 +467,21 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             controls[i].clearHighlight();
         }
         return activeControl;
+    }
+
+    private _canAnimateSelection(evt: IPointerEvent | IMouseEvent, control: SelectionControl, target: ISelectionWithCoord['rangeWithCoord']): boolean {
+        if (this.getSelectionControls().length !== 1 || this._rangeType !== RANGE_TYPE.NORMAL || this._remainLastEnabled ||
+            evt.button !== 0 || evt.ctrlKey || evt.metaKey || evt.shiftKey || evt.altKey) {
+            return false;
+        }
+        const current = control.getCurrentCellInfo();
+        if (!current || !Rectangle.equals(control.model, current)) {
+            return false;
+        }
+        const freeze = this._skeleton.worksheet.getFreeze();
+        // Frozen panes have different scroll offsets, so only interpolate inside the same pane.
+        return (current.startRow < freeze.startRow) === (target.startRow < freeze.startRow) &&
+            (current.startColumn < freeze.startColumn) === (target.startColumn < freeze.startColumn);
     }
 
     override endSelection(): void {

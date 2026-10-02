@@ -246,6 +246,23 @@ export interface IFUniverUIMixin {
     createSubmenu(submenuItem: IFacadeSubmenuItem): FSubmenu;
 
     /**
+     * Remove a menu item (and its submenus) from every position it is registered in, then refresh the UI.
+     * Prefer disposing the handle returned by {@link FMenu.appendTo} for menus you created yourself.
+     * @param {string} menuId The id of the menu item to remove. Built-in menu items can be removed by their command id.
+     * @returns {boolean} `true` if a menu item was removed, `false` if no menu item with this id exists.
+     * @example
+     * ```ts
+     * univerAPI.createSubmenu({ id: 'custom-submenu', title: 'Custom Submenu' })
+     *   .addSubmenu(univerAPI.createMenu({ id: 'custom-menu', title: 'Custom Menu', action: () => {} }))
+     *   .appendTo('contextMenu.footerTabs');
+     *
+     * // Later, remove the whole submenu again.
+     * univerAPI.removeMenu('custom-submenu');
+     * ```
+     */
+    removeMenu(menuId: string): boolean;
+
+    /**
      * Merge menu overrides and refresh the UI immediately. Overrides also apply to menus registered later.
      * Use the same configuration as the UI plugin or preset's `menu` option.
      * @param {MenuConfig} config Overrides keyed by menu item ID, ribbon tab key, or ribbon group key.
@@ -521,6 +538,10 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
 
     override createSubmenu(submenuItem: IFacadeSubmenuItem): FSubmenu {
         return this._injector.createInstance(FSubmenu, submenuItem);
+    }
+
+    override removeMenu(menuId: string): boolean {
+        return this._injector.get(IMenuManagerService).removeMenu(menuId);
     }
 
     override updateMenuConfig(config: MenuConfig): FUniver {

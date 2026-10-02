@@ -69,6 +69,40 @@ describe('MenuManagerService', () => {
         expect(service.getFlatMenuByPositionKey(position).map((item) => item.item?.id)).toEqual(['comment']);
     });
 
+    it('removes menu nodes by key from every position and emits a change event', () => {
+        const service = createInjector().get(IMenuManagerService);
+        const changes: void[] = [];
+
+        service.appendRootMenu({
+            firstPosition: { group: { order: 0 } },
+            secondPosition: { group: { order: 0 } },
+        });
+        service.mergeMenu({
+            group: {
+                keep: { order: 0, menuItemFactory: () => ({ id: 'keep', type: MenuItemType.BUTTON }) },
+                custom: {
+                    order: 1,
+                    menuItemFactory: () => ({ id: 'custom', type: MenuItemType.SUBITEMS }),
+                    child: { order: 0, menuItemFactory: () => ({ id: 'child', type: MenuItemType.BUTTON }) },
+                },
+            },
+        });
+        expect(service.getFlatMenuByPositionKey('firstPosition').map((item) => item.key)).toEqual(['group', 'keep', 'custom', 'child']);
+        expect(service.getFlatMenuByPositionKey('secondPosition').map((item) => item.key)).toEqual(['group', 'keep', 'custom', 'child']);
+
+        const sub = service.menuChanged$.subscribe((value) => changes.push(value));
+        expect(service.removeMenu('custom')).toBe(true);
+
+        expect(changes).toHaveLength(1);
+        expect(service.getFlatMenuByPositionKey('firstPosition').map((item) => item.key)).toEqual(['group', 'keep']);
+        expect(service.getFlatMenuByPositionKey('secondPosition').map((item) => item.key)).toEqual(['group', 'keep']);
+
+        expect(service.removeMenu('custom')).toBe(false);
+        expect(service.removeMenu('missing')).toBe(false);
+        expect(changes).toHaveLength(1);
+        sub.unsubscribe();
+    });
+
     it('returns an empty array for missing menu positions', () => {
         const service = createInjector().get(IMenuManagerService);
 

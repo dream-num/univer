@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ABS: {
+        label: 'ABS',
         description: 'Liefert den Absolutwert einer Zahl. Der Absolutwert einer Zahl ist die Zahl ohne ihr Vorzeichen.',
         abstract: 'Liefert den Absolutwert einer Zahl. Der Absolutwert einer Zahl ist die Zahl ohne ihr Vorzeichen.',
         links: [
@@ -31,6 +32,7 @@ const locale: typeof enUS = {
         },
     },
     ACOS: {
+        label: 'ARCCOS',
         description: 'Liefert den Arkuskosinus oder umgekehrten Kosinus einer Zahl. Der Arkuskosinus ist der Winkel, dessen Kosinus "Zahl" ist. Der Ergebniswinkel wird im Bogenmaß (Radiant) im Wertebereich von 0 (Null) bis pi (Pi) angegeben.',
         abstract: 'Liefert den Arkuskosinus oder umgekehrten Kosinus einer Zahl. Der Arkuskosinus ist der Winkel, dessen Kosinus "Zahl" ist. Der Ergebniswinkel wird im Bogenmaß (Radiant) im Wertebereich von 0 (Null) bis pi (Pi) angegeben.',
         links: [
@@ -44,6 +46,7 @@ const locale: typeof enUS = {
         },
     },
     ACOSH: {
+        label: 'ARCOSH',
         description: 'Gibt den umgekehrten hyperbolischen Kosinus einer Zahl zurück. Die Zahl muss größer oder gleich 1 sein. Der umgekehrte hyperbolische Kosinus ist der Wert, dessen hyperbolischer Kosinus zahl ist, sodass ACOSH(COSH(number)) gleich number ist.',
         abstract: 'Gibt den umgekehrten hyperbolischen Kosinus einer Zahl zurück. Die Zahl muss größer oder gleich 1 sein. Der umgekehrte hyperbolische Kosinus ist der Wert, dessen hyperbolischer Kosinus zahl ist, sodass ACOSH(COSH(number)) gleich number ist.',
         links: [
@@ -57,6 +60,7 @@ const locale: typeof enUS = {
         },
     },
     ACOT: {
+        label: 'ARCCOTAN',
         description: 'Gibt den Hauptwert des Arkuskotangens (Umkehrfunktion des Kotangens) einer Zahl zurück.',
         abstract: 'Gibt den Hauptwert des Arkuskotangens (Umkehrfunktion des Kotangens) einer Zahl zurück.',
         links: [
@@ -70,6 +74,7 @@ const locale: typeof enUS = {
         },
     },
     ACOTH: {
+        label: 'ARCCOTAN.H',
         description: 'Gibt den umgekehrten hyperbolischen Kotangens einer Zahl zurück.',
         abstract: 'Gibt den umgekehrten hyperbolischen Kotangens einer Zahl zurück.',
         links: [
@@ -83,6 +88,7 @@ const locale: typeof enUS = {
         },
     },
     AGGREGATE: {
+        label: 'AGGREGAT',
         description: 'Gibt ein Aggregat in einer Liste oder einer Datenbank zurück. Mit der Funktion AGGREGAT können verschiedene Aggregatfunktionen auf eine Liste oder Datenbank mit der Option angewendet werden, ausgeblendete Zeilen sowie Fehlerwerte zu ignorieren.',
         abstract: 'Gibt ein Aggregat in einer Liste oder einer Datenbank zurück. Mit der Funktion AGGREGAT können verschiedene Aggregatfunktionen auf eine Liste oder Datenbank mit der Option angewendet werden, ausgeblendete Zeilen sowie Fehlerwerte zu ignorieren.',
         links: [
@@ -99,6 +105,7 @@ const locale: typeof enUS = {
         },
     },
     ARABIC: {
+        label: 'ARABISCH',
         description: 'Wandelt eine römische Zahl in eine arabische Zahl um.',
         abstract: 'Wandelt eine römische Zahl in eine arabische Zahl um.',
         links: [
@@ -112,6 +119,7 @@ const locale: typeof enUS = {
         },
     },
     ASIN: {
+        label: 'ARCSIN',
         description: 'Gibt den Arkussinus oder umgekehrten Sinus einer Zahl zurück. Der Arkussinus ist der Winkel, dessen Sinus zahl ist. Der zurückgegebene Winkel wird im Bogenmaß im Bereich -pi/2 bis pi/2 angegeben.',
         abstract: 'Gibt den Arkussinus oder umgekehrten Sinus einer Zahl zurück. Der Arkussinus ist der Winkel, dessen Sinus zahl ist. Der zurückgegebene Winkel wird im Bogenmaß im Bereich -pi/2 bis pi/2 angegeben.',
         links: [
@@ -125,6 +133,7 @@ const locale: typeof enUS = {
         },
     },
     ASINH: {
+        label: 'ARSINH',
         description: 'Gibt den umgekehrten hyperbolischen Sinus einer Zahl zurück. Der inverse hyperbolische Sinus ist der Wert, dessen hyperbolischer Sinus zahl ist, sodass ASINH(SINH(number)) gleich number ist.',
         abstract: 'Gibt den umgekehrten hyperbolischen Sinus einer Zahl zurück. Der inverse hyperbolische Sinus ist der Wert, dessen hyperbolischer Sinus zahl ist, sodass ASINH(SINH(number)) gleich number ist.',
         links: [
@@ -138,6 +147,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN: {
+        label: 'ARCTAN',
         description: 'Gibt den Arkustangens oder umgekehrten Tangens einer Zahl zurück. Der Arkustangens ist der Winkel, dessen Tangens zahl ist. Der zurückgegebene Winkel wird im Bogenmaß im Bereich -pi/2 bis pi/2 angegeben.',
         abstract: 'Gibt den Arkustangens oder umgekehrten Tangens einer Zahl zurück. Der Arkustangens ist der Winkel, dessen Tangens zahl ist. Der zurückgegebene Winkel wird im Bogenmaß im Bereich -pi/2 bis pi/2 angegeben.',
         links: [
@@ -151,6 +161,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN2: {
+        label: 'ARCTAN2',
         description: 'Gibt den Arkustangens oder auch umgekehrten Tangens ausgehend von einer x- und einer y-Koordinate zurück. Dieser Arkustangens ist der Winkel zwischen der x-Achse und der Linie, die durch den Koordinatenursprung (0; 0) und den Punkt verläuft, der die Koordinaten (x_Koordinate; y_Koordinate) hat. Der Winkel wird im Bogenmaß (Radiant) mit einem Wert zwischen -pi und pi (ausgenommen -pi) ausgegeben.',
         abstract: 'Gibt den Arkustangens oder auch umgekehrten Tangens ausgehend von einer x- und einer y-Koordinate zurück. Dieser Arkustangens ist der Winkel zwischen der x-Achse und der Linie, die durch den Koordinatenursprung (0; 0) und den Punkt verläuft, der die Koordinaten (x_Koordinate; y_Koordinate) hat. Der Winkel wird im Bogenmaß (Radiant) mit einem Wert zwischen -pi und pi (ausgenommen -pi) ausgegeben.',
         links: [
@@ -165,6 +176,7 @@ const locale: typeof enUS = {
         },
     },
     ATANH: {
+        label: 'ARTANH',
         description: 'Gibt den umgekehrten hyperbolischen Tangens einer Zahl zurück. Die Zahl muss zwischen -1 und 1 (ausgenommen -1 und 1) sein. Der umgekehrte hyperbolische Tangens ist der Wert, dessen hyperbolischer Tangens zahl ist, sodass ATANH(TANH(number)) gleich number ist.',
         abstract: 'Gibt den umgekehrten hyperbolischen Tangens einer Zahl zurück. Die Zahl muss zwischen -1 und 1 (ausgenommen -1 und 1) sein. Der umgekehrte hyperbolische Tangens ist der Wert, dessen hyperbolischer Tangens zahl ist, sodass ATANH(TANH(number)) gleich number ist.',
         links: [
@@ -178,6 +190,7 @@ const locale: typeof enUS = {
         },
     },
     BASE: {
+        label: 'BASIS',
         description: 'Wandelt eine Zahl in eine Textdarstellung mit der angegebenen Basis um.',
         abstract: 'Wandelt eine Zahl in eine Textdarstellung mit der angegebenen Basis um.',
         links: [
@@ -193,6 +206,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING: {
+        label: 'OBERGRENZE',
         description: 'Rundet eine Zahl betragsmäßig auf das kleinste Vielfache von Schritt auf. Wenn Sie beispielsweise verhindern möchten, dass bei Ihren Preisen Cent verwendet werden, wobei Ihr Produkt 4,42 € kostet, können Sie die Formel =OBERGRENZE(4,42;0,05) verwenden, um die Preise entsprechend einer 5-Cent-Stufung aufzurunden.',
         abstract: 'Rundet eine Zahl betragsmäßig auf das kleinste Vielfache von Schritt auf. Wenn Sie beispielsweise verhindern möchten, dass bei Ihren Preisen Cent verwendet werden, wobei Ihr Produkt 4,42 € kostet, können Sie die Formel =OBERGRENZE(4,42;0,05) verwenden, um die Preise entsprechend einer 5-Cent-Stufung aufzurunden.',
         links: [
@@ -207,6 +221,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_MATH: {
+        label: 'OBERGRENZE.MATH',
         description: 'Die OBERGRENZE. Die MATH-Funktion rundet eine Zahl auf die nächste ganze Zahl oder optional auf das nächste Vielfache der Signifikanz auf.',
         abstract: 'Die OBERGRENZE. Die MATH-Funktion rundet eine Zahl auf die nächste ganze Zahl oder optional auf das nächste Vielfache der Signifikanz auf.',
         links: [
@@ -222,6 +237,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_PRECISE: {
+        label: 'OBERGRENZE.GENAU',
         description: 'Gibt eine Zahl zurück, die auf die nächste Ganzzahl oder auf das kleinste Vielfache von "Schritt" gerundet wurde. Die Zahl wird unabhängig von ihrem Vorzeichen aufgerundet. Ist "Zahl" oder "Schritt" 0, wird 0 zurückgegeben.',
         abstract: 'Gibt eine Zahl zurück, die auf die nächste Ganzzahl oder auf das kleinste Vielfache von "Schritt" gerundet wurde. Die Zahl wird unabhängig von ihrem Vorzeichen aufgerundet. Ist "Zahl" oder "Schritt" 0, wird 0 zurückgegeben.',
         links: [
@@ -236,6 +252,7 @@ const locale: typeof enUS = {
         },
     },
     COMBIN: {
+        label: 'KOMBINATIONEN',
         description: 'Gibt die Anzahl von Kombinationen für eine bestimmte Anzahl von Elementen zurück. Verwenden Sie KOMBINATIONEN, um zu berechnen, wie viele Gruppen aus einer bestimmten Anzahl von Elementen gebildet werden können.',
         abstract: 'Gibt die Anzahl von Kombinationen für eine bestimmte Anzahl von Elementen zurück. Verwenden Sie KOMBINATIONEN, um zu berechnen, wie viele Gruppen aus einer bestimmten Anzahl von Elementen gebildet werden können.',
         links: [
@@ -250,6 +267,7 @@ const locale: typeof enUS = {
         },
     },
     COMBINA: {
+        label: 'KOMBINA',
         description: 'Gibt die Anzahl von Kombinationen (mit Wiederholungen) für eine bestimmte Anzahl von Elementen zurück.',
         abstract: 'Gibt die Anzahl von Kombinationen (mit Wiederholungen) für eine bestimmte Anzahl von Elementen zurück.',
         links: [
@@ -264,6 +282,7 @@ const locale: typeof enUS = {
         },
     },
     COS: {
+        label: 'COS',
         description: 'Gibt den Kosinus einer Zahl zurück.',
         abstract: 'Gibt den Kosinus einer Zahl zurück.',
         links: [
@@ -277,6 +296,7 @@ const locale: typeof enUS = {
         },
     },
     COSH: {
+        label: 'COSH',
         description: 'Gibt den hyperbolischen Kosinus einer Zahl zurück.',
         abstract: 'Gibt den hyperbolischen Kosinus einer Zahl zurück.',
         links: [
@@ -290,6 +310,7 @@ const locale: typeof enUS = {
         },
     },
     COT: {
+        label: 'COTAN',
         description: 'Gibt den Kotangens eines im Bogenmaß angegebenen Winkels zurück.',
         abstract: 'Gibt den Kotangens eines im Bogenmaß angegebenen Winkels zurück.',
         links: [
@@ -303,6 +324,7 @@ const locale: typeof enUS = {
         },
     },
     COTH: {
+        label: 'COTANH',
         description: 'Gibt den hyperbolischen Kotangens eines hyperbolischen Winkels zurück.',
         abstract: 'Gibt den hyperbolischen Kotangens eines hyperbolischen Winkels zurück.',
         links: [
@@ -316,6 +338,7 @@ const locale: typeof enUS = {
         },
     },
     CSC: {
+        label: 'KOSEKANS',
         description: 'Gibt den Kosekans eines im Bogenmaß angegebenen Winkels zurück.',
         abstract: 'Gibt den Kosekans eines im Bogenmaß angegebenen Winkels zurück.',
         links: [
@@ -329,6 +352,7 @@ const locale: typeof enUS = {
         },
     },
     CSCH: {
+        label: 'KOSEKANS.H',
         description: 'Gibt den hyperbolischen Kosekans eines im Bogenmaß angegebenen Winkels zurück.',
         abstract: 'Gibt den hyperbolischen Kosekans eines im Bogenmaß angegebenen Winkels zurück.',
         links: [
@@ -342,6 +366,7 @@ const locale: typeof enUS = {
         },
     },
     DECIMAL: {
+        label: 'DEZIMAL',
         description: 'Konvertiert eine Textdarstellung einer Zahl mit einer angegebenen Basis in eine Dezimalzahl.',
         abstract: 'Konvertiert eine Textdarstellung einer Zahl mit einer angegebenen Basis in eine Dezimalzahl.',
         links: [
@@ -356,6 +381,7 @@ const locale: typeof enUS = {
         },
     },
     DEGREES: {
+        label: 'GRAD',
         description: 'Wandelt Bogenmaß (Radiant) in Grad um.',
         abstract: 'Wandelt Bogenmaß (Radiant) in Grad um.',
         links: [
@@ -369,6 +395,7 @@ const locale: typeof enUS = {
         },
     },
     EVEN: {
+        label: 'GERADE',
         description: 'Gibt die zahl zurück, die auf die nächste gerade ganze Zahl aufgerundet wurde. Sie können diese Funktion verwenden, um Elemente zu verarbeiten, die zu zweit vorhanden sind. Beispielsweise akzeptiert eine Packkiste Zeilen mit einem oder zwei Elementen. Die Kiste ist voll, wenn die Auf die nächsten beiden Elemente aufgerundet mit der Kapazität der Kiste übereinstimmt.',
         abstract: 'Gibt die zahl zurück, die auf die nächste gerade ganze Zahl aufgerundet wurde. Sie können diese Funktion verwenden, um Elemente zu verarbeiten, die zu zweit vorhanden sind. Beispielsweise akzeptiert eine Packkiste Zeilen mit einem oder zwei Elementen. Die Kiste ist voll, wenn die Auf die nächsten beiden Elemente aufgerundet mit der Kapazität der Kiste übereinstimmt.',
         links: [
@@ -382,6 +409,7 @@ const locale: typeof enUS = {
         },
     },
     EXP: {
+        label: 'EXP',
         description: 'Potenziert die Basis e mit der als Argument angegebenen Zahl. Die Konstante "e" ist die Basis des natürlichen Logarithmus und hat den Wert 2,71828182845904.',
         abstract: 'Potenziert die Basis e mit der als Argument angegebenen Zahl. Die Konstante "e" ist die Basis des natürlichen Logarithmus und hat den Wert 2,71828182845904.',
         links: [
@@ -395,6 +423,7 @@ const locale: typeof enUS = {
         },
     },
     FACT: {
+        label: 'FAKULTÄT',
         description: 'Gibt die Fakultät einer Zahl zurück. Die Fakultät einer Zahl wird aus 1*2*3*...* Zahl berechnet.',
         abstract: 'Gibt die Fakultät einer Zahl zurück. Die Fakultät einer Zahl wird aus 1*2*3*...* Zahl berechnet.',
         links: [
@@ -408,6 +437,7 @@ const locale: typeof enUS = {
         },
     },
     FACTDOUBLE: {
+        label: 'FAKULTÄT.DOPPELT',
         description: 'Gibt die Fakultät zu Zahl mit Schrittlänge 2 zurück.',
         abstract: 'Gibt die Fakultät zu Zahl mit Schrittlänge 2 zurück.',
         links: [
@@ -421,6 +451,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR: {
+        label: 'UNTERGRENZE',
         description: 'Die FLOOR-Funktion in Excel rundet eine angegebene Zahl auf das nächste angegebene Vielfache von Bedeutung ab. Negative Zahlen werden auf das nächste ganze Vielfache unter 0 (null) gerundet (weiter negativ).',
         abstract: 'Die FLOOR-Funktion in Excel rundet eine angegebene Zahl auf das nächste angegebene Vielfache von Bedeutung ab. Negative Zahlen werden auf das nächste ganze Vielfache unter 0 (null) gerundet (weiter negativ).',
         links: [
@@ -435,6 +466,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_MATH: {
+        label: 'UNTERGRENZE.MATH',
         description: 'Rundet eine Zahl auf die nächste ganze Zahl oder auf das nächste Vielfache von Schritt ab.',
         abstract: 'Rundet eine Zahl auf die nächste ganze Zahl oder auf das nächste Vielfache von Schritt ab.',
         links: [
@@ -450,6 +482,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_PRECISE: {
+        label: 'UNTERGRENZE.GENAU',
         description: 'Rundet eine Zahl auf die nächste ganze Zahl oder das nächste Vielfache von "Schritt" ab. Die Zahl wird unabhängig vom Vorzeichen abgerundet. Wenn die Zahl oder der "Schritt" jedoch Null ist, wird Null zurückgegeben.',
         abstract: 'Rundet eine Zahl auf die nächste ganze Zahl oder das nächste Vielfache von "Schritt" ab. Die Zahl wird unabhängig vom Vorzeichen abgerundet. Wenn die Zahl oder der "Schritt" jedoch Null ist, wird Null zurückgegeben.',
         links: [
@@ -464,6 +497,7 @@ const locale: typeof enUS = {
         },
     },
     GCD: {
+        label: 'GGT',
         description: 'Gibt den größten gemeinsamen Teiler zurück. Der größte gemeinsame Teiler ist die ganze Zahl, durch die sowohl Zahl1 als auch Zahl2 dividiert werden können, ohne dass ein Rest bleibt.',
         abstract: 'Gibt den größten gemeinsamen Teiler zurück. Der größte gemeinsame Teiler ist die ganze Zahl, durch die sowohl Zahl1 als auch Zahl2 dividiert werden können, ohne dass ein Rest bleibt.',
         links: [
@@ -478,6 +512,7 @@ const locale: typeof enUS = {
         },
     },
     INT: {
+        label: 'GANZZAHL',
         description: 'Rundet eine Zahl auf die nächste ganze Zahl ab.',
         abstract: 'Rundet eine Zahl auf die nächste ganze Zahl ab.',
         links: [
@@ -491,6 +526,7 @@ const locale: typeof enUS = {
         },
     },
     ISO_CEILING: {
+        label: 'ISO.OBERGRENZE',
         description: 'Gibt eine Zahl zurück, die auf die nächste Ganzzahl oder auf das kleinste Vielfache von "Schritt" gerundet wurde. Die Zahl wird unabhängig von ihrem Vorzeichen aufgerundet. Ist "Zahl" oder "Schritt" 0, wird 0 zurückgegeben.',
         abstract: 'Gibt eine Zahl zurück, die auf die nächste Ganzzahl oder auf das kleinste Vielfache von "Schritt" gerundet wurde. Die Zahl wird unabhängig von ihrem Vorzeichen aufgerundet. Ist "Zahl" oder "Schritt" 0, wird 0 zurückgegeben.',
         links: [
@@ -505,6 +541,7 @@ const locale: typeof enUS = {
         },
     },
     LCM: {
+        label: 'KGV',
         description: 'Gibt das kleinste gemeinsame Vielfache der als Argumente angegebenen ganzen Zahlen zurück. Als kleinstes gemeinsames Vielfaches wird die kleinste positive ganze Zahl bezeichnet, die ein Vielfaches aller ganzzahligen Argumente "Zahl1", "Zahl2" und so weiter ist. KGV können Sie verwenden, wenn Sie Brüche addieren müssen, die unterschiedliche Nenner haben.',
         abstract: 'Gibt das kleinste gemeinsame Vielfache der als Argumente angegebenen ganzen Zahlen zurück. Als kleinstes gemeinsames Vielfaches wird die kleinste positive ganze Zahl bezeichnet, die ein Vielfaches aller ganzzahligen Argumente "Zahl1", "Zahl2" und so weiter ist. KGV können Sie verwenden, wenn Sie Brüche addieren müssen, die unterschiedliche Nenner haben.',
         links: [
@@ -519,6 +556,7 @@ const locale: typeof enUS = {
         },
     },
     LN: {
+        label: 'LN',
         description: 'Gibt den natürlichen Logarithmus einer Zahl zurück. Natürliche Logarithmen haben die Konstante e (2,71828182845904) als Basis.',
         abstract: 'Gibt den natürlichen Logarithmus einer Zahl zurück. Natürliche Logarithmen haben die Konstante e (2,71828182845904) als Basis.',
         links: [
@@ -532,6 +570,7 @@ const locale: typeof enUS = {
         },
     },
     LOG: {
+        label: 'LOG',
         description: 'Gibt den Logarithmus einer Zahl zu der angegebenen Basis zurück.',
         abstract: 'Gibt den Logarithmus einer Zahl zu der angegebenen Basis zurück.',
         links: [
@@ -546,6 +585,7 @@ const locale: typeof enUS = {
         },
     },
     LOG10: {
+        label: 'LOG10',
         description: 'Gibt den Logarithmus einer Zahl zur Basis 10 zurück.',
         abstract: 'Gibt den Logarithmus einer Zahl zur Basis 10 zurück.',
         links: [
@@ -559,6 +599,7 @@ const locale: typeof enUS = {
         },
     },
     MDETERM: {
+        label: 'MDET',
         description: 'Liefert die Determinante einer Matrix.',
         abstract: 'Liefert die Determinante einer Matrix.',
         links: [
@@ -572,6 +613,7 @@ const locale: typeof enUS = {
         },
     },
     MINVERSE: {
+        label: 'MINV',
         description: 'Die FUNKTION MINVERSE gibt die umgekehrte Matrix für eine Matrix zurück, die in einem Array gespeichert ist.',
         abstract: 'Die FUNKTION MINVERSE gibt die umgekehrte Matrix für eine Matrix zurück, die in einem Array gespeichert ist.',
         links: [
@@ -585,6 +627,7 @@ const locale: typeof enUS = {
         },
     },
     MMULT: {
+        label: 'MMULT',
         description: 'Die MMULT-Funktion gibt das Matrixprodukt von zwei Arrays zurück. Das Ergebnis ist eine Matrix, die dieselbe Anzahl von Zeilen wie Matrix1 und dieselbe Anzahl von Spalten wie Matrix2 hat.',
         abstract: 'Die MMULT-Funktion gibt das Matrixprodukt von zwei Arrays zurück. Das Ergebnis ist eine Matrix, die dieselbe Anzahl von Zeilen wie Matrix1 und dieselbe Anzahl von Spalten wie Matrix2 hat.',
         links: [
@@ -599,6 +642,7 @@ const locale: typeof enUS = {
         },
     },
     MOD: {
+        label: 'REST',
         description: 'Gibt den Rest einer Division zurück. Das Ergebnis hat dasselbe Vorzeichen wie Divisor.',
         abstract: 'Gibt den Rest einer Division zurück. Das Ergebnis hat dasselbe Vorzeichen wie Divisor.',
         links: [
@@ -613,6 +657,7 @@ const locale: typeof enUS = {
         },
     },
     MROUND: {
+        label: 'MROUND',
         description: 'MROUND gibt eine Zahl zurück, die auf das gewünschte Vielfache gerundet ist.',
         abstract: 'MROUND gibt eine Zahl zurück, die auf das gewünschte Vielfache gerundet ist.',
         links: [
@@ -627,6 +672,7 @@ const locale: typeof enUS = {
         },
     },
     MULTINOMIAL: {
+        label: 'POLYNOMIAL',
         description: 'Gibt den Polynomialkoeffizienten einer Gruppe von Zahlen zurück.',
         abstract: 'Gibt den Polynomialkoeffizienten einer Gruppe von Zahlen zurück.',
         links: [
@@ -641,6 +687,7 @@ const locale: typeof enUS = {
         },
     },
     MUNIT: {
+        label: 'EINS',
         description: 'Die MUNIT-Funktion gibt die Einheitenmatrix für die angegebene Dimension zurück.',
         abstract: 'Die MUNIT-Funktion gibt die Einheitenmatrix für die angegebene Dimension zurück.',
         links: [
@@ -654,6 +701,7 @@ const locale: typeof enUS = {
         },
     },
     ODD: {
+        label: 'UNGERADE',
         description: 'Rundet eine Zahl auf die nächste ungerade ganze Zahl auf.',
         abstract: 'Rundet eine Zahl auf die nächste ungerade ganze Zahl auf.',
         links: [
@@ -667,6 +715,7 @@ const locale: typeof enUS = {
         },
     },
     PI: {
+        label: 'PI',
         description: 'Gibt den Wert pi zurück, die mathematische Konstante (3,14159265358979) mit einer Genauigkeit von 15 Stellen.',
         abstract: 'Gibt den Wert pi zurück, die mathematische Konstante (3,14159265358979) mit einer Genauigkeit von 15 Stellen.',
         links: [
@@ -679,6 +728,7 @@ const locale: typeof enUS = {
         },
     },
     POWER: {
+        label: 'POTENZ',
         description: 'Gibt als Ergebnis eine potenzierte Zahl zurück.',
         abstract: 'Gibt als Ergebnis eine potenzierte Zahl zurück.',
         links: [
@@ -693,6 +743,7 @@ const locale: typeof enUS = {
         },
     },
     PRODUCT: {
+        label: 'PRODUKT',
         description: 'Die FUNKTION PRODUCT multipliziert alle als Argumente angegebenen Zahlen und gibt das Produkt zurück. Wenn die Zellen A1 und A2 z. B. Zahlen enthalten, können Sie die Formel =PRODUCT(A1, A2) verwenden, um diese beiden Zahlen zusammen zu multiplizieren. Sie können denselben Vorgang auch mit dem mathematischen Operator multiplizieren ( * ) ausführen, z. B. =A1 * A2 .',
         abstract: 'Die FUNKTION PRODUCT multipliziert alle als Argumente angegebenen Zahlen und gibt das Produkt zurück. Wenn die Zellen A1 und A2 z. B. Zahlen enthalten, können Sie die Formel =PRODUCT(A1, A2) verwenden, um diese beiden Zahlen zusammen zu multiplizieren. Sie können denselben Vorgang auch mit dem mathematischen Operator multiplizieren ( * ) ausführen, z. B. =A1 * A2 .',
         links: [
@@ -707,6 +758,7 @@ const locale: typeof enUS = {
         },
     },
     QUOTIENT: {
+        label: 'QUOTIENT',
         description: 'Gibt den ganzzahligen Anteil einer Division zurück. Diese Funktion können Sie immer dann verwenden, wenn Sie die Nachkommastellen (den Rest) einer Division löschen möchten.',
         abstract: 'Gibt den ganzzahligen Anteil einer Division zurück. Diese Funktion können Sie immer dann verwenden, wenn Sie die Nachkommastellen (den Rest) einer Division löschen möchten.',
         links: [
@@ -721,6 +773,7 @@ const locale: typeof enUS = {
         },
     },
     RADIANS: {
+        label: 'BOGENMASS',
         description: 'Wandelt Grad in Bogenmaß (Radiant) um.',
         abstract: 'Wandelt Grad in Bogenmaß (Radiant) um.',
         links: [
@@ -734,6 +787,7 @@ const locale: typeof enUS = {
         },
     },
     RAND: {
+        label: 'ZUFALLSZAHL',
         description: 'Zufallszahl gibt eine gleichmäßig verteilte zufällige reelle Zahl zurück, die größer oder gleich 0 und kleiner als 1 ist. Bei jeder Neuberechnung des jeweiligen Arbeitsblatts wird eine neue zufällige reelle Zahl ausgegeben.',
         abstract: 'Zufallszahl gibt eine gleichmäßig verteilte zufällige reelle Zahl zurück, die größer oder gleich 0 und kleiner als 1 ist. Bei jeder Neuberechnung des jeweiligen Arbeitsblatts wird eine neue zufällige reelle Zahl ausgegeben.',
         links: [
@@ -746,6 +800,7 @@ const locale: typeof enUS = {
         },
     },
     RANDARRAY: {
+        label: 'ZUFALLSMATRIX',
         description: 'In den folgenden Beispielen wurde ein Array erstellt, das 5 Zeilen hoch und 3 Spalten breit ist. Das erste gibt eine zufällige Gruppe von Werten zwischen 0 und 1 zurück, das Standardverhalten von ZUFALLSMATRIX. Die nächste gibt eine Reihe von zufälligen Dezimalwerten zwischen 1 und 100 zurück. Das dritte Beispiel schließlich gibt eine Reihe von zufälligen ganzen Zahlen zwischen 1 und 100 zurück.',
         abstract: 'In den folgenden Beispielen wurde ein Array erstellt, das 5 Zeilen hoch und 3 Spalten breit ist. Das erste gibt eine zufällige Gruppe von Werten zwischen 0 und 1 zurück, das Standardverhalten von ZUFALLSMATRIX. Die nächste gibt eine Reihe von zufälligen Dezimalwerten zwischen 1 und 100 zurück. Das dritte Beispiel schließlich gibt eine Reihe von zufälligen ganzen Zahlen zwischen 1 und 100 zurück.',
         links: [
@@ -763,6 +818,7 @@ const locale: typeof enUS = {
         },
     },
     RANDBETWEEN: {
+        label: 'ZUFALLSBEREICH',
         description: 'Gibt eine ganze Zufallszahl aus dem festgelegten Bereich zurück. Bei jeder Neuberechnung des jeweiligen Arbeitsblatts wird eine neue ganze Zufallszahl ausgegeben.',
         abstract: 'Gibt eine ganze Zufallszahl aus dem festgelegten Bereich zurück. Bei jeder Neuberechnung des jeweiligen Arbeitsblatts wird eine neue ganze Zufallszahl ausgegeben.',
         links: [
@@ -777,6 +833,7 @@ const locale: typeof enUS = {
         },
     },
     ROMAN: {
+        label: 'RÖMISCH',
         description: 'Wandelt eine arabische Zahl in eine römische Zahl als Text um.',
         abstract: 'Wandelt eine arabische Zahl in eine römische Zahl als Text um.',
         links: [
@@ -791,6 +848,7 @@ const locale: typeof enUS = {
         },
     },
     ROUND: {
+        label: 'RUNDEN',
         description: 'Mit der Funktion RUNDEN wird eine Zahl auf eine angegebene Anzahl von Stellen gerundet. Wenn beispielsweise die Zelle A1 den Wert 23,7825 enthält und Sie diesen Wert auf zwei Dezimalstellen runden möchten, können Sie die folgende Formel verwenden:',
         abstract: 'Mit der Funktion RUNDEN wird eine Zahl auf eine angegebene Anzahl von Stellen gerundet. Wenn beispielsweise die Zelle A1 den Wert 23,7825 enthält und Sie diesen Wert auf zwei Dezimalstellen runden möchten, können Sie die folgende Formel verwenden:',
         links: [
@@ -805,6 +863,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDBANK: {
+        label: 'RUNDEN.BANKER',
         description: 'Rundet eine Zahl nach der Banker\'s-Rounding-Methode zur nächsten geraden Zahl.',
         abstract: 'Rundet eine Zahl nach der Banker\'s-Rounding-Methode zur nächsten geraden Zahl.',
         links: [
@@ -819,6 +878,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDDOWN: {
+        label: 'ABRUNDEN',
         description: 'Rundet die Zahl auf "Anzahl_Stellen" in Richtung Null ab.',
         abstract: 'Rundet die Zahl auf "Anzahl_Stellen" in Richtung Null ab.',
         links: [
@@ -833,6 +893,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDUP: {
+        label: 'AUFRUNDEN',
         description: 'Rundet die Zahl auf Anzahl_Stellen auf.',
         abstract: 'Rundet die Zahl auf Anzahl_Stellen auf.',
         links: [
@@ -847,6 +908,7 @@ const locale: typeof enUS = {
         },
     },
     SEC: {
+        label: 'SEKANS',
         description: 'Gibt den Sekans eines Winkels zurück.',
         abstract: 'Gibt den Sekans eines Winkels zurück.',
         links: [
@@ -860,6 +922,7 @@ const locale: typeof enUS = {
         },
     },
     SECH: {
+        label: 'SEKANS.H',
         description: 'Gibt den hyperbolischen Sekans eines Winkels zurück.',
         abstract: 'Gibt den hyperbolischen Sekans eines Winkels zurück.',
         links: [
@@ -873,6 +936,7 @@ const locale: typeof enUS = {
         },
     },
     SERIESSUM: {
+        label: 'REIHENSUM',
         description: 'Viele Funktionen können mithilfe einer Potenzreihenentwicklung angenähert werden.',
         abstract: 'Viele Funktionen können mithilfe einer Potenzreihenentwicklung angenähert werden.',
         links: [
@@ -889,6 +953,7 @@ const locale: typeof enUS = {
         },
     },
     SEQUENCE: {
+        label: 'SEQUENZ',
         description: 'Im folgenden Beispiel wurde mit =SEQUENZ(4;5) ein Array erstellt, das 4 Zeilen hoch und 5 Spalten breit ist.',
         abstract: 'Im folgenden Beispiel wurde mit =SEQUENZ(4;5) ein Array erstellt, das 4 Zeilen hoch und 5 Spalten breit ist.',
         links: [
@@ -905,6 +970,7 @@ const locale: typeof enUS = {
         },
     },
     SIGN: {
+        label: 'VORZEICHEN',
         description: 'Bestimmt das Vorzeichen einer Zahl. Gibt 1 zurück, wenn die Zahl positiv ist, null (0), wenn die Zahl 0 ist, und -1, wenn die Zahl negativ ist.',
         abstract: 'Bestimmt das Vorzeichen einer Zahl. Gibt 1 zurück, wenn die Zahl positiv ist, null (0), wenn die Zahl 0 ist, und -1, wenn die Zahl negativ ist.',
         links: [
@@ -918,6 +984,7 @@ const locale: typeof enUS = {
         },
     },
     SIN: {
+        label: 'SIN',
         description: 'Gibt den Sinus einer Zahl zurück.',
         abstract: 'Gibt den Sinus einer Zahl zurück.',
         links: [
@@ -931,6 +998,7 @@ const locale: typeof enUS = {
         },
     },
     SINH: {
+        label: 'SINH',
         description: 'Gibt den hyperbolischen Sinus einer Zahl zurück.',
         abstract: 'Gibt den hyperbolischen Sinus einer Zahl zurück.',
         links: [
@@ -944,6 +1012,7 @@ const locale: typeof enUS = {
         },
     },
     SQRT: {
+        label: 'WURZEL',
         description: 'Gibt die Quadratwurzel einer Zahl zurück.',
         abstract: 'Gibt die Quadratwurzel einer Zahl zurück.',
         links: [
@@ -957,6 +1026,7 @@ const locale: typeof enUS = {
         },
     },
     SQRTPI: {
+        label: 'WURZEL.PI',
         description: 'Gibt die Wurzel aus der mit Pi (pi) multiplizierten Zahl zurück.',
         abstract: 'Gibt die Wurzel aus der mit Pi (pi) multiplizierten Zahl zurück.',
         links: [
@@ -970,6 +1040,7 @@ const locale: typeof enUS = {
         },
     },
     SUBTOTAL: {
+        label: 'TEILERGEBNIS',
         description: 'Gibt ein Teilergebnis in einer Liste oder Datenbank zurück. Grundsätzlich ist es einfacher, eine mit Teilergebnissen versehene Liste mithilfe des Befehls Teilergebnisse in der Gruppe Gliederung auf der Registerkarte Daten der Excel-Desktopanwendung zu erstellen. Nachdem eine solche mit Teilergebnissen versehene Liste erstellt wurde, können Sie diese mit der Funktion TEILERGEBNIS bearbeiten.',
         abstract: 'Gibt ein Teilergebnis in einer Liste oder Datenbank zurück. Grundsätzlich ist es einfacher, eine mit Teilergebnissen versehene Liste mithilfe des Befehls Teilergebnisse in der Gruppe Gliederung auf der Registerkarte Daten der Excel-Desktopanwendung zu erstellen. Nachdem eine solche mit Teilergebnissen versehene Liste erstellt wurde, können Sie diese mit der Funktion TEILERGEBNIS bearbeiten.',
         links: [
@@ -985,6 +1056,7 @@ const locale: typeof enUS = {
         },
     },
     SUM: {
+        label: 'SUMME',
         description: 'Die FUNKTION SUMME fügt Werte hinzu. Sie können einzelne Werte, Zellbezüge oder Bereiche bzw. eine Kombination aller drei Optionen addieren.',
         abstract: 'Die FUNKTION SUMME fügt Werte hinzu. Sie können einzelne Werte, Zellbezüge oder Bereiche bzw. eine Kombination aller drei Optionen addieren.',
         links: [
@@ -999,6 +1071,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIF: {
+        label: 'SUMMEWENN',
         description: 'Sie verwenden die FUNKTION SUMMEWENN , um die Werte in einem Bereich zu summieren, die den von Ihnen angegebenen Kriterien entsprechen. Angenommen, Sie möchten in einer Spalte, die Zahlen enthält nur die Werte summieren, die größer als 5 sind. Sie können die folgende Formel verwenden: =SUMMEWENN(B2:B25;">5")',
         abstract: 'Sie verwenden die FUNKTION SUMMEWENN , um die Werte in einem Bereich zu summieren, die den von Ihnen angegebenen Kriterien entsprechen. Angenommen, Sie möchten in einer Spalte, die Zahlen enthält nur die Werte summieren, die größer als 5 sind. Sie können die folgende Formel verwenden: =SUMMEWENN(B2:B25;">5")',
         links: [
@@ -1014,6 +1087,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIFS: {
+        label: 'SUMMEWENNS',
         description: 'Mit der Funktion SUMMEWENNS, einer der mathematischen und trigonometrischen Funktionen , werden alle Argumente addiert, die mehrere Kriterien erfüllen. Beispielsweise würden Sie SUMMEWENNS verwenden, um die Anzahl der Einzelhändler im Land zu addieren, (1) die in einem bestimmten Postleitzahlbereich wohnen, und (2) deren Gewinne einen bestimmten Wert überschreiten.',
         abstract: 'Mit der Funktion SUMMEWENNS, einer der mathematischen und trigonometrischen Funktionen , werden alle Argumente addiert, die mehrere Kriterien erfüllen. Beispielsweise würden Sie SUMMEWENNS verwenden, um die Anzahl der Einzelhändler im Land zu addieren, (1) die in einem bestimmten Postleitzahlbereich wohnen, und (2) deren Gewinne einen bestimmten Wert überschreiten.',
         links: [
@@ -1031,6 +1105,7 @@ const locale: typeof enUS = {
         },
     },
     SUMPRODUCT: {
+        label: 'SUMMENPRODUKT',
         description: 'Die FUNKTION SUMMENPRODUKT gibt die Summe der Produkte der entsprechenden Bereiche oder Arrays zurück. Der Standardvorgang ist Multiplikation, aber auch Addition, Subtraktion und Division sind möglich.',
         abstract: 'Die FUNKTION SUMMENPRODUKT gibt die Summe der Produkte der entsprechenden Bereiche oder Arrays zurück. Der Standardvorgang ist Multiplikation, aber auch Addition, Subtraktion und Division sind möglich.',
         links: [
@@ -1045,6 +1120,7 @@ const locale: typeof enUS = {
         },
     },
     SUMSQ: {
+        label: 'QUADRATSUMME',
         description: 'Summiert die quadrierten Argumente.',
         abstract: 'Summiert die quadrierten Argumente.',
         links: [
@@ -1059,6 +1135,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2MY2: {
+        label: 'SUMX2MY2',
         description: 'Diese Excel-Funktion gibt die Summe der Differenz der Quadrate der entsprechenden Werte in zwei Arrays zurück.',
         abstract: 'Diese Excel-Funktion gibt die Summe der Differenz der Quadrate der entsprechenden Werte in zwei Arrays zurück.',
         links: [
@@ -1073,6 +1150,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2PY2: {
+        label: 'SUMX2PY2',
         description: 'Summiert für zusammengehörige Komponenten zweier Matrizen die Summen der Quadrate. Die Gesamtsumme aus der Summe von Quadratzahlen ist ein Ausdruck, der häufig in statistischen Berechnungen verwendet wird.',
         abstract: 'Summiert für zusammengehörige Komponenten zweier Matrizen die Summen der Quadrate. Die Gesamtsumme aus der Summe von Quadratzahlen ist ein Ausdruck, der häufig in statistischen Berechnungen verwendet wird.',
         links: [
@@ -1087,6 +1165,7 @@ const locale: typeof enUS = {
         },
     },
     SUMXMY2: {
+        label: 'SUMXMY2',
         description: 'Die SUMXMY2-Funktion gibt die Summe der Quadrate der Unterschiede der entsprechenden Werte in zwei Arrays zurück.',
         abstract: 'Die SUMXMY2-Funktion gibt die Summe der Quadrate der Unterschiede der entsprechenden Werte in zwei Arrays zurück.',
         links: [
@@ -1101,6 +1180,7 @@ const locale: typeof enUS = {
         },
     },
     TAN: {
+        label: 'TAN',
         description: 'Gibt den Tangens einer Zahl zurück.',
         abstract: 'Gibt den Tangens einer Zahl zurück.',
         links: [
@@ -1114,6 +1194,7 @@ const locale: typeof enUS = {
         },
     },
     TANH: {
+        label: 'TANH',
         description: 'Gibt den hyperbolischen Tangens einer Zahl zurück.',
         abstract: 'Gibt den hyperbolischen Tangens einer Zahl zurück.',
         links: [
@@ -1127,6 +1208,7 @@ const locale: typeof enUS = {
         },
     },
     TRUNC: {
+        label: 'KÜRZEN',
         description: 'Die TRUNC-Funktionen kürzen eine Zahl auf eine ganze Zahl ab, indem der Bruchteil der Zahl entfernt wird.',
         abstract: 'Die TRUNC-Funktionen kürzen eine Zahl auf eine ganze Zahl ab, indem der Bruchteil der Zahl entfernt wird.',
         links: [

@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ABS: {
+        label: 'ABS',
         description: 'Zwraca wartość bezwzględną liczby. Wartość bezwzględna liczby to liczba bez znaku.',
         abstract: 'Zwraca wartość bezwzględną liczby.',
         links: [
@@ -31,6 +32,7 @@ const locale: typeof enUS = {
         },
     },
     ACOS: {
+        label: 'ACOS',
         description: 'Zwraca arcus cosinus lub odwrotny cosinus liczby. Arcus cosinus jest wartością kąta, którego cosinus to liczba . Wyznaczona wartość w radianach należy do przedziału od 0 (zero) do pi.',
         abstract: 'Zwraca arcus cosinus lub odwrotny cosinus liczby. Arcus cosinus jest wartością kąta, którego cosinus to liczba . Wyznaczona wartość w radianach należy do przedziału od 0 (zero) do pi.',
         links: [
@@ -44,6 +46,7 @@ const locale: typeof enUS = {
         },
     },
     ACOSH: {
+        label: 'ACOSH',
         description: 'Zwraca arcus cosinus hiperboliczny liczby. Liczba musi być większa niż lub równa 1. Arcus cosinus hiperboliczny jest wartością, której cosinus hiperboliczny to liczba , dlatego ACOSH(COSH(liczba)) równa się liczba .',
         abstract: 'Zwraca arcus cosinus hiperboliczny liczby. Liczba musi być większa niż lub równa 1. Arcus cosinus hiperboliczny jest wartością, której cosinus hiperboliczny to liczba , dlatego ACOSH(COSH(liczba)) równa się liczba .',
         links: [
@@ -57,6 +60,7 @@ const locale: typeof enUS = {
         },
     },
     ACOT: {
+        label: 'ACOT',
         description: 'Zwraca wartość główną funkcji arcus cotangens lub odwrotności funkcji cotangens określonej liczby.',
         abstract: 'Zwraca wartość główną funkcji arcus cotangens lub odwrotności funkcji cotangens określonej liczby.',
         links: [
@@ -70,6 +74,7 @@ const locale: typeof enUS = {
         },
     },
     ACOTH: {
+        label: 'ACOTH',
         description: 'Zwraca odwrotny kotangens hiperboliczny liczby.',
         abstract: 'Zwraca odwrotny kotangens hiperboliczny liczby.',
         links: [
@@ -83,6 +88,7 @@ const locale: typeof enUS = {
         },
     },
     AGGREGATE: {
+        label: 'AGREGUJ',
         description: 'Zwraca wartość zagregowaną z listy lub bazy danych. Funkcja AGREGUJ może stosować różne funkcje agregujące do listy lub bazy danych, oferując przy tym opcję ignorowania ukrytych wierszy i wartości błędów.',
         abstract: 'Zwraca wartość zagregowaną z listy lub bazy danych. Funkcja AGREGUJ może stosować różne funkcje agregujące do listy lub bazy danych, oferując przy tym opcję ignorowania ukrytych wierszy i wartości błędów.',
         links: [
@@ -99,6 +105,7 @@ const locale: typeof enUS = {
         },
     },
     ARABIC: {
+        label: 'ARABSKIE',
         description: 'Konwertuje liczbę rzymską na liczbę arabską.',
         abstract: 'Konwertuje liczbę rzymską na liczbę arabską.',
         links: [
@@ -112,6 +119,7 @@ const locale: typeof enUS = {
         },
     },
     ASIN: {
+        label: 'ASIN',
         description: 'Zwraca arcus sinus lub odwrotny sinus liczby. Arcus sinus jest wartością kąta, którego sinus to liczba . Zwracany kąt w radianach należy do przedziału od -pi/2 do pi/2.',
         abstract: 'Zwraca arcus sinus lub odwrotny sinus liczby. Arcus sinus jest wartością kąta, którego sinus to liczba . Zwracany kąt w radianach należy do przedziału od -pi/2 do pi/2.',
         links: [
@@ -125,6 +133,7 @@ const locale: typeof enUS = {
         },
     },
     ASINH: {
+        label: 'ASINH',
         description: 'Zwraca arcus sinus hiperboliczny liczby. Arcus sinus hiperboliczny jest wartością, której sinus hiperboliczny to liczba , dlatego ASINH(SINH(liczba)) równa się liczba .',
         abstract: 'Zwraca arcus sinus hiperboliczny liczby. Arcus sinus hiperboliczny jest wartością, której sinus hiperboliczny to liczba , dlatego ASINH(SINH(liczba)) równa się liczba .',
         links: [
@@ -138,6 +147,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN: {
+        label: 'ATAN',
         description: 'Zwraca arcus tangens lub odwrotny tangens liczby. Arcus tangens jest kątem, którego tangens to liczba . Zwracany kąt w radianach należy do przedziału od -pi/2 do pi/2.',
         abstract: 'Zwraca arcus tangens lub odwrotny tangens liczby. Arcus tangens jest kątem, którego tangens to liczba . Zwracany kąt w radianach należy do przedziału od -pi/2 do pi/2.',
         links: [
@@ -151,6 +161,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN2: {
+        label: 'ATAN2',
         description: 'Zwraca arcus tangens lub odwrotny tangens określonych współrzędnych x i y. Arcus tangens jest wartością kąta pomiędzy osią x a linią prostą poprowadzoną przez początek układu współrzędnych i punkt o współrzędnych (x_liczba;y_liczba). Kąt w radianach zawiera się w przedziale od -pi do pi, z wyłączeniem wartości -pi.',
         abstract: 'Zwraca arcus tangens lub odwrotny tangens określonych współrzędnych x i y. Arcus tangens jest wartością kąta pomiędzy osią x a linią prostą poprowadzoną przez początek układu współrzędnych i punkt o współrzędnych (x_liczba;y_liczba). Kąt w radianach zawiera się w przedziale od -pi do pi, z wyłączeniem wartości -pi.',
         links: [
@@ -165,6 +176,7 @@ const locale: typeof enUS = {
         },
     },
     ATANH: {
+        label: 'ATANH',
         description: 'Zwraca arcus tangens hiperboliczny liczby. Liczba musi być w przedziale -1 i 1 (z wyłączeniem wartości -1 i 1). Arcus tangens hiperboliczny jest wartością, której tangens hiperboliczny to liczba , dlatego ATANH(TANH(liczba)) równa się liczba .',
         abstract: 'Zwraca arcus tangens hiperboliczny liczby. Liczba musi być w przedziale -1 i 1 (z wyłączeniem wartości -1 i 1). Arcus tangens hiperboliczny jest wartością, której tangens hiperboliczny to liczba , dlatego ATANH(TANH(liczba)) równa się liczba .',
         links: [
@@ -178,6 +190,7 @@ const locale: typeof enUS = {
         },
     },
     BASE: {
+        label: 'PODSTAWA',
         description: 'Konwertuje liczbę na formę tekstową o określonej podstawie.',
         abstract: 'Konwertuje liczbę na formę tekstową o określonej podstawie.',
         links: [
@@ -193,6 +206,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING: {
+        label: 'ZAOKR.W.GÓRĘ',
         description: 'Zwraca wartość liczby, zaokrąglając ją w górę, dalej od zera, do najbliższej wielokrotności istotności. Na przykład jeśli chce się uniknąć używania ułamków bilonu w cenach, a produkt wyceniony jest na 4,42 zł, należy użyć formuły =ZAOKR.W.GÓRĘ(4,42;0,05) aby zaokrąglić cenę do najbliższej drobnej monety.',
         abstract: 'Zwraca wartość liczby, zaokrąglając ją w górę, dalej od zera, do najbliższej wielokrotności istotności. Na przykład jeśli chce się uniknąć używania ułamków bilonu w cenach, a produkt wyceniony jest na 4,42 zł, należy użyć formuły =ZAOKR.W.GÓRĘ(4,42;0,05) aby zaokrąglić cenę do najbliższej drobnej monety.',
         links: [
@@ -207,6 +221,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_MATH: {
+        label: 'SUFIT.MATEMATYKA',
         description: 'ZAOKR.W.W. Funkcja MATEMATYCZNE zaokrągla liczbę w górę do najbliższej liczby całkowitej lub opcjonalnie do najbliższej wielokrotności po istotności.',
         abstract: 'ZAOKR.W.W. Funkcja MATEMATYCZNE zaokrągla liczbę w górę do najbliższej liczby całkowitej lub opcjonalnie do najbliższej wielokrotności po istotności.',
         links: [
@@ -222,6 +237,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_PRECISE: {
+        label: 'ZAOKR.W.GÓRĘ.DOKŁ',
         description: 'Zaokrągla liczbę w górę do najbliższej wartości całkowitej lub wielokrotności podanej istotności. Zaokrąglenie następuje w górę niezależnie od znaku liczby. Jeśli liczba lub istotność wynosi zero, jest zwracana wartość zero.',
         abstract: 'Zaokrągla liczbę w górę do najbliższej wartości całkowitej lub wielokrotności podanej istotności. Zaokrąglenie następuje w górę niezależnie od znaku liczby. Jeśli liczba lub istotność wynosi zero, jest zwracana wartość zero.',
         links: [
@@ -236,6 +252,7 @@ const locale: typeof enUS = {
         },
     },
     COMBIN: {
+        label: 'KOMBINACJE',
         description: 'Zwraca liczbę kombinacji dla danej liczby elementów. Funkcja KOMBINACJE służy do określania całkowitej możliwej liczby grup dla danej liczby elementów.',
         abstract: 'Zwraca liczbę kombinacji dla danej liczby elementów. Funkcja KOMBINACJE służy do określania całkowitej możliwej liczby grup dla danej liczby elementów.',
         links: [
@@ -250,6 +267,7 @@ const locale: typeof enUS = {
         },
     },
     COMBINA: {
+        label: 'KOMBINACJE.A',
         description: 'Zwraca liczbę kombinacji (wraz z powtórzeniami) dla danej liczby elementów.',
         abstract: 'Zwraca liczbę kombinacji (wraz z powtórzeniami) dla danej liczby elementów.',
         links: [
@@ -264,6 +282,7 @@ const locale: typeof enUS = {
         },
     },
     COS: {
+        label: 'COS',
         description: 'Zwraca cosinus danego kąta.',
         abstract: 'Zwraca cosinus danego kąta.',
         links: [
@@ -277,6 +296,7 @@ const locale: typeof enUS = {
         },
     },
     COSH: {
+        label: 'COSH',
         description: 'Zwraca cosinus hiperboliczny liczby.',
         abstract: 'Zwraca cosinus hiperboliczny liczby.',
         links: [
@@ -290,6 +310,7 @@ const locale: typeof enUS = {
         },
     },
     COT: {
+        label: 'COT',
         description: 'Zwraca cotangens kąta określonego w radianach.',
         abstract: 'Zwraca cotangens kąta określonego w radianach.',
         links: [
@@ -303,6 +324,7 @@ const locale: typeof enUS = {
         },
     },
     COTH: {
+        label: 'COTH',
         description: 'Zwraca cotangens hiperboliczny kąta hiperbolicznego.',
         abstract: 'Zwraca cotangens hiperboliczny kąta hiperbolicznego.',
         links: [
@@ -316,6 +338,7 @@ const locale: typeof enUS = {
         },
     },
     CSC: {
+        label: 'CSC',
         description: 'Zwraca cosecans kąta określonego w radianach.',
         abstract: 'Zwraca cosecans kąta określonego w radianach.',
         links: [
@@ -329,6 +352,7 @@ const locale: typeof enUS = {
         },
     },
     CSCH: {
+        label: 'CSCH',
         description: 'Zwraca cosecans hiperboliczny kąta określonego w radianach.',
         abstract: 'Zwraca cosecans hiperboliczny kąta określonego w radianach.',
         links: [
@@ -342,6 +366,7 @@ const locale: typeof enUS = {
         },
     },
     DECIMAL: {
+        label: 'DECIMAL',
         description: 'Konwertuje postać tekstową liczby o określonej podstawie na liczbę dziesiętną.',
         abstract: 'Konwertuje postać tekstową liczby o określonej podstawie na liczbę dziesiętną.',
         links: [
@@ -356,6 +381,7 @@ const locale: typeof enUS = {
         },
     },
     DEGREES: {
+        label: 'STOPNIE',
         description: 'Konwertuje radiany na stopnie.',
         abstract: 'Konwertuje radiany na stopnie.',
         links: [
@@ -369,6 +395,7 @@ const locale: typeof enUS = {
         },
     },
     EVEN: {
+        label: 'ZAOKR.DO.PARZ',
         description: 'Zwraca wartość liczby zaokrąglonej do najbliższej parzystej liczby całkowitej. Funkcji tej można używać do przetwarzania obiektów występujących parami. Na przykład opakowanie pozwala na umieszczenie jednego lub dwóch rodzajów przedmiotów. Opakowanie jest wypełnione, gdy liczba przedmiotów, zaokrąglona do najbliższej liczby parzystej, zgadza się z jego pojemnością.',
         abstract: 'Zwraca wartość liczby zaokrąglonej do najbliższej parzystej liczby całkowitej. Funkcji tej można używać do przetwarzania obiektów występujących parami. Na przykład opakowanie pozwala na umieszczenie jednego lub dwóch rodzajów przedmiotów. Opakowanie jest wypełnione, gdy liczba przedmiotów, zaokrąglona do najbliższej liczby parzystej, zgadza się z jego pojemnością.',
         links: [
@@ -382,6 +409,7 @@ const locale: typeof enUS = {
         },
     },
     EXP: {
+        label: 'EXP',
         description: 'Zwraca wartość liczby e podniesioną do potęgi liczba. Stała e jest równa 2,71828182845904, podstawie logarytmu naturalnego.',
         abstract: 'Zwraca wartość liczby e podniesioną do potęgi liczba. Stała e jest równa 2,71828182845904, podstawie logarytmu naturalnego.',
         links: [
@@ -395,6 +423,7 @@ const locale: typeof enUS = {
         },
     },
     FACT: {
+        label: 'FAKT',
         description: 'Zwraca wartość silni liczby. Silnia liczby jest równa wyrażeniu 1*2*3*...* liczba.',
         abstract: 'Zwraca wartość silni liczby. Silnia liczby jest równa wyrażeniu 1*2*3*...* liczba.',
         links: [
@@ -408,6 +437,7 @@ const locale: typeof enUS = {
         },
     },
     FACTDOUBLE: {
+        label: 'SILNIA.DWUKR',
         description: 'Zwraca dwukrotną wartość silni liczby.',
         abstract: 'Zwraca dwukrotną wartość silni liczby.',
         links: [
@@ -421,6 +451,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR: {
+        label: 'ZAOKR.W.DÓŁ',
         description: 'Funkcja ZAOKR.W.DÓŁ w programie Excel zaokrągla określoną liczbę w dół do najbliższej określonej wielokrotności podanej istotności. Liczby ujemne są zaokrąglane w dół (dalej ujemne) do najbliższej pełnej wielokrotności poniżej zera.',
         abstract: 'Funkcja ZAOKR.W.DÓŁ w programie Excel zaokrągla określoną liczbę w dół do najbliższej określonej wielokrotności podanej istotności. Liczby ujemne są zaokrąglane w dół (dalej ujemne) do najbliższej pełnej wielokrotności poniżej zera.',
         links: [
@@ -435,6 +466,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_MATH: {
+        label: 'PIĘTRO.MATEMATYKA',
         description: 'Zaokrągla liczbę w dół do najbliższej liczby całkowitej lub najbliższej wielokrotności istotności.',
         abstract: 'Zaokrągla liczbę w dół do najbliższej liczby całkowitej lub najbliższej wielokrotności istotności.',
         links: [
@@ -450,6 +482,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_PRECISE: {
+        label: 'ZAOKR.W.DÓŁ.DOKŁ',
         description: 'Zaokrągla liczbę w dół do najbliższej wartości całkowitej lub wielokrotności podanej istotności. Zaokrąglenie następuje w dół niezależnie od znaku liczby. Jeśli liczba lub istotność wynosi zero, jest zwracana wartość zero.',
         abstract: 'Zaokrągla liczbę w dół do najbliższej wartości całkowitej lub wielokrotności podanej istotności. Zaokrąglenie następuje w dół niezależnie od znaku liczby. Jeśli liczba lub istotność wynosi zero, jest zwracana wartość zero.',
         links: [
@@ -464,6 +497,7 @@ const locale: typeof enUS = {
         },
     },
     GCD: {
+        label: 'NAJW.WSP.DZIEL',
         description: 'Zwraca wartość największego wspólnego dzielnika dwu lub więcej liczb całkowitych. Największy wspólny dzielnik jest największą liczbą całkowitą, dzielącą bez reszty zarówno argument liczba1, jak i argument liczba2.',
         abstract: 'Zwraca wartość największego wspólnego dzielnika dwu lub więcej liczb całkowitych. Największy wspólny dzielnik jest największą liczbą całkowitą, dzielącą bez reszty zarówno argument liczba1, jak i argument liczba2.',
         links: [
@@ -478,6 +512,7 @@ const locale: typeof enUS = {
         },
     },
     INT: {
+        label: 'INT',
         description: 'Zaokrągla liczbę w dół do najbliższej liczby całkowitej.',
         abstract: 'Zaokrągla liczbę w dół do najbliższej liczby całkowitej.',
         links: [
@@ -491,6 +526,7 @@ const locale: typeof enUS = {
         },
     },
     ISO_CEILING: {
+        label: 'ZAOKR.W.GÓRĘ',
         description: 'Zaokrągla liczbę w górę do najbliższej wartości całkowitej lub wielokrotności podanej istotności. Zaokrąglenie następuje w górę niezależnie od znaku liczby. Jeśli liczba lub istotność wynosi zero, jest zwracana wartość zero.',
         abstract: 'Zaokrągla liczbę w górę do najbliższej wartości całkowitej lub wielokrotności podanej istotności. Zaokrąglenie następuje w górę niezależnie od znaku liczby. Jeśli liczba lub istotność wynosi zero, jest zwracana wartość zero.',
         links: [
@@ -505,6 +541,7 @@ const locale: typeof enUS = {
         },
     },
     LCM: {
+        label: 'NAJMN.WSP.WIEL',
         description: 'Zwraca wartość najmniejszej wspólnej wielokrotności liczb całkowitych. Najmniejszą wspólną wielokrotnością jest najmniejsza dodatnia liczba całkowita będąca wielokrotnością wszystkich całkowitych argumentów liczba1, liczba2 i tak dalej. Funkcję NAJMN.WSP.WIEL należy stosować przy dodawaniu ułamków o różnych mianownikach.',
         abstract: 'Zwraca wartość najmniejszej wspólnej wielokrotności liczb całkowitych. Najmniejszą wspólną wielokrotnością jest najmniejsza dodatnia liczba całkowita będąca wielokrotnością wszystkich całkowitych argumentów liczba1, liczba2 i tak dalej. Funkcję NAJMN.WSP.WIEL należy stosować przy dodawaniu ułamków o różnych mianownikach.',
         links: [
@@ -519,6 +556,7 @@ const locale: typeof enUS = {
         },
     },
     LN: {
+        label: 'LN',
         description: 'Zwraca wartość logarytmu naturalnego danej liczby. Podstawą logarytmów naturalnych jest stała e (2,71828182845904).',
         abstract: 'Zwraca wartość logarytmu naturalnego danej liczby. Podstawą logarytmów naturalnych jest stała e (2,71828182845904).',
         links: [
@@ -532,6 +570,7 @@ const locale: typeof enUS = {
         },
     },
     LOG: {
+        label: 'LOG',
         description: 'Zwraca logarytm liczby przy zadanej podstawie.',
         abstract: 'Zwraca logarytm liczby przy zadanej podstawie.',
         links: [
@@ -546,6 +585,7 @@ const locale: typeof enUS = {
         },
     },
     LOG10: {
+        label: 'LOG10',
         description: 'Zwraca logarytm zadanej liczby przy podstawie 10.',
         abstract: 'Zwraca logarytm zadanej liczby przy podstawie 10.',
         links: [
@@ -559,6 +599,7 @@ const locale: typeof enUS = {
         },
     },
     MDETERM: {
+        label: 'WYZNACZNIK.MACIERZY',
         description: 'Zwraca wartość wyznacznika macierzy tablicy.',
         abstract: 'Zwraca wartość wyznacznika macierzy tablicy.',
         links: [
@@ -572,6 +613,7 @@ const locale: typeof enUS = {
         },
     },
     MINVERSE: {
+        label: 'MACIERZ.ODW',
         description: 'Funkcja MACIERZ.ODW zwraca macierz odwrotną dla macierzy przechowywanej w tablicy.',
         abstract: 'Funkcja MACIERZ.ODW zwraca macierz odwrotną dla macierzy przechowywanej w tablicy.',
         links: [
@@ -585,6 +627,7 @@ const locale: typeof enUS = {
         },
     },
     MMULT: {
+        label: 'MACIERZ.ILOCZYN',
         description: 'Funkcja MACIERZ.ILOCZYN zwraca iloczyn macierzy dwóch tablic. Wynik jest tablicą o takiej samej liczbie wierszy jak tablica1 i takiej samej liczbie kolumn jak tablica2.',
         abstract: 'Funkcja MACIERZ.ILOCZYN zwraca iloczyn macierzy dwóch tablic. Wynik jest tablicą o takiej samej liczbie wierszy jak tablica1 i takiej samej liczbie kolumn jak tablica2.',
         links: [
@@ -599,6 +642,7 @@ const locale: typeof enUS = {
         },
     },
     MOD: {
+        label: 'MOD',
         description: 'Zwraca wartość reszty po podzieleniu liczby przez dzielnik. Wynik ma taki sam znak jak dzielnik.',
         abstract: 'Zwraca wartość reszty po podzieleniu liczby przez dzielnik. Wynik ma taki sam znak jak dzielnik.',
         links: [
@@ -613,6 +657,7 @@ const locale: typeof enUS = {
         },
     },
     MROUND: {
+        label: 'ZAOKR.DO.WIELOKR',
         description: 'Funkcja ZAOKR.DO.WIELOKR zwraca liczbę zaokrągloną do odpowiedniej wielokrotności.',
         abstract: 'Funkcja ZAOKR.DO.WIELOKR zwraca liczbę zaokrągloną do odpowiedniej wielokrotności.',
         links: [
@@ -627,6 +672,7 @@ const locale: typeof enUS = {
         },
     },
     MULTINOMIAL: {
+        label: 'WIELOMIAN',
         description: 'Zwraca wartość stosunku silni sumy wartości do iloczynu silni.',
         abstract: 'Zwraca wartość stosunku silni sumy wartości do iloczynu silni.',
         links: [
@@ -641,6 +687,7 @@ const locale: typeof enUS = {
         },
     },
     MUNIT: {
+        label: 'MACIERZ.JEDNOSTKOWA',
         description: 'Funkcja MACIERZ.JEDNOSTKOWA zwraca macierz jednostkową dla określonego wymiaru.',
         abstract: 'Funkcja MACIERZ.JEDNOSTKOWA zwraca macierz jednostkową dla określonego wymiaru.',
         links: [
@@ -654,6 +701,7 @@ const locale: typeof enUS = {
         },
     },
     ODD: {
+        label: 'ZAOKR.DO.NPARZ',
         description: 'Zwraca wartość liczby zaokrągloną w górę do najbliższej nieparzystej liczby całkowitej.',
         abstract: 'Zwraca wartość liczby zaokrągloną w górę do najbliższej nieparzystej liczby całkowitej.',
         links: [
@@ -667,6 +715,7 @@ const locale: typeof enUS = {
         },
     },
     PI: {
+        label: 'LICZBA.PI',
         description: 'Zwraca liczbę 3,14159265358979, stałą matematyczną pi, z dokładnością do 15 cyfr.',
         abstract: 'Zwraca liczbę 3,14159265358979, stałą matematyczną pi, z dokładnością do 15 cyfr.',
         links: [
@@ -679,6 +728,7 @@ const locale: typeof enUS = {
         },
     },
     POWER: {
+        label: 'POTĘGA',
         description: 'Zwraca wartość liczby podniesionej do potęgi.',
         abstract: 'Zwraca wartość liczby podniesionej do potęgi.',
         links: [
@@ -693,6 +743,7 @@ const locale: typeof enUS = {
         },
     },
     PRODUCT: {
+        label: 'ILOCZYN',
         description: 'Funkcja ILOCZYN mnoży wszystkie liczby podane jako argumenty i zwraca iloczyn. Jeśli na przykład komórki A1 i A2 zawierają liczby, możesz użyć formuły =ILOCZYN(A1; A2), aby pomnożyć te dwie liczby razem. Tę samą operację można również wykonać za pomocą operatora matematycznego mnożenia ( * ), na przykład =A1 * A2 .',
         abstract: 'Funkcja ILOCZYN mnoży wszystkie liczby podane jako argumenty i zwraca iloczyn. Jeśli na przykład komórki A1 i A2 zawierają liczby, możesz użyć formuły =ILOCZYN(A1; A2), aby pomnożyć te dwie liczby razem. Tę samą operację można również wykonać za pomocą operatora matematycznego mnożenia ( * ), na przykład =A1 * A2 .',
         links: [
@@ -707,6 +758,7 @@ const locale: typeof enUS = {
         },
     },
     QUOTIENT: {
+        label: 'CZ.CAŁK.DZIELENIA',
         description: 'Zwraca całkowitą część z dzielenia. Należy z niej korzystać, aby odrzucić resztę z dzielenia.',
         abstract: 'Zwraca całkowitą część z dzielenia. Należy z niej korzystać, aby odrzucić resztę z dzielenia.',
         links: [
@@ -721,6 +773,7 @@ const locale: typeof enUS = {
         },
     },
     RADIANS: {
+        label: 'RADIANY',
         description: 'Konwertuje stopnie na radiany.',
         abstract: 'Konwertuje stopnie na radiany.',
         links: [
@@ -734,6 +787,7 @@ const locale: typeof enUS = {
         },
     },
     RAND: {
+        label: 'LOS',
         description: 'Funkcja LOS zwraca losową liczbę rzeczywistą o równomiernym rozkładzie, która jest większa niż lub równa 0 i mniejsza od 1. Nowa losowa liczba rzeczywista jest zwracana po każdym obliczeniu arkusza.',
         abstract: 'Funkcja LOS zwraca losową liczbę rzeczywistą o równomiernym rozkładzie, która jest większa niż lub równa 0 i mniejsza od 1. Nowa losowa liczba rzeczywista jest zwracana po każdym obliczeniu arkusza.',
         links: [
@@ -746,6 +800,7 @@ const locale: typeof enUS = {
         },
     },
     RANDARRAY: {
+        label: 'LOSOWA.TABLICA',
         description: 'W poniższym przykładzie utworzono tablicę o wysokości 5 wierszy i szerokości 3 kolumn. Pierwszy zwraca losowy zestaw wartości od 0 do 1, czyli domyślne wartości funkcji LOSOWA.TABLICA. Następny zwraca serię losowych wartości dziesiętnych między 1 a 100. Trzeci przykład zwraca serię losowych liczb całkowitych między 1 a 100.',
         abstract: 'W poniższym przykładzie utworzono tablicę o wysokości 5 wierszy i szerokości 3 kolumn. Pierwszy zwraca losowy zestaw wartości od 0 do 1, czyli domyślne wartości funkcji LOSOWA.TABLICA. Następny zwraca serię losowych wartości dziesiętnych między 1 a 100. Trzeci przykład zwraca serię losowych liczb całkowitych między 1 a 100.',
         links: [
@@ -763,6 +818,7 @@ const locale: typeof enUS = {
         },
     },
     RANDBETWEEN: {
+        label: 'LOS.ZAKR',
         description: 'Zwraca losową liczbę całkowitą z wybranego zakresu liczb. Przy każdym obliczaniu arkusza jest zwracana nowa losowa liczba całkowita.',
         abstract: 'Zwraca losową liczbę całkowitą z wybranego zakresu liczb. Przy każdym obliczaniu arkusza jest zwracana nowa losowa liczba całkowita.',
         links: [
@@ -777,6 +833,7 @@ const locale: typeof enUS = {
         },
     },
     ROMAN: {
+        label: 'RZYMSKIE',
         description: 'Konwertuje cyfry arabskie na rzymskie, jako tekst.',
         abstract: 'Konwertuje cyfry arabskie na rzymskie, jako tekst.',
         links: [
@@ -791,6 +848,7 @@ const locale: typeof enUS = {
         },
     },
     ROUND: {
+        label: 'ZAOKR',
         description: 'Funkcja ZAOKR zaokrągla liczbę do określonej liczby cyfr. Aby na przykład zaokrąglić liczbę 23,7825 znajdującą się w komórce A1 do dwóch miejsc dziesiętnych, można użyć następującej formuły:',
         abstract: 'Funkcja ZAOKR zaokrągla liczbę do określonej liczby cyfr. Aby na przykład zaokrąglić liczbę 23,7825 znajdującą się w komórce A1 do dwóch miejsc dziesiętnych, można użyć następującej formuły:',
         links: [
@@ -805,6 +863,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDBANK: {
+        label: 'ZAOKR',
         description: 'Zaokrągla liczbę metodą zaokrąglania bankierskiego.',
         abstract: 'Zaokrągla liczbę metodą zaokrąglania bankierskiego.',
         links: [
@@ -819,6 +878,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDDOWN: {
+        label: 'ZAOKR.DÓŁ',
         description: 'Zaokrągla liczbę w dół w kierunku zera.',
         abstract: 'Zaokrągla liczbę w dół w kierunku zera.',
         links: [
@@ -833,6 +893,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDUP: {
+        label: 'ZAOKR.GÓRA',
         description: 'Zaokrągla liczbę w górę, dalej od zera.',
         abstract: 'Zaokrągla liczbę w górę, dalej od zera.',
         links: [
@@ -847,6 +908,7 @@ const locale: typeof enUS = {
         },
     },
     SEC: {
+        label: 'SEC',
         description: 'Zwraca sekans kąta.',
         abstract: 'Zwraca sekans kąta.',
         links: [
@@ -860,6 +922,7 @@ const locale: typeof enUS = {
         },
     },
     SECH: {
+        label: 'SECH',
         description: 'Zwraca sekans hiperboliczny kąta.',
         abstract: 'Zwraca sekans hiperboliczny kąta.',
         links: [
@@ -873,6 +936,7 @@ const locale: typeof enUS = {
         },
     },
     SERIESSUM: {
+        label: 'SUMA.SZER.POT',
         description: 'Wiele funkcji można aproksymować przy pomocy rozwinięć w szeregi potęgowe.',
         abstract: 'Wiele funkcji można aproksymować przy pomocy rozwinięć w szeregi potęgowe.',
         links: [
@@ -889,6 +953,7 @@ const locale: typeof enUS = {
         },
     },
     SEQUENCE: {
+        label: 'SEKWENCJA',
         description: 'W poniższym przykładzie stworzyliśmy tablicę mającą 4 wiersze i 5 kolumn, stosując funkcję =SEKWENCJA(4,5) .',
         abstract: 'W poniższym przykładzie stworzyliśmy tablicę mającą 4 wiersze i 5 kolumn, stosując funkcję =SEKWENCJA(4,5) .',
         links: [
@@ -905,6 +970,7 @@ const locale: typeof enUS = {
         },
     },
     SIGN: {
+        label: 'ZNAK.LICZBY',
         description: 'Określa znak liczby. Funkcja zwraca wartość 1, jeśli liczba jest dodatnia, oraz wartość 0, jeśli liczba jest ujemna.',
         abstract: 'Określa znak liczby. Funkcja zwraca wartość 1, jeśli liczba jest dodatnia, oraz wartość 0, jeśli liczba jest ujemna.',
         links: [
@@ -918,6 +984,7 @@ const locale: typeof enUS = {
         },
     },
     SIN: {
+        label: 'SIN',
         description: 'Zwraca sinus podanego kąta.',
         abstract: 'Zwraca sinus podanego kąta.',
         links: [
@@ -931,6 +998,7 @@ const locale: typeof enUS = {
         },
     },
     SINH: {
+        label: 'SINH',
         description: 'Zwraca sinus hiperboliczny liczby.',
         abstract: 'Zwraca sinus hiperboliczny liczby.',
         links: [
@@ -944,6 +1012,7 @@ const locale: typeof enUS = {
         },
     },
     SQRT: {
+        label: 'SQRT',
         description: 'Zwraca dodatni pierwiastek kwadratowy liczby.',
         abstract: 'Zwraca dodatni pierwiastek kwadratowy liczby.',
         links: [
@@ -957,6 +1026,7 @@ const locale: typeof enUS = {
         },
     },
     SQRTPI: {
+        label: 'LICZBA.PI',
         description: 'Zwraca pierwiastek kwadratowy z (liczba * pi).',
         abstract: 'Zwraca pierwiastek kwadratowy z (liczba * pi).',
         links: [
@@ -970,6 +1040,7 @@ const locale: typeof enUS = {
         },
     },
     SUBTOTAL: {
+        label: 'SUMA.CZĘŚCIOWA',
         description: 'Zwraca sumę częściową na liście lub w bazie danych. Na ogół listę z sumami częściowymi można łatwiej utworzyć, używając polecenia Suma częściowa dostępnego w grupie Konspekt na karcie Dane w aplikacji komputerowej programu Excel. Po utworzeniu listy z sumami częściowymi można ją modyfikować, edytując funkcję SUMY.CZĘŚCIOWE.',
         abstract: 'Zwraca sumę częściową na liście lub w bazie danych. Na ogół listę z sumami częściowymi można łatwiej utworzyć, używając polecenia Suma częściowa dostępnego w grupie Konspekt na karcie Dane w aplikacji komputerowej programu Excel. Po utworzeniu listy z sumami częściowymi można ją modyfikować, edytując funkcję SUMY.CZĘŚCIOWE.',
         links: [
@@ -985,6 +1056,7 @@ const locale: typeof enUS = {
         },
     },
     SUM: {
+        label: 'SUMA',
         description: 'Funkcja SUMA dodaje wartości. Możesz dodawać pojedyncze wartości, odwołania do komórek lub zakresów lub połączenie tych wszystkich trzech typów wyrażeń.',
         abstract: 'Funkcja SUMA dodaje wartości. Możesz dodawać pojedyncze wartości, odwołania do komórek lub zakresów lub połączenie tych wszystkich trzech typów wyrażeń.',
         links: [
@@ -999,6 +1071,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIF: {
+        label: 'SUMA.JEŻELI',
         description: 'Funkcja SUMA.JEŻELI służy do sumowania wartości z zakresu spełniającego określone kryteria. Załóżmy na przykład, że mają zostać zsumowane liczby z danej kolumny, które są większe od 5. Możesz użyć następującej formuły: =SUMA.JEŻELI(B2:B25;">5")',
         abstract: 'Funkcja SUMA.JEŻELI służy do sumowania wartości z zakresu spełniającego określone kryteria. Załóżmy na przykład, że mają zostać zsumowane liczby z danej kolumny, które są większe od 5. Możesz użyć następującej formuły: =SUMA.JEŻELI(B2:B25;">5")',
         links: [
@@ -1014,6 +1087,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIFS: {
+        label: 'SUMA.WARUNKÓW',
         description: 'Funkcja SUMA.WARUNKÓW, jedna z funkcji matematycznych i trygonometrycznych , dodaje wszystkie argumenty, które spełniają wiele kryteriów. Funkcji SUMA.WARUNKÓW można użyć na przykład do zsumowania sprzedawców w kraju, których (1) adres zamieszkania obejmuje ten sam kod pocztowy oraz (2) których zyski przekraczają określoną wartość w dolarach.',
         abstract: 'Funkcja SUMA.WARUNKÓW, jedna z funkcji matematycznych i trygonometrycznych , dodaje wszystkie argumenty, które spełniają wiele kryteriów. Funkcji SUMA.WARUNKÓW można użyć na przykład do zsumowania sprzedawców w kraju, których (1) adres zamieszkania obejmuje ten sam kod pocztowy oraz (2) których zyski przekraczają określoną wartość w dolarach.',
         links: [
@@ -1031,6 +1105,7 @@ const locale: typeof enUS = {
         },
     },
     SUMPRODUCT: {
+        label: 'ILOCZYN',
         description: 'Funkcja SUMA.ILOCZYNÓW odpowiada wszystkim wystąpieniom elementu Y/Rozmiar M i sumuje je, dlatego w tym przykładzie 21 plus 41 równa się 62.',
         abstract: 'Funkcja SUMA.ILOCZYNÓW odpowiada wszystkim wystąpieniom elementu Y/Rozmiar M i sumuje je, dlatego w tym przykładzie 21 plus 41 równa się 62.',
         links: [
@@ -1045,6 +1120,7 @@ const locale: typeof enUS = {
         },
     },
     SUMSQ: {
+        label: 'SUMA.KWADRATÓW',
         description: 'Zwraca sumę kwadratów argumentów.',
         abstract: 'Zwraca sumę kwadratów argumentów.',
         links: [
@@ -1059,6 +1135,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2MY2: {
+        label: 'SUMA.X2.M.Y2',
         description: 'Ta funkcja programu Excel zwraca sumę różnic kwadratów odpowiadających sobie wartości w dwóch tablicach.',
         abstract: 'Ta funkcja programu Excel zwraca sumę różnic kwadratów odpowiadających sobie wartości w dwóch tablicach.',
         links: [
@@ -1073,6 +1150,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2PY2: {
+        label: 'SUMA.X2.P.Y2',
         description: 'Zwraca sumę sum kwadratów odpowiadających sobie wartości w dwóch tablicach. Suma sum kwadratów jest często wykorzystywana jako składnik w wielu obliczeniach statystycznych.',
         abstract: 'Zwraca sumę sum kwadratów odpowiadających sobie wartości w dwóch tablicach. Suma sum kwadratów jest często wykorzystywana jako składnik w wielu obliczeniach statystycznych.',
         links: [
@@ -1087,6 +1165,7 @@ const locale: typeof enUS = {
         },
     },
     SUMXMY2: {
+        label: 'SUMA.XMY.2',
         description: 'Funkcja SUMXMY2 zwraca sumę kwadratów różnic odpowiadających sobie wartości w dwóch tablicach.',
         abstract: 'Funkcja SUMXMY2 zwraca sumę kwadratów różnic odpowiadających sobie wartości w dwóch tablicach.',
         links: [
@@ -1101,6 +1180,7 @@ const locale: typeof enUS = {
         },
     },
     TAN: {
+        label: 'TAN',
         description: 'Zwraca tangens podanego kąta.',
         abstract: 'Zwraca tangens podanego kąta.',
         links: [
@@ -1114,6 +1194,7 @@ const locale: typeof enUS = {
         },
     },
     TANH: {
+        label: 'TANH',
         description: 'Zwraca tangens hiperboliczny liczby.',
         abstract: 'Zwraca tangens hiperboliczny liczby.',
         links: [
@@ -1127,6 +1208,7 @@ const locale: typeof enUS = {
         },
     },
     TRUNC: {
+        label: 'LICZBA.CAŁK',
         description: 'Funkcje TRUNC obcinają liczbę do liczby całkowitej, usuwając część ułamkową liczby.',
         abstract: 'Funkcje TRUNC obcinają liczbę do liczby całkowitej, usuwając część ułamkową liczby.',
         links: [

@@ -110,20 +110,27 @@ export function MobileFunctionPanel(props: {
             return RECOMMENDED_FUNCTIONS
                 .map((name) => descriptionService.getFunctionInfo(name))
                 .filter((item): item is IFunctionInfo => Boolean(item))
-                .map((item) => ({ name: item.functionName, desc: item.abstract }));
+                .map((item) => {
+                    const displayName = (item as any).label || item.functionName;
+                    return { name: displayName, desc: item.abstract };
+                });
         }
 
         if (category === 'recent') {
             return readRecentFunctions()
                 .map((name) => descriptionService.getFunctionInfo(name))
                 .filter((item): item is IFunctionInfo => Boolean(item))
-                .map((item) => ({ name: item.functionName, desc: item.abstract }));
+                .map((item) => {
+                    const displayName = (item as any).label || item.functionName;
+                    return { name: displayName, desc: item.abstract };
+                });
         }
 
         return descriptionService.getSearchListByType(category === 'all' ? -1 : category).slice(0, 100);
     }, [category, descriptionService, open, query, recentVersion]);
 
     const handleInsert = (name: string) => {
+        // Parser handles German name resolution automatically via resolveFunctionName()
         rememberFunction(name);
         setRecentVersion((value) => value + 1);
         onInsert(name);

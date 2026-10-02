@@ -57,6 +57,24 @@ export interface IFunctionService {
     clearDescriptions(): void;
 
     deleteFormulaAstCacheKey(...functionToken: IFunctionNames[]): void;
+
+    /**
+     * Get the locale-based function alias map (localized label -> canonical name)
+     */
+    getFunctionAliasMap(): Map<string, IFunctionNames>;
+
+    /**
+     * Rebuild the function alias map from current descriptions
+     * Should be called when locale changes
+     */
+    buildFunctionAliasMap(): void;
+
+    /**
+     * Resolve a function name to its canonical form using the alias map
+     * e.g., "SUMME" -> "SUM" (in German locale)
+     * Falls back to the original name if no alias is found
+     */
+    resolveFunctionName(inputName: string): IFunctionNames;
 }
 export const IFunctionService = createIdentifier<IFunctionService>('univer.formula-function.service');
 
@@ -65,10 +83,13 @@ export class FunctionService extends Disposable implements IFunctionService {
 
     private _functionDescriptions: Map<IFunctionNames, IFunctionInfo> = new Map();
 
+    private _functionAliases: Map<string, string> = new Map();
+
     override dispose(): void {
         super.dispose();
         this._functionExecutors.clear();
         this._functionDescriptions.clear();
+        this._functionAliases.clear();
     }
 
     registerExecutors(...functions: BaseFunction[]) {
@@ -142,5 +163,39 @@ export class FunctionService extends Disposable implements IFunctionService {
                 }
             });
         });
+    }
+
+    getFunctionAliasMap(): Map<string, string> {
+        return this._functionAliases;
+    }
+
+    buildFunctionAliasMap(): void {
+        this._functionAliases.clear();
+
+        // Build alias map from descriptions that have a label
+        this._functionDescriptions.forEach((description) => {
+            const canonicalName = description.functionName;
+            if (description.label && description.label.toUpperCase() !== canonicalName) {
+                this._functionAliases.set(description.label.toUpperCase(), canonicalName);
+            }
+        });
+    }
+
+    resolveFunctionName(inputName: string): string {
+        const upperName = inputName.toUpperCase();
+
+        // First check if it's already a known function (canonical name)
+        if (this._functionExecutors.has(upperName) || this._functionDescriptions.has(upperName)) {
+            return upperName;
+        }
+
+        // Then check if it's an alias (localized label)
+        const resolvedName = this._functionAliases.get(upperName);
+        if (resolvedName) {
+            return resolvedName;
+        }
+
+        // Fallback to original input
+        return upperName;
     }
 }

@@ -24,7 +24,7 @@ export function getFunctionTypeValues(
 ): Array<{ label: string; value: string }> {
     // Exclude the DefinedName key
     return Object.keys(FunctionType)
-        .filter((key) => isNaN(Number(key)) && key !== 'DefinedName' && key !== 'Table' && (customFormula || key !== 'User'))
+        .filter((key) => Number.isNaN(Number(key)) && key !== 'DefinedName' && key !== 'Table' && (customFormula || key !== 'User'))
         .map((key) => ({
             label: localeService.t(`sheets-formula-ui.functionType.${key.toLocaleLowerCase()}`),
             value: `${FunctionType[key as keyof typeof FunctionType]}`,
@@ -33,7 +33,11 @@ export function getFunctionTypeValues(
 
 export function getFunctionName(item: IFunctionInfo, localeService: LocaleService) {
     let functionName = '';
-    if (item.aliasFunctionName) {
+
+    // First, check if there's a locale-specific label
+    if ((item as any).label) {
+        functionName = (item as any).label;
+    } else if (item.aliasFunctionName) {
         functionName = localeService.t(item.aliasFunctionName);
 
         if (functionName === item.aliasFunctionName) {

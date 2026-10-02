@@ -57,4 +57,16 @@ describe('formula shortcuts', () => {
         expect(QuickSumShortcut.group).toBe('4_sheet-edit');
         expect(QuickSumShortcut.groupTitle).toBe('sheets-ui.shortcut.sheet-edit');
     });
+
+    it('binds Ctrl + ` to toggling show formulas while the sheet editor is focused', async () => {
+        const { ToggleShowFormulasOperation } = await import('../../../commands/operations/toggle-show-formulas.operation');
+        const { ToggleShowFormulasShortcut } = await import('../show-formulas.shortcut');
+
+        expect(ToggleShowFormulasShortcut.id).toBe(ToggleShowFormulasOperation.id);
+        expect(ToggleShowFormulasShortcut.binding).toBe(KeyCode.BACK_QUOTE | MetaKeys.CTRL_COMMAND);
+        expect(ToggleShowFormulasShortcut.preconditions).toBe(whenSheetEditorFocusedMock);
+        expect(ToggleShowFormulasShortcut.description).toBe('sheets-formula-ui.shortcut.toggle-show-formulas');
+        expect(ToggleShowFormulasShortcut.group).toBe('3_sheet-view');
+        expect(ToggleShowFormulasShortcut.groupTitle).toBe('sheets-ui.shortcut.sheet-view');
+    });
 });

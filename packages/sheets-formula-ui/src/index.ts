@@ -25,6 +25,8 @@ export { InsertFunctionOperation } from './commands/operations/insert-function.o
 export { MoreFunctionsOperation } from './commands/operations/more-functions.operation';
 export { ReferenceAbsoluteOperation } from './commands/operations/reference-absolute.operation';
 export { SearchFunctionOperation } from './commands/operations/search-function.operation';
+export { ToggleShowFormulasOperation } from './commands/operations/toggle-show-formulas.operation';
+export type { IToggleShowFormulasOperationParams } from './commands/operations/toggle-show-formulas.operation';
 export { genFormulaRefSelectionStyle } from './common/selection';
 export type { IUniverSheetsFormulaUIConfig } from './config/config';
 export { FormulaReorderController } from './controllers/formula-reorder.controller';
@@ -35,6 +37,8 @@ export { FORMULA_PROMPT_ACTIVATED } from './services/prompt.service';
 export { GlobalRangeSelectorService } from './services/range-selector.service';
 export type { IShowRangeSelectorDialogOptions } from './services/range-selector.service';
 export { RefSelectionsRenderService } from './services/render-services/ref-selections.render.service';
+export { SheetsShowFormulasService } from './services/show-formulas.service';
+export type { IShowFormulasChange } from './services/show-formulas.service';
 export { FormulaEditor } from './views/formula-editor/index';
 export type { IFormulaEditorRef } from './views/formula-editor/index';
 export { RangeSelector } from './views/range-selector/index';

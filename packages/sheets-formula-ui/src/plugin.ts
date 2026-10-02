@@ -46,11 +46,13 @@ import { FormulaEditorShowController } from './controllers/formula-editor-show.c
 import { FormulaRenderManagerController } from './controllers/formula-render.controller';
 import { FormulaReorderController } from './controllers/formula-reorder.controller';
 import { ImageFormulaRenderController } from './controllers/image-formula-render.controller';
+import { ShowFormulasRenderController } from './controllers/show-formulas-render.controller';
 import { FormulaUIController } from './controllers/ui.controller';
 import { FormulaMenuController } from './menu/formula-menu.controller';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { GlobalRangeSelectorService } from './services/range-selector.service';
 import { RefSelectionsRenderService } from './services/render-services/ref-selections.render.service';
+import { SheetsShowFormulasService } from './services/show-formulas.service';
 import { GlobalRangeSelector } from './views/range-selector/Global';
 
 /**
@@ -95,6 +97,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
         registerDependencies(this._injector, [
             [IFormulaPromptService, { useClass: FormulaPromptService }],
             [GlobalRangeSelectorService],
+            [SheetsShowFormulasService],
             [FormulaUIController],
             [FormulaMenuController],
             [FormulaClipboardController],
@@ -102,6 +105,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
             [FormulaRenderManagerController],
             [FormulaReorderController],
             [ImageFormulaRenderController],
+            [ShowFormulasRenderController],
         ]);
 
         this._initUIPart();
@@ -129,6 +133,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
             [FormulaClipboardController],
             [FormulaRenderManagerController],
             [ImageFormulaRenderController],
+            [ShowFormulasRenderController],
         ]);
     }
 

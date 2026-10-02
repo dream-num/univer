@@ -18,6 +18,10 @@ const locale = {
     'sheets-formula-ui': {
         shortcut: {
             'quick-sum': 'Quick Sum',
+            'toggle-show-formulas': 'Show Formulas',
+        },
+        showFormulas: {
+            tooltip: 'Show Formulas',
         },
 
         insert: {

@@ -34,6 +34,7 @@ function createController(options: {
     editArea?: DocumentEditArea;
     drawings?: Record<string, unknown>;
     isFocusing?: boolean;
+    isMainScene?: boolean;
     mobile?: boolean;
     openFile?: () => Promise<File[]>;
     saveImage?: (file: File) => Promise<unknown>;
@@ -129,6 +130,7 @@ function createController(options: {
     };
     const context = {
         unitId: 'doc-1',
+        isMainScene: options.isMainScene ?? false,
         unit: {
             getDrawings: vi.fn(() => snapshot.drawings),
             getMutationRevision: vi.fn(() => 0),
@@ -556,7 +558,7 @@ describe('DocDrawingUpdateRenderController', () => {
         expect(scene.attachTransformerTo).not.toHaveBeenCalled();
     });
 
-    it('keeps all drawings opaque while the document input is not focused', () => {
+    it.each([false, true])('keeps unfocused drawings opaque and allows first-click selection only in a main scene (%s)', (isMainScene) => {
         const bodyDrawing = {
             drawingId: 'body-drawing',
             isMultiTransform: BooleanNumber.FALSE,
@@ -577,9 +579,14 @@ describe('DocDrawingUpdateRenderController', () => {
                 'header-drawing': headerDrawing,
             },
             isFocusing: false,
+            isMainScene,
         });
 
-        expect(scene.attachTransformerTo).not.toHaveBeenCalled();
+        if (isMainScene) {
+            expect(scene.attachTransformerTo).toHaveBeenCalledExactlyOnceWith(getShape('body-drawing'));
+        } else {
+            expect(scene.attachTransformerTo).not.toHaveBeenCalled();
+        }
         expect(getShape('body-drawing').setOpacity).toHaveBeenLastCalledWith(1);
         expect(getShape('header-drawing').setOpacity).toHaveBeenLastCalledWith(1);
 

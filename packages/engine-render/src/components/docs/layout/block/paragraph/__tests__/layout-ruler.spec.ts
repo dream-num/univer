@@ -2829,7 +2829,7 @@ describe('layout-ruler', () => {
         section.columns = [column];
         column.lines = [line];
 
-        updateInlineDrawingPosition(line, new Map([['image-1', drawing]]), '', 80);
+        updateInlineDrawingPosition(line, new Map([['image-1', drawing]]), '', 80, undefined, undefined, 32, true);
 
         expect(page.skeDrawings.get('old-image')).toEqual({ drawingId: 'old-image' });
         expect(page.skeDrawings.get('image-1')).toMatchObject({
@@ -2842,6 +2842,8 @@ describe('layout-ruler', () => {
             lineTop: 226,
             columnLeft: 40,
             blockAnchorTop: 206,
+            blockAnchorLeft: 32,
+            normalizeTraditionalColumnAnchor: true,
             lineHeight: 24,
         });
     });

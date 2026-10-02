@@ -671,7 +671,7 @@ function resetCellDrawingAnchors(ctx: ILayoutContext, cellNode: DataStreamTreeNo
 }
 
 export function createSkeletonCellPages(
-    ctx: ILayoutContext,
+    parentContext: ILayoutContext,
     viewModel: DocumentViewModel,
     cellNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
@@ -682,6 +682,9 @@ export function createSkeletonCellPages(
     maxCellPageHeight: number = Number.POSITIVE_INFINITY,
     cellPageHeights?: readonly number[]
 ) {
+    // A cell owns its floating-object retries. Leaking its dirty flag into the
+    // containing story can terminate body layout before the following paragraph.
+    const ctx = { ...parentContext, isDirty: false, layoutStartPointer: { ...parentContext.layoutStartPointer } };
     // Table cell only has one section.
     const sectionNode = cellNode.children[0];
     const body = ctx.dataModel?.getBody?.();
@@ -778,7 +781,7 @@ export interface ICellSkeletonBuildState {
 }
 
 export function startSkeletonCellPagesBuild(
-    ctx: ILayoutContext,
+    parentContext: ILayoutContext,
     viewModel: DocumentViewModel,
     cellNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
@@ -789,6 +792,7 @@ export function startSkeletonCellPagesBuild(
     maxCellPageHeight: number = Number.POSITIVE_INFINITY,
     cellPageHeights?: readonly number[]
 ): ICellSkeletonBuildState {
+    const ctx = { ...parentContext, isDirty: false, layoutStartPointer: { ...parentContext.layoutStartPointer } };
     const sectionNode = cellNode.children[0];
     const { enableDocumentTableLineGrid, inheritDocumentLinePitch } = getCellLineGridOptions(
         sectionBreakConfig

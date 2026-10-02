@@ -16,9 +16,21 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
-import { DrawingTypeEnum, UniverInstanceType } from '@univerjs/core';
-import { getDrawingShapeKeyByDrawingSearch, SetDrawingSelectedOperation } from '@univerjs/drawing';
-import { DRAWING_OBJECT_LAYER_INDEX, Rect } from '@univerjs/engine-render';
+import { DrawingTypeEnum, Univer, UniverInstanceType } from '@univerjs/core';
+import {
+    DrawingManagerService,
+    getDrawingShapeKeyByDrawingSearch,
+    IDrawingManagerService,
+    SetDrawingSelectedOperation,
+} from '@univerjs/drawing';
+import {
+    CanvasColorService,
+    DRAWING_OBJECT_LAYER_INDEX,
+    ICanvasColorService,
+    IRenderManagerService,
+    Rect,
+    RenderManagerService,
+} from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { AlignType, SetDrawingAlignOperation } from '../../commands/operations/drawing-align.operation';
@@ -500,4 +512,50 @@ describe('DrawingUpdateController', () => {
 
         harness.controller.dispose();
     });
+});
+
+describe('drawing removal with real render selection', () => {
+    it.each([DrawingTypeEnum.DRAWING_IMAGE, DrawingTypeEnum.DRAWING_SHAPE, DrawingTypeEnum.DRAWING_CHART]
+        .flatMap((drawingType) => [false, true].map((otherSelected) => ({ drawingType, otherSelected }))))(
+        'clears stale controls for type $drawingType with other selection=$otherSelected',
+        ({ drawingType, otherSelected }) => {
+            const context = new Proxy({}, { get: () => () => {} });
+            const canvas = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(context as never);
+            const univer = new Univer();
+            const injector = univer.__getInjector();
+            injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            injector.add([IDrawingManagerService, { useClass: DrawingManagerService }]);
+            injector.add([DrawingUpdateController]);
+            univer.createUnit(UniverInstanceType.UNIVER_DOC, { id: 'delete-doc', body: { dataStream: '\r\n' } });
+            const render = injector.get(IRenderManagerService).createRender('delete-doc');
+            render.deactivate();
+            injector.get(DrawingUpdateController);
+            const manager = injector.get(IDrawingManagerService);
+            const search = { unitId: 'delete-doc', subUnitId: 'delete-doc', drawingId: 'deleted', drawingType };
+            const key = getDrawingShapeKeyByDrawingSearch(search);
+            const objects = [key, `${key}#-#0`, ...(otherSelected ? ['unrelated'] : [])]
+                .map((id) => new Rect(id, { left: 10, top: 10, width: 40, height: 30 }));
+            const transformer = render.scene.getTransformerByCreate();
+            const cleared = vi.fn();
+            const subscription = transformer.clearControl$.subscribe(cleared);
+            try {
+                for (const object of objects) {
+                    render.scene.addObject(object);
+                    transformer.setSelectedControl(object);
+                }
+                render.scene.removeObjects(objects.slice(0, 2));
+                cleared.mockClear();
+                manager.removeNotification([search]);
+                expect([...transformer.getSelectedObjectMap().keys()]).toEqual(otherSelected ? ['unrelated'] : []);
+                expect(cleared).toHaveBeenCalledTimes(otherSelected ? 0 : 1);
+                expect(render.scene.getAllObjects().some((object) => object.oKey.includes(key))).toBe(false);
+            } finally {
+                subscription.unsubscribe();
+                objects.forEach((object) => object.dispose());
+                univer.dispose();
+                canvas.mockRestore();
+            }
+        }
+    );
 });

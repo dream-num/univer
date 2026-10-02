@@ -134,7 +134,7 @@ export function dealWithSection(
 
     if (ctx.isDirty && ctx.layoutStartPointer[segmentId] != null) {
         // Rollback the skeleton to the layout start point.
-        _rollbackPages(ctx.layoutStartPointer[segmentId] as number, allCurrentSkeletonPages);
+        rollbackSectionPages(ctx.layoutStartPointer[segmentId] as number, allCurrentSkeletonPages);
     }
 
     return {
@@ -146,7 +146,7 @@ export function dealWithSection(
 }
 
 // Roll back pages to the state it was in before the dirty paragraph.
-function _rollbackPages(paragraphIndex: number, allCurrentSkeletonPages: IDocumentSkeletonPage[]) {
+export function rollbackSectionPages(paragraphIndex: number, allCurrentSkeletonPages: IDocumentSkeletonPage[]): void {
     let findFirstDirtyLine = false;
     for (let pageIndex = 0; pageIndex < allCurrentSkeletonPages.length; pageIndex++) {
         const page = allCurrentSkeletonPages[pageIndex];

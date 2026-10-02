@@ -22,7 +22,6 @@ import type {
     IUpdateDrawingDocTransformCommandParams,
 } from '@univerjs/docs-drawing';
 import type { IDrawingJsonUndo1, IDrawingMapItemData, IDrawingOrderMapParam } from '@univerjs/drawing';
-import type { IDrawingAnchorInPage } from '../utils/drawing-anchor-position';
 import {
     BooleanNumber,
     Disposable,
@@ -33,6 +32,7 @@ import {
     JSONX,
     PositionedObjectLayoutType,
     RedoCommand,
+    Tools,
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -44,11 +44,12 @@ import {
     TextWrappingStyle,
     UpdateDocDrawingWrappingStyleCommand,
     UpdateDrawingDocTransformCommand,
+    WRAPPING_STYLE_TO_LAYOUT_TYPE,
 } from '@univerjs/docs-drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocRefreshDrawingsService } from '../services/doc-refresh-drawings.service';
-import { findDrawingAnchorInPage, resolveDrawingAnchorOffsets } from '../utils/drawing-anchor-position';
+import { findDrawingAnchor, getDrawingWrappingPosition } from '../utils/drawing-wrapping-position';
 
 interface IAddOrRemoveDrawing {
     type: 'add' | 'remove';
@@ -301,8 +302,7 @@ export class DocDrawingAddRemoveController extends Disposable {
         }
 
         const editArea = viewModel.getEditArea();
-        const { pages, skeHeaders, skeFooters } = skeletonData;
-        const oldDrawings = documentDataModel.getDrawings() ?? {};
+        const oldDrawings = collectDocDrawings(documentDataModel.getSnapshot()).drawings;
 
         params.drawings = params.drawings.map((drawing) => {
             const oldDrawing = oldDrawings[drawing.drawingId] as IDocDrawing | undefined;
@@ -310,53 +310,29 @@ export class DocDrawingAddRemoveController extends Disposable {
                 return drawing;
             }
 
-            let drawingAnchor: IDrawingAnchorInPage | null = null;
-            for (const page of pages) {
-                const { headerId, footerId, marginTop, marginLeft, marginBottom, pageWidth, pageHeight } = page;
-                if (editArea === DocumentEditArea.HEADER) {
-                    const header = skeHeaders.get(headerId)?.get(pageWidth);
-                    if (header) {
-                        drawingAnchor = findDrawingAnchorInPage(header, drawing.drawingId, header.marginTop, marginLeft);
-                    }
-                } else if (editArea === DocumentEditArea.FOOTER) {
-                    const footer = skeFooters.get(footerId)?.get(pageWidth);
-                    if (footer) {
-                        drawingAnchor = findDrawingAnchorInPage(
-                            footer,
-                            drawing.drawingId,
-                            pageHeight - marginBottom + footer.marginTop,
-                            marginLeft
-                        );
-                    }
-                } else {
-                    drawingAnchor = findDrawingAnchorInPage(page, drawing.drawingId, marginTop, marginLeft);
-                }
-
-                if (drawingAnchor) {
-                    break;
-                }
-            }
+            const drawingAnchor = findDrawingAnchor(unitId, drawing.drawingId, skeletonData, editArea, oldDrawing);
 
             if (!drawingAnchor) {
                 return drawing;
             }
 
-            const oldPositionH = oldDrawing.docTransform.positionH;
-            const oldPositionV = oldDrawing.docTransform.positionV;
-            const { horizontal: posOffsetH, vertical: posOffsetV } = resolveDrawingAnchorOffsets(
-                drawingAnchor,
-                oldPositionH,
-                oldPositionV
-            );
+            const docTransform = getDrawingWrappingPosition(drawingAnchor, WRAPPING_STYLE_TO_LAYOUT_TYPE[params.wrappingStyle]);
+            // A caller may supply an explicit destination position together with the wrapping style.
+            for (const key of ['positionH', 'positionV'] as const) {
+                const requested = drawing.docTransform?.[key];
+                if (requested && !Tools.diffValue(requested, oldDrawing.docTransform[key])) {
+                    Object.assign(docTransform, { [key]: requested });
+                }
+            }
 
             return {
                 ...oldDrawing,
                 ...drawing,
                 docTransform: {
-                    ...oldDrawing.docTransform,
+                    ...docTransform,
                     ...drawing.docTransform,
-                    positionH: { relativeFrom: oldPositionH.relativeFrom, posOffset: posOffsetH },
-                    positionV: { relativeFrom: oldPositionV.relativeFrom, posOffset: posOffsetV },
+                    positionH: docTransform.positionH,
+                    positionV: docTransform.positionV,
                 },
             };
         });

@@ -67,6 +67,7 @@ export interface ISkeletonResourceReference {
 }
 
 export interface IDocumentSkeletonDrawingAnchor {
+    left?: number;
     elements: IDocumentSkeletonLine[]; // element: lines, tr
     paragraphIndex: number; // block id
     top: number; // relative height for previous block
@@ -376,6 +377,9 @@ export interface IDocumentSkeletonDrawing {
     initialState: boolean; // whether initialized
     drawingOrigin: IDocDrawingBase;
     columnLeft: number;
+    blockAnchorLeft?: number; // Paragraph indent used by floating column anchors.
+    normalizeTraditionalColumnAnchor?: boolean; // Preserve the legacy paragraph/column origin when editing positions.
+    pageAnchorLeft?: number; // Page margin removed from traditional floating page/margin coordinates.
     isPageBreak: boolean;
     lineTop: number;
     lineHeight: number;

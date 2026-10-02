@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDrawingParam, IObjectPositionH, IObjectPositionV, Nullable } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    ICommandInfo,
+    IDrawingParam,
+    IObjectPositionH,
+    IObjectPositionV,
+} from '@univerjs/core';
 import type { IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
-import type { IDocumentSkeletonDrawing } from '@univerjs/engine-render';
 import type { LocaleKey } from '../../locale/types';
 import type { IDocDrawingPositionProps } from './DocDrawingPosition';
 import {
@@ -30,12 +35,17 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
+import { findDocDrawing, UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
+import {
+    findDrawingAnchor,
+    getDrawingWrappingPosition,
+    resolveDrawingWrappingPosition,
+} from '../../utils/drawing-wrapping-position';
 
 const MIN_OFFSET = -1000;
 const MAX_OFFSET = 1000;
@@ -103,7 +113,8 @@ export function useDocDrawingPosition(props: IDocDrawingPositionProps) {
 
     function handlePositionChange(
         direction: 'positionH' | 'positionV',
-        value: IObjectPositionH | IObjectPositionV
+        value: IObjectPositionH | IObjectPositionV,
+        positionH?: IObjectPositionH
     ) {
         const focusDrawings = drawingManagerService.getFocusDrawings();
         if (focusDrawings.length === 0) {
@@ -121,11 +132,11 @@ export function useDocDrawingPosition(props: IDocDrawingPositionProps) {
         commandService.executeCommand<IUpdateDrawingDocTransformCommandParams>(UpdateDrawingDocTransformCommand.id, {
             unitId: focusDrawings[0].unitId,
             subUnitId: focusDrawings[0].subUnitId,
-            drawings: drawings.map((drawing) => ({
+            drawings: drawings.flatMap((drawing) => [{
                 drawingId: drawing.drawingId,
                 key: direction,
                 value,
-            })),
+            }, ...(positionH ? [{ drawingId: drawing.drawingId, key: 'positionH' as const, value: positionH }] : [])]),
         });
 
         const docSelectionRenderService = renderManagerService.getRenderUnitById(unitId)?.with(DocSelectionRenderService);
@@ -137,164 +148,58 @@ export function useDocDrawingPosition(props: IDocDrawingPositionProps) {
         transformer.refreshControls();
     }
 
+    function getFocusedDrawingAnchor() {
+        const drawing = drawingManagerService.getFocusDrawings()[0];
+        if (!drawing) {
+            return null;
+        }
+        const manager = renderManagerService.getRenderUnitById(drawing.unitId)?.with(DocSkeletonManagerService);
+        const skeleton = manager?.getSkeleton().getSkeletonData();
+        const viewModel = manager?.getViewModel();
+        const snapshot = documentDataModel?.getSnapshot();
+        return skeleton && viewModel
+            ? findDrawingAnchor(drawing.unitId, drawing.drawingId, skeleton, viewModel.getEditArea(), snapshot && findDocDrawing(snapshot, drawing.drawingId)?.drawing)
+            : null;
+    }
+
     function handleHorizontalRelativeFromChange(value: string) {
-        const prevRelativeFrom = hPosition.relativeFrom;
-        const prevPosOffset = hPosition.posOffset;
         const relativeFrom = [ObjectRelativeFromH.COLUMN, ObjectRelativeFromH.PAGE, ObjectRelativeFromH.MARGIN]
             .find((reference) => String(reference) === value);
         if (relativeFrom == null) {
             return;
         }
-
-        if (prevRelativeFrom === relativeFrom) {
+        if (hPosition.relativeFrom === relativeFrom) {
             return;
         }
-
-        const focusDrawings = drawingManagerService.getFocusDrawings();
-        if (focusDrawings.length === 0) {
+        const anchor = getFocusedDrawingAnchor();
+        if (!anchor) {
             return;
         }
-
-        const drawingId = focusDrawings[0].drawingId;
-        const unitId = focusDrawings[0].unitId;
-
-        let drawing: Nullable<IDocumentSkeletonDrawing> = null;
-        let pageMarginLeft = 0;
-        const skeleton = renderManagerService.getRenderUnitById(unitId)
-            ?.with(DocSkeletonManagerService)
-            .getSkeleton();
-
-        const skeletonData = skeleton?.getSkeletonData();
-
-        if (skeletonData == null) {
-            return;
-        }
-
-        const { pages, skeHeaders, skeFooters } = skeletonData;
-
-        for (const page of pages) {
-            const { marginLeft, skeDrawings, headerId, footerId, pageWidth } = page;
-
-            if (skeDrawings.has(drawingId)) {
-                drawing = skeDrawings.get(drawingId);
-                pageMarginLeft = marginLeft;
-                break;
-            }
-
-            const headerPage = skeHeaders.get(headerId)?.get(pageWidth);
-            if (headerPage?.skeDrawings.has(drawingId)) {
-                drawing = headerPage?.skeDrawings.get(drawingId);
-                pageMarginLeft = marginLeft;
-                break;
-            }
-
-            const footerPage = skeFooters.get(footerId)?.get(pageWidth);
-            if (footerPage?.skeDrawings.has(drawingId)) {
-                drawing = footerPage?.skeDrawings.get(drawingId);
-                pageMarginLeft = marginLeft;
-                break;
-            }
-        }
-
-        if (drawing == null) {
-            return;
-        }
-
-        let delta = 0;
-
-        if (prevRelativeFrom === ObjectRelativeFromH.COLUMN) {
-            delta -= drawing.columnLeft;
-        } else if (prevRelativeFrom === ObjectRelativeFromH.MARGIN) {
-            delta -= pageMarginLeft;
-        }
-
-        if (relativeFrom === ObjectRelativeFromH.COLUMN) {
-            delta += drawing.columnLeft;
-        } else if (relativeFrom === ObjectRelativeFromH.MARGIN) {
-            delta += pageMarginLeft;
-        } else if (relativeFrom === ObjectRelativeFromH.PAGE) {
-            // Do nothing.
-        }
-
-        const newPositionH = {
-            relativeFrom,
-            posOffset: (prevPosOffset ?? 0) - delta,
-        };
-
-        handlePositionChange('positionH', newPositionH);
+        const position = getDrawingWrappingPosition(anchor, anchor.skeDrawing.drawingOrigin.layoutType, relativeFrom);
+        handlePositionChange('positionH', position.positionH);
     }
 
     function handleVerticalRelativeFromChange(value: string) {
-        const prevRelativeFrom = vPosition.relativeFrom;
-        const prevPosOffset = vPosition.posOffset;
         const relativeFrom = [ObjectRelativeFromV.LINE, ObjectRelativeFromV.PAGE, ObjectRelativeFromV.MARGIN, ObjectRelativeFromV.PARAGRAPH]
             .find((reference) => String(reference) === value);
         if (relativeFrom == null) {
             return;
         }
-
-        if (prevRelativeFrom === relativeFrom) {
+        if (vPosition.relativeFrom === relativeFrom) {
             return;
         }
-
-        const focusDrawings = drawingManagerService.getFocusDrawings();
-        if (focusDrawings.length === 0) {
+        const anchor = getFocusedDrawingAnchor();
+        if (!anchor) {
             return;
         }
-
-        const { drawingId, unitId } = focusDrawings[0];
-        const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-        const skeleton = renderManagerService.getRenderUnitById(unitId)
-            ?.with(DocSkeletonManagerService)
-            .getSkeleton();
-
-        const docSelectionRenderService = renderManagerService.getRenderUnitById(unitId)?.with(DocSelectionRenderService);
-
-        const segmentId = docSelectionRenderService?.getSegment();
-        const segmentPage = docSelectionRenderService?.getSegmentPage();
-
-        const drawing = documentDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customBlocks?.find((c) => c.blockId === drawingId);
-
-        if (drawing == null || skeleton == null || docSelectionRenderService == null) {
+        const initialPosition = getDrawingWrappingPosition(anchor, anchor.skeDrawing.drawingOrigin.layoutType, undefined, relativeFrom);
+        const position = documentDataModel
+            ? resolveDrawingWrappingPosition(anchor, initialPosition, documentDataModel.getSnapshot(), localeService, renderObject!.with(DocSkeletonManagerService).getViewModel().getEditArea())
+            : initialPosition;
+        if (!position) {
             return;
         }
-
-        const { startIndex } = drawing;
-
-        const glyph = skeleton.findNodeByCharIndex(startIndex, segmentId, segmentPage);
-        const line = glyph?.parent?.parent;
-        const column = line?.parent;
-        const paragraphStartLine = column?.lines.find((l) => l.paragraphIndex === line?.paragraphIndex && l.paragraphStart);
-        const page = column?.parent?.parent;
-
-        if (glyph == null || line == null || paragraphStartLine == null || column == null || page == null) {
-            return;
-        }
-
-        let delta = 0;
-
-        if (prevRelativeFrom === ObjectRelativeFromV.PARAGRAPH) {
-            delta -= paragraphStartLine.top;
-        } else if (prevRelativeFrom === ObjectRelativeFromV.LINE) {
-            delta -= line.top;
-        } else if (prevRelativeFrom === ObjectRelativeFromV.PAGE) {
-            delta += page.marginTop;
-        }
-
-        if (relativeFrom === ObjectRelativeFromV.PARAGRAPH) {
-            delta += paragraphStartLine.top;
-        } else if (relativeFrom === ObjectRelativeFromV.LINE) {
-            delta += line.top;
-        } else if (relativeFrom === ObjectRelativeFromV.PAGE) {
-            delta -= page.marginTop;
-        }
-
-        const newPositionV = {
-            relativeFrom,
-            posOffset: (prevPosOffset ?? 0) - delta,
-        };
-
-        handlePositionChange('positionV', newPositionV);
+        handlePositionChange('positionV', position.positionV, position.positionH);
     }
 
     function handleFollowTextMoveCheck(val: string | number | boolean) {
@@ -304,7 +209,7 @@ export function useDocDrawingPosition(props: IDocDrawingPositionProps) {
     useEffect(() => {
         function updateState(drawingParam: IDrawingParam) {
             const snapshot = documentDataModel?.getSnapshot();
-            const drawing = snapshot?.drawings?.[drawingParam.drawingId];
+            const drawing = snapshot && findDocDrawing(snapshot, drawingParam.drawingId)?.drawing;
             if (drawing == null) {
                 return;
             }

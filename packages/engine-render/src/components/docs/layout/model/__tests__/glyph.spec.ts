@@ -148,6 +148,8 @@ describe('Glyph utils test cases', () => {
             fontBoundingBoxDescent: 5,
             actualBoundingBoxAscent: 15,
             actualBoundingBoxDescent: 2,
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 0,
         });
         try {
             for (const flavor of [DocumentFlavor.UNSPECIFIED, DocumentFlavor.DRAWINGML]) {
@@ -217,6 +219,8 @@ describe('Glyph utils test cases', () => {
             fontBoundingBoxDescent: 3,
             actualBoundingBoxAscent: 10,
             actualBoundingBoxDescent: 2,
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 0,
         });
         try {
             const glyph = createSkeletonLetterGlyph(raw, { textStyle, fontStyle, charSpace: 0, snapToGrid: BooleanNumber.FALSE });
@@ -236,7 +240,7 @@ describe('Glyph utils test cases', () => {
         expect(getFontStyleString({ ...textStyle, fs: 11 }).fontKerning).toBe('none');
         expect(getFontStyleString({ ...textStyle, kerning: 0 }).fontKerning).toBe('none');
         expect(getFontStyleString({ fs: 12 }).fontKerning).toBeUndefined();
-        const metrics = { width: 10, fontBoundingBoxAscent: 12, fontBoundingBoxDescent: 3, actualBoundingBoxAscent: 10, actualBoundingBoxDescent: 2 };
+        const metrics = { width: 10, fontBoundingBoxAscent: 12, fontBoundingBoxDescent: 3, actualBoundingBoxAscent: 10, actualBoundingBoxDescent: 2, actualBoundingBoxLeft: 0, actualBoundingBoxRight: 0 };
         for (const mode of ['normal', 'none']) {
             for (const content of ['A', right, `A${right}`]) {
                 FontCache.setFontMeasureCache(`${fontStyle.fontString}\u0000${mode}`, content, {
@@ -271,6 +275,8 @@ describe('Glyph utils test cases', () => {
             fontBoundingBoxDescent: 3,
             actualBoundingBoxAscent: 0,
             actualBoundingBoxDescent: 0,
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 0,
         });
         const outlineFont = fontStyle.fontString.replace(/\b\d+(?:\.\d+)?(?:pt|px)\b/, '1024px');
         FontCache.setFontMeasureCache(outlineFont, '\u2028', {
@@ -279,6 +285,8 @@ describe('Glyph utils test cases', () => {
             fontBoundingBoxDescent: 3 * 64,
             actualBoundingBoxAscent: 0,
             actualBoundingBoxDescent: 0,
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 0,
         });
         try {
             for (const sc of [0, 2]) {
@@ -323,6 +331,8 @@ describe('Glyph utils test cases', () => {
             fontBoundingBoxDescent: 3,
             actualBoundingBoxAscent: 10,
             actualBoundingBoxDescent: 2,
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 0,
         };
         for (const text of ['A', '中', 'e\u0301', '👩‍💻', '\r', '\t']) {
             FontCache.setFontMeasureCache(fontStyle.fontString, text, metrics);
@@ -534,6 +544,8 @@ describe('Glyph utils test cases', () => {
                 fontBoundingBoxDescent: 4,
                 actualBoundingBoxAscent: 8,
                 actualBoundingBoxDescent: 0,
+                actualBoundingBoxLeft: 0,
+                actualBoundingBoxRight: 0,
             });
             FontCache.setFontMeasureCache(outlineFont, content, {
                 width: 500,
@@ -541,6 +553,8 @@ describe('Glyph utils test cases', () => {
                 fontBoundingBoxDescent: 224,
                 actualBoundingBoxAscent: 512,
                 actualBoundingBoxDescent: 0,
+                actualBoundingBoxLeft: 0,
+                actualBoundingBoxRight: 0,
             });
             try {
                 const bullet = createSkeletonBulletGlyph(
@@ -713,6 +727,8 @@ describe('Glyph utils test cases', () => {
                 fontBoundingBoxDescent: 9,
                 actualBoundingBoxAscent: 24,
                 actualBoundingBoxDescent: 6,
+                actualBoundingBoxLeft: 0,
+                actualBoundingBoxRight: 0,
             });
             onTestFinished(() => {
                 FontCache.clearFontMeasureCache(font);
@@ -759,6 +775,8 @@ describe('Glyph utils test cases', () => {
                 fontBoundingBoxDescent: 9,
                 actualBoundingBoxAscent: 30,
                 actualBoundingBoxDescent: 9,
+                actualBoundingBoxLeft: 0,
+                actualBoundingBoxRight: 0,
             };
             FontCache.setFontMeasureCache(config.fontStyle.fontString, '5', metrics);
             FontCache.setFontMeasureCache('normal bold 1024px "Calibri", Arial', '5', { ...metrics, width: 512 });
@@ -796,6 +814,8 @@ describe('Glyph utils test cases', () => {
                 fontBoundingBoxDescent: 4,
                 actualBoundingBoxAscent: 15,
                 actualBoundingBoxDescent: 4,
+                actualBoundingBoxLeft: 0,
+                actualBoundingBoxRight: 0,
             };
             FontCache.setFontMeasureCache(config.fontStyle.fontString, '文', metrics);
             FontCache.setFontMeasureCache('normal normal 1024px "Times New Roman", 宋体', '文', { ...metrics, width: 1024 });
@@ -832,6 +852,8 @@ describe('Glyph utils test cases', () => {
             fontBoundingBoxDescent: 4,
             actualBoundingBoxAscent: 0,
             actualBoundingBoxDescent: 0,
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 0,
         });
         const outlineFont = fontStyle.fontString.replace('18pt', '1024px');
         FontCache.setFontMeasureCache(outlineFont, content, {
@@ -840,6 +862,8 @@ describe('Glyph utils test cases', () => {
             fontBoundingBoxDescent: 170,
             actualBoundingBoxAscent: 0,
             actualBoundingBoxDescent: 0,
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 0,
         });
         try {
             const glyph = createSkeletonLetterGlyph(content, {
@@ -870,6 +894,8 @@ describe('Glyph utils test cases', () => {
             fontBoundingBoxDescent: 3,
             actualBoundingBoxAscent: 9,
             actualBoundingBoxDescent: 2,
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 0,
         });
         try {
             const config = { fontStyle, textStyle: { sc }, charSpace: 1, snapToGrid: BooleanNumber.FALSE };
@@ -891,6 +917,8 @@ describe('Glyph utils test cases', () => {
             fontBoundingBoxDescent: 3,
             actualBoundingBoxAscent: 9,
             actualBoundingBoxDescent: 2,
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 0,
         });
         try {
             const config = { fontStyle, textStyle: { sa }, charSpace: 1, snapToGrid: BooleanNumber.FALSE };
@@ -919,6 +947,8 @@ describe('Glyph utils test cases', () => {
             fontBoundingBoxDescent: 2,
             actualBoundingBoxAscent: 8,
             actualBoundingBoxDescent: 1,
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 0,
         };
         const ambiguous = ['“', '”', '‘', '’', '·', '℃', '①', 'α', 'Ж'];
         const latin = ['A', '7', ' ', 'é'];

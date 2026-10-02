@@ -34,6 +34,8 @@ describe('paragraph-layout', () => {
                 fontBoundingBoxDescent: 3,
                 actualBoundingBoxAscent: 10,
                 actualBoundingBoxDescent: 2,
+                actualBoundingBoxLeft: 0,
+                actualBoundingBoxRight: 0,
             });
         }
         try {
@@ -79,6 +81,8 @@ describe('paragraph-layout', () => {
                     fontBoundingBoxDescent: 3,
                     actualBoundingBoxAscent: 10,
                     actualBoundingBoxDescent: 2,
+                    actualBoundingBoxLeft: 0,
+                    actualBoundingBoxRight: 0,
                 });
             }
         }
@@ -125,6 +129,8 @@ describe('paragraph-layout', () => {
                 fontBoundingBoxDescent: 3,
                 actualBoundingBoxAscent: 10,
                 actualBoundingBoxDescent: 2,
+                actualBoundingBoxLeft: 0,
+                actualBoundingBoxRight: 0,
             });
         }
         try {

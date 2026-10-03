@@ -84,7 +84,6 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         this._init();
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _init(): void {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command) => {
@@ -94,7 +93,6 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                     return edit?.commandId === command.id;
                 });
                 if (command.id === EditDocDrawingOperation.id || opensDrawingEditor) {
-                    this._isDrawingPanelOpen = true;
                     this._clearPopups(undefined, true);
                 }
                 if (command.id === SidebarDocDrawingOperation.id) {

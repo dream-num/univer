@@ -681,8 +681,8 @@ function getCellPageFromPositionPath(
 
     const { headerId, footerId, pageWidth } = rootPage;
     const segmentPages = [
-        headerId == null ? null : skeletonData.skeHeaders.get(headerId)?.get(pageWidth),
-        footerId == null ? null : skeletonData.skeFooters.get(footerId)?.get(pageWidth),
+        headerId == null ? null : skeletonData.skeHeaders.get(headerId)?.get(rootPage.headerLayoutKey ?? pageWidth),
+        footerId == null ? null : skeletonData.skeFooters.get(footerId)?.get(rootPage.footerLayoutKey ?? pageWidth),
     ];
 
     for (const segmentPage of segmentPages) {

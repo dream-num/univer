@@ -182,6 +182,8 @@ interface IDocumentDrawingPublicationNestedPage {
 interface IDocumentDrawingPublicationPage extends IDocumentDrawingPublicationNestedPage {
     headerId: string;
     footerId: string;
+    headerLayoutKey?: number | string;
+    footerLayoutKey?: number | string;
     pageWidth: number;
 }
 
@@ -481,14 +483,14 @@ function countPublishedDrawingOccurrences(
 
         const header = page.headerId == null
             ? undefined
-            : skeletonData.skeHeaders.get(page.headerId)?.get(page.pageWidth);
+            : skeletonData.skeHeaders.get(page.headerId)?.get(page.headerLayoutKey ?? page.pageWidth);
         if (header != null) {
             count += countSkeletonPageDrawings(header);
         }
 
         const footer = page.footerId == null
             ? undefined
-            : skeletonData.skeFooters.get(page.footerId)?.get(page.pageWidth);
+            : skeletonData.skeFooters.get(page.footerId)?.get(page.footerLayoutKey ?? page.pageWidth);
         if (footer != null) {
             count += countSkeletonPageDrawings(footer);
         }
@@ -509,14 +511,14 @@ function hasNewPublishedPageDrawings(
 
         const header = page.headerId == null
             ? undefined
-            : skeletonData.skeHeaders.get(page.headerId)?.get(page.pageWidth);
+            : skeletonData.skeHeaders.get(page.headerId)?.get(page.headerLayoutKey ?? page.pageWidth);
         if (header != null && hasSkeletonPageDrawings(header)) {
             return true;
         }
 
         const footer = page.footerId == null
             ? undefined
-            : skeletonData.skeFooters.get(page.footerId)?.get(page.pageWidth);
+            : skeletonData.skeFooters.get(page.footerId)?.get(page.footerLayoutKey ?? page.pageWidth);
         if (footer != null && hasSkeletonPageDrawings(footer)) {
             return true;
         }
@@ -798,7 +800,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
     ): void {
         const selectable = !page.isLayoutPlaceholder && !page.isMaterializationPlaceholder;
         const { headerId, footerId, pageWidth } = page;
-        const headerPage = headerId ? skeHeaders.get(headerId)?.get(pageWidth) : undefined;
+        const headerPage = headerId ? skeHeaders.get(headerId)?.get(page.headerLayoutKey ?? pageWidth) : undefined;
         if (headerPage != null) {
             this._collectSegmentDrawingPositions(
                 unitId,
@@ -813,7 +815,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             );
         }
 
-        const footerPage = footerId ? skeFooters.get(footerId)?.get(pageWidth) : undefined;
+        const footerPage = footerId ? skeFooters.get(footerId)?.get(page.footerLayoutKey ?? pageWidth) : undefined;
         if (footerPage != null) {
             const footerTop = page.pageHeight - footerPage.height - footerPage.marginBottom;
             this._collectSegmentDrawingPositions(

@@ -1655,6 +1655,99 @@ describe('doc skeleton', () => {
         }
     });
 
+    it.each([{ firstPageNumber: 9, table: false }, { firstPageNumber: 99, table: false }, { firstPageNumber: 99, table: true }])('lays out repeated page fields at $firstPageNumber (table=$table) with per-page geometry and a final page count', ({ firstPageNumber, table }) => {
+        mockCanvasTextMetrics(11, 8);
+        const univer = new Univer();
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.setLocale(LocaleType.EN_US);
+        const T = DataStreamTreeTokenType;
+        const text = 'x \u001F9\u001E z\r\n';
+        const story = table ? `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}\r\n` : text;
+        const offset = table ? 3 : 0;
+        const contentWidth = (String(firstPageNumber).length + 4) * 8;
+        const snapshot: IDocumentData = {
+            id: 'page-fields-layout',
+            tableSource: table
+                ? { table: {
+                    tableId: 'table',
+                    align: TableAlignmentType.START,
+                    indent: { v: 0 },
+                    textWrap: TableTextWrapType.NONE,
+                    position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
+                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                    size: { type: TableSizeType.SPECIFIED, width: { v: contentWidth } },
+                    cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
+                    tableRows: [{ tableCells: [{}], trHeight: { val: { v: 0 }, hRule: TableRowHeightRule.AUTO } }],
+                    tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: contentWidth } } }],
+                } }
+                : undefined,
+            body: { dataStream: 'A\rB\r\n', paragraphs: [
+                { paragraphId: 'p1', startIndex: 1 },
+                { paragraphId: 'p2', startIndex: 3, paragraphStyle: { pageBreakBefore: BooleanNumber.TRUE } },
+            ] },
+            headers: { header: { headerId: 'header', body: {
+                dataStream: story,
+                paragraphs: [...story.matchAll(/\r/g)].map((match, index) => ({ paragraphId: `hp-${index}`, startIndex: match.index })),
+                sectionBreaks: [...story.matchAll(/\n/g)].map((match, index) => ({ sectionId: `hs-${index}`, startIndex: match.index })),
+                tables: table ? [{ tableId: 'table', startIndex: 0, endIndex: story.length - 2 }] : [],
+                customRanges: [{ rangeId: 'page', rangeType: CustomRangeType.FIELD, startIndex: offset + 2, endIndex: offset + 4, wholeEntity: false, properties: { fieldType: 'PAGE' } }],
+            } } },
+            footers: { footer: { footerId: 'footer', body: {
+                dataStream: '\u001F999\u001E\r\n',
+                paragraphs: [{ paragraphId: 'fp', startIndex: 5 }],
+                customRanges: [{ rangeId: 'count', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 4, wholeEntity: false, properties: { fieldType: 'NUMPAGES' } }],
+            } } },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageNumberStart: firstPageNumber,
+                pageSize: { width: contentWidth + 32, height: 400 },
+                marginLeft: 16,
+                marginRight: 16,
+                marginTop: 60,
+                marginBottom: 60,
+                marginHeader: 5,
+                marginFooter: 5,
+                textStyle: { ff: 'Arial', fs: 11 },
+                defaultHeaderId: 'header',
+                defaultFooterId: 'footer',
+            },
+        };
+        const main = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(snapshot)), locale);
+        const incremental = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(snapshot)), locale);
+        try {
+            main.calculate();
+            const generation = incremental.startIncrementalLayout();
+            let steps = 0;
+            while (!incremental.stepIncrementalLayout(generation, 8, 1).complete) {
+                expect(++steps).toBeLessThan(100);
+            }
+            expect(normalizeSkeleton(incremental.getSkeletonData())).toEqual(normalizeSkeleton(main.getSkeletonData()));
+            const data = main.getSkeletonData()!;
+            expect(data.pages).toHaveLength(2);
+            const pages = data.pages.map((page) => data.skeHeaders.get('header')!.get(page.headerLayoutKey!)!);
+            expect(pages[0]).not.toBe(pages[1]);
+            const textPages = table ? pages.map((page) => [...page.skeTables.values()][0].rows[0].cells[0]) : pages;
+            const lines = textPages.map((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)));
+            expect(lines[0]).toHaveLength(1);
+            expect(lines[1]).toHaveLength(2);
+            const glyphs = textPages.map((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup)))));
+            expect(glyphs[0].find((glyph) => glyph.content === String(firstPageNumber))).toBeDefined();
+            const next = glyphs[1].find((glyph) => glyph.content === String(firstPageNumber + 1))!;
+            expect(next).toBeDefined();
+            expect(next.width).toBeGreaterThan(glyphs[0].find((glyph) => glyph.content === String(firstPageNumber))!.width);
+            expect(main.findNodeByCharIndex(offset + 3, 'header', 1)?.content).toBe(String(firstPageNumber + 1));
+            for (const page of data.pages) {
+                const footer = data.skeFooters.get('footer')!.get(page.footerLayoutKey!)!;
+                const contents = footer.sections[0].columns[0].lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content))).join('');
+                expect(contents.replace(/[\u001E\u001F\r]/g, '')).toBe('2');
+            }
+        } finally {
+            main.dispose();
+            incremental.dispose();
+            univer.dispose();
+        }
+    });
+
     it('lays out a TOC page number through nested field markers at the right tab stop', () => {
         const univer = new Univer();
         const snapshot: IDocumentData = {

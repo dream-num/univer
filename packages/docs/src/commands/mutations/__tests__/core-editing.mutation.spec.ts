@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { IDocumentBody } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '../core-editing.mutation';
-import { CustomRangeType, DocumentFlavor, ICommandService, JSONX, TextX } from '@univerjs/core';
+import { CustomRangeType, DocumentFlavor, getRichTextEditPath, ICommandService, JSONX, TextX, Tools } from '@univerjs/core';
 import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE, registerDocumentLayoutPresentation } from '@univerjs/engine-render';
 import { describe, expect, it, vi } from 'vitest';
 import { createDocumentData, createTestBed } from '../../../facade/__tests__/create-test-bed';
@@ -79,6 +80,59 @@ describe('transformDocumentTextRanges', () => {
 });
 
 describe('RichTextEditingMutation selection scheduling', () => {
+    it.each(['', 'header', 'footer'])('replays formatting and history consistently in initialized segment %j', (segmentId) => {
+        const plainBody = (): IDocumentBody => ({
+            dataStream: 'Plain text\r\n',
+            textRuns: [],
+            paragraphs: [{ paragraphId: 'plain', startIndex: 10 }],
+        });
+        const snapshot = createDocumentData('format-collab', plainBody());
+        snapshot.headers = { header: { headerId: 'header', body: plainBody() } };
+        snapshot.footers = { footer: { footerId: 'footer', body: plainBody() } };
+        const local = createTestBed(Tools.deepClone(snapshot));
+        const peer = createTestBed(Tools.deepClone(snapshot));
+        try {
+            const params: IRichTextEditingMutationParams = {
+                unitId: snapshot.id,
+                segmentId,
+                textRanges: null,
+                actions: JSONX.getInstance().editOp(new TextX().retain(6).retain(4, {
+                    dataStream: '',
+                    textRuns: [{ st: 0, ed: 4, ts: { bl: 1, fs: 20 } }],
+                }).serialize(), getRichTextEditPath(local.doc, segmentId)),
+            };
+            const command = local.get(ICommandService);
+            const undo = command.syncExecuteCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(
+                RichTextEditingMutation.id,
+                params
+            );
+            // The collaboration entity transmits actions without the local segment/selection metadata.
+            peer.get(ICommandService).syncExecuteCommand(RichTextEditingMutation.id, {
+                unitId: params.unitId,
+                actions: JSON.parse(JSON.stringify(params.actions)),
+                textRanges: null,
+            }, { fromCollab: true });
+            expect(local.doc.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.textRuns)
+                .toEqual([{ st: 6, ed: 10, ts: { bl: 1, fs: 20 } }]);
+            expect(peer.doc.getSnapshot()).toEqual(local.doc.getSnapshot());
+            const formatted = Tools.deepClone(local.doc.getSnapshot());
+            const redo = command.syncExecuteCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(
+                RichTextEditingMutation.id,
+                undo
+            );
+            peer.get(ICommandService).syncExecuteCommand(RichTextEditingMutation.id, JSON.parse(JSON.stringify(undo)), { fromCollab: true });
+            expect(local.doc.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.textRuns).toEqual([]);
+            expect(peer.doc.getSnapshot()).toEqual(local.doc.getSnapshot());
+            command.syncExecuteCommand(RichTextEditingMutation.id, redo);
+            peer.get(ICommandService).syncExecuteCommand(RichTextEditingMutation.id, JSON.parse(JSON.stringify(redo)), { fromCollab: true });
+            expect(local.doc.getSnapshot()).toEqual(formatted);
+            expect(peer.doc.getSnapshot()).toEqual(formatted);
+        } finally {
+            local.univer.dispose();
+            peer.univer.dispose();
+        }
+    });
+
     it('rejects a locked keystroke without normalizing or modifying the imported snapshot', () => {
         const snapshot = createDocumentData('locked-input', {
             dataStream: 'ABCD\r\n',

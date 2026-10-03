@@ -30,8 +30,8 @@ export interface IDocumentLayoutPagePublication {
 
 export interface IDocumentLayoutResourcePublication {
     reset: boolean;
-    skeHeaders: Array<[string, Array<[number, IDocumentSkeletonPagePatch]>]>;
-    skeFooters: Array<[string, Array<[number, IDocumentSkeletonPagePatch]>]>;
+    skeHeaders: Array<[string, Array<[number | string, IDocumentSkeletonPagePatch]>]>;
+    skeFooters: Array<[string, Array<[number | string, IDocumentSkeletonPagePatch]>]>;
     skeListLevel: IDocumentLayoutListLevelPublication | null;
     drawingAnchor: IDocumentLayoutDrawingAnchorPublication | null;
 }

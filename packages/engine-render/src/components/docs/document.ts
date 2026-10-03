@@ -50,7 +50,6 @@ import {
     CellValueType,
     ColumnSeparatorType,
     DashStyleType,
-    DataStreamTreeTokenType,
     DocumentFlavor,
     HorizontalAlign,
     TableTextWrapType,
@@ -71,6 +70,7 @@ import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
 import { collectBackgroundGlyphRuns } from './extensions/background-runs';
 import { getTableIdAndSliceIndex } from './layout/block/table';
+import { resolveHeaderFooterFieldGlyph } from './layout/header-footer-field';
 import { getTextHorizontalScale } from './layout/model/glyph';
 import { FontCache } from './layout/shaping-engine/font-cache';
 import { getColorStyleForCanvas } from './layout/style/color';
@@ -134,37 +134,6 @@ function getVisibleContinuousLineRange(
     return { start, end: low };
 }
 
-export function resolveHeaderFooterFieldGlyph(
-    glyph: IDocumentSkeletonGlyph,
-    startIndex: number,
-    endIndex: number,
-    customRanges: ICustomRange[],
-    pageNumber: number,
-    pageCount: number
-): IDocumentSkeletonGlyph {
-    if (!glyph.content || glyph.raw === DataStreamTreeTokenType.CUSTOM_RANGE_START ||
-        glyph.raw === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
-        return glyph;
-    }
-    const fieldRange = customRanges.find((customRange) =>
-        customRange.startIndex <= startIndex &&
-        customRange.endIndex >= endIndex &&
-        typeof customRange.properties?.fieldType === 'string'
-    );
-    const fieldType = fieldRange?.properties?.fieldType?.toUpperCase();
-    if (!fieldRange || (fieldType !== 'PAGE' && fieldType !== 'NUMPAGES')) {
-        return glyph;
-    }
-    // FIELD endpoints are invisible sentinels. Paint the value once even when
-    // the cached digits were split into several differently formatted runs.
-    let content = '';
-    if (startIndex === fieldRange.startIndex + 1) {
-        content = String(fieldType === 'PAGE' ? pageNumber : pageCount);
-    }
-
-    return content === glyph.content ? glyph : { ...glyph, content };
-}
-
 export interface IPageRenderConfig {
     page: IDocumentSkeletonPage;
     pageLeft: number;
@@ -183,8 +152,8 @@ function resolveHeaderFooterFieldGlyphGroup(
     divide: IDocumentSkeletonDivide,
     context: IHeaderFooterFieldContext
 ): IDocumentSkeletonGlyph[] {
-    // Header/footer skeletons are shared between body pages; keep cached advances immutable.
-    // ponytail: Preserve cached line breaks; overflowing fields need per-page header/footer layout.
+    // Legacy skeletons and note stories resolve fields at draw time. New header/footer
+    // layouts already resolve their fields before wrapping and bypass this fallback.
     const { glyphGroup } = divide;
     let index = divide.st;
     const resolved = glyphGroup.map((glyph) => {
@@ -572,7 +541,7 @@ export class Documents extends DocComponent {
                 ctx.restore();
             }
 
-            const headerSkeletonPage = skeHeaders.get(headerId)?.get(pageWidth);
+            const headerSkeletonPage = skeHeaders.get(headerId)?.get(page.headerLayoutKey ?? pageWidth);
 
             const headerAlignOffsetNoAngle = Vector2.create(
                 horizontalOffsetNoAngle,
@@ -663,7 +632,7 @@ export class Documents extends DocComponent {
                 );
             }
 
-            const footerSkeletonPage = skeFooters.get(footerId)?.get(pageWidth);
+            const footerSkeletonPage = skeFooters.get(footerId)?.get(page.footerLayoutKey ?? pageWidth);
 
             if (footerSkeletonPage) {
                 const footerAlignOffsetNoAngle = Vector2.create(
@@ -1899,7 +1868,7 @@ export class Documents extends DocComponent {
                 .getViewModel()
                 .getSelfOrHeaderFooterViewModel(page.segmentId)
             : undefined;
-        const customRanges = customRangesOverride ?? viewModel?.getBody()?.customRanges ?? [];
+        const customRanges = page.fieldsResolved ? [] : customRangesOverride ?? viewModel?.getBody()?.customRanges ?? [];
         const fieldContext = { customRanges, pageNumber: parentPage.pageNumber, pageCount, viewModel };
 
         ctx.save();

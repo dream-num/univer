@@ -606,7 +606,7 @@ export class DocDrawingTransformerController extends Disposable {
 
                 switch (pageType) {
                     case DocumentSkeletonPageType.HEADER: {
-                        const headerSke = skeHeaders.get(headerId)?.get(pageWidth);
+                        const headerSke = skeHeaders.get(headerId)?.get(p.headerLayoutKey ?? pageWidth);
 
                         if (headerSke) {
                             this._liquid.translatePagePadding({
@@ -621,7 +621,7 @@ export class DocDrawingTransformerController extends Disposable {
                     }
 
                     case DocumentSkeletonPageType.FOOTER: {
-                        const footerSke = skeFooters.get(footerId)?.get(pageWidth);
+                        const footerSke = skeFooters.get(footerId)?.get(p.footerLayoutKey ?? pageWidth);
 
                         if (footerSke) {
                             this._liquid.translatePagePadding({

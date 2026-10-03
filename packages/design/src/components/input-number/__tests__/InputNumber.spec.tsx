@@ -45,6 +45,11 @@ function BlurOnControlledReset() {
 describe('InputNumber controlled reset', () => {
     afterEach(cleanup);
 
+    it('forwards the accessible label to the native input', () => {
+        const { getByRole } = render(<InputNumber aria-label="Header margin" value={24} />);
+        expect(getByRole('textbox', { name: 'Header margin' }).tagName).toBe('INPUT');
+    });
+
     it('keeps the new controlled value when focus leaves during reset effects', () => {
         const { container } = render(<BlurOnControlledReset />);
         const input = container.querySelector('input')!;

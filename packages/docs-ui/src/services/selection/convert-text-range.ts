@@ -675,9 +675,9 @@ export class NodePositionConvertToCursor {
             let segmentPage: Nullable<IDocumentSkeletonPage> = page;
 
             if (pageType === DocumentSkeletonPageType.HEADER) {
-                segmentPage = skeHeaders.get(headerId)?.get(pageWidth);
+                segmentPage = skeHeaders.get(headerId)?.get(page.headerLayoutKey ?? pageWidth);
             } else if (pageType === DocumentSkeletonPageType.FOOTER) {
-                segmentPage = skeFooters.get(footerId)?.get(pageWidth);
+                segmentPage = skeFooters.get(footerId)?.get(page.footerLayoutKey ?? pageWidth);
             } else if (pageType === DocumentSkeletonPageType.NOTE) {
                 const noteId = getPageFromPath(skeletonData, path)?.segmentId;
                 segmentPage = page.notes?.find((note) => note.noteId === noteId)?.page;
@@ -937,8 +937,8 @@ function getCellPageFromSegmentPath(
 
     const segmentPages: IDocumentSkeletonPage[] = [];
     const { headerId, footerId, pageWidth } = rootPage;
-    const headerPage = headerId == null ? null : skeletonData.skeHeaders.get(headerId)?.get(pageWidth);
-    const footerPage = footerId == null ? null : skeletonData.skeFooters.get(footerId)?.get(pageWidth);
+    const headerPage = headerId == null ? null : skeletonData.skeHeaders.get(headerId)?.get(rootPage.headerLayoutKey ?? pageWidth);
+    const footerPage = footerId == null ? null : skeletonData.skeFooters.get(footerId)?.get(rootPage.footerLayoutKey ?? pageWidth);
 
     if (headerPage != null) {
         segmentPages.push(headerPage);

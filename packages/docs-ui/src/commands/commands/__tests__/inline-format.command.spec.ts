@@ -234,6 +234,39 @@ describe('Test inline format commands', () => {
         });
     });
 
+    it.each(['', 'header', 'footer'])('formats initially plain text in segment %j and restores styles through undo/redo', async (segmentId) => {
+        const plainBody = (): IDocumentBody => ({
+            dataStream: 'Plain text\r\n',
+            textRuns: [],
+            paragraphs: [{ paragraphId: 'plain', startIndex: 10 }],
+        });
+        const unitId = 'plain-format-doc';
+        const document = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+            id: unitId,
+            body: plainBody(),
+            headers: { header: { headerId: 'header', body: plainBody() } },
+            footers: { footer: { footerId: 'footer', body: plainBody() } },
+        });
+        get(IUniverInstanceService).focusUnit(unitId);
+        const selections = get(DocSelectionManagerService);
+        selections.__TEST_ONLY_setCurrentSelection({ unitId, subUnitId: unitId });
+        selections.__TEST_ONLY_add([{ startOffset: 6, endOffset: 10, collapsed: false, isActive: true, segmentId }]);
+
+        await commandService.executeCommand(SetInlineFormatBoldCommand.id);
+        await commandService.executeCommand(SetInlineFormatFontSizeCommand.id, { value: 20 });
+        const formattedBody = document.getSelfOrHeaderFooterModel(segmentId)?.getBody();
+        expect(formattedBody?.textRuns).toEqual([{ st: 6, ed: 10, ts: { bl: BooleanNumber.TRUE, fs: 20 } }]);
+        for (const other of ['', 'header', 'footer'].filter((id) => id !== segmentId)) {
+            expect(document.getSelfOrHeaderFooterModel(other)?.getBody()?.textRuns).toEqual([]);
+        }
+        const snapshot = Tools.deepClone(document.getSnapshot());
+        await commandService.executeCommand(UndoCommand.id);
+        expect(document.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.textRuns)
+            .toEqual([{ st: 6, ed: 10, ts: { bl: BooleanNumber.TRUE } }]);
+        await commandService.executeCommand(RedoCommand.id);
+        expect(document.getSnapshot()).toEqual(snapshot);
+    });
+
     it('keeps retained typing style when toggling bold at a collapsed caret without a document mutation', async () => {
         const selections = get(DocSelectionManagerService);
         selections.replaceSelectionInfoWithoutRefresh({

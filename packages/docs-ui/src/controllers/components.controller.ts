@@ -77,7 +77,10 @@ import { ComponentManager, IconManager } from '@univerjs/ui';
 import { DOC_LAYOUT_RECOVERY_COMPONENT, DocLayoutRecovery } from '../views/DocLayoutRecovery';
 import { DOC_PASTE_OPTIONS_COMPONENT, DocPasteOptions } from '../views/DocPasteOptions';
 import { FLOAT_MENU_COMPONENT_KEY, FloatToolbar } from '../views/float-toolbar/FloatToolbar';
-import { COMPONENT_DOC_HEADER_FOOTER_PANEL, DOC_HEADER_FOOTER_RIBBON_CONTROL } from '../views/header-footer/panel/component-name';
+import {
+    COMPONENT_DOC_HEADER_FOOTER_PANEL,
+    DOC_HEADER_FOOTER_RIBBON_CONTROL,
+} from '../views/header-footer/panel/component-name';
 import { DocHeaderFooterPanel } from '../views/header-footer/panel/DocHeaderFooterPanel';
 import { DocHeaderFooterRibbonControl } from '../views/header-footer/panel/DocHeaderFooterRibbonControl';
 import {

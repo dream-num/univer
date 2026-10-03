@@ -16,7 +16,17 @@
 
 import type { DocumentDataModel, IDocDrawingBase, IDocDrawingPosition, Nullable } from '@univerjs/core';
 import type { IDrawingDocTransform, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
-import type { BaseObject, Documents, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, Image, IPoint, Viewport } from '@univerjs/engine-render';
+import type {
+    BaseObject,
+    Documents,
+    IDocumentSkeletonGlyph,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonRow,
+    IDocumentSkeletonTable,
+    Image,
+    IPoint,
+    Viewport,
+} from '@univerjs/engine-render';
 import {
     BooleanNumber,
     COLORS,
@@ -34,10 +44,28 @@ import {
 } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { findDocDrawing, UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
-import { DocSelectionRenderService, getAnchorBounding, getOneTextSelectionRange, neoGetDocObject, NodePositionConvertToCursor, TEXT_RANGE_LAYER_INDEX } from '@univerjs/docs-ui';
+import {
+    DocSelectionRenderService,
+    getAnchorBounding,
+    getOneTextSelectionRange,
+    neoGetDocObject,
+    NodePositionConvertToCursor,
+    TEXT_RANGE_LAYER_INDEX,
+} from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { DocumentSkeletonPageType, getColor, IRenderManagerService, Liquid, PageLayoutType, Rect, Vector2 } from '@univerjs/engine-render';
-import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand } from '../commands/commands/update-doc-drawing.command';
+import {
+    DocumentSkeletonPageType,
+    getColor,
+    IRenderManagerService,
+    Liquid,
+    PageLayoutType,
+    Rect,
+    Vector2,
+} from '@univerjs/engine-render';
+import {
+    IMoveInlineDrawingCommand,
+    ITransformNonInlineDrawingCommand,
+} from '../commands/commands/update-doc-drawing.command';
 import {
     getDocsDrawingBehindText,
     getDocsDrawingClipPage,

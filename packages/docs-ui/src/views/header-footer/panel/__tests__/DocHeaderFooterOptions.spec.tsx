@@ -18,34 +18,56 @@
  * @vitest-environment jsdom
  */
 
-import type { ICommand, IDisposable } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import type { RenderUnit } from '@univerjs/engine-render';
 import type { Root } from 'react-dom/client';
-import type { ICoreHeaderFooterParams } from '../../../../commands/commands/doc-header-footer.command';
 import {
     BooleanNumber,
-    CommandService,
-    CommandType,
-    ConfigService,
-    ContextService,
-    DocumentDataModel,
+    DataStreamTreeTokenType,
+    DocumentFlavor,
     ICommandService,
-    IConfigService,
-    IContextService,
-    ILogService,
-    Injector,
     IUniverInstanceService,
     LocaleService,
-    toDisposable,
-    UniverInstanceService,
+    LocaleType,
+    SectionType,
+    Univer,
+    UniverInstanceType,
 } from '@univerjs/core';
-import { DocSkeletonManagerService } from '@univerjs/docs';
-import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
-import { ILayoutService, RediContext } from '@univerjs/ui';
+import {
+    CreateHeaderFooterCommand,
+    DocLayoutExecutorService,
+    DocSelectionManagerService,
+    DocSkeletonManagerService,
+    DocStateChangeManagerService,
+    DocStateEmitService,
+    RichTextEditingMutation,
+    SetTextSelectionsOperation,
+} from '@univerjs/docs';
+import {
+    CanvasColorService,
+    DocumentEditArea,
+    ICanvasColorService,
+    IRenderManagerService,
+    RenderManagerService,
+} from '@univerjs/engine-render';
+import {
+    DesktopLayoutService,
+    DesktopRibbonService,
+    ILayoutService,
+    IMenuManagerService,
+    IRibbonService,
+    MenuManagerService,
+    RediContext,
+} from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
-import { CloseHeaderFooterCommand, CoreHeaderFooterCommandId } from '../../../../commands/commands/doc-header-footer.command';
+import {
+    CloseHeaderFooterCommand,
+    CoreHeaderFooterCommand,
+} from '../../../../commands/commands/doc-header-footer.command';
+import { DocHeaderFooterRibbonOperation } from '../../../../commands/operations/doc-header-footer-ribbon.operation';
+import enUS from '../../../../locale/en-US';
 import { DocSelectionRenderService } from '../../../../services/selection/doc-selection-render.service';
 import { DocHeaderFooterOptions } from '../DocHeaderFooterOptions';
 
@@ -53,328 +75,144 @@ import { DocHeaderFooterOptions } from '../DocHeaderFooterOptions';
 
 const UNIT_ID = 'header-footer-options-doc';
 
-interface IRecordedCommand {
-    id: string;
-    params: unknown;
-}
-
-class TestLogService {
-    debug(): void {}
-    warn(): void {}
-}
-
-class TestLocaleService {
-    t(key: string): string {
-        return key;
-    }
-}
-
-class TestLayoutService {
-    private _focusCount = 0;
-
-    get focusCount() {
-        return this._focusCount;
-    }
-
-    focus(): void {
-        this._focusCount += 1;
-    }
-
-    registerFocusHandler(): IDisposable {
-        return toDisposable(() => undefined);
-    }
-
-    registerRootContainerElement(): IDisposable {
-        return toDisposable(() => undefined);
-    }
-
-    registerContentElement(): IDisposable {
-        return toDisposable(() => undefined);
-    }
-
-    registerContainerElement(): IDisposable {
-        return toDisposable(() => undefined);
-    }
-
-    getContentElement(): HTMLElement {
-        return document.body;
-    }
-
-    checkElementInCurrentContainers(): boolean {
-        return true;
-    }
-
-    checkContentIsFocused(): boolean {
-        return this._focusCount > 0;
-    }
-}
-
-class TestSelectionRenderService {
-    readonly segmentContext$ = new BehaviorSubject({ segmentId: 'default-header', segmentPage: 3 });
-    private _segment = 'default-header';
-    private _segmentPage = 3;
-    private _removeRangeCount = 0;
-    private _blurCount = 0;
-
-    get segment() {
-        return this._segment;
-    }
-
-    get removeRangeCount() {
-        return this._removeRangeCount;
-    }
-
-    get blurCount() {
-        return this._blurCount;
-    }
-
-    getSegment(): string {
-        return this._segment;
-    }
-
-    setSegment(segmentId: string): void {
-        this._segment = segmentId;
-        this.segmentContext$.next({ segmentId, segmentPage: this._segmentPage });
-    }
-
-    getSegmentPage(): number {
-        return this._segmentPage;
-    }
-
-    setSegmentPage(page: number): void {
-        this._segmentPage = page;
-        this.segmentContext$.next({ segmentId: this._segment, segmentPage: page });
-    }
-
-    removeAllRanges(): void {
-        this._removeRangeCount += 1;
-    }
-
-    blur(): void {
-        this._blurCount += 1;
-    }
-}
-
-class TestDocumentViewModel {
-    readonly editAreaChange$ = new Subject<DocumentEditArea | null>();
-    private _editArea = DocumentEditArea.HEADER;
-
-    getEditArea(): DocumentEditArea {
-        return this._editArea;
-    }
-
-    setEditArea(editArea: DocumentEditArea): void {
-        this._editArea = editArea;
-        this.editAreaChange$.next(editArea);
-    }
-}
-
-class TestDocSkeletonManagerService {
-    constructor(private readonly _viewModel: TestDocumentViewModel) {}
-
-    getViewModel(): TestDocumentViewModel {
-        return this._viewModel;
-    }
-
-    getSkeleton() {
-        return {
-            getSkeletonData: () => ({
-                pages: [undefined, undefined, undefined, { sectionId: 'section_options', pageNumber: 1, pageNumberStart: 1 }],
-            }),
-        };
-    }
-}
-
-class TestRenderUnit {
-    constructor(
-        private readonly _selectionRenderService: TestSelectionRenderService,
-        private readonly _docSkeletonManagerService: TestDocSkeletonManagerService
-    ) {}
-
-    with(token: unknown) {
-        if (token === DocSelectionRenderService) {
-            return this._selectionRenderService;
-        }
-        if (token === DocSkeletonManagerService) {
-            return this._docSkeletonManagerService;
-        }
-        return null;
-    }
-}
-
-class TestRenderManagerService {
-    static renderUnit: TestRenderUnit;
-
-    getRenderUnitById(): TestRenderUnit {
-        return TestRenderManagerService.renderUnit;
-    }
-}
-
-function createHeaderFooterOptionsTestBed() {
-    const injector = new Injector();
-    const records: IRecordedCommand[] = [];
-    const selectionRenderService = new TestSelectionRenderService();
-    const viewModel = new TestDocumentViewModel();
-
-    TestRenderManagerService.renderUnit = new TestRenderUnit(
-        selectionRenderService,
-        new TestDocSkeletonManagerService(viewModel)
-    );
-
-    injector.add([ILogService, { useClass: TestLogService as never }]);
-    injector.add([IConfigService, { useClass: ConfigService }]);
-    injector.add([IContextService, { useClass: ContextService }]);
-    injector.add([ICommandService, { useClass: CommandService }]);
-    injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
-    injector.add([LocaleService, { useClass: TestLocaleService as never }]);
-    injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
-    injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
-
-    const doc = new DocumentDataModel({
+async function renderHeaderFooterOptions() {
+    const univer = new Univer();
+    const injector = univer.__getInjector();
+    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+    injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
+    injector.add([IMenuManagerService, { useClass: MenuManagerService }]);
+    injector.add([IRibbonService, { useClass: DesktopRibbonService }]);
+    injector.add([DocLayoutExecutorService]);
+    injector.add([DocSelectionManagerService]);
+    injector.add([DocStateEmitService]);
+    injector.add([DocStateChangeManagerService]);
+    const locale = injector.get(LocaleService);
+    locale.load({ [LocaleType.EN_US]: enUS });
+    locale.setLocale(LocaleType.EN_US);
+    locale.setDirection('ltr');
+    const first = `A${DataStreamTreeTokenType.PAGE_BREAK}B${DataStreamTreeTokenType.PAGE_BREAK}C\r\n`;
+    const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
         id: UNIT_ID,
         documentStyle: {
+            documentFlavor: DocumentFlavor.TRADITIONAL,
+            pageSize: { width: 300, height: 400 },
             defaultHeaderId: 'default-header',
             defaultFooterId: 'default-footer',
+            marginTop: 40,
             marginHeader: 12,
             marginFooter: 18,
-            useFirstPageHeaderFooter: BooleanNumber.FALSE,
-            evenAndOddHeaders: BooleanNumber.FALSE,
         },
+        headers: { 'default-header': { headerId: 'default-header', body: {
+            dataStream: 'Header\r\n',
+            paragraphs: [{ paragraphId: 'header-p', startIndex: 6 }],
+            textRuns: [],
+        } } },
         body: {
-            dataStream: '\r\n',
-            paragraphs: [],
-            sectionBreaks: [{ sectionId: 'section_options', startIndex: 1 }],
-            customRanges: [],
-            tables: [],
+            dataStream: `${first}D\r\n`,
+            paragraphs: [
+                { paragraphId: 'first-p', startIndex: first.length - 2 },
+                { paragraphId: 'second-p', startIndex: first.length + 1 },
+            ],
+            sectionBreaks: [
+                { sectionId: 'first-section', startIndex: first.length - 1 },
+                {
+                    sectionId: 'section_options',
+                    startIndex: first.length + 2,
+                    sectionType: SectionType.NEXT_PAGE,
+                    pageNumberStart: 1,
+                },
+            ],
             textRuns: [],
         },
     });
-    (injector.get(IUniverInstanceService) as UniverInstanceService).__addUnit(doc);
-
-    const commandService = injector.get(ICommandService);
-    commandService.registerCommand(createRecordingCommand(CoreHeaderFooterCommandId, records));
-    commandService.registerCommand(createRecordingCommand(CloseHeaderFooterCommand.id, records));
-
-    return {
-        injector,
-        records,
-        selectionRenderService,
-        viewModel,
-        layoutService: injector.get(ILayoutService) as unknown as TestLayoutService,
-    };
-}
-
-function createRecordingCommand(id: string, records: IRecordedCommand[]): ICommand {
-    return {
-        id,
-        type: CommandType.COMMAND,
-        handler: (_accessor, params) => {
-            records.push({ id, params });
-            return true;
-        },
-    };
-}
-
-async function renderHeaderFooterOptions() {
-    const testBed = createHeaderFooterOptionsTestBed();
+    injector.get(IUniverInstanceService).focusUnit(UNIT_ID);
+    const render = injector.get(IRenderManagerService).createRender(UNIT_ID) as RenderUnit;
+    render.deactivate();
+    render.addRenderDependencies([[DocSkeletonManagerService], [DocSelectionRenderService]]);
+    const skeletonManager = render.with(DocSkeletonManagerService);
+    skeletonManager.getSkeleton().calculate();
+    skeletonManager.getViewModel().setEditArea(DocumentEditArea.HEADER);
+    const selection = render.with(DocSelectionRenderService);
+    selection.setSegmentPage(3);
+    selection.setSegment('default-header');
+    const commands = injector.get(ICommandService);
+    for (const command of [CoreHeaderFooterCommand, CreateHeaderFooterCommand, RichTextEditingMutation, SetTextSelectionsOperation, CloseHeaderFooterCommand, DocHeaderFooterRibbonOperation]) {
+        commands.registerCommand(command);
+    }
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = createRoot(container);
-
     await act(async () => {
         root.render(
-            <RediContext.Provider value={{ injector: testBed.injector }}>
+            <RediContext.Provider value={{ injector }}>
                 <DocHeaderFooterOptions unitId={UNIT_ID} />
             </RediContext.Provider>
         );
     });
-
-    return { ...testBed, container, root };
-}
-
-function clickCheckbox(input: HTMLInputElement) {
-    input.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    return { univer, model, injector, selection, skeletonManager, container, root };
 }
 
 function changeInput(input: HTMLInputElement, value: string) {
-    const prototypeValueSetter = Object.getOwnPropertyDescriptor(
-        Object.getPrototypeOf(input),
-        'value'
-    )?.set;
-
-    prototypeValueSetter?.call(input, value);
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set?.call(input, value);
     input.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 describe('DocHeaderFooterOptions', () => {
     let root: Root | undefined;
     let container: HTMLElement | undefined;
+    let univer: Univer | undefined;
 
     afterEach(() => {
         if (root) {
             act(() => root!.unmount());
         }
+        univer?.dispose();
         container?.remove();
         root = undefined;
         container = undefined;
+        univer = undefined;
     });
 
-    it('turns on first-page header/footer and focuses the newly created current-page segment', async () => {
+    it('creates and selects a first-page header at a restarted section on the fourth physical page', async () => {
         const rendered = await renderHeaderFooterOptions();
-        root = rendered.root;
-        container = rendered.container;
-
-        const [firstPageCheckbox] = Array.from(container.querySelectorAll('input[type="checkbox"]')) as HTMLInputElement[];
-
-        await act(async () => clickCheckbox(firstPageCheckbox));
-
-        const [record] = rendered.records;
-        const params = record.params as ICoreHeaderFooterParams;
-
-        expect(record.id).toBe(CoreHeaderFooterCommandId);
-        expect(params.unitId).toBe(UNIT_ID);
-        expect(params.headerFooterProps).toEqual({
-            useFirstPageHeaderFooter: BooleanNumber.TRUE,
-        });
-        expect(params.sectionId).toBe('section_options');
-        expect(params.segmentId).toHaveLength(6);
-        expect(rendered.selectionRenderService.segment).toBe(params.segmentId);
-        expect(rendered.layoutService.focusCount).toBe(1);
-    });
-
-    it('sends margin edits and close actions through header/footer commands', async () => {
-        const rendered = await renderHeaderFooterOptions();
-        root = rendered.root;
-        container = rendered.container;
-
-        const [headerMarginInput] = Array.from(container.querySelectorAll('input[type="text"]')) as HTMLInputElement[];
-        const closeButton = Array.from(container.querySelectorAll('button')).find((button) => (
-            button.textContent?.includes('docs-ui.headerFooter.closeHeaderFooter')
-        ));
-
-        if (!closeButton) {
-            throw new Error('Missing close header footer button');
+        ({ root, container, univer } = rendered);
+        expect(rendered.skeletonManager.getSkeleton().getSkeletonData()?.pages.map((page) => page.pageNumber))
+            .toEqual([1, 2, 3, 1]);
+        const firstPageCheckbox = container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')[1];
+        const focus = document.createElement('input');
+        container.appendChild(focus);
+        const registration = rendered.injector.get(ILayoutService).registerFocusHandler(
+            UniverInstanceType.UNIVER_DOC,
+            () => focus.focus()
+        );
+        try {
+            await act(async () => firstPageCheckbox.click());
+            const section = rendered.model.getSnapshot().body!.sectionBreaks![1];
+            expect(section.useFirstPageHeaderFooter).toBe(BooleanNumber.TRUE);
+            expect(section.firstPageHeaderId).toBeTruthy();
+            expect(rendered.model.getSelfOrHeaderFooterModel(section.firstPageHeaderId)).toBeDefined();
+            expect(rendered.selection.getSegment()).toBe(section.firstPageHeaderId);
+            expect(document.activeElement).toBe(focus);
+        } finally {
+            registration.dispose();
         }
+    });
 
-        await act(async () => {
-            changeInput(headerMarginInput, '25.5');
-        });
-        act(() => {
-            closeButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-        });
-
-        expect(rendered.records.map((record) => record.id)).toEqual([
-            CoreHeaderFooterCommandId,
-            CloseHeaderFooterCommand.id,
-        ]);
-        expect((rendered.records[0].params as ICoreHeaderFooterParams).headerFooterProps).toEqual({
-            marginHeader: 25.5,
-        });
-        expect((rendered.records[0].params as ICoreHeaderFooterParams).sectionId).toBe('section_options');
-        expect((rendered.records[1].params as { unitId: string })).toEqual({
-            unitId: UNIT_ID,
-        });
-        expect(rendered.selectionRenderService.removeRangeCount).toBe(0);
-        expect(rendered.selectionRenderService.blurCount).toBe(1);
+    it('persists section margin edits and returns the caret to the body when closed', async () => {
+        const rendered = await renderHeaderFooterOptions();
+        ({ root, container, univer } = rendered);
+        const headerMargin = container.querySelector<HTMLInputElement>('input[type="text"]')!;
+        await act(async () => changeInput(headerMargin, '25.5'));
+        expect(rendered.model.getSnapshot().body!.sectionBreaks![1].marginHeader).toBe(25.5);
+        expect(rendered.model.getSnapshot().documentStyle.marginHeader).toBe(12);
+        const closeButton = Array.from(container.querySelectorAll('button')).find((button) => (
+            button.textContent?.includes(rendered.injector.get(LocaleService).t('docs-ui.headerFooter.closeHeaderFooter'))
+        ))!;
+        await act(async () => closeButton.click());
+        expect(rendered.skeletonManager.getViewModel().getEditArea()).toBe(DocumentEditArea.BODY);
+        expect(rendered.selection.getSegment()).toBe('');
+        expect(rendered.selection.getSegmentPage()).toBe(-1);
+        expect(rendered.injector.get(DocSelectionManagerService).getActiveTextRange()?.segmentId ?? '').toBe('');
     });
 });

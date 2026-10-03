@@ -25,7 +25,13 @@ import {
     resolveSectionHeaderFooterReferences,
     UniverInstanceType,
 } from '@univerjs/core';
-import { CreateHeaderFooterCommand, DocSelectionManagerService, DocSkeletonManagerService, getTopLevelSectionBreaks, HeaderFooterType } from '@univerjs/docs';
+import {
+    CreateHeaderFooterCommand,
+    DocSelectionManagerService,
+    DocSkeletonManagerService,
+    getTopLevelSectionBreaks,
+    HeaderFooterType,
+} from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { findFirstCursorOffset } from '../../basics/selection';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';

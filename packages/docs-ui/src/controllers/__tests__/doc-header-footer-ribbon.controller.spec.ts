@@ -16,10 +16,30 @@
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { RenderUnit } from '@univerjs/engine-render';
-import { DocumentFlavor, IUniverInstanceService, LocaleService, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
+import {
+    DocumentFlavor,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocLayoutExecutorService, DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { CanvasColorService, DocumentEditArea, ICanvasColorService, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { DesktopRibbonService, IMenuManagerService, IRibbonService, MenuManagerPosition, MenuManagerService, RibbonPosition } from '@univerjs/ui';
+import {
+    CanvasColorService,
+    DocumentEditArea,
+    ICanvasColorService,
+    IRenderManagerService,
+    RenderManagerService,
+} from '@univerjs/engine-render';
+import {
+    DesktopRibbonService,
+    IMenuManagerService,
+    IRibbonService,
+    MenuManagerPosition,
+    MenuManagerService,
+    RibbonPosition,
+} from '@univerjs/ui';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../locale/en-US';
 import { headerFooterRibbonSchema } from '../../menu/header-footer-ribbon';

@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDocDrawingBase, IDrawingParam, IExecutionOptions, ITransformState } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    ICommandInfo,
+    IDocDrawingBase,
+    IDrawingParam,
+    IExecutionOptions,
+    ITransformState,
+} from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type {
     DocumentSkeleton,
@@ -187,10 +194,11 @@ interface IDocumentDrawingPublicationPage extends IDocumentDrawingPublicationNes
     pageWidth: number;
 }
 
-type DocumentDrawingPublicationSkeletonData = Pick<
-    IDocumentSkeletonCached,
-    'skeHeaders' | 'skeFooters'
-> & { pages: IDocumentDrawingPublicationPage[] };
+interface IDocumentDrawingPublicationSkeletonData {
+    pages: IDocumentDrawingPublicationPage[];
+    skeHeaders: ReadonlyMap<string, ReadonlyMap<number | string, IDocumentDrawingPublicationNestedPage>>;
+    skeFooters: ReadonlyMap<string, ReadonlyMap<number | string, IDocumentDrawingPublicationNestedPage>>;
+}
 
 export class DocDrawingPublicationTracker {
     private _generation = -1;
@@ -205,7 +213,7 @@ export class DocDrawingPublicationTracker {
 
     shouldRefresh(
         skeleton: {
-            getSkeletonData: () => DocumentDrawingPublicationSkeletonData | null | undefined | void;
+            getSkeletonData: () => IDocumentDrawingPublicationSkeletonData | null | undefined | void;
         },
         progress: DocumentDrawingPublicationProgress
     ): boolean {
@@ -473,7 +481,7 @@ function countSkeletonPageDrawings(page: IDocumentDrawingPublicationNestedPage):
 }
 
 function countPublishedDrawingOccurrences(
-    skeletonData: DocumentDrawingPublicationSkeletonData,
+    skeletonData: IDocumentDrawingPublicationSkeletonData,
     publishedPageCount: number
 ): number {
     let count = 0;
@@ -499,7 +507,7 @@ function countPublishedDrawingOccurrences(
 }
 
 function hasNewPublishedPageDrawings(
-    skeletonData: DocumentDrawingPublicationSkeletonData,
+    skeletonData: IDocumentDrawingPublicationSkeletonData,
     startPageIndex: number,
     publishedPageCount: number
 ): boolean {

@@ -16,7 +16,14 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import type { LocaleKey } from '../../../locale/types';
-import { BooleanNumber, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import {
+    BooleanNumber,
+    ICommandService,
+    IPermissionService,
+    IUniverInstanceService,
+    LocaleService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { Button, Checkbox, DropdownMenu, InputNumber } from '@univerjs/design';
 import { DocSkeletonManagerService, getDocumentPermissionValue } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';

@@ -31,8 +31,14 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocLayoutExecutorService, DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { DeviceType, GlyphType, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PointerInput, RenderUnit } from '@univerjs/engine-render';
-import { ILayoutService } from '@univerjs/ui';
+import {
+    DeviceType,
+    GlyphType,
+    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+    PointerInput,
+    RenderUnit,
+} from '@univerjs/engine-render';
+import { DesktopLayoutService, ILayoutService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
@@ -736,12 +742,11 @@ describe('doc selection render service internals', () => {
     });
 
     it('keeps the rendered caret when its replacement page is not resolved yet', ({ onTestFinished }) => {
-        TestLayoutService.reset();
         const univer = new Univer();
         const injector = univer.__getInjector();
         injector.add([DocSelectionManagerService]);
         injector.add([DocLayoutExecutorService]);
-        injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
+        injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
         const doc = univer.createUnit(UniverInstanceType.UNIVER_DOC, {
             id: 'unresolved-caret',
             body: { dataStream: 'Caret\r\n', paragraphs: [{ paragraphId: 'p', startIndex: 5 }] },
@@ -964,12 +969,11 @@ describe('doc selection render service internals', () => {
 
 describe('DocSelectionRenderService', () => {
     it.each(['', 'note', 'header', 'footer'])('uses the logical caret in segment "%s" while replacement layout is pending', (segmentId) => {
-        TestLayoutService.reset();
         const univer = new Univer();
         const injector = univer.__getInjector();
         injector.add([DocSelectionManagerService]);
         injector.add([DocLayoutExecutorService]);
-        injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
+        injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
         const doc = univer.createUnit(UniverInstanceType.UNIVER_DOC, {
             id: 'pending-input',
             headers: { header: { headerId: 'header', body: { dataStream: 'Header\r\n', paragraphs: [{ paragraphId: 'hp', startIndex: 6 }] } } },

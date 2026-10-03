@@ -16,16 +16,27 @@
 
 import type { DocumentDataModel, LocaleService, Nullable } from '@univerjs/core';
 import type { IDocumentSkeletonCached, IDocumentSkeletonPage } from './basics/i-document-skeleton-cached';
-import type { IDocumentSkeletonContinuousSnapshot, IDocumentSkeletonPagePatch } from './components/docs/layout/document-layout-page-patch';
+import type {
+    IDocumentSkeletonContinuousSnapshot,
+    IDocumentSkeletonPagePatch,
+} from './components/docs/layout/document-layout-page-patch';
 import type {
     IDocumentLayoutGeometryPublication,
     IDocumentLayoutPagePublication,
     IDocumentLayoutResourcePublication,
 } from './components/docs/layout/document-layout-publication';
-import type { DocumentLayoutReason, IDocumentLayoutInvalidation, IDocumentLayoutProgress } from './components/docs/layout/document-layout-types';
+import type {
+    DocumentLayoutReason,
+    IDocumentLayoutInvalidation,
+    IDocumentLayoutProgress,
+} from './components/docs/layout/document-layout-types';
 import { Disposable } from '@univerjs/core';
 import { DocumentSkeleton } from './components/docs/layout/doc-skeleton';
-import { hydrateDocumentSkeletonPage, serializeDocumentSkeletonContinuousBlock, serializeDocumentSkeletonPage } from './components/docs/layout/document-layout-page-patch';
+import {
+    hydrateDocumentSkeletonPage,
+    serializeDocumentSkeletonContinuousBlock,
+    serializeDocumentSkeletonPage,
+} from './components/docs/layout/document-layout-page-patch';
 import { DocumentViewModel } from './components/docs/view-model/document-view-model';
 
 const MAX_PAGES_PER_PUBLICATION = 4;

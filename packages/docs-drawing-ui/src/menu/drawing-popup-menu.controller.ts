@@ -45,7 +45,13 @@ import {
     OpenImageCropOperation,
 } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ContextMenuPosition, FloatingObjectToolbarPosition, IContextMenuService, IMenuManagerService, MenuItemType } from '@univerjs/ui';
+import {
+    ContextMenuPosition,
+    FloatingObjectToolbarPosition,
+    IContextMenuService,
+    IMenuManagerService,
+    MenuItemType,
+} from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing.operation';
 import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-panel.operation';

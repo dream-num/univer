@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IDocumentBody, IDocumentData, Injector, ITextStyle, Univer } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    ICommand,
+    IDocumentBody,
+    IDocumentData,
+    Injector,
+    ITextStyle,
+    Univer,
+} from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
     BaselineOffset,

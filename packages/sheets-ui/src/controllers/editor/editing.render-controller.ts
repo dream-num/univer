@@ -591,9 +591,10 @@ export class EditingRenderController extends Disposable {
         this._resizeEditorOnOpen(param, editorObject, !!isInArrayFormulaRange);
 
         const clearAndEdit = () => {
-            if (isInArrayFormulaRange && eventType === DeviceInputEventType.PointerDown) {
+            const resetPointerSelection = isInArrayFormulaRange && eventType === DeviceInputEventType.PointerDown;
+            const editorId = this._editorService.getFocusId() ?? this._editorBridgeService.getCurrentEditorId();
+            if (resetPointerSelection) {
                 // The pointer anchor was measured against inherited text that is about to be cleared.
-                const editorId = this._editorService.getFocusId() ?? this._editorBridgeService.getCurrentEditorId();
                 this._renderManagerService.getRenderUnitById(editorId)
                     ?.with(DocSelectionRenderService)
                     .cancelPointerSelection();
@@ -617,6 +618,9 @@ export class EditingRenderController extends Disposable {
                     subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
                 }
             );
+            if (resetPointerSelection && editorId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+                this._editorService.getEditor(editorId)?.setSelectionRanges([{ startOffset: 0, endOffset: 0 }]);
+            }
         };
         const replaceSelection = (selection: ITextRange) => {
             // An embedded sheet may open its editor while the host document retains global focus.

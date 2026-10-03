@@ -657,7 +657,10 @@ describe('EditingRenderController business methods', () => {
     });
 
     it('cancels the inherited formula pointer anchor before clearing the formula bar', () => {
-        const { controller, getFormulaSnapshot } = createController('=A1:B10\r\n', false, true);
+        const { controller, formulaBarEditor, getFormulaSnapshot } = createController('=A1:B10\r\n', false, true);
+        formulaBarEditor.setSelectionRanges.mockImplementation(() => {
+            expect(getFormulaSnapshot().body?.dataStream).toBe('\r\n');
+        });
         const cancelPointerSelection = vi.fn(() => {
             expect(getFormulaSnapshot().body?.dataStream).toBe('=A1:B10\r\n');
         });
@@ -686,6 +689,7 @@ describe('EditingRenderController business methods', () => {
 
         expect(cancelPointerSelection).toHaveBeenCalledOnce();
         expect(cancelCellPointerSelection).not.toHaveBeenCalled();
+        expect(formulaBarEditor.setSelectionRanges).toHaveBeenCalledWith([{ startOffset: 0, endOffset: 0 }]);
         expect(getFormulaSnapshot().body?.dataStream).toBe('\r\n');
         expect(controller._editorBridgeService.changeEditorDirty).not.toHaveBeenCalled();
     });

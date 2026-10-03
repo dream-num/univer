@@ -55,7 +55,7 @@ import { Path, Rect } from '../../../shape';
 import { Viewport } from '../../../viewport';
 import { DocBackground } from '../doc-background';
 import { DOCS_EXTENSION_TYPE } from '../doc-extension';
-import { Documents, drawSectionColumnSeparators, resolveHeaderFooterFieldGlyph } from '../document';
+import { Documents, drawSectionColumnSeparators } from '../document';
 import { createParagraphLayoutTestBed } from '../layout/block/paragraph/__tests__/create-paragraph-layout-test-bed';
 import { DocumentSkeleton } from '../layout/doc-skeleton';
 import { setDocsTableRenderViewportProvider } from '../table-render-viewport';
@@ -338,15 +338,6 @@ function attachColumnGroup(page: any) {
 }
 
 describe('documents render', () => {
-    it('resolves PAGE and NUMPAGES fields without mutating the model glyph', () => {
-        const glyph = { st: 1, ed: 1, content: '1' } as any;
-        const pageRange = { startIndex: 0, endIndex: 2, properties: { fieldType: 'PAGE' } } as any;
-        const pageCountRange = { startIndex: 0, endIndex: 2, properties: { fieldType: 'NUMPAGES' } } as any;
-
-        expect(resolveHeaderFooterFieldGlyph(glyph, 1, 1, [pageRange], 15, 16).content).toBe('15');
-        expect(resolveHeaderFooterFieldGlyph(glyph, 1, 1, [pageCountRange], 15, 16).content).toBe('16');
-        expect(glyph.content).toBe('1');
-    });
     let restoreEnv: () => void;
     let container: HTMLDivElement;
     let engine: Engine;

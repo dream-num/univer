@@ -65,6 +65,7 @@ import type { IDocumentPaginationMetrics, ILayoutContext } from './tools';
 import {
     BaselineOffset,
     BooleanNumber,
+    CustomRangeType,
     DataStreamTreeNodeType,
     DataStreamTreeTokenType,
     DocumentFlavor,
@@ -362,6 +363,7 @@ interface IIncrementalLayoutState {
     lastPublishedPageCount: number;
     lastPublishedBlockCount: number;
     publicationRevision: number;
+    paginationRevision: number;
     reuseUnaffectedTail: boolean;
     allowMetadataOnlyStructuralTailReuse: boolean;
     reusedTail: boolean;
@@ -1028,6 +1030,8 @@ function serializePaginatedContinuationCheckpoint(page: IDocumentSkeletonPagePat
         sectionId: page.sectionId,
         headerId: page.headerId,
         footerId: page.footerId,
+        headerLayoutKey: page.headerLayoutKey,
+        footerLayoutKey: page.footerLayoutKey,
         pageWidth: page.pageWidth,
         pageHeight: page.pageHeight,
         pageOrient: page.pageOrient,
@@ -1156,8 +1160,8 @@ function getSegmentPageFromRelativePath(
 
     const { headerId, footerId, pageWidth } = rootPage;
     const segmentPages = [
-        headerId == null ? null : skeletonData.skeHeaders.get(headerId)?.get(pageWidth),
-        footerId == null ? null : skeletonData.skeFooters.get(footerId)?.get(pageWidth),
+        headerId == null ? null : skeletonData.skeHeaders.get(headerId)?.get(rootPage.headerLayoutKey ?? pageWidth),
+        footerId == null ? null : skeletonData.skeFooters.get(footerId)?.get(rootPage.footerLayoutKey ?? pageWidth),
     ];
 
     for (const segmentPage of segmentPages) {
@@ -1201,6 +1205,7 @@ export class DocumentSkeleton extends Skeleton {
 
     private _paginationMetrics: Nullable<IDocumentPaginationMetrics> = null;
 
+    private _completedPageCount: number | undefined;
     private _lastCompleteSkeletonData: Nullable<IDocumentSkeletonCached> = null;
 
     private _pendingInvalidationAnchor: Nullable<number> = null;
@@ -1261,6 +1266,7 @@ export class DocumentSkeleton extends Skeleton {
         this._layoutPageMaterialized$.complete();
         this._skeletonData = null;
         this._lastCompleteSkeletonData = null;
+        this._completedPageCount = undefined;
         this._pendingInvalidationAnchor = null;
         this._externalLayoutProgress = null;
         this._externalProtectedPages = null;
@@ -1288,9 +1294,17 @@ export class DocumentSkeleton extends Skeleton {
         this._externalLayoutProgress = null;
         this._externalProtectedPages = null;
         this._externalProtectedContinuousLayout = null;
-        const ctx = this._prepareLayoutContext();
-        this._skeletonData = this._createSkeleton(ctx, bounds);
+        let ctx = this._prepareLayoutContext();
+        while (true) {
+            this._skeletonData = this._createSkeleton(ctx, bounds);
+            const retry = this._prepareFieldCountRetry(ctx);
+            if (retry == null) {
+                break;
+            }
+            ctx = retry;
+        }
         this._lastCompleteSkeletonData = this._skeletonData;
+        this._completedPageCount = this._skeletonData?.pages.length;
         this._pendingInvalidationAnchor = null;
         this._paginationMetrics = ctx.paginationMetrics ?? null;
         this._dirty$.next(true);
@@ -1415,6 +1429,7 @@ export class DocumentSkeleton extends Skeleton {
             lastPublishedBlockCount: incrementalStart.processedBlockCount,
             publicationRevision: 0,
             reuseUnaffectedTail: options?.reuseUnaffectedTail !== false,
+            paginationRevision: 0,
             allowMetadataOnlyStructuralTailReuse: options?.allowMetadataOnlyStructuralTailReuse === true,
             reusedTail: false,
             tailConvergencePageCount: incrementalStart.ctx.skeleton.pages.length,
@@ -1506,7 +1521,7 @@ export class DocumentSkeleton extends Skeleton {
             blocks[anchorBlockIndex].block.children.length === 0;
         // A Modern page can contain the entire document. Paginated tail reuse
         // deep-clones that page in one atomic step, bypassing the slice budget.
-        if (mode === 'paginated' && reuseInteractionPagePrefix && canResumePlainParagraph &&
+        if (mode === 'paginated' && reuseInteractionPagePrefix && invalidation != null && canResumePlainParagraph &&
             !previousSkeleton.pages[anchorPageIndex]?.notes?.length) {
             const interactionPreviousAnchor = mapCurrentOffsetToPrevious(anchor, invalidation);
             const interactionPageIndex = interactionSkeleton == null
@@ -2150,6 +2165,8 @@ export class DocumentSkeleton extends Skeleton {
         if (
             !state.cancelled &&
             canPublish &&
+            // A NUMPAGES retry is provisional until its pagination converges.
+            (state.ctx.fieldCountCandidates == null || state.complete) &&
             (!suppressPreAnchorPublication || shouldPublishPriority || state.complete)
         ) {
             if (state.mode === 'paginated') {
@@ -2158,6 +2175,7 @@ export class DocumentSkeleton extends Skeleton {
             const isFinalPublication = state.complete && publishedPageCount >= pageCount;
             if (isFinalPublication) {
                 this._lastCompleteSkeletonData = state.ctx.skeleton;
+                this._completedPageCount = state.ctx.skeleton?.pages.length;
                 this._pendingInvalidationAnchor = null;
             }
             this._skeletonData = isFinalPublication
@@ -2655,6 +2673,7 @@ export class DocumentSkeleton extends Skeleton {
             if (progress.complete) {
                 setPageParent(skeletonData.pages, skeletonData);
                 this._lastCompleteSkeletonData = skeletonData;
+                this._completedPageCount = skeletonData?.pages.length;
                 this._pendingInvalidationAnchor = null;
                 this._externalProtectedContinuousLayout = null;
             }
@@ -2799,6 +2818,7 @@ export class DocumentSkeleton extends Skeleton {
             }
             setPageParent(skeletonData.pages, skeletonData);
             this._lastCompleteSkeletonData = skeletonData;
+            this._completedPageCount = skeletonData?.pages.length;
             this._pendingInvalidationAnchor = null;
             this._externalProtectedPages = null;
             this._externalProtectedContinuousLayout = null;
@@ -3191,14 +3211,14 @@ export class DocumentSkeleton extends Skeleton {
             const { headerId, footerId, pageWidth } = skePage;
 
             if (pageType === DocumentSkeletonPageType.HEADER) {
-                const skeHeader = skeHeaders.get(headerId)?.get(pageWidth);
+                const skeHeader = skeHeaders.get(headerId)?.get(skePage.headerLayoutKey ?? pageWidth);
                 if (skeHeader == null) {
                     return;
                 } else {
                     skePage = skeHeader;
                 }
             } else if (pageType === DocumentSkeletonPageType.FOOTER) {
-                const skeFooter = skeFooters.get(footerId)?.get(pageWidth);
+                const skeFooter = skeFooters.get(footerId)?.get(skePage.footerLayoutKey ?? pageWidth);
                 if (skeFooter == null) {
                     return;
                 } else {
@@ -3395,7 +3415,7 @@ export class DocumentSkeleton extends Skeleton {
                 let exactMatch: Nullable<INodeInfo> = null;
 
                 if (editArea === DocumentEditArea.HEADER || editArea === DocumentEditArea.FOOTER) {
-                    const headerSke = skeHeaders.get(headerId)?.get(pageWidth) as IDocumentSkeletonPage;
+                    const headerSke = skeHeaders.get(headerId)?.get(page.headerLayoutKey ?? pageWidth) as IDocumentSkeletonPage;
 
                     if (headerSke) {
                         exactMatch = this._collectNearestNode(
@@ -3411,7 +3431,7 @@ export class DocumentSkeleton extends Skeleton {
                         );
                     }
 
-                    const footerSke = skeFooters.get(footerId)?.get(pageWidth) as IDocumentSkeletonPage;
+                    const footerSke = skeFooters.get(footerId)?.get(page.footerLayoutKey ?? pageWidth) as IDocumentSkeletonPage;
 
                     if (footerSke) {
                         exactMatch = exactMatch ?? this._collectNearestNode(
@@ -3470,7 +3490,7 @@ export class DocumentSkeleton extends Skeleton {
                     const { headerId, footerId, pageWidth } = page;
 
                     if (segmentId !== '' && !this._docViewModel.getNoteTreeMap().has(segmentId)) {
-                        const headerSke = skeHeaders.get(headerId)?.get(pageWidth) as IDocumentSkeletonPage;
+                        const headerSke = skeHeaders.get(headerId)?.get(page.headerLayoutKey ?? pageWidth) as IDocumentSkeletonPage;
 
                         if (headerSke) {
                             exactMatch = this._collectNearestNode(
@@ -3486,7 +3506,7 @@ export class DocumentSkeleton extends Skeleton {
                             );
                         }
 
-                        const footerSke = skeFooters.get(footerId)?.get(pageWidth) as IDocumentSkeletonPage;
+                        const footerSke = skeFooters.get(footerId)?.get(page.footerLayoutKey ?? pageWidth) as IDocumentSkeletonPage;
 
                         if (footerSke) {
                             exactMatch = exactMatch ?? this._collectNearestNode(
@@ -3534,7 +3554,7 @@ export class DocumentSkeleton extends Skeleton {
 
                         const { headerId, pageWidth } = page;
 
-                        const segmentSke = segmentId === headerId ? skeHeaders.get(segmentId)?.get(pageWidth) : skeFooters.get(segmentId)?.get(pageWidth);
+                        const segmentSke = segmentId === headerId ? skeHeaders.get(segmentId)?.get(page.headerLayoutKey ?? pageWidth) : skeFooters.get(segmentId)?.get(page.footerLayoutKey ?? pageWidth);
                         if (segmentSke) {
                             exactMatch = this._collectNearestNode(
                                 segmentSke,
@@ -4097,6 +4117,7 @@ export class DocumentSkeleton extends Skeleton {
         return {
             generation: state.generation,
             publicationRevision: state.publicationRevision,
+            paginationRevision: state.paginationRevision,
             didPublish,
             didPublishAnchor,
             publishedPageCount: state.lastPublishedPageCount,
@@ -5058,9 +5079,57 @@ export class DocumentSkeleton extends Skeleton {
                 updateInlineDrawingCoordsAndBorder(ctx, [page]);
             }
         }
+        const retry = this._prepareFieldCountRetry(ctx);
+        if (retry != null) {
+            state.paginationRevision++;
+            state.ctx = retry;
+            state.sectionIndex = 0;
+            state.paragraphIndex = 0;
+            state.sectionInitialized = false;
+            state.sectionBreakConfig = null;
+            state.layoutAnchor = null;
+            state.laidOutThrough = -1;
+            state.stableLaidOutThrough = -1;
+            state.processedBlockCount = 0;
+            state.pendingTableBuild = null;
+            state.pendingSlicedTableBuild = null;
+            state.pendingParagraphCheckpoint = null;
+            state.stablePageCount = 0;
+            state.finalizedPageCount = 0;
+            state.lastPublishedPageCount = 0;
+            state.lastPublishedBlockCount = 0;
+            state.anchorPublished = false;
+            state.reuseUnaffectedTail = false;
+            state.reusedTail = false;
+            state.tailConvergencePageCount = 0;
+            state.interactionPageTail = null;
+            state.interactionPageComplete = false;
+            state.interactionWindowComplete = false;
+            state.interactionWindowResume = null;
+            return;
+        }
         setPageParent(skeleton.pages, skeleton);
         state.complete = true;
         state.stableLaidOutThrough = state.laidOutThrough;
+    }
+
+    getCompletedPageCount(): number | undefined {
+        return this._completedPageCount;
+    }
+
+    private _prepareFieldCountRetry(ctx: ILayoutContext): ILayoutContext | null {
+        if (!ctx.hasNumPagesFields || ctx.fieldPageCount === ctx.skeleton.pages.length) {
+            return null;
+        }
+        const retry = this._prepareLayoutContext();
+        retry.fieldPageCount = ctx.skeleton.pages.length;
+        retry.headerFooterMinimumMargins = ctx.headerFooterMinimumMargins;
+        retry.fieldCountCandidates = ctx.fieldCountCandidates ?? new Set();
+        if (ctx.fieldPageCount != null) {
+            retry.fieldCountCandidates.add(ctx.fieldPageCount);
+        }
+        retry.fieldCountCycle = ctx.fieldCountCycle || retry.fieldCountCandidates.has(retry.fieldPageCount);
+        return retry;
     }
 
     private _prepareLayoutContext(): ILayoutContext {
@@ -5107,7 +5176,13 @@ export class DocumentSkeleton extends Skeleton {
             drawingAnchor,
         };
 
+        const hasNumPagesFields = [...headerTreeMap.values(), ...footerTreeMap.values()].some((story) =>
+            story.getBody()?.customRanges?.some((range) => range.rangeType === CustomRangeType.FIELD &&
+                range.properties?.fieldType === 'NUMPAGES' && range.properties.locked !== BooleanNumber.TRUE));
         const ctx: ILayoutContext = {
+            fieldPageCount: this.getCompletedPageCount(),
+            hasNumPagesFields,
+            headerFooterMinimumMargins: hasNumPagesFields ? new Map() : undefined,
             viewModel,
             dataModel,
             noteReferences: documentStyle.documentFlavor === DocumentFlavor.TRADITIONAL
@@ -5498,8 +5573,8 @@ export class DocumentSkeleton extends Skeleton {
             let segmentPage = page;
 
             if (segmentId) {
-                const maybeHeaderSke = skeHeaders.get(segmentId)?.get(pageWidth);
-                const maybeFooterSke = skeFooters.get(segmentId)?.get(pageWidth);
+                const maybeHeaderSke = skeHeaders.get(segmentId)?.get(page.headerLayoutKey ?? pageWidth);
+                const maybeFooterSke = skeFooters.get(segmentId)?.get(page.footerLayoutKey ?? pageWidth);
                 const note = page.notes?.find((fragment) => fragment.noteId === segmentId &&
                     fragment.page.st <= charIndex && charIndex <= fragment.page.ed);
                 if (note) {

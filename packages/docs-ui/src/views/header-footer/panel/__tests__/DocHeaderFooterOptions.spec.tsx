@@ -275,13 +275,13 @@ function createRecordingCommand(id: string, records: IRecordedCommand[]): IComma
     };
 }
 
-function renderHeaderFooterOptions() {
+async function renderHeaderFooterOptions() {
     const testBed = createHeaderFooterOptionsTestBed();
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = createRoot(container);
 
-    act(() => {
+    await act(async () => {
         root.render(
             <RediContext.Provider value={{ injector: testBed.injector }}>
                 <DocHeaderFooterOptions unitId={UNIT_ID} />
@@ -319,14 +319,14 @@ describe('DocHeaderFooterOptions', () => {
         container = undefined;
     });
 
-    it('turns on first-page header/footer and focuses the newly created current-page segment', () => {
-        const rendered = renderHeaderFooterOptions();
+    it('turns on first-page header/footer and focuses the newly created current-page segment', async () => {
+        const rendered = await renderHeaderFooterOptions();
         root = rendered.root;
         container = rendered.container;
 
         const [firstPageCheckbox] = Array.from(container.querySelectorAll('input[type="checkbox"]')) as HTMLInputElement[];
 
-        act(() => clickCheckbox(firstPageCheckbox));
+        await act(async () => clickCheckbox(firstPageCheckbox));
 
         const [record] = rendered.records;
         const params = record.params as ICoreHeaderFooterParams;
@@ -343,7 +343,7 @@ describe('DocHeaderFooterOptions', () => {
     });
 
     it('sends margin edits and close actions through header/footer commands', async () => {
-        const rendered = renderHeaderFooterOptions();
+        const rendered = await renderHeaderFooterOptions();
         root = rendered.root;
         container = rendered.container;
 
@@ -374,7 +374,7 @@ describe('DocHeaderFooterOptions', () => {
         expect((rendered.records[1].params as { unitId: string })).toEqual({
             unitId: UNIT_ID,
         });
-        expect(rendered.selectionRenderService.removeRangeCount).toBe(1);
+        expect(rendered.selectionRenderService.removeRangeCount).toBe(0);
         expect(rendered.selectionRenderService.blurCount).toBe(1);
     });
 });

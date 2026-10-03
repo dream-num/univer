@@ -26,6 +26,7 @@ import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
 import {
     BooleanNumber,
+    CustomRangeType,
     GridType,
     PageOrientType,
     PositionedObjectLayoutType,
@@ -122,40 +123,70 @@ export function createSkeletonPage(
     let header: Nullable<IDocumentSkeletonHeaderFooter>;
     let footer: Nullable<IDocumentSkeletonHeaderFooter>;
     if (headerId) {
-        if (skeHeaders.get(headerId)?.has(pageWidth)) {
-            header = skeHeaders.get(headerId)?.get(pageWidth);
+        const fieldRanges = headerTreeMap?.get(headerId)?.getBody()?.customRanges;
+        const dynamic = fieldRanges?.some((range) => range.rangeType === CustomRangeType.FIELD &&
+            range.properties?.locked !== BooleanNumber.TRUE &&
+            (range.properties?.fieldType === 'PAGE' || range.properties?.fieldType === 'NUMPAGES'));
+        const key = dynamic ? JSON.stringify([sectionId, pageNumber, pageWidth, marginLeft, marginRight, ctx.hasNumPagesFields ? ctx.fieldPageCount : undefined]) : pageWidth;
+        if (typeof key === 'string') {
+            page.headerLayoutKey = key;
+        }
+        if (skeHeaders.get(headerId)?.has(key)) {
+            header = skeHeaders.get(headerId)?.get(key);
         } else if (headerTreeMap && headerTreeMap.has(headerId)) {
-            header = _createSkeletonHeaderFooter(
-                ctx,
-                headerTreeMap.get(headerId)!,
-                sectionBreakConfig,
-                skeletonResourceReference,
-                headerId,
-                true
-            );
+            const previousFieldContext = ctx.headerFooterFieldContext;
+            ctx.headerFooterFieldContext = dynamic ? { pageNumber, pageCount: ctx.fieldPageCount } : undefined;
+            try {
+                header = _createSkeletonHeaderFooter(
+                    ctx,
+                    headerTreeMap.get(headerId)!,
+                    sectionBreakConfig,
+                    skeletonResourceReference,
+                    headerId,
+                    true
+                );
+                header.fieldsResolved = Boolean(dynamic);
+            } finally {
+                ctx.headerFooterFieldContext = previousFieldContext;
+            }
 
             const widths = skeHeaders.get(headerId) ?? new Map();
-            widths.set(pageWidth, header);
+            widths.set(key, header);
             skeHeaders.set(headerId, widths);
         }
         page.headerId = headerId;
     }
 
     if (footerId) {
-        if (skeFooters.get(footerId)?.has(pageWidth)) {
-            footer = skeFooters.get(footerId)?.get(pageWidth);
+        const fieldRanges = footerTreeMap?.get(footerId)?.getBody()?.customRanges;
+        const dynamic = fieldRanges?.some((range) => range.rangeType === CustomRangeType.FIELD &&
+            range.properties?.locked !== BooleanNumber.TRUE &&
+            (range.properties?.fieldType === 'PAGE' || range.properties?.fieldType === 'NUMPAGES'));
+        const key = dynamic ? JSON.stringify([sectionId, pageNumber, pageWidth, marginLeft, marginRight, ctx.hasNumPagesFields ? ctx.fieldPageCount : undefined]) : pageWidth;
+        if (typeof key === 'string') {
+            page.footerLayoutKey = key;
+        }
+        if (skeFooters.get(footerId)?.has(key)) {
+            footer = skeFooters.get(footerId)?.get(key);
         } else if (footerTreeMap && footerTreeMap.has(footerId)) {
-            footer = _createSkeletonHeaderFooter(
-                ctx,
-                footerTreeMap.get(footerId)!,
-                sectionBreakConfig,
-                skeletonResourceReference,
-                footerId,
-                false
-            );
+            const previousFieldContext = ctx.headerFooterFieldContext;
+            ctx.headerFooterFieldContext = dynamic ? { pageNumber, pageCount: ctx.fieldPageCount } : undefined;
+            try {
+                footer = _createSkeletonHeaderFooter(
+                    ctx,
+                    footerTreeMap.get(footerId)!,
+                    sectionBreakConfig,
+                    skeletonResourceReference,
+                    footerId,
+                    false
+                );
+                footer.fieldsResolved = Boolean(dynamic);
+            } finally {
+                ctx.headerFooterFieldContext = previousFieldContext;
+            }
 
             const widths = skeFooters.get(footerId) ?? new Map();
-            widths.set(pageWidth, footer);
+            widths.set(key, footer);
             skeFooters.set(footerId, widths);
         }
         page.footerId = footerId;
@@ -165,6 +196,23 @@ export function createSkeletonPage(
     page.originMarginBottom = marginBottom;
     page.marginTop = _getVerticalMargin(marginTop, header);
     page.marginBottom = _getVerticalMargin(marginBottom, footer);
+    // Only retain the larger reservation if proportional digits cause a page-count cycle.
+    if (ctx.headerFooterMinimumMargins) {
+        for (const [id, layoutKey, margin] of [
+            [headerId, page.headerLayoutKey, 'marginTop'],
+            [footerId, page.footerLayoutKey, 'marginBottom'],
+        ] as const) {
+            if (layoutKey == null) {
+                continue;
+            }
+            const key = JSON.stringify([id, sectionId, pageNumber, pageWidth, marginLeft, marginRight, margin]);
+            const maximum = Math.max(page[margin], ctx.headerFooterMinimumMargins.get(key) ?? 0);
+            ctx.headerFooterMinimumMargins.set(key, maximum);
+            if (ctx.fieldCountCycle) {
+                page[margin] = maximum;
+            }
+        }
+    }
 
     const sections = page.sections;
     const lastSection = sections[sections.length - 1];

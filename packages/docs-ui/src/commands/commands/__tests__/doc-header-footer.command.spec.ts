@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-import { DocumentEditArea } from '@univerjs/engine-render';
+import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import type { ISuccinctDocRangeParam, RenderUnit } from '@univerjs/engine-render';
+import { DocumentFlavor, ICommandService, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
+import { DocLayoutExecutorService, DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { CanvasColorService, DocumentEditArea, ICanvasColorService, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { DesktopLayoutService, DesktopRibbonService, ILayoutService, IMenuManagerService, IRibbonService, MenuManagerService } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
+import { headerFooterRibbonSchema } from '../../../menu/header-footer-ribbon';
+import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
+import { DocHeaderFooterRibbonOperation } from '../../operations/doc-header-footer-ribbon.operation';
 import { CloseHeaderFooterCommand, CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../doc-header-footer.command';
 
 describe('CloseHeaderFooterCommand large document regression', () => {
@@ -126,14 +134,47 @@ describe('OpenHeaderFooterPanelCommand', () => {
         expect(testBed.getEditArea()).toBe(DocumentEditArea.BODY);
     });
 
-    it('selects an existing header before opening the sidebar', async () => {
-        const testBed = createOpenCommandTestBed('existing-header');
-        testBed.commandService.executeCommand.mockResolvedValueOnce(true);
-
-        await expect(OpenHeaderFooterPanelCommand.handler(testBed.accessor as never, {})).resolves.toBe(true);
-
-        expect(testBed.selectionRenderService.setSegment).toHaveBeenCalledWith('existing-header');
-        expect(testBed.commandService.executeCommand).toHaveBeenCalledTimes(1);
-        expect(testBed.getEditArea()).toBe(DocumentEditArea.HEADER);
+    it('moves the caret from the body into an existing header when opening the ribbon', async () => {
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+        injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
+        injector.add([IMenuManagerService, { useClass: MenuManagerService }]);
+        injector.add([IRibbonService, { useClass: DesktopRibbonService }]);
+        injector.add([DocSelectionManagerService]);
+        injector.add([DocLayoutExecutorService]);
+        injector.get(IMenuManagerService).mergeMenu(headerFooterRibbonSchema);
+        const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+            id: 'open-header-doc',
+            body: { dataStream: 'Body\r\n', paragraphs: [{ paragraphId: 'body', startIndex: 4 }] },
+            headers: { header: { headerId: 'header', body: { dataStream: 'Page \r\n', paragraphs: [{ paragraphId: 'header-p', startIndex: 5 }] } } },
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, defaultHeaderId: 'header', pageSize: { width: 300, height: 400 }, marginTop: 40 },
+        });
+        injector.get(IUniverInstanceService).focusUnit(model.getUnitId());
+        const render = injector.get(IRenderManagerService).createRender(model.getUnitId()) as RenderUnit;
+        render.deactivate();
+        render.addRenderDependencies([[DocSkeletonManagerService], [DocSelectionRenderService]]);
+        const skeletonManager = render.with(DocSkeletonManagerService);
+        skeletonManager.getSkeleton().calculate();
+        const selection = injector.get(DocSelectionManagerService);
+        let ranges: ISuccinctDocRangeParam[] = [];
+        const subscription = selection.refreshSelection$.subscribe((event) => {
+            if (event) {
+                ranges = event.docRanges;
+            }
+        });
+        const commands = injector.get(ICommandService);
+        commands.registerCommand(OpenHeaderFooterPanelCommand);
+        commands.registerCommand(DocHeaderFooterRibbonOperation);
+        try {
+            expect(await commands.executeCommand(OpenHeaderFooterPanelCommand.id)).toBe(true);
+            expect(render.with(DocSelectionRenderService).getSegment()).toBe('header');
+            expect(skeletonManager.getViewModel().getEditArea()).toBe(DocumentEditArea.HEADER);
+            expect(ranges).toEqual([expect.objectContaining({ startOffset: 0, endOffset: 0, segmentId: 'header', segmentPage: 0 })]);
+        } finally {
+            subscription.unsubscribe();
+            univer.dispose();
+        }
     });
 });

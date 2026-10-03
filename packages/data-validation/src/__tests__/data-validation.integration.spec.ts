@@ -224,6 +224,21 @@ describe('data validation integration', () => {
         sub.unsubscribe();
     });
 
+    it('keeps saved resources unchanged after reading rules from an unconfigured sheet', async () => {
+        await commandService.executeCommand(AddDataValidationMutation.id, {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            rule: createRule('sheet-1-rule'),
+        });
+        const before = resourceLoaderService.saveUnit('unit-1')?.resources;
+        expect(dataValidationModel.getRules('unit-1', 'sheet-2')).toEqual([]);
+        expect(resourceLoaderService.saveUnit('unit-1')?.resources).toEqual(before);
+        resourceManagerService.unloadResources('unit-1', UniverInstanceType.UNIVER_SHEET);
+        resourceManagerService.loadResources('unit-1', before!, UniverInstanceType.UNIVER_SHEET);
+        expect(dataValidationModel.getRules('unit-1', 'sheet-2')).toEqual([]);
+        expect(resourceLoaderService.saveUnit('unit-1')?.resources).toEqual(before);
+    });
+
     it('serializes, unloads, and loads rule resources through the resource manager', async () => {
         await commandService.executeCommand(AddDataValidationMutation.id, {
             unitId: 'unit-1',

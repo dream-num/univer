@@ -296,10 +296,8 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             return false;
         }
         this._syncNoteSegment(ranges[0]);
-        const isBodyOrNote = this._currentSegmentId === '' ||
-            this._context.unit.getSnapshot().notes?.[this._currentSegmentId] != null;
         let currentLogicalSelection: Nullable<IDocSelectionInnerParam> = null;
-        if (isBodyOrNote && ranges.length > 0) {
+        if (ranges.length > 0) {
             const { unitId } = this._context;
             const selection = this._docSelectionManagerService.getSelectionInfo({ unitId, subUnitId: unitId });
             // Only a refresh of the current logical selection belongs to this

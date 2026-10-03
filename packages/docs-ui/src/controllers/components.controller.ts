@@ -19,6 +19,7 @@ import {
     AddImageIcon,
     AlignTextBothIcon,
     BoldIcon,
+    CloseIcon,
     ColumnIcon,
     CopyDoubleIcon,
     CutIcon,
@@ -76,8 +77,9 @@ import { ComponentManager, IconManager } from '@univerjs/ui';
 import { DOC_LAYOUT_RECOVERY_COMPONENT, DocLayoutRecovery } from '../views/DocLayoutRecovery';
 import { DOC_PASTE_OPTIONS_COMPONENT, DocPasteOptions } from '../views/DocPasteOptions';
 import { FLOAT_MENU_COMPONENT_KEY, FloatToolbar } from '../views/float-toolbar/FloatToolbar';
-import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../views/header-footer/panel/component-name';
+import { COMPONENT_DOC_HEADER_FOOTER_PANEL, DOC_HEADER_FOOTER_RIBBON_CONTROL } from '../views/header-footer/panel/component-name';
 import { DocHeaderFooterPanel } from '../views/header-footer/panel/DocHeaderFooterPanel';
+import { DocHeaderFooterRibbonControl } from '../views/header-footer/panel/DocHeaderFooterRibbonControl';
 import {
     DefaultTextColorIcon,
     DocParagraphBackgroundColorSwatchIcon0,
@@ -149,6 +151,7 @@ export class ComponentsController extends Disposable {
             BoldIcon,
             CopyDoubleIcon,
             ColumnIcon,
+            CloseIcon,
             CutIcon,
             DeleteColumnDoubleIcon,
             DeleteIcon,
@@ -228,6 +231,7 @@ export class ComponentsController extends Disposable {
     }
 
     private _registerComponents(): void {
+        this.disposeWithMe(this._componentManager.register(DOC_HEADER_FOOTER_RIBBON_CONTROL, DocHeaderFooterRibbonControl));
         if (!this._componentManager.get(COMPONENT_DOC_HEADER_FOOTER_PANEL)) {
             this.disposeWithMe(this._componentManager.register(COMPONENT_DOC_HEADER_FOOTER_PANEL, DocHeaderFooterPanel));
         }

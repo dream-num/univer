@@ -15,3 +15,6 @@
  */
 
 export const COMPONENT_DOC_HEADER_FOOTER_PANEL = 'COMPONENT_DOC_HEADER_FOOTER_PANEL';
+
+export const DOC_HEADER_FOOTER_RIBBON_TAB = 'docs-ui.ribbon.header-footer';
+export const DOC_HEADER_FOOTER_RIBBON_CONTROL = 'DocHeaderFooterRibbonControl';

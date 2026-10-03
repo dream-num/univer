@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDrawingParam, IObjectPositionH, IObjectPositionV, Nullable } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    ICommandInfo,
+    IDrawingParam,
+    IObjectPositionH,
+    IObjectPositionV,
+    Nullable,
+} from '@univerjs/core';
 import type { IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
 import type { IDocumentSkeletonDrawing } from '@univerjs/engine-render';
 import type { LocaleKey } from '../../locale/types';

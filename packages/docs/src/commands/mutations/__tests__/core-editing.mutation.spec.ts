@@ -16,7 +16,15 @@
 
 import type { IDocumentBody } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '../core-editing.mutation';
-import { CustomRangeType, DocumentFlavor, getRichTextEditPath, ICommandService, JSONX, TextX, Tools } from '@univerjs/core';
+import {
+    CustomRangeType,
+    DocumentFlavor,
+    getRichTextEditPath,
+    ICommandService,
+    JSONX,
+    TextX,
+    Tools,
+} from '@univerjs/core';
 import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE, registerDocumentLayoutPresentation } from '@univerjs/engine-render';
 import { describe, expect, it, vi } from 'vitest';
 import { createDocumentData, createTestBed } from '../../../facade/__tests__/create-test-bed';

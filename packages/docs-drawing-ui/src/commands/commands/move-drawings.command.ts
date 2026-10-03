@@ -15,7 +15,11 @@
  */
 
 import type { DocumentDataModel, IAccessor, ICommand, IObjectPositionH, IObjectPositionV } from '@univerjs/core';
-import type { IDocDrawing, IDrawingDocTransform, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
+import type {
+    IDocDrawing,
+    IDrawingDocTransform,
+    IUpdateDrawingDocTransformCommandParams,
+} from '@univerjs/docs-drawing';
 import type { IDocumentSkeletonCached } from '@univerjs/engine-render';
 import {
     CommandType,

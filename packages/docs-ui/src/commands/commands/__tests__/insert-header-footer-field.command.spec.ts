@@ -43,7 +43,12 @@ import {
     setDocumentPermissionValue,
     SetTextSelectionsOperation,
 } from '@univerjs/docs';
-import { CanvasColorService, ICanvasColorService, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import {
+    CanvasColorService,
+    ICanvasColorService,
+    IRenderManagerService,
+    RenderManagerService,
+} from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../locale/en-US';

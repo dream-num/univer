@@ -17,7 +17,14 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { ISetTextSelectionsOperationParams } from '../commands/operations/text-selection.operation';
-import { BuildTextUtils, CustomRangeType, Disposable, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
+import {
+    BuildTextUtils,
+    CustomRangeType,
+    Disposable,
+    ICommandService,
+    Inject,
+    IUniverInstanceService,
+} from '@univerjs/core';
 import { SetTextSelectionsOperation } from '../commands/operations/text-selection.operation';
 import { DocSelectionManagerService } from '../services/doc-selection-manager.service';
 

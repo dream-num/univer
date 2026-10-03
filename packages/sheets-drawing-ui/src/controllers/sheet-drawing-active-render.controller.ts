@@ -24,6 +24,8 @@ import { SetWorksheetActiveOperation, SheetSkeletonService } from '@univerjs/she
 import { drawingPositionToTransform, ISheetDrawingService, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 
 export class SheetDrawingActiveRenderController extends Disposable implements IRenderModule {
+    private _renderTimeout: ReturnType<typeof setTimeout> | undefined;
+
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @ICommandService private readonly _commandService: ICommandService,
@@ -33,6 +35,26 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
     ) {
         super();
         this._commandListener();
+    }
+
+    override dispose(): void {
+        this._cancelPendingRender();
+        super.dispose();
+    }
+
+    private _cancelPendingRender(): void {
+        if (this._renderTimeout !== undefined) {
+            clearTimeout(this._renderTimeout);
+            this._renderTimeout = undefined;
+        }
+    }
+
+    private _scheduleRender(callback: () => void): void {
+        this._cancelPendingRender();
+        this._renderTimeout = setTimeout(() => {
+            this._renderTimeout = undefined;
+            callback();
+        }, 0);
     }
 
     private _commandListener() {
@@ -58,7 +80,7 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
     }
 
     private _clearDrawings(selfUnitId: string): void {
-        setTimeout(() => {
+        this._scheduleRender(() => {
             const drawingMap = this._drawingManagerService.drawingManagerData;
             const removeDrawings: IDrawingParam[] = [];
 
@@ -80,10 +102,11 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
     }
 
     private _updateDrawings(showUnitId: string, showSubunitId: string): void {
-        setTimeout(() => {
+        this._scheduleRender(() => {
             const sheetSkeletonParam = this._sheetSkeletonService.getSkeletonParam(showUnitId, showSubunitId);
             const drawingMap = this._drawingManagerService.drawingManagerData;
             const insertDrawings: IDrawingParam[] = [];
+            const refreshedDrawings: ISheetDrawing[] = [];
             const removeDrawings: IDrawingParam[] = [];
 
             Object.keys(drawingMap ?? {}).forEach((unitId) => {
@@ -97,8 +120,11 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
                     Object.keys(drawingData).forEach((drawingId) => {
                         if (unitId === showUnitId && subUnitId === showSubunitId) {
                             const drawing = drawingData[drawingId] as ISheetDrawing;
-                            if (drawing.sheetTransform && (drawing.anchorType ?? SheetDrawingAnchorType.None) !== SheetDrawingAnchorType.None) {
-                                drawing.transform = drawingPositionToTransform(drawing.sheetTransform, sheetSkeletonParam);
+                            if (sheetSkeletonParam && drawing.sheetTransform && (drawing.anchorType ?? SheetDrawingAnchorType.None) !== SheetDrawingAnchorType.None) {
+                                refreshedDrawings.push({
+                                    ...drawing,
+                                    transform: drawingPositionToTransform(drawing.sheetTransform, sheetSkeletonParam),
+                                });
                             }
                             insertDrawings.push(drawingData[drawingId]);
                         } else {
@@ -108,10 +134,13 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
                 });
             });
 
+            // JSON1 drawing mutations are applied to both stores, so derived geometry must agree.
+            this._sheetDrawingService.refreshTransform(refreshedDrawings);
+            this._drawingManagerService.refreshTransform(refreshedDrawings);
             this._sheetDrawingService.removeNotification(removeDrawings);
             this._sheetDrawingService.addNotification(insertDrawings);
             this._drawingManagerService.removeNotification(removeDrawings);
             this._drawingManagerService.addNotification(insertDrawings);
-        }, 0);
+        });
     }
 }

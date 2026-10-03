@@ -19,8 +19,7 @@
  */
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
-import type { RenderUnit } from '@univerjs/engine-render';
-import type { Root } from 'react-dom/client';
+import type { ISuccinctDocRangeParam, RenderUnit } from '@univerjs/engine-render';
 import {
     BooleanNumber,
     DataStreamTreeTokenType,
@@ -74,9 +73,11 @@ import { DocHeaderFooterOptions } from '../DocHeaderFooterOptions';
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 const UNIT_ID = 'header-footer-options-doc';
+const cleanups: Array<() => void> = [];
 
 async function renderHeaderFooterOptions() {
     const univer = new Univer();
+    cleanups.push(() => univer.dispose());
     const injector = univer.__getInjector();
     injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
     injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
@@ -140,9 +141,18 @@ async function renderHeaderFooterOptions() {
     for (const command of [CoreHeaderFooterCommand, CreateHeaderFooterCommand, RichTextEditingMutation, SetTextSelectionsOperation, CloseHeaderFooterCommand, DocHeaderFooterRibbonOperation]) {
         commands.registerCommand(command);
     }
+    const state = { ranges: [] as ISuccinctDocRangeParam[] };
+    const subscription = injector.get(DocSelectionManagerService).refreshSelection$.subscribe((event) => {
+        if (event) {
+            state.ranges = event.docRanges;
+        }
+    });
+    cleanups.push(() => subscription.unsubscribe());
     const container = document.createElement('div');
+    cleanups.push(() => container.remove());
     document.body.appendChild(container);
     const root = createRoot(container);
+    cleanups.push(() => act(() => root.unmount()));
     await act(async () => {
         root.render(
             <RediContext.Provider value={{ injector }}>
@@ -150,7 +160,7 @@ async function renderHeaderFooterOptions() {
             </RediContext.Provider>
         );
     });
-    return { univer, model, injector, selection, skeletonManager, container, root };
+    return { model, injector, selection, skeletonManager, container, state };
 }
 
 function changeInput(input: HTMLInputElement, value: string) {
@@ -159,24 +169,11 @@ function changeInput(input: HTMLInputElement, value: string) {
 }
 
 describe('DocHeaderFooterOptions', () => {
-    let root: Root | undefined;
-    let container: HTMLElement | undefined;
-    let univer: Univer | undefined;
-
-    afterEach(() => {
-        if (root) {
-            act(() => root!.unmount());
-        }
-        univer?.dispose();
-        container?.remove();
-        root = undefined;
-        container = undefined;
-        univer = undefined;
-    });
+    afterEach(() => cleanups.splice(0).reverse().forEach((dispose) => dispose()));
 
     it('creates and selects a first-page header at a restarted section on the fourth physical page', async () => {
         const rendered = await renderHeaderFooterOptions();
-        ({ root, container, univer } = rendered);
+        const { container } = rendered;
         expect(rendered.skeletonManager.getSkeleton().getSkeletonData()?.pages.map((page) => page.pageNumber))
             .toEqual([1, 2, 3, 1]);
         const firstPageCheckbox = container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')[1];
@@ -201,7 +198,7 @@ describe('DocHeaderFooterOptions', () => {
 
     it('persists section margin edits and returns the caret to the body when closed', async () => {
         const rendered = await renderHeaderFooterOptions();
-        ({ root, container, univer } = rendered);
+        const { container } = rendered;
         const headerMargin = container.querySelector<HTMLInputElement>('input[type="text"]')!;
         await act(async () => changeInput(headerMargin, '25.5'));
         expect(rendered.model.getSnapshot().body!.sectionBreaks![1].marginHeader).toBe(25.5);
@@ -213,6 +210,6 @@ describe('DocHeaderFooterOptions', () => {
         expect(rendered.skeletonManager.getViewModel().getEditArea()).toBe(DocumentEditArea.BODY);
         expect(rendered.selection.getSegment()).toBe('');
         expect(rendered.selection.getSegmentPage()).toBe(-1);
-        expect(rendered.injector.get(DocSelectionManagerService).getActiveTextRange()?.segmentId ?? '').toBe('');
+        expect(rendered.state.ranges).toEqual([expect.objectContaining({ startOffset: 0, endOffset: 0 })]);
     });
 });

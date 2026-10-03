@@ -154,6 +154,7 @@ import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-rat
 import { defaultPluginConfig, DOCS_UI_PLUGIN_CONFIG_KEY, DOCS_UI_PLUGIN_NAME } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
 import { DocAutoFormatController } from './controllers/doc-auto-format.controller';
+import { DocHeaderFooterRibbonController } from './controllers/doc-header-footer-ribbon.controller';
 import { DocHeaderFooterController } from './controllers/doc-header-footer.controller';
 import { DocMoveCursorController } from './controllers/doc-move-cursor.controller';
 import { DocParagraphSettingController } from './controllers/doc-paragraph-setting.controller';
@@ -168,6 +169,7 @@ import { DocChecklistRenderController } from './controllers/render-controllers/d
 import { DocClipboardController } from './controllers/render-controllers/doc-clipboard.controller';
 import { DocContextMenuRenderController } from './controllers/render-controllers/doc-contextmenu.render-controller';
 import { DocEditorBridgeController } from './controllers/render-controllers/doc-editor-bridge.controller';
+import { DocFieldRenderController } from './controllers/render-controllers/doc-field.render-controller';
 import { DocIMEInputController } from './controllers/render-controllers/doc-ime-input.controller';
 import { DocInputController } from './controllers/render-controllers/doc-input.controller';
 import {
@@ -536,10 +538,12 @@ export class UniverDocsUIPlugin extends Plugin {
     private _initRenderModules() {
         ([
             [DocEventManagerService],
+            [DocFieldRenderController],
             [DocFloatMenuService],
             [DocPasteOptionsRenderController],
             [DocParagraphMenuService],
             [DocHeaderFooterController],
+            [DocHeaderFooterRibbonController],
             [DocResizeRenderController],
             [DocParagraphPlaceholderRenderController],
             [DocContextMenuRenderController],

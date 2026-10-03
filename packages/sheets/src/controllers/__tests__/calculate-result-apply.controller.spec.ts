@@ -45,6 +45,37 @@ describe('CalculateResultApplyController', () => {
         testBed.univer.dispose();
     });
 
+    it.each([
+        { cell: null, expected: undefined, source: { f: '=SUM(A1:B2)' } },
+        { cell: { v: 42 }, expected: 42, source: { f: '=SUM(A1:B2)' } },
+        { cell: { f: '=2', v: 2 }, expected: 2, source: { f: '=SUM(A1:B2)' } },
+        { cell: { f: '=SUM(A1:B2)' }, expected: 10, source: { f: '=SUM(A1:B2)' } },
+        { cell: { si: 'shared-1' }, expected: 10, source: { f: '', si: 'shared-1' } },
+        { cell: { si: 'shared-2' }, expected: undefined, source: { f: '', si: 'shared-1' } },
+    ])('does not restore a late result over a removed or replaced scalar formula: $cell', async ({ cell, expected, source }) => {
+        const testBed = createFunctionTestBed();
+        const commandService = testBed.get(ICommandService);
+        commandService.registerCommand(SetFormulaCalculationResultMutation);
+        commandService.registerCommand(SetRangeValuesMutation);
+        testBed.get(CalculateResultApplyController);
+        const sheet = testBed.sheet.getSheetBySheetId(testBed.sheetId)!;
+        await commandService.executeCommand(SetRangeValuesMutation.id, {
+            unitId: testBed.unitId,
+            subUnitId: testBed.sheetId,
+            cellValue: { 8: { 8: cell } },
+        });
+
+        await commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
+            unitData: { [testBed.unitId]: { [testBed.sheetId]: { 8: { 8: { v: 10, t: CellValueType.NUMBER } } } } },
+            sourceFormulaData: { [testBed.unitId]: { [testBed.sheetId]: { 8: { 8: source } } } },
+            unitOtherData: {},
+        });
+
+        expect(sheet.getCellMatrix().getValue(8, 8)?.v).toBe(expected);
+        expect(sheet.getCellMatrix().getValue(8, 8)?.f).toBe(cell?.f);
+        testBed.univer.dispose();
+    });
+
     it.each([ErrorType.REF, ErrorType.NAME, ErrorType.DIV_BY_ZERO])('applies calculated %s errors to fixed and dynamic arrays', async (error) => {
         const testBed = createFunctionTestBed();
         const commandService = testBed.get(ICommandService);

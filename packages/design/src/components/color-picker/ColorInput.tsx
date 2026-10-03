@@ -39,7 +39,8 @@ function HexInput({ hsv, onChange }: IInputProps) {
     const hexValue = useMemo(() => hsvToHex(hsv[0], hsv[1], hsv[2]), [hsv]);
 
     useEffect(() => {
-        setInputValue(hexValue.replace(/^#/, ''));
+        const value = hexValue.replace(/^#/, '');
+        setInputValue((current) => current.toLowerCase() === value.toLowerCase() ? current : value);
     }, [hexValue]);
 
     const isValidHex = (hex: string) => {
@@ -49,9 +50,13 @@ function HexInput({ hsv, onChange }: IInputProps) {
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const newValue = e.target.value.trim();
 
-        if (newValue.length > 6) return;
+        if (newValue.length > 6) {
+            return;
+        }
 
-        if (newValue !== '' && !/^[0-9A-Fa-f]*$/.test(newValue)) return;
+        if (newValue !== '' && !/^[0-9A-Fa-f]*$/.test(newValue)) {
+            return;
+        }
 
         setInputValue(newValue);
 

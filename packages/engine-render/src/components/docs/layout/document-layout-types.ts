@@ -54,6 +54,8 @@ export interface IDocumentLayoutApplyResult {
 export interface IDocumentLayoutProgress {
     generation: number;
     publicationRevision: number;
+    /** Pagination may restart when a total-page field changes the available body space. */
+    paginationRevision?: number;
     didPublish: boolean;
     /** The publication atomically replaced the page containing the edit anchor. */
     didPublishAnchor: boolean;

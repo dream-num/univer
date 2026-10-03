@@ -163,8 +163,8 @@ export interface IParagraphConfig {
     paragraphStyle?: IDocumentLayoutParagraphStyle;
     borderTopSpace?: number;
     borderBottomSpace?: number;
-    skeHeaders: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>;
-    skeFooters: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>;
+    skeHeaders: Map<string, Map<number | string, IDocumentSkeletonHeaderFooter>>;
+    skeFooters: Map<string, Map<number | string, IDocumentSkeletonHeaderFooter>>;
     pDrawingAnchor?: Map<number, IDocumentSkeletonDrawingAnchor>;
     // sectionBreakConfig: ISectionBreakConfig;
 }

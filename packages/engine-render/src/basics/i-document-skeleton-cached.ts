@@ -59,8 +59,8 @@ export interface IDocumentSkeletonParagraphBorders {
 }
 
 export interface ISkeletonResourceReference {
-    skeHeaders: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>; // id:{ width: IDocumentSkeletonHeaderFooter }
-    skeFooters: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>;
+    skeHeaders: Map<string, Map<number | string, IDocumentSkeletonHeaderFooter>>; // id:{ width: IDocumentSkeletonHeaderFooter }
+    skeFooters: Map<string, Map<number | string, IDocumentSkeletonHeaderFooter>>;
     /* Global cache, does not participate in rendering, only helps skeleton generation */
     skeListLevel?: Map<string, IParagraphList[][]>; // ordered list cache, id: { level: max(width) bullet }
     drawingAnchor?: Map<string, Map<number, IDocumentSkeletonDrawingAnchor>>; // Anchor point to assist floating element positioning
@@ -103,6 +103,10 @@ export interface IDocumentSkeletonPage {
     sections: IDocumentSkeletonSection[];
     headerId: string;
     footerId: string;
+    /** Per-page field geometry; plain stories keep the legacy width cache key. */
+    fieldsResolved?: boolean;
+    headerLayoutKey?: string;
+    footerLayoutKey?: string;
     // page
     pageWidth: number; // default Infinity, The current page width follows the snapshot configuration, determined jointly by documentStyle and sectionBreak, representing the static limit for each page, unrelated to the actual content's text width.
     pageHeight: number; // default Infinity, The current page's height follows the snapshot configuration, jointly determined by documentStyle and sectionBreak, representing the static limit for each page, unrelated to the total height of the actual content's text.

@@ -828,6 +828,7 @@ function createCommentBody(id: string, text: string): IDocumentBody {
     const dataStream = `${text}\r\n`;
     return {
         dataStream,
+        textRuns: [],
         paragraphs: [{ startIndex: dataStream.length - 2, paragraphId: `${id}-paragraph` }],
         sectionBreaks: [{ startIndex: dataStream.length - 1, sectionId: `${id}-section` }],
     };

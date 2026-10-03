@@ -289,6 +289,7 @@ export class CalculateController extends Disposable {
     private async _applyResult(data: IAllRuntimeData) {
         const {
             unitData,
+            sourceFormulaData,
             unitOtherData,
             arrayFormulaRange,
             arrayFormulaCellData,
@@ -340,6 +341,7 @@ export class CalculateController extends Disposable {
             SetFormulaCalculationResultMutation.id,
             {
                 unitData: convertRuntimeToUnitData(unitData),
+                sourceFormulaData,
                 unitOtherData,
             },
             {

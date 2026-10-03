@@ -220,6 +220,7 @@ export function Tooltip(props: ITooltipProps) {
             showTooltip();
         },
         onMouseLeave: () => hideTooltip(),
+        onClick: () => hideTooltip(),
         onFocus: () => showTooltip(),
         onBlur: () => hideTooltip(),
     } as React.HTMLAttributes<HTMLElement> & { ref?: (node: HTMLElement | null) => void };

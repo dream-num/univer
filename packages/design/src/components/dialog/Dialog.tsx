@@ -117,6 +117,9 @@ export interface IDialogProps {
      */
     onClose?: () => void;
 
+    /** Override the focus destination after the dialog closes. */
+    onCloseAutoFocus?: (event: Event) => void;
+
     showOk?: boolean;
     showCancel?: boolean;
 
@@ -282,6 +285,7 @@ export function Dialog(props: IDialogProps) {
         showCancel,
         onOpenChange,
         onClose,
+        onCloseAutoFocus,
         onOk,
         onCancel,
     } = props;
@@ -362,6 +366,7 @@ export function Dialog(props: IDialogProps) {
                 overlayClassName={overlayClassName}
                 dir={direction}
                 onClickClose={handleClickClose}
+                onCloseAutoFocus={onCloseAutoFocus}
                 onEscapeKeyDown={(e) => {
                     if (keyboard) {
                         handleClickClose();

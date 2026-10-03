@@ -656,10 +656,7 @@ describe('EditingRenderController business methods', () => {
     });
 
     it('cancels the inherited formula pointer anchor before clearing the formula bar', () => {
-        const { controller, formulaBarEditor, getFormulaSnapshot } = createController('=A1:B10\r\n', false, true);
-        formulaBarEditor.setSelectionRanges.mockImplementation(() => {
-            expect(getFormulaSnapshot().body?.dataStream).toBe('\r\n');
-        });
+        const { controller, selectionManager, getFormulaSnapshot } = createController('=A1:B10\r\n', false, true);
         const cancelPointerSelection = vi.fn(() => {
             expect(getFormulaSnapshot().body?.dataStream).toBe('=A1:B10\r\n');
         });
@@ -679,10 +676,10 @@ describe('EditingRenderController business methods', () => {
         cellRender.with = vi.fn((service) => service === DocSelectionRenderService
             ? { cancelPointerSelection: cancelCellPointerSelection }
             : originalCellWith(service));
-        controller._renderManagerService.getRenderUnitById.mockImplementation((id) =>
+        controller._renderManagerService.getRenderUnitById.mockImplementation((id: string) =>
             id === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY ? render : cellRender
         );
-        controller._contextService.getContextValue.mockImplementation((key) => key === FOCUSING_FX_BAR_EDITOR);
+        controller._contextService.getContextValue.mockImplementation((key: string) => key === FOCUSING_FX_BAR_EDITOR);
 
         controller._handleEditorVisible({
             visible: true,
@@ -693,7 +690,10 @@ describe('EditingRenderController business methods', () => {
         expect(cancelPointerSelection).toHaveBeenCalledOnce();
         expect(formulaSkeleton.calculate).toHaveBeenCalledOnce();
         expect(cancelCellPointerSelection).not.toHaveBeenCalled();
-        expect(formulaBarEditor.setSelectionRanges).toHaveBeenCalledWith([{ startOffset: 0, endOffset: 0 }]);
+        expect(selectionManager.getDocRanges({
+            unitId: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+            subUnitId: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+        })).toEqual([expect.objectContaining({ startOffset: 0, endOffset: 0, collapsed: true, isActive: true })]);
         expect(getFormulaSnapshot().body?.dataStream).toBe('\r\n');
         expect(controller._editorBridgeService.changeEditorDirty).not.toHaveBeenCalled();
     });

@@ -86,7 +86,7 @@ import {
     VIEWPORT_KEY,
 } from '@univerjs/docs-ui';
 import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
-import { convertTextRotation, DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { convertTextRotation, DeviceInputEventType, IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
 import {
     adjustRangeOnMutation,
     COMMAND_LISTENER_SKELETON_CHANGE,
@@ -624,7 +624,18 @@ export class EditingRenderController extends Disposable {
                 }
             );
             if (resetPointerSelection && editorId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
-                this._editorService.getEditor(editorId)?.setSelectionRanges([{ startOffset: 0, endOffset: 0 }]);
+                const selectionTarget = { unitId: editorId, subUnitId: editorId };
+                const previousSelection = this._textSelectionManagerService.getSelectionInfo(selectionTarget);
+                // Native input must retain a caret while the refreshed formula-bar geometry is not ready.
+                this._textSelectionManagerService.replaceSelectionInfoWithoutRefresh({
+                    textRanges: [{ startOffset: 0, endOffset: 0, collapsed: true, isActive: true }],
+                    rectRanges: [],
+                    segmentId: '',
+                    segmentPage: -1,
+                    style: previousSelection?.style ?? NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+                    isEditing: true,
+                }, selectionTarget);
+                this._textSelectionManagerService.refreshSelection(selectionTarget, true);
             }
         };
         const replaceSelection = (selection: ITextRange) => {

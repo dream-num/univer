@@ -593,7 +593,8 @@ export class EditingRenderController extends Disposable {
         const clearAndEdit = () => {
             if (isInArrayFormulaRange && eventType === DeviceInputEventType.PointerDown) {
                 // The pointer anchor was measured against inherited text that is about to be cleared.
-                this._renderManagerService.getRenderUnitById(this._editorBridgeService.getCurrentEditorId())
+                const editorId = this._editorService.getFocusId() ?? this._editorBridgeService.getCurrentEditorId();
+                this._renderManagerService.getRenderUnitById(editorId)
                     ?.with(DocSelectionRenderService)
                     .cancelPointerSelection();
             }

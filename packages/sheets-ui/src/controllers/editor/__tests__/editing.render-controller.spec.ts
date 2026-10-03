@@ -216,6 +216,7 @@ function createController(initialDataStream = 'new value\r\n', isPercentFormat =
     };
     const editorService = {
         isSheetEditor: vi.fn(() => true),
+        getFocusId: vi.fn((): string | null => null),
         getEditor: vi.fn((editorId: string) => editorId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY ? formulaBarEditor : null),
     };
     const editorBridgeService = {
@@ -665,8 +666,17 @@ describe('EditingRenderController business methods', () => {
         render.with = vi.fn((service) => service === DocSelectionRenderService
             ? { cancelPointerSelection }
             : originalWith(service));
-        controller._renderManagerService.getRenderUnitById.mockReturnValue(render);
-        controller._editorBridgeService.getCurrentEditorId.mockReturnValue(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+        const originalGetRender = controller._renderManagerService.getRenderUnitById;
+        const cellRender = originalGetRender(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        const cancelCellPointerSelection = vi.fn();
+        const originalCellWith = cellRender.with;
+        cellRender.with = vi.fn((service) => service === DocSelectionRenderService
+            ? { cancelPointerSelection: cancelCellPointerSelection }
+            : originalCellWith(service));
+        controller._renderManagerService.getRenderUnitById.mockImplementation((id) =>
+            id === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY ? render : cellRender
+        );
+        controller._editorService.getFocusId.mockReturnValue(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
 
         controller._handleEditorVisible({
             visible: true,
@@ -675,6 +685,7 @@ describe('EditingRenderController business methods', () => {
         });
 
         expect(cancelPointerSelection).toHaveBeenCalledOnce();
+        expect(cancelCellPointerSelection).not.toHaveBeenCalled();
         expect(getFormulaSnapshot().body?.dataStream).toBe('\r\n');
         expect(controller._editorBridgeService.changeEditorDirty).not.toHaveBeenCalled();
     });

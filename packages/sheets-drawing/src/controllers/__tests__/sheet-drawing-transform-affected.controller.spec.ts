@@ -14,14 +14,25 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import {
-    ClearSheetDrawingTransformerOperation,
-    DrawingApplyType,
-    SetDrawingApplyMutation,
-    SheetDrawingAnchorType,
-} from '@univerjs/sheets-drawing';
+    DrawingTypeEnum,
+    ImageSourceType,
+    IUniverInstanceService,
+    RedoCommandId,
+    Tools,
+    UndoCommandId,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { RemoveColByRangeCommand, RemoveRowByRangeCommand, SheetSkeletonService } from '@univerjs/sheets';
 import { describe, expect, it, vi } from 'vitest';
+import { createSheetsDrawingTestBed } from '../../__tests__/create-sheets-drawing-test-bed';
+import { drawingPositionToTransform } from '../../basics/transform-position';
+import { InsertSheetDrawingCommand } from '../../commands/commands/insert-sheet-drawing.command';
+import { DrawingApplyType, SetDrawingApplyMutation } from '../../commands/mutations/set-drawing-apply.mutation';
+import { ClearSheetDrawingTransformerOperation } from '../../commands/operations/clear-drawing-transformer.operation';
+import { ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
 import { SheetDrawingTransformAffectedController } from '../sheet-drawing-transform-affected.controller';
 
 const UNIT_ID = 'unit-1';
@@ -442,5 +453,81 @@ describe('SheetDrawingTransformAffectedController', () => {
             { id: SetDrawingApplyMutation.id, params: { unitId: UNIT_ID, subUnitId: SUB_UNIT_ID, op: 'update-redo', objects: [updatedDrawing], type: DrawingApplyType.UPDATE } },
             { id: ClearSheetDrawingTransformerOperation.id, params: [UNIT_ID] },
         ]);
+    });
+});
+
+describe('explicit deletion targets', () => {
+    it.each([
+        ['row', 'worksheet'],
+        ['column', 'worksheet'],
+        ['row', 'workbook'],
+        ['column', 'workbook'],
+    ] as const)('deletes a %s in an inactive %s without changing the active drawing owner', async (axis, context) => {
+        const testBed = createSheetsDrawingTestBed();
+        try {
+            testBed.get(SheetDrawingTransformAffectedController);
+            const { workbook, commandService } = testBed;
+            const sheetTransform = {
+                from: { row: 3, column: 3, rowOffset: 0, columnOffset: 0 },
+                to: { row: 6, column: 6, rowOffset: 0, columnOffset: 0 },
+            };
+            const skeleton = testBed.get(SheetSkeletonService).getSkeletonParam('test', 'sheet1');
+            const drawing: ISheetDrawing = {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                drawingId: 'inactive-target-drawing',
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                imageSourceType: ImageSourceType.URL,
+                source: 'https://example.com/drawing.png',
+                anchorType: SheetDrawingAnchorType.Both,
+                sheetTransform,
+                axisAlignSheetTransform: sheetTransform,
+                transform: drawingPositionToTransform(sheetTransform, skeleton)!,
+            };
+            expect(await commandService.executeCommand(InsertSheetDrawingCommand.id, {
+                unitId: 'test',
+                drawings: [drawing],
+            })).toBe(true);
+            const drawingService = testBed.get(ISheetDrawingService);
+            const readDrawing = () => drawingService.getDrawingByParam({
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                drawingId: drawing.drawingId,
+            })!;
+            const before = Tools.deepClone(readDrawing());
+            let peer = workbook;
+            if (context === 'worksheet') {
+                workbook.setActiveSheet(workbook.getSheetBySheetId('sheet2')!);
+            } else {
+                peer = testBed.univer.createUnit<ReturnType<Workbook['getSnapshot']>, Workbook>(
+                    UniverInstanceType.UNIVER_SHEET,
+                    { ...Tools.deepClone(workbook.getSnapshot()), id: 'peer-workbook' }
+                );
+                testBed.get(IUniverInstanceService).focusUnit(peer.getUnitId());
+            }
+            const peerSheetBefore = Tools.deepClone(peer.getActiveSheet()!.getSnapshot());
+            const range = axis === 'row'
+                ? { startRow: 1, endRow: 1, startColumn: 0, endColumn: 19 }
+                : { startRow: 0, endRow: 19, startColumn: 1, endColumn: 1 };
+            expect(await commandService.executeCommand(
+                axis === 'row' ? RemoveRowByRangeCommand.id : RemoveColByRangeCommand.id,
+                { unitId: 'test', subUnitId: 'sheet1', range }
+            )).toBe(true);
+            const after = Tools.deepClone(readDrawing());
+            expect(after.sheetTransform?.from[axis]).toBe(before.sheetTransform!.from[axis] - 1);
+            expect(after.sheetTransform?.to[axis]).toBe(before.sheetTransform!.to[axis] - 1);
+            const position = axis === 'row' ? 'top' : 'left';
+            expect(after.transform?.[position]).toBeLessThan(before.transform![position]!);
+            expect(after.transform?.width).toBe(before.transform?.width);
+            expect(after.transform?.height).toBe(before.transform?.height);
+            expect(peer.getActiveSheet()!.getSnapshot()).toEqual(peerSheetBefore);
+            testBed.get(IUniverInstanceService).focusUnit(workbook.getUnitId());
+            expect(commandService.syncExecuteCommand(UndoCommandId)).toBe(true);
+            expect(readDrawing()).toEqual(before);
+            expect(commandService.syncExecuteCommand(RedoCommandId)).toBe(true);
+            expect(readDrawing()).toEqual(after);
+        } finally {
+            testBed.univer.dispose();
+        }
     });
 });

@@ -1636,6 +1636,21 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             config.activeRange = this._getActiveRange();
             config.rangeList = this._getAllTextRanges();
         }
+        const { unitId } = this._context;
+        if (config.activeRange != null || unitId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY || this._context.unit.getBody()?.dataStream !== '\r\n') {
+            return;
+        }
+        const selection = this._docSelectionManagerService.getSelectionInfo({ unitId, subUnitId: unitId });
+        if (selection == null || selection.textRanges.length !== 1 || selection.rectRanges.length > 0) {
+            return;
+        }
+        const caret = selection.textRanges[0];
+        if (!caret.isActive || caret.startOffset !== 0 || caret.endOffset !== 0) {
+            return;
+        }
+        // A cleared formula bar can receive native input before its empty caret has render geometry.
+        config.activeRange = { ...caret, segmentId: selection.segmentId, segmentPage: selection.segmentPage };
+        config.rangeList = [config.activeRange];
     }
 
     protected _handleInputFocus(event: Event): void {

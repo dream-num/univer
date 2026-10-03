@@ -625,7 +625,7 @@ export class EditingRenderController extends Disposable {
         const cellImage = isCellImage(documentDataModel.getSnapshot());
         this._submitEmptyCellImageEdit = cellImage && eventType === DeviceInputEventType.Keyboard && keycode === KeyCode.BACKSPACE;
 
-        if (cellImage) {
+        if (cellImage || isInArrayFormulaRange) {
             clearAndEdit();
         } else if (eventType === DeviceInputEventType.Keyboard && keycode === KeyCode.F2) {
             // f2, continue to edit
@@ -633,11 +633,7 @@ export class EditingRenderController extends Disposable {
             replaceSelection({ startOffset: 0, endOffset: 0, collapsed: true });
             const endOffset = (documentDataModel.getBody()?.dataStream.length ?? 2) - 2;
             replaceSelection(percentSelection ?? { startOffset: endOffset, endOffset, collapsed: true });
-        } else if (
-            // clear and edit
-            eventType === DeviceInputEventType.Keyboard ||
-            (eventType === DeviceInputEventType.Dblclick && isInArrayFormulaRange)
-        ) {
+        } else if (eventType === DeviceInputEventType.Keyboard) {
             if (percentSelection) {
                 replaceSelection(percentSelection);
             } else {

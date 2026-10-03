@@ -80,6 +80,7 @@ describe('EditorDataSyncController', () => {
         themeTextColor?: string;
         isInArrayFormulaRange?: boolean;
         isEditorVisible?: boolean;
+        eventType?: DeviceInputEventType;
         formulaBarPosition?: { width: number; height: number } | null;
         documentDataModel?: DocumentDataModel;
     } = {}) {
@@ -93,7 +94,7 @@ describe('EditorDataSyncController', () => {
             })),
             isVisible: vi.fn(() => ({
                 visible: options.isEditorVisible ?? false,
-                eventType: DeviceInputEventType.Dblclick,
+                eventType: options.eventType ?? DeviceInputEventType.Dblclick,
             })),
             refreshEditCellState: vi.fn(),
             isForceKeepVisible: vi.fn(() => false),
@@ -238,7 +239,13 @@ describe('EditorDataSyncController', () => {
         documentDataModel.dispose();
     });
 
-    it.each([false, true])('clears an inherited formula only during visible double-click editing (visible=%s)', (isEditorVisible) => {
+    it.each([
+        { isEditorVisible: false, eventType: DeviceInputEventType.Dblclick },
+        { isEditorVisible: true, eventType: DeviceInputEventType.Dblclick },
+        { isEditorVisible: false, eventType: DeviceInputEventType.PointerDown },
+        { isEditorVisible: true, eventType: DeviceInputEventType.PointerDown },
+        { isEditorVisible: true, eventType: DeviceInputEventType.Keyboard },
+    ])('clears inherited formulas only while editing (visible=$isEditorVisible, event=$eventType)', ({ isEditorVisible, eventType }) => {
         const documentDataModel = new DocumentDataModel({
             id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
             documentStyle: {},
@@ -252,6 +259,7 @@ describe('EditorDataSyncController', () => {
         const { editorBridgeService } = createController({
             documentDataModel,
             isEditorVisible,
+            eventType,
             isInArrayFormulaRange: true,
         });
 

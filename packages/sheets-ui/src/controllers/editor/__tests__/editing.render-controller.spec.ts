@@ -51,7 +51,6 @@ import { SetRangeValuesCommand, SheetInterceptorService, SheetsSelectionsService
 import { KeyCode } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../../commands/commands/set-selection.command';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../../services/editor/cell-editor-manager.service';
@@ -638,6 +637,22 @@ describe('EditingRenderController business methods', () => {
         });
 
         expect(getNormalSnapshot().body?.dataStream).toBe('\r\n');
+    });
+
+    it.each([
+        { eventType: DeviceInputEventType.PointerDown },
+        { eventType: DeviceInputEventType.Dblclick },
+        { eventType: DeviceInputEventType.Keyboard, keycode: KeyCode.F2 },
+    ])('opens an empty editor for inherited spill formulas (event=$eventType, key=$keycode)', (event) => {
+        const { controller, getNormalSnapshot, getFormulaSnapshot } = createController('=A1:B10\r\n', false, true);
+
+        controller._handleEditorVisible({ visible: true, unitId: 'unit-1', ...event });
+
+        expect(getNormalSnapshot().body?.dataStream).toBe('\r\n');
+        expect(getFormulaSnapshot().body?.dataStream).toBe('\r\n');
+        expect(controller._editorBridgeService.changeEditorDirty).toHaveBeenCalledTimes(
+            event.eventType === DeviceInputEventType.Dblclick ? 1 : 0
+        );
     });
 
     it('keeps full-clear behavior for array formula cells', () => {

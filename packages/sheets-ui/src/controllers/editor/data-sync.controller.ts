@@ -40,7 +40,7 @@ import {
 } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { ReplaceSnapshotCommand } from '@univerjs/docs-ui';
-import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { MoveRangeMutation, RangeProtectionRuleModel, SetRangeValuesMutation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { skip } from 'rxjs';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
@@ -122,11 +122,11 @@ export class EditorDataSyncController extends Disposable {
         let body = Tools.deepClone(param.documentLayoutObject.documentModel?.getBody());
         const drawings = Tools.deepClone(param.documentLayoutObject.documentModel?.drawings);
         const drawingsOrder = Tools.deepClone(param.documentLayoutObject.documentModel?.getDrawingsOrder());
-        const { visible, eventType } = this._editorBridgeService.isVisible();
+        const { visible } = this._editorBridgeService.isVisible();
 
         if (
             !body ||
-            (param.isInArrayFormulaRange === true && visible && eventType === DeviceInputEventType.Dblclick)
+            (param.isInArrayFormulaRange === true && visible)
         ) {
             body = {
                 dataStream: '\r\n',

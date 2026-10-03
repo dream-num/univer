@@ -591,6 +591,12 @@ export class EditingRenderController extends Disposable {
         this._resizeEditorOnOpen(param, editorObject, !!isInArrayFormulaRange);
 
         const clearAndEdit = () => {
+            if (isInArrayFormulaRange && eventType === DeviceInputEventType.PointerDown) {
+                // The pointer anchor was measured against inherited text that is about to be cleared.
+                this._renderManagerService.getRenderUnitById(this._editorBridgeService.getCurrentEditorId())
+                    ?.with(DocSelectionRenderService)
+                    .cancelPointerSelection();
+            }
             this._emptyDocumentDataModel(documentDataModel.getSnapshot().documentStyle, !!isInArrayFormulaRange);
             document.makeDirty();
 

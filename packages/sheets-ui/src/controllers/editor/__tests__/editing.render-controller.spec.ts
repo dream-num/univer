@@ -289,7 +289,7 @@ function createController(initialDataStream = 'new value\r\n', isPercentFormat =
                     : null),
                 resetCursor: vi.fn(),
             },
-            with: vi.fn(() => ({ getSkeleton: () => skeleton, getViewModel: () => viewModel })),
+            with: vi.fn(() => ({ getSkeleton: () => skeleton, getViewModel: () => viewModel, cancelPointerSelection: vi.fn() })),
         })),
     };
     injector.add([IConfigService, { useClass: ConfigService }]);
@@ -653,6 +653,30 @@ describe('EditingRenderController business methods', () => {
         expect(controller._editorBridgeService.changeEditorDirty).toHaveBeenCalledTimes(
             event.eventType === DeviceInputEventType.Dblclick ? 1 : 0
         );
+    });
+
+    it('cancels the inherited formula pointer anchor before clearing the formula bar', () => {
+        const { controller, getFormulaSnapshot } = createController('=A1:B10\r\n', false, true);
+        const cancelPointerSelection = vi.fn(() => {
+            expect(getFormulaSnapshot().body?.dataStream).toBe('=A1:B10\r\n');
+        });
+        const render = controller._renderManagerService.getRenderUnitById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+        const originalWith = render.with;
+        render.with = vi.fn((service) => service === DocSelectionRenderService
+            ? { cancelPointerSelection }
+            : originalWith(service));
+        controller._renderManagerService.getRenderUnitById.mockReturnValue(render);
+        controller._editorBridgeService.getCurrentEditorId.mockReturnValue(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+
+        controller._handleEditorVisible({
+            visible: true,
+            unitId: 'unit-1',
+            eventType: DeviceInputEventType.PointerDown,
+        });
+
+        expect(cancelPointerSelection).toHaveBeenCalledOnce();
+        expect(getFormulaSnapshot().body?.dataStream).toBe('\r\n');
+        expect(controller._editorBridgeService.changeEditorDirty).not.toHaveBeenCalled();
     });
 
     it('keeps full-clear behavior for array formula cells', () => {

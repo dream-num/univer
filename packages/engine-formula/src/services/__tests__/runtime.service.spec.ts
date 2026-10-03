@@ -96,6 +96,22 @@ function createRuntimeService() {
 }
 
 describe('FormulaRuntimeService', () => {
+    it('keeps the scalar result source from before an asynchronous formula replacement and clears it on reset', () => {
+        const { injector, runtime, unitDataMatrix } = createRuntimeService();
+        try {
+            unitDataMatrix.setValue(2, 3, { f: '=SUM(A1:B2)' });
+            runtime.setCurrent(2, 3, 20, 20, 'sheet', 'unit');
+            unitDataMatrix.setValue(2, 3, { f: '=42' });
+            runtime.setRuntimeData(NumberValueObject.create(10));
+
+            expect(runtime.getAllRuntimeData().sourceFormulaData?.unit?.sheet?.[2]?.[3]?.f).toBe('=SUM(A1:B2)');
+            runtime.reset();
+            expect(runtime.getAllRuntimeData().sourceFormulaData).toEqual({});
+        } finally {
+            injector.dispose();
+        }
+    });
+
     it('indexes scalar and spilled null results as blanks, consistently with reference scans', () => {
         const { injector, runtime } = createRuntimeService();
         CELL_INVERTED_INDEX_CACHE.clear();

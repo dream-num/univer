@@ -15,8 +15,16 @@
  */
 
 import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, Nullable, Workbook } from '@univerjs/core';
-import type { ISetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, ObjectMatrix, sequenceExecute, UniverInstanceType } from '@univerjs/core';
+import type { IFormulaData, ISetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
+import {
+    Disposable,
+    ICommandService,
+    Inject,
+    IUniverInstanceService,
+    ObjectMatrix,
+    sequenceExecute,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { handleNumfmtInCell, SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
 
@@ -39,7 +47,7 @@ export class CalculateResultApplyController extends Disposable {
 
                 const params = command.params as ISetFormulaCalculationResultMutation;
 
-                const { unitData } = params;
+                const { unitData, sourceFormulaData } = params;
 
                 const unitIds = Object.keys(unitData);
 
@@ -72,7 +80,7 @@ export class CalculateResultApplyController extends Disposable {
                             continue;
                         }
 
-                        const cellValue = this._getMergedCellData(unitId, sheetId, cellData);
+                        const cellValue = this._getMergedCellData(unitId, sheetId, cellData, sourceFormulaData);
 
                         const setRangeValuesMutation = {
                             subUnitId: sheetId,
@@ -106,9 +114,15 @@ export class CalculateResultApplyController extends Disposable {
      * @param unitId
      * @param sheetId
      * @param cellData
+     * @param sourceFormulaData Formula identities captured before scalar evaluation.
      * @returns Calculated cell data merged with number formats.
      */
-    private _getMergedCellData(unitId: string, sheetId: string, cellData: IObjectMatrixPrimitiveType<Nullable<ICellData>>) {
+    private _getMergedCellData(
+        unitId: string,
+        sheetId: string,
+        cellData: IObjectMatrixPrimitiveType<Nullable<ICellData>>,
+        sourceFormulaData?: IFormulaData
+    ) {
         const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         const styles = workbook?.getStyles();
 
@@ -118,6 +132,13 @@ export class CalculateResultApplyController extends Disposable {
 
         cellDataMatrix.forValue((row, col, cell) => {
             const oldCell = oldCellDataMatrix?.getValue(row, col);
+            const sourceFormula = sourceFormulaData?.[unitId]?.[sheetId]?.[row]?.[col];
+            if (sourceFormula != null && (
+                sourceFormula.f !== (oldCell?.f ?? '') || sourceFormula.si !== (oldCell?.si ?? undefined)
+            )) {
+                cellDataMatrix.realDeleteValue(row, col);
+                return;
+            }
             const newCell = handleNumfmtInCell(oldCell, cell, styles);
             cellDataMatrix.setValue(row, col, newCell);
         });

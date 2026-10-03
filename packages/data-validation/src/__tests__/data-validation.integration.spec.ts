@@ -234,7 +234,7 @@ describe('data validation integration', () => {
         expect(dataValidationModel.getRules('unit-1', 'sheet-2')).toEqual([]);
         expect(resourceLoaderService.saveUnit('unit-1')?.resources).toEqual(before);
         resourceManagerService.unloadResources('unit-1', UniverInstanceType.UNIVER_SHEET);
-        resourceManagerService.loadResources('unit-1', before!, UniverInstanceType.UNIVER_SHEET);
+        resourceManagerService.loadResources('unit-1', before);
         expect(dataValidationModel.getRules('unit-1', 'sheet-2')).toEqual([]);
         expect(resourceLoaderService.saveUnit('unit-1')?.resources).toEqual(before);
     });

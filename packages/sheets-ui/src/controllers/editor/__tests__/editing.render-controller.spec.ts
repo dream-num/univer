@@ -43,7 +43,7 @@ import {
     UndoCommandId,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, DocStateChangeManagerService, DocStateEmitService, InsertTextCommand, RichTextEditingMutation } from '@univerjs/docs';
+import { DocSelectionManagerService, DocSkeletonManagerService, DocStateChangeManagerService, DocStateEmitService, InsertTextCommand, RichTextEditingMutation } from '@univerjs/docs';
 import { DocSelectionRenderService, IEditorService, InnerPasteCommand, MoveCursorOperation, MoveSelectionOperation, SetDocInputStyleCommand, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { FunctionService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { DeviceInputEventType, IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
@@ -216,7 +216,6 @@ function createController(initialDataStream = 'new value\r\n', isPercentFormat =
     };
     const editorService = {
         isSheetEditor: vi.fn(() => true),
-        getFocusId: vi.fn((): string | null => null),
         getEditor: vi.fn((editorId: string) => editorId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY ? formulaBarEditor : null),
     };
     const editorBridgeService = {
@@ -665,6 +664,10 @@ describe('EditingRenderController business methods', () => {
             expect(getFormulaSnapshot().body?.dataStream).toBe('=A1:B10\r\n');
         });
         const render = controller._renderManagerService.getRenderUnitById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+        const formulaSkeleton = render.with(DocSkeletonManagerService).getSkeleton();
+        formulaSkeleton.calculate.mockImplementation(() => {
+            expect(getFormulaSnapshot().body?.dataStream).toBe('\r\n');
+        });
         const originalWith = render.with;
         render.with = vi.fn((service) => service === DocSelectionRenderService
             ? { cancelPointerSelection }
@@ -679,7 +682,7 @@ describe('EditingRenderController business methods', () => {
         controller._renderManagerService.getRenderUnitById.mockImplementation((id) =>
             id === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY ? render : cellRender
         );
-        controller._editorService.getFocusId.mockReturnValue(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+        controller._contextService.getContextValue.mockImplementation((key) => key === FOCUSING_FX_BAR_EDITOR);
 
         controller._handleEditorVisible({
             visible: true,
@@ -688,6 +691,7 @@ describe('EditingRenderController business methods', () => {
         });
 
         expect(cancelPointerSelection).toHaveBeenCalledOnce();
+        expect(formulaSkeleton.calculate).toHaveBeenCalledOnce();
         expect(cancelCellPointerSelection).not.toHaveBeenCalled();
         expect(formulaBarEditor.setSelectionRanges).toHaveBeenCalledWith([{ startOffset: 0, endOffset: 0 }]);
         expect(getFormulaSnapshot().body?.dataStream).toBe('\r\n');

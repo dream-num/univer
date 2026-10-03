@@ -592,7 +592,9 @@ export class EditingRenderController extends Disposable {
 
         const clearAndEdit = () => {
             const resetPointerSelection = isInArrayFormulaRange && eventType === DeviceInputEventType.PointerDown;
-            const editorId = this._editorService.getFocusId() ?? this._editorBridgeService.getCurrentEditorId();
+            const editorId = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR)
+                ? DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
+                : this._editorBridgeService.getCurrentEditorId();
             if (resetPointerSelection) {
                 // The pointer anchor was measured against inherited text that is about to be cleared.
                 this._renderManagerService.getRenderUnitById(editorId)
@@ -601,6 +603,9 @@ export class EditingRenderController extends Disposable {
             }
             this._emptyDocumentDataModel(documentDataModel.getSnapshot().documentStyle, !!isInArrayFormulaRange);
             document.makeDirty();
+            if (resetPointerSelection) {
+                this._getEditorSkeleton(editorId)?.calculate();
+            }
 
             // @JOCS, Why calculate here?
             if (keycode === KeyCode.BACKSPACE || eventType === DeviceInputEventType.Dblclick) {

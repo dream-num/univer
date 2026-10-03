@@ -122,10 +122,11 @@ export class EditorDataSyncController extends Disposable {
         let body = Tools.deepClone(param.documentLayoutObject.documentModel?.getBody());
         const drawings = Tools.deepClone(param.documentLayoutObject.documentModel?.drawings);
         const drawingsOrder = Tools.deepClone(param.documentLayoutObject.documentModel?.getDrawingsOrder());
+        const { visible, eventType } = this._editorBridgeService.isVisible();
 
         if (
             !body ||
-            (param.isInArrayFormulaRange === true && this._editorBridgeService.isVisible().eventType === DeviceInputEventType.Dblclick)
+            (param.isInArrayFormulaRange === true && visible && eventType === DeviceInputEventType.Dblclick)
         ) {
             body = {
                 dataStream: '\r\n',
@@ -352,7 +353,7 @@ export class EditorDataSyncController extends Disposable {
                 renderConfig: { ...formulaEditorStyle.renderConfig },
                 textStyle: {
                     cl: {
-                        rgb: this._themeService.getColorFromTheme('gray.900'),
+                        rgb: this._getFormulaBarTextColor(),
                     },
                 },
             };
@@ -385,6 +386,12 @@ export class EditorDataSyncController extends Disposable {
 
         const isFocusFxBar = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
         renderConfig.isRenderStyle = isFormulaBar === isFocusFxBar ? BooleanNumber.TRUE : BooleanNumber.FALSE;
+    }
+
+    private _getFormulaBarTextColor(): string {
+        const isInheritedFormula = this._editorBridgeService.getEditLocation()?.isInArrayFormulaRange === true
+            && !this._editorBridgeService.isVisible().visible;
+        return this._themeService.getColorFromTheme(isInheritedFormula ? 'gray.300' : 'gray.900');
     }
 
     protected _getSourceStyleRenderValue(isFormulaBar: boolean): BooleanNumber {

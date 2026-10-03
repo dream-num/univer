@@ -1526,6 +1526,41 @@ describe('DocSelectionRenderService', () => {
     });
 
     it.each([
+        { unitId: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, offset: 0, expected: 0 },
+        { unitId: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, offset: 1, expected: undefined },
+        { unitId: 'selection-render-doc', offset: 0, expected: undefined },
+    ])('uses only a valid empty formula-bar caret before geometry is ready ($unitId, $offset)', ({ unitId, offset, expected }) => {
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService({
+            documentData: {
+                id: unitId,
+                body: { dataStream: '\r\n', paragraphs: [{ startIndex: 0, paragraphId: 'empty-editor-paragraph' }] },
+                documentStyle: {},
+            },
+        });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        const manager = univer.__getInjector().get(DocSelectionManagerService);
+        manager.replaceSelectionInfoWithoutRefresh({
+            textRanges: [{ startOffset: offset, endOffset: offset, collapsed: true, isActive: true }],
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            isEditing: true,
+        }, { unitId, subUnitId: unitId });
+        const received: Array<{ content?: string; offset?: number }> = [];
+        const subscription = service.onInput$.subscribe((config) => received.push({
+            content: config.content,
+            offset: config.activeRange?.startOffset,
+        }));
+        cleanup.push(() => subscription.unsubscribe());
+
+        input.textContent = '=';
+        input.dispatchEvent(new InputEvent('input', { bubbles: true, data: '=', inputType: 'insertText' }));
+
+        expect(received).toEqual([{ content: '=', offset: expected }]);
+    });
+
+    it.each([
         { mobile: false, unitId: 'selection-render-doc' },
         { mobile: true, unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY },
     ])('preserves automatic input focus outside mobile standalone docs ($mobile, $unitId)', (options) => {

@@ -229,6 +229,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
             }
             const { startRow, startColumn, endRow, endColumn } = range;
             if (rowIndex === row && columnIndex === col) {
+                result = { ...cellInfo, isInArrayFormulaRange: false };
                 this._createArrayFormulaRangeShape(range, unitId, subUnitId);
                 return false;
             }

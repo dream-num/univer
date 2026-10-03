@@ -15,6 +15,7 @@
  */
 
 import type { ICommandInfo, IDocumentBody, IDocumentData, IDrawings, Nullable } from '@univerjs/core';
+import type { ICellEditorState } from '../../../services/editor-bridge.service';
 import {
     BooleanNumber,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -27,7 +28,7 @@ import {
     IUniverInstanceService,
     ThemeService,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import {
     MoveRangeMutation,
     RangeProtectionRuleModel,
@@ -77,15 +78,23 @@ describe('EditorDataSyncController', () => {
     function createController(options: {
         isFocusFxBar?: boolean;
         themeTextColor?: string;
+        isInArrayFormulaRange?: boolean;
+        isEditorVisible?: boolean;
+        eventType?: DeviceInputEventType;
         formulaBarPosition?: { width: number; height: number } | null;
         documentDataModel?: DocumentDataModel;
     } = {}) {
         const commandService = new TestCommandService();
         const editorBridgeService = {
-            currentEditCellState$: new BehaviorSubject(null),
+            currentEditCellState$: new BehaviorSubject<Nullable<ICellEditorState>>(null),
             getEditLocation: vi.fn(() => ({
                 row: 1,
                 column: 2,
+                isInArrayFormulaRange: options.isInArrayFormulaRange ?? false,
+            })),
+            isVisible: vi.fn(() => ({
+                visible: options.isEditorVisible ?? false,
+                eventType: options.eventType ?? DeviceInputEventType.Dblclick,
             })),
             refreshEditCellState: vi.fn(),
             isForceKeepVisible: vi.fn(() => false),
@@ -129,7 +138,7 @@ describe('EditorDataSyncController', () => {
                 currentTheme$,
                 getColorFromTheme: vi.fn((token: string) => token === 'gray.900'
                     ? options.themeTextColor ?? '#1b1c1f'
-                    : '#000000'),
+                    : '#d1d5db'),
             } as never,
         }]);
         injector.add([EditorDataSyncController]);
@@ -228,6 +237,41 @@ describe('EditorDataSyncController', () => {
 
         subscription.unsubscribe();
         documentDataModel.dispose();
+    });
+
+    it.each([
+        { isEditorVisible: false, eventType: DeviceInputEventType.Dblclick },
+        { isEditorVisible: true, eventType: DeviceInputEventType.Dblclick },
+        { isEditorVisible: false, eventType: DeviceInputEventType.PointerDown },
+        { isEditorVisible: true, eventType: DeviceInputEventType.PointerDown },
+        { isEditorVisible: true, eventType: DeviceInputEventType.Keyboard },
+    ])('clears inherited formulas only while editing (visible=$isEditorVisible, event=$eventType)', ({ isEditorVisible, eventType }) => {
+        const documentDataModel = new DocumentDataModel({
+            id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+            documentStyle: {},
+            body: { dataStream: '\r\n' },
+        });
+        const sourceDocument = new DocumentDataModel({
+            id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            documentStyle: {},
+            body: { dataStream: '=A1:B10\r\n' },
+        });
+        const { editorBridgeService } = createController({
+            documentDataModel,
+            isEditorVisible,
+            eventType,
+            isInArrayFormulaRange: true,
+        });
+
+        editorBridgeService.currentEditCellState$.next({
+            isInArrayFormulaRange: true,
+            documentLayoutObject: { documentModel: sourceDocument },
+        } as ICellEditorState);
+
+        expect(documentDataModel.getBody()?.dataStream).toBe(isEditorVisible ? '\r\n' : '=A1:B10\r\n');
+        expect(sourceDocument.getBody()?.dataStream).toBe('=A1:B10\r\n');
+        documentDataModel.dispose();
+        sourceDocument.dispose();
     });
 
     it('refreshes the current edit cell when set-values updates the edited cell', () => {
@@ -331,6 +375,23 @@ describe('EditorDataSyncController', () => {
         checkAndSetRenderStyleConfig(controller, formulaBarSnapshot);
 
         expect(formulaBarSnapshot.documentStyle.textStyle?.cl?.rgb).toBe('#f7f9fc');
+    });
+
+    it.each([false, true])('shows inherited spill formulas in gray until editing starts (visible=%s)', (isEditorVisible) => {
+        const { controller } = createController({ isInArrayFormulaRange: true, isEditorVisible });
+        const formulaBarSnapshot: IDocumentData = {
+            id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+            body: {
+                dataStream: '=A1:B10\r\n',
+                textRuns: [{ st: 0, ed: 7, ts: { cl: { rgb: '#d1d5db' } } }],
+            },
+            documentStyle: {},
+        };
+
+        checkAndSetRenderStyleConfig(controller, formulaBarSnapshot);
+
+        expect(formulaBarSnapshot.documentStyle.renderConfig?.isRenderStyle).toBe(BooleanNumber.FALSE);
+        expect(formulaBarSnapshot.documentStyle.textStyle?.cl?.rgb).toBe(isEditorVisible ? '#1b1c1f' : '#d1d5db');
     });
 
     it('renders formula reference styles in the formula bar when the formula bar is focused', () => {

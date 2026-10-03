@@ -776,15 +776,12 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         return this._createUndoAndRedoMutation(unitId, subUnitId, updateDrawings);
     }
 
-    private _getUnitIdAndSubUnitId(params: IInsertRowCommandParams | IRemoveRowColCommandParams, type: 'insert' | 'remove') {
-        let target;
-        if (type === 'insert') {
-            target = getSheetCommandTarget(this._univerInstanceService, params as IInsertRowCommandParams);
-        } else {
-            target = getSheetCommandTarget(this._univerInstanceService);
-        }
+    private _getUnitIdAndSubUnitId(params: IInsertRowCommandParams | IRemoveRowColCommandParams) {
+        const target = getSheetCommandTarget(this._univerInstanceService, params);
 
-        if (!target) return;
+        if (!target) {
+            return;
+        }
 
         const { unitId, subUnitId } = target;
 
@@ -856,7 +853,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
     }
 
     private _moveRowInterceptor(params: IInsertRowCommandParams | IRemoveRowColCommandParams, type: 'insert' | 'remove') {
-        const target = this._getUnitIdAndSubUnitId(params, type);
+        const target = this._getUnitIdAndSubUnitId(params);
         if (!target) {
             return { redos: [], undos: [] };
         }
@@ -929,7 +926,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
     }
 
     private _moveColInterceptor(params: IInsertColCommandParams | IRemoveRowColCommandParams, type: 'insert' | 'remove') {
-        const target = this._getUnitIdAndSubUnitId(params, type);
+        const target = this._getUnitIdAndSubUnitId(params);
         if (!target) {
             return { redos: [], undos: [] };
         }

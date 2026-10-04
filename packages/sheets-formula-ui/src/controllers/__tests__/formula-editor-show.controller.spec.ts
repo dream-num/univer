@@ -168,6 +168,44 @@ describe('FormulaEditorShowController', () => {
         expect(result).toBeNull();
     });
 
+    it('distinguishes the editable spill formula from its result cells', () => {
+        const testBed = createControllerTestBed();
+        const worksheet = testBed.sheet.getSheetBySheetId('sheet1')!;
+        testBed.commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: { 0: { 3: { f: '=A1:B10' } } },
+        });
+        testBed.formulaDataModel.setArrayFormulaRange({
+            test: { sheet1: { 0: { 3: { startRow: 0, startColumn: 3, endRow: 9, endColumn: 4 } } } },
+        });
+        testBed.formulaDataModel.setArrayFormulaCellData({
+            test: { sheet1: { 0: { 3: { v: 1 } }, 1: { 3: { v: 2 } } } },
+        });
+
+        const intercept = testBed.sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(BEFORE_CELL_EDIT);
+        for (const row of [0, 1]) {
+            const cellValue = { v: row + 1, isInArrayFormulaRange: true };
+            const result = intercept(
+                cellValue,
+                {
+                    row,
+                    col: 3,
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    worksheet,
+                    workbook: testBed.sheet,
+                    origin: worksheet.getCellRaw(row, 3),
+                }
+            );
+
+            expect(result).toMatchObject({ f: '=A1:B10', isInArrayFormulaRange: row !== 0 });
+            expect(cellValue).toEqual({ v: row + 1, isInArrayFormulaRange: true });
+            expect(worksheet.getCellDocumentModelWithFormula(result!, row, 3)?.documentModel?.getBody()?.dataStream)
+                .toBe('=A1:B10\r\n');
+        }
+    });
+
     it('refreshes when the current cell becomes a spill cell', async () => {
         const testBed = createControllerTestBed();
         setSpillCellData(testBed.formulaDataModel);

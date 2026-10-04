@@ -368,6 +368,10 @@ export function Dialog(props: IDialogProps) {
                 onClickClose={handleClickClose}
                 onCloseAutoFocus={onCloseAutoFocus}
                 onEscapeKeyDown={(e) => {
+                    if (e.isComposing) {
+                        e.preventDefault();
+                        return;
+                    }
                     if (keyboard) {
                         handleClickClose();
                     }

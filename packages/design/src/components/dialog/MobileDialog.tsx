@@ -113,6 +113,10 @@ export function MobileDialog(props: IMobileDialogProps) {
                 overlayClassName={overlayClassName}
                 dir={direction}
                 onEscapeKeyDown={(event) => {
+                    if (event.isComposing) {
+                        event.preventDefault();
+                        return;
+                    }
                     if (keyboard) {
                         close();
                     }

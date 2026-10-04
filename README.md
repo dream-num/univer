@@ -311,7 +311,9 @@ This repository contains Univer's open-source core and first-party OSS plugins. 
 | **Bases** | Extensible plugin architecture for custom data-centric products. | Base database core model, commands, mutations, formula integration, workbench UI, field editors, and render-engine integration. |
 | **Server and runtime** | Node.js headless runtime, RPC/Web Worker patterns, and server-oriented automation primitives. | Collaboration server, Node.js collaboration client, SSR services, computing delegation, server-side calculation, and collaboration changeset replay tooling. |
 
-Pro features are documented in the [Univer Pro guide](https://docs.univer.ai/guides/pro). They are intentionally separated here so the OSS package surface is clear.
+Editor features are documented in the [Web SDK guides](https://docs.univer.ai/guides/sheets). For backend integration, see the Server SDK chapters on [collaboration](https://docs.univer.ai/server/collaboration/overview) and [file import/export](https://docs.univer.ai/server/import-export).
+
+For commercial licensing and purchase enquiries, [contact us](https://univer.ai/#contact). See [license configuration](https://docs.univer.ai/server/license) to configure a license in your application.
 
 Boundary principles:
 
@@ -325,7 +327,7 @@ Boundary principles:
 - **Core SDK**: [`dream-num/univer`](https://github.com/dream-num/univer), this monorepo.
 - **Presets**: this repository's [`presets/`](./presets), curated plugin collections for browser and Node.js apps.
 - **AI agent skills**: [`dream-num/univer-sdk-skills`](https://github.com/dream-num/univer-sdk-skills), reusable instructions for AI agents working with Univer integration, Pro features, plugin development, and Node backends. See the [AI Skills guide](https://docs.univer.ai/guides/skills).
-- **Documentation**: [docs.univer.ai](https://docs.univer.ai), including Sheets, Docs, Slides, recipes, and Pro guides.
+- **Documentation**: [docs.univer.ai](https://docs.univer.ai), including Web SDK, Server SDK, and AI SDK guides and the API reference.
 - **Web SDK**: [embedded editors and headless processing](https://docs.univer.ai/guides/sheets) in the browser and Node.js.
 - **Server SDK**: [collaboration and file conversion](https://docs.univer.ai/server), integrated with your application's storage, identity, and permissions.
 - **AI SDK**: [agent workflows](https://docs.univer.ai/ai) for inspecting, editing, and verifying Office content.

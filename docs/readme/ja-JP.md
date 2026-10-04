@@ -312,7 +312,9 @@ Sheets、Docs、Slides は Univer の共通アーキテクチャ上でスプレ�
 | **Bases** | カスタムのデータ中心プロダクト向けの拡張可能なプラグインアーキテクチャ。 | Base データベースコアモデル、コマンド、ミューテーション、数式連携、ワークベンチ UI、フィールドエディタ、レンダリングエンジン連携。 |
 | **Server and runtime** | Node.js ヘッドレスランタイム、RPC/Web Worker パターン、サーバー向け自動化のプリミティブ。 | 共同編集サーバー、Node.js 共同編集クライアント、SSR サービス、計算委譲、サーバーサイド計算、共同編集 changeset replay ツール。 |
 
-Pro 機能は [Univer Pro guide](https://docs.univer.ai/guides/pro) に記載されています。ここでは OSS パッケージの範囲を明確にするため、意図的に分けて説明しています。
+エディターの機能については [Web SDK ドキュメント](https://docs.univer.ai/guides/sheets)をご覧ください。バックエンドの統合については、Server SDK の[共同編集](https://docs.univer.ai/server/collaboration/overview)と[ファイルのインポート・エクスポート](https://docs.univer.ai/server/import-export)の章をご覧ください。
+
+商用ライセンスや購入については、[お問い合わせください](https://univer.ai/#contact)。アプリケーションでのライセンス設定については、[ライセンス設定](https://docs.univer.ai/server/license)をご覧ください。
 
 Boundary principles:
 
@@ -326,7 +328,7 @@ Boundary principles:
 - **Core SDK**：[`dream-num/univer`](https://github.com/dream-num/univer)、この monorepo です。
 - **Presets**：このリポジトリの [`presets/`](../../presets)。ブラウザと Node.js アプリ向けの curated plugin collection です。
 - **AI agent skills**：[`dream-num/univer-sdk-skills`](https://github.com/dream-num/univer-sdk-skills)、Univer 統合、Pro 機能、プラグイン開発、Node バックエンドに取り組む AI agent 向けの再利用可能な指示集です。[AI Skills guide](https://docs.univer.ai/guides/skills) も参照してください。
-- **Documentation**：[docs.univer.ai](https://docs.univer.ai)、Sheets、Docs、Slides、recipes、Pro guides を含みます。
+- **Documentation**：[docs.univer.ai](https://docs.univer.ai)、Web SDK、Server SDK、AI SDK のガイドと API リファレンスを含みます。
 - **Web SDK**：[組み込みエディタとヘッドレス処理](https://docs.univer.ai/guides/sheets)をブラウザと Node.js で利用できます。
 - **Server SDK**：[共同編集とファイル変換](https://docs.univer.ai/server)を、アプリケーションのストレージ、認証、権限管理と統合します。
 - **AI SDK**：オフィスコンテンツの検査、編集、検証を行う[エージェントワークフロー](https://docs.univer.ai/ai)を構築できます。

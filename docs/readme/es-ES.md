@@ -311,7 +311,9 @@ Este repositorio contiene el núcleo open source de Univer y plugins OSS de prim
 | **Bases** | Arquitectura de plugins extensible para productos personalizados centrados en datos. | Modelo core de base de datos Base, comandos, mutations, integración de fórmulas, UI de workbench, editores de campos e integración con el motor de renderizado. |
 | **Servidor y runtime** | Runtime headless en Node.js, patrones RPC/Web Worker y primitivas de automatización orientada al servidor. | Servidor de colaboración, cliente de colaboración para Node.js, servicios SSR, delegación de cómputo, cálculo del lado del servidor y herramientas de replay de changesets de colaboración. |
 
-Las funciones Pro están documentadas en la [guía de Univer Pro](https://docs.univer.ai/guides/pro). Se separan aquí intencionalmente para que el alcance OSS sea claro.
+Las funciones del editor se documentan en las [guías del Web SDK](https://docs.univer.ai/guides/sheets). Para la integración del backend, consulta los capítulos del Server SDK sobre [colaboración](https://docs.univer.ai/server/collaboration/overview) e [importación y exportación de archivos](https://docs.univer.ai/server/import-export).
+
+Para consultas sobre licencias comerciales y compras, [ponte en contacto con nosotros](https://univer.ai/#contact). Consulta la [configuración de licencias](https://docs.univer.ai/server/license) para configurar una licencia en tu aplicación.
 
 Principios de separación:
 
@@ -325,7 +327,7 @@ Principios de separación:
 - **Core SDK**: [`dream-num/univer`](https://github.com/dream-num/univer), este monorepo.
 - **Presets**: los [`presets/`](../../presets) de este repositorio, colecciones de plugins para aplicaciones en navegador y Node.js.
 - **AI agent skills**: [`dream-num/univer-sdk-skills`](https://github.com/dream-num/univer-sdk-skills), instrucciones reutilizables para agentes de IA que trabajan con integración de Univer, funciones Pro, desarrollo de plugins y backends Node. Consulta la [guía de AI Skills](https://docs.univer.ai/guides/skills).
-- **Documentación**: [docs.univer.ai](https://docs.univer.ai), con guías de Sheets, Docs, Slides, recipes y Pro.
+- **Documentación**: [docs.univer.ai](https://docs.univer.ai), con guías de Web SDK, Server SDK y AI SDK, además de la referencia de la API.
 - **Web SDK**: [editores integrables y procesamiento sin interfaz](https://docs.univer.ai/guides/sheets) en el navegador y en Node.js.
 - **Server SDK**: [colaboración y conversión de archivos](https://docs.univer.ai/server), integradas con el almacenamiento, la autenticación y los permisos de tu aplicación.
 - **AI SDK**: [flujos de agentes](https://docs.univer.ai/ai) para inspeccionar, editar y verificar contenido ofimático.

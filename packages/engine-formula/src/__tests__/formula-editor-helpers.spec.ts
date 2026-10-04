@@ -20,7 +20,9 @@ import {
     findFormulaStructuredReferences,
     getFormulaHighlightDataStream,
     getFormulaReplaceResult,
+    isFormulaReferenceAddingTextContext,
     resolveFormulaReferenceEditingContext,
+    shouldSkipReferenceInsertion,
 } from '../formula-editor-helpers';
 
 describe('formula editor helpers', () => {
@@ -127,5 +129,48 @@ describe('formula editor helpers', () => {
             startIndex: 4,
             endIndex: 30,
         }]);
+    });
+
+    // https://github.com/dream-num/univer/issues/7676
+    it('allows adding a reference after a space following a comma', () => {
+        expect(isFormulaReferenceAddingTextContext('SUM(A1, ', 8)).toBe(true);
+    });
+
+    // https://github.com/dream-num/univer/issues/7676
+    it('allows adding a reference after a line break', () => {
+        expect(isFormulaReferenceAddingTextContext('IF(\r\n', 5)).toBe(true);
+        expect(isFormulaReferenceAddingTextContext('IF(\n', 4)).toBe(true);
+        expect(isFormulaReferenceAddingTextContext('IF(\r\n  ', 7)).toBe(true);
+    });
+
+    // https://github.com/dream-num/univer/issues/7676
+    it('does not allow adding a reference after a completed formula on a new line', () => {
+        expect(isFormulaReferenceAddingTextContext('SUM(A1)\r\n', 9)).toBe(false);
+        expect(isFormulaReferenceAddingTextContext('SUM(A1) ', 9)).toBe(true);
+    });
+
+    // https://github.com/dream-num/univer/issues/7676
+    it('resolves add mode when the cursor is after a line break', () => {
+        expect(resolveFormulaReferenceEditingContext({
+            formulaText: 'IF(\r\n',
+            sequenceNodes: ['IF', '('],
+            offset: 5,
+        })).toMatchObject({ mode: 'add', referenceIndex: -1 });
+    });
+
+    // https://github.com/dream-num/univer/issues/7676
+    it('does not skip insertion when the cursor is past the last node but the text allows a reference', () => {
+        expect(shouldSkipReferenceInsertion(-1, 2, 'SUM(A1, ', 8)).toBe(false);
+        expect(shouldSkipReferenceInsertion(-1, 2, 'IF(\r\n', 5)).toBe(false);
+    });
+
+    // https://github.com/dream-num/univer/issues/7676
+    it('skips insertion when the cursor is past the last node and the text disallows a reference', () => {
+        expect(shouldSkipReferenceInsertion(-1, 2, 'SUM(A1)\r\n', 9)).toBe(true);
+    });
+
+    it('does not skip insertion when the cursor is on a sequence node or there are no nodes', () => {
+        expect(shouldSkipReferenceInsertion(0, 2, 'SUM(A1)\r\n', 9)).toBe(false);
+        expect(shouldSkipReferenceInsertion(-1, 0, 'SUM(A1, ', 8)).toBe(false);
     });
 });

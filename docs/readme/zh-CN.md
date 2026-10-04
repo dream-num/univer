@@ -311,7 +311,9 @@ Sheets、Docs 和 Slides 基于 Univer 的共享架构，分别提供电子表�
 | **Bases** | 用于自定义数据类产品的可扩展插件架构。 | Base 数据库核心模型、命令、变更、公式集成、工作台 UI、字段编辑器和渲染引擎集成。 |
 | **服务端与运行时** | Node.js 无头运行时、RPC/Web Worker 模式和面向服务端自动化的基础能力。 | 协同服务端、Node.js 协同客户端、SSR 服务、计算委托、服务端计算和协同 changeset 回放工具。 |
 
-Pro 功能请参考 [Univer Pro 指南](https://docs.univer.ai/guides/pro)。这里将其单独列出，是为了清晰区分 OSS 包的能力边界。
+编辑器功能请参考 [Web SDK 文档](https://docs.univer.ai/guides/sheets)。服务端集成请参考 Server SDK 中的[协同](https://docs.univer.ai/server/collaboration/overview)和[文件导入导出](https://docs.univer.ai/server/import-export)章节。
+
+商业授权和购买咨询请[联系我们](https://univer.ai/#contact)。在应用中配置许可证，请参考[许可证配置](https://docs.univer.ai/server/license)。
 
 边界原则：
 
@@ -325,7 +327,7 @@ Pro 功能请参考 [Univer Pro 指南](https://docs.univer.ai/guides/pro)。这
 - **核心 SDK**：[`dream-num/univer`](https://github.com/dream-num/univer)，也就是当前 monorepo。
 - **Presets**：本仓库的 [`presets/`](../../presets)，面向浏览器和 Node.js 应用的预设插件集合。
 - **AI agent skills**：[`dream-num/univer-sdk-skills`](https://github.com/dream-num/univer-sdk-skills)，供 AI agent 使用的可复用说明，覆盖 Univer 集成、Pro 功能、插件开发和 Node 后端。参见 [AI Skills 指南](https://docs.univer.ai/guides/skills)。
-- **文档**：[docs.univer.ai](https://docs.univer.ai)，包含 Sheets、Docs、Slides、recipes 和 Pro 指南。
+- **文档**：[docs.univer.ai](https://docs.univer.ai)，包含 Web SDK、Server SDK 和 AI SDK 指南及 API 参考。
 - **Web SDK**：在浏览器和 Node.js 中提供[嵌入式编辑器与无头处理](https://docs.univer.ai/guides/sheets)能力。
 - **Server SDK**：将[协作与文件转换](https://docs.univer.ai/server)接入应用的存储、身份认证和权限系统。
 - **AI SDK**：通过 [Agent 工作流](https://docs.univer.ai/ai)检查、编辑和验证办公内容。

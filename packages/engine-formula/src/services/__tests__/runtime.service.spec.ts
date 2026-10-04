@@ -112,6 +112,23 @@ describe('FormulaRuntimeService', () => {
         }
     });
 
+    it.each([
+        { source: { f: '=SUM(A1:B2)', si: 'shared' }, expected: { f: '=SUM(A1:B2)', si: 'shared' } },
+        { source: { f: '=SUM(A1:B2)', si: 'shared', x: 1, y: 0 }, expected: { f: '', si: 'shared' } },
+    ])('keeps the original shared formula identity when its live cell is replaced: $source', ({ source, expected }) => {
+        const { injector, runtime, unitDataMatrix } = createRuntimeService();
+        try {
+            injector.get(IFormulaCurrentConfigService).registerFormulaData({ unit: { sheet: { 2: { 3: source } } } });
+            unitDataMatrix.setValue(2, 3, { f: '=42', v: 42 });
+            runtime.setCurrent(2, 3, 20, 20, 'sheet', 'unit');
+            runtime.setRuntimeData(NumberValueObject.create(10));
+
+            expect(runtime.getAllRuntimeData().sourceFormulaData?.unit?.sheet?.[2]?.[3]).toEqual(expected);
+        } finally {
+            injector.dispose();
+        }
+    });
+
     it('indexes scalar and spilled null results as blanks, consistently with reference scans', () => {
         const { injector, runtime } = createRuntimeService();
         CELL_INVERTED_INDEX_CACHE.clear();

@@ -444,7 +444,14 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         this._currentSubUnitId = sheetId;
         this._currentUnitId = unitId;
         const cell = this._currentConfigService.getUnitData()[unitId]?.[sheetId]?.cellData.getValue(row, column);
-        this._currentSourceFormula = cell?.f || cell?.si ? { f: cell.f ?? '', si: cell.si ?? undefined } : undefined;
+        const formula = this._currentConfigService.getFormulaData()[unitId]?.[sheetId]?.[row]?.[column];
+        // The live cell may be cleared while an earlier asynchronous dependency is still executing.
+        if (formula) {
+            const isSharedFollower = (formula.x ?? 0) !== 0 || (formula.y ?? 0) !== 0;
+            this._currentSourceFormula = { f: isSharedFollower ? '' : formula.f, si: formula.si };
+        } else {
+            this._currentSourceFormula = cell?.f || cell?.si ? { f: cell.f ?? '', si: cell.si ?? undefined } : undefined;
+        }
     }
 
     setFunctionRefInfoOverride(rowCount: number, columnCount: number) {

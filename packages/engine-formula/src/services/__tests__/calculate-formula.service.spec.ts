@@ -212,6 +212,67 @@ describe('CalculateFormulaService', () => {
         FORMULA_REF_TO_ARRAY_CACHE.clear();
     });
 
+    it('retains a queued scalar source when a preceding asynchronous dependency allows its cell to be cleared', async () => {
+        const testBed = createFunctionTestBed(undefined, [
+            [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
+            [IDependencyManagerService, { useClass: DependencyManagerService }],
+        ]);
+        const formula = '=WAITFORVALUE(A1)';
+        const cells = new ObjectMatrix<ICellData>({ 0: { 0: { f: '=WAITFORVALUE()' }, 2: { f: formula } } });
+        let releaseResult: (value: number) => void = () => {};
+        let markStarted: () => void = () => {};
+        const delayedValue = new Promise<number>((resolve) => {
+            releaseResult = resolve;
+        });
+        const started = new Promise<void>((resolve) => {
+            markStarted = resolve;
+        });
+        const executor = new AsyncCustomFunction('WAITFORVALUE');
+        executor.calculateCustom = () => {
+            markStarted();
+            return delayedValue;
+        };
+        testBed.get(IFunctionService).registerExecutors(executor);
+        const service = testBed.get(ICalculateFormulaService);
+        let markCompleted: (data: IAllRuntimeData) => void = () => {};
+        const completed = new Promise<IAllRuntimeData>((resolve) => {
+            markCompleted = resolve;
+        });
+        const subscription = service.executionCompleteListener$.subscribe(markCompleted);
+        try {
+            const execution = service.execute({
+                allUnitData: { [testBed.unitId]: { [testBed.sheetId]: {
+                    ...testBed.sheetData[testBed.sheetId],
+                    cellData: cells,
+                } } },
+                unitSheetNameMap: { [testBed.unitId]: { [testBed.sheetId]: 'Sheet1' } },
+                unitStylesData: {},
+                formulaData: { [testBed.unitId]: { [testBed.sheetId]: { 0: {
+                    0: { f: '=WAITFORVALUE()' },
+                    2: { f: formula },
+                } } } },
+                arrayFormulaCellData: {},
+                arrayFormulaRange: {},
+                forceCalculate: true,
+                dirtyRanges: [],
+                dirtyNameMap: {},
+                dirtyDefinedNameMap: {},
+                dirtyUnitFeatureMap: {},
+                dirtyUnitOtherFormulaMap: {},
+            });
+            await started;
+            cells.realDeleteValue(0, 2);
+            releaseResult(9);
+            const [result] = await Promise.all([completed, execution]);
+            expect(result.unitData[testBed.unitId]?.[testBed.sheetId]?.getValue(0, 2)?.v).toBe(9);
+            expect(result.sourceFormulaData?.[testBed.unitId]?.[testBed.sheetId]?.[0]?.[2]?.f).toBe(formula);
+        } finally {
+            releaseResult(9);
+            subscription.unsubscribe();
+            testBed.univer.dispose();
+        }
+    });
+
     it('retains an in-flight scalar formula source when its replacement is queued', async () => {
         const testBed = createFunctionTestBed(undefined, [
             [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],

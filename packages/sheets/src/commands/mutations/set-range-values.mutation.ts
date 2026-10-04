@@ -53,6 +53,9 @@ export interface ISetRangeValuesMutationParams extends IMutationCommonParams {
      * @default false
      */
     isOverrideStyle?: boolean;
+
+    /** Formula identities retained for conditional result application across Worker replay. */
+    sourceFormulaData?: IObjectMatrixPrimitiveType<Pick<ICellData, 'f' | 'si'>>;
 }
 
 export interface ISetRangeValuesRangeMutationParams extends ISetRangeValuesMutationParams {
@@ -67,7 +70,7 @@ export interface ISetRangeValuesRangeMutationParams extends ISetRangeValuesMutat
 export function prepareSetRangeValuesMutation(
     cells: ObjectMatrix<Nullable<ICellData>>,
     styles: Styles,
-    params: Pick<ISetRangeValuesMutationParams, 'cellValue' | 'isOverrideStyle'>
+    params: Pick<ISetRangeValuesMutationParams, 'cellValue' | 'isOverrideStyle' | 'sourceFormulaData'>
 ): {
     before: IObjectMatrixPrimitiveType<Nullable<ICellData>>;
     after: IObjectMatrixPrimitiveType<Nullable<ICellData>>;
@@ -78,6 +81,9 @@ export function prepareSetRangeValuesMutation(
     const after = new ObjectMatrix<Nullable<ICellData>>();
     new ObjectMatrix(Tools.deepClone(params.cellValue)).forValue((row, column, value) => {
         const original = Tools.deepClone(cells.getValue(row, column) ?? null);
+        if (isStaleFormulaResult(original, params.sourceFormulaData?.[row]?.[column])) {
+            return;
+        }
         before.setValue(row, column, original);
         const next = value ? mergeCellData(value, Tools.deepClone(original ?? {}), detachedStyles, !!params.isOverrideStyle) : null;
         after.setValue(row, column, next && !Tools.isEmptyObject(next) ? next : null);
@@ -153,7 +159,7 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
     type: CommandType.MUTATION,
 
     handler: (accessor, params) => {
-        const { cellValue, subUnitId, unitId, isOverrideStyle } = params;
+        const { cellValue, subUnitId, unitId, isOverrideStyle, sourceFormulaData } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getUnit<Workbook>(unitId);
         if (!workbook) {
@@ -170,6 +176,9 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
         const newValues = new ObjectMatrix(cellValue);
 
         newValues.forValue((row, col, newVal) => {
+            if (isStaleFormulaResult(cellMatrix.getValue(row, col), sourceFormulaData?.[row]?.[col])) {
+                return;
+            }
             // clear all
             if (!newVal) {
                 cellMatrix.realDeleteValue(row, col);
@@ -188,6 +197,10 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
         return true;
     },
 };
+
+function isStaleFormulaResult(cell: Nullable<ICellData>, source: Nullable<Pick<ICellData, 'f' | 'si'>>): boolean {
+    return source != null && (source.f !== (cell?.f ?? '') || source.si !== (cell?.si ?? undefined));
+}
 
 const overwriteCellPropertiesSet = new Set(['f', 'p', 'si', 'custom', 'ref', 'xf', 'ft', 'fd']);
 function mergeCellData(newValue: ICellData, oldValue: ICellData, styles: Styles, isOverrideStyle = false) {

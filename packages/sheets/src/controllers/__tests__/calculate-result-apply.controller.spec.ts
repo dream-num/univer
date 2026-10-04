@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, CellValueType, FormulaType, ICommandService } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '../../commands/mutations/set-range-values.mutation';
+import { BooleanNumber, CellValueType, FormulaType, ICommandService, Tools } from '@univerjs/core';
 import { ErrorType, SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
 import { describe, expect, it } from 'vitest';
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
@@ -74,6 +75,54 @@ describe('CalculateResultApplyController', () => {
         expect(sheet.getCellMatrix().getValue(8, 8)?.v).toBe(expected);
         expect(sheet.getCellMatrix().getValue(8, 8)?.f).toBe(cell?.f);
         testBed.univer.dispose();
+    });
+
+    it('keeps scalar formula identity through serialized worker value replay after an undo', () => {
+        const testBed = createFunctionTestBed();
+        const commandService = testBed.get(ICommandService);
+        commandService.registerCommand(SetFormulaCalculationResultMutation);
+        commandService.registerCommand(SetRangeValuesMutation);
+        testBed.get(CalculateResultApplyController);
+        const sheet = testBed.sheet.getSheetBySheetId(testBed.sheetId)!;
+        const formula = '=SUM(A1:B2)';
+        let replay: ISetRangeValuesMutationParams | undefined;
+        const listener = commandService.onCommandExecuted((command, options) => {
+            if (command.id === SetRangeValuesMutation.id && options?.applyFormulaCalculationResult) {
+                replay = JSON.parse(JSON.stringify(command.params));
+            }
+        });
+        try {
+            commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+                unitId: testBed.unitId,
+                subUnitId: testBed.sheetId,
+                cellValue: { 8: { 8: { f: formula } } },
+            });
+            commandService.syncExecuteCommand(SetFormulaCalculationResultMutation.id, {
+                unitData: { [testBed.unitId]: { [testBed.sheetId]: { 8: { 8: { v: 10, t: CellValueType.NUMBER } } } } },
+                sourceFormulaData: { [testBed.unitId]: { [testBed.sheetId]: { 8: { 8: { f: formula } } } } },
+                unitOtherData: {},
+            });
+            expect(sheet.getCellMatrix().getValue(8, 8)?.v).toBe(10);
+            const delayedReplay = Tools.deepClone(replay);
+            commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+                unitId: testBed.unitId,
+                subUnitId: testBed.sheetId,
+                cellValue: { 8: { 8: null } },
+            });
+            expect(delayedReplay).toBeDefined();
+            commandService.syncExecuteCommand(SetRangeValuesMutation.id, delayedReplay);
+            expect(sheet.getCellMatrix().getValue(8, 8)).toBeUndefined();
+            commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+                unitId: testBed.unitId,
+                subUnitId: testBed.sheetId,
+                cellValue: { 8: { 8: { f: formula } } },
+            });
+            commandService.syncExecuteCommand(SetRangeValuesMutation.id, delayedReplay);
+            expect(sheet.getCellMatrix().getValue(8, 8)).toMatchObject({ f: formula, v: 10 });
+        } finally {
+            listener.dispose();
+            testBed.univer.dispose();
+        }
     });
 
     it.each([ErrorType.REF, ErrorType.NAME, ErrorType.DIV_BY_ZERO])('applies calculated %s errors to fixed and dynamic arrays', async (error) => {

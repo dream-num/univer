@@ -46,6 +46,37 @@ describe('SetRangeValuesMutation preparation', () => {
         expect(prepared.after[0][0]).toMatchObject({ v: '12', t: CellValueType.FORCE_STRING });
     });
 
+    it.each([
+        { cell: null, source: { f: '=SUM(A1:B2)' }, accepts: false },
+        { cell: { v: 42 }, source: { f: '=SUM(A1:B2)' }, accepts: false },
+        { cell: { f: '=2', v: 2 }, source: { f: '=SUM(A1:B2)' }, accepts: false },
+        { cell: { f: '=SUM(A1:B2)' }, source: { f: '=SUM(A1:B2)' }, accepts: true },
+        { cell: { si: 'shared-1' }, source: { f: '', si: 'shared-1' }, accepts: true },
+        { cell: { si: 'shared-2' }, source: { f: '', si: 'shared-1' }, accepts: false },
+    ])('validates delayed formula writes during preparation and replay ($cell)', ({ cell, source, accepts }) => {
+        const sheet = bed.sheet.getSheets()[0];
+        const commandService = bed.get(ICommandService);
+        const address = { unitId: bed.sheet.getUnitId(), subUnitId: sheet.getSheetId() };
+        commandService.syncExecuteCommand(SetRangeValuesMutation.id, { ...address, cellValue: { 0: { 0: cell } } });
+        const before = Tools.deepClone(sheet.getCellMatrix().getValue(0, 0));
+        const params: ISetRangeValuesMutationParams = {
+            ...address,
+            cellValue: { 0: { 0: { v: 10, t: CellValueType.NUMBER } } },
+            sourceFormulaData: { 0: { 0: source } },
+        };
+        const prepared = prepareSetRangeValuesMutation(sheet.getCellMatrix(), bed.sheet.getStyles(), params);
+        commandService.syncExecuteCommand(SetRangeValuesMutation.id, JSON.parse(JSON.stringify(params)));
+        if (accepts) {
+            expect(prepared.after[0][0]).toMatchObject({ ...before, v: 10 });
+            expect(sheet.getCellMatrix().getValue(0, 0)).toEqual(prepared.after[0][0]);
+        } else {
+            expect(prepared.before).toEqual({});
+            expect(prepared.after).toEqual({});
+            expect(prepared.styles).toEqual({});
+            expect(sheet.getCellMatrix().getValue(0, 0)).toEqual(before);
+        }
+    });
+
     it('prepares clear and formula/style restoration using the same native normalization', () => {
         const sheet = bed.sheet.getSheets()[0];
         const styles = bed.sheet.getStyles();

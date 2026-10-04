@@ -86,6 +86,7 @@ export class CalculateResultApplyController extends Disposable {
                             subUnitId: sheetId,
                             unitId,
                             cellValue,
+                            sourceFormulaData: sourceFormulaData?.[unitId]?.[sheetId],
                         };
 
                         redoMutationsInfo.push({

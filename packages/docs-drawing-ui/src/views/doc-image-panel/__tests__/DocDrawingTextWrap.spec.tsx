@@ -341,11 +341,11 @@ describe('DocDrawingTextWrap', () => {
             docTransform: {
                 positionH: {
                     relativeFrom: ObjectRelativeFromH.PAGE,
-                    posOffset: 24,
+                    posOffset: 0,
                 },
                 positionV: {
                     relativeFrom: ObjectRelativeFromV.PAGE,
-                    posOffset: 114,
+                    posOffset: 0,
                 },
             },
         });
@@ -369,11 +369,11 @@ describe('DocDrawingTextWrap', () => {
             docTransform: {
                 positionH: {
                     relativeFrom: ObjectRelativeFromH.PAGE,
-                    posOffset: 24,
+                    posOffset: 0,
                 },
                 positionV: {
                     relativeFrom: ObjectRelativeFromV.PAGE,
-                    posOffset: 114,
+                    posOffset: 0,
                 },
             },
         });
@@ -401,11 +401,11 @@ describe('DocDrawingTextWrap', () => {
             docTransform: {
                 positionH: {
                     relativeFrom: ObjectRelativeFromH.PAGE,
-                    posOffset: 24,
+                    posOffset: 0,
                 },
                 positionV: {
                     relativeFrom: ObjectRelativeFromV.PAGE,
-                    posOffset: 114,
+                    posOffset: 0,
                 },
             },
         });

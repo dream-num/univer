@@ -87,7 +87,7 @@ import { Liquid } from '../liquid';
 import { getDocsTableRenderViewport, hasDocsTableHorizontalViewport } from '../table-render-viewport';
 import { DocumentEditArea } from '../view-model/document-view-model';
 import { getHyphenationLanguage } from './block/paragraph/shaping';
-import { dealWithSection } from './block/section';
+import { dealWithSection, rollbackSectionPages } from './block/section';
 import {
     cachePrecomputedSlicedTableSkeletons,
     cachePrecomputedTableSkeleton,
@@ -3867,7 +3867,14 @@ export class DocumentSkeleton extends Skeleton {
                             }
                             const startX = divideLeft + glyph.left;
                             const endX = startX + glyph.width;
-                            const node = { node: glyph, ...segment, ratioX: x / (startX + endX), ratioY: y / (startY + endY) };
+                            const contentTop = startY + (line.marginTop ?? 0) + (line.paddingTop ?? 0);
+                            const node = {
+                                node: glyph,
+                                ...segment,
+                                ratioX: x / (startX + endX),
+                                ratioY: y / (startY + endY),
+                                isInsideGlyph: x >= startX && x <= endX && y >= contentTop && y <= contentTop + line.contentHeight,
+                            };
                             if (sameLine && x >= startX && x <= endX) {
                                 return node;
                             }
@@ -3934,7 +3941,13 @@ export class DocumentSkeleton extends Skeleton {
                                 && y >= baseline - bBox.aba && y <= baseline + bBox.abd;
                             const sameLine = hitsLine || hitsPaintedVerticalBounds;
                             const distanceY = sameLine ? Number.NEGATIVE_INFINITY : Math.abs(y - endY);
-                            const node = { node: glyph, ...segment, ratioX: x / (startX + endX), ratioY: y / (startY + endY) };
+                            const node = {
+                                node: glyph,
+                                ...segment,
+                                ratioX: x / (startX + endX),
+                                ratioY: y / (startY + endY),
+                                isInsideGlyph: x >= startX && x <= endX && sameLine,
+                            };
                             const hitsGlyphAdvance = x >= startX && x <= endX;
                             if (sameLine) {
                                 const usesPositionedAdvance = ts?.textAdvance !== undefined && glyph.content.length === 1 && !ts.textSkewX;
@@ -4992,8 +5005,9 @@ export class DocumentSkeleton extends Skeleton {
             .slice(0, sectionIndex)
             .reduce((count, item) => count + item.children.length, 0);
 
-        // dealWithSection has already rolled the active skeleton back to this
-        // paragraph. Resume from that checkpoint in a later scheduler slice.
+        // A float can invalidate a paragraph on an earlier page, outside the
+        // single block passed to dealWithSection in this scheduler slice.
+        rollbackSectionPages(layoutAnchor, ctx.skeleton.pages);
         state.sectionIndex = sectionIndex;
         state.paragraphIndex = paragraphIndex;
         state.sectionInitialized = false;

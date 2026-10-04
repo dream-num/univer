@@ -66,6 +66,7 @@ import { DocumentSkeletonPageType, GlyphType, LineType } from '../../basics/i-do
 import { VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
 import { degToRad, fixLineWidthByScale } from '../../basics/tools';
 import { Vector2 } from '../../basics/vector2';
+import { DrawingGroupObject } from '../../drawing-group';
 import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
 import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
@@ -383,9 +384,32 @@ export class Documents extends DocComponent {
 
     override isHit(coord: Vector2): boolean {
         if (super.isHit(coord)) {
+            // Keep text editable over behind-text drawings, but let exposed drawing areas receive the pointer.
+            const drawingHit = this.getScene()?.getAllObjectsByOrderForPick().some((object) =>
+                (object.isDrawingObject || object instanceof DrawingGroupObject) &&
+                !object.isInGroup && object.visible && object.evented && object.isHit(coord)
+            );
+            const skeleton = this.getSkeleton();
+            if (drawingHit && skeleton) {
+                const node = skeleton.findNodeByCoord(
+                    this.getInverseCoord(coord),
+                    this.pageLayoutType,
+                    this.pageMarginLeft,
+                    this.pageMarginTop
+                );
+                if (node?.isInsideGlyph) {
+                    return true;
+                }
+                // Preserve table padding, borders and controls above drawings behind the document.
+                return this._isHitTable(coord);
+            }
             return true;
         }
 
+        return this._isHitTable(coord);
+    }
+
+    private _isHitTable(coord: Vector2): boolean {
         const skeletonData = this.getSkeleton()?.getSkeletonData();
         if (!skeletonData) {
             return false;

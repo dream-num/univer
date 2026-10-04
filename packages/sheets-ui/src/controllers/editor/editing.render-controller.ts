@@ -86,7 +86,7 @@ import {
     VIEWPORT_KEY,
 } from '@univerjs/docs-ui';
 import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
-import { convertTextRotation, DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { convertTextRotation, DeviceInputEventType, IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
 import {
     adjustRangeOnMutation,
     COMMAND_LISTENER_SKELETON_CHANGE,
@@ -591,8 +591,21 @@ export class EditingRenderController extends Disposable {
         this._resizeEditorOnOpen(param, editorObject, !!isInArrayFormulaRange);
 
         const clearAndEdit = () => {
+            const resetPointerSelection = isInArrayFormulaRange && eventType === DeviceInputEventType.PointerDown;
+            const editorId = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR)
+                ? DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
+                : this._editorBridgeService.getCurrentEditorId();
+            if (resetPointerSelection) {
+                // The pointer anchor was measured against inherited text that is about to be cleared.
+                this._renderManagerService.getRenderUnitById(editorId)
+                    ?.with(DocSelectionRenderService)
+                    .cancelPointerSelection();
+            }
             this._emptyDocumentDataModel(documentDataModel.getSnapshot().documentStyle, !!isInArrayFormulaRange);
             document.makeDirty();
+            if (resetPointerSelection) {
+                this._getEditorSkeleton(editorId)?.calculate();
+            }
 
             // @JOCS, Why calculate here?
             if (keycode === KeyCode.BACKSPACE || eventType === DeviceInputEventType.Dblclick) {
@@ -610,6 +623,20 @@ export class EditingRenderController extends Disposable {
                     subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
                 }
             );
+            if (resetPointerSelection && editorId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+                const selectionTarget = { unitId: editorId, subUnitId: editorId };
+                const previousSelection = this._textSelectionManagerService.getSelectionInfo(selectionTarget);
+                // Native input must retain a caret while the refreshed formula-bar geometry is not ready.
+                this._textSelectionManagerService.replaceSelectionInfoWithoutRefresh({
+                    textRanges: [{ startOffset: 0, endOffset: 0, collapsed: true, isActive: true }],
+                    rectRanges: [],
+                    segmentId: '',
+                    segmentPage: -1,
+                    style: previousSelection?.style ?? NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+                    isEditing: true,
+                }, selectionTarget);
+                this._textSelectionManagerService.refreshSelection(selectionTarget, true);
+            }
         };
         const replaceSelection = (selection: ITextRange) => {
             // An embedded sheet may open its editor while the host document retains global focus.
@@ -625,7 +652,7 @@ export class EditingRenderController extends Disposable {
         const cellImage = isCellImage(documentDataModel.getSnapshot());
         this._submitEmptyCellImageEdit = cellImage && eventType === DeviceInputEventType.Keyboard && keycode === KeyCode.BACKSPACE;
 
-        if (cellImage) {
+        if (cellImage || isInArrayFormulaRange) {
             clearAndEdit();
         } else if (eventType === DeviceInputEventType.Keyboard && keycode === KeyCode.F2) {
             // f2, continue to edit
@@ -633,11 +660,7 @@ export class EditingRenderController extends Disposable {
             replaceSelection({ startOffset: 0, endOffset: 0, collapsed: true });
             const endOffset = (documentDataModel.getBody()?.dataStream.length ?? 2) - 2;
             replaceSelection(percentSelection ?? { startOffset: endOffset, endOffset, collapsed: true });
-        } else if (
-            // clear and edit
-            eventType === DeviceInputEventType.Keyboard ||
-            (eventType === DeviceInputEventType.Dblclick && isInArrayFormulaRange)
-        ) {
+        } else if (eventType === DeviceInputEventType.Keyboard) {
             if (percentSelection) {
                 replaceSelection(percentSelection);
             } else {

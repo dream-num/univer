@@ -45,7 +45,6 @@ import type {
 import type { ISheetDrawingTransformExtensionResult, ISheetDrawingTransformPlan } from '../services/sheet-drawing-transform-plan.service';
 import type { ISheetDrawing, ISheetDrawingPosition } from '../services/sheet-drawing.service';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, RANGE_TYPE, Rectangle } from '@univerjs/core';
-
 import { IDrawingManagerService } from '@univerjs/drawing';
 import {
     attachRangeWithCoord,

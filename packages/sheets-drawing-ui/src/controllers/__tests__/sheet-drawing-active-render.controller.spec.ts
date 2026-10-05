@@ -41,7 +41,7 @@ function createTestBed() {
     return { ...bed, activated$ };
 }
 
-async function insertDrawing(bed: ReturnType<typeof createTestBed>, anchorType = SheetDrawingAnchorType.Both) {
+async function insertDrawing(bed: ReturnType<typeof createTestBed>, anchorType: SheetDrawingAnchorType | undefined) {
     const sheetTransform = {
         from: { row: 3, column: 3, rowOffset: 0, columnOffset: 0 },
         to: { row: 6, column: 6, rowOffset: 0, columnOffset: 0 },
@@ -74,7 +74,7 @@ describe('SheetDrawingActiveRenderController', () => {
     it.each(['row', 'column'] as const)('keeps activation geometry consistent through %s deletion and undo/redo', async (axis) => {
         const bed = createTestBed();
         try {
-            const drawing = await insertDrawing(bed);
+            const drawing = await insertDrawing(bed, SheetDrawingAnchorType.Both);
             bed.get(SheetDrawingActiveRenderController);
             const sheetService = bed.get(ISheetDrawingService);
             const manager = bed.get(IDrawingManagerService);
@@ -111,10 +111,10 @@ describe('SheetDrawingActiveRenderController', () => {
         }
     });
 
-    it('preserves unanchored geometry during activation', async () => {
+    it.each([SheetDrawingAnchorType.None, undefined])('preserves unanchored geometry during activation (%s)', async (anchorType) => {
         const bed = createTestBed();
         try {
-            const drawing = await insertDrawing(bed, SheetDrawingAnchorType.None);
+            const drawing = await insertDrawing(bed, anchorType);
             bed.get(SheetDrawingActiveRenderController);
             bed.activated$.next(true);
             vi.runOnlyPendingTimers();
@@ -129,7 +129,7 @@ describe('SheetDrawingActiveRenderController', () => {
     it.each(['deactivated', 'disposed'] as const)('cancels pending activation when the render module is %s', async (state) => {
         const bed = createTestBed();
         try {
-            const drawing = await insertDrawing(bed);
+            const drawing = await insertDrawing(bed, SheetDrawingAnchorType.Both);
             const controller = bed.get(SheetDrawingActiveRenderController);
             const added = vi.fn();
             const subscription = bed.get(IDrawingManagerService).add$.subscribe(added);

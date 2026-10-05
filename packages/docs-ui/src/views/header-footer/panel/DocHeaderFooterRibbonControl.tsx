@@ -127,16 +127,15 @@ function HeaderFooterRibbonControl({ kind, unitId }: IHeaderFooterRibbonControlP
         );
     }
     return (
-        <div
-            className="
-              univer-grid univer-grid-cols-[auto_5rem] univer-items-center univer-gap-x-2 univer-gap-y-1
-              univer-text-start univer-text-xs
-            "
-        >
-            <span>{localeService.t<LocaleKey>('docs-ui.headerFooter.headerTopMargin')}</span>
-            <InputNumber aria-label={localeService.t<LocaleKey>('docs-ui.headerFooter.headerTopMargin')} disabled={disabled} min={0} max={200} precision={1} value={options.marginHeader} onChange={(value) => handleMarginChange(value ?? 0, 'marginHeader')} />
-            <span>{localeService.t<LocaleKey>('docs-ui.headerFooter.footerBottomMargin')}</span>
-            <InputNumber aria-label={localeService.t<LocaleKey>('docs-ui.headerFooter.footerBottomMargin')} disabled={disabled} min={0} max={200} precision={1} value={options.marginFooter} onChange={(value) => handleMarginChange(value ?? 0, 'marginFooter')} />
+        <div className="univer-flex univer-flex-col univer-gap-1 univer-text-start univer-text-xs">
+            <label className="univer-grid univer-grid-cols-[1fr_5rem] univer-items-center univer-gap-x-2">
+                <span>{localeService.t<LocaleKey>('docs-ui.headerFooter.headerTopMargin')}</span>
+                <InputNumber disabled={disabled} min={0} max={200} precision={1} value={options.marginHeader} onChange={(value) => handleMarginChange(value ?? 0, 'marginHeader')} />
+            </label>
+            <label className="univer-grid univer-grid-cols-[1fr_5rem] univer-items-center univer-gap-x-2">
+                <span>{localeService.t<LocaleKey>('docs-ui.headerFooter.footerBottomMargin')}</span>
+                <InputNumber disabled={disabled} min={0} max={200} precision={1} value={options.marginFooter} onChange={(value) => handleMarginChange(value ?? 0, 'marginFooter')} />
+            </label>
         </div>
     );
 }

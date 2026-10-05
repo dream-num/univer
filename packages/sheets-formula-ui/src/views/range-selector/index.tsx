@@ -283,6 +283,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     } = props;
     const [focusing, setFocusing] = useState(autoFocus ?? false);
     const [popupVisible, setPopupVisible] = useState(false);
+    const [tooltipVisible, setTooltipVisible] = useState(false);
     const [rangeSelectorRanges, setRangeSelectorRanges] = useState<IUnitRangeName[]>([]);
     const editorService = useDependency(IEditorService);
     const { sequenceNodes } = useRangesHighlight(editor, focusing, unitId, subUnitId);
@@ -297,6 +298,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     });
 
     const handleOpenModal = useEvent(() => {
+        setTooltipVisible(false);
         blurEditor();
         setRangeSelectorRanges(parseRanges(editor?.getDocumentDataModel()?.getPlainText() ?? ''));
         setPopupVisible(true);
@@ -316,6 +318,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
             blur: blurEditor,
             verify: () => verifyRange(sequenceNodesRef.current),
             showDialog: (ranges) => {
+                setTooltipVisible(false);
                 blurEditor();
                 setRangeSelectorRanges(ranges);
                 setPopupVisible(true);
@@ -369,7 +372,12 @@ export function RangeSelector(props: IRangeSelectorProps) {
                             onClickOutside?.();
                         }}
                         icon={(
-                            <Tooltip title={localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.buttonTooltip')} placement="bottom">
+                            <Tooltip
+                                title={localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.buttonTooltip')}
+                                placement="bottom"
+                                visible={tooltipVisible && !popupVisible}
+                                onVisibleChange={(visible) => setTooltipVisible(visible && !popupVisible)}
+                            >
                                 <SelectRangeIcon
                                     className={`
                                       -univer-translate-y-0.5 univer-cursor-pointer
@@ -408,6 +416,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 keepSheetReference={keepSheetReference}
                 onShowBySelection={(ranges: IUnitRangeName[]) => {
                     if (focusing || forceShowDialogWhenSelectionChanged) {
+                        setTooltipVisible(false);
                         setRangeSelectorRanges(ranges);
                         setPopupVisible(true);
                         return false;

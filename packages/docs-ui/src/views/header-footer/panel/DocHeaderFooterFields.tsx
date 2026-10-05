@@ -19,11 +19,11 @@ import type { IInsertHeaderFooterFieldParams } from '../../../commands/commands/
 import type { LocaleKey } from '../../../locale/types';
 import type { DateTimeFieldFormat } from '../../../utils/date-time-field';
 import { ICommandService, IUniverInstanceService, LOCALE_META, LocaleService } from '@univerjs/core';
-import { Button, Checkbox, Dialog, DropdownMenu, Select } from '@univerjs/design';
+import { Button, Checkbox, Dialog, DropdownMenu, selectClassName } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { CalendarIcon, MoreDownIcon, NumberIcon } from '@univerjs/icons';
 import { ILayoutService, IShortcutService, useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { InsertHeaderFooterFieldCommand } from '../../../commands/commands/insert-header-footer-field.command';
 import { RefreshHeaderFooterFieldsCommand } from '../../../commands/commands/refresh-header-footer-fields.command';
 import { createDateTimeField } from '../../../utils/date-time-field';
@@ -44,6 +44,19 @@ export function DocHeaderFooterFields({ unitId, disabled }: { unitId: string; di
     const locale = LOCALE_META[localeService.getCurrentLocale()].tag;
 
     const dialogOpen = target !== null;
+    const dialogFocusRef = useRef<{ unitId: string; focusedUnitId: string | undefined } | null>(null);
+    useEffect(() => {
+        if (dialogOpen) {
+            return;
+        }
+        const focus = dialogFocusRef.current;
+        dialogFocusRef.current = null;
+        if (focus?.unitId === unitId && instances.getUnit(unitId) &&
+            instances.getFocusedUnit()?.getUnitId() === focus.focusedUnitId) {
+            layout.focus(unitId);
+        }
+    }, [dialogOpen, instances, layout, unitId]);
+
     useEffect(() => {
         if (!dialogOpen) {
             return;
@@ -63,6 +76,7 @@ export function DocHeaderFooterFields({ unitId, disabled }: { unitId: string; di
         if (!selection?.segmentId || !body) {
             return;
         }
+        dialogFocusRef.current = { unitId, focusedUnitId: instances.getFocusedUnit()?.getUnitId() };
         setTarget({ unitId, selection: { ...selection }, segmentId: selection.segmentId, segmentPage: selection.segmentPage, expectedDataStream: body.dataStream });
         setPreviewDate(new Date());
         setError(false);
@@ -116,18 +130,33 @@ export function DocHeaderFooterFields({ unitId, disabled }: { unitId: string; di
                 onClose={() => setTarget(null)}
                 onCancel={() => setTarget(null)}
                 onOk={insertDateTime}
-                onCloseAutoFocus={restoreFocus}
             >
                 <div className="univer-flex univer-flex-col univer-gap-4">
-                    <Select
-                        aria-label={localeService.t<LocaleKey>('docs-ui.headerFooter.dateTime')}
-                        value={format}
-                        onChange={(value) => setFormat(value as DateTimeFieldFormat)}
-                        options={(['short', 'long', 'time'] as const).map((value) => ({
-                            value,
-                            label: createDateTimeField(value, locale, previewDate).cachedResult,
-                        }))}
-                    />
+                    <DropdownMenu
+                        align="start"
+                        className="univer-w-[--radix-popper-anchor-width]"
+                        items={[{
+                            type: 'radio',
+                            value: format,
+                            hideIndicator: true,
+                            onSelect: (value) => setFormat(value as DateTimeFieldFormat),
+                            options: (['short', 'long', 'time'] as const).map((value) => ({
+                                value,
+                                label: createDateTimeField(value, locale, previewDate).cachedResult,
+                            })),
+                        }]}
+                    >
+                        <Button
+                            aria-label={localeService.t<LocaleKey>('docs-ui.headerFooter.dateTime')}
+                            className={selectClassName}
+                            data-u-comp="select"
+                        >
+                            <span className="univer-flex-1 univer-truncate univer-text-start">
+                                {createDateTimeField(format, locale, previewDate).cachedResult}
+                            </span>
+                            <MoreDownIcon aria-hidden="true" />
+                        </Button>
+                    </DropdownMenu>
                     <Checkbox checked={automatic} onChange={(value) => setAutomatic(Boolean(value))}>
                         {localeService.t<LocaleKey>('docs-ui.headerFooter.updateAutomatically')}
                     </Checkbox>

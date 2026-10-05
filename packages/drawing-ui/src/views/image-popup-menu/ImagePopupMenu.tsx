@@ -212,16 +212,23 @@ function ToolbarButton(props: {
     children: ReactNode;
     onClick: () => void;
 }) {
+    const [tooltipVisible, setTooltipVisible] = useState(false);
+
     return (
         <Tooltip
             className="univer-fill-mode-backwards univer-delay-100"
             title={props.title}
             placement="bottom"
+            visible={tooltipVisible}
+            onVisibleChange={setTooltipVisible}
         >
             <button
                 type="button"
                 disabled={props.disabled}
-                onClick={props.onClick}
+                onClick={() => {
+                    setTooltipVisible(false);
+                    props.onClick();
+                }}
                 className={clsx(`
                   univer-flex univer-h-6 univer-w-6 univer-items-center univer-justify-center univer-rounded-md
                   univer-border-none univer-bg-transparent univer-p-0 univer-text-sm univer-text-gray-700
@@ -247,12 +254,18 @@ function ToolbarDropdownButton<T extends string | number>(props: {
     onChange: (value: T) => void;
 }) {
     const [open, setOpen] = useState(false);
+    const [tooltipVisible, setTooltipVisible] = useState(false);
     const activeOption = props.options.find((option) => option.value === props.value) ?? props.options[0];
 
     return (
         <Dropdown
             open={open}
-            onOpenChange={setOpen}
+            onOpenChange={(open) => {
+                setOpen(open);
+                if (open) {
+                    setTooltipVisible(false);
+                }
+            }}
             overlay={(
                 <div
                     className={`
@@ -292,6 +305,8 @@ function ToolbarDropdownButton<T extends string | number>(props: {
                     className="univer-fill-mode-backwards univer-delay-100"
                     title={props.title}
                     placement="bottom"
+                    visible={tooltipVisible && !open}
+                    onVisibleChange={(visible) => setTooltipVisible(visible && !open)}
                 >
                     <button
                         type="button"

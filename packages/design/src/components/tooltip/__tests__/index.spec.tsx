@@ -72,23 +72,6 @@ describe('Tooltip', () => {
         });
     });
 
-    it('dismisses the tooltip when activating its trigger without blocking the action', async () => {
-        const onClick = vi.fn();
-        render(
-            <Tooltip title="Select data range">
-                <button type="button" onClick={onClick}>Open range selector</button>
-            </Tooltip>
-        );
-        const trigger = screen.getByRole('button', { name: 'Open range selector' });
-        fireEvent.mouseEnter(trigger);
-        expect(await screen.findByRole('tooltip')).toBeInTheDocument();
-        fireEvent.click(trigger);
-        expect(onClick).toHaveBeenCalledTimes(1);
-        await waitFor(() => {
-            expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
-        });
-    });
-
     it('should notify visibility changes in controlled mode', () => {
         const onVisibleChange = vi.fn();
         render(

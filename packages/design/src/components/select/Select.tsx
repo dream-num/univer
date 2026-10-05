@@ -34,7 +34,6 @@ interface IOptionSeparator {
 }
 
 export interface ISelectProps {
-    'aria-label'?: string;
     className?: string;
 
     /**
@@ -81,7 +80,6 @@ export const selectClassName = clsx(`
 export function Select(props: ISelectProps) {
     const {
         className,
-        'aria-label': ariaLabel,
         value,
         disabled = false,
         options = [],
@@ -167,10 +165,6 @@ export function Select(props: ISelectProps) {
         >
             <div
                 data-u-comp="select"
-                role="button"
-                tabIndex={disabled ? -1 : 0}
-                aria-label={ariaLabel}
-                aria-disabled={disabled}
                 className={clsx(selectClassName, {
                     'univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-50 dark:!univer-ring-primary-900': open && !borderless,
                     'univer-border-transparent univer-bg-transparent hover:univer-border-transparent': borderless,

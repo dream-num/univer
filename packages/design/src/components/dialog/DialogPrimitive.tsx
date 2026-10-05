@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ComponentPropsWithoutRef, ElementRef, HTMLAttributes } from 'react';
+import type { ComponentPropsWithoutRef, ComponentRef, HTMLAttributes } from 'react';
 import { Close, Content, Description, Overlay, Portal, Root, Title, Trigger } from '@radix-ui/react-dialog';
 import { CloseIcon } from '@univerjs/icons';
 import { forwardRef } from 'react';
@@ -30,7 +30,7 @@ const DialogPortal = Portal;
 const DialogClose = Close;
 
 const DialogOverlay = forwardRef<
-    ElementRef<typeof Overlay>,
+    ComponentRef<typeof Overlay>,
     ComponentPropsWithoutRef<typeof Overlay>
 >(({ className, ...props }, ref) => (
     <Overlay
@@ -55,7 +55,7 @@ export interface IDialogContentProps {
     overlayClassName?: string;
 }
 const DialogContent = forwardRef<
-    ElementRef<typeof Content>,
+    ComponentRef<typeof Content>,
     ComponentPropsWithoutRef<typeof Content> & IDialogContentProps
 >(({ className, children, closable = true, onClickClose, mountContainer, overlayClassName, ...props }, ref) => (
     <DialogPortal container={mountContainer ?? undefined}>
@@ -92,7 +92,13 @@ const DialogContent = forwardRef<
                       disabled:univer-pointer-events-none
                       rtl:univer-left-4 rtl:univer-right-auto
                     `}
-                    onClick={onClickClose}
+                    onClick={(event) => {
+                        if (onClickClose) {
+                            // The custom callback owns dismissal; skip Radix's second close.
+                            event.preventDefault();
+                            onClickClose();
+                        }
+                    }}
                 >
                     <CloseIcon className="univer-size-4 univer-text-gray-400" />
                     <span className="univer-sr-only">Close</span>
@@ -141,7 +147,7 @@ const DialogFooter = ({
 DialogFooter.displayName = 'DialogFooter';
 
 const DialogTitle = forwardRef<
-    ElementRef<typeof Title>,
+    ComponentRef<typeof Title>,
     ComponentPropsWithoutRef<typeof Title>
 >(({ className, ...props }, ref) => (
     <Title
@@ -160,7 +166,7 @@ const DialogTitle = forwardRef<
 DialogTitle.displayName = Title.displayName;
 
 const DialogDescription = forwardRef<
-    ElementRef<typeof Description>,
+    ComponentRef<typeof Description>,
     ComponentPropsWithoutRef<typeof Description>
 >(({ className, ...props }, ref) => (
     <Description

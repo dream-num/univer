@@ -85,4 +85,20 @@ describe('MobileDialog', () => {
         expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(false);
         expect(onClose).toHaveBeenCalledTimes(1);
     });
+
+    it('keeps Escape disabled without disabling the close control', () => {
+        const onClose = vi.fn();
+        const { getByRole } = render(
+            <MobileDialog open keyboard={false} onClose={onClose}>
+                <input aria-label="Dialog draft" />
+            </MobileDialog>
+        );
+        const input = getByRole('textbox');
+        input.focus();
+        fireEvent.keyDown(input, { key: 'Escape', code: 'Escape', isComposing: true });
+        fireEvent.keyDown(input, { key: 'Escape', code: 'Escape' });
+        expect(onClose).not.toHaveBeenCalled();
+        fireEvent.click(getByRole('button', { name: 'Close' }));
+        expect(onClose).toHaveBeenCalledOnce();
+    });
 });

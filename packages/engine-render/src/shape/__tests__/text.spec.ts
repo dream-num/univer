@@ -76,6 +76,20 @@ describe('text shape', () => {
             skeleton
         );
         expect(ctx.fillText).toHaveBeenLastCalledWith('abcd', 80, 8);
+
+        Text.drawWith(
+            ctx,
+            {
+                text: 'abcd',
+                fontStyle: 'italic normal 10pt Tahoma',
+                width: 100,
+                height: 30,
+                hAlign: HorizontalAlign.RIGHT,
+                vAlign: VerticalAlign.TOP,
+            } as any,
+            skeleton
+        );
+        expect(ctx.fillText).toHaveBeenLastCalledWith('abcd', 78, 8);
     });
 
     it('keeps number left-aligned when overflow in no-wrap mode', () => {

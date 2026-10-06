@@ -39,6 +39,15 @@ export interface ITextProps extends IShapeProps {
 
 export const TEXT_OBJECT_ARRAY = ['text', 'fontStyle', 'warp', 'hAlign', 'vAlign', 'width', 'height', 'color'];
 
+function getItalicOffset(fontStyle: string): number {
+    if (!fontStyle.includes('italic')) {
+        return 0;
+    }
+    const match = fontStyle.match(/(\d+(?:\.\d+)?)(?:pt|px)/);
+    const size = match ? Number.parseFloat(match[1]) : 10;
+    return Math.max(1, Math.ceil(size * 0.15));
+}
+
 export class Text extends Shape<ITextProps> {
     private static readonly _MAX_LAYOUT_CACHE_SIZE = 5000;
     private static readonly _layoutCache = new Map<string, {
@@ -104,9 +113,11 @@ export class Text extends Shape<ITextProps> {
                     case HorizontalAlign.CENTER:
                         lineX = (width - lineWidth) / 2;
                         break;
-                    case HorizontalAlign.RIGHT:
-                        lineX = width - lineWidth;
+                    case HorizontalAlign.RIGHT: {
+                        const italicOffset = getItalicOffset(fontStyle);
+                        lineX = Math.max(0, width - lineWidth - italicOffset);
                         break;
+                    }
                     default:
                         lineX = 0;
                 }
@@ -167,9 +178,11 @@ export class Text extends Shape<ITextProps> {
                     case HorizontalAlign.CENTER:
                         lineX = (width - lineWidth) / 2;
                         break;
-                    case HorizontalAlign.RIGHT:
-                        lineX = width - lineWidth;
+                    case HorizontalAlign.RIGHT: {
+                        const italicOffset = getItalicOffset(fontStyle);
+                        lineX = Math.max(0, width - lineWidth - italicOffset);
                         break;
+                    }
                     default:
                         lineX = 0;
                 }

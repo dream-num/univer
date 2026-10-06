@@ -79,7 +79,18 @@ export const prepareSelectionChangeContext = (opts: { editor?: Editor; lexerTree
         return;
     }
 
-    const nodeIndex = findIndexFromSequenceNodes(sequenceNodes, offset, false);
+    let nodeIndex = findIndexFromSequenceNodes(sequenceNodes, offset, false);
+    if (nodeIndex === -1 && sequenceNodes.length > 0) {
+        const formulaText = dataStream.slice(1);
+        const textBeforeOffset = formulaText.slice(0, offset);
+        if (/[\s\r\n]+$/.test(textBeforeOffset)) {
+            const trimmedLength = textBeforeOffset.trimEnd().length;
+            nodeIndex = findIndexFromSequenceNodes(sequenceNodes, trimmedLength, false);
+            if (nodeIndex === -1 && trimmedLength > 0) {
+                nodeIndex = sequenceNodes.length - 1;
+            }
+        }
+    }
     const updatingRefIndex = findRefSequenceIndex(sequenceNodes, nodeIndex);
     return {
         nodeIndex,
@@ -302,14 +313,19 @@ export const useSheetSelectionChange = (
 
         const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
         if (!ctx) return;
-        const { nodeIndex, updatingRefIndex, formulaText, sequenceNodes, offset } = ctx;
+        let { nodeIndex } = ctx;
+        const { updatingRefIndex, formulaText, sequenceNodes, offset } = ctx;
         const isAddingReference = isSelectingRef.current === FormulaSelectingType.NEED_ADD ||
             isFormulaReferenceAddingContext(sequenceNodes, offset) ||
             isFormulaReferenceAddingTextContext(formulaText, offset);
         if (isAddingReference) {
             if (offset !== 0) {
                 if (nodeIndex === -1 && sequenceNodes.length) {
-                    return;
+                    if (isFormulaReferenceAddingTextContext(formulaText, offset)) {
+                        nodeIndex = sequenceNodes.length - 1;
+                    } else {
+                        return;
+                    }
                 }
                 const range = getLastFormulaSelection(selections);
                 if (!range) {

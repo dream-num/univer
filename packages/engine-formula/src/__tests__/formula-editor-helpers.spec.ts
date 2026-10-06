@@ -20,6 +20,8 @@ import {
     findFormulaStructuredReferences,
     getFormulaHighlightDataStream,
     getFormulaReplaceResult,
+    isFormulaReferenceAddingContext,
+    isFormulaReferenceAddingTextContext,
     resolveFormulaReferenceEditingContext,
 } from '../formula-editor-helpers';
 
@@ -127,5 +129,18 @@ describe('formula editor helpers', () => {
             startIndex: 4,
             endIndex: 30,
         }]);
+    });
+
+    it('identifies formula reference adding text context with trailing whitespace and newlines', () => {
+        expect(isFormulaReferenceAddingTextContext('SUM(A1,', 7)).toBe(true);
+        expect(isFormulaReferenceAddingTextContext('SUM(A1, ', 8)).toBe(true);
+        expect(isFormulaReferenceAddingTextContext('SUM(A1, \n  ', 11)).toBe(true);
+        expect(isFormulaReferenceAddingTextContext('IF(\n', 4)).toBe(true);
+        expect(isFormulaReferenceAddingTextContext('IF(\r\n', 5)).toBe(true);
+        expect(isFormulaReferenceAddingTextContext('A1 ', 3)).toBe(false);
+        expect(isFormulaReferenceAddingTextContext('A1 \n', 4)).toBe(false);
+
+        expect(isFormulaReferenceAddingContext(['SUM(', 'A1', ','], 7)).toBe(true);
+        expect(isFormulaReferenceAddingContext(['IF(', 'A1'], 6)).toBe(false);
     });
 });

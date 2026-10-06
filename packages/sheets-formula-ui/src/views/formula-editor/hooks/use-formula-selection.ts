@@ -20,7 +20,7 @@ import type { ISequenceNode } from '@univerjs/engine-formula';
 import { Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { deserializeRangeWithSheetWithCache, isFormulaLexerToken, LexerTreeBuilder, matchRefDrawToken, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheetWithCache, isFormulaReferenceAddingTextContext, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
@@ -122,14 +122,7 @@ export function resolveFormulaSelectingIntent(adding: boolean, editing: boolean)
 }
 
 export function shouldAddFormulaReference(dataStream: string, index: number): boolean {
-    const char = dataStream[index - 1];
-    const nextChar = dataStream[index];
-
-    return Boolean(
-        char &&
-        (matchRefDrawToken(char) || char === '!') &&
-        (!nextChar || (isFormulaLexerToken(nextChar) && nextChar !== matchToken.OPEN_BRACKET))
-    );
+    return isFormulaReferenceAddingTextContext(dataStream, index);
 }
 
 // eslint-disable-next-line max-lines-per-function

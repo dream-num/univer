@@ -313,7 +313,8 @@ export const useSheetSelectionChange = (
 
         const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
         if (!ctx) return;
-        const { nodeIndex, updatingRefIndex, formulaText, sequenceNodes, offset } = ctx;
+        let { nodeIndex } = ctx;
+        const { updatingRefIndex, formulaText, sequenceNodes, offset } = ctx;
         const isAddingReference = isSelectingRef.current === FormulaSelectingType.NEED_ADD ||
             isFormulaReferenceAddingContext(sequenceNodes, offset) ||
             isFormulaReferenceAddingTextContext(formulaText, offset);

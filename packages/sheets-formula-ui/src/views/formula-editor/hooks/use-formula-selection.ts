@@ -20,7 +20,7 @@ import type { ISequenceNode } from '@univerjs/engine-formula';
 import { Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { deserializeRangeWithSheetWithCache, isFormulaLexerToken, LexerTreeBuilder, matchRefDrawToken, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheetWithCache, isFormulaReferenceAddingTextContext, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
@@ -121,35 +121,8 @@ export function resolveFormulaSelectingIntent(adding: boolean, editing: boolean)
     return FormulaSelectingType.NOT_SELECT;
 }
 
-function getPreviousNonWhitespaceChar(str: string, index: number): string | undefined {
-    for (let i = index - 1; i >= 0; i--) {
-        const c = str[i];
-        if (c !== ' ' && c !== '\t' && c !== '\r' && c !== '\n') {
-            return c;
-        }
-    }
-    return undefined;
-}
-
-function getNextNonWhitespaceChar(str: string, index: number): string | undefined {
-    for (let i = index; i < str.length; i++) {
-        const c = str[i];
-        if (c !== ' ' && c !== '\t' && c !== '\r' && c !== '\n') {
-            return c;
-        }
-    }
-    return undefined;
-}
-
 export function shouldAddFormulaReference(dataStream: string, index: number): boolean {
-    const char = getPreviousNonWhitespaceChar(dataStream, index);
-    const nextChar = getNextNonWhitespaceChar(dataStream, index);
-
-    return Boolean(
-        char &&
-        (matchRefDrawToken(char) || char === '!') &&
-        (!nextChar || (isFormulaLexerToken(nextChar) && nextChar !== matchToken.OPEN_BRACKET))
-    );
+    return isFormulaReferenceAddingTextContext(dataStream, index);
 }
 
 // eslint-disable-next-line max-lines-per-function

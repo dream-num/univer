@@ -121,9 +121,29 @@ export function resolveFormulaSelectingIntent(adding: boolean, editing: boolean)
     return FormulaSelectingType.NOT_SELECT;
 }
 
+function getPreviousNonWhitespaceChar(str: string, index: number): string | undefined {
+    for (let i = index - 1; i >= 0; i--) {
+        const c = str[i];
+        if (c !== ' ' && c !== '\t' && c !== '\r' && c !== '\n') {
+            return c;
+        }
+    }
+    return undefined;
+}
+
+function getNextNonWhitespaceChar(str: string, index: number): string | undefined {
+    for (let i = index; i < str.length; i++) {
+        const c = str[i];
+        if (c !== ' ' && c !== '\t' && c !== '\r' && c !== '\n') {
+            return c;
+        }
+    }
+    return undefined;
+}
+
 export function shouldAddFormulaReference(dataStream: string, index: number): boolean {
-    const char = dataStream[index - 1];
-    const nextChar = dataStream[index];
+    const char = getPreviousNonWhitespaceChar(dataStream, index);
+    const nextChar = getNextNonWhitespaceChar(dataStream, index);
 
     return Boolean(
         char &&

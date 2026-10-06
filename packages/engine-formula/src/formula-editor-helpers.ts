@@ -157,20 +157,55 @@ export function getFormulaSequenceCharacterAtOffset(
     return undefined;
 }
 
+function getPreviousNonWhitespaceChar(str: string, index: number): string | undefined {
+    for (let i = index - 1; i >= 0; i--) {
+        const c = str[i];
+        if (c !== ' ' && c !== '\t' && c !== '\r' && c !== '\n') {
+            return c;
+        }
+    }
+    return undefined;
+}
+
+function getNextNonWhitespaceChar(str: string, index: number): string | undefined {
+    for (let i = index; i < str.length; i++) {
+        const c = str[i];
+        if (c !== ' ' && c !== '\t' && c !== '\r' && c !== '\n') {
+            return c;
+        }
+    }
+    return undefined;
+}
+
 export function isFormulaReferenceAddingContext(
     sequenceNodes: Array<string | { token: string }>,
     offset: number
 ): boolean {
     const character = getFormulaSequenceCharacterAtOffset(sequenceNodes, offset);
-    return Boolean(character && matchRefDrawToken(character));
+    if (character && matchRefDrawToken(character)) {
+        return true;
+    }
+
+    if (!character && sequenceNodes.length) {
+        for (let i = sequenceNodes.length - 1; i >= 0; i--) {
+            const node = sequenceNodes[i];
+            const text = typeof node === 'string' ? node : node.token;
+            const lastChar = text.trimEnd().slice(-1);
+            if (lastChar) {
+                return matchRefDrawToken(lastChar) || lastChar === '!';
+            }
+        }
+    }
+
+    return false;
 }
 
 export function isFormulaReferenceAddingTextContext(formulaText: string, offset: number): boolean {
-    const character = formulaText[offset - 1];
-    const nextCharacter = formulaText[offset];
+    const character = getPreviousNonWhitespaceChar(formulaText, offset);
+    const nextCharacter = getNextNonWhitespaceChar(formulaText, offset);
     return Boolean(
         character &&
-        matchRefDrawToken(character) &&
+        (matchRefDrawToken(character) || character === '!') &&
         (!nextCharacter || (isFormulaLexerToken(nextCharacter) && nextCharacter !== matchToken.OPEN_BRACKET))
     );
 }

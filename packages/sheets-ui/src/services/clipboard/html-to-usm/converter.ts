@@ -120,6 +120,12 @@ export class HtmlToUSMService {
     // mso-number-format is a css property used in html copied from excel to indicate the cell format, we need to parse it and apply the corresponding format in univer sheet.
     private _msoNumfmtMap = new Map<string, string>();
 
+    // mso-displayed-decimal-separator / mso-displayed-thousand-separator are css properties
+    // used in html copied from excel to indicate which separators were used to render the
+    // displayed numbers. They default to the US conventions and are reset on every convert() call.
+    private _msoDecimalSeparator = '.';
+    private _msoThousandSeparator = ',';
+
     private _getCurrentSkeleton: () => Nullable<ISheetSkeletonManagerParam>;
     private _getNumfmtParseOptions?: () => Parameters<typeof getNumfmtParseValueFilter>[1];
     private _numfmtParseOptions?: Parameters<typeof getNumfmtParseValueFilter>[1];
@@ -133,6 +139,10 @@ export class HtmlToUSMService {
     convert(html: string): IUniverSheetCopyDataModel {
         // This service outlives the active workbook, so resolve locale and date system for every paste operation.
         this._numfmtParseOptions = this._getNumfmtParseOptions?.();
+        // Reset mso-displayed separators as well: a paste without a style block must not
+        // inherit the separators of a previous paste.
+        this._msoDecimalSeparator = '.';
+        this._msoThousandSeparator = ',';
         const pastePlugin = HtmlToUSMService._pluginList.find((plugin) => plugin.checkPasteType(html));
         if (pastePlugin) {
             this._styleRules = [...pastePlugin.stylesRules];
@@ -146,6 +156,7 @@ export class HtmlToUSMService {
             // Must read textContent BEFORE shadow DOM moves the element, because browsers discard mso-* properties during CSS parsing.
             const rawStyleText = style.textContent ?? '';
             this._parseMsoNumfmtFromCssText(rawStyleText);
+            this._parseMsoDisplayedSeparators(rawStyleText);
 
             // Excel emits the deprecated `windowtext` system color, which CSSOM may discard with its border declaration.
             // Normalize it before reading cssRules so imported borders retain a stable workbook color.
@@ -303,6 +314,50 @@ export class HtmlToUSMService {
                 this._msoNumfmtMap.set(sel.trim(), decoded);
             });
         }
+    }
+
+    /**
+     * Parse mso-displayed-decimal-separator / mso-displayed-thousand-separator from raw CSS text.
+     * Excel declares these once per document (on the `table` rule) to describe how the displayed
+     * numbers are rendered, which may differ from the workbook locale (e.g. comma as decimal
+     * separator in Vietnamese or German). The first occurrence wins. Resets to the US defaults
+     * on every call, so it must run on each convert() like _parseMsoNumfmtFromCssText.
+     * Must be called with style.textContent BEFORE the style element is moved into a shadow DOM.
+     */
+    private _parseMsoDisplayedSeparators(rawCssText: string): void {
+        this._msoDecimalSeparator = '.';
+        this._msoThousandSeparator = ',';
+
+        const decimalMatch = rawCssText.match(/mso-displayed-decimal-separator\s*:\s*("(?:[^"\\]|\\.)*"|[^;}]+)/i);
+        const thousandMatch = rawCssText.match(/mso-displayed-thousand-separator\s*:\s*("(?:[^"\\]|\\.)*"|[^;}]+)/i);
+        const decimal = decimalMatch ? normalizeMsoSeparatorValue(decimalMatch[1]) : null;
+        const thousand = thousandMatch ? normalizeMsoSeparatorValue(thousandMatch[1]) : null;
+
+        // Only accept single, distinct characters; otherwise keep the US defaults.
+        if (decimal && thousand && decimal !== thousand) {
+            this._msoDecimalSeparator = decimal;
+            this._msoThousandSeparator = thousand;
+        }
+    }
+
+    /**
+     * Check that a number extracted from pasted text is consistent with the cell's number
+     * format pattern, i.e. formatting the number with the pattern reproduces the pasted text.
+     * When the paste declares mso-displayed separators that differ from the US defaults, the
+     * workbook locale may render the same value with different separators, so the comparison
+     * is done with separators normalized away instead of requiring a byte-for-byte match.
+     */
+    private _isNumberTextConsistent(pattern: string, value: number, cellText: string): boolean {
+        if (numfmt.format(pattern, value, this._numfmtParseOptions) === cellText) {
+            return true;
+        }
+
+        if (this._msoDecimalSeparator !== '.' || this._msoThousandSeparator !== ',') {
+            const normalizeSeparators = (text: string) => text.replace(/[.,]/g, '');
+            return normalizeSeparators(numfmt.format(pattern, value, this._numfmtParseOptions)) === normalizeSeparators(cellText);
+        }
+
+        return false;
     }
 
     /**
@@ -542,9 +597,9 @@ export class HtmlToUSMService {
                         cellText = parseData.v.toString();
                         numfmtPattern = parseData.z;
                     } else if (!parseData) {
-                        const extractedNumber = extractNumber(cellText);
+                        const extractedNumber = extractNumber(cellText, this._msoDecimalSeparator, this._msoThousandSeparator);
 
-                        if (extractedNumber !== null && !Number.isNaN(extractedNumber) && numfmt.format(pattern, extractedNumber, this._numfmtParseOptions) === cellText) {
+                        if (extractedNumber !== null && !Number.isNaN(extractedNumber) && this._isNumberTextConsistent(pattern, extractedNumber, cellText)) {
                             cellText = extractedNumber.toString();
                             numfmtPattern = pattern;
                         }
@@ -1044,6 +1099,20 @@ function decodeMsoNumberFormat(value: string): string {
     return result;
 }
 
+/**
+ * Normalize a raw mso-displayed-*-separator CSS value to a single character.
+ * Returns null when the value does not decode to exactly one character.
+ */
+function normalizeMsoSeparatorValue(value: string): string | null {
+    let result = value.trim();
+    // Remove surrounding CSS quotes if present
+    if (result.startsWith('"') && result.endsWith('"') && result.length >= 2) {
+        result = result.slice(1, -1);
+    }
+    const decoded = decodeMsoNumberFormat(result);
+    return decoded.length === 1 ? decoded : null;
+}
+
 function cleanMsoSpaceRun(value: string): string {
     return value
         // remove mso-spacerun spans but keep their content
@@ -1053,15 +1122,28 @@ function cleanMsoSpaceRun(value: string): string {
         .replace(/\u00A0|&nbsp;/gi, '');
 }
 
-function extractNumber(value: string): number | null {
-    const match = value.match(/\(?-?\d[\d,]*(\.\d+)?%?\)?/);
+function escapeRegExpChar(value: string): string {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Extract a number from a string that may contain thousand separators, a decimal
+ * separator and a percent sign. The separators default to the US conventions
+ * ('.' decimal, ',' thousand) and can be overridden with the separators Excel
+ * declares via mso-displayed-decimal-separator / mso-displayed-thousand-separator.
+ */
+function extractNumber(value: string, decimalSeparator = '.', thousandSeparator = ','): number | null {
+    const decimalPattern = escapeRegExpChar(decimalSeparator);
+    const thousandPattern = escapeRegExpChar(thousandSeparator);
+    const match = value.match(new RegExp(`\\(?-?\\d[\\d${thousandPattern}]*(${decimalPattern}\\d+)?%?\\)?`));
     if (!match) return null;
 
     let numStr = match[0];
 
     const isPercent = numStr.includes('%');
 
-    numStr = numStr.replace(/[,%]/g, '');
+    numStr = numStr.split(thousandSeparator).join('').replace(/%/g, '');
+    numStr = numStr.replace(decimalSeparator, '.');
 
     if (/^\(.*\)$/.test(numStr)) {
         numStr = `-${numStr.slice(1, -1)}`;

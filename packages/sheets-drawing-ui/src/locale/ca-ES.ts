@@ -64,6 +64,9 @@ const locale: typeof enUS = {
             exceedMaxCount: 'Només es poden pujar {0} imatges alhora',
             invalidImage: 'Imatge no vàlida',
         },
+        'image-transparency': {
+            title: 'Transparència',
+        },
         'drawing-anchor': {
             title: 'Propietats d’ancoratge',
             both: 'Mou i canvia la mida amb les cel·les',

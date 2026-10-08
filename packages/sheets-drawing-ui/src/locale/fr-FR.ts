@@ -64,6 +64,9 @@ const locale: typeof enUS = {
             exceedMaxCount: 'Seulement {0} images peuvent être téléchargées à la fois',
             invalidImage: 'Image invalide',
         },
+        'image-transparency': {
+            title: 'Transparence',
+        },
         'drawing-anchor': {
             title: 'Propriétés de l\'ancre',
             both: 'Déplacer et redimensionner avec les cellules',

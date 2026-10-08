@@ -64,6 +64,9 @@ const locale: typeof enUS = {
             exceedMaxCount: 'Jednocześnie można przesłać tylko {0} obrazów',
             invalidImage: 'Nieprawidłowy obraz',
         },
+        'image-transparency': {
+            title: 'Przezroczystość',
+        },
         'drawing-anchor': {
             title: 'Właściwości kotwicy',
             both: 'Przesuwaj i zmieniaj rozmiar razem z komórkami',

@@ -19,6 +19,8 @@ import type { IDrawingParam, ImageSourceType, ISrcRect, Nullable, Serializable }
 export interface IImageData extends IDrawingParam {
     imageSourceType: ImageSourceType;
     source: string;
+    /** Whole-image opacity from 0 (transparent) through 1 (opaque). Defaults to 1. */
+    opacity?: number;
     /**
      * 20.1.8.55 srcRect (Source Rectangle)
      */

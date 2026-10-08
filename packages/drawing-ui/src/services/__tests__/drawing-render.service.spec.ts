@@ -378,6 +378,32 @@ describe('DrawingRenderService', () => {
         expect(image.visible).toBe(true);
     });
 
+    it('applies image opacity and restores the sheet default for legacy models', async () => {
+        const { service, scene, univerInstanceService } = createHarness();
+        univerInstanceService.unitType = UniverInstanceType.UNIVER_SHEET;
+
+        await service.renderImages(imageParam({ opacity: 0.35 }), scene as unknown as Scene);
+
+        const key = drawingKey({ unitId: 'book-1', subUnitId: 'sheet-1', drawingId: 'drawing-1' });
+        const image = scene.objects.get(key) as Image;
+        expect(image.opacity).toBe(0.35);
+
+        image.setOpacity(0.2);
+        await service.renderImages(imageParam(), scene as unknown as Scene);
+        expect(image.opacity).toBe(1);
+    });
+
+    it('preserves transient document image opacity when the model has no opacity', async () => {
+        const { service, scene } = createHarness();
+        const key = drawingKey({ unitId: 'book-1', subUnitId: 'sheet-1', drawingId: 'drawing-1' });
+        const image = new Image(key, { ...BASE_TRANSFORM, opacity: 0.5, url: 'existing-image' });
+        scene.objects.set(key, image);
+
+        await service.renderImages(imageParam(), scene as unknown as Scene);
+
+        expect(image.opacity).toBe(0.5);
+    });
+
     it('uses cached native images instead of resolving the source again', async () => {
         const { service, scene, imageIoService } = createHarness();
         const nativeImage = document.createElement('img');

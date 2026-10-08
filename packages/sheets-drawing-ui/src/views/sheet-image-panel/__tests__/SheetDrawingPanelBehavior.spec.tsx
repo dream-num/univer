@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { ISheetDrawing } from '@univerjs/sheets-drawing';
+import type { ISheetDrawing, ISheetImage } from '@univerjs/sheets-drawing';
 import type { Root } from 'react-dom/client';
-import { DrawingTypeEnum, ImageSourceType } from '@univerjs/core';
+import { DrawingTypeEnum, ImageSourceType, LocaleService, LocaleType, RedoCommand, UndoCommand } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { Image, IRenderManagerService } from '@univerjs/engine-render';
 import { InsertSheetDrawingCommand, ISheetDrawingService, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { ComponentManager, IconManager, RediContext } from '@univerjs/ui';
 import { act } from 'react';
@@ -27,6 +27,8 @@ import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createSheetsDrawingUiTestBed } from '../../../__tests__/create-sheets-drawing-ui-test-bed';
+import { PreviewSheetImageOpacityOperation } from '../../../commands/operations/preview-sheet-image-opacity.operation';
+import sheetsDrawingUiEnUS from '../../../locale/en-US';
 import { SheetDrawingPanel } from '../SheetDrawingPanel';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -43,11 +45,14 @@ class TestTransformer {
             changeNotification: () => undefined,
         };
     }
+
+    debounceRefreshControls() {}
 }
 
 class TestScene {
     ancestorLeft = 0;
     ancestorTop = 0;
+    readonly image = new Image('test-image', { opacity: 1 });
 
     constructor(private readonly _transformer: TestTransformer) {}
 
@@ -62,6 +67,14 @@ class TestScene {
 
     getTransformerByCreate() {
         return this._transformer;
+    }
+
+    getTransformer() {
+        return this._transformer;
+    }
+
+    getObject() {
+        return this.image;
     }
 }
 
@@ -280,5 +293,151 @@ describe('SheetDrawingPanel behavior', () => {
         });
 
         expect(container.firstElementChild).toBeNull();
+    });
+
+    it('renders single-image transparency and supports preview, commit, undo, and redo', async () => {
+        currentTestBed = createSheetsDrawingUiTestBed(undefined, [
+            [IRenderManagerService, { useClass: TestRenderManagerService as never }],
+            [IconManager],
+            [ComponentManager],
+        ]);
+        currentTestBed.injector.createInstance(UniverDrawingUIPlugin, {}).onStarting();
+        currentTestBed.commandService.registerCommand(PreviewSheetImageOpacityOperation);
+        currentTestBed.get(LocaleService).load({ [LocaleType.EN_US]: sheetsDrawingUiEnUS });
+        const drawingManagerService = currentTestBed.get(IDrawingManagerService);
+        const sheetDrawingService = currentTestBed.get(ISheetDrawingService);
+        const renderManagerService = currentTestBed.get(IRenderManagerService) as unknown as TestRenderManagerService;
+        const drawing = createSheetDrawing(
+            currentTestBed.unitId,
+            currentTestBed.subUnitId,
+            'drawing-opacity',
+            SheetDrawingAnchorType.Position
+        );
+
+        await currentTestBed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: currentTestBed.unitId,
+            drawings: [drawing],
+        });
+
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <SheetDrawingPanel />
+                </RediContext.Provider>
+            );
+            drawingManagerService.focusDrawing([drawing]);
+            await Promise.resolve();
+        });
+
+        const transparencyInput = container.querySelector<HTMLInputElement>('input[aria-label="Transparency"]');
+        const transparencySlider = container.querySelector<HTMLButtonElement>('[role="slider"][aria-label="Transparency"]');
+        expect(transparencyInput?.value).toBe('0%');
+        expect(transparencySlider?.getAttribute('aria-valuenow')).toBe('0');
+        const headers = Array.from(container.querySelectorAll('header')).map((header) => header.textContent);
+        expect(headers.indexOf('Transparency')).toBeLessThan(headers.indexOf('Anchor Properties'));
+        const sliderTrack = container.querySelector<HTMLDivElement>('[data-u-comp="sheet-image-transparency-slider-track"]')!;
+        Object.defineProperty(sliderTrack, 'getBoundingClientRect', {
+            value: () => ({
+                bottom: 6,
+                height: 6,
+                left: 0,
+                right: 100,
+                top: 0,
+                width: 100,
+                x: 0,
+                y: 0,
+                toJSON: () => ({}),
+            }),
+        });
+
+        await act(async () => {
+            sliderTrack.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, clientX: 35 }));
+            window.dispatchEvent(new MouseEvent('pointermove', { clientX: 65 }));
+            await Promise.resolve();
+        });
+
+        expect(transparencySlider?.getAttribute('aria-valuenow')).toBe('65');
+        expect(renderManagerService.scene.image.opacity).toBe(1);
+        expect((sheetDrawingService.getDrawingByParam({
+            unitId: currentTestBed.unitId,
+            subUnitId: currentTestBed.subUnitId,
+            drawingId: drawing.drawingId,
+        }) as ISheetImage | undefined)?.opacity).toBeUndefined();
+
+        await act(async () => {
+            await new Promise((resolve) => setTimeout(resolve, 60));
+        });
+
+        expect(renderManagerService.scene.image.opacity).toBe(0.35);
+        expect((sheetDrawingService.getDrawingByParam({
+            unitId: currentTestBed.unitId,
+            subUnitId: currentTestBed.subUnitId,
+            drawingId: drawing.drawingId,
+        }) as ISheetImage | undefined)?.opacity).toBeUndefined();
+
+        await act(async () => {
+            window.dispatchEvent(new MouseEvent('pointerup'));
+            await Promise.resolve();
+        });
+
+        expect((sheetDrawingService.getDrawingByParam({
+            unitId: currentTestBed.unitId,
+            subUnitId: currentTestBed.subUnitId,
+            drawingId: drawing.drawingId,
+        }) as ISheetImage | undefined)?.opacity).toBe(0.35);
+        expect(transparencyInput?.value).toBe('65%');
+        expect(transparencySlider?.getAttribute('aria-valuenow')).toBe('65');
+
+        let commandResult = false;
+        await act(async () => {
+            commandResult = await currentTestBed!.commandService.executeCommand(UndoCommand.id);
+            await Promise.resolve();
+        });
+        expect(commandResult).toBe(true);
+        expect((sheetDrawingService.getDrawingByParam({
+            unitId: currentTestBed.unitId,
+            subUnitId: currentTestBed.subUnitId,
+            drawingId: drawing.drawingId,
+        }) as ISheetImage | undefined)?.opacity).toBeUndefined();
+        expect(transparencyInput?.value).toBe('0%');
+        expect(transparencySlider?.getAttribute('aria-valuenow')).toBe('0');
+
+        await act(async () => {
+            commandResult = await currentTestBed!.commandService.executeCommand(RedoCommand.id);
+            await Promise.resolve();
+        });
+        expect(commandResult).toBe(true);
+        expect((sheetDrawingService.getDrawingByParam({
+            unitId: currentTestBed.unitId,
+            subUnitId: currentTestBed.subUnitId,
+            drawingId: drawing.drawingId,
+        }) as ISheetImage | undefined)?.opacity).toBe(0.35);
+        expect(transparencyInput?.value).toBe('65%');
+        expect(transparencySlider?.getAttribute('aria-valuenow')).toBe('65');
+
+        const presetButton = transparencyInput?.parentElement?.parentElement?.querySelector<HTMLButtonElement>('button');
+        await act(async () => {
+            presetButton?.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
+            await new Promise((resolve) => setTimeout(resolve, 0));
+        });
+        const preset80 = Array.from(document.body.querySelectorAll<HTMLElement>('[role="menuitemradio"]'))
+            .find((item) => item.textContent?.trim() === '80%');
+        expect(preset80).toBeDefined();
+
+        await act(async () => {
+            preset80!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+        expect((sheetDrawingService.getDrawingByParam({
+            unitId: currentTestBed.unitId,
+            subUnitId: currentTestBed.subUnitId,
+            drawingId: drawing.drawingId,
+        }) as ISheetImage | undefined)?.opacity).toBe(0.2);
+        expect(transparencyInput?.value).toBe('80%');
+        expect(transparencySlider?.getAttribute('aria-valuenow')).toBe('80');
     });
 });

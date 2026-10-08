@@ -64,6 +64,9 @@ const locale: typeof enUS = {
             exceedMaxCount: 'يمكن رفع {0} صور فقط في المرة الواحدة',
             invalidImage: 'صورة غير صالحة',
         },
+        'image-transparency': {
+            title: 'الشفافية',
+        },
         'drawing-anchor': {
             title: 'خصائص المرساة',
             both: 'النقل والتحجيم مع الخلايا',

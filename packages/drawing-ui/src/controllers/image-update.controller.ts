@@ -25,8 +25,9 @@ import {
     Inject,
     IUniverInstanceService,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
-import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, normalizeImageOpacity, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
 import { bufferTime, filter, map } from 'rxjs';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
@@ -224,7 +225,7 @@ export class ImageUpdateController extends Disposable {
                         return;
                     }
 
-                    const { transform, drawingType, srcRect, prstGeom, source, imageSourceType } = drawingParam;
+                    const { transform, drawingType, srcRect, prstGeom, source, imageSourceType, opacity } = drawingParam;
 
                     if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
                         return;
@@ -256,6 +257,11 @@ export class ImageUpdateController extends Disposable {
                     ensureDrawingRenderLayer(scene, imageShape, drawingParam);
                     imageShape.setSrcRect(srcRect);
                     imageShape.setPrstGeom(prstGeom);
+                    syncImageOpacity(
+                        imageShape,
+                        opacity,
+                        this._currentUniverService.getUnitType(unitId) === UniverInstanceType.UNIVER_SHEET
+                    );
                     if (source != null && source.length > 0 && (imageSourceType === ImageSourceType.BASE64 || imageSourceType === ImageSourceType.URL)) {
                         imageShape.changeSource(source);
                     }
@@ -294,5 +300,11 @@ export class ImageUpdateController extends Disposable {
                 o.onDblclick$.subscribeEvent(preview)
             )
         );
+    }
+}
+
+function syncImageOpacity(image: Image, opacity: number | undefined, isSheet: boolean): void {
+    if (isSheet || opacity !== undefined) {
+        image.setOpacity(normalizeImageOpacity(opacity));
     }
 }

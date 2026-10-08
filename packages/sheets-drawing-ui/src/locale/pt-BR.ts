@@ -64,6 +64,9 @@ const locale: typeof enUS = {
             exceedMaxCount: 'Apenas {0} imagens podem ser enviadas de cada vez',
             invalidImage: 'Imagem inválida',
         },
+        'image-transparency': {
+            title: 'Transparência',
+        },
         'drawing-anchor': {
             title: 'Propriedades da âncora',
             both: 'Mover e dimensionar com as células',

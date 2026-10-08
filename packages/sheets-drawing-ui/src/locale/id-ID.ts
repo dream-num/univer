@@ -64,6 +64,9 @@ const locale: typeof enUS = {
             exceedMaxCount: 'Hanya {0} gambar yang dapat diunggah dalam satu waktu',
             invalidImage: 'Gambar tidak valid',
         },
+        'image-transparency': {
+            title: 'Transparansi',
+        },
         'drawing-anchor': {
             title: 'Properti Jangkar',
             both: 'Pindah dan ukur bersama sel',

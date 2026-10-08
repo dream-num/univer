@@ -64,6 +64,9 @@ const locale: typeof enUS = {
             exceedMaxCount: 'Naraz možno nahrať iba {0} obrázkov',
             invalidImage: 'Neplatný obrázok',
         },
+        'image-transparency': {
+            title: 'Priehľadnosť',
+        },
         'drawing-anchor': {
             title: 'Vlastnosti ukotvenia',
             both: 'Presúvať a meniť veľkosť s bunkami',

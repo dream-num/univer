@@ -64,6 +64,9 @@ const locale: typeof enUS = {
             exceedMaxCount: '圖片只能一次上傳{0}張',
             invalidImage: '無效圖片',
         },
+        'image-transparency': {
+            title: '透明度',
+        },
         'drawing-anchor': {
             title: '錨點屬性',
             both: '與儲存格一起移動和調整大小',

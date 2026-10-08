@@ -64,6 +64,9 @@ const locale: typeof enUS = {
             exceedMaxCount: 'Chỉ có thể tải lên {0} hình ảnh một lần',
             invalidImage: 'Hình ảnh không hợp lệ',
         },
+        'image-transparency': {
+            title: 'Độ trong suốt',
+        },
         'drawing-anchor': {
             title: 'Thuộc tính neo',
             both: 'Di chuyển và thay đổi kích thước cùng với ô',

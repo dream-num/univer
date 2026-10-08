@@ -83,6 +83,11 @@ describe('FOverGridImage', () => {
 
         expect(builder.getSource()).toBe('https://example.com/drawing-1.png');
         expect(builder.getSourceType()).toBe(ImageSourceType.URL);
+        expect(builder.getOpacity()).toBe(1);
+        expect(builder.setOpacity(0.4)).toBe(builder);
+        expect(builder.getOpacity()).toBe(0.4);
+        expect(() => builder.setOpacity(Number.NaN)).toThrow(RangeError);
+        expect(() => builder.setOpacity(1.01)).toThrow(RangeError);
         expect(warnSpy).not.toHaveBeenCalledWith(expect.stringContaining('FOverGridImageBuilder but get 0'));
 
         warnSpy.mockRestore();
@@ -95,6 +100,14 @@ describe('FOverGridImage', () => {
         expect(commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [image] })).toBe(true);
 
         const fImage = injector.createInstance(FOverGridImage, image);
+
+        expect(fImage.getOpacity()).toBe(1);
+        expect(fImage.setOpacity(0)).toBe(true);
+        expect(fImage.getOpacity()).toBe(0);
+        expect(fImage.setOpacity(1)).toBe(true);
+        expect(getStoredImage('drawing-1').opacity).toBe(1);
+        expect(() => fImage.setOpacity(Number.POSITIVE_INFINITY)).toThrow(RangeError);
+        expect(() => fImage.setOpacity(-0.01)).toThrow(RangeError);
 
         expect(fImage.setSource('https://example.com/updated.png', ImageSourceType.URL)).toBe(true);
         expect(getStoredImage('drawing-1').source).toBe('https://example.com/updated.png');

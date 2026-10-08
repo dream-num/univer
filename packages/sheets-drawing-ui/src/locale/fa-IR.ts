@@ -64,6 +64,9 @@ const locale: typeof enUS = {
             exceedMaxCount: 'فقط {0} تصویر می‌توانند همزمان آپلود شوند',
             invalidImage: 'تصویر نامعتبر است',
         },
+        'image-transparency': {
+            title: 'شفافیت',
+        },
         'drawing-anchor': {
             title: 'خواص لنگر',
             both: 'جابه‌جایی و تغییر اندازه با سلول‌ها',

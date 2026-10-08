@@ -30,6 +30,7 @@ import {
 } from '../commands/commands/worksheet-background-image.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 import { SidebarSheetDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
+import { PreviewSheetImageOpacityOperation } from '../commands/operations/preview-sheet-image-opacity.operation';
 import { COMPONENT_SHEET_DRAWING_PANEL } from '../views/sheet-image-panel/component-name';
 import {
     DeleteDrawingsShortcutItem,
@@ -68,6 +69,7 @@ export class SheetDrawingUIController extends Disposable {
             DeleteDrawingsCommand,
             SaveCellImagesCommand,
             FlipSheetDrawingCommand,
+            PreviewSheetImageOpacityOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

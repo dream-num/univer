@@ -62,6 +62,9 @@ const locale = {
             exceedMaxCount: 'Only {0} images can be uploaded at a time',
             invalidImage: 'Invalid image',
         },
+        'image-transparency': {
+            title: 'Transparency',
+        },
         'drawing-anchor': {
             title: 'Anchor Properties',
             both: 'Move and size with cells',

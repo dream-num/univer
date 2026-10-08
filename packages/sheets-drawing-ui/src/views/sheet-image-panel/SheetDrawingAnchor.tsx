@@ -31,6 +31,7 @@ import {
 } from '@univerjs/sheets-drawing';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
+import { isSheetDrawing } from './sheet-drawing-panel.util';
 
 import type { LocaleKey } from '../../locale/types';
 
@@ -39,10 +40,6 @@ export interface ISheetDrawingAnchorProps {
 }
 
 export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
-    function isSheetDrawing(drawing: IDrawingParam | undefined): drawing is ISheetDrawing {
-        return Boolean(drawing && 'sheetTransform' in drawing && 'axisAlignSheetTransform' in drawing);
-    }
-
     function getAnchorKind(value: string | number | boolean): SheetDrawingAnchorType | null {
         if (
             value === SheetDrawingAnchorType.Position ||

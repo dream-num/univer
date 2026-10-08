@@ -268,8 +268,12 @@ describe('SheetsDrawingCopyPasteController', () => {
         controller.dispose();
     });
 
-    it('copies legacy drawings contained in a cell range and pastes them with the range offset', () => {
-        const containedDrawing = createImageDrawing({ anchorType: undefined });
+    it.each([
+        SheetDrawingAnchorType.Both,
+        SheetDrawingAnchorType.Position,
+        undefined,
+    ])('copies contained images with range offsets (%s)', (anchorType) => {
+        const containedDrawing = createImageDrawing({ anchorType });
         const outsideDrawing = createImageDrawing({
             drawingId: 'outside-image',
             transform: { left: 80, top: 80, width: 10, height: 20 },

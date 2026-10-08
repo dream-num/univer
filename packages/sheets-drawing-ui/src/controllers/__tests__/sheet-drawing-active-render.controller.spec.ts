@@ -76,10 +76,15 @@ describe('SheetDrawingActiveRenderController', () => {
     beforeEach(() => vi.useFakeTimers());
     afterEach(() => vi.useRealTimers());
 
-    it.each(['row', 'column'] as const)('keeps activation geometry consistent through %s deletion and undo/redo', async (axis) => {
+    it.each([
+        ['row', SheetDrawingAnchorType.Both],
+        ['column', SheetDrawingAnchorType.Both],
+        ['row', undefined],
+        ['column', undefined],
+    ] as const)('keeps activation geometry consistent through %s deletion and undo/redo (%s)', async (axis, anchorType) => {
         const bed = createTestBed();
         try {
-            const drawing = await insertDrawing(bed, SheetDrawingAnchorType.Both);
+            const drawing = await insertDrawing(bed, anchorType);
             bed.get(SheetDrawingActiveRenderController);
             const sheetService = bed.get(ISheetDrawingService);
             const manager = bed.get(IDrawingManagerService);

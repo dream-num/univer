@@ -20,12 +20,7 @@ import { DrawingTypeEnum, ImageSourceType, RedoCommand, UndoCommand } from '@uni
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetSkeletonService } from '@univerjs/sheets';
-import {
-    InsertSheetDrawingCommand,
-    ISheetDrawingService,
-    SheetDrawingAnchorType,
-    transformToDrawingPosition,
-} from '@univerjs/sheets-drawing';
+import { InsertSheetDrawingCommand, ISheetDrawingService, SheetDrawingAnchorType, transformToDrawingPosition } from '@univerjs/sheets-drawing';
 import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -38,7 +33,7 @@ import { SheetDrawingAnchor } from '../SheetDrawingAnchor';
 
 function createSheetDrawing(
     drawingId: string,
-    anchorType: SheetDrawingAnchorType | undefined,
+    anchorType: SheetDrawingAnchorType,
     drawingType = DrawingTypeEnum.DRAWING_IMAGE
 ): ISheetDrawing {
     return {
@@ -295,11 +290,11 @@ describe('SheetDrawingAnchor', () => {
         testBed.univer.dispose();
     });
 
-    it('shows the legacy default anchor and syncs explicit modes when selection changes', async () => {
+    it('syncs the selected anchor mode when the transformer starts editing another sheet image', async () => {
         const testBed = createTestBed();
         const renderManagerService = testBed.get(IRenderManagerService) as unknown as TestRenderManagerService;
         const drawings = [
-            createSheetDrawing('drawing-a', undefined),
+            createSheetDrawing('drawing-a', SheetDrawingAnchorType.Both),
             createSheetDrawing('drawing-b', SheetDrawingAnchorType.None),
         ];
 
@@ -322,7 +317,7 @@ describe('SheetDrawingAnchor', () => {
         });
 
         const options = Array.from(container.querySelectorAll<HTMLInputElement>('input[type="radio"]'));
-        expect(options.map((option) => option.checked)).toEqual([false, true, false]);
+        expect(options.map((option) => option.checked)).toEqual([true, false, false]);
 
         const drawingBShapeKey = getDrawingShapeKeyByDrawingSearch({
             unitId: testBed.unitId,
@@ -341,14 +336,6 @@ describe('SheetDrawingAnchor', () => {
         });
 
         expect(options.map((option) => option.checked)).toEqual([false, false, true]);
-        const legacyShapeKey = getDrawingShapeKeyByDrawingSearch(drawings[0]);
-        await act(async () => {
-            renderManagerService.changeStart$.next({
-                objects: new Map([[legacyShapeKey, { oKey: legacyShapeKey }]]),
-            });
-            await Promise.resolve();
-        });
-        expect(options.map((option) => option.checked)).toEqual([false, true, false]);
 
         testBed.univer.dispose();
     });

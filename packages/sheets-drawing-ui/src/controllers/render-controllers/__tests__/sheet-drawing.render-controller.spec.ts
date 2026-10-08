@@ -15,6 +15,7 @@
  */
 
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
+import type { Subscription } from 'rxjs';
 import { DrawingTypeEnum, LocaleType, UniverInstanceType } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { CanvasColorService, ICanvasColorService, IRenderManagerService } from '@univerjs/engine-render';
@@ -48,6 +49,7 @@ describe('SheetsDrawingRenderController', () => {
                 },
             },
         }, [[ICanvasColorService, { useClass: CanvasColorService }]]);
+        const subscriptions: Subscription[] = [];
         try {
             const sheetTransform = {
                 from: { row: 1, column: 2, rowOffset: 0, columnOffset: 0 },
@@ -110,11 +112,20 @@ describe('SheetsDrawingRenderController', () => {
                 throw new Error('Expected the Sheet skeleton to exist.');
             }
             sheetDrawingService.registerDrawingData('unit-1', drawingData as never);
+            const sheetDrawingsAdded = vi.fn();
+            const renderDrawingsAdded = vi.fn();
+            subscriptions.push(
+                sheetDrawingService.add$.subscribe(sheetDrawingsAdded),
+                drawingManagerService.add$.subscribe(renderDrawingsAdded)
+            );
             const renderManager = bed.get(IRenderManagerService);
             renderManager.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetsDrawingRenderController]);
             const render = renderManager.createRender('unit-1');
             render.with(SheetsDrawingRenderController);
 
+            const initializedDrawings = Object.values(drawingData).flatMap((subUnit) => Object.values(subUnit.data));
+            expect(sheetDrawingsAdded).toHaveBeenCalledExactlyOnceWith(expect.arrayContaining(initializedDrawings));
+            expect(renderDrawingsAdded).toHaveBeenCalledExactlyOnceWith(expect.arrayContaining(initializedDrawings));
             const marker = skeleton.getNoMergeCellWithCoordByIndex(1, 2);
             expect(legacy.transform).toMatchObject({ left: marker.startX, top: marker.startY, width: 24, height: 72 });
             expect(legacy).not.toHaveProperty('anchorType');
@@ -133,6 +144,7 @@ describe('SheetsDrawingRenderController', () => {
                 drawingId: 'legacy-anchor',
             })?.transform).toEqual(legacy.transform);
         } finally {
+            subscriptions.forEach((subscription) => subscription.unsubscribe());
             bed.univer.dispose();
             canvasContext.mockRestore();
         }

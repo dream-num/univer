@@ -134,10 +134,16 @@ describe('SheetDrawingActiveRenderController', () => {
                 expect(current).toEqual(drawing);
             } else {
                 const skeleton = bed.get(SheetSkeletonService).getSkeletonParam(bed.unitId, bed.subUnitId);
-                expect(current.transform).toEqual(drawingPositionToTransform(drawing.sheetTransform, skeleton));
+                const position = drawingPositionToTransform(drawing.sheetTransform, skeleton)!;
+                expect(current.transform).toMatchObject({
+                    left: position.left,
+                    top: position.top,
+                    width: drawing.transform!.width,
+                    height: drawing.transform!.height,
+                });
                 expect(current.transform?.left).not.toBe(1000);
                 expect(current.transform?.top).not.toBe(2000);
-                expect(current.anchorType).toBeUndefined();
+                expect(getSheetDrawingPlacement(current).kind).toBe(SheetDrawingAnchorType.Position);
             }
         } finally {
             bed.univer.dispose();

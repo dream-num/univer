@@ -41,20 +41,9 @@ function DialogItem(props: IDialogProps) {
         const ownerDocument = document;
         const opener = ownerDocument.activeElement;
         const owner = getEmbedBoundaryOwner(opener);
-        const ownerWindow = ownerDocument?.defaultView;
-        const handleCompositionEscape = (event: KeyboardEvent) => {
-            if (event.key === 'Escape' && event.isComposing &&
-                event.target instanceof Element && event.target.closest('[role="dialog"]') === dialogRef.current) {
-                // The candidate window owns Escape before the dialog's document-level listener sees it.
-                event.preventDefault();
-                event.stopPropagation();
-            }
-        };
-        ownerWindow?.addEventListener('keydown', handleCompositionEscape, true);
         return () => {
             openRef.current = false;
             const content = dialogRef.current;
-            ownerWindow?.removeEventListener('keydown', handleCompositionEscape, true);
             if (props.mask === false) {
                 return;
             }

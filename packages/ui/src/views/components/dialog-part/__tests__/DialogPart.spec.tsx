@@ -101,15 +101,17 @@ describe('DialogPart', () => {
         try {
             const dialogService = rendered.injector.get(IDialogService);
             const onClose = vi.fn(() => dialogService.close('editing'));
+            const onKeyDown = vi.fn();
             act(() => dialogService.open({
                 id: 'editing',
                 title: { title: 'Editing' },
-                children: { title: <input aria-label="Dialog draft" /> },
+                children: { title: <input aria-label="Dialog draft" onKeyDown={onKeyDown} /> },
                 onClose,
             }));
             const input = screen.getByRole('textbox', { name: 'Dialog draft' });
             fireEvent.keyDown(input, { key: 'Escape', isComposing: true });
             expect(onClose).not.toHaveBeenCalled();
+            expect(onKeyDown).toHaveBeenCalledOnce();
             expect(screen.getByRole('dialog').contains(input)).toBe(true);
             fireEvent.keyDown(input, { key: 'Escape' });
             expect(onClose).toHaveBeenCalledOnce();

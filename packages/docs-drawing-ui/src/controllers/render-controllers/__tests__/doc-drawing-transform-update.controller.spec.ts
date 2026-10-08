@@ -268,15 +268,17 @@ describe('DocDrawingTransformUpdateController', () => {
         expect(tracker.shouldRefresh(skeleton, progress(2))).toBe(true);
     });
 
-    it.each(['column', 'footnote'])('refreshes when a published %s contains drawings', (scope) => {
+    it.each(['column', 'footnote', 'header', 'footer'])('refreshes when a published %s contains drawings', (scope) => {
         const nestedPage = {
             skeDrawings: new Map([['column-drawing', {}]]),
             skeTables: new Map(),
             skeColumnGroups: new Map(),
         };
         const pages = [{
-            headerId: '',
-            footerId: '',
+            headerId: scope === 'header' ? 'header' : '',
+            footerId: scope === 'footer' ? 'footer' : '',
+            headerLayoutKey: 'page-1',
+            footerLayoutKey: 'page-1',
             pageWidth: 100,
             skeDrawings: new Map(),
             skeTables: new Map(),
@@ -290,8 +292,8 @@ describe('DocDrawingTransformUpdateController', () => {
         const skeleton = {
             getSkeletonData: () => ({
                 pages,
-                skeHeaders: new Map(),
-                skeFooters: new Map(),
+                skeHeaders: new Map(scope === 'header' ? [['header', new Map([['page-1', nestedPage]])]] : []),
+                skeFooters: new Map(scope === 'footer' ? [['footer', new Map([['page-1', nestedPage]])]] : []),
             }),
         };
         const tracker = new DocDrawingPublicationTracker();

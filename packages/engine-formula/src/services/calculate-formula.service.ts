@@ -143,18 +143,18 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
     }
 
     async execute(formulaDatasetConfig: IFormulaDatasetConfig) {
-        this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START);
-        this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
+        return this._executeLock.acquire('FORMULA_EXECUTION_LOCK', async () => {
+            this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START);
+            this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
 
-        this._currentConfigService.load(formulaDatasetConfig);
+            this._currentConfigService.load(formulaDatasetConfig);
 
-        this._runtimeService.reset();
+            this._runtimeService.reset();
 
-        const cycleReferenceCount = (formulaDatasetConfig.maxIteration || DEFAULT_CYCLE_REFERENCE_COUNT) as number;
+            const cycleReferenceCount = (formulaDatasetConfig.maxIteration || DEFAULT_CYCLE_REFERENCE_COUNT) as number;
 
-        this._isCalculateTreeModel = formulaDatasetConfig.isCalculateTreeModel || false;
+            this._isCalculateTreeModel = formulaDatasetConfig.isCalculateTreeModel || false;
 
-        this._executeLock.acquire('FORMULA_EXECUTION_LOCK', async () => {
             for (let i = 0; i < cycleReferenceCount; i++) {
                 this._runtimeService.setFormulaCycleIndex(i);
                 const executed = await this._executeStep();

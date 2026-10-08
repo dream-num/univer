@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
@@ -34,16 +35,22 @@ import {
     IUIPartsService,
 } from '@univerjs/ui';
 import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
-import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
+import { InsertHeaderFooterFieldCommand } from '../commands/commands/insert-header-footer-field.command';
+import {
+    RefreshHeaderFooterFieldsCommand,
+    UpdateSelectedDocFieldsCommand,
+} from '../commands/commands/refresh-header-footer-fields.command';
+import { DocHeaderFooterRibbonOperation } from '../commands/operations/doc-header-footer-ribbon.operation';
 import { OpenDocParagraphPermissionOperation } from '../commands/operations/paragraph-permission.operation';
 import { OpenDocPermissionPanelOperation } from '../commands/operations/permission-panel.operation';
+import { headerFooterRibbonSchema } from '../menu/header-footer-ribbon';
 import { floatToolbarMenuSchema, menuSchema } from '../menu/schema';
 import {
     IDocEmbedInteractionBoundaryService,
     IDocEmbedRuntimeFocusCoordinator,
 } from '../services/doc-embed-integration.service';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
-import { TabShortCut } from '../shortcuts/format.shortcut';
+import { TabShortCut, UpdateDocFieldsShortcut } from '../shortcuts/format.shortcut';
 import {
     AlignCenterShortCut,
     AlignJustifyShortCut,
@@ -87,6 +94,7 @@ export class DocUIController extends Disposable {
     private _initMenus(): void {
         this._menuManagerService.appendRootMenu(floatToolbarMenuSchema);
         this._menuManagerService.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(headerFooterRibbonSchema);
     }
 
     private _initShortCut() {
@@ -104,6 +112,7 @@ export class DocUIController extends Disposable {
             OrderListShortCut,
             BulletListShortCut,
             TabShortCut,
+            UpdateDocFieldsShortcut,
         ].forEach((shortcut) => {
             this.disposeWithMe(this._shortcutService.registerShortcut(shortcut));
         });
@@ -113,6 +122,7 @@ export class DocUIController extends Disposable {
         this._initMenus();
         this._initFocusHandler();
         this._initCommands();
+        this._initDateTimeFields();
         this._initUiParts();
         this._initShortCut();
     }
@@ -122,9 +132,22 @@ export class DocUIController extends Disposable {
             OpenDocPermissionPanelOperation,
             OpenDocParagraphPermissionOperation,
             CoreHeaderFooterCommand,
+            InsertHeaderFooterFieldCommand,
+            RefreshHeaderFooterFieldsCommand,
+            UpdateSelectedDocFieldsCommand,
             OpenHeaderFooterPanelCommand,
-            SidebarDocHeaderFooterPanelOperation,
+            DocHeaderFooterRibbonOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+    }
+
+    private _initDateTimeFields(): void {
+        const refreshed = new WeakSet<DocumentDataModel>();
+        this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe((model) => {
+            if (model && !refreshed.has(model)) {
+                refreshed.add(model);
+                this._commandService.syncExecuteCommand(RefreshHeaderFooterFieldsCommand.id, { unitId: model.getUnitId(), onOpen: true });
+            }
+        }));
     }
 
     private _initFocusHandler(): void {

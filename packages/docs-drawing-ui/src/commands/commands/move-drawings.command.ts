@@ -15,7 +15,11 @@
  */
 
 import type { DocumentDataModel, IAccessor, ICommand, IObjectPositionH, IObjectPositionV } from '@univerjs/core';
-import type { IDocDrawing, IDrawingDocTransform, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
+import type {
+    IDocDrawing,
+    IDrawingDocTransform,
+    IUpdateDrawingDocTransformCommandParams,
+} from '@univerjs/docs-drawing';
 import type { IDocumentSkeletonCached } from '@univerjs/engine-render';
 import {
     CommandType,
@@ -138,13 +142,13 @@ function findDrawingAnchor(
         const bodyAnchor = findDrawingAnchorInPage(page, drawingId, page.marginTop, page.marginLeft);
         const header = page.headerId == null
             ? undefined
-            : skeletonData.skeHeaders.get(page.headerId)?.get(page.pageWidth);
+            : skeletonData.skeHeaders.get(page.headerId)?.get(page.headerLayoutKey ?? page.pageWidth);
         const headerAnchor = header == null
             ? null
             : findDrawingAnchorInPage(header, drawingId, header.marginTop, page.marginLeft);
         const footer = page.footerId == null
             ? undefined
-            : skeletonData.skeFooters.get(page.footerId)?.get(page.pageWidth);
+            : skeletonData.skeFooters.get(page.footerId)?.get(page.footerLayoutKey ?? page.pageWidth);
         const footerTop = footer == null ? 0 : page.pageHeight - page.marginBottom + footer.marginTop;
         const footerAnchor = footer == null
             ? null

@@ -31,8 +31,14 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocLayoutExecutorService, DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { DeviceType, GlyphType, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PointerInput, RenderUnit } from '@univerjs/engine-render';
-import { ILayoutService } from '@univerjs/ui';
+import {
+    DeviceType,
+    GlyphType,
+    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+    PointerInput,
+    RenderUnit,
+} from '@univerjs/engine-render';
+import { DesktopLayoutService, ILayoutService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
@@ -735,8 +741,30 @@ describe('doc selection render service internals', () => {
         expect(service._rangeList).toEqual([cursorRange]);
     });
 
-    it('keeps the rendered caret when its replacement page is not resolved yet', () => {
-        const { service } = createService();
+    it('keeps the rendered caret when its replacement page is not resolved yet', ({ onTestFinished }) => {
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([DocSelectionManagerService]);
+        injector.add([DocLayoutExecutorService]);
+        injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
+        const doc = univer.createUnit(UniverInstanceType.UNIVER_DOC, {
+            id: 'unresolved-caret',
+            body: { dataStream: 'Caret\r\n', paragraphs: [{ paragraphId: 'p', startIndex: 5 }] },
+        });
+        const render = injector.createInstance(RenderUnit, {
+            engine: {} as never,
+            scene: { getViewports: () => [], getEngine: () => null, enableObjectsEvent: () => {} } as never,
+            isMainScene: true,
+            unit: doc,
+        });
+        render.addRenderDependencies([[DocSkeletonManagerService], [DocSelectionRenderService]]);
+        onTestFinished(() => {
+            render.dispose();
+            univer.dispose();
+        });
+        const subject = render.with(DocSelectionRenderService);
+        const service = subject as unknown as IServiceHarness;
+        const publish = vi.spyOn(service._textSelectionInner$, 'next');
         const currentCaret = createTextRange({
             collapsed: true,
             startOffset: 34,
@@ -758,7 +786,7 @@ describe('doc selection render service internals', () => {
         expect(service._rangeList).toEqual([currentCaret]);
         expect(currentCaret.dispose).not.toHaveBeenCalled();
         expect(unresolvedCaret.dispose).toHaveBeenCalledTimes(1);
-        expect(service._textSelectionInner$.next).not.toHaveBeenCalled();
+        expect(publish).not.toHaveBeenCalled();
     });
 
     it('deactivates structural carets when document ranges contain a visible selection', () => {
@@ -940,15 +968,16 @@ describe('doc selection render service internals', () => {
 });
 
 describe('DocSelectionRenderService', () => {
-    it.each(['', 'note'])('uses the logical caret in segment "%s" while replacement layout is pending', (segmentId) => {
-        TestLayoutService.reset();
+    it.each(['', 'note', 'header', 'footer'])('uses the logical caret in segment "%s" while replacement layout is pending', (segmentId) => {
         const univer = new Univer();
         const injector = univer.__getInjector();
         injector.add([DocSelectionManagerService]);
         injector.add([DocLayoutExecutorService]);
-        injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
+        injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
         const doc = univer.createUnit(UniverInstanceType.UNIVER_DOC, {
             id: 'pending-input',
+            headers: { header: { headerId: 'header', body: { dataStream: 'Header\r\n', paragraphs: [{ paragraphId: 'hp', startIndex: 6 }] } } },
+            footers: { footer: { footerId: 'footer', body: { dataStream: 'Footer\r\n', paragraphs: [{ paragraphId: 'fp', startIndex: 6 }] } } },
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
             body: { dataStream: 'Body\r\n', paragraphs: [{ paragraphId: 'p', startIndex: 4 }] },
             notes: { note: { type: 'footnote' as const, noteId: 'note', body: {
@@ -965,6 +994,7 @@ describe('DocSelectionRenderService', () => {
         render.addRenderDependencies([[DocSkeletonManagerService], [DocSelectionRenderService]]);
         try {
             const service = render.with(DocSelectionRenderService);
+            service.setSegment(segmentId);
             render.with(DocSkeletonManagerService).getSkeleton().beginExternalLayout({ reason: 'edit' });
             const manager = injector.get(DocSelectionManagerService);
             manager.__TEST_ONLY_setCurrentSelection({ unitId: 'pending-input', subUnitId: 'pending-input' });

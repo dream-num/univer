@@ -24,6 +24,7 @@ import { RemoveSheetDrawingCommand, SheetDrawingAnchorType } from '@univerjs/she
 import { COPY_TYPE, ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '@univerjs/sheets-ui';
 import { IClipboardInterfaceService } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
+
 import { InsertFloatImageCommand } from '../../commands/commands/insert-image.command';
 import { SheetsDrawingCopyPasteController } from '../sheet-drawing-copy-paste.controller';
 
@@ -310,7 +311,6 @@ describe('SheetsDrawingCopyPasteController', () => {
             focusedDrawings: [focusedDrawing],
         });
 
-        expect(hook.onBeforeCopyFocusedObject).toBeTypeOf('function');
         expect(hook.onBeforeCopyFocusedObject?.('unit-1', 'sheet-1', COPY_TYPE.CUT)).toBe(true);
         expect(commandService.executeCommand).toHaveBeenCalledWith(RemoveSheetDrawingCommand.id, {
             unitId: 'unit-1',

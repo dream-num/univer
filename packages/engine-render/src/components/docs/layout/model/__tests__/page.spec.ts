@@ -105,8 +105,8 @@ describe('page model', () => {
             isDirty: false,
         } as any;
 
-        const headerVM = { getChildren: () => [{}], getParagraph: () => undefined };
-        const footerVM = { getChildren: () => [{}], getParagraph: () => undefined };
+        const headerVM = { getBody: () => undefined, getChildren: () => [{}], getParagraph: () => undefined };
+        const footerVM = { getBody: () => undefined, getChildren: () => [{}], getParagraph: () => undefined };
         const sectionBreakConfig = {
             sectionId: 'section-page-model',
             pageNumberStart: 1,
@@ -206,8 +206,8 @@ describe('page model', () => {
                 pageSize: { width: 200, height: 300 },
                 headerIds: { defaultHeaderId: 'h-default' },
                 footerIds: { defaultFooterId: 'f-default' },
-                headerTreeMap: new Map([['h-default', { getChildren: () => [{}], getParagraph: () => undefined }]]),
-                footerTreeMap: new Map([['f-default', { getChildren: () => [{}], getParagraph: () => undefined }]]),
+                headerTreeMap: new Map([['h-default', { getBody: () => undefined, getChildren: () => [{}], getParagraph: () => undefined }]]),
+                footerTreeMap: new Map([['f-default', { getBody: () => undefined, getChildren: () => [{}], getParagraph: () => undefined }]]),
                 columnProperties: [],
                 marginTop: 40,
                 marginBottom: 40,

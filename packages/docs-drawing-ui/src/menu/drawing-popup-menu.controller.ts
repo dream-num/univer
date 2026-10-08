@@ -45,7 +45,13 @@ import {
     OpenImageCropOperation,
 } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ContextMenuPosition, FloatingObjectToolbarPosition, IContextMenuService, IMenuManagerService, MenuItemType } from '@univerjs/ui';
+import {
+    ContextMenuPosition,
+    FloatingObjectToolbarPosition,
+    IContextMenuService,
+    IMenuManagerService,
+    MenuItemType,
+} from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing.operation';
 import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
@@ -84,7 +90,6 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         this._init();
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _init(): void {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command) => {
@@ -94,7 +99,6 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                     return edit?.commandId === command.id;
                 });
                 if (command.id === EditDocDrawingOperation.id || opensDrawingEditor) {
-                    this._isDrawingPanelOpen = true;
                     this._clearPopups(undefined, true);
                 }
                 if (command.id === SidebarDocDrawingOperation.id) {

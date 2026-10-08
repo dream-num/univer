@@ -46,8 +46,6 @@ import type {
     ISetWorksheetRowIsAutoHeightMutationParams,
     ISheetSkeletonManagerParam,
 } from '@univerjs/sheets';
-import type { ISheetDrawingTransformExtensionResult, ISheetDrawingTransformPlan } from '../services/sheet-drawing-transform-plan.service';
-import type { ISheetDrawing, ISheetDrawingPosition } from '../services/sheet-drawing.service';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, RANGE_TYPE, Rectangle } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import {
@@ -84,6 +82,9 @@ import {
     SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
+
+import type { ISheetDrawingTransformExtensionResult, ISheetDrawingTransformPlan } from '../services/sheet-drawing-transform-plan.service';
+import type { ISheetDrawing, ISheetDrawingPosition } from '../services/sheet-drawing.service';
 import { drawingPositionToTransform, transformToAxisAlignPosition, transformToDrawingPosition } from '../basics/transform-position';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
@@ -152,11 +153,9 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         this._sheetRefreshListener();
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _sheetInterceptorListener() {
         this.disposeWithMe(
             this._sheetInterceptorService.interceptAfterCommand({
-                // eslint-disable-next-line max-lines-per-function,complexity
                 getMutations: (commandInfo) => {
                     const { id, params } = commandInfo;
 
@@ -405,7 +404,6 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         return this._finalizePlan(unitId, subUnitId, updateDrawings, deleteDrawings);
     }
 
-    // eslint-disable-next-line max-lines-per-function,complexity
     private _getUpdateOrDeleteDrawings(range: IRange, type: RangeMoveUndoType, drawing: ISheetDrawing) {
         const updateDrawings: Partial<ISheetDrawing>[] = [];
         const deleteDrawings: Partial<ISheetDrawing>[] = [];
@@ -503,7 +501,6 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         }
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _getDrawingUndoForColVisible(unitId: string, subUnitId: string, ranges: IRange[]) {
         const sheetSkeletonParam = this._getCalculatedSkeletonParam(unitId, subUnitId);
         if (!sheetSkeletonParam) {
@@ -515,7 +512,6 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         const updateDrawings: ISheetDrawing[] = [];
         const preUpdateDrawings: ISheetDrawing[] = [];
 
-        // eslint-disable-next-line complexity, max-lines-per-function
         Object.keys(drawingData).forEach((drawingId) => {
             const drawing = drawingData[drawingId] as ISheetDrawing;
             const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = drawing;
@@ -634,7 +630,6 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         return this._finalizePlan(unitId, subUnitId, updateDrawings);
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _getDrawingUndoForRowVisible(unitId: string, subUnitId: string, ranges: IRange[]) {
         const sheetSkeletonParam = this._getCalculatedSkeletonParam(unitId, subUnitId);
         if (!sheetSkeletonParam) {
@@ -646,7 +641,6 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         const updateDrawings: ISheetDrawing[] = [];
         const preUpdateDrawings: ISheetDrawing[] = [];
 
-        // eslint-disable-next-line complexity, max-lines-per-function
         Object.keys(drawingData).forEach((drawingId) => {
             const drawing = drawingData[drawingId] as ISheetDrawing;
             const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = drawing;
@@ -817,15 +811,12 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         return this._createUndoAndRedoMutation(unitId, subUnitId, updateDrawings);
     }
 
-    private _getUnitIdAndSubUnitId(params: IInsertRowCommandParams | IRemoveRowColCommandParams, type: 'insert' | 'remove') {
-        let target;
-        if (type === 'insert') {
-            target = getSheetCommandTarget(this._univerInstanceService, params as IInsertRowCommandParams);
-        } else {
-            target = getSheetCommandTarget(this._univerInstanceService);
-        }
+    private _getUnitIdAndSubUnitId(params: IInsertRowCommandParams | IRemoveRowColCommandParams) {
+        const target = getSheetCommandTarget(this._univerInstanceService, params);
 
-        if (!target) return;
+        if (!target) {
+            return;
+        }
 
         const { unitId, subUnitId } = target;
 
@@ -897,7 +888,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
     }
 
     private _moveRowInterceptor(params: IInsertRowCommandParams | IRemoveRowColCommandParams, type: 'insert' | 'remove') {
-        const target = this._getUnitIdAndSubUnitId(params, type);
+        const target = this._getUnitIdAndSubUnitId(params);
         if (!target) {
             return { redos: [], undos: [] };
         }
@@ -970,7 +961,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
     }
 
     private _moveColInterceptor(params: IInsertColCommandParams | IRemoveRowColCommandParams, type: 'insert' | 'remove') {
-        const target = this._getUnitIdAndSubUnitId(params, type);
+        const target = this._getUnitIdAndSubUnitId(params);
         if (!target) {
             return { redos: [], undos: [] };
         }
@@ -1110,7 +1101,6 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         return null;
     }
 
-    // eslint-disable-next-line max-lines-per-function, complexity
     private _shrinkCol(
         colStartIndex: number,
         colEndIndex: number,
@@ -1286,7 +1276,6 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         return null;
     }
 
-    // eslint-disable-next-line max-lines-per-function, complexity
     private _shrinkRow(
         rowStartIndex: number,
         rowEndIndex: number,

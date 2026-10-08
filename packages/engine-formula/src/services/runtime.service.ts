@@ -19,6 +19,8 @@ import type {
     IArrayFormulaEmbeddedMap,
     IArrayFormulaRangeType,
     IFeatureDirtyRangeType,
+    IFormulaData,
+    IFormulaDataItem,
     IRuntimeImageFormulaDataType,
     IRuntimeOtherUnitDataType,
     IRuntimeUnitDataType,
@@ -68,6 +70,7 @@ export enum FormulaExecutedStateType {
 
 export interface IAllRuntimeData {
     unitData: IRuntimeUnitDataType;
+    sourceFormulaData?: IFormulaData;
     arrayFormulaRange: IArrayFormulaRangeType;
     arrayFormulaEmbedded: IArrayFormulaEmbeddedMap;
     unitOtherData: IRuntimeOtherUnitDataType;
@@ -227,6 +230,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     private _currentUnitId: string = '';
 
     private _runtimeData: IRuntimeUnitDataType = Object.create(null);
+    private _sourceFormulaData: IFormulaData = Object.create(null);
+    private _currentSourceFormula: IFormulaDataItem | undefined;
 
     private _runtimeOtherData: IRuntimeOtherUnitDataType = Object.create(null); // Data returned by other businesses through formula calculation, excluding the sheet.
 
@@ -394,6 +399,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     reset() {
         this._formulaExecuteStage = FormulaExecuteStageType.IDLE;
         this._runtimeData = Object.create(null);
+        this._sourceFormulaData = Object.create(null);
+        this._currentSourceFormula = undefined;
         this._runtimeOtherData = Object.create(null);
         this._unitArrayFormulaRange = Object.create(null);
         this._unitArrayFormulaEmbeddedMap = Object.create(null);
@@ -436,6 +443,15 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         this._currentColumnCount = columnCount;
         this._currentSubUnitId = sheetId;
         this._currentUnitId = unitId;
+        const cell = this._currentConfigService.getUnitData()[unitId]?.[sheetId]?.cellData.getValue(row, column);
+        const formula = this._currentConfigService.getFormulaData()[unitId]?.[sheetId]?.[row]?.[column];
+        // The live cell may be cleared while an earlier asynchronous dependency is still executing.
+        if (formula) {
+            const isSharedFollower = (formula.x ?? 0) !== 0 || (formula.y ?? 0) !== 0;
+            this._currentSourceFormula = { f: isSharedFollower ? '' : formula.f, si: formula.si };
+        } else {
+            this._currentSourceFormula = cell?.f || cell?.si ? { f: cell.f ?? '', si: cell.si ?? undefined } : undefined;
+        }
     }
 
     setFunctionRefInfoOverride(rowCount: number, columnCount: number) {
@@ -737,6 +753,12 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         } else {
             const valueObject = this._getValueObjectOfRuntimeData(functionVariant as BaseValueObject);
             sheetData.setValue(row, column, valueObject);
+            if (this._currentSourceFormula != null) {
+                const unitFormulas = this._sourceFormulaData[unitId] ??= {};
+                const sheetFormulas = unitFormulas[sheetId] ??= {};
+                const rowFormulas = sheetFormulas[row] ??= {};
+                rowFormulas[column] = { ...this._currentSourceFormula };
+            }
 
             // If it is the result of the IMAGE formula, the image info needs to be saved to runtimeImageFormulaData
             if ((functionVariant as BaseValueObject).isString() && (functionVariant as StringValueObject).isImage()) {
@@ -854,6 +876,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     getAllRuntimeData(): IAllRuntimeData {
         return {
             unitData: this.getUnitData(),
+            sourceFormulaData: this._sourceFormulaData,
             arrayFormulaRange: this.getUnitArrayFormula(),
             arrayFormulaEmbedded: this.getUnitArrayFormulaEmbeddedMap(),
             unitOtherData: this.getRuntimeOtherData(),

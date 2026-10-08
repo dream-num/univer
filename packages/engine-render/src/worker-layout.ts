@@ -16,16 +16,27 @@
 
 import type { DocumentDataModel, LocaleService, Nullable } from '@univerjs/core';
 import type { IDocumentSkeletonCached, IDocumentSkeletonPage } from './basics/i-document-skeleton-cached';
-import type { IDocumentSkeletonContinuousSnapshot, IDocumentSkeletonPagePatch } from './components/docs/layout/document-layout-page-patch';
+import type {
+    IDocumentSkeletonContinuousSnapshot,
+    IDocumentSkeletonPagePatch,
+} from './components/docs/layout/document-layout-page-patch';
 import type {
     IDocumentLayoutGeometryPublication,
     IDocumentLayoutPagePublication,
     IDocumentLayoutResourcePublication,
 } from './components/docs/layout/document-layout-publication';
-import type { DocumentLayoutReason, IDocumentLayoutInvalidation, IDocumentLayoutProgress } from './components/docs/layout/document-layout-types';
+import type {
+    DocumentLayoutReason,
+    IDocumentLayoutInvalidation,
+    IDocumentLayoutProgress,
+} from './components/docs/layout/document-layout-types';
 import { Disposable } from '@univerjs/core';
 import { DocumentSkeleton } from './components/docs/layout/doc-skeleton';
-import { hydrateDocumentSkeletonPage, serializeDocumentSkeletonContinuousBlock, serializeDocumentSkeletonPage } from './components/docs/layout/document-layout-page-patch';
+import {
+    hydrateDocumentSkeletonPage,
+    serializeDocumentSkeletonContinuousBlock,
+    serializeDocumentSkeletonPage,
+} from './components/docs/layout/document-layout-page-patch';
 import { DocumentViewModel } from './components/docs/view-model/document-view-model';
 
 const MAX_PAGES_PER_PUBLICATION = 4;
@@ -60,12 +71,13 @@ export class DocumentLayoutSession extends Disposable {
     private readonly _viewModel: DocumentViewModel;
     private readonly _skeleton: DocumentSkeleton;
     private _lastPublishedPageCount = 0;
+    private _paginationRevision = 0;
     private _layoutReason: DocumentLayoutReason = 'initial';
     private _didPublishEditAnchor = false;
     private _continuousPageSnapshot: IDocumentSkeletonContinuousSnapshot | null = null;
     private _continuousReplacementOffset: number | undefined;
-    private readonly _publishedHeaderPages = new Map<string, Map<number, IDocumentSkeletonPage>>();
-    private readonly _publishedFooterPages = new Map<string, Map<number, IDocumentSkeletonPage>>();
+    private readonly _publishedHeaderPages = new Map<string, Map<number | string, IDocumentSkeletonPage>>();
+    private readonly _publishedFooterPages = new Map<string, Map<number | string, IDocumentSkeletonPage>>();
     private _resetPublishedResources = true;
     private _pendingPaginatedCompletion: IDocumentLayoutProgress | null = null;
 
@@ -80,6 +92,7 @@ export class DocumentLayoutSession extends Disposable {
     start(options?: IDocumentLayoutSessionStartOptions): number {
         this._lastPublishedPageCount = 0;
         this._layoutReason = options?.reason ?? 'initial';
+        this._paginationRevision = 0;
         this._didPublishEditAnchor = false;
         this._publishedHeaderPages.clear();
         this._publishedFooterPages.clear();
@@ -195,6 +208,12 @@ export class DocumentLayoutSession extends Disposable {
 
     private _collectPublications(initialProgress: IDocumentLayoutProgress): IDocumentLayoutStepResult {
         let progress = initialProgress;
+        // A total-page field can restart pagination within the same generation.
+        if ((progress.paginationRevision ?? 0) !== this._paginationRevision) {
+            this._paginationRevision = progress.paginationRevision ?? 0;
+            this._lastPublishedPageCount = 0;
+            this._didPublishEditAnchor = false;
+        }
         if (!progress.didPublish) {
             return { progress, publication: null };
         }
@@ -330,7 +349,7 @@ export class DocumentLayoutSession extends Disposable {
         }
         const collect = (
             source: typeof skeletonData.skeHeaders,
-            published: Map<string, Map<number, IDocumentSkeletonPage>>
+            published: Map<string, Map<number | string, IDocumentSkeletonPage>>
         ): IDocumentLayoutResourcePublication['skeHeaders'] => {
             const patches: IDocumentLayoutResourcePublication['skeHeaders'] = [];
             for (const [segmentId, pagesByWidth] of source) {
@@ -340,7 +359,7 @@ export class DocumentLayoutSession extends Disposable {
                     published.set(segmentId, publishedPagesByWidth);
                 }
 
-                const pagePatches: Array<[number, IDocumentSkeletonPagePatch]> = [];
+                const pagePatches: Array<[number | string, IDocumentSkeletonPagePatch]> = [];
                 for (const [width, page] of pagesByWidth) {
                     if (publishedPagesByWidth.get(width) === page) {
                         continue;

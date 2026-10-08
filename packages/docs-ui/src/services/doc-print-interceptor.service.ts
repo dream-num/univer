@@ -95,8 +95,8 @@ export class DocPrintInterceptorService extends Disposable {
         }
 
         collectPageDrawingIds(page, drawingIds);
-        const header = data.skeHeaders.get(page.headerId)?.get(page.pageWidth);
-        const footer = data.skeFooters.get(page.footerId)?.get(page.pageWidth);
+        const header = data.skeHeaders.get(page.headerId)?.get(page.headerLayoutKey ?? page.pageWidth);
+        const footer = data.skeFooters.get(page.footerId)?.get(page.footerLayoutKey ?? page.pageWidth);
         if (header) {
             collectPageDrawingIds(header, drawingIds);
         }

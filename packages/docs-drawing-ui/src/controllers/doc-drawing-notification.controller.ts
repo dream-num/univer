@@ -314,12 +314,12 @@ export class DocDrawingAddRemoveController extends Disposable {
             for (const page of pages) {
                 const { headerId, footerId, marginTop, marginLeft, marginBottom, pageWidth, pageHeight } = page;
                 if (editArea === DocumentEditArea.HEADER) {
-                    const header = skeHeaders.get(headerId)?.get(pageWidth);
+                    const header = skeHeaders.get(headerId)?.get(page.headerLayoutKey ?? pageWidth);
                     if (header) {
                         drawingAnchor = findDrawingAnchorInPage(header, drawing.drawingId, header.marginTop, marginLeft);
                     }
                 } else if (editArea === DocumentEditArea.FOOTER) {
-                    const footer = skeFooters.get(footerId)?.get(pageWidth);
+                    const footer = skeFooters.get(footerId)?.get(page.footerLayoutKey ?? pageWidth);
                     if (footer) {
                         drawingAnchor = findDrawingAnchorInPage(
                             footer,

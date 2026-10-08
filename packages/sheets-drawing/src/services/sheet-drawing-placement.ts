@@ -17,13 +17,14 @@
 import type { IGroupBaseBound, ITransformState } from '@univerjs/core';
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ICellOverGridPosition } from '@univerjs/sheets';
+import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute } from '@univerjs/sheets';
+
 import type {
     ISheetDrawing,
     ISheetDrawingPosition,
     ISheetFloatDom,
     ISheetImage,
 } from './sheet-drawing.service';
-import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute } from '@univerjs/sheets';
 import { transformToAxisAlignPosition, transformToDrawingPosition } from '../basics/transform-position';
 import {
     SheetDrawingAnchorType,

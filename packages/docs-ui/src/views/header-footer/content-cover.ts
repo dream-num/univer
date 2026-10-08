@@ -72,8 +72,8 @@ export class HeaderFooterContentCover extends BaseObject {
             if (!page.isLayoutPlaceholder && !page.isMaterializationPlaceholder
                 && !this._documents.isSkipByDiffBounds(page, pageTop, pageLeft, viewport)) {
                 const pageBounds = this._transformBounds({ left: pageLeft, top: pageTop, right: pageLeft + page.pageWidth, bottom: pageTop + page.pageHeight });
-                const header = data.skeHeaders.get(page.headerId)?.get(page.pageWidth);
-                const footer = data.skeFooters.get(page.footerId)?.get(page.pageWidth);
+                const header = data.skeHeaders.get(page.headerId)?.get(page.headerLayoutKey ?? page.pageWidth);
+                const footer = data.skeFooters.get(page.footerId)?.get(page.footerLayoutKey ?? page.pageWidth);
                 const local: IBoundRectNoAngle[] = [];
                 if (header) {
                     this._collectTextAndTables(header, pageLeft + page.marginLeft, pageTop + header.marginTop, local);

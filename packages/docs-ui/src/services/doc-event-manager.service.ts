@@ -515,8 +515,14 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
     private _initPointer() {
         let preCursor = CURSOR_TYPE.TEXT;
+        let pointing = false;
         this.disposeWithMe(this.hoverCustomRanges$.subscribe((ranges) => {
-            if (ranges.length) {
+            const nextPointing = ranges.some(({ range }) => range.rangeType !== CustomRangeType.FIELD);
+            if (nextPointing === pointing) {
+                return;
+            }
+            pointing = nextPointing;
+            if (pointing) {
                 preCursor = this._context.scene.getCursor();
                 this._context.scene.setCursor(CURSOR_TYPE.POINTER);
             } else {
@@ -661,6 +667,12 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         this._buildBulletBounds();
 
         return [...this._bulletBounds];
+    }
+
+    getCustomRangeBounds(): ICustomRangeBound[] {
+        this._buildCustomRangeBounds();
+
+        return [...this._customRangeBounds];
     }
 
     getListContextMenuBulletByOffset(offsetX: number, offsetY: number): Nullable<IBulletBound> {

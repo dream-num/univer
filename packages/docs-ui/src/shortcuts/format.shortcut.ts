@@ -17,11 +17,18 @@
 import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
 import { TabCommand } from '../commands/commands/auto-format.command';
+import { UpdateSelectedDocFieldsCommand } from '../commands/commands/refresh-header-footer-fields.command';
 import { whenDocAndEditorFocused } from './utils';
 
 export const TabShortCut: IShortcutItem = {
     id: TabCommand.id,
     binding: KeyCode.TAB,
+    preconditions: whenDocAndEditorFocused,
+};
+
+export const UpdateDocFieldsShortcut: IShortcutItem = {
+    id: UpdateSelectedDocFieldsCommand.id,
+    binding: KeyCode.F9,
     preconditions: whenDocAndEditorFocused,
 };
 

@@ -21,7 +21,9 @@ import { DrawingTypeEnum, ImageSourceType, RedoCommandId, Tools, UndoCommandId }
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { RemoveColByRangeCommand, RemoveRowByRangeCommand, SheetSkeletonService } from '@univerjs/sheets';
 import {
+    applySheetDrawingPlacement,
     drawingPositionToTransform,
+    getSheetDrawingPlacement,
     InsertSheetDrawingCommand,
     ISheetDrawingService,
     SheetDrawingAnchorType,
@@ -126,6 +128,40 @@ describe('SheetDrawingActiveRenderController', () => {
             vi.runOnlyPendingTimers();
             expect(bed.get(IDrawingManagerService).getDrawingByParam(drawing)).toEqual(drawing);
             expect(bed.get(ISheetDrawingService).getDrawingByParam(drawing)).toEqual(drawing);
+        } finally {
+            bed.univer.dispose();
+            bed.activated$.complete();
+        }
+    });
+
+    it('preserves one-cell anchored size during activation after column widths change', async () => {
+        const bed = createTestBed();
+        try {
+            const drawing = await insertDrawing(bed, SheetDrawingAnchorType.Position);
+            bed.get(SheetDrawingActiveRenderController);
+            const sheetService = bed.get(ISheetDrawingService);
+            const manager = bed.get(IDrawingManagerService);
+            manager.registerDrawingData(bed.unitId, Tools.deepClone(sheetService.getDrawingDataForUnit(bed.unitId)));
+            const before = Tools.deepClone(sheetService.getDrawingByParam(drawing)!);
+            const columnManager = bed.workbook.getActiveSheet().getColumnManager();
+            columnManager.setColumnWidth(1, 140);
+            for (let column = 3; column < 6; column++) {
+                columnManager.setColumnWidth(column, 20);
+            }
+            const skeleton = bed.get(SheetSkeletonService).getSkeleton(bed.unitId, bed.subUnitId)!;
+            skeleton.makeDirty(true);
+            skeleton.calculate();
+            const expected = applySheetDrawingPlacement(before, getSheetDrawingPlacement(before), skeleton);
+
+            bed.activated$.next(true);
+            vi.runOnlyPendingTimers();
+
+            const after = sheetService.getDrawingByParam(drawing)!;
+            expect(after.transform).toEqual(expected.transform);
+            expect(after.transform!.width).toBe(before.transform!.width);
+            expect(after.transform!.height).toBe(before.transform!.height);
+            expect(after.transform!.left).not.toBe(before.transform!.left);
+            expect(manager.getDrawingByParam(drawing)).toEqual(after);
         } finally {
             bed.univer.dispose();
             bed.activated$.complete();

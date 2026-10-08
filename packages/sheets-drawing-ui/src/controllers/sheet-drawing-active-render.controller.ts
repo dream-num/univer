@@ -21,7 +21,12 @@ import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { SetWorksheetActiveOperation, SheetSkeletonService } from '@univerjs/sheets';
-import { drawingPositionToTransform, ISheetDrawingService, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
+import {
+    applySheetDrawingPlacement,
+    getSheetDrawingPlacement,
+    ISheetDrawingService,
+    SheetDrawingAnchorType,
+} from '@univerjs/sheets-drawing';
 
 export class SheetDrawingActiveRenderController extends Disposable implements IRenderModule {
     private _renderTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -121,10 +126,11 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
                         if (unitId === showUnitId && subUnitId === showSubunitId) {
                             const drawing = drawingData[drawingId] as ISheetDrawing;
                             if (sheetSkeletonParam && drawing.sheetTransform && drawing.anchorType !== SheetDrawingAnchorType.None) {
-                                refreshedDrawings.push({
-                                    ...drawing,
-                                    transform: drawingPositionToTransform(drawing.sheetTransform, sheetSkeletonParam),
-                                });
+                                refreshedDrawings.push(applySheetDrawingPlacement(
+                                    drawing,
+                                    getSheetDrawingPlacement(drawing),
+                                    sheetSkeletonParam.skeleton
+                                ));
                             }
                             insertDrawings.push(drawingData[drawingId]);
                         } else {

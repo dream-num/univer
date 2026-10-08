@@ -15,11 +15,15 @@
  */
 
 import type { Workbook } from '@univerjs/core';
+import type { ISheetDrawingPlacement } from '../../services/sheet-drawing-placement';
+import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import { Direction, DrawingTypeEnum, ICommandService, ImageSourceType, Injector, IUniverInstanceService, RANGE_TYPE, RedoCommandId, Tools, UndoCommandId, UniverInstanceType } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import {
     DeleteRangeMoveLeftCommand,
     DeleteRangeMoveUpCommand,
+    DeltaColumnWidthCommand,
+    DeltaRowHeightCommand,
     InsertColCommand,
     InsertRangeMoveDownCommand,
     InsertRangeMoveRightCommand,
@@ -41,9 +45,6 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-import type { ISheetDrawingPlacement } from '../../services/sheet-drawing-placement';
-import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import { createSheetsDrawingTestBed } from '../../__tests__/create-sheets-drawing-test-bed';
 import { drawingPositionToTransform } from '../../basics/transform-position';
 import { InsertSheetDrawingCommand } from '../../commands/commands/insert-sheet-drawing.command';
@@ -656,6 +657,14 @@ describe('sheet drawing transforms without UI plugins', () => {
             value: 120,
             ranges: [{ startRow: 0, endRow: 19, startColumn: 2, endColumn: 2 }],
         }],
+        ['resize row by dragging', DeltaRowHeightCommand.id, {
+            anchorRow: 2,
+            deltaY: 40,
+        }],
+        ['resize column by dragging', DeltaColumnWidthCommand.id, {
+            anchorCol: 2,
+            deltaX: 50,
+        }],
         ['hide row', SetRowHiddenCommand.id, {
             unitId: 'test',
             subUnitId: 'sheet1',
@@ -711,6 +720,13 @@ describe('sheet drawing transforms without UI plugins', () => {
             ...base,
             drawingId: `placement-${index}`,
         }, placement, placement.kind === SheetDrawingAnchorType.None ? undefined : skeleton));
+        drawings.push({
+            ...applySheetDrawingPlacement({
+                ...base,
+                drawingId: 'implicit-position',
+            }, placements[0], skeleton),
+            anchorType: undefined,
+        });
         expect(await testBed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
             unitId: 'test',
             drawings,
@@ -726,6 +742,20 @@ describe('sheet drawing transforms without UI plugins', () => {
         });
         const before = readDrawings();
 
+        if (commandId === DeltaRowHeightCommand.id || commandId === DeltaColumnWidthCommand.id) {
+            testBed.get(SheetsSelectionsService).setSelections([{
+                range: {
+                    startRow: 0,
+                    endRow: 0,
+                    startColumn: 0,
+                    endColumn: 0,
+                    rangeType: RANGE_TYPE.NORMAL,
+                },
+                primary: null,
+                style: null,
+            }]);
+        }
+
         expect(await testBed.commandService.executeCommand(commandId, params)).toBe(true);
         const after = readDrawings();
         expect(after[0].transform).not.toEqual(before[0].transform);
@@ -733,6 +763,8 @@ describe('sheet drawing transforms without UI plugins', () => {
         expect(getSheetDrawingPlacement(after[2])).toEqual(getSheetDrawingPlacement(before[2]));
         expect(after[0].transform?.width).toBe(before[0].transform?.width);
         expect(after[0].transform?.height).toBe(before[0].transform?.height);
+        expect(after[3].transform?.width).toBe(before[3].transform?.width);
+        expect(after[3].transform?.height).toBe(before[3].transform?.height);
         if (commandId === SetRowHiddenCommand.id || commandId === SetColHiddenCommand.id) {
             expect(after[1]).not.toEqual(before[1]);
         } else {
@@ -746,6 +778,7 @@ describe('sheet drawing transforms without UI plugins', () => {
             SheetDrawingAnchorType.Position,
             SheetDrawingAnchorType.Both,
             SheetDrawingAnchorType.None,
+            SheetDrawingAnchorType.Position,
         ]);
 
         expect(await testBed.commandService.executeCommand(UndoCommandId)).toBe(true);

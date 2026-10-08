@@ -47,6 +47,7 @@ export interface ISheetDrawingBase {
      * this property is used to store the excel drawing axis alignment position, which is not always the same as the sheetTransform.
      */
     axisAlignSheetTransform: ISheetDrawingPosition;
+    /** Defaults to Position: the drawing moves with cells while retaining its size. */
     anchorType?: SheetDrawingAnchorType;
 }
 

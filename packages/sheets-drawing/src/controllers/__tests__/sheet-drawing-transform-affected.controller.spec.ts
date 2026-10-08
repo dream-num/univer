@@ -14,10 +14,23 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
+import type { IWorkbookData, Workbook } from '@univerjs/core';
 import type { ISheetDrawingPlacement } from '../../services/sheet-drawing-placement';
 import type { ISheetDrawing } from '../../services/sheet-drawing.service';
-import { Direction, DrawingTypeEnum, ICommandService, ImageSourceType, Injector, IUniverInstanceService, RANGE_TYPE, RedoCommandId, Tools, UndoCommandId, UniverInstanceType } from '@univerjs/core';
+import {
+    Direction,
+    DrawingTypeEnum,
+    ICommandService,
+    ImageSourceType,
+    Injector,
+    IResourceLoaderService,
+    IUniverInstanceService,
+    RANGE_TYPE,
+    RedoCommandId,
+    Tools,
+    UndoCommandId,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import {
     DeleteRangeMoveLeftCommand,
@@ -51,10 +64,15 @@ import { InsertSheetDrawingCommand } from '../../commands/commands/insert-sheet-
 import { SetSheetDrawingPlacementCommand } from '../../commands/commands/set-sheet-drawing-placement.command';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../../commands/mutations/set-drawing-apply.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../../commands/operations/clear-drawing-transformer.operation';
-import { applySheetDrawingPlacement, getSheetDrawingPlacement, normalizeSheetDrawingPlacement } from '../../services/sheet-drawing-placement';
+import {
+    applySheetDrawingPlacement,
+    getSheetDrawingPlacement,
+    normalizeSheetDrawingPlacement,
+} from '../../services/sheet-drawing-placement';
 import { SheetDrawingTransformPlanService } from '../../services/sheet-drawing-transform-plan.service';
 import { ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
 import { SheetDrawingTransformAffectedController } from '../sheet-drawing-transform-affected.controller';
+import { SHEET_DRAWING_PLUGIN } from '../sheet-drawing.controller';
 
 const UNIT_ID = 'unit-1';
 const SUB_UNIT_ID = 'sheet-1';
@@ -574,7 +592,7 @@ describe('sheet drawing transforms without UI plugins', () => {
 
     afterEach(() => testBed.univer.dispose());
 
-    async function insertDrawing() {
+    async function insertDrawing(anchorType: SheetDrawingAnchorType | undefined) {
         const sheetTransform = {
             from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
             to: { row: 4, column: 3, rowOffset: 0, columnOffset: 0 },
@@ -587,7 +605,7 @@ describe('sheet drawing transforms without UI plugins', () => {
             drawingType: DrawingTypeEnum.DRAWING_IMAGE,
             imageSourceType: ImageSourceType.URL,
             source: 'https://example.com/drawing.png',
-            anchorType: SheetDrawingAnchorType.Both,
+            anchorType,
             sheetTransform,
             axisAlignSheetTransform: sheetTransform,
             transform: drawingPositionToTransform(sheetTransform, skeleton)!,
@@ -603,8 +621,29 @@ describe('sheet drawing transforms without UI plugins', () => {
         return service.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-1' })!;
     }
 
+    it.each([DeleteRangeMoveLeftCommand.id, DeleteRangeMoveUpCommand.id])('%s removes a legacy cell anchor and preserves an explicit absolute image', async (commandId) => {
+        const service = await insertDrawing(undefined);
+        const before = structuredClone(getDrawing(service));
+        const absolute = { ...before, drawingId: 'absolute-image', anchorType: SheetDrawingAnchorType.None };
+        expect(await testBed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [absolute],
+        })).toBe(true);
+
+        expect(await testBed.commandService.executeCommand(commandId, {
+            range: { startRow: 1, endRow: 4, startColumn: 1, endColumn: 3 },
+        })).toBe(true);
+        expect(getDrawing(service)).toBeUndefined();
+        expect(service.getDrawingByParam(absolute)).toEqual(absolute);
+        expect(await testBed.commandService.executeCommand(UndoCommandId)).toBe(true);
+        expect(getDrawing(service)).toEqual(before);
+        expect(await testBed.commandService.executeCommand(RedoCommandId)).toBe(true);
+        expect(getDrawing(service)).toBeUndefined();
+        expect(service.getDrawingByParam(absolute)).toEqual(absolute);
+    });
+
     it('inserts rows and restores the exact drawing through undo and redo', async () => {
-        const service = await insertDrawing();
+        const service = await insertDrawing(SheetDrawingAnchorType.Both);
         const before = structuredClone(getDrawing(service));
 
         expect(await testBed.commandService.executeCommand(InsertRowCommand.id, {
@@ -675,7 +714,7 @@ describe('sheet drawing transforms without UI plugins', () => {
             subUnitId: 'sheet1',
             ranges: [{ startRow: 0, endRow: 19, startColumn: 2, endColumn: 2 }],
         }],
-    ])('%s preserves the three placement contracts in headless mode', async (_name, commandId, params) => {
+    ])('%s preserves explicit and default placement contracts in headless mode', async (_name, commandId, params) => {
         const skeleton = testBed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1');
         if (!skeleton) {
             throw new Error('Expected the Sheet skeleton to exist.');
@@ -760,6 +799,8 @@ describe('sheet drawing transforms without UI plugins', () => {
         const after = readDrawings();
         expect(after[0].transform).not.toEqual(before[0].transform);
         expect(after[2].transform).toEqual(before[2].transform);
+        expect(after[3].transform).toEqual(after[0].transform);
+        expect(getSheetDrawingPlacement(after[3])).toEqual(getSheetDrawingPlacement(after[0]));
         expect(getSheetDrawingPlacement(after[2])).toEqual(getSheetDrawingPlacement(before[2]));
         expect(after[0].transform?.width).toBe(before[0].transform?.width);
         expect(after[0].transform?.height).toBe(before[0].transform?.height);
@@ -787,8 +828,93 @@ describe('sheet drawing transforms without UI plugins', () => {
         expect(readDrawings()).toEqual(after);
     });
 
+    it.each([
+        [DeltaRowHeightCommand.id, { anchorRow: 2, deltaY: 48 }, SheetDrawingAnchorType.Position],
+        [DeltaColumnWidthCommand.id, { anchorCol: 2, deltaX: 48 }, SheetDrawingAnchorType.Position],
+        [DeltaRowHeightCommand.id, { anchorRow: 2, deltaY: 48 }, undefined],
+        [DeltaColumnWidthCommand.id, { anchorCol: 2, deltaX: 48 }, undefined],
+    ])('%s with %j preserves drawing size for anchor %s', async (commandId, params, anchorType) => {
+        const service = await insertDrawing(anchorType);
+        const before = structuredClone(getDrawing(service).transform);
+        testBed.get(SheetsSelectionsService).setSelections('test', 'sheet1', [{
+            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+            primary: null,
+        }]);
+
+        expect(await testBed.commandService.executeCommand(commandId, params)).toBe(true);
+        expect(getDrawing(service).transform).toEqual(before);
+    });
+
+    it.each([SheetDrawingAnchorType.Position, undefined])('keeps anchor %s drawing size across auto-height and a preceding column resize', async (anchorType) => {
+        const service = await insertDrawing(anchorType);
+        const before = structuredClone(getDrawing(service).transform)!;
+        const worksheet = testBed.workbook.getSheetBySheetId('sheet1')!;
+        testBed.get(SheetsSelectionsService).setSelections('test', 'sheet1', [{
+            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+            primary: null,
+        }]);
+
+        testBed.commandService.syncExecuteCommand(SetWorksheetRowAutoHeightMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            rowsAutoHeightInfo: [{ row: 2, autoHeight: worksheet.getRowHeight(2) + 30 }],
+        });
+        await Promise.resolve();
+        await testBed.commandService.executeCommand(DeltaColumnWidthCommand.id, { anchorCol: 0, deltaX: 48 });
+
+        expect(getDrawing(service).transform).toEqual({ ...before, left: before.left! + 48 });
+    });
+
+    it('round-trips legacy floating cell anchors through saved resources and undo/redo', async () => {
+        const service = await insertDrawing(undefined);
+        const original = getDrawing(service);
+        const floating = { ...original, drawingId: 'legacy-floating', drawingType: DrawingTypeEnum.DRAWING_DOM };
+        expect(await testBed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [floating],
+        })).toBe(true);
+        const snapshot = testBed.get(IResourceLoaderService).saveUnit<IWorkbookData>('test');
+        if (!snapshot) {
+            throw new Error('Expected the Sheet snapshot to exist.');
+        }
+        const resource = snapshot.resources.find(({ name }) => name === SHEET_DRAWING_PLUGIN);
+        if (!resource) {
+            throw new Error('Expected the drawing resource to exist.');
+        }
+        const persisted = JSON.parse(resource.data).sheet1.data['legacy-floating'];
+        expect(persisted).not.toHaveProperty('anchorType');
+        const restored = createSheetsDrawingTestBed(snapshot);
+        try {
+            const restoredService = restored.get(ISheetDrawingService);
+            const readDrawing = () => restoredService.getDrawingByParam(floating)!;
+            const before = structuredClone(readDrawing());
+            expect(getSheetDrawingPlacement(before)).toMatchObject({
+                kind: SheetDrawingAnchorType.Position,
+                from: floating.sheetTransform.from,
+                width: floating.transform?.width,
+                height: floating.transform?.height,
+            });
+            expect(await restored.commandService.executeCommand(InsertRowCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 19 },
+                direction: Direction.UP,
+            })).toBe(true);
+            const after = structuredClone(readDrawing());
+            expect(after.transform?.top).toBeGreaterThan(before.transform?.top ?? 0);
+            expect(after.transform?.width).toBe(before.transform?.width);
+            expect(after.transform?.height).toBe(before.transform?.height);
+            expect(await restored.commandService.executeCommand(UndoCommandId)).toBe(true);
+            expect(readDrawing()).toEqual(before);
+            expect(await restored.commandService.executeCommand(RedoCommandId)).toBe(true);
+            expect(readDrawing()).toEqual(after);
+        } finally {
+            restored.univer.dispose();
+        }
+    });
+
     it('resizes both-anchored drawings when row height changes', async () => {
-        const service = await insertDrawing();
+        const service = await insertDrawing(SheetDrawingAnchorType.Both);
         const before = structuredClone(getDrawing(service));
 
         expect(testBed.commandService.syncExecuteCommand(SetRowHeightCommand.id, {
@@ -807,7 +933,7 @@ describe('sheet drawing transforms without UI plugins', () => {
     });
 
     it('updates placement through a command and round-trips through undo and redo', async () => {
-        const service = await insertDrawing();
+        const service = await insertDrawing(SheetDrawingAnchorType.Both);
         const before = structuredClone(getDrawing(service));
         const placement: ISheetDrawingPlacement = {
             kind: SheetDrawingAnchorType.None,
@@ -983,7 +1109,7 @@ describe('sheet drawing transforms without UI plugins', () => {
             toRange: { startRow: 8, endRow: 11, startColumn: 7, endColumn: 9 },
         }],
     ])('%s changes drawing geometry and round-trips exactly', async (_name, commandId, params) => {
-        const service = await insertDrawing();
+        const service = await insertDrawing(SheetDrawingAnchorType.Both);
         const before = structuredClone(getDrawing(service));
 
         expect(await testBed.commandService.executeCommand(commandId, params)).toBe(true);
@@ -997,7 +1123,7 @@ describe('sheet drawing transforms without UI plugins', () => {
     });
 
     it('refreshes direct auto-height mutations and their inverse without UI', async () => {
-        const service = await insertDrawing();
+        const service = await insertDrawing(SheetDrawingAnchorType.Both);
         const before = structuredClone(getDrawing(service));
         const worksheet = testBed.workbook.getSheetBySheetId('sheet1')!;
         const originalHeight = worksheet.getRowHeight(2);

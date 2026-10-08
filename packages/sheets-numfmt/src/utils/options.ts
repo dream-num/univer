@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import { currencySymbols } from '@univerjs/core';
+import type { LocaleType } from '@univerjs/core';
+import { currencySymbols, excelDateTimeSerial, getNumfmtLocaleTag, numfmt } from '@univerjs/core';
+import { getDateFormatPatterns } from '../base/const/date-format';
 import { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from '../base/const/formatdetail';
 
 export const getCurrencyOptions = () => currencySymbols.map((item) => ({ label: item, value: item }));
@@ -26,7 +28,24 @@ export const getCurrencyFormatOptions = (suffix: string) =>
         color: item.color,
     }));
 
-export const getDateFormatOptions = () => DATEFMTLISG.map((item) => ({ label: item.label, value: item.suffix }));
+const DATE_FORMAT_PREVIEW_VALUE = excelDateTimeSerial(new Date(Date.UTC(1930, 7, 5, 13, 30, 30)));
+
+export const getDateFormatOptions = (locale?: LocaleType, currentPattern?: string) => {
+    if (locale === undefined) {
+        return DATEFMTLISG.map((item) => ({ label: item.label, value: item.suffix }));
+    }
+
+    const numfmtLocale = getNumfmtLocaleTag(locale);
+    const patterns = getDateFormatPatterns(locale);
+    if (currentPattern && !patterns.includes(currentPattern)) {
+        patterns.unshift(currentPattern);
+    }
+
+    return patterns.map((pattern) => ({
+        label: numfmt.format(pattern, DATE_FORMAT_PREVIEW_VALUE, { locale: numfmtLocale }),
+        value: pattern,
+    }));
+};
 
 export const getNumberFormatOptions = () =>
     NUMBERFORMAT.map((item) => ({ label: item.label, value: item.suffix, color: item.color }));

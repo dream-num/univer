@@ -23,22 +23,27 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../locale/en-US';
+import zhCN from '../../../locale/zh-CN';
 import { MobileCustomFormat } from '../MobileCustomFormat';
 
 const roots: Root[] = [];
 const containers: HTMLElement[] = [];
+const injectors: Injector[] = [];
 
 afterEach(() => {
     roots.splice(0).forEach((root) => act(() => root.unmount()));
     containers.splice(0).forEach((container) => container.remove());
+    injectors.splice(0).forEach((injector) => injector.dispose());
 });
 
 describe('MobileCustomFormat', () => {
     it('selects an existing pattern from a mobile dropdown and confirms it', () => {
         const injector = new Injector([[LocaleService]]);
+        injectors.push(injector);
         const localeService = injector.get(LocaleService);
         localeService.load({ [LocaleType.EN_US]: enUS });
         localeService.setLocale(LocaleType.EN_US);
+        localeService.setDirection('ltr');
         const onConfirm = vi.fn();
         const container = document.createElement('div');
         document.body.appendChild(container);
@@ -71,6 +76,43 @@ describe('MobileCustomFormat', () => {
         const confirm = getButton('Confirm');
         act(() => confirm.dispatchEvent(new MouseEvent('click', { bubbles: true })));
         expect(onConfirm).toHaveBeenCalledExactlyOnceWith('#,##0');
+    });
+
+    it('resolves live date presets while preserving a selection across locale changes', () => {
+        const injector = new Injector([[LocaleService]]);
+        injectors.push(injector);
+        const localeService = injector.get(LocaleService);
+        localeService.load({ [LocaleType.EN_US]: enUS, [LocaleType.ZH_CN]: zhCN });
+        localeService.setLocale(LocaleType.EN_US);
+        localeService.setDirection('ltr');
+        const onConfirm = vi.fn();
+        const container = document.createElement('div');
+        document.body.appendChild(container);
+        containers.push(container);
+        const root = createRoot(container);
+        roots.push(root);
+
+        act(() => root.render(
+            <ConfigProvider locale={designEnUS.design} mountContainer={document.body}>
+                <RediContext.Provider value={{ injector }}>
+                    <MobileCustomFormat patterns={['0.00']} onConfirm={onConfirm} />
+                </RediContext.Provider>
+            </ConfigProvider>
+        ));
+
+        const select = container.querySelector('[data-u-comp="mobile-select"]');
+        act(() => select!.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+        expect(document.body.querySelector('[role="dialog"]')?.textContent).not.toMatch(/[年月日]|上午|下午/);
+        act(() => getButton('m/d/yyyy').dispatchEvent(new MouseEvent('click', { bubbles: true })));
+
+        act(() => localeService.setLocale(LocaleType.ZH_CN));
+
+        expect((container.querySelector('input') as HTMLInputElement).value).toBe('m/d/yyyy');
+        act(() => select!.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+        expect(document.body.querySelector('[role="dialog"]')?.textContent).toContain('yyyy"年"MM"月"dd"日"');
+        act(() => getButton('m/d/yyyy').dispatchEvent(new MouseEvent('click', { bubbles: true })));
+        act(() => getButton(localeService.t('sheets-numfmt-ui.confirm')).dispatchEvent(new MouseEvent('click', { bubbles: true })));
+        expect(onConfirm).toHaveBeenCalledExactlyOnceWith('m/d/yyyy');
     });
 });
 

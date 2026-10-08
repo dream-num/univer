@@ -40,7 +40,6 @@ import {
 import {
     AddDecimalCommand,
     CURRENCYFORMAT,
-    DATEFMTLISG,
     getCurrencySymbolByLocale,
     NUMBERFORMAT,
     SetCurrencyCommand,
@@ -113,7 +112,6 @@ export function createMobileNumberFormatMenuConfig(currencySymbol: string): IMob
         detailOptions,
         customPatterns: [...new Set([
             ...CURRENCYFORMAT.map((item) => item.suffix(currencySymbol)),
-            ...DATEFMTLISG.map((item) => item.suffix),
             ...NUMBERFORMAT.map((item) => item.suffix),
         ])],
     };

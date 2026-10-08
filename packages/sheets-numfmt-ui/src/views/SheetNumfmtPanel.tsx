@@ -21,8 +21,8 @@ import type { IBusinessComponentProps } from './components/interface';
 import { LocaleService } from '@univerjs/core';
 import { Button, clsx, scrollbarClassName, Select } from '@univerjs/design';
 import { getCurrencyType } from '@univerjs/sheets-numfmt';
-import { useDependency } from '@univerjs/ui';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useDependency, useObservable } from '@univerjs/ui';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { UserHabitCurrencyContext } from '../controllers/user-habit.controller';
 import { AccountingPanel, isAccountingPanel } from './components/Accounting';
 import { CurrencyPanel, isCurrencyPanel } from './components/Currency';
@@ -38,55 +38,50 @@ export interface ISheetNumfmtPanelProps {
     onChange: (config: { type: 'change' | 'cancel' | 'confirm'; value: string }) => void;
 }
 
+const TYPE_OPTIONS: Array<{ label: LocaleKey; component: ComponentType<IBusinessComponentProps> }> = [
+    { label: 'sheets-numfmt-ui.general', component: GeneralPanel },
+    { label: 'sheets-numfmt-ui.accounting', component: AccountingPanel },
+    { label: 'sheets-numfmt-ui.currency', component: CurrencyPanel },
+    { label: 'sheets-numfmt-ui.date', component: DatePanel },
+    { label: 'sheets-numfmt-ui.thousandthPercentile', component: ThousandthPercentilePanel },
+    { label: 'sheets-numfmt-ui.customFormat', component: CustomFormat },
+];
+
 export function SheetNumfmtPanel(props: ISheetNumfmtPanelProps) {
+    const { onChange } = props;
     const { defaultValue, defaultPattern, row, col } = props.value;
     const localeService = useDependency(LocaleService);
+    useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
     const currentPatternRef = useRef<() => string | null>(() => '');
     const nextTick = useNextTick();
 
-    const typeOptions = useMemo(
-        () => {
-            const typeOptions: Array<{ label: LocaleKey; component: ComponentType<IBusinessComponentProps> }> = [
-                { label: 'sheets-numfmt-ui.general', component: GeneralPanel },
-                { label: 'sheets-numfmt-ui.accounting', component: AccountingPanel },
-                { label: 'sheets-numfmt-ui.currency', component: CurrencyPanel },
-                { label: 'sheets-numfmt-ui.date', component: DatePanel },
-                { label: 'sheets-numfmt-ui.thousandthPercentile', component: ThousandthPercentilePanel },
-                { label: 'sheets-numfmt-ui.customFormat', component: CustomFormat },
-            ];
-
-            return typeOptions.map((item) => ({ ...item, label: localeService.t<LocaleKey>(item.label) }));
-        },
-        [localeService]
-    );
+    const findDefaultType = useCallback(() => {
+        const list = [isGeneralPanel, isAccountingPanel, isCurrencyPanel, isDatePanel, isThousandthPercentilePanel];
+        return (
+            list.reduce((pre, curFn, index) => pre || (curFn(defaultPattern) ? TYPE_OPTIONS[index].label : ''), '') ||
+            TYPE_OPTIONS[0].label
+        );
+    }, [defaultPattern]);
     const [type, setType] = useState(findDefaultType);
     const [key, setKey] = useState(() => `${row}_${col}_${defaultPattern}`);
     const { mark, userHabitCurrency } = useCurrencyOptions(() => setKey(`${row}_${col}_${defaultPattern}_userCurrency`));
 
-    const BusinessComponent = typeOptions.find((item) => item.label === type)?.component;
+    const BusinessComponent = TYPE_OPTIONS.find((item) => item.label === type)?.component;
 
-    function findDefaultType() {
-        const list = [isGeneralPanel, isAccountingPanel, isCurrencyPanel, isDatePanel, isThousandthPercentilePanel];
-        return (
-            list.reduce((pre, curFn, index) => pre || (curFn(defaultPattern) ? typeOptions[index].label : ''), '') ||
-            typeOptions[0].label
-        );
-    }
-
-    const selectOptions: ISelectProps['options'] = typeOptions.map((option) => ({
-        label: option.label,
+    const selectOptions: ISelectProps['options'] = TYPE_OPTIONS.map((option) => ({
+        label: localeService.t<LocaleKey>(option.label),
         value: option.label,
     }));
 
     const handleSelect: ISelectProps['onChange'] = (value) => {
         setType(value);
         // after the BusinessComponent render.
-        nextTick(() => props.onChange({ type: 'change', value: currentPatternRef.current() || '' }));
+        nextTick(() => onChange({ type: 'change', value: currentPatternRef.current() || '' }));
     };
 
     const handleChange = useCallback((v: string) => {
-        props.onChange({ type: 'change', value: v });
-    }, []);
+        onChange({ type: 'change', value: v });
+    }, [onChange]);
 
     const handleActionChange = useCallback((action: () => string | null) => {
         currentPatternRef.current = action;
@@ -98,11 +93,11 @@ export function SheetNumfmtPanel(props: ISheetNumfmtPanelProps) {
         if (currency) {
             mark(currency);
         }
-        props.onChange({ type: 'confirm', value: pattern });
+        onChange({ type: 'confirm', value: pattern });
     };
 
     const handleCancel = () => {
-        props.onChange({ type: 'cancel', value: '' });
+        onChange({ type: 'cancel', value: '' });
     };
 
     const subProps: IBusinessComponentProps = {
@@ -115,7 +110,7 @@ export function SheetNumfmtPanel(props: ISheetNumfmtPanelProps) {
     useEffect(() => {
         setType(findDefaultType());
         setKey(`${row}_${col}_${defaultPattern}`);
-    }, [row, col, defaultPattern]);
+    }, [row, col, defaultPattern, findDefaultType]);
 
     return (
         <div

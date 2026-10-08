@@ -19,40 +19,27 @@ import type { IBusinessComponentProps } from './interface';
 import { LocaleService, numfmt } from '@univerjs/core';
 import { SelectList } from '@univerjs/design';
 import { getDateFormatOptions } from '@univerjs/sheets-numfmt';
-import { useDependency } from '@univerjs/ui';
+import { useDependency, useObservable } from '@univerjs/ui';
 import { useLayoutEffect, useMemo, useState } from 'react';
 
 export const isDatePanel = (pattern: string) => {
     const info = numfmt.getFormatInfo(pattern);
-    return (
-        getDateFormatOptions()
-            .map((item) => item.value)
-            .includes(pattern) || ['date', 'datetime', 'time'].includes(info.type)
-    );
+    return ['date', 'datetime', 'time'].includes(info.type);
 };
 
 export function DatePanel(props: IBusinessComponentProps) {
     const { onActionChange, onChange, defaultPattern } = props;
-
-    const options = useMemo(getDateFormatOptions, []);
     const localeService = useDependency(LocaleService);
-
-    const [suffix, setSuffix] = useState(() => {
-        if (defaultPattern) {
-            const item = options.find((item) => item.value === defaultPattern);
-            if (item) {
-                return item.value;
-            }
-        }
-        return options[0].value;
-    });
+    const locale = useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
+    const [suffix, setSuffix] = useState(() => defaultPattern || getDateFormatOptions(locale)[0].value);
+    const options = useMemo(() => getDateFormatOptions(locale, suffix), [locale, suffix]);
 
     useLayoutEffect(() => {
         onActionChange(() => suffix);
     }, [onActionChange, suffix]);
 
-    const handleChange = (v: any) => {
-        if (v === undefined) {
+    const handleChange = (v: string | string[] | undefined) => {
+        if (typeof v !== 'string') {
             return;
         }
         setSuffix(v);

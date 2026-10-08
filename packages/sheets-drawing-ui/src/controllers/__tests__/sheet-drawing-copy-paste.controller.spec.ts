@@ -14,42 +14,44 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import type { IRange, IWorkbookData } from '@univerjs/core';
+import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
+import type { ISheetImage } from '@univerjs/sheets-drawing';
 import type { ISheetClipboardHook } from '@univerjs/sheets-ui';
-import { DrawingTypeEnum, ICommandService, ImageSourceType, Injector, ObjectMatrix } from '@univerjs/core';
+import {
+    BooleanNumber,
+    DrawingTypeEnum,
+    ImageSourceType,
+    LocaleType,
+    ObjectMatrix,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetSkeletonService } from '@univerjs/sheets';
-import { RemoveSheetDrawingCommand, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
-import { COPY_TYPE, ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '@univerjs/sheets-ui';
-import { IClipboardInterfaceService } from '@univerjs/ui';
-import { describe, expect, it, vi } from 'vitest';
-
+import { ISheetDrawingService, RemoveSheetDrawingCommand, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
+import {
+    COPY_TYPE,
+    IMarkSelectionService,
+    ISheetClipboardService,
+    MarkSelectionService,
+    PREDEFINED_HOOK_NAME_PASTE,
+    SheetClipboardService,
+} from '@univerjs/sheets-ui';
+import {
+    DesktopNotificationService,
+    IClipboardInterfaceService,
+    INotificationService,
+    IPlatformService,
+    IUIPartsService,
+    PlatformService,
+    UIPartsService,
+} from '@univerjs/ui';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
 import { InsertFloatImageCommand } from '../../commands/commands/insert-image.command';
 import { SheetsDrawingCopyPasteController } from '../sheet-drawing-copy-paste.controller';
 
-function createSkeleton() {
-    return {
-        getNoMergeCellWithCoordByIndex: vi.fn((row: number, column: number) => ({
-            startX: column * 10,
-            endX: column * 10 + 10,
-            startY: row * 20,
-            endY: row * 20 + 20,
-        })),
-        getCellIndexAndOffsetByPosition: vi.fn((left: number, top: number) => {
-            const column = Math.floor(left / 10);
-            const row = Math.floor(top / 20);
-            return {
-                column,
-                row,
-                columnOffset: left - column * 10,
-                rowOffset: top - row * 20,
-            };
-        }),
-    };
-}
-
-function createImageDrawing(overrides: Record<string, unknown> = {}) {
+function createImageDrawing(overrides: Partial<ISheetImage> = {}): ISheetImage {
     return {
         unitId: 'unit-1',
         subUnitId: 'sheet-1',
@@ -90,42 +92,70 @@ interface ITestClipboardHook extends ISheetClipboardHook {
     onPasteUnrecognized: NonNullable<ISheetClipboardHook['onPasteUnrecognized']>;
 }
 
-function createController(options?: { focusedDrawings?: IImageDrawing[]; drawingData?: Record<string, object> }) {
-    let hook: ISheetClipboardHook | undefined;
-    const skeleton = createSkeleton();
-    const drawingService = {
-        getFocusDrawings: vi.fn(() => options?.focusedDrawings ?? []),
-        getDrawingData: vi.fn(() => options?.drawingData ?? {}),
-        getBatchAddOp: vi.fn((drawings: IImageDrawing[]) => ({ undo: 'add-undo', redo: 'add-redo', objects: drawings })),
-        getBatchUpdateOp: vi.fn((drawings: IImageDrawing[]) => ({ undo: 'update-undo', redo: 'update-redo', objects: drawings })),
-    };
-    const commandService = {
-        executeCommand: vi.fn(),
-    };
-    const clipboardInterfaceService = { writeText: vi.fn() };
-    const hookDisposable = { dispose: vi.fn() };
-    const sheetClipboardService = {
-        addClipboardHook: vi.fn((config: ISheetClipboardHook) => {
-            hook = config;
-            return hookDisposable;
-        }),
-    };
+const testBeds: ReturnType<typeof createSheetsDrawingUiTestBed>[] = [];
 
-    const injector = new Injector([
-        [ISheetClipboardService, { useValue: sheetClipboardService }],
-        [IRenderManagerService, { useValue: {} }],
-        [SheetSkeletonService, { useValue: { getSkeleton: vi.fn(() => skeleton) } }],
-        [IDrawingManagerService, { useValue: drawingService }],
+function createWorkbookData(unitId: string, subUnitId: string): IWorkbookData {
+    return {
+        id: unitId,
+        name: 'Book',
+        appVersion: '1.0.0',
+        locale: LocaleType.EN_US,
+        styles: {},
+        sheetOrder: [subUnitId],
+        sheets: {
+            [subUnitId]: {
+                id: subUnitId,
+                name: 'Sheet1',
+                rowCount: 20,
+                columnCount: 20,
+                defaultRowHeight: 20,
+                defaultColumnWidth: 10,
+                rowHeader: { width: 0, hidden: BooleanNumber.TRUE },
+                columnHeader: { height: 0, hidden: BooleanNumber.TRUE },
+                cellData: {},
+            },
+        },
+    };
+}
+
+function createController(options?: { focusedDrawings?: IImageDrawing[]; drawingData?: Record<string, object> }) {
+    const clipboardInterfaceService = { writeText: vi.fn() };
+    const bed = createSheetsDrawingUiTestBed(createWorkbookData('unit-1', 'sheet-1'), [
+        [ISheetClipboardService, { useClass: SheetClipboardService }],
+        [IMarkSelectionService, { useClass: MarkSelectionService }],
         [IClipboardInterfaceService, { useValue: clipboardInterfaceService }],
-        [ICommandService, { useValue: commandService }],
+        [INotificationService, { useClass: DesktopNotificationService }],
+        [IPlatformService, { useClass: PlatformService }],
+        [IUIPartsService, { useClass: UIPartsService }],
         [SheetsDrawingCopyPasteController],
     ]);
-    const controller = injector.get(SheetsDrawingCopyPasteController);
+    testBeds.push(bed);
+    bed.univer.createUnit(UniverInstanceType.UNIVER_SHEET, createWorkbookData('unit-2', 'sheet-2'));
+    const skeletonService = bed.get(SheetSkeletonService);
+    skeletonService.ensureSkeleton('unit-1', 'sheet-1');
+    skeletonService.ensureSkeleton('unit-2', 'sheet-2');
+    const drawingManager = bed.get(IDrawingManagerService);
+    const data: Record<string, object> = { ...options?.drawingData };
+    for (const drawing of options?.focusedDrawings ?? []) {
+        data[drawing.drawingId] = drawing;
+    }
+    const drawingData = { 'sheet-1': { data, order: Object.keys(data) } };
+    bed.get(ISheetDrawingService).registerDrawingData('unit-1', drawingData as never);
+    drawingManager.registerDrawingData('unit-1', drawingData as never);
+    drawingManager.focusDrawing(options?.focusedDrawings ?? []);
+    const drawingService = {
+        getBatchAddOp: vi.spyOn(drawingManager, 'getBatchAddOp'),
+    };
+    const commandService = { executeCommand: vi.spyOn(bed.commandService, 'executeCommand') };
+    const sheetClipboardService = bed.get(ISheetClipboardService);
+    const addClipboardHook = vi.spyOn(sheetClipboardService, 'addClipboardHook');
+    const controller = bed.get(SheetsDrawingCopyPasteController);
+    const hookDisposable = addClipboardHook.mock.results[0].value;
+    vi.spyOn(hookDisposable, 'dispose');
 
     return {
         controller,
-        hook: hook as ITestClipboardHook,
-        skeleton,
+        hook: sheetClipboardService.getClipboardHooks()[0] as ITestClipboardHook,
         drawingService,
         commandService,
         clipboardInterfaceService,
@@ -134,6 +164,10 @@ function createController(options?: { focusedDrawings?: IImageDrawing[]; drawing
 }
 
 describe('SheetsDrawingCopyPasteController', () => {
+    afterEach(() => {
+        testBeds.splice(0).forEach((bed) => bed.univer.dispose());
+        vi.restoreAllMocks();
+    });
     it('cancels all pending clipboard writes when disposed', () => {
         vi.useFakeTimers();
         const { controller, hook, clipboardInterfaceService } = createController({
@@ -197,14 +231,14 @@ describe('SheetsDrawingCopyPasteController', () => {
         }
     });
 
-    it('copies default position-anchored images contained in a cell range', () => {
-        const positionOnlyDrawing = createImageDrawing({
-            drawingId: 'position-only',
-            anchorType: undefined,
+    it('does not copy explicitly absolute images with a cell range', () => {
+        const defaultDrawing = createImageDrawing({
+            drawingId: 'absolute-anchor',
+            anchorType: SheetDrawingAnchorType.None,
         });
         const { controller, hook, drawingService } = createController({
             drawingData: {
-                [positionOnlyDrawing.drawingId]: positionOnlyDrawing,
+                [defaultDrawing.drawingId]: defaultDrawing,
             },
         });
 
@@ -229,18 +263,13 @@ describe('SheetsDrawingCopyPasteController', () => {
             { copyId: 'range-copy', copyType: COPY_TYPE.COPY, pasteType: PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE }
         );
 
-        expect(drawingService.getBatchAddOp).toHaveBeenCalledTimes(1);
-        expect(drawingService.getBatchAddOp.mock.calls[0][0]).toMatchObject([{
-            unitId: 'unit-2',
-            subUnitId: 'sheet-2',
-            transform: { left: 35, top: 45, width: 10, height: 20 },
-        }]);
+        expect(drawingService.getBatchAddOp).not.toHaveBeenCalled();
 
         controller.dispose();
     });
 
-    it('copies drawings contained in a cell range and pastes them with the range offset', () => {
-        const containedDrawing = createImageDrawing();
+    it('copies legacy drawings contained in a cell range and pastes them with the range offset', () => {
+        const containedDrawing = createImageDrawing({ anchorType: undefined });
         const outsideDrawing = createImageDrawing({
             drawingId: 'outside-image',
             transform: { left: 80, top: 80, width: 10, height: 20 },
@@ -298,8 +327,9 @@ describe('SheetsDrawingCopyPasteController', () => {
             },
         });
         expect(pastedDrawing.drawingId).not.toBe(containedDrawing.drawingId);
+        const addOperation = drawingService.getBatchAddOp.mock.results[0].value as IDrawingJsonUndo1;
         expect(mutations.redos).toEqual([
-            expect.objectContaining({ params: expect.objectContaining({ op: 'add-redo', objects: [pastedDrawing] }) }),
+            expect.objectContaining({ params: expect.objectContaining({ op: addOperation.redo, objects: addOperation.objects }) }),
         ]);
 
         controller.dispose();
@@ -340,8 +370,9 @@ describe('SheetsDrawingCopyPasteController', () => {
             transform: { left: 40, top: 60, width: 10, height: 20 },
         });
         expect(pastedDrawing.drawingId).not.toBe(focusedDrawing.drawingId);
+        const addOperation = drawingService.getBatchAddOp.mock.results[0].value as IDrawingJsonUndo1;
         expect(mutations.redos).toEqual([
-            expect.objectContaining({ params: expect.objectContaining({ op: 'add-redo', objects: [pastedDrawing] }) }),
+            expect.objectContaining({ params: expect.objectContaining({ op: addOperation.redo, objects: addOperation.objects }) }),
         ]);
 
         controller.dispose();

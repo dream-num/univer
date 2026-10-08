@@ -284,7 +284,6 @@ function SheetImageTransparencyInput(props: ISheetImageTransparencyInputProps) {
         onChangeComplete,
     } = props;
     const iconManager = useDependency(IconManager);
-    const localeService = useDependency(LocaleService);
     const isEditingRef = useRef(false);
     const [listVisible, setListVisible] = useState(false);
     const [inputValue, setInputValue] = useState(() => `${value}%`);
@@ -398,7 +397,7 @@ function SheetImageTransparencyInput(props: ISheetImageTransparencyInputProps) {
                     className="univer-h-6 univer-w-4 univer-rounded-none univer-p-0"
                     size="small"
                     variant="text"
-                    aria-label={localeService.t('ui.accessibility.menu')}
+                    aria-label={ariaLabel}
                     disabled={disabled}
                 >
                     <MoreDownIcon

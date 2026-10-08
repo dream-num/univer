@@ -15,8 +15,24 @@
  */
 
 import type { ITable, Nullable } from '@univerjs/core';
-import type { DocumentSkeleton, IDocsTableRenderViewport, IDocumentOffsetConfig, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, INodePosition, IPoint } from '@univerjs/engine-render';
-import { DocumentSkeletonPageType, documentSkeletonTableIterator, getDocsTableRenderViewport, getPageFromPath, getTableIdAndSliceIndex, Liquid } from '@univerjs/engine-render';
+import type {
+    DocumentSkeleton,
+    IDocsTableRenderViewport,
+    IDocumentOffsetConfig,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonRow,
+    IDocumentSkeletonTable,
+    INodePosition,
+    IPoint,
+} from '@univerjs/engine-render';
+import {
+    DocumentSkeletonPageType,
+    documentSkeletonTableIterator,
+    getDocsTableRenderViewport,
+    getPageFromPath,
+    getTableIdAndSliceIndex,
+    Liquid,
+} from '@univerjs/engine-render';
 import { compareNodePositionLogic, pushToPoints } from './convert-text-range';
 
 // The anchor and focus need to be in the same table,
@@ -681,8 +697,8 @@ function getCellPageFromPositionPath(
 
     const { headerId, footerId, pageWidth } = rootPage;
     const segmentPages = [
-        headerId == null ? null : skeletonData.skeHeaders.get(headerId)?.get(pageWidth),
-        footerId == null ? null : skeletonData.skeFooters.get(footerId)?.get(pageWidth),
+        headerId == null ? null : skeletonData.skeHeaders.get(headerId)?.get(rootPage.headerLayoutKey ?? pageWidth),
+        footerId == null ? null : skeletonData.skeFooters.get(footerId)?.get(rootPage.footerLayoutKey ?? pageWidth),
     ];
 
     for (const segmentPage of segmentPages) {

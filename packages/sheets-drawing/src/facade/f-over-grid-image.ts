@@ -317,6 +317,25 @@ export class FOverGridImageBuilder {
     }
 
     /**
+     * Set the whole-image opacity from zero (transparent) through one (opaque).
+     * @param {number} opacity The opacity from 0 through 1.
+     * @returns {FOverGridImageBuilder} This builder.
+     */
+    setOpacity(opacity: number): FOverGridImageBuilder {
+        validateImageOpacity(opacity);
+        this._image.opacity = opacity;
+        return this;
+    }
+
+    /**
+     * Get the configured whole-image opacity.
+     * @returns {number} The opacity from 0 (transparent) through 1 (opaque).
+     */
+    getOpacity(): number {
+        return this._image.opacity ?? 1;
+    }
+
+    /**
      * Set the horizontal position of the image
      * @param {number} column - The column index of the image start position, start at 0
      * @returns {FOverGridImageBuilder} The `FOverGridImageBuilder` for chaining
@@ -903,6 +922,38 @@ export class FOverGridImage extends FBase {
     }
 
     /**
+     * Get the current whole-image opacity.
+     * @returns {number} The opacity from 0 (transparent) through 1 (opaque).
+     */
+    getOpacity(): number {
+        const current = this._sheetDrawingService.getDrawingByParam({
+            unitId: this._image.unitId,
+            subUnitId: this._image.subUnitId,
+            drawingId: this._image.drawingId,
+        }) as ISheetImage | undefined;
+
+        return current?.opacity ?? this._image.opacity ?? 1;
+    }
+
+    /**
+     * Set the whole-image opacity from zero (transparent) through one (opaque).
+     * @param {number} opacity The opacity from 0 through 1.
+     * @returns {boolean} Whether the update succeeded.
+     */
+    setOpacity(opacity: number): boolean {
+        validateImageOpacity(opacity);
+        return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, {
+            unitId: this._image.unitId,
+            drawings: [{
+                unitId: this._image.unitId,
+                subUnitId: this._image.subUnitId,
+                drawingId: this._image.drawingId,
+                opacity,
+            }],
+        });
+    }
+
+    /**
      * Set this image's explicit placement through the drawing command.
      * `Position`, `Both`, and `None` correspond to OneCell, TwoCell, and
      * Absolute. Bounds inference is preferable when preserving the current
@@ -1267,5 +1318,11 @@ export class FOverGridImage extends FBase {
             drawingIds: [this._image.drawingId],
             arrangeType: ArrangeTypeEnum.front,
         });
+    }
+}
+
+function validateImageOpacity(opacity: number): void {
+    if (!Number.isFinite(opacity) || opacity < 0 || opacity > 1) {
+        throw new RangeError('Sheet image opacity must be between 0 and 1.');
     }
 }

@@ -247,6 +247,7 @@ describe('ImageUpdateController', () => {
             drawingType: DrawingTypeEnum.DRAWING_IMAGE,
             imageSourceType: ImageSourceType.BASE64,
             source: 'data:image/png;base64,Zm9v',
+            opacity: 0.4,
             srcRect: { bottom: 0, left: 0, right: 0, top: 0 },
             subUnitId: 'sheet-1',
             transform,
@@ -258,6 +259,7 @@ describe('ImageUpdateController', () => {
             setClipBounds: vi.fn(),
             setPrstGeom: vi.fn(),
             setSrcRect: vi.fn(),
+            setOpacity: vi.fn(),
             transformByState: vi.fn(),
         };
         const scene = {
@@ -280,7 +282,11 @@ describe('ImageUpdateController', () => {
             drawingManagerService as never,
             {} as never,
             {} as never,
-            { getUnit: vi.fn(() => createSheetUnit()), getFocusedUnit: vi.fn(() => createSheetUnit()) } as never,
+            {
+                getUnit: vi.fn(() => createSheetUnit()),
+                getFocusedUnit: vi.fn(() => createSheetUnit()),
+                getUnitType: vi.fn(() => UniverInstanceType.UNIVER_SHEET),
+            } as never,
             { renderImages: vi.fn() } as never
         );
 
@@ -300,6 +306,7 @@ describe('ImageUpdateController', () => {
             width: 100,
         });
         expect(imageShape.setClipBounds).toHaveBeenCalledWith(transform.clipBounds);
+        expect(imageShape.setOpacity).toHaveBeenCalledWith(0.4);
         expect(scene.removeObject).toHaveBeenCalledWith(imageShape);
         expect(scene.addObject).toHaveBeenCalledWith(imageShape, DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX);
     });

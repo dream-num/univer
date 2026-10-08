@@ -249,7 +249,7 @@ export class SheetsDrawingCopyPasteController extends RxDisposable {
             if (drawing.drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
                 return;
             }
-            const anchorType = (drawing as ISheetDrawing).anchorType ?? SheetDrawingAnchorType.None;
+            const anchorType = (drawing as ISheetDrawing).anchorType ?? SheetDrawingAnchorType.Position;
             if (anchorType === SheetDrawingAnchorType.None) {
                 return;
             }

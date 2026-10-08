@@ -64,6 +64,9 @@ const locale: typeof enUS = {
             exceedMaxCount: 'За один раз можно загрузить только {0} изображений',
             invalidImage: 'Недопустимое изображение',
         },
+        'image-transparency': {
+            title: 'Прозрачность',
+        },
         'drawing-anchor': {
             title: 'Свойства привязки',
             both: 'Перемещать и изменять размер с ячейками',

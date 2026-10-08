@@ -40,5 +40,6 @@ export type { ICreateDrawingCopyPlanOptions, IDrawingCopyPlan } from './utils/dr
 export { DRAWING_GROUPABLE_TYPES, isGroupableDrawingType } from './utils/drawing-group';
 export { getDrawingShapeKeyByDrawingSearch } from './utils/get-image-shape-key';
 export { getImageSize } from './utils/get-image-size';
+export { normalizeImageOpacity } from './utils/image-opacity';
 export { resolveDrawingRotateEnabled } from './utils/rotate-enabled';
 export type { IDrawingRotateEnabledResolverOptions } from './utils/rotate-enabled';

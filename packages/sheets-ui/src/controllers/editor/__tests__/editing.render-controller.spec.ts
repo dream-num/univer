@@ -43,7 +43,7 @@ import {
     UndoCommandId,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, DocStateChangeManagerService, DocStateEmitService, InsertTextCommand, RichTextEditingMutation } from '@univerjs/docs';
+import { DocSelectionManagerService, DocSkeletonManagerService, DocStateChangeManagerService, DocStateEmitService, InsertTextCommand, RichTextEditingMutation } from '@univerjs/docs';
 import { DocSelectionRenderService, IEditorService, InnerPasteCommand, MoveCursorOperation, MoveSelectionOperation, SetDocInputStyleCommand, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { FunctionService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { DeviceInputEventType, IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
@@ -51,7 +51,6 @@ import { SetRangeValuesCommand, SheetInterceptorService, SheetsSelectionsService
 import { KeyCode } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../../commands/commands/set-selection.command';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../../services/editor/cell-editor-manager.service';
@@ -290,7 +289,7 @@ function createController(initialDataStream = 'new value\r\n', isPercentFormat =
                     : null),
                 resetCursor: vi.fn(),
             },
-            with: vi.fn(() => ({ getSkeleton: () => skeleton, getViewModel: () => viewModel })),
+            with: vi.fn(() => ({ getSkeleton: () => skeleton, getViewModel: () => viewModel, cancelPointerSelection: vi.fn() })),
         })),
     };
     injector.add([IConfigService, { useClass: ConfigService }]);
@@ -638,6 +637,65 @@ describe('EditingRenderController business methods', () => {
         });
 
         expect(getNormalSnapshot().body?.dataStream).toBe('\r\n');
+    });
+
+    it.each([
+        { eventType: DeviceInputEventType.PointerDown },
+        { eventType: DeviceInputEventType.Dblclick },
+        { eventType: DeviceInputEventType.Keyboard, keycode: KeyCode.F2 },
+    ])('opens an empty editor for inherited spill formulas (event=$eventType, key=$keycode)', (event) => {
+        const { controller, getNormalSnapshot, getFormulaSnapshot } = createController('=A1:B10\r\n', false, true);
+
+        controller._handleEditorVisible({ visible: true, unitId: 'unit-1', ...event });
+
+        expect(getNormalSnapshot().body?.dataStream).toBe('\r\n');
+        expect(getFormulaSnapshot().body?.dataStream).toBe('\r\n');
+        expect(controller._editorBridgeService.changeEditorDirty).toHaveBeenCalledTimes(
+            event.eventType === DeviceInputEventType.Dblclick ? 1 : 0
+        );
+    });
+
+    it('cancels the inherited formula pointer anchor before clearing the formula bar', () => {
+        const { controller, selectionManager, getFormulaSnapshot } = createController('=A1:B10\r\n', false, true);
+        const cancelPointerSelection = vi.fn(() => {
+            expect(getFormulaSnapshot().body?.dataStream).toBe('=A1:B10\r\n');
+        });
+        const render = controller._renderManagerService.getRenderUnitById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+        const formulaSkeleton = render.with(DocSkeletonManagerService).getSkeleton();
+        formulaSkeleton.calculate.mockImplementation(() => {
+            expect(getFormulaSnapshot().body?.dataStream).toBe('\r\n');
+        });
+        const originalWith = render.with;
+        render.with = vi.fn((service) => service === DocSelectionRenderService
+            ? { cancelPointerSelection }
+            : originalWith(service));
+        const originalGetRender = controller._renderManagerService.getRenderUnitById;
+        const cellRender = originalGetRender(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        const cancelCellPointerSelection = vi.fn();
+        const originalCellWith = cellRender.with;
+        cellRender.with = vi.fn((service) => service === DocSelectionRenderService
+            ? { cancelPointerSelection: cancelCellPointerSelection }
+            : originalCellWith(service));
+        controller._renderManagerService.getRenderUnitById.mockImplementation((id: string) =>
+            id === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY ? render : cellRender
+        );
+        controller._contextService.getContextValue.mockImplementation((key: string) => key === FOCUSING_FX_BAR_EDITOR);
+
+        controller._handleEditorVisible({
+            visible: true,
+            unitId: 'unit-1',
+            eventType: DeviceInputEventType.PointerDown,
+        });
+
+        expect(cancelPointerSelection).toHaveBeenCalledOnce();
+        expect(formulaSkeleton.calculate).toHaveBeenCalledOnce();
+        expect(cancelCellPointerSelection).not.toHaveBeenCalled();
+        expect(selectionManager.getDocRanges({
+            unitId: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+            subUnitId: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+        })).toEqual([expect.objectContaining({ startOffset: 0, endOffset: 0, collapsed: true, isActive: true })]);
+        expect(getFormulaSnapshot().body?.dataStream).toBe('\r\n');
+        expect(controller._editorBridgeService.changeEditorDirty).not.toHaveBeenCalled();
     });
 
     it('keeps full-clear behavior for array formula cells', () => {

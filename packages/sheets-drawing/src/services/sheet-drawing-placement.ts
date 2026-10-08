@@ -17,14 +17,14 @@
 import type { IGroupBaseBound, ITransformState } from '@univerjs/core';
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ICellOverGridPosition } from '@univerjs/sheets';
+import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute } from '@univerjs/sheets';
+
 import type {
     ISheetDrawing,
     ISheetDrawingPosition,
     ISheetFloatDom,
     ISheetImage,
 } from './sheet-drawing.service';
-
-import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute } from '@univerjs/sheets';
 import { transformToAxisAlignPosition, transformToDrawingPosition } from '../basics/transform-position';
 import {
     SheetDrawingAnchorType,
@@ -97,7 +97,7 @@ export interface ISheetDrawingPlacementByBounds {
 export type ISheetDrawingPlacementInput = ISheetDrawingPlacement | ISheetDrawingPlacementByBounds;
 
 export function getSheetDrawingPlacement(drawing: ISheetDrawing): ISheetDrawingPlacement {
-    const anchorType = drawing.anchorType ?? SheetDrawingAnchorType.None;
+    const anchorType = drawing.anchorType ?? SheetDrawingAnchorType.Position;
     if (anchorType === SheetDrawingAnchorType.None) {
         return {
             kind: SheetDrawingAnchorType.None,

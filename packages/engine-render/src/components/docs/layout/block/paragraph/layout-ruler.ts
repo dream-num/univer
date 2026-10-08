@@ -1746,8 +1746,8 @@ function _lineOperator(
     const lineTop = preLineHeight + preTop;
 
     const { pageWidth, headerId, footerId } = lastPage;
-    const headerPage = skeHeaders?.get(headerId)?.get(pageWidth);
-    const footerPage = skeFooters?.get(footerId)?.get(pageWidth);
+    const headerPage = skeHeaders?.get(headerId)?.get(lastPage.headerLayoutKey ?? pageWidth);
+    const footerPage = skeFooters?.get(footerId)?.get(lastPage.footerLayoutKey ?? pageWidth);
 
     let needOpenNewPageByTableLayout = false;
 

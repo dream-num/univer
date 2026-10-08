@@ -16,6 +16,7 @@
 
 import type { IExecutionOptions, IMutation, IUnitRange, Nullable } from '@univerjs/core';
 import type {
+    IFormulaData,
     IFormulaExecuteResultMap,
     IFormulaStringMap,
     IRuntimeOtherUnitDataType,
@@ -128,6 +129,7 @@ export const SetFormulaCalculationNotificationMutation: IMutation<ISetFormulaCal
 
 export interface ISetFormulaCalculationResultMutation {
     unitData: IRuntimeUnitDataPrimitiveType;
+    sourceFormulaData?: IFormulaData;
     unitOtherData: IRuntimeOtherUnitDataType;
 }
 

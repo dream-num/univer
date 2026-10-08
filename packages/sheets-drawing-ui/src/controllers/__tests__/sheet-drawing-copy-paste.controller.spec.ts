@@ -197,14 +197,14 @@ describe('SheetsDrawingCopyPasteController', () => {
         }
     });
 
-    it('does not copy default absolute images with a cell range', () => {
-        const defaultDrawing = createImageDrawing({
-            drawingId: 'default-anchor',
+    it('copies default position-anchored images contained in a cell range', () => {
+        const positionOnlyDrawing = createImageDrawing({
+            drawingId: 'position-only',
             anchorType: undefined,
         });
         const { controller, hook, drawingService } = createController({
             drawingData: {
-                [defaultDrawing.drawingId]: defaultDrawing,
+                [positionOnlyDrawing.drawingId]: positionOnlyDrawing,
             },
         });
 
@@ -229,7 +229,12 @@ describe('SheetsDrawingCopyPasteController', () => {
             { copyId: 'range-copy', copyType: COPY_TYPE.COPY, pasteType: PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE }
         );
 
-        expect(drawingService.getBatchAddOp).not.toHaveBeenCalled();
+        expect(drawingService.getBatchAddOp).toHaveBeenCalledTimes(1);
+        expect(drawingService.getBatchAddOp.mock.calls[0][0]).toMatchObject([{
+            unitId: 'unit-2',
+            subUnitId: 'sheet-2',
+            transform: { left: 35, top: 45, width: 10, height: 20 },
+        }]);
 
         controller.dispose();
     });

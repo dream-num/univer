@@ -25,7 +25,13 @@ import {
     resolveSectionHeaderFooterReferences,
     UniverInstanceType,
 } from '@univerjs/core';
-import { CreateHeaderFooterCommand, DocSelectionManagerService, DocSkeletonManagerService, getTopLevelSectionBreaks, HeaderFooterType } from '@univerjs/docs';
+import {
+    CreateHeaderFooterCommand,
+    DocSelectionManagerService,
+    DocSkeletonManagerService,
+    getTopLevelSectionBreaks,
+    HeaderFooterType,
+} from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { findFirstCursorOffset } from '../../basics/selection';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
@@ -84,9 +90,9 @@ export const CoreHeaderFooterCommand: ICommand<ICoreHeaderFooterParams> = {
                 const value = headerFooterProps[key as keyof IHeaderFooterProps];
 
                 // need create first page header/footer if useFirstPageHeaderFooter is true and firstPageHeaderId is not set.
-                if (resolvedCreateType == null && key === 'useFirstPageHeaderFooter' && value === BooleanNumber.TRUE && !headerFooterConfig.firstPageHeaderId) {
+                if (resolvedCreateType == null && key === 'useFirstPageHeaderFooter' && value === BooleanNumber.TRUE && !(editArea === DocumentEditArea.HEADER ? headerFooterConfig.firstPageHeaderId : headerFooterConfig.firstPageFooterId)) {
                     resolvedCreateType = editArea === DocumentEditArea.HEADER ? HeaderFooterType.FIRST_PAGE_HEADER : HeaderFooterType.FIRST_PAGE_FOOTER;
-                } else if (resolvedCreateType == null && key === 'evenAndOddHeaders' && value === BooleanNumber.TRUE && !headerFooterConfig.evenPageHeaderId) {
+                } else if (resolvedCreateType == null && key === 'evenAndOddHeaders' && value === BooleanNumber.TRUE && !(editArea === DocumentEditArea.HEADER ? headerFooterConfig.evenPageHeaderId : headerFooterConfig.evenPageFooterId)) {
                     resolvedCreateType = editArea === DocumentEditArea.HEADER ? HeaderFooterType.EVEN_PAGE_HEADER : HeaderFooterType.EVEN_PAGE_FOOTER;
                 }
             });
@@ -105,13 +111,15 @@ export const CoreHeaderFooterCommand: ICommand<ICoreHeaderFooterParams> = {
     },
 };
 
-interface IOpenHeaderFooterPanelParams { }
+interface IOpenHeaderFooterPanelParams {
+    editArea?: DocumentEditArea.HEADER | DocumentEditArea.FOOTER;
+}
 
 export const OpenHeaderFooterPanelCommand: ICommand<IOpenHeaderFooterPanelParams> = {
     id: 'doc.command.open-header-footer-panel',
     type: CommandType.COMMAND,
 
-    handler: async (accessor, _params: IOpenHeaderFooterPanelParams) => {
+    handler: async (accessor, params: IOpenHeaderFooterPanelParams) => {
         const commandService = accessor.get(ICommandService);
         const instanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
@@ -133,10 +141,11 @@ export const OpenHeaderFooterPanelCommand: ICommand<IOpenHeaderFooterPanelParams
         const currentPage = selectionRenderService.getSegmentPage();
         const pageNumber = currentPage >= 0 && currentPage < pages.length ? currentPage : 0;
         const page = pages[pageNumber];
-        viewModel.setEditArea(DocumentEditArea.HEADER);
+        const editArea = params?.editArea ?? DocumentEditArea.HEADER;
+        viewModel.setEditArea(editArea);
         const { createType, headerFooterId, sectionId } = getHeaderFooterTarget(
             viewModel,
-            DocumentEditArea.HEADER,
+            editArea,
             pageNumber,
             page
         );
@@ -161,6 +170,20 @@ export const OpenHeaderFooterPanelCommand: ICommand<IOpenHeaderFooterPanelParams
             selectionRenderService.setSegment(headerFooterId);
         }
 
+        const segmentId = selectionRenderService.getSegment();
+        const segmentSnapshot = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getSnapshot();
+        if (!segmentSnapshot) {
+            return false;
+        }
+        const offset = findFirstCursorOffset(segmentSnapshot);
+        accessor.get(DocSelectionManagerService).replaceDocRanges([{
+            startOffset: offset,
+            endOffset: offset,
+            collapsed: true,
+            segmentId,
+            segmentPage: pageNumber,
+        }], { unitId, subUnitId: unitId });
+        selectionRenderService.focus();
         return commandService.executeCommand(SidebarDocHeaderFooterPanelOperation.id, { value: 'open' });
     },
 };
@@ -244,7 +267,7 @@ export const CloseHeaderFooterCommand: ICommand<ICloseHeaderFooterParams> = {
             ]);
         });
 
-        commandService.executeCommand(SidebarDocHeaderFooterPanelOperation.id, { value: 'close' });
+        await commandService.executeCommand(SidebarDocHeaderFooterPanelOperation.id, { value: 'close' });
 
         return true;
     },

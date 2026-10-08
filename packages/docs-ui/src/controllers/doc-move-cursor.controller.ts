@@ -183,7 +183,7 @@ export class DocMoveCursorController extends Disposable {
         }
 
         const dataStreamLength = body.dataStream.length ?? Number.POSITIVE_INFINITY;
-        const customRanges = docDataModel.getCustomRanges() ?? [];
+        const customRanges = body.customRanges ?? [];
 
         if (granularity !== 'character') {
             const nextOffset = this._getCursorOffsetByGranularity(
@@ -357,7 +357,7 @@ export class DocMoveCursorController extends Disposable {
         }
 
         const dataStreamLength = body.dataStream.length ?? Number.POSITIVE_INFINITY;
-        const customRanges = docDataModel.getCustomRanges() ?? [];
+        const customRanges = body.customRanges ?? [];
 
         if (granularity !== 'character') {
             let cursorOffset: number;

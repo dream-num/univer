@@ -17,7 +17,14 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { ISetTextSelectionsOperationParams } from '../commands/operations/text-selection.operation';
-import { BuildTextUtils, Disposable, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
+import {
+    BuildTextUtils,
+    CustomRangeType,
+    Disposable,
+    ICommandService,
+    Inject,
+    IUniverInstanceService,
+} from '@univerjs/core';
 import { SetTextSelectionsOperation } from '../commands/operations/text-selection.operation';
 import { DocSelectionManagerService } from '../services/doc-selection-manager.service';
 
@@ -32,11 +39,13 @@ export class DocCustomRangeController extends Disposable {
         this._initSelectionChange();
     }
 
-    private _transformCustomRange(doc: DocumentDataModel, selection: ITextRangeWithStyle) {
+    private _transformCustomRange(doc: DocumentDataModel, selection: ITextRangeWithStyle, segmentId?: string) {
         const { startOffset, endOffset, collapsed } = selection;
         // find ranges intersect but not contain with selection
-        const customRanges = doc.getCustomRanges()?.filter((range) => {
-            if (!range.wholeEntity) {
+        const customRanges = doc.getSelfOrHeaderFooterModel(selection.segmentId ?? segmentId)?.getBody()?.customRanges?.filter((range) => {
+            const selectsFieldResult = range.rangeType === CustomRangeType.FIELD && !collapsed &&
+                startOffset <= range.startIndex + 1 && endOffset >= range.endIndex;
+            if (!range.wholeEntity && !selectsFieldResult) {
                 return false;
             }
             if (startOffset <= range.startIndex && endOffset > range.endIndex) {
@@ -77,7 +86,7 @@ export class DocCustomRangeController extends Disposable {
                 if (!doc) {
                     return;
                 }
-                const transformedRanges = ranges.map((range) => this._transformCustomRange(doc, range));
+                const transformedRanges = ranges.map((range) => this._transformCustomRange(doc, range, params.segmentId));
                 if (transformedRanges.some((range, i) => ranges[i] !== range)) {
                     this._textSelectionManagerService.replaceDocRanges(transformedRanges, undefined, isEditing);
                 }

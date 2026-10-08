@@ -46,6 +46,7 @@ import {
 } from '../../../../../basics/tools';
 import { getDocsCustomBlockRenderViewport } from '../../../custom-block-render-viewport';
 import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility } from '../../../document-compatibility';
+import { resolveHeaderFooterFieldGlyph } from '../../header-footer-field';
 import { Lang } from '../../hyphenation/lang';
 import { BreakPointType } from '../../line-breaker/break';
 import { LineBreakerHyphenEnhancer } from '../../line-breaker/enhancers/hyphen-enhancer';
@@ -60,10 +61,12 @@ import {
     createSkeletonLetterGlyph,
     createSkeletonTabGlyph,
     createSkeletonWholeEntityGlyph,
+    getTextHorizontalScale,
     glyphShrinkLeft,
     glyphShrinkRight,
 } from '../../model/glyph';
 import { getBoundingBox } from '../../model/line';
+import { FontCache } from '../../shaping-engine/font-cache';
 import {
     getCharSpaceApply,
     getCustomRangeGlyphMetrics,
@@ -711,6 +714,33 @@ export function shaping(
             punctuationSpaceAdjustment(shapedGlyphs, fixedPunctuationPairs);
         }
 
+        if (ctx.headerFooterFieldContext) {
+            let index = paragraphNode.contentStartIndex + last;
+            for (let glyphIndex = 0; glyphIndex < shapedGlyphs.length; glyphIndex++) {
+                const glyph = shapedGlyphs[glyphIndex];
+                const resolved = resolveHeaderFooterFieldGlyph(
+                    glyph,
+                    index,
+                    index + glyph.count - 1,
+                    viewModel.getBody()?.customRanges ?? [],
+                    ctx.headerFooterFieldContext.pageNumber,
+                    ctx.headerFooterFieldContext.pageCount
+                );
+                index += glyph.count;
+                if (resolved === glyph) {
+                    continue;
+                }
+                const font = glyph.fontStyle?.fontString;
+                const widthDelta = resolved.content && font
+                    ? (FontCache.getMeasureText(resolved.content, font).width - FontCache.getMeasureText(glyph.content, font).width) * getTextHorizontalScale(glyph.ts?.sa)
+                    : -glyph.width;
+                shapedGlyphs[glyphIndex] = {
+                    ...resolved,
+                    width: Math.max(0, glyph.width + widthDelta),
+                    bBox: { ...glyph.bBox, width: Math.max(0, glyph.bBox.width + widthDelta) },
+                };
+            }
+        }
         appendShapedText(shapedTextList, shapedGlyphs, bk.type, paragraphStyle.fixedTabStops === BooleanNumber.TRUE);
 
         last = bk.position;

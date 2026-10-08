@@ -64,6 +64,9 @@ const locale: typeof enUS = {
             exceedMaxCount: '한 번에 {0}개까지만 업로드할 수 있습니다',
             invalidImage: '유효하지 않은 이미지입니다',
         },
+        'image-transparency': {
+            title: '투명도',
+        },
         'drawing-anchor': {
             title: '고정 위치 설정',
             both: '셀과 함께 이동 및 크기 조절',

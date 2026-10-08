@@ -312,7 +312,9 @@ Sheets, Docs, Slides는 Univer의 공통 아키텍처를 기반으로 스프레�
 | **Bases** | 커스텀 data-centric products를 위한 확장 가능한 plugin architecture. | Base database core model, commands, mutations, formula integration, workbench UI, field editors, render-engine integration. |
 | **Server and runtime** | Node.js headless runtime, RPC/Web Worker patterns, server-oriented automation primitives. | Collaboration server, Node.js collaboration client, SSR services, computing delegation, server-side calculation, collaboration changeset replay tooling. |
 
-Pro 기능은 [Univer Pro guide](https://docs.univer.ai/guides/pro)에 문서화되어 있습니다. 여기서는 OSS 패키지의 범위를 명확히 하기 위해 의도적으로 분리했습니다.
+편집기 기능은 [Web SDK 문서](https://docs.univer.ai/guides/sheets)를 참고하세요. 백엔드 통합은 Server SDK의 [공동 편집](https://docs.univer.ai/server/collaboration/overview) 및 [파일 가져오기·내보내기](https://docs.univer.ai/server/import-export) 문서를 참고하세요.
+
+상용 라이선스 및 구매에 관해서는 [문의해 주세요](https://univer.ai/#contact). 애플리케이션에서 라이선스를 설정하려면 [라이선스 설정](https://docs.univer.ai/server/license)을 참고하세요.
 
 Boundary principles:
 
@@ -326,7 +328,7 @@ Boundary principles:
 - **Core SDK**: [`dream-num/univer`](https://github.com/dream-num/univer), 이 monorepo입니다.
 - **Presets**: 이 저장소의 [`presets/`](../../presets), 브라우저와 Node.js 앱을 위한 curated plugin collection입니다.
 - **AI agent skills**: [`dream-num/univer-sdk-skills`](https://github.com/dream-num/univer-sdk-skills), Univer 통합, Pro 기능, 플러그인 개발, Node 백엔드를 다루는 AI agent용 재사용 지침입니다. [AI Skills guide](https://docs.univer.ai/guides/skills)를 참고하세요.
-- **Documentation**: [docs.univer.ai](https://docs.univer.ai), Sheets, Docs, Slides, recipes, Pro guides를 포함합니다.
+- **Documentation**: [docs.univer.ai](https://docs.univer.ai), Web SDK, Server SDK, AI SDK 가이드와 API 레퍼런스를 포함합니다.
 - **Web SDK**: 브라우저와 Node.js에서 [임베드 가능한 편집기 및 헤드리스 처리](https://docs.univer.ai/guides/sheets)를 제공합니다.
 - **Server SDK**: [협업 및 파일 변환](https://docs.univer.ai/server)을 애플리케이션의 저장소, 인증, 권한 시스템과 통합합니다.
 - **AI SDK**: 오피스 콘텐츠를 검사, 편집, 검증하는 [에이전트 워크플로](https://docs.univer.ai/ai)를 구축합니다.

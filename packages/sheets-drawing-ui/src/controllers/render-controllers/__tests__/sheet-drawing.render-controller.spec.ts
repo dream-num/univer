@@ -24,12 +24,11 @@ import { describe, expect, it, vi } from 'vitest';
 import { SheetsDrawingRenderController } from '../sheet-drawing.render-controller';
 
 describe('SheetsDrawingRenderController', () => {
-    it('preserves default absolute bounds while rendering cell-anchored drawings', () => {
+    it('initializes sheet drawing data and materializes sheet transforms for render objects', () => {
         const drawingWithSheetTransform: Partial<ISheetDrawing> = {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             drawingId: 'drawing-1',
-            anchorType: SheetDrawingAnchorType.Position,
             sheetTransform: {
                 from: { row: 1, column: 2, rowOffset: 0, columnOffset: 0 },
                 to: { row: 3, column: 4, rowOffset: 0, columnOffset: 0 },
@@ -72,6 +71,7 @@ describe('SheetsDrawingRenderController', () => {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             drawingId: 'drawing-6',
+            anchorType: SheetDrawingAnchorType.None,
             transform: { left: 240, top: 96, width: 120, height: 80 },
             sheetTransform: {
                 from: { row: 0, column: 0, rowOffset: 96, columnOffset: 240 },

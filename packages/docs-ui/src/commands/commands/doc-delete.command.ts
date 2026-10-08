@@ -40,6 +40,7 @@ import {
     CommandType,
     DataStreamTreeTokenType,
     DeleteDirection,
+    Direction,
     getBlockRangeInterval,
     getParagraphContentStartOffset,
     getRichTextEditPath,
@@ -64,10 +65,12 @@ import {
     UpdateTextCommand,
 } from '@univerjs/docs';
 import { getParagraphByGlyph, hasListGlyph, isFirstGlyph, isIndentByGlyph } from '@univerjs/engine-render';
+
 import { DocAutoFormatService } from '../../services/doc-auto-format.service';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { isHorizontalLineParagraph } from '../../utils/horizontal-line';
+import { MoveSelectionOperation } from '../operations/doc-cursor.operation';
 import { getCommandSkeleton } from '../util';
 import { CutContentCommand } from './clipboard.inner.command';
 import { captureTextFormat } from './format-painter.command';
@@ -169,7 +172,6 @@ interface IMergeTwoParagraphParams {
 export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
     id: 'doc.command.merge-two-paragraph',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IMergeTwoParagraphParams) => {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -292,7 +294,6 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
 export const RemoveHorizontalLineCommand: ICommand = {
     id: 'doc.command.remove-horizontal-line',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor) => {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -441,13 +442,30 @@ export function isDeleteOffsetInsideBlockRange(body: IDocumentBody, offset: numb
     }) ?? false;
 }
 
+export interface IDeleteBoundaryParams {
+    granularity?: 'word' | 'line';
+}
+
+function selectDeleteBoundary(accessor: IAccessor, direction: Direction, granularity: 'word' | 'line'): boolean {
+    const selections = accessor.get(DocSelectionManagerService);
+    if (selections.getActiveTextRange()?.collapsed && !selections.getRectRanges()?.length) {
+        accessor.get(ICommandService).syncExecuteCommand(MoveSelectionOperation.id, { direction, granularity });
+        return selections.getActiveTextRange()?.collapsed === false;
+    }
+
+    return true;
+}
+
 // Handle BACKSPACE key.
-export const DeleteLeftCommand: ICommand = {
+export const DeleteLeftCommand: ICommand<IDeleteBoundaryParams> = {
     id: 'doc.command.delete-left',
 
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function, complexity
-    handler: async (accessor) => {
+    handler: async (accessor, params) => {
+        if (params?.granularity && !selectDeleteBoundary(accessor, Direction.LEFT, params.granularity)) {
+            return true;
+        }
+
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
@@ -682,12 +700,15 @@ export const DeleteLeftCommand: ICommand = {
 };
 
 // handle Delete key
-export const DeleteRightCommand: ICommand = {
+export const DeleteRightCommand: ICommand<IDeleteBoundaryParams> = {
     id: 'doc.command.delete-right',
     type: CommandType.COMMAND,
 
-    // eslint-disable-next-line max-lines-per-function, complexity
-    handler: async (accessor) => {
+    handler: async (accessor, params) => {
+        if (params?.granularity && !selectDeleteBoundary(accessor, Direction.RIGHT, params.granularity)) {
+            return true;
+        }
+
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);

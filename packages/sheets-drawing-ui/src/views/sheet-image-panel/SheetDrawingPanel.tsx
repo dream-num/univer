@@ -18,6 +18,7 @@ import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingCommonPanel } from '@univerjs/drawing-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { SheetDrawingAnchor } from './SheetDrawingAnchor';
+import { SheetImageTransparency } from './SheetImageTransparency';
 
 export const SheetDrawingPanel = () => {
     const drawingManagerService = useDependency(IDrawingManagerService);
@@ -31,6 +32,7 @@ export const SheetDrawingPanel = () => {
     return !!drawings?.length && (
         <div className="univer-text-sm">
             <DrawingCommonPanel drawings={drawings} />
+            <SheetImageTransparency drawings={drawings} />
             <SheetDrawingAnchor drawings={drawings} />
         </div>
     );

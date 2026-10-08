@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import { IConfigService, Injector } from '@univerjs/core';
+import type { ICellData } from '@univerjs/core';
+import type { IFormulaDatasetConfig } from '../../basics/common';
+import type { IAllRuntimeData } from '../runtime.service';
+import { IConfigService, Injector, ObjectMatrix } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ErrorType } from '../../basics/error-type';
 import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../../config/config';
@@ -23,8 +26,13 @@ import { AstTreeBuilder } from '../../engine/analysis/parser';
 import { IFormulaDependencyGenerator } from '../../engine/dependency/formula-dependency';
 import { Interpreter } from '../../engine/interpreter/interpreter';
 import { FORMULA_REF_TO_ARRAY_CACHE } from '../../engine/reference-object/base-reference-object';
+import { createFunctionTestBed } from '../../functions/__tests__/create-function-test-bed';
+import { AsyncCustomFunction } from '../../functions/custom-function';
 import { CalculateFormulaService, ICalculateFormulaService } from '../calculate-formula.service';
 import { IFormulaCurrentConfigService } from '../current-data.service';
+import { DependencyManagerService, IDependencyManagerService } from '../dependency-manager.service';
+import { FeatureCalculationManagerService, IFeatureCalculationManagerService } from '../feature-calculation-manager.service';
+import { IFunctionService } from '../function.service';
 import { FormulaExecutedStateType, FormulaExecuteStageType, IFormulaRuntimeService } from '../runtime.service';
 
 function createService() {
@@ -202,6 +210,145 @@ function createService() {
 describe('CalculateFormulaService', () => {
     beforeEach(() => {
         FORMULA_REF_TO_ARRAY_CACHE.clear();
+    });
+
+    it('retains a queued scalar source when a preceding asynchronous dependency allows its cell to be cleared', async () => {
+        const testBed = createFunctionTestBed(undefined, [
+            [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
+            [IDependencyManagerService, { useClass: DependencyManagerService }],
+        ]);
+        const formula = '=WAITFORVALUE(A1)';
+        const cells = new ObjectMatrix<ICellData>({ 0: { 0: { f: '=WAITFORVALUE()' }, 2: { f: formula } } });
+        let releaseResult: (value: number) => void = () => {};
+        let markStarted: () => void = () => {};
+        const delayedValue = new Promise<number>((resolve) => {
+            releaseResult = resolve;
+        });
+        const started = new Promise<void>((resolve) => {
+            markStarted = resolve;
+        });
+        const executor = new AsyncCustomFunction('WAITFORVALUE');
+        executor.calculateCustom = () => {
+            markStarted();
+            return delayedValue;
+        };
+        testBed.get(IFunctionService).registerExecutors(executor);
+        const service = testBed.get(ICalculateFormulaService);
+        let markCompleted: (data: IAllRuntimeData) => void = () => {};
+        const completed = new Promise<IAllRuntimeData>((resolve) => {
+            markCompleted = resolve;
+        });
+        const subscription = service.executionCompleteListener$.subscribe(markCompleted);
+        try {
+            const execution = service.execute({
+                allUnitData: { [testBed.unitId]: { [testBed.sheetId]: {
+                    ...testBed.sheetData[testBed.sheetId],
+                    cellData: cells,
+                } } },
+                unitSheetNameMap: { [testBed.unitId]: { [testBed.sheetId]: 'Sheet1' } },
+                unitStylesData: {},
+                formulaData: { [testBed.unitId]: { [testBed.sheetId]: { 0: {
+                    0: { f: '=WAITFORVALUE()' },
+                    2: { f: formula },
+                } } } },
+                arrayFormulaCellData: {},
+                arrayFormulaRange: {},
+                forceCalculate: true,
+                dirtyRanges: [],
+                dirtyNameMap: {},
+                dirtyDefinedNameMap: {},
+                dirtyUnitFeatureMap: {},
+                dirtyUnitOtherFormulaMap: {},
+            });
+            await started;
+            cells.realDeleteValue(0, 2);
+            releaseResult(9);
+            const [result] = await Promise.all([completed, execution]);
+            expect(result.unitData[testBed.unitId]?.[testBed.sheetId]?.getValue(0, 2)?.v).toBe(9);
+            expect(result.sourceFormulaData?.[testBed.unitId]?.[testBed.sheetId]?.[0]?.[2]?.f).toBe(formula);
+        } finally {
+            releaseResult(9);
+            subscription.unsubscribe();
+            testBed.univer.dispose();
+        }
+    });
+
+    it('retains an in-flight scalar formula source when its replacement is queued', async () => {
+        const testBed = createFunctionTestBed(undefined, [
+            [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
+            [IDependencyManagerService, { useClass: DependencyManagerService }],
+        ]);
+        const formula = '=WAITFORVALUE()';
+        let releaseResult: (value: number) => void = () => {};
+        let markStarted: () => void = () => {};
+        const delayedValue = new Promise<number>((resolve) => {
+            releaseResult = resolve;
+        });
+        const started = new Promise<void>((resolve) => {
+            markStarted = resolve;
+        });
+        const executor = new AsyncCustomFunction('WAITFORVALUE');
+        executor.calculateCustom = () => {
+            markStarted();
+            return delayedValue;
+        };
+        testBed.get(IFunctionService).registerExecutors(executor);
+        const service = testBed.get(ICalculateFormulaService);
+        const results: IAllRuntimeData[] = [];
+        let markCompleted: () => void = () => {};
+        const completed = new Promise<void>((resolve) => {
+            markCompleted = resolve;
+        });
+        const subscription = service.executionCompleteListener$.subscribe((data) => {
+            results.push(data);
+            if (results.length === 2) {
+                markCompleted();
+            }
+        });
+        const config: IFormulaDatasetConfig = {
+            allUnitData: { [testBed.unitId]: { [testBed.sheetId]: {
+                ...testBed.sheetData[testBed.sheetId],
+                cellData: new ObjectMatrix<ICellData>({ 0: { 2: { f: formula } } }),
+            } } },
+            unitSheetNameMap: { [testBed.unitId]: { Sheet1: testBed.sheetId } },
+            unitStylesData: {},
+            formulaData: { [testBed.unitId]: { [testBed.sheetId]: { 0: { 2: { f: formula } } } } },
+            arrayFormulaCellData: {},
+            arrayFormulaRange: {},
+            forceCalculate: true,
+            dirtyRanges: [],
+            dirtyNameMap: {},
+            dirtyDefinedNameMap: {},
+            dirtyUnitFeatureMap: {},
+            dirtyUnitOtherFormulaMap: {},
+        };
+        try {
+            const firstExecution = service.execute(config);
+            await started;
+            const replacementExecution = service.execute({
+                ...config,
+                formulaData: {},
+                allUnitData: { [testBed.unitId]: { [testBed.sheetId]: {
+                    ...testBed.sheetData[testBed.sheetId],
+                    cellData: new ObjectMatrix<ICellData>({ 0: { 2: { v: 42 } } }),
+                } } },
+            });
+            const pendingFormula = testBed.get(IFormulaCurrentConfigService)
+                .getUnitData()[testBed.unitId]?.[testBed.sheetId]
+                ?.cellData
+                .getValue(0, 2)
+                ?.f;
+            releaseResult(10);
+            await Promise.all([firstExecution, replacementExecution, completed]);
+            expect(pendingFormula).toBe(formula);
+            expect(results[0].unitData[testBed.unitId]?.[testBed.sheetId]?.getValue(0, 2)?.v).toBe(10);
+            expect(results[0].sourceFormulaData?.[testBed.unitId]?.[testBed.sheetId]?.[0]?.[2]?.f).toBe(formula);
+            expect(results[1].unitData[testBed.unitId]?.[testBed.sheetId]?.getValue(0, 2)).toBeUndefined();
+        } finally {
+            releaseResult(10);
+            subscription.unsubscribe();
+            testBed.univer.dispose();
+        }
     });
 
     it('should forward stop and feature runtime setters', () => {

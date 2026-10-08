@@ -15,7 +15,15 @@
  */
 
 import type { IContextService } from '@univerjs/core';
-import { FOCUSING_COMMON_DRAWINGS, FOCUSING_DOC, FOCUSING_UNIVER_EDITOR } from '@univerjs/core';
+import { EDITOR_ACTIVATED, FOCUSING_COMMON_DRAWINGS, FOCUSING_DOC, FOCUSING_FX_BAR_EDITOR, FOCUSING_UNIVER_EDITOR } from '@univerjs/core';
+
+export function whenTextEditorFocused(contextService: IContextService): boolean {
+    return contextService.getContextValue(FOCUSING_UNIVER_EDITOR)
+        && !contextService.getContextValue(FOCUSING_COMMON_DRAWINGS)
+        && (contextService.getContextValue(FOCUSING_DOC)
+            || contextService.getContextValue(EDITOR_ACTIVATED)
+            || contextService.getContextValue(FOCUSING_FX_BAR_EDITOR));
+}
 
 export function whenDocAndEditorFocused(contextService: IContextService): boolean {
     return contextService.getContextValue(FOCUSING_DOC)

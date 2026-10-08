@@ -15,7 +15,13 @@
  */
 
 import type { ISheetDataValidationRule } from '@univerjs/core';
-import { Disposable, Inject, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import {
+    Disposable,
+    Inject,
+    IResourceManagerService,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DataValidationModel } from '../models/data-validation-model';
 
 type DataValidationJSON = Record<string, ISheetDataValidationRule[]>;
@@ -38,7 +44,9 @@ export class DataValidationResourceController extends Disposable {
             const resultMap: DataValidationJSON = {};
             if (map) {
                 map.forEach(([key, v]) => {
-                    resultMap[key] = v;
+                    if (v.length > 0) {
+                        resultMap[key] = v;
+                    }
                 });
                 return JSON.stringify(resultMap);
             }
@@ -50,7 +58,7 @@ export class DataValidationResourceController extends Disposable {
             }
             try {
                 return JSON.parse(json);
-            } catch (err) {
+            } catch {
                 return {};
             }
         };

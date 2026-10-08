@@ -17,8 +17,9 @@
 import type { LocaleKey } from '../../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { Button, Input, MobileActionRowGroup, MobileSelect } from '@univerjs/design';
-import { useDependency } from '@univerjs/ui';
-import { useState } from 'react';
+import { getDateFormatOptions } from '@univerjs/sheets-numfmt';
+import { useDependency, useObservable } from '@univerjs/ui';
+import { useMemo, useState } from 'react';
 
 export interface IMobileCustomFormatProps {
     patterns: string[];
@@ -28,8 +29,15 @@ export interface IMobileCustomFormatProps {
 export function MobileCustomFormat(props: IMobileCustomFormatProps) {
     const { patterns, onConfirm } = props;
     const localeService = useDependency(LocaleService);
+    const locale = useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
     const [pattern, setPattern] = useState('');
     const title = localeService.t<LocaleKey>('sheets-numfmt-ui.customFormat');
+    // Menu configuration outlives locale changes; resolve date presets when the editor renders.
+    const options = useMemo(() => [...new Set([
+        ...patterns,
+        ...getDateFormatOptions(locale).map((item) => item.value),
+        ...(pattern ? [pattern] : []),
+    ])].map((value) => ({ label: value, value })), [locale, pattern, patterns]);
 
     return (
         <div
@@ -50,7 +58,7 @@ export function MobileCustomFormat(props: IMobileCustomFormatProps) {
                   [&>div]:univer-font-mono
                 "
                 value={pattern || title}
-                options={patterns.map((item) => ({ label: item, value: item }))}
+                options={options}
                 onChange={setPattern}
             />
             <div

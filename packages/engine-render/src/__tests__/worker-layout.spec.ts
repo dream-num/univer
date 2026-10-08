@@ -21,6 +21,7 @@ import {
     ColumnLayoutType,
     ColumnResponsiveType,
     createDocumentModelWithStyle,
+    CustomRangeType,
     DataStreamTreeTokenType,
     DocumentDataModel,
     DocumentFlavor,
@@ -43,10 +44,34 @@ import {
 } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DocumentSkeleton } from '../components/docs/layout/doc-skeleton';
+import { FontCache } from '../components/docs/layout/shaping-engine/font-cache';
 import { DocumentViewModel } from '../components/docs/view-model/document-view-model';
 import { DocumentLayoutSession } from '../worker-layout';
 
 type LayoutPublication = ReturnType<DocumentLayoutSession['step']>['publication'];
+
+function mockWorkerCanvas(): void {
+    vi.stubGlobal('document', undefined);
+    vi.stubGlobal('OffscreenCanvas', class {
+        getContext() {
+            return {
+                font: '',
+                textBaseline: 'alphabetic',
+                measureText(this: { font: string }, content: string) {
+                    const size = this.font.match(/([\d.]+)(px|pt)/);
+                    const points = size ? Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) : 11;
+                    return {
+                        width: content.length * 7 * points / 11,
+                        fontBoundingBoxAscent: 9 * points / 11,
+                        fontBoundingBoxDescent: 3 * points / 11,
+                        actualBoundingBoxAscent: 8 * points / 11,
+                        actualBoundingBoxDescent: 2 * points / 11,
+                    };
+                },
+            };
+        }
+    });
+}
 
 function normalizeSkeleton(value: unknown): unknown {
     if (value instanceof Map) {
@@ -125,6 +150,177 @@ function collectNestedElementIds(skeleton: ReturnType<DocumentSkeleton['getSkele
 describe('worker document layout session', () => {
     afterEach(() => {
         vi.unstubAllGlobals();
+        Reflect.set(FontCache, '_context', null);
+        FontCache.invalidateMetrics(() => true);
+    });
+
+    it.each([0, 10_000])('publishes per-page field geometry and the converged total through the Worker protocol (budget=%s)', (budgetMs) => {
+        mockWorkerCanvas();
+        const univer = new Univer();
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.setLocale(LocaleType.EN_US);
+        const model = new DocumentDataModel({
+            id: 'worker-fields',
+            body: { dataStream: 'A\rB\rC\r\n', paragraphs: [
+                { paragraphId: 'a', startIndex: 1 },
+                { paragraphId: 'b', startIndex: 3, paragraphStyle: { pageBreakBefore: BooleanNumber.TRUE } },
+                { paragraphId: 'c', startIndex: 5, paragraphStyle: { pageBreakBefore: BooleanNumber.TRUE } },
+            ] },
+            headers: { header: { headerId: 'header', body: {
+                dataStream: '\u001F9\u001E / \u001F999\u001E\r\n',
+                paragraphs: [{ paragraphId: 'hp', startIndex: 11 }],
+                customRanges: [
+                    { rangeId: 'page', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 2, wholeEntity: false, properties: { fieldType: 'PAGE' } },
+                    { rangeId: 'count', rangeType: CustomRangeType.FIELD, startIndex: 6, endIndex: 10, wholeEntity: false, properties: { fieldType: 'NUMPAGES' } },
+                ],
+            } } },
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageNumberStart: 99, defaultHeaderId: 'header', pageSize: { width: 300, height: 400 }, marginTop: 50, marginBottom: 50 },
+        });
+        const target = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(structuredClone(model.getSnapshot()))), locale);
+        const expected = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(structuredClone(model.getSnapshot()))), locale);
+        const session = new DocumentLayoutSession(model, locale);
+        try {
+            expected.calculate();
+            target.beginExternalLayout({ reason: 'initial' });
+            const generation = session.start({ reason: 'initial' });
+            let complete = false;
+            let pendingPublications = 0;
+            for (let step = 0; step < 100 && !complete; step++) {
+                const result = session.step(generation, step < 2 ? 0 : budgetMs);
+                if (result.publication) {
+                    target.applyLayoutPublication(structuredClone(result.publication), result.progress);
+                    if (result.progress.processedBlockCount < result.progress.totalBlockCount) {
+                        pendingPublications++;
+                        const pendingData = target.getSkeletonData()!;
+                        for (const page of pendingData.pages) {
+                            const header = pendingData.skeHeaders.get('header')!.get(page.headerLayoutKey!)!;
+                            const contents = header.sections[0].columns[0].lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content))).join('');
+                            expect(contents.replace(/[\u001E\u001F\r]/g, '')).toBe(`${page.pageNumber} / 999`);
+                        }
+                    }
+                }
+                complete = result.progress.complete;
+            }
+            expect(complete).toBe(true);
+            expect(pendingPublications).toBeGreaterThan(0);
+            expect(target.getCompletedPageCount()).toBe(3);
+            const data = target.getSkeletonData()!;
+            expect(normalizeSkeleton(data.pages)).toEqual(normalizeSkeleton(expected.getSkeletonData()!.pages));
+            for (const [index, page] of data.pages.entries()) {
+                const header = data.skeHeaders.get('header')!.get(page.headerLayoutKey!)!;
+                const contents = header.sections[0].columns[0].lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content))).join('');
+                expect(contents.replace(/[\u001E\u001F\r]/g, '')).toBe(`${99 + index} / 3`);
+                expect(target.findNodeByCharIndex(1, 'header', index)?.content).toBe(String(99 + index));
+            }
+            const edited = structuredClone(model.getSnapshot());
+            edited.body!.paragraphs![1].paragraphStyle!.pageBreakBefore = BooleanNumber.FALSE;
+            const editedModel = new DocumentDataModel(edited);
+            const targetModel = new DocumentDataModel(structuredClone(edited));
+            try {
+                session.resetDataModel(editedModel);
+                target.getViewModel().reset(targetModel);
+                target.beginExternalLayout({ reason: 'edit' });
+                const editGeneration = session.start({ reason: 'edit' });
+                let editComplete = false;
+                for (let step = 0; step < 100 && !editComplete; step++) {
+                    const result = session.step(editGeneration, 0);
+                    if (result.publication) {
+                        target.applyLayoutPublication(structuredClone(result.publication), result.progress);
+                    }
+                    editComplete = result.progress.complete;
+                    expect(target.getCompletedPageCount()).toBe(editComplete ? 2 : 3);
+                }
+                expect(editComplete).toBe(true);
+                const page = target.getSkeletonData()!.pages[0];
+                const header = target.getSkeletonData()!.skeHeaders.get('header')!.get(page.headerLayoutKey!)!;
+                const text = header.sections[0].columns[0].lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content))).join('');
+                expect(text.replace(/[\u001E\u001F\r]/g, '')).toBe('99 / 2');
+            } finally {
+                editedModel.dispose();
+                targetModel.dispose();
+            }
+        } finally {
+            session.dispose();
+            target.dispose();
+            expected.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
+    it('replaces protected header geometry when inserting the first page field', () => {
+        mockWorkerCanvas();
+        const univer = new Univer();
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.setLocale(LocaleType.EN_US);
+        const model = new DocumentDataModel({
+            id: 'worker-header-insertion',
+            body: { dataStream: 'A\rB\r\n', paragraphs: [
+                { paragraphId: 'a', startIndex: 1 },
+                { paragraphId: 'b', startIndex: 3, paragraphStyle: { pageBreakBefore: BooleanNumber.TRUE } },
+            ] },
+            headers: { header: { headerId: 'header', body: {
+                dataStream: 'Page \r\n',
+                paragraphs: [{ paragraphId: 'hp', startIndex: 5 }],
+            } } },
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageNumberStart: 9, defaultHeaderId: 'header', pageSize: { width: 300, height: 400 }, marginTop: 50, marginBottom: 50 },
+        });
+        const target = DocumentSkeleton.create(new DocumentViewModel(model), locale);
+        const foreground = DocumentSkeleton.create(new DocumentViewModel(model), locale);
+        const session = new DocumentLayoutSession(model, locale);
+        const snapshot = structuredClone(model.getSnapshot());
+        snapshot.headers!.header.body = {
+            dataStream: 'Page \u001F9\u001E\r\n',
+            paragraphs: [{ paragraphId: 'hp', startIndex: 8 }],
+            customRanges: [{ rangeId: 'page', rangeType: CustomRangeType.FIELD, startIndex: 5, endIndex: 7, wholeEntity: false, properties: { fieldType: 'PAGE' } }],
+        };
+        const edited = new DocumentDataModel(snapshot);
+        try {
+            target.calculate();
+            foreground.calculate();
+            foreground.getViewModel().reset(edited);
+            const foregroundGeneration = foreground.startIncrementalLayout({ reason: 'edit', anchor: 0, reuseUnaffectedTail: false });
+            let foregroundComplete = false;
+            for (let step = 0; step < 100 && !foregroundComplete; step++) {
+                foregroundComplete = foreground.stepIncrementalLayout(foregroundGeneration, 0).complete;
+            }
+            expect(foregroundComplete).toBe(true);
+            expect(foreground.getSkeletonData()!.pages[0].headerLayoutKey).toBeDefined();
+            expect(foreground.findNodeByCharIndex(6, 'header', 0)?.content).toBe('9');
+            const initial = session.start({ reason: 'initial' });
+            let initialComplete = false;
+            for (let step = 0; step < 100 && !initialComplete; step++) {
+                initialComplete = session.step(initial, 0).progress.complete;
+            }
+            expect(initialComplete).toBe(true);
+            session.resetDataModel(edited);
+            target.getViewModel().reset(edited);
+            target.beginExternalLayout({ reason: 'edit', protectedRange: { mode: 'paginated', startPageIndex: 0, endPageIndex: 0 } });
+            const generation = session.start({ reason: 'edit', anchor: 0 });
+            let complete = false;
+            for (let step = 0; step < 100 && !complete; step++) {
+                const result = session.step(generation, 0);
+                if (result.publication) {
+                    target.applyLayoutPublication(structuredClone(result.publication), result.progress);
+                }
+                complete = result.progress.complete;
+            }
+            expect(complete).toBe(true);
+            const data = target.getSkeletonData()!;
+            for (const [index, page] of data.pages.entries()) {
+                expect(page.headerLayoutKey).toBeDefined();
+                const header = data.skeHeaders.get('header')!.get(page.headerLayoutKey!)!;
+                const text = header.sections[0].columns[0].lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content))).join('');
+                expect(text.replace(/[\u001E\u001F\r]/g, '')).toBe(`Page ${9 + index}`);
+            }
+        } finally {
+            session.dispose();
+            target.dispose();
+            foreground.dispose();
+            model.dispose();
+            edited.dispose();
+            univer.dispose();
+        }
     });
 
     it('paginates and resolves a 1000-page TOC target incrementally', {

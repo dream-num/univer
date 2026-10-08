@@ -956,7 +956,7 @@ export interface IDocumentSkeletonLineContext {
 }
 
 export type DocumentSkeletonTableSource = 'page' | 'table-cell' | 'column' | 'header' | 'footer';
-type HeaderFooterSkeletonMap = Map<string, Map<number, IDocumentSkeletonPage>>;
+type HeaderFooterSkeletonMap = Map<string, Map<number | string, IDocumentSkeletonPage>>;
 
 export interface IDocumentSkeletonTableCellGeometry {
     cell: IDocumentSkeletonPage;
@@ -1036,7 +1036,7 @@ export function documentSkeletonTableIterator(
         });
 
         const rootPageDocumentLeft = docsLeft + rootPage.marginLeft;
-        const headerPage = rootPage.headerId == null ? undefined : skeHeaders?.get(rootPage.headerId)?.get(rootPage.pageWidth);
+        const headerPage = rootPage.headerId == null ? undefined : skeHeaders?.get(rootPage.headerId)?.get(rootPage.headerLayoutKey ?? rootPage.pageWidth);
         if (headerPage != null) {
             collectPageTables({
                 contexts,
@@ -1054,7 +1054,7 @@ export function documentSkeletonTableIterator(
             });
         }
 
-        const footerPage = rootPage.footerId == null ? undefined : skeFooters?.get(rootPage.footerId)?.get(rootPage.pageWidth);
+        const footerPage = rootPage.footerId == null ? undefined : skeFooters?.get(rootPage.footerId)?.get(rootPage.footerLayoutKey ?? rootPage.pageWidth);
         if (footerPage != null) {
             collectPageTables({
                 contexts,
@@ -1954,6 +1954,12 @@ export interface IDocumentPaginationMetrics {
 }
 
 export interface ILayoutContext {
+    headerFooterFieldContext?: { pageNumber: number; pageCount?: number };
+    fieldPageCount?: number;
+    hasNumPagesFields?: boolean;
+    fieldCountCandidates?: Set<number>;
+    fieldCountCycle?: boolean;
+    headerFooterMinimumMargins?: Map<string, number>;
     noteReferences?: ReadonlyMap<number, INoteReferenceLayout>;
     footnoteLayout?: DocumentFootnoteLayout;
     endnoteLayout?: DocumentEndnoteLayout;

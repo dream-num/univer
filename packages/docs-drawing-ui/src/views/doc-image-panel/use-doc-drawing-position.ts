@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDrawingParam, IObjectPositionH, IObjectPositionV, Nullable } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    ICommandInfo,
+    IDrawingParam,
+    IObjectPositionH,
+    IObjectPositionV,
+    Nullable,
+} from '@univerjs/core';
 import type { IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
 import type { IDocumentSkeletonDrawing } from '@univerjs/engine-render';
 import type { LocaleKey } from '../../locale/types';
@@ -181,14 +188,14 @@ export function useDocDrawingPosition(props: IDocDrawingPositionProps) {
                 break;
             }
 
-            const headerPage = skeHeaders.get(headerId)?.get(pageWidth);
+            const headerPage = skeHeaders.get(headerId)?.get(page.headerLayoutKey ?? pageWidth);
             if (headerPage?.skeDrawings.has(drawingId)) {
                 drawing = headerPage?.skeDrawings.get(drawingId);
                 pageMarginLeft = marginLeft;
                 break;
             }
 
-            const footerPage = skeFooters.get(footerId)?.get(pageWidth);
+            const footerPage = skeFooters.get(footerId)?.get(page.footerLayoutKey ?? pageWidth);
             if (footerPage?.skeDrawings.has(drawingId)) {
                 drawing = footerPage?.skeDrawings.get(drawingId);
                 pageMarginLeft = marginLeft;

@@ -19,8 +19,8 @@ import type { IBusinessComponentProps } from './interface';
 import { ILocalStorageService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, Input } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
-import { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from '@univerjs/sheets-numfmt';
-import { useDependency } from '@univerjs/ui';
+import { CURRENCYFORMAT, getDateFormatOptions, NUMBERFORMAT } from '@univerjs/sheets-numfmt';
+import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { UserHabitController } from '../../controllers/user-habit.controller';
 
@@ -32,6 +32,7 @@ export function CustomFormat(props: IBusinessComponentProps) {
     const userHabitController = useDependency(UserHabitController);
     const localStorageService = useDependency(ILocalStorageService);
     const localeService = useDependency(LocaleService);
+    const locale = useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
 
     const [pattern, setPattern] = useState(defaultPattern);
     useLayoutEffect(() => {
@@ -39,8 +40,8 @@ export function CustomFormat(props: IBusinessComponentProps) {
             userHabitController.markHabit(key, pattern);
             localStorageService.getItem<string[]>(historyPatternKey).then((list = []) => {
                 const _list = [...new Set([pattern, ...(list || [])])].splice(0, 10).filter((e) => !!e);
-                localStorageService.setItem(historyPatternKey, _list);
-            });
+                return localStorageService.setItem(historyPatternKey, _list);
+            }).catch(console.error);
             return pattern;
         });
     }, [localStorageService, onActionChange, pattern, userHabitController]);
@@ -49,10 +50,10 @@ export function CustomFormat(props: IBusinessComponentProps) {
     useEffect(() => {
         let cancelled = false;
 
-        void localStorageService.getItem<string[]>(historyPatternKey).then((historyList) => {
+        localStorageService.getItem<string[]>(historyPatternKey).then((historyList) => {
             const list = [
                 ...CURRENCYFORMAT.map((item) => item.suffix('$')),
-                ...DATEFMTLISG.map((item) => item.suffix),
+                ...getDateFormatOptions(locale).map((item) => item.value),
                 ...NUMBERFORMAT.map((item) => item.suffix),
                 ...(historyList ?? []),
             ];
@@ -61,12 +62,12 @@ export function CustomFormat(props: IBusinessComponentProps) {
             if (!cancelled) {
                 setOptions([...new Set(list)]);
             }
-        });
+        }).catch(console.error);
 
         return () => {
             cancelled = true;
         };
-    }, [localStorageService, userHabitController]);
+    }, [locale, localStorageService, userHabitController]);
 
     const handleClick = (p: string) => {
         setPattern(p);

@@ -64,6 +64,9 @@ const locale: typeof enUS = {
             exceedMaxCount: '一度にアップロードできるのは {0} 個までです',
             invalidImage: '無効な画像です',
         },
+        'image-transparency': {
+            title: '透明度',
+        },
         'drawing-anchor': {
             title: 'プロパティ',
             both: 'セルに合わせて移動やサイズ変更をする',

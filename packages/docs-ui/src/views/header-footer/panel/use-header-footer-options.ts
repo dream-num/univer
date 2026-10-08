@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, IDocumentStyle } from '@univerjs/core';
-import type { IHeaderFooterProps } from '@univerjs/docs';
+import type { IHeaderFooterProps, IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IDocumentSkeletonPage } from '@univerjs/engine-render';
 import {
     BooleanNumber,
@@ -26,10 +26,10 @@ import {
     resolveSectionHeaderFooterReference,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSkeletonManagerService, SetSectionHeaderFooterLinkCommand } from '@univerjs/docs';
+import { DocSkeletonManagerService, RichTextEditingMutation, SetSectionHeaderFooterLinkCommand } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { ILayoutService, useDependency } from '@univerjs/ui';
-import { useState } from 'react';
+import { useEffect, useReducer } from 'react';
 import {
     CloseHeaderFooterCommand,
     CoreHeaderFooterCommandId,
@@ -90,16 +90,27 @@ export function useHeaderFooterOptions(unitId: string) {
         const page = docSkeletonManagerService?.getSkeleton?.()?.getSkeletonData()?.pages[docSelectionRenderService.getSegmentPage()];
         return snapshot == null ? undefined : { ...getDocPageSectionContext(snapshot, page), page };
     };
-    const [options, setOptions] = useState<IHeaderFooterProps>(() => {
-        const config = getCurrentSectionContext()?.config;
-        return {
-            marginHeader: config?.marginHeader ?? 0,
-            marginFooter: config?.marginFooter ?? 0,
-            useFirstPageHeaderFooter: config?.useFirstPageHeaderFooter ?? BooleanNumber.FALSE,
-            evenAndOddHeaders: config?.evenAndOddHeaders ?? BooleanNumber.FALSE,
+    const [, refresh] = useReducer((revision: number) => revision + 1, 0);
+    useEffect(() => {
+        const commandListener = commandService.onCommandExecuted((command) => {
+            if (command.id === RichTextEditingMutation.id && (command.params as IRichTextEditingMutationParams | undefined)?.unitId === unitId) {
+                refresh();
+            }
+        });
+        const segmentListener = docSelectionRenderService.segmentContext$.subscribe(() => refresh());
+        return () => {
+            commandListener.dispose();
+            segmentListener.unsubscribe();
         };
-    });
+    }, [commandService, docSelectionRenderService, unitId]);
     const sectionContext = getCurrentSectionContext();
+    const config = sectionContext?.config;
+    const options: IHeaderFooterProps = {
+        marginHeader: config?.marginHeader ?? 0,
+        marginFooter: config?.marginFooter ?? 0,
+        useFirstPageHeaderFooter: config?.useFirstPageHeaderFooter ?? BooleanNumber.FALSE,
+        evenAndOddHeaders: config?.evenAndOddHeaders ?? BooleanNumber.FALSE,
+    };
     const editArea = renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService)?.getViewModel()?.getEditArea();
     const headerFooterKind = editArea === DocumentEditArea.FOOTER ? 'footer' : 'header';
     const variant = getHeaderFooterVariant(
@@ -109,16 +120,9 @@ export function useHeaderFooterOptions(unitId: string) {
     );
     const referenceKey = getSectionHeaderFooterReferenceKey(headerFooterKind, variant);
     const canLinkToPrevious = (sectionContext?.sectionIndex ?? -1) > 0;
-    const [linkedToPrevious, setLinkedToPrevious] = useState(
-        canLinkToPrevious && !sectionContext?.section?.[referenceKey]
-    );
+    const linkedToPrevious = canLinkToPrevious && !sectionContext?.section?.[referenceKey];
 
-    const handleCheckboxChange = (val: boolean, type: 'useFirstPageHeaderFooter' | 'evenAndOddHeaders') => {
-        setOptions((prev) => ({
-            ...prev,
-            [type]: val ? BooleanNumber.TRUE : BooleanNumber.FALSE,
-        }));
-
+    const handleCheckboxChange = async (val: boolean, type: 'useFirstPageHeaderFooter' | 'evenAndOddHeaders') => {
         const sectionContext = getCurrentSectionContext();
         const documentStyle = sectionContext?.config;
         const docSkeletonManagerService = renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService);
@@ -169,7 +173,7 @@ export function useHeaderFooterOptions(unitId: string) {
                 docSelectionRenderService.setSegment(segmentId);
             }
 
-            commandService.executeCommand(CoreHeaderFooterCommandId, {
+            await commandService.executeCommand(CoreHeaderFooterCommandId, {
                 unitId,
                 segmentId,
                 headerFooterProps: {
@@ -195,7 +199,7 @@ export function useHeaderFooterOptions(unitId: string) {
                 docSelectionRenderService.setSegment(needFocusSegmentId);
             }
 
-            commandService.executeCommand(CoreHeaderFooterCommandId, {
+            await commandService.executeCommand(CoreHeaderFooterCommandId, {
                 unitId,
                 headerFooterProps: {
                     [type]: val ? BooleanNumber.TRUE : BooleanNumber.FALSE,
@@ -208,11 +212,6 @@ export function useHeaderFooterOptions(unitId: string) {
     };
 
     const handleMarginChange = async (val: number, type: 'marginHeader' | 'marginFooter') => {
-        setOptions((prev) => ({
-            ...prev,
-            [type]: val,
-        }));
-
         await commandService.executeCommand(CoreHeaderFooterCommandId, {
             unitId,
             headerFooterProps: {
@@ -222,12 +221,11 @@ export function useHeaderFooterOptions(unitId: string) {
         });
 
         // To make sure input always has focus.
-        docSelectionRenderService.removeAllRanges();
         docSelectionRenderService.blur();
     };
 
     const closeHeaderFooter = () => {
-        commandService.executeCommand(CloseHeaderFooterCommand.id, {
+        return commandService.executeCommand(CloseHeaderFooterCommand.id, {
             unitId,
         });
     };
@@ -259,7 +257,6 @@ export function useHeaderFooterOptions(unitId: string) {
         if (!success) {
             return;
         }
-        setLinkedToPrevious(linked);
         docSelectionRenderService.setSegment(linked ? previousSegmentId ?? '' : segmentId);
         layoutService.focus();
     };

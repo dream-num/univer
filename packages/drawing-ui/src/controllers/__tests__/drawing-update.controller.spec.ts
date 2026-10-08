@@ -16,9 +16,23 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
-import { DrawingTypeEnum, UniverInstanceType } from '@univerjs/core';
-import { getDrawingShapeKeyByDrawingSearch, SetDrawingSelectedOperation } from '@univerjs/drawing';
-import { DRAWING_OBJECT_LAYER_INDEX, Rect } from '@univerjs/engine-render';
+import { DrawingTypeEnum, Univer, UniverInstanceType } from '@univerjs/core';
+import {
+    DrawingManagerService,
+    getDrawingShapeKeyByDrawingSearch,
+    IDrawingManagerService,
+    SetDrawingSelectedOperation,
+} from '@univerjs/drawing';
+import {
+    CanvasColorService,
+    DRAWING_OBJECT_LAYER_INDEX,
+    DrawingGroupObject,
+    Group,
+    ICanvasColorService,
+    IRenderManagerService,
+    Rect,
+    RenderManagerService,
+} from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { AlignType, SetDrawingAlignOperation } from '../../commands/operations/drawing-align.operation';
@@ -71,7 +85,7 @@ function createHarness() {
         clearControlByIds: vi.fn(),
     };
 
-    const zIndexShape = { setProps: vi.fn(), makeDirty: vi.fn() };
+    const zIndexShape = { zIndex: 5, makeDirty: vi.fn() };
     const disposeShape = { dispose: vi.fn() };
     const showHideShape = { show: vi.fn(), hide: vi.fn() };
     const transformShape = { layer: { zIndex: DRAWING_OBJECT_LAYER_INDEX }, transformByState: vi.fn(), setClipBounds: vi.fn(), show: vi.fn(), hide: vi.fn() };
@@ -203,6 +217,56 @@ function createHarness() {
 }
 
 describe('DrawingUpdateController', () => {
+    it.each([{ GroupType: Group }, { GroupType: DrawingGroupObject }])('arranges $GroupType.name and repeated instances without interrupting other drawings', ({ GroupType }) => {
+        const getContextSpy = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
+            return { canvas: this, setTransform: vi.fn(), clearRect: vi.fn() } as unknown as CanvasRenderingContext2D;
+        });
+        const univer = new Univer();
+        try {
+            const injector = univer.__getInjector();
+            injector.add([IDrawingManagerService, { useClass: DrawingManagerService }]);
+            injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            injector.add([DrawingUpdateController]);
+
+            const unitId = 'arrange-unit';
+            const subUnitId = 'arrange-subunit';
+            const { scene } = injector.get(IRenderManagerService).createRender(unitId);
+            const drawingManagerService = injector.get(IDrawingManagerService);
+            injector.get(DrawingUpdateController);
+
+            const groupSearch = { unitId, subUnitId, drawingId: 'group' };
+            const child = new Rect('child', { zIndex: 7 });
+            const group = new GroupType(getDrawingShapeKeyByDrawingSearch(groupSearch), child);
+            const repeatedGroup = new GroupType(getDrawingShapeKeyByDrawingSearch(groupSearch, 0));
+            const shape = new Rect(getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId: 'shape' }));
+            scene.addObjects([group, repeatedGroup, shape], DRAWING_OBJECT_LAYER_INDEX);
+
+            for (const order of [['shape', 'group'], ['group', 'shape']]) {
+                group.makeDirty(false);
+                repeatedGroup.makeDirty(false);
+                shape.makeDirty(false);
+                drawingManagerService.setDrawingOrder(unitId, subUnitId, order);
+                drawingManagerService.orderUpdateNotification({ unitId, subUnitId, drawingIds: ['group', 'shape'] });
+
+                expect(group.zIndex).toBe(order.indexOf('group'));
+                expect(repeatedGroup.zIndex).toBe(group.zIndex);
+                expect(shape.zIndex).toBe(order.indexOf('shape'));
+                expect(group.isDirty()).toBe(true);
+                expect(repeatedGroup.isDirty()).toBe(true);
+                expect(shape.isDirty()).toBe(true);
+                expect(scene.getAllObjectsByOrder()).toEqual(
+                    order[0] === 'group' ? [group, repeatedGroup, shape] : [shape, group, repeatedGroup]
+                );
+                expect(group.getObjects()).toEqual([child]);
+                expect(child.zIndex).toBe(7);
+            }
+        } finally {
+            univer.dispose();
+            getContextSpy.mockRestore();
+        }
+    });
+
     it('syncs selection on transform start and persists transform changes on end', () => {
         const harness = createHarness();
 
@@ -244,7 +308,7 @@ describe('DrawingUpdateController', () => {
         const harness = createHarness();
 
         harness.order$.next({ unitId: 'unit-1', subUnitId: 'sheet-1', drawingIds: ['drawing-z'] });
-        expect(harness.zIndexShape.setProps).toHaveBeenCalledWith({ zIndex: 0 });
+        expect(harness.zIndexShape.zIndex).toBe(0);
         expect(harness.zIndexShape.makeDirty).toHaveBeenCalledTimes(1);
 
         const drawingId = 'drawing-transform';

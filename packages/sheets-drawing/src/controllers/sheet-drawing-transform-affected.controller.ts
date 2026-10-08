@@ -20,8 +20,6 @@ import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type {
     IDeleteRangeMoveLeftCommandParams,
     IDeleteRangeMoveUpCommandParams,
-    IDeltaColumnWidthCommandParams,
-    IDeltaRowHeightCommandParams,
     IInsertColCommandParams,
     IInsertRangeMoveDownCommandParams,
     IInsertRangeMoveRightCommandParams,
@@ -30,12 +28,8 @@ import type {
     IMoveRangeCommandParams,
     IMoveRowsCommandParams,
     IRemoveRowColCommandParams,
-    ISetColHiddenCommandParams,
     ISetColHiddenMutationParams,
     ISetColVisibleMutationParams,
-    ISetColWidthCommandParams,
-    ISetRowHeightCommandParams,
-    ISetRowHiddenCommandParams,
     ISetRowHiddenMutationParams,
     ISetRowVisibleMutationParams,
     ISetSpecificColsVisibleCommandParams,
@@ -46,7 +40,9 @@ import type {
     ISetWorksheetRowIsAutoHeightMutationParams,
     ISheetSkeletonManagerParam,
 } from '@univerjs/sheets';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, RANGE_TYPE, Rectangle } from '@univerjs/core';
+import type { ISheetDrawingTransformExtensionResult, ISheetDrawingTransformPlan } from '../services/sheet-drawing-transform-plan.service';
+import type { ISheetDrawing, ISheetDrawingPosition } from '../services/sheet-drawing.service';
+import { Disposable, ICommandService, Inject, IUniverInstanceService, Rectangle } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import {
     attachRangeWithCoord,
@@ -80,11 +76,7 @@ import {
     SetWorksheetRowIsAutoHeightMutation,
     SheetInterceptorService,
     SheetSkeletonService,
-    SheetsSelectionsService,
 } from '@univerjs/sheets';
-
-import type { ISheetDrawingTransformExtensionResult, ISheetDrawingTransformPlan } from '../services/sheet-drawing-transform-plan.service';
-import type { ISheetDrawing, ISheetDrawingPosition } from '../services/sheet-drawing.service';
 import { drawingPositionToTransform, transformToAxisAlignPosition, transformToDrawingPosition } from '../basics/transform-position';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
@@ -141,7 +133,6 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -212,72 +203,18 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                         const { range } = params as IInsertRangeMoveRightCommandParams;
                         return this._getRangeMoveUndo(range, RangeMoveUndoType.insertRight);
                     } else if (id === SetRowHiddenCommand.id || id === SetSpecificRowsVisibleCommand.id) {
-                        const _params = params as ISetRowHiddenCommandParams | ISetSpecificRowsVisibleCommandParams;
-                        const target = getSheetCommandTarget(this._univerInstanceService, _params);
-                        if (!target) {
-                            return { redos: [], undos: [] };
-                        }
-
-                        const { unitId, subUnitId } = target;
-                        const ranges = _params.ranges || this._selectionManagerService.getCurrentSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.ROW);
-                        if (!ranges || ranges.length === 0) {
-                            return { redos: [], undos: [] };
-                        }
-
+                        const { unitId, subUnitId, ranges } = params as ISetRowHiddenMutationParams | ISetSpecificRowsVisibleCommandParams;
                         return this._getDrawingUndoForRowVisible(unitId, subUnitId, ranges);
                     } else if (id === SetColHiddenCommand.id || id === SetSpecificColsVisibleCommand.id) {
-                        const _params = params as ISetColHiddenCommandParams | ISetSpecificColsVisibleCommandParams;
-                        const target = getSheetCommandTarget(this._univerInstanceService, _params);
-                        if (!target) {
-                            return { redos: [], undos: [] };
-                        }
-
-                        const { unitId, subUnitId } = target;
-                        const ranges = _params.ranges || this._selectionManagerService.getCurrentSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
-                        if (!ranges || ranges.length === 0) {
-                            return { redos: [], undos: [] };
-                        }
-
+                        const { unitId, subUnitId, ranges } = params as ISetColHiddenMutationParams | ISetSpecificColsVisibleCommandParams;
                         return this._getDrawingUndoForColVisible(unitId, subUnitId, ranges);
-                    } else if (id === DeltaRowHeightCommand.id || id === DeltaColumnWidthCommand.id) {
-                        const target = getSheetCommandTarget(this._univerInstanceService);
-                        if (!target) {
-                            return { redos: [], undos: [] };
-                        }
-
-                        const { unitId, subUnitId, worksheet } = target;
-                        const ranges: IRange[] = [];
-
-                        if (id === DeltaRowHeightCommand.id) {
-                            ranges.push({
-                                startRow: (params as IDeltaRowHeightCommandParams).anchorRow,
-                                endRow: (params as IDeltaRowHeightCommandParams).anchorRow,
-                                startColumn: 0,
-                                endColumn: worksheet.getColumnCount() - 1,
-                            });
-                        } else {
-                            ranges.push({
-                                startRow: 0,
-                                endRow: worksheet.getRowCount() - 1,
-                                startColumn: (params as IDeltaColumnWidthCommandParams).anchorCol,
-                                endColumn: (params as IDeltaColumnWidthCommandParams).anchorCol,
-                            });
-                        }
-
-                        return this._getDrawingUndoForRowAndColSize(unitId, subUnitId, ranges);
-                    } else if (id === SetRowHeightCommand.id || id === SetColWidthCommand.id) {
-                        const _params = params as ISetRowHeightCommandParams | ISetColWidthCommandParams;
-                        const target = getSheetCommandTarget(this._univerInstanceService, _params);
-                        if (!target) {
-                            return { redos: [], undos: [] };
-                        }
-
-                        const { unitId, subUnitId } = target;
-                        const ranges = _params.ranges || this._selectionManagerService.getCurrentSelections()?.map((s) => s.range);
-                        if (!ranges || ranges.length === 0) {
-                            return { redos: [], undos: [] };
-                        }
-
+                    } else if (
+                        id === DeltaRowHeightCommand.id ||
+                        id === DeltaColumnWidthCommand.id ||
+                        id === SetRowHeightCommand.id ||
+                        id === SetColWidthCommand.id
+                    ) {
+                        const { unitId, subUnitId, ranges } = params as ISetWorksheetRowHeightMutationParams | ISetWorksheetColWidthMutationParams;
                         return this._getDrawingUndoForRowAndColSize(unitId, subUnitId, ranges);
                     }
 

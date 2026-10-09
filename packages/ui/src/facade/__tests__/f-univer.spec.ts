@@ -304,6 +304,30 @@ describe('ui facade', () => {
         expect(componentManager.get('custom-component')).toBeUndefined();
     });
 
+    it.each([undefined, {}, { framework: 'react' }, { override: undefined }])('defaults facade registrations to overrides with options %j', (options) => {
+        const manager = univer.__getInjector().get(ComponentManager);
+        const HostPanel = () => null;
+        const BuiltInPanel = () => null;
+        const override = univerAPI.registerComponent('panel', HostPanel, options);
+        manager.register('panel', BuiltInPanel);
+
+        expect(manager.get('panel')).toBe(HostPanel);
+        override.dispose();
+        expect(manager.get('panel')).toBe(BuiltInPanel);
+    });
+
+    it('honors an explicit false override option in facade registrations', () => {
+        const manager = univer.__getInjector().get(ComponentManager);
+        const HostPanel = () => null;
+        const BuiltInPanel = () => null;
+        const override = univerAPI.registerComponent('panel', HostPanel);
+        univerAPI.registerComponent('panel', BuiltInPanel, { override: false });
+
+        expect(manager.get('panel')).toBe(HostPanel);
+        override.dispose();
+        expect(manager.get('panel')).toBe(BuiltInPanel);
+    });
+
     it('triggers shortcuts through the active workbook render canvas', () => {
         const injector = new Injector();
         injector.add([IShortcutService, { useClass: FakeShortcutService as never }]);

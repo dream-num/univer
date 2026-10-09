@@ -37,6 +37,7 @@ export type { IShowRangeSelectorDialogOptions } from './services/range-selector.
 export { RefSelectionsRenderService } from './services/render-services/ref-selections.render.service';
 export { FormulaEditor } from './views/formula-editor/index';
 export type { IFormulaEditorRef } from './views/formula-editor/index';
+export { MORE_FUNCTIONS_COMPONENT } from './views/more-functions/interface';
 export { RangeSelector } from './views/range-selector/index';
 export type { IRangeSelectorInstance, IRangeSelectorProps } from './views/range-selector/index';
 export { MobileRangeSelector } from './views/range-selector/MobileRangeSelector';

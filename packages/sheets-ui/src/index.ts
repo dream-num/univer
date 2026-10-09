@@ -295,6 +295,7 @@ export {
 export { AutoFillPopupMenu } from './views/auto-fill-popup-menu/AutoFillPopupMenu';
 export { BorderLine } from './views/border-panel/border-line/BorderLine';
 export { BORDER_LINE_CHILDREN, BORDER_SIZE_CHILDREN } from './views/border-panel/interface';
+export { DEFINED_NAME_CONTAINER } from './views/defined-name/component-name';
 export { EditorContainer, useKeyEventConfig } from './views/editor-container';
 export { FormulaBar } from './views/formula-bar';
 export { useActiveWorkbook, useActiveWorksheet, useWorkbooks } from './views/hook';

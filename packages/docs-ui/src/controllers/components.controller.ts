@@ -235,7 +235,7 @@ export class ComponentsController extends Disposable {
 
     private _registerComponents(): void {
         this.disposeWithMe(this._componentManager.register(DOC_HEADER_FOOTER_RIBBON_CONTROL, DocHeaderFooterRibbonControl));
-        if (!this._componentManager.get(COMPONENT_DOC_HEADER_FOOTER_PANEL)) {
+        if (!this._componentManager.hasDefault(COMPONENT_DOC_HEADER_FOOTER_PANEL)) {
             this.disposeWithMe(this._componentManager.register(COMPONENT_DOC_HEADER_FOOTER_PANEL, DocHeaderFooterPanel));
         }
 

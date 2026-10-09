@@ -28,7 +28,9 @@ export { AddTimePeriodCfCommand } from './commands/commands/add-time-period-cf.c
 export { AddUniqueValuesCfCommand } from './commands/commands/add-unique-values-cf.command';
 export { OpenConditionalFormattingOperator } from './commands/operations/open-conditional-formatting-panel';
 export type { IUniverSheetsConditionalFormattingUIConfig } from './config/config';
+export { CF_PANEL_KEY } from './const';
 export { ConditionalFormattingClearController } from './controllers/cf.clear.controller';
 export { menuSchema as SheetsConditionalFormattingUIMenuSchema } from './menu/schema';
 export { UniverSheetsConditionalFormattingMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsConditionalFormattingUIPlugin } from './plugin';
+export type { IConditionFormattingPanelProps } from './views/ConditionFormattingPanel';

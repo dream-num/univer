@@ -36,6 +36,7 @@ import {
     AddWorksheetMergeMutation,
     discreteRangeToRange,
     MergeCellController,
+    MoveRangeCommand,
     MoveRangeMutation,
     RefRangeService,
     RemoveWorksheetMergeMutation,
@@ -45,6 +46,7 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
+    SheetInterceptorService,
     SheetsSelectionsService,
     WorkbookEditablePermission,
 } from '@univerjs/sheets';
@@ -949,6 +951,65 @@ describe('Test clipboard', () => {
     });
 
     describe('Test cut command in single selection', () => {
+        it('checks range movement before resource hooks and keeps a rejected cut available for retry', async () => {
+            const workbook = get(IUniverInstanceService).getUnit<Workbook>('test')!;
+            const snapshot = Tools.deepClone(workbook.getSnapshot());
+            const history = get(IUndoRedoService).getUndoRedoStatus('test');
+            const matrix = new ObjectMatrix<ICellData>();
+            matrix.setValue(0, 0, { v: 'A25' });
+            const copyId = 'rejected-cut';
+            sheetClipboardService.copyContentCache().set(copyId, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: { rows: [24], cols: [0] },
+                matrix,
+                copyType: COPY_TYPE.CUT,
+            });
+            let allowed = false;
+            const checks: unknown[] = [];
+            const validation = get(SheetInterceptorService).interceptBeforeCommand({
+                performCheck: async (command) => {
+                    checks.push(command);
+                    return allowed;
+                },
+            });
+            let hooksCalled = 0;
+            const hook = sheetClipboardService.addClipboardHook({
+                id: 'movement-preflight-resource',
+                onBeforePaste: () => {
+                    hooksCalled++;
+                    return true;
+                },
+            });
+            const target = {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: { startRow: 24, endRow: 24, startColumn: 1, endColumn: 1 },
+            };
+            expect(await sheetClipboardService.pasteByCopyId(copyId, undefined, target)).toBe(false);
+            expect(checks).toEqual([{
+                id: MoveRangeCommand.id,
+                params: {
+                    fromUnitId: 'test',
+                    fromSubUnitId: 'sheet1',
+                    fromRange: { startRow: 24, endRow: 24, startColumn: 0, endColumn: 0 },
+                    toUnitId: 'test',
+                    toSubUnitId: 'sheet1',
+                    toRange: target.range,
+                },
+            }]);
+            expect(hooksCalled).toBe(0);
+            expect(workbook.getSnapshot()).toEqual(snapshot);
+            expect(get(IUndoRedoService).getUndoRedoStatus('test')).toEqual(history);
+            expect(sheetClipboardService.copyContentCache().get(copyId)?.matrix).toBe(matrix);
+            allowed = true;
+            expect(await sheetClipboardService.pasteByCopyId(copyId, undefined, target)).toBe(true);
+            expect(getValues(24, 0, 24, 1)?.[0].map((cell) => cell?.v ?? null)).toEqual([null, 'A25']);
+            expect(hooksCalled).toBe(1);
+            validation.dispose();
+            hook.dispose();
+        });
+
         it('rejects cross-workbook cuts before running resource hooks and retains the cut for a valid retry', async () => {
             const instances = get(IUniverInstanceService);
             const source = instances.getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!;

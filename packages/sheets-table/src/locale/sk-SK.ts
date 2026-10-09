@@ -20,6 +20,7 @@ const locale: typeof enUS = {
     'sheets-table': {
         columnPrefix: 'Stĺpec',
         tablePrefix: 'Tabuľka',
+        moveTableOverlapError: 'Cieľový rozsah sa prekrýva s inou tabuľkou.',
         tableNameError: 'Názov tabuľky nesmie obsahovať medzery, nesmie začínať číslom a nesmie byť zhodný s existujúcim názvom tabuľky',
     },
 };

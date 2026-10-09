@@ -20,6 +20,7 @@ const locale: typeof enUS = {
     'sheets-table': {
         columnPrefix: 'Kolom',
         tablePrefix: 'Tabel',
+        moveTableOverlapError: 'Rentang tujuan tumpang tindih dengan tabel lain.',
         tableNameError: 'Nama tabel tidak boleh mengandung spasi, tidak boleh diawali dengan angka, dan tidak boleh sama dengan nama tabel yang sudah ada',
     },
 };

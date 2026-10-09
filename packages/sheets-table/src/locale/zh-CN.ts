@@ -20,6 +20,7 @@ const locale: typeof enUS = {
     'sheets-table': {
         columnPrefix: '列',
         tablePrefix: '表格',
+        moveTableOverlapError: '目标区域与其他表格重叠。',
         tableNameError: '表格名称不能包含空格， 不能以数字开头，不能和已有表格名称重复',
     },
 };

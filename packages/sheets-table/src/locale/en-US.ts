@@ -18,6 +18,7 @@ const locale = {
     'sheets-table': {
         columnPrefix: 'Column',
         tablePrefix: 'Table',
+        moveTableOverlapError: 'The destination overlaps another table.',
         tableNameError: 'Table name cannot contain spaces, cannot start with a number, and cannot be identical to an existing table name',
     },
 };

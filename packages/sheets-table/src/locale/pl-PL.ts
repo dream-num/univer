@@ -20,6 +20,7 @@ const locale: typeof enUS = {
     'sheets-table': {
         columnPrefix: 'Kolumna',
         tablePrefix: 'Tabela',
+        moveTableOverlapError: 'Zakres docelowy nakłada się na inną tabelę.',
         tableNameError: 'Nazwa tabeli nie może zawierać spacji, nie może zaczynać się od cyfry i nie może być identyczna z istniejącą nazwą tabeli',
     },
 };

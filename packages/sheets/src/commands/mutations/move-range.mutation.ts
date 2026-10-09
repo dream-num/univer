@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutation, IObjectMatrixPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
+import type {
+    ICellData,
+    IMutation,
+    IObjectMatrixPrimitiveType,
+    IRange,
+    Nullable,
+    Workbook,
+} from '@univerjs/core';
 import { CommandType, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 
 export interface IMoveRangeMutationParams {
@@ -42,7 +49,7 @@ export const MoveRangeMutation: IMutation<IMoveRangeMutationParams, boolean> = {
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = univerInstanceService.getUnit<Workbook>(params.unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return false;
         }

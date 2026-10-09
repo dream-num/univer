@@ -20,6 +20,7 @@ const locale: typeof enUS = {
     'sheets-table': {
         columnPrefix: 'ستون',
         tablePrefix: 'جدول',
+        moveTableOverlapError: 'محدودهٔ مقصد با جدول دیگری هم‌پوشانی دارد.',
         tableNameError: 'نام جدول نمی‌تواند شامل فاصله باشد، نمی‌تواند با عدد شروع شود و نمی‌تواند با نام جدول‌های موجود تکراری باشد',
     },
 };

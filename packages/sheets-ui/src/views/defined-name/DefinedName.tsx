@@ -76,6 +76,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
 
     const [open, setOpen] = useState(false);
     const [isInputEvent, setIsInputEvent] = useState(false);
+    const nameBoxRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const getDefinedNameMap = () => {
@@ -284,6 +285,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
 
     return (
         <div
+            ref={nameBoxRef}
             data-u-comp="defined-name"
             className={`
               univer-relative univer-box-border univer-flex univer-h-full univer-w-24 univer-border-r-gray-200
@@ -308,9 +310,15 @@ export function DefinedName({ disable }: { disable: boolean }) {
             />
 
             <Dropdown
+                align="start"
+                anchorRef={nameBoxRef}
                 overlay={(
                     <div className="univer-z-[1001]">
-                        <DefinedNameOverlay search={inputValue} isInputEvent={isInputEvent} />
+                        <DefinedNameOverlay
+                            search={inputValue}
+                            isInputEvent={isInputEvent}
+                            onClose={() => setOpen(false)}
+                        />
                     </div>
                 )}
                 disabled={disable}

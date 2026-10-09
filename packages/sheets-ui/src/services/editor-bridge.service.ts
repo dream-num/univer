@@ -198,21 +198,32 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     }
 
     refreshEditCellPosition(resetSizeOnly?: boolean) {
-        if (!this._currentEditCell || !this._currentEditCellState) return;
+        if (!this._currentEditCell || !this._currentEditCellState) {
+            return;
+        }
 
-        const { unitId, sheetId, primary, scene, engine } = this._currentEditCell;
+        const { unitId, sheetId, primary: selectedCell, scene, engine } = this._currentEditCell;
         const workbook = this._getWorkbookForEditUnit(unitId);
-        if (!workbook || workbook.getUnitId() !== unitId) return;
+        if (!workbook || workbook.getUnitId() !== unitId) {
+            return;
+        }
 
         const worksheet = workbook.getActiveSheet();
-        if (!worksheet || worksheet.getSheetId() !== sheetId) return;
+        if (!worksheet || worksheet.getSheetId() !== sheetId) {
+            return;
+        }
 
         const renderUnit = this._renderManagerService.getRenderUnitById(unitId);
-        if (!renderUnit) return;
+        if (!renderUnit) {
+            return;
+        }
 
         const skeleton = this._sheetSkeletonService.getSkeleton(unitId, sheetId);
-        if (!skeleton) return;
+        if (!skeleton) {
+            return;
+        }
 
+        const primary = worksheet.getCellInfoInMergeData(selectedCell.actualRow, selectedCell.actualColumn);
         const primaryWithCoord = attachPrimaryWithCoord(skeleton, primary);
         const actualRangeWithCoord = convertCellToRange(primaryWithCoord);
         const canvasOffset = getCanvasOffsetByEngine(engine);
@@ -221,7 +232,9 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
         const { scaleX, scaleY } = scene.getAncestorScale();
         const viewport = getViewportByCell(primary.startRow, primary.startColumn, scene, worksheet);
-        if (!viewport) return;
+        if (!viewport) {
+            return;
+        }
         const scrollXY = scene.getViewportScrollXY(viewport);
 
         startX = convertTransformToOffsetX(startX, scaleX, scrollXY);
@@ -326,21 +339,32 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     }
 
     getLatestEditCellState() {
-        if (!this._currentEditCell) return;
+        if (!this._currentEditCell) {
+            return;
+        }
 
-        const { unitId, sheetId, primary, scene, engine } = this._currentEditCell;
+        const { unitId, sheetId, primary: selectedCell, scene, engine } = this._currentEditCell;
         const workbook = this._getWorkbookForEditUnit(unitId);
-        if (!workbook || workbook.getUnitId() !== unitId) return;
+        if (!workbook || workbook.getUnitId() !== unitId) {
+            return;
+        }
 
         const worksheet = workbook.getActiveSheet();
-        if (!worksheet || worksheet.getSheetId() !== sheetId) return;
+        if (!worksheet || worksheet.getSheetId() !== sheetId) {
+            return;
+        }
 
         const renderUnit = this._renderManagerService.getRenderUnitById(unitId);
-        if (!renderUnit) return;
+        if (!renderUnit) {
+            return;
+        }
 
         const skeleton = this._sheetSkeletonService.getSkeleton(unitId, sheetId);
-        if (!skeleton) return;
+        if (!skeleton) {
+            return;
+        }
 
+        const primary = worksheet.getCellInfoInMergeData(selectedCell.actualRow, selectedCell.actualColumn);
         const { startRow, startColumn } = primary;
         const primaryWithCoord = attachPrimaryWithCoord(skeleton, primary);
         const actualRangeWithCoord = convertCellToRange(primaryWithCoord);
@@ -350,7 +374,9 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
         const { scaleX, scaleY } = scene.getAncestorScale();
         const viewport = getViewportByCell(startRow, startColumn, scene, worksheet);
-        if (!viewport) return;
+        if (!viewport) {
+            return;
+        }
         const scrollXY = scene.getViewportScrollXY(viewport);
 
         startX = convertTransformToOffsetX(startX, scaleX, scrollXY);

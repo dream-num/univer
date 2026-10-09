@@ -14,21 +14,48 @@
  * limitations under the License.
  */
 
+import type { IWorkbookData, Workbook } from '@univerjs/core';
 import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    ICommandService,
     IContextService,
     Injector,
     IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    RedoCommand,
     ThemeService,
+    UndoCommand,
+    Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IEditorService } from '@univerjs/docs-ui';
-import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
+import { DocSelectionManagerService } from '@univerjs/docs';
+import { EditorService, IEditorService } from '@univerjs/docs-ui';
+import {
+    CanvasColorService,
+    DeviceInputEventType,
+    ICanvasColorService,
+    IRenderManagerService,
+    RenderManagerService,
+    SHEET_VIEWPORT_KEY,
+    Viewport,
+} from '@univerjs/engine-render';
+import {
+    AddWorksheetMergeCommand,
+    AddWorksheetMergeMutation,
+    RemoveWorksheetMergeCommand,
+    RemoveWorksheetMergeMutation,
+    SetRangeValuesMutation,
+    SetSelectionsOperation,
+    SheetInterceptorService,
+    SheetSkeletonService,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { DISABLE_AUTO_FOCUS_KEY } from '@univerjs/ui';
 import { Subject } from 'rxjs';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { EditorBridgeService, IEditorBridgeService } from '../editor-bridge.service';
+import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 
 function createService(options?: {
     disableAutoFocus?: boolean;
@@ -320,6 +347,7 @@ describe('EditorBridgeService', () => {
         const worksheet = {
             getSheetId: () => 'sheet-1',
             getFreeze: () => null,
+            getCellInfoInMergeData: () => createEditCellParam().primary,
             getCellRaw: vi.fn(() => ({ v: '=SUM(A1:A2)' })),
             getCell: vi.fn(() => ({ isInArrayFormulaRange: true, isPercentFormat: true })),
             getCellDocumentModelWithFormula: vi.fn(() => ({ documentModel })),
@@ -375,6 +403,7 @@ describe('EditorBridgeService', () => {
         const worksheet = {
             getSheetId: () => 'sheet-1',
             getFreeze: () => null,
+            getCellInfoInMergeData: () => createEditCellParam().primary,
             getCellRaw: vi.fn(() => ({ v: 'Embedded' })),
             getCell: vi.fn(() => ({ v: 'Embedded' })),
             getCellDocumentModelWithFormula: vi.fn(() => ({ documentModel })),
@@ -419,5 +448,124 @@ describe('EditorBridgeService', () => {
 
         service.refreshEditCellPosition();
         expect(service.getEditCellLayout()?.position.startX).toBeGreaterThan(0);
+    });
+});
+
+describe('EditorBridgeService merged-cell layout with real providers', () => {
+    let univer: Univer;
+
+    beforeEach(() => {
+        // Happy DOM has no canvas backend; workbook, editor, and skeleton services remain real.
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
+            return { canvas: this, setTransform: vi.fn(), clearRect: vi.fn() } as unknown as CanvasRenderingContext2D;
+        });
+        univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        injector.add([SheetSkeletonService]);
+        injector.add([SheetInterceptorService]);
+        injector.add([SheetsSelectionsService]);
+        injector.add([DocSelectionManagerService]);
+        injector.add([IEditorService, { useClass: EditorService }]);
+        injector.add([IEditorBridgeService, { useClass: EditorBridgeService }]);
+        injector.get(LocaleService).setLocale(LocaleType.EN_US);
+        injector.get(SheetSkeletonService);
+        injector.get(SheetInterceptorService);
+        injector.get(IRenderManagerService).registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService]);
+        const commands = injector.get(ICommandService);
+        [
+            AddWorksheetMergeCommand,
+            AddWorksheetMergeMutation,
+            RemoveWorksheetMergeCommand,
+            RemoveWorksheetMergeMutation,
+            SetRangeValuesMutation,
+            SetSelectionsOperation,
+        ].forEach((command) => commands.registerCommand(command));
+    });
+
+    afterEach(() => {
+        univer.dispose();
+        vi.restoreAllMocks();
+    });
+
+    it.each(['position', 'size', 'state'] as const)('refreshes %s after merge changes without reselecting the cell', async (refresh) => {
+        const injector = univer.__getInjector();
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'merge-editor',
+            name: 'Merge editor',
+            sheetOrder: ['sheet1'],
+            sheets: {
+                sheet1: {
+                    id: 'sheet1',
+                    rowCount: 20,
+                    columnCount: 10,
+                    defaultColumnWidth: 100,
+                    defaultRowHeight: 24,
+                    cellData: {},
+                },
+            },
+        });
+        const render = injector.get(IRenderManagerService).createRender(workbook.getUnitId());
+        injector.createInstance(Viewport, SHEET_VIEWPORT_KEY.VIEW_MAIN, render.scene, {
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+        });
+        render.with(SheetSkeletonManagerService).setCurrent({ sheetId: 'sheet1' });
+        const range = { startRow: 11, startColumn: 5, endRow: 13, endColumn: 6 };
+        const primary = workbook.getActiveSheet()!.getCellInfoInMergeData(11, 5);
+        injector.get(SheetsSelectionsService).setSelections([{ range, primary, style: null }]);
+        const bridge = injector.get(IEditorBridgeService);
+        bridge.setEditCell({
+            unitId: workbook.getUnitId(),
+            sheetId: 'sheet1',
+            scene: render.scene,
+            engine: render.engine,
+            primary,
+        });
+        injector.get(IUniverInstanceService).focusUnit(workbook.getUnitId());
+        const commands = injector.get(ICommandService);
+        const expectSize = (width: number, height: number) => {
+            if (refresh === 'state') {
+                bridge.refreshEditCellState();
+            } else {
+                bridge.refreshEditCellPosition(refresh === 'size');
+            }
+            const position = bridge.getEditCellLayout()!.position;
+            expect({ width: position.endX - position.startX, height: position.endY - position.startY })
+                .toEqual({ width, height });
+        };
+
+        await commands.executeCommand(AddWorksheetMergeCommand.id, {
+            unitId: workbook.getUnitId(),
+            subUnitId: 'sheet1',
+            selections: [range],
+        });
+        expectSize(200, 72);
+
+        await commands.executeCommand(UndoCommand.id);
+        expectSize(100, 24);
+        await commands.executeCommand(RedoCommand.id);
+        expectSize(200, 72);
+
+        bridge.setEditCell({
+            unitId: workbook.getUnitId(),
+            sheetId: 'sheet1',
+            scene: render.scene,
+            engine: render.engine,
+            primary: workbook.getActiveSheet()!.getCellInfoInMergeData(11, 5),
+        });
+        await commands.executeCommand(RemoveWorksheetMergeCommand.id, {
+            unitId: workbook.getUnitId(),
+            subUnitId: 'sheet1',
+            ranges: [range],
+        });
+        expectSize(100, 24);
+        await commands.executeCommand(UndoCommand.id);
+        expectSize(200, 72);
+        await commands.executeCommand(RedoCommand.id);
+        expectSize(100, 24);
     });
 });

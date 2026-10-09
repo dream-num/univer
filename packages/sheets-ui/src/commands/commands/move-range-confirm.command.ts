@@ -25,13 +25,26 @@ import {
     LocaleService,
     Rectangle,
 } from '@univerjs/core';
-import { findFirstNonEmptyCell, getSheetCommandTarget, MoveRangeCommand } from '@univerjs/sheets';
+import {
+    findFirstNonEmptyCell,
+    getSheetCommandTarget,
+    MoveRangeCommand,
+    SheetInterceptorService,
+} from '@univerjs/sheets';
 
 export const MoveRangeConfirmCommand: ICommand<IMoveRangeCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.move-range-confirm',
     handler: async (accessor, params) => {
         if (!params) {
+            return false;
+        }
+
+        const canMove = await accessor.get(SheetInterceptorService).beforeCommandExecute({
+            id: MoveRangeCommand.id,
+            params,
+        });
+        if (!canMove) {
             return false;
         }
 

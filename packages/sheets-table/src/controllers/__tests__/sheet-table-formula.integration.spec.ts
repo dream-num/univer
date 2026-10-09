@@ -89,20 +89,49 @@ import {
     ValueNodeFactory,
 } from '@univerjs/engine-formula';
 import { Engine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { InsertColMutation, InsertRowMutation, MoveRangeCommand, MoveRangeMutation, RangeProtectionRuleModel, RefRangeService, RemoveColByRangeCommand, RemoveColCommand, RemoveColMutation, RemoveRowByRangeCommand, RemoveRowCommand, RemoveRowMutation, SetRangeValuesCommand, SetRangeValuesMutation, SheetInterceptorService, SheetSkeletonService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import {
+    InsertColMutation,
+    InsertRowMutation,
+    MoveRangeCommand,
+    MoveRangeMutation,
+    RangeProtectionRuleModel,
+    RefRangeService,
+    RemoveColByRangeCommand,
+    RemoveColCommand,
+    RemoveColMutation,
+    RemoveRowByRangeCommand,
+    RemoveRowCommand,
+    RemoveRowMutation,
+    SetRangeValuesCommand,
+    SetRangeValuesMutation,
+    SetSelectionsOperation,
+    SheetInterceptorService,
+    SheetSkeletonService,
+    SheetsSelectionsService,
+    WorkbookPermissionService,
+    WorksheetPermissionService,
+    WorksheetProtectionPointModel,
+    WorksheetProtectionRuleModel,
+} from '@univerjs/sheets';
 import { UpdateFormulaController } from '@univerjs/sheets-formula';
 import enUS from '@univerjs/sheets/locale/en-US';
 import zhCN from '@univerjs/sheets/locale/zh-CN';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DeleteSheetTableCommand } from '../../commands/commands/delete-sheet-table.command';
 import { SetSheetTableCommand } from '../../commands/commands/set-sheet-table.command';
-import { SheetTableInsertColumnAtCommand, SheetTableRemoveColumnAtCommand } from '../../commands/commands/sheet-table-row-col.command';
+import {
+    SheetTableInsertColumnAtCommand,
+    SheetTableRemoveColumnAtCommand,
+} from '../../commands/commands/sheet-table-row-col.command';
 import { AddSheetTableMutation } from '../../commands/mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from '../../commands/mutations/delete-sheet-table.mutation';
+import { MoveSheetTableMutation } from '../../commands/mutations/move-sheet-table.mutation';
 import { SetSheetTableMutation } from '../../commands/mutations/set-sheet-table.mutation';
+import { getCalculatedColumnFillMutation } from '../../commands/utils/calculated-column';
 import { TableManager } from '../../models/table-manager';
 import { SheetTableService } from '../../services/table.service';
 import { SheetTableFormulaController } from '../sheet-table-formula.controller';
+import { SheetTableMoveController } from '../sheet-table-move.controller';
 import { SheetTableRefRangeController } from '../sheet-table-ref-range.controller';
 
 interface ITestBed {
@@ -278,6 +307,7 @@ function createControllerTestBed() {
         [TableManager],
         [SheetTableService],
         [SheetTableFormulaController],
+        [SheetTableMoveController],
         [SheetTableRefRangeController],
         [UpdateFormulaController],
     ];
@@ -341,6 +371,8 @@ describe('Sheet table formula integration', () => {
         commandService.registerCommand(RemoveColCommand);
         commandService.registerCommand(MoveRangeCommand);
         commandService.registerCommand(MoveRangeMutation);
+        commandService.registerCommand(MoveSheetTableMutation);
+        commandService.registerCommand(SetSelectionsOperation);
         commandService.registerCommand(RemoveRowByRangeCommand);
         commandService.registerCommand(RemoveColByRangeCommand);
         commandService.registerCommand(RemoveRowMutation);
@@ -362,6 +394,7 @@ describe('Sheet table formula integration', () => {
         commandService.registerCommand(SetArrayFormulaDataMutation);
 
         testBed.injector.get(SheetTableFormulaController);
+        testBed.injector.get(SheetTableMoveController);
         testBed.injector.get(SheetTableRefRangeController);
         testBed.injector.get(UpdateFormulaController);
 
@@ -426,6 +459,54 @@ describe('Sheet table formula integration', () => {
     afterEach(() => {
         vi.restoreAllMocks();
         testBed?.univer.dispose();
+    });
+
+    it.each(['sheet1', 'sheet2'])('preserves structured references and calculated column anchors when moving to %s', async (sheetId) => {
+        const manager = testBed.injector.get(TableManager);
+        const table = manager.getTableById('test', 'orders-table')!;
+        expect(await commandService.executeCommand(SetSheetTableCommand.id, {
+            unitId: 'test',
+            tableId: table.getId(),
+            calculatedColumn: { columnId: 'tax-column', formula: '=SUM(B2,B2)' },
+        })).toBe(true);
+        const before = table.toJSON();
+        const range = { startRow: 10, endRow: 13, startColumn: 5, endColumn: 7 };
+        expect(await commandService.executeCommand(MoveRangeCommand.id, {
+            fromUnitId: 'test',
+            fromSubUnitId: 'sheet1',
+            fromRange: table.getRange(),
+            toUnitId: 'test',
+            toSubUnitId: sheetId,
+            toRange: range,
+        })).toBe(true);
+        expect(table.getSubunitId()).toBe(sheetId);
+        expect(table.getRange()).toEqual(range);
+        expect(table.getTableInfo().columns.map((column) => column.id)).toEqual(before.columns.map((column) => column.id));
+        expect(getCellFormula(sheetId, 11, 7)).toBe('=SUM(G12,G12)');
+        expect(table.getColumn('tax-column')!.formula).toBe('=SUM(G12,G12)');
+        expect(calculate('=SUM(Orders[amount])', 5, 4, 'sheet1')).toBe(60);
+        expect(calculateCellFormula('test', sheetId, 11, 7)).toBe(20);
+        expect(calculateCellFormula('test', sheetId, 12, 7)).toBe(40);
+        expect(calculateCellFormula('test', sheetId, 13, 7)).toBe(60);
+        expect(getCellFormula('sheet1', 5, 4)).toBe('=SUM(Orders[amount])');
+        const moved = table.toJSON();
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(table.toJSON()).toEqual(before);
+        expect(table.getSubunitId()).toBe('sheet1');
+        expect(calculateCellFormula('test', 'sheet1', 1, 2)).toBe(20);
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(table.toJSON()).toEqual(moved);
+        expect(calculateCellFormula('test', sheetId, 11, 7)).toBe(20);
+        const fill = getCalculatedColumnFillMutation(table, 'test', sheetId, 14, 14, () => testBed.injector.get(LexerTreeBuilder));
+        expect(fill).toBeDefined();
+        commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: sheetId,
+            cellValue: { 14: { 6: { v: 40 } } },
+        });
+        commandService.syncExecuteCommand(fill!.id, fill!.params);
+        expect(getCellFormula(sheetId, 14, 7)).toBe('=SUM(G15,G15)');
+        expect(calculateCellFormula('test', sheetId, 14, 7)).toBe(80);
     });
 
     it('should sync table formulas when a table is renamed, undone, and redone', async () => {

@@ -55,7 +55,7 @@ export class SheetsTableThemeController extends Disposable {
 
         this.disposeWithMe(
             this._tableManager.tableRangeChanged$.subscribe((event) => {
-                const { range, oldRange, tableId, unitId, subUnitId } = event;
+                const { range, oldRange, tableId, unitId, subUnitId, oldSubUnitId = subUnitId } = event;
                 const table = this._tableManager.getTable(unitId, tableId)!;
                 let tableStyleId = table.getTableStyleId();
                 if (!tableStyleId) {
@@ -64,7 +64,7 @@ export class SheetsTableThemeController extends Disposable {
                 }
                 this._sheetRangeThemeService.removeRangeThemeRule(tableStyleId, {
                     unitId,
-                    subUnitId,
+                    subUnitId: oldSubUnitId,
                     range: { ...oldRange },
                 });
                 this._sheetRangeThemeService.registerRangeThemeStyle(tableStyleId, {

@@ -15,17 +15,20 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import type { Subscription } from 'rxjs';
 import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { ISheetRowFilteredService } from '@univerjs/engine-formula';
-import { getSheetCommandTarget, INTERCEPTOR_POINT, SheetInterceptorService, ZebraCrossingCacheController } from '@univerjs/sheets';
+import {
+    getSheetCommandTarget,
+    INTERCEPTOR_POINT,
+    SheetInterceptorService,
+    ZebraCrossingCacheController,
+} from '@univerjs/sheets';
 import { filter, switchMap } from 'rxjs';
 import { TableManager } from '../models/table-manager';
 
 export class TableFilterController extends Disposable {
     private readonly _tableFilteredOutRows = new Map<string, Set<number>>();
 
-    private _subscription: Subscription | null = null;
     constructor(
         @Inject(TableManager) private _tableManager: TableManager,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
@@ -59,7 +62,7 @@ export class TableFilterController extends Disposable {
     }
 
     private _initFilteredOutRows() {
-        this._tableManager.tableInitStatus$.pipe(
+        this.disposeWithMe(this._tableManager.tableInitStatus$.pipe(
             filter((initialized) => initialized),
             switchMap(() => {
                 return this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
@@ -74,13 +77,13 @@ export class TableFilterController extends Disposable {
             }
             const { unitId, subUnitId } = target;
             this._refreshTableFilteredOutRows(unitId, subUnitId);
-        });
+        }));
     }
 
     registerFilterChangeEvent() {
         this.disposeWithMe(
             this._tableManager.tableFilterChanged$.subscribe((event) => {
-                const { unitId, subUnitId, tableId } = event;
+                const { unitId, subUnitId, tableId, oldSubUnitId } = event;
                 const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
                 const worksheet = workbook?.getSheetBySheetId(subUnitId);
                 const table = this._tableManager.getTable(unitId, tableId);
@@ -94,6 +97,10 @@ export class TableFilterController extends Disposable {
                 this._refreshTableFilteredOutRows(unitId, subUnitId);
 
                 this._zebraCrossingCacheController.updateZebraCrossingCache(unitId, subUnitId);
+                if (oldSubUnitId && oldSubUnitId !== subUnitId) {
+                    this._refreshTableFilteredOutRows(unitId, oldSubUnitId);
+                    this._zebraCrossingCacheController.updateZebraCrossingCache(unitId, oldSubUnitId);
+                }
             })
         );
     }
@@ -128,6 +135,6 @@ export class TableFilterController extends Disposable {
 
     override dispose(): void {
         super.dispose();
-        this._subscription?.unsubscribe();
+        this._tableFilteredOutRows.clear();
     }
 }

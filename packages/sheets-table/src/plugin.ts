@@ -15,7 +15,18 @@
  */
 
 import type { IUniverSheetsTableConfig } from './config/config';
-import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import {
+    DependentOn,
+    ICommandService,
+    IConfigService,
+    Inject,
+    Injector,
+    merge,
+    Plugin,
+    registerDependencies,
+    touchDependencies,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import pkg from '../package.json';
 import { AddSheetTableCommand } from './commands/commands/add-sheet-table.command';
@@ -25,14 +36,24 @@ import { RemoveTableThemeCommand } from './commands/commands/remove-table-theme.
 import { SetSheetTableCommand } from './commands/commands/set-sheet-table.command';
 import { SetSheetTableFilterCommand } from './commands/commands/set-table-filter.command';
 import { SetSheetTableSortStateCommand } from './commands/commands/set-table-sort-state.command';
-import { SheetTableInsertColCommand, SheetTableInsertColumnAtCommand, SheetTableInsertRowAtCommand, SheetTableInsertRowCommand, SheetTableRemoveColCommand, SheetTableRemoveColumnAtCommand, SheetTableRemoveRowCommand } from './commands/commands/sheet-table-row-col.command';
+import {
+    SheetTableInsertColCommand,
+    SheetTableInsertColumnAtCommand,
+    SheetTableInsertRowAtCommand,
+    SheetTableInsertRowCommand,
+    SheetTableRemoveColCommand,
+    SheetTableRemoveColumnAtCommand,
+    SheetTableRemoveRowCommand,
+} from './commands/commands/sheet-table-row-col.command';
 import { AddSheetTableMutation } from './commands/mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from './commands/mutations/delete-sheet-table.mutation';
+import { MoveSheetTableMutation } from './commands/mutations/move-sheet-table.mutation';
 import { SetSheetTableMutation } from './commands/mutations/set-sheet-table.mutation';
 import { SetSheetTableFilterMutation } from './commands/mutations/set-table-filter.mutation';
 import { defaultPluginConfig, SHEETS_TABLE_PLUGIN_CONFIG_KEY } from './config/config';
 import { PLUGIN_NAME } from './const';
 import { SheetTableFormulaController } from './controllers/sheet-table-formula.controller';
+import { SheetTableMoveController } from './controllers/sheet-table-move.controller';
 import { SheetTableRangeController } from './controllers/sheet-table-range.controller';
 import { SheetTableRefRangeController } from './controllers/sheet-table-ref-range.controller';
 import { SheetsTableThemeController } from './controllers/sheet-table-theme.controller';
@@ -75,6 +96,7 @@ export class UniverSheetsTablePlugin extends Plugin {
             [TableFilterController],
             [SheetTableRangeController],
             [SheetTableRefRangeController],
+            [SheetTableMoveController],
             [SheetTableFormulaController],
         ]);
     }
@@ -84,6 +106,7 @@ export class UniverSheetsTablePlugin extends Plugin {
             [SheetTableFormulaController],
             [SheetTableRangeController],
             [SheetTableRefRangeController],
+            [SheetTableMoveController],
             [SheetsTableThemeController],
             [SheetsTableController],
             [SheetTableService],
@@ -101,6 +124,7 @@ export class UniverSheetsTablePlugin extends Plugin {
             AddSheetTableMutation,
             DeleteSheetTableCommand,
             DeleteSheetTableMutation,
+            MoveSheetTableMutation,
             SetSheetTableFilterMutation,
             SetSheetTableFilterCommand,
             SetSheetTableSortStateCommand,

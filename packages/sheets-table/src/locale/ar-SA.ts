@@ -20,6 +20,7 @@ const locale: typeof enUS = {
     'sheets-table': {
         columnPrefix: 'عمود',
         tablePrefix: 'جدول',
+        moveTableOverlapError: 'يتداخل نطاق الوجهة مع جدول آخر.',
         tableNameError: 'لا يمكن أن يحتوي اسم الجدول على مسافات، ولا يمكن أن يبدأ برقم، ولا يمكن أن يكون مطابقًا لاسم جدول موجود',
     },
 };

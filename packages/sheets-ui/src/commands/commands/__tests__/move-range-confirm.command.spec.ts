@@ -18,6 +18,7 @@ import type { Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
 import {
     ICommandService,
     IConfirmService,
+    IUndoRedoService,
     LocaleService,
     LocaleType,
     TestConfirmService,
@@ -26,6 +27,7 @@ import {
     MoveRangeCommand,
     MoveRangeMutation,
     SetSelectionsOperation,
+    SheetInterceptorService,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MoveRangeConfirmCommand } from '../move-range-confirm.command';
@@ -50,7 +52,9 @@ describe('MoveRangeConfirmCommand', () => {
         workbook = testBed.sheet;
         commandService = get(ICommandService);
         confirmService = get(IConfirmService) as TestConfirmService<unknown>;
-        get(LocaleService).setLocale(LocaleType.EN_US);
+        const localeService = get(LocaleService);
+        localeService.setLocale(LocaleType.EN_US);
+        localeService.setDirection('ltr');
 
         [MoveRangeCommand, MoveRangeConfirmCommand, MoveRangeMutation, SetSelectionsOperation].forEach((command) => {
             commandService.registerCommand(command);
@@ -59,6 +63,44 @@ describe('MoveRangeConfirmCommand', () => {
 
     afterEach(() => {
         univer.dispose();
+    });
+
+    it('rejects an invalid move before asking to overwrite target content', async () => {
+        const confirm = vi.spyOn(confirmService, 'confirm').mockResolvedValue(true);
+        const history = get(IUndoRedoService).getUndoRedoStatus('test');
+        get(SheetInterceptorService).interceptBeforeCommand({
+            performCheck: async (command) => command.id !== MoveRangeCommand.id,
+        });
+
+        expect(await commandService.executeCommand(MoveRangeConfirmCommand.id, {
+            fromRange: FROM_RANGE,
+            toRange: TO_RANGE,
+        })).toBe(false);
+        expect(confirm).not.toHaveBeenCalled();
+        expect(getCellValue(0, 0)).toBe('source');
+        expect(getCellValue(0, 1)).toBe('target');
+        expect(get(IUndoRedoService).getUndoRedoStatus('test')).toEqual(history);
+    });
+
+    it('revalidates the move if the target becomes unavailable while confirming', async () => {
+        let canMove = true;
+        get(SheetInterceptorService).interceptBeforeCommand({
+            performCheck: async (command) => command.id !== MoveRangeCommand.id || canMove,
+        });
+        const confirm = vi.spyOn(confirmService, 'confirm').mockImplementation(async () => {
+            canMove = false;
+            return true;
+        });
+        const history = get(IUndoRedoService).getUndoRedoStatus('test');
+
+        expect(await commandService.executeCommand(MoveRangeConfirmCommand.id, {
+            fromRange: FROM_RANGE,
+            toRange: TO_RANGE,
+        })).toBe(false);
+        expect(confirm).toHaveBeenCalledTimes(1);
+        expect(getCellValue(0, 0)).toBe('source');
+        expect(getCellValue(0, 1)).toBe('target');
+        expect(get(IUndoRedoService).getUndoRedoStatus('test')).toEqual(history);
     });
 
     it('does not overwrite target content when confirmation is canceled', async () => {

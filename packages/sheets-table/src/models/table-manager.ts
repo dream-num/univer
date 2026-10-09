@@ -364,6 +364,26 @@ export class TableManager extends Disposable {
         });
     }
 
+    moveTable(unitId: string, tableId: string, subUnitId: string, range: ITableRange) {
+        const table = this.getTableById(unitId, tableId);
+        if (!table) {
+            return;
+        }
+        const oldRange = table.getRange();
+        const oldSubUnitId = table.getSubunitId();
+        table.setSubunitId(subUnitId);
+        table.setRange({ ...range });
+        this._tableRangeChanged$.next({
+            unitId,
+            subUnitId,
+            oldSubUnitId,
+            tableId,
+            range: { ...range },
+            oldRange,
+        });
+        this._tableFilterChanged$.next({ unitId, subUnitId, oldSubUnitId, tableId });
+    }
+
     setTableByConfig(unitId: string, tableId: string, config: ITableSetConfig) {
         const unitMap = this._tableMap.get(unitId);
         const table = unitMap?.get(tableId);

@@ -76,12 +76,15 @@ import {
 } from '@univerjs/core';
 import { IRenderManagerService, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
 import {
+    discreteRangeToRange,
     getPrimaryForRange,
+    MoveRangeCommand,
     rangeToDiscreteRange,
     SetSelectionsOperation,
     SetWorksheetActiveOperation,
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowAutoHeightMutationFactory,
+    SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import {
@@ -1023,6 +1026,22 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             const start = pasteTarget.pastedRange.rows[0];
             const end = range.rows[range.rows.length - 1] - range.rows[0] + start;
             pasteTarget.pastedRange.rows = Array.from(new Array(end + 1).keys()).slice(start);
+            if (!skipCellCopy) {
+                const canMove = await this._injector.get(SheetInterceptorService).beforeCommandExecute({
+                    id: MoveRangeCommand.id,
+                    params: {
+                        fromUnitId: copyUnitId,
+                        fromSubUnitId: copySubUnitId,
+                        fromRange: discreteRangeToRange(range),
+                        toUnitId: target.unitId,
+                        toSubUnitId: target.subUnitId,
+                        toRange: discreteRangeToRange(pasteTarget.pastedRange),
+                    },
+                });
+                if (!canMove) {
+                    return false;
+                }
+            }
         }
 
         const pasteRes = this._pasteUSM(

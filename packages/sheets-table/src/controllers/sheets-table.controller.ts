@@ -17,7 +17,17 @@
 import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import type { ICopySheetCommandParams, IRemoveSheetCommandParams } from '@univerjs/sheets';
 import type { ITableResource } from '../types/type';
-import { Disposable, generateRandomId, Inject, InterceptorEffectEnum, IResourceManagerService, IUniverInstanceService, Rectangle, RTree, UniverInstanceType } from '@univerjs/core';
+import {
+    Disposable,
+    generateRandomId,
+    Inject,
+    InterceptorEffectEnum,
+    IResourceManagerService,
+    IUniverInstanceService,
+    Rectangle,
+    RTree,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { CopySheetCommand, INTERCEPTOR_POINT, RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { AddSheetTableMutation } from '../commands/mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from '../commands/mutations/delete-sheet-table.mutation';
@@ -78,11 +88,11 @@ export class SheetsTableController extends Disposable {
 
         this.disposeWithMe(
             this._tableManager.tableRangeChanged$.subscribe((event) => {
-                const { range, tableId, unitId, subUnitId, oldRange } = event;
+                const { range, tableId, unitId, subUnitId, oldRange, oldSubUnitId = subUnitId } = event;
                 const rTree = this._ensureTableRangeRTree(unitId);
                 rTree.remove({
                     unitId,
-                    sheetId: subUnitId,
+                    sheetId: oldSubUnitId,
                     id: tableId,
                     range: { ...oldRange },
                 });

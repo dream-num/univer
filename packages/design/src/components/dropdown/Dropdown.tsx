@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { ComponentProps, ReactNode } from 'react';
+import type { ComponentProps, ReactNode, RefObject } from 'react';
 import { useState } from 'react';
-import { PopoverContent, PopoverPrimitive, PopoverTrigger } from './PopoverPrimitive';
+import { PopoverAnchor, PopoverContent, PopoverPrimitive, PopoverTrigger } from './PopoverPrimitive';
 
 export interface IDropdownProps extends ComponentProps<typeof PopoverContent> {
     children: ReactNode;
     overlay: ReactNode;
+    anchorRef?: RefObject<HTMLElement | null>;
     disabled?: boolean;
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
@@ -30,6 +31,7 @@ export function Dropdown(props: IDropdownProps) {
     const {
         children,
         overlay,
+        anchorRef,
         disabled,
         open: controlledOpen,
         onOpenChange: controlledOnOpenChange,
@@ -56,6 +58,7 @@ export function Dropdown(props: IDropdownProps) {
 
     return (
         <PopoverPrimitive open={open} onOpenChange={handleChangeOpen}>
+            {anchorRef && <PopoverAnchor virtualRef={anchorRef} />}
             <PopoverTrigger asChild>
                 {children}
             </PopoverTrigger>

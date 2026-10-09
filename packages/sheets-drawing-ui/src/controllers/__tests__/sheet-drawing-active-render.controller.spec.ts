@@ -30,7 +30,6 @@ import {
 } from '@univerjs/sheets-drawing';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
 import { SheetDrawingActiveRenderController } from '../sheet-drawing-active-render.controller';
 
@@ -38,13 +37,16 @@ function createTestBed() {
     const bed = createSheetsDrawingUiTestBed();
     const activated$ = new BehaviorSubject(false);
     const context = { unit: bed.workbook, unitId: bed.unitId, activated$ } as unknown as IRenderContext<Workbook>;
-    bed.injector.add([SheetDrawingActiveRenderController, {
-        useFactory: () => bed.injector.createInstance(SheetDrawingActiveRenderController, context),
-    }]);
+    const createController = () => bed.injector.createInstance(SheetDrawingActiveRenderController, context);
+    bed.injector.add([SheetDrawingActiveRenderController, { useFactory: createController }]);
     return { ...bed, activated$ };
 }
 
-async function insertDrawing(bed: ReturnType<typeof createTestBed>, anchorType: SheetDrawingAnchorType | undefined) {
+async function insertDrawing(
+    bed: ReturnType<typeof createTestBed>,
+    anchorType: SheetDrawingAnchorType | undefined,
+    position?: { left: number; top: number }
+) {
     const sheetTransform = {
         from: { row: 3, column: 3, rowOffset: 0, columnOffset: 0 },
         to: { row: 6, column: 6, rowOffset: 0, columnOffset: 0 },
@@ -61,7 +63,7 @@ async function insertDrawing(bed: ReturnType<typeof createTestBed>, anchorType: 
         anchorType,
         sheetTransform,
         axisAlignSheetTransform: sheetTransform,
-        transform: { left, top, width, height },
+        transform: { left, top, width, height, ...position },
     };
     expect(await bed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
         unitId: bed.unitId,
@@ -119,15 +121,30 @@ describe('SheetDrawingActiveRenderController', () => {
         }
     });
 
-    it('preserves unanchored geometry during activation', async () => {
+    it.each([SheetDrawingAnchorType.None, undefined])('activates absolute or legacy cell-anchored geometry (%s)', async (anchorType) => {
         const bed = createTestBed();
         try {
-            const drawing = await insertDrawing(bed, SheetDrawingAnchorType.None);
+            const drawing = await insertDrawing(bed, anchorType, { left: 1000, top: 2000 });
             bed.get(SheetDrawingActiveRenderController);
             bed.activated$.next(true);
             vi.runOnlyPendingTimers();
-            expect(bed.get(IDrawingManagerService).getDrawingByParam(drawing)).toEqual(drawing);
-            expect(bed.get(ISheetDrawingService).getDrawingByParam(drawing)).toEqual(drawing);
+            const current = bed.get(ISheetDrawingService).getDrawingByParam(drawing)!;
+            expect(bed.get(IDrawingManagerService).getDrawingByParam(drawing)).toEqual(current);
+            if (anchorType === SheetDrawingAnchorType.None) {
+                expect(current).toEqual(drawing);
+            } else {
+                const skeleton = bed.get(SheetSkeletonService).getSkeletonParam(bed.unitId, bed.subUnitId);
+                const position = drawingPositionToTransform(drawing.sheetTransform, skeleton)!;
+                expect(current.transform).toMatchObject({
+                    left: position.left,
+                    top: position.top,
+                    width: drawing.transform!.width,
+                    height: drawing.transform!.height,
+                });
+                expect(current.transform?.left).not.toBe(1000);
+                expect(current.transform?.top).not.toBe(2000);
+                expect(getSheetDrawingPlacement(current).kind).toBe(SheetDrawingAnchorType.Position);
+            }
         } finally {
             bed.univer.dispose();
             bed.activated$.complete();

@@ -21,7 +21,7 @@ import type { IBusinessComponentProps } from './components/interface';
 import { LocaleService } from '@univerjs/core';
 import { Button, clsx, scrollbarClassName, Select } from '@univerjs/design';
 import { getCurrencyType } from '@univerjs/sheets-numfmt';
-import { useDependency } from '@univerjs/ui';
+import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useRef, useState } from 'react';
 import { UserHabitCurrencyContext } from '../controllers/user-habit.controller';
 import { AccountingPanel, isAccountingPanel } from './components/Accounting';
@@ -33,7 +33,12 @@ import { isThousandthPercentilePanel, ThousandthPercentilePanel } from './compon
 import { useCurrencyOptions } from './hooks/use-currency-options';
 import { useNextTick } from './hooks/use-next-tick';
 
-const typeOptions: Array<{ label: LocaleKey; component: ComponentType<IBusinessComponentProps> }> = [
+export interface ISheetNumfmtPanelProps {
+    value: { defaultValue: number; defaultPattern: string; row: number; col: number };
+    onChange: (config: { type: 'change' | 'cancel' | 'confirm'; value: string }) => void;
+}
+
+const TYPE_OPTIONS: Array<{ label: LocaleKey; component: ComponentType<IBusinessComponentProps> }> = [
     { label: 'sheets-numfmt-ui.general', component: GeneralPanel },
     { label: 'sheets-numfmt-ui.accounting', component: AccountingPanel },
     { label: 'sheets-numfmt-ui.currency', component: CurrencyPanel },
@@ -41,11 +46,6 @@ const typeOptions: Array<{ label: LocaleKey; component: ComponentType<IBusinessC
     { label: 'sheets-numfmt-ui.thousandthPercentile', component: ThousandthPercentilePanel },
     { label: 'sheets-numfmt-ui.customFormat', component: CustomFormat },
 ];
-
-export interface ISheetNumfmtPanelProps {
-    value: { defaultValue: number; defaultPattern: string; row: number; col: number };
-    onChange: (config: { type: 'change' | 'cancel' | 'confirm'; value: string }) => void;
-}
 
 export function SheetNumfmtPanel(props: ISheetNumfmtPanelProps) {
     const { row, col, defaultPattern } = props.value;
@@ -56,6 +56,7 @@ function SheetNumfmtPanelContent(props: ISheetNumfmtPanelProps) {
     const { onChange } = props;
     const { defaultValue, defaultPattern, row, col } = props.value;
     const localeService = useDependency(LocaleService);
+    useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
     const currentPatternRef = useRef<() => string | null>(() => '');
     const nextTick = useNextTick();
 
@@ -63,17 +64,17 @@ function SheetNumfmtPanelContent(props: ISheetNumfmtPanelProps) {
     const [key, setKey] = useState(() => `${row}_${col}_${defaultPattern}`);
     const { mark, userHabitCurrency } = useCurrencyOptions(() => setKey(`${row}_${col}_${defaultPattern}_userCurrency`));
 
-    const BusinessComponent = typeOptions.find((item) => item.label === type)?.component;
+    const BusinessComponent = TYPE_OPTIONS.find((item) => item.label === type)?.component;
 
     function findDefaultType() {
         const list = [isGeneralPanel, isAccountingPanel, isCurrencyPanel, isDatePanel, isThousandthPercentilePanel];
         return (
-            list.reduce((pre, curFn, index) => pre || (curFn(defaultPattern) ? typeOptions[index].label : ''), '') ||
+            list.reduce((pre, curFn, index) => pre || (curFn(defaultPattern) ? TYPE_OPTIONS[index].label : ''), '') ||
             'sheets-numfmt-ui.customFormat'
         );
     }
 
-    const selectOptions: ISelectProps['options'] = typeOptions.map((option) => ({
+    const selectOptions: ISelectProps['options'] = TYPE_OPTIONS.map((option) => ({
         label: localeService.t<LocaleKey>(option.label),
         value: option.label,
     }));

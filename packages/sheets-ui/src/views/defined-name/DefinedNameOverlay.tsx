@@ -27,7 +27,13 @@ import { map, startWith } from 'rxjs';
 import { SidebarDefinedNameOperation } from '../../commands/operations/sidebar-defined-name.operation';
 import { DEFINED_NAME_CONTAINER } from './component-name';
 
-export function DefinedNameOverlay({ search, isInputEvent }: { search: string; isInputEvent: boolean }) {
+interface IDefinedNameOverlayProps {
+    search: string;
+    isInputEvent: boolean;
+    onClose: () => void;
+}
+
+export function DefinedNameOverlay({ search, isInputEvent, onClose }: IDefinedNameOverlayProps) {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const definedNamesService = useDependency(IDefinedNamesService);
@@ -89,8 +95,9 @@ export function DefinedNameOverlay({ search, isInputEvent }: { search: string; i
         overscan: 6,
     });
 
-    const openSlider = () => {
-        commandService.executeCommand(SidebarDefinedNameOperation.id, { value: 'open' });
+    const openSlider = async () => {
+        onClose();
+        await commandService.executeCommand(SidebarDefinedNameOperation.id, { value: 'open' });
     };
 
     const focusDefinedName = async (definedName: IDefinedNamesServiceParam) => {
@@ -135,7 +142,10 @@ export function DefinedNameOverlay({ search, isInputEvent }: { search: string; i
                                   hover:univer-bg-gray-100
                                   dark:hover:!univer-bg-gray-600
                                 `}
-                                onClick={() => { focusDefinedName(definedName); }}
+                                onClick={async () => {
+                                    onClose();
+                                    await focusDefinedName(definedName);
+                                }}
                             >
                                 <div
                                     data-u-comp="defined-name-overlay-row"

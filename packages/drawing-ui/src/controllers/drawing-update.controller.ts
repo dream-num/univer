@@ -23,7 +23,7 @@ import type {
     Nullable,
 } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam, IDrawingOrderMapParam } from '@univerjs/drawing';
-import type { BaseObject, Image, IShapeProps, Scene, Shape } from '@univerjs/engine-render';
+import type { BaseObject, Image, Scene } from '@univerjs/engine-render';
 import type { ISetDrawingAlignOperationParams } from '../commands/operations/drawing-align.operation';
 import {
     checkIfMove,
@@ -643,14 +643,14 @@ export class DrawingUpdateController extends Disposable {
 
         drawingIds.forEach((drawingId) => {
             const oKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
-            const drawingShapes = scene.fuzzyMathObjects(oKey, true) as Shape<IShapeProps>[];
-            if (drawingShapes == null || drawingShapes.length === 0) {
+            const drawingObjects = scene.fuzzyMathObjects(oKey, true);
+            if (drawingObjects.length === 0) {
                 return;
             }
             const index = this._drawingManagerService.getDrawingOrder(unitId, subUnitId).indexOf(drawingId);
-            for (const shape of drawingShapes) {
-                shape.setProps({ zIndex: index });
-                shape.makeDirty();
+            for (const object of drawingObjects) {
+                object.zIndex = index;
+                object.makeDirty();
             }
         });
     }

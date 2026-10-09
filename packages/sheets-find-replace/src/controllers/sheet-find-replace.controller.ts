@@ -81,6 +81,7 @@ import {
     SetWorksheetActiveOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
+
 import { getCoordByCell, getSheetObject, ScrollToCellCommand, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { debounceTime, filter, merge, skip, Subject, throttleTime } from 'rxjs';
 import { SheetReplaceCommand } from '../commands/commands/sheet-replace.command';
@@ -1056,11 +1057,9 @@ class SheetsFindReplaceProvider extends Disposable implements IFindReplaceProvid
      * @returns the parsed query object
      */
     private _preprocessQuery(query: Readonly<IFindQuery>): IFindQuery {
-        let findString = query.caseSensitive
+        const findString = query.caseSensitive
             ? query.findString
             : query.findString.toLowerCase();
-
-        findString = findString.trim();
 
         return {
             ...query,
@@ -1140,14 +1139,12 @@ export function hitCell(worksheet: Worksheet, row: number, col: number, query: I
 }
 
 function matchCellData(cellData: ICellData, query: IFindQuery): boolean {
-    let value = extractPureValue(cellData);
+    const value = extractPureValue(cellData);
     if (!value) {
         return false;
     }
 
     if (query.matchesTheWholeCell) {
-        // Only need to trim the next when we want to match the whole cell.
-        value = trimLeadingTrailingWhitespace(value);
         return query.caseSensitive
             ? value === query.findString
             : value.toLowerCase() === query.findString;
@@ -1169,12 +1166,4 @@ function extractPureValue(cell: ICellData): Nullable<string> {
     }
 
     return rawValue;
-}
-
-/**
- * Trim only white spaces but not line breaks from the start and end of a string.
- * @param value the string to be trimmed
- */
-function trimLeadingTrailingWhitespace(value: string): string {
-    return value.replace(/^ +/g, '').replace(/ +$/g, ''); // be careful there are two spaces in the regex
 }

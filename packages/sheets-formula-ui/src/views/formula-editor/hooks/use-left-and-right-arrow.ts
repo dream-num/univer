@@ -15,13 +15,22 @@
  */
 
 import type { Editor } from '@univerjs/docs-ui';
-import { CommandType, Direction, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, generateRandomId, ICommandService, IContextService } from '@univerjs/core';
+import {
+    CommandType,
+    Direction,
+    DisposableCollection,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    FOCUSING_FX_BAR_EDITOR,
+    generateRandomId,
+    ICommandService,
+    IContextService,
+} from '@univerjs/core';
 import { IEditorService, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from '@univerjs/sheets-ui';
 import { IShortcutService, KeyCode, MetaKeys, useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useRef } from 'react';
-
 import { FormulaSelectingType } from './use-formula-selection';
 
 export function shouldMoveFormulaSelectionFromCurrentSelection(selectingType: FormulaSelectingType, refSelectionCount: number): boolean {
@@ -132,9 +141,10 @@ export const useLeftAndRightArrow = (
                 direction = Direction.RIGHT;
             }
             if (shouldMoveSelectionRef.current) {
+                const refSelectionCount = getRefSelectionCountRef.current?.() ?? 0;
                 const fromCurrentSelection = shouldMoveFormulaSelectionFromCurrentSelection(
                     shouldMoveSelectionRef.current,
-                    getRefSelectionCountRef.current?.() ?? 0
+                    refSelectionCount
                 );
                 if (metaKey === MetaKeys.CTRL_COMMAND) {
                     return commandService.executeCommand(MoveSelectionCommand.id, {
@@ -147,12 +157,14 @@ export const useLeftAndRightArrow = (
                     return commandService.executeCommand(ExpandSelectionCommand.id, {
                         direction,
                         extra: 'formula-editor',
+                        fromCurrentSelection: refSelectionCount === 0,
                     });
                 } else if (metaKey === (MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT)) {
                     return commandService.executeCommand(ExpandSelectionCommand.id, {
                         direction,
                         jumpOver: JumpOver.moveGap,
                         extra: 'formula-editor',
+                        fromCurrentSelection: refSelectionCount === 0,
                     });
                 } else {
                     return commandService.executeCommand(MoveSelectionCommand.id, {

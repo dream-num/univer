@@ -15,11 +15,19 @@
  */
 
 import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
-import type {
-    ISetSelectionsOperationParams,
-} from '@univerjs/sheets';
-import { CommandType, Direction, ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle, sequenceExecute, Tools } from '@univerjs/core';
-
+import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
+import type { IUniverSheetsUIConfig } from '../../config/config';
+import {
+    CommandType,
+    Direction,
+    ICommandService,
+    IConfigService,
+    IUniverInstanceService,
+    RANGE_TYPE,
+    Rectangle,
+    sequenceExecute,
+    Tools,
+} from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     expandToContinuousRange,
@@ -31,6 +39,7 @@ import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { SelectAllService } from '../../services/select-all/select-all.service';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 import { ShortcutExperienceService } from '../../services/shortcut-experience.service';
@@ -76,14 +85,15 @@ export interface IMoveSelectionEnterAndTabCommandParams {
 export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
     id: 'sheet.command.move-selection',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params) => {
         if (!params) {
             return false;
         }
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { workbook, worksheet } = target;
         const selection = getSelectionsService(accessor, params.fromCurrentSelection).getCurrentLastSelection();
@@ -116,12 +126,14 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
         }
 
         const startRange = getStartRange(range, primary, direction);
+        const config = accessor.get(IConfigService).getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
+        const allowWrap = config?.allowArrowKeyWrapOnSheetBoundary ?? true;
 
         // the start range is from the primary selection range
         const next =
             jumpOver === JumpOver.moveGap
                 ? findNextGapRange(startRange, direction, worksheet)
-                : findNextRange(startRange, direction, worksheet);
+                : findNextRange(startRange, direction, worksheet, undefined, true, 1, allowWrap);
         const destRange = getCellAtRowCol(next.startRow, next.startColumn, worksheet);
 
         if (Rectangle.equals(destRange, startRange)) {
@@ -171,14 +183,15 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
 export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTabCommandParams> = {
     id: 'sheet.command.move-selection-enter-tab',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function, complexity
     handler: (accessor, params) => {
         if (!params) {
             return false;
         }
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { workbook, worksheet } = target;
         const selectionsService = getSelectionsService(accessor, params.fromCurrentSelection);
@@ -293,13 +306,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
                 });
             }
 
-            /**
-             * The start range is from the primary selection range.
-             * If the edited cell is the last row/column of the worksheet, and the submitted operation is Enter/Tab to move down/right, the next selected cell should still be the current cell (not move to the first row/column of the worksheet).
-             */
-            const isLastRowCell = keycode === KeyCode.ENTER && direction === Direction.DOWN && startRange.endRow === worksheet.getMaxRows() - 1;
-            const isLastColumnCell = keycode === KeyCode.TAB && direction === Direction.RIGHT && startRange.endColumn === worksheet.getMaxColumns() - 1;
-            const next = (isLastRowCell || isLastColumnCell) ? startRange : findNextRange(startRange, direction, worksheet);
+            const next = findNextRange(startRange, direction, worksheet, undefined, true, 1, false);
             const destRange = getCellAtRowCol(next.startRow, next.startColumn, worksheet);
 
             if (Rectangle.equals(destRange, startRange)) {
@@ -351,6 +358,8 @@ export interface IExpandSelectionCommandParams {
     jumpOver?: JumpOver;
     nextStep?: number;
     extra?: string;
+    /** Use the normal selection's primary cell to start a formula reference. */
+    fromCurrentSelection?: boolean;
 }
 
 // Though the command's name is "expand-selection", it actually does not expand but shrink the selection.
@@ -359,20 +368,37 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
     id: 'sheet.command.expand-selection',
     type: CommandType.COMMAND,
     handler: (accessor, params) => {
-        if (!params) return false;
+        if (!params) {
+            return false;
+        }
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { worksheet, unitId, subUnitId } = target;
 
-        const selection = getSelectionsService(accessor).getCurrentLastSelection();
-        if (!selection) return false;
+        const selectionsService = getSelectionsService(accessor, params.fromCurrentSelection);
+        const selection = selectionsService.getCurrentLastSelection();
+        if (!selection) {
+            return false;
+        }
 
         const { jumpOver, direction, extra } = params;
         let { range: startRange, primary } = selection;
 
         if (extra === 'formula-editor') {
+            if (params.fromCurrentSelection && primary) {
+                startRange = {
+                    startRow: primary.startRow,
+                    endRow: primary.endRow,
+                    startColumn: primary.startColumn,
+                    endColumn: primary.endColumn,
+                    rangeType: RANGE_TYPE.NORMAL,
+                };
+            }
+
             // When in formula editor, if the current cell is a merged cell, expand the selection to the merged cell range for calculation.
             if (startRange.startRow === startRange.endRow && startRange.startColumn === startRange.endColumn) {
                 const mergedCell = worksheet.getMergedCell(startRange.startRow, startRange.startColumn);
@@ -386,7 +412,7 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
 
             // When in formula editor, try to use the last primary cell in ref selections as the primary cell for calculation.
             if (!primary) {
-                const lastSelectionPrimary = getSelectionsService(accessor).getCurrentLastSelectionPrimaryCell();
+                const lastSelectionPrimary = selectionsService.getCurrentLastSelectionPrimaryCell();
                 if (lastSelectionPrimary && Rectangle.contains(startRange, lastSelectionPrimary)) {
                     primary = lastSelectionPrimary;
                 }
@@ -394,11 +420,9 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
         }
 
         const isShrink = checkIfShrink({ range: startRange, primary }, direction, worksheet);
-        const destRange = !isShrink
-            ? jumpOver === JumpOver.moveGap
-                ? expandToNextGapRange(startRange, direction, worksheet)
-                : expandToNextCell(startRange, direction, worksheet)
-            : jumpOver === JumpOver.moveGap
+        let destRange: IRange;
+        if (isShrink) {
+            destRange = jumpOver === JumpOver.moveGap
                 ? shrinkToNextGapRange(
                     startRange,
                     { ...Rectangle.clone(primary), rangeType: RANGE_TYPE.NORMAL },
@@ -406,7 +430,12 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
                     worksheet
                 )
                 : shrinkToNextCell(startRange, direction, worksheet);
-        destRange.rangeType = selection.range.rangeType;
+        } else {
+            destRange = jumpOver === JumpOver.moveGap
+                ? expandToNextGapRange(startRange, direction, worksheet)
+                : expandToNextCell(startRange, direction, worksheet);
+        }
+        destRange.rangeType = startRange.rangeType;
 
         if (Rectangle.equals(destRange, startRange)) {
             return false;

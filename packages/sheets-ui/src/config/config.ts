@@ -29,6 +29,13 @@ export interface IUniverSheetsUIConfig {
     override?: DependencyOverride;
 
     /**
+     * Whether arrow keys may wrap to another row or column at worksheet boundaries.
+     * Does not affect Enter/Tab cycling within selected ranges.
+     * @default true
+     */
+    allowArrowKeyWrapOnSheetBoundary?: boolean;
+
+    /**
      * The maximum count of rows triggering auto height. This is used to avoid performance issue.
      * @default 1000
      */
@@ -141,6 +148,7 @@ export interface IUniverSheetsUIConfig {
 }
 
 export const defaultPluginConfig: IUniverSheetsUIConfig = {
+    allowArrowKeyWrapOnSheetBoundary: true,
     formulaBar: true,
     protectedRangeShadow: true,
     maxAutoHeightCount: 1000,

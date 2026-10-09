@@ -97,6 +97,7 @@ export enum KeyCode {
     COMMA = 188,
     MINUS = 189,
     PERIOD = 190,
+    BACK_QUOTE = 192,
 
     BACK_SLASH = 220,
 
@@ -171,6 +172,7 @@ export const KeyCodeToChar: { [key: number]: string } = {
     [KeyCode.EQUAL]: '=',
     [KeyCode.PERIOD]: '.',
     [KeyCode.COMMA]: ',',
+    [KeyCode.BACK_QUOTE]: '`',
 
     [KeyCode.BACK_SLASH]: '\\',
 };

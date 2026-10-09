@@ -61,6 +61,7 @@ export type {
     ISnapshot,
     ITableInfo,
 } from './ts/univer/snapshot';
+export type { ICustomSheetTemplate } from './ts/univer/unit-template';
 export type { IUnit } from './ts/univer/univer-file';
 export { CellValueType } from './ts/univer/workbook';
 export type { ICellData, ISheetBlock, ISheetBlockMeta, IWorkbookMeta, IWorksheetMeta } from './ts/univer/workbook';

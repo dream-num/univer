@@ -22,3 +22,22 @@ export interface ICustomCellTemplate {
     colWidth: number;
     showGridlines: number;
 }
+
+/**
+ * Initial worksheet dimensions for the `custom-sheet` template.
+ * Each omitted field uses its built-in default independently.
+ */
+export interface ICustomSheetTemplate {
+    /** Initial number of rows. Defaults to 1000. */
+    rowCount?: number;
+    /** Initial number of columns. Defaults to 20 (A–T); use 26 for A–Z. */
+    columnCount?: number;
+    /** Default row height in pixels. Defaults to 24. */
+    defaultRowHeight?: number;
+    /** Default column width in pixels. Defaults to 88. */
+    defaultColumnWidth?: number;
+    /** Width of the row-number header in pixels. Defaults to 46; an explicit 0 is preserved. */
+    rowHeaderWidth?: number;
+    /** Height of the column-letter header in pixels. Defaults to 20; an explicit 0 is preserved. */
+    columnHeaderHeight?: number;
+}

@@ -19,7 +19,7 @@ import type { IError } from '../../univer/constants/errors';
 import type { UniverType } from '../../univer/constants/univer';
 import type { IInitialSheet } from '../../univer/initial-sheet';
 import type { ISnapshot } from '../../univer/snapshot';
-import type { ICustomCellTemplate, ICustomSheetTemplate } from '../../univer/unit-template';
+import type { ICustomCellTemplate } from '../../univer/unit-template';
 
 export interface IForkUnitRequest {
     sourceUnitId: string;
@@ -60,7 +60,6 @@ export interface IWorkbookCreateMeta {
     customCell?:
     | ICustomCellTemplate
     | undefined;
-    customSheet?: ICustomSheetTemplate | undefined;
     /** Other meta in the future. */
     docContent: string;
 }

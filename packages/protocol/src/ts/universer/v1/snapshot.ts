@@ -22,7 +22,7 @@ import type { UniverType } from '../../univer/constants/univer';
 import type { IInitialSheet } from '../../univer/initial-sheet';
 import type { IResource } from '../../univer/resource';
 import type { ISnapshot, ITableInfo } from '../../univer/snapshot';
-import type { ICustomCellTemplate, ICustomSheetTemplate } from '../../univer/unit-template';
+import type { ICustomCellTemplate } from '../../univer/unit-template';
 import type { IUnit } from '../../univer/univer-file';
 import type { ISheetBlock, ISheetBlockMeta } from '../../univer/workbook';
 
@@ -161,7 +161,6 @@ export interface ICreateUnitRequest {
     snapshot: ISnapshot | undefined;
     templateID: string;
     customCell?: ICustomCellTemplate | undefined;
-    customSheet?: ICustomSheetTemplate | undefined;
     initialSheets: IInitialSheet[];
     docContent: string;
     preCreateUnitId: string;

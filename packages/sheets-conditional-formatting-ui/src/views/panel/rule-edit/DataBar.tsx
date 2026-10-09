@@ -32,7 +32,7 @@ import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ColorPicker } from '../../ColorPicker';
-import { Preview } from '../../Preview';
+import { ConditionalFormattingRulePreview } from '../../ConditionalFormattingRulePreview';
 import { previewClassName } from './styles';
 
 const createOptionItem = (text: CFValueType): { label: LocaleKey; value: CFValueType } => ({
@@ -287,7 +287,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                 {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.styleRule')}
             </div>
             <div className={previewClassName}>
-                <Preview
+                <ConditionalFormattingRulePreview
                     rule={getResult({
                         isGradient,
                         minValue,

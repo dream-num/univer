@@ -26,7 +26,7 @@ import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ColorPicker } from '../../ColorPicker';
-import { Preview } from '../../Preview';
+import { ConditionalFormattingRulePreview } from '../../ConditionalFormattingRulePreview';
 import { previewClassName } from './styles';
 
 const createOptionItem = (text: CFValueType | 'none'): { label: LocaleKey; value: CFValueType | 'none' } => ({
@@ -249,7 +249,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.styleRule')}
             </div>
             <div className={previewClassName}>
-                <Preview
+                <ConditionalFormattingRulePreview
                     rule={getResult({
                         minType,
                         medianType,

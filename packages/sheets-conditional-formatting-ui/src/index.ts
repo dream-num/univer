@@ -33,4 +33,7 @@ export { ConditionalFormattingClearController } from './controllers/cf.clear.con
 export { menuSchema as SheetsConditionalFormattingUIMenuSchema } from './menu/schema';
 export { UniverSheetsConditionalFormattingMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsConditionalFormattingUIPlugin } from './plugin';
+export { getRuleDescribe } from './utils/get-rule-describe';
+export type { IConditionalFormattingRulePreviewProps } from './views/ConditionalFormattingRulePreview';
+export { ConditionalFormattingRulePreview } from './views/ConditionalFormattingRulePreview';
 export type { IConditionFormattingPanelProps } from './views/ConditionFormattingPanel';

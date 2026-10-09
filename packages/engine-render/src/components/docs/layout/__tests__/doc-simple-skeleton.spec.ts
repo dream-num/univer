@@ -55,6 +55,21 @@ describe('doc simple skeleton', () => {
         expect(noWrap.getTotalWidth()).toBe(110);
     });
 
+    it('uses the actual glyph right bound for line width', () => {
+        vi.mocked(FontCache.getMeasureText).mockReturnValue({
+            width: 20,
+            actualBoundingBoxRight: 22,
+            fontBoundingBoxAscent: 8,
+            fontBoundingBoxDescent: 2,
+            actualBoundingBoxAscent: 8,
+            actualBoundingBoxDescent: 2,
+        });
+
+        const skeleton = new DocSimpleSkeleton('italic', 'italic 12px Tahoma', false, 100, 100);
+
+        expect(skeleton.calculate()[0].width).toBe(22);
+    });
+
     it('wraps long text and uses cache behavior', () => {
         const skeleton = new DocSimpleSkeleton('supercalifragilistic', '12px Arial', true, 25, 100);
         const lines = skeleton.calculate();

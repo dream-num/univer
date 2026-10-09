@@ -21,9 +21,20 @@ import type {
     IMoveSelectionEnterAndTabCommandParams,
     ISelectAllCommandParams,
 } from '../set-selection.command';
-import { Direction, ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
+import {
+    BooleanNumber,
+    Direction,
+    ICommandService,
+    IConfigService,
+    IContextService,
+    IUniverInstanceService,
+    RANGE_TYPE,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
+    IRefSelectionsService,
+    REF_SELECTIONS_ENABLED,
     SetColHiddenCommand,
     SetColHiddenMutation,
     SetColVisibleMutation,
@@ -37,13 +48,21 @@ import {
 } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../../config/config';
 import { SelectAllService } from '../../../services/select-all/select-all.service';
 import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
-import { ExpandSelectionCommand, JumpOver, MoveSelectionCommand, MoveSelectionEnterAndTabCommand, SelectAllCommand } from '../set-selection.command';
+import {
+    ExpandSelectionCommand,
+    JumpOver,
+    MoveSelectionCommand,
+    MoveSelectionEnterAndTabCommand,
+    SelectAllCommand,
+} from '../set-selection.command';
 import {
     createSelectionCommandTestBed,
     SELECTION_WITH_EMPTY_CELLS_DATA,
     SELECTION_WITH_MERGED_CELLS_DATA,
+    SIMPLE_SELECTION_WORKBOOK_DATA,
 } from './create-selection-command-test-bed';
 
 describe('Test commands used for change selections', () => {
@@ -259,6 +278,173 @@ describe('Test commands used for change selections', () => {
                 direction: Direction.UP,
             })).toBeTruthy();
             expectSelectionToBe(0, 0, 0, 0);
+        });
+    });
+
+    describe('Sheet boundary navigation', () => {
+        beforeEach(() => {
+            prepareSelectionsTestBed();
+            commandService.registerCommand(MoveSelectionEnterAndTabCommand);
+        });
+
+        const boundaries = [
+            { direction: Direction.UP, keycode: KeyCode.ENTER, row: 0, column: 4, wrapRow: 19, wrapColumn: 3 },
+            { direction: Direction.DOWN, keycode: KeyCode.ENTER, row: 19, column: 4, wrapRow: 0, wrapColumn: 5 },
+            { direction: Direction.LEFT, keycode: KeyCode.TAB, row: 4, column: 0, wrapRow: 3, wrapColumn: 19 },
+            { direction: Direction.RIGHT, keycode: KeyCode.TAB, row: 4, column: 19, wrapRow: 5, wrapColumn: 0 },
+        ];
+        const cases = boundaries.flatMap((boundary) => [undefined, false, true].map((allowWrap) => ({
+            ...boundary,
+            allowWrap,
+        })));
+
+        it.each(cases.flatMap((testCase) => [false, true].map((referenceMode) => ({ ...testCase, referenceMode }))))(
+            'handles arrow $direction at the sheet edge with wrapping=$allowWrap and referenceMode=$referenceMode',
+            async ({ direction, row, column, wrapRow, wrapColumn, allowWrap, referenceMode }) => {
+                get(IConfigService).setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, {
+                    allowArrowKeyWrapOnSheetBoundary: allowWrap,
+                });
+                select(row, column, row, column, row, column, false, false);
+                const normalSelections = selectionManagerService.getCurrentSelections();
+                const refSelections = get(IRefSelectionsService);
+                if (referenceMode) {
+                    refSelections.setSelections(normalSelections.concat());
+                    get(IContextService).setContextValue(REF_SELECTIONS_ENABLED, true);
+                }
+
+                await expect(commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                    direction,
+                })).resolves.toBe(allowWrap !== false);
+
+                const selections = referenceMode ? refSelections : selectionManagerService;
+                const expectedRow = allowWrap === false ? row : wrapRow;
+                const expectedColumn = allowWrap === false ? column : wrapColumn;
+                expect(selections.getCurrentLastSelection()?.range).toMatchObject({
+                    startRow: expectedRow,
+                    endRow: expectedRow,
+                    startColumn: expectedColumn,
+                    endColumn: expectedColumn,
+                });
+                if (referenceMode) {
+                    expect(selectionManagerService.getCurrentSelections()).toEqual(normalSelections);
+                }
+            }
+        );
+
+        it.each(cases)(
+            'stops single-cell Enter/Tab in direction $direction regardless of wrapping=$allowWrap',
+            async ({ direction, keycode, row, column, allowWrap }) => {
+                get(IConfigService).setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, {
+                    allowArrowKeyWrapOnSheetBoundary: allowWrap,
+                });
+                select(row, column, row, column, row, column, false, false);
+
+                await expect(commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(
+                    MoveSelectionEnterAndTabCommand.id,
+                    { direction, keycode }
+                )).resolves.toBe(false);
+
+                expectSelectionToBe(row, column, row, column);
+            }
+        );
+
+        it.each([
+            { direction: Direction.DOWN, keycode: KeyCode.ENTER, cells: [[1, 0], [0, 1], [1, 1], [0, 0]] },
+            { direction: Direction.RIGHT, keycode: KeyCode.TAB, cells: [[0, 1], [1, 0], [1, 1], [0, 0]] },
+            { direction: Direction.UP, keycode: KeyCode.ENTER, cells: [[0, 1], [1, 0], [0, 0], [1, 1]] },
+            { direction: Direction.LEFT, keycode: KeyCode.TAB, cells: [[1, 0], [0, 1], [0, 0], [1, 1]] },
+        ].flatMap((navigation) => [false, true].map((allowWrap) => ({ ...navigation, allowWrap }))))(
+            'cycles Enter/Tab inside a selected range in direction $direction with wrapping=$allowWrap',
+            async ({ direction, keycode, cells, allowWrap }) => {
+                get(IConfigService).setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, {
+                    allowArrowKeyWrapOnSheetBoundary: allowWrap,
+                });
+                const origin = direction === Direction.UP || direction === Direction.LEFT ? 1 : 0;
+                select(origin, origin, origin, origin, origin, origin, false, false);
+                const range = { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1, rangeType: RANGE_TYPE.NORMAL };
+                selectionManagerService.setSelections([{
+                    ...selectionManagerService.getCurrentLastSelection()!,
+                    range,
+                }]);
+
+                for (const [row, column] of cells) {
+                    await expect(commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(
+                        MoveSelectionEnterAndTabCommand.id,
+                        { direction, keycode }
+                    )).resolves.toBe(true);
+                    expect(selectionManagerService.getCurrentLastSelection()?.range).toEqual(range);
+                    expect(selectionManagerService.getCurrentLastSelection()?.primary).toMatchObject({
+                        actualRow: row,
+                        actualColumn: column,
+                    });
+                }
+            }
+        );
+    });
+
+    describe('Merged and hidden worksheet boundaries', () => {
+        it.each([
+            { direction: Direction.UP, keycode: KeyCode.ENTER, row: 0, column: 4 },
+            { direction: Direction.DOWN, keycode: KeyCode.ENTER, row: 18, column: 4 },
+            { direction: Direction.LEFT, keycode: KeyCode.TAB, row: 4, column: 0 },
+            { direction: Direction.RIGHT, keycode: KeyCode.TAB, row: 4, column: 18 },
+        ])('keeps an edge merged cell selected in direction $direction', async ({ direction, keycode, row, column }) => {
+            const mergedRange = { startRow: row, endRow: row + 1, startColumn: column, endColumn: column + 1 };
+            prepareSelectionsTestBed({
+                ...SIMPLE_SELECTION_WORKBOOK_DATA,
+                sheets: {
+                    sheet1: { ...SIMPLE_SELECTION_WORKBOOK_DATA.sheets.sheet1, mergeData: [mergedRange] },
+                },
+            });
+            commandService.registerCommand(MoveSelectionEnterAndTabCommand);
+            get(IConfigService).setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, { allowArrowKeyWrapOnSheetBoundary: false });
+            select(row, column, row + 1, column + 1, row, column, true, true);
+
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, { direction });
+            expectSelectionToBe(row, column, row + 1, column + 1);
+
+            await commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(
+                MoveSelectionEnterAndTabCommand.id,
+                { direction, keycode }
+            );
+            expectSelectionToBe(row, column, row + 1, column + 1);
+            expect(selectionManagerService.getCurrentLastSelection()?.primary).toMatchObject({
+                actualRow: row,
+                actualColumn: column,
+            });
+        });
+
+        it.each([
+            { direction: Direction.UP, keycode: KeyCode.ENTER, row: 1, column: 4 },
+            { direction: Direction.DOWN, keycode: KeyCode.ENTER, row: 18, column: 4 },
+            { direction: Direction.LEFT, keycode: KeyCode.TAB, row: 4, column: 1 },
+            { direction: Direction.RIGHT, keycode: KeyCode.TAB, row: 4, column: 18 },
+        ])('stops at the last visible cell in direction $direction', async ({ direction, keycode, row, column }) => {
+            prepareSelectionsTestBed({
+                ...SIMPLE_SELECTION_WORKBOOK_DATA,
+                sheets: {
+                    sheet1: {
+                        ...SIMPLE_SELECTION_WORKBOOK_DATA.sheets.sheet1,
+                        rowData: { 0: { hd: BooleanNumber.TRUE }, 19: { hd: BooleanNumber.TRUE } },
+                        columnData: { 0: { hd: BooleanNumber.TRUE }, 19: { hd: BooleanNumber.TRUE } },
+                    },
+                },
+            });
+            commandService.registerCommand(MoveSelectionEnterAndTabCommand);
+            get(IConfigService).setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, { allowArrowKeyWrapOnSheetBoundary: false });
+            select(row, column, row, column, row, column, false, false);
+
+            await expect(commandService.executeCommand<IMoveSelectionCommandParams>(
+                MoveSelectionCommand.id,
+                { direction }
+            )).resolves.toBe(false);
+            expectSelectionToBe(row, column, row, column);
+
+            await expect(commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(
+                MoveSelectionEnterAndTabCommand.id,
+                { direction, keycode }
+            )).resolves.toBe(false);
+            expectSelectionToBe(row, column, row, column);
         });
     });
 

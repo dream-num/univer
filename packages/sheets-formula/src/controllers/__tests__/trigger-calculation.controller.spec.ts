@@ -20,6 +20,7 @@ import {
     CommandType,
     ICommandService,
     IConfigService,
+    LocaleService,
     LocaleType,
 } from '@univerjs/core';
 import {
@@ -368,6 +369,64 @@ describe('TriggerCalculationController', () => {
         expect(progressValues).toContainEqual({ done: 3, count: 8, label: 'sheets-formula.progress.array-analysis' });
         expect(progressValues).toContainEqual({ done: 6, count: 8, label: 'sheets-formula.progress.array-calculation' });
         expect(progressValues).toContainEqual({ done: 1, count: 1, label: 'sheets-formula.progress.done' });
+
+        subscription.unsubscribe();
+        testBed.executedDisposable.dispose();
+        testBed.testBed.univer.dispose();
+    });
+
+    it('should ignore progress labels after locale service disposal', async () => {
+        const testBed = createControllerTestBed();
+        await settleInitialCalculation(testBed);
+        const subscription = testBed.controller.progress$.subscribe();
+
+        testBed.testBed.get(LocaleService).dispose();
+
+        await expect(testBed.commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
+            stageInfo: {
+                stage: FormulaExecuteStageType.START,
+                totalFormulasToCalculate: 0,
+                completedFormulasCount: 0,
+                totalArrayFormulasToCalculate: 0,
+                completedArrayFormulasCount: 0,
+                formulaCycleIndex: 0,
+            } as IExecutionInProgressParams,
+        })).resolves.toBe(true);
+        await vi.advanceTimersByTimeAsync(1000);
+
+        await expect(testBed.commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
+            stageInfo: {
+                stage: FormulaExecuteStageType.CURRENTLY_CALCULATING,
+                totalFormulasToCalculate: 1,
+                completedFormulasCount: 0,
+                totalArrayFormulasToCalculate: 0,
+                completedArrayFormulasCount: 0,
+                formulaCycleIndex: 0,
+            } as IExecutionInProgressParams,
+        })).resolves.toBe(true);
+        await expect(testBed.commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
+            stageInfo: {
+                stage: FormulaExecuteStageType.START_DEPENDENCY_ARRAY_FORMULA,
+                totalFormulasToCalculate: 1,
+                completedFormulasCount: 0,
+                totalArrayFormulasToCalculate: 1,
+                completedArrayFormulasCount: 0,
+                formulaCycleIndex: 0,
+            } as IExecutionInProgressParams,
+        })).resolves.toBe(true);
+        await expect(testBed.commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
+            stageInfo: {
+                stage: FormulaExecuteStageType.CURRENTLY_CALCULATING_ARRAY_FORMULA,
+                totalFormulasToCalculate: 1,
+                completedFormulasCount: 1,
+                totalArrayFormulasToCalculate: 1,
+                completedArrayFormulasCount: 0,
+                formulaCycleIndex: 0,
+            } as IExecutionInProgressParams,
+        })).resolves.toBe(true);
+        await expect(testBed.commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
+            functionsExecutedState: FormulaExecutedStateType.SUCCESS,
+        })).resolves.toBe(true);
 
         subscription.unsubscribe();
         testBed.executedDisposable.dispose();

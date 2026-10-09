@@ -25,7 +25,14 @@ import type {
     IRangeWithCoord,
     Nullable,
 } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
+import type {
+    IMouseEvent,
+    IPointerEvent,
+    IRenderModule,
+    Scene,
+    SpreadsheetSkeleton,
+    Viewport,
+} from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoord, ISelectionWithStyle } from '@univerjs/sheets';
 import type { Theme } from '@univerjs/themes';
 import type { IShortcutService } from '@univerjs/ui';
@@ -40,9 +47,16 @@ import {
     ThemeService,
 } from '@univerjs/core';
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { attachSelectionWithCoord, convertPrimaryWithCoordToPrimary, REF_SELECTIONS_ENABLED, SELECTIONS_ENABLED } from '@univerjs/sheets';
+import {
+    attachSelectionWithCoord,
+    convertPrimaryWithCoordToPrimary,
+    REF_SELECTIONS_ENABLED,
+    SELECTIONS_ENABLED,
+} from '@univerjs/sheets';
+import { IPlatformService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
+import { isSheetContextMenuGesture, isSheetMultiSelectModifier } from '../../common/selection-input';
 import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
 import { SelectionControl } from './selection-control';
 import { SelectionLayer } from './selection-layer';
@@ -808,7 +822,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
                 { firstMatch: true } // for visible
             );
 
-            if (!primaryWithCoord) return;
+            if (!primaryWithCoord) {
+                return;
+            }
 
             const rangeWithCoord = convertCellToRange(primaryWithCoord);
             return {
@@ -853,6 +869,14 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         //#endregion
     }
 
+    protected _isContextMenuGesture(evt: IPointerEvent | IMouseEvent): boolean {
+        return isSheetContextMenuGesture(evt, this._injector.get(IPlatformService).isMac, this.inRefSelectionMode());
+    }
+
+    protected _isMultiSelectModifier(evt: IPointerEvent | IMouseEvent): boolean {
+        return isSheetMultiSelectModifier(evt, this._injector.get(IPlatformService).isMac);
+    }
+
     protected _checkClearPreviousControls(evt: IPointerEvent | IMouseEvent): void {
         const curControls = this.getSelectionControls();
         if (curControls.length === 0) {
@@ -860,7 +884,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         }
 
         if (
-            (!evt.ctrlKey && !evt.metaKey && !evt.shiftKey && !this._remainLastEnabled) ||
+            (this._isContextMenuGesture(evt) && !this.inRefSelectionMode()) ||
+            (!this._isMultiSelectModifier(evt) && !evt.shiftKey && !this._remainLastEnabled) ||
             (this._singleSelectionEnabled && !evt.shiftKey)
         ) {
             this._clearAllSelectionControls();

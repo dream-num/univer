@@ -17,11 +17,19 @@
 // @vitest-environment jsdom
 
 import type { EmbedRuntimeFocusCoordinator } from '../../../services/sheet-embed-integration.service';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET, ICommandService, IContextService, Injector, IUniverInstanceService } from '@univerjs/core';
+import {
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    FOCUSING_FX_BAR_EDITOR,
+    FOCUSING_SHEET,
+    ICommandService,
+    IContextService,
+    Injector,
+    IUniverInstanceService,
+} from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { ClearSelectionFormatCommand, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
-import { DISABLE_AUTO_FOCUS_KEY } from '@univerjs/ui';
+import { DISABLE_AUTO_FOCUS_KEY, IPlatformService, PlatformService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { SetZoomRatioCommand } from '../../../commands/commands/set-zoom-ratio.command';
@@ -29,7 +37,10 @@ import { SetActivateCellEditOperation } from '../../../commands/operations/activ
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, ISheetEmbedRuntimeFocusCoordinator } from '../../../services/sheet-embed-integration.service';
+import {
+    EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
+    ISheetEmbedRuntimeFocusCoordinator,
+} from '../../../services/sheet-embed-integration.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { DesktopCellEditRenderController } from '../desktop-cell-edit.render-controller';
 import { EditorBridgeRenderController } from '../editor-bridge.render-controller';
@@ -207,6 +218,7 @@ function createController(options?: {
         })),
     };
     const injector = new Injector([
+        [IPlatformService, { useClass: PlatformService }],
         [IUniverInstanceService, { useValue: instanceService }],
         [ICommandService, { useValue: commandService }],
         [IEditorBridgeService, { useValue: editorBridgeService }],
@@ -318,6 +330,11 @@ describe('DesktopCellEditRenderController integration with the editor bridge', (
 
         spreadsheet.onDblclick$.emit({ button: 2 });
         expect(commandService.syncExecuteCommand).not.toHaveBeenCalledWith(SetCellEditVisibleOperation.id, expect.anything());
+
+        const macPlatform = vi.spyOn(PlatformService.prototype, 'isMac', 'get').mockReturnValue(true);
+        spreadsheet.onDblclick$.emit({ button: 0, ctrlKey: true, clientX: 150, clientY: 180 });
+        expect(commandService.syncExecuteCommand).not.toHaveBeenCalledWith(SetCellEditVisibleOperation.id, expect.anything());
+        macPlatform.mockRestore();
 
         spreadsheet.onDblclick$.emit({ button: 0, clientX: 150, clientY: 180 });
         expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(SetCellEditVisibleOperation.id, {

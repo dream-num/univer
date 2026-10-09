@@ -104,64 +104,91 @@ describe('RefSelectionsRenderService additive modifiers with real render provide
         vi.useRealTimers();
     });
 
-    for (const remainLast of [false, true]) {
-        for (const modifier of ['none', 'ctrlKey', 'metaKey'] as const) {
-            it(`keeps reference ownership with ${modifier} and remain-last ${remainLast}`, () => {
-                const injector = univer.__getInjector();
-                const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
-                    id: 'ref-modifiers',
-                    name: 'Reference modifiers',
-                    sheetOrder: ['sheet1'],
-                    sheets: { sheet1: { id: 'sheet1', name: 'Sheet 1', rowCount: 20, columnCount: 10, cellData: {} } },
-                });
-                const renderManager = injector.get(IRenderManagerService);
-                const render = renderManager.createRender(workbook.getUnitId());
-                render.engine.resizeBySize(800, 600);
-                new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN, render.scene, { left: 0, top: 0, right: 0, bottom: 0 });
-                const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
-                render.mainComponent = spreadsheet;
-                render.components.set(SHEET_VIEW_KEY.MAIN, spreadsheet);
-                render.scene.addObject(spreadsheet);
-                const skeletonManager = render.with(SheetSkeletonManagerService);
-                skeletonManager.setCurrent({ sheetId: 'sheet1' });
-                renderManager.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [RefSelectionsRenderService]);
-                const service = render.with(RefSelectionsRenderService);
-                service.setRemainLastEnabled(remainLast);
-                injector.get(IContextService).setContextValue(REF_SELECTIONS_ENABLED, true);
-                service.enableSelectionChanging();
-                const skeleton = skeletonManager.getCurrentSkeleton()!;
+    for (const isMac of [false, true]) {
+        for (const drag of [false, true]) {
+            for (const remainLast of [false, true]) {
+                for (const modifier of ['none', 'ctrlKey', 'metaKey'] as const) {
+                    it(`keeps reference ownership with ${modifier}, Mac ${isMac}, drag ${drag}, remain-last ${remainLast}`, () => {
+                        const injector = univer.__getInjector();
+                        vi.spyOn(injector.get(IPlatformService), 'isMac', 'get').mockReturnValue(isMac);
+                        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+                            id: 'ref-modifiers',
+                            name: 'Reference modifiers',
+                            sheetOrder: ['sheet1'],
+                            sheets: { sheet1: { id: 'sheet1', name: 'Sheet 1', rowCount: 20, columnCount: 10, cellData: {} } },
+                        });
+                        const renderManager = injector.get(IRenderManagerService);
+                        const render = renderManager.createRender(workbook.getUnitId());
+                        render.engine.resizeBySize(800, 600);
+                        injector.createInstance(Viewport, SHEET_VIEWPORT_KEY.VIEW_MAIN, render.scene, { left: 0, top: 0, right: 0, bottom: 0 });
+                        const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
+                        render.mainComponent = spreadsheet;
+                        render.components.set(SHEET_VIEW_KEY.MAIN, spreadsheet);
+                        render.scene.addObject(spreadsheet);
+                        const skeletonManager = render.with(SheetSkeletonManagerService);
+                        skeletonManager.setCurrent({ sheetId: 'sheet1' });
+                        renderManager.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [RefSelectionsRenderService]);
+                        const service = render.with(RefSelectionsRenderService);
+                        service.setRemainLastEnabled(remainLast);
+                        injector.get(IContextService).setContextValue(SELECTIONS_ENABLED, true);
+                        injector.get(IContextService).setContextValue(REF_SELECTIONS_ENABLED, true);
+                        service.enableSelectionChanging();
+                        const skeleton = skeletonManager.getCurrentSkeleton()!;
+                        const initialSelections = [
+                            createSelection(0, 0),
+                            createSelection(1, 1),
+                        ];
+                        service.resetSelectionsByModelData(initialSelections);
+                        injector.get(IRefSelectionsService).setSelections(workbook.getUnitId(), 'sheet1', initialSelections);
+                        expect(service.getSelectionControls()).toHaveLength(2);
 
-                for (const index of [0, 2]) {
-                    const cell = skeleton.getNoMergeCellWithCoordByIndex(index, index);
-                    const event = {
-                        offsetX: (cell.startX + cell.endX) / 2,
-                        offsetY: (cell.startY + cell.endY) / 2,
-                        button: 0,
-                        ...(index === 2 && modifier !== 'none' ? { [modifier]: true } : {}),
-                    } as IPointerEvent;
-                    spreadsheet.onPointerDown$.emitEvent(event);
-                    render.scene.onPointerUp$.emitEvent(event);
-                }
+                        const cell = skeleton.getNoMergeCellWithCoordByIndex(2, 2);
+                        const event = {
+                            offsetX: (cell.startX + cell.endX) / 2,
+                            offsetY: (cell.startY + cell.endY) / 2,
+                            button: 0,
+                            buttons: 1,
+                            ...(modifier !== 'none' ? { [modifier]: true } : {}),
+                        } as IPointerEvent;
+                        spreadsheet.onPointerDown$.emitEvent(event);
+                        if (drag) {
+                            const endCell = skeleton.getNoMergeCellWithCoordByIndex(3, 3);
+                            render.scene.onPointerMove$.emitEvent({
+                                ...event,
+                                offsetX: (endCell.startX + endCell.endX) / 2,
+                                offsetY: (endCell.startY + endCell.endY) / 2,
+                            });
+                        }
+                        render.scene.onPointerUp$.emitEvent(event);
 
-                const selections = injector.get(IRefSelectionsService)
-                    .getWorkbookSelections(workbook.getUnitId())
-                    .getCurrentSelections();
-                const ranges = selections.map(({ range }) => ({
-                    startRow: range.startRow,
-                    startColumn: range.startColumn,
-                    endRow: range.endRow,
-                    endColumn: range.endColumn,
-                }));
-                if (modifier === 'none') {
-                    expect(ranges).toEqual([{ startRow: 2, startColumn: 2, endRow: 2, endColumn: 2 }]);
-                } else {
-                    expect(ranges).toEqual([
-                        { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 },
-                        { startRow: 2, startColumn: 2, endRow: 2, endColumn: 2 },
-                    ]);
+                        const selections = injector.get(IRefSelectionsService)
+                            .getWorkbookSelections(workbook.getUnitId())
+                            .getCurrentSelections();
+                        const ranges = selections.map(({ range }) => ({
+                            startRow: range.startRow,
+                            startColumn: range.startColumn,
+                            endRow: range.endRow,
+                            endColumn: range.endColumn,
+                        }));
+                        const target = { startRow: 2, startColumn: 2, endRow: drag ? 3 : 2, endColumn: drag ? 3 : 2 };
+                        if (modifier !== (isMac ? 'metaKey' : 'ctrlKey')) {
+                            expect(ranges).toEqual(remainLast
+                                ? [
+                                    { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 },
+                                    target,
+                                ]
+                                : [target]);
+                        } else {
+                            expect(ranges).toEqual([
+                                { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 },
+                                { startRow: 1, startColumn: 1, endRow: 1, endColumn: 1 },
+                                target,
+                            ]);
+                        }
+                        expect(service.getSelectionControls()).toHaveLength(ranges.length);
+                    });
                 }
-                expect(service.getSelectionControls()).toHaveLength(ranges.length);
-            });
+            }
         }
     }
 });
@@ -475,6 +502,7 @@ function createRefSelectionTestBed(mobile = false) {
         override onStarting(): void {
             this._injector.add([SheetsSelectionsService]);
             this._injector.add([IRefSelectionsService, { useClass: RefSelectionsService }]);
+            this._injector.add([IPlatformService, { useClass: PlatformService }]);
             this._injector.add([IShortcutService, { useClass: TestShortcutService as never }]);
             this._injector.add([SheetSkeletonManagerService, { useClass: TestSheetSkeletonManagerService as never }]);
         }

@@ -35,10 +35,11 @@ import {
 } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { isCellImage, SheetsSelectionsService } from '@univerjs/sheets';
-import { DISABLE_AUTO_FOCUS_KEY, getEmbedChildUnitId } from '@univerjs/ui';
+import { isCellImage, REF_SELECTIONS_ENABLED, SheetsSelectionsService } from '@univerjs/sheets';
+import { DISABLE_AUTO_FOCUS_KEY, getEmbedChildUnitId, IPlatformService } from '@univerjs/ui';
 import { filter } from 'rxjs';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
+import { isSheetContextMenuGesture } from '../../common/selection-input';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import {
     ISheetEmbedRuntimeFocusCoordinator,
@@ -57,6 +58,7 @@ export class DesktopCellEditRenderController extends RxDisposable implements IRe
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @IContextService private readonly _contextService: IContextService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IPlatformService private readonly _platformService: IPlatformService,
         @Optional(ISheetEmbedRuntimeFocusCoordinator)
         private readonly _embedRuntimeFocusCoordinator?: ISheetEmbedRuntimeFocusCoordinator
     ) {
@@ -98,7 +100,11 @@ export class DesktopCellEditRenderController extends RxDisposable implements IRe
         const { spreadsheet, spreadsheetColumnHeader, spreadsheetLeftTopPlaceholder, spreadsheetRowHeader } = sheetObject;
 
         d.add(spreadsheet.onDblclick$.subscribeEvent((evt) => {
-            if (evt.button === 2) {
+            if (isSheetContextMenuGesture(
+                evt,
+                this._platformService.isMac,
+                this._contextService.getContextValue(REF_SELECTIONS_ENABLED)
+            )) {
                 return;
             }
 

@@ -67,6 +67,7 @@ describe('SheetSelectionRenderService', () => {
     function preparePointerSelectionTestBed() {
         const testBed = createRenderTestBed({
             dependencies: [
+                [IPlatformService, { useClass: PlatformService }],
                 [IShortcutService, { useClass: TestShortcutService }],
             ],
         });
@@ -118,6 +119,7 @@ describe('SheetSelectionRenderService', () => {
     it('renders selections from model changes and respects SELECTIONS_ENABLED', async () => {
         const testBed = createRenderTestBed({
             dependencies: [
+                [IPlatformService, { useClass: PlatformService }],
                 [IShortcutService, { useClass: TestShortcutService }],
             ],
         });
@@ -305,8 +307,9 @@ describe('SheetSelectionRenderService pointer gestures with real render provider
         vi.useRealTimers();
     });
 
-    function createSelectionTestBed(mergeData: IRange[] = [], rowCount = 20) {
+    function createSelectionTestBed(mergeData: IRange[] = [], rowCount = 20, isMac = false) {
         const injector = univer.__getInjector();
+        vi.spyOn(injector.get(IPlatformService), 'isMac', 'get').mockReturnValue(isMac);
         const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
             id: 'pointer-modifiers',
             name: 'Pointer modifiers',
@@ -499,7 +502,7 @@ describe('SheetSelectionRenderService pointer gestures with real render provider
                 }));
                 if (modifier === 'shiftKey') {
                     expect(ranges).toEqual([{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }]);
-                } else if (!single && modifier !== 'none') {
+                } else if (!single && modifier === 'ctrlKey') {
                     expect(ranges).toEqual([
                         { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 },
                         { startRow: 2, startColumn: 2, endRow: 2, endColumn: 2 },
@@ -513,7 +516,7 @@ describe('SheetSelectionRenderService pointer gestures with real render provider
     }
 
     it.each(['ctrlKey', 'metaKey'] as const)('toggles a cell inside a range with %s without accumulating selections', (modifier) => {
-        const { click, getSelections, service } = createSelectionTestBed();
+        const { click, getSelections, service } = createSelectionTestBed([], 20, modifier === 'metaKey');
         click(0, 0);
         click(2, 2, { shiftKey: true });
         const clickedCell = { startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 };
@@ -532,7 +535,7 @@ describe('SheetSelectionRenderService pointer gestures with real render provider
     });
 
     it('removes a clicked cell from every overlapping selection but preserves additive dragging', () => {
-        const { click, getSelections, eventAt, spreadsheet, render } = createSelectionTestBed();
+        const { click, getSelections, eventAt, spreadsheet, render } = createSelectionTestBed([], 20, true);
         click(0, 0);
         click(2, 2, { shiftKey: true });
         spreadsheet.onPointerDown$.emitEvent(eventAt(3, 3, { metaKey: true }));
@@ -553,7 +556,7 @@ describe('SheetSelectionRenderService pointer gestures with real render provider
 
     it('deselects an entire merged cell and retains the final active cell', () => {
         const merged = { startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 };
-        const { click, getSelections } = createSelectionTestBed([merged]);
+        const { click, getSelections } = createSelectionTestBed([merged], 20, true);
         click(0, 0);
         click(3, 3, { shiftKey: true });
         click(2, 2, { metaKey: true });
@@ -569,7 +572,7 @@ describe('SheetSelectionRenderService pointer gestures with real render provider
     });
 
     it('preserves right click, shift extension, and single-selection mode inside a selected range', () => {
-        const { click, getSelections, service } = createSelectionTestBed();
+        const { click, getSelections, service } = createSelectionTestBed([], 20, true);
         click(0, 0);
         click(2, 2, { shiftKey: true });
         click(1, 1, { metaKey: true, button: 2 });
@@ -586,13 +589,15 @@ describe('SheetSelectionRenderService pointer gestures with real render provider
         expect(getSelections()[0].range).toMatchObject({ startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 });
     });
 
-    it('keeps dragging additive even when it starts inside a selection', () => {
+    it.each([false, true])('keeps dragging additive even when it starts inside a selection on Mac %s', (isMac) => {
         const { click, getSelections, eventAt, spreadsheet, render } = createSelectionTestBed();
+        vi.spyOn(univer.__getInjector().get(IPlatformService), 'isMac', 'get').mockReturnValue(isMac);
+        const modifier = isMac ? { metaKey: true } : { ctrlKey: true };
         click(0, 0);
         click(2, 2, { shiftKey: true });
-        spreadsheet.onPointerDown$.emitEvent(eventAt(1, 1, { ctrlKey: true }));
-        render.scene.onPointerMove$.emitEvent(eventAt(3, 3, { ctrlKey: true }));
-        render.scene.onPointerUp$.emitEvent(eventAt(3, 3, { ctrlKey: true }));
+        spreadsheet.onPointerDown$.emitEvent(eventAt(1, 1, modifier));
+        render.scene.onPointerMove$.emitEvent(eventAt(3, 3, modifier));
+        render.scene.onPointerUp$.emitEvent(eventAt(3, 3, modifier));
         expect(getSelections().map(({ range }) => range)).toMatchObject([
             { startRow: 0, endRow: 2, startColumn: 0, endColumn: 2 },
             { startRow: 1, endRow: 3, startColumn: 1, endColumn: 3 },
@@ -611,5 +616,21 @@ describe('SheetSelectionRenderService pointer gestures with real render provider
             startColumn: 0,
             endColumn: 0,
         }))).toBe(false);
+    });
+
+    it('preserves Mac Control-clicked selections and replaces an outside target without starting a drag', () => {
+        const { click, getSelections, eventAt, spreadsheet, render, service } = createSelectionTestBed([], 20, true);
+        click(0, 0);
+        click(2, 2, { shiftKey: true });
+        click(1, 1, { ctrlKey: true });
+        expect(getSelections()).toHaveLength(1);
+        expect(getSelections()[0].range).toMatchObject({ startRow: 0, endRow: 2, startColumn: 0, endColumn: 2 });
+
+        spreadsheet.onPointerDown$.emitEvent(eventAt(4, 4, { ctrlKey: true, metaKey: true, shiftKey: true }));
+        render.scene.onPointerMove$.emitEvent(eventAt(6, 6, { ctrlKey: true }));
+        render.scene.onPointerUp$.emitEvent(eventAt(6, 6, { ctrlKey: true }));
+        expect(getSelections()).toHaveLength(1);
+        expect(getSelections()[0].range).toMatchObject({ startRow: 4, endRow: 4, startColumn: 4, endColumn: 4 });
+        expect(service.selectionMoving).toBe(false);
     });
 });

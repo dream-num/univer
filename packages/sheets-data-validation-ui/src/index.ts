@@ -16,7 +16,9 @@
 
 import './global.css';
 
+export { DATA_VALIDATION_PANEL } from './commands/operations/data-validation.operation';
 export type { IUniverSheetsDataValidationUIConfig } from './config/config';
 export { menuSchema as SheetsDataValidationUIMenuSchema } from './menu/schema';
 export { UniverSheetsDataValidationMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsDataValidationUIPlugin } from './plugin';
+export { DataValidationPanelService } from './services/data-validation-panel.service';

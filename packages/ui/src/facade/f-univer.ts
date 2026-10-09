@@ -412,11 +412,13 @@ export interface IFUniverUIMixin {
     registerUIPart(key: BuiltInUIPart, component: ComponentType): IDisposable;
 
     /**
-     * Register an component.
+     * Register a component, overriding its built-in default regardless of registration order.
+     * Register before opening the corresponding view; mounted views do not update automatically.
      * @param {string} name - The name of the component.
      * @param {ComponentType} component - The component.
-     * @param {IComponentOptions} [options] - The options of the component.
-     * @returns {IDisposable} The disposable object.
+     * @param {IComponentOptions} [options] - Component options. `override` defaults to true; pass false to register a default.
+     * @returns {IDisposable} Disposes this registration, restoring the current built-in default when available.
+     * @throws When another override is already registered for this name. Dispose it before registering a replacement.
      * @example
      * ```tsx
      * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
@@ -578,7 +580,10 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
 
     override registerComponent(name: string, component: ComponentType, options?: IComponentOptions): IDisposable {
         const componentManager = this._injector.get(ComponentManager);
-        return this.disposeWithMe(componentManager.register(name, component, options));
+        return this.disposeWithMe(componentManager.register(name, component, {
+            ...options,
+            override: options?.override ?? true,
+        }));
     }
 
     override setCurrent(unitId: string): void {

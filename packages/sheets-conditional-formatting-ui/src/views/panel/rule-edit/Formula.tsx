@@ -29,8 +29,8 @@ import { CFRuleType, CFSubRuleType } from '@univerjs/sheets-conditional-formatti
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
+import { ConditionalFormattingRulePreview } from '../../ConditionalFormattingRulePreview';
 import { ConditionalStyleEditor } from '../../ConditionalStyleEditor';
-import { Preview } from '../../Preview';
 import { previewClassName } from './styles';
 
 export const FormulaStyleEditor = (props: IStyleEditorProps) => {
@@ -153,7 +153,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
             </div>
 
             <div className={previewClassName}>
-                <Preview
+                <ConditionalFormattingRulePreview
                     rule={getResult({
                         style,
                         formula,

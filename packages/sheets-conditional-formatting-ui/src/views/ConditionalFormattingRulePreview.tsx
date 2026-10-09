@@ -29,7 +29,12 @@ import {
 } from '@univerjs/sheets-conditional-formatting';
 import { useMemo } from 'react';
 
-export function Preview(props: { rule?: IConditionalFormattingRuleConfig }) {
+export interface IConditionalFormattingRulePreviewProps {
+    rule?: IConditionalFormattingRuleConfig;
+}
+
+/** Shows a rule's configured appearance without evaluating worksheet values. */
+export function ConditionalFormattingRulePreview(props: IConditionalFormattingRulePreviewProps) {
     const { rule } = props;
 
     const colorList = useMemo(() => {
@@ -51,7 +56,9 @@ export function Preview(props: { rule?: IConditionalFormattingRuleConfig }) {
         }
     }, [rule]);
 
-    if (!rule) return null;
+    if (!rule) {
+        return null;
+    }
 
     const previewClassName = 'univer-pointer-events-none univer-flex univer-h-5 univer-min-w-[72px] univer-items-center univer-justify-center univer-text-xs';
 

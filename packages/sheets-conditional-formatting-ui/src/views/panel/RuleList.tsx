@@ -42,8 +42,6 @@ import {
 } from '@univerjs/sheets';
 import {
     AddConditionalRuleMutation,
-    CFRuleType,
-    CFSubRuleType,
     ClearWorksheetCfCommand,
     ConditionalFormattingRuleModel,
     DeleteCfCommand,
@@ -57,71 +55,13 @@ import { useDependency, useObservable } from '@univerjs/ui';
 import { useMemo, useState } from 'react';
 import { debounceTime, filter, map, merge, Observable, share, startWith } from 'rxjs';
 import { ConditionalFormattingI18nController } from '../../controllers/cf.i18n.controller';
-import { Preview } from '../Preview';
+import { getRuleDescribe } from '../../utils/get-rule-describe';
+import { ConditionalFormattingRulePreview } from '../ConditionalFormattingRulePreview';
 
 export interface IRuleListProps {
     onClick: (rule: IConditionFormattingRule) => void;
     onCreate: () => void;
     SelectComponent?: ComponentType<ISelectProps>;
-};
-const getRuleDescribe = (rule: IConditionFormattingRule, localeService: LocaleService) => {
-    const ruleConfig = rule.rule;
-    switch (ruleConfig.type) {
-        case CFRuleType.colorScale: {
-            return localeService.t<LocaleKey>('sheets-conditional-formatting-ui.ruleType.colorScale');
-        }
-        case CFRuleType.dataBar: {
-            return localeService.t<LocaleKey>('sheets-conditional-formatting-ui.ruleType.dataBar');
-        }
-        case CFRuleType.iconSet: {
-            return localeService.t<LocaleKey>('sheets-conditional-formatting-ui.ruleType.iconSet');
-        }
-        case CFRuleType.highlightCell: {
-            switch (ruleConfig.subType) {
-                case CFSubRuleType.average: {
-                    const operator = ruleConfig.operator;
-                    return localeService.t<LocaleKey>(`sheets-conditional-formatting-ui.preview.describe.${operator}`, localeService.t<LocaleKey>('sheets-conditional-formatting-ui.subRuleType.average'));
-                }
-                case CFSubRuleType.duplicateValues: {
-                    return localeService.t<LocaleKey>('sheets-conditional-formatting-ui.subRuleType.duplicateValues');
-                }
-                case CFSubRuleType.uniqueValues: {
-                    return localeService.t<LocaleKey>('sheets-conditional-formatting-ui.subRuleType.uniqueValues');
-                }
-                case CFSubRuleType.number: {
-                    const operator = ruleConfig.operator;
-                    return localeService.t<LocaleKey>(`sheets-conditional-formatting-ui.preview.describe.${operator}`, ...Array.isArray(ruleConfig.value) ? (ruleConfig.value.map((e) => String(e))) : [String(ruleConfig.value || '')]);
-                }
-                case CFSubRuleType.text: {
-                    const operator = ruleConfig.operator;
-                    return localeService.t<LocaleKey>(`sheets-conditional-formatting-ui.preview.describe.${operator}`, ruleConfig.value || '');
-                }
-
-                case CFSubRuleType.timePeriod: {
-                    const operator = ruleConfig.operator;
-                    return localeService.t<LocaleKey>(`sheets-conditional-formatting-ui.preview.describe.${operator}`);
-                }
-                case CFSubRuleType.rank: {
-                    if (ruleConfig.isPercent) {
-                        if (ruleConfig.isBottom) {
-                            return localeService.t<LocaleKey>('sheets-conditional-formatting-ui.preview.describe.bottomNPercent', String(ruleConfig.value));
-                        } else {
-                            return localeService.t<LocaleKey>('sheets-conditional-formatting-ui.preview.describe.topNPercent', String(ruleConfig.value));
-                        }
-                    } else {
-                        if (ruleConfig.isBottom) {
-                            return localeService.t<LocaleKey>('sheets-conditional-formatting-ui.preview.describe.bottomN', String(ruleConfig.value));
-                        } else {
-                            return localeService.t<LocaleKey>('sheets-conditional-formatting-ui.preview.describe.topN', String(ruleConfig.value));
-                        }
-                    }
-                }
-                case CFSubRuleType.formula: {
-                    return localeService.t<LocaleKey>('sheets-conditional-formatting-ui.ruleType.formula');
-                }
-            }
-        }
-    }
 };
 
 export function RuleList(props: IRuleListProps) {
@@ -400,7 +340,7 @@ export function RuleList(props: IRuleListProps) {
                                 </div>
                             </div>
                             <div>
-                                <Preview rule={rule.rule} />
+                                <ConditionalFormattingRulePreview rule={rule.rule} />
                             </div>
                             <div
                                 className={clsx(`

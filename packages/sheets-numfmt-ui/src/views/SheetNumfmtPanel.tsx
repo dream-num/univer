@@ -22,7 +22,7 @@ import { LocaleService } from '@univerjs/core';
 import { Button, clsx, scrollbarClassName, Select } from '@univerjs/design';
 import { getCurrencyType } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { UserHabitCurrencyContext } from '../controllers/user-habit.controller';
 import { AccountingPanel, isAccountingPanel } from './components/Accounting';
 import { CurrencyPanel, isCurrencyPanel } from './components/Currency';
@@ -33,32 +33,32 @@ import { isThousandthPercentilePanel, ThousandthPercentilePanel } from './compon
 import { useCurrencyOptions } from './hooks/use-currency-options';
 import { useNextTick } from './hooks/use-next-tick';
 
+const typeOptions: Array<{ label: LocaleKey; component: ComponentType<IBusinessComponentProps> }> = [
+    { label: 'sheets-numfmt-ui.general', component: GeneralPanel },
+    { label: 'sheets-numfmt-ui.accounting', component: AccountingPanel },
+    { label: 'sheets-numfmt-ui.currency', component: CurrencyPanel },
+    { label: 'sheets-numfmt-ui.date', component: DatePanel },
+    { label: 'sheets-numfmt-ui.thousandthPercentile', component: ThousandthPercentilePanel },
+    { label: 'sheets-numfmt-ui.customFormat', component: CustomFormat },
+];
+
 export interface ISheetNumfmtPanelProps {
     value: { defaultValue: number; defaultPattern: string; row: number; col: number };
     onChange: (config: { type: 'change' | 'cancel' | 'confirm'; value: string }) => void;
 }
 
 export function SheetNumfmtPanel(props: ISheetNumfmtPanelProps) {
+    const { row, col, defaultPattern } = props.value;
+    return <SheetNumfmtPanelContent {...props} key={`${row}_${col}_${defaultPattern}`} />;
+}
+
+function SheetNumfmtPanelContent(props: ISheetNumfmtPanelProps) {
+    const { onChange } = props;
     const { defaultValue, defaultPattern, row, col } = props.value;
     const localeService = useDependency(LocaleService);
     const currentPatternRef = useRef<() => string | null>(() => '');
     const nextTick = useNextTick();
 
-    const typeOptions = useMemo(
-        () => {
-            const typeOptions: Array<{ label: LocaleKey; component: ComponentType<IBusinessComponentProps> }> = [
-                { label: 'sheets-numfmt-ui.general', component: GeneralPanel },
-                { label: 'sheets-numfmt-ui.accounting', component: AccountingPanel },
-                { label: 'sheets-numfmt-ui.currency', component: CurrencyPanel },
-                { label: 'sheets-numfmt-ui.date', component: DatePanel },
-                { label: 'sheets-numfmt-ui.thousandthPercentile', component: ThousandthPercentilePanel },
-                { label: 'sheets-numfmt-ui.customFormat', component: CustomFormat },
-            ];
-
-            return typeOptions.map((item) => ({ ...item, label: localeService.t<LocaleKey>(item.label) }));
-        },
-        [localeService]
-    );
     const [type, setType] = useState(findDefaultType);
     const [key, setKey] = useState(() => `${row}_${col}_${defaultPattern}`);
     const { mark, userHabitCurrency } = useCurrencyOptions(() => setKey(`${row}_${col}_${defaultPattern}_userCurrency`));
@@ -69,24 +69,24 @@ export function SheetNumfmtPanel(props: ISheetNumfmtPanelProps) {
         const list = [isGeneralPanel, isAccountingPanel, isCurrencyPanel, isDatePanel, isThousandthPercentilePanel];
         return (
             list.reduce((pre, curFn, index) => pre || (curFn(defaultPattern) ? typeOptions[index].label : ''), '') ||
-            typeOptions[0].label
+            'sheets-numfmt-ui.customFormat'
         );
     }
 
     const selectOptions: ISelectProps['options'] = typeOptions.map((option) => ({
-        label: option.label,
+        label: localeService.t<LocaleKey>(option.label),
         value: option.label,
     }));
 
     const handleSelect: ISelectProps['onChange'] = (value) => {
         setType(value);
         // after the BusinessComponent render.
-        nextTick(() => props.onChange({ type: 'change', value: currentPatternRef.current() || '' }));
+        nextTick(() => onChange({ type: 'change', value: currentPatternRef.current() || '' }));
     };
 
     const handleChange = useCallback((v: string) => {
-        props.onChange({ type: 'change', value: v });
-    }, []);
+        onChange({ type: 'change', value: v });
+    }, [onChange]);
 
     const handleActionChange = useCallback((action: () => string | null) => {
         currentPatternRef.current = action;
@@ -98,11 +98,11 @@ export function SheetNumfmtPanel(props: ISheetNumfmtPanelProps) {
         if (currency) {
             mark(currency);
         }
-        props.onChange({ type: 'confirm', value: pattern });
+        onChange({ type: 'confirm', value: pattern });
     };
 
     const handleCancel = () => {
-        props.onChange({ type: 'cancel', value: '' });
+        onChange({ type: 'cancel', value: '' });
     };
 
     const subProps: IBusinessComponentProps = {
@@ -111,11 +111,6 @@ export function SheetNumfmtPanel(props: ISheetNumfmtPanelProps) {
         defaultValue,
         defaultPattern,
     };
-
-    useEffect(() => {
-        setType(findDefaultType());
-        setKey(`${row}_${col}_${defaultPattern}`);
-    }, [row, col, defaultPattern]);
 
     return (
         <div

@@ -89,4 +89,72 @@ describe('HtmlToUSMService', () => {
         expect(cellMatrix.getValue(2, 0)?.v).toBe('right ');
         expect(cellMatrix.getValue(3, 0)).toBeUndefined();
     });
+
+    it('parses numbers pasted from Excel with non-US separators declared via mso-displayed-*-separator', () => {
+        const converter = new HtmlToUSMService({
+            getCurrentSkeleton: () => null,
+            getNumfmtParseOptions: () => ({ locale: 'en-US' }),
+        });
+        const { cellMatrix } = converter.convert(`
+            <html>
+                <head>
+                    <style>
+                        <!--table
+                            {mso-displayed-decimal-separator:"\\,";
+                            mso-displayed-thousand-separator:"\\.";}
+                        .xl65 { mso-number-format:"\\#\\,\\#\\#0"; }
+                        .xl66 { mso-number-format:"0\\.0"; }
+                        .xl67 { mso-number-format:"\\#\\,\\#\\#0\\.0"; }
+                        -->
+                    </style>
+                </head>
+                <body><table>
+                    <tr><td class="xl65">516.382.306.730</td></tr>
+                    <tr><td class="xl66">12,5</td></tr>
+                    <tr><td class="xl67">1.000,5</td></tr>
+                </table></body>
+            </html>
+        `);
+
+        expect(cellMatrix.getValue(0, 0)?.v).toBe(516382306730);
+        expect(cellMatrix.getValue(1, 0)?.v).toBe(12.5);
+        expect(cellMatrix.getValue(2, 0)?.v).toBe(1000.5);
+
+        // A subsequent paste without mso separators must not inherit them from the previous paste.
+        const { cellMatrix: secondMatrix } = converter.convert(`
+            <html>
+                <head>
+                    <style>
+                        .xl65 { mso-number-format:"\\#\\,\\#\\#0"; }
+                    </style>
+                </head>
+                <body><table>
+                    <tr><td class="xl65">1,234</td></tr>
+                </table></body>
+            </html>
+        `);
+
+        expect(secondMatrix.getValue(0, 0)?.v).toBe(1234);
+    });
+
+    it('keeps US number parsing unchanged when no mso separators are declared', () => {
+        const converter = new HtmlToUSMService({
+            getCurrentSkeleton: () => null,
+            getNumfmtParseOptions: () => ({ locale: 'en-US' }),
+        });
+        const { cellMatrix } = converter.convert(`
+            <html>
+                <head>
+                    <style>
+                        .xl65 { mso-number-format:"\\#\\,\\#\\#0\\.00"; }
+                    </style>
+                </head>
+                <body><table>
+                    <tr><td class="xl65">1,234.56</td></tr>
+                </table></body>
+            </html>
+        `);
+
+        expect(cellMatrix.getValue(0, 0)?.v).toBe(1234.56);
+    });
 });

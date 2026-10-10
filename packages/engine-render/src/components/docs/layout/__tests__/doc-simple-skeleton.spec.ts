@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DocSimpleSkeleton } from '../doc-simple-skeleton';
 import { FontCache } from '../shaping-engine/font-cache';
 
@@ -23,17 +24,33 @@ function measure(text: string) {
         width: text.length * 10,
         fontBoundingBoxAscent: 8,
         fontBoundingBoxDescent: 2,
-    } as any;
+        actualBoundingBoxAscent: 8,
+        actualBoundingBoxDescent: 2,
+    };
 }
 
 describe('doc simple skeleton', () => {
+    let injector: Injector;
+
     beforeEach(() => {
+        injector = new Injector();
+        Reflect.set(FontCache, '_context', null);
+        FontCache.invalidateMetrics(() => true);
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+            font: '',
+            measureText: vi.fn(measure),
+        } as unknown as CanvasRenderingContext2D);
+    });
+
+    afterEach(() => {
+        injector.dispose();
         vi.restoreAllMocks();
-        vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => measure(text));
+        Reflect.set(FontCache, '_context', null);
+        FontCache.invalidateMetrics(() => true);
     });
 
     it('handles empty text and no-wrap text', () => {
-        const empty = new DocSimpleSkeleton('', '12px Arial', true, 100, 100);
+        const empty = injector.createInstance(DocSimpleSkeleton, '', '12px Arial', true, 100, 100);
         const emptyLines = empty.calculate();
         expect(emptyLines).toEqual([
             {
@@ -46,7 +63,7 @@ describe('doc simple skeleton', () => {
         expect(empty.getTotalHeight()).toBe(10);
         expect(empty.getTotalWidth()).toBe(0);
 
-        const noWrap = new DocSimpleSkeleton('hello world', '12px Arial', false, 30, 200);
+        const noWrap = injector.createInstance(DocSimpleSkeleton, 'hello world', '12px Arial', false, 30, 200);
         const lines = noWrap.calculate();
         expect(lines).toHaveLength(1);
         expect(lines[0].text).toBe('hello world');
@@ -56,48 +73,55 @@ describe('doc simple skeleton', () => {
     });
 
     it('wraps long text and uses cache behavior', () => {
-        const skeleton = new DocSimpleSkeleton('supercalifragilistic', '12px Arial', true, 25, 100);
+        const skeleton = injector.createInstance(DocSimpleSkeleton, 'supercalifragilistic', '12px Arial', true, 25, 100);
         const lines = skeleton.calculate();
         expect(lines.length).toBeGreaterThan(1);
         expect(lines.every((line) => line.width > 0)).toBe(true);
         expect(lines.every((line) => line.width <= 25 || line.text.length === 1)).toBe(true);
 
-        const callCountAfterFirst = (FontCache.getMeasureText as any).mock.calls.length;
         const second = skeleton.calculate();
         expect(second).toBe(lines);
-        expect((FontCache.getMeasureText as any).mock.calls.length).toBe(callCountAfterFirst);
     });
 
     it('recalculates after makeDirty in no-wrap mode', () => {
-        const skeleton = new DocSimpleSkeleton('hello world', '12px Arial', false, 30, 200);
+        const skeleton = injector.createInstance(DocSimpleSkeleton, 'hello world', '12px Arial', false, 30, 200);
         const first = skeleton.calculate();
-        const callCountAfterFirst = (FontCache.getMeasureText as any).mock.calls.length;
         const second = skeleton.calculate();
         expect(second).toBe(first);
-        expect((FontCache.getMeasureText as any).mock.calls.length).toBe(callCountAfterFirst);
 
         skeleton.makeDirty();
         const third = skeleton.calculate();
         expect(third).not.toBe(first);
         expect(third).toHaveLength(1);
         expect(third[0].text).toBe('hello world');
-        expect((FontCache.getMeasureText as any).mock.calls.length).toBeGreaterThan(callCountAfterFirst);
     });
 
     it('respects height limits when wrapping', () => {
-        const skeleton = new DocSimpleSkeleton('a b c d e f g h i j k', '12px Arial', true, 20, 15);
+        const skeleton = injector.createInstance(DocSimpleSkeleton, 'a b c d e f g h i j k', '12px Arial', true, 20, 15);
         const lines = skeleton.calculate();
-        expect(lines.length).toBeGreaterThan(0);
-        expect(skeleton.getTotalHeight()).toBeGreaterThanOrEqual(10);
+        expect(lines.slice(0, 2).map((line) => line.text)).toEqual(['a ', 'b ']);
+        expect(lines.some((line) => line.text.includes('c'))).toBe(false);
     });
 
     it('content with \n', () => {
-        const skeleton = new DocSimpleSkeleton('客户经理UM1\n客户经理UM2', '11pt Arial', true, 60, Infinity);
+        const skeleton = injector.createInstance(DocSimpleSkeleton, '客户经理UM1\n客户经理UM2', '11pt Arial', true, 60, Infinity);
         const lines = skeleton.calculate();
         expect(lines.length).toBe(4);
         expect(lines[0].text).toBe('客户经理');
         expect(lines[1].text).toBe('UM1');
         expect(lines[2].text).toBe('客户经理');
         expect(lines[3].text).toBe('UM2');
+    });
+
+    it('adds the configured gap only between wrapped lines without changing glyph metrics or breaks', () => {
+        const baseline = injector.createInstance(DocSimpleSkeleton, 'first\nsecond\nthird', '12px Arial', true, 100, Infinity);
+        const spaced = injector.createInstance(DocSimpleSkeleton, 'first\nsecond\nthird', '12px Arial', true, 100, Infinity, 2);
+        expect(spaced.calculate()).toEqual(baseline.calculate());
+        expect(spaced.getTotalHeight()).toBe(baseline.getTotalHeight() + 4);
+        expect(spaced.getTotalWidth()).toBe(baseline.getTotalWidth());
+
+        const single = injector.createInstance(DocSimpleSkeleton, 'first', '12px Arial', true, 100, Infinity, 2);
+        single.calculate();
+        expect(single.getTotalHeight()).toBe(baseline.getLines()[0].height);
     });
 });

@@ -36,7 +36,8 @@ export class DocSimpleSkeleton {
         private _fontStyle: string,
         private _warp: boolean,
         private _width: number,
-        private _height: number
+        private _height: number,
+        private _lineGap = 0
     ) {
         this._lineBreaker = new LineBreaker(this._text);
     }
@@ -97,7 +98,7 @@ export class DocSimpleSkeleton {
                         // Push current line if it has content
                         if (currentLine.text.length > 0) {
                             this._lines.push(currentLine);
-                            totalHeight += currentLine.height;
+                            totalHeight += currentLine.height + (this._lines.length > 1 ? this._lineGap : 0);
                             if (totalHeight > this._height) {
                                 break;
                             }
@@ -187,7 +188,7 @@ export class DocSimpleSkeleton {
                                 // If there's remaining text, need to wrap to next line
                                 if (remainingText.length > 0) {
                                     this._lines.push(currentLine);
-                                    totalHeight += currentLine.height;
+                                    totalHeight += currentLine.height + (this._lines.length > 1 ? this._lineGap : 0);
                                     if (totalHeight > this._height) {
                                         break;
                                     }
@@ -208,7 +209,7 @@ export class DocSimpleSkeleton {
                         if (currentLine.text.length > 0) {
                             // Push the current line first
                             this._lines.push(currentLine);
-                            totalHeight += currentLine.height;
+                            totalHeight += currentLine.height + (this._lines.length > 1 ? this._lineGap : 0);
                             if (totalHeight > this._height) {
                                 break;
                             }
@@ -241,7 +242,7 @@ export class DocSimpleSkeleton {
             // For excel, when cell text is wrapped, \n should be treated as mandatory line break, so we need to break the line here.
             if (isMandatoryBreak) {
                 this._lines.push(currentLine);
-                totalHeight += currentLine.height;
+                totalHeight += currentLine.height + (this._lines.length > 1 ? this._lineGap : 0);
 
                 if (totalHeight > this._height) {
                     break;
@@ -272,7 +273,7 @@ export class DocSimpleSkeleton {
     }
 
     getTotalHeight() {
-        return this._lines.reduce((acc, line) => acc + line.height, 0);
+        return this._lines.reduce((acc, line) => acc + line.height, 0) + Math.max(0, this._lines.length - 1) * this._lineGap;
     }
 
     getTotalWidth() {

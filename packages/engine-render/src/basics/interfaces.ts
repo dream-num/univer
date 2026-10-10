@@ -95,6 +95,7 @@ export interface IFontLocale {
 }
 
 export interface IDocsConfig extends IReferenceSource, IDocumentLayout {
+    lineGap?: number;
     localeService: LocaleService;
     documentTextStyle?: IDocumentLayoutTextStyle;
     documentCompatibilityPolicy?: IDocumentCompatibilityPolicy;

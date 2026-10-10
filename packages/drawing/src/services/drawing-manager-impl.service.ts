@@ -200,12 +200,14 @@ function validateDrawingData<T extends IDrawingParam>(data: IDrawingSubunitMap<T
 
 interface IDrawingRefreshMetadata {
     behindText?: unknown;
+    sheetTransform?: unknown;
+    axisAlignSheetTransform?: unknown;
 }
 
 /**
  * unitId -> subUnitId -> drawingId -> drawingParam
  */
-export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawingService<T> {
+export class UnitDrawingService<T extends IDrawingParam & IDrawingRefreshMetadata> implements IUnitDrawingService<T> {
     drawingManagerData: IDrawingMap<T> = {};
 
     private _oldDrawingManagerData: IDrawingMap<T> = {};
@@ -290,6 +292,13 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             }
 
             param.transform = updateParam.transform;
+            // Cell anchors must describe the same bounds as the refreshed pixel transform.
+            if (Object.prototype.hasOwnProperty.call(updateParam, 'sheetTransform')) {
+                param.sheetTransform = updateParam.sheetTransform;
+            }
+            if (Object.prototype.hasOwnProperty.call(updateParam, 'axisAlignSheetTransform')) {
+                param.axisAlignSheetTransform = updateParam.axisAlignSheetTransform;
+            }
             if (Object.prototype.hasOwnProperty.call(updateParam, 'transforms')) {
                 param.transforms = updateParam.transforms;
             }
@@ -298,7 +307,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             }
 
             if ('behindText' in updateParam) {
-                (param as T & IDrawingRefreshMetadata).behindText = (updateParam as T & IDrawingRefreshMetadata).behindText;
+                param.behindText = updateParam.behindText;
             }
             if ('hidden' in updateParam) {
                 param.hidden = updateParam.hidden;

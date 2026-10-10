@@ -485,6 +485,30 @@ describe('UnitDrawingService', () => {
         expect(service.getFocusDrawings()).toEqual([]);
     });
 
+    it('refreshes cell anchors with pixel bounds and retains them when a later refresh omits them', () => {
+        const from = { row: 1, column: 2, rowOffset: 0, columnOffset: 0 };
+        const drawing = {
+            ...createDrawing('a', { transform: { left: 160, top: 20, width: 320, height: 40 } }),
+            sheetTransform: { from, to: { ...from, row: 3, column: 6 } },
+            axisAlignSheetTransform: { from, to: { ...from, row: 3, column: 6 } },
+        };
+        service.applyJson1(unitId, subUnitId, service.getBatchAddOp([drawing]).redo);
+        const refreshed = {
+            ...drawing,
+            sheetTransform: { from, to: { ...from, row: 3, column: 10 } },
+            axisAlignSheetTransform: { from, to: { ...from, row: 3, column: 10 } },
+        };
+
+        service.refreshTransform([refreshed]);
+        expect(service.getDrawingByParam(createSearch('a'))).toMatchObject(refreshed);
+
+        service.refreshTransform([createDrawing('a', { transform: { ...drawing.transform, left: 200 } })]);
+        expect(service.getDrawingByParam(createSearch('a'))).toMatchObject({
+            ...refreshed,
+            transform: { ...drawing.transform, left: 200 },
+        });
+    });
+
     it('does not add omitted multi-transform fields during a transform refresh', () => {
         const drawing = createDrawing('a', { transform: { left: 0, top: 0 } });
         service.applyJson1(unitId, subUnitId, service.getBatchAddOp([drawing]).redo);

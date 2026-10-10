@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ABS: {
+        label: 'ABS',
         description: 'Renvoie la valeur absolue d’un nombre. La valeur absolue d’un nombre est le nombre sans son signe.',
         abstract: 'Renvoie la valeur absolue d’un nombre. La valeur absolue d’un nombre est le nombre sans son signe.',
         links: [
@@ -31,6 +32,7 @@ const locale: typeof enUS = {
         },
     },
     ACOS: {
+        label: 'ACOS',
         description: 'Renvoie l’arccosinus d’un nombre. L’arccosinus, ou inverse du cosinus, est l’angle dont le cosinus est l’argument nombre . L’angle renvoyé, exprimé en radians, est compris entre 0 (zéro) et pi.',
         abstract: 'Renvoie l’arccosinus d’un nombre. L’arccosinus, ou inverse du cosinus, est l’angle dont le cosinus est l’argument nombre . L’angle renvoyé, exprimé en radians, est compris entre 0 (zéro) et pi.',
         links: [
@@ -44,6 +46,7 @@ const locale: typeof enUS = {
         },
     },
     ACOSH: {
+        label: 'ACOSH',
         description: 'Renvoie le cosinus hyperbolique inverse d’un nombre. L’argument Nombre doit être supérieur ou égal à 1. Le cosinus hyperbolique inverse est la valeur dont le cosinus hyperbolique est nombre , de sorte que ACOSH(COSH(nombre)) égale nombre .',
         abstract: 'Renvoie le cosinus hyperbolique inverse d’un nombre. L’argument Nombre doit être supérieur ou égal à 1. Le cosinus hyperbolique inverse est la valeur dont le cosinus hyperbolique est nombre , de sorte que ACOSH(COSH(nombre)) égale nombre .',
         links: [
@@ -57,6 +60,7 @@ const locale: typeof enUS = {
         },
     },
     ACOT: {
+        label: 'ACOT',
         description: 'Renvoie la valeur principale de l’arccotangente, ou cotangente inverse, d’un nombre.',
         abstract: 'Renvoie la valeur principale de l’arccotangente, ou cotangente inverse, d’un nombre.',
         links: [
@@ -70,6 +74,7 @@ const locale: typeof enUS = {
         },
     },
     ACOTH: {
+        label: 'ACOTH',
         description: 'Renvoie la cotangente hyperbolique inverse d’un nombre.',
         abstract: 'Renvoie la cotangente hyperbolique inverse d’un nombre.',
         links: [
@@ -83,6 +88,7 @@ const locale: typeof enUS = {
         },
     },
     AGGREGATE: {
+        label: 'AGRÉGAT',
         description: 'Renvoie un agrégat dans une liste ou une base de données. La fonction AGREGAT peut appliquer diverses fonctions d’agrégation à une liste ou à une base de données en proposant l’option d’ignorer les lignes masquées et les valeurs d’erreur.',
         abstract: 'Renvoie un agrégat dans une liste ou une base de données. La fonction AGREGAT peut appliquer diverses fonctions d’agrégation à une liste ou à une base de données en proposant l’option d’ignorer les lignes masquées et les valeurs d’erreur.',
         links: [
@@ -99,6 +105,7 @@ const locale: typeof enUS = {
         },
     },
     ARABIC: {
+        label: 'ARABE',
         description: 'Convertit un chiffre romain en chiffre arabe.',
         abstract: 'Convertit un chiffre romain en chiffre arabe.',
         links: [
@@ -112,6 +119,7 @@ const locale: typeof enUS = {
         },
     },
     ASIN: {
+        label: 'ASIN',
         description: 'Renvoie l’arcsinus, ou sinus inverse, d’un nombre. L’arcsinus est l’angle dont le sinus est ce nombre. L’angle renvoyé est exprimé en radians entre -pi/2 et pi/2.',
         abstract: 'Renvoie l’arcsinus, ou sinus inverse, d’un nombre.',
         links: [
@@ -125,6 +133,7 @@ const locale: typeof enUS = {
         },
     },
     ASINH: {
+        label: 'ASINH',
         description: 'Renvoie le sinus hyperbolique inverse d’un nombre. Le sinus hyperbolique inverse est la valeur dont le sinus hyperbolique est ce nombre ; ainsi ASINH(SINH(nombre)) est égal à nombre.',
         abstract: 'Renvoie le sinus hyperbolique inverse d’un nombre.',
         links: [
@@ -138,6 +147,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN: {
+        label: 'ATAN',
         description: 'Renvoie l’arctangente ou la tangente inverse d’un nombre. L’arctangente est l’angle dont la tangente est l’argument nombre . L’angle renvoyé, exprimé en radians, est compris entre -pi/2 et pi/2.',
         abstract: 'Renvoie l’arctangente ou la tangente inverse d’un nombre. L’arctangente est l’angle dont la tangente est l’argument nombre . L’angle renvoyé, exprimé en radians, est compris entre -pi/2 et pi/2.',
         links: [
@@ -151,6 +161,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN2: {
+        label: 'ATAN2',
         description: 'Renvoie l’arctangente ou la tangente inverse des coordonnées x et y spécifiées. L’arctangente est l’angle formé par l’axe des abscisses (x) et une droite passant par l’origine (0, 0) et un point dont les coordonnées sont (no_x, no_y). Cet angle, exprimé en radians, est compris entre -pi et pi, -pi non compris.',
         abstract: 'Renvoie l’arctangente ou la tangente inverse des coordonnées x et y spécifiées. L’arctangente est l’angle formé par l’axe des abscisses (x) et une droite passant par l’origine (0, 0) et un point dont les coordonnées sont (no_x, no_y). Cet angle, exprimé en radians, est compris entre -pi et pi, -pi non compris.',
         links: [
@@ -165,6 +176,7 @@ const locale: typeof enUS = {
         },
     },
     ATANH: {
+        label: 'ATANH',
         description: 'Renvoie la tangente hyperbolique inverse d’un nombre. L’argument nombre doit être strictement compris entre -1 et 1 (-1 et 1 non compris). La tangente hyperbolique inverse est la valeur dont la tangente hyperbolique est l’argument nombre , de sorte que ATANH(TANH(nombre)) égale nombre .',
         abstract: 'Renvoie la tangente hyperbolique inverse d’un nombre. L’argument nombre doit être strictement compris entre -1 et 1 (-1 et 1 non compris). La tangente hyperbolique inverse est la valeur dont la tangente hyperbolique est l’argument nombre , de sorte que ATANH(TANH(nombre)) égale nombre .',
         links: [
@@ -178,6 +190,7 @@ const locale: typeof enUS = {
         },
     },
     BASE: {
+        label: 'BASE',
         description: 'Convertit un nombre en une représentation textuelle avec la base donnée.',
         abstract: 'Convertit un nombre en une représentation textuelle avec la base donnée.',
         links: [
@@ -193,6 +206,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING: {
+        label: 'PLAFOND',
         description: 'Renvoie l’argument nombre après l’avoir arrondi au multiple de l’argument précision en s’éloignant de zéro. Par exemple, si vous voulez que la valeur décimale de vos prix soit toujours un multiple de 5 centimes, et que le prix de votre produit est 4,42 F, utilisez la formule =PLAFOND(4,42;0,05) pour arrondir les centimes au multiple de 5 supérieur.',
         abstract: 'Renvoie l’argument nombre après l’avoir arrondi au multiple de l’argument précision en s’éloignant de zéro. Par exemple, si vous voulez que la valeur décimale de vos prix soit toujours un multiple de 5 centimes, et que le prix de votre produit est 4,42 F, utilisez la formule =PLAFOND(4,42;0,05) pour arrondir les centimes au multiple de 5 supérieur.',
         links: [
@@ -207,6 +221,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_MATH: {
+        label: 'PLAFOND.MATHÉMATIQUES',
         description: 'Le PLAFOND. La fonction MATH arrondit un nombre jusqu’à l’entier le plus proche ou, éventuellement, au multiple de précision le plus proche.',
         abstract: 'Le PLAFOND. La fonction MATH arrondit un nombre jusqu’à l’entier le plus proche ou, éventuellement, au multiple de précision le plus proche.',
         links: [
@@ -222,6 +237,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_PRECISE: {
+        label: 'PLAFOND.PRÉCIS',
         description: 'Renvoie un nombre arrondi au nombre entier le plus proche ou au multiple le plus proche de l’argument précision en s’éloignant de zéro. Quel que soit son signe, ce nombre est arrondi à l’entier supérieur. Toutefois, si le nombre ou l’argument précision est égal à zéro, zéro est retourné.',
         abstract: 'Renvoie un nombre arrondi au nombre entier le plus proche ou au multiple le plus proche de l’argument précision en s’éloignant de zéro. Quel que soit son signe, ce nombre est arrondi à l’entier supérieur. Toutefois, si le nombre ou l’argument précision est égal à zéro, zéro est retourné.',
         links: [
@@ -236,6 +252,7 @@ const locale: typeof enUS = {
         },
     },
     COMBIN: {
+        label: 'COMBIN',
         description: 'Renvoie le nombre de combinaisons pour un nombre donné d’éléments. Utilisez COMBIN pour déterminer le nombre total de groupes qu’il est possible de former à partir d’un nombre donné d’éléments.',
         abstract: 'Renvoie le nombre de combinaisons pour un nombre donné d’éléments. Utilisez COMBIN pour déterminer le nombre total de groupes qu’il est possible de former à partir d’un nombre donné d’éléments.',
         links: [
@@ -250,6 +267,7 @@ const locale: typeof enUS = {
         },
     },
     COMBINA: {
+        label: 'COMBINA',
         description: 'Renvoie le nombre de combinaisons (avec répétitions) pour un nombre d’éléments donné.',
         abstract: 'Renvoie le nombre de combinaisons (avec répétitions) pour un nombre d’éléments donné.',
         links: [
@@ -264,6 +282,7 @@ const locale: typeof enUS = {
         },
     },
     COS: {
+        label: 'COS',
         description: 'Renvoie le cosinus de l’angle spécifié.',
         abstract: 'Renvoie le cosinus de l’angle spécifié.',
         links: [
@@ -277,6 +296,7 @@ const locale: typeof enUS = {
         },
     },
     COSH: {
+        label: 'COSH',
         description: 'Renvoie le cosinus hyperbolique d’un nombre.',
         abstract: 'Renvoie le cosinus hyperbolique d’un nombre.',
         links: [
@@ -290,6 +310,7 @@ const locale: typeof enUS = {
         },
     },
     COT: {
+        label: 'COT',
         description: 'Renvoie la cotangente d’un angle spécifié en radians.',
         abstract: 'Renvoie la cotangente d’un angle spécifié en radians.',
         links: [
@@ -303,6 +324,7 @@ const locale: typeof enUS = {
         },
     },
     COTH: {
+        label: 'COTH',
         description: 'Retourne la cotangente hyperbolique d’un angle hyperbolique.',
         abstract: 'Retourne la cotangente hyperbolique d’un angle hyperbolique.',
         links: [
@@ -316,6 +338,7 @@ const locale: typeof enUS = {
         },
     },
     CSC: {
+        label: 'CSC',
         description: 'Renvoie la cosécante d’un angle spécifié en radians.',
         abstract: 'Renvoie la cosécante d’un angle spécifié en radians.',
         links: [
@@ -329,6 +352,7 @@ const locale: typeof enUS = {
         },
     },
     CSCH: {
+        label: 'CSCH',
         description: 'Renvoie la cosécante hyperbolique d’un angle spécifié en radians.',
         abstract: 'Renvoie la cosécante hyperbolique d’un angle spécifié en radians.',
         links: [
@@ -342,6 +366,7 @@ const locale: typeof enUS = {
         },
     },
     DECIMAL: {
+        label: 'DÉCIMAL',
         description: 'Convertit une représentation textuelle d’un nombre dans une base donnée en nombre décimal.',
         abstract: 'Convertit une représentation textuelle d’un nombre dans une base donnée en nombre décimal.',
         links: [
@@ -356,6 +381,7 @@ const locale: typeof enUS = {
         },
     },
     DEGREES: {
+        label: 'DEGRÉS',
         description: 'Cette fonction convertit les radians en degrés.',
         abstract: 'Cette fonction convertit les radians en degrés.',
         links: [
@@ -369,6 +395,7 @@ const locale: typeof enUS = {
         },
     },
     EVEN: {
+        label: 'PAIR',
         description: 'Retourne un nombre arrondi à l’entier pair le plus proche. Vous pouvez utiliser cette fonction pour traiter les éléments qui sont fournis en deux. Par exemple, une caisse d’emballage accepte des lignes d’un ou deux éléments. La caisse est pleine lorsque le nombre d’éléments, arrondi aux deux plus proches, correspond à la capacité de la caisse.',
         abstract: 'Retourne un nombre arrondi à l’entier pair le plus proche. Vous pouvez utiliser cette fonction pour traiter les éléments qui sont fournis en deux. Par exemple, une caisse d’emballage accepte des lignes d’un ou deux éléments. La caisse est pleine lorsque le nombre d’éléments, arrondi aux deux plus proches, correspond à la capacité de la caisse.',
         links: [
@@ -382,6 +409,7 @@ const locale: typeof enUS = {
         },
     },
     EXP: {
+        label: 'EXP',
         description: 'Renvoie la constante e élevée à la puissance de l’argument nombre. La constante e est égale à 2,71828182845904, soit la base du logarithme népérien.',
         abstract: 'Renvoie la constante e élevée à la puissance de l’argument nombre. La constante e est égale à 2,71828182845904, soit la base du logarithme népérien.',
         links: [
@@ -395,6 +423,7 @@ const locale: typeof enUS = {
         },
     },
     FACT: {
+        label: 'RÉALITÉ',
         description: 'Donne la factorielle d’un nombre. La factorielle de l’argument nombre est égale à 1*2*3*...* nombre.',
         abstract: 'Donne la factorielle d’un nombre. La factorielle de l’argument nombre est égale à 1*2*3*...* nombre.',
         links: [
@@ -408,6 +437,7 @@ const locale: typeof enUS = {
         },
     },
     FACTDOUBLE: {
+        label: 'FACTDOUBLE',
         description: 'Renvoie la factorielle double d’un nombre.',
         abstract: 'Renvoie la factorielle double d’un nombre.',
         links: [
@@ -421,6 +451,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR: {
+        label: 'PLANCHER',
         description: 'La fonction FLOOR dans Excel arrondit un nombre spécifié au multiple de précision spécifié le plus proche. Les nombres négatifs sont arrondis vers le bas (négatif supplémentaire) au multiple entier le plus proche en dessous de zéro.',
         abstract: 'La fonction FLOOR dans Excel arrondit un nombre spécifié au multiple de précision spécifié le plus proche. Les nombres négatifs sont arrondis vers le bas (négatif supplémentaire) au multiple entier le plus proche en dessous de zéro.',
         links: [
@@ -435,6 +466,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_MATH: {
+        label: 'PLANCHER.MATHÉMATIQUES',
         description: 'Arrondir un nombre au nombre entier inférieur le plus proche ou au multiple le plus proche de l’argument précision en tendant vers zéro.',
         abstract: 'Arrondir un nombre au nombre entier inférieur le plus proche ou au multiple le plus proche de l’argument précision en tendant vers zéro.',
         links: [
@@ -450,6 +482,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_PRECISE: {
+        label: 'PLANCHER.PRÉCIS',
         description: 'Renvoie un nombre arrondi au nombre entier inférieur le plus proche ou au multiple le plus proche de l’argument précision en s’éloignant de zéro. Quel que soit son signe, ce nombre est arrondi à l’entier inférieur. Toutefois, si le nombre ou l’argument précision est égal à zéro, zéro est retourné.',
         abstract: 'Renvoie un nombre arrondi au nombre entier inférieur le plus proche ou au multiple le plus proche de l’argument précision en s’éloignant de zéro. Quel que soit son signe, ce nombre est arrondi à l’entier inférieur. Toutefois, si le nombre ou l’argument précision est égal à zéro, zéro est retourné.',
         links: [
@@ -464,6 +497,7 @@ const locale: typeof enUS = {
         },
     },
     GCD: {
+        label: 'PGCD',
         description: 'Renvoie le plus grand commun diviseur de plusieurs nombres entiers. Le plus grand commun diviseur est le nombre entier le plus grand qui puisse diviser nombre1 et nombre2 sans qu’il y ait de reste.',
         abstract: 'Renvoie le plus grand commun diviseur de plusieurs nombres entiers. Le plus grand commun diviseur est le nombre entier le plus grand qui puisse diviser nombre1 et nombre2 sans qu’il y ait de reste.',
         links: [
@@ -478,6 +512,7 @@ const locale: typeof enUS = {
         },
     },
     INT: {
+        label: 'INT',
         description: 'Arrondit un nombre à l’entier immédiatement inférieur.',
         abstract: 'Arrondit un nombre à l’entier immédiatement inférieur.',
         links: [
@@ -491,6 +526,7 @@ const locale: typeof enUS = {
         },
     },
     ISO_CEILING: {
+        label: 'ISO.PLAFOND',
         description: 'Renvoie un nombre arrondi à l’entier supérieur le plus proche ou au multiple de précision supérieur le plus proche.',
         abstract: 'Renvoie un nombre arrondi à l’entier supérieur le plus proche ou au multiple de précision supérieur le plus proche.',
         links: [
@@ -505,6 +541,7 @@ const locale: typeof enUS = {
         },
     },
     LCM: {
+        label: 'PPCM',
         description: 'Retourne le multiple le moins commun d’entiers. Le multiple le moins commun est le plus petit entier positif qui est un multiple de tous les arguments entiers nombre1, nombre2, etc. Utilisez LCM pour ajouter des fractions avec différents dénominateurs.',
         abstract: 'Retourne le multiple le moins commun d’entiers. Le multiple le moins commun est le plus petit entier positif qui est un multiple de tous les arguments entiers nombre1, nombre2, etc. Utilisez LCM pour ajouter des fractions avec différents dénominateurs.',
         links: [
@@ -519,6 +556,7 @@ const locale: typeof enUS = {
         },
     },
     LN: {
+        label: 'LN',
         description: 'Donne le logarithme népérien d’un nombre. Les logarithmes népériens sont ceux dont la base est la constante e (2,71828182845904).',
         abstract: 'Donne le logarithme népérien d’un nombre. Les logarithmes népériens sont ceux dont la base est la constante e (2,71828182845904).',
         links: [
@@ -532,6 +570,7 @@ const locale: typeof enUS = {
         },
     },
     LOG: {
+        label: 'LOG',
         description: 'Renvoie le logarithme d’un nombre de la base spécifiée.',
         abstract: 'Renvoie le logarithme d’un nombre de la base spécifiée.',
         links: [
@@ -546,6 +585,7 @@ const locale: typeof enUS = {
         },
     },
     LOG10: {
+        label: 'LOG10',
         description: 'Calcule le logarithme en base 10 d’un nombre.',
         abstract: 'Calcule le logarithme en base 10 d’un nombre.',
         links: [
@@ -559,6 +599,7 @@ const locale: typeof enUS = {
         },
     },
     MDETERM: {
+        label: 'DETERMAT',
         description: 'Renvoie le déterminant matriciel d’une matrice.',
         abstract: 'Renvoie le déterminant matriciel d’une matrice.',
         links: [
@@ -572,6 +613,7 @@ const locale: typeof enUS = {
         },
     },
     MINVERSE: {
+        label: 'INVERSEMAT',
         description: 'Renvoie l’inverse matricielle d’une matrice.',
         abstract: 'Renvoie l’inverse matricielle d’une matrice.',
         links: [
@@ -585,6 +627,7 @@ const locale: typeof enUS = {
         },
     },
     MMULT: {
+        label: 'PRODUITMAT',
         description: 'Renvoie le produit matriciel de deux matrices.',
         abstract: 'Renvoie le produit matriciel de deux matrices.',
         links: [
@@ -599,6 +642,7 @@ const locale: typeof enUS = {
         },
     },
     MOD: {
+        label: 'MOD',
         description: 'Renvoie le reste de la division de l’argument nombre par l’argument diviseur. Le résultat est du même signe que diviseur.',
         abstract: 'Renvoie le reste de la division de l’argument nombre par l’argument diviseur. Le résultat est du même signe que diviseur.',
         links: [
@@ -613,6 +657,7 @@ const locale: typeof enUS = {
         },
     },
     MROUND: {
+        label: 'ARRONDI.AU.MULTIPLE',
         description: 'MROUND retourne un nombre arrondi au multiple souhaité.',
         abstract: 'MROUND retourne un nombre arrondi au multiple souhaité.',
         links: [
@@ -627,6 +672,7 @@ const locale: typeof enUS = {
         },
     },
     MULTINOMIAL: {
+        label: 'MULTINOMIALE',
         description: 'Renvoie le rapport de la factorielle d’une somme de valeurs sur le produit des factorielles.',
         abstract: 'Renvoie le rapport de la factorielle d’une somme de valeurs sur le produit des factorielles.',
         links: [
@@ -641,6 +687,7 @@ const locale: typeof enUS = {
         },
     },
     MUNIT: {
+        label: 'MUNIT',
         description: 'La fonction MUNIT retourne la matrice d’unités pour la dimension spécifiée.',
         abstract: 'La fonction MUNIT retourne la matrice d’unités pour la dimension spécifiée.',
         links: [
@@ -654,6 +701,7 @@ const locale: typeof enUS = {
         },
     },
     ODD: {
+        label: 'IMPAIR',
         description: 'Renvoie le nombre, arrondi à la valeur du nombre entier impair le plus proche en s’éloignant de zéro.',
         abstract: 'Renvoie le nombre, arrondi à la valeur du nombre entier impair le plus proche en s’éloignant de zéro.',
         links: [
@@ -667,6 +715,7 @@ const locale: typeof enUS = {
         },
     },
     PI: {
+        label: 'PI',
         description: 'Renvoie la valeur 3,14159265358979, la constante mathématique pi, avec une précision de 15 décimales.',
         abstract: 'Renvoie la valeur 3,14159265358979, la constante mathématique pi, avec une précision de 15 décimales.',
         links: [
@@ -679,6 +728,7 @@ const locale: typeof enUS = {
         },
     },
     POWER: {
+        label: 'PUISSANCE',
         description: 'Renvoie la valeur du nombre élevé à une puissance.',
         abstract: 'Renvoie la valeur du nombre élevé à une puissance.',
         links: [
@@ -693,6 +743,7 @@ const locale: typeof enUS = {
         },
     },
     PRODUCT: {
+        label: 'PRODUIT',
         description: 'La fonction PRODUIT multiplie tous les nombres donnés comme arguments et renvoie le produit. Par exemple, si les cellules A1 et A2 contiennent des nombres, vous pouvez utiliser la formule =PRODUCT(A1, A2) pour multiplier ces deux nombres ensemble. Vous pouvez également effectuer la même opération à l’aide de l’opérateur mathématique de multiplication ( * ), par exemple, =A1*A2 .',
         abstract: 'La fonction PRODUIT multiplie tous les nombres donnés comme arguments et renvoie le produit. Par exemple, si les cellules A1 et A2 contiennent des nombres, vous pouvez utiliser la formule =PRODUCT(A1, A2) pour multiplier ces deux nombres ensemble. Vous pouvez également effectuer la même opération à l’aide de l’opérateur mathématique de multiplication ( * ), par exemple, =A1*A2 .',
         links: [
@@ -707,6 +758,7 @@ const locale: typeof enUS = {
         },
     },
     QUOTIENT: {
+        label: 'QUOTIENT',
         description: 'Renvoie la partie entière du résultat d’une division. Utilisez cette fonction lorsque vous voulez ignorer le reste d’une division.',
         abstract: 'Renvoie la partie entière du résultat d’une division. Utilisez cette fonction lorsque vous voulez ignorer le reste d’une division.',
         links: [
@@ -721,6 +773,7 @@ const locale: typeof enUS = {
         },
     },
     RADIANS: {
+        label: 'RADIANS',
         description: 'Convertit des degrés en radians.',
         abstract: 'Convertit des degrés en radians.',
         links: [
@@ -734,6 +787,7 @@ const locale: typeof enUS = {
         },
     },
     RAND: {
+        label: 'RAND',
         description: 'ALEA renvoie un nombre réel aléatoire distribué de manière symétrique supérieur ou égal à 0 et inférieur à 1. Un nouveau nombre réel aléatoire est renvoyé chaque fois que la feuille de calcul est recalculée.',
         abstract: 'ALEA renvoie un nombre réel aléatoire distribué de manière symétrique supérieur ou égal à 0 et inférieur à 1. Un nouveau nombre réel aléatoire est renvoyé chaque fois que la feuille de calcul est recalculée.',
         links: [
@@ -746,6 +800,7 @@ const locale: typeof enUS = {
         },
     },
     RANDARRAY: {
+        label: 'TABLEAU.ALEA',
         description: 'Dans l’exemple suivant, nous avons créé un tableau de 5 lignes en hauteur x 3 colonnes de large. La première renvoie un ensemble de valeurs aléatoire compris entre 0 et 1, c\'est-à-dire le comportement par défaut de TABLEAU. ALEA. L’autre renvoie une série de valeurs décimales aléatoires compris entre 1 et 100. Enfin, le troisième exemple renvoie une série de nombres entiers aléatoires compris entre 1 et 100.',
         abstract: 'Dans l’exemple suivant, nous avons créé un tableau de 5 lignes en hauteur x 3 colonnes de large. La première renvoie un ensemble de valeurs aléatoire compris entre 0 et 1, c\'est-à-dire le comportement par défaut de TABLEAU. ALEA. L’autre renvoie une série de valeurs décimales aléatoires compris entre 1 et 100. Enfin, le troisième exemple renvoie une série de nombres entiers aléatoires compris entre 1 et 100.',
         links: [
@@ -763,6 +818,7 @@ const locale: typeof enUS = {
         },
     },
     RANDBETWEEN: {
+        label: 'RANDBETWEEN',
         description: 'Renvoie un nombre entier aléatoire entre les nombres que vous spécifiez. Un nouveau nombre entier aléatoire est renvoyé chaque fois que la feuille de calcul est calculée.',
         abstract: 'Renvoie un nombre entier aléatoire entre les nombres que vous spécifiez. Un nouveau nombre entier aléatoire est renvoyé chaque fois que la feuille de calcul est calculée.',
         links: [
@@ -777,6 +833,7 @@ const locale: typeof enUS = {
         },
     },
     ROMAN: {
+        label: 'ROMAIN',
         description: 'Convertit un nombre arabe en nombre romain, sous forme de texte.',
         abstract: 'Convertit un nombre arabe en nombre romain, sous forme de texte.',
         links: [
@@ -791,6 +848,7 @@ const locale: typeof enUS = {
         },
     },
     ROUND: {
+        label: 'ARRONDI',
         description: 'La fonction ARRONDI arrondi un nombre à un nombre spécifié de chiffres. Par exemple, si la cellule A1 contient la valeur 23,7825 et que vous voulez l’arrondir à deux décimales, vous pouvez utiliser la formule suivante :',
         abstract: 'La fonction ARRONDI arrondi un nombre à un nombre spécifié de chiffres. Par exemple, si la cellule A1 contient la valeur 23,7825 et que vous voulez l’arrondir à deux décimales, vous pouvez utiliser la formule suivante :',
         links: [
@@ -805,6 +863,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDBANK: {
+        label: 'ARRONDI.BANKER',
         description: 'Arrondit un nombre selon la méthode de l’arrondi bancaire.',
         abstract: 'Arrondit un nombre selon la méthode de l’arrondi bancaire.',
         links: [
@@ -819,6 +878,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDDOWN: {
+        label: 'ARRONDI.INF',
         description: 'Arrondit un nombre en tendant vers 0 (zéro).',
         abstract: 'Arrondit un nombre en tendant vers 0 (zéro).',
         links: [
@@ -833,6 +893,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDUP: {
+        label: 'ARRONDI.SUP',
         description: 'Arrondit un nombre en s’éloignant de 0 (zéro).',
         abstract: 'Arrondit un nombre en s’éloignant de 0 (zéro).',
         links: [
@@ -847,6 +908,7 @@ const locale: typeof enUS = {
         },
     },
     SEC: {
+        label: 'SEC',
         description: 'Renvoie la sécante d’un angle.',
         abstract: 'Renvoie la sécante d’un angle.',
         links: [
@@ -860,6 +922,7 @@ const locale: typeof enUS = {
         },
     },
     SECH: {
+        label: 'SECH',
         description: 'Renvoie la sécante hyperbolique d’un angle.',
         abstract: 'Renvoie la sécante hyperbolique d’un angle.',
         links: [
@@ -873,6 +936,7 @@ const locale: typeof enUS = {
         },
     },
     SERIESSUM: {
+        label: 'SOMME.SERIES',
         description: 'Renvoie la somme d’une série géométrique en s’appuyant sur la formule suivante :',
         abstract: 'Renvoie la somme d’une série géométrique en s’appuyant sur la formule suivante :',
         links: [
@@ -889,6 +953,7 @@ const locale: typeof enUS = {
         },
     },
     SEQUENCE: {
+        label: 'SEQUENCE',
         description: 'Dans l’exemple suivant, nous avons créé un tableau de 4 lignes x 5 colonnes avec la formule =SEQUENCE(4;5) .',
         abstract: 'Dans l’exemple suivant, nous avons créé un tableau de 4 lignes x 5 colonnes avec la formule =SEQUENCE(4;5) .',
         links: [
@@ -905,6 +970,7 @@ const locale: typeof enUS = {
         },
     },
     SIGN: {
+        label: 'SIGNE',
         description: 'Détermine le signe d’un nombre. Renvoie 1 si le nombre est positif, zéro (0) si le nombre est égal à 0 et -1 si le nombre est négatif.',
         abstract: 'Détermine le signe d’un nombre. Renvoie 1 si le nombre est positif, zéro (0) si le nombre est égal à 0 et -1 si le nombre est négatif.',
         links: [
@@ -918,6 +984,7 @@ const locale: typeof enUS = {
         },
     },
     SIN: {
+        label: 'SIN',
         description: 'Renvoie le sinus d’un nombre.',
         abstract: 'Renvoie le sinus d’un nombre.',
         links: [
@@ -931,6 +998,7 @@ const locale: typeof enUS = {
         },
     },
     SINH: {
+        label: 'SINH',
         description: 'Renvoie le sinus hyperbolique d’un nombre.',
         abstract: 'Renvoie le sinus hyperbolique d’un nombre.',
         links: [
@@ -944,6 +1012,7 @@ const locale: typeof enUS = {
         },
     },
     SQRT: {
+        label: 'RACINE',
         description: 'Donne la racine carrée d’un nombre.',
         abstract: 'Donne la racine carrée d’un nombre.',
         links: [
@@ -957,6 +1026,7 @@ const locale: typeof enUS = {
         },
     },
     SQRTPI: {
+        label: 'RACINE.PI',
         description: 'Renvoie la racine carrée de (nombre * pi).',
         abstract: 'Renvoie la racine carrée de (nombre * pi).',
         links: [
@@ -970,6 +1040,7 @@ const locale: typeof enUS = {
         },
     },
     SUBTOTAL: {
+        label: 'SOUS.TOTAL',
         description: 'Renvoie un sous-total dans une liste ou une base de données. Il est généralement plus facile de créer une liste comportant des sous-totaux à l’aide de la commande Sous-total du groupe Contour dans l’onglet Données de l’application de bureau Excel. Une fois cette liste de sous-totaux créée, vous pouvez la modifier en changeant la fonction SOUS.TOTAL.',
         abstract: 'Renvoie un sous-total dans une liste ou une base de données. Il est généralement plus facile de créer une liste comportant des sous-totaux à l’aide de la commande Sous-total du groupe Contour dans l’onglet Données de l’application de bureau Excel. Une fois cette liste de sous-totaux créée, vous pouvez la modifier en changeant la fonction SOUS.TOTAL.',
         links: [
@@ -985,6 +1056,7 @@ const locale: typeof enUS = {
         },
     },
     SUM: {
+        label: 'SOMME',
         description: 'La fonction SUM ajoute des valeurs. Vous pouvez ajouter des valeurs individuelles, des références ou des plages de cellules, ou une combinaison des trois.',
         abstract: 'La fonction SUM ajoute des valeurs. Vous pouvez ajouter des valeurs individuelles, des références ou des plages de cellules, ou une combinaison des trois.',
         links: [
@@ -999,6 +1071,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIF: {
+        label: 'SOMME.SI',
         description: 'Vous utilisez la fonction SUMIF pour additionner les valeurs d’une plage qui répondent aux critères que vous spécifiez. Par exemple, supposons que dans une colonne contenant des nombres, vous vouliez uniquement calculer la somme des valeurs supérieures à 5. Vous pouvez utiliser la formule suivante : =SUMIF(B2 :B25,">5 »)',
         abstract: 'Vous utilisez la fonction SUMIF pour additionner les valeurs d’une plage qui répondent aux critères que vous spécifiez. Par exemple, supposons que dans une colonne contenant des nombres, vous vouliez uniquement calculer la somme des valeurs supérieures à 5. Vous pouvez utiliser la formule suivante : =SUMIF(B2 :B25,">5 »)',
         links: [
@@ -1014,6 +1087,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIFS: {
+        label: 'SOMME.SI.ENS',
         description: 'Additionne tous les arguments qui répondent à plusieurs critères.',
         abstract: 'Additionne tous les arguments qui répondent à plusieurs critères.',
         links: [
@@ -1031,6 +1105,7 @@ const locale: typeof enUS = {
         },
     },
     SUMPRODUCT: {
+        label: 'SOMMEPROD',
         description: 'La fonction SUMPRODUCT retourne la somme des produits des plages ou tableaux correspondants. L’opération par défaut est la multiplication, mais l’addition, la soustraction et la division sont également possibles.',
         abstract: 'La fonction SUMPRODUCT retourne la somme des produits des plages ou tableaux correspondants. L’opération par défaut est la multiplication, mais l’addition, la soustraction et la division sont également possibles.',
         links: [
@@ -1045,6 +1120,7 @@ const locale: typeof enUS = {
         },
     },
     SUMSQ: {
+        label: 'SOMME.CARRES',
         description: 'Renvoie la somme des carrés des arguments.',
         abstract: 'Renvoie la somme des carrés des arguments.',
         links: [
@@ -1059,6 +1135,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2MY2: {
+        label: 'SOMME.X2MY2',
         description: 'Renvoie la somme des différences des carrés des valeurs correspondantes de deux matrices.',
         abstract: 'Renvoie la somme des différences des carrés des valeurs correspondantes de deux matrices.',
         links: [
@@ -1073,6 +1150,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2PY2: {
+        label: 'SOMME.X2PY2',
         description: 'Renvoie la somme des sommes des carrés des valeurs correspondantes de deux matrices.',
         abstract: 'Renvoie la somme des sommes des carrés des valeurs correspondantes de deux matrices.',
         links: [
@@ -1087,6 +1165,7 @@ const locale: typeof enUS = {
         },
     },
     SUMXMY2: {
+        label: 'SOMME.XMY2',
         description: 'La fonction SUMXMY2 retourne la somme des carrés des différences de valeurs correspondantes dans deux tableaux.',
         abstract: 'La fonction SUMXMY2 retourne la somme des carrés des différences de valeurs correspondantes dans deux tableaux.',
         links: [
@@ -1101,6 +1180,7 @@ const locale: typeof enUS = {
         },
     },
     TAN: {
+        label: 'TAN',
         description: 'Renvoie la tangente de l’angle donné.',
         abstract: 'Renvoie la tangente de l’angle donné.',
         links: [
@@ -1114,6 +1194,7 @@ const locale: typeof enUS = {
         },
     },
     TANH: {
+        label: 'TANH',
         description: 'Donne la tangente hyperbolique d’un nombre.',
         abstract: 'Donne la tangente hyperbolique d’un nombre.',
         links: [
@@ -1127,6 +1208,7 @@ const locale: typeof enUS = {
         },
     },
     TRUNC: {
+        label: 'TRONQUE',
         description: 'Les fonctions TRUNC tronquent un nombre en entier en supprimant la partie fractionnaire du nombre.',
         abstract: 'Les fonctions TRUNC tronquent un nombre en entier en supprimant la partie fractionnaire du nombre.',
         links: [

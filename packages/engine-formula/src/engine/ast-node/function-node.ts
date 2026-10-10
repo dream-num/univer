@@ -532,8 +532,11 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
             return;
         }
 
-        if (this._functionService.hasExecutor(tokenTrimUpper)) {
-            const functionNode = this.create(tokenTrimUpper);
+        // Resolve function name (handles German → English mapping)
+        const resolvedName = this._functionService.resolveFunctionName(tokenTrimUpper);
+
+        if (this._functionService.hasExecutor(resolvedName)) {
+            const functionNode = this.create(resolvedName as any);
             if (atPrefixNode) {
                 functionNode.setParent(atPrefixNode);
                 // return atPrefixNode;

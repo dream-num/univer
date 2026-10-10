@@ -172,6 +172,12 @@ export interface IFunctionInfo {
     aliasFunctionName?: string;
 
     /**
+     * Localized function label (e.g. "SUMME" for "SUM" in German)
+     * Used for locale-specific function name resolution
+     */
+    label?: string;
+
+    /**
      * Function type
      */
     functionType: FunctionType;

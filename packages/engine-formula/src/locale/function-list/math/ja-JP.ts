@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ABS: {
+        label: 'ABS',
         description: '数値の絶対値を返します。 絶対値とは、数値から符号 (+、-) を除いた数の大きさのことです。',
         abstract: '数値の絶対値を返します。',
         links: [
@@ -31,6 +32,7 @@ const locale: typeof enUS = {
         },
     },
     ACOS: {
+        label: 'ACOS',
         description: '数値のアークコサイン (逆余弦) を返します。 アークコサインとは、そのコサインが数値となる角度のことです。 戻り値の角度は、0 (ゼロ) ～ pi の範囲内のラジアンで示されます。',
         abstract: '数値のアークコサインを返します。',
         links: [
@@ -44,6 +46,7 @@ const locale: typeof enUS = {
         },
     },
     ACOSH: {
+        label: 'ACOSH',
         description: '数値の逆双曲線コサインを返します。 数値は 1 以上である必要があります。 逆双曲線コサインは、双曲線コサインが 数値の値なので、ACOSH(COSH(number)) は数値と等 しくなります。',
         abstract: '数値の双曲線逆余弦 (ハイパーボリック コサインの逆関数) を返します。',
         links: [
@@ -57,6 +60,7 @@ const locale: typeof enUS = {
         },
     },
     ACOT: {
+        label: 'ACOT',
         description: 'コタンジェント、または逆コタンジェント、数値の主値を返します。',
         abstract: '数値の逆余接を返します。',
         links: [
@@ -73,6 +77,7 @@ const locale: typeof enUS = {
         },
     },
     ACOTH: {
+        label: 'ACOTH',
         description: '数値の双曲線逆余接を返します。',
         abstract: '数値の双曲線逆余接を返します。',
         links: [
@@ -86,6 +91,7 @@ const locale: typeof enUS = {
         },
     },
     AGGREGATE: {
+        label: '集計',
         description: 'リストまたはデータベースの集計値を返します。',
         abstract: 'リストまたはデータベースの集計値を返します。',
         links: [
@@ -102,6 +108,7 @@ const locale: typeof enUS = {
         },
     },
     ARABIC: {
+        label: 'アラビア語',
         description: 'ローマ数字をアラビア数字に変換します。',
         abstract: 'ローマ数字をアラビア数字に変換します。',
         links: [
@@ -115,6 +122,7 @@ const locale: typeof enUS = {
         },
     },
     ASIN: {
+        label: 'ASIN',
         description: '数値のアークサインを返します。',
         abstract: '数値のアークサインを返します',
         links: [
@@ -128,6 +136,7 @@ const locale: typeof enUS = {
         },
     },
     ASINH: {
+        label: 'ASINH',
         description: '数値の双曲線逆正弦 (ハイパーボリック サインの逆関数) を返します。',
         abstract: '数値の双曲線逆正弦 (ハイパーボリック サインの逆関数) を返します',
         links: [
@@ -141,6 +150,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN: {
+        label: 'ATAN',
         description: '数値のアークタンジェントを返します。',
         abstract: '数値のアークタンジェントを返します',
         links: [
@@ -154,6 +164,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN2: {
+        label: 'ATAN2',
         description: '指定された x-y 座標のアークタンジェントを返します。',
         abstract: '指定された x-y 座標のアークタンジェントを返します',
         links: [
@@ -168,6 +179,7 @@ const locale: typeof enUS = {
         },
     },
     ATANH: {
+        label: 'ATANH',
         description: '数値の逆双曲線正接を返します。 数値は 、-1 から 1 (-1 と 1 を除く) の間である必要があります。 逆双曲線正接は、双曲線正接が 数値 である値であるため、ATANH(TANH(number)) は 数値 と等しくなります。',
         abstract: '数値の逆双曲線正接を返します。 数値は 、-1 から 1 (-1 と 1 を除く) の間である必要があります。 逆双曲線正接は、双曲線正接が 数値 である値であるため、ATANH(TANH(number)) は 数値 と等しくなります。',
         links: [
@@ -181,6 +193,7 @@ const locale: typeof enUS = {
         },
     },
     BASE: {
+        label: 'BASE',
         description: '指定された基数 (底) のテキスト表現に、数値を変換します。',
         abstract: '指定された基数 (底) のテキスト表現に、数値を変換します。',
         links: [
@@ -196,6 +209,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING: {
+        label: 'CEILING',
         description: '指定された基準値の倍数のうち、最も近い値に数値を切り上げます。',
         abstract: '指定された基準値の倍数のうち、最も近い値に数値を切り上げます。',
         links: [
@@ -210,6 +224,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_MATH: {
+        label: 'CEILING.数学',
         description: '指定された基準値の倍数のうち、最も近い値に数値を切り上げます。',
         abstract: '指定された基準値の倍数のうち、最も近い値に数値を切り上げます。',
         links: [
@@ -225,6 +240,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_PRECISE: {
+        label: 'CEILING_PRECISE',
         description: '指定された基準値の倍数のうち、最も近い値に数値を切り上げます。 数値は正負に関係なく切り上げられます。',
         abstract: '指定された基準値の倍数のうち、最も近い値に数値を切り上げます。 数値は正負に関係なく切り上げられます。',
         links: [
@@ -239,6 +255,7 @@ const locale: typeof enUS = {
         },
     },
     COMBIN: {
+        label: 'COMBIN',
         description: '指定された個数を選択するときの組み合わせの数を返します。',
         abstract: '指定された個数を選択するときの組み合わせの数を返します。',
         links: [
@@ -253,6 +270,7 @@ const locale: typeof enUS = {
         },
     },
     COMBINA: {
+        label: 'COMBINA',
         description: '指定された個数を選択するときの組み合わせ (反復あり) の数を返します',
         abstract: '指定された個数を選択するときの組み合わせ (反復あり) の数を返します',
         links: [
@@ -267,6 +285,7 @@ const locale: typeof enUS = {
         },
     },
     COS: {
+        label: 'COS',
         description: '指定された角度のコサインを返します。',
         abstract: '指定された角度のコサインを返します',
         links: [
@@ -280,6 +299,7 @@ const locale: typeof enUS = {
         },
     },
     COSH: {
+        label: 'COSH',
         description: '数値の双曲線余弦 (ハイパーボリック コサイン) を返します。',
         abstract: '数値の双曲線余弦 (ハイパーボリック コサイン) を返します。',
         links: [
@@ -293,6 +313,7 @@ const locale: typeof enUS = {
         },
     },
     COT: {
+        label: 'COT',
         description: '角度の双曲線余接を返します。',
         abstract: '角度の双曲線余接を返します。',
         links: [
@@ -306,6 +327,7 @@ const locale: typeof enUS = {
         },
     },
     COTH: {
+        label: 'COTH',
         description: '数値の双曲線余接を返します。',
         abstract: '数値の双曲線余接を返します。',
         links: [
@@ -319,6 +341,7 @@ const locale: typeof enUS = {
         },
     },
     CSC: {
+        label: 'CSC',
         description: '角度の余割を返します。',
         abstract: '角度の余割を返します。',
         links: [
@@ -332,6 +355,7 @@ const locale: typeof enUS = {
         },
     },
     CSCH: {
+        label: 'CSCH',
         description: '角度の双曲線余割を返します。',
         abstract: '角度の双曲線余割を返します。',
         links: [
@@ -345,6 +369,7 @@ const locale: typeof enUS = {
         },
     },
     DECIMAL: {
+        label: 'DECIMAL',
         description: '指定された底の数値のテキスト表現を 10 進数に変換します。',
         abstract: '指定された底の数値のテキスト表現を 10 進数に変換します。',
         links: [
@@ -359,6 +384,7 @@ const locale: typeof enUS = {
         },
     },
     DEGREES: {
+        label: 'DEGREES',
         description: 'ラジアンを度に変換します。',
         abstract: 'ラジアンを度に変換します。',
         links: [
@@ -372,6 +398,7 @@ const locale: typeof enUS = {
         },
     },
     EVEN: {
+        label: 'EVEN',
         description: '指定された数値を最も近い偶数に切り上げた値を返します。',
         abstract: '指定された数値を最も近い偶数に切り上げた値を返します。',
         links: [
@@ -385,6 +412,7 @@ const locale: typeof enUS = {
         },
     },
     EXP: {
+        label: 'EXP',
         description: 'e を底とする数値のべき乗を返します。',
         abstract: 'e を底とする数値のべき乗を返します。',
         links: [
@@ -398,6 +426,7 @@ const locale: typeof enUS = {
         },
     },
     FACT: {
+        label: 'FACT',
         description: '数値の階乗を返します。',
         abstract: '数値の階乗を返します。',
         links: [
@@ -411,6 +440,7 @@ const locale: typeof enUS = {
         },
     },
     FACTDOUBLE: {
+        label: 'FACTDOUBLE',
         description: '数値の二重階乗を返します。',
         abstract: '数値の二重階乗を返します。',
         links: [
@@ -424,6 +454,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR: {
+        label: 'FLOOR',
         description: '数値を指定された桁数で切り捨てます。',
         abstract: '数値を指定された桁数で切り捨てます。',
         links: [
@@ -438,6 +469,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_MATH: {
+        label: 'FLOOR.数学',
         description: '指定された基準値の倍数のうち、最も近い値に数値を切り捨てます。',
         abstract: '指定された基準値の倍数のうち、最も近い値に数値を切り捨てます。',
         links: [
@@ -453,6 +485,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_PRECISE: {
+        label: 'FLOOR_PRECISE',
         description: '指定された基準値の倍数のうち、最も近い値に数値を切り捨てます。 数値は正負に関係なく切り捨てられます。',
         abstract: '指定された基準値の倍数のうち、最も近い値に数値を切り捨てます。',
         links: [
@@ -467,6 +500,7 @@ const locale: typeof enUS = {
         },
     },
     GCD: {
+        label: 'GCD',
         description: '最大公約数を返します。',
         abstract: '最大公約数を返します。',
         links: [
@@ -481,6 +515,7 @@ const locale: typeof enUS = {
         },
     },
     INT: {
+        label: 'INT',
         description: '指定された数値を最も近い整数に切り捨てます。',
         abstract: '指定された数値を最も近い整数に切り捨てます。',
         links: [
@@ -494,6 +529,7 @@ const locale: typeof enUS = {
         },
     },
     ISO_CEILING: {
+        label: 'ISO.CEILING',
         description: '最も近い整数に切り上げた値、または、指定された基準値の倍数のうち最も近い値を返します。',
         abstract: '最も近い整数に切り上げた値、または、指定された基準値の倍数のうち最も近い値を返します。',
         links: [
@@ -508,6 +544,7 @@ const locale: typeof enUS = {
         },
     },
     LCM: {
+        label: 'LCM',
         description: '最小公倍数を返します。',
         abstract: '最小公倍数を返します。',
         links: [
@@ -522,6 +559,7 @@ const locale: typeof enUS = {
         },
     },
     LN: {
+        label: 'LN',
         description: '数値の自然対数を返します。',
         abstract: '数値の自然対数を返します。',
         links: [
@@ -535,6 +573,7 @@ const locale: typeof enUS = {
         },
     },
     LOG: {
+        label: 'LOG',
         description: '指定された数を底とする数値の対数を返します。',
         abstract: '指定された数を底とする数値の対数を返します。',
         links: [
@@ -549,6 +588,7 @@ const locale: typeof enUS = {
         },
     },
     LOG10: {
+        label: 'LOG10',
         description: '10 を底とする数値の対数 (常用対数) を返します。',
         abstract: '10 を底とする数値の対数 (常用対数) を返します。',
         links: [
@@ -562,6 +602,7 @@ const locale: typeof enUS = {
         },
     },
     MDETERM: {
+        label: 'MDETERM',
         description: '配列の行列式を返します。',
         abstract: '配列の行列式を返します。',
         links: [
@@ -575,6 +616,7 @@ const locale: typeof enUS = {
         },
     },
     MINVERSE: {
+        label: 'MINVERSE',
         description: '行列の逆行列を返します。',
         abstract: '行列の逆行列を返します。',
         links: [
@@ -588,6 +630,7 @@ const locale: typeof enUS = {
         },
     },
     MMULT: {
+        label: 'MMULT',
         description: '2 つの配列の行列積を返します。',
         abstract: '2 つの配列の行列積を返します。',
         links: [
@@ -602,6 +645,7 @@ const locale: typeof enUS = {
         },
     },
     MOD: {
+        label: 'MOD',
         description: '数値を除数で割ったときの剰余を返します。 戻り値は除数と同じ符号になります。',
         abstract: '数値を除算したときの剰余を返します。',
         links: [
@@ -616,6 +660,7 @@ const locale: typeof enUS = {
         },
     },
     MROUND: {
+        label: 'MROUND',
         description: '指定された値の倍数になるように、数値を切り上げまたは切り捨てます。',
         abstract: '指定された値の倍数になるように、数値を切り上げまたは切り捨てます。',
         links: [
@@ -630,6 +675,7 @@ const locale: typeof enUS = {
         },
     },
     MULTINOMIAL: {
+        label: 'MULTINOMIAL',
         description: '指定された複数の数値の多項係数を返します。',
         abstract: '指定された複数の数値の多項係数を返します。',
         links: [
@@ -644,6 +690,7 @@ const locale: typeof enUS = {
         },
     },
     MUNIT: {
+        label: 'MUNIT',
         description: '指定された次元の単位行列を返します。',
         abstract: '指定された次元の単位行列を返します。',
         links: [
@@ -657,6 +704,7 @@ const locale: typeof enUS = {
         },
     },
     ODD: {
+        label: 'ODD',
         description: '指定された数値を最も近い奇数に切り上げた値を返します。',
         abstract: '指定された数値を最も近い奇数に切り上げた値を返します。',
         links: [
@@ -670,6 +718,7 @@ const locale: typeof enUS = {
         },
     },
     PI: {
+        label: 'PI',
         description: '円周率πを返します。',
         abstract: '円周率πを返します。',
         links: [
@@ -682,6 +731,7 @@ const locale: typeof enUS = {
         },
     },
     POWER: {
+        label: 'POWER',
         description: '数値のべき乗を返します。',
         abstract: '数値のべき乗を返します。',
         links: [
@@ -696,6 +746,7 @@ const locale: typeof enUS = {
         },
     },
     PRODUCT: {
+        label: 'PRODUCT',
         description: 'は、引数として指定されたすべての数値を乗算し、製品を返します。',
         abstract: '引数リストの積を返します。',
         links: [
@@ -710,6 +761,7 @@ const locale: typeof enUS = {
         },
     },
     QUOTIENT: {
+        label: 'QUOTIENT',
         description: '除算の商の整数部を返します。',
         abstract: '除算の商の整数部を返します。',
         links: [
@@ -724,6 +776,7 @@ const locale: typeof enUS = {
         },
     },
     RADIANS: {
+        label: 'RADIANS',
         description: '度をラジアンに変換します。',
         abstract: '度をラジアンに変換します。',
         links: [
@@ -737,6 +790,7 @@ const locale: typeof enUS = {
         },
     },
     RAND: {
+        label: 'RAND',
         description: '0 以上 1 未満の乱数を返します。',
         abstract: '0 以上 1 未満の乱数を返します。',
         links: [
@@ -749,6 +803,7 @@ const locale: typeof enUS = {
         },
     },
     RANDARRAY: {
+        label: 'RANDARRAY',
         description: '0 から 1 までのランダムな数値の配列を返します。ただし、入力する行と列の数、最小値と最大値、および整数または 10 進数の値を返すかどうかを指定できます。',
         abstract: '0 から 1 までのランダムな数値の配列を返します。',
         links: [
@@ -766,6 +821,7 @@ const locale: typeof enUS = {
         },
     },
     RANDBETWEEN: {
+        label: 'RANDBETWEEN',
         description: '指定された範囲内の整数の乱数を返します。',
         abstract: '指定された範囲内の整数の乱数を返します。',
         links: [
@@ -780,6 +836,7 @@ const locale: typeof enUS = {
         },
     },
     ROMAN: {
+        label: 'ROMAN',
         description: 'アラビア数字を、ローマ数字を表す文字列に変換します。',
         abstract: 'アラビア数字を、ローマ数字を表す文字列に変換します。',
         links: [
@@ -794,6 +851,7 @@ const locale: typeof enUS = {
         },
     },
     ROUND: {
+        label: 'ROUND',
         description: '数値を四捨五入して指定された桁数にします。',
         abstract: '数値を四捨五入して指定された桁数にします。',
         links: [
@@ -808,6 +866,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDBANK: {
+        label: 'ROUNDBANK',
         description: '銀行家の丸めで数値を丸めます',
         abstract: '銀行家の丸めで数値を丸めます',
         links: [
@@ -822,6 +881,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDDOWN: {
+        label: 'ROUNDDOWN',
         description: '数値を指定された桁数で切り捨てます。',
         abstract: '数値を指定された桁数で切り捨てます。',
         links: [
@@ -836,6 +896,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDUP: {
+        label: 'ROUNDUP',
         description: '数値を指定された桁数に切り上げます。',
         abstract: '数値を指定された桁数に切り上げます。',
         links: [
@@ -850,6 +911,7 @@ const locale: typeof enUS = {
         },
     },
     SEC: {
+        label: 'SEC',
         description: '角度の正割を返します。',
         abstract: '角度の正割を返します。',
         links: [
@@ -863,6 +925,7 @@ const locale: typeof enUS = {
         },
     },
     SECH: {
+        label: 'SECH',
         description: '角度の双曲線正割を返します。',
         abstract: '角度の双曲線正割を返します。',
         links: [
@@ -876,6 +939,7 @@ const locale: typeof enUS = {
         },
     },
     SERIESSUM: {
+        label: 'SERIESSUM',
         description: '数式で定義されるべき級数を返します。',
         abstract: '数式で定義されるべき級数を返します。',
         links: [
@@ -892,6 +956,7 @@ const locale: typeof enUS = {
         },
     },
     SEQUENCE: {
+        label: 'SEQUENCE',
         description: '1、2、3、4 など、配列内の連続した数値の一覧を生成します。',
         abstract: '1、2、3、4 など、配列内の連続した数値の一覧を生成します。',
         links: [
@@ -908,6 +973,7 @@ const locale: typeof enUS = {
         },
     },
     SIGN: {
+        label: 'SIGN',
         description: '数値の正負を調べます。',
         abstract: '数値の正負を調べます。',
         links: [
@@ -921,6 +987,7 @@ const locale: typeof enUS = {
         },
     },
     SIN: {
+        label: 'SIN',
         description: '指定された角度のサインを返します。',
         abstract: '指定された角度のサインを返します。',
         links: [
@@ -934,6 +1001,7 @@ const locale: typeof enUS = {
         },
     },
     SINH: {
+        label: 'SINH',
         description: '数値の双曲線正弦 (ハイパーボリック サイン) を返します。',
         abstract: '数値の双曲線正弦 (ハイパーボリック サイン) を返します。',
         links: [
@@ -947,6 +1015,7 @@ const locale: typeof enUS = {
         },
     },
     SQRT: {
+        label: 'SQRT',
         description: '正の平方根を返します。',
         abstract: '正の平方根を返します。',
         links: [
@@ -960,6 +1029,7 @@ const locale: typeof enUS = {
         },
     },
     SQRTPI: {
+        label: 'SQRTPI',
         description: '(数値 * π) の平方根を返します。',
         abstract: '(数値 * π) の平方根を返します。',
         links: [
@@ -973,6 +1043,7 @@ const locale: typeof enUS = {
         },
     },
     SUBTOTAL: {
+        label: 'SUBTOTAL',
         description: 'リストまたはデータベースの集計値を返します。',
         abstract: 'リストまたはデータベースの集計値を返します。',
         links: [
@@ -988,6 +1059,7 @@ const locale: typeof enUS = {
         },
     },
     SUM: {
+        label: 'SUM',
         description: '引数を合計します。',
         abstract: '引数を合計します。',
         links: [
@@ -1008,6 +1080,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIF: {
+        label: 'SUMIF',
         description: '指定された検索条件に一致するセルの値を合計します。',
         abstract: '指定された検索条件に一致するセルの値を合計します。',
         links: [
@@ -1023,6 +1096,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIFS: {
+        label: 'SUMIFS',
         description: '複数の検索条件に一致するすべての引数を合計します。',
         abstract: '複数の検索条件に一致するすべての引数を合計します。',
         links: [
@@ -1040,6 +1114,7 @@ const locale: typeof enUS = {
         },
     },
     SUMPRODUCT: {
+        label: 'SUMPRODUCT',
         description: '指定された配列で対応する要素の積を合計します。',
         abstract: '指定された配列で対応する要素の積を合計します。',
         links: [
@@ -1054,6 +1129,7 @@ const locale: typeof enUS = {
         },
     },
     SUMSQ: {
+        label: 'SUMSQ',
         description: '引数の 2 乗の和 (平方和) を返します。',
         abstract: '引数の 2 乗の和 (平方和) を返します。',
         links: [
@@ -1068,6 +1144,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2MY2: {
+        label: 'SUMX2MY2',
         description: '2 つの配列で対応する配列要素の平方差を合計します。',
         abstract: '2 つの配列で対応する配列要素の平方差を合計します。',
         links: [
@@ -1082,6 +1159,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2PY2: {
+        label: 'SUMX2PY2',
         description: '2 つの配列で対応する配列要素の平方和を合計します。',
         abstract: '2 つの配列で対応する配列要素の平方和を合計します。',
         links: [
@@ -1096,6 +1174,7 @@ const locale: typeof enUS = {
         },
     },
     SUMXMY2: {
+        label: 'SUMXMY2',
         description: '2 つの配列で対応する配列要素の差を 2 乗して合計します。',
         abstract: '2 つの配列で対応する配列要素の差を 2 乗して合計します。',
         links: [
@@ -1110,6 +1189,7 @@ const locale: typeof enUS = {
         },
     },
     TAN: {
+        label: 'TAN',
         description: '指定された角度のタンジェントを返します。',
         abstract: '指定された角度のタンジェントを返します',
         links: [
@@ -1123,6 +1203,7 @@ const locale: typeof enUS = {
         },
     },
     TANH: {
+        label: 'TANH',
         description: '数値の双曲線正接 (ハイパーボリック タンジェント) を返します。',
         abstract: '数値の双曲線正接 (ハイパーボリック タンジェント) を返します',
         links: [
@@ -1136,6 +1217,7 @@ const locale: typeof enUS = {
         },
     },
     TRUNC: {
+        label: 'TRUNC',
         description: '数値の小数部を切り捨てて、整数または指定された桁数にします。',
         abstract: '数値の小数部を切り捨てて、整数または指定された桁数にします。',
         links: [

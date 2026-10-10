@@ -41,7 +41,11 @@ export class Lexer extends Disposable {
             sheetId: this._formulaCurrentConfigService.getExecuteSubUnitId(),
             refOffsetX,
             refOffsetY,
-            hasFunction: this._functionService.hasExecutor.bind(this._functionService),
+            hasFunction: (functionToken) => {
+                // Normalize function name using locale-based alias resolution
+                const resolvedName = this._functionService.resolveFunctionName(functionToken as string);
+                return this._functionService.hasExecutor(resolvedName as any);
+            },
             getValueByName: this._definedNamesService.getValueByName.bind(this._definedNamesService),
             getDirtyDefinedNameMap: this._formulaCurrentConfigService.getDirtyDefinedNameMap.bind(this._formulaCurrentConfigService),
             getSheetName: this._formulaCurrentConfigService.getSheetName.bind(this._formulaCurrentConfigService),

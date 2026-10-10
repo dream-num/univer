@@ -257,6 +257,7 @@ const locale: typeof enUS = {
         },
     },
     DELTA: {
+        label: 'DELTA',
         description: 'Kiểm tra hai giá trị có bằng nhau không',
         abstract: 'Kiểm tra hai giá trị có bằng nhau không',
         links: [

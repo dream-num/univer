@@ -202,7 +202,7 @@ describe('SheetDrawingPanel behavior', () => {
         })?.anchorType).toBe(SheetDrawingAnchorType.None);
     });
 
-    it('applies anchor changes when the image panel opens with an existing sheet image focus', async () => {
+    it.each([true, false])('applies anchor changes with an existing sheet image focus (axis alignment: %s)', async (hasAxisAlignment) => {
         currentTestBed = createSheetsDrawingUiTestBed(undefined, [
             [IRenderManagerService, { useClass: TestRenderManagerService as never }],
             [IconManager],
@@ -214,6 +214,9 @@ describe('SheetDrawingPanel behavior', () => {
         const drawings = [
             createSheetDrawing(currentTestBed.unitId, currentTestBed.subUnitId, 'drawing-a', SheetDrawingAnchorType.None),
         ];
+        if (!hasAxisAlignment) {
+            Reflect.deleteProperty(drawings[0], 'axisAlignSheetTransform');
+        }
 
         await currentTestBed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
             unitId: currentTestBed.unitId,
@@ -295,7 +298,7 @@ describe('SheetDrawingPanel behavior', () => {
         expect(container.firstElementChild).toBeNull();
     });
 
-    it('renders single-image transparency and supports preview, commit, undo, and redo', async () => {
+    it.each([undefined, 0.4])('supports transparency preview, commit, undo, and redo (imported opacity: %s)', async (opacity) => {
         currentTestBed = createSheetsDrawingUiTestBed(undefined, [
             [IRenderManagerService, { useClass: TestRenderManagerService as never }],
             [IconManager],
@@ -313,6 +316,11 @@ describe('SheetDrawingPanel behavior', () => {
             'drawing-opacity',
             SheetDrawingAnchorType.Position
         );
+        if (opacity !== undefined) {
+            (drawing as ISheetImage).opacity = opacity;
+            Reflect.deleteProperty(drawing, 'axisAlignSheetTransform');
+        }
+        const initialTransparency = Math.round((1 - (opacity ?? 1)) * 100);
 
         await currentTestBed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
             unitId: currentTestBed.unitId,
@@ -335,8 +343,8 @@ describe('SheetDrawingPanel behavior', () => {
 
         const transparencyInput = container.querySelector<HTMLInputElement>('input[aria-label="Transparency"]');
         const transparencySlider = container.querySelector<HTMLButtonElement>('[role="slider"][aria-label="Transparency"]');
-        expect(transparencyInput?.value).toBe('0%');
-        expect(transparencySlider?.getAttribute('aria-valuenow')).toBe('0');
+        expect(transparencyInput?.value).toBe(`${initialTransparency}%`);
+        expect(transparencySlider?.getAttribute('aria-valuenow')).toBe(String(initialTransparency));
         const headers = Array.from(container.querySelectorAll('header')).map((header) => header.textContent);
         expect(headers.indexOf('Transparency')).toBeLessThan(headers.indexOf('Anchor Properties'));
         const sliderTrack = container.querySelector<HTMLDivElement>('[data-u-comp="sheet-image-transparency-slider-track"]')!;
@@ -366,7 +374,7 @@ describe('SheetDrawingPanel behavior', () => {
             unitId: currentTestBed.unitId,
             subUnitId: currentTestBed.subUnitId,
             drawingId: drawing.drawingId,
-        }) as ISheetImage | undefined)?.opacity).toBeUndefined();
+        }) as ISheetImage | undefined)?.opacity).toBe(opacity);
 
         await act(async () => {
             await new Promise((resolve) => setTimeout(resolve, 60));
@@ -377,7 +385,7 @@ describe('SheetDrawingPanel behavior', () => {
             unitId: currentTestBed.unitId,
             subUnitId: currentTestBed.subUnitId,
             drawingId: drawing.drawingId,
-        }) as ISheetImage | undefined)?.opacity).toBeUndefined();
+        }) as ISheetImage | undefined)?.opacity).toBe(opacity);
 
         await act(async () => {
             window.dispatchEvent(new MouseEvent('pointerup'));
@@ -402,9 +410,9 @@ describe('SheetDrawingPanel behavior', () => {
             unitId: currentTestBed.unitId,
             subUnitId: currentTestBed.subUnitId,
             drawingId: drawing.drawingId,
-        }) as ISheetImage | undefined)?.opacity).toBeUndefined();
-        expect(transparencyInput?.value).toBe('0%');
-        expect(transparencySlider?.getAttribute('aria-valuenow')).toBe('0');
+        }) as ISheetImage | undefined)?.opacity).toBe(opacity);
+        expect(transparencyInput?.value).toBe(`${initialTransparency}%`);
+        expect(transparencySlider?.getAttribute('aria-valuenow')).toBe(String(initialTransparency));
 
         await act(async () => {
             commandResult = await currentTestBed!.commandService.executeCommand(RedoCommand.id);

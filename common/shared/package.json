@@ -47,7 +47,7 @@
         "tailwind-scrollbar": "^3",
         "tailwindcss": "3.4.18",
         "tsdown": "^0.23.0",
-        "unplugin-vue": "^7.2.0",
+        "unplugin-vue": "^8.0.0",
         "vitest": "^5.0.0"
     },
     "devDependencies": {

@@ -223,6 +223,7 @@ describe('font extension', () => {
             startY: 0,
             endX: 100,
             endY: 20,
+            spreadsheetSkeleton: { textLineGap: 4 },
             fontCache: createFontCache({
                 horizontalAlign: HorizontalAlign.UNSPECIFIED,
                 verticalAlign: VerticalAlign.MIDDLE,
@@ -231,12 +232,13 @@ describe('font extension', () => {
                 cellData: { v: 123, t: CellValueType.NUMBER },
             }),
         } as any;
-        font._renderText(ctx, 0, 0, renderFontCtx, overflow);
+        font._renderText(ctx, renderFontCtx);
         expect(drawWithSpy).toHaveBeenLastCalledWith(
             ctx,
             expect.objectContaining({
                 hAlign: HorizontalAlign.RIGHT,
                 warp: true,
+                lineGap: 4,
             })
         );
 
@@ -245,7 +247,7 @@ describe('font extension', () => {
             wrapStrategy: WrapStrategy.OVERFLOW,
             cellData: { v: true, t: CellValueType.BOOLEAN },
         });
-        font._renderText(ctx, 0, 0, renderFontCtx, overflow);
+        font._renderText(ctx, renderFontCtx);
         expect(drawPlainSpy).toHaveBeenLastCalledWith(
             ctx,
             expect.objectContaining({
@@ -262,7 +264,7 @@ describe('font extension', () => {
             wrapStrategy: WrapStrategy.OVERFLOW,
             cellData: { v: 123, t: CellValueType.NUMBER },
         });
-        font._renderText(ctx, 0, 0, renderFontCtx, overflow);
+        font._renderText(ctx, renderFontCtx);
         expect(drawPlainSpy).toHaveBeenLastCalledWith(
             ctx,
             expect.objectContaining({
@@ -277,7 +279,7 @@ describe('font extension', () => {
         renderFontCtx.fontCache = createFontCache({
             cellData: { v: null, t: CellValueType.STRING },
         });
-        font._renderText(ctx, 0, 0, renderFontCtx, overflow);
+        font._renderText(ctx, renderFontCtx);
         expect(drawWithSpy.mock.calls.length).toBe(before);
         expect(drawPlainSpy.mock.calls.length).toBe(beforePlain);
     });

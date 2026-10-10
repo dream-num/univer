@@ -18,121 +18,135 @@
  * @vitest-environment jsdom
  */
 
-import { afterEach, describe, expect, it } from 'vitest';
-import {
-    EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
-    EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
-    EmbedInteractionBoundaryService,
-    EmbedRuntimeFocusCoordinator,
-} from '../../../services/sheet-embed-integration.service';
-import {
-    focusSheetCellEditorElement,
-    registerSheetCellEditorRuntimePortal,
-    resolveSheetCellEditorPortalRoot,
-} from '../focus-editor';
+import type { IDisposable } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, toDisposable, Univer, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
+import { RenderUnit } from '@univerjs/engine-render';
+import { ILayoutService } from '@univerjs/ui';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '../../../services/sheet-embed-integration.service';
+import { focusSheetCellEditorElement, registerSheetCellEditorRuntimePortal } from '../focus-editor';
 
-describe('focusSheetCellEditorElement', () => {
+const disposables: IDisposable[] = [];
+
+class TestDocSkeletonManagerService {
+    getSkeleton() { return null; }
+}
+
+function createTestBed() {
+    const univer = new Univer();
+    disposables.push(univer);
+    const injector = univer.__getInjector();
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    injector.add([DocSelectionManagerService]);
+    injector.add([EmbedInteractionBoundaryService]);
+    injector.add([EmbedRuntimeFocusCoordinator]);
+    injector.add([ILayoutService, { useValue: {
+        rootContainerElement: host,
+        registerContainerElement: () => toDisposable(() => {}),
+    } as never }]);
+    const unit = univer.createUnit(UniverInstanceType.UNIVER_DOC, {
+        id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+        body: { dataStream: '\r\n', paragraphs: [{ startIndex: 0 }], sectionBreaks: [] },
+        documentStyle: {},
+    });
+    const render = injector.createInstance(RenderUnit, {
+        engine: {} as never,
+        scene: { getViewports: () => [], getEngine: () => null } as never,
+        isMainScene: true,
+        unit,
+    });
+    disposables.push(render);
+    render.addRenderDependencies([
+        [DocSkeletonManagerService, { useClass: TestDocSkeletonManagerService }],
+        [DocSelectionRenderService],
+    ]);
+    const selection = render.with(DocSelectionRenderService);
+    injector.add([IEditorService, { useValue: {
+        getEditor: vi.fn(() => ({ docSelectionRenderService: selection })),
+    } as never }]);
+
+    return {
+        host,
+        selection,
+        editorService: injector.get(IEditorService),
+        interactionBoundaryService: injector.get(EmbedInteractionBoundaryService),
+        focusCoordinator: injector.get(EmbedRuntimeFocusCoordinator),
+    };
+}
+
+describe('sheet cell editor instance isolation', () => {
     afterEach(() => {
+        disposables.splice(0).reverse().forEach((disposable) => disposable.dispose());
         document.body.replaceChildren();
     });
 
-    it('focuses the sheet cell editor DOM node', () => {
-        const hostEditor = document.createElement('div');
-        hostEditor.id = '__editor_docs-embed-host';
-        hostEditor.tabIndex = -1;
-        const cellEditor = document.createElement('div');
-        cellEditor.id = '__editor___INTERNAL_EDITOR__DOCS_NORMAL';
-        cellEditor.tabIndex = -1;
-        document.body.append(hostEditor, cellEditor);
-        hostEditor.focus();
+    it.each([false, true])('focuses its own editor with duplicate IDs (nested: %s)', (nested) => {
+        const left = createTestBed();
+        const right = createTestBed();
+        if (nested) {
+            left.host.prepend(right.host);
+        }
+        left.selection.focus();
 
-        expect(focusSheetCellEditorElement(document)).toBe(true);
-
-        expect(document.activeElement).toBe(cellEditor);
+        expect(focusSheetCellEditorElement(right.editorService)).toBe(true);
+        expect(document.activeElement).toBe(right.selection.inputElement);
+        expect(focusSheetCellEditorElement(right.editorService)).toBe(false);
+        expect(focusSheetCellEditorElement(left.editorService)).toBe(true);
+        expect(document.activeElement).toBe(left.selection.inputElement);
     });
 
-    it('makes the sheet cell editor focusable when it has no tabindex', () => {
-        const hostEditor = document.createElement('div');
-        hostEditor.id = '__editor_docs-embed-host';
-        hostEditor.tabIndex = -1;
-        const cellEditor = document.createElement('div');
-        cellEditor.id = '__editor___INTERNAL_EDITOR__DOCS_NORMAL';
-        document.body.append(hostEditor, cellEditor);
-        hostEditor.focus();
+    it('makes its own input focusable without taking focus from another instance when absent', () => {
+        const left = createTestBed();
+        const right = createTestBed();
+        right.selection.inputElement.removeAttribute('tabindex');
+        left.selection.focus();
 
-        expect(focusSheetCellEditorElement(document)).toBe(true);
+        focusSheetCellEditorElement(right.editorService);
+        expect(document.activeElement).toBe(right.selection.inputElement);
 
-        expect(cellEditor.tabIndex).toBe(-1);
-        expect(document.activeElement).toBe(cellEditor);
+        vi.mocked(left.editorService.getEditor).mockReturnValue(undefined);
+        expect(focusSheetCellEditorElement(left.editorService)).toBe(false);
+        expect(document.activeElement).toBe(right.selection.inputElement);
     });
 
-    it('registers the sheet cell editor portal as an owned child editor while embedded', () => {
-        const selectionContainer = document.createElement('div');
-        selectionContainer.id = 'univer-doc-selection-container-__INTERNAL_EDITOR__DOCS_NORMAL';
-        const cellEditor = document.createElement('div');
-        cellEditor.id = '__editor___INTERNAL_EDITOR__DOCS_NORMAL';
-        selectionContainer.appendChild(cellEditor);
-        document.body.appendChild(selectionContainer);
-        const interactionBoundaryService = new EmbedInteractionBoundaryService();
-        const focusCoordinator = new EmbedRuntimeFocusCoordinator();
+    it('registers and releases only its own portal when another instance has the same IDs', () => {
+        const left = createTestBed();
+        const right = createTestBed();
+        const registration = registerSheetCellEditorRuntimePortal({ embedId: 'embed-right', ...right });
+        disposables.push(registration);
 
-        const disposable = registerSheetCellEditorRuntimePortal({
-            embedId: 'embed-1',
-            interactionBoundaryService,
-            focusCoordinator,
-        });
+        expect(right.interactionBoundaryService.contains('embed-right', right.selection.inputElement)).toBe(true);
+        expect(right.focusCoordinator.containsElement('embed-right', right.selection.inputElement)).toBe(true);
+        expect(right.focusCoordinator.containsElement('embed-right', right.selection.selectionContainer)).toBe(true);
+        expect(right.interactionBoundaryService.contains('embed-right', left.selection.inputElement)).toBe(false);
+        expect(right.focusCoordinator.containsElement('embed-right', left.selection.inputElement)).toBe(false);
 
-        expect(resolveSheetCellEditorPortalRoot(document)).toBe(selectionContainer);
-        expect(selectionContainer.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('embed-1');
-        expect(cellEditor.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('embed-1');
-        expect(selectionContainer.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe('child-editor');
-        expect(cellEditor.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe('child-editor');
-        expect(interactionBoundaryService.contains('embed-1', cellEditor)).toBe(true);
-        expect(focusCoordinator.containsElement('embed-1', cellEditor)).toBe(true);
-
-        disposable.dispose();
-
-        expect(selectionContainer.hasAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe(false);
-        expect(cellEditor.hasAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe(false);
-        expect(selectionContainer.hasAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe(false);
-        expect(cellEditor.hasAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe(false);
+        registration.dispose();
+        expect(right.interactionBoundaryService.contains('embed-right', right.selection.inputElement)).toBe(false);
+        expect(right.focusCoordinator.containsElement('embed-right', right.selection.inputElement)).toBe(false);
     });
 
-    it('keeps ownership when the sheet cell editor portal is remounted while embedded', async () => {
-        const selectionContainer = document.createElement('div');
-        selectionContainer.id = 'univer-doc-selection-container-__INTERNAL_EDITOR__DOCS_NORMAL';
-        const cellEditor = document.createElement('div');
-        cellEditor.id = '__editor___INTERNAL_EDITOR__DOCS_NORMAL';
-        selectionContainer.appendChild(cellEditor);
-        document.body.appendChild(selectionContainer);
-        const interactionBoundaryService = new EmbedInteractionBoundaryService();
-        const focusCoordinator = new EmbedRuntimeFocusCoordinator();
+    it('releases a detached portal and registers the remounted instance editor', async () => {
+        const left = createTestBed();
+        const right = createTestBed();
+        const registration = registerSheetCellEditorRuntimePortal({ embedId: 'embed-right', ...right });
+        disposables.push(registration);
+        right.selection.selectionContainer.remove();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        expect(right.focusCoordinator.containsElement('embed-right', right.selection.inputElement)).toBe(false);
+        expect(right.focusCoordinator.containsElement('embed-right', left.selection.inputElement)).toBe(false);
 
-        const disposable = registerSheetCellEditorRuntimePortal({
-            embedId: 'embed-1',
-            interactionBoundaryService,
-            focusCoordinator,
-        });
-
-        selectionContainer.remove();
-        const nextSelectionContainer = document.createElement('div');
-        nextSelectionContainer.id = 'univer-doc-selection-container-__INTERNAL_EDITOR__DOCS_NORMAL';
-        const nextCellEditor = document.createElement('div');
-        nextCellEditor.id = '__editor___INTERNAL_EDITOR__DOCS_NORMAL';
-        nextSelectionContainer.appendChild(nextCellEditor);
-        document.body.appendChild(nextSelectionContainer);
+        const replacement = createTestBed();
+        vi.mocked(right.editorService.getEditor).mockReturnValue({ docSelectionRenderService: replacement.selection } as never);
         await new Promise((resolve) => setTimeout(resolve, 0));
 
-        expect(nextSelectionContainer.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('embed-1');
-        expect(nextCellEditor.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe('embed-1');
-        expect(nextSelectionContainer.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe('child-editor');
-        expect(nextCellEditor.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBe('child-editor');
-        expect(interactionBoundaryService.contains('embed-1', nextCellEditor)).toBe(true);
-        expect(focusCoordinator.containsElement('embed-1', nextCellEditor)).toBe(true);
+        expect(right.focusCoordinator.containsElement('embed-right', replacement.selection.inputElement)).toBe(true);
+        expect(right.interactionBoundaryService.contains('embed-right', replacement.selection.inputElement)).toBe(true);
 
-        disposable.dispose();
-
-        expect(nextSelectionContainer.hasAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe(false);
-        expect(nextCellEditor.hasAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBe(false);
+        registration.dispose();
+        expect(right.focusCoordinator.containsElement('embed-right', replacement.selection.inputElement)).toBe(false);
     });
 });

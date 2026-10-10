@@ -360,7 +360,7 @@ export function EditorContainer({ hidden = false }: IEditorContainerProps) {
                 return;
             }
 
-            focusSheetCellEditorElement(ownerDocument);
+            focusSheetCellEditorElement(editorService);
             if (delayedFocusTimer != null) {
                 ownerWindow.clearTimeout(delayedFocusTimer);
             }
@@ -369,7 +369,7 @@ export function EditorContainer({ hidden = false }: IEditorContainerProps) {
                 if (shouldPreserveEmbedInteractiveFocus(scope?.embedId, ownerDocument)) {
                     return;
                 }
-                focusSheetCellEditorElement(ownerDocument);
+                focusSheetCellEditorElement(editorService);
             }, 0);
         };
         const focusEditor = () => {
@@ -382,13 +382,6 @@ export function EditorContainer({ hidden = false }: IEditorContainerProps) {
                 : resolveActiveSheetEmbedRuntimeDomScope(ownerDocument);
             if (shouldPreserveEmbedControlFocus(scope?.embedId, ownerDocument)) {
                 return;
-            }
-
-            const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
-            const docSelectionRenderService = editor?.render.with(DocSelectionRenderService);
-
-            if (!docSelectionRenderService?.isFocusing) {
-                docSelectionRenderService?.focus();
             }
 
             focusCellEditorElement();
@@ -460,6 +453,7 @@ export function EditorContainer({ hidden = false }: IEditorContainerProps) {
             element: editorRoot,
         }));
         collection.add(registerSheetCellEditorRuntimePortal({
+            editorService,
             embedId: scope.embedId,
             ownerDocument: rootRef.current.ownerDocument,
             interactionBoundaryService,
@@ -473,14 +467,7 @@ export function EditorContainer({ hidden = false }: IEditorContainerProps) {
                     return;
                 }
 
-                const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
-                const docSelectionRenderService = editor?.render.with(DocSelectionRenderService);
-
-                if (!docSelectionRenderService?.isFocusing) {
-                    docSelectionRenderService?.focus();
-                }
-
-                focusSheetCellEditorElement(ownerDocument);
+                focusSheetCellEditorElement(editorService);
             };
             const refocusEditorAfterRuntimePointer = (event: PointerEvent | MouseEvent) => {
                 if (!focusCoordinator.isChildUnitRuntimeEvent(scope.childUnitId, event.target, event) || isEmbedRuntimeEditorOrPopup(event.target)) {
@@ -530,6 +517,7 @@ export function EditorContainer({ hidden = false }: IEditorContainerProps) {
             ? injector.get(ISheetEmbedInteractionBoundaryService)
             : undefined;
         const portalRegistration = registerSheetCellEditorRuntimePortal({
+            editorService,
             embedId: activeSessionScope.embedId,
             ownerDocument,
             interactionBoundaryService,
@@ -542,7 +530,7 @@ export function EditorContainer({ hidden = false }: IEditorContainerProps) {
                 return;
             }
 
-            focusSheetCellEditorElement(ownerDocument);
+            focusSheetCellEditorElement(editorService);
             if (delayedFocusTimer != null) {
                 ownerWindow.clearTimeout(delayedFocusTimer);
             }
@@ -551,7 +539,7 @@ export function EditorContainer({ hidden = false }: IEditorContainerProps) {
                 if (shouldPreserveEmbedInteractiveFocus(activeSessionScope.embedId, ownerDocument)) {
                     return;
                 }
-                focusSheetCellEditorElement(ownerDocument);
+                focusSheetCellEditorElement(editorService);
             }, 0);
         };
         const focusHiddenEditor = () => {
@@ -640,11 +628,7 @@ export function EditorContainer({ hidden = false }: IEditorContainerProps) {
 
         pointerRefocusTimerRef.current = ownerWindow.setTimeout(() => {
             pointerRefocusTimerRef.current = undefined;
-            if (!docSelectionRenderService?.isFocusing) {
-                docSelectionRenderService?.focus();
-            }
-
-            focusSheetCellEditorElement(ownerDocument);
+            focusSheetCellEditorElement(editorService);
         }, 0);
     });
 

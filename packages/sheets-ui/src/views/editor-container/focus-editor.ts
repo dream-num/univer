@@ -15,30 +15,28 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
+import type { IEditorService } from '@univerjs/docs-ui';
+import type {
+    ISheetEmbedInteractionBoundaryService,
+    ISheetEmbedRuntimeFocusCoordinator,
+} from '../../services/sheet-embed-integration.service';
 import { DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, toDisposable } from '@univerjs/core';
-import type { ISheetEmbedInteractionBoundaryService, ISheetEmbedRuntimeFocusCoordinator } from '../../services/sheet-embed-integration.service';
 
-const SHEET_CELL_EDITOR_ELEMENT_ID = `__editor_${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
-const SHEET_CELL_EDITOR_SELECTION_CONTAINER_ID = `univer-doc-selection-container-${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
+export function focusSheetCellEditorElement(editorService: IEditorService): boolean {
+    const selection = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.docSelectionRenderService;
 
-export function focusSheetCellEditorElement(ownerDocument: Document = document): boolean {
-    const element = ownerDocument.getElementById(SHEET_CELL_EDITOR_ELEMENT_ID) as HTMLElement | null;
-
-    if (element == null || ownerDocument.activeElement === element) {
+    if (!selection || selection.isFocusing) {
         return false;
     }
 
-    if (!element.hasAttribute('tabindex')) {
-        element.tabIndex = -1;
-    }
+    selection.focus();
 
-    element.focus({ preventScroll: true });
-
-    return ownerDocument.activeElement === element;
+    return selection.isFocusing;
 }
 
 export function registerSheetCellEditorRuntimePortal(options: {
     embedId: string;
+    editorService: IEditorService;
     ownerDocument?: Document;
     interactionBoundaryService?: ISheetEmbedInteractionBoundaryService;
     focusCoordinator?: ISheetEmbedRuntimeFocusCoordinator;
@@ -60,7 +58,8 @@ export function registerSheetCellEditorRuntimePortal(options: {
             return;
         }
 
-        const portalRoot = resolveSheetCellEditorPortalRoot(ownerDocument);
+        const selection = options.editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.docSelectionRenderService;
+        const portalRoot = selection?.selectionContainer.isConnected ? selection.selectionContainer : null;
         if (portalRoot === registeredPortalRoot) {
             return;
         }
@@ -85,7 +84,7 @@ export function registerSheetCellEditorRuntimePortal(options: {
                 element: portalRoot,
             }));
 
-            const editorElement = ownerDocument.getElementById(SHEET_CELL_EDITOR_ELEMENT_ID) as HTMLElement | null;
+            const editorElement = selection?.inputElement;
             if (editorElement && editorElement !== portalRoot) {
                 rootRegistration.add(options.focusCoordinator.registerElement({
                     embedId: options.embedId,
@@ -135,9 +134,4 @@ export function registerSheetCellEditorRuntimePortal(options: {
     }));
 
     return collection;
-}
-
-export function resolveSheetCellEditorPortalRoot(ownerDocument: Document = document): HTMLElement | null {
-    return (ownerDocument.getElementById(SHEET_CELL_EDITOR_SELECTION_CONTAINER_ID) as HTMLElement | null)
-        ?? (ownerDocument.getElementById(SHEET_CELL_EDITOR_ELEMENT_ID) as HTMLElement | null);
 }

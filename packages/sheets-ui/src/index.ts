@@ -296,13 +296,14 @@ export { AutoFillPopupMenu } from './views/auto-fill-popup-menu/AutoFillPopupMen
 export { BorderLine } from './views/border-panel/border-line/BorderLine';
 export { BORDER_LINE_CHILDREN, BORDER_SIZE_CHILDREN } from './views/border-panel/interface';
 export { DEFINED_NAME_CONTAINER } from './views/defined-name/component-name';
-export { EditorContainer, useKeyEventConfig } from './views/editor-container';
+export { EditorContainer } from './views/editor-container/EditorContainer';
+export { useKeyEventConfig } from './views/editor-container/hooks';
 export { FormulaBar } from './views/formula-bar';
 export { useActiveWorkbook, useActiveWorksheet, useWorkbooks } from './views/hook';
 export type { IRangeProtectionRenderCellData } from './views/permission/extensions/range-protection.render';
-export { type IPermissionDetailUserPartProps } from './views/permission/panel-detail/PermissionDetailUserPart';
-export { type IBaseSheetBarProps } from './views/sheet-bar/sheet-bar-tabs/SheetBarItem';
+export type { IPermissionDetailUserPartProps } from './views/permission/panel-detail/PermissionDetailUserPart';
+export type { IBaseSheetBarProps } from './views/sheet-bar/sheet-bar-tabs/SheetBarItem';
 export { SheetBar } from './views/sheet-bar/SheetBar';
 export { SHEET_FOOTER_BAR_HEIGHT } from './views/sheet-container/SheetContainer';
-export { type IStatisticItem } from './views/status-bar/CopyableStatisticItem';
+export type { IStatisticItem } from './views/status-bar/CopyableStatisticItem';
 export { functionDisplayNames } from './views/status-bar/CopyableStatisticItem';

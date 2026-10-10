@@ -187,12 +187,27 @@ class TestEditorBridgeService {
     dispose(): void {}
 }
 
+const testInjectors: Injector[] = [];
+
 function createTestBed(options: { disableAutoFocus?: boolean; docSelectionIsFocusing?: boolean; focusedUnitId?: string | null; sheetUnitIds?: string[] } = {}) {
     const injector = new Injector();
-    const componentManager = new ComponentManager();
-    const focusCoordinator = new EmbedRuntimeFocusCoordinator();
-    const interactionBoundaryService = new EmbedInteractionBoundaryService();
-    const editorBridgeService = new TestEditorBridgeService();
+    testInjectors.push(injector);
+    injector.add([ComponentManager]);
+    injector.add([ISheetEmbedRuntimeFocusCoordinator, { useClass: EmbedRuntimeFocusCoordinator }]);
+    injector.add([ISheetEmbedInteractionBoundaryService, { useClass: EmbedInteractionBoundaryService }]);
+    injector.add([TestEditorBridgeService]);
+    injector.add([TestCellEditorManagerService]);
+    const componentManager = injector.get(ComponentManager);
+    const focusCoordinator = injector.get(ISheetEmbedRuntimeFocusCoordinator) as EmbedRuntimeFocusCoordinator;
+    const interactionBoundaryService = injector.get(ISheetEmbedInteractionBoundaryService) as EmbedInteractionBoundaryService;
+    const editorBridgeService = injector.get(TestEditorBridgeService);
+    const selectionContainer = document.createElement('div');
+    selectionContainer.id = `univer-doc-selection-container-${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
+    const internalEditor = document.createElement('div');
+    internalEditor.id = `__editor_${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
+    internalEditor.tabIndex = -1;
+    selectionContainer.appendChild(internalEditor);
+    document.body.appendChild(selectionContainer);
     const editSheet = { getSheetId: () => 'worksheet-1', getName: () => 'Sheet1' };
     const otherSheet = { getSheetId: () => 'worksheet-2', getName: () => 'Sheet2' };
     const activeSheet$ = new BehaviorSubject(editSheet);
@@ -212,10 +227,12 @@ function createTestBed(options: { disableAutoFocus?: boolean; docSelectionIsFocu
     };
     const validViewportScrollInfo$ = new BehaviorSubject<Nullable<Record<string, never>>>({});
     const docSelectionRenderService = {
-        isFocusing: options.docSelectionIsFocusing ?? true,
-        focus: vi.fn(),
+        get isFocusing() { return options.docSelectionIsFocusing ?? document.activeElement === internalEditor; },
+        inputElement: internalEditor,
+        selectionContainer,
+        focus: vi.fn(() => internalEditor.focus()),
     };
-    const cellEditorManagerService = new TestCellEditorManagerService();
+    const cellEditorManagerService = injector.get(TestCellEditorManagerService);
 
     latestFormulaEditorProps = undefined;
     componentManager.register(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, (props: {
@@ -225,8 +242,6 @@ function createTestBed(options: { disableAutoFocus?: boolean; docSelectionIsFocu
         latestFormulaEditorProps = props;
         return <div data-testid="formula-editor" />;
     });
-    injector.add([Injector, injector]);
-    injector.add([ComponentManager, componentManager]);
     injector.add([IEditorBridgeService, { useValue: editorBridgeService as never }]);
     injector.add([ICellEditorManagerService, { useValue: cellEditorManagerService }]);
     injector.add([IEditorService, {
@@ -234,6 +249,7 @@ function createTestBed(options: { disableAutoFocus?: boolean; docSelectionIsFocu
             getEditor: () => ({
                 getBoundingClientRect: () => ({ left: 0, top: 0, width: 120, height: 32 }),
                 render: { with: () => docSelectionRenderService },
+                docSelectionRenderService,
             }),
         } as never,
     }]);
@@ -281,10 +297,8 @@ function createTestBed(options: { disableAutoFocus?: boolean; docSelectionIsFocu
     }]);
     injector.add([ILayoutService, { useValue: { focus: vi.fn() } as never }]);
     injector.add([ISidebarService, { useValue: { getContainer: () => null } as never }]);
-    injector.add([ISheetEmbedRuntimeFocusCoordinator, { useValue: focusCoordinator }]);
-    injector.add([ISheetEmbedInteractionBoundaryService, { useValue: interactionBoundaryService }]);
 
-    return { injector, editorBridgeService, focusCoordinator, interactionBoundaryService, docSelectionRenderService, cellEditorManagerService, cellEditorResizeService, validViewportScrollInfo$, activeSheet$, otherSheet };
+    return { injector, selectionContainer, internalEditor, editorBridgeService, focusCoordinator, interactionBoundaryService, docSelectionRenderService, cellEditorManagerService, cellEditorResizeService, validViewportScrollInfo$, activeSheet$, otherSheet };
 }
 
 function renderEditorContainer(root: Root, injector: Injector, props: { hidden?: boolean } = {}): void {
@@ -298,12 +312,29 @@ describe('EditorContainer embed focus lease', () => {
 
     afterEach(() => {
         act(() => root?.unmount());
-        container?.remove();
-        document.getElementById(`univer-doc-selection-container-${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`)?.remove();
-        document.getElementById(`__editor_${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`)?.remove();
+        testInjectors.splice(0).forEach((injector) => injector.dispose());
+        document.body.replaceChildren();
         vi.useRealTimers();
         root = undefined;
         container = undefined;
+    });
+
+    it.each([false, true])('keeps cell editing in its own instance with duplicate IDs (nested: %s)', async (nested) => {
+        const left = createTestBed();
+        const right = createTestBed();
+        if (nested) {
+            left.selectionContainer.appendChild(right.selectionContainer);
+        }
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            renderEditorContainer(root!, right.injector);
+            await new Promise((resolve) => setTimeout(resolve, 50));
+        });
+
+        expect(document.activeElement).toBe(right.internalEditor);
     });
 
     it('keeps the cell editor mounted but non-interactive when hidden', async () => {
@@ -326,12 +357,7 @@ describe('EditorContainer embed focus lease', () => {
 
     it('holds a child-editor lease while the embedded sheet cell editor is visible', async () => {
         const { injector, editorBridgeService, focusCoordinator, interactionBoundaryService } = createTestBed();
-        const selectionContainer = document.createElement('div');
-        selectionContainer.id = `univer-doc-selection-container-${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
-        const internalEditor = document.createElement('div');
-        internalEditor.id = `__editor_${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
-        selectionContainer.appendChild(internalEditor);
-        document.body.appendChild(selectionContainer);
+        const { selectionContainer, inputElement: internalEditor } = injector.get(IEditorService).getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)!.docSelectionRenderService;
         container = document.createElement('div');
         container.setAttribute('data-embed-float-dom', 'true');
         container.setAttribute('data-embed-id', 'embed-1');
@@ -391,12 +417,7 @@ describe('EditorContainer embed focus lease', () => {
             childUnitId: 'scoped-child-sheet',
             childType: UniverInstanceType.UNIVER_SHEET,
         });
-        const selectionContainer = document.createElement('div');
-        selectionContainer.id = `univer-doc-selection-container-${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
-        const internalEditor = document.createElement('div');
-        internalEditor.id = `__editor_${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
-        selectionContainer.appendChild(internalEditor);
-        document.body.appendChild(selectionContainer);
+        const { selectionContainer, inputElement: internalEditor } = injector.get(IEditorService).getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)!.docSelectionRenderService;
         container = document.createElement('div');
         document.body.appendChild(container);
         root = createRoot(container);
@@ -422,12 +443,7 @@ describe('EditorContainer embed focus lease', () => {
         const { injector, focusCoordinator, interactionBoundaryService } = createTestBed({
             focusedUnitId: 'host-doc',
         });
-        const selectionContainer = document.createElement('div');
-        selectionContainer.id = `univer-doc-selection-container-${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
-        const internalEditor = document.createElement('div');
-        internalEditor.id = `__editor_${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
-        selectionContainer.appendChild(internalEditor);
-        document.body.appendChild(selectionContainer);
+        const { selectionContainer, inputElement: internalEditor } = injector.get(IEditorService).getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)!.docSelectionRenderService;
         container = document.createElement('div');
         document.body.appendChild(container);
         root = createRoot(container);
@@ -476,13 +492,7 @@ describe('EditorContainer embed focus lease', () => {
             focusedUnitId: 'host-doc',
             sheetUnitIds: ['scoped-child-sheet'],
         });
-        const selectionContainer = document.createElement('div');
-        selectionContainer.id = `univer-doc-selection-container-${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
-        const internalEditor = document.createElement('div');
-        internalEditor.id = `__editor_${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
-        internalEditor.tabIndex = -1;
-        selectionContainer.appendChild(internalEditor);
-        document.body.appendChild(selectionContainer);
+        const { selectionContainer, inputElement: internalEditor } = injector.get(IEditorService).getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)!.docSelectionRenderService;
         const hostCanvas = document.createElement('canvas');
         hostCanvas.tabIndex = -1;
         document.body.appendChild(hostCanvas);
@@ -537,13 +547,7 @@ describe('EditorContainer embed focus lease', () => {
             focusedUnitId: 'host-doc',
             sheetUnitIds: ['scoped-child-sheet'],
         });
-        const selectionContainer = document.createElement('div');
-        selectionContainer.id = `univer-doc-selection-container-${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
-        const internalEditor = document.createElement('div');
-        internalEditor.id = `__editor_${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
-        internalEditor.tabIndex = -1;
-        selectionContainer.appendChild(internalEditor);
-        document.body.appendChild(selectionContainer);
+        const { selectionContainer } = injector.get(IEditorService).getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)!.docSelectionRenderService;
         const hostCanvas = document.createElement('canvas');
         hostCanvas.tabIndex = -1;
         document.body.appendChild(hostCanvas);
@@ -595,13 +599,7 @@ describe('EditorContainer embed focus lease', () => {
             focusedUnitId: 'host-doc',
             sheetUnitIds: ['scoped-child-base'],
         });
-        const selectionContainer = document.createElement('div');
-        selectionContainer.id = `univer-doc-selection-container-${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
-        const internalEditor = document.createElement('div');
-        internalEditor.id = `__editor_${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
-        internalEditor.tabIndex = -1;
-        selectionContainer.appendChild(internalEditor);
-        document.body.appendChild(selectionContainer);
+        const { selectionContainer } = injector.get(IEditorService).getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)!.docSelectionRenderService;
         const hostCanvas = document.createElement('canvas');
         hostCanvas.tabIndex = -1;
         document.body.appendChild(hostCanvas);
@@ -672,12 +670,7 @@ describe('EditorContainer embed focus lease', () => {
             childUnitId: 'child-base',
             childType: UniverInstanceType.UNIVER_BASE,
         });
-        const selectionContainer = document.createElement('div');
-        selectionContainer.id = `univer-doc-selection-container-${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
-        const internalEditor = document.createElement('div');
-        internalEditor.id = `__editor_${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
-        selectionContainer.appendChild(internalEditor);
-        document.body.appendChild(selectionContainer);
+        const { selectionContainer, inputElement: internalEditor } = injector.get(IEditorService).getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)!.docSelectionRenderService;
         container = document.createElement('div');
         container.setAttribute('data-embed-float-dom', 'true');
         container.setAttribute('data-embed-id', 'embed-sheet');
@@ -860,10 +853,7 @@ describe('EditorContainer embed focus lease', () => {
 
     it('restores focus to the internal cell editor after pointer down inside the editor canvas', async () => {
         const { injector, docSelectionRenderService } = createTestBed({ docSelectionIsFocusing: false });
-        const hiddenEditor = document.createElement('div');
-        hiddenEditor.id = `__editor_${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
-        hiddenEditor.tabIndex = -1;
-        document.body.appendChild(hiddenEditor);
+        const hiddenEditor = docSelectionRenderService.inputElement;
         container = document.createElement('div');
         container.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
         document.body.appendChild(container);

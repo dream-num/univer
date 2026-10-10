@@ -19,28 +19,13 @@ import type { IBorderInfo } from '@univerjs/sheets';
 import type { IBorderPanelProps } from './interface';
 import { BorderStyleTypes } from '@univerjs/core';
 import { clsx, ColorPicker, ConfigContext, Dropdown, Separator } from '@univerjs/design';
-import { CheckMarkIcon, MoreDownIcon, PaintBucketDoubleIcon } from '@univerjs/icons';
-import { BorderStyleManagerService, SheetsSelectionsService } from '@univerjs/sheets';
+import { MoreDownIcon, PaintBucketDoubleIcon } from '@univerjs/icons';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { IconManager, useDependency } from '@univerjs/ui';
 import { useContext } from 'react';
+
 import { BorderLine } from './border-line/BorderLine';
 import { BORDER_LINE_CHILDREN, BORDER_SIZE_CHILDREN } from './interface';
-
-function getBorderColor(borderData: Nullable<IBorderData>): string | undefined {
-    if (!borderData) return;
-    for (const key in borderData) {
-        const border = borderData[key as keyof IBorderData];
-        if (border?.cl?.rgb) return border.cl.rgb;
-    }
-}
-
-function getBorderStyle(borderData: Nullable<IBorderData>): BorderStyleTypes | undefined {
-    if (!borderData) return;
-    for (const key in borderData) {
-        const border = borderData[key as keyof IBorderData];
-        if (border?.cl?.rgb) return border.s;
-    }
-}
 
 export interface IResponsiveBorderPanelProps extends IBorderPanelProps {
     ColorPickerComponent?: typeof ColorPicker;
@@ -49,15 +34,21 @@ export interface IResponsiveBorderPanelProps extends IBorderPanelProps {
 
 export function BorderPanel(props: IResponsiveBorderPanelProps) {
     const iconManager = useDependency(IconManager);
-    const borderStyleManagerService = useDependency(BorderStyleManagerService);
     const selectionManagerService = useDependency(SheetsSelectionsService);
     const { direction } = useContext(ConfigContext);
 
     const { isAllValuesSame, value: currentValue } = selectionManagerService.getCellStylesProperty('bd');
     const color = isAllValuesSame ? getBorderColor(currentValue as Nullable<IBorderData>) : undefined;
-    const type = isAllValuesSame ? getBorderStyle(currentValue as Nullable<IBorderData>) : undefined;
 
     const { onChange, value, ColorPickerComponent = ColorPicker, DropdownComponent = Dropdown } = props;
+
+    function getBorderColor(borderData: Nullable<IBorderData>): string | undefined {
+        if (!borderData) return;
+        for (const key in borderData) {
+            const border = borderData[key as keyof IBorderData];
+            if (border?.cl?.rgb) return border.cl.rgb;
+        }
+    }
 
     function handleClick(v: string | number, type: keyof IBorderInfo) {
         onChange?.({
@@ -89,7 +80,7 @@ export function BorderPanel(props: IResponsiveBorderPanelProps) {
                           hover:univer-bg-gray-100
                           dark:hover:!univer-bg-gray-700
                         `, {
-                            'univer-bg-gray-200 dark:!univer-bg-gray-600': borderStyleManagerService.getBorderInfo().type === item.value,
+                            'univer-bg-gray-200 dark:!univer-bg-gray-600': value.type === item.value,
                         })}
                         onClick={(e) => {
                             e.stopPropagation();
@@ -139,28 +130,30 @@ export function BorderPanel(props: IResponsiveBorderPanelProps) {
                             <section className="univer-rounded-lg univer-p-1.5">
                                 <ul className="univer-m-0 univer-grid univer-list-none univer-gap-1 univer-p-0">
                                     {BORDER_SIZE_CHILDREN.map((item) => (
-                                        <li
-                                            key={item.value}
-                                            className={`
-                                              univer-flex univer-cursor-pointer univer-items-center
-                                              univer-justify-center univer-rounded univer-px-1 univer-py-3
-                                              hover:univer-bg-gray-100
-                                              dark:hover:!univer-bg-gray-700
-                                            `}
-                                            onClick={() => handleClick(item.value, 'style')}
-                                        >
-                                            {item.value === type && (
-                                                <CheckMarkIcon
-                                                    className="univer-absolute univer-left-3 univer-text-primary-600"
+                                        <li key={item.value}>
+                                            <button
+                                                type="button"
+                                                aria-label={BorderStyleTypes[item.value]}
+                                                aria-pressed={item.value === value.style}
+                                                className={clsx(`
+                                                  univer-flex univer-w-full univer-cursor-pointer univer-items-center
+                                                  univer-justify-center univer-rounded univer-border-none
+                                                  univer-bg-transparent univer-px-1 univer-py-3
+                                                  hover:univer-bg-gray-100
+                                                  dark:hover:!univer-bg-gray-700
+                                                `, {
+                                                    'univer-bg-gray-200 dark:!univer-bg-gray-600': item.value === value.style,
+                                                })}
+                                                onClick={() => handleClick(item.value, 'style')}
+                                            >
+                                                <BorderLine
+                                                    className={`
+                                                      univer-fill-gray-900
+                                                      dark:!univer-fill-gray-0
+                                                    `}
+                                                    type={item.value}
                                                 />
-                                            )}
-                                            <BorderLine
-                                                className={`
-                                                  univer-ml-6 univer-fill-gray-900
-                                                  dark:!univer-fill-gray-0
-                                                `}
-                                                type={item.value}
-                                            />
+                                            </button>
                                         </li>
                                     ))}
                                 </ul>
@@ -181,7 +174,7 @@ export function BorderPanel(props: IResponsiveBorderPanelProps) {
                                   univer-fill-gray-900
                                   dark:!univer-fill-gray-0
                                 `}
-                                type={type ?? BorderStyleTypes.THIN}
+                                type={value.style}
                             />
                             <MoreDownIcon className="dark:!univer-text-gray-0" />
                         </button>

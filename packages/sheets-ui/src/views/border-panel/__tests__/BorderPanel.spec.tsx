@@ -18,12 +18,16 @@ import type { IBorderInfo } from '@univerjs/sheets';
 import type { Root } from 'react-dom/client';
 import { BorderStyleTypes, BorderType, Univer } from '@univerjs/core';
 import { ConfigProvider } from '@univerjs/design';
-import { BorderStyleManagerService, SheetsSelectionsService } from '@univerjs/sheets';
+import * as icons from '@univerjs/icons';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { IconManager, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { afterEach, describe, expect, it } from 'vitest';
+import { describe, expect, it, onTestFinished } from 'vitest';
+
 import { BorderPanel } from '../BorderPanel';
+
+(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 class TestSheetsSelectionsService {
     getCellStylesProperty() {
@@ -39,57 +43,45 @@ class TestSheetsSelectionsService {
     }
 }
 
-class TestState {
-    static changes: IBorderInfo[] = [];
-
-    static reset(): void {
-        this.changes = [];
-    }
-}
-
 function renderPanel(value: IBorderInfo, direction: 'ltr' | 'rtl' = 'ltr') {
     const univer = new Univer();
     const injector = univer.__getInjector();
-    injector.add([BorderStyleManagerService]);
     injector.add([IconManager]);
     injector.add([SheetsSelectionsService, { useClass: TestSheetsSelectionsService as never }]);
+    injector.get(IconManager).register(icons);
 
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root: Root = createRoot(container);
+    const changes: IBorderInfo[] = [];
 
-    act(() => {
+    function render(value: IBorderInfo) {
         root.render(
             <RediContext.Provider value={{ injector }}>
                 <ConfigProvider mountContainer={document.body} direction={direction}>
                     <BorderPanel
                         value={value}
-                        onChange={(nextValue) => TestState.changes.push(nextValue)}
+                        onChange={(nextValue) => {
+                            changes.push(nextValue);
+                            render(nextValue);
+                        }}
                     />
                 </ConfigProvider>
             </RediContext.Provider>
         );
+    }
+
+    act(() => render(value));
+    onTestFinished(() => {
+        act(() => root.unmount());
+        container.remove();
+        univer.dispose();
     });
 
-    return {
-        container,
-        dispose: () => {
-            act(() => root.unmount());
-            container.remove();
-            univer.dispose();
-        },
-    };
-}
-
-function hasClassToken(element: HTMLElement, token: string): boolean {
-    return element.className.split(/\s+/).includes(token);
+    return { container, changes };
 }
 
 describe('BorderPanel', () => {
-    afterEach(() => {
-        TestState.reset();
-    });
-
     it('keeps the current border color and style when selecting a new border type', () => {
         const rendered = renderPanel({
             type: BorderType.ALL,
@@ -103,7 +95,7 @@ describe('BorderPanel', () => {
             (borderTypeItems[0] as HTMLElement).click();
         });
 
-        expect(TestState.changes).toEqual([
+        expect(rendered.changes).toEqual([
             {
                 type: BorderType.TOP,
                 color: '#123456',
@@ -111,24 +103,38 @@ describe('BorderPanel', () => {
                 activeBorderType: true,
             },
         ]);
-        rendered.dispose();
     });
 
-    it('keeps color and line dropdown icon order compatible with rtl', () => {
+    it.each(['ltr', 'rtl'] as const)('keeps the line preview and selected option in sync in %s', async (direction) => {
         const rendered = renderPanel({
             type: BorderType.ALL,
             color: '#123456',
-            style: BorderStyleTypes.THIN,
+            style: BorderStyleTypes.DOTTED,
             activeBorderType: true,
-        }, 'rtl');
+        }, direction);
 
-        expect(rendered.container.querySelector('section')?.getAttribute('dir')).toBe('rtl');
-        const dropdownButtons = rendered.container.querySelectorAll('button');
+        expect(rendered.container.querySelector('section')?.getAttribute('dir')).toBe(direction);
+        const trigger = rendered.container.querySelectorAll('button')[1];
+        await act(async () => trigger.click());
 
-        expect(dropdownButtons).toHaveLength(2);
-        dropdownButtons.forEach((button) => {
-            expect(hasClassToken(button, 'rtl:univer-flex-row-reverse')).toBe(false);
+        const options = document.body.querySelectorAll('li');
+        const dottedPreview = options[2].querySelector('svg')!;
+        expect(trigger.querySelector('svg')?.innerHTML).toBe(dottedPreview.innerHTML);
+        expect(options[2].querySelector('button')?.getAttribute('aria-pressed')).toBe('true');
+
+        const dashedPreview = options[3].querySelector('svg')!;
+        await act(async () => {
+            dashedPreview.dispatchEvent(new MouseEvent('click', { bubbles: true }));
         });
-        rendered.dispose();
+
+        expect(rendered.changes).toEqual([{
+            type: BorderType.ALL,
+            color: '#123456',
+            style: BorderStyleTypes.DASHED,
+            activeBorderType: true,
+        }]);
+        expect(trigger.querySelector('svg')?.innerHTML).toBe(dashedPreview.innerHTML);
+        expect(options[3].querySelector('button')?.getAttribute('aria-pressed')).toBe('true');
+        expect(options[2].querySelector('button')?.getAttribute('aria-pressed')).toBe('false');
     });
 });

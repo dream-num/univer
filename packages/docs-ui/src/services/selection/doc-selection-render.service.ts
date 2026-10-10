@@ -181,6 +181,14 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         return this._input === this._getOwnerDocument().activeElement;
     }
 
+    get inputElement(): HTMLDivElement {
+        return this._input;
+    }
+
+    get selectionContainer(): HTMLDivElement {
+        return this._container;
+    }
+
     get isEditing() {
         return this._textSelectionInner$.value?.isEditing === true;
     }

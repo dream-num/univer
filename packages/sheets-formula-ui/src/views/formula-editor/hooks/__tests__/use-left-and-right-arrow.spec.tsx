@@ -51,12 +51,7 @@ import {
     UniverDocsUIPlugin,
 } from '@univerjs/docs-ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import {
-    IRefSelectionsService,
-    REF_SELECTIONS_ENABLED,
-    SetSelectionsOperation,
-    SheetsSelectionsService,
-} from '@univerjs/sheets';
+import { IRefSelectionsService, REF_SELECTIONS_ENABLED, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { ExpandSelectionCommand, JumpOver, MoveSelectionCommand, UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import {
     ComponentManager,
@@ -73,7 +68,11 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { describe, expect, it, vi } from 'vitest';
 import { FormulaSelectingType } from '../use-formula-selection';
-import { useLeftAndRightArrow } from '../use-left-and-right-arrow';
+import {
+    isFormulaEditorInteractionOwner,
+    shouldMoveFormulaSelectionFromCurrentSelection,
+    useLeftAndRightArrow,
+} from '../use-left-and-right-arrow';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -321,5 +320,46 @@ describe('formula editor text navigation', () => {
             await act(async () => root.unmount());
             injector.dispose();
         }
+    });
+});
+
+describe('use-left-and-right-arrow regression scenarios', () => {
+    it('treats the hidden normal editor as the fx bar owner while the fx bar owns formula selection', () => {
+        expect(isFormulaEditorInteractionOwner(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, {
+            fxBarFocused: true,
+        })).toBe(true);
+    });
+
+    it('lets the fx bar own formula selection when the canvas leaves no focused editor', () => {
+        expect(isFormulaEditorInteractionOwner(null, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, {
+            fxBarFocused: true,
+            allowMissingFocus: true,
+        })).toBe(true);
+    });
+
+    it('does not let the hidden normal editor own the fx bar outside an fx formula selection session', () => {
+        expect(isFormulaEditorInteractionOwner(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, {
+            fxBarFocused: false,
+        })).toBe(false);
+    });
+
+    it('starts the first keyboard-added formula reference from the edited cell selection', () => {
+        expect(shouldMoveFormulaSelectionFromCurrentSelection(FormulaSelectingType.NEED_ADD, 0)).toBe(true);
+    });
+
+    it('routes formula editor interactions only to the focused formula editor', () => {
+        expect(isFormulaEditorInteractionOwner('__INTERNAL_EDITOR__DOCS_NORMAL', '__INTERNAL_EDITOR__DOCS_NORMAL')).toBe(true);
+        expect(isFormulaEditorInteractionOwner('__INTERNAL_EDITOR__DOCS_FORMULA_BAR', '__INTERNAL_EDITOR__DOCS_NORMAL')).toBe(false);
+        expect(isFormulaEditorInteractionOwner(null, '__INTERNAL_EDITOR__DOCS_NORMAL')).toBe(false);
+    });
+
+    it('continues keyboard-added formula references from the last reference selection after a delimiter', () => {
+        expect(shouldMoveFormulaSelectionFromCurrentSelection(FormulaSelectingType.NEED_ADD, 1)).toBe(false);
+        expect(shouldMoveFormulaSelectionFromCurrentSelection(FormulaSelectingType.NEED_ADD, 2)).toBe(false);
+    });
+
+    it('keeps cross-sheet reference editing anchored to the current sheet selection', () => {
+        expect(shouldMoveFormulaSelectionFromCurrentSelection(FormulaSelectingType.EDIT_OTHER_SHEET_REFERENCE, 1)).toBe(true);
+        expect(shouldMoveFormulaSelectionFromCurrentSelection(FormulaSelectingType.CAN_EDIT, 1)).toBe(false);
     });
 });

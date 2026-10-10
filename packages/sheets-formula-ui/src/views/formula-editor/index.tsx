@@ -418,6 +418,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
             element: formulaEditorContainer,
         }));
         collection.add(registerFormulaEditorRuntimePortal({
+            editorService,
             embedId: scope.embedId,
             editorId,
             ownerDocument: formulaEditorContainer.ownerDocument,
@@ -426,7 +427,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
         }));
 
         return () => collection.dispose();
-    }, [editorId, injector, isFocus]);
+    }, [editorId, editorService, injector, isFocus]);
 
     useLayoutEffect(() => {
         let focusRetryFrame = 0;
@@ -532,12 +533,11 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
         }
     };
 
-    const handleMouseUp = (event: React.MouseEvent<HTMLDivElement>) => {
+    const handleMouseUp = () => {
         if (hasActiveFormulaEmbedInteraction(formulaEditorContainerRef.current)) {
             return;
         }
         if (!shouldRefocusFormulaEditorOnMouseUp({
-            target: event.target,
             isFocusing,
             isPointerSelecting: docSelectionRenderService?.isOnPointerEvent,
         })) {

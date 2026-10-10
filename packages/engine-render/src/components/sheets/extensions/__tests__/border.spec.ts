@@ -145,6 +145,38 @@ describe('border extension', () => {
         expect(outOfDiff).toBe(true);
     });
 
+    it.each([BORDER_TYPE.TL_BR, BORDER_TYPE.BL_TR])('keeps outer borders after skipping a merged child diagonal %s', (diagonalType) => {
+        const extension = new Border();
+        const ctx = createCtx();
+        const renderBorderContext = {
+            ctx,
+            precisionScale: 1,
+            overflowCache: new ObjectMatrix(),
+            spreadsheetSkeleton: {
+                getCellWithCoordByIndex: () => createCellInfo({
+                    isMerged: true,
+                    mergeInfo: {
+                        startRow: 7,
+                        endRow: 8,
+                        startColumn: 0,
+                        endColumn: 3,
+                    },
+                }),
+            },
+            diffRanges: [{ startRow: 7, endRow: 8, startColumn: 0, endColumn: 3 }],
+            viewRanges: [],
+        } as any;
+
+        extension.renderBorderByCell(renderBorderContext, 8, 0, {
+            [diagonalType]: { type: diagonalType, style: BorderStyleTypes.THIN, color: '#000000' },
+            [BORDER_TYPE.LEFT]: { type: BORDER_TYPE.LEFT, style: BorderStyleTypes.MEDIUM, color: '#000000' },
+            [BORDER_TYPE.BOTTOM]: { type: BORDER_TYPE.BOTTOM, style: BorderStyleTypes.THIN, color: '#000000' },
+        });
+
+        expect(drawLineByBorderTypeMock.mock.calls.map((call) => call[1])).toEqual([BORDER_TYPE.LEFT, BORDER_TYPE.BOTTOM]);
+        expect(drawDiagonalLineByBorderTypeMock.mock.calls.map((call) => call[2])).not.toContain(diagonalType);
+    });
+
     it('renders regular/diagonal/double borders and internal helpers', () => {
         const extension = new Border() as any;
         const ctx = createCtx();

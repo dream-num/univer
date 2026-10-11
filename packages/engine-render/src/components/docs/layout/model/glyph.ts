@@ -18,9 +18,11 @@ import type {
     IAdjustability,
     IDocumentSkeletonBoundingBox,
     IDocumentSkeletonBullet,
+    IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
     IDocumentSkeletonFontStyle,
     IDocumentSkeletonGlyph,
+    IDocumentSkeletonLine,
 } from '../../../../basics/i-document-skeleton-cached';
 import type { IFontCreateConfig } from '../../../../basics/interfaces';
 import type { IDocumentCompatibilityPolicy } from '../../document-compatibility';
@@ -35,6 +37,7 @@ import {
     isCjkCenterAlignedPunctuation,
     isCjkLeftAlignedPunctuation,
     isCjkRightAlignedPunctuation,
+    splitGraphemes,
 } from '../../../../basics/tools';
 import { getCheckboxShapeSize, isCheckboxGlyph } from '../../../../shape/checkbox';
 import {
@@ -103,6 +106,159 @@ export function getGlyphGroupFontBoundingBox(
 
 export function getTextHorizontalScale(percent?: number): number {
     return percent != null && Number.isFinite(percent) && percent > 0 ? percent / 100 : 1;
+}
+
+/**
+ * Vertical advance of one upright character in stacked vertical text
+ * (vertical cell text direction / `tr: { v: 1 }`). Stacked characters are
+ * spaced by their font em-box height instead of the horizontal layout advance.
+ */
+export function getVerticalStackCharHeight(glyph: IDocumentSkeletonGlyph, fallback = 0): number {
+    const { bBox } = glyph;
+    const fontBoxHeight = bBox.ba + bBox.bd;
+    if (Number.isFinite(fontBoxHeight) && fontBoxHeight > 0) {
+        return fontBoxHeight;
+    }
+    const inkHeight = bBox.aba + bBox.abd;
+    if (Number.isFinite(inkHeight) && inkHeight > 0) {
+        return inkHeight;
+    }
+    return fallback;
+}
+
+/**
+ * Control glyphs (paragraph/section breaks) are invisible and must not
+ * occupy an em slot in stacked vertical text.
+ */
+export function isVerticalStackControlGlyph(glyph: IDocumentSkeletonGlyph): boolean {
+    return glyph.streamType === DataStreamTreeTokenType.PARAGRAPH
+        || glyph.raw === DataStreamTreeTokenType.PARAGRAPH
+        || glyph.streamType === DataStreamTreeTokenType.SECTION_BREAK
+        || glyph.content === '\n';
+}
+
+/**
+ * Graphemes that occupy a slot in stacked vertical text. Must stay in sync
+ * with `_drawGlyphGroup` (advance) and the stacked paint branch of `_fillText`
+ * in font-and-base-line.ts.
+ */
+export function getVerticalStackGraphemes(glyph: IDocumentSkeletonGlyph): string[] {
+    if (isVerticalStackControlGlyph(glyph)) {
+        return [];
+    }
+    return splitGraphemes(glyph.content).filter((grapheme) => !/^[\r\n]+$/.test(grapheme));
+}
+
+/**
+ * Rendered flow-direction extent of a glyph in stacked vertical text. CJK
+ * glyphs keep their layout advance (they are already em-wide), other glyphs
+ * stack one grapheme per em-box height. Must stay in sync with the stacking
+ * in `_drawGlyphGroup` and the stacked paint branch of `_fillText` in
+ * font-and-base-line.ts.
+ */
+export function getVerticalStackedGlyphAdvance(glyph: IDocumentSkeletonGlyph, fallbackCharHeight = 0): number {
+    if (cjk.hasCJK(glyph.content)) {
+        return glyph.width;
+    }
+    return getVerticalStackGraphemes(glyph).length * getVerticalStackCharHeight(glyph, fallbackCharHeight);
+}
+
+/**
+ * Rendered flow-direction extent of a whole divide in stacked vertical text.
+ */
+export function getVerticalStackedDivideWidth(divide: IDocumentSkeletonDivide, fallbackCharHeight = 0): number {
+    let width = 0;
+    for (const glyph of divide.glyphGroup) {
+        if (!glyph.content) {
+            continue;
+        }
+        width += getVerticalStackedGlyphAdvance(glyph, fallbackCharHeight);
+    }
+    return width;
+}
+
+function getVerticalStackedLineExtent(line: IDocumentSkeletonLine): number {
+    let extent = 0;
+    for (const divide of line.divides) {
+        extent += getVerticalStackedDivideWidth(divide, line.lineHeight ?? 0);
+    }
+    return extent;
+}
+
+/**
+ * Rendered flow-direction extent of a whole column in stacked vertical text:
+ * the tallest line's sum of per-character advances.
+ */
+export function getVerticalStackedColumnExtent(column: IDocumentSkeletonColumn): number {
+    let extent = 0;
+    for (const line of column.lines) {
+        const lineExtent = getVerticalStackedLineExtent(line);
+        if (lineExtent > extent) {
+            extent = lineExtent;
+        }
+    }
+    return extent;
+}
+
+/**
+ * Column order of stacked vertical text. CJK text follows the traditional
+ * top-to-bottom, right-to-left order (the first line is the rightmost column);
+ * other scripts stack left-to-right (first line leftmost), like spreadsheet
+ * vertical text for Latin characters.
+ */
+export function isVerticalStackRightToLeft(column: IDocumentSkeletonColumn): boolean {
+    for (const line of column.lines) {
+        for (const divide of line.divides) {
+            for (const glyph of divide.glyphGroup) {
+                if (glyph.content && cjk.hasCJKText(glyph.content)) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+/**
+ * Empty em-box space below the ink of the last stacked character in the
+ * tallest line. Stacked glyphs are painted with their ink centered in the
+ * em slot, so the visible text bottom sits this far above the em extent —
+ * subtracting it makes BOTTOM alignment reach the visible text bottom.
+ */
+export function getVerticalStackBottomInkTrim(column: IDocumentSkeletonColumn): number {
+    let maxExtent = 0;
+    for (const line of column.lines) {
+        const lineExtent = getVerticalStackedLineExtent(line);
+        if (lineExtent > maxExtent) {
+            maxExtent = lineExtent;
+        }
+    }
+    if (maxExtent <= 0) {
+        return 0;
+    }
+    for (let i = column.lines.length - 1; i >= 0; i--) {
+        const line = column.lines[i];
+        if (getVerticalStackedLineExtent(line) !== maxExtent) {
+            continue;
+        }
+        for (let d = line.divides.length - 1; d >= 0; d--) {
+            const glyphGroup = line.divides[d].glyphGroup;
+            for (let g = glyphGroup.length - 1; g >= 0; g--) {
+                const glyph = glyphGroup[g];
+                if (!glyph.content || cjk.hasCJK(glyph.content) || isVerticalStackControlGlyph(glyph)) {
+                    continue;
+                }
+                const charHeight = getVerticalStackCharHeight(glyph, line.lineHeight ?? 0);
+                const inkHeight = glyph.bBox.aba + glyph.bBox.abd;
+                if (!Number.isFinite(inkHeight) || inkHeight <= 0) {
+                    return 0;
+                }
+                return Math.max(0, charHeight - inkHeight) / 2;
+            }
+        }
+        return 0;
+    }
+    return 0;
 }
 // Whether the glyph is justifiable.
 export function isJustifiable(

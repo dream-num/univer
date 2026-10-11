@@ -24,6 +24,7 @@ import type {
 } from '../../basics/i-document-skeleton-cached';
 import { VerticalAlign } from '@univerjs/core';
 import { PageLayoutType } from '../../basics/i-document-skeleton-cached';
+import { getVerticalStackedDivideWidth } from './layout/model/glyph';
 
 export class Liquid {
     private _translateX: number = 0;
@@ -178,10 +179,12 @@ export class Liquid {
         if (!isVerticalAndWrap) {
             left += dividePaddingLeft;
         } else {
+            const lineHeight = (divide.parent as IDocumentSkeletonLine | undefined)?.lineHeight ?? 0;
+            const contentWidth = getVerticalStackedDivideWidth(divide, lineHeight) || glyphGroupWidth;
             if (verticalAlign === VerticalAlign.MIDDLE) {
-                left += (rotatedHeight - glyphGroupWidth) / 2;
+                left += (rotatedHeight - contentWidth) / 2;
             } else if (verticalAlign === VerticalAlign.BOTTOM) {
-                left += rotatedHeight - glyphGroupWidth - 2;
+                left += rotatedHeight - contentWidth - 2;
             } else {
                 left += 2;
             }

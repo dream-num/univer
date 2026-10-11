@@ -66,6 +66,7 @@ import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-ro
 import { degToRad, getFontStyleString } from '../../basics/tools';
 import { DocSimpleSkeleton } from '../docs/layout/doc-simple-skeleton';
 import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
+import { getVerticalStackedColumnExtent } from '../docs/layout/model/glyph';
 import { columnIterator } from '../docs/layout/tools';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, MEASURE_EXTENT, MEASURE_EXTENT_FOR_PARAGRAPH, shouldRenderRowText } from './constants';
@@ -769,16 +770,24 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             }
 
             const documentViewModel = new DocumentViewModel(documentModel);
-            const { vertexAngle: angle } = convertTextRotation(textRotation);
+            const { vertexAngle: angle, centerAngle: centerAngleOfRotation } = convertTextRotation(textRotation);
+            const isVerticalStack = centerAngleOfRotation === VERTICAL_ROTATE_ANGLE && angle === VERTICAL_ROTATE_ANGLE;
 
-            if (typeof colWidth === 'number' && wrapStrategy === WrapStrategy.WRAP) {
+            if (isVerticalStack) {
+                // The render path never wrap-lays-out stacked vertical text;
+                // keep a single line so the measured extent matches the paint.
+                documentModel.updateDocumentDataPageSize(Number.POSITIVE_INFINITY);
+            } else if (typeof colWidth === 'number' && wrapStrategy === WrapStrategy.WRAP) {
                 documentModel.updateDocumentDataPageSize(colWidth);
             }
 
             const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService);
             documentSkeleton.calculate();
 
-            let { height: h = 0 } = getDocsSkeletonPageSize(documentSkeleton, angle) ?? {};
+            const pageSize = isVerticalStack
+                ? getVerticalStackedDocsPageSize(documentSkeleton)
+                : getDocsSkeletonPageSize(documentSkeleton, angle);
+            let { height: h = 0 } = pageSize ?? {};
 
             // When calculating the auto Height, need take the margin information into account,
             // because there is margin information when rendering
@@ -791,13 +800,19 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                     marginRight: r,
                 } = skeletonData.pages[skeletonData.pages.length - 1];
 
-                const absAngleInRad = Math.abs(degToRad(angle));
+                if (isVerticalStack) {
+                    // Stacked vertical text flows straight down between the
+                    // top and bottom paddings.
+                    h += t + b;
+                } else {
+                    const absAngleInRad = Math.abs(degToRad(angle));
 
-                h +=
-                    t * Math.cos(absAngleInRad) +
-                    r * Math.sin(absAngleInRad) +
-                    b * Math.cos(absAngleInRad) +
-                    l * Math.sin(absAngleInRad);
+                    h +=
+                        t * Math.cos(absAngleInRad) +
+                        r * Math.sin(absAngleInRad) +
+                        b * Math.cos(absAngleInRad) +
+                        l * Math.sin(absAngleInRad);
+                }
             }
 
             return h;
@@ -997,9 +1012,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
 
         const documentViewModel = new DocumentViewModel(documentModel);
-        const { vertexAngle: angle } = convertTextRotation(textRotation);
+        const { vertexAngle: angle, centerAngle: centerAngleOfRotation } = convertTextRotation(textRotation);
+        const isVerticalStack = centerAngleOfRotation === VERTICAL_ROTATE_ANGLE && angle === VERTICAL_ROTATE_ANGLE;
 
-        if (style?.tb === WrapStrategy.WRAP) {
+        if (style?.tb === WrapStrategy.WRAP && !isVerticalStack) {
             documentModel.updateDocumentDataPageSize(currColWidth, Infinity);
         } else {
             documentModel.updateDocumentDataPageSize(Infinity, Infinity);
@@ -1021,13 +1037,19 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 marginRight: r,
             } = skeletonData.pages[skeletonData.pages.length - 1];
 
-            const absAngleInRad = Math.abs(degToRad(angle));
+            if (isVerticalStack) {
+                // Stacked vertical text spans the cell cross-direction by the
+                // line thickness plus the left/right paddings.
+                measuredWidth += l + r;
+            } else {
+                const absAngleInRad = Math.abs(degToRad(angle));
 
-            measuredWidth +=
-                t * Math.sin(absAngleInRad) +
-                r * Math.cos(absAngleInRad) +
-                b * Math.sin(absAngleInRad) +
-                l * Math.cos(absAngleInRad);
+                measuredWidth +=
+                    t * Math.sin(absAngleInRad) +
+                    r * Math.cos(absAngleInRad) +
+                    b * Math.sin(absAngleInRad) +
+                    l * Math.cos(absAngleInRad);
+            }
         }
         return measuredWidth;
     };
@@ -1895,4 +1917,29 @@ export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angl
         width: allRotatedWidth,
         height: allRotatedHeight,
     };
+}
+
+/**
+ * Size of stacked vertical cell text (tr: { v: 1 }). The text flows straight
+ * down, so the needed height is the tallest line's sum of per-character
+ * advances, while the cross extent is the layout height (line offsets).
+ */
+export function getVerticalStackedDocsPageSize(documentSkeleton: DocumentSkeleton): Nullable<Required<ISize>> {
+    const skeletonData = documentSkeleton?.getSkeletonData();
+    if (!skeletonData) {
+        return;
+    }
+    const { pages } = skeletonData;
+    if (!pages || pages.length === 0) {
+        return;
+    }
+    const lastPage = pages[pages.length - 1];
+    let height = 0;
+    columnIterator([lastPage], (column: IDocumentSkeletonColumn) => {
+        const extent = getVerticalStackedColumnExtent(column);
+        if (extent > height) {
+            height = extent;
+        }
+    });
+    return { width: lastPage.height, height };
 }

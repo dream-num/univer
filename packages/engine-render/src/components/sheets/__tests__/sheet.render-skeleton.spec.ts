@@ -322,3 +322,52 @@ describe('Custom number display', () => {
         expect(getCustomNumberDisplayText('10/1/2022', '13.33px SimSun', 70)).toBe('10/1/2022');
     });
 });
+
+describe('Vertical stacked text auto height', () => {
+    it('measures the stacked extent (one em slot per character) instead of the rotated text width', () => {
+        const environment = setupRenderTestEnv();
+        vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text) => ({
+            fontBoundingBoxAscent: 10,
+            fontBoundingBoxDescent: 2,
+            actualBoundingBoxAscent: 10,
+            actualBoundingBoxDescent: 2,
+            width: text.length * 7,
+        }));
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'vertical-auto-height',
+            sheetOrder: ['sheet'],
+            sheets: {
+                sheet: {
+                    id: 'sheet',
+                    name: 'Sheet',
+                    rowCount: 10,
+                    columnCount: 10,
+                    cellData: {
+                        0: {
+                            0: { v: 'ABC', s: 'vertical' },
+                            2: { v: 'A', s: 'vertical' },
+                        },
+                    },
+                },
+            },
+            styles: {
+                vertical: { tr: { a: 0, v: 1 } },
+            },
+        });
+        const worksheet = workbook.getActiveSheet()!;
+        const skeleton = univer.__getInjector().createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles());
+        try {
+            skeleton.calculate();
+            // Each stacked character takes one em slot (ascent 10 + descent 2)
+            // plus the default bottom padding (2).
+            expect(skeleton.calculateAutoHeightForCell(0, 2)).toBe(12 + 2);
+            expect(skeleton.calculateAutoHeightForCell(0, 0)).toBe(36 + 2);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+            environment.restore();
+            vi.restoreAllMocks();
+        }
+    });
+});

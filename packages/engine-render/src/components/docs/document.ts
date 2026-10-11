@@ -59,6 +59,7 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { Subject } from 'rxjs';
+import { cjk } from '../../basics/cjk-regexp';
 import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../basics/const';
 import { calculateRectRotate, drawLineByBorderType, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { DocumentSkeletonPageType, GlyphType, LineType } from '../../basics/i-document-skeleton-cached';
@@ -71,7 +72,7 @@ import { DOCS_EXTENSION_TYPE } from './doc-extension';
 import { collectBackgroundGlyphRuns } from './extensions/background-runs';
 import { getTableIdAndSliceIndex } from './layout/block/table';
 import { resolveHeaderFooterFieldGlyph } from './layout/header-footer-field';
-import { getTextHorizontalScale } from './layout/model/glyph';
+import { getTextHorizontalScale, getVerticalStackBottomInkTrim, getVerticalStackedColumnExtent, getVerticalStackedGlyphAdvance, isVerticalStackControlGlyph, isVerticalStackRightToLeft } from './layout/model/glyph';
 import { FontCache } from './layout/shaping-engine/font-cache';
 import { getColorStyleForCanvas } from './layout/style/color';
 import { documentSkeletonTableIterator } from './layout/tools';
@@ -751,6 +752,7 @@ export class Documents extends DocComponent {
                     rotatedHeight: rotatedHeightStore,
                     rotateTranslateXList: rotateTranslateXListApply,
                     rotateTranslateY,
+                    mirrorLineOffsets,
                 } = this._getColumnDrawLayout(page, column, alignOffsetNoAngle);
                 if (vertexAngle !== 0) {
                     this._drawLiquid.translate(0, -rotateTranslateY);
@@ -789,7 +791,12 @@ export class Documents extends DocComponent {
                         }
                     } else {
                         this._drawLiquid.translateSave();
-                        this._drawLiquid.translateLine(line, true, true);
+                        const lineOffsetApply = this._drawLiquid.translateLine(line, true, true);
+                        if (mirrorLineOffsets) {
+                            // Left-to-right stacked columns: the 90° rotation
+                            // maps the layout line offset to physical -X, so mirror it.
+                            this._drawLiquid.translate(0, -2 * lineOffsetApply.y);
+                        }
 
                         rotateTranslateXListApply && this._drawLiquid.translate(rotateTranslateXListApply[i]); // x axis offset
                         this._drawLineBackground(ctx, page, line, column.width);
@@ -801,7 +808,7 @@ export class Documents extends DocComponent {
                             const { glyphGroup } = divide;
 
                             this._drawLiquid.translateSave();
-                            this._drawLiquid.translateDivide(divide, isVertical && wrapStrategy === WrapStrategy.WRAP, verticalAlign, rotatedHeightStore);
+                            this._drawLiquid.translateDivide(divide, isVertical && wrapStrategy === WrapStrategy.WRAP, verticalAlign, isVertical ? column.width : rotatedHeightStore);
 
                             this._drawGlyphGroupBackgrounds(
                                 ctx,
@@ -848,7 +855,7 @@ export class Documents extends DocComponent {
         page: IDocumentSkeletonPage,
         column: IDocumentSkeletonColumn,
         alignOffset: Vector2
-    ): { alignOffset: Vector2; rotatedHeight: number; rotateTranslateXList: number[] | null; rotateTranslateY: number } {
+    ): { alignOffset: Vector2; rotatedHeight: number; rotateTranslateXList: number[] | null; rotateTranslateY: number; mirrorLineOffsets: boolean } {
         const {
             marginTop = 0,
             marginBottom = 0,
@@ -871,17 +878,68 @@ export class Documents extends DocComponent {
                 // Wrapped text retains the cell padding rather than block alignment.
                 alignOffset.x = marginLeft;
             }
-            return { alignOffset, rotatedHeight: 0, rotateTranslateXList: null, rotateTranslateY: 0 };
+            return { alignOffset, rotatedHeight: 0, rotateTranslateXList: null, rotateTranslateY: 0, mirrorLineOffsets: false };
         }
 
+        const isVertical = vertexAngleDeg === VERTICAL_ROTATE_ANGLE && centerAngleDeg === VERTICAL_ROTATE_ANGLE;
         const {
             rotateTranslateXList,
-            rotatedHeight,
+            rotatedHeight: rotatedHeightFromLines,
             rotatedWidth,
             fixOffsetX,
             fixOffsetY,
             rotateTranslateY,
         } = getRotateOffsetAndFarthestHypotenuse(column.lines, column.width, vertexAngle);
+        // Stacked vertical text is drawn as upright characters: its flow-direction
+        // extent is the sum of per-character advances, not the rotated layout width.
+        const rotatedHeight = isVertical ? getVerticalStackedColumnExtent(column) : rotatedHeightFromLines;
+        if (isVertical && column.lines.length > 0) {
+            // Each line is a physical column (thickness = line height). CJK
+            // text keeps the traditional right-to-left column order (first
+            // line rightmost); other scripts stack left-to-right. The 90°
+            // rotation maps a layout line offset to physical -X, so
+            // left-to-right placement mirrors each line offset in the draw
+            // loop (mirrorLineOffsets).
+            let minLineOffset = Number.POSITIVE_INFINITY;
+            let maxLineOffset = 0;
+            let lineThickness = 0;
+            for (const line of column.lines) {
+                const lineOffset = line.top + (line.marginTop ?? 0) + (line.paddingTop ?? 0);
+                if (lineOffset < minLineOffset) minLineOffset = lineOffset;
+                if (lineOffset > maxLineOffset) maxLineOffset = lineOffset;
+                if ((line.lineHeight ?? 0) > lineThickness) lineThickness = line.lineHeight ?? 0;
+            }
+
+            const rightToLeft = isVerticalStackRightToLeft(column);
+            let horizontalOffset: number;
+            if (horizontalAlign === HorizontalAlign.RIGHT) {
+                horizontalOffset = rightToLeft
+                    ? this.width - marginRight + minLineOffset
+                    : this.width - marginRight - maxLineOffset;
+            } else if (horizontalAlign === HorizontalAlign.LEFT) {
+                horizontalOffset = rightToLeft
+                    ? marginLeft + lineThickness + maxLineOffset
+                    : marginLeft + lineThickness - minLineOffset;
+            } else {
+                horizontalOffset = rightToLeft
+                    ? this.width / 2 + lineThickness / 2 + (minLineOffset + maxLineOffset) / 2
+                    : this.width / 2 + lineThickness / 2 - (minLineOffset + maxLineOffset) / 2;
+            }
+            let verticalOffset = this._verticalHandler(rotatedHeight, marginTop, marginBottom, verticalAlign);
+            if (verticalAlign === VerticalAlign.BOTTOM || verticalAlign === VerticalAlign.UNSPECIFIED) {
+                // Stacked glyphs are painted ink-centered in their em slots, so
+                // the visible text bottom sits above the em extent — shift down
+                // so BOTTOM alignment reaches the visible text bottom.
+                verticalOffset += getVerticalStackBottomInkTrim(column);
+            }
+            return {
+                alignOffset: Vector2.create(horizontalOffset, verticalOffset),
+                rotatedHeight,
+                rotateTranslateXList: null,
+                rotateTranslateY: 0,
+                mirrorLineOffsets: !rightToLeft,
+            };
+        }
         let exceedWidthFix = rotatedWidth;
         if (rotatedHeight > this.height && wrapStrategy !== WrapStrategy.WRAP) {
             if (wrapStrategy === WrapStrategy.OVERFLOW || vertexAngle > 0) {
@@ -896,8 +954,13 @@ export class Documents extends DocComponent {
             vertexAngleDeg,
             centerAngleDeg
         );
-        const verticalOffset = this._verticalHandler(rotatedHeight, marginTop, marginBottom, verticalAlign);
-        const isVertical = vertexAngleDeg === VERTICAL_ROTATE_ANGLE && centerAngleDeg === VERTICAL_ROTATE_ANGLE;
+        let verticalOffset = this._verticalHandler(rotatedHeight, marginTop, marginBottom, verticalAlign);
+        if (isVertical && (verticalAlign === VerticalAlign.BOTTOM || verticalAlign === VerticalAlign.UNSPECIFIED)) {
+            // Stacked glyphs are painted ink-centered in their em slots, so the
+            // visible text bottom sits above the em extent — shift down so BOTTOM
+            // alignment reaches the visible text bottom.
+            verticalOffset += getVerticalStackBottomInkTrim(column);
+        }
         let exceedHeightFix = verticalOffset - fixOffsetY;
         if (rotatedHeight > this.height && !isVertical) {
             if (vertexAngle < 0) {
@@ -911,6 +974,7 @@ export class Documents extends DocComponent {
             rotatedHeight,
             rotateTranslateXList,
             rotateTranslateY,
+            mirrorLineOffsets: false,
         };
     }
 
@@ -932,12 +996,25 @@ export class Documents extends DocComponent {
         const { asc = 0, lineHeight = 0 } = line;
         const maxLineAscSin = asc * Math.sin(centerAngle);
         const maxLineAscCos = asc * Math.cos(centerAngle);
+        const isVerticalStack = Math.abs(centerAngle - vertexAngle) < 1e-6 && Math.abs(centerAngle - Math.PI / 2) < 1e-6;
+        let stackedPosition: number | undefined;
 
         for (const glyph of glyphGroup) {
             if (!glyph.content) {
                 continue;
             }
-            const { width: spanWidth, left: spanLeft, xOffset } = glyph;
+            let spanWidth = glyph.width;
+            let spanLeft = glyph.left;
+            const { xOffset } = glyph;
+            if (isVerticalStack && !cjk.hasCJK(glyph.content) && !isVerticalStackControlGlyph(glyph)) {
+                // Stacked upright glyphs advance by their font em-box height
+                // instead of the horizontal layout advance, so spanStartPoint and
+                // spanPointWithFont reflect the real vertical character spacing.
+                const effectiveWidth = getVerticalStackedGlyphAdvance(glyph, lineHeight);
+                spanLeft = stackedPosition ?? glyph.left;
+                stackedPosition = spanLeft + effectiveWidth;
+                spanWidth = effectiveWidth;
+            }
             const { x, y } = this._drawLiquid;
             const originTranslate = Vector2.create(x, y);
             const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);

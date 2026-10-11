@@ -30,7 +30,7 @@ import { CheckboxShape, isCheckboxGlyph } from '../../../shape/checkbox';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { getDocCustomGlyphRenderer, getDocCustomGlyphStrokeRenderer } from '../custom-glyph-renderer';
 import { docExtension } from '../doc-extension';
-import { getTextHorizontalScale } from '../layout/model/glyph';
+import { getTextHorizontalScale, getVerticalStackCharHeight, getVerticalStackGraphemes, isVerticalStackControlGlyph } from '../layout/model/glyph';
 import { getColorStyleForCanvas } from '../layout/style/color';
 
 const UNIQUE_KEY = 'DefaultDocsFontAndBaseLineExtension';
@@ -419,8 +419,7 @@ export class FontAndBaseLine extends docExtension {
 
     private _fillText(ctx: UniverRenderingContext, glyph: IDocumentSkeletonGlyph, spanPointWithFont: Vector2) {
         const { renderConfig, spanStartPoint, centerPoint } = this.extensionOffset;
-        const { content, width, bBox } = glyph;
-        const { aba, abd } = bBox;
+        const { content, width } = glyph;
 
         if (content == null || spanStartPoint == null || centerPoint == null) {
             return;
@@ -447,16 +446,32 @@ export class FontAndBaseLine extends docExtension {
         const isVertical = vertexAngle === VERTICAL_DEG && centerAngle === VERTICAL_DEG;
         const horizontalScale = getTextHorizontalScale(glyph.ts?.sa);
 
-        if (isVertical && !cjk.hasCJK(content)) {
-            ctx.save();
-            ctx.translate(spanStartPoint.x + centerPoint.x, spanStartPoint.y + centerPoint.y);
-            ctx.rotate(Math.PI / 2);
-            ctx.translate(-width / 2, (aba + abd) / 2 - abd);
-            if (horizontalScale !== 1) {
-                ctx.scale(horizontalScale, 1);
+        if (isVertical && !cjk.hasCJK(content) && !isVerticalStackControlGlyph(glyph)) {
+            // Stacked vertical text: every grapheme is painted upright in its own slot.
+            // The slot height must stay in sync with `getVerticalStackCharHeight`, which
+            // `_drawGlyphGroup` uses when computing spanStartPoint/spanPointWithFont.
+            const graphemes = getVerticalStackGraphemes(glyph);
+            const charHeight = getVerticalStackCharHeight(glyph);
+            if (charHeight > 0 && graphemes.length > 0) {
+                const { bBox } = glyph;
+                const totalHeight = graphemes.length * charHeight;
+                ctx.save();
+                ctx.translate(spanStartPoint.x + centerPoint.x, spanStartPoint.y + centerPoint.y);
+                if (horizontalScale !== 1) {
+                    ctx.scale(horizontalScale, 1);
+                }
+                ctx.textAlign = 'center';
+                let slotTop = -totalHeight / 2;
+                for (const grapheme of graphemes) {
+                    const metrics = ctx.measureText(grapheme);
+                    const ascent = Number.isFinite(metrics.actualBoundingBoxAscent) ? metrics.actualBoundingBoxAscent : bBox.aba;
+                    const descent = Number.isFinite(metrics.actualBoundingBoxDescent) ? metrics.actualBoundingBoxDescent : bBox.abd;
+                    const baseline = slotTop + (charHeight + ascent - descent) / 2;
+                    this._paintText(ctx, glyph, grapheme, 0, baseline);
+                    slotTop += charHeight;
+                }
+                ctx.restore();
             }
-            this._paintGlyphText(ctx, glyph, 0, 0);
-            ctx.restore();
         } else {
             if (isCheckboxGlyph(content) && glyph.glyphType === GlyphType.LIST) {
                 const size = glyph.bBox.width;

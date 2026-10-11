@@ -193,12 +193,22 @@ describe('docs font and baseline extension', () => {
             textSpacing: { content: 'ก้ข', segments: [{ content: 'ก้', left: 0 }, { content: 'ข', left: 7 }] },
         });
         extension.draw(context, DEFAULT_SCALE, glyph);
-        const x = angle === 0 ? 12 : 0;
-        const y = angle === 0 ? 20 : 0;
-        expect(context.fillText.mock.calls).toEqual([['ก้', x, y], ['ข', x + 7, y]]);
+        if (angle === 0) {
+            expect(context.fillText.mock.calls).toEqual([['ก้', 12, 20], ['ข', 19, 20]]);
+        } else {
+            expect(context.rotate).not.toHaveBeenCalled();
+            expect(context.fillText.mock.calls).toEqual([['ก้', 0, -2], ['ข', 0, 10]]);
+        }
         context.fillText.mockClear();
         extension.draw(context, DEFAULT_SCALE, { ...glyph, content: 'Updated field' });
-        expect(context.fillText).toHaveBeenCalledWith('Updated field', x, y);
+        if (angle === 0) {
+            expect(context.fillText).toHaveBeenCalledWith('Updated field', 12, 20);
+        } else {
+            // Stacked vertical text paints one upright grapheme per slot.
+            expect(context.fillText).toHaveBeenCalledTimes(13);
+            expect(context.fillText.mock.calls[0]).toEqual(['U', 0, -68]);
+            expect(context.fillText.mock.calls[12]).toEqual(['d', 0, 76]);
+        }
     });
 
     it('keeps existing document text colors unchanged', () => {
@@ -774,7 +784,8 @@ describe('docs font and baseline extension', () => {
             },
         } as IExtensionConfig;
         extension.draw(TestContext, DEFAULT_SCALE, createGlyph('X'));
-        expect(TestContext.rotate).toHaveBeenCalled();
+        expect(TestContext.rotate).not.toHaveBeenCalled();
+        expect(TestContext.fillText).toHaveBeenCalledWith('X', 0, 4);
 
         TestContext.fillText.mockClear();
         extension.draw(TestContext, DEFAULT_SCALE, createGlyph('阿', {

@@ -35,6 +35,7 @@ import {
     TableTextWrapType,
     TabStopAlignment,
     Univer,
+    VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -2017,9 +2018,298 @@ describe('documents render', () => {
         expect(positions).toHaveLength(2);
         expect(positions[0].x).toBeCloseTo(68);
         expect(positions[1].x).toBeCloseTo(68);
-        expect(positions[0].y).toBeCloseTo(73);
-        expect(positions[1].y).toBeCloseTo(91);
+        // Stacked vertical glyphs advance by their font em-box height (ba + bd = 12),
+        // not by the horizontal layout advance.
+        expect(positions[0].y).toBeCloseTo(71);
+        expect(positions[1].y).toBeCloseTo(83);
         expect((documents as any)._drawLiquid).toMatchObject({ x: 12, y: 20 });
+        documents.dispose();
+    });
+
+    it.each([
+        // [verticalAlign, rowHeight, expected glyph centers] — stacked text extent is 24 (2 glyphs x em-box 12)
+        [VerticalAlign.TOP, 100, [[40, 9], [40, 21]]],
+        [VerticalAlign.MIDDLE, 100, [[40, 44], [40, 56]]],
+        [VerticalAlign.BOTTOM, 100, [[40, 79], [40, 91]]],
+        [VerticalAlign.TOP, 40, [[40, 9], [40, 21]]],
+        [VerticalAlign.MIDDLE, 40, [[40, 14], [40, 26]]],
+        [VerticalAlign.BOTTOM, 40, [[40, 19], [40, 31]]],
+    ])('aligns stacked vertical text within the cell by its real extent: vAlign=%s rowHeight=%s', (verticalAlign, rowHeight, expected) => {
+        const page = createPage(DocumentSkeletonPageType.BODY, '');
+        page.renderConfig = {
+            horizontalAlign: HorizontalAlign.UNSPECIFIED,
+            verticalAlign,
+            centerAngle: 90,
+            vertexAngle: 90,
+            wrapStrategy: WrapStrategy.UNSPECIFIED,
+        };
+        const line = createLine(LineType.PARAGRAPH, 0);
+        const column = page.sections[0].columns[0];
+        column.lines = [line];
+        line.parent = column;
+        column.width = 100;
+        page.pageWidth = 100;
+        page.width = 100;
+        page.marginLeft = 4;
+        page.marginRight = 4;
+        page.marginTop = 3;
+        page.marginBottom = 3;
+        const skeletonData = { pages: [page], skeHeaders: new Map(), skeFooters: new Map() };
+        const documents = new Documents('vertical-align', { getSkeletonData: () => skeletonData } as never);
+        documents.resize(80, rowHeight);
+        const positions: { x: number; y: number }[] = [];
+        const extension = {
+            uKey: 'VerticalAlign',
+            type: DOCS_EXTENSION_TYPE.SPAN,
+            extensionOffset: {} as IExtensionConfig,
+            clearCache() {},
+            draw() {
+                const { spanStartPoint, centerPoint } = this.extensionOffset;
+                if (!spanStartPoint || !centerPoint) {
+                    throw new Error('A painted glyph must have placement coordinates');
+                }
+                positions.push({ x: spanStartPoint.x + centerPoint.x, y: spanStartPoint.y + centerPoint.y });
+            },
+        };
+        vi.spyOn(documents, 'getExtensionsByOrder').mockReturnValue([extension] as never);
+        documents.draw(canvas.getContext());
+        expect(positions).toHaveLength(2);
+        expected.forEach(([x, y], index) => {
+            expect(positions[index].x).toBeCloseTo(x);
+            expect(positions[index].y).toBeCloseTo(y);
+        });
+        documents.dispose();
+    });
+
+    it('bottom-aligns stacked vertical text to the visible ink bottom when the ink is smaller than the em box', () => {
+        const page = createPage(DocumentSkeletonPageType.BODY, '');
+        page.renderConfig = {
+            horizontalAlign: HorizontalAlign.UNSPECIFIED,
+            verticalAlign: VerticalAlign.BOTTOM,
+            centerAngle: 90,
+            vertexAngle: 90,
+            wrapStrategy: WrapStrategy.UNSPECIFIED,
+        };
+        const line = createLine(LineType.PARAGRAPH, 0);
+        const glyphGroup = line.divides[0].glyphGroup;
+        // Capitals: ink (8) is smaller than the em box (ba + bd = 12)
+        for (const glyph of glyphGroup) {
+            glyph.bBox.aba = 8;
+            glyph.bBox.abd = 0;
+        }
+        const column = page.sections[0].columns[0];
+        column.lines = [line];
+        line.parent = column;
+        column.width = 100;
+        page.pageWidth = 100;
+        page.width = 100;
+        page.marginLeft = 4;
+        page.marginRight = 4;
+        page.marginTop = 3;
+        page.marginBottom = 3;
+        const skeletonData = { pages: [page], skeHeaders: new Map(), skeFooters: new Map() };
+        const documents = new Documents('vertical-align-ink', { getSkeletonData: () => skeletonData } as never);
+        documents.resize(80, 100);
+        const positions: { x: number; y: number }[] = [];
+        const extension = {
+            uKey: 'VerticalAlignInk',
+            type: DOCS_EXTENSION_TYPE.SPAN,
+            extensionOffset: {} as IExtensionConfig,
+            clearCache() {},
+            draw() {
+                const { spanStartPoint, centerPoint } = this.extensionOffset;
+                if (!spanStartPoint || !centerPoint) {
+                    throw new Error('A painted glyph must have placement coordinates');
+                }
+                positions.push({ x: spanStartPoint.x + centerPoint.x, y: spanStartPoint.y + centerPoint.y });
+            },
+        };
+        vi.spyOn(documents, 'getExtensionsByOrder').mockReturnValue([extension] as never);
+        documents.draw(canvas.getContext());
+        expect(positions).toHaveLength(2);
+        // Em extent is 24, bottom ink trim is (12 - 8) / 2 = 2, so the block
+        // shifts down by 2 and the visible ink bottom reaches 100 - 3 = 97.
+        expect(positions[0].x).toBeCloseTo(40);
+        expect(positions[0].y).toBeCloseTo(81);
+        expect(positions[1].x).toBeCloseTo(40);
+        expect(positions[1].y).toBeCloseTo(93);
+        documents.dispose();
+    });
+
+    it.each([VerticalAlign.TOP, VerticalAlign.MIDDLE, VerticalAlign.BOTTOM])('does not allocate a stacked slot for the paragraph mark: vAlign=%s', (verticalAlign) => {
+        const page = createPage(DocumentSkeletonPageType.BODY, '');
+        page.renderConfig = {
+            horizontalAlign: HorizontalAlign.UNSPECIFIED,
+            verticalAlign,
+            centerAngle: 90,
+            vertexAngle: 90,
+            wrapStrategy: WrapStrategy.UNSPECIFIED,
+        };
+        const line = createLine(LineType.PARAGRAPH, 0);
+        // Trailing paragraph mark, like every real document line
+        const paragraphMark = createGlyph('\r', 36, 0);
+        paragraphMark.streamType = DataStreamTreeTokenType.PARAGRAPH;
+        line.divides[0].glyphGroup.push(paragraphMark);
+        const column = page.sections[0].columns[0];
+        column.lines = [line];
+        line.parent = column;
+        column.width = 100;
+        page.pageWidth = 100;
+        page.width = 100;
+        page.marginLeft = 4;
+        page.marginRight = 4;
+        page.marginTop = 3;
+        page.marginBottom = 3;
+        const skeletonData = { pages: [page], skeHeaders: new Map(), skeFooters: new Map() };
+        const documents = new Documents('vertical-paragraph-mark', { getSkeletonData: () => skeletonData } as never);
+        documents.resize(80, 100);
+        const positions: { x: number; y: number }[] = [];
+        const extension = {
+            uKey: 'VerticalParagraphMark',
+            type: DOCS_EXTENSION_TYPE.SPAN,
+            extensionOffset: {} as IExtensionConfig,
+            clearCache() {},
+            draw() {
+                const { spanStartPoint, centerPoint } = this.extensionOffset;
+                if (!spanStartPoint || !centerPoint) {
+                    throw new Error('A painted glyph must have placement coordinates');
+                }
+                positions.push({ x: spanStartPoint.x + centerPoint.x, y: spanStartPoint.y + centerPoint.y });
+            },
+        };
+        vi.spyOn(documents, 'getExtensionsByOrder').mockReturnValue([extension] as never);
+        documents.draw(canvas.getContext());
+        // The invisible paragraph mark must not shift the visible text
+        const expected = verticalAlign === VerticalAlign.TOP
+            ? [[40, 9], [40, 21]]
+            : verticalAlign === VerticalAlign.MIDDLE
+                ? [[40, 44], [40, 56]]
+                : [[40, 79], [40, 91]];
+        expect(positions).toHaveLength(3);
+        expected.forEach(([x, y], index) => {
+            expect(positions[index].x).toBeCloseTo(x);
+            expect(positions[index].y).toBeCloseTo(y);
+        });
+        documents.dispose();
+    });
+
+    it('places wrapped stacked vertical lines left-to-right with the first line leftmost', () => {
+        const page = createPage(DocumentSkeletonPageType.BODY, '');
+        page.renderConfig = {
+            horizontalAlign: HorizontalAlign.UNSPECIFIED,
+            verticalAlign: VerticalAlign.TOP,
+            centerAngle: 90,
+            vertexAngle: 90,
+            wrapStrategy: WrapStrategy.UNSPECIFIED,
+        };
+        const line0 = createLine(LineType.PARAGRAPH, 0);
+        const line1 = createLine(LineType.PARAGRAPH, 23);
+        const column = page.sections[0].columns[0];
+        column.lines = [line0, line1];
+        line0.parent = column;
+        line1.parent = column;
+        column.width = 100;
+        page.pageWidth = 100;
+        page.width = 100;
+        page.marginLeft = 4;
+        page.marginRight = 4;
+        page.marginTop = 3;
+        page.marginBottom = 3;
+        const skeletonData = { pages: [page], skeHeaders: new Map(), skeFooters: new Map() };
+        const documents = new Documents('vertical-wrap-order', { getSkeletonData: () => skeletonData } as never);
+        documents.resize(80, 100);
+        const positions: { x: number; y: number }[] = [];
+        const extension = {
+            uKey: 'VerticalWrapOrder',
+            type: DOCS_EXTENSION_TYPE.SPAN,
+            extensionOffset: {} as IExtensionConfig,
+            clearCache() {},
+            draw() {
+                const { spanStartPoint, centerPoint } = this.extensionOffset;
+                if (!spanStartPoint || !centerPoint) {
+                    throw new Error('A painted glyph must have placement coordinates');
+                }
+                positions.push({ x: spanStartPoint.x + centerPoint.x, y: spanStartPoint.y + centerPoint.y });
+            },
+        };
+        vi.spyOn(documents, 'getExtensionsByOrder').mockReturnValue([extension] as never);
+        documents.draw(canvas.getContext());
+        expect(positions).toHaveLength(4);
+        // Line offsets: line0 = 0 + 1 + 2 = 3, line1 = 23 + 1 + 2 = 26.
+        // Latin text stacks left-to-right, centered: Ao.x = 80/2 + 20/2 - (3 + 26)/2 = 35.5,
+        // C.x = Ao.x + offset - lineHeight/2.
+        expect(positions[0].x).toBeCloseTo(28.5);
+        expect(positions[1].x).toBeCloseTo(28.5);
+        expect(positions[2].x).toBeCloseTo(51.5);
+        expect(positions[3].x).toBeCloseTo(51.5);
+        // Both columns start at the same flow top
+        expect(positions[0].y).toBeCloseTo(9);
+        expect(positions[2].y).toBeCloseTo(9);
+        expect(positions[0].x).toBeLessThan(positions[2].x);
+        documents.dispose();
+    });
+
+    it('places wrapped stacked CJK vertical lines right-to-left with the first line rightmost', () => {
+        const page = createPage(DocumentSkeletonPageType.BODY, '');
+        page.renderConfig = {
+            horizontalAlign: HorizontalAlign.UNSPECIFIED,
+            verticalAlign: VerticalAlign.TOP,
+            centerAngle: 90,
+            vertexAngle: 90,
+            wrapStrategy: WrapStrategy.UNSPECIFIED,
+        };
+        const line0 = createLine(LineType.PARAGRAPH, 0);
+        const line1 = createLine(LineType.PARAGRAPH, 23);
+        for (const line of [line0, line1]) {
+            const divide = line.divides[0];
+            const glyphGroup = [createGlyph('中', 0, 12), createGlyph('文', 12, 12)];
+            glyphGroup.forEach((glyph) => {
+                glyph.parent = divide;
+            });
+            divide.glyphGroup = glyphGroup;
+            divide.glyphGroupWidth = 24;
+            divide.width = 24;
+        }
+        const column = page.sections[0].columns[0];
+        column.lines = [line0, line1];
+        line0.parent = column;
+        line1.parent = column;
+        column.width = 100;
+        page.pageWidth = 100;
+        page.width = 100;
+        page.marginLeft = 4;
+        page.marginRight = 4;
+        page.marginTop = 3;
+        page.marginBottom = 3;
+        const skeletonData = { pages: [page], skeHeaders: new Map(), skeFooters: new Map() };
+        const documents = new Documents('vertical-wrap-order-cjk', { getSkeletonData: () => skeletonData } as never);
+        documents.resize(80, 100);
+        const positions: { x: number; y: number }[] = [];
+        const extension = {
+            uKey: 'VerticalWrapOrderCjk',
+            type: DOCS_EXTENSION_TYPE.SPAN,
+            extensionOffset: {} as IExtensionConfig,
+            clearCache() {},
+            draw() {
+                const { spanStartPoint, centerPoint } = this.extensionOffset;
+                if (!spanStartPoint || !centerPoint) {
+                    throw new Error('A painted glyph must have placement coordinates');
+                }
+                positions.push({ x: spanStartPoint.x + centerPoint.x, y: spanStartPoint.y + centerPoint.y });
+            },
+        };
+        vi.spyOn(documents, 'getExtensionsByOrder').mockReturnValue([extension] as never);
+        documents.draw(canvas.getContext());
+        expect(positions).toHaveLength(4);
+        // CJK text keeps the right-to-left column order, centered:
+        // Ao.x = 80/2 + 20/2 + (3 + 26)/2 = 64.5, C.x = Ao.x - offset - lineHeight/2.
+        expect(positions[0].x).toBeCloseTo(51.5);
+        expect(positions[1].x).toBeCloseTo(51.5);
+        expect(positions[2].x).toBeCloseTo(28.5);
+        expect(positions[3].x).toBeCloseTo(28.5);
+        expect(positions[0].y).toBeCloseTo(9);
+        expect(positions[2].y).toBeCloseTo(9);
+        expect(positions[0].x).toBeGreaterThan(positions[2].x);
         documents.dispose();
     });
 

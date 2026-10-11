@@ -419,6 +419,13 @@ export function getFirstGrapheme(text: string): string | null {
     return it.next().value?.segment ?? null;
 }
 
+export function splitGraphemes(text: string): string[] {
+    if (text.length <= 1) {
+        return text ? [text] : [];
+    }
+    return Array.from(segmenter.segment(text), (segment) => segment.segment);
+}
+
 export function isEmojiGrapheme(grapheme: string): boolean {
     // emoji + ZWJ + skin tone
     if (/\p{Extended_Pictographic}/u.test(grapheme)) {

@@ -256,10 +256,7 @@ export class Table {
     }
 
     toJSON(): ITableJson {
-        const columns: ITableColumnJson[] = [];
-        this._columns.forEach((column) => {
-            columns.push(column.toJSON());
-        });
+        const columns = this._columnOrder.map((columnId) => this._columns.get(columnId)!.toJSON());
         return {
             id: this._id,
             name: this._name,

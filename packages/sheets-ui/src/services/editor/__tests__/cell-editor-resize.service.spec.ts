@@ -40,7 +40,8 @@ import { EditorService, IEditorService } from '@univerjs/docs-ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
 import { DesktopLayoutService, ILayoutService } from '@univerjs/ui';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { BehaviorSubject } from 'rxjs';
+import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { EditorBridgeService, IEditorBridgeService } from '../../editor-bridge.service';
 import { EmbedFloatingGeometryService, ISheetEmbedFloatingGeometryService } from '../../sheet-embed-integration.service';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
@@ -69,6 +70,8 @@ class TestCellEditorManagerService {
 
 class TestEditorBridgeService {
     refreshCount = 0;
+
+    readonly visible$ = new BehaviorSubject({ visible: true });
 
     readonly editCellState = {
         unitId: 'unit-1',
@@ -107,7 +110,7 @@ class TestEditorBridgeService {
     }
 
     isVisible() {
-        return { visible: true };
+        return this.visible$.value;
     }
 
     refreshEditCellPosition() {
@@ -155,6 +158,8 @@ class TestUniverInstanceServiceWithDifferentCurrent extends TestUniverInstanceSe
 }
 
 class TestRenderManagerService {
+    readonly actualSize = { actualWidth: 120, actualHeight: 36 };
+
     readonly sheetCanvasElement = {
         style: { width: '800px' },
         getBoundingClientRect: () => ({ left: 30, top: 50, width: 800, height: 600 }),
@@ -199,7 +204,7 @@ class TestRenderManagerService {
     readonly docSkeleton = {
         calculate: () => { },
         resetInitialWidth: () => { },
-        getActualSize: () => ({ actualWidth: 120, actualHeight: 36 }),
+        getActualSize: () => this.actualSize,
     };
 
     getRenderUnitById(unitId: string) {
@@ -286,9 +291,152 @@ class TestTransformedEmbedRenderManagerService extends TestRenderManagerService 
     };
 }
 
+function createResizeTestInjector() {
+    const injector = new Injector();
+    onTestFinished(() => injector.dispose());
+    injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
+    injector.add([ICellEditorManagerService, { useClass: TestCellEditorManagerService as never }]);
+    injector.add([IEditorBridgeService, { useClass: TestEditorBridgeService as never }]);
+    injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
+    injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+    injector.add([IConfigService, { useClass: ConfigService }]);
+    injector.add([SheetCellEditorResizeService]);
+    return injector;
+}
+
 describe('SheetCellEditorResizeService', () => {
     afterEach(() => {
         vi.unstubAllGlobals();
+    });
+
+    it.each([HorizontalAlign.LEFT, HorizontalAlign.CENTER, HorizontalAlign.RIGHT])('keeps the expanded editor size when deleting text with alignment %s', (alignment) => {
+        const injector = createResizeTestInjector();
+        const resizeService = injector.get(SheetCellEditorResizeService);
+        const bridge = injector.get(IEditorBridgeService) as unknown as TestEditorBridgeService;
+        const renderManager = injector.get(IRenderManagerService) as unknown as TestRenderManagerService;
+        const editorManager = injector.get(ICellEditorManagerService) as unknown as TestCellEditorManagerService;
+        bridge.editCellState.documentLayoutObject.horizontalAlign = alignment;
+
+        resizeService.fitTextSize();
+        const expandedState = editorManager.getState();
+        renderManager.actualSize.actualWidth = 12;
+        renderManager.actualSize.actualHeight = 16;
+        resizeService.fitTextSize();
+
+        expect(editorManager.getState()).toEqual(expandedState);
+        expect(renderManager.editorDocument.resized).toEqual({ width: 130, height: 44 });
+
+        renderManager.actualSize.actualWidth = 140;
+        renderManager.actualSize.actualHeight = 58;
+        resizeService.fitTextSize();
+        expect(renderManager.editorDocument.resized).toEqual({ width: 150, height: 66 });
+    });
+
+    it('starts a fresh size after the editor is closed and reopened', () => {
+        const injector = createResizeTestInjector();
+        const resizeService = injector.get(SheetCellEditorResizeService);
+        const bridge = injector.get(IEditorBridgeService) as unknown as TestEditorBridgeService;
+        const renderManager = injector.get(IRenderManagerService) as unknown as TestRenderManagerService;
+
+        resizeService.fitTextSize();
+        bridge.visible$.next({ visible: false });
+        renderManager.actualSize.actualWidth = 12;
+        renderManager.actualSize.actualHeight = 16;
+        bridge.visible$.next({ visible: true });
+        resizeService.fitTextSize();
+
+        expect(renderManager.editorDocument.resized).toEqual({ width: 60, height: 24 });
+    });
+
+    it('scales the retained size with worksheet zoom without inheriting viewport pixels', () => {
+        const injector = createResizeTestInjector();
+        const resizeService = injector.get(SheetCellEditorResizeService);
+        const bridge = injector.get(IEditorBridgeService) as unknown as TestEditorBridgeService;
+        const renderManager = injector.get(IRenderManagerService) as unknown as TestRenderManagerService;
+        const editorManager = injector.get(ICellEditorManagerService) as unknown as TestCellEditorManagerService;
+
+        resizeService.fitTextSize();
+        renderManager.actualSize.actualWidth = 12;
+        renderManager.actualSize.actualHeight = 16;
+        bridge.editCellState.scaleX = 0.5;
+        bridge.editCellState.scaleY = 0.5;
+        bridge.editCellState.position = { startX: 50, startY: 30, endX: 80, endY: 42 };
+        resizeService.fitTextSize();
+
+        expect(renderManager.editorDocument.resized).toEqual({ width: 130, height: 44 });
+        const state = editorManager.getState()!;
+        expect(Number(state.endX) - Number(state.startX)).toBe(65);
+        expect(Number(state.endY) - Number(state.startY)).toBe(22);
+    });
+
+    it('keeps wrapped content height without changing the cell wrapping width', () => {
+        const injector = createResizeTestInjector();
+        const resizeService = injector.get(SheetCellEditorResizeService);
+        const bridge = injector.get(IEditorBridgeService) as unknown as TestEditorBridgeService;
+        const renderManager = injector.get(IRenderManagerService) as unknown as TestRenderManagerService;
+        const instanceService = injector.get(IUniverInstanceService) as unknown as TestUniverInstanceService;
+        bridge.editCellState.documentLayoutObject.wrapStrategy = WrapStrategy.WRAP;
+        renderManager.actualSize.actualWidth = 50;
+        renderManager.actualSize.actualHeight = 70;
+
+        resizeService.fitTextSize();
+        renderManager.actualSize.actualWidth = 12;
+        renderManager.actualSize.actualHeight = 16;
+        resizeService.fitTextSize();
+
+        expect(renderManager.editorDocument.resized).toEqual({ width: 60, height: 78 });
+        expect(instanceService.documentModel.pageSize).toBe(60);
+    });
+
+    it('constrains the retained size to the viewport and restores it when space is available', () => {
+        const injector = createResizeTestInjector();
+        const resizeService = injector.get(SheetCellEditorResizeService);
+        const renderManager = injector.get(IRenderManagerService) as unknown as TestRenderManagerService;
+        const instanceService = injector.get(IUniverInstanceService) as unknown as TestUniverInstanceService;
+
+        resizeService.fitTextSize();
+        renderManager.actualSize.actualWidth = 12;
+        renderManager.actualSize.actualHeight = 16;
+        renderManager.sheetCanvasElement.style.width = '210px';
+        const bounds = vi.spyOn(renderManager.sheetCanvasElement, 'getBoundingClientRect')
+            .mockReturnValue({ left: 30, top: 50, width: 210, height: 88 });
+        resizeService.fitTextSize();
+
+        expect(renderManager.editorDocument.resized).toEqual({ width: 106, height: 24 });
+        expect(instanceService.documentModel.pageSize).toBe(106);
+
+        renderManager.sheetCanvasElement.style.width = '800px';
+        bounds.mockRestore();
+        resizeService.fitTextSize();
+        expect(renderManager.editorDocument.resized).toEqual({ width: 130, height: 44 });
+    });
+
+    it('does not repeatedly add scrollbar width or retain scrolling after deleting overflowing content', () => {
+        const injector = createResizeTestInjector();
+        const resizeService = injector.get(SheetCellEditorResizeService);
+        const renderManager = injector.get(IRenderManagerService) as unknown as TestRenderManagerService;
+        let hasScrollBar = true;
+        const scrollBar = {
+            barSize: 8,
+            dispose: () => { hasScrollBar = false; },
+        };
+        const viewport = {
+            getScrollBar: () => hasScrollBar ? scrollBar : null,
+            resetCanvasSizeAndUpdateScroll: () => {},
+            scrollToViewportPos: () => {},
+        };
+        vi.spyOn(renderManager.editorScene, 'getViewport').mockReturnValue(viewport as never);
+        renderManager.actualSize.actualHeight = 600;
+
+        resizeService.fitTextSize();
+        resizeService.fitTextSize();
+        expect(renderManager.editorDocument.resized).toEqual({ width: 138, height: 608 });
+
+        renderManager.actualSize.actualWidth = 12;
+        renderManager.actualSize.actualHeight = 16;
+        resizeService.fitTextSize();
+        expect(renderManager.editorDocument.resized).toEqual({ width: 138, height: 536 });
+        expect(hasScrollBar).toBe(false);
     });
 
     it('does not resize anything when no cell editor is active', () => {

@@ -15,6 +15,7 @@
  */
 
 import type { IDocumentBody, IDocumentData } from '../../types/interfaces/i-document-data';
+import { createLiteralRegExp } from '../../common/regexp/escape';
 import { DocumentDataModel } from './document-data-model';
 import { JSONX } from './json-x/json-x';
 import { TextX } from './text-x/text-x';
@@ -34,10 +35,12 @@ export function replaceInDocumentBody(body: IDocumentBody, query: string, target
     const documentDataModel = new DocumentDataModel(mockDocumentData);
 
     const queryLen = query.length;
-    let index;
+    const expression = createLiteralRegExp(query, caseSensitive ? 'g' : 'gi');
+    let match;
 
     // eslint-disable-next-line no-cond-assign
-    while ((index = (caseSensitive ? documentDataModel.getBody()!.dataStream : documentDataModel.getBody()!.dataStream.toLowerCase()).indexOf(query)) >= 0) {
+    while ((match = expression.exec(documentDataModel.getBody()!.dataStream)) !== null) {
+        const index = match.index;
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
 
@@ -73,6 +76,8 @@ export function replaceInDocumentBody(body: IDocumentBody, query: string, target
 
         textX.delete(queryLen);
         documentDataModel.apply(jsonX.editOp(textX.serialize()));
+        // Continue after the inserted text, including when the replacement is empty.
+        expression.lastIndex = index + target.length;
     }
 
     const newBody = documentDataModel.getBody()!;

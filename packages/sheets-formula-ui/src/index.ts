@@ -27,7 +27,6 @@ export { ReferenceAbsoluteOperation } from './commands/operations/reference-abso
 export { SearchFunctionOperation } from './commands/operations/search-function.operation';
 export { genFormulaRefSelectionStyle } from './common/selection';
 export type { IUniverSheetsFormulaUIConfig } from './config/config';
-export { FormulaReorderController } from './controllers/formula-reorder.controller';
 export { menuSchema as SheetsFormulaUIMenuSchema } from './menu/schema';
 export { UniverSheetsFormulaMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsFormulaUIPlugin } from './plugin';

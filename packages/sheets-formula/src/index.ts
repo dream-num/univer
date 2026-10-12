@@ -19,6 +19,7 @@ export type { IInsertFunction, IInsertFunctionCommandParams } from './commands/c
 export { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from './config/config';
 export type { IUniverSheetsFormulaBaseConfig, IUniverSheetsFormulaRemoteConfig } from './config/config';
 export { FormulaAutoFillController } from './controllers/formula-auto-fill.controller';
+export { FormulaReorderController } from './controllers/formula-reorder.controller';
 export { ImageFormulaCellInterceptorController } from './controllers/image-formula-cell-interceptor.controller';
 export { TriggerCalculationController } from './controllers/trigger-calculation.controller';
 export { collectUnitQualifierFormulaPatches, UnitQualifierRenameController } from './controllers/unit-qualifier-rename.controller';

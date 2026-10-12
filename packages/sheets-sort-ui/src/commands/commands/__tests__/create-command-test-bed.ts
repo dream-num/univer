@@ -18,7 +18,7 @@ import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import { ILogService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Tools, Univer, UniverInstanceType } from '@univerjs/core';
 import { FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, HyperlinkEngineFormulaService, IFormulaCurrentConfigService, IFormulaRuntimeService, IHyperlinkEngineFormulaService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import { FormulaReorderController } from '@univerjs/sheets-formula-ui';
+import { FormulaReorderController } from '@univerjs/sheets-formula';
 import { SheetsSortService } from '@univerjs/sheets-sort';
 import { SheetsSortController } from '@univerjs/sheets-sort/controllers/sheets-sort.controller.js';
 import zhCN from '../../../locale/zh-CN';

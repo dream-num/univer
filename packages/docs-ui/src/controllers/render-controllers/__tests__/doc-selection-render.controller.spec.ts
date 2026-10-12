@@ -19,11 +19,13 @@
 import type { IDocumentData } from '@univerjs/core';
 import type { IDocSelectionInnerParam, RenderUnit } from '@univerjs/engine-render';
 import {
+    DOC_RANGE_TYPE,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentFlavor,
     ICommandService,
     IContextService,
     IUniverInstanceService,
+    RANGE_DIRECTION,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -441,6 +443,14 @@ describe('DocSelectionRenderController', () => {
                 expect(selections.getActiveTextRange()).toMatchObject({ startOffset, endOffset });
                 expect(selections.getSelectionInfo()?.isEditing).toBe(true);
             }
+
+            render.with(DocSelectionRenderService).replaceDocRanges([
+                { startOffset: 9, endOffset: 5, rangeType: DOC_RANGE_TYPE.TEXT },
+            ], true, { shouldFocus: false });
+            expect(selections.getActiveTextRange()).toMatchObject({ startOffset: 5, endOffset: 9, direction: RANGE_DIRECTION.BACKWARD });
+            skeletonManager.recalculate();
+            selections.refreshSelection(undefined, true);
+            expect(selections.getActiveTextRange()).toMatchObject({ startOffset: 5, endOffset: 9, direction: RANGE_DIRECTION.BACKWARD });
         } finally {
             univer.dispose();
             root.remove();

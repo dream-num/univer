@@ -78,7 +78,7 @@ export class FormulaReorderController extends Disposable {
         Range.foreach(range, (row, col) => {
             let targetRow = row;
 
-            if (order.hasOwnProperty(row)) {
+            if (Object.prototype.hasOwnProperty.call(order, row)) {
                 targetRow = order[row];
             }
 

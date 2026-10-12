@@ -2306,9 +2306,9 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      '@univerjs/sheets-formula-ui':
+      '@univerjs/sheets-formula':
         specifier: workspace:*
-        version: link:../sheets-formula-ui
+        version: link:../sheets-formula
       postcss:
         specifier: ^8.5.28
         version: 8.5.28

@@ -42,6 +42,7 @@ import { ActiveDirtyController } from './controllers/active-dirty.controller';
 import { ArrayFormulaCellInterceptorController } from './controllers/array-formula-cell-interceptor.controller';
 import { DefinedNameController } from './controllers/defined-name.controller';
 import { FormulaAutoFillController } from './controllers/formula-auto-fill.controller';
+import { FormulaReorderController } from './controllers/formula-reorder.controller';
 import { FormulaController } from './controllers/formula.controller';
 import { ImageFormulaCellInterceptorController } from './controllers/image-formula-cell-interceptor.controller';
 import {
@@ -129,6 +130,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [UpdateDefinedNameController],
             [SuperTableController],
             [FormulaAutoFillController],
+            [FormulaReorderController],
             [UnitQualifierRenameController],
         ];
 
@@ -157,6 +159,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [UpdateFormulaController],
             [UpdateDefinedNameController],
             [FormulaAutoFillController],
+            [FormulaReorderController],
             [UnitQualifierRenameController],
             [SheetFormulaCalculationResultApplyController],
         ]);

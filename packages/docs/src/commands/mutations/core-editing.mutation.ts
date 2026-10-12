@@ -268,11 +268,8 @@ function scheduleDocumentSelectionUpdate(
         if (selectionManager.getSelectionInfo(selectionTarget) !== updatedSelection) {
             return;
         }
-        if (updatedSelection == null) {
-            selectionManager.replaceDocRanges(logicalTextRanges, selectionTarget, isEditing, params.options);
-        } else {
-            selectionManager.refreshSelection(selectionTarget, isEditing);
-        }
+        // Editing and history establish new input intent; geometry-only refreshes preserve it.
+        selectionManager.replaceDocRanges(logicalTextRanges, selectionTarget, isEditing, params.options);
     });
 }
 

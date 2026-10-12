@@ -195,7 +195,7 @@ export class DocSelectionManagerService extends RxDisposable {
             subUnitId,
             docRanges,
             isEditing,
-            options,
+            options: { ...options, preserveInputStyle: false },
         });
     }
 
@@ -294,8 +294,8 @@ export class DocSelectionManagerService extends RxDisposable {
             subUnitId,
             docRanges,
             isEditing,
-            // Forced focus belongs to the original interaction, not later layout refreshes.
-            options: options?.forceFocus ? { ...options, forceFocus: false } : options,
+            // Geometry refreshes retain input intent without replaying forced focus.
+            options: { ...options, forceFocus: false, preserveInputStyle: true },
         });
     }
 

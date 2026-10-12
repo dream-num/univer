@@ -22,7 +22,7 @@ import { compareToken } from '../../../basics/token';
 import { ArrayOrderSearchType, getMatchModeValue, getSearchModeValue } from '../../../engine/utils/compare';
 import { baseValueObjectToArrayValueObject } from '../../../engine/utils/value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Xlookup extends BaseFunction {
@@ -234,7 +234,7 @@ export class Xlookup extends BaseFunction {
             return resultArray.slice(undefined, [position.column, position.column + 1]) ?? ErrorValueObject.create(ErrorType.NA);
         }
 
-        const result = resultArray.get(position.row, position.column) ?? ErrorValueObject.create(ErrorType.NA);
+        const result = resultArray.get(position.row, position.column) ?? NullValueObject.create();
         return this._blankResultAsZero(result);
     }
 

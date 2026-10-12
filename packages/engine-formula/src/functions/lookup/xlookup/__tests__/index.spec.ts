@@ -262,6 +262,25 @@ describe('Test xlookup', () => {
             expect(getObjectValue(result)).toStrictEqual([[30, 10, 'missing', ErrorType.DIV_BY_ZERO]]);
         });
 
+        it.each([
+            [0, 1],
+            [0, 2],
+            [-1, 1],
+        ])('returns zero for a matched native null return value, match_mode=%i and search_mode=%i', (matchMode, searchMode) => {
+            const returnArray = ArrayValueObject.createByArray([[10], [20], [30]]);
+            returnArray.set(1, 0, null);
+            const result = testFunction.calculate(
+                NumberValueObject.create(2),
+                ArrayValueObject.create('{1;2;3}'),
+                returnArray,
+                StringValueObject.create('missing'),
+                NumberValueObject.create(matchMode),
+                NumberValueObject.create(searchMode)
+            );
+            expect(result.isNumber()).toBe(true);
+            expect(result.getValue()).toBe(0);
+        });
+
         it('uses the default forward direction for an explicitly blank search mode', () => {
             const result = testFunction.calculate(
                 NumberValueObject.create(1),

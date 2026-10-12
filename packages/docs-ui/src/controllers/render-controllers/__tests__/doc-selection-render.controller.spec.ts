@@ -481,12 +481,19 @@ describe('DocSelectionRenderController', () => {
                 }).serialize(), ['body']),
                 textRanges: [{ startOffset: 3, endOffset: 3, collapsed: true }],
             });
+            skeletonManager.recalculate();
+            selections.refreshSelection(undefined, true);
             await Promise.resolve();
             expect(menuStyle.getStyleCache()).toBeNull();
             menuStyle.setStyleCache(inputStyle);
             commands.syncExecuteCommand(RichTextEditingMutation.id, { ...undo, trigger: UndoCommandId });
+            skeletonManager.recalculate();
+            selections.refreshSelection(undefined, true);
             await Promise.resolve();
             expect(menuStyle.getStyleCache()).toBeNull();
+            menuStyle.setStyleCache(inputStyle);
+            selections.refreshSelection(undefined, true);
+            expect(menuStyle.getStyleCache()).toEqual(inputStyle);
 
             // Explicitly positioning the same caret still resets transient input formatting.
             menuStyle.setStyleCache(inputStyle);

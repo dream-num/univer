@@ -227,7 +227,8 @@ export class DocSelectionManagerService extends RxDisposable {
         };
 
         // Store the textSelectionInfo.
-        this._replaceByParam(params);
+        // Consume logical input intent once, even when layout publishes before the deferred refresh.
+        this._replaceByParam({ ...params, options: { ...params.options, preserveInputStyle: true } });
 
         // Broadcast textSelection changes, this should be used within the application.
         this._textSelection$.next(params);
@@ -295,7 +296,7 @@ export class DocSelectionManagerService extends RxDisposable {
             docRanges,
             isEditing,
             // Geometry refreshes retain input intent without replaying forced focus.
-            options: { ...options, forceFocus: false, preserveInputStyle: true },
+            options: { ...options, forceFocus: false, preserveInputStyle: options?.preserveInputStyle ?? true },
         });
     }
 

@@ -260,7 +260,7 @@ function scheduleDocumentSelectionUpdate(
             textRanges: logicalTextRanges,
             rectRanges: [],
             isEditing,
-            options: params.options,
+            options: { ...params.options, preserveInputStyle: false },
         }, selectionTarget);
     }
     const updatedSelection = selectionManager.getSelectionInfo(selectionTarget);

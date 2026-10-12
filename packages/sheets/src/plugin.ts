@@ -16,7 +16,21 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsConfig } from './config/config';
-import { AUTO_HEIGHT_FOR_MERGED_CELLS, DependentOn, IConfigService, Inject, Injector, IS_ROW_STYLE_PRECEDE_COLUMN_STYLE, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import {
+    AUTO_HEIGHT_FOR_MERGED_CELLS,
+    DependentOn,
+    IConfigService,
+    Inject,
+    Injector,
+    IS_ROW_STYLE_PRECEDE_COLUMN_STYLE,
+    merge,
+    mergeOverrideWithDependencies,
+    Plugin,
+    registerDependencies,
+    SHEET_TEXT_LINE_GAP,
+    touchDependencies,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_PLUGIN_CONFIG_KEY } from './config/config';
@@ -46,7 +60,13 @@ import { INumfmtService } from './services/numfmt/type';
 import { RangeProtectionRefRangeService } from './services/permission/range-permission/range-protection.ref-range';
 import { RangeProtectionService } from './services/permission/range-permission/range-protection.service';
 import { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';
-import { WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from './services/permission/worksheet-permission';
+import {
+    WorksheetProtectionPointModel,
+} from './services/permission/worksheet-permission/worksheet-permission-point.model';
+import {
+    WorksheetProtectionRuleModel,
+} from './services/permission/worksheet-permission/worksheet-permission-rule.model';
+import { WorksheetPermissionService } from './services/permission/worksheet-permission/worksheet-permission.service';
 import { SheetRangeThemeService } from './services/range-theme.service';
 import { RefRangeService } from './services/ref-range/ref-range.service';
 import { SheetsSelectionsService } from './services/selections/selection.service';
@@ -80,6 +100,12 @@ export class UniverSheetsPlugin extends Plugin {
     }
 
     private _initConfig(): void {
+        const textLineGap = this._config.textLineGap ?? 0;
+        if (!Number.isFinite(textLineGap) || textLineGap < 0) {
+            throw new RangeError('textLineGap must be a finite, non-negative number.');
+        }
+        this._configService.setConfig(SHEET_TEXT_LINE_GAP, textLineGap);
+
         if (this._config?.onlyRegisterFormulaRelatedMutations) {
             this._configService.setConfig(ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY, true);
         }

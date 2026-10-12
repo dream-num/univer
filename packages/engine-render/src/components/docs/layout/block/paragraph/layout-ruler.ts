@@ -1490,6 +1490,10 @@ function _getParagraphLineMetrics(
             drawingMLLineHeight
         );
 
+    if (preLine) {
+        marginTop += sectionBreakConfig.lineGap ?? 0;
+    }
+
     if (startingSection && marginTop > 0 && isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)) {
         marginTop = _collapseSectionBeforeSpacing(ctx, startingSection.children[0].startIndex - 2, marginTop);
     }

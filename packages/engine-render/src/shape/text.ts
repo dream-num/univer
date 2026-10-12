@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
 import { CellValueType, HorizontalAlign, TextDecoration, VerticalAlign } from '@univerjs/core';
-import { COLOR_BLACK_RGB } from '../basics';
+import { COLOR_BLACK_RGB } from '../basics/const';
 import { DocSimpleSkeleton } from '../components/docs/layout/doc-simple-skeleton';
 import { Shape } from './shape';
 
@@ -28,6 +28,7 @@ export interface ITextProps extends IShapeProps {
     text: string;
     fontStyle: string;
     warp?: boolean;
+    lineGap?: number;
     hAlign?: HorizontalAlign;
     vAlign?: VerticalAlign;
     color?: Nullable<string>;
@@ -37,7 +38,17 @@ export interface ITextProps extends IShapeProps {
     cellValueType?: Nullable<CellValueType>;
 }
 
-export const TEXT_OBJECT_ARRAY = ['text', 'fontStyle', 'warp', 'hAlign', 'vAlign', 'width', 'height', 'color'];
+export const TEXT_OBJECT_ARRAY = [
+    'text',
+    'fontStyle',
+    'warp',
+    'lineGap',
+    'hAlign',
+    'vAlign',
+    'width',
+    'height',
+    'color',
+];
 
 export class Text extends Shape<ITextProps> {
     private static readonly _MAX_LAYOUT_CACHE_SIZE = 5000;
@@ -49,6 +60,7 @@ export class Text extends Shape<ITextProps> {
     text: string;
     fontStyle: string;
     warp: boolean;
+    lineGap: number;
     hAlign: HorizontalAlign;
     vAlign: VerticalAlign;
     skeleton: DocSimpleSkeleton;
@@ -61,6 +73,7 @@ export class Text extends Shape<ITextProps> {
         this.text = props.text;
         this.fontStyle = props.fontStyle;
         this.warp = props.warp ?? false;
+        this.lineGap = props.lineGap ?? 0;
         this.hAlign = props.hAlign ?? HorizontalAlign.LEFT;
         this.vAlign = props.vAlign ?? VerticalAlign.TOP;
         this.skeleton = new DocSimpleSkeleton(
@@ -68,14 +81,15 @@ export class Text extends Shape<ITextProps> {
             props.fontStyle,
             Boolean(props.warp),
             props.width,
-            props.height
+            props.height,
+            this.lineGap
         );
     }
 
     static override drawWith(ctx: UniverRenderingContext, props: ITextProps, _skeleton?: DocSimpleSkeleton) {
-        const { text, fontStyle, warp, hAlign, vAlign, width, height, left = 0, top = 0, cellValueType } = props;
+        const { text, fontStyle, warp, lineGap = 0, hAlign, vAlign, width, height, left = 0, top = 0, cellValueType } = props;
         const cachedLayout = !_skeleton && !warp ? Text._getCachedLayout(text, fontStyle) : null;
-        const skeleton = cachedLayout ? null : _skeleton ?? new DocSimpleSkeleton(text, fontStyle, Boolean(warp), width, vAlign === VerticalAlign.TOP ? height : Infinity);
+        const skeleton = cachedLayout ? null : _skeleton ?? new DocSimpleSkeleton(text, fontStyle, Boolean(warp), width, vAlign === VerticalAlign.TOP ? height : Infinity, lineGap);
         const lines = cachedLayout?.lines ?? skeleton!.calculate();
         const totalHeight = cachedLayout?.totalHeight ?? skeleton!.getTotalHeight();
         const offsetY = vAlign === VerticalAlign.TOP ? 0 : vAlign === VerticalAlign.MIDDLE ? (height - totalHeight) / 2 : height - totalHeight;
@@ -141,7 +155,7 @@ export class Text extends Shape<ITextProps> {
                 });
             }
 
-            lineTop = lineTop + lineHeight;
+            lineTop = lineTop + lineHeight + lineGap;
         }
 
         ctx.restore();

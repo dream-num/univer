@@ -20,8 +20,10 @@ import {
     DataStreamTreeTokenType,
     DocumentFlavor,
     HorizontalAlign,
+    IConfigService,
     LocaleType,
     RANGE_TYPE,
+    SHEET_TEXT_LINE_GAP,
     Tools,
     Univer,
     UniverInstanceType,
@@ -320,5 +322,77 @@ describe('Custom number display', () => {
 
         expect(getCustomNumberDisplayText('2022-11-01 0:00:00', '13.33px SimSun', 66)).toBe('#########');
         expect(getCustomNumberDisplayText('10/1/2022', '13.33px SimSun', 70)).toBe('10/1/2022');
+    });
+});
+
+describe('Configured cell text line gap', () => {
+    it.each([false, true])('keeps saved cells intact and includes inter-line gaps in auto height (rich: %s)', (rich) => {
+        const environment = setupRenderTestEnv();
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const injector = univer.__getInjector();
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'line-gap',
+            sheetOrder: ['sheet'],
+            sheets: {
+                sheet: {
+                    id: 'sheet',
+                    rowCount: 10,
+                    columnCount: 10,
+                    defaultColumnWidth: 200,
+                    rowData: { 0: { h: 30 }, 1: { h: 15 } },
+                    cellData: {
+                        0: {
+                            0: {
+                                v: 'one\ntwo\nthree',
+                                s: { fs: 12, tb: WrapStrategy.WRAP },
+                                ...(rich
+                                    ? {
+                                        p: {
+                                            id: 'rich-lines',
+                                            documentStyle: {},
+                                            body: {
+                                                dataStream: 'one\rtwo\rthree\r\n',
+                                                paragraphs: [{ startIndex: 3, paragraphId: 'one' }, { startIndex: 7, paragraphId: 'two' }, { startIndex: 13, paragraphId: 'three' }],
+                                                sectionBreaks: [{ startIndex: 14, sectionId: 'section' }],
+                                            },
+                                        },
+                                    }
+                                    : {}),
+                            },
+                        },
+                        1: { 0: { v: 'one', s: { fs: 12, tb: WrapStrategy.WRAP } } },
+                    },
+                },
+            },
+        });
+        const worksheet = workbook.getActiveSheet()!;
+        const baseline = injector.createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles());
+        injector.get(IConfigService).setConfig(SHEET_TEXT_LINE_GAP, 2);
+        const spaced = injector.createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles());
+        try {
+            baseline.calculate();
+            spaced.calculate();
+            const saved = Tools.deepClone(workbook.getSnapshot());
+            expect(spaced.calculateAutoHeightForCell(0, 0)).toBeCloseTo(baseline.calculateAutoHeightForCell(0, 0)! + 4);
+            expect(spaced.calculateAutoHeightForCell(1, 0)).toBe(baseline.calculateAutoHeightForCell(1, 0));
+            expect(worksheet.getRowHeight(0)).toBe(30);
+            if (rich) {
+                const cell = worksheet.getCellRaw(0, 0)!;
+                baseline._setFontStylesCache(0, 0, cell, {}, false);
+                spaced._setFontStylesCache(0, 0, cell, {}, false);
+                const oldLines = baseline.stylesCache.fontMatrix.getValue(0, 0)!.documentSkeleton!.getSkeletonData()!.pages[0].sections[0].columns[0].lines;
+                const newLines = spaced.stylesCache.fontMatrix.getValue(0, 0)!.documentSkeleton!.getSkeletonData()!.pages[0].sections[0].columns[0].lines;
+                expect(newLines).toHaveLength(oldLines.length);
+                newLines.forEach((line, index) => {
+                    expect(line.top + line.marginTop - oldLines[index].top - oldLines[index].marginTop).toBeCloseTo(index * 2);
+                });
+            }
+            expect(workbook.getSnapshot()).toEqual(saved);
+        } finally {
+            baseline.dispose();
+            spaced.dispose();
+            univer.dispose();
+            environment.restore();
+        }
     });
 });

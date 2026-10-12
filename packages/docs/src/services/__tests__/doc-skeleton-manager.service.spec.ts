@@ -20,6 +20,8 @@ import {
     ConfigService,
     ContextService,
     DesktopLogService,
+    DOCS_COMMENT_EDITOR_UNIT_ID_KEY,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentDataModel,
     DocumentFlavor,
@@ -30,6 +32,7 @@ import {
     Injector,
     IUniverInstanceService,
     LocaleService,
+    SHEET_TEXT_LINE_GAP,
     UniverInstanceService,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -89,7 +92,7 @@ function createExecutor(): IDocLayoutExecutor {
     };
 }
 
-function createService(document: DocumentDataModel, registerExecutor = false) {
+function createService(document: DocumentDataModel, registerExecutor = false, textLineGap = 0) {
     const injector = new Injector();
     injector.add([IContextService, { useClass: ContextService }]);
     injector.add([IConfigService, { useClass: ConfigService }]);
@@ -98,6 +101,7 @@ function createService(document: DocumentDataModel, registerExecutor = false) {
     injector.add([LocaleService]);
     injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
     injector.add([DocLayoutExecutorService]);
+    injector.get(IConfigService).setConfig(SHEET_TEXT_LINE_GAP, textLineGap);
     const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;
     univerInstanceService.__addUnit(document);
     if (registerExecutor) {
@@ -210,5 +214,40 @@ describe('DocSkeletonManagerService', () => {
 
         expect(service.supportsIncrementalLayout()).toBe(false);
         expect(service.getSkeleton().getSkeletonData()).not.toBeNull();
+    });
+
+    it.each([
+        [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, 4],
+        [DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, 4],
+        [DOCS_COMMENT_EDITOR_UNIT_ID_KEY, 0],
+        ['ordinary-document', 0],
+    ])('applies sheet line gaps only to the cell and formula editors: %s', (id, heightChange) => {
+        const injector = new Injector();
+        const document = injector.createInstance(DocumentDataModel, {
+            id,
+            body: {
+                dataStream: 'one\rtwo\rthree\r\n',
+                paragraphs: [{ startIndex: 3, paragraphId: 'one' }, { startIndex: 7, paragraphId: 'two' }, { startIndex: 13, paragraphId: 'three' }],
+                sectionBreaks: [{ startIndex: 14, sectionId: 'section' }],
+            },
+            documentStyle: { documentFlavor: DocumentFlavor.UNSPECIFIED, pageSize: { width: 400, height: Infinity } },
+        });
+        const baseline = createService(document);
+        const spaced = createService(document, false, 2);
+        try {
+            const oldPage = baseline.getSkeleton().getSkeletonData()!.pages[0];
+            const newPage = spaced.getSkeleton().getSkeletonData()!.pages[0];
+            expect(newPage.height).toBeCloseTo(oldPage.height + heightChange);
+            const oldLines = oldPage.sections[0].columns[0].lines;
+            const newLines = newPage.sections[0].columns[0].lines;
+            expect(newLines).toHaveLength(3);
+            newLines.forEach((line, index) => {
+                expect(line.top + line.marginTop - oldLines[index].top - oldLines[index].marginTop).toBeCloseTo(index * heightChange / 2);
+            });
+        } finally {
+            spaced.dispose();
+            baseline.dispose();
+            injector.dispose();
+        }
     });
 });

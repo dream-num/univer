@@ -36,7 +36,7 @@ export interface IUniverDocsPresetConfig extends
 }
 
 export interface IUniverSheetsPresetConfig extends
-    Pick<IUniverSheetsConfig, 'isRowStylePrecedeColumnStyle' | 'autoHeightForMergedCells' | 'freezeSync'>,
+    Pick<IUniverSheetsConfig, 'isRowStylePrecedeColumnStyle' | 'autoHeightForMergedCells' | 'freezeSync' | 'textLineGap'>,
     Pick<
         IUniverSheetsUIConfig,
         'maxAutoHeightCount'

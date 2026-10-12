@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable max-lines-per-function */
-/* eslint-disable complexity */
-
 import type {
     ICellDataForSheetInterceptor,
     ICellWithCoord,
@@ -27,7 +24,7 @@ import type {
     Nullable,
     ObjectMatrix,
 } from '@univerjs/core';
-import type { IBoundRectNoAngle, IViewportInfo } from '../../../basics';
+import type { IBoundRectNoAngle, IViewportInfo } from '../../../basics/vector2';
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
 import type { IDrawInfo } from '../../extension';
@@ -41,7 +38,7 @@ import {
     Tools,
     WrapStrategy,
 } from '@univerjs/core';
-import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
+import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
 import { clampRange, inViewRanges } from '../../../basics/tools';
 import { Text } from '../../../shape/text';
@@ -389,7 +386,7 @@ export class Font extends SheetExtension {
         if (fontCache.documentSkeleton) {
             this._renderDocuments(ctx, row, col, renderFontCtx, spreadsheetSkeleton.overflowCache);
         } else {
-            this._renderText(ctx, row, col, renderFontCtx, spreadsheetSkeleton.overflowCache);
+            this._renderText(ctx, renderFontCtx);
         }
         ctx.restore();
 
@@ -509,7 +506,7 @@ export class Font extends SheetExtension {
                     } else {
                         try {
                             ctx.drawImage(image, -rotatedWidth / 2, -rotatedHeight / 2, width, height);
-                        } catch (e) {
+                        } catch {
                             this._drawFallbackImage(ctx, -rotatedWidth / 2, -rotatedHeight / 2, width, height);
                         }
                     }
@@ -524,7 +521,7 @@ export class Font extends SheetExtension {
      * @param renderFontContext
      * @param row
      * @param col
-     * @param fontCache
+     * @param padding
      */
     private _clipByRenderBounds(renderFontContext: IRenderFontContext, row: number, col: number, padding = 0) {
         const { ctx, scale, overflowRectangle, fontCache } = renderFontContext;
@@ -624,10 +621,7 @@ export class Font extends SheetExtension {
 
     private _renderText(
         ctx: UniverRenderingContext,
-        row: number,
-        col: number,
-        renderFontCtx: IRenderFontContext,
-        overflowCache: ObjectMatrix<IRange>
+        renderFontCtx: IRenderFontContext
     ) {
         const { fontCache } = renderFontCtx;
         if (!fontCache) return;
@@ -648,6 +642,7 @@ export class Font extends SheetExtension {
             text,
             fontStyle: fontCache.fontString,
             warp: wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0,
+            lineGap: renderFontCtx.spreadsheetSkeleton.textLineGap,
             hAlign,
             vAlign: fontCache.verticalAlign,
             width: cellWidth,

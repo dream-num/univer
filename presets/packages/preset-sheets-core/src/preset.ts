@@ -136,6 +136,7 @@ export function UniverSheetsCorePreset(config: Partial<IUniverSheetsCorePresetCo
                 onlyRegisterFormulaRelatedMutations: false,
                 isRowStylePrecedeColumnStyle: sheets?.isRowStylePrecedeColumnStyle,
                 autoHeightForMergedCells: sheets?.autoHeightForMergedCells,
+                textLineGap: sheets?.textLineGap,
                 freezeSync: sheets?.freezeSync,
             }],
             [UniverSheetsUIPlugin, {

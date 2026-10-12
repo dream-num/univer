@@ -93,7 +93,6 @@ import {
     cachePrecomputedSlicedTableSkeletons,
     cachePrecomputedTableSkeleton,
     getTableIdAndSliceIndex,
-
     startTableSkeletonBuild,
     startTableSkeletonsBuild,
     stepTableSkeletonBuild,
@@ -119,7 +118,6 @@ import {
     getLastPage,
     getNullSkeleton,
     getPageFromPath,
-
     prepareSectionBreakConfig,
     resetContext,
     setPageParent,
@@ -859,9 +857,7 @@ export interface IFindNodeRestrictions {
 function getPagePath(page: IDocumentSkeletonPage) {
     const path: (string | number)[] = [];
 
-    // eslint-disable-next-line ts/no-explicit-any
     let skeNode: any = page;
-    // eslint-disable-next-line ts/no-explicit-any
     let parent: any = skeNode.parent;
     while (parent) {
         if (parent.page === skeNode && parent.noteId && parent.parent?.notes) {
@@ -1242,19 +1238,22 @@ export class DocumentSkeleton extends Skeleton {
 
     private _modernHorizontalMargin: number | undefined;
 
+    private readonly _lineGap: number;
+
     constructor(
         private _docViewModel: DocumentViewModel,
         localeService: LocaleService,
-        options: { isolateIncrementalPublications?: boolean } = {}
+        options: { isolateIncrementalPublications?: boolean; lineGap?: number } = {}
     ) {
         super(localeService);
         this._isolateIncrementalPublications = options.isolateIncrementalPublications !== false;
+        this._lineGap = options.lineGap ?? 0;
     }
 
     static create(
         docViewModel: DocumentViewModel,
         localeService: LocaleService,
-        options?: { isolateIncrementalPublications?: boolean }
+        options?: { isolateIncrementalPublications?: boolean; lineGap?: number }
     ) {
         return new DocumentSkeleton(docViewModel, localeService, options);
     }
@@ -5149,6 +5148,7 @@ export class DocumentSkeleton extends Skeleton {
         } = documentStyle;
 
         const docsConfig: IDocsConfig = {
+            lineGap: this._lineGap,
             headerTreeMap,
             footerTreeMap,
             lists,

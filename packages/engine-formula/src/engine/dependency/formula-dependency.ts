@@ -55,6 +55,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { prefixToken, suffixToken } from '../../basics/token';
+import { FUNCTION_NAMES_LOOKUP } from '../../functions/lookup/function-names';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IDependencyManagerService } from '../../services/dependency-manager.service';
 import {
@@ -889,11 +890,27 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
         return false;
     }
 
+    private _isStaticReference(node: BaseAstNode): boolean {
+        return node.nodeType === NodeType.REFERENCE || (
+            node.nodeType === NodeType.UNION && node.getChildren().every((child) => this._isStaticReference(child))
+        );
+    }
+
     private _nodeTraversalRef(node: BaseAstNode, result: PreCalculateNodeType[]) {
         const children = node.getChildren();
         const childrenCount = children.length;
+        const token = node.getToken();
+        const readsReferenceMetadata = node.nodeType === NodeType.FUNCTION && (
+            token === FUNCTION_NAMES_LOOKUP.ROW || token === FUNCTION_NAMES_LOOKUP.ROWS ||
+            token === FUNCTION_NAMES_LOOKUP.COLUMN || token === FUNCTION_NAMES_LOOKUP.COLUMNS
+        );
         for (let i = 0; i < childrenCount; i++) {
             const item = children[i];
+            // Static references only supply coordinates or dimensions to these functions.
+            // Expressions and dynamic references can still read cell values while evaluating their arguments.
+            if (readsReferenceMetadata && this._isStaticReference(item)) {
+                continue;
+            }
             if (this._isPreCalculateNode(item)) {
                 result.push(item as PreCalculateNodeType);
                 if (item.nodeType === NodeType.UNION) {

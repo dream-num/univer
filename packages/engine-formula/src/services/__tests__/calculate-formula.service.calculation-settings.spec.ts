@@ -106,6 +106,67 @@ describe('Persisted calculation settings', () => {
         }
     });
 
+    it.each([
+        { formula: '=ROW(A1)', expected: 1 },
+        { formula: '=COLUMN(A1)', expected: 1 },
+        { formula: '=ROWS(A1:A3)', expected: 3 },
+        { formula: '=COLUMNS(A1:C1)', expected: 3 },
+    ])('does not treat reference metadata in $formula as a circular value dependency', async ({ formula, expected }) => {
+        const bed = createBed();
+        try {
+            bed.sheetData[bed.sheetId]!.cellData.setValue(0, 0, { f: formula, v: 7, t: CellValueType.NUMBER });
+            const result = await calculate(bed, { 0: { 0: { f: formula } } }, false);
+            expect(result.unitData[bed.unitId]?.[bed.sheetId]?.getValue(0, 0)?.v).toBe(expected);
+            expect(result.circularReferences).toEqual([]);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it.each(['=ROWS(A1+1)', '=COLUMNS(A1+1)', '=ROWS(A1:A3)+A1'])(
+        'retains circular value dependencies in %s',
+        async (formula) => {
+            const bed = createBed();
+            try {
+                bed.sheetData[bed.sheetId]!.cellData.setValue(0, 0, { f: formula, v: 7, t: CellValueType.NUMBER });
+                const result = await calculate(bed, { 0: { 0: { f: formula } } }, false);
+                expect(result.unitData[bed.unitId]?.[bed.sheetId]?.getValue(0, 0)?.v ?? 7).toBe(7);
+                expect(result.circularReferences).toHaveLength(1);
+            } finally {
+                bed.univer.dispose();
+            }
+        }
+    );
+
+    it('updates value dependencies beside a metadata-only self-reference', async () => {
+        const bed = createBed();
+        try {
+            const cells = bed.sheetData[bed.sheetId]!.cellData;
+            const firstFormula = '=ROWS(A1:A3)+B1';
+            const secondFormula = '=C1+1';
+            const formulas = { 0: { 0: { f: firstFormula }, 1: { f: secondFormula } } };
+            cells.setValue(0, 0, { f: firstFormula, v: 7, t: CellValueType.NUMBER });
+            cells.setValue(0, 1, { f: secondFormula, v: 0, t: CellValueType.NUMBER });
+            cells.setValue(0, 2, { v: 2, t: CellValueType.NUMBER });
+            const first = await calculate(bed, formulas, false);
+            expect(first.unitData[bed.unitId]?.[bed.sheetId]?.getValue(0, 0)?.v).toBe(6);
+            expect(first.circularReferences).toEqual([]);
+
+            cells.setValue(0, 0, { f: firstFormula, v: 6, t: CellValueType.NUMBER });
+            cells.setValue(0, 1, { f: secondFormula, v: 3, t: CellValueType.NUMBER });
+            cells.setValue(0, 2, { v: 3, t: CellValueType.NUMBER });
+            const second = await calculate(bed, formulas, false, 100, 0.001, {
+                forceCalculate: false,
+                clearDependencyTreeCache: {},
+                dirtyRanges: [{ unitId: bed.unitId, sheetId: bed.sheetId, range: { startRow: 0, endRow: 0, startColumn: 2, endColumn: 2 } }],
+            });
+            expect(second.unitData[bed.unitId]?.[bed.sheetId]?.getValue(0, 0)?.v).toBe(7);
+            expect(second.circularReferences).toEqual([]);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
     it('retains unrelated cycle diagnostics on incremental recalculation', async () => {
         const bed = createBed();
         try {

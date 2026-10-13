@@ -251,6 +251,10 @@ export interface IUnitRowData {
 }
 
 export interface IFormulaDatasetConfig {
+    /** Snapshot replay limits calculation to affected cycles and their required precedents. */
+    calculateCircularOnly?: boolean;
+    /** Finalize replay by calculating ordinary formulas without advancing complete circular caches. */
+    preserveCircularUnits?: string[];
     formulaData: IFormulaData;
     arrayFormulaCellData: IArrayFormulaUnitCellType;
     arrayFormulaRange: IArrayFormulaRangeType;

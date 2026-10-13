@@ -78,8 +78,8 @@
         "jest-canvas-mock": "^2.5.8",
         "rollup-plugin-polyfill-node": "^0.13.0",
         "rxjs": "^7.8.2",
-        "tsdown": "^0.23.0",
+        "tsdown": "^0.23.1",
         "typescript": "^6.0.3",
-        "vitest": "^5.0.0"
+        "vitest": "^5.0.4"
     }
 }

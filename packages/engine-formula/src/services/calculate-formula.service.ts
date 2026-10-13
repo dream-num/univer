@@ -61,6 +61,7 @@ import { FORMULA_REF_TO_ARRAY_CACHE } from '../engine/reference-object/base-refe
 import { generateAstNode } from '../engine/utils/generate-ast-node';
 import { ErrorValueObjectCache } from '../engine/value-object/base-value-object';
 import { StringValueObjectCache } from '../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_LOOKUP } from '../functions/lookup/function-names';
 import { IFormulaCurrentConfigService } from './current-data.service';
 import { FormulaExecuteStageType, IFormulaRuntimeService } from './runtime.service';
 
@@ -97,6 +98,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
 
     protected _isCalculateTreeModel: boolean = false;
     protected _workbookCalculationSettings: Record<string, IWorkbookCalculationSettings> = {};
+    protected _preserveCircularUnits = new Set<string>();
     private readonly _normalizedCalculationSettings = new Map<string, IWorkbookCalculationSettings>();
 
     protected _loadCalculationSettings(settings?: Record<string, IWorkbookCalculationSettings>): void {
@@ -120,11 +122,34 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         return cell.v == null ? { v: 0, t: CellValueType.NUMBER } : cell;
     }
 
-    protected async* _iterateCalculationGroup<T extends { unitId: string; subUnitId: string; row: number; column: number }>(
+    protected async* _iterateCalculationGroup<T extends { unitId: string; subUnitId: string; row: number; column: number; formula?: string }>(
         group: T[],
         groupId: string
     ) {
         const settings = group.map((item) => this._getCalculationSettings(item.unitId));
+        if (group.every((item, i) => {
+            const cell = this._currentConfigService.getUnitData()[item.unitId]?.[item.subUnitId]?.cellData.getValue(item.row, item.column);
+            const formula = (item.formula ?? cell?.f ?? '').toUpperCase();
+            // Match native materialization: INDEX can narrow a static self-containing
+            // range to another cell, while classic LOOKUP retains cache-backed cycles.
+            const requiresRecalculation = formula.includes(`${FUNCTION_NAMES_LOOKUP.INDEX}(`) &&
+                !(formula.includes(`${FUNCTION_NAMES_LOOKUP.LOOKUP}(`) && !formula.includes(`${FUNCTION_NAMES_LOOKUP.XLOOKUP}(`));
+            return settings[i].iterativeCalculation && this._preserveCircularUnits.has(item.unitId) &&
+                cell?.v != null && !requiresRecalculation;
+        })) {
+            for (const tree of group) {
+                yield { tree, preserve: true, iteration: 0 };
+            }
+            this._runtimeService.recordCircularReferences(group.map((item) => ({
+                unitId: item.unitId,
+                sheetId: item.subUnitId,
+                row: item.row,
+                column: item.column,
+                groupId,
+                iterations: 0,
+            })));
+            return;
+        }
         const limit = settings.reduce((limit, setting) => Math.max(limit, setting.iterativeCalculation ? setting.maxIterations : 0), 1);
         let converged = false;
         let iterations = 0;
@@ -244,6 +269,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
             this._runtimeService.reset();
 
             this._loadCalculationSettings(formulaDatasetConfig.calculationSettings);
+            this._preserveCircularUnits = new Set(formulaDatasetConfig.preserveCircularUnits);
             this._runtimeService.beginCircularReferences();
             this._isCalculateTreeModel = formulaDatasetConfig.isCalculateTreeModel || false;
             await this._executeStep();

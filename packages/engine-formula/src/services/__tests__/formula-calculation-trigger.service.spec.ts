@@ -69,6 +69,36 @@ describe('FormulaCalculationTriggerService', () => {
         vi.restoreAllMocks();
     });
 
+    it('does not debounce reconstructed snapshot inputs and resumes for subsequent local edits', async () => {
+        const testBed = createTestBed();
+        try {
+            testBed.service.runWithoutTriggering(() => testBed.emit({
+                id: SetTriggerFormulaCalculationStartMutation.id,
+                params: { forceCalculation: true },
+            }));
+            await vi.advanceTimersByTimeAsync(10);
+            expect(testBed.executed).toEqual([]);
+            expect(() => testBed.service.runWithoutTriggering(() => {
+                throw new Error('load failed');
+            })).toThrow('load failed');
+            testBed.emit({
+                id: SetTriggerFormulaCalculationStartMutation.id,
+                params: { dirtyRanges: [{ unitId: 'unit', sheetId: 'sheet', range: {
+                    startRow: 0,
+                    endRow: 0,
+                    startColumn: 1,
+                    endColumn: 1,
+                } }] },
+            });
+            await vi.advanceTimersByTimeAsync(10);
+            expect(testBed.executed).toHaveLength(1);
+            expect(testBed.executed[0].params).toMatchObject({ dirtyRanges: [{ unitId: 'unit' }] });
+            expect(testBed.executed[0].params).not.toHaveProperty('preserveCircularUnits');
+        } finally {
+            testBed.service.dispose();
+        }
+    });
+
     it('batches formula registrations without changing payloads or completed session maps', async () => {
         const testBed = createTestBed();
         const payload = Object.freeze({

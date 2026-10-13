@@ -49,6 +49,7 @@ export class FormulaCalculationTriggerService extends Disposable {
     private _executionInProgress = false;
     private _hasPendingCalculation = false;
     private _stopRequested = false;
+    private _suppressed = false;
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -66,6 +67,17 @@ export class FormulaCalculationTriggerService extends Disposable {
 
         this._started = true;
         this._scheduleFlush();
+    }
+
+    /** Snapshot reconstruction calculates these synchronous mutations in its isolated runtime. */
+    runWithoutTriggering<T>(operation: () => T): T {
+        const previous = this._suppressed;
+        this._suppressed = true;
+        try {
+            return operation();
+        } finally {
+            this._suppressed = previous;
+        }
     }
 
     override dispose(): void {
@@ -89,7 +101,7 @@ export class FormulaCalculationTriggerService extends Disposable {
             }
 
             const conversion = this._activeDirtyManagerService.get(command.id);
-            if (!conversion) {
+            if (!conversion || this._suppressed) {
                 return;
             }
             if (conversion.shouldTrigger?.(command, options) === false) {
@@ -213,7 +225,7 @@ function createEmptyDirtyData(): IFormulaDirtyData {
     };
 }
 
-function mergeDirtyData(left: IFormulaDirtyData, right: Partial<IFormulaDirtyData>): IFormulaDirtyData {
+export function mergeDirtyData(left: Partial<IFormulaDirtyData>, right: Partial<IFormulaDirtyData>): IFormulaDirtyData {
     const result = createEmptyDirtyData();
     const rangeKeys = new Set<string>();
     appendDirtyData(result, left, rangeKeys);

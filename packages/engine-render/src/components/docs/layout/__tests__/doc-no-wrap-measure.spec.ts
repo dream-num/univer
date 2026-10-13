@@ -152,6 +152,8 @@ describe('measureDocumentNoWrapTextWidth', () => {
                 fontBoundingBoxDescent: 3,
                 actualBoundingBoxAscent: 10,
                 actualBoundingBoxDescent: 2,
+                actualBoundingBoxLeft: 0,
+                actualBoundingBoxRight: 0,
             });
         }
         try {

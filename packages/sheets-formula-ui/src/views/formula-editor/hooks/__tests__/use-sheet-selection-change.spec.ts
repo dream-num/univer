@@ -14,15 +14,28 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import type { IRange, IWorkbookData, Workbook } from '@univerjs/core';
+import type { Editor } from '@univerjs/docs-ui';
+import type { ISelectionWithCoord } from '@univerjs/sheets';
+import { ICommandService, Injector, IUniverInstanceService, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
+import { IEditorService } from '@univerjs/docs-ui';
 import {
     getFormulaSequenceCharacterAtOffset,
     isFormulaReferenceAddingContext,
     isFormulaReferenceAddingTextContext,
+    LexerTreeBuilder,
     sequenceNodeType,
 } from '@univerjs/engine-formula';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRefSelectionsService, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { RediContext } from '@univerjs/ui';
+import { act, createElement } from 'react';
+import { createRoot } from 'react-dom/client';
+import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { FormulaSelectingType } from '../use-formula-selection';
+import { RefSelectionsRenderService } from '../../../../services/render-services/ref-selections.render.service';
+import { useFormulaSelecting } from '../use-formula-selection';
 import {
     createSelectionChangeDuplicateEndGuard,
     createSelectionChangeHandler,
@@ -35,6 +48,7 @@ import {
     prepareSelectionChangeContext,
     replaceFormulaControlSelection,
     shouldSkipFormulaReferenceUpdate,
+    useSheetSelectionChange,
 } from '../use-sheet-selection-change';
 
 describe('formula reference selection gesture boundaries', () => {
@@ -126,9 +140,8 @@ describe('use-sheet-selection-change regression scenarios', () => {
     });
 
     it('uses the formula text end as the insertion context when the embedded editor selection is temporarily empty', () => {
-        const lexerTreeBuilder = {
-            sequenceNodesBuilder: vi.fn(() => []),
-        };
+        const injector = new Injector([[LexerTreeBuilder]]);
+        const lexerTreeBuilder = injector.get(LexerTreeBuilder);
         const editor = {
             getSelectionRanges: vi.fn(() => []),
             getDocumentData: vi.fn(() => ({ body: { dataStream: '=\r\n' } })),
@@ -136,19 +149,19 @@ describe('use-sheet-selection-change regression scenarios', () => {
 
         expect(prepareSelectionChangeContext({
             editor: editor as never,
-            lexerTreeBuilder: lexerTreeBuilder as never,
+            lexerTreeBuilder,
         })).toMatchObject({
             offset: 0,
             nodeIndex: -1,
             updatingRefIndex: -1,
             sequenceNodes: [],
         });
+        injector.dispose();
     });
 
     it('does not create a fallback formula context for non-formula editor text', () => {
-        const lexerTreeBuilder = {
-            sequenceNodesBuilder: vi.fn(() => []),
-        };
+        const injector = new Injector([[LexerTreeBuilder]]);
+        const lexerTreeBuilder = injector.get(LexerTreeBuilder);
         const editor = {
             getSelectionRanges: vi.fn(() => []),
             getDocumentData: vi.fn(() => ({ body: { dataStream: 'plain\r\n' } })),
@@ -156,8 +169,9 @@ describe('use-sheet-selection-change regression scenarios', () => {
 
         expect(prepareSelectionChangeContext({
             editor: editor as never,
-            lexerTreeBuilder: lexerTreeBuilder as never,
+            lexerTreeBuilder,
         })).toBeUndefined();
+        injector.dispose();
     });
 
     it('recognizes delimiter-adjacent formula context as a new reference insertion point', () => {
@@ -349,8 +363,7 @@ describe('use-sheet-selection-change regression scenarios', () => {
         expect(getInitialFormulaReferenceSelectionCount(0, 0)).toBe(0);
         expect(getInitialFormulaReferenceSelectionCount(0, 2)).toBe(2);
         expect(getInitialFormulaReferenceSelectionCount(1, 0)).toBe(1);
-        expect(getInitialFormulaReferenceSelectionCount(1, 0, FormulaSelectingType.NEED_ADD)).toBe(1);
-        expect(getInitialFormulaReferenceSelectionCount(1, 1, FormulaSelectingType.NEED_ADD)).toBe(1);
+        expect(getInitialFormulaReferenceSelectionCount(1, 1)).toBe(1);
     });
 
     it('keeps formula control ranges scoped to the current selection unit and sheet', () => {
@@ -368,5 +381,191 @@ describe('use-sheet-selection-change regression scenarios', () => {
     it('returns no formula selection for empty selection events', () => {
         expect(getLastFormulaSelection([])).toBeUndefined();
         expect(getLastFormulaSelection([range(1, 1), range(2, 2)])).toEqual(range(2, 2));
+    });
+});
+
+(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+
+async function createReferencePickingHarness(formulaWithCursor: string) {
+    const univer = new Univer({ locale: LocaleType.EN_US });
+    const injector = univer.__getInjector();
+    const root = createRoot(document.createElement('div'));
+    const unitId = 'whitespace-reference-test';
+    const editorId = 'formula-editor';
+    let formula = formulaWithCursor.replace('|', '');
+    let offset = formulaWithCursor.includes('|') ? formulaWithCursor.indexOf('|') : formula.length;
+    const input$ = new Subject<{ content: string; isComposing: boolean }>();
+    const renderer = {
+        selectionMoveStart$: new Subject<ISelectionWithCoord[]>(),
+        selectionMoving$: new Subject<ISelectionWithCoord[]>(),
+        selectionMoveEnd$: new Subject<ISelectionWithCoord[]>(),
+        getSelectionDataWithStyle: () => [],
+        getSelectionControls: () => [],
+        setSkipLastEnabled: vi.fn(),
+    };
+    const editor = {
+        getEditorId: () => editorId,
+        getDocumentDataModel: () => ({ getBody: () => ({ dataStream: `${formula}\r\n` }) }),
+        getDocumentData: () => ({ body: { dataStream: `${formula}\r\n` } }),
+        getSelectionRanges: () => [{ startOffset: offset, endOffset: offset, collapsed: true }],
+        input$,
+    } as unknown as Editor;
+    injector.add([DocSelectionManagerService]);
+    injector.add([LexerTreeBuilder]);
+    injector.add([SheetsSelectionsService]);
+    let focusedEditorId = editorId;
+    injector.add([IEditorService, { useValue: { getFocusId: () => focusedEditorId } as IEditorService }]);
+    injector.add([IRefSelectionsService, { useValue: { selectionSet$: new Subject() } as never }]);
+    injector.add([IRenderManagerService, { useValue: {
+        getRenderUnitById: (id: string) => id === unitId
+            ? {
+                with: (token: unknown) => token === RefSelectionsRenderService ? renderer : undefined,
+            }
+            : undefined,
+    } as unknown as IRenderManagerService }]);
+    univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+        id: unitId,
+        name: 'Reference test',
+        appVersion: '1.0.0',
+        locale: LocaleType.EN_US,
+        sheetOrder: ['sheet1', 'sheet2'],
+        sheets: {
+            sheet1: { id: 'sheet1', name: 'Sheet 1', rowCount: 10, columnCount: 10 },
+            sheet2: { id: 'sheet2', name: 'Sheet 2', rowCount: 10, columnCount: 10 },
+        },
+        styles: {},
+    });
+    injector.get(IUniverInstanceService).focusUnit(unitId);
+    const commands = injector.get(ICommandService);
+    commands.registerCommand(SetSelectionsOperation);
+    const changes = vi.fn((text: string, nextOffset: number, _isEnd: boolean) => {
+        formula = `=${text}`;
+        offset = nextOffset + 1;
+        input$.next({ content: '', isComposing: false });
+    });
+    function ReferencePicking() {
+        const { isSelecting, isSelectingRef } = useFormulaSelecting({
+            editor,
+            editorId,
+            isFocus: true,
+            disableOnClick: true,
+            unitId,
+            subUnitId: 'sheet1',
+        });
+        const getRefSelections = () => [];
+        useSheetSelectionChange(Boolean(isSelecting), true, isSelectingRef, unitId, 'sheet1', getRefSelections, true, true, editor, changes);
+        return null;
+    }
+    await act(async () => root.render(createElement(RediContext.Provider, { value: { injector } }, createElement(ReferencePicking))));
+    return {
+        changes,
+        blur() { focusedEditorId = 'other-editor'; },
+        async select(selectedRange: IRange) {
+            await act(async () => {
+                renderer.selectionMoveStart$.next([{ rangeWithCoord: selectedRange } as ISelectionWithCoord]);
+            });
+            await act(async () => {
+                renderer.selectionMoveEnd$.next([{ rangeWithCoord: selectedRange } as ISelectionWithCoord]);
+            });
+            return formula;
+        },
+        async selectWithKeyboard(selectedRange: IRange) {
+            await act(async () => {
+                await commands.executeCommand(SetSelectionsOperation.id, {
+                    unitId,
+                    subUnitId: 'sheet1',
+                    extra: 'formula-editor',
+                    selections: [{ range: selectedRange, primary: null, style: null }],
+                });
+            });
+            return formula;
+        },
+        async drag(selectedRange: IRange, expandedRange: IRange, existingRanges: IRange[]) {
+            const existing = existingRanges.map((rangeWithCoord) => ({ rangeWithCoord } as ISelectionWithCoord));
+            await act(async () => renderer.selectionMoveStart$.next([...existing, { rangeWithCoord: selectedRange } as ISelectionWithCoord]));
+            await act(async () => renderer.selectionMoving$.next([...existing, { rangeWithCoord: expandedRange } as ISelectionWithCoord]));
+            await act(async () => renderer.selectionMoveEnd$.next([...existing, { rangeWithCoord: expandedRange } as ISelectionWithCoord]));
+            return formula;
+        },
+        async dispose() {
+            await act(async () => root.unmount());
+            getSharedSelectionChangeDuplicateEndGuard(`${unitId}:sheet1`).reset();
+            input$.complete();
+            renderer.selectionMoveStart$.complete();
+            renderer.selectionMoving$.complete();
+            renderer.selectionMoveEnd$.complete();
+            univer.dispose();
+        },
+    };
+}
+
+describe('formula reference picking through editor and selection hooks', () => {
+    it.each([
+        ['=SUM(A1,', '=SUM(A1,A2'],
+        ['=SUM(\'Sheet "1\'!A1,\r ', '=SUM(\'Sheet "1\'!A1,\r A2'],
+        ['=SUM(A1, ', '=SUM(A1, A2'],
+        ['=SUM(A1,  ', '=SUM(A1,  A2'],
+        ['=IF(\r ', '=IF(\r A2'],
+        ['=IF(\n ', '=IF(\n A2'],
+        ['=IF(\r\n  ', '=IF(\r\n  A2'],
+        ['=SUM(A1, \r  |)', '=SUM(A1, \r  A2)'],
+        ['=SUM(A1, \r |,B1)', '=SUM(A1, \r A2,B1)'],
+        ['=SUM(A1|)', '=SUM(A2)'],
+        ['=SUM(A1 |)', '=SUM(A1 A2)'],
+    ])('inserts a picked cell without discarding whitespace in %j', async (formula, expected) => {
+        const harness = await createReferencePickingHarness(formula);
+        try {
+            expect(await harness.select(range(1, 0, 'sheet1', 'whitespace-reference-test'))).toBe(expected);
+        } finally {
+            await harness.dispose();
+        }
+    });
+});
+
+describe('formula reference picking isolation', () => {
+    it.each(['=1', '=SUM(A1)', '=IF(\r', '=IF(\n', '=SUM(A1, \r\n', '=A1+\r', '=SUM(A1, \r|,B1)', '=IF(\r|)', '=SU\r', '=IF("value,\r', '=IF(\'Sheet "1\'!A1, "hello,\r', '=SUM( |A1)'])('does not insert a reference in %j', async (formula) => {
+        const harness = await createReferencePickingHarness(formula);
+        try {
+            expect(await harness.select(range(1, 0))).toBe(formula.replace('|', ''));
+        } finally {
+            await harness.dispose();
+        }
+    });
+
+    it('keeps other editors from consuming a selection event', async () => {
+        const harness = await createReferencePickingHarness('=SUM(A1, ');
+        try {
+            harness.blur();
+            expect(await harness.select(range(1, 0))).toBe('=SUM(A1, ');
+        } finally {
+            await harness.dispose();
+        }
+    });
+
+    it('qualifies a reference picked from another sheet after a line break and indentation', async () => {
+        const harness = await createReferencePickingHarness('=SUM(A1,\r ');
+        try {
+            expect(await harness.select(range(1, 0, 'sheet2', 'whitespace-reference-test'))).toBe("=SUM(A1,\r 'Sheet 2'!A2");
+        } finally {
+            await harness.dispose();
+        }
+    });
+
+    it('inserts a keyboard-selected reference after a line break and indentation', async () => {
+        const harness = await createReferencePickingHarness('=SUM(A1,\r ');
+        try {
+            expect(await harness.selectWithKeyboard(range(1, 0))).toBe('=SUM(A1,\r A2');
+        } finally {
+            await harness.dispose();
+        }
+    });
+
+    it('updates a dragged reference instead of appending another reference', async () => {
+        const harness = await createReferencePickingHarness('=SUM(A1, ');
+        try {
+            expect(await harness.drag(range(1, 0), { ...range(1, 0), endRow: 3 }, [range(0, 0)])).toBe('=SUM(A1, A2:A4');
+        } finally {
+            await harness.dispose();
+        }
     });
 });

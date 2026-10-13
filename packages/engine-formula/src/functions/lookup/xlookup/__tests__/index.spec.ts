@@ -78,6 +78,236 @@ const arrayValueObject5 = ArrayValueObject.create(/*ts*/ `{
 describe('Test xlookup', () => {
     const testFunction = new Xlookup(FUNCTION_NAMES_LOOKUP.XLOOKUP);
 
+    describe('Not-found handling', () => {
+        it.each([
+            [0, 1],
+            [0, -1],
+            [-1, 1],
+            [1, -1],
+            [0, 2],
+            [0, -2],
+            [-1, 2],
+            [1, -2],
+        ])('preserves matched errors with match_mode %i and search_mode %i', (matchMode, searchMode) => {
+            const lookupArray = ArrayValueObject.create(searchMode === -2 ? '{3;2;1}' : '{1;2;3}');
+            for (const error of [ErrorType.DIV_BY_ZERO, ErrorType.NA]) {
+                const returnArray = ArrayValueObject.create(`{${error};${error};${error}}`);
+                for (const fallback of [undefined, StringValueObject.create('missing')]) {
+                    const result = testFunction.calculate(
+                        NumberValueObject.create(2),
+                        lookupArray,
+                        returnArray,
+                        fallback,
+                        NumberValueObject.create(matchMode),
+                        NumberValueObject.create(searchMode)
+                    );
+                    expect(result.isError()).toBe(true);
+                    expect(result.getValue()).toBe(error);
+                }
+            }
+        });
+
+        it('preserves errors returned by an approximate match rather than an exact match', () => {
+            const result = testFunction.calculate(
+                NumberValueObject.create(2),
+                ArrayValueObject.create('{1;3}'),
+                ArrayValueObject.create('{10;#DIV/0!}'),
+                StringValueObject.create('missing'),
+                NumberValueObject.create(1)
+            );
+            expect(result.getValue()).toBe(ErrorType.DIV_BY_ZERO);
+        });
+
+        it('preserves errors returned by a wildcard match', () => {
+            const lookupArray = ArrayValueObject.create('{"alpha";"beta"}');
+            const returnArray = ArrayValueObject.create('{#DIV/0!;#N/A}');
+            for (const [lookup, expected] of [['a*', ErrorType.DIV_BY_ZERO], ['b*', ErrorType.NA]]) {
+                const result = testFunction.calculate(
+                    StringValueObject.create(lookup),
+                    lookupArray,
+                    returnArray,
+                    StringValueObject.create('missing'),
+                    NumberValueObject.create(2)
+                );
+                expect(result.getValue()).toBe(expected);
+            }
+        });
+
+        it.each([
+            [false, -1],
+            [false, 1],
+            [true, -1],
+            [true, 1],
+        ] as const)('returns zero for an approximate match to a blank, horizontal=%s and match_mode=%i', (horizontal, matchMode) => {
+            const lookupArray = ArrayValueObject.create(horizontal ? '{1,3}' : '{1;3}');
+            const returnArray = ArrayValueObject.createByArray(horizontal ? [[null, null]] : [[null], [null]]);
+            for (const fallback of [undefined, StringValueObject.create('missing'), ErrorValueObject.create(ErrorType.REF)]) {
+                const result = testFunction.calculate(
+                    NumberValueObject.create(2),
+                    lookupArray,
+                    returnArray,
+                    fallback,
+                    NumberValueObject.create(matchMode)
+                );
+                expect(result.isNumber()).toBe(true);
+                expect(result.getValue()).toBe(0);
+            }
+        });
+
+        it.each([
+            [0, 1, 4],
+            [0, -1, 4],
+            [-1, 1, 0],
+            [1, -1, 4],
+            [0, 2, 4],
+            [0, -2, 4],
+            [-1, 2, 0],
+            [1, -2, 4],
+        ])('applies fallback only on a miss with match_mode %i and search_mode %i', (matchMode, searchMode, lookup) => {
+            const lookupArray = ArrayValueObject.create(searchMode === -2 ? '{3;2;1}' : '{1;2;3}');
+            const returnArray = ArrayValueObject.create('{10;20;30}');
+            for (const fallback of [undefined, StringValueObject.create('missing')]) {
+                const result = testFunction.calculate(
+                    NumberValueObject.create(lookup),
+                    lookupArray,
+                    returnArray,
+                    fallback,
+                    NumberValueObject.create(matchMode),
+                    NumberValueObject.create(searchMode)
+                );
+                expect(result.getValue()).toBe(fallback?.getValue() ?? ErrorType.NA);
+            }
+        });
+
+        it.each([false, true])('handles matched errors and misses with a multi-cell return, horizontal=%s', (horizontal) => {
+            const lookupArray = ArrayValueObject.create(horizontal ? '{1,2}' : '{1;2}');
+            const returnArray = ArrayValueObject.create(horizontal ? '{#DIV/0!,20;#N/A,200}' : '{#DIV/0!,#N/A;20,200}');
+            const result = testFunction.calculate(NumberValueObject.create(1), lookupArray, returnArray, StringValueObject.create('missing'));
+            expect(getObjectValue(result)).toStrictEqual(horizontal ? [[ErrorType.DIV_BY_ZERO], [ErrorType.NA]] : [[ErrorType.DIV_BY_ZERO, ErrorType.NA]]);
+
+            for (const fallback of [undefined, StringValueObject.create('missing'), ErrorValueObject.create(ErrorType.REF)]) {
+                const missing = testFunction.calculate(NumberValueObject.create(3), lookupArray, returnArray, fallback);
+                expect(missing.getValue()).toBe(fallback?.getValue() ?? ErrorType.NA);
+            }
+        });
+
+        it.each(['{1;2;3;4}', '{1,2;3,4}'])('handles errors and misses within lookup arrays %s', (lookup) => {
+            const result = testFunction.calculate(
+                ArrayValueObject.create(lookup),
+                ArrayValueObject.create('{1;2;3}'),
+                ArrayValueObject.create('{#DIV/0!;20;#N/A}'),
+                StringValueObject.create('missing')
+            );
+            expect(getObjectValue(result)).toStrictEqual(lookup.includes(',')
+                ? [[ErrorType.DIV_BY_ZERO, 20], [ErrorType.NA, 'missing']]
+                : [[ErrorType.DIV_BY_ZERO], [20], [ErrorType.NA], ['missing']]);
+        });
+
+        it('propagates errors in the lookup values instead of using fallback', () => {
+            const result = testFunction.calculate(
+                ArrayValueObject.create('{1;#REF!}'),
+                ArrayValueObject.create('{1;2}'),
+                ArrayValueObject.create('{10;20}'),
+                StringValueObject.create('missing')
+            );
+            expect(getObjectValue(result)).toStrictEqual([[10], [ErrorType.REF]]);
+        });
+
+        it.each([false, true])('propagates lookup errors from a scalar or single-cell array, array=%s', (asArray) => {
+            for (const error of [ErrorType.REF, ErrorType.NA, ErrorType.DIV_BY_ZERO]) {
+                const lookup = asArray ? ArrayValueObject.create(`{${error}}`) : ErrorValueObject.create(error);
+                const result = testFunction.calculate(
+                    lookup,
+                    ArrayValueObject.create('{1;2}'),
+                    ArrayValueObject.create('{10;20}'),
+                    StringValueObject.create('missing')
+                );
+                expect(result.isError()).toBe(true);
+                expect(result.getValue()).toBe(error);
+            }
+        });
+
+        it.each([2, -2])('uses the matched column in a horizontal binary search, search_mode=%i', (searchMode) => {
+            const lookupArray = ArrayValueObject.create(searchMode === 2 ? '{1,2,3}' : '{3,2,1}');
+            const returnArray = ArrayValueObject.create(searchMode === 2
+                ? '{10,#DIV/0!,30;100,#N/A,300}'
+                : '{30,#DIV/0!,10;300,#N/A,100}');
+            const fallback = StringValueObject.create('missing');
+            const matchMode = NumberValueObject.create(0);
+            const search = NumberValueObject.create(searchMode);
+
+            const scalarResult = testFunction.calculate(NumberValueObject.create(1), lookupArray, returnArray.slice([0, 1])!, fallback, matchMode, search);
+            expect(scalarResult.getValue()).toBe(10);
+            const scalarError = testFunction.calculate(NumberValueObject.create(2), lookupArray, returnArray.slice([0, 1])!, fallback, matchMode, search);
+            expect(scalarError.getValue()).toBe(ErrorType.DIV_BY_ZERO);
+
+            const expandedResult = testFunction.calculate(NumberValueObject.create(1), lookupArray, returnArray, fallback, matchMode, search);
+            expect(getObjectValue(expandedResult)).toStrictEqual([[10], [100]]);
+            const expandedError = testFunction.calculate(NumberValueObject.create(2), lookupArray, returnArray, fallback, matchMode, search);
+            expect(getObjectValue(expandedError)).toStrictEqual([[ErrorType.DIV_BY_ZERO], [ErrorType.NA]]);
+
+            for (const ifNotFound of [undefined, fallback]) {
+                const missing = testFunction.calculate(NumberValueObject.create(4), lookupArray, returnArray, ifNotFound, matchMode, search);
+                expect(missing.getValue()).toBe(ifNotFound?.getValue() ?? ErrorType.NA);
+            }
+        });
+
+        it('preserves the lookup vector shape when searching a horizontal array', () => {
+            const result = testFunction.calculate(
+                ArrayValueObject.create('{3,1,4,2}'),
+                ArrayValueObject.create('{1,2,3}'),
+                ArrayValueObject.create('{10,#DIV/0!,30;100,200,300}'),
+                StringValueObject.create('missing')
+            );
+            expect(getObjectValue(result)).toStrictEqual([[30, 10, 'missing', ErrorType.DIV_BY_ZERO]]);
+        });
+
+        it.each([
+            [0, 1],
+            [0, 2],
+            [-1, 1],
+        ])('returns zero for a matched native null return value, match_mode=%i and search_mode=%i', (matchMode, searchMode) => {
+            const returnArray = ArrayValueObject.createByArray([[10], [20], [30]]);
+            returnArray.set(1, 0, null);
+            const result = testFunction.calculate(
+                NumberValueObject.create(2),
+                ArrayValueObject.create('{1;2;3}'),
+                returnArray,
+                StringValueObject.create('missing'),
+                NumberValueObject.create(matchMode),
+                NumberValueObject.create(searchMode)
+            );
+            expect(result.isNumber()).toBe(true);
+            expect(result.getValue()).toBe(0);
+        });
+
+        it('uses the default forward direction for an explicitly blank search mode', () => {
+            const result = testFunction.calculate(
+                NumberValueObject.create(1),
+                ArrayValueObject.create('{1;1}'),
+                ArrayValueObject.create('{10;20}'),
+                StringValueObject.create('missing'),
+                NumberValueObject.create(0),
+                NullValueObject.create()
+            );
+            expect(result.getValue()).toBe(10);
+        });
+
+        it.each([
+            ['{1,2;3,4}', '{10,20;30,40}'],
+            ['{1,2}', '{10,20,30}'],
+            ['{1;2}', '{10;20;30}'],
+        ])('rejects incompatible lookup and return ranges: %s / %s', (lookup, result) => {
+            const value = testFunction.calculate(
+                NumberValueObject.create(1),
+                ArrayValueObject.create(lookup),
+                ArrayValueObject.create(result),
+                StringValueObject.create('missing')
+            );
+            expect(value.getValue()).toBe(ErrorType.VALUE);
+        });
+    });
+
     describe('The value of the lookup', () => {
         it('Search normal', async () => {
             const resultObject = testFunction.calculate(
@@ -222,6 +452,27 @@ describe('Test xlookup', () => {
             }
 
             expect(getObjectValue(resultObject)).toBe(20);
+        });
+
+        it.each([
+            ['{1,2,3}', 8, 2, 20],
+            ['{1,2;3,4}', 2, 2, 40],
+            ['{1,2;3,4}', 3, 3, ErrorType.VALUE],
+        ] as const)('uses legacy implicit intersection for a positioned lookup %s at (%i, %i)', (lookup, row, column, expected) => {
+            const positionedFunction = new Xlookup(FUNCTION_NAMES_LOOKUP.XLOOKUP);
+            positionedFunction.setRefInfo('unit', 'summary', row, column);
+            const lookupValue = ArrayValueObject.create(lookup);
+            lookupValue.setUnitId('unit');
+            lookupValue.setSheetId('source');
+            lookupValue.setCurrent(1, 1);
+
+            const result = positionedFunction.calculate(
+                lookupValue,
+                ArrayValueObject.create('{1;2;3;4}'),
+                ArrayValueObject.create('{10;20;30;40}'),
+                StringValueObject.create('missing')
+            );
+            expect(result.getValue()).toBe(expected);
         });
 
         it('Reference-derived lookup array should stay an array in a dynamic array formula', async () => {

@@ -18,10 +18,11 @@ import type { Nullable } from '@univerjs/core';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { compareToken } from '../../../basics/token';
 import { ArrayOrderSearchType, getMatchModeValue, getSearchModeValue } from '../../../engine/utils/compare';
 import { baseValueObjectToArrayValueObject } from '../../../engine/utils/value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Xlookup extends BaseFunction {
@@ -137,38 +138,14 @@ export class Xlookup extends BaseFunction {
             }
 
             return lookupValue.map((value) => {
-                const checkErrorCombination = this._checkErrorCombination(matchModeValue, searchModeValue);
-
-                if (checkErrorCombination) {
-                    return checkErrorCombination;
-                }
-
-                const result = this._handleSingleObject(value, lookupArray, resultArray!, matchModeValue, searchModeValue);
-
-                if (result.isError()) {
-                    return ifNotFound;
-                }
-
-                return this._blankResultAsZero(result);
+                return this._getLookupResult(value, lookupArray, resultArray!, ifNotFound, matchModeValue, searchModeValue);
             });
         }
 
         const _lookupValue = lookupValue.isArray() ? (lookupValue as ArrayValueObject).get(0, 0) as BaseValueObject : lookupValue;
 
         if (columnCountLookup === columnCountReturn && rowCountLookup === rowCountReturn) {
-            const checkErrorCombination = this._checkErrorCombination(matchModeValue, searchModeValue);
-
-            if (checkErrorCombination) {
-                return checkErrorCombination;
-            }
-
-            const result = this._handleSingleObject(_lookupValue, lookupArray, returnArray!, matchModeValue, searchModeValue);
-
-            if (result.isError()) {
-                return ifNotFound!;
-            }
-
-            return this._blankResultAsZero(result);
+            return this._getLookupResult(_lookupValue, lookupArray, returnArray, ifNotFound, matchModeValue, searchModeValue);
         }
 
         let axis = 0;
@@ -180,13 +157,7 @@ export class Xlookup extends BaseFunction {
             axis = 1;
         }
 
-        const resultArray = this._handleExpandObject(_lookupValue, lookupArray, returnArray, matchModeValue, searchModeValue, axis);
-
-        if (resultArray == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
-        return resultArray;
+        return this._getLookupResult(_lookupValue, lookupArray, returnArray, ifNotFound, matchModeValue, searchModeValue, axis);
     }
 
     private _legacyImplicitLookupValue(lookupValue: BaseValueObject): BaseValueObject {
@@ -233,105 +204,75 @@ export class Xlookup extends BaseFunction {
         return array.get(rowIndex, columnIndex) as BaseValueObject || ErrorValueObject.create(ErrorType.VALUE);
     }
 
-    private _handleExpandObject(
+    private _getLookupResult(
         value: BaseValueObject,
         searchArray: ArrayValueObject,
         resultArray: ArrayValueObject,
+        ifNotFound: BaseValueObject,
         matchModeValue: number,
         searchModeValue: number,
-        axis: number = 0
+        axis?: number
     ) {
-        if ((searchModeValue === 2 || searchModeValue === -2) && matchModeValue !== 2) {
-            const searchType = getSearchModeValue(searchModeValue);
-            const matchType = getMatchModeValue(matchModeValue);
-            return this.binarySearchExpand(
-                value,
-                searchArray,
-                resultArray,
-                axis,
-                searchType,
-                matchType
-            );
+        if (value.isError()) {
+            return value;
         }
 
-        if (matchModeValue === 2) {
-            return this.fuzzySearchExpand(value, searchArray, resultArray, searchModeValue !== -1, axis);
-        }
-        if (matchModeValue === -1 || matchModeValue === 1) {
-            return this.orderSearchExpand(
-                value,
-                searchArray,
-                resultArray,
-                matchModeValue === 1 ? ArrayOrderSearchType.MAX : ArrayOrderSearchType.MIN,
-                searchModeValue === -1,
-                axis,
-                true
-            );
+        const checkErrorCombination = this._checkErrorCombination(matchModeValue, searchModeValue);
+        if (checkErrorCombination) {
+            return checkErrorCombination;
         }
 
-        return this._exactSearchExpand(value, searchArray, resultArray, searchModeValue !== -1, axis);
+        const position = this._findPosition(value, searchArray, matchModeValue, searchModeValue);
+        if (position == null) {
+            return ifNotFound;
+        }
+
+        if (axis === 0) {
+            return resultArray.slice([position.row, position.row + 1]) ?? ErrorValueObject.create(ErrorType.NA);
+        }
+        if (axis === 1) {
+            return resultArray.slice(undefined, [position.column, position.column + 1]) ?? ErrorValueObject.create(ErrorType.NA);
+        }
+
+        const result = resultArray.get(position.row, position.column) ?? NullValueObject.create();
+        return this._blankResultAsZero(result);
     }
 
-    private _handleSingleObject(
+    private _findPosition(
         value: BaseValueObject,
         searchArray: ArrayValueObject,
-        resultArray: ArrayValueObject,
         matchModeValue: number,
         searchModeValue: number
-    ) {
+    ): Nullable<{ row: number; column: number }> {
         if ((searchModeValue === 2 || searchModeValue === -2) && matchModeValue !== 2) {
             const searchType = getSearchModeValue(searchModeValue);
             const matchType = getMatchModeValue(matchModeValue);
-            return this.binarySearch(value, searchArray, resultArray, searchType, matchType);
+            const rowOrColumn = searchArray.binarySearch(value, searchType, matchType);
+            if (rowOrColumn == null) {
+                return null;
+            }
+
+            return searchArray.getRowCount() === 1
+                ? { row: 0, column: rowOrColumn }
+                : { row: rowOrColumn, column: 0 };
         }
 
         if (matchModeValue === 2) {
-            return this.fuzzySearch(value, searchArray, resultArray, searchModeValue !== -1);
+            const matches = searchArray.compare(value, compareToken.EQUALS) as ArrayValueObject;
+            return searchModeValue === -1 ? matches.getLastTruePosition() : matches.getFirstTruePosition();
         }
 
         if (matchModeValue === -1 || matchModeValue === 1) {
-            return this.orderSearch(
+            return searchArray.orderSearch(
                 value,
-                searchArray,
-                resultArray,
                 matchModeValue === 1 ? ArrayOrderSearchType.MAX : ArrayOrderSearchType.MIN,
                 searchModeValue === -1,
+                false,
                 true
             );
         }
 
-        return this._exactSearch(value, searchArray, resultArray, searchModeValue !== -1);
-    }
-
-    private _exactSearch(
-        value: BaseValueObject,
-        searchArray: ArrayValueObject,
-        resultArray: ArrayValueObject,
-        isFirst: boolean
-    ): BaseValueObject {
-        const position = this._findExactPosition(value, searchArray, isFirst);
-        if (position == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
-        return resultArray.get(position.row, position.column) ?? ErrorValueObject.create(ErrorType.NA);
-    }
-
-    private _exactSearchExpand(
-        value: BaseValueObject,
-        searchArray: ArrayValueObject,
-        resultArray: ArrayValueObject,
-        isFirst: boolean,
-        axis: number
-    ): BaseValueObject {
-        const position = this._findExactPosition(value, searchArray, isFirst);
-        if (position == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
-        return axis === 0
-            ? resultArray.slice([position.row, position.row + 1]) ?? ErrorValueObject.create(ErrorType.NA)
-            : resultArray.slice(undefined, [position.column, position.column + 1]) ?? ErrorValueObject.create(ErrorType.NA);
+        return this._findExactPosition(value, searchArray, searchModeValue !== -1);
     }
 
     private _findExactPosition(

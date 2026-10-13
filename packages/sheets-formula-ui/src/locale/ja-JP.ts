@@ -18,6 +18,21 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-formula-ui': {
+        calculation: {
+            circularTitle: '循環参照',
+            title: '計算オプション',
+            enable: '反復計算を有効にする',
+            iterations: '最大反復回数（1～{0}）',
+            change: '最大変化量',
+            workbook: 'この設定は現在のブックに適用されます。',
+            invalidIterations: '最大反復回数は 1～{0} の整数である必要があります。',
+            invalidChange: '最大変化量は有限の正の数である必要があります。',
+            cancel: 'キャンセル',
+            confirm: 'OK',
+            circular: 'この数式には循環参照があります。計算オプションで反復計算を有効にしてください。',
+            action: '反復計算',
+        },
+
         shortcut: {
             'quick-sum': 'クイック合計',
         },

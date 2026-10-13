@@ -18,6 +18,21 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-formula-ui': {
+        calculation: {
+            circularTitle: 'Référence circulaire',
+            title: 'Options de calcul',
+            enable: 'Activer le calcul itératif',
+            iterations: 'Nombre maximal d’itérations (1–{0})',
+            change: 'Écart maximal',
+            workbook: 'Ces paramètres s’appliquent au classeur actuel.',
+            invalidIterations: 'Le nombre maximal d’itérations doit être un entier de 1 à {0}.',
+            invalidChange: 'L’écart maximal doit être un nombre positif et fini.',
+            cancel: 'Annuler',
+            confirm: 'OK',
+            circular: 'Cette formule contient une référence circulaire. Ouvrez les options de calcul pour activer le calcul itératif.',
+            action: 'Calcul itératif',
+        },
+
         shortcut: {
             'quick-sum': 'Somme rapide',
         },

@@ -18,6 +18,21 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-formula-ui': {
+        calculation: {
+            circularTitle: '循环引用',
+            title: '计算选项',
+            enable: '启用迭代计算',
+            iterations: '最大迭代次数（1～{0}）',
+            change: '最大误差',
+            workbook: '设置应用于当前工作簿。',
+            invalidIterations: '最大迭代次数必须是 1～{0} 的整数。',
+            invalidChange: '最大误差必须是有限正数。',
+            cancel: '取消',
+            confirm: '确定',
+            circular: '此公式存在循环引用。如需使用迭代计算，请打开计算选项。',
+            action: '迭代计算',
+        },
+
         shortcut: {
             'quick-sum': '快速求和',
         },

@@ -36,7 +36,6 @@ import type {
 import { ICommandService, IConfigService, Inject, Injector } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
 import {
-    ENGINE_FORMULA_CYCLE_REFERENCE_COUNT,
     ENGINE_FORMULA_RETURN_DEPENDENCY_TREE,
     FormulaCalculationSessionService,
     IDefinedNamesService,
@@ -260,22 +259,6 @@ export class FFormula extends FBase {
                 callback(params.stageInfo);
             }
         });
-    }
-
-    /**
-     * When a formula contains a circular reference, set the maximum number of iterations for the formula calculation.
-     * @param {number} maxIteration The maximum number of iterations. The default value is 1.
-     *
-     * @example
-     * ```ts
-     * // Set the maximum number of iterations for the formula calculation to 5.
-     * // The default value is 1.
-     * const formulaEngine = univerAPI.getFormula();
-     * formulaEngine.setMaxIteration(5);
-     * ```
-     */
-    setMaxIteration(maxIteration: number): void {
-        this._configService.setConfig(ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, maxIteration);
     }
 
     /**

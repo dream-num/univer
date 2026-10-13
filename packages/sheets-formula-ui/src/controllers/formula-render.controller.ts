@@ -44,7 +44,10 @@ export class FormulaRenderManagerController extends RxDisposable {
                         [pos.col];
 
                     const errorType = extractFormulaError(cell, !!arrayFormulaCellData);
-                    if (!errorType) {
+                    const circular = Boolean(cell?.f || cell?.si) &&
+                        !pos.workbook.getCalculationSettings().iterativeCalculation &&
+                        this._formulaDataModel.isCircularReference(pos.unitId, pos.subUnitId, pos.row, pos.col);
+                    if (!errorType && !circular) {
                         return next(cell);
                     }
 

@@ -69,6 +69,7 @@ import { NodeType } from '../ast-node/node-type';
 import { Interpreter } from '../interpreter/interpreter';
 import { BaseReferenceObject } from '../reference-object/base-reference-object';
 import { FORMULA_AST_CACHE, generateAstNode, includeDefinedName } from '../utils/generate-ast-node';
+import { getDependencyGroups } from './dependency-groups';
 import {
     FormulaDependencyTree,
     FormulaDependencyTreeModel,
@@ -177,7 +178,34 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
 
         const updateTreeList = this._getUpdateTreeListAndMakeDependency();
 
-        const finalTreeList = this._calculateRunList(updateTreeList);
+        const runList = this._calculateRunList(updateTreeList);
+        const selfReferences = new Set<number>();
+        const groups = getDependencyGroups(runList, (tree) => tree.treeId, (tree) => {
+            const dependents = this._dependencyManagerService.searchDependency(tree.toRTreeItem());
+            const addressDependents = this._dependencyRTreeCacheForAddressFunction.bulkSearch(tree.toRTreeItem()) as Set<number>;
+            for (const dependent of addressDependents) {
+                dependents.add(dependent);
+            }
+            if (dependents.has(tree.treeId)) {
+                selfReferences.add(tree.treeId);
+            }
+            return dependents;
+        });
+        this._runtimeService.clearCircularReferenceCells(runList);
+        for (const group of groups) {
+            const cyclic = group.length > 1 || selfReferences.has(group[0].treeId);
+            const groupId = cyclic ? group.map((tree) => tree.treeId).sort((a, b) => a - b).join(',') : undefined;
+            for (const tree of group) {
+                tree.cycleGroup = groupId;
+                if (cyclic) {
+                    // Address discovery can evaluate cells provisionally. Cycles must start
+                    // from the workbook cache, without spending iterations during discovery.
+                    this._runtimeService.getUnitData()[tree.unitId]?.[tree.subUnitId]
+                        ?.realDeleteValue(tree.row, tree.column);
+                }
+            }
+        }
+        const finalTreeList = groups.flat().reverse();
 
         const isCycleDependency = this._checkIsCycleDependency(finalTreeList);
 
@@ -202,57 +230,8 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
         return Promise.resolve(finalTreeList);
     }
 
-    private _isCyclicUtilMap(treeId: number, colorMap: Map<number, number>): boolean {
-        const WHITE = 0;
-        const GRAY = 1;
-        const BLACK = 2;
-        const stack: number[] = [treeId];
-
-        while (stack.length > 0) {
-            const currentTreeId = stack[stack.length - 1];
-            const color = colorMap.get(currentTreeId) || WHITE;
-
-            if (color === WHITE) {
-                colorMap.set(currentTreeId, GRAY);
-                const node = this._dependencyTreeCache.get(currentTreeId);
-                if (node == null) {
-                    colorMap.set(currentTreeId, BLACK);
-                    stack.pop();
-                    continue;
-                }
-
-                const parents = this._dependencyManagerService.searchDependency(node.toRTreeItem());
-                for (const parentTreeId of parents) {
-                    const parentColor = colorMap.get(parentTreeId) || WHITE;
-                    if (parentColor === GRAY) {
-                        return true; // 发现环
-                    } else if (parentColor === WHITE) {
-                        stack.push(parentTreeId);
-                    }
-                }
-            } else {
-                colorMap.set(currentTreeId, BLACK);
-                stack.pop();
-            }
-        }
-
-        return false;
-    }
-
     protected _checkIsCycleDependency(treeList: IFormulaDependencyTree[]): boolean {
-        const colorMap = new Map<number, number>();
-
-        for (const tree of treeList) {
-            if (!colorMap.has(tree.treeId)) {
-                if (this._isCyclicUtilMap(tree.treeId, colorMap)) {
-                    return true;
-                }
-            }
-        }
-
-        colorMap.clear();
-
-        return false;
+        return treeList.some((tree) => tree.cycleGroup != null);
     }
 
     protected _getFeatureFormulaTree(featureId: string, treeId: Nullable<number>, params: IFeatureCalculationManagerParam) {

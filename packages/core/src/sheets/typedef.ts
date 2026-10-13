@@ -23,6 +23,7 @@ import type { LocaleType } from '../types/enum/locale-type';
 import type { IDocumentData } from '../types/interfaces';
 import type { ICellCustomRender } from '../types/interfaces/i-cell-custom-render';
 import type { IStyleData } from '../types/interfaces/i-style-data';
+import type { IWorkbookCalculationSettings } from './calculation-settings';
 import { CellValueType } from '../types/enum';
 
 /**
@@ -57,6 +58,12 @@ export interface IWorkbookData {
 
     /** Date serial system used by this workbook. Missing values mean Excel 1900. */
     dateSystem?: DateSystem;
+
+    /**
+     * Calculation settings shared by all worksheets in this workbook and persisted in its snapshot.
+     * Optional for compatibility with older snapshots; omitted settings use the defaults with iterative calculation disabled.
+     */
+    calculationSettings?: IWorkbookCalculationSettings;
 
     /**
      * Style references.
@@ -598,9 +605,6 @@ export type IColumnStartEndData = [startColumn: number, endColumn: number] | num
  *  row:[0,1],
  *  column:[0,1]
  * }
- *todo
-
- true false 枚举
  * means "A1:B2"
  */
 export interface IRangeArrayData {

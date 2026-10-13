@@ -16,6 +16,21 @@
 
 const locale = {
     'sheets-formula-ui': {
+        calculation: {
+            circularTitle: 'Circular Reference',
+            title: 'Calculation Options',
+            enable: 'Enable iterative calculation',
+            iterations: 'Maximum iterations (1–{0})',
+            change: 'Maximum change',
+            workbook: 'These settings apply to the current workbook.',
+            invalidIterations: 'Maximum iterations must be an integer from 1 to {0}.',
+            invalidChange: 'Maximum change must be a finite positive number.',
+            cancel: 'Cancel',
+            confirm: 'OK',
+            circular: 'This formula contains a circular reference. Open Calculation Options to enable iterative calculation.',
+            action: 'Iterative Calculation',
+        },
+
         shortcut: {
             'quick-sum': 'Quick Sum',
         },

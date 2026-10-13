@@ -18,6 +18,21 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-formula-ui': {
+        calculation: {
+            circularTitle: 'Kruhový odkaz',
+            title: 'Možnosti výpočtu',
+            enable: 'Povoliť iteratívny výpočet',
+            iterations: 'Maximálny počet iterácií (1–{0})',
+            change: 'Maximálna zmena',
+            workbook: 'Nastavenia platia pre aktuálny zošit.',
+            invalidIterations: 'Maximálny počet iterácií musí byť celé číslo od 1 do {0}.',
+            invalidChange: 'Maximálna zmena musí byť konečné kladné číslo.',
+            cancel: 'Zrušiť',
+            confirm: 'OK',
+            circular: 'Vzorec obsahuje kruhový odkaz. Otvorte možnosti výpočtu a povoľte iteratívny výpočet.',
+            action: 'Iteratívny výpočet',
+        },
+
         shortcut: {
             'quick-sum': 'Rýchly súčet',
         },

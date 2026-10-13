@@ -30,6 +30,8 @@ import {
 } from '@univerjs/icons';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '@univerjs/sheets-ui';
 import { ComponentManager, IconManager } from '@univerjs/ui';
+import { CalculationOptions } from '../views/calculation-options/CalculationOptions';
+import { CALCULATION_OPTIONS_COMPONENT } from '../views/calculation-options/interface';
 import { FormulaEditor } from '../views/formula-editor/index';
 import { MORE_FUNCTIONS_COMPONENT } from '../views/more-functions/interface';
 import { MoreFunctions } from '../views/more-functions/MoreFunctions';
@@ -68,5 +70,7 @@ export class ComponentsController extends Disposable {
         this.disposeWithMe(this._componentManager.register(RANGE_SELECTOR_COMPONENT_KEY, RangeSelector));
 
         this.disposeWithMe(this._componentManager.register(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, FormulaEditor));
+
+        this.disposeWithMe(this._componentManager.register(CALCULATION_OPTIONS_COMPONENT, CalculationOptions));
     }
 }

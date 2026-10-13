@@ -35,6 +35,7 @@ import {
     SheetCopyFormulaOnlyCommand,
     SheetOnlyPasteFormulaCommand,
 } from '../commands/commands/formula-clipboard.command';
+import { CalculationOptionsOperation } from '../commands/operations/calculation-options.operation';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
 
@@ -183,6 +184,16 @@ export function PasteFormulaMenuItemFactory(accessor: IAccessor): IMenuItem<Loca
             })),
             map(([d1, d2]) => d1 || d2)
         ),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+    };
+}
+
+export function CalculationOptionsMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
+    return {
+        id: CalculationOptionsOperation.id,
+        type: MenuItemType.BUTTON,
+        title: 'sheets-formula-ui.calculation.title',
+        tooltip: 'sheets-formula-ui.calculation.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }

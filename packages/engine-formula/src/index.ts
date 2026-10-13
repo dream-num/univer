@@ -134,8 +134,6 @@ export type {
     ISetSuperTableMutationSearchParam,
 } from './commands/mutations/set-super-table.mutation';
 export {
-    DEFAULT_CYCLE_REFERENCE_COUNT,
-    ENGINE_FORMULA_CYCLE_REFERENCE_COUNT,
     ENGINE_FORMULA_PLUGIN_CONFIG_KEY,
     ENGINE_FORMULA_RETURN_DEPENDENCY_TREE,
 } from './config/config';
@@ -360,6 +358,7 @@ export {
     IFormulaRuntimeService,
 } from './services/runtime.service';
 export type { IAllRuntimeData, IExecutionInProgressParams } from './services/runtime.service';
+export type { ICircularReference } from './services/runtime.service';
 export { ISheetRowFilteredService, SheetRowFilteredService } from './services/sheet-row-filtered.service';
 export { ISuperTableService } from './services/super-table.service';
 export { SuperTableService } from './services/super-table.service';

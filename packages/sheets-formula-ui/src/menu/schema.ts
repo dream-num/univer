@@ -18,10 +18,12 @@ import type { MenuSchemaType } from '@univerjs/ui';
 import { COPY_SPECIAL_MENU_ID, PASTE_SPECIAL_MENU_ID } from '@univerjs/sheets-ui';
 import { RibbonFormulasGroup } from '@univerjs/ui';
 import { SheetCopyFormulaOnlyCommand, SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
+import { CalculationOptionsOperation } from '../commands/operations/calculation-options.operation';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
 import {
     AllFunctionsMenuItemFactory,
+    CalculationOptionsMenuItemFactory,
     CopyFormulaOnlyMenuItemFactory,
     InsertCommonFunctionMenuItemFactory,
     InsertDatabaseFunctionMenuItemFactory,
@@ -87,6 +89,12 @@ export const menuSchema: MenuSchemaType = {
         [`${InsertFunctionOperation.id}.database`]: {
             order: 10,
             menuItemFactory: InsertDatabaseFunctionMenuItemFactory,
+        },
+    },
+    [RibbonFormulasGroup.OTHERS]: {
+        [CalculationOptionsOperation.id]: {
+            order: 0,
+            menuItemFactory: CalculationOptionsMenuItemFactory,
         },
     },
     [COPY_SPECIAL_MENU_ID]: {

@@ -97,6 +97,7 @@ import {
     SetVerticalTextAlignCommand,
 } from '../commands/commands/set-style.command';
 import { SetTabColorCommand } from '../commands/commands/set-tab-color.command';
+import { SetWorkbookCalculationSettingsCommand } from '../commands/commands/set-workbook-calculation-settings.command';
 import { SetWorkbookNameCommand } from '../commands/commands/set-workbook-name.command';
 import { SetWorksheetActivateCommand } from '../commands/commands/set-worksheet-activate.command';
 import { DeltaColumnWidthCommand, SetColWidthCommand } from '../commands/commands/set-worksheet-col-width.command';
@@ -151,6 +152,7 @@ import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.m
 import { SetRowDataMutation } from '../commands/mutations/set-row-data.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutations/set-row-visible.mutation';
 import { SetTabColorMutation } from '../commands/mutations/set-tab-color.mutation';
+import { SetWorkbookCalculationSettingsMutation } from '../commands/mutations/set-workbook-calculation-settings.mutation';
 import { SetWorkbookNameMutation } from '../commands/mutations/set-workbook-name.mutation';
 import { SetWorksheetColWidthMutation } from '../commands/mutations/set-worksheet-col-width.mutation';
 import { SetWorksheetColumnCountMutation } from '../commands/mutations/set-worksheet-column-count.mutation';
@@ -211,6 +213,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             RemoveWorksheetMergeMutation,
             RemoveNumfmtMutation,
             AddWorksheetMergeMutation,
+            SetWorkbookCalculationSettingsMutation,
             SetWorkbookNameMutation,
             SetWorksheetNameMutation,
             SetNumfmtMutation,
@@ -313,6 +316,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetTextRotationCommand,
                 SetTextWrapCommand,
                 SetVerticalTextAlignCommand,
+                SetWorkbookCalculationSettingsCommand,
                 SetWorkbookNameCommand,
                 SetWorksheetActivateCommand,
                 SetWorksheetActiveOperation,

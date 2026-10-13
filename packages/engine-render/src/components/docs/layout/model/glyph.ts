@@ -52,6 +52,11 @@ export function isSpace(char: string) {
     return SPACE_CHARS.includes(char);
 }
 
+export function isStackedGlyph(glyph: IDocumentSkeletonGlyph): boolean {
+    const page = glyph.parent?.parent?.parent?.parent?.parent;
+    return page?.isSheetCell === true && page.renderConfig?.centerAngle === 90 && page.renderConfig.vertexAngle === 90;
+}
+
 export function getGlyphGroupFontBoundingBox(
     policy: IDocumentCompatibilityPolicy | undefined,
     ...glyphGroups: IDocumentSkeletonGlyph[][]

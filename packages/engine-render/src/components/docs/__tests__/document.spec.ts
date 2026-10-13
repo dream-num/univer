@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IParagraphStyle, IScale, ITable } from '@univerjs/core';
+import type { IDocumentBody, IParagraphStyle, IScale, ITable, ITextRun } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 import type { IExtensionConfig } from '../../extension';
+import type { IDocumentLayoutRenderConfig, IDocumentLayoutTextStyle } from '../document-layout-presentation';
 import {
+    BaselineOffset,
     BooleanNumber,
     ColumnSeparatorType,
     CustomRangeType,
@@ -34,7 +36,9 @@ import {
     TableSizeType,
     TableTextWrapType,
     TabStopAlignment,
+    TextDecoration,
     Univer,
+    VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -51,13 +55,16 @@ import { Canvas } from '../../../canvas';
 import { UniverRenderingContext } from '../../../context';
 import { Engine } from '../../../engine';
 import { MAIN_VIEW_PORT_KEY, Scene } from '../../../scene';
-import { Path, Rect } from '../../../shape';
+import { Path } from '../../../shape/path';
+import { Rect } from '../../../shape/rect';
 import { Viewport } from '../../../viewport';
 import { DocBackground } from '../doc-background';
 import { DOCS_EXTENSION_TYPE } from '../doc-extension';
 import { Documents, drawSectionColumnSeparators } from '../document';
+import { FontAndBaseLine } from '../extensions/font-and-base-line';
 import { createParagraphLayoutTestBed } from '../layout/block/paragraph/__tests__/create-paragraph-layout-test-bed';
 import { DocumentSkeleton } from '../layout/doc-skeleton';
+import { FontCache } from '../layout/shaping-engine/font-cache';
 import { setDocsTableRenderViewportProvider } from '../table-render-viewport';
 import { DocumentEditArea, DocumentViewModel } from '../view-model/document-view-model';
 
@@ -384,6 +391,283 @@ describe('documents render', () => {
         document.body.innerHTML = '';
         vi.restoreAllMocks();
         setDocsTableRenderViewportProvider(null);
+    });
+
+    function renderStackedText(content: string, options: {
+        isSheetCell?: boolean;
+        documentFlavor?: DocumentFlavor;
+        wrapStrategy?: WrapStrategy;
+        verticalAlign?: VerticalAlign;
+        pageWidth?: number;
+        textStyle?: IDocumentLayoutTextStyle;
+        textRuns?: ITextRun[];
+        renderConfig?: IDocumentLayoutRenderConfig;
+        sectionRenderConfig?: IDocumentLayoutRenderConfig;
+    } = {}) {
+        const metrics = (text: string, font = '9pt Arial') => {
+            const size = font.match(/([\d.]+)(pt|px)/);
+            const scale = size ? Number(size[1]) * (size[2] === 'pt' ? 4 / 3 : 1) / 12 : 1;
+            return {
+                width: Array.from(text).reduce((width, character) => width + (/\p{Script=Han}/u.test(character) ? 12 : /[\r\n]/.test(character) ? 0 : character === 'i' ? 3 : 7), 0) * scale,
+                fontBoundingBoxAscent: 10 * scale,
+                fontBoundingBoxDescent: 2 * scale,
+                actualBoundingBoxAscent: 10 * scale,
+                actualBoundingBoxDescent: 2 * scale,
+            };
+        };
+        vi.spyOn(FontCache, 'getMeasureText').mockImplementation(metrics);
+        const ctx = canvas.getContext();
+        vi.spyOn(ctx, 'measureText').mockImplementation((text) => metrics(text, ctx.font) as TextMetrics);
+        const textStyle = { fs: 9, ff: 'Arial', ...options.textStyle };
+        const bed = createParagraphLayoutTestBed(content, {
+            body: {
+                textRuns: options.textRuns ?? [{ st: 0, ed: content.length, ts: textStyle }],
+                paragraphs: [...content.matchAll(/\r/g), { index: content.length }]
+                    .map(({ index }) => ({ startIndex: index, paragraphId: `paragraph-${index}` })),
+                ...(options.sectionRenderConfig ? { sectionBreaks: [{ startIndex: content.length + 1, sectionId: 'rotated-section', renderConfig: options.sectionRenderConfig }] } : {}),
+            },
+            documentStyle: {
+                documentFlavor: options.documentFlavor ?? DocumentFlavor.UNSPECIFIED,
+                textStyle,
+                pageSize: { width: options.pageWidth ?? Infinity, height: Infinity },
+                marginLeft: 0,
+                marginRight: 0,
+                marginTop: 0,
+                marginBottom: 0,
+                renderConfig: {
+                    horizontalAlign: HorizontalAlign.CENTER,
+                    verticalAlign: options.verticalAlign ?? VerticalAlign.TOP,
+                    centerAngle: 90,
+                    vertexAngle: 90,
+                    wrapStrategy: options.wrapStrategy ?? WrapStrategy.UNSPECIFIED,
+                    ...options.renderConfig,
+                },
+            },
+        });
+        const skeleton = DocumentSkeleton.create(
+            bed.viewModel,
+            bed.ctx.docsConfig.localeService,
+            options.isSheetCell === false ? undefined : { isSheetCell: true }
+        );
+        const documents = new Documents('stacked-text', skeleton);
+        const ink: { text: string; left: number; right: number; top: number; bottom: number; a: number; b: number; c: number; d: number }[] = [];
+        const segments: { start: Vector2; end: Vector2 }[] = [];
+        const backgrounds: { left: number; right: number; top: number; bottom: number }[] = [];
+        let lineStart = Vector2.create(0, 0);
+        try {
+            skeleton.calculate();
+            scene.addObject(documents, 1);
+            documents.resize(80, 100);
+            vi.spyOn(ctx, 'fillText').mockImplementation((text, x, y) => {
+                if (!text.trim()) return;
+                const { a, b, c, d, e, f } = ctx.getTransform();
+                const measured = metrics(text, ctx.font);
+                const baseline = b * x + d * y + f;
+                const left = a * x + c * y + e;
+                ink.push({ text, left, right: left + measured.width, top: baseline - measured.actualBoundingBoxAscent, bottom: baseline + measured.actualBoundingBoxDescent, a, b, c, d });
+            });
+            vi.spyOn(ctx, 'moveTo').mockImplementation((x, y) => {
+                lineStart = Vector2.create(x, y);
+            });
+            vi.spyOn(ctx, 'lineTo').mockImplementation((x, y) => {
+                segments.push({ start: lineStart, end: Vector2.create(x, y) });
+            });
+            vi.spyOn(ctx, 'fillRect').mockImplementation((x, y, width, height) => {
+                backgrounds.push({ left: x, right: x + width, top: y, bottom: y + height });
+            });
+            documents.draw(ctx);
+            const layout = skeleton.getSkeletonData()!.pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines.map((line) => ({
+                start: line.st,
+                end: line.ed,
+                paragraph: line.paragraphIndex,
+                height: line.contentHeight,
+                widths: line.divides.map((divide) => divide.glyphGroupWidth),
+            })))));
+            const caretPositions = Array.from({ length: content.length }, (_, index) => skeleton.findNodePositionByCharIndex(index));
+            return { ink, segments, backgrounds, layout, caretPositions };
+        } finally {
+            documents.dispose();
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    }
+
+    it.each(['ABC', '中文汉', '日本語', '한글', 'A中B', 'ABC中文DEF', 'e\u0301中😀', 'A👨‍👩‍👧‍👦𠮷B', 'A（中）B'])('stacks %s upright without overlapping characters', (content) => {
+        const { ink } = renderStackedText(content);
+        expect(ink.map(({ text }) => text)).toEqual(Array.from(new Intl.Segmenter().segment(content), ({ segment }) => segment));
+        for (const glyph of ink) {
+            expect(glyph.a).toBeCloseTo(1);
+            expect(glyph.b).toBeCloseTo(0);
+            expect(glyph.c).toBeCloseTo(0);
+            expect(glyph.d).toBeCloseTo(1);
+        }
+        for (let index = 1; index < ink.length; index++) {
+            expect(ink[index].top).toBeGreaterThanOrEqual(ink[index - 1].bottom - 0.01);
+        }
+    });
+
+    it('underlines the full upright stack', () => {
+        const { ink, segments } = renderStackedText('iii', { textStyle: { ul: { s: BooleanNumber.TRUE, t: TextDecoration.SINGLE } } });
+        expect(ink).toHaveLength(3);
+        expect(segments.length).toBeGreaterThan(0);
+        expect(Math.max(...segments.map(({ end }) => end.y))).toBeGreaterThanOrEqual(Math.max(...ink.map(({ bottom }) => bottom)) - 0.01);
+    });
+
+    it.each([VerticalAlign.TOP, VerticalAlign.MIDDLE, VerticalAlign.BOTTOM])('wrapping does not shift a fitting stack at alignment %s', (verticalAlign) => {
+        const unwrapped = renderStackedText('iii', { verticalAlign });
+        const wrapped = renderStackedText('iii', { verticalAlign, wrapStrategy: WrapStrategy.WRAP });
+        expect(wrapped.ink).toEqual(unwrapped.ink);
+    });
+
+    it.each(['ABCDEF', '中文测试文字', 'A中B文C字'])('wraps vertical %s into columns from right to left', (content) => {
+        const { ink } = renderStackedText(content, { pageWidth: 36, wrapStrategy: WrapStrategy.WRAP });
+        expect(ink.map(({ text }) => text).join('')).toBe(content);
+        expect(ink[0].left).toBeGreaterThan(ink[3].left);
+        for (let index = 0; index < 3; index++) {
+            expect(ink[index + 3].top).toBeCloseTo(ink[index].top);
+        }
+    });
+
+    it.each(['ABC\rDEF', '中文\r测试', 'A中B\rC文D'])('preserves explicit wrapped columns in %s', (content) => {
+        const { ink } = renderStackedText(content, { wrapStrategy: WrapStrategy.WRAP });
+        const [first, second] = content.split('\r');
+        expect(ink.map(({ text }) => text).join('')).toBe(first + second);
+        expect(ink[0].left).toBeGreaterThan(ink[first.length].left);
+        expect(ink[0].top).toBeCloseTo(ink[first.length].top);
+    });
+
+    it('keeps rich-text backgrounds behind the entire stack', () => {
+        const { ink, backgrounds } = renderStackedText('iii', { textStyle: { bg: { rgb: '#ffff00' } } });
+        expect(backgrounds).toHaveLength(1);
+        for (const glyph of ink) {
+            expect(backgrounds[0].left).toBeLessThanOrEqual(glyph.left);
+            expect(backgrounds[0].right).toBeGreaterThanOrEqual(glyph.right);
+            expect(backgrounds[0].top).toBeLessThanOrEqual(glyph.top + 0.01);
+            expect(backgrounds[0].bottom).toBeGreaterThanOrEqual(glyph.bottom - 0.01);
+        }
+    });
+
+    it('strikes through each upright character horizontally', () => {
+        const { ink, segments } = renderStackedText('iii', { textStyle: { st: { s: BooleanNumber.TRUE, t: TextDecoration.SINGLE } } });
+        expect(segments).toHaveLength(3);
+        segments.forEach(({ start, end }, index) => {
+            expect(end.y).toBeCloseTo(start.y);
+            expect(start.x).toBeCloseTo(ink[index].left);
+            expect(end.x).toBeCloseTo(ink[index].right);
+            expect(start.y).toBeGreaterThan(ink[index].top);
+            expect(start.y).toBeLessThan(ink[index].bottom);
+        });
+    });
+
+    it('lays out mixed font sizes without reusing the narrow glyph advance', () => {
+        const { ink } = renderStackedText('A中B', { textRuns: [
+            { st: 0, ed: 1, ts: { fs: 9, ff: 'Arial' } },
+            { st: 1, ed: 2, ts: { fs: 18, ff: 'Arial' } },
+            { st: 2, ed: 3, ts: { fs: 9, ff: 'Arial' } },
+        ] });
+        expect(ink).toHaveLength(3);
+        expect(ink[1].top).toBeGreaterThanOrEqual(ink[0].bottom);
+        expect(ink[2].top).toBeGreaterThanOrEqual(ink[1].bottom);
+    });
+
+    it.each(['中', 'A', '한'])('keeps explicit text position when stacking %s', (content) => {
+        const normal = renderStackedText(content);
+        const raised = renderStackedText(content, {
+            textStyle: { pos: 3 },
+            renderConfig: { applyTextPosition: BooleanNumber.TRUE },
+        });
+        expect(raised.ink[0].top).toBeCloseTo(normal.ink[0].top - 4);
+        expect(raised.ink[0].left).toBeCloseTo(normal.ink[0].left);
+    });
+
+    it.each([BaselineOffset.SUPERSCRIPT, BaselineOffset.SUBSCRIPT])('keeps baseline displacement for stacked CJK with offset %s', (va) => {
+        const normal = renderStackedText('中');
+        const shifted = renderStackedText('中', { textStyle: { va } });
+        if (va === BaselineOffset.SUPERSCRIPT) {
+            expect(shifted.ink[0].top).toBeLessThan(normal.ink[0].top);
+        } else {
+            expect(shifted.ink[0].top).toBeGreaterThan(normal.ink[0].top);
+        }
+    });
+
+    it.each(['中文', 'AB', 'A中'])('preserves authored character spacing in stacked %s', (content) => {
+        const normal = renderStackedText(content);
+        const spaced = renderStackedText(content, { textStyle: { sc: 6 } });
+        const normalDistance = normal.ink[1].top - normal.ink[0].top;
+        const spacedDistance = spaced.ink[1].top - spaced.ink[0].top;
+        expect(spacedDistance - normalDistance).toBeCloseTo(8);
+    });
+
+    it('preserves explicit stacked text advances supplied by layout providers', () => {
+        const { ink } = renderStackedText('中A文', { textStyle: { textAdvance: 24 } });
+        expect(ink[1].top - ink[0].top).toBeCloseTo(24);
+        expect(ink[2].top - ink[1].top).toBeCloseTo(24);
+    });
+
+    it.each([-90, -45, 0, 45, 90])('keeps ordinary text rotation at %s degrees separate from stacking', (angle) => {
+        const { ink } = renderStackedText('AB中文CD', { renderConfig: { centerAngle: 0, vertexAngle: angle } });
+        expect(ink.map(({ text }) => text).join('')).toBe('AB中文CD');
+        const radians = angle * Math.PI / 180;
+        for (const glyph of ink) {
+            expect(glyph.a).toBeCloseTo(Math.cos(radians));
+            expect(glyph.b).toBeCloseTo(Math.sin(radians));
+            expect(glyph.c).toBeCloseTo(-Math.sin(radians));
+            expect(glyph.d).toBeCloseTo(Math.cos(radians));
+        }
+    });
+
+    it.each([DocumentFlavor.UNSPECIFIED, DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL].flatMap((documentFlavor) =>
+        ['document', 'section'].map((rotationSource) => ({ documentFlavor, rotationSource }))
+    ))('keeps Docs $rotationSource rotation and caret mapping unchanged for flavor $documentFlavor', ({ documentFlavor, rotationSource }) => {
+        const content = 'AB中\r文CD';
+        const options = { isSheetCell: false, documentFlavor };
+        const horizontal = renderStackedText(content, { ...options, renderConfig: { centerAngle: 0, vertexAngle: 0 } });
+        const rotated = renderStackedText(content, {
+            ...options,
+            ...(rotationSource === 'section' ? { sectionRenderConfig: { centerAngle: 90, vertexAngle: 90 } } : {}),
+        });
+
+        expect(rotated.layout).toEqual(horizontal.layout);
+        expect(rotated.layout).toHaveLength(2);
+        expect(rotated.caretPositions).toEqual(horizontal.caretPositions);
+        expect(rotated.caretPositions[2]?.line).not.toBe(rotated.caretPositions[4]?.line);
+        expect(rotated.ink.map(({ text }) => text).join('')).toBe(content.replace('\r', ''));
+        if (documentFlavor === DocumentFlavor.MODERN && rotationSource === 'document') {
+            expect(rotated.ink).toEqual(horizontal.ink);
+        } else {
+            for (const glyph of rotated.ink) {
+                const upright = /\p{Script=Han}/u.test(glyph.text);
+                expect(glyph.a).toBeCloseTo(upright ? 1 : 0);
+                expect(glyph.b).toBeCloseTo(upright ? 0 : 1);
+            }
+        }
+    });
+
+    it.each([WrapStrategy.UNSPECIFIED, WrapStrategy.WRAP])('keeps Docs backgrounds and decoration direction with custom rotation and wrap %s', (wrapStrategy) => {
+        const options = {
+            isSheetCell: false,
+            wrapStrategy,
+            textStyle: {
+                bg: { rgb: '#ffff00' },
+                st: { s: BooleanNumber.TRUE, t: TextDecoration.SINGLE },
+                ul: { s: BooleanNumber.TRUE, t: TextDecoration.SINGLE },
+            },
+        };
+        const horizontal = renderStackedText('iii', { ...options, renderConfig: { centerAngle: 0, vertexAngle: 0 } });
+        const rotated = renderStackedText('iii', options);
+
+        expect(rotated.backgrounds).toHaveLength(horizontal.backgrounds.length);
+        rotated.backgrounds.forEach((background, index) => {
+            const reference = horizontal.backgrounds[index];
+            expect(background.right - background.left).toBeCloseTo(reference.right - reference.left);
+            expect(background.bottom - background.top).toBeCloseTo(reference.bottom - reference.top);
+        });
+        expect(rotated.segments.length).toBeGreaterThan(0);
+        for (const { start, end } of rotated.segments) {
+            expect(end.x).toBeCloseTo(start.x);
+            expect(end.y).not.toBeCloseTo(start.y);
+        }
     });
 
     it('routes glyphs with source groups and replays them without accumulating baseline offsets', () => {
@@ -1979,7 +2263,7 @@ describe('documents render', () => {
         univer.dispose();
     });
 
-    it('draws vertical cell glyphs down the physical cell and restores its parent origin', () => {
+    it.each(['AB', '中文', 'A中'])('preserves Word vertical table glyph orientation and parent origin for %s', (content) => {
         const parent = createPage(DocumentSkeletonPageType.CELL, 'outer');
         const cell = createPage(DocumentSkeletonPageType.CELL, 'vertical');
         cell.cellTextDirection = 'tbRlV';
@@ -1988,6 +2272,9 @@ describe('documents render', () => {
         cell.marginLeft = 5;
         cell.marginTop = 4;
         const line = createLine(LineType.PARAGRAPH, 0);
+        line.divides[0].glyphGroup.forEach((glyph: IDocumentSkeletonGlyph, index: number) => {
+            glyph.content = glyph.raw = content[index];
+        });
         line.paddingTop = 0;
         line.marginTop = 0;
         const column = cell.sections[0].columns[0];
@@ -2004,16 +2291,21 @@ describe('documents render', () => {
                 positions.push({ x: spanStartPoint.x + centerPoint.x, y: spanStartPoint.y + centerPoint.y });
             },
         };
-        const ctx = {
-            beginPath: vi.fn(),
-            clip: vi.fn(),
-            closePath: vi.fn(),
-            rectByPrecision: vi.fn(),
-            restore: vi.fn(),
-            save: vi.fn(),
-        };
-        (documents as any)._drawNestedPageContent(ctx, parent, cell, [], null, [], [extension], Vector2.create(30, 40), 0, 0, {}, { scaleX: 1, scaleY: 1 });
-        expect(ctx.rectByPrecision).toHaveBeenCalledWith(42, 60, 40, 120);
+        const ctx = canvas.getContext();
+        const clip = vi.spyOn(ctx, 'rectByPrecision');
+        const orientations: { text: string; a: number; b: number }[] = [];
+        vi.spyOn(ctx, 'fillText').mockImplementation((text) => {
+            const { a, b } = ctx.getTransform();
+            orientations.push({ text, a, b });
+        });
+        (documents as any)._drawNestedPageContent(ctx, parent, cell, [], null, [], [extension, new FontAndBaseLine()], Vector2.create(30, 40), 0, 0, {}, { scaleX: 1, scaleY: 1 });
+        expect(clip).toHaveBeenCalledWith(42, 60, 40, 120);
+        expect(orientations.map(({ text }) => text).join('')).toBe(content);
+        for (const glyph of orientations) {
+            const upright = /\p{Script=Han}/u.test(glyph.text);
+            expect(glyph.a).toBeCloseTo(upright ? 1 : 0);
+            expect(glyph.b).toBeCloseTo(upright ? 0 : 1);
+        }
         expect(positions).toHaveLength(2);
         expect(positions[0].x).toBeCloseTo(68);
         expect(positions[1].x).toBeCloseTo(68);

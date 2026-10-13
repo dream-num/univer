@@ -543,6 +543,9 @@ export function shaping(
     sectionBreakConfig: ISectionBreakConfig
 ): IShapedText[] {
     const shapedTextList: IShapedText[] = [];
+    const isStacked = ctx.isSheetCell === true
+        && sectionBreakConfig.renderConfig?.centerAngle === 90
+        && sectionBreakConfig.renderConfig.vertexAngle === 90;
     const traditionalLayout = isTraditionalDocumentCompatibility(
         sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy(ctx.dataModel.documentStyle.documentFlavor)
     );
@@ -648,6 +651,12 @@ export function shaping(
                 shapedGlyphs.push(newGlyph);
                 i += char.length;
                 src = src.substring(char.length);
+            } else if (isStacked && !/\s/.test(char)) {
+                const config = getFontCreateConfig(i, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+                char = getFirstGrapheme(src) ?? char;
+                shapedGlyphs.push(createSkeletonLetterGlyph(char, config, getCustomRangeGlyphMetrics(i, viewModel, paragraphNode, config)));
+                i += char.length;
+                src = src.substring(char.length);
             } else if (/\s/.test(char) || cjk.hasCJK(char)) {
                 const config = getFontCreateConfig(i, viewModel, paragraphNode, sectionBreakConfig, paragraph);
                 if (config.textStyle.sc && cjk.hasCJK(char)) {
@@ -709,7 +718,7 @@ export function shaping(
         // With line compression enabled, Word resolves spacing for the whole line.
         // doNotCompress still retains fixed adjacent-punctuation spacing, including
         // East Asian quote/bracket pairs, independently of line justification.
-        if (sectionBreakConfig.renderConfig?.preservePunctuationSpacing !== BooleanNumber.TRUE
+        if (!isStacked && sectionBreakConfig.renderConfig?.preservePunctuationSpacing !== BooleanNumber.TRUE
             && (!traditionalLayout || fixedPunctuationPairs)) {
             punctuationSpaceAdjustment(shapedGlyphs, fixedPunctuationPairs);
         }
@@ -747,8 +756,29 @@ export function shaping(
     }
 
     // Preserve the legacy default, but honor documents that explicitly disable mixed-script spacing.
-    if (sectionBreakConfig.spaceWidthEastAsian !== BooleanNumber.FALSE) {
+    if (!isStacked && sectionBreakConfig.spaceWidthEastAsian !== BooleanNumber.FALSE) {
         addCJKLatinSpacing(shapedTextList);
+    }
+
+    if (isStacked) {
+        for (const { glyphs } of shapedTextList) {
+            for (const glyph of glyphs) {
+                if (glyph.glyphType !== GlyphType.LETTER) {
+                    continue;
+                }
+                const fixedAdvance = glyph.ts?.textAdvance;
+                if (glyph.streamType === DataStreamTreeTokenType.PARAGRAPH) {
+                    glyph.width = 0;
+                } else if (!(typeof fixedAdvance === 'number' && Number.isFinite(fixedAdvance) && fixedAdvance >= 0)) {
+                    // Convert the ink advance, retaining authored tracking and custom spacing.
+                    const spacing = glyph.width - glyph.bBox.width - (glyph.kerningAdjustment ?? 0);
+                    glyph.width = Math.max(0, Math.max(glyph.bBox.ba + glyph.bBox.bd, glyph.bBox.aba + glyph.bBox.abd) + spacing);
+                }
+                glyph.xOffset = 0;
+                glyph.adjustability = { stretchability: [0, 0], shrinkability: [0, 0] };
+                delete glyph.kerningAdjustment;
+            }
+        }
     }
 
     setTabAlignedTextWidths(shapedTextList);

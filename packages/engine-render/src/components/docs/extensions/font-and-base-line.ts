@@ -30,7 +30,7 @@ import { CheckboxShape, isCheckboxGlyph } from '../../../shape/checkbox';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { getDocCustomGlyphRenderer, getDocCustomGlyphStrokeRenderer } from '../custom-glyph-renderer';
 import { docExtension } from '../doc-extension';
-import { getTextHorizontalScale } from '../layout/model/glyph';
+import { getTextHorizontalScale, isStackedGlyph } from '../layout/model/glyph';
 import { getColorStyleForCanvas } from '../layout/style/color';
 
 const UNIQUE_KEY = 'DefaultDocsFontAndBaseLineExtension';
@@ -108,6 +108,7 @@ export class FontAndBaseLine extends docExtension {
 
         const { cl: colorStyle, pos: position, va: baselineOffset, textFill, glow, outerShadow } = textStyle;
         const fontColor = getColorStyleForCanvas(colorStyle) || COLOR_BLACK_RGB;
+        const originalBaselineY = spanPointWithFont.y;
 
         if (this.extensionOffset.renderConfig?.applyTextPosition === BooleanNumber.TRUE
             && typeof position === 'number' && Number.isFinite(position)) {
@@ -140,7 +141,7 @@ export class FontAndBaseLine extends docExtension {
                 ctx.fillStyle = fontColor;
             }
 
-            this._fillText(ctx, glyph, spanPointWithFont);
+            this._fillText(ctx, glyph, spanPointWithFont, spanPointWithFont.y - originalBaselineY);
         };
         if (!glow && !outerShadow) {
             drawText();
@@ -417,7 +418,7 @@ export class FontAndBaseLine extends docExtension {
         return Math.max(min, Math.min(max, value));
     }
 
-    private _fillText(ctx: UniverRenderingContext, glyph: IDocumentSkeletonGlyph, spanPointWithFont: Vector2) {
+    private _fillText(ctx: UniverRenderingContext, glyph: IDocumentSkeletonGlyph, spanPointWithFont: Vector2, baselineShift = 0) {
         const { renderConfig, spanStartPoint, centerPoint } = this.extensionOffset;
         const { content, width, bBox } = glyph;
         const { aba, abd } = bBox;
@@ -447,7 +448,18 @@ export class FontAndBaseLine extends docExtension {
         const isVertical = vertexAngle === VERTICAL_DEG && centerAngle === VERTICAL_DEG;
         const horizontalScale = getTextHorizontalScale(glyph.ts?.sa);
 
-        if (isVertical && !cjk.hasCJK(content)) {
+        if (isVertical && isStackedGlyph(glyph)) {
+            ctx.save();
+            ctx.translate(
+                spanStartPoint.x + centerPoint.x - bBox.width / 2,
+                spanStartPoint.y + centerPoint.y + (aba - abd) / 2 + baselineShift
+            );
+            if (horizontalScale !== 1) {
+                ctx.scale(horizontalScale, 1);
+            }
+            this._paintGlyphText(ctx, glyph, 0, 0);
+            ctx.restore();
+        } else if (isVertical && !cjk.hasCJK(content)) {
             ctx.save();
             ctx.translate(spanStartPoint.x + centerPoint.x, spanStartPoint.y + centerPoint.y);
             ctx.rotate(Math.PI / 2);

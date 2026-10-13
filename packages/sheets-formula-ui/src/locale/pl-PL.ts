@@ -18,6 +18,21 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-formula-ui': {
+        calculation: {
+            circularTitle: 'Odwołanie cykliczne',
+            title: 'Opcje obliczeń',
+            enable: 'Włącz obliczenia iteracyjne',
+            iterations: 'Maksymalna liczba iteracji (1–{0})',
+            change: 'Maksymalna zmiana',
+            workbook: 'Ustawienia dotyczą bieżącego skoroszytu.',
+            invalidIterations: 'Maksymalna liczba iteracji musi być liczbą całkowitą od 1 do {0}.',
+            invalidChange: 'Maksymalna zmiana musi być skończoną liczbą dodatnią.',
+            cancel: 'Anuluj',
+            confirm: 'OK',
+            circular: 'Formuła zawiera odwołanie cykliczne. Otwórz opcje obliczeń, aby włączyć obliczenia iteracyjne.',
+            action: 'Obliczenia iteracyjne',
+        },
+
         shortcut: {
             'quick-sum': 'Szybka suma',
         },

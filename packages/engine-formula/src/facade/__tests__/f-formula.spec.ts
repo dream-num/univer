@@ -32,7 +32,7 @@ import {
     SetQueryFormulaDependencyResultMutation,
     SetTriggerFormulaCalculationStartMutation,
 } from '../../commands/mutations/set-formula-calculation.mutation';
-import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_RETURN_DEPENDENCY_TREE } from '../../config/config';
+import { ENGINE_FORMULA_RETURN_DEPENDENCY_TREE } from '../../config/config';
 import { FFormula } from '../f-formula';
 
 interface ICommandServiceMock {
@@ -158,10 +158,8 @@ describe('FFormula', () => {
     it('should set formula configs', () => {
         const { formula, configService } = createFFormula();
 
-        formula.setMaxIteration(12);
         formula.setFormulaReturnDependencyTree(true);
 
-        expect(configService.setConfig).toHaveBeenCalledWith(ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, 12);
         expect(configService.setConfig).toHaveBeenCalledWith(ENGINE_FORMULA_RETURN_DEPENDENCY_TREE, true);
     });
 

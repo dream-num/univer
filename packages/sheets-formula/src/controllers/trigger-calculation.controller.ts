@@ -29,7 +29,6 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import {
-    ENGINE_FORMULA_CYCLE_REFERENCE_COUNT,
     ENGINE_FORMULA_RETURN_DEPENDENCY_TREE,
     FormulaDataModel,
     FormulaExecutedStateType,
@@ -161,7 +160,10 @@ export class TriggerCalculationController extends Disposable {
                         params.isCalculateTreeModel = isCalculateTreeModel;
                     }
 
-                    params.maxIteration = this._configService.getConfig(ENGINE_FORMULA_CYCLE_REFERENCE_COUNT) as number | undefined;
+                    params.calculationSettings = Object.fromEntries(
+                        this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET)
+                            .map((workbook) => [workbook.getUnitId(), workbook.getCalculationSettings()])
+                    );
                     params.rowData = this._formulaDataModel.getHiddenRowsFiltered();
                 }
             })
@@ -187,6 +189,9 @@ export class TriggerCalculationController extends Disposable {
                 }
 
                 const params = command.params as ISetFormulaCalculationNotificationMutation;
+                if (params.circularReferences) {
+                    this._formulaDataModel.setCircularReferences(params.circularReferences);
+                }
 
                 if (params.stageInfo != null) {
                     const {

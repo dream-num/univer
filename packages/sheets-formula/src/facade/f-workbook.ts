@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ISheetFormulaError } from '@univerjs/engine-formula';
+import type { ICircularReference, ISheetFormulaError } from '@univerjs/engine-formula';
 import { extractFormulaError, FormulaDataModel } from '@univerjs/engine-formula';
 import { FWorkbook } from '@univerjs/sheets/facade';
 
@@ -33,6 +33,23 @@ export interface IFWorkbookEngineFormulaMixin {
      * ```
      */
     getAllFormulaError(): ISheetFormulaError[];
+
+    /**
+     * Get recorded circular-reference diagnostics for the workbook.
+     * Diagnostics are updated when formula calculation results are applied; this method does not trigger calculation.
+     * Row and column indices are zero-based. Convergence status is included when available.
+     * @returns {ICircularReference[]} Circular-reference cells with worksheet coordinates, group IDs and iteration counts.
+     * Returns an empty array if no circular references have been recorded.
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const circularReferences = fWorkbook.getCircularReferences();
+     * circularReferences.forEach(({ sheetId, row, column, groupId, iterations, converged }) => {
+     *     console.log({ sheetId, row, column, groupId, iterations, converged });
+     * });
+     * ```
+     */
+    getCircularReferences(): ICircularReference[];
 }
 
 export class FWorkbookEngineFormulaMixin extends FWorkbook implements IFWorkbookEngineFormulaMixin {
@@ -72,6 +89,10 @@ export class FWorkbookEngineFormulaMixin extends FWorkbook implements IFWorkbook
         });
 
         return errors;
+    }
+
+    override getCircularReferences(): ICircularReference[] {
+        return this._injector.get(FormulaDataModel).getCircularReferences(this._workbook.getUnitId());
     }
 }
 

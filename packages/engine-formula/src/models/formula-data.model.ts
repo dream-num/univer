@@ -32,6 +32,7 @@ import type {
     IUnitStylesData,
 } from '../basics/common';
 import type { IImageFormulaInfo } from '../engine/value-object/primitive-object';
+import type { ICircularReference } from '../services/runtime.service';
 import { BooleanNumber, CellValueType, createBaseFormulaTableNameMap, Disposable, getBaseFormulaTableName, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, Styles, UniverInstanceType } from '@univerjs/core';
 import { copyUnitData } from '../basics/runtime';
 import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
@@ -44,6 +45,8 @@ export interface IRangeChange {
 }
 
 export class FormulaDataModel extends Disposable {
+    private _circularReferences = new Map<string, ICircularReference>();
+
     private _formulaIdMapData: IFormulaIdMapData = Object.create(null);
 
     private _arrayFormulaRange: IArrayFormulaRangeType = Object.create(null);
@@ -57,14 +60,42 @@ export class FormulaDataModel extends Disposable {
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
     ) {
         super();
+
+        this.disposeWithMe(
+            this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
+                for (const [key, cell] of this._circularReferences) {
+                    if (cell.unitId === workbook.getUnitId()) {
+                        this._circularReferences.delete(key);
+                    }
+                }
+            })
+        );
     }
 
     override dispose() {
         super.dispose();
+        this._circularReferences.clear();
         this._formulaIdMapData = Object.create(null);
         this._arrayFormulaRange = Object.create(null);
         this._arrayFormulaCellData = Object.create(null);
         this._unitImageFormulaData = Object.create(null);
+    }
+
+    setCircularReferences(cells: ICircularReference[]): void {
+        this._circularReferences.clear();
+        for (const cell of cells) {
+            this._circularReferences.set(JSON.stringify([cell.unitId, cell.sheetId, cell.row, cell.column]), { ...cell });
+        }
+    }
+
+    getCircularReferences(unitId: string): ICircularReference[] {
+        return Array.from(this._circularReferences.values())
+            .filter((cell) => cell.unitId === unitId)
+            .map((cell) => ({ ...cell }));
+    }
+
+    isCircularReference(unitId: string, sheetId: string, row: number, column: number): boolean {
+        return this._circularReferences.has(JSON.stringify([unitId, sheetId, row, column]));
     }
 
     clearPreviousArrayFormulaCellData(clearArrayFormulaCellData: IRuntimeUnitDataType) {

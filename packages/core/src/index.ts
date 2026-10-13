@@ -177,6 +177,8 @@ export {
 export { awaitTime, delayAnimationFrame } from './shared/timer';
 export { isNodeEnv } from './shared/tools';
 export * from './sheets';
+export type { IWorkbookCalculationSettings } from './sheets/calculation-settings';
+export { MAX_ITERATION_COUNT, normalizeWorkbookCalculationSettings } from './sheets/calculation-settings';
 export { Skeleton } from './skeleton';
 export * from './types/const';
 export { skipParseTagNames } from './types/const/clipboard';

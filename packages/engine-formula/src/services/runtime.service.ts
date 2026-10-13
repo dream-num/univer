@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, Nullable } from '@univerjs/core';
+import type { ICellData, IRange, Nullable, Workbook } from '@univerjs/core';
 import type {
     IArrayFormulaEmbeddedMap,
     IArrayFormulaRangeType,
@@ -31,7 +31,7 @@ import type { BaseReferenceObject, FunctionVariantType } from '../engine/referen
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { StringValueObject } from '../engine/value-object/primitive-object';
-import { CellValueType, createIdentifier, Disposable, isNullCell, isRealNum, ObjectMatrix } from '@univerjs/core';
+import { CellValueType, createIdentifier, Disposable, isNullCell, isRealNum, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
@@ -68,7 +68,18 @@ export enum FormulaExecutedStateType {
     SUCCESS,
 }
 
+export interface ICircularReference {
+    unitId: string;
+    sheetId: string;
+    row: number;
+    column: number;
+    groupId: string;
+    iterations: number;
+    converged?: boolean;
+}
+
 export interface IAllRuntimeData {
+    circularReferences?: ICircularReference[];
     unitData: IRuntimeUnitDataType;
     sourceFormulaData?: IFormulaData;
     arrayFormulaRange: IArrayFormulaRangeType;
@@ -92,6 +103,7 @@ export interface IExecutionInProgressParams {
     totalArrayFormulasToCalculate: number;
     completedArrayFormulasCount: number;
 
+    circularReferences?: ICircularReference[];
     formulaCycleIndex: number;
 
     stage: FormulaExecuteStageType;
@@ -113,6 +125,11 @@ export interface IFormulaRuntimeService {
     dispose(): void;
 
     reset(): void;
+    beginCircularReferences(): void;
+    clearCircularReferenceCells(cells: { unitId: string; subUnitId: string; row: number; column: number }[]): void;
+    recordCircularReferences(cells: ICircularReference[]): void;
+    completeCircularReferences(): void;
+    preserveCurrentCellData(): void;
 
     setCurrent(
         row: number,
@@ -215,6 +232,9 @@ export interface IFormulaRuntimeService {
 export class FormulaRuntimeService extends Disposable implements IFormulaRuntimeService {
     private _formulaExecuteStage: FormulaExecuteStageType = FormulaExecuteStageType.IDLE;
 
+    private _circularReferences = new Map<string, ICircularReference>();
+    private _pendingCircularReferences = new Map<string, ICircularReference>();
+
     private _stopState = false;
     private _externalReferenceUnavailable = false;
 
@@ -270,9 +290,22 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     constructor(
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
-        @IHyperlinkEngineFormulaService private readonly _hyperlinkEngineFormulaService: IHyperlinkEngineFormulaService
+        @IHyperlinkEngineFormulaService private readonly _hyperlinkEngineFormulaService: IHyperlinkEngineFormulaService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
+
+        this.disposeWithMe(
+            this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
+                for (const references of [this._circularReferences, this._pendingCircularReferences]) {
+                    for (const [key, cell] of references) {
+                        if (cell.unitId === workbook.getUnitId()) {
+                            references.delete(key);
+                        }
+                    }
+                }
+            })
+        );
     }
 
     get currentRow() {
@@ -305,6 +338,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         super.dispose();
 
         this.reset();
+        this._circularReferences.clear();
+        this._pendingCircularReferences.clear();
         this._runtimeFeatureCellData = Object.create(null);
         this._runtimeFeatureRange = Object.create(null);
         this.clearReferenceAndNumberformatCache();
@@ -426,6 +461,65 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         clearNumberFormatTypeCache();
         clearStringToNumberPatternCache();
         clearReferenceToRangeCache();
+    }
+
+    beginCircularReferences(): void {
+        this._pendingCircularReferences = new Map(this._circularReferences);
+        const formulaData = this._currentConfigService.getFormulaData();
+        for (const [key, cell] of this._pendingCircularReferences) {
+            if (!formulaData[cell.unitId]?.[cell.sheetId]?.[cell.row]?.[cell.column]) {
+                this._pendingCircularReferences.delete(key);
+            }
+        }
+    }
+
+    clearCircularReferenceCells(cells: { unitId: string; subUnitId: string; row: number; column: number }[]): void {
+        if (this._pendingCircularReferences.size === 0) {
+            return;
+        }
+        for (const cell of cells) {
+            this._pendingCircularReferences.delete(JSON.stringify([cell.unitId, cell.subUnitId, cell.row, cell.column]));
+            if (this._pendingCircularReferences.size === 0) {
+                return;
+            }
+        }
+    }
+
+    recordCircularReferences(cells: ICircularReference[]): void {
+        for (const cell of cells) {
+            if (cell.row < 0 || cell.column < 0) {
+                continue;
+            }
+            this._pendingCircularReferences.set(JSON.stringify([cell.unitId, cell.sheetId, cell.row, cell.column]), { ...cell });
+        }
+    }
+
+    completeCircularReferences(): void {
+        if (!this.isStopExecution()) {
+            this._circularReferences = new Map(this._pendingCircularReferences);
+        }
+    }
+
+    preserveCurrentCellData(): void {
+        const unitId = this.currentUnitId;
+        const sheetId = this.currentSubUnitId;
+        const cell = this._currentConfigService.getUnitData()[unitId]?.[sheetId]?.cellData
+            .getValue(this.currentRow, this.currentColumn);
+        if (cell?.v != null) {
+            return;
+        }
+        const sheets = this._runtimeData[unitId] ??= {};
+        const matrix = sheets[sheetId] ??= new ObjectMatrix<ICellData>();
+        matrix.setValue(this.currentRow, this.currentColumn, {
+            v: cell?.v ?? 0,
+            t: cell?.v == null ? CellValueType.NUMBER : cell.t,
+        });
+        if (this._currentSourceFormula) {
+            const formulas = this._sourceFormulaData[unitId] ??= {};
+            const sheet = formulas[sheetId] ??= {};
+            const row = sheet[this.currentRow] ??= {};
+            row[this.currentColumn] = { ...this._currentSourceFormula };
+        }
     }
 
     setCurrent(
@@ -876,6 +970,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     getAllRuntimeData(): IAllRuntimeData {
         return {
             unitData: this.getUnitData(),
+            circularReferences: Array.from(this._circularReferences.values(), (cell) => ({ ...cell })),
             sourceFormulaData: this._sourceFormulaData,
             arrayFormulaRange: this.getUnitArrayFormula(),
             arrayFormulaEmbedded: this.getUnitArrayFormulaEmbeddedMap(),
@@ -904,6 +999,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
             stage: this.getFormulaExecuteStage(),
 
+            circularReferences: Array.from(this._circularReferences.values(), (cell) => ({ ...cell })),
             formulaCycleIndex: this.getFormulaCycleIndex(),
         };
     }

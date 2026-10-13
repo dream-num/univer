@@ -18,6 +18,21 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-formula-ui': {
+        calculation: {
+            circularTitle: 'Referència circular',
+            title: 'Opcions de càlcul',
+            enable: 'Activa el càlcul iteratiu',
+            iterations: 'Iteracions màximes (1–{0})',
+            change: 'Canvi màxim',
+            workbook: 'Aquesta configuració s’aplica al llibre actual.',
+            invalidIterations: 'El nombre màxim d’iteracions ha de ser un enter d’1 a {0}.',
+            invalidChange: 'El canvi màxim ha de ser un nombre positiu i finit.',
+            cancel: 'Cancel·la',
+            confirm: 'D’acord',
+            circular: 'Aquesta fórmula conté una referència circular. Obriu les opcions de càlcul per activar el càlcul iteratiu.',
+            action: 'Càlcul iteratiu',
+        },
+
         shortcut: {
             'quick-sum': 'Suma ràpida',
         },

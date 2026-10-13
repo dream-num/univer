@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { CellValueType } from '@univerjs/core';
 import { ErrorType, extractFormulaError } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT } from '@univerjs/sheets';
 import { describe, expect, it, vi } from 'vitest';
@@ -97,6 +98,45 @@ describe('FormulaRenderManagerController', () => {
             rawData: null,
         }, (cell: unknown) => cell)).toBeNull();
 
+        controller.dispose();
+    });
+
+    it('marks disabled circular formulas with numeric caches and clears the mark when enabled or resolved', () => {
+        let interceptor: any;
+        const circular = vi.fn(() => true);
+        const controller = new FormulaRenderManagerController({
+            intercept: vi.fn((_point, config) => {
+                interceptor = config;
+                return { dispose: vi.fn() };
+            }),
+        } as any, {
+            getArrayFormulaCellData: () => null,
+            isCircularReference: circular,
+        } as any);
+        const settings = { iterativeCalculation: false };
+        const rawCell = { f: '=SUM(A1:B1)', v: 0, t: CellValueType.NUMBER };
+        const position = {
+            unitId: 'unit',
+            subUnitId: 'sheet',
+            row: 0,
+            col: 0,
+            rawData: rawCell,
+            workbook: { getCalculationSettings: () => settings },
+        };
+        vi.mocked(extractFormulaError).mockReturnValue(null as never);
+        const render = (cell: unknown = rawCell) => interceptor.handler(cell, position, (next: unknown) => next);
+
+        expect(render().markers?.tl).toEqual({ size: 6, color: '#409f11' });
+        expect(rawCell).not.toHaveProperty('markers');
+        expect(circular).toHaveBeenCalledWith('unit', 'sheet', 0, 0);
+
+        settings.iterativeCalculation = true;
+        expect(render()).toBe(rawCell);
+        settings.iterativeCalculation = false;
+        circular.mockReturnValue(false);
+        expect(render()).toBe(rawCell);
+        circular.mockReturnValue(true);
+        expect(render({ v: 0, t: CellValueType.NUMBER })).not.toHaveProperty('markers');
         controller.dispose();
     });
 });

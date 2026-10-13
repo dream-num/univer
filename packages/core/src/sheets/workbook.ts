@@ -17,6 +17,7 @@
 import type { Observable } from 'rxjs';
 import type { Nullable } from '../shared';
 import type { IStyleData } from '../types/interfaces';
+import type { IWorkbookCalculationSettings } from './calculation-settings';
 import type { CustomData, IRangeType, IWorkbookData, IWorksheetData } from './typedef';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { UnitModel, UniverInstanceType } from '../common/unit';
@@ -25,6 +26,7 @@ import { Tools } from '../shared';
 import { generateRandomId } from '../shared/random-id';
 import { BooleanNumber } from '../types/enum';
 import { DateSystem } from '../types/enum/date-system';
+import { normalizeWorkbookCalculationSettings } from './calculation-settings';
 import { getEmptySnapshot } from './empty-snapshot';
 import { Styles } from './styles';
 import { WorksheetHiddenState } from './typedef';
@@ -103,6 +105,8 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
             }
         }
 
+        this._snapshot.calculationSettings = normalizeWorkbookCalculationSettings(workbookData.calculationSettings);
+
         const { styles } = this._snapshot;
         if (this._snapshot.id == null || this._snapshot.id.length === 0) {
             this._snapshot.id = generateRandomId(6);
@@ -150,6 +154,14 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
      */
     getSnapshot(): IWorkbookData {
         return this._snapshot;
+    }
+
+    getCalculationSettings(): IWorkbookCalculationSettings {
+        return normalizeWorkbookCalculationSettings(this._snapshot.calculationSettings);
+    }
+
+    setCalculationSettings(settings: IWorkbookCalculationSettings): void {
+        this._snapshot.calculationSettings = { ...settings };
     }
 
     setName(name: string): void {

@@ -22,6 +22,7 @@ import type {
     IRange,
     IRowData,
     IUnitRange,
+    IWorkbookCalculationSettings,
     Nullable,
     ObjectMatrix,
     Styles,
@@ -267,7 +268,7 @@ export interface IFormulaDatasetConfig {
     unitSheetNameMap?: IUnitSheetNameMap;
     unitNameMap?: IFormulaUnitNameMap;
     externalReferences?: IFormulaExternalReferences;
-    maxIteration?: number;
+    calculationSettings?: Record<string, IWorkbookCalculationSettings>;
     isCalculateTreeModel?: boolean;
     rowData?: IUnitRowData; // Include rows hidden by filters
 }

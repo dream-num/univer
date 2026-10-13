@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { BaseDataModel, ITableSnapshot, IUnitRange, LocaleType, Nullable, Workbook } from '@univerjs/core';
+import type { BaseDataModel, ITableSnapshot, IUnitRange, IWorkbookCalculationSettings, LocaleType, Nullable, Workbook } from '@univerjs/core';
 import type {
     IArrayFormulaRangeType,
     IDirtyUnitDefinedNameMap,
@@ -57,7 +57,7 @@ export interface IFormulaDirtyData {
     dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
     dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap;
     clearDependencyTreeCache: IDirtyUnitSheetNameMap; // unitId -> sheetId
-    maxIteration?: number;
+    calculationSettings?: Record<string, IWorkbookCalculationSettings>;
     isCalculateTreeModel?: boolean; // whether to calculate the dependency tree model
     rowData?: IUnitRowData; // Include rows hidden by filters
     externalReferences?: IFormulaExternalReferences;

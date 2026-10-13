@@ -69,6 +69,8 @@ class FormulaDependencyTreeCalculator {
         return this._state === FDtreeStateType.SKIP;
     }
 
+    cycleGroup?: string;
+
     treeId: number;
 
     children: Set<number> = new Set();

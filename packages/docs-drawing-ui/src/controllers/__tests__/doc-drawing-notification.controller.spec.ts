@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentData, JSONXActions } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentData, JSONXActions, Univer } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { IChangeObserverConfig, RenderUnit } from '@univerjs/engine-render';
 import type { Subject } from 'rxjs';
 import {
-    BooleanNumber,
     CustomRangeType,
-    DocumentFlavor,
     DrawingTypeEnum,
     ICommandService,
-    IUndoRedoService,
-    IUniverInstanceService,
     JSONX,
     LocaleService,
     ObjectRelativeFromH,
@@ -33,22 +29,12 @@ import {
     PositionedObjectLayoutType,
     RedoCommand,
     UndoCommand,
-    Univer,
-    UniverInstanceType,
 } from '@univerjs/core';
 import {
-    DocLayoutExecutorService,
-    DocSelectionManagerService,
     DocSkeletonManagerService,
-    DocStateChangeManagerService,
-    DocStateEmitService,
     RichTextEditingMutation,
 } from '@univerjs/docs';
 import {
-    DocDrawingAdapterService,
-    DocDrawingController,
-    DocDrawingService,
-    IDocDrawingAdapterService,
     IDocDrawingService,
     InsertDocDrawingCommand,
     RemoveDocDrawingCommand,
@@ -56,22 +42,19 @@ import {
     UpdateDocDrawingWrappingStyleCommand,
     UpdateDrawingDocTransformCommand,
 } from '@univerjs/docs-drawing';
-import { DrawingManagerService, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import {
-    CanvasColorService,
-    ICanvasColorService,
     IRenderManagerService,
     Rect,
-    RenderManagerService,
 } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createDocDrawing, createDocDrawingTestBed } from '../../__tests__/create-doc-drawing-test-bed';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 import {
     findDrawingAnchor,
     getDrawingWrappingPosition,
     resolveDrawingWrappingPosition,
 } from '../../utils/drawing-wrapping-position';
-import { DocDrawingAddRemoveController } from '../doc-drawing-notification.controller';
 import { DocDrawingTransformerController } from '../doc-drawing-transformer-update.controller';
 
 describe('DocDrawingAddRemoveController with real commands and services', () => {
@@ -85,86 +68,16 @@ describe('DocDrawingAddRemoveController with real commands and services', () => 
     let refresh: DocRefreshDrawingsService;
 
     function drawing(drawingId: string): IDocDrawing {
-        return {
-            unitId,
-            subUnitId: unitId,
-            drawingId,
-            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
-            layoutType: PositionedObjectLayoutType.WRAP_NONE,
-            behindDoc: drawingId === 'a' ? BooleanNumber.TRUE : BooleanNumber.FALSE,
-            transform: { left: 20, top: 30, width: 40, height: 30 },
-            docTransform: {
-                size: { width: 40, height: 30 },
-                angle: 0,
-                positionH: { relativeFrom: ObjectRelativeFromH.MARGIN, posOffset: 20 },
-                positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 30 },
-            },
-        };
+        return createDocDrawing(unitId, drawingId);
     }
 
     beforeEach(() => {
-        const context = new Proxy({
-            font: '',
-            webkitBackingStorePixelRatio: 1,
-            measureText: (text: string) => ({
-                width: text.length * 8,
-                actualBoundingBoxAscent: 8,
-                actualBoundingBoxDescent: 2,
-                fontBoundingBoxAscent: 8,
-                fontBoundingBoxDescent: 2,
-            }),
-        }, { get: (target, key) => key in target ? Reflect.get(target, key) : () => {} });
-        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(context as never);
-        univer = new Univer();
+        ({ univer, model, render } = createDocDrawingTestBed(unitId));
         const injector = univer.__getInjector();
-        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
-        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
-        injector.add([IDrawingManagerService, { useClass: DrawingManagerService }]);
-        injector.add([IDocDrawingService, { useClass: DocDrawingService }]);
-        injector.add([IDocDrawingAdapterService, { useClass: DocDrawingAdapterService }]);
-        injector.add([DocLayoutExecutorService]);
-        injector.add([DocSelectionManagerService]);
-        injector.add([DocStateEmitService]);
-        injector.add([DocStateChangeManagerService]);
-        injector.add([DocRefreshDrawingsService]);
-        injector.add([DocDrawingController]);
-        injector.add([DocDrawingAddRemoveController]);
         commands = injector.get(ICommandService);
-        commands.registerCommand(RichTextEditingMutation);
-        injector.get(IUndoRedoService);
-        injector.get(DocStateChangeManagerService);
-        const drawingController = injector.get(DocDrawingController);
-        model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
-            id: unitId,
-            body: {
-                dataStream: 'A\b\rB\b\r\n',
-                paragraphs: [{ startIndex: 2, paragraphId: 'p1' }, { startIndex: 5, paragraphId: 'p2' }],
-                sectionBreaks: [{ startIndex: 6, sectionId: 's1' }],
-                customBlocks: [{ startIndex: 1, blockId: 'a' }, { startIndex: 4, blockId: 'b' }],
-            },
-            drawings: { a: drawing('a'), b: drawing('b') },
-            drawingsOrder: ['a', 'b'],
-            documentStyle: {
-                documentFlavor: DocumentFlavor.TRADITIONAL,
-                autoHyphenation: BooleanNumber.FALSE,
-                pageSize: { width: 300, height: 400 },
-                marginTop: 20,
-                marginBottom: 20,
-                marginLeft: 20,
-                marginRight: 20,
-            },
-        });
-        injector.get(IUniverInstanceService).setCurrentUnitForType(unitId);
-        injector.get(IUniverInstanceService).focusUnit(unitId);
-        render = injector.get(IRenderManagerService).createRender(unitId) as RenderUnit;
-        render.deactivate();
-        render.addRenderDependencies([[DocSkeletonManagerService]]);
-        render.with(DocSkeletonManagerService);
-        drawingController.loadDrawingDataForUnit(unitId);
         manager = injector.get(IDrawingManagerService);
         docDrawings = injector.get(IDocDrawingService);
         refresh = injector.get(DocRefreshDrawingsService);
-        injector.get(DocDrawingAddRemoveController);
     });
 
     afterEach(() => {

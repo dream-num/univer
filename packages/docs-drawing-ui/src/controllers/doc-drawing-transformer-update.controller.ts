@@ -38,7 +38,6 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
-    throttle,
     toDisposable,
     Tools,
     UniverInstanceType,
@@ -63,6 +62,7 @@ import {
     Rect,
     Vector2,
 } from '@univerjs/engine-render';
+import { filter, switchMap, takeUntil, throttleTime } from 'rxjs';
 import {
     IMoveInlineDrawingCommand,
     ITransformNonInlineDrawingCommand,
@@ -172,6 +172,9 @@ export class DocDrawingTransformerController extends Disposable {
             listener.dispose();
         }
         this._listenerOnImageMap.clear();
+        this._transformerCache.clear();
+        this._anchorShape?.dispose();
+        this._anchorShape = null;
         super.dispose();
     }
 
@@ -207,13 +210,25 @@ export class DocDrawingTransformerController extends Disposable {
     // Only handle one drawing transformer change.
 
     private _listenTransformerChange(unitId: string): IDisposable | undefined {
-        const transformer = this._getSceneAndTransformerByDrawingSearch(unitId)?.transformer;
+        const context = this._getSceneAndTransformerByDrawingSearch(unitId);
+        const transformer = context?.transformer;
 
         if (transformer == null) {
             return;
         }
 
         const listeners = new DisposableCollection();
+        listeners.add(toDisposable(() => {
+            for (const [id, cached] of this._transformerCache) {
+                if (cached.drawing.unitId === unitId) {
+                    this._transformerCache.delete(id);
+                }
+            }
+            if (this._anchorShape && this._anchorShape.getScene() === context?.scene) {
+                this._anchorShape.dispose();
+                this._anchorShape = null;
+            }
+        }));
         listeners.add(
             toDisposable(
                 transformer.changeStart$.subscribe((state) => {
@@ -252,16 +267,21 @@ export class DocDrawingTransformerController extends Disposable {
             )
         );
 
-        const throttleMultipleDrawingUpdate = throttle(this._updateMultipleDrawingDocTransform.bind(this), 50);
+        // Queued updates belong to the gesture and render that created them.
+        listeners.add(toDisposable(transformer.changeStart$.pipe(
+            switchMap(() => transformer.changing$.pipe(
+                filter(({ objects }) => objects.size > 1),
+                throttleTime(50, undefined, { leading: true, trailing: true }),
+                takeUntil(transformer.changeEnd$)
+            ))
+        ).subscribe(({ objects }) => this._updateMultipleDrawingDocTransform(objects))));
 
         listeners.add(
             toDisposable(
                 transformer.changing$.subscribe((state) => {
                     const { objects, offsetX, offsetY } = state;
 
-                    if (objects.size > 1) {
-                        throttleMultipleDrawingUpdate(objects);
-                    } else if (objects.size === 1) {
+                    if (objects.size === 1) {
                         const drawingCache: Nullable<IDrawingCache> = this._transformerCache.values().next().value;
                         const object: BaseObject = objects.values().next().value!;
                         const { width, height, top, left, angle } = object;

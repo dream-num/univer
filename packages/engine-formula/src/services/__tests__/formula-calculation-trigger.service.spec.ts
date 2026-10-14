@@ -69,6 +69,34 @@ describe('FormulaCalculationTriggerService', () => {
         vi.restoreAllMocks();
     });
 
+    it('batches iteration settings changes and preserves them when restarting an active calculation', async () => {
+        const bed = createTestBed();
+        bed.conversions.set('iteration-settings', {
+            commandId: 'iteration-settings',
+            getDirtyData: (command) => command.params as ReturnType<IDirtyConversionManagerParams['getDirtyData']>,
+        });
+        try {
+            bed.emit({ id: 'iteration-settings', params: { dirtyIterationUnits: ['first'] } });
+            bed.emit({ id: 'iteration-settings', params: { dirtyIterationUnits: ['first', 'second'] } });
+            await vi.advanceTimersByTimeAsync(10);
+            expect(bed.executed[0].params).toMatchObject({ dirtyIterationUnits: ['first', 'second'], dirtyRanges: [] });
+            bed.emit({ id: SetTriggerFormulaCalculationStartMutation.id, params: { dirtyRanges: [{
+                unitId: 'first',
+                sheetId: 'sheet',
+                range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+            }] } });
+            await vi.advanceTimersByTimeAsync(10);
+            expect(bed.executed[1].id).toBe(SetFormulaCalculationStopMutation.id);
+            bed.emit({ id: SetFormulaCalculationNotificationMutation.id, params: {
+                functionsExecutedState: FormulaExecutedStateType.STOP_EXECUTION,
+            } });
+            await vi.advanceTimersByTimeAsync(10);
+            expect(bed.executed[2].params).toMatchObject({ dirtyIterationUnits: ['first', 'second'] });
+        } finally {
+            bed.service.dispose();
+        }
+    });
+
     it('does not debounce reconstructed snapshot inputs and resumes for subsequent local edits', async () => {
         const testBed = createTestBed();
         try {

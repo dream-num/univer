@@ -28,6 +28,7 @@ export interface IDirtyConversionManagerParams {
     commandId: string;
     shouldTrigger?: (command: ICommandInfo, options?: IExecutionOptions) => boolean;
     getDirtyData: (command: ICommandInfo) => {
+        dirtyIterationUnits?: string[];
         forceCalculation?: boolean;
         dirtyRanges?: IUnitRange[];
         dirtyNameMap?: IDirtyUnitSheetNameMap;

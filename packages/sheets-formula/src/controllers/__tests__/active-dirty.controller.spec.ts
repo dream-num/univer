@@ -36,6 +36,7 @@ import {
     SetRangeValuesMutation,
     SetRowHiddenMutation,
     SetStyleCommand,
+    SetWorkbookCalculationSettingsMutation,
 } from '@univerjs/sheets';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
@@ -90,6 +91,17 @@ describe('ActiveDirtyController', () => {
 
     afterEach(() => {
         testBed?.univer.dispose();
+    });
+
+    it('marks iteration-sensitive workbooks without making every sheet dirty', () => {
+        testBed = createControllerTestBed();
+        testBed.injector.get(ActiveDirtyController);
+        const dirty = getDirtyData(testBed, {
+            id: SetWorkbookCalculationSettingsMutation.id,
+            params: { unitId: 'test', settings: { iterativeCalculation: true, maxIterations: 3, maxChange: 0.001 } },
+        });
+        expect(dirty.dirtyIterationUnits).toEqual(['test']);
+        expect(dirty.dirtyRanges ?? []).toEqual([]);
     });
 
     it.each(['__proto__', 'constructor', 'prototype', 'toString'])('keeps dirty sheet names local for special unit identifiers (%s)', (key) => {

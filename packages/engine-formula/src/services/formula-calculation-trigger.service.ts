@@ -235,6 +235,9 @@ export function mergeDirtyData(left: Partial<IFormulaDirtyData>, right: Partial<
 
 // The accumulator owns its nested maps; command payloads and running sessions stay unchanged.
 function appendDirtyData(target: IFormulaDirtyData, source: Partial<IFormulaDirtyData>, rangeKeys: Set<string>): void {
+    if (source.dirtyIterationUnits?.length) {
+        target.dirtyIterationUnits = Array.from(new Set([...(target.dirtyIterationUnits ?? []), ...source.dirtyIterationUnits]));
+    }
     mergeDirtyRanges(target.dirtyRanges, source.dirtyRanges ?? [], rangeKeys);
     mergeDirtyUnitStringMap(target.dirtyNameMap, source.dirtyNameMap);
     mergeDirtyUnitStringMap(target.dirtyDefinedNameMap, source.dirtyDefinedNameMap);
@@ -276,6 +279,7 @@ function mergeDirtyUnitNestedMap(target: IDirtyUnitFeatureMap, right?: IDirtyUni
 
 function hasDirtyData(dirtyData: IFormulaDirtyData): boolean {
     return dirtyData.forceCalculation ||
+        Boolean(dirtyData.dirtyIterationUnits?.length) ||
         dirtyData.dirtyRanges.length > 0 ||
         hasNestedValue(dirtyData.dirtyNameMap) ||
         hasNestedValue(dirtyData.dirtyDefinedNameMap) ||
@@ -296,7 +300,7 @@ function hasNestedValue(value: unknown): boolean {
 }
 
 function dirtyDataIntersects(left: IFormulaDirtyData, right: IFormulaDirtyData): boolean {
-    if (left.forceCalculation || right.forceCalculation) {
+    if (left.forceCalculation || right.forceCalculation || left.dirtyIterationUnits?.length || right.dirtyIterationUnits?.length) {
         return true;
     }
 

@@ -1232,6 +1232,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
     private _includeTreeFeature(tree: FormulaDependencyTree) {
         const unitId = tree.unitId;
         const subUnitId = tree.subUnitId;
+
         /**
          * Perform active dirty detection for the feature.
          */
@@ -1297,6 +1298,11 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
     protected _includeTree(tree: IFormulaDependencyTree, node: BaseAstNode) {
         const unitId = tree.unitId;
         const subUnitId = tree.subUnitId;
+
+        // The base engine retains workbook-wide invalidation without a cycle-group selector.
+        if (this._currentConfigService.getDirtyData().dirtyIterationUnits?.includes(unitId)) {
+            return true;
+        }
 
         /**
          * RAND, RANDBETWEEN, NOW, TODAY are volatile functions that are marked dirty and recalculated every time a calculation occurs.

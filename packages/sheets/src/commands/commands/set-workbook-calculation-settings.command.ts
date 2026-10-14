@@ -22,6 +22,7 @@ import {
     IPermissionService,
     IUndoRedoService,
     IUniverInstanceService,
+    normalizeWorkbookCalculationSettings,
 } from '@univerjs/core';
 import { WorkbookEditablePermission } from '../../services/permission/permission-point/workbook/editable';
 import { SetWorkbookCalculationSettingsMutation } from '../mutations/set-workbook-calculation-settings.mutation';
@@ -53,8 +54,14 @@ export const SetWorkbookCalculationSettingsCommand: ICommand<ISetWorkbookCalcula
         };
         const redoParams = {
             unitId: params.unitId,
-            settings: { ...params.settings },
+            settings: normalizeWorkbookCalculationSettings(params.settings),
         };
+
+        if (undoParams.settings.iterativeCalculation === redoParams.settings.iterativeCalculation &&
+            undoParams.settings.maxIterations === redoParams.settings.maxIterations &&
+            undoParams.settings.maxChange === redoParams.settings.maxChange) {
+            return true;
+        }
 
         const result = accessor.get(ICommandService).syncExecuteCommand<ISetWorkbookCalculationSettingsMutationParams>(SetWorkbookCalculationSettingsMutation.id, redoParams);
 

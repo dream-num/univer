@@ -96,13 +96,8 @@ export class ActiveDirtyController extends Disposable {
             commandId: SetWorkbookCalculationSettingsMutation.id,
             getDirtyData: (command: ICommandInfo) => {
                 const { unitId } = command.params as { unitId: string };
-                const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
                 return {
-                    dirtyRanges: workbook?.getSheets().map((sheet) => ({
-                        unitId,
-                        sheetId: sheet.getSheetId(),
-                        range: { startRow: 0, startColumn: 0, endRow: sheet.getRowCount() - 1, endColumn: sheet.getColumnCount() - 1 },
-                    })) ?? [],
+                    dirtyIterationUnits: [unitId],
                 };
             },
         });

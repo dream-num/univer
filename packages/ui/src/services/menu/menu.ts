@@ -16,7 +16,6 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-
 import type { IRibbonGridLayout } from './menu-manager.service';
 
 export type OneOrMany<T> = T | T[];
@@ -83,6 +82,8 @@ export interface IValueOption<TLocaleKey extends string = string, TValue = undef
     params?: IMenuCommandParams | ((value?: string | number) => IMenuCommandParams | undefined);
     slot?: boolean;
     label?: MenuLabel; // custom component, send to CustomLabel label property
+    /** Localized feature-search title when label is a custom component. */
+    title?: TLocaleKey;
     icon?: string;
     tooltip?: TLocaleKey;
     style?: object;

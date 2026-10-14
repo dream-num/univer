@@ -190,16 +190,17 @@ export function FeatureSearch() {
 
                 if (hasOptions) {
                     options.forEach((option, index) => {
-                        if (option.disabled || typeof option.label !== 'string') {
+                        const titleKey = option.title ?? (typeof option.label === 'string' ? option.label : undefined);
+                        if (option.disabled || !titleKey) {
                             return;
                         }
 
                         const commandId = option.commandId ?? option.id ?? item.selectionsCommandId ?? item.commandId ?? item.id;
                         result.push({
                             key: `${candidate.key}:option:${option.id ?? option.commandId ?? option.value ?? index}`,
-                            title: localeService.t(option.label),
+                            title: localeService.t(titleKey),
                             parentTitle: title,
-                            description: '',
+                            description: localeService.t(option.tooltip ?? ''),
                             path,
                             commandId,
                             params: resolveOptionParams(option),

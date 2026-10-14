@@ -3000,43 +3000,6 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  presets/packages/preset-docs-node-core:
-    dependencies:
-      '@univerjs/docs':
-        specifier: workspace:*
-        version: link:../../../packages/docs
-      '@univerjs/docs-drawing':
-        specifier: workspace:*
-        version: link:../../../packages/docs-drawing
-      '@univerjs/docs-hyper-link':
-        specifier: workspace:*
-        version: link:../../../packages/docs-hyper-link
-      '@univerjs/engine-formula':
-        specifier: workspace:*
-        version: link:../../../packages/engine-formula
-      '@univerjs/rpc-node':
-        specifier: workspace:*
-        version: link:../../../packages/rpc-node
-      '@univerjs/thread-comment':
-        specifier: workspace:*
-        version: link:../../../packages/thread-comment
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../../../common/shared
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@univerjs/presets':
-        specifier: workspace:*
-        version: link:../..
-      rxjs:
-        specifier: ^7.8.2
-        version: 7.8.2
-      typescript:
-        specifier: ^6.0.3
-        version: 6.0.3
-
   presets/packages/preset-docs-thread-comment:
     dependencies:
       '@univerjs/docs-thread-comment-ui':
@@ -3329,64 +3292,6 @@ importers:
       react-dom:
         specifier: 19.3.0
         version: 19.3.0(react@19.3.0)
-      rxjs:
-        specifier: ^7.8.2
-        version: 7.8.2
-      typescript:
-        specifier: ^6.0.3
-        version: 6.0.3
-
-  presets/packages/preset-sheets-node-core:
-    dependencies:
-      '@univerjs/docs':
-        specifier: workspace:*
-        version: link:../../../packages/docs
-      '@univerjs/engine-formula':
-        specifier: workspace:*
-        version: link:../../../packages/engine-formula
-      '@univerjs/rpc-node':
-        specifier: workspace:*
-        version: link:../../../packages/rpc-node
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../../../packages/sheets
-      '@univerjs/sheets-data-validation':
-        specifier: workspace:*
-        version: link:../../../packages/sheets-data-validation
-      '@univerjs/sheets-drawing':
-        specifier: workspace:*
-        version: link:../../../packages/sheets-drawing
-      '@univerjs/sheets-filter':
-        specifier: workspace:*
-        version: link:../../../packages/sheets-filter
-      '@univerjs/sheets-formula':
-        specifier: workspace:*
-        version: link:../../../packages/sheets-formula
-      '@univerjs/sheets-hyper-link':
-        specifier: workspace:*
-        version: link:../../../packages/sheets-hyper-link
-      '@univerjs/sheets-numfmt':
-        specifier: workspace:*
-        version: link:../../../packages/sheets-numfmt
-      '@univerjs/sheets-sort':
-        specifier: workspace:*
-        version: link:../../../packages/sheets-sort
-      '@univerjs/sheets-thread-comment':
-        specifier: workspace:*
-        version: link:../../../packages/sheets-thread-comment
-      '@univerjs/thread-comment':
-        specifier: workspace:*
-        version: link:../../../packages/thread-comment
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../../../common/shared
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@univerjs/presets':
-        specifier: workspace:*
-        version: link:../..
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2

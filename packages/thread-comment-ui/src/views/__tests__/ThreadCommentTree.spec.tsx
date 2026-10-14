@@ -25,6 +25,7 @@ import {
     ConfigService,
     ContextService,
     createIdentifier,
+    CustomRangeType,
     dateKit,
     DesktopLogService,
     ICommandService,
@@ -63,8 +64,9 @@ import { IShortcutService, ISidebarService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
+import enUS from '../../locale/en-US';
 import { ThreadCommentPanelService } from '../../services/thread-comment-panel.service';
 import { transformTextNodes2Document } from '../thread-comment-editor/util';
 import { ThreadCommentTree, ThreadCommentTreeLocation } from '../ThreadCommentTree';
@@ -376,14 +378,14 @@ function createComment(overrides: Partial<IThreadComment>): IThreadComment {
     };
 }
 
-function createTreeTestBed() {
+function createTreeTestBed(localeDependency: Dependency = [LocaleService, { useClass: TestLocaleService as never }]) {
     const injector = new Injector();
     const dependencies: Dependency[] = [
         [ICommandService, { useClass: CommandService }],
         [ILogService, { useClass: DesktopLogService }],
         [IContextService, { useClass: ContextService }],
         [IConfigService, { useClass: ConfigService }],
-        [LocaleService, { useClass: TestLocaleService as never }],
+        localeDependency,
         [RegionService],
         [IEditorService, { useClass: TestEditorService as never }],
         [IRenderManagerService, { useClass: TestRenderManagerService as never }],
@@ -663,6 +665,106 @@ describe('ThreadCommentTree', () => {
 
         expect(container.querySelector('img[src="x"]')).toBeNull();
         expect(container.querySelector('script')).toBeNull();
+    });
+
+    it.each([
+        ['https://univer.ai', true],
+        ['mailto:review@example.com', true],
+        ['javascript:alert(1)', false],
+        ['data:text/html,test', false],
+        ['', false],
+    ])('renders the comment URL %s as a navigable link only when safe', (url, navigable) => {
+        const testBed = createTreeTestBed([LocaleService]);
+        const localeService = testBed.injector.get(LocaleService);
+        localeService.load({ [LocaleType.EN_US]: enUS });
+        localeService.setLocale(LocaleType.EN_US);
+        localeService.setDirection('ltr');
+        const text = 'Open website';
+        addRootComment(testBed.threadCommentModel, createComment({
+            id: 'link-thread',
+            text: {
+                dataStream: `${text}\r\n`,
+                paragraphs: [{ startIndex: text.length, paragraphId: 'para_comment_link' }],
+                customRanges: [{
+                    rangeId: 'comment-link',
+                    rangeType: CustomRangeType.HYPERLINK,
+                    startIndex: 0,
+                    endIndex: text.length - 1,
+                    properties: { url },
+                }],
+            },
+        }));
+        const onActivate = vi.fn();
+        const rendered = renderTree(
+            testBed.injector,
+            <ThreadCommentTree
+                id="link-thread"
+                unitId={UNIT_ID}
+                subUnitId={SHEET_ID}
+                type={UniverInstanceType.UNIVER_SHEET}
+                getSubUnitName={() => ''}
+                location={ThreadCommentTreeLocation.PANEL}
+                showEdit={false}
+                onClick={onActivate}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        const link = container.querySelector('a');
+        if (!navigable) {
+            expect(link).toBeNull();
+            expect(container.textContent).toContain(text);
+            return;
+        }
+        expect(link?.getAttribute('href')).toBe(url);
+        expect(link?.target).toBe('_blank');
+        expect(link?.rel).toContain('noopener');
+        link!.addEventListener('click', (event) => event.preventDefault());
+        act(() => link!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true })));
+        expect(onActivate).not.toHaveBeenCalled();
+    });
+
+    it('keeps selected comment text focused without activating its document anchor', () => {
+        const testBed = createTreeTestBed([LocaleService]);
+        const localeService = testBed.injector.get(LocaleService);
+        localeService.load({ [LocaleType.EN_US]: enUS });
+        localeService.setLocale(LocaleType.EN_US);
+        localeService.setDirection('ltr');
+        addRootComment(testBed.threadCommentModel, createComment({ id: 'selection-thread' }));
+        const onActivate = vi.fn();
+        const rendered = renderTree(
+            testBed.injector,
+            <ThreadCommentTree
+                id="selection-thread"
+                unitId={UNIT_ID}
+                subUnitId={SHEET_ID}
+                type={UniverInstanceType.UNIVER_SHEET}
+                getSubUnitName={() => ''}
+                location={ThreadCommentTreeLocation.PANEL}
+                showEdit={false}
+                onClick={onActivate}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+        const paragraph = container.querySelector('.univer-break-words')!;
+        const content = paragraph.parentElement!;
+        const selection = document.getSelection()!;
+        content.focus();
+        expect(document.activeElement).toBe(content);
+        const range = document.createRange();
+        range.selectNodeContents(paragraph);
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        act(() => paragraph.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+        expect(onActivate).not.toHaveBeenCalled();
+        expect(selection.toString()).toBe('selection-thread');
+
+        selection.removeAllRanges();
+        act(() => paragraph.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+        expect(onActivate).toHaveBeenCalledOnce();
     });
 
     it('exposes icon-only thread actions as labeled keyboard controls', () => {

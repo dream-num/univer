@@ -23,6 +23,7 @@ import {
     dateKit,
     generateRandomId,
     ICommandService,
+    isSafeUrl,
     LOCALE_META,
     LocaleService,
     RegionService,
@@ -331,8 +332,9 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                 )
                 : (
                     <div
+                        tabIndex={-1}
                         className={`
-                          univer-text-sm univer-text-gray-900
+                          univer-select-text univer-text-sm univer-text-gray-900
                           dark:!univer-text-gray-0
                         `}
                     >
@@ -351,11 +353,29 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                         switch (node.type) {
                                             case 'mention':
                                                 return (
-                                                    <a className="univer-text-primary-600" key={key}>
+                                                    <span className="univer-text-primary-600" key={key}>
                                                         {node.content.label}
                                                         {' '}
+                                                    </span>
+                                                );
+                                            case 'hyperlink': {
+                                                const url = node.range.properties?.url;
+                                                if (!isSafeUrl(url)) {
+                                                    return node.content;
+                                                }
+                                                return (
+                                                    <a
+                                                        key={key}
+                                                        href={url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="univer-text-primary-600 univer-underline"
+                                                        onClick={(event) => event.stopPropagation()}
+                                                    >
+                                                        {node.content}
                                                     </a>
                                                 );
+                                            }
                                             default:
                                                 return node.content;
                                         }
@@ -516,7 +536,14 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                 'univer-shadow': !resolved && (showHighlight || isHover || location === ThreadCommentTreeLocation.CELL),
             })}
             style={style}
-            onClick={onClick}
+            onClick={(event) => {
+                const selection = event.currentTarget.ownerDocument.getSelection();
+                if (selection && !selection.isCollapsed && selection.anchorNode && selection.focusNode &&
+                    event.currentTarget.contains(selection.anchorNode) && event.currentTarget.contains(selection.focusNode)) {
+                    return;
+                }
+                onClick?.();
+            }}
             onMouseEnter={() => {
                 onMouseEnter?.();
                 setIsHover(true);

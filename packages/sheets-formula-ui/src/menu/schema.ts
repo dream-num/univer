@@ -94,6 +94,7 @@ export const menuSchema: MenuSchemaType = {
     [RibbonFormulasGroup.OTHERS]: {
         [CalculationOptionsOperation.id]: {
             order: 0,
+            gridLayout: { row: 1, column: 1, rowSpan: 2, columnSpan: 2, showLabel: true },
             menuItemFactory: CalculationOptionsMenuItemFactory,
         },
     },

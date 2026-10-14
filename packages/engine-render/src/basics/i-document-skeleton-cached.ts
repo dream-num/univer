@@ -90,6 +90,8 @@ export enum DocumentSkeletonPageType {
 };
 
 export interface IDocumentSkeletonPage {
+    /** Runtime layout origin; document rotation settings cannot enable Sheets behavior. */
+    isSheetCell?: boolean;
     /**
      * Preserves page geometry while incremental pagination rebuilds a later page.
      * A placeholder can retain cloned flow nodes as a non-interactive visual preview;

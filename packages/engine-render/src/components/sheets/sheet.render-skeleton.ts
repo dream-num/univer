@@ -784,14 +784,17 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 return undefined;
             }
 
-            const documentViewModel = new DocumentViewModel(documentModel);
             const { vertexAngle: angle } = convertTextRotation(textRotation);
 
-            if (typeof colWidth === 'number' && wrapStrategy === WrapStrategy.WRAP) {
+            if (centerAngle === VERTICAL_ROTATE_ANGLE && vertexAngle === VERTICAL_ROTATE_ANGLE) {
+                const cellInfo = this.getCellWithCoordByIndex(row, col);
+                const { startY, endY } = cellInfo.isMergedMainCell ? cellInfo.mergeInfo : cellInfo;
+                documentModel.updateDocumentDataPageSize(wrapStrategy === WrapStrategy.WRAP ? endY - startY : Infinity);
+            } else if (typeof colWidth === 'number' && wrapStrategy === WrapStrategy.WRAP) {
                 documentModel.updateDocumentDataPageSize(colWidth);
             }
 
-            const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService, { lineGap: this.textLineGap });
+            const documentSkeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), this._localeService, { lineGap: this.textLineGap, isSheetCell: true });
             documentSkeleton.calculate();
 
             let { height: h = 0 } = getDocsSkeletonPageSize(documentSkeleton, angle) ?? {};
@@ -1013,16 +1016,20 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             return measuredWidth;
         }
 
-        const documentViewModel = new DocumentViewModel(documentModel);
-        const { vertexAngle: angle } = convertTextRotation(textRotation);
+        const { vertexAngle: angle, centerAngle } = convertTextRotation(textRotation);
 
         if (style?.tb === WrapStrategy.WRAP) {
-            documentModel.updateDocumentDataPageSize(currColWidth, Infinity);
+            const cellInfo = this.getCellWithCoordByIndex(row, column);
+            const { startY, endY } = cellInfo.isMergedMainCell ? cellInfo.mergeInfo : cellInfo;
+            const layoutWidth = centerAngle === VERTICAL_ROTATE_ANGLE && angle === VERTICAL_ROTATE_ANGLE
+                ? endY - startY
+                : currColWidth;
+            documentModel.updateDocumentDataPageSize(layoutWidth, Infinity);
         } else {
             documentModel.updateDocumentDataPageSize(Infinity, Infinity);
         }
 
-        const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService, { lineGap: this.textLineGap });
+        const documentSkeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), this._localeService, { lineGap: this.textLineGap, isSheetCell: true });
 
         documentSkeleton.calculate();
         // key
@@ -1469,7 +1476,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         if (fontCache.documentSkeleton) {
             const snapshot = fontCache.documentSkeleton.getViewModel().getDataModel().getSnapshot();
             const documentModel = new DocumentDataModel(scaleDocumentDataForShrinkToFit(snapshot, scale, fallbackFontSize));
-            const documentSkeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), this._localeService, { lineGap: this.textLineGap });
+            const documentSkeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), this._localeService, { lineGap: this.textLineGap, isSheetCell: true });
             documentSkeleton.calculate();
             fontCache.documentSkeleton = documentSkeleton;
         } else {
@@ -1547,24 +1554,21 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 if (FULL_WIDTH_HORIZONTAL_ALIGNMENTS.has(horizontalAlign)) {
                     updateDocumentPageWidth(documentModel, this.getCellWithCoordByIndex(row, col, false));
                 }
-                const documentViewModel = new DocumentViewModel(documentModel);
-                if (documentViewModel) {
-                    const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService, { lineGap: this.textLineGap });
-                    documentSkeleton.calculate();
+                const documentSkeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), this._localeService, { lineGap: this.textLineGap, isSheetCell: true });
+                documentSkeleton.calculate();
 
-                    config = {
-                        documentSkeleton,
-                        vertexAngle,
-                        centerAngle,
-                        verticalAlign,
-                        horizontalAlign,
-                        wrapStrategy,
-                        imageCacheMap: this._imageCacheMap,
-                        cellData,
-                        fontString,
-                        style,
-                    };
-                }
+                config = {
+                    documentSkeleton,
+                    vertexAngle,
+                    centerAngle,
+                    verticalAlign,
+                    horizontalAlign,
+                    wrapStrategy,
+                    imageCacheMap: this._imageCacheMap,
+                    cellData,
+                    fontString,
+                    style,
+                };
             }
         } else {
             const fontString = getFontStyleString(style ?? undefined).fontCache;

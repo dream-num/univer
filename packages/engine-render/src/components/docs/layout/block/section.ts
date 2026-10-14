@@ -17,10 +17,10 @@
 import type { Nullable } from '@univerjs/core';
 import type { IDocumentSkeletonPage } from '../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../basics/interfaces';
-import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
-import { DataStreamTreeNodeType } from '@univerjs/core';
+import { DataStreamTreeNodeType, WrapStrategy } from '@univerjs/core';
+import { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import { createSkeletonPage } from '../model/page';
 import { dealWithBlockError } from './block-error';
 import { appendColumnGroupBlockLine, createColumnGroupSkeleton } from './column';
@@ -42,14 +42,37 @@ export function dealWithSection(
 ) {
     const allCurrentSkeletonPages: IDocumentSkeletonPage[] = [];
     const renderedBlockIdMap = new Map<string, boolean>();
+    const { renderConfig } = sectionBreakConfig;
+    const body = viewModel.getBody();
+    let paragraphNodes = sectionNode.children;
+    if (
+        ctx.isSheetCell === true &&
+        renderConfig?.centerAngle === 90 && renderConfig.vertexAngle === 90 &&
+        renderConfig.wrapStrategy !== WrapStrategy.WRAP &&
+        options == null && layoutAnchor == null &&
+        viewModel.getChildren().length === 1 && paragraphNodes.length > 1 &&
+        paragraphNodes.every((node) => node.nodeType === DataStreamTreeNodeType.PARAGRAPH && !node.children.length && !node.blocks.length) &&
+        !body?.blockRanges?.length &&
+        !body?.paragraphs?.some((paragraph) => paragraph.bullet || paragraph.styleId != null || paragraph.directBullet || paragraph.sourceBullet ||
+            Object.keys(paragraph.paragraphStyle ?? {}).some((key) => key !== 'horizontalAlign'))
+    ) {
+        // Cell layout treats unwrapped breaks as blank advances without rewriting editable text or paragraph metadata.
+        const content = paragraphNodes.map((node) => node.content ?? '').join('');
+        const paragraph = new DataStreamTreeNode(
+            DataStreamTreeNodeType.PARAGRAPH,
+            content.slice(0, -2).replace(/\r/g, ' ') + content.slice(-2)
+        );
+        paragraph.setIndexRange(paragraphNodes[0].startIndex, paragraphNodes[paragraphNodes.length - 1].endIndex);
+        paragraphNodes = [paragraph];
+    }
 
     let paragraphStartIndex = options?.startParagraphIndex ?? 0;
 
     if (layoutAnchor != null) {
         const { startIndex, endIndex } = sectionNode;
         if (layoutAnchor >= startIndex && layoutAnchor <= endIndex) {
-            for (let pi = 0; pi < sectionNode.children.length; pi++) {
-                const paragraph = sectionNode.children[pi];
+            for (let pi = 0; pi < paragraphNodes.length; pi++) {
+                const paragraph = paragraphNodes[pi];
                 if (paragraph.endIndex === layoutAnchor) {
                     paragraphStartIndex = pi;
                     break;
@@ -59,12 +82,12 @@ export function dealWithSection(
     }
 
     const paragraphEndIndex = Math.min(
-        sectionNode.children.length,
+        paragraphNodes.length,
         paragraphStartIndex + (options?.maxParagraphs ?? Number.POSITIVE_INFINITY)
     );
 
     for (let i = paragraphStartIndex; i < paragraphEndIndex; i++) {
-        const paragraphNode = sectionNode.children[i];
+        const paragraphNode = paragraphNodes[i];
         // const { paragraph, table, tableOfContents, blockType, customBlock, blockId } = block;
         // if (preRenderedBlockIdMap?.get(blockId)) {
         //     continue;
@@ -98,8 +121,8 @@ export function dealWithSection(
                 paragraphNode,
                 currentPageCache,
                 sectionBreakConfig,
-                sectionNode.children[i + 1]?.nodeType === DataStreamTreeNodeType.PARAGRAPH
-                    ? sectionNode.children[i + 1]
+                paragraphNodes[i + 1]?.nodeType === DataStreamTreeNodeType.PARAGRAPH
+                    ? paragraphNodes[i + 1]
                     : undefined
             );
         }
@@ -141,7 +164,7 @@ export function dealWithSection(
         pages: allCurrentSkeletonPages,
         renderedBlockIdMap,
         nextParagraphIndex: paragraphEndIndex,
-        complete: paragraphEndIndex >= sectionNode.children.length,
+        complete: paragraphEndIndex >= paragraphNodes.length,
     };
 }
 

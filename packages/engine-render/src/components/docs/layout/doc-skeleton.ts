@@ -1239,21 +1239,23 @@ export class DocumentSkeleton extends Skeleton {
     private _modernHorizontalMargin: number | undefined;
 
     private readonly _lineGap: number;
+    private readonly _isSheetCell: boolean;
 
     constructor(
         private _docViewModel: DocumentViewModel,
         localeService: LocaleService,
-        options: { isolateIncrementalPublications?: boolean; lineGap?: number } = {}
+        options: { isolateIncrementalPublications?: boolean; lineGap?: number; isSheetCell?: boolean } = {}
     ) {
         super(localeService);
         this._isolateIncrementalPublications = options.isolateIncrementalPublications !== false;
         this._lineGap = options.lineGap ?? 0;
+        this._isSheetCell = options.isSheetCell === true;
     }
 
     static create(
         docViewModel: DocumentViewModel,
         localeService: LocaleService,
-        options?: { isolateIncrementalPublications?: boolean; lineGap?: number }
+        options?: { isolateIncrementalPublications?: boolean; lineGap?: number; isSheetCell?: boolean }
     ) {
         return new DocumentSkeleton(docViewModel, localeService, options);
     }
@@ -5180,6 +5182,7 @@ export class DocumentSkeleton extends Skeleton {
             story.getBody()?.customRanges?.some((range) => range.rangeType === CustomRangeType.FIELD &&
                 range.properties?.fieldType === 'NUMPAGES' && range.properties.locked !== BooleanNumber.TRUE));
         const ctx: ILayoutContext = {
+            isSheetCell: this._isSheetCell,
             fieldPageCount: this.getCompletedPageCount(),
             hasNumPagesFields,
             headerFooterMinimumMargins: hasNumPagesFields ? new Map() : undefined,

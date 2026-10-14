@@ -98,6 +98,9 @@ export function createSkeletonPage(
     page.sectionId = sectionId;
     page.pageNumberStart = pageNumberStart;
     page.renderConfig = renderConfig;
+    if (ctx.isSheetCell) {
+        page.isSheetCell = true;
+    }
     page.marginLeft = marginLeft;
     page.marginRight = marginRight;
     page.breakType = breakType;

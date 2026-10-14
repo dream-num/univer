@@ -21,6 +21,7 @@ import { getColorStyle } from '@univerjs/core';
 import { Vector2 } from '../../../basics/vector2';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
+import { isStackedGlyph } from '../layout/model/glyph';
 
 const UNIQUE_KEY = 'DefaultDocsBackgroundExtension';
 
@@ -55,7 +56,16 @@ export class Background extends docExtension {
 
         if (background && content !== '\r') {
             ctx.fillStyle = background;
-            ctx.fillRect(spanStartPoint.x - 0.5, spanStartPoint.y + 1, width + 1, contentHeight + 2 * DELTA);
+            if (isStackedGlyph(span)) {
+                ctx.fillRect(
+                    spanStartPoint.x + (width - contentHeight) / 2 - DELTA,
+                    spanStartPoint.y + ((line.lineHeight ?? contentHeight) - width) / 2,
+                    contentHeight + 2 * DELTA,
+                    width
+                );
+            } else {
+                ctx.fillRect(spanStartPoint.x - 0.5, spanStartPoint.y + 1, width + 1, contentHeight + 2 * DELTA);
+            }
         }
     }
 

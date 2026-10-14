@@ -801,7 +801,18 @@ export class Documents extends DocComponent {
                             const { glyphGroup } = divide;
 
                             this._drawLiquid.translateSave();
-                            this._drawLiquid.translateDivide(divide, isVertical && wrapStrategy === WrapStrategy.WRAP, verticalAlign, rotatedHeightStore);
+                            if (page.isSheetCell && isVertical) {
+                                const remaining = rotatedHeightStore - (divide.glyphGroupWidth ?? 0);
+                                let align = 0;
+                                if (verticalAlign === VerticalAlign.MIDDLE) {
+                                    align = remaining / 2;
+                                } else if (verticalAlign === VerticalAlign.BOTTOM || verticalAlign === VerticalAlign.UNSPECIFIED) {
+                                    align = remaining;
+                                }
+                                this._drawLiquid.translate(divide.left + align, 0);
+                            } else {
+                                this._drawLiquid.translateDivide(divide, isVertical && wrapStrategy === WrapStrategy.WRAP, verticalAlign, rotatedHeightStore);
+                            }
 
                             this._drawGlyphGroupBackgrounds(
                                 ctx,

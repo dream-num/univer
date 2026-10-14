@@ -28,6 +28,7 @@ import { degToRad, getScale } from '../../../basics/tools';
 import { Vector2 } from '../../../basics/vector2';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
+import { isStackedGlyph } from '../layout/model/glyph';
 import { getColorStyleForCanvas } from '../layout/style/color';
 
 const UNIQUE_KEY = 'DefaultDocsLineExtension';
@@ -155,20 +156,29 @@ export class Line extends docExtension {
 
         const centerAngle = degToRad(centerAngleDeg);
         const vertexAngle = degToRad(vertexAngleDeg);
-        const start = calculateRectRotate(
+        let start = calculateRectRotate(
             originTranslate.addByPoint(lineLeft, startY),
             Vector2.create(0, 0),
             centerAngle,
             vertexAngle,
             lineAlignOffset
         );
-        const end = calculateRectRotate(
+        let end = calculateRectRotate(
             originTranslate.addByPoint(lineRight, startY),
             Vector2.create(0, 0),
             centerAngle,
             vertexAngle,
             lineAlignOffset
         );
+
+        if (line === glyph.ts?.st && isStackedGlyph(glyph)) {
+            const { spanStartPoint: point, centerPoint } = this.extensionOffset;
+            const { aba, abd, width: inkWidth } = glyph.bBox;
+            const x = point!.x + centerPoint!.x - inkWidth / 2;
+            const y = point!.y + centerPoint!.y + (aba - abd) / 2 + startY - glyph.parent!.parent!.asc;
+            start = Vector2.create(x, y);
+            end = Vector2.create(x + inkWidth, y);
+        }
 
         ctx.beginPath();
         ctx.moveTo(start.x, start.y);

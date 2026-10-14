@@ -1954,6 +1954,7 @@ export interface IDocumentPaginationMetrics {
 }
 
 export interface ILayoutContext {
+    isSheetCell?: boolean;
     headerFooterFieldContext?: { pageNumber: number; pageCount?: number };
     fieldPageCount?: number;
     hasNumPagesFields?: boolean;

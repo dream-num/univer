@@ -252,52 +252,52 @@ export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.FORMAT]: {
         [SetInlineFormatBoldCommand.id]: {
             order: 0,
-            gridLayout: { row: 2, column: 1 },
+            gridLayout: { row: 2, column: 1, width: 44 },
             menuItemFactory: BoldMenuItemFactory,
         },
         [SetInlineFormatItalicCommand.id]: {
             order: 1,
-            gridLayout: { row: 2, column: 2 },
+            gridLayout: { row: 2, column: 2, width: 44 },
             menuItemFactory: ItalicMenuItemFactory,
         },
         [SetInlineFormatUnderlineCommand.id]: {
             order: 2,
-            gridLayout: { row: 2, column: 3 },
+            gridLayout: { row: 2, column: 3, width: 44 },
             menuItemFactory: UnderlineMenuItemFactory,
         },
         [SetInlineFormatStrikethroughCommand.id]: {
             order: 3,
-            gridLayout: { row: 2, column: 4 },
+            gridLayout: { row: 2, column: 4, width: 44 },
             menuItemFactory: StrikeThroughMenuItemFactory,
         },
         [SetInlineFormatSubscriptCommand.id]: {
             order: 4,
-            gridLayout: { row: 2, column: 5 },
+            gridLayout: { row: 2, column: 6, width: 44 },
             menuItemFactory: SubscriptMenuItemFactory,
         },
         [SetInlineFormatSuperscriptCommand.id]: {
             order: 5,
-            gridLayout: { row: 2, column: 6 },
+            gridLayout: { row: 2, column: 5, width: 44 },
             menuItemFactory: SuperscriptMenuItemFactory,
         },
         [SetParagraphNamedStyleCommand.id]: {
             order: 5.5,
-            gridLayout: { row: 1, column: 1, columnSpan: 2, width: 100 },
+            gridLayout: { row: 1, column: 1, columnSpan: 2, width: 96 },
             menuItemFactory: HeadingSelectorMenuItemFactory,
         },
         [SetInlineFormatFontSizeCommand.id]: {
             order: 6,
-            gridLayout: { row: 1, column: 7, width: 64 },
+            gridLayout: { row: 1, column: 7, columnSpan: 2, width: 96 },
             menuItemFactory: FontSizeSelectorMenuItemFactory,
         },
         [SetInlineFormatFontFamilyCommand.id]: {
             order: 7,
-            gridLayout: { row: 1, column: 3, columnSpan: 4, width: 160 },
+            gridLayout: { row: 1, column: 3, columnSpan: 4, width: 200 },
             menuItemFactory: FontFamilySelectorMenuItemFactory,
         },
         [SetInlineFormatTextColorCommand.id]: {
             order: 8,
-            gridLayout: { row: 2, column: 7 },
+            gridLayout: { row: 2, column: 8, width: 44 },
             menuItemFactory: TextColorSelectorMenuItemFactory,
             [ResetInlineFormatTextColorCommand.id]: {
                 order: 0,
@@ -306,7 +306,7 @@ export const menuSchema: MenuSchemaType = {
         },
         [SetInlineFormatTextBackgroundColorCommand.id]: {
             order: 9,
-            gridLayout: { row: 2, column: 8 },
+            gridLayout: { row: 2, column: 7, width: 44 },
             menuItemFactory: BackgroundColorSelectorMenuItemFactory,
             [ResetInlineFormatTextBackgroundColorCommand.id]: {
                 order: 0,

@@ -1068,6 +1068,7 @@ export function PasteRibbonMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
     return {
         ...PasteSpacialMenuItemFactory(accessor),
         id: PASTE_RIBBON_MENU_ID,
+        icon: 'DocPasteOptionsIcon',
         title: 'sheets-ui.rightClick.paste',
         hidden$: combineLatest([
             getObservableWithExclusiveRange$(accessor, getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET)),

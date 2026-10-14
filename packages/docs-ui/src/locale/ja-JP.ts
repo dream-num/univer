@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'ドキュメントのレイアウトを復元しています…',
         },
         toolbar: {
+            zoom: 'ズーム',
+            fullscreen: '全画面表示',
             font: 'フォント',
             fontSize: 'フォントサイズ',
             bold: '太字',

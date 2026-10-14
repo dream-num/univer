@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'Ripristino del layout del documento…',
         },
         toolbar: {
+            zoom: 'Zoom',
+            fullscreen: 'Schermo intero',
             font: 'Carattere',
             fontSize: 'Dimensione carattere',
             bold: 'Grassetto',

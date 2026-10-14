@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'در حال بازیابی صفحه‌آرایی سند…',
         },
         toolbar: {
+            zoom: 'بزرگ‌نمایی',
+            fullscreen: 'تمام‌صفحه',
             font: 'فونت',
             fontSize: 'اندازه فونت',
             bold: 'پررنگ',

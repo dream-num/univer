@@ -54,6 +54,8 @@ const locale = {
             recovering: 'Restoring document layout…',
         },
         toolbar: {
+            zoom: 'Zoom',
+            fullscreen: 'Fullscreen',
             font: 'Font',
             fontSize: 'Font size',
             bold: 'Bold',

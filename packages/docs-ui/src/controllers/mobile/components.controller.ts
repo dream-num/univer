@@ -71,6 +71,7 @@ import {
     TodoListDoubleIcon,
     UnderlineIcon,
     UnorderIcon,
+    ZoomInIcon,
 } from '@univerjs/icons';
 import { ComponentManager, IconManager } from '@univerjs/ui';
 import { DOC_LAYOUT_RECOVERY_COMPONENT, DocLayoutRecovery } from '../../views/DocLayoutRecovery';
@@ -194,6 +195,7 @@ export class MobileComponentsController extends Disposable {
             TodoListDoubleIcon,
             UnderlineIcon,
             UnorderIcon,
+            ZoomInIcon,
             DefaultTextColorIcon,
             HeaderTextColorIcon,
             MoreRightIcon,

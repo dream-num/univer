@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'Obnovuje sa rozloženie dokumentu…',
         },
         toolbar: {
+            zoom: 'Priblíženie',
+            fullscreen: 'Celá obrazovka',
             font: 'Písmo',
             fontSize: 'Veľkosť písma',
             bold: 'Tučné',

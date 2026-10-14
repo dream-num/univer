@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'Restaurando o layout do documento…',
         },
         toolbar: {
+            zoom: 'Zoom',
+            fullscreen: 'Tela cheia',
             font: 'Fonte',
             fontSize: 'Tamanho da fonte',
             bold: 'Negrito',

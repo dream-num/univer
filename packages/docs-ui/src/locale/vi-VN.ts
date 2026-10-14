@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'Đang khôi phục bố cục tài liệu…',
         },
         toolbar: {
+            zoom: 'Thu phóng',
+            fullscreen: 'Toàn màn hình',
             font: 'Phông chữ',
             fontSize: 'Cỡ chữ',
             bold: 'In đậm',

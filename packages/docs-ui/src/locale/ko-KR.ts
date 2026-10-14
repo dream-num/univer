@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: '문서 레이아웃을 복구하는 중…',
         },
         toolbar: {
+            zoom: '확대/축소',
+            fullscreen: '전체 화면',
             font: '글꼴',
             fontSize: '글꼴 크기',
             bold: '굵게',

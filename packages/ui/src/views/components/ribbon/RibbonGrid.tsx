@@ -52,8 +52,7 @@ export function RibbonGrid({ groups, title, className, ...props }: IRibbonGridPr
                             key={group.key}
                             data-u-comp="ribbon-grid-group"
                             className="
-                              univer-relative univer-box-border univer-flex univer-min-w-16 univer-shrink-0
-                              univer-flex-col univer-px-2
+                              univer-relative univer-box-border univer-flex univer-shrink-0 univer-flex-col univer-px-2
                             "
                         >
                             <div

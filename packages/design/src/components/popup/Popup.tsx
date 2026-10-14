@@ -55,7 +55,7 @@ export interface IPopupProps {
 export function Popup(props: IPopupProps) {
     const { children, visible = false, offset = DEFAULT_POPUP_OFFSET, overflowVisible = false, placementY = 'below' } = props;
 
-    const nodeRef = useRef(null);
+    const nodeRef = useRef<HTMLElement>(null);
 
     const [realOffset, setRealOffset] = useState<[number, number]>(HIDDEN_POPUP_OFFSET);
 
@@ -94,7 +94,7 @@ export function Popup(props: IPopupProps) {
     }, [offset, placementY, visible]);
 
     useEffect(() => {
-        if (!visible) {
+        if (!visible || !nodeRef.current) {
             return;
         }
 
@@ -105,8 +105,11 @@ export function Popup(props: IPopupProps) {
             }
         };
 
+        const resizeObserver = new ResizeObserver(handleResize);
+        resizeObserver.observe(nodeRef.current);
         window.addEventListener('resize', handleResize);
         return () => {
+            resizeObserver.disconnect();
             window.removeEventListener('resize', handleResize);
         };
     }, [offset, placementY, visible]);

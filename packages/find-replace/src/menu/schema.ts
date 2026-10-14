@@ -20,10 +20,10 @@ import { OpenFindDialogOperation } from '../commands/operations/find-replace.ope
 import { FindReplaceMenuItemFactory } from './find-replace.menu';
 
 export const menuSchema: MenuSchemaType = {
-    [RibbonDataGroup.ORGANIZATION]: {
+    [RibbonDataGroup.OTHERS]: {
         [OpenFindDialogOperation.id]: {
-            order: 2,
-            gridLayout: { row: 1, column: 3 },
+            order: 0,
+            gridLayout: { row: 1, column: 1, rowSpan: 2, columnSpan: 2, showLabel: true },
             menuItemFactory: FindReplaceMenuItemFactory,
         },
     },

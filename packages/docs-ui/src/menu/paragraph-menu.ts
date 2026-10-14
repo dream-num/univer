@@ -21,7 +21,6 @@ import { ICommandService, NamedStyleType, ThemeService, UniverInstanceType } fro
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { UnitAction } from '@univerjs/protocol';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-
 import { Observable } from 'rxjs';
 import {
     DocCopyCommand,
@@ -510,7 +509,7 @@ export function ParagraphMenuInsertBelowSubmenuItemFactory(accessor: IAccessor):
     return {
         id: DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        icon: 'TextTypeIcon',
+        icon: 'InsertRowBelowDoubleIcon',
         title: 'docs-ui.rightClick.insertBellow',
         tooltip: 'docs-ui.rightClick.insertBellow',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),

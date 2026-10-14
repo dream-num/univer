@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: '文字旋轉',
             },
             toggleGridlines: '切換網格線',
+            zoom: '縮放',
             fullscreen: '全螢幕',
         },
         align: {

@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'Поворот текста',
             },
             toggleGridlines: 'Переключить сетку',
+            zoom: 'Масштаб',
             fullscreen: 'Полноэкранный режим',
         },
         align: {

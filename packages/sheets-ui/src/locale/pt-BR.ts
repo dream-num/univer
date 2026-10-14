@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'Rotação de texto',
             },
             toggleGridlines: 'Mostrar/Ocultar linhas de grade',
+            zoom: 'Zoom',
             fullscreen: 'Tela cheia',
         },
         align: {

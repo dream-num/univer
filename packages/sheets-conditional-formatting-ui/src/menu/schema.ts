@@ -26,7 +26,7 @@ export const conditionalFormattingRuleMenuSchema: MenuSchemaType = {
     [RibbonDataGroup.RULES]: {
         [OpenConditionalFormattingOperator.id]: {
             order: 1,
-            gridLayout: { row: 2, column: 1, showLabel: true },
+            gridLayout: { row: 2, column: 1 },
             menuItemFactory: FactoryManageConditionalFormattingRule,
         },
     },

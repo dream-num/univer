@@ -35,7 +35,6 @@ import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
-import { useScrollYOverContainer } from '../../hooks/layout';
 import { preventBrowserZoomInContainers } from '../../hooks/prevent-browser-zoom';
 import { resolveMenuItemActiveState, UIQuickTileMenuGroup, UITinyMenuGroup } from '../../menu/desktop/TinyMenuGroup';
 
@@ -700,8 +699,6 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
     );
     const submenuPortalContainer = layoutService.rootContainerElement?.ownerDocument?.body
         ?? (typeof document !== 'undefined' ? document.body : null);
-
-    useScrollYOverContainer(menuElement, layoutService.rootContainerElement);
 
     useEffect(() => {
         if (!menuElement) {

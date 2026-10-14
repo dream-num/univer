@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'Putar teks',
             },
             toggleGridlines: 'Alihkan garis kisi',
+            zoom: 'Zoom',
             fullscreen: 'Layar penuh',
         },
         align: {

@@ -386,20 +386,20 @@ export const menuSchema: MenuSchemaType = {
             },
             [ZOOM_RATIO_MENU_ID]: {
                 order: 1,
-                gridLayout: { row: 1, column: 2, width: 112 },
+                gridLayout: { row: 1, column: 2 },
                 menuItemFactory: ZoomRatioMenuItemFactory,
-            },
-            [ToggleFullscreenOperation.id]: {
-                order: 2,
-                gridLayout: { row: 2, column: 2, showLabel: true, width: 112 },
-                menuItemFactory: FullscreenMenuItemFactory,
             },
         },
         [RibbonViewGroup.VISIBILITY]: {
             [ToggleGridlinesCommand.id]: {
                 order: 0,
-                gridLayout: { row: 1, column: 1, showLabel: true },
+                gridLayout: { row: 1, column: 1 },
                 menuItemFactory: ToggleGridlinesMenuFactory,
+            },
+            [ToggleFullscreenOperation.id]: {
+                order: 1,
+                gridLayout: { row: 2, column: 1 },
+                menuItemFactory: FullscreenMenuItemFactory,
             },
         },
     },

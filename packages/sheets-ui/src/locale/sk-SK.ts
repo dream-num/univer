@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'Otočenie textu',
             },
             toggleGridlines: 'Prepnúť mriežku',
+            zoom: 'Priblíženie',
             fullscreen: 'Celá obrazovka',
         },
         align: {

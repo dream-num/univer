@@ -53,6 +53,7 @@ const locale = {
                 main: 'Text rotate',
             },
             toggleGridlines: 'Toggle Gridlines',
+            zoom: 'Zoom',
             fullscreen: 'Fullscreen',
         },
         align: {

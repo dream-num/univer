@@ -509,7 +509,7 @@ export function ParagraphMenuInsertBelowSubmenuItemFactory(accessor: IAccessor):
     return {
         id: DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        icon: 'InsertRowBelowDoubleIcon',
+        icon: 'InsertBelowDoubleIcon',
         title: 'docs-ui.rightClick.insertBellow',
         tooltip: 'docs-ui.rightClick.insertBellow',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),

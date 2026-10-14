@@ -126,9 +126,9 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
             this._menuManagerService.getMenuByPositionKey(MenuManagerPosition.RIBBON)
         );
 
-        // Collect all hidden$ Observables and their corresponding paths
+        // The same command can have different visibility in each menu group.
         const hiddenObservableMap: Observable<boolean>[] = [];
-        const hiddenKeyMap: string[] = [];
+        const menusWithHiddenState: IMenuSchema[] = [];
         for (const group of ribbon) {
             if (group.children) {
                 for (const item of group.children) {
@@ -136,7 +136,7 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
                         for (const child of item.children) {
                             if (child.item?.hidden$) {
                                 hiddenObservableMap.push(child.item.hidden$);
-                                hiddenKeyMap.push(child.key);
+                                menusWithHiddenState.push(child);
                             }
                         }
                     }
@@ -157,12 +157,7 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
             .subscribe((hiddenMap) => {
                 const newRibbon: IMenuSchema[] = [];
 
-                const hiddenPathMap = hiddenMap.map((hidden, index) => {
-                    if (hidden) {
-                        return hiddenKeyMap[index];
-                    }
-                    return null;
-                }).filter((item) => !!item) as string[];
+                const hiddenMenus = new Set(menusWithHiddenState.filter((_, index) => hiddenMap[index]));
 
                 for (const group of ribbon) {
                     const newGroup: IMenuSchema = { ...group, children: [] };
@@ -174,7 +169,7 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
 
                             if (item.children?.length) {
                                 for (const child of item.children) {
-                                    if (!hiddenPathMap.includes(child.key)) {
+                                    if (!hiddenMenus.has(child)) {
                                         newItem.children?.push(child);
                                     }
                                 }

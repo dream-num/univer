@@ -27,13 +27,13 @@ import {
     UniverInstanceService,
 } from '@univerjs/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, onTestFinished } from 'vitest';
 import { MenuItemType } from '../../menu/menu';
 import { IMenuManagerService, MenuManagerService } from '../../menu/menu-manager.service';
 import { MenuManagerPosition, RibbonPosition } from '../../menu/types';
 import { DesktopRibbonService, IRibbonService } from '../ribbon.service';
 
-function createService(univerInstanceService?: { focused$: BehaviorSubject<string | null> }) {
+function createInjector(univerInstanceService?: { focused$: BehaviorSubject<string | null> }) {
     const injector = new Injector();
     injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([IContextService, { useClass: ContextService }]);
@@ -43,15 +43,15 @@ function createService(univerInstanceService?: { focused$: BehaviorSubject<strin
         : [IUniverInstanceService, { useClass: UniverInstanceService }]);
     injector.add([IMenuManagerService, { useClass: MenuManagerService }]);
     injector.add([IRibbonService, { useClass: DesktopRibbonService }]);
-    return {
-        service: injector.get(IRibbonService),
-        menuManagerService: injector.get(IMenuManagerService),
-    };
+    onTestFinished(() => injector.dispose());
+    return injector;
 }
 
 describe('DesktopRibbonService', () => {
     it('shows contextual ribbon tabs only when requested and restores the last regular tab when hidden', () => {
-        const { service, menuManagerService } = createService();
+        const injector = createInjector();
+        const service = injector.get(IRibbonService);
+        const menuManagerService = injector.get(IMenuManagerService);
         const ribbons: string[][] = [];
         const activated: string[] = [];
         const ribbonSub = service.ribbon$.subscribe((ribbon) => ribbons.push(ribbon.map((item) => item.key)));
@@ -80,7 +80,8 @@ describe('DesktopRibbonService', () => {
     });
 
     it('publishes collapsed group ids and fake toolbar visibility changes', () => {
-        const { service } = createService();
+        const injector = createInjector();
+        const service = injector.get(IRibbonService);
         const collapsed: string[][] = [];
         const fakeToolbarVisible: boolean[] = [];
         const collapsedSub = service.collapsedIds$.subscribe((ids) => collapsed.push(ids));
@@ -96,7 +97,9 @@ describe('DesktopRibbonService', () => {
     });
 
     it('filters hidden ribbon commands and restores activation when contextual tabs disappear', () => {
-        const { service, menuManagerService } = createService();
+        const injector = createInjector();
+        const service = injector.get(IRibbonService);
+        const menuManagerService = injector.get(IMenuManagerService);
         const hidden$ = new BehaviorSubject(false);
         const ribbons: IMenuSchema[][] = [];
         const activated: string[] = [];
@@ -153,7 +156,9 @@ describe('DesktopRibbonService', () => {
     });
 
     it('does not republish the ribbon when hidden states emit unchanged values', () => {
-        const { service, menuManagerService } = createService();
+        const injector = createInjector();
+        const service = injector.get(IRibbonService);
+        const menuManagerService = injector.get(IMenuManagerService);
         const hidden$ = new BehaviorSubject(false);
         const ribbons: IMenuSchema[][] = [];
         const ribbonSub = service.ribbon$.subscribe((ribbon) => ribbons.push(ribbon));
@@ -186,7 +191,9 @@ describe('DesktopRibbonService', () => {
     });
 
     it('filters a hidden command even when another hidden state has not emitted', () => {
-        const { service, menuManagerService } = createService();
+        const injector = createInjector();
+        const service = injector.get(IRibbonService);
+        const menuManagerService = injector.get(IMenuManagerService);
         const silentHidden$ = new Subject<boolean>();
         const hidden$ = new BehaviorSubject(true);
         let latestRibbon: IMenuSchema[] = [];
@@ -224,7 +231,9 @@ describe('DesktopRibbonService', () => {
 
     it('does not republish the ribbon when focus emits the same unit id', () => {
         const focused$ = new BehaviorSubject<string | null>('unit-1');
-        const { service, menuManagerService } = createService({ focused$ });
+        const injector = createInjector({ focused$ });
+        const service = injector.get(IRibbonService);
+        const menuManagerService = injector.get(IMenuManagerService);
         const ribbons: IMenuSchema[][] = [];
         const ribbonSub = service.ribbon$.subscribe((ribbon) => ribbons.push(ribbon));
 
@@ -255,8 +264,58 @@ describe('DesktopRibbonService', () => {
         ribbonSub.unsubscribe();
     });
 
+    it('keeps visibility independent when groups contain the same command', () => {
+        const injector = createInjector();
+        const service = injector.get(IRibbonService);
+        const menuManagerService = injector.get(IMenuManagerService);
+        const docHidden$ = new BehaviorSubject(true);
+        const slideHidden$ = new BehaviorSubject(false);
+        let latestRibbon: IMenuSchema[] = [];
+        const subscription = service.ribbon$.subscribe((ribbon) => latestRibbon = ribbon);
+        onTestFinished(() => subscription.unsubscribe());
+
+        menuManagerService.appendRootMenu({
+            [MenuManagerPosition.RIBBON]: {
+                [RibbonPosition.VIEW]: {
+                    'doc-display': {
+                        order: 0,
+                        fullscreen: {
+                            order: 0,
+                            menuItemFactory: () => ({ id: 'fullscreen', type: MenuItemType.BUTTON, hidden$: docHidden$ }),
+                        },
+                    },
+                    'slide-display': {
+                        order: 1,
+                        fullscreen: {
+                            order: 0,
+                            menuItemFactory: () => ({ id: 'fullscreen', type: MenuItemType.BUTTON, hidden$: slideHidden$ }),
+                        },
+                    },
+                    'global-display': {
+                        order: 2,
+                        fullscreen: {
+                            order: 0,
+                            menuItemFactory: () => ({ id: 'fullscreen', type: MenuItemType.BUTTON }),
+                        },
+                    },
+                },
+            },
+        });
+
+        expect(latestRibbon.find((tab) => tab.key === RibbonPosition.VIEW)?.children?.map((group) => group.key))
+            .toEqual(['slide-display', 'global-display']);
+
+        docHidden$.next(false);
+        slideHidden$.next(true);
+
+        expect(latestRibbon.find((tab) => tab.key === RibbonPosition.VIEW)?.children?.map((group) => group.key))
+            .toEqual(['doc-display', 'global-display']);
+    });
+
     it('unsubscribes hidden states that are no longer in the ribbon', () => {
-        const { menuManagerService } = createService();
+        const injector = createInjector();
+        injector.get(IRibbonService);
+        const menuManagerService = injector.get(IMenuManagerService);
         let subscriptions = 0;
         let unsubscriptions = 0;
         const hidden$ = new Observable<boolean>(() => {

@@ -45,6 +45,7 @@ import {
     isInternalEditorID,
     IUniverInstanceService,
     Optional,
+    RANGE_DIRECTION,
     RxDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -445,7 +446,14 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         };
 
         for (const range of ranges) {
-            const { startOffset, endOffset, rangeType, startNodePosition, endNodePosition } = range;
+            const { rangeType } = range;
+            let { startOffset, endOffset, startNodePosition, endNodePosition } = range;
+            // Published ranges use sorted offsets. Keep their anchor and focus
+            // when rebuilding a backward selection after layout or zoom changes.
+            if (rangeType !== DOC_RANGE_TYPE.RECT && range.direction === RANGE_DIRECTION.BACKWARD && startOffset < endOffset) {
+                [startOffset, endOffset] = [endOffset, startOffset];
+                [startNodePosition, endNodePosition] = [endNodePosition, startNodePosition];
+            }
             const rangeStyle = range.style ?? style;
 
             if (rangeType !== DOC_RANGE_TYPE.RECT && startOffset === endOffset) {

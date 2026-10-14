@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocDrawingBase, IDocDrawingPosition, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, IDocDrawingBase, IDocDrawingPosition, Nullable } from '@univerjs/core';
 import type { IDrawingDocTransform, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
 import type {
     BaseObject,
@@ -31,13 +31,13 @@ import {
     BooleanNumber,
     COLORS,
     Disposable,
+    DisposableCollection,
     generateRandomId,
     ICommandService,
     IUniverInstanceService,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
-    throttle,
     toDisposable,
     Tools,
     UniverInstanceType,
@@ -62,10 +62,12 @@ import {
     Rect,
     Vector2,
 } from '@univerjs/engine-render';
+import { filter, switchMap, takeUntil, throttleTime } from 'rxjs';
 import {
     IMoveInlineDrawingCommand,
     ITransformNonInlineDrawingCommand,
 } from '../commands/commands/update-doc-drawing.command';
+import { findDrawingAnchor, getDrawingWrappingPosition } from '../utils/drawing-wrapping-position';
 import {
     getDocsDrawingBehindText,
     getDocsDrawingClipPage,
@@ -149,7 +151,7 @@ export function shouldUseDocsDrawingOuterPageOrigin(config: {
 // Listen doc drawing transformer change, and update drawing data.
 export class DocDrawingTransformerController extends Disposable {
     private _liquid = new Liquid();
-    private _listenerOnImageMap = new Set();
+    private _listenerOnImageMap = new Map<string, IDisposable>();
     // Use to cache the drawings is under transforming or scaling.
     private _transformerCache: Map<string, IDrawingCache> = new Map();
     private _anchorShape: Nullable<Rect>;
@@ -165,7 +167,22 @@ export class DocDrawingTransformerController extends Disposable {
         this._init();
     }
 
+    override dispose(): void {
+        for (const listener of this._listenerOnImageMap.values()) {
+            listener.dispose();
+        }
+        this._listenerOnImageMap.clear();
+        this._transformerCache.clear();
+        this._anchorShape?.dispose();
+        this._anchorShape = null;
+        super.dispose();
+    }
+
     private _init(): void {
+        this.disposeWithMe(this._renderManagerService.disposed$.subscribe((unitId) => {
+            this._listenerOnImageMap.get(unitId)?.dispose();
+            this._listenerOnImageMap.delete(unitId);
+        }));
         this._listenDrawingFocus();
     }
 
@@ -180,8 +197,10 @@ export class DocDrawingTransformerController extends Disposable {
                     const { unitId } = drawingParam;
 
                     if (!this._listenerOnImageMap.has(unitId)) {
-                        this._listenTransformerChange(unitId);
-                        this._listenerOnImageMap.add(unitId);
+                        const listener = this._listenTransformerChange(unitId);
+                        if (listener) {
+                            this._listenerOnImageMap.set(unitId, listener);
+                        }
                     }
                 }
             })
@@ -190,14 +209,27 @@ export class DocDrawingTransformerController extends Disposable {
 
     // Only handle one drawing transformer change.
 
-    private _listenTransformerChange(unitId: string): void {
-        const transformer = this._getSceneAndTransformerByDrawingSearch(unitId)?.transformer;
+    private _listenTransformerChange(unitId: string): IDisposable | undefined {
+        const context = this._getSceneAndTransformerByDrawingSearch(unitId);
+        const transformer = context?.transformer;
 
         if (transformer == null) {
             return;
         }
 
-        this.disposeWithMe(
+        const listeners = new DisposableCollection();
+        listeners.add(toDisposable(() => {
+            for (const [id, cached] of this._transformerCache) {
+                if (cached.drawing.unitId === unitId) {
+                    this._transformerCache.delete(id);
+                }
+            }
+            if (this._anchorShape && this._anchorShape.getScene() === context?.scene) {
+                this._anchorShape.dispose();
+                this._anchorShape = null;
+            }
+        }));
+        listeners.add(
             toDisposable(
                 transformer.changeStart$.subscribe((state) => {
                     this._transformerCache.clear();
@@ -216,7 +248,7 @@ export class DocDrawingTransformerController extends Disposable {
                         if (drawingData?.layoutType === PositionedObjectLayoutType.INLINE) {
                             try {
                                 (object as Image).setOpacity(0.2);
-                            } catch (e) {
+                            } catch {
                             }
                         }
 
@@ -235,16 +267,21 @@ export class DocDrawingTransformerController extends Disposable {
             )
         );
 
-        const throttleMultipleDrawingUpdate = throttle(this._updateMultipleDrawingDocTransform.bind(this), 50);
+        // Queued updates belong to the gesture and render that created them.
+        listeners.add(toDisposable(transformer.changeStart$.pipe(
+            switchMap(() => transformer.changing$.pipe(
+                filter(({ objects }) => objects.size > 1),
+                throttleTime(50, undefined, { leading: true, trailing: true }),
+                takeUntil(transformer.changeEnd$)
+            ))
+        ).subscribe(({ objects }) => this._updateMultipleDrawingDocTransform(objects))));
 
-        this.disposeWithMe(
+        listeners.add(
             toDisposable(
                 transformer.changing$.subscribe((state) => {
                     const { objects, offsetX, offsetY } = state;
 
-                    if (objects.size > 1) {
-                        throttleMultipleDrawingUpdate(objects);
-                    } else if (objects.size === 1) {
+                    if (objects.size === 1) {
                         const drawingCache: Nullable<IDrawingCache> = this._transformerCache.values().next().value;
                         const object: BaseObject = objects.values().next().value!;
                         const { width, height, top, left, angle } = object;
@@ -269,7 +306,7 @@ export class DocDrawingTransformerController extends Disposable {
         );
 
         // Handle transformer mouseup.
-        this.disposeWithMe(
+        listeners.add(
             toDisposable(
                 // eslint-disable-next-line complexity
                 transformer.changeEnd$.subscribe((state) => {
@@ -286,7 +323,7 @@ export class DocDrawingTransformerController extends Disposable {
                         if (drawingCache?.drawing.layoutType === PositionedObjectLayoutType.INLINE) {
                             try {
                                 (object as Image).setOpacity(1);
-                            } catch (e) {
+                            } catch {
                             }
                         }
                     }
@@ -331,6 +368,7 @@ export class DocDrawingTransformerController extends Disposable {
                 })
             )
         );
+        return listeners;
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -395,25 +433,40 @@ export class DocDrawingTransformerController extends Disposable {
             if (oldTop !== top || oldLeft !== left) {
                 const verticalDelta = top - oldTop;
                 const horizontalDelta = left - oldLeft;
+                const { positionH, positionV } = drawingData.docTransform;
+                let resolvedPosition: IDocDrawingPosition | undefined;
+                const hasHorizontalOffset = positionH.posOffset != null && positionH.align == null;
+                const hasVerticalOffset = positionV.posOffset != null && positionV.align == null;
+                if (!hasHorizontalOffset || !hasVerticalOffset) {
+                    const manager = this._renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService);
+                    const skeleton = manager?.getSkeleton().getSkeletonData();
+                    const viewModel = manager?.getViewModel();
+                    const anchor = skeleton && viewModel ? findDrawingAnchor(unitId, drawing.drawingId, skeleton, viewModel.getEditArea(), drawingData) : null;
+                    if (anchor) {
+                        resolvedPosition = getDrawingWrappingPosition(anchor, drawingData.layoutType, undefined, undefined, { left: horizontalDelta, top: verticalDelta });
+                    }
+                }
+                const posOffsetV = hasVerticalOffset ? positionV.posOffset! + verticalDelta : resolvedPosition?.positionV.posOffset;
+                const posOffsetH = hasHorizontalOffset ? positionH.posOffset! + horizontalDelta : resolvedPosition?.positionH.posOffset;
 
-                if (verticalDelta !== 0) {
+                if (verticalDelta !== 0 && posOffsetV != null) {
                     drawings.push({
                         drawingId: drawing.drawingId,
                         key: 'positionV',
                         value: {
-                            relativeFrom: drawingData.docTransform.positionV.relativeFrom,
-                            posOffset: drawingData.docTransform.positionV.posOffset! + verticalDelta,
+                            relativeFrom: positionV.relativeFrom,
+                            posOffset: posOffsetV,
                         },
                     });
                 }
 
-                if (horizontalDelta !== 0) {
+                if (horizontalDelta !== 0 && posOffsetH != null) {
                     drawings.push({
                         drawingId: drawing.drawingId,
                         key: 'positionH',
                         value: {
-                            relativeFrom: drawingData.docTransform.positionH.relativeFrom,
-                            posOffset: drawingData.docTransform.positionH.posOffset! + horizontalDelta,
+                            relativeFrom: positionH.relativeFrom,
+                            posOffset: posOffsetH,
                         },
                     });
                 }
@@ -427,18 +480,6 @@ export class DocDrawingTransformerController extends Disposable {
                 drawings,
             });
         }
-    }
-
-    // TODO: @JOCS, Use to draw and update the drawing anchor.
-    private _updateDrawingAnchor(objects: Map<string, BaseObject>) {
-        if (this._transformerCache.size !== 1) {
-            return;
-        }
-
-        const drawingCache: IDrawingCache = this._transformerCache.values().next().value!;
-        const object = objects.values().next().value!;
-
-        const anchor = this._getDrawingAnchor(drawingCache.drawing, object);
     }
 
     private _updateInlineDrawingAnchor(drawing: IDocDrawingBase, offsetX: number, offsetY: number) {

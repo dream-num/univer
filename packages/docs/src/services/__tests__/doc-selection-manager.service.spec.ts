@@ -121,7 +121,7 @@ describe('DocSelectionManagerService', () => {
             subUnitId: 'doc-1',
             docRanges: [{ startOffset: 2, endOffset: 4 }],
             isEditing: false,
-            options: { keepVisible: true },
+            options: { keepVisible: true, preserveInputStyle: false },
         });
         sub.unsubscribe();
     });
@@ -149,7 +149,7 @@ describe('DocSelectionManagerService', () => {
                 endOffset: 2,
                 collapsed: true,
             })],
-            options: { preserveCaret: true },
+            options: { preserveCaret: true, forceFocus: false, preserveInputStyle: true },
         }));
         sub.unsubscribe();
     });
@@ -176,11 +176,11 @@ describe('DocSelectionManagerService', () => {
             expect(refreshes.at(-1)).toEqual(expect.objectContaining({
                 unitId: 'doc-1',
                 docRanges: [expect.objectContaining({ startOffset: 2, endOffset: 5 })],
-                options: { forceFocus: false, preserveCaret: true },
+                options: { forceFocus: false, preserveCaret: true, preserveInputStyle: true },
             }));
             expect(service.__getCurrentSelection()?.unitId).toBe('doc-2');
-            service.replaceDocRanges([{ startOffset: 3, endOffset: 3 }], target, false, { forceFocus: true });
-            expect(refreshes.at(-1)).toEqual(expect.objectContaining({ options: { forceFocus: true } }));
+            service.replaceDocRanges([{ startOffset: 3, endOffset: 3 }], target, false, { forceFocus: true, preserveInputStyle: true });
+            expect(refreshes.at(-1)).toEqual(expect.objectContaining({ options: { forceFocus: true, preserveInputStyle: false } }));
         } finally {
             sub.unsubscribe();
             service.dispose();
@@ -206,7 +206,7 @@ describe('DocSelectionManagerService', () => {
             subUnitId: 'doc-1',
             docRanges: [expect.objectContaining({ startOffset: 2, endOffset: 2 })],
             isEditing: true,
-            options: undefined,
+            options: { forceFocus: false, preserveInputStyle: true },
         });
         sub.unsubscribe();
     });

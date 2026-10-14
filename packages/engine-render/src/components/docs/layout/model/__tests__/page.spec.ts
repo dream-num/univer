@@ -483,13 +483,13 @@ describe('page model', () => {
             skeletonResourceReference: createSkeletonResourceReference(),
             isDirty: false,
         } as any;
-        resetContextMock.mockImplementationOnce(() => {
-            ctx.isDirty = false;
+        resetContextMock.mockImplementationOnce((cellContext: any) => {
+            cellContext.isDirty = false;
         });
         dealWithSectionMock
-            .mockImplementationOnce((_ctx: any, _vm: any, _node: any, areaPage: any) => {
-                ctx.isDirty = true;
-                ctx.layoutStartPointer['table-1'] = 7;
+            .mockImplementationOnce((cellContext: any, _vm: any, _node: any, areaPage: any) => {
+                cellContext.isDirty = true;
+                cellContext.layoutStartPointer['table-1'] = 7;
                 return {
                     pages: [
                         { ...createDealPage(areaPage), pageNumber: 1 },
@@ -526,7 +526,7 @@ describe('page model', () => {
 
         expect(pages.map((page) => page.pageNumber)).toEqual([1, 2]);
         expect(ctx.isDirty).toBe(false);
-        expect(ctx.layoutStartPointer['table-1']).toBeNull();
+        expect(ctx.layoutStartPointer['table-1']).toBeUndefined();
         expect(dealWithSectionMock).toHaveBeenCalledTimes(2);
         expect(resetContextMock).toHaveBeenCalledTimes(1);
     });

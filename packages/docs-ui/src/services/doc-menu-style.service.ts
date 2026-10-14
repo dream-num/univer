@@ -59,8 +59,10 @@ export class DocMenuStyleService extends Disposable {
 
     private _listenDocRangeChange() {
         this.disposeWithMe(
-            this._textSelectionManagerService.textSelection$.subscribe(() => {
-                this._clearStyleCache();
+            this._textSelectionManagerService.textSelection$.subscribe(({ options }) => {
+                if (!options?.preserveInputStyle) {
+                    this._clearStyleCache();
+                }
             })
         );
     }

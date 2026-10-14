@@ -24,6 +24,8 @@ import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentFlavor,
     JSONX,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
     PositionedObjectLayoutType,
     TextXActionType,
 } from '@univerjs/core';
@@ -174,6 +176,7 @@ function createControllerFixture(options?: {
     selectionIsEditing?: boolean;
     drawings?: Record<string, {
         layoutType: PositionedObjectLayoutType;
+        docTransform?: { positionH: { relativeFrom: ObjectRelativeFromH }; positionV: { relativeFrom: ObjectRelativeFromV } };
     }>;
     snapshot?: Partial<IDocumentData>;
     hasCompleteLayout?: boolean;
@@ -716,6 +719,10 @@ describe('doc render controller', () => {
             drawings: {
                 'drawing-1': {
                     layoutType: PositionedObjectLayoutType.WRAP_NONE,
+                    docTransform: {
+                        positionH: { relativeFrom: ObjectRelativeFromH.PAGE },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PAGE },
+                    },
                 },
             },
         });
@@ -734,6 +741,38 @@ describe('doc render controller', () => {
 
         expect(skeletonManager.getSkeleton().startIncrementalLayout).not.toHaveBeenCalled();
         expect(skeletonManager.recalculate).not.toHaveBeenCalled();
+    });
+
+    it.each([
+        [ObjectRelativeFromH.MARGIN, ObjectRelativeFromV.PAGE],
+        [ObjectRelativeFromH.COLUMN, ObjectRelativeFromV.PAGE],
+        [ObjectRelativeFromH.PAGE, ObjectRelativeFromV.MARGIN],
+        [ObjectRelativeFromH.PAGE, ObjectRelativeFromV.LINE],
+        [ObjectRelativeFromH.PAGE, ObjectRelativeFromV.PARAGRAPH],
+    ])('refreshes the skeleton when a relative overlay moves (%s, %s)', (horizontal, vertical) => {
+        const { commandCallbacks, skeletonManager } = createControllerFixture({
+            drawings: {
+                'drawing-1': {
+                    layoutType: PositionedObjectLayoutType.WRAP_NONE,
+                    docTransform: {
+                        positionH: { relativeFrom: horizontal as ObjectRelativeFromH },
+                        positionV: { relativeFrom: vertical as ObjectRelativeFromV },
+                    },
+                },
+            },
+        });
+        commandCallbacks[0]({
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId: 'doc-unit',
+                actions: JSONX.getInstance().replaceOp(
+                    ['drawings', 'drawing-1', 'docTransform', 'positionV', 'posOffset'],
+                    10,
+                    20
+                ),
+            },
+        } satisfies ICommandInfo);
+        expect(skeletonManager.getSkeleton().startIncrementalLayout).toHaveBeenCalledTimes(1);
     });
 
     it('does not start document layout when only the drawing stacking order changes', () => {

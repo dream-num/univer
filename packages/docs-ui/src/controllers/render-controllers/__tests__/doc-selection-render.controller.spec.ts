@@ -17,13 +17,19 @@
 // @vitest-environment jsdom
 
 import type { IDocumentData } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IDocSelectionInnerParam, RenderUnit } from '@univerjs/engine-render';
 import {
+    DOC_RANGE_TYPE,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentFlavor,
     ICommandService,
     IContextService,
     IUniverInstanceService,
+    JSONX,
+    RANGE_DIRECTION,
+    TextX,
+    UndoCommandId,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -31,6 +37,8 @@ import {
     DocLayoutExecutorService,
     DocSelectionManagerService,
     DocSkeletonManagerService,
+    DocStateEmitService,
+    RichTextEditingMutation,
     SetTextSelectionsOperation,
 } from '@univerjs/docs';
 import {
@@ -56,6 +64,7 @@ import {
     IDocEmbedInteractionBoundaryService,
     IDocEmbedRuntimeFocusCoordinator,
 } from '../../../services/doc-embed-integration.service';
+import { DocMenuStyleService } from '../../../services/doc-menu-style.service';
 import { DocMobileElementMenuService } from '../../../services/doc-mobile-element-menu.service';
 import { DocCanvasPopManagerService } from '../../../services/doc-popup-manager.service';
 import { EditorService, IEditorService } from '../../../services/editor/editor-manager.service';
@@ -383,10 +392,13 @@ describe('DocSelectionRenderController', () => {
             injector.add([DocMobileElementMenuService]);
             injector.add([DocLayoutExecutorService]);
             injector.add([DocSelectionManagerService]);
+            injector.add([DocMenuStyleService]);
+            injector.add([DocStateEmitService]);
             injector.add([IEditorService, { useClass: EditorService }]);
             injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
             injector.get(ILayoutService).registerRootContainerElement(root);
             injector.get(ICommandService).registerCommand(SetTextSelectionsOperation);
+            injector.get(ICommandService).registerCommand(RichTextEditingMutation);
             const dataStream = 'First paragraph\r\r\rLast paragraph\r\n';
             const unit = univer.createUnit(UniverInstanceType.UNIVER_DOC, {
                 id: 'selection-layout-test',
@@ -441,6 +453,52 @@ describe('DocSelectionRenderController', () => {
                 expect(selections.getActiveTextRange()).toMatchObject({ startOffset, endOffset });
                 expect(selections.getSelectionInfo()?.isEditing).toBe(true);
             }
+
+            render.with(DocSelectionRenderService).replaceDocRanges([
+                { startOffset: 9, endOffset: 5, rangeType: DOC_RANGE_TYPE.TEXT },
+            ], true, { shouldFocus: false });
+            expect(selections.getActiveTextRange()).toMatchObject({ startOffset: 5, endOffset: 9, direction: RANGE_DIRECTION.BACKWARD });
+            skeletonManager.recalculate();
+            selections.refreshSelection(undefined, true);
+            expect(selections.getActiveTextRange()).toMatchObject({ startOffset: 5, endOffset: 9, direction: RANGE_DIRECTION.BACKWARD });
+
+            const selectionRender = render.with(DocSelectionRenderService);
+            selectionRender.replaceDocRanges([{ startOffset: 3, endOffset: 3 }], true, { shouldFocus: false });
+            const menuStyle = injector.get(DocMenuStyleService);
+            const inputStyle = { cl: { rgb: '#0000ff' }, fs: 20, it: 1 };
+            menuStyle.setStyleCache(inputStyle);
+            skeletonManager.recalculate();
+            selections.refreshSelection(undefined, true);
+            expect(menuStyle.getStyleCache()).toEqual(inputStyle);
+
+            const commands = injector.get(ICommandService);
+            const undo = commands.syncExecuteCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(RichTextEditingMutation.id, {
+                unitId,
+                trigger: 'doc.command.inline-format',
+                actions: JSONX.getInstance().editOp(new TextX().retain(3).retain(1, {
+                    dataStream: '',
+                    textRuns: [{ st: 0, ed: 1, ts: { bl: 1 } }],
+                }).serialize(), ['body']),
+                textRanges: [{ startOffset: 3, endOffset: 3, collapsed: true }],
+            });
+            skeletonManager.recalculate();
+            selections.refreshSelection(undefined, true);
+            await Promise.resolve();
+            expect(menuStyle.getStyleCache()).toBeNull();
+            menuStyle.setStyleCache(inputStyle);
+            commands.syncExecuteCommand(RichTextEditingMutation.id, { ...undo, trigger: UndoCommandId });
+            skeletonManager.recalculate();
+            selections.refreshSelection(undefined, true);
+            await Promise.resolve();
+            expect(menuStyle.getStyleCache()).toBeNull();
+            menuStyle.setStyleCache(inputStyle);
+            selections.refreshSelection(undefined, true);
+            expect(menuStyle.getStyleCache()).toEqual(inputStyle);
+
+            // Explicitly positioning the same caret still resets transient input formatting.
+            menuStyle.setStyleCache(inputStyle);
+            selectionRender.replaceDocRanges([{ startOffset: 3, endOffset: 3 }], true, { shouldFocus: false });
+            expect(menuStyle.getStyleCache()).toBeNull();
         } finally {
             univer.dispose();
             root.remove();

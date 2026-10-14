@@ -15,19 +15,24 @@
  */
 
 import type {
+    IChangeObserverConfig,
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
     IDocumentSkeletonSection,
+    RenderUnit,
 } from '@univerjs/engine-render';
 import { BooleanNumber, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType } from '@univerjs/core';
+import { DocSkeletonManagerService } from '@univerjs/docs';
 import { UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
 import { NodePositionConvertToCursor } from '@univerjs/docs-ui';
-import { DocumentSkeletonPageType } from '@univerjs/engine-render';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
+import { DocumentSkeletonPageType, IRenderManagerService, Rect } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { createDocDrawing, createDocDrawingTestBed } from '../../__tests__/create-doc-drawing-test-bed';
 import {
     IMoveInlineDrawingCommand,
     ITransformNonInlineDrawingCommand,
@@ -686,5 +691,86 @@ describe('DocDrawingTransformerController business methods', () => {
             ],
         });
         expect(controller._transformerCache.size).toBe(0);
+    });
+});
+
+describe('DocDrawingTransformerController gesture lifetime', () => {
+    it.each(['render', 'controller', 'gesture', 'active'] as const)('keeps multi-drawing updates scoped to the %s lifetime', async (boundary) => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date'] });
+        const unitId = 'drawing-gesture-lifetime';
+        const { univer, model, render } = createDocDrawingTestBed(unitId);
+        const injector = univer.__getInjector();
+        injector.add([DocDrawingTransformerController]);
+        const controller = injector.get(DocDrawingTransformerController);
+        const updates = vi.spyOn(controller as unknown as {
+            _updateMultipleDrawingDocTransform(objects: Map<string, Rect>): void;
+        }, '_updateMultipleDrawingDocTransform');
+        const objects = new Map(['a', 'b'].map((id) => {
+            const key = getDrawingShapeKeyByDrawingSearch(createDocDrawing(unitId, id));
+            const object = new Rect(key, { left: 20, top: 30, width: 40, height: 30 });
+            render.scene.addObject(object);
+            return [key, object] as const;
+        }));
+        const gesture = render.scene.getTransformerByCreate() as unknown as {
+            _changeStart$: Subject<IChangeObserverConfig>;
+            _changing$: Subject<IChangeObserverConfig>;
+            _changeEnd$: Subject<IChangeObserverConfig>;
+        };
+        const event: IChangeObserverConfig = { objects, type: 2 };
+        try {
+            injector.get(IDrawingManagerService).addNotification(['a', 'b'].map((id) => createDocDrawing(unitId, id)));
+            gesture._changeStart$.next(event);
+            gesture._changing$.next(event);
+            expect(updates).toHaveBeenCalledTimes(1);
+            vi.advanceTimersByTime(10);
+            objects.forEach((object) => object.transformByState({ left: 45 }));
+            gesture._changing$.next(event);
+            expect(updates).toHaveBeenCalledTimes(1);
+            expect(model.getDrawings()!.a.docTransform.positionH.posOffset).toBe(20);
+
+            if (boundary === 'render') {
+                injector.get(IRenderManagerService).removeRender(unitId);
+            } else if (boundary === 'controller') {
+                controller.dispose();
+            } else if (boundary === 'gesture') {
+                gesture._changeEnd$.next(event);
+            } else {
+                objects.forEach((object) => object.transformByState({ left: 60 }));
+                gesture._changing$.next(event);
+            }
+            await vi.advanceTimersByTimeAsync(60);
+            expect(updates).toHaveBeenCalledTimes({ render: 1, controller: 1, gesture: 2, active: 2 }[boundary]);
+            expect(model.getDrawings()!.a.docTransform.positionH.posOffset).toBe({ render: 20, controller: 20, gesture: 45, active: 60 }[boundary]);
+
+            if (boundary === 'render') {
+                const recreated = injector.get(IRenderManagerService).createRender(unitId) as RenderUnit;
+                recreated.deactivate();
+                recreated.addRenderDependencies([[DocSkeletonManagerService]]);
+                recreated.with(DocSkeletonManagerService);
+                model.getDrawings()!.a.layoutType = PositionedObjectLayoutType.INLINE;
+                const restored = new Rect(getDrawingShapeKeyByDrawingSearch(createDocDrawing(unitId, 'a')), {
+                    left: 20,
+                    top: 30,
+                    width: 40,
+                    height: 30,
+                });
+                recreated.scene.addObject(restored);
+                injector.get(IDrawingManagerService).addNotification([createDocDrawing(unitId, 'a')]);
+                const transformer = recreated.scene.getTransformerByCreate();
+                transformer.activeAnObject(restored);
+                restored.transformByState({ width: 65 });
+                (transformer as unknown as { _changeEnd$: Subject<IChangeObserverConfig> })._changeEnd$.next({
+                    objects: new Map([[restored.oKey, restored]]),
+                    type: 2,
+                });
+                await vi.advanceTimersByTimeAsync(0);
+                expect(model.getDrawings()!.a.docTransform.size.width).toBe(65);
+            }
+        } finally {
+            univer.dispose();
+            objects.forEach((object) => object.dispose());
+            vi.useRealTimers();
+            vi.restoreAllMocks();
+        }
     });
 });

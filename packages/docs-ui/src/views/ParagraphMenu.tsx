@@ -33,6 +33,7 @@ import {
     DataStreamTreeTokenType,
     DocumentBlockRangeType,
     ICommandService,
+    ILogService,
     IUniverInstanceService,
     JSONX,
     LocaleService,
@@ -876,10 +877,12 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     const targetRangeRef = useRef<ITextRangeWithStyle | null>(null);
     const dragTargetOffsetRef = useRef<number | null>(null);
     const dragRangeRef = useRef<{ startOffset: number; endOffset: number } | null>(null);
+    const dragCleanupRef = useRef<(() => void) | null>(null);
     const isDraggingRef = useRef(false);
     const openMenuRef = useRef<() => void>(() => undefined);
     const hoverOpenSchedulerRef = useRef(createParagraphMenuHoverOpenScheduler(() => openMenuRef.current()));
     const commandService = useDependency(ICommandService);
+    const logService = useDependency(ILogService);
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
@@ -900,14 +903,24 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     const doc = univerInstanceService.getUnit<DocumentDataModel>(popup.unitId, UniverInstanceType.UNIVER_DOC);
     const docParagraphMenuService = renderUnit?.with(DocParagraphMenuService);
     const docEventManagerService = renderUnit?.with(DocEventManagerService);
-    const activeTarget = useObservable(docParagraphMenuService?.activeTarget$);
+    const isFocusedTableMenu = popup.extraProps?.focusedTableMenu === true;
+    const activeTarget = useObservable(isFocusedTableMenu
+        ? docParagraphMenuService?.focusedTableTarget$
+        : docParagraphMenuService?.activeTarget$);
     const slashMenuRequest = useObservable(docParagraphMenuService?.slashMenuRequest$);
     const paragraph = useObservable(docEventManagerService?.hoverParagraph$);
     const paragraphLeft = useObservable(docEventManagerService?.hoverParagraphLeft$);
-    const rawActiveTarget = activeTarget ?? docParagraphMenuService?.activeTarget;
-    const currentActiveTarget = tableBlockOnly
-        ? rawActiveTarget?.kind === 'table' ? rawActiveTarget : null
-        : rawActiveTarget?.kind === 'table' ? null : rawActiveTarget;
+    const getActiveTarget = () => {
+        if (isFocusedTableMenu) {
+            return docParagraphMenuService?.focusedTableTarget ?? activeTarget;
+        }
+        return docParagraphMenuService?.activeTarget ?? activeTarget;
+    };
+    const setMenuInteractionActive = (active: boolean) => {
+        docParagraphMenuService?.setParagraphMenuActive(active, isFocusedTableMenu);
+    };
+    const rawActiveTarget = getActiveTarget();
+    const currentActiveTarget = (rawActiveTarget?.kind === 'table') === tableBlockOnly ? rawActiveTarget : null;
     const activeParagraphBound = currentActiveTarget?.paragraph ?? docParagraphMenuService?.activeParagraph ?? paragraph ?? paragraphLeft;
     const startIndex = activeParagraphBound?.startIndex;
     const dataStream = doc?.getBody()?.dataStream ?? '';
@@ -974,13 +987,36 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     // Service-driven dismissal (for example scrolling) can unmount the entire popup.
     useLayoutEffect(() => restoreMenuFocus, [restoreMenuFocus]);
 
-    const handleHideMenu = () => {
+    const handleHideMenu = useCallback(() => {
+        hoverOpenSchedulerRef.current.cancel();
         restoreMenuFocus();
         setVisible(false);
         setOpenMode('pointer');
         targetRangeRef.current = null;
-        setParagraphMenuInteractionActive(docParagraphMenuService, false);
-    };
+        docParagraphMenuService?.setParagraphMenuActive(false, isFocusedTableMenu);
+    }, [docParagraphMenuService, isFocusedTableMenu, restoreMenuFocus]);
+
+    useEffect(() => {
+        if (!isFocusedTableMenu || !docParagraphMenuService) {
+            return;
+        }
+        const subscription = docParagraphMenuService.focusedTableMenuDismiss$.subscribe(handleHideMenu);
+        const ownerDocument = popup.canvasElement.ownerDocument;
+        const handleKeydown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                event.stopPropagation();
+                handleHideMenu();
+            }
+        };
+        if (visible) {
+            ownerDocument.addEventListener('keydown', handleKeydown, true);
+        }
+        return () => {
+            subscription.unsubscribe();
+            ownerDocument.removeEventListener('keydown', handleKeydown, true);
+        };
+    }, [docParagraphMenuService, isFocusedTableMenu, handleHideMenu, popup.canvasElement, visible]);
 
     const clearHideTimer = () => {
         if (hideTimerRef.current != null) {
@@ -1010,8 +1046,8 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
             return;
         }
 
-        const latestTarget = docParagraphMenuService?.activeTarget ?? activeTarget;
-        setParagraphMenuInteractionActive(docParagraphMenuService, true);
+        const latestTarget = getActiveTarget();
+        setMenuInteractionActive(true);
         const targetRange = latestTarget
             ? {
                 ...latestTarget.menuRange,
@@ -1078,7 +1114,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     };
 
     const unwrapActiveBlockRange = async () => {
-        const latestTarget = docParagraphMenuService?.activeTarget ?? activeTarget;
+        const latestTarget = getActiveTarget();
         if (!latestTarget || latestTarget.kind !== 'blockRange' || !latestTarget.blockRange || !doc?.getBody()) {
             return null;
         }
@@ -1111,7 +1147,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     };
 
     const executeParagraphMenuOption = async (option: IValueOption) => {
-        const latestTarget = docParagraphMenuService?.activeTarget ?? activeTarget;
+        const latestTarget = getActiveTarget();
         const targetRange = getTargetSelectionRange(latestTarget, activeParagraphBound ?? undefined);
         const blockRange = getBlockSelectionRange(latestTarget, activeParagraphBound ?? undefined);
         const formattingRange = getParagraphFormattingRange(latestTarget, activeParagraphBound ?? undefined);
@@ -1273,16 +1309,17 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     const resolvedParagraphMenuType = openMode === 'slash' ? DOC_PARAGRAPH_T_INSERT_MENU_ID : paragraphMenuType;
 
     useEffect(() => () => {
+        dragCleanupRef.current?.();
         if (hideTimerRef.current != null) {
             window.clearTimeout(hideTimerRef.current);
             hideTimerRef.current = null;
         }
         hoverOpenSchedulerRef.current.cancel();
-        setParagraphMenuInteractionActive(docParagraphMenuService, false);
-    }, []);
+        docParagraphMenuService?.setParagraphMenuActive(false, isFocusedTableMenu);
+    }, [docParagraphMenuService, isFocusedTableMenu]);
 
     useEffect(() => {
-        if (!slashMenuRequest || handledSlashRequestNonceRef.current >= slashMenuRequest.nonce) {
+        if (tableBlockOnly || !slashMenuRequest || handledSlashRequestNonceRef.current >= slashMenuRequest.nonce) {
             return;
         }
 
@@ -1291,7 +1328,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
         clearHideTimer();
         isMouseOver.current = false;
         handleOpenSlashMenu(slashMenuRequest);
-    }, [slashMenuRequest]);
+    }, [slashMenuRequest, tableBlockOnly]);
 
     if (!currentActiveTarget) {
         return null;
@@ -1301,20 +1338,22 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
         <>
             <div
                 data-u-comp="paragraph-menu"
+                data-u-table-menu={tableBlockOnly ? 'true' : undefined}
+                data-u-focused-table-menu={isFocusedTableMenu ? 'true' : undefined}
                 ref={anchorRef}
                 className={clsx(`
                   univer-mr-1 univer-inline-flex univer-h-7 univer-cursor-pointer univer-items-center univer-gap-1
-                  univer-rounded-md univer-border univer-border-gray-200 univer-bg-gray-0 univer-px-2 univer-py-0
-                  univer-shadow-sm univer-transition-colors
+                  univer-rounded-md univer-border univer-border-solid univer-border-gray-200 univer-bg-gray-0
+                  univer-px-2 univer-py-0 univer-shadow-sm univer-transition-colors
                   hover:univer-bg-gray-50 hover:univer-shadow-md
-                  dark:!univer-border-gray-700 dark:!univer-bg-gray-900
+                  dark:!univer-border-gray-600 dark:!univer-bg-gray-900
                   dark:hover:!univer-bg-gray-800
                 `, {
                     'univer-bg-gray-100 univer-shadow-md dark:!univer-bg-gray-800': visible,
                 })}
                 onMouseEnter={(e) => {
                     popup.onPointerEnter?.(e);
-                    setParagraphMenuInteractionActive(docParagraphMenuService, true);
+                    setMenuInteractionActive(true);
                     isMouseOver.current = true;
                     scheduleOpenMenu();
                 }}
@@ -1350,7 +1389,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                         aria-label={localeService.t<LocaleKey>('docs-ui.doc.blockMenu.dragBlock')}
                         title={localeService.t<LocaleKey>('docs-ui.doc.blockMenu.dragBlock')}
                         onPointerDown={(event) => {
-                            const latestTarget = docParagraphMenuService?.activeTarget ?? activeTarget;
+                            const latestTarget = getActiveTarget();
                             const moveRange = latestTarget?.moveRange;
                             if (!moveRange || !latestTarget?.draggable) {
                                 return;
@@ -1388,6 +1427,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                                 window.removeEventListener('pointerup', handlePointerUp);
                                 window.removeEventListener('pointercancel', handlePointerCancel);
                                 window.removeEventListener('blur', handleWindowBlur);
+                                dragCleanupRef.current = null;
                                 const range = dragRangeRef.current;
                                 const targetOffset = dragTargetOffsetRef.current;
                                 dragRangeRef.current = null;
@@ -1405,7 +1445,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                                         unitId: popup.unitId,
                                         sourceRange: range,
                                         targetOffset,
-                                    });
+                                    }).catch((error) => logService.error(error));
                                 }
                             };
                             const handlePointerUp = (upEvent: PointerEvent) => {
@@ -1427,6 +1467,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                                 finishDrag(false);
                             };
 
+                            dragCleanupRef.current = () => finishDrag(false);
                             window.addEventListener('pointermove', handlePointerMove);
                             window.addEventListener('pointerup', handlePointerUp);
                             window.addEventListener('pointercancel', handlePointerCancel);
@@ -1445,7 +1486,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                     // Keep hover continuity when the pointer crosses the tiny dead zone between trigger and popup.
                     onMouseEnter={(e) => {
                         popup.onPointerEnter?.(e);
-                        setParagraphMenuInteractionActive(docParagraphMenuService, true);
+                        setMenuInteractionActive(true);
                         isMouseOver.current = true;
                         clearHideTimer();
                     }}
@@ -1470,7 +1511,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                         }}
                         onMouseEnter={(e) => {
                             popup.onPointerEnter?.(e);
-                            setParagraphMenuInteractionActive(docParagraphMenuService, true);
+                            setMenuInteractionActive(true);
                             isMouseOver.current = true;
                             clearHideTimer();
                         }}
@@ -1489,7 +1530,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                             autoFocusTarget={openMode === 'slash' ? 'container' : undefined}
                             suppressHoverUntilPointerMove={openMode === 'slash'}
                             onMenuPointerEnter={() => {
-                                setParagraphMenuInteractionActive(docParagraphMenuService, true);
+                                setMenuInteractionActive(true);
                                 isMouseOver.current = true;
                                 clearHideTimer();
                             }}
@@ -1503,7 +1544,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                             onOptionSelect={async (params) => {
                                 const targetRange = targetRangeRef.current ?? getParagraphMenuTargetRange(activeParagraphBound);
                                 const { commandId, params: commandParams } = getParagraphMenuCommand(params, targetRange);
-                                const latestTarget = docParagraphMenuService?.activeTarget ?? activeTarget;
+                                const latestTarget = getActiveTarget();
 
                                 if (latestTarget?.kind === 'table' && commandId && targetRange) {
                                     univerInstanceService.focusUnit(popup.unitId);

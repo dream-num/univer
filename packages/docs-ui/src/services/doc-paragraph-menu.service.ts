@@ -46,7 +46,7 @@ import {
     getDocumentEditTargetObjectIds,
 } from '@univerjs/docs';
 import { DocumentEditArea } from '@univerjs/engine-render';
-import { BehaviorSubject, combineLatest, first, throttleTime } from 'rxjs';
+import { BehaviorSubject, combineLatest, first, Subject, throttleTime } from 'rxjs';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
 import { isHorizontalLineParagraph } from '../utils/horizontal-line';
 import {
@@ -149,6 +149,17 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
 
     private readonly _activeTarget$ = new BehaviorSubject<IDocBlockMenuTarget | null>(null);
     readonly activeTarget$ = this._activeTarget$.asObservable();
+    private _focusedTableMenu: {
+        target: IDocBlockMenuTarget;
+        bound: ITableBound;
+        disposable: INeedCheckDisposable;
+        active: boolean;
+    } | null = null;
+
+    private readonly _focusedTableTarget$ = new BehaviorSubject<IDocBlockMenuTarget | null>(null);
+    readonly focusedTableTarget$ = this._focusedTableTarget$.asObservable();
+    private readonly _focusedTableMenuDismiss$ = new Subject<void>();
+    readonly focusedTableMenuDismiss$ = this._focusedTableMenuDismiss$.asObservable();
     private readonly _slashMenuRequest$ = new BehaviorSubject<IDocSlashMenuRequest | null>(null);
     readonly slashMenuRequest$ = this._slashMenuRequest$.asObservable();
     private _isBlockMenuDragging = false;
@@ -163,6 +174,10 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
 
     get activeTarget() {
         return this._paragraphMenu?.target ?? null;
+    }
+
+    get focusedTableTarget() {
+        return this._focusedTableMenu?.target ?? null;
     }
 
     setBlockMenuDragging(isDragging: boolean) {
@@ -203,6 +218,9 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             if (!this._canEditDocument(menu?.target.menuRange, menu?.paragraph.segmentId)) {
                 this._isBlockMenuDragging = false;
                 this.hideParagraphMenu(true);
+            }
+            if (this._focusedTableMenu && !this._canEditDocument(this._focusedTableMenu.target.menuRange)) {
+                this.hideFocusedTableMenu();
             }
         }));
     }
@@ -267,11 +285,12 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         return this._hasExpandedSelectionRanges(this._docSelectionManagerService.getDocRanges());
     }
 
-    setParagraphMenuActive(active: boolean) {
-        if (this._paragraphMenu) {
-            this._paragraphMenu.active = active;
+    setParagraphMenuActive(active: boolean, focusedTable = false) {
+        const menu = focusedTable ? this._focusedTableMenu : this._paragraphMenu;
+        if (menu) {
+            menu.active = active;
         }
-        if (active && this._paragraphMenu) {
+        if (this._paragraphMenu?.active || this._focusedTableMenu?.active) {
             this._menuInteraction ??= this._docLayoutInteractionService.beginInteraction();
         } else {
             this._menuInteraction?.dispose();
@@ -282,6 +301,9 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
     private _init() {
         const handleHoverTarget = (paragraph: Nullable<IMutiPageParagraphBound>, tableBound: Nullable<ITableBound>) => {
             if (this._isBlockMenuDragging) {
+                return;
+            }
+            if (this._focusedTableMenu?.active) {
                 return;
             }
 
@@ -366,6 +388,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             }
 
             lastScrollY = e.scrollY;
+            this._focusedTableMenuDismiss$.next();
             if (this._paragraphMenu?.blockRange) {
                 return;
             }
@@ -391,6 +414,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
                 return;
             }
 
+            this._focusedTableMenuDismiss$.next();
             this.hideParagraphMenu(true);
         }));
 
@@ -589,8 +613,11 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         this._activeTarget$.next(target);
     }
 
-    showTableMenu(tableBound: ITableBound) {
-        if (this._hasExpandedTextSelection()) {
+    showTableMenu(tableBound: ITableBound, focused = false) {
+        if (!focused && this._focusedTableMenu?.target.table?.tableId === tableBound.tableId) {
+            return;
+        }
+        if (!focused && this._hasExpandedTextSelection()) {
             this.hideParagraphMenu(true);
             return;
         }
@@ -598,6 +625,9 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         const body = this._context.unit.getBody();
         const table = body?.tables?.find((item) => item.tableId === tableBound.tableId);
         if (!table) {
+            if (focused) {
+                this.hideFocusedTableMenu();
+            }
             return;
         }
 
@@ -613,21 +643,26 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             },
             moveRange: {
                 startOffset: table.startIndex,
-                endOffset: table.endIndex,
+                // Move the trailing empty paragraph with the table to retain the body terminator at the document end.
+                endOffset: table.endIndex + (body?.dataStream[table.endIndex] === '\r' ? 1 : 0),
             },
             emptyMode: false,
             draggable: true,
         };
         if (!this._canEditDocument(target.menuRange)) {
+            if (focused) {
+                this.hideFocusedTableMenu();
+                return;
+            }
             this.hideParagraphMenu(true);
             return;
         }
 
-        if (this._shouldKeepCurrentCellMenuForTable(table)) {
+        if (!focused && this._shouldKeepCurrentCellMenuForTable(table)) {
             return;
         }
 
-        if (this._paragraphMenu?.target.key === target.key) {
+        if (!focused && this._paragraphMenu?.target.key === target.key) {
             return;
         }
 
@@ -642,8 +677,22 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             firstLine: anchorRect,
         };
 
+        if (focused) {
+            target.paragraph = paragraph;
+            this._showFocusedTableMenu(tableBound, target);
+            return;
+        }
+
+        this._showHoverTableMenu(tableBound, target, paragraph);
+    }
+
+    private _showHoverTableMenu(
+        tableBound: ITableBound,
+        target: IDocBlockMenuTarget,
+        paragraph: IMutiPageParagraphBound
+    ): void {
         this.hideParagraphMenu(true);
-        const getFirstLine = () => getTableAnchorRect(this._docEventManagerService.tableBounds.get(table.tableId) ?? tableBound);
+        const getFirstLine = () => getTableAnchorRect(this._docEventManagerService.tableBounds.get(tableBound.tableId) ?? tableBound);
         const disposable = this._docPopupManagerService.attachPopupToRect(
             getFirstLine,
             {
@@ -666,6 +715,34 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             active: false,
         };
         this._activeTarget$.next(target);
+    }
+
+    private _showFocusedTableMenu(tableBound: ITableBound, target: IDocBlockMenuTarget): void {
+        if (this._focusedTableMenu?.target.key === target.key) {
+            this._focusedTableMenu.target = target;
+            this._focusedTableMenu.bound = tableBound;
+            this._focusedTableTarget$.next(target);
+            return;
+        }
+
+        this.hideFocusedTableMenu();
+        if (this._paragraphMenu?.target.key === target.key) {
+            this.hideParagraphMenu(true);
+        }
+        const getFocusedAnchor = () => getTableAnchorRect(
+            this._docEventManagerService.tableBounds.get(tableBound.tableId) ?? this._focusedTableMenu?.bound ?? tableBound
+        );
+        const disposable = this._docPopupManagerService.attachPopupToRect(getFocusedAnchor, {
+            componentKey: DOC_TABLE_BLOCK_MENU_COMPONENT_KEY,
+            extraProps: { focusedTableMenu: true },
+            constrainToCanvas: true,
+            requiresStableLayout: false,
+            direction: 'top-right',
+            onClickOutside: () => this._focusedTableMenuDismiss$.next(),
+            zIndex: 102,
+        }, this._context.unitId);
+        this._focusedTableMenu = { target, bound: tableBound, disposable, active: false };
+        this._focusedTableTarget$.next(target);
     }
 
     private _shouldKeepCurrentCellMenuForTable(table: ICustomTable): boolean {
@@ -732,12 +809,18 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         if (this._paragraphMenu && ((this._paragraphMenu.disposable.canDispose() || force))) {
             this._paragraphMenu.disposable.dispose();
             this._paragraphMenu = null;
-            this._menuInteraction?.dispose();
-            this._menuInteraction = null;
+            this.setParagraphMenuActive(false);
             this._isSlashMenuActive = false;
             this._slashMenuRequest$.next(null);
             this._activeTarget$.next(null);
         }
+    }
+
+    hideFocusedTableMenu() {
+        this._focusedTableMenu?.disposable.dispose();
+        this._focusedTableMenu = null;
+        this._focusedTableTarget$.next(null);
+        this.setParagraphMenuActive(false, true);
     }
 
     private _canEditDocument(
@@ -752,6 +835,11 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
     }
 
     override dispose(): void {
+        this._isBlockMenuDragging = false;
+        this.hideFocusedTableMenu();
+        this.hideParagraphMenu(true);
+        this._focusedTableTarget$.complete();
+        this._focusedTableMenuDismiss$.complete();
         this._menuInteraction?.dispose();
         this._menuInteraction = null;
         this._dragInteraction?.dispose();

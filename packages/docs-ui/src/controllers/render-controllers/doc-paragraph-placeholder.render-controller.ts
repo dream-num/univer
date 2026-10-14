@@ -422,6 +422,7 @@ export function drawParagraphPlaceholders(
 ): void {
     ctx.save();
     ctx.fillStyle = color;
+    ctx.globalAlpha *= 0.5;
     ctx.textBaseline = 'alphabetic';
 
     for (const placeholder of placeholders) {

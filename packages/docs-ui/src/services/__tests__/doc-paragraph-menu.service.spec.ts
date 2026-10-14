@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import type { RenderUnit } from '@univerjs/engine-render';
 import type { IMutiPageParagraphBound, ITableBound } from '../doc-event-manager.service';
 import {
     BlockType,
@@ -21,24 +23,181 @@ import {
     DOC_RANGE_TYPE,
     DocumentBlockRangeType,
     DocumentBlockType,
+    DocumentFlavor,
+    IPermissionService,
+    LocaleService,
+    LocaleType,
     PresetListType,
+    Univer,
+    UniverInstanceType,
 } from '@univerjs/core';
-import { createDocumentPermissionPoint, getDocumentParagraphPermissionObjectId } from '@univerjs/docs';
-import { DocumentEditArea } from '@univerjs/engine-render';
+import {
+    createDocumentPermissionPoint,
+    DocSkeletonManagerService,
+    getDocumentParagraphPermissionObjectId,
+    setDocumentPermissionValue,
+    UniverDocsPlugin,
+} from '@univerjs/docs';
+import {
+    CanvasColorService,
+    DocumentEditArea,
+    Documents,
+    ICanvasColorService,
+    IRenderManagerService,
+    RenderManagerService,
+    Viewport,
+} from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
+import {
+    CanvasPopupService,
+    ContextMenuService,
+    DesktopLayoutService,
+    ICanvasPopupService,
+    IContextMenuService,
+    ILayoutService,
+} from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
+import { buildMoveDocBlockActions } from '../../commands/commands/doc-block-move.command';
+import { genTableSource } from '../../commands/commands/table/table';
+import enUS from '../../locale/en-US';
 import {
     DOC_PARAGRAPH_MENU_COMPONENT_KEY,
     DOC_TABLE_BLOCK_MENU_COMPONENT_KEY,
 } from '../../views/paragraph-menu/component-keys';
 import {
+    DocEventManagerService,
     getPreferredParagraphBoundsInRange,
     getTableBlockMenuHoverRect,
     getTableHorizontalViewportGeometry,
 } from '../doc-event-manager.service';
 import { DocLayoutInteractionService } from '../doc-layout-interaction.service';
 import { DocParagraphMenuService } from '../doc-paragraph-menu.service';
+import { DocCanvasPopManagerService } from '../doc-popup-manager.service';
+import { DocFloatMenuService } from '../float-menu.service';
+import { DocSelectionRenderService } from '../selection/doc-selection-render.service';
+
+describe('focused table menus with real render services', () => {
+    function createFocusedMenuTestBed() {
+        const context = new Proxy({
+            font: '',
+            measureText: (text: string) => ({ width: text.length * 8, actualBoundingBoxAscent: 8, actualBoundingBoxDescent: 2 }),
+        }, { get: (target, key) => key in target ? Reflect.get(target, key) : () => {} });
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(context as never);
+        const univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: enUS } });
+        onTestFinished(() => {
+            univer.dispose();
+            vi.restoreAllMocks();
+        });
+        univer.registerPlugin(UniverDocsPlugin);
+        const injector = univer.__getInjector();
+        injector.get(LocaleService).setDirection('ltr');
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+        injector.add([ICanvasPopupService, { useClass: CanvasPopupService }]);
+        injector.add([IContextMenuService, { useClass: ContextMenuService }]);
+        injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
+        injector.add([DocCanvasPopManagerService]);
+        const table = genTableSource(1, 1, 200);
+        const tableStream = `${DataStreamTreeTokenType.TABLE_START}${DataStreamTreeTokenType.TABLE_ROW_START}${DataStreamTreeTokenType.TABLE_CELL_START}Cell\r\n${DataStreamTreeTokenType.TABLE_CELL_END}${DataStreamTreeTokenType.TABLE_ROW_END}${DataStreamTreeTokenType.TABLE_END}`;
+        const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+            id: 'focused-table-doc',
+            body: {
+                dataStream: `${tableStream}\rBody\r\n`,
+                paragraphs: [
+                    { startIndex: 7, paragraphId: 'cell' },
+                    { startIndex: tableStream.length, paragraphId: 'after-table' },
+                    { startIndex: tableStream.length + 5, paragraphId: 'body' },
+                ],
+                tables: [{ tableId: table.tableId, startIndex: 0, endIndex: tableStream.length }],
+            },
+            tableSource: { [table.tableId]: table },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 300, height: 400 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const render = injector.get(IRenderManagerService).createRender(model.getUnitId()) as RenderUnit;
+        render.deactivate();
+        render.engine.resizeBySize(300, 400);
+        const canvas = render.engine.getCanvasElement();
+        canvas.style.width = '300px';
+        vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 300, 400));
+        const viewport = new Viewport('viewMain', render.scene, { left: 0, top: 0, width: 300, height: 400 });
+        onTestFinished(() => viewport.dispose());
+        render.addRenderDependencies([[DocSkeletonManagerService], [DocLayoutInteractionService]]);
+        const skeleton = render.with(DocSkeletonManagerService).getSkeleton();
+        const documents = new Documents('focused-table-documents', skeleton);
+        render.mainComponent = documents;
+        render.scene.addObject(documents);
+        render.addRenderDependencies([
+            [DocSelectionRenderService],
+            [DocEventManagerService],
+            [DocFloatMenuService],
+            [DocParagraphMenuService],
+        ]);
+        const service = render.with(DocParagraphMenuService);
+        const bound = render.with(DocEventManagerService).tableBounds.get(table.tableId)!;
+        return { injector, service, bound, render, model };
+    }
+
+    it('keeps a focused table trigger independent of paragraph hover and closes each popup independently', () => {
+        const { injector, service, bound, render, model } = createFocusedMenuTestBed();
+        const popups = injector.get(ICanvasPopupService);
+        service.showTableMenu(bound, true);
+        expect(service.focusedTableTarget?.table?.tableId).toBe(bound.tableId);
+        expect(service.focusedTableTarget?.moveRange.endOffset)
+            .toBe(service.focusedTableTarget!.table!.endIndex + 1);
+        const sourceRange = service.focusedTableTarget!.moveRange;
+        const snapshot = model.getSnapshot();
+        const moved = buildMoveDocBlockActions({
+            documentData: snapshot,
+            sourceRange,
+            targetOffset: snapshot.body!.dataStream.length - 1,
+        });
+        expect(moved.nextDocumentData.body!.dataStream.endsWith('\r\n')).toBe(true);
+        const restored = buildMoveDocBlockActions({
+            documentData: moved.nextDocumentData,
+            sourceRange: moved.movedRange,
+            targetOffset: sourceRange.startOffset,
+        });
+        expect(restored.nextDocumentData.body).toEqual(snapshot.body);
+        service.showParagraphMenu(createParagraphBound({ paragraphStart: 3, paragraphEnd: 7, startIndex: 7 }));
+        expect(service.activeTarget?.kind).toBe(DocumentBlockType.PARAGRAPH);
+        expect(popups.popups).toHaveLength(2);
+        service.setParagraphMenuActive(true, true);
+        service.hideParagraphMenu(true);
+        expect(popups.popups).toHaveLength(1);
+        expect(render.with(DocLayoutInteractionService).isActive).toBe(true);
+        const dismiss = vi.fn();
+        const subscription = service.focusedTableMenuDismiss$.subscribe(dismiss);
+        onTestFinished(() => subscription.unsubscribe());
+        popups.popups[0][1].onClickOutside?.(new PointerEvent('pointerdown'));
+        expect(dismiss).toHaveBeenCalledOnce();
+        expect(service.focusedTableTarget?.table?.tableId).toBe(bound.tableId);
+        service.hideFocusedTableMenu();
+        expect(popups.popups).toHaveLength(0);
+        expect(render.with(DocLayoutInteractionService).isActive).toBe(false);
+    });
+
+    it('releases focused popups on permission loss and service disposal', () => {
+        const { injector, service, bound } = createFocusedMenuTestBed();
+        const popups = injector.get(ICanvasPopupService);
+        service.showTableMenu(bound, true);
+        setDocumentPermissionValue(injector.get(IPermissionService), 'focused-table-doc', 'focused-table-doc', UnitAction.Edit, false);
+        expect(service.focusedTableTarget).toBeNull();
+        expect(popups.popups).toHaveLength(0);
+        setDocumentPermissionValue(injector.get(IPermissionService), 'focused-table-doc', 'focused-table-doc', UnitAction.Edit, true);
+        service.showTableMenu(bound, true);
+        expect(popups.popups).toHaveLength(1);
+        service.dispose();
+        expect(popups.popups).toHaveLength(0);
+    });
+});
 
 describe('DocParagraphMenuService', () => {
     it('shows the paragraph menu for empty paragraphs', () => {

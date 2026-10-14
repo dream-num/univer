@@ -175,6 +175,7 @@ export { scrollDocsTableLikeCustomBlockLive } from './embed-docs-custom-block-sc
 export type { IDocsTableLikeCustomBlockScrollOptions } from './embed-docs-custom-block-scroll';
 export { resolveDocsCustomBlockRenderViewport } from './embed-host-anchor';
 export type { IDocsCustomBlockLayoutViewport, IDocsCustomBlockRenderViewportParams } from './embed-host-anchor';
+export { ParagraphSettingMenuFactory } from './menu/context-menu';
 export {
     AlignMenuItemFactory,
     BackgroundColorSelectorMenuItemFactory,

@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'جارٍ استعادة تخطيط المستند…',
         },
         toolbar: {
+            zoom: 'التكبير والتصغير',
+            fullscreen: 'ملء الشاشة',
             font: 'خط',
             fontSize: 'حجم الخط',
             bold: 'غامق',

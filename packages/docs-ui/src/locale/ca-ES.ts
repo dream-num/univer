@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'S’està restaurant el disseny del document…',
         },
         toolbar: {
+            zoom: 'Zoom',
+            fullscreen: 'Pantalla completa',
             font: 'Tipus de lletra',
             fontSize: 'Mida de lletra',
             bold: 'Negreta',

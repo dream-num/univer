@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: '正在恢復文件排版…',
         },
         toolbar: {
+            zoom: '縮放',
+            fullscreen: '全螢幕',
             font: '字型',
             fontSize: '字號',
             bold: '粗體',

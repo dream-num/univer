@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'Restaurando el diseño del documento…',
         },
         toolbar: {
+            zoom: 'Zoom',
+            fullscreen: 'Pantalla completa',
             font: 'Fuente',
             fontSize: 'Tamaño de fuente',
             bold: 'Negrita',

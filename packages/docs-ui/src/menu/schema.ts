@@ -15,7 +15,14 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { ContextMenuGroup, ContextMenuPosition, RibbonInsertGroup, RibbonStartGroup } from '@univerjs/ui';
+import {
+    ContextMenuGroup,
+    ContextMenuPosition,
+    RibbonInsertGroup,
+    RibbonStartGroup,
+    RibbonViewGroup,
+    ToggleFullscreenOperation,
+} from '@univerjs/ui';
 import {
     DocCopyCommand,
     DocCopyCurrentParagraphCommand,
@@ -103,6 +110,7 @@ import {
     TableDeleteMenuItemFactory,
     TableInsertMenuItemFactory,
 } from './context-menu';
+import { DOC_ZOOM_RATIO_MENU_ID, DocFullscreenMenuItemFactory, DocZoomRatioMenuItemFactory } from './display.menu';
 import {
     AlignCenterMenuItemFactory,
     AlignJustifyMenuItemFactory,
@@ -395,6 +403,18 @@ export const menuSchema: MenuSchemaType = {
             order: 6,
             gridLayout: { row: 2, column: 3 },
             menuItemFactory: SymbolPickerMenuItemFactory,
+        },
+    },
+    [RibbonViewGroup.DISPLAY]: {
+        [DOC_ZOOM_RATIO_MENU_ID]: {
+            order: 0,
+            gridLayout: { row: 1, column: 1 },
+            menuItemFactory: DocZoomRatioMenuItemFactory,
+        },
+        [ToggleFullscreenOperation.id]: {
+            order: 1,
+            gridLayout: { row: 2, column: 1 },
+            menuItemFactory: DocFullscreenMenuItemFactory,
         },
     },
     [ContextMenuPosition.MAIN_AREA]: {

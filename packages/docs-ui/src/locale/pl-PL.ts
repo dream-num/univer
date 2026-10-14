@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'Przywracanie układu dokumentu…',
         },
         toolbar: {
+            zoom: 'Powiększenie',
+            fullscreen: 'Pełny ekran',
             font: 'Czcionka',
             fontSize: 'Rozmiar czcionki',
             bold: 'Pogrubienie',

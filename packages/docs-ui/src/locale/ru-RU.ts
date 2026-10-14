@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'Восстановление макета документа…',
         },
         toolbar: {
+            zoom: 'Масштаб',
+            fullscreen: 'Полноэкранный режим',
             font: 'Шрифт',
             fontSize: 'Размер шрифта',
             bold: 'Полужирный',

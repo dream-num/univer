@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'Restauration de la mise en page du document…',
         },
         toolbar: {
+            zoom: 'Zoom',
+            fullscreen: 'Plein écran',
             font: 'Police',
             fontSize: 'Taille de la police',
             bold: 'Gras',

@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'Memulihkan tata letak dokumen…',
         },
         toolbar: {
+            zoom: 'Zoom',
+            fullscreen: 'Layar penuh',
             font: 'Font',
             fontSize: 'Ukuran font',
             bold: 'Tebal',

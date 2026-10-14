@@ -192,6 +192,7 @@ export function CalculationOptionsMenuItemFactory(accessor: IAccessor): IMenuIte
     return {
         id: CalculationOptionsOperation.id,
         type: MenuItemType.BUTTON,
+        icon: 'CalculationOptionsIcon',
         title: 'sheets-formula-ui.calculation.title',
         tooltip: 'sheets-formula-ui.calculation.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),

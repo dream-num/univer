@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: '텍스트 회전',
             },
             toggleGridlines: '눈금선 표시/숨기기',
+            zoom: '확대/축소',
             fullscreen: '전체 화면',
         },
         align: {

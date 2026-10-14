@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'Rotation du texte',
             },
             toggleGridlines: 'Activer/désactiver le quadrillage',
+            zoom: 'Zoom',
             fullscreen: 'Plein écran',
         },
         align: {

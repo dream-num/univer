@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'Girar text',
             },
             toggleGridlines: 'Alternar línies de quadrícula',
+            zoom: 'Zoom',
             fullscreen: 'Pantalla completa',
         },
         align: {

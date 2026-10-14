@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'تدوير النص',
             },
             toggleGridlines: 'تبديل خطوط الشبكة',
+            zoom: 'التكبير والتصغير',
             fullscreen: 'ملء الشاشة',
         },
         align: {

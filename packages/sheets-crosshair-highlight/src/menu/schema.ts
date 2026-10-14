@@ -20,10 +20,10 @@ import { ToggleCrosshairHighlightOperation } from '../commands/operations/operat
 import { CrosshairHighlightMenuItemFactory } from './crosshair.menu';
 
 export const menuSchema: MenuSchemaType = {
-    [RibbonViewGroup.VISIBILITY]: {
+    [RibbonViewGroup.DISPLAY]: {
         [ToggleCrosshairHighlightOperation.id]: {
-            order: 1,
-            gridLayout: { row: 2, column: 1, showLabel: true },
+            order: 2,
+            gridLayout: { row: 2, column: 2 },
             menuItemFactory: CrosshairHighlightMenuItemFactory,
         },
     },

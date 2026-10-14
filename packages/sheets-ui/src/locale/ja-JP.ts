@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: '文字の回転',
             },
             toggleGridlines: 'グリッド線の表示/非表示',
+            zoom: 'ズーム',
             fullscreen: '全画面表示',
         },
         align: {

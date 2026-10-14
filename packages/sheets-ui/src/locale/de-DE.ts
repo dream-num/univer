@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'Text drehen',
             },
             toggleGridlines: 'Gitterlinien ein-/ausblenden',
+            zoom: 'Zoom',
             fullscreen: 'Vollbild',
         },
         align: {

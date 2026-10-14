@@ -51,7 +51,7 @@ export const menuSchema: MenuSchemaType = {
     [RibbonDataGroup.RULES]: {
         [DATA_VALIDATION_MENU_ID]: {
             order: 0,
-            gridLayout: { row: 1, column: 1, showLabel: true },
+            gridLayout: { row: 1, column: 1 },
             menuItemFactory: dataValidationMenuFactory,
             [OpenValidationPanelOperation.id]: {
                 order: 0,

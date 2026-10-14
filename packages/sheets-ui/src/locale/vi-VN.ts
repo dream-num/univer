@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'Xoay văn bản',
             },
             toggleGridlines: 'Chuyển đổi đường lưới',
+            zoom: 'Thu phóng',
             fullscreen: 'Toàn màn hình',
         },
         align: {

@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'Rotazione testo',
             },
             toggleGridlines: 'Mostra/Nascondi griglia',
+            zoom: 'Zoom',
             fullscreen: 'Schermo intero',
         },
         align: {

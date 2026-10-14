@@ -99,6 +99,7 @@ import {
     VerticalIntegrationIcon,
     VerticalTextIcon,
     WriteIcon,
+    ZoomInIcon,
 } from '@univerjs/icons';
 
 export const sheetsUIIcons: IconMap = {
@@ -185,4 +186,5 @@ export const sheetsUIIcons: IconMap = {
     VerticalIntegrationIcon,
     VerticalTextIcon,
     WriteIcon,
+    ZoomInIcon,
 };

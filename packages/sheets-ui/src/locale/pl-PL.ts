@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'Obrót tekstu',
             },
             toggleGridlines: 'Przełącz linie siatki',
+            zoom: 'Powiększenie',
             fullscreen: 'Pełny ekran',
         },
         align: {

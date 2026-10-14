@@ -15,15 +15,13 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import type { IMenuButtonItem } from '@univerjs/ui';
+import type { IMenuSelectorItem } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
 import { SetZoomRatioFromToolbarCommand } from '../commands/commands/set-zoom-ratio-from-toolbar.command';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
-import { SHEET_ZOOM_RANGE } from '../common/keys';
-import { SHEET_ZOOM_INPUT_COMPONENT } from '../views/sheet-slider/SheetZoomInput';
 import { deriveStateFromActiveSheet$ } from './menu-util';
 
 export const ZOOM_RATIO_MENU_ID = 'sheet.menu.zoom-ratio';
@@ -37,7 +35,9 @@ function getZoomRatioValue$(accessor: IAccessor) {
     return deriveStateFromActiveSheet$(univerInstanceService, 100, ({ worksheet }) => new Observable<number>((subscriber) => {
         const update = () => subscriber.next(Math.round(worksheet.getZoomRatio() * 100));
         const disposable = commandService.onCommandExecuted((command) => {
-            if (command.id === SetZoomRatioOperation.id) update();
+            if (command.id === SetZoomRatioOperation.id) {
+                update();
+            }
         });
 
         update();
@@ -45,19 +45,14 @@ function getZoomRatioValue$(accessor: IAccessor) {
     }));
 }
 
-export function ZoomRatioMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey, number> {
+export function ZoomRatioMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey, number> {
     return {
         id: ZOOM_RATIO_MENU_ID,
-        commandId: SetZoomRatioFromToolbarCommand.id,
-        type: MenuItemType.BUTTON,
-        label: {
-            name: SHEET_ZOOM_INPUT_COMPONENT,
-            props: {
-                min: SHEET_ZOOM_RANGE[0],
-                max: SHEET_ZOOM_RANGE[1],
-                shortcuts: ZOOM_RATIO_LIST,
-            },
-        },
+        selectionsCommandId: SetZoomRatioFromToolbarCommand.id,
+        type: MenuItemType.SELECTOR,
+        icon: 'ZoomInIcon',
+        tooltip: 'sheets-ui.toolbar.zoom',
+        selections: ZOOM_RATIO_LIST.map((value) => ({ value, label: `${value}%` })),
         value$: getZoomRatioValue$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };

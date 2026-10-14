@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Popup } from '../Popup';
 import '@testing-library/jest-dom/vitest';
 
 afterEach(() => {
     cleanup();
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
 });
 
 describe('Popup', () => {
-    it('should switch Tailwind transition state with visibility', () => {
+    it('should move the popup on-screen only while visible', () => {
         const mountContainer = document.createElement('div');
         document.body.appendChild(mountContainer);
 
@@ -38,7 +40,8 @@ describe('Popup', () => {
         );
 
         const popup = mountContainer.querySelector('section') as HTMLElement;
-        expect(popup).toHaveClass('univer-scale-y-0', 'univer-opacity-0');
+        expect(Number.parseFloat(popup.style.left)).toBeLessThan(0);
+        expect(Number.parseFloat(popup.style.top)).toBeLessThan(0);
 
         rerender(
             <ConfigProvider mountContainer={mountContainer}>
@@ -48,7 +51,8 @@ describe('Popup', () => {
             </ConfigProvider>
         );
 
-        expect(popup).toHaveClass('univer-scale-y-100', 'univer-opacity-100');
+        expect(Number.parseFloat(popup.style.left)).toBeGreaterThanOrEqual(0);
+        expect(Number.parseFloat(popup.style.top)).toBeGreaterThanOrEqual(0);
 
         mountContainer.remove();
     });
@@ -57,14 +61,8 @@ describe('Popup', () => {
         const mountContainer = document.createElement('div');
         document.body.appendChild(mountContainer);
 
-        Object.defineProperty(window, 'innerWidth', {
-            configurable: true,
-            value: 100,
-        });
-        Object.defineProperty(window, 'innerHeight', {
-            configurable: true,
-            value: 100,
-        });
+        vi.stubGlobal('innerWidth', 100);
+        vi.stubGlobal('innerHeight', 100);
 
         render(
             <ConfigProvider mountContainer={mountContainer}>
@@ -105,26 +103,46 @@ describe('Popup', () => {
         mountContainer.remove();
     });
 
-    it('should move popup off-screen when hidden', async () => {
-        const mountContainer = document.createElement('div');
-        document.body.appendChild(mountContainer);
+    it.each(['below', 'above'] as const)('keeps a %s popup inside the viewport when content height changes', (placementY) => {
+        vi.stubGlobal('innerHeight', 800);
+        vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(208);
+        const height = vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(444);
+        let notifyResize = () => {};
+        const disconnect = vi.fn();
+        vi.stubGlobal('ResizeObserver', class {
+            constructor(callback: () => void) {
+                notifyResize = callback;
+            }
 
-        render(
-            <ConfigProvider mountContainer={mountContainer}>
-                <Popup visible={false} offset={[10, 20]}>
+            observe() {}
+
+            disconnect = disconnect;
+        });
+
+        const { unmount } = render(
+            <ConfigProvider mountContainer={document.body}>
+                <Popup visible offset={[500, 748]} placementY={placementY}>
                     <div>popup-content</div>
                 </Popup>
             </ConfigProvider>
         );
 
-        const popup = mountContainer.querySelector('section.univer-popup') as HTMLElement;
-        expect(popup).toBeInTheDocument();
+        const popup = document.querySelector('section.univer-popup') as HTMLElement;
+        const initialTop = Number.parseFloat(popup.style.top);
+        height.mockReturnValue(578);
+        act(() => notifyResize());
 
-        await waitFor(() => {
-            expect(popup.style.left).toBe('-9997px');
-            expect(popup.style.top).toBe('-9997px');
-        });
+        const expandedTop = Number.parseFloat(popup.style.top);
+        expect(expandedTop).toBeLessThan(initialTop);
+        expect(expandedTop).toBeGreaterThanOrEqual(0);
+        expect(expandedTop + popup.clientHeight).toBeLessThanOrEqual(window.innerHeight);
 
-        mountContainer.remove();
+        height.mockReturnValue(200);
+        act(() => notifyResize());
+        expect(Number.parseFloat(popup.style.top)).toBeGreaterThan(expandedTop);
+        expect(Number.parseFloat(popup.style.top) + popup.clientHeight).toBeLessThanOrEqual(window.innerHeight);
+
+        unmount();
+        expect(disconnect).toHaveBeenCalledOnce();
     });
 });

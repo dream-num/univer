@@ -562,12 +562,10 @@ function dispatchMouseEvent(element: Element, type: string) {
 }
 
 function getRootDeleteAction(panelItem: Element) {
-    const header = panelItem.firstElementChild;
-    const controls = header?.lastElementChild;
-    const action = controls?.lastElementChild;
-    expect(action).toBeInstanceOf(HTMLElement);
+    const action = panelItem.querySelector('button[aria-label="Delete This Comment"]');
+    expect(action).toBeInstanceOf(HTMLButtonElement);
 
-    return action as HTMLElement;
+    return action as HTMLButtonElement;
 }
 
 function waitForTreeRefresh() {

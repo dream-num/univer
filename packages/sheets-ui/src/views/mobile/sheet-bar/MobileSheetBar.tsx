@@ -318,7 +318,6 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                 <div className="univer-grid univer-gap-2">
                     <Input
                         autoFocus
-                        size="large"
                         value={renameValue}
                         onChange={(value) => {
                             setRenameValue(value);

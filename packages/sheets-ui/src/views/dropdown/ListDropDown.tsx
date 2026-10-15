@@ -20,7 +20,7 @@ import type { CSSProperties } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import type { IBaseDropdownProps } from './type';
 import { ColorKit, LocaleService, ThemeService } from '@univerjs/core';
-import { borderClassName, borderTopClassName, clsx, scrollbarClassName } from '@univerjs/design';
+import { borderClassName, borderTopClassName, clsx, Input, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
 import {
     RangeProtectionPermissionEditPoint,
@@ -84,8 +84,8 @@ function SelectList(props: ISelectListProps) {
         return options.filter((item) => lowerFilter ? item.label.toLowerCase().includes(lowerFilter) : true);
     }, [options, lowerFilter]);
 
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setLowerFilter(e.target.value.toLowerCase());
+    const handleSearchChange = (value: string) => {
+        setLowerFilter(value.toLowerCase());
     };
 
     const sheetPermissionCheckController = useDependency(SheetPermissionCheckController);
@@ -111,14 +111,8 @@ function SelectList(props: ISelectListProps) {
         >
             {showSearchOnDropdown && (
                 <div className="univer-box-border univer-flex univer-w-full univer-px-2">
-                    <input
+                    <Input
                         ref={searchRef}
-                        className={clsx(`
-                          univer-w-full univer-rounded-md univer-bg-gray-0 univer-px-2 univer-py-1 univer-text-sm
-                          univer-text-gray-900
-                          focus:univer-border-primary-500 focus:univer-outline-none
-                          dark:!univer-bg-gray-1000 dark:!univer-text-gray-0
-                        `, borderClassName)}
                         type="text"
                         value={lowerFilter}
                         autoFocus
@@ -163,7 +157,9 @@ function SelectList(props: ISelectListProps) {
                     const backgroundColor = isThemeColor
                         ? themeService.getColorFromTheme(item.color!)
                         : item.color;
-                    const isDark = new ColorKit(backgroundColor).isDark();
+                    const color = new ColorKit(backgroundColor);
+                    const hasBackground = Boolean(backgroundColor) && backgroundColor !== 'transparent' && color.getAlpha() > 0;
+                    const isDark = color.isDark();
 
                     return (
                         <div
@@ -181,8 +177,8 @@ function SelectList(props: ISelectListProps) {
                                   univer-inline-flex univer-h-4 univer-w-fit univer-items-center univer-truncate
                                   univer-rounded-full univer-px-1.5 univer-text-xs
                                 `, {
-                                    'univer-text-gray-900': isThemeColor || !isDark,
-                                    'univer-text-gray-0': !isThemeColor && isDark,
+                                    'univer-text-gray-900': hasBackground && (isThemeColor || !isDark),
+                                    'univer-text-gray-0': hasBackground && !isThemeColor && isDark,
                                 })}
                                 style={{ background: backgroundColor }}
                             >
@@ -245,7 +241,9 @@ export function ListDropDown(props: { popup: IPopupWithExtraProps<IListDropdownP
     const { worksheet } = location;
     const [localValue, setLocalValue] = useState(defaultValue);
 
-    if (!worksheet) return null;
+    if (!worksheet) {
+        return null;
+    }
     const cellWidth = (anchorRect?.right ?? 0) - (anchorRect?.left ?? 0);
 
     return (

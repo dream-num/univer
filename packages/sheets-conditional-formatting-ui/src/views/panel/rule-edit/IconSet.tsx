@@ -20,7 +20,7 @@ import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { LocaleKey } from '../../../locale/types';
 import type { IStyleEditorProps } from './type';
 import { get, IUniverInstanceService, LocaleService, set, Tools, UniverInstanceType } from '@univerjs/core';
-import { borderClassName, Checkbox, clsx, Dropdown, InputNumber, Select } from '@univerjs/design';
+import { borderClassName, Checkbox, clsx, Dropdown, Select } from '@univerjs/design';
 import { MoreDownIcon, SlashDoubleIcon } from '@univerjs/icons';
 import {
     CFNumberOperator,
@@ -37,6 +37,7 @@ import {
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useObservable, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { RuleNumberInput } from './RuleNumberInput';
 
 const getIcon = (iconType: IIconSetType, iconId: string | number) => {
     const arr = iconMap[iconType] || [];
@@ -69,7 +70,7 @@ const TextInput = (props: {
             {type !== CFValueType.formula
                 ? (
                     <>
-                        <InputNumber
+                        <RuleNumberInput
                             className={clsx({
                                 'univer-border-red-500': error,
                             })}

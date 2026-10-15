@@ -340,15 +340,6 @@ export const menuSchema: MenuSchemaType = {
             gridLayout: { row: 1, column: 3, rowSpan: 2, showLabel: true },
             menuItemFactory: HeaderFooterMenuItemFactory,
         },
-        // [SwitchDocModeCommand.id]: {
-        //     order: 11,
-        //     menuItemFactory: DocSwitchModeMenuItemFactory,
-        // },
-        [DocOpenPageSettingCommand.id]: {
-            order: 12,
-            gridLayout: { row: 1, column: 4, rowSpan: 2, showLabel: true },
-            menuItemFactory: PageSettingMenuItemFactory,
-        },
     },
     [RibbonInsertGroup.MEDIA]: {
         [TABLE_MENU_ID]: {
@@ -406,14 +397,19 @@ export const menuSchema: MenuSchemaType = {
         },
     },
     [RibbonViewGroup.DISPLAY]: {
-        [DOC_ZOOM_RATIO_MENU_ID]: {
+        [DocOpenPageSettingCommand.id]: {
             order: 0,
-            gridLayout: { row: 1, column: 1 },
+            gridLayout: { row: 1, column: 1, rowSpan: 2, showLabel: true },
+            menuItemFactory: PageSettingMenuItemFactory,
+        },
+        [DOC_ZOOM_RATIO_MENU_ID]: {
+            order: 1,
+            gridLayout: { row: 1, column: 2 },
             menuItemFactory: DocZoomRatioMenuItemFactory,
         },
         [ToggleFullscreenOperation.id]: {
-            order: 1,
-            gridLayout: { row: 2, column: 1 },
+            order: 2,
+            gridLayout: { row: 2, column: 2 },
             menuItemFactory: DocFullscreenMenuItemFactory,
         },
     },

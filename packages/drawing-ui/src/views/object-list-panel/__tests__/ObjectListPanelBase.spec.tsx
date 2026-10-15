@@ -21,12 +21,10 @@ import { LocaleService, LocaleType, Univer } from '@univerjs/core';
 import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../locale/en-US';
 import { MobileObjectListPanel } from '../MobileObjectListPanel';
 import { ObjectListPanelBase } from '../ObjectListPanelBase';
-
-Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, configurable: true });
 
 describe.each([
     { name: 'desktop', PanelComponent: ObjectListPanelBase },
@@ -39,6 +37,7 @@ describe.each([
     let selectableChanges: Array<{ ids: string[]; selectable: boolean }>;
 
     beforeEach(() => {
+        vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
         univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: enUS } });
         univer.__getInjector().get(LocaleService).setDirection('ltr');
         container = document.createElement('div');
@@ -48,15 +47,16 @@ describe.each([
         selectableChanges = [];
     });
 
-    afterEach(() => {
-        act(() => root.unmount());
+    afterEach(async () => {
+        await act(async () => root.unmount());
         container.remove();
         univer.dispose();
+        vi.unstubAllGlobals();
     });
 
-    function render(element: ReactElement) {
-        act(() => root.render(element));
-        return { rerender: (next: ReactElement) => act(() => root.render(next)) };
+    async function render(element: ReactElement) {
+        await act(async () => root.render(element));
+        return { rerender: async (next: ReactElement) => act(async () => root.render(next)) };
     }
 
     function getButton(name: string): HTMLButtonElement {
@@ -67,8 +67,8 @@ describe.each([
         return button;
     }
 
-    function click(button: HTMLButtonElement): void {
-        act(() => button.click());
+    async function click(button: HTMLButtonElement) {
+        await act(async () => button.click());
     }
 
     function panel(items: IObjectListPanelItem[], props: Partial<IObjectListPanelBaseProps> = {}) {
@@ -90,54 +90,72 @@ describe.each([
         );
     }
 
-    it('switches both bulk actions from current model state, including external updates', () => {
+    it('switches both bulk actions from current model state, including external updates', async () => {
         const original = [{ id: 'a', name: 'A', visible: true }, { id: 'b', name: 'B', visible: true }];
-        const view = render(panel(original));
-        click(getButton('Hide all'));
+        const view = await render(panel(original));
+        await click(getButton('Hide all'));
         expect(visibilityChanges).toEqual([{ ids: ['a', 'b'], visible: false }]);
-        click(getButton('Lock all'));
+        await click(getButton('Lock all'));
         expect(selectableChanges).toEqual([{ ids: ['a', 'b'], selectable: false }]);
 
-        view.rerender(panel(original.map((item) => ({ ...item, visible: false, selectable: false }))));
-        click(getButton('Show all'));
-        click(getButton('Unlock all'));
+        await view.rerender(panel(original.map((item) => ({ ...item, visible: false, selectable: false }))));
+        await click(getButton('Show all'));
+        await click(getButton('Unlock all'));
         expect(visibilityChanges[1]).toEqual({ ids: ['a', 'b'], visible: true });
         expect(selectableChanges[1]).toEqual({ ids: ['a', 'b'], selectable: true });
 
-        view.rerender(panel(original));
+        await view.rerender(panel(original));
         expect(getButton('Hide all')).toBeTruthy();
         expect(getButton('Lock all')).toBeTruthy();
     });
 
-    it('includes collapsed children and ignores the search filter when normalizing mixed states', () => {
+    it('includes collapsed children and ignores the search filter when normalizing mixed states', async () => {
         const group = { id: 'group', name: 'Group', visible: true, selectable: false, isGroup: true, expanded: false };
-        render(panel([group], {
+        await render(panel([group], {
             allItems: [group, { id: 'child', visible: false, selectable: true }],
         }));
         const search = container.querySelector<HTMLInputElement>('input[placeholder="Search objects"]')!;
-        act(() => {
+        await act(async () => {
             Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(search, 'unmatched');
             search.dispatchEvent(new Event('input', { bubbles: true }));
         });
-        click(getButton('Show all'));
-        click(getButton('Lock all'));
+        await click(getButton('Show all'));
+        await click(getButton('Lock all'));
         expect(visibilityChanges).toEqual([{ ids: ['group', 'child'], visible: true }]);
         expect(selectableChanges).toEqual([{ ids: ['group', 'child'], selectable: false }]);
     });
 
-    it('excludes unavailable capabilities and disables actions when no targets exist', () => {
+    it('excludes unavailable capabilities and disables actions when no targets exist', async () => {
         const items = [
             { id: 'available', name: 'Available', visible: true },
             { id: 'disabled', name: 'Disabled', visible: false, disabled: true },
             { id: 'unsupported', name: 'Unsupported', visible: false, capabilities: { visible: false, selectable: false } },
         ];
-        const view = render(panel(items));
-        click(getButton('Hide all'));
-        click(getButton('Lock all'));
+        const view = await render(panel(items));
+        await click(getButton('Hide all'));
+        await click(getButton('Lock all'));
         expect(visibilityChanges).toEqual([{ ids: ['available'], visible: false }]);
         expect(selectableChanges).toEqual([{ ids: ['available'], selectable: false }]);
-        view.rerender(panel([]));
+        await view.rerender(panel([]));
         expect(getButton('Show all').disabled).toBe(true);
         expect(getButton('Lock all').disabled).toBe(true);
+    });
+
+    it('commits the description on blur and follows external updates', async () => {
+        const onCommitDescription = vi.fn();
+        const item = { id: 'a', name: 'A', description: 'Original', visible: true };
+        const props = { selectedIds: ['a'], onCommitDescription };
+        const view = await render(panel([item], props));
+        const description = container.querySelector<HTMLTextAreaElement>('textarea')!;
+        await act(async () => {
+            description.focus();
+            Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(description, 'New description');
+            description.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+        expect(onCommitDescription).not.toHaveBeenCalled();
+        await act(async () => description.blur());
+        expect(onCommitDescription).toHaveBeenCalledExactlyOnceWith('a', 'New description');
+        await view.rerender(panel([{ ...item, description: 'External update' }], props));
+        expect(description.value).toBe('External update');
     });
 });

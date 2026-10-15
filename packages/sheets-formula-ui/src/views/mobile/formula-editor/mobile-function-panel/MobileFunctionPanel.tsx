@@ -17,7 +17,7 @@
 import type { IFunctionInfo, ISearchItem } from '@univerjs/engine-formula';
 import type { LocaleKey } from '../../../../locale/types';
 import { LocaleService } from '@univerjs/core';
-import { clsx, scrollbarClassName } from '@univerjs/design';
+import { clsx, Input, scrollbarClassName } from '@univerjs/design';
 import { FunctionType, IDescriptionService } from '@univerjs/engine-formula';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -247,18 +247,11 @@ export function MobileFunctionPanel(props: {
                     : (
                         <>
                             <div className="univer-px-4 univer-pb-3">
-                                <input
+                                <Input
                                     value={query}
                                     aria-label={copy.search}
                                     placeholder={copy.search}
-                                    className="
-                                      univer-box-border univer-h-11 univer-w-full univer-rounded-xl univer-border
-                                      univer-border-solid univer-border-gray-200 univer-bg-gray-50 univer-px-4
-                                      univer-text-base univer-outline-none
-                                      focus:univer-border-primary-500
-                                      dark:!univer-border-gray-700 dark:!univer-bg-gray-800 dark:!univer-text-gray-0
-                                    "
-                                    onChange={(event) => setQuery(event.target.value)}
+                                    onChange={setQuery}
                                 />
                             </div>
                             {!query && (

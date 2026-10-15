@@ -264,31 +264,46 @@ export function getTableClipboardBodySlice(body: IDocumentBody, range: IRectRang
 function getTableCellContentClipboardBodySlice(body: IDocumentBody, start: number, end: number): IDocumentBody {
     const bodySlice = getBodySlice(body, start, end + 2); // +2 for '\r\n in last cell'
 
-    const dataStream = DataStreamTreeTokenType.TABLE_START +
+    const prefix = DataStreamTreeTokenType.TABLE_START +
         DataStreamTreeTokenType.TABLE_ROW_START +
-        DataStreamTreeTokenType.TABLE_CELL_START +
-        bodySlice.dataStream +
+        DataStreamTreeTokenType.TABLE_CELL_START;
+    bodySlice.dataStream = prefix + bodySlice.dataStream +
         DataStreamTreeTokenType.TABLE_CELL_END +
         DataStreamTreeTokenType.TABLE_ROW_END +
         DataStreamTreeTokenType.TABLE_END;
 
-    bodySlice.dataStream = dataStream;
+    const offset = prefix.length;
+    // Every retained metadata offset is relative to the cell content before wrapping.
     bodySlice.textRuns?.forEach((textRun) => {
-        const { st, ed } = textRun;
-        textRun.st = st + 3;
-        textRun.ed = ed + 3;
+        textRun.st += offset;
+        textRun.ed += offset;
     });
-
-    bodySlice.tables?.forEach((table) => {
-        const { startIndex, endIndex } = table;
-        table.startIndex = startIndex + 3;
-        table.endIndex = endIndex + 3;
+    [
+        bodySlice.paragraphs,
+        bodySlice.sectionBreaks,
+        bodySlice.customBlocks,
+        bodySlice.docxRawCustomBlocks,
+        bodySlice.docxRawBlocks,
+    ].forEach((items) => items?.forEach((item) => {
+        item.startIndex += offset;
+    }));
+    [
+        bodySlice.tables,
+        bodySlice.columnGroups,
+        bodySlice.blockRanges,
+        bodySlice.customRanges,
+        bodySlice.customDecorations,
+    ].forEach((ranges) => ranges?.forEach((range) => {
+        range.startIndex += offset;
+        range.endIndex += offset;
+    }));
+    bodySlice.docxExportExcludedRanges?.forEach((range) => {
+        range.start += offset;
+        range.end += offset;
     });
-
-    bodySlice.paragraphs?.forEach((paragraph) => {
-        const { startIndex } = paragraph;
-        paragraph.startIndex = startIndex + 3;
-    });
+    if (bodySlice.renderedPageBreaks) {
+        bodySlice.renderedPageBreaks = bodySlice.renderedPageBreaks.map((index) => index + offset);
+    }
 
     return bodySlice;
 }

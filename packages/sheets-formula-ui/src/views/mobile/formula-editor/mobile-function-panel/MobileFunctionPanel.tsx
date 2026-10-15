@@ -248,7 +248,6 @@ export function MobileFunctionPanel(props: {
                         <>
                             <div className="univer-px-4 univer-pb-3">
                                 <Input
-                                    size="large"
                                     value={query}
                                     aria-label={copy.search}
                                     placeholder={copy.search}

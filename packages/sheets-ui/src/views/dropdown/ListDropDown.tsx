@@ -157,7 +157,9 @@ function SelectList(props: ISelectListProps) {
                     const backgroundColor = isThemeColor
                         ? themeService.getColorFromTheme(item.color!)
                         : item.color;
-                    const isDark = new ColorKit(backgroundColor).isDark();
+                    const color = new ColorKit(backgroundColor);
+                    const hasBackground = Boolean(backgroundColor) && backgroundColor !== 'transparent' && color.getAlpha() > 0;
+                    const isDark = color.isDark();
 
                     return (
                         <div
@@ -175,8 +177,8 @@ function SelectList(props: ISelectListProps) {
                                   univer-inline-flex univer-h-4 univer-w-fit univer-items-center univer-truncate
                                   univer-rounded-full univer-px-1.5 univer-text-xs
                                 `, {
-                                    'univer-text-gray-900': isThemeColor || !isDark,
-                                    'univer-text-gray-0': !isThemeColor && isDark,
+                                    'univer-text-gray-900': hasBackground && (isThemeColor || !isDark),
+                                    'univer-text-gray-0': hasBackground && !isThemeColor && isDark,
                                 })}
                                 style={{ background: backgroundColor }}
                             >
@@ -239,7 +241,9 @@ export function ListDropDown(props: { popup: IPopupWithExtraProps<IListDropdownP
     const { worksheet } = location;
     const [localValue, setLocalValue] = useState(defaultValue);
 
-    if (!worksheet) return null;
+    if (!worksheet) {
+        return null;
+    }
     const cellWidth = (anchorRect?.right ?? 0) - (anchorRect?.left ?? 0);
 
     return (

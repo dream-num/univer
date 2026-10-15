@@ -33,6 +33,8 @@ const locale: typeof enUS = {
             save: '儲存',
         },
         item: {
+            markResolved: '標記為已解決',
+            markUnresolved: '標記為未解決',
             edit: '編輯',
             delete: '刪除',
             more: '更多',

@@ -21,6 +21,7 @@ import { SheetInterceptorService } from '@univerjs/sheets';
 import { TableManager } from '../../models/table-manager';
 import { AddSheetTableMutation } from '../mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from '../mutations/delete-sheet-table.mutation';
+import { SetSheetTableFilterMutation } from '../mutations/set-table-filter.mutation';
 
 export const DeleteSheetTableCommand: ICommand<IDeleteSheetTableParams> = {
     id: 'sheet.command.delete-table',
@@ -68,6 +69,19 @@ export const DeleteSheetTableCommand: ICommand<IDeleteSheetTableParams> = {
                 range: tableConfig.range,
                 options: tableConfig.options,
             },
+        });
+        tableConfig.filters.tableColumnFilterList?.forEach((tableFilter, column) => {
+            if (tableFilter) {
+                undos.push({
+                    id: SetSheetTableFilterMutation.id,
+                    params: {
+                        unitId: params.unitId,
+                        tableId: params.tableId,
+                        column,
+                        tableFilter,
+                    },
+                });
+            }
         });
         undos.push(...interceptorCommands.undos);
 

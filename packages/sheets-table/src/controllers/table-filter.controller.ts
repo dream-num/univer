@@ -54,7 +54,9 @@ export class TableFilterController extends Disposable {
             // Priority must be higher than sheet filtering, because filtering has no next, and those below filtering will not trigger interceptor
             priority: 100,
             handler: (filtered, rowLocation, next) => {
-                if (filtered) return true;
+                if (filtered) {
+                    return true;
+                }
                 const isTableFiltered = this._getTableFilteredOutRows(rowLocation.unitId, rowLocation.subUnitId).has(rowLocation.row);
                 return isTableFiltered ? true : next(isTableFiltered);
             },
@@ -81,6 +83,10 @@ export class TableFilterController extends Disposable {
     }
 
     registerFilterChangeEvent() {
+        this.disposeWithMe(this._tableManager.tableDelete$.subscribe(({ unitId, subUnitId }) => {
+            this._refreshTableFilteredOutRows(unitId, subUnitId);
+            this._zebraCrossingCacheController.updateZebraCrossingCache(unitId, subUnitId);
+        }));
         this.disposeWithMe(
             this._tableManager.tableFilterChanged$.subscribe((event) => {
                 const { unitId, subUnitId, tableId, oldSubUnitId } = event;

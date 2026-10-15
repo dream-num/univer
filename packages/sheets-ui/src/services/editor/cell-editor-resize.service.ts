@@ -58,6 +58,10 @@ export class SheetCellEditorResizeService extends Disposable {
 
     private _editorHeight = 0;
 
+    private _initialEditorSize: Nullable<{ width: number; height: number }> = null;
+
+    private _cellSize: Nullable<{ width: number; height: number }> = null;
+
     constructor(
         @ILayoutService private readonly _layoutService: ILayoutService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
@@ -73,6 +77,8 @@ export class SheetCellEditorResizeService extends Disposable {
             if (!visible) {
                 this._editorWidth = 0;
                 this._editorHeight = 0;
+                this._initialEditorSize = null;
+                this._cellSize = null;
             }
         }));
     }
@@ -107,6 +113,8 @@ export class SheetCellEditorResizeService extends Disposable {
         const { position, documentLayoutObject, canvasOffset, scaleX, scaleY } = param;
 
         const { startX, startY, endX, endY } = position;
+        const cellWidth = endX - startX;
+        const cellHeight = endY - startY;
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, UniverInstanceType.UNIVER_DOC);
 
         if (documentDataModel == null) {
@@ -115,6 +123,7 @@ export class SheetCellEditorResizeService extends Disposable {
 
         const documentSkeleton = this._getEditorSkeleton();
         if (!documentSkeleton) return;
+        this._syncCellSize(cellWidth / scaleX, cellHeight / scaleY);
         // Cell editors are embedded docs with unspecified compatibility mode. Reset before
         // measuring so stale page width from a previous resize does not leak into this editor.
         documentSkeleton.resetInitialWidth();
@@ -132,8 +141,6 @@ export class SheetCellEditorResizeService extends Disposable {
         const { verticalAlign, horizontalAlign, paddingData, fill } = documentLayoutObject;
         actualWidth = actualWidth + (paddingData.l ?? 0) * scaleX + (paddingData.r ?? 0) * scaleX;
         actualHeight = actualHeight + (paddingData.t ?? 0) * scaleY + (paddingData.b ?? 0) * scaleY;
-        const cellWidth = endX - startX;
-        const cellHeight = endY - startY;
         const contentWidth = cellWidth < actualWidth ? Math.ceil(actualWidth) : cellWidth;
         const contentHeight = cellHeight < actualHeight ? Math.ceil(actualHeight) : cellHeight;
         const editorWidth = Math.max(contentWidth, Math.min(this._editorWidth * scaleX, info.maxSize.width));
@@ -177,6 +184,18 @@ export class SheetCellEditorResizeService extends Disposable {
         );
     }
 
+    private _syncCellSize(width: number, height: number) {
+        if (this._cellSize && (
+            Math.abs(this._cellSize.width - width) > 1e-6 ||
+            Math.abs(this._cellSize.height - height) > 1e-6
+        )) {
+            // Refit resized cells while still covering the original worksheet text until the edit is submitted.
+            this._editorWidth = this._initialEditorSize?.width ?? 0;
+            this._editorHeight = this._initialEditorSize?.height ?? 0;
+        }
+        this._cellSize = { width, height };
+    }
+
     /**
      * Mainly used to pre-calculate the width of the editor,
      * to determine whether it needs to be automatically widened.
@@ -200,9 +219,10 @@ export class SheetCellEditorResizeService extends Disposable {
         const maxSize = this._getEditorMaxSize(actualRangeWithCoord, canvasOffset, documentLayoutObject.horizontalAlign);
         if (!maxSize) return;
 
+        // Measure content without alignment margins left over from the previous editor size.
+        documentDataModel?.updateDocumentDataMargin({ l: paddingData.l, t: paddingData.t });
         if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
             documentDataModel?.updateDocumentDataPageSize((endX - startX) / scaleX);
-            documentDataModel?.updateDocumentDataMargin({ l: paddingData.l, t: paddingData.t });
             documentSkeleton.calculate();
             const { actualWidth, actualHeight } = documentSkeleton.getActualSize();
             // The skeleton obtains the original volume, which needs to be multiplied by the magnification factor.
@@ -331,6 +351,9 @@ export class SheetCellEditorResizeService extends Disposable {
         // Keep the visible extent for this edit only; skeleton measurements must still discard stale layout width.
         this._editorWidth = Math.max(this._editorWidth, editorWidth / scaleX);
         this._editorHeight = Math.max(this._editorHeight, physicHeight / scaleY);
+        if (!this._initialEditorSize && this._editorBridgeService.isVisible().visible) {
+            this._initialEditorSize = { width: editorWidth / scaleX, height: physicHeight / scaleY };
+        }
 
         this._addBackground(editorScene, editorWidth / scaleX, editorHeight / scaleY, fill);
 

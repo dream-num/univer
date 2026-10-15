@@ -36,13 +36,14 @@ export interface ISetSelectionFrozenCommandParams {
 export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-selection-frozen',
-    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params) => {
         const { type } = params || {};
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const target = getSheetCommandTarget(univerInstanceService);
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { unitId, subUnitId } = target;
         const commandService = accessor.get(ICommandService);
@@ -62,7 +63,7 @@ export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParam
         let freezedColCount;
 
         if (type === SetSelectionFrozenType.FirstRow) {
-            startRow = sheetViewStartRow + 1; ;
+            startRow = sheetViewStartRow + 1;
             freezedRowCount = 1;
             startColumn = -1;
             freezedColCount = 0;
@@ -82,7 +83,7 @@ export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParam
             if (selectColumn === 0) {
                 selectColumn = 1;
             }
-            const rangeType = range.rangeType;
+            const rangeType = range.rangeType ?? RANGE_TYPE.NORMAL;
 
             if (rangeType === RANGE_TYPE.ROW || type === SetSelectionFrozenType.Row) {
                 // Frozen to Row

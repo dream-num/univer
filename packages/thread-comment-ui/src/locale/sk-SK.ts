@@ -33,6 +33,8 @@ const locale: typeof enUS = {
             save: 'Uložiť',
         },
         item: {
+            markResolved: 'Označiť ako vyriešené',
+            markUnresolved: 'Označiť ako nevyriešené',
             edit: 'Upraviť',
             delete: 'Odstrániť tento komentár',
             more: 'Viac',

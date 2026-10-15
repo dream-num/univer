@@ -33,6 +33,8 @@ const locale: typeof enUS = {
             save: 'Lưu',
         },
         item: {
+            markResolved: 'Đánh dấu là đã giải quyết',
+            markUnresolved: 'Đánh dấu là chưa giải quyết',
             edit: 'Chỉnh sửa',
             delete: 'Xóa',
             more: 'Thêm',

@@ -486,14 +486,14 @@ function getButton(container: HTMLElement, text: string): HTMLButtonElement {
 
 function getResolveAction(container: HTMLElement, commentId: string) {
     const tree = getTree(container, commentId);
-    const header = tree.firstElementChild as HTMLElement | null;
-    const controls = header?.lastElementChild as HTMLElement | null;
-    const action = controls?.firstElementChild;
+    const action = tree.querySelector<HTMLButtonElement>(
+        'button[aria-label="thread-comment-ui.item.markResolved"], button[aria-label="thread-comment-ui.item.markUnresolved"]'
+    );
     if (!action) {
         throw new Error('Resolve action was not found.');
     }
 
-    return action as HTMLElement;
+    return action;
 }
 
 function getRootCommentItem(container: HTMLElement, commentId: string) {
@@ -776,7 +776,7 @@ describe('ThreadCommentTree', () => {
         container = rendered.container;
 
         expect(container.querySelector('button[aria-label="thread-comment-ui.item.more"]')).not.toBeNull();
-        expect(container.querySelector('button[aria-label="thread-comment-ui.filter.status.resolved"]')).not.toBeNull();
+        expect(container.querySelector('button[aria-label="thread-comment-ui.item.markResolved"]')).not.toBeNull();
         expect(container.querySelector('button[aria-label="thread-comment-ui.item.delete"]')).not.toBeNull();
     });
 

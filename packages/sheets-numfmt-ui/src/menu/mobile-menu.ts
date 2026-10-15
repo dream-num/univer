@@ -19,20 +19,12 @@ import type { IMenuSelectorItem } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
 import {
     DEFAULT_TEXT_FORMAT_EXCEL,
-    fromCallback,
-    ICommandService,
-    isDefaultFormat,
-    isPatternEqualWithoutDecimal,
-    IUniverInstanceService,
     LocaleService,
     RegionService,
     UniverInstanceType,
 } from '@univerjs/core';
 import {
     RangeProtectionPermissionEditPoint,
-    RemoveNumfmtMutation,
-    SetNumfmtMutation,
-    SheetsSelectionsService,
     WorkbookEditablePermission,
     WorksheetEditPermission,
     WorksheetSetCellStylePermission,
@@ -46,11 +38,12 @@ import {
     SetPercentCommand,
     SubtractDecimalCommand,
 } from '@univerjs/sheets-numfmt';
-import { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
+import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { filter, merge, Observable } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { SetMobileNumfmtCommand } from '../commands/commands/set-mobile-numfmt.command';
 import { MENU_OPTIONS } from './number-format-options';
+import { getCurrentNumfmtPattern$, getNumberFormatLabelKey } from './numfmt-menu-util';
 
 export const MOBILE_NUMFMT_MENU_ID = 'sheet.menu.mobile.numfmt';
 export const MOBILE_CUSTOM_NUMFMT_COMPONENT = 'sheets-numfmt-ui.mobile.custom-format';
@@ -120,54 +113,15 @@ export function createMobileNumberFormatMenuConfig(currencySymbol: string): IMob
 export function FactoryMobileOtherMenuItem(
     accessor: IAccessor
 ): IMenuSelectorItem<LocaleKey, string> & { mobileNumberFormat: IMobileNumberFormatMenuConfig } {
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const commandService = accessor.get(ICommandService);
     const localeService = accessor.get(LocaleService);
     const regionService = accessor.get(RegionService);
-    const selectionManagerService = accessor.get(SheetsSelectionsService);
-    const commandList = [RemoveNumfmtMutation.id, SetNumfmtMutation.id];
-    const value$ = deriveStateFromActiveSheet$(
-        univerInstanceService,
-        '',
-        ({ workbook, worksheet }) => new Observable((subscribe) =>
-            merge(
-                selectionManagerService.selectionMoveEnd$,
-                regionService.currentRegion$,
-                fromCallback(commandService.onCommandExecuted.bind(commandService)).pipe(
-                    filter(([commandInfo]) => commandList.includes(commandInfo.id))
-                )
-            ).subscribe(() => {
-                const selection = selectionManagerService.getCurrentSelections()?.[0];
-                if (!selection) {
-                    return;
-                }
-
-                const { startRow, startColumn } = selection.range;
-                const numfmtValue = workbook.getStyles().get(worksheet.getCell(startRow, startColumn)?.s)?.n;
-                const pattern = numfmtValue?.pattern;
-                const currencySymbol = getCurrencySymbolByLocale(regionService.getCurrentRegion());
-                let value = localeService.t<LocaleKey>('sheets-numfmt-ui.general');
-
-                if (isDefaultFormat(pattern)) {
-                    subscribe.next(value);
-                    return;
-                }
-
-                if (pattern) {
-                    const item = MENU_OPTIONS(currencySymbol)
-                        .filter((option) => typeof option === 'object' && option.pattern)
-                        .find((option) => isPatternEqualWithoutDecimal(
-                            pattern,
-                            (option as { pattern: string }).pattern
-                        ));
-                    value = item && typeof item === 'object' && item.pattern
-                        ? localeService.t<LocaleKey>(item.label)
-                        : localeService.t<LocaleKey>('sheets-numfmt-ui.moreFmt');
-                }
-
-                subscribe.next(value);
-            })
-        )
+    const value$ = combineLatest([
+        getCurrentNumfmtPattern$(accessor),
+        regionService.currentRegion$,
+        localeService.currentLocale$,
+    ]).pipe(
+        map(([pattern, region]) => localeService.t<LocaleKey>(getNumberFormatLabelKey(pattern, getCurrencySymbolByLocale(region)))),
+        distinctUntilChanged()
     );
 
     return {

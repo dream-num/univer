@@ -37,7 +37,7 @@ import {
     LocaleService,
     toDisposable,
 } from '@univerjs/core';
-import { CURSOR_TYPE } from '@univerjs/engine-render';
+import { CURSOR_TYPE, Vector2 } from '@univerjs/engine-render';
 import {
     SelectRangeCommand,
     SheetRangeThemeModel,
@@ -54,7 +54,6 @@ import {
 } from '@univerjs/sheets-table';
 import {
     ExpandSelectionCommand,
-    getTransformCoord,
     ISheetSelectionRenderService,
     MoveSelectionCommand,
     MoveSelectionEnterAndTabCommand,
@@ -619,14 +618,9 @@ export class SheetTableControlsRenderController extends Disposable implements IR
     }
 
     private _getLocalPoint(evt: IPointerEvent | IMouseEvent): { x: number; y: number } {
-        const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
-        if (skeleton) {
-            return getTransformCoord(evt.offsetX, evt.offsetY, this._context.scene, skeleton);
-        }
-
-        return {
-            x: evt.offsetX,
-            y: evt.offsetY,
-        };
+        const { scene } = this._context;
+        const point = new Vector2(evt.offsetX, evt.offsetY);
+        const viewport = scene.getActiveViewportByCoord(point) ?? scene.getDefaultViewport();
+        return viewport?.transformVector2SceneCoord(point) ?? point;
     }
 }

@@ -17,7 +17,7 @@
 import type { ReactNode } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { clsx, Input, resetButtonClassName, useMobileKeyboardViewportLayout } from '@univerjs/design';
+import { Button, Input, useMobileKeyboardViewportLayout } from '@univerjs/design';
 import { ArrowDownIcon, ArrowUpIcon, CloseIcon, ConfigureTabIcon, SearchIcon } from '@univerjs/icons';
 import { IDialogService, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
@@ -267,22 +267,17 @@ interface IIconButtonProps {
 
 function IconButton(props: IIconButtonProps) {
     return (
-        <button
+        <Button
             type="button"
             aria-label={props.label}
             disabled={props.disabled}
-            className={clsx(resetButtonClassName, `
-              univer-flex univer-size-9 univer-flex-none univer-items-center univer-justify-center univer-rounded-full
-              univer-text-lg univer-text-gray-700
-              active:univer-bg-gray-100
-              disabled:univer-opacity-35
-              dark:!univer-text-gray-200
-              dark:active:!univer-bg-gray-700
-            `)}
+            variant="text"
+            size="icon"
+            className="univer-size-9 univer-flex-none univer-rounded-full"
             onClick={props.onClick}
         >
             {props.children}
-        </button>
+        </Button>
     );
 }
 
@@ -294,19 +289,15 @@ interface IActionButtonProps {
 
 function ActionButton(props: IActionButtonProps) {
     return (
-        <button
+        <Button
             type="button"
             disabled={props.disabled}
-            className={clsx(resetButtonClassName, `
-              univer-h-10 univer-flex-none univer-whitespace-nowrap univer-rounded-lg univer-bg-primary-600 univer-px-3
-              univer-text-sm univer-font-medium univer-text-gray-0
-              active:univer-bg-primary-700
-              disabled:univer-bg-gray-100 disabled:univer-text-gray-400
-              dark:disabled:!univer-bg-gray-700 dark:disabled:!univer-text-gray-500
-            `)}
+            variant="primary"
+            size="large"
+            className="univer-flex-none"
             onClick={props.onClick}
         >
             {props.children}
-        </button>
+        </Button>
     );
 }

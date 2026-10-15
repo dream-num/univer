@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { ReactNode } from 'react';
+import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import type { IDropdownMenuProps } from '../dropdown-menu/DropdownMenu';
 import { MoreDownIcon } from '@univerjs/icons';
 import { useMemo, useState } from 'react';
 import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
+import { Button } from '../button/Button';
 import { DropdownMenu } from '../dropdown-menu/DropdownMenu';
 
 interface IOption {
@@ -33,7 +34,7 @@ interface IOptionSeparator {
     type: 'separator';
 }
 
-export interface ISelectProps {
+export interface ISelectProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children' | 'onChange' | 'value'> {
     className?: string;
 
     /**
@@ -77,16 +78,19 @@ export const selectClassName = clsx(`
   dark:!univer-bg-gray-700 dark:!univer-text-gray-0
 `, borderClassName);
 
+const EMPTY_OPTIONS: NonNullable<ISelectProps['options']> = [];
+
 export function Select(props: ISelectProps) {
     const {
         className,
         value,
         disabled = false,
-        options = [],
+        options = EMPTY_OPTIONS,
         borderless = false,
         side,
         avoidCollisions,
         onChange,
+        ...triggerProps
     } = props;
 
     const [open, setOpen] = useState(false);
@@ -128,7 +132,7 @@ export function Select(props: ISelectProps) {
                 onChange(item);
             },
         }];
-    }, [options]);
+    }, [onChange, options, value]);
 
     const displayValue = useMemo(() => {
         let label = null;
@@ -163,7 +167,10 @@ export function Select(props: ISelectProps) {
             avoidCollisions={avoidCollisions}
             onOpenChange={handleOpenChange}
         >
-            <div
+            <Button
+                {...triggerProps}
+                type="button"
+                disabled={disabled}
                 data-u-comp="select"
                 className={clsx(selectClassName, {
                     'univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-50 dark:!univer-ring-primary-900': open && !borderless,
@@ -173,21 +180,21 @@ export function Select(props: ISelectProps) {
                     'univer-cursor-pointer': !disabled && !open,
                 }, className)}
             >
-                <div
+                <span
                     className={`
-                      univer-flex-1 univer-truncate univer-text-sm univer-text-gray-500
+                      univer-flex-1 univer-truncate univer-text-start univer-text-sm univer-text-gray-500
                       dark:!univer-text-gray-0
                     `}
                 >
                     {displayValue}
-                </div>
+                </span>
                 <MoreDownIcon
                     className={`
                       univer-flex-shrink-0
                       dark:!univer-text-gray-0
                     `}
                 />
-            </div>
+            </Button>
         </DropdownMenu>
     );
 }

@@ -21,9 +21,24 @@ import { Radio } from '../Radio';
 afterEach(cleanup);
 
 describe('Radio', () => {
+    it('keeps named options mutually exclusive using native radio behavior', () => {
+        const { getByLabelText } = render(
+            <>
+                <Radio name="update-mode" value="pages">Page numbers</Radio>
+                <Radio name="update-mode" value="all">Entire table</Radio>
+            </>
+        );
+        const pages = getByLabelText('Page numbers') as HTMLInputElement;
+        const all = getByLabelText('Entire table') as HTMLInputElement;
+        fireEvent.click(pages);
+        fireEvent.click(all);
+        expect(pages.checked).toBe(false);
+        expect(all.checked).toBe(true);
+    });
+
     const component = <Radio value="0">text</Radio>;
 
-    it('click Radio', async () => {
+    it('click Radio', () => {
         const { container } = render(component);
 
         fireEvent.click(container.querySelector('input')!);

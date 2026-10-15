@@ -20,7 +20,7 @@ import type { CSSProperties } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import type { IBaseDropdownProps } from './type';
 import { ColorKit, LocaleService, ThemeService } from '@univerjs/core';
-import { borderClassName, borderTopClassName, clsx, scrollbarClassName } from '@univerjs/design';
+import { borderClassName, borderTopClassName, clsx, Input, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
 import {
     RangeProtectionPermissionEditPoint,
@@ -84,8 +84,8 @@ function SelectList(props: ISelectListProps) {
         return options.filter((item) => lowerFilter ? item.label.toLowerCase().includes(lowerFilter) : true);
     }, [options, lowerFilter]);
 
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setLowerFilter(e.target.value.toLowerCase());
+    const handleSearchChange = (value: string) => {
+        setLowerFilter(value.toLowerCase());
     };
 
     const sheetPermissionCheckController = useDependency(SheetPermissionCheckController);
@@ -111,14 +111,8 @@ function SelectList(props: ISelectListProps) {
         >
             {showSearchOnDropdown && (
                 <div className="univer-box-border univer-flex univer-w-full univer-px-2">
-                    <input
+                    <Input
                         ref={searchRef}
-                        className={clsx(`
-                          univer-w-full univer-rounded-md univer-bg-gray-0 univer-px-2 univer-py-1 univer-text-sm
-                          univer-text-gray-900
-                          focus:univer-border-primary-500 focus:univer-outline-none
-                          dark:!univer-bg-gray-1000 dark:!univer-text-gray-0
-                        `, borderClassName)}
                         type="text"
                         value={lowerFilter}
                         autoFocus

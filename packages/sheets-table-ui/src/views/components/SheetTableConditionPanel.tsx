@@ -18,7 +18,7 @@ import type { ITableFilterItem } from '@univerjs/sheets-table';
 import type { LocaleKey } from '../../locale/types';
 import type { IConditionCompareTypeEnum, IConditionExpect, IConditionInfo, ITableConditionTypeEnumWithoutLogic } from './type';
 import { Injector, LocaleService } from '@univerjs/core';
-import { borderClassName, CascaderList, clsx, DatePicker, DateRangePicker, Dropdown, Input, InputNumber, Select } from '@univerjs/design';
+import { borderClassName, CascaderList, clsx, DatePicker, DateRangePicker, Dropdown, Input, Select } from '@univerjs/design';
 import { MoreDownIcon } from '@univerjs/icons';
 import { TableConditionTypeEnum, TableDateCompareTypeEnum, TableStringCompareTypeEnum } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
@@ -39,6 +39,25 @@ interface IConditionFilterProps {
 export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
     const { conditionInfo, onChange } = props;
     const localeService = useDependency(LocaleService);
+
+    const [numberDraftState, setNumberDraftState] = useState({ value: conditionInfo.info.number, type: conditionInfo.type, compare: conditionInfo.compare, text: String(conditionInfo.info.number ?? '') });
+    if (!Object.is(numberDraftState.value, conditionInfo.info.number) || numberDraftState.type !== conditionInfo.type || numberDraftState.compare !== conditionInfo.compare) {
+        setNumberDraftState({ value: conditionInfo.info.number, type: conditionInfo.type, compare: conditionInfo.compare, text: String(conditionInfo.info.number ?? '') });
+    }
+    const numberDraft = numberDraftState.text;
+    const setNumberDraft = (text: string) => setNumberDraftState({ value: conditionInfo.info.number, type: conditionInfo.type, compare: conditionInfo.compare, text });
+    const [minDraftState, setMinDraftState] = useState({ value: conditionInfo.info.numberRange?.[0], type: conditionInfo.type, compare: conditionInfo.compare, text: String(conditionInfo.info.numberRange?.[0] ?? '') });
+    if (!Object.is(minDraftState.value, conditionInfo.info.numberRange?.[0]) || minDraftState.type !== conditionInfo.type || minDraftState.compare !== conditionInfo.compare) {
+        setMinDraftState({ value: conditionInfo.info.numberRange?.[0], type: conditionInfo.type, compare: conditionInfo.compare, text: String(conditionInfo.info.numberRange?.[0] ?? '') });
+    }
+    const minDraft = minDraftState.text;
+    const setMinDraft = (text: string) => setMinDraftState({ value: conditionInfo.info.numberRange?.[0], type: conditionInfo.type, compare: conditionInfo.compare, text });
+    const [maxDraftState, setMaxDraftState] = useState({ value: conditionInfo.info.numberRange?.[1], type: conditionInfo.type, compare: conditionInfo.compare, text: String(conditionInfo.info.numberRange?.[1] ?? '') });
+    if (!Object.is(maxDraftState.value, conditionInfo.info.numberRange?.[1]) || maxDraftState.type !== conditionInfo.type || maxDraftState.compare !== conditionInfo.compare) {
+        setMaxDraftState({ value: conditionInfo.info.numberRange?.[1], type: conditionInfo.type, compare: conditionInfo.compare, text: String(conditionInfo.info.numberRange?.[1] ?? '') });
+    }
+    const maxDraft = maxDraftState.text;
+    const setMaxDraft = (text: string) => setMaxDraftState({ value: conditionInfo.info.numberRange?.[1], type: conditionInfo.type, compare: conditionInfo.compare, text });
 
     const [conditionVisible, setConditionVisible] = useState(false);
 
@@ -137,13 +156,16 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
                                 />
                             )
                             : (
-                                <InputNumber
+                                <Input
                                     className="univer-h-7 univer-w-full"
-                                    value={conditionInfo.info.number}
-                                    controls={false}
+                                    inputMode="decimal"
+                                    value={numberDraft}
+                                    aria-invalid={numberDraft !== '' && !Number.isFinite(Number(numberDraft))}
+                                    onBlur={() => setNumberDraft(String(conditionInfo.info.number ?? ''))}
                                     onChange={(v) => {
-                                        if (v !== null) {
-                                            handleConditionInfo({ number: v });
+                                        setNumberDraft(v);
+                                        if (v.trim() !== '' && Number.isFinite(Number(v))) {
+                                            handleConditionInfo({ number: Number(v) });
                                         }
                                     }}
                                 />
@@ -176,24 +198,30 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
                 )}
                 {subComponentType === ConditionSubComponentEnum.Inputs && (
                     <div className="univer-flex univer-items-center univer-gap-2">
-                        <InputNumber
+                        <Input
                             className="univer-w-full"
-                            value={conditionInfo.info.numberRange?.[0]}
+                            inputMode="decimal"
+                            value={minDraft}
+                            aria-invalid={minDraft !== '' && !Number.isFinite(Number(minDraft))}
+                            onBlur={() => setMinDraft(String(conditionInfo.info.numberRange?.[0] ?? ''))}
                             onChange={(v) => {
-                                if (v !== null) {
-                                    handleConditionInfo({ numberRange: [v, conditionInfo.info.numberRange?.[1]] });
+                                setMinDraft(v);
+                                if (v.trim() !== '' && Number.isFinite(Number(v))) {
+                                    handleConditionInfo({ numberRange: [Number(v), conditionInfo.info.numberRange?.[1]] });
                                 }
                             }}
-                            controls={false}
                         />
                         <span> - </span>
-                        <InputNumber
+                        <Input
                             className="univer-w-full"
-                            value={conditionInfo.info.numberRange?.[1]}
-                            controls={false}
+                            inputMode="decimal"
+                            value={maxDraft}
+                            aria-invalid={maxDraft !== '' && !Number.isFinite(Number(maxDraft))}
+                            onBlur={() => setMaxDraft(String(conditionInfo.info.numberRange?.[1] ?? ''))}
                             onChange={(v) => {
-                                if (v !== null) {
-                                    handleConditionInfo({ numberRange: [conditionInfo.info.numberRange?.[0], v] });
+                                setMaxDraft(v);
+                                if (v.trim() !== '' && Number.isFinite(Number(v))) {
+                                    handleConditionInfo({ numberRange: [conditionInfo.info.numberRange?.[0], Number(v)] });
                                 }
                             }}
                         />

@@ -18,8 +18,15 @@ import type { ITextStyle, Nullable } from '@univerjs/core';
 import type { ReactNode } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import type { Editor } from '../../services/editor/editor';
-import { BooleanNumber, BuildTextUtils, ICommandService, LocaleService, PresetListType, ThemeService } from '@univerjs/core';
-import { clsx, resetButtonClassName } from '@univerjs/design';
+import {
+    BooleanNumber,
+    BuildTextUtils,
+    ICommandService,
+    LocaleService,
+    PresetListType,
+    ThemeService,
+} from '@univerjs/core';
+import { Button, clsx, MobileColorPicker, MobileDropdown, resetButtonClassName } from '@univerjs/design';
 import {
     BoldIcon,
     ColorWheelMultiIcon,
@@ -64,6 +71,38 @@ export interface IMobileRichTextToolbarProps {
 }
 
 export function MobileRichTextToolbar({ editorId, className }: IMobileRichTextToolbarProps) {
+    function resolveToolbarState(editor: Readonly<Nullable<Editor>>, defaultTextColor: string): {
+        bold: boolean;
+        italic: boolean;
+        underline: boolean;
+        strike: boolean;
+        color: string;
+        bulletList: boolean;
+        orderList: boolean;
+    } {
+        const body = editor?.getDocumentData().body;
+        const ranges = editor?.getSelectionRanges() ?? [];
+        const range = ranges.find((item) => item.isActive) ?? ranges[0];
+        if (!body || !range) {
+            return { bold: false, italic: false, underline: false, strike: false, color: defaultTextColor, bulletList: false, orderList: false };
+        }
+
+        const style: ITextStyle = getStyleInTextRange(body, range, {});
+        const paragraphs = BuildTextUtils.range.getParagraphsInRanges([range], body.paragraphs ?? [], body.dataStream);
+        const listTypes = paragraphs
+            .map((paragraph) => paragraph.bullet?.listType)
+            .filter((listType): listType is string => typeof listType === 'string');
+        return {
+            bold: style.bl === BooleanNumber.TRUE,
+            italic: style.it === BooleanNumber.TRUE,
+            underline: style.ul?.s === BooleanNumber.TRUE,
+            strike: style.st?.s === BooleanNumber.TRUE,
+            color: style.cl?.rgb ?? defaultTextColor,
+            bulletList: Boolean(listTypes.length && listTypes.every((listType) => listType.startsWith(PresetListType.BULLET_LIST))),
+            orderList: Boolean(listTypes.length && listTypes.every((listType) => listType.startsWith(PresetListType.ORDER_LIST))),
+        };
+    }
+
     const commandService = useDependency(ICommandService);
     const editorService = useDependency(IEditorService);
     const localeService = useDependency(LocaleService);
@@ -80,7 +119,9 @@ export function MobileRichTextToolbar({ editorId, className }: IMobileRichTextTo
     }, [editorId, editorService]);
 
     useEffect(() => {
-        if (!editor) return undefined;
+        if (!editor) {
+            return undefined;
+        }
         const subscription = merge(editor.input$, editor.selectionChange$).subscribe(() => setRevision((value) => value + 1));
         return () => subscription.unsubscribe();
     }, [editor]);
@@ -183,28 +224,26 @@ export function MobileRichTextToolbar({ editorId, className }: IMobileRichTextTo
                                 onClick={() => execute(SetInlineFormatTextColorCommand.id, { value: color })}
                             />
                         ))}
-                        <label
-                            aria-label={localeService.t<LocaleKey>('docs-ui.toolbar.textColor.main')}
-                            className={clsx(resetButtonClassName, `
-                              univer-relative univer-flex univer-size-7 univer-items-center univer-justify-center
-                              univer-justify-self-center univer-overflow-hidden univer-rounded-md univer-border-2
-                              univer-border-solid univer-border-transparent
-                              active:univer-scale-95
-                            `)}
+                        <MobileDropdown
+                            overlay={(
+                                <div className="univer-px-4 univer-pb-2" onPointerDown={(event) => event.stopPropagation()}>
+                                    <MobileColorPicker
+                                        value={state.color}
+                                        onChange={(color) => execute(SetInlineFormatTextColorCommand.id, { value: color })}
+                                    />
+                                </div>
+                            )}
                         >
-                            <ColorWheelMultiIcon className="univer-size-6" />
-                            <input
+                            <Button
+                                type="button"
+                                variant="text"
+                                size="icon"
                                 aria-label={localeService.t<LocaleKey>('docs-ui.toolbar.textColor.main')}
-                                className="
-                                  univer-absolute univer-inset-0 univer-size-full univer-cursor-pointer univer-opacity-0
-                                "
-                                type="color"
-                                defaultValue={defaultTextColor}
-                                onChange={(event) => {
-                                    execute(SetInlineFormatTextColorCommand.id, { value: event.target.value });
-                                }}
-                            />
-                        </label>
+                                className="univer-size-7 univer-justify-self-center"
+                            >
+                                <ColorWheelMultiIcon className="!univer-size-6" />
+                            </Button>
+                        </MobileDropdown>
                     </div>
                 )}
         </div>
@@ -228,36 +267,4 @@ function FormatButton(props: {
             <span className="univer-flex univer-size-5 univer-items-center univer-justify-center">{props.icon}</span>
         </button>
     );
-}
-
-function resolveToolbarState(editor: Readonly<Nullable<Editor>>, defaultTextColor: string): {
-    bold: boolean;
-    italic: boolean;
-    underline: boolean;
-    strike: boolean;
-    color: string;
-    bulletList: boolean;
-    orderList: boolean;
-} {
-    const body = editor?.getDocumentData().body;
-    const ranges = editor?.getSelectionRanges() ?? [];
-    const range = ranges.find((item) => item.isActive) ?? ranges[0];
-    if (!body || !range) {
-        return { bold: false, italic: false, underline: false, strike: false, color: defaultTextColor, bulletList: false, orderList: false };
-    }
-
-    const style: ITextStyle = getStyleInTextRange(body, range, {});
-    const paragraphs = BuildTextUtils.range.getParagraphsInRanges([range], body.paragraphs ?? [], body.dataStream);
-    const listTypes = paragraphs
-        .map((paragraph) => paragraph.bullet?.listType)
-        .filter((listType): listType is string => typeof listType === 'string');
-    return {
-        bold: style.bl === BooleanNumber.TRUE,
-        italic: style.it === BooleanNumber.TRUE,
-        underline: style.ul?.s === BooleanNumber.TRUE,
-        strike: style.st?.s === BooleanNumber.TRUE,
-        color: style.cl?.rgb ?? defaultTextColor,
-        bulletList: Boolean(listTypes.length && listTypes.every((listType) => listType.startsWith(PresetListType.BULLET_LIST))),
-        orderList: Boolean(listTypes.length && listTypes.every((listType) => listType.startsWith(PresetListType.ORDER_LIST))),
-    };
 }

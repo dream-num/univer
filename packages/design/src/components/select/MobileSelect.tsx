@@ -38,7 +38,10 @@ export function MobileSelect(props: IMobileSelectProps) {
         disabled = false,
         options = EMPTY_OPTIONS,
         borderless = false,
+        side,
+        avoidCollisions,
         onChange,
+        ...triggerProps
     } = props;
     const [open, setOpen] = useState(false);
     const items: IMobileDropdownMenuProps['items'] = useMemo(() => {
@@ -91,9 +94,12 @@ export function MobileSelect(props: IMobileSelectProps) {
             open={open}
             items={items}
             disabled={disabled}
+            side={side}
+            avoidCollisions={avoidCollisions}
             onOpenChange={setOpen}
         >
             <button
+                {...triggerProps}
                 type="button"
                 disabled={disabled}
                 aria-expanded={open}
@@ -105,14 +111,14 @@ export function MobileSelect(props: IMobileSelectProps) {
                     'univer-cursor-pointer': !disabled,
                 }, className)}
             >
-                <div
+                <span
                     className="
                       univer-flex-1 univer-truncate univer-text-base univer-text-gray-500
                       dark:!univer-text-gray-0
                     "
                 >
                     {displayValue}
-                </div>
+                </span>
                 <MoreDownIcon
                     className="
                       univer-flex-shrink-0

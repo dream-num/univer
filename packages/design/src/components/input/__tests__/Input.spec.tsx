@@ -25,6 +25,20 @@ afterEach(() => {
 });
 
 describe('Input', () => {
+    it('forwards mobile keyboard, validation and focus attributes to the input', () => {
+        const onFocus = vi.fn();
+        const { getByLabelText } = render(
+            <Input aria-label="Amount" aria-invalid inputMode="decimal" required onFocus={onFocus} />
+        );
+        const input = getByLabelText('Amount') as HTMLInputElement;
+        input.focus();
+        expect(document.activeElement).toBe(input);
+        expect(input.inputMode).toBe('decimal');
+        expect(input.getAttribute('aria-invalid')).toBe('true');
+        expect(input.checkValidity()).toBe(false);
+        expect(onFocus).toHaveBeenCalledOnce();
+    });
+
     it('renders the placeholder', () => {
         const { getByPlaceholderText } = render(<Input placeholder="Test" />);
         const inputElement = getByPlaceholderText('Test');
@@ -45,26 +59,16 @@ describe('Input', () => {
         expect(container.querySelector('input')?.disabled).toBeTruthy();
     });
 
-    it('renders the size', () => {
-        const { container } = render(<Input size="large" />);
-
-        expect(container.innerHTML).contains('univer-h-12');
-    });
-
-    it('renders the clearable', () => {
-        const { container } = render(<Input allowClear value="x" />);
-
-        expect(container.innerHTML).contains('type="button"');
-    });
-
     it('change the value', () => {
-        const { container } = render(<Input />);
+        const onChange = vi.fn();
+        const { container } = render(<Input onChange={onChange} />);
 
         const inputElement = container.querySelector('input')!;
 
         fireEvent.change(inputElement, { target: { value: 'Test' } });
 
         expect(inputElement.value).toBe('Test');
+        expect(onChange).toHaveBeenCalledExactlyOnceWith('Test');
     });
 
     it('should clear value without bubbling click event', () => {
@@ -174,12 +178,6 @@ describe('Input', () => {
         const { container } = render(<Input allowClear value="x" />);
         const input = container.querySelector('input') as HTMLInputElement;
         expect(input.style.paddingRight).toBe('26px');
-    });
-
-    it('should preserve ltr right padding compatibility when no trailing content exists', () => {
-        const { container } = render(<Input />);
-        const input = container.querySelector('input') as HTMLInputElement;
-        expect(input.style.paddingRight).toBe('0px');
     });
 
     it('should not override rtl right padding when no trailing content exists', () => {

@@ -15,7 +15,7 @@
  */
 
 import type { ComponentProps, ComponentType, DragEvent, FocusEvent, KeyboardEvent, MouseEvent, ReactNode } from 'react';
-import { Button, clsx, Input, StateIconButton } from '@univerjs/design';
+import { Button, clsx, Input, StateIconButton, Textarea } from '@univerjs/design';
 import {
     ArrowDownIcon,
     ArrowUpIcon,
@@ -771,7 +771,6 @@ export function ObjectDetailsEditor(props: {
                         {labels.name}
                     </span>
                     <InputComponent
-
                         value={draftName}
                         aria-label={labels.nameInput}
                         disabled={disabled}
@@ -799,16 +798,8 @@ export function ObjectDetailsEditor(props: {
                     >
                         {labels.description}
                     </span>
-                    <textarea
-                        className={clsx(descriptionClassName, `
-                          univer-box-border univer-min-h-16 univer-w-full univer-resize-none univer-rounded-md
-                          univer-border univer-border-solid univer-border-gray-200 univer-bg-gray-0 univer-p-2
-                          univer-text-sm univer-text-gray-900 univer-outline-none
-                          focus:univer-border-primary-500 focus:univer-ring-1 focus:univer-ring-primary-100
-                          disabled:univer-cursor-not-allowed disabled:univer-opacity-70
-                          dark:!univer-border-gray-700 dark:!univer-bg-gray-900 dark:!univer-text-gray-100
-                          dark:focus:!univer-ring-primary-900
-                        `)}
+                    <Textarea
+                        className={clsx('univer-min-h-16 univer-resize-none univer-text-sm', descriptionClassName)}
                         value={draftDescription}
                         disabled={disabled}
                         placeholder={labels.descriptionPlaceholder}

@@ -26,6 +26,7 @@ import {
     getSheetDrawingPlacement,
     InsertSheetDrawingCommand,
     ISheetDrawingService,
+    SetSheetDrawingPlacementCommand,
     SheetDrawingAnchorType,
 } from '@univerjs/sheets-drawing';
 import { BehaviorSubject } from 'rxjs';
@@ -115,6 +116,75 @@ describe('SheetDrawingActiveRenderController', () => {
             expect(bed.commandService.syncExecuteCommand(RedoCommandId)).toBe(true);
             expect(read()).toEqual(after);
             expect(manager.getDrawingByParam(drawing)).toEqual(after);
+        } finally {
+            bed.univer.dispose();
+            bed.activated$.complete();
+        }
+    });
+
+    it.each([
+        [SheetDrawingAnchorType.Both, 0, 81.9],
+        [SheetDrawingAnchorType.Position, 0, 81.9],
+        [SheetDrawingAnchorType.None, 0, 81.9],
+        [SheetDrawingAnchorType.Both, 81.9, 0],
+        [SheetDrawingAnchorType.Position, 81.9, 0],
+        [SheetDrawingAnchorType.None, 81.9, 0],
+    ] as const)('reactivates a line and preserves movement undo/redo (%s, %s, %s)', async (anchorType, width, height) => {
+        const bed = createTestBed();
+        try {
+            const from = { row: 3, column: 3, rowOffset: 0, columnOffset: 0 };
+            const sheetTransform = { from, to: { ...from, rowOffset: height, columnOffset: width } };
+            const skeleton = bed.get(SheetSkeletonService).getSkeletonParam(bed.unitId, bed.subUnitId);
+            const drawing: ISheetDrawing = {
+                unitId: bed.unitId,
+                subUnitId: bed.subUnitId,
+                drawingId: 'line',
+                drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+                anchorType,
+                sheetTransform,
+                axisAlignSheetTransform: sheetTransform,
+                transform: drawingPositionToTransform(sheetTransform, skeleton),
+            };
+            expect(await bed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+                unitId: bed.unitId,
+                drawings: [drawing],
+            })).toBe(true);
+            bed.get(SheetDrawingActiveRenderController);
+            const sheetService = bed.get(ISheetDrawingService);
+            const manager = bed.get(IDrawingManagerService);
+            manager.registerDrawingData(bed.unitId, Tools.deepClone(sheetService.getDrawingDataForUnit(bed.unitId)));
+            const reactivate = () => {
+                bed.activated$.next(false);
+                vi.runOnlyPendingTimers();
+                bed.activated$.next(true);
+                vi.runOnlyPendingTimers();
+                const current = Tools.deepClone(sheetService.getDrawingByParam(drawing)!);
+                expect(current.transform).toMatchObject({ width, height });
+                expect(manager.getDrawingByParam(drawing)).toEqual(current);
+                return current;
+            };
+            const before = reactivate();
+            expect(reactivate()).toEqual(before);
+            expect(await bed.commandService.executeCommand(SetSheetDrawingPlacementCommand.id, {
+                unitId: bed.unitId,
+                subUnitId: bed.subUnitId,
+                drawings: [{ drawingId: drawing.drawingId, placement: {
+                    kind: anchorType,
+                    bounds: {
+                        left: before.transform!.left! + 10,
+                        top: before.transform!.top! + 10,
+                        width,
+                        height,
+                    },
+                } }],
+            })).toBe(true);
+            const after = reactivate();
+            expect(after.transform!.left).toBeCloseTo(before.transform!.left! + 10);
+            expect(after.transform!.top).toBeCloseTo(before.transform!.top! + 10);
+            expect(bed.commandService.syncExecuteCommand(UndoCommandId)).toBe(true);
+            expect(reactivate()).toEqual(before);
+            expect(bed.commandService.syncExecuteCommand(RedoCommandId)).toBe(true);
+            expect(reactivate()).toEqual(after);
         } finally {
             bed.univer.dispose();
             bed.activated$.complete();

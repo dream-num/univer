@@ -284,7 +284,7 @@ export const nextMonth = (date: Date, anchorTime: Date = new Date()): boolean =>
     nextMonthStart.setMonth(nextMonthStart.getMonth() + 1, 1);
 
     const monthEnd = new Date(nextMonthStart);
-    monthEnd.setMonth(monthEnd.getMonth() + 1, 0);
+    monthEnd.setMonth(monthEnd.getMonth() + 1);
 
     const dateTime = date.getTime();
 
@@ -298,10 +298,9 @@ export const nextMonth = (date: Date, anchorTime: Date = new Date()): boolean =>
  * @returns {boolean} return the date is match
  */
 export const lastMonth = (date: Date, anchorTime: Date = new Date()): boolean => {
-    const lastMonthStart = getMonthStart(anchorTime);
-
-    const monthEnd = new Date(lastMonthStart);
-    monthEnd.setMonth(monthEnd.getMonth() + 1, 0);
+    const monthEnd = getMonthStart(anchorTime);
+    const lastMonthStart = new Date(monthEnd);
+    lastMonthStart.setMonth(lastMonthStart.getMonth() - 1);
 
     const dateTime = date.getTime();
 
@@ -347,7 +346,7 @@ export const nextQuarter = (date: Date, anchorTime: Date = new Date()): boolean 
     const nextQuarterStart = new Date(quarterStart);
     nextQuarterStart.setMonth(nextQuarterStart.getMonth() + 3);
     const nextQuarterEnd = new Date(nextQuarterStart);
-    nextQuarterEnd.setMonth(nextQuarterEnd.getMonth() + 3, 0);
+    nextQuarterEnd.setMonth(nextQuarterEnd.getMonth() + 3);
 
     const dateTime = date.getTime();
 
@@ -364,12 +363,9 @@ export const lastQuarter = (date: Date, anchorTime: Date = new Date()): boolean 
     const quarterStart = getQuarterStart(anchorTime);
     const lastQuarterStart = new Date(quarterStart);
     lastQuarterStart.setMonth(lastQuarterStart.getMonth() - 3);
-    const lastQuarterEnd = new Date(quarterStart);
-    lastQuarterEnd.setDate(0);
-
     const dateTime = date.getTime();
 
-    return dateTime >= lastQuarterStart.getTime() && dateTime < lastQuarterEnd.getTime();
+    return dateTime >= lastQuarterStart.getTime() && dateTime < quarterStart.getTime();
 };
 
 /**

@@ -165,8 +165,8 @@ const weekendNumberMap: {
 
 export function isValidWeekend(weekend: number | string): boolean {
     // Weekend string values are seven characters long and each character in the string represents a day of the week, starting with Monday.
-    if (typeof weekend === 'string' && /^[0|1]{7}/.test(weekend)) {
-        return true;
+    if (typeof weekend === 'string') {
+        return weekend.length === 7 && /^[01]{7}$/.test(weekend);
     }
 
     if (weekendNumberMap[Number(weekend)]) {
@@ -181,7 +181,7 @@ export function getWeekendArray(weekend: number | string): number[] {
         return [];
     }
 
-    if (typeof weekend === 'string' && /^[0|1]{7}/.test(weekend)) {
+    if (typeof weekend === 'string') {
         // 1 represents a non-workday and 0 represents a workday. Only the characters 1 and 0 are permitted in the string. Using 1111111 will always return 0.
         const result = [];
 

@@ -16,7 +16,9 @@
 
 import type { CellValue, ICellRenderContext, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IRuleChange } from '@univerjs/data-validation';
+import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import {
+    CanceledError,
     DataValidationStatus,
     DataValidationType,
     ICommandService,
@@ -29,10 +31,15 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { DataValidationCacheService, getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
-import { AutoHeightController, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import {
+    AutoHeightController,
+    IEditorBridgeService,
+    SetCellEditVisibleOperation,
+    SheetSkeletonManagerService,
+} from '@univerjs/sheets-ui';
 import { IMenuManagerService } from '@univerjs/ui';
 import { bufferTime, filter, takeUntil } from 'rxjs';
 import { menuSchema } from '../menu/schema';
@@ -62,6 +69,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
         super();
 
         this._initMenu();
+        this._initEditor();
         this._initDropdown();
         this._initViewModelIntercept();
         this._initAutoHeight();
@@ -69,6 +77,35 @@ export class SheetsDataValidationRenderController extends RxDisposable {
 
     private _initMenu() {
         this._menuManagerService.mergeMenu(menuSchema);
+    }
+
+    private _initEditor() {
+        this.disposeWithMe(this._commandService.beforeCommandExecuted((command) => {
+            if (command.id !== SetCellEditVisibleOperation.id) {
+                return;
+            }
+
+            const params = command.params as IEditorBridgeServiceVisibleParam | undefined;
+            // Facade startEditing also uses Dblclick, but has no pointer coordinates.
+            if (!params?.visible || params.eventType !== DeviceInputEventType.Dblclick || !params.pointerPosition) {
+                return;
+            }
+
+            const location = this._editorBridgeService?.getEditLocation();
+            if (!location || (params.unitId && params.unitId !== location.unitId)) {
+                return;
+            }
+
+            const { unitId, sheetId, row, column } = location;
+            const rule = this._sheetDataValidationModel.getRuleByLocation(unitId, sheetId, row, column);
+            if (rule && (
+                rule.type === DataValidationType.LIST ||
+                rule.type === DataValidationType.LIST_MULTIPLE ||
+                rule.type === DataValidationType.CHECKBOX
+            )) {
+                throw new CanceledError();
+            }
+        }));
     }
 
     private _initDropdown() {

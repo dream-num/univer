@@ -34,6 +34,7 @@ import type {
     IWorksheetData,
 } from './typedef';
 import type { Worksheet } from './worksheet';
+import { Subject } from 'rxjs';
 import { AUTO_HEIGHT_FOR_MERGED_CELLS, IS_ROW_STYLE_PRECEDE_COLUMN_STYLE } from '../common/const';
 import { Inject, Injector } from '../common/di';
 import { DocumentDataModel } from '../docs/data-model/document-data-model';
@@ -286,6 +287,9 @@ export class SheetSkeleton extends Skeleton {
 
     // #region Gap Config
 
+    private readonly _gapConfigChanged$ = new Subject<void>();
+    readonly gapConfigChanged$ = this._gapConfigChanged$.asObservable();
+
     get gapConfig(): ISheetGapConfig {
         return this._gapConfig;
     }
@@ -298,6 +302,7 @@ export class SheetSkeleton extends Skeleton {
         this._gapConfig = this._fillDefaultGapThemeColors(config);
         this.makeDirty(true);
         this._updateLayout();
+        this._gapConfigChanged$.next();
     }
 
     private _fillDefaultGapThemeColors(config: ISheetGapConfig): ISheetGapConfig {
@@ -1191,6 +1196,7 @@ export class SheetSkeleton extends Skeleton {
 
     override dispose(): void {
         super.dispose();
+        this._gapConfigChanged$.complete();
 
         this._rowHeightAccumulation = [];
         this._columnWidthAccumulation = [];

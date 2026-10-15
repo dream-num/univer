@@ -35,7 +35,8 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IEditorService } from '@univerjs/docs-ui';
+import { DocSelectionManagerService } from '@univerjs/docs';
+import { EditorService, IEditorService } from '@univerjs/docs-ui';
 import {
     DefinedNamesService,
     FunctionService,
@@ -45,15 +46,27 @@ import {
     LexerTreeBuilder,
     SuperTableService,
 } from '@univerjs/engine-formula';
-import { DeviceInputEventType } from '@univerjs/engine-render';
+import { DeviceInputEventType, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     RangeProtectionCache,
     RangeProtectionRuleModel,
+    SheetInterceptorService,
     SheetPermissionCheckController,
+    SheetSkeletonService,
     SheetsSelectionsService,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { ComponentManager, ILayoutService, IUIPartsService, KeyCode, RediContext, UIPartsService } from '@univerjs/ui';
+import {
+    ComponentManager,
+    DesktopLayoutService,
+    DesktopSidebarService,
+    ILayoutService,
+    ISidebarService,
+    IUIPartsService,
+    KeyCode,
+    RediContext,
+    UIPartsService,
+} from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject, EMPTY } from 'rxjs';
@@ -63,7 +76,7 @@ import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../../common/keys';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../../config/config';
 import { MOBILE_FORMULA_BAR_SUBMIT_COMMAND_ID } from '../../../consts/mobile-context';
 import enUS from '../../../locale/en-US';
-import { IEditorBridgeService } from '../../../services/editor-bridge.service';
+import { EditorBridgeService, IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { FormulaEditorManagerService, IFormulaEditorManagerService } from '../../../services/editor/formula-editor-manager.service';
 import { MobileFormulaBar } from '../../mobile/formula-bar/MobileFormulaBar';
 import { MobileFormulaBarOverlays } from '../../mobile/formula-bar/MobileFormulaBarControls';
@@ -257,7 +270,7 @@ function createCellEditState(): ICellEditorState {
     };
 }
 
-function createFormulaBarTestBed(cellStyle?: IStyleData) {
+function createFormulaBarTestBed(cellStyle?: IStyleData, realEditorServices = false) {
     const originalResizeObserver = globalThis.ResizeObserver;
     globalThis.ResizeObserver = TestResizeObserver as typeof ResizeObserver;
 
@@ -279,9 +292,20 @@ function createFormulaBarTestBed(cellStyle?: IStyleData) {
     injector.add([RangeProtectionCache, { useClass: RangeProtectionCache }]);
     injector.add([SheetPermissionCheckController, { useClass: SheetPermissionCheckController }]);
     injector.add([IFormulaEditorManagerService, { useClass: FormulaEditorManagerService }]);
-    injector.add([IEditorBridgeService, { useClass: TestEditorBridgeService as never }]);
-    injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
-    injector.add([IEditorService, { useClass: TestEditorService as never }]);
+    if (realEditorServices) {
+        injector.add([SheetInterceptorService]);
+        injector.add([SheetSkeletonService]);
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        injector.add([DocSelectionManagerService]);
+        injector.add([IEditorBridgeService, { useClass: EditorBridgeService }]);
+        injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
+        injector.add([IEditorService, { useClass: EditorService }]);
+        injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
+    } else {
+        injector.add([IEditorBridgeService, { useClass: TestEditorBridgeService as never }]);
+        injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
+        injector.add([IEditorService, { useClass: TestEditorService as never }]);
+    }
     const workbook = univer.createUnit<IWorkbookData, Workbook>(
         UniverInstanceType.UNIVER_SHEET,
         createWorkbookData(cellStyle)
@@ -302,12 +326,19 @@ function createFormulaBarTestBed(cellStyle?: IStyleData) {
     });
 
     const editorBridgeService = injector.get(IEditorBridgeService) as TestEditorBridgeService;
-    editorBridgeService.setCurrentEditCell(createCellEditState());
-    editorBridgeService.changeVisible({
+    if (!realEditorServices) {
+        editorBridgeService.setCurrentEditCell(createCellEditState());
+    }
+    const visibleParams: IEditorBridgeServiceVisibleParam = {
         visible: true,
         eventType: DeviceInputEventType.PointerDown,
         unitId: UNIT_ID,
-    });
+    };
+    if (realEditorServices) {
+        commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, visibleParams);
+    } else {
+        editorBridgeService.changeVisible(visibleParams);
+    }
 
     return {
         univer,
@@ -377,6 +408,57 @@ describe('FormulaBar', () => {
         container = undefined;
         currentBed = undefined;
         vi.unstubAllGlobals();
+    });
+
+    it.each([
+        DeviceInputEventType.Dblclick,
+        DeviceInputEventType.Keyboard,
+        DeviceInputEventType.PointerDown,
+    ])('disables the name box during editing and restores it afterwards (%s)', async (eventType) => {
+        currentBed = createFormulaBarTestBed(undefined, true);
+        const commandService = currentBed.injector.get(ICommandService);
+        commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, { visible: true, eventType, unitId: UNIT_ID });
+        const rendered = renderWithDependencies(<FormulaBar disableDefinedName={false} />, currentBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+        const nameBox = rendered.container.querySelector('[data-u-comp="defined-name"]');
+        const input = nameBox?.querySelector('input');
+        const trigger = nameBox?.querySelector('a');
+        if (!(input instanceof HTMLInputElement) || !(trigger instanceof HTMLElement)) {
+            throw new TypeError('Name box controls not rendered');
+        }
+
+        expect(input.disabled).toBe(true);
+        const editorInput = document.createElement('textarea');
+        rendered.container.appendChild(editorInput);
+        editorInput.focus();
+        input.focus();
+        expect(document.activeElement).toBe(editorInput);
+
+        const mouseDown = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+        await act(async () => {
+            trigger.dispatchEvent(mouseDown);
+            trigger.click();
+            input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        });
+        expect(mouseDown.defaultPrevented).toBe(true);
+        expect(document.activeElement).toBe(editorInput);
+        expect(document.querySelector('[data-u-comp="defined-name-overlay"]')).toBeNull();
+        expect(currentBed.injector.get(IEditorBridgeService).isVisible().visible).toBe(true);
+
+        await act(async () => {
+            commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+                visible: false,
+                eventType: DeviceInputEventType.Keyboard,
+                keycode: KeyCode.ENTER,
+                unitId: UNIT_ID,
+            });
+        });
+        expect(input.disabled).toBe(false);
+        input.focus();
+        expect(document.activeElement).toBe(input);
+        await clickElement(trigger);
+        expect(document.querySelector('[data-u-comp="defined-name-overlay"]')).not.toBeNull();
     });
 
     it('replays the selected cell after the lazy mobile formula editor mounts', async () => {

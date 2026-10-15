@@ -26,7 +26,19 @@ import type {
     IUniverSheetCopyDataModel,
 } from '../type';
 import type { IAfterProcessRule, IPastePlugin } from './paste-plugins/type';
-import { createDocumentModelWithStyle, createParagraphId, CustomRangeType, DEFAULT_WORKSHEET_ROW_HEIGHT, generateRandomId, getNumfmtParseValueFilter, isDefaultFormat, isSafeUrl, numfmt, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
+import {
+    createDocumentModelWithStyle,
+    createParagraphId,
+    CustomRangeType,
+    DEFAULT_WORKSHEET_ROW_HEIGHT,
+    generateRandomId,
+    getNumfmtParseValueFilter,
+    isDefaultFormat,
+    isSafeUrl,
+    numfmt,
+    ObjectMatrix,
+    skipParseTagNames,
+} from '@univerjs/core';
 import { handleStringToStyle, textTrim } from '@univerjs/ui';
 import { extractNodeStyle } from './parse-node-style';
 import parseToDom, { convertToCellStyle, generateParagraphs } from './utils';
@@ -190,9 +202,10 @@ export class HtmlToUSMService {
                 } else {
                     cellDataStream = `${dataStream.substring(starts[i], starts[i + 1] - 1)}\r\n`;
                 }
+                const end = starts[i + 1] ?? dataStream.length;
                 const cellTextRuns: ITextRun[] = [];
                 textRuns?.forEach((t) => {
-                    if (t.st >= starts[i] && t.ed <= starts[i + 1]) {
+                    if (t.st >= starts[i] && t.ed <= end) {
                         cellTextRuns.push({
                             st: t.st - starts[i],
                             ed: t.ed - starts[i],
@@ -202,7 +215,7 @@ export class HtmlToUSMService {
                 });
                 const cellCustomRanges: ICustomRange[] = [];
                 customRanges?.forEach((c) => {
-                    if (c.startIndex >= starts[i] && c.endIndex <= starts[i + 1]) {
+                    if (c.startIndex >= starts[i] && c.endIndex <= end) {
                         cellCustomRanges.push({
                             ...c,
                             startIndex: c.startIndex - starts[i],
@@ -238,14 +251,13 @@ export class HtmlToUSMService {
                     customRanges,
                 };
 
-                if (!customRanges?.length) {
-                    valueMatrix.setValue(0, 0, convertToCellStyle({ v: dataStream }, dataStream, textRuns));
-                } else {
-                    const p = this._generateDocumentDataModelSnapshot({
+                const cell: ICellDataWithSpanInfo = { v: dataStream };
+                if (textRuns?.length || customRanges?.length) {
+                    cell.p = this._generateDocumentDataModelSnapshot({
                         body: singleDocBody,
                     });
-                    valueMatrix.setValue(0, 0, convertToCellStyle({ v: dataStream, p }, dataStream, textRuns));
                 }
+                valueMatrix.setValue(0, 0, convertToCellStyle(cell, dataStream, textRuns));
 
                 rowProperties.push({}); // TODO@yuhongz
             }

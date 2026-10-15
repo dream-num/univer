@@ -147,7 +147,9 @@ export class SheetsTableUiService extends Disposable {
         if (table) {
             const filter = table.getTableFilterColumn(columnIndex);
             if (isManualTableFilter(filter)) {
-                checkedItems.push(...filter.values.map((value) => value === TABLE_FILTER_EMPTY_VALUE ? this._localeService.t<LocaleKey>('sheets-table-ui.condition.empty') : value));
+                checkedItems.push(...filter.values.map((value) => value === TABLE_FILTER_EMPTY_VALUE
+                    ? this._localeService.t<LocaleKey>('sheets-table-ui.condition.empty')
+                    : String(value)));
             } else if (isRecordTableFilter(filter)) {
                 const accepts = compileTableRecordFilter(filter);
                 const items = this.getTableFilterItems(unitId, table.getSubunitId(), tableId, columnIndex);
@@ -318,14 +320,10 @@ export class SheetsTableUiService extends Disposable {
             if (filteredRowsByOtherColumns.has(row)) {
                 continue;
             }
-            let stringItem = this._sheetTableService.getCellValueWithConditionType(worksheet, row, column) as string;
-
-            if (stringItem == null) {
-                stringItem = this._localeService.t<LocaleKey>('sheets-table-ui.condition.empty');
-            }
-            if (useRecordValues && typeof stringItem !== 'string') {
-                stringItem = String(stringItem);
-            }
+            const cellValue = this._sheetTableService.getCellValueWithConditionType(worksheet, row, column);
+            const stringItem = cellValue == null
+                ? this._localeService.t<LocaleKey>('sheets-table-ui.condition.empty')
+                : String(cellValue);
 
             const recordValue = useRecordValues ? getTableRecordValue(worksheet, row, column) : undefined;
             const valueKey = recordValue ? getTableRecordValueKey(recordValue) : undefined;

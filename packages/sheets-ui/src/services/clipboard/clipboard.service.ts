@@ -185,9 +185,10 @@ interface ICopyContent {
  * This service provide hooks for sheet features to supplement content or modify behavior of clipboard.
  */
 
+// Univer clipboard HTML also contains Word compatibility metadata.
+HtmlToUSMService.use(UniverPastePlugin);
 HtmlToUSMService.use(WordPastePlugin);
 HtmlToUSMService.use(LarkPastePlugin);
-HtmlToUSMService.use(UniverPastePlugin);
 
 export interface ISheetClipboardService {
     showMenu$: Observable<boolean>;

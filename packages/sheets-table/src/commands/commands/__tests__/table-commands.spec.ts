@@ -117,6 +117,7 @@ describe('sheets-table commands', () => {
             name: 'Table1',
             range: { startRow: 1, endRow: 5, startColumn: 2, endColumn: 4 },
             options: { headerRow: true },
+            filters: {},
         };
         const tableManager = {
             getTable: vi.fn(() => ({ toJSON: () => tableSnapshot })),

@@ -45,7 +45,6 @@ import {
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
-
 import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, TRANSFORM_CHANGE_OBSERVABLE_TYPE, Vector2 } from '@univerjs/engine-render';
 import {
     InsertColCommand,
@@ -70,9 +69,8 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { Subscription } from 'rxjs';
+import { EMPTY, Subscription, switchMap } from 'rxjs';
 import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from '../../commands/commands/headersize-changed.command';
-
 import { ScrollCommand } from '../../commands/commands/set-scroll.command';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../../common/keys';
@@ -861,6 +859,10 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
         // freeze start
         const startSheetView = skeleton.getNoMergeCellWithCoordByIndex(row - ySplit, column - xSplit, false);
+        // The gap above the first row belongs to the frozen area, including any Table title in it.
+        if (isTopView && row === ySplit) {
+            startSheetView.startY = 0;
+        }
         // freeze end
         const endSheetView = skeleton.getNoMergeCellWithCoordByIndex(row, column, false);
 
@@ -1147,6 +1149,11 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
      * When switching sheet tabs, it is necessary to update the frozen state of the current view.
      */
     private _skeletonListener() {
+        this.disposeWithMe(
+            this._sheetSkeletonManagerService.currentSkeleton$.pipe(
+                switchMap((param) => param?.skeleton?.gapConfigChanged$ ?? EMPTY)
+            ).subscribe(() => this._refreshCurrent())
+        );
         this.disposeWithMe(
             toDisposable(
                 this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {

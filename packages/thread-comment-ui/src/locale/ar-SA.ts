@@ -33,6 +33,8 @@ const locale: typeof enUS = {
             save: 'حفظ',
         },
         item: {
+            markResolved: 'وضع علامة كمحلول',
+            markUnresolved: 'وضع علامة كغير محلول',
             edit: 'تحرير',
             delete: 'حذف هذا التعليق',
             more: 'المزيد',

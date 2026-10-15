@@ -33,6 +33,8 @@ const locale: typeof enUS = {
             save: 'ذخیره',
         },
         item: {
+            markResolved: 'علامت‌گذاری به‌عنوان حل‌شده',
+            markUnresolved: 'علامت‌گذاری به‌عنوان حل‌نشده',
             edit: 'ویرایش',
             delete: 'حذف این نظر',
             more: 'بیشتر',

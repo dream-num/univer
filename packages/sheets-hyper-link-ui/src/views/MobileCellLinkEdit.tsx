@@ -41,7 +41,7 @@ import {
     serializeRangeWithSheet,
 } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { MobileRangeSelector } from '@univerjs/sheets-formula-ui';
 import {
     AddHyperLinkCommand,
@@ -51,7 +51,7 @@ import {
     UpdateHyperLinkCommand,
     UpdateRichHyperLinkCommand,
 } from '@univerjs/sheets-hyper-link';
-import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
+import { IEditorBridgeService, IMarkSelectionService } from '@univerjs/sheets-ui';
 import { KeyCode, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CloseHyperLinkPopupOperation } from '../commands/operations/popup.operations';
@@ -407,19 +407,11 @@ export const MobileCellLinkEdit = () => {
             }
         }
         if (editing?.type === HyperLinkEditSourceType.VIEWING) {
-            await commandService.executeCommand(SetWorksheetActiveOperation.id, {
-                unitId: editing.unitId,
-                subUnitId: editing.subUnitId,
-            });
-
-            const GAP = 1;
-            await commandService.executeCommand(ScrollToRangeOperation.id, {
-                range: {
-                    startRow: Math.max(editing.row - GAP, 0),
-                    endRow: editing.row + GAP,
-                    startColumn: Math.max(editing.col - GAP, 0),
-                    endColumn: editing.col + GAP,
-                },
+            await resolverService.navigateToRange(editing.unitId, editing.subUnitId, {
+                startRow: editing.row,
+                endRow: editing.row,
+                startColumn: editing.col,
+                endColumn: editing.col,
             });
         }
 

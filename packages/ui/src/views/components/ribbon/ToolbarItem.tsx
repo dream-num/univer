@@ -161,7 +161,10 @@ const toolbarSelectorRootVariants = cva(
                 `,
             },
             active: {
-                true: 'univer-bg-gray-200',
+                true: `
+                  univer-bg-gray-200
+                  dark:!univer-bg-gray-500
+                `,
                 false: '',
             },
         },

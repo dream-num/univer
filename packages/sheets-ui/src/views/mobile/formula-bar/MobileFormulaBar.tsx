@@ -86,7 +86,12 @@ export function MobileFormulaBar() {
         let cursorFrame: number | undefined;
         const contentFrame = requestAnimationFrame(() => {
             editorBridgeService.refreshEditCellState();
-            editorService.focus(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+            if (editorService.getFocusId() !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+                editorService.focus(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+            } else {
+                // Replaying the cell can change the active document while keeping the cached editor id.
+                editorService.getEditor(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY)?.focus();
+            }
             cursorFrame = requestAnimationFrame(() => {
                 const editor = editorService.getEditor(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
                 const end = Math.max(0, (editor?.getDocumentData().body?.dataStream.length ?? 2) - 2);

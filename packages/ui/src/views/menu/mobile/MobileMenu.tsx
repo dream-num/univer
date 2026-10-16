@@ -25,7 +25,7 @@ import type {
 } from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import type { IBaseMenuProps } from '../types';
-import { LocaleService } from '@univerjs/core';
+import { isRealNum, LocaleService } from '@univerjs/core';
 import { borderBottomClassName, clsx } from '@univerjs/design';
 import { CheckMarkIcon, MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -35,7 +35,7 @@ import { ComponentManager } from '../../../common/component-manager';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { useDependency, useObservable } from '../../../utils/di';
-import { CustomLabel } from '../../custom-label/index';
+import { CustomLabel } from '../../custom-label/CustomLabel';
 
 type MobileMenuView =
     | {
@@ -660,7 +660,7 @@ function MobileSchemaRow(props: {
 
                         onExecute?.({
                             commandId: menuItem.commandId,
-                            value: nextValue,
+                            value: typeof value === 'number' && isRealNum(nextValue) ? Number(nextValue) : nextValue,
                             id: menuItem.id,
                             label: schema.key,
                             params: menuItem.params,

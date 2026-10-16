@@ -38,6 +38,10 @@ import { MobileMenu } from '../MobileMenu';
 
 const injectors: Injector[] = [];
 
+function TextValueLabel(props: { onChange?: (value: string) => void }) {
+    return <button type="button" onClick={() => props.onChange?.('24')}>Submit text value</button>;
+}
+
 function renderWithDependencies(
     schemas: IMenuSchema[],
     onOptionSelect: NonNullable<ComponentProps<typeof MobileMenu>['onOptionSelect']>,
@@ -60,6 +64,7 @@ function renderWithDependencies(
         </button>
     ));
     injector.get(ComponentManager).register('plain-custom-label', () => <span>Plain custom action</span>);
+    injector.get(ComponentManager).register('text-value-label', TextValueLabel);
 
     const renderMenu = (nextSchemas: IMenuSchema[]) => (
         <RediProvider value={{ injector }}>
@@ -82,6 +87,30 @@ afterEach(() => {
 });
 
 describe('MobileMenu', () => {
+    it.each([
+        { initialValue: 1, expectedValue: 24 },
+        { initialValue: '001', expectedValue: '24' },
+    ])('preserves the command value type for a custom input starting with $initialValue', ({ initialValue, expectedValue }) => {
+        const onOptionSelect = vi.fn();
+        renderWithDependencies([{
+            key: 'input',
+            order: 0,
+            item: {
+                id: 'input.command',
+                type: MenuItemType.BUTTON,
+                label: { name: 'text-value-label' },
+                value$: new BehaviorSubject(initialValue),
+            },
+        }], onOptionSelect);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Submit text value' }));
+
+        expect(onOptionSelect).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+            id: 'input.command',
+            value: expectedValue,
+        }));
+    });
+
     it('shows the selected option label instead of its persisted identifier', () => {
         const value$ = new BehaviorSubject('wideScreen16By9');
         renderWithDependencies([{

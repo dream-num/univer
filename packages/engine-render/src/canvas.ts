@@ -143,16 +143,18 @@ export class Canvas {
         const canvasElement = this.getCanvasEle();
 
         if (canvasElement && width !== undefined) {
-            // canvasElement.width & height requires integer value.
-            // canvasElement.width would return a integer even you set a decimal number.
-            canvasElement.width = width * this._pixelRatio;
-            this._width = canvasElement.width / this._pixelRatio;
+            // canvas backing store requires integers. With fractional DPR (for example 1.25),
+            // width * pixelRatio can be fractional and the browser truncates it, which makes
+            // the backing store smaller than CSS size * DPR and blurs text via upscaling.
+            // Round the store size and keep the requested CSS size stable.
+            canvasElement.width = Math.round(width * this._pixelRatio);
+            this._width = width;
             canvasElement.style.width = `${this._width}px`;
         }
 
         if (canvasElement && height !== undefined) {
-            canvasElement.height = height * this._pixelRatio;
-            this._height = canvasElement.height / this._pixelRatio;
+            canvasElement.height = Math.round(height * this._pixelRatio);
+            this._height = height;
             canvasElement.style.height = `${this._height}px`;
         }
 
@@ -178,7 +180,8 @@ export class Canvas {
 
     clear() {
         const ctx = this.getContext();
-        ctx.clearRect(0, 0, this._width * this._pixelRatio, this._height * this._pixelRatio);
+        const ele = this.getCanvasEle();
+        ctx.clearRect(0, 0, ele.width, ele.height);
     }
 
     /**

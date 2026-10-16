@@ -69,6 +69,10 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
     }
 
     setActivatedTab(tab: string): void {
+        if (this._disposed) {
+            return;
+        }
+
         if (!this._isContextualTab(tab)) {
             this._lastNonContextualActivatedTab = tab;
         }
@@ -77,6 +81,10 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
     }
 
     showContextualTab(tab: string, options?: { activate?: boolean }): void {
+        if (this._disposed) {
+            return;
+        }
+
         this._visibleContextualTabs.add(tab);
         this._updateRibbon();
 
@@ -86,6 +94,10 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
     }
 
     hideContextualTab(tab: string): void {
+        if (this._disposed) {
+            return;
+        }
+
         if (!this._visibleContextualTabs.delete(tab)) {
             return;
         }
@@ -94,6 +106,10 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
     }
 
     hideAllContextualTabs(): void {
+        if (this._disposed) {
+            return;
+        }
+
         if (this._visibleContextualTabs.size === 0) {
             return;
         }
@@ -103,10 +119,18 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
     }
 
     setCollapsedIds(ids: string[]): void {
+        if (this._disposed) {
+            return;
+        }
+
         this._collapsedIds$.next(ids);
     }
 
     setFakeToolbarVisible(visible: boolean): void {
+        if (this._disposed) {
+            return;
+        }
+
         this._fakeToolbarVisible$.next(visible);
     }
 
@@ -122,6 +146,10 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
     }
 
     private _updateRibbon() {
+        if (this._disposed) {
+            return;
+        }
+
         const ribbon = this._filterContextualTabs(
             this._menuManagerService.getMenuByPositionKey(MenuManagerPosition.RIBBON)
         );
@@ -192,6 +220,12 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
 
                 this._setRibbon(newRibbon);
             });
+
+        // A synchronous ribbon observer can dispose the service before subscribe returns.
+        if (this._disposed) {
+            this._hiddenSubscription.unsubscribe();
+            this._hiddenSubscription = null;
+        }
     }
 
     private _filterContextualTabs(ribbon: IMenuSchema[]): IMenuSchema[] {
@@ -236,6 +270,13 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
     }
 
     override dispose(): void {
+        if (this._disposed) {
+            return;
+        }
+
+        super.dispose();
+        this._visibleContextualTabs.clear();
+        this._contextualTabs.clear();
         this._hiddenSubscription?.unsubscribe();
         this._hiddenSubscription = null;
         this._ribbon$.next([]);
@@ -243,6 +284,5 @@ export class DesktopRibbonService extends Disposable implements IRibbonService {
         this._activatedTab$.complete();
         this._collapsedIds$.complete();
         this._fakeToolbarVisible$.complete();
-        super.dispose();
     }
 }

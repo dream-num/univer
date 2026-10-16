@@ -125,3 +125,21 @@ describe('use-formula-selection regression scenarios', () => {
         expect(shouldAddFormulaReference('=A1', 3)).toBe(false);
     });
 });
+
+describe('formula reference picking after whitespace', () => {
+    it.each(['=SUM(A1, ', '=IF(\r ', '=IF(\n  ', '=SUM(A1, \r\n  ', '=SUM(A1 '])('allows a reference after a space in %j', (formula) => {
+        expect(shouldAddFormulaReference(formula, formula.length)).toBe(true);
+    });
+
+    it.each(['=IF(\r', '=IF(\n', '=SUM(A1, \r\n', '=A1+\r', "='Sheet 1'!\r", '=A1\r', '=SUM(A1)\n', '=SU\n', '=IF("value,\r'])('does not start reference picking immediately after a line break in %j', (formula) => {
+        expect(shouldAddFormulaReference(formula, formula.length)).toBe(false);
+    });
+
+    it('retains the next-token guard and rejects invalid cursor offsets', () => {
+        expect(shouldAddFormulaReference('=IF(\r A1)', 6)).toBe(false);
+        expect(shouldAddFormulaReference('=IF(\r )', 6)).toBe(true);
+        expect(shouldAddFormulaReference('=IF(', -1)).toBe(false);
+        expect(shouldAddFormulaReference('=IF(', 0)).toBe(false);
+        expect(shouldAddFormulaReference('=IF(', 5)).toBe(false);
+    });
+});

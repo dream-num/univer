@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable max-lines-per-function */
-
 import type { IRange, Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISelectionWithCoord, ISetSelectionsOperationParams } from '@univerjs/sheets';
@@ -37,7 +35,6 @@ import {
     deserializeRangeWithSheet,
     generateStringWithSequence,
     isFormulaReferenceAddingContext,
-    isFormulaReferenceAddingTextContext,
     LexerTreeBuilder,
     sequenceNodeType,
     serializeRange,
@@ -59,7 +56,7 @@ import {
 import { getOffsetFromSequenceNodes } from '../../range-selector/utils/get-offset-from-sequence-nodes';
 import { sequenceNodeToText } from '../../range-selector/utils/sequence-node-to-text';
 import { unitRangesToText } from '../../range-selector/utils/unit-ranges-to-text';
-import { FormulaSelectingType, resolveFormulaSelectionWorkbook } from './use-formula-selection';
+import { FormulaSelectingType, resolveFormulaSelectionWorkbook, shouldAddFormulaReference } from './use-formula-selection';
 import { calcHighlightRanges } from './use-highlight';
 import { isFormulaEditorInteractionOwner } from './use-left-and-right-arrow';
 import { useStateRef } from './use-state-ref';
@@ -253,23 +250,30 @@ export function replaceFormulaControlSelection(
     return nextSelections;
 }
 
-export function getInitialFormulaReferenceSelectionCount(renderSelectionCount: number, formulaReferenceCount: number, selectingType?: FormulaSelectingType): number {
+export function getInitialFormulaReferenceSelectionCount(renderSelectionCount: number, formulaReferenceCount: number): number {
     return Math.max(renderSelectionCount, formulaReferenceCount);
 }
 
-export const useSheetSelectionChange = (
-    isNeed: boolean,
-    isFocus: boolean,
-    isSelectingRef: RefObject<FormulaSelectingType>,
-    unitId: string,
-    subUnitId: string,
-    getRefSelections: () => IRefSelection[],
-    isSupportAcrossSheet: boolean,
-    listenSelectionSet: boolean,
-    editor?: Editor,
-    handleRangeChange: ((refString: string, offset: number, isEnd: boolean, isModify?: boolean) => void) = () => {},
-    allowMissingEditorFocus = false
-) => {
+interface IFormulaSelectionChangeOptions {
+    isNeed: boolean;
+    isFocus: boolean;
+    isSelectingRef: RefObject<FormulaSelectingType>;
+    unitId: string;
+    subUnitId: string;
+    getRefSelections: () => IRefSelection[];
+    isSupportAcrossSheet: boolean;
+    listenSelectionSet: boolean;
+    editor?: Editor;
+    handleRangeChange: (refString: string, offset: number, isEnd: boolean, isModify?: boolean) => void;
+    allowMissingEditorFocus: boolean;
+}
+
+type IFormulaSelectionChangeContext = ReturnType<typeof useFormulaSelectionChangeContext>;
+type ISelectionChangeContext = NonNullable<ReturnType<typeof prepareSelectionChangeContext>>;
+type IHandleSelectionsChange = (selections: IRange[], isEnd: boolean, isCtrlAddMode?: boolean) => void;
+
+function useFormulaSelectionChangeContext(opts: IFormulaSelectionChangeOptions) {
+    const { unitId, subUnitId, editor, allowMissingEditorFocus, isSupportAcrossSheet } = opts;
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
@@ -278,7 +282,7 @@ export const useSheetSelectionChange = (
     const editorService = useDependency(IEditorService);
     const themeService = useDependency(ThemeService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
-
+    const refSelectionsService = useDependency(IRefSelectionsService);
     const workbook = univerInstanceService.getUnit<Workbook>(unitId);
     const getSheetNameById = useEvent((unitId: string, sheetId: string) => univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(sheetId)?.getName() ?? '');
     const sheetName = useMemo(() => getSheetNameById(unitId, subUnitId), [getSheetNameById, subUnitId, unitId]);
@@ -289,339 +293,245 @@ export const useSheetSelectionChange = (
     const render = renderManagerService.getRenderUnitById(activeWorkbook?.getUnitId() ?? unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
-    const refSelectionsService = useDependency(IRefSelectionsService);
     const duplicateEndGuard = useMemo(() => getSharedSelectionChangeDuplicateEndGuard(`${unitId}:${subUnitId}`), [subUnitId, unitId]);
-    // eslint-disable-next-line complexity
-    const onSelectionsChange = useEvent((selections: IRange[], isEnd: boolean, isCtrlAddMode?: boolean) => {
-        if (!editor || !isFormulaEditorInteractionOwner(editorService.getFocusId(), editor.getEditorId(), {
-            fxBarFocused: contextService.getContextValue(FOCUSING_FX_BAR_EDITOR),
-            allowMissingFocus: allowMissingEditorFocus,
-        })) {
-            return;
-        }
+    const isInteractionOwner = useEvent(() => Boolean(editor && isFormulaEditorInteractionOwner(editorService.getFocusId(), editor.getEditorId(), {
+        fxBarFocused: contextService.getContextValue(FOCUSING_FX_BAR_EDITOR),
+        allowMissingFocus: allowMissingEditorFocus,
+    })));
+    const getRefRangeText = useEvent((range: IRange) => {
+        const rangeSheetId = range.sheetId ?? subUnitId;
+        const unitRangeName = {
+            range,
+            unitId: range.unitId ?? activeWorkbook!.getUnitId(),
+            sheetName: getSheetNameById(range.unitId ?? activeWorkbook!.getUnitId(), rangeSheetId),
+        };
+        const isAcrossWorkbook = activeWorkbook?.getUnitId() !== unitId;
+        const isAcrossSheet = rangeSheetId !== subUnitId;
+        return unitRangesToText([unitRangeName], isSupportAcrossSheet && (isAcrossSheet || isAcrossWorkbook), sheetName, isAcrossWorkbook)[0];
+    });
+    return {
+        ...opts,
+        univerInstanceService,
+        commandService,
+        docSelectionManagerService,
+        themeService,
+        lexerTreeBuilder,
+        refSelectionsService,
+        sheetName,
+        activeSheet,
+        contextRef,
+        activeWorkbook,
+        refSelectionsRenderService,
+        sheetSkeletonManagerService,
+        duplicateEndGuard,
+        isInteractionOwner,
+        getRefRangeText,
+    };
+}
 
-        const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
-        if (!ctx) return;
-        const { nodeIndex, updatingRefIndex, formulaText, sequenceNodes, offset } = ctx;
-        const isAddingReference = isSelectingRef.current === FormulaSelectingType.NEED_ADD ||
-            isFormulaReferenceAddingContext(sequenceNodes, offset) ||
-            isFormulaReferenceAddingTextContext(formulaText, offset);
-        if (isAddingReference) {
-            if (offset !== 0) {
-                if (nodeIndex === -1 && sequenceNodes.length) {
-                    return;
-                }
-                const range = getLastFormulaSelection(selections);
-                if (!range) {
-                    return;
-                }
-                const lastNodes = sequenceNodes.splice(nodeIndex + 1);
-                const rangeSheetId = range.sheetId ?? subUnitId;
-                const unitRangeName = {
-                    range,
-                    unitId: range.unitId ?? activeWorkbook!.getUnitId(),
-                    sheetName: getSheetNameById(range.unitId ?? activeWorkbook!.getUnitId(), rangeSheetId),
-                };
-                const isAcrossSheet = rangeSheetId !== subUnitId;
-                const isAcrossWorkbook = activeWorkbook?.getUnitId() !== unitId;
-                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && (isAcrossSheet || isAcrossWorkbook), sheetName, isAcrossWorkbook);
-                if (isFormulaReferenceAddingTextContext(formulaText, offset)) {
-                    const result = insertFormulaReferenceText(formulaText, refRanges[0], offset);
-                    handleRangeChange(result, offset + refRanges[0].length, isEnd);
-                    return;
-                }
-                sequenceNodes.push({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
-                const newSequenceNodes = [...sequenceNodes, ...lastNodes];
-                const result = sequenceNodeToText(newSequenceNodes);
-                handleRangeChange(result, getOffsetFromSequenceNodes(sequenceNodes), isEnd);
-            } else {
-                const range = getLastFormulaSelection(selections);
-                if (!range) {
-                    return;
-                }
-                const rangeSheetId = range.sheetId ?? subUnitId;
-                const unitRangeName = {
-                    range,
-                    unitId: range.unitId ?? activeWorkbook!.getUnitId(),
-                    sheetName: getSheetNameById(range.unitId ?? activeWorkbook!.getUnitId(), rangeSheetId),
-                };
-                const isAcrossSheet = rangeSheetId !== subUnitId;
-                const isAcrossWorkbook = activeWorkbook?.getUnitId() !== unitId;
-                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && (isAcrossSheet || isAcrossWorkbook), sheetName, isAcrossWorkbook);
-                sequenceNodes.unshift({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
-                const result = sequenceNodeToText(sequenceNodes);
-                handleRangeChange(result, refRanges[0].length, isEnd);
-            }
-        } else if (isSelectingRef.current === FormulaSelectingType.EDIT_OTHER_SHEET_REFERENCE || isSelectingRef.current === FormulaSelectingType.EDIT_OTHER_WORKBOOK_REFERENCE) {
-            const last = selections.pop();
-            if (!last) return;
-            const node = sequenceNodes[nodeIndex];
-            if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
-                const oldToken = node.token;
-                const isAcrossWorkbook = activeWorkbook?.getUnitId() !== unitId;
-                if (isAcrossWorkbook) {
-                    node.token = serializeRangeWithSpreadsheet(activeWorkbook?.getUnitId() ?? '', sheetName, last);
-                } else {
-                    node.token = sheetName === activeSheet?.getName() ? serializeRange(last) : serializeRangeWithSheet(activeSheet!.getName(), last);
-                }
-                const newOffset = offset + (node.token.length - oldToken.length);
-                handleRangeChange(generateStringWithSequence(sequenceNodes), newOffset, isEnd);
-            }
-        } else {
-            const { orderedSelections, insertedSelection } = getSelectionsForFormulaRefUpdate(selections, updatingRefIndex, isCtrlAddMode);
-            const getRefRangeText = (range: IRange) => {
-                const rangeSheetId = range.sheetId ?? subUnitId;
-                const unitRangeName = {
-                    range,
-                    unitId: range.unitId ?? activeWorkbook!.getUnitId(),
-                    sheetName: getSheetNameById(range.unitId ?? activeWorkbook!.getUnitId(), rangeSheetId),
-                };
-                const isAcrossWorkbook = activeWorkbook?.getUnitId() !== unitId;
-                const isAcrossSheet = rangeSheetId !== subUnitId;
-                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && (isAcrossSheet || isAcrossWorkbook), sheetName, isAcrossWorkbook);
-                return refRanges[0];
-            };
-            // Update all ref Selections
-            let currentRefIndex = 0;
-            const newTokens = sequenceNodes.map((item) => {
-                if (typeof item === 'string') {
-                    return item;
-                }
-                if (item.nodeType === sequenceNodeType.REFERENCE) {
-                    const nodeRange = deserializeRangeWithSheet(item.token);
-                    if (!nodeRange.sheetName) {
-                        nodeRange.sheetName = sheetName;
-                    }
-
-                    if (((nodeRange.unitId || unitId) !== activeWorkbook?.getUnitId())) {
-                        return item.token;
-                    }
-
-                    if (isSupportAcrossSheet) {
-                        // Directly skip nodes that are not in the current sheet
-                        if (contextRef.current.activeSheet?.getName() !== nodeRange.sheetName) {
-                            return item.token;
-                        }
-                    }
-                    const refIndex = currentRefIndex;
-                    const selection = orderedSelections[currentRefIndex];
-                    currentRefIndex++;
-                    if (!selection) {
-                        return '';
-                    }
-                    const refRangeText = getRefRangeText(selection);
-                    if (insertedSelection && refIndex === updatingRefIndex) {
-                        return `${refRangeText},${getRefRangeText(insertedSelection)}`;
-                    }
-
-                    return refRangeText;
-                }
-                return item.token;
-            });
-
-            let currentText = '';
-            let newOffset;
-            newTokens.forEach((item, index) => {
-                currentText += item;
-                if (index === nodeIndex) {
-                    newOffset = currentText.length;
-                }
-            });
-            const theLastList: string[] = [];
-            for (let index = currentRefIndex; index <= orderedSelections.length - 1; index++) {
-                const selection = orderedSelections[index];
-                theLastList.push(getRefRangeText(selection));
-            }
-            const preNode = sequenceNodes[sequenceNodes.length - 1];
-            const isPreNodeRef = preNode && (typeof preNode === 'string' ? false : preNode.nodeType === sequenceNodeType.REFERENCE);
-            const result = `${currentText}${theLastList.length && isPreNodeRef ? ',' : ''}${theLastList.join(',')}`;
-            handleRangeChange(result, !theLastList.length && newOffset ? newOffset : result.length, isEnd);
+function useAddFormulaReference(context: IFormulaSelectionChangeContext) {
+    const { getRefRangeText, handleRangeChange } = context;
+    return useEvent((ctx: ISelectionChangeContext, selections: IRange[], isEnd: boolean) => {
+        const { nodeIndex, formulaText, sequenceNodes, offset } = ctx;
+        const range = getLastFormulaSelection(selections);
+        if (!range) return;
+        const refText = getRefRangeText(range);
+        // Raw text insertion does not depend on a lexer node at the cursor. The lexer
+        // omits trailing whitespace, but the editor must retain it. See #7676.
+        if (shouldAddFormulaReference(formulaText, offset)) {
+            handleRangeChange(insertFormulaReferenceText(formulaText, refText, offset), offset + refText.length, isEnd);
+        } else if (offset === 0) {
+            sequenceNodes.unshift(refText);
+            handleRangeChange(sequenceNodeToText(sequenceNodes), refText.length, isEnd);
+        } else if (nodeIndex !== -1 || sequenceNodes.length === 0) {
+            const lastNodes = sequenceNodes.splice(nodeIndex + 1);
+            sequenceNodes.push(refText);
+            const result = sequenceNodeToText([...sequenceNodes, ...lastNodes]);
+            handleRangeChange(result, getOffsetFromSequenceNodes(sequenceNodes), isEnd);
         }
     });
+}
 
-    useEffect(() => {
-        if (refSelectionsRenderService && isNeed) {
-            const isInteractionOwner = () => Boolean(editor && isFormulaEditorInteractionOwner(
-                editorService.getFocusId(),
-                editor.getEditorId(),
-                {
-                    fxBarFocused: contextService.getContextValue(FOCUSING_FX_BAR_EDITOR),
-                    allowMissingFocus: allowMissingEditorFocus,
-                }
-            ));
-            const initialSelectionsCount = getInitialFormulaReferenceSelectionCount(
-                refSelectionsRenderService.getSelectionDataWithStyle().length,
-                getRefSelections().length,
-                isSelectingRef.current
-            );
-            const handleSelectionsChange = createSelectionChangeHandler<ISelectionWithCoord>({
-                initialSelectionsCount,
-                duplicateEndGuard: {
-                    shouldSkip: (selections, isEnd) => duplicateEndGuard.shouldSkip(selections.map((i) => i.rangeWithCoord), isEnd),
-                    reset: duplicateEndGuard.reset,
-                },
-                onSelectionsChange: (selections, isEnd, isCtrlAddMode) => {
-                    onSelectionsChange(selections.map((i) => i.rangeWithCoord), isEnd, isCtrlAddMode);
-                },
-                onDuplicateEnd: () => {
-                    const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
-                    if (!ctx) {
-                        return;
-                    }
-                    handleRangeChange(ctx.formulaText, ctx.offset, true);
-                },
-            });
-            let isInitialMoveEnd = true;
-
-            const disposableCollection = new DisposableCollection();
-            disposableCollection.add(refSelectionsRenderService.selectionMoveStart$.subscribe((selections) => {
-                if (!isInteractionOwner()) {
-                    return;
-                }
-                handleSelectionsChange(selections, false, { start: true });
-            }));
-            disposableCollection.add(refSelectionsRenderService.selectionMoving$.subscribe((selections) => {
-                if (!isInteractionOwner()) {
-                    return;
-                }
-                handleSelectionsChange(selections, false);
-            }));
-            disposableCollection.add(refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
-                if (!isInteractionOwner()) {
-                    return;
-                }
-                handleSelectionsChange(selections, true, { initial: isInitialMoveEnd });
-                isInitialMoveEnd = false;
-            }));
-
-            return () => {
-                disposableCollection.dispose();
-            };
+function useReplaceCrossSheetFormulaReference(context: IFormulaSelectionChangeContext) {
+    const { activeWorkbook, unitId, sheetName, activeSheet, handleRangeChange } = context;
+    return useEvent((ctx: ISelectionChangeContext, selections: IRange[], isEnd: boolean) => {
+        const last = selections.pop();
+        if (!last) return;
+        const { sequenceNodes, nodeIndex, offset } = ctx;
+        const node = sequenceNodes[nodeIndex];
+        if (typeof node !== 'object' || node.nodeType !== sequenceNodeType.REFERENCE) return;
+        const oldToken = node.token;
+        if (activeWorkbook?.getUnitId() !== unitId) {
+            node.token = serializeRangeWithSpreadsheet(activeWorkbook?.getUnitId() ?? '', sheetName, last);
+        } else {
+            node.token = sheetName === activeSheet?.getName() ? serializeRange(last) : serializeRangeWithSheet(activeSheet!.getName(), last);
         }
-    }, [allowMissingEditorFocus, contextService, editor, editorService, getRefSelections, isNeed, onSelectionsChange, refSelectionsRenderService, refSelectionsService]);
+        handleRangeChange(generateStringWithSequence(sequenceNodes), offset + node.token.length - oldToken.length, isEnd);
+    });
+}
 
-    useEffect(() => {
-        if (isFocus && refSelectionsRenderService && editor) {
-            const disposableCollection = new DisposableCollection();
+function useUpdateFormulaReferences(context: IFormulaSelectionChangeContext) {
+    const { unitId, sheetName, activeWorkbook, isSupportAcrossSheet, contextRef, getRefRangeText, handleRangeChange } = context;
+    return useEvent((ctx: ISelectionChangeContext, selections: IRange[], isEnd: boolean, isCtrlAddMode?: boolean) => {
+        const { sequenceNodes, nodeIndex, updatingRefIndex } = ctx;
+        const { orderedSelections, insertedSelection } = getSelectionsForFormulaRefUpdate(selections, updatingRefIndex, isCtrlAddMode);
+        let currentRefIndex = 0;
+        const newTokens = sequenceNodes.map((item) => {
+            if (typeof item === 'string') return item;
+            if (item.nodeType !== sequenceNodeType.REFERENCE) return item.token;
+            const nodeRange = deserializeRangeWithSheet(item.token);
+            if (!nodeRange.sheetName) nodeRange.sheetName = sheetName;
+            if ((nodeRange.unitId || unitId) !== activeWorkbook?.getUnitId()) return item.token;
+            if (isSupportAcrossSheet && contextRef.current.activeSheet?.getName() !== nodeRange.sheetName) return item.token;
+            const refIndex = currentRefIndex;
+            const selection = orderedSelections[currentRefIndex++];
+            if (!selection) return '';
+            const refRangeText = getRefRangeText(selection);
+            return insertedSelection && refIndex === updatingRefIndex
+                ? `${refRangeText},${getRefRangeText(insertedSelection)}`
+                : refRangeText;
+        });
+        let currentText = '';
+        let newOffset;
+        newTokens.forEach((item, index) => {
+            currentText += item;
+            if (index === nodeIndex) newOffset = currentText.length;
+        });
+        const remainingRefs = orderedSelections.slice(currentRefIndex).map(getRefRangeText);
+        const preNode = sequenceNodes[sequenceNodes.length - 1];
+        const isPreNodeRef = preNode && typeof preNode !== 'string' && preNode.nodeType === sequenceNodeType.REFERENCE;
+        const result = `${currentText}${remainingRefs.length && isPreNodeRef ? ',' : ''}${remainingRefs.join(',')}`;
+        handleRangeChange(result, !remainingRefs.length && newOffset ? newOffset : result.length, isEnd);
+    });
+}
 
-            const reListen = () => {
-                disposableCollection.dispose();
-                const controls = refSelectionsRenderService.getSelectionControls();
-                controls.forEach((control, index) => {
-                    disposableCollection.add(
-                        control.selectionScaling$
-                            .subscribe((newRange) => {
-                                const selections = refSelectionsRenderService.getSelectionDataWithStyle().map((i) => i.rangeWithCoord);
-                                const nextSelections = replaceFormulaControlSelection(selections, index, newRange);
-                                if (nextSelections) {
-                                    onSelectionsChange(nextSelections, false);
-                                }
-                            })
-                    );
-
-                    disposableCollection.add(
-                        control.selectionMoving$
-                            .subscribe((newRange) => {
-                                const selections = refSelectionsRenderService.getSelectionDataWithStyle().map((i) => i.rangeWithCoord);
-                                const nextSelections = replaceFormulaControlSelection(selections, index, newRange);
-                                if (nextSelections) {
-                                    onSelectionsChange(nextSelections, true);
-                                }
-                            })
-                    );
-                });
-            };
-            const dispose = merge(
-                editor.input$,
-                refSelectionsService.selectionSet$,
-                refSelectionsRenderService.selectionMoveEnd$
-            ).pipe(debounceTime(50)
-            ).subscribe(() => {
-                reListen();
-            });
-
-            return () => {
-                dispose.unsubscribe();
-                disposableCollection.dispose();
-            };
+function useFormulaReferenceChange(context: IFormulaSelectionChangeContext): IHandleSelectionsChange {
+    const { editor, lexerTreeBuilder, isSelectingRef, isInteractionOwner } = context;
+    const addReference = useAddFormulaReference(context);
+    const replaceCrossSheetReference = useReplaceCrossSheetFormulaReference(context);
+    const updateReferences = useUpdateFormulaReferences(context);
+    return useEvent((selections: IRange[], isEnd: boolean, isCtrlAddMode?: boolean) => {
+        if (!isInteractionOwner()) return;
+        const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
+        if (!ctx) return;
+        const isAddingReference = isSelectingRef.current === FormulaSelectingType.NEED_ADD ||
+            isFormulaReferenceAddingContext(ctx.sequenceNodes, ctx.offset) || shouldAddFormulaReference(ctx.formulaText, ctx.offset);
+        if (isAddingReference) {
+            addReference(ctx, selections, isEnd);
+        } else if (isSelectingRef.current === FormulaSelectingType.EDIT_OTHER_SHEET_REFERENCE || isSelectingRef.current === FormulaSelectingType.EDIT_OTHER_WORKBOOK_REFERENCE) {
+            replaceCrossSheetReference(ctx, selections, isEnd);
+        } else {
+            updateReferences(ctx, selections, isEnd, isCtrlAddMode);
         }
+    });
+}
+
+function useFormulaPointerSelection(context: IFormulaSelectionChangeContext, onSelectionsChange: IHandleSelectionsChange) {
+    const { refSelectionsRenderService, isNeed, isInteractionOwner, getRefSelections, isSelectingRef, duplicateEndGuard, editor, lexerTreeBuilder, handleRangeChange } = context;
+    useEffect(() => {
+        if (!refSelectionsRenderService || !isNeed) return;
+        const initialSelectionsCount = getInitialFormulaReferenceSelectionCount(refSelectionsRenderService.getSelectionDataWithStyle().length, getRefSelections().length);
+        const handleSelectionsChange = createSelectionChangeHandler<ISelectionWithCoord>({
+            initialSelectionsCount,
+            duplicateEndGuard: {
+                shouldSkip: (selections, isEnd) => duplicateEndGuard.shouldSkip(selections.map((i) => i.rangeWithCoord), isEnd),
+                reset: duplicateEndGuard.reset,
+            },
+            onSelectionsChange: (selections, isEnd, isCtrlAddMode) => onSelectionsChange(selections.map((i) => i.rangeWithCoord), isEnd, isCtrlAddMode),
+            onDuplicateEnd: () => {
+                const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
+                if (ctx) handleRangeChange(ctx.formulaText, ctx.offset, true);
+            },
+        });
+        let isInitialMoveEnd = true;
+        const disposables = new DisposableCollection();
+        disposables.add(refSelectionsRenderService.selectionMoveStart$.subscribe((selections) => {
+            if (isInteractionOwner()) handleSelectionsChange(selections, false, { start: true });
+        }));
+        disposables.add(refSelectionsRenderService.selectionMoving$.subscribe((selections) => {
+            if (isInteractionOwner()) handleSelectionsChange(selections, false);
+        }));
+        disposables.add(refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
+            if (!isInteractionOwner()) return;
+            handleSelectionsChange(selections, true, { initial: isInitialMoveEnd });
+            isInitialMoveEnd = false;
+        }));
+        return () => disposables.dispose();
+    }, [refSelectionsRenderService, isNeed, isInteractionOwner, getRefSelections, isSelectingRef, duplicateEndGuard, editor, lexerTreeBuilder, handleRangeChange, onSelectionsChange]);
+}
+
+function useFormulaReferenceControls(context: IFormulaSelectionChangeContext, onSelectionsChange: IHandleSelectionsChange) {
+    const { isFocus, refSelectionsRenderService, editor, refSelectionsService } = context;
+    useEffect(() => {
+        if (!isFocus || !refSelectionsRenderService || !editor) return;
+        const disposables = new DisposableCollection();
+        const reListen = () => {
+            disposables.dispose();
+            refSelectionsRenderService.getSelectionControls().forEach((control, index) => {
+                disposables.add(control.selectionScaling$.subscribe((newRange) => {
+                    const selections = refSelectionsRenderService.getSelectionDataWithStyle().map((i) => i.rangeWithCoord);
+                    const next = replaceFormulaControlSelection(selections, index, newRange);
+                    if (next) onSelectionsChange(next, false);
+                }));
+                disposables.add(control.selectionMoving$.subscribe((newRange) => {
+                    const selections = refSelectionsRenderService.getSelectionDataWithStyle().map((i) => i.rangeWithCoord);
+                    const next = replaceFormulaControlSelection(selections, index, newRange);
+                    if (next) onSelectionsChange(next, true);
+                }));
+            });
+        };
+        const sub = merge(editor.input$, refSelectionsService.selectionSet$, refSelectionsRenderService.selectionMoveEnd$)
+            .pipe(debounceTime(50))
+            .subscribe(reListen);
+        return () => {
+            sub.unsubscribe();
+            disposables.dispose();
+        };
     }, [editor, isFocus, onSelectionsChange, refSelectionsRenderService, refSelectionsService.selectionSet$]);
+}
 
-    refSelectionsRenderService?.getSelectionDataWithStyle();
-
+function useFormulaKeyboardSelection(context: IFormulaSelectionChangeContext, onSelectionsChange: IHandleSelectionsChange) {
+    const { listenSelectionSet, commandService, isInteractionOwner, editor, lexerTreeBuilder, isSelectingRef, refSelectionsRenderService, duplicateEndGuard } = context;
     useEffect(() => {
-        if (listenSelectionSet) {
-            // selection changed by keyborad
-            const d = commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== SetSelectionsOperation.id) {
-                    return;
-                }
-                if (!editor || !isFormulaEditorInteractionOwner(editorService.getFocusId(), editor.getEditorId(), {
-                    fxBarFocused: contextService.getContextValue(FOCUSING_FX_BAR_EDITOR),
-                    allowMissingFocus: allowMissingEditorFocus,
-                })) {
-                    return;
-                }
-
-                const params = commandInfo.params as ISetSelectionsOperationParams;
-                if (params.extra !== 'formula-editor') {
-                    return;
-                }
-                if (params.selections.length) {
-                    const last = params.selections[params.selections.length - 1];
-                    if (last) {
-                        const { range, primary } = last;
-                        // When in formula editor, if the current cell is a merged cell, only set the main cell of the merged cell as the selection.
-                        if ((primary?.isMergedMainCell || primary?.isMerged) && Rectangle.contains(primary, range)) {
-                            range.startRow = primary.startRow;
-                            range.endRow = primary.startRow;
-                            range.startColumn = primary.startColumn;
-                            range.endColumn = primary.startColumn;
-                        }
-                        range.unitId = params.unitId;
-                        range.sheetId = params.subUnitId;
-
-                        const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
-                        const isAdd = isSelectingRef.current === FormulaSelectingType.NEED_ADD ||
-                            Boolean(ctx && (
-                                isFormulaReferenceAddingContext(ctx.sequenceNodes, ctx.offset) ||
-                                isFormulaReferenceAddingTextContext(ctx.formulaText, ctx.offset)
-                            ));
-                        const selections: IRange[] = (refSelectionsRenderService?.getSelectionDataWithStyle() ?? []).map((i) => i.rangeWithCoord);
-                        if (isAdd) {
-                            if (selections.length > 0 && isSameFormulaSelection(selections[selections.length - 1], range)) {
-                                return;
-                            }
-                            selections.push(range);
-                        } else {
-                            if (shouldSkipFormulaReferenceUpdate(isAdd, selections.length)) {
-                                return;
-                            }
-                            selections[selections.length - 1] = range;
-                        }
-                        if (duplicateEndGuard.shouldSkip(selections, true)) {
-                            return;
-                        }
-                        onSelectionsChange(selections, true);
-                    }
-                }
-            });
-
-            return () => {
-                d.dispose();
-            };
-        }
-    }, [commandService, contextService, duplicateEndGuard, editor, editorService, isSelectingRef, lexerTreeBuilder, listenSelectionSet, onSelectionsChange, refSelectionsRenderService]);
-
-    useEffect(() => {
-        if (!editor) {
-            return;
-        }
-        const sub = docSelectionManagerService.textSelection$.subscribe((e) => {
-            if (e.unitId !== editor.getEditorId()) {
-                return;
+        if (!listenSelectionSet) return;
+        const sub = commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id !== SetSelectionsOperation.id || !isInteractionOwner()) return;
+            const params = commandInfo.params as ISetSelectionsOperationParams;
+            const last = params.selections[params.selections.length - 1];
+            if (params.extra !== 'formula-editor' || !last) return;
+            const { range, primary } = last;
+            if ((primary?.isMergedMainCell || primary?.isMerged) && Rectangle.contains(primary, range)) {
+                range.startRow = primary.startRow;
+                range.endRow = primary.startRow;
+                range.startColumn = primary.startColumn;
+                range.endColumn = primary.startColumn;
             }
+            range.unitId = params.unitId;
+            range.sheetId = params.subUnitId;
+            const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
+            const isAdd = isSelectingRef.current === FormulaSelectingType.NEED_ADD || Boolean(ctx && (
+                isFormulaReferenceAddingContext(ctx.sequenceNodes, ctx.offset) || shouldAddFormulaReference(ctx.formulaText, ctx.offset)
+            ));
+            const selections: IRange[] = (refSelectionsRenderService?.getSelectionDataWithStyle() ?? []).map((i) => i.rangeWithCoord);
+            if (isAdd) {
+                if (selections.length > 0 && isSameFormulaSelection(selections[selections.length - 1], range)) return;
+                selections.push(range);
+            } else {
+                if (shouldSkipFormulaReferenceUpdate(isAdd, selections.length)) return;
+                selections[selections.length - 1] = range;
+            }
+            if (!duplicateEndGuard.shouldSkip(selections, true)) onSelectionsChange(selections, true);
+        });
+        return () => sub.dispose();
+    }, [listenSelectionSet, commandService, isInteractionOwner, editor, lexerTreeBuilder, isSelectingRef, refSelectionsRenderService, duplicateEndGuard, onSelectionsChange]);
+}
 
+function useFormulaSelectionHighlight(context: IFormulaSelectionChangeContext) {
+    const { editor, docSelectionManagerService, unitId, subUnitId, getRefSelections, refSelectionsService, refSelectionsRenderService, sheetSkeletonManagerService, themeService, univerInstanceService, activeWorkbook } = context;
+    useEffect(() => {
+        if (!editor) return;
+        const sub = docSelectionManagerService.textSelection$.subscribe((event) => {
+            if (event.unitId !== editor.getEditorId()) return;
             calcHighlightRanges({
                 unitId,
                 subUnitId,
@@ -635,7 +545,39 @@ export const useSheetSelectionChange = (
                 currentWorkbook: activeWorkbook!,
             });
         });
-
         return () => sub.unsubscribe();
-    }, [docSelectionManagerService.textSelection$, editor, getRefSelections, refSelectionsRenderService, refSelectionsService, sheetSkeletonManagerService, subUnitId, themeService, unitId, univerInstanceService]);
+    }, [docSelectionManagerService.textSelection$, editor, getRefSelections, refSelectionsRenderService, refSelectionsService, sheetSkeletonManagerService, subUnitId, themeService, unitId, univerInstanceService, activeWorkbook]);
+}
+
+export const useSheetSelectionChange = (
+    isNeed: boolean,
+    isFocus: boolean,
+    isSelectingRef: RefObject<FormulaSelectingType>,
+    unitId: string,
+    subUnitId: string,
+    getRefSelections: () => IRefSelection[],
+    isSupportAcrossSheet: boolean,
+    listenSelectionSet: boolean,
+    editor?: Editor,
+    handleRangeChange: IFormulaSelectionChangeOptions['handleRangeChange'] = () => {},
+    allowMissingEditorFocus = false
+) => {
+    const context = useFormulaSelectionChangeContext({
+        isNeed,
+        isFocus,
+        isSelectingRef,
+        unitId,
+        subUnitId,
+        getRefSelections,
+        isSupportAcrossSheet,
+        listenSelectionSet,
+        editor,
+        handleRangeChange,
+        allowMissingEditorFocus,
+    });
+    const onSelectionsChange = useFormulaReferenceChange(context);
+    useFormulaPointerSelection(context, onSelectionsChange);
+    useFormulaReferenceControls(context, onSelectionsChange);
+    useFormulaKeyboardSelection(context, onSelectionsChange);
+    useFormulaSelectionHighlight(context);
 };

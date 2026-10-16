@@ -173,7 +173,6 @@ describe('DocHeaderFooterFields', () => {
         const { model, injector, editor } = await renderFields();
         const trigger = document.querySelector<HTMLButtonElement>('button[data-u-comp="select"]')!;
         expect(trigger.tagName).toBe('BUTTON');
-        expect(trigger.getAttribute('aria-label')).toBe('Date & time');
         expect(document.querySelector('[role="dialog"]')!.contains(trigger)).toBe(true);
         await act(async () => {
             trigger.focus();

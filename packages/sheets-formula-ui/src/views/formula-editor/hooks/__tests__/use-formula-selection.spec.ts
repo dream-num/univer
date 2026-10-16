@@ -16,7 +16,19 @@
 
 // @vitest-environment jsdom
 
-import { describe, expect, it, vi } from 'vitest';
+import type { DocumentDataModel, IDocumentData, IWorkbookData, Workbook } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, Univer, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import {
+    IRenderManagerService,
+    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+    RenderManagerService,
+} from '@univerjs/engine-render';
+import { RediContext } from '@univerjs/ui';
+import { act, createElement } from 'react';
+import { createRoot } from 'react-dom/client';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import {
     FormulaSelectingType,
     resolveFormulaSelectingIntent,
@@ -25,9 +37,73 @@ import {
     resolveFormulaSelectionWorkbook,
     shouldAddFormulaReference,
     shouldSkipReferenceEditingByPointer,
+    useFormulaSelecting,
 } from '../use-formula-selection';
 
+(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+
+function FormulaSelectionState({ isFocus }: { isFocus: boolean }) {
+    const { isSelecting } = useFormulaSelecting({
+        editorId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+        unitId: 'formula-selection-sheet',
+        subUnitId: 'sheet1',
+        isFocus,
+    });
+    return createElement('output', null, isSelecting);
+}
+
 describe('use-formula-selection regression scenarios', () => {
+    it.each(['=', '=SUM('])('does not restart reference picking from hidden editor text %s after editing ends', async (input) => {
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        injector.add([DocSelectionManagerService]);
+        injector.add([LexerTreeBuilder]);
+        injector.get(ICommandService).registerCommand(SetTextSelectionsOperation);
+        univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'formula-selection-sheet',
+            sheetOrder: ['sheet1'],
+            sheets: { sheet1: { id: 'sheet1' } },
+        });
+        univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+            id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            body: { dataStream: `${input}\r\n` },
+        });
+        const selections = injector.get(DocSelectionManagerService);
+        const container = document.createElement('div');
+        document.body.appendChild(container);
+        const root = createRoot(container);
+        onTestFinished(() => {
+            act(() => root.unmount());
+            container.remove();
+            univer.dispose();
+        });
+        const render = async (isFocus: boolean) => {
+            await act(async () => root.render(createElement(
+                RediContext.Provider,
+                { value: { injector } },
+                createElement(FormulaSelectionState, { isFocus })
+            )));
+        };
+
+        await render(true);
+        expect(container.textContent).toBe(String(FormulaSelectingType.NEED_ADD));
+        await render(false);
+        expect(container.textContent).toBe(String(FormulaSelectingType.NOT_SELECT));
+
+        await act(async () => {
+            selections.__replaceTextRangesWithNoRefresh({
+                textRanges: [{ startOffset: 0, endOffset: 0, collapsed: true, isActive: true }],
+                rectRanges: [],
+                segmentId: '',
+                segmentPage: -1,
+                isEditing: false,
+                style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            }, { unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY, subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY });
+        });
+        expect(container.textContent).toBe(String(FormulaSelectingType.NOT_SELECT));
+    });
+
     it('only skips reference editing when pointer-origin editing is still disabled and click editing is allowed', () => {
         expect(shouldSkipReferenceEditingByPointer(true)).toBe(true);
         expect(shouldSkipReferenceEditingByPointer(true, true)).toBe(false);

@@ -152,6 +152,8 @@ export interface ICanvasFloatDomInfo {
     scrollDirectionResponse?: ScrollDirectionResponse; // update float dom pos by scrolling
     domAnchor?: IDOMAnchor;
     id: string;
+    /** Query attributes for float doms created without a backing drawing. */
+    runtimeMetadata?: Pick<ICanvasFloatDom, 'componentKey' | 'data' | 'allowTransform'>;
     domId?: string; // Ensure unique id for dom element at runtime
     floatDomConfig?: IFloatDom;
     runtimeMounted?: boolean;
@@ -2010,6 +2012,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 unitId,
                 subUnitId,
                 id: drawingId,
+                runtimeMetadata: { componentKey, data, allowTransform },
             } as unknown as ICanvasFloatDomInfo;
 
             const initedPosition = calcSheetFloatDomPosition(domRect, renderObject.renderUnit.scene, skeletonParam.skeleton, target.worksheet, floatDomInfo);
@@ -2253,6 +2256,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 boundsOfViewArea,
                 domAnchor: domLayoutParam,
                 scrollDirectionResponse: ScrollDirectionResponse.HORIZONTAL,
+                runtimeMetadata: { componentKey, data, allowTransform },
             } as unknown as ICanvasFloatDomInfo;
 
             const initedPosition = calcSheetFloatDomPosition(domRect, renderObject.renderUnit.scene, skeleton.skeleton, target.worksheet, floatDomInfo);

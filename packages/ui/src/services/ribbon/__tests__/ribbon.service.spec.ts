@@ -127,6 +127,56 @@ describe('DesktopRibbonService', () => {
         subscription.unsubscribe();
     });
 
+    it('keeps UI state unchanged when teardown observers invoke setters during or after disposal', () => {
+        const injector = createInjector();
+        const service = injector.get(IRibbonService) as DesktopRibbonService;
+        const activated: string[] = [];
+        const collapsed: string[][] = [];
+        const fakeToolbarVisible: boolean[] = [];
+        const completed: string[] = [];
+        service.activatedTab$.subscribe({
+            next: (tab) => activated.push(tab),
+            complete: () => completed.push('activated'),
+        });
+        service.collapsedIds$.subscribe({
+            next: (ids) => collapsed.push(ids),
+            complete: () => completed.push('collapsed'),
+        });
+        service.fakeToolbarVisible$.subscribe({
+            next: (visible) => fakeToolbarVisible.push(visible),
+            complete: () => completed.push('fakeToolbar'),
+        });
+        service.setActivatedTab(RibbonPosition.INSERT);
+        service.setCollapsedIds(['format']);
+        service.setFakeToolbarVisible(true);
+        const previousActivated = [...activated];
+        const previousCollapsed = [...collapsed];
+        const previousFakeToolbarVisible = [...fakeToolbarVisible];
+        let disposing = false;
+        let teardownNotifications = 0;
+        service.ribbon$.subscribe((tabs) => {
+            if (disposing && tabs.length === 0) {
+                teardownNotifications += 1;
+                service.setActivatedTab(RibbonPosition.START);
+                service.setCollapsedIds([]);
+                service.setFakeToolbarVisible(false);
+            }
+        });
+
+        disposing = true;
+        service.dispose();
+        service.setActivatedTab(RibbonPosition.START);
+        service.setCollapsedIds([]);
+        service.setFakeToolbarVisible(false);
+        service.dispose();
+
+        expect(teardownNotifications).toBe(1);
+        expect(activated).toEqual(previousActivated);
+        expect(collapsed).toEqual(previousCollapsed);
+        expect(fakeToolbarVisible).toEqual(previousFakeToolbarVisible);
+        expect(completed.sort()).toEqual(['activated', 'collapsed', 'fakeToolbar']);
+    });
+
     it('releases hidden subscriptions when disposed synchronously by a ribbon observer', () => {
         const injector = createInjector();
         const service = injector.get(IRibbonService) as DesktopRibbonService;

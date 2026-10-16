@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDocumentData, Injector, IStyleData, Nullable, RichTextValue, Workbook } from '@univerjs/core';
+import type {
+    ICellData,
+    IDocumentData,
+    Injector,
+    IStyleData,
+    Nullable,
+    RichTextValue,
+    Workbook,
+} from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
+import type { FWorksheet } from '../f-worksheet';
 import {
     AbsoluteRefType,
     Dimension,
@@ -907,6 +916,96 @@ describe('Test FRange', () => {
         ]));
     });
 
+    describe('getDataRegion', () => {
+        let worksheet: FWorksheet;
+
+        beforeEach(() => {
+            worksheet = univerAPI.createWorkbook({
+                id: 'data-region',
+                sheetOrder: ['data'],
+                sheets: {
+                    data: { id: 'data', name: 'data', rowCount: 8, columnCount: 8 },
+                },
+            }).getActiveSheet();
+        });
+
+        it.each([
+            { dataRange: 'A1:A4', cells: ['A1', 'A2', 'A3', 'A4'] },
+            { dataRange: 'A1:D1', cells: ['A1', 'B1', 'C1', 'D1'] },
+        ])('expands every cell in $dataRange to the whole list', ({ dataRange, cells }) => {
+            worksheet.getRange(dataRange).setValue(1);
+
+            for (const cell of cells) {
+                const range = worksheet.getRange(cell);
+                expect(range.getDataRegion().getA1Notation()).toBe(dataRange);
+                expect(range.getA1Notation()).toBe(cell);
+            }
+        });
+
+        it('expands rectangles while respecting the requested dimension', () => {
+            worksheet.getRange('A1:F6').setValue(1);
+
+            expect(worksheet.getRange('C3').getDataRegion().getA1Notation()).toBe('A1:F6');
+            expect(worksheet.getRange('C3:D4').getDataRegion().getA1Notation()).toBe('A1:F6');
+            expect(worksheet.getRange('C3:D4').getDataRegion(Dimension.ROWS).getA1Notation()).toBe('C1:D6');
+            expect(worksheet.getRange('C3:D4').getDataRegion(Dimension.COLUMNS).getA1Notation()).toBe('A3:F4');
+        });
+
+        it('rechecks boundaries exposed by expansion in another direction', () => {
+            worksheet.getRange('B4:D4').setValue(1);
+            worksheet.getRange('D2:D3').setValue(1);
+            worksheet.getRange('A2:C2').setValue(1);
+            worksheet.getRange('A1').setValue(1);
+
+            expect(worksheet.getRange('B4').getDataRegion().getA1Notation()).toBe('A1:D4');
+        });
+
+        it('counts zero, false, formulas and rich text as data and stops at empty boundaries', () => {
+            worksheet.getRange('A1:A4').setValues([
+                [{ v: 0 }],
+                [{ v: false }],
+                [{ f: '=1' }],
+                [{ p: { id: 'rich-text', documentStyle: {}, body: { dataStream: 'text\r\n' } } }],
+            ]);
+            worksheet.getRange('A5:B5').setValues([[{ v: '' }, {}]]);
+            worksheet.getRange('A5:B5').setFontWeight('bold');
+            worksheet.getRange('A6:B6').setValue('separate');
+            worksheet.getRange('C1:C4').setValue('separate');
+
+            expect(worksheet.getRange('A1').getDataRegion().getA1Notation()).toBe('A1:A4');
+            expect(worksheet.getRange('A4').getDataRegion().getA1Notation()).toBe('A1:A4');
+        });
+
+        it('expands an empty starting cell when adjacent cells contain data', () => {
+            worksheet.getRange('C2').setValue(1);
+            worksheet.getRange('B3').setValue(1);
+            worksheet.getRange('D3').setValue(1);
+            worksheet.getRange('C4').setValue(1);
+
+            expect(worksheet.getRange('C3').getDataRegion().getA1Notation()).toBe('B2:D4');
+            expect(worksheet.getRange('C3').getDataRegion(Dimension.ROWS).getA1Notation()).toBe('C2:C4');
+            expect(worksheet.getRange('C3').getDataRegion(Dimension.COLUMNS).getA1Notation()).toBe('B3:D3');
+        });
+
+        it('keeps isolated ranges and ignores diagonal-only neighbors', () => {
+            worksheet.getRange('A1').setValue(1);
+            worksheet.getRange('C3').setValue(1);
+            worksheet.getRange('F6').setValue(1);
+
+            expect(worksheet.getRange('A1').getDataRegion().getA1Notation()).toBe('A1');
+            expect(worksheet.getRange('B2').getDataRegion().getA1Notation()).toBe('B2');
+            expect(worksheet.getRange('D4:E5').getDataRegion().getA1Notation()).toBe('D4:E5');
+        });
+
+        it('stays within worksheet bounds when data reaches every edge', () => {
+            worksheet.getRange('A1:H8').setValue(1);
+
+            expect(worksheet.getRange('D4').getDataRegion().getA1Notation()).toBe('A1:H8');
+            expect(worksheet.getRange('A1').getDataRegion(Dimension.ROWS).getA1Notation()).toBe('A1:A8');
+            expect(worksheet.getRange('H8').getDataRegion(Dimension.COLUMNS).getA1Notation()).toBe('A8:H8');
+        });
+    });
+
     it('Range supports an analyst editing a formatted data island', () => {
         const workbook = univerAPI.getActiveWorkbook()!;
         const activeSheet = workbook.getActiveSheet();
@@ -982,9 +1081,9 @@ describe('Test FRange', () => {
         activeSheet.getRange('A3').setValue('Neighbor');
         activeSheet.getRange('E3').setValue('Calculated');
         activeSheet.getRange('C5').setValue('Footer');
-        expect(activeSheet.getRange('C3').getDataRegion().getA1Notation()).toBe('B2:D4');
-        expect(activeSheet.getRange('C3').getDataRegion(Dimension.ROWS).getA1Notation()).toBe('C2:C4');
-        expect(activeSheet.getRange('C3').getDataRegion(Dimension.COLUMNS).getA1Notation()).toBe('B3:D3');
+        expect(activeSheet.getRange('C3').getDataRegion().getA1Notation()).toBe('A1:E5');
+        expect(activeSheet.getRange('C3').getDataRegion(Dimension.ROWS).getA1Notation()).toBe('C2:C5');
+        expect(activeSheet.getRange('C3').getDataRegion(Dimension.COLUMNS).getA1Notation()).toBe('A3:E3');
 
         const offset = report.offset(1, 1, 2);
         expect(offset.getA1Notation()).toBe('C3:E4');

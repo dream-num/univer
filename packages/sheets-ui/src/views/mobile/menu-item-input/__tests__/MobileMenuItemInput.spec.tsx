@@ -49,7 +49,7 @@ async function renderInput(props: Partial<IMenuItemInputProps> = {}) {
     };
     const renderWithProps = (nextProps: Partial<IMenuItemInputProps>) => (
         <RediContext.Provider value={{ injector }}>
-            <ConfigProvider locale={designEnUS.design}>
+            <ConfigProvider locale={designEnUS.design} mountContainer={container}>
                 <div onClick={onRowClick}>
                     <MobileMenuItemInput {...initialProps} {...nextProps} />
                 </div>

@@ -54,7 +54,7 @@ import {
     WorkbookRenameSheetPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { UI_PLUGIN_CONFIG_KEY, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
+import { ILayoutService, UI_PLUGIN_CONFIG_KEY, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { merge } from 'rxjs';
 import { getEmbedSheetsTabCustomData } from '../../../embed-tab-anchor';
@@ -148,6 +148,7 @@ export function SheetBarTabs() {
     const activeSheetIdRef = useRef(activeSheetId);
 
     const commandService = useDependency(ICommandService);
+    const layoutService = useDependency(ILayoutService);
     const renderManagerService = useDependency(IRenderManagerService);
     const sheetBarService = useDependency(ISheetBarService);
     const localeService = useDependency(LocaleService);
@@ -370,6 +371,7 @@ export function SheetBarTabs() {
             subUnitId,
             unitId: workbookRef.current.getUnitId(),
         }).then((result) => {
+            requestAnimationFrame(() => layoutService.focus(workbookRef.current.getUnitId()));
             if (result !== false) {
                 return;
             }
@@ -380,7 +382,7 @@ export function SheetBarTabs() {
                 syncActiveSheetRender(subUnitId);
             }
         });
-    }, [commandService, syncActiveSheetRender]);
+    }, [commandService, layoutService, syncActiveSheetRender]);
 
     const observeResize = useCallback((slideTabBar: SlideTabBar) => {
         const slideTabBarContainer = slideTabBarContainerRef.current?.querySelector('[data-u-comp=slide-tab-bar]');

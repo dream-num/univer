@@ -2635,6 +2635,7 @@ export class FRange extends FBaseInitialable {
      * Returns a copy of the range expanded `Direction.UP` and `Direction.DOWN` if the specified dimension is `Dimension.ROWS`, or `Direction.NEXT` and `Direction.PREVIOUS` if the dimension is `Dimension.COLUMNS`.
      * The expansion of the range is based on detecting data next to the range that is organized like a table.
      * The expanded range covers all adjacent cells with data in them along the specified dimension including the table boundaries.
+     * Cells connected only diagonally do not cause the range to expand.
      * If the original range is surrounded by empty cells along the specified dimension, the range itself is returned.
      * @param {Dimension} [dimension] - The dimension along which to expand the range. If not provided, the range will be expanded in both dimensions.
      * @returns {FRange} The range's data region or a range covering each column or each row spanned by the original range.
@@ -2655,7 +2656,7 @@ export class FRange extends FBaseInitialable {
      * fWorksheet.getRange('D3').setValue(100);
      * fWorksheet.getRange('C4').setValue(100);
      *
-     * // Get C3 data region along the rows dimension, the range will be C2:D4
+     * // Get C3 data region along the rows dimension, the range will be C2:C4
      * const range = fWorksheet.getRange('C3').getDataRegion(univerAPI.Enum.Dimension.ROWS);
      * console.log(range.getA1Notation()); // C2:C4
      *
@@ -2669,78 +2670,57 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     getDataRegion(dimension?: Dimension): FRange {
-        const { startRow, startColumn, endRow, endColumn } = this._range;
+        let { startRow, startColumn, endRow, endColumn } = this._range;
         const maxRows = this._worksheet.getMaxRows();
         const maxColumns = this._worksheet.getMaxColumns();
         const cellMatrix = this._worksheet.getCellMatrix();
-
-        // If the original range is surrounded by empty cells along the specified dimension, the range itself is returned.
-        let newStartRow = startRow;
-        let newStartColumn = startColumn;
-        let newEndRow = endRow;
-        let newEndColumn = endColumn;
-
-        // Four directions or dimension rows
-        if (dimension !== Dimension.COLUMNS) {
-            let topRowHasValue = false;
-            let bottomRowHasValue = false;
-
+        const rowHasData = (row: number): boolean => {
             for (let c = startColumn; c <= endColumn; c++) {
-                if (startRow > 0 && !isNullCell(cellMatrix.getValue(startRow - 1, c))) {
-                    topRowHasValue = true;
-                }
-
-                if (endRow < maxRows - 1 && !isNullCell(cellMatrix.getValue(endRow + 1, c))) {
-                    bottomRowHasValue = true;
-                }
-
-                if (topRowHasValue && bottomRowHasValue) {
-                    break;
+                if (!isNullCell(cellMatrix.getValue(row, c))) {
+                    return true;
                 }
             }
-
-            if (topRowHasValue) {
-                newStartRow = startRow - 1;
-            }
-
-            if (bottomRowHasValue) {
-                newEndRow = endRow + 1;
-            }
-        }
-
-        // Four directions or dimension columns
-        if (dimension !== Dimension.ROWS) {
-            let leftColumnHasValue = false;
-            let rightColumnHasValue = false;
-
+            return false;
+        };
+        const columnHasData = (column: number): boolean => {
             for (let r = startRow; r <= endRow; r++) {
-                if (startColumn > 0 && !isNullCell(cellMatrix.getValue(r, startColumn - 1))) {
-                    leftColumnHasValue = true;
-                }
-
-                if (endColumn < maxColumns - 1 && !isNullCell(cellMatrix.getValue(r, endColumn + 1))) {
-                    rightColumnHasValue = true;
-                }
-
-                if (leftColumnHasValue && rightColumnHasValue) {
-                    break;
+                if (!isNullCell(cellMatrix.getValue(r, column))) {
+                    return true;
                 }
             }
+            return false;
+        };
 
-            if (leftColumnHasValue) {
-                newStartColumn = startColumn - 1;
+        let expanded = true;
+        while (expanded) {
+            expanded = false;
+
+            while (dimension !== Dimension.COLUMNS && startRow > 0 && rowHasData(startRow - 1)) {
+                startRow--;
+                expanded = true;
             }
 
-            if (rightColumnHasValue) {
-                newEndColumn = endColumn + 1;
+            while (dimension !== Dimension.COLUMNS && endRow < maxRows - 1 && rowHasData(endRow + 1)) {
+                endRow++;
+                expanded = true;
+            }
+
+            while (dimension !== Dimension.ROWS && startColumn > 0 && columnHasData(startColumn - 1)) {
+                startColumn--;
+                expanded = true;
+            }
+
+            while (dimension !== Dimension.ROWS && endColumn < maxColumns - 1 && columnHasData(endColumn + 1)) {
+                endColumn++;
+                expanded = true;
             }
         }
 
         return this._injector.createInstance(FRange, this._workbook, this._worksheet, {
-            startRow: newStartRow,
-            startColumn: newStartColumn,
-            endRow: newEndRow,
-            endColumn: newEndColumn,
+            startRow,
+            startColumn,
+            endRow,
+            endColumn,
         });
     }
 

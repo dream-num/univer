@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        defaultStyleNumber: 'Standardstil {0}',
+        customStyleNumber: 'Benutzerdefinierter Stil {0}',
+        removeCustomStyle: 'Benutzerdefinierten Stil {0} löschen',
         calculatedColumn: 'Berechnete Spalte',
         columnFormula: 'Formel',
         columnFormulaHint: 'Ersetzt sofort alle {0} Datenzellen ohne Kopf- und Ergebniszeile. Beim Stoppen bleiben vorhandene Zellen erhalten. Rückgängig möglich.',

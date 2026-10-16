@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        defaultStyleNumber: 'Kiểu mặc định {0}',
+        customStyleNumber: 'Kiểu tùy chỉnh {0}',
+        removeCustomStyle: 'Xóa kiểu tùy chỉnh {0}',
         calculatedColumn: 'Cột tính toán',
         columnFormula: 'Công thức',
         columnFormulaHint: 'Thay ngay {0} ô dữ liệu, không gồm tiêu đề và tổng. Dừng điền tự động giữ nguyên các ô hiện có. Có thể hoàn tác.',

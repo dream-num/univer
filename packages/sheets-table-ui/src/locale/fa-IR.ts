@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        defaultStyleNumber: 'سبک پیش‌فرض {0}',
+        customStyleNumber: 'سبک سفارشی {0}',
+        removeCustomStyle: 'حذف سبک سفارشی {0}',
         calculatedColumn: 'ستون محاسباتی',
         columnFormula: 'فرمول',
         columnFormulaHint: 'بلافاصله {0} سلول داده را بدون سربرگ و جمع جایگزین می‌کند. توقف، سلول‌های موجود را حفظ می‌کند. قابل واگرد است.',

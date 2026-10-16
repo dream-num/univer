@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        defaultStyleNumber: 'Gaya default {0}',
+        customStyleNumber: 'Gaya kustom {0}',
+        removeCustomStyle: 'Hapus gaya kustom {0}',
         calculatedColumn: 'Kolom terhitung',
         columnFormula: 'Rumus',
         columnFormulaHint: 'Langsung mengganti {0} sel data, kecuali header dan total. Berhenti mempertahankan sel yang ada. Perubahan dapat diurungkan.',

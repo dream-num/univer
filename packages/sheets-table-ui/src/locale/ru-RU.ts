@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        defaultStyleNumber: 'Стандартный стиль {0}',
+        customStyleNumber: 'Пользовательский стиль {0}',
+        removeCustomStyle: 'Удалить пользовательский стиль {0}',
         calculatedColumn: 'Вычисляемый столбец',
         columnFormula: 'Формула',
         columnFormulaHint: 'Сразу заменяет {0} ячеек данных без заголовка и итогов. Остановка сохраняет текущие ячейки. Действие можно отменить.',

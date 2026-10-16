@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        defaultStyleNumber: '默认样式 {0}',
+        customStyleNumber: '自定义样式 {0}',
+        removeCustomStyle: '删除自定义样式 {0}',
         calculatedColumn: '计算列',
         columnFormula: '公式',
         columnFormulaHint: '应用后立即覆盖此列的 {0} 个数据单元格，不包含表头和汇总行。停止自动填充会保留现有单元格。操作可撤销。',

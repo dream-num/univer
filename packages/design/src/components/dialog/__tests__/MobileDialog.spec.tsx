@@ -16,6 +16,8 @@
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import enUS from '../../../locale/en-US';
+import zhCN from '../../../locale/zh-CN';
 import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { MobileDialog } from '../MobileDialog';
 import '@testing-library/jest-dom/vitest';
@@ -34,11 +36,22 @@ describe('MobileDialog', () => {
         expect(screen.getByRole('textbox')).toHaveFocus();
     });
 
-    it('closes once when the close control is pressed', () => {
+    it('closes once through the close control after the locale changes', () => {
         const onClose = vi.fn();
-        render(<MobileDialog open title="Print" onClose={onClose}>Preview</MobileDialog>);
-        fireEvent.click(screen.getByRole('button', { name: 'Close' }));
-        expect(onClose).toHaveBeenCalledTimes(1);
+        const { getByRole, rerender } = render(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body} direction="ltr">
+                <MobileDialog open title="Print" onClose={onClose}>Preview</MobileDialog>
+            </ConfigProvider>
+        );
+
+        rerender(
+            <ConfigProvider locale={zhCN.design} mountContainer={document.body} direction="ltr">
+                <MobileDialog open title="Print" onClose={onClose}>Preview</MobileDialog>
+            </ConfigProvider>
+        );
+
+        fireEvent.click(getByRole('button', { name: '关闭' }));
+        expect(onClose).toHaveBeenCalledOnce();
     });
 
     it('keeps its original geometry while the keyboard viewport is visible', () => {

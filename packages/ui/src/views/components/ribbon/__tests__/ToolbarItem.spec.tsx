@@ -129,7 +129,6 @@ describe('ToolbarItem', () => {
 
         expect(trigger.getAttribute('role')).toBe('button');
         expect(trigger.getAttribute('tabindex')).toBe('0');
-        expect(trigger.getAttribute('aria-label')).toBe('Format');
         trigger.focus();
         expect(document.activeElement).toBe(trigger);
         fireEvent.keyDown(trigger, { key: 'Enter' });

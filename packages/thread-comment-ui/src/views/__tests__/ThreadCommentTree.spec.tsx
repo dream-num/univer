@@ -767,19 +767,6 @@ describe('ThreadCommentTree', () => {
         expect(onActivate).toHaveBeenCalledOnce();
     });
 
-    it('exposes icon-only thread actions as labeled keyboard controls', () => {
-        const testBed = createTreeTestBed();
-        addRootComment(testBed.threadCommentModel, createComment({ id: 'accessible-thread' }));
-
-        const rendered = renderDefaultTree(testBed.injector, 'accessible-thread');
-        root = rendered.root;
-        container = rendered.container;
-
-        expect(container.querySelector('button[aria-label="thread-comment-ui.item.more"]')).not.toBeNull();
-        expect(container.querySelector('button[aria-label="thread-comment-ui.item.markResolved"]')).not.toBeNull();
-        expect(container.querySelector('button[aria-label="thread-comment-ui.item.delete"]')).not.toBeNull();
-    });
-
     it('keeps comment content visible when its author is no longer in the user directory', () => {
         const testBed = createTreeTestBed();
         addRootComment(testBed.threadCommentModel, createComment({

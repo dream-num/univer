@@ -16,7 +16,7 @@
 
 import type { IBorderInfo } from '@univerjs/sheets';
 import type { Root } from 'react-dom/client';
-import { BorderStyleTypes, BorderType, Univer } from '@univerjs/core';
+import { BorderStyleTypes, BorderType, LocaleService, LocaleType, Univer } from '@univerjs/core';
 import { ConfigProvider } from '@univerjs/design';
 import * as icons from '@univerjs/icons';
 import { SheetsSelectionsService } from '@univerjs/sheets';
@@ -24,31 +24,22 @@ import { IconManager, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { describe, expect, it, onTestFinished } from 'vitest';
-
+import arSA from '../../../locale/ar-SA';
+import enUS from '../../../locale/en-US';
 import { BorderPanel } from '../BorderPanel';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
-class TestSheetsSelectionsService {
-    getCellStylesProperty() {
-        return {
-            isAllValuesSame: true,
-            value: {
-                t: {
-                    s: BorderStyleTypes.THIN,
-                    cl: { rgb: '#123456' },
-                },
-            },
-        };
-    }
-}
-
-function renderPanel(value: IBorderInfo, direction: 'ltr' | 'rtl' = 'ltr') {
+function renderPanel(value: IBorderInfo, direction: 'ltr' | 'rtl' = 'ltr', locale = LocaleType.EN_US) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     injector.add([IconManager]);
-    injector.add([SheetsSelectionsService, { useClass: TestSheetsSelectionsService as never }]);
+    injector.add([SheetsSelectionsService]);
     injector.get(IconManager).register(icons);
+    const localeService = injector.get(LocaleService);
+    localeService.load({ [LocaleType.EN_US]: enUS, [LocaleType.AR_SA]: arSA });
+    localeService.setLocale(locale);
+    localeService.setDirection(direction);
 
     const container = document.createElement('div');
     document.body.appendChild(container);
@@ -105,13 +96,16 @@ describe('BorderPanel', () => {
         ]);
     });
 
-    it.each(['ltr', 'rtl'] as const)('keeps the line preview and selected option in sync in %s', async (direction) => {
+    it.each([
+        { direction: 'ltr', locale: LocaleType.EN_US },
+        { direction: 'rtl', locale: LocaleType.AR_SA },
+    ] as const)('keeps the selected border style and preview in sync in $direction', async ({ direction, locale }) => {
         const rendered = renderPanel({
             type: BorderType.ALL,
             color: '#123456',
             style: BorderStyleTypes.DOTTED,
             activeBorderType: true,
-        }, direction);
+        }, direction, locale);
 
         expect(rendered.container.querySelector('section')?.getAttribute('dir')).toBe(direction);
         const trigger = rendered.container.querySelectorAll('button')[1];

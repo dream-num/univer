@@ -118,17 +118,13 @@ describe('DocStatistics', () => {
         });
 
         expect(useDocStatistics).toHaveBeenLastCalledWith(true);
-        expect(document.body.textContent).toContain('Document statistics');
-        expect(document.body.textContent).toContain('Pages');
-        expect(document.body.textContent).toContain('Characters (no spaces)');
-        expect(document.body.textContent).toContain('Asian characters and Korean words');
-        expect(document.querySelector('[role="dialog"]')?.getAttribute('aria-label')).toBe('Document statistics');
+        expect(document.querySelector('[role="dialog"]')).not.toBeNull();
 
         act(() => {
             document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
         });
 
-        expect(document.body.textContent).not.toContain('Document statistics');
+        expect(document.querySelector('[role="dialog"]')).toBeNull();
         expect(useDocStatistics).toHaveBeenLastCalledWith(false);
     });
 

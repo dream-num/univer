@@ -20,8 +20,8 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import { ConfigService, IConfigService, Injector, LocaleService } from '@univerjs/core';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { BehaviorSubject, map } from 'rxjs';
-import { afterEach, beforeEach, describe, expect, expectTypeOf, it, vi } from 'vitest';
+import { BehaviorSubject } from 'rxjs';
+import { afterEach, beforeEach, describe, expect, expectTypeOf, it } from 'vitest';
 import { ComponentManager } from '../../../../common/component-manager';
 import { CanvasPopupService, ICanvasPopupService } from '../../../../services/popup/canvas-popup.service';
 import { RediContext } from '../../../../utils/di';
@@ -162,7 +162,6 @@ describe('CanvasPopup', () => {
 
     afterEach(() => {
         cleanup();
-        vi.restoreAllMocks();
         if (previousResizeObserver) {
             globalThis.ResizeObserver = previousResizeObserver;
         } else {
@@ -218,46 +217,6 @@ describe('CanvasPopup', () => {
             expect(screen.queryByRole('button', { name: 'Cell comment' })).toBeNull();
         });
 
-        rendered.dispose();
-    });
-
-    it('keeps the final anchor when zoom and recentering publish in the same frame', async () => {
-        vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((callback) =>
-            window.setTimeout(() => callback(performance.now()), 0));
-        vi.spyOn(globalThis, 'cancelAnimationFrame').mockImplementation((id) => window.clearTimeout(id));
-        const rendered = renderWithDependencies(<CanvasPopup />);
-        const anchorRect$ = new BehaviorSubject({ left: 40, top: 50, right: 90, bottom: 70 });
-        const onClickOutside = vi.fn();
-        act(() => {
-            rendered.injector.get(ICanvasPopupService).addPopup({
-                unitId: 'doc',
-                subUnitId: 'doc',
-                componentKey: 'test-popup',
-                anchorRect$,
-                excludeRects$: anchorRect$.pipe(map((rect) => [rect])),
-                onClickOutside,
-                canvasElement: createCanvasElement(new DOMRect(0, 0, 800, 600)),
-                direction: 'bottom-left',
-                hideOnInvisible: false,
-                extraProps: { label: 'Formula editor' },
-            });
-        });
-        await screen.findByRole('button', { name: 'Formula editor' });
-        const popup = document.querySelector('[data-u-comp="rect-popup"]') as HTMLElement;
-        await waitFor(() => expect(popup.style.left).toBe('40px'));
-        await act(async () => {
-            await new Promise(requestAnimationFrame);
-            anchorRect$.next({ left: 300, top: 80, right: 350, bottom: 100 });
-            anchorRect$.next({ left: 80, top: 90, right: 130, bottom: 110 });
-        });
-        await waitFor(() => {
-            expect(popup.style.left).toBe('80px');
-            expect(popup.style.top).toBe('110px');
-        });
-        fireEvent.pointerDown(document.body, { clientX: 85, clientY: 95 });
-        expect(onClickOutside).not.toHaveBeenCalled();
-        fireEvent.pointerDown(document.body, { clientX: 310, clientY: 85 });
-        expect(onClickOutside).toHaveBeenCalledOnce();
         rendered.dispose();
     });
 

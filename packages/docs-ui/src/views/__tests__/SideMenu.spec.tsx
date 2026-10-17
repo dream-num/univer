@@ -19,7 +19,6 @@ import type { Root } from 'react-dom/client';
 import { act, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-
 import { SideMenu } from '../SideMenu';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -30,17 +29,17 @@ const menus = [
     { id: 'details', level: 2, text: 'Details' },
 ];
 
+function SideMenuExample({ menuProps }: { menuProps: Partial<ComponentProps<typeof SideMenu>> }) {
+    const [open, setOpen] = useState(menuProps.open ?? true);
+    return <SideMenu label="Document outline" menus={menus} maxHeight={180} {...menuProps} open={open} onOpenChange={setOpen} />;
+}
+
 function renderSideMenu(props: Partial<ComponentProps<typeof SideMenu>> = {}) {
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = createRoot(container);
 
-    function Example() {
-        const [open, setOpen] = useState(props.open ?? true);
-        return <SideMenu label="Document outline" menus={menus} maxHeight={180} {...props} open={open} onOpenChange={setOpen} />;
-    }
-
-    act(() => root.render(<Example />));
+    act(() => root.render(<SideMenuExample menuProps={props} />));
     return { container, root };
 }
 
@@ -101,5 +100,25 @@ describe('SideMenu', () => {
         ({ root, container } = renderSideMenu({ mode }));
         act(() => document.body.dispatchEvent(new Event('pointerdown', { bubbles: true })));
         expect(container.querySelector('nav') !== null).toBe(mode === 'side-bar');
+    });
+
+    it('starts floating outlines collapsed and allows opening them temporarily to navigate', () => {
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const onClick = vi.fn();
+        act(() => root!.render(
+            <SideMenu label="Document outline" menus={menus} maxHeight={180} mode="float" onClick={onClick} />
+        ));
+
+        const toggle = container.querySelector<HTMLButtonElement>('button[aria-expanded]')!;
+        expect(toggle.getAttribute('aria-expanded')).toBe('false');
+        expect(container.querySelector('nav')).toBeNull();
+        act(() => toggle.click());
+        expect(toggle.getAttribute('aria-expanded')).toBe('true');
+        act(() => container.querySelector<HTMLButtonElement>('button[title="Details"]')!.click());
+        expect(onClick).toHaveBeenCalledWith(menus[2]);
+        expect(container.querySelector('nav')).toBeNull();
+        expect(document.activeElement).toBe(toggle);
     });
 });

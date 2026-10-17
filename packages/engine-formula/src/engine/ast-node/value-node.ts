@@ -45,6 +45,12 @@ export class ValueNode extends BaseAstNode {
             return;
         }
 
+        const numberLiteral = ValueObjectFactory.createNumberLiteral(tokenTrim, dateSystem);
+        if (numberLiteral) {
+            this.setValue(numberLiteral);
+            return;
+        }
+
         const parent = this.getParent();
         let isIgnoreNumberPattern = true;
         if (parent?.nodeType === NodeType.FUNCTION) {

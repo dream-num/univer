@@ -212,8 +212,6 @@ const getWeekStart = (date: Date): Date => {
     return weekStart;
 };
 
-const perWeek = 7 * 24 * 60 * 60 * 1000;
-
 /**
  * The provided date is in the current week.
  * @param {Date} date - The date to compare.
@@ -234,7 +232,8 @@ export const thisWeek = (date: Date, anchorTime: Date = new Date()): boolean => 
  */
 export const nextWeek = (date: Date, anchorTime: Date = new Date()): boolean => {
     const weekStart = getWeekStart(date);
-    const anchorTimeNextWeekStart = new Date(getWeekStart(anchorTime).getTime() + perWeek);
+    const anchorTimeNextWeekStart = getWeekStart(anchorTime);
+    anchorTimeNextWeekStart.setDate(anchorTimeNextWeekStart.getDate() + 7);
     return weekStart.toDateString() === anchorTimeNextWeekStart.toDateString();
 };
 
@@ -246,7 +245,8 @@ export const nextWeek = (date: Date, anchorTime: Date = new Date()): boolean => 
  */
 export const lastWeek = (date: Date, anchorTime: Date = new Date()): boolean => {
     const weekStart = getWeekStart(date);
-    const anchorTimeLastWeekStart = new Date(getWeekStart(anchorTime).getTime() - perWeek);
+    const anchorTimeLastWeekStart = getWeekStart(anchorTime);
+    anchorTimeLastWeekStart.setDate(anchorTimeLastWeekStart.getDate() - 7);
     return weekStart.toDateString() === anchorTimeLastWeekStart.toDateString();
 };
 

@@ -15,9 +15,9 @@
  */
 
 import type { CSSProperties, KeyboardEvent } from 'react';
-import { clsx, scrollbarClassName } from '@univerjs/design';
+import { Button, clsx, scrollbarClassName } from '@univerjs/design';
 import { CatalogueIcon, MoreLeftIcon } from '@univerjs/icons';
-import { forwardRef, useEffect, useId, useImperativeHandle, useMemo, useRef } from 'react';
+import { forwardRef, useCallback, useEffect, useId, useImperativeHandle, useMemo, useRef, useState } from 'react';
 
 export interface ISideMenuItem {
     text: string;
@@ -49,7 +49,15 @@ export interface ISideMenuInstance {
 }
 
 export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, ref) => {
-    const { label, menus, onClick, className, style, mode, maxHeight, activeId, open, onOpenChange, maxWidth, wrapperClass, wrapperStyle, iconClass, iconStyle } = props;
+    const { label, menus, onClick, className, style, mode = 'side-bar', maxHeight, activeId, open: controlledOpen, onOpenChange, maxWidth, wrapperClass, wrapperStyle, iconClass, iconStyle } = props;
+    const [expanded, setExpanded] = useState(mode === 'side-bar');
+    const open = controlledOpen ?? expanded;
+    const handleOpenChange = useCallback((nextOpen: boolean) => {
+        if (controlledOpen === undefined) {
+            setExpanded(nextOpen);
+        }
+        onOpenChange?.(nextOpen);
+    }, [controlledOpen, onOpenChange]);
     const panelId = useId();
     const wrapperRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -60,7 +68,9 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
         scrollTo: (id: string) => {
             const container = containerRef.current;
             const target = itemsRef.current.get(id);
-            if (!container || !target) return;
+            if (!container || !target) {
+                return;
+            }
 
             const top = target.offsetTop;
             const bottom = top + target.offsetHeight;
@@ -81,28 +91,32 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
     }, [activeId, instance, open]);
 
     useEffect(() => {
-        if (!open || mode !== 'float') return;
+        if (!open || mode !== 'float') {
+            return;
+        }
 
         const handlePointerDown = (event: PointerEvent) => {
             if (event.target instanceof Node && !wrapperRef.current?.contains(event.target)) {
-                onOpenChange?.(false);
+                handleOpenChange(false);
             }
         };
         document.addEventListener('pointerdown', handlePointerDown);
         return () => document.removeEventListener('pointerdown', handlePointerDown);
-    }, [mode, onOpenChange, open]);
+    }, [handleOpenChange, mode, open]);
 
     const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
         if (event.key === 'Escape' && open) {
             event.preventDefault();
             event.stopPropagation();
-            onOpenChange?.(false);
+            handleOpenChange(false);
             toggleRef.current?.focus();
             return;
         }
         const items = Array.from(itemsRef.current.values());
         const index = items.indexOf(event.target as HTMLButtonElement);
-        if (index === -1) return;
+        if (index === -1) {
+            return;
+        }
 
         let next: number;
         switch (event.key) {
@@ -118,7 +132,8 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
             case 'End':
                 next = items.length - 1;
                 break;
-            default: return;
+            default:
+                return;
         }
         event.preventDefault();
         event.stopPropagation();
@@ -128,116 +143,87 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
     return (
         <div
             ref={wrapperRef}
-            className={clsx('univer-relative univer-ml-3', wrapperClass)}
-            style={{ width, ...wrapperStyle }}
+            className={clsx('univer-relative univer-ms-4', wrapperClass)}
+            style={{ width: open ? width : 32, ...wrapperStyle }}
             onKeyDown={handleKeyDown}
         >
-            <button
+            <Button
                 ref={toggleRef}
                 type="button"
+                variant="ghost"
+                size="icon"
                 aria-label={label}
                 aria-expanded={!!open}
                 aria-controls={open ? panelId : undefined}
                 title={label}
-                onClick={() => onOpenChange?.(!open)}
+                onClick={() => handleOpenChange(!open)}
                 className={clsx(`
-                  univer-absolute univer-top-1.5 univer-z-10 univer-flex univer-size-8 univer-cursor-pointer
-                  univer-items-center univer-justify-center univer-rounded-md univer-border-0 univer-bg-gray-0
-                  univer-text-gray-500 univer-transition-colors
-                  hover:univer-bg-gray-100 hover:univer-text-gray-900
+                  univer-absolute univer-start-0 univer-top-0 univer-z-10 !univer-text-gray-500
+                  hover:!univer-text-gray-900
                   focus-visible:univer-outline focus-visible:univer-outline-2 focus-visible:univer-outline-primary-600
-                  dark:univer-bg-gray-900 dark:univer-text-gray-400
-                  dark:hover:univer-bg-gray-800
-                `, !open && 'univer-shadow-sm', iconClass)}
-                style={{ left: open ? width - 40 : 0, ...iconStyle }}
+                  dark:!univer-text-gray-400
+                  dark:hover:!univer-text-gray-100
+                `, iconClass)}
+                style={iconStyle}
             >
-                {open ? <MoreLeftIcon aria-hidden="true" /> : <CatalogueIcon aria-hidden="true" />}
-            </button>
+                {open
+                    ? <MoreLeftIcon aria-hidden="true" className="!univer-size-6" />
+                    : <CatalogueIcon aria-hidden="true" className="!univer-size-5" />}
+            </Button>
             {open && (
                 <nav
                     id={panelId}
                     aria-label={label}
                     className={clsx(`
-                      univer-box-border univer-flex univer-w-full univer-flex-col univer-overflow-hidden
-                      univer-rounded-lg univer-border univer-border-solid univer-border-gray-200 univer-bg-gray-0
-                      univer-text-gray-700
-                      dark:univer-border-gray-700 dark:univer-bg-gray-900 dark:univer-text-gray-200
-                    `, mode === 'float' ? 'univer-shadow-md' : 'univer-shadow-sm', className)}
+                      univer-box-border univer-flex univer-w-full univer-flex-col univer-overflow-hidden univer-pt-10
+                    `, mode === 'float' && `
+                      univer-bg-gray-0
+                      dark:univer-bg-gray-900
+                    `, className)}
                     style={{ maxHeight, ...style }}
                 >
                     <div
-                        className="
-                          univer-flex univer-h-11 univer-shrink-0 univer-items-center univer-gap-2 univer-px-3
-                          univer-pr-12 univer-text-xs univer-font-medium univer-text-gray-500
-                          dark:univer-text-gray-400
-                        "
-                    >
-                        <CatalogueIcon aria-hidden="true" className="univer-shrink-0 univer-text-sm" />
-                        <span className="univer-truncate">{label}</span>
-                    </div>
-                    <div
                         ref={containerRef}
                         className={clsx(`
-                          univer-relative univer-min-h-0 univer-overflow-y-auto univer-overscroll-contain univer-px-2
-                          univer-pb-2
+                          univer-relative univer-min-h-0 univer-overflow-y-auto univer-overscroll-contain univer-pb-2
                         `, scrollbarClassName)}
                     >
                         <ol className="univer-m-0 univer-list-none univer-p-0">
                             {menus?.map((menu) => (
-                                <li key={menu.id} className={menu.isTitle ? 'univer-mb-1 univer-pb-1' : undefined}>
+                                <li key={menu.id} className={menu.isTitle ? 'univer-mb-2' : undefined}>
                                     <button
                                         ref={(element) => {
-                                            if (element) itemsRef.current.set(menu.id, element);
-                                            else itemsRef.current.delete(menu.id);
+                                            if (element) {
+                                                itemsRef.current.set(menu.id, element);
+                                            } else {
+                                                itemsRef.current.delete(menu.id);
+                                            }
                                         }}
                                         type="button"
                                         aria-current={menu.id === activeId ? 'location' : undefined}
                                         title={menu.text}
                                         className={clsx(`
-                                          univer-relative univer-box-border univer-flex univer-min-h-8 univer-w-full
-                                          univer-cursor-pointer univer-items-center univer-rounded univer-border-0
-                                          univer-bg-transparent univer-py-1.5 univer-pr-2 univer-text-left
+                                          univer-box-border univer-flex univer-min-h-8 univer-w-full
+                                          univer-cursor-pointer univer-items-center univer-border-0
+                                          univer-bg-transparent univer-py-1.5 univer-pe-2 univer-text-start
                                           univer-text-sm univer-leading-5 univer-transition-colors
-                                          hover:univer-bg-gray-100
                                           focus-visible:univer-outline focus-visible:univer-outline-2
                                           focus-visible:-univer-outline-offset-2
                                           focus-visible:univer-outline-primary-600
-                                          dark:hover:univer-bg-gray-800
-                                        `, menu.isTitle ? 'univer-font-semibold' : 'univer-font-normal', {
-                                            'univer-bg-primary-50 univer-text-primary-700 hover:univer-bg-primary-50 dark:univer-bg-gray-700 dark:univer-text-primary-200 dark:hover:univer-bg-gray-700': menu.id === activeId,
-                                            'univer-text-gray-900 dark:univer-text-gray-100': menu.isTitle && menu.id !== activeId,
-                                            'univer-text-gray-600 dark:univer-text-gray-300': !menu.isTitle && menu.id !== activeId,
+                                        `, menu.isTitle ? 'univer-font-medium' : 'univer-font-normal', {
+                                            'univer-text-primary-600 dark:univer-text-primary-400': menu.id === activeId,
+                                            'univer-text-gray-600 hover:univer-text-gray-900 dark:univer-text-gray-300 dark:hover:univer-text-gray-100': menu.isTitle && menu.id !== activeId,
+                                            'univer-text-gray-500 hover:univer-text-gray-900 dark:univer-text-gray-400 dark:hover:univer-text-gray-100': !menu.isTitle && menu.id !== activeId,
                                         })}
-                                        style={{ paddingLeft: 10 + Math.max(0, menu.level - 1) * 12 }}
+                                        style={{ paddingInlineStart: menu.isTitle ? 0 : 12 + Math.max(0, menu.level - 1) * 12 }}
                                         onClick={() => {
                                             onClick?.(menu);
                                             if (mode === 'float') {
-                                                onOpenChange?.(false);
+                                                handleOpenChange(false);
                                                 toggleRef.current?.focus();
                                             }
                                         }}
                                     >
-                                        {menu.level > 1 && (
-                                            <span
-                                                aria-hidden="true"
-                                                className="
-                                                  univer-absolute univer-bottom-0 univer-top-0 univer-w-px
-                                                  univer-bg-gray-200
-                                                  dark:univer-bg-gray-700
-                                                "
-                                                style={{ left: 14 + Math.max(0, menu.level - 2) * 12 }}
-                                            />
-                                        )}
-                                        {menu.id === activeId && (
-                                            <span
-                                                aria-hidden="true"
-                                                className="
-                                                  univer-absolute univer-bottom-2 univer-left-0 univer-top-2
-                                                  univer-w-0.5 univer-rounded-full univer-bg-primary-600
-                                                  dark:univer-bg-primary-400
-                                                "
-                                            />
-                                        )}
                                         <span
                                             className={menu.isTitle
                                                 ? 'univer-line-clamp-2 univer-break-words'

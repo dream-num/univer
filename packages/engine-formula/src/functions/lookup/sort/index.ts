@@ -139,7 +139,7 @@ export class Sort extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            const arrayValue = array.getArrayValue();
+            const arrayValue = array.getArrayValue().slice();
             arrayValue.sort(this._sort(sortIndexValue - 1, sortOrderValue));
 
             return ArrayValueObject.create({

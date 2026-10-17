@@ -23,6 +23,9 @@ import {
     BooleanNumber,
     DrawingTypeEnum,
     ICommandService,
+    IImageIoService,
+    ImageSourceType,
+    IURLImageService,
     JSONX,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
@@ -30,9 +33,13 @@ import {
 } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
-import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
+import { DrawingImageClipService, DrawingRenderService } from '@univerjs/drawing-ui';
+import { DrawingUpdateController } from '@univerjs/drawing-ui/controllers/drawing-update.controller.ts';
+import { ImageUpdateController } from '@univerjs/drawing-ui/controllers/image-update.controller.ts';
 import { Documents, DocumentSkeletonPageType, Liquid, Rect, setDocsTableRenderViewportProvider } from '@univerjs/engine-render';
-import { Subject } from 'rxjs';
+import { DesktopGalleryService, IGalleryService, IUIPartsService, UIPartsService } from '@univerjs/ui';
+import { EMPTY, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createDocDrawingTestBed } from '../../../__tests__/create-doc-drawing-test-bed';
 import { getDocsTableCellAnchorContext } from '../../doc-drawing-transformer-update.controller';
@@ -50,6 +57,76 @@ import {
     getDocsTableCellDrawingOffset,
     shouldRefreshDocDrawingTransform,
 } from '../doc-drawing-transform-update.controller';
+
+async function createRepeatedImageTestBed(unitId: string) {
+    const testBed = createDocDrawingTestBed(unitId);
+    const { univer, model, render } = testBed;
+    const injector = univer.__getInjector();
+    const manager = injector.get(IDrawingManagerService);
+    const snapshot = model.getSnapshot();
+    snapshot.body!.customBlocks = snapshot.body!.customBlocks!.filter(({ blockId }) => blockId !== 'a');
+    snapshot.body!.paragraphs![1].paragraphStyle = { pageBreakBefore: BooleanNumber.TRUE };
+    snapshot.headers = { header: {
+        headerId: 'header',
+        body: {
+            dataStream: '\b\r\n',
+            paragraphs: [{ startIndex: 1, paragraphId: 'header-p' }],
+            sectionBreaks: [{ startIndex: 2, sectionId: 'header-s' }],
+            customBlocks: [{ startIndex: 0, blockId: 'a' }],
+        },
+    } };
+    snapshot.documentStyle!.defaultHeaderId = 'header';
+    const drawing = snapshot.drawings!.a;
+    Object.assign(drawing, {
+        source: 'cached-header-image',
+        imageSourceType: ImageSourceType.BASE64,
+        isMultiTransform: BooleanNumber.TRUE,
+        transforms: [drawing.transform!],
+    });
+    model.reset(snapshot);
+    Object.assign(manager.getDrawingByParam(drawing)!, drawing);
+    const cachedImage = document.createElement('img');
+    Object.defineProperties(cachedImage, {
+        complete: { value: true },
+        naturalWidth: { value: 40 },
+        naturalHeight: { value: 30 },
+    });
+    injector.add([IImageIoService, { useValue: {
+        change$: EMPTY,
+        setWaitCount: () => {},
+        getImage: async () => '',
+        saveImage: async () => null,
+        getImageSourceCache: () => cachedImage,
+        addImageSourceCache: () => {},
+    } }]);
+    injector.add([IURLImageService, { useValue: {
+        getImage: async (url: string) => url,
+        downloadImage: async () => new Blob(),
+        registerURLImageDownloader: () => ({ dispose: () => {} }),
+    } }]);
+    injector.add([IUIPartsService, { useClass: UIPartsService }]);
+    injector.add([IGalleryService, { useClass: DesktopGalleryService }]);
+    injector.add([DrawingImageClipService]);
+    injector.add([DrawingRenderService]);
+    injector.add([DrawingUpdateController]);
+    injector.add([ImageUpdateController]);
+    injector.add([IEditorService, { useClass: EditorService }]);
+    injector.get(ICommandService).registerCommand(SetDrawingSelectedOperation);
+    injector.get(DrawingUpdateController);
+    injector.get(ImageUpdateController);
+    const skeletonManager = render.with(DocSkeletonManagerService);
+    skeletonManager.getViewModel().reset(model);
+    skeletonManager.getSkeleton().makeDirty(true);
+    skeletonManager.recalculate();
+    expect(skeletonManager.getSkeleton().getSkeletonData()!.pages).toHaveLength(2);
+    render.mainComponent = new Documents(`${unitId}-document`);
+    render.addRenderDependencies([[DocDrawingTransformUpdateController]]);
+    const controller = render.with(DocDrawingTransformUpdateController);
+    expect(manager.getDrawingByParam(drawing)).toMatchObject({ hidden: false, transforms: [expect.anything(), expect.anything()] });
+    manager.addNotification([drawing]);
+    await vi.advanceTimersByTimeAsync(34);
+    return { ...testBed, manager, drawing, controller, commands: injector.get(ICommandService) };
+}
 
 describe('DocDrawingTransformUpdateController', () => {
     afterEach(() => {
@@ -161,6 +238,228 @@ describe('DocDrawingTransformUpdateController', () => {
         } finally {
             univer.dispose();
             vi.restoreAllMocks();
+        }
+    });
+
+    it('batches changeset appearance edits and publishes the final repeated image after queued microtasks', async () => {
+        vi.useFakeTimers();
+        const { univer, model, render, drawing, manager, commands } = await createRepeatedImageTestBed('header-changeset-edit');
+        try {
+            const key = getDrawingShapeKeyByDrawingSearch(drawing, 0);
+            const original = render.scene.getObject(key);
+            expect(original).toBeTruthy();
+            const add = vi.spyOn(manager, 'addNotification');
+            const remove = vi.spyOn(manager, 'removeNotification');
+            const firstCrop = { left: 0.1, top: 0, right: 0, bottom: 0 };
+            const finalCrop = { left: 0.2, top: 0.1, right: 0, bottom: 0 };
+            const jsonX = JSONX.getInstance();
+            for (const actions of [
+                jsonX.insertOp(['drawings', drawing.drawingId, 'srcRect'], firstCrop),
+                jsonX.replaceOp(['drawings', drawing.drawingId, 'srcRect'], firstCrop, finalCrop),
+            ]) {
+                expect(commands.syncExecuteCommand(RichTextEditingMutation.id, {
+                    unitId: render.unitId,
+                    actions,
+                    textRanges: null,
+                }, { fromChangeset: true })).toBeTruthy();
+            }
+            expect(model.getSnapshot().drawings!.a).toMatchObject({ srcRect: finalCrop });
+            expect(remove).not.toHaveBeenCalled();
+            expect(add).not.toHaveBeenCalled();
+            expect(render.scene.getObject(key)).toBe(original);
+
+            await Promise.resolve();
+            expect(remove).not.toHaveBeenCalled();
+            await Promise.resolve();
+            expect(remove).toHaveBeenCalledTimes(1);
+            expect(add).toHaveBeenCalledTimes(1);
+            await vi.advanceTimersByTimeAsync(34);
+
+            const replacement = render.scene.getObject(key);
+            expect(replacement).toBeTruthy();
+            expect(replacement).not.toBe(original);
+            expect(replacement).toHaveProperty('srcRect', finalCrop);
+        } finally {
+            univer.dispose();
+            vi.restoreAllMocks();
+            vi.useRealTimers();
+        }
+    });
+
+    it('restores selected repeated images after consecutive appearance edits finish rendering', async () => {
+        vi.useFakeTimers();
+        const { univer, render, drawing, commands } = await createRepeatedImageTestBed('header-selected-crop-edit');
+        try {
+            const keys = [0, 1].map((index) => getDrawingShapeKeyByDrawingSearch(drawing, index));
+            const originals = keys.map((key) => render.scene.getObject(key)!);
+            const transformer = render.scene.getTransformerByCreate();
+            originals.forEach((original) => transformer.setSelectedControl(original));
+            const firstCrop = { left: 0.1, top: 0, right: 0, bottom: 0 };
+            const finalCrop = { left: 0.2, top: 0.1, right: 0, bottom: 0 };
+            const jsonX = JSONX.getInstance();
+
+            for (const actions of [
+                jsonX.insertOp(['drawings', drawing.drawingId, 'srcRect'], firstCrop),
+                jsonX.replaceOp(['drawings', drawing.drawingId, 'srcRect'], firstCrop, finalCrop),
+            ]) {
+                expect(commands.syncExecuteCommand(RichTextEditingMutation.id, {
+                    unitId: render.unitId,
+                    actions,
+                    textRanges: null,
+                })).toBeTruthy();
+            }
+            await vi.advanceTimersByTimeAsync(34);
+
+            expect([...transformer.getSelectedObjectMap().keys()]).toEqual(keys);
+            keys.forEach((key, index) => {
+                const replacement = render.scene.getObject(key);
+                expect(replacement).toBeTruthy();
+                expect(replacement).not.toBe(originals[index]);
+                expect(replacement).toHaveProperty('srcRect', finalCrop);
+                expect(transformer.getSelectedObjectMap().get(key)).toBe(replacement);
+            });
+        } finally {
+            univer.dispose();
+            vi.restoreAllMocks();
+            vi.useRealTimers();
+        }
+    });
+
+    it('discards a queued changeset appearance refresh when its render controller is disposed', async () => {
+        vi.useFakeTimers();
+        const { univer, render, drawing, manager, commands, controller } = await createRepeatedImageTestBed('header-disposed-changeset');
+        try {
+            const add = vi.spyOn(manager, 'addNotification');
+            const remove = vi.spyOn(manager, 'removeNotification');
+            expect(commands.syncExecuteCommand(RichTextEditingMutation.id, {
+                unitId: render.unitId,
+                actions: JSONX.getInstance().insertOp(['drawings', drawing.drawingId, 'srcRect'], {
+                    left: 0.2,
+                    top: 0.1,
+                    right: 0,
+                    bottom: 0,
+                }),
+                textRanges: null,
+            }, { fromChangeset: true })).toBeTruthy();
+            controller.dispose();
+            await Promise.resolve();
+            await Promise.resolve();
+            await vi.advanceTimersByTimeAsync(34);
+
+            expect(remove).not.toHaveBeenCalled();
+            expect(add).not.toHaveBeenCalled();
+        } finally {
+            univer.dispose();
+            vi.restoreAllMocks();
+            vi.useRealTimers();
+        }
+    });
+
+    it('keeps pending header selection when earlier instances finish loading before a layout refresh', async () => {
+        vi.useFakeTimers();
+        const { univer, render, drawing, manager, commands, controller } = await createRepeatedImageTestBed('header-staggered-selection');
+        let finishSecondImage: (source: string) => void = () => {};
+        const secondImage = new Promise<string>((resolve) => {
+            finishSecondImage = resolve;
+        });
+        try {
+            const keys = [0, 1].map((index) => getDrawingShapeKeyByDrawingSearch(drawing, index));
+            const transformer = render.scene.getTransformerByCreate();
+            keys.forEach((key) => transformer.setSelectedControl(render.scene.getObject(key)!));
+            const imageIo = univer.__getInjector().get(IImageIoService);
+            vi.spyOn(imageIo, 'getImageSourceCache').mockReturnValue(null);
+            let imageRequests = 0;
+            vi.spyOn(imageIo, 'getImage').mockImplementation(async () => {
+                imageRequests++;
+                return imageRequests === 2 ? secondImage : '';
+            });
+            expect(commands.syncExecuteCommand(RichTextEditingMutation.id, {
+                unitId: render.unitId,
+                actions: JSONX.getInstance().replaceOp(
+                    ['drawings', drawing.drawingId, 'imageSourceType'],
+                    ImageSourceType.BASE64,
+                    ImageSourceType.UUID
+                ),
+                textRanges: null,
+            })).toBeTruthy();
+            await vi.advanceTimersByTimeAsync(34);
+            expect(render.scene.getObject(keys[0])).toBeTruthy();
+            expect(render.scene.getObject(keys[1])).toBeFalsy();
+
+            const current = manager.getDrawingByParam(drawing)!;
+            (controller as unknown as {
+                _handleMultiDrawingsTransform: (drawings: IDrawingParam[]) => void;
+            })._handleMultiDrawingsTransform([{
+                ...current,
+                transforms: current.transforms!.map((transform) => ({ ...transform, left: (transform.left ?? 0) + 1 })),
+            }]);
+            expect(transformer.getSelectedObjectMap().get(keys[0])).toBe(render.scene.getObject(keys[0]));
+            transformer.refreshControls();
+            finishSecondImage('');
+            await vi.advanceTimersByTimeAsync(1);
+
+            expect([...transformer.getSelectedObjectMap().keys()]).toEqual(keys);
+            keys.forEach((key) => {
+                expect(transformer.getSelectedObjectMap().get(key)).toBe(render.scene.getObject(key));
+            });
+        } finally {
+            finishSecondImage('');
+            univer.dispose();
+            vi.restoreAllMocks();
+            vi.useRealTimers();
+        }
+    });
+
+    it.each(['clear', 'select another object', 'start a transform', 'remove', 'dispose'])('does not restore pending image selection after %s', async (action) => {
+        vi.useFakeTimers();
+        const { univer, model, render, drawing, commands, controller } = await createRepeatedImageTestBed(`header-selection-${action}`);
+        try {
+            const key = getDrawingShapeKeyByDrawingSearch(drawing, 0);
+            const transformer = render.scene.getTransformerByCreate();
+            transformer.setSelectedControl(render.scene.getObject(key)!);
+            expect(commands.syncExecuteCommand(RichTextEditingMutation.id, {
+                unitId: render.unitId,
+                actions: JSONX.getInstance().insertOp(['drawings', drawing.drawingId, 'srcRect'], {
+                    left: 0.2,
+                    top: 0.1,
+                    right: 0,
+                    bottom: 0,
+                }),
+                textRanges: null,
+            })).toBeTruthy();
+
+            const other = new Rect('other-selection', { left: 40, top: 40, width: 10, height: 10 });
+            render.scene.addObject(other);
+            if (action === 'clear') {
+                transformer.clearSelectedObjects();
+            } else if (action === 'select another object') {
+                transformer.setSelectedControl(other);
+            } else if (action === 'start a transform') {
+                transformer.activeAnObject(other);
+            } else if (action === 'remove') {
+                expect(commands.syncExecuteCommand(RichTextEditingMutation.id, {
+                    unitId: render.unitId,
+                    actions: JSONX.getInstance().removeOp(['drawings', drawing.drawingId], model.getSnapshot().drawings!.a),
+                    textRanges: null,
+                })).toBeTruthy();
+            } else {
+                controller.dispose();
+            }
+            await vi.advanceTimersByTimeAsync(34);
+
+            if (action === 'remove') {
+                expect(render.scene.getObject(key)).toBeFalsy();
+            } else {
+                expect(render.scene.getObject(key)).toBeTruthy();
+            }
+            expect(transformer.getSelectedObjectMap().has(key)).toBe(false);
+            if (action === 'select another object' || action === 'start a transform') {
+                expect(transformer.getSelectedObjectMap().get(other.oKey)).toBe(other);
+            }
+        } finally {
+            univer.dispose();
+            vi.restoreAllMocks();
+            vi.useRealTimers();
         }
     });
 
@@ -542,6 +841,7 @@ describe('DocDrawingTransformUpdateController', () => {
             addNotification: vi.fn(),
         };
         const controller = Object.create(DocDrawingTransformUpdateController.prototype);
+        controller._pendingMultiDrawingSelection = new Set<string>();
         controller._context = context;
         controller._drawingManagerService = drawingManagerService;
         controller._liquid = new Liquid();
@@ -878,6 +1178,7 @@ describe('DocDrawingTransformUpdateController', () => {
 
     it('restores visibility and presentation when publishing a previously hidden header drawing', () => {
         const controller = Object.create(DocDrawingTransformUpdateController.prototype);
+        controller._pendingMultiDrawingSelection = new Set<string>();
         const drawing = { drawingId: 'logo', hidden: true, source: 'image-source' };
         const update = {
             drawingId: 'logo',

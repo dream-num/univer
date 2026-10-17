@@ -17,6 +17,7 @@
 import type {
     DocumentDataModel,
     ICommandInfo,
+    IDisposable,
     IDocDrawingBase,
     IDrawingParam,
     IExecutionOptions,
@@ -52,6 +53,7 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
+    toDisposable,
 } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { collectDocDrawings } from '@univerjs/docs-drawing';
@@ -65,7 +67,7 @@ import {
     Liquid,
     TRANSFORM_CHANGE_OBSERVABLE_TYPE,
 } from '@univerjs/engine-render';
-import { animationFrames, debounceTime, EMPTY, filter, map, merge, startWith, switchMap, take } from 'rxjs';
+import { animationFrames, debounceTime, EMPTY, filter, map, merge, startWith, Subscription, switchMap, take } from 'rxjs';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 import { getDocMutationAffectedDrawingIds } from './doc-drawing-mutation';
 
@@ -547,6 +549,8 @@ function hasNewPublishedPageDrawings(
 export class DocDrawingTransformUpdateController extends Disposable implements IRenderModule {
     private _liquid = new Liquid();
     private _changesetDrawingRefreshScheduled = false;
+    private _pendingMultiDrawingSelection = new Set<string>();
+    private _pendingMultiDrawingSelectionSubscription?: IDisposable;
     private readonly _publicationTracker = new DocDrawingPublicationTracker();
 
     constructor(
@@ -564,6 +568,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         this._initialize();
 
         this._commandExecutedListener();
+        this.disposeWithMe(toDisposable(() => this._clearPendingMultiDrawingSelection()));
     }
 
     private _initialize() {
@@ -973,7 +978,12 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         }
 
         const transformer = scene.getTransformer();
-        const selectedObjectKeys = forceRecreate ? [...(transformer?.getSelectedObjectMap().keys() ?? [])] : [];
+        const selectedObjectKeys = forceRecreate
+            ? [...new Set([...this._pendingMultiDrawingSelection, ...(transformer?.getSelectedObjectMap().keys() ?? [])])]
+            : [];
+        if (forceRecreate) {
+            this._clearPendingMultiDrawingSelection();
+        }
         changedDrawings.forEach((updateParam) => {
             const param = this._drawingManagerService.getDrawingByParam(updateParam);
             if (param == null) {
@@ -1006,13 +1016,74 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                 this._drawingManagerService.refreshTransform(changedDrawings);
             }
         }
-        for (const key of selectedObjectKeys) {
+        if (forceRecreate) {
+            this._restoreMultiDrawingSelection(selectedObjectKeys);
+        } else if (this._pendingMultiDrawingSelection.size > 0) {
+            this._restoreMultiDrawingSelection([...this._pendingMultiDrawingSelection]);
+        } else {
+            transformer?.refreshControls();
+        }
+    }
+
+    private _clearPendingMultiDrawingSelection(): void {
+        this._pendingMultiDrawingSelectionSubscription?.dispose();
+        this._pendingMultiDrawingSelectionSubscription = undefined;
+        this._pendingMultiDrawingSelection.clear();
+    }
+
+    private _restoreMultiDrawingSelection(selectedKeys: readonly string[]): void {
+        this._clearPendingMultiDrawingSelection();
+        const { scene, unitId } = this._context;
+        const transformer = scene.getTransformer();
+        if (!transformer || this._disposed) {
+            return;
+        }
+
+        const publishedKeys = new Set(Object.values(this._drawingManagerService.getDrawingData(unitId, unitId))
+            .filter((drawing) => drawing.isMultiTransform === BooleanNumber.TRUE && drawing.hidden !== true && drawing.selectable !== false)
+            .flatMap((drawing) => (drawing.transforms ?? []).map((_, index) => getDrawingShapeKeyByDrawingSearch(drawing, index))));
+        for (const key of selectedKeys) {
             const drawingShape = scene.getObjectIncludeInGroup(key);
-            if (drawingShape) {
-                transformer?.setSelectedControl(drawingShape);
+            if (drawingShape?.visible && drawingShape.evented) {
+                transformer.setSelectedControl(drawingShape);
+            } else if (!drawingShape && publishedKeys.has(key)) {
+                this._pendingMultiDrawingSelection.add(key);
             }
         }
-        transformer?.refreshControls();
+        transformer.refreshControls();
+        if (this._pendingMultiDrawingSelection.size === 0) {
+            return;
+        }
+
+        // Image additions are buffered and may load asynchronously. Restore only once their real instances exist.
+        const subscriptions = new Subscription();
+        this._pendingMultiDrawingSelectionSubscription = this.disposeWithMe(subscriptions);
+        const allowedSelectionKeys = new Set([...selectedKeys, ...transformer.getSelectedObjectMap().keys()]);
+        const pendingDrawingIds = this._includeGroupChildren(new Set([...this._pendingMultiDrawingSelection].flatMap((key) => {
+            const drawing = this._drawingManagerService.getDrawingOKey(key);
+            return drawing ? [drawing.drawingId] : [];
+        })));
+        subscriptions.add(this._drawingManagerService.refreshTransform$.subscribe((drawings) => {
+            if (drawings.some((drawing) => drawing.unitId === unitId && pendingDrawingIds?.has(drawing.drawingId))) {
+                this._restoreMultiDrawingSelection([...this._pendingMultiDrawingSelection]);
+            }
+        }));
+        subscriptions.add(this._drawingManagerService.remove$.subscribe((drawings) => {
+            const removedKeys = drawings.map((drawing) => getDrawingShapeKeyByDrawingSearch(drawing));
+            const remainingKeys = [...this._pendingMultiDrawingSelection]
+                .filter((key) => !removedKeys.some((removedKey) => key === removedKey || key.startsWith(`${removedKey}#-#`)));
+            if (remainingKeys.length !== this._pendingMultiDrawingSelection.size) {
+                this._restoreMultiDrawingSelection(remainingKeys);
+            }
+        }));
+        subscriptions.add(merge(transformer.clearControl$, transformer.changeStart$).subscribe(() => {
+            this._clearPendingMultiDrawingSelection();
+        }));
+        subscriptions.add(transformer.createControl$.subscribe(() => {
+            if ([...transformer.getSelectedObjectMap().keys()].some((key) => !allowedSelectionKeys.has(key))) {
+                this._clearPendingMultiDrawingSelection();
+            }
+        }));
     }
 
     private _calculateDrawingPosition(

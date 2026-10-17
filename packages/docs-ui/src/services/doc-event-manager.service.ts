@@ -532,6 +532,12 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     }
 
     private _initResetDirty() {
+        this.disposeWithMe(this._documents.onTransformChange$.subscribeEvent(() => {
+            this._customRangeDirty = true;
+            this._bulletDirty = true;
+            this._paragraphDirty = true;
+            this._tableBoundsDirty = true;
+        }));
         this.disposeWithMe(this._skeleton.dirty$.subscribe(() => {
             this._customRangeDirty = true;
             this._bulletDirty = true;

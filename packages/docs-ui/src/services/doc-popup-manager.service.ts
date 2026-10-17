@@ -18,11 +18,12 @@ import type { IDisposable, INeedCheckDisposable, Injector, ITextRangeParam } fro
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { BaseObject, Documents, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
 import type { IPopup } from '@univerjs/ui';
+import type { Observable } from 'rxjs';
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService, pxToNum } from '@univerjs/engine-render';
 import { ICanvasPopupService } from '@univerjs/ui';
-import { BehaviorSubject, filter, map } from 'rxjs';
+import { animationFrameScheduler, BehaviorSubject, filter, map, throttleTime } from 'rxjs';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
 import { SetDocZoomRatioOperation } from '../commands/operations/set-doc-zoom-ratio.operation';
 import { findDocRangeNodePositions, NodePositionConvertToCursor } from './selection/convert-text-range';
@@ -85,6 +86,8 @@ export function transformOffset2Bound(offsetX: number, offsetY: number, scene: S
 }
 
 export interface IDocCanvasPopup extends Omit<IPopup, 'anchorRect$' | 'children' | 'unitId' | 'subUnitId' | 'canvasElement'> {
+    /** Notify when a business-owned rect changes independently of scene transforms. */
+    positionChanges$?: Observable<unknown>;
     /** Defaults to true. Passive hover affordances can track layout without holding it. */
     requiresStableLayout?: boolean;
     mask?: boolean;
@@ -250,7 +253,9 @@ export class DocCanvasPopManagerService extends Disposable {
         const updatePosition = () => {
             try {
                 const newPosition = calc();
-                if (newPosition) {
+                const previous = position$.value;
+                if (newPosition && (newPosition.left !== previous.left || newPosition.right !== previous.right ||
+                    newPosition.top !== previous.top || newPosition.bottom !== previous.bottom)) {
                     position$.next(newPosition);
                 }
             } catch {
@@ -337,6 +342,9 @@ export class DocCanvasPopManagerService extends Disposable {
         disposable.add(currentRender.scene.onTransformChange$.subscribeEvent(() => {
             updatePositions();
         }));
+        if (currentRender.mainComponent) {
+            disposable.add(currentRender.mainComponent.onTransformChange$.subscribeEvent(updatePositions));
+        }
 
         return {
             positions,
@@ -353,14 +361,17 @@ export class DocCanvasPopManagerService extends Disposable {
         const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
         const popupManagerService = this._resolvePopupManagerService(popupInjector);
 
-        const { position, position$, disposable } = this._createRectPositionObserver(rect, currentRender);
+        const { position, position$, disposable, updatePosition } = this._createRectPositionObserver(rect, currentRender);
+        if (popup.positionChanges$) {
+            disposable.add(popup.positionChanges$.subscribe(updatePosition));
+        }
         const id = popupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId: 'default',
             connectorInjector: popupInjector,
             anchorRect: position,
-            anchorRect$: position$,
+            anchorRect$: position$.pipe(throttleTime(0, animationFrameScheduler, { leading: true, trailing: true })),
             canvasElement: currentRender.engine.getCanvasElement(),
         });
         const popupActivity = popup.requiresStableLayout === false ? null : this._beginPopupActivity(unitId);
@@ -398,7 +409,7 @@ export class DocCanvasPopManagerService extends Disposable {
             subUnitId: 'default',
             connectorInjector: popupInjector,
             anchorRect: position,
-            anchorRect$: position$,
+            anchorRect$: position$.pipe(throttleTime(0, animationFrameScheduler, { leading: true, trailing: true })),
             canvasElement: currentRender.engine.getCanvasElement(),
         });
         const popupActivity = popup.requiresStableLayout === false ? null : this._beginPopupActivity(unitId);
@@ -446,7 +457,9 @@ export class DocCanvasPopManagerService extends Disposable {
             }
             return direction.includes('top') ? bounds[0] : bounds[bounds.length - 1];
         };
-        const position$ = bounds$.pipe(filter((bounds) => bounds.length > 0), map(getAnchor));
+        // Coalesce Docs layout notifications before the shared popup's frame throttle.
+        const popupBounds$ = bounds$.pipe(throttleTime(0, animationFrameScheduler, { leading: true, trailing: true }));
+        const position$ = popupBounds$.pipe(filter((bounds) => bounds.length > 0), map(getAnchor));
         let id: string | undefined;
         let popupActivity: IDisposable | null = null;
         const removePopup = () => {
@@ -474,7 +487,7 @@ export class DocCanvasPopManagerService extends Disposable {
                 anchorRect: getAnchor(bounds),
                 anchorRect$: position$,
                 excludeRects: bounds,
-                excludeRects$: bounds$,
+                excludeRects$: popupBounds$,
                 direction: (['top', 'bottom', 'horizontal'].some((i) => direction.includes(i)))
                     ? bounds.length > 1
                         ? multipleDirection ?? direction

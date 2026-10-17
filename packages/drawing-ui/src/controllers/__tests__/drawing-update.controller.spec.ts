@@ -16,7 +16,7 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
-import { DrawingTypeEnum, Univer, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, DrawingTypeEnum, Univer, UniverInstanceType } from '@univerjs/core';
 import {
     DrawingManagerService,
     getDrawingShapeKeyByDrawingSearch,
@@ -217,6 +217,63 @@ function createHarness() {
 }
 
 describe('DrawingUpdateController', () => {
+    it('refreshes indexed header images without requesting another image load', () => {
+        const canvas = vi.spyOn(HTMLCanvasElement.prototype, 'getContext')
+            .mockReturnValue(new Proxy({}, { get: () => () => {} }) as CanvasRenderingContext2D);
+        const univer = new Univer();
+        try {
+            const injector = univer.__getInjector();
+            injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            injector.add([IDrawingManagerService, { useClass: DrawingManagerService }]);
+            injector.add([DrawingUpdateController]);
+            const unitId = 'header-doc';
+            univer.createUnit(UniverInstanceType.UNIVER_DOC, { id: unitId, body: { dataStream: '\r\n' } });
+            const render = injector.get(IRenderManagerService).createRender(unitId);
+            render.deactivate();
+            const manager = injector.get(IDrawingManagerService);
+            injector.get(DrawingUpdateController);
+            const drawing = {
+                unitId,
+                subUnitId: unitId,
+                drawingId: 'logo',
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                isMultiTransform: BooleanNumber.TRUE,
+                hidden: false,
+                transform: { left: 20, top: 30, width: 40, height: 30 },
+                transforms: [
+                    { left: 20, top: 30, width: 40, height: 30 },
+                    { left: 20, top: 530, width: 40, height: 30 },
+                ],
+            };
+            manager.setDrawingData(unitId, unitId, { logo: drawing });
+            const images = drawing.transforms.map((transform, index) => {
+                const image = new Rect(getDrawingShapeKeyByDrawingSearch(drawing, index), transform);
+                render.scene.addObject(image);
+                return image;
+            });
+            const add = vi.spyOn(manager, 'addNotification');
+
+            const update = { ...drawing, transforms: drawing.transforms.map((transform) => ({ ...transform, left: 50 })) };
+            manager.refreshTransform([update]);
+            expect(add).not.toHaveBeenCalled();
+            expect(images.map((image) => image.left)).toEqual([50, 50]);
+
+            manager.refreshTransform([{ ...update, hidden: true }]);
+            expect(images.every((image) => !image.visible)).toBe(true);
+            manager.refreshTransform([update]);
+            expect(images.every((image) => image.visible)).toBe(true);
+            expect(add).not.toHaveBeenCalled();
+
+            images[1].dispose();
+            manager.refreshTransform([update]);
+            expect(add).toHaveBeenCalledTimes(1);
+        } finally {
+            univer.dispose();
+            canvas.mockRestore();
+        }
+    });
+
     it.each([{ GroupType: Group }, { GroupType: DrawingGroupObject }])('arranges $GroupType.name and repeated instances without interrupting other drawings', ({ GroupType }) => {
         const getContextSpy = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
             return { canvas: this, setTransform: vi.fn(), clearRect: vi.fn() } as unknown as CanvasRenderingContext2D;

@@ -30,7 +30,7 @@ interface ISingleCanvasPopupProps {
 
 export const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
     const anchorRect$ = useMemo(() => popup.anchorRect$.pipe(
-        throttleTime(0, animationFrameScheduler),
+        throttleTime(0, animationFrameScheduler, { leading: true, trailing: true }),
         map((anchorRect) => {
             const { bottom, left, right, top } = anchorRect;
             const [x = 0, y = 0] = popup.offset ?? [];
@@ -43,7 +43,9 @@ export const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) 
         })
     ), [popup.anchorRect$, popup.offset]);
     const hiddenRects$ = useMemo(() => popup.hiddenRects$?.pipe(throttleTime(0, animationFrameScheduler)) ?? of([]), [popup.hiddenRects$]);
-    const excludeRects$ = useMemo(() => popup.excludeRects$?.pipe(throttleTime(0, animationFrameScheduler)), [popup.excludeRects$]);
+    const excludeRects$ = useMemo(() => popup.excludeRects$?.pipe(
+        throttleTime(0, animationFrameScheduler, { leading: true, trailing: true })
+    ), [popup.excludeRects$]);
     const excludeRectsRef = useObservableRef(excludeRects$, popup.excludeRects);
     const { boundaryInsets, canvasElement, constrainToCanvas = false, hideOnInvisible = true, hiddenType = 'destroy' } = popup;
 

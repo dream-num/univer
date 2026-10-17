@@ -15,8 +15,9 @@
  */
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
-import type { RenderUnit } from '@univerjs/engine-render';
+import type { IBoundRectNoAngle, RenderUnit } from '@univerjs/engine-render';
 import type { IPopup } from '@univerjs/ui';
+import type { BehaviorSubject } from 'rxjs';
 import {
     BooleanNumber,
     DocumentFlavor,
@@ -36,9 +37,12 @@ import {
     IRenderManagerService,
     Rect,
     RenderManagerService,
+    Viewport,
 } from '@univerjs/engine-render';
 import { CanvasPopupService, ICanvasPopupService } from '@univerjs/ui';
+import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import {
     DocCanvasPopupLayoutInteractionController,
@@ -195,6 +199,27 @@ describe('popup anchors with real document layout', () => {
                 expect(bounds[0].right).toBeCloseTo(lastGlyphBounds.right);
                 expect(bounds[0].right).toBeGreaterThan(bounds[0].left);
             }
+
+            const viewport = new Viewport(VIEWPORT_KEY.VIEW_MAIN, render.scene);
+            const popup = injector.get(DocCanvasPopManagerService).attachPopupToRange({
+                startOffset,
+                endOffset: startOffset + length,
+                collapsed: length === 0,
+            }, { componentKey: 'zoom-range-popup', requiresStableLayout: false }, model.getUnitId());
+            const anchors: IBoundRectNoAngle[] = [];
+            const subscription = popupService.popups[0][1].anchorRect$.subscribe((anchor) => anchors.push(anchor));
+            render.scene.scale(0.7, 0.7);
+            documents.translate(240, 35);
+            const after = anchors[anchors.length - 1];
+            expect(after.left).toBeCloseTo((bounds[0].left + 240 - viewport.viewportScrollX) * 0.7);
+            expect(after.right).toBeCloseTo((bounds[0].right + 240 - viewport.viewportScrollX) * 0.7);
+            expect(after.top).toBeCloseTo((bounds[0].top + 35 - viewport.viewportScrollY) * 0.7);
+            expect(after.bottom).toBeCloseTo((bounds[0].bottom + 35 - viewport.viewportScrollY) * 0.7);
+            popup.dispose();
+            const count = anchors.length;
+            documents.translate(300, 50);
+            expect(anchors).toHaveLength(count);
+            subscription.unsubscribe();
         } finally {
             univer.dispose();
             vi.restoreAllMocks();
@@ -241,7 +266,9 @@ class TestRenderManagerService {
     scopedPopupService = new TestCanvasPopupService();
     getInjector = vi.fn(() => this.popupInjector);
     readonly onTransformChange$ = new EventSubject();
+    readonly onDocumentTransformChange$ = new EventSubject();
     readonly onScrollAfter$ = new EventSubject();
+    readonly afterRender$ = new Subject();
 
     constructor() {
         this.popupInjector.add([ICanvasPopupService, { useValue: this.scopedPopupService as never }]);
@@ -263,6 +290,7 @@ class TestRenderManagerService {
             },
             getInjector: this.getInjector,
             mainComponent: {
+                onTransformChange$: this.onDocumentTransformChange$,
                 getOffsetConfig: () => {
                     if (this.throwOnGetOffsetConfig) {
                         throw new TypeError("Cannot read properties of null (reading 'clone')");
@@ -297,6 +325,7 @@ class TestRenderManagerService {
                 })
                 : undefined,
             onTransformChange$: this.onTransformChange$,
+            afterRender$: this.afterRender$,
         };
     }
 }
@@ -480,13 +509,15 @@ describe('DocCanvasPopManagerService', () => {
         expect(renderManagerService.scopedPopupService.popups.get('popup-1')?.componentKey).toBe('embed-popup');
     });
 
-    it('refreshes function-based rect popup anchors after scroll and rich text changes', () => {
+    it('refreshes function-based rect popup anchors after scroll, rich text changes and custom-range paint', () => {
         const { service, popupService, renderManagerService, commandService } = createService();
         const rect = { left: 10, right: 110, top: 20, bottom: 40 };
 
-        service.attachPopupToRect(() => rect, { componentKey: 'dynamic-rect' }, 'doc-1');
+        const disposable = service.attachPopupToRect(() => rect, { componentKey: 'dynamic-rect' }, 'doc-1');
         const popup = popupService.popups.get('popup-1');
-        const anchorRect$ = popup?.anchorRect$ as { value?: unknown } | undefined;
+        const anchorRect$ = popup!.anchorRect$ as BehaviorSubject<unknown>;
+        const anchors: unknown[] = [];
+        const subscription = anchorRect$.subscribe((anchor) => anchors.push(anchor));
 
         renderManagerService.viewportScrollX = 20;
         renderManagerService.viewportScrollY = 30;
@@ -497,6 +528,21 @@ describe('DocCanvasPopManagerService', () => {
         rect.right = 130;
         commandService.emit(RichTextEditingMutation.id);
         expect(anchorRect$?.value).toEqual({ left: 20, right: 120, top: 10, bottom: 30 });
+
+        rect.left = 60;
+        rect.right = 160;
+        renderManagerService.afterRender$.next(null);
+        expect(anchorRect$?.value).toEqual({ left: 50, right: 150, top: 10, bottom: 30 });
+        expect(anchors).toHaveLength(4);
+        renderManagerService.afterRender$.next(null);
+        renderManagerService.afterRender$.next(null);
+        expect(anchors).toHaveLength(4);
+        disposable.dispose();
+        rect.left = 90;
+        renderManagerService.afterRender$.next(null);
+        expect(anchorRect$?.value).toEqual({ left: 50, right: 150, top: 10, bottom: 30 });
+        expect(anchors).toHaveLength(4);
+        subscription.unsubscribe();
     });
 
     it('does not refresh rect popup anchors for rich text changes from another document', () => {

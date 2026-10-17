@@ -250,7 +250,9 @@ export class DocCanvasPopManagerService extends Disposable {
         const updatePosition = () => {
             try {
                 const newPosition = calc();
-                if (newPosition) {
+                const previous = position$.value;
+                if (newPosition && (newPosition.left !== previous.left || newPosition.right !== previous.right ||
+                    newPosition.top !== previous.top || newPosition.bottom !== previous.bottom)) {
                     position$.next(newPosition);
                 }
             } catch {
@@ -275,6 +277,9 @@ export class DocCanvasPopManagerService extends Disposable {
         disposable.add(currentRender.scene.onTransformChange$.subscribeEvent(() => {
             updatePosition();
         }));
+        if (typeof rect === 'function') {
+            disposable.add(currentRender.scene.afterRender$.subscribe(updatePosition));
+        }
 
         return {
             position,
@@ -337,6 +342,9 @@ export class DocCanvasPopManagerService extends Disposable {
         disposable.add(currentRender.scene.onTransformChange$.subscribeEvent(() => {
             updatePositions();
         }));
+        if (currentRender.mainComponent) {
+            disposable.add(currentRender.mainComponent.onTransformChange$.subscribeEvent(updatePositions));
+        }
 
         return {
             positions,

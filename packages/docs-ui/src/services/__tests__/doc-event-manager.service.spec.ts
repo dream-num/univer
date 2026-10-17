@@ -36,8 +36,10 @@ import {
     RenderManagerService,
     setDocsTableRenderViewportProvider,
     TRANSFORM_CHANGE_OBSERVABLE_TYPE,
+    Viewport,
 } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { VIEWPORT_KEY } from '../../basics/docs-view-key';
 import {
     calcDocGlyphPosition,
     DocEventManagerService,
@@ -113,6 +115,7 @@ describe('custom-range hit testing with real document layout', () => {
             const documents = new Documents('custom-range-document', skeleton);
             render.mainComponent = documents;
             render.scene.addObject(documents);
+            const viewport = new Viewport(VIEWPORT_KEY.VIEW_MAIN, render.scene);
             render.addRenderDependencies([[DocEventManagerService]]);
             const service = render.with(DocEventManagerService);
             const clicks: string[] = [];
@@ -140,6 +143,20 @@ describe('custom-range hit testing with real document layout', () => {
             expect(clicks).toEqual(['link']);
             click(bounds.right + 1);
             expect(clicks).toEqual(['link']);
+
+            const before = service.getCustomRangeBounds()[0].rects[0];
+            render.scene.scale(0.7, 0.7);
+            service.getCustomRangeBounds();
+            documents.translate(240, 35);
+            const after = service.getCustomRangeBounds()[0].rects[0];
+            expect(after.left).toBeCloseTo(before.left + 240);
+            expect(after.right).toBeCloseTo(before.right + 240);
+            expect(after.top).toBeCloseTo(before.top + 35);
+            expect(after.bottom).toBeCloseTo(before.bottom + 35);
+            expect(service.isPointerOnInteractiveRange(
+                ((after.left + after.right) / 2 - viewport.viewportScrollX) * 0.7,
+                ((after.top + after.bottom) / 2 - viewport.viewportScrollY) * 0.7
+            )).toBe(!nested && kind !== 'group' && kind !== 'repeatingSection');
             subscription.unsubscribe();
         } finally {
             univer.dispose();
@@ -355,6 +372,7 @@ class TestDocSkeletonManagerService {
 
 class TestDocuments {
     readonly onPointerDown$ = new EventSubject();
+    readonly onTransformChange$ = new EventSubject();
 
     getOffsetConfig() {
         return {

@@ -127,31 +127,24 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
                     Object.keys(drawingData).forEach((drawingId) => {
                         if (unitId === showUnitId && subUnitId === showSubunitId) {
                             const drawing = drawingData[drawingId] as ISheetDrawing;
-                            let refreshed: ISheetDrawing | undefined;
-                            try {
-                                if (drawing.anchorType === SheetDrawingAnchorType.None) {
-                                    // Validate absolute geometry without rewriting its persisted cell markers.
-                                    applySheetDrawingPlacement(drawing, getSheetDrawingPlacement(drawing));
-                                } else if (sheetSkeletonParam && drawing.sheetTransform) {
-                                    refreshed = applySheetDrawingPlacement(
+                            if (sheetSkeletonParam && drawing.sheetTransform && drawing.anchorType !== SheetDrawingAnchorType.None) {
+                                try {
+                                    refreshedDrawings.push(applySheetDrawingPlacement(
                                         drawing,
                                         getSheetDrawingPlacement(drawing),
                                         sheetSkeletonParam.skeleton
-                                    );
+                                    ));
+                                } catch (error) {
+                                    // Preserve failed model data and remove any stale rendering until a later retry.
+                                    failures.push({
+                                        drawingId,
+                                        drawingType: drawing.drawingType,
+                                        anchorType: drawing.anchorType ?? SheetDrawingAnchorType.Position,
+                                        error,
+                                    });
+                                    removeDrawings.push(drawing);
+                                    return;
                                 }
-                            } catch (error) {
-                                // Activation must preserve failed model data while removing any stale rendering.
-                                failures.push({
-                                    drawingId,
-                                    drawingType: drawing.drawingType,
-                                    anchorType: drawing.anchorType ?? SheetDrawingAnchorType.Position,
-                                    error,
-                                });
-                                removeDrawings.push(drawing);
-                                return;
-                            }
-                            if (refreshed) {
-                                refreshedDrawings.push(refreshed);
                             }
                             insertDrawings.push(drawingData[drawingId]);
                         } else {

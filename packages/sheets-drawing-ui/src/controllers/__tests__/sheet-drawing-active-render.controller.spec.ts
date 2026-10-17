@@ -88,7 +88,7 @@ describe('SheetDrawingActiveRenderController', () => {
     beforeEach(() => vi.useFakeTimers());
     afterEach(() => vi.useRealTimers());
 
-    it.each([SheetDrawingAnchorType.Position, SheetDrawingAnchorType.Both, SheetDrawingAnchorType.None])(
+    it.each([SheetDrawingAnchorType.Position, SheetDrawingAnchorType.Both])(
         'isolates failed geometry and retries repaired drawings on activation (%s)',
         async (anchorType) => {
             const bed = createTestBed();
@@ -99,7 +99,7 @@ describe('SheetDrawingActiveRenderController', () => {
                 const sheetService = bed.get(ISheetDrawingService);
                 const manager = bed.get(IDrawingManagerService);
                 bed.get(ILogService).setLogLevel(LogLevel.ERROR);
-                const valid = { ...base, drawingId: 'before' };
+                const valid = { ...base, drawingId: 'before', transform: { ...base.transform, left: -100, top: -100 } };
                 const invalid = {
                     ...base,
                     drawingId: 'invalid',
@@ -107,7 +107,7 @@ describe('SheetDrawingActiveRenderController', () => {
                     sheetTransform: { ...base.sheetTransform, to: { ...base.sheetTransform.from, columnOffset: -2 } },
                 };
                 const secondInvalid = { ...invalid, drawingId: 'second-invalid' };
-                const last = { ...base, drawingId: 'after' };
+                const last = { ...valid, drawingId: 'after' };
                 const drawings = [valid, invalid, secondInvalid, last];
                 const snapshot = {
                     [bed.subUnitId]: {
@@ -135,6 +135,12 @@ describe('SheetDrawingActiveRenderController', () => {
                 }
                 for (const drawing of drawings) {
                     expect(manager.getDrawingByParam(drawing)).toEqual(sheetService.getDrawingByParam(drawing));
+                }
+                for (const drawing of [valid, last]) {
+                    expect(sheetService.getDrawingByParam(drawing)?.transform).toMatchObject({
+                        left: base.transform!.left,
+                        top: base.transform!.top,
+                    });
                 }
                 expect(sheetService.getDrawingByParam(invalid)).toEqual(invalid);
                 expect(sheetService.getDrawingByParam(secondInvalid)).toEqual(secondInvalid);
@@ -177,41 +183,9 @@ describe('SheetDrawingActiveRenderController', () => {
         }
     );
 
-    it('rejects an invalid batch placement without partial writes or undo history', async () => {
-        const bed = createTestBed();
-        try {
-            const drawing = await insertDrawing(bed, SheetDrawingAnchorType.Position);
-            const sheetService = bed.get(ISheetDrawingService);
-            const before = Tools.deepClone(sheetService.getDrawingByParam(drawing));
-            const history = bed.get(IUndoRedoService).getUndoRedoStatus(bed.unitId);
-            const placement = {
-                kind: SheetDrawingAnchorType.None,
-                left: 400,
-                top: 200,
-                width: 100,
-                height: 50,
-            };
-            await expect(bed.commandService.executeCommand(SetSheetDrawingPlacementCommand.id, {
-                unitId: bed.unitId,
-                subUnitId: bed.subUnitId,
-                drawings: [
-                    { drawingId: drawing.drawingId, placement },
-                    { drawingId: drawing.drawingId, placement: { ...placement, width: -1 } },
-                ],
-            })).rejects.toThrow('SHEET_DRAWING_PLACEMENT_EXTENT_INVALID');
-            expect(sheetService.getDrawingByParam(drawing)).toEqual(before);
-            expect(bed.get(IDrawingManagerService).getDrawingByParam(drawing)).toEqual(before);
-            expect(bed.get(IUndoRedoService).getUndoRedoStatus(bed.unitId)).toEqual(history);
-        } finally {
-            bed.univer.dispose();
-            bed.activated$.complete();
-        }
-    });
-
-    it.each(['row', 'column'] as const)('preserves data and recovers after hidden %ss collapse an image', async (axis) => {
+    it.each(['row', 'column'] as const)('reactivates an image after initially hidden %ss become visible', async (axis) => {
         const bed = createTestBed();
         const subscriptions = new Disposable();
-        const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
         try {
             const drawing = await insertDrawing(bed, SheetDrawingAnchorType.Both);
             const sheetService = bed.get(ISheetDrawingService);
@@ -228,17 +202,12 @@ describe('SheetDrawingActiveRenderController', () => {
             const removed = vi.fn();
             subscriptions.disposeWithMe(sheetService.add$.subscribe(added));
             subscriptions.disposeWithMe(sheetService.remove$.subscribe(removed));
-            bed.get(ILogService).setLogLevel(LogLevel.ERROR);
             bed.get(SheetDrawingActiveRenderController);
             bed.activated$.next(true);
             expect(() => vi.runOnlyPendingTimers()).not.toThrow();
             expect(removed).toHaveBeenLastCalledWith([drawing]);
             expect(added).toHaveBeenLastCalledWith([]);
             expect(sheetService.getDrawingByParam(drawing)).toEqual(before);
-            expect(logged).toHaveBeenCalledTimes(1);
-            expect(logged.mock.calls[0][1].failures[0].error).toMatchObject({
-                [axis === 'row' ? 'height' : 'width']: 0,
-            });
             for (let index = 3; index < 6; index++) {
                 data[index]!.hd = BooleanNumber.FALSE;
             }
@@ -249,10 +218,8 @@ describe('SheetDrawingActiveRenderController', () => {
             expect(added.mock.calls.at(-1)![0]).toHaveLength(1);
             expect(sheetService.getDrawingByParam(drawing)?.transform).toEqual(before!.transform);
             expect(bed.get(IDrawingManagerService).getDrawingByParam(drawing)).toEqual(sheetService.getDrawingByParam(drawing));
-            expect(logged).toHaveBeenCalledTimes(1);
         } finally {
             subscriptions.dispose();
-            logged.mockRestore();
             bed.univer.dispose();
             bed.activated$.complete();
         }

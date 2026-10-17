@@ -33,7 +33,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DefinedNamesService, FormulaDataModel, IDefinedNamesService, LexerTreeBuilder } from '@univerjs/engine-formula';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { CanvasColorService, ICanvasColorService, IRenderManagerService } from '@univerjs/engine-render';
 import {
     AddRangeThemeMutation,
     RemoveRangeThemeMutation,
@@ -487,6 +487,7 @@ function createTestBed(): ITestBed {
                 [SheetInterceptorService],
                 [SheetSkeletonService, { useClass: SheetSkeletonService }],
                 [SheetsSelectionsService],
+                [ICanvasColorService, { useClass: CanvasColorService }],
                 [IRenderManagerService, { useClass: TestRenderManagerService }],
                 [IEditorService, { useClass: TestEditorService as never }],
                 [IMarkSelectionService, { useClass: TestMarkSelectionService as never }],

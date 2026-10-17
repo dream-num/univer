@@ -361,6 +361,7 @@ function validateExtent(width: number, height: number, requiresArea: boolean): v
     // this is independent of stroke width. Images and floating DOM still require area.
     const hasInvalidZeroExtent = requiresArea ? width === 0 || height === 0 : width === 0 && height === 0;
     if (!Number.isFinite(width) || !Number.isFinite(height) || width < 0 || height < 0 || hasInvalidZeroExtent) {
-        throw new Error('SHEET_DRAWING_PLACEMENT_EXTENT_INVALID');
+        // Preserve the error message contract and report the actual checked extent, including converted cell bounds.
+        throw Object.assign(new Error('SHEET_DRAWING_PLACEMENT_EXTENT_INVALID'), { width, height });
     }
 }

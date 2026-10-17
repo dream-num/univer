@@ -17,7 +17,18 @@
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext } from '@univerjs/engine-render';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
-import { DrawingTypeEnum, ImageSourceType, RedoCommandId, Tools, UndoCommandId } from '@univerjs/core';
+import {
+    BooleanNumber,
+    Disposable,
+    DrawingTypeEnum,
+    ILogService,
+    ImageSourceType,
+    IUndoRedoService,
+    LogLevel,
+    RedoCommandId,
+    Tools,
+    UndoCommandId,
+} from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { RemoveColByRangeCommand, RemoveRowByRangeCommand, SheetSkeletonService } from '@univerjs/sheets';
 import {
@@ -76,6 +87,176 @@ async function insertDrawing(
 describe('SheetDrawingActiveRenderController', () => {
     beforeEach(() => vi.useFakeTimers());
     afterEach(() => vi.useRealTimers());
+
+    it.each([SheetDrawingAnchorType.Position, SheetDrawingAnchorType.Both, SheetDrawingAnchorType.None])(
+        'isolates failed geometry and retries repaired drawings on activation (%s)',
+        async (anchorType) => {
+            const bed = createTestBed();
+            const subscriptions = new Disposable();
+            const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
+            try {
+                const base = await insertDrawing(bed, anchorType);
+                const sheetService = bed.get(ISheetDrawingService);
+                const manager = bed.get(IDrawingManagerService);
+                bed.get(ILogService).setLogLevel(LogLevel.ERROR);
+                const valid = { ...base, drawingId: 'before' };
+                const invalid = {
+                    ...base,
+                    drawingId: 'invalid',
+                    transform: { ...base.transform, width: -1 },
+                    sheetTransform: { ...base.sheetTransform, to: { ...base.sheetTransform.from, columnOffset: -2 } },
+                };
+                const secondInvalid = { ...invalid, drawingId: 'second-invalid' };
+                const last = { ...base, drawingId: 'after' };
+                const drawings = [valid, invalid, secondInvalid, last];
+                const snapshot = {
+                    [bed.subUnitId]: {
+                        data: Object.fromEntries(drawings.map((drawing) => [drawing.drawingId, drawing])),
+                        order: drawings.map((drawing) => drawing.drawingId),
+                    },
+                };
+                sheetService.registerDrawingData(bed.unitId, Tools.deepClone(snapshot));
+                manager.registerDrawingData(bed.unitId, Tools.deepClone(snapshot));
+                const beforeHistory = bed.get(IUndoRedoService).getUndoRedoStatus(bed.unitId);
+                const notifications = [sheetService, manager].map((service) => {
+                    const added = vi.fn();
+                    const removed = vi.fn();
+                    subscriptions.disposeWithMe(service.add$.subscribe(added));
+                    subscriptions.disposeWithMe(service.remove$.subscribe(removed));
+                    return { added, removed };
+                });
+                bed.get(SheetDrawingActiveRenderController);
+                bed.activated$.next(true);
+                expect(() => vi.runOnlyPendingTimers()).not.toThrow();
+                for (const { added, removed } of notifications) {
+                    expect(added.mock.calls.at(-1)![0].map((drawing: ISheetDrawing) => drawing.drawingId))
+                        .toEqual([valid.drawingId, last.drawingId]);
+                    expect(removed).toHaveBeenLastCalledWith([invalid, secondInvalid]);
+                }
+                for (const drawing of drawings) {
+                    expect(manager.getDrawingByParam(drawing)).toEqual(sheetService.getDrawingByParam(drawing));
+                }
+                expect(sheetService.getDrawingByParam(invalid)).toEqual(invalid);
+                expect(sheetService.getDrawingByParam(secondInvalid)).toEqual(secondInvalid);
+                expect(bed.get(IUndoRedoService).getUndoRedoStatus(bed.unitId)).toEqual(beforeHistory);
+                expect(logged).toHaveBeenCalledTimes(1);
+                expect(logged.mock.calls[0][1]).toMatchObject({
+                    unitId: bed.unitId,
+                    subUnitId: bed.subUnitId,
+                    failures: [invalid, secondInvalid].map(({ drawingId, drawingType }) => ({
+                        drawingId,
+                        drawingType,
+                        anchorType,
+                        error: expect.objectContaining({
+                            width: anchorType === SheetDrawingAnchorType.Both ? -2 : -1,
+                            height: anchorType === SheetDrawingAnchorType.Both ? 0 : base.transform!.height,
+                        }),
+                    })),
+                });
+                expect(await bed.commandService.executeCommand(SetSheetDrawingPlacementCommand.id, {
+                    unitId: bed.unitId,
+                    subUnitId: bed.subUnitId,
+                    drawings: [invalid, secondInvalid].map(({ drawingId }) => ({
+                        drawingId,
+                        placement: getSheetDrawingPlacement(base),
+                    })),
+                })).toBe(true);
+                bed.activated$.next(true);
+                vi.runOnlyPendingTimers();
+                for (const { added } of notifications) {
+                    expect(added.mock.calls.at(-1)![0].map((drawing: ISheetDrawing) => drawing.drawingId))
+                        .toEqual(drawings.map((drawing) => drawing.drawingId));
+                }
+                expect(logged).toHaveBeenCalledTimes(1);
+            } finally {
+                subscriptions.dispose();
+                logged.mockRestore();
+                bed.univer.dispose();
+                bed.activated$.complete();
+            }
+        }
+    );
+
+    it('rejects an invalid batch placement without partial writes or undo history', async () => {
+        const bed = createTestBed();
+        try {
+            const drawing = await insertDrawing(bed, SheetDrawingAnchorType.Position);
+            const sheetService = bed.get(ISheetDrawingService);
+            const before = Tools.deepClone(sheetService.getDrawingByParam(drawing));
+            const history = bed.get(IUndoRedoService).getUndoRedoStatus(bed.unitId);
+            const placement = {
+                kind: SheetDrawingAnchorType.None,
+                left: 400,
+                top: 200,
+                width: 100,
+                height: 50,
+            };
+            await expect(bed.commandService.executeCommand(SetSheetDrawingPlacementCommand.id, {
+                unitId: bed.unitId,
+                subUnitId: bed.subUnitId,
+                drawings: [
+                    { drawingId: drawing.drawingId, placement },
+                    { drawingId: drawing.drawingId, placement: { ...placement, width: -1 } },
+                ],
+            })).rejects.toThrow('SHEET_DRAWING_PLACEMENT_EXTENT_INVALID');
+            expect(sheetService.getDrawingByParam(drawing)).toEqual(before);
+            expect(bed.get(IDrawingManagerService).getDrawingByParam(drawing)).toEqual(before);
+            expect(bed.get(IUndoRedoService).getUndoRedoStatus(bed.unitId)).toEqual(history);
+        } finally {
+            bed.univer.dispose();
+            bed.activated$.complete();
+        }
+    });
+
+    it.each(['row', 'column'] as const)('preserves data and recovers after hidden %ss collapse an image', async (axis) => {
+        const bed = createTestBed();
+        const subscriptions = new Disposable();
+        const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
+        try {
+            const drawing = await insertDrawing(bed, SheetDrawingAnchorType.Both);
+            const sheetService = bed.get(ISheetDrawingService);
+            const before = Tools.deepClone(sheetService.getDrawingByParam(drawing));
+            const worksheet = bed.workbook.getActiveSheet();
+            const data = axis === 'row' ? worksheet.getRowManager().getRowData() : worksheet.getColumnManager().getColumnData();
+            for (let index = 3; index < 6; index++) {
+                data[index] = { ...data[index], hd: BooleanNumber.TRUE };
+            }
+            const skeleton = bed.get(SheetSkeletonService).getSkeleton(bed.unitId, bed.subUnitId)!;
+            skeleton.makeDirty(true);
+            skeleton.calculate();
+            const added = vi.fn();
+            const removed = vi.fn();
+            subscriptions.disposeWithMe(sheetService.add$.subscribe(added));
+            subscriptions.disposeWithMe(sheetService.remove$.subscribe(removed));
+            bed.get(ILogService).setLogLevel(LogLevel.ERROR);
+            bed.get(SheetDrawingActiveRenderController);
+            bed.activated$.next(true);
+            expect(() => vi.runOnlyPendingTimers()).not.toThrow();
+            expect(removed).toHaveBeenLastCalledWith([drawing]);
+            expect(added).toHaveBeenLastCalledWith([]);
+            expect(sheetService.getDrawingByParam(drawing)).toEqual(before);
+            expect(logged).toHaveBeenCalledTimes(1);
+            expect(logged.mock.calls[0][1].failures[0].error).toMatchObject({
+                [axis === 'row' ? 'height' : 'width']: 0,
+            });
+            for (let index = 3; index < 6; index++) {
+                data[index]!.hd = BooleanNumber.FALSE;
+            }
+            skeleton.makeDirty(true);
+            skeleton.calculate();
+            bed.activated$.next(true);
+            vi.runOnlyPendingTimers();
+            expect(added.mock.calls.at(-1)![0]).toHaveLength(1);
+            expect(sheetService.getDrawingByParam(drawing)?.transform).toEqual(before!.transform);
+            expect(bed.get(IDrawingManagerService).getDrawingByParam(drawing)).toEqual(sheetService.getDrawingByParam(drawing));
+            expect(logged).toHaveBeenCalledTimes(1);
+        } finally {
+            subscriptions.dispose();
+            logged.mockRestore();
+            bed.univer.dispose();
+            bed.activated$.complete();
+        }
+    });
 
     it.each([
         ['row', SheetDrawingAnchorType.Both],

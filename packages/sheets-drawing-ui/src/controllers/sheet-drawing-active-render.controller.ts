@@ -18,7 +18,7 @@ import type { ICommandInfo, IDrawingParam, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { ISetWorksheetActiveOperationParams } from '@univerjs/sheets';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
-import { Disposable, ICommandService, Inject } from '@univerjs/core';
+import { Disposable, ICommandService, ILogService, Inject } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { SetWorksheetActiveOperation, SheetSkeletonService } from '@univerjs/sheets';
 import {
@@ -36,7 +36,8 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
-        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService
+        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
+        @ILogService private readonly _logService: ILogService
     ) {
         super();
         this._commandListener();
@@ -112,6 +113,7 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
             const drawingMap = this._drawingManagerService.drawingManagerData;
             const insertDrawings: IDrawingParam[] = [];
             const refreshedDrawings: ISheetDrawing[] = [];
+            const failures: Array<Pick<ISheetDrawing, 'drawingId' | 'drawingType' | 'anchorType'> & { error: unknown }> = [];
             const removeDrawings: IDrawingParam[] = [];
 
             Object.keys(drawingMap ?? {}).forEach((unitId) => {
@@ -125,12 +127,31 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
                     Object.keys(drawingData).forEach((drawingId) => {
                         if (unitId === showUnitId && subUnitId === showSubunitId) {
                             const drawing = drawingData[drawingId] as ISheetDrawing;
-                            if (sheetSkeletonParam && drawing.sheetTransform && drawing.anchorType !== SheetDrawingAnchorType.None) {
-                                refreshedDrawings.push(applySheetDrawingPlacement(
-                                    drawing,
-                                    getSheetDrawingPlacement(drawing),
-                                    sheetSkeletonParam.skeleton
-                                ));
+                            let refreshed: ISheetDrawing | undefined;
+                            try {
+                                if (drawing.anchorType === SheetDrawingAnchorType.None) {
+                                    // Validate absolute geometry without rewriting its persisted cell markers.
+                                    applySheetDrawingPlacement(drawing, getSheetDrawingPlacement(drawing));
+                                } else if (sheetSkeletonParam && drawing.sheetTransform) {
+                                    refreshed = applySheetDrawingPlacement(
+                                        drawing,
+                                        getSheetDrawingPlacement(drawing),
+                                        sheetSkeletonParam.skeleton
+                                    );
+                                }
+                            } catch (error) {
+                                // Activation must preserve failed model data while removing any stale rendering.
+                                failures.push({
+                                    drawingId,
+                                    drawingType: drawing.drawingType,
+                                    anchorType: drawing.anchorType ?? SheetDrawingAnchorType.Position,
+                                    error,
+                                });
+                                removeDrawings.push(drawing);
+                                return;
+                            }
+                            if (refreshed) {
+                                refreshedDrawings.push(refreshed);
                             }
                             insertDrawings.push(drawingData[drawingId]);
                         } else {
@@ -147,6 +168,13 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
             this._sheetDrawingService.addNotification(insertDrawings);
             this._drawingManagerService.removeNotification(removeDrawings);
             this._drawingManagerService.addNotification(insertDrawings);
+            if (failures.length) {
+                this._logService.error('[SheetDrawingActiveRenderController]', {
+                    unitId: showUnitId,
+                    subUnitId: showSubunitId,
+                    failures,
+                });
+            }
         });
     }
 }

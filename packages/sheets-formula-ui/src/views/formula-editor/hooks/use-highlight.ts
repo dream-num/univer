@@ -16,10 +16,10 @@
 
 import type { IDocumentBody, IRange, ITextRange, ITextRun, Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
-import type { ISequenceNode } from '@univerjs/engine-formula';
+import type { IFormulaHighlightColors } from '@univerjs/engine-formula';
 import type { ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/sheets';
 import type { INode } from './use-formula-token';
-import { ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { ColorKit, ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { ReplaceTextRunsCommand } from '@univerjs/docs-ui';
 import {
     buildFormulaTextRuns,
@@ -27,10 +27,10 @@ import {
     getFormulaHighlightDataStream,
     IDescriptionService,
 } from '@univerjs/engine-formula';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { ICanvasColorService, IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
 import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { useDependency, useEvent } from '@univerjs/ui';
+import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo } from 'react';
 import { genFormulaRefSelectionStyle } from '../../../common/selection';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render.service';
@@ -261,7 +261,7 @@ export function useDocHight(_leadingCharacter: string = '') {
             });
             return [];
         } else {
-            const { textRuns, refSelections } = buildTextRuns(descriptionService, colorMap, sequenceNodes);
+            const { textRuns, refSelections } = buildFormulaTextRuns(descriptionService, colorMap, sequenceNodes);
             if (leadingCharacterLength) {
                 textRuns.forEach((e) => {
                     e.ed = e.ed + leadingCharacterLength;
@@ -275,7 +275,7 @@ export function useDocHight(_leadingCharacter: string = '') {
             if (isNeedResetSelection) {
                 // Switching between uppercase and lowercase will trigger a reflow, causing the cursor to be misplaced. Let's refresh the cursor position here.
                 selections = editor.getSelectionRanges();
-                // After 'buildTextRuns' , the content changes, most of it is deleted, and the cursor position needs to be corrected
+                // Clamp the cursor after rebuilding the formula text.
                 const maxOffset = highlightDataStream.length - 2 + leadingCharacterLength;
                 selections.forEach((selection) => {
                     selection.startOffset = Math.max(0, Math.min(selection.startOffset, maxOffset));
@@ -308,39 +308,27 @@ export function createHighlightTextRuns(textRuns: ITextRun[], leadingCharacterLe
         : textRuns;
 }
 
-interface IColorMap {
-    formulaRefColors: string[];
-    numberColor: string;
-    stringColor: string;
-    plainTextColor: string;
-}
-
-export function useColor(): IColorMap {
+export function useColor(): IFormulaHighlightColors {
     const themeService = useDependency(ThemeService);
-    const theme = themeService.getCurrentTheme();
+    const canvasColorService = useDependency(ICanvasColorService);
+    const theme = useObservable(themeService.currentTheme$, themeService.getCurrentTheme());
+    const darkMode = useObservable(themeService.darkMode$, themeService.darkMode);
     const result = useMemo(() => {
-        const formulaRefColors = [
-            themeService.getColorFromTheme('loop-color.1'),
-            themeService.getColorFromTheme('loop-color.2'),
-            themeService.getColorFromTheme('loop-color.3'),
-            themeService.getColorFromTheme('loop-color.4'),
-            themeService.getColorFromTheme('loop-color.5'),
-            themeService.getColorFromTheme('loop-color.6'),
-            themeService.getColorFromTheme('loop-color.7'),
-            themeService.getColorFromTheme('loop-color.8'),
-            themeService.getColorFromTheme('loop-color.9'),
-            themeService.getColorFromTheme('loop-color.10'),
-            themeService.getColorFromTheme('loop-color.11'),
-            themeService.getColorFromTheme('loop-color.12'),
-        ].map((color) => themeService.isValidThemeColor(color) ? themeService.getColorFromTheme(color) : color);
+        const formulaRefColors = Object.values(theme['loop-color']).map((color) => {
+            const resolvedColor = themeService.isValidThemeColor(color) ? themeService.getColorFromTheme(color) : color;
+            if (!darkMode) return resolvedColor;
+
+            let referenceColor = new ColorKit(resolvedColor);
+            // Canvas inverts these colors, so darken the source to brighten rendered references.
+            while (referenceColor.toHsl().l > 0 && ColorKit.getContrastRatio(canvasColorService.getRenderColor(referenceColor.toHexString()), theme.gray[800]) < 4.5) {
+                referenceColor = referenceColor.darken(5);
+            }
+            return referenceColor.toHexString();
+        });
         const numberColor = themeService.getColorFromTheme('blue.700');
         const stringColor = themeService.getColorFromTheme('jiqing.800');
         const plainTextColor = themeService.getColorFromTheme('gray.1000');
         return { formulaRefColors, numberColor, stringColor, plainTextColor };
-    }, [theme]);
+    }, [theme, darkMode, themeService, canvasColorService]);
     return result;
 }
-
-function buildTextRuns(descriptionService: IDescriptionService, colorMap: IColorMap, sequenceNodes: Array<ISequenceNode | string>) {
-    return buildFormulaTextRuns(descriptionService, colorMap, sequenceNodes);
-};

@@ -31,6 +31,7 @@ import {
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import { IDescriptionService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { CanvasColorService, ICanvasColorService } from '@univerjs/engine-render';
 import { SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import { IDialogService, RediContext } from '@univerjs/ui';
@@ -177,6 +178,7 @@ function createGlobalRangeSelectorTestBed() {
     const injector = new Injector();
     injector.add([LocaleService, { useClass: LocaleService }]);
     injector.add([ThemeService, { useClass: ThemeService }]);
+    injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
     injector.add([LexerTreeBuilder, { useClass: LexerTreeBuilder }]);
     injector.add([IDescriptionService, { useClass: TestDescriptionService as never }]);
     injector.add([ICommandService, { useClass: TestCommandService as never }]);

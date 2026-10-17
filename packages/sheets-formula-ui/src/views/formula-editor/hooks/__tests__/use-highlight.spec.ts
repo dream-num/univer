@@ -16,8 +16,28 @@
 
 // @vitest-environment jsdom
 
-import { describe, expect, it, vi } from 'vitest';
-import { calcHighlightRanges, createFormulaHighlightBody, createHighlightTextRuns } from '../use-highlight';
+import { ColorKit, Injector, ThemeService } from '@univerjs/core';
+import { CanvasColorService, ICanvasColorService } from '@univerjs/engine-render';
+import { RediContext, useDependency } from '@univerjs/ui';
+import { act, createElement } from 'react';
+import { createRoot } from 'react-dom/client';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
+import { calcHighlightRanges, createFormulaHighlightBody, createHighlightTextRuns, useColor } from '../use-highlight';
+
+(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+
+function FormulaReferenceColors() {
+    const colors = useColor();
+    const canvasColorService = useDependency(ICanvasColorService);
+    const themeService = useDependency(ThemeService);
+    const background = themeService.getColorFromTheme(themeService.darkMode ? 'gray.800' : 'gray.0');
+
+    return createElement('div', null, colors.formulaRefColors.map((color) => createElement('span', {
+        key: color,
+        'data-color': color,
+        'data-contrast': ColorKit.getContrastRatio(canvasColorService.getRenderColor(color), background),
+    })));
+}
 
 function range(row: number, col: number, sheetId = 'sheet1', unitId = 'unit1') {
     return {
@@ -31,6 +51,50 @@ function range(row: number, col: number, sheetId = 'sheet1', unitId = 'unit1') {
 }
 
 describe('use-highlight regression scenarios', () => {
+    it('keeps formula references readable after switching to dark mode and restores light colors', async () => {
+        const injector = new Injector([
+            [ThemeService],
+            [ICanvasColorService, { useClass: CanvasColorService }],
+        ]);
+        const themeService = injector.get(ThemeService);
+        const container = document.createElement('div');
+        const root = createRoot(container);
+        onTestFinished(() => {
+            act(() => root.unmount());
+            injector.dispose();
+        });
+
+        await act(async () => root.render(createElement(
+            RediContext.Provider,
+            { value: { injector } },
+            createElement(FormulaReferenceColors)
+        )));
+
+        const lightColors = Array.from(container.querySelectorAll('span'), (reference) => reference.dataset.color);
+        expect(lightColors).not.toHaveLength(0);
+
+        await act(async () => themeService.setDarkMode(true));
+        for (const reference of container.querySelectorAll('span')) {
+            expect(Number(reference.dataset.contrast)).toBeGreaterThanOrEqual(4.5);
+        }
+
+        await act(async () => themeService.setDarkMode(false));
+        expect(Array.from(container.querySelectorAll('span'), (reference) => reference.dataset.color)).toEqual(lightColors);
+
+        await act(async () => {
+            themeService.setDarkMode(true);
+            const theme = themeService.getCurrentTheme();
+            themeService.setTheme({
+                ...theme,
+                gray: { ...theme.gray, 800: '#30343d' },
+                'loop-color': { ...theme['loop-color'], 1: 'rgb(210, 190, 250)' },
+            });
+        });
+        for (const reference of container.querySelectorAll('span')) {
+            expect(Number(reference.dataset.contrast)).toBeGreaterThanOrEqual(4.5);
+        }
+    });
+
     it('does not cover the first highlighted character when there is no leading marker', () => {
         const textRuns = [{ st: 0, ed: 12, ts: { cl: { rgb: '#ff0000' } } }];
 

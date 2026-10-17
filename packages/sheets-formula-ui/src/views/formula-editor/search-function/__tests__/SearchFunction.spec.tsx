@@ -391,6 +391,45 @@ describe('SearchFunction', () => {
         expect(document.body.textContent).not.toContain('Adds selected values.');
     });
 
+    it.each([KeyCode.TAB, KeyCode.ENTER])('keeps the hovered suggestion selected after leaving the panel for key %s', async (keyCode) => {
+        const { injector, editor, commandService } = createSearchFunctionTestBed();
+
+        await act(async () => {
+            root.render(
+                <RediContext.Provider value={{ injector }}>
+                    <SearchFunction
+                        isFocus
+                        editor={editor}
+                        sequenceNodes={[{ nodeType: sequenceNodeType.FUNCTION, token: 'SU' } as never]}
+                        onSelect={(result) => SearchFunctionState.selected.push(result)}
+                    />
+                </RediContext.Provider>
+            );
+        });
+
+        await waitForSearchList(editor);
+        const items = Array.from(popupRoot.querySelectorAll('li'));
+        expect(items).toHaveLength(2);
+
+        await act(async () => {
+            items[0].dispatchEvent(new MouseEvent('mousemove', { bubbles: true }));
+            items[0].dispatchEvent(new MouseEvent('mouseout', { bubbles: true, relatedTarget: items[1] }));
+            items[1].dispatchEvent(new MouseEvent('mouseover', { bubbles: true, relatedTarget: items[0] }));
+        });
+        expect(items[1].classList.contains('univer-bg-gray-200')).toBe(true);
+        expect(items[0].classList.contains('univer-bg-gray-200')).toBe(false);
+
+        await act(async () => {
+            items[1].dispatchEvent(new MouseEvent('mouseout', { bubbles: true, relatedTarget: document.body }));
+        });
+        expect(items[1].classList.contains('univer-bg-gray-200')).toBe(true);
+
+        await runFormulaSearchKeyboardCommand(commandService, editor, keyCode);
+
+        expect(SearchFunctionState.selected).toEqual([{ text: 'SUBTOTAL(', offset: -7 }]);
+        expect(popupRoot.querySelector('li')).toBeNull();
+    });
+
     it('closes formula suggestions without selecting a function when escape is pressed', async () => {
         const { injector, editor, commandService } = createSearchFunctionTestBed();
 

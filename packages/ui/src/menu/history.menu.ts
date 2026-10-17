@@ -36,7 +36,7 @@ const undoRedoDisableFactory$ = (accessor: IAccessor, isUndo: boolean) => {
 
     return combineLatest([
         undoRedoService.undoRedoStatus$.pipe(map((v) => isUndo ? v.undos <= 0 : v.redos <= 0)),
-        merge([of({}), contextService.contextChanged$]),
+        merge(of({}), contextService.contextChanged$),
     ]).pipe(map(([undoDisable]) => {
         return undoDisable || contextService.getContextValue(EDITOR_ACTIVATED) || contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
     }));

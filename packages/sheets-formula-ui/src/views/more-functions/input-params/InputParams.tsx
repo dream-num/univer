@@ -77,7 +77,7 @@ function InputParamsInner(props: IInputParamsProps & { functionInfo: IFunctionIn
             <div className={clsx('univer-flex-1 univer-p-3', borderLeftClassName)}>
                 <FunctionParams
                     title={activeIndex === -1
-                        ? <FunctionHelp prefix={functionInfo.functionName} value={functionParameter} />
+                        ? <FunctionHelp prefix={(functionInfo as any).label || functionInfo.functionName} value={functionParameter} />
                         : functionParameter[activeIndex].name}
                     value={activeIndex === -1 ? functionInfo.description : functionParameter[activeIndex].detail}
                 />

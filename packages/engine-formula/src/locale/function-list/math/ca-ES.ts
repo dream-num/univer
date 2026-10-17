@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ABS: {
+        label: 'ABS',
         description: 'Retorna el valor absolut d\'un nombre. El valor absolut d\'un nombre és el nombre sense el seu signe.',
         abstract: 'Retorna el valor absolut d\'un nombre',
         links: [
@@ -31,6 +32,7 @@ const locale: typeof enUS = {
         },
     },
     ACOS: {
+        label: 'ARCCOS',
         description: 'Retorna l\'arccosinus, o cosinus invers, d\'un nombre. L\'arccosinus és l\'angle el cosinus del qual és el nombre. L\'angle retornat es dóna en radians en el rang de 0 (zero) a pi.',
         abstract: 'Retorna l\'arccosinus d\'un nombre',
         links: [
@@ -44,6 +46,7 @@ const locale: typeof enUS = {
         },
     },
     ACOSH: {
+        label: 'ARCOSH',
         description: 'Retorna el cosinus hiperbòlic invers d\'un nombre. El nombre ha de ser més gran o igual a 1. El cosinus hiperbòlic invers és el valor el cosinus hiperbòlic del qual és el nombre, de manera que ACOSH(COSH(nombre)) és igual a nombre.',
         abstract: 'Retorna el cosinus hiperbòlic invers d\'un nombre',
         links: [
@@ -57,6 +60,7 @@ const locale: typeof enUS = {
         },
     },
     ACOT: {
+        label: 'ARCCOS.TANGENT',
         description: 'Retorna el valor principal de l\'arccotangent, o cotangent inversa, d\'un nombre.',
         abstract: 'Retorna l\'arccotangent d\'un nombre',
         links: [
@@ -73,6 +77,7 @@ const locale: typeof enUS = {
         },
     },
     ACOTH: {
+        label: 'ARCCOS.TANGENT.H',
         description: 'Retorna l\'arccotangent hiperbòlica d\'un nombre',
         abstract: 'Retorna l\'arccotangent hiperbòlica d\'un nombre',
         links: [
@@ -86,6 +91,7 @@ const locale: typeof enUS = {
         },
     },
     AGGREGATE: {
+        label: 'AGREGAT',
         description: 'Retorna un agregat en una llista o base de dades',
         abstract: 'Retorna un agregat en una llista o base de dades',
         links: [
@@ -102,6 +108,7 @@ const locale: typeof enUS = {
         },
     },
     ARABIC: {
+        label: 'NÚMERO.ÀRAB',
         description: 'Converteix un nombre romà a aràbic, com a nombre',
         abstract: 'Converteix un nombre romà a aràbic, com a nombre',
         links: [
@@ -115,6 +122,7 @@ const locale: typeof enUS = {
         },
     },
     ASIN: {
+        label: 'ARCSINUS',
         description: 'Retorna l\'arcsinus d\'un nombre.',
         abstract: 'Retorna l\'arcsinus d\'un nombre',
         links: [
@@ -128,6 +136,7 @@ const locale: typeof enUS = {
         },
     },
     ASINH: {
+        label: 'ARCSINUS.H',
         description: 'Retorna el sinus hiperbòlic invers d\'un nombre.',
         abstract: 'Retorna el sinus hiperbòlic invers d\'un nombre',
         links: [
@@ -141,6 +150,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN: {
+        label: 'ARCTANGENT',
         description: 'Retorna l\'arctangent d\'un nombre.',
         abstract: 'Retorna l\'arctangent d\'un nombre',
         links: [
@@ -154,6 +164,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN2: {
+        label: 'ARCTANGENT.2',
         description: 'Retorna l\'arctangent de les coordenades x i y.',
         abstract: 'Retorna l\'arctangent de les coordenades x i y',
         links: [
@@ -168,6 +179,7 @@ const locale: typeof enUS = {
         },
     },
     ATANH: {
+        label: 'ARCTANGENT.H',
         description: 'Retorna la tangent hiperbòlica inversa d\'un nombre.',
         abstract: 'Retorna la tangent hiperbòlica inversa d\'un nombre',
         links: [
@@ -181,6 +193,7 @@ const locale: typeof enUS = {
         },
     },
     BASE: {
+        label: 'BASE',
         description: 'Converteix un nombre en una representació de text amb la base donada (arrel)',
         abstract: 'Converteix un nombre en una representació de text amb la base donada (arrel)',
         links: [
@@ -196,6 +209,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING: {
+        label: 'LÍMIT.SUPERIOR',
         description: 'Arrodoneix un nombre a l\'enter més proper o al múltiple més proper de la xifra significativa',
         abstract: 'Arrodoneix un nombre a l\'enter més proper o al múltiple més proper de la xifra significativa',
         links: [
@@ -210,6 +224,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_MATH: {
+        label: 'LÍMIT.SUPERIOR.MAT',
         description: 'Arrodoneix un nombre cap amunt, a l\'enter més proper o al múltiple més proper de la xifra significativa',
         abstract: 'Arrodoneix un nombre cap amunt, a l\'enter més proper o al múltiple més proper de la xifra significativa',
         links: [
@@ -225,6 +240,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_PRECISE: {
+        label: 'LÍMIT.SUPERIOR.EXACTE',
         description: 'Arrodoneix un nombre a l\'enter més proper o al múltiple més proper de la xifra significativa. Independentment del signe del nombre, el nombre s\'arrodoneix cap amunt.',
         abstract: 'Arrodoneix un nombre a l\'enter més proper o al múltiple més proper de la xifra significativa. Independentment del signe del nombre, el nombre s\'arrodoneix cap amunt.',
         links: [
@@ -239,6 +255,7 @@ const locale: typeof enUS = {
         },
     },
     COMBIN: {
+        label: 'COMBINACIONS',
         description: 'Retorna el nombre de combinacions per a un nombre donat d\'objectes',
         abstract: 'Retorna el nombre de combinacions per a un nombre donat d\'objectes',
         links: [
@@ -253,6 +270,7 @@ const locale: typeof enUS = {
         },
     },
     COMBINA: {
+        label: 'COMBINACIONS.A',
         description: 'Retorna el nombre de combinacions amb repeticions per a un nombre donat d\'elements',
         abstract: 'Retorna el nombre de combinacions amb repeticions per a un nombre donat d\'elements',
         links: [
@@ -267,6 +285,7 @@ const locale: typeof enUS = {
         },
     },
     COS: {
+        label: 'COS',
         description: 'Retorna el cosinus d\'un nombre.',
         abstract: 'Retorna el cosinus d\'un nombre',
         links: [
@@ -280,6 +299,7 @@ const locale: typeof enUS = {
         },
     },
     COSH: {
+        label: 'COSH',
         description: 'Retorna el cosinus hiperbòlic d\'un nombre',
         abstract: 'Retorna el cosinus hiperbòlic d\'un nombre',
         links: [
@@ -293,6 +313,7 @@ const locale: typeof enUS = {
         },
     },
     COT: {
+        label: 'COTANGENT',
         description: 'Retorna la cotangent d\'un angle',
         abstract: 'Retorna la cotangent d\'un angle',
         links: [
@@ -306,6 +327,7 @@ const locale: typeof enUS = {
         },
     },
     COTH: {
+        label: 'COTANGENT.H',
         description: 'Retorna la cotangent hiperbòlica d\'un nombre',
         abstract: 'Retorna la cotangent hiperbòlica d\'un nombre',
         links: [
@@ -319,6 +341,7 @@ const locale: typeof enUS = {
         },
     },
     CSC: {
+        label: 'COSECANT',
         description: 'Retorna la cosecant d\'un angle',
         abstract: 'Retorna la cosecant d\'un angle',
         links: [
@@ -332,6 +355,7 @@ const locale: typeof enUS = {
         },
     },
     CSCH: {
+        label: 'COSECANT.H',
         description: 'Retorna la cosecant hiperbòlica d\'un angle',
         abstract: 'Retorna la cosecant hiperbòlica d\'un angle',
         links: [
@@ -345,6 +369,7 @@ const locale: typeof enUS = {
         },
     },
     DECIMAL: {
+        label: 'DECIMAL',
         description: 'Converteix una representació de text d\'un nombre en una base donada en un nombre decimal',
         abstract: 'Converteix una representació de text d\'un nombre en una base donada en un nombre decimal',
         links: [
@@ -359,6 +384,7 @@ const locale: typeof enUS = {
         },
     },
     DEGREES: {
+        label: 'GRAUS',
         description: 'Converteix radians a graus',
         abstract: 'Converteix radians a graus',
         links: [
@@ -372,6 +398,7 @@ const locale: typeof enUS = {
         },
     },
     EVEN: {
+        label: 'PARELL',
         description: 'Arrodoneix un nombre cap amunt a l\'enter parell més proper',
         abstract: 'Arrodoneix un nombre cap amunt a l\'enter parell més proper',
         links: [
@@ -385,6 +412,7 @@ const locale: typeof enUS = {
         },
     },
     EXP: {
+        label: 'EXP',
         description: 'Retorna e elevat a la potència d\'un nombre donat',
         abstract: 'Retorna e elevat a la potència d\'un nombre donat',
         links: [
@@ -398,6 +426,7 @@ const locale: typeof enUS = {
         },
     },
     FACT: {
+        label: 'FACTORIAL',
         description: 'Retorna el factorial d\'un nombre',
         abstract: 'Retorna el factorial d\'un nombre',
         links: [
@@ -411,6 +440,7 @@ const locale: typeof enUS = {
         },
     },
     FACTDOUBLE: {
+        label: 'FACTORIAL.DOBLE',
         description: 'Retorna el doble factorial d\'un nombre',
         abstract: 'Retorna el doble factorial d\'un nombre',
         links: [
@@ -424,6 +454,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR: {
+        label: 'LÍMIT.INFERIOR',
         description: 'Arrodoneix un nombre cap avall, cap a zero',
         abstract: 'Arrodoneix un nombre cap avall, cap a zero',
         links: [
@@ -438,6 +469,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_MATH: {
+        label: 'LÍMIT.INFERIOR.MAT',
         description: 'Arrodoneix un nombre cap avall, a l\'enter més proper o al múltiple més proper de la xifra significativa',
         abstract: 'Arrodoneix un nombre cap avall, a l\'enter més proper o al múltiple més proper de la xifra significativa',
         links: [
@@ -453,6 +485,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_PRECISE: {
+        label: 'LÍMIT.INFERIOR.EXACTE',
         description: 'Arrodoneix un nombre cap avall a l\'enter més proper o al múltiple més proper de la xifra significativa. Independentment del signe del nombre, el nombre s\'arrodoneix cap avall.',
         abstract: 'Arrodoneix un nombre cap avall a l\'enter més proper o al múltiple més proper de la xifra significativa.',
         links: [
@@ -467,6 +500,7 @@ const locale: typeof enUS = {
         },
     },
     GCD: {
+        label: 'MCD',
         description: 'Retorna el màxim comú divisor',
         abstract: 'Retorna el màxim comú divisor',
         links: [
@@ -481,6 +515,7 @@ const locale: typeof enUS = {
         },
     },
     INT: {
+        label: 'NÚMERO.SENCER',
         description: 'Arrodoneix un nombre cap avall a l\'enter més proper',
         abstract: 'Arrodoneix un nombre cap avall a l\'enter més proper',
         links: [
@@ -494,6 +529,7 @@ const locale: typeof enUS = {
         },
     },
     ISO_CEILING: {
+        label: 'LÍMIT.SUPERIOR',
         description: 'Retorna un nombre que s\'arrodoneix cap amunt a l\'enter més proper o al múltiple més proper de la xifra significativa',
         abstract: 'Retorna un nombre que s\'arrodoneix cap amunt a l\'enter més proper o al múltiple més proper de la xifra significativa',
         links: [
@@ -508,6 +544,7 @@ const locale: typeof enUS = {
         },
     },
     LCM: {
+        label: 'MCM',
         description: 'Retorna el mínim comú múltiple',
         abstract: 'Retorna el mínim comú múltiple',
         links: [
@@ -522,6 +559,7 @@ const locale: typeof enUS = {
         },
     },
     LN: {
+        label: 'LN',
         description: 'Retorna el logaritme natural d\'un nombre',
         abstract: 'Retorna el logaritme natural d\'un nombre',
         links: [
@@ -535,6 +573,7 @@ const locale: typeof enUS = {
         },
     },
     LOG: {
+        label: 'LOG',
         description: 'Retorna el logaritme d\'un nombre en una base especificada',
         abstract: 'Retorna el logaritme d\'un nombre en una base especificada',
         links: [
@@ -549,6 +588,7 @@ const locale: typeof enUS = {
         },
     },
     LOG10: {
+        label: 'LOG10',
         description: 'Retorna el logaritme en base 10 d\'un nombre',
         abstract: 'Retorna el logaritme en base 10 d\'un nombre',
         links: [
@@ -562,6 +602,7 @@ const locale: typeof enUS = {
         },
     },
     MDETERM: {
+        label: 'DETERMINANT',
         description: 'Retorna el determinant matricial d\'una matriu',
         abstract: 'Retorna el determinant matricial d\'una matriu',
         links: [
@@ -575,6 +616,7 @@ const locale: typeof enUS = {
         },
     },
     MINVERSE: {
+        label: 'INVERSA',
         description: 'Retorna la matriu inversa d\'una matriu',
         abstract: 'Retorna la matriu inversa d\'una matriu',
         links: [
@@ -588,6 +630,7 @@ const locale: typeof enUS = {
         },
     },
     MMULT: {
+        label: 'MMULT',
         description: 'Retorna el producte matricial de dues matrius',
         abstract: 'Retorna el producte matricial de dues matrius',
         links: [
@@ -602,6 +645,7 @@ const locale: typeof enUS = {
         },
     },
     MOD: {
+        label: 'RESTA',
         description: 'Retorna el residu després que el nombre es divideixi pel divisor. El resultat té el mateix signe que el divisor.',
         abstract: 'Retorna el residu de la divisió',
         links: [
@@ -616,6 +660,7 @@ const locale: typeof enUS = {
         },
     },
     MROUND: {
+        label: 'MROUND',
         description: 'Retorna un nombre arrodonit al múltiple desitjat',
         abstract: 'Retorna un nombre arrodonit al múltiple desitjat',
         links: [
@@ -630,6 +675,7 @@ const locale: typeof enUS = {
         },
     },
     MULTINOMIAL: {
+        label: 'POLINOMI',
         description: 'Retorna el multinomial d\'un conjunt de nombres',
         abstract: 'Retorna el multinomial d\'un conjunt de nombres',
         links: [
@@ -644,6 +690,7 @@ const locale: typeof enUS = {
         },
     },
     MUNIT: {
+        label: 'UNITAT',
         description: 'Retorna la matriu unitària o la dimensió especificada',
         abstract: 'Retorna la matriu unitària o la dimensió especificada',
         links: [
@@ -657,6 +704,7 @@ const locale: typeof enUS = {
         },
     },
     ODD: {
+        label: 'SENAR',
         description: 'Arrodoneix un nombre cap amunt a l\'enter senar més proper',
         abstract: 'Arrodoneix un nombre cap amunt a l\'enter senar més proper',
         links: [
@@ -670,6 +718,7 @@ const locale: typeof enUS = {
         },
     },
     PI: {
+        label: 'PI',
         description: 'Retorna el valor de pi',
         abstract: 'Retorna el valor de pi',
         links: [
@@ -682,6 +731,7 @@ const locale: typeof enUS = {
         },
     },
     POWER: {
+        label: 'POTÈNCIA',
         description: 'Retorna el resultat d\'un nombre elevat a una potència.',
         abstract: 'Retorna el resultat d\'un nombre elevat a una potència',
         links: [
@@ -696,6 +746,7 @@ const locale: typeof enUS = {
         },
     },
     PRODUCT: {
+        label: 'PRODUCTE',
         description: 'Multiplica tots els nombres donats com a arguments i retorna el producte.',
         abstract: 'Multiplica els seus arguments',
         links: [
@@ -710,6 +761,7 @@ const locale: typeof enUS = {
         },
     },
     QUOTIENT: {
+        label: 'QUOCIENT',
         description: 'Retorna la part entera d\'una divisió',
         abstract: 'Retorna la part entera d\'una divisió',
         links: [
@@ -724,6 +776,7 @@ const locale: typeof enUS = {
         },
     },
     RADIANS: {
+        label: 'RADIANS',
         description: 'Converteix graus a radians',
         abstract: 'Converteix graus a radians',
         links: [
@@ -737,6 +790,7 @@ const locale: typeof enUS = {
         },
     },
     RAND: {
+        label: 'ALEATORI',
         description: 'Retorna un nombre aleatori entre 0 i 1',
         abstract: 'Retorna un nombre aleatori entre 0 i 1',
         links: [
@@ -749,6 +803,7 @@ const locale: typeof enUS = {
         },
     },
     RANDARRAY: {
+        label: 'MATRIU.ALEATÒRIA',
         description: 'Retorna una matriu de nombres aleatoris entre 0 i 1. Tanmateix, podeu especificar el nombre de files i columnes a omplir, els valors mínims i màxims, i si es retornen nombres enters o valors decimals.',
         abstract: 'Retorna una matriu de nombres aleatoris entre 0 i 1.',
         links: [
@@ -766,6 +821,7 @@ const locale: typeof enUS = {
         },
     },
     RANDBETWEEN: {
+        label: 'ALEATORI.ENTRE',
         description: 'Retorna un nombre aleatori entre els nombres que especifiqueu',
         abstract: 'Retorna un nombre aleatori entre els nombres que especifiqueu',
         links: [
@@ -780,6 +836,7 @@ const locale: typeof enUS = {
         },
     },
     ROMAN: {
+        label: 'NÚMERO.ROMÀ',
         description: 'Converteix un nombre aràbic a romà, com a text',
         abstract: 'Converteix un nombre aràbic a romà, com a text',
         links: [
@@ -794,6 +851,7 @@ const locale: typeof enUS = {
         },
     },
     ROUND: {
+        label: 'ARRODONEIX',
         description: 'Arrodoneix un nombre a un nombre especificat de dígits',
         abstract: 'Arrodoneix un nombre a un nombre especificat de dígits',
         links: [
@@ -808,6 +866,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDBANK: {
+        label: 'ARRODONEIX.BANQUER',
         description: 'Arrodoneix un nombre amb arrodoniment bancari',
         abstract: 'Arrodoneix un nombre amb arrodoniment bancari',
         links: [
@@ -822,6 +881,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDDOWN: {
+        label: 'ARRODONEIX.AVALL',
         description: 'Arrodoneix un nombre cap avall, cap a zero',
         abstract: 'Arrodoneix un nombre cap avall, cap a zero',
         links: [
@@ -836,6 +896,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDUP: {
+        label: 'ARRODONEIX.AMUNT',
         description: 'Arrodoneix un nombre cap amunt, en direcció contrària a zero',
         abstract: 'Arrodoneix un nombre cap amunt, en direcció contrària a zero',
         links: [
@@ -850,6 +911,7 @@ const locale: typeof enUS = {
         },
     },
     SEC: {
+        label: 'SECANT',
         description: 'Retorna la secant d\'un angle',
         abstract: 'Retorna la secant d\'un angle',
         links: [
@@ -863,6 +925,7 @@ const locale: typeof enUS = {
         },
     },
     SECH: {
+        label: 'SECANT.H',
         description: 'Retorna la secant hiperbòlica d\'un angle',
         abstract: 'Retorna la secant hiperbòlica d\'un angle',
         links: [
@@ -876,6 +939,7 @@ const locale: typeof enUS = {
         },
     },
     SERIESSUM: {
+        label: 'SUMA.SÈRIE',
         description: 'Retorna la suma d\'una sèrie de potències basada en la fórmula',
         abstract: 'Retorna la suma d\'una sèrie de potències basada en la fórmula',
         links: [
@@ -892,6 +956,7 @@ const locale: typeof enUS = {
         },
     },
     SEQUENCE: {
+        label: 'SEQÜÈNCIA',
         description: 'Genera una llista de nombres seqüencials en una matriu, com 1, 2, 3, 4',
         abstract: 'Genera una llista de nombres seqüencials en una matriu, com 1, 2, 3, 4',
         links: [
@@ -908,6 +973,7 @@ const locale: typeof enUS = {
         },
     },
     SIGN: {
+        label: 'SIGNE',
         description: 'Retorna el signe d\'un nombre',
         abstract: 'Retorna el signe d\'un nombre',
         links: [
@@ -921,6 +987,7 @@ const locale: typeof enUS = {
         },
     },
     SIN: {
+        label: 'SIN',
         description: 'Retorna el sinus de l\'angle donat',
         abstract: 'Retorna el sinus de l\'angle donat',
         links: [
@@ -934,6 +1001,7 @@ const locale: typeof enUS = {
         },
     },
     SINH: {
+        label: 'SINH',
         description: 'Retorna el sinus hiperbòlic d\'un nombre',
         abstract: 'Retorna el sinus hiperbòlic d\'un nombre',
         links: [
@@ -947,6 +1015,7 @@ const locale: typeof enUS = {
         },
     },
     SQRT: {
+        label: 'ARREL.QUADRADA',
         description: 'Retorna una arrel quadrada positiva',
         abstract: 'Retorna una arrel quadrada positiva',
         links: [
@@ -960,6 +1029,7 @@ const locale: typeof enUS = {
         },
     },
     SQRTPI: {
+        label: 'ARREL.QUADRADA.PI',
         description: 'Retorna l\'arrel quadrada de (nombre * pi)',
         abstract: 'Retorna l\'arrel quadrada de (nombre * pi)',
         links: [
@@ -973,6 +1043,7 @@ const locale: typeof enUS = {
         },
     },
     SUBTOTAL: {
+        label: 'SUBTOTAL',
         description: 'Retorna un subtotal en una llista o base de dades.',
         abstract: 'Retorna un subtotal en una llista o base de dades',
         links: [
@@ -988,6 +1059,7 @@ const locale: typeof enUS = {
         },
     },
     SUM: {
+        label: 'SUMA',
         description: 'Podeu sumar valors individuals, referències de cel·la o rangs, o una barreja de tots tres.',
         abstract: 'Suma els seus arguments',
         links: [
@@ -1008,6 +1080,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIF: {
+        label: 'SUMA.SI',
         description: 'Suma els valors en un rang que compleixen els criteris que especifiqueu.',
         abstract: 'Suma les cel·les especificades per un criteri donat',
         links: [
@@ -1032,6 +1105,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIFS: {
+        label: 'SUMA.SI.CONJUNT',
         description: 'Suma tots els seus arguments que compleixen múltiples criteris.',
         abstract: 'Suma tots els seus arguments que compleixen múltiples criteris.',
         links: [
@@ -1049,6 +1123,7 @@ const locale: typeof enUS = {
         },
     },
     SUMPRODUCT: {
+        label: 'PRODUCTE',
         description: 'Retorna la suma dels productes dels components corresponents de la matriu',
         abstract: 'Retorna la suma dels productes dels components corresponents de la matriu',
         links: [
@@ -1063,6 +1138,7 @@ const locale: typeof enUS = {
         },
     },
     SUMSQ: {
+        label: 'SUMA.QUADRATS',
         description: 'Retorna la suma dels quadrats dels arguments',
         abstract: 'Retorna la suma dels quadrats dels arguments',
         links: [
@@ -1077,6 +1153,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2MY2: {
+        label: 'SUMA.X2MENOSY2',
         description: 'Retorna la suma de la diferència de quadrats dels valors corresponents en dues matrius',
         abstract: 'Retorna la suma de la diferència de quadrats dels valors corresponents en dues matrius',
         links: [
@@ -1091,6 +1168,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2PY2: {
+        label: 'SUMA.X2MASY2',
         description: 'Retorna la suma de la suma de quadrats dels valors corresponents en dues matrius',
         abstract: 'Retorna la suma de la suma de quadrats dels valors corresponents en dues matrius',
         links: [
@@ -1105,6 +1183,7 @@ const locale: typeof enUS = {
         },
     },
     SUMXMY2: {
+        label: 'SUMA.XMENOSY2',
         description: 'Retorna la suma dels quadrats de les diferències dels valors corresponents en dues matrius',
         abstract: 'Retorna la suma dels quadrats de les diferències dels valors corresponents en dues matrius',
         links: [
@@ -1119,6 +1198,7 @@ const locale: typeof enUS = {
         },
     },
     TAN: {
+        label: 'TAN',
         description: 'Retorna la tangent d\'un nombre.',
         abstract: 'Retorna la tangent d\'un nombre',
         links: [
@@ -1132,6 +1212,7 @@ const locale: typeof enUS = {
         },
     },
     TANH: {
+        label: 'TANH',
         description: 'Retorna la tangent hiperbòlica d\'un nombre.',
         abstract: 'Retorna la tangent hiperbòlica d\'un nombre',
         links: [
@@ -1145,6 +1226,7 @@ const locale: typeof enUS = {
         },
     },
     TRUNC: {
+        label: 'TRUNCA',
         description: 'Trunca un nombre a un enter',
         abstract: 'Trunca un nombre a un enter',
         links: [

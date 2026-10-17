@@ -35,6 +35,10 @@ const locale: typeof enUS = {
 
         shortcut: {
             'quick-sum': '快速求和',
+            'toggle-show-formulas': '顯示公式',
+        },
+        showFormulas: {
+            tooltip: '顯示公式',
         },
 
         insert: {

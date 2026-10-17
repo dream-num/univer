@@ -14,18 +14,27 @@
  * limitations under the License.
  */
 
+import type { IDrawingParam } from '@univerjs/core';
+import type { IImageData } from '@univerjs/drawing';
 import type { DocumentDrawingPublicationProgress } from '../doc-drawing-transform-update.controller';
 import {
     AlignTypeH,
     AlignTypeV,
     BooleanNumber,
+    DrawingTypeEnum,
+    ICommandService,
+    JSONX,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
 } from '@univerjs/core';
-import { DocumentSkeletonPageType, Liquid, setDocsTableRenderViewportProvider } from '@univerjs/engine-render';
+import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { EditorService, IEditorService } from '@univerjs/docs-ui';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
+import { Documents, DocumentSkeletonPageType, Liquid, Rect, setDocsTableRenderViewportProvider } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createDocDrawingTestBed } from '../../../__tests__/create-doc-drawing-test-bed';
 import { getDocsTableCellAnchorContext } from '../../doc-drawing-transformer-update.controller';
 import { doesDocMutationAffectDrawingPresentation, getDocMutationAffectedDrawingIds } from '../doc-drawing-mutation';
 import {
@@ -45,6 +54,114 @@ import {
 describe('DocDrawingTransformUpdateController', () => {
     afterEach(() => {
         setDocsTableRenderViewportProvider(null);
+    });
+
+    it('keeps published header images while pages are appended and removes only surplus instances', () => {
+        const { univer, render } = createDocDrawingTestBed('header-publication');
+        try {
+            const injector = univer.__getInjector();
+            injector.add([IEditorService, { useClass: EditorService }]);
+            render.mainComponent = new Documents('header-document');
+            render.addRenderDependencies([[DocDrawingTransformUpdateController]]);
+            const controller = render.with(DocDrawingTransformUpdateController) as unknown as {
+                _handleMultiDrawingsTransform: (drawings: IDrawingParam[]) => void;
+            };
+            const manager = injector.get(IDrawingManagerService);
+            const drawing = manager.getDrawingByParam({
+                unitId: render.unitId,
+                subUnitId: render.unitId,
+                drawingId: 'a',
+            })!;
+            Object.assign(drawing, {
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                isMultiTransform: BooleanNumber.TRUE,
+                hidden: false,
+                selectable: true,
+                behindText: false,
+                transforms: [{ ...drawing.transform }],
+            });
+            const first = new Rect(getDrawingShapeKeyByDrawingSearch(drawing, 0), drawing.transform ?? undefined);
+            render.scene.addObject(first);
+            const remove = vi.spyOn(manager, 'removeNotification');
+            const refresh = vi.spyOn(manager, 'refreshTransform');
+            const update = { ...drawing, transforms: drawing.transforms!.map((transform) => ({ ...transform })) };
+
+            controller._handleMultiDrawingsTransform([update]);
+            expect(remove).not.toHaveBeenCalled();
+            expect(refresh).not.toHaveBeenCalled();
+
+            update.transforms = [...update.transforms, { ...drawing.transform, top: 500 }];
+            controller._handleMultiDrawingsTransform([update]);
+            expect(remove).not.toHaveBeenCalled();
+            expect(refresh).toHaveBeenCalledTimes(1);
+            expect(render.scene.getObjectIncludeInGroup(first.oKey)).toBe(first);
+
+            const second = new Rect(getDrawingShapeKeyByDrawingSearch(drawing, 1), update.transforms[1]);
+            render.scene.addObject(second);
+            const transformer = render.scene.getTransformerByCreate();
+            transformer.setSelectedControl(first);
+            transformer.setSelectedControl(second);
+            controller._handleMultiDrawingsTransform([{ ...update, transforms: update.transforms.slice(0, 1) }]);
+            expect(render.scene.getObjectIncludeInGroup(first.oKey)).toBe(first);
+            expect(render.scene.getObjectIncludeInGroup(second.oKey)).toBeFalsy();
+            expect([...transformer.getSelectedObjectMap().values()]).toEqual([first]);
+            expect(remove).not.toHaveBeenCalled();
+
+            controller._handleMultiDrawingsTransform([]);
+            expect(remove).toHaveBeenCalledWith([drawing]);
+        } finally {
+            univer.dispose();
+            vi.restoreAllMocks();
+        }
+    });
+
+    it('publishes changed crop metadata for repeated images even when their layout is unchanged', () => {
+        const { univer, model, render } = createDocDrawingTestBed('header-crop-edit');
+        try {
+            const injector = univer.__getInjector();
+            const commands = injector.get(ICommandService);
+            const manager = injector.get(IDrawingManagerService);
+            const drawing = model.getSnapshot().drawings!.a;
+            drawing.isMultiTransform = BooleanNumber.TRUE;
+            drawing.transforms = [drawing.transform!];
+            Object.assign(manager.getDrawingByParam(drawing)!, drawing);
+            render.with(DocSkeletonManagerService).recalculate();
+            injector.add([IEditorService, { useClass: EditorService }]);
+            render.mainComponent = new Documents('header-crop-document');
+            render.addRenderDependencies([[DocDrawingTransformUpdateController]]);
+            render.with(DocDrawingTransformUpdateController);
+            const publishedCrops: unknown[] = [];
+            const subscription = manager.add$.subscribe((drawings) => {
+                for (const published of drawings) {
+                    if (published.drawingId === drawing.drawingId) {
+                        publishedCrops.push((manager.getDrawingByParam(published) as IImageData | undefined)?.srcRect);
+                    }
+                }
+            });
+            try {
+                const crop = { left: 0.2, top: 0.1, right: 0, bottom: 0 };
+                const jsonX = JSONX.getInstance();
+                expect(commands.syncExecuteCommand(RichTextEditingMutation.id, {
+                    unitId: render.unitId,
+                    actions: jsonX.insertOp(['drawings', drawing.drawingId, 'srcRect'], crop),
+                    textRanges: null,
+                })).toBeTruthy();
+                expect(model.getSnapshot().drawings!.a).toMatchObject({ srcRect: crop });
+                expect(publishedCrops).toContainEqual(crop);
+
+                expect(commands.syncExecuteCommand(RichTextEditingMutation.id, {
+                    unitId: render.unitId,
+                    actions: jsonX.replaceOp(['drawings', drawing.drawingId, 'srcRect'], crop, null),
+                    textRanges: null,
+                })).toBeTruthy();
+                expect(publishedCrops[publishedCrops.length - 1]).toBeNull();
+            } finally {
+                subscription.unsubscribe();
+            }
+        } finally {
+            univer.dispose();
+            vi.restoreAllMocks();
+        }
     });
 
     it('refreshes drawings when scrolling materializes pages without a layout progress event', () => {
@@ -389,6 +506,7 @@ describe('DocDrawingTransformUpdateController', () => {
         const transformer = {
             getSelectedObjectMap: vi.fn(() => new Map([['multi-drawing', selectedShape]])),
             setSelectedControl: vi.fn(),
+            refreshControls: vi.fn(),
         };
         const context = {
             unitId: 'unit-1',
@@ -403,13 +521,15 @@ describe('DocDrawingTransformUpdateController', () => {
                 pageMarginTop: 20,
             },
             scene: {
-                getTransformerByCreate: vi.fn(() => transformer),
+                getTransformer: vi.fn(() => transformer),
                 getObject: vi.fn((key) => key === 'multi-drawing' ? selectedShape : null),
             },
         };
         const drawingManagerService = {
             refreshTransform: vi.fn(),
-            getDrawingByParam: vi.fn((drawing) => ({ ...drawing })),
+            getDrawingByParam: vi.fn((drawing) => drawing.drawingId === 'multi-drawing'
+                ? { drawingId: drawing.drawingId, isMultiTransform: BooleanNumber.TRUE }
+                : undefined),
             getDrawingData: vi.fn(() => ({
                 'multi-drawing': { drawingId: 'multi-drawing', isMultiTransform: BooleanNumber.TRUE },
                 'stale-multi': { drawingId: 'stale-multi', isMultiTransform: BooleanNumber.TRUE },
@@ -683,10 +803,9 @@ describe('DocDrawingTransformUpdateController', () => {
             }),
         ]);
         expect(drawingManagerService.removeNotification).toHaveBeenCalledWith([
-            { drawingId: 'multi-drawing', isMultiTransform: BooleanNumber.TRUE },
-            { drawingId: 'stale-multi', isMultiTransform: BooleanNumber.TRUE },
+            { drawingId: 'stale-multi', isMultiTransform: BooleanNumber.TRUE, hidden: true },
         ]);
-        expect(drawingManagerService.addNotification).toHaveBeenCalledWith([
+        expect(drawingManagerService.refreshTransform).toHaveBeenLastCalledWith([
             expect.objectContaining({
                 drawingId: 'multi-drawing',
                 isMultiTransform: BooleanNumber.TRUE,
@@ -696,7 +815,7 @@ describe('DocDrawingTransformUpdateController', () => {
                 ],
             }),
         ]);
-        expect(transformer.setSelectedControl).toHaveBeenCalledWith(selectedShape);
+        expect(transformer.setSelectedControl).not.toHaveBeenCalled();
     });
 
     it('projects a document page clip bound in scene coordinates before page padding is applied', () => {
@@ -771,16 +890,16 @@ describe('DocDrawingTransformUpdateController', () => {
         };
         controller._context = {
             unitId: 'doc',
-            scene: { getTransformerByCreate: () => ({ getSelectedObjectMap: () => new Map() }) },
+            scene: { getTransformer: () => undefined },
         };
         controller._drawingManagerService = {
             getDrawingByParam: () => drawing,
             getDrawingData: () => ({ logo: drawing }),
             removeNotification: vi.fn(),
-            addNotification: vi.fn(() => expect(drawing).toMatchObject(update)),
+            refreshTransform: vi.fn(() => expect(drawing).toMatchObject(update)),
         };
         controller._handleMultiDrawingsTransform([update]);
-        expect(controller._drawingManagerService.addNotification).toHaveBeenCalledWith([update]);
+        expect(controller._drawingManagerService.refreshTransform).toHaveBeenCalledWith([update]);
         expect(drawing.source).toBe('image-source');
     });
 

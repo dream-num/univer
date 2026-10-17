@@ -89,8 +89,10 @@ export class FontAndBaseLine extends docExtension {
             return;
         }
 
-        if (ctx.fontKerning != null) {
-            ctx.fontKerning = fontStyle?.fontKerning ?? 'auto';
+        const currentKerning = ctx.fontKerning;
+        const fontKerning = fontStyle?.fontKerning ?? 'auto';
+        if (currentKerning != null && currentKerning !== fontKerning) {
+            ctx.fontKerning = fontKerning;
         }
 
         if (!textStyle) {

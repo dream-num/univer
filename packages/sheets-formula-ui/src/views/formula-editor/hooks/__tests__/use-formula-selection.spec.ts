@@ -200,4 +200,17 @@ describe('use-formula-selection regression scenarios', () => {
         expect(shouldAddFormulaReference('=SUM', 4)).toBe(false);
         expect(shouldAddFormulaReference('=A1', 3)).toBe(false);
     });
+
+    // https://github.com/dream-num/univer/issues/7676
+    it('arms reference picking after a line break following a delimiter', () => {
+        expect(shouldAddFormulaReference('=IF(\r\n', 6)).toBe(true);
+        expect(shouldAddFormulaReference('=IF(\n', 5)).toBe(true);
+        expect(shouldAddFormulaReference('=IF(\r\n  ', 8)).toBe(true);
+        expect(shouldAddFormulaReference('=SUM(A1,\r\n', 10)).toBe(true);
+    });
+
+    // https://github.com/dream-num/univer/issues/7676
+    it('does not arm reference picking after a line break following a completed formula', () => {
+        expect(shouldAddFormulaReference('=SUM(A1)\r\n', 10)).toBe(false);
+    });
 });

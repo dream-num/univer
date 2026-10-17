@@ -62,7 +62,7 @@ export class Average extends BaseFunction {
         }
 
         const array = variant as ArrayValueObject;
-        if (array.usesInvertedIndexCache()) {
+        if (array.usesInvertedIndexCache() || !array.usesLegacyImplicitForAggregate()) {
             return variant;
         }
 

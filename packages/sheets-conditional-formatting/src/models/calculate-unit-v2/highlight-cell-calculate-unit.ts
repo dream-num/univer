@@ -150,19 +150,21 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     const subRuleConfig = ruleConfig as ITimePeriodHighlightCell;
                     switch (subRuleConfig.operator) {
                         case CFTimePeriodOperator.last7Days: {
+                            const today = dateKit().startOf('day');
                             return {
                                 value: {
-                                    start: dateKit().subtract(7, 'day').valueOf(),
-                                    end: dateKit().valueOf(),
+                                    start: today.subtract(6, 'day').valueOf(),
+                                    end: today.endOf('day').valueOf(),
                                 },
                                 type: ruleConfig.subType,
                             };
                         }
                         case CFTimePeriodOperator.lastMonth: {
+                            const month = dateKit().startOf('month').subtract(1, 'month');
                             return {
                                 value: {
-                                    start: dateKit().startOf('month').subtract(1, 'month').valueOf(),
-                                    end: dateKit().endOf('month').subtract(1, 'month').valueOf(),
+                                    start: month.valueOf(),
+                                    end: month.endOf('month').valueOf(),
                                 },
                                 type: ruleConfig.subType,
                             };
@@ -177,10 +179,11 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                             };
                         }
                         case CFTimePeriodOperator.nextMonth: {
+                            const month = dateKit().startOf('month').add(1, 'month');
                             return {
                                 value: {
-                                    start: dateKit().startOf('month').add(1, 'month').valueOf(),
-                                    end: dateKit().endOf('month').add(1, 'month').valueOf(),
+                                    start: month.valueOf(),
+                                    end: month.endOf('month').valueOf(),
                                 },
                                 type: ruleConfig.subType,
                             };

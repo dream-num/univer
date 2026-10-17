@@ -44,6 +44,15 @@ describe('date-kit', () => {
         expect(dateKit('2024-01-01').week()).toBeGreaterThanOrEqual(1);
     });
 
+    it.each(['2026-03-08', '2026-11-01'])('counts calendar weeks across offset changes after %s', (start) => {
+        const sunday = dateKit(start);
+        const nextSunday = sunday.add(1, 'week');
+
+        expect(nextSunday.week()).toBe(sunday.week() + 1);
+        expect(sunday.week(nextSunday.week()).format('YYYY-MM-DD')).toBe(nextSunday.format('YYYY-MM-DD'));
+        expect(dateKit.utc(nextSunday.format('YYYY-MM-DD')).week()).toBe(nextSunday.week());
+    });
+
     it('should support localized and advanced format tokens', () => {
         const value = dateKit('2024-02-01 15:04:05');
         expect(value.format('L')).toBe('02/01/2024');

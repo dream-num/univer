@@ -26,6 +26,7 @@ import type { IDrawingGroupUpdateParam, IDrawingOrderMapParam } from '@univerjs/
 import type { BaseObject, Image, Scene } from '@univerjs/engine-render';
 import type { ISetDrawingAlignOperationParams } from '../commands/operations/drawing-align.operation';
 import {
+    BooleanNumber,
     checkIfMove,
     Disposable,
     ICommandService,
@@ -799,35 +800,43 @@ export class DrawingUpdateController extends Disposable {
                         return true;
                     }
 
-                    const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
-                    const drawingShape = scene.getObjectIncludeInGroup(drawingShapeKey);
                     const drawingParamWithRefreshMetadata = mergeRefreshMetadata(drawingParam, param);
-
-                    if (drawingShape == null) {
-                        if (drawingParamWithRefreshMetadata.hidden === true) {
-                            return true;
+                    const isMultiTransform = drawingParam.isMultiTransform === BooleanNumber.TRUE;
+                    const transforms = isMultiTransform ? drawingParam.transforms ?? [] : [transform];
+                    let hasMissingShape = false;
+                    transforms.forEach((instanceTransform, index) => {
+                        const drawingShapeKey = getDrawingShapeKeyByDrawingSearch(
+                            { unitId, subUnitId, drawingId },
+                            isMultiTransform ? index : undefined
+                        );
+                        const drawingShape = scene.getObjectIncludeInGroup(drawingShapeKey);
+                        if (drawingShape == null) {
+                            hasMissingShape = true;
+                            return;
                         }
+
+                        const {
+                            left = 0,
+                            top = 0,
+                            width = 0,
+                            height = 0,
+                            angle = 0,
+                            flipX = false,
+                            flipY = false,
+                            skewX = 0,
+                            skewY = 0,
+                        } = instanceTransform;
+
+                        drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+                        (drawingShape as Image).setClipBounds?.((instanceTransform as IDrawingTransformStateWithClipBounds).clipBounds);
+                        syncDrawingHiddenState(drawingShape, drawingParamWithRefreshMetadata);
+                        syncDrawingSelectableState(drawingShape, drawingParamWithRefreshMetadata, scene, this._drawingManagerService);
+                        ensureDrawingRenderLayer(scene, drawingShape, drawingParamWithRefreshMetadata);
+                    });
+                    // Repeated drawings only have indexed shapes; looking up the base key would reload them forever.
+                    if (hasMissingShape && drawingParamWithRefreshMetadata.hidden !== true) {
                         this._drawingManagerService.addNotification([{ unitId, subUnitId, drawingId }]);
-                        return true;
                     }
-
-                    const {
-                        left = 0,
-                        top = 0,
-                        width = 0,
-                        height = 0,
-                        angle = 0,
-                        flipX = false,
-                        flipY = false,
-                        skewX = 0,
-                        skewY = 0,
-                    } = transform;
-
-                    drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
-                    (drawingShape as Image).setClipBounds?.((transform as IDrawingTransformStateWithClipBounds).clipBounds);
-                    syncDrawingHiddenState(drawingShape as BaseObject, drawingParamWithRefreshMetadata);
-                    syncDrawingSelectableState(drawingShape as BaseObject, drawingParamWithRefreshMetadata, scene, this._drawingManagerService);
-                    ensureDrawingRenderLayer(scene, drawingShape as BaseObject, drawingParamWithRefreshMetadata);
                 });
             })
         );

@@ -17,6 +17,7 @@
 import type {
     DocumentDataModel,
     ICommandInfo,
+    IDisposable,
     IDocDrawingBase,
     IDrawingParam,
     IExecutionOptions,
@@ -34,7 +35,6 @@ import type {
     IDocumentSkeletonPage,
     IDocumentSkeletonRow,
     IDocumentSkeletonTable,
-    Image,
     IRenderContext,
     IRenderModule,
 } from '@univerjs/engine-render';
@@ -53,11 +53,12 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
+    toDisposable,
 } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { collectDocDrawings } from '@univerjs/docs-drawing';
 import { IEditorService, SetDocZoomRatioOperation } from '@univerjs/docs-ui';
-import { IDrawingManagerService } from '@univerjs/drawing';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import {
     Documents,
     DocumentSkeletonPageType,
@@ -66,7 +67,7 @@ import {
     Liquid,
     TRANSFORM_CHANGE_OBSERVABLE_TYPE,
 } from '@univerjs/engine-render';
-import { animationFrames, debounceTime, EMPTY, filter, map, merge, startWith, switchMap, take } from 'rxjs';
+import { animationFrames, debounceTime, EMPTY, filter, map, merge, startWith, Subscription, switchMap, take } from 'rxjs';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 import { getDocMutationAffectedDrawingIds } from './doc-drawing-mutation';
 
@@ -115,7 +116,10 @@ interface IDrawingTransformStateWithClipBounds extends ITransformState {
     clipBounds?: IDrawingClipBounds;
 }
 
-type DrawingRefreshParam = Partial<IDrawingParam & IDrawingParamsWithBehindText>;
+type DrawingRefreshParam = Partial<IDrawingParam> & {
+    behindText?: boolean;
+    customBlockRenderViewport?: IDrawingParamsWithBehindText['customBlockRenderViewport'];
+};
 
 function isSameTransformValue(left: unknown, right: unknown): boolean {
     return left === right || JSON.stringify(left) === JSON.stringify(right);
@@ -545,6 +549,8 @@ function hasNewPublishedPageDrawings(
 export class DocDrawingTransformUpdateController extends Disposable implements IRenderModule {
     private _liquid = new Liquid();
     private _changesetDrawingRefreshScheduled = false;
+    private _pendingMultiDrawingSelection = new Set<string>();
+    private _pendingMultiDrawingSelectionSubscription?: IDisposable;
     private readonly _publicationTracker = new DocDrawingPublicationTracker();
 
     constructor(
@@ -562,6 +568,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         this._initialize();
 
         this._commandExecutedListener();
+        this.disposeWithMe(toDisposable(() => this._clearPendingMultiDrawingSelection()));
     }
 
     private _initialize() {
@@ -655,7 +662,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                         return;
                     }
 
-                    this._refreshCurrentDrawing(drawingIds ?? undefined);
+                    this._refreshCurrentDrawing(drawingIds ?? undefined, command.id === RichTextEditingMutation.id);
                 }
             })
         );
@@ -674,12 +681,12 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                     return;
                 }
 
-                this._refreshCurrentDrawing();
+                this._refreshCurrentDrawing(undefined, true);
             });
         });
     }
 
-    private _refreshCurrentDrawing(drawingIds?: ReadonlySet<string>): void {
+    private _refreshCurrentDrawing(drawingIds?: ReadonlySet<string>, forceRecreateMultiDrawings = false): void {
         const skeleton = this._docSkeletonManagerService.getSkeleton();
         if (skeleton == null) {
             return;
@@ -692,7 +699,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             return;
         }
 
-        this._refreshDrawing(skeleton, drawingIds);
+        this._refreshDrawing(skeleton, drawingIds, forceRecreateMultiDrawings);
     }
 
     private _initTransformRefresh() {
@@ -716,7 +723,11 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         );
     }
 
-    private _refreshDrawing(skeleton: DocumentSkeleton, drawingIds?: ReadonlySet<string>) {
+    private _refreshDrawing(
+        skeleton: DocumentSkeleton,
+        drawingIds?: ReadonlySet<string>,
+        forceRecreateMultiDrawings = false
+    ) {
         const skeletonData = skeleton?.getSkeletonData();
         const { mainComponent, unitId } = this._context;
         const documentComponent = mainComponent as Documents;
@@ -779,11 +790,9 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             updateDrawingMap[drawingId]?.isMultiTransform === BooleanNumber.TRUE ||
             this._drawingManagerService.getDrawingByParam({ unitId, subUnitId: unitId, drawingId })?.isMultiTransform === BooleanNumber.TRUE);
         if (affectedDrawingIds == null || targetedMultiDrawing) {
-            // Multi-transform drawings are recreated as a group so repeated
-            // header/footer occurrences stay consistent.
             const allMultiDrawings = Object.values(updateDrawingMap)
                 .filter((drawing) => drawing.isMultiTransform);
-            this._handleMultiDrawingsTransform(allMultiDrawings as unknown as IDrawingParam[]);
+            this._handleMultiDrawingsTransform(allMultiDrawings as unknown as IDrawingParam[], forceRecreateMultiDrawings);
         }
     }
 
@@ -954,41 +963,127 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             } as IDrawingParamsWithBehindText));
     }
 
-    private _handleMultiDrawingsTransform(multiDrawings: IDrawingParam[]) {
+    private _handleMultiDrawingsTransform(multiDrawings: IDrawingParam[], forceRecreate = false) {
         const { scene, unitId } = this._context;
-        const transformer = scene.getTransformerByCreate();
+        const changedDrawings = multiDrawings.filter((drawing) => forceRecreate || shouldRefreshDocDrawingTransform(
+            this._drawingManagerService.getDrawingByParam(drawing) ?? undefined,
+            drawing
+        ));
+        const publishedDrawingIds = new Set(multiDrawings.map((drawing) => drawing.drawingId));
+        const removedDrawings = Object.values(this._drawingManagerService.getDrawingData(unitId, unitId))
+            .filter((drawing) => drawing.isMultiTransform === BooleanNumber.TRUE &&
+                (forceRecreate || (!publishedDrawingIds.has(drawing.drawingId) && drawing.hidden !== true)));
+        if (changedDrawings.length === 0 && removedDrawings.length === 0) {
+            return;
+        }
 
-        // Step 1: Update data in drawingManagerService.
-        multiDrawings.forEach((updateParam) => {
+        const transformer = scene.getTransformer();
+        const selectedObjectKeys = forceRecreate
+            ? [...new Set([...this._pendingMultiDrawingSelection, ...(transformer?.getSelectedObjectMap().keys() ?? [])])]
+            : [];
+        if (forceRecreate) {
+            this._clearPendingMultiDrawingSelection();
+        }
+        changedDrawings.forEach((updateParam) => {
             const param = this._drawingManagerService.getDrawingByParam(updateParam);
             if (param == null) {
                 return;
             }
 
+            // Keep published instances alive while later pages are added or rematerialized.
+            for (let index = updateParam.transforms?.length ?? 0; index < (param.transforms?.length ?? 0); index++) {
+                const key = getDrawingShapeKeyByDrawingSearch(param, index);
+                transformer?.clearControlByIds([key]);
+                scene.getObjectIncludeInGroup(key)?.dispose();
+            }
             // A segment drawing may have been hidden before its first layout publication.
             Object.assign(param, updateParam);
         });
 
-        // Step 2: remove all drawing shapes.
-        const selectedObjectMap = transformer.getSelectedObjectMap();
-        const selectedObjectKeys = [...selectedObjectMap.keys()];
-
-        const allMultiDrawings = Object.values(this._drawingManagerService.getDrawingData(unitId, unitId)).filter((drawing) => drawing.isMultiTransform === BooleanNumber.TRUE);
-
-        this._drawingManagerService.removeNotification(allMultiDrawings);
-        // Step 3: create new drawing shapes.
-        if (multiDrawings.length > 0) {
-            this._drawingManagerService.addNotification(multiDrawings);
-        }
-
-        // Step 4: reSelect previous shapes and focus previous drawings.
-        for (const key of selectedObjectKeys) {
-            const drawingShape = scene.getObject(key) as Image;
-
-            if (drawingShape) {
-                transformer.setSelectedControl(drawingShape);
+        if (removedDrawings.length > 0) {
+            this._drawingManagerService.removeNotification(removedDrawings);
+            for (const drawing of removedDrawings) {
+                if (!publishedDrawingIds.has(drawing.drawingId)) {
+                    drawing.hidden = true;
+                }
             }
         }
+        if (changedDrawings.length > 0) {
+            if (forceRecreate) {
+                // Appearance edits must reach renderers that only apply metadata when creating instances.
+                this._drawingManagerService.addNotification(changedDrawings);
+            } else {
+                this._drawingManagerService.refreshTransform(changedDrawings);
+            }
+        }
+        if (forceRecreate) {
+            this._restoreMultiDrawingSelection(selectedObjectKeys);
+        } else if (this._pendingMultiDrawingSelection.size > 0) {
+            this._restoreMultiDrawingSelection([...this._pendingMultiDrawingSelection]);
+        } else {
+            transformer?.refreshControls();
+        }
+    }
+
+    private _clearPendingMultiDrawingSelection(): void {
+        this._pendingMultiDrawingSelectionSubscription?.dispose();
+        this._pendingMultiDrawingSelectionSubscription = undefined;
+        this._pendingMultiDrawingSelection.clear();
+    }
+
+    private _restoreMultiDrawingSelection(selectedKeys: readonly string[]): void {
+        this._clearPendingMultiDrawingSelection();
+        const { scene, unitId } = this._context;
+        const transformer = scene.getTransformer();
+        if (!transformer || this._disposed) {
+            return;
+        }
+
+        const publishedKeys = new Set(Object.values(this._drawingManagerService.getDrawingData(unitId, unitId))
+            .filter((drawing) => drawing.isMultiTransform === BooleanNumber.TRUE && drawing.hidden !== true && drawing.selectable !== false)
+            .flatMap((drawing) => (drawing.transforms ?? []).map((_, index) => getDrawingShapeKeyByDrawingSearch(drawing, index))));
+        for (const key of selectedKeys) {
+            const drawingShape = scene.getObjectIncludeInGroup(key);
+            if (drawingShape?.visible && drawingShape.evented) {
+                transformer.setSelectedControl(drawingShape);
+            } else if (!drawingShape && publishedKeys.has(key)) {
+                this._pendingMultiDrawingSelection.add(key);
+            }
+        }
+        transformer.refreshControls();
+        if (this._pendingMultiDrawingSelection.size === 0) {
+            return;
+        }
+
+        // Image additions are buffered and may load asynchronously. Restore only once their real instances exist.
+        const subscriptions = new Subscription();
+        this._pendingMultiDrawingSelectionSubscription = this.disposeWithMe(subscriptions);
+        const allowedSelectionKeys = new Set([...selectedKeys, ...transformer.getSelectedObjectMap().keys()]);
+        const pendingDrawingIds = this._includeGroupChildren(new Set([...this._pendingMultiDrawingSelection].flatMap((key) => {
+            const drawing = this._drawingManagerService.getDrawingOKey(key);
+            return drawing ? [drawing.drawingId] : [];
+        })));
+        subscriptions.add(this._drawingManagerService.refreshTransform$.subscribe((drawings) => {
+            if (drawings.some((drawing) => drawing.unitId === unitId && pendingDrawingIds?.has(drawing.drawingId))) {
+                this._restoreMultiDrawingSelection([...this._pendingMultiDrawingSelection]);
+            }
+        }));
+        subscriptions.add(this._drawingManagerService.remove$.subscribe((drawings) => {
+            const removedKeys = drawings.map((drawing) => getDrawingShapeKeyByDrawingSearch(drawing));
+            const remainingKeys = [...this._pendingMultiDrawingSelection]
+                .filter((key) => !removedKeys.some((removedKey) => key === removedKey || key.startsWith(`${removedKey}#-#`)));
+            if (remainingKeys.length !== this._pendingMultiDrawingSelection.size) {
+                this._restoreMultiDrawingSelection(remainingKeys);
+            }
+        }));
+        subscriptions.add(merge(transformer.clearControl$, transformer.changeStart$).subscribe(() => {
+            this._clearPendingMultiDrawingSelection();
+        }));
+        subscriptions.add(transformer.createControl$.subscribe(() => {
+            if ([...transformer.getSelectedObjectMap().keys()].some((key) => !allowedSelectionKeys.has(key))) {
+                this._clearPendingMultiDrawingSelection();
+            }
+        }));
     }
 
     private _calculateDrawingPosition(

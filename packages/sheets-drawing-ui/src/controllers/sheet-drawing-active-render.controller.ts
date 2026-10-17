@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, IDrawingParam, Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISetWorksheetActiveOperationParams } from '@univerjs/sheets';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import { Disposable, ICommandService, ILogService, Inject } from '@univerjs/core';
@@ -110,57 +110,28 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
     private _updateDrawings(showUnitId: string, showSubunitId: string): void {
         this._scheduleRender(() => {
             const sheetSkeletonParam = this._sheetSkeletonService.getSkeletonParam(showUnitId, showSubunitId);
-            const drawingMap = this._drawingManagerService.drawingManagerData;
-            const insertDrawings: IDrawingParam[] = [];
-            const refreshedDrawings: ISheetDrawing[] = [];
-            const failures: Array<Pick<ISheetDrawing, 'drawingId' | 'drawingType' | 'anchorType'> & { error: unknown }> = [];
-            const removeDrawings: IDrawingParam[] = [];
-
-            Object.keys(drawingMap ?? {}).forEach((unitId) => {
-                if (unitId !== showUnitId) {
-                    return;
+            const subUnitMap = this._drawingManagerService.drawingManagerData[showUnitId] ?? {};
+            const drawingData = subUnitMap[showSubunitId]?.data ?? {};
+            const { successDrawings, refreshedDrawings, failures } = prepareSheetDrawings(
+                Object.values(drawingData) as ISheetDrawing[],
+                sheetSkeletonParam?.skeleton
+            );
+            const removeDrawings: IDrawingParam[] = failures.map(({ drawingId }) => drawingData[drawingId]);
+            for (const subUnitId of Object.keys(subUnitMap)) {
+                if (subUnitId !== showSubunitId) {
+                    for (const drawing of Object.values(subUnitMap[subUnitId]?.data ?? {})) {
+                        removeDrawings.push(drawing);
+                    }
                 }
-
-                const subUnitMap = drawingMap[unitId] ?? {};
-                Object.keys(subUnitMap).forEach((subUnitId) => {
-                    const drawingData = subUnitMap[subUnitId]?.data ?? {};
-                    Object.keys(drawingData).forEach((drawingId) => {
-                        if (unitId === showUnitId && subUnitId === showSubunitId) {
-                            const drawing = drawingData[drawingId] as ISheetDrawing;
-                            if (sheetSkeletonParam && drawing.sheetTransform && drawing.anchorType !== SheetDrawingAnchorType.None) {
-                                try {
-                                    refreshedDrawings.push(applySheetDrawingPlacement(
-                                        drawing,
-                                        getSheetDrawingPlacement(drawing),
-                                        sheetSkeletonParam.skeleton
-                                    ));
-                                } catch (error) {
-                                    // Preserve failed model data and remove any stale rendering until a later retry.
-                                    failures.push({
-                                        drawingId,
-                                        drawingType: drawing.drawingType,
-                                        anchorType: drawing.anchorType ?? SheetDrawingAnchorType.Position,
-                                        error,
-                                    });
-                                    removeDrawings.push(drawing);
-                                    return;
-                                }
-                            }
-                            insertDrawings.push(drawingData[drawingId]);
-                        } else {
-                            removeDrawings.push(drawingData[drawingId]);
-                        }
-                    });
-                });
-            });
+            }
 
             // JSON1 drawing mutations are applied to both stores, so derived geometry must agree.
             this._sheetDrawingService.refreshTransform(refreshedDrawings);
             this._drawingManagerService.refreshTransform(refreshedDrawings);
             this._sheetDrawingService.removeNotification(removeDrawings);
-            this._sheetDrawingService.addNotification(insertDrawings);
+            this._sheetDrawingService.addNotification(successDrawings);
             this._drawingManagerService.removeNotification(removeDrawings);
-            this._drawingManagerService.addNotification(insertDrawings);
+            this._drawingManagerService.addNotification(successDrawings);
             if (failures.length) {
                 this._logService.error('[SheetDrawingActiveRenderController]', {
                     unitId: showUnitId,
@@ -170,4 +141,29 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
             }
         });
     }
+}
+
+function prepareSheetDrawings(drawings: ISheetDrawing[], skeleton?: SpreadsheetSkeleton) {
+    const successDrawings: ISheetDrawing[] = [];
+    const refreshedDrawings: ISheetDrawing[] = [];
+    const failures: Array<Pick<ISheetDrawing, 'drawingId' | 'drawingType' | 'anchorType'> & { error: unknown }> = [];
+
+    for (const drawing of drawings) {
+        if (skeleton && drawing.sheetTransform && drawing.anchorType !== SheetDrawingAnchorType.None) {
+            try {
+                refreshedDrawings.push(applySheetDrawingPlacement(drawing, getSheetDrawingPlacement(drawing), skeleton));
+            } catch (error) {
+                failures.push({
+                    drawingId: drawing.drawingId,
+                    drawingType: drawing.drawingType,
+                    anchorType: drawing.anchorType ?? SheetDrawingAnchorType.Position,
+                    error,
+                });
+                continue;
+            }
+        }
+        successDrawings.push(drawing);
+    }
+
+    return { successDrawings, refreshedDrawings, failures };
 }

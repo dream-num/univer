@@ -16,7 +16,6 @@
 
 import type { Dependency, IDisposable, IDocumentData, IWorkbookData, Workbook } from '@univerjs/core';
 import type { Root } from 'react-dom/client';
-import type { IConditionInfo } from '../type';
 import {
     createIdentifier,
     ICommandService,
@@ -33,7 +32,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DefinedNamesService, FormulaDataModel, IDefinedNamesService, LexerTreeBuilder } from '@univerjs/engine-formula';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { CanvasColorService, ICanvasColorService, IRenderManagerService } from '@univerjs/engine-render';
 import {
     AddRangeThemeMutation,
     RemoveRangeThemeMutation,
@@ -72,6 +71,7 @@ import { act, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { IConditionInfo } from '../type';
 import { SheetsTableMobileComponentController } from '../../../controllers/mobile/sheet-table-component.controller';
 import { SheetsTableComponentController } from '../../../controllers/sheet-table-component.controller';
 import { SheetTableThemeUIController } from '../../../controllers/sheet-table-theme-ui.controller';
@@ -487,6 +487,7 @@ function createTestBed(): ITestBed {
                 [SheetInterceptorService],
                 [SheetSkeletonService, { useClass: SheetSkeletonService }],
                 [SheetsSelectionsService],
+                [ICanvasColorService, { useClass: CanvasColorService }],
                 [IRenderManagerService, { useClass: TestRenderManagerService }],
                 [IEditorService, { useClass: TestEditorService as never }],
                 [IMarkSelectionService, { useClass: TestMarkSelectionService as never }],

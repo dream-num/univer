@@ -65,7 +65,7 @@ import {
     SheetRowFilteredService,
     SuperTableService,
 } from '@univerjs/engine-formula';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { CanvasColorService, ICanvasColorService, IRenderManagerService } from '@univerjs/engine-render';
 import {
     RangeProtectionRuleModel,
     RefRangeService,
@@ -388,6 +388,7 @@ function createItemTestBed(rule: ISheetDataValidationRule = createCheckboxRule()
                 [ComponentManager],
                 [IEditorService, { useClass: TestEditorService }],
                 [IDescriptionService, { useClass: TestDescriptionService }],
+                [ICanvasColorService, { useClass: CanvasColorService }],
                 [IRenderManagerService, { useClass: TestRenderManagerService as never }],
                 [IPlatformService, { useClass: PlatformService }],
                 [IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }],

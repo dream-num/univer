@@ -33,6 +33,8 @@ const locale: typeof enUS = {
             save: 'Simpan',
         },
         item: {
+            markResolved: 'Tandai sebagai terselesaikan',
+            markUnresolved: 'Tandai sebagai belum terselesaikan',
             edit: 'Edit',
             delete: 'Hapus Komentar Ini',
             more: 'Lebih Banyak',

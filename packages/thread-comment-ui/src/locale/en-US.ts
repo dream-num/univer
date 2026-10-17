@@ -31,6 +31,8 @@ const locale = {
             save: 'Save',
         },
         item: {
+            markResolved: 'Mark as resolved',
+            markUnresolved: 'Mark as unresolved',
             edit: 'Edit',
             delete: 'Delete This Comment',
             more: 'More',

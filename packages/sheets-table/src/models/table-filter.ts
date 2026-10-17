@@ -152,7 +152,7 @@ export class TableFilters {
 
     getExecuteFunc(sheet: Worksheet, range: ITableRange, columnIndex: number, filter: ITableFilterItem): (value: any) => boolean {
         if (filter.filterType === TableColumnFilterTypeEnum.manual) {
-            const valuesSet = new Set(filter.values);
+            const valuesSet = new Set(filter.values.map(String));
             return (value: string | number) => {
                 if (value == null) {
                     return valuesSet.has(TABLE_FILTER_EMPTY_VALUE);

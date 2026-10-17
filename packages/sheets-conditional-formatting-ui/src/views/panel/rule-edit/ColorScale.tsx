@@ -20,13 +20,14 @@ import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { LocaleKey } from '../../../locale/types';
 import type { IStyleEditorProps } from './type';
 import { IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { borderClassName, clsx, InputNumber, Select } from '@univerjs/design';
+import { borderClassName, clsx, Select } from '@univerjs/design';
 import { CFRuleType, CFValueType, createDefaultValueByValueType } from '@univerjs/sheets-conditional-formatting';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ColorPicker } from '../../ColorPicker';
 import { ConditionalFormattingRulePreview } from '../../ConditionalFormattingRulePreview';
+import { RuleNumberInput } from './RuleNumberInput';
 import { previewClassName } from './styles';
 
 const createOptionItem = (text: CFValueType | 'none'): { label: LocaleKey; value: CFValueType | 'none' } => ({
@@ -100,7 +101,7 @@ const TextInput = (props: {
             </div>
         );
     } else {
-        return <InputNumber className={className} value={Number(props.value) || 0} onChange={(v) => props.onChange(v || 0)} {...config} />;
+        return <RuleNumberInput className={className} value={Number(props.value) || 0} onChange={(v) => props.onChange(v || 0)} {...config} />;
     }
 };
 export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {

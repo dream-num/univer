@@ -109,7 +109,9 @@ export function DefinedName({ disable }: { disable: boolean }) {
         const subUnitId = worksheet.getSheetId();
 
         getSelections(worksheet, refString).then((selections) => {
-            if (!selections) return;
+            if (!selections) {
+                return;
+            }
 
             commandService.executeCommand(SetSelectionsOperation.id, {
                 unitId,
@@ -168,7 +170,9 @@ export function DefinedName({ disable }: { disable: boolean }) {
         setIsInputEvent(true);
 
         if (!value) {
-            if (open) setOpen(false);
+            if (open) {
+                setOpen(false);
+            }
             return;
         }
 
@@ -239,7 +243,9 @@ export function DefinedName({ disable }: { disable: boolean }) {
     }
 
     function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
-        if (disable) return;
+        if (disable) {
+            return;
+        }
 
         if (e.key === 'Enter') {
             const handled = confirm();
@@ -260,7 +266,9 @@ export function DefinedName({ disable }: { disable: boolean }) {
     }
 
     async function getSelections(worksheet: Worksheet, formulaOrRefString: string) {
-        if (!worksheet) return;
+        if (!worksheet) {
+            return;
+        }
 
         const unitRange = deserializeRangeWithSheet(formulaOrRefString.trim());
 
@@ -287,6 +295,11 @@ export function DefinedName({ disable }: { disable: boolean }) {
         <div
             ref={nameBoxRef}
             data-u-comp="defined-name"
+            onMouseDown={(e) => {
+                if (disable) {
+                    e.preventDefault();
+                }
+            }}
             className={`
               univer-relative univer-box-border univer-flex univer-h-full univer-w-24 univer-border-r-gray-200
               univer-py-1.5 univer-transition-all
@@ -303,6 +316,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
                     'univer-cursor-not-allowed': disable,
                 })}
                 type="text"
+                disabled={disable}
                 value={inputValue}
                 onChange={handleChangeSelection}
                 onKeyDown={handleKeyDown}
@@ -322,7 +336,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
                     </div>
                 )}
                 disabled={disable}
-                open={open}
+                open={!disable && open}
                 onOpenChange={setOpen}
                 onOpenAutoFocus={(e) => e.preventDefault()}
             >

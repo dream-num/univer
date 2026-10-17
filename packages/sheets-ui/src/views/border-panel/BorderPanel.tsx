@@ -16,14 +16,14 @@
 
 import type { IBorderData, Nullable } from '@univerjs/core';
 import type { IBorderInfo } from '@univerjs/sheets';
+import type { LocaleKey } from '../../locale/types';
 import type { IBorderPanelProps } from './interface';
-import { BorderStyleTypes } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { clsx, ColorPicker, ConfigContext, Dropdown, Separator } from '@univerjs/design';
 import { MoreDownIcon, PaintBucketDoubleIcon } from '@univerjs/icons';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { IconManager, useDependency } from '@univerjs/ui';
 import { useContext } from 'react';
-
 import { BorderLine } from './border-line/BorderLine';
 import { BORDER_LINE_CHILDREN, BORDER_SIZE_CHILDREN } from './interface';
 
@@ -33,6 +33,7 @@ export interface IResponsiveBorderPanelProps extends IBorderPanelProps {
 }
 
 export function BorderPanel(props: IResponsiveBorderPanelProps) {
+    const localeService = useDependency(LocaleService);
     const iconManager = useDependency(IconManager);
     const selectionManagerService = useDependency(SheetsSelectionsService);
     const { direction } = useContext(ConfigContext);
@@ -43,10 +44,14 @@ export function BorderPanel(props: IResponsiveBorderPanelProps) {
     const { onChange, value, ColorPickerComponent = ColorPicker, DropdownComponent = Dropdown } = props;
 
     function getBorderColor(borderData: Nullable<IBorderData>): string | undefined {
-        if (!borderData) return;
+        if (!borderData) {
+            return;
+        }
         for (const key in borderData) {
             const border = borderData[key as keyof IBorderData];
-            if (border?.cl?.rgb) return border.cl.rgb;
+            if (border?.cl?.rgb) {
+                return border.cl.rgb;
+            }
         }
     }
 
@@ -133,7 +138,7 @@ export function BorderPanel(props: IResponsiveBorderPanelProps) {
                                         <li key={item.value}>
                                             <button
                                                 type="button"
-                                                aria-label={BorderStyleTypes[item.value]}
+                                                aria-label={localeService.t<LocaleKey>(item.label)}
                                                 aria-pressed={item.value === value.style}
                                                 className={clsx(`
                                                   univer-flex univer-w-full univer-cursor-pointer univer-items-center

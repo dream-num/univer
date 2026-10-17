@@ -15,15 +15,19 @@
  */
 
 import type { IDocumentBody, IDocumentData } from '@univerjs/core';
+import type { IDocImage } from '@univerjs/docs-drawing';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDocClipboardPasteAdapter } from '../doc-paste-mutation-adapter.service';
 import {
     BooleanNumber,
     createInternalEditorID,
+    CustomDecorationType,
+    CustomRangeType,
     DataStreamTreeTokenType,
     DOC_RANGE_TYPE,
     DocumentBlockRangeType,
     DocumentDataModel,
+    DrawingTypeEnum,
     EDITOR_ACTIVATED,
     FOCUSING_SHAPE_TEXT_EDITOR,
     ICommandService,
@@ -32,6 +36,9 @@ import {
     IPermissionService,
     IUndoRedoService,
     IUniverInstanceService,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
     RedoCommand,
     SliceBodyType,
     Tools,
@@ -69,10 +76,12 @@ import {
 } from '../doc-paste-mutation-adapter.service';
 import { HtmlToUDMService } from '../html-to-udm/converter';
 import {
+    createInternalClipboardDocData,
     createInternalClipboardFragment,
     DOC_INTERNAL_FRAGMENT_MIME,
     parseInternalClipboardFragment,
 } from '../internal-fragment';
+import { getBodySliceHtml } from '../udm-to-html/convertor';
 import { DocHtmlExportService } from '../udm-to-html/doc-html-export.service';
 
 class TestClipboardInterfaceService {
@@ -255,6 +264,125 @@ describe('DocClipboardService table copy helpers', () => {
         expect(slice.dataStream).toBe(`${tokens.TABLE_START}${tokens.TABLE_ROW_START}${tokens.TABLE_CELL_START}A\r\n${tokens.TABLE_CELL_END}${tokens.TABLE_ROW_END}${tokens.TABLE_END}`);
         expect(slice.textRuns?.[0]).toMatchObject({ st: 3, ed: 4, ts: { bl: BooleanNumber.TRUE } });
         expect(slice.paragraphs?.[0].startIndex).toBe(4);
+    });
+
+    it('preserves hyperlinks and inline images in a copied cell and its clipboard exports', () => {
+        const tokens = DataStreamTreeTokenType;
+        const prefix = `Intro\r${tokens.TABLE_START}${tokens.TABLE_ROW_START}${tokens.TABLE_CELL_START}`;
+        const cellStart = prefix.length;
+        const cellContent = `link${tokens.CUSTOM_BLOCK}\r\n`;
+        const body: IDocumentBody = {
+            dataStream: `${prefix}${cellContent}${tokens.TABLE_CELL_END}${tokens.TABLE_CELL_START}Other\r\n${tokens.TABLE_CELL_END}${tokens.TABLE_ROW_END}${tokens.TABLE_END}`,
+            paragraphs: [{ paragraphId: 'linked-cell', startIndex: cellStart + 5 }],
+            sectionBreaks: [{ sectionId: 'linked-cell-section', startIndex: cellStart + 6 }],
+            customRanges: [{
+                rangeId: 'cell-link',
+                rangeType: CustomRangeType.HYPERLINK,
+                startIndex: cellStart,
+                endIndex: cellStart + 3,
+                properties: { url: 'https://univer.ai/' },
+            }],
+            customBlocks: [{ blockId: 'cell-image', startIndex: cellStart + 4 }],
+            customDecorations: [{ id: 'cell-comment', type: CustomDecorationType.COMMENT, startIndex: cellStart, endIndex: cellStart + 3 }],
+        };
+        const original = Tools.deepClone(body);
+        const slice = getTableClipboardBodySlice(body, {
+            startOffset: cellStart,
+            endOffset: cellStart + 5,
+            collapsed: false,
+            rangeType: DOC_RANGE_TYPE.RECT,
+            tableId: 'table-1',
+            startRow: 0,
+            endRow: 0,
+            startColumn: 0,
+            endColumn: 0,
+            spanEntireRow: false,
+            spanEntireColumn: false,
+            spanEntireTable: false,
+        });
+        const image: IDocImage = {
+            drawingId: 'cell-image',
+            unitId: 'copied-cell',
+            subUnitId: '',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            imageSourceType: ImageSourceType.URL,
+            source: 'https://univer.ai/image.png',
+            layoutType: PositionedObjectLayoutType.INLINE,
+            docTransform: {
+                size: { width: 20, height: 10 },
+                angle: 0,
+                positionH: { relativeFrom: ObjectRelativeFromH.CHARACTER, posOffset: 0 },
+                positionV: { relativeFrom: ObjectRelativeFromV.LINE, posOffset: 0 },
+            },
+        };
+        const doc: IDocumentData = {
+            id: 'copied-cell',
+            body: slice,
+            documentStyle: {},
+            drawings: { 'cell-image': image },
+        };
+
+        expect(slice.customRanges?.[0]).toMatchObject({ startIndex: 3, endIndex: 6 });
+        expect(slice.customBlocks?.[0].startIndex).toBe(7);
+        expect(slice.dataStream[slice.customBlocks![0].startIndex]).toBe(tokens.CUSTOM_BLOCK);
+        expect(slice.customDecorations?.[0]).toMatchObject({ startIndex: 3, endIndex: 6 });
+        expect(slice.sectionBreaks?.[0].startIndex).toBe(9);
+        expect(slice.dataStream[slice.sectionBreaks![0].startIndex]).toBe('\n');
+
+        const html = new DOMParser().parseFromString(getBodySliceHtml(doc, 3, 8), 'text/html');
+        expect(html.querySelector('a')?.getAttribute('href')).toBe('https://univer.ai/');
+        expect(html.querySelector('a')?.textContent).toBe('link');
+        expect(html.body.textContent?.trim()).toBe('link');
+        expect(html.querySelector('img')?.getAttribute('src')).toBe('https://univer.ai/image.png');
+
+        const internalDoc = parseInternalClipboardFragment(createInternalClipboardFragment(createInternalClipboardDocData(doc)));
+        expect(internalDoc?.body?.customRanges?.[0]).toMatchObject({ startIndex: 3, endIndex: 6 });
+        expect(internalDoc?.body?.customBlocks?.[0].startIndex).toBe(7);
+        expect(internalDoc?.drawings?.[internalDoc.body!.customBlocks![0].blockId]).toMatchObject({ source: 'https://univer.ai/image.png' });
+        expect(body).toEqual(original);
+    });
+
+    it('keeps structural and imported metadata anchored to the wrapped cell content', () => {
+        const tokens = DataStreamTreeTokenType;
+        const prefix = `${tokens.TABLE_START}${tokens.TABLE_ROW_START}${tokens.TABLE_CELL_START}`;
+        const cellContent = `${tokens.BLOCK_START}${tokens.COLUMN_GROUP_START}${tokens.COLUMN_START}${tokens.CUSTOM_BLOCK}${tokens.PAGE_BREAK}\r${tokens.COLUMN_END}${tokens.COLUMN_GROUP_END}${tokens.BLOCK_END}\r\n`;
+        const cellStart = prefix.length;
+        const body: IDocumentBody = {
+            dataStream: `${prefix}${cellContent}${tokens.TABLE_CELL_END}${tokens.TABLE_ROW_END}${tokens.TABLE_END}`,
+            blockRanges: [{ blockId: 'quote', blockType: DocumentBlockRangeType.QUOTE, startIndex: cellStart, endIndex: cellStart + 8 }],
+            columnGroups: [{ columnGroupId: 'columns', startIndex: cellStart + 1, endIndex: cellStart + 7 }],
+            docxRawCustomBlocks: [{ blockId: 'opaque-run', startIndex: cellStart + 3, docxRawXml: '<w:r/>' }],
+            docxRawBlocks: [{ startIndex: cellStart + 3, xml: '<w:p/>' }],
+            docxExportExcludedRanges: [{ start: cellStart + 3, end: cellStart + 4 }],
+            renderedPageBreaks: [cellStart + 4],
+        };
+        const slice = getTableClipboardBodySlice(body, {
+            startOffset: cellStart,
+            endOffset: cellStart + cellContent.length - 2,
+            collapsed: false,
+            rangeType: DOC_RANGE_TYPE.RECT,
+            tableId: 'table-1',
+            startRow: 0,
+            endRow: 0,
+            startColumn: 0,
+            endColumn: 0,
+            spanEntireRow: false,
+            spanEntireColumn: false,
+            spanEntireTable: false,
+        });
+
+        expect(slice.blockRanges?.[0]).toMatchObject({ startIndex: 3, endIndex: 11 });
+        expect(slice.dataStream[slice.blockRanges![0].startIndex]).toBe(tokens.BLOCK_START);
+        expect(slice.dataStream[slice.blockRanges![0].endIndex]).toBe(tokens.BLOCK_END);
+        expect(slice.columnGroups?.[0]).toMatchObject({ startIndex: 4, endIndex: 10 });
+        expect(slice.dataStream[slice.columnGroups![0].startIndex]).toBe(tokens.COLUMN_GROUP_START);
+        expect(slice.dataStream[slice.columnGroups![0].endIndex]).toBe(tokens.COLUMN_GROUP_END);
+        expect(slice.docxRawCustomBlocks?.[0]).toMatchObject({ startIndex: 6, docxRawXml: '<w:r/>' });
+        expect(slice.dataStream[slice.docxRawCustomBlocks![0].startIndex]).toBe(tokens.CUSTOM_BLOCK);
+        expect(slice.docxRawBlocks?.[0]).toEqual({ startIndex: 6, xml: '<w:p/>' });
+        expect(slice.docxExportExcludedRanges).toEqual([{ start: 6, end: 7 }]);
+        expect(slice.renderedPageBreaks).toEqual([7]);
+        expect(slice.dataStream[slice.renderedPageBreaks![0]]).toBe(tokens.PAGE_BREAK);
     });
 
     it('copies the selected document text as plain text, html, and internal clipboard data', async () => {

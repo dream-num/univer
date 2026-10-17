@@ -25,7 +25,7 @@ import { HoverManagerService } from '../../../../services/hover-manager.service'
 import { MobileCellEditRenderController } from '../mobile-cell-edit.render-controller';
 
 describe('MobileCellEditRenderController', () => {
-    it('opens the current sheet editor from a mobile double tap', () => {
+    it('opens the current sheet editor without a cell pointer caret from a mobile double tap', () => {
         const currentDbClickedCell$ = new Subject<{ location: { unitId: string }; event: { clientX: number; clientY: number } }>();
         const currentPointerDownCell$ = new Subject<never>();
         const commandService = { syncExecuteCommand: vi.fn() };
@@ -44,7 +44,6 @@ describe('MobileCellEditRenderController', () => {
             visible: true,
             eventType: DeviceInputEventType.Dblclick,
             unitId: 'unit-1',
-            pointerPosition: { x: 150, y: 180 },
         });
 
         controller.dispose();

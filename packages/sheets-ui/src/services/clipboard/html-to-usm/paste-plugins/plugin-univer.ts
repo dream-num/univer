@@ -22,7 +22,7 @@ import { getParagraphStyle } from '../utils';
 export const UniverPastePlugin: IPastePlugin = {
     name: 'univer-sheet-paste-plugin-univer',
     checkPasteType(html: string) {
-        return /UniverNormal/i.test(html);
+        return /<p\b[^>]*\sclass\s*=\s*["'](?:[^"']*\s)?UniverNormal(?:\s[^"']*)?["']/i.test(html);
     },
 
     stylesRules: [],

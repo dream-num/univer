@@ -189,8 +189,17 @@ export const MobileFormulaBarSubmitCommand: ICommand = {
         editorBridgeService.refreshEditCellState();
         editorBridgeService.changeEditorDirty(false);
 
+        const editorService = accessor.get(IEditorService);
+        const formulaEditor = editorService.getEditor(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+        if (editorService.getFocusId() !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+            editorService.focus(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+        } else {
+            // Refreshing the next cell can reset the active document while the formula bar stays focused.
+            formulaEditor?.focus();
+        }
+
         const endOffset = Math.max(0, (formulaModel.getBody()?.dataStream.length ?? 2) - 2);
-        accessor.get(IEditorService).getEditor(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY)?.setSelectionRanges([{
+        formulaEditor?.setSelectionRanges([{
             startOffset: endOffset,
             endOffset,
         }], false);

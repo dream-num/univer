@@ -310,7 +310,7 @@ export function FormulaBar(props: IProps) {
             })}
         >
             <div className="univer-relative univer-box-border univer-h-full univer-w-[100px]">
-                <DefinedName disable={disableDefinedName ?? editDisable} />
+                <DefinedName disable={iconActivated || (disableDefinedName ?? editDisable)} />
             </div>
 
             <div className="univer-flex univer-size-full">

@@ -61,6 +61,8 @@ import {
     SetRangeTextColorCommand,
     SetRangeUnderlineCommand,
 } from '../../../../commands/commands/inline-format.command';
+import enUS from '../../../../locale/en-US';
+import zhCN from '../../../../locale/zh-CN';
 import { BORDER_LINE_CHILDREN, BORDER_SIZE_CHILDREN } from '../../../border-panel/interface';
 import { MobileStylePanel } from '../MobileStylePanel';
 
@@ -77,6 +79,8 @@ function renderStylePanel(
     injector.add([ComponentManager]);
     injector.add([IFontService, { useClass: FontService }]);
     injector.get(LocaleService).load({ [LocaleType.ZH_CN]: {} });
+    injector.get(LocaleService).setLocale(LocaleType.ZH_CN);
+    injector.get(LocaleService).setDirection('ltr');
     configureInjector?.(injector);
     const resolvedProps: ComponentProps<typeof MobileStylePanel> = {
         groups: [],
@@ -110,7 +114,9 @@ function renderStylePanel(
 function getButton(container: HTMLElement, name: string): HTMLButtonElement {
     const button = Array.from(container.querySelectorAll('button')).find((element) =>
         element.getAttribute('aria-label') === name || element.textContent?.trim() === name);
-    if (!button) throw new Error(`Button "${name}" was not rendered.`);
+    if (!button) {
+        throw new Error(`Button "${name}" was not rendered.`);
+    }
     return button;
 }
 
@@ -131,6 +137,34 @@ afterEach(() => {
 });
 
 describe('MobileStylePanel', () => {
+    it.each([
+        [LocaleType.EN_US, 'Dashed'],
+        [LocaleType.ZH_CN, '虚线'],
+    ])('applies the numeric border style selected by its localized name in %s', (language, label) => {
+        const onExecute = vi.fn();
+        const rendered = renderStylePanel({
+            currentView: {
+                kind: 'border-style',
+                title: 'Border style',
+                item: { id: SetBorderBasicCommand.id, type: MenuItemType.BUTTON },
+            },
+            onExecute,
+        }, (injector) => {
+            const localeService = injector.get(LocaleService);
+            localeService.load({ [LocaleType.EN_US]: enUS, [LocaleType.ZH_CN]: zhCN });
+            localeService.setLocale(language);
+        });
+        root = rendered.root;
+        container = rendered.container;
+
+        clickButton(container, label);
+
+        expect(onExecute).toHaveBeenCalledExactlyOnceWith({
+            id: SetBorderBasicCommand.id,
+            value: expect.objectContaining({ style: BorderStyleTypes.DASHED }),
+        });
+    });
+
     it('keeps BIUS controls independently selected and clickable', () => {
         const commandIds = [
             SetRangeBoldCommand.id,
@@ -509,7 +543,7 @@ describe('MobileStylePanel', () => {
         rendered = renderStylePanel({ currentView: { kind: 'border-style', title: 'Border style', item }, onExecute });
         root = rendered.root;
         container = rendered.container;
-        BORDER_SIZE_CHILDREN.forEach((option) => clickButton(rendered.container, String(option.value)));
+        BORDER_SIZE_CHILDREN.forEach((option) => clickButton(rendered.container, option.label));
         expect(onExecute.mock.calls.map(([command]) => command)).toEqual(BORDER_SIZE_CHILDREN.map((option) => ({
             id: SetBorderBasicCommand.id,
             value: { ...borderValue, style: option.value },

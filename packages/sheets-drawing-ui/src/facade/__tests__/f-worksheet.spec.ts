@@ -48,18 +48,18 @@ import {
     SetSheetDrawingCommand,
     UniverSheetsDrawingPlugin,
 } from '@univerjs/sheets-drawing';
-import {
-    BatchSaveImagesService,
-    IBatchSaveImagesService,
-    SheetCanvasFloatDomManagerService,
-} from '@univerjs/sheets-drawing-ui';
 import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import sheetsEnUS from '@univerjs/sheets/locale/en-US';
 import { CanvasFloatDomService, ComponentManager } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { BatchSaveImagesService, IBatchSaveImagesService } from '../../services/batch-save-images.service';
+import { SheetCanvasFloatDomManagerService } from '../../services/canvas-float-dom-manager.service';
 import '@univerjs/sheets/facade';
-import '@univerjs/sheets-drawing-ui/facade';
+import '../f-event';
+import '../f-range';
+import '../f-univer';
+import '../f-worksheet';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
     id: 'test',
@@ -533,6 +533,108 @@ describe('sheets-drawing-ui facade', () => {
         expect(worksheet.getAllFloatDoms()).toEqual([]);
     });
 
+    it('reads and removes range and column header float doms without persisting drawings', () => {
+        univer.dispose();
+        const testBed = createDrawingUITestBedWithRender();
+        univer = testBed.univer;
+        injector = testBed.injector;
+        univerAPI = FUniver.newAPI(injector);
+
+        const worksheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+        const sheetDrawingService = injector.get(ISheetDrawingService);
+        const rangeDom = worksheet.addFloatDomToRange(worksheet.getRange(1, 1, 1, 1), {
+            componentKey: 'RangeLoading',
+            data: { label: 'Loading range' },
+            allowTransform: false,
+        }, {})!;
+        const headerDom = worksheet.addFloatDomToColumnHeader(2, {
+            componentKey: 'HeaderAction',
+            data: { column: 2 },
+        }, { width: 80, height: 24, marginX: 0, marginY: 0 })!;
+
+        const expectedRange = expect.objectContaining({
+            id: rangeDom.id,
+            componentKey: 'RangeLoading',
+            data: { label: 'Loading range' },
+            allowTransform: false,
+            position: expect.objectContaining({
+                width: worksheet.getColumnWidth(1),
+                height: worksheet.getRowHeight(1),
+            }),
+        });
+        const expectedHeader = expect.objectContaining({
+            id: headerDom.id,
+            componentKey: 'HeaderAction',
+            data: { column: 2 },
+            allowTransform: true,
+            position: expect.objectContaining({ width: 80, height: 24 }),
+        });
+
+        expect(worksheet.getFloatDomById(rangeDom.id)).toEqual(expectedRange);
+        expect(worksheet.getFloatDomById(headerDom.id)).toEqual(expectedHeader);
+        expect(worksheet.getAllFloatDoms()).toEqual([expectedRange, expectedHeader]);
+        expect(sheetDrawingService.getDrawingByParam({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: rangeDom.id,
+        })).toBeUndefined();
+        expect(sheetDrawingService.getDrawingByParam({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: headerDom.id,
+        })).toBeUndefined();
+
+        rangeDom.dispose();
+        expect(worksheet.getFloatDomById(rangeDom.id)).toBeNull();
+        expect(worksheet.getAllFloatDoms()).toEqual([expectedHeader]);
+        worksheet.removeFloatDom(headerDom.id);
+        expect(worksheet.getFloatDomById(headerDom.id)).toBeNull();
+        expect(worksheet.getAllFloatDoms()).toEqual([]);
+    });
+
+    it('reads mixed float dom sources and current drawing attributes', async () => {
+        univer.dispose();
+        const testBed = createDrawingUITestBedWithRender();
+        univer = testBed.univer;
+        injector = testBed.injector;
+        univerAPI = FUniver.newAPI(injector);
+
+        const worksheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+        const positionDom = worksheet.addFloatDomToPosition({
+            componentKey: 'OrderCard',
+            initPosition: { startX: 20, startY: 30, endX: 140, endY: 90 },
+            data: { label: 'Draft' },
+        })!;
+        await Promise.resolve();
+
+        const rangeDom = worksheet.addFloatDomToRange(worksheet.getRange('A1:B2'), {
+            componentKey: 'RangeLoading',
+        }, {})!;
+        const headerDom = worksheet.addFloatDomToColumnHeader(2, {
+            componentKey: 'HeaderAction',
+            allowTransform: false,
+        }, { width: 80, height: 24, marginX: 0, marginY: 0 })!;
+
+        worksheet.updateFloatDom(positionDom.id, {
+            componentKey: 'ApprovedOrderCard',
+            data: { label: 'Approved' },
+            allowTransform: false,
+        });
+
+        const allDoms = worksheet.getAllFloatDoms();
+        expect(allDoms.map((dom) => dom.id)).toEqual([positionDom.id, rangeDom.id, headerDom.id]);
+        for (const dom of allDoms) {
+            expect(worksheet.getFloatDomById(dom.id)).toEqual(dom);
+        }
+        expect(allDoms[0]).toEqual(expect.objectContaining({
+            componentKey: 'ApprovedOrderCard',
+            data: { label: 'Approved' },
+            allowTransform: false,
+        }));
+        expect(allDoms[1]).toEqual(expect.objectContaining({ componentKey: 'RangeLoading', allowTransform: true }));
+        expect(allDoms[2]).toEqual(expect.objectContaining({ componentKey: 'HeaderAction', allowTransform: false }));
+    });
+
     it('omits float doms without backing drawing params', async () => {
         univer.dispose();
         const testBed = createDrawingUITestBedWithRender();
@@ -556,6 +658,7 @@ describe('sheets-drawing-ui facade', () => {
         delete drawingData['missing-card'];
 
         expect(sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'missing-card' })).toBeUndefined();
+        expect(worksheet.getFloatDomById('missing-card')).toBeNull();
         expect(worksheet.getAllFloatDoms().map((dom) => dom.id)).toEqual(['order-card']);
     });
 

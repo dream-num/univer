@@ -36,9 +36,12 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
 import {
     CanvasColorService,
+    DeviceInputEventType,
     ICanvasColorService,
     IRenderManagerService,
     RenderManagerService,
+    SHEET_VIEWPORT_KEY,
+    Viewport,
 } from '@univerjs/engine-render';
 import {
     INTERCEPTOR_POINT,
@@ -54,6 +57,7 @@ import {
     EditorBridgeService,
     IEditorBridgeService,
     ISheetCellDropdownManagerService,
+    SetCellEditVisibleOperation,
     SheetCanvasPopManagerService,
     SheetCellDropdownManagerService,
     SheetSkeletonManagerService,
@@ -120,6 +124,7 @@ for (const Controller of controllers) {
             injector.add([IMenuManagerService, { useClass: MenuManagerService }]);
             injector.add([Controller]);
             injector.add([SheetsDataValidationUIController]);
+            injector.get(ICommandService).registerCommand(SetCellEditVisibleOperation);
             const instances = injector.get(IUniverInstanceService);
             first = instances.createUnit<IWorkbookData, Workbook>(
                 UniverInstanceType.UNIVER_SHEET,
@@ -146,6 +151,118 @@ for (const Controller of controllers) {
             vi.restoreAllMocks();
             vi.useRealTimers();
         });
+
+        if (Controller === SheetsDataValidationRenderController) {
+            it.each([
+                DataValidationType.LIST,
+                DataValidationType.LIST_MULTIPLE,
+                DataValidationType.CHECKBOX,
+            ])('keeps %s cells out of text editing on double-click', (type) => {
+                addRule(univer, 'first', 'sheet1', 1, type);
+                selectEditorCell(univer, first, 1);
+                const injector = univer.__getInjector();
+                const bridge = injector.get(IEditorBridgeService);
+                const visibility: boolean[] = [];
+                const subscription = bridge.visible$.subscribe((state) => visibility.push(state.visible));
+
+                expect(injector.get(ICommandService).syncExecuteCommand(SetCellEditVisibleOperation.id, {
+                    visible: true,
+                    eventType: DeviceInputEventType.Dblclick,
+                    unitId: 'first',
+                    pointerPosition: { x: 100, y: 100 },
+                })).toBe(false);
+                expect(bridge.isVisible().visible).toBe(false);
+                expect(visibility).toEqual([false]);
+                subscription.unsubscribe();
+            });
+
+            it.each([undefined, DataValidationType.WHOLE, DataValidationType.DECIMAL])(
+                'preserves double-click editing for cells with rule type %s',
+                (type) => {
+                    if (type) {
+                        addRule(univer, 'first', 'sheet1', 1, type);
+                    }
+                    selectEditorCell(univer, first, 1);
+                    const injector = univer.__getInjector();
+
+                    expect(injector.get(ICommandService).syncExecuteCommand(SetCellEditVisibleOperation.id, {
+                        visible: true,
+                        eventType: DeviceInputEventType.Dblclick,
+                        unitId: 'first',
+                        pointerPosition: { x: 100, y: 100 },
+                    })).toBe(true);
+                    expect(injector.get(IEditorBridgeService).isVisible().visible).toBe(true);
+                }
+            );
+
+            it.each([
+                DeviceInputEventType.Keyboard,
+                DeviceInputEventType.PointerDown,
+                DeviceInputEventType.Dblclick,
+            ])(
+                'preserves other editing entrances and editor closing (%s)',
+                (eventType) => {
+                    addRule(univer, 'first', 'sheet1', 1, DataValidationType.CHECKBOX);
+                    selectEditorCell(univer, first, 1);
+                    const injector = univer.__getInjector();
+                    const commands = injector.get(ICommandService);
+                    expect(commands.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+                        visible: true,
+                        eventType,
+                        unitId: 'first',
+                    })).toBe(true);
+                    expect(injector.get(IEditorBridgeService).isVisible().visible).toBe(true);
+                    expect(commands.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+                        visible: false,
+                        eventType: DeviceInputEventType.Dblclick,
+                        unitId: 'first',
+                    })).toBe(true);
+                    expect(injector.get(IEditorBridgeService).isVisible().visible).toBe(false);
+                }
+            );
+
+            it('checks the edited cell location across cells, worksheets, and workbooks', () => {
+                addRule(univer, 'first', 'sheet1', 1, DataValidationType.LIST);
+                const injector = univer.__getInjector();
+                const commands = injector.get(ICommandService);
+                for (const [workbook, sheetId, column, editable] of [
+                    [first, 'sheet1', 0, false],
+                    [first, 'sheet1', 1, true],
+                    [first, 'sheet2', 0, true],
+                    [peer, 'sheet1', 0, true],
+                ] as const) {
+                    selectEditorCell(univer, workbook, 1, column, sheetId);
+                    const unitId = workbook.getUnitId();
+                    expect(commands.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+                        visible: true,
+                        eventType: DeviceInputEventType.Dblclick,
+                        unitId,
+                        pointerPosition: { x: 100, y: 100 },
+                    })).toBe(editable);
+                    expect(injector.get(IEditorBridgeService).isVisible().visible).toBe(editable);
+                    commands.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+                        visible: false,
+                        eventType: DeviceInputEventType.PointerDown,
+                        unitId,
+                    });
+                }
+            });
+
+            it('releases the editing restriction when disposed', () => {
+                addRule(univer, 'first', 'sheet1', 1, DataValidationType.CHECKBOX);
+                selectEditorCell(univer, first, 1);
+                const injector = univer.__getInjector();
+                injector.get(Controller).dispose();
+
+                expect(injector.get(ICommandService).syncExecuteCommand(SetCellEditVisibleOperation.id, {
+                    visible: true,
+                    eventType: DeviceInputEventType.Dblclick,
+                    unitId: 'first',
+                    pointerPosition: { x: 100, y: 100 },
+                })).toBe(true);
+                expect(injector.get(IEditorBridgeService).isVisible().visible).toBe(true);
+            });
+        }
 
         it('keeps each workbook and worksheet in a shared batch isolated after focus changes', async () => {
             const injector = univer.__getInjector();
@@ -233,6 +350,32 @@ for (const Controller of controllers) {
             expect(cell.interceptorAutoWidth?.()).toBeGreaterThan(0);
         });
     });
+}
+
+function selectEditorCell(univer: Univer, workbook: Workbook, row: number, column = 0, sheetId = 'sheet1') {
+    const injector = univer.__getInjector();
+    injector.get(IUniverInstanceService).setCurrentUnitForType(workbook.getUnitId());
+    const worksheet = workbook.getSheetBySheetId(sheetId)!;
+    workbook.setActiveSheet(worksheet);
+    const render = injector.get(IRenderManagerService).getRenderUnitById(workbook.getUnitId())!;
+    if (!render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)) {
+        injector.createInstance(Viewport, SHEET_VIEWPORT_KEY.VIEW_MAIN, render.scene, {
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+        });
+    }
+    render.with(SheetSkeletonManagerService).setCurrent({ sheetId });
+    const bridge = injector.get(IEditorBridgeService);
+    bridge.setEditCell({
+        unitId: workbook.getUnitId(),
+        sheetId,
+        scene: render.scene,
+        engine: render.engine,
+        primary: worksheet.getCellInfoInMergeData(row, column),
+    });
+    expect(bridge.getEditLocation()).toMatchObject({ unitId: workbook.getUnitId(), sheetId, row, column });
 }
 
 function addRule(

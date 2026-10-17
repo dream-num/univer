@@ -49,7 +49,7 @@ export const inputVariants = cva(
     }
 );
 
-export interface IInputProps extends Pick<InputProps, 'dir' | 'onFocus' | 'onBlur'>,
+export interface IInputProps extends Omit<InputProps, 'onChange' | 'size' | 'slot' | 'value'>,
     VariantProps<typeof inputVariants> {
     autoFocus?: boolean;
     className?: string;

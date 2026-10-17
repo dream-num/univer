@@ -16,14 +16,97 @@
 
 import { ICommandService } from '@univerjs/core';
 import { SHEET_VIEWPORT_KEY, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
-import { SetFrozenCommand, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { SetFrozenCommand, SetWorksheetActiveOperation, SheetSkeletonService } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
+import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { HeaderFreezeRenderController } from '../freeze.render-controller';
 import { createRenderTestBed } from './render-test-bed';
 
 describe('HeaderFreezeRenderController', () => {
+    it.each([
+        { startRow: 3, startColumn: -1, ySplit: 3, xSplit: 0 },
+        { startRow: 3, startColumn: 2, ySplit: 3, xSplit: 2 },
+    ])('keeps the leading Table title gap visible with freeze config %j', (freeze) => {
+        const testBed = createRenderTestBed();
+        const { sheet, context, viewportMap } = testBed;
+        const injector = testBed.injector.createChild();
+        injector.add([SheetSkeletonService]);
+        injector.add([SheetSkeletonManagerService, {
+            useFactory: function createSkeletonManager() {
+                return injector.createInstance(SheetSkeletonManagerService, context);
+            },
+        }]);
+        injector.add([SheetScrollManagerService, {
+            useFactory: function createScrollManager() {
+                return injector.createInstance(SheetScrollManagerService, context);
+            },
+        }]);
+        injector.add([HeaderFreezeRenderController, {
+            useFactory: function createFreezeController() {
+                return injector.createInstance(HeaderFreezeRenderController, context);
+            },
+        }]);
+
+        try {
+            const manager = injector.get(SheetSkeletonManagerService);
+            const worksheet = sheet.getActiveSheet();
+            manager.setCurrent({ sheetId: worksheet.getSheetId() });
+            const skeleton = manager.getCurrentSkeleton()!;
+            const frozenRowsHeight = skeleton.getNoMergeCellWithCoordByIndex(3, 0, false).startY;
+            const headerHeight = skeleton.columnHeaderHeightAndMarginTop;
+            skeleton.setGapConfig({ rowGaps: { 0: { size: 32 } } });
+            worksheet.getConfig().freeze = freeze;
+            injector.get(HeaderFreezeRenderController);
+            // A scene scale refresh also applies the initial freeze layout.
+            testBed.scene.onTransformChange$.emit({
+                type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale,
+                value: { scaleX: 1, scaleY: 1 },
+            }, { stopPropagation: () => {} });
+
+            const viewMain = viewportMap.get(SHEET_VIEWPORT_KEY.VIEW_MAIN)!;
+            const viewMainTop = viewportMap.get(SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP)!;
+            const viewRowTop = viewportMap.get(SHEET_VIEWPORT_KEY.VIEW_ROW_TOP)!;
+            const viewMainLeftTop = viewportMap.get(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP)!;
+            expect(viewMainTop.viewportScrollY).toBe(0);
+            expect(viewRowTop.viewportScrollY).toBe(0);
+            expect(viewMainTop.height).toBe(frozenRowsHeight + 32);
+            expect(viewMain.top).toBe(headerHeight + frozenRowsHeight + 32);
+            if (freeze.xSplit > 0) {
+                expect(viewMainLeftTop.viewportScrollY).toBe(0);
+                expect(viewMainLeftTop.height).toBe(frozenRowsHeight + 32);
+            }
+
+            // Removing and recreating the top Table must resize an existing frozen area too.
+            skeleton.setGapConfig({});
+            expect(viewMainTop.height).toBe(frozenRowsHeight);
+            expect(viewMain.top).toBe(headerHeight + frozenRowsHeight);
+            skeleton.setGapConfig({ rowGaps: { 0: { size: 32 } } });
+            expect(viewMainTop.height).toBe(frozenRowsHeight + 32);
+            expect(viewMainTop.viewportScrollY).toBe(0);
+
+            // A frozen range starting below row 1 must still skip the preceding rows and gap.
+            worksheet.getConfig().freeze = { ...freeze, startRow: 5 };
+            testBed.scene.onTransformChange$.emit({
+                type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale,
+                value: { scaleX: 1, scaleY: 1 },
+            }, { stopPropagation: () => {} });
+            expect(viewMainTop.viewportScrollY).toBe(skeleton.getNoMergeCellWithCoordByIndex(2, 0, false).startY);
+
+            worksheet.getConfig().freeze = { startRow: -1, startColumn: -1, ySplit: 0, xSplit: 0 };
+            testBed.scene.onTransformChange$.emit({
+                type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale,
+                value: { scaleX: 1, scaleY: 1 },
+            }, { stopPropagation: () => {} });
+            expect(viewMainTop.isActive).toBe(false);
+            expect(viewMain.top).toBe(headerHeight);
+        } finally {
+            injector.dispose();
+            testBed.univer.dispose();
+        }
+    });
+
     it('refreshes viewports when switching sheets and freeze is enabled', () => {
         const validViewportScrollInfo$ = new BehaviorSubject<any>(null);
         const scrollManagerService = {

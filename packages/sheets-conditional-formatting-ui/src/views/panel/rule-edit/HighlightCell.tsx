@@ -25,7 +25,7 @@ import type {
 import type { LocaleKey } from '../../../locale/types';
 import type { IStyleEditorProps } from './type';
 import { LocaleService } from '@univerjs/core';
-import { Input, InputNumber, Select } from '@univerjs/design';
+import { Input, Select } from '@univerjs/design';
 import {
     CFNumberOperator,
     CFRuleType,
@@ -39,6 +39,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ConditionalFormattingRulePreview } from '../../ConditionalFormattingRulePreview';
 import { ConditionalStyleEditor } from '../../ConditionalStyleEditor';
 import { WrapperError } from '../../wrapper-error/WrapperError';
+import { RuleNumberInput } from './RuleNumberInput';
 import { previewClassName } from './styles';
 
 type IEditableHighlightCell = ITextHighlightCell | INumberHighlightCell | ITimePeriodHighlightCell | IDuplicateValuesHighlightCell | IUniqueValuesHighlightCell;
@@ -156,7 +157,7 @@ function HighlightCellInput(props: {
                 return (
                     <div className="univer-mt-3">
                         <WrapperError errorText={numberError}>
-                            <InputNumber
+                            <RuleNumberInput
                                 className="univer-w-full"
                                 min={Number.MIN_SAFE_INTEGER}
                                 max={Number.MAX_SAFE_INTEGER}
@@ -183,10 +184,10 @@ function HighlightCellInput(props: {
                 return (
                     <div className="univer-mt-3 univer-flex univer-items-center">
                         <WrapperError errorText={numberMinError}>
-                            <InputNumber min={Number.MIN_SAFE_INTEGER} max={Number.MAX_SAFE_INTEGER} value={inputNumberMin} onChange={onChangeMin} />
+                            <RuleNumberInput min={Number.MIN_SAFE_INTEGER} max={Number.MAX_SAFE_INTEGER} value={inputNumberMin} onChange={onChangeMin} />
                         </WrapperError>
                         <WrapperError errorText={numberMaxError}>
-                            <InputNumber
+                            <RuleNumberInput
                                 className="univer-ml-3"
                                 min={Number.MIN_SAFE_INTEGER}
                                 max={Number.MAX_SAFE_INTEGER}

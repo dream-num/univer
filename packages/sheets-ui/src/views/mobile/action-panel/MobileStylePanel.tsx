@@ -15,10 +15,25 @@
  */
 
 import type { IBorderInfo } from '@univerjs/sheets';
-import type { IDisplayMenuItem, IFontConfig, IMenuItem, IMenuSchema, IMenuSelectorItem, IValueOption, MenuItemDefaultValueType } from '@univerjs/ui';
+import type {
+    IDisplayMenuItem,
+    IFontConfig,
+    IMenuItem,
+    IMenuSchema,
+    IMenuSelectorItem,
+    IValueOption,
+    MenuItemDefaultValueType,
+} from '@univerjs/ui';
 import type { LocaleKey } from '../../../locale/types';
 import { BorderStyleTypes, BorderType, LocaleService, ThemeService } from '@univerjs/core';
-import { borderBottomClassName, clsx, ColorPickerPanel, MobileActionRow, MobileColorPresets, resetButtonClassName } from '@univerjs/design';
+import {
+    borderBottomClassName,
+    clsx,
+    ColorPickerPanel,
+    MobileActionRow,
+    MobileColorPresets,
+    resetButtonClassName,
+} from '@univerjs/design';
 import { CheckMarkIcon, MoreDownIcon, MoreRightIcon, NoColorDoubleIcon } from '@univerjs/icons';
 import {
     AddWorksheetMergeCommand,
@@ -290,7 +305,9 @@ function MobileStyleRoot(props: {
         <div className="univer-grid univer-gap-3">
             {groups.map((group) => {
                 const items = group.children?.filter(hasMenuItem) ?? [];
-                if (items.length === 0) return null;
+                if (items.length === 0) {
+                    return null;
+                }
                 const textStyleItems = items.filter((schema) => TEXT_STYLE_COMMANDS.has(schema.item.id));
                 const inlineSelectorItems = items
                     .filter(isMobileSelectorSchema)
@@ -407,7 +424,9 @@ function MobileRotationNavigation(props: {
     const title = typeof titleKey === 'string' ? localeService.t(titleKey) : schema.key;
     const value = selected ? getOptionLabel(localeService, selected) : undefined;
 
-    if (status.hidden) return null;
+    if (status.hidden) {
+        return null;
+    }
 
     return (
         <div
@@ -439,7 +458,9 @@ function MobileMergeGroup(props: {
     const title = typeof titleKey === 'string' ? localeService.t(titleKey) : schema.key;
     const children = schema.children?.filter(hasMenuItem) ?? [];
 
-    if (status.hidden || children.length === 0) return null;
+    if (status.hidden || children.length === 0) {
+        return null;
+    }
 
     return (
         <section className="univer-grid univer-gap-2">
@@ -478,7 +499,9 @@ function MobileMergeOption(props: {
     const titleKey = item.title ?? item.tooltip;
     const title = typeof titleKey === 'string' ? localeService.t(titleKey) : schema.key;
 
-    if (status.hidden) return null;
+    if (status.hidden) {
+        return null;
+    }
 
     return (
         <button
@@ -512,7 +535,9 @@ function MobileNumberFormatGroup(props: {
     const localeService = useDependency(LocaleService);
     const status = useToolbarItemStatus(item);
 
-    if (status.hidden) return null;
+    if (status.hidden) {
+        return null;
+    }
 
     return (
         <section className="univer-grid univer-gap-2">
@@ -607,7 +632,9 @@ function MobileNumberFormatTab(props: {
     const title = option.label ? localeService.t(option.label) : '';
     const selected = title === currentValue;
 
-    if (status.hidden) return null;
+    if (status.hidden) {
+        return null;
+    }
 
     return (
         <button
@@ -742,7 +769,9 @@ function MobileTextStyleItem(props: {
     const Icon = iconName ? iconManager.get(iconName) : null;
     const titleKey = item.title ?? item.tooltip;
     const title = typeof titleKey === 'string' ? localeService.t(titleKey) : schema.key;
-    if (status.hidden) return null;
+    if (status.hidden) {
+        return null;
+    }
 
     return (
         <button
@@ -779,7 +808,9 @@ function MobileInlineSelector(props: { schema: SelectorMenuSchema; onExecute: (p
         ? selections[selections.length - 1]?.value
         : selections[0]?.value);
 
-    if (status.hidden || selections.length === 0) return null;
+    if (status.hidden || selections.length === 0) {
+        return null;
+    }
 
     return (
         <div
@@ -860,7 +891,9 @@ function MobileStyleNavigationItem(props: {
     const title = typeof titleKey === 'string' ? localeService.t(titleKey) : schema.key;
     const target = item.id === SetRangeTextColorCommand.id ? 'text' : 'background';
 
-    if (status.hidden) return null;
+    if (status.hidden) {
+        return null;
+    }
 
     return (
         <MobileActionRow
@@ -902,7 +935,9 @@ function MobileStyleRootItem(props: { schema: MenuSchemaWithItem; onOpenView: (v
         !isBorder &&
         isMobileSelectorItem(item)
     ) {
-        if (status.hidden) return null;
+        if (status.hidden) {
+            return null;
+        }
         return (
             <button
                 type="button"
@@ -953,7 +988,9 @@ function MobileStyleRootItem(props: { schema: MenuSchemaWithItem; onOpenView: (v
         );
     }
 
-    if (status.hidden) return null;
+    if (status.hidden) {
+        return null;
+    }
 
     return (
         <button
@@ -1270,6 +1307,7 @@ function MobileBorderStyleView(props: {
     onExecute: (params: IMobileStyleCommand) => void;
 }) {
     const { value, onExecute } = props;
+    const localeService = useDependency(LocaleService);
 
     return (
         <div
@@ -1301,7 +1339,7 @@ function MobileBorderStyleView(props: {
                         "
                         type={option.value}
                     />
-                    <span className="univer-flex-1 univer-text-left univer-text-sm">{option.value}</span>
+                    <span className="univer-flex-1 univer-text-left univer-text-sm">{localeService.t<LocaleKey>(option.label)}</span>
                     {value.style === option.value && (
                         <CheckMarkIcon
                             className="
@@ -1359,7 +1397,9 @@ function executeColor(
 }
 
 function isBorderInfo(value: unknown): value is IBorderInfo {
-    if (!value || typeof value !== 'object') return false;
+    if (!value || typeof value !== 'object') {
+        return false;
+    }
 
     return 'type' in value
         && BORDER_TYPES.has(value.type)
@@ -1386,10 +1426,14 @@ function isMobileSelectorSchema(schema: MenuSchemaWithItem): schema is SelectorM
 function isMobileNumberFormatSchema(
     schema: MenuSchemaWithItem
 ): schema is MenuSchemaWithItem & { item: ConfiguredMobileNumberFormatItem } {
-    if (!isMobileSelectorItem(schema.item) || !('mobileNumberFormat' in schema.item)) return false;
+    if (!isMobileSelectorItem(schema.item) || !('mobileNumberFormat' in schema.item)) {
+        return false;
+    }
 
     const config = schema.item.mobileNumberFormat;
-    if (!config || typeof config !== 'object') return false;
+    if (!config || typeof config !== 'object') {
+        return false;
+    }
 
     return 'kind' in config
         && config.kind === 'number-format'

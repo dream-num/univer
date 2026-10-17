@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        defaultStyleNumber: '기본 스타일 {0}',
+        customStyleNumber: '사용자 지정 스타일 {0}',
+        removeCustomStyle: '사용자 지정 스타일 {0} 삭제',
         calculatedColumn: '계산 열',
         columnFormula: '수식',
         columnFormulaHint: '적용하면 머리글과 합계 행을 제외한 데이터 셀 {0}개를 즉시 바꿉니다. 자동 채우기를 중지해도 기존 셀은 유지됩니다. 실행 취소할 수 있습니다.',

@@ -46,7 +46,6 @@ export function MobileCustomFormat(props: IMobileCustomFormatProps) {
         >
             <Input
                 className="univer-shrink-0"
-                size="large"
                 aria-label={title}
                 value={pattern}
                 placeholder={title}

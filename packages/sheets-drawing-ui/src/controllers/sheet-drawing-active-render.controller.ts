@@ -65,10 +65,31 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
 
     private _commandListener() {
         this.disposeWithMe(
+            this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
+                if (command.id !== SetWorksheetActiveOperation.id) {
+                    return;
+                }
+                const { unitId, subUnitId } = command.params as ISetWorksheetActiveOperationParams;
+                const { unit, unitId: contextUnitId } = this._context;
+                if (
+                    unitId !== contextUnitId || !unit.getSheetBySheetId(subUnitId) ||
+                    unit.getActiveSheet().getSheetId() === subUnitId
+                ) {
+                    return;
+                }
+
+                // Restoring the next sheet's viewport can expose offscreen drawings from the previous sheet.
+                this._clearDrawings(unitId, subUnitId);
+            })
+        );
+
+        this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === SetWorksheetActiveOperation.id) {
                     const { unitId, subUnitId } = command.params as ISetWorksheetActiveOperationParams;
-                    this._updateDrawings(unitId, subUnitId);
+                    if (unitId === this._context.unitId && subUnitId === this._context.unit.getActiveSheet().getSheetId()) {
+                        this._updateDrawings(unitId, subUnitId);
+                    }
                 }
             })
         );
@@ -77,7 +98,9 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
             this._context.activated$.subscribe((activated) => {
                 const { unit, unitId } = this._context;
                 if (activated) {
-                    this._updateDrawings(unitId, unit.getActiveSheet().getSheetId());
+                    const subUnitId = unit.getActiveSheet().getSheetId();
+                    this._clearDrawings(unitId, subUnitId);
+                    this._updateDrawings(unitId, subUnitId);
                 } else {
                     this._clearDrawings(unitId);
                 }
@@ -85,26 +108,21 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
         );
     }
 
-    private _clearDrawings(selfUnitId: string): void {
-        this._scheduleRender(() => {
-            const drawingMap = this._drawingManagerService.drawingManagerData;
-            const removeDrawings: IDrawingParam[] = [];
+    private _clearDrawings(unitId: string, keepSubUnitId?: string): void {
+        this._cancelPendingRender();
+        const subUnitMap = this._drawingManagerService.drawingManagerData[unitId] ?? {};
+        const removeDrawings: IDrawingParam[] = [];
+        for (const subUnitId of Object.keys(subUnitMap)) {
+            if (subUnitId === keepSubUnitId) {
+                continue;
+            }
+            for (const drawing of Object.values(subUnitMap[subUnitId]?.data ?? {})) {
+                removeDrawings.push(drawing);
+            }
+        }
 
-            Object.keys(drawingMap ?? {}).forEach((unitId) => {
-                const subUnitMap = drawingMap[unitId] ?? {};
-                Object.keys(subUnitMap).forEach((subUnitId) => {
-                    const drawingData = subUnitMap[subUnitId]?.data ?? {};
-                    Object.keys(drawingData).forEach((drawingId) => {
-                        if (unitId === selfUnitId) {
-                            removeDrawings.push(drawingData[drawingId]);
-                        }
-                    });
-                });
-            });
-
-            this._sheetDrawingService.removeNotification(removeDrawings);
-            this._drawingManagerService.removeNotification(removeDrawings);
-        });
+        this._sheetDrawingService.removeNotification(removeDrawings);
+        this._drawingManagerService.removeNotification(removeDrawings);
     }
 
     private _updateDrawings(showUnitId: string, showSubunitId: string): void {
@@ -117,14 +135,6 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
                 sheetSkeletonParam?.skeleton
             );
             const removeDrawings: IDrawingParam[] = failures.map(({ drawingId }) => drawingData[drawingId]);
-            for (const subUnitId of Object.keys(subUnitMap)) {
-                if (subUnitId !== showSubunitId) {
-                    for (const drawing of Object.values(subUnitMap[subUnitId]?.data ?? {})) {
-                        removeDrawings.push(drawing);
-                    }
-                }
-            }
-
             // JSON1 drawing mutations are applied to both stores, so derived geometry must agree.
             this._sheetDrawingService.refreshTransform(refreshedDrawings);
             this._drawingManagerService.refreshTransform(refreshedDrawings);

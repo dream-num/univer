@@ -25,12 +25,20 @@ import {
     ImageSourceType,
     IUndoRedoService,
     LogLevel,
+    mergeWorksheetSnapshotWithDefault,
     RedoCommandId,
     Tools,
     UndoCommandId,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { RemoveColByRangeCommand, RemoveRowByRangeCommand, SheetSkeletonService } from '@univerjs/sheets';
+import {
+    InsertSheetCommand,
+    RemoveColByRangeCommand,
+    RemoveRowByRangeCommand,
+    SetWorksheetActiveOperation,
+    SheetSkeletonService,
+} from '@univerjs/sheets';
 import {
     applySheetDrawingPlacement,
     drawingPositionToTransform,
@@ -87,6 +95,122 @@ async function insertDrawing(
 describe('SheetDrawingActiveRenderController', () => {
     beforeEach(() => vi.useFakeTimers());
     afterEach(() => vi.useRealTimers());
+
+    it.each([DrawingTypeEnum.DRAWING_IMAGE, DrawingTypeEnum.DRAWING_CHART])(
+        'removes old drawings before the target sheet can restore its viewport (%s)',
+        async (drawingType) => {
+            const bed = createTestBed();
+            const subscriptions = new Disposable();
+            try {
+                expect(bed.commandService.syncExecuteCommand(InsertSheetCommand.id, {
+                    unitId: bed.unitId,
+                    sheet: mergeWorksheetSnapshotWithDefault({ id: 'sheet2', name: 'Sheet2' }),
+                })).toBe(true);
+                expect(bed.commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+                    unitId: bed.unitId,
+                    subUnitId: bed.subUnitId,
+                })).toBe(true);
+                const image = await insertDrawing(bed, SheetDrawingAnchorType.None);
+                const drawing: ISheetDrawing = { ...image, drawingType };
+                const sheetService = bed.get(ISheetDrawingService);
+                const manager = bed.get(IDrawingManagerService);
+                const store = {
+                    [bed.subUnitId]: { data: { [drawing.drawingId]: drawing }, order: [drawing.drawingId] },
+                };
+                sheetService.registerDrawingData(bed.unitId, Tools.deepClone(store));
+                manager.registerDrawingData(bed.unitId, Tools.deepClone(store));
+                bed.get(SheetDrawingActiveRenderController);
+                bed.activated$.next(true);
+                vi.runOnlyPendingTimers();
+                const events: string[] = [];
+                subscriptions.disposeWithMe(sheetService.remove$.subscribe((drawings) => {
+                    if (drawings.some(({ drawingId }) => drawingId === drawing.drawingId)) {
+                        events.push('sheet-remove');
+                    }
+                }));
+                subscriptions.disposeWithMe(manager.remove$.subscribe((drawings) => {
+                    if (drawings.some(({ drawingId }) => drawingId === drawing.drawingId)) {
+                        events.push('manager-remove');
+                    }
+                }));
+                subscriptions.disposeWithMe(bed.workbook.activeSheet$.subscribe((sheet) => {
+                    if (sheet?.getSheetId() === 'sheet2') {
+                        events.push('target-sheet');
+                    }
+                }));
+
+                expect(bed.commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+                    unitId: bed.unitId,
+                    subUnitId: 'sheet2',
+                })).toBe(true);
+                expect(events).toEqual(['sheet-remove', 'manager-remove', 'target-sheet']);
+                vi.runOnlyPendingTimers();
+                expect(events).toEqual(['sheet-remove', 'manager-remove', 'target-sheet']);
+                expect(manager.getDrawingByParam(drawing)).toEqual(drawing);
+                expect(sheetService.getDrawingByParam(drawing)).toEqual(drawing);
+
+                const added = vi.fn();
+                subscriptions.disposeWithMe(manager.add$.subscribe(added));
+                expect(bed.commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+                    unitId: bed.unitId,
+                    subUnitId: bed.subUnitId,
+                })).toBe(true);
+                expect(bed.commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+                    unitId: bed.unitId,
+                    subUnitId: 'sheet2',
+                })).toBe(true);
+                vi.runOnlyPendingTimers();
+                expect(added).toHaveBeenCalledExactlyOnceWith([]);
+                expect(bed.commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+                    unitId: bed.unitId,
+                    subUnitId: bed.subUnitId,
+                })).toBe(true);
+                vi.runOnlyPendingTimers();
+                expect(added).toHaveBeenLastCalledWith([drawing]);
+            } finally {
+                subscriptions.dispose();
+                bed.univer.dispose();
+                bed.activated$.complete();
+            }
+        }
+    );
+
+    it('preserves pending activation for invalid targets and other workbooks', async () => {
+        const bed = createTestBed();
+        const subscriptions = new Disposable();
+        try {
+            const drawing = await insertDrawing(bed, SheetDrawingAnchorType.None);
+            bed.univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+                ...Tools.deepClone(bed.workbook.getSnapshot()),
+                id: 'other-workbook',
+            });
+            const manager = bed.get(IDrawingManagerService);
+            manager.registerDrawingData(bed.unitId, Tools.deepClone(
+                bed.get(ISheetDrawingService).getDrawingDataForUnit(bed.unitId)
+            ));
+            bed.get(SheetDrawingActiveRenderController);
+            bed.activated$.next(true);
+            const removed = vi.fn();
+            const added = vi.fn();
+            subscriptions.disposeWithMe(manager.remove$.subscribe(removed));
+            subscriptions.disposeWithMe(manager.add$.subscribe(added));
+            expect(bed.commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+                unitId: bed.unitId,
+                subUnitId: 'missing-sheet',
+            })).toBe(false);
+            expect(bed.commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+                unitId: 'other-workbook',
+                subUnitId: bed.subUnitId,
+            })).toBe(true);
+            expect(removed).not.toHaveBeenCalled();
+            vi.runOnlyPendingTimers();
+            expect(added).toHaveBeenCalledExactlyOnceWith([drawing]);
+        } finally {
+            subscriptions.dispose();
+            bed.univer.dispose();
+            bed.activated$.complete();
+        }
+    });
 
     it.each([SheetDrawingAnchorType.Position, SheetDrawingAnchorType.Both])(
         'isolates failed geometry and retries repaired drawings on activation (%s)',

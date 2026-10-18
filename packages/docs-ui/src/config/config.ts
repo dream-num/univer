@@ -39,6 +39,7 @@ export interface IDocFitToWidthOptions {
 export interface IUniverDocsUIConfig {
     menu?: MenuConfig;
     container?: HTMLElement | string;
+    /** Whether to show the document outline. Defaults to enabled for modern documents. */
     toc?: boolean;
     footer?: boolean;
     wordCount?: boolean;
@@ -57,7 +58,6 @@ export const DEFAULT_DOC_FIT_TO_WIDTH_OPTIONS: Required<Omit<IDocFitToWidthOptio
 };
 
 export const defaultPluginConfig: IUniverDocsUIConfig = {
-    toc: false,
     footer: true,
     wordCount: true,
     placeholder: true,

@@ -16,6 +16,7 @@
 
 import type { DocumentDataModel, IParagraph } from '@univerjs/core';
 import {
+    DocumentFlavor,
     fromEventSubject,
     getParagraphContentStartOffsets,
     getPlainText,
@@ -97,14 +98,14 @@ export function DocSideMenu() {
     const workbenchService = useDependency(IWorkbenchService);
     const rootUnitType = useObservable(workbenchService.rootUnitType$, null, true);
 
-    if (rootUnitType === UniverInstanceType.UNIVER_DOC && config?.toc) {
-        return <DocSideMenuContent />;
+    if (rootUnitType === UniverInstanceType.UNIVER_DOC && config?.toc !== false) {
+        return <DocSideMenuContent toc={config?.toc} />;
     }
 
     return null;
 }
 
-function DocSideMenuContent() {
+function DocSideMenuContent({ toc }: { toc?: boolean }) {
     const instanceService = useDependency(IUniverInstanceService);
     const localeService = useDependency(LocaleService);
     const currentDoc = useObservable(
@@ -113,6 +114,7 @@ function DocSideMenuContent() {
         false,
         [instanceService]
     );
+    const enabled = toc ?? (currentDoc?.getSnapshot().documentStyle?.documentFlavor === DocumentFlavor.MODERN);
     const renderManagerService = useDependency(IRenderManagerService);
     const documentData = useObservable(
         currentDoc
@@ -252,7 +254,7 @@ function DocSideMenuContent() {
         const observer = new ResizeObserver(measureOutline);
         observer.observe(menu);
         return () => observer.disconnect();
-    }, [mode, unitId, menus.length]);
+    }, [mode, unitId, menus.length, enabled]);
 
     useEffect(() => {
         const viewport = renderer?.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
@@ -291,7 +293,7 @@ function DocSideMenuContent() {
         setActiveId(menu.id);
     });
 
-    if (!currentDoc || isInternalEditorID(unitId) || !menus?.length) {
+    if (!enabled || !currentDoc || isInternalEditorID(unitId) || !menus?.length) {
         return null;
     }
 

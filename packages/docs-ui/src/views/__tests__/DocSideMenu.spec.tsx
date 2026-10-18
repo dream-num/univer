@@ -18,6 +18,7 @@ import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { RenderUnit } from '@univerjs/engine-render';
 import type { Root } from 'react-dom/client';
 import {
+    DocumentFlavor,
     IConfigService,
     IUniverInstanceService,
     LocaleService,
@@ -41,7 +42,7 @@ import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { genEmptyTable, genTableSource } from '../../commands/commands/table/table';
-import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
+import { defaultPluginConfig, DOCS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import enUS from '../../locale/en-US';
 import { DocEventManagerService } from '../../services/doc-event-manager.service';
 import { DocSideMenu } from '../DocSideMenu';
@@ -87,7 +88,7 @@ class TestResizeObserver {
     }
 }
 
-describe('DocSideMenu height invalidation', () => {
+describe('DocSideMenu', () => {
     let univer: Univer;
     let root: Root;
     let container: HTMLDivElement;
@@ -115,6 +116,16 @@ describe('DocSideMenu height invalidation', () => {
             return getBoundingClientRect.call(this);
         });
         univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+        injector.add([DocLayoutExecutorService]);
+        injector.add([IWorkbenchService, { useClass: WorkbenchService }]);
+        injector.get(IWorkbenchService);
+        const localeService = injector.get(LocaleService);
+        localeService.load({ [LocaleType.EN_US]: enUS });
+        localeService.setLocale(LocaleType.EN_US);
+        localeService.setDirection('ltr');
         container = document.createElement('div');
         document.body.appendChild(container);
         root = createRoot(container);
@@ -131,18 +142,44 @@ describe('DocSideMenu height invalidation', () => {
         vi.useRealTimers();
     });
 
+    it.each([
+        [DocumentFlavor.MODERN, undefined, true],
+        [DocumentFlavor.TRADITIONAL, undefined, false],
+        [DocumentFlavor.MODERN, false, false],
+        [DocumentFlavor.TRADITIONAL, true, true],
+        [DocumentFlavor.MODERN, true, true],
+        [DocumentFlavor.TRADITIONAL, false, false],
+    ])('applies outline visibility for flavor %s and toc %s', (documentFlavor, toc, visible) => {
+        const injector = univer.__getInjector();
+        injector.get(IConfigService).setConfig(DOCS_UI_PLUGIN_CONFIG_KEY, { ...defaultPluginConfig, toc });
+        const data = createDocument('doc', 'Document title');
+        data.documentStyle.documentFlavor = documentFlavor;
+        univer.createUnit(UniverInstanceType.UNIVER_DOC, data);
+
+        act(() => root.render(<RediContext.Provider value={{ injector }}><DocSideMenu /></RediContext.Provider>));
+
+        expect(container.querySelector('button[aria-expanded]') !== null).toBe(visible);
+    });
+
+    it('updates the default outline visibility when switching between document modes', () => {
+        const injector = univer.__getInjector();
+        injector.get(IConfigService).setConfig(DOCS_UI_PLUGIN_CONFIG_KEY, defaultPluginConfig);
+        for (const documentFlavor of [DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL]) {
+            const data = createDocument(String(documentFlavor), 'Document title');
+            data.documentStyle.documentFlavor = documentFlavor;
+            univer.createUnit(UniverInstanceType.UNIVER_DOC, data);
+        }
+        act(() => root.render(<RediContext.Provider value={{ injector }}><DocSideMenu /></RediContext.Provider>));
+        const instanceService = injector.get(IUniverInstanceService);
+        for (const [documentFlavor, visible] of [[DocumentFlavor.MODERN, true], [DocumentFlavor.TRADITIONAL, false], [DocumentFlavor.MODERN, true]] as const) {
+            act(() => instanceService.focusUnit(String(documentFlavor)));
+            expect(container.querySelector('button[aria-expanded]') !== null).toBe(visible);
+        }
+    });
+
     it('remeasures a shorter document instead of retaining the previous collapsed outline height', () => {
         const injector = univer.__getInjector();
-        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
-        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
-        injector.add([DocLayoutExecutorService]);
-        injector.add([IWorkbenchService, { useClass: WorkbenchService }]);
-        injector.get(IWorkbenchService);
         injector.get(IConfigService).setConfig(DOCS_UI_PLUGIN_CONFIG_KEY, { toc: true });
-        const localeService = injector.get(LocaleService);
-        localeService.load({ [LocaleType.EN_US]: enUS });
-        localeService.setLocale(LocaleType.EN_US);
-        localeService.setDirection('ltr');
         setDocsTableRenderViewportProvider(() => ({
             contentWidth: 1200,
             leadingInsetLeft: 384,

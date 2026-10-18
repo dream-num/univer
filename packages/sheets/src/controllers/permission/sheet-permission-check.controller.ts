@@ -26,6 +26,32 @@ import type {
     WorkbookPermissionPointConstructor,
 } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
+import {
+    CustomCommandExecutionError,
+    Direction,
+    Disposable,
+    DisposableCollection,
+    ICommandService,
+    Inject,
+    IPermissionService,
+    isICellData,
+    IUniverInstanceService,
+    LocaleService,
+    ObjectMatrix,
+    Rectangle,
+    Tools,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    deserializeRangeWithSheet,
+    deserializeRangeWithSheetWithCache,
+    IDefinedNamesService,
+    LexerTreeBuilder,
+    operatorToken,
+    sequenceNodeType,
+} from '@univerjs/engine-formula';
+import { UnitAction } from '@univerjs/protocol';
+import { Subject } from 'rxjs';
 import type { IAutoFillCommandParams } from '../../commands/commands/auto-fill.command';
 import type { IClearSelectionAllCommandParams } from '../../commands/commands/clear-selection-all.command';
 import type { IClearSelectionContentCommandParams } from '../../commands/commands/clear-selection-content.command';
@@ -56,32 +82,6 @@ import type {
 import type { ISetWorksheetShowCommandParams } from '../../commands/commands/set-worksheet-show.command';
 import type { ITextToNumberCommandParams } from '../../commands/commands/text-to-number.command';
 import type { LocaleKey } from '../../locale/types';
-import {
-    CustomCommandExecutionError,
-    Direction,
-    Disposable,
-    DisposableCollection,
-    ICommandService,
-    Inject,
-    IPermissionService,
-    isICellData,
-    IUniverInstanceService,
-    LocaleService,
-    ObjectMatrix,
-    Rectangle,
-    Tools,
-    UniverInstanceType,
-} from '@univerjs/core';
-import {
-    deserializeRangeWithSheet,
-    deserializeRangeWithSheetWithCache,
-    IDefinedNamesService,
-    LexerTreeBuilder,
-    operatorToken,
-    sequenceNodeType,
-} from '@univerjs/engine-formula';
-import { UnitAction } from '@univerjs/protocol';
-import { Subject } from 'rxjs';
 import { AutoFillCommand } from '../../commands/commands/auto-fill.command';
 import { ClearSelectionAllCommand } from '../../commands/commands/clear-selection-all.command';
 import { ClearSelectionContentCommand } from '../../commands/commands/clear-selection-content.command';
@@ -437,7 +437,9 @@ export class SheetPermissionCheckController extends Disposable {
                 errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.operatorSheetErr');
                 break;
 
-            // set row/column style
+            // Showing rows or columns is a sheet-style operation. Range edit protection
+            // locks cell values, and a visibility range covers the whole row or column,
+            // so that lock must not block show. Hide already skips this check. #4880
             case SetSpecificColsVisibleCommand.id:
                 params = commandInfo.params as ISetSpecificColsVisibleCommandParams;
 
@@ -445,7 +447,6 @@ export class SheetPermissionCheckController extends Disposable {
                     {
                         workbookTypes: [WorkbookEditablePermission],
                         worksheetTypes: [WorksheetEditPermission, WorksheetSetColumnStylePermission],
-                        rangeTypes: [RangeProtectionPermissionEditPoint],
                     },
                     params.ranges,
                     params.unitId,
@@ -460,7 +461,6 @@ export class SheetPermissionCheckController extends Disposable {
                     {
                         workbookTypes: [WorkbookEditablePermission],
                         worksheetTypes: [WorksheetEditPermission, WorksheetSetRowStylePermission],
-                        rangeTypes: [RangeProtectionPermissionEditPoint],
                     },
                     params.ranges,
                     params.unitId,
@@ -472,7 +472,6 @@ export class SheetPermissionCheckController extends Disposable {
                 permission = this.permissionCheckWithRanges({
                     workbookTypes: [WorkbookEditablePermission],
                     worksheetTypes: [WorksheetEditPermission, WorksheetSetColumnStylePermission],
-                    rangeTypes: [RangeProtectionPermissionEditPoint],
                 });
                 errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.setRowColStyleErr');
                 break;
@@ -480,7 +479,6 @@ export class SheetPermissionCheckController extends Disposable {
                 permission = this.permissionCheckWithRanges({
                     workbookTypes: [WorkbookEditablePermission],
                     worksheetTypes: [WorksheetEditPermission, WorksheetSetRowStylePermission],
-                    rangeTypes: [RangeProtectionPermissionEditPoint],
                 });
                 errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.setRowColStyleErr');
                 break;

@@ -34,6 +34,28 @@ univer.registerPlugin(UniverDocsUIPlugin);
 // Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
+## Document outline (`toc`)
+
+The optional `IUniverDocsUIConfig.toc` setting controls the left-hand document outline for heading navigation.
+
+| `toc` | Modern documents | Traditional documents |
+| --- | --- | --- |
+| Omitted | Enabled | Disabled |
+| `true` | Enabled | Enabled |
+| `false` | Disabled | Disabled |
+
+Set it when registering the plugin to override the document mode's default:
+
+```ts
+univer.registerPlugin(UniverDocsUIPlugin, {
+    toc: false,
+});
+```
+
+Preset integrations can pass the same option to `UniverDocsCorePreset({ container: 'app', toc: false })`.
+When enabled, the outline collapses if there is insufficient space or table content overlaps it,
+and reopens when the layout provides enough space without overlap.
+
 ## Format painter
 
 Use the shared Start ribbon format painter to copy character formatting. Include a paragraph

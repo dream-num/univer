@@ -39,6 +39,11 @@ export interface IDocFitToWidthOptions {
 export interface IUniverDocsUIConfig {
     menu?: MenuConfig;
     container?: HTMLElement | string;
+    /**
+     * Show the left-hand document outline for heading navigation.
+     * When omitted, enabled for modern documents and disabled for traditional documents.
+     * Explicit `true` or `false` overrides the default in either document mode.
+     */
     toc?: boolean;
     footer?: boolean;
     wordCount?: boolean;
@@ -57,7 +62,6 @@ export const DEFAULT_DOC_FIT_TO_WIDTH_OPTIONS: Required<Omit<IDocFitToWidthOptio
 };
 
 export const defaultPluginConfig: IUniverDocsUIConfig = {
-    toc: false,
     footer: true,
     wordCount: true,
     placeholder: true,

@@ -39,7 +39,11 @@ export interface IDocFitToWidthOptions {
 export interface IUniverDocsUIConfig {
     menu?: MenuConfig;
     container?: HTMLElement | string;
-    /** Whether to show the document outline. Defaults to enabled for modern documents. */
+    /**
+     * Show the left-hand document outline for heading navigation.
+     * When omitted, enabled for modern documents and disabled for traditional documents.
+     * Explicit `true` or `false` overrides the default in either document mode.
+     */
     toc?: boolean;
     footer?: boolean;
     wordCount?: boolean;

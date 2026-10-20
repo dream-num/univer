@@ -15,8 +15,6 @@
  */
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
-import type { ISheetDrawingPlacement } from '../../services/sheet-drawing-placement';
-import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import {
     Direction,
     DrawingTypeEnum,
@@ -52,12 +50,16 @@ import {
     SetColWidthCommand,
     SetRowHeightCommand,
     SetRowHiddenCommand,
+    SetSpecificColsVisibleCommand,
+    SetSpecificRowsVisibleCommand,
     SetWorksheetRowAutoHeightMutation,
     SheetInterceptorService,
     SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ISheetDrawingPlacement } from '../../services/sheet-drawing-placement';
+import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import { createSheetsDrawingTestBed } from '../../__tests__/create-sheets-drawing-test-bed';
 import { drawingPositionToTransform } from '../../basics/transform-position';
 import { InsertSheetDrawingCommand } from '../../commands/commands/insert-sheet-drawing.command';
@@ -382,8 +384,8 @@ describe('SheetDrawingTransformAffectedController', () => {
         });
     });
 
-    it('updates both-anchored drawings when hidden rows cut through their top edge', () => {
-        const skeleton = createSkeleton();
+    it('preserves both anchors when hidden rows cut through the drawing top edge', () => {
+        const skeleton = createSkeleton({ rowHeights: [20, 0, 0, 20, 20] });
         const drawing = createDrawing({
             drawingId: 'row-hidden-top-edge',
             sheetTransform: {
@@ -396,18 +398,15 @@ describe('SheetDrawingTransformAffectedController', () => {
             drawingData: { [drawing.drawingId]: drawing },
         });
 
-        const result = controller._getDrawingUndoForRowVisible(UNIT_ID, SUB_UNIT_ID, [
+        const result = controller._getDrawingUndoForRowAndColSize(UNIT_ID, SUB_UNIT_ID, [
             { startRow: 1, endRow: 2, startColumn: 0, endColumn: 9 },
         ]);
         const updatedDrawing = sheetDrawingService.getBatchUpdateOp.mock.calls[0][0][0];
 
         expect(updatedDrawing).toMatchObject({
             drawingId: 'row-hidden-top-edge',
-            transform: { left: 10, top: 20, width: 20, height: 20 },
-            sheetTransform: {
-                from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
-                to: { row: 2, column: 3, rowOffset: 0, columnOffset: 0 },
-            },
+            transform: { left: 10, top: 20, width: 20, height: 25 },
+            sheetTransform: drawing.sheetTransform,
         });
         expect(result.redos).toEqual([
             { id: SetDrawingApplyMutation.id, params: { unitId: UNIT_ID, subUnitId: SUB_UNIT_ID, op: 'update-redo', objects: [updatedDrawing], type: DrawingApplyType.UPDATE } },
@@ -1120,6 +1119,84 @@ describe('sheet drawing transforms without UI plugins', () => {
         expect(getDrawing(service)).toEqual(before);
         expect(await testBed.commandService.executeCommand(RedoCommandId)).toBe(true);
         expect(getDrawing(service)).toEqual(after);
+    });
+
+    it.each([
+        [true, SheetDrawingAnchorType.Position],
+        [false, SheetDrawingAnchorType.Position],
+        [true, undefined],
+        [false, undefined],
+        [true, SheetDrawingAnchorType.Both],
+        [false, SheetDrawingAnchorType.Both],
+        [true, SheetDrawingAnchorType.None],
+        [false, SheetDrawingAnchorType.None],
+    ])('restores row visibility=%s and anchor=%s across commands and saved resources', async (rows, anchorType) => {
+        const service = await insertDrawing(anchorType);
+        const skeleton = testBed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+        const positioned = applySheetDrawingPlacement(getDrawing(service), {
+            kind: SheetDrawingAnchorType.Position,
+            from: { row: 1, column: 1, rowOffset: 6, columnOffset: 12 },
+            width: 180,
+            height: 120,
+        }, skeleton);
+        expect(await testBed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [{ ...positioned, drawingId: 'offset-image', anchorType }],
+        })).toBe(true);
+        const readDrawing = (drawingService = service) => Tools.deepClone(drawingService.getDrawingByParam({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'offset-image',
+        })!);
+        const before = readDrawing();
+        const cell = skeleton.getNoMergeCellWithCoordByIndex(1, 1);
+        const params = {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            ranges: [{
+                startRow: rows ? 1 : 0,
+                endRow: rows ? 1 : 19,
+                startColumn: rows ? 0 : 1,
+                endColumn: rows ? 19 : 1,
+            }],
+        };
+        const hideId = rows ? SetRowHiddenCommand.id : SetColHiddenCommand.id;
+        const showId = rows ? SetSpecificRowsVisibleCommand.id : SetSpecificColsVisibleCommand.id;
+        expect(await testBed.commandService.executeCommand(hideId, params)).toBe(true);
+        const hidden = readDrawing();
+        if (anchorType === SheetDrawingAnchorType.None) {
+            expect(hidden.transform).toEqual(before.transform);
+        } else {
+            expect(hidden.sheetTransform.from).toEqual(before.sheetTransform.from);
+            expect(hidden.transform?.[rows ? 'top' : 'left']).toBe(rows ? cell.startY : cell.startX);
+            if (anchorType === SheetDrawingAnchorType.Both) {
+                expect(hidden.sheetTransform.to).toEqual(before.sheetTransform.to);
+                expect(hidden.transform?.[rows ? 'height' : 'width'])
+                    .toBeLessThan(before.transform?.[rows ? 'height' : 'width'] ?? 0);
+            } else {
+                expect(hidden.transform).toMatchObject({ width: 180, height: 120 });
+                expect(hidden.sheetTransform.to).not.toEqual(before.sheetTransform.to);
+            }
+        }
+        expect(await testBed.commandService.executeCommand(UndoCommandId)).toBe(true);
+        expect(readDrawing()).toEqual(before);
+        expect(await testBed.commandService.executeCommand(RedoCommandId)).toBe(true);
+        expect(readDrawing()).toEqual(hidden);
+
+        const snapshot = testBed.get(IResourceLoaderService).saveUnit<IWorkbookData>('test')!;
+        const restored = createSheetsDrawingTestBed(snapshot);
+        try {
+            const restoredService = restored.get(ISheetDrawingService);
+            expect(readDrawing(restoredService)).toEqual(hidden);
+            expect(await restored.commandService.executeCommand(showId, params)).toBe(true);
+            expect(readDrawing(restoredService)).toEqual(before);
+            expect(await restored.commandService.executeCommand(UndoCommandId)).toBe(true);
+            expect(readDrawing(restoredService)).toEqual(hidden);
+            expect(await restored.commandService.executeCommand(RedoCommandId)).toBe(true);
+            expect(readDrawing(restoredService)).toEqual(before);
+        } finally {
+            restored.univer.dispose();
+        }
     });
 
     it('refreshes direct auto-height mutations and their inverse without UI', async () => {

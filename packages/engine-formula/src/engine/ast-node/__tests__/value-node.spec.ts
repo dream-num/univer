@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { ErrorType } from '../../../basics/error-type';
 import { createFunctionTestBed } from '../../../functions/__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_INFORMATION } from '../../../functions/information/function-names';
 import { Isnumber } from '../../../functions/information/isnumber';
@@ -33,8 +34,7 @@ import { Interpreter } from '../../interpreter/interpreter';
 import { generateExecuteAstNodeData } from '../../utils/ast-node-tool';
 import { BaseAstNode } from '../base-ast-node';
 
-function createCalculate() {
-    const testBed = createFunctionTestBed();
+function createCalculate(testBed: ReturnType<typeof createFunctionTestBed>) {
     const currentConfigService = testBed.get(IFormulaCurrentConfigService);
     const runtimeService = testBed.get(IFormulaRuntimeService);
     const lexer = testBed.get(Lexer);
@@ -63,16 +63,30 @@ function createCalculate() {
 
     return (formula: string) => {
         const lexerNode = lexer.treeBuilder(formula);
-        if (!(lexerNode instanceof LexerNode)) throw new TypeError(`Failed to parse formula: ${formula}`);
+        if (!(lexerNode instanceof LexerNode)) {
+            throw new TypeError(`Failed to parse formula: ${formula}`);
+        }
         const astNode = astTreeBuilder.parse(lexerNode);
-        if (!(astNode instanceof BaseAstNode)) throw new TypeError(`Failed to build AST: ${formula}`);
+        if (!(astNode instanceof BaseAstNode)) {
+            throw new TypeError(`Failed to build AST: ${formula}`);
+        }
         return getObjectValue(interpreter.execute(generateExecuteAstNodeData(astNode)));
     };
 }
 
 describe('ValueNode number literals', () => {
+    let testBed: ReturnType<typeof createFunctionTestBed>;
+
+    beforeEach(() => {
+        testBed = createFunctionTestBed();
+    });
+
+    afterEach(() => {
+        testBed.univer.dispose();
+    });
+
     it('treats non-canonical number literals as numbers', () => {
-        const calculate = createCalculate();
+        const calculate = createCalculate(testBed);
 
         expect(calculate('=12.50')).toBe(12.5);
         expect(calculate('=.5')).toBe(0.5);
@@ -85,7 +99,7 @@ describe('ValueNode number literals', () => {
     });
 
     it('converts number literals to canonical text', () => {
-        const calculate = createCalculate();
+        const calculate = createCalculate(testBed);
 
         expect(calculate('=12.50&""')).toStrictEqual([['12.5']]);
         expect(calculate('=1.0&"x"')).toStrictEqual([['1x']]);
@@ -95,16 +109,28 @@ describe('ValueNode number literals', () => {
     });
 
     it('treats number literals in array constants as numbers', () => {
-        const calculate = createCalculate();
+        const calculate = createCalculate(testBed);
 
         expect(calculate('={1.50,.5;007,1E3}')).toStrictEqual([[1.5, 0.5], [7, 1000]]);
     });
 
     it('keeps quoted number text as text', () => {
-        const calculate = createCalculate();
+        const calculate = createCalculate(testBed);
 
         expect(calculate('="12.50"')).toBe('12.50');
         expect(calculate('="007"&""')).toStrictEqual([['007']]);
         expect(calculate('=ISNUMBER("12.50")')).toBe(false);
+    });
+
+    it('returns NUM errors for overflowing scalar and array number literals', () => {
+        const calculate = createCalculate(testBed);
+
+        expect(calculate('=1E309')).toBe(ErrorType.NUM);
+        expect(calculate('=-1E309')).toBe(ErrorType.NUM);
+        expect(calculate('=ISNUMBER(1E309)')).toBe(false);
+        expect(calculate('={1E309,-1E309;1.50,2}')).toStrictEqual([
+            [ErrorType.NUM, ErrorType.NUM],
+            [1.5, 2],
+        ]);
     });
 });

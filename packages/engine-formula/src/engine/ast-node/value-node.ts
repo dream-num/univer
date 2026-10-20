@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ErrorType } from '../../basics/error-type';
-import type { FunctionNode } from './';
 import { DateSystem } from '@univerjs/core';
+import type { ErrorType } from '../../basics/error-type';
+import type { FunctionNode } from './function-node';
 import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET } from '../../basics/error-type';
 import { LexerNode } from '../analysis/lexer-node';

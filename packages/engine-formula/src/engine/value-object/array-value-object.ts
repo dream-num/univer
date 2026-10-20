@@ -15,8 +15,8 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { callbackMapFnType, IArrayValueObject } from './base-value-object';
 import { DateSystem, isRealNum } from '@univerjs/core';
+import type { callbackMapFnType, IArrayValueObject } from './base-value-object';
 import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
@@ -1994,7 +1994,7 @@ export class ArrayValueObject extends BaseValueObject {
     }
 }
 
-const NUMBER_LITERAL_REGEX = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i;
+const NUMBER_LITERAL_REGEX = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i;
 
 export class ValueObjectFactory {
     static create(
@@ -2054,7 +2054,7 @@ export class ValueObjectFactory {
      *
      * @param token The unquoted token from the formula source.
      * @param dateSystem The workbook date system.
-     * @returns The number value object, or null when the token is not a number literal.
+     * @returns The number value object, a NUM error on overflow, or null when the token is not a number literal.
      */
     static createNumberLiteral(token: string, dateSystem: DateSystem = DateSystem.Date1900): Nullable<BaseValueObject> {
         const tokenTrim = token.trim();
@@ -2062,7 +2062,7 @@ export class ValueObjectFactory {
             return null;
         }
 
-        return NumberValueObject.create(Number(tokenTrim)).withDateSystem(dateSystem);
+        return createNumberValueObjectByRawValue(Number(tokenTrim)).withDateSystem(dateSystem);
     }
 }
 

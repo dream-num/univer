@@ -14,12 +14,46 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ImageSourceType } from '@univerjs/core';
+import { DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ImageSourceType, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { SetDrawingSelectedOperation } from '@univerjs/drawing';
-import { SetDrawingArrangeCommand, SetSheetDrawingCommand, SetWorksheetBackgroundImageCommand } from '@univerjs/sheets-drawing';
+import {
+    CanvasColorService,
+    ICanvasColorService,
+    IRenderManagerService,
+    SHEET_VIEWPORT_KEY,
+    Spreadsheet,
+    Viewport,
+} from '@univerjs/engine-render';
+import {
+    ISheetDrawingService,
+    SetDrawingArrangeCommand,
+    SetSheetDrawingCommand,
+    SetWorksheetBackgroundImageCommand,
+} from '@univerjs/sheets-drawing';
+import {
+    ISheetSelectionRenderService,
+    SHEET_VIEW_KEY,
+    SheetSelectionRenderService,
+    SheetSkeletonManagerService,
+} from '@univerjs/sheets-ui';
+import {
+    DesktopLocalFileService,
+    DesktopMessageService,
+    ILocalFileService,
+    IMessageService,
+    IPlatformService,
+    IShortcutService,
+    IUIPartsService,
+    IUIRuntimeScopeService,
+    PlatformService,
+    ShortcutService,
+    UIPartsService,
+    UIRuntimeScopeService,
+} from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
 import { GroupSheetDrawingCommand } from '../../commands/commands/group-sheet-drawing.command';
 import { UngroupSheetDrawingCommand } from '../../commands/commands/ungroup-sheet-drawing.command';
 import { SheetDrawingUpdateController } from '../sheet-drawing-update.controller';
@@ -133,6 +167,74 @@ function createController(options?: { imageParam?: unknown; openFiles?: unknown[
 }
 
 describe('SheetDrawingUpdateController', () => {
+    it.each([
+        [600, 100, 500, 500 / 6],
+        [100, 600, 500 / 6, 500],
+        [1000, 800, 500, 400],
+        [400, 100, 400, 100],
+        [100, 400, 100, 400],
+        [500, 100, 500, 100],
+        [500, 500, 500, 500],
+    ])('fits a %i × %i floating image without enlarging it or changing its aspect ratio', async (width, height, expectedWidth, expectedHeight) => {
+        const canvasContext = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
+            return { canvas: this, setTransform: vi.fn(), clearRect: vi.fn() } as unknown as CanvasRenderingContext2D;
+        });
+        const imageConstructor = vi.spyOn(globalThis, 'Image').mockImplementation(function () {
+            const image = document.createElement('img');
+            image.width = width;
+            image.height = height;
+            queueMicrotask(() => image.dispatchEvent(new Event('load')));
+            return image;
+        });
+        const bed = createSheetsDrawingUiTestBed(undefined, [
+            [ICanvasColorService, { useClass: CanvasColorService }],
+            [IPlatformService, { useClass: PlatformService }],
+            [IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }],
+            [IShortcutService, { useClass: ShortcutService }],
+            [ILocalFileService, { useClass: DesktopLocalFileService }],
+            [IUIPartsService, { useClass: UIPartsService }],
+            [IMessageService, { useClass: DesktopMessageService }],
+        ]);
+
+        try {
+            const renderManager = bed.get(IRenderManagerService);
+            const render = renderManager.createRender(bed.unitId);
+            render.engine.resizeBySize(800, 600);
+            render.scene.transformByState({ width: 10000, height: 10000 });
+            bed.injector.createInstance(Viewport, SHEET_VIEWPORT_KEY.VIEW_MAIN, render.scene, {
+                left: 0,
+                top: 0,
+                right: 0,
+                bottom: 0,
+            });
+            const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
+            render.mainComponent = spreadsheet;
+            render.components.set(SHEET_VIEW_KEY.MAIN, spreadsheet);
+            render.scene.addObject(spreadsheet);
+            renderManager.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService]);
+            render.with(SheetSkeletonManagerService).setCurrent({ sheetId: bed.subUnitId });
+            renderManager.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [
+                ISheetSelectionRenderService,
+                { useClass: SheetSelectionRenderService },
+            ]);
+            renderManager.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetDrawingUpdateController]);
+            const controller = render.with(SheetDrawingUpdateController);
+
+            await expect(controller.insertFloatImageByFile(new File(['image'], 'screenshot.png', {
+                type: 'image/png',
+            }))).resolves.toBe(true);
+
+            const drawings = Object.values(bed.get(ISheetDrawingService).getDrawingData(bed.unitId, bed.subUnitId));
+            expect(drawings).toHaveLength(1);
+            expect(drawings[0].transform?.width).toBeCloseTo(expectedWidth, 1);
+            expect(drawings[0].transform?.height).toBeCloseTo(expectedHeight, 1);
+        } finally {
+            bed.univer.dispose();
+            imageConstructor.mockRestore();
+            canvasContext.mockRestore();
+        }
+    });
+
     it('uploads and sets a worksheet background image', async () => {
         const file = { name: 'background.png' };
         const imageParam = {

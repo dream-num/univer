@@ -25,7 +25,6 @@ import type {
     ISheetDrawing,
     ISheetDrawingPosition,
 } from '@univerjs/sheets-drawing';
-import type { LocaleKey } from '../locale/types';
 import {
     BooleanNumber,
     BuildTextUtils,
@@ -78,6 +77,7 @@ import {
 } from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 import { getWorksheetBackgroundImageScale } from '../utils/worksheet-background-image';
@@ -297,7 +297,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         if (width > DRAWING_IMAGE_WIDTH_LIMIT || height > DRAWING_IMAGE_HEIGHT_LIMIT) {
             const scaleWidth = DRAWING_IMAGE_WIDTH_LIMIT / width;
             const scaleHeight = DRAWING_IMAGE_HEIGHT_LIMIT / height;
-            scale = Math.max(scaleWidth, scaleHeight);
+            scale = Math.min(scaleWidth, scaleHeight);
         }
 
         const sheetSkeletonParam = this._sheetSkeletonService.getSkeletonParam(unitId, subUnitId);

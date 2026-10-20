@@ -18,6 +18,7 @@ import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import type { ITableManualFilterItem, ITableRecordFilterItem } from '@univerjs/sheets-table';
 import {
     FilterSelectionMode,
+    getRecordValueKey,
     ICommandService,
     Inject,
     Injector,
@@ -34,7 +35,6 @@ import {
 } from '@univerjs/core';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
 import {
-    getTableRecordValueKey,
     SetSheetTableFilterCommand,
     SetSheetTableFilterMutation,
     SheetTableService,
@@ -395,9 +395,9 @@ describe('SheetsTableUiService', () => {
             ],
         });
         const items = service.getTableFilterItems(unitId, 'sheet1', 'table-orders', 1);
-        const numberKey = getTableRecordValueKey({ type: RecordValueType.Number, value: 12 });
-        const stringKey = getTableRecordValueKey({ type: RecordValueType.String, value: '12' });
-        const eightKey = getTableRecordValueKey({ type: RecordValueType.Number, value: 8 });
+        const numberKey = getRecordValueKey({ type: RecordValueType.Number, value: 12 });
+        const stringKey = getRecordValueKey({ type: RecordValueType.String, value: '12' });
+        const eightKey = getRecordValueKey({ type: RecordValueType.Number, value: 8 });
         expect(items.data.map((item) => ({ title: item.title, valueKey: item.valueKey }))).toEqual([
             { title: '12', valueKey: numberKey },
             { title: '12', valueKey: stringKey },
@@ -499,7 +499,7 @@ describe('SheetsTableUiService', () => {
             values: [{ type: RecordValueType.String, value: 'book' }],
         });
         expect(service.getTableFilterItems(unitId, 'sheet1', 'table-orders', 0).data[0].valueKey).toBe(
-            getTableRecordValueKey({ type: RecordValueType.String, value: 'book' })
+            getRecordValueKey({ type: RecordValueType.String, value: 'book' })
         );
 
         await commandService.executeCommand(UndoCommand.id);
@@ -507,7 +507,7 @@ describe('SheetsTableUiService', () => {
 
         await commandService.executeCommand(RedoCommand.id);
         expect(service.getTableFilterItems(unitId, 'sheet1', 'table-orders', 0).data[0].valueKey).toBe(
-            getTableRecordValueKey({ type: RecordValueType.String, value: 'book' })
+            getRecordValueKey({ type: RecordValueType.String, value: 'book' })
         );
     });
 });

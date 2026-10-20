@@ -521,7 +521,7 @@ export const DeleteLeftCommand: ICommand<IDeleteBoundaryParams> = {
         }
 
         if (activeRange.collapsed && !segmentId) {
-            const hidden = skeleton.getViewModel().getCollapsedHeadingAtOffset(activeRange.startOffset - 1);
+            const hidden = docSkeletonManagerService?.getViewModel().getCollapsedHeadingAtOffset(activeRange.startOffset - 1);
             if (hidden) {
                 return commandService.executeCommand(SetHeadingCollapsedCommand.id, {
                     unitId,
@@ -767,7 +767,7 @@ export const DeleteRightCommand: ICommand<IDeleteBoundaryParams> = {
         }
 
         if (activeRange.collapsed && !segmentId) {
-            const hidden = skeleton.getViewModel().getCollapsedHeadingAtOffset(activeRange.startOffset + 1);
+            const hidden = docSkeletonManagerService?.getViewModel().getCollapsedHeadingAtOffset(activeRange.startOffset + 1);
             if (hidden) {
                 return commandService.executeCommand(SetHeadingCollapsedCommand.id, {
                     unitId: docDataModel.getUnitId(),

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { FilterSelectionMode, IRange, IStyleData, Nullable, RecordValueType } from '@univerjs/core';
+import type { FilterSelectionMode, IRange, IStyleData, Nullable, RecordValue } from '@univerjs/core';
 import type {
     SheetsTableButtonStateEnum,
     SheetsTableSortStateEnum,
@@ -74,13 +74,6 @@ export interface ITableFilterJSON {
     tableSortInfo?: { columnIndex: number; sortState: SheetsTableSortStateEnum };
 }
 
-export type TableRecordValue =
-    | { type: RecordValueType.Blank }
-    | { type: RecordValueType.String; value: string }
-    | { type: RecordValueType.Number | RecordValueType.Date; value: number }
-    | { type: RecordValueType.Boolean; value: boolean }
-    | { type: RecordValueType.Error; value: string };
-
 export type ITableFilterItem =
     | ITableManualFilterItem
     | ITableConditionFilterItem
@@ -120,7 +113,7 @@ export interface ITableColorFilterItem {
 export interface ITableRecordFilterItem {
     filterType: TableColumnFilterTypeEnum.record;
     mode: FilterSelectionMode.Include | FilterSelectionMode.Exclude;
-    values: TableRecordValue[];
+    values: RecordValue[];
 }
 
 export interface ITableDateFilterInfo {

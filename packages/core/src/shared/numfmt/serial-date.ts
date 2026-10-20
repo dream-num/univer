@@ -101,7 +101,7 @@ export function excelSerialToDateTimeParts(
     serial: number,
     options: IDateSystemOptions
 ): IExcelDateTimeParts | null {
-    if (!Number.isFinite(serial) || serial < 0) {
+    if (!Number.isFinite(serial) || serial < 0 || serial >= getDateSystemMaxSerial(options.dateSystem) + 1) {
         return null;
     }
 

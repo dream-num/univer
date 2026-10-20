@@ -307,6 +307,8 @@ describe('line-adjustment', () => {
                     fontBoundingBoxDescent: 3,
                     actualBoundingBoxAscent: 10,
                     actualBoundingBoxDescent: 2,
+                    actualBoundingBoxLeft: 0,
+                    actualBoundingBoxRight: 0,
                 });
                 FontCache.setFontMeasureCache(outlineFont, text, {
                     width: text === '\r' ? 0 : 10 * 64,
@@ -314,6 +316,8 @@ describe('line-adjustment', () => {
                     fontBoundingBoxDescent: 3 * 64,
                     actualBoundingBoxAscent: 10 * 64,
                     actualBoundingBoxDescent: 2 * 64,
+                    actualBoundingBoxLeft: 0,
+                    actualBoundingBoxRight: 0,
                 });
             }
             try {
@@ -386,6 +390,8 @@ describe('line-adjustment', () => {
                 fontBoundingBoxDescent: 3,
                 actualBoundingBoxAscent: 10,
                 actualBoundingBoxDescent: 2,
+                actualBoundingBoxLeft: 0,
+                actualBoundingBoxRight: 0,
             });
         }
         const { ctx, viewModel, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {

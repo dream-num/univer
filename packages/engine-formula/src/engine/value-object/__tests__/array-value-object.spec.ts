@@ -15,9 +15,9 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { BaseValueObject } from '../base-value-object';
 import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
+import type { BaseValueObject } from '../base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../../../basics/inverted-index-cache';
 import { compareToken } from '../../../basics/token';
@@ -441,6 +441,43 @@ describe('arrayValueObject test', () => {
     });
 
     describe('ValueObjectFactory', () => {
+        it.each([
+            ['12.50', 12.5],
+            ['1.', 1],
+            ['+.5', 0.5],
+            ['007', 7],
+            ['1.5e-2', 0.015],
+        ])('parses decimal formula number literals: %s', (token, expected) => {
+            const value = ValueObjectFactory.createNumberLiteral(token, DateSystem.Date1904);
+
+            expect(value?.isNumber()).toBe(true);
+            expect(value?.getValue()).toBe(expected);
+            expect(value?.getDateSystem()).toBe(DateSystem.Date1904);
+        });
+
+        it.each(['', '0x10', '0b11', 'Infinity', '1e+', '1.2.3', '"12.50"'])(
+            'rejects tokens outside decimal formula number syntax: %s',
+            (token) => {
+                expect(ValueObjectFactory.createNumberLiteral(token)).toBeNull();
+            }
+        );
+
+        it('rejects long malformed number literals', () => {
+            const token = `${'1'.repeat(32_000)}x`;
+
+            expect(ValueObjectFactory.createNumberLiteral(token)).toBeNull();
+        });
+
+        it.each(['000123456', '123456789123456789'])(
+            'preserves numeric cell text when formula literals are parsed separately: %s',
+            (token) => {
+                const value = ValueObjectFactory.create(token, true);
+
+                expect(value.isString()).toBe(true);
+                expect(value.getValue()).toBe(token);
+            }
+        );
+
         it('ValueObjectFactory create BooleanValueObject ', () => {
             let booleanValueObject = ValueObjectFactory.create(true);
 

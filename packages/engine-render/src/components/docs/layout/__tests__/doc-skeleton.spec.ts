@@ -15,8 +15,6 @@
  */
 
 import type { IDocumentData, IParagraph } from '@univerjs/core';
-import type { IDocumentLayoutSnapshot } from '../../document-layout-presentation';
-import type { IDocumentLayoutPageGeometryPublication } from '../document-layout-publication';
 import {
     BooleanNumber,
     ColumnLayoutType,
@@ -33,6 +31,7 @@ import {
     HorizontalAlign,
     LocaleService,
     LocaleType,
+    NamedStyleType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PageOrientType,
@@ -52,6 +51,8 @@ import {
     WrapTextType,
 } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { IDocumentLayoutSnapshot } from '../../document-layout-presentation';
+import type { IDocumentLayoutPageGeometryPublication } from '../document-layout-publication';
 import { DocumentSkeletonPageType, GlyphType, PageLayoutType } from '../../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../../basics/vector2';
 import { setDocsCustomBlockRenderViewportProvider } from '../../custom-block-render-viewport';
@@ -7816,5 +7817,211 @@ describe('doc skeleton', () => {
 
         skeleton.dispose();
         univer.dispose();
+    });
+});
+
+describe('modern heading collapse', () => {
+    it('retains the visible layout until a fold generation fills the viewport, including interrupted reversals', () => {
+        const univer = new Univer();
+        const content = Array.from({ length: 100 }, (_, index) => `Paragraph ${index} fills the document.\r`).join('');
+        const model = createDocumentModelWithStyle(content, {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        model.getBody()!.paragraphs = [...content.matchAll(/\r/g)].map((match, index) => ({ startIndex: match.index, paragraphId: `paragraph-${index}` }));
+        const paragraphs = model.getBody()!.paragraphs!;
+        paragraphs[40].paragraphStyle = { namedStyleType: NamedStyleType.HEADING_1 };
+        paragraphs[60].paragraphStyle = { namedStyleType: NamedStyleType.HEADING_1 };
+        const view = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(view, univer.__getInjector().get(LocaleService));
+        skeleton.calculate();
+        const baseline = skeleton.getSkeletonData()!;
+        const baselineGeometry = normalizeSkeleton(baseline);
+        const minimumPublicationHeight = baseline.pages[0].height * 0.65;
+        try {
+            for (const collapsed of [true, false, true, false]) {
+                paragraphs[40].headingCollapsed = collapsed;
+                view.reset(model);
+                const previous = skeleton.getSkeletonData();
+                const generation = skeleton.startIncrementalLayout({
+                    reason: 'edit',
+                    anchor: paragraphs[40].startIndex,
+                    minimumPublicationHeight,
+                });
+                let published = false;
+                for (let step = 0; step < 150; step++) {
+                    const progress = skeleton.stepIncrementalLayout(generation, 0, 1);
+                    if (!progress.didPublish) {
+                        expect(skeleton.getSkeletonData()).toBe(previous);
+                    } else {
+                        published = true;
+                        expect(progress.anchorReady).toBe(true);
+                        expect(progress.complete).toBe(false);
+                        expect(skeleton.getSkeletonData()!.pages[0].height).toBeGreaterThanOrEqual(minimumPublicationHeight);
+                        expect(skeleton.findNodePositionByCharIndex(paragraphs[60].startIndex - 1)).toBeDefined();
+                        break;
+                    }
+                }
+                expect(published).toBe(true);
+                skeleton.cancelIncrementalLayout(generation);
+            }
+            completeIncrementalLayout(skeleton, paragraphs[40].startIndex);
+            expect(normalizeSkeleton(skeleton.getSkeletonData())).toEqual(baselineGeometry);
+        } finally {
+            skeleton.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each([false, true])('omits folded content from geometry and preserves model offsets (incremental: %s)', (incremental) => {
+        const univer = new Univer();
+        const locale = univer.__getInjector().get(LocaleService);
+        const model = new DocumentDataModel({
+            id: 'fold-layout',
+            documentStyle: { documentFlavor: DocumentFlavor.MODERN, pageSize: { width: 400, height: Number.POSITIVE_INFINITY } },
+            body: {
+                dataStream: 'Parent\rChild\rHidden text\rPeer\rTail\r\n',
+                paragraphs: [
+                    { startIndex: 6, paragraphId: 'parent', headingCollapsed: true, paragraphStyle: { namedStyleType: NamedStyleType.HEADING_1 } },
+                    { startIndex: 12, paragraphId: 'child', headingCollapsed: true, paragraphStyle: { namedStyleType: NamedStyleType.HEADING_2 } },
+                    { startIndex: 24, paragraphId: 'hidden' },
+                    { startIndex: 29, paragraphId: 'peer', paragraphStyle: { namedStyleType: NamedStyleType.HEADING_1 } },
+                    { startIndex: 34, paragraphId: 'tail' },
+                ],
+                sectionBreaks: [{ startIndex: 35, sectionId: 'section' }],
+            },
+        });
+        const view = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(view, locale);
+        const layout = () => {
+            if (incremental) {
+                completeIncrementalLayout(skeleton, 6);
+            } else {
+                skeleton.calculate();
+            }
+        };
+        try {
+            layout();
+            const paragraphs = () => skeleton.getSkeletonData()!.pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines.map((line) => line.paragraphIndex))));
+            expect(paragraphs()).toEqual([6, 29, 34]);
+            expect(skeleton.findNodePositionByCharIndex(15)).toBeUndefined();
+            expect(skeleton.findNodeByCharIndex(25)?.content).toBe('P');
+            const collapsedHeight = skeleton.getSkeletonData()!.pages[0].height;
+            model.getBody()!.paragraphs![0].headingCollapsed = false;
+            view.reset(model);
+            skeleton.makeDirty(true);
+            layout();
+            expect(paragraphs()).toEqual([6, 12, 29, 34]);
+            expect(skeleton.findNodePositionByCharIndex(15)).toBeUndefined();
+            model.getBody()!.paragraphs![1].headingCollapsed = false;
+            view.reset(model);
+            skeleton.makeDirty(true);
+            layout();
+            expect(paragraphs()).toEqual([6, 12, 24, 29, 34]);
+            expect(skeleton.findNodePositionByCharIndex(15)).toBeDefined();
+            expect(skeleton.getSkeletonData()!.pages[0].height).toBeGreaterThan(collapsedHeight);
+            if (incremental) {
+                model.getBody()!.paragraphs![0].headingCollapsed = true;
+                view.reset(model);
+                const generation = skeleton.startIncrementalLayout({ reason: 'edit', anchor: 6 });
+                skeleton.stepIncrementalLayout(generation, 0, 1);
+                skeleton.cancelIncrementalLayout(generation);
+                completeIncrementalLayout(skeleton, 6);
+                expect(paragraphs()).toEqual([6, 29, 34]);
+            }
+            expect(model.getBody()!.dataStream).toBe('Parent\rChild\rHidden text\rPeer\rTail\r\n');
+        } finally {
+            skeleton.dispose();
+            view.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each([false, true])('hides whole tables and columns without treating their headings as outer boundaries (%s)', (incremental) => {
+        const T = DataStreamTreeTokenType;
+        const prefix = 'Heading\r';
+        const table = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cell\r\n${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+        const columns = `${T.COLUMN_GROUP_START}${T.COLUMN_START}Left\r${T.COLUMN_END}${T.COLUMN_START}Right\r${T.COLUMN_END}${T.COLUMN_GROUP_END}`;
+        const dataStream = `${prefix}${table}\r${columns}Peer\rTail\r\n`;
+        const peerOffset = dataStream.indexOf('Peer');
+        const paragraphs = [...dataStream.matchAll(/\r/g)].map((match, index) => ({
+            startIndex: match.index,
+            paragraphId: `block-p${index}`,
+            headingCollapsed: index === 0,
+            paragraphStyle: match.index === 7 || match.index === peerOffset + 4 || index === 1
+                ? { namedStyleType: NamedStyleType.HEADING_1 }
+                : undefined,
+        }));
+        const model = new DocumentDataModel({
+            id: 'fold-blocks',
+            documentStyle: { documentFlavor: DocumentFlavor.MODERN, pageSize: { width: 400, height: Number.POSITIVE_INFINITY } },
+            body: {
+                dataStream,
+                paragraphs,
+                sectionBreaks: [...dataStream.matchAll(/\n/g)].map((match, index) => ({ startIndex: match.index, sectionId: `block-s${index}` })),
+                tables: [{ tableId: 'table', startIndex: prefix.length, endIndex: prefix.length + table.length }],
+                columnGroups: [{ columnGroupId: 'columns', startIndex: prefix.length + table.length + 1, endIndex: prefix.length + table.length + columns.length, columns: [{ columnId: 'left', widthRatio: 1 }, { columnId: 'right', widthRatio: 1 }] }],
+            },
+            tableSource: { table: {
+                tableId: 'table',
+                align: TableAlignmentType.START,
+                indent: { v: 0 },
+                textWrap: TableTextWrapType.NONE,
+                position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
+                dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                size: { type: TableSizeType.SPECIFIED, width: { v: 80 } },
+                cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
+                tableRows: [{ tableCells: [{}], trHeight: { val: { v: 0 }, hRule: TableRowHeightRule.AUTO } }],
+                tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 80 } } }],
+            } },
+        });
+        const univer = new Univer();
+        const view = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(view, univer.__getInjector().get(LocaleService));
+        const layout = () => {
+            if (incremental) {
+                completeIncrementalLayout(skeleton, 7);
+            } else {
+                skeleton.makeDirty(true);
+                skeleton.calculate();
+            }
+        };
+        try {
+            layout();
+            expect(skeleton.getSkeletonData()!.pages.every((page) => page.skeTables.size === 0 && page.skeColumnGroups.size === 0)).toBe(true);
+            expect(skeleton.findNodeByCharIndex(peerOffset)?.content).toBe('P');
+            model.getBody()!.paragraphs![0].headingCollapsed = false;
+            view.reset(model);
+            layout();
+            expect(skeleton.getSkeletonData()!.pages.some((page) => page.skeTables.size === 1)).toBe(true);
+            expect(skeleton.getSkeletonData()!.pages.some((page) => page.skeColumnGroups.size === 1)).toBe(true);
+            expect(model.getBody()!.dataStream).toBe(dataStream);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.UNSPECIFIED])('ignores stored folds outside modern mode (%s)', (documentFlavor) => {
+        const univer = new Univer();
+        const model = new DocumentDataModel({
+            id: 'traditional-fold',
+            documentStyle: { documentFlavor, pageSize: { width: 400, height: 600 } },
+            body: { dataStream: 'A\rB\r\n', paragraphs: [
+                { paragraphId: 'a', startIndex: 1, headingCollapsed: true, paragraphStyle: { namedStyleType: NamedStyleType.HEADING_1 } },
+                { paragraphId: 'b', startIndex: 3 },
+            ] },
+        });
+        const view = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(view, univer.__getInjector().get(LocaleService));
+        try {
+            skeleton.calculate();
+            expect(skeleton.findNodePositionByCharIndex(2)).toBeDefined();
+        } finally {
+            skeleton.dispose();
+            view.dispose();
+            model.dispose();
+            univer.dispose();
+        }
     });
 });

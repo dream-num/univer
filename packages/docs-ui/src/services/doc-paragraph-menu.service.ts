@@ -24,14 +24,13 @@ import type {
     Nullable,
 } from '@univerjs/core';
 import type { IBoundRectNoAngle, IRenderContext, IRenderModule, ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IMutiPageParagraphBound, ITableBound, ITableParagraphBound } from './doc-event-manager.service';
-import type { IEditorInputConfig } from './selection/doc-selection-render.service';
 import {
     BlockType,
     DataStreamTreeTokenType,
     Disposable,
     DOC_RANGE_TYPE,
     DocumentBlockType,
+    DocumentFlavor,
     getParagraphContentStartOffset,
     IContextService,
     Inject,
@@ -47,6 +46,8 @@ import {
 } from '@univerjs/docs';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { BehaviorSubject, combineLatest, first, Subject, throttleTime } from 'rxjs';
+import type { IMutiPageParagraphBound, ITableBound, ITableParagraphBound } from './doc-event-manager.service';
+import type { IEditorInputConfig } from './selection/doc-selection-render.service';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
 import { isHorizontalLineParagraph } from '../utils/horizontal-line';
 import {
@@ -571,11 +572,14 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
                 ? getBlockRangeAnchorRect(this._docEventManagerService, blockRange, paragraph)
                 : latestParagraphBound.firstLine ?? paragraph.firstLine;
 
+            const isHeading = this._context.unit.getSnapshot().documentStyle?.documentFlavor === DocumentFlavor.MODERN &&
+                this._docSkeletonManagerService.getViewModel().getHeadingSections().some((heading) => heading.paragraphIndex === targetParagraph.startIndex && heading.startOffset < heading.endOffset);
+            const menuAnchor = isHeading ? { ...baseAnchor, left: baseAnchor.left - 24, right: baseAnchor.right - 24 } : baseAnchor;
             if (!target.cellRange) {
-                return baseAnchor;
+                return menuAnchor;
             }
 
-            return getTableCellParagraphAnchorRect(this._docEventManagerService, latestParagraphBound, baseAnchor);
+            return getTableCellParagraphAnchorRect(this._docEventManagerService, latestParagraphBound, menuAnchor);
         };
 
         const disposable = this._docPopupManagerService.attachPopupToRect(

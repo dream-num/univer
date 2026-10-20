@@ -17,7 +17,15 @@
 import type { ImageSourceType } from '../../services/image-io/image-io.service';
 import type { IResources } from '../../services/resource-manager/type';
 import type { ISize } from '../../shared/shape';
-import type { BooleanNumber, CellValueType, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../enum';
+import type {
+    BooleanNumber,
+    CellValueType,
+    HorizontalAlign,
+    LocaleType,
+    TextDirection,
+    VerticalAlign,
+    WrapStrategy,
+} from '../enum';
 import type { IDrawingParam } from './i-drawing';
 import type { IMention } from './i-mention';
 import type { IColorStyle, IGlowEffect, IShadowEffect, IStyleBase } from './i-style-data';
@@ -892,6 +900,8 @@ export interface IParagraph {
     // elements: IElement[]; // elements
     startIndex: number;
     paragraphId: string;
+    /** Collapse the following heading section in modern documents; content remains in the snapshot. */
+    headingCollapsed?: boolean;
     /** Optional stable named-style reference. Direct paragraph style has higher precedence. */
     styleId?: string;
     paragraphStyle?: IParagraphStyle; // paragraphStyle

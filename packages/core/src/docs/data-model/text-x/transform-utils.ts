@@ -361,6 +361,23 @@ function transformParagraph(
         }
     }
 
+    if (originCoverType === UpdateDocsAttributeType.REPLACE && targetCoverType === UpdateDocsAttributeType.REPLACE) {
+        paragraph.headingCollapsed = transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED
+            ? originParagraph.headingCollapsed
+            : targetParagraph.headingCollapsed;
+    } else if (originParagraph.headingCollapsed === undefined) {
+        paragraph.headingCollapsed = targetParagraph.headingCollapsed;
+    } else if (originCoverType === UpdateDocsAttributeType.REPLACE || targetCoverType === UpdateDocsAttributeType.REPLACE) {
+        paragraph.headingCollapsed = transformType === TextXTransformType.COVER && targetParagraph.headingCollapsed !== undefined
+            ? targetParagraph.headingCollapsed
+            : originParagraph.headingCollapsed;
+    } else if (transformType === TextXTransformType.COVER) {
+        paragraph.headingCollapsed = targetParagraph.headingCollapsed;
+    }
+    if (paragraph.headingCollapsed === undefined) {
+        delete paragraph.headingCollapsed;
+    }
+
     if (paragraph.bullet === undefined) {
         delete paragraph.bullet;
     }

@@ -62,10 +62,10 @@ import {
     DocHistoryAction,
     DocSelectionManagerService,
     RichTextEditingMutation,
+    SetHeadingCollapsedCommand,
     UpdateTextCommand,
 } from '@univerjs/docs';
 import { getParagraphByGlyph, hasListGlyph, isFirstGlyph, isIndentByGlyph } from '@univerjs/engine-render';
-
 import { DocAutoFormatService } from '../../services/doc-auto-format.service';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { IEditorService } from '../../services/editor/editor-manager.service';
@@ -520,6 +520,17 @@ export const DeleteLeftCommand: ICommand<IDeleteBoundaryParams> = {
             return false;
         }
 
+        if (activeRange.collapsed && !segmentId) {
+            const hidden = skeleton.getViewModel().getCollapsedHeadingAtOffset(activeRange.startOffset - 1);
+            if (hidden) {
+                return commandService.executeCommand(SetHeadingCollapsedCommand.id, {
+                    unitId,
+                    paragraphId: hidden.paragraphId,
+                    collapsed: false,
+                });
+            }
+        }
+
         const originalLength = body.dataStream.length;
         const typingStyle = captureDeletedTypingStyle(accessor, docDataModel, body, activeRange);
         const actualRange = activeRange;
@@ -753,6 +764,17 @@ export const DeleteRightCommand: ICommand<IDeleteBoundaryParams> = {
         const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
         if (!docDataModel || !body) {
             return false;
+        }
+
+        if (activeRange.collapsed && !segmentId) {
+            const hidden = skeleton.getViewModel().getCollapsedHeadingAtOffset(activeRange.startOffset + 1);
+            if (hidden) {
+                return commandService.executeCommand(SetHeadingCollapsedCommand.id, {
+                    unitId: docDataModel.getUnitId(),
+                    paragraphId: hidden.paragraphId,
+                    collapsed: false,
+                });
+            }
         }
 
         const actualRange = activeRange;

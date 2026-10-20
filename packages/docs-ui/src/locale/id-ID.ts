@@ -244,6 +244,10 @@ const locale: typeof enUS = {
             defaultTextColor: 'Warna teks default',
             noBackground: 'Tanpa latar belakang',
         },
+        heading: {
+            collapse: 'Ciutkan',
+            expand: 'Perluas',
+        },
         'page-settings': {
             'document-setting': 'Pengaturan Dokumen',
             'modern-width': 'Lebar konten',

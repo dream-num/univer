@@ -36,6 +36,7 @@ export type { ISetDocumentNameCommandParams } from './commands/commands/set-docu
 export { SetDocumentPermissionCommand } from './commands/commands/set-document-permission.command';
 export type { ISetDocumentPermissionCommandParams } from './commands/commands/set-document-permission.command';
 export { SetDocumentPermissionsCommand } from './commands/commands/set-document-permissions.command';
+export { SetHeadingCollapsedCommand } from './commands/commands/set-heading-collapsed.command';
 export { SetSectionHeaderFooterLinkCommand } from './commands/commands/set-section-header-footer-link.command';
 export type { ISetSectionHeaderFooterLinkCommandParams } from './commands/commands/set-section-header-footer-link.command';
 export { UpdateDocumentParagraphStyleCommand } from './commands/commands/update-document-paragraph-style.command';

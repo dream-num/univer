@@ -244,6 +244,10 @@ const locale: typeof enUS = {
             defaultTextColor: 'Cor de texto padrão',
             noBackground: 'Sem plano de fundo',
         },
+        heading: {
+            collapse: 'Recolher',
+            expand: 'Expandir',
+        },
         'page-settings': {
             'document-setting': 'Configuração do documento',
             'modern-width': 'Largura do conteúdo',

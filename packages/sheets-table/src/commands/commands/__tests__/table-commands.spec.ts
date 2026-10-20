@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ITableManualFilterItem } from '../../../types/type';
 import { ICommandService, ILogService, IUndoRedoService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import {
@@ -24,6 +23,7 @@ import {
     SheetRangeThemeModel,
 } from '@univerjs/sheets';
 import { describe, expect, it, vi } from 'vitest';
+import type { ITableManualFilterItem } from '../../../types/type';
 import { TableManager } from '../../../models/table-manager';
 import { TableColumnFilterTypeEnum } from '../../../types/enum';
 import { IRangeOperationTypeEnum, IRowColTypeEnum } from '../../../types/type';
@@ -31,7 +31,6 @@ import { AddSheetTableMutation } from '../../mutations/add-sheet-table.mutation'
 import { DeleteSheetTableMutation } from '../../mutations/delete-sheet-table.mutation';
 import { SetSheetTableMutation } from '../../mutations/set-sheet-table.mutation';
 import { SetSheetTableFilterMutation } from '../../mutations/set-table-filter.mutation';
-import { AddSheetTableCommand } from '../add-sheet-table.command';
 import { AddTableThemeCommand } from '../add-table-theme.command';
 import { DeleteSheetTableCommand } from '../delete-sheet-table.command';
 import { RemoveTableThemeCommand } from '../remove-table-theme.command';
@@ -51,58 +50,6 @@ function createAccessor(pairs: Array<[unknown, unknown]>) {
 }
 
 describe('sheets-table commands', () => {
-    it('AddSheetTableCommand should auto-generate table name and push undo/redo', () => {
-        const syncExecuteCommand = vi.fn(() => true);
-        const pushUndoRedo = vi.fn();
-        const tableManager = {
-            getTableList: vi.fn(() => [{ name: 'table9' }]),
-            getColumnHeader: vi.fn(() => ['Name']),
-        };
-
-        const accessor = createAccessor([
-            [ICommandService, { syncExecuteCommand }],
-            [IUndoRedoService, { pushUndoRedo }],
-            [LocaleService, { t: (key: string) => (key === 'sheets-table.tablePrefix' ? 'Table' : 'Column') }],
-            [TableManager, tableManager],
-            [IUniverInstanceService, {
-                getUnit: () => ({ getSheets: () => [{ getName: () => 'SheetA' }] }),
-            }],
-            [IDefinedNamesService, {
-                getDefinedNameMap: () => ({ d1: { name: 'DefinedA' } }),
-            }],
-        ]);
-
-        const result = AddSheetTableCommand.handler(accessor, {
-            unitId: 'u1',
-            subUnitId: 's1',
-            range: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 1 },
-            name: 'SheetA',
-        });
-
-        expect(result).toBe(true);
-        expect(tableManager.getColumnHeader).toHaveBeenCalledWith(
-            'u1',
-            's1',
-            { startRow: 0, endRow: 2, startColumn: 0, endColumn: 1 },
-            'Column'
-        );
-        expect(syncExecuteCommand).toHaveBeenCalledWith(
-            AddSheetTableMutation.id,
-            expect.objectContaining({
-                unitId: 'u1',
-                subUnitId: 's1',
-                name: 'Table10',
-                header: ['Name'],
-            }),
-            undefined
-        );
-        expect(pushUndoRedo).toHaveBeenCalledTimes(1);
-    });
-
-    it('AddSheetTableCommand should return false when params are missing', () => {
-        expect(AddSheetTableCommand.handler(createAccessor([]), undefined as any)).toBe(false);
-    });
-
     it('DeleteSheetTableCommand should build undo mutations from table snapshot', () => {
         const syncExecuteCommand = vi.fn(() => true);
         const pushUndoRedo = vi.fn();

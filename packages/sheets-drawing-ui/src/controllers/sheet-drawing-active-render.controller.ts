@@ -18,13 +18,12 @@ import type { ICommandInfo, IDrawingParam, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISetWorksheetActiveOperationParams } from '@univerjs/sheets';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
-import { Disposable, ICommandService, ILogService, Inject } from '@univerjs/core';
+import { Disposable, DrawingTypeEnum, ICommandService, ILogService, Inject } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { SetWorksheetActiveOperation, SheetSkeletonService } from '@univerjs/sheets';
 import {
-    applySheetDrawingPlacement,
-    getSheetDrawingPlacement,
     ISheetDrawingService,
+    refreshSheetDrawingPlacement,
     SheetDrawingAnchorType,
 } from '@univerjs/sheets-drawing';
 
@@ -130,11 +129,10 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
             const sheetSkeletonParam = this._sheetSkeletonService.getSkeletonParam(showUnitId, showSubunitId);
             const subUnitMap = this._drawingManagerService.drawingManagerData[showUnitId] ?? {};
             const drawingData = subUnitMap[showSubunitId]?.data ?? {};
-            const { successDrawings, refreshedDrawings, failures } = prepareSheetDrawings(
+            const { successDrawings, refreshedDrawings, removeDrawings, failures } = prepareSheetDrawings(
                 Object.values(drawingData) as ISheetDrawing[],
                 sheetSkeletonParam?.skeleton
             );
-            const removeDrawings: IDrawingParam[] = failures.map(({ drawingId }) => drawingData[drawingId]);
             // JSON1 drawing mutations are applied to both stores, so derived geometry must agree.
             this._sheetDrawingService.refreshTransform(refreshedDrawings);
             this._drawingManagerService.refreshTransform(refreshedDrawings);
@@ -156,13 +154,22 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
 function prepareSheetDrawings(drawings: ISheetDrawing[], skeleton?: SpreadsheetSkeleton) {
     const successDrawings: ISheetDrawing[] = [];
     const refreshedDrawings: ISheetDrawing[] = [];
+    const removeDrawings: ISheetDrawing[] = [];
     const failures: Array<Pick<ISheetDrawing, 'drawingId' | 'drawingType' | 'anchorType'> & { error: unknown }> = [];
 
     for (const drawing of drawings) {
         if (skeleton && drawing.sheetTransform && drawing.anchorType !== SheetDrawingAnchorType.None) {
             try {
-                refreshedDrawings.push(applySheetDrawingPlacement(drawing, getSheetDrawingPlacement(drawing), skeleton));
+                const refreshed = refreshSheetDrawingPlacement(drawing, skeleton);
+                refreshedDrawings.push(refreshed);
+                // Hidden cells can collapse an image or DOM without invalidating its original anchors.
+                if ((drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE || drawing.drawingType === DrawingTypeEnum.DRAWING_DOM)
+                    && (refreshed.transform?.width === 0 || refreshed.transform?.height === 0)) {
+                    removeDrawings.push(drawing);
+                    continue;
+                }
             } catch (error) {
+                removeDrawings.push(drawing);
                 failures.push({
                     drawingId: drawing.drawingId,
                     drawingType: drawing.drawingType,
@@ -175,5 +182,5 @@ function prepareSheetDrawings(drawings: ISheetDrawing[], skeleton?: SpreadsheetS
         successDrawings.push(drawing);
     }
 
-    return { successDrawings, refreshedDrawings, failures };
+    return { successDrawings, refreshedDrawings, removeDrawings, failures };
 }

@@ -331,7 +331,8 @@ describe('SheetDrawingActiveRenderController', () => {
             expect(() => vi.runOnlyPendingTimers()).not.toThrow();
             expect(removed).toHaveBeenLastCalledWith([drawing]);
             expect(added).toHaveBeenLastCalledWith([]);
-            expect(sheetService.getDrawingByParam(drawing)).toEqual(before);
+            expect(sheetService.getDrawingByParam(drawing)?.sheetTransform).toEqual(before!.sheetTransform);
+            expect(sheetService.getDrawingByParam(drawing)?.transform?.[axis === 'row' ? 'height' : 'width']).toBe(0);
             for (let index = 3; index < 6; index++) {
                 data[index]!.hd = BooleanNumber.FALSE;
             }

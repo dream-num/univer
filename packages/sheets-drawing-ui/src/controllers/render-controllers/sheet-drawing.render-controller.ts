@@ -15,10 +15,16 @@
  */
 
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import { Disposable, DrawingTypeEnum, Inject } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { SheetSkeletonService } from '@univerjs/sheets';
-import { drawingPositionToTransform, ISheetDrawingService, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
+import {
+    drawingPositionToTransform,
+    ISheetDrawingService,
+    refreshSheetDrawingPlacement,
+    SheetDrawingAnchorType,
+} from '@univerjs/sheets-drawing';
 
 export class SheetsDrawingRenderController extends Disposable implements IRenderModule {
     constructor(
@@ -40,6 +46,7 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
         // initialize drawing data and add to sheet canvas
         this._sheetDrawingService.initializeNotification(this._context.unitId);
         const data = this._sheetDrawingService.getDrawingDataForUnit(this._context.unitId);
+        const refreshedDrawings: ISheetDrawing[] = [];
         for (const subUnit in data) {
             const subUnitData = data[subUnit];
             for (const drawingId in subUnitData.data) {
@@ -53,18 +60,24 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
                     !drawingData.groupId &&
                     drawingData.anchorType !== SheetDrawingAnchorType.None
                 ) {
-                    const transform = drawingPositionToTransform(drawingData.sheetTransform, skeletonParam);
-                    drawingData.transform = transform && drawingData.drawingType === DrawingTypeEnum.DRAWING_GROUP
-                        ? {
-                            ...transform,
-                            left: (transform.left ?? 0) - skeletonParam.skeleton.rowHeaderWidthAndMarginLeft,
-                            top: (transform.top ?? 0) - skeletonParam.skeleton.columnHeaderHeightAndMarginTop,
-                        }
-                        : transform;
+                    if (drawingData.drawingType === DrawingTypeEnum.DRAWING_GROUP) {
+                        const transform = drawingPositionToTransform(drawingData.sheetTransform, skeletonParam);
+                        refreshedDrawings.push({
+                            ...drawingData,
+                            transform: transform && {
+                                ...transform,
+                                left: (transform.left ?? 0) - skeletonParam.skeleton.rowHeaderWidthAndMarginLeft,
+                                top: (transform.top ?? 0) - skeletonParam.skeleton.columnHeaderHeightAndMarginTop,
+                            },
+                        });
+                    } else {
+                        refreshedDrawings.push(refreshSheetDrawingPlacement(drawingData, skeletonParam.skeleton));
+                    }
                 }
             }
         }
 
+        this._sheetDrawingService.refreshTransform(refreshedDrawings);
         this._drawingManagerService.registerDrawingData(this._context.unitId, this._sheetDrawingService.getDrawingDataForUnit(this._context.unitId));
         this._drawingManagerService.initializeNotification(this._context.unitId);
     }

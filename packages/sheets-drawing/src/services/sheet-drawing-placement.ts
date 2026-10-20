@@ -17,14 +17,14 @@
 import type { IGroupBaseBound, ITransformState } from '@univerjs/core';
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ICellOverGridPosition } from '@univerjs/sheets';
+import { DrawingTypeEnum } from '@univerjs/core';
+import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute } from '@univerjs/sheets';
 import type {
     ISheetDrawing,
     ISheetDrawingPosition,
     ISheetFloatDom,
     ISheetImage,
 } from './sheet-drawing.service';
-import { DrawingTypeEnum } from '@univerjs/core';
-import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute } from '@univerjs/sheets';
 import { transformToAxisAlignPosition, transformToDrawingPosition } from '../basics/transform-position';
 import {
     SheetDrawingAnchorType,
@@ -148,6 +148,35 @@ export function applySheetDrawingPlacement(
         || drawing.drawingType === DrawingTypeEnum.DRAWING_DOM;
     const placement = normalizePlacement(input, skeleton, requiresArea);
 
+    return resolveSheetDrawingPlacement(drawing, placement, skeleton);
+}
+
+/** Refresh layout-derived geometry without changing the drawing's anchor semantics. */
+export function refreshSheetDrawingPlacement(drawing: ISheetDrawing, skeleton: SpreadsheetSkeleton): ISheetDrawing {
+    if (drawing.anchorType === SheetDrawingAnchorType.None) {
+        return drawing;
+    }
+
+    const placement = getSheetDrawingPlacement(drawing);
+    const requiresArea = drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE
+        || drawing.drawingType === DrawingTypeEnum.DRAWING_DOM;
+    // A valid two-cell drawing can temporarily collapse when its cells are hidden.
+    validatePlacement(placement, requiresArea);
+    const resolved = resolveSheetDrawingPlacement(drawing, placement, skeleton);
+    validateExtent(resolved.transform?.width ?? 0, resolved.transform?.height ?? 0, requiresArea, true);
+    return {
+        ...drawing,
+        sheetTransform: resolved.sheetTransform,
+        transform: resolved.transform,
+        axisAlignSheetTransform: resolved.axisAlignSheetTransform,
+    };
+}
+
+function resolveSheetDrawingPlacement(
+    drawing: ISheetDrawing,
+    placement: ISheetDrawingPlacement,
+    skeleton?: SpreadsheetSkeleton
+): ISheetDrawing {
     if (placement.kind === SheetDrawingAnchorType.None) {
         const transform = withExistingTransform(drawing.transform, placement);
         const sheetTransform = absoluteSheetTransform(placement, drawing.sheetTransform);
@@ -168,19 +197,25 @@ export function applySheetDrawingPlacement(
         const converted = convertPositionCellToSheetOverGrid(
             drawing.unitId,
             drawing.subUnitId,
-            placement.from,
+            getVisibleCellPosition(placement.from, skeleton),
             placement.width,
             placement.height,
             skeleton
         );
-        const sheetTransform = withExistingSheetTransform(drawing.sheetTransform, converted.sheetTransform);
+        const sheetTransform = withExistingSheetTransform(drawing.sheetTransform, {
+            from: placement.from,
+            to: converted.sheetTransform.to,
+        });
         const transform = withExistingTransform(drawing.transform, converted.transform);
         return {
             ...drawing,
             anchorType: SheetDrawingAnchorType.Position,
             sheetTransform,
             transform,
-            axisAlignSheetTransform: transformToAxisAlignPosition(transform, skeleton),
+            axisAlignSheetTransform: withExistingSheetTransform(
+                drawing.axisAlignSheetTransform,
+                transformToAxisAlignPosition(transform, skeleton)
+            ),
         };
     }
 
@@ -191,7 +226,10 @@ export function applySheetDrawingPlacement(
     const bounds = convertPositionSheetOverGridToAbsolute(
         drawing.unitId,
         drawing.subUnitId,
-        sheetTransform,
+        {
+            from: getVisibleCellPosition(placement.from, skeleton),
+            to: getVisibleCellPosition(placement.to, skeleton),
+        },
         skeleton
     );
     const transform = withExistingTransform(drawing.transform, bounds);
@@ -200,7 +238,19 @@ export function applySheetDrawingPlacement(
         anchorType: SheetDrawingAnchorType.Both,
         sheetTransform,
         transform,
-        axisAlignSheetTransform: transformToAxisAlignPosition(transform, skeleton),
+        axisAlignSheetTransform: withExistingSheetTransform(
+            drawing.axisAlignSheetTransform,
+            transformToAxisAlignPosition(transform, skeleton)
+        ),
+    };
+}
+
+function getVisibleCellPosition(position: ICellOverGridPosition, skeleton: SpreadsheetSkeleton): ICellOverGridPosition {
+    const cell = skeleton.getNoMergeCellWithCoordByIndex(position.row, position.column);
+    return {
+        ...position,
+        columnOffset: cell.startX === cell.endX ? 0 : position.columnOffset,
+        rowOffset: cell.startY === cell.endY ? 0 : position.rowOffset,
     };
 }
 
@@ -356,10 +406,10 @@ function validateCellPosition(position: ICellOverGridPosition): void {
     }
 }
 
-function validateExtent(width: number, height: number, requiresArea: boolean): void {
+function validateExtent(width: number, height: number, requiresArea: boolean, allowCollapsed = false): void {
     // Horizontal and vertical lines have a zero bounding-box extent on one axis;
     // this is independent of stroke width. Images and floating DOM still require area.
-    const hasInvalidZeroExtent = requiresArea ? width === 0 || height === 0 : width === 0 && height === 0;
+    const hasInvalidZeroExtent = !allowCollapsed && (requiresArea ? width === 0 || height === 0 : width === 0 && height === 0);
     if (!Number.isFinite(width) || !Number.isFinite(height) || width < 0 || height < 0 || hasInvalidZeroExtent) {
         // Preserve the error message contract and report the actual checked extent, including converted cell bounds.
         throw Object.assign(new Error('SHEET_DRAWING_PLACEMENT_EXTENT_INVALID'), { width, height });

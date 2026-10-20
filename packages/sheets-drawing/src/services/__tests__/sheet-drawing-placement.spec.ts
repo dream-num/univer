@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 
+import { DrawingTypeEnum } from '@univerjs/core';
+import {
+    SetColHiddenCommand,
+    SetRowHiddenCommand,
+    SetSpecificColsVisibleCommand,
+    SetSpecificRowsVisibleCommand,
+    SheetSkeletonService,
+} from '@univerjs/sheets';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { ISheetDrawingPlacement } from '../sheet-drawing-placement';
 import type { ISheetDrawing } from '../sheet-drawing.service';
-import { DrawingTypeEnum } from '@univerjs/core';
-import { SheetSkeletonService } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createSheetsDrawingTestBed } from '../../__tests__/create-sheets-drawing-test-bed';
-import { applySheetDrawingPlacement, normalizeSheetDrawingPlacement } from '../sheet-drawing-placement';
+import {
+    applySheetDrawingPlacement,
+    normalizeSheetDrawingPlacement,
+    refreshSheetDrawingPlacement,
+} from '../sheet-drawing-placement';
 import { SheetDrawingAnchorType } from '../sheet-drawing.service';
 
 describe('sheet drawing placement extents', () => {
@@ -60,6 +70,47 @@ describe('sheet drawing placement extents', () => {
                     .toThrow('SHEET_DRAWING_PLACEMENT_EXTENT_INVALID');
             }
         }
+    });
+
+    it.each([true, false])('restores a fully collapsed two-cell drawing after hiding rows=%s', async (rows) => {
+        const skeleton = bed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+        const sheetTransform = {
+            from: { row: 1, column: 1, rowOffset: 6, columnOffset: 12 },
+            to: { row: 4, column: 4, rowOffset: 8, columnOffset: 16 },
+        };
+        const drawing = applySheetDrawingPlacement({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'image',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            sheetTransform,
+            axisAlignSheetTransform: sheetTransform,
+        } as ISheetDrawing, { kind: SheetDrawingAnchorType.Both, ...sheetTransform }, skeleton);
+        const params = {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            ranges: [{
+                startRow: rows ? 1 : 0,
+                endRow: rows ? 4 : 19,
+                startColumn: rows ? 0 : 1,
+                endColumn: rows ? 19 : 4,
+            }],
+        };
+        expect(await bed.commandService.executeCommand(rows ? SetRowHiddenCommand.id : SetColHiddenCommand.id, params))
+            .toBe(true);
+        skeleton.makeDirty(true);
+        skeleton.calculate();
+        const hidden = refreshSheetDrawingPlacement(drawing, skeleton);
+        expect(hidden.sheetTransform).toEqual(drawing.sheetTransform);
+        expect(hidden.transform?.[rows ? 'height' : 'width']).toBe(0);
+        expect(refreshSheetDrawingPlacement(hidden, skeleton)).toEqual(hidden);
+        expect(await bed.commandService.executeCommand(
+            rows ? SetSpecificRowsVisibleCommand.id : SetSpecificColsVisibleCommand.id,
+            params
+        )).toBe(true);
+        skeleton.makeDirty(true);
+        skeleton.calculate();
+        expect(refreshSheetDrawingPlacement(hidden, skeleton)).toEqual(drawing);
     });
 
     it.each([[0, 0], [-1, 20], [20, -1], [NaN, 20], [20, Infinity]])(

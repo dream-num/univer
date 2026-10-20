@@ -16,16 +16,99 @@
 
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import type { Subscription } from 'rxjs';
-import { DrawingTypeEnum, LocaleType, UniverInstanceType } from '@univerjs/core';
+import { DrawingTypeEnum, LocaleType, Tools, UniverInstanceType } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { CanvasColorService, ICanvasColorService, IRenderManagerService } from '@univerjs/engine-render';
-import { SheetSkeletonService } from '@univerjs/sheets';
+import { SetWorksheetRowAutoHeightMutation, SheetSkeletonService } from '@univerjs/sheets';
 import { ISheetDrawingService, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { describe, expect, it, vi } from 'vitest';
 import { createSheetsDrawingUiTestBed } from '../../../__tests__/create-sheets-drawing-ui-test-bed';
 import { SheetsDrawingRenderController } from '../sheet-drawing.render-controller';
+import '@univerjs/sheets/facade';
+import '@univerjs/sheets-drawing/facade';
 
 describe('SheetsDrawingRenderController', () => {
+    it.each([
+        ['row', SheetDrawingAnchorType.Position],
+        ['column', SheetDrawingAnchorType.Position],
+        ['auto height', SheetDrawingAnchorType.Position],
+        ['row', undefined],
+        ['column', undefined],
+        ['auto height', undefined],
+        ['collapsed row', SheetDrawingAnchorType.Both],
+        ['collapsed column', SheetDrawingAnchorType.Both],
+    ] as const)('preserves image anchors and size across %s, save, rendering and show (%s)', async (scenario, anchorType) => {
+        const canvasContext = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
+            { setTransform: vi.fn(), clearRect: vi.fn() } as unknown as CanvasRenderingContext2D
+        );
+        const bed = createSheetsDrawingUiTestBed();
+        let restored: ReturnType<typeof createSheetsDrawingUiTestBed> | undefined;
+        try {
+            const book = FUniver.newAPI(bed.univer).getActiveWorkbook()!;
+            const sheet = book.getSheets()[0];
+            const builder = sheet.newOverGridImage().setSource('https://example.com/drawing.png').setRow(1).setColumn(1).setWidth(180).setHeight(120).setRowOffset(6).setColumnOffset(12);
+            if (anchorType !== undefined) {
+                builder.setAnchorType(anchorType);
+            }
+            const image = await builder.buildAsync();
+            sheet.insertImages([image]);
+            const service = bed.get(ISheetDrawingService);
+            const before = Tools.deepClone(service.getDrawingByParam(image)!);
+            const rows = scenario === 'row' || scenario === 'collapsed row';
+            const count = anchorType === SheetDrawingAnchorType.Both ? 8 : 1;
+            const cell = bed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!.getNoMergeCellWithCoordByIndex(1, 1);
+            if (scenario === 'auto height') {
+                const worksheet = bed.workbook.getActiveSheet()!;
+                expect(bed.commandService.syncExecuteCommand(SetWorksheetRowAutoHeightMutation.id, {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    rowsAutoHeightInfo: [{ row: 2, autoHeight: worksheet.getRowHeight(2) + 30 }],
+                })).toBe(true);
+            } else if (rows) {
+                sheet.hideRows(1, count);
+            } else {
+                sheet.hideColumns(1, count);
+            }
+            await Promise.resolve();
+            const hidden = Tools.deepClone(service.getDrawingByParam(image)!);
+            expect(hidden.sheetTransform.from).toEqual(before.sheetTransform.from);
+            if (scenario !== 'auto height') {
+                expect(hidden.transform?.[rows ? 'top' : 'left']).toBe(rows ? cell.startY : cell.startX);
+            }
+            if (anchorType === SheetDrawingAnchorType.Both) {
+                expect(hidden.transform?.[rows ? 'height' : 'width']).toBe(0);
+            } else {
+                expect(hidden.transform).toMatchObject({ width: 180, height: 120 });
+            }
+            restored = createSheetsDrawingUiTestBed(book.save(), [[ICanvasColorService, { useClass: CanvasColorService }]]);
+            restored.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1');
+            const manager = restored.get(IRenderManagerService);
+            manager.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetsDrawingRenderController]);
+            manager.createRender('test').with(SheetsDrawingRenderController);
+            const restoredService = restored.get(ISheetDrawingService);
+            expect(restoredService.getDrawingByParam(image)).toEqual(hidden);
+            const restoredSheet = FUniver.newAPI(restored.univer).getActiveWorkbook()!.getSheets()[0];
+            if (scenario === 'auto height') {
+                expect(restoredService.getDrawingByParam(image)!.transform).toEqual(before.transform);
+            } else {
+                if (rows) {
+                    restoredSheet.showRows(1, count);
+                } else {
+                    restoredSheet.showColumns(1, count);
+                }
+                await Promise.resolve();
+                expect(restoredService.getDrawingByParam(image)).toEqual(before);
+            }
+            expect(restored.get(IDrawingManagerService).getDrawingByParam(image))
+                .toEqual(restoredService.getDrawingByParam(image));
+        } finally {
+            restored?.univer.dispose();
+            bed.univer.dispose();
+            canvasContext.mockRestore();
+        }
+    });
+
     it('renders legacy cell anchors while preserving explicit absolute and group-local bounds', () => {
         const canvasContext = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
             { setTransform: vi.fn(), clearRect: vi.fn() } as unknown as CanvasRenderingContext2D

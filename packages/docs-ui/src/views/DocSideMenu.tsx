@@ -70,21 +70,30 @@ function findActiveHeading(boundMap: Map<number, IMutiPageParagraphBound> | unde
     }
     const paragraphBounds = Array.from(boundMap.values());
     const paragraphIndex = paragraphBounds.findIndex((p) => p.paragraphStart !== p.paragraphEnd && p.rect.top < bottom && p.rect.bottom > scrollTop);
-    if (paragraphIndex === -1) return undefined;
-    const lastParagraphIndex = paragraphBounds?.findLastIndex((p) => p.paragraphStart !== p.paragraphEnd && p.rect.top < bottom && p.rect.bottom > scrollTop);
+    if (paragraphIndex === -1) {
+        return undefined;
+    }
+    let lastParagraphIndex = paragraphBounds.length - 1;
+    while (lastParagraphIndex > paragraphIndex) {
+        const bound = paragraphBounds[lastParagraphIndex];
+        if (bound.paragraphStart !== bound.paragraphEnd && bound.rect.top < bottom && bound.rect.bottom > scrollTop) {
+            break;
+        }
+        lastParagraphIndex--;
+    }
     for (let i = paragraphIndex; i <= lastParagraphIndex; i++) {
         const bound = paragraphBounds[i];
         const paragraph = paragraphMap.get(bound.startIndex);
-        if (paragraph?.paragraphStyle?.headingId) {
-            return paragraph.paragraphStyle.headingId;
+        if (paragraph) {
+            return paragraph.paragraphId;
         }
     }
 
     for (let i = paragraphIndex; i >= 0; i--) {
         const bound = paragraphBounds[i];
         const paragraph = paragraphMap.get(bound.startIndex);
-        if (paragraph?.paragraphStyle?.headingId) {
-            return paragraph.paragraphStyle.headingId;
+        if (paragraph) {
+            return paragraph.paragraphId;
         }
     }
 
@@ -184,24 +193,30 @@ function DocSideMenuContent({ toc }: { toc?: boolean }) {
 
     const paragraphs = useMemo(() => documentData?.body?.paragraphs ?? [], [documentData?.body?.paragraphs]);
     const paragraphStarts = useMemo(() => getParagraphContentStartOffsets({ dataStream: fullDataStream, paragraphs }), [fullDataStream, paragraphs]);
+    const headingParagraphs = useMemo(() => paragraphs.filter((p) =>
+        p.paragraphStyle?.namedStyleType !== undefined &&
+        p.paragraphStyle.namedStyleType !== NamedStyleType.SUBTITLE &&
+        p.paragraphStyle.namedStyleType !== NamedStyleType.NORMAL_TEXT
+    ).map((p) => p.paragraphId
+        ? p
+        : {
+            ...p,
+            // Legacy snapshots can omit paragraph IDs; keep their fallback local to the outline.
+            paragraphId: `__paragraph_${p.startIndex}`,
+        }), [paragraphs]);
     const paragraphMap = useMemo(() => {
         const map = new Map<number, IParagraph>();
-        paragraphs.forEach((p) => {
+        headingParagraphs.forEach((p) => {
             map.set(p.startIndex, p);
         });
         return map;
-    }, [paragraphs]);
+    }, [headingParagraphs]);
     const mode = left < 288 || layout.overlapsTable ? 'float' : 'side-bar';
-    const paragraphMenus = paragraphs
-        ?.filter((p) =>
-            p.paragraphStyle?.namedStyleType !== undefined &&
-            p.paragraphStyle!.namedStyleType !== NamedStyleType.SUBTITLE &&
-            p.paragraphStyle.namedStyleType !== NamedStyleType.NORMAL_TEXT
-        )
+    const paragraphMenus = headingParagraphs
         .map((p) => {
             const level = transformNamedStyleTypeToLevel(p.paragraphStyle!.namedStyleType!);
             return {
-                id: p.paragraphStyle!.headingId!,
+                id: p.paragraphId,
                 text: getPlainText(fullDataStream.slice(paragraphStarts.get(p.startIndex)!, p.startIndex)),
                 level,
                 isTitle: p.paragraphStyle?.namedStyleType === NamedStyleType.TITLE,
@@ -280,7 +295,7 @@ function DocSideMenuContent({ toc }: { toc?: boolean }) {
             setActiveId(menu.id);
             return;
         }
-        const paragraph = paragraphs.find((p) => p.paragraphStyle?.headingId === menu.id);
+        const paragraph = headingParagraphs.find((p) => p.paragraphId === menu.id);
         if (!paragraph) {
             return;
         }

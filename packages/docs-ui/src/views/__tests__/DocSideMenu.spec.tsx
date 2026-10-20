@@ -23,6 +23,7 @@ import {
     IUniverInstanceService,
     LocaleService,
     LocaleType,
+    NamedStyleType,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -33,6 +34,7 @@ import {
     ICanvasColorService,
     IRenderManagerService,
     RenderManagerService,
+    ScrollBar,
     setDocsTableRenderViewportProvider,
     Viewport,
 } from '@univerjs/engine-render';
@@ -215,5 +217,77 @@ describe('DocSideMenu', () => {
         act(() => vi.advanceTimersByTime(150));
         expect(container.querySelector('button[aria-expanded="true"]')).not.toBeNull();
         expect(container.querySelector('nav')?.textContent).toContain('Short outline');
+    });
+
+    it.each([
+        [undefined, true],
+        ['shared-heading-id', true],
+        ['legacy-heading-id', false],
+    ] as const)('navigates and highlights headings with headingId %s and paragraph IDs %s', (headingId, hasParagraphIds) => {
+        const injector = univer.__getInjector();
+        injector.get(IConfigService).setConfig(DOCS_UI_PLUGIN_CONFIG_KEY, { toc: true });
+        const lines = ['First heading', ...Array.from({ length: 60 }, () => 'Body text'), 'Second heading', 'Final body'];
+        let offset = 0;
+        const data: IDocumentData = {
+            id: 'headings',
+            title: 'Document title',
+            body: {
+                dataStream: `${lines.join('\r')}\r\n`,
+                paragraphs: lines.map((text, index) => {
+                    offset += text.length + 1;
+                    return {
+                        startIndex: offset - 1,
+                        paragraphId: `paragraph-${index}`,
+                        paragraphStyle: {
+                            namedStyleType: index === 0 || index === 61 ? NamedStyleType.HEADING_1 : NamedStyleType.NORMAL_TEXT,
+                            headingId: hasParagraphIds ? headingId : `${headingId}-${index}`,
+                        },
+                    };
+                }),
+                sectionBreaks: [{ startIndex: lines.join('\r').length + 1, sectionId: 'section' }],
+            },
+            documentStyle: { pageSize: { width: 1400, height: 2400 } },
+        };
+        if (!hasParagraphIds) {
+            data.body!.paragraphs!.forEach((paragraph) => Reflect.deleteProperty(paragraph, 'paragraphId'));
+        }
+        const originalHeadingIds = data.body!.paragraphs!.map((paragraph) => paragraph.paragraphStyle?.headingId);
+        const originalParagraphIds = data.body!.paragraphs!.map((paragraph) => paragraph.paragraphId);
+        const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, data);
+        const render = injector.get(IRenderManagerService).createRender(data.id) as RenderUnit;
+        render.deactivate();
+        render.engine.resizeBySize(1400, 400);
+        render.addRenderDependencies([[DocSkeletonManagerService]]);
+        const documents = new Documents(data.id, render.with(DocSkeletonManagerService).getSkeleton());
+        documents.translate(400, 0);
+        render.mainComponent = documents;
+        render.scene.addObject(documents);
+        render.components.set(data.id, documents);
+        const viewport = new Viewport(VIEWPORT_KEY.VIEW_MAIN, render.scene);
+        render.disposeWithMe(viewport);
+        render.disposeWithMe(new ScrollBar(viewport, { mainScene: render.scene }));
+        render.scene.transformByState({ width: 1400, height: 3000 });
+        render.addRenderDependencies([[DocEventManagerService]]);
+        const bounds = render.with(DocEventManagerService).paragraphBounds;
+        const secondHeadingTop = bounds.get(data.body!.paragraphs![61].startIndex)!.rect.top;
+        expect(secondHeadingTop).toBeGreaterThan(400);
+
+        act(() => root.render(<RediContext.Provider value={{ injector }}><DocSideMenu /></RediContext.Provider>));
+        act(() => vi.advanceTimersByTime(150));
+        const headingButtons = Array.from(container.querySelectorAll<HTMLButtonElement>('nav button'));
+        expect(headingButtons.map((button) => button.textContent)).toEqual(['Document title', 'First heading', 'Second heading']);
+        expect(container.querySelectorAll('[aria-current="location"]')).toHaveLength(0);
+
+        act(() => headingButtons[2].click());
+        expect(viewport.viewportScrollY).toBeCloseTo(secondHeadingTop);
+        expect(container.querySelectorAll('[aria-current="location"]')).toHaveLength(1);
+        expect(headingButtons[2].getAttribute('aria-current')).toBe('location');
+
+        act(() => vi.advanceTimersByTime(100));
+        act(() => viewport.scrollToViewportPos({ viewportScrollY: bounds.get(data.body!.paragraphs![10].startIndex)!.rect.top }));
+        expect(container.querySelectorAll('[aria-current="location"]')).toHaveLength(1);
+        expect(headingButtons[1].getAttribute('aria-current')).toBe('location');
+        expect(model.getBody()?.paragraphs?.map((paragraph) => paragraph.paragraphStyle?.headingId)).toEqual(originalHeadingIds);
+        expect(model.getBody()?.paragraphs?.map((paragraph) => paragraph.paragraphId)).toEqual(originalParagraphIds);
     });
 });

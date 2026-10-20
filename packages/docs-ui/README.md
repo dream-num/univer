@@ -56,6 +56,27 @@ Preset integrations can pass the same option to `UniverDocsCorePreset({ containe
 When enabled, the outline collapses if there is insufficient space or table content overlaps it,
 and reopens when the layout provides enough space without overlap.
 
+## Heading collapse
+
+Modern documents show a Canvas triangle beside visible Heading 1 through Heading 5 paragraphs
+that have section content. Click it to collapse or expand the section. This is independent of
+the document outline's `toc` setting. Traditional documents and embedded text editors do not
+show these controls.
+
+Collapsing keeps the heading visible and hides its following section, including nested headings,
+tables, and images. Expanding the parent retains each nested heading's own collapse state.
+Hidden content remains in the document snapshot. Collapse changes participate in undo/redo and
+collaboration, so other editors share the state. Selections inside hidden content move to a
+visible heading, and caret navigation skips hidden content.
+
+The triangle and its tooltip are drawn on Canvas. Colors follow `ThemeService`, including
+runtime theme changes. After a 500 ms hover, the control shows the localized “Collapse”
+or “Expand” tooltip above it; if the viewport clips the top, the tooltip appears below.
+Scrolling, zooming, leaving the control, or activating it clears the tooltip.
+
+See [the snapshot and command contract](../docs/README.md#heading-collapse-in-modern-documents)
+to change collapse state programmatically through `SetHeadingCollapsedCommand`.
+
 ## Format painter
 
 Use the shared Start ribbon format painter to copy character formatting. Include a paragraph

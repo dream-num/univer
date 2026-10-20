@@ -72,7 +72,7 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "rxjs": "^7.8.2",
+        "rxjs": "7.8.2",
         "typescript": "^6.0.3",
         "vitest": "^5.0.4"
     }

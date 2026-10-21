@@ -5638,6 +5638,153 @@ describe('doc skeleton', () => {
         measureSpy.mockRestore();
     });
 
+    it.each([false, true].flatMap((incremental) => [1, 2].map((columnCount) => ({ incremental, columnCount }))))('continues after the current inline table slice ($incremental/$columnCount columns)', ({ incremental, columnCount }) => {
+        mockCanvasTextMetrics();
+        const T = DataStreamTreeTokenType;
+        const rowStream = `${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cell${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}`;
+        const tableStream = `${T.TABLE_START}${rowStream}${rowStream}${T.TABLE_END}`;
+        const dataStream = `${tableStream}${T.PARAGRAPH}After${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const univer = new Univer();
+        const model = new DocumentDataModel({
+            id: 'unequal-inline-table-slices',
+            body: {
+                dataStream,
+                paragraphs: Array.from(dataStream).flatMap((token, startIndex) => token === T.PARAGRAPH
+                    ? [{ startIndex, paragraphId: `p-${startIndex}` }]
+                    : []),
+                sectionBreaks: Array.from(dataStream).flatMap((token, startIndex) => token === T.SECTION_BREAK
+                    ? [{
+                        startIndex,
+                        sectionId: `s-${startIndex}`,
+                        ...(startIndex === dataStream.length - 1 && columnCount === 2
+                            ? { columnProperties: [{ width: 220, paddingEnd: 20 }, { width: 220, paddingEnd: 0 }] }
+                            : {}),
+                    }]
+                    : []),
+                tables: [{ tableId: 'table', startIndex: 0, endIndex: tableStream.length }],
+            },
+            tableSource: {
+                table: {
+                    tableId: 'table',
+                    align: TableAlignmentType.START,
+                    indent: { v: 0 },
+                    textWrap: TableTextWrapType.NONE,
+                    position: {
+                        positionH: { relativeFrom: ObjectRelativeFromH.PAGE },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PAGE },
+                    },
+                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                    size: { type: TableSizeType.SPECIFIED, width: { v: 200 } },
+                    tableRows: [180, 40].map((height) => ({
+                        cantSplit: BooleanNumber.TRUE,
+                        tableCells: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } }],
+                        trHeight: { val: { v: height }, hRule: TableRowHeightRule.EXACT },
+                    })),
+                    tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } }],
+                },
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 500, height: 240 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        if (incremental) {
+            completeIncrementalLayout(skeleton);
+        } else {
+            skeleton.calculate();
+        }
+        const pages = skeleton.getSkeletonData()!.pages;
+        expect(pages).toHaveLength(columnCount === 1 ? 2 : 1);
+        expect([...pages[0].skeTables.values()][0].height).toBe(180);
+        const lastPage = pages[pages.length - 1];
+        const lastTable = [...lastPage.skeTables.values()].find((table) => table.height === 40)!;
+        expect(lastTable.height).toBe(40);
+        const lines = lastPage.sections.flatMap((section) => section.columns.flatMap((column) => column.lines));
+        const blankLine = lines.find((line) => line.paragraphIndex === tableStream.length)!;
+        const followingLine = lines.find((line) => line.paragraphIndex === dataStream.length - 2)!;
+        expect(blankLine.top).toBeCloseTo(lastTable.top + lastTable.height);
+        expect(followingLine.top).toBeCloseTo(blankLine.top + blankLine.lineHeight);
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it.each([false, true])('keeps tables before authored breaks clear of following modern content (incremental: %s)', (incremental) => {
+        mockCanvasTextMetrics();
+        const T = DataStreamTreeTokenType;
+        const cell = `${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cover${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}`;
+        const tableStream = `${T.TABLE_START}${cell}${T.TABLE_END}`;
+        const dataStream = `${tableStream}${T.PARAGRAPH}${tableStream}${T.PARAGRAPH}${T.PAGE_BREAK}Contents${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const contentsIndex = dataStream.lastIndexOf(T.PARAGRAPH);
+        const univer = new Univer();
+        const model = new DocumentDataModel({
+            id: 'modern-floating-cover',
+            body: {
+                dataStream,
+                paragraphs: Array.from(dataStream).flatMap((token, startIndex) => token === T.PARAGRAPH
+                    ? [{ startIndex, paragraphId: `p-${startIndex}` }]
+                    : []),
+                sectionBreaks: Array.from(dataStream).flatMap((token, startIndex) => token === T.SECTION_BREAK
+                    ? [{ startIndex, sectionId: `s-${startIndex}` }]
+                    : []),
+                tables: [
+                    { tableId: 'cover', startIndex: 0, endIndex: tableStream.length },
+                    { tableId: 'details', startIndex: tableStream.length + 1, endIndex: tableStream.length * 2 + 1 },
+                ],
+            },
+            tableSource: Object.fromEntries(['cover', 'details'].map((tableId, index) => [tableId, {
+                tableId,
+                align: TableAlignmentType.START,
+                indent: { v: 0 },
+                textWrap: index === 0 ? TableTextWrapType.WRAP : TableTextWrapType.NONE,
+                overlap: BooleanNumber.FALSE,
+                dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                position: {
+                    positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 0 },
+                    positionV: { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 0 },
+                },
+                size: { type: TableSizeType.SPECIFIED, width: { v: 600 } },
+                tableRows: [{
+                    tableCells: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 600 } } }],
+                    trHeight: { val: { v: index === 0 ? 500 : 120 }, hRule: TableRowHeightRule.EXACT },
+                }],
+                tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 600 } } }],
+            }])),
+            documentStyle: {
+                documentFlavor: DocumentFlavor.MODERN,
+                pageSize: { width: 960, height: 400 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        if (incremental) {
+            completeIncrementalLayout(skeleton);
+        } else {
+            skeleton.calculate();
+        }
+        const pages = skeleton.getSkeletonData()!.pages;
+        expect(pages).toHaveLength(1);
+        const page = pages[0];
+        const cover = page.skeTables.get('cover')!;
+        const details = page.skeTables.get('details')!;
+        expect(details.top).toBeGreaterThanOrEqual(cover.top + cover.height);
+        const contentsSection = page.sections.find((section) => section.columns.some((column) =>
+            column.lines.some((line) => line.paragraphIndex === contentsIndex)))!;
+        const contentsLine = contentsSection.columns.flatMap((column) => column.lines)
+            .find((line) => line.paragraphIndex === contentsIndex)!;
+        expect(contentsSection.top + contentsLine.top).toBeGreaterThanOrEqual(details.top + details.height);
+        expect(page.height).toBeGreaterThanOrEqual(contentsSection.top + contentsLine.top + contentsLine.lineHeight);
+        skeleton.dispose();
+        univer.dispose();
+    });
+
     it.each(['', 'Following paragraph', '\rFollowing paragraph'].flatMap((followingText) =>
         [TableRowHeightRule.EXACT, TableRowHeightRule.AT_LEAST].flatMap((hRule) =>
             [false, true].flatMap((incremental) =>

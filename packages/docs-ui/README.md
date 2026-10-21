@@ -67,7 +67,8 @@ Collapsing keeps the heading visible and hides its following section, including 
 tables, and images. Expanding the parent retains each nested heading's own collapse state.
 Hidden content remains in the document snapshot. Collapse changes participate in undo/redo and
 collaboration, so other editors share the state. Selections inside hidden content move to a
-visible heading, and caret navigation skips hidden content.
+visible heading, and caret navigation skips hidden content. Collaborative table edits and history
+can update hidden cells without drawing a rectangular selection over that heading.
 
 The triangle and its tooltip are drawn on Canvas. Colors follow `ThemeService`, including
 runtime theme changes. After a 500 ms hover, the control shows the localized “Collapse”

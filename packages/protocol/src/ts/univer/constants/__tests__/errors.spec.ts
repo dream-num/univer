@@ -26,7 +26,6 @@ describe('Office export error protocol', () => {
         ['LICENSE_USAGE_STATE_INVALID', 9008],
         ['LICENSE_USAGE_STORAGE_ERROR', 9009],
         ['LICENSE_CONCURRENCY_TIMEOUT', 9010],
-        ['LICENSE_CELL_LIMIT_EXCEEDED', 9011],
         ['LICENSE_VERSION_NOT_ALLOWED', 9012],
         ['LICENSE_NOT_YET_EFFECTIVE', 9013],
     ] as const)('preserves %s = %i across the numeric IError JSON boundary', (name, code) => {

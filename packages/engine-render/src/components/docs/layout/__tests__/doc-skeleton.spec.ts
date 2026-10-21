@@ -60,7 +60,7 @@ import { registerDocumentLayoutPresentation } from '../../document-layout-presen
 import { setDocsTableRenderViewportProvider } from '../../table-render-viewport';
 import { DocumentViewModel } from '../../view-model/document-view-model';
 import { DocumentSkeleton } from '../doc-skeleton';
-import { serializeDocumentSkeletonPage } from '../document-layout-page-patch';
+import { serializeDocumentSkeletonContinuousBlock, serializeDocumentSkeletonPage } from '../document-layout-page-patch';
 import { Hyphen } from '../hyphenation/hyphen';
 import { Lang } from '../hyphenation/lang';
 import { PATTERN_LOADERS } from '../hyphenation/pattern-loaders.gen';
@@ -2762,6 +2762,72 @@ describe('doc skeleton', () => {
         skeleton.dispose();
         model.dispose();
         univer.dispose();
+    });
+
+    it('commits a Worker continuation after its section is absent from the retained Main interaction window', () => {
+        const univer = new Univer();
+        const content = `Modern paragraph across imported pages.${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.PAGE_BREAK}`.repeat(40);
+        const model = createDocumentModelWithStyle(content, {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        model.updateDocumentDataPageSize(240, 180);
+        model.getBody()!.sectionBreaks![0].pageSize = { width: 240, height: 180 };
+        const localeService = univer.__getInjector().get(LocaleService);
+        const main = DocumentSkeleton.create(new DocumentViewModel(model), localeService);
+        const worker = DocumentSkeleton.create(new DocumentViewModel(model), localeService);
+        try {
+            const mainGeneration = main.startIncrementalLayout({ reason: 'initial', anchor: 0 });
+            let mainProgress = main.stepIncrementalLayout(mainGeneration, 0);
+            for (let step = 0; step < 100 && !mainProgress.didPublishAnchor; step++) {
+                mainProgress = main.stepIncrementalLayout(mainGeneration, 0);
+            }
+            expect(mainProgress.didPublishAnchor).toBe(true);
+            const retainedPage = main.getSkeletonData()!.pages[0];
+            const protectedEnd = retainedPage.sections[0].columns[0].lines[0].ed;
+            main.beginExternalLayout({
+                reason: 'edit',
+                protectedRange: { mode: 'continuous', startOffset: 0, endOffset: protectedEnd },
+            });
+            const workerGeneration = worker.startIncrementalLayout({ reason: 'initial' });
+            let snapshot: ReturnType<typeof serializeDocumentSkeletonContinuousBlock>['snapshot'] | null = null;
+            let sawMissingBoundary = false;
+            let complete = false;
+            for (let step = 0; step < 1000; step++) {
+                const progress = worker.stepIncrementalLayout(workerGeneration, 0);
+                if (!progress.didPublish) {
+                    continue;
+                }
+                const data = worker.getSkeletonData()!;
+                const serialized = serializeDocumentSkeletonContinuousBlock(data.pages[0], snapshot);
+                snapshot = serialized.snapshot;
+                const mainSection = main.getSkeletonData()!.pages[0].sections[serialized.block.flow.sectionIndex];
+                const missingBoundary = mainSection?.columns[serialized.block.flow.columnIndex] == null;
+                sawMissingBoundary ||= missingBoundary && !progress.complete;
+                expect(() => main.applyLayoutPublication({
+                    kind: 'block',
+                    left: data.left,
+                    top: data.top,
+                    st: data.st,
+                    ed: data.ed,
+                    block: serialized.block,
+                    resources: { reset: step === 0, skeHeaders: [], skeFooters: [], skeListLevel: null, drawingAnchor: null },
+                }, progress)).not.toThrow();
+                if (!progress.complete) {
+                    expect(main.getSkeletonData()!.pages[0]).toBe(retainedPage);
+                } else {
+                    complete = true;
+                    break;
+                }
+            }
+            expect(sawMissingBoundary).toBe(true);
+            expect(complete).toBe(true);
+            expect(serializeDocumentSkeletonPage(main.getSkeletonData()!.pages[0]))
+                .toEqual(serializeDocumentSkeletonPage(worker.getSkeletonData()!.pages[0]));
+        } finally {
+            main.dispose();
+            worker.dispose();
+            model.dispose();
+            univer.dispose();
+        }
     });
 
     it('hit-tests imported sections throughout a modern page while Worker layout is pending', () => {

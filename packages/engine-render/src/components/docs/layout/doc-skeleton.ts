@@ -2966,7 +2966,9 @@ export class DocumentSkeleton extends Skeleton {
             ?.sections[flow.sectionIndex]
             ?.columns[flow.columnIndex];
         if (existingColumn == null) {
-            throw new Error('Continuous layout cannot merge a Worker tail without the Main interaction boundary.');
+            // A retained folded window can omit sections restored by this generation.
+            // Commit the queued canonical Worker geometry together when it completes.
+            return null;
         }
 
         const firstUnprotectedLine = flow.lines[firstUnprotectedLineOffset];

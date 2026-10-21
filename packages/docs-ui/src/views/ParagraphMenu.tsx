@@ -26,12 +26,10 @@ import type { IDocBlockMoveValidationContext } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IPopup, IValueOption, RectPopupDirection } from '@univerjs/ui';
 import type { CSSProperties } from 'react';
-import type { LocaleKey } from '../locale/types';
-import type { IMutiPageParagraphBound } from '../services/doc-event-manager.service';
-import type { IDocBlockMenuTarget } from '../services/doc-paragraph-menu.service';
 import {
     DataStreamTreeTokenType,
     DocumentBlockRangeType,
+    DocumentFlavor,
     ICommandService,
     ILogService,
     IUniverInstanceService,
@@ -49,6 +47,7 @@ import {
     DocBlockMoveValidatorService,
     DocContentInsertService,
     DocSelectionManagerService,
+    DocSkeletonManagerService,
     RichTextEditingMutation,
 } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -62,6 +61,9 @@ import {
 } from '@univerjs/ui';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
+import type { IMutiPageParagraphBound } from '../services/doc-event-manager.service';
+import type { IDocBlockMenuTarget } from '../services/doc-paragraph-menu.service';
 import {
     DocCopyCommand,
     DocCopyCurrentParagraphCommand,
@@ -927,6 +929,8 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     const paragraphObj = useMemo(() => doc?.getBody()?.paragraphs?.find((p) => p.startIndex === startIndex), [doc, startIndex]);
     const isEmptyParagraph = currentActiveTarget?.emptyMode ?? isEmptyParagraphMenuTarget(dataStream, activeParagraphBound);
     const namedStyleType = paragraphObj?.paragraphStyle?.namedStyleType;
+    const isModernHeading = doc?.getDocumentStyle().documentFlavor === DocumentFlavor.MODERN &&
+        startIndex != null && renderUnit?.with(DocSkeletonManagerService).getViewModel().getHeadingSections().some((heading) => heading.paragraphIndex === startIndex && heading.startOffset < heading.endOffset);
     const targetIconKey = currentActiveTarget?.icon ?? getParagraphMenuTriggerIconKey(namedStyleType);
     const TargetIcon = iconManager.get(targetIconKey);
     const paragraphMenuType = useMemo(
@@ -1342,13 +1346,15 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                 data-u-focused-table-menu={isFocusedTableMenu ? 'true' : undefined}
                 ref={anchorRef}
                 className={clsx(`
-                  univer-mr-1 univer-inline-flex univer-h-7 univer-cursor-pointer univer-items-center univer-gap-1
-                  univer-rounded-md univer-border univer-border-solid univer-border-gray-200 univer-bg-gray-0
-                  univer-px-2 univer-py-0 univer-shadow-sm univer-transition-colors
+                  univer-inline-flex univer-h-7 univer-cursor-pointer univer-items-center univer-gap-1 univer-rounded-md
+                  univer-border univer-border-solid univer-border-gray-200 univer-bg-gray-0 univer-px-2 univer-py-0
+                  univer-shadow-sm univer-transition-colors
                   hover:univer-bg-gray-50 hover:univer-shadow-md
                   dark:!univer-border-gray-600 dark:!univer-bg-gray-900
                   dark:hover:!univer-bg-gray-800
                 `, {
+                    // Outer spacing becomes a pointer target over the Canvas arrow when the popup is clamped.
+                    'univer-mr-1': !isModernHeading,
                     'univer-bg-gray-100 univer-shadow-md dark:!univer-bg-gray-800': visible,
                 })}
                 onMouseEnter={(e) => {

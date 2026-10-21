@@ -70,7 +70,8 @@ collaboration, so other editors share the state. Selections inside hidden conten
 visible heading, and caret navigation skips hidden content. Collaborative table edits and history
 can update hidden cells without drawing a rectangular selection over that heading.
 
-The triangle and its tooltip are drawn on Canvas. Colors follow `ThemeService`, including
+The paragraph menu leaves the Canvas arrow accessible when constrained against the canvas edge,
+including headings resolved through inherited styles. The triangle and its tooltip are drawn on Canvas. Colors follow `ThemeService`, including
 runtime theme changes. After a 500 ms hover, the control shows the localized “Collapse”
 or “Expand” tooltip above it; if the viewport clips the top, the tooltip appears below.
 Scrolling, zooming, leaving the control, or activating it clears the tooltip.

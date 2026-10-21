@@ -375,9 +375,9 @@ describe('selection utils', () => {
         vi.restoreAllMocks();
     });
 
-    it('creates text and rect ranges from char indexes', () => {
+    it.each([0, 1])('creates text and rect ranges from char indexes ending in cell %s', (endCell) => {
         const startPosition = createNodePosition(['pages', 0, 'skeTables', 'table-1', 'rows', 0, 'cells', 0]);
-        const endPosition = createNodePosition(['pages', 0, 'skeTables', 'table-1', 'rows', 0, 'cells', 1], 1);
+        const endPosition = createNodePosition(['pages', 0, 'skeTables', 'table-1', 'rows', 0, 'cells', endCell], 1);
         const skeleton = {
             findNodePositionByCharIndex: vi
                 .fn()

@@ -242,6 +242,10 @@ const locale = {
             defaultTextColor: 'Default text color',
             noBackground: 'No background',
         },
+        heading: {
+            collapse: 'Collapse',
+            expand: 'Expand',
+        },
         'page-settings': {
             'document-setting': 'Page Setup',
             'modern-width': 'Content width',

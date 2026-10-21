@@ -244,6 +244,10 @@ const locale: typeof enUS = {
             defaultTextColor: '기본 텍스트 색상',
             noBackground: '배경 없음',
         },
+        heading: {
+            collapse: '접기',
+            expand: '펼치기',
+        },
         'page-settings': {
             'document-setting': '문서 설정',
             'modern-width': '콘텐츠 너비',

@@ -15,7 +15,6 @@
  */
 
 import type { Dependency, DocumentDataModel } from '@univerjs/core';
-import type { IUniverDocsUIConfig } from './config/config';
 import {
     DependentOn,
     ICommandService,
@@ -37,6 +36,7 @@ import {
 } from '@univerjs/docs';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { IShortcutService } from '@univerjs/ui';
+import type { IUniverDocsUIConfig } from './config/config';
 import pkg from '../package.json';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands/auto-format.command';
 import { BreakLineCommand } from './commands/commands/break-line.command';
@@ -196,6 +196,7 @@ import { DocHtmlExportService } from './services/clipboard/udm-to-html/doc-html-
 import { DocAutoFormatService } from './services/doc-auto-format.service';
 import { DocContextualRibbonService } from './services/doc-contextual-ribbon.service';
 import { DocEventManagerService } from './services/doc-event-manager.service';
+import { DocHeadingCollapseService } from './services/doc-heading-collapse.service';
 import { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
 import { DocIMEStateChangeInterceptorService } from './services/doc-ime-state-change-interceptor.service';
 import { DocLayoutInteractionService } from './services/doc-layout-interaction.service';
@@ -541,6 +542,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocFloatMenuService],
             [DocPasteOptionsRenderController],
             [DocParagraphMenuService],
+            [DocHeadingCollapseService],
             [DocHeaderFooterController],
             [DocHeaderFooterRibbonController],
             [DocResizeRenderController],

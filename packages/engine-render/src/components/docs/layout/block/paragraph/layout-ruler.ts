@@ -15,21 +15,6 @@
  */
 
 import type { INumberUnit, IParagraphProperties, ITabStop, Nullable } from '@univerjs/core';
-import type {
-    IDocumentSkeletonColumn,
-    IDocumentSkeletonDivide,
-    IDocumentSkeletonDrawing,
-    IDocumentSkeletonGlyph,
-    IDocumentSkeletonLine,
-    IDocumentSkeletonPage,
-    IDocumentSkeletonSection,
-    IDocumentSkeletonTable,
-} from '../../../../../basics/i-document-skeleton-cached';
-import type { IParagraphConfig, IParagraphTableCache, ISectionBreakConfig } from '../../../../../basics/interfaces';
-import type {
-    IFloatObject,
-    ILayoutContext,
-} from '../../tools';
 import {
     BooleanNumber,
     characterSpacingControlType,
@@ -47,6 +32,21 @@ import {
     TabStopAlignment,
     WrapStrategy,
 } from '@univerjs/core';
+import type {
+    IDocumentSkeletonColumn,
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonDrawing,
+    IDocumentSkeletonGlyph,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonSection,
+    IDocumentSkeletonTable,
+} from '../../../../../basics/i-document-skeleton-cached';
+import type { IParagraphConfig, IParagraphTableCache, ISectionBreakConfig } from '../../../../../basics/interfaces';
+import type {
+    IFloatObject,
+    ILayoutContext,
+} from '../../tools';
 import { cjk } from '../../../../../basics/cjk-regexp';
 import {
     DocumentSkeletonPageType,
@@ -1777,11 +1777,19 @@ function _lineOperator(
         [...paragraphNonInlineSkeDrawings.values()].some(
             (drawing) => drawing.drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM
         );
+    // An inline table can move below a float without intersecting its old anchor line.
+    // Only the latest positioned slice on this page/column governs following flow.
+    let tableFlowTop = lineTop;
+    for (const item of skeTablesInParagraph ?? []) {
+        if (item.hasPositioned && item.table.parent === lastPage && item.table.tableSource.textWrap === TableTextWrapType.NONE) {
+            tableFlowTop = Math.max(lineTop, item.table.top + item.table.height - section.top);
+        }
+    }
     const calculatedLineTop = positionedCustomBlockOnly
-        ? lineTop
+        ? tableFlowTop
         : calculateLineTopByDrawings(
             lineHeight,
-            lineTop,
+            tableFlowTop,
             lastPage,
             headerPage,
             footerPage,

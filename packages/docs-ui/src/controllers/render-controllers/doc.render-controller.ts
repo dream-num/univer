@@ -850,9 +850,18 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             skeleton,
             options.invalidation
         );
+        const viewport = this._context.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        const docsComponent = this._context.mainComponent;
+        const minimumPublicationHeight = this._context.unit.documentStyle.documentFlavor === DocumentFlavor.MODERN &&
+            viewport != null && docsComponent instanceof Documents
+            ? Math.max(0, viewport.calcViewportInfo().viewBound.bottom - docsComponent.getOffsetConfig().docsTop)
+            : undefined;
         this._layoutCoordinator.schedule(skeleton, {
             ...options,
             anchor: interactionAnchor,
+            ...(minimumPublicationHeight != null && Number.isFinite(minimumPublicationHeight) && minimumPublicationHeight > 0
+                ? { minimumPublicationHeight }
+                : {}),
             ...(foregroundEndOffset == null ? {} : { foregroundEndOffset }),
             preserveInteractionWindow: interactionAnchor != null && interactionAnchor !== options.anchor,
             // The authoritative Worker recomputes the suffix after the protected

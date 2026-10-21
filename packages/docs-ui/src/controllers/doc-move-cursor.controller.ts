@@ -29,7 +29,6 @@ import type {
     INodeSearch,
 } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
-import type { DocCursorMoveGranularity, IMoveCursorOperationParams } from '../commands/operations/doc-cursor.operation';
 import {
     DataStreamTreeTokenType,
     Direction,
@@ -42,6 +41,7 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentSkeletonPageType, IRenderManagerService, LineType } from '@univerjs/engine-render';
+import type { DocCursorMoveGranularity, IMoveCursorOperationParams } from '../commands/operations/doc-cursor.operation';
 import { neoGetDocObject } from '../basics/component-tools';
 import {
     findTableAfterLine,
@@ -579,7 +579,7 @@ export class DocMoveCursorController extends Disposable {
         segmentId: string,
         resume: () => void
     ): boolean {
-        if (segmentId !== '') {
+        if (segmentId !== '' || skeleton.getViewModel().getCollapsedHeadingAtOffset(offset)) {
             return false;
         }
         const pageIndex = skeleton.findBodyPageIndexByCharIndex(offset);
@@ -850,6 +850,13 @@ export class DocMoveCursorController extends Disposable {
 
         while (current >= 0 && current < dataStream.length && !visited.has(current)) {
             visited.add(current);
+            if (!segmentId) {
+                const hidden = skeleton.getViewModel().getCollapsedHeadingAtOffset(current);
+                if (hidden) {
+                    current = step < 0 ? hidden.paragraphIndex : hidden.endOffset;
+                    continue;
+                }
+            }
 
             const normalizedCursor = this._normalizeCursorOffset(dataStream, customRanges, current, direction);
 

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import { BehaviorSubject } from 'rxjs';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { Nullable } from '../../../shared/types';
 import type { IWorkbookData } from '../../../sheets/typedef';
 import type { IDocumentData } from '../../../types/interfaces/i-document-data';
-import { BehaviorSubject } from 'rxjs';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { Injector } from '../../../common/di';
 import { UnitModel, UniverInstanceType } from '../../../common/unit';
 import { DocumentDataModel } from '../../../docs/data-model/document-data-model';
@@ -83,12 +83,13 @@ class MockBoardUnit extends UnitModel {
 }
 
 describe('UniverInstanceService', () => {
+    let injector: Injector;
     let service: UniverInstanceService;
     let contextService: ContextService;
     let logService: DesktopLogService;
 
     beforeEach(() => {
-        const injector = new Injector();
+        injector = new Injector();
         injector.add([IContextService, { useClass: ContextService }]);
         injector.add([ILogService, { useClass: DesktopLogService }]);
         injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
@@ -184,19 +185,38 @@ describe('UniverInstanceService', () => {
     });
 
     it('should dispose units while resetting focus and current', () => {
+        const subject = injector.get(IUniverInstanceService);
+        const focusedIds: Array<Nullable<string>> = [];
         const disposed: string[] = [];
-        service.getTypeOfUnitDisposed$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe((unit) => {
+        subject.focused$.subscribe((unitId) => focusedIds.push(unitId));
+        subject.getTypeOfUnitDisposed$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe((unit) => {
             disposed.push(unit.getUnitId());
         });
 
-        const doc = service.createUnit<Partial<IDocumentData>, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, createDocData());
-        service.focusUnit(doc.getUnitId());
+        const doc = subject.createUnit<Partial<IDocumentData>, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, createDocData());
+        subject.focusUnit(doc.getUnitId());
 
-        expect(service.disposeUnit('doc-unit')).toBe(true);
+        expect(subject.disposeUnit('doc-unit')).toBe(true);
         expect(disposed).toEqual(['doc-unit']);
-        expect(service.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)).toBeNull();
-        expect(service.getFocusedUnit()).toBeUndefined();
-        expect(service.disposeUnit('missing')).toBe(false);
+        expect(subject.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)).toBeNull();
+        expect(focusedIds).toEqual([null, 'doc-unit', null]);
+        expect(subject.getFocusedUnit()).toBeNull();
+        expect(contextService.getContextValue(FOCUSING_DOC)).toBe(false);
+        expect(subject.disposeUnit('missing')).toBe(false);
+
+        const replacement = subject.createUnit<Partial<IDocumentData>, DocumentDataModel>(
+            UniverInstanceType.UNIVER_DOC,
+            createDocData('replacement-doc')
+        );
+        subject.focusUnit(replacement.getUnitId());
+        const background = subject.createUnit<Partial<IWorkbookData>, Workbook>(
+            UniverInstanceType.UNIVER_SHEET,
+            createWorkbookData(),
+            { makeCurrent: false }
+        );
+        expect(subject.disposeUnit(background.getUnitId())).toBe(true);
+        expect(subject.getFocusedUnit()).toBe(replacement);
+        expect(focusedIds).toEqual([null, 'doc-unit', null, 'replacement-doc']);
     });
 
     it('should throw on duplicate unit id and support current type stream', () => {

@@ -299,6 +299,10 @@ describe('DocsLayoutWorkerRuntime', () => {
                     if (step.progress.complete) {
                         break;
                     }
+                    // Pattern imports need an event-loop turn; microtask-only stepping can starve them in CI.
+                    await new Promise<void>((resolve) => {
+                        setTimeout(resolve, 0);
+                    });
                     step = await runtime.stepLayout({ ...identity, generation: step.progress.generation, budgetMs: 0 });
                 }
                 expect(step.progress.complete).toBe(true);

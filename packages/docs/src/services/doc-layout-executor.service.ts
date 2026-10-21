@@ -31,7 +31,6 @@ import type {
     IDocumentLayoutSessionStartOptions,
     IDocumentLayoutStepResult,
 } from '@univerjs/engine-render';
-import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import {
     Disposable,
     DocumentFlavor,
@@ -51,6 +50,7 @@ import {
 } from '@univerjs/core';
 import { getDocsCustomBlockRenderViewport } from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
+import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import { RICH_TEXT_EDITING_MUTATION_ID } from '../commands/mutations/core-editing.mutation-id';
 import { createDocumentLayoutSnapshot } from './document-layout-snapshot';
 
@@ -692,6 +692,9 @@ export class DocLayoutExecutorService extends Disposable {
         if (executor == null || dataModel == null) {
             return;
         }
+        if (JSONX.isNoop(params.actions) || params.actions?.length === 0) {
+            return;
+        }
 
         const session = this._sessions.get(params.unitId);
         if (session == null) {
@@ -701,9 +704,6 @@ export class DocLayoutExecutorService extends Disposable {
             return;
         }
 
-        if (JSONX.isNoop(params.actions)) {
-            return;
-        }
         const sourceMutationRevision = dataModel.getMutationRevision();
         if (sourceMutationRevision !== session.sourceMutationRevision + 1) {
             session.needsResnapshot = true;

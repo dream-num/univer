@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency, ICellData, IDocumentBody } from '@univerjs/core';
+import type { Dependency, ICellData, IDocumentBody, IDocumentData } from '@univerjs/core';
 import {
     BooleanNumber,
     CellValueType,
@@ -34,6 +34,7 @@ import {
     IContextService,
     ILogService,
     Injector,
+    isNullCell,
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
@@ -47,7 +48,7 @@ import { DocSelectionManagerService, DocSkeletonManagerService, DocStateChangeMa
 import { DocSelectionRenderService, IEditorService, InnerPasteCommand, MoveCursorOperation, MoveSelectionOperation, SetDocInputStyleCommand, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { FunctionService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { DeviceInputEventType, IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
-import { SetRangeValuesCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import { SetRangeValuesCommand, SetRangeValuesMutation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -84,6 +85,98 @@ describe('imported formula metadata when editing', () => {
             const unchanged = { ...previous };
             expect(parseInput(previous.f!, unchanged)).toBeNull();
             expect(unchanged).toMatchObject({ f: previous.f, ft: previous.ft, fd });
+        } finally {
+            testBed.univer.dispose();
+        }
+    });
+});
+
+describe('clearing cell editor content', () => {
+    const cases: Array<{ name: string; cell: ICellData; body?: IDocumentBody }> = [
+        { name: 'number', cell: { v: 1, t: CellValueType.NUMBER } },
+        { name: 'text', cell: { v: 'text', t: CellValueType.STRING } },
+        { name: 'typed empty string', cell: { v: '', t: CellValueType.STRING } },
+        { name: 'text-formatted value', cell: { v: '001', t: CellValueType.STRING, s: { n: { pattern: '@' }, bl: 1 } } },
+        { name: 'formula', cell: { f: '=1', v: 1, t: CellValueType.NUMBER } },
+        { name: 'formula without a cached value', cell: { f: '=1' } },
+        { name: 'shared formula without a cached value', cell: { si: 'shared', ft: FormulaType.SHARED } },
+        {
+            name: 'rich text',
+            cell: { p: { id: 'rich-text', body: { dataStream: 'rich text\r\n', textRuns: [{ st: 0, ed: 4, ts: { bl: 1 } }] }, documentStyle: {} } },
+            body: { dataStream: '\r\n', paragraphs: [{ startIndex: 0, paragraphId: 'first' }, { startIndex: 1, paragraphId: 'last' }] },
+        },
+    ];
+
+    it.each(cases)('clears $name without removing cell formatting', ({ cell, body }) => {
+        const testBed = createTestBed(undefined, [[LexerTreeBuilder], [IFunctionService, { useClass: FunctionService }]]);
+        try {
+            const worksheet = testBed.sheet.getSheetBySheetId('sheet1')!;
+            const previous: ICellData = { s: { bl: 1, n: { pattern: '0.00' } }, ...cell };
+            worksheet.getCellMatrix().setValue(0, 0, Tools.deepClone(previous));
+            const incoming = getCellDataByInput(
+                Tools.deepClone(previous),
+                { id: 'editor', body: body ?? { dataStream: '\r\n' }, documentStyle: {} },
+                testBed.get(LexerTreeBuilder),
+                testBed.get(LocaleService),
+                testBed.get(IFunctionService),
+                testBed.sheet.getStyles()
+            );
+            const commands = testBed.get(ICommandService);
+            commands.registerCommand(SetRangeValuesMutation);
+            if (incoming) {
+                commands.syncExecuteCommand(SetRangeValuesMutation.id, {
+                    unitId: testBed.sheet.getUnitId(),
+                    subUnitId: worksheet.getSheetId(),
+                    cellValue: { 0: { 0: incoming } },
+                });
+            }
+
+            const stored = worksheet.getCellRaw(0, 0);
+            expect(isNullCell(stored)).toBe(true);
+            expect(stored?.v).toBeUndefined();
+            expect(stored?.t).toBeUndefined();
+            expect(testBed.sheet.getStyles().getStyleByCell(stored)).toEqual(previous.s);
+        } finally {
+            testBed.univer.dispose();
+        }
+    });
+
+    it.each([
+        { name: 'empty-string formula', input: '=""', expected: { f: '=""', v: null } },
+        { name: 'explicit empty text', input: "'", expected: { v: '', t: CellValueType.FORCE_STRING } },
+        { name: 'whitespace', input: ' ', expected: { v: ' ' } },
+    ])('preserves $name', ({ input, expected }) => {
+        const testBed = createTestBed(undefined, [[LexerTreeBuilder], [IFunctionService, { useClass: FunctionService }]]);
+        try {
+            const incoming = getCellDataByInput(
+                { v: 1, t: CellValueType.NUMBER },
+                { id: 'editor', body: { dataStream: `${input}\r\n` }, documentStyle: {} },
+                testBed.get(LexerTreeBuilder),
+                testBed.get(LocaleService),
+                testBed.get(IFunctionService),
+                testBed.sheet.getStyles()
+            );
+
+            expect(incoming).toMatchObject(expected);
+        } finally {
+            testBed.univer.dispose();
+        }
+    });
+
+    it('preserves an in-cell image with no text', () => {
+        const testBed = createTestBed(undefined, [[LexerTreeBuilder], [IFunctionService, { useClass: FunctionService }]]);
+        try {
+            const snapshot: IDocumentData = { id: 'editor', body: { dataStream: '\r\n' }, documentStyle: {}, drawingsOrder: ['image'] };
+            const incoming = getCellDataByInput(
+                {},
+                snapshot,
+                testBed.get(LexerTreeBuilder),
+                testBed.get(LocaleService),
+                testBed.get(IFunctionService),
+                testBed.sheet.getStyles()
+            );
+
+            expect(incoming?.p).toEqual(snapshot);
         } finally {
             testBed.univer.dispose();
         }
@@ -163,7 +256,7 @@ describe('emptyBody', () => {
 function createController(initialDataStream = 'new value\r\n', isPercentFormat = false, isInArrayFormulaRange = false) {
     const worksheet = {
         getSheetId: vi.fn(() => 'sheet-1'),
-        getCellRaw: vi.fn(() => ({ v: 'old' })),
+        getCellRaw: vi.fn((): ICellData => ({ v: 'old' })),
         getComposedCellStyleWithoutSelf: vi.fn(() => ({})),
     };
     const styles = new Styles();
@@ -416,6 +509,15 @@ describe('EditingRenderController business methods', () => {
         expect(worksheet.getCellRaw).not.toHaveBeenCalled();
         expect(controller._sheetInterceptorService.onWriteCell).not.toHaveBeenCalled();
         expect(controller._commandService.syncExecuteCommand).not.toHaveBeenCalled();
+    });
+
+    it.each<ICellData>([{}, { s: { bl: 1 } }, { s: { n: { pattern: '@' } } }])('does not submit an empty edit to an already blank cell (%j)', async (cell) => {
+        const { controller, worksheet, commandService, docModel } = createController('\r\n');
+        worksheet.getCellRaw.mockReturnValue(cell);
+
+        await controller.submitCellData(docModel);
+
+        expect(commandService.syncExecuteCommand).not.toHaveBeenCalled();
     });
 
     it('reuses an empty cell style for the next editor input', () => {

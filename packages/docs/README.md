@@ -70,11 +70,13 @@ Concurrent paragraph formatting preserves inherited style references and importe
 a full replacement can still explicitly clear those fields.
 
 Collapse state is shared document state, not a personal view preference. The command uses the
-rich-text mutation path for undo/redo and collaboration. A selection hidden by a collapse moves
-to the visible heading. Worker layout uses the same flags after edits, undo/redo, and snapshot
-recovery; visibility changes rebuild the affected layout and retain the published viewport until
+rich-text mutation path for undo/redo and collaboration. Undoing a fold preserves later peer
+character formatting and enclosing field or content-control properties that the fold did not edit.
+A selection hidden by a collapse moves to the visible heading. Worker layout uses the same flags
+after edits, undo/redo, and snapshot recovery; visibility changes rebuild the affected layout and retain the published viewport until
 replacement content is ready. Hidden tables and images are omitted from layout publications,
-while their source data remains in the snapshot.
+while their source data remains in the snapshot. Rejected edits with empty operations do not
+advance the Worker mutation queue or force the next real edit to resnapshot the document.
 
 See [the editor interaction details](../docs-ui/README.md#heading-collapse) for the Canvas control.
 

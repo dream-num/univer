@@ -66,6 +66,9 @@ Use `collapsed: false` to expand. The command returns `false` for a no-op or an 
 including Traditional or disabled documents, headings hidden by an ancestor, empty sections
 when collapsing, and targets without edit permission.
 
+Concurrent paragraph formatting preserves inherited style references and imported numbering metadata;
+a full replacement can still explicitly clear those fields.
+
 Collapse state is shared document state, not a personal view preference. The command uses the
 rich-text mutation path for undo/redo and collaboration. A selection hidden by a collapse moves
 to the visible heading. Worker layout uses the same flags after edits, undo/redo, and snapshot

@@ -16,6 +16,7 @@
 
 import type { JSONXActions } from '@univerjs/core';
 import {
+    DocStyleType,
     DocumentDataModel,
     DocumentFlavor,
     ICommandService,
@@ -23,6 +24,7 @@ import {
     JSONX,
     NamedStyleType,
     PRESERVE_INSERTED_PARAGRAPH_IDS,
+    PresetListType,
     RedoCommand,
     TextXActionType,
     Tools,
@@ -37,6 +39,7 @@ import { DocStateEmitService } from '../../../services/doc-state-emit.service';
 import { DocumentEditablePermission } from '../../../services/permission/permission-point/document/editable';
 import { RichTextEditingMutation } from '../../mutations/core-editing.mutation';
 import { SetHeadingCollapsedCommand } from '../set-heading-collapsed.command';
+import { UpdateDocumentParagraphStyleCommand } from '../update-document-paragraph-style.command';
 
 function createData() {
     return createDocumentData('fold-doc', {
@@ -236,6 +239,65 @@ describe('SetHeadingCollapsedCommand', () => {
             expect(peer.doc.getSnapshot()).toEqual(bed.doc.getSnapshot());
             expect(bed.doc.getBody()!.paragraphs![0].headingCollapsed).toBe(priority === 'right');
             expect(bed.doc.getBody()!.dataStream).toBe(originalStream);
+        } finally {
+            peer.univer.dispose();
+        }
+    });
+
+    it.each(['left', 'right'] as const)('retains inherited heading and numbering through concurrent formatting history replay (%s)', async (priority) => {
+        const parent = bed.doc.getBody()!.paragraphs![0];
+        parent.styleId = 'derived-heading';
+        parent.paragraphStyle = undefined;
+        parent.sourceBullet = { listId: 'imported', listType: PresetListType.ORDER_LIST, nestingLevel: 0 };
+        parent.directBullet = null;
+        bed.doc.getSnapshot().styles = {
+            heading: { type: DocStyleType.paragraph, name: 'Heading', paragraphStyle: { namedStyleType: NamedStyleType.HEADING_1 } },
+            'derived-heading': { type: DocStyleType.paragraph, name: 'Derived', basedOn: 'heading' },
+        };
+        const initial = Tools.deepClone(bed.doc.getSnapshot());
+        const peer = createTestBed(initial);
+        try {
+            const commands = bed.get(ICommandService);
+            expect(set('parent', true)).toBe(true);
+            await commands.executeCommand(UndoCommand.id);
+            expect(bed.doc.getSnapshot()).toEqual(initial);
+            await commands.executeCommand(RedoCommand.id);
+            const fold = Tools.deepClone(getLatestActions(bed));
+
+            const peerCommands = peer.get(ICommandService);
+            expect(peerCommands.syncExecuteCommand(UpdateDocumentParagraphStyleCommand.id, {
+                unitId: peer.doc.getUnitId(),
+                paragraphId: 'parent',
+                startOffset: 0,
+                endOffset: 6,
+                style: { spaceAbove: { v: 12 } },
+            })).toBe(true);
+            await peerCommands.executeCommand(UndoCommand.id);
+            expect(peer.doc.getSnapshot()).toEqual(initial);
+            await peerCommands.executeCommand(RedoCommand.id);
+            const format = Tools.deepClone(getLatestActions(peer));
+
+            replayRemoteMutation(bed, JSONX.transform(format, fold, priority));
+            replayRemoteMutation(peer, JSONX.transform(fold, format, priority === 'left' ? 'right' : 'left'));
+            expect(peer.doc.getSnapshot()).toEqual(bed.doc.getSnapshot());
+            expect(bed.doc.getBody()!.paragraphs![0]).toMatchObject({
+                styleId: 'derived-heading',
+                sourceBullet: parent.sourceBullet,
+                directBullet: null,
+                headingCollapsed: true,
+                paragraphStyle: { spaceAbove: { v: 12 } },
+            });
+            expect(bed.doc.getBody()!.dataStream).toBe(initial.body!.dataStream);
+
+            const restored = new DocumentDataModel(JSON.parse(JSON.stringify(bed.doc.getSnapshot())));
+            const view = new DocumentViewModel(restored);
+            try {
+                expect(view.getCollapsedHeadingAtOffset(15)?.paragraphId).toBe('parent');
+                expect(restored.getSnapshot()).toEqual(bed.doc.getSnapshot());
+            } finally {
+                view.dispose();
+                restored.dispose();
+            }
         } finally {
             peer.univer.dispose();
         }

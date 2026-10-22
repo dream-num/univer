@@ -418,13 +418,6 @@ export function getParagraphMenuCommandParams(
     target: IDocBlockMenuTarget | null | undefined,
     unitId: string
 ): Record<string, unknown> | undefined {
-    if (target?.kind === 'table' && target.table) {
-        return {
-            ...commandParams,
-            unitId,
-            tableId: target.table.tableId,
-        };
-    }
     if (commandId !== DeleteCurrentParagraphCommand.id || target?.kind !== 'blockRange' || !target.blockRange) {
         return commandParams;
     }
@@ -1601,7 +1594,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                                                     ...commandParams,
                                                     tableId: (commandParams as { tableId?: string } | undefined)?.tableId ?? latestTarget.table?.tableId,
                                                 }
-                                                : getParagraphMenuCommandParams(commandId, commandParams as Record<string, unknown> | undefined, latestTarget, popup.unitId));
+                                                : commandParams);
                                     }
 
                                     finishParagraphMenuCommand(docParagraphMenuService, handleHideMenu);

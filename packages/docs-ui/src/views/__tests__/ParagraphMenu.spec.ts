@@ -17,12 +17,12 @@
 import type { IDocumentBlockRange, IDocumentBody, IParagraphStyle } from '@univerjs/core';
 import type { IDocBlockMoveValidationContext } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IMutiPageParagraphBound } from '../../services/doc-event-manager.service';
-import type { IDocBlockMenuTarget } from '../../services/doc-paragraph-menu.service';
 import { DataStreamTreeTokenType, DocumentBlockRangeType, DocumentBlockType, JSONX, NamedStyleType } from '@univerjs/core';
 import { DocBlockMoveValidatorService } from '@univerjs/docs';
 import { ContextMenuPosition } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
+import type { IMutiPageParagraphBound } from '../../services/doc-event-manager.service';
+import type { IDocBlockMenuTarget } from '../../services/doc-paragraph-menu.service';
 import {
     DocCopyCurrentParagraphCommand,
     DocCutCurrentParagraphCommand,
@@ -105,6 +105,30 @@ function blockRangeBody(blockType: DocumentBlockRangeType, paragraphStyle: IPara
 }
 
 describe('ParagraphMenu command behavior', () => {
+    it('targets the table menu owner even when the caret and menu params refer to another table', () => {
+        const target: IDocBlockMenuTarget = {
+            kind: DocumentBlockType.TABLE,
+            key: 'table:menu-table',
+            table: { tableId: 'menu-table', startIndex: 0, endIndex: 20 },
+            menuRange: { startOffset: 0, endOffset: 20, collapsed: false },
+            moveRange: { startOffset: 0, endOffset: 21 },
+            emptyMode: false,
+            draggable: true,
+        };
+        const params = { value: 1, unitId: 'other-doc', tableId: 'other-table' };
+        expect(getParagraphMenuCommandParams('table-align', params, target, 'menu-doc')).toEqual({
+            value: 1,
+            unitId: 'menu-doc',
+            tableId: 'menu-table',
+        });
+        expect(params.tableId).toBe('other-table');
+        expect(getParagraphMenuCommandParams('table-align', undefined, target, 'menu-doc')).toEqual({
+            unitId: 'menu-doc',
+            tableId: 'menu-table',
+        });
+        expect(getParagraphMenuCommandParams('table-align', params, null, 'menu-doc')).toBe(params);
+    });
+
     it('keeps the extensible T menu quick-action groups configured as icon grids', () => {
         for (const menuId of [
             DOC_PARAGRAPH_T_INSERT_MENU_ID,

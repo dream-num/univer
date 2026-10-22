@@ -3,7 +3,7 @@
     "type": "module",
     "version": "1.1.0",
     "private": true,
-    "packageManager": "pnpm@12.11.2",
+    "packageManager": "pnpm@12.14.0",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {

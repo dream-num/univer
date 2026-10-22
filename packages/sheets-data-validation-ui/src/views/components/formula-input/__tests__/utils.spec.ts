@@ -18,7 +18,7 @@ import { deserializeListOptions } from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
 import { buildCustomListFormulaPayload } from '../utils';
 
-describe('ListFormulaInput', () => {
+describe('buildCustomListFormulaPayload', () => {
     it('keeps commas inside custom list values', () => {
         const payload = buildCustomListFormulaPayload([
             { label: 'a,b', color: '#ff0000' },

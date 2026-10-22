@@ -16,8 +16,6 @@
 
 import type { ListValidator } from '@univerjs/sheets-data-validation';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
-import type { LocaleKey } from '../../../locale/types';
-import type { IFormulaInputProps } from './interface';
 import { DataValidationType, generateRandomId, isFormulaString, LocaleService, ThemeService } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { borderClassName, clsx, DraggableList, Dropdown, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design';
@@ -27,7 +25,9 @@ import { DataValidationFormulaController } from '@univerjs/sheets-data-validatio
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { debounceTime } from 'rxjs';
+import { debounceTime, noop } from 'rxjs';
+import type { LocaleKey } from '../../../locale/types';
+import type { IFormulaInputProps } from './interface';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../../const';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
 import { buildCustomListFormulaPayload } from './utils';
@@ -170,10 +170,8 @@ const Template = (props: { item: IDropdownItem; commonProps: any; className?: st
     );
 };
 
-const NOOP = () => { /* empty */ };
-
 export function ListFormulaInput(props: IFormulaInputProps) {
-    const { value, onChange: _onChange = NOOP, unitId, subUnitId, validResult, showError, ruleId } = props;
+    const { value, onChange: _onChange = noop, unitId, subUnitId, validResult, showError, ruleId } = props;
     const { formula1 = '', formula2 = '' } = value || {};
     const [isFormulaStr, setIsFormulaStr] = useState(() => isFormulaString(formula1) ? '1' : '0');
     const [formulaStr, setFormulaStr] = useState(isFormulaStr === '1' ? formula1 : '=');
@@ -412,9 +410,10 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                             />
                             <a
                                 className={`
-                                  univer-text-primary univer-flex univer-w-fit univer-cursor-pointer univer-flex-row
-                                  univer-items-center univer-rounded univer-p-1 univer-px-2 univer-text-sm
+                                  univer-flex univer-w-fit univer-cursor-pointer univer-flex-row univer-items-center
+                                  univer-rounded univer-p-1 univer-px-2 univer-text-sm univer-text-primary-600
                                   hover:univer-bg-primary-50
+                                  dark:!univer-text-primary-500
                                   dark:hover:!univer-bg-gray-800
                                 `}
                                 onClick={handleAdd}

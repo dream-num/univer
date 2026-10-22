@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../../locale/types';
 import { ICommandService, IContextService, LocaleService } from '@univerjs/core';
 import { Button, Checkbox, FormDualColumnLayout, FormLayout, Input, MessageType, Select } from '@univerjs/design';
 import { ILayoutService, IMessageService, useDebounceFn, useDependency, useObservable } from '@univerjs/ui';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from 'react';
 import { fromEvent } from 'rxjs';
+import type { LocaleKey } from '../../locale/types';
 import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../../commands/commands/replace.command';
 import { OpenReplaceDialogOperation } from '../../commands/operations/find-replace.operation';
 import { FIND_REPLACE_DIALOG_FOCUS, FIND_REPLACE_INPUT_FOCUS } from '../../services/context-keys';
@@ -110,8 +110,8 @@ export const FindDialog = forwardRef(function FindDialogImpl(_props, ref) {
             <div className="univer-mt-4 univer-text-center">
                 <a
                     className={`
-                      hover:univer-text-primary-500/80
                       univer-cursor-pointer univer-text-sm univer-text-primary-500 univer-transition-colors
+                      hover:univer-text-primary-500
                     `}
                     onClick={revealReplace}
                 >

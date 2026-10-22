@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency, IWorkbookData, Injector as RediInjector, Workbook } from '@univerjs/core';
+import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     DEFAULT_TEXT_FORMAT_EXCEL,
@@ -104,7 +104,7 @@ function createCommandTestBed(workbookData?: IWorkbookData) {
 
         constructor(
             _config: undefined,
-            @Inject(Injector) override readonly _injector: RediInjector
+            @Inject(Injector) override readonly _injector: Injector
         ) {
             super();
         }
@@ -136,7 +136,7 @@ function createCommandTestBed(workbookData?: IWorkbookData) {
 
 describe('Sheets numfmt commands', () => {
     let univer: Univer;
-    let get: RediInjector['get'];
+    let get: Injector['get'];
     let commandService: ICommandService;
     let selectionService: SheetsSelectionsService;
     let numfmtService: INumfmtService;

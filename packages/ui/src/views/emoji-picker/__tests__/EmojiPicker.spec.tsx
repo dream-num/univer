@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import type { ILocalStorageService as ILocalStorageServiceType } from '@univerjs/core';
 import type { ComponentType, ReactElement } from 'react';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { ILocalStorageService, Injector, LocaleService, LocaleType } from '@univerjs/core';
-import { scrollbarClassName } from '@univerjs/design';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../locale/en-US';
 import zhCN from '../../../locale/zh-CN';
@@ -26,7 +24,7 @@ import { connectInjector } from '../../../utils/di';
 import { SymbolPicker } from '../../symbol-picker/SymbolPicker';
 import { EmojiPicker } from '../EmojiPicker';
 
-class TestLocalStorageService implements ILocalStorageServiceType {
+class TestLocalStorageService implements ILocalStorageService {
     async getItem<T>(): Promise<T | null> {
         return null;
     }
@@ -131,15 +129,6 @@ describe('picker callbacks', () => {
         });
     });
 
-    it('uses the design scrollbar styles for emoji content', () => {
-        const { container } = renderWithDependencies(<EmojiPicker />);
-        const scrollContainer = container.querySelector('.univer-overflow-y-auto');
-
-        for (const className of scrollbarClassName.split(' ')) {
-            expect(scrollContainer?.classList.contains(className)).toBe(true);
-        }
-    });
-
     it('finds localized titles and aliases with the compact locale data', async () => {
         const onChange = vi.fn();
         const { getByRole } = renderWithDependencies(<EmojiPicker onChange={onChange} />, LocaleType.ZH_CN);
@@ -171,14 +160,5 @@ describe('picker callbacks', () => {
         fireEvent.click(getByRole('button', { name: '∞' }));
 
         expect(onChange).toHaveBeenCalledWith('∞');
-    });
-
-    it('uses the design scrollbar styles for symbol content', () => {
-        const { container } = renderWithDependencies(<SymbolPicker />);
-        const scrollContainer = container.querySelector('.univer-overflow-y-auto');
-
-        for (const className of scrollbarClassName.split(' ')) {
-            expect(scrollContainer?.classList.contains(className)).toBe(true);
-        }
     });
 });

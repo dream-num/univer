@@ -130,7 +130,7 @@ function createSheetDrawing(unitId: string, subUnitId: string, drawingId: string
     };
 }
 
-describe('SheetDrawingPanel behavior', () => {
+describe('SheetDrawingPanel', () => {
     let root: Root | undefined;
     let container: HTMLDivElement | undefined;
     let currentTestBed: ReturnType<typeof createSheetsDrawingUiTestBed> | undefined;

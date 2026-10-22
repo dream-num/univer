@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../../locale/types';
-import type { ByValuesModel, IFilterByValueWithTreeItem } from '../../services/sheets-filter-panel.service';
 import { LocaleService } from '@univerjs/core';
 import { borderClassName, Checkbox, clsx, Input, Tree } from '@univerjs/design';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type { ByValuesModel, IFilterByValueWithTreeItem } from '../../services/sheets-filter-panel.service';
 import { statisticFilterByValueItems } from '../../models/utils';
 
 /**
@@ -129,7 +129,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                         defaultCache={treeMap}
                         itemHeight={28}
                         treeNodeClassName={`
-                          univer-pr-2 univer-border-box univer-rounded-md
+                          univer-pr-2 univer-box-border univer-rounded-md
                           [&:hover_a]:univer-inline-block
                           hover:univer-bg-gray-50 univer-h-full
                           univer-text-gray-900 dark:hover:!univer-bg-gray-900

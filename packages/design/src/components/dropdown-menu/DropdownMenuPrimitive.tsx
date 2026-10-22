@@ -113,7 +113,7 @@ function DropdownMenuSubTrigger({
             {...props}
         >
             {children}
-            <MoreRightIcon className="ml-auto" />
+            <MoreRightIcon className="univer-ms-auto" />
         </SubTrigger>
     );
 }

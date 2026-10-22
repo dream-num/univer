@@ -18,7 +18,6 @@ import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, IUnd
 import type { IDocImage } from '@univerjs/docs-drawing';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
-import type { DocPasteMode, IDocPasteStyle } from './paste-options';
 import {
     BuildTextUtils,
     CommandType,
@@ -39,6 +38,7 @@ import {
     ImageSourceType,
     Inject,
     IPermissionService,
+    isCommentEditorID,
     isInternalEditorID,
     IUndoRedoService,
     IUniverInstanceService,
@@ -73,6 +73,7 @@ import {
     PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
 } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
+import type { DocPasteMode, IDocPasteStyle } from './paste-options';
 import { isTopLevelStructuralGap } from '../../basics/paragraph';
 import { CutContentCommand, InnerPasteCommand } from '../../commands/commands/clipboard.inner.command';
 import { getCursorWhenDelete } from '../../commands/commands/doc-delete.command';
@@ -556,17 +557,31 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         if (!unitId || !this._canEditTargets(unitId)) {
             return false;
         }
-        if (!cachedSource && !payload.html && !payload.text && !payload.internalJson && !payload.files.length) {
+        const isCommentEditor = isCommentEditorID(unitId);
+        if (!cachedSource && !payload.html && !payload.text && !payload.internalJson && (isCommentEditor || !payload.files.length)) {
             return false;
         }
         const generation = this._pasteGeneration;
-        const mode = unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY ? 'text' : payload.mode ?? 'source';
+        const mode = isCommentEditor || unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY ? 'text' : payload.mode ?? 'source';
         const style = this._getPasteStyle(unitId);
-        const source = await this._preparePaste(payload, mode, cachedSource);
+        const source = await (isCommentEditor && payload.text !== undefined
+            ? { body: { dataStream: payload.text } }
+            : this._preparePaste(payload, mode, cachedSource));
         if (generation !== this._pasteGeneration || !this._canEditTargets(unitId)) {
             return false;
         }
-        let doc = applyDocPasteMode(source, mode, style, payload.text);
+        let doc: Partial<IDocumentData>;
+        if (isCommentEditor) {
+            const text = payload.text ?? getClipboardPlainText(source);
+            if (!text) {
+                return false;
+            }
+            const body = BuildTextUtils.transform.fromPlainText(text);
+            delete body.customRanges;
+            doc = { body };
+        } else {
+            doc = applyDocPasteMode(source, mode, style, payload.text);
+        }
         if (unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
             doc = { ...source, body: { ...source.body!, textRuns: [] } };
             if (payload.text) {

@@ -2928,9 +2928,8 @@ describe('layout-ruler', () => {
         const section = { top: 0, height: 900 } as any;
         const cache = [{ table, tableId: table.tableId, hasPositioned: false, isSlideTable: false, tableNode: {} }] as any;
         const source = JSON.stringify(table.tableSource);
-        __testing.updateAndPositionTable({} as any, 0, 14, page, [page], column, section, cache, 0, {
-            ...(flavor != null ? { documentCompatibilityPolicy: getDocumentCompatibilityPolicy(flavor) } : {}),
-        } as any);
+        const sectionBreakConfig = flavor != null ? { documentCompatibilityPolicy: getDocumentCompatibilityPolicy(flavor) } : {};
+        __testing.updateAndPositionTable({} as any, 0, 14, page, [page], column, section, cache, 0, sectionBreakConfig as any);
         const alignmentLeft = align === TableAlignmentType.CENTER ? -29 : -58;
         const offset = flavor === DocumentFlavor.TRADITIONAL && hasWidth ? alignmentLeft : 0;
         expect(table.left).toBe(17 + offset);

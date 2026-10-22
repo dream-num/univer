@@ -14,8 +14,15 @@
  * limitations under the License.
  */
 
-import type { Direction, IAccessor, ICellData, IMutationInfo, IObjectMatrixPrimitiveType, Nullable } from '@univerjs/core';
-import type { IDiscreteRange } from '../../basics';
+import type {
+    Direction,
+    IAccessor,
+    ICellData,
+    IMutationInfo,
+    IObjectMatrixPrimitiveType,
+    Nullable,
+} from '@univerjs/core';
+import type { IDiscreteRange } from '../../basics/interfaces/selection-config';
 
 export enum AUTO_FILL_APPLY_TYPE {
     COPY = 'COPY',
@@ -56,6 +63,12 @@ export interface ISheetAutoFillHook {
     bindUnit?: string;
     disable?: (location: IAutoFillLocation, direction: Direction, applyType: AUTO_FILL_APPLY_TYPE) => boolean;
     onBeforeFillData?(location: IAutoFillLocation, direction: Direction): AUTO_FILL_APPLY_TYPE | void;
+    /** Prepare and validate without mutations; the returned callback captures undo data after reverting a previous fill. */
+    onPrepareFillData?(
+        location: IAutoFillLocation,
+        direction: Direction,
+        applyType: AUTO_FILL_APPLY_TYPE
+    ): () => { undos: IMutationInfo[]; redos: IMutationInfo[] };
     onFillData?(
         location: IAutoFillLocation,
         direction: Direction,
@@ -65,6 +78,13 @@ export interface ISheetAutoFillHook {
         redos: IMutationInfo[];
     };
     onAfterFillData?(location: IAutoFillLocation, direction: Direction, applyType: AUTO_FILL_APPLY_TYPE): boolean | void;
+    /** Validate proposed values before reverting or applying any fill mutations. Throw to reject the entire fill. */
+    onValidateFillData?(
+        location: IAutoFillLocation,
+        direction: Direction,
+        applyType: AUTO_FILL_APPLY_TYPE,
+        cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>
+    ): void;
     onBeforeSubmit?: (location: IAutoFillLocation, direction: Direction, applyType: AUTO_FILL_APPLY_TYPE, cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>) => void;
 }
 

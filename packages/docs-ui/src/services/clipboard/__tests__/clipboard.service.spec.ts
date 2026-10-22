@@ -17,7 +17,6 @@
 import type { IDocumentBody, IDocumentData } from '@univerjs/core';
 import type { IDocImage } from '@univerjs/docs-drawing';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IDocClipboardPasteAdapter } from '../doc-paste-mutation-adapter.service';
 import {
     BooleanNumber,
     createInternalEditorID,
@@ -25,6 +24,7 @@ import {
     CustomRangeType,
     DataStreamTreeTokenType,
     DOC_RANGE_TYPE,
+    DOCS_COMMENT_EDITOR_UNIT_ID_KEY,
     DocumentBlockRangeType,
     DocumentDataModel,
     DrawingTypeEnum,
@@ -60,6 +60,7 @@ import { UnitAction } from '@univerjs/protocol';
 import { IClipboardInterfaceService } from '@univerjs/ui';
 import { firstValueFrom } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import type { IDocClipboardPasteAdapter } from '../doc-paste-mutation-adapter.service';
 import { createCommandTestBed } from '../../../commands/commands/__tests__/create-command-test-bed';
 import { CutContentCommand, InnerPasteCommand } from '../../../commands/commands/clipboard.inner.command';
 import { DocMenuStyleService } from '../../doc-menu-style.service';
@@ -2060,6 +2061,114 @@ describe('DocClipboardService paste options', () => {
             });
             await expect(bed.clipboard.changePasteMode('text')).rejects.toThrow('Rejected paste');
             expect(bed.doc.getBody()).toEqual(snapshot);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
+
+describe('comment editor plain-text paste', () => {
+    function setup() {
+        const unitId = `${DOCS_COMMENT_EDITOR_UNIT_ID_KEY}_cell_host_sheet_comment`;
+        const bed = createCommandTestBed({
+            id: unitId,
+            body: {
+                dataStream: 'Before selected after\r\n',
+                customBlocks: [],
+                customDecorations: [],
+                customRanges: [],
+                paragraphs: [{ startIndex: 21, paragraphId: 'comment-target' }],
+                textRuns: [],
+            },
+            documentStyle: {},
+        }, [
+            [IClipboardInterfaceService, { useClass: TestClipboardInterfaceService }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
+        ]);
+        const commands = bed.get(ICommandService);
+        [InnerPasteCommand, RichTextEditingMutation, SetTextSelectionsOperation].forEach((command) => commands.registerCommand(command));
+        const selection = bed.get(DocSelectionManagerService);
+        selection.__TEST_ONLY_setCurrentSelection({ unitId, subUnitId: '' });
+        selection.__TEST_ONLY_add([{ startOffset: 7, endOffset: 15, collapsed: false, isActive: true, segmentId: '' }]);
+        return { ...bed, unitId, commands, clipboard: bed.get(IDocClipboardService) };
+    }
+
+    it.each(['clipboard text', 'HTML', 'internal fragment'] as const)('discards dark-mode formatting from %s and preserves undo/redo', async (source) => {
+        const bed = setup();
+        const html = '<span style="background-color: #202020; color: #ffffff; font-size: 28px; font-weight: bold">中文🙂 café</span>';
+        const internalJson = createInternalClipboardFragment({
+            body: {
+                dataStream: '中文🙂 café',
+                textRuns: [{ st: 0, ed: 9, ts: { bl: BooleanNumber.TRUE, fs: 28, bg: { rgb: '#202020' }, cl: { rgb: '#ffffff' } } }],
+            },
+        });
+        try {
+            const before = Tools.deepClone(bed.doc.getBody());
+            const payload = { unitId: bed.unitId, files: [], mode: 'source' as const };
+            const content = source === 'HTML' ? { html } : { internalJson };
+            const text = '中文🙂 café\n第二段\t文字\nhttps://univer.ai';
+            expect(await bed.clipboard.legacyPaste({
+                ...payload,
+                ...content,
+                ...(source === 'clipboard text' ? { html, text } : {}),
+            })).toBe(true);
+
+            const after = Tools.deepClone(bed.doc.getBody())!;
+            const expectedText = source === 'clipboard text' ? text.replace(/\n/g, '\r') : '中文🙂 café';
+            expect(after.dataStream).toBe(`Before ${expectedText} after\r\n`);
+            expect(after.textRuns ?? []).toEqual([]);
+            expect(after.paragraphs?.some((paragraph) => Object.keys(paragraph.paragraphStyle ?? {}).length)).toBe(false);
+            expect(after.customRanges ?? []).toEqual([]);
+            expect(after.customBlocks ?? []).toEqual([]);
+            expect(await firstValueFrom(bed.clipboard.pasteOptions$)).toBeNull();
+            expect(validateDocBodyStructure(after)).toEqual([]);
+            expect(await bed.commands.executeCommand(UndoCommand.id)).toBe(true);
+            expect(bed.doc.getBody()).toEqual(before);
+            expect(await bed.commands.executeCommand(RedoCommand.id)).toBe(true);
+            expect(bed.doc.getBody()).toEqual(after);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('flattens an internal table fragment to text without inserting table resources', async () => {
+        const bed = setup();
+        const token = DataStreamTreeTokenType;
+        const row = (cells: string[]) => token.TABLE_ROW_START
+            + cells.map((text) => `${token.TABLE_CELL_START}${text}\r\n${token.TABLE_CELL_END}`).join('')
+            + token.TABLE_ROW_END;
+        const dataStream = token.TABLE_START + row(['A', 'B']) + row(['C', 'D']) + token.TABLE_END;
+        try {
+            expect(await bed.clipboard.legacyPaste({
+                unitId: bed.unitId,
+                internalJson: createInternalClipboardFragment({
+                    body: {
+                        dataStream,
+                        tables: [{ startIndex: 0, endIndex: dataStream.length, tableId: 'copied-table' }],
+                    },
+                    tableSource: {},
+                }),
+                files: [],
+            })).toBe(true);
+            expect(bed.doc.getBody()?.dataStream).toBe('Before A\tB\rC\tD after\r\n');
+            expect(bed.doc.getBody()?.tables ?? []).toEqual([]);
+            expect(bed.doc.getBody()?.textRuns ?? []).toEqual([]);
+            expect(Object.keys(bed.doc.getSnapshot().tableSource ?? {})).toEqual([]);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('ignores image-only clipboard content without replacing selected comment text', async () => {
+        const bed = setup();
+        try {
+            const before = Tools.deepClone(bed.doc.getBody());
+            expect(await bed.clipboard.legacyPaste({
+                unitId: bed.unitId,
+                files: [new File(['image'], 'comment.png', { type: 'image/png' })],
+            })).toBe(false);
+            expect(bed.doc.getBody()).toEqual(before);
+            expect(bed.get(IUndoRedoService).getUndoRedoStatus(bed.unitId).undos).toBe(0);
         } finally {
             bed.univer.dispose();
         }

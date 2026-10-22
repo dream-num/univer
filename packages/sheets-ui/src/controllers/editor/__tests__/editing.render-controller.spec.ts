@@ -39,8 +39,10 @@ import {
     IUniverInstanceService,
     LocaleService,
     LocaleType,
+    RedoCommand,
     Styles,
     Tools,
+    UndoCommand,
     UndoCommandId,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -48,7 +50,13 @@ import { DocSelectionManagerService, DocSkeletonManagerService, DocStateChangeMa
 import { DocSelectionRenderService, IEditorService, InnerPasteCommand, MoveCursorOperation, MoveSelectionOperation, SetDocInputStyleCommand, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { FunctionService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { DeviceInputEventType, IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
-import { SetRangeValuesCommand, SetRangeValuesMutation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    SetRangeValuesCommand,
+    SetRangeValuesMutation,
+    SetSelectionsOperation,
+    SheetInterceptorService,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -136,6 +144,46 @@ describe('clearing cell editor content', () => {
             expect(stored?.v).toBeUndefined();
             expect(stored?.t).toBeUndefined();
             expect(testBed.sheet.getStyles().getStyleByCell(stored)).toEqual(previous.s);
+        } finally {
+            testBed.univer.dispose();
+        }
+    });
+
+    it('restores a styled value on Undo and clears it again on Redo', async () => {
+        const testBed = createTestBed(undefined, [[LexerTreeBuilder], [IFunctionService, { useClass: FunctionService }]]);
+        try {
+            const worksheet = testBed.sheet.getSheetBySheetId('sheet1')!;
+            const previous: ICellData = { v: 2, t: CellValueType.NUMBER, s: { bl: 1 } };
+            worksheet.getCellMatrix().setValue(0, 0, Tools.deepClone(previous));
+            const incoming = getCellDataByInput(
+                Tools.deepClone(previous),
+                { id: 'editor', body: { dataStream: '\r\n' }, documentStyle: {} },
+                testBed.get(LexerTreeBuilder),
+                testBed.get(LocaleService),
+                testBed.get(IFunctionService),
+                testBed.sheet.getStyles()
+            );
+            expect(incoming).not.toBeNull();
+
+            const commands = testBed.get(ICommandService);
+            commands.registerCommand(SetRangeValuesCommand);
+            commands.registerCommand(SetRangeValuesMutation);
+            commands.registerCommand(SetSelectionsOperation);
+            expect(commands.syncExecuteCommand(SetRangeValuesCommand.id, {
+                unitId: testBed.sheet.getUnitId(),
+                subUnitId: worksheet.getSheetId(),
+                range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+                value: incoming,
+            })).toBe(true);
+            expect(isNullCell(worksheet.getCellRaw(0, 0))).toBe(true);
+
+            expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+            expect(worksheet.getCellRaw(0, 0)).toMatchObject({ v: 2, t: CellValueType.NUMBER });
+            expect(testBed.sheet.getStyles().getStyleByCell(worksheet.getCellRaw(0, 0))).toEqual(previous.s);
+
+            expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+            expect(isNullCell(worksheet.getCellRaw(0, 0))).toBe(true);
+            expect(testBed.sheet.getStyles().getStyleByCell(worksheet.getCellRaw(0, 0))).toEqual(previous.s);
         } finally {
             testBed.univer.dispose();
         }

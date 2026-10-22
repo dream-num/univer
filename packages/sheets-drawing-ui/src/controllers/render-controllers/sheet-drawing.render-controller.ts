@@ -16,7 +16,7 @@
 
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
-import { Disposable, DrawingTypeEnum, Inject } from '@univerjs/core';
+import { Disposable, DrawingTypeEnum, ILogService, Inject } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { SheetSkeletonService } from '@univerjs/sheets';
 import {
@@ -31,7 +31,8 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
         private _context: IRenderContext,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService
+        @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService,
+        @ILogService private readonly _logService: ILogService
     ) {
         super();
 
@@ -60,18 +61,29 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
                     !drawingData.groupId &&
                     drawingData.anchorType !== SheetDrawingAnchorType.None
                 ) {
-                    if (drawingData.drawingType === DrawingTypeEnum.DRAWING_GROUP) {
-                        const transform = drawingPositionToTransform(drawingData.sheetTransform, skeletonParam);
-                        refreshedDrawings.push({
-                            ...drawingData,
-                            transform: transform && {
-                                ...transform,
-                                left: (transform.left ?? 0) - skeletonParam.skeleton.rowHeaderWidthAndMarginLeft,
-                                top: (transform.top ?? 0) - skeletonParam.skeleton.columnHeaderHeightAndMarginTop,
-                            },
+                    try {
+                        if (drawingData.drawingType === DrawingTypeEnum.DRAWING_GROUP) {
+                            const transform = drawingPositionToTransform(drawingData.sheetTransform, skeletonParam);
+                            refreshedDrawings.push({
+                                ...drawingData,
+                                transform: transform && {
+                                    ...transform,
+                                    left: (transform.left ?? 0) - skeletonParam.skeleton.rowHeaderWidthAndMarginLeft,
+                                    top: (transform.top ?? 0) - skeletonParam.skeleton.columnHeaderHeightAndMarginTop,
+                                },
+                            });
+                        } else {
+                            refreshedDrawings.push(refreshSheetDrawingPlacement(drawingData, skeletonParam.skeleton));
+                        }
+                    } catch (error) {
+                        this._logService.warn('[SheetsDrawingRenderController]', 'Skipping drawing placement initialization', {
+                            unitId,
+                            subUnitId,
+                            drawingId,
+                            transform: drawingData.transform,
+                            sheetTransform: drawingData.sheetTransform,
+                            error,
                         });
-                    } else {
-                        refreshedDrawings.push(refreshSheetDrawingPlacement(drawingData, skeletonParam.skeleton));
                     }
                 }
             }

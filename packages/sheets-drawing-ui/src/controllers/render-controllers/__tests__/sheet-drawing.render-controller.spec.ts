@@ -16,12 +16,12 @@
 
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import type { Subscription } from 'rxjs';
-import { DrawingTypeEnum, LocaleType, Tools, UniverInstanceType } from '@univerjs/core';
+import { DrawingTypeEnum, ILogService, LocaleType, LogLevel, Tools, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { CanvasColorService, ICanvasColorService, IRenderManagerService } from '@univerjs/engine-render';
-import { SetWorksheetRowAutoHeightMutation, SheetSkeletonService } from '@univerjs/sheets';
-import { ISheetDrawingService, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
+import { SetRangeValuesCommand, SetWorksheetRowAutoHeightMutation, SheetSkeletonService } from '@univerjs/sheets';
+import { ISheetDrawingService, SHEET_DRAWING_PLUGIN, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { describe, expect, it, vi } from 'vitest';
 import { createSheetsDrawingUiTestBed } from '../../../__tests__/create-sheets-drawing-ui-test-bed';
 import { SheetsDrawingRenderController } from '../sheet-drawing.render-controller';
@@ -29,6 +29,99 @@ import '@univerjs/sheets/facade';
 import '@univerjs/sheets-drawing/facade';
 
 describe('SheetsDrawingRenderController', () => {
+    it('loads issue 5842 data, initializes healthy images, and preserves edits across save and reload', async () => {
+        const canvasContext = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
+            { setTransform: vi.fn(), clearRect: vi.fn() } as unknown as CanvasRenderingContext2D
+        );
+        const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        const source = createSheetsDrawingUiTestBed();
+        let restored: ReturnType<typeof createSheetsDrawingUiTestBed> | undefined;
+        let reloaded: ReturnType<typeof createSheetsDrawingUiTestBed> | undefined;
+        try {
+            const snapshot = FUniver.newAPI(source.univer).getActiveWorkbook()!.save();
+            snapshot.sheets.sheet1.rowCount = 300;
+            const from = { column: 3, columnOffset: 0, row: 198, rowOffset: -4460 };
+            const to = { column: 4, columnOffset: 60.3, row: -2, rowOffset: 0 };
+            const broken: ISheetDrawing = {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                drawingId: 'broken-image',
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                anchorType: SheetDrawingAnchorType.Position,
+                transform: { left: 300, top: -4243, width: 180.3, height: -4243, angle: 0 },
+                sheetTransform: { from, to, angle: 0 },
+                axisAlignSheetTransform: { from, to, angle: 0 },
+            };
+            const healthy: ISheetDrawing = {
+                ...broken,
+                drawingId: 'healthy-image',
+                transform: { left: 999, top: 999, width: 120, height: 80, angle: 0 },
+                sheetTransform: {
+                    from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
+                    to: { row: 4, column: 2, rowOffset: 8, columnOffset: 20 },
+                    angle: 0,
+                },
+            };
+            snapshot.resources = (snapshot.resources ?? []).filter((resource) => resource.name !== SHEET_DRAWING_PLUGIN);
+            snapshot.resources.push({ name: SHEET_DRAWING_PLUGIN, data: JSON.stringify({
+                sheet1: {
+                    data: { [broken.drawingId]: broken, [healthy.drawingId]: healthy },
+                    order: [broken.drawingId, healthy.drawingId],
+                },
+            }) });
+            restored = createSheetsDrawingUiTestBed(snapshot, [[ICanvasColorService, { useClass: CanvasColorService }]]);
+            restored.get(ILogService).setLogLevel(LogLevel.WARN);
+            const skeleton = restored.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+            const manager = restored.get(IRenderManagerService);
+            manager.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetsDrawingRenderController]);
+            expect(() => manager.createRender('test').with(SheetsDrawingRenderController)).not.toThrow();
+            expect(warning).toHaveBeenCalledWith(expect.stringContaining('[SheetsDrawingRenderController]'), expect.any(String), expect.objectContaining({
+                drawingId: broken.drawingId,
+                error: expect.any(Error),
+            }));
+            const drawings = restored.get(ISheetDrawingService);
+            const renderDrawings = restored.get(IDrawingManagerService);
+            expect(drawings.getDrawingByParam(broken)).toEqual(broken);
+            expect(renderDrawings.getDrawingByParam(broken)).toEqual(broken);
+            const cell = skeleton.getNoMergeCellWithCoordByIndex(1, 1);
+            expect(drawings.getDrawingByParam(healthy)?.transform).toMatchObject({
+                left: cell.startX,
+                top: cell.startY,
+                width: 120,
+                height: 80,
+            });
+            expect(renderDrawings.getDrawingByParam(healthy)).toEqual(drawings.getDrawingByParam(healthy));
+            expect(restored.commandService.syncExecuteCommand(SetWorksheetRowAutoHeightMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                rowsAutoHeightInfo: [{ row: 80, autoHeight: 40 }],
+            })).toBe(true);
+            await Promise.resolve();
+            expect(await restored.commandService.executeCommand(SetRangeValuesCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: { startRow: 80, endRow: 80, startColumn: 0, endColumn: 0 },
+                value: { v: 'edited after replay' },
+            })).toBe(true);
+            reloaded = createSheetsDrawingUiTestBed(FUniver.newAPI(restored.univer).getActiveWorkbook()!.save(), [
+                [ICanvasColorService, { useClass: CanvasColorService }],
+            ]);
+            reloaded.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1');
+            const reloadedManager = reloaded.get(IRenderManagerService);
+            reloadedManager.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetsDrawingRenderController]);
+            expect(() => reloadedManager.createRender('test').with(SheetsDrawingRenderController)).not.toThrow();
+            expect(reloaded.workbook.getSheetBySheetId('sheet1')!.getCell(80, 0)?.v).toBe('edited after replay');
+            expect(reloaded.get(ISheetDrawingService).getDrawingByParam(broken)).toEqual(broken);
+            expect(reloaded.get(ISheetDrawingService).getDrawingByParam(healthy)).toEqual(drawings.getDrawingByParam(healthy));
+        } finally {
+            reloaded?.univer.dispose();
+            restored?.univer.dispose();
+            source.univer.dispose();
+            warning.mockRestore();
+            canvasContext.mockRestore();
+        }
+    });
+
     it.each([
         ['row', SheetDrawingAnchorType.Position],
         ['column', SheetDrawingAnchorType.Position],

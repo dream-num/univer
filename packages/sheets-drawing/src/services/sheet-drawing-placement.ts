@@ -96,6 +96,21 @@ export interface ISheetDrawingPlacementByBounds {
  */
 export type ISheetDrawingPlacementInput = ISheetDrawingPlacement | ISheetDrawingPlacementByBounds;
 
+const PLACEMENT_ERROR = {
+    CELL_INVALID: 'SHEET_DRAWING_PLACEMENT_CELL_INVALID',
+    EXTENT_INVALID: 'SHEET_DRAWING_PLACEMENT_EXTENT_INVALID',
+    KIND_INVALID: 'SHEET_DRAWING_PLACEMENT_KIND_INVALID',
+    POSITION_INVALID: 'SHEET_DRAWING_PLACEMENT_POSITION_INVALID',
+} as const;
+
+interface ISheetDrawingPlacementFailure {
+    ok: false;
+    reason: typeof PLACEMENT_ERROR[keyof typeof PLACEMENT_ERROR];
+    details?: Record<string, unknown>;
+}
+
+type SheetDrawingPlacementRefreshResult = { ok: true; drawing: ISheetDrawing } | ISheetDrawingPlacementFailure;
+
 export function getSheetDrawingPlacement(drawing: ISheetDrawing): ISheetDrawingPlacement {
     const anchorType = drawing.anchorType ?? SheetDrawingAnchorType.Position;
     if (anchorType === SheetDrawingAnchorType.None) {
@@ -144,8 +159,7 @@ export function applySheetDrawingPlacement(
     input: ISheetDrawingPlacementInput,
     skeleton?: SpreadsheetSkeleton
 ): ISheetDrawing {
-    const requiresArea = drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE
-        || drawing.drawingType === DrawingTypeEnum.DRAWING_DOM;
+    const requiresArea = requiresDrawingArea(drawing);
     const placement = normalizePlacement(input, skeleton, requiresArea);
 
     return resolveSheetDrawingPlacement(drawing, placement, skeleton);
@@ -153,23 +167,63 @@ export function applySheetDrawingPlacement(
 
 /** Refresh layout-derived geometry without changing the drawing's anchor semantics. */
 export function refreshSheetDrawingPlacement(drawing: ISheetDrawing, skeleton: SpreadsheetSkeleton): ISheetDrawing {
+    const result = tryRefreshSheetDrawingPlacement(drawing, skeleton);
+    if (!result.ok) {
+        throw createPlacementError(result);
+    }
+    return result.drawing;
+}
+
+/** Validate persisted markers before any caller reads them to select a refresh range. */
+export function validateSheetDrawingPlacement(drawing: ISheetDrawing): ISheetDrawingPlacementFailure | undefined {
+    if (!drawing || typeof drawing !== 'object') {
+        return { ok: false, reason: PLACEMENT_ERROR.KIND_INVALID };
+    }
+    const anchorType = drawing.anchorType ?? SheetDrawingAnchorType.Position;
+    if (anchorType === SheetDrawingAnchorType.None) {
+        return;
+    }
+    if (anchorType !== SheetDrawingAnchorType.Position && anchorType !== SheetDrawingAnchorType.Both) {
+        return { ok: false, reason: PLACEMENT_ERROR.KIND_INVALID };
+    }
+    const markerFailure = validateCellPosition(drawing.sheetTransform?.from)
+        ?? validateCellPosition(drawing.sheetTransform?.to);
+    if (markerFailure) {
+        return markerFailure;
+    }
+    return validatePlacement(getSheetDrawingPlacement(drawing), requiresDrawingArea(drawing));
+}
+
+/** Expected snapshot errors are results; unexpected calculation failures are caught by the task owner. */
+export function tryRefreshSheetDrawingPlacement(drawing: ISheetDrawing, skeleton: SpreadsheetSkeleton): SheetDrawingPlacementRefreshResult {
+    const failure = validateSheetDrawingPlacement(drawing);
+    if (failure) {
+        return failure;
+    }
     if (drawing.anchorType === SheetDrawingAnchorType.None) {
-        return drawing;
+        return { ok: true, drawing };
     }
 
     const placement = getSheetDrawingPlacement(drawing);
-    const requiresArea = drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE
-        || drawing.drawingType === DrawingTypeEnum.DRAWING_DOM;
-    // A valid two-cell drawing can temporarily collapse when its cells are hidden.
-    validatePlacement(placement, requiresArea);
     const resolved = resolveSheetDrawingPlacement(drawing, placement, skeleton);
-    validateExtent(resolved.transform?.width ?? 0, resolved.transform?.height ?? 0, requiresArea, true);
+    // A valid two-cell drawing can temporarily collapse when its cells are hidden.
+    const extentFailure = validateExtent(resolved.transform?.width ?? 0, resolved.transform?.height ?? 0, requiresDrawingArea(drawing), true);
+    if (extentFailure) {
+        return extentFailure;
+    }
     return {
-        ...drawing,
-        sheetTransform: resolved.sheetTransform,
-        transform: resolved.transform,
-        axisAlignSheetTransform: resolved.axisAlignSheetTransform,
+        ok: true,
+        drawing: {
+            ...drawing,
+            sheetTransform: resolved.sheetTransform,
+            transform: resolved.transform,
+            axisAlignSheetTransform: resolved.axisAlignSheetTransform,
+        },
     };
+}
+
+function requiresDrawingArea(drawing: ISheetDrawing): boolean {
+    return drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE || drawing.drawingType === DrawingTypeEnum.DRAWING_DOM;
 }
 
 function resolveSheetDrawingPlacement(
@@ -271,9 +325,9 @@ function normalizePlacement(
     requiresArea: boolean
 ): ISheetDrawingPlacement {
     if (!('bounds' in input)) {
-        validatePlacement(input, requiresArea);
+        assertValidPlacement(validatePlacement(input, requiresArea));
         if (input.kind === SheetDrawingAnchorType.Both && skeleton) {
-            validateBounds(convertPositionSheetOverGridToAbsolute(
+            assertValidPlacement(validateBounds(convertPositionSheetOverGridToAbsolute(
                 skeleton.worksheet.getUnitId(),
                 skeleton.worksheet.getSheetId(),
                 {
@@ -281,12 +335,12 @@ function normalizePlacement(
                     to: input.to,
                 },
                 skeleton
-            ), requiresArea);
+            ), requiresArea));
         }
         return input;
     }
 
-    validateBounds(input.bounds, requiresArea);
+    assertValidPlacement(validateBounds(input.bounds, requiresArea));
     if (input.kind === SheetDrawingAnchorType.None) {
         return {
             kind: SheetDrawingAnchorType.None,
@@ -314,7 +368,7 @@ function normalizePlacement(
         };
     }
 
-    throw new Error('SHEET_DRAWING_PLACEMENT_KIND_INVALID');
+    throw new Error(PLACEMENT_ERROR.KIND_INVALID);
 }
 
 function withExistingSheetTransform(
@@ -362,39 +416,35 @@ function absoluteSheetTransform(
     };
 }
 
-function validatePlacement(placement: ISheetDrawingPlacement, requiresArea: boolean): void {
+function validatePlacement(placement: ISheetDrawingPlacement, requiresArea: boolean): ISheetDrawingPlacementFailure | undefined {
     if (placement.kind === SheetDrawingAnchorType.Position) {
-        validateCellPosition(placement.from);
-        validateExtent(placement.width, placement.height, requiresArea);
-        return;
+        return validateCellPosition(placement.from) ?? validateExtent(placement.width, placement.height, requiresArea);
     }
 
     if (placement.kind === SheetDrawingAnchorType.Both) {
-        validateCellPosition(placement.from);
-        validateCellPosition(placement.to);
-        return;
+        return validateCellPosition(placement.from) ?? validateCellPosition(placement.to);
     }
 
     if (placement.kind === SheetDrawingAnchorType.None) {
         if (!Number.isFinite(placement.left) || !Number.isFinite(placement.top)) {
-            throw new TypeError('SHEET_DRAWING_PLACEMENT_POSITION_INVALID');
+            return { ok: false, reason: PLACEMENT_ERROR.POSITION_INVALID };
         }
-        validateExtent(placement.width, placement.height, requiresArea);
-        return;
+        return validateExtent(placement.width, placement.height, requiresArea);
     }
 
-    throw new Error('SHEET_DRAWING_PLACEMENT_KIND_INVALID');
+    return { ok: false, reason: PLACEMENT_ERROR.KIND_INVALID };
 }
 
-function validateBounds(bounds: IGroupBaseBound, requiresArea: boolean): void {
-    if (!Number.isFinite(bounds.left) || !Number.isFinite(bounds.top)) {
-        throw new TypeError('SHEET_DRAWING_PLACEMENT_POSITION_INVALID');
+function validateBounds(bounds: IGroupBaseBound, requiresArea: boolean): ISheetDrawingPlacementFailure | undefined {
+    if (!bounds || !Number.isFinite(bounds.left) || !Number.isFinite(bounds.top)) {
+        return { ok: false, reason: PLACEMENT_ERROR.POSITION_INVALID };
     }
-    validateExtent(bounds.width, bounds.height, requiresArea);
+    return validateExtent(bounds.width, bounds.height, requiresArea);
 }
 
-function validateCellPosition(position: ICellOverGridPosition): void {
+function validateCellPosition(position: ICellOverGridPosition | undefined): ISheetDrawingPlacementFailure | undefined {
     if (
+        !position ||
         !Number.isInteger(position.row) ||
         !Number.isInteger(position.column) ||
         position.row < 0 ||
@@ -402,16 +452,26 @@ function validateCellPosition(position: ICellOverGridPosition): void {
         !Number.isFinite(position.rowOffset) ||
         !Number.isFinite(position.columnOffset)
     ) {
-        throw new Error('SHEET_DRAWING_PLACEMENT_CELL_INVALID');
+        return { ok: false, reason: PLACEMENT_ERROR.CELL_INVALID };
     }
 }
 
-function validateExtent(width: number, height: number, requiresArea: boolean, allowCollapsed = false): void {
+function validateExtent(width: number, height: number, requiresArea: boolean, allowCollapsed = false): ISheetDrawingPlacementFailure | undefined {
     // Horizontal and vertical lines have a zero bounding-box extent on one axis;
     // this is independent of stroke width. Images and floating DOM still require area.
     const hasInvalidZeroExtent = !allowCollapsed && (requiresArea ? width === 0 || height === 0 : width === 0 && height === 0);
     if (!Number.isFinite(width) || !Number.isFinite(height) || width < 0 || height < 0 || hasInvalidZeroExtent) {
-        // Preserve the error message contract and report the actual checked extent, including converted cell bounds.
-        throw Object.assign(new Error('SHEET_DRAWING_PLACEMENT_EXTENT_INVALID'), { width, height });
+        return { ok: false, reason: PLACEMENT_ERROR.EXTENT_INVALID, details: { width, height } };
     }
+}
+
+function assertValidPlacement(failure: ISheetDrawingPlacementFailure | undefined): void {
+    if (failure) {
+        throw createPlacementError(failure);
+    }
+}
+
+function createPlacementError(failure: ISheetDrawingPlacementFailure): Error {
+    const error = failure.reason === PLACEMENT_ERROR.POSITION_INVALID ? new TypeError(failure.reason) : new Error(failure.reason);
+    return Object.assign(error, failure.details);
 }

@@ -16,9 +16,11 @@
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
 import {
+    DesktopLogService,
     Direction,
     DrawingTypeEnum,
     ICommandService,
+    ILogService,
     ImageSourceType,
     Injector,
     IResourceLoaderService,
@@ -195,6 +197,7 @@ function createController(options: { drawingData?: Record<string, any>; skeleton
         [SheetsSelectionsService, { useValue: {} }],
         [IUniverInstanceService, { useValue: {} }],
         [SheetDrawingTransformPlanService],
+        [ILogService, { useClass: DesktopLogService }],
         [SheetDrawingTransformAffectedController],
     ]);
     injectors.push(injector);
@@ -658,6 +661,180 @@ describe('sheet drawing transforms without UI plugins', () => {
         expect(getDrawing(service)).toEqual(before);
         expect(testBed.commandService.syncExecuteCommand(RedoCommandId)).toBe(true);
         expect(getDrawing(service)).toEqual(after);
+    });
+
+    it.each([true, false])('preserves fixed image dimensions after repeated deletion with rows=%s', async (rows) => {
+        const service = await insertDrawing(SheetDrawingAnchorType.Position);
+        const original = getDrawing(service);
+        const legacy = {
+            ...original,
+            sheetTransform: { ...original.sheetTransform, to: { ...original.sheetTransform.to, row: -2, column: -2 } },
+        };
+        expect(testBed.commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [{ ...legacy, drawingId: 'legacy-position' }],
+        })).toBe(true);
+        const read = () => Tools.deepClone(service.getDrawingByParam({ ...legacy, drawingId: 'legacy-position' })!);
+        const before = read();
+        const commandId = rows ? RemoveRowCommand.id : RemoveColCommand.id;
+        for (let i = 0; i < 2; i++) {
+            expect(await testBed.commandService.executeCommand(commandId, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: { startRow: 0, endRow: rows ? 0 : 19, startColumn: 0, endColumn: rows ? 19 : 0 },
+            })).toBe(true);
+            expect(read().transform).toMatchObject({ width: before.transform?.width, height: before.transform?.height });
+            expect(read().sheetTransform.to.row).toBeGreaterThanOrEqual(0);
+            expect(read().sheetTransform.to.column).toBeGreaterThanOrEqual(0);
+        }
+        const after = read();
+        for (let i = 0; i < 2; i++) {
+            expect(await testBed.commandService.executeCommand(UndoCommandId)).toBe(true);
+        }
+        expect(read()).toEqual(before);
+        for (let i = 0; i < 2; i++) {
+            expect(await testBed.commandService.executeCommand(RedoCommandId)).toBe(true);
+        }
+        expect(read()).toEqual(after);
+    });
+
+    it.each([DeleteRangeMoveLeftCommand.id, DeleteRangeMoveUpCommand.id])('keeps fractional fixed sizes through %s', async (commandId) => {
+        const service = await insertDrawing(SheetDrawingAnchorType.Position);
+        expect(testBed.commandService.syncExecuteCommand(SetSheetDrawingPlacementCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawings: [{
+                drawingId: 'drawing-1',
+                placement: {
+                    kind: SheetDrawingAnchorType.Position,
+                    from: { row: 3, column: 3, rowOffset: 2, columnOffset: 2 },
+                    width: 180.35,
+                    height: 46.25,
+                },
+            }],
+        })).toBe(true);
+        const before = Tools.deepClone(getDrawing(service));
+        const rows = commandId === DeleteRangeMoveUpCommand.id;
+        expect(await testBed.commandService.executeCommand(commandId, {
+            range: { startRow: 0, endRow: rows ? 0 : 19, startColumn: 0, endColumn: rows ? 19 : 0 },
+        })).toBe(true);
+        expect(getDrawing(service).transform).toMatchObject({ width: 180.35, height: 46.25 });
+        expect(await testBed.commandService.executeCommand(UndoCommandId)).toBe(true);
+        expect(getDrawing(service)).toEqual(before);
+    });
+
+    it.each([true, false])('moves a deleted Position anchor to the boundary with unequal cell sizes and rows=%s', async (rows) => {
+        const service = await insertDrawing(SheetDrawingAnchorType.Position);
+        expect(await testBed.commandService.executeCommand(rows ? SetRowHeightCommand.id : SetColWidthCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            ranges: [{ startRow: 2, endRow: 2, startColumn: 2, endColumn: 2 }],
+            value: 100,
+        })).toBe(true);
+        expect(testBed.commandService.syncExecuteCommand(SetSheetDrawingPlacementCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawings: [{
+                drawingId: 'drawing-1',
+                placement: {
+                    kind: SheetDrawingAnchorType.Position,
+                    from: { row: 3, column: 3, rowOffset: 2, columnOffset: 2 },
+                    width: 180.35,
+                    height: 46.25,
+                },
+            }],
+        })).toBe(true);
+        const before = Tools.deepClone(getDrawing(service));
+        const skeleton = testBed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+        const boundary = skeleton.getNoMergeCellWithCoordByIndex(1, 1);
+        expect(await testBed.commandService.executeCommand(rows ? RemoveRowCommand.id : RemoveColCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { startRow: rows ? 1 : 0, endRow: rows ? 3 : 19, startColumn: rows ? 0 : 1, endColumn: rows ? 19 : 3 },
+        })).toBe(true);
+        expect(getDrawing(service).transform).toMatchObject({
+            [rows ? 'top' : 'left']: rows ? boundary.startY : boundary.startX,
+            width: 180.35,
+            height: 46.25,
+        });
+        expect(await testBed.commandService.executeCommand(UndoCommandId)).toBe(true);
+        expect(getDrawing(service)).toEqual(before);
+    });
+
+    it.each([true, false])('clips a Both endpoint at the sheet boundary when deleting the last rows=%s', async (rows) => {
+        const service = await insertDrawing(SheetDrawingAnchorType.Both);
+        expect(testBed.commandService.syncExecuteCommand(SetSheetDrawingPlacementCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawings: [{
+                drawingId: 'drawing-1',
+                placement: {
+                    kind: SheetDrawingAnchorType.Both,
+                    from: { row: 0, column: 0, rowOffset: 0, columnOffset: 0 },
+                    to: { row: 18, column: 18, rowOffset: 0, columnOffset: 0 },
+                },
+            }],
+        })).toBe(true);
+        const before = Tools.deepClone(getDrawing(service));
+        const skeleton = testBed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+        const boundary = skeleton.getNoMergeCellWithCoordByIndex(15, 15);
+        expect(await testBed.commandService.executeCommand(rows ? RemoveRowCommand.id : RemoveColCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { startRow: rows ? 15 : 0, endRow: 19, startColumn: rows ? 0 : 15, endColumn: 19 },
+        })).toBe(true);
+        const after = getDrawing(service);
+        const position = rows ? 'top' : 'left';
+        const size = rows ? 'height' : 'width';
+        expect((after.transform?.[position] ?? 0) + (after.transform?.[size] ?? 0))
+            .toBe(rows ? boundary.startY : boundary.startX);
+        expect(await testBed.commandService.executeCommand(UndoCommandId)).toBe(true);
+        expect(getDrawing(service)).toEqual(before);
+    });
+
+    it.each([true, false])('keeps both anchors valid when deleting the first rows=%s', async (rows) => {
+        const service = await insertDrawing(SheetDrawingAnchorType.Both);
+        expect(testBed.commandService.syncExecuteCommand(SetSheetDrawingPlacementCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawings: [{
+                drawingId: 'drawing-1',
+                placement: {
+                    kind: SheetDrawingAnchorType.Both,
+                    from: { row: 0, column: 0, rowOffset: 0, columnOffset: 0 },
+                    to: { row: 4, column: 4, rowOffset: 0, columnOffset: 0 },
+                },
+            }],
+        })).toBe(true);
+        const before = Tools.deepClone(getDrawing(service));
+        expect(await testBed.commandService.executeCommand(rows ? RemoveRowCommand.id : RemoveColCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { startRow: 0, endRow: rows ? 2 : 19, startColumn: 0, endColumn: rows ? 19 : 2 },
+        })).toBe(true);
+        const after = Tools.deepClone(getDrawing(service));
+        expect(after.sheetTransform.from).toMatchObject({ row: 0, column: 0 });
+        expect(after.sheetTransform.to[rows ? 'row' : 'column']).toBe(1);
+        expect(after.transform?.[rows ? 'height' : 'width']).toBeGreaterThanOrEqual(0);
+        expect(await testBed.commandService.executeCommand(UndoCommandId)).toBe(true);
+        expect(getDrawing(service)).toEqual(before);
+        expect(await testBed.commandService.executeCommand(RedoCommandId)).toBe(true);
+        expect(getDrawing(service)).toEqual(after);
+    });
+
+    it.each([true, false])('expands both anchors when an inserted block overlaps the endpoint with rows=%s', async (rows) => {
+        const service = await insertDrawing(SheetDrawingAnchorType.Both);
+        const before = Tools.deepClone(getDrawing(service));
+        expect(await testBed.commandService.executeCommand(rows ? InsertRowCommand.id : InsertColCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            direction: rows ? Direction.DOWN : Direction.RIGHT,
+            range: { startRow: rows ? 2 : 0, endRow: rows ? 5 : 19, startColumn: rows ? 0 : 2, endColumn: rows ? 19 : 5 },
+        })).toBe(true);
+        const size = rows ? 'height' : 'width';
+        expect(getDrawing(service).transform?.[size]).toBeGreaterThan(before.transform?.[size] ?? 0);
+        expect(await testBed.commandService.executeCommand(UndoCommandId)).toBe(true);
+        expect(getDrawing(service)).toEqual(before);
     });
 
     it.each([
@@ -1196,6 +1373,164 @@ describe('sheet drawing transforms without UI plugins', () => {
             expect(readDrawing(restoredService)).toEqual(before);
         } finally {
             restored.univer.dispose();
+        }
+    });
+
+    it.each([
+        [SheetDrawingAnchorType.Position, false, undefined],
+        [undefined, false, undefined],
+        [SheetDrawingAnchorType.Both, false, undefined],
+        [SheetDrawingAnchorType.Position, true, undefined],
+        [SheetDrawingAnchorType.Position, false, 'from'],
+        [SheetDrawingAnchorType.Position, false, 'to'],
+        [SheetDrawingAnchorType.Both, false, 'from'],
+        [SheetDrawingAnchorType.Both, false, 'to'],
+        [SheetDrawingAnchorType.Both, false, 'sheetTransform'],
+    ] as const)('isolates invalid snapshot placement with anchor=%s, legacy markers=%s and missing=%s during replay', async (anchorType, legacyMarkers, missing) => {
+        const service = await insertDrawing(SheetDrawingAnchorType.Both);
+        const healthy = Tools.deepClone(getDrawing(service));
+        const from = legacyMarkers
+            ? { column: 3, columnOffset: 0, row: 198, rowOffset: -4460 }
+            : { ...healthy.sheetTransform.from, row: anchorType === SheetDrawingAnchorType.Both ? -1 : 1 };
+        const to = legacyMarkers
+            ? { column: 4, columnOffset: 60.3, row: -2, rowOffset: 0 }
+            : healthy.sheetTransform.to;
+        const invalid: ISheetDrawing = {
+            ...healthy,
+            drawingId: 'invalid-image',
+            anchorType,
+            transform: { ...healthy.transform, top: -4243, width: 180.3, height: -4243 },
+            sheetTransform: { from, to },
+            axisAlignSheetTransform: { from, to },
+        };
+        if (missing === 'sheetTransform') {
+            Reflect.deleteProperty(invalid, missing);
+        } else if (missing) {
+            Reflect.deleteProperty(invalid.sheetTransform, missing);
+        }
+        const snapshot = testBed.get(IResourceLoaderService).saveUnit<IWorkbookData>('test')!;
+        snapshot.sheets.sheet1.rowCount = 300;
+        snapshot.resources!.find(({ name }) => name === SHEET_DRAWING_PLUGIN)!.data = JSON.stringify({
+            sheet1: {
+                data: { [invalid.drawingId]: invalid, [healthy.drawingId]: healthy },
+                order: [invalid.drawingId, healthy.drawingId],
+            },
+        });
+        const restored = createSheetsDrawingTestBed(snapshot);
+        const warn = vi.spyOn(DesktopLogService.prototype, 'warn');
+        try {
+            const restoredService = restored.get(ISheetDrawingService);
+            const drawingManager = restored.get(IDrawingManagerService);
+            const worksheet = restored.workbook.getSheetBySheetId('sheet1')!;
+            const originalHeight = worksheet.getRowHeight(2);
+
+            expect(restoredService.getDrawingByParam(invalid)).toEqual(invalid);
+            expect(restored.commandService.syncExecuteCommand(SetWorksheetRowAutoHeightMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                rowsAutoHeightInfo: [{ row: 2, autoHeight: originalHeight + 30 }],
+            })).toBe(true);
+            await Promise.resolve();
+
+            const afterAutoHeight = Tools.deepClone(getDrawing(restoredService));
+            expect(afterAutoHeight.transform?.height).toBeCloseTo((healthy.transform?.height ?? 0) + 30);
+            expect(drawingManager.getDrawingByParam(healthy)).toEqual(afterAutoHeight);
+            expect(restoredService.getDrawingByParam(invalid)).toEqual(invalid);
+            expect(drawingManager.getDrawingByParam(invalid)).toEqual(invalid);
+            expect(warn).toHaveBeenCalledWith(expect.any(String), expect.any(String), expect.objectContaining({
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                drawingId: invalid.drawingId,
+                commandId: SetWorksheetRowAutoHeightMutation.id,
+                failure: expect.objectContaining({ ok: false, reason: expect.any(String) }),
+            }));
+
+            const originalWidth = worksheet.getColumnWidth(2);
+            expect(await restored.commandService.executeCommand(SetColWidthCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                ranges: [{ startRow: 0, endRow: 299, startColumn: 2, endColumn: 2 }],
+                value: originalWidth + 50,
+            })).toBe(true);
+            const afterColumnWidth = Tools.deepClone(getDrawing(restoredService));
+            expect(afterColumnWidth.transform?.width).toBeCloseTo((afterAutoHeight.transform?.width ?? 0) + 50);
+            expect(await restored.commandService.executeCommand(UndoCommandId)).toBe(true);
+            expect(getDrawing(restoredService)).toEqual(afterAutoHeight);
+            expect(await restored.commandService.executeCommand(RedoCommandId)).toBe(true);
+            expect(getDrawing(restoredService)).toEqual(afterColumnWidth);
+            expect(drawingManager.getDrawingByParam(healthy)).toEqual(afterColumnWidth);
+            expect(restoredService.getDrawingByParam(invalid)).toEqual(invalid);
+            expect(drawingManager.getDrawingByParam(invalid)).toEqual(invalid);
+        } finally {
+            restored.univer.dispose();
+            warn.mockRestore();
+        }
+    });
+
+    it('contains a refresh extension failure and refreshes again after the extension recovers', async () => {
+        const service = await insertDrawing(SheetDrawingAnchorType.Both);
+        const before = Tools.deepClone(getDrawing(service));
+        const error = new Error('Drawing extension failed');
+        const extension = testBed.get(SheetDrawingTransformPlanService).register({
+            transform: () => { throw error; },
+        });
+        const log = vi.spyOn(DesktopLogService.prototype, 'error');
+        try {
+            expect(testBed.commandService.syncExecuteCommand(SetWorksheetRowAutoHeightMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                rowsAutoHeightInfo: [{ row: 2, autoHeight: 60 }],
+            })).toBe(true);
+            await Promise.resolve();
+
+            expect(getDrawing(service)).toEqual(before);
+            expect(testBed.get(IDrawingManagerService).getDrawingByParam(before)).toEqual(before);
+            expect(log).toHaveBeenCalledWith(expect.any(String), expect.any(String), expect.objectContaining({
+                commandId: SetWorksheetRowAutoHeightMutation.id,
+                error,
+            }));
+
+            extension.dispose();
+            expect(testBed.commandService.syncExecuteCommand(SetWorksheetRowAutoHeightMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                rowsAutoHeightInfo: [{ row: 2, autoHeight: 80 }],
+            })).toBe(true);
+            await Promise.resolve();
+            expect(getDrawing(service).transform?.height).toBeGreaterThan(before.transform?.height ?? 0);
+        } finally {
+            extension.dispose();
+            log.mockRestore();
+        }
+    });
+
+    it.each(['controller', 'unit'] as const)('cancels a queued drawing refresh when the %s is disposed', async (owner) => {
+        const service = await insertDrawing(SheetDrawingAnchorType.Both);
+        const before = Tools.deepClone(getDrawing(service));
+        const plans: string[] = [];
+        const extension = testBed.get(SheetDrawingTransformPlanService).register({
+            transform: (plan) => { plans.push(plan.mode); },
+        });
+        try {
+            expect(testBed.commandService.syncExecuteCommand(SetWorksheetRowAutoHeightMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                rowsAutoHeightInfo: [{ row: 2, autoHeight: 60 }],
+            })).toBe(true);
+            if (owner === 'controller') {
+                testBed.get(SheetDrawingTransformAffectedController).dispose();
+            } else {
+                testBed.get(IUniverInstanceService).disposeUnit('test');
+            }
+            await Promise.resolve();
+            expect(plans).toEqual([]);
+            if (owner === 'controller') {
+                expect(getDrawing(service)).toEqual(before);
+            } else {
+                expect(service.getDrawingByParam(before)).toBeUndefined();
+            }
+        } finally {
+            extension.dispose();
         }
     });
 

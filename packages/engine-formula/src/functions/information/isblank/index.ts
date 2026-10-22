@@ -29,8 +29,9 @@ export class Isblank extends BaseFunction {
 
     override calculate(value: FunctionVariantType) {
         if (value instanceof BaseReferenceObject) {
-            const array = value.toArrayValueObject(false).mapValue((valueObject) =>
-                BooleanValueObject.create(valueObject.isNull())
+            const { startRow, startColumn } = value.getRangePosition();
+            const array = value.toArrayValueObject(false).mapValue((valueObject, row, column) =>
+                BooleanValueObject.create(!valueObject.isError() && value.isCellBlank(startRow + row, startColumn + column))
             );
 
             return array.getRowCount() === 1 && array.getColumnCount() === 1

@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-import type {
-    IDocumentSkeletonDivide,
-    IDocumentSkeletonGlyph,
-} from '../../../../../../basics/i-document-skeleton-cached';
-import type { IParagraphConfig } from '../../../../../../basics/interfaces';
 import {
     AlignTypeH,
     BooleanNumber,
@@ -44,6 +39,11 @@ import {
     WrapTextType,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type {
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonGlyph,
+} from '../../../../../../basics/i-document-skeleton-cached';
+import type { IParagraphConfig } from '../../../../../../basics/interfaces';
 import { DocumentSkeletonPageType, GlyphType, LineType } from '../../../../../../basics/i-document-skeleton-cached';
 import { setDocsCustomBlockRenderViewportProvider } from '../../../../custom-block-render-viewport';
 import { getDocumentCompatibilityPolicy } from '../../../../document-compatibility';
@@ -2902,6 +2902,40 @@ describe('layout-ruler', () => {
         __testing.avoidNonOverlappingFloatingTables(table, page);
 
         expect(table.top).toBe(1029);
+    });
+
+    it.each(
+        [DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN, DocumentFlavor.UNSPECIFIED, undefined].flatMap((flavor) =>
+            [TableAlignmentType.CENTER, TableAlignmentType.END].flatMap((align) =>
+                [false, true].map((hasWidth) => ({ flavor, align, hasWidth }))
+            )
+        )
+    )('retains the table overflow policy during final paragraph placement ($flavor, $align, width: $hasWidth)', ({ flavor, align, hasWidth }) => {
+        const table = {
+            tableId: 'imported-table',
+            tableSource: {
+                align,
+                ...(hasWidth ? { size: { type: TableSizeType.SPECIFIED, width: { v: 612 } } } : {}),
+                textWrap: TableTextWrapType.NONE,
+            },
+            top: 0,
+            left: 0,
+            width: 612,
+            height: 100,
+        } as any;
+        const page = { skeDrawings: new Map(), skeTables: new Map() } as any;
+        const column = { left: 17, width: 554 } as any;
+        const section = { top: 0, height: 900 } as any;
+        const cache = [{ table, tableId: table.tableId, hasPositioned: false, isSlideTable: false, tableNode: {} }] as any;
+        const source = JSON.stringify(table.tableSource);
+        __testing.updateAndPositionTable({} as any, 0, 14, page, [page], column, section, cache, 0, {
+            ...(flavor != null ? { documentCompatibilityPolicy: getDocumentCompatibilityPolicy(flavor) } : {}),
+        } as any);
+        const alignmentLeft = align === TableAlignmentType.CENTER ? -29 : -58;
+        const offset = flavor === DocumentFlavor.TRADITIONAL && hasWidth ? alignmentLeft : 0;
+        expect(table.left).toBe(17 + offset);
+        expect(page.skeTables.get(table.tableId)).toBe(table);
+        expect(JSON.stringify(table.tableSource)).toBe(source);
     });
 
     it('positions a sliced table continuation in its current column', () => {

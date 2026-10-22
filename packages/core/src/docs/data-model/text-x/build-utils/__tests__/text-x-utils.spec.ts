@@ -18,7 +18,7 @@ import type { IDocumentBody } from '../../../../../types/interfaces/i-document-d
 import { describe, expect, it } from 'vitest';
 import { CustomRangeType, DocumentFlavor } from '../../../../../types/interfaces/i-document-data';
 import { TextX } from '../../text-x';
-import { deleteSelectionTextX } from '../text-x-utils';
+import { addCustomRangeTextX, deleteSelectionTextX } from '../text-x-utils';
 
 describe('deleteSelectionTextX structural expansion', () => {
     it.each([0, 3])('preserves an unrelated blank bookmark when deleting character %i', (startOffset) => {
@@ -111,5 +111,32 @@ describe('empty paragraph formatting', () => {
         expect(body.paragraphs![1].bullet?.textStyle).toEqual({ cl: { rgb: '#0000ff' } });
         expect(body.paragraphs![1].paragraphStyle?.paragraphMarkTextStyle).toEqual({ cl: { rgb: '#800080' } });
         expect(body.textRuns?.find((run) => run.st <= 2 && run.ed > 2)?.ts).toEqual({ cl: { rgb: '#ff0000' }, bl: 1 });
+    });
+});
+
+describe('addCustomRangeTextX across paragraphs', () => {
+    it.each([
+        { startOffset: 0, endOffset: 10, expected: [['new', 0, 9]] },
+        { startOffset: 4, endOffset: 10, expected: [['new', 3, 9]] },
+        { startOffset: 7, endOffset: 8, expected: [['new', 3, 8]] },
+    ])('emits no negative retain when a link spans the paragraph ($startOffset to $endOffset)', ({ startOffset, endOffset, expected }) => {
+        const body: IDocumentBody = {
+            dataStream: 'abcdef\rghij\r\n',
+            paragraphs: [{ startIndex: 6, paragraphId: 'p1' }, { startIndex: 11, paragraphId: 'p2' }],
+            sectionBreaks: [{ startIndex: 12, sectionId: 's1' }],
+            customRanges: [{ rangeId: 'old', rangeType: CustomRangeType.HYPERLINK, startIndex: 3, endIndex: 8, properties: { url: 'https://old.test' } }],
+        };
+        const textX = addCustomRangeTextX({
+            ranges: [{ startOffset, endOffset, collapsed: false }],
+            rangeId: 'new',
+            rangeType: CustomRangeType.HYPERLINK,
+            properties: { url: 'https://new.test' },
+            body,
+        });
+        expect(textX).not.toBe(false);
+        const actions = (textX as TextX).serialize();
+        expect(actions.every((action) => action.t !== 'r' || action.len >= 0)).toBe(true);
+        TextX.apply(body, actions);
+        expect(body.customRanges?.map(({ rangeId, startIndex, endIndex }) => [rangeId, startIndex, endIndex])).toEqual(expected);
     });
 });

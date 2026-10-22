@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IDisplayMenuItem, IMenuItem, IValueOption, MenuItemDefaultValueType } from '../../../services/menu/menu';
-import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
-import type { TinyMenuLayoutVariant, TinyMenuSizeVariant } from './DesignTinyMenuGroup';
 import { LocaleService } from '@univerjs/core';
 import { cva } from '@univerjs/design';
 import { useMemo } from 'react';
 import { combineLatest, map, of, startWith } from 'rxjs';
-import { IconManager } from '../../../common';
+import type { IDisplayMenuItem, IMenuItem, IValueOption, MenuItemDefaultValueType } from '../../../services/menu/menu';
+import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
+import type { TinyMenuLayoutVariant, TinyMenuSizeVariant } from './DesignTinyMenuGroup';
+import { IconManager } from '../../../common/icon-manager';
 import { useDependency, useObservable } from '../../../utils/di';
 import { DesignTinyMenuGroup } from './DesignTinyMenuGroup';
 
@@ -225,7 +225,7 @@ export function UIQuickTileMenuGroup(props: IUIQuickMenuGroupProps) {
     }
 
     return (
-        <div className="univer-item-center univer-grid univer-grid-cols-3 univer-gap-1.5 univer-py-1">
+        <div className="univer-grid univer-grid-cols-3 univer-items-center univer-gap-1.5 univer-py-1">
             {getVisibleTinyMenuChildren(item.children, hiddenItemIds).map((menuSchema) => (
                 <QuickTileMenuItem
                     key={menuSchema.key}

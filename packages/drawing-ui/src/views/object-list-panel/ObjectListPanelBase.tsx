@@ -399,9 +399,8 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
                                 'univer-h-7',
                                 filterMode === mode
                                     ? `
-                                      dark:!univer-bg-primary-900/30
                                       univer-border-primary-500 univer-bg-primary-50 univer-text-primary-600
-                                      dark:!univer-text-primary-200
+                                      dark:!univer-bg-primary-900 dark:!univer-text-primary-200
                                     `
                                     : clsx(`
                                       univer-border-gray-200 univer-bg-gray-0 univer-text-gray-600

@@ -15,12 +15,12 @@
  */
 
 import type { IFormulaValue } from '@univerjs/data-validation';
-import type { FormulaInputType } from '../interface';
 import { LocaleService, LocaleType, Univer } from '@univerjs/core';
 import { RediContext } from '@univerjs/ui';
 import { act, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it } from 'vitest';
+import type { FormulaInputType } from '../interface';
 import { BaseFormulaInput } from '../BaseFormulaInput';
 import { CheckboxFormulaInput } from '../CheckboxFormulaInput';
 

@@ -15,9 +15,9 @@
  */
 
 import type { ComponentProps } from 'react';
-import type { IObjectListPanelBaseProps, IObjectListRowProps } from './ObjectListPanelBase';
 import { Button, clsx, Input, StateIconButton } from '@univerjs/design';
 import { ArrowDownIcon, ArrowUpIcon, EyeIcon, EyelashIcon, LocateFixedIcon, LockIcon, MoreDownIcon, UnlockIcon } from '@univerjs/icons';
+import type { IObjectListPanelBaseProps, IObjectListRowProps } from './ObjectListPanelBase';
 import { hasCapability, ObjectDetailsEditor, useObjectListPanel, useObjectListRow } from './ObjectListPanelBase';
 
 const mobileIconButtonClassName = `
@@ -139,9 +139,8 @@ export function MobileObjectListPanel(props: IObjectListPanelBaseProps) {
                                 'univer-h-11 univer-text-sm',
                                 filterMode === mode
                                     ? `
-                                      dark:!univer-bg-primary-900/30
                                       univer-border-primary-500 univer-bg-primary-50 univer-text-primary-600
-                                      dark:!univer-text-primary-200
+                                      dark:!univer-bg-primary-900 dark:!univer-text-primary-200
                                     `
                                     : clsx(`
                                       univer-border-gray-200 univer-bg-gray-0 univer-text-gray-600

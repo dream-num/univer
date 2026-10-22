@@ -15,9 +15,6 @@
  */
 
 import type { KeyboardEvent, ReactElement, UIEvent } from 'react';
-import type { LocaleKey } from '../../locale/types';
-import type { IPopup } from '../../services/popup/canvas-popup.service';
-import type { EmojiCategory, EmojiSkinTone, IEmojiItem, IEmojiVariant } from './emoji-picker-utils';
 import { ILocalStorageService, LocaleService } from '@univerjs/core';
 import { borderTopClassName, Button, clsx, Dropdown, Input, scrollbarClassName } from '@univerjs/design';
 import {
@@ -34,6 +31,9 @@ import {
     SymbolsIcon,
 } from '@univerjs/icons';
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type { IPopup } from '../../services/popup/canvas-popup.service';
+import type { EmojiCategory, EmojiSkinTone, IEmojiItem, IEmojiVariant } from './emoji-picker-utils';
 import { useDependency, useObservable } from '../../utils/di';
 import { useVirtualList } from '../hooks/virtual-list';
 import {
@@ -111,6 +111,36 @@ export function EmojiPicker(props: IEmojiPickerProps) {
     const recentStorageKey = extraProps?.recentStorageKey ?? RECENTS_STORAGE_KEY;
     const isSearching = deferredQuery.trim().length > 0;
     const { rows, sectionPositions } = useMemo(() => {
+        function createEmojiVirtualRows(sections: IEmojiSection[], locale: string): {
+            rows: EmojiVirtualRow[];
+            sectionPositions: IEmojiSectionPosition[];
+        } {
+            const rows: EmojiVirtualRow[] = [];
+            const sectionPositions: IEmojiSectionPosition[] = [];
+            let top = 0;
+
+            sections.forEach((section) => {
+                if (!section.emojis.length) {
+                    return;
+                }
+
+                sectionPositions.push({ key: section.key, rowIndex: rows.length, top });
+                rows.push({ key: `${locale}-${section.key}-header`, title: section.title, type: 'header' });
+                top += EMOJI_SECTION_HEADER_HEIGHT;
+
+                for (let start = 0; start < section.emojis.length; start += EMOJI_COLUMN_COUNT) {
+                    rows.push({
+                        items: section.emojis.slice(start, start + EMOJI_COLUMN_COUNT),
+                        key: `${locale}-${section.key}-${start / EMOJI_COLUMN_COUNT}`,
+                        type: 'emojis',
+                    });
+                    top += EMOJI_ROW_HEIGHT;
+                }
+            });
+
+            return { rows, sectionPositions };
+        }
+
         const normalSections: IEmojiSection[] = [
             { key: 'recent', title: localeService.t<LocaleKey>('ui.emojiPicker.recents'), emojis: recents },
             ...EMOJI_CATEGORIES.map((category) => ({
@@ -131,7 +161,7 @@ export function EmojiPicker(props: IEmojiPickerProps) {
     }, [currentLocale, isSearching, localeService, recents, searchResults, skinTone]);
     const [virtualRows, { containerProps, scrollTo, wrapperStyle }] = useVirtualList(rows, {
         containerTarget: scrollRef,
-        itemHeight: getEmojiVirtualRowHeight,
+        itemHeight: (_index, row) => row.type === 'header' ? EMOJI_SECTION_HEADER_HEIGHT : EMOJI_ROW_HEIGHT,
         overscan: EMOJI_VIRTUAL_OVERSCAN,
     });
 
@@ -181,6 +211,24 @@ export function EmojiPicker(props: IEmojiPickerProps) {
         }
         pendingSectionRef.current = null;
     }, [isSearching, scrollTo, sectionPositions]);
+
+    function writeStorageItem<T>(localStorageService: ILocalStorageService, storageKey: string, value: T): void {
+        localStorageService
+            .setItem(storageKey, value)
+            .catch(() => undefined);
+    }
+
+    function getActiveSectionByScrollTop(sectionPositions: IEmojiSectionPosition[], scrollTop: number): EmojiSectionKey {
+        let active: EmojiSectionKey = 'recent';
+
+        sectionPositions.forEach((position) => {
+            if (position.top <= scrollTop + ACTIVE_SECTION_SCROLL_OFFSET) {
+                active = position.key;
+            }
+        });
+
+        return active;
+    }
 
     const handleSelect = (item: IEmojiItem, options?: { keepOpen?: boolean }) => {
         const nextRecents = promoteRecentEmoji(recents, item);
@@ -464,15 +512,13 @@ function EmojiButton(props: {
                     aria-label={`${title}, ${props.moreTitle}`}
                     title={`${title}, ${props.moreTitle}`}
                     className="
-                      univer-bg-gray-0/90
-                      dark:!univer-bg-gray-800/90
                       univer-absolute univer-bottom-0 univer-right-0 univer-flex univer-size-3 univer-cursor-pointer
-                      univer-items-center univer-justify-center univer-rounded-sm univer-border-0 univer-p-0
-                      univer-text-gray-500
+                      univer-items-center univer-justify-center univer-rounded-sm univer-border-0 univer-bg-gray-0
+                      univer-p-0 univer-text-gray-500
                       hover:univer-bg-gray-100 hover:univer-text-gray-700
                       focus-visible:univer-outline-none focus-visible:univer-ring-1
                       focus-visible:univer-ring-primary-600
-                      dark:!univer-text-gray-300
+                      dark:!univer-bg-gray-800 dark:!univer-text-gray-300
                       dark:hover:!univer-bg-gray-700
                     "
                 >
@@ -642,58 +688,6 @@ function CategoryButton(props: { children: ReactElement; onClick: () => void; se
             {props.children}
         </button>
     );
-}
-
-function writeStorageItem<T>(localStorageService: ILocalStorageService, storageKey: string, value: T): void {
-    localStorageService
-        .setItem(storageKey, value)
-        .catch(() => undefined);
-}
-
-function createEmojiVirtualRows(sections: IEmojiSection[], locale: string): {
-    rows: EmojiVirtualRow[];
-    sectionPositions: IEmojiSectionPosition[];
-} {
-    const rows: EmojiVirtualRow[] = [];
-    const sectionPositions: IEmojiSectionPosition[] = [];
-    let top = 0;
-
-    sections.forEach((section) => {
-        if (!section.emojis.length) {
-            return;
-        }
-
-        sectionPositions.push({ key: section.key, rowIndex: rows.length, top });
-        rows.push({ key: `${locale}-${section.key}-header`, title: section.title, type: 'header' });
-        top += EMOJI_SECTION_HEADER_HEIGHT;
-
-        for (let start = 0; start < section.emojis.length; start += EMOJI_COLUMN_COUNT) {
-            rows.push({
-                items: section.emojis.slice(start, start + EMOJI_COLUMN_COUNT),
-                key: `${locale}-${section.key}-${start / EMOJI_COLUMN_COUNT}`,
-                type: 'emojis',
-            });
-            top += EMOJI_ROW_HEIGHT;
-        }
-    });
-
-    return { rows, sectionPositions };
-}
-
-function getEmojiVirtualRowHeight(_index: number, row: EmojiVirtualRow): number {
-    return row.type === 'header' ? EMOJI_SECTION_HEADER_HEIGHT : EMOJI_ROW_HEIGHT;
-}
-
-function getActiveSectionByScrollTop(sectionPositions: IEmojiSectionPosition[], scrollTop: number): EmojiSectionKey {
-    let active: EmojiSectionKey = 'recent';
-
-    sectionPositions.forEach((position) => {
-        if (position.top <= scrollTop + ACTIVE_SECTION_SCROLL_OFFSET) {
-            active = position.key;
-        }
-    });
-
-    return active;
 }
 
 function CategoryIcon(props: { category: EmojiCategory }) {

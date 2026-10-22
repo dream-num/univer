@@ -23,19 +23,11 @@ import { ConfigContext } from '../config-provider/ConfigProvider';
 import { DropdownMenu } from '../dropdown-menu/DropdownMenu';
 import { Dropdown } from '../dropdown/Dropdown';
 import { TimeInput } from '../time-input/TimeInput';
-import { VirtualList } from '../virtual-list';
+import { VirtualList } from '../virtual-list/VirtualList';
 
 const DEFAULT_YEAR_RANGE = 100;
 const YEAR_ITEM_HEIGHT = 32;
 const YEAR_LIST_HEIGHT = 224;
-
-function getDaysInMonth(year: number, month: number) {
-    return new Date(year, month + 1, 0).getDate();
-}
-
-function getFirstDayOfWeek(year: number, month: number) {
-    return new Date(year, month, 1).getDay();
-}
 
 function DayButton(props: ButtonHTMLAttributes<HTMLButtonElement>) {
     const { className, ...restProps } = props;
@@ -137,8 +129,8 @@ export function Calendar(props: ICalendarProps) {
         onSelect: handleChangeMonth,
     }], [currentMonth, months]);
 
-    const daysInMonth = getDaysInMonth(currentYear, currentMonth);
-    const firstDay = getFirstDayOfWeek(currentYear, currentMonth);
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
 
     const days = useMemo(() => {
         const daysArray = [];
@@ -316,7 +308,7 @@ export function Calendar(props: ICalendarProps) {
                                     '!univer-bg-primary-600 univer-text-gray-0': isToday(day) && isSelected(day),
                                     'univer-font-semibold univer-text-primary-600 dark:!univer-text-primary-500': isToday(day) && !isSelected(day),
                                     'univer-cursor-not-allowed univer-opacity-40': isDisabled(day),
-                                    'univer-hover:bg-primary-100 univer-cursor-pointer univer-text-gray-800': !isSelected(day) && !isDisabled(day),
+                                    'univer-cursor-pointer univer-text-gray-800 hover:univer-bg-primary-100': !isSelected(day) && !isDisabled(day),
                                 })}
                                 onClick={() => handleChangeDate(day)}
                                 disabled={isDisabled(day)}

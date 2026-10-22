@@ -16,7 +16,6 @@
 
 import type { Nullable, Workbook } from '@univerjs/core';
 import type { IDefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
-import type { LocaleKey } from '../../locale/types';
 import { generateRandomId, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Button, clsx, Confirm, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
@@ -35,6 +34,7 @@ import {
 import { useDependency, useObservable, useVirtualList } from '@univerjs/ui';
 import { useRef, useState } from 'react';
 import { map, startWith } from 'rxjs';
+import type { LocaleKey } from '../../locale/types';
 import { DefinedNameInput } from './DefinedNameInput';
 
 export interface IDefinedNameContainerProps {
@@ -310,7 +310,7 @@ export const DefinedNameContainer = ({
                                             `}
                                         >
                                             {definedName.name}
-                                            <span className="univer-text-xxs univer-ml-1 univer-text-gray-400">
+                                            <span className="univer-ml-1 univer-text-xs univer-text-gray-400">
                                                 {(definedName.localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME || definedName.localSheetId == null) ? '' : getSheetNameBySheetId(definedName.localSheetId)}
                                             </span>
                                         </div>

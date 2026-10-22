@@ -78,10 +78,11 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
         <div
             className={clsx(
                 `
-                  univer-bg-secondary univer-relative univer--mx-2 univer-box-border univer-flex univer-w-[287px]
-                  univer-cursor-pointer univer-flex-col univer-justify-between univer-overflow-hidden univer-rounded-md
+                  univer-relative univer--mx-2 univer-box-border univer-flex univer-w-[287px] univer-cursor-pointer
+                  univer-flex-col univer-justify-between univer-overflow-hidden univer-rounded-md univer-bg-gray-0
                   univer-p-2 univer-pr-9
                   rtl:univer-pl-9 rtl:univer-pr-2
+                  dark:!univer-bg-gray-900
                 `,
                 {
                     'hover:univer-bg-gray-50 dark:hover:!univer-bg-gray-700': !disable,
@@ -116,7 +117,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
             </div>
             <div
                 className={`
-                  univer-text-secondary univer-truncate univer-text-xs univer-leading-[18px]
+                  univer-truncate univer-text-xs univer-leading-[18px] univer-text-gray-500
                   dark:!univer-text-gray-300
                 `}
             >

@@ -15,11 +15,6 @@
  */
 
 import type { IDisposable, Workbook, Worksheet } from '@univerjs/core';
-import type {
-    IRangeProtectionRule,
-    EditStateEnum as RangeEditStateEnum,
-} from '../../../../models/range-protection-rule.model';
-import type { IObjectModel, IObjectPointModel } from '../../type';
 import {
     DesktopLogService,
     ILogService,
@@ -32,6 +27,8 @@ import {
 import { UnitObject } from '@univerjs/protocol';
 import { Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IRangeProtectionRule } from '../../../../models/range-protection-rule.model';
+import type { IObjectModel, IObjectPointModel } from '../../type';
 import {
     EditStateEnum,
     RangeProtectionRuleModel,
@@ -174,7 +171,7 @@ describe('WorksheetPermissionService', () => {
             unitId: 'book-1',
             subUnitId: 'sheet-1',
             viewState: ViewStateEnum.OthersCanView as ViewStateEnum,
-            editState: EditStateEnum.OnlyMe as RangeEditStateEnum,
+            editState: EditStateEnum.OnlyMe as EditStateEnum,
         };
         rangeRuleModel.addRule('book-1', 'sheet-1', rangeRule);
 

@@ -15,10 +15,10 @@
  */
 
 import type { KeyboardEvent, PointerEvent } from 'react';
-import type { LocaleKey } from '../../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { borderClassName, Button, clsx } from '@univerjs/design';
 import { useEffect, useRef, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { IconManager } from '../../common/icon-manager';
 import { useDependency, useObservable } from '../../utils/di';
 import { ZoomInput } from './ZoomInput';
@@ -313,7 +313,7 @@ export function Slider(props: ISliderProps) {
                     >
                         <div
                             className={clsx(`
-                              univer-bg-primary-500/60 univer-absolute univer-top-0 univer-h-full univer-rounded-full
+                              univer-absolute univer-top-0 univer-h-full univer-rounded-full univer-bg-primary-500
                             `, isRtl ? 'univer-right-0' : 'univer-left-0')}
                             style={{
                                 width: `${sliderOffset}%`,

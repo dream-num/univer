@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import type { IImageIoService as IImageIoServiceContract } from '../../../services/image-io/image-io.service';
-import type { IURLImageService as IURLImageServiceContract } from '../../../services/image-io/url-image.service';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Injector } from '../../../common/di';
@@ -47,7 +45,7 @@ const flushTasks = async () => {
     await Promise.resolve();
 };
 
-function createImageIoService(getImage: IImageIoServiceContract['getImage']): IImageIoServiceContract {
+function createImageIoService(getImage: IImageIoService['getImage']): IImageIoService {
     return {
         change$: new Subject<number>(),
         setWaitCount: () => {},
@@ -58,7 +56,7 @@ function createImageIoService(getImage: IImageIoServiceContract['getImage']): II
     };
 }
 
-function createUrlImageService(getImage: IURLImageServiceContract['getImage']): IURLImageServiceContract {
+function createUrlImageService(getImage: IURLImageService['getImage']): IURLImageService {
     return {
         getImage,
         downloadImage: async () => new Blob(),

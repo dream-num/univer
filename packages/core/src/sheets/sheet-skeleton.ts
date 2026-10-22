@@ -15,6 +15,7 @@
  */
 
 /* eslint-disable no-param-reassign */
+import { Subject } from 'rxjs';
 import type { IObjectArrayPrimitiveType, Nullable } from '../shared';
 import type {
     IDocumentData,
@@ -34,7 +35,6 @@ import type {
     IWorksheetData,
 } from './typedef';
 import type { Worksheet } from './worksheet';
-import { Subject } from 'rxjs';
 import { AUTO_HEIGHT_FOR_MERGED_CELLS, IS_ROW_STYLE_PRECEDE_COLUMN_STYLE } from '../common/const';
 import { Inject, Injector } from '../common/di';
 import { DocumentDataModel } from '../docs/data-model/document-data-model';
@@ -1115,11 +1115,15 @@ export class SheetSkeleton extends Skeleton {
     }
 
     /**
-     * Here, offsetX and offsetY are the coordinates in the viewport, including the rowHeaderWidthAndMarginLeft and columnHeaderHeightAndMarginTop.
+     * Coordinates include the row and column headers. Defaults to the current viewport transform;
+     * pass unit scales and zero scroll for Sheet model coordinates.
      */
     getCellIndexAndOffsetByPosition(
         offsetX: number,
-        offsetY: number
+        offsetY: number,
+        scaleX: number = this._scaleX,
+        scaleY: number = this._scaleY,
+        scrollXY: { x: number; y: number } = { x: this._scrollX, y: this._scrollY }
     ): {
         row: number;
         rowOffset: number;
@@ -1129,12 +1133,9 @@ export class SheetSkeleton extends Skeleton {
         const { actualRow, actualColumn, startX, startY } = this.getCellWithCoordByOffset(
             offsetX,
             offsetY,
-            this._scaleX,
-            this._scaleY,
-            {
-                x: this._scrollX,
-                y: this._scrollY,
-            }
+            scaleX,
+            scaleY,
+            scrollXY
         );
 
         return {

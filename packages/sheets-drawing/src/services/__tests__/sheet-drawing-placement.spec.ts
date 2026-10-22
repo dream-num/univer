@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum } from '@univerjs/core';
+import { DrawingTypeEnum, Tools } from '@univerjs/core';
 import {
     SetColHiddenCommand,
     SetRowHiddenCommand,
@@ -30,6 +30,7 @@ import {
     applySheetDrawingPlacement,
     normalizeSheetDrawingPlacement,
     refreshSheetDrawingPlacement,
+    tryRefreshSheetDrawingPlacement,
 } from '../sheet-drawing-placement';
 import { SheetDrawingAnchorType } from '../sheet-drawing.service';
 
@@ -39,6 +40,63 @@ describe('sheet drawing placement extents', () => {
         bed = createSheetsDrawingTestBed();
     });
     afterEach(() => bed.univer.dispose());
+
+    it.each([
+        ['missing markers', { sheetTransform: undefined }],
+        ['null markers', { sheetTransform: null }],
+        ['missing from', { sheetTransform: { to: { row: 2, column: 2, rowOffset: 0, columnOffset: 0 } } }],
+        ['null to', { sheetTransform: { from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 }, to: null } }],
+        ['invalid cell', { sheetTransform: {
+            from: { row: NaN, column: 1, rowOffset: 0, columnOffset: 0 },
+            to: { row: 2, column: 2, rowOffset: 0, columnOffset: 0 },
+        } }],
+        ['negative extent', { transform: { left: 10, top: 20, width: 20, height: -4243 } }],
+        ['non-finite extent', { transform: { left: 10, top: 20, width: NaN, height: 20 } }],
+    ])('returns a diagnostic for %s without rewriting the drawing', (_name, patch) => {
+        const skeleton = bed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+        const drawing = {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'invalid-image',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            anchorType: SheetDrawingAnchorType.Position,
+            sheetTransform: {
+                from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
+                to: { row: 2, column: 2, rowOffset: 0, columnOffset: 0 },
+            },
+            transform: { left: 10, top: 20, width: 20, height: 20 },
+            ...patch,
+        } as ISheetDrawing;
+        const before = Tools.deepClone(drawing);
+        const result = tryRefreshSheetDrawingPlacement(drawing, skeleton);
+        expect(result).toMatchObject({ ok: false, reason: expect.any(String) });
+        expect(drawing).toEqual(before);
+        // The existing strict API must still reject the same invalid placement.
+        if (!result.ok) {
+            expect(() => refreshSheetDrawingPlacement(drawing, skeleton)).toThrow(result.reason);
+        }
+    });
+
+    it('reports a negative calculated two-cell extent as a result', () => {
+        const skeleton = bed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+        const drawing = {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'inverted-image',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            anchorType: SheetDrawingAnchorType.Both,
+            sheetTransform: {
+                from: { row: 4, column: 4, rowOffset: 0, columnOffset: 0 },
+                to: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
+            },
+        } as ISheetDrawing;
+        const before = Tools.deepClone(drawing);
+        expect(tryRefreshSheetDrawingPlacement(drawing, skeleton)).toMatchObject({
+            ok: false,
+            details: { width: expect.any(Number), height: expect.any(Number) },
+        });
+        expect(drawing).toEqual(before);
+    });
 
     it.each([
         [0, 81.9],
@@ -111,6 +169,36 @@ describe('sheet drawing placement extents', () => {
         skeleton.makeDirty(true);
         skeleton.calculate();
         expect(refreshSheetDrawingPlacement(hidden, skeleton)).toEqual(drawing);
+    });
+
+    it.each([
+        [150, 4800, 0.5],
+        [300, 100, 2],
+    ])('keeps model placements stable with scroll=(%s,%s) and scale=%s', (scrollX, scrollY, scale) => {
+        const skeleton = bed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+        const bounds = { left: 300, top: 85, width: 180.3, height: 46 };
+        const marker = { row: 0, column: 0, rowOffset: 0, columnOffset: 0 };
+        const drawing: ISheetDrawing = {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'scrolled-image',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            transform: { ...bounds, angle: 90 },
+            sheetTransform: { from: marker, to: marker },
+            axisAlignSheetTransform: { from: marker, to: marker },
+        };
+        for (const kind of [SheetDrawingAnchorType.Position, SheetDrawingAnchorType.Both]) {
+            skeleton.setScroll(0, 0);
+            skeleton.setScale(1);
+            const expected = applySheetDrawingPlacement(drawing, { kind, bounds }, skeleton);
+            skeleton.setScroll(scrollX, scrollY);
+            skeleton.setScale(scale);
+            const actual = applySheetDrawingPlacement(drawing, { kind, bounds }, skeleton);
+            expect(actual).toEqual(expected);
+            expect(refreshSheetDrawingPlacement(actual, skeleton)).toEqual(expected);
+            expect(normalizeSheetDrawingPlacement({ kind, bounds }, skeleton))
+                .toEqual(normalizeSheetDrawingPlacement({ kind, bounds }, bed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet2')!));
+        }
     });
 
     it.each([[0, 0], [-1, 20], [20, -1], [NaN, 20], [20, Infinity]])(

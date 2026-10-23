@@ -933,7 +933,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     const namedStyleType = paragraphObj?.paragraphStyle?.namedStyleType;
     const isModernHeading = doc?.getDocumentStyle().documentFlavor === DocumentFlavor.MODERN &&
         startIndex != null && renderUnit?.with(DocSkeletonManagerService).getViewModel().getHeadingSections().some((heading) => heading.paragraphIndex === startIndex && heading.startOffset < heading.endOffset);
-    const targetIconKey = currentActiveTarget?.icon ?? getParagraphMenuTriggerIconKey(namedStyleType);
+    const targetIconKey = isEmptyParagraph ? 'IncreaseIcon' : currentActiveTarget?.icon ?? getParagraphMenuTriggerIconKey(namedStyleType);
     const TargetIcon = iconManager.get(targetIconKey);
     const paragraphMenuType = useMemo(
         () => getParagraphMenuType(currentActiveTarget, isEmptyParagraph),
@@ -1397,7 +1397,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                         `
                     )}
                 />
-                {currentActiveTarget?.draggable && (
+                {!isEmptyParagraph && currentActiveTarget?.draggable && (
                     <button
                         type="button"
                         className={`

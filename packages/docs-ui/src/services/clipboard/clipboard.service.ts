@@ -875,23 +875,19 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         plainTextList?: readonly string[]
     ): Promise<void> {
         const copyId = generateRandomId(6);
-        const text =
-            (plainTextList
-                ? plainTextList.join('\n')
-                : documentList.length > 1
-                    ? documentList.map((doc) => doc.body?.dataStream || '').join('\n')
-                    : documentList[0].body?.dataStream || '')
-                .replaceAll(DataStreamTreeTokenType.TABLE_START, '')
-                .replaceAll(DataStreamTreeTokenType.TABLE_END, '')
-                .replaceAll(DataStreamTreeTokenType.TABLE_ROW_START, '')
-                .replaceAll(DataStreamTreeTokenType.TABLE_ROW_END, '')
-                .replaceAll(DataStreamTreeTokenType.TABLE_CELL_START, '')
-                .replaceAll(DataStreamTreeTokenType.TABLE_CELL_END, '')
-                .replaceAll(DataStreamTreeTokenType.BLOCK_START, '')
-                .replaceAll(DataStreamTreeTokenType.BLOCK_END, '')
-                // Replace `\r\n` in table cell to white space.
-                .replaceAll('\r\n', ' ')
-                .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+        const text = (plainTextList ?? documentList.map((doc) => doc.body?.dataStream || ''))
+            .join('\n')
+            .replaceAll(DataStreamTreeTokenType.TABLE_START, '')
+            .replaceAll(DataStreamTreeTokenType.TABLE_END, '')
+            .replaceAll(DataStreamTreeTokenType.TABLE_ROW_START, '')
+            .replaceAll(DataStreamTreeTokenType.TABLE_ROW_END, '')
+            .replaceAll(DataStreamTreeTokenType.TABLE_CELL_START, '')
+            .replaceAll(DataStreamTreeTokenType.TABLE_CELL_END, '')
+            .replaceAll(DataStreamTreeTokenType.BLOCK_START, '')
+            .replaceAll(DataStreamTreeTokenType.BLOCK_END, '')
+            // Replace `\r\n` in table cell to white space.
+            .replaceAll('\r\n', ' ')
+            .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
 
         let html = this._umdToHtml.convert(documentList);
         let internalJson = '';
@@ -1004,6 +1000,14 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                     table.startIndex >= startOffset && table.endIndex <= endOffset
                 )).map((table) => table.tableId));
                 docBody.tables = docBody.tables.filter((table) => completeTableIds.has(table.tableId));
+            }
+
+            // Block metadata requires both sentinels; copying its content must not create another block.
+            if (docBody.blockRanges?.length) {
+                const completeBlockIds = new Set(body.blockRanges?.filter((block) => (
+                    block.startIndex >= startOffset && block.endIndex < endOffset
+                )).map((block) => block.blockId));
+                docBody.blockRanges = docBody.blockRanges.filter((block) => completeBlockIds.has(block.blockId));
             }
 
             results.push(docBody);

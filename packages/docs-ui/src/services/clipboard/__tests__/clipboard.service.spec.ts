@@ -15,6 +15,7 @@
  */
 
 import type { IDocumentBody, IDocumentData } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IDocImage } from '@univerjs/docs-drawing';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
@@ -46,6 +47,7 @@ import {
     Univer,
     UniverInstanceType,
     validateDocBodyStructure,
+    validateDocumentStructure,
 } from '@univerjs/core';
 import {
     DocSelectionManagerService,
@@ -987,6 +989,86 @@ describe('DocClipboardService table copy helpers', () => {
         expect(documentModel.getBody()?.dataStream).toBe(`${blockStream}Pasted${tokens.PARAGRAPH}Quote${tokens.PARAGRAPH}${tokens.SECTION_BREAK}`);
 
         testBed.univer.dispose();
+    });
+
+    it.each([false, true])('keeps collaboration structure valid when pasting callout content into code (paragraph: %s)', async (includeParagraph) => {
+        const tokens = DataStreamTreeTokenType;
+        const code = `${tokens.BLOCK_START}Code${tokens.PARAGRAPH}${tokens.BLOCK_END}`;
+        const callout = `${tokens.BLOCK_START}Callout${tokens.PARAGRAPH}${tokens.BLOCK_END}`;
+        const clipboardInterface = new TestClipboardInterfaceService();
+        const testBed = createCommandTestBed({
+            id: 'callout-into-code',
+            documentStyle: {},
+            body: {
+                dataStream: `${code}${callout}\r\n`,
+                customBlocks: [],
+                customDecorations: [],
+                customRanges: [],
+                paragraphs: [
+                    { startIndex: code.length - 2, paragraphId: 'code-paragraph' },
+                    { startIndex: code.length + callout.length - 2, paragraphId: 'callout-paragraph' },
+                    { startIndex: code.length + callout.length, paragraphId: 'root-paragraph' },
+                ],
+                sectionBreaks: [{ startIndex: code.length + callout.length + 1, sectionId: 'root-section' }],
+                blockRanges: [
+                    { startIndex: 0, endIndex: code.length - 1, blockId: 'code', blockType: DocumentBlockRangeType.CODE },
+                    { startIndex: code.length, endIndex: code.length + callout.length - 1, blockId: 'callout', blockType: DocumentBlockRangeType.CALLOUT },
+                ],
+            },
+        }, [
+            [IClipboardInterfaceService, { useValue: clipboardInterface }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
+        ]);
+        const before = Tools.deepClone(testBed.doc.getSnapshot());
+        const remote = new DocumentDataModel(Tools.deepClone(before));
+        const commands = testBed.get(ICommandService);
+        const listener = commands.onMutationExecutedForCollab((command) => {
+            if (command.id === RichTextEditingMutation.id) {
+                remote.apply((command.params as IRichTextEditingMutationParams).actions);
+            }
+        });
+        try {
+            [InnerPasteCommand, RichTextEditingMutation, SetTextSelectionsOperation]
+                .forEach((command) => commands.registerCommand(command));
+            const selections = testBed.get(DocSelectionManagerService);
+            selections.__TEST_ONLY_setCurrentSelection({ unitId: testBed.doc.getUnitId(), subUnitId: '' });
+            const clipboard = testBed.get(IDocClipboardService);
+            expect(validateDocumentStructure(testBed.doc.getSnapshot())).toEqual([]);
+            expect(await clipboard.copy(SliceBodyType.copy, [{
+                startOffset: code.length + 1,
+                endOffset: code.length + callout.length - (includeParagraph ? 1 : 2),
+                collapsed: false,
+                segmentId: '',
+            }])).toBe(true);
+            const copied = parseInternalClipboardFragment(clipboardInterface.writes[0].custom?.[DOC_INTERNAL_FRAGMENT_MIME]);
+            expect(copied?.body?.blockRanges ?? []).toEqual([]);
+            selections.__TEST_ONLY_add([{
+                startOffset: 2,
+                endOffset: 2,
+                collapsed: true,
+                isActive: true,
+                segmentId: '',
+            }]);
+
+            expect(await clipboard.paste()).toBe(true);
+            const inserted = includeParagraph ? 'Callout\r' : 'Callout';
+            expect(testBed.doc.getBody()?.dataStream).toBe(`${code.slice(0, 2)}${inserted}${code.slice(2)}${callout}\r\n`);
+            expect(testBed.doc.getBody()?.blockRanges?.map((block) => block.blockId)).toEqual(['code', 'callout']);
+            expect(validateDocumentStructure(testBed.doc.getSnapshot())).toEqual([]);
+            const after = Tools.deepClone(testBed.doc.getSnapshot());
+            expect(remote.getSnapshot()).toEqual(after);
+
+            expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+            expect(testBed.doc.getSnapshot()).toEqual(before);
+            expect(remote.getSnapshot()).toEqual(before);
+            expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+            expect(testBed.doc.getSnapshot()).toEqual(after);
+            expect(remote.getSnapshot()).toEqual(after);
+        } finally {
+            listener.dispose();
+            remote.dispose();
+            testBed.univer.dispose();
+        }
     });
 
     it('copies and pastes a complete block range after itself', async () => {

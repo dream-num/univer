@@ -25,7 +25,7 @@ import { CheckMarkIcon } from '@univerjs/icons';
 import { PLUGIN_CONFIG_KEY_BASE } from '@univerjs/sheets-formula';
 import { ISidebarService, useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useState } from 'react';
-import { getFunctionTypeValues } from '../../../services/utils';
+import { getFunctionName, getFunctionTypeValues } from '../../../services/utils';
 import { FunctionHelp } from '../function-help/FunctionHelp';
 
 export interface ISelectFunctionProps {
@@ -217,7 +217,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
                               dark:!univer-text-gray-0
                             "
                         >
-                            {functionInfo.functionName}
+                            {functionInfo && getFunctionName(functionInfo, localeService)}
                         </div>
                         <div
                             className="
@@ -248,7 +248,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
                                 `, borderClassName)}
                             >
                                 <FunctionHelp
-                                    prefix={functionInfo.functionName}
+                                    prefix={(functionInfo as any).label || functionInfo.functionName}
                                     value={functionInfo.functionParameter}
                                 />
                             </div>
@@ -271,7 +271,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
                                   dark:!univer-bg-gray-800 dark:!univer-text-gray-0
                                 `, borderClassName)}
                             >
-                                {`${functionInfo.functionName}(${functionInfo.functionParameter
+                                {`${(functionInfo as any).label || functionInfo.functionName}(${functionInfo.functionParameter
                                     .map((item) => item.example)
                                     .join(',')})`}
                             </div>

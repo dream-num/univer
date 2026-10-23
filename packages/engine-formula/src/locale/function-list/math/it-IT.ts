@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ABS: {
+        label: 'ABS',
         description: 'Restituisce il valore assoluto di un numero. Il valore assoluto di un numero è il numero privo del segno corrispondente.',
         abstract: 'Restituisce il valore assoluto di un numero. Il valore assoluto di un numero è il numero privo del segno corrispondente.',
         links: [
@@ -31,6 +32,7 @@ const locale: typeof enUS = {
         },
     },
     ACOS: {
+        label: 'ARCCOS',
         description: 'Restituisce l\'arcocoseno, o inversa del coseno, di un numero. L\'arcocoseno è l\'angolo il cui coseno è num . L\'angolo risultante viene espresso in radianti con un valore compreso tra 0 (zero) e pi.',
         abstract: 'Restituisce l\'arcocoseno, o inversa del coseno, di un numero. L\'arcocoseno è l\'angolo il cui coseno è num . L\'angolo risultante viene espresso in radianti con un valore compreso tra 0 (zero) e pi.',
         links: [
@@ -44,6 +46,7 @@ const locale: typeof enUS = {
         },
     },
     ACOSH: {
+        label: 'ACOSH',
         description: 'Restituisce l\'inversa del coseno iperbolico di un numero. Il numero deve essere maggiore o uguale a 1. L\'inversa del coseno iperbolico è il valore il cui coseno iperbolico è num , quindi ACOSH(COSH(num)) equivale a num .',
         abstract: 'Restituisce l\'inversa del coseno iperbolico di un numero. Il numero deve essere maggiore o uguale a 1. L\'inversa del coseno iperbolico è il valore il cui coseno iperbolico è num , quindi ACOSH(COSH(num)) equivale a num .',
         links: [
@@ -57,6 +60,7 @@ const locale: typeof enUS = {
         },
     },
     ACOT: {
+        label: 'ACOT',
         description: 'Restituisce il valore principale dell\'arcotangente, o cotangente inversa, di un numero.',
         abstract: 'Restituisce il valore principale dell\'arcotangente, o cotangente inversa, di un numero.',
         links: [
@@ -70,6 +74,7 @@ const locale: typeof enUS = {
         },
     },
     ACOTH: {
+        label: 'ACOTH',
         description: 'Restituisce l\'inversa della cotangente iperbolica di un numero.',
         abstract: 'Restituisce l\'inversa della cotangente iperbolica di un numero.',
         links: [
@@ -83,6 +88,7 @@ const locale: typeof enUS = {
         },
     },
     AGGREGATE: {
+        label: 'AGGREGAZIONE',
         description: 'Restituisce un aggregato in un elenco o database. La funzione AGGREGA può applicare funzioni di aggregazione diverse a un elenco o database con l\'opzione di ignorare le righe nascoste e i valori di errore.',
         abstract: 'Restituisce un aggregato in un elenco o database. La funzione AGGREGA può applicare funzioni di aggregazione diverse a un elenco o database con l\'opzione di ignorare le righe nascoste e i valori di errore.',
         links: [
@@ -99,6 +105,7 @@ const locale: typeof enUS = {
         },
     },
     ARABIC: {
+        label: 'ARABO',
         description: 'Converte un numero romano in numero arabo.',
         abstract: 'Converte un numero romano in numero arabo.',
         links: [
@@ -112,6 +119,7 @@ const locale: typeof enUS = {
         },
     },
     ASIN: {
+        label: 'ARCSEN',
         description: 'Restituisce l\'arcoseno, o inversa del seno, di un numero. L\'arcoseno è l\'angolo il cui seno è num . L\'angolo risultante viene espresso in radianti con un valore compreso tra -pi greco/2 e pi greco/2.',
         abstract: 'Restituisce l\'arcoseno, o inversa del seno, di un numero. L\'arcoseno è l\'angolo il cui seno è num . L\'angolo risultante viene espresso in radianti con un valore compreso tra -pi greco/2 e pi greco/2.',
         links: [
@@ -125,6 +133,7 @@ const locale: typeof enUS = {
         },
     },
     ASINH: {
+        label: 'ASINH',
         description: 'Restituisce l\'inversa del seno iperbolico di un numero. L\'inversa del seno iperbolico è il valore il cui seno iperbolico è num , quindi ASINH(SINH(num)) equivale a num .',
         abstract: 'Restituisce l\'inversa del seno iperbolico di un numero. L\'inversa del seno iperbolico è il valore il cui seno iperbolico è num , quindi ASINH(SINH(num)) equivale a num .',
         links: [
@@ -138,6 +147,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN: {
+        label: 'ARCTAN',
         description: 'Restituisce l\'arcotangente, o inversa della tangente, di un numero. L\'arcotangente è l\'angolo la cui tangente è num . L\'angolo risultante viene espresso in radianti con un valore compreso tra -pi greco/2 e pi greco/2.',
         abstract: 'Restituisce l\'arcotangente, o inversa della tangente, di un numero. L\'arcotangente è l\'angolo la cui tangente è num . L\'angolo risultante viene espresso in radianti con un valore compreso tra -pi greco/2 e pi greco/2.',
         links: [
@@ -151,6 +161,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN2: {
+        label: 'ATAN2',
         description: 'Restituisce l\'arcotangente, o inversa della tangente, delle coordinate x e y specificate. L\'arcotangente è l\'angolo compreso tra l\'asse x e una linea contenente l\'origine (0; 0) e un punto con coordinate (x; y). L\'angolo viene espresso in radianti con valori compresi tra -pi greco e pi greco, a esclusione di -pi greco.',
         abstract: 'Restituisce l\'arcotangente, o inversa della tangente, delle coordinate x e y specificate. L\'arcotangente è l\'angolo compreso tra l\'asse x e una linea contenente l\'origine (0; 0) e un punto con coordinate (x; y). L\'angolo viene espresso in radianti con valori compresi tra -pi greco e pi greco, a esclusione di -pi greco.',
         links: [
@@ -165,6 +176,7 @@ const locale: typeof enUS = {
         },
     },
     ATANH: {
+        label: 'ATANH',
         description: 'Restituisce l\'inversa della tangente iperbolica di un numero. Num deve essere compreso tra -1 e 1 (esclusi -1 e 1). L\'inversa della tangente iperbolica è il valore la cui tangente iperbolica è num , quindi ARCTANH(TANH(num)) equivale a num .',
         abstract: 'Restituisce l\'inversa della tangente iperbolica di un numero. Num deve essere compreso tra -1 e 1 (esclusi -1 e 1). L\'inversa della tangente iperbolica è il valore la cui tangente iperbolica è num , quindi ARCTANH(TANH(num)) equivale a num .',
         links: [
@@ -178,6 +190,7 @@ const locale: typeof enUS = {
         },
     },
     BASE: {
+        label: 'BASE',
         description: 'Converte un numero in una rappresentazione in formato testo con la radice data (base).',
         abstract: 'Converte un numero in una rappresentazione in formato testo con la radice data (base).',
         links: [
@@ -193,6 +206,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING: {
+        label: 'SOFFITTO.ECCESSO',
         description: 'Restituisce un numero arrotondato per eccesso al multiplo più vicino a peso. Se ad esempio si desidera arrotondare il prezzo di un prodotto in modo da eliminare i centesimi inferiori a 5 e il prodotto costa € 4,42, utilizzare la formula =ARROTONDA.ECCESSO(4,42;0,05).',
         abstract: 'Restituisce un numero arrotondato per eccesso al multiplo più vicino a peso. Se ad esempio si desidera arrotondare il prezzo di un prodotto in modo da eliminare i centesimi inferiori a 5 e il prodotto costa € 4,42, utilizzare la formula =ARROTONDA.ECCESSO(4,42;0,05).',
         links: [
@@ -207,6 +221,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_MATH: {
+        label: 'SOFFITTO.MATEMATICA',
         description: 'Il SOFFITTO. La funzione MATEMATICA arrotonda un numero per eccesso all\'intero più vicino o, facoltativamente, al multiplo più vicino a peso.',
         abstract: 'Il SOFFITTO. La funzione MATEMATICA arrotonda un numero per eccesso all\'intero più vicino o, facoltativamente, al multiplo più vicino a peso.',
         links: [
@@ -222,6 +237,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_PRECISE: {
+        label: 'CEILING.PRECISE',
         description: 'Restituisce un numero arrotondato per eccesso all\'intero più vicino o al multiplo più vicino a peso. Indipendentemente dal segno di num, il numero viene arrotondato per eccesso. Se tuttavia num o peso è zero, verrà restituito il valore zero.',
         abstract: 'Restituisce un numero arrotondato per eccesso all\'intero più vicino o al multiplo più vicino a peso. Indipendentemente dal segno di num, il numero viene arrotondato per eccesso. Se tuttavia num o peso è zero, verrà restituito il valore zero.',
         links: [
@@ -236,6 +252,7 @@ const locale: typeof enUS = {
         },
     },
     COMBIN: {
+        label: 'COMBIN',
         description: 'Restituisce il numero delle combinazioni per un numero assegnato di elementi, indipendentemente dal loro ordine. Utilizzare la funzione COMBINAZIONE per calcolare tutti i possibili gruppi che si possono formare con un determinato numero di elementi.',
         abstract: 'Restituisce il numero delle combinazioni per un numero assegnato di elementi, indipendentemente dal loro ordine. Utilizzare la funzione COMBINAZIONE per calcolare tutti i possibili gruppi che si possono formare con un determinato numero di elementi.',
         links: [
@@ -250,6 +267,7 @@ const locale: typeof enUS = {
         },
     },
     COMBINA: {
+        label: 'COMBINA',
         description: 'Restituisce il numero delle combinazioni (con ripetizioni) per un numero assegnato di elementi.',
         abstract: 'Restituisce il numero delle combinazioni (con ripetizioni) per un numero assegnato di elementi.',
         links: [
@@ -264,6 +282,7 @@ const locale: typeof enUS = {
         },
     },
     COS: {
+        label: 'COS',
         description: 'Restituisce il coseno dell\'angolo specificato.',
         abstract: 'Restituisce il coseno dell\'angolo specificato.',
         links: [
@@ -277,6 +296,7 @@ const locale: typeof enUS = {
         },
     },
     COSH: {
+        label: 'COSH',
         description: 'Restituisce il coseno iperbolico di un numero.',
         abstract: 'Restituisce il coseno iperbolico di un numero.',
         links: [
@@ -290,6 +310,7 @@ const locale: typeof enUS = {
         },
     },
     COT: {
+        label: 'COT',
         description: 'Restituisce la COTgente di un angolo espresso in radianti.',
         abstract: 'Restituisce la COTgente di un angolo espresso in radianti.',
         links: [
@@ -303,6 +324,7 @@ const locale: typeof enUS = {
         },
     },
     COTH: {
+        label: 'COTH',
         description: 'Restituisce la cotangente iperbolico di un angolo iperbolico.',
         abstract: 'Restituisce la cotangente iperbolico di un angolo iperbolico.',
         links: [
@@ -316,6 +338,7 @@ const locale: typeof enUS = {
         },
     },
     CSC: {
+        label: 'CSC',
         description: 'Restituisce la cosecante di un angolo espresso in radianti.',
         abstract: 'Restituisce la cosecante di un angolo espresso in radianti.',
         links: [
@@ -329,6 +352,7 @@ const locale: typeof enUS = {
         },
     },
     CSCH: {
+        label: 'CSCH',
         description: 'Restituisce la cosecante iperbolica di un angolo espresso in radianti.',
         abstract: 'Restituisce la cosecante iperbolica di un angolo espresso in radianti.',
         links: [
@@ -342,6 +366,7 @@ const locale: typeof enUS = {
         },
     },
     DECIMAL: {
+        label: 'DECIMALE',
         description: 'Converte la rappresentazione di un numero in formato testo di una determinata base in un numero decimale.',
         abstract: 'Converte la rappresentazione di un numero in formato testo di una determinata base in un numero decimale.',
         links: [
@@ -356,6 +381,7 @@ const locale: typeof enUS = {
         },
     },
     DEGREES: {
+        label: 'DEGREES',
         description: 'Converte i radianti in gradi.',
         abstract: 'Converte i radianti in gradi.',
         links: [
@@ -369,6 +395,7 @@ const locale: typeof enUS = {
         },
     },
     EVEN: {
+        label: 'EVEN',
         description: 'Restituisce num arrotondato per eccesso all\'intero pari più vicino. Questa funzione consente di elaborare elementi disponibili a gruppi di due. Una cassa da imballaggio può contenere ad esempio alcune file di uno o due articoli. La cassa sarà piena quando ci sarà corrispondenza tra il numero degli articoli, arrotondato per eccesso ai due più vicini, e la capacità della cassa.',
         abstract: 'Restituisce num arrotondato per eccesso all\'intero pari più vicino. Questa funzione consente di elaborare elementi disponibili a gruppi di due. Una cassa da imballaggio può contenere ad esempio alcune file di uno o due articoli. La cassa sarà piena quando ci sarà corrispondenza tra il numero degli articoli, arrotondato per eccesso ai due più vicini, e la capacità della cassa.',
         links: [
@@ -382,6 +409,7 @@ const locale: typeof enUS = {
         },
     },
     EXP: {
+        label: 'ESP',
         description: 'Restituisce il numero e elevato alla potenza di num. La costante e è uguale a 2,71828182845904, la base del logaritmo naturale.',
         abstract: 'Restituisce il numero e elevato alla potenza di num. La costante e è uguale a 2,71828182845904, la base del logaritmo naturale.',
         links: [
@@ -395,6 +423,7 @@ const locale: typeof enUS = {
         },
     },
     FACT: {
+        label: 'FATTO',
         description: 'Restituisce il fattoriale di un numero. Il fattoriale di un numero è uguale a 1*2*3*...* num.',
         abstract: 'Restituisce il fattoriale di un numero. Il fattoriale di un numero è uguale a 1*2*3*...* num.',
         links: [
@@ -408,6 +437,7 @@ const locale: typeof enUS = {
         },
     },
     FACTDOUBLE: {
+        label: 'FACTDOUBLE',
         description: 'Restituisce il fattoriale doppio di un numero.',
         abstract: 'Restituisce il fattoriale doppio di un numero.',
         links: [
@@ -421,6 +451,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR: {
+        label: 'ARROTONDA.DIFETTO',
         description: 'La funzione ARROTONDA.DIFETTO di Excel arrotonda un numero specificato per difetto al multiplo specificato più vicino a peso. I numeri negativi vengono arrotondati per difetto (ulteriori negativi) al multiplo intero più vicino sotto lo zero.',
         abstract: 'La funzione ARROTONDA.DIFETTO di Excel arrotonda un numero specificato per difetto al multiplo specificato più vicino a peso. I numeri negativi vengono arrotondati per difetto (ulteriori negativi) al multiplo intero più vicino sotto lo zero.',
         links: [
@@ -435,6 +466,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_MATH: {
+        label: 'PIANO.MATEMATICA',
         description: 'Arrotonda un numero per difetto all\'intero più vicino o al multiplo più vicino a peso.',
         abstract: 'Arrotonda un numero per difetto all\'intero più vicino o al multiplo più vicino a peso.',
         links: [
@@ -450,6 +482,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_PRECISE: {
+        label: 'FLOOR.PRECISE',
         description: 'Restituisce un numero arrotondato per difetto all\'intero più vicino o al multiplo più vicino al peso. Indipendentemente dal segno di num, il numero viene arrotondato per difetto. Se tuttavia num o peso è zero, verrà restituito il valore zero.',
         abstract: 'Restituisce un numero arrotondato per difetto all\'intero più vicino o al multiplo più vicino al peso. Indipendentemente dal segno di num, il numero viene arrotondato per difetto. Se tuttavia num o peso è zero, verrà restituito il valore zero.',
         links: [
@@ -464,6 +497,7 @@ const locale: typeof enUS = {
         },
     },
     GCD: {
+        label: 'GCD',
         description: 'Restituisce il massimo comun divisore di due o più numeri interi. Il massimo comun divisore è il più grande numero intero che divide perfettamente sia num1 che num2.',
         abstract: 'Restituisce il massimo comun divisore di due o più numeri interi. Il massimo comun divisore è il più grande numero intero che divide perfettamente sia num1 che num2.',
         links: [
@@ -478,6 +512,7 @@ const locale: typeof enUS = {
         },
     },
     INT: {
+        label: 'INT',
         description: 'Arrotonda un numero per difetto all\'intero più vicino.',
         abstract: 'Arrotonda un numero per difetto all\'intero più vicino.',
         links: [
@@ -491,6 +526,7 @@ const locale: typeof enUS = {
         },
     },
     ISO_CEILING: {
+        label: 'ISO.SOFFITTO',
         description: 'Restituisce un numero arrotondato per eccesso all\'intero più vicino o al multiplo più vicino a peso. Indipendentemente dal segno di num, il numero viene arrotondato per eccesso. Se tuttavia num o peso è zero, verrà restituito il valore zero.',
         abstract: 'Restituisce un numero arrotondato per eccesso all\'intero più vicino o al multiplo più vicino a peso. Indipendentemente dal segno di num, il numero viene arrotondato per eccesso. Se tuttavia num o peso è zero, verrà restituito il valore zero.',
         links: [
@@ -505,6 +541,7 @@ const locale: typeof enUS = {
         },
     },
     LCM: {
+        label: 'LCM',
         description: 'Restituisce il minimo comune multiplo.',
         abstract: 'Restituisce il minimo comune multiplo.',
         links: [
@@ -519,6 +556,7 @@ const locale: typeof enUS = {
         },
     },
     LN: {
+        label: 'LN',
         description: 'Restituisce il logaritmo naturale di un numero. I logaritmi naturali si basano sulla costante e (2,71828182845904).',
         abstract: 'Restituisce il logaritmo naturale di un numero. I logaritmi naturali si basano sulla costante e (2,71828182845904).',
         links: [
@@ -532,6 +570,7 @@ const locale: typeof enUS = {
         },
     },
     LOG: {
+        label: 'LOG',
         description: 'Restituisce il logaritmo di un numero nella base specificata.',
         abstract: 'Restituisce il logaritmo di un numero nella base specificata.',
         links: [
@@ -546,6 +585,7 @@ const locale: typeof enUS = {
         },
     },
     LOG10: {
+        label: 'LOG10',
         description: 'Restituisce il logaritmo in base 10 di un numero.',
         abstract: 'Restituisce il logaritmo in base 10 di un numero.',
         links: [
@@ -559,6 +599,7 @@ const locale: typeof enUS = {
         },
     },
     MDETERM: {
+        label: 'MDETERM',
         description: 'Restituisce il determinante di una matrice.',
         abstract: 'Restituisce il determinante di una matrice.',
         links: [
@@ -572,6 +613,7 @@ const locale: typeof enUS = {
         },
     },
     MINVERSE: {
+        label: 'MINVERSE',
         description: 'La funzione MATR.INVERSA restituisce l\'inversa di una matrice memorizzata in una matrice.',
         abstract: 'La funzione MATR.INVERSA restituisce l\'inversa di una matrice memorizzata in una matrice.',
         links: [
@@ -585,6 +627,7 @@ const locale: typeof enUS = {
         },
     },
     MMULT: {
+        label: 'MMULT',
         description: 'Restituisce il prodotto matriciale di due matrici.',
         abstract: 'Restituisce il prodotto matriciale di due matrici.',
         links: [
@@ -599,6 +642,7 @@ const locale: typeof enUS = {
         },
     },
     MOD: {
+        label: 'MOD',
         description: 'Restituisce il resto quando dividendo viene diviso per divisore. Il segno del risultato coinciderà con quello di divisore.',
         abstract: 'Restituisce il resto quando dividendo viene diviso per divisore. Il segno del risultato coinciderà con quello di divisore.',
         links: [
@@ -613,6 +657,7 @@ const locale: typeof enUS = {
         },
     },
     MROUND: {
+        label: 'MROUND',
         description: 'ARROTONDA.MULTIPLO restituisce un numero arrotondato al multiplo desiderato.',
         abstract: 'ARROTONDA.MULTIPLO restituisce un numero arrotondato al multiplo desiderato.',
         links: [
@@ -627,6 +672,7 @@ const locale: typeof enUS = {
         },
     },
     MULTINOMIAL: {
+        label: 'MULTINOMIAL',
         description: 'Restituisce il multinomiale di un insieme di numeri.',
         abstract: 'Restituisce il multinomiale di un insieme di numeri.',
         links: [
@@ -641,6 +687,7 @@ const locale: typeof enUS = {
         },
     },
     MUNIT: {
+        label: 'MUNIT',
         description: 'La funzione MATR.UNIT restituisce la matrice unitaria per la dimensione specificata.',
         abstract: 'La funzione MATR.UNIT restituisce la matrice unitaria per la dimensione specificata.',
         links: [
@@ -654,6 +701,7 @@ const locale: typeof enUS = {
         },
     },
     ODD: {
+        label: 'ODD',
         description: 'Restituisce num arrotondato per eccesso all\'intero dispari più vicino.',
         abstract: 'Restituisce num arrotondato per eccesso all\'intero dispari più vicino.',
         links: [
@@ -667,6 +715,7 @@ const locale: typeof enUS = {
         },
     },
     PI: {
+        label: 'PI',
         description: 'Restituisce il numero 3,14159265358979, la costante matematica pi, con una precisione di 15 cifre.',
         abstract: 'Restituisce il numero 3,14159265358979, la costante matematica pi, con una precisione di 15 cifre.',
         links: [
@@ -679,6 +728,7 @@ const locale: typeof enUS = {
         },
     },
     POWER: {
+        label: 'POTENZA',
         description: 'Restituisce il risultato di un numero elevato a potenza.',
         abstract: 'Restituisce il risultato di un numero elevato a potenza.',
         links: [
@@ -693,6 +743,7 @@ const locale: typeof enUS = {
         },
     },
     PRODUCT: {
+        label: 'PRODOTTO',
         description: 'La funzione PRODOTTO moltiplica tutti i numeri assegnati come argomenti e restituisce il prodotto. Ad esempio, se le celle A1 e A2 contengono numeri, è possibile usare la formula =PRODOTTO(A1, A2) per moltiplicare questi due numeri. È anche possibile eseguire la stessa operazione usando l\'operatore matematico moltiplicazione ( * ), ad esempio =A1 * A2 .',
         abstract: 'La funzione PRODOTTO moltiplica tutti i numeri assegnati come argomenti e restituisce il prodotto. Ad esempio, se le celle A1 e A2 contengono numeri, è possibile usare la formula =PRODOTTO(A1, A2) per moltiplicare questi due numeri. È anche possibile eseguire la stessa operazione usando l\'operatore matematico moltiplicazione ( * ), ad esempio =A1 * A2 .',
         links: [
@@ -707,6 +758,7 @@ const locale: typeof enUS = {
         },
     },
     QUOTIENT: {
+        label: 'QUOTIENT',
         description: 'Restituisce il quoziente di una divisione. Utilizzare questa funzione quando si desidera ignorare il resto di una divisione.',
         abstract: 'Restituisce il quoziente di una divisione. Utilizzare questa funzione quando si desidera ignorare il resto di una divisione.',
         links: [
@@ -721,6 +773,7 @@ const locale: typeof enUS = {
         },
     },
     RADIANS: {
+        label: 'RADIANTI',
         description: 'Converte i gradi in radianti.',
         abstract: 'Converte i gradi in radianti.',
         links: [
@@ -734,6 +787,7 @@ const locale: typeof enUS = {
         },
     },
     RAND: {
+        label: 'CASUALE',
         description: 'CASUALE restituisce un numero reale casuale distribuito in maniera uniforme maggiore o uguale a 0 e minore di 1. Un nuovo numero reale casuale viene restituito volta che il foglio di lavoro viene calcolato.',
         abstract: 'CASUALE restituisce un numero reale casuale distribuito in maniera uniforme maggiore o uguale a 0 e minore di 1. Un nuovo numero reale casuale viene restituito volta che il foglio di lavoro viene calcolato.',
         links: [
@@ -746,6 +800,7 @@ const locale: typeof enUS = {
         },
     },
     RANDARRAY: {
+        label: 'MATR.CASUALE',
         description: 'Negli esempi seguenti viene creata una matrice composta da 5 righe e 3 colonne. Il primo esempio restituisce un set di valori casuali compresi tra 0 e 1, che è il comportamento predefinito di MATR.CASUALE. Il secondo esempio restituisce una serie di valori decimali casuali compresi tra 1 e 100. Infine, il terzo esempio restituisce una serie di numeri interi casuali compresi tra 1 e 100.',
         abstract: 'Negli esempi seguenti viene creata una matrice composta da 5 righe e 3 colonne. Il primo esempio restituisce un set di valori casuali compresi tra 0 e 1, che è il comportamento predefinito di MATR.CASUALE. Il secondo esempio restituisce una serie di valori decimali casuali compresi tra 1 e 100. Infine, il terzo esempio restituisce una serie di numeri interi casuali compresi tra 1 e 100.',
         links: [
@@ -763,6 +818,7 @@ const locale: typeof enUS = {
         },
     },
     RANDBETWEEN: {
+        label: 'RANDBETWEEN',
         description: 'Restituisce un numero intero casuale compreso tra i numeri specificati. Un nuovo numero intero casuale viene restituito ogni volta che il foglio di lavoro viene calcolato.',
         abstract: 'Restituisce un numero intero casuale compreso tra i numeri specificati. Un nuovo numero intero casuale viene restituito ogni volta che il foglio di lavoro viene calcolato.',
         links: [
@@ -777,6 +833,7 @@ const locale: typeof enUS = {
         },
     },
     ROMAN: {
+        label: 'ROMAN',
         description: 'Restituisce il numero come numero romano sotto forma di testo.',
         abstract: 'Restituisce il numero come numero romano sotto forma di testo.',
         links: [
@@ -791,6 +848,7 @@ const locale: typeof enUS = {
         },
     },
     ROUND: {
+        label: 'ROUND',
         description: 'La funzione ARROTONDA arrotonda un numero al numero di cifre specificato. Se ad esempio la cella A1 contiene 23,7825 e si desidera arrotondare tale valore a due posizioni decimali, sarà possibile usare la formula seguente:',
         abstract: 'La funzione ARROTONDA arrotonda un numero al numero di cifre specificato. Se ad esempio la cella A1 contiene 23,7825 e si desidera arrotondare tale valore a due posizioni decimali, sarà possibile usare la formula seguente:',
         links: [
@@ -805,6 +863,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDBANK: {
+        label: 'ARROTONDA',
         description: 'Arrotonda un numero con il metodo dell\'arrotondamento bancario.',
         abstract: 'Arrotonda un numero con il metodo dell\'arrotondamento bancario.',
         links: [
@@ -819,6 +878,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDDOWN: {
+        label: 'ROUNDDOWN',
         description: 'Arrotonda il valore assoluto di un numero per difetto.',
         abstract: 'Arrotonda il valore assoluto di un numero per difetto.',
         links: [
@@ -833,6 +893,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDUP: {
+        label: 'ROUNDUP',
         description: 'Arrotonda il valore assoluto di un numero, escluso zero, per eccesso.',
         abstract: 'Arrotonda il valore assoluto di un numero, escluso zero, per eccesso.',
         links: [
@@ -847,6 +908,7 @@ const locale: typeof enUS = {
         },
     },
     SEC: {
+        label: 'SEC',
         description: 'Restituisce la secante di un angolo.',
         abstract: 'Restituisce la secante di un angolo.',
         links: [
@@ -860,6 +922,7 @@ const locale: typeof enUS = {
         },
     },
     SECH: {
+        label: 'SECH',
         description: 'Restituisce la secante iperbolica di un angolo.',
         abstract: 'Restituisce la secante iperbolica di un angolo.',
         links: [
@@ -873,6 +936,7 @@ const locale: typeof enUS = {
         },
     },
     SERIESSUM: {
+        label: 'SERIESSUM',
         description: 'Molte funzioni possono essere approssimate per un\'espansione di serie di potenze.',
         abstract: 'Molte funzioni possono essere approssimate per un\'espansione di serie di potenze.',
         links: [
@@ -889,6 +953,7 @@ const locale: typeof enUS = {
         },
     },
     SEQUENCE: {
+        label: 'SEQUENCE',
         description: 'Nell\'esempio seguente, viene creata una matrice alta 4 righe e larga 5 colonne con =SEQUENZA(4,5) .',
         abstract: 'Nell\'esempio seguente, viene creata una matrice alta 4 righe e larga 5 colonne con =SEQUENZA(4,5) .',
         links: [
@@ -905,6 +970,7 @@ const locale: typeof enUS = {
         },
     },
     SIGN: {
+        label: 'SEGNO',
         description: 'Determina il segno di un numero. Restituisce 1 se il numero è positivo, zero (0) se il numero è 0 e -1 se il numero è negativo.',
         abstract: 'Determina il segno di un numero. Restituisce 1 se il numero è positivo, zero (0) se il numero è 0 e -1 se il numero è negativo.',
         links: [
@@ -918,6 +984,7 @@ const locale: typeof enUS = {
         },
     },
     SIN: {
+        label: 'SEN',
         description: 'Restituisce il seno dell\'angolo specificato.',
         abstract: 'Restituisce il seno dell\'angolo specificato.',
         links: [
@@ -931,6 +998,7 @@ const locale: typeof enUS = {
         },
     },
     SINH: {
+        label: 'SINH',
         description: 'Restituisce il seno iperbolico di un numero.',
         abstract: 'Restituisce il seno iperbolico di un numero.',
         links: [
@@ -944,6 +1012,7 @@ const locale: typeof enUS = {
         },
     },
     SQRT: {
+        label: 'RADQ',
         description: 'Restituisce una radice quadrata positiva.',
         abstract: 'Restituisce una radice quadrata positiva.',
         links: [
@@ -957,6 +1026,7 @@ const locale: typeof enUS = {
         },
     },
     SQRTPI: {
+        label: 'SQRTPI',
         description: 'Restituisce la radice quadrata di (num * pi).',
         abstract: 'Restituisce la radice quadrata di (num * pi).',
         links: [
@@ -970,6 +1040,7 @@ const locale: typeof enUS = {
         },
     },
     SUBTOTAL: {
+        label: 'SUBTOTAL',
         description: 'Restituisce un subtotale in un elenco o in un database. In genere, risulta più semplice creare un elenco con i subtotali scegliendo Subtotale nel gruppo Struttura della scheda Dati nell\'applicazione desktop Excel. Dopo la creazione dell\'elenco con i subtotali, sarà possibile apportarvi delle modifiche modificando la funzione SUBTOTALE.',
         abstract: 'Restituisce un subtotale in un elenco o in un database. In genere, risulta più semplice creare un elenco con i subtotali scegliendo Subtotale nel gruppo Struttura della scheda Dati nell\'applicazione desktop Excel. Dopo la creazione dell\'elenco con i subtotali, sarà possibile apportarvi delle modifiche modificando la funzione SUBTOTALE.',
         links: [
@@ -985,6 +1056,7 @@ const locale: typeof enUS = {
         },
     },
     SUM: {
+        label: 'SOMMA',
         description: 'La funzione SOMMA somma i valori. È possibile sommare singoli valori, riferimenti o intervalli di celle, o una combinazione dei tre.',
         abstract: 'La funzione SOMMA somma i valori. È possibile sommare singoli valori, riferimenti o intervalli di celle, o una combinazione dei tre.',
         links: [
@@ -999,6 +1071,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIF: {
+        label: 'SOMMA.SE',
         description: 'Usare la funzione SOMMA.SE per sommare i valori di un intervallo che soddisfano i criteri specificati. Supponiamo ad esempio di voler sommare in una colonna contenente numeri solo i valori maggiori di 5. È possibile usare la formula seguente: =SOMMA.SE(B2:B25;">5")',
         abstract: 'Usare la funzione SOMMA.SE per sommare i valori di un intervallo che soddisfano i criteri specificati. Supponiamo ad esempio di voler sommare in una colonna contenente numeri solo i valori maggiori di 5. È possibile usare la formula seguente: =SOMMA.SE(B2:B25;">5")',
         links: [
@@ -1014,6 +1087,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIFS: {
+        label: 'SOMMA.PIÙ.SE',
         description: 'La funzione SOMMA.PIÙ.SE, una delle funzioni matematiche e trigonometriche , somma tutti i suoi argomenti che soddisfano più criteri. Ad esempio, si può usare SUMIFS per sommare il numero di rivenditori del paese che (1) risiedono in un singolo codice postale e (2) i cui profitti superano un determinato valore in dollari.',
         abstract: 'La funzione SOMMA.PIÙ.SE, una delle funzioni matematiche e trigonometriche , somma tutti i suoi argomenti che soddisfano più criteri. Ad esempio, si può usare SUMIFS per sommare il numero di rivenditori del paese che (1) risiedono in un singolo codice postale e (2) i cui profitti superano un determinato valore in dollari.',
         links: [
@@ -1031,6 +1105,7 @@ const locale: typeof enUS = {
         },
     },
     SUMPRODUCT: {
+        label: 'MATR.SOMMA.PRODOTTO',
         description: 'MATR.SOMMA.PRODOTTO corrisponde a tutte le istanze dell\'elemento Y/Dimensione M e le somma, quindi per questo esempio 21 più 41 è uguale a 62.',
         abstract: 'MATR.SOMMA.PRODOTTO corrisponde a tutte le istanze dell\'elemento Y/Dimensione M e le somma, quindi per questo esempio 21 più 41 è uguale a 62.',
         links: [
@@ -1045,6 +1120,7 @@ const locale: typeof enUS = {
         },
     },
     SUMSQ: {
+        label: 'SUMSQ',
         description: 'Restituisce la somma dei quadrati degli argomenti.',
         abstract: 'Restituisce la somma dei quadrati degli argomenti.',
         links: [
@@ -1059,6 +1135,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2MY2: {
+        label: 'SUMX2MY2',
         description: 'Questa funzione di Excel restituisce la somma della differenza dei quadrati dei valori corrispondenti di due matrici.',
         abstract: 'Questa funzione di Excel restituisce la somma della differenza dei quadrati dei valori corrispondenti di due matrici.',
         links: [
@@ -1073,6 +1150,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2PY2: {
+        label: 'SUMX2PY2',
         description: 'Restituisce la somma della somma dei quadrati dei valori corrispondenti di due matrici. La somma della somma dei quadrati è un termine ricorrente in molte funzioni di calcolo statistico.',
         abstract: 'Restituisce la somma della somma dei quadrati dei valori corrispondenti di due matrici. La somma della somma dei quadrati è un termine ricorrente in molte funzioni di calcolo statistico.',
         links: [
@@ -1087,6 +1165,7 @@ const locale: typeof enUS = {
         },
     },
     SUMXMY2: {
+        label: 'SUMXMY2',
         description: 'La funzione SUMXMY2 restituisce la somma dei quadrati delle differenze dei valori corrispondenti di due matrici.',
         abstract: 'La funzione SUMXMY2 restituisce la somma dei quadrati delle differenze dei valori corrispondenti di due matrici.',
         links: [
@@ -1101,6 +1180,7 @@ const locale: typeof enUS = {
         },
     },
     TAN: {
+        label: 'TAN',
         description: 'Restituisce la tangente dell\'angolo specificato.',
         abstract: 'Restituisce la tangente dell\'angolo specificato.',
         links: [
@@ -1114,6 +1194,7 @@ const locale: typeof enUS = {
         },
     },
     TANH: {
+        label: 'TANH',
         description: 'Restituisce la tangente iperbolica di un numero.',
         abstract: 'Restituisce la tangente iperbolica di un numero.',
         links: [
@@ -1127,6 +1208,7 @@ const locale: typeof enUS = {
         },
     },
     TRUNC: {
+        label: 'TRUNC',
         description: 'La funzione TRONCA tronca un numero in un numero intero rimuovendo la parte frazionaria del numero.',
         abstract: 'La funzione TRONCA tronca un numero in un numero intero rimuovendo la parte frazionaria del numero.',
         links: [

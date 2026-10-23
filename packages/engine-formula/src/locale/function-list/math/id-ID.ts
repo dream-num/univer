@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ABS: {
+        label: 'ABS',
         description: 'Mengembalikan nilai absolut dari suatu angka. Nilai mutlak suatu angka adalah angka tanpa tanda.',
         abstract: 'Mengembalikan nilai absolut dari suatu angka. Nilai mutlak suatu angka adalah angka tanpa tanda.',
         links: [
@@ -31,6 +32,7 @@ const locale: typeof enUS = {
         },
     },
     ACOS: {
+        label: 'ACOS',
         description: 'Mengembalikan arka kosinus, atau kosinus inversi, dari suatu angka. Arka kosinus adalah sudut yang kosinusnya adalah angka . Sudut yang dikembalikan diberikan dalam satuan radian dalam rentang 0 (nol) hingga pi.',
         abstract: 'Mengembalikan arka kosinus, atau kosinus inversi, dari suatu angka. Arka kosinus adalah sudut yang kosinusnya adalah angka . Sudut yang dikembalikan diberikan dalam satuan radian dalam rentang 0 (nol) hingga pi.',
         links: [
@@ -44,6 +46,7 @@ const locale: typeof enUS = {
         },
     },
     ACOSH: {
+        label: 'ACOSH',
         description: 'Mengembalikan nilai inversi kosinus hiperbolik dari bilangan. Bilangan harus lebih besar dari atau sama dengan 1. Nilai inversi kosinus hiperbolik adalah nilai dengan kosinus hiperbolik berupa bilangan , sehingga ACOSH(COSH(bilangan)) sama dengan bilangan .',
         abstract: 'Mengembalikan nilai inversi kosinus hiperbolik dari bilangan. Bilangan harus lebih besar dari atau sama dengan 1. Nilai inversi kosinus hiperbolik adalah nilai dengan kosinus hiperbolik berupa bilangan , sehingga ACOSH(COSH(bilangan)) sama dengan bilangan .',
         links: [
@@ -57,6 +60,7 @@ const locale: typeof enUS = {
         },
     },
     ACOT: {
+        label: 'ACOT',
         description: 'Mengembalikan nilai utama arka kotangen, atau balikan kotangen dari suatu angka.',
         abstract: 'Mengembalikan nilai utama arka kotangen, atau balikan kotangen dari suatu angka.',
         links: [
@@ -70,6 +74,7 @@ const locale: typeof enUS = {
         },
     },
     ACOTH: {
+        label: 'ACOTH',
         description: 'Mengembalikan kotangen hiperbolik balikan dari suatu angka.',
         abstract: 'Mengembalikan kotangen hiperbolik balikan dari suatu angka.',
         links: [
@@ -83,6 +88,7 @@ const locale: typeof enUS = {
         },
     },
     AGGREGATE: {
+        label: 'AGREGAT',
         description: 'Mengembalikan agregat dalam daftar atau database. Fungsi AGGREGATE dapat menerapkan fungsi-fungsi agregat lain ke daftar atau database dengan opsi untuk mengabaikan baris tersembunyi dan nilai kesalahan.',
         abstract: 'Mengembalikan agregat dalam daftar atau database. Fungsi AGGREGATE dapat menerapkan fungsi-fungsi agregat lain ke daftar atau database dengan opsi untuk mengabaikan baris tersembunyi dan nilai kesalahan.',
         links: [
@@ -99,6 +105,7 @@ const locale: typeof enUS = {
         },
     },
     ARABIC: {
+        label: 'BAHASA ARAB',
         description: 'Mengonversi angka Romawi ke angka Arab.',
         abstract: 'Mengonversi angka Romawi ke angka Arab.',
         links: [
@@ -112,6 +119,7 @@ const locale: typeof enUS = {
         },
     },
     ASIN: {
+        label: 'ASIN',
         description: 'Mengembalikan arka sinus, atau nilai inversi sinus, dari bilangan. Arka sinus adalah sudut yang sinusnya adalah angka . Sudut yang dikembalikan diberikan dalam satuan radian dalam rentang -pi/2 sampai pi/2.',
         abstract: 'Mengembalikan arka sinus, atau nilai inversi sinus, dari bilangan. Arka sinus adalah sudut yang sinusnya adalah angka . Sudut yang dikembalikan diberikan dalam satuan radian dalam rentang -pi/2 sampai pi/2.',
         links: [
@@ -125,6 +133,7 @@ const locale: typeof enUS = {
         },
     },
     ASINH: {
+        label: 'ASINH',
         description: 'Mengembalikan nilai inversi sinus hiperbolik bilangan. Nilai inversi sinus hiperbolik adalah nilai yang sinus hiperboliknya berupa angka , sehingga ASINH(SINH(angka)) sama dengan angka .',
         abstract: 'Mengembalikan nilai inversi sinus hiperbolik bilangan. Nilai inversi sinus hiperbolik adalah nilai yang sinus hiperboliknya berupa angka , sehingga ASINH(SINH(angka)) sama dengan angka .',
         links: [
@@ -138,6 +147,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN: {
+        label: 'ATAN',
         description: 'Mengembalikan arka tangen, atau inversi tangen dari sebuah bilangan. Arka tangen adalah sudut yang tangennya adalah angka . Sudut yang dikembalikan diberikan dalam radian dalam rentang -pi/2 sampai pi/2.',
         abstract: 'Mengembalikan arka tangen, atau inversi tangen dari sebuah bilangan. Arka tangen adalah sudut yang tangennya adalah angka . Sudut yang dikembalikan diberikan dalam radian dalam rentang -pi/2 sampai pi/2.',
         links: [
@@ -151,6 +161,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN2: {
+        label: 'ATAN2',
         description: 'Mengembalikan arka tangen, atau inversi tangen, dari koordinat x dan y yang ditentukan. Arka tangen adalah sudut dari sumbu-x ke garis yang berisi asal (0,0) dan titik dengan koordinat (angka_x, angka_y). Sudut diberikan dalam radian antara -pi dan pi, tidak termasuk -pi.',
         abstract: 'Mengembalikan arka tangen, atau inversi tangen, dari koordinat x dan y yang ditentukan. Arka tangen adalah sudut dari sumbu-x ke garis yang berisi asal (0,0) dan titik dengan koordinat (angka_x, angka_y). Sudut diberikan dalam radian antara -pi dan pi, tidak termasuk -pi.',
         links: [
@@ -165,6 +176,7 @@ const locale: typeof enUS = {
         },
     },
     ATANH: {
+        label: 'ATANH',
         description: 'Mengembalikan inversi tangen hiperbolik dari bilangan. Angka harus bernilai antara -1 dan 1 (tidak termasuk -1 dan 1). Inversi tangen hiperbolik adalah nilai yang tangen hiperboliknya berupa angka , sehingga ATANH(TANH(angka)) sama dengan angka .',
         abstract: 'Mengembalikan inversi tangen hiperbolik dari bilangan. Angka harus bernilai antara -1 dan 1 (tidak termasuk -1 dan 1). Inversi tangen hiperbolik adalah nilai yang tangen hiperboliknya berupa angka , sehingga ATANH(TANH(angka)) sama dengan angka .',
         links: [
@@ -178,6 +190,7 @@ const locale: typeof enUS = {
         },
     },
     BASE: {
+        label: 'BASE',
         description: 'Mengonversi angka menjadi representasi teks beserta bilangan pokoknya (basis).',
         abstract: 'Mengonversi angka menjadi representasi teks beserta bilangan pokoknya (basis).',
         links: [
@@ -193,6 +206,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING: {
+        label: 'CEILING',
         description: 'Mengembalikan angka yang dibulatkan ke atas, menjauh dari nol, ke kelipatan signifikansi terdekat. Misalnya, jika Anda ingin menghindari penggunaan sen dalam harga Anda dan produk Anda dihargai $4,42, gunakan rumus =CEILING(4.42,0.05) untuk membulatkan harga ke atas ke nikel terdekat.',
         abstract: 'Mengembalikan angka yang dibulatkan ke atas, menjauh dari nol, ke kelipatan signifikansi terdekat. Misalnya, jika Anda ingin menghindari penggunaan sen dalam harga Anda dan produk Anda dihargai $4,42, gunakan rumus =CEILING(4.42,0.05) untuk membulatkan harga ke atas ke nikel terdekat.',
         links: [
@@ -207,6 +221,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_MATH: {
+        label: 'LANGIT-LANGIT.MATEMATIKA',
         description: 'LANGIT-LANGIT. Fungsi MATH membulatkan angka ke atas ke bilangan bulat terdekat atau, secara opsional, ke kelipatan signifikansi terdekat.',
         abstract: 'LANGIT-LANGIT. Fungsi MATH membulatkan angka ke atas ke bilangan bulat terdekat atau, secara opsional, ke kelipatan signifikansi terdekat.',
         links: [
@@ -222,6 +237,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_PRECISE: {
+        label: 'CEILING.PRECISE',
         description: 'Mengembalikan angka yang dibulatkan ke atas ke bilangan bulat terdekat atau ke kelipatan signifikansi terdekat. Tanpa memperhatikan lambang angkanya, bilangan itu dibulatkan ke atas. Akan tetapi, jika angka signifikansinya nol, maka hasilnya nol.',
         abstract: 'Mengembalikan angka yang dibulatkan ke atas ke bilangan bulat terdekat atau ke kelipatan signifikansi terdekat. Tanpa memperhatikan lambang angkanya, bilangan itu dibulatkan ke atas. Akan tetapi, jika angka signifikansinya nol, maka hasilnya nol.',
         links: [
@@ -236,6 +252,7 @@ const locale: typeof enUS = {
         },
     },
     COMBIN: {
+        label: 'COMBIN',
         description: 'Mengembalikan jumlah kombinasi untuk jumlah item tertentu. Gunakan COMBIN untuk menentukan total jumlah grup yang memungkinkan untuk jumlah item tertentu.',
         abstract: 'Mengembalikan jumlah kombinasi untuk jumlah item tertentu. Gunakan COMBIN untuk menentukan total jumlah grup yang memungkinkan untuk jumlah item tertentu.',
         links: [
@@ -250,6 +267,7 @@ const locale: typeof enUS = {
         },
     },
     COMBINA: {
+        label: 'COMBINA',
         description: 'Mengembalikan jumlah kombinasi (dengan perulangan) untuk sejumlah item tertentu.',
         abstract: 'Mengembalikan jumlah kombinasi (dengan perulangan) untuk sejumlah item tertentu.',
         links: [
@@ -264,6 +282,7 @@ const locale: typeof enUS = {
         },
     },
     COS: {
+        label: 'COS',
         description: 'Mengembalikan kosinus dari sudut tertentu.',
         abstract: 'Mengembalikan kosinus dari sudut tertentu.',
         links: [
@@ -277,6 +296,7 @@ const locale: typeof enUS = {
         },
     },
     COSH: {
+        label: 'COSH',
         description: 'Mengembalikan kosinus hiperbolik dari suatu angka.',
         abstract: 'Mengembalikan kosinus hiperbolik dari suatu angka.',
         links: [
@@ -290,6 +310,7 @@ const locale: typeof enUS = {
         },
     },
     COT: {
+        label: 'COT',
         description: 'Mengembalikan kotangen sebuah sudut yang ditentukan dalam radian.',
         abstract: 'Mengembalikan kotangen sebuah sudut yang ditentukan dalam radian.',
         links: [
@@ -303,6 +324,7 @@ const locale: typeof enUS = {
         },
     },
     COTH: {
+        label: 'COTH',
         description: 'Mengembalikan kotangen hiperbolik dari sudut hiperbolik.',
         abstract: 'Mengembalikan kotangen hiperbolik dari sudut hiperbolik.',
         links: [
@@ -316,6 +338,7 @@ const locale: typeof enUS = {
         },
     },
     CSC: {
+        label: 'CSC',
         description: 'Mengembalikan kosekan sebuah sudut yang ditentukan dalam radian.',
         abstract: 'Mengembalikan kosekan sebuah sudut yang ditentukan dalam radian.',
         links: [
@@ -329,6 +352,7 @@ const locale: typeof enUS = {
         },
     },
     CSCH: {
+        label: 'CSCH',
         description: 'Mengembalikan kosekan hiperbolik sebuah sudut yang ditentukan dalam radian.',
         abstract: 'Mengembalikan kosekan hiperbolik sebuah sudut yang ditentukan dalam radian.',
         links: [
@@ -342,6 +366,7 @@ const locale: typeof enUS = {
         },
     },
     DECIMAL: {
+        label: 'DESIMAL',
         description: 'Mengonversi representasi teks dari sebuah basis tertentu ke dalam bilangan desimal.',
         abstract: 'Mengonversi representasi teks dari sebuah basis tertentu ke dalam bilangan desimal.',
         links: [
@@ -356,6 +381,7 @@ const locale: typeof enUS = {
         },
     },
     DEGREES: {
+        label: 'DEGREES',
         description: 'Mengonversi radian ke dalam derajat.',
         abstract: 'Mengonversi radian ke dalam derajat.',
         links: [
@@ -369,6 +395,7 @@ const locale: typeof enUS = {
         },
     },
     EVEN: {
+        label: 'EVEN',
         description: 'Mengembalikan angka yang dibulatkan ke atas ke bilangan bulat genap terdekat. Anda dapat menggunakan fungsi ini untuk memproses item yang disusun dua-dua. Misalnya, peti kemas dari kayu menampung satu atau dua baris item. Peti tersebut penuh ketika jumlah item, yang dibulatkan ke kelipatan dua terdekat, sesuai dengan kapasitas peti.',
         abstract: 'Mengembalikan angka yang dibulatkan ke atas ke bilangan bulat genap terdekat. Anda dapat menggunakan fungsi ini untuk memproses item yang disusun dua-dua. Misalnya, peti kemas dari kayu menampung satu atau dua baris item. Peti tersebut penuh ketika jumlah item, yang dibulatkan ke kelipatan dua terdekat, sesuai dengan kapasitas peti.',
         links: [
@@ -382,6 +409,7 @@ const locale: typeof enUS = {
         },
     },
     EXP: {
+        label: 'EXP',
         description: 'Mengembalikan e yang dinaikkan ke pangkat angka. Konstanta e sama dengan 2,71828182845904, bilangan dasar logaritma natural.',
         abstract: 'Mengembalikan e yang dinaikkan ke pangkat angka. Konstanta e sama dengan 2,71828182845904, bilangan dasar logaritma natural.',
         links: [
@@ -395,6 +423,7 @@ const locale: typeof enUS = {
         },
     },
     FACT: {
+        label: 'FAKTA',
         description: 'Mengembalikan faktorial dari suatu angka. Faktorial suatu angka sama dengan 1*2*3*...* angka.',
         abstract: 'Mengembalikan faktorial dari suatu angka. Faktorial suatu angka sama dengan 1*2*3*...* angka.',
         links: [
@@ -408,6 +437,7 @@ const locale: typeof enUS = {
         },
     },
     FACTDOUBLE: {
+        label: 'FACTDOUBLE',
         description: 'Mengembalikan faktorial ganda dari suatu angka.',
         abstract: 'Mengembalikan faktorial ganda dari suatu angka.',
         links: [
@@ -421,6 +451,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR: {
+        label: 'FLOOR',
         description: 'Fungsi FLOOR di Excel membulatkan angka tertentu ke kelipatan signifikansi yang ditentukan terdekat. Angka negatif dibulatkan ke bawah (negatif lebih lanjut) ke kelipatan terdekat di bawah nol.',
         abstract: 'Fungsi FLOOR di Excel membulatkan angka tertentu ke kelipatan signifikansi yang ditentukan terdekat. Angka negatif dibulatkan ke bawah (negatif lebih lanjut) ke kelipatan terdekat di bawah nol.',
         links: [
@@ -435,6 +466,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_MATH: {
+        label: 'LANTAI.MATEMATIKA',
         description: 'Membulatkan angka ke bawah, sampai ke bilangan bulat terdekat atau ke kelipatan signifikansi terdekat.',
         abstract: 'Membulatkan angka ke bawah, sampai ke bilangan bulat terdekat atau ke kelipatan signifikansi terdekat.',
         links: [
@@ -450,6 +482,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_PRECISE: {
+        label: 'FLOOR.PRECISE',
         description: 'Mengembalikan angka yang dibulatkan ke bawah ke bilangan bulat terdekat atau ke kelipatan signifikansi terdekat. Tanpa memperhatikan tanda angka, angka dibulatkan ke bawah. Akan tetapi, jika angka signifikansi adalah nol, maka nol dikembalikan.',
         abstract: 'Mengembalikan angka yang dibulatkan ke bawah ke bilangan bulat terdekat atau ke kelipatan signifikansi terdekat. Tanpa memperhatikan tanda angka, angka dibulatkan ke bawah. Akan tetapi, jika angka signifikansi adalah nol, maka nol dikembalikan.',
         links: [
@@ -464,6 +497,7 @@ const locale: typeof enUS = {
         },
     },
     GCD: {
+        label: 'GCD',
         description: 'Mengembalikan faktor persekutuan terbesar dari dua atau lebih bilangan bulat. Faktor persekutuan terbesar adalah bilangan bulat terbesar yang dapat membagi habis number1 and number2.',
         abstract: 'Mengembalikan faktor persekutuan terbesar dari dua atau lebih bilangan bulat. Faktor persekutuan terbesar adalah bilangan bulat terbesar yang dapat membagi habis number1 and number2.',
         links: [
@@ -478,6 +512,7 @@ const locale: typeof enUS = {
         },
     },
     INT: {
+        label: 'INT',
         description: 'Membulatkan angka ke bawah ke bilangan bulat terdekat.',
         abstract: 'Membulatkan angka ke bawah ke bilangan bulat terdekat.',
         links: [
@@ -491,6 +526,7 @@ const locale: typeof enUS = {
         },
     },
     ISO_CEILING: {
+        label: 'CEILING',
         description: 'Mengembalikan angka yang dibulatkan ke atas ke bilangan bulat terdekat atau ke kelipatan signifikansi terdekat. Tanpa memperhatikan lambang angkanya, bilangan itu dibulatkan ke atas. Akan tetapi, jika angka signifikansinya nol, maka hasilnya nol.',
         abstract: 'Mengembalikan angka yang dibulatkan ke atas ke bilangan bulat terdekat atau ke kelipatan signifikansi terdekat. Tanpa memperhatikan lambang angkanya, bilangan itu dibulatkan ke atas. Akan tetapi, jika angka signifikansinya nol, maka hasilnya nol.',
         links: [
@@ -505,6 +541,7 @@ const locale: typeof enUS = {
         },
     },
     LCM: {
+        label: 'LCM',
         description: 'Mengembalikan kelipatan persekutuan terkecil (KPK) bilangan bulat. KPK adalah bilangan bulat paling kecil yang merupakan kelipatan dari semua argumen bilangan bulat number1, number2, dan seterusnya. Gunakan LCM untuk menambahkan pecahan dengan penyebut yang berbeda.',
         abstract: 'Mengembalikan kelipatan persekutuan terkecil (KPK) bilangan bulat. KPK adalah bilangan bulat paling kecil yang merupakan kelipatan dari semua argumen bilangan bulat number1, number2, dan seterusnya. Gunakan LCM untuk menambahkan pecahan dengan penyebut yang berbeda.',
         links: [
@@ -519,6 +556,7 @@ const locale: typeof enUS = {
         },
     },
     LN: {
+        label: 'LN',
         description: 'Mengembalikan logaritma natural dari sebuah bilangan. Logaritma natural didasarkan pada konstanta e (2,71828182845904).',
         abstract: 'Mengembalikan logaritma natural dari sebuah bilangan. Logaritma natural didasarkan pada konstanta e (2,71828182845904).',
         links: [
@@ -532,6 +570,7 @@ const locale: typeof enUS = {
         },
     },
     LOG: {
+        label: 'LOG',
         description: 'Mengembalikan logaritma dari bilangan dengan basis tertentu.',
         abstract: 'Mengembalikan logaritma dari bilangan dengan basis tertentu.',
         links: [
@@ -546,6 +585,7 @@ const locale: typeof enUS = {
         },
     },
     LOG10: {
+        label: 'LOG10',
         description: 'Mengembalikan bilangan logaritma berbasis 10.',
         abstract: 'Mengembalikan bilangan logaritma berbasis 10.',
         links: [
@@ -559,6 +599,7 @@ const locale: typeof enUS = {
         },
     },
     MDETERM: {
+        label: 'MDETERM',
         description: 'Mengembalikan determinan matriks sebuah array.',
         abstract: 'Mengembalikan determinan matriks sebuah array.',
         links: [
@@ -572,6 +613,7 @@ const locale: typeof enUS = {
         },
     },
     MINVERSE: {
+        label: 'MINVERSE',
         description: 'Fungsi MINVERSE mengembalikan matriks inversi untuk matriks yang disimpan dalam array.',
         abstract: 'Fungsi MINVERSE mengembalikan matriks inversi untuk matriks yang disimpan dalam array.',
         links: [
@@ -585,6 +627,7 @@ const locale: typeof enUS = {
         },
     },
     MMULT: {
+        label: 'MMULT',
         description: 'Fungsi MMULT mengembalikan produk matriks dari dua array. Hasilnya adalah sebuah array dengan jumlah baris yang sama dengan array1 dan jumlah kolom yang sama dengan array2.',
         abstract: 'Fungsi MMULT mengembalikan produk matriks dari dua array. Hasilnya adalah sebuah array dengan jumlah baris yang sama dengan array1 dan jumlah kolom yang sama dengan array2.',
         links: [
@@ -599,6 +642,7 @@ const locale: typeof enUS = {
         },
     },
     MOD: {
+        label: 'MOD',
         description: 'Mengembalikan sisa setelah angka dibagi oleh divisor. Hasilnya memiliki lambang yang sama dengan divisor.',
         abstract: 'Mengembalikan sisa setelah angka dibagi oleh divisor. Hasilnya memiliki lambang yang sama dengan divisor.',
         links: [
@@ -613,6 +657,7 @@ const locale: typeof enUS = {
         },
     },
     MROUND: {
+        label: 'MROUND',
         description: 'MROUND mengembalikan angka yang dibulatkan ke kelipatan yang diinginkan.',
         abstract: 'MROUND mengembalikan angka yang dibulatkan ke kelipatan yang diinginkan.',
         links: [
@@ -627,6 +672,7 @@ const locale: typeof enUS = {
         },
     },
     MULTINOMIAL: {
+        label: 'MULTINOMIAL',
         description: 'Mengembalikan rasio faktorial jumlah nilai terhadap hasil kali faktorial.',
         abstract: 'Mengembalikan rasio faktorial jumlah nilai terhadap hasil kali faktorial.',
         links: [
@@ -641,6 +687,7 @@ const locale: typeof enUS = {
         },
     },
     MUNIT: {
+        label: 'MUNIT',
         description: 'Fungsi MUNIT mengembalikan matriks unit untuk dimensi yang ditentukan.',
         abstract: 'Fungsi MUNIT mengembalikan matriks unit untuk dimensi yang ditentukan.',
         links: [
@@ -654,6 +701,7 @@ const locale: typeof enUS = {
         },
     },
     ODD: {
+        label: 'ODD',
         description: 'Mengembalikan angka yang dibulatkan ke atas ke bilangan bulat ganjil terdekat.',
         abstract: 'Mengembalikan angka yang dibulatkan ke atas ke bilangan bulat ganjil terdekat.',
         links: [
@@ -667,6 +715,7 @@ const locale: typeof enUS = {
         },
     },
     PI: {
+        label: 'PI',
         description: 'Mengembalikan angka 3,14159265358979, konstanta matematika pi, akurat sampai 15 digit.',
         abstract: 'Mengembalikan angka 3,14159265358979, konstanta matematika pi, akurat sampai 15 digit.',
         links: [
@@ -679,6 +728,7 @@ const locale: typeof enUS = {
         },
     },
     POWER: {
+        label: 'POWER',
         description: 'Mengembalikan sebuah angka yang dipangkatkan.',
         abstract: 'Mengembalikan sebuah angka yang dipangkatkan.',
         links: [
@@ -693,6 +743,7 @@ const locale: typeof enUS = {
         },
     },
     PRODUCT: {
+        label: 'PRODUCT',
         description: 'Fungsi PRODUCT mengalikan semua angka yang diberikan sebagai argumen dan mengembalikan hasil kali. Misalnya, jika sel A1 dan A2 berisi angka, Anda dapat menggunakan rumus =PRODUCT(A1, A2) untuk mengalikan kedua angka tersebut bersama-sama. Anda juga dapat melakukan operasi yang sama dengan menggunakan operator matematika perkalian ( * ); misalnya, =A1 * A2 .',
         abstract: 'Fungsi PRODUCT mengalikan semua angka yang diberikan sebagai argumen dan mengembalikan hasil kali. Misalnya, jika sel A1 dan A2 berisi angka, Anda dapat menggunakan rumus =PRODUCT(A1, A2) untuk mengalikan kedua angka tersebut bersama-sama. Anda juga dapat melakukan operasi yang sama dengan menggunakan operator matematika perkalian ( * ); misalnya, =A1 * A2 .',
         links: [
@@ -707,6 +758,7 @@ const locale: typeof enUS = {
         },
     },
     QUOTIENT: {
+        label: 'QUOTIENT',
         description: 'Mengembalikan bilangan bulat dari sebuah pembagian. Gunakan fungsi saat Anda ingin menghapus sisa dari sebuah pembagian.',
         abstract: 'Mengembalikan bilangan bulat dari sebuah pembagian. Gunakan fungsi saat Anda ingin menghapus sisa dari sebuah pembagian.',
         links: [
@@ -721,6 +773,7 @@ const locale: typeof enUS = {
         },
     },
     RADIANS: {
+        label: 'RADIAN',
         description: 'Mengonversi derajat menjadi radian.',
         abstract: 'Mengonversi derajat menjadi radian.',
         links: [
@@ -734,6 +787,7 @@ const locale: typeof enUS = {
         },
     },
     RAND: {
+        label: 'RAND',
         description: 'RAND mengembalikan bilangan riil acak yang terdistribusi secara merata yang lebih besar atau sama dengan 0 dan kurang dari 1. Bilangan riil acak akan dikembalikan setiap kali lembar kerja dihitung.',
         abstract: 'RAND mengembalikan bilangan riil acak yang terdistribusi secara merata yang lebih besar atau sama dengan 0 dan kurang dari 1. Bilangan riil acak akan dikembalikan setiap kali lembar kerja dihitung.',
         links: [
@@ -746,6 +800,7 @@ const locale: typeof enUS = {
         },
     },
     RANDARRAY: {
+        label: 'RANDARRAY',
         description: 'Dalam contoh berikut, kami membuat larik dengan tinggi 5 baris dan lebar 3 kolom. Contoh pertama mengembalikan rangkaian nilai antara 0 dan 1, yang adalah perilaku default RANDARRAY. Contoh berikutnya mengembalikan rangkaian nilai desimal acak antara 1 dan 100. Terakhir, contoh ketiga mengembalikan rangkaian bilangan bulat acak antara 1 dan 100.',
         abstract: 'Dalam contoh berikut, kami membuat larik dengan tinggi 5 baris dan lebar 3 kolom. Contoh pertama mengembalikan rangkaian nilai antara 0 dan 1, yang adalah perilaku default RANDARRAY. Contoh berikutnya mengembalikan rangkaian nilai desimal acak antara 1 dan 100. Terakhir, contoh ketiga mengembalikan rangkaian bilangan bulat acak antara 1 dan 100.',
         links: [
@@ -763,6 +818,7 @@ const locale: typeof enUS = {
         },
     },
     RANDBETWEEN: {
+        label: 'RANDBETWEEN',
         description: 'Mengembalikan angka bilangan bulat acak di antara angka-angka yang Anda tentukan. Bilangan bulat acak baru akan dikembalikan setiap kali lembar kerja dihitung.',
         abstract: 'Mengembalikan angka bilangan bulat acak di antara angka-angka yang Anda tentukan. Bilangan bulat acak baru akan dikembalikan setiap kali lembar kerja dihitung.',
         links: [
@@ -777,6 +833,7 @@ const locale: typeof enUS = {
         },
     },
     ROMAN: {
+        label: 'ROMAN',
         description: 'Mengonversi angka Arab ke Romawi, sebagai teks.',
         abstract: 'Mengonversi angka Arab ke Romawi, sebagai teks.',
         links: [
@@ -791,6 +848,7 @@ const locale: typeof enUS = {
         },
     },
     ROUND: {
+        label: 'ROUND',
         description: 'Fungsi ROUND membulatkan angka ke jumlah digit yang ditentukan. Sebagai contoh, jika sel A1 berisi 23,7825, dan Anda ingin membulatkan nilai itu ke dua tempat desimal, Anda bisa menggunakan rumus berikut:',
         abstract: 'Fungsi ROUND membulatkan angka ke jumlah digit yang ditentukan. Sebagai contoh, jika sel A1 berisi 23,7825, dan Anda ingin membulatkan nilai itu ke dua tempat desimal, Anda bisa menggunakan rumus berikut:',
         links: [
@@ -805,6 +863,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDBANK: {
+        label: 'ROUNDBANK',
         description: 'Membulatkan angka dengan metode pembulatan bankir.',
         abstract: 'Membulatkan angka dengan metode pembulatan bankir.',
         links: [
@@ -819,6 +878,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDDOWN: {
+        label: 'ROUNDDOWN',
         description: 'Membulatkan angka ke bawah, mendekati nol.',
         abstract: 'Membulatkan angka ke bawah, mendekati nol.',
         links: [
@@ -833,6 +893,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDUP: {
+        label: 'ROUNDUP',
         description: 'Membulatkan angka ke atas, menjauhi 0 (nol).',
         abstract: 'Membulatkan angka ke atas, menjauhi 0 (nol).',
         links: [
@@ -847,6 +908,7 @@ const locale: typeof enUS = {
         },
     },
     SEC: {
+        label: 'SEC',
         description: 'Mengembalikan nilai sekan dari suatu sudut.',
         abstract: 'Mengembalikan nilai sekan dari suatu sudut.',
         links: [
@@ -860,6 +922,7 @@ const locale: typeof enUS = {
         },
     },
     SECH: {
+        label: 'SECH',
         description: 'Mengembalikan nilai sekan hiperbolik dari suatu sudut.',
         abstract: 'Mengembalikan nilai sekan hiperbolik dari suatu sudut.',
         links: [
@@ -873,6 +936,7 @@ const locale: typeof enUS = {
         },
     },
     SERIESSUM: {
+        label: 'SERIESSUM',
         description: 'Banyak fungsi dapat diperkirakan oleh pengembangan deret pangkat.',
         abstract: 'Banyak fungsi dapat diperkirakan oleh pengembangan deret pangkat.',
         links: [
@@ -889,6 +953,7 @@ const locale: typeof enUS = {
         },
     },
     SEQUENCE: {
+        label: 'SEQUENCE',
         description: 'Dalam contoh berikut, kami membuat larik dengan tinggi 4 baris dan lebar 5 kolom menggunakan =SEQUENCE(4,5) .',
         abstract: 'Dalam contoh berikut, kami membuat larik dengan tinggi 4 baris dan lebar 5 kolom menggunakan =SEQUENCE(4,5) .',
         links: [
@@ -905,6 +970,7 @@ const locale: typeof enUS = {
         },
     },
     SIGN: {
+        label: 'SIGN',
         description: 'Mengembalikan lambang angka. Mengembalikan 1 jika angkanya positif, nol (0) jika angkanya adalah 0, dan -1 jika angkanya negatif.',
         abstract: 'Mengembalikan lambang angka. Mengembalikan 1 jika angkanya positif, nol (0) jika angkanya adalah 0, dan -1 jika angkanya negatif.',
         links: [
@@ -918,6 +984,7 @@ const locale: typeof enUS = {
         },
     },
     SIN: {
+        label: 'SIN',
         description: 'Mengembalikan sinus sudut tertentu.',
         abstract: 'Mengembalikan sinus sudut tertentu.',
         links: [
@@ -931,6 +998,7 @@ const locale: typeof enUS = {
         },
     },
     SINH: {
+        label: 'SINH',
         description: 'Mengembalikan sinus hiperbolik sebuah angka.',
         abstract: 'Mengembalikan sinus hiperbolik sebuah angka.',
         links: [
@@ -944,6 +1012,7 @@ const locale: typeof enUS = {
         },
     },
     SQRT: {
+        label: 'SQRT',
         description: 'Mengembalikan akar kuadrat positif.',
         abstract: 'Mengembalikan akar kuadrat positif.',
         links: [
@@ -957,6 +1026,7 @@ const locale: typeof enUS = {
         },
     },
     SQRTPI: {
+        label: 'PI',
         description: 'Mengembalikan akar kuadrat dari (angka * pi).',
         abstract: 'Mengembalikan akar kuadrat dari (angka * pi).',
         links: [
@@ -970,6 +1040,7 @@ const locale: typeof enUS = {
         },
     },
     SUBTOTAL: {
+        label: 'SUBTOTAL',
         description: 'Menghasilkan subtotal dalam daftar atau database. Umumnya lebih muda membuat daftar dengan subtotal dengan menggunakan perintah Subtotal di grup Kerangka di tab Data di aplikasi desktop Excel. Setelah daftar subtotal dibuat, Anda bisa mengubahnya dengan mengedit fungsi SUBTOTAL.',
         abstract: 'Menghasilkan subtotal dalam daftar atau database. Umumnya lebih muda membuat daftar dengan subtotal dengan menggunakan perintah Subtotal di grup Kerangka di tab Data di aplikasi desktop Excel. Setelah daftar subtotal dibuat, Anda bisa mengubahnya dengan mengedit fungsi SUBTOTAL.',
         links: [
@@ -985,6 +1056,7 @@ const locale: typeof enUS = {
         },
     },
     SUM: {
+        label: 'SUM',
         description: 'Fungsi SUM menambahkan nilai. Anda dapat menambahkan nilai individual, referensi sel atau rentang, atau campuran ketiganya.',
         abstract: 'Fungsi SUM menambahkan nilai. Anda dapat menambahkan nilai individual, referensi sel atau rentang, atau campuran ketiganya.',
         links: [
@@ -999,6 +1071,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIF: {
+        label: 'SUMIF',
         description: 'Anda menggunakan fungsi SUMIF untuk menjumlahkan nilai dalam rentang yang memenuhi kriteria yang Anda tentukan. Sebagai contoh, di dalam kolom yang berisi angka, Anda hanya ingin menjumlahkan nilai-nilai yang lebih besar dari 5. Anda dapat menggunakan rumus berikut: =SUMIF(B2:B25,">5")',
         abstract: 'Anda menggunakan fungsi SUMIF untuk menjumlahkan nilai dalam rentang yang memenuhi kriteria yang Anda tentukan. Sebagai contoh, di dalam kolom yang berisi angka, Anda hanya ingin menjumlahkan nilai-nilai yang lebih besar dari 5. Anda dapat menggunakan rumus berikut: =SUMIF(B2:B25,">5")',
         links: [
@@ -1014,6 +1087,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIFS: {
+        label: 'SUMIFS',
         description: 'Fungsi SUMIFS, salah satu dari fungsi matematika dan trigonometri , menambahkan semua argumennya yang memenuhi beberapa kriteria. Sebagai contoh, gunakan SUMIFS untuk menjumlahkan jumlah pengecer di negara yang (1) berada dalam satu kode pos dan (2) yang labanya melebihi nilai dolar tertentu.',
         abstract: 'Fungsi SUMIFS, salah satu dari fungsi matematika dan trigonometri , menambahkan semua argumennya yang memenuhi beberapa kriteria. Sebagai contoh, gunakan SUMIFS untuk menjumlahkan jumlah pengecer di negara yang (1) berada dalam satu kode pos dan (2) yang labanya melebihi nilai dolar tertentu.',
         links: [
@@ -1031,6 +1105,7 @@ const locale: typeof enUS = {
         },
     },
     SUMPRODUCT: {
+        label: 'PRODUCT',
         description: 'Fungsi SUMPRODUCT mengembalikan jumlah produk rentang atau array terkait. Operasi default adalah perkalian, tetapi penambahan, pengurangan, dan pembagian juga dimungkinkan.',
         abstract: 'Fungsi SUMPRODUCT mengembalikan jumlah produk rentang atau array terkait. Operasi default adalah perkalian, tetapi penambahan, pengurangan, dan pembagian juga dimungkinkan.',
         links: [
@@ -1045,6 +1120,7 @@ const locale: typeof enUS = {
         },
     },
     SUMSQ: {
+        label: 'SUMSQ',
         description: 'Mengembalikan jumlah kuadrat dari argumen.',
         abstract: 'Mengembalikan jumlah kuadrat dari argumen.',
         links: [
@@ -1059,6 +1135,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2MY2: {
+        label: 'SUMX2MY2',
         description: 'Fungsi Excel ini mengembalikan jumlah selisih kuadrat dari nilai terkait dalam dua array.',
         abstract: 'Fungsi Excel ini mengembalikan jumlah selisih kuadrat dari nilai terkait dalam dua array.',
         links: [
@@ -1073,6 +1150,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2PY2: {
+        label: 'SUMX2PY2',
         description: 'Mengembalikan jumlah dari jumlah kuadrat dari nilai yang terkait dalam dua array. Jumlah dari jumlah kuadrat adalah istilah yang umum dalam banyak perhitungan statistik.',
         abstract: 'Mengembalikan jumlah dari jumlah kuadrat dari nilai yang terkait dalam dua array. Jumlah dari jumlah kuadrat adalah istilah yang umum dalam banyak perhitungan statistik.',
         links: [
@@ -1087,6 +1165,7 @@ const locale: typeof enUS = {
         },
     },
     SUMXMY2: {
+        label: 'SUMXMY2',
         description: 'Fungsi SUMXMY2 mengembalikan jumlah kuadrat selisih nilai terkait dalam dua array.',
         abstract: 'Fungsi SUMXMY2 mengembalikan jumlah kuadrat selisih nilai terkait dalam dua array.',
         links: [
@@ -1101,6 +1180,7 @@ const locale: typeof enUS = {
         },
     },
     TAN: {
+        label: 'TAN',
         description: 'Mengembalikan tangen dari sudut yang diberikan.',
         abstract: 'Mengembalikan tangen dari sudut yang diberikan.',
         links: [
@@ -1114,6 +1194,7 @@ const locale: typeof enUS = {
         },
     },
     TANH: {
+        label: 'TANH',
         description: 'Mengembalikan tangen hiperbolik dari sebuah angka.',
         abstract: 'Mengembalikan tangen hiperbolik dari sebuah angka.',
         links: [
@@ -1127,6 +1208,7 @@ const locale: typeof enUS = {
         },
     },
     TRUNC: {
+        label: 'TRUNC',
         description: 'Fungsi TRUNC memotong angka menjadi bilangan bulat dengan menghapus bagian pecahan dari angka.',
         abstract: 'Fungsi TRUNC memotong angka menjadi bilangan bulat dengan menghapus bagian pecahan dari angka.',
         links: [

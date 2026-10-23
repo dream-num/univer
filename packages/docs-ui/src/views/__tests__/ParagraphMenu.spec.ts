@@ -17,12 +17,12 @@
 import type { IDocumentBlockRange, IDocumentBody, IParagraphStyle } from '@univerjs/core';
 import type { IDocBlockMoveValidationContext } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IMutiPageParagraphBound } from '../../services/doc-event-manager.service';
-import type { IDocBlockMenuTarget } from '../../services/doc-paragraph-menu.service';
 import { DataStreamTreeTokenType, DocumentBlockRangeType, DocumentBlockType, JSONX, NamedStyleType } from '@univerjs/core';
 import { DocBlockMoveValidatorService } from '@univerjs/docs';
 import { ContextMenuPosition } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
+import type { IMutiPageParagraphBound } from '../../services/doc-event-manager.service';
+import type { IDocBlockMenuTarget } from '../../services/doc-paragraph-menu.service';
 import {
     DocCopyCurrentParagraphCommand,
     DocCutCurrentParagraphCommand,

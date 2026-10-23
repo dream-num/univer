@@ -55,7 +55,12 @@ import {
 } from '../../../../../basics/i-document-skeleton-cached';
 import { isCjkLeftAlignedPunctuation } from '../../../../../basics/tools';
 import { getDocsCustomBlockRenderViewport } from '../../../custom-block-render-viewport';
-import { getNominalFontLineHeight, isTraditionalDocumentCompatibility } from '../../../document-compatibility';
+import {
+    getDocumentCompatibilityPolicy,
+    getNominalFontLineHeight,
+    isTraditionalDocumentCompatibility,
+    shouldAllowImportedTableMarginOverflow,
+} from '../../../document-compatibility';
 import { BreakPointType } from '../../line-breaker/break';
 import {
     addGlyphToDivide,
@@ -2224,7 +2229,13 @@ function _updateAndPositionTable(
         switch (tableSource.textWrap) {
             case TableTextWrapType.NONE: {
                 table.top = section.top + lineTop;
-                table.left = column.left + getTableLeft(column.width, table.width, tableSource.align, tableSource.indent);
+                table.left = column.left + getTableLeft(
+                    column.width,
+                    table.width,
+                    tableSource.align,
+                    tableSource.indent,
+                    shouldAllowImportedTableMarginOverflow(sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy(), tableSource)
+                );
                 __avoidFlowAffectingDrawingsForTable(table, page, column);
                 __avoidNonOverlappingFloatingTables(table, page);
                 break;

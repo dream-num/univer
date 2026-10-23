@@ -60,7 +60,7 @@ import {
     useObservable,
 } from '@univerjs/ui';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, skip } from 'rxjs';
 import type { LocaleKey } from '../locale/types';
 import type { IMutiPageParagraphBound } from '../services/doc-event-manager.service';
 import type { IDocBlockMenuTarget } from '../services/doc-paragraph-menu.service';
@@ -113,6 +113,8 @@ import {
 import { IDocClipboardService } from '../services/clipboard/clipboard.service';
 import { DocEventManagerService } from '../services/doc-event-manager.service';
 import { DocParagraphMenuService } from '../services/doc-paragraph-menu.service';
+import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
+import { observeParagraphMenuPosition } from './paragraph-menu/paragraph-menu-position';
 
 export function getParagraphMenuPopupDirection(
     anchorLeft: number,
@@ -905,6 +907,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     const doc = univerInstanceService.getUnit<DocumentDataModel>(popup.unitId, UniverInstanceType.UNIVER_DOC);
     const docParagraphMenuService = renderUnit?.with(DocParagraphMenuService);
     const docEventManagerService = renderUnit?.with(DocEventManagerService);
+    const docSelectionRenderService = renderUnit?.with(DocSelectionRenderService);
     const isFocusedTableMenu = popup.extraProps?.focusedTableMenu === true;
     const activeTarget = useObservable(isFocusedTableMenu
         ? docParagraphMenuService?.focusedTableTarget$
@@ -922,7 +925,8 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
         docParagraphMenuService?.setParagraphMenuActive(active, isFocusedTableMenu);
     };
     const rawActiveTarget = getActiveTarget();
-    const currentActiveTarget = (rawActiveTarget?.kind === 'table') === tableBlockOnly ? rawActiveTarget : null;
+    const isTableMenu = tableBlockOnly || rawActiveTarget?.kind === 'table';
+    const currentActiveTarget = (rawActiveTarget?.kind === 'table') === isTableMenu ? rawActiveTarget : null;
     const activeParagraphBound = currentActiveTarget?.paragraph ?? docParagraphMenuService?.activeParagraph ?? paragraph ?? paragraphLeft;
     const startIndex = activeParagraphBound?.startIndex;
     const dataStream = doc?.getBody()?.dataStream ?? '';
@@ -931,7 +935,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     const namedStyleType = paragraphObj?.paragraphStyle?.namedStyleType;
     const isModernHeading = doc?.getDocumentStyle().documentFlavor === DocumentFlavor.MODERN &&
         startIndex != null && renderUnit?.with(DocSkeletonManagerService).getViewModel().getHeadingSections().some((heading) => heading.paragraphIndex === startIndex && heading.startOffset < heading.endOffset);
-    const targetIconKey = currentActiveTarget?.icon ?? getParagraphMenuTriggerIconKey(namedStyleType);
+    const targetIconKey = isEmptyParagraph ? 'IncreaseIcon' : currentActiveTarget?.icon ?? getParagraphMenuTriggerIconKey(namedStyleType);
     const TargetIcon = iconManager.get(targetIconKey);
     const paragraphMenuType = useMemo(
         () => getParagraphMenuType(currentActiveTarget, isEmptyParagraph),
@@ -991,6 +995,17 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     // Service-driven dismissal (for example scrolling) can unmount the entire popup.
     useLayoutEffect(() => restoreMenuFocus, [restoreMenuFocus]);
 
+    useLayoutEffect(() => {
+        if (isFocusedTableMenu || !docParagraphMenuService) {
+            return;
+        }
+        const popupElement = anchorRef.current?.closest<HTMLElement>('[data-u-comp="rect-popup"]');
+        if (!popupElement) {
+            return;
+        }
+        return observeParagraphMenuPosition(popupElement, popup, docParagraphMenuService.activeTarget$);
+    }, [docParagraphMenuService, isFocusedTableMenu, popup]);
+
     const handleHideMenu = useCallback(() => {
         hoverOpenSchedulerRef.current.cancel();
         restoreMenuFocus();
@@ -999,6 +1014,15 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
         targetRangeRef.current = null;
         docParagraphMenuService?.setParagraphMenuActive(false, isFocusedTableMenu);
     }, [docParagraphMenuService, isFocusedTableMenu, restoreMenuFocus]);
+
+    useEffect(() => {
+        if (!visible || isFocusedTableMenu || !docSelectionRenderService) {
+            return;
+        }
+        // Selection-start replays its last value; dismiss only for a new canvas interaction.
+        const subscription = docSelectionRenderService.onSelectionStart$.pipe(skip(1)).subscribe(handleHideMenu);
+        return () => subscription.unsubscribe();
+    }, [docSelectionRenderService, handleHideMenu, isFocusedTableMenu, visible]);
 
     useEffect(() => {
         if (!isFocusedTableMenu || !docParagraphMenuService) {
@@ -1323,7 +1347,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     }, [docParagraphMenuService, isFocusedTableMenu]);
 
     useEffect(() => {
-        if (tableBlockOnly || !slashMenuRequest || handledSlashRequestNonceRef.current >= slashMenuRequest.nonce) {
+        if (isTableMenu || !slashMenuRequest || handledSlashRequestNonceRef.current >= slashMenuRequest.nonce) {
             return;
         }
 
@@ -1332,7 +1356,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
         clearHideTimer();
         isMouseOver.current = false;
         handleOpenSlashMenu(slashMenuRequest);
-    }, [slashMenuRequest, tableBlockOnly]);
+    }, [slashMenuRequest, isTableMenu]);
 
     if (!currentActiveTarget) {
         return null;
@@ -1342,7 +1366,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
         <>
             <div
                 data-u-comp="paragraph-menu"
-                data-u-table-menu={tableBlockOnly ? 'true' : undefined}
+                data-u-table-menu={isTableMenu ? 'true' : undefined}
                 data-u-focused-table-menu={isFocusedTableMenu ? 'true' : undefined}
                 ref={anchorRef}
                 className={clsx(`
@@ -1384,7 +1408,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                         `
                     )}
                 />
-                {currentActiveTarget?.draggable && (
+                {!isEmptyParagraph && currentActiveTarget?.draggable && (
                     <button
                         type="button"
                         className={`

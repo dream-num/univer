@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICellDataForSheetInterceptor, INumfmtLocaleTag, Workbook } from '@univerjs/core';
-import type { ISetNumfmtMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import type { IUniverSheetsNumfmtConfig } from '../config/config';
+import type { DateSystem, ICellData, ICellDataForSheetInterceptor, INumfmtLocaleTag, Nullable, Workbook } from '@univerjs/core';
+import type { ISetNumfmtMutationParams, ISetRangeValuesMutationParams, ISheetLocation } from '@univerjs/sheets';
 import {
     CellValueType,
     Disposable,
@@ -45,6 +44,7 @@ import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { BehaviorSubject, merge, of, skip, switchMap } from 'rxjs';
+import type { IUniverSheetsNumfmtConfig } from '../config/config';
 import { SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from '../config/config';
 import { getPatternPreviewIgnoreGeneral } from '../utils/pattern';
 
@@ -55,6 +55,7 @@ const TEXT_FORMAT_MARK = {
     },
 };
 export class SheetsNumfmtCellContentController extends Disposable {
+    private readonly _renderCache = new ObjectMatrix<{ result: ICellDataForSheetInterceptor; parameters: string }>();
     private _locale$ = new BehaviorSubject<INumfmtLocaleTag | null>(null);
     public locale$ = this._locale$.asObservable();
     constructor(
@@ -78,109 +79,14 @@ export class SheetsNumfmtCellContentController extends Disposable {
         return this._locale$.getValue() ?? getNumfmtLocaleTag(workbook?.getSnapshot().locale ?? this._localeService.getCurrentLocale());
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _initInterceptorCellContent() {
-        const renderCache = new ObjectMatrix<{ result: ICellData; parameters: string | number }>();
-
         this.disposeWithMe(merge(this._locale$, this._localeService.currentLocale$).subscribe(() => {
-            renderCache.reset();
+            this._renderCache.reset();
         }));
 
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
             effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
-
-            // eslint-disable-next-line max-lines-per-function, complexity
-            handler: (cell, location, next) => {
-                // If the cell is empty, or the cell type is boolean or force_string, do not process it.
-                // Cell type is number or number string, it will be applied number format.
-                if (!cell || cell.v === undefined || cell.v === null || cell.t === CellValueType.BOOLEAN || cell.t === CellValueType.FORCE_STRING) {
-                    return next(cell);
-                }
-
-                const unitId = location.unitId;
-                const sheetId = location.subUnitId;
-                const locale = this.getLocale(location.workbook);
-                const dateSystem = location.workbook.getDateSystem();
-                let numfmtValue;
-
-                if (cell?.s) {
-                    const style = location.workbook.getStyles().get(cell.s);
-                    if (style?.n) {
-                        numfmtValue = style.n;
-                    }
-                }
-
-                if (!numfmtValue) {
-                    numfmtValue = this._numfmtService.getValue(unitId, sheetId, location.row, location.col);
-                }
-
-                // If the cell is not formatted, or the format is 'General', do not process it
-                // e.g. { v: '001', t: 1, s: { n: { pattern: 'General' } } } should display as '001'
-                if (isDefaultFormat(numfmtValue?.pattern)) {
-                    return next(cell);
-                }
-
-                // If the cell not specified number type, then check the cell value type
-                if (cell.t !== CellValueType.NUMBER) {
-                    const type = checkCellValueType(cell.v, cell.t);
-                    // just handle number/number string/number string with text format, other type will not be processed
-                    if (
-                        type !== CellValueType.NUMBER &&
-                        !(
-                            isTextFormat(numfmtValue?.pattern) &&
-                            typeof cell.v === 'string' &&
-                            typeof getNumfmtParseValueFilter(cell.v, { locale, dateSystem })?.v === 'number'
-                        )
-                    ) {
-                        return next(cell);
-                    }
-                }
-
-                const originCellValue = cell;
-                if (!cell || cell === location.rawData) {
-                    cell = { ...location.rawData };
-                }
-
-                // Add error marker to text format number
-                if (isTextFormat(numfmtValue?.pattern)) {
-                    // If the user has disabled the text format mark, do not show it
-                    if (this._configService.getConfig<IUniverSheetsNumfmtConfig>(SHEETS_NUMFMT_PLUGIN_CONFIG_KEY)?.disableTextFormatMark) {
-                        cell.t = CellValueType.STRING;
-                        return next(cell);
-                    }
-
-                    cell.t = CellValueType.STRING;
-                    cell.markers = { ...cell?.markers, ...TEXT_FORMAT_MARK };
-                    return next(cell);
-                }
-
-                const cacheParameters = `${unitId}_${sheetId}_${originCellValue.v}_${numfmtValue?.pattern}_${locale}_${dateSystem}`;
-                const cache = renderCache.getValue(location.row, location.col);
-                if (cache && cache.parameters === cacheParameters) {
-                    return next({ ...cell, ...cache.result });
-                }
-
-                const info = getPatternPreviewIgnoreGeneral(numfmtValue?.pattern as string, Number(originCellValue.v), locale, dateSystem);
-                const numfmtRes = info.result;
-                const res: ICellDataForSheetInterceptor = { v: numfmtRes, t: CellValueType.NUMBER };
-                if (numfmtRes === '') {
-                    res.coverable = false;
-                }
-                if (info.color) {
-                    const color = this._themeService.getColorFromTheme(`${info.color}.500`) ?? info.color;
-
-                    if (color) {
-                        res.interceptorStyle = { cl: { rgb: color } };
-                    }
-                }
-
-                renderCache.setValue(location.row, location.col, {
-                    result: res,
-                    parameters: cacheParameters,
-                });
-                Object.assign(cell, res);
-                return next(cell);
-            },
+            handler: (cell, location, next) => next(this._formatCell(cell, location)),
             priority: InterceptCellContentPriority.NUMFMT,
         }));
 
@@ -191,14 +97,14 @@ export class SheetsNumfmtCellContentController extends Disposable {
                     const v = params.values[key];
                     v.ranges.forEach((range) => {
                         Range.foreach(range, (row, col) => {
-                            renderCache.realDeleteValue(row, col);
+                            this._renderCache.realDeleteValue(row, col);
                         });
                     });
                 });
             } else if (commandInfo.id === SetRangeValuesMutation.id) {
                 const params = commandInfo.params as ISetRangeValuesMutationParams;
                 new ObjectMatrix(params.cellValue).forValue((row, col) => {
-                    renderCache.realDeleteValue(row, col);
+                    this._renderCache.realDeleteValue(row, col);
                 });
             }
         }));
@@ -209,7 +115,70 @@ export class SheetsNumfmtCellContentController extends Disposable {
                     switchMap((workbook) => workbook?.activeSheet$ ?? of(null)),
                     skip(1)
                 )
-                .subscribe(() => renderCache.reset())
+                .subscribe(() => this._renderCache.reset())
+        );
+    }
+
+    private _formatCell(
+        cell: Nullable<ICellDataForSheetInterceptor>,
+        location: ISheetLocation & { rawData: Nullable<ICellData> }
+    ): Nullable<ICellDataForSheetInterceptor> {
+        if (!cell || cell.v == null || cell.t === CellValueType.BOOLEAN || cell.t === CellValueType.FORCE_STRING) {
+            return cell;
+        }
+
+        const { unitId, subUnitId: sheetId, row, col, workbook } = location;
+        const locale = this.getLocale(workbook);
+        const dateSystem = workbook.getDateSystem();
+        const numfmtValue = workbook.getStyles().get(cell.s)?.n ?? this._numfmtService.getValue(unitId, sheetId, row, col);
+        const pattern = numfmtValue?.pattern;
+        // General must preserve numeric strings such as '001'.
+        if (isDefaultFormat(pattern)) {
+            return cell;
+        }
+
+        if (!this._isNumericCell(cell, pattern, locale, dateSystem)) {
+            return cell;
+        }
+
+        const formattedCell = cell === location.rawData ? { ...cell } : cell;
+
+        if (isTextFormat(pattern)) {
+            formattedCell.t = CellValueType.STRING;
+            if (!this._configService.getConfig<IUniverSheetsNumfmtConfig>(SHEETS_NUMFMT_PLUGIN_CONFIG_KEY)?.disableTextFormatMark) {
+                formattedCell.markers = { ...formattedCell.markers, ...TEXT_FORMAT_MARK };
+            }
+            return formattedCell;
+        }
+
+        const cacheParameters = `${unitId}_${sheetId}_${cell.v}_${pattern}_${locale}_${dateSystem}`;
+        const cache = this._renderCache.getValue(row, col);
+        if (cache && cache.parameters === cacheParameters) {
+            return { ...formattedCell, ...cache.result };
+        }
+
+        const info = getPatternPreviewIgnoreGeneral(pattern as string, Number(cell.v), locale, dateSystem);
+        const res: ICellDataForSheetInterceptor = { v: info.result, t: CellValueType.NUMBER };
+        if (info.result === '') {
+            res.coverable = false;
+        }
+        if (info.color) {
+            const color = this._themeService.getColorFromTheme(`${info.color}.500`) ?? info.color;
+            if (color) {
+                res.interceptorStyle = { cl: { rgb: color } };
+            }
+        }
+
+        this._renderCache.setValue(row, col, { result: res, parameters: cacheParameters });
+        Object.assign(formattedCell, res);
+        return formattedCell;
+    }
+
+    private _isNumericCell(cell: ICellData, pattern: string | undefined, locale: INumfmtLocaleTag, dateSystem: DateSystem): boolean {
+        return cell.t === CellValueType.NUMBER || checkCellValueType(cell.v, cell.t) === CellValueType.NUMBER || (
+            isTextFormat(pattern) &&
+            typeof cell.v === 'string' &&
+            typeof getNumfmtParseValueFilter(cell.v, { locale, dateSystem })?.v === 'number'
         );
     }
 

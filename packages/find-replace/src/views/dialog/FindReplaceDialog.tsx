@@ -186,9 +186,9 @@ export const ReplaceDialog = forwardRef(function ReplaceDialogImpl(_props, ref) 
         findReplaceService.changeFindBy(findBy as FindBy);
     }, [findReplaceService]);
 
-    const findScopeOptions = FIND_SCOPE_OPTIONS.map((option) => ({ ...option, label: localeService.t(option.label) }));
-    const findDirectionOptions = FIND_DIRECTION_OPTIONS.map((option) => ({ ...option, label: localeService.t(option.label) }));
-    const findByOptions = FIND_BY_OPTIONS.map((option) => ({ ...option, label: localeService.t(option.label) }));
+    const findScopeOptions = FIND_SCOPE_OPTIONS.map((option) => ({ ...option, label: localeService.t<LocaleKey>(option.label) }));
+    const findDirectionOptions = FIND_DIRECTION_OPTIONS.map((option) => ({ ...option, label: localeService.t<LocaleKey>(option.label) }));
+    const findByOptions = FIND_BY_OPTIONS.map((option) => ({ ...option, label: localeService.t<LocaleKey>(option.label) }));
 
     useEffect(() => {
         const shouldDisplayNoMatchInfo = findCompleted && matchesCount === 0;

@@ -17,9 +17,9 @@
 import type { CellValue, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import type { ISheetLocationBase } from '@univerjs/sheets';
-import type { LocaleKey } from '../locale/types';
 import { DataValidationOperator, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import type { LocaleKey } from '../locale/types';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { TextLengthErrorTitleMap } from '../types/const/operator-text-map';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
@@ -118,7 +118,7 @@ export class TextLengthValidator extends BaseSheetValidator {
         }
 
         const { transformedFormula1, transformedFormula2 } = getTransformedFormula(this._lexerTreeBuilder, rule as ISheetDataValidationRule, pos);
-        const errorMsg = this.localeService.t(TextLengthErrorTitleMap[rule.operator]).replace(FORMULA1, transformedFormula1 ?? '').replace(FORMULA2, transformedFormula2 ?? '');
+        const errorMsg = this.localeService.t<LocaleKey>(TextLengthErrorTitleMap[rule.operator]).replace(FORMULA1, transformedFormula1 ?? '').replace(FORMULA2, transformedFormula2 ?? '');
         return `${errorMsg}`;
     }
 }

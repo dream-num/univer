@@ -17,24 +17,14 @@
 import type { CellValue, IDataValidationRule, IDataValidationRuleBase, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { CellValueType } from '@univerjs/protocol';
 import type { ISheetLocationBase } from '@univerjs/sheets';
-import type { IBaseDataValidationWidget } from './base-widget';
 import { DataValidationOperator, Inject, Injector, LocaleService } from '@univerjs/core';
-import { OperatorErrorTitleMap, OperatorTitleMap } from '../types/const/operator-text-map';
+import type { LocaleKey } from '../locale/types';
+import type { IBaseDataValidationWidget } from './base-widget';
+import { OperatorErrorTitleMap, OperatorTextMap, OperatorTitleMap } from '../types/const/operator-text-map';
 
 export const FORMULA1 = '{FORMULA1}';
 export const FORMULA2 = '{FORMULA2}';
 export const TYPE = '{TYPE}';
-
-const operatorNameMap: Record<DataValidationOperator, string> = {
-    [DataValidationOperator.BETWEEN]: 'data-validation.operators.between',
-    [DataValidationOperator.EQUAL]: 'data-validation.operators.equal',
-    [DataValidationOperator.GREATER_THAN]: 'data-validation.operators.greaterThan',
-    [DataValidationOperator.GREATER_THAN_OR_EQUAL]: 'data-validation.operators.greaterThanOrEqual',
-    [DataValidationOperator.LESS_THAN]: 'data-validation.operators.lessThan',
-    [DataValidationOperator.LESS_THAN_OR_EQUAL]: 'data-validation.operators.lessThanOrEqual',
-    [DataValidationOperator.NOT_BETWEEN]: 'data-validation.operators.notBetween',
-    [DataValidationOperator.NOT_EQUAL]: 'data-validation.operators.notEqual',
-};
 
 export interface IValidatorCellInfo<DataType = Nullable<CellValue>> {
     value: DataType;
@@ -96,7 +86,7 @@ export abstract class BaseDataValidator {
     }
 
     get operatorNames() {
-        return this.operators.map((operator) => this.localeService.t(operatorNameMap[operator]));
+        return this.operators.map((operator) => this.localeService.t<LocaleKey>(OperatorTextMap[operator]));
     }
 
     get titleStr() {
@@ -107,19 +97,19 @@ export abstract class BaseDataValidator {
 
     generateRuleName(rule: IDataValidationRuleBase): string {
         if (!rule.operator) {
-            return this.localeService.t(OperatorTitleMap.NONE).replace(TYPE, this.titleStr);
+            return this.localeService.t<LocaleKey>(OperatorTitleMap.NONE).replace(TYPE, this.titleStr);
         }
 
-        const ruleName = this.localeService.t(OperatorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
+        const ruleName = this.localeService.t<LocaleKey>(OperatorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
         return `${this.titleStr} ${ruleName}`;
     }
 
     generateRuleErrorMessage(rule: IDataValidationRuleBase, position: ISheetLocationBase) {
         if (!rule.operator) {
-            return this.localeService.t(OperatorErrorTitleMap.NONE).replace(TYPE, this.titleStr); ;
+            return this.localeService.t<LocaleKey>(OperatorErrorTitleMap.NONE).replace(TYPE, this.titleStr);
         }
 
-        const errorMsg = this.localeService.t(OperatorErrorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
+        const errorMsg = this.localeService.t<LocaleKey>(OperatorErrorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
         return `${errorMsg}`;
     }
 

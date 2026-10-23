@@ -16,8 +16,6 @@
 
 import type { IMenuSchema, IValueOption, MobileDrawerSnap } from '@univerjs/ui';
 import type { ReactNode } from 'react';
-import type { LocaleKey } from '../../locale/types';
-import type { MobileDocSelectionRenderService } from '../../services/mobile/doc-selection-render.service';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { clsx, resetButtonClassName } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -45,6 +43,8 @@ import {
 } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { map, startWith } from 'rxjs';
+import type { LocaleKey } from '../../locale/types';
+import type { MobileDocSelectionRenderService } from '../../services/mobile/doc-selection-render.service';
 import {
     DOC_PARAGRAPH_T_ALIGN_MENU_ID,
     DOC_PARAGRAPH_T_EDIT_MENU_ID,
@@ -340,7 +340,7 @@ export function MobileDocToolbar() {
         selectionService?.suspendMobileEditingInput();
     }
 
-    const drawerTitle = navigation?.title ?? localeService.t(
+    const drawerTitle = navigation?.title ?? localeService.t<LocaleKey>(
         drawer === 'insert'
             ? 'docs-ui.mobile.insert'
             : drawer === 'format'

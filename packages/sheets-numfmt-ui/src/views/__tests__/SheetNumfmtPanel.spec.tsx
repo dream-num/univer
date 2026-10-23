@@ -15,7 +15,6 @@
  */
 
 import type { Root } from 'react-dom/client';
-import type { ISheetNumfmtPanelProps } from '../SheetNumfmtPanel';
 import { ILocalStorageService, Injector, LocaleService, LocaleType } from '@univerjs/core';
 import { ConfigProvider } from '@univerjs/design';
 import designEnUS from '@univerjs/design/locale/en-US';
@@ -23,6 +22,8 @@ import { DesktopLocalStorageService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { LocaleKey } from '../../locale/types';
+import type { ISheetNumfmtPanelProps } from '../SheetNumfmtPanel';
 import { UserHabitController } from '../../controllers/user-habit.controller';
 import enUS from '../../locale/en-US';
 import zhCN from '../../locale/zh-CN';
@@ -105,10 +106,10 @@ describe('SheetNumfmtPanel', () => {
         act(() => localeService.setLocale(LocaleType.ZH_CN));
 
         expect(container.querySelector('[data-u-comp="select"]')?.textContent)
-            .toContain(localeService.t('sheets-numfmt-ui.date'));
+            .toContain(localeService.t<LocaleKey>('sheets-numfmt-ui.date'));
         expect(container.textContent).toContain('1930年08月05日');
         expect(onChange).toHaveBeenCalledTimes(1);
-        await confirmPanel(container, localeService.t('sheets-numfmt-ui.confirm'));
+        await confirmPanel(container, localeService.t<LocaleKey>('sheets-numfmt-ui.confirm'));
         expect(onChange).toHaveBeenLastCalledWith({ type: 'confirm', value: selectedPattern });
     });
 

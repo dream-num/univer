@@ -15,8 +15,9 @@
  */
 
 import { DataValidationOperator } from '@univerjs/core';
+import type { LocaleKey } from '../locale/types';
 
-export const DateOperatorNameMap: Record<DataValidationOperator, string> = {
+export const DateOperatorNameMap: Record<DataValidationOperator, LocaleKey> = {
     [DataValidationOperator.BETWEEN]: 'sheets-data-validation.date.operators.between',
     [DataValidationOperator.EQUAL]: 'sheets-data-validation.date.operators.equal',
     [DataValidationOperator.GREATER_THAN]: 'sheets-data-validation.date.operators.greaterThan',
@@ -27,7 +28,7 @@ export const DateOperatorNameMap: Record<DataValidationOperator, string> = {
     [DataValidationOperator.NOT_EQUAL]: 'sheets-data-validation.date.operators.notEqual',
 };
 
-export const DateOperatorTextMap: Record<DataValidationOperator, string> = {
+export const DateOperatorTextMap: Record<DataValidationOperator, LocaleKey> = {
     [DataValidationOperator.BETWEEN]: 'sheets-data-validation.date.operators.between',
     [DataValidationOperator.EQUAL]: 'sheets-data-validation.date.operators.equal',
     [DataValidationOperator.GREATER_THAN]: 'sheets-data-validation.date.operators.greaterThan',
@@ -38,7 +39,7 @@ export const DateOperatorTextMap: Record<DataValidationOperator, string> = {
     [DataValidationOperator.NOT_EQUAL]: 'sheets-data-validation.date.operators.notEqual',
 };
 
-export const DateOperatorTitleMap: Record<DataValidationOperator | 'NONE', string> = {
+export const DateOperatorTitleMap: Record<DataValidationOperator | 'NONE', LocaleKey> = {
     [DataValidationOperator.BETWEEN]: 'sheets-data-validation.date.ruleName.between',
     [DataValidationOperator.EQUAL]: 'sheets-data-validation.date.ruleName.equal',
     [DataValidationOperator.GREATER_THAN]: 'sheets-data-validation.date.ruleName.greaterThan',
@@ -50,7 +51,7 @@ export const DateOperatorTitleMap: Record<DataValidationOperator | 'NONE', strin
     NONE: 'sheets-data-validation.date.ruleName.legal',
 };
 
-export const DateOperatorErrorTitleMap: Record<DataValidationOperator | 'NONE', string> = {
+export const DateOperatorErrorTitleMap: Record<DataValidationOperator | 'NONE', LocaleKey> = {
     [DataValidationOperator.BETWEEN]: 'sheets-data-validation.date.errorMsg.between',
     [DataValidationOperator.EQUAL]: 'sheets-data-validation.date.errorMsg.equal',
     [DataValidationOperator.GREATER_THAN]: 'sheets-data-validation.date.errorMsg.greaterThan',

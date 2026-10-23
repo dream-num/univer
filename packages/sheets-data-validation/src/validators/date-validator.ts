@@ -17,9 +17,9 @@
 import type { CellValue, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable, ParseOptions, Workbook } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import type { ISheetLocationBase } from '@univerjs/sheets';
-import type { LocaleKey } from '../locale/types';
 import { DataValidationOperator, DataValidationType, DateSystem, excelSerialToDateTimeParts, getNumfmtLocaleTag, isFormulaString, IUniverInstanceService, numfmt, Tools, UniverInstanceType } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import type { LocaleKey } from '../locale/types';
 import { DateOperatorErrorTitleMap, DateOperatorNameMap, DateOperatorTitleMap } from '../common/date-text-map';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
@@ -168,15 +168,15 @@ export class DateValidator extends BaseSheetValidator {
     }
 
     override get operatorNames() {
-        return this.operators.map((operator) => this.localeService.t(DateOperatorNameMap[operator]));
+        return this.operators.map((operator) => this.localeService.t<LocaleKey>(DateOperatorNameMap[operator]));
     }
 
     override generateRuleName(rule: IDataValidationRuleBase): string {
         if (!rule.operator) {
-            return this.localeService.t(DateOperatorTitleMap.NONE);
+            return this.localeService.t<LocaleKey>(DateOperatorTitleMap.NONE);
         }
 
-        const ruleName = this.localeService.t(DateOperatorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
+        const ruleName = this.localeService.t<LocaleKey>(DateOperatorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
         return `${this.titleStr} ${ruleName}`;
     }
 
@@ -186,7 +186,7 @@ export class DateValidator extends BaseSheetValidator {
         }
         const { transformedFormula1, transformedFormula2 } = getTransformedFormula(this._lexerTreeBuilder, rule as ISheetDataValidationRule, pos);
 
-        const errorMsg = this.localeService.t(DateOperatorErrorTitleMap[rule.operator]).replace(FORMULA1, transformedFormula1 ?? '').replace(FORMULA2, transformedFormula2 ?? '');
+        const errorMsg = this.localeService.t<LocaleKey>(DateOperatorErrorTitleMap[rule.operator]).replace(FORMULA1, transformedFormula1 ?? '').replace(FORMULA2, transformedFormula2 ?? '');
         return `${errorMsg}`;
     }
 }

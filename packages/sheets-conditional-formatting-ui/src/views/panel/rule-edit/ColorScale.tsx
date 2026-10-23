@@ -17,14 +17,14 @@
 import type { Workbook } from '@univerjs/core';
 import type { IColorScale } from '@univerjs/sheets-conditional-formatting';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
-import type { LocaleKey } from '../../../locale/types';
-import type { IStyleEditorProps } from './type';
 import { IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, clsx, Select } from '@univerjs/design';
 import { CFRuleType, CFValueType, createDefaultValueByValueType } from '@univerjs/sheets-conditional-formatting';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { LocaleKey } from '../../../locale/types';
+import type { IStyleEditorProps } from './type';
 import { ColorPicker } from '../../ColorPicker';
 import { ConditionalFormattingRulePreview } from '../../ConditionalFormattingRulePreview';
 import { RuleNumberInput } from './RuleNumberInput';
@@ -115,9 +115,9 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
 
     const rule = props.rule?.type === CFRuleType.colorScale ? props.rule : undefined as IColorScale | undefined;
     const commonOptionDefinitions = [createOptionItem(CFValueType.num), createOptionItem(CFValueType.percent), createOptionItem(CFValueType.percentile), createOptionItem(CFValueType.formula)];
-    const minOptions = [createOptionItem(CFValueType.min), ...commonOptionDefinitions].map((option) => ({ ...option, label: localeService.t(option.label) }));
-    const medianOptions = [createOptionItem('none'), ...commonOptionDefinitions].map((option) => ({ ...option, label: localeService.t(option.label) }));
-    const maxOptions = [createOptionItem(CFValueType.max), ...commonOptionDefinitions].map((option) => ({ ...option, label: localeService.t(option.label) }));
+    const minOptions = [createOptionItem(CFValueType.min), ...commonOptionDefinitions].map((option) => ({ ...option, label: localeService.t<LocaleKey>(option.label) }));
+    const medianOptions = [createOptionItem('none'), ...commonOptionDefinitions].map((option) => ({ ...option, label: localeService.t<LocaleKey>(option.label) }));
+    const maxOptions = [createOptionItem(CFValueType.max), ...commonOptionDefinitions].map((option) => ({ ...option, label: localeService.t<LocaleKey>(option.label) }));
 
     const [minType, setMinType] = useState(() => {
         const defaultV = CFValueType.min;

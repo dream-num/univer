@@ -17,6 +17,7 @@
 import type { LocaleService } from '@univerjs/core';
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import { FunctionType } from '@univerjs/engine-formula';
+import type { LocaleKey } from '../locale/types';
 
 export function getFunctionTypeValues(
     localeService: LocaleService,
@@ -24,9 +25,9 @@ export function getFunctionTypeValues(
 ): Array<{ label: string; value: string }> {
     // Exclude the DefinedName key
     return Object.keys(FunctionType)
-        .filter((key) => isNaN(Number(key)) && key !== 'DefinedName' && key !== 'Table' && (customFormula || key !== 'User'))
+        .filter((key): key is Exclude<keyof typeof FunctionType, 'DefinedName' | 'Table'> => Number.isNaN(Number(key)) && key !== 'DefinedName' && key !== 'Table' && (customFormula || key !== 'User'))
         .map((key) => ({
-            label: localeService.t(`sheets-formula-ui.functionType.${key.toLocaleLowerCase()}`),
+            label: localeService.t<LocaleKey>(`sheets-formula-ui.functionType.${key.toLowerCase() as Lowercase<typeof key>}`),
             value: `${FunctionType[key as keyof typeof FunctionType]}`,
         }));
 }

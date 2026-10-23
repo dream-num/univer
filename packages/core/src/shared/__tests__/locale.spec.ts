@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, expectTypeOf, it } from 'vitest';
+import type { LocaleLeafKeys } from '../locale';
+import { Injector } from '../../common/di';
+import { LocaleService } from '../../services/locale/locale.service';
+import { LocaleType } from '../../types/enum/locale-type';
 import { mergeLocales } from '../locale';
 
 describe('mergeLocales function', () => {
@@ -51,5 +55,30 @@ describe('mergeLocales function', () => {
         const merged1 = mergeLocales(locale1, locale2);
 
         expect(merged1).toEqual({ key: 'value' });
+    });
+});
+
+describe('LocaleLeafKeys', () => {
+    it('types numeric property paths that LocaleService can translate and excludes non-string leaves', () => {
+        const resources = {
+            month: { 1: 'January', 12: 'December' },
+            layout: { '001': 'List', 100: { name: 'Picture list' } },
+            enabled: true,
+            alternatives: ['First', 'Second'],
+        };
+        type TestLocaleKey = LocaleLeafKeys<typeof resources>;
+        expectTypeOf<TestLocaleKey>().toEqualTypeOf<'month.1' | 'month.12' | 'layout.001' | 'layout.100.name'>();
+
+        const injector = new Injector([[LocaleService]]);
+        try {
+            const localeService = injector.get(LocaleService);
+            localeService.load({ [LocaleType.EN_US]: resources });
+            localeService.setLocale(LocaleType.EN_US);
+            localeService.setDirection('ltr');
+            expect(localeService.t<TestLocaleKey>('month.1')).toBe('January');
+            expect(localeService.t<TestLocaleKey>('layout.100.name')).toBe('Picture list');
+        } finally {
+            injector.dispose();
+        }
     });
 });

@@ -16,10 +16,10 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { ICollaborator, UnitAction } from '@univerjs/protocol';
-import type { LocaleKey } from '../../locale/types';
 import {
     IAuthzIoService,
     ICommandService,
+    ILogService,
     IPermissionService,
     IUniverInstanceService,
     LocaleService,
@@ -34,6 +34,7 @@ import {
 } from '@univerjs/sheets';
 import { IDialogService, useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import {
     defaultWorksheetUnitActionList,
     subUnitPermissionTypeMap,
@@ -54,6 +55,7 @@ export interface ISheetPermissionDialogProps {
 
 export const SheetPermissionDialog = ({ ActionRowComponent = ActionRow }: ISheetPermissionDialogProps = {}) => {
     const localeService = useDependency(LocaleService);
+    const logService = useDependency(ILogService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const authzIoService = useDependency(IAuthzIoService);
     const worksheetProtectionPointRuleModel = useDependency(WorksheetProtectionPointModel);
@@ -72,9 +74,9 @@ export const SheetPermissionDialog = ({ ActionRowComponent = ActionRow }: ISheet
     });
 
     const [permissionMap, setPermissionMap] = useState(() => {
-        return Object.keys(subUnitPermissionTypeMap).reduce((acc, action) => {
+        return Object.entries(subUnitPermissionTypeMap).reduce((acc, [action, key]) => {
             acc[action] = {
-                text: localeService.t(`sheets-ui.permission.panel.${subUnitPermissionTypeMap[Number(action) as UnitAction]}`),
+                text: localeService.t<LocaleKey>(key),
                 allowed: true,
             };
             return acc;
@@ -84,19 +86,19 @@ export const SheetPermissionDialog = ({ ActionRowComponent = ActionRow }: ISheet
     useEffect(() => {
         let cancelled = false;
 
-        void authzIoService.listCollaborators({
+        authzIoService.listCollaborators({
             objectID: unitId,
             unitID: unitId,
         }).then((collaborators) => {
             if (!cancelled) {
                 setCollaborators(collaborators);
             }
-        });
+        }).catch((error: unknown) => logService.error(error));
 
         return () => {
             cancelled = true;
         };
-    }, [authzIoService, unitId]);
+    }, [authzIoService, logService, unitId]);
 
     useEffect(() => {
         let cancelled = false;
@@ -106,7 +108,7 @@ export const SheetPermissionDialog = ({ ActionRowComponent = ActionRow }: ISheet
         if (worksheetPointRule) {
             setLoading(true);
 
-            void authzIoService.list({
+            authzIoService.list({
                 unitID: unitId,
                 objectIDs: [worksheetPointRule.permissionId],
                 actions: defaultWorksheetUnitActionList,
@@ -116,9 +118,10 @@ export const SheetPermissionDialog = ({ ActionRowComponent = ActionRow }: ISheet
                 }
 
                 const actions = result[0].strategies.reduce((p, c) => {
-                    if (subUnitPermissionTypeMap[c.action]) {
+                    const key = subUnitPermissionTypeMap[c.action];
+                    if (key) {
                         p[c.action] = {
-                            text: localeService.t(`sheets-ui.permission.panel.${subUnitPermissionTypeMap[c.action]}`),
+                            text: localeService.t<LocaleKey>(key),
                             allowed: c.role !== UnitRole.Owner,
                         };
                     }
@@ -128,6 +131,11 @@ export const SheetPermissionDialog = ({ ActionRowComponent = ActionRow }: ISheet
                 loadingTimer = setTimeout(() => {
                     setLoading(false);
                 }, 100);
+            }).catch((error: unknown) => {
+                logService.error(error);
+                if (!cancelled) {
+                    setLoading(false);
+                }
             });
         }
 
@@ -137,7 +145,7 @@ export const SheetPermissionDialog = ({ ActionRowComponent = ActionRow }: ISheet
                 clearTimeout(loadingTimer);
             }
         };
-    }, [authzIoService, localeService, subUnitId, unitId, worksheetProtectionPointRuleModel]);
+    }, [authzIoService, localeService, logService, subUnitId, unitId, worksheetProtectionPointRuleModel]);
 
     const handleChangeActionPermission = async () => {
         const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;

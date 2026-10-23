@@ -17,7 +17,6 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IValueOption } from '@univerjs/ui';
 import type { ReactNode } from 'react';
-import type { LocaleKey } from '../../locale/types';
 import {
     BooleanNumber,
     ICommandService,
@@ -35,6 +34,7 @@ import {
 } from '@univerjs/icons';
 import { IconManager, useDependency } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 
 export interface IImagePopupMenuItem {
     label: string;
@@ -123,7 +123,7 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
                 align="start"
                 items={menuItems.map((item) => ({
                     type: 'item',
-                    children: localeService.t(item.label as LocaleKey),
+                    children: localeService.t<LocaleKey>(item.label as LocaleKey),
                     disabled: item.disable,
                     onSelect: () => handleClick(item),
                 }))}
@@ -424,7 +424,7 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
                             return (
                                 <ToolbarButton
                                     key={`${item.commandId}-${item.index}`}
-                                    title={localeService.t(item.label as LocaleKey)}
+                                    title={localeService.t<LocaleKey>(item.label as LocaleKey)}
                                     disabled={item.disable}
                                     onClick={() => executeMenuItem(item)}
                                 >
@@ -490,7 +490,7 @@ function DocChartFloatingToolbar(props: Pick<IDocImageFloatingToolbarProps, 'men
                 <>
                     <ToolbarGroup>
                         <ToolbarDropdownButton
-                            title={localeService.t(chartTypeItem.label as LocaleKey)}
+                            title={localeService.t<LocaleKey>(chartTypeItem.label as LocaleKey)}
                             value={chartTypeItem.value ?? chartTypeOptions[0]?.value ?? ''}
                             options={chartTypeOptions}
                             onChange={(value) => {
@@ -510,7 +510,7 @@ function DocChartFloatingToolbar(props: Pick<IDocImageFloatingToolbarProps, 'men
                         return (
                             <ToolbarButton
                                 key={`${item.commandId}-${item.index}`}
-                                title={localeService.t(item.label as LocaleKey)}
+                                title={localeService.t<LocaleKey>(item.label as LocaleKey)}
                                 disabled={item.disable}
                                 onClick={() => executeMenuItem(item)}
                             >

@@ -15,12 +15,12 @@
  */
 
 import type { ComponentType, ReactNode } from 'react';
-import type { LocaleKey } from '../../locale/types';
 import { HorizontalAlign, LocaleService } from '@univerjs/core';
 import { borderClassName, Button, clsx, InputNumber, Select, Tooltip } from '@univerjs/design';
 import { AlignTextBothIcon, HorizontallyIcon, LeftJustifyingIcon, RightJustifyingIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useMemo, useRef } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import {
     useCurrentParagraph,
     useFirstParagraphHorizontalAlign,
@@ -171,7 +171,7 @@ export function ParagraphSetting({
     const { lineSpacing: [lineSpacing, setLineSpacing], spacingRule: [spacingRule, setSpacingRule] } = useFirstParagraphLineSpacing(currentParagraph);
 
     const lineSpaceConfig = useMemo(() => getLineSpacingInputConfig(spacingRule), [spacingRule]);
-    const lineSpacingOptions = LINE_SPACING_RULE_OPTIONS.map((option) => ({ ...option, label: localeService.t(option.label) }));
+    const lineSpacingOptions = LINE_SPACING_RULE_OPTIONS.map((option) => ({ ...option, label: localeService.t<LocaleKey>(option.label) }));
 
     return (
         <div className="univer-box-border univer-w-full">
@@ -190,7 +190,7 @@ export function ParagraphSetting({
                                 className="univer-flex univer-w-full univer-items-center univer-justify-center"
                             >
                                 <AlignmentButtonComponent
-                                    label={localeService.t(item.label)}
+                                    label={localeService.t<LocaleKey>(item.label)}
                                     selected={horizontalAlignValue === item.value}
                                     onClick={() => setHorizontalAlign(item.value)}
                                 >

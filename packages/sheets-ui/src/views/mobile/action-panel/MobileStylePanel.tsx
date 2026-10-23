@@ -24,7 +24,6 @@ import type {
     IValueOption,
     MenuItemDefaultValueType,
 } from '@univerjs/ui';
-import type { LocaleKey } from '../../../locale/types';
 import { BorderStyleTypes, BorderType, LocaleService, ThemeService } from '@univerjs/core';
 import {
     borderBottomClassName,
@@ -58,6 +57,7 @@ import {
 } from '@univerjs/ui';
 import { useMemo, useState } from 'react';
 import { isObservable } from 'rxjs';
+import type { LocaleKey } from '../../../locale/types';
 import {
     ResetRangeTextColorCommand,
     SetRangeBoldCommand,
@@ -1224,7 +1224,7 @@ function MobileBorderView(props: {
                             onClick={() => apply({ type: option.value })}
                         >
                             {Icon && <Icon className="univer-size-5" />}
-                            <span className="univer-line-clamp-1">{localeService.t(option.label)}</span>
+                            <span className="univer-line-clamp-1">{localeService.t<LocaleKey>(option.label)}</span>
                         </button>
                     );
                 })}

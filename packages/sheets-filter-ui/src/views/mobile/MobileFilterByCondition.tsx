@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../../locale/types';
-import type { FilterOperator } from '../../models/conditions';
-import type { ByConditionsModel } from '../../services/sheets-filter-panel.service';
 import { LocaleService } from '@univerjs/core';
 import { Input, MobileSelect, Radio, RadioGroup } from '@univerjs/design';
 import { useDependency, useObservable } from '@univerjs/ui';
+import type { LocaleKey } from '../../locale/types';
+import type { FilterOperator } from '../../models/conditions';
+import type { ByConditionsModel } from '../../services/sheets-filter-panel.service';
 import { FilterConditionItems } from '../../models/conditions';
 
 export function MobileFilterByCondition(props: { model: ByConditionsModel }) {
@@ -29,7 +29,7 @@ export function MobileFilterByCondition(props: { model: ByConditionsModel }) {
     const formParams = useObservable(model.filterConditionFormParams$, undefined, true);
     const secondaryOptions = FilterConditionItems.ALL_CONDITIONS
         .filter((item) => item.numOfParameters !== 2)
-        .map((item) => ({ label: localeService.t(item.label), value: item.operator }));
+        .map((item) => ({ label: localeService.t<LocaleKey>(item.label), value: item.operator }));
 
     if (!condition || !formParams) {
         return null;
@@ -124,7 +124,7 @@ export function MobileFilterByCondition(props: { model: ByConditionsModel }) {
                                 onChange={(operator) => model.onPrimaryConditionChange(operator as FilterOperator)}
                             >
                                 <span className="univer-flex univer-min-h-12 univer-items-center univer-text-base">
-                                    {localeService.t(item.label)}
+                                    {localeService.t<LocaleKey>(item.label)}
                                 </span>
                             </Radio>
                             {selected && condition.numOfParameters > 0 && renderConditionEditor()}

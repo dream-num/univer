@@ -15,8 +15,9 @@
  */
 
 import { DataValidationOperator } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 
-export const OperatorTextMap: Record<DataValidationOperator, string> = {
+export const OperatorTextMap: Record<DataValidationOperator, LocaleKey> = {
     [DataValidationOperator.BETWEEN]: 'data-validation.operators.between',
     [DataValidationOperator.EQUAL]: 'data-validation.operators.equal',
     [DataValidationOperator.GREATER_THAN]: 'data-validation.operators.greaterThan',
@@ -27,7 +28,7 @@ export const OperatorTextMap: Record<DataValidationOperator, string> = {
     [DataValidationOperator.NOT_EQUAL]: 'data-validation.operators.notEqual',
 };
 
-export const OperatorTitleMap: Record<DataValidationOperator | 'NONE', string> = {
+export const OperatorTitleMap: Record<DataValidationOperator | 'NONE', LocaleKey> = {
     [DataValidationOperator.BETWEEN]: 'data-validation.ruleName.between',
     [DataValidationOperator.EQUAL]: 'data-validation.ruleName.equal',
     [DataValidationOperator.GREATER_THAN]: 'data-validation.ruleName.greaterThan',
@@ -39,7 +40,7 @@ export const OperatorTitleMap: Record<DataValidationOperator | 'NONE', string> =
     NONE: 'data-validation.ruleName.legal',
 };
 
-export const OperatorErrorTitleMap: Record<DataValidationOperator | 'NONE', string> = {
+export const OperatorErrorTitleMap: Record<DataValidationOperator | 'NONE', LocaleKey> = {
     [DataValidationOperator.BETWEEN]: 'data-validation.errorMsg.between',
     [DataValidationOperator.EQUAL]: 'data-validation.errorMsg.equal',
     [DataValidationOperator.GREATER_THAN]: 'data-validation.errorMsg.greaterThan',

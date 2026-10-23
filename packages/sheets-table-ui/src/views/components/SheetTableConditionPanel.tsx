@@ -15,14 +15,14 @@
  */
 
 import type { ITableFilterItem } from '@univerjs/sheets-table';
-import type { LocaleKey } from '../../locale/types';
-import type { IConditionCompareTypeEnum, IConditionExpect, IConditionInfo, ITableConditionTypeEnumWithoutLogic } from './type';
 import { Injector, LocaleService } from '@univerjs/core';
 import { borderClassName, CascaderList, clsx, DatePicker, DateRangePicker, Dropdown, Input, Select } from '@univerjs/design';
 import { MoreDownIcon } from '@univerjs/icons';
 import { TableConditionTypeEnum, TableDateCompareTypeEnum, TableStringCompareTypeEnum } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type { IConditionCompareTypeEnum, IConditionExpect, IConditionInfo, ITableConditionTypeEnumWithoutLogic } from './type';
 import { ConditionSubComponentEnum } from './type';
 import { datePickerSet, getCascaderListOptions, getConditionDateSelect, getSubComponentType } from './util';
 
@@ -99,12 +99,16 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
     };
 
     const subComponentType = getSubComponentType(conditionInfo.type, conditionInfo.compare);
+    const compareLabel = cascaderOptions.find((option) => option.value === conditionInfo.type)
+        ?.children
+        .find((option) => option.value === conditionInfo.compare)
+        ?.label ?? '';
 
     let selectType = '';
     if (conditionInfo.compare) {
-        selectType = `${localeService.t(`sheets-table-ui.condition.${conditionInfo.type}`)} - ${localeService.t(`sheets-table-ui.${conditionInfo.type}.compare.${conditionInfo.compare}`)}`;
+        selectType = `${localeService.t<LocaleKey>(`sheets-table-ui.condition.${conditionInfo.type}`)} - ${compareLabel}`;
     } else {
-        selectType = localeService.t(`sheets-table-ui.condition.${conditionInfo.type}`);
+        selectType = localeService.t<LocaleKey>(`sheets-table-ui.condition.${conditionInfo.type}`);
     }
 
     const conditionDateOptions = getConditionDateSelect(injector, conditionInfo.compare as TableDateCompareTypeEnum);

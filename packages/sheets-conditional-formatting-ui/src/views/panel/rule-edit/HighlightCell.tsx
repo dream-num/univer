@@ -22,8 +22,6 @@ import type {
     ITimePeriodHighlightCell,
     IUniqueValuesHighlightCell,
 } from '@univerjs/sheets-conditional-formatting';
-import type { LocaleKey } from '../../../locale/types';
-import type { IStyleEditorProps } from './type';
 import { LocaleService } from '@univerjs/core';
 import { Input, Select } from '@univerjs/design';
 import {
@@ -36,6 +34,8 @@ import {
 } from '@univerjs/sheets-conditional-formatting';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useState } from 'react';
+import type { LocaleKey } from '../../../locale/types';
+import type { IStyleEditorProps } from './type';
 import { ConditionalFormattingRulePreview } from '../../ConditionalFormattingRulePreview';
 import { ConditionalStyleEditor } from '../../ConditionalStyleEditor';
 import { WrapperError } from '../../wrapper-error/WrapperError';
@@ -279,7 +279,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, IEditable
         label: localeService.t<LocaleKey>('sheets-conditional-formatting-ui.subRuleType.uniqueValues'),
     }];
 
-    const operatorOptions = useMemo(() => getOperatorOptions(subType).map((option) => ({ ...option, label: localeService.t(option.label) })), [localeService, subType]);
+    const operatorOptions = useMemo(() => getOperatorOptions(subType).map((option) => ({ ...option, label: localeService.t<LocaleKey>(option.label) })), [localeService, subType]);
 
     const [operator, setOperator] = useState<IEditableOperator | undefined>(() => {
         const defaultV = operatorOptions[0]?.value;
@@ -382,7 +382,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, IEditable
         if (!_subType) {
             return;
         }
-        const operatorList = getOperatorOptions(_subType).map((option) => ({ ...option, label: localeService.t(option.label) }));
+        const operatorList = getOperatorOptions(_subType).map((option) => ({ ...option, label: localeService.t<LocaleKey>(option.label) }));
         const _operator = operatorList[0]?.value;
         setSubType(_subType);
         setOperator(_operator);

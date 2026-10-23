@@ -16,8 +16,6 @@
 
 import type { IRange, Nullable, Styles, Workbook, Worksheet } from '@univerjs/core';
 import type { FilterColumn } from '@univerjs/sheets-filter';
-import type { LocaleKey } from '../locale/types';
-import type { IFilterByValueItem, IFilterByValueWithTreeItem } from '../services/sheets-filter-panel.service';
 import {
     createIdentifier,
     Disposable,
@@ -30,6 +28,9 @@ import {
     numfmt,
 } from '@univerjs/core';
 import { FilterBy } from '@univerjs/sheets-filter';
+import type enUS from '../locale/en-US';
+import type { LocaleKey } from '../locale/types';
+import type { IFilterByValueItem, IFilterByValueWithTreeItem } from '../services/sheets-filter-panel.service';
 
 export interface ISheetsGenerateFilterValuesService {
     getFilterValues(params: {
@@ -159,7 +160,6 @@ export function getFilterByValueItems(
     return items;
 }
 
-// eslint-disable-next-line max-lines-per-function, complexity
 export function getFilterTreeByValueItems(
     filters: boolean,
     localeService: LocaleService,
@@ -240,7 +240,7 @@ export function getFilterTreeByValueItems(
                 let monthItem = yearItem.children?.find((item) => item.key === `${year}-${month}`);
                 if (!monthItem) {
                     monthItem = {
-                        title: localeService.t(`sheets-filter-ui.date.${month}`),
+                        title: localeService.t<LocaleKey>(`sheets-filter-ui.date.${month as keyof typeof enUS['sheets-filter-ui']['date']}`),
                         key: `${year}-${month}`,
                         children: [],
                         count: 0,

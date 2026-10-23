@@ -145,7 +145,7 @@ export function EmojiPicker(props: IEmojiPickerProps) {
             { key: 'recent', title: localeService.t<LocaleKey>('ui.emojiPicker.recents'), emojis: recents },
             ...EMOJI_CATEGORIES.map((category) => ({
                 key: category.key,
-                title: localeService.t(category.titleKey),
+                title: localeService.t<LocaleKey>(category.titleKey),
                 emojis: emojis[category.key].map((item) => applyEmojiSkinTone(item, skinTone)),
             })),
         ];
@@ -392,7 +392,7 @@ export function EmojiPicker(props: IEmojiPickerProps) {
                     <CategoryButton
                         key={category.key}
                         selected={!isSearching && activeTab === category.key}
-                        title={localeService.t(category.titleKey)}
+                        title={localeService.t<LocaleKey>(category.titleKey)}
                         onClick={() => scrollToSection(category.key)}
                     >
                         <CategoryIcon category={category.key} />

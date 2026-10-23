@@ -15,13 +15,6 @@
  */
 
 import type { ITableFilterItem } from '@univerjs/sheets-table';
-import type { LocaleKey } from '../../locale/types';
-import type {
-    IConditionCompareTypeEnum,
-    IConditionExpect,
-    IConditionInfo,
-    ITableConditionTypeEnumWithoutLogic,
-} from './type';
 import { Injector, LocaleService } from '@univerjs/core';
 import {
     borderClassName,
@@ -37,6 +30,13 @@ import { MoreDownIcon } from '@univerjs/icons';
 import { TableConditionTypeEnum, TableDateCompareTypeEnum, TableStringCompareTypeEnum } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type {
+    IConditionCompareTypeEnum,
+    IConditionExpect,
+    IConditionInfo,
+    ITableConditionTypeEnumWithoutLogic,
+} from './type';
 import { ConditionSubComponentEnum } from './type';
 import { datePickerSet, getCascaderListOptions, getConditionDateSelect, getSubComponentType } from './util';
 
@@ -116,9 +116,13 @@ export function MobileSheetTableConditionPanel(props: IMobileSheetTableCondition
     }
 
     const subComponentType = getSubComponentType(conditionInfo.type, conditionInfo.compare);
+    const compareLabel = cascaderOptions.find((option) => option.value === conditionInfo.type)
+        ?.children
+        .find((option) => option.value === conditionInfo.compare)
+        ?.label ?? '';
     const selectType = conditionInfo.compare
-        ? `${localeService.t(`sheets-table-ui.condition.${conditionInfo.type}`)} - ${localeService.t(`sheets-table-ui.${conditionInfo.type}.compare.${conditionInfo.compare}`)}`
-        : localeService.t(`sheets-table-ui.condition.${conditionInfo.type}`);
+        ? `${localeService.t<LocaleKey>(`sheets-table-ui.condition.${conditionInfo.type}`)} - ${compareLabel}`
+        : localeService.t<LocaleKey>(`sheets-table-ui.condition.${conditionInfo.type}`);
     const conditionDateOptions = getConditionDateSelect(injector, conditionInfo.compare as TableDateCompareTypeEnum);
 
     return (

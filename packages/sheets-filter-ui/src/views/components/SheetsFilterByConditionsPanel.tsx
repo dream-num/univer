@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../../locale/types';
-import type { FilterOperator, IFilterConditionFormParams } from '../../models/conditions';
-import type { ByConditionsModel } from '../../services/sheets-filter-panel.service';
 import { LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type { FilterOperator, IFilterConditionFormParams } from '../../models/conditions';
+import type { ByConditionsModel } from '../../services/sheets-filter-panel.service';
 import { FilterConditionItems } from '../../models/conditions';
 
 const PRIMARY_CONDITION_GROUPS = [
@@ -65,7 +65,7 @@ export function FilterByCondition(props: { model: ByConditionsModel }) {
 
     const primaryOptions = PRIMARY_CONDITION_GROUPS.map((group) => ({
         options: group.map((conditionItem) => ({
-            label: localeService.t(conditionItem.label),
+            label: localeService.t<LocaleKey>(conditionItem.label),
             value: conditionItem.operator,
         })),
     }));
@@ -76,7 +76,7 @@ export function FilterByCondition(props: { model: ByConditionsModel }) {
     const secondaryOptions = FilterConditionItems.ALL_CONDITIONS
         .filter((conditionItem) => conditionItem.numOfParameters !== 2)
         .map((conditionItem) => ({
-            label: localeService.t(conditionItem.label),
+            label: localeService.t<LocaleKey>(conditionItem.label),
             value: conditionItem.operator,
         }));
     const onFormParamsChange = useCallback((diffParams: Partial<IFilterConditionFormParams>) => {

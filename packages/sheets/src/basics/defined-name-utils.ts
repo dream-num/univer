@@ -19,6 +19,7 @@ import type { IDefinedNamesService, IFunctionService, ISuperTableService } from 
 import { Tools, UniverInstanceType } from '@univerjs/core';
 import { isReferenceStringWithEffectiveColumn } from '@univerjs/engine-formula';
 import { cjk } from '@univerjs/engine-render';
+import type { LocaleKey } from '../locale/types';
 
 interface IValidateDefinedNameOptions {
     unitId: string;
@@ -30,7 +31,7 @@ interface IValidateDefinedNameOptions {
     id?: string;
 }
 
-export function validateDefinedName(name: string, options: IValidateDefinedNameOptions): true | string {
+export function validateDefinedName(name: string, options: IValidateDefinedNameOptions): true | LocaleKey {
     if (name.length === 0) {
         return 'sheets.definedName.nameEmpty';
     }

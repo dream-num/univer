@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../../locale/types';
-import type { ByColorsModel, ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button, Segmented } from '@univerjs/design';
 import { FilterBy, SheetsFilterService } from '@univerjs/sheets-filter';
@@ -23,6 +21,8 @@ import { SheetsUIPart } from '@univerjs/sheets-ui';
 import { ComponentContainer, useComponentsOfPart, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback } from 'react';
 import { of } from 'rxjs';
+import type { LocaleKey } from '../../locale/types';
+import type { ByColorsModel, ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
 import { ChangeFilterByOperation, CloseFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import { ISheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
 import { FilterByColor } from './SheetsFilterByColorsPanel';
@@ -49,7 +49,7 @@ export function FilterPanel() {
     const filterBy = useObservable(sheetsFilterPanelService.filterBy$, undefined, true);
     const filterByModel = useObservable(sheetsFilterPanelService.filterByModel$, undefined, false);
     const canApply = useObservable(() => filterByModel?.canApply$ || of(false), undefined, false, [filterByModel]);
-    const items = FILTER_BY_OPTIONS.map((option) => ({ ...option, label: localeService.t(option.label) }));
+    const items = FILTER_BY_OPTIONS.map((option) => ({ ...option, label: localeService.t<LocaleKey>(option.label) }));
 
     // only can disable clear when there is no criteria
     const clearFilterDisabled = !useObservable(sheetsFilterPanelService.hasCriteria$);

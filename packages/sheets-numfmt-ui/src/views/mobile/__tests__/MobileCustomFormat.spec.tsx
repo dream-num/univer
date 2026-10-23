@@ -22,6 +22,7 @@ import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { LocaleKey } from '../../../locale/types';
 import enUS from '../../../locale/en-US';
 import zhCN from '../../../locale/zh-CN';
 import { MobileCustomFormat } from '../MobileCustomFormat';
@@ -111,7 +112,7 @@ describe('MobileCustomFormat', () => {
         act(() => select!.dispatchEvent(new MouseEvent('click', { bubbles: true })));
         expect(document.body.querySelector('[role="dialog"]')?.textContent).toContain('yyyy"年"MM"月"dd"日"');
         act(() => getButton('m/d/yyyy').dispatchEvent(new MouseEvent('click', { bubbles: true })));
-        act(() => getButton(localeService.t('sheets-numfmt-ui.confirm')).dispatchEvent(new MouseEvent('click', { bubbles: true })));
+        act(() => getButton(localeService.t<LocaleKey>('sheets-numfmt-ui.confirm')).dispatchEvent(new MouseEvent('click', { bubbles: true })));
         expect(onConfirm).toHaveBeenCalledExactlyOnceWith('m/d/yyyy');
     });
 });

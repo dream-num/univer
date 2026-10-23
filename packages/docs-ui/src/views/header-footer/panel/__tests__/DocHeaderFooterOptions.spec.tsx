@@ -61,6 +61,7 @@ import {
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it } from 'vitest';
+import type { LocaleKey } from '../../../../locale/types';
 import {
     CloseHeaderFooterCommand,
     CoreHeaderFooterCommand,
@@ -204,7 +205,7 @@ describe('DocHeaderFooterOptions', () => {
         expect(rendered.model.getSnapshot().body!.sectionBreaks![1].marginHeader).toBe(25.5);
         expect(rendered.model.getSnapshot().documentStyle.marginHeader).toBe(12);
         const closeButton = Array.from(container.querySelectorAll('button')).find((button) => (
-            button.textContent?.includes(rendered.injector.get(LocaleService).t('docs-ui.headerFooter.closeHeaderFooter'))
+            button.textContent?.includes(rendered.injector.get(LocaleService).t<LocaleKey>('docs-ui.headerFooter.closeHeaderFooter'))
         ))!;
         await act(async () => closeButton.click());
         expect(rendered.skeletonManager.getViewModel().getEditArea()).toBe(DocumentEditArea.BODY);

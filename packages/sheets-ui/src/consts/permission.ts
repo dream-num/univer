@@ -15,6 +15,7 @@
  */
 
 import { UnitAction } from '@univerjs/protocol';
+import type { LocaleKey } from '../locale/types';
 
 export const UNIVER_SHEET_PERMISSION_PLUGIN_NAME = 'UNIVER_SHEET_PERMISSION_PLUGIN';
 export const UNIVER_SHEET_PERMISSION_PANEL = 'UNIVER_SHEET_PERMISSION_PANEL';
@@ -25,21 +26,21 @@ export const UNIVER_SHEET_PERMISSION_DIALOG = 'UNIVER_SHEET_PERMISSION_DIALOG';
 export const UNIVER_SHEET_PERMISSION_USER_DIALOG_ID = 'UNIVER_SHEET_PERMISSION_USER_DIALOG_ID';
 export const UNIVER_SHEET_PERMISSION_DIALOG_ID = 'UNIVER_SHEET_PERMISSION_DIALOG_ID';
 
-export const subUnitPermissionTypeMap: Partial<Record<UnitAction, string>> = {
-    [UnitAction.Copy]: 'Copy',
-    [UnitAction.SetCellStyle]: 'SetCellStyle',
-    [UnitAction.SetCellValue]: 'SetCellValue',
-    [UnitAction.SetRowStyle]: 'SetRowStyle',
-    [UnitAction.SetColumnStyle]: 'SetColumnStyle',
-    [UnitAction.InsertRow]: 'InsertRow',
-    [UnitAction.InsertColumn]: 'InsertColumn',
-    [UnitAction.InsertHyperlink]: 'InsertHyperlink',
-    [UnitAction.DeleteRow]: 'DeleteRow',
-    [UnitAction.DeleteColumn]: 'DeleteColumn',
-    [UnitAction.Sort]: 'Sort',
-    [UnitAction.Filter]: 'Filter',
-    [UnitAction.PivotTable]: 'PivotTable',
-    [UnitAction.EditExtraObject]: 'EditExtraObject',
+export const subUnitPermissionTypeMap: Partial<Record<UnitAction, LocaleKey>> = {
+    [UnitAction.Copy]: 'sheets-ui.permission.panel.Copy',
+    [UnitAction.SetCellStyle]: 'sheets-ui.permission.panel.SetCellStyle',
+    [UnitAction.SetCellValue]: 'sheets-ui.permission.panel.SetCellValue',
+    [UnitAction.SetRowStyle]: 'sheets-ui.permission.panel.SetRowStyle',
+    [UnitAction.SetColumnStyle]: 'sheets-ui.permission.panel.SetColumnStyle',
+    [UnitAction.InsertRow]: 'sheets-ui.permission.panel.InsertRow',
+    [UnitAction.InsertColumn]: 'sheets-ui.permission.panel.InsertColumn',
+    [UnitAction.InsertHyperlink]: 'sheets-ui.permission.panel.InsertHyperlink',
+    [UnitAction.DeleteRow]: 'sheets-ui.permission.panel.DeleteRow',
+    [UnitAction.DeleteColumn]: 'sheets-ui.permission.panel.DeleteColumn',
+    [UnitAction.Sort]: 'sheets-ui.permission.panel.Sort',
+    [UnitAction.Filter]: 'sheets-ui.permission.panel.Filter',
+    [UnitAction.PivotTable]: 'sheets-ui.permission.panel.PivotTable',
+    [UnitAction.EditExtraObject]: 'sheets-ui.permission.panel.EditExtraObject',
 };
 
 export const defaultWorksheetUnitActionList: UnitAction[] = [

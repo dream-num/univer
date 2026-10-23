@@ -58,7 +58,7 @@ const FILTER_BY_OPTIONS: Array<{ label: LocaleKey; value: FilterByEnum }> = [
 
 export function SheetTableFilterPanel() {
     const localeService = useDependency(LocaleService);
-    const filterByItems = FILTER_BY_OPTIONS.map((option) => ({ ...option, label: localeService.t(option.label) }));
+    const filterByItems = FILTER_BY_OPTIONS.map((option) => ({ ...option, label: localeService.t<LocaleKey>(option.label) }));
     const tableUiService = useDependency(SheetsTableUiService);
     const tableManager = useDependency(TableManager);
     const commandService = useDependency(ICommandService);

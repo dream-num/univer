@@ -17,6 +17,7 @@
 import type { IDataValidationRuleBase } from '@univerjs/core';
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import { BaseDataValidator } from '@univerjs/data-validation';
+import type { LocaleKey } from '../locale/types';
 import { OperatorErrorTitleMap, OperatorTextMap, OperatorTitleMap } from '../types/const/operator-text-map';
 
 export const FORMULA1 = '{FORMULA1}';
@@ -25,24 +26,24 @@ export const TYPE = '{TYPE}';
 
 export abstract class BaseSheetValidator extends BaseDataValidator {
     override get operatorNames() {
-        return this.operators.map((operator) => this.localeService.t(OperatorTextMap[operator]));
+        return this.operators.map((operator) => this.localeService.t<LocaleKey>(OperatorTextMap[operator]));
     }
 
     override generateRuleName(rule: IDataValidationRuleBase): string {
         if (!rule.operator) {
-            return this.localeService.t(OperatorTitleMap.NONE).replace(TYPE, this.titleStr);
+            return this.localeService.t<LocaleKey>(OperatorTitleMap.NONE).replace(TYPE, this.titleStr);
         }
 
-        const ruleName = this.localeService.t(OperatorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
+        const ruleName = this.localeService.t<LocaleKey>(OperatorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
         return `${this.titleStr} ${ruleName}`;
     }
 
     override generateRuleErrorMessage(rule: IDataValidationRuleBase, _position: ISheetLocationBase) {
         if (!rule.operator) {
-            return this.localeService.t(OperatorErrorTitleMap.NONE).replace(TYPE, this.titleStr);
+            return this.localeService.t<LocaleKey>(OperatorErrorTitleMap.NONE).replace(TYPE, this.titleStr);
         }
 
-        const errorMsg = this.localeService.t(OperatorErrorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
+        const errorMsg = this.localeService.t<LocaleKey>(OperatorErrorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
         return `${errorMsg}`;
     }
 }

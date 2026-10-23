@@ -17,7 +17,6 @@
 import type { DocumentDataModel, ISize, PaperType } from '@univerjs/core';
 import type { IConfirmChildrenProps } from '@univerjs/ui';
 import type { ReactNode } from 'react';
-import type { LocaleKey } from '../locale/types';
 import {
     DocumentFlavor,
     IUniverInstanceService,
@@ -32,6 +31,7 @@ import {
 import { borderClassName, clsx, InputNumber, resetButtonClassName, Select } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
+import type { LocaleKey } from '../locale/types';
 
 export interface IPageSettingsProps {
     onClose: () => void;
@@ -177,7 +177,7 @@ export function PageSettings(props: IConfirmChildrenProps & { InputNumberCompone
                                     })}
                                     onClick={() => handleModernWidthChange(option)}
                                 >
-                                    <span>{localeService.t(`docs-ui.page-settings.modern-width-${option}`)}</span>
+                                    <span>{localeService.t<LocaleKey>(`docs-ui.page-settings.modern-width-${option}`)}</span>
                                     <span className="univer-text-xs univer-font-normal univer-text-gray-400">
                                         {MODERN_DOCUMENT_WIDTH[option]}
                                         px
@@ -198,7 +198,7 @@ export function PageSettings(props: IConfirmChildrenProps & { InputNumberCompone
                                 value={settings.paperSize}
                                 onChange={handlePaperSizeChange}
                                 options={PAPER_TYPES.map((p) => ({
-                                    label: localeService.t(`docs-ui.page-settings.page-size.${p.toLocaleLowerCase()}`),
+                                    label: localeService.t<LocaleKey>(`docs-ui.page-settings.page-size.${p.toLowerCase() as Lowercase<PaperType>}`),
                                     value: p,
                                 }))}
                             />

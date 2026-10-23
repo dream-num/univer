@@ -27,6 +27,7 @@ import {
     WorksheetSetColumnStylePermission,
     WorksheetSetRowStylePermission,
 } from '@univerjs/sheets';
+import type { LocaleKey } from '../../locale/types';
 import { IRepeatLastActionService, RepeatLastActionPermission } from '../../services/repeat-last-action.service';
 
 const permissionCheckMap = {
@@ -36,7 +37,7 @@ const permissionCheckMap = {
             worksheetTypes: [WorksheetEditPermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
         },
-        errorMessageKey: 'sheets-ui.permission.dialog.editErr',
+        errorMessageKey: 'sheets-ui.permission.dialog.editErr' as const,
     },
     [RepeatLastActionPermission.CellStyle]: {
         permissionTypes: {
@@ -44,7 +45,7 @@ const permissionCheckMap = {
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
         },
-        errorMessageKey: 'sheets-ui.permission.dialog.setStyleErr',
+        errorMessageKey: 'sheets-ui.permission.dialog.setStyleErr' as const,
     },
     [RepeatLastActionPermission.CellValue]: {
         permissionTypes: {
@@ -52,7 +53,7 @@ const permissionCheckMap = {
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
         },
-        errorMessageKey: 'sheets-ui.permission.dialog.editErr',
+        errorMessageKey: 'sheets-ui.permission.dialog.editErr' as const,
     },
     [RepeatLastActionPermission.RowStyle]: {
         permissionTypes: {
@@ -60,7 +61,7 @@ const permissionCheckMap = {
             worksheetTypes: [WorksheetEditPermission, WorksheetSetRowStylePermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
         },
-        errorMessageKey: 'sheets-ui.permission.dialog.setRowColStyleErr',
+        errorMessageKey: 'sheets-ui.permission.dialog.setRowColStyleErr' as const,
     },
     [RepeatLastActionPermission.ColumnStyle]: {
         permissionTypes: {
@@ -68,7 +69,7 @@ const permissionCheckMap = {
             worksheetTypes: [WorksheetEditPermission, WorksheetSetColumnStylePermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
         },
-        errorMessageKey: 'sheets-ui.permission.dialog.setRowColStyleErr',
+        errorMessageKey: 'sheets-ui.permission.dialog.setRowColStyleErr' as const,
     },
 };
 
@@ -96,7 +97,7 @@ export const RepeatLastActionCommand: ICommand = {
                 const permissionConfig = permissionCheckMap[permissionType];
                 const permission = sheetPermissionCheckController.permissionCheckWithRanges(permissionConfig.permissionTypes);
                 if (!permission) {
-                    sheetPermissionCheckController.blockExecuteWithoutPermission(localeService.t(permissionConfig.errorMessageKey));
+                    sheetPermissionCheckController.blockExecuteWithoutPermission(localeService.t<LocaleKey>(permissionConfig.errorMessageKey));
                     return false;
                 }
             }
@@ -104,7 +105,7 @@ export const RepeatLastActionCommand: ICommand = {
             const permissionConfig = permissionCheckMap[actionPermissionType];
             const permission = sheetPermissionCheckController.permissionCheckWithRanges(permissionConfig.permissionTypes);
             if (!permission) {
-                sheetPermissionCheckController.blockExecuteWithoutPermission(localeService.t(permissionConfig.errorMessageKey));
+                sheetPermissionCheckController.blockExecuteWithoutPermission(localeService.t<LocaleKey>(permissionConfig.errorMessageKey));
                 return false;
             }
         }

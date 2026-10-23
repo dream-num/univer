@@ -17,8 +17,6 @@
 import type { Workbook } from '@univerjs/core';
 import type { IDataBar, IValueConfig } from '@univerjs/sheets-conditional-formatting';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
-import type { LocaleKey } from '../../../locale/types';
-import type { IStyleEditorProps } from './type';
 import { IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, Checkbox, clsx, Radio, RadioGroup, Select } from '@univerjs/design';
 import {
@@ -31,6 +29,8 @@ import {
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { LocaleKey } from '../../../locale/types';
+import type { IStyleEditorProps } from './type';
 import { ColorPicker } from '../../ColorPicker';
 import { ConditionalFormattingRulePreview } from '../../ConditionalFormattingRulePreview';
 import { RuleNumberInput } from './RuleNumberInput';
@@ -151,8 +151,8 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         createOptionItem(CFValueType.percentile),
         createOptionItem(CFValueType.formula),
     ];
-    const minOptions = [createOptionItem(CFValueType.min), ...commonOptionDefinitions].map((option) => ({ ...option, label: localeService.t(option.label) }));
-    const maxOptions = [createOptionItem(CFValueType.max), ...commonOptionDefinitions].map((option) => ({ ...option, label: localeService.t(option.label) }));
+    const minOptions = [createOptionItem(CFValueType.min), ...commonOptionDefinitions].map((option) => ({ ...option, label: localeService.t<LocaleKey>(option.label) }));
+    const maxOptions = [createOptionItem(CFValueType.max), ...commonOptionDefinitions].map((option) => ({ ...option, label: localeService.t<LocaleKey>(option.label) }));
     const [minValueType, setMinValueType] = useState<CFValueType>(() => {
         const defaultV = minOptions[0].value as CFValueType;
         if (!rule) {

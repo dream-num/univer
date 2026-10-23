@@ -17,7 +17,6 @@
 import type { IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISheetRangeLocation } from '@univerjs/sheets';
 import type { ISortOption } from '@univerjs/sheets-sort';
-import type { LocaleKey } from '../locale/types';
 import {
     Disposable,
     ICommandService,
@@ -32,6 +31,7 @@ import {
 import { expandToContinuousRange, getPrimaryForRange, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import { BehaviorSubject } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
 import { createExtendConfirm } from '../views/ExtendConfirm';
 import { createSortCheckError } from '../views/SortCheckError';
 
@@ -55,7 +55,7 @@ const SORT_ERROR_MESSAGE = {
     EMPTY_ERROR: 'sheets-sort-ui.error.empty',
     SINGLE_ERROR: 'sheets-sort-ui.error.single',
     FORMULA_ARRAY: 'sheets-sort-ui.error.formula-array',
-};
+} satisfies Record<string, LocaleKey>;
 
 export class SheetsSortUIService extends Disposable {
     private readonly _customSortState$ = new BehaviorSubject<Nullable<ICustomSortState>>(null);
@@ -154,14 +154,14 @@ export class SheetsSortUIService extends Disposable {
         this._commandService.executeCommand(SetSelectionsOperation.id, setSelectionsOperationParams);
     }
 
-    async showCheckError(content: string): Promise<boolean> {
+    async showCheckError(content: LocaleKey): Promise<boolean> {
         return await this._confirmService.confirm({
             id: 'sort-range-check-error',
             title: {
                 title: this._localeService.t<LocaleKey>('sheets-sort-ui.info.tooltip'),
             },
             children: {
-                title: createSortCheckError(this._localeService.t(content)),
+                title: createSortCheckError(this._localeService.t<LocaleKey>(content)),
             },
             cancelText: this._localeService.t<LocaleKey>('sheets-sort-ui.dialog.cancel'),
             confirmText: this._localeService.t<LocaleKey>('sheets-sort-ui.dialog.confirm'),

@@ -60,7 +60,7 @@ import {
     useObservable,
 } from '@univerjs/ui';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, skip } from 'rxjs';
 import type { LocaleKey } from '../locale/types';
 import type { IMutiPageParagraphBound } from '../services/doc-event-manager.service';
 import type { IDocBlockMenuTarget } from '../services/doc-paragraph-menu.service';
@@ -113,6 +113,7 @@ import {
 import { IDocClipboardService } from '../services/clipboard/clipboard.service';
 import { DocEventManagerService } from '../services/doc-event-manager.service';
 import { DocParagraphMenuService } from '../services/doc-paragraph-menu.service';
+import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
 import { observeParagraphMenuPosition } from './paragraph-menu/paragraph-menu-position';
 
 export function getParagraphMenuPopupDirection(
@@ -906,6 +907,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     const doc = univerInstanceService.getUnit<DocumentDataModel>(popup.unitId, UniverInstanceType.UNIVER_DOC);
     const docParagraphMenuService = renderUnit?.with(DocParagraphMenuService);
     const docEventManagerService = renderUnit?.with(DocEventManagerService);
+    const docSelectionRenderService = renderUnit?.with(DocSelectionRenderService);
     const isFocusedTableMenu = popup.extraProps?.focusedTableMenu === true;
     const activeTarget = useObservable(isFocusedTableMenu
         ? docParagraphMenuService?.focusedTableTarget$
@@ -1012,6 +1014,15 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
         targetRangeRef.current = null;
         docParagraphMenuService?.setParagraphMenuActive(false, isFocusedTableMenu);
     }, [docParagraphMenuService, isFocusedTableMenu, restoreMenuFocus]);
+
+    useEffect(() => {
+        if (!visible || isFocusedTableMenu || !docSelectionRenderService) {
+            return;
+        }
+        // Selection-start replays its last value; dismiss only for a new canvas interaction.
+        const subscription = docSelectionRenderService.onSelectionStart$.pipe(skip(1)).subscribe(handleHideMenu);
+        return () => subscription.unsubscribe();
+    }, [docSelectionRenderService, handleHideMenu, isFocusedTableMenu, visible]);
 
     useEffect(() => {
         if (!isFocusedTableMenu || !docParagraphMenuService) {

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IBullet } from '../../../types/interfaces';
 import { describe, expect, it } from 'vitest';
+import type { IBullet, IDocumentData } from '../../../types/interfaces';
 import {
     BaselineOffset,
     BooleanNumber,
@@ -359,6 +359,98 @@ describe('RichTextValue', () => {
 });
 
 describe('RichTextBuilder', () => {
+    describe('normalized imported documents', () => {
+        it.each([
+            {
+                name: 'missing section ids',
+                dataStream: 'Data\rData\r\n',
+                secondStart: 5,
+                sectionBreaks: [{ startIndex: 10 }],
+            },
+            {
+                name: 'duplicate section ids',
+                dataStream: 'Data\r\nData\r\n',
+                secondStart: 6,
+                sectionBreaks: [
+                    { startIndex: 5, sectionId: 'duplicate' },
+                    { startIndex: 11, sectionId: 'duplicate' },
+                ],
+            },
+        ])('publishes copied style edits after normalizing $name', ({ dataStream, secondStart, sectionBreaks }) => {
+            const style = { ff: '宋体', fs: 18, bl: BooleanNumber.TRUE, cl: { rgb: '#FF0000' } };
+            // Legacy import payloads can omit ids required by the current document schema.
+            const data = {
+                id: 'imported-rich-text',
+                documentStyle: { textStyle: { ff: '宋体' } },
+                body: {
+                    dataStream,
+                    textRuns: [
+                        { st: 0, ed: 4, ts: style },
+                        { st: secondStart, ed: secondStart + 4, ts: style },
+                    ],
+                    paragraphs: [{ startIndex: 4 }, { startIndex: secondStart + 4 }],
+                    sectionBreaks,
+                    customRanges: [{
+                        startIndex: secondStart,
+                        endIndex: secondStart + 3,
+                        rangeId: 'source-link',
+                        rangeType: CustomRangeType.HYPERLINK,
+                        properties: { url: 'https://example.com/report' },
+                    }],
+                },
+            } as unknown as IDocumentData;
+            const original = RichTextValue.create(data);
+            const before = JSON.parse(JSON.stringify(original.getData()));
+            const edited = original.copy();
+            const untouched = original.copy();
+
+            edited.setStyle(0, 4, { ff: 'Courier New', fs: 22, bl: BooleanNumber.FALSE });
+
+            const result = edited.getData();
+            expect(result.body?.textRuns).toEqual([
+                { st: 0, ed: 4, ts: { ...style, ff: 'Courier New', fs: 22, bl: BooleanNumber.FALSE } },
+                { st: secondStart, ed: secondStart + 4, ts: style },
+            ]);
+            expect(result.body?.dataStream).toBe(dataStream);
+            expect(result.body?.customRanges).toEqual(before.body.customRanges);
+            expect(result.documentStyle).toEqual(before.documentStyle);
+            const ids = result.body!.sectionBreaks!.map((section) => section.sectionId);
+            expect(ids.every(Boolean)).toBe(true);
+            expect(new Set(ids).size).toBe(ids.length);
+            expect(original.getData()).toEqual(before);
+            expect(untouched.getData().body?.textRuns).toEqual(before.body.textRuns);
+            expect(edited.copy().getData().body?.textRuns).toEqual(result.body?.textRuns);
+        });
+
+        it('keeps text-run handles and later edits synchronized after section normalization', () => {
+            const original = RichTextValue.create({
+                id: 'imported-text-runs',
+                documentStyle: {},
+                body: {
+                    dataStream: 'Data\rData\r\n',
+                    textRuns: [
+                        { st: 0, ed: 4, ts: { ff: '宋体', fs: 18 } },
+                        { st: 5, ed: 9, ts: { ff: '等线', fs: 11 } },
+                    ],
+                    paragraphs: [{ startIndex: 4 }, { startIndex: 9 }],
+                    sectionBreaks: [{ startIndex: 10 }],
+                },
+            } as unknown as IDocumentData);
+            const before = JSON.parse(JSON.stringify(original.getData()));
+            const edited = original.copy();
+            edited.getParagraphs()[0].getTextRuns()[0].setText('Ready');
+            edited.setStyle(0, 5, { bl: BooleanNumber.TRUE });
+            edited.insertText(5, '!');
+
+            expect(edited.toPlainText()).toBe('Ready!\nData');
+            expect(edited.getParagraphs().map((paragraph) => paragraph.getText())).toEqual(['Ready!', 'Data']);
+            expect(edited.getData().body?.textRuns?.[0].ts).toMatchObject({ ff: '宋体', fs: 18, bl: BooleanNumber.TRUE });
+            expect(edited.getData().body?.textRuns?.at(-1)).toEqual({ st: 7, ed: 11, ts: { ff: '等线', fs: 11 } });
+            expect(edited.getData().body?.sectionBreaks?.[0].startIndex).toBe(12);
+            expect(original.getData()).toEqual(before);
+        });
+    });
+
     it('should create empty rich text builder', () => {
         const builder = RichTextBuilder.create();
         const emptyData = RichTextBuilder.newEmptyData();

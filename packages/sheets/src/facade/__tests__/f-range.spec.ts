@@ -24,7 +24,6 @@ import type {
     Workbook,
 } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import type { FWorksheet } from '../f-worksheet';
 import {
     AbsoluteRefType,
     Dimension,
@@ -77,6 +76,7 @@ import {
     UnregisterWorksheetRangeThemeStyleMutation,
 } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { FWorksheet } from '../f-worksheet';
 import { SHEETS_CUSTOM_FIELD_WARNING_MESSAGE } from '../const';
 import { createFacadeTestBed } from './create-test-bed';
 
@@ -773,6 +773,39 @@ describe('Test FRange', () => {
         activeSheet.getRange('H3:I3').setRichTextValueForCell(richText);
         expect((activeSheet.getRange('H3').getValue(true) as RichTextValue).toPlainText()).toBe('Hello');
         expect(activeSheet.getRange('I3').getValue(true)).toBeUndefined();
+    });
+
+    it('persists copied rich-text edits without changing the source cell', () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        const sheet = workbook.getActiveSheet()!;
+        const style = { ff: '宋体', fs: 18, bl: 1, cl: { rgb: '#FF0000' } };
+        const data = {
+            id: 'imported-rich-text',
+            documentStyle: {},
+            body: {
+                dataStream: 'Data\rData\r\n',
+                textRuns: [
+                    { st: 0, ed: 4, ts: { ...style, bl: 1 } },
+                    { st: 5, ed: 9, ts: { ...style, bl: 1 } },
+                ],
+                paragraphs: [{ startIndex: 4 }, { startIndex: 9 }],
+                sectionBreaks: [{ startIndex: 10 }],
+            },
+        } as unknown as IDocumentData;
+        sheet.getRange('H4').setRichTextValueForCell(data);
+        const original = sheet.getRange('H4').getValue(true) as RichTextValue;
+        const before = JSON.parse(JSON.stringify(original.getData()));
+        const edited = original.copy().setStyle(0, 4, { ff: 'Courier New', fs: 22, bl: 0 });
+        sheet.getRange('I4').setRichTextValueForCell(edited);
+
+        const saved = workbook.save().sheets[sheet.getSheetId()].cellData!;
+        expect(saved[3][8].p?.body?.textRuns).toEqual([
+            { st: 0, ed: 4, ts: { ...style, ff: 'Courier New', fs: 22, bl: 0 } },
+            { st: 5, ed: 9, ts: style },
+        ]);
+        expect(saved[3][8].p?.body?.dataStream).toBe('Data\rData\r\n');
+        expect(saved[3][7].p).toEqual(before);
+        expect(original.getData()).toEqual(before);
     });
 
     it('Range inserts and deletes cells along both dimensions', async () => {

@@ -113,6 +113,7 @@ import {
 import { IDocClipboardService } from '../services/clipboard/clipboard.service';
 import { DocEventManagerService } from '../services/doc-event-manager.service';
 import { DocParagraphMenuService } from '../services/doc-paragraph-menu.service';
+import { observeParagraphMenuPosition } from './paragraph-menu/paragraph-menu-position';
 
 export function getParagraphMenuPopupDirection(
     anchorLeft: number,
@@ -922,7 +923,8 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
         docParagraphMenuService?.setParagraphMenuActive(active, isFocusedTableMenu);
     };
     const rawActiveTarget = getActiveTarget();
-    const currentActiveTarget = (rawActiveTarget?.kind === 'table') === tableBlockOnly ? rawActiveTarget : null;
+    const isTableMenu = tableBlockOnly || rawActiveTarget?.kind === 'table';
+    const currentActiveTarget = (rawActiveTarget?.kind === 'table') === isTableMenu ? rawActiveTarget : null;
     const activeParagraphBound = currentActiveTarget?.paragraph ?? docParagraphMenuService?.activeParagraph ?? paragraph ?? paragraphLeft;
     const startIndex = activeParagraphBound?.startIndex;
     const dataStream = doc?.getBody()?.dataStream ?? '';
@@ -990,6 +992,17 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
 
     // Service-driven dismissal (for example scrolling) can unmount the entire popup.
     useLayoutEffect(() => restoreMenuFocus, [restoreMenuFocus]);
+
+    useLayoutEffect(() => {
+        if (isFocusedTableMenu || !docParagraphMenuService) {
+            return;
+        }
+        const popupElement = anchorRef.current?.closest<HTMLElement>('[data-u-comp="rect-popup"]');
+        if (!popupElement) {
+            return;
+        }
+        return observeParagraphMenuPosition(popupElement, popup, docParagraphMenuService.activeTarget$);
+    }, [docParagraphMenuService, isFocusedTableMenu, popup]);
 
     const handleHideMenu = useCallback(() => {
         hoverOpenSchedulerRef.current.cancel();
@@ -1323,7 +1336,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     }, [docParagraphMenuService, isFocusedTableMenu]);
 
     useEffect(() => {
-        if (tableBlockOnly || !slashMenuRequest || handledSlashRequestNonceRef.current >= slashMenuRequest.nonce) {
+        if (isTableMenu || !slashMenuRequest || handledSlashRequestNonceRef.current >= slashMenuRequest.nonce) {
             return;
         }
 
@@ -1332,7 +1345,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
         clearHideTimer();
         isMouseOver.current = false;
         handleOpenSlashMenu(slashMenuRequest);
-    }, [slashMenuRequest, tableBlockOnly]);
+    }, [slashMenuRequest, isTableMenu]);
 
     if (!currentActiveTarget) {
         return null;
@@ -1342,7 +1355,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
         <>
             <div
                 data-u-comp="paragraph-menu"
-                data-u-table-menu={tableBlockOnly ? 'true' : undefined}
+                data-u-table-menu={isTableMenu ? 'true' : undefined}
                 data-u-focused-table-menu={isFocusedTableMenu ? 'true' : undefined}
                 ref={anchorRef}
                 className={clsx(`

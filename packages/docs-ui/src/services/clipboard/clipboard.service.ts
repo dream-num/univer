@@ -33,6 +33,7 @@ import {
     ErrorService,
     generateRandomId,
     getBodySlice,
+    getBodySliceForTextXAction,
     ICommandService,
     ILogService,
     ImageSourceType,
@@ -875,23 +876,19 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         plainTextList?: readonly string[]
     ): Promise<void> {
         const copyId = generateRandomId(6);
-        const text =
-            (plainTextList
-                ? plainTextList.join('\n')
-                : documentList.length > 1
-                    ? documentList.map((doc) => doc.body?.dataStream || '').join('\n')
-                    : documentList[0].body?.dataStream || '')
-                .replaceAll(DataStreamTreeTokenType.TABLE_START, '')
-                .replaceAll(DataStreamTreeTokenType.TABLE_END, '')
-                .replaceAll(DataStreamTreeTokenType.TABLE_ROW_START, '')
-                .replaceAll(DataStreamTreeTokenType.TABLE_ROW_END, '')
-                .replaceAll(DataStreamTreeTokenType.TABLE_CELL_START, '')
-                .replaceAll(DataStreamTreeTokenType.TABLE_CELL_END, '')
-                .replaceAll(DataStreamTreeTokenType.BLOCK_START, '')
-                .replaceAll(DataStreamTreeTokenType.BLOCK_END, '')
-                // Replace `\r\n` in table cell to white space.
-                .replaceAll('\r\n', ' ')
-                .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+        const text = (plainTextList ?? documentList.map((doc) => doc.body?.dataStream || ''))
+            .join('\n')
+            .replaceAll(DataStreamTreeTokenType.TABLE_START, '')
+            .replaceAll(DataStreamTreeTokenType.TABLE_END, '')
+            .replaceAll(DataStreamTreeTokenType.TABLE_ROW_START, '')
+            .replaceAll(DataStreamTreeTokenType.TABLE_ROW_END, '')
+            .replaceAll(DataStreamTreeTokenType.TABLE_CELL_START, '')
+            .replaceAll(DataStreamTreeTokenType.TABLE_CELL_END, '')
+            .replaceAll(DataStreamTreeTokenType.BLOCK_START, '')
+            .replaceAll(DataStreamTreeTokenType.BLOCK_END, '')
+            // Replace `\r\n` in table cell to white space.
+            .replaceAll('\r\n', ' ')
+            .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
 
         let html = this._umdToHtml.convert(documentList);
         let internalJson = '';
@@ -991,26 +988,13 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 continue;
             }
 
-            const deleteRange = { startOffset, endOffset, collapsed };
-
-            const docBody = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.sliceBody(deleteRange.startOffset, deleteRange.endOffset, sliceType);
-            if (docBody == null) {
-                continue;
-            }
-
-            // Text inside a cell is not a nested table. Keep only completely copied table structures.
-            if (docBody.tables?.length) {
-                const completeTableIds = new Set(body.tables?.filter((table) => (
-                    table.startIndex >= startOffset && table.endIndex <= endOffset
-                )).map((table) => table.tableId));
-                docBody.tables = docBody.tables.filter((table) => completeTableIds.has(table.tableId));
-            }
+            const docBody = getBodySliceForTextXAction(body, startOffset, endOffset, false, sliceType);
 
             results.push(docBody);
             plainTextResults.push(
                 copyContentHook?.(
-                    deleteRange.startOffset,
-                    deleteRange.endOffset,
+                    startOffset,
+                    endOffset,
                     {
                         body,
                         segmentId,

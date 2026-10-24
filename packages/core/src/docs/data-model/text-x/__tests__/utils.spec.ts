@@ -14,17 +14,75 @@
  * limitations under the License.
  */
 
+import { describe, expect, it, vi } from 'vitest';
 import type { IDocumentBody } from '../../../../types/interfaces/i-document-data';
 import type { IRetainAction } from '../action-types';
-import { describe, expect, it, vi } from 'vitest';
 import { Tools } from '../../../../shared/tools';
 import { BooleanNumber } from '../../../../types/enum/text-style';
-import { CustomRangeType } from '../../../../types/interfaces/i-document-data';
+import { CustomRangeType, DocumentBlockRangeType } from '../../../../types/interfaces/i-document-data';
 import { PresetListType } from '../../preset-list-type';
+import { DataStreamTreeTokenType } from '../../types';
 import { TextXActionType } from '../action-types';
-import { composeBody, getBodySlice, getTextRunSlice, isUselessRetainAction, SliceBodyType } from '../utils';
+import {
+    composeBody,
+    getBodySlice,
+    getBodySliceForTextXAction,
+    getTextRunSlice,
+    isUselessRetainAction,
+    SliceBodyType,
+} from '../utils';
 
 describe('test text-x utils', () => {
+    it.each([SliceBodyType.copy, SliceBodyType.cut])('keeps both block sentinels in complete action slices (%s)', (type) => {
+        const tokens = DataStreamTreeTokenType;
+        const body: IDocumentBody = {
+            dataStream: `A\r${tokens.BLOCK_START}B\r${tokens.BLOCK_END}C\r\n`,
+            blockRanges: [{
+                blockId: 'callout',
+                blockType: DocumentBlockRangeType.CALLOUT,
+                startIndex: 2,
+                endIndex: 5,
+            }],
+        };
+
+        expect(getBodySliceForTextXAction(body, 2, 5, false, type).blockRanges).toBeUndefined();
+        expect(getBodySliceForTextXAction(body, 3, 6, false, type).blockRanges).toBeUndefined();
+        const complete = getBodySliceForTextXAction(body, 2, 6, false, type);
+        expect(complete.blockRanges).toEqual([{
+            blockId: 'callout',
+            blockType: DocumentBlockRangeType.CALLOUT,
+            startIndex: 0,
+            endIndex: 3,
+        }]);
+        complete.blockRanges![0].blockId = 'pasted-callout';
+        expect(body.blockRanges![0].blockId).toBe('callout');
+
+        expect(getBodySlice(body, 3, 5, false, type).blockRanges).toEqual([{
+            blockId: 'callout',
+            blockType: DocumentBlockRangeType.CALLOUT,
+            startIndex: 0,
+            endIndex: 2,
+        }]);
+    });
+
+    it('keeps complete column groups in clipboard slices', () => {
+        const tokens = DataStreamTreeTokenType;
+        const columns = `${tokens.COLUMN_GROUP_START}${tokens.COLUMN_START}Alpha\r${tokens.COLUMN_END}${tokens.COLUMN_GROUP_END}`;
+        const body: IDocumentBody = {
+            dataStream: `A\r${columns}\r\n`,
+            columnGroups: [{ columnGroupId: 'columns', startIndex: 2, endIndex: columns.length + 1 }],
+        };
+
+        const slice = getBodySliceForTextXAction(body, 2, columns.length + 2, false, SliceBodyType.copy);
+
+        expect(slice.dataStream).toBe(columns);
+        expect(slice.columnGroups).toEqual([{
+            columnGroupId: 'columns',
+            startIndex: 0,
+            endIndex: columns.length - 1,
+        }]);
+    });
+
     it('only clones text runs intersecting the requested slice', () => {
         const body: IDocumentBody = {
             dataStream: 'a'.repeat(10_000),

@@ -52,6 +52,7 @@ const locale: typeof enUS = {
             lessThanOrEqual: '<=',
         },
         panel: {
+            stopIfTrue: 'Interrompre si vrai',
             createRule: 'Créer une règle',
             clear: 'Effacer toutes les règles',
             range: 'Appliquer la plage',

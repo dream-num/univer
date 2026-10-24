@@ -17,12 +17,21 @@
 import {
     createDocumentModelWithStyle,
     CustomRangeType,
+    DataStreamTreeTokenType,
     DocumentFlavor,
     JSONX,
     LocaleType,
+    NamedStyleType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
+    TableAlignmentType,
+    TableRowHeightRule,
+    TableSizeType,
+    TableTextWrapType,
+    TextX,
+    TextXActionType,
+    UpdateDocsAttributeType,
 } from '@univerjs/core';
 import { getFontStyleString, invalidateDocumentFontMetrics } from '@univerjs/engine-render';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -117,6 +126,195 @@ describe('DocsLayoutWorkerRuntime', () => {
             }
         } finally {
             await runtime.disposeSession({ unitId: identity.unitId, sessionEpoch: 1 });
+        }
+    });
+
+    it('preserves heading visibility through Worker edits, undo/redo, and snapshot recovery', async () => {
+        stubOffscreenCanvas();
+        const source = createDocumentModelWithStyle('Parent\rHidden\rPeer\rTail', {});
+        source.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        const snapshot = structuredClone(source.getSnapshot());
+        snapshot.body!.paragraphs = [
+            { startIndex: 6, paragraphId: 'parent', headingCollapsed: false, paragraphStyle: { namedStyleType: NamedStyleType.HEADING_1 } },
+            { startIndex: 13, paragraphId: 'hidden' },
+            { startIndex: 18, paragraphId: 'peer', paragraphStyle: { namedStyleType: NamedStyleType.HEADING_1 } },
+            { startIndex: 23, paragraphId: 'tail' },
+        ];
+        const runtime = new DocsLayoutWorkerRuntime();
+        const identity = { unitId: source.getUnitId(), mountId: 'heading-mount', mountEpoch: 1, viewportEpoch: 1 };
+        const createSession = (sessionEpoch: number, modelRevision: number) => runtime.createSession({
+            unitId: identity.unitId,
+            sessionEpoch,
+            snapshot: structuredClone(snapshot),
+            modelRevision,
+            locale: LocaleType.EN_US,
+            direction: 'ltr',
+        });
+        await createSession(1, 0);
+        try {
+            for (let revision = 0; revision < 5; revision++) {
+                const collapsed = revision === 1 || revision >= 3;
+                const textX = new TextX();
+                textX.push({ t: TextXActionType.RETAIN, len: 6 });
+                textX.push({
+                    t: TextXActionType.RETAIN,
+                    len: 1,
+                    coverType: UpdateDocsAttributeType.COVER,
+                    body: { dataStream: '', paragraphs: [{ paragraphId: 'parent', startIndex: 0, headingCollapsed: collapsed }] },
+                });
+                if (revision === 4) {
+                    snapshot.body!.paragraphs![0].headingCollapsed = true;
+                    await createSession(2, revision);
+                }
+                const recovered = revision === 0 || revision === 4;
+                const start = await runtime.startLayout({
+                    ...identity,
+                    metricsRevision: revision + 1,
+                    baseRevision: recovered ? revision : revision - 1,
+                    modelRevision: revision,
+                    mutations: recovered
+                        ? []
+                        : [{
+                            baseRevision: revision - 1,
+                            modelRevision: revision,
+                            actions: JSONX.getInstance().editOp(textX.serialize(), ['body']),
+                        }],
+                    reason: recovered ? 'initial' : 'edit',
+                    budgetMs: 0,
+                });
+                if (start.status !== DocLayoutSessionStatus.ACCEPTED) {
+                    throw new Error('Expected Worker heading layout to start.');
+                }
+                let step = start.step;
+                await expect.poll(async () => {
+                    if (!step.progress.complete) {
+                        step = await runtime.stepLayout({ ...identity, generation: step.progress.generation, budgetMs: 8 });
+                    }
+                    return step.progress.complete;
+                }).toBe(true);
+                const result = await runtime.getLayoutPage({ ...identity, pageIndex: 0 });
+                const lines = result.page!.page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines));
+                expect(lines.map((line) => line.paragraphIndex)).toEqual(collapsed ? [6, 18, 23] : [6, 13, 18, 23]);
+                expect(lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup))
+                    .map((glyph) => glyph.raw).join('')).toContain('Peer');
+            }
+        } finally {
+            runtime.dispose();
+            source.dispose();
+        }
+    });
+
+    it('loads folded tables and images without publishing hidden resources and supersedes an unfinished expansion', async () => {
+        stubOffscreenCanvas();
+        const T = DataStreamTreeTokenType;
+        const prefix = 'Intro\rParent\r';
+        const table = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cell\r\n${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+        const content = `${prefix}${T.CUSTOM_BLOCK}\r${table}\rPeer\r${'Visible tail\r'.repeat(50)}\n`;
+        const source = createDocumentModelWithStyle(content, {});
+        source.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        const snapshot = structuredClone(source.getSnapshot());
+        const parentOffset = prefix.length - 1;
+        const peerOffset = content.indexOf('Peer') + 4;
+        snapshot.body!.paragraphs = [...content.matchAll(/\r/g)].map((match, index) => ({
+            startIndex: match.index,
+            paragraphId: `resource-p${index}`,
+            headingCollapsed: match.index === parentOffset,
+            paragraphStyle: match.index === parentOffset || match.index === peerOffset
+                ? { namedStyleType: NamedStyleType.HEADING_1 }
+                : undefined,
+        }));
+        snapshot.body!.sectionBreaks = [...content.matchAll(/\n/g)].map((match, index) => ({ startIndex: match.index, sectionId: `resource-s${index}` }));
+        snapshot.body!.customBlocks = [{ blockId: 'image', startIndex: prefix.length }];
+        snapshot.body!.tables = [{ tableId: 'table', startIndex: prefix.length + 2, endIndex: prefix.length + 2 + table.length }];
+        snapshot.drawings = { image: {
+            unitId: snapshot.id,
+            subUnitId: snapshot.id,
+            drawingId: 'image',
+            drawingType: 1,
+            layoutType: PositionedObjectLayoutType.INLINE,
+            docTransform: {
+                angle: 0,
+                positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 0 },
+                positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 0 },
+                size: { width: 100, height: 80 },
+            },
+        } };
+        snapshot.tableSource = { table: {
+            tableId: 'table',
+            align: TableAlignmentType.START,
+            indent: { v: 0 },
+            textWrap: TableTextWrapType.NONE,
+            position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
+            dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+            size: { type: TableSizeType.SPECIFIED, width: { v: 80 } },
+            cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
+            tableRows: [{ tableCells: [{}], trHeight: { val: { v: 0 }, hRule: TableRowHeightRule.AUTO } }],
+            tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 80 } } }],
+        } };
+        const runtime = new DocsLayoutWorkerRuntime();
+        const identity = { unitId: snapshot.id, mountId: 'folded-resources', mountEpoch: 1, viewportEpoch: 1 };
+        await runtime.createSession({ unitId: snapshot.id, sessionEpoch: 1, snapshot, modelRevision: 0, locale: LocaleType.EN_US, direction: 'ltr' });
+        try {
+            let interruptedGeneration: number | undefined;
+            for (let revision = 0; revision < 5; revision++) {
+                const collapsed = revision % 2 === 0;
+                const textX = new TextX();
+                textX.push({ t: TextXActionType.RETAIN, len: parentOffset });
+                textX.push({ t: TextXActionType.RETAIN, len: 1, coverType: UpdateDocsAttributeType.COVER, body: {
+                    dataStream: '',
+                    paragraphs: [{ paragraphId: 'resource-p1', startIndex: 0, headingCollapsed: collapsed }],
+                } });
+                const start = await runtime.startLayout({
+                    ...identity,
+                    metricsRevision: revision + 1,
+                    baseRevision: Math.max(0, revision - 1),
+                    modelRevision: revision,
+                    mutations: revision === 0 ? [] : [{ baseRevision: revision - 1, modelRevision: revision, actions: JSONX.getInstance().editOp(textX.serialize(), ['body']) }],
+                    reason: revision === 0 ? 'initial' : 'edit',
+                    anchor: parentOffset,
+                    budgetMs: 0,
+                });
+                if (start.status !== DocLayoutSessionStatus.ACCEPTED) {
+                    throw new Error('Expected folded resource layout to start.');
+                }
+                if (revision === 1) {
+                    expect(start.step.progress.complete).toBe(false);
+                    interruptedGeneration = start.step.progress.generation;
+                    continue;
+                }
+                if (revision === 2) {
+                    const superseded = await runtime.stepLayout({ ...identity, generation: interruptedGeneration!, budgetMs: 8 });
+                    expect(superseded.progress.cancelled).toBe(true);
+                }
+                let step = start.step;
+                for (let index = 0; index < 500; index++) {
+                    if (collapsed && step.publication?.kind === 'block') {
+                        expect(step.publication.block.skeDrawings).toHaveLength(0);
+                        expect(step.publication.block.skeTables).toHaveLength(0);
+                    }
+                    if (!collapsed && step.publication?.kind === 'block' && step.progress.stableLaidOutThrough >= peerOffset) {
+                        expect(step.publication.block.skeDrawings).toHaveLength(1);
+                        expect(step.publication.block.skeTables).toHaveLength(1);
+                    }
+                    if (step.progress.complete) {
+                        break;
+                    }
+                    // Pattern imports need an event-loop turn; microtask-only stepping can starve them in CI.
+                    await new Promise<void>((resolve) => {
+                        setTimeout(resolve, 0);
+                    });
+                    step = await runtime.stepLayout({ ...identity, generation: step.progress.generation, budgetMs: 0 });
+                }
+                expect(step.progress.complete).toBe(true);
+                const result = await runtime.getLayoutPage({ ...identity, pageIndex: 0 });
+                expect(result.page!.page.skeTables).toHaveLength(collapsed ? 0 : 1);
+                expect(result.page!.page.skeDrawings).toHaveLength(collapsed ? 0 : 1);
+                expect(result.page!.page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines))
+                    .some((line) => line.paragraphIndex === peerOffset)).toBe(true);
+            }
+        } finally {
+            runtime.dispose();
+            source.dispose();
         }
     });
 

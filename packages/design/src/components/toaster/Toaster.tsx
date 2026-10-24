@@ -23,8 +23,8 @@ function Toaster({ visibleToasts, ...props }: IToasterProps) {
     return (
         <Sonner
             className={`
-              dark:![&_[data-description]]:univer-text-gray-200
               [&_[data-description]]:univer-text-sm [&_[data-description]]:univer-text-gray-600
+              dark:[&_[data-description]]:!univer-text-gray-200
               [&_[data-icon]>svg]:univer-relative [&_[data-icon]>svg]:univer-top-1
               [&_[data-icon]]:univer-self-baseline
               [&_[data-sonner-toast]]:univer-shadow-md

@@ -244,6 +244,10 @@ const locale: typeof enUS = {
             defaultTextColor: 'デフォルトの文字色',
             noBackground: '背景なし',
         },
+        heading: {
+            collapse: '折りたたむ',
+            expand: '展開する',
+        },
         'page-settings': {
             'document-setting': '文書設定',
             'modern-width': 'コンテンツ幅',

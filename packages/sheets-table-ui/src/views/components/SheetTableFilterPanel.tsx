@@ -16,9 +16,6 @@
 
 import type { ISortRangeCommandParams } from '@univerjs/sheets-sort';
 import type { ITableFilterItem } from '@univerjs/sheets-table';
-import type { LocaleKey } from '../../locale/types';
-import type { ITableFilterColorList } from '../../types';
-import type { IConditionInfo } from './type';
 import { generateRandomId, ICommandService, IPermissionService, IUndoRedoService, LocaleService } from '@univerjs/core';
 import { ActionRow, Button, ButtonGroup, Segmented } from '@univerjs/design';
 import {
@@ -42,6 +39,9 @@ import {
 } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type { ITableFilterColorList } from '../../types';
+import type { IConditionInfo } from './type';
 import { SheetsTableComponentController } from '../../controllers/sheet-table-component.controller';
 import { SheetsTableUiService } from '../../services/sheets-table-ui.service';
 import { FilterByEnum } from '../../types';
@@ -355,7 +355,7 @@ export function SheetTableFilterPanel() {
             </div>
             <ActionRow
                 className={`
-                  univer-flex-wrap-nowrap univer-mt-4 univer-inline-flex univer-flex-shrink-0 univer-flex-grow-0
+                  univer-mt-4 univer-inline-flex univer-flex-shrink-0 univer-flex-grow-0 univer-flex-nowrap
                   univer-justify-between univer-gap-6 univer-overflow-hidden
                 `}
             >

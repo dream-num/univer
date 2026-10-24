@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import { describe, expect, it } from 'vitest';
 import type { IDocumentBody, IDocumentData } from '../../../../types/interfaces/i-document-data';
 import type { IInsertAction, IRetainAction } from '../action-types';
-import { describe, expect, it } from 'vitest';
 import { UpdateDocsAttributeType } from '../../../../shared/command-enum';
 import { Tools } from '../../../../shared/tools';
 import { BooleanNumber } from '../../../../types/enum/text-style';
@@ -33,6 +33,38 @@ import { TextX } from '../text-x';
 import { composeBody } from '../utils';
 
 describe('test TextX methods and branches', () => {
+    it('keeps peer formatting and nested fields when undoing heading metadata without text edits', () => {
+        const body: IDocumentBody = {
+            dataStream: 'Heading\rTail\r\n',
+            paragraphs: [{ paragraphId: 'heading', startIndex: 7 }, { paragraphId: 'tail', startIndex: 12 }],
+            textRuns: [{ st: 0, ed: 13, ts: { fs: 12 } }],
+            customRanges: [
+                { startIndex: 0, endIndex: 12, rangeId: 'outer', rangeType: CustomRangeType.FIELD },
+                { startIndex: 2, endIndex: 4, rangeId: 'inner', rangeType: CustomRangeType.FIELD },
+            ],
+        };
+        const originalParagraphs = Tools.deepClone(body.paragraphs);
+        const fold = new TextX().retain(7).retain(1, {
+            dataStream: '',
+            paragraphs: [{ startIndex: 0, paragraphId: 'heading', headingCollapsed: true }],
+        }).serialize();
+        TextX.makeInvertible(fold, body);
+        TextX.apply(body, fold);
+        TextX.apply(body, new TextX().retain(7).retain(1, {
+            dataStream: '',
+            textRuns: [{ st: 0, ed: 1, ts: { it: BooleanNumber.TRUE } }],
+        }).serialize());
+        TextX.apply(body, new TextX().updateCustomRangeProperties(body.customRanges![0], {
+            locked: BooleanNumber.TRUE,
+        }).serialize());
+        const expected = Tools.deepClone(body);
+        expected.paragraphs = originalParagraphs;
+
+        TextX.apply(body, TextX.invert(fold));
+
+        expect(body).toEqual(expected);
+    });
+
     it('keeps scalar identity distinct from adjacent typing, different controls and document snapshots', () => {
         const value = { t: TextXActionType.INSERT, len: 1, body: { dataStream: 'A' }, valueRangeId: 'first' } as IInsertAction;
         const edit = new TextX().insert(1, { dataStream: 'X' }).push(value).delete(1).serialize();

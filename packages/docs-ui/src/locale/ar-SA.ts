@@ -244,6 +244,10 @@ const locale: typeof enUS = {
             defaultTextColor: 'لون النص الافتراضي',
             noBackground: 'بدون خلفية',
         },
+        heading: {
+            collapse: 'طي',
+            expand: 'توسيع',
+        },
         'page-settings': {
             'document-setting': 'إعداد المستند',
             'modern-width': 'عرض المحتوى',

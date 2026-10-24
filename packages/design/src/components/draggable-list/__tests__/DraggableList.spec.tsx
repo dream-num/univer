@@ -19,14 +19,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DraggableList } from '../DraggableList';
 import '@testing-library/jest-dom/vitest';
 
-vi.mock('react-dom', async () => {
-    const actual = await vi.importActual<typeof import('react-dom')>('react-dom');
-    return {
-        ...actual,
-        createPortal: (node: any) => node,
-    };
-});
-
 afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
@@ -102,8 +94,6 @@ describe('DraggableList', () => {
         await waitFor(() => {
             expect(onDragStart).toHaveBeenCalledWith(undefined, { y: 0 });
         });
-
-        expect(container.querySelector('.univer-pointer-events-none')).toBeInTheDocument();
 
         fireEvent.pointerMove(window, {
             pointerId: 1,
@@ -262,7 +252,7 @@ describe('DraggableList', () => {
         expect(onListChange).toHaveBeenCalledTimes(1);
     });
 
-    it('should render ghost from cloned item dom', async () => {
+    it('should show a drag preview and remove it when dragging ends', async () => {
         const onListChange = vi.fn();
 
         const { container } = render(
@@ -276,7 +266,6 @@ describe('DraggableList', () => {
 
         const itemA = container.querySelector('[data-draggable-list-item-id="a"]') as HTMLDivElement;
         mockRect(itemA);
-        const cloneNodeSpy = vi.spyOn(itemA, 'cloneNode');
         Object.defineProperty(itemA, 'setPointerCapture', {
             configurable: true,
             value: vi.fn(),
@@ -289,8 +278,7 @@ describe('DraggableList', () => {
         });
 
         await waitFor(() => {
-            expect(cloneNodeSpy).toHaveBeenCalledWith(true);
-            expect(container.querySelectorAll('.drag-content')).toHaveLength(2);
+            expect(screen.getAllByText('A')).toHaveLength(2);
         });
 
         fireEvent.pointerUp(window, {
@@ -299,5 +287,6 @@ describe('DraggableList', () => {
             clientY: 24,
         });
         expect(onListChange).toHaveBeenCalledTimes(1);
+        expect(screen.getAllByText('A')).toHaveLength(1);
     });
 });

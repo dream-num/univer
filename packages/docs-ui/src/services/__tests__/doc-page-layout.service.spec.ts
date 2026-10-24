@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
-import type { IRenderContext, ISceneTransformState } from '@univerjs/engine-render';
+import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import type { IRenderContext, ISceneTransformState, RenderUnit } from '@univerjs/engine-render';
+import { ICommandService, Injector, Univer, UniverInstanceType } from '@univerjs/core';
+import {
+    CanvasColorService,
+    DocBackground,
+    Documents,
+    ICanvasColorService,
+    IRenderManagerService,
+    RenderManagerService,
+    ScrollBar,
+    Viewport,
+} from '@univerjs/engine-render';
+import { beforeEach, describe, expect, it, onTestFinished } from 'vitest';
 import type { IDocFitToWidthOptions } from '../../config/config';
-import { Injector } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
 import { DOCS_VIEW_KEY, VIEWPORT_KEY } from '../../basics/docs-view-key';
+import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import { DocPageLayoutService } from '../doc-page-layout.service';
 import { DocViewScaleService } from '../doc-view-scale';
 
@@ -154,9 +165,86 @@ function createLayoutService(params: {
     };
 }
 
+function createScrollableLayout(documentHeight: number) {
+    const univer = new Univer();
+    onTestFinished(() => univer.dispose());
+    const injector = univer.__getInjector();
+    injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    const commandService = injector.get(ICommandService);
+    commandService.registerCommand(SetDocZoomRatioOperation);
+    const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+        id: 'zoom-scroll-layout',
+        body: { dataStream: '\r\n' },
+        documentStyle: { pageSize: { width: 600, height: documentHeight } },
+        settings: { zoomRatio: 1 },
+    });
+    const render = injector.get(IRenderManagerService).createRender(model.getUnitId()) as RenderUnit;
+    render.deactivate();
+    render.engine.resizeBySize(1000, 800);
+    const documents = new Documents(DOCS_VIEW_KEY.MAIN, undefined, { pageMarginLeft: 40, pageMarginTop: 20 });
+    documents.resize(600, documentHeight);
+    const background = new DocBackground(DOCS_VIEW_KEY.BACKGROUND);
+    render.mainComponent = documents;
+    render.components.set(DOCS_VIEW_KEY.BACKGROUND, background);
+    render.scene.addObjects([documents, background]);
+    const viewport = new Viewport(VIEWPORT_KEY.VIEW_MAIN, render.scene, { left: 0, top: 0, right: 0, bottom: 0 });
+    const scrollBar = new ScrollBar(viewport);
+    render.addRenderDependencies([[DocViewScaleService], [DocPageLayoutService]]);
+    const service = render.with(DocPageLayoutService);
+    return {
+        scrollBar,
+        viewport,
+        zoom(ratio: number) {
+            commandService.syncExecuteCommand(SetDocZoomRatioOperation.id, { unitId: model.getUnitId(), zoomRatio: ratio });
+            service.calculatePagePosition();
+        },
+    };
+}
+
 describe('DocPageLayoutService', () => {
     beforeEach(() => {
         TestDocViewScaleService.reset();
+    });
+
+    it.each([600, 780])('creates a scrollable range when zooming a fitting %ipx document past the viewport', (documentHeight) => {
+        const { scrollBar, viewport, zoom } = createScrollableLayout(documentHeight);
+        zoom(0.75);
+        expect(scrollBar.hasVerticalThumb()).toBe(false);
+
+        zoom(1.5);
+
+        expect(scrollBar.hasVerticalThumb()).toBe(true);
+        viewport.scrollToViewportPos({ viewportScrollY: documentHeight + 40 });
+        expect(viewport.viewportScrollY).toBeGreaterThan(0);
+        expect(viewport.calcViewportInfo().viewBound.bottom).toBeGreaterThanOrEqual(documentHeight + 20);
+
+        zoom(0.75);
+
+        expect(scrollBar.hasVerticalThumb()).toBe(false);
+        expect(viewport.viewportScrollY).toBe(0);
+    });
+
+    it('includes page margins when zooming into the overflow boundary', () => {
+        const { scrollBar, zoom } = createScrollableLayout(600);
+        zoom(1);
+        expect(scrollBar.hasVerticalThumb()).toBe(false);
+
+        zoom(1.26);
+
+        expect(scrollBar.hasVerticalThumb()).toBe(true);
+    });
+
+    it('updates an existing scrollable range on zoom', () => {
+        const { scrollBar, zoom } = createScrollableLayout(1200);
+        zoom(1);
+        expect(scrollBar.hasVerticalThumb()).toBe(true);
+        const initialThumbHeight = scrollBar.verticalThumbSize;
+
+        zoom(2);
+
+        expect(scrollBar.hasVerticalThumb()).toBe(true);
+        expect(scrollBar.verticalThumbSize).toBeLessThan(initialThumbHeight);
     });
 
     it('centers the document page when the viewport is wider than the page', () => {

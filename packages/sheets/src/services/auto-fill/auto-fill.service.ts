@@ -14,19 +14,47 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IDisposable, IMutationInfo, IRange, IRowAutoHeightInfo, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type {
+    IAccessor,
+    IDisposable,
+    IMutationInfo,
+    IRange,
+    IRowAutoHeightInfo,
+    Nullable,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import type { ISetRangeValuesMutationParams } from '../../commands/mutations/set-range-values.mutation';
-import type { ISetWorksheetRowAutoHeightMutationParams } from '../../commands/mutations/set-worksheet-row-height.mutation';
-import type { IAutoFillLocation, IAutoFillRule, ISheetAutoFillHook } from './type';
-import { createIdentifier, Direction, Disposable, ICommandService, Inject, Injector, IUndoRedoService, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, Rectangle, toDisposable, UniverInstanceType } from '@univerjs/core';
+import {
+    createIdentifier,
+    Direction,
+    Disposable,
+    ICommandService,
+    Inject,
+    Injector,
+    IUndoRedoService,
+    IUniverInstanceService,
+    ObjectMatrix,
+    RANGE_TYPE,
+    Rectangle,
+    toDisposable,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
+import type { ISetRangeValuesMutationParams } from '../../commands/mutations/set-range-values.mutation';
+import type {
+    ISetWorksheetRowAutoHeightMutationParams,
+} from '../../commands/mutations/set-worksheet-row-height.mutation';
+import type { IAutoFillLocation, IAutoFillRule, ISheetAutoFillHook } from './type';
 import { discreteRangeToRange, rangeToDiscreteRange } from '../../basics/utils';
 import { AutoClearContentCommand } from '../../commands/commands/auto-fill.command';
 import { AFFECT_LAYOUT_STYLES } from '../../commands/commands/set-style.command';
 import { getPrimaryForRange } from '../../commands/commands/utils/selection-utils';
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
-import { SetWorksheetRowAutoHeightMutation, SetWorksheetRowAutoHeightMutationFactory } from '../../commands/mutations/set-worksheet-row-height.mutation';
+import {
+    SetWorksheetRowAutoHeightMutation,
+    SetWorksheetRowAutoHeightMutationFactory,
+} from '../../commands/mutations/set-worksheet-row-height.mutation';
 import { SetSelectionsOperation } from '../../commands/operations/selection.operation';
 import AutoFillRules from './rules';
 import { AUTO_FILL_APPLY_TYPE, AUTO_FILL_HOOK_TYPE } from './type';
@@ -66,7 +94,7 @@ export interface IAutoFillService {
     registerRule(rule: IAutoFillRule): void;
 
     getAllHooks(): ISheetAutoFillHook[];
-    getActiveHooks(): ISheetAutoFillHook[];
+    getActiveHooks(applyType?: AUTO_FILL_APPLY_TYPE): ISheetAutoFillHook[];
     addHook(hook: ISheetAutoFillHook): IDisposable;
     fillData(applyType: AUTO_FILL_APPLY_TYPE): boolean;
 
@@ -227,6 +255,8 @@ export class AutoFillService extends Disposable implements IAutoFillService {
             return false;
         }
 
+        // A new drag replaces the cached fill session; its old menu must not survive a rejected preparation.
+        this.setShowMenu(false);
         this.direction = direction;
 
         const autoFillSource = this._injector.invoke((accessor: IAccessor) => rangeToDiscreteRange(source, accessor, unitId, subUnitId));
@@ -314,13 +344,13 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         return this._hooks;
     }
 
-    getActiveHooks() {
+    getActiveHooks(applyType = this.applyType) {
         const { source, target, unitId, subUnitId } = this.autoFillLocation || {};
         if (!source || !target || !unitId || !subUnitId) {
             return [];
         }
         const enabledHooks = this._hooks.filter(
-            (h) => !h.disable?.({ source, target, unitId, subUnitId }, this._direction, this.applyType) === true
+            (h) => !h.disable?.({ source, target, unitId, subUnitId }, this._direction, applyType) === true
         );
         const onlyHooks = enabledHooks.filter((h) => h.type === AUTO_FILL_HOOK_TYPE.ONLY);
         if (onlyHooks.length > 0) {
@@ -390,7 +420,6 @@ export class AutoFillService extends Disposable implements IAutoFillService {
 
     // eslint-disable-next-line max-lines-per-function
     fillData(applyType: AUTO_FILL_APPLY_TYPE) {
-        this.applyType = applyType;
         const activeWorkbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         const activeUnitId = activeWorkbook?.getUnitId();
         const activeSubUnitId = activeWorkbook?.getActiveSheet()?.getSheetId();
@@ -401,11 +430,23 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         }
 
         const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) return false;
+        if (!workbook) {
+            return false;
+        }
         const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) return false;
+        if (!worksheet) {
+            return false;
+        }
 
         const direction = this.direction;
+        const activeHooks = this.getActiveHooks(applyType);
+        // Prepare and validate before updating the apply type, undoing a previous fill or changing the selection.
+        const fillCallbacks = activeHooks.map((hook) => hook.onPrepareFillData?.(
+            { source, target, unitId, subUnitId },
+            direction,
+            applyType
+        ) ?? (() => hook.onFillData?.({ source, target, unitId, subUnitId }, direction, applyType)));
+        this.applyType = applyType;
 
         if (this._prevUndos.length > 0) {
             this._prevUndos.forEach((undo) => {
@@ -415,7 +456,6 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         this._prevUndos = [];
 
         const selection = Rectangle.union(discreteRangeToRange(source), discreteRangeToRange(target));
-        const activeHooks = this.getActiveHooks();
 
         // If filling the active sheet, update the selection immediately
         if (unitId === activeUnitId && subUnitId === activeSubUnitId) {
@@ -441,9 +481,8 @@ export class AutoFillService extends Disposable implements IAutoFillService {
 
         const undos: IMutationInfo[] = [];
         const redos: IMutationInfo[] = [];
-        activeHooks.forEach((hook) => {
-            const { undos: hookUndos, redos: hookRedos } =
-                hook.onFillData?.({ source, target, unitId, subUnitId }, direction, applyType) || {};
+        fillCallbacks.forEach((fill) => {
+            const { undos: hookUndos, redos: hookRedos } = fill() || {};
             if (hookUndos) {
                 undos.push(...hookUndos);
             }

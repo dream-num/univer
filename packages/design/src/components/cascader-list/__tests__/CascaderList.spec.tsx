@@ -21,33 +21,6 @@ import { CascaderList } from '../CascaderList';
 afterEach(cleanup);
 
 describe('CascaderList', () => {
-    afterEach(cleanup);
-
-    // const options: ICascaderListProps['options'] = [
-    //     {
-    //         label: 'Option 1',
-    //         value: 'option1',
-    //         children: [
-    //             { label: 'Option 1-1', value: 'option1-1' },
-    //             { label: 'Option 1-2', value: 'option1-2' },
-    //         ],
-    //     },
-    //     {
-    //         label: 'Option 2',
-    //         value: 'option2',
-    //         children: [
-    //             { label: 'Option 2-1', value: 'option2-1' },
-    //             { label: 'Option 2-2', value: 'option2-2' },
-    //         ],
-    //     },
-    // ];
-
-    it('renders correctly with default props', () => {
-        const { container } = render(<CascaderList value={[]} onChange={() => {}} />);
-
-        expect(container).toBeTruthy();
-    });
-
     it('should select parent and child options', () => {
         const onChange = vi.fn();
         const options = [

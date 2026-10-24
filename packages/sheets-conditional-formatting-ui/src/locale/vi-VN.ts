@@ -52,6 +52,7 @@ const locale: typeof enUS = {
             lessThanOrEqual: '<=',
         },
         panel: {
+            stopIfTrue: 'Dừng nếu đúng',
             createRule: 'Tạo quy tắc mới',
             clear: 'Xóa tất cả quy tắc',
             range: 'Phạm vi áp dụng',

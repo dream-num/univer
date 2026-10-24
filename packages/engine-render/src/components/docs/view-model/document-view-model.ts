@@ -26,6 +26,18 @@ import type {
     JSONXPath,
     Nullable,
 } from '@univerjs/core';
+import {
+    DataStreamTreeNodeType,
+    DataStreamTreeTokenType,
+    DocumentFlavor,
+    getRichTextEditPath,
+    JSON1,
+    resolveDocumentParagraphStyle,
+    TextX,
+    TextXActionType,
+    toDisposable,
+} from '@univerjs/core';
+import { BehaviorSubject } from 'rxjs';
 import type {
     IDocumentLayoutBody,
     IDocumentLayoutColumnGroup,
@@ -35,18 +47,10 @@ import type {
     IDocumentLayoutSnapshot,
     IDocumentLayoutTextRun,
 } from '../document-layout-presentation';
-import {
-    DataStreamTreeNodeType,
-    DataStreamTreeTokenType,
-    getRichTextEditPath,
-    JSON1,
-    TextX,
-    TextXActionType,
-    toDisposable,
-} from '@univerjs/core';
-import { BehaviorSubject } from 'rxjs';
+import type { IHeadingSection } from './heading-sections';
 import { getDocumentLayoutPresentation } from '../document-layout-presentation';
 import { DataStreamTreeNode } from './data-stream-tree-node';
+import { getHeadingSections } from './heading-sections';
 
 interface ITableCache {
     table: DataStreamTreeNode;
@@ -538,6 +542,9 @@ export class DocumentViewModel implements IDisposable {
 
     private _plainTopLevelParagraphNodes: DataStreamTreeNode[] = [];
 
+    private _headingSections: IHeadingSection[] | null = null;
+    private _collapsedHeadingSections: IHeadingSection[] | null = null;
+
     private _metadataCachesDirty = false;
 
     private _textRunsOrderedAndDisjoint = true;
@@ -603,6 +610,8 @@ export class DocumentViewModel implements IDisposable {
         this._treeNodes = [];
         this._treeNodesByStartIndex = [];
         this._plainTopLevelParagraphNodes = [];
+        this._headingSections = null;
+        this._collapsedHeadingSections = null;
         this._lastTextRun = null;
         // this._headerTreeMap.clear();
         this._noteTreeMap.forEach((viewModel) => viewModel.dispose());
@@ -635,6 +644,53 @@ export class DocumentViewModel implements IDisposable {
 
     getChildren() {
         return this._children;
+    }
+
+    getHeadingSections(): readonly IHeadingSection[] {
+        const snapshot = this.getSnapshot();
+        if (snapshot.documentStyle.documentFlavor !== DocumentFlavor.MODERN) {
+            return [];
+        }
+        this._headingSections ??= getHeadingSections(this._children, (index) => {
+            const paragraph = this.getParagraph(index);
+            if (!paragraph?.styleId || paragraph.paragraphStyle?.namedStyleType != null) {
+                return paragraph;
+            }
+            return {
+                ...paragraph,
+                paragraphStyle: resolveDocumentParagraphStyle(snapshot.documentStyle, paragraph.paragraphStyle, {
+                    styles: snapshot.styles,
+                    paragraphStyleId: paragraph.styleId,
+                }),
+            };
+        });
+        return this._headingSections;
+    }
+
+    getCollapsedHeadingAtOffset(offset: number): IHeadingSection | undefined {
+        if (!this._collapsedHeadingSections) {
+            this._collapsedHeadingSections = [];
+            for (const section of this.getHeadingSections()) {
+                const previous = this._collapsedHeadingSections[this._collapsedHeadingSections.length - 1];
+                if (section.collapsed && section.endOffset > section.startOffset &&
+                    (!previous || section.startOffset >= previous.endOffset)) {
+                    this._collapsedHeadingSections.push(section);
+                }
+            }
+        }
+        let low = 0;
+        let high = this._collapsedHeadingSections.length - 1;
+        while (low <= high) {
+            const middle = Math.floor((low + high) / 2);
+            const section = this._collapsedHeadingSections[middle];
+            if (offset < section.startOffset) {
+                high = middle - 1;
+            } else if (offset >= section.endOffset) {
+                low = middle + 1;
+            } else {
+                return section;
+            }
+        }
     }
 
     getBody(): IDocumentLayoutBody | undefined {
@@ -674,6 +730,8 @@ export class DocumentViewModel implements IDisposable {
     }
 
     reset(documentDataModel: DocumentDataModel) {
+        this._headingSections = null;
+        this._collapsedHeadingSections = null;
         this._children.forEach((child) => child.dispose());
         this._textRunsCache.clear();
         this._paragraphCache.clear();
@@ -714,6 +772,8 @@ export class DocumentViewModel implements IDisposable {
         }
 
         this._documentDataModel = documentDataModel;
+        this._headingSections = null;
+        this._collapsedHeadingSections = null;
         this._metadataCachesDirty = true;
         this._lastTextRun = null;
         if (!this._textRunsOrderedAndDisjoint) {
@@ -729,6 +789,8 @@ export class DocumentViewModel implements IDisposable {
         }
 
         this._documentDataModel = documentDataModel;
+        this._headingSections = null;
+        this._collapsedHeadingSections = null;
         this._metadataCachesDirty = true;
         this._lastTextRun = null;
 

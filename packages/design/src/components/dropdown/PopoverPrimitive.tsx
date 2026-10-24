@@ -45,7 +45,6 @@ function PopoverContent({
                 sideOffset={sideOffset}
                 className={clsx(
                     `
-                      univer-outline-hidden
                       data-[state=open]:univer-animate-in data-[state=open]:univer-fade-in-0
                       data-[state=open]:univer-zoom-in-95
                       data-[state=closed]:univer-animate-out data-[state=closed]:univer-fade-out-0
@@ -55,7 +54,7 @@ function PopoverContent({
                       data-[side=right]:univer-slide-in-from-left-2
                       data-[side=top]:univer-slide-in-from-bottom-2
                       univer-z-[1080] univer-max-h-[--radix-popper-available-height] univer-overflow-y-auto
-                      univer-rounded-md univer-bg-gray-0 univer-text-gray-900 univer-shadow-md
+                      univer-rounded-md univer-bg-gray-0 univer-text-gray-900 univer-shadow-md univer-outline-none
                       data-[state=closed]:univer-pointer-events-none
                       dark:!univer-bg-gray-900 dark:!univer-text-gray-0
                       dark:focus-visible:!univer-border-gray-600

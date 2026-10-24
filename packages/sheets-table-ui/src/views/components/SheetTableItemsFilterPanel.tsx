@@ -16,12 +16,12 @@
 
 import type { ITableFilterItem } from '@univerjs/sheets-table';
 import type { Dispatch, SetStateAction } from 'react';
-import type { LocaleKey } from '../../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { borderClassName, Checkbox, clsx, Input, scrollbarClassName } from '@univerjs/design';
 import { isRecordTableFilter } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
 import { useMemo, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { SheetsTableUiService } from '../../services/sheets-table-ui.service';
 
 interface ISheetTableItemsFilterPanelProps {
@@ -36,15 +36,15 @@ interface ISheetTableItemsFilterPanelProps {
     onItemChange?: () => void;
 }
 
-const getCheckedItemCount = (map: Map<string, number>, checkedItemSet: Set<string>) => {
-    let count = 0;
-    checkedItemSet.forEach((item) => {
-        count += map.get(item) ?? 0;
-    });
-    return count;
-};
-
 export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelProps) {
+    function getCheckedItemCount(map: Map<string, number>, checkedItemSet: Set<string>) {
+        let count = 0;
+        checkedItemSet.forEach((item) => {
+            count += map.get(item) ?? 0;
+        });
+        return count;
+    }
+
     const {
         unitId,
         tableId,
@@ -196,7 +196,7 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
                             >
                                 <div className="univer-flex univer-h-5 univer-flex-1 univer-items-center univer-text-sm">
                                     <span className="univer-flex-1 univer-truncate">{`${localeService.t<LocaleKey>('sheets-table-ui.filter.select-all')}`}</span>
-                                    <span className="univer-ml univer-text-gray-400">{`(${checkedCount}/${searchText ? displayItems.length : allItemsCount})`}</span>
+                                    <span className="univer-ms-1 univer-text-gray-400">{`(${checkedCount}/${searchText ? displayItems.length : allItemsCount})`}</span>
                                 </div>
                             </Checkbox>
                         </div>

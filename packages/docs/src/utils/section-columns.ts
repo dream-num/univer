@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDocumentStyle, ISectionBreak, ISectionColumnProperties, PageOrientType } from '@univerjs/core';
-import { PAGE_SIZE, PageOrientType as PageOrient, PaperType, TRADITIONAL_DOCUMENT_DEFAULT_MARGIN } from '@univerjs/core';
+import type { IDocumentStyle, ISectionBreak, ISectionColumnProperties } from '@univerjs/core';
+import { PAGE_SIZE, PageOrientType, PaperType, TRADITIONAL_DOCUMENT_DEFAULT_MARGIN } from '@univerjs/core';
 
 export interface IEffectiveSectionPageSetup {
     pageSize: {
@@ -93,7 +93,7 @@ export function getEffectiveSectionPageSetup(
     const pageNumberStart = section?.pageNumberStart ?? documentStyle?.pageNumberStart;
     return {
         pageSize,
-        pageOrient: resolveSectionValue(section?.pageOrient, documentStyle?.pageOrient, PageOrient.PORTRAIT),
+        pageOrient: resolveSectionValue(section?.pageOrient, documentStyle?.pageOrient, PageOrientType.PORTRAIT),
         margins,
         contentSize,
         ...(pageNumberStart == null ? {} : { pageNumberStart }),

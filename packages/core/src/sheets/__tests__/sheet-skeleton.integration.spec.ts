@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import { afterEach, describe, expect, it } from 'vitest';
 import type { Injector } from '../../common/di';
 import type { IDocumentData, IDocumentRenderConfig, IPaddingData } from '../../types/interfaces';
 import type { IWorkbookData } from '../typedef';
-import { afterEach, describe, expect, it } from 'vitest';
 import { IConfigService } from '../../services/config/config.service';
 import { IContextService } from '../../services/context/context.service';
 import { LocaleService } from '../../services/locale/locale.service';
@@ -215,6 +215,29 @@ describe('SheetSkeleton integration', () => {
         expect(skeleton.getCellIndexByOffset(252, 96, 2, 2, { x: 24, y: 12 })).toEqual({ row: 1, column: 1 });
         expect(skeleton.getRowIndexByOffsetY(128, 1, { x: 0, y: 0 }, { firstMatch: true })).toBe(5);
         expect(skeleton.getColumnIndexByOffsetX(382, 1, { x: 0, y: 0 }, { firstMatch: true })).toBe(5);
+    });
+
+    it('resolves model positions independently of the viewport while preserving default viewport lookup', () => {
+        const testBed = createCoreTestBed(workbookDataFactory());
+        const injector = testBed.univer.__getInjector();
+        const worksheet = testBed.sheet.getActiveSheet()!;
+        const createSkeleton = () => injector.createInstance(SheetSkeleton, worksheet, testBed.sheet.getStyles());
+        injector.add([SheetSkeleton, { useFactory: createSkeleton }]);
+        const skeleton = injector.get(SheetSkeleton);
+        skeleton.calculate();
+        disposables.push(() => {
+            skeleton.dispose();
+            testBed.univer.dispose();
+        });
+        const expected = skeleton.getCellIndexAndOffsetByPosition(150, 60, 1, 1, { x: 0, y: 0 });
+        skeleton.setScroll(24, 12);
+        skeleton.setScale(2);
+        expect(skeleton.getCellIndexAndOffsetByPosition(150, 60, 1, 1, { x: 0, y: 0 })).toEqual(expected);
+        const viewportCell = skeleton.getCellWithCoordByOffset(252, 96, 2, 2, { x: 24, y: 12 });
+        expect(skeleton.getCellIndexAndOffsetByPosition(252, 96)).toMatchObject({
+            row: viewportCell.actualRow,
+            column: viewportCell.actualColumn,
+        });
     });
 
     it('should compute overflow bounds and document render config through the real skeleton instance', () => {

@@ -23,9 +23,6 @@ import type {
     ISetCfCommandParams,
 } from '@univerjs/sheets-conditional-formatting';
 import type { ComponentType } from 'react';
-import type { LocaleKey } from '../../locale/types';
-import type { IConditionalColorPickerProps } from '../ColorPicker';
-import type { IStyleEditorProps } from './rule-edit/type';
 import {
     ICommandService,
     InterceptorManager,
@@ -33,7 +30,7 @@ import {
     LocaleService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { Button, Select } from '@univerjs/design';
+import { Button, Checkbox, Select } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import {
     RemoveSheetMutation,
@@ -51,6 +48,9 @@ import {
 import { FormulaEditor, RangeSelector } from '@univerjs/sheets-formula-ui';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type { IConditionalColorPickerProps } from '../ColorPicker';
+import type { IStyleEditorProps } from './rule-edit/type';
 import { ColorScaleStyleEditor } from './rule-edit/ColorScale';
 import { DataBarStyleEditor } from './rule-edit/DataBar';
 import { FormulaStyleEditor } from './rule-edit/Formula';
@@ -89,6 +89,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const subUnitId = getSubUnitId(univerInstanceService);
 
     const [errorText, setErrorText] = useState<string | undefined>(undefined);
+    const [stopIfTrue, setStopIfTrue] = useState(!!props.rule?.stopIfTrue);
     const rangeResult = useRef<IRange[]>(props.rule?.ranges ?? []);
     const rangeSelectorTouched = useRef(false);
 
@@ -186,6 +187,9 @@ export const RuleEdit = (props: IRuleEditProps) => {
             }
         }
     }, [ruleType]);
+    const supportsStopIfTrue = StyleEditor === HighlightCellStyleEditor
+        || StyleEditor === RankStyleEditor
+        || StyleEditor === FormulaStyleEditor;
 
     useEffect(() => {
         // If the child table which  the rule being edited is deleted, exit edit mode
@@ -244,12 +248,12 @@ export const RuleEdit = (props: IRuleEditProps) => {
                 }
                 let rule = {} as IConditionFormattingRule;
                 if (props.rule && props.rule.cfId) {
-                    rule = { ...props.rule, ranges, rule: result };
+                    rule = { ...props.rule, ranges, rule: result, stopIfTrue: result.type === CFRuleType.highlightCell && stopIfTrue };
                     commandService.executeCommand(SetCfCommand.id, { unitId, subUnitId, rule } as ISetCfCommandParams);
                     props.onCancel();
                 } else {
                     const cfId = conditionalFormattingRuleModel.createCfId(unitId, subUnitId);
-                    rule = { cfId, ranges, rule: result, stopIfTrue: false };
+                    rule = { cfId, ranges, rule: result, stopIfTrue: result.type === CFRuleType.highlightCell && stopIfTrue };
                     commandService.executeCommand(AddCfCommand.id, { unitId, subUnitId, rule } as IAddCfCommandParams);
                     props.onCancel();
                 }
@@ -320,6 +324,13 @@ export const RuleEdit = (props: IRuleEditProps) => {
                 ColorPickerComponent={ColorPickerComponent}
                 FormulaEditorComponent={FormulaEditorComponent}
             />
+            {supportsStopIfTrue && (
+                <div className="univer-mt-4">
+                    <Checkbox checked={stopIfTrue} onChange={(checked) => setStopIfTrue(!!checked)}>
+                        {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.stopIfTrue')}
+                    </Checkbox>
+                </div>
+            )}
             <div className="univer-mt-4 univer-flex univer-justify-end univer-gap-2">
                 <Button onClick={handleCancel}>{localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.cancel')}</Button>
                 <Button variant="primary" onClick={handleSubmit}>

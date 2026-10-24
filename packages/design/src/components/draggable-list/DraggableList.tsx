@@ -39,16 +39,6 @@ export interface IDraggableListProps<T> extends Omit<HTMLAttributes<HTMLDivEleme
     margin?: [number, number];
 }
 
-function moveItemByIndex<T>(list: T[], fromIndex: number, toIndex: number) {
-    if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0 || fromIndex >= list.length || toIndex >= list.length) {
-        return list;
-    }
-    const next = [...list];
-    const [item] = next.splice(fromIndex, 1);
-    next.splice(toIndex, 0, item);
-    return next;
-}
-
 export function DraggableList<T = any>(props: IDraggableListProps<T>) {
     const {
         list,
@@ -109,6 +99,16 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
     useEffect(() => {
         if (!draggingId) {
             return;
+        }
+
+        function moveItemByIndex(list: T[], fromIndex: number, toIndex: number) {
+            if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0 || fromIndex >= list.length || toIndex >= list.length) {
+                return list;
+            }
+            const next = [...list];
+            const [item] = next.splice(fromIndex, 1);
+            next.splice(toIndex, 0, item);
+            return next;
         }
 
         const handlePointerMove = (evt: PointerEvent | globalThis.PointerEvent) => {
@@ -210,10 +210,8 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
                                 'univer-relative univer-transition-all univer-duration-150',
                                 isDraggingItem && 'univer-opacity-0',
                                 isDragOverItem && `
-                                  univer-bg-primary-50/60
-                                  dark:!univer-bg-primary-900/20
-                                  univer-rounded univer-border univer-border-primary-200
-                                  dark:!univer-border-primary-700
+                                  univer-rounded univer-border univer-border-primary-200 univer-bg-primary-50
+                                  dark:!univer-border-primary-700 dark:!univer-bg-primary-900
                                 `
                             )}
                             onPointerDownCapture={(e: PointerEvent<HTMLDivElement>) => {
@@ -260,8 +258,8 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
                             {isDraggingItem && (
                                 <div
                                     className="
-                                      univer-bg-primary-50/50 univer-absolute univer-inset-0 univer-rounded
-                                      univer-border univer-border-dashed univer-border-primary-300
+                                      univer-absolute univer-inset-0 univer-rounded univer-border univer-border-dashed
+                                      univer-border-primary-300 univer-bg-primary-50
                                     "
                                 />
                             )}

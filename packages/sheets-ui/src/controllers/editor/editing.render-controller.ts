@@ -36,9 +36,6 @@ import type {
     ISetWorksheetActivateCommandParams,
     MutationsAffectRange,
 } from '@univerjs/sheets';
-import type { IDocObjectParam } from '../../basics/editor/get-editor-object';
-import type { IUniverSheetsUIConfig } from '../../config/config';
-import type { ICellEditorState, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
     BooleanNumber,
     CellValueType,
@@ -109,7 +106,9 @@ import {
 } from '@univerjs/sheets';
 import { DISABLE_AUTO_FOCUS_KEY, KeyCode, MetaKeys } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
-
+import type { IDocObjectParam } from '../../basics/editor/get-editor-object';
+import type { IUniverSheetsUIConfig } from '../../config/config';
+import type { ICellEditorState, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
 import {
@@ -126,6 +125,7 @@ import { EditorBridgeRenderController } from '../render-controllers/editor-bridg
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
 import { extractStringFromForceString, isForceString } from '../utils/cell-tools';
 import { normalizeString } from '../utils/char-tools';
+import { getEditCellInputPosition } from './utils/get-edit-cell-input-position';
 import { isRangeSelector } from './utils/is-range-selector';
 
 const HIDDEN_EDITOR_POSITION = -1000;
@@ -416,11 +416,10 @@ export class EditingRenderController extends Disposable {
                 if (this._contextService.getContextValue(DISABLE_AUTO_FOCUS_KEY)) {
                     cellSelectionRenderManager?.setInputPosition(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
                 } else {
-                    cellSelectionRenderManager?.activate(
-                        HIDDEN_EDITOR_POSITION,
-                        HIDDEN_EDITOR_POSITION,
-                        true
-                    );
+                    // Keep the hidden input on the selected cell, so the IME candidate window opens next to it
+                    // when the user starts typing before the cell editor is visible.
+                    const { x, y } = getEditCellInputPosition(state, this._renderManagerService.getRenderUnitById(state.unitId)?.engine);
+                    cellSelectionRenderManager?.activate(x, y, true);
                 }
             }
         }));
@@ -1094,7 +1093,7 @@ export function getCellDataByInput(
         cellData.t = CellValueType.STRING;
     } else if (
         // Text format ('@' or '@@@') has the highest priority
-        cellData.s && isTextFormat(styles?.get(cellData.s)?.n?.pattern)
+        newDataStream !== '' && cellData.s && isTextFormat(styles?.get(cellData.s)?.n?.pattern)
     ) {
         // If the style is text format ('@'or  '@@@'), the data should be set as a string.
         cellData.v = newDataStream;
@@ -1104,7 +1103,7 @@ export function getCellDataByInput(
         cellData.t = CellValueType.STRING;
 
         // Text format supports rich text
-        if (isRichText(body) && body.dataStream !== '\r\n') {
+        if (isRichText(body)) {
             cellData.p = snapshot;
         }
 
@@ -1134,24 +1133,17 @@ export function getCellDataByInput(
         cellData.si = null;
         cellData.p = null;
         cellData.t = CellValueType.FORCE_STRING;
-    } else if (isRichText(body)) {
-        if (body.dataStream === '\r\n') {
-            cellData.v = '';
-            cellData.f = null;
-            cellData.si = null;
-            cellData.p = null;
-        } else {
-            cellData.p = snapshot;
-            cellData.v = null;
-            cellData.f = null;
-            cellData.si = null;
-        }
+    } else if (newDataStream !== '' && isRichText(body)) {
+        cellData.p = snapshot;
+        cellData.v = null;
+        cellData.f = null;
+        cellData.si = null;
     } else {
-        // If the data is empty, the data is set to null.
-        if (newDataStream === '' && cellData.v == null && cellData.p == null) {
+        // An empty editor does not change an already empty cell.
+        if (newDataStream === '' && cellData.v == null && cellData.p == null && cellData.f == null && cellData.si == null) {
             return null;
         }
-        cellData.v = newDataStream;
+        cellData.v = newDataStream === '' ? null : newDataStream;
         cellData.f = null;
         cellData.si = null;
         cellData.p = null;

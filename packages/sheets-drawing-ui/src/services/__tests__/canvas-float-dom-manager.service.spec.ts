@@ -16,10 +16,9 @@
 
 import type { IWorkbookData } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import type { IRender, IRenderManagerService as IRenderManagerServiceType, Scene } from '@univerjs/engine-render';
+import type { IRender, Scene } from '@univerjs/engine-render';
 import type { ISheetFloatDom } from '@univerjs/sheets-drawing';
 import type { IFloatDom, IFloatDomLayout } from '@univerjs/ui';
-import type { ICanvasFloatDomInfo, ISheetFloatDomRenderObjectFactoryContext } from '../canvas-float-dom-manager.service';
 import {
     BooleanNumber,
     Disposable,
@@ -38,6 +37,7 @@ import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univ
 import { CanvasFloatDomService } from '@univerjs/ui';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { ICanvasFloatDomInfo, ISheetFloatDomRenderObjectFactoryContext } from '../canvas-float-dom-manager.service';
 import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
 import {
     applyFloatDomTransformerConfig,
@@ -155,7 +155,7 @@ function setup(workbookData: IWorkbookData = BASE_WORKBOOK_DATA) {
     };
 }
 
-class TestRenderManagerService extends Disposable implements Partial<IRenderManagerServiceType> {
+class TestRenderManagerService extends Disposable implements Partial<IRenderManagerService> {
     private _render: IRender | null = null;
     readonly created$ = new Subject<IRender>();
     readonly disposed$ = new Subject<string>();

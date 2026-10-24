@@ -15,7 +15,6 @@
  */
 
 import type { Dependency, ICommand } from '@univerjs/core';
-import type { IUniverDocsConfig } from './config/config';
 import {
     ICommandService,
     IConfigService,
@@ -28,6 +27,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
+import type { IUniverDocsConfig } from './config/config';
 import pkg from '../package.json';
 import { DeleteTextCommand, InsertTextCommand, UpdateTextCommand } from './commands/commands/core-editing.command';
 import { CreateHeaderFooterCommand } from './commands/commands/create-header-footer.command';
@@ -37,6 +37,7 @@ import {
 import { SetDocumentNameCommand } from './commands/commands/set-document-name.command';
 import { SetDocumentPermissionCommand } from './commands/commands/set-document-permission.command';
 import { SetDocumentPermissionsCommand } from './commands/commands/set-document-permissions.command';
+import { SetHeadingCollapsedCommand } from './commands/commands/set-heading-collapsed.command';
 import { SetSectionHeaderFooterLinkCommand } from './commands/commands/set-section-header-footer-link.command';
 import { UpdateDocumentParagraphStyleCommand } from './commands/commands/update-document-paragraph-style.command';
 import {
@@ -126,6 +127,7 @@ export class UniverDocsPlugin extends Plugin {
                 SetDocumentPermissionsCommand,
                 SetDocumentDefaultParagraphStyleCommand,
                 SetDocumentNameCommand,
+                SetHeadingCollapsedCommand,
                 SetSectionHeaderFooterLinkCommand,
                 UpdateDocumentParagraphStyleCommand,
                 UpdateDocumentSectionCommand,

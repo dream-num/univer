@@ -10,9 +10,9 @@ runs:
     using: composite
     steps:
         - name: Setup pnpm and Node.js
-          uses: pnpm/setup@v2
+          uses: pnpm/setup@v3
           with:
-              runtime: node@24.3.0
+              runtime: node@24.22.1
               install: false
 
         - name: Get pnpm store path

@@ -27,13 +27,13 @@ import type {
     ITextSelectionStyle,
     Scene,
 } from '@univerjs/engine-render';
-import type { IDocRange } from './range-interface';
 import { DataStreamTreeNodeType, RANGE_DIRECTION, Tools } from '@univerjs/core';
 import {
     DocumentSkeletonPageType,
     getDocumentSkeletonColumnPagePathInfo,
     getOffsetRectForDom,
 } from '@univerjs/engine-render';
+import type { IDocRange } from './range-interface';
 import { isInSameTableCell, isInSameTableCellData, isValidRectRange } from './convert-rect-range';
 import { compareNodePosition } from './convert-text-range';
 import { convertPositionsToRectRanges, RectRange } from './rect-range';
@@ -171,7 +171,9 @@ export function getRectRangeFromCharIndex(
     const startNodePosition = skeleton.findNodePositionByCharIndex(startOffset, true, segmentId, segmentPage);
     const endNodePosition = skeleton.findNodePositionByCharIndex(endOffset, true, segmentId, segmentPage);
 
-    if (startNodePosition == null || endNodePosition == null) {
+    // Hidden table offsets can resolve to their visible heading during layout.
+    if (startNodePosition == null || endNodePosition == null ||
+        startNodePosition.path.indexOf('cells') === -1 || endNodePosition.path.indexOf('cells') === -1) {
         return;
     }
 

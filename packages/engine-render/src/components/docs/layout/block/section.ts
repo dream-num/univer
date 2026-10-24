@@ -15,12 +15,12 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import { DataStreamTreeNodeType } from '@univerjs/core';
 import type { IDocumentSkeletonPage } from '../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
-import { DataStreamTreeNodeType } from '@univerjs/core';
 import { createSkeletonPage } from '../model/page';
 import { dealWithBlockError } from './block-error';
 import { appendColumnGroupBlockLine, createColumnGroupSkeleton } from './column';
@@ -65,10 +65,9 @@ export function dealWithSection(
 
     for (let i = paragraphStartIndex; i < paragraphEndIndex; i++) {
         const paragraphNode = sectionNode.children[i];
-        // const { paragraph, table, tableOfContents, blockType, customBlock, blockId } = block;
-        // if (preRenderedBlockIdMap?.get(blockId)) {
-        //     continue;
-        // }
+        if (viewModel.getCollapsedHeadingAtOffset(paragraphNode.startIndex)) {
+            continue;
+        }
         let skeletonPages: IDocumentSkeletonPage[] = [];
         let currentPageCache = curPage;
         if (allCurrentSkeletonPages.length > 0) {
@@ -124,7 +123,6 @@ export function dealWithSection(
 
         _pushPage(allCurrentSkeletonPages, skeletonPages);
 
-        // renderedBlockIdMap.set(blockId, true);
         if (ctx.isDirty) {
             break;
         }

@@ -15,7 +15,6 @@
  */
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
-import type { IDocLayoutExecutor, IDocLayoutMountIdentity, IDocLayoutStartResult } from '../doc-layout-executor.service';
 import {
     CustomRangeType,
     DocumentFlavor,
@@ -38,6 +37,7 @@ import {
     setDocsCustomBlockRenderViewportProvider,
 } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IDocLayoutExecutor, IDocLayoutMountIdentity, IDocLayoutStartResult } from '../doc-layout-executor.service';
 import { RichTextEditingMutation } from '../../commands/mutations/core-editing.mutation';
 import { UniverDocsPlugin } from '../../plugin';
 import {
@@ -511,7 +511,7 @@ describe('DocLayoutExecutorService', () => {
         });
     });
 
-    it('projects committed mutations to the Worker in revision order before layout starts', async () => {
+    it.each([false, true])('projects committed mutations without resnapshot after empty operations: %s', async (emptyOperation) => {
         const injector = univer.__getInjector();
         const service = injector.get(DocLayoutExecutorService);
         const executor = createExecutor();
@@ -524,6 +524,13 @@ describe('DocLayoutExecutorService', () => {
 
         const commandService = injector.get(ICommandService);
         for (const [offset, text] of [[5, 'A'], [6, 'B']] as const) {
+            if (emptyOperation) {
+                commandService.syncExecuteCommand(RichTextEditingMutation.id, {
+                    unitId: 'traditional-doc',
+                    actions: [],
+                    textRanges: [],
+                });
+            }
             const textX = new TextX();
             textX.push({ t: TextXActionType.RETAIN, len: offset });
             textX.push({

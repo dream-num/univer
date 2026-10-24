@@ -15,21 +15,6 @@
  */
 
 import type { INumberUnit, IParagraphProperties, ITabStop, Nullable } from '@univerjs/core';
-import type {
-    IDocumentSkeletonColumn,
-    IDocumentSkeletonDivide,
-    IDocumentSkeletonDrawing,
-    IDocumentSkeletonGlyph,
-    IDocumentSkeletonLine,
-    IDocumentSkeletonPage,
-    IDocumentSkeletonSection,
-    IDocumentSkeletonTable,
-} from '../../../../../basics/i-document-skeleton-cached';
-import type { IParagraphConfig, IParagraphTableCache, ISectionBreakConfig } from '../../../../../basics/interfaces';
-import type {
-    IFloatObject,
-    ILayoutContext,
-} from '../../tools';
 import {
     BooleanNumber,
     characterSpacingControlType,
@@ -47,6 +32,21 @@ import {
     TabStopAlignment,
     WrapStrategy,
 } from '@univerjs/core';
+import type {
+    IDocumentSkeletonColumn,
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonDrawing,
+    IDocumentSkeletonGlyph,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonSection,
+    IDocumentSkeletonTable,
+} from '../../../../../basics/i-document-skeleton-cached';
+import type { IParagraphConfig, IParagraphTableCache, ISectionBreakConfig } from '../../../../../basics/interfaces';
+import type {
+    IFloatObject,
+    ILayoutContext,
+} from '../../tools';
 import { cjk } from '../../../../../basics/cjk-regexp';
 import {
     DocumentSkeletonPageType,
@@ -55,7 +55,12 @@ import {
 } from '../../../../../basics/i-document-skeleton-cached';
 import { isCjkLeftAlignedPunctuation } from '../../../../../basics/tools';
 import { getDocsCustomBlockRenderViewport } from '../../../custom-block-render-viewport';
-import { getNominalFontLineHeight, isTraditionalDocumentCompatibility } from '../../../document-compatibility';
+import {
+    getDocumentCompatibilityPolicy,
+    getNominalFontLineHeight,
+    isTraditionalDocumentCompatibility,
+    shouldAllowImportedTableMarginOverflow,
+} from '../../../document-compatibility';
 import { BreakPointType } from '../../line-breaker/break';
 import {
     addGlyphToDivide,
@@ -1777,11 +1782,19 @@ function _lineOperator(
         [...paragraphNonInlineSkeDrawings.values()].some(
             (drawing) => drawing.drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM
         );
+    // An inline table can move below a float without intersecting its old anchor line.
+    // Only the latest positioned slice on this page/column governs following flow.
+    let tableFlowTop = lineTop;
+    for (const item of skeTablesInParagraph ?? []) {
+        if (item.hasPositioned && item.table.parent === lastPage && item.table.tableSource.textWrap === TableTextWrapType.NONE) {
+            tableFlowTop = Math.max(lineTop, item.table.top + item.table.height - section.top);
+        }
+    }
     const calculatedLineTop = positionedCustomBlockOnly
-        ? lineTop
+        ? tableFlowTop
         : calculateLineTopByDrawings(
             lineHeight,
-            lineTop,
+            tableFlowTop,
             lastPage,
             headerPage,
             footerPage,
@@ -2216,7 +2229,13 @@ function _updateAndPositionTable(
         switch (tableSource.textWrap) {
             case TableTextWrapType.NONE: {
                 table.top = section.top + lineTop;
-                table.left = column.left + getTableLeft(column.width, table.width, tableSource.align, tableSource.indent);
+                table.left = column.left + getTableLeft(
+                    column.width,
+                    table.width,
+                    tableSource.align,
+                    tableSource.indent,
+                    shouldAllowImportedTableMarginOverflow(sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy(), tableSource)
+                );
                 __avoidFlowAffectingDrawingsForTable(table, page, column);
                 __avoidNonOverlappingFloatingTables(table, page);
                 break;

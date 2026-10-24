@@ -14,127 +14,239 @@
  * limitations under the License.
  */
 
-import { Injector } from '@univerjs/core';
-import { Subject } from 'rxjs';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { CFRuleType } from '../../base/const';
-import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
-import { ConditionalFormattingViewModel } from '../../models/conditional-formatting-view-model';
+import type { ICellData } from '@univerjs/core';
+import { BooleanNumber, CellValueType } from '@univerjs/core';
+import {
+    ErrorType,
+    OtherFormulaMarkDirty,
+    SetFormulaCalculationResultMutation,
+    SetOtherFormulaMutation,
+} from '@univerjs/engine-formula';
+import { SetRangeValuesMutation } from '@univerjs/sheets';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IConditionalFormattingRuleConfig, IConditionFormattingRule, INumberHighlightCell } from '../../models/type';
+import { CFNumberOperator, CFRuleType, CFSubRuleType, CFValueType } from '../../base/const';
+import { AddConditionalRuleMutation } from '../../commands/mutations/add-conditional-rule.mutation';
+import { MoveConditionalRuleMutation } from '../../commands/mutations/move-conditional-rule.mutation';
+import { SetConditionalRuleMutation } from '../../commands/mutations/set-conditional-rule.mutation';
+import { createTestBed } from '../../models/calculate-unit-v2/__tests__/test.util';
+import { IIconSetType } from '../../models/icon-map';
+import { ConditionalFormattingFormulaService } from '../conditional-formatting-formula.service';
 import { ConditionalFormattingStyleComposer } from '../conditional-formatting-style-composer.service';
 
+const RANGES = [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 2 }];
+
+const createHighlightConfig = (style: INumberHighlightCell['style'] = {}, value = 0): INumberHighlightCell => ({
+    type: CFRuleType.highlightCell,
+    subType: CFSubRuleType.number,
+    operator: CFNumberOperator.greaterThan,
+    value,
+    style,
+});
+
+const COLOR_SCALE: IConditionalFormattingRuleConfig = {
+    type: CFRuleType.colorScale,
+    config: [
+        { index: 0, color: '#ffeeaa', value: { type: CFValueType.num, value: 0 } },
+        { index: 1, color: '#ffeeaa', value: { type: CFValueType.num, value: 10 } },
+    ],
+};
+const DATA_BAR: IConditionalFormattingRuleConfig = {
+    type: CFRuleType.dataBar,
+    isShowValue: false,
+    config: {
+        min: { type: CFValueType.num, value: 0 },
+        max: { type: CFValueType.num, value: 10 },
+        isGradient: false,
+        positiveColor: '#38bdf8',
+        nativeColor: '#ff0000',
+    },
+};
+const ICON_SET: IConditionalFormattingRuleConfig = {
+    type: CFRuleType.iconSet,
+    isShowValue: false,
+    config: [{
+        operator: CFNumberOperator.greaterThanOrEqual,
+        value: { type: CFValueType.num, value: 0 },
+        iconType: IIconSetType.threeArrows,
+        iconId: '0',
+    }],
+};
+
+// Exercise the calculation, viewport cache, and composer together so empty styles cannot hide a match.
 describe('ConditionalFormattingStyleComposer', () => {
+    let testBed: ReturnType<typeof createTestBed>;
     let service: ConditionalFormattingStyleComposer;
-    const rules = new Map<string, unknown>();
-    let cellCfs: Array<{ cfId: string; result: unknown; priority: number }>;
-    let ruleChange$: Subject<void>;
-    let markDirty$: Subject<void>;
-    let cacheClear$: Subject<void>;
-    const getCellCfs = vi.fn(() => cellCfs);
-
-    class TestConditionalFormattingRuleModel {
-        $ruleChange = ruleChange$;
-
-        getRule(_unitId: string, _subUnitId: string, cfId: string) {
-            return rules.get(cfId);
-        }
-    }
-
-    class TestConditionalFormattingViewModel {
-        markDirty$ = markDirty$;
-        cacheClear$ = cacheClear$;
-
-        getCellCfs = getCellCfs;
-    }
 
     beforeEach(() => {
-        rules.clear();
-        cellCfs = [];
-        ruleChange$ = new Subject();
-        markDirty$ = new Subject();
-        cacheClear$ = new Subject();
-        getCellCfs.mockClear();
-        const injector = new Injector();
-        injector.add([ConditionalFormattingRuleModel, { useClass: TestConditionalFormattingRuleModel as never }]);
-        injector.add([ConditionalFormattingViewModel, { useClass: TestConditionalFormattingViewModel as never }]);
-        injector.add([ConditionalFormattingStyleComposer]);
-        service = injector.get(ConditionalFormattingStyleComposer);
+        vi.useFakeTimers();
+        testBed = createTestBed();
+        testBed.getConditionalFormattingService();
+        service = testBed.get(ConditionalFormattingStyleComposer);
     });
 
-    it('merges matched conditional styles in rule priority order', () => {
-        rules.set('color-scale', { stopIfTrue: false, rule: { type: CFRuleType.colorScale } });
-        rules.set('highlight', { stopIfTrue: false, rule: { type: CFRuleType.highlightCell } });
-        cellCfs = [
-            { cfId: 'color-scale', result: '#ffeeaa', priority: 1 },
-            { cfId: 'highlight', result: { cl: { rgb: '#333333' } }, priority: 2 },
-        ];
+    afterEach(() => {
+        testBed.univer.dispose();
+        vi.useRealTimers();
+    });
 
-        expect(service.composeStyle('book-1', 'sheet-1', 1, 1)).toEqual({
-            style: { cl: { rgb: '#333333' }, bg: { rgb: '#ffeeaa' } },
+    const addRule = (cfId: string, rule: IConditionalFormattingRuleConfig, stopIfTrue = false) => {
+        const wrapper: IConditionFormattingRule = { cfId, ranges: RANGES, rule, stopIfTrue };
+        testBed.commandService.syncExecuteCommand(AddConditionalRuleMutation.id, {
+            unitId: testBed.unitId,
+            subUnitId: testBed.subUnitId,
+            rule: wrapper,
+        });
+        return wrapper;
+    };
+
+    const compose = () => service.composeStyle(testBed.unitId, testBed.subUnitId, 0, 1);
+
+    it('merges matched conditional styles in rule priority order', () => {
+        addRule('highlight', createHighlightConfig({ cl: { rgb: '#333333' }, bg: { rgb: '#ff0000' } }));
+        addRule('color-scale', COLOR_SCALE);
+
+        expect(compose()).toEqual({
+            style: { cl: { rgb: '#333333' }, bg: { rgb: 'rgb(255,238,170)' } },
         });
     });
 
     it('composes highlight, data bar, and icon set rules on the same cell', () => {
-        const dataBar = {
-            color: '#38bdf8',
-            isGradient: false,
-            isShowValue: true,
-            startPoint: 0,
-            value: 50,
-        };
-        const iconSet = {
-            iconId: '0',
-            iconType: '3Arrows',
-            isShowValue: true,
-        };
-        rules.set('highlight', { stopIfTrue: false, rule: { type: CFRuleType.highlightCell } });
-        rules.set('data-bar', { stopIfTrue: false, rule: { type: CFRuleType.dataBar } });
-        rules.set('icon-set', { stopIfTrue: false, rule: { type: CFRuleType.iconSet } });
-        cellCfs = [
-            { cfId: 'icon-set', result: iconSet, priority: 1 },
-            { cfId: 'data-bar', result: dataBar, priority: 2 },
-            { cfId: 'highlight', result: { bg: { rgb: '#fff7cc' } }, priority: 3 },
-        ];
+        addRule('highlight', createHighlightConfig({ bg: { rgb: '#fff7cc' } }));
+        addRule('data-bar', DATA_BAR);
+        addRule('icon-set', ICON_SET);
 
-        expect(service.composeStyle('book-1', 'sheet-1', 1, 1)).toEqual({
+        expect(compose()).toEqual({
             style: { bg: { rgb: '#fff7cc' } },
-            dataBar,
-            iconSet,
-            isShowValue: true,
+            dataBar: {
+                color: '#38bdf8',
+                isGradient: false,
+                isShowValue: false,
+                startPoint: 0,
+                value: expect.closeTo(20),
+            },
+            iconSet: { iconId: '0', iconType: IIconSetType.threeArrows, isShowValue: false },
+            isShowValue: false,
         });
     });
 
-    it('stops evaluating lower-priority rules after a matched stop-if-true rule', () => {
-        rules.set('stop', { stopIfTrue: true, rule: { type: CFRuleType.highlightCell } });
-        rules.set('ignored', { stopIfTrue: false, rule: { type: CFRuleType.colorScale } });
-        cellCfs = [
-            { cfId: 'stop', result: { bg: { rgb: '#ff0000' } }, priority: 1 },
-            { cfId: 'ignored', result: '#00ff00', priority: 2 },
+    it.each([
+        createHighlightConfig({ bg: { rgb: '#ff0000' } }),
+        COLOR_SCALE,
+        DATA_BAR,
+        ICON_SET,
+    ])('suppresses lower-priority $type after an empty-style stop rule matches', async (config) => {
+        addRule('lower', config);
+        expect(compose()).not.toEqual({ style: {} });
+        addRule('stop', createHighlightConfig(), true);
+        addRule('higher', createHighlightConfig({ cl: { rgb: '#333333' } }));
+        await vi.advanceTimersByTimeAsync(100);
+
+        expect(compose()).toEqual({ style: { cl: { rgb: '#333333' } } });
+        expect(testBed.getConditionalFormattingViewModel().getCellCfs(testBed.unitId, testBed.subUnitId, 0, 1))
+            .toContainEqual(expect.objectContaining({ cfId: 'stop', result: {}, matched: true }));
+    });
+
+    it.each([
+        { value: 100, stopIfTrue: true },
+        { value: 0, stopIfTrue: false },
+    ])('continues after an empty-style rule with threshold $value and stopIfTrue=$stopIfTrue', ({ value, stopIfTrue }) => {
+        addRule('lower', createHighlightConfig({ bg: { rgb: '#00ff00' } }));
+        addRule('stop', createHighlightConfig({}, value), stopIfTrue);
+
+        expect(compose()).toEqual({ style: { bg: { rgb: '#00ff00' } } });
+    });
+
+    it('stops lower-priority rules after a nonempty-style rule matches', () => {
+        addRule('lower', createHighlightConfig({ cl: { rgb: '#333333' } }));
+        addRule('stop', createHighlightConfig({ bg: { rgb: '#ff0000' } }), true);
+
+        expect(compose()).toEqual({ style: { bg: { rgb: '#ff0000' } } });
+    });
+
+    it('refreshes the stop state after changing cell values and rule order', async () => {
+        testBed.commandService.registerCommand(SetRangeValuesMutation);
+        addRule('lower', createHighlightConfig({ bg: { rgb: '#00ff00' } }));
+        addRule('stop', createHighlightConfig({}, 1), true);
+        expect(compose()).toEqual({ style: {} });
+
+        testBed.commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: testBed.unitId,
+            subUnitId: testBed.subUnitId,
+            cellValue: { 0: { 1: { v: 1, t: CellValueType.NUMBER } } },
+        });
+        await vi.advanceTimersByTimeAsync(100);
+        expect(compose()).toEqual({ style: { bg: { rgb: '#00ff00' } } });
+        expect(testBed.getConditionalFormattingViewModel().getCellCfs(testBed.unitId, testBed.subUnitId, 0, 1))
+            .toContainEqual(expect.objectContaining({ cfId: 'stop', result: {}, matched: false }));
+
+        testBed.commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: testBed.unitId,
+            subUnitId: testBed.subUnitId,
+            cellValue: { 0: { 1: { v: 2, t: CellValueType.NUMBER } } },
+        });
+        await vi.advanceTimersByTimeAsync(100);
+        expect(compose()).toEqual({ style: {} });
+
+        testBed.commandService.syncExecuteCommand(MoveConditionalRuleMutation.id, {
+            unitId: testBed.unitId,
+            subUnitId: testBed.subUnitId,
+            start: { id: 'lower', type: 'self' },
+            end: { id: 'stop', type: 'before' },
+        });
+        await vi.advanceTimersByTimeAsync(100);
+        expect(compose()).toEqual({ style: { bg: { rgb: '#00ff00' } } });
+    });
+
+    it('reuses composed results and invalidates them after editing stopIfTrue', async () => {
+        addRule('lower', createHighlightConfig({ bg: { rgb: '#00ff00' } }));
+        const stop = addRule('stop', createHighlightConfig(), true);
+        const first = compose();
+        expect(compose()).toBe(first);
+        expect(first).toEqual({ style: {} });
+
+        testBed.commandService.syncExecuteCommand(SetConditionalRuleMutation.id, {
+            unitId: testBed.unitId,
+            subUnitId: testBed.subUnitId,
+            rule: { ...stop, stopIfTrue: false },
+        });
+        await vi.advanceTimersByTimeAsync(100);
+        expect(compose()).toEqual({ style: { bg: { rgb: '#00ff00' } } });
+    });
+
+    it('updates an empty-style formula stop rule when asynchronous results arrive', () => {
+        testBed.commandService.registerCommand(SetFormulaCalculationResultMutation);
+        testBed.commandService.registerCommand(SetOtherFormulaMutation);
+        testBed.commandService.registerCommand(OtherFormulaMarkDirty);
+        addRule('lower', createHighlightConfig({ bg: { rgb: '#00ff00' } }));
+        addRule('stop', {
+            type: CFRuleType.highlightCell,
+            subType: CFSubRuleType.formula,
+            value: '=A1>0',
+            style: {},
+        }, true);
+        expect(compose()).toEqual({ style: { bg: { rgb: '#00ff00' } } });
+        expect(testBed.getConditionalFormattingViewModel().getCellCfs(testBed.unitId, testBed.subUnitId, 0, 1))
+            .toContainEqual(expect.objectContaining({ cfId: 'stop', result: undefined, matched: false }));
+
+        const formula = testBed.get(ConditionalFormattingFormulaService)
+            .getSubUnitFormulaMap(testBed.unitId, testBed.subUnitId)
+            ?.getValues()[0];
+        expect(formula).toBeDefined();
+        const results: Array<{ cell: ICellData; stopped: boolean }> = [
+            { cell: { t: CellValueType.BOOLEAN, v: BooleanNumber.TRUE }, stopped: true },
+            { cell: { t: CellValueType.BOOLEAN, v: BooleanNumber.FALSE }, stopped: false },
+            { cell: { t: CellValueType.NUMBER, v: 1 }, stopped: true },
+            { cell: { t: CellValueType.STRING, v: ErrorType.DIV_BY_ZERO }, stopped: false },
         ];
-
-        expect(service.composeStyle('book-1', 'sheet-1', 1, 1)).toEqual({
-            style: { bg: { rgb: '#ff0000' } },
-        });
-    });
-
-    it('reuses the composed result until conditional formatting changes', () => {
-        rules.set('highlight', { stopIfTrue: false, rule: { type: CFRuleType.highlightCell } });
-        cellCfs = [{ cfId: 'highlight', result: { cl: { rgb: '#333333' } }, priority: 1 }];
-        const first = service.composeStyle('book-1', 'sheet-1', 1, 1);
-        const second = service.composeStyle('book-1', 'sheet-1', 1, 1);
-
-        expect(second).toBe(first);
-        expect(getCellCfs).toHaveBeenCalledOnce();
-
-        markDirty$.next();
-        service.composeStyle('book-1', 'sheet-1', 1, 1);
-        expect(getCellCfs).toHaveBeenCalledTimes(2);
-
-        ruleChange$.next();
-        service.composeStyle('book-1', 'sheet-1', 1, 1);
-        expect(getCellCfs).toHaveBeenCalledTimes(3);
-
-        cacheClear$.next();
-        service.composeStyle('book-1', 'sheet-1', 1, 1);
-        expect(getCellCfs).toHaveBeenCalledTimes(4);
+        for (const { cell, stopped } of results) {
+            testBed.commandService.syncExecuteCommand(SetFormulaCalculationResultMutation.id, {
+                unitData: {},
+                unitOtherData: {
+                    [testBed.unitId]: { [testBed.subUnitId]: { [formula!.formulaId]: { 0: { 1: [[cell]] } } } },
+                },
+            });
+            expect(compose()).toEqual(stopped ? { style: {} } : { style: { bg: { rgb: '#00ff00' } } });
+        }
     });
 });

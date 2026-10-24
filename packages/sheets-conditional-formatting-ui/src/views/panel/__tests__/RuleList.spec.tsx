@@ -83,7 +83,7 @@ function createNumberHighlightRule(cfId: string, range: IRange, value: number): 
     };
 }
 
-async function createRuleListTestBed() {
+async function createRuleListTestBed(stopIfTrue = false) {
     const testBed = createCfUiTestBed();
 
     testBed.injector.add([ConditionalFormattingI18nController]);
@@ -121,6 +121,7 @@ async function createRuleListTestBed() {
                     selectedRange: 'Selected range',
                     createRule: 'Create rule',
                     clear: 'Clear rules',
+                    stopIfTrue: 'Stop If True',
                 },
                 preview: {
                     describe: {
@@ -135,7 +136,7 @@ async function createRuleListTestBed() {
     await testBed.commandService.executeCommand(AddCfCommand.id, {
         unitId: testBed.unitId,
         subUnitId: testBed.subUnitId,
-        rule: createNumberHighlightRule('cf-active', ACTIVE_RANGE, 10),
+        rule: { ...createNumberHighlightRule('cf-active', ACTIVE_RANGE, 10), stopIfTrue },
     });
     await testBed.commandService.executeCommand(AddCfCommand.id, {
         unitId: testBed.unitId,
@@ -160,6 +161,40 @@ describe('RuleList', () => {
         root = undefined;
         container = undefined;
         currentTestBed = undefined;
+    });
+
+    it.each([false, true])('opens the rule from its read-only stopIfTrue=%s display without toggling it', async (stopIfTrue) => {
+        currentTestBed = await createRuleListTestBed(stopIfTrue);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const openedRuleIds: string[] = [];
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <RuleList onClick={(rule) => openedRuleIds.push(rule.cfId)} onCreate={() => undefined} />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const row = container.querySelector('[data-draggable-list-item-id="cf-active"]')!;
+        const label = row.querySelector('[data-u-comp="checkbox"]')!;
+        const checkbox = label.querySelector('input')!;
+        expect(checkbox.checked).toBe(stopIfTrue);
+        expect(checkbox.disabled).toBe(true);
+
+        // The display's icon and label both belong to the surrounding rule's edit target.
+        const target = stopIfTrue ? label.lastElementChild! : checkbox.parentElement!.lastElementChild!;
+        await act(async () => {
+            target.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(openedRuleIds).toEqual(['cf-active']);
+        expect(checkbox.checked).toBe(stopIfTrue);
+        expect(currentTestBed.ruleModel.getRule(currentTestBed.unitId, currentTestBed.subUnitId, 'cf-active')?.stopIfTrue).toBe(stopIfTrue);
     });
 
     it('shows only conditional formatting rules intersecting the current sheet selection in selected-range mode', async () => {

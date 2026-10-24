@@ -16,8 +16,6 @@
 
 import type { ICommand, IMutationInfo } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import type { LocaleKey } from '../../locale/types';
-import type { ITableSetConfig } from '../../types/type';
 import {
     CommandType,
     ICommandService,
@@ -27,15 +25,19 @@ import {
     IUniverInstanceService,
     LocaleService,
     sequenceExecute,
+    SheetTypes,
 } from '@univerjs/core';
 import { IDefinedNamesService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import {
     checkRangesEditablePermission,
+    getSheetCommandTarget,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
     SheetInterceptorService,
     WorkbookEditablePermission,
 } from '@univerjs/sheets';
+import type { LocaleKey } from '../../locale/types';
+import type { ITableSetConfig } from '../../types/type';
 import { TableManager } from '../../models/table-manager';
 import { IRangeOperationTypeEnum } from '../../types/type';
 import { getExistingNamesSet } from '../../util';
@@ -62,6 +64,13 @@ export const SetSheetTableCommand: ICommand<ISetSheetTableCommandParams> = {
         const table = tableManager.getTableById(unitId, tableId);
 
         if (!table) {
+            return false;
+        }
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), {
+            unitId,
+            subUnitId: table.getSubunitId(),
+        });
+        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
             return false;
         }
 

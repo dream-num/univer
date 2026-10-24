@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { ITestBed } from './create-test-bed';
-import { ICommandService } from '@univerjs/core';
+import { ICommandService, IPermissionService, mergeWorksheetSnapshotWithDefault, SheetTypes } from '@univerjs/core';
 import {
     AddRangeProtectionMutation,
     AddWorksheetProtectionMutation,
@@ -24,6 +23,10 @@ import {
     SetRangeProtectionMutation,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ITestBed } from './create-test-bed';
+import { InsertSheetMutation } from '../../commands/mutations/insert-sheet.mutation';
+import { WorksheetEditPermission } from '../../services/permission/permission-point/worksheet/edit';
+import { WorksheetPermissionService } from '../../services/permission/worksheet-permission/worksheet-permission.service';
 import { createFacadeTestBed } from './create-test-bed';
 
 describe('sheets facade permissions', () => {
@@ -42,6 +45,34 @@ describe('sheets facade permissions', () => {
 
     afterEach(() => {
         testBed.univer.dispose();
+    });
+
+    it('rebinds a missing chart edit point before facade setPoint and retains denial after unprotect', async () => {
+        const { get, univerAPI } = testBed;
+        const owner = get(WorksheetPermissionService);
+        expect(owner.setWorksheetEditPermissionConstraint((sheet) => sheet.getConfig().type !== SheetTypes.CHART)).toBe(true);
+        const commands = get(ICommandService);
+        commands.registerCommand(InsertSheetMutation);
+        expect(commands.syncExecuteCommand(InsertSheetMutation.id, {
+            unitId: 'test',
+            sheet: mergeWorksheetSnapshotWithDefault({ id: 'chart', name: 'Chart', type: SheetTypes.CHART }),
+        })).toBe(true);
+        const chart = univerAPI.getActiveWorkbook()!.getSheetBySheetId('chart')!;
+        const chartPermission = chart.getWorksheetPermission();
+        const permissionService = get(IPermissionService);
+        const editPoint = new WorksheetEditPermission('test', 'chart');
+        expect(permissionService.getPermissionPoint(editPoint.id)?.value).toBe(false);
+
+        await chartPermission.protect({ name: 'Collaborative chart protection' });
+        permissionService.deletePermissionPoint(editPoint.id);
+        expect(permissionService.getPermissionPoint(editPoint.id)).toBeUndefined();
+        await chartPermission.setPoint(univerAPI.Enum.WorksheetPermissionPoint.Edit, true);
+        expect(permissionService.getPermissionPoint(editPoint.id)?.value).toBe(false);
+        expect(chartPermission.canEdit()).toBe(false);
+
+        expect(await chartPermission.unprotect()).toBe(true);
+        expect(permissionService.getPermissionPoint(editPoint.id)?.value).toBe(false);
+        expect(univerAPI.getActiveWorkbook()!.getActiveSheet().getWorksheetPermission().canEdit()).toBe(true);
     });
 
     it('applies workbook modes and collaborator changes through the permission facade', async () => {

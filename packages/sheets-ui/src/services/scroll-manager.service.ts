@@ -180,7 +180,7 @@ export class SheetScrollManagerService implements IRenderModule {
         };
     }
 
-    setSearchParam(param: IScrollStateSearchParam) {
+    setSearchParam(param: Nullable<IScrollStateSearchParam>) {
         this._searchParamForScroll = param;
     }
 

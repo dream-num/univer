@@ -15,9 +15,6 @@
  */
 
 import type { IAccessor, ICellData, ICommand, IRange } from '@univerjs/core';
-import type { IRemoveNumfmtMutationParams, ISetCellsNumfmt } from '../mutations/numfmt.mutation';
-import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
-import type { ISheetCommandSharedParams } from '../utils/interface';
 import {
     CellValueType,
     CommandType,
@@ -31,6 +28,9 @@ import {
     ObjectMatrix,
     sequenceExecute,
 } from '@univerjs/core';
+import type { IRemoveNumfmtMutationParams, ISetCellsNumfmt } from '../mutations/numfmt.mutation';
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+import type { ISheetCommandSharedParams } from '../utils/interface';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import {
     factoryRemoveNumfmtUndoMutation,
@@ -40,7 +40,7 @@ import {
     transformCellsToRange,
 } from '../mutations/numfmt.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
-import { getSheetCommandTarget } from './utils/target-util';
+import { getSheetGridCommandTarget } from './utils/target-util';
 
 export interface ITextToNumberCommandParams extends Partial<ISheetCommandSharedParams> {
     ranges?: IRange[];
@@ -56,7 +56,7 @@ export const TextToNumberCommand: ICommand = {
 
     // eslint-disable-next-line max-lines-per-function, complexity
     handler: (accessor: IAccessor, params: ITextToNumberCommandParams) => {
-        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        const target = getSheetGridCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
 
         const ranges = params?.ranges || accessor.get(SheetsSelectionsService).getCurrentSelections()?.map((s) => s.range);

@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IDrawingParam, IImageIoServiceParam, IRange, Nullable, Workbook } from '@univerjs/core';
+import type {
+    IAccessor,
+    IDrawingParam,
+    IImageIoServiceParam,
+    IRange,
+    Nullable,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
 import type { IImageData } from '@univerjs/drawing';
-import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { IRender, IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetLocationBase, WorkbookSelectionModel } from '@univerjs/sheets';
 import type {
     IInsertSheetDrawingCommandParams,
@@ -36,13 +44,18 @@ import {
     ICommandService,
     IContextService,
     IImageIoService,
+    ILogService,
     ImageSourceType,
     ImageUploadStatusType,
     Inject,
     Injector,
+    IPermissionService,
+    IUniverInstanceService,
     IURLImageService,
     LocaleService,
     PositionedObjectLayoutType,
+    SheetTypes,
+    UniverInstanceType,
     WrapTextType,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
@@ -57,25 +70,31 @@ import {
     IDrawingManagerService,
     SetDrawingSelectedOperation,
 } from '@univerjs/drawing';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, Rect } from '@univerjs/engine-render';
 import {
     attachRangeWithCoord,
+    getSheetCommandTarget,
     SetRangeValuesCommand,
     SheetInterceptorService,
     SheetSkeletonService,
     SheetsSelectionsService,
+    WorkbookEditablePermission,
+    WorksheetEditPermission,
 } from '@univerjs/sheets';
 import {
+    applySheetDrawingPlacement,
     drawingPositionToTransform,
+    getSheetDrawingPlacement,
     InsertSheetDrawingCommand,
     ISheetDrawingService,
     SetDrawingArrangeCommand,
     SetSheetDrawingCommand,
     SetWorksheetBackgroundImageCommand,
+    SheetDrawingAnchorType,
     transformToAxisAlignPosition,
     transformToDrawingPosition,
 } from '@univerjs/sheets-drawing';
-import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { ISheetSelectionRenderService, SHEET_VIEW_KEY, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
@@ -138,8 +157,21 @@ export function getDrawingSizeByCell(
     };
 }
 
+interface IImageInsertionTarget {
+    workbook: Workbook;
+    worksheet: Worksheet;
+    render: IRender;
+    unitId: string;
+    subUnitId: string;
+    epoch: number;
+    location?: ISheetLocationBase;
+    explicit: boolean;
+    pageFrame?: Rect;
+}
+
 export class SheetDrawingUpdateController extends Disposable implements IRenderModule {
     private readonly _workbookSelections: WorkbookSelectionModel;
+    private _imageInsertionEpoch = 0;
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @ICommandService private readonly _commandService: ICommandService,
@@ -161,6 +193,23 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
         this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
 
+        this.disposeWithMe(this._context.unit.activeSheet$.subscribe(() => {
+            this._imageInsertionEpoch++;
+        }));
+        this.disposeWithMe(this._injector.get(IUniverInstanceService).getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe(() => {
+            this._imageInsertionEpoch++;
+        }));
+        this.disposeWithMe(this._injector.get(IUniverInstanceService).focused$.subscribe(() => {
+            this._imageInsertionEpoch++;
+        }));
+        this.disposeWithMe(this._injector.get(IPermissionService).permissionPointUpdate$.subscribe((point) => {
+            const workbookId = this._context.unitId;
+            const sheetId = this._context.unit.getActiveSheet()?.getSheetId();
+            if (point.value === false && (point.id === new WorkbookEditablePermission(workbookId).id ||
+                (sheetId && point.id === new WorksheetEditPermission(workbookId, sheetId).id))) {
+                this._imageInsertionEpoch++;
+            }
+        }));
         this._updateDrawingListener();
         this._updateOrderListener();
         this._groupDrawingListener();
@@ -168,6 +217,10 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
     }
 
     async insertFloatImage(): Promise<boolean> {
+        const target = this._captureImageTarget();
+        if (!target) {
+            return false;
+        }
         const files = await this._fileOpenerService.openFile({
             multiple: true,
             accept: DRAWING_IMAGE_ALLOW_IMAGE_LIST.map((image) => `.${image.replace('image/', '')}`).join(','),
@@ -184,19 +237,25 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             return false;
         }
 
-        files.forEach(async (file) => await this.insertFloatImageByFile(file));
-        return true;
+        const results = await Promise.all(files.map((file) => this._insertFloatImage(file, target).catch((error: unknown) => {
+            this._injector.get(ILogService).error(error);
+            return false;
+        })));
+        return results.every(Boolean);
     }
 
     async insertCellImage(): Promise<boolean> {
+        const target = this._captureCellImageTarget();
+        if (!target) {
+            return false;
+        }
         const files = await this._fileOpenerService.openFile({
             multiple: false,
             accept: DRAWING_IMAGE_ALLOW_IMAGE_LIST.map((image) => `.${image.replace('image/', '')}`).join(','),
         });
         const file = files[0];
         if (file) {
-            await this._insertCellImage(file);
-            return true;
+            return this._insertCellImage(file, undefined, target);
         }
         return false;
     }
@@ -257,6 +316,20 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
     }
 
     async insertFloatImageByFile(file: File) {
+        const target = this._captureImageTarget();
+        if (!target) {
+            return false;
+        }
+        return this._insertFloatImage(file, target).catch((error: unknown) => {
+            this._injector.get(ILogService).error(error);
+            return false;
+        });
+    }
+
+    private async _insertFloatImage(file: File, target: IImageInsertionTarget): Promise<boolean> {
+        if (!this._isImageTargetValid(target)) {
+            return false;
+        }
         let imageParam: Nullable<IImageIoServiceParam>;
 
         try {
@@ -281,15 +354,21 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             }
         }
 
-        if (imageParam == null) {
-            return;
+        if (imageParam == null || !this._isImageTargetValid(target)) {
+            return false;
         }
 
-        const info = this._getUnitInfo();
-        const { unitId, subUnitId } = info;
+        const { unitId, subUnitId } = target;
         const { imageId, imageSourceType, source, base64Cache } = imageParam;
-        const { width, height, image } = await getImageSize(base64Cache || '');
-        const { width: sceneWidth, height: sceneHeight } = this._context.scene;
+        const imageSize = await getImageSize(base64Cache || '').catch(() => null);
+        if (!imageSize) {
+            return false;
+        }
+        const { width, height, image } = imageSize;
+        if (!this._isImageTargetValid(target) || !Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+            return false;
+        }
+        const { width: sceneWidth, height: sceneHeight } = target.render.scene;
 
         this._imageIoService.addImageSourceCache(source, imageSourceType, image);
 
@@ -300,15 +379,47 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             scale = Math.min(scaleWidth, scaleHeight);
         }
 
+        if (target.worksheet.getConfig().type === SheetTypes.CHART) {
+            const bounds = this._getChartImageBounds(target.render);
+            if (!bounds) {
+                return false;
+            }
+            scale = Math.min(scale, bounds.width / width, bounds.height / height);
+            const marker = { row: 0, column: 0, rowOffset: 0, columnOffset: 0 };
+            const drawing = applySheetDrawingPlacement({
+                unitId,
+                subUnitId,
+                drawingId: imageId,
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                imageSourceType,
+                source,
+                sheetTransform: { from: marker, to: marker },
+                axisAlignSheetTransform: { from: marker, to: marker },
+            }, {
+                kind: SheetDrawingAnchorType.None,
+                left: bounds.left + (bounds.width - width * scale) / 2,
+                top: bounds.top + (bounds.height - height * scale) / 2,
+                width: width * scale,
+                height: height * scale,
+            });
+            return this._commandService.executeCommand<IInsertSheetDrawingCommandParams>(InsertSheetDrawingCommand.id, { unitId, drawings: [drawing] });
+        }
+
         const sheetSkeletonParam = this._sheetSkeletonService.getSkeletonParam(unitId, subUnitId);
-        if (!sheetSkeletonParam) return;
+        if (!sheetSkeletonParam) {
+            return false;
+        }
 
         const { skeleton } = sheetSkeletonParam;
         const sheetTransform = this._getImagePosition(width * scale, height * scale, sceneWidth, sceneHeight, skeleton);
-        if (!sheetTransform) return;
+        if (!sheetTransform) {
+            return false;
+        }
 
         const newTransform = drawingPositionToTransform(sheetTransform, sheetSkeletonParam);
-        if (!newTransform) return;
+        if (!newTransform) {
+            return false;
+        }
 
         const sheetDrawingParam: ISheetDrawing = {
             unitId,
@@ -329,7 +440,11 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private async _insertCellImage(file: File, location?: ISheetLocationBase) {
+    private async _insertCellImage(file: File, location?: ISheetLocationBase, capturedTarget?: IImageInsertionTarget) {
+        const target = capturedTarget ?? this._captureCellImageTarget(location);
+        if (!target || !this._isImageTargetValid(target)) {
+            return false;
+        }
         let imageParam: Nullable<IImageIoServiceParam>;
         try {
             imageParam = await this._imageIoService.saveImage(file);
@@ -360,28 +475,16 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         const { imageId, imageSourceType, source, base64Cache } = imageParam;
         const { width, height, image } = await getImageSize(base64Cache || '');
         this._imageIoService.addImageSourceCache(source, imageSourceType, image);
-        const selection = this._workbookSelections.getCurrentLastSelection();
-        if (!selection) {
+        if (!this._isImageTargetValid(target)) {
             return false;
         }
-
-        // use start row and col when upload image to a merged cell
-        let row = selection.primary.actualRow;
-        let col = selection.primary.actualColumn;
-        if (selection.primary.isMerged) {
-            row = selection.primary.startRow;
-            col = selection.primary.startColumn;
-        }
+        const cellLocation = target.location!;
+        const { row, col } = cellLocation;
         const docDataModel = createDocumentModelWithStyle('', {});
 
         const imageSize = getDrawingSizeByCell(
             this._injector,
-            {
-                unitId: this._context.unitId,
-                subUnitId: this._context.unit.getActiveSheet().getSheetId(),
-                row,
-                col,
-            },
+            cellLocation,
             width,
             height,
             0
@@ -425,15 +528,16 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
             return this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, {
                 value: {
-                    [location?.row ?? row]: {
-                        [location?.col ?? col]: {
+                    [row]: {
+                        [col]: {
                             p: (docDataModel.getSnapshot()),
                             t: 1,
                         },
                     },
                 },
-                unitId: location?.unitId,
-                subUnitId: location?.subUnitId,
+                unitId: target.unitId,
+                subUnitId: target.subUnitId,
+                range: { startRow: row, endRow: row, startColumn: col, endColumn: col },
             });
         }
 
@@ -441,6 +545,10 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
     }
 
     async insertCellImageByUrl(url: string, location?: ISheetLocationBase) {
+        const target = this._captureCellImageTarget(location);
+        if (!target) {
+            return false;
+        }
         let src = url;
         try {
             src = await this._urlImageService.getImage(url);
@@ -449,20 +557,15 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }
         const { width, height, image } = await getImageSize(src || '');
         this._imageIoService.addImageSourceCache(url, ImageSourceType.URL, image);
-        const selection = this._workbookSelections.getCurrentLastSelection();
-        if (!selection) {
+        if (!this._isImageTargetValid(target)) {
             return false;
         }
+        const cellLocation = target.location!;
         const docDataModel = createDocumentModelWithStyle('', {});
 
         const imageSize = getDrawingSizeByCell(
             this._injector,
-            {
-                unitId: this._context.unitId,
-                subUnitId: this._context.unit.getActiveSheet().getSheetId(),
-                row: selection.primary.actualRow,
-                col: selection.primary.actualColumn,
-            },
+            cellLocation,
             width,
             height,
             0
@@ -505,19 +608,97 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             docDataModel.apply(jsonXActions);
             return this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, {
                 value: {
-                    [location?.row ?? selection.primary.actualRow]: {
-                        [location?.col ?? selection.primary.actualColumn]: {
+                    [cellLocation.row]: {
+                        [cellLocation.col]: {
                             p: (docDataModel.getSnapshot()),
                             t: 1,
                         },
                     },
                 },
-                unitId: location?.unitId,
-                subUnitId: location?.subUnitId,
+                unitId: target.unitId,
+                subUnitId: target.subUnitId,
+                range: { startRow: cellLocation.row, endRow: cellLocation.row, startColumn: cellLocation.col, endColumn: cellLocation.col },
             });
         }
 
         return false;
+    }
+
+    private _captureImageTarget(location?: ISheetLocationBase): IImageInsertionTarget | null {
+        if (this._disposed) {
+            return null;
+        }
+        const instances = this._injector.get(IUniverInstanceService);
+        const host = getSheetCommandTarget(instances, location ?? { unitId: this._context.unitId });
+        const render = host && this._injector.get(IRenderManagerService).getRenderUnitById(host.unitId);
+        if (!host || !render || (host.worksheet.getConfig().type !== SheetTypes.GRID && host.worksheet.getConfig().type !== SheetTypes.CHART)) {
+            return null;
+        }
+        const frame = render.components.get(SHEET_VIEW_KEY.CHART_PAGE);
+        const pageFrame = frame instanceof Rect ? frame : undefined;
+        const target = { ...host, render, epoch: this._imageInsertionEpoch, location, explicit: Boolean(location), pageFrame };
+        return this._isImageTargetValid(target) ? target : null;
+    }
+
+    private _captureCellImageTarget(location?: ISheetLocationBase): IImageInsertionTarget | null {
+        const target = this._captureImageTarget(location);
+        if (!target || target.worksheet.getConfig().type !== SheetTypes.GRID) {
+            return null;
+        }
+        if (!location) {
+            const selection = this._workbookSelections.getCurrentLastSelection();
+            if (!selection) {
+                return null;
+            }
+            const { primary } = selection;
+            target.location = {
+                unitId: target.unitId,
+                subUnitId: target.subUnitId,
+                row: primary.isMerged ? primary.startRow : primary.actualRow,
+                col: primary.isMerged ? primary.startColumn : primary.actualColumn,
+            };
+        }
+        return target;
+    }
+
+    private _isImageTargetValid(target: IImageInsertionTarget): boolean {
+        if (this._disposed) {
+            return false;
+        }
+        const instances = this._injector.get(IUniverInstanceService);
+        const { workbook, worksheet, unitId, subUnitId, render } = target;
+        if (instances.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET) !== workbook ||
+            workbook.getSheetBySheetId(subUnitId) !== worksheet || render.isDisposed() ||
+            this._injector.get(IRenderManagerService).getRenderUnitById(unitId) !== render) {
+            return false;
+        }
+        if (!target.explicit && (target.epoch !== this._imageInsertionEpoch ||
+            instances.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET) !== workbook ||
+            instances.getFocusedUnit() !== workbook || workbook.getActiveSheet() !== worksheet)) {
+            return false;
+        }
+        const permissions = this._injector.get(IPermissionService);
+        if (permissions.getPermissionPoint(new WorkbookEditablePermission(unitId).id)?.value !== true ||
+            permissions.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value !== true) {
+            return false;
+        }
+        return worksheet.getConfig().type !== SheetTypes.CHART ||
+            (target.pageFrame === render.components.get(SHEET_VIEW_KEY.CHART_PAGE) && Boolean(this._getChartImageBounds(render)));
+    }
+
+    private _getChartImageBounds(render: IRender) {
+        const frame = render.components.get(SHEET_VIEW_KEY.CHART_PAGE);
+        if (!frame || ![frame.left, frame.top, frame.width, frame.height].every(Number.isFinite) || frame.width <= 0 || frame.height <= 0) {
+            return null;
+        }
+        const view = render.scene.getMainViewport().calcViewportInfo().viewBound;
+        const left = Math.max(frame.left, view.left);
+        const top = Math.max(frame.top, view.top);
+        const right = Math.min(frame.left + frame.width, view.right);
+        const bottom = Math.min(frame.top + frame.height, view.bottom);
+        return [left, top, right, bottom].every(Number.isFinite) && right > left && bottom > top
+            ? { left, top, width: right - left, height: bottom - top }
+            : null;
     }
 
     private _getUnitInfo() {
@@ -635,16 +816,24 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             (params as IImageData[]).forEach((param) => {
                 const { unitId, subUnitId, drawingId, transform } = param;
                 const sheetSkeletonParam = this._sheetSkeletonService.getSkeletonParam(unitId, subUnitId);
-                if (!transform || !sheetSkeletonParam) {
+                if (!transform) {
                     return;
                 }
 
-                const { skeleton } = sheetSkeletonParam;
                 const sheetDrawing = this._sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
                 if (sheetDrawing == null || sheetDrawing.unitId !== this._context.unitId) {
                     return;
                 }
 
+                if (sheetDrawing.anchorType === SheetDrawingAnchorType.None) {
+                    const next = { ...sheetDrawing, ...param, transform: { ...sheetDrawing.transform, ...transform } } as ISheetDrawing;
+                    drawings.push(applySheetDrawingPlacement(next, getSheetDrawingPlacement(next)));
+                    return;
+                }
+                if (!sheetSkeletonParam) {
+                    return;
+                }
+                const { skeleton } = sheetSkeletonParam;
                 const sheetTransform = transformToDrawingPosition({ ...sheetDrawing.transform, ...transform }, skeleton);
                 const axisAlignSheetTransform = transformToAxisAlignPosition({ ...sheetDrawing.transform, ...transform }, skeleton);
 

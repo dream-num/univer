@@ -17,9 +17,6 @@
 import type { ICommandInfo } from '@univerjs/core';
 import type { IUniverUIConfig } from '@univerjs/ui';
 import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from 'react';
-import type { LocaleKey } from '../../../locale/types';
-import type { IScrollState } from '../../../services/sheet-bar/type';
-import type { IBaseSheetBarProps } from './SheetBarItem';
 import {
     ICommandService,
     IConfirmService,
@@ -28,12 +25,14 @@ import {
     LocaleService,
     nameCharacterCheck,
     Quantity,
+    SheetTypes,
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     BasesMultiIcon,
     BoardsMultiIcon,
+    ChartIcon,
     DocsMultiIcon,
     LockIcon,
     SheetsMultiIcon,
@@ -57,6 +56,9 @@ import {
 import { ILayoutService, UI_PLUGIN_CONFIG_KEY, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { merge } from 'rxjs';
+import type { LocaleKey } from '../../../locale/types';
+import type { IScrollState } from '../../../services/sheet-bar/type';
+import type { IBaseSheetBarProps } from './SheetBarItem';
 import { getEmbedSheetsTabCustomData } from '../../../embed-tab-anchor';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
@@ -306,6 +308,7 @@ export function SheetBarTabs() {
                     label: (
                         <>
                             {embedChildType != null && <EmbedSheetTabProductIcon childType={embedChildType} />}
+                            {sheet.getConfig().type === SheetTypes.CHART && <ChartIcon className="univer-shrink-0" />}
                             {hasProtection && <LockIcon className="univer-shrink-0" />}
                             <span className="univer-truncate univer-outline-none">{sheet.getName()}</span>
                         </>

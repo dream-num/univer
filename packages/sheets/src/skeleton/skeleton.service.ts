@@ -16,7 +16,7 @@
 
 import type { Nullable, Styles, Workbook, Worksheet } from '@univerjs/core';
 import type { Scene } from '@univerjs/engine-render';
-import { Disposable, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, Injector, IUniverInstanceService, SheetTypes, UniverInstanceType } from '@univerjs/core';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 
@@ -78,6 +78,9 @@ export class SheetSkeletonService extends Disposable {
 
         this.disposeWithMe(
             workbook.sheetCreated$.subscribe((worksheet) => {
+                if (worksheet.getConfig().type === SheetTypes.CHART) {
+                    return;
+                }
                 const sheetSkeletonMap = this._sheetSkeletonParamStore.get(unitId);
                 if (!sheetSkeletonMap) {
                     return;
@@ -116,6 +119,9 @@ export class SheetSkeletonService extends Disposable {
         const sheetSkeletonMap = new Map<string, ISheetSkeletonManagerParam>();
 
         workbook.getWorksheets().forEach((worksheet) => {
+            if (worksheet.getConfig().type === SheetTypes.CHART) {
+                return;
+            }
             const sheetId = worksheet.getSheetId();
             const skeleton = this._buildSkeleton(worksheet, workbook.getStyles());
             sheetSkeletonMap.set(sheetId, {
@@ -130,6 +136,10 @@ export class SheetSkeletonService extends Disposable {
     }
 
     private _buildSkeleton(worksheet: Worksheet, styles: Styles) {
+        // Chart Sheets have no cell geometry; direct creation retains its nonnullable contract.
+        if (worksheet.getConfig().type === SheetTypes.CHART) {
+            throw new Error('Cannot create a SpreadsheetSkeleton for SheetTypes.CHART');
+        }
         const spreadsheetSkeleton = this._injector.createInstance(
             SpreadsheetSkeleton,
             worksheet,
@@ -212,10 +222,14 @@ export class SheetSkeletonService extends Disposable {
         }
 
         const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
-        if (!workbook) return;
+        if (!workbook) {
+            return;
+        }
 
         const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) return;
+        if (!worksheet || worksheet.getConfig().type === SheetTypes.CHART) {
+            return;
+        }
 
         return this.newSkeleton(unitId, subUnitId, worksheet, workbook.getStyles());
     }

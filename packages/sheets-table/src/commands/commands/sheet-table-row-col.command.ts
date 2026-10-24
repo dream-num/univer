@@ -18,10 +18,29 @@
 
 import type { IAccessor, ICommand, IMutationInfo } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import type { ITableColumnJson } from '../../types/type';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
+import {
+    CommandType,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    sequenceExecute,
+    SheetTypes,
+} from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
-import { getMoveRangeCommandMutations, getMoveRangeUndoRedoMutations, getSheetCommandTarget, InsertColMutation, InsertRowMutation, RemoveColMutation, RemoveRowMutation, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    getMoveRangeCommandMutations,
+    getMoveRangeUndoRedoMutations,
+    getSheetCommandTarget,
+    InsertColMutation,
+    InsertRowMutation,
+    RemoveColMutation,
+    RemoveRowMutation,
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+    SheetInterceptorService,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
+import type { ITableColumnJson } from '../../types/type';
 import { SheetsTableController } from '../../controllers/sheets-table.controller';
 import { TableManager } from '../../models/table-manager';
 import { IRangeOperationTypeEnum, IRowColTypeEnum } from '../../types/type';
@@ -69,7 +88,7 @@ export const SheetTableInsertRowCommand: ICommand<ISheetTableRowColOperationComm
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService);
 
-        if (!target) {
+        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
             return false;
         }
 
@@ -253,7 +272,7 @@ export const SheetTableInsertRowAtCommand: ICommand<ISheetTableInsertAtCommandPa
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId });
-        if (!target) {
+        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
             return false;
         }
 
@@ -353,7 +372,7 @@ export const SheetTableInsertColCommand: ICommand<ISheetTableRowColOperationComm
     handler: (accessor) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService);
-        if (!target) {
+        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
             return false;
         }
         const { worksheet, unitId, subUnitId } = target;
@@ -518,7 +537,7 @@ export const SheetTableInsertColumnAtCommand: ICommand<ISheetTableInsertAtComman
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId });
-        if (!target) {
+        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
             return false;
         }
 
@@ -616,7 +635,7 @@ export const SheetTableRemoveColumnAtCommand: ICommand<ISheetTableInsertAtComman
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId });
-        if (!target) {
+        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
             return false;
         }
 
@@ -738,7 +757,7 @@ export const SheetTableRemoveRowCommand: ICommand<ISheetTableRowColOperationComm
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target) {
+        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
             return false;
         }
         const { unitId, subUnitId } = target;
@@ -844,7 +863,7 @@ export const SheetTableRemoveColCommand: ICommand<ISheetTableRowColOperationComm
         }
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target) {
+        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
             return false;
         }
         const { workbook, unitId, subUnitId } = target;

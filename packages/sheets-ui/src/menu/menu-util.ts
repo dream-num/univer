@@ -24,8 +24,8 @@ import type {
     Worksheet,
 } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import type { IEditorBridgeServiceVisibleParam } from '../services/editor-bridge.service';
 import {
+    EDITOR_ACTIVATED,
     FOCUSING_COMMON_DRAWINGS,
     FOCUSING_FX_BAR_EDITOR,
     FOCUSING_SHAPE_TEXT_EDITOR,
@@ -33,6 +33,7 @@ import {
     IPermissionService,
     IUniverInstanceService,
     Rectangle,
+    SheetTypes,
     Tools,
     UniverInstanceType,
     UserManagerService,
@@ -48,6 +49,7 @@ import {
 } from '@univerjs/sheets';
 import { combineLatest, merge, of } from 'rxjs';
 import { debounceTime, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
+import type { IEditorBridgeServiceVisibleParam } from '../services/editor-bridge.service';
 import { IEditorBridgeService } from '../services/editor-bridge.service';
 
 interface IActive {
@@ -59,7 +61,9 @@ function getActiveSheet$(univerInstanceService: IUniverInstanceService): Observa
     return univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(switchMap((workbook) =>
         workbook
             ? workbook.activeSheet$.pipe(map((worksheet) => {
-                if (!worksheet) return null;
+                if (!worksheet) {
+                    return null;
+                }
                 return { workbook, worksheet };
             }))
             : of(null)));
@@ -67,7 +71,9 @@ function getActiveSheet$(univerInstanceService: IUniverInstanceService): Observa
 
 export function deriveStateFromActiveSheet$<T>(univerInstanceService: IUniverInstanceService, defaultValue: T, callback: (active: IActive) => Observable<T>) {
     return getActiveSheet$(univerInstanceService).pipe(switchMap((active) => {
-        if (!active) return of(defaultValue);
+        if (!active) {
+            return of(defaultValue);
+        }
         return callback(active);
     }));
 }
@@ -132,7 +138,7 @@ export function getObservableWithExclusiveRange$(accessor: IAccessor, observable
 }
 
 // eslint-disable-next-line max-lines-per-function
-export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IPermissionTypes = {}, supportCellEdit = false) {
+export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IPermissionTypes = {}, supportCellEdit = false, supportShapeText = false) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
     const userManagerService = accessor.get(UserManagerService);
@@ -155,8 +161,9 @@ export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IP
         shareReplay({ bufferSize: 1, refCount: true })
     );
 
-    const observable = combineLatest([userManagerService.currentUser$, workbook$, editorVisible$, formulaEditorFocus$, focusingShapeTextEditor$]).pipe(
-        switchMap(([_, workbook, visible, formulaEditorFocus, focusingShapeTextEditor]) => {
+    const editorActivated$ = contextService.subscribeContextValue$(EDITOR_ACTIVATED).pipe(startWith(false));
+    const observable = combineLatest([userManagerService.currentUser$, workbook$, editorVisible$, formulaEditorFocus$, focusingShapeTextEditor$, editorActivated$]).pipe(
+        switchMap(([_, workbook, visible, formulaEditorFocus, focusingShapeTextEditor, editorActivated]) => {
             if (
                 !workbook ||
                 (visible?.visible && visible.unitId === workbook.getUnitId() && !supportCellEdit) ||
@@ -167,7 +174,8 @@ export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IP
 
             return workbook.activeSheet$.pipe(
                 switchMap((worksheet) => {
-                    if (!worksheet) {
+                    if (!worksheet || (worksheet.getConfig().type === SheetTypes.CHART &&
+                        !(supportShapeText && focusingShapeTextEditor && editorActivated))) {
                         return of(true);
                     }
 
@@ -250,14 +258,17 @@ export function getBaseRangeMenuHidden$(accessor: IAccessor) {
     const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
     const permissionService = accessor.get(IPermissionService);
 
-    return merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$.pipe(debounceTime(100))).pipe(
+    return combineLatest([
+        getActiveSheet$(univerInstanceService),
+        merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$.pipe(debounceTime(100))).pipe(startWith(null)),
+    ]).pipe(
         map(() => {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
 
             const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             const worksheet = workbook?.getActiveSheet();
-            if (!workbook || !worksheet) {
+            if (!workbook || !worksheet || worksheet.getConfig().type === SheetTypes.CHART) {
                 return true;
             }
 
@@ -284,14 +295,17 @@ export function getInsertAfterMenuHidden$(accessor: IAccessor, type: 'row' | 'co
     const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
     const permissionService = accessor.get(IPermissionService);
 
-    return merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$.pipe(debounceTime(100))).pipe(
+    return combineLatest([
+        getActiveSheet$(univerInstanceService),
+        merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$.pipe(debounceTime(100))).pipe(startWith(null)),
+    ]).pipe(
         map(() => {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
 
             const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             const worksheet = workbook?.getActiveSheet();
-            if (!workbook || !worksheet) {
+            if (!workbook || !worksheet || worksheet.getConfig().type === SheetTypes.CHART) {
                 return true;
             }
 
@@ -326,14 +340,17 @@ export function getInsertBeforeMenuHidden$(accessor: IAccessor, type: 'row' | 'c
     const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
     const permissionService = accessor.get(IPermissionService);
 
-    return merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$.pipe(debounceTime(100))).pipe(
+    return combineLatest([
+        getActiveSheet$(univerInstanceService),
+        merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$.pipe(debounceTime(100))).pipe(startWith(null)),
+    ]).pipe(
         map(() => {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
 
             const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             const worksheet = workbook?.getActiveSheet();
-            if (!workbook || !worksheet) {
+            if (!workbook || !worksheet || worksheet.getConfig().type === SheetTypes.CHART) {
                 return true;
             }
 
@@ -369,14 +386,17 @@ export function getDeleteMenuHidden$(accessor: IAccessor, type: 'row' | 'col') {
 
     const permissionService = accessor.get(IPermissionService);
 
-    return merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$.pipe(debounceTime(100))).pipe(
+    return combineLatest([
+        getActiveSheet$(univerInstanceService),
+        merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$.pipe(debounceTime(100))).pipe(startWith(null)),
+    ]).pipe(
         map(() => {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
 
             const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             const worksheet = workbook?.getActiveSheet();
-            if (!workbook || !worksheet) {
+            if (!workbook || !worksheet || worksheet.getConfig().type === SheetTypes.CHART) {
                 return true;
             }
 
@@ -414,14 +434,17 @@ export function getCellMenuHidden$(accessor: IAccessor, type: 'row' | 'col') {
 
     const permissionService = accessor.get(IPermissionService);
 
-    return merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$.pipe(debounceTime(100))).pipe(
+    return combineLatest([
+        getActiveSheet$(univerInstanceService),
+        merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$.pipe(debounceTime(100))).pipe(startWith(null)),
+    ]).pipe(
         map(() => {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
 
             const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             const worksheet = workbook?.getActiveSheet();
-            if (!workbook || !worksheet) {
+            if (!workbook || !worksheet || worksheet.getConfig().type === SheetTypes.CHART) {
                 return true;
             }
 

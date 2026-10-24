@@ -14,17 +14,34 @@
  * limitations under the License.
  */
 
-import type { ITableManualFilterItem } from '../../../types/type';
-import { ICommandService, ILogService, IUndoRedoService, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { IDefinedNamesService } from '@univerjs/engine-formula';
+import type { IWorkbookData, Workbook } from '@univerjs/core';
+import {
+    CommandType,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    RedoCommand,
+    UndoCommand,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import {
     AddRangeThemeMutation,
+    RangeThemeStyle,
     RemoveRangeThemeMutation,
     SheetInterceptorService,
     SheetRangeThemeModel,
+    UniverSheetsPlugin,
 } from '@univerjs/sheets';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ITableManualFilterItem } from '../../../types/type';
+import enUS from '../../../locale/en-US';
 import { TableManager } from '../../../models/table-manager';
+import { UniverSheetsTablePlugin } from '../../../plugin';
+import { SheetTableService } from '../../../services/table.service';
 import { TableColumnFilterTypeEnum } from '../../../types/enum';
 import { IRangeOperationTypeEnum, IRowColTypeEnum } from '../../../types/type';
 import { AddSheetTableMutation } from '../../mutations/add-sheet-table.mutation';
@@ -38,419 +55,326 @@ import { RemoveTableThemeCommand } from '../remove-table-theme.command';
 import { SetSheetTableCommand } from '../set-sheet-table.command';
 import { SetSheetTableFilterCommand } from '../set-table-filter.command';
 
-function createAccessor(pairs: Array<[unknown, unknown]>) {
-    const services = new Map<unknown, unknown>(pairs);
-    return {
-        get(token: unknown) {
-            if (!services.has(token)) {
-                throw new Error(`Missing dependency: ${String(token)}`);
-            }
-            return services.get(token);
-        },
-    } as any;
-}
+const range = { startRow: 1, endRow: 5, startColumn: 0, endColumn: 1 };
+const unitId = 'table-command-workbook';
+const subUnitId = 'grid';
 
-describe('sheets-table commands', () => {
-    it('AddSheetTableCommand should auto-generate table name and push undo/redo', () => {
-        const syncExecuteCommand = vi.fn(() => true);
-        const pushUndoRedo = vi.fn();
-        const tableManager = {
-            getTableList: vi.fn(() => [{ name: 'table9' }]),
-            getColumnHeader: vi.fn(() => ['Name']),
-        };
+describe('sheets-table commands with real table providers', () => {
+    let univer: Univer;
+    let commands: ICommandService;
+    let history: IUndoRedoService;
+    let tables: TableManager;
+    let tableService: SheetTableService;
 
-        const accessor = createAccessor([
-            [ICommandService, { syncExecuteCommand }],
-            [IUndoRedoService, { pushUndoRedo }],
-            [LocaleService, { t: (key: string) => (key === 'sheets-table.tablePrefix' ? 'Table' : 'Column') }],
-            [TableManager, tableManager],
-            [IUniverInstanceService, {
-                getUnit: () => ({ getSheets: () => [{ getName: () => 'SheetA' }] }),
-            }],
-            [IDefinedNamesService, {
-                getDefinedNameMap: () => ({ d1: { name: 'DefinedA' } }),
-            }],
-        ]);
-
-        const result = AddSheetTableCommand.handler(accessor, {
-            unitId: 'u1',
-            subUnitId: 's1',
-            range: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 1 },
-            name: 'SheetA',
-        });
-
-        expect(result).toBe(true);
-        expect(tableManager.getColumnHeader).toHaveBeenCalledWith(
-            'u1',
-            's1',
-            { startRow: 0, endRow: 2, startColumn: 0, endColumn: 1 },
-            'Column'
-        );
-        expect(syncExecuteCommand).toHaveBeenCalledWith(
-            AddSheetTableMutation.id,
-            expect.objectContaining({
-                unitId: 'u1',
-                subUnitId: 's1',
-                name: 'Table10',
-                header: ['Name'],
-            }),
-            undefined
-        );
-        expect(pushUndoRedo).toHaveBeenCalledTimes(1);
-    });
-
-    it('AddSheetTableCommand should return false when params are missing', () => {
-        expect(AddSheetTableCommand.handler(createAccessor([]), undefined as any)).toBe(false);
-    });
-
-    it('DeleteSheetTableCommand should build undo mutations from table snapshot', () => {
-        const syncExecuteCommand = vi.fn(() => true);
-        const pushUndoRedo = vi.fn();
-        const onCommandExecute = vi.fn(() => ({
-            preRedos: [{ id: 'formula.redo.before', params: { phase: 'pre' } }],
-            redos: [{ id: 'formula.redo.after', params: { phase: 'post' } }],
-            preUndos: [{ id: 'formula.undo.before', params: { phase: 'pre' } }],
-            undos: [{ id: 'formula.undo.after', params: { phase: 'post' } }],
-        }));
-        const tableSnapshot = {
-            id: 't1',
-            name: 'Table1',
-            range: { startRow: 1, endRow: 5, startColumn: 2, endColumn: 4 },
-            options: { headerRow: true },
-            filters: {},
-        };
-        const tableManager = {
-            getTable: vi.fn(() => ({ toJSON: () => tableSnapshot })),
-        };
-        const accessor = createAccessor([
-            [IUndoRedoService, { pushUndoRedo }],
-            [ICommandService, { syncExecuteCommand }],
-            [TableManager, tableManager],
-            [ILogService, { error: vi.fn() }],
-            [SheetInterceptorService, { onCommandExecute }],
-        ]);
-
-        const result = DeleteSheetTableCommand.handler(accessor, { unitId: 'u1', subUnitId: 's1', tableId: 't1' });
-
-        expect(result).toBe(true);
-        expect(onCommandExecute).toHaveBeenCalledWith({
-            id: DeleteSheetTableCommand.id,
-            params: {
-                unitId: 'u1',
-                subUnitId: 's1',
-                tableId: 't1',
-                tableName: 'Table1',
+    beforeEach(() => {
+        univer = new Univer();
+        univer.registerPlugin(UniverFormulaEnginePlugin);
+        univer.registerPlugin(UniverSheetsPlugin);
+        univer.registerPlugin(UniverSheetsTablePlugin);
+        univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: unitId,
+            appVersion: '1.0.0',
+            locale: LocaleType.EN_US,
+            name: 'Table commands',
+            sheetOrder: [subUnitId],
+            styles: {},
+            sheets: {
+                grid: { id: subUnitId, name: 'Grid', cellData: {} },
             },
         });
-        expect((syncExecuteCommand.mock.calls as unknown as Array<[string, unknown, unknown?]>).map(([id]) => id)).toEqual([
-            'formula.redo.before',
-            DeleteSheetTableMutation.id,
-            'formula.redo.after',
-        ]);
-        expect(pushUndoRedo).toHaveBeenCalledWith(expect.objectContaining({
-            unitID: 'u1',
-            undoMutations: [
-                expect.objectContaining({ id: 'formula.undo.before' }),
+        const injector = univer.__getInjector();
+        injector.get(IUniverInstanceService).focusUnit(unitId);
+        injector.get(LocaleService).load({ [LocaleType.EN_US]: enUS });
+        injector.get(LocaleService).setLocale(LocaleType.EN_US);
+        commands = injector.get(ICommandService);
+        history = injector.get(IUndoRedoService);
+        tables = injector.get(TableManager);
+        tableService = injector.get(SheetTableService);
+    });
+
+    afterEach(() => {
+        univer.dispose();
+    });
+
+    function addTable(tableId = 't1', name = 'Table1', options = {}) {
+        tableService.addTable(unitId, subUnitId, name, range, ['Name', 'Value'], tableId, options);
+        return tables.getTable(unitId, tableId)!;
+    }
+
+    it('generates a collision-free table name and records the inverse delete', async () => {
+        addTable('existing', 'Table9');
+        expect(await commands.executeCommand(AddSheetTableCommand.id, {
+            unitId,
+            subUnitId,
+            id: 'new-table',
+            range,
+            name: 'Grid',
+        })).toBe(true);
+        expect(tables.getTable(unitId, 'new-table')?.getDisplayName()).toBe('Table10');
+        expect(history.pitchTopUndoElement()?.undoMutations).toContainEqual({
+            id: DeleteSheetTableMutation.id,
+            params: expect.objectContaining({ unitId, tableId: 'new-table' }),
+        });
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(tables.getTable(unitId, 'new-table')).toBeUndefined();
+    });
+
+    it('rejects missing add parameters without recording history', async () => {
+        const before = history.pitchTopUndoElement();
+        expect(await commands.executeCommand(AddSheetTableCommand.id)).toBe(false);
+        expect(history.pitchTopUndoElement()).toBe(before);
+    });
+
+    it('deletes a real table with interceptor order and an inverse snapshot', async () => {
+        addTable('t1', 'Table1', { headerRow: true });
+        const interceptor = univer.__getInjector().get(SheetInterceptorService);
+        const markerIds = ['formula.redo.before', 'formula.redo.after', 'formula.undo.before', 'formula.undo.after'];
+        markerIds.forEach((id) => commands.registerCommand({ id, type: CommandType.MUTATION, handler: () => true }));
+        const getMutations = vi.fn((info: { id: string }) => info.id === DeleteSheetTableCommand.id
+            ? {
+                preRedos: [{ id: markerIds[0], params: {} }],
+                redos: [{ id: markerIds[1], params: {} }],
+                preUndos: [{ id: markerIds[2], params: {} }],
+                undos: [{ id: markerIds[3], params: {} }],
+            }
+            : { redos: [], undos: [] });
+        const registration = interceptor.interceptCommand({ priority: 100, getMutations });
+        const executed: string[] = [];
+        const observation = commands.onCommandExecuted((command) => {
+            if (command.type === CommandType.MUTATION) {
+                executed.push(command.id);
+            }
+        });
+        try {
+            expect(await commands.executeCommand(DeleteSheetTableCommand.id, { unitId, subUnitId, tableId: 't1' })).toBe(true);
+            expect(tables.getTable(unitId, 't1')).toBeUndefined();
+            expect(getMutations).toHaveBeenCalledWith({
+                id: DeleteSheetTableCommand.id,
+                params: expect.objectContaining({ unitId, subUnitId, tableId: 't1', tableName: 'Table1' }),
+            });
+            expect(executed).toEqual(expect.arrayContaining([markerIds[0], DeleteSheetTableMutation.id, markerIds[1]]));
+            expect(executed.indexOf(markerIds[0])).toBeLessThan(executed.indexOf(DeleteSheetTableMutation.id));
+            expect(executed.indexOf(DeleteSheetTableMutation.id)).toBeLessThan(executed.indexOf(markerIds[1]));
+            const undo = history.pitchTopUndoElement()!;
+            expect(undo.undoMutations).toEqual(expect.arrayContaining([
+                expect.objectContaining({ id: markerIds[2] }),
                 expect.objectContaining({
                     id: AddSheetTableMutation.id,
-                    params: expect.objectContaining({
-                        tableId: 't1',
-                        name: 'Table1',
-                    }),
+                    params: expect.objectContaining({ unitId, subUnitId, tableId: 't1', name: 'Table1', range }),
                 }),
-                expect.objectContaining({ id: 'formula.undo.after' }),
-            ],
-            redoMutations: [
-                expect.objectContaining({ id: 'formula.redo.before' }),
-                expect.objectContaining({ id: DeleteSheetTableMutation.id }),
-                expect.objectContaining({ id: 'formula.redo.after' }),
-            ],
-        }));
+                expect.objectContaining({ id: markerIds[3] }),
+            ]));
+            const undoIds = undo.undoMutations.map(({ id }) => id);
+            expect(undoIds.indexOf(markerIds[2])).toBeLessThan(undoIds.indexOf(AddSheetTableMutation.id));
+            expect(undoIds.indexOf(AddSheetTableMutation.id)).toBeLessThan(undoIds.indexOf(markerIds[3]));
+            expect(undo.redoMutations.map(({ id }) => id)).toEqual(expect.arrayContaining([markerIds[0], DeleteSheetTableMutation.id, markerIds[1]]));
+            expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+            expect(tables.getTable(unitId, 't1')?.getDisplayName()).toBe('Table1');
+            expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+            expect(tables.getTable(unitId, 't1')).toBeUndefined();
+        } finally {
+            observation.dispose();
+            registration.dispose();
+        }
     });
 
-    it('DeleteSheetTableCommand should return false when table does not exist', () => {
-        const logService = { error: vi.fn() };
-        const accessor = createAccessor([
-            [IUndoRedoService, { pushUndoRedo: vi.fn() }],
-            [ICommandService, { syncExecuteCommand: vi.fn(() => true) }],
-            [TableManager, { getTable: () => undefined }],
-            [ILogService, logService],
-        ]);
-
-        expect(DeleteSheetTableCommand.handler(accessor, { unitId: 'u1', subUnitId: 's1', tableId: 't1' })).toBe(false);
-        expect(logService.error).toHaveBeenCalled();
+    it('returns false for a missing table without recording history', async () => {
+        const before = history.pitchTopUndoElement();
+        expect(await commands.executeCommand(DeleteSheetTableCommand.id, { unitId, subUnitId, tableId: 'missing' })).toBe(false);
+        expect(history.pitchTopUndoElement()).toBe(before);
     });
 
-    it('SetSheetTableCommand should reject invalid table name and warn', () => {
-        const logService = { warn: vi.fn() };
-        const commandService = { executeCommand: vi.fn() };
-        const table = {
-            getDisplayName: () => 'Old',
-            getRange: () => ({ startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 }),
-            getSubunitId: () => 's1',
-            getTableStyleId: () => 'theme-1',
-        };
+    it('rejects a name colliding with the owning worksheet', async () => {
+        const table = addTable();
+        const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        const before = history.pitchTopUndoElement();
+        try {
+            expect(await commands.executeCommand(SetSheetTableCommand.id, { unitId, tableId: 't1', name: 'Grid' })).toBe(false);
+            expect(table.getDisplayName()).toBe('Table1');
+            expect(warning).toHaveBeenCalled();
+            expect(history.pitchTopUndoElement()).toBe(before);
+        } finally {
+            warning.mockRestore();
+        }
+    });
 
-        const accessor = createAccessor([
-            [TableManager, { getTableById: () => table, getTableList: () => [] }],
-            [LocaleService, { t: () => 'invalid name' }],
-            [IUniverInstanceService, {
-                getUnit: () => ({ getSheets: () => [{ getName: () => 'SheetA' }] }),
-            }],
-            [IDefinedNamesService, { getDefinedNameMap: () => ({}) }],
-            [ICommandService, commandService],
-            [IUndoRedoService, { pushUndoRedo: vi.fn() }],
-            [ILogService, logService],
-        ]);
-
-        const result = SetSheetTableCommand.handler(accessor, {
-            unitId: 'u1',
-            tableId: 't1',
-            name: 'SheetA',
+    it('passes the old table name to Set interceptors and orders inverse mutations', async () => {
+        const table = addTable('t1', 'OldName', { tableStyleId: 'theme-old' });
+        const markerIds = ['set.redo.before', 'set.redo.after', 'set.undo.before', 'set.undo.after'];
+        markerIds.forEach((id) => commands.registerCommand({ id, type: CommandType.MUTATION, handler: () => true }));
+        const getMutations = vi.fn((info: { id: string }) => info.id === SetSheetTableCommand.id
+            ? {
+                preRedos: [{ id: markerIds[0], params: {} }],
+                redos: [{ id: markerIds[1], params: {} }],
+                preUndos: [{ id: markerIds[2], params: {} }],
+                undos: [{ id: markerIds[3], params: {} }],
+            }
+            : { redos: [], undos: [] });
+        const registration = univer.__getInjector().get(SheetInterceptorService).interceptCommand({ priority: 100, getMutations });
+        const executed: string[] = [];
+        const observation = commands.onCommandExecuted((command) => {
+            if (command.type === CommandType.MUTATION) {
+                executed.push(command.id);
+            }
         });
-
-        expect(result).toBe(false);
-        expect(logService.warn).toHaveBeenCalledWith('invalid name');
-        expect(commandService.executeCommand).not.toHaveBeenCalled();
+        try {
+            expect(await commands.executeCommand(SetSheetTableCommand.id, {
+                unitId,
+                tableId: 't1',
+                name: 'NewName',
+                theme: 'theme-new',
+            })).toBe(true);
+            expect(getMutations).toHaveBeenCalledWith({
+                id: SetSheetTableCommand.id,
+                params: expect.objectContaining({ unitId, tableId: 't1', name: 'NewName', oldTableName: 'OldName' }),
+            });
+            expect(table.getDisplayName()).toBe('NewName');
+            expect(table.getTableStyleId()).toBe('theme-new');
+            expect(executed).toEqual(expect.arrayContaining([markerIds[0], SetSheetTableMutation.id, markerIds[1]]));
+            expect(executed.indexOf(markerIds[0])).toBeLessThan(executed.indexOf(SetSheetTableMutation.id));
+            expect(executed.indexOf(SetSheetTableMutation.id)).toBeLessThan(executed.indexOf(markerIds[1]));
+            const undo = history.pitchTopUndoElement()!;
+            expect(undo.undoMutations).toEqual(expect.arrayContaining([
+                expect.objectContaining({ id: markerIds[2] }),
+                expect.objectContaining({
+                    id: SetSheetTableMutation.id,
+                    params: expect.objectContaining({ config: { name: 'OldName', theme: 'theme-old' } }),
+                }),
+                expect.objectContaining({ id: markerIds[3] }),
+            ]));
+            const undoIds = undo.undoMutations.map(({ id }) => id);
+            expect(undoIds.indexOf(markerIds[2])).toBeLessThan(undoIds.indexOf(SetSheetTableMutation.id));
+            expect(undoIds.indexOf(SetSheetTableMutation.id)).toBeLessThan(undoIds.indexOf(markerIds[3]));
+            const redoIds = undo.redoMutations.map(({ id }) => id);
+            expect(redoIds).toEqual(expect.arrayContaining([markerIds[0], SetSheetTableMutation.id, markerIds[1]]));
+            expect(redoIds.indexOf(markerIds[0])).toBeLessThan(redoIds.indexOf(SetSheetTableMutation.id));
+            expect(redoIds.indexOf(SetSheetTableMutation.id)).toBeLessThan(redoIds.indexOf(markerIds[1]));
+            expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+            expect(table.getDisplayName()).toBe('OldName');
+            expect(table.getTableStyleId()).toBe('theme-old');
+        } finally {
+            observation.dispose();
+            registration.dispose();
+        }
     });
 
-    it('SetSheetTableCommand should execute mutation and build inverse undo config', () => {
-        const syncExecuteCommand = vi.fn((_id: string) => true);
-        const pushUndoRedo = vi.fn();
-        const onCommandExecute = vi.fn(() => ({
-            preRedos: [{ id: 'formula.redo.before', params: { phase: 'pre' } }],
-            redos: [{ id: 'formula.redo.after', params: { phase: 'post' } }],
-            preUndos: [{ id: 'formula.undo.before', params: { phase: 'pre' } }],
-            undos: [{ id: 'formula.undo.after', params: { phase: 'post' } }],
-        }));
-        const table = {
-            getDisplayName: () => 'OldName',
-            getRange: () => ({ startRow: 1, endRow: 4, startColumn: 1, endColumn: 3 }),
-            getSubunitId: () => 's1',
-            getTableStyleId: () => 'theme-old',
-        };
-
-        const accessor = createAccessor([
-            [TableManager, { getTableById: () => table, getTableList: () => [] }],
-            [LocaleService, { t: () => 'msg' }],
-            [IUniverInstanceService, { getUnit: () => ({ getSheets: () => [{ getName: () => 'SheetA' }] }) }],
-            [IDefinedNamesService, { getDefinedNameMap: () => ({}) }],
-            [ICommandService, { syncExecuteCommand }],
-            [IUndoRedoService, { pushUndoRedo }],
-            [ILogService, { warn: vi.fn() }],
-            [SheetInterceptorService, { onCommandExecute }],
-        ]);
-
-        const result = SetSheetTableCommand.handler(accessor, {
-            unitId: 'u1',
+    it('records the inverse column operation and original table range', async () => {
+        const table = addTable();
+        const originalRange = { ...table.getRange() };
+        expect(await commands.executeCommand(SetSheetTableCommand.id, {
+            unitId,
             tableId: 't1',
-            name: 'NewName',
             rowColOperation: {
                 operationType: IRangeOperationTypeEnum.Insert,
                 rowColType: IRowColTypeEnum.Col,
-                index: 2,
+                index: 1,
                 count: 1,
             },
-            updateRange: {
-                newRange: { startRow: 1, endRow: 6, startColumn: 1, endColumn: 4 },
-            },
-            theme: 'theme-new',
-        });
-
-        expect(result).toBe(true);
-        expect(onCommandExecute).toHaveBeenCalledWith({
-            id: SetSheetTableCommand.id,
+            updateRange: { newRange: { ...originalRange, endColumn: 2 } },
+        })).toBe(true);
+        expect(history.pitchTopUndoElement()?.undoMutations).toContainEqual({
+            id: SetSheetTableMutation.id,
             params: expect.objectContaining({
-                unitId: 'u1',
-                tableId: 't1',
-                name: 'NewName',
-                oldTableName: 'OldName',
+                config: expect.objectContaining({
+                    rowColOperation: expect.objectContaining({ operationType: IRangeOperationTypeEnum.Delete }),
+                    updateRange: { newRange: originalRange },
+                }),
             }),
         });
-        expect(syncExecuteCommand.mock.calls.map(([id]) => id)).toEqual([
-            'formula.redo.before',
-            SetSheetTableMutation.id,
-            'formula.redo.after',
-        ]);
-
-        expect(pushUndoRedo).toHaveBeenCalledWith(expect.objectContaining({
-            undoMutations: [
-                expect.objectContaining({ id: 'formula.undo.before' }),
-                expect.objectContaining({
-                    id: SetSheetTableMutation.id,
-                    params: expect.objectContaining({
-                        config: expect.objectContaining({
-                            name: 'OldName',
-                            theme: 'theme-old',
-                            rowColOperation: expect.objectContaining({ operationType: IRangeOperationTypeEnum.Delete }),
-                        }),
-                    }),
-                }),
-                expect.objectContaining({ id: 'formula.undo.after' }),
-            ],
-            redoMutations: [
-                expect.objectContaining({ id: 'formula.redo.before' }),
-                expect.objectContaining({ id: SetSheetTableMutation.id }),
-                expect.objectContaining({ id: 'formula.redo.after' }),
-            ],
-        }));
     });
 
-    it('SetSheetTableFilterCommand should restore the previous filter on undo', () => {
-        const syncExecuteCommand = vi.fn(() => true);
-        const pushUndoRedo = vi.fn();
-        const previousFilter: ITableManualFilterItem = {
-            filterType: TableColumnFilterTypeEnum.manual,
-            values: ['Old'],
-        };
-        const accessor = createAccessor([
-            [IUndoRedoService, { pushUndoRedo }],
-            [ICommandService, { syncExecuteCommand }],
-            [TableManager, {
-                getTable: () => ({
-                    getTableFilterColumn: () => previousFilter,
-                    getTableFilters: () => ({ getColumnFilter: () => previousFilter, getFilterOutRows: () => new Set() }),
-                }),
-            }],
-        ]);
-
-        const result = SetSheetTableFilterCommand.handler(accessor, {
-            unitId: 'u1',
+    it('restores the previous manual filter on undo', async () => {
+        const table = addTable();
+        const previous: ITableManualFilterItem = { filterType: TableColumnFilterTypeEnum.manual, values: ['Old'] };
+        table.getTableFilters().setColumnFilter(1, previous);
+        expect(await commands.executeCommand(SetSheetTableFilterCommand.id, {
+            unitId,
             tableId: 't1',
             column: 1,
-            tableFilter: { filterType: TableColumnFilterTypeEnum.manual, values: ['A'] },
+            tableFilter: { filterType: TableColumnFilterTypeEnum.manual, values: ['New'] },
+        })).toBe(true);
+        expect(table.getTableFilters().getColumnFilter(1)).toEqual({ filterType: TableColumnFilterTypeEnum.manual, values: ['New'] });
+        expect(history.pitchTopUndoElement()?.undoMutations).toContainEqual({
+            id: SetSheetTableFilterMutation.id,
+            params: expect.objectContaining({ tableFilter: previous, filterOutRows: [] }),
         });
-
-        expect(result).toBe(true);
-        expect(syncExecuteCommand).toHaveBeenCalledWith(
-            SetSheetTableFilterMutation.id,
-            expect.objectContaining({
-                unitId: 'u1',
-                tableId: 't1',
-                column: 1,
-                tableFilter: { filterType: TableColumnFilterTypeEnum.manual, values: ['A'] },
-            }),
-            undefined
-        );
-        expect(pushUndoRedo).toHaveBeenCalledWith(expect.objectContaining({
-            undoMutations: [{
-                id: SetSheetTableFilterMutation.id,
-                params: {
-                    unitId: 'u1',
-                    tableId: 't1',
-                    column: 1,
-                    tableFilter: previousFilter,
-                    filterOutRows: [],
-                },
-            }],
-        }));
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(table.getTableFilters().getColumnFilter(1)).toEqual(previous);
     });
 
-    it('SetSheetTableFilterCommand restores the previous filter and cached filtered rows', () => {
-        const syncExecuteCommand = vi.fn(() => true);
-        const pushUndoRedo = vi.fn();
-        const previousFilter = { filterType: 'manual', values: ['original'] };
-        const previousRows = new Set([2, 5]);
-        const accessor = createAccessor([
-            [IUndoRedoService, { pushUndoRedo }],
-            [ICommandService, { syncExecuteCommand }],
-            [TableManager, {
-                getTable: () => ({
-                    getTableFilters: () => ({
-                        getColumnFilter: () => previousFilter,
-                        getFilterOutRows: () => previousRows,
-                    }),
-                }),
-            }],
-        ]);
-
-        const result = SetSheetTableFilterCommand.handler(accessor, {
-            unitId: 'u1',
+    it('restores cached filtered rows when clearing a filter', async () => {
+        const table = addTable();
+        const previous: ITableManualFilterItem = { filterType: TableColumnFilterTypeEnum.manual, values: ['original'] };
+        table.getTableFilters().setColumnFilter(0, previous);
+        table.getTableFilters().setFilterOutRows([2, 5]);
+        expect(await commands.executeCommand(SetSheetTableFilterCommand.id, {
+            unitId,
             tableId: 't1',
             column: 0,
             tableFilter: undefined,
+        })).toBe(true);
+        expect(history.pitchTopUndoElement()?.undoMutations).toContainEqual({
+            id: SetSheetTableFilterMutation.id,
+            params: expect.objectContaining({ tableFilter: previous, filterOutRows: [2, 5] }),
         });
-
-        expect(result).toBe(true);
-        expect(pushUndoRedo).toHaveBeenCalledWith(expect.objectContaining({
-            undoMutations: [expect.objectContaining({
-                id: SetSheetTableFilterMutation.id,
-                params: expect.objectContaining({ tableFilter: previousFilter, filterOutRows: [2, 5] }),
-            })],
-        }));
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(table.getTableFilters().getColumnFilter(0)).toEqual(previous);
+        expect([...table.getTableFilters().getFilterOutRows()]).toEqual([2, 5]);
     });
 
-    it('AddTableThemeCommand should register theme and update table style', () => {
-        const syncExecuteCommand = vi.fn(() => true);
-        const pushUndoRedo = vi.fn();
-        const themeStyle = {
-            toJson: () => ({ name: 'theme-new' }),
-            getName: () => 'theme-new',
-        } as any;
-        const table = {
-            getSubunitId: () => 's1',
-            getTableStyleId: () => 'theme-old',
-        };
-
-        const accessor = createAccessor([
-            [TableManager, { getTableById: () => table }],
-            [ICommandService, { syncExecuteCommand }],
-            [IUndoRedoService, { pushUndoRedo }],
-        ]);
-
-        const result = AddTableThemeCommand.handler(accessor, {
-            unitId: 'u1',
-            tableId: 't1',
-            themeStyle,
-        });
-
-        expect(result).toBe(true);
-        expect(syncExecuteCommand).toHaveBeenNthCalledWith(1, AddRangeThemeMutation.id, {
-            unitId: 'u1',
-            subUnitId: 's1',
-            styleJSON: { name: 'theme-new' },
-        }, undefined);
-        expect(syncExecuteCommand).toHaveBeenNthCalledWith(2, SetSheetTableMutation.id, {
-            unitId: 'u1',
-            subUnitId: 's1',
-            tableId: 't1',
-            config: { theme: 'theme-new' },
-        }, undefined);
-        expect(pushUndoRedo).toHaveBeenCalled();
+    it('registers a custom theme and applies it to the table', async () => {
+        const table = addTable('t1', 'Table1', { tableStyleId: 'table-default-1' });
+        const theme = new RangeThemeStyle('table-custom-1');
+        expect(await commands.executeCommand(AddTableThemeCommand.id, { unitId, tableId: 't1', themeStyle: theme })).toBe(true);
+        expect(table.getTableStyleId()).toBe('table-custom-1');
+        expect(univer.__getInjector().get(SheetRangeThemeModel).getALLRegisteredTheme(unitId)).toContain('table-custom-1');
+        expect(history.pitchTopUndoElement()?.redoMutations.map(({ id }) => id)).toEqual(expect.arrayContaining([
+            AddRangeThemeMutation.id,
+            SetSheetTableMutation.id,
+        ]));
     });
 
-    it('RemoveTableThemeCommand should select replacement theme and build undo payload', () => {
-        const syncExecuteCommand = vi.fn(() => true);
-        const pushUndoRedo = vi.fn();
-
-        const accessor = createAccessor([
-            [TableManager, { getTableById: () => ({ getSubunitId: () => 's1' }) }],
-            [SheetRangeThemeModel, {
-                getRegisteredRangeThemes: () => ['table-default-0', 'table-default-1', 'table-custom-1', 'table-custom-2'],
-                getDefaultRangeThemeStyle: () => ({ toJson: () => ({ name: 'table-custom-1' }) }),
-            }],
-            [ICommandService, { syncExecuteCommand }],
-            [IUndoRedoService, { pushUndoRedo }],
-        ]);
-
-        const result = RemoveTableThemeCommand.handler(accessor, {
-            unitId: 'u1',
+    it('removes a custom theme and selects the available built-in fallback', async () => {
+        const table = addTable('t1', 'Table1', { tableStyleId: 'table-custom-1' });
+        expect(commands.syncExecuteCommand(AddRangeThemeMutation.id, {
+            unitId,
+            subUnitId,
+            styleJSON: new RangeThemeStyle('table-custom-1').toJson(),
+        })).toBe(true);
+        const themes = univer.__getInjector().get(SheetRangeThemeModel);
+        expect(await commands.executeCommand(RemoveTableThemeCommand.id, {
+            unitId,
             tableId: 't1',
             themeName: 'table-custom-1',
-        });
+        })).toBe(true);
+        const fallback = table.getTableStyleId();
+        expect(fallback).not.toBe('table-custom-1');
+        expect(themes.getRegisteredRangeThemes()).toContain(fallback);
+        expect(themes.getALLRegisteredTheme(unitId)).not.toContain('table-custom-1');
+        expect(history.pitchTopUndoElement()?.redoMutations.map(({ id }) => id)).toEqual([
+            SetSheetTableMutation.id,
+            RemoveRangeThemeMutation.id,
+        ]);
+    });
 
-        expect(result).toBe(true);
-        expect(syncExecuteCommand).toHaveBeenNthCalledWith(1, SetSheetTableMutation.id, {
-            unitId: 'u1',
-            subUnitId: 's1',
+    it('records and applies inverse mutations when removing a built-in theme', async () => {
+        const table = addTable('t1', 'Table1', { tableStyleId: 'table-default-1' });
+        expect(await commands.executeCommand(RemoveTableThemeCommand.id, {
+            unitId,
             tableId: 't1',
-            config: { theme: 'table-custom-2' },
-        }, undefined);
-        expect(syncExecuteCommand).toHaveBeenNthCalledWith(2, RemoveRangeThemeMutation.id, {
-            unitId: 'u1',
-            subUnitId: 's1',
-            styleName: 'table-custom-1',
-        }, undefined);
-        expect(pushUndoRedo).toHaveBeenCalled();
+            themeName: 'table-default-1',
+        })).toBe(true);
+        const fallback = table.getTableStyleId();
+        expect(fallback).not.toBe('table-default-1');
+        expect(univer.__getInjector().get(SheetRangeThemeModel).getRegisteredRangeThemes()).toContain(fallback);
+        expect(history.pitchTopUndoElement()?.undoMutations).toEqual([
+            expect.objectContaining({ id: AddRangeThemeMutation.id }),
+            expect.objectContaining({
+                id: SetSheetTableMutation.id,
+                params: expect.objectContaining({ config: { theme: 'table-default-1' } }),
+            }),
+        ]);
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(table.getTableStyleId()).toBe('table-default-1');
     });
 });

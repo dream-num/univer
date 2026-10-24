@@ -17,7 +17,7 @@
 import type { DependencyIdentifier, Nullable, Workbook } from '@univerjs/core';
 import type { IRender, IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetSkeletonManagerParam } from '@univerjs/sheets';
-import { Disposable, Inject } from '@univerjs/core';
+import { Disposable, Inject, SheetTypes } from '@univerjs/core';
 import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
@@ -110,10 +110,16 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
     private _setCurrent(sheetId: string) {
         this._sheetId = sheetId;
 
+        const workbook = this._context.unit;
+        const worksheet = workbook.getSheetBySheetId(sheetId);
+        if (worksheet?.getConfig().type === SheetTypes.CHART) {
+            this._currentSkeletonBefore$.next(null);
+            this._currentSkeleton$.next(null);
+            return;
+        }
+
         let skeletonParam = this._getSkeletonParam(sheetId);
         if (!skeletonParam) {
-            const workbook = this._context.unit;
-            const worksheet = workbook.getSheetBySheetId(sheetId);
             const unitId = this._context.unitId;
 
             if (!worksheet) {

@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import type { Injector, IWorkbookData, Workbook } from '@univerjs/core';
+import type { IWorkbookData, Workbook } from '@univerjs/core';
 import {
+    CommandType,
     ICommandService,
     Inject,
-    Injector as InjectorIdentifier,
+    Injector,
+    IUndoRedoService,
     IUniverInstanceService,
     LocaleType,
     Plugin,
     RANGE_TYPE,
+    SheetTypes,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -82,7 +85,7 @@ class SheetsFilterCommandTestPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
     static override pluginName = 'SheetsFilterCommandTestPlugin';
 
-    constructor(_config: unknown, @Inject(InjectorIdentifier) protected readonly _injector: Injector) {
+    constructor(_config: unknown, @Inject(Injector) protected readonly _injector: Injector) {
         super();
     }
 
@@ -129,6 +132,44 @@ describe('sheet filter commands', () => {
 
     afterEach(() => {
         univer.dispose();
+    });
+
+    async function expectRefused(id: string, params?: object) {
+        const before = JSON.parse(JSON.stringify({ workbook: workbook.save(), chart: sheetsFilterService.getFilterModel(unitId, 'chart')?.serialize(), grid: sheetsFilterService.getFilterModel(unitId, subUnitId)?.serialize() }));
+        const history = univer.__getInjector().get(IUndoRedoService);
+        const undo = history.pitchTopUndoElement();
+        const redo = history.pitchTopRedoElement();
+        const mutations: string[] = [];
+        const observer = commandService.onCommandExecuted((command) => {
+            if (command.type === CommandType.MUTATION) {
+                mutations.push(command.id);
+            }
+        });
+        try {
+            expect(await commandService.executeCommand(id, params)).toBe(false);
+            expect(JSON.parse(JSON.stringify({ workbook: workbook.save(), chart: sheetsFilterService.getFilterModel(unitId, 'chart')?.serialize(), grid: sheetsFilterService.getFilterModel(unitId, subUnitId)?.serialize() }))).toEqual(before);
+            expect(history.pitchTopUndoElement()).toBe(undo);
+            expect(history.pitchTopRedoElement()).toBe(redo);
+            expect(mutations).toEqual([]);
+        } finally {
+            observer.dispose();
+        }
+    }
+
+    it('refuses creation and historical filter edits on Chart without changing resources or history', async () => {
+        workbook.addWorksheet('chart', 1, { id: 'chart', name: 'Chart', type: SheetTypes.CHART, cellData: {} });
+        const chart = { unitId: workbook.getUnitId(), subUnitId: 'chart' };
+        const range = { startRow: 0, endRow: 3, startColumn: 0, endColumn: 0 };
+        await expectRefused(SetSheetFilterRangeCommand.id, { ...chart, range });
+        expect(commandService.syncExecuteCommand(SetSheetsFilterRangeMutation.id, { ...chart, range })).toBe(true);
+        expect(commandService.syncExecuteCommand(SetSheetsFilterCriteriaMutation.id, { ...chart, col: 0, criteria: { colId: 0, filters: { filters: ['A'] } } })).toBe(true);
+        await expectRefused(SetSheetsFilterCriteriaCommand.id, { ...chart, col: 0, criteria: null });
+        await expectRefused(ClearSheetsFilterCriteriaCommand.id, chart);
+        await expectRefused(RemoveSheetFilterCommand.id, chart);
+        await expectRefused(ReCalcSheetsFilterCommand.id, chart);
+        workbook.setActiveSheet(workbook.getSheetBySheetId('chart')!);
+        await expectRefused(SmartToggleSheetsFilterCommand.id);
+        expect(await commandService.executeCommand(SetSheetFilterRangeCommand.id, { unitId: workbook.getUnitId(), subUnitId, range })).toBe(true);
     });
 
     it('sets a filter range and applies criteria to the filtered rows', async () => {

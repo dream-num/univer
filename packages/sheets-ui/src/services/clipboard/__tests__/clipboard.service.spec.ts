@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, IRange, IStyleData, Nullable, Univer, Workbook } from '@univerjs/core';
-import type { IClipboardItem } from './mock-clipboard';
+import type { ICellData, IRange, IStyleData, Nullable, Univer, Workbook } from '@univerjs/core';
+import type { IClipboardInterfaceService } from '@univerjs/ui';
 import {
     BooleanNumber,
+    CommandType,
     CustomCommandExecutionError,
+    extractPureTextFromCell,
     FormulaType,
     ICommandService,
+    Injector,
     IPermissionService,
     IUndoRedoService,
     IUniverInstanceService,
@@ -28,9 +31,11 @@ import {
     RANGE_TYPE,
     Rectangle,
     RedoCommand,
+    SheetTypes,
     Tools,
     UndoCommand,
     UniverInstanceType,
+    WrapStrategy,
 } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
@@ -44,18 +49,24 @@ import {
     SetSelectionsOperation,
     SetWorksheetActiveOperation,
     SetWorksheetColWidthMutation,
+    SetWorksheetNameMutation,
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
     SheetInterceptorService,
     SheetsSelectionsService,
+    WorkbookCopyPermission,
     WorkbookEditablePermission,
+    WorksheetCopyPermission,
+    WorksheetEditPermission,
 } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
+import type { IClipboardItem } from './mock-clipboard';
+import { SheetCopyCommand } from '../../../commands/commands/clipboard.command';
 import {
     SheetPermissionInterceptorClipboardController,
 } from '../../../controllers/permission/sheet-permission-interceptor-clipboard.controller';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
-import { ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '../clipboard.service';
+import { ISheetClipboardService, PREDEFINED_HOOK_NAME_COPY, PREDEFINED_HOOK_NAME_PASTE } from '../clipboard.service';
 import { COPY_TYPE } from '../type';
 import { clipboardTestBed } from './clipboard-test-bed';
 import { MockClipboard } from './mock-clipboard';
@@ -1151,5 +1162,560 @@ describe('Test clipboard', () => {
             expect(getValues(24, 0, 24, 0)![0][0]).toBe(null);
             expect(getValues(24, 1, 24, 1)![0][0]!.v).toBe('A25');
         });
+    });
+});
+
+describe('CHART clipboard without grid selection', () => {
+    let univer: Univer;
+    let get: Injector['get'];
+    let workbook: Workbook;
+    let commands: ICommandService;
+    let clipboard: ISheetClipboardService;
+    let writes: Array<{ text: string; html: string }>;
+
+    beforeEach(() => {
+        writes = [];
+        const boundary: IClipboardInterfaceService = {
+            supportClipboard: true,
+            write: async (text, html) => { writes.push({ text, html }); },
+            writeText: async (text) => { writes.push({ text, html: '' }); },
+            readText: async () => '',
+            read: async () => [],
+        };
+        const bed = clipboardTestBed(undefined, [
+            [SheetPermissionInterceptorClipboardController],
+            [MergeCellController],
+            [RefRangeService],
+        ], boundary);
+        univer = bed.univer;
+        get = bed.get;
+        workbook = bed.sheet;
+        commands = get(ICommandService);
+        for (const command of [
+            SetRangeValuesMutation,
+            SetWorksheetRowHeightMutation,
+            SetWorksheetColWidthMutation,
+            SetSelectionsOperation,
+            SetWorksheetActiveOperation,
+            SetWorksheetRowAutoHeightMutation,
+            SetWorksheetNameMutation,
+        ]) {
+            commands.registerCommand(command);
+        }
+        get(MergeCellController);
+        get(SheetPermissionInterceptorClipboardController);
+        clipboard = get(ISheetClipboardService);
+        workbook.addWorksheet('chart-host', 1, {
+            id: 'chart-host',
+            name: 'Chart Host',
+            type: SheetTypes.CHART,
+            cellData: {},
+        });
+        commands.syncExecuteCommand(SetWorksheetActiveOperation.id, { unitId: 'test', subUnitId: 'chart-host' });
+        get(SheetsSelectionsService).setSelections('test', 'chart-host', []);
+        get(IUndoRedoService).clearUndoRedo('test');
+    });
+
+    afterEach(() => univer.dispose());
+
+    function seedObjectCache(copyId = 'chart-object') {
+        clipboard.copyContentCache().set(copyId, {
+            unitId: 'test',
+            subUnitId: 'chart-host',
+            range: { rows: [0], cols: [0] },
+            matrix: new ObjectMatrix({ 0: { 0: {} } }),
+            copyType: COPY_TYPE.COPY,
+            skipCellCopy: true,
+        });
+        return copyId;
+    }
+
+    function trackMutations() {
+        const executed: string[] = [];
+        const listener = commands.onCommandExecuted((command) => {
+            if (command.type === CommandType.MUTATION || command.id === SetSelectionsOperation.id) {
+                executed.push(command.id);
+            }
+        });
+        onTestFinished(() => listener.dispose());
+        return executed;
+    }
+
+    it('copies only a claimed focused object through the real permission entry without creating a grid selection', async () => {
+        let focusedCalls = 0;
+        let cellCalls = 0;
+        const hook = clipboard.addClipboardHook({
+            id: 'chart-selectionless-object-copy',
+            onBeforeCopyFocusedObject: (_unitId, _subUnitId, copyType) => {
+                focusedCalls += 1;
+                expect(copyType).toBe(COPY_TYPE.COPY);
+                return true;
+            },
+            onBeforeCopy: () => { cellCalls += 1; },
+        });
+        onTestFinished(() => hook.dispose());
+        const before = Tools.deepClone(workbook.getSnapshot());
+        const executed = trackMutations();
+        expect(get(SheetsSelectionsService).getCurrentSelections()).toEqual([]);
+        expect(await SheetCopyCommand.handler(get(Injector))).toBe(true);
+        const copyId = clipboard.copyContentCache().getLastCopyId();
+        const cached = clipboard.copyContentCache().get(copyId!)!;
+        expect(focusedCalls).toBe(1);
+        expect(cellCalls).toBe(0);
+        expect(cached.skipCellCopy).toBe(true);
+        const content: string[] = [];
+        cached.matrix!.forValue((_row, _column, cell) => {
+            content.push(extractPureTextFromCell(cell));
+        });
+        expect(content.every((text) => text === '')).toBe(true);
+        expect(writes).toHaveLength(1);
+        expect(writes[0].text).toBe('');
+        expect(get(SheetsSelectionsService).getCurrentSelections()).toEqual([]);
+        expect(workbook.getSnapshot()).toEqual(before);
+        expect(executed).toEqual([]);
+        expect(get(IUndoRedoService).getUndoRedoStatus('test')).toEqual({ undos: 0, redos: 0 });
+    });
+
+    it('pastes an object cache through its extension plan without selection or autoheight side effects', async () => {
+        const copyId = seedObjectCache();
+        let pasted = false;
+        const hook = clipboard.addClipboardHook({
+            id: 'chart-selectionless-object-plan',
+            onBeforeCopyFocusedObject: () => true,
+            onPasteCells: (from, to, matrix) => {
+                pasted = true;
+                expect(from?.subUnitId).toBe('chart-host');
+                expect(to.subUnitId).toBe('chart-host');
+                matrix.forValue((_row, _column, cell) => expect(extractPureTextFromCell(cell)).toBe(''));
+                // A real metadata mutation exercises the extension-plan contract; Drawing acceptance belongs to its consumer.
+                return {
+                    redos: [{ id: SetWorksheetNameMutation.id, params: { unitId: to.unitId, subUnitId: to.subUnitId, name: 'Pasted object metadata' } }],
+                    undos: [{ id: SetWorksheetNameMutation.id, params: { unitId: to.unitId, subUnitId: to.subUnitId, name: 'Chart Host' } }],
+                };
+            },
+        });
+        onTestFinished(() => hook.dispose());
+        const beforeCells = Tools.deepClone(workbook.getActiveSheet().getConfig().cellData);
+        const executed = trackMutations();
+        expect(await clipboard.pasteByCopyId(copyId)).toBe(true);
+        expect(pasted).toBe(true);
+        expect(executed).toEqual([SetWorksheetNameMutation.id]);
+        expect(workbook.getActiveSheet().getName()).toBe('Pasted object metadata');
+        expect(workbook.getActiveSheet().getConfig().cellData).toEqual(beforeCells);
+        expect(get(SheetsSelectionsService).getCurrentSelections()).toEqual([]);
+        expect(get(IUndoRedoService).getUndoRedoStatus('test')).toEqual({ undos: 1, redos: 0 });
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(workbook.getActiveSheet().getName()).toBe('Chart Host');
+        expect(get(SheetsSelectionsService).getCurrentSelections()).toEqual([]);
+        expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+        expect(workbook.getActiveSheet().getName()).toBe('Pasted object metadata');
+        expect(get(SheetsSelectionsService).getCurrentSelections()).toEqual([]);
+    });
+
+    it('pastes a CHART object into GRID without touching its selected text cell or autoheight row', async () => {
+        const copyId = seedObjectCache();
+        commands.syncExecuteCommand(SetWorksheetActiveOperation.id, { unitId: 'test', subUnitId: 'sheet1' });
+        expect(commands.syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: { 4: { 3: { v: 'A wrapped text line that must remain untouched.\n'.repeat(12), s: { tb: WrapStrategy.WRAP } } } },
+        })).toBe(true);
+        expect(commands.syncExecuteCommand(SetWorksheetRowAutoHeightMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            rowsAutoHeightInfo: [{ row: 4, autoHeight: 64 }],
+        })).toBe(true);
+        const selections = get(SheetsSelectionsService);
+        selections.setSelections('test', 'sheet1', [{
+            range: { startRow: 4, endRow: 4, startColumn: 3, endColumn: 3 },
+            primary: null,
+            style: null,
+        }]);
+        const grid = workbook.getActiveSheet();
+        const beforeCells = Tools.deepClone(grid.getConfig().cellData);
+        const beforeRows = Tools.deepClone(grid.getConfig().rowData);
+        const beforeSelections = Tools.deepClone(selections.getCurrentSelections());
+        const originalName = grid.getName();
+        const skeleton = get(SheetSkeletonManagerService).ensureSkeleton('sheet1')!;
+        const calculateAutoHeight = vi.spyOn(skeleton, 'calculateAutoHeightInRange');
+        onTestFinished(() => calculateAutoHeight.mockRestore());
+        const rowAndColumnHooks: string[] = [];
+        const hook = clipboard.addClipboardHook({
+            id: 'chart-to-grid-object-plan',
+            onBeforeCopyFocusedObject: () => true,
+            onPasteRows: () => {
+                rowAndColumnHooks.push('row');
+                return { redos: [], undos: [] };
+            },
+            onPasteColumns: () => {
+                rowAndColumnHooks.push('column');
+                return { redos: [], undos: [] };
+            },
+            onPasteCells: (from, to) => {
+                expect(from?.subUnitId).toBe('chart-host');
+                expect(to.subUnitId).toBe('sheet1');
+                return {
+                    redos: [{ id: SetWorksheetNameMutation.id, params: { unitId: to.unitId, subUnitId: to.subUnitId, name: 'GRID object metadata' } }],
+                    undos: [{ id: SetWorksheetNameMutation.id, params: { unitId: to.unitId, subUnitId: to.subUnitId, name: originalName } }],
+                };
+            },
+        });
+        onTestFinished(() => hook.dispose());
+        get(IUndoRedoService).clearUndoRedo('test');
+        const executed = trackMutations();
+        expect(await clipboard.pasteByCopyId(copyId)).toBe(true);
+        expect(executed).toEqual([SetWorksheetNameMutation.id]);
+        expect(rowAndColumnHooks).toEqual([]);
+        expect(calculateAutoHeight).not.toHaveBeenCalled();
+        expect(grid.getName()).toBe('GRID object metadata');
+        expect(grid.getConfig().cellData).toEqual(beforeCells);
+        expect(grid.getConfig().rowData).toEqual(beforeRows);
+        expect(selections.getCurrentSelections()).toEqual(beforeSelections);
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(grid.getName()).toBe(originalName);
+        expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+        expect(grid.getName()).toBe('GRID object metadata');
+        expect(grid.getConfig().cellData).toEqual(beforeCells);
+        expect(grid.getConfig().rowData).toEqual(beforeRows);
+        expect(selections.getCurrentSelections()).toEqual(beforeSelections);
+    });
+
+    it.each(['success', 'empty plan', 'owner throws'])('finalizes before-only CHART paste observers exactly once after %s', async (outcome) => {
+        const copyId = seedObjectCache();
+        const observed: boolean[] = [];
+        const ownerFinalized: boolean[] = [];
+        let beforeCalls = 0;
+        const observer = clipboard.addClipboardHook({
+            id: 'chart-before-only-paste-observer',
+            onBeforePaste: () => {
+                beforeCalls += 1;
+                return true;
+            },
+            onAfterPaste: (result) => { observed.push(result); },
+        });
+        const owner = clipboard.addClipboardHook({
+            id: 'chart-object-paste-lifecycle-owner',
+            onBeforeCopyFocusedObject: () => true,
+            onPasteCells: (_from, to) => {
+                if (outcome === 'owner throws') {
+                    throw new Error('Object owner preparation failed');
+                }
+                if (outcome === 'empty plan') {
+                    return { redos: [], undos: [] };
+                }
+                return {
+                    redos: [{ id: SetWorksheetNameMutation.id, params: { unitId: to.unitId, subUnitId: to.subUnitId, name: 'Finalized object metadata' } }],
+                    undos: [{ id: SetWorksheetNameMutation.id, params: { unitId: to.unitId, subUnitId: to.subUnitId, name: 'Chart Host' } }],
+                };
+            },
+            onAfterPaste: (result) => { ownerFinalized.push(result); },
+        });
+        onTestFinished(() => {
+            observer.dispose();
+            owner.dispose();
+        });
+        const before = Tools.deepClone(workbook.getSnapshot());
+        const executed = trackMutations();
+        const paste = clipboard.pasteByCopyId(copyId);
+        if (outcome === 'owner throws') {
+            await expect(paste).rejects.toThrow('Object owner preparation failed');
+        } else {
+            expect(await paste).toBe(outcome === 'success');
+        }
+        expect(beforeCalls).toBe(1);
+        expect(observed).toEqual([outcome === 'success']);
+        expect(ownerFinalized).toEqual(observed);
+        expect(get(SheetsSelectionsService).getCurrentSelections()).toEqual([]);
+        if (outcome === 'success') {
+            expect(executed).toEqual([SetWorksheetNameMutation.id]);
+            expect(workbook.getActiveSheet().getName()).toBe('Finalized object metadata');
+            expect(workbook.getActiveSheet().getConfig().cellData).toEqual(before.sheets['chart-host'].cellData);
+            expect(get(IUndoRedoService).getUndoRedoStatus('test')).toEqual({ undos: 1, redos: 0 });
+        } else {
+            expect(executed).toEqual([]);
+            expect(workbook.getSnapshot()).toEqual(before);
+            expect(get(IUndoRedoService).getUndoRedoStatus('test')).toEqual({ undos: 0, redos: 0 });
+        }
+    });
+
+    it.each(['error', 'undefined'])('finishes every CHART paste finalizer once and preserves the first after %s', async (failure) => {
+        let afterCalls = 0;
+        let ownerAfterCalls = 0;
+        const firstFailure = failure === 'undefined' ? undefined : new Error('Paste finalizer failed');
+        const observer = clipboard.addClipboardHook({
+            id: 'chart-failing-finalizer',
+            onBeforePaste: () => true,
+            onAfterPaste: () => {
+                afterCalls += 1;
+                throw firstFailure;
+            },
+        });
+        const owner = clipboard.addClipboardHook({
+            id: 'chart-empty-plan-with-failing-finalizer',
+            onBeforeCopyFocusedObject: () => true,
+            onPasteCells: () => ({ redos: [], undos: [] }),
+            onAfterPaste: () => {
+                ownerAfterCalls += 1;
+                throw new Error('Later finalizer failed');
+            },
+        });
+        onTestFinished(() => {
+            observer.dispose();
+            owner.dispose();
+        });
+        const before = Tools.deepClone(workbook.getSnapshot());
+        const executed = trackMutations();
+        await expect(clipboard.pasteByCopyId(seedObjectCache())).rejects.toBe(firstFailure);
+        expect(afterCalls).toBe(1);
+        expect(ownerAfterCalls).toBe(1);
+        expect(executed).toEqual([]);
+        expect(workbook.getSnapshot()).toEqual(before);
+        expect(get(IUndoRedoService).getUndoRedoStatus('test')).toEqual({ undos: 0, redos: 0 });
+    });
+
+    it.each(['owner error', 'owner undefined', 'before error', 'before undefined'])('preserves the original %s while completing failing CHART finalizers', async (failure) => {
+        const originalFailure = failure.endsWith('undefined') ? undefined : new Error('Original paste preparation failed');
+        const finalizers: string[] = [];
+        const observer = clipboard.addClipboardHook({
+            id: 'chart-original-error-observer',
+            onBeforePaste: () => true,
+            onAfterPaste: (result) => {
+                expect(result).toBe(false);
+                finalizers.push('observer');
+                throw new Error('Observer finalization failed');
+            },
+        });
+        const owner = clipboard.addClipboardHook({
+            id: 'chart-original-error-owner',
+            onBeforeCopyFocusedObject: () => true,
+            onBeforePaste: () => {
+                if (failure.startsWith('before')) {
+                    throw originalFailure;
+                }
+                return true;
+            },
+            onPasteCells: () => { throw originalFailure; },
+            onAfterPaste: (result) => {
+                expect(result).toBe(false);
+                finalizers.push('owner');
+                throw new Error('Owner finalization failed');
+            },
+        });
+        onTestFinished(() => {
+            observer.dispose();
+            owner.dispose();
+        });
+        const before = Tools.deepClone(workbook.getSnapshot());
+        const executed = trackMutations();
+        await expect(clipboard.pasteByCopyId(seedObjectCache())).rejects.toBe(originalFailure);
+        expect(finalizers).toEqual(['observer', 'owner']);
+        expect(executed).toEqual([]);
+        expect(workbook.getSnapshot()).toEqual(before);
+        expect(get(IUndoRedoService).getUndoRedoStatus('test')).toEqual({ undos: 0, redos: 0 });
+    });
+
+    it('rejects an unclaimed CHART copy instead of falling back to cell content', async () => {
+        let focusedCalls = 0;
+        let cellCalls = 0;
+        const hook = clipboard.addClipboardHook({
+            id: 'chart-no-focused-object',
+            onBeforeCopyFocusedObject: () => {
+                focusedCalls += 1;
+                return false;
+            },
+            onBeforeCopy: () => { cellCalls += 1; },
+        });
+        onTestFinished(() => hook.dispose());
+        expect(await clipboard.copy()).toBe(false);
+        expect(focusedCalls).toBe(1);
+        expect(cellCalls).toBe(0);
+        expect(writes).toEqual([]);
+        expect(clipboard.copyContentCache().getLastCopyId()).toBeNull();
+        expect(get(SheetsSelectionsService).getCurrentSelections()).toEqual([]);
+    });
+
+    it.each(['cut', 'formula-only'])('does not allow CHART %s to use the selectionless object path', async (kind) => {
+        let focusedCalls = 0;
+        const hook = clipboard.addClipboardHook({
+            id: 'chart-copy-only',
+            onBeforeCopyFocusedObject: () => {
+                focusedCalls += 1;
+                return true;
+            },
+        });
+        onTestFinished(() => hook.dispose());
+        expect(await (kind === 'cut'
+            ? clipboard.cut()
+            : clipboard.copy({ copyHookType: PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY }))).toBe(false);
+        expect(focusedCalls).toBe(0);
+        expect(writes).toEqual([]);
+        expect(clipboard.copyContentCache().getLastCopyId()).toBeNull();
+    });
+
+    it.each(['workbook', 'worksheet'])('retains %s copy permission before invoking a focused CHART owner', async (scope) => {
+        const permissions = get(IPermissionService);
+        const point = scope === 'workbook' ? new WorkbookCopyPermission('test') : new WorksheetCopyPermission('test', 'chart-host');
+        if (!permissions.getPermissionPoint(point.id)) {
+            permissions.addPermissionPoint(point);
+        }
+        permissions.updatePermissionPoint(point.id, false);
+        let focusedCalls = 0;
+        const hook = clipboard.addClipboardHook({
+            id: 'chart-denied-copy',
+            onBeforeCopyFocusedObject: () => {
+                focusedCalls += 1;
+                return true;
+            },
+        });
+        onTestFinished(() => hook.dispose());
+        await expect(SheetCopyCommand.handler(get(Injector))).rejects.toThrow(CustomCommandExecutionError);
+        expect(focusedCalls).toBe(0);
+        expect(writes).toEqual([]);
+        expect(clipboard.copyContentCache().getLastCopyId()).toBeNull();
+    });
+
+    it('runs paste permissions before a CHART object extension plan', async () => {
+        const point = new WorksheetEditPermission('test', 'chart-host');
+        const permissions = get(IPermissionService);
+        if (!permissions.getPermissionPoint(point.id)) {
+            permissions.addPermissionPoint(point);
+        }
+        permissions.updatePermissionPoint(point.id, false);
+        let pasted = false;
+        const hook = clipboard.addClipboardHook({
+            id: 'chart-denied-paste',
+            onBeforeCopyFocusedObject: () => true,
+            onPasteCells: () => {
+                pasted = true;
+                return { redos: [], undos: [] };
+            },
+        });
+        onTestFinished(() => hook.dispose());
+        const before = Tools.deepClone(workbook.getSnapshot());
+        const executed = trackMutations();
+        await expect(clipboard.pasteByCopyId(seedObjectCache())).rejects.toThrow(CustomCommandExecutionError);
+        expect(pasted).toBe(false);
+        expect(executed).toEqual([]);
+        expect(workbook.getSnapshot()).toEqual(before);
+        expect(get(IUndoRedoService).getUndoRedoStatus('test')).toEqual({ undos: 0, redos: 0 });
+    });
+
+    it.each(['chart-host', 'sheet1'])('rejects an object paste to %s whose hooks contribute no mutation plan', async (targetSheet) => {
+        let pasted = false;
+        const hook = clipboard.addClipboardHook({
+            id: 'chart-empty-object-plan',
+            onBeforeCopyFocusedObject: () => true,
+            onPasteCells: () => {
+                pasted = true;
+                return { redos: [], undos: [] };
+            },
+        });
+        onTestFinished(() => hook.dispose());
+        const before = Tools.deepClone(workbook.getSnapshot());
+        const executed = trackMutations();
+        expect(await clipboard.pasteByCopyId(seedObjectCache(), undefined, {
+            unitId: 'test',
+            subUnitId: targetSheet,
+            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+        })).toBe(false);
+        expect(pasted).toBe(true);
+        expect(executed).toEqual([]);
+        expect(get(SheetsSelectionsService).getCurrentSelections()).toEqual([]);
+        expect(workbook.getSnapshot()).toEqual(before);
+        expect(get(IUndoRedoService).getUndoRedoStatus('test')).toEqual({ undos: 0, redos: 0 });
+    });
+
+    it.each(['chart-host', 'sheet1'])('rejects a retained CHART object CUT cache before hooks when pasting to %s', async (targetSheet) => {
+        const copyId = seedObjectCache();
+        const cached = clipboard.copyContentCache().get(copyId)!;
+        clipboard.copyContentCache().set(copyId, { ...cached, copyType: COPY_TYPE.CUT });
+        let pasted = false;
+        const hook = clipboard.addClipboardHook({
+            id: 'chart-cut-cache-rejected',
+            onBeforeCopyFocusedObject: () => true,
+            onPasteCells: () => {
+                pasted = true;
+                return { redos: [], undos: [] };
+            },
+        });
+        onTestFinished(() => hook.dispose());
+        const before = Tools.deepClone(workbook.getSnapshot());
+        const executed = trackMutations();
+        expect(await clipboard.pasteByCopyId(copyId, undefined, {
+            unitId: 'test',
+            subUnitId: targetSheet,
+            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+        })).toBe(false);
+        expect(pasted).toBe(false);
+        expect(executed).toEqual([]);
+        expect(clipboard.copyContentCache().get(copyId)?.matrix).toBe(cached.matrix);
+        expect(workbook.getSnapshot()).toEqual(before);
+        expect(get(SheetsSelectionsService).getCurrentSelections()).toEqual([]);
+        expect(get(IUndoRedoService).getUndoRedoStatus('test')).toEqual({ undos: 0, redos: 0 });
+    });
+
+    it.each(['internal cells', 'plain text', 'external html', 'external file'])('rejects %s pasted into CHART even with an explicit target', async (kind) => {
+        const target = { unitId: 'test', subUnitId: 'chart-host', range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } };
+        const before = Tools.deepClone(workbook.getSnapshot());
+        const executed = trackMutations();
+        let result: boolean;
+        if (kind === 'internal cells') {
+            clipboard.copyContentCache().set('grid-cell', {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: { rows: [24], cols: [0] },
+                matrix: new ObjectMatrix({ 0: { 0: { v: 'A25' } } }),
+                copyType: COPY_TYPE.COPY,
+            });
+            result = await clipboard.pasteByCopyId('grid-cell', undefined, target);
+        } else if (kind === 'plain text') {
+            result = await clipboard.legacyPaste(undefined, 'MUST_NOT_ENTER_CHART', undefined, undefined, target);
+        } else if (kind === 'external html') {
+            result = await clipboard.legacyPaste('<table><tr><td>MUST_NOT_ENTER_CHART</td></tr></table>', undefined, undefined, undefined, target);
+        } else {
+            result = await clipboard.legacyPaste(undefined, undefined, [new File(['cells'], 'clipboard.txt', { type: 'text/plain' })], undefined, target);
+        }
+        expect(result).toBe(false);
+        expect(executed).toEqual([]);
+        expect(workbook.getSnapshot()).toEqual(before);
+        expect(get(SheetsSelectionsService).getCurrentSelections()).toEqual([]);
+        expect(get(IUndoRedoService).getUndoRedoStatus('test')).toEqual({ undos: 0, redos: 0 });
+    });
+
+    it('keeps GRID cell copy and paste working while rejecting an empty GRID selection', async () => {
+        commands.syncExecuteCommand(SetWorksheetActiveOperation.id, { unitId: 'test', subUnitId: 'sheet1' });
+        const selections = get(SheetsSelectionsService);
+        selections.setSelections('test', 'sheet1', [{
+            range: { startRow: 24, endRow: 24, startColumn: 0, endColumn: 0 },
+            primary: null,
+            style: null,
+        }]);
+        expect(await clipboard.copy()).toBe(true);
+        const copyId = clipboard.copyContentCache().getLastCopyId()!;
+        selections.setSelections('test', 'sheet1', [{
+            range: { startRow: 24, endRow: 24, startColumn: 1, endColumn: 1 },
+            primary: null,
+            style: null,
+        }]);
+        expect(await clipboard.pasteByCopyId(copyId)).toBe(true);
+        expect(workbook.getActiveSheet().getCellRaw(24, 1)?.v).toBe('A25');
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(workbook.getActiveSheet().getCellRaw(24, 1)?.v).toBe('B25');
+        selections.setSelections('test', 'sheet1', []);
+        let focusedCalls = 0;
+        const hook = clipboard.addClipboardHook({
+            id: 'grid-selection-required',
+            onBeforeCopyFocusedObject: () => {
+                focusedCalls += 1;
+                return true;
+            },
+        });
+        onTestFinished(() => hook.dispose());
+        const before = Tools.deepClone(workbook.getSnapshot());
+        expect(await clipboard.copy()).toBe(false);
+        expect(clipboard.capturePasteTarget()).toBeNull();
+        expect(await clipboard.pasteByCopyId(copyId)).toBe(false);
+        expect(focusedCalls).toBe(0);
+        expect(workbook.getSnapshot()).toEqual(before);
     });
 });

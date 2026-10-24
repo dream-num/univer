@@ -47,8 +47,6 @@ import type {
     IStyleTypeValue,
     SplitDelimiterEnum,
 } from '@univerjs/sheets';
-import type { IFacadeClearOptions } from './f-worksheet';
-import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import {
     BooleanNumber,
     covertCellValue,
@@ -97,6 +95,8 @@ import {
     SheetRangeThemeService,
     SplitTextToColumnsCommand,
 } from '@univerjs/sheets';
+import type { IFacadeClearOptions } from './f-worksheet';
+import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import { SHEETS_CUSTOM_FIELD_WARNING_MESSAGE } from './const';
 import { FWorkbook } from './f-workbook';
 import { FWorksheet } from './f-worksheet';
@@ -2554,10 +2554,14 @@ export class FRange extends FBaseInitialable {
     insertCells(shiftDimension: Dimension): void {
         if (shiftDimension === Dimension.ROWS) {
             this._commandService.executeCommand(InsertRangeMoveDownCommand.id, {
+                unitId: this._workbook.getUnitId(),
+                subUnitId: this._worksheet.getSheetId(),
                 range: this._range,
             });
         } else {
             this._commandService.executeCommand(InsertRangeMoveRightCommand.id, {
+                unitId: this._workbook.getUnitId(),
+                subUnitId: this._worksheet.getSheetId(),
                 range: this._range,
             });
         }
@@ -2622,10 +2626,14 @@ export class FRange extends FBaseInitialable {
     deleteCells(shiftDimension: Dimension): void {
         if (shiftDimension === Dimension.ROWS) {
             this._commandService.executeCommand(DeleteRangeMoveUpCommand.id, {
+                unitId: this._workbook.getUnitId(),
+                subUnitId: this._worksheet.getSheetId(),
                 range: this._range,
             });
         } else {
             this._commandService.executeCommand(DeleteRangeMoveLeftCommand.id, {
+                unitId: this._workbook.getUnitId(),
+                subUnitId: this._worksheet.getSheetId(),
                 range: this._range,
             });
         }

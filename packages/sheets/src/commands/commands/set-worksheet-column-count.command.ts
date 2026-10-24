@@ -15,15 +15,18 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import type { ISetWorksheetColumnCountMutationParams } from '../mutations/set-worksheet-column-count.mutation';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
 } from '@univerjs/core';
-import { SetWorksheetColumnCountMutation, SetWorksheetColumnCountUndoMutationFactory } from '../mutations/set-worksheet-column-count.mutation';
-import { getSheetCommandTarget } from './utils/target-util';
+import type { ISetWorksheetColumnCountMutationParams } from '../mutations/set-worksheet-column-count.mutation';
+import {
+    SetWorksheetColumnCountMutation,
+    SetWorksheetColumnCountUndoMutationFactory,
+} from '../mutations/set-worksheet-column-count.mutation';
+import { getSheetGridCommandTarget } from './utils/target-util';
 
 export const SetWorksheetColumnCountCommand: ICommand = {
     type: CommandType.COMMAND,
@@ -36,7 +39,7 @@ export const SetWorksheetColumnCountCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetCommandTarget(univerInstanceService, params);
+        const target = getSheetGridCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const redoMutationParams: ISetWorksheetColumnCountMutationParams = {

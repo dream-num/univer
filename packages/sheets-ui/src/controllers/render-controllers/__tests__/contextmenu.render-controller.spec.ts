@@ -19,8 +19,10 @@ import type { IPointerEvent } from '@univerjs/engine-render';
 import {
     ICommandService,
     IContextService,
+    IUniverInstanceService,
     LocaleService,
     LocaleType,
+    SheetTypes,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -141,6 +143,22 @@ describe('SheetContextMenuRenderController pointer gestures', () => {
         };
         return { injector, render, spreadsheet, rowHeader, columnHeader, triggerMenu, getSelections, eventAt, click };
     }
+
+    it('refuses Chart right clicks before a Grid-only selection lookup', () => {
+        const { injector, render, spreadsheet, getSelections, eventAt, click } = createContextMenuTestBed(false);
+        click(spreadsheet, eventAt(1, 1));
+        const gridSelections = getSelections();
+        const workbook = injector.get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        workbook.addWorksheet('chart', 1, { id: 'chart', type: SheetTypes.CHART });
+        workbook.setActiveSheet(workbook.getSheetBySheetId('chart')!);
+        render.with(SheetSkeletonManagerService).setCurrent({ sheetId: 'chart' });
+        injector.get(ICommandService).syncExecuteCommand(SetSelectionsOperation.id, {
+            unitId: workbook.getUnitId(),
+            subUnitId: 'chart',
+            selections: gridSelections,
+        });
+        expect(() => click(spreadsheet, eventAt(1, 1, { button: 2 }))).not.toThrow();
+    });
 
     it.each([false, true])('opens cell and header menus with real right clicks on Mac %s', (isMac) => {
         const { spreadsheet, rowHeader, columnHeader, triggerMenu, eventAt, click } = createContextMenuTestBed(isMac);

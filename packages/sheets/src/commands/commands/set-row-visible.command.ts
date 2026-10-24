@@ -15,8 +15,6 @@
  */
 
 import type { IAccessor, ICommand, IRange, Nullable, Worksheet } from '@univerjs/core';
-import type { ISetRowHiddenMutationParams, ISetRowVisibleMutationParams } from '../mutations/set-row-visible.mutation';
-import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import {
     CommandType,
     ICommandService,
@@ -25,6 +23,8 @@ import {
     RANGE_TYPE,
     sequenceExecute,
 } from '@univerjs/core';
+import type { ISetRowHiddenMutationParams, ISetRowVisibleMutationParams } from '../mutations/set-row-visible.mutation';
+import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import {
@@ -35,7 +35,7 @@ import {
 } from '../mutations/set-row-visible.mutation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
 import { getPrimaryForRange } from './utils/selection-utils';
-import { getSheetCommandTarget } from './utils/target-util';
+import { getSheetGridCommandTarget } from './utils/target-util';
 
 export interface ISetSpecificRowsVisibleCommandParams {
     unitId: string;
@@ -52,7 +52,7 @@ export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleComm
         const undoRedoService = accessor.get(IUndoRedoService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), { unitId, subUnitId });
+        const target = getSheetGridCommandTarget(accessor.get(IUniverInstanceService), { unitId, subUnitId });
         if (!target) return false;
 
         const { worksheet } = target;
@@ -136,7 +136,7 @@ export const SetSelectedRowsVisibleCommand: ICommand = {
         const ranges = getSelectedRowRanges(selectionManagerService);
         if (!ranges.length) return false;
 
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetGridCommandTarget(univerInstanceService);
         if (!target) return false;
 
         const { worksheet, unitId, subUnitId } = target;
@@ -169,7 +169,7 @@ export const SetRowHiddenCommand: ICommand<ISetRowHiddenCommandParams> = {
         let ranges = params?.ranges?.length ? params.ranges : getSelectedRowRanges(selectionManagerService);
         if (!ranges.length) return false;
 
-        const target = getSheetCommandTarget(univerInstanceService, params);
+        const target = getSheetGridCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         ranges = divideRangesByHiddenRows(target.worksheet, ranges);

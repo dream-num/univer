@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import type { IUniverSheetsUIConfig } from '../../../config/config';
-import type { LocaleKey } from '../../../locale/types';
-import type { IEditorBridgeServiceVisibleParam } from '../../../services/editor-bridge.service';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     FOCUSING_FX_BAR_EDITOR,
@@ -24,6 +21,7 @@ import {
     IContextService,
     IPermissionService,
     LocaleService,
+    SheetTypes,
 } from '@univerjs/core';
 import { borderBottomClassName, clsx, useMobileKeyboardViewportLayout } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
@@ -51,6 +49,9 @@ import {
 } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { EMPTY, map, merge, of, switchMap } from 'rxjs';
+import type { IUniverSheetsUIConfig } from '../../../config/config';
+import type { LocaleKey } from '../../../locale/types';
+import type { IEditorBridgeServiceVisibleParam } from '../../../services/editor-bridge.service';
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../../common/keys';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../../config/config';
@@ -63,10 +64,13 @@ import { SheetsUIPart } from '../../../consts/ui-name';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { IFormulaEditorManagerService } from '../../../services/editor/formula-editor-manager.service';
 import { useKeyEventConfig } from '../../editor-container/hooks';
-import { useActiveWorkbook } from '../../hook';
+import { useActiveWorkbook, useActiveWorksheet } from '../../hook';
 import { MobileFormulaBarActions, MobileFormulaBarOverlays } from './MobileFormulaBarControls';
 
 export function MobileFormulaBar() {
+    const workbook = useActiveWorkbook();
+    const worksheet = useActiveWorksheet(workbook);
+    const isGridSheet = worksheet?.getConfig().type === SheetTypes.GRID;
     const editorBridgeService = useDependency(IEditorBridgeService);
     const contextService = useDependency(IContextService);
     const editorService = useDependency(IEditorService);
@@ -78,7 +82,7 @@ export function MobileFormulaBar() {
     );
 
     useEffect(() => {
-        if (!visible) {
+        if (!visible || !isGridSheet) {
             return undefined;
         }
 
@@ -104,9 +108,9 @@ export function MobileFormulaBar() {
                 cancelAnimationFrame(cursorFrame);
             }
         };
-    }, [contextService, editorBridgeService, editorService, visible]);
+    }, [contextService, editorBridgeService, editorService, isGridSheet, visible]);
 
-    if (!visible) {
+    if (!visible || !isGridSheet) {
         return null;
     }
 

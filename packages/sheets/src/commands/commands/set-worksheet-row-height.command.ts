@@ -15,10 +15,6 @@
  */
 
 import type { IAccessor, ICommand, IRange } from '@univerjs/core';
-import type {
-    ISetWorksheetRowHeightMutationParams,
-    ISetWorksheetRowIsAutoHeightMutationParams,
-} from '../mutations/set-worksheet-row-height.mutation';
 import {
     BooleanNumber,
     CommandType,
@@ -29,6 +25,10 @@ import {
     Rectangle,
     sequenceExecute,
 } from '@univerjs/core';
+import type {
+    ISetWorksheetRowHeightMutationParams,
+    ISetWorksheetRowIsAutoHeightMutationParams,
+} from '../mutations/set-worksheet-row-height.mutation';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SheetSkeletonService } from '../../skeleton/skeleton.service';
@@ -39,7 +39,7 @@ import {
     SetWorksheetRowIsAutoHeightMutationFactory,
 } from '../mutations/set-worksheet-row-height.mutation';
 import { getSuitableRangesInView } from './util';
-import { getSheetCommandTarget } from './utils/target-util';
+import { getSheetGridCommandTarget } from './utils/target-util';
 
 export interface IDeltaRowHeightCommandParams {
     anchorRow: number;
@@ -59,7 +59,7 @@ export const DeltaRowHeightCommand: ICommand = {
             return false;
         }
 
-        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        const target = getSheetGridCommandTarget(accessor.get(IUniverInstanceService));
         if (!target) return false;
 
         const { worksheet, subUnitId, unitId } = target;
@@ -218,7 +218,7 @@ export const SetRowHeightCommand: ICommand = {
             return false;
         }
 
-        const target = getSheetCommandTarget(univerInstanceService, params);
+        const target = getSheetGridCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { unitId, subUnitId, worksheet } = target;
@@ -318,7 +318,7 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetCommandTarget(univerInstanceService, params);
+        const target = getSheetGridCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { unitId, subUnitId, worksheet } = target;

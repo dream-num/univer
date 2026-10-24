@@ -14,32 +14,47 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
+import type {
+    ICellData,
+    ICommandInfo,
+    IMutationInfo,
+    IObjectMatrixPrimitiveType,
+    IRange,
+    IWorkbookData,
+    IWorksheetData,
+    Workbook,
+} from '@univerjs/core';
 import {
+    CanceledError,
     CellValueType,
+    CommandType,
     DateSystem,
     ICommandService,
+    ILogService,
     IUndoRedoService,
     IUniverInstanceService,
     LocaleType,
-    ObjectMatrix,
+    LogLevel,
     PresetListType,
+    RedoCommand,
+    Tools,
+    UndoCommand,
+    Univer,
+    UniverInstanceType,
 } from '@univerjs/core';
-import { RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
-import { describe, expect, it } from 'vitest';
+import { IDefinedNamesService, SetDefinedNameMutation } from '@univerjs/engine-formula';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { SplitDelimiterEnum } from '../../../basics/split-range-text';
+import enUS from '../../../locale/en-US';
+import { UniverSheetsPlugin } from '../../../plugin';
 import { IAutoFillService } from '../../../services/auto-fill/auto-fill.service';
 import { AUTO_FILL_APPLY_TYPE } from '../../../services/auto-fill/type';
 import { INumfmtService } from '../../../services/numfmt/type';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
-import { SheetSkeletonService } from '../../../skeleton/skeleton.service';
-import { InsertColMutation, InsertRowMutation } from '../../mutations/insert-row-col.mutation';
-import { RemoveNumfmtMutation, SetNumfmtMutation } from '../../mutations/numfmt.mutation';
-import { RemoveColMutation, RemoveRowMutation } from '../../mutations/remove-row-col.mutation';
 import { ReorderRangeMutation } from '../../mutations/reorder-range.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
-import { SetSelectionsOperation } from '../../operations/selection.operation';
+import { SetWorksheetRowHeightMutation } from '../../mutations/set-worksheet-row-height.mutation';
 import { AppendRowCommand } from '../append-row.command';
 import {
     AutoClearContentCommand,
@@ -54,776 +69,515 @@ import { SetRangeValuesCommand } from '../set-range-values.command';
 import { SplitTextToColumnsCommand } from '../split-text-to-columns.command';
 import { TextToNumberCommand } from '../text-to-number.command';
 import { ToggleCellCheckboxCommand } from '../toggle-checkbox.command';
+import { getPrimaryForRange } from '../utils/selection-utils';
 
-function createAccessor(records: Map<unknown, unknown>): IAccessor {
-    return {
-        get: (token: unknown) => records.get(token) as never,
-        has: (token: unknown) => records.has(token),
-    } as IAccessor;
+function createBed(cellData: IObjectMatrixPrimitiveType<ICellData> = {}, sheetData: Partial<IWorksheetData> = {}) {
+    const univer = new Univer({ locale: LocaleType.EN_US, locales: { enUS } });
+    univer.registerPlugin(UniverSheetsPlugin);
+    const injector = univer.__getInjector();
+    const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+        id: 'unit-1',
+        appVersion: '3.0.0-alpha',
+        name: 'Command consumers',
+        locale: LocaleType.EN_US,
+        dateSystem: DateSystem.Date1904,
+        sheetOrder: ['sheet-1'],
+        styles: { 'text-style': { n: { pattern: '@' } } },
+        sheets: { 'sheet-1': { id: 'sheet-1', name: 'Sheet1', rowCount: 10, columnCount: 10, cellData, ...sheetData } },
+    });
+    onTestFinished(() => univer.dispose());
+    injector.get(IUniverInstanceService).focusUnit('unit-1');
+    injector.get(ILogService).setLogLevel(LogLevel.SILENT);
+    const commands = injector.get(ICommandService);
+    const history = injector.get(IUndoRedoService);
+    const worksheet = workbook.getSheetBySheetId('sheet-1')!;
+    const selections = injector.get(SheetsSelectionsService);
+    function select(range: IRange) {
+        selections.setSelections([{ range, primary: getPrimaryForRange(range, worksheet), style: null }]);
+    }
+    return { univer, injector, workbook, worksheet, commands, history, selections, select };
 }
 
-function createStyles() {
+function cancelMutation(commands: ICommandService, id: string) {
+    const subscription = commands.beforeCommandExecuted((command) => {
+        if (command.id === id) {
+            throw new CanceledError();
+        }
+    });
+    onTestFinished(() => subscription.dispose());
+    return subscription;
+}
+
+function valueMutation(row: number, column: number, value: string | null): IMutationInfo {
     return {
-        getStyleByCell: (cell?: { s?: unknown }) => typeof cell?.s === 'object' ? cell.s : null,
-        get: (id: string) => id === 'text-style' ? { n: { pattern: '@' } } : null,
+        id: SetRangeValuesMutation.id,
+        params: { unitId: 'unit-1', subUnitId: 'sheet-1', cellValue: { [row]: { [column]: { v: value } } } },
     };
 }
 
-function createWorkbook(worksheet: unknown) {
-    return {
-        getUnitId: () => 'unit-1',
-        getSheetBySheetId: (subUnitId: string) => subUnitId === 'sheet-1' ? worksheet : null,
-        getActiveSheet: () => worksheet,
-        getStyles: createStyles,
-        getSnapshot: () => ({ locale: LocaleType.EN_US }),
-        getDateSystem: () => DateSystem.Date1904,
-    };
+function recordMutations(commands: ICommandService) {
+    const events: ICommandInfo[] = [];
+    const subscription = commands.onCommandExecuted((command) => {
+        if (command.type === CommandType.MUTATION) {
+            events.push(Tools.deepClone(command));
+        }
+    });
+    onTestFinished(() => subscription.dispose());
+    return events;
 }
 
-function createUniverInstanceService(worksheet: unknown) {
-    const workbook = createWorkbook(worksheet);
-    return {
-        getUnit: (unitId: string) => unitId === 'unit-1' ? workbook : null,
-        getCurrentUnitOfType: () => workbook,
-    };
-}
+const nameParams = { unitId: 'unit-1', id: 'name-1', name: 'RevenueTotal', formulaOrRefString: '=SUM(Sheet1!A:A)' };
 
 describe('InsertDefinedNameCommand', () => {
-    it('creates a defined name and records the remove mutation as undo', () => {
-        const calls: Array<{ id: string; params: unknown }> = [];
-        const undoRecords: unknown[] = [];
-        const commandService = {
-            syncExecuteCommand: (id: string, params: unknown) => {
-                calls.push({ id, params });
-                return true;
-            },
-        };
-        const undoRedoService = {
-            pushUndoRedo: (record: unknown) => undoRecords.push(record),
-        };
-        const accessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, commandService],
-            [IUndoRedoService, undoRedoService],
-        ]));
-        const params = {
-            unitId: 'unit-1',
-            id: 'name-1',
-            name: 'RevenueTotal',
-            formulaOrRefString: '=SUM(Sheet1!A:A)',
-        };
-
-        expect(InsertDefinedNameCommand.handler(accessor, params)).toBe(true);
-        expect(calls).toEqual([{ id: SetDefinedNameMutation.id, params }]);
-        expect(undoRecords).toEqual([{
-            unitID: 'unit-1',
-            undoMutations: [{ id: RemoveDefinedNameMutation.id, params }],
-            redoMutations: [{ id: SetDefinedNameMutation.id, params }],
-        }]);
+    it('creates a defined name and removes and recreates it through real undo/redo', async () => {
+        const { commands, history, injector } = createBed();
+        const names = injector.get(IDefinedNamesService);
+        expect(commands.syncExecuteCommand(InsertDefinedNameCommand.id, nameParams)).toBe(true);
+        expect(names.getValueById('unit-1', 'name-1')).toMatchObject(nameParamsWithoutUnit());
+        expect(history.getUndoRedoStatus('unit-1').undos).toBe(1);
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(names.getValueById('unit-1', 'name-1')).toBeUndefined();
+        expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+        expect(names.getValueById('unit-1', 'name-1')).toMatchObject(nameParamsWithoutUnit());
     });
 
-    it('does not create undo records without params or when the mutation fails', () => {
-        const undoRecords: unknown[] = [];
-        const accessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { syncExecuteCommand: () => false }],
-            [IUndoRedoService, { pushUndoRedo: (record: unknown) => undoRecords.push(record) }],
-        ]));
-
-        expect(InsertDefinedNameCommand.handler(accessor, undefined)).toBe(false);
-        expect(InsertDefinedNameCommand.handler(accessor, {
-            unitId: 'unit-1',
-            id: 'name-1',
-            name: 'RevenueTotal',
-            formulaOrRefString: '=SUM(Sheet1!A:A)',
-        })).toBe(false);
-        expect(undoRecords).toEqual([]);
+    it('does not create a name or undo record when params are omitted or its real mutation is cancelled', () => {
+        const { commands, history, injector } = createBed();
+        expect(injector.invoke(InsertDefinedNameCommand.handler)).toBe(false);
+        cancelMutation(commands, SetDefinedNameMutation.id);
+        expect(commands.syncExecuteCommand(InsertDefinedNameCommand.id, nameParams)).toBe(false);
+        expect(injector.get(IDefinedNamesService).getValueById('unit-1', 'name-1')).toBeUndefined();
+        expect(history.getUndoRedoStatus('unit-1').undos).toBe(0);
     });
 });
 
-describe('AppendRowCommand', () => {
-    it('inserts missing sheet rows and columns before appending cell values', () => {
-        const executed: Array<{ id: string; params: unknown }> = [];
-        const undoRecords: unknown[] = [];
-        const cellMatrix = new ObjectMatrix({ 5: { 0: { v: 'old' } } });
-        const worksheet = {
-            getSheetId: () => 'sheet-1',
-            getCellMatrix: () => cellMatrix,
-        };
-        const accessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { syncExecuteCommand: (id: string, params: unknown) => {
-                executed.push({ id, params });
-                return true;
-            } }],
-            [IUndoRedoService, { pushUndoRedo: (record: unknown) => undoRecords.push(record) }],
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-        ]));
-        const cellValue = { 5: { 0: { v: 'new' }, 3: { v: 'overflow column' } } };
+function nameParamsWithoutUnit() {
+    return { id: nameParams.id, name: nameParams.name, formulaOrRefString: nameParams.formulaOrRefString };
+}
 
-        expect(AppendRowCommand.handler(accessor, {
+describe('AppendRowCommand', () => {
+    it('inserts missing rows and columns, appends values, and restores dimensions through undo/redo', async () => {
+        const { commands, worksheet } = createBed({ 0: { 0: { v: 'old' } } }, { rowCount: 5, columnCount: 3 });
+        expect(commands.syncExecuteCommand(AppendRowCommand.id, {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
-            cellValue,
+            cellValue: { 5: { 0: { v: 'new' }, 3: { v: 'overflow column' } } },
             insertRowNums: 1,
             insertColumnNums: 2,
             maxRows: 5,
             maxColumns: 3,
         })).toBe(true);
-        expect(executed.map((call) => call.id)).toEqual([InsertColMutation.id, InsertRowMutation.id, SetRangeValuesMutation.id]);
-        expect(undoRecords[0]).toMatchObject({
-            unitID: 'unit-1',
-            undoMutations: [
-                { id: SetRangeValuesMutation.id },
-                { id: RemoveRowMutation.id },
-                { id: RemoveColMutation.id },
-            ],
-            redoMutations: [
-                { id: InsertColMutation.id },
-                { id: InsertRowMutation.id },
-                { id: SetRangeValuesMutation.id },
-            ],
-        });
+        expect([worksheet.getRowCount(), worksheet.getColumnCount()]).toEqual([6, 5]);
+        expect(worksheet.getCellRaw(5, 3)?.v).toBe('overflow column');
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect([worksheet.getRowCount(), worksheet.getColumnCount()]).toEqual([5, 3]);
+        expect(worksheet.getCellRaw(0, 0)?.v).toBe('old');
+        expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+        expect(worksheet.getCellRaw(5, 0)?.v).toBe('new');
     });
 
-    it('returns false when append mutations do not complete', () => {
-        const accessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { syncExecuteCommand: () => false }],
-            [IUndoRedoService, { pushUndoRedo: () => undefined }],
-            [IUniverInstanceService, createUniverInstanceService({ getSheetId: () => 'sheet-1', getCellMatrix: () => new ObjectMatrix() })],
-        ]));
-
-        expect(AppendRowCommand.handler(accessor, {
+    it('returns false without model changes or undo when its value mutation is cancelled', () => {
+        const { commands, workbook, history } = createBed();
+        const before = Tools.deepClone(workbook.getSnapshot());
+        cancelMutation(commands, SetRangeValuesMutation.id);
+        expect(commands.syncExecuteCommand(AppendRowCommand.id, {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             cellValue: { 0: { 0: { v: 'new' } } },
         })).toBe(false);
+        expect(workbook.getSnapshot()).toEqual(before);
+        expect(history.getUndoRedoStatus('unit-1').undos).toBe(0);
     });
 });
 
 describe('SetRangeValuesCommand', () => {
-    it('sets a two-dimensional value array over the current selection and follows the target range', () => {
-        const executed: Array<{ id: string; params: unknown }> = [];
-        const undoRecords: unknown[] = [];
-        const cellMatrix = new ObjectMatrix({
+    it('writes the real selected rectangle and includes command and auto-height interceptors in undo/redo', async () => {
+        const { commands, worksheet, injector, select, selections } = createBed({
             1: { 1: { v: 'old-1' }, 2: { v: 'old-2' } },
             2: { 1: { v: 'old-3' }, 2: { v: 'old-4' } },
         });
-        const worksheet = {
-            getSheetId: () => 'sheet-1',
-            getCellMatrix: () => cellMatrix,
-            getCellHeight: () => 24,
-            getMergedCell: () => null,
-        };
-        const accessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { syncExecuteCommand: (id: string, params: unknown) => {
-                executed.push({ id, params });
-                return true;
+        const range = { startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 };
+        select(range);
+        const interceptors = injector.get(SheetInterceptorService);
+        const commandHook = interceptors.interceptCommand({ getMutations: (info) => info.id === SetRangeValuesCommand.id
+            ? { redos: [valueMutation(7, 7, 'intercepted')], undos: [valueMutation(7, 7, null)] }
+            : { redos: [], undos: [] } });
+        const originalHeight = worksheet.getRowHeight(1);
+        const heightHook = interceptors.interceptAutoHeight({ getMutations: () => ({
+            redos: [{ id: SetWorksheetRowHeightMutation.id, params: {
+                unitId: 'unit-1',
+                subUnitId: 'sheet-1',
+                ranges: [range],
+                rowHeight: 42,
             } }],
-            [IUndoRedoService, { pushUndoRedo: (record: unknown) => undoRecords.push(record) }],
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-            [SheetsSelectionsService, { getCurrentSelections: () => [{ range: { startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 } }] }],
-            [SheetInterceptorService, {
-                onCommandExecute: () => ({ redos: [{ id: 'interceptor-redo', params: {} }], undos: [{ id: 'interceptor-undo', params: {} }] }),
-                generateMutationsOfAutoHeight: () => ({ redos: [{ id: 'auto-height-redo', params: {} }], undos: [{ id: 'auto-height-undo', params: {} }] }),
-            }],
-        ]));
-
-        expect(SetRangeValuesCommand.handler(accessor, {
+            undos: [{ id: SetWorksheetRowHeightMutation.id, params: {
+                unitId: 'unit-1',
+                subUnitId: 'sheet-1',
+                ranges: [range],
+                rowHeight: originalHeight,
+            } }],
+        }) });
+        onTestFinished(() => {
+            commandHook.dispose();
+            heightHook.dispose();
+        });
+        expect(commands.syncExecuteCommand(SetRangeValuesCommand.id, {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             value: [[{ v: 'A' }, { v: 'B' }], [{ v: 'C' }, { v: 'D' }]],
             redoUndoId: 'set-range-values-test',
         })).toBe(true);
-        expect(executed.map((call) => call.id)).toEqual([SetRangeValuesMutation.id, 'interceptor-redo', 'auto-height-redo']);
-        expect(executed[0].params).toMatchObject({
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            cellValue: { 1: { 1: { v: 'A' }, 2: { v: 'B' } }, 2: { 1: { v: 'C' }, 2: { v: 'D' } } },
-        });
-        expect(undoRecords[0]).toMatchObject({
-            unitID: 'unit-1',
-            id: 'set-range-values-test',
-            undoMutations: [{ id: SetRangeValuesMutation.id }, { id: 'interceptor-undo' }, { id: 'auto-height-undo' }, { id: SetSelectionsOperation.id }],
-            redoMutations: [{ id: SetRangeValuesMutation.id }, { id: 'interceptor-redo' }, { id: 'auto-height-redo' }, { id: SetSelectionsOperation.id }],
-        });
+        expect(worksheet.getCellRaw(1, 1)?.v).toBe('A');
+        expect(worksheet.getCellRaw(2, 2)?.v).toBe('D');
+        expect(worksheet.getCellRaw(7, 7)?.v).toBe('intercepted');
+        expect(worksheet.getRowHeight(1)).toBe(42);
+        expect(selections.getCurrentLastSelection()?.range).toMatchObject(range);
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(worksheet.getCellRaw(1, 1)?.v).toBe('old-1');
+        expect(worksheet.getCellRaw(7, 7)?.v).toBeUndefined();
+        expect(worksheet.getRowHeight(1)).toBe(originalHeight);
+        expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+        expect(worksheet.getCellRaw(2, 2)?.v).toBe('D');
+        expect(worksheet.getCellRaw(7, 7)?.v).toBe('intercepted');
     });
 
-    it('returns false when no range can be resolved or post mutations fail', () => {
-        const worksheet = {
-            getSheetId: () => 'sheet-1',
-            getCellMatrix: () => new ObjectMatrix(),
-            getCellHeight: () => undefined,
-            getMergedCell: () => null,
-        };
-        const noRangeAccessor = createAccessor(new Map<unknown, unknown>([
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-            [SheetsSelectionsService, { getCurrentSelections: () => [] }],
-        ]));
-        expect(SetRangeValuesCommand.handler(noRangeAccessor, { unitId: 'unit-1', subUnitId: 'sheet-1', value: { v: 'A' } })).toBe(false);
-
-        const failedAccessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { syncExecuteCommand: (id: string) => id !== 'interceptor-redo' }],
-            [IUndoRedoService, { pushUndoRedo: () => undefined }],
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-            [SheetsSelectionsService, { getCurrentSelections: () => [{ range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } }] }],
-            [SheetInterceptorService, {
-                onCommandExecute: () => ({ redos: [{ id: 'interceptor-redo', params: {} }], undos: [] }),
-                generateMutationsOfAutoHeight: () => ({ redos: [], undos: [] }),
-            }],
-        ]));
-        expect(SetRangeValuesCommand.handler(failedAccessor, { unitId: 'unit-1', subUnitId: 'sheet-1', value: { v: 'A' } })).toBe(false);
+    it('returns false without a selection or when a real follow-up mutation is cancelled', () => {
+        const { commands, history, injector, select, worksheet } = createBed();
+        expect(commands.syncExecuteCommand(SetRangeValuesCommand.id, {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            value: { v: 'A' },
+        })).toBe(false);
+        select({ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 });
+        const hook = injector.get(SheetInterceptorService).interceptCommand({ getMutations: (info) =>
+            info.id === SetRangeValuesCommand.id
+                ? { redos: [valueMutation(7, 7, 'follow-up')], undos: [valueMutation(7, 7, null)] }
+                : { redos: [], undos: [] } });
+        onTestFinished(() => hook.dispose());
+        const cancel = commands.beforeCommandExecuted((event) => {
+            if (event.id === SetRangeValuesMutation.id && worksheet.getCellRaw(0, 0)?.v === 'A') {
+                throw new CanceledError();
+            }
+        });
+        onTestFinished(() => cancel.dispose());
+        expect(commands.syncExecuteCommand(SetRangeValuesCommand.id, {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            value: { v: 'A' },
+        })).toBe(false);
+        expect(worksheet.getCellRaw(7, 7)).toBeUndefined();
+        expect(history.getUndoRedoStatus('unit-1').undos).toBe(0);
     });
 });
 
 describe('RefillCommand', () => {
-    it('delegates the selected auto-fill apply type to the auto-fill service', async () => {
-        const filledTypes: AUTO_FILL_APPLY_TYPE[] = [];
-        const autoFillService = {
-            fillData: (type: AUTO_FILL_APPLY_TYPE) => {
-                filledTypes.push(type);
-                return type === AUTO_FILL_APPLY_TYPE.COPY;
-            },
-        };
-        const accessor = createAccessor(new Map<unknown, unknown>([[IAutoFillService, autoFillService]]));
-
-        await expect(RefillCommand.handler(accessor, { type: AUTO_FILL_APPLY_TYPE.COPY })).resolves.toBe(true);
-        await expect(RefillCommand.handler(accessor, { type: AUTO_FILL_APPLY_TYPE.NO_FORMAT })).resolves.toBe(false);
-        expect(filledTypes).toEqual([AUTO_FILL_APPLY_TYPE.COPY, AUTO_FILL_APPLY_TYPE.NO_FORMAT]);
+    it('reapplies real cached fill data with selected apply types and refuses an uncached refill', async () => {
+        const { commands, worksheet, injector } = createBed({ 0: { 0: { v: 1 } }, 1: { 0: { v: 3 } } });
+        expect(await commands.executeCommand(AutoFillCommand.id, {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            sourceRange: { startRow: 0, endRow: 1, startColumn: 0, endColumn: 0 },
+            targetRange: { startRow: 0, endRow: 3, startColumn: 0, endColumn: 0 },
+            applyType: AUTO_FILL_APPLY_TYPE.SERIES,
+        })).toBe(true);
+        expect(worksheet.getCellRaw(2, 0)?.v).toBe(5);
+        expect(await commands.executeCommand(RefillCommand.id, { type: AUTO_FILL_APPLY_TYPE.COPY })).toBe(true);
+        expect(worksheet.getCellRaw(2, 0)?.v).toBe(1);
+        expect(injector.get(IAutoFillService).applyType).toBe(AUTO_FILL_APPLY_TYPE.COPY);
+        expect(await commands.executeCommand(RefillCommand.id, { type: AUTO_FILL_APPLY_TYPE.NO_FORMAT })).toBe(true);
+        expect(worksheet.getCellRaw(3, 0)?.v).toBe(7);
+        const empty = createBed();
+        expect(await empty.commands.executeCommand(RefillCommand.id, { type: AUTO_FILL_APPLY_TYPE.COPY })).toBe(false);
+        expect(empty.history.getUndoRedoStatus('unit-1').undos).toBe(0);
     });
 });
 
 describe('AutoFillCommand family', () => {
-    it('delegates explicit auto-fill ranges to the auto-fill service target', async () => {
-        const calls: unknown[] = [];
-        const worksheet = { getSheetId: () => 'sheet-1' };
-        const autoFillService = {
-            triggerAutoFill: (...args: unknown[]) => {
-                calls.push(args);
-                return Promise.resolve(true);
-            },
-        };
-        const accessor = createAccessor(new Map<unknown, unknown>([
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-            [IAutoFillService, autoFillService],
-        ]));
-        const sourceRange = { startRow: 0, endRow: 0, startColumn: 0, endColumn: 1 };
-        const targetRange = { startRow: 0, endRow: 4, startColumn: 0, endColumn: 1 };
-
-        await expect(AutoFillCommand.handler(accessor, { unitId: 'unit-1', subUnitId: 'sheet-1', sourceRange, targetRange, applyType: AUTO_FILL_APPLY_TYPE.SERIES })).resolves.toBe(true);
-        expect(calls).toEqual([['unit-1', 'sheet-1', sourceRange, targetRange, AUTO_FILL_APPLY_TYPE.SERIES]]);
-
-        const noTargetAccessor = createAccessor(new Map<unknown, unknown>([
-            [IUniverInstanceService, { getUnit: () => null }],
-            [IAutoFillService, autoFillService],
-        ]));
-        await expect(AutoFillCommand.handler(noTargetAccessor, { unitId: 'missing', subUnitId: 'sheet-1', sourceRange, targetRange })).resolves.toBe(false);
+    it('fills explicit ranges with real autofill logic and restores values through undo', async () => {
+        const { commands, worksheet, injector } = createBed({ 0: { 0: { v: 1 } }, 1: { 0: { v: 3 } } });
+        const service = injector.get(IAutoFillService);
+        const callThrough = vi.spyOn(service, 'triggerAutoFill');
+        onTestFinished(() => callThrough.mockRestore());
+        const sourceRange = { startRow: 0, endRow: 1, startColumn: 0, endColumn: 0 };
+        const targetRange = { startRow: 0, endRow: 4, startColumn: 0, endColumn: 0 };
+        expect(await commands.executeCommand(AutoFillCommand.id, {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            sourceRange,
+            targetRange,
+            applyType: AUTO_FILL_APPLY_TYPE.SERIES,
+        })).toBe(true);
+        expect(callThrough).toHaveBeenCalledWith('unit-1', 'sheet-1', sourceRange, targetRange, AUTO_FILL_APPLY_TYPE.SERIES);
+        expect(worksheet.getCellRaw(4, 0)?.v).toBe(9);
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(worksheet.getCellRaw(4, 0)?.v).toBeUndefined();
+        expect(await commands.executeCommand(AutoFillCommand.id, {
+            unitId: 'missing',
+            subUnitId: 'sheet-1',
+            sourceRange,
+            targetRange,
+        })).toBe(false);
     });
 
-    it('copy-fills down and right from the current selection and hides the apply menu after success', async () => {
-        const commandCalls: unknown[] = [];
-        const shownStates: boolean[] = [];
-        const worksheet = { getSheetId: () => 'sheet-1' };
-        const commandService = {
-            executeCommand: async (id: string, params: unknown) => {
-                commandCalls.push({ id, params });
-                return true;
-            },
-        };
-        const autoFillService = {
-            setShowMenu: (show: boolean) => shownStates.push(show),
-        };
-        const selections = [
-            { range: { startRow: 3, endRow: 3, startColumn: 0, endColumn: 2 } },
-            { range: { startRow: 1, endRow: 3, startColumn: 4, endColumn: 4 } },
-        ];
-        let selectionIndex = 0;
-        const accessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, commandService],
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-            [IAutoFillService, autoFillService],
-            [SheetsSelectionsService, { getCurrentLastSelection: () => selections[selectionIndex++] }],
-        ]));
-
-        await expect(SheetCopyDownCommand.handler(accessor)).resolves.toBe(true);
-        await expect(SheetCopyRightCommand.handler(accessor)).resolves.toBe(true);
-        expect(commandCalls).toEqual([
-            {
-                id: AutoFillCommand.id,
-                params: {
-                    sourceRange: { startRow: 2, endRow: 2, startColumn: 0, endColumn: 2 },
-                    targetRange: { startRow: 2, endRow: 3, startColumn: 0, endColumn: 2 },
-                    unitId: 'unit-1',
-                    subUnitId: 'sheet-1',
-                    applyType: AUTO_FILL_APPLY_TYPE.COPY,
-                },
-            },
-            {
-                id: AutoFillCommand.id,
-                params: {
-                    sourceRange: { startRow: 1, endRow: 3, startColumn: 3, endColumn: 3 },
-                    targetRange: { startRow: 1, endRow: 3, startColumn: 3, endColumn: 4 },
-                    unitId: 'unit-1',
-                    subUnitId: 'sheet-1',
-                    applyType: AUTO_FILL_APPLY_TYPE.COPY,
-                },
-            },
-        ]);
-        expect(shownStates).toEqual([false, false]);
-    });
-
-    it('does not copy-fill when the selection cannot produce a source range or the command fails', async () => {
-        const worksheet = { getSheetId: () => 'sheet-1' };
-        const accessorAtTopLeft = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { executeCommand: async () => true }],
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-            [IAutoFillService, { setShowMenu: () => undefined }],
-            [SheetsSelectionsService, { getCurrentLastSelection: () => ({ range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } }) }],
-        ]));
-        await expect(SheetCopyDownCommand.handler(accessorAtTopLeft)).resolves.toBe(false);
-        await expect(SheetCopyRightCommand.handler(accessorAtTopLeft)).resolves.toBe(false);
-
-        const shownStates: boolean[] = [];
-        const failedAccessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { executeCommand: async () => false }],
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-            [IAutoFillService, { setShowMenu: (show: boolean) => shownStates.push(show) }],
-            [SheetsSelectionsService, { getCurrentLastSelection: () => ({ range: { startRow: 2, endRow: 4, startColumn: 0, endColumn: 1 } }) }],
-        ]));
-        await expect(SheetCopyDownCommand.handler(failedAccessor)).resolves.toBe(false);
-        expect(shownStates).toEqual([]);
-    });
-
-    it('clears dragged content, restores selection on undo, and runs after-interceptor mutations', async () => {
-        const executed: unknown[] = [];
-        const undoRecords: unknown[] = [];
-        const oldSelection = { range: { startRow: 9, endRow: 9, startColumn: 9, endColumn: 9 } };
-        const cellMatrix = new ObjectMatrix({ 2: { 2: { v: 'old' } } });
-        const worksheet = {
-            getSheetId: () => 'sheet-1',
-            getCellMatrix: () => cellMatrix,
-        };
-        const accessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { syncExecuteCommand: (id: string, params: unknown) => {
-                executed.push({ id, params });
-                return true;
-            } }],
-            [IUndoRedoService, { pushUndoRedo: (record: unknown) => undoRecords.push(record) }],
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-            [SheetsSelectionsService, { getCurrentLastSelection: () => oldSelection }],
-            [SheetInterceptorService, { afterCommandExecute: () => ({ redos: [{ id: 'after-redo', params: {} }], undos: [{ id: 'after-undo', params: {} }] }) }],
-        ]));
-
-        await expect(AutoClearContentCommand.handler(accessor, {
-            clearRange: { startRow: 2, endRow: 2, startColumn: 2, endColumn: 3 },
-            selectionRange: { startRow: 2, endRow: 2, startColumn: 2, endColumn: 3 },
-        })).resolves.toBe(true);
-        expect((executed[0] as { id: string }).id).toBe(SetRangeValuesMutation.id);
-        expect((executed[1] as { id: string }).id).toBe(SetSelectionsOperation.id);
-        expect((executed[2] as { id: string }).id).toBe('after-redo');
-        expect(undoRecords[0]).toMatchObject({
-            unitID: 'unit-1',
-            undoMutations: [
-                { id: SetRangeValuesMutation.id },
-                { id: SetSelectionsOperation.id, params: { selections: [oldSelection], unitId: 'unit-1', subUnitId: 'sheet-1' } },
-                { id: 'after-undo' },
-            ],
+    it('copy-fills down and right through real commands and hides the apply menu after success', async () => {
+        const { commands, worksheet, injector, select } = createBed({ 2: { 0: { v: 'down' } }, 1: { 3: { v: 'right' } } });
+        let menuVisible = true;
+        const menu = injector.get(IAutoFillService).showMenu$.subscribe((value) => {
+            menuVisible = value;
         });
+        onTestFinished(() => menu.unsubscribe());
+        select({ startRow: 3, endRow: 3, startColumn: 0, endColumn: 0 });
+        expect(await commands.executeCommand(SheetCopyDownCommand.id)).toBe(true);
+        expect(worksheet.getCellRaw(3, 0)?.v).toBe('down');
+        expect(menuVisible).toBe(false);
+        select({ startRow: 1, endRow: 1, startColumn: 4, endColumn: 4 });
+        expect(await commands.executeCommand(SheetCopyRightCommand.id)).toBe(true);
+        expect(worksheet.getCellRaw(1, 4)?.v).toBe('right');
+        expect(menuVisible).toBe(false);
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(worksheet.getCellRaw(1, 4)?.v).toBeUndefined();
+    });
+
+    it('does not copy-fill a top-left no-op or when actual autofill execution is cancelled', async () => {
+        const { commands, select, worksheet, history, injector } = createBed({ 0: { 0: { v: 'source' } } });
+        select({ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 });
+        expect(await commands.executeCommand(SheetCopyDownCommand.id)).toBe(false);
+        expect(await commands.executeCommand(SheetCopyRightCommand.id)).toBe(false);
+        select({ startRow: 0, endRow: 2, startColumn: 0, endColumn: 0 });
+        let menuVisible = true;
+        const menu = injector.get(IAutoFillService).showMenu$.subscribe((value) => {
+            menuVisible = value;
+        });
+        onTestFinished(() => menu.unsubscribe());
+        injector.get(IAutoFillService).setShowMenu(true);
+        cancelMutation(commands, AutoFillCommand.id);
+        expect(await commands.executeCommand(SheetCopyDownCommand.id)).toBe(false);
+        expect(menuVisible).toBe(true);
+        expect(worksheet.getCellRaw(2, 0)).toBeUndefined();
+        expect(history.getUndoRedoStatus('unit-1').undos).toBe(0);
+    });
+
+    it('clears dragged content and includes real selection and after-interceptor changes in undo', async () => {
+        const { commands, worksheet, injector, select, selections } = createBed({ 2: { 2: { v: 'old' } } });
+        const oldRange = { startRow: 9, endRow: 9, startColumn: 9, endColumn: 9 };
+        select(oldRange);
+        const hook = injector.get(SheetInterceptorService).interceptAfterCommand({ getMutations: (info) =>
+            info.id === SetRangeValuesMutation.id
+                ? { redos: [valueMutation(7, 7, 'after clear')], undos: [valueMutation(7, 7, null)] }
+                : { redos: [], undos: [] } });
+        onTestFinished(() => hook.dispose());
+        const range = { startRow: 2, endRow: 2, startColumn: 2, endColumn: 3 };
+        expect(await commands.executeCommand(AutoClearContentCommand.id, { clearRange: range, selectionRange: range })).toBe(true);
+        expect(worksheet.getCellRaw(2, 2)?.v).toBeUndefined();
+        expect(worksheet.getCellRaw(7, 7)?.v).toBe('after clear');
+        expect(selections.getCurrentLastSelection()?.range).toMatchObject(range);
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(worksheet.getCellRaw(2, 2)?.v).toBe('old');
+        expect(worksheet.getCellRaw(7, 7)?.v).toBeUndefined();
+        expect(selections.getCurrentLastSelection()?.range).toMatchObject(oldRange);
     });
 });
 
 describe('TextToNumberCommand', () => {
-    it('converts numeric text cells and removes text number format where needed', () => {
-        const executed: Array<{ id: string; params: unknown }> = [];
-        const undoRecords: unknown[] = [];
-        const cellMatrix = new ObjectMatrix({
-            0: {
-                0: { v: '42', t: CellValueType.STRING },
-                1: { v: '003', t: CellValueType.NUMBER, s: 'text-style' },
-                2: { v: 'abc', t: CellValueType.STRING },
-                3: { v: '20%', t: CellValueType.FORCE_STRING },
-                4: { v: '01/02/1904', t: CellValueType.STRING },
-            },
-        });
-        const worksheet = {
-            getSheetId: () => 'sheet-1',
-            getCellRaw: (row: number, col: number) => cellMatrix.getValue(row, col),
-            getCellMatrix: () => cellMatrix,
-            getStyleDataByHash: (id: string) => id === 'text-style' ? { n: { pattern: '@' } } : null,
-        };
-        const accessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { syncExecuteCommand: (id: string, params: unknown) => {
-                executed.push({ id, params });
-                return true;
-            } }],
-            [IUndoRedoService, { pushUndoRedo: (record: unknown) => undoRecords.push(record) }],
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-            [INumfmtService, { getValue: (_unitId: string, _subUnitId: string, row: number, col: number) => row === 0 && col === 1 ? { pattern: '@' } : null }],
-        ]));
-
-        expect(TextToNumberCommand.handler(accessor, {
+    it('converts numeric text and updates real number formats, preserving original values on undo', async () => {
+        const { commands, worksheet, injector } = createBed({ 0: {
+            0: { v: '42', t: CellValueType.STRING },
+            1: { v: '003', t: CellValueType.STRING, s: 'text-style' },
+            2: { v: 'abc', t: CellValueType.STRING },
+            3: { v: '20%', t: CellValueType.FORCE_STRING },
+            4: { v: '01/02/1904', t: CellValueType.STRING },
+        } });
+        const formats = injector.get(INumfmtService);
+        expect(commands.syncExecuteCommand(TextToNumberCommand.id, {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 4 }],
         })).toBe(true);
-        expect(executed.map((call) => call.id)).toEqual([SetRangeValuesMutation.id, SetNumfmtMutation.id, RemoveNumfmtMutation.id]);
-        expect(executed[0].params).toMatchObject({
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            cellValue: {
-                0: {
-                    0: { v: 42, t: CellValueType.NUMBER },
-                    1: { v: 3, t: CellValueType.NUMBER },
-                    3: { v: 0.2, t: CellValueType.NUMBER },
-                    4: { v: 1, t: CellValueType.NUMBER },
-                },
-            },
-        });
-        expect(executed[1].params).toMatchObject({
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            refMap: {
-                0: { pattern: '0%' },
-            },
-            values: {
-                0: { ranges: [{ startRow: 0, endRow: 0, startColumn: 3, endColumn: 3 }] },
-            },
-        });
-        expect(executed[2].params).toEqual({
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            ranges: [{ startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 }],
-        });
-        expect(undoRecords[0]).toMatchObject({
-            unitID: 'unit-1',
-            undoMutations: [
-                { id: SetRangeValuesMutation.id },
-                { id: RemoveNumfmtMutation.id },
-                { id: SetNumfmtMutation.id },
-            ],
-        });
+        expect([0, 1, 2, 3, 4].map((column) => worksheet.getCellRaw(0, column)?.v)).toEqual([42, 3, 'abc', 0.2, 1]);
+        expect(formats.getValue('unit-1', 'sheet-1', 0, 3)?.pattern).toBe('0%');
+        expect(formats.getValue('unit-1', 'sheet-1', 0, 1)?.pattern).toBeUndefined();
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(worksheet.getCellRaw(0, 1)?.v).toBe('003');
+        expect(formats.getValue('unit-1', 'sheet-1', 0, 1)?.pattern).toBe('@');
+        expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+        expect(worksheet.getCellRaw(0, 3)?.v).toBe(0.2);
     });
 
-    it('returns false without a target, without ranges, or when mutation execution fails', () => {
-        const worksheet = {
-            getSheetId: () => 'sheet-1',
-            getCellRaw: () => ({ v: '42', t: CellValueType.STRING }),
-            getCellMatrix: () => new ObjectMatrix(),
-            getStyleDataByHash: () => null,
-        };
-        const noTargetAccessor = createAccessor(new Map<unknown, unknown>([
-            [IUniverInstanceService, { getUnit: () => null }],
-        ]));
-        expect(TextToNumberCommand.handler(noTargetAccessor, { unitId: 'missing', subUnitId: 'sheet-1', ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }] })).toBe(false);
-
-        const noRangesAccessor = createAccessor(new Map<unknown, unknown>([
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-            [SheetsSelectionsService, { getCurrentSelections: () => [] }],
-        ]));
-        expect(TextToNumberCommand.handler(noRangesAccessor, { unitId: 'unit-1', subUnitId: 'sheet-1' })).toBe(false);
-
-        const failedAccessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { syncExecuteCommand: () => false }],
-            [IUndoRedoService, { pushUndoRedo: () => undefined }],
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-        ]));
-        expect(TextToNumberCommand.handler(failedAccessor, { unitId: 'unit-1', subUnitId: 'sheet-1', ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }] })).toBe(false);
+    it('returns false without a target or ranges and when its real value mutation is cancelled', () => {
+        const { commands, worksheet, history } = createBed({ 0: { 0: { v: '42', t: CellValueType.STRING } } });
+        const ranges = [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }];
+        expect(commands.syncExecuteCommand(TextToNumberCommand.id, { unitId: 'missing', subUnitId: 'sheet-1', ranges })).toBe(false);
+        expect(commands.syncExecuteCommand(TextToNumberCommand.id, { unitId: 'unit-1', subUnitId: 'sheet-1' })).toBe(false);
+        cancelMutation(commands, SetRangeValuesMutation.id);
+        expect(commands.syncExecuteCommand(TextToNumberCommand.id, { unitId: 'unit-1', subUnitId: 'sheet-1', ranges })).toBe(false);
+        expect(worksheet.getCellRaw(0, 0)?.v).toBe('42');
+        expect(history.getUndoRedoStatus('unit-1').undos).toBe(0);
     });
 
-    it('uses current selections when ranges are omitted', () => {
-        const executed: Array<{ id: string; params: unknown }> = [];
-        const undoRecords: unknown[] = [];
-        const cellMatrix = new ObjectMatrix({ 2: { 2: { v: '56', t: CellValueType.STRING } } });
-        const worksheet = {
-            getSheetId: () => 'sheet-1',
-            getCellRaw: (row: number, col: number) => cellMatrix.getValue(row, col),
-            getCellMatrix: () => cellMatrix,
-            getStyleDataByHash: () => null,
-        };
-        const accessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { syncExecuteCommand: (id: string, params: unknown) => {
-                executed.push({ id, params });
-                return true;
-            } }],
-            [IUndoRedoService, { pushUndoRedo: (record: unknown) => undoRecords.push(record) }],
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-            [SheetsSelectionsService, { getCurrentSelections: () => [{ range: { startRow: 2, endRow: 2, startColumn: 2, endColumn: 2 } }] }],
-        ]));
-
-        expect(TextToNumberCommand.handler(accessor, { unitId: 'unit-1', subUnitId: 'sheet-1' })).toBe(true);
-        expect(executed[0]).toMatchObject({
-            id: SetRangeValuesMutation.id,
-            params: {
-                unitId: 'unit-1',
-                subUnitId: 'sheet-1',
-                cellValue: { 2: { 2: { v: 56, t: CellValueType.NUMBER } } },
-            },
-        });
-        expect(undoRecords).toHaveLength(1);
+    it('uses the current real selection when ranges are omitted', () => {
+        const { commands, worksheet, select, history } = createBed({ 2: { 2: { v: '56', t: CellValueType.STRING } } });
+        select({ startRow: 2, endRow: 2, startColumn: 2, endColumn: 2 });
+        expect(commands.syncExecuteCommand(TextToNumberCommand.id, { unitId: 'unit-1', subUnitId: 'sheet-1' })).toBe(true);
+        expect(worksheet.getCellRaw(2, 2)?.v).toBe(56);
+        expect(history.getUndoRedoStatus('unit-1').undos).toBe(1);
     });
 });
 
+function checklistCell(): ICellData {
+    return { p: { id: 'doc-1', documentStyle: {}, body: {
+        dataStream: 'Alpha\rBeta\r\n',
+        paragraphs: [
+            { startIndex: 5, paragraphId: 'para-1' },
+            { startIndex: 10, paragraphId: 'para-2', bullet: {
+                listId: 'check-1',
+                listType: PresetListType.CHECK_LIST,
+                nestingLevel: 0,
+            } },
+        ],
+    } } };
+}
+
 describe('ToggleCellCheckboxCommand', () => {
-    function createChecklistCell() {
-        return {
-            p: {
-                id: 'doc-1',
-                body: {
-                    dataStream: 'Alpha\rBeta\r\n',
-                    paragraphs: [
-                        { startIndex: 5, paragraphId: 'para-1' },
-                        {
-                            startIndex: 10,
-                            paragraphId: 'para-2',
-                            bullet: {
-                                listId: 'check-1',
-                                listType: PresetListType.CHECK_LIST,
-                                nestingLevel: 0,
-                            },
-                        },
-                    ],
-                },
-            },
-        };
-    }
+    it('toggles the real rich-text checklist paragraph and preserves the prior cell through undo/redo', async () => {
+        const { commands, worksheet } = createBed({ 4: { 3: checklistCell() } });
+        const params = { unitId: 'unit-1', subUnitId: 'sheet-1', row: 4, col: 3, paragraphIndex: 10 };
+        expect(commands.syncExecuteCommand(ToggleCellCheckboxCommand.id, params)).toBe(true);
+        expect(worksheet.getCellRaw(4, 3)?.p?.body?.paragraphs?.[1].bullet?.listType).toBe(PresetListType.CHECK_LIST_CHECKED);
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(worksheet.getCellRaw(4, 3)?.p?.body?.paragraphs?.[1].bullet?.listType).toBe(PresetListType.CHECK_LIST);
+        expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+        expect(worksheet.getCellRaw(4, 3)?.p?.body?.paragraphs?.[1].bullet?.listType).toBe(PresetListType.CHECK_LIST_CHECKED);
+    });
 
-    it('toggles a rich-text checklist paragraph and records undo from the old cell value', () => {
-        const executed: Array<{ id: string; params: unknown }> = [];
-        const undoRecords: unknown[] = [];
-        const cell = createChecklistCell();
-        const cellMatrix = new ObjectMatrix({ 4: { 3: cell } });
-        const worksheet = {
-            getSheetId: () => 'sheet-1',
-            getCell: (row: number, col: number) => cellMatrix.getValue(row, col),
-            getCellMatrix: () => cellMatrix,
-        };
-        const accessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { syncExecuteCommand: (id: string, params: unknown) => {
-                executed.push({ id, params });
-                return true;
-            } }],
-            [IUndoRedoService, { pushUndoRedo: (record: unknown) => undoRecords.push(record) }],
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-        ]));
-
-        expect(ToggleCellCheckboxCommand.handler(accessor, {
+    it('returns false for missing params, targets, rich text or checklist paragraph without history', () => {
+        const { commands, history, worksheet } = createBed({ 0: { 0: { v: 'plain' } }, 4: { 3: checklistCell() } });
+        const before = Tools.deepClone(worksheet.getSnapshot());
+        expect(commands.syncExecuteCommand(ToggleCellCheckboxCommand.id)).toBe(false);
+        expect(commands.syncExecuteCommand(ToggleCellCheckboxCommand.id, {
+            unitId: 'missing',
+            subUnitId: 'sheet-1',
+            row: 0,
+            col: 0,
+            paragraphIndex: 0,
+        })).toBe(false);
+        expect(commands.syncExecuteCommand(ToggleCellCheckboxCommand.id, {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            row: 0,
+            col: 0,
+            paragraphIndex: 0,
+        })).toBe(false);
+        expect(commands.syncExecuteCommand(ToggleCellCheckboxCommand.id, {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             row: 4,
             col: 3,
-            paragraphIndex: 10,
-        })).toBe(true);
-
-        const redoCell = (executed[0].params as { cellValue: Record<number, Record<number, { t: CellValueType; p: { body: { paragraphs: Array<{ bullet?: { listType: string } }> } } }>> }).cellValue[4][3];
-        expect(executed[0].id).toBe(SetRangeValuesMutation.id);
-        expect(redoCell.t).toBe(CellValueType.STRING);
-        expect(redoCell.p.body.paragraphs[1].bullet?.listType).toBe(PresetListType.CHECK_LIST_CHECKED);
-        expect(undoRecords[0]).toMatchObject({
-            unitID: 'unit-1',
-            redoMutations: [{ id: SetRangeValuesMutation.id }],
-            undoMutations: [{ id: SetRangeValuesMutation.id }],
-        });
-    });
-
-    it('returns false when checkbox toggle has no target rich text or paragraph', () => {
-        const worksheetWithoutRichText = {
-            getSheetId: () => 'sheet-1',
-            getCell: () => ({ v: 'plain' }),
-            getCellMatrix: () => new ObjectMatrix(),
-        };
-        const accessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { syncExecuteCommand: () => true }],
-            [IUndoRedoService, { pushUndoRedo: () => undefined }],
-            [IUniverInstanceService, createUniverInstanceService(worksheetWithoutRichText)],
-        ]));
-
-        expect(ToggleCellCheckboxCommand.handler(accessor, undefined as never)).toBe(false);
-        expect(ToggleCellCheckboxCommand.handler(accessor, { unitId: 'missing', subUnitId: 'sheet-1', row: 0, col: 0, paragraphIndex: 0 })).toBe(false);
-        expect(ToggleCellCheckboxCommand.handler(accessor, { unitId: 'unit-1', subUnitId: 'sheet-1', row: 0, col: 0, paragraphIndex: 0 })).toBe(false);
-
-        const cell = createChecklistCell();
-        const cellMatrix = new ObjectMatrix({ 4: { 3: cell } });
-        const invalidParagraphAccessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { syncExecuteCommand: () => true }],
-            [IUndoRedoService, { pushUndoRedo: () => undefined }],
-            [IUniverInstanceService, createUniverInstanceService({
-                getSheetId: () => 'sheet-1',
-                getCell: (row: number, col: number) => cellMatrix.getValue(row, col),
-                getCellMatrix: () => cellMatrix,
-            })],
-        ]));
-        expect(ToggleCellCheckboxCommand.handler(invalidParagraphAccessor, { unitId: 'unit-1', subUnitId: 'sheet-1', row: 4, col: 3, paragraphIndex: 999 })).toBe(false);
+            paragraphIndex: 999,
+        })).toBe(false);
+        expect(worksheet.getSnapshot()).toEqual(before);
+        expect(history.getUndoRedoStatus('unit-1').undos).toBe(0);
     });
 });
 
 describe('SplitTextToColumnsCommand', () => {
-    it('splits single-column text into adjacent columns and inserts columns when output exceeds sheet width', () => {
-        const executed: Array<{ id: string; params: unknown }> = [];
-        const undoRecords: unknown[] = [];
-        const cellMatrix = new ObjectMatrix({
+    it('splits text into real adjacent columns, extends dimensions and undoes both effects', async () => {
+        const { commands, worksheet } = createBed({
             0: { 1: { v: 'North,West,East', t: CellValueType.STRING } },
             1: { 1: { v: '1,2,3', t: CellValueType.STRING } },
-        });
-        const worksheet = {
-            getSheetId: () => 'sheet-1',
-            getColumnCount: () => 3,
-            getRowCount: () => 10,
-            getMaxColumns: () => 3,
-            getMaxRows: () => 10,
-            getCell: (row: number, col: number) => cellMatrix.getValue(row, col),
-            getCellMatrix: () => cellMatrix,
-        };
-        const accessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { syncExecuteCommand: (id: string, params: unknown) => {
-                executed.push({ id, params });
-                return true;
-            } }],
-            [IUndoRedoService, { pushUndoRedo: (record: unknown) => undoRecords.push(record) }],
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-        ]));
-
-        expect(SplitTextToColumnsCommand.handler(accessor, {
+        }, { columnCount: 3 });
+        expect(commands.syncExecuteCommand(SplitTextToColumnsCommand.id, {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             range: { startRow: 0, endRow: 1, startColumn: 1, endColumn: 1 },
             delimiter: SplitDelimiterEnum.Comma,
         })).toBe(true);
-
-        expect(executed.map((call) => call.id)).toEqual(['sheet.mutation.insert-col', SetRangeValuesMutation.id]);
-        expect(executed[1].params).toMatchObject({
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            cellValue: {
-                0: {
-                    1: { v: 'North' },
-                    2: { v: 'West' },
-                    3: { v: 'East' },
-                },
-                1: {
-                    1: { v: '1' },
-                    2: { v: '2' },
-                    3: { v: '3' },
-                },
-            },
-        });
-        expect(undoRecords[0]).toMatchObject({
-            unitID: 'unit-1',
-            undoMutations: [{ id: SetRangeValuesMutation.id }, { id: 'sheet.mutation.remove-col' }],
-        });
+        expect([1, 2, 3].map((column) => worksheet.getCellRaw(0, column)?.v)).toEqual(['North', 'West', 'East']);
+        expect([1, 2, 3].map((column) => worksheet.getCellRaw(1, column)?.v)).toEqual([1, 2, 3]);
+        expect(worksheet.getColumnCount()).toBeGreaterThan(3);
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(worksheet.getColumnCount()).toBe(3);
+        expect(worksheet.getCellRaw(0, 1)?.v).toBe('North,West,East');
+        expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+        expect(worksheet.getCellRaw(1, 3)?.v).toBe(3);
     });
 
-    it('returns false for multi-column source ranges, missing targets, or failed mutation sequence', () => {
-        const worksheet = {
-            getSheetId: () => 'sheet-1',
-            getColumnCount: () => 5,
-            getRowCount: () => 10,
-            getMaxColumns: () => 5,
-            getMaxRows: () => 10,
-            getCell: () => ({ v: 'A,B', t: CellValueType.STRING }),
-            getCellMatrix: () => new ObjectMatrix(),
-        };
-        const accessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { syncExecuteCommand: () => true }],
-            [IUndoRedoService, { pushUndoRedo: () => undefined }],
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-        ]));
-        expect(() => SplitTextToColumnsCommand.handler(accessor, { unitId: 'unit-1', subUnitId: 'sheet-1', range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 1 } })).toThrowError('The range must be in the same column.');
-
-        const noTargetAccessor = createAccessor(new Map<unknown, unknown>([[IUniverInstanceService, { getUnit: () => null }]]));
-        expect(SplitTextToColumnsCommand.handler(noTargetAccessor, { unitId: 'missing', subUnitId: 'sheet-1', range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } })).toBe(false);
-
-        const failedAccessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { syncExecuteCommand: () => false }],
-            [IUndoRedoService, { pushUndoRedo: () => undefined }],
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-        ]));
-        expect(SplitTextToColumnsCommand.handler(failedAccessor, { unitId: 'unit-1', subUnitId: 'sheet-1', range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } })).toBe(false);
+    it('rejects multiple source columns, missing targets and cancelled real mutation sequences', () => {
+        const { commands, worksheet, history } = createBed({ 0: { 0: { v: 'A,B', t: CellValueType.STRING } } });
+        expect(() => commands.syncExecuteCommand(SplitTextToColumnsCommand.id, {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 1 },
+        })).toThrowError('The range must be in the same column.');
+        expect(commands.syncExecuteCommand(SplitTextToColumnsCommand.id, {
+            unitId: 'missing',
+            subUnitId: 'sheet-1',
+            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+        })).toBe(false);
+        cancelMutation(commands, SetRangeValuesMutation.id);
+        expect(commands.syncExecuteCommand(SplitTextToColumnsCommand.id, {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+            delimiter: SplitDelimiterEnum.Comma,
+        })).toBe(false);
+        expect(worksheet.getCellRaw(0, 0)?.v).toBe('A,B');
+        expect(history.getUndoRedoStatus('unit-1').undos).toBe(0);
     });
 });
 
 describe('ReorderRangeCommand', () => {
-    it('executes reorder with interceptor and auto-height mutations and records undo/redo', () => {
-        const executed: Array<{ id: string; params: unknown }> = [];
-        const undoRecords: unknown[] = [];
-        const commandService = {
-            syncExecuteCommand: (id: string, params: unknown) => {
-                executed.push({ id, params });
-                return true;
-            },
-        };
-        const sheetInterceptorService = {
-            onCommandExecute: () => ({
-                preRedos: [{ id: 'pre-redo', params: { stage: 'before' } }],
-                redos: [{ id: 'redo-after-reorder', params: { stage: 'during' } }],
-                preUndos: [{ id: 'pre-undo', params: { stage: 'before' } }],
-                undos: [{ id: 'undo-after-reorder', params: { stage: 'during' } }],
-            }),
-            afterCommandExecute: () => ({
-                redos: [{ id: 'post-redo', params: { stage: 'after' } }],
-                undos: [{ id: 'post-undo', params: { stage: 'after' } }],
-            }),
-            generateMutationsOfAutoHeight: () => ({
-                redos: [{ id: 'auto-height-redo', params: { stage: 'height' } }],
-                undos: [{ id: 'auto-height-undo', params: { stage: 'height' } }],
-            }),
-        };
-        const accessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, commandService],
-            [IUndoRedoService, { pushUndoRedo: (record: unknown) => undoRecords.push(record) }],
-            [SheetInterceptorService, sheetInterceptorService],
-            [SheetSkeletonService, { getSkeleton: () => null }],
-        ]));
-        const range = { startRow: 0, endRow: 2, startColumn: 0, endColumn: 1 };
-
-        expect(ReorderRangeCommand.handler(accessor, {
+    it('reorders real cells with pre, command, post and auto-height mutations and symmetric undo/redo', async () => {
+        const { commands, worksheet, injector } = createBed({ 0: { 0: { v: 'first' } }, 1: { 0: { v: 'second' } }, 2: { 0: { v: 'third' } } });
+        const interceptors = injector.get(SheetInterceptorService);
+        const during = interceptors.interceptCommand({ getMutations: (info) => info.id === ReorderRangeCommand.id
+            ? { preRedos: [valueMutation(7, 0, 'before')], preUndos: [valueMutation(7, 0, null)], redos: [valueMutation(7, 1, 'during')], undos: [valueMutation(7, 1, null)] }
+            : { redos: [], undos: [] } });
+        const after = interceptors.interceptAfterCommand({ getMutations: (info) => info.id === ReorderRangeCommand.id
+            ? { redos: [valueMutation(7, 2, 'after')], undos: [valueMutation(7, 2, null)] }
+            : { redos: [], undos: [] } });
+        const height = interceptors.interceptAutoHeight({ getMutations: () => ({
+            redos: [valueMutation(7, 3, 'auto-height')],
+            undos: [valueMutation(7, 3, null)],
+        }) });
+        onTestFinished(() => {
+            during.dispose();
+            after.dispose();
+            height.dispose();
+        });
+        const events = recordMutations(commands);
+        expect(commands.syncExecuteCommand(ReorderRangeCommand.id, {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
-            range,
+            range: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 0 },
             order: { 0: 2, 1: 0, 2: 1 },
         })).toBe(true);
-
-        expect(executed).toEqual([
-            { id: 'pre-redo', params: { stage: 'before' } },
-            { id: ReorderRangeMutation.id, params: { unitId: 'unit-1', subUnitId: 'sheet-1', range, order: { 0: 2, 1: 0, 2: 1 } } },
-            { id: 'redo-after-reorder', params: { stage: 'during' } },
-            { id: 'post-redo', params: { stage: 'after' } },
-            { id: 'auto-height-redo', params: { stage: 'height' } },
+        expect([0, 1, 2].map((row) => worksheet.getCellRaw(row, 0)?.v)).toEqual(['third', 'first', 'second']);
+        expect([0, 1, 2, 3].map((column) => worksheet.getCellRaw(7, column)?.v)).toEqual(['before', 'during', 'after', 'auto-height']);
+        expect(events.map((event) => event.id)).toEqual([
+            SetRangeValuesMutation.id,
+            ReorderRangeMutation.id,
+            SetRangeValuesMutation.id,
+            SetRangeValuesMutation.id,
+            SetRangeValuesMutation.id,
         ]);
-        expect(undoRecords[0]).toMatchObject({
-            unitID: 'unit-1',
-            undoMutations: [
-                { id: 'pre-undo' },
-                { id: ReorderRangeMutation.id, params: { unitId: 'unit-1', subUnitId: 'sheet-1', range, order: { 0: 1, 1: 2, 2: 0 } } },
-                { id: 'undo-after-reorder' },
-                { id: 'post-undo' },
-                { id: 'auto-height-undo' },
-            ],
-            redoMutations: [
-                { id: 'pre-redo' },
-                { id: ReorderRangeMutation.id },
-                { id: 'redo-after-reorder' },
-                { id: 'post-redo' },
-                { id: 'auto-height-redo' },
-            ],
-        });
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect([0, 1, 2].map((row) => worksheet.getCellRaw(row, 0)?.v)).toEqual(['first', 'second', 'third']);
+        expect([0, 1, 2, 3].map((column) => worksheet.getCellRaw(7, column)?.v)).toEqual([undefined, undefined, undefined, undefined]);
+        expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+        expect(worksheet.getCellRaw(0, 0)?.v).toBe('third');
     });
 
-    it('returns false and skips undo records when the reorder sequence fails', () => {
-        const undoRecords: unknown[] = [];
-        const accessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { syncExecuteCommand: () => false }],
-            [IUndoRedoService, { pushUndoRedo: (record: unknown) => undoRecords.push(record) }],
-            [SheetInterceptorService, {
-                onCommandExecute: () => ({ preRedos: [], redos: [], preUndos: [], undos: [] }),
-                afterCommandExecute: () => ({ redos: [], undos: [] }),
-                generateMutationsOfAutoHeight: () => ({ redos: [], undos: [] }),
-            }],
-            [SheetSkeletonService, { getSkeleton: () => null }],
-        ]));
-
-        expect(ReorderRangeCommand.handler(accessor, {
+    it('returns false without undo records when its actual reorder mutation is cancelled', () => {
+        const { commands, worksheet, history } = createBed({ 0: { 0: { v: 'first' } }, 1: { 0: { v: 'second' } } });
+        const before = Tools.deepClone(worksheet.getSnapshot());
+        cancelMutation(commands, ReorderRangeMutation.id);
+        expect(commands.syncExecuteCommand(ReorderRangeCommand.id, {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
-            range: { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 },
+            range: { startRow: 0, endRow: 1, startColumn: 0, endColumn: 0 },
             order: { 0: 1, 1: 0 },
         })).toBe(false);
-        expect(undoRecords).toEqual([]);
+        expect(worksheet.getSnapshot()).toEqual(before);
+        expect(history.getUndoRedoStatus('unit-1').undos).toBe(0);
     });
 });

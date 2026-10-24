@@ -15,8 +15,6 @@
  */
 
 import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
-import type { LocaleKey } from '../../locale/types';
-import type { ITableOptions } from '../../types/type';
 import {
     CommandType,
     customNameCharacterCheck,
@@ -26,8 +24,12 @@ import {
     IUniverInstanceService,
     LocaleService,
     sequenceExecute,
+    SheetTypes,
 } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
+import { getSheetCommandTarget } from '@univerjs/sheets';
+import type { LocaleKey } from '../../locale/types';
+import type { ITableOptions } from '../../types/type';
 import { TableManager } from '../../models/table-manager';
 import { getExistingNamesSet } from '../../util';
 import { AddSheetTableMutation } from '../mutations/add-sheet-table.mutation';
@@ -47,6 +49,11 @@ export const AddSheetTableCommand: ICommand<IAddSheetTableCommandParams> = {
     type: CommandType.COMMAND,
     handler: (accessor, params) => {
         if (!params) {
+            return false;
+        }
+
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
             return false;
         }
 

@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-drawing-ui': {
+        print: {
+            unsupportedObject: 'La pàgina del gràfic conté objectes que encara no es poden imprimir.',
+        },
         title: 'Imatge',
         backgroundImage: {
             title: 'Imatge de fons',

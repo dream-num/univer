@@ -14,231 +14,115 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum } from '@univerjs/core';
-import { describe, expect, it, vi } from 'vitest';
-import { mountPrintingFloatDom } from '../../views/PrintingFloatDom';
+import { DrawingTypeEnum, ImageSourceType, LocaleService, LocaleType } from '@univerjs/core';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
+import { DrawingImageClipService, DrawingRenderService } from '@univerjs/drawing-ui';
+import { CanvasColorService, ICanvasColorService, Image, IRenderManagerService } from '@univerjs/engine-render';
+import { SheetPrintingResourceCollector, SheetPrintInterceptorService } from '@univerjs/sheets-ui';
+import { ComponentManager, DesktopGalleryService, IGalleryService, IUIPartsService, UIPartsService } from '@univerjs/ui';
+import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
+import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
+import enUS from '../../locale/en-US';
 import { SheetDrawingPrintingController } from '../sheet-drawing-printing.controller';
 
-vi.mock('../../views/PrintingFloatDom', () => ({
-    mountPrintingFloatDom: vi.fn(() => vi.fn()),
-}));
-
-function createController(options?: { hasDrawingData?: boolean }) {
-    const interceptors = new Map<string, any>();
-    const points = {
-        PRINTING_COMPONENT_COLLECT: 'PRINTING_COMPONENT_COLLECT',
-        PRINTING_RANGE: 'PRINTING_RANGE',
-        PRINTING_DOM_COLLECT: 'PRINTING_DOM_COLLECT',
-    };
-    const drawingData = {
-        'unit-1': {
-            'sheet-1': {
-                order: ['image-1', 'chart-1', 'dom-1', 'block-1', 'grouped-image', 'hidden-image', 'hidden-chart'],
-                data: {
-                    'image-1': {
-                        unitId: 'unit-1',
-                        subUnitId: 'sheet-1',
-                        drawingId: 'image-1',
-                        drawingType: DrawingTypeEnum.DRAWING_IMAGE,
-                        transform: { left: 20, top: 30, width: 120, height: 60 },
-                    },
-                    'chart-1': {
-                        unitId: 'unit-1',
-                        subUnitId: 'sheet-1',
-                        drawingId: 'chart-1',
-                        drawingType: DrawingTypeEnum.DRAWING_CHART,
-                        transform: { left: 40, top: 50, width: 120, height: 60 },
-                    },
-                    'dom-1': {
-                        unitId: 'unit-1',
-                        subUnitId: 'sheet-1',
-                        drawingId: 'dom-1',
-                        drawingType: DrawingTypeEnum.DRAWING_DOM,
-                        componentKey: 'custom-dom',
-                        transform: { left: 80, top: 90, width: 40, height: 20 },
-                    },
-                    'block-1': {
-                        unitId: 'unit-1',
-                        subUnitId: 'sheet-1',
-                        drawingId: 'block-1',
-                        drawingType: DrawingTypeEnum.DRAWING_BLOCK,
-                        componentKey: 'custom-block',
-                        transform: { left: 80, top: 80, width: 20, height: 20 },
-                    },
-                    'grouped-image': {
-                        unitId: 'unit-1',
-                        subUnitId: 'sheet-1',
-                        drawingId: 'grouped-image',
-                        drawingType: DrawingTypeEnum.DRAWING_IMAGE,
-                        groupId: 'group-1',
-                        transform: { left: -100, top: -100, width: 20, height: 20 },
-                    },
-                    'hidden-image': {
-                        unitId: 'unit-1',
-                        subUnitId: 'sheet-1',
-                        drawingId: 'hidden-image',
-                        drawingType: DrawingTypeEnum.DRAWING_IMAGE,
-                        hidden: true,
-                        transform: { left: 1000, top: 1000, width: 500, height: 500 },
-                    },
-                    'hidden-chart': {
-                        unitId: 'unit-1',
-                        subUnitId: 'sheet-1',
-                        drawingId: 'hidden-chart',
-                        drawingType: DrawingTypeEnum.DRAWING_CHART,
-                        hidden: true,
-                        transform: { left: 1000, top: 1000, width: 500, height: 500 },
-                    },
-                },
-            },
-        },
-    };
-    const render = {
-        scene: { scaleX: 1, scaleY: 1 },
-        with: vi.fn(() => ({
-            getSkeletonParam: vi.fn(() => ({
-                skeleton: {
-                    getCellIndexByOffset: vi.fn((x: number, y: number) => ({
-                        row: Math.floor(y / 10),
-                        column: Math.floor(x / 10),
-                    })),
-                },
-            })),
-        })),
-    };
-    const controller = new SheetDrawingPrintingController(
-        {
-            getPrintComponent: vi.fn((key: string) => `${key}-print`),
-            interceptor: {
-                getInterceptPoints: vi.fn(() => points),
-                intercept: vi.fn((point, config) => {
-                    interceptors.set(point, config);
-                    return { dispose: vi.fn() };
-                }),
-            },
-        } as never,
-        { renderDrawing: vi.fn(() => Promise.resolve()) } as never,
-        { getDrawingDataForUnit: vi.fn(() => options?.hasDrawingData === false ? undefined : drawingData['unit-1']) } as never,
-        { getRenderUnitById: vi.fn(() => render) } as never,
-        {
-            get: vi.fn((key: string) => `${key}-Component`),
-        } as never,
-        {} as never
-    );
-
-    return { controller, interceptors, points };
+function installCanvasPlatformDouble(): void {
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
+        return new Proxy({ canvas: this }, { get: (target, key) => key in target ? target[key as keyof typeof target] : () => undefined }) as never;
+    });
 }
 
 describe('SheetDrawingPrintingController', () => {
-    it('renders printable images while excluding charts and floating DOM drawings', () => {
-        const { controller, interceptors, points } = createController();
-        const scene = {};
-        const resourceCollector = { add: vi.fn() };
-        const next = vi.fn(() => 'next-result');
-
-        const result = interceptors.get(points.PRINTING_COMPONENT_COLLECT).handler(null, {
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            scene,
-            resourceCollector,
-        }, next);
-
-        expect((controller as any)._drawingRenderService.renderDrawing).toHaveBeenCalledTimes(2);
-        expect((controller as any)._drawingRenderService.renderDrawing).toHaveBeenCalledWith(expect.objectContaining({ drawingId: 'image-1' }), scene, { allowInactiveSheet: true });
-        expect((controller as any)._drawingRenderService.renderDrawing).toHaveBeenCalledWith(expect.objectContaining({ drawingId: 'grouped-image' }), scene, { allowInactiveSheet: true });
-        expect(resourceCollector.add).toHaveBeenCalledTimes(2);
-        expect(result).toBe('next-result');
-
-        controller.dispose();
-    });
-
-    it('expands the printed range to include ungrouped drawing bounds', () => {
-        const { controller, interceptors, points } = createController();
-        const next = vi.fn((range) => range);
-
-        const range = interceptors.get(points.PRINTING_RANGE).handler(
-            { startRow: 4, endRow: 4, startColumn: 4, endColumn: 4 },
-            { unitId: 'unit-1', subUnitId: 'sheet-1' },
-            next
-        );
-
-        expect(range).toEqual({
-            startRow: 3,
-            endRow: 11,
-            startColumn: 2,
-            endColumn: 16,
+    afterEach(() => vi.restoreAllMocks());
+    it('rejects a Chart Sheet page when a visible image cannot be decoded', async () => {
+        installCanvasPlatformDouble();
+        const bed = createSheetsDrawingUiTestBed();
+        onTestFinished(() => bed.univer.dispose());
+        bed.injector.add([SheetPrintInterceptorService]);
+        bed.injector.add([IUIPartsService, { useClass: UIPartsService }]);
+        bed.injector.add([IGalleryService, { useClass: DesktopGalleryService }]);
+        bed.injector.add([DrawingImageClipService]);
+        bed.injector.add([DrawingRenderService]);
+        bed.injector.add([ComponentManager]);
+        bed.injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+        bed.injector.add([SheetDrawingPrintingController]);
+        bed.get(SheetDrawingPrintingController);
+        const drawingManager = bed.get(IDrawingManagerService);
+        const drawing = {
+            unitId: bed.unitId,
+            subUnitId: bed.subUnitId,
+            drawingId: 'image-1',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            source: 'data:image/png;base64,invalid',
+            imageSourceType: ImageSourceType.BASE64,
+            transform: { left: 0, top: 0, width: 100, height: 50 },
+        };
+        drawingManager.setDrawingData(bed.unitId, bed.subUnitId, { 'image-1': drawing } as never);
+        drawingManager.setDrawingOrder(bed.unitId, bed.subUnitId, ['image-1']);
+        const collector = new SheetPrintingResourceCollector();
+        const renderer = bed.get(IRenderManagerService).createRender(bed.unitId);
+        const interceptor = bed.get(SheetPrintInterceptorService);
+        interceptor.interceptor.fetchThroughInterceptors(interceptor.interceptor.getInterceptPoints().PRINTING_CHART_COMPONENT_COLLECT)(undefined, {
+            unitId: bed.unitId,
+            subUnitId: bed.subUnitId,
+            scene: renderer.scene,
+            engine: renderer.engine,
+            root: document.createElement('div'),
+            worksheet: bed.workbook.getSheetBySheetId(bed.subUnitId)!,
+            resourceCollector: collector,
+            sourceRect: { x: 0, y: 0, width: 100, height: 50 },
+            contentRect: { x: 0, y: 0, width: 100, height: 50 },
+            offset: { offsetX: 0, offsetY: 0 },
         });
-
-        controller.dispose();
+        const shapeKey = getDrawingShapeKeyByDrawingSearch(drawing);
+        await vi.waitFor(() => expect(renderer.scene.getObject(shapeKey)).toBeInstanceOf(Image));
+        const native = (renderer.scene.getObject(shapeKey) as Image).getNative()!;
+        native.onerror?.(new Event('error'));
+        await expect(collector.wait()).rejects.toThrow();
+        collector.close();
     });
 
-    it('defers React root cleanup when replacing printed float components', async () => {
-        const { controller, interceptors, points } = createController();
-        const unmount = vi.fn();
-        vi.mocked(mountPrintingFloatDom).mockReturnValueOnce(unmount);
-        const disposers: Array<() => void> = [];
-        const add = vi.fn((dispose: () => void) => disposers.push(dispose));
-        const disposableCollection = { add };
-        const resourceCollector = { add: vi.fn() };
-        const next = vi.fn((value) => value);
-        const root = document.createElement('div');
-
-        const result = interceptors.get(points.PRINTING_DOM_COLLECT).handler(disposableCollection, {
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            scene: 'scene',
-            skeleton: 'skeleton',
-            worksheet: 'worksheet',
-            root,
-            resourceCollector,
-        }, next);
-
-        expect(mountPrintingFloatDom).toHaveBeenCalledWith(
-            {
-                floatDomInfos: [
-                    expect.objectContaining({ drawingId: 'dom-1', componentKey: 'custom-dom-print-Component' }),
-                    expect.objectContaining({ drawingId: 'block-1', componentKey: 'custom-block-print-Component' }),
-                ],
-                scene: 'scene',
-                skeleton: 'skeleton',
-                worksheet: 'worksheet',
+    it('makes visible unsupported Chart Sheet objects a required print failure with an owner diagnostic', async () => {
+        installCanvasPlatformDouble();
+        const bed = createSheetsDrawingUiTestBed();
+        onTestFinished(() => bed.univer.dispose());
+        bed.get(LocaleService).load({ [LocaleType.EN_US]: enUS });
+        bed.injector.add([SheetPrintInterceptorService]);
+        bed.injector.add([IUIPartsService, { useClass: UIPartsService }]);
+        bed.injector.add([IGalleryService, { useClass: DesktopGalleryService }]);
+        bed.injector.add([DrawingImageClipService]);
+        bed.injector.add([DrawingRenderService]);
+        bed.injector.add([ComponentManager]);
+        bed.injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+        bed.injector.add([SheetDrawingPrintingController]);
+        bed.get(SheetDrawingPrintingController);
+        const drawingManager = bed.get(IDrawingManagerService);
+        drawingManager.setDrawingData(bed.unitId, bed.subUnitId, {
+            'dom-1': {
+                unitId: bed.unitId,
+                subUnitId: bed.subUnitId,
+                drawingId: 'dom-1',
+                drawingType: DrawingTypeEnum.DRAWING_DOM,
+                componentKey: 'custom-dom',
+                transform: { left: 0, top: 0, width: 100, height: 50 },
             },
-            expect.any(HTMLElement),
-            expect.any(Object)
-        );
-        const printingRoot = vi.mocked(mountPrintingFloatDom).mock.calls[0][1];
-        expect(printingRoot).not.toBe(root);
-        expect(printingRoot.parentElement).toBe(root);
-        expect(add).toHaveBeenCalled();
-        expect(resourceCollector.add).not.toHaveBeenCalled();
-        expect(unmount).not.toHaveBeenCalled();
-        expect(result).toBe(disposableCollection);
-
-        disposers.forEach((dispose) => dispose());
-        expect(unmount).not.toHaveBeenCalled();
-        expect(printingRoot.parentElement).toBeNull();
-
-        await Promise.resolve();
-        expect(unmount).toHaveBeenCalledOnce();
-
-        controller.dispose();
-    });
-
-    it('continues DOM collection when the sheet has no drawing data', () => {
-        const { controller, interceptors, points } = createController({ hasDrawingData: false });
-        const disposableCollection = { add: vi.fn() };
-        const next = vi.fn(() => 'next-result');
-        const mountCallCount = vi.mocked(mountPrintingFloatDom).mock.calls.length;
-
-        const result = interceptors.get(points.PRINTING_DOM_COLLECT).handler(disposableCollection, {
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-        }, next);
-
-        expect(next).toHaveBeenCalledWith(disposableCollection);
-        expect(result).toBe('next-result');
-        expect(mountPrintingFloatDom).toHaveBeenCalledTimes(mountCallCount);
-
-        controller.dispose();
+        } as never);
+        drawingManager.setDrawingOrder(bed.unitId, bed.subUnitId, ['dom-1']);
+        const collector = new SheetPrintingResourceCollector();
+        const interceptor = bed.get(SheetPrintInterceptorService);
+        const renderer = bed.get(IRenderManagerService).createRender(bed.unitId);
+        interceptor.interceptor.fetchThroughInterceptors(interceptor.interceptor.getInterceptPoints().PRINTING_CHART_DOM_COLLECT)(undefined, {
+            unitId: bed.unitId,
+            subUnitId: bed.subUnitId,
+            scene: renderer.scene,
+            engine: renderer.engine,
+            root: document.createElement('div'),
+            worksheet: bed.workbook.getSheetBySheetId(bed.subUnitId)!,
+            resourceCollector: collector,
+            sourceRect: { x: 0, y: 0, width: 100, height: 50 },
+            contentRect: { x: 0, y: 0, width: 100, height: 50 },
+            offset: { offsetX: 0, offsetY: 0 },
+        });
+        await expect(collector.wait()).rejects.toThrow();
+        expect(collector.failureMessage).toBe('The Chart Sheet contains objects that cannot be printed yet.');
     });
 });

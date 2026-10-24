@@ -37,8 +37,6 @@ import type {
     ISetTextWrapCommandParams,
     IToggleGridlinesCommandParams,
 } from '@univerjs/sheets';
-import type { FDefinedName } from './f-defined-name';
-import type { FWorkbook } from './f-workbook';
 import {
     BooleanNumber,
     covertCellValue,
@@ -50,6 +48,7 @@ import {
     Injector,
     ObjectMatrix,
     RANGE_TYPE,
+    SheetTypes,
     WorksheetHiddenState,
     WrapStrategy,
 } from '@univerjs/core';
@@ -91,6 +90,8 @@ import {
     SheetsSelectionsService,
     ToggleGridlinesCommand,
 } from '@univerjs/sheets';
+import type { FDefinedName } from './f-defined-name';
+import type { FWorkbook } from './f-workbook';
 import { SHEETS_CUSTOM_FIELD_WARNING_MESSAGE } from './const';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FRange } from './f-range';
@@ -331,6 +332,9 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     setDefaultStyle(style: string | Nullable<IStyleData>): FWorksheet {
+        if (this._worksheet.getConfig().type === SheetTypes.CHART) {
+            return this;
+        }
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         this._commandService.syncExecuteCommand(SetWorksheetDefaultStyleMutation.id, {
@@ -973,6 +977,9 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     autoFitRow(rowPosition: number, auto: BooleanNumber = BooleanNumber.TRUE): FWorksheet {
+        if (this._worksheet.getConfig().type === SheetTypes.CHART) {
+            return this;
+        }
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const ranges = [{

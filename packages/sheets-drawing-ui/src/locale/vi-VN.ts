@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-drawing-ui': {
+        print: {
+            unsupportedObject: 'Trang biểu đồ chứa các đối tượng hiện chưa thể in.',
+        },
         title: 'Hình ảnh',
         backgroundImage: {
             title: 'Hình nền',

@@ -37,7 +37,6 @@ import type { ISelectionStyle, ISelectionWithCoord, ISelectionWithStyle } from '
 import type { Theme } from '@univerjs/themes';
 import type { IShortcutService } from '@univerjs/ui';
 import type { Observable, Subscription } from 'rxjs';
-import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import {
     convertCellToRange,
     createIdentifier,
@@ -55,6 +54,7 @@ import {
 } from '@univerjs/sheets';
 import { IPlatformService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
+import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { isSheetContextMenuGesture, isSheetMultiSelectModifier } from '../../common/selection-input';
 import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
@@ -137,7 +137,18 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     private _cancelDownSubscription: Nullable<Subscription>;
     private _cancelUpSubscription: Nullable<Subscription>;
 
-    protected _skeleton!: SpreadsheetSkeleton;
+    protected _currentSkeleton: Nullable<SpreadsheetSkeleton> = null;
+
+    protected get _skeleton(): SpreadsheetSkeleton {
+        if (!this._currentSkeleton) {
+            throw new Error('Cell selection requires a current Grid skeleton');
+        }
+        return this._currentSkeleton;
+    }
+
+    protected set _skeleton(skeleton: SpreadsheetSkeleton) {
+        this._currentSkeleton = skeleton;
+    }
 
     /**
      * From renderContext.
@@ -212,10 +223,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             return;
         }
 
-        this._clearUpdatingListeners();
-        this._reset();
-        this._escapeShortcutDisposable?.dispose();
-        this._escapeShortcutDisposable = null;
+        this._clearRuntime();
 
         this._controlFillConfig$.complete();
         this._selectionMoveEnd$.complete();
@@ -297,7 +305,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      */
     resetSelectionsByModelData(selectionsWithStyleList: readonly ISelectionWithStyle[]): void {
         const allSelectionControls = this.getSelectionControls();
-        const skeleton = this._skeleton;
+        const skeleton = this._currentSkeleton;
         if (!allSelectionControls || !skeleton) {
             return;
         }
@@ -359,8 +367,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      */
     getSelectionDataWithStyle(): ISelectionWithCoord[] {
         const selectionControls = this._selectionControls;
-        if (this._skeleton.worksheet) {
-            const [unitId, sheetId] = this._skeleton.getLocation();
+        if (this._currentSkeleton) {
+            const [unitId, sheetId] = this._currentSkeleton.getLocation();
             return selectionControls.map((control) => {
                 const v = control.getValue();
                 v.rangeWithCoord.sheetId = sheetId;
@@ -390,6 +398,16 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         selectionWithStyle.style = style;
         const control = this.newSelectionControl(scene, skeleton, selectionWithStyle);
         return control;
+    }
+
+    protected _clearRuntime(): void {
+        this._clearUpdatingListeners();
+        this._reset();
+        this._escapeShortcutDisposable?.dispose();
+        this._escapeShortcutDisposable = null;
+        this._currentSkeleton = null;
+        this._activeViewport = null;
+        this._selectionMoving = false;
     }
 
     protected _clearAllSelectionControls(): void {
@@ -758,7 +776,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     protected _clearUpdatingListeners(): void {
         const scene = this._scene;
-        scene.enableObjectsEvent();
+        scene?.enableObjectsEvent();
 
         this._scenePointerMoveSub?.unsubscribe();
         this._scenePointerMoveSub = null;
@@ -808,7 +826,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         scaleY: number,
         scrollXY: { x: number; y: number }
     ): Nullable<ISelectionWithCoord> {
-        const skeleton = this._skeleton;
+        const skeleton = this._currentSkeleton;
         if (skeleton == null) return null;
 
         //#region normal selection

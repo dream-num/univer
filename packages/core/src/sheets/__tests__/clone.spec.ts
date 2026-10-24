@@ -15,9 +15,11 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { BooleanNumber } from '../../types/enum';
-import { cloneCellData, cloneCellDataWithSpanAndDisplay } from '../clone';
+import { SheetTypes } from '../../types/enum/sheet-types';
+import { BooleanNumber } from '../../types/enum/text-style';
+import { cloneCellData, cloneCellDataWithSpanAndDisplay, cloneWorksheetData } from '../clone';
 import { FormulaType } from '../typedef';
+import { createCoreTestBed } from './create-core-test-bed';
 
 describe('formula metadata cloning', () => {
     it.each([BooleanNumber.FALSE, BooleanNumber.TRUE])('retains the array kind and dynamic flag %s in cell and clipboard clones', (fd) => {
@@ -29,5 +31,87 @@ describe('formula metadata cloning', () => {
             displayV: '3',
         });
         expect(cloneCellData({ v: 'text' })).toEqual({ v: 'text' });
+    });
+});
+
+describe('worksheet type snapshots', () => {
+    it.each([undefined, BooleanNumber.FALSE, BooleanNumber.TRUE])('preserves optional Chart Sheet fit mode %s through clone, save and reopen', (zoomToFit) => {
+        const { univer, sheet } = createCoreTestBed();
+        try {
+            sheet.addWorksheet('fit', 1, {
+                id: 'fit',
+                type: SheetTypes.CHART,
+                zoomRatio: 0.75,
+                ...(zoomToFit === undefined ? {} : { zoomToFit }),
+            });
+            const copy = cloneWorksheetData(sheet.getSheetBySheetId('fit')!.getSnapshot());
+            copy.id = 'fit-copy';
+            sheet.addWorksheet(copy.id, 2, copy);
+            const saved = JSON.parse(JSON.stringify(sheet.save()));
+            const reopened = createCoreTestBed(saved);
+            try {
+                for (const id of ['fit', 'fit-copy']) {
+                    const actual = reopened.sheet.getSheetBySheetId(id)!.getSnapshot();
+                    expect(actual.zoomRatio).toBe(0.75);
+                    if (zoomToFit === undefined) {
+                        expect(actual).not.toHaveProperty('zoomToFit');
+                    } else {
+                        expect(actual.zoomToFit).toBe(zoomToFit);
+                    }
+                }
+            } finally {
+                reopened.univer.dispose();
+            }
+        } finally {
+            univer.dispose();
+        }
+    });
+
+    it('defaults legacy worksheets to GRID while retaining explicit and unknown types', () => {
+        const { univer, sheet } = createCoreTestBed();
+        try {
+            sheet.addWorksheet('explicit-grid', 1, { id: 'explicit-grid', type: SheetTypes.GRID });
+            sheet.addWorksheet('future-sheet', 2, { id: 'future-sheet', type: 47 as SheetTypes });
+
+            const saved = sheet.save();
+            expect(saved.sheets.sheet1.type).toBe(0);
+            expect(saved.sheets['explicit-grid'].type).toBe(0);
+            expect(saved.sheets['future-sheet'].type).toBe(47);
+        } finally {
+            univer.dispose();
+        }
+    });
+
+    it('preserves the chart sheet wire type and empty worksheet when cloning for insertion', () => {
+        const { univer, sheet } = createCoreTestBed();
+        try {
+            sheet.addWorksheet('chart-sheet', 1, {
+                id: 'chart-sheet',
+                type: SheetTypes.CHART,
+                protection: { content: BooleanNumber.FALSE, objects: BooleanNumber.TRUE },
+                printSettings: { orientation: 'landscape', margin: { left: 40 }, issues: [] },
+                cellData: {},
+            });
+            const chartSheet = sheet.getSheetBySheetId('chart-sheet')!;
+            const copied = cloneWorksheetData(chartSheet.getSnapshot());
+            copied.id = 'chart-copy';
+            sheet.addWorksheet(copied.id, 2, cloneWorksheetData(copied));
+
+            const chartCopy = sheet.getSheetBySheetId('chart-copy')!;
+            expect(chartCopy.getSnapshot().type).toBe(3);
+            expect(chartCopy.getSnapshot().cellData).toEqual({});
+            expect(chartCopy).not.toBe(chartSheet);
+            expect(sheet.getSheetBySheetId('chart-sheet')).toBe(chartSheet);
+            expect(sheet.getSheetBySheetId('chart-copy')).toBe(chartCopy);
+            expect(sheet.save().sheets['chart-copy'].type).toBe(3);
+            expect(sheet.save().sheets['chart-copy'].protection).toEqual(chartSheet.getConfig().protection);
+            expect(sheet.save().sheets['chart-copy'].printSettings).toEqual(chartSheet.getConfig().printSettings);
+            chartCopy.getConfig().protection!.objects = BooleanNumber.FALSE;
+            chartCopy.getConfig().printSettings!.margin!.left = 80;
+            expect(chartSheet.getConfig().protection!.objects).toBe(BooleanNumber.TRUE);
+            expect(chartSheet.getConfig().printSettings!.margin!.left).toBe(40);
+        } finally {
+            univer.dispose();
+        }
     });
 });

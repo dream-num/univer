@@ -15,16 +15,16 @@
  */
 
 import type { IAccessor, IColumnData, ICommand, IObjectArrayPrimitiveType, Nullable } from '@univerjs/core';
-import type { ISetColDataMutationParams } from '../mutations/set-col-data.mutation';
-import type { ISheetCommandSharedParams } from '../utils/interface';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
 } from '@univerjs/core';
+import type { ISetColDataMutationParams } from '../mutations/set-col-data.mutation';
+import type { ISheetCommandSharedParams } from '../utils/interface';
 import { SetColDataMutation, SetColDataMutationFactory } from '../mutations/set-col-data.mutation';
-import { getSheetCommandTarget } from './utils/target-util';
+import { getSheetGridCommandTarget } from './utils/target-util';
 
 export type IColumnProperties = Omit<IColumnData, 'w' | 'hd'>;
 
@@ -40,7 +40,7 @@ export const SetColDataCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetCommandTarget(univerInstanceService, params);
+        const target = getSheetGridCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { columnData } = params;

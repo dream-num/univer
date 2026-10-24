@@ -15,14 +15,15 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import type { IDeleteConditionalRuleMutationParams } from '../mutations/delete-conditional-rule.mutation';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
+    SheetTypes,
 } from '@univerjs/core';
 import { getSheetCommandTarget } from '@univerjs/sheets';
+import type { IDeleteConditionalRuleMutationParams } from '../mutations/delete-conditional-rule.mutation';
 import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../mutations/delete-conditional-rule.mutation';
 
 export interface IDeleteCfCommandParams {
@@ -41,7 +42,9 @@ export const DeleteCfCommand: ICommand<IDeleteCfCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target) return false;
+        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
+            return false;
+        }
 
         const { unitId, subUnitId } = target;
         const config: IDeleteConditionalRuleMutationParams = { unitId, subUnitId, cfId: params.cfId };

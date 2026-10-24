@@ -34,8 +34,6 @@ import type {
     IUpdateDataValidationMutationParams,
 } from '@univerjs/data-validation';
 import type { ISetRangeValuesMutationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
-import type { RangeMutation } from '../../models/rule-matrix';
-import type { CheckboxValidator } from '../../validators';
 import {
     CommandType,
     DataValidationType,
@@ -47,6 +45,7 @@ import {
     ObjectMatrix,
     Range,
     sequenceExecute,
+    SheetTypes,
     Tools,
 } from '@univerjs/core';
 import {
@@ -60,6 +59,8 @@ import {
 } from '@univerjs/data-validation';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
+import type { RangeMutation } from '../../models/rule-matrix';
+import type { CheckboxValidator } from '../../validators';
 import { SheetDataValidationModel } from '../../models/sheet-data-validation-model';
 import { shouldOffsetFormulaByRange } from '../../utils/formula';
 import { getStringCellValue } from '../../utils/get-cell-data-origin';
@@ -329,6 +330,10 @@ export const UpdateSheetDataValidationRangeCommand: ICommand<IUpdateSheetDataVal
         if (!params) {
             return false;
         }
+        const commandTarget = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        if (!commandTarget || commandTarget.worksheet.getConfig().type === SheetTypes.CHART) {
+            return false;
+        }
         const { unitId, subUnitId, ranges, ruleId } = params;
         const sheetDataValidationModel = accessor.get(SheetDataValidationModel);
         const commandService = accessor.get(ICommandService);
@@ -364,6 +369,10 @@ export const AddSheetDataValidationCommand: ICommand<IAddSheetDataValidationComm
     id: 'sheet.command.addDataValidation',
     handler(accessor, params) {
         if (!params) {
+            return false;
+        }
+        const commandTarget = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        if (!commandTarget || commandTarget.worksheet.getConfig().type === SheetTypes.CHART) {
             return false;
         }
         const { unitId, subUnitId, rule } = params;
@@ -423,6 +432,10 @@ export const UpdateSheetDataValidationSettingCommand: ICommand<IUpdateSheetDataV
     // eslint-disable-next-line max-lines-per-function
     handler(accessor, params) {
         if (!params) {
+            return false;
+        }
+        const commandTarget = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        if (!commandTarget || commandTarget.worksheet.getConfig().type === SheetTypes.CHART) {
             return false;
         }
         const commandService = accessor.get(ICommandService);
@@ -552,6 +565,10 @@ export const UpdateSheetDataValidationOptionsCommand: ICommand<IUpdateSheetDataV
         if (!params) {
             return false;
         }
+        const commandTarget = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        if (!commandTarget || commandTarget.worksheet.getConfig().type === SheetTypes.CHART) {
+            return false;
+        }
         const commandService = accessor.get(ICommandService);
         const redoUndoService = accessor.get(IUndoRedoService);
         const sheetDataValidationModel = accessor.get(SheetDataValidationModel);
@@ -616,6 +633,10 @@ export const ClearRangeDataValidationCommand: ICommand<IClearRangeDataValidation
         if (!params) {
             return false;
         }
+        const commandTarget = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        if (!commandTarget || commandTarget.worksheet.getConfig().type === SheetTypes.CHART) {
+            return false;
+        }
         const { unitId, subUnitId, ranges, types } = params;
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -657,6 +678,10 @@ export const RemoveSheetAllDataValidationCommand: ICommand<IRemoveSheetAllDataVa
     id: 'sheet.command.remove-all-data-validation',
     handler(accessor, params) {
         if (!params) {
+            return false;
+        }
+        const commandTarget = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        if (!commandTarget || commandTarget.worksheet.getConfig().type === SheetTypes.CHART) {
             return false;
         }
         const { unitId, subUnitId } = params;
@@ -735,6 +760,10 @@ export const RemoveSheetDataValidationCommand: ICommand<IRemoveSheetDataValidati
     id: 'sheet.command.remove-data-validation-rule',
     handler(accessor, params) {
         if (!params) {
+            return false;
+        }
+        const commandTarget = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        if (!commandTarget || commandTarget.worksheet.getConfig().type === SheetTypes.CHART) {
             return false;
         }
         const { unitId, subUnitId, ruleId } = params;

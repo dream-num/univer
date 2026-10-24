@@ -15,22 +15,27 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import type { IWorksheetRangeThemeStyleMutationParams } from '../../basics/interfaces/mutation-interface';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
+    IUniverInstanceService,
 } from '@univerjs/core';
+import type { IWorksheetRangeThemeStyleMutationParams } from '../../basics/interfaces/mutation-interface';
 import { SetWorksheetRangeThemeStyleMutation } from '../mutations/add-worksheet-range-theme.mutation';
 import {
     DeleteWorksheetRangeThemeStyleMutation,
     DeleteWorksheetRangeThemeStyleMutationFactory,
 } from '../mutations/delete-worksheet-range-theme.mutation';
+import { getSheetGridCommandTarget } from './utils/target-util';
 
 export const DeleteWorksheetRangeThemeStyleCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.remove-worksheet-range-theme-style',
     handler: (accessor: IAccessor, params: IWorksheetRangeThemeStyleMutationParams) => {
+        if (!getSheetGridCommandTarget(accessor.get(IUniverInstanceService), params)) {
+            return false;
+        }
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 

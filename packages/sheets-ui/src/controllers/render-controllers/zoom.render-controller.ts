@@ -16,9 +16,21 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
-import { Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, ICommandService, IContextService, Inject, Optional } from '@univerjs/core';
+import {
+    BooleanNumber,
+    Disposable,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    FOCUSING_SHEET,
+    ICommandService,
+    IContextService,
+    Inject,
+    Optional,
+    SheetTypes,
+} from '@univerjs/core';
 import { getNextWheelZoomRatio } from '@univerjs/engine-render';
+import { merge } from 'rxjs';
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
+import { SHEET_ZOOM_RANGE } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getSheetObject } from '../utils/component-tools';
@@ -36,17 +48,26 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
     ) {
         super();
 
-        this._initSkeletonListener();
+        this._initWorksheetListener();
         this._initZoomEventListener();
     }
 
-    updateZoom(worksheetId: string, zoomRatio: number): boolean {
+    updateZoom(worksheetId: string, zoomRatio: number, zoomToFit?: BooleanNumber): boolean {
         const worksheet = this._context.unit.getSheetBySheetId(worksheetId);
-        if (!worksheet) return false;
+        if (!worksheet) {
+            return false;
+        }
 
-        worksheet.getConfig().zoomRatio = zoomRatio;
+        if (worksheet.getConfig().type === SheetTypes.CHART) {
+            worksheet.getConfig().zoomToFit = zoomToFit ?? BooleanNumber.FALSE;
+        }
+
+        const nextZoomRatio = worksheet.getConfig().type === SheetTypes.CHART && zoomToFit === BooleanNumber.TRUE
+            ? Math.min(SHEET_ZOOM_RANGE[1], Math.max(SHEET_ZOOM_RANGE[0], zoomRatio * 100)) / 100
+            : zoomRatio;
+        worksheet.getConfig().zoomRatio = nextZoomRatio;
         if (worksheet === this._context.unit.getActiveSheet()) {
-            this._updateViewZoom(zoomRatio);
+            this._updateViewZoom(nextZoomRatio);
         }
 
         return true;
@@ -71,7 +92,9 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
 
                 const workbook = this._context.unit;
                 const sheet = workbook.getActiveSheet();
-                if (!sheet) return;
+                if (!sheet) {
+                    return;
+                }
 
                 const currentRatio = sheet.getZoomRatio();
                 const nextRatio = getNextWheelZoomRatio(currentRatio, e);
@@ -88,15 +111,12 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
     }
 
     private _zoom: number;
-    private _initSkeletonListener() {
-        this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-            if (param == null) {
+    private _initWorksheetListener() {
+        this.disposeWithMe(merge(this._context.unit.activeSheet$, this._sheetSkeletonManagerService.currentSkeleton$).subscribe(() => {
+            const worksheet = this._context.unit.getActiveSheet();
+            if (!worksheet) {
                 return;
             }
-
-            const workbook = this._context.unit;
-            const worksheet = workbook.getActiveSheet();
-            if (!worksheet) return;
 
             const zoomRatio = worksheet.getZoomRatio() || 1;
             if (this._zoom !== zoomRatio) {

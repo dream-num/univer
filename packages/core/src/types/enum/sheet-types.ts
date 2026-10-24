@@ -18,4 +18,5 @@ export enum SheetTypes {
     GRID,
     KANBAN,
     GANTT,
+    CHART = 3,
 }

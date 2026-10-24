@@ -31,6 +31,7 @@ import {
     IUniverInstanceService,
     ObjectMatrix,
     sequenceExecute,
+    SheetTypes,
 } from '@univerjs/core';
 import {
     checkCellValueType,
@@ -65,7 +66,9 @@ export const SetNumfmtCommand: ICommand<ISetNumfmtCommandParams> = {
         const undoRedoService = accessor.get(IUndoRedoService);
 
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target) return false;
+        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
+            return false;
+        }
 
         const { unitId, subUnitId, worksheet } = target;
         // Because of precision issues with scientific notation values, filter out some format settings for them here.

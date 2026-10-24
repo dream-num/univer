@@ -16,7 +16,7 @@
 
 import type { IRange, IWorkbookData } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import type { ISheetImage } from '@univerjs/sheets-drawing';
+import type { ISheetDrawing, ISheetImage } from '@univerjs/sheets-drawing';
 import type { ISheetClipboardHook } from '@univerjs/sheets-ui';
 import {
     BooleanNumber,
@@ -24,6 +24,7 @@ import {
     ImageSourceType,
     LocaleType,
     ObjectMatrix,
+    SheetTypes,
     UniverInstanceType,
 } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
@@ -47,6 +48,7 @@ import {
     UIPartsService,
 } from '@univerjs/ui';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createAbsoluteChart } from '../../__tests__/chart-drawing-test-bed';
 import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
 import { InsertFloatImageCommand } from '../../commands/commands/insert-image.command';
 import { SheetsDrawingCopyPasteController } from '../sheet-drawing-copy-paste.controller';
@@ -94,7 +96,7 @@ interface ITestClipboardHook extends ISheetClipboardHook {
 
 const testBeds: ReturnType<typeof createSheetsDrawingUiTestBed>[] = [];
 
-function createWorkbookData(unitId: string, subUnitId: string): IWorkbookData {
+function createWorkbookData(unitId: string, subUnitId: string, sheetType = SheetTypes.GRID): IWorkbookData {
     return {
         id: unitId,
         name: 'Book',
@@ -105,6 +107,7 @@ function createWorkbookData(unitId: string, subUnitId: string): IWorkbookData {
         sheets: {
             [subUnitId]: {
                 id: subUnitId,
+                type: sheetType,
                 name: 'Sheet1',
                 rowCount: 20,
                 columnCount: 20,
@@ -118,9 +121,15 @@ function createWorkbookData(unitId: string, subUnitId: string): IWorkbookData {
     };
 }
 
-function createController(options?: { focusedDrawings?: IImageDrawing[]; drawingData?: Record<string, object> }) {
-    const clipboardInterfaceService = { writeText: vi.fn() };
-    const bed = createSheetsDrawingUiTestBed(createWorkbookData('unit-1', 'sheet-1'), [
+function createController(options?: { focusedDrawings?: ISheetDrawing[]; drawingData?: Record<string, object>; sheetType?: SheetTypes; targetSheetType?: SheetTypes }) {
+    const clipboardInterfaceService: IClipboardInterfaceService = {
+        supportClipboard: false,
+        write: vi.fn(async () => {}),
+        writeText: vi.fn(async () => {}),
+        read: vi.fn(async () => []),
+        readText: vi.fn(async () => ''),
+    };
+    const bed = createSheetsDrawingUiTestBed(createWorkbookData('unit-1', 'sheet-1', options?.sheetType), [
         [ISheetClipboardService, { useClass: SheetClipboardService }],
         [IMarkSelectionService, { useClass: MarkSelectionService }],
         [IClipboardInterfaceService, { useValue: clipboardInterfaceService }],
@@ -130,10 +139,14 @@ function createController(options?: { focusedDrawings?: IImageDrawing[]; drawing
         [SheetsDrawingCopyPasteController],
     ]);
     testBeds.push(bed);
-    bed.univer.createUnit(UniverInstanceType.UNIVER_SHEET, createWorkbookData('unit-2', 'sheet-2'));
+    bed.univer.createUnit(UniverInstanceType.UNIVER_SHEET, createWorkbookData('unit-2', 'sheet-2', options?.targetSheetType));
     const skeletonService = bed.get(SheetSkeletonService);
-    skeletonService.ensureSkeleton('unit-1', 'sheet-1');
-    skeletonService.ensureSkeleton('unit-2', 'sheet-2');
+    if (options?.sheetType !== SheetTypes.CHART) {
+        skeletonService.ensureSkeleton('unit-1', 'sheet-1');
+    }
+    if (options?.targetSheetType !== SheetTypes.CHART) {
+        skeletonService.ensureSkeleton('unit-2', 'sheet-2');
+    }
     const drawingManager = bed.get(IDrawingManagerService);
     const data: Record<string, object> = { ...options?.drawingData };
     for (const drawing of options?.focusedDrawings ?? []) {
@@ -154,6 +167,7 @@ function createController(options?: { focusedDrawings?: IImageDrawing[]; drawing
     vi.spyOn(hookDisposable, 'dispose');
 
     return {
+        bed,
         controller,
         hook: sheetClipboardService.getClipboardHooks()[0] as ITestClipboardHook,
         drawingService,
@@ -542,5 +556,149 @@ describe('SheetsDrawingCopyPasteController', () => {
         }]);
 
         controller.dispose();
+    });
+});
+
+describe('SheetsDrawingCopyPasteController Chart-parent COPY consumers', () => {
+    afterEach(() => {
+        testBeds.splice(0).forEach((bed) => bed.univer.dispose());
+        vi.useRealTimers();
+        vi.restoreAllMocks();
+    });
+
+    function createSubtree() {
+        const root = { ...createAbsoluteChart('root', 'sheet-1'), unitId: 'unit-1' };
+        const nested = { ...root, drawingId: 'nested', chartParent: { drawingId: 'root', resizeWithParent: true }, transform: { ...root.transform, left: 180, top: 140 } };
+        const shape = { ...root, drawingId: 'shape', drawingType: DrawingTypeEnum.DRAWING_SHAPE, chartParent: { drawingId: 'nested', resizeWithParent: false } };
+        const image = createImageDrawing({
+            drawingId: 'image',
+            anchorType: SheetDrawingAnchorType.None,
+            chartParent: { drawingId: 'nested', resizeWithParent: true },
+        });
+        return { root, nested, shape, image };
+    }
+
+    function planPaste(hook: ITestClipboardHook) {
+        return hook.onPasteCells(
+            { unitId: 'unit-1', subUnitId: 'sheet-1', range: { rows: [0], cols: [0] } },
+            { unitId: 'unit-2', subUnitId: 'sheet-2', range: { rows: [3], cols: [4] } },
+            new ObjectMatrix(),
+            { copyId: 'chart-parent-copy', copyType: COPY_TYPE.COPY, pasteType: PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE }
+        );
+    }
+
+    it('copies the complete Chart/Shape/Image graph with fresh remapped identities and symmetric Drawing replay', () => {
+        const originals = createSubtree();
+        const runtime = createController({ focusedDrawings: [originals.root], drawingData: originals });
+        const source = JSON.parse(JSON.stringify(runtime.bed.get(ISheetDrawingService).getDrawingData('unit-1', 'sheet-1')));
+        const copiedGraphs: ISheetDrawing[][] = [];
+        let expectedOrder: string[] = [];
+        runtime.controller.registerFeatureCopyHook(DrawingTypeEnum.DRAWING_CHART, ({ copies, idMap }) => {
+            expectedOrder = runtime.bed.get(ISheetDrawingService).getDrawingOrder('unit-1', 'sheet-1').map((id) => idMap.get(id)!);
+            copiedGraphs.push(copies);
+            return { redos: [], undos: [] };
+        });
+        runtime.controller.registerFeatureCopyHook(DrawingTypeEnum.DRAWING_SHAPE, () => ({ redos: [], undos: [] }));
+        expect(runtime.hook.onBeforeCopyFocusedObject?.('unit-1', 'sheet-1', COPY_TYPE.COPY)).toBe(true);
+        expect(runtime.commandService.executeCommand).not.toHaveBeenCalled();
+
+        const plan = planPaste(runtime.hook)!;
+        expect(copiedGraphs[0]).toHaveLength(4);
+        const copied = copiedGraphs[0];
+        expect(copied.every((drawing) => !Object.values(originals).some((original) => original.drawingId === drawing.drawingId))).toBe(true);
+        expect(copied.every((drawing) => drawing.unitId === 'unit-2' && drawing.subUnitId === 'sheet-2')).toBe(true);
+        const root = copied.find((drawing) => !drawing.chartParent)!;
+        const nested = copied.find((drawing) => drawing.drawingType === DrawingTypeEnum.DRAWING_CHART && drawing.chartParent)!;
+        expect(nested.chartParent).toEqual({ drawingId: root.drawingId, resizeWithParent: true });
+        expect(copied.filter((drawing) => drawing.drawingType !== DrawingTypeEnum.DRAWING_CHART)
+            .every((drawing) => drawing.chartParent?.drawingId === nested.drawingId)).toBe(true);
+        expect(nested.transform!.left! - root.transform!.left!).toBe(originals.nested.transform.left! - originals.root.transform!.left!);
+        expect(copied.every((drawing) => drawing.anchorType === SheetDrawingAnchorType.None)).toBe(true);
+        for (const mutation of plan.redos) {
+            expect(runtime.bed.commandService.syncExecuteCommand(mutation.id, mutation.params)).toBe(true);
+        }
+        expect(runtime.bed.get(ISheetDrawingService).getDrawingOrder('unit-2', 'sheet-2')).toEqual(expectedOrder);
+        expect(runtime.bed.get(ISheetDrawingService).getDrawingData('unit-2', 'sheet-2')).toEqual(Object.fromEntries(copied.map((drawing) => [drawing.drawingId, drawing])));
+        for (const mutation of plan.undos) {
+            expect(runtime.bed.commandService.syncExecuteCommand(mutation.id, mutation.params)).toBe(true);
+        }
+        expect(runtime.bed.get(ISheetDrawingService).getDrawingData('unit-2', 'sheet-2')).toEqual({});
+        for (const mutation of plan.redos) {
+            expect(runtime.bed.commandService.syncExecuteCommand(mutation.id, mutation.params)).toBe(true);
+        }
+        expect(runtime.bed.get(ISheetDrawingService).getDrawingOrder('unit-2', 'sheet-2')).toEqual(expectedOrder);
+        expect(runtime.bed.get(ISheetDrawingService).getDrawingData('unit-1', 'sheet-1')).toEqual(source);
+        planPaste(runtime.hook);
+        expect(copiedGraphs[1].every((drawing) => !copied.some((old) => old.drawingId === drawing.drawingId))).toBe(true);
+    });
+
+    it.each(['missing Shape owner', 'disposed Chart owner'] as const)('rejects %s before target batch preparation', (condition) => {
+        const originals = createSubtree();
+        const runtime = createController({ focusedDrawings: [originals.root], drawingData: originals });
+        const registration = runtime.controller.registerFeatureCopyHook(DrawingTypeEnum.DRAWING_CHART, () => ({ redos: [], undos: [] }));
+        if (condition === 'disposed Chart owner') {
+            runtime.controller.registerFeatureCopyHook(DrawingTypeEnum.DRAWING_SHAPE, () => ({ redos: [], undos: [] }));
+        }
+        expect(runtime.hook.onBeforeCopyFocusedObject?.('unit-1', 'sheet-1', COPY_TYPE.COPY)).toBe(true);
+        if (condition === 'disposed Chart owner') {
+            registration.dispose();
+        }
+        const prepare = vi.spyOn(runtime.bed.get(ISheetDrawingService), 'getBatchAddOp');
+        expect(() => planPaste(runtime.hook)).toThrow();
+        expect(prepare).not.toHaveBeenCalled();
+        expect(runtime.bed.get(ISheetDrawingService).getDrawingData('unit-2', 'sheet-2')).toEqual({});
+    });
+
+    it.each(['Shape', 'Image'] as const)('rejects Chart-parent graph plus %s focus before any clipboard or model writes', (otherType) => {
+        const originals = createSubtree();
+        const other = otherType === 'Shape' ? originals.shape : originals.image;
+        const runtime = createController({ focusedDrawings: [originals.root, other], drawingData: originals });
+        runtime.controller.registerFeatureCopyHook(DrawingTypeEnum.DRAWING_CHART, () => ({ redos: [], undos: [] }));
+        expect(() => runtime.hook.onBeforeCopyFocusedObject?.('unit-1', 'sheet-1', COPY_TYPE.COPY)).toThrow();
+        expect(runtime.commandService.executeCommand).not.toHaveBeenCalled();
+        expect(runtime.clipboardInterfaceService.writeText).not.toHaveBeenCalled();
+        expect(runtime.bed.get(ISheetDrawingService).getDrawingData('unit-2', 'sheet-2')).toEqual({});
+    });
+
+    it.each(['Shape', 'Image'] as const)('retains the GRID standalone Chart plus %s per-owner Copy path', (otherType) => {
+        vi.useFakeTimers();
+        const originals = createSubtree();
+        const other = { ...(otherType === 'Shape' ? originals.shape : originals.image), chartParent: undefined };
+        const runtime = createController({ focusedDrawings: [originals.root, other], drawingData: { root: originals.root, [other.drawingId]: other } });
+        runtime.controller.registerFeatureCopyHook(DrawingTypeEnum.DRAWING_CHART, () => ({ redos: [], undos: [] }));
+        expect(runtime.hook.onBeforeCopyFocusedObject?.('unit-1', 'sheet-1', COPY_TYPE.COPY)).toBe(otherType === 'Image');
+        expect(runtime.commandService.executeCommand).not.toHaveBeenCalled();
+    });
+
+    it('rejects standalone multiple focus on a CHART source before clipboard writes', () => {
+        const originals = createSubtree();
+        const shape = { ...originals.shape, chartParent: undefined };
+        const runtime = createController({ focusedDrawings: [originals.root, shape], drawingData: { root: originals.root, shape }, sheetType: SheetTypes.CHART });
+        runtime.controller.registerFeatureCopyHook(DrawingTypeEnum.DRAWING_CHART, () => ({ redos: [], undos: [] }));
+        expect(() => runtime.hook.onBeforeCopyFocusedObject?.('unit-1', 'sheet-1', COPY_TYPE.COPY)).toThrow();
+        expect(runtime.clipboardInterfaceService.writeText).not.toHaveBeenCalled();
+        expect(runtime.commandService.executeCommand).not.toHaveBeenCalled();
+    });
+
+    it('rejects GRID standalone mixed Copy pasted into CHART before preparing any Drawing batch', () => {
+        vi.useFakeTimers();
+        const originals = createSubtree();
+        const image = { ...originals.image, chartParent: undefined };
+        const runtime = createController({ focusedDrawings: [originals.root, image], drawingData: { root: originals.root, image }, targetSheetType: SheetTypes.CHART });
+        expect(runtime.hook.onBeforeCopyFocusedObject?.('unit-1', 'sheet-1', COPY_TYPE.COPY)).toBe(true);
+        const prepare = vi.spyOn(runtime.bed.get(ISheetDrawingService), 'getBatchAddOp');
+        expect(() => planPaste(runtime.hook)).toThrow();
+        expect(prepare).not.toHaveBeenCalled();
+        expect(runtime.bed.get(ISheetDrawingService).getDrawingData('unit-2', 'sheet-2')).toEqual({});
+    });
+
+    it('rejects a parent cycle before claiming Copy and preserves the source', () => {
+        const originals = createSubtree();
+        const root = { ...originals.root, chartParent: { drawingId: 'nested', resizeWithParent: true } };
+        const runtime = createController({ focusedDrawings: [root], drawingData: { ...originals, root } });
+        runtime.controller.registerFeatureCopyHook(DrawingTypeEnum.DRAWING_CHART, () => ({ redos: [], undos: [] }));
+        expect(() => runtime.hook.onBeforeCopyFocusedObject?.('unit-1', 'sheet-1', COPY_TYPE.COPY)).toThrow();
+        expect(runtime.commandService.executeCommand).not.toHaveBeenCalled();
+        expect(runtime.bed.get(ISheetDrawingService).getDrawingData('unit-1', 'sheet-1').root).toEqual(root);
     });
 });

@@ -15,10 +15,10 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import type { IToggleGridlinesMutationParams } from '../mutations/toggle-gridlines.mutation';
 import { BooleanNumber, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import type { IToggleGridlinesMutationParams } from '../mutations/toggle-gridlines.mutation';
 import { ToggleGridlinesMutation } from '../mutations/toggle-gridlines.mutation';
-import { getSheetCommandTarget } from './utils/target-util';
+import { getSheetGridCommandTarget } from './utils/target-util';
 
 export interface IToggleGridlinesCommandParams {
     showGridlines?: BooleanNumber;
@@ -33,7 +33,7 @@ export const ToggleGridlinesCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        const target = getSheetGridCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
 
         const { worksheet } = target;

@@ -38,6 +38,7 @@ import {
     Injector,
     RANGE_TYPE,
     Rectangle,
+    SheetTypes,
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
@@ -111,6 +112,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             _contextService
         );
 
+        this._scene = this._context.scene;
         this._workbookSelections = this._refSelectionsService.getWorkbookSelections(this._context.unitId);
 
         this._initSelectionChangeListener();
@@ -172,7 +174,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
 
         const listenerDisposables = new DisposableCollection();
         listenerDisposables.add(spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
-            if (!this.inRefSelectionMode()) {
+            if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART || !this.inRefSelectionMode()) {
                 return;
             }
 
@@ -185,7 +187,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         listenerDisposables.add(
             spreadsheetRowHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
                 const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
-                if (!this.inRefSelectionMode() || !skeleton) {
+                if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART || !this.inRefSelectionMode() || !skeleton) {
                     return;
                 }
                 const { row } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
@@ -203,7 +205,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
 
         listenerDisposables.add(spreadsheetColumnHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
             const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
-            if (!this.inRefSelectionMode() || !skeleton) {
+            if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART || !this.inRefSelectionMode() || !skeleton) {
                 return;
             }
             const { column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
@@ -223,7 +225,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             // remove all other selections
             this._reset();
             const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
-            if (!this.inRefSelectionMode() || !skeleton) {
+            if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART || !this.inRefSelectionMode() || !skeleton) {
                 return;
             }
             const selectionWithStyle = getAllSelection(skeleton);
@@ -262,7 +264,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         // unlike normal selection, there is no need to listen selectionService.selectionMoveEnd$ for keyboard moving event. prompt@highlightFormula would refresh selection.
         this.disposeWithMe(this._refSelectionsService.selectionSet$.subscribe((selectionsWithStyles) => {
             this._reset();
-            const skeleton = this._skeleton;
+            const skeleton = this._currentSkeleton;
             if (!skeleton) {
                 return;
             }
@@ -287,6 +289,9 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
     }
 
     private _updateSelections(selectionDataWithStyleList: ISelectionWithCoord[], type: SelectionMoveType): void {
+        if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART) {
+            return;
+        }
         const workbook = this._context.unit;
         const sheetId = workbook.getActiveSheet()!.getSheetId();
 
@@ -305,8 +310,18 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         // COMMAND_LISTENER_SKELETON_CHANGE ---> currentSkeleton$.next
         // 'sheet.mutation.set-worksheet-row-auto-height' is one of COMMAND_LISTENER_SKELETON_CHANGE
         // dv render controller would cause row auto height, this._autoHeightController.getUndoRedoParamsOfAutoHeight
+        this.disposeWithMe(this._context.unit.activeSheet$.subscribe((worksheet) => {
+            if (worksheet?.getConfig().type === SheetTypes.CHART) {
+                this._clearRuntime();
+            }
+        }));
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
             if (!param) {
+                this._clearRuntime();
+                return;
+            }
+            const worksheet = this._context.unit.getActiveSheet();
+            if (worksheet?.getConfig().type === SheetTypes.CHART || param.sheetId !== worksheet?.getSheetId()) {
                 return;
             }
 
@@ -315,7 +330,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
             // changing sheet
-            if (this._skeleton && this._skeleton.worksheet?.getSheetId() !== skeleton.worksheet.getSheetId()) {
+            if (this._currentSkeleton && this._currentSkeleton.worksheet?.getSheetId() !== skeleton.worksheet.getSheetId()) {
                 this._reset();
             }
             this._changeRuntime(skeleton, scene, viewportMain);
@@ -355,7 +370,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
     ): void {
         this._rangeType = rangeType;
 
-        const skeleton = this._skeleton;
+        const skeleton = this._currentSkeleton;
         const scene = this._scene;
         if (!scene || !skeleton) {
             return;

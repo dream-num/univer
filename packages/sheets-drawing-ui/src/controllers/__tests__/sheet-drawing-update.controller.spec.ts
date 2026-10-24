@@ -14,22 +14,35 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ImageSourceType, UniverInstanceType } from '@univerjs/core';
+import {
+    ArrangeTypeEnum,
+    DrawingTypeEnum,
+    FOCUSING_COMMON_DRAWINGS,
+    IContextService,
+    IImageIoService,
+    ImageSourceType,
+    ImageUploadStatusType,
+    IPermissionService,
+    IURLImageService,
+    RedoCommand,
+    UndoCommand,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
-import { SetDrawingSelectedOperation } from '@univerjs/drawing';
 import {
     CanvasColorService,
     ICanvasColorService,
     IRenderManagerService,
+    Rect,
     SHEET_VIEWPORT_KEY,
     Spreadsheet,
     Viewport,
 } from '@univerjs/engine-render';
+import { WorksheetEditPermission } from '@univerjs/sheets';
 import {
+    InsertSheetDrawingCommand,
     ISheetDrawingService,
-    SetDrawingArrangeCommand,
-    SetSheetDrawingCommand,
-    SetWorksheetBackgroundImageCommand,
+    SheetDrawingAnchorType,
 } from '@univerjs/sheets-drawing';
 import {
     ISheetSelectionRenderService,
@@ -51,120 +64,12 @@ import {
     UIPartsService,
     UIRuntimeScopeService,
 } from '@univerjs/ui';
-import { Subject } from 'rxjs';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
+import { createAbsoluteChart, createChartDrawingTestBed } from '../../__tests__/chart-drawing-test-bed';
 import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
 import { GroupSheetDrawingCommand } from '../../commands/commands/group-sheet-drawing.command';
 import { UngroupSheetDrawingCommand } from '../../commands/commands/ungroup-sheet-drawing.command';
 import { SheetDrawingUpdateController } from '../sheet-drawing-update.controller';
-
-function createSkeleton() {
-    return {
-        rowHeaderWidth: 0,
-        columnHeaderHeight: 0,
-        columnTotalWidth: 1000,
-        rowTotalHeight: 1000,
-        getNoMergeCellWithCoordByIndex: vi.fn((row: number, column: number) => ({
-            startX: column * 10,
-            endX: column * 10 + 10,
-            startY: row * 20,
-            endY: row * 20 + 20,
-        })),
-        getCellIndexAndOffsetByPosition: vi.fn((left: number, top: number) => {
-            const column = Math.floor(left / 10);
-            const row = Math.floor(top / 20);
-            return {
-                column,
-                row,
-                columnOffset: left - column * 10,
-                rowOffset: top - row * 20,
-            };
-        }),
-    };
-}
-
-function createController(options?: { imageParam?: unknown; openFiles?: unknown[] }) {
-    const featurePluginOrderUpdate$ = new Subject<any>();
-    const featurePluginUpdate$ = new Subject<any[]>();
-    const featurePluginGroupUpdate$ = new Subject<any[]>();
-    const featurePluginUngroupUpdate$ = new Subject<any[]>();
-    const focus$ = new Subject<any[] | null>();
-    const skeleton = createSkeleton();
-    const commandService = {
-        executeCommand: vi.fn(),
-        syncExecuteCommand: vi.fn(() => true),
-    };
-    const sheetDrawingService = {
-        getDrawingByParam: vi.fn(({ drawingId }) => ({
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            drawingId,
-            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
-            transform: { left: 10, top: 20, width: 30, height: 40 },
-            sheetTransform: {
-                from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
-                to: { row: 3, column: 4, rowOffset: 0, columnOffset: 0 },
-            },
-        })),
-        getDrawingsByGroup: vi.fn(() => []),
-        focusDrawing: vi.fn(),
-    };
-    const selectionManagerService = {
-        getWorkbookSelections: vi.fn(() => ({
-            getCurrentSelections: vi.fn(() => []),
-            getCurrentLastSelection: vi.fn(() => undefined),
-        })),
-    };
-    const imageIoService = {
-        saveImage: vi.fn(async () => options?.imageParam),
-        addImageSourceCache: vi.fn(),
-    };
-    const controller = new SheetDrawingUpdateController(
-        {
-            unitId: 'unit-1',
-            unit: {
-                getUnitId: () => 'unit-1',
-                getActiveSheet: () => ({ getSheetId: () => 'sheet-1' }),
-            },
-            scene: { width: 400, height: 300 },
-        } as never,
-        commandService as never,
-        { interceptAfterCommand: vi.fn(() => ({ dispose: vi.fn() })) } as never,
-        { getCellWithCoordByOffset: vi.fn() } as never,
-        imageIoService as never,
-        { openFile: vi.fn(async () => options?.openFiles ?? []) } as never,
-        sheetDrawingService as never,
-        {
-            featurePluginOrderUpdate$,
-            featurePluginUpdate$,
-            featurePluginGroupUpdate$,
-            featurePluginUngroupUpdate$,
-            focus$,
-        } as never,
-        { setContextValue: vi.fn() } as never,
-        { show: vi.fn() } as never,
-        { t: vi.fn((key: string, value?: string) => `${key}:${value ?? ''}`) } as never,
-        selectionManagerService as never,
-        {
-            getSkeleton: vi.fn(() => skeleton),
-            getSkeletonParam: vi.fn(() => ({ unitId: 'unit-1', sheetId: 'sheet-1', skeleton })),
-        } as never,
-        { get: vi.fn() } as never,
-        { getImage: vi.fn() } as never
-    );
-
-    return {
-        controller,
-        commandService,
-        imageIoService,
-        sheetDrawingService,
-        featurePluginOrderUpdate$,
-        featurePluginUpdate$,
-        featurePluginGroupUpdate$,
-        featurePluginUngroupUpdate$,
-        focus$,
-    };
-}
 
 describe('SheetDrawingUpdateController', () => {
     it.each([
@@ -235,187 +140,259 @@ describe('SheetDrawingUpdateController', () => {
         }
     });
 
-    it('uploads and sets a worksheet background image', async () => {
-        const file = { name: 'background.png' };
-        const imageParam = {
-            source: 'uploaded-file-id',
-            imageSourceType: ImageSourceType.UUID,
-            base64Cache: 'data:image/png;base64,background',
-        };
-        const { controller, commandService, imageIoService } = createController({
-            openFiles: [file],
-            imageParam,
-        });
-        commandService.executeCommand.mockResolvedValue(true);
-
-        await expect(controller.setWorksheetBackgroundImage()).resolves.toBe(true);
-        expect(imageIoService.saveImage).toHaveBeenCalledWith(file);
-        expect(commandService.executeCommand).toHaveBeenCalledWith(SetWorksheetBackgroundImageCommand.id, {
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            backgroundImage: {
-                source: imageParam.source,
-                imageSourceType: imageParam.imageSourceType,
-            },
-        });
-
-        controller.dispose();
+    it('uploads a worksheet background image through the real command, resource and history owners', async () => {
+        const bed = createChartDrawingTestBed();
+        bed.activate('grid');
+        const file = new File(['png'], 'background.png', { type: 'image/png' });
+        vi.spyOn(bed.get(ILocalFileService), 'openFile').mockResolvedValue([file]);
+        vi.spyOn(bed.get(IImageIoService), 'saveImage').mockResolvedValue({ imageId: 'background', source: 'uploaded-file-id', imageSourceType: ImageSourceType.UUID, base64Cache: '', status: ImageUploadStatusType.SUCCUSS });
+        const controller = bed.render.with(SheetDrawingUpdateController);
+        expect(await controller.setWorksheetBackgroundImage()).toBe(true);
+        expect(bed.workbook.getSheetBySheetId('grid')!.getConfig().backgroundImage).toMatchObject({ source: 'uploaded-file-id', imageSourceType: ImageSourceType.UUID });
+        expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(bed.workbook.getSheetBySheetId('grid')!.getConfig().backgroundImage).toBeUndefined();
     });
 
-    it('reports empty and over-limit file selections without inserting images', async () => {
-        const empty = createController({ openFiles: [] });
+    it('reports empty and over-limit picker results without uploading or creating a drawing', async () => {
+        const bed = createChartDrawingTestBed();
+        bed.activate('grid');
+        const picker = vi.spyOn(bed.get(ILocalFileService), 'openFile').mockResolvedValue([]);
+        const upload = vi.spyOn(bed.get(IImageIoService), 'saveImage');
+        const message = vi.spyOn(bed.get(IMessageService), 'show');
+        const controller = bed.render.with(SheetDrawingUpdateController);
+        expect(await controller.insertFloatImage()).toBe(false);
+        expect(await controller.insertCellImage()).toBe(false);
+        picker.mockResolvedValue(Array.from({ length: 30 }, (_, index) => new File(['png'], `image-${index}.png`, { type: 'image/png' })));
+        expect(await controller.insertFloatImage()).toBe(false);
+        expect(message).toHaveBeenCalledWith(expect.objectContaining({ type: MessageType.Error }));
+        expect(upload).not.toHaveBeenCalled();
+        expect(bed.drawings.getDrawingData('test', 'grid')).toEqual({});
+    });
+});
 
-        await expect(empty.controller.insertFloatImage()).resolves.toBe(false);
-        await expect(empty.controller.insertCellImage()).resolves.toBe(false);
-        expect((empty.controller as any)._messageService.show).not.toHaveBeenCalled();
-        empty.controller.dispose();
+it('keeps real GRID transform, arrange, grouping and focus event consumers coherent without persisting derived group flags', async () => {
+    const bed = createChartDrawingTestBed();
+    bed.activate('grid');
+    bed.commandService.registerCommand(GroupSheetDrawingCommand);
+    bed.commandService.registerCommand(UngroupSheetDrawingCommand);
+    const first = createAbsoluteChart('first', 'grid');
+    const second = createAbsoluteChart('second', 'grid');
+    expect(await bed.commandService.executeCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [first, second] })).toBe(true);
+    bed.drawingManager.featurePluginUpdateNotification([{ unitId: 'test', subUnitId: 'grid', drawingId: 'first', drawingType: DrawingTypeEnum.DRAWING_CHART, transform: { left: 200, top: 150 } }]);
+    await Promise.resolve();
+    const search = { unitId: 'test', subUnitId: 'grid', drawingId: 'first' };
+    expect(bed.drawings.getDrawingByParam(search)!.transform).toMatchObject({ left: 200, top: 150, width: 200, height: 140 });
+    bed.drawingManager.featurePluginOrderUpdateNotification({ unitId: 'test', subUnitId: 'grid', drawingIds: ['first'], arrangeType: ArrangeTypeEnum.front });
+    await Promise.resolve();
+    expect(bed.drawings.getDrawingOrder('test', 'grid')).toEqual(['second', 'first']);
+    bed.drawingManager.focusDrawing([search]);
+    expect(bed.get(IContextService).getContextValue(FOCUSING_COMMON_DRAWINGS)).toBe(true);
+    expect(bed.drawings.getFocusDrawings()).toEqual([expect.objectContaining(search)]);
+    bed.drawingManager.focusDrawing([]);
+    expect(bed.get(IContextService).getContextValue(FOCUSING_COMMON_DRAWINGS)).toBe(false);
+    const parent = { unitId: 'test', subUnitId: 'grid', drawingId: 'group', drawingType: DrawingTypeEnum.DRAWING_GROUP, transform: { left: 100, top: 100, width: 400, height: 300 } };
+    const children = [bed.drawings.getDrawingByParam(search)!, second];
+    bed.drawingManager.featurePluginGroupUpdateNotification([{ parent, children: children.map((child) => ({ ...child, groupId: 'group' })) }]);
+    await Promise.resolve();
+    const group = bed.drawings.getDrawingByParam({ ...search, drawingId: 'group' })!;
+    expect(group).toBeDefined();
+    expect(group.transform).not.toHaveProperty('rotateEnabled');
+    expect(bed.drawings.getDrawingsByGroup({ ...search, drawingId: 'group' })).toHaveLength(2);
+    bed.drawingManager.featurePluginUngroupUpdateNotification([{ parent: group, children: children.map((child) => ({ ...child, groupId: undefined })) }]);
+    await Promise.resolve();
+    expect(bed.drawings.getDrawingByParam({ ...search, drawingId: 'group' })).toBeUndefined();
+    expect(bed.drawings.getDrawingByParam(search)!.groupId).toBeUndefined();
+});
 
-        const overLimitFiles = Array.from({ length: 30 }, (_, index) => ({ name: `image-${index}.png` }));
-        const overLimit = createController({ openFiles: overLimitFiles });
+it('commits actual None feature updates through both stores, full save/reopen and undo/redo without a grid', async () => {
+    const bed = createChartDrawingTestBed(undefined, createAbsoluteChart());
+    const search = { unitId: 'test', subUnitId: 'chart', drawingId: 'child' };
+    const before = bed.drawings.getDrawingByParam(search)!;
+    bed.drawingManager.featurePluginUpdateNotification([{ ...search, drawingType: DrawingTypeEnum.DRAWING_CHART, transform: { left: 210, top: 180, width: 330, height: 220 } }]);
+    await Promise.resolve();
+    const changed = bed.drawings.getDrawingByParam(search)!;
+    expect(changed.transform).toMatchObject({ ...before.transform, left: 210, top: 180, width: 330, height: 220 });
+    expect(changed.sheetTransform.from).toEqual({ row: 0, column: 0, columnOffset: 210, rowOffset: 180 });
+    expect(bed.drawingManager.getDrawingByParam(search)).toEqual(changed);
+    expect(bed.manager.getFloatDomInfo('child')!.rect.width).toBe(330);
+    expect(bed.manager.getFloatDomInfo('child')!.rect.left).toBe(210);
+    expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
+    expect(bed.drawings.getDrawingByParam(search)).toEqual(before);
+    expect(await bed.commandService.executeCommand(RedoCommand.id)).toBe(true);
+    expect(bed.drawings.getDrawingByParam(search)).toEqual(changed);
+    const reopened = createChartDrawingTestBed(bed.save());
+    expect(reopened.drawings.getDrawingByParam(search)).toEqual(changed);
+    expect(reopened.drawingManager.getDrawingByParam(search)).toEqual(changed);
+    expect(reopened.skeletons.ensureSkeleton('test', 'chart')).toBeUndefined();
+});
 
-        await expect(overLimit.controller.insertFloatImage()).resolves.toBe(false);
-
-        expect((overLimit.controller as any)._messageService.show).toHaveBeenCalledWith({
-            type: MessageType.Error,
-            content: expect.stringContaining('sheets-drawing-ui.update-status.exceedMaxCount'),
+describe('target-bound image insertion', () => {
+    function imageBed() {
+        const bed = createChartDrawingTestBed();
+        const frame = new Rect('test-page', { left: 500, top: 100, width: 300, height: 300 });
+        bed.render.scene.transformByState({ width: 800, height: 600 });
+        bed.render.scene.addObject(frame);
+        bed.render.components.set('__ChartSheetPage__', frame);
+        const imageConstructor = vi.spyOn(globalThis, 'Image').mockImplementation(function () {
+            const image = document.createElement('img');
+            image.width = 600;
+            image.height = 300;
+            queueMicrotask(() => image.dispatchEvent(new Event('load')));
+            return image;
         });
-        expect(overLimit.commandService.executeCommand).not.toHaveBeenCalled();
-        overLimit.controller.dispose();
+        onTestFinished(() => imageConstructor.mockRestore());
+        const io = bed.get(IImageIoService);
+        const upload = vi.spyOn(io, 'saveImage').mockResolvedValue({ imageId: 'new-image', imageSourceType: ImageSourceType.BASE64, source: 'data:image/png;base64,test', base64Cache: 'data:image/png;base64,test', status: ImageUploadStatusType.SUCCUSS });
+        const controller = bed.render.with(SheetDrawingUpdateController);
+        const file = new File(['png'], 'test.png', { type: 'image/png' });
+        return { ...bed, controller, file, upload, frame };
+    }
+
+    it('inserts a resource-backed image inside a nonzero Chart page without a skeleton and replays it', async () => {
+        const bed = imageBed();
+        expect(await bed.controller.insertFloatImageByFile(bed.file)).toBe(true);
+        const search = { unitId: 'test', subUnitId: 'chart', drawingId: 'new-image' };
+        const image = bed.drawings.getDrawingByParam(search)!;
+        expect(image).toBeDefined();
+        expect(image.anchorType).toBe(SheetDrawingAnchorType.None);
+        expect(image.transform).toMatchObject({ left: 500, top: 175, width: 300, height: 150 });
+        expect(bed.skeletons.ensureSkeleton('test', 'chart')).toBeUndefined();
+        expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(bed.drawings.getDrawingByParam(search)).toBeUndefined();
+        expect(await bed.commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(bed.drawings.getDrawingByParam(search)).toEqual(image);
+        const reopened = createChartDrawingTestBed(bed.save());
+        expect(reopened.drawings.getDrawingByParam(search)).toEqual(image);
     });
 
-    it('converts drawing transform updates into sheet drawing commands', () => {
-        const { controller, commandService, featurePluginUpdate$ } = createController();
-
-        featurePluginUpdate$.next([{
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            drawingId: 'image-1',
-            transform: { left: 25, top: 45 },
-        }]);
-
-        expect(commandService.executeCommand).toHaveBeenCalledWith(SetSheetDrawingCommand.id, {
-            unitId: 'unit-1',
-            drawings: [
-                expect.objectContaining({
-                    drawingId: 'image-1',
-                    transform: expect.objectContaining({ left: 25, top: 45, width: 30, height: 40 }),
-                    sheetTransform: expect.objectContaining({
-                        from: { row: 2, column: 2, rowOffset: 5, columnOffset: 5 },
-                        to: { row: 4, column: 5, rowOffset: 5, columnOffset: 5 },
-                    }),
-                }),
-            ],
-        });
-
-        controller.dispose();
+    it.each(['switch', 'permission', 'permission-restore', 'render', 'delete'] as const)('cancels a captured Chart image after upload on %s', async (change) => {
+        const bed = imageBed();
+        let finish!: (value: Awaited<ReturnType<typeof bed.upload>>) => void;
+        bed.upload.mockImplementation(() => new Promise((done) => {
+            finish = done;
+        }));
+        const pending = bed.controller.insertFloatImageByFile(bed.file);
+        if (change === 'switch') {
+            bed.activate('grid');
+        }
+        if (change === 'permission' || change === 'permission-restore') {
+            bed.get(IPermissionService).updatePermissionPoint(new WorksheetEditPermission('test', 'chart').id, false);
+        }
+        if (change === 'permission-restore') {
+            bed.get(IPermissionService).updatePermissionPoint(new WorksheetEditPermission('test', 'chart').id, true);
+        }
+        if (change === 'render') {
+            bed.renders.removeRender('test');
+        }
+        if (change === 'delete') {
+            bed.workbook.removeSheet('chart');
+        }
+        finish({ imageId: 'new-image', imageSourceType: ImageSourceType.BASE64, source: 'data:image/png;base64,test', base64Cache: 'data:image/png;base64,test', status: ImageUploadStatusType.SUCCUSS });
+        expect(await pending).toBe(false);
+        expect(bed.drawings.getDrawingData('test', 'chart')).toEqual({});
+        expect(bed.drawings.getDrawingData('test', 'grid')).toEqual({});
     });
 
-    it('forwards arrange, group, ungroup and focus drawing events to sheet services', () => {
-        const {
-            controller,
-            commandService,
-            sheetDrawingService,
-            featurePluginOrderUpdate$,
-            featurePluginGroupUpdate$,
-            featurePluginUngroupUpdate$,
-            focus$,
-        } = createController();
-        const parent = {
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            drawingId: 'group-1',
-            transform: { left: 0, top: 0, width: 40, height: 40 },
-        };
-        const child = {
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            drawingId: 'image-1',
-            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
-            transform: { left: 10, top: 20, width: 30, height: 40 },
-        };
-
-        featurePluginOrderUpdate$.next({
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            drawingIds: ['image-1'],
-            arrangeType: 'front',
+    it('captures the host before the picker and awaits every file with truthful partial cancellation', async () => {
+        const bed = imageBed();
+        let finishPicker!: (files: File[]) => void;
+        vi.spyOn(bed.get(ILocalFileService), 'openFile').mockImplementationOnce(() => new Promise((done) => {
+            finishPicker = done;
+        }));
+        const switched = bed.controller.insertFloatImage();
+        bed.activate('grid');
+        finishPicker([bed.file]);
+        expect(await switched).toBe(false);
+        expect(bed.upload).not.toHaveBeenCalled();
+        bed.activate('chart');
+        let finishUpload!: (value: Awaited<ReturnType<typeof bed.upload>>) => void;
+        bed.upload.mockResolvedValueOnce({ imageId: 'completed', imageSourceType: ImageSourceType.BASE64, source: 'data:image/png;base64,test', base64Cache: 'data:image/png;base64,test', status: ImageUploadStatusType.SUCCUSS });
+        bed.upload.mockImplementationOnce(() => new Promise((done) => {
+            finishUpload = done;
+        }));
+        vi.spyOn(bed.get(ILocalFileService), 'openFile').mockResolvedValue([bed.file, bed.file]);
+        const completed = new Promise<void>((done) => {
+            const listener = bed.commandService.onCommandExecuted((command) => {
+                if (command.id === InsertSheetDrawingCommand.id) {
+                    listener.dispose();
+                    done();
+                }
+            });
         });
-        featurePluginGroupUpdate$.next([{ parent, children: [child] }]);
-        featurePluginUngroupUpdate$.next([{ parent, children: [child] }]);
-        focus$.next([{ unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'image-1' }]);
-        focus$.next([]);
-
-        expect(commandService.executeCommand).toHaveBeenCalledWith(SetDrawingArrangeCommand.id, {
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            drawingIds: ['image-1'],
-            arrangeType: 'front',
-        });
-        expect(commandService.executeCommand).toHaveBeenCalledWith(GroupSheetDrawingCommand.id, [
-            expect.objectContaining({
-                parent: expect.objectContaining({ drawingId: 'group-1', sheetTransform: expect.any(Object) }),
-                children: [expect.objectContaining({ drawingId: 'image-1', sheetTransform: expect.any(Object) })],
-            }),
-        ]);
-        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(SetDrawingSelectedOperation.id, [{
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            drawingId: 'group-1',
-        }]);
-        expect(commandService.executeCommand).toHaveBeenCalledWith(UngroupSheetDrawingCommand.id, [
-            expect.objectContaining({
-                children: [expect.objectContaining({ drawingId: 'image-1', sheetTransform: expect.any(Object) })],
-            }),
-        ]);
-        expect((controller as any)._contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_COMMON_DRAWINGS, true);
-        expect((controller as any)._contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_COMMON_DRAWINGS, false);
-        expect(sheetDrawingService.focusDrawing).toHaveBeenLastCalledWith([]);
-
-        controller.dispose();
+        const partial = bed.controller.insertFloatImage();
+        await completed;
+        expect(bed.drawings.getDrawingByParam({ unitId: 'test', subUnitId: 'chart', drawingId: 'completed' })).toBeDefined();
+        bed.activate('grid');
+        finishUpload({ imageId: 'cancelled', imageSourceType: ImageSourceType.BASE64, source: 'data:image/png;base64,test', base64Cache: 'data:image/png;base64,test', status: ImageUploadStatusType.SUCCUSS });
+        expect(await partial).toBe(false);
+        expect(Object.keys(bed.drawings.getDrawingData('test', 'chart'))).toEqual(['completed']);
+        expect(bed.drawings.getDrawingData('test', 'grid')).toEqual({});
+        expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(bed.drawings.getDrawingData('test', 'chart')).toEqual({});
     });
 
-    it('does not persist derived group rotateEnabled before grouping', () => {
-        const {
-            controller,
-            commandService,
-            featurePluginGroupUpdate$,
-        } = createController();
-        const parent = {
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            drawingId: 'group-1',
-            drawingType: DrawingTypeEnum.DRAWING_GROUP,
-            transform: { left: 0, top: 0, width: 80, height: 40 },
-        };
-        const children = [
-            {
-                unitId: 'unit-1',
-                subUnitId: 'sheet-1',
-                drawingId: 'image-1',
-                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
-                transform: { left: 10, top: 20, width: 30, height: 40 },
-            },
-            {
-                unitId: 'unit-1',
-                subUnitId: 'sheet-1',
-                drawingId: 'chart-1',
-                drawingType: DrawingTypeEnum.DRAWING_CHART,
-                transform: { left: 40, top: 20, width: 30, height: 40 },
-            },
-        ];
+    it('awaits every file when a real insertion command notification throws and retains each completed history entry', async () => {
+        const bed = imageBed();
+        vi.spyOn(bed.get(ILocalFileService), 'openFile').mockResolvedValue([bed.file, bed.file]);
+        let finishUpload!: (value: Awaited<ReturnType<typeof bed.upload>>) => void;
+        bed.upload.mockResolvedValueOnce({ imageId: 'first', imageSourceType: ImageSourceType.BASE64, source: 'data:image/png;base64,test', base64Cache: 'data:image/png;base64,test', status: ImageUploadStatusType.SUCCUSS });
+        bed.upload.mockImplementationOnce(() => new Promise((done) => {
+            finishUpload = done;
+        }));
+        const listener = bed.commandService.onCommandExecuted((command) => {
+            if (command.id === InsertSheetDrawingCommand.id && (command.params as { drawings: { drawingId: string }[] }).drawings[0].drawingId === 'first') {
+                throw new Error('External insertion notification failed');
+            }
+        });
+        onTestFinished(() => listener.dispose());
+        let state = 'pending';
+        const pending = bed.controller.insertFloatImage().then((value) => {
+            state = 'fulfilled';
+            return value;
+        }, (error: unknown) => {
+            state = 'rejected';
+            return error;
+        });
+        await vi.advanceTimersByTimeAsync(1);
+        expect(bed.drawings.getDrawingByParam({ unitId: 'test', subUnitId: 'chart', drawingId: 'first' })).toBeDefined();
+        expect(state).toBe('pending');
+        finishUpload({ imageId: 'second', imageSourceType: ImageSourceType.BASE64, source: 'data:image/png;base64,test', base64Cache: 'data:image/png;base64,test', status: ImageUploadStatusType.SUCCUSS });
+        expect(await pending).toBe(false);
+        expect(Object.keys(bed.drawings.getDrawingData('test', 'chart'))).toEqual(['first', 'second']);
+        expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(Object.keys(bed.drawings.getDrawingData('test', 'chart'))).toEqual(['first']);
+        expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(bed.drawings.getDrawingData('test', 'chart')).toEqual({});
+    });
 
-        featurePluginGroupUpdate$.next([{ parent, children }]);
+    it('fails before upload when the Chart page is missing or outside the viewport', async () => {
+        const bed = imageBed();
+        bed.frame.transformByState({ left: 2000 });
+        expect(await bed.controller.insertFloatImageByFile(bed.file)).toBe(false);
+        bed.render.components.delete('__ChartSheetPage__');
+        expect(await bed.controller.insertFloatImageByFile(bed.file)).toBe(false);
+        expect(bed.upload).not.toHaveBeenCalled();
+    });
 
-        expect(commandService.executeCommand).toHaveBeenCalledWith(GroupSheetDrawingCommand.id, [
-            expect.objectContaining({
-                parent: expect.objectContaining({
-                    drawingId: 'group-1',
-                }),
-            }),
-        ]);
-        const groupCommandParams = commandService.executeCommand.mock.calls.find(([commandId]) => commandId === GroupSheetDrawingCommand.id)?.[1] as any[];
-        expect(Object.prototype.hasOwnProperty.call(groupCommandParams[0].parent.transform ?? {}, 'rotateEnabled')).toBe(false);
+    it.each(['file', 'url'] as const)('rejects an explicit Chart cell target before %s IO while GRID is active', async (method) => {
+        const bed = imageBed();
+        bed.activate('grid');
+        const network = vi.spyOn(bed.get(IURLImageService), 'getImage');
+        const location = { unitId: 'test', subUnitId: 'chart', row: 0, col: 0 };
+        const result = method === 'file' ? await bed.controller.insertCellImageByFile(bed.file, location) : await bed.controller.insertCellImageByUrl('https://example.test/p.png', location);
+        expect(result).toBe(false);
+        expect(bed.upload).not.toHaveBeenCalled();
+        expect(network).not.toHaveBeenCalled();
+    });
 
-        controller.dispose();
+    it.each(['file', 'url'] as const)('inserts into an explicit GRID cell while CHART is active through %s', async (method) => {
+        const bed = imageBed();
+        bed.skeletons.ensureSkeleton('test', 'grid');
+        vi.spyOn(bed.get(IURLImageService), 'getImage').mockResolvedValue('data:image/png;base64,test');
+        const location = { unitId: 'test', subUnitId: 'grid', row: 3, col: 4 };
+        const result = method === 'file' ? await bed.controller.insertCellImageByFile(bed.file, location) : await bed.controller.insertCellImageByUrl('https://example.test/p.png', location);
+        expect(result).toBe(true);
+        expect(bed.workbook.getSheetBySheetId('grid')!.getCell(3, 4)?.p?.drawings).toBeDefined();
+        expect(bed.workbook.getSheetBySheetId('chart')!.getCellMatrix().getMatrix()).toEqual({});
     });
 });

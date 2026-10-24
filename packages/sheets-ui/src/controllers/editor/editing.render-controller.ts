@@ -36,9 +36,6 @@ import type {
     ISetWorksheetActivateCommandParams,
     MutationsAffectRange,
 } from '@univerjs/sheets';
-import type { IDocObjectParam } from '../../basics/editor/get-editor-object';
-import type { IUniverSheetsUIConfig } from '../../config/config';
-import type { ICellEditorState, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
     BooleanNumber,
     CellValueType,
@@ -86,7 +83,12 @@ import {
     VIEWPORT_KEY,
 } from '@univerjs/docs-ui';
 import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
-import { convertTextRotation, DeviceInputEventType, IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
+import {
+    convertTextRotation,
+    DeviceInputEventType,
+    IRenderManagerService,
+    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+} from '@univerjs/engine-render';
 import {
     adjustRangeOnMutation,
     COMMAND_LISTENER_SKELETON_CHANGE,
@@ -109,7 +111,9 @@ import {
 } from '@univerjs/sheets';
 import { DISABLE_AUTO_FOCUS_KEY, KeyCode, MetaKeys } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
-
+import type { IDocObjectParam } from '../../basics/editor/get-editor-object';
+import type { IUniverSheetsUIConfig } from '../../config/config';
+import type { ICellEditorState, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
 import {
@@ -745,6 +749,11 @@ export class EditingRenderController extends Disposable {
         const currentUnitId = editCellState?.unitId ?? '';
         this._exitInput(param);
         if (editCellState == null) {
+            return;
+        }
+
+        if (keycode === KeyCode.ESC && param.restoreEditSheet === false) {
+            this._editorBridgeService.disableForceKeepVisible();
             return;
         }
 

@@ -15,13 +15,20 @@
  */
 
 import type { IAccessor, ICommand, IRange } from '@univerjs/core';
+import {
+    CommandType,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    sequenceExecute,
+} from '@univerjs/core';
 import type { IReorderRangeMutationParams } from '../mutations/reorder-range.mutation';
 import type { ISheetCommandSharedParams } from '../utils/interface';
-import { CommandType, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SheetSkeletonService } from '../../skeleton/skeleton.service';
 import { ReorderRangeMutation, ReorderRangeUndoMutationFactory } from '../mutations/reorder-range.mutation';
 import { getSuitableRangesInView } from './util';
+import { getSheetGridCommandTarget } from './utils/target-util';
 
 export interface IReorderRangeCommandParams extends ISheetCommandSharedParams {
     range: IRange;
@@ -34,6 +41,9 @@ export const ReorderRangeCommand: ICommand<IReorderRangeCommandParams> = {
     id: ReorderRangeCommandId,
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params: IReorderRangeCommandParams) => {
+        if (!getSheetGridCommandTarget(accessor.get(IUniverInstanceService), params)) {
+            return false;
+        }
         const { subUnitId, unitId, range, order } = params;
         const commandService = accessor.get(ICommandService);
 

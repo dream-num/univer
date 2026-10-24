@@ -19,11 +19,22 @@
  */
 
 import type { ComponentType, ReactElement } from 'react';
-import type { IFloatDom, IFloatDomLayout } from '../../../../services/dom/canvas-dom-layer.service';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { Injector, IUniverInstanceService } from '@univerjs/core';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+    ContextService,
+    DesktopLogService,
+    IContextService,
+    ILogService,
+    Injector,
+    IUniverInstanceService,
+    ThemeService,
+    UniverInstanceService,
+    Workbook,
+} from '@univerjs/core';
+import { CanvasColorService, ICanvasColorService, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { IFloatDom, IFloatDomLayout } from '../../../../services/dom/canvas-dom-layer.service';
 import { CanvasFloatDomService } from '../../../../services/dom/canvas-dom-layer.service';
 import { connectInjector } from '../../../../utils/di';
 import { FloatDom, FloatDomSingle, resolveFloatDomCurrentUnitId, resolveFloatDomOverflow } from '../FloatDom';
@@ -32,15 +43,24 @@ function TestFloatDomContent(_props: { hostFloatDomLayout$?: IFloatDom['position
     return <div>float content</div>;
 }
 
-function renderWithDependencies(element: ReactElement, focusedUnit: unknown = null) {
+const testInjectors: Injector[] = [];
+
+function renderWithDependencies(element: ReactElement, focusedUnitId: string | null = null) {
     const injector = new Injector();
+    testInjectors.push(injector);
     injector.add([CanvasFloatDomService]);
-    injector.add([IUniverInstanceService, {
-        useValue: {
-            focused$: new BehaviorSubject(focusedUnit) as never,
-            getUnit: () => undefined,
-        } as never,
-    }]);
+    injector.add([ThemeService]);
+    injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    injector.add([IContextService, { useClass: ContextService }]);
+    injector.add([ILogService, { useClass: DesktopLogService }]);
+    injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
+    if (focusedUnitId) {
+        const workbook = injector.createInstance(Workbook, { id: focusedUnitId });
+        const instances = injector.get(IUniverInstanceService);
+        instances.__addUnit(workbook);
+        instances.focusUnit(workbook.getUnitId());
+    }
 
     const ConnectedTestRoot = connectInjector(() => element, injector) as ComponentType;
     const result = render(<ConnectedTestRoot />);
@@ -73,6 +93,16 @@ function createFloatDom(): IFloatDom {
     };
 }
 
+afterEach(() => {
+    cleanup();
+    for (const injector of testInjectors) {
+        injector.dispose();
+    }
+    testInjectors.length = 0;
+    vi.restoreAllMocks();
+    document.body.innerHTML = '';
+});
+
 describe('resolveFloatDomOverflow', () => {
     it('keeps regular float dom layers clipped', () => {
         expect(resolveFloatDomOverflow({})).toEqual({
@@ -103,10 +133,6 @@ describe('resolveFloatDomCurrentUnitId', () => {
 });
 
 describe('FloatDomSingle', () => {
-    afterEach(() => {
-        document.body.innerHTML = '';
-    });
-
     it('renders an existing BehaviorSubject position without waiting for a later movement event', async () => {
         renderWithDependencies(<FloatDomSingle id="dom-1" layer={createFloatDom()} />);
 
@@ -178,6 +204,100 @@ describe('FloatDomSingle', () => {
 
         fireEvent.pointerDown(inner);
         expect(onPointerDown).toHaveBeenCalledOnce();
+    });
+
+    it('keeps the native descendant as capture owner when a forwarded canvas down requests capture', async () => {
+        const canvas = document.createElement('canvas');
+        let captureOwner: Element | undefined;
+        canvas.setPointerCapture = () => {
+            captureOwner = canvas;
+        };
+        canvas.addEventListener('pointerdown', () => canvas.setPointerCapture(7));
+        const layer = {
+            ...createFloatDom(),
+            onPointerDown: () => canvas.dispatchEvent(new Event('pointerdown')),
+        };
+        renderWithDependencies(<FloatDomSingle id="dom-1" layer={layer} />);
+
+        const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
+        inner.setPointerCapture = () => {
+            captureOwner = inner;
+        };
+
+        fireEvent.pointerDown(inner, { pointerId: 7 });
+
+        expect(captureOwner).toBe(inner);
+    });
+
+    it.each(['removed', 'replaced'] as const)(
+        'keeps the forwarded canvas capture when its native descendant is synchronously %s',
+        async (change) => {
+            const canvas = document.createElement('canvas');
+            const descendant = document.createElement('canvas');
+            const replacement = document.createElement('canvas');
+            document.body.appendChild(canvas);
+            let captureOwner: Element | undefined;
+            // jsdom does not implement the native pointer capture API.
+            canvas.setPointerCapture = () => {
+                captureOwner = canvas;
+            };
+            const captureDetachedDescendant = vi.fn(() => {
+                if (!descendant.isConnected) {
+                    throw new DOMException('Cannot capture a disconnected descendant', 'InvalidStateError');
+                }
+                captureOwner = descendant;
+            });
+            descendant.setPointerCapture = captureDetachedDescendant;
+            canvas.addEventListener('pointerdown', () => canvas.setPointerCapture(7));
+            const layer = {
+                ...createFloatDom(),
+                onPointerDown: (event: PointerEvent | MouseEvent) => {
+                    canvas.dispatchEvent(new Event(event.type));
+                    if (change === 'replaced') {
+                        descendant.replaceWith(replacement);
+                    } else {
+                        descendant.remove();
+                    }
+                },
+            };
+            renderWithDependencies(<FloatDomSingle id="dom-1" layer={layer} />);
+            const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
+            inner.appendChild(descendant);
+            const wrapper = inner.parentElement as HTMLDivElement;
+            const captureOnWrapper = vi.fn();
+            wrapper.setPointerCapture = captureOnWrapper;
+
+            fireEvent.pointerDown(descendant, { pointerId: 7 });
+
+            expect(descendant.isConnected).toBe(false);
+            expect(inner.isConnected).toBe(true);
+            if (change === 'replaced') {
+                expect(replacement.parentElement).toBe(inner);
+            }
+            expect(captureDetachedDescendant).not.toHaveBeenCalled();
+            expect(captureOnWrapper).not.toHaveBeenCalled();
+            expect(captureOwner).toBe(canvas);
+        }
+    );
+
+    it('forwards a real wrapper leave to the canvas and removes the listener on unmount', async () => {
+        const canvas = document.createElement('canvas');
+        const canvasLeave = vi.fn();
+        canvas.addEventListener('pointerleave', canvasLeave);
+        const layer = {
+            ...createFloatDom(),
+            onPointerMove: (event: PointerEvent | MouseEvent) => canvas.dispatchEvent(new Event(event.type)),
+        };
+        const { unmount } = renderWithDependencies(<FloatDomSingle id="dom-1" layer={layer} />);
+        const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
+        const wrapper = inner.parentElement as HTMLDivElement;
+
+        fireEvent.pointerLeave(wrapper, { pointerId: 7 });
+        expect(canvasLeave).toHaveBeenCalledOnce();
+
+        unmount();
+        fireEvent.pointerLeave(wrapper, { pointerId: 7 });
+        expect(canvasLeave).toHaveBeenCalledOnce();
     });
 
     it('captures forwarded pointers on the original descendant and finishes cancelled canvas gestures', async () => {
@@ -266,14 +386,8 @@ describe('FloatDomSingle', () => {
 });
 
 describe('FloatDom', () => {
-    afterEach(() => {
-        document.body.innerHTML = '';
-    });
-
-    it('renders layers for the focused unit when focused$ emits a unit object', async () => {
-        const rendered = renderWithDependencies(<FloatDom />, {
-            getUnitId: () => 'doc-1',
-        });
+    it('renders layers for the real focused unit', async () => {
+        const rendered = renderWithDependencies(<FloatDom />, 'doc-1');
         rendered.injector.get(CanvasFloatDomService).addFloatDom(createFloatDom());
 
         await waitFor(() => expect(screen.getByText('float content')).not.toBeNull());
@@ -298,7 +412,7 @@ describe('FloatDom', () => {
                 <div data-testid="global-root"><FloatDom /></div>
                 <div data-testid="scoped-root"><FloatDom unitId="doc-1" /></div>
             </>,
-            { getUnitId: () => 'doc-1' }
+            'doc-1'
         );
 
         act(() => rendered.injector.get(CanvasFloatDomService).addFloatDom(createFloatDom()));
@@ -326,5 +440,128 @@ describe('FloatDom', () => {
 
         await waitFor(() => expect(wrapper.style.width).toBe('100px'));
         expect(inner.style.width).toBe('100px');
+    });
+});
+
+describe('FloatDom logical canvas boundary', () => {
+    async function createBoundaryFixture() {
+        // jsdom has no 2D drawing platform; all ownership and event delivery stay real.
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
+            return { canvas: this, setTransform: () => {}, clearRect: () => {} } as unknown as CanvasRenderingContext2D;
+        });
+        const rendered = renderWithDependencies(
+            <>
+                <FloatDom unitId="doc-1" />
+                <FloatDom unitId="foreign-doc" />
+            </>,
+            'doc-1'
+        );
+        const layers = rendered.injector.get(CanvasFloatDomService);
+        act(() => {
+            for (const id of ['current', 'sibling', 'interactive', 'foreign']) {
+                layers.addFloatDom({
+                    ...createFloatDom(),
+                    id,
+                    unitId: id === 'foreign' ? 'foreign-doc' : 'doc-1',
+                    eventPassThrough: id !== 'interactive',
+                    onPointerMove: (event) => {
+                        const canvas = rendered.injector.get(IRenderManagerService)
+                            .getRenderUnitById('doc-1')
+                            ?.engine
+                            .getCanvasElement();
+                        canvas?.dispatchEvent(new MouseEvent(event.type, { relatedTarget: event.relatedTarget }));
+                    },
+                });
+            }
+        });
+        await waitFor(() => expect(document.getElementById('sibling')).not.toBeNull());
+        const manager = rendered.injector.get(IRenderManagerService);
+        function createCanvas() {
+            const renderUnit = manager.createRender('doc-1');
+            const host = document.createElement('div');
+            document.body.appendChild(host);
+            renderUnit.engine.mount(host, false);
+            const leaves: string[] = [];
+            const subscription = renderUnit.engine.onInputChanged$.subscribeEvent((event) => {
+                if (event.type === 'pointerleave') {
+                    leaves.push(event.type);
+                }
+            });
+            return { canvas: renderUnit.engine.getCanvasElement(), leaves, subscription };
+        }
+        const main = createCanvas();
+        const inner = (id: string) => document.getElementById(id)!;
+        const wrapper = inner('current').parentElement!;
+        return { ...rendered, layers, manager, inner, wrapper, main, createCanvas };
+    }
+
+    it.each(['current', 'sibling'] as const)(
+        'does not deliver a logical exit when the canvas enters its live %s passthrough layer',
+        async (id) => {
+            const { main, inner } = await createBoundaryFixture();
+
+            fireEvent(main.canvas, new MouseEvent('pointerleave', { relatedTarget: inner(id) }));
+
+            expect(main.leaves).toEqual([]);
+            main.subscription.unsubscribe();
+        }
+    );
+
+    it.each(['canvas', 'sibling'] as const)(
+        'does not forward a logical exit when a wrapper enters its owned %s',
+        async (destination) => {
+            const { main, inner, wrapper } = await createBoundaryFixture();
+            const target = destination === 'canvas' ? main.canvas : inner('sibling');
+
+            fireEvent(wrapper, new MouseEvent('pointerleave', { relatedTarget: target }));
+
+            expect(main.leaves).toEqual([]);
+            main.subscription.unsubscribe();
+        }
+    );
+
+    it.each(['foreign', 'interactive', 'outside'] as const)(
+        'retains real canvas and wrapper exits toward %s',
+        async (destination) => {
+            const { main, inner, wrapper } = await createBoundaryFixture();
+            const target = destination === 'outside' ? document.body : inner(destination);
+
+            fireEvent(main.canvas, new MouseEvent('pointerleave', { relatedTarget: target }));
+            fireEvent(wrapper, new MouseEvent('pointerleave', { relatedTarget: target }));
+
+            expect(main.leaves).toEqual(['pointerleave', 'pointerleave']);
+            main.subscription.unsubscribe();
+        }
+    );
+
+    it('uses the current layer registry when passthrough ownership changes', async () => {
+        const { main, inner, layers } = await createBoundaryFixture();
+        act(() => layers.updateFloatDom('sibling', { eventPassThrough: false }));
+
+        fireEvent(main.canvas, new MouseEvent('pointerleave', { relatedTarget: inner('sibling') }));
+
+        expect(main.leaves).toEqual(['pointerleave']);
+        main.subscription.unsubscribe();
+    });
+
+    it('binds newly created renders and releases old canvas listeners on disposal and unmount', async () => {
+        const { main, inner, manager, createCanvas, unmount } = await createBoundaryFixture();
+        const target = inner('current');
+        const oldDelivery = vi.fn();
+        main.canvas.addEventListener('pointerleave', oldDelivery);
+        manager.removeRender('doc-1');
+
+        fireEvent(main.canvas, new MouseEvent('pointerleave', { relatedTarget: target }));
+        expect(oldDelivery).toHaveBeenCalledOnce();
+        main.subscription.unsubscribe();
+
+        const replacement = createCanvas();
+        fireEvent(replacement.canvas, new MouseEvent('pointerleave', { relatedTarget: target }));
+        expect(replacement.leaves).toEqual([]);
+
+        unmount();
+        fireEvent(replacement.canvas, new MouseEvent('pointerleave', { relatedTarget: target }));
+        expect(replacement.leaves).toEqual(['pointerleave']);
+        replacement.subscription.unsubscribe();
     });
 });

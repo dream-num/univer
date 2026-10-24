@@ -15,6 +15,7 @@
  */
 
 import type { IWorksheetData } from './typedef';
+import { SheetTypes } from '../types/enum/sheet-types';
 import { BooleanNumber } from '../types/enum/text-style';
 
 // TODO@wzhudev: default value should not be exposed, but the keys.
@@ -46,6 +47,7 @@ export const DEFAULT_WORKSHEET_COLUMN_TITLE_HEIGHT = 20;
  */
 export function mergeWorksheetSnapshotWithDefault(snapshot: Partial<IWorksheetData>): IWorksheetData {
     const defaultSnapshot: IWorksheetData = {
+        type: SheetTypes.GRID,
         name: 'Sheet1', // TODO: name should have i18n
         id: 'sheet-01',
         tabColor: '',

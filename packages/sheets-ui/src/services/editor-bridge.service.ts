@@ -29,6 +29,7 @@ import {
     IContextService,
     Inject,
     IUniverInstanceService,
+    SheetTypes,
     ThemeService,
     toDisposable,
     UniverInstanceType,
@@ -56,6 +57,8 @@ export interface IEditorBridgeServiceVisibleParam {
     eventType: DeviceInputEventType;
     unitId: string;
     keycode?: KeyCode;
+    /** Restore the captured edit sheet on close by default; false cancels an invalid owner during Chart activation. */
+    restoreEditSheet?: boolean;
     isShift?: boolean;
     initialValue?: string;
     pointerPosition?: { x: number; y: number };
@@ -174,11 +177,11 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             this._currentEditCell = null;
         }));
 
-        this._univerInstanceService.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {
+        this.disposeWithMe(this._univerInstanceService.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {
             if (unit.getUnitId() === this._currentEditCellState?.unitId) {
                 this._clearCurrentEditCellState();
             }
-        });
+        }));
     }
 
     refreshEditCellState() {
@@ -264,6 +267,11 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     }
 
     setEditCell(param: ICurrentEditCellParam) {
+        const workbook = this._getWorkbookForEditUnit(param.unitId);
+        if (workbook?.getActiveSheet()?.getConfig().type === SheetTypes.CHART ||
+            workbook?.getSheetBySheetId(param.sheetId)?.getConfig().type === SheetTypes.CHART) {
+            return;
+        }
         this._currentEditCell = param;
 
         /**
@@ -476,6 +484,9 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     }
 
     changeVisible(params: IEditorBridgeServiceVisibleParam) {
+        if (params.visible && this._getWorkbookForEditUnit(params.unitId)?.getActiveSheet()?.getConfig().type === SheetTypes.CHART) {
+            return;
+        }
         this._visibleParams = params;
 
         // Reset the dirty status when the editor is visible.

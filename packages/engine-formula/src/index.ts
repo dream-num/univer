@@ -232,6 +232,7 @@ export {
     isFormulaReferenceAddingTextContext,
     resolveFormulaReferenceEditingContext,
     searchFormulaFunctions,
+    shouldSkipReferenceInsertion,
 } from './formula-editor-helpers';
 export type {
     FormulaReferenceEditingMode,

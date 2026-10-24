@@ -122,7 +122,11 @@ export function resolveFormulaSelectingIntent(adding: boolean, editing: boolean)
 }
 
 export function shouldAddFormulaReference(dataStream: string, index: number): boolean {
-    const char = dataStream[index - 1];
+    // Line breaks are paragraph separators in the editor document and carry no formula meaning,
+    // so they are skipped when looking for the character before the cursor.
+    // See https://github.com/dream-num/univer/issues/7676
+    const textBeforeCursor = dataStream.slice(0, index).replace(/[\r\n]+$/, '');
+    const char = textBeforeCursor[textBeforeCursor.length - 1];
     const nextChar = dataStream[index];
 
     return Boolean(

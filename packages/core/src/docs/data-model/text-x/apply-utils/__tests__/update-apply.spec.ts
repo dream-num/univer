@@ -88,3 +88,20 @@ describe('retained heading collapse metadata', () => {
         expect(body.paragraphs?.[1].headingCollapsed).toBeUndefined();
     });
 });
+
+describe('retained text inside a hyperlink', () => {
+    const linkedBody = (): IDocumentBody => ({
+        dataStream: 'abcdef\rghij\r\n',
+        paragraphs: [{ startIndex: 6, paragraphId: 'p1' }, { startIndex: 11, paragraphId: 'p2' }],
+        customRanges: [{ rangeId: 'link', rangeType: CustomRangeType.HYPERLINK, startIndex: 3, endIndex: 8, properties: { url: 'https://example.test' } }],
+    });
+
+    it.each<{ name: string; updateBody: IDocumentBody; length: number; offset: number }>([
+        { name: 'a text style', updateBody: { dataStream: '', textRuns: [{ st: 0, ed: 2, ts: { bl: 1 } }] }, length: 2, offset: 4 },
+        { name: 'a paragraph style', updateBody: { dataStream: '', paragraphs: [{ startIndex: 0, paragraphId: 'p1', paragraphStyle: { indentStart: { v: 10 } } }] }, length: 1, offset: 6 },
+    ])('keeps the link whole after $name', ({ updateBody, length, offset }) => {
+        const body = linkedBody();
+        updateAttribute(body, updateBody, length, offset, UpdateDocsAttributeType.COVER);
+        expect(body.customRanges?.map(({ rangeId, startIndex, endIndex }) => [rangeId, startIndex, endIndex])).toEqual([['link', 3, 8]]);
+    });
+});

@@ -70,3 +70,12 @@ describe('SDT nesting through text changes', () => {
         expect(body.customRanges?.find((range) => range.rangeId === 'parent')).toMatchObject({ startIndex: 0, endIndex: 2 });
     });
 });
+
+describe('custom range identity', () => {
+    it('gives a single fragment its root id, as it would among others', () => {
+        const link = { startIndex: 3, endIndex: 8, rangeType: CustomRangeType.HYPERLINK, properties: { url: 'https://example.test' } };
+        expect(mergeContinuousRanges([{ ...link, rangeId: 'link$1' }])).toEqual([{ ...link, rangeId: 'link' }]);
+        expect(mergeContinuousRanges([{ ...link, rangeId: 'link$1' }, { ...link, rangeId: 'other', startIndex: 10, endIndex: 11 }])
+            .map((range) => range.rangeId)).toEqual(['link', 'other']);
+    });
+});

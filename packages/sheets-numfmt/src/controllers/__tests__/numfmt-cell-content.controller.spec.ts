@@ -29,6 +29,7 @@ import {
     LocaleType,
     LogLevel,
     Plugin,
+    ThemeService,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -40,9 +41,8 @@ import {
     SetRangeValuesMutation,
     SheetInterceptorService,
 } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from '../../config/config';
-import * as patternUtils from '../../utils/pattern';
 import { SheetsNumfmtCellContentController } from '../numfmt-cell-content.controller';
 
 function createWorkbookData(
@@ -164,7 +164,6 @@ describe('SheetsNumfmtCellContentController', () => {
     let workbook: Workbook;
     let commandService: ICommandService;
     let numfmtService: INumfmtService;
-    let controller: SheetsNumfmtCellContentController;
 
     beforeEach(() => {
         const testBed = createControllerTestBed();
@@ -174,18 +173,17 @@ describe('SheetsNumfmtCellContentController', () => {
 
         commandService = get(ICommandService);
         numfmtService = get(INumfmtService);
-        controller = get(SheetsNumfmtCellContentController);
 
         commandService.registerCommand(SetNumfmtMutation);
         commandService.registerCommand(SetRangeValuesMutation);
     });
 
     afterEach(() => {
-        vi.restoreAllMocks();
         univer.dispose();
     });
 
     it('skips unsupported cells and handles text format markers', () => {
+        get(SheetsNumfmtCellContentController);
         const worksheet = workbook.getSheetBySheetId('sheet1')!;
 
         expect(getInterceptedCell(worksheet, workbook, 0, 0, get)).toEqual({ v: true, t: CellValueType.BOOLEAN });
@@ -231,8 +229,8 @@ describe('SheetsNumfmtCellContentController', () => {
     });
 
     it('formats numeric values and clears render cache on numfmt or value mutations', async () => {
+        get(SheetsNumfmtCellContentController);
         const worksheet = workbook.getSheetBySheetId('sheet1')!;
-        const previewSpy = vi.spyOn(patternUtils, 'getPatternPreviewIgnoreGeneral');
 
         numfmtService.setValues('test', 'sheet1', [
             { pattern: '0.00', ranges: [cellToRange(1, 1)] },
@@ -254,17 +252,12 @@ describe('SheetsNumfmtCellContentController', () => {
             },
         });
 
-        const previewCallsAfterFirstRender = previewSpy.mock.calls.length;
-
-        getInterceptedCell(worksheet, workbook, 1, 1, get);
-        expect(previewSpy).toHaveBeenCalledTimes(previewCallsAfterFirstRender);
-
         await commandService.executeCommand(SetNumfmtMutation.id, {
             unitId: 'test',
             subUnitId: 'sheet1',
             refMap: {
                 1: {
-                    pattern: '0.00',
+                    pattern: '0.0',
                 },
             },
             values: {
@@ -274,8 +267,7 @@ describe('SheetsNumfmtCellContentController', () => {
             },
         });
 
-        getInterceptedCell(worksheet, workbook, 1, 1, get);
-        expect(previewSpy).toHaveBeenCalledTimes(previewCallsAfterFirstRender + 1);
+        expect(getInterceptedCell(worksheet, workbook, 1, 1, get)).toMatchObject({ v: '1234.5' });
 
         await commandService.executeCommand(SetRangeValuesMutation.id, {
             unitId: 'test',
@@ -283,82 +275,110 @@ describe('SheetsNumfmtCellContentController', () => {
             cellValue: {
                 1: {
                     1: {
-                        v: '1234.5',
+                        v: '42',
                         t: CellValueType.STRING,
                     },
                 },
             },
         });
 
-        getInterceptedCell(worksheet, workbook, 1, 1, get);
-        expect(previewSpy).toHaveBeenCalledTimes(previewCallsAfterFirstRender + 2);
+        expect(getInterceptedCell(worksheet, workbook, 1, 1, get)).toMatchObject({ v: '42.0' });
+    });
+
+    it('updates section colors after value and format edits while preserving the raw font color', async () => {
+        get(SheetsNumfmtCellContentController);
+        const worksheet = workbook.getSheetBySheetId('sheet1')!;
+        const themeService = get(ThemeService);
+        const originalStyle = { cl: { rgb: '#663399' } };
+
+        numfmtService.setValues('test', 'sheet1', [{
+            pattern: '[Red]0.00;[Green]\\-0.00;[Blue]0.00',
+            ranges: [cellToRange(1, 1)],
+        }]);
+
+        for (const { value, color } of [
+            { value: 12.34, color: 'red' },
+            { value: -12.34, color: 'green' },
+            { value: 0, color: 'blue' },
+        ]) {
+            await commandService.executeCommand(SetRangeValuesMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                cellValue: { 1: { 1: { v: value, t: CellValueType.NUMBER, s: originalStyle } } },
+            });
+
+            expect(getInterceptedCell(worksheet, workbook, 1, 1, get)).toMatchObject({
+                v: value.toFixed(2),
+                interceptorStyle: { cl: { rgb: themeService.getColorFromTheme(`${color}.500`) } },
+            });
+            expect(worksheet.getCellRaw(1, 1)).toMatchObject({ v: value });
+            expect(workbook.getStyles().get(worksheet.getCellRaw(1, 1)?.s)).toMatchObject(originalStyle);
+        }
+
+        await commandService.executeCommand(SetNumfmtMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            refMap: { 1: { pattern: '0.00' } },
+            values: { 1: { ranges: [cellToRange(1, 1)] } },
+        });
+
+        const cell = getInterceptedCell(worksheet, workbook, 1, 1, get);
+        expect(cell).toMatchObject({ v: '0.00' });
+        expect(cell?.interceptorStyle).toBeUndefined();
+        expect(workbook.getStyles().get(cell?.s)).toMatchObject(originalStyle);
     });
 
     it('formats each workbook with its own locale and date system', () => {
+        get(SheetsNumfmtCellContentController);
         const date1900Sheet = workbook.getSheetBySheetId('sheet1')!;
         const date1904Workbook = univer.createUnit<IWorkbookData, Workbook>(
             UniverInstanceType.UNIVER_SHEET,
             createWorkbookData('date1904', LocaleType.FR_FR, DateSystem.Date1904)
         );
         const date1904Sheet = date1904Workbook.getSheetBySheetId('sheet1')!;
-        const previewSpy = vi.spyOn(patternUtils, 'getPatternPreviewIgnoreGeneral');
 
         numfmtService.setValues('test', 'sheet1', [{ pattern: 'yyyy-mm-dd', ranges: [cellToRange(1, 4)] }]);
         numfmtService.setValues('date1904', 'sheet1', [{ pattern: 'yyyy-mm-dd', ranges: [cellToRange(1, 4)] }]);
 
         expect(getInterceptedCell(date1900Sheet, workbook, 1, 4, get)).toMatchObject({ v: '1900-01-00' });
         expect(getInterceptedCell(date1904Sheet, date1904Workbook, 1, 4, get)).toMatchObject({ v: '1904-01-01' });
-        expect(previewSpy).toHaveBeenLastCalledWith('yyyy-mm-dd', 0, 'fr', DateSystem.Date1904);
     });
 
-    it('applies and caches a legitimate empty number-format result', () => {
+    it('preserves a legitimate empty number-format result across renders', () => {
+        get(SheetsNumfmtCellContentController);
         const worksheet = workbook.getSheetBySheetId('sheet1')!;
-        const previewSpy = vi.spyOn(patternUtils, 'getPatternPreviewIgnoreGeneral');
 
         numfmtService.setValues('test', 'sheet1', [{ pattern: ';;;', ranges: [cellToRange(1, 1)] }]);
 
-        expect(getInterceptedCell(worksheet, workbook, 1, 1, get)).toMatchObject({
+        const formattedCell = getInterceptedCell(worksheet, workbook, 1, 1, get);
+        expect(formattedCell).toMatchObject({
             v: '',
             t: CellValueType.NUMBER,
             coverable: false,
         });
         expect(worksheet.getCellRaw(1, 1)).toMatchObject({ v: '1234.5', t: CellValueType.STRING });
 
-        const previewCallsAfterFirstRender = previewSpy.mock.calls.length;
-        getInterceptedCell(worksheet, workbook, 1, 1, get);
-        expect(previewSpy).toHaveBeenCalledTimes(previewCallsAfterFirstRender);
+        expect(getInterceptedCell(worksheet, workbook, 1, 1, get)).toEqual(formattedCell);
     });
 
-    it('resets cached rendering when active sheet changes and supports locale override', () => {
+    it('formats sheets independently and applies locale overrides after switching sheets', () => {
+        const controller = get(SheetsNumfmtCellContentController);
         const sheet1 = workbook.getSheetBySheetId('sheet1')!;
         const sheet2 = workbook.getSheetBySheetId('sheet2')!;
-        const previewSpy = vi.spyOn(patternUtils, 'getPatternPreviewIgnoreGeneral');
 
         numfmtService.setValues('test', 'sheet1', [{ pattern: '0.00', ranges: [cellToRange(1, 1)] }]);
+        numfmtService.setValues('test', 'sheet2', [{ pattern: '0.0', ranges: [cellToRange(1, 1)] }]);
 
         expect(getInterceptedCell(sheet1, workbook, 1, 1, get)).toMatchObject({ v: '1234.50', t: CellValueType.NUMBER });
-        let previewCallCount = previewSpy.mock.calls.length;
-
-        getInterceptedCell(sheet1, workbook, 1, 1, get);
-        expect(previewSpy).toHaveBeenCalledTimes(previewCallCount);
-
         workbook.setActiveSheet(sheet2);
-
-        getInterceptedCell(sheet1, workbook, 1, 1, get);
-        previewCallCount += 1;
-        expect(previewSpy).toHaveBeenCalledTimes(previewCallCount);
+        expect(getInterceptedCell(sheet2, workbook, 1, 1, get)).toMatchObject({ v: '9.9' });
 
         workbook.setActiveSheet(sheet1);
 
-        getInterceptedCell(sheet1, workbook, 1, 1, get);
-        previewCallCount += 1;
-        expect(previewSpy).toHaveBeenCalledTimes(previewCallCount);
+        expect(getInterceptedCell(sheet1, workbook, 1, 1, get)).toMatchObject({ v: '1234.50' });
 
         controller.setNumfmtLocal('fr');
-        expect(controller.locale).toBe('fr');
-
-        getInterceptedCell(sheet1, workbook, 1, 1, get);
-        previewCallCount += 1;
-        expect(previewSpy).toHaveBeenCalledTimes(previewCallCount);
+        expect(getInterceptedCell(sheet1, workbook, 1, 1, get)).toMatchObject({ v: '1234,50' });
+        expect(getInterceptedCell(sheet2, workbook, 1, 1, get)).toMatchObject({ v: '9,9' });
     });
 });

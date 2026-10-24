@@ -16,7 +16,7 @@
 
 import type { KeyboardEvent, PointerEvent } from 'react';
 import { LocaleService } from '@univerjs/core';
-import { borderClassName, Button, clsx } from '@univerjs/design';
+import { borderClassName, Button, clsx, Tooltip } from '@univerjs/design';
 import { useEffect, useRef, useState } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import { IconManager } from '../../common/icon-manager';
@@ -291,11 +291,7 @@ export function Slider(props: ISliderProps) {
                 "
             >
                 <div
-                    className={clsx(`
-                      univer-relative univer-h-1.5 univer-rounded-full univer-bg-gray-200 univer-px-1.5
-                      univer-transition-colors
-                      dark:!univer-bg-gray-600
-                    `, {
+                    className={clsx('univer-relative univer-h-1.5 univer-px-1.5', {
                         'univer-opacity-60': disabled,
                     })}
                     style={{
@@ -306,7 +302,7 @@ export function Slider(props: ISliderProps) {
                         ref={sliderInnerRailRef}
                         role="track"
                         className="
-                          univer-relative univer-h-1.5 univer-bg-gray-200
+                          univer-relative univer-h-1.5 univer-rounded-full univer-bg-gray-200 univer-transition-colors
                           dark:!univer-bg-gray-600
                         "
                         onPointerDown={handlePointerDown}
@@ -319,34 +315,56 @@ export function Slider(props: ISliderProps) {
                                 width: `${sliderOffset}%`,
                             }}
                         />
-                        <a
-                            key="reset-button"
-                            className={`
-                              univer-absolute univer-left-1/2 univer-top-1/2 univer-box-border univer-block
-                              univer-size-1.5 -univer-translate-x-1/2 -univer-translate-y-1/2 univer-cursor-pointer
-                              univer-rounded-full univer-border univer-border-gray-0 univer-bg-gray-400
-                              dark:!univer-border-gray-700 dark:!univer-bg-gray-300
-                            `}
-                            role="button"
-                            tabIndex={disabled ? -1 : 0}
-                            aria-label={localeService.t<LocaleKey>('ui.accessibility.resetZoom')}
-                            aria-disabled={disabled}
-                            onClick={handleReset}
-                            onKeyDown={(e) => {
-                                if (e.key !== 'Enter' && e.key !== ' ') {
-                                    return;
-                                }
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleReset();
-                            }}
-                        />
+                        <div
+                            className="
+                              univer-absolute univer-left-1/2 univer-top-1/2 univer-size-6 -univer-translate-x-1/2
+                              -univer-translate-y-1/2
+                            "
+                        >
+                            <Tooltip
+                                title={`${localeService.t<LocaleKey>('ui.accessibility.resetZoom')} (${resetPoint}%)`}
+                                placement="top"
+                            >
+                                <Button
+                                    className="
+                                      univer-size-6 univer-p-0
+                                      focus-visible:univer-outline-none focus-visible:univer-ring-2
+                                      focus-visible:univer-ring-primary-100
+                                    "
+                                    size="small"
+                                    variant="link"
+                                    type="button"
+                                    data-u-comp="zoom-reset"
+                                    aria-label={localeService.t<LocaleKey>('ui.accessibility.resetZoom')}
+                                    disabled={disabled}
+                                    onPointerDown={(e) => e.stopPropagation()}
+                                    onClick={handleReset}
+                                    onKeyDown={(e) => {
+                                        if (e.key !== 'Enter' && e.key !== ' ') {
+                                            return;
+                                        }
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        handleReset();
+                                    }}
+                                >
+                                    <span
+                                        aria-hidden="true"
+                                        className="
+                                          univer-box-border univer-h-3 univer-w-1 univer-rounded-full univer-border
+                                          univer-border-solid univer-border-gray-0 univer-bg-gray-600
+                                          dark:!univer-border-gray-800 dark:!univer-bg-gray-100
+                                        "
+                                    />
+                                </Button>
+                            </Tooltip>
+                        </div>
 
                         <button
                             className={clsx(`
                               univer-absolute univer-top-1/2 univer-size-3.5 -univer-translate-x-1/2
                               -univer-translate-y-1/2 univer-rounded-full univer-bg-gray-0 univer-shadow-sm
-                              univer-transition-all
+                              univer-transition
                               focus-visible:univer-outline-none focus-visible:univer-ring-2
                               focus-visible:univer-ring-primary-100
                               dark:!univer-bg-gray-800

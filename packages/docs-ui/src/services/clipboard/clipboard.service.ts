@@ -33,6 +33,7 @@ import {
     ErrorService,
     generateRandomId,
     getBodySlice,
+    getBodySliceForTextXAction,
     ICommandService,
     ILogService,
     ImageSourceType,
@@ -987,34 +988,13 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 continue;
             }
 
-            const deleteRange = { startOffset, endOffset, collapsed };
-
-            const docBody = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.sliceBody(deleteRange.startOffset, deleteRange.endOffset, sliceType);
-            if (docBody == null) {
-                continue;
-            }
-
-            // Text inside a cell is not a nested table. Keep only completely copied table structures.
-            if (docBody.tables?.length) {
-                const completeTableIds = new Set(body.tables?.filter((table) => (
-                    table.startIndex >= startOffset && table.endIndex <= endOffset
-                )).map((table) => table.tableId));
-                docBody.tables = docBody.tables.filter((table) => completeTableIds.has(table.tableId));
-            }
-
-            // Block metadata requires both sentinels; copying its content must not create another block.
-            if (docBody.blockRanges?.length) {
-                const completeBlockIds = new Set(body.blockRanges?.filter((block) => (
-                    block.startIndex >= startOffset && block.endIndex < endOffset
-                )).map((block) => block.blockId));
-                docBody.blockRanges = docBody.blockRanges.filter((block) => completeBlockIds.has(block.blockId));
-            }
+            const docBody = getBodySliceForTextXAction(body, startOffset, endOffset, false, sliceType);
 
             results.push(docBody);
             plainTextResults.push(
                 copyContentHook?.(
-                    deleteRange.startOffset,
-                    deleteRange.endOffset,
+                    startOffset,
+                    endOffset,
                     {
                         body,
                         segmentId,

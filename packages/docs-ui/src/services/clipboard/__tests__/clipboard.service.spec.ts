@@ -545,6 +545,39 @@ describe('DocClipboardService table copy helpers', () => {
         }
     });
 
+    it.each([SliceBodyType.copy, SliceBodyType.cut])('copies column text without recreating its containing group (%s)', async (sliceType) => {
+        const tokens = DataStreamTreeTokenType;
+        const columnStream = `${tokens.COLUMN_GROUP_START}${tokens.COLUMN_START}Alpha\r${tokens.COLUMN_END}${tokens.COLUMN_GROUP_END}`;
+        const documentData: IDocumentData = {
+            id: 'copy-column-text',
+            documentStyle: {},
+            body: {
+                dataStream: `${columnStream}\r\n`,
+                paragraphs: [{ paragraphId: 'column-alpha', startIndex: 7 }],
+                columnGroups: [{ columnGroupId: 'columns', startIndex: 0, endIndex: columnStream.length - 1 }],
+            },
+        };
+        const testBed = createCommandTestBed(documentData, [
+            [IClipboardInterfaceService, { useClass: TestClipboardInterfaceService }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
+        ]);
+        try {
+            const service = testBed.get(IDocClipboardService);
+            const clipboard = testBed.get(IClipboardInterfaceService) as unknown as TestClipboardInterfaceService;
+            expect(await service.copy(sliceType, [{
+                startOffset: 2,
+                endOffset: 7,
+                collapsed: false,
+                segmentId: '',
+            }])).toBe(true);
+            const fragment = parseInternalClipboardFragment(clipboard.writes[0].custom?.[DOC_INTERNAL_FRAGMENT_MIME]);
+            expect(fragment?.body?.dataStream).toBe('Alpha');
+            expect(fragment?.body?.columnGroups ?? []).toEqual([]);
+        } finally {
+            testBed.univer.dispose();
+        }
+    });
+
     it('returns false when writing copied content to the clipboard fails', async () => {
         const documentData: IDocumentData = {
             id: 'failed-copy-doc',

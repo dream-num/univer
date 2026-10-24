@@ -157,6 +157,28 @@ describe('ui facade', () => {
         expect(menuKeys).toContain('second-action');
     });
 
+    it('removes appended menus through the returned disposable or by id', () => {
+        const menuManagerService = univer.__getInjector().get(IMenuManagerService);
+        const getContextMenuKeys = () => menuManagerService.getFlatMenuByPositionKey('contextMenu').map((item) => item.key);
+
+        const disposable = univerAPI.createMenu({ id: 'disposable-menu', title: 'Disposable', action: 'disposable.command' })
+            .appendTo('contextMenu.others');
+        univerAPI.createSubmenu({ id: 'removable-submenu', title: 'Removable' })
+            .addSubmenu(univerAPI.createMenu({ id: 'removable-child', title: 'Child', action: 'child.command' }))
+            .appendTo('contextMenu.footerTabs');
+
+        expect(getContextMenuKeys()).toEqual(expect.arrayContaining(['disposable-menu', 'removable-submenu', 'removable-child']));
+
+        disposable.dispose();
+        expect(getContextMenuKeys()).not.toContain('disposable-menu');
+        expect(getContextMenuKeys()).toContain('removable-submenu');
+
+        expect(univerAPI.removeMenu('removable-submenu')).toBe(true);
+        expect(getContextMenuKeys()).not.toContain('removable-submenu');
+        expect(getContextMenuKeys()).not.toContain('removable-child');
+        expect(univerAPI.removeMenu('removable-submenu')).toBe(false);
+    });
+
     it('updates ribbon menu order and grid layout while preserving menu actions and earlier overrides', async () => {
         const injector = univer.__getInjector();
         injector.add([IRibbonService, { useClass: DesktopRibbonService }]);

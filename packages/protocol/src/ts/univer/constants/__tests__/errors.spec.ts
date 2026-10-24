@@ -29,6 +29,7 @@ describe('Office export error protocol', () => {
         ['LICENSE_VERSION_NOT_ALLOWED', 9012],
         ['LICENSE_NOT_YET_EFFECTIVE', 9013],
         ['LICENSE_EXPORT_EXPIRED', 9014],
+        ['LICENSE_INVALID', 9015],
     ] as const)('preserves %s = %i across the numeric IError JSON boundary', (name, code) => {
         const error: IError = { code: ErrorCode[name], message: 'Export authorization failed.' };
         expect(JSON.parse(JSON.stringify(error))).toEqual({ code, message: 'Export authorization failed.' });

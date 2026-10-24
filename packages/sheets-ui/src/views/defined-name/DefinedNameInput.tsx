@@ -16,7 +16,6 @@
 
 import type { Nullable, Workbook } from '@univerjs/core';
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
-import type * as SheetsLocale from '@univerjs/sheets/locale/types';
 import type { ComponentType } from 'react';
 import { AbsoluteRefType, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { borderBottomClassName, borderClassName, Button, clsx, Input, Radio, RadioGroup, Select } from '@univerjs/design';
@@ -146,7 +145,7 @@ function DefinedNameInputContent(props: IDefinedNameInputProps) {
         });
 
         if (typeof validationResult === 'string') {
-            setValidString(localeService.t<SheetsLocale.LocaleKey>(validationResult));
+            setValidString(localeService.t(validationResult));
             return;
         }
 

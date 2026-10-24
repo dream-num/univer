@@ -16,7 +16,6 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IIconSet } from '@univerjs/sheets-conditional-formatting';
-import type * as ConditionalFormattingLocale from '@univerjs/sheets-conditional-formatting/locale/types';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import { get, IUniverInstanceService, LocaleService, set, Tools, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, Checkbox, clsx, Dropdown, Select } from '@univerjs/design';
@@ -145,7 +144,7 @@ const IconGroupList = (props: IIconGroupListProps) => {
                               dark:!univer-text-gray-400
                             "
                         >
-                            {localeService.t<ConditionalFormattingLocale.LocaleKey>(group.title)}
+                            {localeService.t(group.title)}
                         </div>
                         <div
                             dir={direction}
@@ -158,7 +157,7 @@ const IconGroupList = (props: IIconGroupListProps) => {
                                     <button
                                         key={groupItem.name}
                                         type="button"
-                                        aria-label={`${localeService.t<ConditionalFormattingLocale.LocaleKey>(group.title)} ${groupItemIndex + 1}`}
+                                        aria-label={`${localeService.t(group.title)} ${groupItemIndex + 1}`}
                                         aria-pressed={selected}
                                         className={clsx(
                                             `

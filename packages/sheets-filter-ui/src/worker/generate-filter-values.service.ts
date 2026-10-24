@@ -28,9 +28,11 @@ import {
     numfmt,
 } from '@univerjs/core';
 import { FilterBy } from '@univerjs/sheets-filter';
-import type enUS from '../locale/en-US';
 import type { LocaleKey } from '../locale/types';
 import type { IFilterByValueItem, IFilterByValueWithTreeItem } from '../services/sheets-filter-panel.service';
+
+type FilterMonth = Extract<LocaleKey, `sheets-filter-ui.date.${number}`> extends
+    `sheets-filter-ui.date.${infer Month extends number}` ? Month : never;
 
 export interface ISheetsGenerateFilterValuesService {
     getFilterValues(params: {
@@ -240,7 +242,7 @@ export function getFilterTreeByValueItems(
                 let monthItem = yearItem.children?.find((item) => item.key === `${year}-${month}`);
                 if (!monthItem) {
                     monthItem = {
-                        title: localeService.t<LocaleKey>(`sheets-filter-ui.date.${month as keyof typeof enUS['sheets-filter-ui']['date']}`),
+                        title: localeService.t<LocaleKey>(`sheets-filter-ui.date.${month as FilterMonth}`),
                         key: `${year}-${month}`,
                         children: [],
                         count: 0,

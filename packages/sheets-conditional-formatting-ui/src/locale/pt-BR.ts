@@ -53,6 +53,7 @@ const locale: typeof enUS = {
             lessThanOrEqual: '<=',
         },
         panel: {
+            stopIfTrue: 'Parar se Verdadeiro',
             createRule: 'Criar Regra',
             clear: 'Limpar Todas as Regras',
             range: 'Aplicar ao Intervalo',

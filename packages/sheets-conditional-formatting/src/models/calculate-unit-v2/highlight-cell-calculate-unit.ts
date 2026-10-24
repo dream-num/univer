@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import type { IStyleData, Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { CellValueType, dateKit, Range, Tools } from '@univerjs/core';
+import { ERROR_TYPE_SET, FormulaResultStatus } from '@univerjs/engine-formula';
 import type {
     IAverageHighlightCell,
     IFormulaHighlightCell,
@@ -25,8 +27,6 @@ import type {
     ITimePeriodHighlightCell,
 } from '../type';
 import type { IContext } from './base-calculate-unit';
-import { CellValueType, dateKit, Range, Tools } from '@univerjs/core';
-import { ERROR_TYPE_SET, FormulaResultStatus } from '@univerjs/engine-formula';
 import { CFNumberOperator, CFSubRuleType, CFTextOperator, CFTimePeriodOperator } from '../../base/const';
 import { ConditionalFormattingFormulaService } from '../../services/conditional-formatting-formula.service';
 import { BaseCalculateUnit, CalculateEmitStatus } from './base-calculate-unit';
@@ -54,7 +54,7 @@ const sortRangesByTopLeft = <T extends { startRow: number; startColumn: number }
     return a.startColumn - b.startColumn;
 });
 
-export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConfig>, Nullable<IStyleData>> {
+export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConfig>, boolean> {
     // eslint-disable-next-line max-lines-per-function
     override preComputing(row: number, col: number, context: IContext): void {
         const ruleConfig = context.rule.rule as IHighlightCell;
@@ -430,7 +430,6 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                 }
             }
         };
-        const result = run();
-        return result ? ruleConfig.style : {};
+        return !!run();
     }
 }

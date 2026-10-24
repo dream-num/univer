@@ -22,7 +22,6 @@ import type {
     IMoveCfCommandParams,
 } from '@univerjs/sheets-conditional-formatting';
 import type { ComponentType } from 'react';
-import type { LocaleKey } from '../../locale/types';
 import {
     ICommandService,
     Injector,
@@ -31,7 +30,7 @@ import {
     Rectangle,
     UniverInstanceType,
 } from '@univerjs/core';
-import { clsx, DraggableList, Select, Tooltip } from '@univerjs/design';
+import { Checkbox, clsx, DraggableList, Select, Tooltip } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteIcon, GripVerticalIcon, IncreaseIcon } from '@univerjs/icons';
 import {
@@ -42,6 +41,7 @@ import {
 } from '@univerjs/sheets';
 import {
     AddConditionalRuleMutation,
+    CFRuleType,
     ClearWorksheetCfCommand,
     ConditionalFormattingRuleModel,
     DeleteCfCommand,
@@ -54,6 +54,7 @@ import { useHighlightRange } from '@univerjs/sheets-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useMemo, useState } from 'react';
 import { debounceTime, filter, map, merge, Observable, share, startWith } from 'rxjs';
+import type { LocaleKey } from '../../locale/types';
 import { ConditionalFormattingI18nController } from '../../controllers/cf.i18n.controller';
 import { getRuleDescribe } from '../../utils/get-rule-describe';
 import { ConditionalFormattingRulePreview } from '../ConditionalFormattingRulePreview';
@@ -292,8 +293,8 @@ export function RuleList(props: IRuleListProps) {
                     itemRender={(rule) => (
                         <div
                             className={clsx(`
-                              univer-group univer-relative univer-flex univer-items-center univer-justify-between
-                              univer-rounded univer-py-2 univer-pl-5 univer-pr-8
+                              univer-group univer-relative univer-flex univer-flex-wrap univer-items-center
+                              univer-justify-between univer-rounded univer-py-2 univer-pl-5 univer-pr-8
                               hover:univer-bg-gray-100
                               rtl:univer-pl-8 rtl:univer-pr-5
                               dark:hover:!univer-bg-gray-700
@@ -342,6 +343,18 @@ export function RuleList(props: IRuleListProps) {
                             <div>
                                 <ConditionalFormattingRulePreview rule={rule.rule} />
                             </div>
+                            {rule.rule.type === CFRuleType.highlightCell && (
+                                <div className="univer-pointer-events-none univer-mt-2 univer-w-full">
+                                    <Checkbox
+                                        className="univer-max-w-full"
+                                        contentClassName="univer-min-w-0"
+                                        checked={!!rule.stopIfTrue}
+                                        disabled
+                                    >
+                                        {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.stopIfTrue')}
+                                    </Checkbox>
+                                </div>
+                            )}
                             <div
                                 className={clsx(`
                                   univer-absolute univer-right-1 univer-hidden univer-size-6 univer-cursor-pointer

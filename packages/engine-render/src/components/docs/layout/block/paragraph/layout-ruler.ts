@@ -1482,6 +1482,11 @@ function _getParagraphLineMetrics(
     const startingSection = lastPage.type === DocumentSkeletonPageType.BODY && preLine == null
         ? ctx.viewModel.getChildren().find((section, index) => index > 0 && section.children[0]?.endIndex === paragraphIndex)
         : undefined;
+    const hasInlineTableBoundary = isParagraphFirstShapedText &&
+        paragraphConfig.skeTablesInParagraph?.find((item) => !item.hasPositioned)?.table.tableSource.textWrap === TableTextWrapType.NONE;
+    // Inline tables are attached to the following paragraph in the view model.
+    // Spacing on opposite sides of that table must not collapse together.
+    const spaceBeforeTable = hasInlineTableBoundary ? Math.max(0, preLine?.spaceBelowApply ?? 0) : 0;
     let { marginTop, spaceBelowApply } = isHiddenParagraph
         ? { marginTop: 0, spaceBelowApply: preLine?.spaceBelowApply ?? 0 }
         : __getParagraphSpace(
@@ -1490,8 +1495,8 @@ function _getParagraphLineMetrics(
             suppressCellAutoSpaceAbove ? undefined : spaceAbove,
             spaceBelow,
             isParagraphFirstShapedText,
-            preLine,
-            _shouldSuppressPageTopSpacing(lastPage, column, paragraphConfig, preLine, firstPageNumber, startingSection != null),
+            hasInlineTableBoundary ? undefined : preLine,
+            !hasInlineTableBoundary && _shouldSuppressPageTopSpacing(lastPage, column, paragraphConfig, preLine, firstPageNumber, startingSection != null),
             drawingMLLineHeight
         );
 
@@ -1553,6 +1558,7 @@ function _getParagraphLineMetrics(
         paddingBottom,
         contentHeight,
         marginTop,
+        spaceBeforeTable,
         spaceBelowApply,
         borderTopSpace,
         borderBottomSpace,
@@ -1730,6 +1736,7 @@ function _lineOperator(
         paddingBottom,
         contentHeight,
         marginTop,
+        spaceBeforeTable,
         spaceBelowApply,
         borderTopSpace,
         borderBottomSpace,
@@ -1774,7 +1781,7 @@ function _lineOperator(
     );
 
     if (skeTablesInParagraph != null && skeTablesInParagraph.length > 0) {
-        needOpenNewPageByTableLayout = _updateAndPositionTable(ctx, lineTop, lineHeight, lastPage, pages, column, section, skeTablesInParagraph, paragraphConfig.paragraphIndex, sectionBreakConfig, pDrawingAnchor?.get(paragraphIndex)?.top);
+        needOpenNewPageByTableLayout = _updateAndPositionTable(ctx, lineTop + spaceBeforeTable, lineHeight, lastPage, pages, column, section, skeTablesInParagraph, paragraphConfig.paragraphIndex, sectionBreakConfig, pDrawingAnchor?.get(paragraphIndex)?.top);
     }
 
     const hasSameParagraphTopBottomDrawingWithInline = hasInlineCustomBlock &&

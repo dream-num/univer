@@ -26,6 +26,17 @@ import type {
     IParagraphStyle,
     Nullable,
 } from '@univerjs/core';
+import {
+    BooleanNumber,
+    DataStreamTreeNodeType,
+    DataStreamTreeTokenType,
+    DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,
+    DocumentBlockRangeType,
+    DocxBreakType,
+    PositionedObjectLayoutType,
+    resolveDocumentParagraphStyle,
+    TableTextWrapType,
+} from '@univerjs/core';
 import type {
     IDocumentSkeletonBullet,
     IDocumentSkeletonColumn,
@@ -41,17 +52,6 @@ import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-no
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import type { ILayoutContext } from '../../tools';
 import type { IShapedText } from './shaping';
-import {
-    BooleanNumber,
-    DataStreamTreeNodeType,
-    DataStreamTreeTokenType,
-    DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,
-    DocumentBlockRangeType,
-    DocxBreakType,
-    PositionedObjectLayoutType,
-    resolveDocumentParagraphStyle,
-    TableTextWrapType,
-} from '@univerjs/core';
 import { BreakType, DocumentSkeletonPageType, GlyphType } from '../../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility } from '../../../document-compatibility';
 import { BreakPointType } from '../../line-breaker/break';
@@ -113,6 +113,30 @@ function _isDocxColumnBreakVisuallyBlankColumn(column: IDocumentSkeletonColumn):
 
 function _hasOnlyCustomBlockGlyphs(glyphs: IDocumentSkeletonGlyph[]): boolean {
     return glyphs.length > 0 && glyphs.every((glyph) => glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK);
+}
+
+function _mergeTrailingBlockEndShapedTexts(shapedTextList: IShapedText[]): IShapedText[] {
+    const result: IShapedText[] = [];
+    for (const shapedText of shapedTextList) {
+        const previous = result[result.length - 1];
+        if (
+            previous?.breakPointType === BreakPointType.Mandatory &&
+            _endsWithToken(previous.text, previous.glyphs, DataStreamTreeTokenType.PARAGRAPH) &&
+            shapedText.glyphs.length > 0 &&
+            shapedText.glyphs.every((glyph) => glyph.width === 0 && glyph.streamType === DataStreamTreeTokenType.BLOCK_END)
+        ) {
+            // A block delimiter follows the authored paragraph mark in the model.
+            // Keep its logical offset on that line instead of opening an empty line.
+            result[result.length - 1] = {
+                ...previous,
+                text: previous.text + shapedText.text,
+                glyphs: [...previous.glyphs, ...shapedText.glyphs],
+            };
+        } else {
+            result.push(shapedText);
+        }
+    }
+    return result;
 }
 
 function _mergeAdjacentCustomBlockShapedTexts(
@@ -1156,9 +1180,11 @@ function _layoutShapedTexts({
     const referencePageBreaks = retainedBreaks
         ? new Set(retainedBreaks.map((offset) => offset - paragraphNode.contentStartIndex))
         : undefined;
-    const mergedShapedTextList = _mergeAdjacentCustomBlockShapedTexts(
-        _splitAtReferencePageBreaks(shapedTextList, referencePageBreaks),
-        paragraphNonInlineSkeDrawingsByBlockId
+    const mergedShapedTextList = _mergeTrailingBlockEndShapedTexts(
+        _mergeAdjacentCustomBlockShapedTexts(
+            _splitAtReferencePageBreaks(shapedTextList, referencePageBreaks),
+            paragraphNonInlineSkeDrawingsByBlockId
+        )
     );
 
     for (let shapedIndex = 0; shapedIndex < mergedShapedTextList.length; shapedIndex++) {

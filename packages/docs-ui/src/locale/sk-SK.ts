@@ -244,6 +244,10 @@ const locale: typeof enUS = {
             defaultTextColor: 'Predvolená farba textu',
             noBackground: 'Bez pozadia',
         },
+        heading: {
+            collapse: 'Zbaliť',
+            expand: 'Rozbaliť',
+        },
         'page-settings': {
             'document-setting': 'Nastavenia dokumentu',
             'modern-width': 'Šírka obsahu',

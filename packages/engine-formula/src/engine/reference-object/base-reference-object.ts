@@ -15,9 +15,18 @@
  */
 
 import type { ICellData, IRange, IUnitRange, Nullable } from '@univerjs/core';
+import {
+    CellValueType,
+    DateSystem,
+    isFormulaId,
+    isFormulaString,
+    isNullCell,
+    isTextFormat,
+    moveRangeByOffset,
+    ObjectMatrix,
+} from '@univerjs/core';
 import type { IArrayFormulaRangeType, IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap, IUnitStylesData } from '../../basics/common';
 import type { BaseValueObject, IArrayValueObject } from '../value-object/base-value-object';
-import { CellValueType, DateSystem, isNullCell, isTextFormat, moveRangeByOffset, ObjectMatrix } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
@@ -582,6 +591,34 @@ export class BaseReferenceObject extends ObjectClassType {
 
     getRuntimeFeatureCellValue(row: number, column: number) {
         return getRuntimeFeatureCell(row, column, this.getSheetId(), this.getUnitId(), this._runtimeFeatureCellData);
+    }
+
+    isCellBlank(row: number, column: number): boolean {
+        const cell = this.getCellData(row, column);
+        if (!isNullCell(cell)) {
+            return false;
+        }
+
+        const originalCell = this.getCurrentActiveSheetData()?.cellData.getValue(row, column);
+        if (isFormulaString(originalCell?.f) || isFormulaId(originalCell?.si)) {
+            return false;
+        }
+
+        if (!cell) {
+            return true;
+        }
+
+        // Formula result matrices omit f/si. Only the result selected by getCellData is active.
+        if (
+            cell === this.getCurrentRuntimeActiveArrayFormulaCellData()?.getValue(row, column) ||
+            cell === this.getCurrentActiveArrayFormulaCellData()?.getValue(row, column) ||
+            cell === this.getRuntimeFeatureCellValue(row, column)
+        ) {
+            return false;
+        }
+
+        // Runtime sheet data also copies ordinary cells when an array formula is blocked.
+        return originalCell != null || cell !== this.getCurrentRuntimeSheetData()?.getValue(row, column);
     }
 
     getCellByPosition(rowRaw?: number, columnRaw?: number) {

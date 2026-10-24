@@ -86,6 +86,7 @@ describe('sheets-table commands with real table providers', () => {
         injector.get(IUniverInstanceService).focusUnit(unitId);
         injector.get(LocaleService).load({ [LocaleType.EN_US]: enUS });
         injector.get(LocaleService).setLocale(LocaleType.EN_US);
+        injector.get(LocaleService).setDirection('ltr');
         commands = injector.get(ICommandService);
         history = injector.get(IUndoRedoService);
         tables = injector.get(TableManager);

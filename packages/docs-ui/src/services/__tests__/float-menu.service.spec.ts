@@ -51,7 +51,7 @@ import {
     IContextMenuService,
 } from '@univerjs/ui';
 import { Subject } from 'rxjs';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, onTestFinished } from 'vitest';
 import { EmbedRuntimeFocusCoordinator, IDocEmbedRuntimeFocusCoordinator } from '../doc-embed-integration.service';
 import { DocLayoutInteractionService } from '../doc-layout-interaction.service';
 import { DocCanvasPopManagerService } from '../doc-popup-manager.service';
@@ -183,6 +183,45 @@ function createActiveFloatMenuHarness(
 }
 
 describe('DocFloatMenuService', () => {
+    it('keeps edit and history selections from locking layout and restores the toolbar for a user selection', () => {
+        const unitId = 'doc-moved-selection';
+        const { injector, popupService, selectionManager, service } = createActiveFloatMenuHarness(unitId, {
+            dataStream: 'Before\rMoved\r\n',
+            paragraphs: [{ paragraphId: 'before', startIndex: 6 }, { paragraphId: 'moved', startIndex: 12 }],
+        });
+        onTestFinished(() => {
+            service.dispose();
+            injector.dispose();
+        });
+        const selection = {
+            textRanges: [{ startOffset: 7, endOffset: 13, collapsed: false }],
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            isEditing: true,
+        };
+        const target = { unitId, subUnitId: unitId };
+        const layoutInteractionService = injector.get(DocLayoutInteractionService);
+
+        selectionManager.__replaceTextRangesWithNoRefresh(selection, target);
+        expect(service.floatMenu).toBeNull();
+        expect(popupService.ranges).toEqual([]);
+
+        selectionManager.__replaceTextRangesWithNoRefresh({ ...selection, isEditing: false }, target);
+        expect(service.floatMenu).toMatchObject({ start: 7, end: 13 });
+        const unmount = popupService.onMount!();
+        expect(layoutInteractionService.isActive).toBe(true);
+
+        selectionManager.__replaceTextRangesWithNoRefresh(selection, target);
+        expect(service.floatMenu).toBeNull();
+        expect(layoutInteractionService.isActive).toBe(false);
+        unmount();
+
+        selectionManager.__replaceTextRangesWithNoRefresh({ ...selection, isEditing: false }, target);
+        expect(service.floatMenu).toMatchObject({ start: 7, end: 13 });
+    });
+
     it('does not register or show a floating toolbar inside internal document editors', () => {
         const injector = new Injector();
         injector.add([IPermissionService, { useClass: PermissionService }]);
@@ -247,7 +286,7 @@ describe('DocFloatMenuService', () => {
             segmentId: '',
             segmentPage: -1,
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-            isEditing: true,
+            isEditing: false,
         }, { unitId, subUnitId: unitId });
         selectionManager.__replaceTextRangesWithNoRefresh({
             textRanges: [{
@@ -259,7 +298,7 @@ describe('DocFloatMenuService', () => {
             segmentId: '',
             segmentPage: -1,
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-            isEditing: true,
+            isEditing: false,
         }, { unitId, subUnitId: unitId });
 
         const popupService = injector.get(DocCanvasPopManagerService) as unknown as RecordingDocCanvasPopManagerService;
@@ -297,7 +336,7 @@ describe('DocFloatMenuService', () => {
             segmentId: '',
             segmentPage: -1,
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-            isEditing: true,
+            isEditing: false,
         }, { unitId, subUnitId: unitId });
 
         expect(harness.contextMenuService.triggers).toEqual([{
@@ -327,7 +366,7 @@ describe('DocFloatMenuService', () => {
             segmentId: '',
             segmentPage: -1,
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-            isEditing: true,
+            isEditing: false,
         };
         harness.selectionManager.__replaceTextRangesWithNoRefresh(selection, { unitId, subUnitId: unitId });
         expect(harness.service.floatMenu).toMatchObject({ start: 0, end: 5 });
@@ -366,7 +405,7 @@ describe('DocFloatMenuService', () => {
             segmentId: '',
             segmentPage: -1,
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-            isEditing: true,
+            isEditing: false,
         };
         harness.selectionManager.__replaceTextRangesWithNoRefresh(selection, { unitId, subUnitId: unitId });
         expect(harness.service.floatMenu).toMatchObject({ start: 0, end: 5 });
@@ -415,7 +454,7 @@ describe('DocFloatMenuService', () => {
             segmentId: '',
             segmentPage: -1,
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-            isEditing: true,
+            isEditing: false,
         }, { unitId, subUnitId: unitId });
 
         expect(harness.service.floatMenu).toBeNull();
@@ -452,7 +491,7 @@ describe('DocFloatMenuService', () => {
             segmentId: '',
             segmentPage: -1,
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-            isEditing: true,
+            isEditing: false,
         };
         harness.selectionManager.__replaceTextRangesWithNoRefresh(selection, { unitId, subUnitId: unitId });
         expect(harness.service.floatMenu).toMatchObject({ start: 0, end: 5, segmentId: '' });
@@ -523,7 +562,7 @@ describe('DocFloatMenuService', () => {
             segmentId: '',
             segmentPage: -1,
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-            isEditing: true,
+            isEditing: false,
         }, { unitId, subUnitId: unitId });
 
         const popupService = injector.get(DocCanvasPopManagerService) as unknown as RecordingDocCanvasPopManagerService;
@@ -558,7 +597,7 @@ describe('DocFloatMenuService', () => {
             segmentId: '',
             segmentPage: -1,
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-            isEditing: true,
+            isEditing: false,
         }, { unitId, subUnitId: unitId });
         selectionManager.__replaceTextRangesWithNoRefresh({
             textRanges: [{
@@ -570,7 +609,7 @@ describe('DocFloatMenuService', () => {
             segmentId: '',
             segmentPage: -1,
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-            isEditing: true,
+            isEditing: false,
         }, { unitId, subUnitId: unitId });
 
         expect(service.floatMenu).toBeNull();
@@ -599,7 +638,7 @@ describe('DocFloatMenuService', () => {
             segmentId: '',
             segmentPage: -1,
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-            isEditing: true,
+            isEditing: false,
         }, { unitId, subUnitId: unitId });
 
         expect(service.floatMenu).toBeNull();
@@ -628,7 +667,7 @@ describe('DocFloatMenuService', () => {
             segmentId: '',
             segmentPage: -1,
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-            isEditing: true,
+            isEditing: false,
         }, { unitId, subUnitId: unitId });
 
         expect(service.floatMenu).toBeNull();
@@ -655,7 +694,7 @@ describe('DocFloatMenuService', () => {
             segmentId: '',
             segmentPage: -1,
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-            isEditing: true,
+            isEditing: false,
         }, { unitId, subUnitId: unitId });
 
         expect(service.floatMenu).toMatchObject({ start: 0, end: 10 });
@@ -675,7 +714,7 @@ describe('DocFloatMenuService', () => {
             segmentId: '',
             segmentPage: -1,
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-            isEditing: true,
+            isEditing: false,
         }, { unitId, subUnitId: unitId });
 
         expect(service.floatMenu).toBeNull();
@@ -699,7 +738,7 @@ describe('DocFloatMenuService', () => {
             segmentId: '',
             segmentPage: -1,
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-            isEditing: true,
+            isEditing: false,
         };
 
         selectionManager.__replaceTextRangesWithNoRefresh(selection, { unitId, subUnitId: unitId });
@@ -736,7 +775,7 @@ describe('DocFloatMenuService', () => {
             segmentId: '',
             segmentPage: -1,
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-            isEditing: true,
+            isEditing: false,
         };
         selectionManager.__replaceTextRangesWithNoRefresh(selection, { unitId, subUnitId: unitId });
         popupService.onDismiss?.();
@@ -778,7 +817,7 @@ describe('DocFloatMenuService', () => {
             segmentId: '',
             segmentPage: -1,
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-            isEditing: true,
+            isEditing: false,
         }, { unitId, subUnitId: unitId });
 
         expect(service.floatMenu).toMatchObject({ start: 0, end: 18 });

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/rpc",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "private": false,
     "description": "Browser RPC layer for Univer main-thread and worker communication.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -71,7 +71,7 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "rxjs": "^7.8.2",
+        "rxjs": "7.8.2",
         "typescript": "^6.0.3",
         "vitest": "^5.0.4"
     }

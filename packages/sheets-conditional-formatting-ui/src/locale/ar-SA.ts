@@ -53,6 +53,7 @@ const locale: typeof enUS = {
             lessThanOrEqual: '<=',
         },
         panel: {
+            stopIfTrue: 'الإيقاف إذا تحقق الشرط',
             createRule: 'إنشاء قاعدة',
             clear: 'مسح كل القواعد',
             range: 'نطاق التطبيق',

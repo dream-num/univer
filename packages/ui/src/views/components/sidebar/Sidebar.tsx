@@ -15,12 +15,12 @@
  */
 
 import type { Attributes, ReactNode } from 'react';
-import type { LocaleKey } from '../../../locale/types';
-import type { ICustomLabelProps } from '../../custom-label/CustomLabel';
 import { LocaleService } from '@univerjs/core';
 import { borderLeftBottomClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { CloseIcon } from '@univerjs/icons';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { LocaleKey } from '../../../locale/types';
+import type { ICustomLabelProps } from '../../custom-label/CustomLabel';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
@@ -231,10 +231,10 @@ export function Sidebar() {
             {options?.visible && (
                 <div
                     className={`
-                      hover:univer-bg-primary-500/30
-                      active:univer-bg-primary-500/50
                       univer-absolute univer-left-0 univer-top-0 univer-z-20 univer-h-full univer-w-1
                       univer-cursor-col-resize univer-transition-colors
+                      hover:univer-bg-primary-500
+                      active:univer-bg-primary-500
                     `}
                     onMouseDown={handleResizeMouseDown}
                     role="separator"
@@ -281,11 +281,10 @@ export function Sidebar() {
                         ref={closeButtonRef}
                         type="button"
                         className={`
-                          focus:univer-ring-primary-500/50
                           univer-flex univer-size-6 univer-cursor-pointer univer-appearance-none univer-items-center
                           univer-justify-center univer-rounded-sm univer-border-none univer-bg-transparent univer-p-0
                           univer-text-gray-500
-                          focus:univer-outline-none focus:univer-ring-2
+                          focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-500
                           dark:!univer-text-gray-300
                         `}
                         onClick={handleClose}

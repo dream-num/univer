@@ -16,7 +16,6 @@
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { RenderUnit } from '@univerjs/engine-render';
-import type { IMutiPageParagraphBound, ITableBound } from '../doc-event-manager.service';
 import {
     BlockType,
     DataStreamTreeTokenType,
@@ -33,6 +32,7 @@ import {
 } from '@univerjs/core';
 import {
     createDocumentPermissionPoint,
+    DocSelectionManagerService,
     DocSkeletonManagerService,
     getDocumentParagraphPermissionObjectId,
     setDocumentPermissionValue,
@@ -44,6 +44,7 @@ import {
     Documents,
     ICanvasColorService,
     IRenderManagerService,
+    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
     RenderManagerService,
     Viewport,
 } from '@univerjs/engine-render';
@@ -58,13 +59,11 @@ import {
 } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, onTestFinished, vi } from 'vitest';
+import type { IMutiPageParagraphBound, ITableBound } from '../doc-event-manager.service';
 import { buildMoveDocBlockActions } from '../../commands/commands/doc-block-move.command';
 import { genTableSource } from '../../commands/commands/table/table';
 import enUS from '../../locale/en-US';
-import {
-    DOC_PARAGRAPH_MENU_COMPONENT_KEY,
-    DOC_TABLE_BLOCK_MENU_COMPONENT_KEY,
-} from '../../views/paragraph-menu/component-keys';
+import { DOC_PARAGRAPH_MENU_COMPONENT_KEY } from '../../views/paragraph-menu/component-keys';
 import {
     DocEventManagerService,
     getPreferredParagraphBoundsInRange,
@@ -142,7 +141,10 @@ describe('focused table menus with real render services', () => {
         ]);
         const service = render.with(DocParagraphMenuService);
         const bound = render.with(DocEventManagerService).tableBounds.get(table.tableId)!;
-        return { injector, service, bound, render, model };
+        const events = render.with(DocEventManagerService);
+        const hoverParagraph$ = Reflect.get(events, '_hoverParagraph$') as BehaviorSubject<IMutiPageParagraphBound | null>;
+        const hoverTable$ = Reflect.get(events, '_hoverTable$') as Subject<ITableBound | null>;
+        return { injector, service, bound, render, model, hoverParagraph$, hoverTable$ };
     }
 
     it('keeps a focused table trigger independent of paragraph hover and closes each popup independently', () => {
@@ -196,6 +198,210 @@ describe('focused table menus with real render services', () => {
         expect(popups.popups).toHaveLength(1);
         service.dispose();
         expect(popups.popups).toHaveLength(0);
+    });
+
+    it('keeps the hover trigger mounted across short gaps and switches its paragraph anchor', () => {
+        vi.useFakeTimers();
+        onTestFinished(() => {
+            vi.useRealTimers();
+        });
+        const { injector, service, model, hoverParagraph$, hoverTable$ } = createFocusedMenuTestBed();
+        const popups = injector.get(ICanvasPopupService);
+        const paragraph = createParagraphBound({ paragraphStart: 3, paragraphEnd: 7, startIndex: 7 });
+        hoverTable$.next(null);
+        hoverParagraph$.next(paragraph);
+        vi.advanceTimersByTime(32);
+        const popupId = popups.popups[0][0];
+        const anchors: unknown[] = [];
+        const anchorSubscription = popups.popups[0][1].anchorRect$.subscribe((anchor) => anchors.push(anchor));
+        onTestFinished(() => anchorSubscription.unsubscribe());
+        const targets: Array<string | null> = [];
+        const subscription = service.activeTarget$.subscribe((target) => targets.push(target?.key ?? null));
+        onTestFinished(() => subscription.unsubscribe());
+
+        hoverParagraph$.next(null);
+        vi.advanceTimersByTime(199);
+        expect(popups.popups[0]?.[0]).toBe(popupId);
+
+        const startOffset = model.getBody()!.dataStream.indexOf('Body');
+        const nextParagraph = createParagraphBound({
+            paragraphStart: startOffset,
+            paragraphEnd: startOffset + 4,
+            startIndex: startOffset + 4,
+        });
+        hoverParagraph$.next(nextParagraph);
+        vi.advanceTimersByTime(200);
+
+        expect(popups.popups).toHaveLength(1);
+        expect(popups.popups[0][0]).toBe(popupId);
+        expect(service.activeTarget?.key).toBe(`paragraph:${nextParagraph.startIndex}`);
+        expect(targets).not.toContain(null);
+        expect(anchors[anchors.length - 1]).not.toEqual(anchors[0]);
+    });
+
+    it('hides 200ms after hover loss without extending the deadline on repeated empty hover events', () => {
+        vi.useFakeTimers();
+        onTestFinished(() => {
+            vi.useRealTimers();
+        });
+        const { injector, service, hoverParagraph$, hoverTable$ } = createFocusedMenuTestBed();
+        const popups = injector.get(ICanvasPopupService);
+        hoverTable$.next(null);
+        hoverParagraph$.next(createParagraphBound({ paragraphStart: 3, paragraphEnd: 7, startIndex: 7 }));
+        vi.advanceTimersByTime(32);
+        hoverParagraph$.next(null);
+        vi.advanceTimersByTime(100);
+        hoverParagraph$.next(null);
+        vi.advanceTimersByTime(99);
+        expect(popups.popups).toHaveLength(1);
+        vi.advanceTimersByTime(1);
+        expect(popups.popups).toHaveLength(0);
+        expect(service.activeTarget).toBeNull();
+    });
+
+    it('cancels a pending hover dismissal when the trigger becomes active or the same paragraph returns', () => {
+        vi.useFakeTimers();
+        onTestFinished(() => {
+            vi.useRealTimers();
+        });
+        const { injector, service, hoverParagraph$, hoverTable$ } = createFocusedMenuTestBed();
+        const popups = injector.get(ICanvasPopupService);
+        const paragraph = createParagraphBound({ paragraphStart: 3, paragraphEnd: 7, startIndex: 7 });
+        hoverTable$.next(null);
+        hoverParagraph$.next(paragraph);
+        vi.advanceTimersByTime(32);
+        const popupId = popups.popups[0][0];
+        hoverParagraph$.next(null);
+        vi.advanceTimersByTime(150);
+        hoverParagraph$.next(paragraph);
+        vi.advanceTimersByTime(200);
+        expect(popups.popups[0]?.[0]).toBe(popupId);
+
+        hoverParagraph$.next(null);
+        vi.advanceTimersByTime(150);
+        service.setParagraphMenuActive(true);
+        vi.advanceTimersByTime(200);
+        expect(popups.popups[0]?.[0]).toBe(popupId);
+    });
+
+    it('cancels pending hover dismissal on disposal and still closes immediately on permission loss', () => {
+        vi.useFakeTimers();
+        onTestFinished(() => {
+            vi.useRealTimers();
+        });
+        const { injector, service, hoverParagraph$, hoverTable$ } = createFocusedMenuTestBed();
+        const popups = injector.get(ICanvasPopupService);
+        const paragraph = createParagraphBound({ paragraphStart: 3, paragraphEnd: 7, startIndex: 7 });
+        hoverTable$.next(null);
+        hoverParagraph$.next(paragraph);
+        vi.advanceTimersByTime(32);
+        hoverParagraph$.next(null);
+        vi.advanceTimersByTime(50);
+        setDocumentPermissionValue(injector.get(IPermissionService), 'focused-table-doc', 'focused-table-doc', UnitAction.Edit, false);
+        expect(popups.popups).toHaveLength(0);
+        setDocumentPermissionValue(injector.get(IPermissionService), 'focused-table-doc', 'focused-table-doc', UnitAction.Edit, true);
+        service.showParagraphMenu(paragraph);
+        hoverParagraph$.next(null);
+        vi.advanceTimersByTime(32);
+        const hideMenu = vi.spyOn(service, 'hideParagraphMenu');
+        service.dispose();
+        hideMenu.mockClear();
+        vi.advanceTimersByTime(200);
+        expect(hideMenu).not.toHaveBeenCalled();
+        expect(popups.popups).toHaveLength(0);
+    });
+
+    it.each([DocumentBlockType.PARAGRAPH, DocumentBlockType.TABLE])(
+        'keeps the passive %s trigger mounted on pointerdown and dismisses it on selection movement',
+        (kind) => {
+            vi.useFakeTimers();
+            onTestFinished(() => {
+                vi.useRealTimers();
+            });
+            const { injector, service, render, bound, model, hoverParagraph$, hoverTable$ } = createFocusedMenuTestBed();
+            const popups = injector.get(ICanvasPopupService);
+            if (kind === DocumentBlockType.TABLE) {
+                service.showTableMenu(bound);
+            } else {
+                service.showParagraphMenu(createParagraphBound({ paragraphStart: 3, paragraphEnd: 7, startIndex: 7 }));
+            }
+            const popupId = popups.popups[0][0];
+            const selectionRender = render.with(DocSelectionRenderService);
+            const selectionStart$ = Reflect.get(selectionRender, '_onSelectionStart$') as Subject<unknown>;
+            hoverTable$.next(null);
+            vi.advanceTimersByTime(32);
+            Reflect.set(selectionRender, '_onPointerEvent', true);
+            selectionStart$.next(null);
+            vi.advanceTimersByTime(220);
+            expect(popups.popups[0]?.[0]).toBe(popupId);
+
+            popups.popups[0][1].onClickOutside?.(new MouseEvent('pointerdown'));
+            const selections = injector.get(DocSelectionManagerService);
+            const offset = model.getBody()!.dataStream.indexOf('Body');
+            const selectionInfo = {
+                textRanges: [{ startOffset: offset, endOffset: offset, collapsed: true }],
+                rectRanges: [],
+                segmentId: '',
+                segmentPage: -1,
+                isEditing: true,
+                style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            };
+            selections.replaceSelectionInfoWithoutRefresh(selectionInfo);
+            const textSelection$ = Reflect.get(selections, '_textSelection$') as Subject<unknown>;
+            textSelection$.next(selectionInfo);
+            expect(popups.popups[0]?.[0]).toBe(popupId);
+
+            hoverTable$.next(null);
+            hoverParagraph$.next(null);
+            vi.advanceTimersByTime(32);
+            expect(popups.popups[0]?.[0]).toBe(popupId);
+
+            render.scene.onPointerMove$.emitEvent(new PointerEvent('pointermove', { buttons: 1 }) as never);
+            expect(popups.popups[0]?.[0]).toBe(popupId);
+            const movingSelection$ = Reflect.get(selectionRender, '_movingSelection$') as Subject<unknown>;
+            movingSelection$.next(selectionInfo);
+            expect(popups.popups).toHaveLength(0);
+            Reflect.set(selectionRender, '_onPointerEvent', false);
+        }
+    );
+
+    it('keeps the trigger when navigation and modifier keys do not expand the selection', () => {
+        const { injector, service, render } = createFocusedMenuTestBed();
+        const popups = injector.get(ICanvasPopupService);
+        service.showParagraphMenu(createParagraphBound({ paragraphStart: 3, paragraphEnd: 7, startIndex: 7 }));
+        const popupId = popups.popups[0][0];
+        const keydown$ = Reflect.get(render.with(DocSelectionRenderService), '_onKeydown$') as Subject<unknown>;
+
+        for (const key of ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown', 'Shift', 'Control', 'Alt', 'Meta']) {
+            keydown$.next({ event: new KeyboardEvent('keydown', { key }) });
+            expect(popups.popups[0]?.[0], key).toBe(popupId);
+        }
+    });
+
+    it('reuses the hover popup and publishes target changes when switching between tables and paragraphs', () => {
+        const { injector, service, bound, model } = createFocusedMenuTestBed();
+        const popups = injector.get(ICanvasPopupService);
+        service.showTableMenu(bound);
+        const [popupId, popup] = popups.popups[0];
+        const targetKinds: Array<DocumentBlockType | undefined> = [];
+        const subscription = service.activeTarget$.subscribe((target) => targetKinds.push(target?.kind));
+        onTestFinished(() => subscription.unsubscribe());
+
+        service.showParagraphMenu(createParagraphBound({ paragraphStart: 3, paragraphEnd: 7, startIndex: 7 }));
+        expect(popups.popups[0][0]).toBe(popupId);
+        expect(popups.popups[0][1].componentKey).toBe(popup.componentKey);
+        expect(targetKinds[targetKinds.length - 1]).toBe(DocumentBlockType.PARAGRAPH);
+
+        const startOffset = model.getBody()!.dataStream.indexOf('Body');
+        service.showParagraphMenu(createParagraphBound({
+            paragraphStart: startOffset,
+            paragraphEnd: startOffset + 4,
+            startIndex: startOffset + 4,
+        }));
+        service.showTableMenu(bound);
+        expect(popups.popups).toHaveLength(1);
+        expect(popups.popups[0][0]).toBe(popupId);
+        expect(targetKinds[targetKinds.length - 1]).toBe(DocumentBlockType.TABLE);
     });
 });
 
@@ -394,8 +600,7 @@ describe('DocParagraphMenuService', () => {
             tableId: 'table-1',
         });
 
-        const [anchor, options] = attachPopupToRect.mock.calls[0] as unknown as [() => { bottom: number; left: number; right: number; top: number }, { componentKey: string; direction: string }];
-        expect(options.componentKey).toBe(DOC_TABLE_BLOCK_MENU_COMPONENT_KEY);
+        const [anchor, options] = attachPopupToRect.mock.calls[0] as unknown as [() => { bottom: number; left: number; right: number; top: number }, { direction: string }];
         expect(options.direction).toBe('top-right');
         expect(anchor()).toEqual({
             bottom: 76,
@@ -429,11 +634,8 @@ describe('DocParagraphMenuService', () => {
     });
 
     it('does not let the same table hover target steal back a cell paragraph menu', () => {
-        const disposeTableMenu = vi.fn();
-        const disposeCellMenu = vi.fn();
-        const attachPopupToRect = vi.fn()
-            .mockReturnValueOnce({ canDispose: () => true, dispose: disposeTableMenu })
-            .mockReturnValueOnce({ canDispose: () => true, dispose: disposeCellMenu });
+        const dispose = vi.fn();
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose }));
         const service = createService({
             attachPopupToRect,
             dataStream: `${DataStreamTreeTokenType.TABLE_START}${DataStreamTreeTokenType.TABLE_ROW_START}${DataStreamTreeTokenType.TABLE_CELL_START}Cell\r${DataStreamTreeTokenType.TABLE_CELL_END}${DataStreamTreeTokenType.TABLE_ROW_END}${DataStreamTreeTokenType.TABLE_END}`,
@@ -460,8 +662,8 @@ describe('DocParagraphMenuService', () => {
 
         expect(service.activeTarget?.kind).toBe(DocumentBlockType.PARAGRAPH);
         expect(service.activeTarget?.key).toBe(`${DocumentBlockType.PARAGRAPH}:7`);
-        expect(disposeCellMenu).not.toHaveBeenCalled();
-        expect(attachPopupToRect).toHaveBeenCalledTimes(2);
+        expect(dispose).not.toHaveBeenCalled();
+        expect(attachPopupToRect).toHaveBeenCalledTimes(1);
     });
 
     it('anchors first-column table-cell paragraph menus to the left of the row header lane', () => {
@@ -1256,7 +1458,7 @@ describe('DocParagraphMenuService', () => {
         expect(service.activeTarget?.key).toBe('paragraph:5');
     });
 
-    it('hides the visible paragraph menu after a custom range click and after scrolling', () => {
+    it('keeps a passive trigger during scrolling but closes an active menu or a custom range click', () => {
         const dispose = vi.fn();
         const clickCustomRanges$ = new Subject();
         const scrollAfter = createScrollAfterEvent();
@@ -1285,6 +1487,10 @@ describe('DocParagraphMenuService', () => {
         }));
         scrollAfter.emit({ scrollY: 20 });
 
+        expect(dispose).toHaveBeenCalledTimes(1);
+        expect(service.activeTarget).not.toBeNull();
+        service.setParagraphMenuActive(true);
+        scrollAfter.emit({ scrollY: 40 });
         expect(dispose).toHaveBeenCalledTimes(2);
         expect(service.activeTarget).toBeNull();
     });
@@ -1316,6 +1522,8 @@ describe('DocParagraphMenuService', () => {
         hoverParagraphRealTime$.next(null);
         hoverParagraphLeft$.next(null);
         await new Promise((resolve) => setTimeout(resolve, 20));
+        expect(dispose).not.toHaveBeenCalled();
+        await new Promise((resolve) => setTimeout(resolve, 200));
 
         expect(dispose).toHaveBeenCalledTimes(1);
         expect(service.activeTarget).toBeNull();
@@ -1353,28 +1561,6 @@ describe('DocParagraphMenuService', () => {
         });
 
         expect(attachPopupToRect).not.toHaveBeenCalled();
-    });
-
-    it('hides a visible table menu as soon as text selection starts', () => {
-        const dispose = vi.fn();
-        const selectionStart$ = new Subject<unknown>();
-        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose }));
-        const service = createService({
-            attachPopupToRect,
-            dataStream: '',
-            selectionStart$,
-            tables: [{ tableId: 'table-1', startIndex: 10, endIndex: 30 }],
-        });
-
-        service.showTableMenu({
-            pageIndex: 0,
-            rect: { bottom: 170, left: 100, right: 400, top: 80 },
-            tableId: 'table-1',
-        });
-        selectionStart$.next(null);
-
-        expect(dispose).toHaveBeenCalledTimes(1);
-        expect(service.activeTarget).toBeNull();
     });
 
     it('does not show table menus from hover events while pointer text selection is active', async () => {
@@ -1515,7 +1701,6 @@ function createService(options: {
     mobile?: boolean;
     replaceDocRanges?: ReturnType<typeof vi.fn>;
     scrollAfter$?: { subscribeEvent: (callback: (event: { scrollY: number }) => void) => { dispose: () => void } };
-    selectionStart$?: Subject<unknown>;
     textSelection$?: Subject<unknown>;
     tableCellBounds?: Map<string, Array<{ colIndex: number; pageIndex: number; rect: { bottom: number; left: number; right: number; top: number }; rowIndex: number; tableId: string }>>;
     tables?: Array<{ endIndex: number; startIndex: number; tableId: string }>;
@@ -1590,7 +1775,8 @@ function createService(options: {
         {
             onInputBefore$: options.inputBefore$ ?? new Subject(),
             onKeydown$: options.keydown$ ?? new Subject(),
-            onSelectionStart$: options.selectionStart$ ?? new Subject(),
+            onSelectionStart$: new Subject(),
+            movingSelection$: new Subject(),
             isOnPointerEvent: options.isOnPointerEvent ?? false,
         } as never,
         {

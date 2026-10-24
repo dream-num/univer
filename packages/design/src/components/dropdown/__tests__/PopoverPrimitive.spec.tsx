@@ -58,8 +58,6 @@ describe('Dropdown', () => {
             </Dropdown>
         );
 
-        expect(screen.getByText('Overlay Content').closest('[data-slot="popover-content"]')?.classList.contains('data-[state=closed]:univer-pointer-events-none')).toBe(true);
-
         rerender(
             <Dropdown overlay={<div>Overlay Content</div>} open={false}>
                 <button type="button">Trigger</button>

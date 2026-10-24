@@ -59,7 +59,7 @@ export const buttonVariants = cva(
                   dark:active:!univer-bg-gray-600
                 `,
                 link: `
-                  univer-underline-current univer-border-transparent univer-bg-transparent univer-text-primary-600
+                  univer-border-transparent univer-bg-transparent univer-text-primary-600 univer-decoration-current
                   univer-underline-offset-4
                   hover:univer-text-primary-500 hover:univer-underline
                   active:univer-text-primary-700

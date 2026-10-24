@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import type { Worksheet } from '@univerjs/core';
-import type { ITableRecordFilterItem, TableRecordValue } from '../../types/type';
-import { CellValueType, FilterSelectionMode, numfmt, RecordValueType } from '@univerjs/core';
+import type { RecordValue, Worksheet } from '@univerjs/core';
+import { CellValueType, FilterSelectionMode, getRecordValueKey, numfmt, RecordValueType } from '@univerjs/core';
 import { extractFormulaError } from '@univerjs/engine-formula';
+import type { ITableRecordFilterItem } from '../../types/type';
 import { TableColumnFilterTypeEnum } from '../../types/enum';
 import { convertCellDataToString } from '../../util';
 
 /**
  * Formula errors are recognized when the cell retains formula, shared-formula, or intercepted array-formula context.
  */
-export function getTableRecordValue(sheet: Worksheet, row: number, column: number): TableRecordValue {
+export function getTableRecordValue(sheet: Worksheet, row: number, column: number): RecordValue {
     const cell = sheet.getCell(row, column);
     const error = extractFormulaError(cell, cell?.isInArrayFormulaRange === true);
     if (error !== null) {
@@ -73,44 +73,7 @@ export function getTableRecordValue(sheet: Worksheet, row: number, column: numbe
     throw new TypeError('Invalid table record cell value.');
 }
 
-export function getTableRecordValueKey(_value: TableRecordValue): string {
-    const value = _value as unknown;
-    if (!isRecord(value) || typeof value.type !== 'string') {
-        throw new TypeError('Invalid table record value.');
-    }
-
-    switch (value.type) {
-        case RecordValueType.Blank:
-            if ('value' in value) {
-                throw new TypeError('Blank table record values cannot have a value.');
-            }
-            return '["blank"]';
-        case RecordValueType.String:
-        case RecordValueType.Error:
-            if (typeof value.value !== 'string') {
-                throw new TypeError('Invalid table record value.');
-            }
-            return JSON.stringify([value.type, value.value]);
-        case RecordValueType.Boolean:
-            if (typeof value.value !== 'boolean') {
-                throw new TypeError('Invalid table record value.');
-            }
-            return JSON.stringify([value.type, value.value]);
-        case RecordValueType.Number:
-        case RecordValueType.Date:
-            if (typeof value.value !== 'number') {
-                throw new TypeError('Invalid table record value.');
-            }
-            if (!Number.isFinite(value.value)) {
-                throw new RangeError('Table record numeric values must be finite.');
-            }
-            return JSON.stringify([value.type, value.value === 0 ? 0 : value.value]);
-        default:
-            throw new TypeError('Unknown table record value type.');
-    }
-}
-
-export function compileTableRecordFilter(_filter: ITableRecordFilterItem): (value: TableRecordValue) => boolean {
+export function compileTableRecordFilter(_filter: ITableRecordFilterItem): (value: RecordValue) => boolean {
     const filter = _filter as unknown;
     if (!isRecord(filter) || filter.filterType !== TableColumnFilterTypeEnum.record) {
         throw new TypeError('Invalid table record filter.');
@@ -119,11 +82,11 @@ export function compileTableRecordFilter(_filter: ITableRecordFilterItem): (valu
         throw new TypeError('Invalid table record filter.');
     }
 
-    const keys = new Set(filter.values.map((value) => getTableRecordValueKey(value as TableRecordValue)));
+    const keys = new Set(filter.values.map((value) => getRecordValueKey(value as RecordValue)));
     if (filter.mode === FilterSelectionMode.Include) {
-        return (value) => keys.has(getTableRecordValueKey(value));
+        return (value) => keys.has(getRecordValueKey(value));
     }
-    return (value) => !keys.has(getTableRecordValueKey(value));
+    return (value) => !keys.has(getRecordValueKey(value));
 }
 
 export function cloneTableRecordFilter(filter: ITableRecordFilterItem): ITableRecordFilterItem {

@@ -244,6 +244,10 @@ const locale: typeof enUS = {
             defaultTextColor: 'Màu văn bản mặc định',
             noBackground: 'Không có nền',
         },
+        heading: {
+            collapse: 'Thu gọn',
+            expand: 'Mở rộng',
+        },
         'page-settings': {
             'document-setting': 'Cài đặt tài liệu',
             'modern-width': 'Độ rộng nội dung',

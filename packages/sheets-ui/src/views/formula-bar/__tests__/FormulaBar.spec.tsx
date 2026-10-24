@@ -34,6 +34,7 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
 import {
     DefinedNamesService,
+    FormulaDataModel,
     FunctionService,
     IDefinedNamesService,
     IFunctionService,
@@ -43,6 +44,8 @@ import {
 } from '@univerjs/engine-formula';
 import { DeviceInputEventType, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
+    AutoFillService,
+    IAutoFillService,
     RangeProtectionCache,
     RangeProtectionRuleModel,
     SheetInterceptorService,
@@ -284,6 +287,7 @@ function createFormulaBarTestBed(cellStyle?: IStyleData, realEditorServices = fa
     injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
     injector.add([ISuperTableService, { useClass: SuperTableService }]);
     injector.add([IFunctionService, { useClass: FunctionService }]);
+    injector.add([FormulaDataModel]);
     injector.add([LexerTreeBuilder, { useClass: LexerTreeBuilder }]);
     injector.add([ComponentManager, { useClass: ComponentManager }]);
     injector.add([IUIPartsService, { useClass: UIPartsService }]);
@@ -291,6 +295,7 @@ function createFormulaBarTestBed(cellStyle?: IStyleData, realEditorServices = fa
     injector.add([WorksheetProtectionRuleModel, { useClass: WorksheetProtectionRuleModel }]);
     injector.add([RangeProtectionRuleModel, { useClass: RangeProtectionRuleModel }]);
     injector.add([RangeProtectionCache, { useClass: RangeProtectionCache }]);
+    injector.add([IAutoFillService, { useClass: AutoFillService }]);
     injector.add([SheetPermissionCheckController, { useClass: SheetPermissionCheckController }]);
     injector.add([IFormulaEditorManagerService, { useClass: FormulaEditorManagerService }]);
     if (realEditorServices) {

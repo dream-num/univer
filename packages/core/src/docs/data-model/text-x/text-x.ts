@@ -418,12 +418,11 @@ export class TextX {
             if (action.t === TextXActionType.RETAIN && action.body != null) {
                 const body = getBodySlice(doc, index, index + action.len, true);
 
-                // A partial slice clips enclosing structural ranges. Restoring
-                // those ranges would duplicate/truncate a table (or container)
-                // when undoing an unrelated comment or text-formatting change.
-                for (const field of ['tables', 'columnGroups', 'blockRanges'] as const) {
-                    if (action.body[field] == null) {
-                        delete body[field];
+                // Restoring untouched attributes can overwrite peer formatting or
+                // reinsert clipped enclosing ranges. Paragraph identities need separate handling below.
+                for (const field of Object.keys(body) as Array<keyof IDocumentBody>) {
+                    if (field !== 'dataStream' && field !== 'paragraphs' && action.body[field] == null) {
+                        Reflect.deleteProperty(body, field);
                     }
                 }
 

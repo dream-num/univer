@@ -129,13 +129,9 @@ export function Popup(props: IPopupProps) {
                 `,
                 visible
                     ? `
-                      univer-[transition-timing-function:cubic-bezier(0.08,0.82,0.17,1)] univer-scale-y-100
-                      univer-opacity-100
+                      univer-scale-y-100 univer-opacity-100 [transition-timing-function:cubic-bezier(0.08,0.82,0.17,1)]
                     `
-                    : `
-                      univer-[transition-timing-function:cubic-bezier(0.6,0.04,0.98,0.34)] univer-scale-y-0
-                      univer-opacity-0
-                    `
+                    : 'univer-scale-y-0 univer-opacity-0 [transition-timing-function:cubic-bezier(0.6,0.04,0.98,0.34)]'
             )}
             style={{
                 // Fix #1089. If the popup does not have this 2px offset, the pointerup event's target would

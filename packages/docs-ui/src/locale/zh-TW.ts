@@ -244,6 +244,10 @@ const locale: typeof enUS = {
             defaultTextColor: '預設文字顏色',
             noBackground: '無背景色',
         },
+        heading: {
+            collapse: '收合',
+            expand: '展開',
+        },
         'page-settings': {
             'document-setting': '文件設定',
             'modern-width': '內容寬度',

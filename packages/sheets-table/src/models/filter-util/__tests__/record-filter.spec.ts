@@ -18,6 +18,7 @@ import type { IWorkbookData, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     FilterSelectionMode,
+    getRecordValueKey,
     InterceptorEffectEnum,
     LocaleType,
     RecordValueType,
@@ -27,7 +28,7 @@ import {
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { afterEach, describe, expect, it } from 'vitest';
 import { TableColumnFilterTypeEnum } from '../../../types/enum';
-import { compileTableRecordFilter, getTableRecordValue, getTableRecordValueKey } from '../record-filter';
+import { compileTableRecordFilter, getTableRecordValue } from '../record-filter';
 
 function createWorkbookData(): IWorkbookData {
     return {
@@ -107,8 +108,8 @@ describe('record-filter', () => {
         expect(include({ type: RecordValueType.Blank })).toBe(true);
         expect(exclude({ type: RecordValueType.String, value: 'blocked' })).toBe(false);
         expect(exclude({ type: RecordValueType.String, value: 'new' })).toBe(true);
-        const numberKey = getTableRecordValueKey({ type: RecordValueType.Number, value: 1 });
-        const stringKey = getTableRecordValueKey({ type: RecordValueType.String, value: '1' });
+        const numberKey = getRecordValueKey({ type: RecordValueType.Number, value: 1 });
+        const stringKey = getRecordValueKey({ type: RecordValueType.String, value: '1' });
         expect(numberKey).not.toBe(stringKey);
     });
 
@@ -145,7 +146,7 @@ describe('record-filter', () => {
             mode: FilterSelectionMode.Include,
             values: [{ type: RecordValueType.Number, value: Number.POSITIVE_INFINITY }],
         })).toThrow(RangeError);
-        expect(() => getTableRecordValueKey({ type: RecordValueType.Blank, value: 'not-blank' } as never)).toThrow(TypeError);
-        expect(() => getTableRecordValueKey({ type: 'unknown', value: 'x' } as never)).toThrow(TypeError);
+        expect(() => getRecordValueKey({ type: RecordValueType.Blank, value: 'not-blank' } as never)).toThrow(TypeError);
+        expect(() => getRecordValueKey({ type: 'unknown', value: 'x' } as never)).toThrow(TypeError);
     });
 });

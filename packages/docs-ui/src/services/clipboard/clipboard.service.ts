@@ -18,7 +18,6 @@ import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, IUnd
 import type { IDocImage } from '@univerjs/docs-drawing';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
-import type { DocPasteMode, IDocPasteStyle } from './paste-options';
 import {
     BuildTextUtils,
     CommandType,
@@ -34,11 +33,13 @@ import {
     ErrorService,
     generateRandomId,
     getBodySlice,
+    getBodySliceForTextXAction,
     ICommandService,
     ILogService,
     ImageSourceType,
     Inject,
     IPermissionService,
+    isCommentEditorID,
     isInternalEditorID,
     IUndoRedoService,
     IUniverInstanceService,
@@ -73,6 +74,7 @@ import {
     PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
 } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
+import type { DocPasteMode, IDocPasteStyle } from './paste-options';
 import { isTopLevelStructuralGap } from '../../basics/paragraph';
 import { CutContentCommand, InnerPasteCommand } from '../../commands/commands/clipboard.inner.command';
 import { getCursorWhenDelete } from '../../commands/commands/doc-delete.command';
@@ -556,17 +558,31 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         if (!unitId || !this._canEditTargets(unitId)) {
             return false;
         }
-        if (!cachedSource && !payload.html && !payload.text && !payload.internalJson && !payload.files.length) {
+        const isCommentEditor = isCommentEditorID(unitId);
+        if (!cachedSource && !payload.html && !payload.text && !payload.internalJson && (isCommentEditor || !payload.files.length)) {
             return false;
         }
         const generation = this._pasteGeneration;
-        const mode = unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY ? 'text' : payload.mode ?? 'source';
+        const mode = isCommentEditor || unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY ? 'text' : payload.mode ?? 'source';
         const style = this._getPasteStyle(unitId);
-        const source = await this._preparePaste(payload, mode, cachedSource);
+        const source = await (isCommentEditor && payload.text !== undefined
+            ? { body: { dataStream: payload.text } }
+            : this._preparePaste(payload, mode, cachedSource));
         if (generation !== this._pasteGeneration || !this._canEditTargets(unitId)) {
             return false;
         }
-        let doc = applyDocPasteMode(source, mode, style, payload.text);
+        let doc: Partial<IDocumentData>;
+        if (isCommentEditor) {
+            const text = payload.text ?? getClipboardPlainText(source);
+            if (!text) {
+                return false;
+            }
+            const body = BuildTextUtils.transform.fromPlainText(text);
+            delete body.customRanges;
+            doc = { body };
+        } else {
+            doc = applyDocPasteMode(source, mode, style, payload.text);
+        }
         if (unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
             doc = { ...source, body: { ...source.body!, textRuns: [] } };
             if (payload.text) {
@@ -860,23 +876,19 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         plainTextList?: readonly string[]
     ): Promise<void> {
         const copyId = generateRandomId(6);
-        const text =
-            (plainTextList
-                ? plainTextList.join('\n')
-                : documentList.length > 1
-                    ? documentList.map((doc) => doc.body?.dataStream || '').join('\n')
-                    : documentList[0].body?.dataStream || '')
-                .replaceAll(DataStreamTreeTokenType.TABLE_START, '')
-                .replaceAll(DataStreamTreeTokenType.TABLE_END, '')
-                .replaceAll(DataStreamTreeTokenType.TABLE_ROW_START, '')
-                .replaceAll(DataStreamTreeTokenType.TABLE_ROW_END, '')
-                .replaceAll(DataStreamTreeTokenType.TABLE_CELL_START, '')
-                .replaceAll(DataStreamTreeTokenType.TABLE_CELL_END, '')
-                .replaceAll(DataStreamTreeTokenType.BLOCK_START, '')
-                .replaceAll(DataStreamTreeTokenType.BLOCK_END, '')
-                // Replace `\r\n` in table cell to white space.
-                .replaceAll('\r\n', ' ')
-                .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+        const text = (plainTextList ?? documentList.map((doc) => doc.body?.dataStream || ''))
+            .join('\n')
+            .replaceAll(DataStreamTreeTokenType.TABLE_START, '')
+            .replaceAll(DataStreamTreeTokenType.TABLE_END, '')
+            .replaceAll(DataStreamTreeTokenType.TABLE_ROW_START, '')
+            .replaceAll(DataStreamTreeTokenType.TABLE_ROW_END, '')
+            .replaceAll(DataStreamTreeTokenType.TABLE_CELL_START, '')
+            .replaceAll(DataStreamTreeTokenType.TABLE_CELL_END, '')
+            .replaceAll(DataStreamTreeTokenType.BLOCK_START, '')
+            .replaceAll(DataStreamTreeTokenType.BLOCK_END, '')
+            // Replace `\r\n` in table cell to white space.
+            .replaceAll('\r\n', ' ')
+            .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
 
         let html = this._umdToHtml.convert(documentList);
         let internalJson = '';
@@ -976,26 +988,13 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 continue;
             }
 
-            const deleteRange = { startOffset, endOffset, collapsed };
-
-            const docBody = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.sliceBody(deleteRange.startOffset, deleteRange.endOffset, sliceType);
-            if (docBody == null) {
-                continue;
-            }
-
-            // Text inside a cell is not a nested table. Keep only completely copied table structures.
-            if (docBody.tables?.length) {
-                const completeTableIds = new Set(body.tables?.filter((table) => (
-                    table.startIndex >= startOffset && table.endIndex <= endOffset
-                )).map((table) => table.tableId));
-                docBody.tables = docBody.tables.filter((table) => completeTableIds.has(table.tableId));
-            }
+            const docBody = getBodySliceForTextXAction(body, startOffset, endOffset, false, sliceType);
 
             results.push(docBody);
             plainTextResults.push(
                 copyContentHook?.(
-                    deleteRange.startOffset,
-                    deleteRange.endOffset,
+                    startOffset,
+                    endOffset,
                     {
                         body,
                         segmentId,

@@ -16,7 +16,15 @@
 
 import type { IWorkbookData, Univer, Workbook } from '@univerjs/core';
 import type { Subscription } from 'rxjs';
-import { ICommandService, IPermissionService, IResourceManagerService, LocaleType, mergeWorksheetSnapshotWithDefault, SheetTypes, UniverInstanceType } from '@univerjs/core';
+import {
+    ICommandService,
+    IPermissionService,
+    IResourceManagerService,
+    LocaleType,
+    mergeWorksheetSnapshotWithDefault,
+    SheetTypes,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { IRangeProtectionRule } from '../../../../models/range-protection-rule.model';
@@ -170,5 +178,36 @@ describe('WorksheetPermissionService', () => {
         expect(permissionService.getPermissionPoint(chartPoint.id)?.value).toBe(false);
         expect(observations).toEqual([false, false, false]);
         subscription?.unsubscribe();
+    });
+
+    it('restores Grid permission after a protection rule is removed', () => {
+        const original = worksheetRule('grid', 'grid-rule');
+        const revised = worksheetRule('grid', 'revised-grid-rule');
+        worksheetRuleModel.addRule('test', original);
+        worksheetRuleModel.setRule('test', 'grid', revised);
+        expect(worksheetRuleModel.getRule('test', 'grid')).toEqual(revised);
+        expect(permissionService.getPermissionPoint(new WorksheetViewPermission('test', 'grid').id)?.value).not.toBe(true);
+
+        worksheetRuleModel.deleteRule('test', 'grid');
+        expect(permissionService.getPermissionPoint(new WorksheetViewPermission('test', 'grid').id)?.value).toBe(true);
+        expect(permissionService.getPermissionPoint(editPoint('grid').id)?.value).toBe(true);
+        expect(permissionService.getPermissionPoint(editPoint('chart').id)?.value).toBe(false);
+    });
+
+    it('accepts empty and malformed protection resources without leaving stale rules', () => {
+        worksheetRuleModel.addRule('test', worksheetRule('grid', 'grid-rule'));
+        worksheetPointModel.addRule({ unitId: 'test', subUnitId: 'grid', permissionId: 'grid-point-rule' });
+        const hooks = resourceManager.getAllResourceHooks();
+        const ruleResource = hooks.find((hook) => hook.pluginName === RULE_MODEL_PLUGIN_NAME)!;
+        const pointResource = hooks.find((hook) => hook.pluginName === POINT_MODEL_PLUGIN_NAME)!;
+        expect(ruleResource.parseJson('')).toEqual({});
+        expect(pointResource.parseJson('')).toEqual({});
+        resourceManager.loadResources('test', [
+            { name: RULE_MODEL_PLUGIN_NAME, data: '{bad json' },
+            { name: POINT_MODEL_PLUGIN_NAME, data: '{bad json' },
+        ]);
+        expect(worksheetRuleModel.getRule('test', 'grid')).toBeUndefined();
+        expect(worksheetPointModel.getRule('test', 'grid')).toBeUndefined();
+        expect(permissionService.getPermissionPoint(editPoint('chart').id)?.value).toBe(false);
     });
 });

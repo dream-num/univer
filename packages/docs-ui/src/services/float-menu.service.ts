@@ -106,7 +106,8 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
                 return;
             }
 
-            if (this._suppressed || this._embedSuppressed || this._contextService.getContextValue(FOCUSING_COMMON_DRAWINGS)) {
+            // Edit/history selections can precede layout publication; a toolbar would lock that stale geometry.
+            if (selection.isEditing || this._suppressed || this._embedSuppressed || this._contextService.getContextValue(FOCUSING_COMMON_DRAWINGS)) {
                 this._hideFloatMenu();
                 return;
             }

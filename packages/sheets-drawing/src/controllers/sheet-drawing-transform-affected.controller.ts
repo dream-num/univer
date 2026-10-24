@@ -40,15 +40,11 @@ import type {
     ISetWorksheetRowIsAutoHeightMutationParams,
     ISheetSkeletonManagerParam,
 } from '@univerjs/sheets';
-import type {
-    ISheetDrawingTransformExtensionResult,
-    ISheetDrawingTransformPlan,
-} from '../services/sheet-drawing-transform-plan.service';
-import type { ISheetDrawing, ISheetDrawingPosition } from '../services/sheet-drawing.service';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, Rectangle } from '@univerjs/core';
+import { Disposable, ICommandService, ILogService, Inject, IUniverInstanceService, Rectangle } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import {
     attachRangeWithCoord,
+    convertPositionCellToSheetOverGrid,
     DeleteRangeMoveLeftCommand,
     DeleteRangeMoveUpCommand,
     DeltaColumnWidthCommand,
@@ -80,6 +76,11 @@ import {
     SheetInterceptorService,
     SheetSkeletonService,
 } from '@univerjs/sheets';
+import type {
+    ISheetDrawingTransformExtensionResult,
+    ISheetDrawingTransformPlan,
+} from '../services/sheet-drawing-transform-plan.service';
+import type { ISheetDrawing, ISheetDrawingPosition } from '../services/sheet-drawing.service';
 import {
     drawingPositionToTransform,
     transformToAxisAlignPosition,
@@ -87,7 +88,7 @@ import {
 } from '../basics/transform-position';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
-import { applySheetDrawingPlacement, getSheetDrawingPlacement } from '../services/sheet-drawing-placement';
+import { tryRefreshSheetDrawingPlacement, validateSheetDrawingPlacement } from '../services/sheet-drawing-placement';
 import { SheetDrawingTransformPlanService } from '../services/sheet-drawing-transform-plan.service';
 import { ISheetDrawingService, SheetDrawingAnchorType } from '../services/sheet-drawing.service';
 
@@ -144,7 +145,8 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetDrawingTransformPlanService) private readonly _transformPlanService: SheetDrawingTransformPlanService
+        @Inject(SheetDrawingTransformPlanService) private readonly _transformPlanService: SheetDrawingTransformPlanService,
+        @ILogService private readonly _logService: ILogService
     ) {
         super();
 
@@ -210,19 +212,23 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                     } else if (id === InsertRangeMoveRightCommand.id) {
                         const { range } = params as IInsertRangeMoveRightCommandParams;
                         return this._getRangeMoveUndo(range, RangeMoveUndoType.insertRight);
-                    } else if (id === SetRowHiddenCommand.id || id === SetSpecificRowsVisibleCommand.id) {
-                        const { unitId, subUnitId, ranges } = params as ISetRowHiddenMutationParams | ISetSpecificRowsVisibleCommandParams;
-                        return this._getDrawingUndoForRowVisible(unitId, subUnitId, ranges);
-                    } else if (id === SetColHiddenCommand.id || id === SetSpecificColsVisibleCommand.id) {
-                        const { unitId, subUnitId, ranges } = params as ISetColHiddenMutationParams | ISetSpecificColsVisibleCommandParams;
-                        return this._getDrawingUndoForColVisible(unitId, subUnitId, ranges);
                     } else if (
+                        id === SetRowHiddenCommand.id ||
+                        id === SetSpecificRowsVisibleCommand.id ||
+                        id === SetColHiddenCommand.id ||
+                        id === SetSpecificColsVisibleCommand.id ||
                         id === DeltaRowHeightCommand.id ||
                         id === DeltaColumnWidthCommand.id ||
                         id === SetRowHeightCommand.id ||
                         id === SetColWidthCommand.id
                     ) {
-                        const { unitId, subUnitId, ranges } = params as ISetWorksheetRowHeightMutationParams | ISetWorksheetColWidthMutationParams;
+                        const { unitId, subUnitId, ranges } = params as
+                            | ISetRowHiddenMutationParams
+                            | ISetSpecificRowsVisibleCommandParams
+                            | ISetColHiddenMutationParams
+                            | ISetSpecificColsVisibleCommandParams
+                            | ISetWorksheetRowHeightMutationParams
+                            | ISetWorksheetColWidthMutationParams;
                         return this._getDrawingUndoForRowAndColSize(unitId, subUnitId, ranges);
                     }
 
@@ -427,277 +433,14 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         }
 
         if (newSheetTransform && newTransform) {
-            const newTransform = drawingPositionToTransform(newSheetTransform, sheetSkeletonParam);
             updateDrawings.push({ ...drawing, sheetTransform: newSheetTransform, transform: newTransform, axisAlignSheetTransform });
         }
 
         return { updateDrawings, deleteDrawings };
     }
 
-    private _remainDrawingSize(transform: Nullable<ITransformState>, updateDrawings: ISheetDrawing[], drawing: ISheetDrawing, skeleton: SpreadsheetSkeleton) {
-        const newSheetTransform = transformToDrawingPosition({ ...transform }, skeleton);
-        if (newSheetTransform) {
-            const axisAlignSheetTransform = transformToAxisAlignPosition({ ...transform }, skeleton) as ISheetDrawingPosition;
-            updateDrawings.push({
-                ...drawing,
-                sheetTransform: newSheetTransform,
-                axisAlignSheetTransform,
-            });
-        }
-    }
-
-    private _getDrawingUndoForColVisible(unitId: string, subUnitId: string, ranges: IRange[]) {
-        const sheetSkeletonParam = this._getCalculatedSkeletonParam(unitId, subUnitId);
-        if (!sheetSkeletonParam) {
-            return { redos: [], undos: [] };
-        }
-        const { skeleton } = sheetSkeletonParam;
-
-        const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
-        const updateDrawings: ISheetDrawing[] = [];
-        const preUpdateDrawings: ISheetDrawing[] = [];
-
-        Object.keys(drawingData).forEach((drawingId) => {
-            const drawing = drawingData[drawingId] as ISheetDrawing;
-            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = drawing;
-
-            if (anchorType === SheetDrawingAnchorType.None) {
-                this._remainDrawingSize(transform, updateDrawings, drawing, skeleton);
-            } else {
-                const { from, to } = sheetTransform;
-                const { row: fromRow, column: fromColumn } = from;
-                const { row: toRow, column: toColumn } = to;
-
-                for (let i = 0; i < ranges.length; i++) {
-                    const range = ranges[i];
-                    const { startColumn, endColumn } = range;
-
-                    if (toColumn < startColumn) {
-                        continue;
-                    }
-
-                    if (anchorType === SheetDrawingAnchorType.Position) {
-                        let newSheetTransform: Nullable<ISheetDrawingPosition> = null;
-                        let newTransform: Nullable<ITransformState> = null;
-
-                        if (fromColumn >= startColumn && fromColumn <= endColumn) {
-                            const selectionCell = attachRangeWithCoord(skeleton, {
-                                startColumn: fromColumn,
-                                endColumn,
-                                startRow: fromRow,
-                                endRow: toRow,
-                            });
-                            newTransform = { ...transform, left: selectionCell.startX };
-                        }
-
-                        if (newTransform) {
-                            newSheetTransform = transformToDrawingPosition(newTransform, skeleton);
-                            const axisAlignSheetTransform = transformToAxisAlignPosition(newTransform, skeleton) as ISheetDrawingPosition;
-
-                            if (newSheetTransform && newTransform) {
-                                updateDrawings.push({ ...drawing, sheetTransform: newSheetTransform, transform: newTransform, axisAlignSheetTransform });
-                                break;
-                            }
-                        }
-
-                        continue;
-                    }
-
-                    if (fromColumn >= startColumn && toColumn <= endColumn) {
-                        continue;
-                    }
-
-                    let newSheetTransform: Nullable<ISheetDrawingPosition> = null;
-                    let newTransform: Nullable<ITransformState> = null;
-
-                    if (fromColumn >= startColumn && fromColumn <= endColumn) {
-                        const selectionCell = attachRangeWithCoord(skeleton, {
-                            startColumn: fromColumn,
-                            endColumn,
-                            startRow: fromRow,
-                            endRow: toRow,
-                        });
-                        newTransform = {
-                            ...transform,
-                            left: (selectionCell?.startX || 0),
-                            width: (transform?.width || 0) - selectionCell.endX + selectionCell.startX,
-                        };
-                    } else if (toColumn >= startColumn && toColumn <= endColumn) {
-                        const selectionCell = attachRangeWithCoord(skeleton, {
-                            startColumn,
-                            endColumn: toColumn,
-                            startRow: fromRow,
-                            endRow: toRow,
-                        });
-                        newTransform = {
-                            ...transform,
-                            left: selectionCell.startX - (transform?.width || 0),
-                        };
-                    } else {
-                        const selectionCell = attachRangeWithCoord(skeleton, {
-                            startColumn,
-                            endColumn,
-                            startRow: fromRow,
-                            endRow: toRow,
-                        });
-                        newTransform = {
-                            ...transform,
-                            width: (transform?.width || 0) - selectionCell.endX + selectionCell.startX,
-                        };
-                        newSheetTransform = transformToDrawingPosition(newTransform, skeleton);
-
-                        if (newSheetTransform && newTransform) {
-                            const axisAlignSheetTransform = transformToAxisAlignPosition(newTransform, skeleton) as ISheetDrawingPosition;
-                            preUpdateDrawings.push({ ...drawing, sheetTransform: newSheetTransform, transform: newTransform, axisAlignSheetTransform });
-                            break;
-                        }
-                    }
-
-                    if (newTransform) {
-                        newSheetTransform = transformToDrawingPosition(newTransform, skeleton);
-                    }
-
-                    if (newTransform && newSheetTransform) {
-                        const axisAlignSheetTransform = transformToAxisAlignPosition(newTransform, skeleton) as ISheetDrawingPosition;
-                        updateDrawings.push({ ...drawing, sheetTransform: newSheetTransform, transform: newTransform, axisAlignSheetTransform });
-                        break;
-                    } else {
-                        this._remainDrawingSize(transform, updateDrawings, drawing, skeleton);
-                    }
-                }
-            }
-        });
-
-        return this._finalizePlan(unitId, subUnitId, [...preUpdateDrawings, ...updateDrawings]);
-    }
-
     private _createUndoAndRedoMutation(unitId: string, subUnitId: string, updateDrawings: ISheetDrawing[]) {
         return this._finalizePlan(unitId, subUnitId, updateDrawings);
-    }
-
-    private _getDrawingUndoForRowVisible(unitId: string, subUnitId: string, ranges: IRange[]) {
-        const sheetSkeletonParam = this._getCalculatedSkeletonParam(unitId, subUnitId);
-        if (!sheetSkeletonParam) {
-            return { redos: [], undos: [] };
-        }
-        const { skeleton } = sheetSkeletonParam;
-
-        const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
-        const updateDrawings: ISheetDrawing[] = [];
-        const preUpdateDrawings: ISheetDrawing[] = [];
-
-        Object.keys(drawingData).forEach((drawingId) => {
-            const drawing = drawingData[drawingId] as ISheetDrawing;
-            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = drawing;
-
-            if (anchorType === SheetDrawingAnchorType.None) {
-                this._remainDrawingSize(transform, updateDrawings, drawing, skeleton);
-            } else {
-                const { from, to } = sheetTransform;
-                const { row: fromRow, column: fromColumn } = from;
-                const { row: toRow, column: toColumn } = to;
-
-                for (let i = 0; i < ranges.length; i++) {
-                    const range = ranges[i];
-                    const { startRow, endRow } = range;
-
-                    if (toRow < startRow) {
-                        continue;
-                    }
-
-                    if (anchorType === SheetDrawingAnchorType.Position) {
-                        let newSheetTransform: Nullable<ISheetDrawingPosition> = null;
-                        let newTransform: Nullable<ITransformState> = null;
-
-                        if (fromRow >= startRow && fromRow <= endRow) {
-                            const selectionCell = attachRangeWithCoord(skeleton, {
-                                startColumn: fromColumn,
-                                endColumn: toColumn,
-                                startRow: fromRow,
-                                endRow,
-                            });
-                            newTransform = { ...transform, top: selectionCell.startY };
-                        }
-
-                        if (newTransform) {
-                            newSheetTransform = transformToDrawingPosition(newTransform, skeleton);
-                            const axisAlignSheetTransform = transformToAxisAlignPosition(newTransform, skeleton) as ISheetDrawingPosition;
-
-                            if (newSheetTransform && newTransform) {
-                                updateDrawings.push({ ...drawing, sheetTransform: newSheetTransform, transform: newTransform, axisAlignSheetTransform });
-                                break;
-                            }
-                        }
-
-                        continue;
-                    }
-
-                    if (fromRow >= startRow && toRow <= endRow) {
-                        continue;
-                    }
-
-                    let newSheetTransform: Nullable<ISheetDrawingPosition> = null;
-                    let newTransform: Nullable<ITransformState> = null;
-
-                    if (fromRow >= startRow && fromRow <= endRow) {
-                        const selectionCell = attachRangeWithCoord(skeleton, {
-                            startColumn: fromColumn,
-                            endColumn: toColumn,
-                            startRow: fromRow,
-                            endRow,
-                        });
-                        newTransform = {
-                            ...transform,
-                            top: (selectionCell?.startY || 0),
-                            height: (transform?.height || 0) - selectionCell.endY + selectionCell.startY,
-                        };
-                    } else if (toRow >= startRow && toRow <= endRow) {
-                        const selectionCell = attachRangeWithCoord(skeleton, {
-                            startColumn: fromColumn,
-                            endColumn: toColumn,
-                            startRow,
-                            endRow: toRow,
-                        });
-                        newTransform = {
-                            ...transform,
-                            top: selectionCell.startY - (transform?.height || 0),
-                        };
-                    } else {
-                        const selectionCell = attachRangeWithCoord(skeleton, {
-                            startColumn: fromColumn,
-                            endColumn: toColumn,
-                            startRow,
-                            endRow,
-                        });
-                        newTransform = {
-                            ...transform,
-                            height: (transform?.height || 0) - selectionCell.endY + selectionCell.startY,
-                        };
-                        newSheetTransform = transformToDrawingPosition(newTransform, skeleton);
-
-                        if (newSheetTransform && newTransform) {
-                            const axisAlignSheetTransform = transformToAxisAlignPosition(newTransform, skeleton) as ISheetDrawingPosition;
-                            preUpdateDrawings.push({ ...drawing, sheetTransform: newSheetTransform, transform: newTransform, axisAlignSheetTransform });
-                            break;
-                        }
-                    }
-
-                    if (newTransform) {
-                        newSheetTransform = transformToDrawingPosition(newTransform, skeleton);
-                    }
-
-                    if (newTransform && newSheetTransform) {
-                        const axisAlignSheetTransform = transformToAxisAlignPosition(newTransform, skeleton) as ISheetDrawingPosition;
-                        updateDrawings.push({ ...drawing, sheetTransform: newSheetTransform, transform: newTransform, axisAlignSheetTransform });
-                        break;
-                    } else {
-                        this._remainDrawingSize(transform, updateDrawings, drawing, skeleton);
-                    }
-                }
-            }
-        });
-
-        return this._finalizePlan(unitId, subUnitId, [...preUpdateDrawings, ...updateDrawings]);
     }
 
     private _getDrawingUndoForRowAndColSize(unitId: string, subUnitId: string, ranges: IRange[]) {
@@ -712,36 +455,13 @@ export class SheetDrawingTransformAffectedController extends Disposable {
 
         Object.keys(drawingData).forEach((drawingId) => {
             const drawing = drawingData[drawingId] as ISheetDrawing;
-            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = drawing;
-
-            if (anchorType === SheetDrawingAnchorType.None) {
-                this._remainDrawingSize(transform, updateDrawings, drawing, skeleton);
-            } else {
-                const { row: toRow, column: toColumn } = sheetTransform.to;
-
-                for (let i = 0; i < ranges.length; i++) {
-                    const range = ranges[i];
-                    const { startRow, startColumn } = range;
-
-                    if (toRow < startRow || toColumn < startColumn) {
-                        continue;
-                    }
-
-                    if (anchorType === SheetDrawingAnchorType.Position) {
-                        updateDrawings.push(applySheetDrawingPlacement(drawing, getSheetDrawingPlacement(drawing), skeleton));
-                        break;
-                    }
-
-                    const newTransform = drawingPositionToTransform({ ...sheetTransform }, sheetSkeletonParam);
-
-                    if (newTransform) {
-                        updateDrawings.push({
-                            ...drawing,
-                            transform: newTransform,
-                        });
-                        break;
-                    }
-                }
+            if (drawing?.anchorType === SheetDrawingAnchorType.None) {
+                return;
+            }
+            const refreshed = this._tryRefreshDrawingPlacement(drawing, skeleton, this._currentCommand.id, ({ to }) =>
+                ranges.some(({ startRow, startColumn }) => to.row >= startRow && to.column >= startColumn));
+            if (refreshed) {
+                updateDrawings.push(refreshed);
             }
         });
 
@@ -1014,7 +734,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             newTransform = { ...transform, left: (transform.left || 0) + selectionCell.endX - selectionCell.startX };
             newSheetTransform = transformToDrawingPosition(newTransform, skeleton);
             axisAlignSheetTransform = transformToAxisAlignPosition(newTransform, skeleton) as ISheetDrawingPosition;
-        } else if (toColumn >= colEndIndex) {
+        } else if (toColumn >= colStartIndex) {
             // move end right only
             if (anchorType === SheetDrawingAnchorType.Both) {
                 newSheetTransform = {
@@ -1031,15 +751,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             }
         }
 
-        if (newSheetTransform && newTransform) {
-            return {
-                newSheetTransform,
-                newTransform,
-                axisAlignSheetTransform,
-            };
-        }
-
-        return null;
+        return this._getStructuralDrawingResult(newSheetTransform, newTransform, axisAlignSheetTransform, skeleton);
     }
 
     private _shrinkCol(
@@ -1077,8 +789,11 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: { ...from, column: fromColumn - colCount },
                 to: { ...to, column: toColumn - colCount },
             };
+            if (anchorType === SheetDrawingAnchorType.Position) {
+                return this._resolveShiftedPositionDrawing(newSheetTransform, transform, sheetSkeletonParam);
+            }
             newTransform = drawingPositionToTransform(newSheetTransform, sheetSkeletonParam);
-        } else if (fromColumn >= colStartIndex && toColumn <= colEndIndex) {
+        } else if (anchorType === SheetDrawingAnchorType.Both && fromColumn >= colStartIndex && toColumn <= colEndIndex) {
             // delete drawing
             return null;
         } else if (fromColumn < colStartIndex && toColumn > colEndIndex) {
@@ -1104,46 +819,28 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 };
                 newTransform = drawingPositionToTransform(newSheetTransform, sheetSkeletonParam);
                 axisAlignSheetTransform = transformToAxisAlignPosition(newTransform!, skeleton);
-            } else if (fromColumn === colStartIndex) {
-                newTransform = { ...transform, left: (transform.left || 0) - sheetTransform.from.columnOffset };
             } else {
-                const selectionCell = attachRangeWithCoord(skeleton, {
-                    startColumn: colStartIndex,
-                    endColumn: fromColumn - 1,
-                    startRow: from.row,
-                    endRow: to.row,
-                });
-                newTransform = { ...transform, left: (transform.left || 0) - selectionCell.endX + selectionCell.startX - sheetTransform.from.columnOffset };
-            }
-
-            if (!newSheetTransform) {
-                newSheetTransform = transformToDrawingPosition(newTransform!, skeleton);
-                axisAlignSheetTransform = transformToAxisAlignPosition(newTransform!, skeleton);
+                return this._resolveShiftedPositionDrawing({
+                    ...sheetTransform,
+                    from: { ...from, column: colStartIndex, columnOffset: 0 },
+                }, transform, sheetSkeletonParam);
             }
         } else if (toColumn >= colStartIndex && toColumn <= colEndIndex && anchorType === SheetDrawingAnchorType.Both) {
-            // shrink end col left, then set toColOffset to full cell width
-            const selectionCell = attachRangeWithCoord(skeleton, {
-                startColumn: colStartIndex - 1,
-                endColumn: colStartIndex - 1,
-                startRow: from.row,
-                endRow: to.row,
-            });
+            // At the sheet edge there is no surviving column after the deletion boundary.
+            const boundaryColumn = Math.min(colStartIndex, skeleton.worksheet.getColumnCount() - 1);
+            const boundaryCell = skeleton.getNoMergeCellWithCoordByIndex(from.row, boundaryColumn);
             newSheetTransform = {
                 from: { ...from },
-                to: { ...to, column: colStartIndex - 1, columnOffset: selectionCell.endX - selectionCell.startX },
+                to: {
+                    ...to,
+                    column: boundaryColumn,
+                    columnOffset: boundaryColumn < colStartIndex ? boundaryCell.endX - boundaryCell.startX : 0,
+                },
             };
             newTransform = drawingPositionToTransform(newSheetTransform, sheetSkeletonParam);
         }
 
-        if (newSheetTransform && newTransform) {
-            return {
-                newSheetTransform,
-                newTransform,
-                axisAlignSheetTransform,
-            };
-        }
-
-        return null;
+        return this._getStructuralDrawingResult(newSheetTransform, newTransform, axisAlignSheetTransform, skeleton);
     }
 
     private _expandRow(
@@ -1186,7 +883,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             newTransform = { ...transform, top: (transform.top || 0) + selectionCell.endY - selectionCell.startY };
             newSheetTransform = transformToDrawingPosition(newTransform, skeleton);
             axisAlignSheetTransform = transformToAxisAlignPosition(newTransform, skeleton) as ISheetDrawingPosition;
-        } else if (toRow >= rowEndIndex) {
+        } else if (toRow >= rowStartIndex) {
             // move end down only
             if (anchorType === SheetDrawingAnchorType.Both) {
                 newSheetTransform = {
@@ -1206,15 +903,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             }
         }
 
-        if (newSheetTransform && newTransform) {
-            return {
-                newSheetTransform,
-                newTransform,
-                axisAlignSheetTransform,
-            };
-        }
-
-        return null;
+        return this._getStructuralDrawingResult(newSheetTransform, newTransform, axisAlignSheetTransform, skeleton);
     }
 
     private _shrinkRow(
@@ -1252,8 +941,11 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: { ...from, row: fromRow - rowCount },
                 to: { ...to, row: toRow - rowCount },
             };
+            if (anchorType === SheetDrawingAnchorType.Position) {
+                return this._resolveShiftedPositionDrawing(newSheetTransform, transform, sheetSkeletonParam);
+            }
             newTransform = drawingPositionToTransform(newSheetTransform, sheetSkeletonParam);
-        } else if (fromRow >= rowStartIndex && toRow <= rowEndIndex) {
+        } else if (anchorType === SheetDrawingAnchorType.Both && fromRow >= rowStartIndex && toRow <= rowEndIndex) {
             // delete drawing
             return null;
         } else if (fromRow < rowStartIndex && toRow > rowEndIndex) {
@@ -1279,45 +971,112 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 };
                 newTransform = drawingPositionToTransform(newSheetTransform, sheetSkeletonParam);
                 axisAlignSheetTransform = transformToAxisAlignPosition(newTransform!, skeleton);
-            } else if (fromRow === rowStartIndex) {
-                newTransform = { ...transform, top: (transform.top || 0) - sheetTransform.from.rowOffset };
             } else {
-                const selectionCell = attachRangeWithCoord(skeleton, {
-                    startRow: rowStartIndex,
-                    endRow: fromRow - 1,
-                    startColumn: from.column,
-                    endColumn: to.column,
-                });
-                newTransform = { ...transform, top: (transform.top || 0) - selectionCell.endY + selectionCell.startY - sheetTransform.from.rowOffset };
-            }
-            if (!newSheetTransform) {
-                newSheetTransform = transformToDrawingPosition(newTransform!, skeleton);
-                axisAlignSheetTransform = transformToAxisAlignPosition(newTransform!, skeleton);
+                return this._resolveShiftedPositionDrawing({
+                    ...sheetTransform,
+                    from: { ...from, row: rowStartIndex, rowOffset: 0 },
+                }, transform, sheetSkeletonParam);
             }
         } else if (toRow >= rowStartIndex && toRow <= rowEndIndex && anchorType === SheetDrawingAnchorType.Both) {
-            // shrink end row up, then set toRowOffset to full cell height
-            const selectionCell = attachRangeWithCoord(skeleton, {
-                startColumn: from.column,
-                endColumn: from.column,
-                startRow: rowStartIndex - 1,
-                endRow: rowStartIndex - 1,
-            });
+            // At the sheet edge there is no surviving row after the deletion boundary.
+            const boundaryRow = Math.min(rowStartIndex, skeleton.worksheet.getRowCount() - 1);
+            const boundaryCell = skeleton.getNoMergeCellWithCoordByIndex(boundaryRow, from.column);
             newSheetTransform = {
                 from: { ...from },
-                to: { ...to, row: rowStartIndex - 1, rowOffset: selectionCell.endY - selectionCell.startY },
+                to: {
+                    ...to,
+                    row: boundaryRow,
+                    rowOffset: boundaryRow < rowStartIndex ? boundaryCell.endY - boundaryCell.startY : 0,
+                },
             };
             newTransform = drawingPositionToTransform(newSheetTransform, sheetSkeletonParam);
         }
 
-        if (newSheetTransform && newTransform) {
-            return {
-                newSheetTransform,
-                newTransform,
-                axisAlignSheetTransform,
-            };
-        }
+        return this._getStructuralDrawingResult(newSheetTransform, newTransform, axisAlignSheetTransform, skeleton);
+    }
 
-        return null;
+    private _resolveShiftedPositionDrawing(
+        sheetTransform: ISheetDrawingPosition,
+        transform: ITransformState,
+        { unitId, sheetId, skeleton }: ISheetSkeletonManagerParam
+    ) {
+        const converted = convertPositionCellToSheetOverGrid(
+            unitId,
+            sheetId,
+            sheetTransform.from,
+            transform.width ?? 0,
+            transform.height ?? 0,
+            skeleton
+        );
+        const newTransform = { ...transform, ...converted.transform };
+        return this._getStructuralDrawingResult(
+            { ...sheetTransform, ...transformToDrawingPosition(newTransform, skeleton) },
+            newTransform,
+            null,
+            skeleton
+        );
+    }
+
+    private _getStructuralDrawingResult(
+        newSheetTransform: Nullable<ISheetDrawingPosition>,
+        newTransform: Nullable<ITransformState>,
+        axisAlignSheetTransform: Nullable<ISheetDrawingPosition>,
+        skeleton: SpreadsheetSkeleton
+    ) {
+        if (!newSheetTransform || !newTransform) {
+            return null;
+        }
+        const { left = 0, top = 0, width = 0, height = 0 } = newTransform;
+        if (![left, top, width, height].every(Number.isFinite) || width < 0 || height < 0) {
+            return null;
+        }
+        if ([newSheetTransform.from, newSheetTransform.to].some(({ row, column, rowOffset, columnOffset }) =>
+            !Number.isInteger(row) || !Number.isInteger(column) || row < 0 || column < 0 ||
+            !Number.isFinite(rowOffset) || !Number.isFinite(columnOffset))) {
+            return null;
+        }
+        return {
+            newSheetTransform,
+            newTransform,
+            axisAlignSheetTransform: axisAlignSheetTransform ?? transformToAxisAlignPosition(newTransform, skeleton),
+        };
+    }
+
+    private _tryRefreshDrawingPlacement(
+        drawing: ISheetDrawing,
+        skeleton: SpreadsheetSkeleton,
+        commandId: string,
+        shouldRefresh?: (position: ISheetDrawingPosition) => boolean
+    ): ISheetDrawing | undefined {
+        try {
+            const failure = validateSheetDrawingPlacement(drawing);
+            if (failure) {
+                this._logSkippedDrawingRefresh(drawing, commandId, failure);
+                return;
+            }
+            if (shouldRefresh && !shouldRefresh(drawing.sheetTransform)) {
+                return;
+            }
+            const result = tryRefreshSheetDrawingPlacement(drawing, skeleton);
+            if (result.ok) {
+                return result.drawing;
+            }
+            this._logSkippedDrawingRefresh(drawing, commandId, result);
+        } catch (error) {
+            this._logSkippedDrawingRefresh(drawing, commandId, error);
+        }
+    }
+
+    private _logSkippedDrawingRefresh(drawing: ISheetDrawing, commandId: string, failure: unknown): void {
+        this._logService.warn('[SheetDrawingTransformAffectedController]', 'Skipping drawing placement refresh', {
+            unitId: drawing?.unitId,
+            subUnitId: drawing?.subUnitId,
+            drawingId: drawing?.drawingId,
+            commandId,
+            transform: drawing?.transform,
+            sheetTransform: drawing?.sheetTransform,
+            failure,
+        });
     }
 
     private _sheetRefreshListener() {
@@ -1328,7 +1087,11 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 }
 
                 queueMicrotask(() => {
-                    const params = command.params as
+                    if (this._disposed) {
+                        return;
+                    }
+                    try {
+                        const params = command.params as
                         | ISetRowVisibleMutationParams
                         | ISetRowHiddenMutationParams
                         | ISetColVisibleMutationParams
@@ -1337,24 +1100,33 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                         | ISetWorksheetRowAutoHeightMutationParams
                         | ISetWorksheetRowIsAutoHeightMutationParams
                         | ISetWorksheetColWidthMutationParams;
-                    const target = getSheetCommandTarget(this._univerInstanceService, params);
-                    if (!target) return;
+                        const target = getSheetCommandTarget(this._univerInstanceService, params);
+                        if (!target) {
+                            return;
+                        }
 
-                    const { unitId, subUnitId, worksheet } = target;
+                        const { unitId, subUnitId, worksheet } = target;
 
-                    let ranges: IRange[] = [];
-                    if ('ranges' in params) {
-                        ranges = params.ranges;
-                    } else if ('rowsAutoHeightInfo' in params) {
-                        ranges = params.rowsAutoHeightInfo.map((info) => ({
-                            startRow: info.row,
-                            endRow: info.row,
-                            startColumn: 0,
-                            endColumn: worksheet.getColumnCount() - 1,
-                        }));
+                        let ranges: IRange[] = [];
+                        if ('ranges' in params) {
+                            ranges = params.ranges;
+                        } else if ('rowsAutoHeightInfo' in params) {
+                            ranges = params.rowsAutoHeightInfo.map((info) => ({
+                                startRow: info.row,
+                                endRow: info.row,
+                                startColumn: 0,
+                                endColumn: worksheet.getColumnCount() - 1,
+                            }));
+                        }
+
+                        this._refreshDrawingTransform(command, unitId, subUnitId, ranges);
+                    } catch (error) {
+                        this._logService.error('[SheetDrawingTransformAffectedController]', 'Drawing layout refresh failed', {
+                            commandId: command.id,
+                            params: command.params,
+                            error,
+                        });
                     }
-
-                    this._refreshDrawingTransform(command, unitId, subUnitId, ranges);
                 });
             })
         );
@@ -1371,52 +1143,33 @@ export class SheetDrawingTransformAffectedController extends Disposable {
 
         Object.keys(drawingData).forEach((drawingId) => {
             const drawing = drawingData[drawingId] as ISheetDrawing;
-            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = drawing;
-            if (anchorType === SheetDrawingAnchorType.None) {
-                return true;
-            }
-            if (!sheetTransform) {
-                return true;
+            if (drawing?.anchorType === SheetDrawingAnchorType.None) {
+                return;
             }
 
-            const { from, to } = sheetTransform;
-            const { row: fromRow, column: fromColumn } = from;
-            const { row: toRow, column: toColumn } = to;
-            for (let i = 0; i < ranges.length; i++) {
-                const range = ranges[i];
-                const { startRow, endRow, startColumn, endColumn } = range;
-                if (Rectangle.intersects(
-                    {
-                        startRow,
-                        endRow,
-                        startColumn,
-                        endColumn,
-                    },
-                    {
-                        startRow: fromRow,
-                        endRow: toRow,
-                        startColumn: fromColumn,
-                        endColumn: toColumn,
-                    }
-                ) || fromRow > endRow || fromColumn > endColumn) {
-                    if (anchorType === SheetDrawingAnchorType.Position) {
-                        updateDrawings.push(applySheetDrawingPlacement(drawing, getSheetDrawingPlacement(drawing), sheetSkeletonParam.skeleton));
-                        break;
-                    }
-
-                    const newTransform = drawingPositionToTransform(sheetTransform, sheetSkeletonParam);
-                    updateDrawings.push({
-                        ...drawing,
-                        transform: {
-                            ...transform,
-                            left: newTransform?.left,
-                            top: newTransform?.top,
-                            width: newTransform?.width,
-                            height: newTransform?.height,
+            const refreshed = this._tryRefreshDrawingPlacement(drawing, sheetSkeletonParam.skeleton, command.id, ({ from, to }) => {
+                const { row: fromRow, column: fromColumn } = from;
+                const { row: toRow, column: toColumn } = to;
+                return ranges.some((range) => {
+                    const { startRow, endRow, startColumn, endColumn } = range;
+                    return Rectangle.intersects(
+                        {
+                            startRow,
+                            endRow,
+                            startColumn,
+                            endColumn,
                         },
-                    });
-                    break;
-                }
+                        {
+                            startRow: fromRow,
+                            endRow: toRow,
+                            startColumn: fromColumn,
+                            endColumn: toColumn,
+                        }
+                    ) || fromRow > endRow || fromColumn > endColumn;
+                });
+            });
+            if (refreshed) {
+                updateDrawings.push(refreshed);
             }
         });
 

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-filter-ui",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "private": false,
     "description": "Filtering menus and panels for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -88,7 +88,7 @@
         "@univerjs-infra/shared": "workspace:*",
         "postcss": "^8.5.29",
         "react": "18.3.1",
-        "rxjs": "^7.8.2",
+        "rxjs": "7.8.2",
         "tailwindcss": "3.4.18",
         "typescript": "^6.0.3",
         "vitest": "^5.0.4"

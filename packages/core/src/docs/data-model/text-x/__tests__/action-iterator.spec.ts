@@ -22,6 +22,15 @@ import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
 
 describe('Test action iterator', () => {
+    it('does not consume a retain when the other operation has zero length', () => {
+        const iterator = new ActionIterator([{ t: TextXActionType.RETAIN, len: 16 }]);
+
+        expect(iterator.next(0)).toEqual({ t: TextXActionType.RETAIN, len: 0 });
+        expect(iterator.peekLength()).toBe(16);
+        expect(iterator.next()).toEqual({ t: TextXActionType.RETAIN, len: 16 });
+        expect(iterator.hasNext()).toBe(false);
+    });
+
     it('test action iterator basic use', () => {
         const iterator = new ActionIterator([{
             t: TextXActionType.RETAIN,

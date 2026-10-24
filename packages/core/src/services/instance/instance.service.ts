@@ -15,10 +15,10 @@
  */
 
 import type { Observable } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, filter, map, Subject } from 'rxjs';
 import type { IDisposable } from '../../common/di';
 import type { UnitModel } from '../../common/unit';
-import type { Nullable } from '../../shared';
-import { BehaviorSubject, distinctUntilChanged, filter, map, Subject } from 'rxjs';
+import type { Nullable } from '../../shared/types';
 import { createIdentifier, Inject, Injector } from '../../common/di';
 import { UniverInstanceType } from '../../common/unit';
 import { DocumentDataModel } from '../../docs/data-model/document-data-model';
@@ -353,8 +353,8 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
     }
 
     private _tryResetFocusOnRemoval(unitId: string): void {
-        if (this.focused?.getUnitId() === unitId) {
-            this._focused$.next(null);
+        if (this._focused$.getValue() === unitId) {
+            this.focusUnit(null);
         }
     };
 

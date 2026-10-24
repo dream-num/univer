@@ -27,6 +27,7 @@ import type {
     WorkSheetPermissionPointConstructor,
 } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
+import type { UnitAction } from '@univerjs/protocol';
 import {
     CustomCommandExecutionError,
     Direction,
@@ -38,20 +39,26 @@ import {
     isICellData,
     IUniverInstanceService,
     LocaleService,
+    MAX_COLUMN_COUNT,
+    MAX_ROW_COUNT,
+    moveRangeByOffset,
     ObjectMatrix,
     Rectangle,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import {
-    deserializeRangeWithSheet,
     deserializeRangeWithSheetWithCache,
+    FormulaDataModel,
+    handleRefStringInfo,
     IDefinedNamesService,
+    IFunctionService,
     LexerTreeBuilder,
+    matchToken,
+    normalizeFormulaUnitName,
     operatorToken,
     sequenceNodeType,
 } from '@univerjs/engine-formula';
-import { UnitAction } from '@univerjs/protocol';
 import { Subject } from 'rxjs';
 import type { IAutoFillCommandParams } from '../../commands/commands/auto-fill.command';
 import type { IClearSelectionAllCommandParams } from '../../commands/commands/clear-selection-all.command';
@@ -122,35 +129,47 @@ import { TextToNumberCommand } from '../../commands/commands/text-to-number.comm
 import { getSheetCommandTarget } from '../../commands/commands/utils/target-util';
 import { SetWorksheetNameMutation } from '../../commands/mutations/set-worksheet-name.mutation';
 import { RangeProtectionRuleModel } from '../../models/range-protection-rule.model';
+import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
+import { AUTO_FILL_APPLY_TYPE } from '../../services/auto-fill/type';
+import { RangeProtectionPermissionEditPoint } from '../../services/permission/permission-point/range/edit';
+import { RangeProtectionPermissionViewPoint } from '../../services/permission/permission-point/range/view';
+import { WorkbookDeleteColumnPermission } from '../../services/permission/permission-point/workbook/delete-column';
+import { WorkbookDeleteRowPermission } from '../../services/permission/permission-point/workbook/delete-row';
+import { WorkbookEditablePermission } from '../../services/permission/permission-point/workbook/editable';
+import { WorkbookHideSheetPermission } from '../../services/permission/permission-point/workbook/hide-sheet';
+import { WorkbookInsertColumnPermission } from '../../services/permission/permission-point/workbook/insert-column';
+import { WorkbookInsertRowPermission } from '../../services/permission/permission-point/workbook/insert-row';
+import { WorkbookMoveSheetPermission } from '../../services/permission/permission-point/workbook/move-sheet';
+import { WorkbookRenameSheetPermission } from '../../services/permission/permission-point/workbook/rename-sheet';
+import { WorksheetDeleteColumnPermission } from '../../services/permission/permission-point/worksheet/delete-column';
+import { WorksheetDeleteRowPermission } from '../../services/permission/permission-point/worksheet/delete-row';
+import { WorksheetEditPermission } from '../../services/permission/permission-point/worksheet/edit';
+import { WorksheetInsertColumnPermission } from '../../services/permission/permission-point/worksheet/insert-column';
+import { WorksheetInsertRowPermission } from '../../services/permission/permission-point/worksheet/insert-row';
+import { WorksheetSetCellStylePermission } from '../../services/permission/permission-point/worksheet/set-cell-style';
+import { WorksheetSetCellValuePermission } from '../../services/permission/permission-point/worksheet/set-cell-value';
 import {
-    RangeProtectionPermissionEditPoint,
-    WorkbookDeleteColumnPermission,
-    WorkbookDeleteRowPermission,
-    WorkbookEditablePermission,
-    WorkbookHideSheetPermission,
-    WorkbookInsertColumnPermission,
-    WorkbookInsertRowPermission,
-    WorkbookMoveSheetPermission,
-    WorkbookRenameSheetPermission,
-    WorksheetDeleteColumnPermission,
-    WorksheetDeleteRowPermission,
-    WorksheetEditPermission,
-    WorksheetInsertColumnPermission,
-    WorksheetInsertRowPermission,
-    WorksheetSetCellStylePermission,
-    WorksheetSetCellValuePermission,
     WorksheetSetColumnStylePermission,
-    WorksheetSetRowStylePermission,
-    WorksheetViewPermission,
-} from '../../services/permission/permission-point';
-import { WorksheetProtectionRuleModel } from '../../services/permission/worksheet-permission';
-import { SheetsSelectionsService } from '../../services/selections';
+} from '../../services/permission/permission-point/worksheet/set-column-style';
+import { WorksheetSetRowStylePermission } from '../../services/permission/permission-point/worksheet/set-row-style';
+import { WorksheetViewPermission } from '../../services/permission/permission-point/worksheet/view';
+import {
+    WorksheetProtectionRuleModel,
+} from '../../services/permission/worksheet-permission/worksheet-permission-rule.model';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SCOPE_WORKBOOK_VALUE_DEFINED_NAME } from '../defined-name-data.controller';
 
 /* eslint-disable complexity */
 /* eslint-disable max-lines-per-function */
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
+
+interface IFormulaPermissionContext {
+    unitId: string;
+    subUnitId: string;
+    row: number;
+    column: number;
+}
 
 export class SheetPermissionCheckController extends Disposable {
     disposableCollection = new DisposableCollection();
@@ -167,7 +186,10 @@ export class SheetPermissionCheckController extends Disposable {
         @Inject(WorksheetProtectionRuleModel) private _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
-        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService
+        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
+        @IAutoFillService private readonly _autoFillService: IAutoFillService,
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
+        @IFunctionService private readonly _functionService: IFunctionService
     ) {
         super();
         this._initialize();
@@ -175,6 +197,37 @@ export class SheetPermissionCheckController extends Disposable {
 
     private _initialize(): void {
         this._commandExecutedListener();
+        this.disposeWithMe(this._autoFillService.addHook({
+            id: 'permission-check',
+            onValidateFillData: ({ unitId, subUnitId }, _direction, applyType, cellValue) => {
+                if (applyType === AUTO_FILL_APPLY_TYPE.ONLY_FORMAT) {
+                    return;
+                }
+
+                // Resolve shared followers from the proposed data without updating the formula model.
+                const formulas = new ObjectMatrix(this._formulaDataModel.updateFormulaData(unitId, subUnitId, cellValue));
+                new ObjectMatrix(cellValue).forValue((row, column) => {
+                    const formula = formulas.getValue(row, column);
+                    if (!formula?.f) {
+                        return;
+                    }
+
+                    const formulaString = this._lexerTreeBuilder.moveFormulaRefOffset(
+                        formula.f,
+                        formula.x ?? 0,
+                        formula.y ?? 0
+                    );
+                    if (!this._permissionCheckWithFormula({
+                        unitId,
+                        subUnitId,
+                        range: { startRow: row, endRow: row, startColumn: column, endColumn: column },
+                        value: { f: formulaString },
+                    })) {
+                        this.blockExecuteWithoutPermission(this._localeService.t<LocaleKey>('sheets.permission.dialog.formulaErr'));
+                    }
+                });
+            },
+        }));
     }
 
     private _commandExecutedListener() {
@@ -718,92 +771,24 @@ export class SheetPermissionCheckController extends Disposable {
         const target = getSheetCommandTarget(this._univerInstanceService, params);
         if (!target) return false;
 
-        const { workbook, unitId, subUnitId } = target;
+        const { unitId, subUnitId } = target;
 
         const formulaString = (params.value as ICellData).f;
         if (formulaString) {
-            const definedNameStr = formulaString.substring(1);
-            const definedName = this._definedNamesService.getValueByName(unitId, definedNameStr);
-
-            if (definedName) {
-                let formulaOrRefString = definedName.formulaOrRefString;
-                if (formulaOrRefString.startsWith(operatorToken.EQUALS)) {
-                    formulaOrRefString = formulaOrRefString.slice(1);
-                }
-
-                const refRangesArr = formulaOrRefString.split(',');
-
-                for (let i = 0; i < refRangesArr.length; i++) {
-                    const refRange = refRangesArr[i];
-                    const { sheetName, range } = deserializeRangeWithSheet(refRange);
-
-                    if (sheetName) {
-                        const targetSheet = workbook.getSheetBySheetName(sheetName);
-                        if (!targetSheet) {
-                            // Formula errors need to be handled by the formula system, and permissions will not be blocked
-                            return true;
-                        }
-
-                        const { startRow, endRow, startColumn, endColumn } = range;
-
-                        for (let r = startRow; r <= endRow; r++) {
-                            for (let c = startColumn; c <= endColumn; c++) {
-                                const cell = targetSheet.getCell(r, c) as Nullable<ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }>;
-                                const permission = cell?.selectionProtection?.[0];
-                                if (permission?.[UnitAction.View] === false) {
-                                    return false;
-                                }
-                            }
+            const ranges = params.range
+                ? [params.range]
+                : this._selectionManagerService.getCurrentSelections()?.map((selection) => selection.range) ?? [];
+            for (const range of ranges) {
+                for (let row = range.startRow; row <= range.endRow; row++) {
+                    for (let column = range.startColumn; column <= range.endColumn; column++) {
+                        if (!this._permissionCheckFormulaReferences(formulaString, { unitId, subUnitId, row, column })) {
+                            return false;
                         }
                     }
                 }
-
-                return true;
-            } else {
-                const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString);
-                if (!sequenceNodes) {
-                    return true;
-                }
-
-                for (let i = 0; i < sequenceNodes.length; i++) {
-                    const node = sequenceNodes[i];
-                    if (typeof node === 'string' || node.nodeType !== sequenceNodeType.REFERENCE) {
-                        continue;
-                    }
-
-                    const { token } = node;
-                    const { unitId: sequenceGridUnitId, sheetName, range } = deserializeRangeWithSheetWithCache(token);
-
-                    let sequenceGridWorkbook = workbook;
-                    if (sequenceGridUnitId && sequenceGridUnitId !== unitId) {
-                        const _sequenceGridWorkbook = this._univerInstanceService.getUnit<Workbook>(sequenceGridUnitId, UniverInstanceType.UNIVER_SHEET);
-                        if (!_sequenceGridWorkbook) return true;
-                        sequenceGridWorkbook = _sequenceGridWorkbook;
-                    }
-
-                    const sequenceGridWorksheet = sheetName ? sequenceGridWorkbook.getSheetBySheetName(sheetName) : sequenceGridWorkbook.getActiveSheet();
-                    if (!sequenceGridWorksheet) return true;
-
-                    if (sheetName) {
-                        const viewPermission = this._permissionService.getPermissionPoint(new WorksheetViewPermission(sequenceGridWorkbook.getUnitId(), sequenceGridWorksheet.getSheetId()).id);
-                        if (!viewPermission || viewPermission.value === false) return false;
-                    }
-
-                    const { startRow, endRow, startColumn, endColumn } = range;
-
-                    for (let r = startRow; r <= endRow; r++) {
-                        for (let c = startColumn; c <= endColumn; c++) {
-                            const cell = sequenceGridWorksheet.getCell(r, c) as Nullable<ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }>;
-                            const permission = cell?.selectionProtection?.[0];
-                            if (permission?.[UnitAction.View] === false) {
-                                return false;
-                            }
-                        }
-                    }
-                }
-
-                return true;
             }
+
+            return true;
         }
 
         const { range } = params;
@@ -818,6 +803,134 @@ export class SheetPermissionCheckController extends Disposable {
                 .map((rule) => new RangeProtectionPermissionEditPoint(unitId, subUnitId, rule.permissionId).id);
 
             return this._permissionService.composePermission(permissionIds).every((permission) => permission.value);
+        }
+
+        return true;
+    }
+
+    private _getFormulaReferenceWorkbook(unitId: string, qualifier: string): Nullable<Workbook> {
+        const workbook = this._univerInstanceService.getUnit<Workbook>(
+            qualifier || unitId,
+            UniverInstanceType.UNIVER_SHEET
+        );
+        if (workbook || !qualifier) {
+            return workbook;
+        }
+
+        // Match calculation's name resolution against live workbooks without relying on worker-only services.
+        const workbooks = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET)
+            .filter((item) => item.getSnapshot().name.length > 0);
+        const exactMatches = workbooks.filter((item) => item.getSnapshot().name.toLowerCase() === qualifier.toLowerCase());
+        const matches = exactMatches.length > 0
+            ? exactMatches
+            : workbooks.filter((item) => normalizeFormulaUnitName(item.getSnapshot().name) === normalizeFormulaUnitName(qualifier));
+        return matches.length === 1 ? matches[0] : null;
+    }
+
+    private _permissionCheckFormulaReferences(
+        formulaString: string,
+        context: IFormulaPermissionContext,
+        visitingNames = new Set<string>(),
+        referenceOffset?: { x: number; y: number }
+    ): boolean {
+        const { unitId, subUnitId, row, column } = context;
+        const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString) ?? [];
+        for (let index = 0; index < sequenceNodes.length; index++) {
+            const node = sequenceNodes[index];
+            if (typeof node === 'string'
+                || (node.nodeType !== sequenceNodeType.REFERENCE && node.nodeType !== sequenceNodeType.FUNCTION)) {
+                continue;
+            }
+
+            const nextNode = sequenceNodes[index + 1];
+            if (node.nodeType === sequenceNodeType.FUNCTION
+                && typeof nextNode === 'string' && nextNode.trim() === matchToken.OPEN_BRACKET
+                && this._functionService.hasExecutor(node.token.trim().toUpperCase())) {
+                continue;
+            }
+
+            let nameToken = node.token.trim();
+            if (node.nodeType === sequenceNodeType.FUNCTION) {
+                const parts = nameToken.split('!');
+                if (parts.length === 2) {
+                    const unqualifiedName = parts[1].trim();
+                    const unscopedName = this._definedNamesService.getValueByName(unitId, unqualifiedName);
+                    const localSheetId = unscopedName?.localSheetId;
+                    const localSheet = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
+                        ?.getSheetBySheetId(localSheetId ?? '');
+                    // The engine strips any prefix for global names, but requires a matching prefix for local names.
+                    if (unscopedName && (localSheetId == null
+                        || localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME
+                        || localSheet?.getName() === parts[0])) {
+                        nameToken = unqualifiedName;
+                    }
+                }
+            }
+            // Expanded names retain the formula's evaluation context.
+            const definedName = this._definedNamesService.getValueByName(unitId, nameToken, subUnitId);
+            if (definedName) {
+                const nameKey = `${unitId}:${definedName.id}`;
+                if (visitingNames.has(nameKey)) {
+                    continue;
+                }
+
+                visitingNames.add(nameKey);
+                const definition = definedName.formulaOrRefString;
+                const isFormula = definition.startsWith(operatorToken.EQUALS);
+                const offset = isFormula
+                    ? undefined
+                    : {
+                        x: column - (definedName.localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME ? 1 : 0),
+                        y: row,
+                    };
+                const permitted = this._permissionCheckFormulaReferences(
+                    isFormula ? definition : `${operatorToken.EQUALS}${definition}`,
+                    context,
+                    visitingNames,
+                    offset
+                );
+                visitingNames.delete(nameKey);
+                if (!permitted) {
+                    return false;
+                }
+                continue;
+            }
+
+            if (node.nodeType !== sequenceNodeType.REFERENCE) {
+                continue;
+            }
+
+            const { unitQualifier, sheetName } = handleRefStringInfo(node.token.trim());
+            const referenceWorkbook = this._getFormulaReferenceWorkbook(unitId, unitQualifier);
+            const referenceWorksheet = sheetName
+                ? referenceWorkbook?.getSheetBySheetName(sheetName)
+                : referenceWorkbook?.getSheetBySheetId(subUnitId);
+            if (!referenceWorkbook || !referenceWorksheet) {
+                // Invalid references are handled by the formula engine.
+                continue;
+            }
+
+            const referenceUnitId = referenceWorkbook.getUnitId();
+            const referenceSheetId = referenceWorksheet.getSheetId();
+            const { range } = deserializeRangeWithSheetWithCache(node.token);
+            const referenceRange = referenceOffset
+                ? moveRangeByOffset({ ...range }, referenceOffset.x, referenceOffset.y)
+                : range;
+            if (referenceOffset) {
+                // Relative names wrap at the sheet limits, matching formula-engine name resolution.
+                const wrap = (value: number, limit: number) => ((value % limit) + limit) % limit;
+                referenceRange.startRow = wrap(referenceRange.startRow, MAX_ROW_COUNT);
+                referenceRange.endRow = wrap(referenceRange.endRow, MAX_ROW_COUNT);
+                referenceRange.startColumn = wrap(referenceRange.startColumn, MAX_COLUMN_COUNT);
+                referenceRange.endColumn = wrap(referenceRange.endColumn, MAX_COLUMN_COUNT);
+            }
+
+            if (!this.permissionCheckWithRanges({
+                worksheetTypes: [WorksheetViewPermission],
+                rangeTypes: [RangeProtectionPermissionViewPoint],
+            }, [referenceRange], referenceUnitId, referenceSheetId)) {
+                return false;
+            }
         }
 
         return true;

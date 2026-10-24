@@ -100,13 +100,12 @@ export const Messager = ({ className, ...props }: IMessagerProps) => (
         offset={{ top: 16 }}
         className={clsx(
             `
-              [&_[data-sonner-toast]]:univer-bg-gray-0/95
-              dark:[&_[data-sonner-toast]]:!univer-bg-gray-800/95
               [&_[data-sonner-toast]]:univer-rounded-2xl [&_[data-sonner-toast]]:univer-border
               [&_[data-sonner-toast]]:univer-border-solid [&_[data-sonner-toast]]:univer-border-gray-200
+              [&_[data-sonner-toast]]:univer-bg-gray-0
               [&_[data-sonner-toast]]:univer-shadow-[0_16px_40px_-20px_rgba(15,23,42,0.55)]
               [&_[data-sonner-toast]]:univer-backdrop-blur-sm
-              dark:[&_[data-sonner-toast]]:!univer-border-gray-600
+              dark:[&_[data-sonner-toast]]:!univer-border-gray-600 dark:[&_[data-sonner-toast]]:!univer-bg-gray-800
             `,
             className
         )}

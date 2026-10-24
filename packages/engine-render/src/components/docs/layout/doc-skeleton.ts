@@ -15,6 +15,19 @@
  */
 
 import type { ColumnSeparatorType, ISectionColumnProperties, LocaleService, Nullable } from '@univerjs/core';
+import {
+    BaselineOffset,
+    BooleanNumber,
+    CustomRangeType,
+    DataStreamTreeNodeType,
+    DataStreamTreeTokenType,
+    DocumentFlavor,
+    PositionedObjectLayoutType,
+    PRESET_LIST_TYPE,
+    SectionType,
+    Skeleton,
+} from '@univerjs/core';
+import { Subject } from 'rxjs';
 import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonColumn,
@@ -62,19 +75,6 @@ import type {
     IDocumentLayoutProtectedRange,
 } from './document-layout-types';
 import type { IDocumentPaginationMetrics, ILayoutContext } from './tools';
-import {
-    BaselineOffset,
-    BooleanNumber,
-    CustomRangeType,
-    DataStreamTreeNodeType,
-    DataStreamTreeTokenType,
-    DocumentFlavor,
-    PositionedObjectLayoutType,
-    PRESET_LIST_TYPE,
-    SectionType,
-    Skeleton,
-} from '@univerjs/core';
-import { Subject } from 'rxjs';
 import {
     BreakType,
     DocumentSkeletonPageType,
@@ -337,6 +337,7 @@ interface IIncrementalLayoutState {
     sectionBreakConfig: Nullable<ISectionBreakConfig>;
     layoutAnchor: Nullable<number>;
     priorityAnchor: Nullable<number>;
+    minimumPublicationHeight: number;
     priorityPageIndex: number;
     priorityPageEnd: Nullable<number>;
     interactionPageTail: Nullable<IInteractionPageTail>;
@@ -1203,6 +1204,8 @@ export class DocumentSkeleton extends Skeleton {
 
     private _completedPageCount: number | undefined;
     private _lastCompleteSkeletonData: Nullable<IDocumentSkeletonCached> = null;
+    private _completedHeadingCollapseSignature = '[]';
+    private _publishedHeadingCollapseSignature = '[]';
 
     private _pendingInvalidationAnchor: Nullable<number> = null;
 
@@ -1303,10 +1306,18 @@ export class DocumentSkeleton extends Skeleton {
             ctx = retry;
         }
         this._lastCompleteSkeletonData = this._skeletonData;
+        this._completedHeadingCollapseSignature = this._getHeadingCollapseSignature();
+        this._publishedHeadingCollapseSignature = this._completedHeadingCollapseSignature;
         this._completedPageCount = this._skeletonData?.pages.length;
         this._pendingInvalidationAnchor = null;
         this._paginationMetrics = ctx.paginationMetrics ?? null;
         this._dirty$.next(true);
+    }
+
+    private _getHeadingCollapseSignature(): string {
+        return JSON.stringify(this.getViewModel().getHeadingSections()
+            .filter((heading) => heading.collapsed)
+            .map((heading) => [heading.paragraphId, heading.startOffset, heading.endOffset]));
     }
 
     startIncrementalLayout(options?: {
@@ -1317,6 +1328,8 @@ export class DocumentSkeleton extends Skeleton {
         modernPageWidth?: number;
         modernHorizontalMargin?: number;
         bounds?: IViewportInfo;
+        /** Keep the current Modern viewport until a visibility change fills its replacement. */
+        minimumPublicationHeight?: number;
         reuseUnaffectedTail?: boolean;
         /** The caller proved this edit only changes offset-preserving render metadata. */
         allowMetadataOnlyStructuralTailReuse?: boolean;
@@ -1324,26 +1337,33 @@ export class DocumentSkeleton extends Skeleton {
         /** Cooperative schedulers wait for code-split dictionaries before publishing. */
         waitForHyphenationPatterns?: boolean;
     }): number {
-        this._modernPageWidth = options?.modernPageWidth;
-        this._modernHorizontalMargin = options?.modernHorizontalMargin;
+        // A fold changes the visibility of the suffix even when the heading's own geometry is unchanged.
+        const headingCollapseSignature = this._getHeadingCollapseSignature();
+        const headingVisibilityChanged = headingCollapseSignature !== this._completedHeadingCollapseSignature ||
+            headingCollapseSignature !== this._publishedHeadingCollapseSignature;
+        const layoutOptions = headingVisibilityChanged
+            ? { ...options, anchor: 0, priorityAnchor: options?.priorityAnchor ?? options?.anchor ?? 0, invalidation: undefined, reuseUnaffectedTail: false, preserveInteractionWindow: false }
+            : options;
+        this._modernPageWidth = layoutOptions?.modernPageWidth;
+        this._modernHorizontalMargin = layoutOptions?.modernHorizontalMargin;
         this.cancelIncrementalLayout();
         this._externalLayoutProgress = null;
         this._externalProtectedPages = null;
         this._externalProtectedContinuousLayout = null;
 
         const generation = ++this._layoutGeneration;
-        const reason = options?.reason ?? (options?.anchor == null ? 'initial' : 'edit');
+        const reason = layoutOptions?.reason ?? (layoutOptions?.anchor == null ? 'initial' : 'edit');
         const dataModel = this.getViewModel().getDataModel();
         const sections = this.getViewModel().getChildren();
         const topLevelBlocks = this._getTopLevelBlocks(sections);
         const mode: DocumentLayoutMode = dataModel.documentStyle.documentFlavor === DocumentFlavor.MODERN
             ? 'continuous'
             : 'paginated';
-        const priorityAnchor = options?.priorityAnchor ?? options?.anchor;
+        const priorityAnchor = layoutOptions?.priorityAnchor ?? layoutOptions?.anchor;
         const hasPublishedCheckpoint = this._skeletonData != null || this._lastCompleteSkeletonData != null;
         const previousSkeleton = this._lastCompleteSkeletonData ?? this._skeletonData;
-        const invalidation = options?.invalidation;
-        const layoutAnchor = options?.anchor;
+        const invalidation = layoutOptions?.invalidation;
+        const layoutAnchor = layoutOptions?.anchor;
         const invalidationAnchor = layoutAnchor == null
             ? this._pendingInvalidationAnchor ?? undefined
             : Math.min(layoutAnchor, this._pendingInvalidationAnchor ?? layoutAnchor);
@@ -1381,8 +1401,8 @@ export class DocumentSkeleton extends Skeleton {
             invalidationAnchor,
             mode,
             invalidation,
-            options?.preserveInteractionWindow === true,
-            options?.reuseUnaffectedTail === false
+            layoutOptions?.preserveInteractionWindow === true,
+            layoutOptions?.reuseUnaffectedTail === false
         );
         // The first-open anchor only prioritizes the initial viewport; it does not
         // represent mutated content. Carry invalidation across generations only
@@ -1401,6 +1421,9 @@ export class DocumentSkeleton extends Skeleton {
             sectionBreakConfig: null,
             layoutAnchor: incrementalStart.layoutAnchor,
             priorityAnchor: priorityAnchor ?? null,
+            minimumPublicationHeight: mode === 'continuous' && headingVisibilityChanged && this._skeletonData != null
+                ? layoutOptions?.minimumPublicationHeight ?? 0
+                : 0,
             priorityPageIndex,
             priorityPageEnd,
             interactionPageTail: incrementalStart.interactionPageTail,
@@ -1427,16 +1450,16 @@ export class DocumentSkeleton extends Skeleton {
                 : 0,
             lastPublishedBlockCount: incrementalStart.processedBlockCount,
             publicationRevision: 0,
-            reuseUnaffectedTail: options?.reuseUnaffectedTail !== false,
+            reuseUnaffectedTail: layoutOptions?.reuseUnaffectedTail !== false,
             paginationRevision: 0,
-            allowMetadataOnlyStructuralTailReuse: options?.allowMetadataOnlyStructuralTailReuse === true,
+            allowMetadataOnlyStructuralTailReuse: layoutOptions?.allowMetadataOnlyStructuralTailReuse === true,
             reusedTail: false,
             tailConvergencePageCount: incrementalStart.ctx.skeleton.pages.length,
             dirtyRetries: new Map(),
             preparedHyphenationNodes: new WeakSet(),
             pendingHyphenation: null,
             hyphenationError: null,
-            waitForHyphenationPatterns: options?.waitForHyphenationPatterns === true,
+            waitForHyphenationPatterns: layoutOptions?.waitForHyphenationPatterns === true,
         };
 
         return generation;
@@ -2174,6 +2197,7 @@ export class DocumentSkeleton extends Skeleton {
             const isFinalPublication = state.complete && publishedPageCount >= pageCount;
             if (isFinalPublication) {
                 this._lastCompleteSkeletonData = state.ctx.skeleton;
+                this._completedHeadingCollapseSignature = this._getHeadingCollapseSignature();
                 this._completedPageCount = state.ctx.skeleton?.pages.length;
                 this._pendingInvalidationAnchor = null;
             }
@@ -2182,6 +2206,7 @@ export class DocumentSkeleton extends Skeleton {
                 : !this._isolateIncrementalPublications && state.mode === 'paginated'
                     ? this._createSharedPublishablePartialSkeleton(state, publishedPageCount)
                     : this._createPublishablePartialSkeleton(state, publishedPageCount);
+            this._publishedHeadingCollapseSignature = this._getHeadingCollapseSignature();
             this._paginationMetrics = state.ctx.paginationMetrics ?? null;
             this._dirty$.next(true);
             didPublish = true;
@@ -2231,6 +2256,20 @@ export class DocumentSkeleton extends Skeleton {
         // the same on cloned foreground pages so the temporary page list has the
         // same physical-page identity as the previous complete skeleton.
         mergeContinuousDuplicatePages(activePages, state.mode === 'continuous');
+        if (state.mode === 'continuous') {
+            // Inline objects otherwise appear only when the complete tail is finalized.
+            // Position publication-owned copies without moving the active layout's objects.
+            const paragraphConfigCache = new Map([...state.ctx.paragraphConfigCache].map(([segmentId, configs]) => [
+                segmentId,
+                new Map([...configs].map(([index, config]) => [index, config.paragraphInlineSkeDrawings?.size
+                    ? {
+                        ...config,
+                        paragraphInlineSkeDrawings: new Map([...config.paragraphInlineSkeDrawings].map(([id, drawing]) => [id, { ...drawing }])),
+                    }
+                    : config])),
+            ]));
+            updateInlineDrawingCoordsAndBorder({ ...state.ctx, paragraphConfigCache }, activePages);
+        }
 
         const flowPages = [...stablePages, ...activePages];
         const currentPriorityPageIndex = state.priorityAnchor == null
@@ -2672,6 +2711,7 @@ export class DocumentSkeleton extends Skeleton {
             if (progress.complete) {
                 setPageParent(skeletonData.pages, skeletonData);
                 this._lastCompleteSkeletonData = skeletonData;
+                this._completedHeadingCollapseSignature = this._getHeadingCollapseSignature();
                 this._completedPageCount = skeletonData?.pages.length;
                 this._pendingInvalidationAnchor = null;
                 this._externalProtectedContinuousLayout = null;
@@ -2817,6 +2857,7 @@ export class DocumentSkeleton extends Skeleton {
             }
             setPageParent(skeletonData.pages, skeletonData);
             this._lastCompleteSkeletonData = skeletonData;
+            this._completedHeadingCollapseSignature = this._getHeadingCollapseSignature();
             this._completedPageCount = skeletonData?.pages.length;
             this._pendingInvalidationAnchor = null;
             this._externalProtectedPages = null;
@@ -2825,6 +2866,7 @@ export class DocumentSkeleton extends Skeleton {
 
         this._skeletonData = skeletonData;
         this._externalLayoutProgress = progress.complete ? null : progress;
+        this._publishedHeadingCollapseSignature = this._getHeadingCollapseSignature();
         this._dirty$.next(true);
         this._layoutProgress$.next(progress);
         return { didReplaceProtectedPages };
@@ -2924,7 +2966,9 @@ export class DocumentSkeleton extends Skeleton {
             ?.sections[flow.sectionIndex]
             ?.columns[flow.columnIndex];
         if (existingColumn == null) {
-            throw new Error('Continuous layout cannot merge a Worker tail without the Main interaction boundary.');
+            // A retained folded window can omit sections restored by this generation.
+            // Commit the queued canonical Worker geometry together when it completes.
+            return null;
         }
 
         const firstUnprotectedLine = flow.lines[firstUnprotectedLineOffset];
@@ -4270,7 +4314,31 @@ export class DocumentSkeleton extends Skeleton {
         }
 
         if (state.mode === 'continuous') {
-            return state.laidOutThrough >= anchor;
+            if (state.laidOutThrough < anchor) {
+                return false;
+            }
+            if (state.minimumPublicationHeight <= 0) {
+                return true;
+            }
+            // Page heights are finalized on publication. Measure stable flow directly
+            // so a large document can hand off after filling the viewport, not its tail.
+            let height = 0;
+            for (const page of state.ctx.skeleton.pages) {
+                for (const section of page.sections) {
+                    let sectionHeight = 0;
+                    for (const column of section.columns) {
+                        for (let index = column.lines.length - 1; index >= 0; index--) {
+                            const line = column.lines[index];
+                            if (line.paragraphIndex <= state.stableLaidOutThrough) {
+                                sectionHeight = Math.max(sectionHeight, line.top + line.lineHeight);
+                                break;
+                            }
+                        }
+                    }
+                    height += sectionHeight;
+                }
+            }
+            return height >= state.minimumPublicationHeight;
         }
 
         // A paginated page is not publishable merely because the edited paragraph
@@ -4594,7 +4662,7 @@ export class DocumentSkeleton extends Skeleton {
         }
 
         const paragraphNode = sectionNode.children[state.paragraphIndex];
-        const tableNode = paragraphNode?.children.length === 1 &&
+        const tableNode = paragraphNode && !ctx.viewModel.getCollapsedHeadingAtOffset(paragraphNode.startIndex) && paragraphNode.children.length === 1 &&
             paragraphNode.children[0].nodeType === DataStreamTreeNodeType.TABLE
             ? paragraphNode.children[0]
             : null;

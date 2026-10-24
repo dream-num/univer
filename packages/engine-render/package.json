@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/engine-render",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "private": false,
     "description": "Canvas rendering engine for Univer documents, sheets, and slides.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -77,7 +77,7 @@
         "@univerjs-infra/shared": "workspace:*",
         "jest-canvas-mock": "^2.5.8",
         "rollup-plugin-polyfill-node": "^0.13.0",
-        "rxjs": "^7.8.2",
+        "rxjs": "7.8.2",
         "tsdown": "^0.23.1",
         "typescript": "^6.0.3",
         "vitest": "^5.0.4"

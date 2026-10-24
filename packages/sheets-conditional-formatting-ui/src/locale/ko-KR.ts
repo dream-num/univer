@@ -52,6 +52,7 @@ const locale: typeof enUS = {
             lessThanOrEqual: '≤',
         },
         panel: {
+            stopIfTrue: '참이면 중지',
             createRule: '규칙 만들기',
             clear: '모든 규칙 지우기',
             range: '적용 범위',

@@ -35,19 +35,8 @@ function useLatest<T>(value: T) {
     return ref;
 }
 
-// eslint-disable-next-line max-lines-per-function
-const useVirtualList = <T>(list: T[], options: IVirtualListOptions<T>) => {
-    const { containerTarget, itemHeight, overscan = 5 } = options;
-
+function useVirtualListMetrics<T>(list: T[], itemHeight: number | ItemHeight<T>) {
     const itemHeightRef = useLatest(itemHeight);
-
-    const [size, setSize] = useState<Nullable<{ width: number; height: number }>>(null);
-
-    const scrollTriggerByScrollToFunc = useRef(false);
-
-    const [targetList, setTargetList] = useState<{ index: number; data: T }[]>([]);
-
-    const [wrapperStyle, setWrapperStyle] = useState<{ height: string | undefined; marginTop: string | undefined }>({ height: undefined, marginTop: undefined });
 
     const getVisibleCount = (containerHeight: number, fromIndex: number) => {
         if (typeof itemHeightRef.current === 'number') {
@@ -84,7 +73,6 @@ const useVirtualList = <T>(list: T[], options: IVirtualListOptions<T>) => {
         return offset + 1;
     };
 
-  // Get top height
     const getDistanceTop = (index: number) => {
         if (typeof (itemHeightRef.current) === 'number') {
             const height = index * itemHeightRef.current;
@@ -105,6 +93,53 @@ const useVirtualList = <T>(list: T[], options: IVirtualListOptions<T>) => {
             0
         );
     }, [list]);
+
+    return { getVisibleCount, getOffset, getDistanceTop, totalHeight };
+}
+
+function useContainerSize(containerTarget: RefObject<HTMLElement | null>) {
+    const [size, setSize] = useState<Nullable<{ width: number; height: number }>>(null);
+
+    useEffect(() => {
+        const container = containerTarget.current;
+        if (container) {
+            let active = true;
+            const getSize = () => {
+                if (!active || containerTarget.current !== container) {
+                    return;
+                }
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                if (width !== size?.width || height !== size?.height) {
+                    setSize({ width, height });
+                }
+            };
+
+            getSize();
+            const ob = new ResizeObserver(getSize);
+            ob.observe(container);
+            return () => {
+                active = false;
+                ob.disconnect();
+            };
+        }
+    }, []);
+
+    return size;
+}
+
+const useVirtualList = <T>(list: T[], options: IVirtualListOptions<T>) => {
+    const { containerTarget, itemHeight, overscan = 5 } = options;
+
+    const { getVisibleCount, getOffset, getDistanceTop, totalHeight } = useVirtualListMetrics(list, itemHeight);
+
+    const size = useContainerSize(containerTarget);
+
+    const scrollTriggerByScrollToFunc = useRef(false);
+
+    const [targetList, setTargetList] = useState<{ index: number; data: T }[]>([]);
+
+    const [wrapperStyle, setWrapperStyle] = useState<{ height: string | undefined; marginTop: string | undefined }>({ height: undefined, marginTop: undefined });
 
     const calculateRange = () => {
         const container = containerTarget.current;
@@ -133,31 +168,6 @@ const useVirtualList = <T>(list: T[], options: IVirtualListOptions<T>) => {
             );
         }
     };
-
-    useEffect(() => {
-        const container = containerTarget.current;
-        if (container) {
-            let active = true;
-            const getSize = () => {
-                if (!active || containerTarget.current !== container) {
-                    return;
-                }
-                const width = container.clientWidth;
-                const height = container.clientHeight;
-                if (width !== size?.width || height !== size?.height) {
-                    setSize({ width, height });
-                }
-            };
-
-            getSize();
-            const ob = new ResizeObserver(getSize);
-            ob.observe(container);
-            return () => {
-                active = false;
-                ob.disconnect();
-            };
-        }
-    }, []);
 
     useEffect(() => {
         if (!size?.width || !size?.height) {

@@ -74,13 +74,10 @@ export class FBaseInitialable extends Disposable {
         const manual = Boolean(Ctor[ManualInitSymbol]); // <— Enable manual control only when this class (and its subclasses) is active.
         if (manual) return;
 
-        // eslint-disable-next-line ts/no-this-alias
-        const self = this;
-
         const initializers = Object.getPrototypeOf(this)[InitializerSymbol];
         if (initializers) {
-            initializers.forEach(function (fn: (_injector: Injector) => void) {
-                fn.apply(self, [_injector]);
+            initializers.forEach((fn: (_injector: Injector) => void) => {
+                fn.apply(this, [_injector]);
             });
         }
     }

@@ -28,9 +28,6 @@ import type {
     IReorderRangeMutationParams,
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
-import type { IAddConditionalRuleMutationParams } from '../commands/mutations/add-conditional-rule.mutation';
-import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/delete-conditional-rule.mutation';
-import type { IRuleModelJson } from '../models/type';
 import {
     Disposable,
     ICommandService,
@@ -57,6 +54,9 @@ import {
     SetRangeValuesMutation,
     SheetInterceptorService,
 } from '@univerjs/sheets';
+import type { IAddConditionalRuleMutationParams } from '../commands/mutations/add-conditional-rule.mutation';
+import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/delete-conditional-rule.mutation';
+import type { IRuleModelJson } from '../models/type';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '../base/const';
 import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory } from '../commands/mutations/add-conditional-rule.mutation';
 import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../commands/mutations/delete-conditional-rule.mutation';
@@ -192,7 +192,8 @@ export class ConditionalFormattingService extends Disposable {
                         const redos: IMutationInfo[] = [];
                         const undos: IMutationInfo[] = [];
 
-                        ruleList.forEach((item) => {
+                        // AddRule prepends, so copy lower-priority rules first.
+                        ruleList.slice().reverse().forEach((item) => {
                             const params: IAddConditionalRuleMutationParams = {
                                 unitId,
                                 subUnitId: targetSubUnitId,

@@ -22,12 +22,6 @@ import type {
     ITableManualFilterItem,
     ITableRecordFilterItem,
 } from '@univerjs/sheets-table';
-import type { LocaleKey } from '../locale/types';
-import type {
-    IFilterByValueWithTreeItem,
-    ITableFilterColorList,
-    ITableFilterItemList,
-} from '../types';
 import {
     cellToRange,
     ColorKit,
@@ -35,6 +29,7 @@ import {
     Disposable,
     FilterSelectionMode,
     getColorStyle,
+    getRecordValueKey,
     ICommandService,
     Inject,
     IUniverInstanceService,
@@ -47,7 +42,6 @@ import { SetRangeValuesMutation } from '@univerjs/sheets';
 import {
     compileTableRecordFilter,
     getTableRecordValue,
-    getTableRecordValueKey,
     isColorTableFilter,
     isConditionFilter,
     isManualTableFilter,
@@ -59,6 +53,12 @@ import {
     TableColumnFilterTypeEnum,
     TableManager,
 } from '@univerjs/sheets-table';
+import type { LocaleKey } from '../locale/types';
+import type {
+    IFilterByValueWithTreeItem,
+    ITableFilterColorList,
+    ITableFilterItemList,
+} from '../types';
 import { FilterByEnum } from '../types';
 
 interface ISheetTableFilterPanelProps {
@@ -194,7 +194,7 @@ export class SheetsTableUiService extends Disposable {
 
         const candidateKeys = new Set(recordItems.map((item) => item.valueKey!));
         const values = currentFilter.values
-            .filter((value) => !candidateKeys.has(getTableRecordValueKey(value)))
+            .filter((value) => !candidateKeys.has(getRecordValueKey(value)))
             .map((value) => value.type === RecordValueType.Blank ? { type: RecordValueType.Blank } as const : { ...value });
         recordItems.forEach((item) => {
             const selected = checkedItemSet.has(item.valueKey!);
@@ -326,7 +326,7 @@ export class SheetsTableUiService extends Disposable {
                 : String(cellValue);
 
             const recordValue = useRecordValues ? getTableRecordValue(worksheet, row, column) : undefined;
-            const valueKey = recordValue ? getTableRecordValueKey(recordValue) : undefined;
+            const valueKey = recordValue ? getRecordValueKey(recordValue) : undefined;
             const itemKey = valueKey ?? stringItem;
             if (!map.has(itemKey)) {
                 data.push({

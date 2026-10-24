@@ -109,7 +109,7 @@ export function CascaderList(props: ICascaderListProps) {
         <section
             data-u-comp="cascader-list"
             className={clsx(`
-              univer-overflow-auto-y univer-grid univer-h-full univer-max-h-80 univer-grid-flow-col univer-rounded
+              univer-grid univer-h-full univer-max-h-80 univer-grid-flow-col univer-overflow-y-auto univer-rounded
               univer-py-2 univer-text-gray-900
               dark:!univer-text-gray-0
               [&>ul:not(:last-child)]:univer-border-0 [&>ul:not(:last-child)]:univer-border-r

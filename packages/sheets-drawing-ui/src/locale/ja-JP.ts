@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-drawing-ui': {
+        print: {
+            unsupportedObject: 'グラフシートには、まだ印刷できないオブジェクトが含まれています。',
+        },
         title: '画像',
         backgroundImage: {
             title: '背景画像',

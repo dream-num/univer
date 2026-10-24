@@ -15,7 +15,6 @@
  */
 
 import type { IPermissionPoint, Workbook, Worksheet } from '@univerjs/core';
-import type { IObjectModel, IObjectPointModel } from '../type';
 import {
     ILogService,
     Inject,
@@ -26,8 +25,11 @@ import {
     RxDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import type { IObjectModel, IObjectPointModel } from '../type';
 import { RangeProtectionRuleModel } from '../../../models/range-protection-rule.model';
+import { WorksheetEditPermission } from '../permission-point/worksheet/edit';
 import { getAllRangePermissionPoint } from '../range-permission/util';
 import { getAllWorkbookPermissionPoint } from '../workbook-permission';
 import { getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './utils';
@@ -38,6 +40,34 @@ export const RULE_MODEL_PLUGIN_NAME = 'SHEET_WORKSHEET_PROTECTION_PLUGIN';
 export const POINT_MODEL_PLUGIN_NAME = 'SHEET_WORKSHEET_PROTECTION_POINT_PLUGIN';
 
 export class WorksheetPermissionService extends RxDisposable {
+    private _editConstraint?: (worksheet: Worksheet) => boolean;
+    private readonly _workbookSubscriptions = new Map<Workbook, Subscription>();
+
+    setWorksheetEditPermissionConstraint(constraint: (worksheet: Worksheet) => boolean): boolean {
+        if (this._editConstraint) {
+            return false;
+        }
+        for (const workbook of this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET)) {
+            if (workbook.getSheets().some((worksheet) => !constraint(worksheet))) {
+                return false;
+            }
+        }
+        this._editConstraint = constraint;
+        return true;
+    }
+
+    addWorksheetPermissionPoint<T = boolean>(point: IPermissionPoint<T> | BehaviorSubject<IPermissionPoint<T>>): boolean {
+        const instance = point instanceof BehaviorSubject ? point.getValue() : point;
+        if (instance instanceof WorksheetEditPermission) {
+            const worksheet = this._univerInstanceService.getUnit<Workbook>(instance.unitId, UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(instance.subUnitId);
+            if (!worksheet) {
+                return false;
+            }
+            instance.setLocalEditAllowed(this._editConstraint?.(worksheet) ?? true);
+        }
+        return this._permissionService.addPermissionPoint(point);
+    }
+
     constructor(
         @Inject(IPermissionService) private _permissionService: IPermissionService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
@@ -62,17 +92,18 @@ export class WorksheetPermissionService extends RxDisposable {
                 const subUnitId = worksheet.getSheetId();
                 [...getAllWorksheetPermissionPoint(), ...getAllWorksheetPermissionPointByPointPanel()].forEach((F) => {
                     const instance = new F(unitId, subUnitId);
-                    this._permissionService.addPermissionPoint(instance);
+                    this.addWorksheetPermissionPoint(instance);
                 });
                 this._logService.debug('[WorksheetPermissionService]', 'Initialization completed', unitId, subUnitId);
             };
             workbook.getSheets().forEach((worksheet) => {
                 handleWorksheet(worksheet);
             });
-            workbook.sheetCreated$.subscribe((worksheet) => {
+            const subscriptions = new Subscription();
+            subscriptions.add(workbook.sheetCreated$.subscribe((worksheet) => {
                 handleWorksheet(worksheet);
-            });
-            workbook.sheetDisposed$.subscribe((worksheet) => {
+            }));
+            subscriptions.add(workbook.sheetDisposed$.subscribe((worksheet) => {
                 const subUnitId = worksheet.getSheetId();
 
                 const rangeRuleList = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId);
@@ -87,7 +118,8 @@ export class WorksheetPermissionService extends RxDisposable {
                     const instance = new F(unitId, subUnitId);
                     this._permissionService.deletePermissionPoint(instance.id);
                 });
-            });
+            }));
+            this._workbookSubscriptions.set(workbook, subscriptions);
         };
 
         this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => handleWorkbook(workbook));
@@ -95,15 +127,21 @@ export class WorksheetPermissionService extends RxDisposable {
         this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((event) => handleWorkbook(event.unit));
 
         this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => {
+            this._workbookSubscriptions.get(workbook)?.unsubscribe();
+            this._workbookSubscriptions.delete(workbook);
             workbook.getSheets().forEach((worksheet) => {
                 const unitId = workbook.getUnitId();
                 const subUnitId = worksheet.getSheetId();
-                getAllWorksheetPermissionPoint().forEach((F) => {
+                [...getAllWorksheetPermissionPoint(), ...getAllWorksheetPermissionPointByPointPanel()].forEach((F) => {
                     const instance = new F(unitId, subUnitId);
                     this._permissionService.deletePermissionPoint(instance.id);
                 });
             });
         });
+        this.disposeWithMe({ dispose: () => {
+            this._workbookSubscriptions.forEach((subscriptions) => subscriptions.unsubscribe());
+            this._workbookSubscriptions.clear();
+        } });
     }
 
     private _initRuleChange() {
@@ -172,7 +210,13 @@ export class WorksheetPermissionService extends RxDisposable {
 
                             [...getAllWorksheetPermissionPoint(), ...getAllWorksheetPermissionPointByPointPanel()].forEach((F) => {
                                 const instance = new F(unitId, subUnitId);
-                                this._permissionService.deletePermissionPoint(instance.id);
+                                if (instance instanceof WorksheetEditPermission) {
+                                    if (!this._permissionService.getPermissionPoint(instance.id)) {
+                                        this.addWorksheetPermissionPoint(instance);
+                                    }
+                                } else {
+                                    this._permissionService.deletePermissionPoint(instance.id);
+                                }
                             });
                         });
                         getAllWorkbookPermissionPoint().forEach((F) => {
@@ -230,6 +274,6 @@ export class WorksheetPermissionService extends RxDisposable {
             return;
         }
 
-        this._permissionService.addPermissionPoint(instance);
+        this.addWorksheetPermissionPoint(instance);
     }
 }

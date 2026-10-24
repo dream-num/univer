@@ -25,12 +25,14 @@ import {
     LocaleService,
     nameCharacterCheck,
     Quantity,
+    SheetTypes,
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     BasesMultiIcon,
     BoardsMultiIcon,
+    ChartIcon,
     DocsMultiIcon,
     LockIcon,
     SheetsMultiIcon,
@@ -306,6 +308,7 @@ export function SheetBarTabs() {
                     label: (
                         <>
                             {embedChildType != null && <EmbedSheetTabProductIcon childType={embedChildType} />}
+                            {sheet.getConfig().type === SheetTypes.CHART && <ChartIcon className="univer-shrink-0" />}
                             {hasProtection && <LockIcon className="univer-shrink-0" />}
                             <span className="univer-min-w-px univer-truncate univer-outline-none">{sheet.getName()}</span>
                         </>

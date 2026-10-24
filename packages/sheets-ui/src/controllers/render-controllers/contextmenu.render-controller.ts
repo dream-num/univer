@@ -23,17 +23,18 @@ import type {
     SpreadsheetColumnHeader,
     SpreadsheetHeader,
 } from '@univerjs/engine-render';
-import type { ISheetEmbedRuntimeDomScope } from '../../services/sheet-embed-integration.service';
-import type { ISheetHostChromeOverride } from '../../services/sheet-host-chrome-override.service';
 import {
     Disposable,
     IContextService,
     Inject,
     Injector,
     RANGE_TYPE,
+    SheetTypes,
 } from '@univerjs/core';
 import { attachSelectionWithCoord, REF_SELECTIONS_ENABLED, SheetsSelectionsService } from '@univerjs/sheets';
 import { ContextMenuPosition, IContextMenuService, IPlatformService } from '@univerjs/ui';
+import type { ISheetEmbedRuntimeDomScope } from '../../services/sheet-embed-integration.service';
+import type { ISheetHostChromeOverride } from '../../services/sheet-host-chrome-override.service';
 import { SHEET_VIEW_KEY } from '../../common/keys';
 import { isSheetContextMenuGesture } from '../../common/selection-input';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
@@ -65,6 +66,9 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
 
         // Content range context menu
         const spreadsheetSubscription = spreadsheetPointerDownObserver.subscribeEvent((event) => {
+            if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART) {
+                return;
+            }
             if (this._isContextMenuGesture(event)) {
                 const selections = this._selectionManagerService.getCurrentSelections();
                 const currentSelection = selections?.[0];

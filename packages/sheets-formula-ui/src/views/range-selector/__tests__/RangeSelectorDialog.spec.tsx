@@ -23,15 +23,17 @@ import {
     LocaleService,
     LocaleType,
     RANGE_TYPE,
+    Univer,
     UniverInstanceType,
 } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
-import { SheetsSelectionsService } from '@univerjs/sheets';
+import { SheetsSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
 import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import enUS from '../../../locale/en-US';
 import { RangeSelectorDialog } from '../index';
 import { MobileRangeSelectorDialog } from '../MobileRangeSelectorDialog';
 
@@ -542,5 +544,97 @@ describe('RangeSelectorDialog', () => {
             startColumn: 0,
             endColumn: 2,
         }));
+    });
+});
+
+describe('RangeSelectorDialog raw draft with real workbook providers', () => {
+    let univer: Univer;
+    let root: Root;
+    let container: HTMLDivElement;
+
+    beforeEach(() => {
+        univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: enUS } });
+        univer.registerPlugin(UniverSheetsPlugin);
+        const workbook = univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+            id: 'draft-book',
+            name: 'Drafts',
+            appVersion: 'test',
+            locale: LocaleType.EN_US,
+            styles: {},
+            sheetOrder: ['data'],
+            sheets: { data: { id: 'data', name: 'Data', rowCount: 20, columnCount: 10 } },
+        });
+        univer.__getInjector().get(IUniverInstanceService).focusUnit(workbook.getUnitId());
+        univer.__getInjector().get(LocaleService).setDirection('ltr');
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+    });
+
+    afterEach(async () => {
+        await act(async () => {
+            root.unmount();
+            univer.dispose();
+        });
+        container.remove();
+    });
+
+    it('copies invalid raw input on open without publishing or resetting it on controlled updates', async () => {
+        const initial = Object.freeze(['Data!A1:']);
+        const callback = vi.fn();
+        const render = (text: readonly string[]) => root.render(
+            <RediContext.Provider value={{ injector: univer.__getInjector() }}>
+                <RangeSelectorDialog
+                    visible
+                    initialValue={[]}
+                    initialTextRanges={text}
+                    unitId="draft-book"
+                    subUnitId="data"
+                    onDraftChange={callback}
+                    onConfirm={() => {}}
+                    onClose={() => {}}
+                />
+            </RediContext.Provider>
+        );
+        await act(async () => render(initial));
+        const input = document.body.querySelector<HTMLInputElement>('input')!;
+        expect(input.value).toBe('Data!A1:');
+        expect(callback).not.toHaveBeenCalled();
+        await act(async () => writeInput(input, 'Data!B2:'));
+        expect(callback).toHaveBeenCalledExactlyOnceWith(['Data!B2:']);
+        await act(async () => render(['Data!C3:D4']));
+        expect(input.value).toBe('Data!B2:');
+        expect(initial).toEqual(['Data!A1:']);
+    });
+
+    it('publishes genuine input, add and remove drafts without confirmation and preserves cancel semantics', async () => {
+        const drafts: Array<readonly string[]> = [];
+        const confirm = vi.fn();
+        const close = vi.fn();
+        await act(async () => root.render(
+            <RediContext.Provider value={{ injector: univer.__getInjector() }}>
+                <RangeSelectorDialog
+                    visible
+                    initialValue={[]}
+                    initialTextRanges={['Data!A1:B2']}
+                    unitId="draft-book"
+                    subUnitId="data"
+                    onDraftChange={(ranges) => drafts.push(ranges)}
+                    onConfirm={confirm}
+                    onClose={close}
+                />
+            </RediContext.Provider>
+        ));
+        const input = document.body.querySelector<HTMLInputElement>('input')!;
+        await act(async () => writeInput(input, 'Data!C3:D4'));
+        await clickButton(enUS['sheets-formula-ui'].rangeSelector.addAnotherRange);
+        expect(drafts).toEqual([['Data!C3:D4'], ['Data!C3:D4', '']]);
+        const remove = document.body.querySelector<SVGElement>('.univerjs-icon-delete-icon')!.closest('button')!;
+        await act(async () => remove.click());
+        expect(drafts[drafts.length - 1]).toEqual(['']);
+        expect(confirm).not.toHaveBeenCalled();
+        await clickButton(enUS['sheets-formula-ui'].rangeSelector.cancel);
+        expect(close).toHaveBeenCalledOnce();
+        expect(confirm).not.toHaveBeenCalled();
     });
 });

@@ -16,13 +16,6 @@
 
 import type { IAccessor, ICommand, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IMarkDirtyFilterChangeMutationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
-import type { LocaleKey } from '../../locale/types';
-import type { FilterColumn } from '../../models/filter-model';
-import type { IAutoFilter, IFilterColumn } from '../../models/types';
-import type {
-    ISetSheetsFilterCriteriaMutationParams,
-    ISetSheetsFilterRangeMutationParams,
-} from '../mutations/sheets-filter.mutation';
 import {
     CommandType,
     ErrorService,
@@ -31,6 +24,7 @@ import {
     IUniverInstanceService,
     LocaleService,
     sequenceExecute,
+    SheetTypes,
     UniverInstanceType,
 } from '@univerjs/core';
 import {
@@ -40,6 +34,13 @@ import {
     MarkDirtyFilterChangeMutation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
+import type { LocaleKey } from '../../locale/types';
+import type { FilterColumn } from '../../models/filter-model';
+import type { IAutoFilter, IFilterColumn } from '../../models/types';
+import type {
+    ISetSheetsFilterCriteriaMutationParams,
+    ISetSheetsFilterRangeMutationParams,
+} from '../mutations/sheets-filter.mutation';
 import { SheetsFilterService } from '../../services/sheet-filter.service';
 import {
     ReCalcSheetsFilterMutation,
@@ -72,7 +73,9 @@ export const SetSheetFilterRangeCommand: ICommand<ISetSheetFilterRangeCommandPar
         const { unitId, subUnitId, range } = params;
 
         const commandTarget = getSheetCommandTarget(instanceSrv, params);
-        if (!commandTarget) return false;
+        if (!commandTarget || commandTarget.worksheet.getConfig().type === SheetTypes.CHART) {
+            return false;
+        }
 
         const filterModel = sheetsFilterService.getFilterModel(unitId, subUnitId);
         if (filterModel) return false;
@@ -108,7 +111,9 @@ export const RemoveSheetFilterCommand: ICommand<ISheetCommandSharedParams> = {
     type: CommandType.COMMAND,
     handler: (accessor, params: ISheetCommandSharedParams) => {
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
-        if (!target) return false;
+        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
+            return false;
+        }
 
         const sheetsFilterService = accessor.get(SheetsFilterService);
         const { unitId, subUnitId } = target;
@@ -155,7 +160,9 @@ export const SmartToggleSheetsFilterCommand: ICommand = {
 
         const currentWorkbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         const currentWorksheet = currentWorkbook?.getActiveSheet();
-        if (!currentWorksheet || !currentWorkbook) return false;
+        if (!currentWorksheet || !currentWorkbook || currentWorksheet.getConfig().type === SheetTypes.CHART) {
+            return false;
+        }
 
         const unitId = currentWorkbook.getUnitId();
         const subUnitId = currentWorksheet.getSheetId();
@@ -209,7 +216,9 @@ export const SetSheetsFilterCriteriaCommand: ICommand<ISetSheetsFilterCriteriaCo
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params: ISetSheetsFilterCriteriaCommandParams) => {
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
-        if (!target) return false;
+        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
+            return false;
+        }
 
         const sheetsFilterService = accessor.get(SheetsFilterService);
         const { unitId, subUnitId } = target;
@@ -262,7 +271,9 @@ export const ClearSheetsFilterCriteriaCommand: ICommand<ISheetCommandSharedParam
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params) => {
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
-        if (!target) return false;
+        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
+            return false;
+        }
 
         const sheetsFilterService = accessor.get(SheetsFilterService);
         const { unitId, subUnitId } = target;
@@ -311,7 +322,9 @@ export const ReCalcSheetsFilterCommand: ICommand<ISheetCommandSharedParams> = {
         const instanceSrv = accessor.get(IUniverInstanceService);
 
         const commandTarget = getSheetCommandTarget(instanceSrv, params);
-        if (!commandTarget) return false;
+        if (!commandTarget || commandTarget.worksheet.getConfig().type === SheetTypes.CHART) {
+            return false;
+        }
 
         const { unitId, subUnitId } = commandTarget;
         const filterModel = sheetsFilterService.getFilterModel(commandTarget.unitId, commandTarget.subUnitId);

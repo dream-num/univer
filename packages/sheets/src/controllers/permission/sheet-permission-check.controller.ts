@@ -24,9 +24,9 @@ import type {
     Nullable,
     Workbook,
     WorkbookPermissionPointConstructor,
+    WorkSheetPermissionPointConstructor,
 } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
-import type { UnitAction } from '@univerjs/protocol';
 import {
     CustomCommandExecutionError,
     Direction,
@@ -38,26 +38,20 @@ import {
     isICellData,
     IUniverInstanceService,
     LocaleService,
-    MAX_COLUMN_COUNT,
-    MAX_ROW_COUNT,
-    moveRangeByOffset,
     ObjectMatrix,
     Rectangle,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import {
+    deserializeRangeWithSheet,
     deserializeRangeWithSheetWithCache,
-    FormulaDataModel,
-    handleRefStringInfo,
     IDefinedNamesService,
-    IFunctionService,
     LexerTreeBuilder,
-    matchToken,
-    normalizeFormulaUnitName,
     operatorToken,
     sequenceNodeType,
 } from '@univerjs/engine-formula';
+import { UnitAction } from '@univerjs/protocol';
 import { Subject } from 'rxjs';
 import type { IAutoFillCommandParams } from '../../commands/commands/auto-fill.command';
 import type { IClearSelectionAllCommandParams } from '../../commands/commands/clear-selection-all.command';
@@ -694,6 +688,17 @@ export class SheetPermissionCheckController extends Disposable {
         return true;
     }
 
+    public assertWorksheetEditable(unitId: string, subUnitId: string): void {
+        const workbookPoint = this._permissionService.getPermissionPoint(new WorkbookEditablePermission(unitId).id);
+        const worksheetPoint = this._permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id);
+        if (workbookPoint?.value !== true || worksheetPoint?.value !== true || !this.permissionCheckWithoutRange({
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission],
+        }, unitId, subUnitId)) {
+            this.blockExecuteWithoutPermission(this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr'));
+        }
+    }
+
     public permissionCheckWithoutRange(permissionTypes: IPermissionTypes, unitId?: string, subUnitId?: string) {
         const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
         if (!target) return false;
@@ -1022,11 +1027,8 @@ export class SheetPermissionCheckController extends Disposable {
         const { range, direction } = params;
 
         const _range = { ...range };
-        const permissionTypes = {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetEditPermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
-        };
+        const workbookTypes: WorkbookPermissionPointConstructor[] = [WorkbookEditablePermission];
+        const worksheetTypes: WorkSheetPermissionPointConstructor[] = [WorksheetEditPermission];
 
         if (direction === Direction.UP || direction === Direction.DOWN) {
             const anchorRow = direction === Direction.UP ? range.startRow : range.startRow - 1;
@@ -1035,8 +1037,8 @@ export class SheetPermissionCheckController extends Disposable {
             _range.startRow = anchorRow;
             _range.endRow = anchorRow;
 
-            permissionTypes.workbookTypes.push(WorkbookInsertRowPermission);
-            permissionTypes.worksheetTypes.push(WorksheetInsertRowPermission);
+            workbookTypes.push(WorkbookInsertRowPermission);
+            worksheetTypes.push(WorksheetInsertRowPermission);
         } else if (direction === Direction.LEFT || direction === Direction.RIGHT) {
             const anchorCol = direction === Direction.LEFT ? range.startColumn : range.startColumn - 1;
             if (anchorCol < 0 || anchorCol > worksheet.getColumnCount() - 1) return false;
@@ -1044,11 +1046,11 @@ export class SheetPermissionCheckController extends Disposable {
             _range.startColumn = anchorCol;
             _range.endColumn = anchorCol;
 
-            permissionTypes.workbookTypes.push(WorkbookInsertColumnPermission);
-            permissionTypes.worksheetTypes.push(WorksheetInsertColumnPermission);
+            workbookTypes.push(WorkbookInsertColumnPermission);
+            worksheetTypes.push(WorksheetInsertColumnPermission);
         }
 
-        return this.permissionCheckWithRanges(permissionTypes, [_range], unitId, subUnitId);
+        return this.permissionCheckWithRanges({ workbookTypes, worksheetTypes, rangeTypes: [RangeProtectionPermissionEditPoint] }, [_range], unitId, subUnitId);
     }
 
     private _permissionCheckByWorksheetCommand(workbookPermissionTypes: WorkbookPermissionPointConstructor[], params: ISetWorksheetOrderCommandParams | ISetWorksheetNameCommandParams | ISetWorksheetShowCommandParams) {

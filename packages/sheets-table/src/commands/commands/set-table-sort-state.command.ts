@@ -15,8 +15,15 @@
  */
 
 import type { ICommand } from '@univerjs/core';
+import {
+    CommandType,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    SheetTypes,
+} from '@univerjs/core';
+import { getSheetCommandTarget } from '@univerjs/sheets';
 import type { ITableFilterJSON } from '../../types/type';
-import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
 import { TableManager } from '../../models/table-manager';
 import { SetSheetTableMutation } from '../mutations/set-sheet-table.mutation';
 
@@ -36,6 +43,13 @@ export const SetSheetTableSortStateCommand: ICommand<ISetSheetTableSortStatePara
 
         const table = accessor.get(TableManager).getTable(params.unitId, params.tableId);
         if (!table) {
+            return false;
+        }
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), {
+            unitId: params.unitId,
+            subUnitId: table.getSubunitId(),
+        });
+        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
             return false;
         }
 

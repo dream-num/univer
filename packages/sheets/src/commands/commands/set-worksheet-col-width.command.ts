@@ -34,7 +34,7 @@ import {
     SetWorksheetColWidthMutationFactory,
 } from '../mutations/set-worksheet-col-width.mutation';
 import { getRangesHeight, getSuitableRangesInView } from './util';
-import { getSheetCommandTarget } from './utils/target-util';
+import { getSheetGridCommandTarget } from './utils/target-util';
 
 export interface IDeltaColumnWidthCommandParams {
     anchorCol: number;
@@ -56,10 +56,8 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
-        if (!target) {
-            return false;
-        }
+        const target = getSheetGridCommandTarget(accessor.get(IUniverInstanceService));
+        if (!target) return false;
 
         const { worksheet, unitId, subUnitId } = target;
 
@@ -192,10 +190,8 @@ export const SetColWidthCommand: ICommand = {
         const selections = params?.ranges?.length ? params.ranges : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!selections?.length) return false;
 
-        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
-        if (!target) {
-            return false;
-        }
+        const target = getSheetGridCommandTarget(accessor.get(IUniverInstanceService), params);
+        if (!target) return false;
 
         const { subUnitId, unitId, worksheet } = target;
         const skeleton = accessor.get(SheetSkeletonService).getSkeleton(unitId, subUnitId);
@@ -274,10 +270,8 @@ export const SetWorksheetColIsAutoWidthCommand: ICommand = {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target) {
-            return false;
-        }
+        const target = getSheetGridCommandTarget(univerInstanceService, params);
+        if (!target) return false;
 
         const { unitId, subUnitId } = target;
 

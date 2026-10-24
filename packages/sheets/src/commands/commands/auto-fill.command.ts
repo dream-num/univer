@@ -15,17 +15,23 @@
  */
 
 import type { IAccessor, ICommand, IRange } from '@univerjs/core';
+import {
+    CommandType,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    sequenceExecute,
+} from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import type { ISheetCommandSharedParams } from '../utils/interface';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
 import { generateNullCellValue } from '../../basics/utils';
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 import { AUTO_FILL_APPLY_TYPE } from '../../services/auto-fill/type';
-import { SheetsSelectionsService } from '../../services/selections';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
-import { getSheetCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget, getSheetGridCommandTarget } from './utils/target-util';
 
 export interface IAutoFillCommandParams extends Partial<ISheetCommandSharedParams> {
     sourceRange: IRange;
@@ -37,7 +43,7 @@ export const AutoFillCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.auto-fill',
     handler: async (accessor: IAccessor, params: IAutoFillCommandParams) => {
-        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        const target = getSheetGridCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
 
         const { unitId, subUnitId } = target;
@@ -144,7 +150,7 @@ export const AutoClearContentCommand: ICommand = {
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: IAutoClearContentCommand) => {
-        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        const target = getSheetGridCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
 
         const commandService = accessor.get(ICommandService);

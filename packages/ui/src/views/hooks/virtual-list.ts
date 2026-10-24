@@ -164,6 +164,31 @@ const useVirtualList = <T>(list: T[], options: IVirtualListOptions<T>) => {
     };
 
     useEffect(() => {
+        const container = containerTarget.current;
+        if (container) {
+            let active = true;
+            const getSize = () => {
+                if (!active || containerTarget.current !== container) {
+                    return;
+                }
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                if (width !== size?.width || height !== size?.height) {
+                    setSize({ width, height });
+                }
+            };
+
+            getSize();
+            const ob = new ResizeObserver(getSize);
+            ob.observe(container);
+            return () => {
+                active = false;
+                ob.disconnect();
+            };
+        }
+    }, []);
+
+    useEffect(() => {
         if (!size?.width || !size?.height) {
             return;
         }

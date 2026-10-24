@@ -15,9 +15,10 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import type { AUTO_FILL_APPLY_TYPE } from '../../services/auto-fill/type';
-import { CommandType } from '@univerjs/core';
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
+import { getSheetGridCommandTarget } from './utils/target-util';
 
 export interface IRefillCommandParams {
     type: AUTO_FILL_APPLY_TYPE;
@@ -28,6 +29,9 @@ export const RefillCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IRefillCommandParams) => {
         const autoFillService = accessor.get(IAutoFillService);
+        if (!getSheetGridCommandTarget(accessor.get(IUniverInstanceService), autoFillService.autoFillLocation ?? {})) {
+            return false;
+        }
         return autoFillService.fillData(params.type);
     },
 };

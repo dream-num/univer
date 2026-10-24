@@ -19,7 +19,20 @@ import { PermissionStatus } from '@univerjs/core';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
 
 export class WorksheetEditPermission implements IPermissionPoint {
-    value = true;
+    private _requestedValue = true;
+    private _localEditAllowed = true;
+    get value(): boolean {
+        return this._requestedValue && this._localEditAllowed;
+    }
+
+    set value(value: boolean) {
+        this._requestedValue = value;
+    }
+
+    setLocalEditAllowed(allowed: boolean): void {
+        this._localEditAllowed = allowed;
+    }
+
     type = UnitObject.Worksheet;
     status = PermissionStatus.INIT;
     id: string;

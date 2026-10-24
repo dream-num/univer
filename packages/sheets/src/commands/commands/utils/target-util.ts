@@ -15,7 +15,7 @@
  */
 
 import type { IUniverInstanceService, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { UniverInstanceType } from '@univerjs/core';
+import { SheetTypes, UniverInstanceType } from '@univerjs/core';
 
 export function getSheetCommandTargetWorkbook(univerInstanceService: IUniverInstanceService, params: { unitId?: string }): Nullable<{
     workbook: Workbook;
@@ -83,4 +83,16 @@ export function getSheetMutationTarget(univerInstanceService: IUniverInstanceSer
         worksheet,
         workbook,
     };
+}
+
+/** New grid edits cannot target Chart Sheets; mutation replay keeps its historical target semantics. */
+export function getSheetGridCommandTarget(
+    univerInstanceService: IUniverInstanceService,
+    params: { unitId?: string; subUnitId?: string } = {}
+): Nullable<IResult> {
+    const target = getSheetCommandTarget(univerInstanceService, params);
+    if (target?.worksheet.getConfig().type === SheetTypes.CHART) {
+        return null;
+    }
+    return target;
 }

@@ -24,9 +24,6 @@ import type {
     Workbook,
     Worksheet,
 } from '@univerjs/core';
-import type { LocaleKey } from '../../locale/types';
-import type { IMoveRangeMutationParams } from '../mutations/move-range.mutation';
-import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import {
     cellToRange,
     CommandType,
@@ -39,9 +36,13 @@ import {
     Range,
     Rectangle,
     sequenceExecute,
+    SheetTypes,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
+import type { IMoveRangeMutationParams } from '../mutations/move-range.mutation';
+import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SelectionMoveType } from '../../services/selections/type';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { MoveRangeMutation } from '../mutations/move-range.mutation';
@@ -77,6 +78,12 @@ export const MoveRangeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: MoveRangeCommandId,
     handler: async (accessor: IAccessor, params: IMoveRangeCommandParams) => {
+        const context = _resolveMoveRangeContext(accessor, params);
+        if (!context || context.fromWorksheet.getConfig().type === SheetTypes.CHART ||
+            context.toWorksheet.getConfig().type === SheetTypes.CHART) {
+            return false;
+        }
+
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const errorService = accessor.get(ErrorService);
@@ -86,6 +93,12 @@ export const MoveRangeCommand: ICommand = {
         const perform = await sheetInterceptorService.beforeCommandExecute({ id: MoveRangeCommand.id, params });
 
         if (!perform) {
+            return false;
+        }
+
+        const currentContext = _resolveMoveRangeContext(accessor, params);
+        if (!currentContext || currentContext.fromWorksheet.getConfig().type === SheetTypes.CHART ||
+            currentContext.toWorksheet.getConfig().type === SheetTypes.CHART) {
             return false;
         }
 

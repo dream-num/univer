@@ -40,7 +40,7 @@ import { OleObject } from '../views/ole/ole-object';
 import { DrawingImageClipService } from './drawing-image-clip.service';
 import { OleUIService } from './ole-ui.service';
 
-// const IMAGE_VIEWER_DROPDOWN_PADDING = 50;
+const PRINT_IMAGE_PAGE_CLOSED = 'Print image page closed';
 
 interface IDrawingTransformStateWithClipBounds {
     clipBounds?: { left: number; top: number; width: number; height: number } | null;
@@ -88,7 +88,7 @@ export class DrawingRenderService {
     ) { }
 
     // eslint-disable-next-line max-lines-per-function, complexity
-    async renderImages(imageParam: IImageData, scene: Scene, options?: { allowInactiveSheet?: boolean; interactive?: boolean }) {
+    async renderImages(imageParam: IImageData, scene: Scene, options?: { allowInactiveSheet?: boolean; requireRenderedImage?: boolean; whenPageClosed?: Promise<void> }) {
         const {
             transform: singleTransform,
             drawingType,
@@ -124,15 +124,42 @@ export class DrawingRenderService {
             return;
         }
 
+        if (options?.requireRenderedImage && hidden) {
+            return;
+        }
         if (singleTransform == null) {
+            if (options?.requireRenderedImage) {
+                throw new Error('Print image has no transform');
+            }
             return;
         }
 
         const transforms = isMultiTransform && multiTransforms ? multiTransforms : [singleTransform];
         const images = [];
+        const requireRenderedImage = options?.requireRenderedImage === true;
+        let closed = false;
+        let loadingNative: HTMLImageElement | null | undefined;
+        const whenPageClosed = requireRenderedImage && options?.whenPageClosed?.then(() => {
+            closed = true;
+            if (loadingNative) {
+                loadingNative.onload = null;
+                loadingNative.onerror = null;
+                loadingNative.removeAttribute('src');
+            }
+        });
+        const waitForPage = async <T>(pending: Promise<T>): Promise<T> => whenPageClosed
+            ? Promise.race([pending, whenPageClosed.then(() => { throw new Error(PRINT_IMAGE_PAGE_CLOSED); })])
+            : pending;
 
         for (const transform of transforms) {
+            if (closed) {
+                throw new Error(PRINT_IMAGE_PAGE_CLOSED);
+            }
             const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = transform;
+            if (requireRenderedImage && (!Number.isFinite(left) || !Number.isFinite(top) ||
+                width == null || height == null || !Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0)) {
+                throw new Error('Print image has invalid geometry');
+            }
             const index = transforms.indexOf(transform);
             const imageShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId }, isMultiTransform ? index : undefined);
 
@@ -161,11 +188,30 @@ export class DrawingRenderService {
                 zIndex: zIndex === -1 ? (orders.length - 1) : zIndex,
             };
             let shouldBeCache = false;
-            if (drawingType !== DrawingTypeEnum.DRAWING_OLE) {
-                const imageNativeCache = this._imageIoService.getImageSourceCache(source, imageSourceType);
-
-                if (isRenderableImageCache(imageNativeCache)) {
-                    imageConfig.image = imageNativeCache;
+            if (isRenderableImageCache(imageNativeCache)) {
+                imageConfig.image = imageNativeCache;
+            } else {
+                if (imageSourceType === ImageSourceType.UUID) {
+                    try {
+                        imageConfig.url = await waitForPage(this._imageIoService.getImage(source));
+                    } catch (error) {
+                        if (requireRenderedImage) {
+                            throw error;
+                        }
+                        console.error(error);
+                        continue;
+                    }
+                } else if (imageSourceType === ImageSourceType.URL) {
+                    try {
+                        imageConfig.url = await waitForPage(this._urlImageService.getImage(source));
+                    } catch (error) {
+                        if (closed) {
+                            throw error;
+                        }
+                        console.error(error);
+                        imageConfig.url = source;
+                    }
+                    shouldBeCache = true;
                 } else {
                     if (imageSourceType === ImageSourceType.UUID) {
                         try {
@@ -195,17 +241,28 @@ export class DrawingRenderService {
                 imageConfig.visible = false;
             }
 
+            if (closed) {
+                throw new Error(PRINT_IMAGE_PAGE_CLOSED);
+            }
             if (scene.getObject(imageShapeKey)) {
                 // The image maybe already added  in the time we are getting  the source of the image
                 continue;
             }
 
+            let loaded: Promise<void> | undefined;
+            if (requireRenderedImage && !imageConfig.image) {
+                loaded = new Promise<void>((resolve, reject) => {
+                    imageConfig.success = resolve;
+                    imageConfig.fail = () => reject(new Error('Print image could not be loaded'));
+                });
+            }
             imageConfig.printable = true;
             const image = drawingType === DrawingTypeEnum.DRAWING_OLE
                 ? new OleObject(imageShapeKey, imageConfig)
                 : new Image(imageShapeKey, imageConfig);
             image.setClipService(this._drawingImageClipService);
-            if (shouldBeCache) {
+            loadingNative = image.getNative() ?? undefined;
+            if (shouldBeCache && !requireRenderedImage) {
                 this._imageIoService.addImageSourceCache(source, imageSourceType, image.getNative());
             }
 
@@ -227,6 +284,16 @@ export class DrawingRenderService {
                 image.setSrcRect(srcRect);
             }
 
+            if (loaded) {
+                await waitForPage(loaded);
+                if (!isRenderableImageCache(loadingNative)) {
+                    throw new Error('Print image has no drawable pixels');
+                }
+                if (shouldBeCache) {
+                    this._imageIoService.addImageSourceCache(source, imageSourceType, loadingNative);
+                }
+            }
+            loadingNative = undefined;
             images.push(image);
         }
 
@@ -305,9 +372,12 @@ export class DrawingRenderService {
         return rects;
     }
 
-    renderDrawing(param: IDrawingSearch, scene: Scene, options?: { allowInactiveSheet?: boolean; interactive?: boolean }) {
+    renderDrawing(param: IDrawingSearch, scene: Scene, options?: { allowInactiveSheet?: boolean; requireRenderedImage?: boolean; whenPageClosed?: Promise<void> }) {
         const drawingParam = this._drawingManagerService.getDrawingByParam(param);
         if (drawingParam == null) {
+            if (options?.requireRenderedImage) {
+                throw new Error('Print drawing has no model');
+            }
             return;
         }
 

@@ -16,17 +16,28 @@
 
 import type { ICommandInfo, IDisposable, IExecutionOptions, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { ISelectionWithStyle } from '@univerjs/sheets';
-import type { ICurrentEditCellParam } from '../../services/editor-bridge.service';
-import type { ISheetObjectParam } from '../utils/component-tools';
-import { DisposableCollection, ICommandService, Inject, IUniverInstanceService, Optional, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import type { ISelectionWithStyle, ISetWorksheetActiveOperationParams } from '@univerjs/sheets';
+import {
+    CanceledError,
+    DisposableCollection,
+    ICommandService,
+    Inject,
+    IUniverInstanceService,
+    Optional,
+    RxDisposable,
+    SheetTypes,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import {
     ClearSelectionFormatCommand,
     SetWorksheetActiveOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
+import { KeyCode } from '@univerjs/ui';
 import { merge } from 'rxjs';
+import type { ICurrentEditCellParam } from '../../services/editor-bridge.service';
+import type { ISheetObjectParam } from '../utils/component-tools';
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { SetActivateCellEditOperation } from '../../commands/operations/activate-cell-edit.operation';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
@@ -63,10 +74,22 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         }));
     }
 
+    override dispose(): void {
+        this._disposeCurrent();
+        super.dispose();
+    }
+
     private _init(): IDisposable {
         const d = new DisposableCollection();
         this._initSelectionChangeListener(d);
         this._commandExecutedListener(d);
+        d.add(this._context.unit.activeSheet$.subscribe((worksheet) => {
+            if (worksheet?.getConfig().type === SheetTypes.CHART &&
+                this._editorBridgeService.getEditLocation()?.unitId === this._context.unitId &&
+                !this._editorBridgeService.isVisible().visible) {
+                this._editorBridgeService.refreshEditCellState();
+            }
+        }));
         return d;
     }
 
@@ -87,6 +110,9 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     }
 
     private _updateEditorPosition(params: Nullable<ISelectionWithStyle[]>) {
+        if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART) {
+            return;
+        }
         if (this._editorBridgeService.isVisible().visible) return;
 
         const primary = params?.[params.length - 1]?.primary;
@@ -160,9 +186,54 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         d.add(this._commandService.beforeCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
             if (options?.fromCollab) return;
             if (command.id === SetWorksheetActiveOperation.id) {
+                const params = command.params as ISetWorksheetActiveOperationParams;
+                const target = params.unitId === this._context.unitId
+                    ? this._context.unit.getSheetBySheetId(params.subUnitId)
+                    : null;
+                if (target?.getConfig().type === SheetTypes.CHART &&
+                    this._editorBridgeService.getEditLocation()?.unitId === this._context.unitId) {
+                    this._closeEditorForChart();
+                    return;
+                }
                 this._tryHideEditor();
             }
         }));
+    }
+
+    private _closeEditorForChart() {
+        if (!this._editorBridgeService.isVisible().visible) {
+            return;
+        }
+        const edit = this._editorBridgeService.getEditLocation();
+        const workbook = this._context.unit;
+        const worksheet = edit && workbook.getSheetBySheetId(edit.sheetId);
+        if (!worksheet || worksheet.getConfig().type !== SheetTypes.GRID) {
+            this._editorBridgeService.disableForceKeepVisible();
+            this._hideEditor(true);
+            return;
+        }
+        if (this._instanceSrv.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET) !== workbook) {
+            throw new CanceledError();
+        }
+        if (workbook.getActiveSheet() !== worksheet) {
+            const keepVisible = this._editorBridgeService.isForceKeepVisible();
+            this._editorBridgeService.enableForceKeepVisible();
+            try {
+                // Restore the captured Grid synchronously so the close path cannot asynchronously steal Chart activation.
+                if (!this._commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+                    unitId: this._context.unitId,
+                    subUnitId: worksheet.getSheetId(),
+                }) || workbook.getActiveSheet() !== worksheet) {
+                    throw new CanceledError();
+                }
+            } finally {
+                if (!keepVisible) {
+                    this._editorBridgeService.disableForceKeepVisible();
+                }
+            }
+        }
+        this._editorBridgeService.disableForceKeepVisible();
+        this._hideEditor();
     }
 
     private _tryHideEditor() {
@@ -188,13 +259,14 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         return typeof dataStream === 'string' && dataStream.startsWith('=');
     }
 
-    private _hideEditor() {
+    private _hideEditor(cancel = false) {
         if (this._editorBridgeService.isVisible().visible !== true) return;
 
         this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
             visible: false,
             eventType: DeviceInputEventType.PointerDown,
             unitId: this._context.unitId,
+            ...(cancel ? { keycode: KeyCode.ESC, restoreEditSheet: false } : {}),
         });
     }
 

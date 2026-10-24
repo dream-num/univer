@@ -15,18 +15,19 @@
  */
 
 import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
-import type { CFRuleType } from '../../base/const';
-import type { IConditionFormattingRule } from '../../models/type';
-import type { IDeleteConditionalRuleMutationParams } from '../mutations/delete-conditional-rule.mutation';
-import type { ISetConditionalRuleMutationParams } from '../mutations/set-conditional-rule.mutation';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
     sequenceExecute,
+    SheetTypes,
 } from '@univerjs/core';
 import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
+import type { CFRuleType } from '../../base/const';
+import type { IConditionFormattingRule } from '../../models/type';
+import type { IDeleteConditionalRuleMutationParams } from '../mutations/delete-conditional-rule.mutation';
+import type { ISetConditionalRuleMutationParams } from '../mutations/set-conditional-rule.mutation';
 import { ConditionalFormattingRangeIndexModel } from '../../models/conditional-formatting-range-index-model';
 import { ConditionalFormattingRangeTransformService } from '../../services/conditional-formatting-range-transform.service';
 import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../mutations/delete-conditional-rule.mutation';
@@ -53,7 +54,9 @@ export const ClearRangeCfCommand: ICommand<IClearRangeCfParams> = {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
 
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target) return false;
+        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
+            return false;
+        }
 
         const { unitId, subUnitId } = target;
         const ranges = params.ranges ?? selectionManagerService.getCurrentSelections()?.map((selection) => selection.range) ?? [];

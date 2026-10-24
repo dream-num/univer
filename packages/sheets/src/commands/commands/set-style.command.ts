@@ -27,8 +27,6 @@ import type {
     VerticalAlign,
     Worksheet,
 } from '@univerjs/core';
-import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
-import type { ISheetCommandSharedParams } from '../utils/interface';
 import {
     BooleanNumber,
     CommandType,
@@ -42,14 +40,15 @@ import {
     Tools,
     WrapStrategy,
 } from '@univerjs/core';
-
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+import type { ISheetCommandSharedParams } from '../utils/interface';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SheetSkeletonService } from '../../skeleton/skeleton.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { getRangesHeight, getSuitableRangesInView } from './util';
 import { createRangeIteratorWithSkipFilteredRows } from './utils/selection-utils';
-import { getSheetCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget, getSheetGridCommandTarget } from './utils/target-util';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -112,7 +111,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
     handler: <T>(accessor: IAccessor, params: ISetStyleCommandParams<T>) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetCommandTarget(univerInstanceService, params);
+        const target = getSheetGridCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { unitId, subUnitId, worksheet } = target;

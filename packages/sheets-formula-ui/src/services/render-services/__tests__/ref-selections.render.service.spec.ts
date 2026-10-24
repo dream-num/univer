@@ -28,6 +28,7 @@ import {
     LogLevel,
     Plugin,
     RANGE_TYPE,
+    SheetTypes,
     toDisposable,
     Tools,
     Univer,
@@ -102,6 +103,43 @@ describe('RefSelectionsRenderService additive modifiers with real render provide
         univer.dispose();
         vi.restoreAllMocks();
         vi.useRealTimers();
+    });
+
+    it('refuses reference selection on Chart and preserves Grid range picking after a host switch', () => {
+        const injector = univer.__getInjector();
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'chart-refs',
+            sheetOrder: ['chart', 'grid'],
+            sheets: { chart: { id: 'chart', type: SheetTypes.CHART }, grid: { id: 'grid', rowCount: 20, columnCount: 10 } },
+        });
+        const renderManager = injector.get(IRenderManagerService);
+        const render = renderManager.createRender(workbook.getUnitId());
+        render.engine.resizeBySize(800, 600);
+        injector.createInstance(Viewport, SHEET_VIEWPORT_KEY.VIEW_MAIN, render.scene, { left: 0, top: 0, right: 0, bottom: 0 });
+        const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
+        render.mainComponent = spreadsheet;
+        render.components.set(SHEET_VIEW_KEY.MAIN, spreadsheet);
+        render.scene.addObject(spreadsheet);
+        const manager = render.with(SheetSkeletonManagerService);
+        manager.setCurrent({ sheetId: 'chart' });
+        renderManager.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [RefSelectionsRenderService]);
+        const service = render.with(RefSelectionsRenderService);
+        injector.get(IContextService).setContextValue(SELECTIONS_ENABLED, true);
+        injector.get(IContextService).setContextValue(REF_SELECTIONS_ENABLED, true);
+        service.enableSelectionChanging();
+        const event = { offsetX: 140, offsetY: 100, button: 0, buttons: 1 } as IPointerEvent;
+        spreadsheet.onPointerDown$.emitEvent(event);
+        expect(service.getSelectionControls()).toHaveLength(0);
+        workbook.setActiveSheet(workbook.getSheetBySheetId('grid')!);
+        manager.setCurrent({ sheetId: 'grid' });
+        spreadsheet.onPointerDown$.emitEvent(event);
+        render.scene.onPointerUp$.emitEvent(event);
+        expect(service.getSelectionControls()).toHaveLength(1);
+        workbook.setActiveSheet(workbook.getSheetBySheetId('chart')!);
+        manager.setCurrent({ sheetId: 'chart' });
+        expect(service.getSelectionControls()).toHaveLength(0);
+        spreadsheet.onPointerDown$.emitEvent(event);
+        expect(service.getSelectionControls()).toHaveLength(0);
     });
 
     for (const isMac of [false, true]) {
@@ -659,6 +697,8 @@ describe('RefSelectionsRenderService', () => {
         service.resetSelectionsByModelData([createSelection(1, 1)]);
         expect(service.getSelectionControls()).toHaveLength(1);
 
+        workbook.addWorksheet('sheet2', 1, { id: 'sheet2', rowCount: 20, columnCount: 20 });
+        workbook.setActiveSheet(workbook.getSheetBySheetId('sheet2')!);
         const sheet2Skeleton = createFakeSkeleton({
             getLocation: () => [workbook.getUnitId(), 'sheet2'],
             worksheet: {

@@ -53,7 +53,14 @@ import {
 } from '@univerjs/sheets';
 import { DISABLE_AUTO_FOCUS_KEY } from '@univerjs/ui';
 import { Subject } from 'rxjs';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
+import { SetActivateCellEditOperation } from '../../commands/operations/activate-cell-edit.operation';
+import {
+    SetCellEditVisibleOperation,
+    SetCellEditVisibleWithF2Operation,
+} from '../../commands/operations/cell-edit.operation';
+import { createChartRenderTestBed } from '../../controllers/render-controllers/__tests__/chart-render-test-bed';
+import { EditorBridgeRenderController } from '../../controllers/render-controllers/editor-bridge.render-controller';
 import { EditorBridgeService, IEditorBridgeService } from '../editor-bridge.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 
@@ -63,9 +70,13 @@ function createService(options?: {
     hasInternalEditorDocument?: boolean;
 }) {
     const unitDisposed$ = new Subject<any>();
-    const workbook = {
-        getUnitId: () => 'unit-1',
-    };
+    const model = new Univer();
+    onTestFinished(() => model.dispose());
+    const workbook = model.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+        id: 'unit-1',
+        sheetOrder: ['sheet-1'],
+        sheets: { 'sheet-1': { id: 'sheet-1' } },
+    });
 
     const mocks = {
         unitDisposed$,
@@ -92,7 +103,7 @@ function createService(options?: {
                 }
 
                 return unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY && options?.hasInternalEditorDocument
-                    ? { getUnitId: () => DOCS_NORMAL_EDITOR_UNIT_ID_KEY }
+                    ? { getUnitId: (): string => DOCS_NORMAL_EDITOR_UNIT_ID_KEY }
                     : null;
             }),
             setCurrentUnitForType: vi.fn(),
@@ -151,7 +162,8 @@ function createService(options?: {
     injector.add([IEditorBridgeService, { useClass: EditorBridgeService }]);
     const service = injector.get(IEditorBridgeService) as EditorBridgeService;
 
-    return { service, mocks };
+    onTestFinished(() => injector.dispose());
+    return { service, mocks, workbook };
 }
 
 function createLatestState() {
@@ -332,7 +344,7 @@ describe('EditorBridgeService', () => {
     });
 
     it('builds the edit cell state from workbook, skeleton, render and intercepted cell data', () => {
-        const { service, mocks } = createService();
+        const { service, mocks, workbook } = createService();
         const body: any = {
             dataStream: '=SUM(A1:A2)\r\n',
             textRuns: [],
@@ -344,7 +356,7 @@ describe('EditorBridgeService', () => {
             getBody: () => body,
             setZoomRatio: vi.fn(),
         };
-        const worksheet = {
+        Object.assign(workbook.getActiveSheet(), {
             getSheetId: () => 'sheet-1',
             getFreeze: () => null,
             getCellInfoInMergeData: () => createEditCellParam().primary,
@@ -352,11 +364,8 @@ describe('EditorBridgeService', () => {
             getCell: vi.fn(() => ({ isInArrayFormulaRange: true, isPercentFormat: true })),
             getCellDocumentModelWithFormula: vi.fn(() => ({ documentModel })),
             getBlankCellDocumentModel: vi.fn(() => ({ documentModel })),
-        };
-        mocks.univerInstanceService.getCurrentUnitOfType.mockReturnValue({
-            getUnitId: () => 'unit-1',
-            getActiveSheet: () => worksheet,
-        } as never);
+        });
+        mocks.univerInstanceService.getCurrentUnitOfType.mockReturnValue(workbook);
         mocks.sheetSkeletonService.getSkeleton.mockReturnValue({
             getNoMergeCellWithCoordByIndex: (row: number, column: number) => ({
                 startX: column * 100,
@@ -392,7 +401,7 @@ describe('EditorBridgeService', () => {
     });
 
     it('builds and refreshes the edit cell state from the target unit when current sheet unit is different', () => {
-        const { service, mocks } = createService();
+        const { service, mocks, workbook } = createService();
         const documentModel = {
             documentStyle: {
                 renderConfig: {},
@@ -400,7 +409,7 @@ describe('EditorBridgeService', () => {
             getBody: () => ({ dataStream: 'Embedded\r\n', textRuns: [] }),
             setZoomRatio: vi.fn(),
         };
-        const worksheet = {
+        Object.assign(workbook.getActiveSheet(), {
             getSheetId: () => 'sheet-1',
             getFreeze: () => null,
             getCellInfoInMergeData: () => createEditCellParam().primary,
@@ -408,11 +417,8 @@ describe('EditorBridgeService', () => {
             getCell: vi.fn(() => ({ v: 'Embedded' })),
             getCellDocumentModelWithFormula: vi.fn(() => ({ documentModel })),
             getBlankCellDocumentModel: vi.fn(() => ({ documentModel })),
-        };
-        const childWorkbook = {
-            getUnitId: () => 'unit-1',
-            getActiveSheet: () => worksheet,
-        };
+        });
+        const childWorkbook = workbook;
         mocks.univerInstanceService.getCurrentUnitOfType.mockReturnValue({
             getUnitId: () => 'host-or-other-sheet',
             getActiveSheet: () => null,
@@ -567,5 +573,51 @@ describe('EditorBridgeService merged-cell layout with real providers', () => {
         expectSize(200, 72);
         await commands.executeCommand(RedoCommand.id);
         expectSize(100, 24);
+    });
+});
+
+describe('Chart cell editor refusal with real providers', () => {
+    it('closes a captured Grid edit before Chart activation and refuses pointer, F2 and formula-bar activation', () => {
+        const { injector, render, workbook, activate, commands } = createChartRenderTestBed([
+            [EditorBridgeRenderController],
+        ]);
+        commands.registerCommand(SetActivateCellEditOperation);
+        commands.registerCommand(SetCellEditVisibleOperation);
+        commands.registerCommand(SetCellEditVisibleWithF2Operation);
+        const bridge = injector.get(IEditorBridgeService);
+        const param = {
+            unitId: workbook.getUnitId(),
+            sheetId: 'grid',
+            scene: render.scene,
+            engine: render.engine,
+            primary: workbook.getActiveSheet().getCellInfoInMergeData(1, 1),
+        };
+        commands.syncExecuteCommand(SetActivateCellEditOperation.id, param);
+        expect(bridge.getEditLocation()).toMatchObject({ sheetId: 'grid', row: 1, column: 1 });
+        commands.syncExecuteCommand(SetCellEditVisibleOperation.id, { unitId: workbook.getUnitId(), visible: true, eventType: DeviceInputEventType.PointerDown });
+        bridge.enableForceKeepVisible();
+        const closedOn: string[] = [];
+        const subscription = bridge.visible$.subscribe((event) => {
+            if (!event.visible && bridge.getEditLocation()) {
+                closedOn.push(workbook.getActiveSheet().getSheetId());
+            }
+        });
+        activate('chart');
+        expect(closedOn).toEqual(['grid']);
+        expect(bridge.isVisible().visible).toBe(false);
+        subscription.unsubscribe();
+        for (const eventType of [DeviceInputEventType.PointerDown, DeviceInputEventType.Keyboard]) {
+            commands.syncExecuteCommand(SetCellEditVisibleOperation.id, { unitId: workbook.getUnitId(), visible: true, eventType });
+            expect(bridge.isVisible().visible).toBe(false);
+        }
+        commands.syncExecuteCommand(SetCellEditVisibleWithF2Operation.id, { visible: true, eventType: DeviceInputEventType.Keyboard });
+        expect(bridge.isVisible().visible).toBe(false);
+        commands.syncExecuteCommand(SetActivateCellEditOperation.id, { ...param, sheetId: 'chart' });
+        expect(bridge.getEditLocation()?.sheetId).not.toBe('chart');
+        activate('grid');
+        commands.syncExecuteCommand(SetActivateCellEditOperation.id, param);
+        commands.syncExecuteCommand(SetCellEditVisibleWithF2Operation.id, { visible: true, eventType: DeviceInputEventType.Keyboard });
+        expect(bridge.isVisible().visible).toBe(true);
+        expect(bridge.getEditLocation()).toMatchObject({ sheetId: 'grid', row: 1, column: 1 });
     });
 });

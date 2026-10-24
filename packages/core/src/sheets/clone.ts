@@ -281,12 +281,14 @@ export function cloneWorksheetData(worksheet: IWorksheetData): IWorksheetData {
     const result: IWorksheetData = {
         // Primitive values - direct copy
         id: worksheet.id,
+        type: worksheet.type,
         name: worksheet.name,
         tabColor: worksheet.tabColor,
         hidden: worksheet.hidden,
         rowCount: worksheet.rowCount,
         columnCount: worksheet.columnCount,
         zoomRatio: worksheet.zoomRatio,
+        ...(worksheet.zoomToFit === undefined ? {} : { zoomToFit: worksheet.zoomToFit }),
         scrollTop: worksheet.scrollTop,
         scrollLeft: worksheet.scrollLeft,
         defaultColumnWidth: worksheet.defaultColumnWidth,
@@ -342,6 +344,13 @@ export function cloneWorksheetData(worksheet: IWorksheetData): IWorksheetData {
         } else {
             result.defaultStyle = cloneValue(worksheet.defaultStyle);
         }
+    }
+
+    if (worksheet.protection !== undefined) {
+        result.protection = cloneValue(worksheet.protection);
+    }
+    if (worksheet.printSettings !== undefined) {
+        result.printSettings = cloneValue(worksheet.printSettings);
     }
 
     if (worksheet.custom !== undefined) {

@@ -83,7 +83,12 @@ import {
     VIEWPORT_KEY,
 } from '@univerjs/docs-ui';
 import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
-import { convertTextRotation, DeviceInputEventType, IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
+import {
+    convertTextRotation,
+    DeviceInputEventType,
+    IRenderManagerService,
+    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+} from '@univerjs/engine-render';
 import {
     adjustRangeOnMutation,
     COMMAND_LISTENER_SKELETON_CHANGE,
@@ -744,6 +749,11 @@ export class EditingRenderController extends Disposable {
         const currentUnitId = editCellState?.unitId ?? '';
         this._exitInput(param);
         if (editCellState == null) {
+            return;
+        }
+
+        if (keycode === KeyCode.ESC && param.restoreEditSheet === false) {
+            this._editorBridgeService.disableForceKeepVisible();
             return;
         }
 

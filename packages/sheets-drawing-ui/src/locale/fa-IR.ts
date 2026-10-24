@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-drawing-ui': {
+        print: {
+            unsupportedObject: 'صفحه نمودار شامل اشیایی است که هنوز نمی‌توان چاپ کرد.',
+        },
         title: 'تصویر',
         backgroundImage: {
             title: 'تصویر پس‌زمینه',

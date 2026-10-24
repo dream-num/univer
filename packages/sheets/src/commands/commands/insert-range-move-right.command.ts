@@ -15,13 +15,6 @@
  */
 
 import type { IAccessor, ICellData, ICommand, IMutationInfo, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
-import type {
-    IInsertColMutationParams,
-    IInsertRangeMutationParams,
-    IRemoveColMutationParams,
-} from '../../basics/interfaces/mutation-interface';
-import type { LocaleKey } from '../../locale/types';
-
 import {
     BooleanNumber,
     CommandType,
@@ -34,6 +27,13 @@ import {
     Range,
     sequenceExecute,
 } from '@univerjs/core';
+import type {
+    IInsertColMutationParams,
+    IInsertRangeMutationParams,
+    IRemoveColMutationParams,
+} from '../../basics/interfaces/mutation-interface';
+import type { LocaleKey } from '../../locale/types';
+import type { ISheetCommandSharedParams } from '../utils/interface';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { InsertColMutation, InsertColMutationUndoFactory } from '../mutations/insert-row-col.mutation';
@@ -41,9 +41,10 @@ import { RemoveColMutation } from '../mutations/remove-row-col.mutation';
 import { getInsertRangeMutations } from '../utils/handle-range.mutation';
 import { hasOverlappingRanges } from '../utils/selection-command-util';
 import { followSelectionOperation } from './utils/selection-utils';
-import { getSheetCommandTarget } from './utils/target-util';
+import { getSheetGridCommandTarget } from './utils/target-util';
 
-export interface IInsertRangeMoveRightCommandParams {
+// Omitted targets retain historical active-sheet command replay semantics.
+export interface IInsertRangeMoveRightCommandParams extends Partial<ISheetCommandSharedParams> {
     range: IRange;
 }
 export const InsertRangeMoveRightCommandId = 'sheet.command.insert-range-move-right';
@@ -69,7 +70,7 @@ export const InsertRangeMoveRightCommand: ICommand = {
             return false;
         }
 
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetGridCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { workbook, worksheet, unitId, subUnitId } = target;

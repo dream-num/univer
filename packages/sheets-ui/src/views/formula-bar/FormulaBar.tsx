@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import type { IUniverSheetsUIConfig } from '../../config/config';
-import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     FOCUSING_FX_BAR_EDITOR,
     ICommandService,
     IContextService,
     IPermissionService,
+    SheetTypes,
 } from '@univerjs/core';
 import { borderBottomClassName, borderRightClassName, clsx } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
@@ -49,6 +48,8 @@ import {
 } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { EMPTY, map, merge, of, switchMap } from 'rxjs';
+import type { IUniverSheetsUIConfig } from '../../config/config';
+import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
@@ -57,7 +58,7 @@ import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { DefinedName } from '../defined-name/DefinedName';
 import { useKeyEventConfig } from '../editor-container/hooks';
-import { useActiveWorkbook } from '../hook';
+import { useActiveWorkbook, useActiveWorksheet } from '../hook';
 
 enum ArrowDirection {
     Down,
@@ -96,6 +97,8 @@ export function FormulaBar(props: IProps) {
     );
     const componentManager = useDependency(ComponentManager);
     const workbook = useActiveWorkbook();
+    const worksheet = useActiveWorksheet(workbook);
+    const isGridSheet = worksheet?.getConfig().type === SheetTypes.GRID;
     const editState = useObservable(editorBridgeService.currentEditCellState$);
     const keyCodeConfig = useKeyEventConfig(editState?.unitId);
     const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);
@@ -204,6 +207,10 @@ export function FormulaBar(props: IProps) {
     }, [formulaEditorManagerService]);
 
     function handleArrowClick() {
+        if (!isGridSheet) {
+            return;
+        }
+
         setArrowDirection(arrowDirection === ArrowDirection.Down ? ArrowDirection.Up : ArrowDirection.Down);
 
         const ANIMATION_DURATION = 150;
@@ -214,6 +221,10 @@ export function FormulaBar(props: IProps) {
 
     // Handle click the "×" button.
     function handleCloseBtnClick() {
+        if (!isGridSheet) {
+            return;
+        }
+
         const visibleState = editorBridgeService.isVisible();
         if (visibleState.visible) {
             commandService.executeCommand(SetCellEditVisibleOperation.id, {
@@ -227,6 +238,10 @@ export function FormulaBar(props: IProps) {
 
     // Handle click the "√" button.
     function handleConfirmBtnClick() {
+        if (!isGridSheet) {
+            return;
+        }
+
         const visibleState = editorBridgeService.isVisible();
         if (visibleState.visible) {
             commandService.executeCommand(SetCellEditVisibleOperation.id, {
@@ -238,18 +253,25 @@ export function FormulaBar(props: IProps) {
     }
 
     function handlerFxBtnClick() {
+        if (!isGridSheet) {
+            return;
+        }
+
         formulaEditorManagerService.handleFxBtnClick(true);
     }
 
     // TODO Is there a need to disable an editor here?
     const { viewDisable, editDisable: permissionEditDisable } = disableInfo;
-    const editDisable = permissionEditDisable || !!disableEdit;
+    const editDisable = !isGridSheet || permissionEditDisable || !!disableEdit;
     const workbookEditDisable = !(workbookEditablePermission?.value ?? true);
     const editorActivationDisable = editDisable || workbookEditDisable;
     const disabled = editDisable || imageDisable;
     const shouldSkipFocusRef = useRef(false);
 
     const handlePointerDown = () => {
+        if (!isGridSheet) {
+            return;
+        }
         try {
             contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
 
@@ -293,7 +315,7 @@ export function FormulaBar(props: IProps) {
     };
 
     const cellImage = isCellImage(editState?.documentLayoutObject.documentModel?.getSnapshot());
-    const hideEditor = cellImage || viewDisable;
+    const hideEditor = !isGridSheet || cellImage || viewDisable;
 
     return (
         <div
@@ -371,7 +393,11 @@ export function FormulaBar(props: IProps) {
                         "
                         onPointerDown={handlePointerDown}
                         onPointerUp={handlePointerUp}
-                        style={{ pointerEvents: hideEditor ? 'none' : 'auto' }}
+                        aria-hidden={!isGridSheet}
+                        style={{
+                            pointerEvents: hideEditor ? 'none' : 'auto',
+                            visibility: isGridSheet ? undefined : 'hidden',
+                        }}
                     >
                         {FormulaEditor && (
                             <FormulaEditor
@@ -381,7 +407,7 @@ export function FormulaBar(props: IProps) {
                                 editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
                                 initValue=""
                                 onChange={() => { }}
-                                isFocus={isFocusFxBar}
+                                isFocus={isGridSheet && isFocusFxBar}
                                 unitId={editState?.unitId}
                                 subUnitId={editState?.sheetId}
                                 isSupportAcrossSheet

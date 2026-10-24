@@ -16,6 +16,9 @@
 
 const locale = {
     'sheets-drawing-ui': {
+        print: {
+            unsupportedObject: 'The Chart Sheet contains objects that cannot be printed yet.',
+        },
         title: 'Image',
         backgroundImage: {
             title: 'Background Image',

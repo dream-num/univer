@@ -15,8 +15,20 @@
  */
 
 import type { ICommand, IMutationInfo, Workbook } from '@univerjs/core';
+import {
+    BuildTextUtils,
+    CellValueType,
+    CommandType,
+    DocumentDataModel,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    SheetTypes,
+    TextX,
+    Tools,
+    UniverInstanceType,
+} from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
-import { BuildTextUtils, CellValueType, CommandType, DocumentDataModel, ICommandService, IUndoRedoService, IUniverInstanceService, TextX, Tools, UniverInstanceType } from '@univerjs/core';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 
 export interface IToggleCellCheckboxCommandParams {
@@ -40,7 +52,7 @@ export const ToggleCellCheckboxCommand: ICommand<IToggleCellCheckboxCommandParam
         const sheet = workbook?.getSheetBySheetId(subUnitId);
         const undoRedoService = accessor.get(IUndoRedoService);
         const commandService = accessor.get(ICommandService);
-        if (!sheet) {
+        if (!sheet || sheet.getConfig().type === SheetTypes.CHART) {
             return false;
         }
         const cell = sheet.getCell(row, col);

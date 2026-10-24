@@ -21,15 +21,6 @@ import type {
     IDeleteWorksheetProtectionParams,
     IRangeProtectionRule,
 } from '@univerjs/sheets';
-import type { FRange } from '../f-range';
-import type { FWorksheet } from '../f-worksheet';
-import type {
-    IRangeProtectionOptions,
-    IWorksheetPermissionConfig,
-    IWorksheetProtectionOptions,
-    WorksheetMode,
-    WorksheetPermissionSnapshot,
-} from './permission-types';
 import {
     cellToRange,
     generateRandomId,
@@ -54,9 +45,20 @@ import {
     RangeProtectionPermissionViewPoint,
     RangeProtectionRuleModel,
     ViewStateEnum,
+    WorksheetEditPermission,
+    WorksheetPermissionService,
     WorksheetProtectionPointModel,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
+import type { FRange } from '../f-range';
+import type { FWorksheet } from '../f-worksheet';
+import type {
+    IRangeProtectionOptions,
+    IWorksheetPermissionConfig,
+    IWorksheetProtectionOptions,
+    WorksheetMode,
+    WorksheetPermissionSnapshot,
+} from './permission-types';
 import { FRangeProtectionRule } from './f-range-protection-rule';
 import { WORKSHEET_PERMISSION_POINT_MAP } from './permission-point-map';
 import { WorksheetPermissionPoint } from './permission-types';
@@ -86,7 +88,8 @@ export class FWorksheetPermission extends FBase {
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(RangeProtectionRuleModel) private readonly _rangeProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(WorksheetProtectionPointModel) private readonly _worksheetProtectionPointModel: WorksheetProtectionPointModel,
-        @Inject(WorksheetProtectionRuleModel) private readonly _worksheetProtectionRuleModel: WorksheetProtectionRuleModel
+        @Inject(WorksheetProtectionRuleModel) private readonly _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
+        @Inject(WorksheetPermissionService) private readonly _worksheetPermissionService: WorksheetPermissionService
     ) {
         super();
 
@@ -205,7 +208,7 @@ export class FWorksheetPermission extends FBase {
 
     /**
      * Remove worksheet protection.
-     * This deletes the protection rule and resets all permission points to allowed.
+     * This removes collaboration protection; retained Office sheet protection still restricts local editing.
      * @returns {Promise<boolean>} A promise resolving to whether protection was removed; also resolves to `true` if already unprotected.
      * @example
      * ```ts
@@ -349,12 +352,12 @@ export class FWorksheetPermission extends FBase {
 
         const instance = new PermissionPointClass(this._unitId, this._subUnitId);
         const permissionPoint = this._permissionService.getPermissionPoint(instance.id);
-        if (permissionPoint && permissionPoint.value === value) {
+        if (permissionPoint && !(instance instanceof WorksheetEditPermission) && permissionPoint.value === value) {
             return; // Value unchanged, no update needed
         }
 
         if (!permissionPoint) {
-            this._permissionService.addPermissionPoint(instance);
+            this._worksheetPermissionService.addWorksheetPermissionPoint(instance);
         }
 
         await this._authzIoService.update({

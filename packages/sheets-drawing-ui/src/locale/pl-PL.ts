@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-drawing-ui': {
+        print: {
+            unsupportedObject: 'Arkusz wykresu zawiera obiekty, których nie można jeszcze wydrukować.',
+        },
         title: 'Obraz',
         backgroundImage: {
             title: 'Obraz tła',

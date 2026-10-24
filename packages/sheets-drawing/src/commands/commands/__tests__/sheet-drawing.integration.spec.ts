@@ -15,7 +15,6 @@
  */
 
 import type { Injector, Univer, Workbook } from '@univerjs/core';
-import type { ISheetDrawing } from '../../../services/sheet-drawing.service';
 import {
     ArrangeTypeEnum,
     DrawingTypeEnum,
@@ -24,12 +23,15 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     RedoCommand,
+    Tools,
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DRAWING_COPY_CONTEXT_KEY, IDrawingManagerService } from '@univerjs/drawing';
 import { CopySheetCommand, RemoveSheetCommand, SetWorksheetActivateCommand, SheetInterceptorService } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
+import type { ISheetDrawing } from '../../../services/sheet-drawing.service';
+import type { IRemoveSheetDrawingCommandParams } from '../remove-sheet-drawing.command';
 import { createSheetsDrawingTestBed } from '../../../__tests__/create-sheets-drawing-test-bed';
 import { resolveSheetDrawingRotateEnabled } from '../../../common/rotate-enabled';
 import { ISheetDrawingService } from '../../../services/sheet-drawing.service';
@@ -160,15 +162,15 @@ describe('sheet drawing integration', () => {
         expect(sheetDrawingService.getDrawingOrder('test', 'sheet1')).toEqual(['drawing-1']);
     });
 
-    it('removes an inserted drawing through the real command pipeline', async () => {
+    it('keeps ordinary image removal scoped to the input and restores it through history', async () => {
         const drawing = createSheetDrawing('drawing-2');
-
-        await commandService.executeCommand(InsertSheetDrawingCommand.id, {
+        const unrelated = createSheetDrawing('unrelated-image');
+        expect(await commandService.executeCommand(InsertSheetDrawingCommand.id, {
             unitId: 'test',
-            drawings: [drawing],
-        });
-
-        expect(await commandService.executeCommand(RemoveSheetDrawingCommand.id, {
+            drawings: [drawing, unrelated],
+        })).toBe(true);
+        get(IUndoRedoService).clearUndoRedo('test');
+        const params = {
             unitId: 'test',
             drawings: [{
                 unitId: 'test',
@@ -176,14 +178,35 @@ describe('sheet drawing integration', () => {
                 drawingId: 'drawing-2',
                 drawingType: DrawingTypeEnum.DRAWING_IMAGE,
             }],
-        })).toBe(true);
-
+        };
+        const beforeParams = Tools.deepClone(params);
+        let intercepted: IRemoveSheetDrawingCommandParams | undefined;
+        const registration = get(SheetInterceptorService).interceptCommand({
+            getMutations: (command) => {
+                if (command.id === RemoveSheetDrawingCommand.id) {
+                    intercepted = Tools.deepClone(command.params as IRemoveSheetDrawingCommandParams);
+                }
+                return { preRedos: [], redos: [], preUndos: [], undos: [] };
+            },
+        });
+        onTestFinished(() => registration.dispose());
+        expect(await commandService.executeCommand(RemoveSheetDrawingCommand.id, params)).toBe(true);
+        expect(params).toEqual(beforeParams);
+        expect(intercepted).toEqual(beforeParams);
         const sheetDrawingService = get(ISheetDrawingService);
         const drawingManagerService = get(IDrawingManagerService);
-
-        expect(sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-2' })).toBeUndefined();
-        expect(drawingManagerService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-2' })).toBeUndefined();
-        expect(sheetDrawingService.getDrawingOrder('test', 'sheet1')).toEqual([]);
+        expect(sheetDrawingService.getDrawingByParam(drawing)).toBeUndefined();
+        expect(drawingManagerService.getDrawingByParam(drawing)).toBeUndefined();
+        expect(sheetDrawingService.getDrawingByParam(unrelated)).toEqual(unrelated);
+        expect(drawingManagerService.getDrawingByParam(unrelated)).toEqual(unrelated);
+        expect(sheetDrawingService.getDrawingOrder('test', 'sheet1')).toEqual(['unrelated-image']);
+        expect(get(IUndoRedoService).getUndoRedoStatus('test')).toEqual({ undos: 1, redos: 0 });
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(sheetDrawingService.getDrawingByParam(drawing)).toEqual(drawing);
+        expect(drawingManagerService.getDrawingByParam(drawing)).toEqual(drawing);
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(sheetDrawingService.getDrawingByParam(drawing)).toBeUndefined();
+        expect(sheetDrawingService.getDrawingByParam(unrelated)).toEqual(unrelated);
     });
 
     it('skips remove sheet drawing when no drawing objects are resolved', async () => {
@@ -193,57 +216,61 @@ describe('sheet drawing integration', () => {
         })).toBe(false);
     });
 
-    it('removes and restores a grouped drawing graph including chart children', async () => {
-        await commandService.executeCommand(InsertSheetDrawingCommand.id, {
+    it('deletes group members and their Chart descendants through one canonical removal list', async () => {
+        const graph = [
+            createGroupSheetDrawing('group-delete'),
+            { ...createSheetDrawing('image-child'), groupId: 'group-delete', transform: createSheetDrawingTransform() },
+            {
+                ...createSheetDrawing('chart-child'),
+                drawingType: DrawingTypeEnum.DRAWING_CHART,
+                groupId: 'group-delete',
+                transform: createSheetDrawingTransform(),
+            } as ISheetDrawing,
+            {
+                ...createSheetDrawing('relative-image'),
+                chartParent: { drawingId: 'chart-child', resizeWithParent: false },
+            },
+        ];
+        const unrelated = createSheetDrawing('outside-group');
+        expect(await commandService.executeCommand(InsertSheetDrawingCommand.id, {
             unitId: 'test',
-            drawings: [
-                createGroupSheetDrawing('group-delete'),
-                {
-                    ...createSheetDrawing('image-child'),
-                    groupId: 'group-delete',
-                    transform: createSheetDrawingTransform(),
-                },
-                {
-                    ...createSheetDrawing('chart-child'),
-                    drawingType: DrawingTypeEnum.DRAWING_CHART,
-                    groupId: 'group-delete',
-                    transform: createSheetDrawingTransform(),
-                } as ISheetDrawing,
-            ],
-        });
-
-        expect(await commandService.executeCommand(RemoveSheetDrawingCommand.id, {
-            unitId: 'test',
-            drawings: [{
-                unitId: 'test',
-                subUnitId: 'sheet1',
-                drawingId: 'group-delete',
-                drawingType: DrawingTypeEnum.DRAWING_GROUP,
-            }],
+            drawings: [...graph, unrelated],
         })).toBe(true);
-
+        get(IUndoRedoService).clearUndoRedo('test');
+        const params = { unitId: 'test', drawings: [graph[0], graph[2]] };
+        const beforeParams = Tools.deepClone(params);
+        let intercepted: IRemoveSheetDrawingCommandParams | undefined;
+        const registration = get(SheetInterceptorService).interceptCommand({
+            getMutations: (command) => {
+                if (command.id === RemoveSheetDrawingCommand.id) {
+                    intercepted = Tools.deepClone(command.params as IRemoveSheetDrawingCommandParams);
+                }
+                return { preRedos: [], redos: [], preUndos: [], undos: [] };
+            },
+        });
+        onTestFinished(() => registration.dispose());
+        expect(await commandService.executeCommand(RemoveSheetDrawingCommand.id, params)).toBe(true);
+        expect(params).toEqual(beforeParams);
+        expect(intercepted!.drawings.map((drawing) => drawing.drawingId).sort()).toEqual(graph.map((drawing) => drawing.drawingId).sort());
         const sheetDrawingService = get(ISheetDrawingService);
         const drawingManagerService = get(IDrawingManagerService);
-        const drawingSearches = ['group-delete', 'image-child', 'chart-child'].map((drawingId) => ({ unitId: 'test', subUnitId: 'sheet1', drawingId }));
-
-        drawingSearches.forEach((drawingSearch) => {
-            expect(sheetDrawingService.getDrawingByParam(drawingSearch)).toBeUndefined();
-            expect(drawingManagerService.getDrawingByParam(drawingSearch)).toBeUndefined();
-        });
-        expect(sheetDrawingService.getDrawingOrder('test', 'sheet1')).toEqual([]);
-
+        for (const drawing of graph) {
+            expect(sheetDrawingService.getDrawingByParam(drawing)).toBeUndefined();
+            expect(drawingManagerService.getDrawingByParam(drawing)).toBeUndefined();
+        }
+        expect(sheetDrawingService.getDrawingByParam(unrelated)).toEqual(unrelated);
+        expect(sheetDrawingService.getDrawingOrder('test', 'sheet1')).toEqual(['outside-group']);
+        expect(get(IUndoRedoService).getUndoRedoStatus('test')).toEqual({ undos: 1, redos: 0 });
         expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
-
-        expect(sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'group-delete' })).toMatchObject({
-            drawingType: DrawingTypeEnum.DRAWING_GROUP,
-        });
-        expect(sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'image-child' })).toMatchObject({
-            groupId: 'group-delete',
-        });
-        expect(sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'chart-child' })).toMatchObject({
-            drawingType: DrawingTypeEnum.DRAWING_CHART,
-            groupId: 'group-delete',
-        });
+        for (const drawing of graph) {
+            expect(sheetDrawingService.getDrawingByParam(drawing)).toEqual(drawing);
+            expect(drawingManagerService.getDrawingByParam(drawing)).toEqual(drawing);
+        }
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        for (const drawing of graph) {
+            expect(sheetDrawingService.getDrawingByParam(drawing)).toBeUndefined();
+        }
+        expect(sheetDrawingService.getDrawingByParam(unrelated)).toEqual(unrelated);
     });
 
     it('updates an existing drawing through the real command pipeline', async () => {

@@ -42,6 +42,30 @@ describe('SheetPrintInterceptorService', () => {
 });
 
 describe('SheetPrintingResourceCollector', () => {
+    it('rejects a failed required chart resource while legacy resources still settle', async () => {
+        const collector = new SheetPrintingResourceCollector();
+        collector.add(Promise.reject(new Error('snapshot failed')), { required: true, failureMessage: 'Chart object unavailable' });
+        await expect(collector.wait()).rejects.toThrow('snapshot failed');
+        expect(collector.failureMessage).toBe('Chart object unavailable');
+
+        const gridCollector = new SheetPrintingResourceCollector();
+        gridCollector.add(Promise.reject(new Error('grid resource failed')));
+        await expect(gridCollector.wait()).resolves.toBeUndefined();
+        expect(gridCollector.failureMessage).toBeUndefined();
+    });
+
+    it('still fails the print page when a required resource rejects without a reason', async () => {
+        const collector = new SheetPrintingResourceCollector();
+        collector.add(Promise.reject(), { required: true });
+
+        await expect(collector.wait()).rejects.toThrow('Required print resource failed');
+    });
+
+    it('rejects a required resource timeout', async () => {
+        const collector = new SheetPrintingResourceCollector();
+        collector.add(new Promise(() => {}), { required: true });
+        await expect(collector.wait(1)).rejects.toThrow('Required print resource timed out');
+    });
     it('waits for registered printing resources', async () => {
         const collector = new SheetPrintingResourceCollector();
         let resolveResource!: () => void;

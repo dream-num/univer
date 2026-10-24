@@ -51,8 +51,8 @@ import {
     UIRuntimeScopeService,
 } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { SHEET_COMPONENT_MAIN_LAYER_INDEX, SHEET_VIEW_KEY } from '../../../common/keys';
+import { createChartRenderTestBed } from '../../../controllers/render-controllers/__tests__/chart-render-test-bed';
 import { createRenderTestBed } from '../../../controllers/render-controllers/__tests__/render-test-bed';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { SheetSelectionRenderService } from '../selection-render.service';
@@ -632,5 +632,37 @@ describe('SheetSelectionRenderService pointer gestures with real render provider
         expect(getSelections()).toHaveLength(1);
         expect(getSelections()[0].range).toMatchObject({ startRow: 4, endRow: 4, startColumn: 4, endColumn: 4 });
         expect(service.selectionMoving).toBe(false);
+    });
+});
+
+describe('Chart selection isolation with real providers', () => {
+    it.each([false, true])('refuses Chart pointer and model selection and restores Grid with initialChart=%s', (initialChart) => {
+        const { render, workbook, activate, manager, commands } = createChartRenderTestBed([
+            [SheetSelectionRenderService],
+        ], initialChart);
+        const service = render.with(SheetSelectionRenderService);
+        if (!initialChart) {
+            expect(service.getSelectionControls().length).toBeGreaterThan(0);
+            const cell = manager.getCurrentSkeleton()!.getNoMergeCellWithCoordByIndex(3, 3);
+            render.mainComponent!.onPointerDown$.emitEvent({ offsetX: cell.startX + 5, offsetY: cell.startY + 5, button: 0, buttons: 1 } as IPointerEvent);
+            activate('chart');
+        }
+        expect(service.getSelectionControls()).toHaveLength(0);
+        expect(() => service.getSkeleton()).toThrow();
+        const selection = { range: { startRow: 2, endRow: 2, startColumn: 2, endColumn: 2 }, primary: null };
+        commands.syncExecuteCommand(SetSelectionsOperation.id, { unitId: workbook.getUnitId(), subUnitId: 'chart', selections: [selection] });
+        for (const component of render.components.values()) {
+            component.onPointerDown$.emitEvent({ offsetX: 100, offsetY: 100, button: 0, buttons: 1 } as IPointerEvent);
+        }
+        render.scene.onPointerMove$.emitEvent({ offsetX: 500, offsetY: 500, button: 0, buttons: 1 } as IPointerEvent);
+        render.scene.onPointerUp$.emitEvent({ offsetX: 500, offsetY: 500, button: 0 } as IPointerEvent);
+        vi.advanceTimersByTime(200);
+        expect(service.getSelectionControls()).toHaveLength(0);
+        activate('grid');
+        const cell = manager.getCurrentSkeleton()!.getNoMergeCellWithCoordByIndex(4, 4);
+        const event = { offsetX: cell.startX + 5, offsetY: cell.startY + 5, button: 0, buttons: 1 } as IPointerEvent;
+        render.mainComponent!.onPointerDown$.emitEvent(event);
+        render.scene.onPointerUp$.emitEvent(event);
+        expect(service.getActiveRange()).toMatchObject({ startRow: 4, endRow: 4, startColumn: 4, endColumn: 4 });
     });
 });

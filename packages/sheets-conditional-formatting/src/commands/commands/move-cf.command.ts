@@ -15,15 +15,16 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import type { IAnchor } from '../../utils/anchor';
-import type { IMoveConditionalRuleMutationParams } from '../mutations/move-conditional-rule.mutation';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
+    SheetTypes,
 } from '@univerjs/core';
 import { getSheetCommandTarget } from '@univerjs/sheets';
+import type { IAnchor } from '../../utils/anchor';
+import type { IMoveConditionalRuleMutationParams } from '../mutations/move-conditional-rule.mutation';
 import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
 import { transformSupportSymmetryAnchor } from '../../utils/anchor';
 import { MoveConditionalRuleMutation, MoveConditionalRuleMutationUndoFactory } from '../mutations/move-conditional-rule.mutation';
@@ -48,7 +49,9 @@ export const MoveCfCommand: ICommand<IMoveCfCommandParams> = {
         const conditionalFormattingRuleModel = accessor.get(ConditionalFormattingRuleModel);
 
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target) return false;
+        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
+            return false;
+        }
 
         const { unitId, subUnitId } = target;
         const anchorList = transformSupportSymmetryAnchor(params.start, params.end, conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId) || [], (rule) => rule.cfId);

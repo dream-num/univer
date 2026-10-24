@@ -17,10 +17,33 @@
 import type { Workbook } from '@univerjs/core';
 import type { ISetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Disposable, ICommandService, Inject, isICellData, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { ErrorType, extractFormulaError, FormulaDataModel, SetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
-import { SetRangeValuesMutation, SetWorkbookCalculationSettingsMutation, SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
-import { CellAlertManagerService, CellAlertType, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import {
+    Disposable,
+    ICommandService,
+    Inject,
+    isICellData,
+    IUniverInstanceService,
+    LocaleService,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    ErrorType,
+    extractFormulaError,
+    FormulaDataModel,
+    SetFormulaCalculationNotificationMutation,
+} from '@univerjs/engine-formula';
+import {
+    SetRangeValuesMutation,
+    SetWorkbookCalculationSettingsMutation,
+    SheetSkeletonService,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
+import {
+    CellAlertManagerService,
+    CellAlertType,
+    IEditorBridgeService,
+    SheetSkeletonManagerService,
+} from '@univerjs/sheets-ui';
 import type { LocaleKey } from '../locale/types';
 import { CalculationOptionsOperation } from '../commands/operations/calculation-options.operation';
 
@@ -121,7 +144,7 @@ export class FormulaAlertRenderController extends Disposable implements IRenderM
         }
         const message = circular
             ? this._localeService.t<LocaleKey>('sheets-formula-ui.calculation.circular')
-            : this._localeService.t<LocaleKey>(
+            : this._localeService.t(
                 (`sheets-formula-ui.error.${ErrorTypeToMessageMap[error!]}`) as LocaleKey
             );
         const previous = this._cellAlertManagerService.currentAlert.get(this._alertKey)?.alert;

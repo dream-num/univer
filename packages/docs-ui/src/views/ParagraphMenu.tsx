@@ -147,38 +147,11 @@ const PARAGRAPH_MENU_HOVER_BRIDGE_EDGE_OVERLAP = 12;
 const PARAGRAPH_MENU_HOVER_BRIDGE_VERTICAL_PADDING = 8;
 type ParagraphMenuOpenMode = 'pointer' | 'slash';
 
-function getParagraphMenuIconSizeClass(iconKey: string): string {
-    return iconKey === 'TextTypeIcon' ? 'univer-size-3' : 'univer-size-4';
-}
-
 export function shouldExecuteParagraphMenuMove(
     validatorService: Pick<DocBlockMoveValidatorService, 'canMoveBlock'>,
     context: IDocBlockMoveValidationContext
 ): boolean {
     return validatorService.canMoveBlock(context);
-}
-
-function getParagraphMenuTriggerIconKey(namedStyleType?: NamedStyleType): string {
-    switch (namedStyleType) {
-        case NamedStyleType.HEADING_1:
-            return 'H1Icon';
-        case NamedStyleType.HEADING_2:
-            return 'H2Icon';
-        case NamedStyleType.HEADING_3:
-            return 'H3Icon';
-        case NamedStyleType.HEADING_4:
-            return 'H4Icon';
-        case NamedStyleType.HEADING_5:
-            return 'H5Icon';
-        case NamedStyleType.TITLE:
-            return 'TitleTypeIcon';
-        case NamedStyleType.SUBTITLE:
-            return 'SubtitleTypeIcon';
-        case NamedStyleType.NORMAL_TEXT:
-        case NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED:
-        default:
-            return 'TextTypeIcon';
-    }
 }
 
 export function createParagraphMenuHoverOpenScheduler(openMenu: () => void, delay = PARAGRAPH_MENU_HOVER_OPEN_DELAY) {
@@ -355,10 +328,6 @@ const PARAGRAPH_MENU_RESTORE_SELECTION_COMMAND_IDS = new Set([
     ResetInlineFormatTextBackgroundColorCommand.id,
 ]);
 
-function shouldRestoreParagraphMenuSelectionAfterCommand(commandId: string | undefined) {
-    return !!commandId && PARAGRAPH_MENU_RESTORE_SELECTION_COMMAND_IDS.has(commandId);
-}
-
 export function getParagraphMenuCommand(params: IValueOption, targetRange?: ITextRangeWithStyle | null): { commandId?: string; params?: object } {
     const commandId = params.commandId ?? params.id ?? (typeof params.label === 'string' ? params.label : undefined);
     if (commandId && targetRange && commandId in HEADING_COMMAND_VALUES) {
@@ -431,42 +400,8 @@ export function getParagraphMenuCommandParams(
     };
 }
 
-function getParagraphMenuType(target: IDocBlockMenuTarget | null | undefined, emptyMode: boolean): string {
-    if (target?.kind === 'table') {
-        return DOC_TABLE_BLOCK_MENU_ID;
-    }
-
-    if (emptyMode) {
-        return DOC_PARAGRAPH_T_INSERT_MENU_ID;
-    }
-
-    if (target?.icon === 'ReduceIcon') {
-        return DOC_PARAGRAPH_T_DIVIDER_MENU_ID;
-    }
-
-    return DOC_PARAGRAPH_T_EDIT_MENU_ID;
-}
-
 export function shouldShowParagraphSettingMenu(target: IDocBlockMenuTarget | null | undefined): boolean {
     return !target || target.kind === 'paragraph';
-}
-
-function getParagraphMenuActiveItemIds(target: IDocBlockMenuTarget | null | undefined, namedStyleType?: NamedStyleType): string[] {
-    if (target?.kind === 'blockRange') {
-        const blockType = target.blockRange?.blockType;
-        const commandId = getParagraphMenuBlockRangeCommandId(blockType);
-        return commandId && PARAGRAPH_MENU_BLOCK_RANGE_COMMAND_IDS.has(commandId)
-            ? [commandId]
-            : [];
-    }
-
-    const activeIds = [getParagraphMenuActiveHeadingCommandId(namedStyleType)];
-    const listCommandId = target?.icon ? LIST_ICON_TO_COMMAND_ID[target.icon] : undefined;
-    if (listCommandId) {
-        activeIds.push(listCommandId);
-    }
-
-    return activeIds;
 }
 
 export function getParagraphMenuHiddenItemIds(
@@ -933,18 +868,61 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     const paragraphObj = useMemo(() => doc?.getBody()?.paragraphs?.find((p) => p.startIndex === startIndex), [doc, startIndex]);
     const isEmptyParagraph = currentActiveTarget?.emptyMode ?? isEmptyParagraphMenuTarget(dataStream, activeParagraphBound);
     const namedStyleType = paragraphObj?.paragraphStyle?.namedStyleType;
+    const getParagraphMenuTriggerIconKey = () => {
+        switch (namedStyleType) {
+            case NamedStyleType.HEADING_1:
+                return 'H1Icon';
+            case NamedStyleType.HEADING_2:
+                return 'H2Icon';
+            case NamedStyleType.HEADING_3:
+                return 'H3Icon';
+            case NamedStyleType.HEADING_4:
+                return 'H4Icon';
+            case NamedStyleType.HEADING_5:
+                return 'H5Icon';
+            case NamedStyleType.TITLE:
+                return 'TitleTypeIcon';
+            case NamedStyleType.SUBTITLE:
+                return 'SubtitleTypeIcon';
+            default:
+                return 'TextTypeIcon';
+        }
+    };
     const isModernHeading = doc?.getDocumentStyle().documentFlavor === DocumentFlavor.MODERN &&
         startIndex != null && renderUnit?.with(DocSkeletonManagerService).getViewModel().getHeadingSections().some((heading) => heading.paragraphIndex === startIndex && heading.startOffset < heading.endOffset);
-    const targetIconKey = isEmptyParagraph ? 'IncreaseIcon' : currentActiveTarget?.icon ?? getParagraphMenuTriggerIconKey(namedStyleType);
+    const targetIconKey = isEmptyParagraph ? 'IncreaseIcon' : currentActiveTarget?.icon ?? getParagraphMenuTriggerIconKey();
     const TargetIcon = iconManager.get(targetIconKey);
-    const paragraphMenuType = useMemo(
-        () => getParagraphMenuType(currentActiveTarget, isEmptyParagraph),
-        [currentActiveTarget, isEmptyParagraph]
-    );
-    const paragraphMenuActiveItemIds = useMemo(
-        () => getParagraphMenuActiveItemIds(currentActiveTarget, namedStyleType),
-        [currentActiveTarget, namedStyleType]
-    );
+    const paragraphMenuType = useMemo(() => {
+        if (currentActiveTarget?.kind === 'table') {
+            return DOC_TABLE_BLOCK_MENU_ID;
+        }
+
+        if (isEmptyParagraph) {
+            return DOC_PARAGRAPH_T_INSERT_MENU_ID;
+        }
+
+        if (currentActiveTarget?.icon === 'ReduceIcon') {
+            return DOC_PARAGRAPH_T_DIVIDER_MENU_ID;
+        }
+
+        return DOC_PARAGRAPH_T_EDIT_MENU_ID;
+    }, [currentActiveTarget, isEmptyParagraph]);
+    const paragraphMenuActiveItemIds = useMemo(() => {
+        if (currentActiveTarget?.kind === 'blockRange') {
+            const commandId = getParagraphMenuBlockRangeCommandId(currentActiveTarget.blockRange?.blockType);
+            return commandId && PARAGRAPH_MENU_BLOCK_RANGE_COMMAND_IDS.has(commandId)
+                ? [commandId]
+                : [];
+        }
+
+        const activeIds = [getParagraphMenuActiveHeadingCommandId(namedStyleType)];
+        const listCommandId = currentActiveTarget?.icon ? LIST_ICON_TO_COMMAND_ID[currentActiveTarget.icon] : undefined;
+        if (listCommandId) {
+            activeIds.push(listCommandId);
+        }
+
+        return activeIds;
+    }, [currentActiveTarget, namedStyleType]);
     const paragraphMenuHiddenItemIds = useMemo(
         () => currentActiveTarget?.kind === 'table'
             ? []
@@ -1070,7 +1048,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
 
     const handleOpenMenu = (mode: ParagraphMenuOpenMode = 'pointer') => {
         clearHideTimer();
-        if (openMode === 'slash') {
+        if (openMode === 'slash' || isDraggingRef.current) {
             return;
         }
 
@@ -1299,7 +1277,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
             return;
         }
 
-        const previousTextRanges = shouldRestoreParagraphMenuSelectionAfterCommand(commandId)
+        const previousTextRanges = commandId && PARAGRAPH_MENU_RESTORE_SELECTION_COMMAND_IDS.has(commandId)
             ? getCurrentTextRangesSnapshot()
             : null;
 
@@ -1370,9 +1348,9 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                 data-u-focused-table-menu={isFocusedTableMenu ? 'true' : undefined}
                 ref={anchorRef}
                 className={clsx(`
-                  univer-inline-flex univer-h-7 univer-cursor-pointer univer-items-center univer-gap-1 univer-rounded-md
-                  univer-border univer-border-solid univer-border-gray-200 univer-bg-gray-0 univer-px-2 univer-py-0
-                  univer-shadow-sm univer-transition-colors
+                  univer-inline-flex univer-h-7 univer-cursor-pointer univer-select-none univer-items-center
+                  univer-gap-1 univer-rounded-md univer-border univer-border-solid univer-border-gray-200
+                  univer-bg-gray-0 univer-px-2 univer-py-0 univer-shadow-sm univer-transition-colors
                   hover:univer-bg-gray-50 hover:univer-shadow-md
                   dark:!univer-border-gray-600 dark:!univer-bg-gray-900
                   dark:hover:!univer-bg-gray-800
@@ -1401,7 +1379,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
             >
                 <TargetIcon
                     className={clsx(
-                        getParagraphMenuIconSizeClass(targetIconKey),
+                        targetIconKey === 'TextTypeIcon' ? 'univer-size-3' : 'univer-size-4',
                         `
                           univer-shrink-0 univer-text-gray-700
                           dark:!univer-text-gray-0
@@ -1432,6 +1410,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                             isMouseOver.current = true;
                             isDraggingRef.current = true;
                             docParagraphMenuService?.setBlockMenuDragging(true);
+                            handleHideMenu();
                             dragRangeRef.current = moveRange;
                             dragTargetOffsetRef.current = null;
                             setDropRect(null);
@@ -1511,7 +1490,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
             {visible && hoverBridgeStyle && (
                 <div
                     aria-hidden="true"
-                    className="univer-fixed univer-z-[1019] univer-bg-transparent"
+                    className="univer-fixed univer-z-[1019] univer-select-none univer-bg-transparent"
                     style={hoverBridgeStyle}
                     // Keep hover continuity when the pointer crosses the tiny dead zone between trigger and popup.
                     onMouseEnter={(e) => {
@@ -1533,6 +1512,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                     direction={menuDirection}
                 >
                     <section
+                        className="univer-select-none"
                         onFocusCapture={(event) => {
                             focusedMenuElementRef.current = event.target;
                         }}

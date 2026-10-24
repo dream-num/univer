@@ -75,7 +75,7 @@ export type {
     IFloatDom,
     IFloatDomLayout,
 } from './services/dom/canvas-dom-layer.service';
-export { FontService, IFontService } from './services/font.service';
+export { FontCategory, FontService, IFontService } from './services/font.service';
 export type { IFontConfig } from './services/font.service';
 export { bindFormatPainterCanvas } from './services/format-painter/format-painter-canvas';
 export { FormatPainterSessionService } from './services/format-painter/format-painter-session.service';

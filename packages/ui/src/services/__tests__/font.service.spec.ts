@@ -18,7 +18,7 @@ import { ConfigService, IConfigService, Injector } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { IUniverUIConfig } from '../../config/config';
 import { UI_PLUGIN_CONFIG_KEY } from '../../config/config';
-import { FontService, IFontService } from '../font.service';
+import { FontCategory, FontService, IFontService } from '../font.service';
 
 class CustomFontConfigService extends ConfigService {
     override getConfig<T>(key: string): T {
@@ -26,7 +26,7 @@ class CustomFontConfigService extends ConfigService {
             return {
                 customFontFamily: {
                     override: true,
-                    list: [{ value: 'OnlyCustom', label: 'Only Custom', category: 'display' }],
+                    list: [{ value: 'OnlyCustom', label: 'Only Custom', category: FontCategory.DISPLAY }],
                 },
             } as IUniverUIConfig as T;
         }
@@ -54,7 +54,7 @@ describe('FontService', () => {
     it('maintains the font catalog used by font family pickers', () => {
         const service = createService();
 
-        service.addFont({ value: 'Inter', label: 'Inter', category: 'sans-serif' });
+        service.addFont({ value: 'Inter', label: 'Inter', category: FontCategory.SANS_SERIF });
         service.updateFont('Inter', { label: 'Inter UI' });
 
         expect(service.getFontByValue('Inter')).toMatchObject({ label: 'Inter UI' });
@@ -64,8 +64,8 @@ describe('FontService', () => {
 
     it('exposes monospaced catalog fonts and custom fonts through the same category', () => {
         const service = createService();
-        service.addFont({ value: 'Custom Mono', label: 'Custom Mono', category: 'monospace' });
-        const fonts = service.getFonts().filter((font) => font.category === 'monospace');
+        service.addFont({ value: 'Custom Mono', label: 'Custom Mono', category: FontCategory.MONOSPACE });
+        const fonts = service.getFonts().filter((font) => font.category === FontCategory.MONOSPACE);
 
         expect(fonts.map((font) => font.value)).toEqual([
             'Courier New',
@@ -79,25 +79,25 @@ describe('FontService', () => {
             'PT Mono',
             'Custom Mono',
         ]);
-        expect(service.getFontByValue('Arial')?.category).not.toBe('monospace');
+        expect(service.getFontByValue('Arial')?.category).not.toBe(FontCategory.MONOSPACE);
         service.resetToDefaults();
         expect(service.getFontByValue('Custom Mono')).toBeUndefined();
-        expect(service.getFontByValue('Menlo')?.category).toBe('monospace');
+        expect(service.getFontByValue('Menlo')?.category).toBe(FontCategory.MONOSPACE);
     });
 
     it('classifies every built-in font so consumers can filter the shared catalog', () => {
         const service = createService();
         expect(service.getFonts().every((font) => font.category != null)).toBe(true);
-        expect(service.getFontByValue('宋体')?.category).toBe('serif');
-        expect(service.getFontByValue('Arial')?.category).toBe('sans-serif');
-        expect(service.getFontByValue('楷体-简')?.category).toBe('handwriting');
-        expect(service.getFontByValue('Bauhaus 93')?.category).toBe('display');
-        expect(service.getFontByValue('Courier New')?.category).toBe('monospace');
+        expect(service.getFontByValue('宋体')?.category).toBe(FontCategory.SERIF);
+        expect(service.getFontByValue('Arial')?.category).toBe(FontCategory.SANS_SERIF);
+        expect(service.getFontByValue('楷体-简')?.category).toBe(FontCategory.HANDWRITING);
+        expect(service.getFontByValue('Bauhaus 93')?.category).toBe(FontCategory.DISPLAY);
+        expect(service.getFontByValue('Courier New')?.category).toBe(FontCategory.MONOSPACE);
 
-        service.updateFont('Arial', { category: 'display' });
-        expect(service.fonts$.getValue().filter((font) => font.category === 'display').map((font) => font.value)).toContain('Arial');
+        service.updateFont('Arial', { category: FontCategory.DISPLAY });
+        expect(service.fonts$.getValue().filter((font) => font.category === FontCategory.DISPLAY).map((font) => font.value)).toContain('Arial');
         service.resetToDefaults();
-        expect(service.getFontByValue('Arial')?.category).toBe('sans-serif');
+        expect(service.getFontByValue('Arial')?.category).toBe(FontCategory.SANS_SERIF);
     });
 
     it('rejects duplicate font values to keep font selection stable', () => {
@@ -110,7 +110,7 @@ describe('FontService', () => {
     it('loads override font configuration and rejects updates to missing fonts', () => {
         const service = createService(CustomFontConfigService);
 
-        expect(service.getFonts()).toEqual([{ value: 'OnlyCustom', label: 'Only Custom', category: 'display' }]);
+        expect(service.getFonts()).toEqual([{ value: 'OnlyCustom', label: 'Only Custom', category: FontCategory.DISPLAY }]);
         expect(() => service.updateFont('Arial', { label: 'Missing' })).toThrow('Font with value "Arial" not found.');
         expect(service.removeFont('Arial')).toBe(false);
     });

@@ -45,12 +45,14 @@ import { FormulaEditorShowController } from './controllers/formula-editor-show.c
 import { FormulaRenderManagerController } from './controllers/formula-render.controller';
 import { ImageFormulaRenderController } from './controllers/image-formula-render.controller';
 import { MobileComponentsController } from './controllers/mobile/components.controller';
+import { ShowFormulasRenderController } from './controllers/show-formulas-render.controller';
 import { FormulaUIController } from './controllers/ui.controller';
 import { MobileFormulaMenuController } from './menu/mobile-formula-menu.controller';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { GlobalRangeSelectorService } from './services/range-selector.service';
 import { MobileRefSelectionsRenderService } from './services/render-services/mobile-ref-selections.render.service';
 import { RefSelectionsRenderService } from './services/render-services/ref-selections.render.service';
+import { SheetsShowFormulasService } from './services/show-formulas.service';
 import { MobileGlobalRangeSelector } from './views/range-selector/MobileGlobal';
 
 /**
@@ -96,12 +98,14 @@ export class UniverSheetsFormulaMobileUIPlugin extends Plugin {
         registerDependencies(this._injector, [
             [IFormulaPromptService, { useClass: FormulaPromptService }],
             [GlobalRangeSelectorService],
+            [SheetsShowFormulasService],
             [FormulaUIController],
             [MobileFormulaMenuController],
             [FormulaClipboardController],
             [FormulaEditorShowController],
             [FormulaRenderManagerController],
             [ImageFormulaRenderController],
+            [ShowFormulasRenderController],
         ]);
 
         this._initUIPart();
@@ -129,6 +133,7 @@ export class UniverSheetsFormulaMobileUIPlugin extends Plugin {
             [FormulaClipboardController],
             [FormulaRenderManagerController],
             [ImageFormulaRenderController],
+            [ShowFormulasRenderController],
         ]);
     }
 

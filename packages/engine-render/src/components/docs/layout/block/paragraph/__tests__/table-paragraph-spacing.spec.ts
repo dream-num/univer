@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+import type { IParagraphStyle } from '@univerjs/core';
 import {
     DataStreamTreeTokenType,
     DocumentFlavor,
     NamedStyleType,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
     SpacingRule,
     TableAlignmentType,
     TableRowHeightRule,
@@ -36,49 +39,67 @@ interface ISpacingOptions {
     pageHeight?: number;
     rowCount?: number;
     incremental?: boolean;
+    beforeStyle?: NamedStyleType | null;
+    afterStyle?: NamedStyleType | null;
+    defaultParagraphStyle?: IParagraphStyle;
+    tableWrap?: TableTextWrapType | null;
 }
 
 function layoutTable(documentFlavor: DocumentFlavor, options: ISpacingOptions = {}) {
     const T = DataStreamTreeTokenType;
     const prefix = `Before${T.PARAGRAPH}`;
     const row = `${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cell${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}`;
-    const tableStream = `${T.TABLE_START}${row.repeat(options.rowCount ?? 1)}${T.TABLE_END}`;
+    const tableStream = options.tableWrap === null ? '' : `${T.TABLE_START}${row.repeat(options.rowCount ?? 1)}${T.TABLE_END}`;
     const content = `${prefix}${tableStream}After`;
     const dataStream = `${content}${T.PARAGRAPH}${T.SECTION_BREAK}`;
     const beforeIndex = prefix.length - 1;
     const afterIndex = content.length;
+    const beforeStyle = options.beforeStyle === undefined ? NamedStyleType.HEADING_1 : options.beforeStyle;
+    const afterStyle = options.afterStyle === undefined ? NamedStyleType.HEADING_2 : options.afterStyle;
     const paragraphs = [...dataStream.matchAll(/\r/g)].map((match) => ({
         startIndex: match.index,
         paragraphId: `p-${match.index}`,
         paragraphStyle: match.index === beforeIndex
-            ? { namedStyleType: NamedStyleType.HEADING_1, ...(options.before == null ? {} : { spaceBelow: { v: options.before } }) }
+            ? { ...(beforeStyle == null ? {} : { namedStyleType: beforeStyle }), ...(options.before == null ? {} : { spaceBelow: { v: options.before } }) }
             : match.index === afterIndex
-                ? { namedStyleType: NamedStyleType.HEADING_2, ...(options.after == null ? {} : { spaceAbove: { v: options.after } }) }
+                ? { ...(afterStyle == null ? {} : { namedStyleType: afterStyle }), ...(options.after == null ? {} : { spaceAbove: { v: options.after } }) }
                 : { spacingRule: SpacingRule.EXACT, lineSpacing: 20 },
     }));
     const bed = createParagraphLayoutTestBed(content, {
         body: {
             paragraphs,
             sectionBreaks: [...dataStream.matchAll(/\n/g)].map((match) => ({ startIndex: match.index })),
-            tables: [{ tableId: 'between-headings', startIndex: prefix.length, endIndex: prefix.length + tableStream.length }],
+            tables: tableStream ? [{ tableId: 'between-headings', startIndex: prefix.length, endIndex: prefix.length + tableStream.length }] : [],
         },
-        tableSource: {
-            'between-headings': {
-                tableId: 'between-headings',
-                align: TableAlignmentType.START,
-                indent: { v: 0 },
-                textWrap: TableTextWrapType.NONE,
-                size: { type: TableSizeType.SPECIFIED, width: { v: 200 } },
-                cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
-                tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } }],
-                tableRows: Array.from({ length: options.rowCount ?? 1 }, () => ({
-                    tableCells: [{}],
-                    trHeight: { val: { v: 20 }, hRule: TableRowHeightRule.EXACT },
-                })),
-            },
-        },
+        tableSource: tableStream
+            ? {
+                'between-headings': {
+                    tableId: 'between-headings',
+                    align: TableAlignmentType.START,
+                    indent: { v: 0 },
+                    textWrap: options.tableWrap ?? TableTextWrapType.NONE,
+                    ...(options.tableWrap === TableTextWrapType.WRAP
+                        ? {
+                            position: {
+                                positionH: { relativeFrom: ObjectRelativeFromH.COLUMN, posOffset: 20 },
+                                positionV: { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 200 },
+                            },
+                            dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                        }
+                        : {}),
+                    size: { type: TableSizeType.SPECIFIED, width: { v: 200 } },
+                    cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
+                    tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } }],
+                    tableRows: Array.from({ length: options.rowCount ?? 1 }, () => ({
+                        tableCells: [{}],
+                        trHeight: { val: { v: 20 }, hRule: TableRowHeightRule.EXACT },
+                    })),
+                },
+            }
+            : undefined,
         documentStyle: {
             documentFlavor,
+            ...(options.defaultParagraphStyle ? { defaultParagraphStyle: options.defaultParagraphStyle } : {}),
             pageSize: { width: 400, height: options.pageHeight ?? 600 },
             marginTop: 20,
             marginBottom: 20,
@@ -145,6 +166,51 @@ describe('paragraph spacing around native inline tables', () => {
         const table = tables[0];
         expect(table.top - contentBottom(before)).toBeCloseTo(10);
         expect(after.top + after.marginTop - table.top - table.height).toBeCloseTo(18);
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((flavor) => [
+        { flavor, beforeStyle: NamedStyleType.NORMAL_TEXT, afterStyle: NamedStyleType.NORMAL_TEXT, beforeGap: 12, afterGap: 0 },
+        { flavor, beforeStyle: NamedStyleType.HEADING_1, afterStyle: NamedStyleType.NORMAL_TEXT, beforeGap: 10, afterGap: 0 },
+        { flavor, beforeStyle: NamedStyleType.NORMAL_TEXT, afterStyle: NamedStyleType.HEADING_2, beforeGap: 12, afterGap: 18 },
+    ]))('keeps native body and heading spacing on their own side (flavor: $flavor, before: $beforeStyle, after: $afterStyle)', ({ flavor, beforeStyle, afterStyle, beforeGap, afterGap }) => {
+        const { before, after, tables: [table] } = layoutTable(flavor, { beforeStyle, afterStyle });
+        expect(table.top - contentBottom(before)).toBeCloseTo(beforeGap);
+        expect(after.top + after.marginTop - table.top - table.height).toBeCloseTo(afterGap);
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('respects unstyled body defaults without requiring a named style (flavor: %s)', (flavor) => {
+        const { before, after, tables: [table] } = layoutTable(flavor, { beforeStyle: null, afterStyle: null });
+        expect(table.top - contentBottom(before)).toBeCloseTo(flavor === DocumentFlavor.MODERN ? 12 : 0);
+        expect(after.top + after.marginTop - table.top - table.height).toBeCloseTo(0);
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('keeps explicit imported document defaults around a table (flavor: %s)', (flavor) => {
+        const { before, after, tables: [table] } = layoutTable(flavor, {
+            beforeStyle: null,
+            afterStyle: null,
+            defaultParagraphStyle: { spaceAbove: { v: 7 }, spaceBelow: { v: 14 } },
+        });
+        expect(table.top - contentBottom(before)).toBeCloseTo(14);
+        expect(after.top + after.marginTop - table.top - table.height).toBeCloseTo(7);
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((flavor) => [
+        { flavor, before: 40, after: 10 },
+        { flavor, before: 10, after: 40 },
+    ]))('still collapses adjacent paragraphs without a table (flavor: $flavor, before: $before, after: $after)', ({ flavor, before: beforeGap, after: afterGap }) => {
+        const { before, after, tables } = layoutTable(flavor, { before: beforeGap, after: afterGap, tableWrap: null });
+        expect(tables).toHaveLength(0);
+        expect(after.top + after.marginTop - contentBottom(before)).toBeCloseTo(Math.max(beforeGap, afterGap));
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('keeps ordinary paragraph geometry with a page-positioned floating table (flavor: %s)', (flavor) => {
+        const options = { before: 40, after: 10 };
+        const plain = layoutTable(flavor, { ...options, tableWrap: null });
+        const floating = layoutTable(flavor, { ...options, tableWrap: TableTextWrapType.WRAP });
+        expect(floating.tables).toHaveLength(1);
+        expect(floating.tables[0].top).toBeGreaterThan(contentBottom(floating.after));
+        expect(contentBottom(floating.before)).toBeCloseTo(contentBottom(plain.before));
+        expect(floating.after.top + floating.after.marginTop).toBeCloseTo(plain.after.top + plain.after.marginTop);
     });
 
     it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((flavor) =>

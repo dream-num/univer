@@ -123,9 +123,13 @@ function _mergeTrailingBlockEndShapedTexts(shapedTextList: IShapedText[]): IShap
             previous?.breakPointType === BreakPointType.Mandatory &&
             _endsWithToken(previous.text, previous.glyphs, DataStreamTreeTokenType.PARAGRAPH) &&
             shapedText.glyphs.length > 0 &&
-            shapedText.glyphs.every((glyph) => glyph.width === 0 && glyph.streamType === DataStreamTreeTokenType.BLOCK_END)
+            shapedText.glyphs.some((glyph) => glyph.streamType === DataStreamTreeTokenType.BLOCK_END) &&
+            shapedText.glyphs.every((glyph, index) => glyph.width === 0 && (
+                glyph.streamType === DataStreamTreeTokenType.BLOCK_END ||
+                (index === shapedText.glyphs.length - 1 && glyph.streamType === DataStreamTreeTokenType.SECTION_BREAK)
+            ))
         ) {
-            // A block delimiter follows the authored paragraph mark in the model.
+            // A block delimiter and optional section end follow the authored paragraph mark.
             // Keep its logical offset on that line instead of opening an empty line.
             result[result.length - 1] = {
                 ...previous,

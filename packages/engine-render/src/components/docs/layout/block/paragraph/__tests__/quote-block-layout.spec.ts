@@ -23,7 +23,9 @@ import {
     DocumentFlavor,
     JSONX,
     LocaleService,
+    SectionType,
     TextX,
+    validateDocumentStructure,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DocumentViewModel } from '../../../../view-model/document-view-model';
@@ -33,12 +35,12 @@ import { clearFontCreateConfigCache } from '../../../tools';
 
 const { BLOCK_START, BLOCK_END, PARAGRAPH, SECTION_BREAK } = DataStreamTreeTokenType;
 
-function quoteSnapshot(contents: string[], flavor: DocumentFlavor, prefix = '', width = 900): IDocumentData {
+function quoteSnapshot(contents: string[], flavor: DocumentFlavor, blockType: DocumentBlockRangeType, prefix = '', width = 900, terminal = false): IDocumentData {
     const leading = prefix ? `${prefix}${PARAGRAPH}` : '';
     const quoteText = `${contents.join(PARAGRAPH)}${PARAGRAPH}`;
     const rangeStart = leading.length;
     const rangeEnd = rangeStart + quoteText.length + 1;
-    const dataStream = `${leading}${BLOCK_START}${quoteText}${BLOCK_END}After${PARAGRAPH}${SECTION_BREAK}`;
+    const dataStream = `${leading}${BLOCK_START}${quoteText}${BLOCK_END}${terminal ? '' : `After${PARAGRAPH}`}${SECTION_BREAK}`;
     const paragraphs = [...dataStream.matchAll(/\r/g)].map((match, index) => ({
         startIndex: match.index!,
         paragraphId: `quote-paragraph-${index}`,
@@ -55,7 +57,7 @@ function quoteSnapshot(contents: string[], flavor: DocumentFlavor, prefix = '', 
             sectionBreaks: [{ sectionId: 'quote-section', startIndex: dataStream.length - 1 }],
             blockRanges: [{
                 blockId: 'quote',
-                blockType: DocumentBlockRangeType.QUOTE,
+                blockType,
                 startIndex: rangeStart,
                 endIndex: rangeEnd,
             }],
@@ -77,6 +79,7 @@ function quoteSnapshot(contents: string[], flavor: DocumentFlavor, prefix = '', 
 }
 
 function layout(snapshot: IDocumentData) {
+    expect(validateDocumentStructure(snapshot)).toEqual([]);
     const model = new DocumentDataModel(snapshot);
     const viewModel = new DocumentViewModel(model);
     const skeleton = DocumentSkeleton.create(viewModel, new LocaleService());
@@ -108,7 +111,8 @@ function expectLogicalOffsets(model: DocumentDataModel, skeleton: DocumentSkelet
     }
 }
 
-describe.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL])('native quote block layout in flavor %s', (flavor) => {
+describe.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL].flatMap((flavor) =>
+    [DocumentBlockRangeType.QUOTE, DocumentBlockRangeType.CALLOUT, DocumentBlockRangeType.CODE].map((blockType) => ({ flavor, blockType }))))('native $blockType closing-marker layout in flavor $flavor', ({ flavor, blockType }) => {
     const disposables: Array<{ dispose(): void }> = [];
     beforeEach(() => {
         clearFontCreateConfigCache();
@@ -137,7 +141,7 @@ describe.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL])('native quote
         { label: 'authored blank paragraph', contents: ['First sentence.', '', 'Second sentence.'] },
         { label: 'empty editable quote', contents: [''] },
     ])('does not add a rendered line for the closing marker of $label', ({ contents }) => {
-        const snapshot = quoteSnapshot(contents, flavor);
+        const snapshot = quoteSnapshot(contents, flavor, blockType);
         const { model, skeleton, initial } = layout(snapshot);
         disposables.push(model, skeleton);
         expect(quoteLines(model, skeleton)).toHaveLength(contents.length);
@@ -146,8 +150,8 @@ describe.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL])('native quote
         expectLogicalOffsets(model, skeleton);
     });
 
-    it('keeps a quote after an existing paragraph to its authored line', () => {
-        const { model, skeleton } = layout(quoteSnapshot(['First sentence.'], flavor, 'Before'));
+    it('keeps a block after an existing paragraph to its authored line', () => {
+        const { model, skeleton } = layout(quoteSnapshot(['First sentence.'], flavor, blockType, 'Before'));
         disposables.push(model, skeleton);
         expect(quoteLines(model, skeleton)).toHaveLength(1);
         expect(lines(skeleton)).toHaveLength(3);
@@ -155,7 +159,7 @@ describe.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL])('native quote
     });
 
     it('keeps wrapped text and attaches the closing marker to its authored paragraph mark', () => {
-        const { model, skeleton } = layout(quoteSnapshot(['First sentence repeats and wraps to multiple lines. '.repeat(4).trimEnd()], flavor, '', 500));
+        const { model, skeleton } = layout(quoteSnapshot(['First sentence repeats and wraps to multiple lines. '.repeat(4).trimEnd()], flavor, blockType, '', 500));
         disposables.push(model, skeleton);
         const rendered = quoteLines(model, skeleton);
         expect(rendered.length).toBeGreaterThan(1);
@@ -168,8 +172,64 @@ describe.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL])('native quote
         expectLogicalOffsets(model, skeleton);
     });
 
+    it.each([1, 2])('preserves %s authored line breaks before the closing marker', (count) => {
+        const { model, skeleton, initial } = layout(quoteSnapshot([
+            `First sentence.${DataStreamTreeTokenType.COLUMN_BREAK.repeat(count)}Second sentence.`,
+        ], flavor, blockType));
+        disposables.push(model, skeleton);
+        expect(quoteLines(model, skeleton)).toHaveLength(count + 1);
+        expect(lines(skeleton)).toHaveLength(count + 2);
+        expect(model.getSnapshot()).toEqual(initial);
+        expectLogicalOffsets(model, skeleton);
+    });
+
+    it('keeps a terminal block editable without adding a closing-marker line', () => {
+        const { model, skeleton, initial } = layout(quoteSnapshot(['First sentence.', ''], flavor, blockType, '', 900, true));
+        disposables.push(model, skeleton);
+        expect(quoteLines(model, skeleton)).toHaveLength(2);
+        expect(lines(skeleton)).toHaveLength(2);
+        expect(model.getSnapshot()).toEqual(initial);
+        expectLogicalOffsets(model, skeleton);
+    });
+
+    it('preserves ordinary body paragraph marks and authored blank paragraphs', () => {
+        const snapshot = quoteSnapshot(['First sentence.'], flavor, blockType);
+        const dataStream = `First sentence.${PARAGRAPH}${PARAGRAPH}After${PARAGRAPH}${SECTION_BREAK}`;
+        snapshot.body = {
+            dataStream,
+            paragraphs: [...dataStream.matchAll(/\r/g)].map((match, index) => ({ startIndex: match.index!, paragraphId: `plain-${index}` })),
+            sectionBreaks: [{ sectionId: 'plain-section', startIndex: dataStream.length - 1 }],
+        };
+        const { model, skeleton, initial } = layout(snapshot);
+        disposables.push(model, skeleton);
+        expect(lines(skeleton)).toHaveLength(3);
+        expect(model.getSnapshot()).toEqual(initial);
+        expectLogicalOffsets(model, skeleton);
+    });
+
+    it('preserves native pagination of a following NEXT_PAGE section after a terminal block marker', () => {
+        const snapshot = quoteSnapshot(['First sentence.'], flavor, blockType);
+        const body = snapshot.body!;
+        const sectionOffset = body.blockRanges![0].endIndex + 1;
+        body.dataStream = `${body.dataStream.slice(0, sectionOffset)}${SECTION_BREAK}${body.dataStream.slice(sectionOffset)}`;
+        body.paragraphs = body.paragraphs!.map((paragraph) => paragraph.startIndex >= sectionOffset
+            ? { ...paragraph, startIndex: paragraph.startIndex + 1 }
+            : paragraph);
+        body.sectionBreaks = [
+            { sectionId: 'block-section', startIndex: sectionOffset },
+            { sectionId: 'following-section', startIndex: body.dataStream.length - 1, sectionType: SectionType.NEXT_PAGE },
+        ];
+        const { model, skeleton, initial } = layout(snapshot);
+        disposables.push(model, skeleton);
+        expect(quoteLines(model, skeleton)).toHaveLength(1);
+        expect(lines(skeleton)).toHaveLength(2);
+        expect(skeleton.getSkeletonData()!.pages).toHaveLength(flavor === DocumentFlavor.TRADITIONAL ? 2 : 1);
+        expect(model.getSnapshot()).toEqual(initial);
+        expectLogicalOffsets(model, skeleton);
+    });
+
     it('preserves editable model offsets and the closing marker after inserting text', () => {
-        const { model, viewModel, skeleton } = layout(quoteSnapshot(['First sentence.'], flavor));
+        const { model, viewModel, skeleton } = layout(quoteSnapshot(['First sentence.'], flavor, blockType));
         disposables.push(model, skeleton);
         const paragraphId = model.getBody()!.paragraphs![0].paragraphId;
         const textX = new TextX().retain(1).insert(7, { dataStream: 'Edited ' });

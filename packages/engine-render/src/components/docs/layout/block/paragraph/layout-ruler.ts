@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { INumberUnit, IParagraphProperties, ITabStop, Nullable } from '@univerjs/core';
+import type { INumberUnit, IParagraphProperties, ITabStop, ITextStyle, Nullable } from '@univerjs/core';
 import {
     BooleanNumber,
     characterSpacingControlType,
@@ -254,7 +254,8 @@ export function layoutParagraph(
     isParagraphFirstShapedText: boolean,
     breakPointType = BreakPointType.Normal,
     renderBullet = isParagraphFirstShapedText,
-    startNewLine = false
+    startNewLine = false,
+    markerTextStyle?: Pick<ITextStyle, 'cl' | 'ul'>
 ) {
     paragraphConfig.documentCompatibilityPolicy ??= sectionBreakConfig.documentCompatibilityPolicy;
     if (isParagraphFirstShapedText || startNewLine) {
@@ -268,7 +269,10 @@ export function layoutParagraph(
             const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
-            const bulletGlyph = createSkeletonBulletGlyph(glyphGroup[0], bulletSkeleton, charSpaceApply, paragraphConfig.documentCompatibilityPolicy ?? sectionBreakConfig.documentCompatibilityPolicy);
+            const resolvedBulletSkeleton = markerTextStyle
+                ? { ...bulletSkeleton, ts: { ...markerTextStyle, ...bulletSkeleton.ts } }
+                : bulletSkeleton;
+            const bulletGlyph = createSkeletonBulletGlyph(glyphGroup[0], resolvedBulletSkeleton, charSpaceApply, paragraphConfig.documentCompatibilityPolicy ?? sectionBreakConfig.documentCompatibilityPolicy);
             const paragraphProperties = bulletSkeleton.paragraphProperties || {};
             const bulletParagraphStyle = {
                 ...paragraphProperties,

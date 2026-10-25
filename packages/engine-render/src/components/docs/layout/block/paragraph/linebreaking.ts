@@ -1073,7 +1073,7 @@ function _prepareLineBreaking(
                 ...getFontCreateConfig(endIndex - paragraphNode.contentStartIndex, viewModel, paragraphNode, sectionBreakConfig, {
                     ...paragraph,
                     paragraphStyle: resolvedParagraphStyle,
-                }).textStyle,
+                }, false).textStyle,
                 // Explicit list formatting below may underline the marker; paragraph-mark formatting may not.
                 ul: { s: BooleanNumber.FALSE },
             }
@@ -1205,6 +1205,7 @@ function _layoutShapedTexts({
                 return;
             }
 
+            const markerSourceIndex = textStartIndex - paragraphNode.contentStartIndex - _glyphCount(deferredRenderedMarkers);
             if (deferredRenderedMarkers.length > 0) {
                 pendingGlyphs = [...deferredRenderedMarkers, ...pendingGlyphs];
                 deferredRenderedMarkers = [];
@@ -1223,6 +1224,17 @@ function _layoutShapedTexts({
                     glyph.streamType !== DataStreamTreeTokenType.PARAGRAPH &&
                     glyph.streamType !== DataStreamTreeTokenType.SECTION_BREAK &&
                     glyph.streamType !== DataStreamTreeTokenType.DOCS_END));
+            const renderBullet = renderParagraphBullet && !preserveParagraphStart;
+            const paragraph = renderBullet && paragraphConfig.bulletSkeleton
+                ? viewModel.getParagraph(paragraphNode.endIndex)
+                : undefined;
+            // Resolve the actual marker provider after zero-height anchors, without copying hyperlink appearance.
+            const markerTextStyle = paragraph
+                ? getFontCreateConfig(markerSourceIndex, viewModel, paragraphNode, sectionBreakConfig, {
+                    ...paragraph,
+                    paragraphStyle: paragraphConfig.paragraphStyle,
+                }, false).textStyle
+                : undefined;
             allPages = layoutParagraph(
                 ctx,
                 pendingGlyphs,
@@ -1231,8 +1243,9 @@ function _layoutShapedTexts({
                 paragraphConfig,
                 isParagraphFirstShapedText || (!nonFlowAnchor && hasOnlyFloatingCustomBlockGlyphs(pendingGlyphs, paragraphNonInlineSkeDrawingsByBlockId)),
                 layoutBreakPointType,
-                renderParagraphBullet && !preserveParagraphStart,
-                startNewLine
+                renderBullet,
+                startNewLine,
+                markerTextStyle ? { cl: markerTextStyle.cl, ul: markerTextStyle.ul } : undefined
             );
 
             // Zero-height drawing anchors do not consume the visible first line.

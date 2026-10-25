@@ -751,6 +751,25 @@ describe('docs layout tools extra', () => {
         expect(JSON.stringify(dataModel.getSnapshot())).toBe(before);
     });
 
+    it.each([true, false])('keeps marker and hyperlink font caches separate with marker first %s', (markerFirst) => {
+        clearFontCreateConfigCache();
+        const paragraph = { startIndex: 4, paragraphId: 'linked-paragraph' };
+        const { viewModel, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Link', {
+            body: {
+                paragraphs: [paragraph],
+                textRuns: [{ st: 0, ed: 4, ts: { fs: 18, cl: { rgb: '#123456' } } }],
+                customRanges: [{ startIndex: 0, endIndex: 3, rangeId: 'link', rangeType: CustomRangeType.HYPERLINK, properties: { url: 'https://example.test' } }],
+            },
+        });
+        for (const marker of [markerFirst, !markerFirst, markerFirst]) {
+            const config = getFontCreateConfig(0, viewModel, paragraphNode, sectionBreakConfig, paragraph, !marker);
+            expect(config.textStyle.fs).toBe(18);
+            expect(config.textStyle.cl).toEqual({ rgb: marker ? '#123456' : 'blue.600' });
+            expect(config.textStyle.ul?.s).toBe(marker ? undefined : BooleanNumber.TRUE);
+        }
+        clearFontCreateConfigCache();
+    });
+
     it('creates default skeleton, prepares section config, and resolves page paths', () => {
         const skeleton = getNullSkeleton();
         const pages = [{ segmentId: 'seg-1' }, { segmentId: 'seg-2' }] as any[];

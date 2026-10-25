@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { Dependency, DependencyIdentifier, Injector } from '@wendellhu/redi';
+import type { Dependency, DependencyIdentifier, Injector, IdentifierDecorator as RediIdentifierDecorator } from '@wendellhu/redi';
+import { createIdentifier as createRediIdentifier } from '@wendellhu/redi';
 
 export {
-    createIdentifier,
     forwardRef,
     Inject,
     Injector,
@@ -50,11 +50,14 @@ export type {
     DependencyPair,
     FactoryDependencyItem,
     IAccessor,
-    IdentifierDecorator,
     IDisposable,
     SyncDependencyItem,
     ValueDependencyItem,
 } from '@wendellhu/redi';
+
+// Keep inferred service-token declarations anchored to Core's public DI boundary.
+export type IdentifierDecorator<T> = RediIdentifierDecorator<T>;
+export const createIdentifier: <T>(id: string) => IdentifierDecorator<T> = createRediIdentifier;
 
 /**
  * Register the dependencies to the injector.

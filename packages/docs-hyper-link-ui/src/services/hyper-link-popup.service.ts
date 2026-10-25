@@ -259,9 +259,7 @@ export class DocHyperLinkPopupService extends Disposable {
         if (this._infoPopupPinned || this._infoPopupSuppressed) {
             return;
         }
-        if (!this.showing) {
-            this.showInfoPopup(info);
-        }
+        this.showInfoPopup(info);
     }
 
     hideInfoPopup() {

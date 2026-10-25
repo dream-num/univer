@@ -15,7 +15,6 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import type { IError } from '../errors';
 import { ErrorCode } from '../errors';
 
 describe('Office export error protocol', () => {
@@ -30,8 +29,7 @@ describe('Office export error protocol', () => {
         ['LICENSE_NOT_YET_EFFECTIVE', 9013],
         ['LICENSE_EXPORT_EXPIRED', 9014],
         ['LICENSE_INVALID', 9015],
-    ] as const)('preserves %s = %i across the numeric IError JSON boundary', (name, code) => {
-        const error: IError = { code: ErrorCode[name], message: 'Export authorization failed.' };
-        expect(JSON.parse(JSON.stringify(error))).toEqual({ code, message: 'Export authorization failed.' });
+    ] as const)('preserves the public wire value %s = %i', (name, code) => {
+        expect(ErrorCode[name]).toBe(code);
     });
 });

@@ -27,7 +27,7 @@ describe('Office export error protocol', () => {
         ['LICENSE_CONCURRENCY_TIMEOUT', 9010],
         ['LICENSE_VERSION_NOT_ALLOWED', 9012],
         ['LICENSE_NOT_YET_EFFECTIVE', 9013],
-        ['LICENSE_EXPORT_EXPIRED', 9014],
+        ['LICENSE_UNIT_TYPE_REJECTED', 9014],
         ['LICENSE_INVALID', 9015],
     ] as const)('preserves the public wire value %s = %i', (name, code) => {
         expect(ErrorCode[name]).toBe(code);

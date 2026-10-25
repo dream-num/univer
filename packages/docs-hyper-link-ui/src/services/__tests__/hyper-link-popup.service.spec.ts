@@ -323,13 +323,33 @@ describe('DocHyperLinkPopupService', () => {
         const firstLink = { unitId: 'doc-1', linkId: 'link-1', startIndex: 4, endIndex: 8 };
         const secondLink = { unitId: 'doc-1', linkId: 'link-2', startIndex: 9, endIndex: 13 };
 
+        it('waits for hover intent on another link without extending the deadline for repeated hover events', () => {
+            vi.useFakeTimers();
+            const { injector, attached } = createService(documentFlavor);
+            const service = injector.get(DocHyperLinkPopupService);
+
+            service.showInfoPopupFromHover(secondLink);
+            service.showInfoPopupFromHover(firstLink);
+            vi.advanceTimersByTime(100);
+            service.showInfoPopupFromHover({ ...firstLink, segmentId: '' });
+            vi.advanceTimersByTime(99);
+            expect(service.showing).toEqual(secondLink);
+            expect(attached()).toHaveLength(1);
+
+            vi.advanceTimersByTime(1);
+            expect(service.showing).toEqual(firstLink);
+            expect(attached()).toHaveLength(2);
+        });
+
         it('replaces a hovered link in both directions without remounting the same link or changing the document', () => {
+            vi.useFakeTimers();
             const { injector, attached, disposed, model } = createService(documentFlavor);
             const service = injector.get(DocHyperLinkPopupService);
             const snapshot = structuredClone(model.getSnapshot());
 
             service.showInfoPopupFromHover(firstLink);
             service.showInfoPopupFromHover(secondLink);
+            vi.advanceTimersByTime(200);
             expect(service.showing).toEqual(secondLink);
             expect(attached().at(-1)?.range).toMatchObject({ startOffset: 9, endOffset: 14 });
             expect(disposed()).toEqual([1]);
@@ -339,6 +359,7 @@ describe('DocHyperLinkPopupService', () => {
             expect(disposed()).toEqual([1]);
 
             service.showInfoPopupFromHover(firstLink);
+            vi.advanceTimersByTime(200);
             expect(service.showing).toEqual(firstLink);
             expect(attached()).toHaveLength(3);
             expect(disposed()).toEqual([1, 2]);
@@ -356,6 +377,9 @@ describe('DocHyperLinkPopupService', () => {
             vi.advanceTimersByTime(149);
             service.showInfoPopupFromHover(secondLink);
             vi.advanceTimersByTime(1);
+            expect(service.showing).toEqual(firstLink);
+            expect(disposed()).toEqual([]);
+            vi.advanceTimersByTime(199);
             expect(service.showing).toEqual(secondLink);
             expect(disposed()).toEqual([1]);
 
@@ -369,6 +393,92 @@ describe('DocHyperLinkPopupService', () => {
             vi.advanceTimersByTime(150);
             expect(service.showing).toBeNull();
             expect(disposed()).toEqual([1, 2]);
+        });
+
+        it('cancels replacement when returning to the original link or leaving the candidate', () => {
+            vi.useFakeTimers();
+            const { injector, attached } = createService(documentFlavor);
+            const service = injector.get(DocHyperLinkPopupService);
+
+            service.showInfoPopupFromHover(firstLink);
+            service.showInfoPopupFromHover(secondLink);
+            vi.advanceTimersByTime(100);
+            service.showInfoPopupFromHover(firstLink);
+            vi.advanceTimersByTime(200);
+            expect(service.showing).toEqual(firstLink);
+            expect(attached()).toHaveLength(1);
+
+            service.showInfoPopupFromHover(secondLink);
+            vi.advanceTimersByTime(100);
+            service.scheduleHideInfoPopup();
+            vi.advanceTimersByTime(200);
+            expect(service.showing).toBeNull();
+            expect(attached()).toHaveLength(1);
+        });
+
+        it('ignores late canvas hover and leave events inside the popup and releases ownership on pointer leave', () => {
+            vi.useFakeTimers();
+            const { injector, attached } = createService(documentFlavor);
+            const service = injector.get(DocHyperLinkPopupService);
+
+            service.showInfoPopupFromHover(secondLink);
+            service.showInfoPopupFromHover(firstLink);
+            vi.advanceTimersByTime(100);
+            service.setInfoPopupHovered(true);
+            vi.advanceTimersByTime(30);
+            service.showInfoPopupFromHover(firstLink);
+            service.scheduleHideInfoPopup();
+            vi.advanceTimersByTime(200);
+            expect(service.showing).toEqual(secondLink);
+            expect(attached()).toHaveLength(1);
+
+            service.setInfoPopupHovered(false);
+            service.scheduleHideInfoPopup();
+            vi.advanceTimersByTime(149);
+            expect(service.showing).toEqual(secondLink);
+            vi.advanceTimersByTime(1);
+            expect(service.showing).toBeNull();
+            service.showInfoPopupFromHover(firstLink);
+            service.showInfoPopupFromHover(secondLink);
+            vi.advanceTimersByTime(200);
+            expect(service.showing).toEqual(secondLink);
+        });
+
+        it.each(['pin', 'edit', 'hide', 'dispose', 'dispose-render'] as const)('cancels pending replacement on %s', (action) => {
+            vi.useFakeTimers();
+            const { injector, attached, disposeRender } = createService(documentFlavor);
+            const service = injector.get(DocHyperLinkPopupService);
+
+            service.showInfoPopupFromHover(firstLink);
+            service.showInfoPopupFromHover(secondLink);
+            vi.advanceTimersByTime(100);
+            switch (action) {
+                case 'pin':
+                    service.showInfoPopup(firstLink, { pinned: true });
+                    break;
+                case 'edit':
+                    service.showEditPopup('doc-1', firstLink);
+                    break;
+                case 'hide':
+                    service.hideInfoPopup();
+                    break;
+                case 'dispose':
+                    service.dispose();
+                    break;
+                case 'dispose-render':
+                    disposeRender('doc-1');
+                    break;
+            }
+            const attachedCount = attached().length;
+            vi.advanceTimersByTime(200);
+            expect(attached()).toHaveLength(attachedCount);
+            expect(service.showing).toEqual(action === 'pin' || action === 'edit' ? firstLink : null);
+            if (action === 'pin') {
+                expect(service.infoPopupPinned).toBe(true);
+            }
+            if (action === 'edit') {
+                expect(service.editing).toEqual(firstLink);
+            }
         });
 
         it('preserves click pinning until the pinned popup closes', () => {
@@ -405,6 +515,21 @@ describe('DocHyperLinkPopupService', () => {
             expect(service.showing).toEqual(secondLink);
             expect(attached()).toHaveLength(2);
         });
+    });
+
+    it('cancels replacement when its candidate render is disposed without closing the current popup', () => {
+        vi.useFakeTimers();
+        const { injector, attached, disposeRender } = createService();
+        const service = injector.get(DocHyperLinkPopupService);
+        const firstLink = { unitId: 'doc-1', linkId: 'link-1', startIndex: 4, endIndex: 8 };
+
+        service.showInfoPopupFromHover(firstLink);
+        service.showInfoPopupFromHover({ unitId: 'doc-2', linkId: 'link-2', startIndex: 0, endIndex: 3 });
+        disposeRender('doc-2');
+        vi.advanceTimersByTime(200);
+
+        expect(service.showing).toEqual(firstLink);
+        expect(attached()).toHaveLength(1);
     });
 
     it('does not show link information when the target document is not loaded', () => {

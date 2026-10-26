@@ -15,11 +15,11 @@
  */
 
 import type { KeyboardEvent } from 'react';
-import type { IMenuItemInputProps } from './interface';
 import { LocaleService } from '@univerjs/core';
 import { InputNumber } from '@univerjs/design';
 import { IContextMenuService, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
+import type { IMenuItemInputProps } from './interface';
 
 export const MenuItemInput = (props: IMenuItemInputProps) => {
     const {
@@ -46,12 +46,7 @@ export const MenuItemInput = (props: IMenuItemInputProps) => {
     }, []);
 
     const handleChange = (value: number | null) => {
-        if (!value) {
-            setInputValue(min.toString());
-            return;
-        }
-
-        const inputValue = value.toString();
+        const inputValue = (value ?? min).toString();
         setInputValue(inputValue);
         onChange(inputValue);
     };

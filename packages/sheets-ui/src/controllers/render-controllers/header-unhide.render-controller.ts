@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import type { Workbook, Worksheet } from '@univerjs/core';
+import type { IRange, Workbook, Worksheet } from '@univerjs/core';
 import type { IRenderContext } from '@univerjs/engine-render';
 import type { ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams } from '@univerjs/sheets';
-import type { IHeaderUnhideRangeVisibleCheck } from '../../services/header-unhide-range.service';
 import {
     createInterceptorKey,
     ICommandService,
     Inject,
     InterceptorManager,
+    RANGE_TYPE,
+    Rectangle,
     RxDisposable,
 } from '@univerjs/core';
 import {
@@ -30,7 +31,7 @@ import {
     SetSpecificRowsVisibleCommand,
 } from '@univerjs/sheets';
 import { takeUntil } from 'rxjs';
-
+import type { IHeaderUnhideRangeVisibleCheck } from '../../services/header-unhide-range.service';
 import { SHEET_COMPONENT_UNHIDE_LAYER_INDEX } from '../../common/keys';
 import { HeaderUnhideRangeAxis, HeaderUnhideRangeService } from '../../services/header-unhide-range.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
@@ -65,6 +66,7 @@ export class HeaderUnhideRenderController extends RxDisposable {
         super.dispose();
 
         this._clearShapes();
+        this.interceptor.dispose();
     }
 
     private _init(): void {
@@ -76,7 +78,7 @@ export class HeaderUnhideRenderController extends RxDisposable {
             if (!worksheet) {
                 activeSheetId = '';
                 return;
-            };
+            }
 
             activeSheetId = worksheet.getSheetId();
             this._update(this._workbook, worksheet);
@@ -99,7 +101,9 @@ export class HeaderUnhideRenderController extends RxDisposable {
 
     private _update(workbook: Workbook, worksheet: Worksheet): void {
         const skeleton = this._sheetSkeletonManagerService.getSkeletonParam(worksheet.getSheetId())?.skeleton;
-        if (!skeleton) return;
+        if (!skeleton) {
+            return;
+        }
 
         // steps to render the unhide button for the current worksheet
         // 1. and get hidden rows and columns
@@ -108,18 +112,42 @@ export class HeaderUnhideRenderController extends RxDisposable {
             this._headerUnhideRangeService.shouldRenderRange(visibleCheck(true, payload) ?? true, payload)
         );
 
-        const hiddenRowRanges = worksheet.getHiddenRows().filter((range) => shouldRenderRange({
-            axis: HeaderUnhideRangeAxis.ROW,
-            range,
-            workbook,
-            worksheet,
-        }));
-        const hiddenColRanges = worksheet.getHiddenCols().filter((range) => shouldRenderRange({
-            axis: HeaderUnhideRangeAxis.COLUMN,
-            range,
-            workbook,
-            worksheet,
-        }));
+        const zeroHeightRowRanges: IRange[] = [];
+        const rowData = worksheet.getRowManager().getRowData();
+        for (const rowIndex of Object.keys(rowData)) {
+            const row = Number(rowIndex);
+            if (row >= 0 && row < worksheet.getRowCount() && worksheet.getRowVisible(row) && worksheet.getRowHeight(row) === 0) {
+                zeroHeightRowRanges.push({ startRow: row, endRow: row, startColumn: 0, endColumn: worksheet.getColumnCount() - 1 });
+            }
+        }
+        const rowRanges = [...worksheet.getHiddenRows(), ...Rectangle.mergeRanges(zeroHeightRowRanges)]
+            .map((range) => ({ ...range, rangeType: RANGE_TYPE.ROW }))
+            .filter((range) => shouldRenderRange({
+                axis: HeaderUnhideRangeAxis.ROW,
+                range,
+                workbook,
+                worksheet,
+            }));
+        const hiddenRowRanges = Rectangle.mergeRanges(rowRanges)
+            .map((range) => ({ ...range, rangeType: RANGE_TYPE.ROW }));
+        const zeroWidthColRanges: IRange[] = [];
+        const columnData = worksheet.getColumnManager().getColumnData();
+        for (const columnIndex of Object.keys(columnData)) {
+            const column = Number(columnIndex);
+            if (column >= 0 && column < worksheet.getColumnCount() && worksheet.getColVisible(column) && worksheet.getColumnWidth(column) === 0) {
+                zeroWidthColRanges.push({ startRow: 0, endRow: worksheet.getRowCount() - 1, startColumn: column, endColumn: column });
+            }
+        }
+        const columnRanges = [...worksheet.getHiddenCols(), ...Rectangle.mergeRanges(zeroWidthColRanges)]
+            .map((range) => ({ ...range, rangeType: RANGE_TYPE.COLUMN }))
+            .filter((range) => shouldRenderRange({
+                axis: HeaderUnhideRangeAxis.COLUMN,
+                range,
+                workbook,
+                worksheet,
+            }));
+        const hiddenColRanges = Rectangle.mergeRanges(columnRanges)
+            .map((range) => ({ ...range, rangeType: RANGE_TYPE.COLUMN }));
 
         // First just let me render a unhide button of the column header!.
         const sheetObject = this._getSheetObject();

@@ -48,6 +48,8 @@ import { getIntersectRange } from '../shared/range';
 import { Skeleton } from '../skeleton';
 import { BooleanNumber, HorizontalAlign } from '../types/enum';
 import { DocumentFlavor } from '../types/interfaces';
+import { isValidSheetDimension, normalizeSheetDimension } from './sheet-dimensions';
+import { DEFAULT_WORKSHEET_COLUMN_WIDTH, DEFAULT_WORKSHEET_ROW_HEIGHT } from './sheet-snapshot-utils';
 
 /**
  * Configuration for a single gap (visual separator between rows or columns).
@@ -402,9 +404,10 @@ export class SheetSkeleton extends Skeleton {
     ): { rowTotalHeight: number; rowHeightAccumulation: number[] } {
         let rowTotalHeight = 0;
         const rowHeightAccumulation: number[] = [];
+        const fallbackHeight = normalizeSheetDimension(defaultRowHeight, DEFAULT_WORKSHEET_ROW_HEIGHT, false);
         const data = rowData;
         for (let r = 0; r < rowCount; r++) {
-            let rowHeight = defaultRowHeight;
+            let rowHeight = fallbackHeight;
 
             if (this.worksheet.getRowFiltered(r)) {
                 rowHeight = 0;
@@ -414,14 +417,14 @@ export class SheetSkeleton extends Skeleton {
                     continue;
                 }
 
-                const { h = defaultRowHeight, ah, ia } = rowDataItem;
+                const { h = fallbackHeight, ah, ia } = rowDataItem;
                 if (
                     (ia == null || ia === BooleanNumber.TRUE) &&
-                    typeof ah === 'number' && ah > 0
+                    isValidSheetDimension(ah, false)
                 ) {
                     rowHeight = ah;
                 } else {
-                    rowHeight = h;
+                    rowHeight = normalizeSheetDimension(h, 0);
                 }
 
                 if (rowDataItem.hd === BooleanNumber.TRUE) {
@@ -454,11 +457,12 @@ export class SheetSkeleton extends Skeleton {
     ): { columnTotalWidth: number; columnWidthAccumulation: number[] } {
         let columnTotalWidth = 0;
         const columnWidthAccumulation: number[] = [];
+        const fallbackWidth = normalizeSheetDimension(defaultColumnWidth, DEFAULT_WORKSHEET_COLUMN_WIDTH, false);
 
         const data = columnData;
 
         for (let c = 0; c < colCount; c++) {
-            let columnWidth = defaultColumnWidth;
+            let columnWidth = fallbackWidth;
 
             if (data[c] != null) {
                 const columnDataItem = data[c];
@@ -466,8 +470,8 @@ export class SheetSkeleton extends Skeleton {
                 if (!columnDataItem) {
                     continue;
                 }
-                if (columnDataItem.w != null) {
-                    columnWidth = columnDataItem.w;
+                if (columnDataItem.w !== undefined) {
+                    columnWidth = normalizeSheetDimension(columnDataItem.w, 0);
                 }
 
                 if (columnDataItem.hd === BooleanNumber.TRUE) {

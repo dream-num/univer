@@ -15,7 +15,7 @@
  */
 
 import type { IColumnData, IMutation, IObjectArrayPrimitiveType, Nullable, Worksheet } from '@univerjs/core';
-import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, isValidColumnDimensions, IUniverInstanceService } from '@univerjs/core';
 import { getOldColumnData } from '../../basics/row-column-value';
 import { getSheetCommandTarget } from '../commands/utils/target-util';
 
@@ -54,9 +54,14 @@ export const SetColDataMutation: IMutation<ISetColDataMutationParams> = {
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const { columnData } = params;
+        if (!Object.values(columnData).every(isValidColumnDimensions)) {
+            return false;
+        }
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { worksheet } = target;
         const manager = worksheet.getColumnManager();

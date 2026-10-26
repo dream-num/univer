@@ -20,7 +20,7 @@ import { hexToHsv, hsvToHex } from './color-conversion';
 import { colorPresets } from './presets';
 
 interface IColorPresetsProps {
-    hsv: [number, number, number];
+    hsv?: [number, number, number];
     onChange: (h: number, s: number, v: number) => void;
 }
 
@@ -30,32 +30,48 @@ export function ColorPresets({ hsv, onChange }: IColorPresetsProps) {
         onChange(h, s, v);
     }, [onChange]);
 
-    const currentColor = hsvToHex(hsv[0], hsv[1], hsv[2]);
+    const currentColor = hsv ? hsvToHex(...hsv) : '';
 
     return (
         <div
             data-u-comp="color-picker-presets"
-            className="univer-grid univer-content-center univer-gap-2"
+            className="univer-grid univer-content-center"
         >
-            {colorPresets.map((row, i) => (
+            {colorPresets.map((row) => (
                 <div
-                    key={i}
-                    className="univer-grid univer-grid-flow-col univer-items-center univer-justify-between univer-gap-2"
+                    key={row[0]}
+                    className="univer-grid univer-grid-flow-col univer-items-center univer-justify-between"
                 >
-                    {row.map((color, j) => (
+                    {row.map((color) => (
                         <button
-                            key={j}
+                            key={color}
                             type="button"
+                            aria-label={color}
+                            aria-pressed={color.toUpperCase() === currentColor.toUpperCase()}
+                            title={color}
                             className={clsx(`
-                              univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border
-                              univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow
+                              univer-box-border univer-flex univer-size-8 univer-cursor-pointer univer-items-center
+                              univer-justify-center univer-rounded-md univer-border-0 univer-bg-transparent univer-p-1
+                              univer-transition-colors
+                              hover:univer-bg-gray-100
+                              focus-visible:univer-outline focus-visible:univer-outline-2
+                              focus-visible:univer-outline-primary-600
+                              dark:hover:!univer-bg-gray-700
                             `, {
-                                'univer-ring-2 univer-ring-offset-2 univer-ring-offset-gray-0 dark:!univer-ring-primary-600 dark:!univer-ring-offset-gray-600': color.toUpperCase() === currentColor.toUpperCase(),
-                                '!univer-border-gray-200': i === 0 && j === 0,
+                                'univer-bg-primary-50 dark:!univer-bg-gray-700': color.toUpperCase() === currentColor.toUpperCase(),
                             })}
-                            style={{ backgroundColor: color }}
                             onClick={() => handleSelectPreset(color)}
-                        />
+                        >
+                            <span
+                                className={clsx(`
+                                  univer-box-border univer-size-6 univer-rounded univer-border univer-border-solid
+                                  univer-border-black/10
+                                `, {
+                                    'univer-ring-2 univer-ring-primary-600 univer-ring-offset-2 univer-ring-offset-gray-0 dark:!univer-ring-primary-400 dark:!univer-ring-offset-gray-700': color.toUpperCase() === currentColor.toUpperCase(),
+                                })}
+                                style={{ backgroundColor: color }}
+                            />
+                        </button>
                     ))}
                 </div>
             ))}

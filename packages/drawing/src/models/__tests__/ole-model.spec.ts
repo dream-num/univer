@@ -54,6 +54,15 @@ function adapter(): IOleAttachmentIo {
 }
 
 describe('durable OLE attachments', () => {
+    it('verifies original bytes on HTTP origins without Web Crypto', async () => {
+        vi.stubGlobal('crypto', {});
+        expect(await readOleFile(resource().files[sha256])).toEqual(bytes);
+        const corrupt = resource().files[sha256];
+        corrupt.data = Buffer.from('different bytes').toString('base64');
+        corrupt.size = Buffer.from('different bytes').length;
+        await expect(readOleFile(corrupt)).rejects.toThrow('integrity mismatch');
+    });
+
     it('JSON save and reopen is self-contained and never calls attachment IO', async () => {
         const io = adapter();
         const json = await prepareOleResource(resource(), 'json', undefined, io);

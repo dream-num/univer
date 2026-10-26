@@ -185,11 +185,13 @@ export async function readOleFile(file: IOleFile, io?: IOleAttachmentIo, signal?
     if (bytes.byteLength !== file.size || bytes.byteLength > OLE_MAX_RESOURCE_BYTES) {
         throw new Error('OLE attachment size mismatch');
     }
-    const hash = await globalThis.crypto.subtle.digest('SHA-256', bytes as Uint8Array<ArrayBuffer>);
+    const hash = globalThis.crypto?.subtle
+        ? new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256', bytes as Uint8Array<ArrayBuffer>))
+        : (await import('@noble/hashes/sha256')).sha256(bytes);
     if (signal?.aborted) {
         throw new Error('OLE request aborted');
     }
-    const digest = Array.from(new Uint8Array(hash), (byte) => byte.toString(16).padStart(2, '0')).join('');
+    const digest = Array.from(hash, (byte) => byte.toString(16).padStart(2, '0')).join('');
     if (digest !== file.sha256) {
         throw new Error('OLE attachment integrity mismatch');
     }

@@ -57,7 +57,7 @@ describe('ColorPicker', () => {
         expect(view.queryByRole('dialog')).not.toBeInTheDocument();
         const input = view.getByRole('textbox', { name: 'HEX' });
         expect(input).toHaveFocus();
-        fireEvent.change(input, { target: { value: '#12ab34' } });
+        fireEvent.paste(input, { clipboardData: { getData: () => '#12ab34' } });
         expect(onChange).not.toHaveBeenCalled();
         fireEvent.click(view.getByRole('button', { name: enUS.design.ColorPicker.confirm }));
         expect(onChange).toHaveBeenCalledExactlyOnceWith('#12ab34');

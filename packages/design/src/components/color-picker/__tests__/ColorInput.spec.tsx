@@ -147,7 +147,10 @@ describe('ColorInput', () => {
 it('accepts pasted hex colors with a hash and rejects incomplete alpha values', () => {
     const onChange = vi.fn();
     const view = render(<ColorInput hsv={[0, 100, 100]} alpha={1} format="rgba" onChange={onChange} />);
-    fireEvent.change(view.getByRole('textbox', { name: 'HEX' }), { target: { value: '#123456' } });
+    const hexInput = view.getByRole('textbox', { name: 'HEX' });
+    expect(hexInput).toHaveAttribute('maxlength', '6');
+    fireEvent.paste(hexInput, { clipboardData: { getData: () => '#123456' } });
+    expect(hexInput).toHaveValue('123456');
     expect(onChange).toHaveBeenCalledExactlyOnceWith(...hexToHsv('#123456'));
     onChange.mockClear();
     fireEvent.change(view.getByRole('textbox', { name: 'A' }), { target: { value: '.' } });

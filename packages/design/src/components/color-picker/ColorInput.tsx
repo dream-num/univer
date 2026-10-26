@@ -48,7 +48,7 @@ function HexInput({ hsv, onChange }: IInputProps) {
     };
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const newValue = e.target.value.trim().replace(/^#/, '');
+        const newValue = e.target.value.trim();
 
         if (newValue.length > 6) {
             return;
@@ -86,7 +86,15 @@ function HexInput({ hsv, onChange }: IInputProps) {
                 value={inputValue}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                maxLength={7}
+                onPaste={(event) => {
+                    const pastedValue = event.clipboardData.getData('text').trim();
+                    if (!/^#[0-9A-Fa-f]{6}$/.test(pastedValue)) return;
+                    event.preventDefault();
+                    const hex = pastedValue.slice(1);
+                    setInputValue(hex);
+                    onChange?.(...hexToHsv(hex));
+                }}
+                maxLength={6}
                 aria-label="HEX"
                 spellCheck={false}
             />

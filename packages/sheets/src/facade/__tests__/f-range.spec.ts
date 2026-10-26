@@ -26,6 +26,11 @@ import type {
 import type { FUniver } from '@univerjs/core/facade';
 import {
     AbsoluteRefType,
+    BooleanNumber,
+    BorderStyleTypes,
+    BorderType,
+    CellValueType,
+    DEFAULT_NUMBER_FORMAT,
     Dimension,
     HorizontalAlign,
     ICommandService,
@@ -34,6 +39,7 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     TestConfirmService,
+    Tools,
     UniverInstanceType,
     VerticalAlign,
     WrapStrategy,
@@ -76,9 +82,87 @@ import {
     UnregisterWorksheetRangeThemeStyleMutation,
 } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { FRange } from '../f-range';
 import type { FWorksheet } from '../f-worksheet';
+import { SetBorderBasicCommand, SetBorderCommand } from '../../commands/commands/set-border.command';
+import { BorderStyleManagerService } from '../../services/border-style-manager.service';
 import { SHEETS_CUSTOM_FIELD_WARNING_MESSAGE } from '../const';
 import { createFacadeTestBed } from './create-test-bed';
+
+describe('FRange style-only text preservation', () => {
+    it.each<{ name: string; apply: (range: FRange) => FRange }>([
+        { name: 'setFontWeight', apply: (range) => range.setFontWeight('bold') },
+        { name: 'setFontStyle', apply: (range) => range.setFontStyle('italic') },
+        { name: 'setFontColor', apply: (range) => range.setFontColor('#ffff00') },
+        { name: 'setFontFamily', apply: (range) => range.setFontFamily('Arial') },
+        { name: 'setFontSize', apply: (range) => range.setFontSize(20) },
+        { name: 'setBackground', apply: (range) => range.setBackground('#ffff00') },
+        { name: 'setBackgroundColor', apply: (range) => range.setBackgroundColor('#ffff00') },
+        { name: 'setHorizontalAlignment', apply: (range) => range.setHorizontalAlignment('center') },
+        { name: 'setVerticalAlignment', apply: (range) => range.setVerticalAlignment('middle') },
+        { name: 'setWrap', apply: (range) => range.setWrap(true) },
+        { name: 'setBorder', apply: (range) => range.setBorder(BorderType.ALL, BorderStyleTypes.THIN, '#ffff00') },
+        {
+            name: 'setValues with style-only cells',
+            apply: (range) => range.setValues(Array.from({ length: range.getHeight() }, () =>
+                Array.from({ length: range.getWidth() }, () => ({ s: { bl: BooleanNumber.TRUE } })))),
+        },
+    ])('preserves values and types through $name, including neighboring border cells', ({ name, apply }) => {
+        const bed = createFacadeTestBed(undefined, [[BorderStyleManagerService]]);
+        try {
+            const commandService = bed.get(ICommandService);
+            [
+                SetRangeValuesCommand,
+                SetRangeValuesMutation,
+                SetStyleCommand,
+                SetTextWrapCommand,
+                SetHorizontalTextAlignCommand,
+                SetVerticalTextAlignCommand,
+                SetBorderBasicCommand,
+                SetBorderCommand,
+            ].forEach((command) => commandService.registerCommand(command));
+            bed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1');
+            const worksheet = bed.univerAPI.getActiveWorkbook()!.getActiveSheet();
+            const surroundingRange = worksheet.getRange('A1:J5');
+            const border = { s: BorderStyleTypes.THIN, cl: { rgb: '#000000' } };
+            surroundingRange.setValue({
+                v: '001',
+                t: CellValueType.STRING,
+                s: { bd: { t: border, b: border, l: border, r: border } },
+            });
+            const cells: ICellData[] = [
+                ...['014', '1.50', '1e3', 'abc', '2-2', '12%'].map((v) => ({ v, t: CellValueType.STRING })),
+                { v: 14, t: CellValueType.NUMBER },
+                { v: 3, t: CellValueType.NUMBER, f: '=1+2' },
+            ];
+            const range = worksheet.getRange('B2:I4');
+            range.setValues([undefined, '000', DEFAULT_NUMBER_FORMAT].map((pattern) =>
+                cells.map((cell) => ({ ...cell, s: pattern ? { n: { pattern } } : undefined }))));
+            const before = Tools.deepClone(surroundingRange.getCellDataGrid());
+            const readValues = () => surroundingRange.getCellDataGrid().map((row) =>
+                row.map((cell) => ({ v: cell?.v, t: cell?.t, f: cell?.f })));
+            const expected = readValues();
+            expect(range.getCellDataGrid().map((row) => row.map((cell) => cell?.v))).toEqual([
+                cells.map((cell) => cell.v),
+                cells.map((cell) => cell.v),
+                cells.map((cell) => cell.v),
+            ]);
+
+            apply(range);
+
+            expect(readValues()).toEqual(expected);
+            expect(surroundingRange.getCellDataGrid()).not.toEqual(before);
+            if (name === 'setBorder') {
+                expect(worksheet.getRange('B1').getCellStyleData()?.bd?.b).toBeUndefined();
+                expect(worksheet.getRange('B5').getCellStyleData()?.bd?.t).toBeUndefined();
+                expect(worksheet.getRange('A2').getCellStyleData()?.bd?.r).toBeUndefined();
+                expect(worksheet.getRange('J2').getCellStyleData()?.bd?.l).toBeUndefined();
+            }
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
 
 describe('Test FRange', () => {
     let get: Injector['get'];

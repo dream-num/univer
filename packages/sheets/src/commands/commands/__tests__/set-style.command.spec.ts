@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { IColorStyle, Injector, ITextDecoration, ITextRotation, Univer, Workbook } from '@univerjs/core';
-import type { ISetStyleCommandParams } from '../set-style.command';
+import type { IColorStyle, Injector, IStyleData, ITextDecoration, ITextRotation, Univer, Workbook } from '@univerjs/core';
 import {
     BooleanNumber,
+    CellValueType,
+    DEFAULT_TEXT_FORMAT_EXCEL,
     FontItalic,
     FontWeight,
     HorizontalAlign,
@@ -31,7 +32,7 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
+import type { ISetStyleCommandParams } from '../set-style.command';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { InsertSheetMutation } from '../../mutations/insert-sheet.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
@@ -87,6 +88,75 @@ describe("Test commands used for updating cells' styles", () => {
     });
 
     afterEach(() => univer.dispose());
+
+    it.each<{
+        name: string;
+        commandId: string;
+        params?: { value: string };
+        style: IStyleData;
+    }>([
+        {
+            name: 'background color',
+            commandId: SetBackgroundColorCommand.id,
+            params: { value: '#2C53F1' },
+            style: { bg: { rgb: '#2C53F1' } },
+        },
+        {
+            name: 'bold',
+            commandId: SetBoldCommand.id,
+            style: { bl: BooleanNumber.TRUE },
+        },
+        {
+            name: 'text color',
+            commandId: SetTextColorCommand.id,
+            params: { value: '#2C53F1' },
+            style: { cl: { rgb: '#2C53F1' } },
+        },
+    ])('preserves numeric text through $name, undo/redo and snapshot reload', async ({ commandId, params, style }) => {
+        const workbook = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!;
+        const worksheet = workbook.getSheetBySheetId('sheet1')!;
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
+        const cellValue = {
+            0: { 0: { v: '014', t: CellValueType.STRING } },
+            1: { 0: { v: '014', t: CellValueType.FORCE_STRING } },
+            2: { 0: { v: '014', t: CellValueType.STRING, s: { n: { pattern: DEFAULT_TEXT_FORMAT_EXCEL } } } },
+        };
+        expect(commandService.syncExecuteCommand(SetRangeValuesMutation.id, { unitId, subUnitId, cellValue })).toBe(true);
+        get(SheetsSelectionsService).addSelections([{
+            range: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.NORMAL },
+            primary: {
+                startRow: 0,
+                endRow: 0,
+                startColumn: 0,
+                endColumn: 0,
+                actualRow: 0,
+                actualColumn: 0,
+                isMerged: false,
+                isMergedMainCell: false,
+            },
+            style: null,
+        }]);
+        const readCells = (targetWorkbook: Workbook) => [0, 1, 2].map((row) => {
+            const cell = targetWorkbook.getSheetBySheetId(subUnitId)!.getCellRaw(row, 0);
+            return { ...cell, s: targetWorkbook.getStyles().getStyleByCell(cell) ?? null };
+        });
+        const before = readCells(workbook);
+        const after = before.map((cell) => ({ ...cell, s: { ...cell.s, ...style } }));
+        expect(await commandService.executeCommand(commandId, params)).toBe(true);
+        expect(readCells(workbook)).toEqual(after);
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(readCells(workbook)).toEqual(before);
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(readCells(workbook)).toEqual(after);
+
+        const restored = createCommandTestBed(workbook.save());
+        try {
+            expect(readCells(restored.sheet)).toEqual(after);
+        } finally {
+            restored.univer.dispose();
+        }
+    });
 
     it('set array of style', async () => {
         const range = { startRow: 1, startColumn: 1, endColumn: 3, endRow: 3, rangeType: RANGE_TYPE.NORMAL };

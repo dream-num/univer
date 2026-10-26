@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentData, Nullable } from '@univerjs/core';
 import {
     CommandType,
     DOCS_COMMENT_EDITOR_UNIT_ID_KEY,
@@ -296,7 +296,7 @@ describe('host-preserving editor undo redo', () => {
     it.each([false, true])('does not override a focus change during undo (preserveHostFocus=%s)', async (preserveHostFocus) => {
         const { commandService, contextService, univerInstanceService, editor } = createTestBed();
         const otherDocument = univer.createUnit(UniverInstanceType.UNIVER_DOC, { id: 'other-doc' });
-        const focusChanges: Array<string | null | undefined> = [];
+        const focusChanges: Array<Nullable<string>> = [];
         const subscription = univerInstanceService.focused$.subscribe((unitId) => focusChanges.push(unitId));
         univer.onDispose(() => subscription.unsubscribe());
 

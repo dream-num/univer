@@ -273,6 +273,7 @@ function SheetPermissionPanelListContent({ ActionRowComponent }: Required<ISheet
                                     className={clsx(`
                                       univer-mt-3 univer-rounded-lg univer-p-3
                                       hover:univer-bg-gray-50
+                                      dark:hover:!univer-bg-gray-800
                                     `, borderClassName)}
                                     onMouseMove={() => {
                                         const { subUnitId, unitType } = rule;
@@ -313,6 +314,7 @@ function SheetPermissionPanelListContent({ ActionRowComponent }: Required<ISheet
                                                             className={`
                                                               univer-box-border univer-h-6 univer-rounded-sm univer-p-1
                                                               hover:univer-bg-gray-200
+                                                              dark:hover:!univer-bg-gray-700
                                                             `}
                                                             onClick={() => handleEdit(rule as IPermissionPanelRule)}
                                                         >
@@ -326,6 +328,7 @@ function SheetPermissionPanelListContent({ ActionRowComponent }: Required<ISheet
                                                             className={`
                                                               univer-box-border univer-h-6 univer-rounded-sm univer-p-1
                                                               hover:univer-bg-gray-200
+                                                              dark:hover:!univer-bg-gray-700
                                                             `}
                                                             onClick={() => handleDelete(rule)}
                                                         >

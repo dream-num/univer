@@ -52,10 +52,16 @@ export function keepLastTextIndex(inputHtml: HTMLElement) {
 export function keepTextSelected(inputHtml: HTMLElement) {
     setTimeout(() => {
         const selection = window.getSelection();
-        if (!selection) return;
+        if (!selection) {
+            return;
+        }
 
         const range = document.createRange();
         range.selectNodeContents(inputHtml);
+        // An empty contenteditable can retain a <br>, which must not become a non-collapsed selection.
+        if (!getEditorText(inputHtml)) {
+            range.collapse(true);
+        }
 
         selection.removeAllRanges();
         selection.addRange(range);

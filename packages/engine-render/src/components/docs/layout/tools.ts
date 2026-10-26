@@ -1744,7 +1744,8 @@ export function getFontCreateConfig(
     viewModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
-    paragraph: IDocumentLayoutParagraph
+    paragraph: IDocumentLayoutParagraph,
+    includeCustomRangeStyle = true
 ) {
     const {
         gridType = GridType.LINES,
@@ -1770,7 +1771,7 @@ export function getFontCreateConfig(
     const customDecoration = viewModel.getCustomDecoration(index + startIndex);
     const showCustomDecoration = customDecoration && (customDecoration.show !== false);
     const customDecorationStyle = showCustomDecoration ? getCustomDecorationStyle(customDecoration) : null;
-    const customRange = viewModel.getCustomRange(index + startIndex);
+    const customRange = includeCustomRangeStyle ? viewModel.getCustomRange(index + startIndex) : null;
     const showCustomRange = customRange && (customRange.show !== false);
     const customRangeStyle = showCustomRange ? getCustomRangeStyle(customRange) : null;
     const hasAddonStyle = showCustomRange || showCustomDecoration || !!bullet || paragraphStyle?.namedStyleType || paragraphStyle?.textStyle != null || paragraphStyle?.paragraphMarkTextStyle != null;

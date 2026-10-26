@@ -17,9 +17,6 @@
 import type { ICommandInfo } from '@univerjs/core';
 import type { IUniverUIConfig } from '@univerjs/ui';
 import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from 'react';
-import type { LocaleKey } from '../../../locale/types';
-import type { IScrollState } from '../../../services/sheet-bar/type';
-import type { IBaseSheetBarProps } from './SheetBarItem';
 import {
     ICommandService,
     IConfirmService,
@@ -57,6 +54,9 @@ import {
 import { ILayoutService, UI_PLUGIN_CONFIG_KEY, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { merge } from 'rxjs';
+import type { LocaleKey } from '../../../locale/types';
+import type { IScrollState } from '../../../services/sheet-bar/type';
+import type { IBaseSheetBarProps } from './SheetBarItem';
 import { getEmbedSheetsTabCustomData } from '../../../embed-tab-anchor';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
@@ -307,7 +307,7 @@ export function SheetBarTabs() {
                         <>
                             {embedChildType != null && <EmbedSheetTabProductIcon childType={embedChildType} />}
                             {hasProtection && <LockIcon className="univer-shrink-0" />}
-                            <span className="univer-truncate univer-outline-none">{sheet.getName()}</span>
+                            <span className="univer-min-w-px univer-truncate univer-outline-none">{sheet.getName()}</span>
                         </>
                     ),
                     index,

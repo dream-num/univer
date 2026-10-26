@@ -1462,6 +1462,68 @@ describe('DocSelectionRenderService', () => {
         expect(document.activeElement).toBe(input);
     });
 
+    it.each([
+        { geometry: false, retainedEditor: false },
+        { geometry: false, retainedEditor: true },
+        { geometry: true, retainedEditor: false },
+        { geometry: true, retainedEditor: true },
+    ])('preserves external frame focus during passive selection refresh: %j', ({ geometry, retainedEditor }) => {
+        const frame = document.createElement('iframe');
+        document.body.appendChild(frame);
+        const ownerDocument = frame.contentDocument!;
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService({
+            scene: {
+                getViewports: () => geometry ? [{ getAbsoluteVector: () => ({ x: 30, y: 40 }) }] : [],
+                getEngine: () => ({ name: 'engine' }),
+            },
+        });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        ownerDocument.body.appendChild(TestLayoutService.root);
+        if (geometry) {
+            (service as unknown as { _rangeList: TextRange[] })._rangeList = [{
+                isActive: () => true,
+                getAnchor: () => ({ left: 12, top: 20, visible: true }),
+                dispose: vi.fn(),
+            } as never];
+        }
+        if (retainedEditor) {
+            input.focus();
+        }
+        const peerInput = document.createElement('div');
+        peerInput.tabIndex = -1;
+        document.body.appendChild(peerInput);
+        peerInput.focus();
+        vi.spyOn(ownerDocument, 'hasFocus').mockReturnValue(false);
+        const focus = vi.spyOn(input, 'focus');
+
+        expect(service.canFocusing).toBe(false);
+        service.sync();
+        if (geometry) {
+            expect(service.selectionContainer.style.left).toBe('30px');
+            expect(service.selectionContainer.style.top).toBe('40px');
+        }
+        service.activate(12, 34);
+
+        expect(document.activeElement).toBe(peerInput);
+        expect(focus).not.toHaveBeenCalled();
+        expect(service.selectionContainer.style.left).toBe('12px');
+        expect(service.selectionContainer.style.top).toBe('34px');
+
+        service.activate(12, 34, true);
+        expect(focus).toHaveBeenCalledOnce();
+        expect(ownerDocument.activeElement).toBe(input);
+    });
+
+    it('retains top-level focus recovery when the browser window is inactive', () => {
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService();
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        vi.spyOn(document, 'hasFocus').mockReturnValue(false);
+
+        service.sync();
+
+        expect(document.activeElement).toBe(input);
+    });
+
     it('publishes hidden editor input, paste, focus, and blur events with the typed content', () => {
         const { input, renderUnit, service, univer } = createRealSelectionRenderService();
         cleanup.push(() => renderUnit.dispose(), () => univer.dispose());

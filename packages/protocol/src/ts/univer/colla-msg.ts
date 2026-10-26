@@ -15,6 +15,7 @@
  */
 
 import type { IChangeset } from './changeset';
+import type { ErrorCode } from './constants/errors';
 import type { IUnitPermissionStrategy, IUser, ObjectScope, UnitRole, UnitShareScope } from './permission';
 
 export interface ICollaMsg {
@@ -76,10 +77,18 @@ interface IChangesetAck {
 
 interface IChangesetRej {
     cs: IChangeset | undefined;
+    /** Reject reason code. `0` (`ErrorCode.UNDEFINED`) or absent means the server did not fill it in. */
+    code?: ErrorCode;
+    /** Human-readable description of why the changeset was rejected. Empty or absent when not filled in. */
+    reason?: string;
 }
 
 interface IChangesetShouldRetry {
     cs: IChangeset | undefined;
+    /** Reject reason code. `0` (`ErrorCode.UNDEFINED`) or absent means the server did not fill it in. */
+    code?: ErrorCode;
+    /** Human-readable description of why the changeset was rejected. Empty or absent when not filled in. */
+    reason?: string;
 }
 
 export interface IUpdateCursor {
@@ -127,6 +136,10 @@ export interface ICollaMsgErrorEvent {
 
 interface IPermissionRej {
     cs: IChangeset | undefined;
+    /** Reject reason code. `0` (`ErrorCode.UNDEFINED`) or absent means the server did not fill it in. */
+    code?: ErrorCode;
+    /** Human-readable description of why the changeset was rejected. Empty or absent when not filled in. */
+    reason?: string;
 }
 
 export interface ICommentUpdate {

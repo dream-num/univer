@@ -36,7 +36,7 @@ export interface IOlePreviewViewerOptions {
 
 /** An isolated temporary Univer instance. The host's Unit list, revision and collaboration remain untouched. */
 export function createOlePreviewViewer(options: IOlePreviewViewerOptions): IDisposable {
-    const viewer = new Univer({ locale: options.locale.getCurrentLocale(), locales: { [options.locale.getCurrentLocale()]: options.locale.getLocales() ?? {} }, theme: options.theme.getCurrentTheme() });
+    const viewer = new Univer({ darkMode: options.theme.darkMode, locale: options.locale.getCurrentLocale(), locales: { [options.locale.getCurrentLocale()]: options.locale.getLocales() ?? {} }, theme: options.theme.getCurrentTheme() });
     try {
         viewer.registerPlugin(UniverRenderEnginePlugin);
         viewer.registerPlugin(UniverUIPlugin, { container: options.container, portalContainer: options.container, header: false, toolbar: false, footer: false, contextMenu: false });

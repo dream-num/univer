@@ -19,6 +19,10 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'drawing-ui': {
         ole: {
+            progressReading: 'Lendo anexo…',
+            progressUploading: 'Enviando anexo…',
+            progressCreating: 'Criando arquivo online…',
+            progressSaving: 'Salvando link…',
             externalAttachment: 'Anexo vinculado',
             externalHint: 'O arquivo original deste anexo não está incorporado ao documento. A visualização e o download estão indisponíveis.',
             missingHint: 'Os dados deste anexo estão ausentes no documento. A visualização e o download estão indisponíveis.',

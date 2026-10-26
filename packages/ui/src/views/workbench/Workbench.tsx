@@ -16,13 +16,13 @@
 
 import type { Injector } from '@univerjs/core';
 import type { ComponentType } from 'react';
+import type { IUniverUIConfig } from '../../config/config';
+import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { IConfigService, LifecycleService, LifecycleStages, LocaleService, ThemeService } from '@univerjs/core';
 import { borderBottomClassName, clsx, ConfigContext, ConfigProvider, render } from '@univerjs/design';
 import { useContext, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { map } from 'rxjs';
-import type { IUniverUIConfig } from '../../config/config';
-import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { ThemeSwitcherService } from '../../services/theme-switcher/theme-switcher.service';
@@ -143,7 +143,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
     }, [mountContainer, portalContainer, uiConfig?.portalContainer]);
 
     useEffect(() => {
-        portalContainer.dir = direction;
+        portalContainer.setAttribute('dir', direction);
     }, [direction, portalContainer]);
 
     return (

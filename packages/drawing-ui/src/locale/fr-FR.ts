@@ -19,6 +19,10 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'drawing-ui': {
         ole: {
+            progressReading: 'Lecture de la pièce jointe…',
+            progressUploading: 'Envoi de la pièce jointe…',
+            progressCreating: 'Création du fichier en ligne…',
+            progressSaving: 'Enregistrement du lien…',
             externalAttachment: 'Pièce jointe liée',
             externalHint: 'Le fichier source de cette pièce jointe n’est pas intégré au document. L’aperçu et le téléchargement sont indisponibles.',
             missingHint: 'Les données de cette pièce jointe sont absentes du document. L’aperçu et le téléchargement sont indisponibles.',

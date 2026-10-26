@@ -19,6 +19,10 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'drawing-ui': {
         ole: {
+            progressReading: 'S’està llegint el fitxer adjunt…',
+            progressUploading: 'S’està pujant el fitxer adjunt…',
+            progressCreating: 'S’està creant el fitxer en línia…',
+            progressSaving: 'S’està desant l’enllaç…',
             externalAttachment: 'Fitxer adjunt enllaçat',
             externalHint: 'El fitxer original d’aquest adjunt no està incrustat al document. La previsualització i la baixada no estan disponibles.',
             missingHint: 'Falten les dades d’aquest adjunt al document. La previsualització i la baixada no estan disponibles.',

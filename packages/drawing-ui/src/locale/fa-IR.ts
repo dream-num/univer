@@ -19,6 +19,10 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'drawing-ui': {
         ole: {
+            progressReading: 'در حال خواندن پیوست…',
+            progressUploading: 'در حال بارگذاری پیوست…',
+            progressCreating: 'در حال ایجاد فایل آنلاین…',
+            progressSaving: 'در حال ذخیره پیوند…',
             externalAttachment: 'پیوست پیوندشده',
             externalHint: 'فایل اصلی این پیوست در سند جاسازی نشده است. پیش‌نمایش و بارگیری در دسترس نیست.',
             missingHint: 'داده‌های این پیوست در سند موجود نیست. پیش‌نمایش و بارگیری در دسترس نیست.',

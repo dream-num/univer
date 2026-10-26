@@ -19,6 +19,10 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'drawing-ui': {
         ole: {
+            progressReading: 'Đang đọc tệp đính kèm…',
+            progressUploading: 'Đang tải tệp đính kèm lên…',
+            progressCreating: 'Đang tạo tệp trực tuyến…',
+            progressSaving: 'Đang lưu liên kết…',
             externalAttachment: 'Tệp đính kèm được liên kết',
             externalHint: 'Tệp gốc mà tệp đính kèm này tham chiếu chưa được nhúng vào tài liệu. Không thể xem trước hoặc tải xuống.',
             missingHint: 'Tài liệu thiếu dữ liệu của tệp đính kèm này. Không thể xem trước hoặc tải xuống.',

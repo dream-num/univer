@@ -15,8 +15,8 @@
  */
 
 import type { IBaseAttachment, IDisposable } from '@univerjs/core';
-import { UniverInstanceType } from '@univerjs/core';
 import type { IImageData } from './image-model-interface';
+import { UniverInstanceType } from '@univerjs/core';
 
 export const OLE_RESOURCE_NAME = 'UNIVER_OLE_ATTACHMENT_PLUGIN';
 export const OLE_MAX_RESOURCE_BYTES = 50 * 1024 * 1024;
@@ -69,6 +69,7 @@ export interface IOleRelationship {
 export interface IOleObject {
     id: string;
     hostPart: string;
+    fileName?: string;
     subUnitId: string;
     drawingId: string;
     initialGeometry?: object;
@@ -111,11 +112,18 @@ export interface IOlePreviewRequest {
     signal: AbortSignal;
 }
 
+export type OleConversionStage = 'reading' | 'uploading' | 'converting' | 'creating' | 'saving';
+
+/** Existing Unit attachments are converted by reference. JSON attachments upload their bytes once. */
+export type IOleOnlineConversionRequest = Omit<IOlePreviewRequest, 'bytes'> & {
+    onProgress?: (stage: OleConversionStage) => void;
+} & ({ fileId: string; bytes?: never } | { bytes: Uint8Array; fileId?: never });
+
 export interface IOleConfig {
     /** Whether this exact host Unit is backed by the collaboration server. */
     isCollaborative?: (unitId: string) => boolean;
     /** Explicitly create an independent online Unit and return its application URL. */
-    convertToOnline?: (request: IOlePreviewRequest) => Promise<IOleOnlineUnit>;
+    convertToOnline?: (request: IOleOnlineConversionRequest) => Promise<IOleOnlineUnit>;
     attachmentIo?: IOleAttachmentIo;
     /** Open a temporary read-only Office preview. The handler must not create a persisted child Unit. */
     previewOffice?: (request: IOlePreviewRequest) => Promise<void>;
@@ -146,7 +154,7 @@ export function parseOleResource(json: string): IOleResource {
         }
     }
     for (const [id, object] of Object.entries(value.objects)) {
-        if (object.id !== id || typeof object.drawingId !== 'string' || typeof object.subUnitId !== 'string') {
+        if (object.id !== id || typeof object.drawingId !== 'string' || typeof object.subUnitId !== 'string' || (object.fileName != null && typeof object.fileName !== 'string')) {
             throw new Error('Invalid OLE object identity');
         }
         for (const fileId of [object.fileId, object.rawFileId, ...Object.values(object.parts)]) {
@@ -178,6 +186,9 @@ export async function readOleFile(file: IOleFile, io?: IOleAttachmentIo, signal?
         throw new Error('OLE attachment size mismatch');
     }
     const hash = await globalThis.crypto.subtle.digest('SHA-256', bytes as Uint8Array<ArrayBuffer>);
+    if (signal?.aborted) {
+        throw new Error('OLE request aborted');
+    }
     const digest = Array.from(new Uint8Array(hash), (byte) => byte.toString(16).padStart(2, '0')).join('');
     if (digest !== file.sha256) {
         throw new Error('OLE attachment integrity mismatch');

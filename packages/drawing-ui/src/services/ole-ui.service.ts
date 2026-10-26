@@ -37,8 +37,9 @@ import {
 import { MessageType } from '@univerjs/design';
 import { getOleOfficeType, IDrawingManagerService, OleService, readOleFile } from '@univerjs/drawing';
 import { Image } from '@univerjs/engine-render';
-import { IDialogService, IMessageService } from '@univerjs/ui';
+import { IDialogService, IMessageService, INotificationService } from '@univerjs/ui';
 import { OleCanvasRenderer } from '../views/ole/ole-canvas-renderer';
+import { createOleConversionProgress } from '../views/ole/OleConversionProgress';
 
 export const OLE_NAME_COMPONENT = 'drawing.ole-name';
 export const OLE_POPUP_COMPONENT = 'drawing.ole-popup';
@@ -93,6 +94,7 @@ export class OleUIService extends Disposable {
         @Inject(LocaleService) private readonly _locale: LocaleService,
         @IMessageService private readonly _messages: IMessageService,
         @IDialogService private readonly _dialogs: IDialogService,
+        @INotificationService private readonly _notifications: INotificationService,
         @Inject(ThemeService) theme: ThemeService
     ) {
         super();
@@ -287,7 +289,7 @@ export class OleUIService extends Disposable {
         const record = id ? resource?.objects[id] : undefined;
         const fileId = record?.fileId;
         return current?.oleFileName ?? current?.element?.oleFileName
-            ?? (fileId ? resource?.files[fileId]?.name : undefined) ?? this._locale.t<LocaleKey>(record?.external ? 'drawing-ui.ole.externalAttachment' : 'drawing-ui.ole.attachment');
+            ?? record?.fileName ?? (fileId ? resource?.files[fileId]?.name : undefined) ?? this._locale.t<LocaleKey>(record?.external ? 'drawing-ui.ole.externalAttachment' : 'drawing-ui.ole.attachment');
     }
 
     private _showName(object: BaseObject, drawing: IDrawingSearch): void {
@@ -427,24 +429,50 @@ export class OleUIService extends Disposable {
         if (tab) {
             tab.opener = null;
         }
+        let tabClosed = false;
+        const closeTab = () => {
+            if (!tabClosed) {
+                tabClosed = true;
+                tab?.close();
+            }
+        };
+        const progress = createOleConversionProgress(this._notifications, this._locale, this._fileName(drawing), tab);
+        const cancelProgress = () => {
+            progress.dispose();
+            closeTab();
+        };
+        controller.signal.addEventListener('abort', cancelProgress, { once: true });
         try {
             const cached = this._onlineResults.get(key(drawing));
             let online = cached && cached.attachmentId === objectId ? cached.online : undefined;
             if (!online) {
-                const { id, bytes, file: namedFile } = await this._file(drawing, controller.signal);
-                online = await config.convertToOnline({ unitId: drawing.unitId, attachmentId: id, bytes, name: namedFile.name, mimeType: file.mimeType, signal: controller.signal });
+                const request = {
+                    unitId: drawing.unitId,
+                    attachmentId: objectId!,
+                    name: this._fileName(drawing),
+                    mimeType: file.mimeType,
+                    signal: controller.signal,
+                    onProgress: progress.update,
+                };
+                if (file.data == null && file.attachment?.sourceType === 'UUID' && file.attachment.source) {
+                    online = await config.convertToOnline({ ...request, fileId: file.attachment.source });
+                } else {
+                    const { bytes } = await this._file(drawing, controller.signal);
+                    online = await config.convertToOnline({ ...request, bytes });
+                }
                 if (online.type !== officeType) {
                     throw new Error('OLE online Unit type mismatch');
                 }
                 online = { ...online, url: this._onlineUrl(online) };
                 if (!controller.signal.aborted) {
-                    this._onlineResults.set(key(drawing), { attachmentId: id, online });
+                    this._onlineResults.set(key(drawing), { attachmentId: objectId!, online });
                 }
             }
             if (controller.signal.aborted || attachmentId(this._getDrawing(drawing)) !== objectId) {
-                tab?.close();
+                closeTab();
                 return;
             }
+            progress.update('saving');
             try {
                 const editable = host.isEditable?.(drawing) ?? host.drawingService?.getDrawingEditable() ?? this._drawings.getDrawingEditable();
                 if (!editable || !await host.saveOnlineUnit(drawing, online)) {
@@ -459,10 +487,13 @@ export class OleUIService extends Disposable {
                 this._messages.show({ type: MessageType.Info, content: this._locale.t<LocaleKey>('drawing-ui.ole.converted') });
             }
         } catch (error) {
-            tab?.close();
+            closeTab();
             if (!controller.signal.aborted) {
                 throw error;
             }
+        } finally {
+            controller.signal.removeEventListener('abort', cancelProgress);
+            progress.dispose();
         }
     }
 

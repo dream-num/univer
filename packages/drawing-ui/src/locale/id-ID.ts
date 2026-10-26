@@ -19,6 +19,10 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'drawing-ui': {
         ole: {
+            progressReading: 'Membaca lampiran…',
+            progressUploading: 'Mengunggah lampiran…',
+            progressCreating: 'Membuat file online…',
+            progressSaving: 'Menyimpan tautan…',
             externalAttachment: 'Lampiran tertaut',
             externalHint: 'File asli yang dirujuk oleh lampiran ini tidak disematkan dalam dokumen. Pratinjau dan unduhan tidak tersedia.',
             missingHint: 'Data lampiran ini tidak ada dalam dokumen. Pratinjau dan unduhan tidak tersedia.',

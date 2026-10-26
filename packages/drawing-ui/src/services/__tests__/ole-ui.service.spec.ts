@@ -31,7 +31,7 @@ import {
 } from '@univerjs/core';
 import { IDrawingManagerService, OleService, UnitDrawingService } from '@univerjs/drawing';
 import { Image } from '@univerjs/engine-render';
-import { IDialogService, IMessageService } from '@univerjs/ui';
+import { IDialogService, IMessageService, INotificationService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { OLE_POPUP_COMPONENT, OleUIService } from '../ole-ui.service';
@@ -71,6 +71,7 @@ function harness(online = false, type = UniverInstanceType.UNIVER_SHEET) {
         [LocaleService, { useValue: { t: (key: string, ...args: unknown[]) => args.length ? `${key}:${args.join(',')}` : key } }],
         [IMessageService, { useValue: messages }],
         [IDialogService, { useValue: dialogs }],
+        [INotificationService, { useValue: { show: vi.fn(() => ({ dispose: vi.fn() })) } }],
         [ThemeService],
         [OleUIService],
     ]);
@@ -357,14 +358,14 @@ function collaborativeHarness() {
     h.resource.files[sha256].mimeType = 'application/msword';
     h.resource.files[sha256].name = 'original.doc';
     h.config.isCollaborative = vi.fn((unitId) => unitId === 'host');
-    const convert = vi.fn(async () => online);
+    const convert = vi.fn<NonNullable<IOleConfig['convertToOnline']>>(async () => online);
     h.config.convertToOnline = convert;
     const save = vi.fn(async (_drawing: unknown, value: IOleOnlineUnit) => {
         h.drawing.oleOnlineUnit = value;
         return true;
     });
     h.service.registerHost(UniverInstanceType.UNIVER_SHEET, { attach: h.attach, remove: h.remove, saveOnlineUnit: save });
-    const tab = { opener: {}, location: { href: 'about:blank' }, closed: false, close: vi.fn() };
+    const tab = { document: document.implementation.createHTMLDocument(), opener: {}, location: { href: 'about:blank' }, closed: false, close: vi.fn() };
     const open = vi.spyOn(window, 'open').mockReturnValue(tab as never);
     return { ...h, convert, save, tab, open };
 }
@@ -396,12 +397,14 @@ describe('explicit collaborative OLE conversion', () => {
         expect(h.tab.opener).toBeNull();
         await first;
         expect(h.convert).toHaveBeenCalledOnce();
+        expect(h.convert).toHaveBeenCalledWith(expect.objectContaining({ fileId: 'stable-file', unitId: 'host' }));
+        expect(h.convert.mock.calls[0][0]).not.toHaveProperty('bytes');
         expect(h.save).toHaveBeenCalledWith(h.drawing, online);
         expect(h.tab.location.href).toBe(online.url);
         expect(JSON.stringify(h.resource)).toBe(before);
         await h.service.convertToOnline(h.drawing);
         expect(h.convert).toHaveBeenCalledOnce();
-        expect(h.io.read).toHaveBeenCalledOnce();
+        expect(h.io.read).not.toHaveBeenCalled();
         expect(h.open).toHaveBeenLastCalledWith(online.url, '_blank', 'noopener,noreferrer');
         expect(h.attach.mock.lastCall?.[2].hasOnlineUnit).toBe(true);
     });
@@ -452,8 +455,12 @@ describe('explicit collaborative OLE conversion', () => {
         }));
         const pending = h.service.convertToOnline(h.drawing);
         await vi.waitFor(() => expect(h.convert).toHaveBeenCalledOnce());
+        expect(h.tab.document.querySelector('progress')).not.toBeNull();
+        h.convert.mock.calls[0][0].onProgress?.('creating');
+        expect(h.tab.document.body.textContent).toContain('drawing-ui.ole.progressCreating');
         if (reason === 'deletion') h.removeModel();
         else h.disposed$.next({ getUnitId: () => 'host' });
+        expect(h.tab.close).toHaveBeenCalledOnce();
         complete(online);
         await pending;
         expect(h.save).not.toHaveBeenCalled();

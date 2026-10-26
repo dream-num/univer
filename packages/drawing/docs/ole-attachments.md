@@ -34,23 +34,16 @@ Before Office export, materialize the Unit through the Server SDK and call `prep
 
 ## Preview integration
 
-The Pro collaboration client supplies an adapter using the existing attachment upload/sign/read requests. It passes the explicit target Unit to the shared attachment uploader, independently of the currently focused Unit. The Pro exchange client supplies a converter using its JSON import endpoint and a temporary isolated read-only viewer. Product renderers are loaded on demand; preview does not create a persisted child Unit or use the embed model.
+The Pro collaboration client supplies an adapter using the existing attachment upload/sign/read requests. It passes the explicit target Unit to the shared attachment uploader, independently of the currently focused Unit. Register the optional Pro `UniverOleExchangeClientPlugin` after `UniverExchangeClientPlugin`:
 
-The isolated viewer sets the UI plugin's `portalContainer` to its preview container. Its menus and nested preview dialogs therefore remain inside the owning modal's interaction scope; closing a nested preview returns to its parent. The attachment glyph and caption remain Canvas content.
+```ts
+univer.registerPlugin(UniverExchangeClientPlugin, exchangeEndpoints);
+univer.registerPlugin(UniverOleExchangeClientPlugin, {
+    getLink: (unitId, type) => application.unitUrl(unitId, type),
+});
+```
 
-Applications may supply `ole.attachmentIo`, `ole.previewOffice`, `ole.convertOffice` or `ole.createOfficePreview` in `UniverDrawingPlugin` configuration. Server runtimes can use the transport helpers with their own attachment adapter. For an Office preview, `convertOffice` returns `{ type, data }` with UnitData. A custom preview handler must honor cancellation and keep preview results out of the host snapshot.
-
-Load the normal styles for any product that the lazy Office viewer may display. PDF and raster images use local Blob previews. PDF display depends on the browser PDF renderer; the dialog includes a download link when native rendering is unavailable. Unknown binary objects remain downloadable and report that online preview is unavailable. External local-file links retain an unavailable placeholder; the importer never follows them. Download returns the extracted original file, or the opaque original OLE container when extraction is unavailable. Preview conversions never replace the retained source bytes.
-
-## Unavailable attachments
-
-External links and missing attachment records remain visible placeholders at their imported position and size. Canvas draws a warning badge and a localized unavailable caption; a known filename is retained, otherwise a linked attachment receives a localized fallback name. The toolbar keeps a focusable warning icon with the specific reason and, for editors, Delete. Preview, Download, Rename and online conversion are omitted for these placeholders. The warning tooltip does not intercept pointer input over adjacent actions. Opening preview through the public API or double-clicking also explains the reason without reading or converting a file.
-
-When an interactive OLE drawing is first bound, the UI reports the document's unavailable attachment count once per open Unit. Thumbnail rendering, hovering and undo do not repeat the notice. Closing the Unit resets this local notice state. These hints do not add fields to the snapshot or change the preserved Office relationships, original bytes, export metadata or geometry. An external link is never followed automatically.
-
-## Explicit conversion to an online document
-
-The Pro exchange client supplies `ole.convertToOnline` using the existing `importFileToUnitId` endpoint and the link resolver registered with `IExchangeOperateService.registerLink`. It never uses the JSON preview endpoint for this action. `ole.isCollaborative(unitId)` checks whether that exact host Unit was loaded from the snapshot server; installing a collaboration plugin does not enable conversion for local JSON Units. Applications with custom collaboration integration may supply both callbacks.
+The base exchange client remains independent of drawing UI. The optional plugin supplies the read-only Office viewer and `ole.convertToOnline`. An online attachment submits its stable file ID and source Unit ID to the existing import/task endpoint; the browser does not read or upload its bytes. Inline JSON bytes are uploaded once. The server must authorize the persistent attachment reference and can use `UniverAttachmentImportService` with its normal attachment and Unit creation adapters. The JSON preview endpoint never creates a persisted Unit. `ole.isCollaborative(unitId)` checks the exact host Unit. Applications with custom integration may provide these callbacks directly.
 
 Only supported Office attachments in a collaborative host show Convert to online spreadsheet/document/slides. PDF, unknown binaries and unavailable local links are retained as attachments. A read-only host cannot create a link. Existing saved links can still be opened, subject to normal destination authentication and permissions.
 
@@ -69,4 +62,4 @@ File-type glyphs use built-in static vector paths and captions use Canvas text a
 
 Rename replaces the toolbar with an input above the object, with a fixed extension and explicit Save/Cancel buttons. Enter saves, Escape cancels, and composition Enter is ignored. Clipboard actions inside the input remain native text operations; they do not paste into the Slide canvas. Names must be nonempty, at most 255 Unicode characters including the extension, and cannot contain control/path characters or end in a dot. The per-occurrence `oleFileName` field overrides the displayed and default download name. The original file record, SHA-256 and bytes are unchanged, so other occurrences sharing those bytes retain their own names. Drawing commands persist the name through the normal mutations and undo/redo; both JSON and Unit snapshot transport retain it. Rename does not change an already converted online Unit's title. Office export retains original OLE binary and presentation parts; rewriting their native caption metadata to match the override is not implemented.
 
-Online conversion shows an immediate progress indicator while its request is pending. Delete uses the danger hover color; normal, focus and dark colors use the existing theme tokens. All three product adapters position the toolbar above its attachment with an 8 px gap.
+Online conversion keeps an indeterminate progress bar and localized reading/uploading, converting, creating and saving stages visible in a notification and the reserved tab. Closing a Unit or deleting its drawing immediately clears this UI and stops waiting; committed server work is not rolled back. Configure the existing exchange task timeout for large documents. Delete uses the danger hover color; normal, focus and dark colors use the existing theme tokens. All three product adapters position the toolbar above its attachment with an 8 px gap.

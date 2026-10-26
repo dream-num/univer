@@ -19,6 +19,10 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'drawing-ui': {
         ole: {
+            progressReading: 'جارٍ قراءة المرفق…',
+            progressUploading: 'جارٍ رفع المرفق…',
+            progressCreating: 'جارٍ إنشاء الملف عبر الإنترنت…',
+            progressSaving: 'جارٍ حفظ الرابط…',
             externalAttachment: 'مرفق مرتبط',
             externalHint: 'الملف الأصلي الذي يشير إليه هذا المرفق غير مضمّن في المستند. المعاينة والتنزيل غير متاحين.',
             missingHint: 'بيانات هذا المرفق مفقودة من المستند. المعاينة والتنزيل غير متاحين.',

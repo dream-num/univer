@@ -19,6 +19,10 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'drawing-ui': {
         ole: {
+            progressReading: '첨부 파일을 읽는 중…',
+            progressUploading: '첨부 파일을 업로드하는 중…',
+            progressCreating: '온라인 파일을 만드는 중…',
+            progressSaving: '링크를 저장하는 중…',
             externalAttachment: '연결된 첨부 파일',
             externalHint: '이 첨부 파일이 참조하는 원본 파일이 문서에 포함되어 있지 않아 미리 보기와 다운로드를 사용할 수 없습니다.',
             missingHint: '문서에 첨부 파일 데이터가 없어 미리 보기와 다운로드를 사용할 수 없습니다.',

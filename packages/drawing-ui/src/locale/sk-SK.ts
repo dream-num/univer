@@ -19,6 +19,10 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'drawing-ui': {
         ole: {
+            progressReading: 'Čítanie prílohy…',
+            progressUploading: 'Nahrávanie prílohy…',
+            progressCreating: 'Vytváranie online súboru…',
+            progressSaving: 'Ukladanie odkazu…',
             externalAttachment: 'Prepojená príloha',
             externalHint: 'Pôvodný súbor tejto prílohy nie je vložený do dokumentu. Náhľad a sťahovanie nie sú dostupné.',
             missingHint: 'V dokumente chýbajú údaje tejto prílohy. Náhľad a sťahovanie nie sú dostupné.',

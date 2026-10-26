@@ -19,6 +19,10 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'drawing-ui': {
         ole: {
+            progressReading: 'Чтение вложения…',
+            progressUploading: 'Загрузка вложения…',
+            progressCreating: 'Создание онлайн-файла…',
+            progressSaving: 'Сохранение ссылки…',
             externalAttachment: 'Связанное вложение',
             externalHint: 'Исходный файл этого вложения не встроен в документ. Просмотр и скачивание недоступны.',
             missingHint: 'В документе отсутствуют данные этого вложения. Просмотр и скачивание недоступны.',

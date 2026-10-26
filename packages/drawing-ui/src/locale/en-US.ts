@@ -17,6 +17,10 @@
 const locale = {
     'drawing-ui': {
         ole: {
+            progressReading: 'Reading attachment…',
+            progressUploading: 'Uploading attachment…',
+            progressCreating: 'Creating online file…',
+            progressSaving: 'Saving link…',
             externalAttachment: 'Linked attachment',
             externalHint: 'The original file referenced by this attachment is not embedded in this document. Preview and download are unavailable.',
             missingHint: 'This document is missing the attachment data. Preview and download are unavailable.',

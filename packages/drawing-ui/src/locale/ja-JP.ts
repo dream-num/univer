@@ -19,6 +19,10 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'drawing-ui': {
         ole: {
+            progressReading: '添付ファイルを読み込み中…',
+            progressUploading: '添付ファイルをアップロード中…',
+            progressCreating: 'オンラインファイルを作成中…',
+            progressSaving: 'リンクを保存中…',
             externalAttachment: 'リンクされた添付ファイル',
             externalHint: 'この添付ファイルの参照先の元ファイルは文書に埋め込まれていないため、プレビューやダウンロードはできません。',
             missingHint: 'この文書には添付ファイルのデータがないため、プレビューやダウンロードはできません。',

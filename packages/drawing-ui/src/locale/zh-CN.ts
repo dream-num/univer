@@ -19,6 +19,10 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'drawing-ui': {
         ole: {
+            progressReading: '正在读取附件…',
+            progressUploading: '正在上传附件…',
+            progressCreating: '正在创建在线文件…',
+            progressSaving: '正在保存链接…',
             externalAttachment: '外链附件',
             externalHint: '此附件引用的原文件未嵌入当前文档，无法预览或下载。',
             missingHint: '当前文档缺少此附件的数据，无法预览或下载。',

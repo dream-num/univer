@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import type { IOleAttachmentIo, IOleResource } from '../ole-model';
 import { Buffer } from 'node:buffer';
 import { createHash } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
-import type { IOleAttachmentIo, IOleResource } from '../ole-model';
 import { parseOleResource, prepareOleResource, prepareOleSnapshot, readOleFile } from '../ole-model';
 
 const bytes = new TextEncoder().encode('%PDF-1.7 original attachment');

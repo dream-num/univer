@@ -19,6 +19,10 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'drawing-ui': {
         ole: {
+            progressReading: 'Lettura dell’allegato…',
+            progressUploading: 'Caricamento dell’allegato…',
+            progressCreating: 'Creazione del file online…',
+            progressSaving: 'Salvataggio del collegamento…',
             externalAttachment: 'Allegato collegato',
             externalHint: 'Il file originale di questo allegato non è incorporato nel documento. Anteprima e download non sono disponibili.',
             missingHint: 'I dati di questo allegato sono assenti dal documento. Anteprima e download non sono disponibili.',

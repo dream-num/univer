@@ -182,6 +182,7 @@ export { cssPxToEmu, EMU_PER_CSS_PX, emuToCssPx } from './shared/units';
 export * from './sheets';
 export type { IWorkbookCalculationSettings } from './sheets/calculation-settings';
 export { MAX_ITERATION_COUNT, normalizeWorkbookCalculationSettings } from './sheets/calculation-settings';
+export { isValidColumnDimensions, isValidRowDimensions, isValidSheetDimension } from './sheets/sheet-dimensions';
 export { Skeleton } from './skeleton';
 export * from './types/const';
 export { skipParseTagNames } from './types/const/clipboard';

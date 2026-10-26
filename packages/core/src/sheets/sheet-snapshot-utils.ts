@@ -16,6 +16,7 @@
 
 import type { IWorksheetData } from './typedef';
 import { BooleanNumber } from '../types/enum/text-style';
+import { isValidSheetDimension, normalizeSheetDimension } from './sheet-dimensions';
 
 // TODO@wzhudev: default value should not be exposed, but the keys.
 
@@ -93,6 +94,27 @@ export function mergeWorksheetSnapshotWithDefault(snapshot: Partial<IWorksheetDa
     freeze.ySplit = freeze.ySplit ?? defaultSnapshot.freeze.ySplit;
     freeze.startRow = freeze.ySplit === 0 ? defaultSnapshot.freeze.startRow : (freeze.startRow ?? defaultSnapshot.freeze.startRow);
     freeze.startColumn = freeze.xSplit === 0 ? defaultSnapshot.freeze.startColumn : (freeze.startColumn ?? defaultSnapshot.freeze.startColumn);
+
+    snapshot.defaultColumnWidth = normalizeSheetDimension(snapshot.defaultColumnWidth, DEFAULT_WORKSHEET_COLUMN_WIDTH, false);
+    snapshot.defaultRowHeight = normalizeSheetDimension(snapshot.defaultRowHeight, DEFAULT_WORKSHEET_ROW_HEIGHT, false);
+
+    for (const column of Object.values(snapshot.columnData!)) {
+        if (column && column.w !== undefined && !isValidSheetDimension(column.w)) {
+            column.w = 0;
+        }
+    }
+
+    for (const row of Object.values(snapshot.rowData!)) {
+        if (!row) {
+            continue;
+        }
+        if (row.h !== undefined && !isValidSheetDimension(row.h)) {
+            row.h = 0;
+        }
+        if (row.ah !== undefined && !isValidSheetDimension(row.ah)) {
+            delete row.ah;
+        }
+    }
 
     return snapshot as IWorksheetData;
 }

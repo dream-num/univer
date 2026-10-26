@@ -15,13 +15,13 @@
  */
 
 import type { IAccessor, IMutation } from '@univerjs/core';
+import { CommandType, isValidColumnDimensions, isValidRowDimensions, IUniverInstanceService } from '@univerjs/core';
 import type {
     IInsertColMutationParams,
     IInsertRowMutationParams,
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
 } from '../../basics/interfaces/mutation-interface';
-import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import { getSheetMutationTarget } from '../commands/utils/target-util';
 
 export const InsertRowMutationUndoFactory = (
@@ -52,6 +52,9 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
         const { worksheet } = target;
         const rowManager = worksheet.getRowManager();
         const { range, rowInfo } = params;
+        if (rowInfo && !Object.values(rowInfo).every(isValidRowDimensions)) {
+            return false;
+        }
         const { startRow, endRow } = range;
 
         // insert row data
@@ -92,11 +95,14 @@ export const InsertColMutation: IMutation<IInsertColMutationParams> = {
         const target = getSheetMutationTarget(accessor.get(IUniverInstanceService), params);
         if (!target) {
             throw new Error('Workbook or Worksheet not found at InsertColMutation');
-        };
+        }
 
         const { worksheet } = target;
         const columnManager = worksheet.getColumnManager();
         const { range, colInfo } = params;
+        if (colInfo && !Object.values(colInfo).every(isValidColumnDimensions)) {
+            return false;
+        }
         const { startColumn, endColumn } = range;
 
         // insert column data

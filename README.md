@@ -385,6 +385,7 @@ Repository-local notes worth reading before deeper changes:
 - [Naming Convention](./docs/NAMING_CONVENTION.md): file, folder, interface, plugin, command, and dependency injection token conventions.
 - [Fixing Memory Leaks](./docs/FIX_MEMORY_LEAK.md): common leak patterns and debugging workflow for Univer instances.
 - [Architecture TLDRs](./docs/tldr): concise notes for formula engine, web worker, permission, selection, and ref-range behavior.
+- [OLE attachments](./packages/drawing/docs/ole-attachments.md): drawing resources, JSON and online transport, previews, and optional Pro conversion integration.
 
 ## 💬 Community
 

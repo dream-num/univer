@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IColorPickerProps } from './ColorPicker';
 import { memo, useCallback, useContext, useEffect, useState } from 'react';
+import type { IColorPickerProps } from './ColorPicker';
 import { isBrowser } from '../../helper/is-browser';
 import { MobileActionRowGroup } from '../action-row/MobileActionRowGroup';
 import { Button } from '../button/Button';
@@ -42,10 +42,12 @@ export function MobileColorPicker({ format = 'hex', value, onChange }: IMobileCo
     const closeMobileDropdown = useContext(MobileDropdownCloseContext);
     const [hsv, setHsv] = useState<[number, number, number]>([0, 100, 100]);
     const [alpha, setAlpha] = useState(1);
+    const [hasSelectedColor, setHasSelectedColor] = useState(Boolean(value));
     const [visible, setVisible] = useState(false);
     const getRgb = useCallback((h: number, s: number, v: number) => hsvToRgb(h, s, v), []);
 
     useEffect(() => {
+        setHasSelectedColor(Boolean(value));
         try {
             const actualValue = value || (format === 'hex' ? '#000000' : 'rgba(0, 0, 0, 1)');
             if (format === 'hex') {
@@ -70,6 +72,7 @@ export function MobileColorPicker({ format = 'hex', value, onChange }: IMobileCo
     }
 
     function handleColorChanged(h: number, s: number, v: number, a: number = alpha) {
+        setHasSelectedColor(true);
         if (format === 'hex') {
             onChange?.(rgbToHex(...getRgb(h, s, v)));
         } else {
@@ -94,7 +97,7 @@ export function MobileColorPicker({ format = 'hex', value, onChange }: IMobileCo
             onClick={(event) => event.stopPropagation()}
         >
             <MemoizedMobileColorPresets
-                value={hsvToHex(...hsv)}
+                value={hasSelectedColor && alpha === 1 ? hsvToHex(...hsv) : undefined}
                 onSelect={(color) => {
                     const [h, s, v] = hexToHsv(color);
                     handleColorChange(h, s, v);

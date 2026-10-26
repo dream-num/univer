@@ -265,10 +265,6 @@ export function DropdownMenuLabel({ icon, value, option, preserveStrokeWidth, on
     );
 }
 
-function getOptionKey(option: IValueOption) {
-    return String(option.id ?? option.commandId ?? option.value ?? (typeof option.label === 'string' ? option.label : option.label?.name));
-}
-
 export function DropdownMenuWrapper({
     menuId,
     slot,
@@ -458,6 +454,10 @@ export function DropdownMenuWrapper({
         keepInteractionInsideSameEmbedBoundary(event);
     }
 
+    function getOptionKey(option: IValueOption) {
+        return String(option.id ?? option.commandId ?? option.value ?? (typeof option.label === 'string' ? option.label : option.label?.name));
+    }
+
     function handleOptionSelect(option: IValueOption) {
         const target = sheetTarget;
         if (target && target !== sheetTargetRef.current) {
@@ -506,7 +506,7 @@ export function DropdownMenuWrapper({
         const items: IDropdownMenuProps['items'] = options.map((option) => ({
             type: 'item',
             className: clsx({
-                'focus:univer-bg-gray-0 dark:focus:!univer-bg-gray-800':
+                'focus:univer-bg-transparent dark:focus:!univer-bg-transparent':
                     typeof option.label !== 'string' && option.label?.hoverable === false,
                 '!univer-p-0': isSingleEmbeddedCustomPanel ||
                     (typeof option.label === 'object' && option.label.name === FONT_FAMILY_ITEM_COMPONENT),

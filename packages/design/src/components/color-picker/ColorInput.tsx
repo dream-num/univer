@@ -48,7 +48,7 @@ function HexInput({ hsv, onChange }: IInputProps) {
     };
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const newValue = e.target.value.trim();
+        const newValue = e.target.value.trim().replace(/^#/, '');
 
         if (newValue.length > 6) {
             return;
@@ -78,7 +78,7 @@ function HexInput({ hsv, onChange }: IInputProps) {
         <>
             <input
                 className={clsx(`
-                  univer-w-full univer-px-2 !univer-pl-4 univer-uppercase
+                  univer-w-full univer-min-w-0 univer-px-2 !univer-pl-4 univer-uppercase
                   focus:univer-border-primary-500 focus:univer-outline-none
                   rtl:!univer-pl-2 rtl:!univer-pr-4
                   dark:!univer-text-gray-0
@@ -86,7 +86,8 @@ function HexInput({ hsv, onChange }: IInputProps) {
                 value={inputValue}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                maxLength={6}
+                maxLength={7}
+                aria-label="HEX"
                 spellCheck={false}
             />
             <span
@@ -119,7 +120,7 @@ function RgbInput({ hsv, alpha, format, onChange }: IInputProps) {
         if (color === 'a') {
             if (value !== '' && !/^\d*\.?\d*$/.test(value)) return;
             const numValue = value === '' ? 0 : Number.parseFloat(value);
-            if (numValue > 1) return;
+            if (!Number.isFinite(numValue) || numValue > 1) return;
             const newValues = { ...localValues, a: numValue };
             setLocalValues(newValues);
             if (onChange) {
@@ -163,18 +164,21 @@ function RgbInput({ hsv, alpha, format, onChange }: IInputProps) {
             `}
         >
             <input
+                aria-label="R"
                 value={localValues.r}
                 onChange={(e) => handleChange('r', e.target.value)}
                 onBlur={handleBlur}
                 maxLength={3}
             />
             <input
+                aria-label="G"
                 value={localValues.g}
                 onChange={(e) => handleChange('g', e.target.value)}
                 onBlur={handleBlur}
                 maxLength={3}
             />
             <input
+                aria-label="B"
                 value={localValues.b}
                 onChange={(e) => handleChange('b', e.target.value)}
                 onBlur={handleBlur}
@@ -182,6 +186,7 @@ function RgbInput({ hsv, alpha, format, onChange }: IInputProps) {
             />
             {format === 'rgba' && (
                 <input
+                    aria-label="A"
                     value={localValues.a}
                     onChange={(e) => handleChange('a', e.target.value)}
                     onBlur={handleBlur}

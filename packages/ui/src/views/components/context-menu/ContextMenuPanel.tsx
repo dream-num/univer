@@ -15,6 +15,12 @@
  */
 
 import type { Dispatch, KeyboardEvent, SetStateAction } from 'react';
+import { isRealNum, LocaleService } from '@univerjs/core';
+import { borderBottomClassName, borderClassName, clsx, cva, scrollbarClassName } from '@univerjs/design';
+import { CheckMarkIcon, MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { combineLatest, isObservable, map, merge, of, scan, startWith } from 'rxjs';
 import type {
     IDisplayMenuItem,
     IMenuButtonItem,
@@ -24,12 +30,6 @@ import type {
     MenuItemDefaultValueType,
 } from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
-import { isRealNum, LocaleService } from '@univerjs/core';
-import { borderBottomClassName, borderClassName, clsx, cva, scrollbarClassName } from '@univerjs/design';
-import { CheckMarkIcon, MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
-import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { combineLatest, isObservable, map, merge, of, scan, startWith } from 'rxjs';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
@@ -1190,7 +1190,9 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         clearSubmenuCloseTimer();
         submenuCloseTimerRef.current = setTimeout(() => {
             submenuCloseTimerRef.current = null;
-            closeSubmenu();
+            if (!submenuElementRef.current?.contains(document.activeElement)) {
+                closeSubmenu();
+            }
         }, CONTEXT_MENU_SUBMENU_CLOSE_DELAY);
     }, [clearSubmenuCloseTimer, closeSubmenu]);
 
@@ -1261,11 +1263,16 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         };
 
         const frameId = window.requestAnimationFrame(updateSubmenuPosition);
+        const resizeObserver = new ResizeObserver(updateSubmenuPosition);
+        if (submenuElementRef.current) {
+            resizeObserver.observe(submenuElementRef.current);
+        }
         window.addEventListener('resize', updateSubmenuPosition);
         window.addEventListener('scroll', updateSubmenuPosition, true);
 
         return () => {
             window.cancelAnimationFrame(frameId);
+            resizeObserver.disconnect();
             window.removeEventListener('resize', updateSubmenuPosition);
             window.removeEventListener('scroll', updateSubmenuPosition, true);
         };
@@ -1339,6 +1346,9 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
             }}
             onMouseLeave={(event) => {
                 if (hasSubmenu) {
+                    if (submenuElementRef.current?.contains(document.activeElement)) {
+                        return;
+                    }
                     const nextTarget = event.relatedTarget as Node | null;
                     if (nextTarget && submenuElementRef.current?.contains(nextTarget)) {
                         return;
@@ -1471,6 +1481,9 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                 onMenuPointerEnter?.();
                             }}
                             onMouseLeave={(event) => {
+                                if (submenuElementRef.current?.contains(document.activeElement)) {
+                                    return;
+                                }
                                 const nextTarget = event.relatedTarget as Node | null;
                                 if (nextTarget && menuItemElementRef.current?.contains(nextTarget)) {
                                     return;

@@ -18,6 +18,8 @@ export { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAG
 export { SetDrawingSelectedOperation } from './commands/operations/set-drawing-selected.operation';
 export type { IUniverDrawingConfig } from './config/config';
 export type { IDocFloatDomData, IDocFloatDomDataBase, IImageData } from './models/image-model-interface';
+export type { IOleAttachmentIo, IOleConfig, IOleDrawing, IOleFile, IOleObject, IOleOnlineUnit, IOlePreviewRequest, IOleResource } from './models/ole-model';
+export { getOleOfficeType, OLE_MAX_RESOURCE_BYTES, OLE_RESOURCE_NAME, parseOleResource, prepareOleResource, prepareOleSnapshot, readOleFile } from './models/ole-model';
 export { UniverDrawingPlugin } from './plugin';
 export { DrawingManagerService, UnitDrawingService } from './services/drawing-manager-impl.service';
 export type { IDrawingJson1Type, IDrawingJsonUndo1 } from './services/drawing-manager-impl.service';
@@ -34,6 +36,7 @@ export type {
 } from './services/drawing-manager.service';
 export { IDrawingManagerService } from './services/drawing-manager.service';
 export { ImageIoService } from './services/image-io-impl.service';
+export { OleService } from './services/ole.service';
 export { URLImageService } from './services/url-image.service';
 export { createDrawingCopyPlan, DRAWING_COPY_CONTEXT_KEY, getOrCreateDrawingCopyPlan } from './utils/drawing-copy-plan';
 export type { ICreateDrawingCopyPlanOptions, IDrawingCopyPlan } from './utils/drawing-copy-plan';

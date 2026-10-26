@@ -701,8 +701,35 @@ describe('docs drawing commands integration', () => {
         testBed.univer.dispose();
     });
 
-    it('deletes a focused drawing through the command pipeline and removes it from the document and services', async () => {
-        const testBed = setupDrawingTestBed(createDrawingDocData());
+    it('persists an OLE online link in the document and restores it through undo and redo', async () => {
+        const data = createDrawingDocData();
+        Object.assign(data.drawings!['shape-1'], { drawingType: DrawingTypeEnum.DRAWING_OLE, oleAttachmentId: 'retained' });
+        const testBed = setupDrawingTestBed(data);
+        vi.spyOn(testBed.get(DocSkeletonManagerService), 'getSkeleton').mockReturnValue({} as never);
+        const doc = testBed.get(IUniverInstanceService).getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+        const online = { unitId: 'child', type: UniverInstanceType.UNIVER_SHEET, url: 'https://example.test/sheet/child' };
+        expect(await testBed.commandService.executeCommand<IUpdateDrawingDocTransformCommandParams>(UpdateDrawingDocTransformCommand.id, {
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            drawings: [{ drawingId: 'shape-1', key: 'oleOnlineUnit', value: online }, { drawingId: 'shape-1', key: 'oleFileName', value: '预算.xlsx' }],
+        })).toBe(true);
+        await awaitTime(350);
+        const read = () => JSON.parse(JSON.stringify(doc.getSnapshot().drawings!['shape-1']));
+        expect(read()).toMatchObject({ oleAttachmentId: 'retained', oleOnlineUnit: online, oleFileName: '预算.xlsx' });
+        expect(await testBed.commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(read()).not.toHaveProperty('oleOnlineUnit');
+        expect(read()).not.toHaveProperty('oleFileName');
+        expect(await testBed.commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(read()).toMatchObject({ oleOnlineUnit: online, oleFileName: '预算.xlsx' });
+        testBed.univer.dispose();
+    });
+
+    it.each([false, true])('deletes a focused drawing through the command pipeline and removes it from the document and services (OLE: %s)', async (ole) => {
+        const data = createDrawingDocData();
+        if (ole) {
+            Object.assign(data.drawings!['shape-1'], { drawingType: DrawingTypeEnum.DRAWING_OLE, oleAttachmentId: 'retained-attachment' });
+        }
+        const testBed = setupDrawingTestBed(data);
 
         testBed.docDrawingService.focusDrawing([{ unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-1' }]);
 
@@ -856,8 +883,12 @@ describe('docs drawing commands integration', () => {
         testBed.univer.dispose();
     });
 
-    it('moves a focused floating drawing by updating the persisted doc transform', async () => {
-        const testBed = setupDrawingTestBed(createDrawingDocData());
+    it.each([false, true])('moves a focused floating drawing by updating the persisted doc transform (OLE: %s)', async (ole) => {
+        const data = createDrawingDocData();
+        if (ole) {
+            Object.assign(data.drawings!['shape-1'], { drawingType: DrawingTypeEnum.DRAWING_OLE, oleAttachmentId: 'retained-attachment' });
+        }
+        const testBed = setupDrawingTestBed(data);
         vi.spyOn(testBed.get(DocSkeletonManagerService), 'getSkeleton').mockReturnValue({
             getSkeletonData: () => null,
         } as never);

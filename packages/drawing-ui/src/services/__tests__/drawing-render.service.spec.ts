@@ -40,6 +40,7 @@ import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { DrawingImageClipService } from '../drawing-image-clip.service';
 import { DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX, DrawingRenderService } from '../drawing-render.service';
+import { OleUIService } from '../ole-ui.service';
 
 const BASE_TRANSFORM = {
     left: 10,
@@ -273,6 +274,8 @@ function createScene(): IRecordedScene {
 
 function createHarness() {
     const injector = new Injector();
+    const oleUI = { bindObject: vi.fn() };
+    injector.add([OleUIService, { useValue: oleUI as never }]);
 
     injector.add([IDrawingManagerService, { useClass: TestDrawingManagerService as never }]);
     injector.add([IImageIoService, { useClass: TestImageIoService as never }]);
@@ -284,6 +287,7 @@ function createHarness() {
 
     return {
         service: injector.get(DrawingRenderService),
+        oleUI,
         drawingManagerService: injector.get(IDrawingManagerService) as unknown as TestDrawingManagerService,
         imageIoService: injector.get(IImageIoService) as unknown as TestImageIoService,
         urlImageService: injector.get(IURLImageService) as unknown as TestUrlImageService,
@@ -295,6 +299,15 @@ function createHarness() {
 }
 
 describe('DrawingRenderService', () => {
+    it('renders OLE attachments with their menu binding and disables rotation', async () => {
+        const harness = createHarness();
+        const drawing = imageParam({ drawingType: DrawingTypeEnum.DRAWING_OLE });
+        await harness.service.renderImages(drawing, harness.scene as unknown as Scene);
+        const object = harness.scene.addedObjects[0].object;
+        expect(object.transformerConfig?.rotateEnabled).toBe(false);
+        expect(harness.oleUI.bindObject).toHaveBeenCalledWith(object, drawing);
+    });
+
     it('skips image rendering when the drawing is not renderable in the current context', async () => {
         const hiddenCase = createHarness();
         hiddenCase.drawingManagerService.visible = false;

@@ -15,17 +15,22 @@
  */
 
 import {
+    ConfigService,
     ContextService,
     DrawingTypeEnum,
     ICommandService,
+    IConfigService,
     IContextService,
     IImageIoService,
     Injector,
+    IPermissionService,
     IUniverInstanceService,
     LocaleService,
+    ThemeService,
     toDisposable,
 } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
+import { OleUIService } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { IDialogService, IMenuManagerService, IMessageService, MenuItemType } from '@univerjs/ui';
@@ -35,6 +40,10 @@ import { DrawingPopupMenuController } from '../drawing-popup-menu.controller';
 
 function createControllerHarness(initialDrawingType: DrawingTypeEnum) {
     const injector = new Injector();
+    injector.add([IConfigService, { useClass: ConfigService }]);
+    injector.add([ThemeService]);
+    injector.add([IPermissionService, { useValue: { getPermissionPoint: () => undefined } as never }]);
+    injector.add([OleUIService, { useValue: { registerHost: () => toDisposable(() => undefined) } as never }]);
     const createControl$ = new Subject<void>();
     const clearControl$ = new Subject<void>();
     const changing$ = new Subject<void>();

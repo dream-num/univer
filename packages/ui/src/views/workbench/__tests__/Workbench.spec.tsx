@@ -47,7 +47,9 @@ import { DesktopWorkbenchContent } from '../Workbench';
 describe('DesktopWorkbenchContent lifecycle', () => {
     afterEach(cleanup);
 
-    it('renders lifecycle and externally requested skeletons without unmounting ready content', () => {
+    it.each([false, true])('keeps transient UI in its owning container (%s) throughout lifecycle updates', (scoped) => {
+        const portalOwner = document.createElement('div');
+        document.body.appendChild(portalOwner);
         const lifecycle$ = new BehaviorSubject(LifecycleStages.Starting);
         const lifecycleService = {
             lifecycle$: lifecycle$.asObservable(),
@@ -72,7 +74,7 @@ describe('DesktopWorkbenchContent lifecycle', () => {
                 },
             }],
             [ThemeSwitcherService, { useValue: { injectThemeToHead: () => {} } }],
-            [IConfigService, { useValue: { getConfig: () => ({ popupRootId: 'test-popup-root' }) } }],
+            [IConfigService, { useValue: { getConfig: () => ({ popupRootId: 'test-popup-root', portalContainer: scoped ? portalOwner : undefined }) } }],
             [IContextService, { useClass: ContextService }],
             [ILogService, { useClass: DesktopLogService }],
             [IUniverInstanceService, { useClass: UniverInstanceService }],
@@ -105,6 +107,7 @@ describe('DesktopWorkbenchContent lifecycle', () => {
         );
 
         expect(result.container.querySelector('[aria-busy="true"]')).not.toBeNull();
+        expect(portalOwner.children.length).toBe(scoped ? 1 : 0);
         expect(result.container.querySelector('[data-u-comp="workbench-layout"]')).not.toBeNull();
         expect(onRendered).not.toHaveBeenCalled();
 
@@ -133,5 +136,8 @@ describe('DesktopWorkbenchContent lifecycle', () => {
 
         expect(result.container.querySelector('[aria-busy="true"]')).toBeNull();
         expect(result.container.querySelector('[data-u-comp="workbench-layout"]')).not.toBeNull();
+        result.unmount();
+        expect(portalOwner.children.length).toBe(0);
+        portalOwner.remove();
     });
 });

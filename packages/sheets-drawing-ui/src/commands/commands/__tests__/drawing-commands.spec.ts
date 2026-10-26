@@ -15,11 +15,21 @@
  */
 
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
-import { Direction, DrawingTypeEnum, ImageSourceType } from '@univerjs/core';
+import { Direction, DrawingTypeEnum, ImageSourceType, IUndoRedoService } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { insertGroupObject } from '@univerjs/drawing-ui';
-import { DrawingGroupObject, Engine, Image, IRenderManagerService, MAIN_VIEW_PORT_KEY, Rect, Scene, Vector2, Viewport } from '@univerjs/engine-render';
-import { InsertSheetDrawingCommand, ISheetDrawingService } from '@univerjs/sheets-drawing';
+import {
+    DrawingGroupObject,
+    Engine,
+    Image,
+    IRenderManagerService,
+    MAIN_VIEW_PORT_KEY,
+    Rect,
+    Scene,
+    Vector2,
+    Viewport,
+} from '@univerjs/engine-render';
+import { InsertSheetDrawingCommand, ISheetDrawingService, SetSheetDrawingCommand } from '@univerjs/sheets-drawing';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createSheetsDrawingUiTestBed } from '../../../__tests__/create-sheets-drawing-ui-test-bed';
 import { FlipSheetDrawingCommand } from '../flip-drawings.command';
@@ -152,11 +162,29 @@ describe('sheet drawing UI commands', () => {
         // each test disposes its own univer instance
     });
 
-    it('moves focused drawings by one pixel in the selected direction', async () => {
+    it('persists an online OLE link with symmetric drawing mutations', async () => {
+        const testBed = createSheetsDrawingUiTestBed();
+        const service = testBed.get(ISheetDrawingService);
+        const drawing = { ...createSheetDrawing('ole-1', 10, 20), drawingType: DrawingTypeEnum.DRAWING_OLE, oleAttachmentId: 'retained' };
+        await insertDrawings(testBed, [drawing]);
+        const online = { unitId: 'child', type: 1, url: 'https://example.test/doc/child' };
+        expect(await testBed.commandService.executeCommand(SetSheetDrawingCommand.id, { unitId: testBed.unitId, drawings: [{ ...drawing, oleOnlineUnit: online, oleFileName: '预算.xlsx' }] })).toBe(true);
+        expect(JSON.parse(JSON.stringify(service.getDrawingByParam(drawing)))).toMatchObject({ oleAttachmentId: 'retained', oleOnlineUnit: online, oleFileName: '预算.xlsx' });
+        const history = testBed.get(IUndoRedoService).pitchTopUndoElement()!;
+        for (const mutation of history.undoMutations) testBed.commandService.syncExecuteCommand(mutation.id, mutation.params);
+        expect(service.getDrawingByParam(drawing)).not.toHaveProperty('oleOnlineUnit');
+        expect(service.getDrawingByParam(drawing)).not.toHaveProperty('oleFileName');
+        for (const mutation of history.redoMutations) testBed.commandService.syncExecuteCommand(mutation.id, mutation.params);
+        expect(service.getDrawingByParam(drawing)).toMatchObject({ oleOnlineUnit: online, oleFileName: '预算.xlsx' });
+        testBed.univer.dispose();
+    });
+
+    it.each([DrawingTypeEnum.DRAWING_IMAGE, DrawingTypeEnum.DRAWING_OLE])('moves drawing type %s and replays geometry through undo and redo', async (drawingType) => {
         const testBed = createSheetsDrawingUiTestBed();
         const sheetDrawingService = testBed.get(ISheetDrawingService);
         testBed.commandService.registerCommand(MoveDrawingsCommand);
-        await insertDrawings(testBed, [createSheetDrawing('drawing-1', 10, 20)]);
+        const drawing = { ...createSheetDrawing('drawing-1', 10, 20), drawingType, oleAttachmentId: 'retained-attachment' };
+        await insertDrawings(testBed, [drawing]);
         sheetDrawingService.focusDrawing([{
             unitId: testBed.unitId,
             subUnitId: testBed.subUnitId,
@@ -173,6 +201,17 @@ describe('sheet drawing UI commands', () => {
             left: 11,
             top: 20,
         });
+
+        const param = { unitId: testBed.unitId, subUnitId: testBed.subUnitId, drawingId: 'drawing-1' };
+        const history = testBed.get(IUndoRedoService).pitchTopUndoElement()!;
+        for (const mutation of history.undoMutations) {
+            testBed.commandService.syncExecuteCommand(mutation.id, mutation.params);
+        }
+        expect(sheetDrawingService.getDrawingByParam(param)).toMatchObject({ drawingType, oleAttachmentId: 'retained-attachment', transform: { left: 10, top: 20 } });
+        for (const mutation of history.redoMutations) {
+            testBed.commandService.syncExecuteCommand(mutation.id, mutation.params);
+        }
+        expect(sheetDrawingService.getDrawingByParam(param)).toMatchObject({ drawingType, oleAttachmentId: 'retained-attachment', transform: { left: 11, top: 20 } });
 
         testBed.univer.dispose();
     });

@@ -48,6 +48,33 @@ function createCtxMock() {
     } as any;
 }
 
+describe('custom vector image content', () => {
+    it('redraws custom content at the current logical size without an image bitmap', () => {
+        const image = new Image('vector', { width: 96, height: 64 });
+        const ctx = createCtxMock();
+        const draw = vi.fn();
+        image.setContentRenderer(draw);
+        image.render(ctx);
+        expect(draw).toHaveBeenLastCalledWith(ctx, 96, 64);
+        image.transformByState({ width: 192, height: 128 });
+        image.render(ctx);
+        expect(draw).toHaveBeenLastCalledWith(ctx, 192, 128);
+        expect(ctx.drawImage).not.toHaveBeenCalled();
+        image.dispose();
+    });
+
+    it('restores normal image rendering when the custom renderer is cleared', () => {
+        const native = createNativeImage();
+        const image = new Image('normal', { width: 96, height: 64, image: native });
+        const ctx = createCtxMock();
+        image.setContentRenderer(vi.fn());
+        image.setContentRenderer();
+        image.render(ctx);
+        expect(ctx.drawImage).toHaveBeenCalledWith(native, -48, -32, 96, 64);
+        image.dispose();
+    });
+});
+
 describe('image extra', () => {
     it('preserves the request mode of an already-loaded native image', () => {
         const native = createNativeImage();

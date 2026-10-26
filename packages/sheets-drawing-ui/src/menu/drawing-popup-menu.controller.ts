@@ -23,25 +23,31 @@ import {
     DrawingTypeEnum,
     FOCUSING_COMMON_DRAWINGS,
     ICommandService,
+    IConfigService,
     IContextService,
     IImageIoService,
     Inject,
+    IPermissionService,
     IUniverInstanceService,
     LocaleService,
     RxDisposable,
+    ThemeService,
     UniverInstanceType,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import {
     COMPONENT_IMAGE_POPUP_MENU,
+    createOlePreviewViewer,
     ImageCropperObject,
     ImageResetSizeOperation,
+    OleUIService,
     OpenImageCropOperation,
 } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { RemoveSheetDrawingCommand } from '@univerjs/sheets-drawing';
-import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
+import { UniverSheetsPlugin, WorkbookEditablePermission } from '@univerjs/sheets';
+import { RemoveSheetDrawingCommand, SetSheetDrawingCommand, UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
+import { SheetCanvasPopManagerService, UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import {
     FloatingObjectToolbarPosition,
     IMenuManagerService,
@@ -50,6 +56,7 @@ import {
 } from '@univerjs/ui';
 import { FlipSheetDrawingCommand } from '../commands/commands/flip-drawings.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
+import { UniverSheetsDrawingUIPlugin } from '../plugin';
 
 export class DrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
@@ -64,9 +71,33 @@ export class DrawingPopupMenuController extends RxDisposable {
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @IContextService protected readonly _contextService: IContextService,
         @IImageIoService private readonly _ioService: ImageIoService,
-        @ICommandService protected readonly _commandService: ICommandService
+        @ICommandService protected readonly _commandService: ICommandService,
+        @Inject(OleUIService) private readonly _oleUI: OleUIService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService,
+        @IConfigService private readonly _configService: IConfigService,
+        @IPermissionService private readonly _permissionService: IPermissionService
     ) {
         super();
+
+        this.disposeWithMe(this._oleUI.registerHost(UniverInstanceType.UNIVER_SHEET, {
+            isEditable: (drawing) => this._drawingManagerService.getDrawingEditable() && this._permissionService.getPermissionPoint(new WorkbookEditablePermission(drawing.unitId).id)?.value !== false,
+            attach: (object, componentKey, extraProps, _drawing, direction = 'top-center') => this._canvasPopManagerService.attachPopupToObject(object, { componentKey, extraProps, direction, offset: direction === 'top-center' ? [0, 8] : [0, 0] }),
+            rename: (drawing, name) => this._commandService.executeCommand(SetSheetDrawingCommand.id, { unitId: drawing.unitId, drawings: [{ ...drawing, oleFileName: name }] }),
+            saveOnlineUnit: (drawing, online) => this._commandService.executeCommand(SetSheetDrawingCommand.id, { unitId: drawing.unitId, drawings: [{ ...drawing, oleOnlineUnit: online }] }),
+            remove: (drawing) => this._commandService.executeCommand(RemoveSheetDrawingCommand.id, { unitId: drawing.unitId, drawings: [drawing] }),
+            createPreview: (container, data) => createOlePreviewViewer({ container, data, type: UniverInstanceType.UNIVER_SHEET, locale: this._localeService, theme: this._themeService, config: this._configService, setReadonly: (permissions, unitId) => {
+                const point = new WorkbookEditablePermission(unitId);
+                if (!permissions.getPermissionPoint(point.id)) {
+                    permissions.addPermissionPoint(point);
+                }
+                permissions.updatePermissionPoint(point.id, false);
+            }, register: (viewer) => {
+                viewer.registerPlugin(UniverSheetsPlugin);
+                viewer.registerPlugin(UniverSheetsUIPlugin);
+                viewer.registerPlugin(UniverSheetsDrawingPlugin);
+                viewer.registerPlugin(UniverSheetsDrawingUIPlugin);
+            } }),
+        }));
 
         this._init();
     }
@@ -184,7 +215,7 @@ export class DrawingPopupMenuController extends RxDisposable {
         }
 
         const drawingParam = this._drawingManagerService.getDrawingOKey(object.oKey);
-        if (!drawingParam || drawingParam.drawingType === DrawingTypeEnum.DRAWING_SHAPE) {
+        if (!drawingParam || drawingParam.drawingType === DrawingTypeEnum.DRAWING_SHAPE || drawingParam.drawingType === DrawingTypeEnum.DRAWING_OLE) {
             return;
         }
 

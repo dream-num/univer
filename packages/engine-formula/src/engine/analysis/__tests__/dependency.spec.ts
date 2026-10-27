@@ -20,6 +20,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
 import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import { IFeatureCalculationManagerService } from '../../../services/feature-calculation-manager.service';
+import { IDependencyManagerService } from '../../../services/dependency-manager.service';
 import { IOtherFormulaManagerService } from '../../../services/other-formula-manager.service';
 import { IFormulaRuntimeService } from '../../../services/runtime.service';
 import { FormulaDependencyTree } from '../../dependency/dependency-tree';
@@ -378,6 +379,82 @@ describe('Test dependency', () => {
             vi.spyOn(get(Interpreter), 'execute').mockReturnValue(ErrorValueObject.create(ErrorType.REF));
 
             await expect(formulaDependencyGenerator.generate()).resolves.toHaveLength(1);
+        });
+
+        it('does not duplicate RTree entries on subsequent recalculations', async () => {
+            const formula = '=SUM(A1:B10)';
+            formulaCurrentConfigService.load({
+                formulaData: {
+                    [testUnitId]: {
+                        [testSheetId]: {
+                            0: {
+                                2: { f: formula },
+                            },
+                        },
+                    },
+                },
+                arrayFormulaCellData: {},
+                arrayFormulaRange: {},
+                forceCalculate: false,
+                dirtyRanges: [],
+                dirtyNameMap: {},
+                dirtyDefinedNameMap: {},
+                dirtyUnitFeatureMap: {},
+                dirtyUnitOtherFormulaMap: {},
+                excludedCell: {},
+                allUnitData: {
+                    [testUnitId]: testSheetData,
+                },
+            });
+
+            await formulaDependencyGenerator.generate();
+
+            const dependencyManagerService = get(IDependencyManagerService);
+            const rTree = (dependencyManagerService as any)._dependencyRTreeCache;
+            const initialCount = rTree.getTree(testUnitId, testSheetId).all().length;
+            expect(initialCount).toBe(1);
+
+            // Trigger second recalculation
+            formulaCurrentConfigService.load({
+                formulaData: {
+                    [testUnitId]: {
+                        [testSheetId]: {
+                            0: {
+                                2: { f: formula },
+                            },
+                        },
+                    },
+                },
+                arrayFormulaCellData: {},
+                arrayFormulaRange: {},
+                forceCalculate: false,
+                dirtyRanges: [{
+                    unitId: testUnitId,
+                    sheetId: testSheetId,
+                    range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+                }],
+                dirtyNameMap: {},
+                dirtyDefinedNameMap: {},
+                dirtyUnitFeatureMap: {},
+                dirtyUnitOtherFormulaMap: {},
+                excludedCell: {},
+                allUnitData: {
+                    [testUnitId]: testSheetData,
+                },
+            });
+
+            await formulaDependencyGenerator.generate();
+
+            const subsequentCount = rTree.getTree(testUnitId, testSheetId).all().length;
+            expect(subsequentCount).toBe(1);
+
+            // When a formula cell is edited or deleted, removeFormulaDependency clears its cache
+            dependencyManagerService.removeFormulaDependency(testUnitId, testSheetId, 0, 2);
+            expect(rTree.getTree(testUnitId, testSheetId).all().length).toBe(0);
+
+            // Subsequent recalculation re-registers and inserts it once
+            await formulaDependencyGenerator.generate();
+            expect(rTree.getTree(testUnitId, testSheetId).all().length).toBe(1);
         });
     });
 });

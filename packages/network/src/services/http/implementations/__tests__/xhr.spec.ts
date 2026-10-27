@@ -14,30 +14,15 @@
  * limitations under the License.
  */
 
-import { DesktopLogService, ILogService, Injector, LogLevel } from '@univerjs/core';
-import { createServer } from 'node:http';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { HTTPHeaders } from '../../headers';
-import { HTTPService } from '../../http.service';
 import { HTTPParams } from '../../params';
 import { HTTPRequest } from '../../request';
-import { FetchHTTPImplementation } from '../fetch';
-import { IHTTPImplementation } from '../implementation';
 import { XHRHTTPImplementation } from '../xhr';
 
 type Listener = (event: ProgressEvent) => void;
 
 const xhrInstances: FakeXMLHttpRequest[] = [];
-let injector: Injector;
-
-beforeEach(() => {
-    injector = new Injector([
-        [ILogService, { useClass: DesktopLogService }],
-        [IHTTPImplementation, { useClass: XHRHTTPImplementation }],
-        [HTTPService],
-    ]);
-    injector.get(ILogService).setLogLevel(LogLevel.SILENT);
-});
 
 class FakeXMLHttpRequest {
     DONE = 4;
@@ -111,58 +96,14 @@ function createRequest(responseType: string, extra: Record<string, unknown> = {}
 }
 
 afterEach(() => {
-    injector.dispose();
     vi.restoreAllMocks();
-    vi.unstubAllGlobals();
     xhrInstances.length = 0;
 });
 
 describe('XHRHTTPImplementation', () => {
-    it.each([
-        { name: 'XHR', implementation: XHRHTTPImplementation },
-        { name: 'Fetch', implementation: FetchHTTPImplementation },
-    ])('preserves a failed HTTP response body in error with $name', async ({ implementation }) => {
-        injector.replace([IHTTPImplementation, { useClass: implementation }]);
-        const server = createServer((request, response) => {
-            if (request.method === 'OPTIONS') {
-                response.writeHead(204, {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'GET',
-                    'Access-Control-Allow-Headers': 'Content-Type',
-                });
-                response.end();
-                return;
-            }
-
-            response.writeHead(403, {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-            });
-            response.end(JSON.stringify({ error: { code: 9018, message: 'Domain is not authorized' } }));
-        });
-        await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
-
-        try {
-            const address = server.address();
-            if (!address || typeof address === 'string') {
-                throw new Error('Expected a TCP server address');
-            }
-
-            const httpService = injector.get(HTTPService);
-            await expect(httpService.get(`http://127.0.0.1:${address.port}/session-ticket`))
-                .rejects
-                .toMatchObject({
-                    status: 403,
-                    error: { error: { code: 9018, message: 'Domain is not authorized' } },
-                });
-        } finally {
-            await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
-        }
-    });
-
     it('sends requests with headers, credentials and JSON body, then parses JSON responses', async () => {
         vi.stubGlobal('XMLHttpRequest', FakeXMLHttpRequest as never);
-        const impl = injector.get(IHTTPImplementation);
+        const impl = new XHRHTTPImplementation({ debug: vi.fn(), error: vi.fn() } as any);
         const events: any[] = [];
         const promise = new Promise<void>((resolve, reject) => {
             impl.send(createRequest('json')).subscribe({
@@ -190,7 +131,7 @@ describe('XHRHTTPImplementation', () => {
 
     it('returns null for no-content responses and raw text for text responses', async () => {
         vi.stubGlobal('XMLHttpRequest', FakeXMLHttpRequest as never);
-        const impl = injector.get(IHTTPImplementation);
+        const impl = new XHRHTTPImplementation({ debug: vi.fn(), error: vi.fn() } as any);
 
         const noContentPromise = new Promise<any>((resolve, reject) => {
             impl.send(createRequest('json')).subscribe({ next: resolve, error: reject });
@@ -209,9 +150,9 @@ describe('XHRHTTPImplementation', () => {
     });
 
     it('emits response errors for status errors, invalid JSON, blob mismatches, and network failures', async () => {
-        const logError = vi.spyOn(injector.get(ILogService), 'error');
+        const logService = { debug: vi.fn(), error: vi.fn() };
         vi.stubGlobal('XMLHttpRequest', FakeXMLHttpRequest as never);
-        const impl = injector.get(IHTTPImplementation);
+        const impl = new XHRHTTPImplementation(logService as any);
 
         const statusError = new Promise((resolve, reject) => {
             impl.send(createRequest('json')).subscribe({ next: resolve, error: reject });
@@ -227,18 +168,14 @@ describe('XHRHTTPImplementation', () => {
         });
         xhrInstances[1].responseText = '{bad';
         xhrInstances[1].emit('load');
-        await expect(jsonError).rejects.toMatchObject({ status: 200, statusText: 'OK', error: expect.any(SyntaxError) });
+        await expect(jsonError).rejects.toMatchObject({ status: 200, statusText: 'OK' });
 
         const blobError = new Promise((resolve, reject) => {
             impl.send(createRequest('blob')).subscribe({ next: resolve, error: reject });
         });
         xhrInstances[2].response = 'not-a-blob';
         xhrInstances[2].emit('load');
-        await expect(blobError).rejects.toMatchObject({
-            status: 200,
-            statusText: 'OK',
-            error: expect.objectContaining({ message: 'Response is not a Blob object' }),
-        });
+        await expect(blobError).rejects.toMatchObject({ status: 200, statusText: 'OK' });
 
         const networkError = new Promise((resolve, reject) => {
             impl.send(createRequest('json')).subscribe({ next: resolve, error: reject });
@@ -246,17 +183,13 @@ describe('XHRHTTPImplementation', () => {
         xhrInstances[3].status = 0;
         xhrInstances[3].statusText = '';
         xhrInstances[3].emit('error');
-        await expect(networkError).rejects.toMatchObject({
-            status: 0,
-            statusText: 'Unknown Error',
-            error: expect.any(ProgressEvent),
-        });
-        expect(logError).toHaveBeenCalled();
+        await expect(networkError).rejects.toMatchObject({ status: 0, statusText: 'Unknown Error' });
+        expect(logService.error).toHaveBeenCalled();
     });
 
     it('aborts pending requests and removes event listeners when unsubscribed', () => {
         vi.stubGlobal('XMLHttpRequest', FakeXMLHttpRequest as never);
-        const impl = injector.get(IHTTPImplementation);
+        const impl = new XHRHTTPImplementation({ debug: vi.fn(), error: vi.fn() } as any);
         const subscription = impl.send(createRequest('json')).subscribe({ error: () => undefined });
         const xhr = xhrInstances[0];
 

@@ -18,7 +18,7 @@
  * @vitest-environment jsdom
  */
 
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../locale/en-US';
 import { ConfigProvider } from '../../config-provider/ConfigProvider';
@@ -32,6 +32,23 @@ afterEach(() => {
 });
 
 describe('Dropdown', () => {
+    it('keeps native input composition open and dismisses on a later Escape', () => {
+        const onOpenChange = vi.fn();
+        const view = render(
+            <Dropdown open overlay={<input aria-label="Draft" />} onOpenChange={onOpenChange}>
+                <button type="button">Trigger</button>
+            </Dropdown>
+        );
+        const input = view.getByRole('textbox', { name: 'Draft' });
+        input.focus();
+        fireEvent.keyDown(input, { key: 'Escape', isComposing: true });
+        expect(onOpenChange).not.toHaveBeenCalled();
+        expect(document.activeElement).toBe(input);
+
+        fireEvent.keyDown(input, { key: 'Escape' });
+        expect(onOpenChange).toHaveBeenCalledWith(false);
+    });
+
     it('should render trigger and not show overlay by default', () => {
         const { getByText, queryByText } = render(
             <Dropdown overlay={<div>Overlay Content</div>}>

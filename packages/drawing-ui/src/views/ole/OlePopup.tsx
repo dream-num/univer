@@ -15,12 +15,12 @@
  */
 
 import type { ReactNode } from 'react';
-import type { LocaleKey } from '../../locale/types';
 import { LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Button, clsx, Separator, Tooltip } from '@univerjs/design';
 import { ConvertIcon, DeleteIcon, DownloadIcon, EyeIcon, LinkIcon, RenameIcon, WarningIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { OleUIService } from '../../services/ole-ui.service';
 
 interface IOlePopupActions {
@@ -31,6 +31,7 @@ interface IOlePopupActions {
     converting?: boolean;
     convert?: () => Promise<void>;
     available: boolean;
+    previewAvailable: boolean;
     status: string;
     editable: boolean;
     onEnter: () => void;
@@ -133,7 +134,7 @@ export function OlePopup({ popup }: { popup: { extraProps: IOlePopupActions } })
             {actions.available
                 ? (
                     <>
-                        <OleActionButton title={locale.t<LocaleKey>('drawing-ui.ole.preview')} disabled={disabled} onClick={() => run(actions.preview)}><EyeIcon /></OleActionButton>
+                        <OleActionButton title={locale.t<LocaleKey>(actions.previewAvailable ? 'drawing-ui.ole.preview' : 'drawing-ui.ole.unsupported')} disabled={disabled || !actions.previewAvailable} onClick={() => run(actions.preview)}><EyeIcon /></OleActionButton>
                         <OleActionButton title={locale.t<LocaleKey>('drawing-ui.ole.download')} disabled={disabled} onClick={() => run(actions.download)}><DownloadIcon /></OleActionButton>
                     </>
                 )

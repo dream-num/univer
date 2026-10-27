@@ -42,6 +42,7 @@ function renderPopup() {
         hasOnlineUnit: false,
         converting: false,
         available: true,
+        previewAvailable: true,
         status: '',
         editable: true,
         onEnter: vi.fn(),
@@ -69,6 +70,15 @@ function renderPopup() {
 afterEach(() => cleanups.splice(0).forEach((cleanup) => cleanup()));
 
 describe('compact OLE toolbar', () => {
+    it('disables unsupported preview without blocking download', () => {
+        const h = renderPopup();
+        h.actions.previewAvailable = false;
+        h.render();
+        expect(h.button('Preview')).toBeNull();
+        expect(h.toolbar().querySelector<HTMLButtonElement>('button:disabled')).not.toBeNull();
+        expect(h.button('Download')?.disabled).toBe(false);
+    });
+
     it('shows a focusable reason instead of unavailable actions, with Delete only for editors', () => {
         const h = renderPopup();
         h.actions.available = false;

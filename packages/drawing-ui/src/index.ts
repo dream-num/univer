@@ -49,7 +49,8 @@ export { UniverDrawingUIPlugin } from './plugin';
 export { DrawingImageClipService, IMAGE_CLIP_SHAPE_PICKER_COMPONENT } from './services/drawing-image-clip.service';
 export type { ImageShapeClipDelegate } from './services/drawing-image-clip.service';
 export { DrawingRenderService } from './services/drawing-render.service';
-export { createOlePreviewViewer } from './services/ole-preview-viewer';
+export { createOlePreviewViewer, registerOlePreviewRenderer } from './services/ole-preview-viewer';
+export type { IOlePreviewContext, IOlePreviewRenderer } from './services/ole-preview-viewer';
 export { OLE_POPUP_COMPONENT, OleUIService } from './services/ole-ui.service';
 export type { IOleHostActions } from './services/ole-ui.service';
 export {

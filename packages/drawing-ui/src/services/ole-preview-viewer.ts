@@ -34,6 +34,20 @@ export interface IOlePreviewViewerOptions {
     setReadonly: (permissions: IPermissionService, unitId: string) => void;
 }
 
+export type IOlePreviewContext = Omit<IOlePreviewViewerOptions, 'register' | 'onResize' | 'setReadonly'>;
+export type IOlePreviewRenderer = (context: IOlePreviewContext) => IDisposable;
+
+const previewRenderers = new Map<UniverInstanceType, IOlePreviewRenderer>();
+
+/** Product UI modules register stateless factories without creating Units or retaining an application. */
+export function registerOlePreviewRenderer(type: UniverInstanceType, renderer: IOlePreviewRenderer): void {
+    previewRenderers.set(type, renderer);
+}
+
+export function getOlePreviewRenderer(type: UniverInstanceType): IOlePreviewRenderer | undefined {
+    return previewRenderers.get(type);
+}
+
 /** An isolated temporary Univer instance. The host's Unit list, revision and collaboration remain untouched. */
 export function createOlePreviewViewer(options: IOlePreviewViewerOptions): IDisposable {
     const viewer = new Univer({ darkMode: options.theme.darkMode, locale: options.locale.getCurrentLocale(), locales: { [options.locale.getCurrentLocale()]: options.locale.getLocales() ?? {} }, theme: options.theme.getCurrentTheme() });

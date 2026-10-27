@@ -23,7 +23,6 @@ import type {
     IUniverDrawingConfig,
 } from '@univerjs/drawing';
 import type { BaseObject } from '@univerjs/engine-render';
-import type { LocaleKey } from '../locale/types';
 import {
     Disposable,
     IConfigService,
@@ -38,8 +37,10 @@ import { MessageType } from '@univerjs/design';
 import { getOleOfficeType, IDrawingManagerService, OleService, readOleFile } from '@univerjs/drawing';
 import { Image } from '@univerjs/engine-render';
 import { IDialogService, IMessageService, INotificationService } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { OleCanvasRenderer } from '../views/ole/ole-canvas-renderer';
 import { createOleConversionProgress } from '../views/ole/OleConversionProgress';
+import { getOlePreviewRenderer } from './ole-preview-viewer';
 
 export const OLE_NAME_COMPONENT = 'drawing.ole-name';
 export const OLE_POPUP_COMPONENT = 'drawing.ole-popup';
@@ -96,10 +97,10 @@ export class OleUIService extends Disposable {
         @IMessageService private readonly _messages: IMessageService,
         @IDialogService private readonly _dialogs: IDialogService,
         @INotificationService private readonly _notifications: INotificationService,
-        @Inject(ThemeService) theme: ThemeService
+        @Inject(ThemeService) private readonly _theme: ThemeService
     ) {
         super();
-        this.disposeWithMe(theme.currentTheme$.subscribe((value) => {
+        this.disposeWithMe(this._theme.currentTheme$.subscribe((value) => {
             this._captionColor.value = value.gray[900];
             this._captionColor.warning = value.yellow[600];
             for (const binding of this._bindings.values()) {
@@ -250,6 +251,7 @@ export class OleUIService extends Disposable {
         }
         this._popup = host.attach(object, OLE_POPUP_COMPONENT, {
             available,
+            previewAvailable: available && this._canPreview(file.mimeType),
             officeType,
             showConvert: canConvert,
             hasOnlineUnit: !!savedOnline,
@@ -530,6 +532,10 @@ export class OleUIService extends Disposable {
             this._messages.show({ type: MessageType.Info, content: this._locale.t<LocaleKey>(record?.external ? 'drawing-ui.ole.externalHint' : 'drawing-ui.ole.missingHint') });
             return;
         }
+        if (!this._canPreview(resource.files[record.fileId].mimeType)) {
+            this._messages.show({ type: MessageType.Info, content: this._locale.t<LocaleKey>('drawing-ui.ole.unsupported') });
+            return;
+        }
         const previewKey = key(drawing);
         this._previews.get(previewKey)?.abort();
         const controller = new AbortController();
@@ -548,12 +554,12 @@ export class OleUIService extends Disposable {
             this._dialogs.open({ id: dialogId, title: { title: file.name }, children: { label: OLE_PREVIEW_COMPONENT, value: JSON.stringify({ url, mimeType: file.mimeType, name: file.name }) }, width: '80vw', onClose: close });
         } else if (this._oleConfig().previewOffice) {
             await this._oleConfig().previewOffice!({ unitId: drawing.unitId, attachmentId: id, bytes, name: file.name, mimeType: file.mimeType, signal: controller.signal });
-        } else if (this._oleConfig().convertOffice && ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'].includes(file.mimeType)) {
+        } else if (this._oleConfig().convertOffice && getOleOfficeType(file.mimeType) != null) {
             const view = await this._oleConfig().convertOffice!({ unitId: drawing.unitId, attachmentId: id, bytes, name: file.name, mimeType: file.mimeType, signal: controller.signal });
             if (controller.signal.aborted || attachmentId(this._getDrawing(drawing)) !== id) {
                 return;
             }
-            if (!this._hosts.get(view.type)?.createPreview && !this._oleConfig().createOfficePreview) {
+            if (!this._previewFactory(view.type)) {
                 throw new Error('Office preview renderer is unavailable');
             }
             this._officeViews.set(previewKey, view);
@@ -571,14 +577,39 @@ export class OleUIService extends Disposable {
         }
     }
 
+    private _canPreview(mimeType: string): boolean {
+        if (mimeType === 'application/pdf' || ['image/png', 'image/jpeg', 'image/gif', 'image/webp'].includes(mimeType)) {
+            return true;
+        }
+        const config = this._oleConfig();
+        if (config.previewOffice) {
+            return true;
+        }
+        const type = getOleOfficeType(mimeType);
+        return !!config.convertOffice && type != null && !!this._previewFactory(type);
+    }
+
+    private _previewFactory(type: UniverInstanceType): IOleConfig['createOfficePreview'] {
+        const configured = this._oleConfig().createOfficePreview;
+        if (configured) {
+            return configured;
+        }
+        const host = this._hosts.get(type)?.createPreview;
+        if (host) {
+            return async (container, view) => host(container, view.data);
+        }
+        const renderer = getOlePreviewRenderer(type);
+        return renderer ? async (container, view) => renderer({ container, ...view, config: this._config, locale: this._locale, theme: this._theme }) : undefined;
+    }
+
     mountOfficePreview(id: string, container: HTMLElement): IDisposable | undefined {
         const view = this._officeViews.get(id);
         if (!view) {
             return;
         }
-        const factory = this._oleConfig().createOfficePreview;
+        const factory = this._previewFactory(view.type);
         if (!factory) {
-            return this._hosts.get(view.type)?.createPreview?.(container, view.data);
+            return;
         }
         let disposed = false;
         let renderer: IDisposable | undefined;

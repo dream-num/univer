@@ -15,6 +15,7 @@
  */
 
 import type { DocumentDataModel, IDisposable, INeedCheckDisposable, Nullable } from '@univerjs/core';
+import type { IOlePreviewContext } from '@univerjs/drawing-ui';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import {
     DrawingTypeEnum,
@@ -57,6 +58,7 @@ import {
     ImageResetSizeOperation,
     OleUIService,
     OpenImageCropOperation,
+    registerOlePreviewRenderer,
 } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
@@ -113,12 +115,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
             rename: (drawing, name) => this._commandService.executeCommand(UpdateDrawingDocTransformCommand.id, { unitId: drawing.unitId, subUnitId: drawing.subUnitId, drawings: [{ drawingId: drawing.drawingId, key: 'oleFileName', value: name }] }),
             saveOnlineUnit: (drawing, online) => this._commandService.executeCommand(UpdateDrawingDocTransformCommand.id, { unitId: drawing.unitId, subUnitId: drawing.subUnitId, drawings: [{ drawingId: drawing.drawingId, key: 'oleOnlineUnit', value: online }] }),
             remove: (drawing) => this._commandService.executeCommand(RemoveDocDrawingCommand.id, { unitId: drawing.unitId, drawings: [{ ...drawing, drawingType: DrawingTypeEnum.DRAWING_OLE }] }),
-            createPreview: (container, data) => createOlePreviewViewer({ container, data, type: UniverInstanceType.UNIVER_DOC, onResize: (render) => render.with(DocPageLayoutService).calculatePagePosition(), locale: this._localeService, theme: this._themeService, config: this._configService, setReadonly: (permissions, unitId) => setDocumentPermissionValue(permissions, unitId, unitId, UnitAction.Edit, false), register: (viewer) => {
-                viewer.registerPlugin(UniverDocsPlugin);
-                viewer.registerPlugin(UniverDocsUIPlugin);
-                viewer.registerPlugin(UniverDocsDrawingPlugin);
-                viewer.registerPlugin(UniverDocsDrawingUIPlugin);
-            } }),
+            createPreview: (container, data) => createDocOlePreview({ container, data, type: UniverInstanceType.UNIVER_DOC, locale: this._localeService, theme: this._themeService, config: this._configService }),
         }));
 
         this._init();
@@ -506,3 +503,14 @@ export class DocDrawingPopupMenuController extends RxDisposable {
             });
     }
 }
+
+function createDocOlePreview(context: IOlePreviewContext): IDisposable {
+    return createOlePreviewViewer({ ...context, onResize: (render) => render.with(DocPageLayoutService).calculatePagePosition(), setReadonly: (permissions, unitId) => setDocumentPermissionValue(permissions, unitId, unitId, UnitAction.Edit, false), register: (viewer) => {
+        viewer.registerPlugin(UniverDocsPlugin);
+        viewer.registerPlugin(UniverDocsUIPlugin);
+        viewer.registerPlugin(UniverDocsDrawingPlugin);
+        viewer.registerPlugin(UniverDocsDrawingUIPlugin);
+    } });
+}
+
+registerOlePreviewRenderer(UniverInstanceType.UNIVER_DOC, createDocOlePreview);

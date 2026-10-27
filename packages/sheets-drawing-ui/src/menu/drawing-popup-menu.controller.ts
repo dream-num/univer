@@ -16,9 +16,9 @@
 
 import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import type { ImageIoService } from '@univerjs/drawing';
+import type { IOlePreviewContext } from '@univerjs/drawing-ui';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import type { ISheetFloatDom } from '@univerjs/sheets-drawing';
-import type { LocaleKey } from '../locale/types';
 import {
     DrawingTypeEnum,
     FOCUSING_COMMON_DRAWINGS,
@@ -43,6 +43,7 @@ import {
     ImageResetSizeOperation,
     OleUIService,
     OpenImageCropOperation,
+    registerOlePreviewRenderer,
 } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsPlugin, WorkbookEditablePermission } from '@univerjs/sheets';
@@ -54,6 +55,7 @@ import {
     IMessageService,
     MenuItemType,
 } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { FlipSheetDrawingCommand } from '../commands/commands/flip-drawings.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 import { UniverSheetsDrawingUIPlugin } from '../plugin';
@@ -85,18 +87,7 @@ export class DrawingPopupMenuController extends RxDisposable {
             rename: (drawing, name) => this._commandService.executeCommand(SetSheetDrawingCommand.id, { unitId: drawing.unitId, drawings: [{ ...drawing, oleFileName: name }] }),
             saveOnlineUnit: (drawing, online) => this._commandService.executeCommand(SetSheetDrawingCommand.id, { unitId: drawing.unitId, drawings: [{ ...drawing, oleOnlineUnit: online }] }),
             remove: (drawing) => this._commandService.executeCommand(RemoveSheetDrawingCommand.id, { unitId: drawing.unitId, drawings: [drawing] }),
-            createPreview: (container, data) => createOlePreviewViewer({ container, data, type: UniverInstanceType.UNIVER_SHEET, locale: this._localeService, theme: this._themeService, config: this._configService, setReadonly: (permissions, unitId) => {
-                const point = new WorkbookEditablePermission(unitId);
-                if (!permissions.getPermissionPoint(point.id)) {
-                    permissions.addPermissionPoint(point);
-                }
-                permissions.updatePermissionPoint(point.id, false);
-            }, register: (viewer) => {
-                viewer.registerPlugin(UniverSheetsPlugin);
-                viewer.registerPlugin(UniverSheetsUIPlugin);
-                viewer.registerPlugin(UniverSheetsDrawingPlugin);
-                viewer.registerPlugin(UniverSheetsDrawingUIPlugin);
-            } }),
+            createPreview: (container, data) => createSheetOlePreview({ container, data, type: UniverInstanceType.UNIVER_SHEET, locale: this._localeService, theme: this._themeService, config: this._configService }),
         }));
 
         this._init();
@@ -307,3 +298,18 @@ export class DrawingPopupMenuController extends RxDisposable {
             });
     }
 }
+
+function createSheetOlePreview(context: IOlePreviewContext): IDisposable {
+    return createOlePreviewViewer({ ...context, setReadonly: (permissions, unitId) => {
+        const point = new WorkbookEditablePermission(unitId);
+        if (!permissions.getPermissionPoint(point.id)) permissions.addPermissionPoint(point);
+        permissions.updatePermissionPoint(point.id, false);
+    }, register: (viewer) => {
+        viewer.registerPlugin(UniverSheetsPlugin);
+        viewer.registerPlugin(UniverSheetsUIPlugin);
+        viewer.registerPlugin(UniverSheetsDrawingPlugin);
+        viewer.registerPlugin(UniverSheetsDrawingUIPlugin);
+    } });
+}
+
+registerOlePreviewRenderer(UniverInstanceType.UNIVER_SHEET, createSheetOlePreview);

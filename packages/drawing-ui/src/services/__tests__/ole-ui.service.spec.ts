@@ -17,9 +17,6 @@
 // @vitest-environment happy-dom
 
 import type { IOleConfig, IOleDrawing, IOleOnlineUnit, IOleResource } from '@univerjs/drawing';
-import type { IOleHostActions } from '../ole-ui.service';
-import { Buffer } from 'node:buffer';
-import { createHash, webcrypto } from 'node:crypto';
 import {
     DrawingTypeEnum,
     IConfigService,
@@ -32,8 +29,12 @@ import {
 import { IDrawingManagerService, OleService, UnitDrawingService } from '@univerjs/drawing';
 import { Image } from '@univerjs/engine-render';
 import { IDialogService, IMessageService, INotificationService } from '@univerjs/ui';
+import { Buffer } from 'node:buffer';
+import { createHash, webcrypto } from 'node:crypto';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { IOleHostActions } from '../ole-ui.service';
+import * as previewRegistry from '../ole-preview-viewer';
 import { OLE_POPUP_COMPONENT, OleUIService } from '../ole-ui.service';
 
 const bytes = new TextEncoder().encode('%PDF-1.7 original');
@@ -317,6 +318,55 @@ describe('OLE local UI lifecycle', () => {
         await h.service.preview(h.drawing);
         expect(h.dialogs.open).toHaveBeenCalledWith(expect.objectContaining({ children: expect.objectContaining({ value: expect.stringContaining('blob:verified-pdf') }) }));
         expect(JSON.stringify(h.resource)).toBe(saved);
+    });
+
+    it('uses the target product UI factory even before a host of that product exists', async () => {
+        const h = harness();
+        h.resource.files[sha256].mimeType = 'application/msword';
+        const data = { id: 'preview-doc' };
+        h.config.convertOffice = vi.fn(async () => ({ type: UniverInstanceType.UNIVER_DOC, data }));
+        const renderer = { dispose: vi.fn() };
+        const factory = vi.fn(() => renderer);
+        vi.spyOn(previewRegistry, 'getOlePreviewRenderer').mockImplementation((type) => type === UniverInstanceType.UNIVER_DOC ? factory : undefined);
+        await h.service.preview(h.drawing);
+        const id = h.dialogs.open.mock.lastCall![0].children.value;
+        const container = document.createElement('div');
+        const mounted = h.service.mountOfficePreview(id, container)!;
+        await Promise.resolve();
+        expect(factory).toHaveBeenCalledWith(expect.objectContaining({ container, data, type: UniverInstanceType.UNIVER_DOC, theme: h.injector.get(ThemeService) }));
+        mounted.dispose();
+        expect(renderer.dispose).toHaveBeenCalledOnce();
+    });
+
+    it.each([false, true])('does not read or convert Office attachments when their product UI is absent (Unit: %s)', async (unit) => {
+        const h = harness(unit);
+        h.resource.files[sha256].mimeType = 'application/msword';
+        h.config.convertOffice = vi.fn();
+        vi.spyOn(previewRegistry, 'getOlePreviewRenderer').mockReturnValue(undefined);
+        h.enter$.next();
+        expect(h.attach.mock.lastCall?.[2]).toMatchObject({ available: true, previewAvailable: false });
+        await h.service.preview(h.drawing);
+        expect(h.config.convertOffice).not.toHaveBeenCalled();
+        expect(h.io.read).not.toHaveBeenCalled();
+        expect(h.dialogs.open).not.toHaveBeenCalled();
+        expect(h.messages.show).toHaveBeenLastCalledWith(expect.objectContaining({ content: 'drawing-ui.ole.unsupported' }));
+    });
+
+    it('retains application preview overrides instead of replacing them with a registered product default', async () => {
+        const h = harness();
+        h.resource.files[sha256].mimeType = 'application/msword';
+        h.config.convertOffice = vi.fn(async () => ({ type: UniverInstanceType.UNIVER_DOC, data: { id: 'preview-doc' } }));
+        const custom = { dispose: vi.fn() };
+        h.config.createOfficePreview = vi.fn(async () => custom);
+        const factory = vi.fn();
+        vi.spyOn(previewRegistry, 'getOlePreviewRenderer').mockReturnValue(factory);
+        await h.service.preview(h.drawing);
+        const mounted = h.service.mountOfficePreview(h.dialogs.open.mock.lastCall![0].children.value, document.createElement('div'))!;
+        await Promise.resolve();
+        expect(h.config.createOfficePreview).toHaveBeenCalledOnce();
+        expect(factory).not.toHaveBeenCalled();
+        mounted.dispose();
+        expect(custom.dispose).toHaveBeenCalledOnce();
     });
 
     it('a remote deletion cancels a pending read and prevents the late preview from reopening', async () => {

@@ -487,7 +487,7 @@ describe('explicit collaborative OLE conversion', () => {
             type: 'success',
             title: 'drawing-ui.ole.converted',
             content: 'original.doc',
-            action: { label: 'drawing-ui.ole.openDoc', onClick: expect.any(Function) },
+            action: { label: 'drawing-ui.ole.open', onClick: expect.any(Function) },
         }));
         expect(JSON.stringify(h.resource)).toBe(before);
         await h.service.convertToOnline(h.drawing);

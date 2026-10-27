@@ -412,22 +412,39 @@ export class OleUIService extends Disposable {
     }
 
     private _showOnlineComplete(name: string, online: IOleOnlineUnit): void {
-        const openKey: LocaleKey = online.type === UniverInstanceType.UNIVER_SHEET
-            ? 'drawing-ui.ole.openSheet'
-            : online.type === UniverInstanceType.UNIVER_SLIDE ? 'drawing-ui.ole.openSlide' : 'drawing-ui.ole.openDoc';
         this.disposeWithMe(this._notifications.show({
             type: 'success',
             title: this._locale.t<LocaleKey>('drawing-ui.ole.converted'),
             content: name,
             position: 'bottom-right',
             duration: Infinity,
+            classNames: {
+                toast: `
+                  !univer-grid !univer-grid-cols-[20px_minmax(0,1fr)] !univer-items-start !univer-gap-x-3
+                  !univer-gap-y-3 !univer-rounded-xl !univer-border-gray-200 !univer-bg-gray-0 univer-font-sans
+                  dark:!univer-border-gray-700 dark:!univer-bg-gray-800
+                `,
+                icon: '!univer-m-0 !univer-self-start [&>svg]:!univer-top-0',
+                content: '!univer-min-w-0 !univer-gap-1 univer-pe-5',
+                title: '!univer-text-sm !univer-font-medium !univer-leading-5',
+                description: '!univer-truncate !univer-text-xs !univer-leading-5',
+                actionButton: `
+                  univer-col-start-2 univer-justify-self-end !univer-m-0 !univer-h-8 !univer-rounded-lg
+                  !univer-bg-primary-600 !univer-px-3 !univer-text-sm !univer-font-medium !univer-text-gray-0
+                  hover:!univer-bg-primary-500
+                `,
+                closeButton: `
+                  !univer-start-auto !univer-end-2 !univer-top-2 !univer-transform-none !univer-rounded-md
+                  !univer-border-0 !univer-bg-transparent !univer-text-gray-500
+                  hover:!univer-bg-gray-100
+                  dark:!univer-text-gray-300 dark:hover:!univer-bg-gray-700
+                `,
+            },
             action: {
-                label: this._locale.t<LocaleKey>(openKey),
-                onClick: () => {
-                    void this._act(async () => {
-                        window.open(this._onlineUrl(online), '_blank', 'noopener,noreferrer');
-                    });
-                },
+                label: this._locale.t<LocaleKey>('drawing-ui.ole.open'),
+                onClick: () => this._act(async () => {
+                    window.open(this._onlineUrl(online), '_blank', 'noopener,noreferrer');
+                }),
             },
         }));
     }

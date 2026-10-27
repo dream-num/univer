@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-import type { IFreeze, Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
-import type { IScrollStateWithSearchParam } from '../../../services/scroll-manager.service';
+import type { IFreeze, Injector, IWorkbookData, Workbook } from '@univerjs/core';
 import {
     ICommandService,
+    IUndoRedoService,
     IUniverInstanceService,
     RANGE_TYPE,
     RedoCommand,
+    SheetTypes,
     UndoCommand,
+    Univer,
     UniverInstanceType,
 } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { CancelFrozenCommand, getPrimaryForRange, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { CancelFrozenCommand, getPrimaryForRange, SetSelectionsOperation, SheetsSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { IScrollStateWithSearchParam } from '../../../services/scroll-manager.service';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import {
     SetColumnFrozenCommand,
@@ -261,4 +264,33 @@ describe('Test commands used for change selections', () => {
             expect(config?.startRow === -1 && config.startColumn === -1).toBeTruthy();
         });
     });
+});
+
+it('rejects Chart Sheet freeze commands before reading Grid render state or writing a mutation', async () => {
+    const univer = new Univer();
+    try {
+        univer.registerPlugin(UniverSheetsPlugin);
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'chart-freeze',
+            sheetOrder: ['chart'],
+            sheets: { chart: { id: 'chart', name: 'Chart', type: SheetTypes.CHART, rowCount: 0, columnCount: 0 } },
+        });
+        const injector = univer.__getInjector();
+        injector.get(IUniverInstanceService).focusUnit(workbook.getUnitId());
+        const commands = injector.get(ICommandService);
+        commands.registerCommand(SetSelectionFrozenCommand);
+        commands.registerCommand(SetFirstRowFrozenCommand);
+        injector.get(SheetsSelectionsService).addSelections([{
+            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+            primary: null,
+            style: null,
+        }]);
+        const before = JSON.stringify(workbook.getSnapshot());
+        const history = injector.get(IUndoRedoService).pitchTopUndoElement();
+        expect(await commands.executeCommand(SetFirstRowFrozenCommand.id)).toBe(false);
+        expect(JSON.stringify(workbook.getSnapshot())).toBe(before);
+        expect(injector.get(IUndoRedoService).pitchTopUndoElement()).toBe(history);
+    } finally {
+        univer.dispose();
+    }
 });

@@ -48,7 +48,7 @@ import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univ
 import { CanvasFloatDomService } from '@univerjs/ui';
 import { resolveFloatDomLayout } from '@univerjs/ui/views/components/dom/float-dom-layout.ts';
 import { BehaviorSubject, of, Subject } from 'rxjs';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import type {
     ICanvasFloatDomInfo,
     ISheetFloatDomRenderObjectFactoryContext,
@@ -2150,60 +2150,6 @@ describe('absolute chart consumers with a real no-grid render', () => {
     });
 });
 
-it('constrains a chart-owned DOM drag before pointerup and commits the preview bounds on release', async () => {
-    const parent = applySheetDrawingPlacement(createAbsoluteChart('parent'), {
-        kind: SheetDrawingAnchorType.None,
-        left: 100,
-        top: 200,
-        width: 300,
-        height: 200,
-    });
-    const child = {
-        ...applySheetDrawingPlacement(createAbsoluteChart('child'), {
-            kind: SheetDrawingAnchorType.None,
-            left: 140,
-            top: 240,
-            width: 100,
-            height: 80,
-        }),
-        drawingType: DrawingTypeEnum.DRAWING_DOM,
-        chartParent: { drawingId: 'parent', resizeWithParent: false },
-    };
-    child.transform = { ...child.transform, angle: 35 };
-    const bed = createChartDrawingTestBed(undefined, parent);
-    expect(await bed.commandService.executeCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [child] })).toBe(true);
-    const search = { unitId: 'test', subUnitId: 'chart', drawingId: 'child' };
-    const original = bed.drawings.getDrawingByParam(search)!;
-    bed.render.scene.transformByState({ scaleX: 1.5, scaleY: 1.5 });
-    const viewport = bed.render.scene.getMainViewport();
-    const start = viewport.getAbsoluteVector(Vector2.FromArray([160, 260]));
-    const finish = viewport.getAbsoluteVector(Vector2.FromArray([470, 470]));
-    document.dispatchEvent(new CustomEvent(EMBED_FLOAT_DRAG_HANDLE_POINTER_DOWN_EVENT, { detail: {
-        hostUnitId: 'test',
-        hostAnchorId: 'child',
-        pointerId: 1,
-        clientX: start.x,
-        clientY: start.y,
-        button: 0,
-    } }));
-
-    window.dispatchEvent(new PointerEvent('pointermove', { pointerId: 1, clientX: finish.x, clientY: finish.y }));
-
-    const rect = bed.manager.getFloatDomInfo('child')!.rect;
-    expect(rect.left).toBeCloseTo(300);
-    expect(rect.top).toBeCloseTo(320);
-    expect(rect.width).toBe(100);
-    expect(rect.height).toBe(80);
-    expect(bed.drawings.getDrawingByParam(search)).toEqual(original);
-    window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, clientX: finish.x, clientY: finish.y }));
-    const changed = bed.drawings.getDrawingByParam(search)!;
-    expect(changed.transform).toMatchObject({ left: 300, top: 320, width: 100, height: 80, angle: 35 });
-    expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
-    expect(bed.drawings.getDrawingByParam(search)).toEqual(original);
-    expect(await bed.commandService.executeCommand(RedoCommand.id)).toBe(true);
-    expect(bed.drawings.getDrawingByParam(search)).toEqual(changed);
-});
-
 it('commits a real pointer move in viewport coordinates and cancels pending work on object or host removal', async () => {
     const drawing = createAbsoluteChart();
     drawing.transform = { ...drawing.transform, angle: 35 };
@@ -2335,4 +2281,63 @@ it.each([90, 30])('keeps the actual DOM wrapper and pointer commit aligned under
     expect(bed.drawingManager.getDrawingByParam(search)).toEqual(bed.drawings.getDrawingByParam(search));
     assertWrapper(290, 220);
     expect(bed.skeletons.ensureSkeleton('test', 'chart')).toBeUndefined();
+});
+
+it('applies an owner move constraint before pointerup and commits preview bounds with symmetric history', async () => {
+    const parent = applySheetDrawingPlacement(createAbsoluteChart('parent'), {
+        kind: SheetDrawingAnchorType.None,
+        left: 100,
+        top: 200,
+        width: 300,
+        height: 200,
+    });
+    const child = {
+        ...applySheetDrawingPlacement(createAbsoluteChart('child'), {
+            kind: SheetDrawingAnchorType.None,
+            left: 140,
+            top: 240,
+            width: 100,
+            height: 80,
+        }),
+        drawingType: DrawingTypeEnum.DRAWING_DOM,
+    };
+    child.transform = { ...child.transform, angle: 35 };
+    const bed = createChartDrawingTestBed(undefined, parent);
+    expect(await bed.commandService.executeCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [child] })).toBe(true);
+    const registration = bed.manager.registerMoveTransformConstraint((drawing, transform) => ({
+        ...transform,
+        left: Math.max(100, Math.min(transform.left!, 400 - drawing.transform!.width!)),
+        top: Math.max(200, Math.min(transform.top!, 400 - drawing.transform!.height!)),
+    }));
+    onTestFinished(() => registration.dispose());
+    const search = { unitId: 'test', subUnitId: 'chart', drawingId: 'child' };
+    const original = bed.drawings.getDrawingByParam(search)!;
+    bed.render.scene.transformByState({ scaleX: 1.5, scaleY: 1.5 });
+    const viewport = bed.render.scene.getMainViewport();
+    const start = viewport.getAbsoluteVector(Vector2.FromArray([160, 260]));
+    const finish = viewport.getAbsoluteVector(Vector2.FromArray([470, 470]));
+    document.dispatchEvent(new CustomEvent(EMBED_FLOAT_DRAG_HANDLE_POINTER_DOWN_EVENT, { detail: {
+        hostUnitId: 'test',
+        hostAnchorId: 'child',
+        pointerId: 1,
+        clientX: start.x,
+        clientY: start.y,
+        button: 0,
+    } }));
+
+    window.dispatchEvent(new PointerEvent('pointermove', { pointerId: 1, clientX: finish.x, clientY: finish.y }));
+
+    const rect = bed.manager.getFloatDomInfo('child')!.rect;
+    expect(rect.left).toBeCloseTo(300);
+    expect(rect.top).toBeCloseTo(320);
+    expect(rect.width).toBe(100);
+    expect(rect.height).toBe(80);
+    expect(bed.drawings.getDrawingByParam(search)).toEqual(original);
+    window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, clientX: finish.x, clientY: finish.y }));
+    const changed = bed.drawings.getDrawingByParam(search)!;
+    expect(changed.transform).toMatchObject({ left: 300, top: 320, width: 100, height: 80, angle: 35 });
+    expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
+    expect(bed.drawings.getDrawingByParam(search)).toEqual(original);
+    expect(await bed.commandService.executeCommand(RedoCommand.id)).toBe(true);
+    expect(bed.drawings.getDrawingByParam(search)).toEqual(changed);
 });

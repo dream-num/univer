@@ -65,8 +65,7 @@ function expandDrawingRemovalParams(
             return;
         }
         const children = Object.values(service.getDrawingData(search.unitId, search.subUnitId))
-            .filter((drawing) => drawing.chartParent?.drawingId === search.drawingId
-                || (current.drawingType === DrawingTypeEnum.DRAWING_GROUP && drawing.groupId === search.drawingId));
+            .filter((drawing) => (current.drawingType === DrawingTypeEnum.DRAWING_GROUP && drawing.groupId === search.drawingId));
         const nextAncestors = new Set(ancestors);
         nextAncestors.add(search.drawingId);
         children.forEach((drawing) => visit({
@@ -100,19 +99,15 @@ export const RemoveSheetDrawingCommand: ICommand = {
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const sheetDrawingService = accessor.get(ISheetDrawingService);
 
-        // Drawing removal and model interceptors must capture the same complete preimage.
-        const drawings = expandDrawingRemovalParams(sheetDrawingService, params.drawings);
-        const jsonOp = sheetDrawingService.getBatchRemoveOp(drawings) as IDrawingJsonUndo1;
+        const normalizedParams = { ...params, drawings: expandDrawingRemovalParams(sheetDrawingService, params.drawings) };
+        // Interceptors share the complete command-local preimage, including feature-owned descendants.
+        const intercepted = sheetInterceptorService.onCommandExecute({ id: RemoveSheetDrawingCommand.id, params: normalizedParams });
+        const jsonOp = sheetDrawingService.getBatchRemoveOp(normalizedParams.drawings) as IDrawingJsonUndo1;
         const { unitId, subUnitId, undo, redo, objects } = jsonOp;
-
         if (Array.isArray(objects) && objects.length === 0) {
             return false;
         }
 
-        const intercepted = sheetInterceptorService.onCommandExecute({
-            id: RemoveSheetDrawingCommand.id,
-            params: { ...params, drawings },
-        });
         const redoMutations = [
             ...(intercepted.preRedos ?? []),
             {

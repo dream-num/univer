@@ -15,9 +15,8 @@
  */
 
 import type { ICommand, Nullable } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, SheetTypes, UniverInstanceType } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
-import { getSheetCommandTarget } from '@univerjs/sheets';
 import { SheetDrawingUpdateController } from '../../controllers/sheet-drawing-update.controller';
 
 export interface IInsertImageCommandParams {
@@ -57,10 +56,6 @@ export const InsertCellImageCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: (accessor) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const target = getSheetCommandTarget(univerInstanceService);
-        if (target?.worksheet.getConfig().type !== SheetTypes.GRID) {
-            return false;
-        }
         const renderManagerService = accessor.get(IRenderManagerService);
 
         return getCurrentTypeOfRenderer(

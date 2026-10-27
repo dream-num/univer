@@ -17,15 +17,30 @@
 import type { Workbook } from '@univerjs/core';
 import type { IDrawingJsonUndo1, IDrawingSubunitMap } from '@univerjs/drawing';
 import type { ICopySheetCommandInterceptorParams, IRemoveSheetCommandParams } from '@univerjs/sheets';
-import { Disposable, ICommandService, Inject, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import {
+    Disposable,
+    ICommandService,
+    Inject,
+    IResourceManagerService,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { getOrCreateDrawingCopyPlan, IDrawingManagerService } from '@univerjs/drawing';
-import { CopySheetCommand, getSheetCommandTarget, RemoveSheetCommand, SheetInterceptorService, SheetPermissionCheckController } from '@univerjs/sheets';
+import {
+    CopySheetCommand,
+    getSheetCommandTarget,
+    RemoveSheetCommand,
+    SheetInterceptorService,
+    SheetPermissionCheckController,
+} from '@univerjs/sheets';
 import type { IInsertSheetDrawingCommandParams } from '../commands/commands/insert-sheet-drawing.command';
 import type { IRemoveSheetDrawingCommandParams } from '../commands/commands/remove-sheet-drawing.command';
 import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-drawing-arrange.command';
 import type { ISetSheetDrawingPlacementCommandParams } from '../commands/commands/set-sheet-drawing-placement.command';
 import type { ISetDrawingCommandParams } from '../commands/commands/set-sheet-drawing.command';
-import type { ISetWorksheetBackgroundImageCommandParams } from '../commands/commands/set-worksheet-background-image.command';
+import type {
+    ISetWorksheetBackgroundImageCommandParams,
+} from '../commands/commands/set-worksheet-background-image.command';
 import type { ISheetDrawing } from '../services/sheet-drawing.service';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
@@ -230,17 +245,7 @@ export class SheetsDrawingLoadController extends Disposable {
                             sourceSubUnitId: subUnitId,
                             targetSubUnitId,
                         });
-                        const drawings = copyPlan.drawings.map((drawing) => {
-                            const source = drawing as ISheetDrawing;
-                            if (!source.chartParent) {
-                                return drawing;
-                            }
-                            const parentId = copyPlan.idMap.get(source.chartParent.drawingId);
-                            if (!parentId) {
-                                throw new Error(CopySheetCommand.id);
-                            }
-                            return { ...source, chartParent: { ...source.chartParent, drawingId: parentId } };
-                        });
+                        const drawings = copyPlan.drawings;
 
                         if (drawings.length === 0) {
                             return { redos: [], undos: [] };

@@ -62,6 +62,7 @@ import {
     LifecycleStages,
     Optional,
     SheetTypes,
+    toDisposable,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -754,6 +755,13 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
     private _remove$ = new Subject<{ unitId: string; subUnitId: string; id: string }>();
     remove$ = this._remove$.asObservable();
+    private readonly _moveTransformConstraints = new Set<(drawing: ISheetDrawing, transform: ITransformState) => ITransformState>();
+
+    registerMoveTransformConstraint(constraint: (drawing: ISheetDrawing, transform: ITransformState) => ITransformState): IDisposable {
+        this._moveTransformConstraints.add(constraint);
+        return toDisposable(() => this._moveTransformConstraints.delete(constraint));
+    }
+
     private readonly _floatDomMoveDisposables = new Map<string, IDisposable>();
     private readonly _renderObjectFactories = new Map<DrawingTypeEnum, SheetFloatDomRenderObjectFactory[]>();
 
@@ -790,6 +798,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
     }
 
     override dispose(): void {
+        this._moveTransformConstraints.clear();
         for (const id of Array.from(this._domLayerInfoMap.keys())) {
             this._removeDom(id);
         }
@@ -919,13 +928,12 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 : resolveFloatDomMoveDragTransform(dragState, pointerEvent, scene);
             const drawing = this._sheetDrawingService.getDrawingByParam({ unitId: info.unitId, subUnitId: info.subUnitId, drawingId: info.id });
             if (drawing?.anchorType === SheetDrawingAnchorType.None) {
-                const parent = drawing.chartParent && this._sheetDrawingService.getDrawingByParam({
-                    unitId: info.unitId,
-                    subUnitId: info.subUnitId,
-                    drawingId: drawing.chartParent.drawingId,
-                });
                 const next = { ...drawing, transform: { ...drawing.transform, ...nextTransform } };
-                info.rect.transformByState(applySheetDrawingPlacement(drawing, getSheetDrawingPlacement(next), undefined, parent ?? undefined).transform as ITransformState);
+                let transform = applySheetDrawingPlacement(drawing, getSheetDrawingPlacement(next)).transform as ITransformState;
+                for (const constraint of this._moveTransformConstraints) {
+                    transform = constraint(drawing, transform);
+                }
+                info.rect.transformByState(transform);
             } else {
                 info.rect.transformByState(nextTransform as ITransformState);
             }
@@ -1005,13 +1013,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             const next = { ...drawing, transform };
             this._commandService.syncExecuteCommand<ISetDrawingCommandParams>(SetSheetDrawingCommand.id, {
                 unitId: info.unitId,
-                drawings: [applySheetDrawingPlacement(drawing, getSheetDrawingPlacement(next), undefined, drawing.chartParent
-                    ? this._sheetDrawingService.getDrawingByParam({
-                        unitId: info.unitId,
-                        subUnitId: info.subUnitId,
-                        drawingId: drawing.chartParent.drawingId,
-                    }) ?? undefined
-                    : undefined)],
+                drawings: [applySheetDrawingPlacement(drawing, getSheetDrawingPlacement(next))],
             });
             return;
         }

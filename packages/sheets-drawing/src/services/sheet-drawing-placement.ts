@@ -142,65 +142,27 @@ export function getSheetDrawingPlacement(drawing: ISheetDrawing): ISheetDrawingP
 export function applySheetDrawingPlacement(
     drawing: ISheetImage,
     input: ISheetDrawingPlacementInput,
-    skeleton?: SpreadsheetSkeleton,
-    parent?: ISheetDrawing,
-    resizeFromEdge?: boolean
+    skeleton?: SpreadsheetSkeleton
 ): ISheetImage;
 export function applySheetDrawingPlacement(
     drawing: ISheetFloatDom,
     input: ISheetDrawingPlacementInput,
-    skeleton?: SpreadsheetSkeleton,
-    parent?: ISheetDrawing,
-    resizeFromEdge?: boolean
+    skeleton?: SpreadsheetSkeleton
 ): ISheetFloatDom;
 export function applySheetDrawingPlacement(
     drawing: ISheetDrawing,
     input: ISheetDrawingPlacementInput,
-    skeleton?: SpreadsheetSkeleton,
-    parent?: ISheetDrawing,
-    resizeFromEdge?: boolean
+    skeleton?: SpreadsheetSkeleton
 ): ISheetDrawing;
 export function applySheetDrawingPlacement(
     drawing: ISheetDrawing,
     input: ISheetDrawingPlacementInput,
-    skeleton?: SpreadsheetSkeleton,
-    parent?: ISheetDrawing,
-    resizeFromEdge = false
+    skeleton?: SpreadsheetSkeleton
 ): ISheetDrawing {
     const requiresArea = requiresDrawingArea(drawing);
-    let placement = normalizePlacement(input, skeleton, requiresArea);
-    if (placement.kind === SheetDrawingAnchorType.None && drawing.chartParent?.drawingId === parent?.drawingId
-        && parent && drawing.unitId === parent.unitId && drawing.subUnitId === parent.subUnitId) {
-        const parentBounds = parent.transform as IGroupBaseBound;
-        assertValidPlacement(validateBounds(parentBounds, true));
-        placement = fitChartChildPlacement(drawing, placement, parentBounds, resizeFromEdge);
-        assertValidPlacement(validatePlacement(placement, requiresArea));
-    }
+    const placement = normalizePlacement(input, skeleton, requiresArea);
 
     return resolveSheetDrawingPlacement(drawing, placement, skeleton);
-}
-
-function fitChartChildPlacement(
-    drawing: ISheetDrawing,
-    placement: ISheetDrawingAbsolutePlacement,
-    parent: IGroupBaseBound,
-    resizeFromEdge: boolean
-): ISheetDrawingAbsolutePlacement {
-    const fitAxis = (start: number, extent: number, previousStart: number, previousExtent: number, parentStart: number, parentExtent: number) => {
-        const end = parentStart + parentExtent;
-        if (resizeFromEdge && extent !== previousExtent) {
-            const previousEnd = previousStart + previousExtent;
-            const movingStart = Math.abs(start - previousStart) > Math.abs(start + extent - previousEnd);
-            const fixedEdge = Math.max(parentStart, Math.min(end, movingStart ? previousEnd : previousStart));
-            const movingEdge = Math.max(parentStart, Math.min(end, movingStart ? start : start + extent));
-            return { start: Math.min(fixedEdge, movingEdge), extent: Math.abs(movingEdge - fixedEdge) };
-        }
-        const fittedExtent = Math.min(extent, parentExtent);
-        return { start: Math.max(parentStart, Math.min(start, end - fittedExtent)), extent: fittedExtent };
-    };
-    const horizontal = fitAxis(placement.left, placement.width, drawing.transform?.left ?? placement.left, drawing.transform?.width ?? placement.width, parent.left, parent.width);
-    const vertical = fitAxis(placement.top, placement.height, drawing.transform?.top ?? placement.top, drawing.transform?.height ?? placement.height, parent.top, parent.height);
-    return { ...placement, left: horizontal.start, top: vertical.start, width: horizontal.extent, height: vertical.extent };
 }
 
 /** Refresh layout-derived geometry without changing the drawing's anchor semantics. */

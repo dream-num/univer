@@ -16,6 +16,8 @@
 
 import type { IAbsoluteTransform, Nullable } from '@univerjs/core';
 import type { Subscription } from 'rxjs';
+import { Disposable, MOVE_BUFFER_VALUE, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
+import { Subject } from 'rxjs';
 import type { BaseObject } from './base-object';
 import type { IMouseEvent, IPointerEvent } from './basics/i-events';
 import type { ITransformerConfig } from './basics/transformer-config';
@@ -24,8 +26,6 @@ import type { UniverRenderingContext } from './context';
 import type { Scene } from './scene';
 import type { IRectProps } from './shape/rect';
 import type { IRegularPolygonProps } from './shape/regular-polygon';
-import { Disposable, MOVE_BUFFER_VALUE, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
-import { Subject } from 'rxjs';
 import { CURSOR_TYPE } from './basics/const';
 import { offsetRotationAxis } from './basics/offset-rotation-axis';
 import { getCurrentScrollXY } from './basics/scroll-xy';
@@ -603,6 +603,11 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 return;
             }
 
+            if (!isCropper && (evt.ctrlKey || this._selectedObjectMap.has(this._findGroupObject(applyObject).oKey))
+                && Array.from(this._selectedObjectMap.values()).some((object) => !this._getConfig(object).moveEnabled)) {
+                this._updateActiveObjectList(applyObject, evt);
+                return;
+            }
             this._addCancelObserver(scene);
 
             // Selection can mount DOM chrome under the pointer before pointerup.
@@ -1185,7 +1190,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
                     this._startOffsetY = evtOffsetY;
                     const topScene = this._getTopScene();
                     const { keepRatio, isCropper } = this._getConfig(applyObject);
-                    if (topScene == null) {
+                    if (topScene == null || (!isCropper && Array.from(this._selectedObjectMap.values())
+                        .some((object) => !this._getConfig(object).resizeEnabled))) {
                         return;
                     }
                     topScene.getEngine()?.setCapture();

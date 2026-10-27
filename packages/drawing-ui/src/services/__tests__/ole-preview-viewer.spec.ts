@@ -17,10 +17,43 @@
 // @vitest-environment happy-dom
 
 import { IConfigService, IImageIoService, LocaleService, ThemeService, Univer, UniverInstanceType } from '@univerjs/core';
+import { UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
 import { createOlePreviewViewer } from '../ole-preview-viewer';
 
 describe('isolated OLE preview dependencies', () => {
+    it.each([
+        { type: UniverInstanceType.UNIVER_SHEET, footer: true },
+        { type: UniverInstanceType.UNIVER_DOC, footer: false },
+        { type: UniverInstanceType.UNIVER_SLIDE, footer: false },
+    ])('keeps native worksheet navigation available only for Sheet previews ($type)', ({ type, footer }) => {
+        const host = new Univer();
+        const injector = host.__getInjector();
+        const stop = new Error('preview configuration inspected');
+        try {
+            expect(() => createOlePreviewViewer({
+                container: document.createElement('div'),
+                data: {},
+                type,
+                locale: injector.get(LocaleService),
+                theme: injector.get(ThemeService),
+                config: injector.get(IConfigService),
+                register: (viewer) => {
+                    expect(viewer.__getInjector().get(IConfigService).getConfig(UI_PLUGIN_CONFIG_KEY)).toMatchObject({
+                        footer,
+                        header: false,
+                        toolbar: false,
+                        contextMenu: false,
+                    });
+                    throw stop;
+                },
+                setReadonly: () => {},
+            })).toThrow(stop);
+        } finally {
+            host.dispose();
+        }
+    });
+
     it('keeps standalone image IO when collaboration overrides disable it in the source instance', async () => {
         const host = new Univer();
         const injector = host.__getInjector();

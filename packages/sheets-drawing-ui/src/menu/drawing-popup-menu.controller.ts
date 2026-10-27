@@ -44,7 +44,7 @@ import {
     registerOlePreviewRenderer,
 } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { UniverSheetsPlugin, WorkbookEditablePermission } from '@univerjs/sheets';
+import { UniverSheetsPlugin, WorkbookEditablePermission, WorkbookRenameSheetPermission } from '@univerjs/sheets';
 import { RemoveSheetDrawingCommand, SetSheetDrawingCommand, UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import { SheetCanvasPopManagerService, UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import {
@@ -296,12 +296,15 @@ export class DrawingPopupMenuController extends RxDisposable {
 
 function createSheetOlePreview(context: IOlePreviewContext): IDisposable {
     return createOlePreviewViewer({ ...context, setReadonly: (permissions, unitId) => {
-        const point = new WorkbookEditablePermission(unitId);
-        if (!permissions.getPermissionPoint(point.id)) permissions.addPermissionPoint(point);
-        permissions.updatePermissionPoint(point.id, false);
+        for (const point of [new WorkbookEditablePermission(unitId), new WorkbookRenameSheetPermission(unitId)]) {
+            if (!permissions.getPermissionPoint(point.id)) {
+                permissions.addPermissionPoint(point);
+            }
+            permissions.updatePermissionPoint(point.id, false);
+        }
     }, register: (viewer) => {
         viewer.registerPlugin(UniverSheetsPlugin);
-        viewer.registerPlugin(UniverSheetsUIPlugin);
+        viewer.registerPlugin(UniverSheetsUIPlugin, { disableEdit: true });
         viewer.registerPlugin(UniverSheetsDrawingPlugin);
         viewer.registerPlugin(UniverSheetsDrawingUIPlugin);
     } });

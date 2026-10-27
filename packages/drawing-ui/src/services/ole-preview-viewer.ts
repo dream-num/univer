@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IConfigService, IDisposable, LocaleService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import type { IConfigService, IDisposable, LocaleService, ThemeService } from '@univerjs/core';
 import type { IUniverDrawingConfig } from '@univerjs/drawing';
 import type { IRender } from '@univerjs/engine-render';
-import { IPermissionService, IUniverInstanceService, LifecycleService, LifecycleStages, Univer } from '@univerjs/core';
+import { IPermissionService, IUniverInstanceService, LifecycleService, LifecycleStages, Univer, UniverInstanceType } from '@univerjs/core';
 import { IDrawingManagerService, UniverDrawingPlugin } from '@univerjs/drawing';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverUIPlugin } from '@univerjs/ui';
@@ -53,7 +53,7 @@ export function createOlePreviewViewer(options: IOlePreviewViewerOptions): IDisp
     const viewer = new Univer({ darkMode: options.theme.darkMode, locale: options.locale.getCurrentLocale(), locales: { [options.locale.getCurrentLocale()]: options.locale.getLocales() ?? {} }, theme: options.theme.getCurrentTheme() });
     try {
         viewer.registerPlugin(UniverRenderEnginePlugin);
-        viewer.registerPlugin(UniverUIPlugin, { container: options.container, header: false, toolbar: false, footer: false, contextMenu: false });
+        viewer.registerPlugin(UniverUIPlugin, { container: options.container, header: false, toolbar: false, footer: options.type === UniverInstanceType.UNIVER_SHEET, contextMenu: false });
         const drawing = options.config.getConfig<IUniverDrawingConfig>('drawing.config');
         // The standalone viewer owns its providers; source collaboration overrides require services absent here.
         viewer.registerPlugin(UniverDrawingPlugin, { ...drawing, override: undefined, ole: { ...drawing?.ole, isCollaborative: () => false, convertToOnline: undefined } });
@@ -64,7 +64,7 @@ export function createOlePreviewViewer(options: IOlePreviewViewerOptions): IDisp
         let disposed = false;
         let frame: number | undefined;
         // A dialog mounts its engine after the first layout. Resize after render modules subscribe.
-        void injector.get(LifecycleService).onStage(LifecycleStages.Rendered).then(() => {
+        injector.get(LifecycleService).onStage(LifecycleStages.Rendered).then(() => {
             if (!disposed) {
                 options.setReadonly(injector.get(IPermissionService), unit.getUnitId());
                 injector.get(IDrawingManagerService).setDrawingEditable(false);

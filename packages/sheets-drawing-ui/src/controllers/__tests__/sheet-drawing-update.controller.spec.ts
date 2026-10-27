@@ -29,6 +29,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
+import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import {
     CanvasColorService,
     ICanvasColorService,
@@ -40,6 +41,7 @@ import {
 } from '@univerjs/engine-render';
 import { WorksheetEditPermission } from '@univerjs/sheets';
 import {
+    applySheetDrawingPlacement,
     InsertSheetDrawingCommand,
     ISheetDrawingService,
     SheetDrawingAnchorType,
@@ -226,6 +228,120 @@ it('commits actual None feature updates through both stores, full save/reopen an
     expect(reopened.skeletons.ensureSkeleton('test', 'chart')).toBeUndefined();
 });
 
+it.each([true, false])('normalizes a chart child against the complete parent update before committing, parent first=%s', async (parentFirst) => {
+    const parent = applySheetDrawingPlacement(createAbsoluteChart('parent'), {
+        kind: SheetDrawingAnchorType.None,
+        left: 100,
+        top: 200,
+        width: 300,
+        height: 200,
+    });
+    const child = {
+        ...applySheetDrawingPlacement(createAbsoluteChart('child'), {
+            kind: SheetDrawingAnchorType.None,
+            left: 140,
+            top: 240,
+            width: 100,
+            height: 80,
+        }),
+        drawingType: DrawingTypeEnum.DRAWING_DOM,
+        chartParent: { drawingId: 'parent', resizeWithParent: true },
+    };
+    const bed = createChartDrawingTestBed(undefined, parent);
+    expect(await bed.commandService.executeCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [child] })).toBe(true);
+    const parentSearch = { unitId: 'test', subUnitId: 'chart', drawingId: 'parent' };
+    const childSearch = { unitId: 'test', subUnitId: 'chart', drawingId: 'child' };
+    const originalParent = bed.drawings.getDrawingByParam(parentSearch)!;
+    const originalChild = bed.drawings.getDrawingByParam(childSearch)!;
+    const parentUpdate = { ...parentSearch, drawingType: DrawingTypeEnum.DRAWING_CHART, transform: { width: 200, height: 150 } };
+    const childUpdate = { ...childSearch, drawingType: DrawingTypeEnum.DRAWING_DOM, transform: { left: 280, top: 320 }, data: { modelId: 'child', label: 'edited' } };
+
+    bed.drawingManager.featurePluginUpdateNotification(parentFirst ? [parentUpdate, childUpdate] : [childUpdate, parentUpdate]);
+    await Promise.resolve();
+
+    const changed = bed.drawings.getDrawingByParam(childSearch)!;
+    expect(changed.transform).toMatchObject({ left: 200, top: 270, width: 100, height: 80 });
+    expect(changed).toMatchObject({ data: { modelId: 'child', label: 'edited' } });
+    expect(bed.drawings.getDrawingByParam(parentSearch)!.transform).toMatchObject({ left: 100, top: 200, width: 200, height: 150 });
+    expect(bed.drawingManager.getDrawingByParam(childSearch)).toEqual(changed);
+    expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
+    expect(bed.drawings.getDrawingByParam(parentSearch)).toEqual(originalParent);
+    expect(bed.drawings.getDrawingByParam(childSearch)).toEqual(originalChild);
+    expect(await bed.commandService.executeCommand(RedoCommand.id)).toBe(true);
+    expect(bed.drawings.getDrawingByParam(childSearch)).toEqual(changed);
+});
+
+it('fits a numeric width update without treating it as an edge drag', async () => {
+    const parent = applySheetDrawingPlacement(createAbsoluteChart('parent'), {
+        kind: SheetDrawingAnchorType.None,
+        left: 100,
+        top: 200,
+        width: 300,
+        height: 200,
+    });
+    const child = {
+        ...applySheetDrawingPlacement(createAbsoluteChart('child'), {
+            kind: SheetDrawingAnchorType.None,
+            left: 140,
+            top: 240,
+            width: 100,
+            height: 80,
+        }),
+        chartParent: { drawingId: 'parent', resizeWithParent: true },
+    };
+    const bed = createChartDrawingTestBed(undefined, parent);
+    expect(await bed.commandService.executeCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [child] })).toBe(true);
+    const search = { unitId: 'test', subUnitId: 'chart', drawingId: 'child' };
+
+    bed.drawingManager.featurePluginUpdateNotification([{ ...search, drawingType: DrawingTypeEnum.DRAWING_CHART, transform: { width: 280 } }]);
+    await Promise.resolve();
+
+    expect(bed.drawings.getDrawingByParam(search)!.transform).toMatchObject({ left: 120, top: 240, width: 280, height: 80 });
+});
+
+it('normalizes selected ancestors before descendants when a nested parent also reaches its own boundary', async () => {
+    const grandparent = applySheetDrawingPlacement(createAbsoluteChart('grandparent'), {
+        kind: SheetDrawingAnchorType.None,
+        left: 100,
+        top: 200,
+        width: 300,
+        height: 200,
+    });
+    const parent = {
+        ...applySheetDrawingPlacement(createAbsoluteChart('parent'), {
+            kind: SheetDrawingAnchorType.None,
+            left: 140,
+            top: 240,
+            width: 200,
+            height: 120,
+        }),
+        chartParent: { drawingId: 'grandparent', resizeWithParent: true },
+    };
+    const child = {
+        ...applySheetDrawingPlacement(createAbsoluteChart('child'), {
+            kind: SheetDrawingAnchorType.None,
+            left: 160,
+            top: 260,
+            width: 100,
+            height: 80,
+        }),
+        chartParent: { drawingId: 'parent', resizeWithParent: true },
+    };
+    const bed = createChartDrawingTestBed(undefined, grandparent);
+    expect(await bed.commandService.executeCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [parent, child] })).toBe(true);
+    const parentSearch = { unitId: 'test', subUnitId: 'chart', drawingId: 'parent' };
+    const childSearch = { unitId: 'test', subUnitId: 'chart', drawingId: 'child' };
+
+    bed.drawingManager.featurePluginUpdateNotification([
+        { ...childSearch, drawingType: DrawingTypeEnum.DRAWING_CHART, transform: { left: 480, top: 380 } },
+        { ...parentSearch, drawingType: DrawingTypeEnum.DRAWING_CHART, transform: { left: 350, top: 300 } },
+    ]);
+    await Promise.resolve();
+
+    expect(bed.drawings.getDrawingByParam(parentSearch)!.transform).toMatchObject({ left: 200, top: 280, width: 200, height: 120 });
+    expect(bed.drawings.getDrawingByParam(childSearch)!.transform).toMatchObject({ left: 300, top: 320, width: 100, height: 80 });
+});
+
 describe('target-bound image insertion', () => {
     function imageBed() {
         const bed = createChartDrawingTestBed();
@@ -395,4 +511,117 @@ describe('target-bound image insertion', () => {
         expect(bed.workbook.getSheetBySheetId('grid')!.getCell(3, 4)?.p?.drawings).toBeDefined();
         expect(bed.workbook.getSheetBySheetId('chart')!.getCellMatrix().getMatrix()).toEqual({});
     });
+});
+
+it.each([DrawingTypeEnum.DRAWING_IMAGE, DrawingTypeEnum.DRAWING_SHAPE, DrawingTypeEnum.DRAWING_DOM])(
+    'clips a chart-owned drawing type %s at the shared transformer preview and commits the same bounds',
+    async (drawingType) => {
+        const parent = applySheetDrawingPlacement(createAbsoluteChart('parent'), {
+            kind: SheetDrawingAnchorType.None,
+            left: 100,
+            top: 200,
+            width: 300,
+            height: 200,
+        });
+        const child = {
+            ...applySheetDrawingPlacement(createAbsoluteChart('child'), {
+                kind: SheetDrawingAnchorType.None,
+                left: 140,
+                top: 240,
+                width: 100,
+                height: 80,
+            }),
+            drawingType,
+            chartParent: { drawingId: 'parent', resizeWithParent: false },
+        };
+        const bed = createChartDrawingTestBed(undefined, parent);
+        expect(await bed.commandService.executeCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [child] })).toBe(true);
+        const original = bed.drawings.getDrawingByParam(child)!;
+        const rect = new Rect(getDrawingShapeKeyByDrawingSearch(child), child.transform!);
+        bed.render.scene.addObject(rect);
+        const transformer = bed.render.scene.getTransformerByCreate();
+        transformer.getSelectedObjectMap().set(rect.oKey, rect);
+        rect.transformByState({ left: 60, width: 180 });
+        transformer.changeNotification();
+        expect({ left: rect.left, top: rect.top, width: rect.width, height: rect.height })
+            .toEqual({ left: 100, top: 240, width: 140, height: 80 });
+        expect(bed.drawings.getDrawingByParam(child)).toEqual(original);
+        bed.drawingManager.featurePluginUpdateNotification([{ ...child, transform: {
+            ...child.transform,
+            left: rect.left,
+            top: rect.top,
+            width: rect.width,
+            height: rect.height,
+        } }]);
+        await Promise.resolve();
+        const changed = bed.drawings.getDrawingByParam(child)!;
+        expect(changed.transform).toMatchObject({ left: 100, top: 240, width: 140, height: 80 });
+        expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(bed.drawings.getDrawingByParam(child)).toEqual(original);
+        expect(await bed.commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(bed.drawings.getDrawingByParam(child)).toEqual(changed);
+    }
+);
+
+it.each([
+    [true, { left: 1480, top: 1520, width: 100, height: 80 }],
+    [false, { left: 1280, top: 1360, width: 100, height: 80 }],
+] as const)('fits grandchild preview and commit to the inherited parent size, resizeWithParent=%s', async (resizeWithParent, expected) => {
+    const ancestor = applySheetDrawingPlacement(createAbsoluteChart('ancestor'), {
+        kind: SheetDrawingAnchorType.None,
+        left: 100,
+        top: 200,
+        width: 500,
+        height: 400,
+    });
+    const parent = {
+        ...applySheetDrawingPlacement(createAbsoluteChart('parent'), {
+            kind: SheetDrawingAnchorType.None,
+            left: 140,
+            top: 240,
+            width: 200,
+            height: 160,
+        }),
+        chartParent: { drawingId: 'ancestor', resizeWithParent },
+    };
+    const child = {
+        ...applySheetDrawingPlacement(createAbsoluteChart('child'), {
+            kind: SheetDrawingAnchorType.None,
+            left: 240,
+            top: 320,
+            width: 100,
+            height: 80,
+        }),
+        chartParent: { drawingId: 'parent', resizeWithParent: false },
+    };
+    const bed = createChartDrawingTestBed(undefined, ancestor);
+    expect(await bed.commandService.executeCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [parent, child] })).toBe(true);
+    const originalParent = bed.drawings.getDrawingByParam(parent)!;
+    const originalChild = bed.drawings.getDrawingByParam(child)!;
+    const ancestorRect = bed.manager.getFloatDomInfo('ancestor')!.rect;
+    const parentRect = bed.manager.getFloatDomInfo('parent')!.rect;
+    const childRect = bed.manager.getFloatDomInfo('child')!.rect;
+    const transformer = bed.render.scene.getTransformerByCreate();
+    transformer.getSelectedObjectMap().set(childRect.oKey, childRect);
+    transformer.getSelectedObjectMap().set(ancestorRect.oKey, ancestorRect);
+    ancestorRect.transformByState({ left: 1100, top: 1200, width: 1000, height: 800 });
+    childRect.transformByState({ left: 1540, top: 1550 });
+    transformer.changeNotification();
+    expect({ left: childRect.left, top: childRect.top, width: childRect.width, height: childRect.height })
+        .toEqual(expected);
+    expect({ left: parentRect.left, top: parentRect.top, width: parentRect.width, height: parentRect.height })
+        .toEqual({ left: 140, top: 240, width: 200, height: 160 });
+    expect(bed.drawings.getDrawingByParam(parent)).toEqual(originalParent);
+    expect(bed.drawings.getDrawingByParam(child)).toEqual(originalChild);
+    bed.drawingManager.featurePluginUpdateNotification([
+        { ...ancestor, transform: { ...ancestor.transform, left: ancestorRect.left, top: ancestorRect.top, width: ancestorRect.width, height: ancestorRect.height } },
+        { ...child, transform: { ...child.transform, left: childRect.left, top: childRect.top } },
+    ]);
+    await Promise.resolve();
+    const changed = bed.drawings.getDrawingByParam(child)!;
+    expect(changed.transform).toMatchObject(expected);
+    expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
+    expect(bed.drawings.getDrawingByParam(child)).toEqual(originalChild);
+    expect(await bed.commandService.executeCommand(RedoCommand.id)).toBe(true);
+    expect(bed.drawings.getDrawingByParam(child)).toEqual(changed);
 });

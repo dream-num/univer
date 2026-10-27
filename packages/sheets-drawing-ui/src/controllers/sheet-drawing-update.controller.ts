@@ -66,6 +66,7 @@ import {
     DRAWING_IMAGE_HEIGHT_LIMIT,
     DRAWING_IMAGE_WIDTH_LIMIT,
     getDrawingImageAllowSize,
+    getDrawingShapeKeyByDrawingSearch,
     getImageSize,
     IDrawingManagerService,
     SetDrawingSelectedOperation,
@@ -210,6 +211,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                 this._imageInsertionEpoch++;
             }
         }));
+        this._constrainDrawingTransformPreview();
         this._updateDrawingListener();
         this._updateOrderListener();
         this._groupDrawingListener();
@@ -802,6 +804,77 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                 drawingIds,
                 arrangeType,
             } as ISetDrawingArrangeCommandParams);
+        }));
+    }
+
+    private _constrainDrawingTransformPreview(): void {
+        this.disposeWithMe(this._context.scene.getTransformerByCreate().changing$.subscribe(({ objects }) => {
+            const subUnitId = this._context.unit.getActiveSheet()?.getSheetId();
+            if (!subUnitId) {
+                return;
+            }
+            const drawings = this._sheetDrawingService.getDrawingData(this._context.unitId, subUnitId);
+            const processing = new Set<string>();
+            const previewDrawing = (drawing: ISheetDrawing): ISheetDrawing => {
+                if (processing.has(drawing.drawingId)) {
+                    return drawing;
+                }
+                processing.add(drawing.drawingId);
+                const key = getDrawingShapeKeyByDrawingSearch(drawing);
+                const selectedRect = objects.get(key);
+                const rect = selectedRect ?? this._context.scene.getObjectIncludeInGroup(key);
+                let preview = drawing;
+                if (rect) {
+                    preview = {
+                        ...drawing,
+                        transform: {
+                            ...drawing.transform,
+                            left: rect.left,
+                            top: rect.top,
+                            width: rect.width,
+                            height: rect.height,
+                        },
+                    };
+                }
+                const parent = drawing.chartParent && drawings[drawing.chartParent.drawingId];
+                if (parent && drawing.anchorType === SheetDrawingAnchorType.None) {
+                    const liveParent = previewDrawing(parent);
+                    if (selectedRect) {
+                        preview = applySheetDrawingPlacement(drawing, getSheetDrawingPlacement(preview), undefined, liveParent, true);
+                        const next = preview.transform!;
+                        if (next.left !== selectedRect.left || next.top !== selectedRect.top
+                            || next.width !== selectedRect.width || next.height !== selectedRect.height) {
+                            selectedRect.transformByState(next);
+                        }
+                    } else if (parent.transform && liveParent.transform && drawing.transform) {
+                        const oldBounds = parent.transform;
+                        const nextBounds = liveParent.transform;
+                        const changed = nextBounds.left !== oldBounds.left || nextBounds.top !== oldBounds.top
+                            || nextBounds.width !== oldBounds.width || nextBounds.height !== oldBounds.height;
+                        if (changed) {
+                            const childBounds = drawing.transform;
+                            const widthRatio = nextBounds.width! / oldBounds.width!;
+                            const heightRatio = nextBounds.height! / oldBounds.height!;
+                            // An unselected intermediate parent follows its selected ancestor only in this calculation.
+                            // Its render object remains unchanged until the command updates the drawing graph.
+                            preview = applySheetDrawingPlacement(drawing, {
+                                kind: SheetDrawingAnchorType.None,
+                                left: nextBounds.left! + (childBounds.left! - oldBounds.left!) * widthRatio,
+                                top: nextBounds.top! + (childBounds.top! - oldBounds.top!) * heightRatio,
+                                width: drawing.chartParent!.resizeWithParent ? childBounds.width! * widthRatio : childBounds.width!,
+                                height: drawing.chartParent!.resizeWithParent ? childBounds.height! * heightRatio : childBounds.height!,
+                            }, undefined, liveParent);
+                        }
+                    }
+                }
+                processing.delete(drawing.drawingId);
+                return preview;
+            };
+            for (const drawing of Object.values(drawings)) {
+                if (objects.has(getDrawingShapeKeyByDrawingSearch(drawing))) {
+                    previewDrawing(drawing);
+                }
+            }
         }));
     }
 

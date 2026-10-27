@@ -325,6 +325,54 @@ describe('Transformer', () => {
         engine.dispose();
     });
 
+    it.each(['move', 'resize'])('does not %s a mixed selection containing a locked object', (gesture) => {
+        const engine = new Engine('locked-selection-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
+        const scene = new Scene('locked-selection-scene', engine, { width: 800, height: 800 });
+        const viewport = new Viewport('locked-selection-viewport', scene, { left: 0, top: 0, width: 800, height: 800 });
+        const locked = new Rect('locked', { left: 0, top: 0, width: 400, height: 300 });
+        locked.transformerConfig = { moveEnabled: false, resizeEnabled: false };
+        const editable = new Rect('editable', { left: 100, top: 100, width: 100, height: 100 });
+        scene.addObject(locked);
+        scene.addObject(editable);
+        const transformer = new Transformer(scene);
+        const started = vi.fn();
+        const subscription = transformer.changeStart$.subscribe(started);
+        try {
+            transformer.attachTo(editable);
+            transformer.setSelectedControl(locked);
+            transformer.setSelectedControl(editable);
+            const previousLocked = locked.getState();
+            const previousEditable = editable.getState();
+            if (gesture === 'move') {
+                editable.onPointerDown$.emitEvent(createPointerEvent('pointerdown', 120, 120));
+            } else {
+                const anchor = scene.getAllObjectsByOrderForPick().find((object) => object.oKey.includes('ResizeRB'))!;
+                const point = anchor.ancestorTransform.applyPoint(new Vector2(anchor.width / 2, anchor.height / 2));
+                anchor.onPointerDown$.emitEvent(createPointerEvent('pointerdown', point.x, point.y));
+            }
+            scene.onPointerMove$.emitEvent(createPointerEvent('pointermove', 300, 300));
+            scene.onPointerUp$.emitEvent(createPointerEvent('pointerup', 300, 300));
+            expect(locked.getState()).toEqual(previousLocked);
+            expect(editable.getState()).toEqual(previousEditable);
+            expect(started).not.toHaveBeenCalled();
+            if (gesture === 'move') {
+                transformer.clearSelectedObjects();
+                transformer.setSelectedControl(editable);
+                editable.onPointerDown$.emitEvent(createPointerEvent('pointerdown', 120, 120));
+                scene.onPointerMove$.emitEvent(createPointerEvent('pointermove', 160, 160));
+                scene.onPointerUp$.emitEvent(createPointerEvent('pointerup', 160, 160));
+                expect(editable.left).toBe(140);
+                expect(locked.getState()).toEqual(previousLocked);
+            }
+        } finally {
+            subscription.unsubscribe();
+            transformer.dispose();
+            viewport.dispose();
+            scene.dispose();
+            engine.dispose();
+        }
+    });
+
     it('keeps read-only objects selectable without starting a move gesture', () => {
         const engine = new Engine('transformer-readonly-engine', { elementWidth: 100, elementHeight: 100, dpr: 1 });
         const scene = new Scene('transformer-readonly-scene', engine);

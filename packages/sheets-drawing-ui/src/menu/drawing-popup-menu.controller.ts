@@ -23,7 +23,6 @@ import {
     DrawingTypeEnum,
     FOCUSING_COMMON_DRAWINGS,
     ICommandService,
-    IConfigService,
     IContextService,
     IImageIoService,
     Inject,
@@ -31,7 +30,6 @@ import {
     IUniverInstanceService,
     LocaleService,
     RxDisposable,
-    ThemeService,
     UniverInstanceType,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
@@ -75,8 +73,6 @@ export class DrawingPopupMenuController extends RxDisposable {
         @IImageIoService private readonly _ioService: ImageIoService,
         @ICommandService protected readonly _commandService: ICommandService,
         @Inject(OleUIService) private readonly _oleUI: OleUIService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @IConfigService private readonly _configService: IConfigService,
         @IPermissionService private readonly _permissionService: IPermissionService
     ) {
         super();
@@ -87,7 +83,6 @@ export class DrawingPopupMenuController extends RxDisposable {
             rename: (drawing, name) => this._commandService.executeCommand(SetSheetDrawingCommand.id, { unitId: drawing.unitId, drawings: [{ ...drawing, oleFileName: name }] }),
             saveOnlineUnit: (drawing, online) => this._commandService.executeCommand(SetSheetDrawingCommand.id, { unitId: drawing.unitId, drawings: [{ ...drawing, oleOnlineUnit: online }] }),
             remove: (drawing) => this._commandService.executeCommand(RemoveSheetDrawingCommand.id, { unitId: drawing.unitId, drawings: [drawing] }),
-            createPreview: (container, data) => createSheetOlePreview({ container, data, type: UniverInstanceType.UNIVER_SHEET, locale: this._localeService, theme: this._themeService, config: this._configService }),
         }));
 
         this._init();

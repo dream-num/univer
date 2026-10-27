@@ -50,9 +50,8 @@ export { DrawingImageClipService, IMAGE_CLIP_SHAPE_PICKER_COMPONENT } from './se
 export type { ImageShapeClipDelegate } from './services/drawing-image-clip.service';
 export { DrawingRenderService } from './services/drawing-render.service';
 export { createOlePreviewViewer, registerOlePreviewRenderer } from './services/ole-preview-viewer';
-export type { IOlePreviewContext, IOlePreviewRenderer } from './services/ole-preview-viewer';
-export { OLE_POPUP_COMPONENT, OleUIService } from './services/ole-ui.service';
-export type { IOleHostActions } from './services/ole-ui.service';
+export type { IOlePreviewContext } from './services/ole-preview-viewer';
+export { OleUIService } from './services/ole-ui.service';
 export {
     extractClipboardHtmlImageFiles,
     extractClipboardImageFiles,

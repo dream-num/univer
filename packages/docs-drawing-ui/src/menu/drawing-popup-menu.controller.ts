@@ -21,15 +21,12 @@ import {
     DrawingTypeEnum,
     FOCUSING_COMMON_DRAWINGS,
     ICommandService,
-    IConfigService,
     IContextService,
     Inject,
     IPermissionService,
     isInternalEditorID,
     IUniverInstanceService,
-    LocaleService,
     RxDisposable,
-    ThemeService,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -102,10 +99,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @IPermissionService private readonly _permissionService: IPermissionService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
-        @Inject(OleUIService) private readonly _oleUI: OleUIService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @IConfigService private readonly _configService: IConfigService
+        @Inject(OleUIService) private readonly _oleUI: OleUIService
     ) {
         super();
 
@@ -115,7 +109,6 @@ export class DocDrawingPopupMenuController extends RxDisposable {
             rename: (drawing, name) => this._commandService.executeCommand(UpdateDrawingDocTransformCommand.id, { unitId: drawing.unitId, subUnitId: drawing.subUnitId, drawings: [{ drawingId: drawing.drawingId, key: 'oleFileName', value: name }] }),
             saveOnlineUnit: (drawing, online) => this._commandService.executeCommand(UpdateDrawingDocTransformCommand.id, { unitId: drawing.unitId, subUnitId: drawing.subUnitId, drawings: [{ drawingId: drawing.drawingId, key: 'oleOnlineUnit', value: online }] }),
             remove: (drawing) => this._commandService.executeCommand(RemoveDocDrawingCommand.id, { unitId: drawing.unitId, drawings: [{ ...drawing, drawingType: DrawingTypeEnum.DRAWING_OLE }] }),
-            createPreview: (container, data) => createDocOlePreview({ container, data, type: UniverInstanceType.UNIVER_DOC, locale: this._localeService, theme: this._themeService, config: this._configService }),
         }));
 
         this._init();

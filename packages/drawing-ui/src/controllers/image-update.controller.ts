@@ -267,7 +267,7 @@ export class ImageUpdateController extends Disposable {
                         opacity,
                         this._currentUniverService.getUnitType(unitId) === UniverInstanceType.UNIVER_SHEET
                     );
-                    if (source != null && source.length > 0 && (imageSourceType === ImageSourceType.BASE64 || imageSourceType === ImageSourceType.URL)) {
+                    if (drawingType === DrawingTypeEnum.DRAWING_IMAGE && source != null && source.length > 0 && (imageSourceType === ImageSourceType.BASE64 || imageSourceType === ImageSourceType.URL)) {
                         imageShape.changeSource(source);
                     }
                 });

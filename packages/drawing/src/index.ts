@@ -18,8 +18,8 @@ export { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAG
 export { SetDrawingSelectedOperation } from './commands/operations/set-drawing-selected.operation';
 export type { IUniverDrawingConfig } from './config/config';
 export type { IDocFloatDomData, IDocFloatDomDataBase, IImageData } from './models/image-model-interface';
-export type { IOleAttachmentIo, IOleConfig, IOleDrawing, IOleFile, IOleObject, IOleOnlineConversionRequest, IOleOnlineUnit, IOlePreviewRequest, IOleResource, OleConversionStage } from './models/ole-model';
-export { getOleOfficeType, OLE_MAX_RESOURCE_BYTES, OLE_RESOURCE_NAME, parseOleResource, prepareOleResource, prepareOleSnapshot, readOleFile } from './models/ole-model';
+export type { IOleAttachmentIo, IOleConfig, IOleDrawing, IOleOnlineConversionRequest, IOleOnlineUnit, IOlePreviewRequest, IOleResource, OleConversionStage } from './models/ole-model';
+export { getOleOfficeType, OLE_RESOURCE_NAME, prepareOleSnapshot, readOleFile } from './models/ole-model';
 export { UniverDrawingPlugin } from './plugin';
 export { DrawingManagerService, UnitDrawingService } from './services/drawing-manager-impl.service';
 export type { IDrawingJson1Type, IDrawingJsonUndo1 } from './services/drawing-manager-impl.service';

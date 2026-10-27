@@ -348,8 +348,8 @@ describe('OLE local UI lifecycle', () => {
         }
     });
 
-    it('uses the target product UI factory even before a host of that product exists', async () => {
-        const h = harness();
+    it.each([UniverInstanceType.UNIVER_SHEET, UniverInstanceType.UNIVER_DOC])('uses one product UI factory whether its host already exists or not (host: %s)', async (type) => {
+        const h = harness(false, type);
         h.resource.files[sha256].mimeType = 'application/msword';
         const data = { id: 'preview-doc' };
         h.config.convertOffice = vi.fn(async () => ({ type: UniverInstanceType.UNIVER_DOC, data }));

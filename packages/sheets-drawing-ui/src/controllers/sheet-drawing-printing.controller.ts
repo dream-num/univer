@@ -59,7 +59,7 @@ export class SheetDrawingPrintingController extends Disposable {
                                     drawing.drawingType !== DrawingTypeEnum.DRAWING_DOM &&
                                     drawing.drawingType !== DrawingTypeEnum.DRAWING_BLOCK
                                 ) {
-                                    const resource = this._drawingRenderService.renderDrawing(drawing, scene, { allowInactiveSheet: true });
+                                    const resource = this._drawingRenderService.renderDrawing(drawing, scene, { allowInactiveSheet: true, interactive: false });
                                     if (resource) {
                                         resourceCollector.add(Promise.resolve(resource));
                                     }

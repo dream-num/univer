@@ -16,19 +16,15 @@
 
 import type { IDrawingSearch } from '@univerjs/core';
 import {
-    ConfigService,
     ContextService,
     DocumentDataModel,
     DrawingTypeEnum,
     ICommandService,
-    IConfigService,
     IContextService,
     Injector,
     IPermissionService,
     IUniverInstanceService,
-    LocaleService,
     PermissionService,
-    ThemeService,
     toDisposable,
 } from '@univerjs/core';
 import { setDocumentPermissionValue } from '@univerjs/docs';
@@ -55,9 +51,6 @@ function createControllerHarness(drawingType = DrawingTypeEnum.DRAWING_IMAGE, mo
     const unitId = 'doc-1';
     const drawingId = 'drawing-1';
     const injector = new Injector();
-    injector.add([IConfigService, { useClass: ConfigService }]);
-    injector.add([ThemeService]);
-    injector.add([LocaleService]);
     injector.add([OleUIService, { useValue: { registerHost: () => toDisposable(() => undefined) } as never }]);
     const createControl$ = new Subject<void>();
     const clearControl$ = new Subject<boolean>();

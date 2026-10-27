@@ -311,7 +311,19 @@ describe('DrawingRenderService', () => {
         expect(readSource).not.toHaveBeenCalled();
         expect(readCache).not.toHaveBeenCalled();
         expect(object.transformerConfig?.rotateEnabled).toBe(false);
-        expect(harness.oleUI.bindObject).toHaveBeenCalledWith(object, drawing);
+        expect(harness.oleUI.bindObject).toHaveBeenCalledWith(object, drawing, true);
+    });
+
+    it.each([UniverInstanceType.UNIVER_SHEET, UniverInstanceType.UNIVER_DOC])('paints OLE print copies without registering editor interaction (host: %s)', async (type) => {
+        const h = createHarness();
+        h.univerInstanceService.unitType = type;
+        const drawing = imageParam({ drawingType: DrawingTypeEnum.DRAWING_OLE });
+        h.drawingManagerService.drawings.set(drawingKey(drawing), drawing);
+        await h.service.renderImages(drawing, h.scene as unknown as Scene);
+        const printScene = createScene();
+        await h.service.renderDrawing(drawing, printScene as unknown as Scene, { allowInactiveSheet: true, interactive: false });
+        expect(printScene.addedObjects[0].object).toBeInstanceOf(OleObject);
+        expect(h.oleUI.bindObject.mock.calls.map((call) => call[2])).toEqual([true, false]);
     });
 
     it('skips image rendering when the drawing is not renderable in the current context', async () => {

@@ -54,7 +54,6 @@ export interface IOleHostActions {
     remove: (drawing: IDrawingSearch) => Promise<boolean>;
     rename?: (drawing: IDrawingSearch, name: string) => Promise<boolean>;
     saveOnlineUnit?: (drawing: IDrawingSearch, online: IOleOnlineUnit) => Promise<boolean>;
-    createPreview?: (container: HTMLElement, data: object) => IDisposable;
 }
 
 function key(drawing: IDrawingSearch): string {
@@ -605,10 +604,6 @@ export class OleUIService extends Disposable {
         const configured = this._oleConfig().createOfficePreview;
         if (configured) {
             return configured;
-        }
-        const host = this._hosts.get(type)?.createPreview;
-        if (host) {
-            return async (container, view) => host(container, view.data);
         }
         const renderer = getOlePreviewRenderer(type);
         return renderer ? async (container, view) => renderer({ container, ...view, config: this._config, locale: this._locale, theme: this._theme }) : undefined;

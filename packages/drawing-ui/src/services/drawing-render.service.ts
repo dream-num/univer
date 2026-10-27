@@ -88,7 +88,7 @@ export class DrawingRenderService {
     ) { }
 
     // eslint-disable-next-line max-lines-per-function, complexity
-    async renderImages(imageParam: IImageData, scene: Scene, options?: { allowInactiveSheet?: boolean }) {
+    async renderImages(imageParam: IImageData, scene: Scene, options?: { allowInactiveSheet?: boolean; interactive?: boolean }) {
         const {
             transform: singleTransform,
             drawingType,
@@ -210,7 +210,7 @@ export class DrawingRenderService {
             }
 
             scene.addObject(image, getDrawingRenderLayerIndex(imageParam as IDrawingParamWithBehindText));
-            this._oleUI.bindObject(image, imageParam);
+            this._oleUI.bindObject(image, imageParam, options?.interactive !== false);
             if (this._drawingManagerService.getDrawingEditable()) {
                 scene.attachTransformerTo(image);
             }
@@ -305,7 +305,7 @@ export class DrawingRenderService {
         return rects;
     }
 
-    renderDrawing(param: IDrawingSearch, scene: Scene, options?: { allowInactiveSheet?: boolean }) {
+    renderDrawing(param: IDrawingSearch, scene: Scene, options?: { allowInactiveSheet?: boolean; interactive?: boolean }) {
         const drawingParam = this._drawingManagerService.getDrawingByParam(param);
         if (drawingParam == null) {
             return;

@@ -16,7 +16,6 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuItem, IValueOption } from '@univerjs/ui';
-import type { LocaleKey } from '../locale/types';
 import { UniverInstanceType } from '@univerjs/core';
 import { FunctionType, IDescriptionService } from '@univerjs/engine-formula';
 import {
@@ -31,6 +30,7 @@ import {
 import { getCurrentRangeDisable$, menuClipboardDisabledObservable } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatestWith, map } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
 import {
     SheetCopyFormulaOnlyCommand,
     SheetOnlyPasteFormulaCommand,
@@ -53,6 +53,14 @@ type FunctionCategoryKey =
 
 type EnsureLocaleKey<T extends LocaleKey> = T;
 type FunctionCategoryLocaleKey = EnsureLocaleKey<`sheets-formula-ui.functionType.${FunctionCategoryKey}`>;
+
+function getInsertFunctionDisabled$(accessor: IAccessor) {
+    return getCurrentRangeDisable$(accessor, {
+        workbookTypes: [WorkbookEditablePermission],
+        worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
+        rangeTypes: [RangeProtectionPermissionEditPoint],
+    });
+}
 
 export function InsertCommonFunctionMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     const commonFunctions = ['SUMIF', 'SUM', 'AVERAGE', 'IF', 'COUNT', 'SIN', 'MAX'];
@@ -88,6 +96,7 @@ export function InsertCommonFunctionMenuItemFactory(accessor: IAccessor): IMenuI
         icon: 'FunctionIcon',
         type: MenuItemType.SELECTOR,
         selections,
+        disabled$: getInsertFunctionDisabled$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -123,6 +132,7 @@ function createInsertFunctionCategoryMenuItemFactory(
             icon,
             type: MenuItemType.SELECTOR,
             selections,
+            disabled$: getInsertFunctionDisabled$(accessor),
             hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         };
     };
@@ -147,11 +157,7 @@ export function AllFunctionsMenuItemFactory(accessor: IAccessor): IMenuItem<Loca
         tooltip: 'sheets-formula-ui.insert.tooltip',
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
-        }),
+        disabled$: getInsertFunctionDisabled$(accessor),
     };
 }
 

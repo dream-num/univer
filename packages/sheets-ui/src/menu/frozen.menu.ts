@@ -17,11 +17,11 @@
 import type { IAccessor } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import type { LocaleKey } from '../locale/types';
-import { UniverInstanceType } from '@univerjs/core';
+import { IUniverInstanceService, SheetTypes, UniverInstanceType } from '@univerjs/core';
 import { CancelFrozenCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { combineLatest, map, Observable } from 'rxjs';
+import { combineLatest, map, Observable, of } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
 import {
     SetColumnFrozenCommand,
     SetFirstColumnFrozenCommand,
@@ -30,6 +30,11 @@ import {
     SetSelectionFrozenCommand,
 } from '../commands/commands/set-frozen.command';
 import { MENU_ITEM_FROZEN_COMPONENT } from '../views/menu-item-frozen/index';
+import { deriveStateFromActiveSheet$ } from './menu-util';
+
+function getFrozenDisabled$(accessor: IAccessor) {
+    return deriveStateFromActiveSheet$(accessor.get(IUniverInstanceService), true, ({ worksheet }) => of(worksheet.getConfig().type === SheetTypes.CHART));
+}
 
 const getMenuHiddenByCurrentSelectionChangedObservable$ = (accessor: IAccessor, type: 'row' | 'col' | 'all'): Observable<boolean> => {
     const selectionManagerService = accessor.get(SheetsSelectionsService);
@@ -124,6 +129,7 @@ export function SheetFrozenToolbarMenuItemFactory(accessor: IAccessor): IMenuSel
             },
         ],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        disabled$: getFrozenDisabled$(accessor),
     };
 }
 
@@ -134,6 +140,7 @@ export function SheetFrozenMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
         title: 'sheets-ui.rightClick.freeze',
         icon: 'FreezeToSelectedIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        disabled$: getFrozenDisabled$(accessor),
     };
 }
 
@@ -146,6 +153,7 @@ export function SheetFrozenColumnHeaderMenuItemFactory(accessor: IAccessor): IMe
         title: 'sheets-ui.rightClick.freeze',
         icon: 'FreezeToSelectedIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        disabled$: getFrozenDisabled$(accessor),
     };
 }
 
@@ -158,6 +166,7 @@ export function SheetFrozenRowHeaderMenuItemFactory(accessor: IAccessor): IMenuS
         title: 'sheets-ui.rightClick.freeze',
         icon: 'FreezeToSelectedIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        disabled$: getFrozenDisabled$(accessor),
     };
 }
 
@@ -228,6 +237,7 @@ export function FrozenFirstRowMenuItemFactory(accessor: IAccessor): IMenuButtonI
         title: 'sheets-ui.rightClick.freezeFirstRow',
         icon: 'FreezeRowIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        disabled$: getFrozenDisabled$(accessor),
     };
 }
 
@@ -238,6 +248,7 @@ export function FrozenFirstColMenuItemFactory(accessor: IAccessor): IMenuButtonI
         title: 'sheets-ui.rightClick.freezeFirstCol',
         icon: 'FreezeColumnIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        disabled$: getFrozenDisabled$(accessor),
     };
 }
 
@@ -248,5 +259,6 @@ export function CancelFrozenMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         title: 'sheets-ui.rightClick.cancelFreeze',
         icon: 'CancelFreezeIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        disabled$: getFrozenDisabled$(accessor),
     };
 }

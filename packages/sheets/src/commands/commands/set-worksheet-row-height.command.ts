@@ -39,7 +39,7 @@ import {
     SetWorksheetRowIsAutoHeightMutationFactory,
 } from '../mutations/set-worksheet-row-height.mutation';
 import { getSuitableRangesInView } from './util';
-import { getSheetGridCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IDeltaRowHeightCommandParams {
     anchorRow: number;
@@ -59,7 +59,7 @@ export const DeltaRowHeightCommand: ICommand = {
             return false;
         }
 
-        const target = getSheetGridCommandTarget(accessor.get(IUniverInstanceService));
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
         if (!target) return false;
 
         const { worksheet, subUnitId, unitId } = target;
@@ -218,7 +218,7 @@ export const SetRowHeightCommand: ICommand = {
             return false;
         }
 
-        const target = getSheetGridCommandTarget(univerInstanceService, params);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { unitId, subUnitId, worksheet } = target;
@@ -318,7 +318,7 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetGridCommandTarget(univerInstanceService, params);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { unitId, subUnitId, worksheet } = target;

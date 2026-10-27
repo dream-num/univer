@@ -48,7 +48,7 @@ import { SheetSkeletonService } from '../../skeleton/skeleton.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { getRangesHeight, getSuitableRangesInView } from './util';
 import { createRangeIteratorWithSkipFilteredRows } from './utils/selection-utils';
-import { getSheetCommandTarget, getSheetGridCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -111,7 +111,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
     handler: <T>(accessor: IAccessor, params: ISetStyleCommandParams<T>) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetGridCommandTarget(univerInstanceService, params);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { unitId, subUnitId, worksheet } = target;

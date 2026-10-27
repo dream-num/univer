@@ -59,7 +59,7 @@ import {
     AddMergeUndoSelectionsOperationFactory,
 } from '../utils/handle-merge-operation';
 import { RemoveWorksheetMergeCommand } from './remove-worksheet-merge.command';
-import { getSheetCommandTarget, getSheetGridCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IAddMergeCommandParams extends ISheetCommandSharedParams {
     value?: Dimension.ROWS | Dimension.COLUMNS;
@@ -180,7 +180,7 @@ export const AddWorksheetMergeCommand: ICommand = {
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: IAddMergeCommandParams) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const target = getSheetGridCommandTarget(univerInstanceService, params);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { worksheet } = target;
@@ -362,7 +362,7 @@ export const AddWorksheetMergeHorizontalCommand: ICommand = {
 };
 
 export function addMergeCellsUtil(injector: Injector, unitId: string, subUnitId: string, ranges: IRange[], options: IMergeCellsUtilOptions = {}) {
-    const target = getSheetGridCommandTarget(injector.get(IUniverInstanceService), { unitId, subUnitId });
+    const target = getSheetCommandTarget(injector.get(IUniverInstanceService), { unitId, subUnitId });
     if (!target) return;
 
     const commandService = injector.get(ICommandService);

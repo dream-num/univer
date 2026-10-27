@@ -19,22 +19,17 @@ import {
     CommandType,
     ICommandService,
     IUndoRedoService,
-    IUniverInstanceService,
 } from '@univerjs/core';
 import type { ISetWorksheetDefaultStyleMutationParams } from '../mutations/set-worksheet-default-style.mutation';
 import {
     SetWorksheetDefaultStyleMutation,
     SetWorksheetDefaultStyleMutationFactory,
 } from '../mutations/set-worksheet-default-style.mutation';
-import { getSheetGridCommandTarget } from './utils/target-util';
 
 export const SetWorksheetDefaultStyleCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-worksheet-default-style',
     handler: (accessor: IAccessor, params: ISetWorksheetDefaultStyleMutationParams) => {
-        if (!getSheetGridCommandTarget(accessor.get(IUniverInstanceService), params)) {
-            return false;
-        }
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 

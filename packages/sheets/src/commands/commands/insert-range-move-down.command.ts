@@ -33,7 +33,6 @@ import type {
     IRemoveRowsMutationParams,
 } from '../../basics/interfaces/mutation-interface';
 import type { LocaleKey } from '../../locale/types';
-import type { ISheetCommandSharedParams } from '../utils/interface';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { InsertRowMutation, InsertRowMutationUndoFactory } from '../mutations/insert-row-col.mutation';
@@ -41,10 +40,9 @@ import { RemoveRowMutation } from '../mutations/remove-row-col.mutation';
 import { getInsertRangeMutations } from '../utils/handle-range.mutation';
 import { hasOverlappingRanges } from '../utils/selection-command-util';
 import { followSelectionOperation } from './utils/selection-utils';
-import { getSheetGridCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './utils/target-util';
 
-// Omitted targets retain historical active-sheet command replay semantics.
-export interface IInsertRangeMoveDownCommandParams extends Partial<ISheetCommandSharedParams> {
+export interface IInsertRangeMoveDownCommandParams {
     range: IRange;
 }
 
@@ -71,7 +69,7 @@ export const InsertRangeMoveDownCommand: ICommand = {
             return false;
         }
 
-        const target = getSheetGridCommandTarget(univerInstanceService, params);
+        const target = getSheetCommandTarget(univerInstanceService);
         if (!target) return false;
 
         const { unitId, subUnitId, worksheet, workbook } = target;

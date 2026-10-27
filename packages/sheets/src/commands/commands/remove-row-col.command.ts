@@ -43,7 +43,7 @@ import {
 } from '../mutations/remove-row-col.mutation';
 import { SetRangeValuesMutation } from '../mutations/set-range-values.mutation';
 import { followSelectionOperation } from './utils/selection-utils';
-import { getSheetGridCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IRemoveRowColCommandParams extends Partial<ISheetCommandSharedParams> {
     range: IRange;
@@ -88,7 +88,7 @@ export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> =
             return false;
         }
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const target = getSheetGridCommandTarget(univerInstanceService, params);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { workbook, worksheet } = target;
@@ -184,7 +184,7 @@ export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
     id: RemoveRowCommandId,
 
     handler: async (accessor: IAccessor, params?: IRemoveRowColCommandParams) => {
-        const target = getSheetGridCommandTarget(accessor.get(IUniverInstanceService), params);
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
 
         const selectionManagerService = accessor.get(SheetsSelectionsService);
@@ -230,7 +230,7 @@ export const RemoveColByRangeCommand: ICommand<IRemoveColByRangeCommandParams> =
             return false;
         }
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const target = getSheetGridCommandTarget(univerInstanceService, params);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { workbook, worksheet } = target;
@@ -315,7 +315,7 @@ export const RemoveColCommand: ICommand = {
         if (!range) return false;
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const target = getSheetGridCommandTarget(univerInstanceService, params);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { worksheet, subUnitId, unitId } = target;

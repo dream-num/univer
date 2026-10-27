@@ -24,7 +24,6 @@ import {
     IUniverInstanceService,
     RANGE_TYPE,
     sequenceExecute,
-    SheetTypes,
 } from '@univerjs/core';
 import type {
     IInsertColMutationParams,
@@ -43,7 +42,7 @@ import {
 import { RemoveColMutation, RemoveRowMutation } from '../mutations/remove-row-col.mutation';
 import { SetRangeValuesMutation } from '../mutations/set-range-values.mutation';
 import { copyRangeStyles, followSelectionOperation } from './utils/selection-utils';
-import { getSheetCommandTarget, getSheetGridCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IInsertRowCommandParams {
     unitId: string;
@@ -72,9 +71,6 @@ export const InsertRowCommand: ICommand = {
     type: CommandType.COMMAND,
     id: InsertRowCommandId,
     handler: async (accessor: IAccessor, params: IInsertRowCommandParams) => {
-        if (!getSheetGridCommandTarget(accessor.get(IUniverInstanceService), params)) {
-            return false;
-        }
         const commandService = accessor.get(ICommandService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
@@ -107,9 +103,6 @@ export const InsertRowByRangeCommand: ICommand = {
         if (!target) {
             throw new Error('Workbook or Worksheet not found at InsertRowByRangeCommand');
         };
-        if (target.worksheet.getConfig().type === SheetTypes.CHART) {
-            return false;
-        }
 
         const { workbook, worksheet, unitId, subUnitId } = target;
         const { range, direction, cellValue } = params;
@@ -398,9 +391,6 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
     id: InsertColCommandId,
 
     handler: async (accessor: IAccessor, params: IInsertColCommandParams) => {
-        if (!getSheetGridCommandTarget(accessor.get(IUniverInstanceService), params)) {
-            return false;
-        }
         const commandService = accessor.get(ICommandService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
@@ -432,9 +422,6 @@ export const InsertColByRangeCommand: ICommand<IInsertColCommandParams> = {
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) {
             throw new Error('Workbook or Worksheet not found at InsertColByRangeCommand');
-        }
-        if (target.worksheet.getConfig().type === SheetTypes.CHART) {
-            return false;
         }
 
         const { workbook, worksheet, unitId, subUnitId } = target;

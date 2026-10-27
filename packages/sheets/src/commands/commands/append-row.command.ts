@@ -19,7 +19,6 @@ import {
     CommandType,
     ICommandService,
     IUndoRedoService,
-    IUniverInstanceService,
     sequenceExecute,
 } from '@univerjs/core';
 import type {
@@ -37,7 +36,6 @@ import {
 } from '../mutations/insert-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../mutations/remove-row-col.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
-import { getSheetGridCommandTarget } from './utils/target-util';
 
 export interface IAppendRowCommandParams {
     unitId: string;
@@ -59,9 +57,6 @@ export const AppendRowCommand: ICommand<IAppendRowCommandParams> = {
     type: CommandType.COMMAND,
     id: AppendRowCommandId,
     handler: (accessor: IAccessor, params: IAppendRowCommandParams) => {
-        if (!getSheetGridCommandTarget(accessor.get(IUniverInstanceService), params)) {
-            return false;
-        }
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const { unitId, subUnitId, cellValue, insertRowNums, insertColumnNums, maxRows, maxColumns } = params;

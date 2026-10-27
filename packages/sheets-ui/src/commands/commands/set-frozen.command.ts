@@ -16,9 +16,14 @@
 
 import type { ICommand } from '@univerjs/core';
 import type { ISetFrozenMutationParams } from '@univerjs/sheets';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, RANGE_TYPE, SheetTypes } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { getSheetCommandTarget, SetFrozenMutation, SetFrozenMutationFactory, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    getSheetCommandTarget,
+    SetFrozenMutation,
+    SetFrozenMutationFactory,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 
 export enum SetSelectionFrozenType {
@@ -41,7 +46,7 @@ export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParam
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const target = getSheetCommandTarget(univerInstanceService);
-        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
+        if (!target) {
             return false;
         }
 
@@ -137,9 +142,11 @@ export const SetRowFrozenCommand: ICommand = {
     id: 'sheet.command.set-row-frozen',
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
-        return commandService.executeCommand(SetSelectionFrozenCommand.id, {
+        commandService.executeCommand(SetSelectionFrozenCommand.id, {
             type: SetSelectionFrozenType.Row,
         });
+
+        return true;
     },
 };
 
@@ -148,9 +155,11 @@ export const SetColumnFrozenCommand: ICommand = {
     id: 'sheet.command.set-col-frozen',
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
-        return commandService.executeCommand(SetSelectionFrozenCommand.id, {
+        commandService.executeCommand(SetSelectionFrozenCommand.id, {
             type: SetSelectionFrozenType.Column,
         });
+
+        return true;
     },
 };
 
@@ -159,9 +168,11 @@ export const SetFirstRowFrozenCommand: ICommand = {
     id: 'sheet.command.set-first-row-frozen',
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
-        return commandService.executeCommand(SetSelectionFrozenCommand.id, {
+        commandService.executeCommand(SetSelectionFrozenCommand.id, {
             type: SetSelectionFrozenType.FirstRow,
         });
+
+        return true;
     },
 };
 
@@ -170,8 +181,10 @@ export const SetFirstColumnFrozenCommand: ICommand = {
     id: 'sheet.command.set-first-column-frozen',
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
-        return commandService.executeCommand(SetSelectionFrozenCommand.id, {
+        commandService.executeCommand(SetSelectionFrozenCommand.id, {
             type: SetSelectionFrozenType.FirstColumn,
         });
+
+        return true;
     },
 };

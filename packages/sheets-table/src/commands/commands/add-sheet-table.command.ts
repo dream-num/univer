@@ -24,11 +24,9 @@ import {
     IUniverInstanceService,
     LocaleService,
     sequenceExecute,
-    SheetTypes,
     Tools,
 } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
-import { getSheetCommandTarget } from '@univerjs/sheets';
 import type { LocaleKey } from '../../locale/types';
 import type { ITableOptions } from '../../types/type';
 import { TableColumn } from '../../models/table-column';
@@ -51,11 +49,6 @@ export const AddSheetTableCommand: ICommand<IAddSheetTableCommandParams> = {
     type: CommandType.COMMAND,
     handler: (accessor, params) => {
         if (!params) {
-            return false;
-        }
-
-        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
-        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
             return false;
         }
 

@@ -24,7 +24,6 @@ import type {
     Univer,
     Workbook,
 } from '@univerjs/core';
-import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
 import {
     BooleanNumber,
     CellValueType,
@@ -36,11 +35,13 @@ import {
     merge,
     RANGE_TYPE,
     RedoCommand,
+    SheetTypes,
     Tools,
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../../mutations/set-range-values.mutation';
 import { SetSelectionsOperation } from '../../operations/selection.operation';
@@ -221,6 +222,20 @@ describe('Test set range values commands', () => {
     });
 
     describe('set range values', () => {
+        it('keeps programmatic writes and undo available independently of Chart Sheet UI restrictions', async () => {
+            const workbook = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!;
+            workbook.getSheetBySheetId('sheet1')!.getConfig().type = SheetTypes.CHART;
+            expect(commandService.syncExecuteCommand(SetRangeValuesCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+                value: { v: 'programmatic' },
+            })).toBe(true);
+            expect(getValue()?.v).toBe('programmatic');
+            expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+            expect(getValue()?.v).toBe('A1');
+        });
+
         describe('correct situations', () => {
             it('will set range values when there is a selected range', async () => {
                 function getParams() {

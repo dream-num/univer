@@ -15,19 +15,8 @@
  */
 
 import type { ICommand, IMutationInfo } from '@univerjs/core';
-import {
-    CommandType,
-    ICommandService,
-    ILogService,
-    IUndoRedoService,
-    IUniverInstanceService,
-    sequenceExecute,
-    SheetTypes,
-} from '@univerjs/core';
-import {
-    getSheetCommandTarget,
-    SheetInterceptorService,
-} from '@univerjs/sheets';
+import { CommandType, ICommandService, ILogService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
+import { SheetInterceptorService } from '@univerjs/sheets';
 import type { IDeleteSheetTableParams } from '../mutations/delete-sheet-table.mutation';
 import { TableManager } from '../../models/table-manager';
 import { AddSheetTableMutation } from '../mutations/add-sheet-table.mutation';
@@ -50,18 +39,6 @@ export const DeleteSheetTableCommand: ICommand<IDeleteSheetTableParams> = {
         const undos: IMutationInfo[] = [];
 
         const tableInstance = sheetTableManager.getTable(params.unitId, params.tableId);
-        if (tableInstance) {
-            if (params.subUnitId !== tableInstance.getSubunitId()) {
-                return false;
-            }
-            const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), {
-                unitId: params.unitId,
-                subUnitId: tableInstance.getSubunitId(),
-            });
-            if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
-                return false;
-            }
-        }
         const tableConfig = tableInstance?.toJSON();
 
         if (!tableConfig) {

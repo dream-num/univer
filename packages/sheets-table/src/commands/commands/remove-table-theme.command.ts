@@ -15,20 +15,8 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import {
-    CommandType,
-    ICommandService,
-    IUndoRedoService,
-    IUniverInstanceService,
-    sequenceExecute,
-    SheetTypes,
-} from '@univerjs/core';
-import {
-    AddRangeThemeMutation,
-    getSheetCommandTarget,
-    RemoveRangeThemeMutation,
-    SheetRangeThemeModel,
-} from '@univerjs/sheets';
+import { CommandType, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
+import { AddRangeThemeMutation, RemoveRangeThemeMutation, SheetRangeThemeModel } from '@univerjs/sheets';
 import { SHEET_TABLE_CUSTOM_THEME_PREFIX } from '../../const';
 import { TableManager } from '../../models/table-manager';
 import { SetSheetTableMutation } from '../mutations/set-sheet-table.mutation';
@@ -53,13 +41,6 @@ export const RemoveTableThemeCommand: ICommand<IRemoveTableThemeCommandParams> =
         const rangeThemeModel = accessor.get(SheetRangeThemeModel);
         const table = tableManager.getTableById(unitId, tableId);
         if (!table) return false;
-        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), {
-            unitId,
-            subUnitId: table.getSubunitId(),
-        });
-        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
-            return false;
-        }
         const subUnitId = table.getSubunitId();
 
         const redos = [];

@@ -21,7 +21,6 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     sequenceExecute,
-    SheetTypes,
 } from '@univerjs/core';
 import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
 import type { CFRuleType } from '../../base/const';
@@ -29,9 +28,17 @@ import type { IConditionFormattingRule } from '../../models/type';
 import type { IDeleteConditionalRuleMutationParams } from '../mutations/delete-conditional-rule.mutation';
 import type { ISetConditionalRuleMutationParams } from '../mutations/set-conditional-rule.mutation';
 import { ConditionalFormattingRangeIndexModel } from '../../models/conditional-formatting-range-index-model';
-import { ConditionalFormattingRangeTransformService } from '../../services/conditional-formatting-range-transform.service';
-import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../mutations/delete-conditional-rule.mutation';
-import { SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '../mutations/set-conditional-rule.mutation';
+import {
+    ConditionalFormattingRangeTransformService,
+} from '../../services/conditional-formatting-range-transform.service';
+import {
+    DeleteConditionalRuleMutation,
+    DeleteConditionalRuleMutationUndoFactory,
+} from '../mutations/delete-conditional-rule.mutation';
+import {
+    SetConditionalRuleMutation,
+    setConditionalRuleMutationUndoFactory,
+} from '../mutations/set-conditional-rule.mutation';
 
 export interface IClearRangeCfParams {
     ranges?: IRange[];
@@ -54,9 +61,7 @@ export const ClearRangeCfCommand: ICommand<IClearRangeCfParams> = {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
 
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
-            return false;
-        }
+        if (!target) return false;
 
         const { unitId, subUnitId } = target;
         const ranges = params.ranges ?? selectionManagerService.getCurrentSelections()?.map((selection) => selection.range) ?? [];

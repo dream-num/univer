@@ -26,7 +26,7 @@ import {
     Rectangle,
     sequenceExecute,
 } from '@univerjs/core';
-import type { ISelectionWithStyle } from '../../basics/selection';
+import type { ISelectionWithStyle } from '../../basics';
 import type { LocaleKey } from '../../locale/types';
 import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../mutations/move-rows-cols.mutation';
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
@@ -41,7 +41,7 @@ import {
 } from '../mutations/move-rows-cols.mutation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
 import { alignToMergedCellsBorders, getPrimaryForRange } from './utils/selection-utils';
-import { getSheetGridCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IMoveRowsCommandParams {
     unitId?: string;
@@ -92,7 +92,7 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetGridCommandTarget(univerInstanceService, params);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { workbook, worksheet } = target;
@@ -246,7 +246,7 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetGridCommandTarget(univerInstanceService, params);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { workbook, worksheet } = target;

@@ -35,7 +35,7 @@ import {
 } from '../mutations/set-col-visible.mutation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
 import { getPrimaryForRange } from './utils/selection-utils';
-import { getSheetGridCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ISetSpecificColsVisibleCommandParams {
     unitId: string;
@@ -53,7 +53,7 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
         const commandService = accessor.get(ICommandService);
         const instanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetGridCommandTarget(instanceService, { unitId, subUnitId });
+        const target = getSheetCommandTarget(instanceService, { unitId, subUnitId });
         if (!target) return false;
 
         const { worksheet } = target;
@@ -134,7 +134,7 @@ export const SetSelectedColsVisibleCommand: ICommand = {
         const ranges = getSelectedColRanges(selectionManagerService);
         if (!ranges.length) return false;
 
-        const target = getSheetGridCommandTarget(accessor.get(IUniverInstanceService));
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
         if (!target) return false;
 
         const { worksheet, unitId, subUnitId } = target;
@@ -167,7 +167,7 @@ export const SetColHiddenCommand: ICommand = {
         let ranges = params?.ranges?.length ? params.ranges : getSelectedColRanges(selectionManagerService);
         if (!ranges.length) return false;
 
-        const target = getSheetGridCommandTarget(univerInstanceService, params);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { worksheet, unitId, subUnitId } = target;

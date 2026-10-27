@@ -113,7 +113,7 @@ export class XHRHTTPImplementation implements IHTTPImplementation {
                 } else {
                     const e = new HTTPResponseError({
                         request,
-                        error,
+                        error: error ?? body,
                         headers,
                         status,
                         statusText,

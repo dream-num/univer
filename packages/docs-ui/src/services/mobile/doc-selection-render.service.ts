@@ -16,9 +16,10 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext } from '@univerjs/engine-render';
-import type { MobileTextRangeHandleType } from './mobile-text-selection-visuals';
 import {
     DisposableCollection,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     IContextService,
     ILogService,
     Inject,
@@ -30,6 +31,7 @@ import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs
 import { getSystemHighlightColor, ScrollTimer } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
+import type { MobileTextRangeHandleType } from './mobile-text-selection-visuals';
 import { neoGetDocObject } from '../../basics/component-tools';
 import { IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../doc-embed-integration.service';
 import { DocSelectionRenderService } from '../selection/doc-selection-render.service';
@@ -87,6 +89,19 @@ export class MobileDocSelectionRenderService extends DocSelectionRenderService {
         this._initMobileKeyboardViewport();
     }
 
+    override focus(): void {
+        // Repeated native focus calls during sheet editing can prevent the iOS keyboard from opening.
+        if (
+            (this._context.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY ||
+                this._context.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) &&
+            this.isFocusing
+        ) {
+            return;
+        }
+
+        super.focus();
+    }
+
     override cancelPointerSelection(): void {
         this._handleDragDisposables.dispose();
         super.cancelPointerSelection();
@@ -136,10 +151,12 @@ export class MobileDocSelectionRenderService extends DocSelectionRenderService {
 
     private _syncMobileSelectionVisuals(): void {
         const activeRange = this._getActiveRangeInstance();
+        // Internal editors publish their initial caret with isEditing=false, unlike standalone docs.
+        const isInternalEditor = isInternalEditorID(this._context.unitId);
         this._selectionVisuals.hide();
         for (const range of this._rangeList) {
             const caret = range.getAnchor();
-            if (this.isEditing && range === activeRange) {
+            if ((this.isEditing || isInternalEditor) && range === activeRange) {
                 caret?.show();
             } else {
                 caret?.hide();
@@ -198,6 +215,12 @@ export class MobileDocSelectionRenderService extends DocSelectionRenderService {
     }
 
     protected override _handleInputBlur(event: Event): void {
+        // Internal editors do not enter mobile document edit mode, so deferred blur would never flush.
+        if (isInternalEditorID(this._context.unitId)) {
+            super._handleInputBlur(event);
+            return;
+        }
+
         if (this.isEditing) {
             this._pendingBlurEvent = event;
             return;

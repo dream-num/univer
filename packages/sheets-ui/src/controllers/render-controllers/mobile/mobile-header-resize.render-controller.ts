@@ -312,7 +312,14 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
 
         // Get zoom ratio for delta adjustment
         const worksheet = this._context.unit.getActiveSheet();
-        const zoomRatio = worksheet?.getZoomRatio() || 1;
+        if (!worksheet) {
+            this._cancelResize();
+            return;
+        }
+        const zoomRatio = worksheet.getZoomRatio() || 1;
+        const initialSize = type === 'row'
+            ? worksheet.getRowHeight(this._currentRow)
+            : worksheet.getColumnWidth(this._currentColumn);
 
         let totalDelta = 0;
 
@@ -345,9 +352,9 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
             }
 
             if (this._isDragging) {
-                totalDelta = adjustedDelta;
-                this._updateResizeHelper(type, initialOffset + adjustedDelta);
-                this._updateResizeButton(type, initialOffset + adjustedDelta);
+                totalDelta = Math.max(adjustedDelta, -initialSize);
+                this._updateResizeHelper(type, initialOffset + totalDelta);
+                this._updateResizeButton(type, initialOffset + totalDelta);
             }
 
             e.preventDefault();
@@ -357,7 +364,8 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
         this._touchEndHandler = (e: TouchEvent) => {
             scene.enableObjectsEvent();
 
-            if (this._isDragging && Math.abs(totalDelta) >= MINIMAL_OFFSET) {
+            // A meaningful drag can collapse a dimension smaller than MINIMAL_OFFSET.
+            if (this._isDragging && totalDelta !== 0) {
                 // Execute resize command
                 if (type === 'row') {
                     this._commandService.executeCommand(DeltaRowHeightCommand.id, {

@@ -341,6 +341,8 @@ export function applySheetChartTransformerConfig(rect: BaseObject): void {
     rect.transformerConfig = {
         ...rect.transformerConfig,
         ...SHEET_CHART_TRANSFORMER_CONFIG,
+        moveEnabled: rect.transformerConfig?.moveEnabled ?? SHEET_CHART_TRANSFORMER_CONFIG.moveEnabled,
+        resizeEnabled: rect.transformerConfig?.resizeEnabled ?? SHEET_CHART_TRANSFORMER_CONFIG.resizeEnabled,
     };
 }
 
@@ -915,7 +917,18 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             const nextTransform = point && startPoint
                 ? { left: dragState.startLeft + point.x - startPoint.x, top: dragState.startTop + point.y - startPoint.y }
                 : resolveFloatDomMoveDragTransform(dragState, pointerEvent, scene);
-            info.rect.transformByState(nextTransform as ITransformState);
+            const drawing = this._sheetDrawingService.getDrawingByParam({ unitId: info.unitId, subUnitId: info.subUnitId, drawingId: info.id });
+            if (drawing?.anchorType === SheetDrawingAnchorType.None) {
+                const parent = drawing.chartParent && this._sheetDrawingService.getDrawingByParam({
+                    unitId: info.unitId,
+                    subUnitId: info.subUnitId,
+                    drawingId: drawing.chartParent.drawingId,
+                });
+                const next = { ...drawing, transform: { ...drawing.transform, ...nextTransform } };
+                info.rect.transformByState(applySheetDrawingPlacement(drawing, getSheetDrawingPlacement(next), undefined, parent ?? undefined).transform as ITransformState);
+            } else {
+                info.rect.transformByState(nextTransform as ITransformState);
+            }
         };
         const handlePointerUp = (pointerEvent: PointerEvent) => {
             if (dragState.pointerId != null && pointerEvent.pointerId !== dragState.pointerId) {
@@ -992,7 +1005,13 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             const next = { ...drawing, transform };
             this._commandService.syncExecuteCommand<ISetDrawingCommandParams>(SetSheetDrawingCommand.id, {
                 unitId: info.unitId,
-                drawings: [applySheetDrawingPlacement(next, getSheetDrawingPlacement(next))],
+                drawings: [applySheetDrawingPlacement(drawing, getSheetDrawingPlacement(next), undefined, drawing.chartParent
+                    ? this._sheetDrawingService.getDrawingByParam({
+                        unitId: info.unitId,
+                        subUnitId: info.subUnitId,
+                        drawingId: drawing.chartParent.drawingId,
+                    }) ?? undefined
+                    : undefined)],
             });
             return;
         }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IGroupBaseBound } from '@univerjs/core';
 import { DrawingTypeEnum, Tools } from '@univerjs/core';
 import {
     SetColHiddenCommand,
@@ -33,6 +34,130 @@ import {
     tryRefreshSheetDrawingPlacement,
 } from '../sheet-drawing-placement';
 import { SheetDrawingAnchorType } from '../sheet-drawing.service';
+
+function createChartChild(resizeWithParent = true): ISheetDrawing {
+    const from = { row: 0, column: 0, rowOffset: 240, columnOffset: 140 };
+    const to = { row: 0, column: 0, rowOffset: 320, columnOffset: 240 };
+    return {
+        unitId: 'test',
+        subUnitId: 'sheet1',
+        drawingId: 'child',
+        drawingType: DrawingTypeEnum.DRAWING_DOM,
+        componentKey: 'chart-child',
+        anchorType: SheetDrawingAnchorType.None,
+        chartParent: { drawingId: 'parent', resizeWithParent },
+        transform: { left: 140, top: 240, width: 100, height: 80, angle: 37 },
+        sheetTransform: { from, to },
+        axisAlignSheetTransform: { from, to },
+    };
+}
+
+function createChartParent(): ISheetDrawing {
+    return {
+        ...createChartChild(),
+        drawingId: 'parent',
+        drawingType: DrawingTypeEnum.DRAWING_CHART,
+        chartParent: undefined,
+        transform: { left: 100, top: 200, width: 300, height: 200 },
+    };
+}
+
+describe('chart-owned drawing interaction placement', () => {
+    it.each([
+        ['left', { left: 60, top: 240, width: 180, height: 80 }, { left: 100, top: 240, width: 140, height: 80 }],
+        ['right', { left: 140, top: 240, width: 350, height: 80 }, { left: 140, top: 240, width: 260, height: 80 }],
+        ['top', { left: 140, top: 160, width: 100, height: 160 }, { left: 140, top: 200, width: 100, height: 120 }],
+        ['bottom', { left: 140, top: 240, width: 100, height: 250 }, { left: 140, top: 240, width: 100, height: 160 }],
+    ] satisfies Array<[string, IGroupBaseBound, IGroupBaseBound]>)('clips the moving %s edge while preserving the opposite edge', (_edge, bounds, expected) => {
+        const drawing = createChartChild();
+        const parent = createChartParent();
+        const input = { kind: SheetDrawingAnchorType.None, ...bounds };
+        const before = Tools.deepClone({ drawing, parent, input });
+
+        const placed = applySheetDrawingPlacement(drawing, input, undefined, parent, true);
+
+        expect(placed.transform).toEqual({ ...expected, angle: 37 });
+        expect(placed.sheetTransform.from).toMatchObject({ columnOffset: expected.left, rowOffset: expected.top });
+        expect(placed.sheetTransform.to).toMatchObject({ columnOffset: expected.left + expected.width, rowOffset: expected.top + expected.height });
+        expect({ drawing, parent, input }).toEqual(before);
+    });
+
+    it('moves within relative parent bounds without changing size', () => {
+        const drawing = createChartChild();
+        const placed = applySheetDrawingPlacement(drawing, {
+            kind: SheetDrawingAnchorType.None,
+            left: 50,
+            top: 450,
+            width: 100,
+            height: 80,
+        }, undefined, createChartParent());
+        expect(placed.transform).toEqual({ left: 100, top: 320, width: 100, height: 80, angle: 37 });
+    });
+
+    it('distinguishes horizontal resize from vertical movement', () => {
+        const placed = applySheetDrawingPlacement(createChartChild(), {
+            kind: SheetDrawingAnchorType.None,
+            left: 60,
+            top: 450,
+            width: 180,
+            height: 80,
+        }, undefined, createChartParent(), true);
+        expect(placed.transform).toEqual({ left: 100, top: 320, width: 140, height: 80, angle: 37 });
+    });
+
+    it.each([true, false])('fits numeric extents and keeps the complete child inside its parent, resizeWithParent=%s', (resizeWithParent) => {
+        const drawing = createChartChild(resizeWithParent);
+        const parent = createChartParent();
+        expect(applySheetDrawingPlacement(drawing, {
+            kind: SheetDrawingAnchorType.None,
+            left: 140,
+            top: 240,
+            width: 280,
+            height: 180,
+        }, undefined, parent).transform).toEqual({ left: 120, top: 220, width: 280, height: 180, angle: 37 });
+        expect(applySheetDrawingPlacement(drawing, {
+            kind: SheetDrawingAnchorType.None,
+            left: 140,
+            top: 240,
+            width: 500,
+            height: 350,
+        }, undefined, parent).transform).toEqual({ left: 100, top: 200, width: 300, height: 200, angle: 37 });
+    });
+
+    it.each([
+        ['non-finite origin', { left: Infinity }, 'SHEET_DRAWING_PLACEMENT_POSITION_INVALID'],
+        ['non-finite extent', { width: NaN }, 'SHEET_DRAWING_PLACEMENT_EXTENT_INVALID'],
+        ['negative extent', { height: -1 }, 'SHEET_DRAWING_PLACEMENT_EXTENT_INVALID'],
+        ['collapsed parent', { width: 0 }, 'SHEET_DRAWING_PLACEMENT_EXTENT_INVALID'],
+        ['missing extent', { width: undefined }, 'SHEET_DRAWING_PLACEMENT_EXTENT_INVALID'],
+    ] satisfies Array<[string, Partial<IGroupBaseBound>, string]>)('rejects a malformed parent with %s before fitting an otherwise valid child', (_name, patch, reason) => {
+        const parent = createChartParent();
+        parent.transform = { ...parent.transform, ...patch };
+        expect(() => applySheetDrawingPlacement(createChartChild(), {
+            kind: SheetDrawingAnchorType.None,
+            left: 140,
+            top: 240,
+            width: 100,
+            height: 80,
+        }, undefined, parent)).toThrow(reason);
+    });
+
+    it('rejects an edge clip that collapses DOM area while preserving a shape line', () => {
+        const input = { kind: SheetDrawingAnchorType.None, left: 240, top: 240, width: 1, height: 80 };
+        expect(() => applySheetDrawingPlacement(createChartChild(), input, undefined, createChartParent(), true))
+            .toThrow('SHEET_DRAWING_PLACEMENT_EXTENT_INVALID');
+        const line = applySheetDrawingPlacement({ ...createChartChild(), drawingType: DrawingTypeEnum.DRAWING_SHAPE }, input, undefined, createChartParent(), true);
+        expect(line.transform).toMatchObject({ left: 240, top: 240, width: 0, height: 80 });
+    });
+
+    it('preserves unrestricted placement when the caller has no parent or the drawing has no chart owner', () => {
+        const drawing = createChartChild();
+        const input = { kind: SheetDrawingAnchorType.None, left: 50, top: 450, width: 100, height: 80 };
+        expect(applySheetDrawingPlacement(drawing, input).transform).toEqual({ left: 50, top: 450, width: 100, height: 80, angle: 37 });
+        expect(applySheetDrawingPlacement({ ...drawing, chartParent: undefined }, input, undefined, createChartParent()).transform)
+            .toEqual({ left: 50, top: 450, width: 100, height: 80, angle: 37 });
+    });
+});
 
 describe('sheet drawing placement extents', () => {
     let bed: ReturnType<typeof createSheetsDrawingTestBed>;

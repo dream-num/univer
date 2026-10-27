@@ -134,16 +134,15 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
     const portalContainer = useMemo<HTMLElement>(() => document.createElement('div'), []);
 
     useEffect(() => {
-        const parent = uiConfig?.portalContainer ?? document.body;
-        parent.appendChild(portalContainer);
+        document.body.appendChild(portalContainer);
 
         return () => {
-            portalContainer.remove();
+            document.body.removeChild(portalContainer);
         };
-    }, [mountContainer, portalContainer, uiConfig?.portalContainer]);
+    }, [mountContainer, portalContainer]);
 
     useEffect(() => {
-        portalContainer.setAttribute('dir', direction);
+        portalContainer.dir = direction;
     }, [direction, portalContainer]);
 
     return (

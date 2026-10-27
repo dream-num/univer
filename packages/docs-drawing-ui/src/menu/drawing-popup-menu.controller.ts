@@ -111,7 +111,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
 
         this.disposeWithMe(this._oleUI.registerHost(UniverInstanceType.UNIVER_DOC, {
             isEditable: (drawing) => this._drawingManagerService.getDrawingEditable() && getDocumentPermissionValue(this._permissionService, drawing.unitId, drawing.unitId, UnitAction.Edit),
-            attach: (object, componentKey, extraProps, drawing, direction = 'top-center') => this._canvasPopManagerService.attachPopupToObject(object, { componentKey, extraProps, direction, offset: direction === 'top-center' ? [0, 8] : [0, 0] }, drawing.unitId),
+            attach: (object, componentKey, extraProps, drawing, direction = 'top-center') => this._canvasPopManagerService.attachPopupToObject(object, { componentKey, extraProps, direction, portal: true, offset: direction === 'top-center' ? [0, 8] : [0, 0] }, drawing.unitId),
             rename: (drawing, name) => this._commandService.executeCommand(UpdateDrawingDocTransformCommand.id, { unitId: drawing.unitId, subUnitId: drawing.subUnitId, drawings: [{ drawingId: drawing.drawingId, key: 'oleFileName', value: name }] }),
             saveOnlineUnit: (drawing, online) => this._commandService.executeCommand(UpdateDrawingDocTransformCommand.id, { unitId: drawing.unitId, subUnitId: drawing.subUnitId, drawings: [{ drawingId: drawing.drawingId, key: 'oleOnlineUnit', value: online }] }),
             remove: (drawing) => this._commandService.executeCommand(RemoveDocDrawingCommand.id, { unitId: drawing.unitId, drawings: [{ ...drawing, drawingType: DrawingTypeEnum.DRAWING_OLE }] }),

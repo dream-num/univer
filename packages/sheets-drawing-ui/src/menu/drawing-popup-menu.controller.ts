@@ -83,7 +83,7 @@ export class DrawingPopupMenuController extends RxDisposable {
 
         this.disposeWithMe(this._oleUI.registerHost(UniverInstanceType.UNIVER_SHEET, {
             isEditable: (drawing) => this._drawingManagerService.getDrawingEditable() && this._permissionService.getPermissionPoint(new WorkbookEditablePermission(drawing.unitId).id)?.value !== false,
-            attach: (object, componentKey, extraProps, _drawing, direction = 'top-center') => this._canvasPopManagerService.attachPopupToObject(object, { componentKey, extraProps, direction, offset: direction === 'top-center' ? [0, 8] : [0, 0] }),
+            attach: (object, componentKey, extraProps, _drawing, direction = 'top-center') => this._canvasPopManagerService.attachPopupToObject(object, { componentKey, extraProps, direction, portal: true, offset: direction === 'top-center' ? [0, 8] : [0, 0] }),
             rename: (drawing, name) => this._commandService.executeCommand(SetSheetDrawingCommand.id, { unitId: drawing.unitId, drawings: [{ ...drawing, oleFileName: name }] }),
             saveOnlineUnit: (drawing, online) => this._commandService.executeCommand(SetSheetDrawingCommand.id, { unitId: drawing.unitId, drawings: [{ ...drawing, oleOnlineUnit: online }] }),
             remove: (drawing) => this._commandService.executeCommand(RemoveSheetDrawingCommand.id, { unitId: drawing.unitId, drawings: [drawing] }),

@@ -320,6 +320,32 @@ describe('OLE local UI lifecycle', () => {
         expect(JSON.stringify(h.resource)).toBe(saved);
     });
 
+    it.each(['application/pdf', 'application/msword'])('gives nested preview a stable focus owner for %s', async (mimeType) => {
+        const h = harness();
+        h.resource.files[sha256].mimeType = mimeType;
+        h.config.convertOffice = vi.fn(async () => ({ type: UniverInstanceType.UNIVER_DOC, data: {} }));
+        vi.spyOn(previewRegistry, 'getOlePreviewRenderer').mockReturnValue(vi.fn());
+        vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:preview');
+        const owner = document.createElement('div');
+        owner.setAttribute('role', 'dialog');
+        owner.tabIndex = -1;
+        const button = document.createElement('button');
+        owner.appendChild(button);
+        document.body.appendChild(owner);
+        button.focus();
+        h.dialogs.open.mockImplementation(() => {
+            expect(document.activeElement).toBe(owner);
+        });
+        try {
+            await h.service.preview(h.drawing);
+            expect(h.dialogs.open).toHaveBeenCalledOnce();
+            button.remove();
+            expect(document.activeElement).toBe(owner);
+        } finally {
+            owner.remove();
+        }
+    });
+
     it('uses the target product UI factory even before a host of that product exists', async () => {
         const h = harness();
         h.resource.files[sha256].mimeType = 'application/msword';

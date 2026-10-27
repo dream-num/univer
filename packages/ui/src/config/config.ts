@@ -31,8 +31,6 @@ export interface IUniverUIConfig extends IWorkbenchOptions {
     menu?: MenuConfig;
 
     popupRootId?: string;
-    /** Keep transient UI inside its owning modal when embedding an isolated viewer. */
-    portalContainer?: HTMLElement;
 
     /**
      * The fallback avatar for user.

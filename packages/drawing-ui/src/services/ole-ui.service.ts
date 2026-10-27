@@ -536,6 +536,8 @@ export class OleUIService extends Disposable {
             this._messages.show({ type: MessageType.Info, content: this._locale.t<LocaleKey>('drawing-ui.ole.unsupported') });
             return;
         }
+        // The existing dialog service must capture a stable opener when the OLE toolbar unmounts.
+        const focusOwner = document.activeElement?.closest<HTMLElement>('[role="dialog"]');
         const previewKey = key(drawing);
         this._previews.get(previewKey)?.abort();
         const controller = new AbortController();
@@ -551,6 +553,7 @@ export class OleUIService extends Disposable {
                 this._previews.delete(previewKey);
             };
             controller.signal.addEventListener('abort', () => URL.revokeObjectURL(url), { once: true });
+            focusOwner?.focus({ preventScroll: true });
             this._dialogs.open({ id: dialogId, title: { title: file.name }, children: { label: OLE_PREVIEW_COMPONENT, value: JSON.stringify({ url, mimeType: file.mimeType, name: file.name }) }, width: '80vw', onClose: close });
         } else if (this._oleConfig().previewOffice) {
             await this._oleConfig().previewOffice!({ unitId: drawing.unitId, attachmentId: id, bytes, name: file.name, mimeType: file.mimeType, signal: controller.signal });
@@ -570,7 +573,16 @@ export class OleUIService extends Disposable {
                 this._officeViews.delete(previewKey);
                 this._previews.delete(previewKey);
             };
-            this._dialogs.open({ id: dialogId, title: { title: file.name }, children: { label: OLE_OFFICE_PREVIEW_COMPONENT, value: previewKey }, width: '90vw', onClose: close });
+            focusOwner?.focus({ preventScroll: true });
+            this._dialogs.open({
+                id: dialogId,
+                title: { title: file.name },
+                children: { label: OLE_OFFICE_PREVIEW_COMPONENT, value: previewKey },
+                width: '90vw',
+                // Fixed canvas popups use viewport coordinates, so their modal must not create a transformed containing block.
+                style: { top: 0, right: 0, bottom: 0, left: 0, margin: 'auto', height: 'max-content', transform: 'none', animation: 'none' },
+                onClose: close,
+            });
         } else {
             this._messages.show({ type: MessageType.Info, content: this._locale.t<LocaleKey>('drawing-ui.ole.unsupported') });
             this._previews.delete(previewKey);

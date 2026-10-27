@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import type { IRenderContext } from '@univerjs/engine-render';
+import type { BaseObject, IPointerEvent, IRenderContext } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { EventSubject, ICommandService, LocaleType, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import {
@@ -29,7 +29,6 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { HeaderMenuResizeShape } from '../../../../views/header-resize-shape';
 import { SheetScrollManagerService } from '../../../../services/scroll-manager.service';
 import { SheetSkeletonManagerService } from '../../../../services/sheet-skeleton-manager.service';
 import { createTestBed } from '../../../editor/__tests__/create-test-bed';
@@ -38,15 +37,25 @@ import { MobileHeaderResizeRenderController } from '../mobile-header-resize.rend
 interface IMobileHeaderResizeTestAccess {
     _currentRow: number;
     _currentColumn: number;
-    _rowResizeButton: HeaderMenuResizeShape;
-    _columnResizeButton: HeaderMenuResizeShape;
-    _resizeHelperShape: { top: number; left: number };
+    _rowResizeButton: BaseObject;
+    _columnResizeButton: BaseObject;
+    _resizeHelperShape: BaseObject;
     _handleSelectionChange(selections: ISelectionWithStyle[]): void;
     _startResize(event: { offsetX: number; offsetY: number }, type: 'row' | 'column'): void;
     _updateButtonPositionOnScroll(): void;
+    dispose(): void;
 }
 
 const testBeds: ReturnType<typeof createTestBed>[] = [];
+
+function pointerEvent(type: string, clientX = 0, clientY = 0, pointerId = 0, pointerType = 'touch') {
+    return Object.defineProperties(new MouseEvent(type, { clientX, clientY, bubbles: true, cancelable: true }), {
+        pointerId: { value: pointerId },
+        pointerType: { value: pointerType },
+        offsetX: { value: clientX },
+        offsetY: { value: clientY },
+    }) as IPointerEvent;
+}
 
 function createController(zoomRatio = 2, size = 20) {
     const testBed = createTestBed({
@@ -74,12 +83,8 @@ function createController(zoomRatio = 2, size = 20) {
     }, [[SheetSkeletonService]]);
     testBeds.push(testBed);
     const injector = testBed.univer.__getInjector();
-    const canvasListeners = new Map<string, EventListener>();
-    const canvasElement = {
-        addEventListener: vi.fn((type: string, handler: EventListener) => canvasListeners.set(type, handler)),
-        removeEventListener: vi.fn(),
-        getBoundingClientRect: vi.fn(() => ({ left: 0, top: 0 })),
-    };
+    const canvasElement = document.createElement('canvas');
+    document.body.appendChild(canvasElement);
     const scene = {
         addObjects: vi.fn(),
         addObject: vi.fn(),
@@ -123,7 +128,7 @@ function createController(zoomRatio = 2, size = 20) {
     const executeCommand = vi.spyOn(commandService, 'executeCommand');
 
     return {
-        canvasListeners,
+        canvasElement,
         controller,
         commandService,
         executeCommand,
@@ -134,9 +139,97 @@ function createController(zoomRatio = 2, size = 20) {
     };
 }
 
-afterEach(() => testBeds.splice(0).forEach((testBed) => testBed.univer.dispose()));
+afterEach(() => {
+    testBeds.splice(0).forEach((testBed) => testBed.univer.dispose());
+    document.body.replaceChildren();
+});
 
 describe('MobileHeaderResizeRenderController business methods', () => {
+    it.each([
+        { axis: 'row', pointerType: 'mouse' },
+        { axis: 'column', pointerType: 'mouse' },
+        { axis: 'row', pointerType: 'touch' },
+        { axis: 'column', pointerType: 'touch' },
+    ] as const)('resizes a $axis with $pointerType input and releases outside the canvas', async ({ axis, pointerType }) => {
+        const { controller, commandService, executeCommand, selections, scene, worksheet } = createController();
+        const isRow = axis === 'row';
+        selections.setSelections([{
+            range: {
+                startRow: isRow ? 2 : 0,
+                endRow: isRow ? 2 : 19,
+                startColumn: isRow ? 0 : 1,
+                endColumn: isRow ? 19 : 1,
+                rangeType: isRow ? RANGE_TYPE.ROW : RANGE_TYPE.COLUMN,
+            },
+            primary: null,
+            style: null,
+        }], SelectionMoveType.MOVE_END);
+        const handle = isRow ? controller._rowResizeButton : controller._columnResizeButton;
+        const initialSize = isRow ? worksheet.getRowHeight(2) : worksheet.getColumnWidth(1);
+        handle.onPointerDown$.emitEvent(pointerEvent('pointerdown', 100, 100, 1, pointerType));
+        expect(scene.disableObjectsEvent).toHaveBeenCalledTimes(1);
+
+        // Another pointer cannot move or finish the active drag.
+        document.dispatchEvent(pointerEvent('pointermove', 500, 500, 2, pointerType));
+        document.dispatchEvent(pointerEvent('pointerup', 500, 500, 2, pointerType));
+        expect(scene.enableObjectsEvent).not.toHaveBeenCalled();
+        document.dispatchEvent(pointerEvent('pointermove', isRow ? 100 : 140, isRow ? 140 : 100, 1, pointerType));
+        const draggedOffset = isRow ? handle.top : handle.left;
+        document.dispatchEvent(pointerEvent('pointerup', 140, 140, 1, pointerType));
+        expect(isRow ? handle.top : handle.left).toBe(draggedOffset);
+        expect(scene.enableObjectsEvent).toHaveBeenCalledTimes(1);
+        expect(executeCommand).toHaveBeenCalledTimes(1);
+        expect(await executeCommand.mock.results[0].value).toBe(true);
+        expect(isRow ? worksheet.getRowHeight(2) : worksheet.getColumnWidth(1)).toBe(initialSize + 20);
+        await commandService.executeCommand(UndoCommand.id);
+        expect(isRow ? worksheet.getRowHeight(2) : worksheet.getColumnWidth(1)).toBe(initialSize);
+        await commandService.executeCommand(RedoCommand.id);
+        expect(isRow ? worksheet.getRowHeight(2) : worksheet.getColumnWidth(1)).toBe(initialSize + 20);
+
+        executeCommand.mockClear();
+        handle.onPointerDown$.emitEvent(pointerEvent('pointerdown', 100, 100, 1, pointerType));
+        document.dispatchEvent(pointerEvent('pointerup', 100, 100, 1, pointerType));
+        expect(scene.enableObjectsEvent).toHaveBeenCalledTimes(2);
+        expect(executeCommand).not.toHaveBeenCalled();
+    });
+
+    it.each(['pointercancel', 'blur', 'dispose', 'secondPointer'] as const)(
+        'restores scene events and removes drag listeners on %s without submitting a resize',
+        (reason) => {
+            const { controller, executeCommand, scene } = createController();
+            controller._handleSelectionChange([{
+                range: { startRow: 0, endRow: 19, startColumn: 1, endColumn: 1, rangeType: RANGE_TYPE.COLUMN },
+                primary: null,
+                style: null,
+            }]);
+            const handle = controller._columnResizeButton;
+            const initialLeft = handle.left;
+            handle.onPointerDown$.emitEvent(pointerEvent('pointerdown', 100, 100));
+            const disposeHelper = vi.spyOn(controller._resizeHelperShape, 'dispose');
+            document.dispatchEvent(pointerEvent('pointermove', 140, 100));
+            expect(handle.left).not.toBe(initialLeft);
+            if (reason === 'dispose') {
+                controller.dispose();
+            } else if (reason === 'blur') {
+                window.dispatchEvent(new Event('blur'));
+            } else if (reason === 'secondPointer') {
+                document.dispatchEvent(pointerEvent('pointerdown', 100, 100, 1));
+            } else {
+                document.dispatchEvent(pointerEvent('pointercancel'));
+            }
+            expect(scene.enableObjectsEvent).toHaveBeenCalledTimes(1);
+            expect(controller._resizeHelperShape).toBeNull();
+            expect(disposeHelper).toHaveBeenCalledTimes(1);
+            if (reason !== 'dispose') {
+                expect(handle.left).toBe(initialLeft);
+            }
+            document.dispatchEvent(pointerEvent('pointermove', 180, 100));
+            document.dispatchEvent(pointerEvent('pointerup'));
+            expect(executeCommand).not.toHaveBeenCalled();
+            expect(scene.enableObjectsEvent).toHaveBeenCalledTimes(1);
+        }
+    );
+
     it.each([
         { axis: 'row', zoom: 0.5, size: 20 },
         { axis: 'row', zoom: 1, size: 20 },
@@ -147,7 +240,7 @@ describe('MobileHeaderResizeRenderController business methods', () => {
         { axis: 'row', zoom: 2, size: 1 },
         { axis: 'column', zoom: 2, size: 0.25 },
     ] as const)('collapses $axis selections at zoom $zoom and size $size without passing zero', async ({ axis, zoom, size }) => {
-        const { canvasListeners, controller, commandService, executeCommand, selections, skeleton, worksheet } =
+        const { canvasElement, controller, commandService, executeCommand, selections, skeleton, worksheet } =
             createController(zoom, size);
         const isRow = axis === 'row';
         const initialSize = isRow ? worksheet.getRowHeight(2) : worksheet.getColumnWidth(1);
@@ -166,16 +259,13 @@ describe('MobileHeaderResizeRenderController business methods', () => {
         const initialOffset = isRow ? skeleton.getOffsetByRow(2) : skeleton.getOffsetByColumn(1);
         controller._startResize({ offsetX: 200, offsetY: 100 }, axis);
         const rawDelta = -(initialSize + 30) * zoom;
-        canvasListeners.get('touchmove')!({
-            touches: [{ clientX: 200 + (isRow ? 0 : rawDelta), clientY: 100 + (isRow ? rawDelta : 0) }],
-            preventDefault: vi.fn(),
-        } as unknown as Event);
+        canvasElement.dispatchEvent(pointerEvent('pointermove', 200 + (isRow ? 0 : rawDelta), 100 + (isRow ? rawDelta : 0)));
 
         const handle = isRow ? controller._rowResizeButton : controller._columnResizeButton;
         expect(isRow ? controller._resizeHelperShape.top : controller._resizeHelperShape.left)
             .toBe(initialOffset - initialSize - 2);
         expect(isRow ? handle.top : handle.left).toBe(initialOffset - initialSize - 6);
-        canvasListeners.get('touchend')!({ preventDefault: vi.fn() } as unknown as Event);
+        canvasElement.dispatchEvent(pointerEvent('pointerup'));
         expect(executeCommand).toHaveBeenCalledWith(
             isRow ? DeltaRowHeightCommand.id : DeltaColumnWidthCommand.id,
             isRow ? { anchorRow: 2, deltaY: -initialSize } : { anchorCol: 1, deltaX: -initialSize }
@@ -192,7 +282,7 @@ describe('MobileHeaderResizeRenderController business methods', () => {
     });
 
     it('can drag back from the zero boundary before releasing', async () => {
-        const { canvasListeners, controller, executeCommand, selections, worksheet } = createController();
+        const { canvasElement, controller, executeCommand, selections, worksheet } = createController();
         selections.setSelections([{
             range: { startRow: 2, endRow: 2, startColumn: 0, endColumn: 19, rangeType: RANGE_TYPE.ROW },
             primary: null,
@@ -200,36 +290,27 @@ describe('MobileHeaderResizeRenderController business methods', () => {
         }], SelectionMoveType.MOVE_END);
         controller._startResize({ offsetX: 12, offsetY: 100 }, 'row');
         for (const clientY of [0, 80]) {
-            canvasListeners.get('touchmove')!({
-                touches: [{ clientX: 12, clientY }],
-                preventDefault: vi.fn(),
-            } as unknown as Event);
+            canvasElement.dispatchEvent(pointerEvent('pointermove', 12, clientY));
         }
-        canvasListeners.get('touchend')!({ preventDefault: vi.fn() } as unknown as Event);
+        canvasElement.dispatchEvent(pointerEvent('pointerup'));
         expect(executeCommand).toHaveBeenCalledWith(DeltaRowHeightCommand.id, { anchorRow: 2, deltaY: -10 });
         expect(await executeCommand.mock.results[0].value).toBe(true);
         expect(worksheet.getRowHeight(2)).toBe(10);
     });
 
     it('does not submit a small finger movement or a drag returning to its initial position', () => {
-        const { canvasListeners, controller, executeCommand } = createController();
+        const { canvasElement, controller, executeCommand } = createController();
         controller._currentRow = 2;
         controller._startResize({ offsetX: 12, offsetY: 100 }, 'row');
-        canvasListeners.get('touchmove')!({
-            touches: [{ clientX: 12, clientY: 98 }],
-            preventDefault: vi.fn(),
-        } as unknown as Event);
-        canvasListeners.get('touchend')!({ preventDefault: vi.fn() } as unknown as Event);
+        canvasElement.dispatchEvent(pointerEvent('pointermove', 12, 98));
+        canvasElement.dispatchEvent(pointerEvent('pointerup'));
         expect(executeCommand).not.toHaveBeenCalled();
 
         controller._startResize({ offsetX: 12, offsetY: 100 }, 'row');
         for (const clientY of [0, 100]) {
-            canvasListeners.get('touchmove')!({
-                touches: [{ clientX: 12, clientY }],
-                preventDefault: vi.fn(),
-            } as unknown as Event);
+            canvasElement.dispatchEvent(pointerEvent('pointermove', 12, clientY));
         }
-        canvasListeners.get('touchend')!({ preventDefault: vi.fn() } as unknown as Event);
+        canvasElement.dispatchEvent(pointerEvent('pointerup'));
         expect(executeCommand).not.toHaveBeenCalled();
     });
 
@@ -268,15 +349,12 @@ describe('MobileHeaderResizeRenderController business methods', () => {
     });
 
     it('executes row and column resize commands after a meaningful touch drag', async () => {
-        const { canvasListeners, controller, executeCommand, scene } = createController();
+        const { canvasElement, controller, executeCommand, scene } = createController();
 
         controller._currentRow = 2;
         controller._startResize({ offsetX: 12, offsetY: 60 }, 'row');
-        canvasListeners.get('touchmove')!({
-            touches: [{ clientX: 12, clientY: 90 }],
-            preventDefault: vi.fn(),
-        } as unknown as Event);
-        canvasListeners.get('touchend')!({ preventDefault: vi.fn() } as unknown as Event);
+        canvasElement.dispatchEvent(pointerEvent('pointermove', 12, 90));
+        canvasElement.dispatchEvent(pointerEvent('pointerup'));
         expect(scene.disableObjectsEvent).toHaveBeenCalled();
         expect(scene.enableObjectsEvent).toHaveBeenCalled();
         expect(executeCommand).toHaveBeenCalledWith(DeltaRowHeightCommand.id, {
@@ -288,11 +366,8 @@ describe('MobileHeaderResizeRenderController business methods', () => {
         executeCommand.mockClear();
         controller._currentColumn = 1;
         controller._startResize({ offsetX: 160, offsetY: 12 }, 'column');
-        canvasListeners.get('touchmove')!({
-            touches: [{ clientX: 200, clientY: 12 }],
-            preventDefault: vi.fn(),
-        } as unknown as Event);
-        canvasListeners.get('touchend')!({ preventDefault: vi.fn() } as unknown as Event);
+        canvasElement.dispatchEvent(pointerEvent('pointermove', 200, 12));
+        canvasElement.dispatchEvent(pointerEvent('pointerup'));
         expect(executeCommand).toHaveBeenCalledWith(DeltaColumnWidthCommand.id, {
             deltaX: 20,
             anchorCol: 1,

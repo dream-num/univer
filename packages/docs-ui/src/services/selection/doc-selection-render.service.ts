@@ -621,6 +621,8 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     focus(): void {
+        // The layout may mount after the input; keep focus inside its owning modal.
+        this._ensureHostContainer();
         if (!this._input.hasAttribute('tabindex')) {
             this._input.tabIndex = -1;
         }

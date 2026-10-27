@@ -34,18 +34,33 @@ Before Office export, materialize the Unit through the Server SDK and call `prep
 
 ## Preview integration
 
-The Pro collaboration client supplies an adapter using the existing attachment upload/sign/read requests. It passes the explicit target Unit to the shared attachment uploader, independently of the currently focused Unit. Register the optional Pro `UniverOleExchangeClientPlugin` after `UniverExchangeClientPlugin`:
+The Pro collaboration client supplies an adapter using the existing attachment upload/sign/read requests. It passes the explicit target Unit to the shared attachment uploader, independently of the currently focused Unit. Configure navigation on the existing drawing plugin, and register the existing exchange client with the application's exchange endpoints:
 
 ```ts
-univer.registerPlugin(UniverExchangeClientPlugin, exchangeEndpoints);
-univer.registerPlugin(UniverOleExchangeClientPlugin, {
-    getLink: (unitId) => `/documents/${encodeURIComponent(unitId)}`,
+import { UniverDrawingPlugin } from '@univerjs/drawing';
+import { UniverExchangeClientPlugin } from '@univerjs-pro/exchange-client';
+
+univer.registerPlugin(UniverDrawingPlugin, {
+    ole: {
+        getLink: (unitId, type) => `/viewer?unit=${encodeURIComponent(unitId)}&type=${type}`,
+    },
 });
+univer.registerPlugin(UniverExchangeClientPlugin, exchangeEndpoints);
 ```
 
-Configure `getLink` once for all three hosts. It must synchronously return a relative or absolute HTTP(S) URL for the application's current route; use its second `type` argument when Sheet, Doc and Slide routes differ. There is no default application route. Without a resolver, online actions stay hidden while preview and download remain available.
+The example's `/viewer` route belongs to the application; replace it with the application's official Unit Viewer route. Configure `getLink` once for all three hosts. It must synchronously return a relative or absolute HTTP(S) URL; use its second `type` argument when Sheet, Doc and Slide routes differ. There is no default application route. Without a resolver, online actions stay hidden; preview and download follow their own capabilities.
 
-The base exchange client remains independent of drawing UI. The optional plugin supplies the read-only Office viewer, `ole.convertToOnline` and `ole.getLink`. An online attachment submits its stable file ID and source Unit ID to the existing import/task endpoint; the browser does not read or upload its bytes. Inline JSON bytes are uploaded once. The server must authorize the persistent attachment reference and can use `UniverAttachmentImportService` with its normal attachment and Unit creation adapters. The JSON preview endpoint never creates a persisted Unit. `ole.isCollaborative(unitId)` checks the exact host Unit. Applications with custom integration may provide these callbacks directly.
+The existing exchange client installs lazy `ole.convertOffice` and `ole.convertToOnline` callbacks and an exact-Unit `ole.isCollaborative(unitId)` check, preserving application overrides. It contains transport and conversion logic without importing UI or DOM packages, so its normal entry remains usable in Node.js. There is no additional OLE exchange package or plugin registration. An online attachment submits its stable file ID and source Unit ID to the existing import/task endpoint; the browser does not read or upload its bytes. Inline JSON bytes are uploaded once. The server must authorize the persistent attachment reference and can use `UniverAttachmentImportService` with its normal attachment and Unit creation adapters. The JSON preview endpoint never creates a persisted Unit.
+
+Common Drawing UI owns attachment actions, dialogs and the isolated temporary viewer lifecycle. Existing product UI modules provide stateless read-only renderers:
+
+| Target attachment | Required renderer module |
+| --- | --- |
+| XLS/XLSX | `@univerjs/sheets-drawing-ui` |
+| DOC/DOCX | `@univerjs/docs-drawing-ui` |
+| PPT/PPTX | `@univerjs-pro/slides-ui` |
+
+Load the corresponding existing product UI module with its normal styles and locale resources to enable cross-type preview. For example, a Sheet application needs Doc UI loaded to preview a Word attachment. Loading the module makes its renderer available before any target-type Unit exists; there is no additional OLE plugin registration. The temporary viewer registers that product's normal plugins when it opens. Applications may supply `ole.previewOffice` or `ole.createOfficePreview` instead. If the renderer is absent, Preview is disabled with a localized explanation before attachment reads or conversion requests. Download and online conversion retain their independent capability checks. PDF and supported image previews use the existing native preview dialog.
 
 Only supported Office attachments in a collaborative host show Convert to online spreadsheet/document/slides. PDF, unknown binaries and unavailable local links are retained as attachments. A read-only host cannot create an online Unit reference. Existing references can still be opened, subject to normal destination authentication and permissions.
 

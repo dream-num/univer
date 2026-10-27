@@ -18,7 +18,6 @@ import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import type { ImageIoService } from '@univerjs/drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import type { ISheetFloatDom } from '@univerjs/sheets-drawing';
-import type { LocaleKey } from '../locale/types';
 import {
     DrawingTypeEnum,
     FOCUSING_COMMON_DRAWINGS,
@@ -48,6 +47,7 @@ import {
     IMessageService,
     MenuItemType,
 } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { FlipSheetDrawingCommand } from '../commands/commands/flip-drawings.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 
@@ -268,6 +268,7 @@ export class DrawingPopupMenuController extends RxDisposable {
 
                 return [{
                     label: item.title,
+                    ...(typeof item.icon === 'string' ? { icon: item.icon } : {}),
                     index: 100 + index,
                     commandId: item.commandId ?? item.id,
                     commandParams: typeof item.params === 'function' ? item.params() : item.params,

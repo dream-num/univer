@@ -19,6 +19,7 @@
  */
 
 import { CommandType, ICommandService, LocaleService, LocaleType, Univer } from '@univerjs/core';
+import { EyelashIcon } from '@univerjs/icons';
 import { IconManager, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -32,6 +33,45 @@ const cleanups: Array<() => void> = [];
 afterEach(async () => {
     cleanups.splice(0).reverse().forEach((dispose) => dispose());
     await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
+});
+
+it('renders a registered action icon beside its label in the drawing dropdown', async () => {
+    const univer = new Univer();
+    cleanups.push(() => univer.dispose());
+    const injector = univer.__getInjector();
+    injector.add([IconManager]);
+    injector.get(IconManager).register({ EyelashIcon });
+    const locale = injector.get(LocaleService);
+    locale.load({ [LocaleType.EN_US]: { test: { hidePanel: 'Hide chart panel' } } });
+    locale.setLocale(LocaleType.EN_US);
+    locale.setDirection('ltr');
+    const container = document.body.appendChild(document.createElement('div'));
+    cleanups.push(() => container.remove());
+    const root = createRoot(container);
+    cleanups.push(() => act(() => root.unmount()));
+    await act(async () => root.render(
+        <RediContext.Provider value={{ injector }}>
+            <ImagePopupMenu
+                popup={{
+                    extraProps: {
+                        menuItems: [{
+                            label: 'test.hidePanel',
+                            index: 0,
+                            commandId: 'test.operation.hide-panel',
+                            icon: 'EyelashIcon',
+                            disable: false,
+                        }],
+                    },
+                }}
+            />
+        </RediContext.Provider>
+    ));
+    const trigger = container.querySelector<HTMLButtonElement>('[data-slot="dropdown-menu-trigger"]')!;
+    expect(trigger).not.toBeNull();
+    await act(async () => trigger.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, button: 0 })));
+    const item = document.querySelector('[role="menuitem"]');
+    expect(item?.textContent).toBe('Hide chart panel');
+    expect(item?.querySelector('svg')).not.toBeNull();
 });
 
 it('dismisses the chart type tooltip while the dropdown is open and routes the selected type', async () => {

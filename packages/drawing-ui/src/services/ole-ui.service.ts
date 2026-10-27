@@ -35,10 +35,10 @@ import {
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { getOleOfficeType, IDrawingManagerService, OleService, readOleFile } from '@univerjs/drawing';
-import { Image } from '@univerjs/engine-render';
 import { IDialogService, IMessageService, INotificationService } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
 import { OleCanvasRenderer } from '../views/ole/ole-canvas-renderer';
+import { OleObject } from '../views/ole/ole-object';
 import { createOleConversionProgress } from '../views/ole/OleConversionProgress';
 import { getOlePreviewRenderer } from './ole-preview-viewer';
 
@@ -180,7 +180,7 @@ export class OleUIService extends Disposable {
         if (this._bindings.get(id)?.object === object) {
             return;
         }
-        if (object instanceof Image) {
+        if (object instanceof OleObject) {
             const resource = this._oleService.getResource(drawing.unitId);
             const record = resource?.objects[attachmentId(this._getDrawing(drawing))!];
             const file = record?.fileId ? resource?.files[record.fileId] : undefined;
@@ -193,7 +193,7 @@ export class OleUIService extends Disposable {
                 () => this._fileName(drawing),
                 unavailable ? { label: this._locale.t<LocaleKey>(record?.external ? 'drawing-ui.ole.external' : 'drawing-ui.ole.missing'), color: () => color.warning } : undefined
             );
-            object.setContentRenderer(renderer.draw);
+            object.setRenderer(renderer);
         }
         if (!interactive) return;
         this._reportUnavailable(drawing.unitId);

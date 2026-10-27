@@ -34,6 +34,8 @@ import { createHash, webcrypto } from 'node:crypto';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { IOleHostActions } from '../ole-ui.service';
+import { OleCanvasRenderer } from '../../views/ole/ole-canvas-renderer';
+import { OleObject } from '../../views/ole/ole-object';
 import * as previewRegistry from '../ole-preview-viewer';
 import { OLE_POPUP_COMPONENT, OleUIService } from '../ole-ui.service';
 
@@ -190,10 +192,10 @@ describe('OLE local UI lifecycle', () => {
     it('installs live canvas content for existing OLE drawings without changing their snapshot', () => {
         const h = harness();
         const saved = JSON.stringify(h.resource);
-        const image = new Image('canvas-ole', { width: 96, height: 64 });
-        const setter = vi.spyOn(image, 'setContentRenderer');
+        const image = new OleObject('canvas-ole', { width: 96, height: 64 });
+        const setter = vi.spyOn(image, 'setRenderer');
         h.service.bindObject(image, h.drawing);
-        expect(setter).toHaveBeenCalledWith(expect.any(Function));
+        expect(setter).toHaveBeenCalledWith(expect.any(OleCanvasRenderer));
         expect(JSON.stringify(h.resource)).toBe(saved);
         expect(h.io.read).not.toHaveBeenCalled();
         image.dispose();
@@ -201,10 +203,10 @@ describe('OLE local UI lifecycle', () => {
 
     it('renders thumbnails without replacing the interactive canvas binding', () => {
         const h = harness();
-        const image = new Image('thumbnail', { width: 96, height: 64 });
-        const setter = vi.spyOn(image, 'setContentRenderer');
+        const image = new OleObject('thumbnail', { width: 96, height: 64 });
+        const setter = vi.spyOn(image, 'setRenderer');
         h.service.bindObject(image, h.drawing, false);
-        expect(setter).toHaveBeenCalledWith(expect.any(Function));
+        expect(setter).toHaveBeenCalledWith(expect.any(OleCanvasRenderer));
         h.enter$.next();
         expect(h.attach.mock.lastCall?.[0]).not.toBe(image);
         image.dispose();

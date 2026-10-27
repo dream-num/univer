@@ -91,4 +91,5 @@ export type {
     IObjectListPanelLabels,
     ObjectListPanelTypeNameKey,
 } from './views/object-list-panel/ObjectListPanelBase';
+export { OleObject } from './views/ole/ole-object';
 export { DrawingCommonPanel } from './views/panel/DrawingCommonPanel';

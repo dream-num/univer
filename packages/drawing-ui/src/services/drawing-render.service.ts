@@ -36,6 +36,7 @@ import {
 import { DRAWING_OBJECT_LAYER_INDEX, Image, Rect } from '@univerjs/engine-render';
 import { IGalleryService } from '@univerjs/ui';
 import { insertGroupObject } from '../controllers/utils';
+import { OleObject } from '../views/ole/ole-object';
 import { DrawingImageClipService } from './drawing-image-clip.service';
 import { OleUIService } from './ole-ui.service';
 
@@ -159,30 +160,32 @@ export class DrawingRenderService {
                 opacity: normalizeImageOpacity(opacity),
                 zIndex: zIndex === -1 ? (orders.length - 1) : zIndex,
             };
-            const imageNativeCache = this._imageIoService.getImageSourceCache(source, imageSourceType);
-
             let shouldBeCache = false;
-            if (isRenderableImageCache(imageNativeCache)) {
-                imageConfig.image = imageNativeCache;
-            } else {
-                if (imageSourceType === ImageSourceType.UUID) {
-                    try {
-                        imageConfig.url = await this._imageIoService.getImage(source);
-                    } catch (error) {
-                        console.error(error);
-                        continue;
-                    }
-                } else if (imageSourceType === ImageSourceType.URL) {
-                    try {
-                        imageConfig.url = await this._urlImageService.getImage(source);
-                    } catch (error) {
-                        console.error(error);
-                        imageConfig.url = source;
-                    }
-                    shouldBeCache = true;
+            if (drawingType !== DrawingTypeEnum.DRAWING_OLE) {
+                const imageNativeCache = this._imageIoService.getImageSourceCache(source, imageSourceType);
+
+                if (isRenderableImageCache(imageNativeCache)) {
+                    imageConfig.image = imageNativeCache;
                 } else {
-                    imageConfig.url = source;
-                    shouldBeCache = true;
+                    if (imageSourceType === ImageSourceType.UUID) {
+                        try {
+                            imageConfig.url = await this._imageIoService.getImage(source);
+                        } catch (error) {
+                            console.error(error);
+                            continue;
+                        }
+                    } else if (imageSourceType === ImageSourceType.URL) {
+                        try {
+                            imageConfig.url = await this._urlImageService.getImage(source);
+                        } catch (error) {
+                            console.error(error);
+                            imageConfig.url = source;
+                        }
+                        shouldBeCache = true;
+                    } else {
+                        imageConfig.url = source;
+                        shouldBeCache = true;
+                    }
                 }
             }
 
@@ -198,10 +201,9 @@ export class DrawingRenderService {
             }
 
             imageConfig.printable = true;
-            const image = new Image(imageShapeKey, imageConfig);
-            if (drawingType === DrawingTypeEnum.DRAWING_OLE) {
-                image.transformerConfig = { ...image.transformerConfig, rotateEnabled: false };
-            }
+            const image = drawingType === DrawingTypeEnum.DRAWING_OLE
+                ? new OleObject(imageShapeKey, imageConfig)
+                : new Image(imageShapeKey, imageConfig);
             image.setClipService(this._drawingImageClipService);
             if (shouldBeCache) {
                 this._imageIoService.addImageSourceCache(source, imageSourceType, image.getNative());

@@ -116,12 +116,8 @@ export interface IImageProps extends IShapeProps {
     clipBounds?: Nullable<IShapeClipBounds>;
 }
 
-type ImageContentRenderer = (ctx: UniverRenderingContext, width: number, height: number) => void;
-
 export class Image extends Shape<IImageProps> {
     protected _props: IImageProps;
-
-    private _contentRenderer?: ImageContentRenderer;
 
     protected _native: Nullable<HTMLImageElement>;
 
@@ -169,17 +165,6 @@ export class Image extends Shape<IImageProps> {
         }
 
         this._init();
-    }
-
-    /** Draw custom image content in local coordinates centered at (0, 0), without a bitmap cache. */
-    setContentRenderer(renderer?: ImageContentRenderer): void {
-        this._contentRenderer = renderer;
-        this.makeDirty(true);
-    }
-
-    override dispose(): void {
-        this._contentRenderer = undefined;
-        super.dispose();
     }
 
     get srcRect() {
@@ -458,16 +443,12 @@ export class Image extends Shape<IImageProps> {
     }
 
     protected override _draw(ctx: UniverRenderingContext, _bounds?: IViewportInfo, renderWidth?: number, renderHeight?: number) {
-        const w = renderWidth ?? this.width;
-        const h = renderHeight ?? this.height;
-        if (this._contentRenderer) {
-            this._contentRenderer(ctx, w, h);
-            return;
-        }
         const native = this._native;
         if (native == null) {
             return;
         }
+        const w = renderWidth ?? this.width;
+        const h = renderHeight ?? this.height;
 
         if (this._shouldRasterCache()) {
             const transform = ctx.getTransform();

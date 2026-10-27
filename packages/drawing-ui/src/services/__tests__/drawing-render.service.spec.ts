@@ -38,6 +38,7 @@ import { DRAWING_OBJECT_LAYER_INDEX, Image, Rect } from '@univerjs/engine-render
 import { IGalleryService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { OleObject } from '../../views/ole/ole-object';
 import { DrawingImageClipService } from '../drawing-image-clip.service';
 import { DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX, DrawingRenderService } from '../drawing-render.service';
 import { OleUIService } from '../ole-ui.service';
@@ -301,9 +302,14 @@ function createHarness() {
 describe('DrawingRenderService', () => {
     it('renders OLE attachments with their menu binding and disables rotation', async () => {
         const harness = createHarness();
-        const drawing = imageParam({ drawingType: DrawingTypeEnum.DRAWING_OLE });
+        const drawing = imageParam({ drawingType: DrawingTypeEnum.DRAWING_OLE, imageSourceType: ImageSourceType.UUID });
+        const readSource = vi.spyOn(harness.imageIoService, 'getImage');
+        const readCache = vi.spyOn(harness.imageIoService, 'getImageSourceCache');
         await harness.service.renderImages(drawing, harness.scene as unknown as Scene);
         const object = harness.scene.addedObjects[0].object;
+        expect(object).toBeInstanceOf(OleObject);
+        expect(readSource).not.toHaveBeenCalled();
+        expect(readCache).not.toHaveBeenCalled();
         expect(object.transformerConfig?.rotateEnabled).toBe(false);
         expect(harness.oleUI.bindObject).toHaveBeenCalledWith(object, drawing);
     });

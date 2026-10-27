@@ -19,11 +19,11 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { Observer } from 'rxjs';
-import { ILogService } from '@univerjs/core';
-import { Observable } from 'rxjs';
 import type { HTTPRequest } from '../request';
 import type { HTTPEvent } from '../response';
 import type { IHTTPImplementation } from './implementation';
+import { ILogService } from '@univerjs/core';
+import { Observable } from 'rxjs';
 import { HTTPHeaders } from '../headers';
 import { ErrorStatusCodeLowerBound, HTTPStatusCode, SuccessStatusCodeLowerBound } from '../http';
 import { HTTPResponse, HTTPResponseError, ResponseHeader } from '../response';

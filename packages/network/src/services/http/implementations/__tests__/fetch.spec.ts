@@ -15,6 +15,7 @@
  */
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import { HTTPHeaders } from '../../headers';
 import { HTTPRequest } from '../../request';
 import { FetchHTTPImplementation } from '../fetch';

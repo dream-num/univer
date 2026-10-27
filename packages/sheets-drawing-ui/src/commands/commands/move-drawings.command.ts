@@ -19,12 +19,9 @@ import type { ISetDrawingCommandParams, ISheetDrawing } from '@univerjs/sheets-d
 import { CommandType, Direction, ICommandService } from '@univerjs/core';
 import { SheetSkeletonService } from '@univerjs/sheets';
 import {
-    applySheetDrawingPlacement,
     ClearSheetDrawingTransformerOperation,
-    getSheetDrawingPlacement,
     ISheetDrawingService,
     SetSheetDrawingCommand,
-    SheetDrawingAnchorType,
     transformToAxisAlignPosition,
     transformToDrawingPosition,
 } from '@univerjs/sheets-drawing';
@@ -54,10 +51,9 @@ export const MoveDrawingsCommand: ICommand = {
         const unitId = drawings[0].unitId;
 
         const newDrawings = drawings.map((drawing) => {
-            const sheetDrawing = drawing as ISheetDrawing;
-            const { transform, unitId, subUnitId, anchorType } = sheetDrawing;
+            const { transform, unitId, subUnitId } = drawing as ISheetDrawing;
             const skeleton = sheetSkeletonService.getSkeleton(unitId, subUnitId);
-            if (!transform || (!skeleton && anchorType !== SheetDrawingAnchorType.None)) {
+            if (!transform || !skeleton) {
                 return null;
             }
 
@@ -74,22 +70,13 @@ export const MoveDrawingsCommand: ICommand = {
                 newTransform.left = left + 1;
             }
 
-            if (anchorType === SheetDrawingAnchorType.None) {
-                const next = { ...drawing, transform: newTransform } as ISheetDrawing;
-                return applySheetDrawingPlacement(next, getSheetDrawingPlacement(next));
-            }
-
             return {
                 ...drawing,
                 transform: newTransform,
-                sheetTransform: transformToDrawingPosition(newTransform, skeleton!),
-                axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, skeleton!),
+                sheetTransform: transformToDrawingPosition(newTransform, skeleton),
+                axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, skeleton),
             } as ISheetDrawing;
         }).filter((drawing) => drawing != null) as ISheetDrawing[];
-
-        if (newDrawings.length === 0) {
-            return false;
-        }
 
         const result = undoRedoGroupService.runTimed(
             unitId,

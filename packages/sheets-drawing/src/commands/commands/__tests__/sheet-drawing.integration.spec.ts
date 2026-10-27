@@ -28,7 +28,12 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DRAWING_COPY_CONTEXT_KEY, IDrawingManagerService } from '@univerjs/drawing';
-import { CopySheetCommand, RemoveSheetCommand, SetWorksheetActivateCommand, SheetInterceptorService } from '@univerjs/sheets';
+import {
+    CopySheetCommand,
+    RemoveSheetCommand,
+    SetWorksheetActivateCommand,
+    SheetInterceptorService,
+} from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import type { ISheetDrawing } from '../../../services/sheet-drawing.service';
 import type { IRemoveSheetDrawingCommandParams } from '../remove-sheet-drawing.command';
@@ -216,19 +221,19 @@ describe('sheet drawing integration', () => {
         })).toBe(false);
     });
 
-    it('deletes group members and their Chart descendants through one canonical removal list', async () => {
+    it('deletes nested group members through one command-local removal list', async () => {
         const graph = [
             createGroupSheetDrawing('group-delete'),
             { ...createSheetDrawing('image-child'), groupId: 'group-delete', transform: createSheetDrawingTransform() },
             {
                 ...createSheetDrawing('chart-child'),
-                drawingType: DrawingTypeEnum.DRAWING_CHART,
+                drawingType: DrawingTypeEnum.DRAWING_GROUP,
                 groupId: 'group-delete',
                 transform: createSheetDrawingTransform(),
             } as ISheetDrawing,
             {
                 ...createSheetDrawing('relative-image'),
-                chartParent: { drawingId: 'chart-child', resizeWithParent: false },
+                groupId: 'chart-child',
             },
         ];
         const unrelated = createSheetDrawing('outside-group');

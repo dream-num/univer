@@ -16,9 +16,7 @@
 
 import { Inject } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ILocalFileService } from '@univerjs/ui';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createChartDrawingTestBed } from '../../../__tests__/chart-drawing-test-bed';
+import { afterEach, describe, expect, it } from 'vitest';
 import { createSheetsDrawingUiTestBed } from '../../../__tests__/create-sheets-drawing-ui-test-bed';
 import { SheetDrawingUpdateController } from '../../../controllers/sheet-drawing-update.controller';
 import { InsertCellImageCommand, InsertFloatImageCommand } from '../insert-image.command';
@@ -164,12 +162,4 @@ describe('insert image commands', () => {
 
         testBed.univer.dispose();
     });
-});
-
-it('denies direct cell-image command on CHART before opening the real picker boundary', async () => {
-    const bed = createChartDrawingTestBed();
-    const picker = vi.spyOn(bed.get(ILocalFileService), 'openFile').mockResolvedValue([]);
-    bed.commandService.registerCommand(InsertCellImageCommand);
-    expect(await bed.commandService.executeCommand(InsertCellImageCommand.id)).toBe(false);
-    expect(picker).not.toHaveBeenCalled();
 });

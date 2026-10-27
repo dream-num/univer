@@ -424,23 +424,8 @@ export class OleUIService extends Disposable {
         if (!file || record?.external || officeType == null) {
             throw new Error('Unsupported online conversion');
         }
-        // Reserve the tab in the click gesture; browsers block window.open after an async import.
-        const tab = window.open('about:blank', '_blank');
-        if (tab) {
-            tab.opener = null;
-        }
-        let tabClosed = false;
-        const closeTab = () => {
-            if (!tabClosed) {
-                tabClosed = true;
-                tab?.close();
-            }
-        };
-        const progress = createOleConversionProgress(this._notifications, this._locale, this._fileName(drawing), tab);
-        const cancelProgress = () => {
-            progress.dispose();
-            closeTab();
-        };
+        const progress = createOleConversionProgress(this._notifications, this._locale, this._fileName(drawing));
+        const cancelProgress = () => progress.dispose();
         controller.signal.addEventListener('abort', cancelProgress, { once: true });
         try {
             const cached = this._onlineResults.get(key(drawing));
@@ -469,7 +454,6 @@ export class OleUIService extends Disposable {
                 }
             }
             if (controller.signal.aborted || attachmentId(this._getDrawing(drawing)) !== objectId) {
-                closeTab();
                 return;
             }
             progress.update('saving');
@@ -481,13 +465,26 @@ export class OleUIService extends Disposable {
             } catch {
                 throw new OleLinkSaveError('OLE online link could not be saved');
             }
-            if (tab && !tab.closed) {
-                tab.location.href = this._onlineUrl(online);
-            } else {
-                this._messages.show({ type: MessageType.Info, content: this._locale.t<LocaleKey>('drawing-ui.ole.converted') });
+            if (controller.signal.aborted || attachmentId(this._getDrawing(drawing)) !== objectId) {
+                return;
             }
+            const openKey: LocaleKey = online.type === UniverInstanceType.UNIVER_SHEET
+                ? 'drawing-ui.ole.openSheet'
+                : online.type === UniverInstanceType.UNIVER_SLIDE ? 'drawing-ui.ole.openSlide' : 'drawing-ui.ole.openDoc';
+            const url = this._onlineUrl(online);
+            progress.dispose();
+            this.disposeWithMe(this._notifications.show({
+                type: 'success',
+                title: this._locale.t<LocaleKey>('drawing-ui.ole.converted'),
+                content: this._fileName(drawing),
+                position: 'bottom-right',
+                duration: Infinity,
+                action: {
+                    label: this._locale.t<LocaleKey>(openKey),
+                    onClick: () => { window.open(url, '_blank', 'noopener,noreferrer'); },
+                },
+            }));
         } catch (error) {
-            closeTab();
             if (!controller.signal.aborted) {
                 throw error;
             }

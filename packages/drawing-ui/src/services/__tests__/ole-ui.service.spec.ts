@@ -63,6 +63,7 @@ function harness(online = false, type = UniverInstanceType.UNIVER_SHEET) {
     const config: IOleConfig = { attachmentIo: io };
     const messages = { show: vi.fn() };
     const dialogs = { open: vi.fn(), close: vi.fn() };
+    const notifications = { show: vi.fn<INotificationService['show']>(() => ({ dispose: vi.fn() })) };
     const injector = new Injector([
         [OleService, { useValue: { getResource: () => resource } }],
         [IDrawingManagerService, { useValue: drawings }],
@@ -71,7 +72,7 @@ function harness(online = false, type = UniverInstanceType.UNIVER_SHEET) {
         [LocaleService, { useValue: { t: (key: string, ...args: unknown[]) => args.length ? `${key}:${args.join(',')}` : key } }],
         [IMessageService, { useValue: messages }],
         [IDialogService, { useValue: dialogs }],
-        [INotificationService, { useValue: { show: vi.fn(() => ({ dispose: vi.fn() })) } }],
+        [INotificationService, { useValue: notifications }],
         [ThemeService],
         [OleUIService],
     ]);
@@ -81,7 +82,7 @@ function harness(online = false, type = UniverInstanceType.UNIVER_SHEET) {
     const remove = vi.fn(async () => true);
     service.registerHost(type, { attach, remove });
     service.bindObject(object as never, drawing);
-    return { injector, service, drawing, resource, config, drawings, disposed$, messages, pointerDown$, restoreModel: () => {
+    return { injector, service, drawing, resource, config, drawings, disposed$, messages, notifications, pointerDown$, restoreModel: () => {
         present = true;
     }, hideGlobalModel: () => {
         present = false;
@@ -353,8 +354,8 @@ describe('OLE local UI lifecycle', () => {
 
 const online: IOleOnlineUnit = { unitId: 'created-doc', type: UniverInstanceType.UNIVER_DOC, url: 'https://example.test/doc/created-doc' };
 
-function collaborativeHarness() {
-    const h = harness(true);
+function collaborativeHarness(type = UniverInstanceType.UNIVER_SHEET) {
+    const h = harness(true, type);
     h.resource.files[sha256].mimeType = 'application/msword';
     h.resource.files[sha256].name = 'original.doc';
     h.config.isCollaborative = vi.fn((unitId) => unitId === 'host');
@@ -364,10 +365,9 @@ function collaborativeHarness() {
         h.drawing.oleOnlineUnit = value;
         return true;
     });
-    h.service.registerHost(UniverInstanceType.UNIVER_SHEET, { attach: h.attach, remove: h.remove, saveOnlineUnit: save });
-    const tab = { document: document.implementation.createHTMLDocument(), opener: {}, location: { href: 'about:blank' }, closed: false, close: vi.fn() };
-    const open = vi.spyOn(window, 'open').mockReturnValue(tab as never);
-    return { ...h, convert, save, tab, open };
+    h.service.registerHost(type, { attach: h.attach, remove: h.remove, saveOnlineUnit: save });
+    const open = vi.spyOn(window, 'open').mockReturnValue(null);
+    return { ...h, convert, save, open };
 }
 
 describe('explicit collaborative OLE conversion', () => {
@@ -387,20 +387,25 @@ describe('explicit collaborative OLE conversion', () => {
         expect(h.io.read).not.toHaveBeenCalled();
     });
 
-    it('reserves a tab, imports once, persists the link and reopens it without touching the original bytes', async () => {
+    it('imports once, waits on the source page and opens only after an explicit user action', async () => {
         const h = collaborativeHarness();
         const before = JSON.stringify(h.resource);
         const first = h.service.convertToOnline(h.drawing);
         const second = h.service.convertToOnline(h.drawing);
         expect(first).toBe(second);
-        expect(h.open).toHaveBeenCalledWith('about:blank', '_blank');
-        expect(h.tab.opener).toBeNull();
+        expect(h.open).not.toHaveBeenCalled();
         await first;
         expect(h.convert).toHaveBeenCalledOnce();
         expect(h.convert).toHaveBeenCalledWith(expect.objectContaining({ fileId: 'stable-file', unitId: 'host' }));
         expect(h.convert.mock.calls[0][0]).not.toHaveProperty('bytes');
         expect(h.save).toHaveBeenCalledWith(h.drawing, online);
-        expect(h.tab.location.href).toBe(online.url);
+        expect(h.open).not.toHaveBeenCalled();
+        expect(h.notifications.show).toHaveBeenLastCalledWith(expect.objectContaining({
+            type: 'success',
+            title: 'drawing-ui.ole.converted',
+            content: 'original.doc',
+            action: { label: 'drawing-ui.ole.openDoc', onClick: expect.any(Function) },
+        }));
         expect(JSON.stringify(h.resource)).toBe(before);
         await h.service.convertToOnline(h.drawing);
         expect(h.convert).toHaveBeenCalledOnce();
@@ -409,12 +414,69 @@ describe('explicit collaborative OLE conversion', () => {
         expect(h.attach.mock.lastCall?.[2].hasOnlineUnit).toBe(true);
     });
 
+    it.each([UniverInstanceType.UNIVER_SHEET, UniverInstanceType.UNIVER_DOC, UniverInstanceType.UNIVER_SLIDE])('offers an Open action only after the link has been saved (host: %s)', async (type) => {
+        const h = collaborativeHarness(type);
+        let finishSave!: () => void;
+        h.save.mockImplementation(async (_drawing, value) => {
+            await new Promise<void>((resolve) => {
+                finishSave = resolve;
+            });
+            h.drawing.oleOnlineUnit = value;
+            return true;
+        });
+        const pending = h.service.convertToOnline(h.drawing);
+        await vi.waitFor(() => expect(h.save).toHaveBeenCalledOnce());
+        expect(h.open).not.toHaveBeenCalled();
+        expect(h.drawing.oleOnlineUnit).toBeUndefined();
+        expect(h.notifications.show).toHaveBeenCalledOnce();
+        finishSave();
+        await pending;
+        expect(h.drawing.oleOnlineUnit).toEqual(online);
+        expect(h.open).not.toHaveBeenCalled();
+        const action = h.notifications.show.mock.calls.at(-1)![0].action;
+        if (!action || typeof action !== 'object' || !('onClick' in action)) throw new Error('Missing Open action');
+        action.onClick({} as never);
+        expect(h.open).toHaveBeenCalledOnce();
+        expect(h.open).toHaveBeenCalledWith(online.url, '_blank', 'noopener,noreferrer');
+        h.injector.dispose();
+        expect(h.notifications.show.mock.results.at(-1)!.value.dispose).toHaveBeenCalledOnce();
+    });
+
+    it('also keeps inline attachment conversion on the source page', async () => {
+        const h = collaborativeHarness();
+        delete h.resource.files[sha256].attachment;
+        h.resource.files[sha256].data = Buffer.from(bytes).toString('base64');
+        await h.service.convertToOnline(h.drawing);
+        expect(h.convert).toHaveBeenCalledWith(expect.objectContaining({ bytes, unitId: 'host' }));
+        expect(h.convert.mock.calls[0][0]).not.toHaveProperty('fileId');
+        expect(h.drawing.oleOnlineUnit).toEqual(online);
+        expect(h.notifications.show).toHaveBeenLastCalledWith(expect.objectContaining({ type: 'success' }));
+        expect(h.open).not.toHaveBeenCalled();
+    });
+
+    it.each(['deletion', 'unit disposal'])('suppresses completion when %s occurs while saving the link', async (reason) => {
+        const h = collaborativeHarness();
+        let finishSave!: (value: boolean) => void;
+        h.save.mockImplementation(() => new Promise<boolean>((resolve) => {
+            finishSave = resolve;
+        }));
+        const pending = h.service.convertToOnline(h.drawing);
+        await vi.waitFor(() => expect(h.save).toHaveBeenCalledOnce());
+        if (reason === 'deletion') h.removeModel();
+        else h.disposed$.next({ getUnitId: () => 'host' });
+        finishSave(true);
+        await pending;
+        expect(h.notifications.show).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'success' }));
+        expect(h.open).not.toHaveBeenCalled();
+    });
+
     it('retries saving a created link without creating a second online document', async () => {
         const h = collaborativeHarness();
         h.save.mockResolvedValueOnce(false);
         await expect(h.service.convertToOnline(h.drawing)).rejects.toThrow('could not be saved');
-        expect(h.tab.close).toHaveBeenCalledOnce();
+        expect(h.open).not.toHaveBeenCalled();
         expect(h.drawing.oleOnlineUnit).toBeUndefined();
+        expect(h.notifications.show).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'success' }));
         await h.service.convertToOnline(h.drawing);
         expect(h.convert).toHaveBeenCalledOnce();
         expect(h.save).toHaveBeenCalledTimes(2);
@@ -455,17 +517,18 @@ describe('explicit collaborative OLE conversion', () => {
         }));
         const pending = h.service.convertToOnline(h.drawing);
         await vi.waitFor(() => expect(h.convert).toHaveBeenCalledOnce());
-        expect(h.tab.document.querySelector('progress')).not.toBeNull();
+        const progress = h.notifications.show.mock.results[0].value;
+        expect(progress.dispose).not.toHaveBeenCalled();
         h.convert.mock.calls[0][0].onProgress?.('creating');
-        expect(h.tab.document.body.textContent).toContain('drawing-ui.ole.progressCreating');
         if (reason === 'deletion') h.removeModel();
         else h.disposed$.next({ getUnitId: () => 'host' });
-        expect(h.tab.close).toHaveBeenCalledOnce();
+        expect(progress.dispose).toHaveBeenCalledOnce();
+        expect(h.open).not.toHaveBeenCalled();
         complete(online);
         await pending;
         expect(h.save).not.toHaveBeenCalled();
         expect(h.drawing.oleOnlineUnit).toBeUndefined();
-        expect(h.tab.close).toHaveBeenCalledOnce();
+        expect(h.open).not.toHaveBeenCalled();
     });
 
     it('does not let a cancelled request overwrite a new conversion after deletion is undone', async () => {
@@ -498,6 +561,7 @@ describe('explicit collaborative OLE conversion', () => {
         await expect(h.service.convertToOnline(h.drawing)).rejects.toThrow('Invalid');
         expect(h.save).not.toHaveBeenCalled();
         expect(h.drawing.oleOnlineUnit).toBeUndefined();
-        expect(h.tab.close).toHaveBeenCalledTimes(2);
+        expect(h.open).not.toHaveBeenCalled();
+        expect(h.notifications.show).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'success' }));
     });
 });

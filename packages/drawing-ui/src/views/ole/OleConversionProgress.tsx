@@ -45,12 +45,11 @@ function OleConversionProgress({ stage$, locale, name }: {
     );
 }
 
-/** Keep feedback visible when the drawing menu closes or the reserved tab gains focus. */
+/** Keep progress on the source page even when the drawing menu closes. */
 export function createOleConversionProgress(
     notifications: INotificationService,
     locale: LocaleService,
-    name: string,
-    tab: Window | null
+    name: string
 ): IDisposable & { update: (stage: OleConversionStage) => void } {
     const stage$ = new BehaviorSubject<OleConversionStage>('reading');
     const notification = notifications.show({
@@ -60,27 +59,10 @@ export function createOleConversionProgress(
         closable: false,
         dismissible: false,
     });
-    let label: HTMLElement | undefined;
-    if (tab && !tab.closed) {
-        const document = tab.document;
-        document.title = name;
-        const root = document.createElement('main');
-        root.style.cssText = 'max-width:32rem;margin:20vh auto;padding:2rem;font-family:system-ui;overflow-wrap:anywhere';
-        const title = document.createElement('h1');
-        title.textContent = name;
-        label = document.createElement('p');
-        label.setAttribute('role', 'status');
-        const bar = document.createElement('progress');
-        bar.style.width = '100%';
-        root.append(title, label, bar);
-        document.body.replaceChildren(root);
-        document.documentElement.style.colorScheme = 'light dark';
-    }
     let disposed = false;
     const update = (stage: OleConversionStage): void => {
         if (disposed) return;
         stage$.next(stage);
-        if (label) label.textContent = locale.t<LocaleKey>(STAGE_KEYS[stage]);
     };
     update('reading');
     return { update, dispose: () => {

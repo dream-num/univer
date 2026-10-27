@@ -707,7 +707,7 @@ describe('docs drawing commands integration', () => {
         const testBed = setupDrawingTestBed(data);
         vi.spyOn(testBed.get(DocSkeletonManagerService), 'getSkeleton').mockReturnValue({} as never);
         const doc = testBed.get(IUniverInstanceService).getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
-        const online = { unitId: 'child', type: UniverInstanceType.UNIVER_SHEET, url: 'https://example.test/sheet/child' };
+        const online = { unitId: 'child', type: UniverInstanceType.UNIVER_SHEET };
         expect(await testBed.commandService.executeCommand<IUpdateDrawingDocTransformCommandParams>(UpdateDrawingDocTransformCommand.id, {
             unitId: 'test-doc',
             subUnitId: 'test-doc',

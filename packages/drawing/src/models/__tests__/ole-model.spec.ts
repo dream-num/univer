@@ -147,7 +147,7 @@ describe.each(['workbook', 'doc', 'slide'])('OLE snapshot transport: %s', (host)
     });
 
     it('roundtrips JSON → Unit → JSON without changing the original snapshot', async () => {
-        const onlineUnit = { unitId: 'child', type: 1, url: 'https://example.test/doc/child' };
+        const onlineUnit = { unitId: 'child', type: 1 };
         const model = { drawings: { 'ole-1': { oleAttachmentId: 'ole-1', oleOnlineUnit: onlineUnit, oleFileName: '预算.pdf' } }, resources: [{ name: 'UNIVER_OLE_ATTACHMENT_PLUGIN', data: JSON.stringify(resource()) }] };
         const snapshot = { snapshot: { [host]: host === 'slide' ? { originalMeta: Buffer.from(JSON.stringify(model)).toString('base64') } : model } };
         const saved = JSON.stringify(snapshot);

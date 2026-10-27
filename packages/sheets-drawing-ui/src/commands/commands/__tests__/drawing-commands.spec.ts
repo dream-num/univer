@@ -167,7 +167,7 @@ describe('sheet drawing UI commands', () => {
         const service = testBed.get(ISheetDrawingService);
         const drawing = { ...createSheetDrawing('ole-1', 10, 20), drawingType: DrawingTypeEnum.DRAWING_OLE, oleAttachmentId: 'retained' };
         await insertDrawings(testBed, [drawing]);
-        const online = { unitId: 'child', type: 1, url: 'https://example.test/doc/child' };
+        const online = { unitId: 'child', type: 1 };
         expect(await testBed.commandService.executeCommand(SetSheetDrawingCommand.id, { unitId: testBed.unitId, drawings: [{ ...drawing, oleOnlineUnit: online, oleFileName: '预算.xlsx' }] })).toBe(true);
         expect(JSON.parse(JSON.stringify(service.getDrawingByParam(drawing)))).toMatchObject({ oleAttachmentId: 'retained', oleOnlineUnit: online, oleFileName: '预算.xlsx' });
         const history = testBed.get(IUndoRedoService).pitchTopUndoElement()!;

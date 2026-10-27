@@ -31,7 +31,6 @@ export interface IOleDrawing extends IImageData {
 export interface IOleOnlineUnit {
     unitId: string;
     type: UniverInstanceType;
-    url: string;
 }
 
 export function getOleOfficeType(mimeType: string): UniverInstanceType | undefined {
@@ -122,7 +121,9 @@ export type IOleOnlineConversionRequest = Omit<IOlePreviewRequest, 'bytes'> & {
 export interface IOleConfig {
     /** Whether this exact host Unit is backed by the collaboration server. */
     isCollaborative?: (unitId: string) => boolean;
-    /** Explicitly create an independent online Unit and return its application URL. */
+    /** Resolve the current application URL on each Open action; URLs are never persisted. */
+    getLink?: (unitId: string, type: UniverInstanceType) => string;
+    /** Explicitly create an independent online Unit and return its durable identity. */
     convertToOnline?: (request: IOleOnlineConversionRequest) => Promise<IOleOnlineUnit>;
     attachmentIo?: IOleAttachmentIo;
     /** Open a temporary read-only Office preview. The handler must not create a persisted child Unit. */

@@ -67,7 +67,8 @@ function attachmentId(drawing: Nullable<IDrawingParam>): string | undefined {
 
 function onlineUnit(drawing: Nullable<IDrawingParam>): IOleOnlineUnit | undefined {
     const value = drawing as (Partial<IOleDrawing> & { element?: Partial<IOleDrawing> }) | undefined;
-    return value?.oleOnlineUnit ?? value?.element?.oleOnlineUnit;
+    const online = value?.oleOnlineUnit ?? value?.element?.oleOnlineUnit;
+    return online ? { unitId: online.unitId, type: online.type } : undefined;
 }
 
 class OleLinkSaveError extends Error {}
@@ -234,10 +235,11 @@ export class OleUIService extends Disposable {
         const record = resource?.objects[id];
         const file = record?.fileId ? resource?.files[record.fileId] : undefined;
         const available = !!file && !record?.external;
-        const officeType = file ? getOleOfficeType(file.mimeType) : undefined;
         const savedOnline = onlineUnit(this._getDrawing(drawing));
+        const officeType = savedOnline?.type ?? (file ? getOleOfficeType(file.mimeType) : undefined);
         const config = this._oleConfig();
-        const canConvert = available && config.isCollaborative?.(drawing.unitId) === true && !!config.convertToOnline && !!host.saveOnlineUnit && officeType != null;
+        const canConvert = !!config.getLink && config.isCollaborative?.(drawing.unitId) === true &&
+            (!!savedOnline || (available && !!config.convertToOnline && !!host.saveOnlineUnit && officeType != null));
         let statusKey: LocaleKey = 'drawing-ui.ole.attachment';
         if (record?.external) {
             statusKey = 'drawing-ui.ole.external';
@@ -392,12 +394,41 @@ export class OleUIService extends Disposable {
         return promise;
     }
 
-    private _onlineUrl(online: IOleOnlineUnit): string {
-        const url = new URL(online.url, window.location.href);
-        if (!online.unitId || ![UniverInstanceType.UNIVER_SHEET, UniverInstanceType.UNIVER_DOC, UniverInstanceType.UNIVER_SLIDE].includes(online.type) || !['http:', 'https:'].includes(url.protocol)) {
-            throw new Error('Invalid OLE online Unit link');
+    private _onlineReference(online: IOleOnlineUnit): IOleOnlineUnit {
+        if (typeof online?.unitId !== 'string' || !online.unitId.trim() || ![UniverInstanceType.UNIVER_SHEET, UniverInstanceType.UNIVER_DOC, UniverInstanceType.UNIVER_SLIDE].includes(online.type)) {
+            throw new Error('Invalid OLE online Unit reference');
         }
+        return { unitId: online.unitId, type: online.type };
+    }
+
+    private _onlineUrl(online: IOleOnlineUnit): string {
+        const reference = this._onlineReference(online);
+        const link = this._oleConfig().getLink?.(reference.unitId, reference.type);
+        if (typeof link !== 'string' || !link.trim()) throw new Error('Invalid OLE online Unit link');
+        const url = new URL(link, window.location.href);
+        if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Invalid OLE online Unit link');
         return url.href;
+    }
+
+    private _showOnlineComplete(name: string, online: IOleOnlineUnit): void {
+        const openKey: LocaleKey = online.type === UniverInstanceType.UNIVER_SHEET
+            ? 'drawing-ui.ole.openSheet'
+            : online.type === UniverInstanceType.UNIVER_SLIDE ? 'drawing-ui.ole.openSlide' : 'drawing-ui.ole.openDoc';
+        this.disposeWithMe(this._notifications.show({
+            type: 'success',
+            title: this._locale.t<LocaleKey>('drawing-ui.ole.converted'),
+            content: name,
+            position: 'bottom-right',
+            duration: Infinity,
+            action: {
+                label: this._locale.t<LocaleKey>(openKey),
+                onClick: () => {
+                    void this._act(async () => {
+                        window.open(this._onlineUrl(online), '_blank', 'noopener,noreferrer');
+                    });
+                },
+            },
+        }));
     }
 
     private async _convertToOnline(drawing: IDrawingSearch, controller: AbortController): Promise<void> {
@@ -405,7 +436,7 @@ export class OleUIService extends Disposable {
         const current = this._getDrawing(drawing);
         const type = this._instances.getUnit(drawing.unitId)?.type;
         const host = type == null ? undefined : this._hosts.get(type);
-        if (!current || !config.isCollaborative?.(drawing.unitId) || !config.convertToOnline || !host?.saveOnlineUnit) {
+        if (!current || !config.isCollaborative?.(drawing.unitId) || !config.getLink) {
             throw new Error('OLE online conversion requires a collaborative Unit');
         }
         const existing = onlineUnit(current);
@@ -413,6 +444,7 @@ export class OleUIService extends Disposable {
             window.open(this._onlineUrl(existing), '_blank', 'noopener,noreferrer');
             return;
         }
+        if (!config.convertToOnline || !host?.saveOnlineUnit) throw new Error('OLE online conversion is unavailable');
         if (!(host.isEditable?.(drawing) ?? host.drawingService?.getDrawingEditable() ?? this._drawings.getDrawingEditable())) {
             throw new Error('OLE link is read-only');
         }
@@ -448,7 +480,7 @@ export class OleUIService extends Disposable {
                 if (online.type !== officeType) {
                     throw new Error('OLE online Unit type mismatch');
                 }
-                online = { ...online, url: this._onlineUrl(online) };
+                online = this._onlineReference(online);
                 if (!controller.signal.aborted) {
                     this._onlineResults.set(key(drawing), { attachmentId: objectId!, online });
                 }
@@ -468,22 +500,8 @@ export class OleUIService extends Disposable {
             if (controller.signal.aborted || attachmentId(this._getDrawing(drawing)) !== objectId) {
                 return;
             }
-            const openKey: LocaleKey = online.type === UniverInstanceType.UNIVER_SHEET
-                ? 'drawing-ui.ole.openSheet'
-                : online.type === UniverInstanceType.UNIVER_SLIDE ? 'drawing-ui.ole.openSlide' : 'drawing-ui.ole.openDoc';
-            const url = this._onlineUrl(online);
             progress.dispose();
-            this.disposeWithMe(this._notifications.show({
-                type: 'success',
-                title: this._locale.t<LocaleKey>('drawing-ui.ole.converted'),
-                content: this._fileName(drawing),
-                position: 'bottom-right',
-                duration: Infinity,
-                action: {
-                    label: this._locale.t<LocaleKey>(openKey),
-                    onClick: () => { window.open(url, '_blank', 'noopener,noreferrer'); },
-                },
-            }));
+            this._showOnlineComplete(this._fileName(drawing), online);
         } catch (error) {
             if (!controller.signal.aborted) {
                 throw error;

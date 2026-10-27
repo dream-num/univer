@@ -352,13 +352,16 @@ describe('OLE local UI lifecycle', () => {
     });
 });
 
-const online: IOleOnlineUnit = { unitId: 'created-doc', type: UniverInstanceType.UNIVER_DOC, url: 'https://example.test/doc/created-doc' };
+const online: IOleOnlineUnit = { unitId: 'created-doc', type: UniverInstanceType.UNIVER_DOC };
+const onlineUrl = 'https://example.test/doc/created-doc';
 
 function collaborativeHarness(type = UniverInstanceType.UNIVER_SHEET) {
     const h = harness(true, type);
     h.resource.files[sha256].mimeType = 'application/msword';
     h.resource.files[sha256].name = 'original.doc';
     h.config.isCollaborative = vi.fn((unitId) => unitId === 'host');
+    const getLink = vi.fn((_unitId: string, _type: UniverInstanceType) => onlineUrl);
+    h.config.getLink = getLink;
     const convert = vi.fn<NonNullable<IOleConfig['convertToOnline']>>(async () => online);
     h.config.convertToOnline = convert;
     const save = vi.fn(async (_drawing: unknown, value: IOleOnlineUnit) => {
@@ -367,7 +370,7 @@ function collaborativeHarness(type = UniverInstanceType.UNIVER_SHEET) {
     });
     h.service.registerHost(type, { attach: h.attach, remove: h.remove, saveOnlineUnit: save });
     const open = vi.spyOn(window, 'open').mockReturnValue(null);
-    return { ...h, convert, save, open };
+    return { ...h, convert, save, open, getLink };
 }
 
 describe('explicit collaborative OLE conversion', () => {
@@ -399,6 +402,8 @@ describe('explicit collaborative OLE conversion', () => {
         expect(h.convert).toHaveBeenCalledWith(expect.objectContaining({ fileId: 'stable-file', unitId: 'host' }));
         expect(h.convert.mock.calls[0][0]).not.toHaveProperty('bytes');
         expect(h.save).toHaveBeenCalledWith(h.drawing, online);
+        expect(h.drawing.oleOnlineUnit).not.toHaveProperty('url');
+        expect(h.getLink).not.toHaveBeenCalled();
         expect(h.open).not.toHaveBeenCalled();
         expect(h.notifications.show).toHaveBeenLastCalledWith(expect.objectContaining({
             type: 'success',
@@ -410,7 +415,7 @@ describe('explicit collaborative OLE conversion', () => {
         await h.service.convertToOnline(h.drawing);
         expect(h.convert).toHaveBeenCalledOnce();
         expect(h.io.read).not.toHaveBeenCalled();
-        expect(h.open).toHaveBeenLastCalledWith(online.url, '_blank', 'noopener,noreferrer');
+        expect(h.open).toHaveBeenLastCalledWith(onlineUrl, '_blank', 'noopener,noreferrer');
         expect(h.attach.mock.lastCall?.[2].hasOnlineUnit).toBe(true);
     });
 
@@ -435,11 +440,30 @@ describe('explicit collaborative OLE conversion', () => {
         expect(h.open).not.toHaveBeenCalled();
         const action = h.notifications.show.mock.calls.at(-1)![0].action;
         if (!action || typeof action !== 'object' || !('onClick' in action)) throw new Error('Missing Open action');
+        h.config.getLink = vi.fn(() => 'https://new-domain.test/new-route/created-doc');
         action.onClick({} as never);
         expect(h.open).toHaveBeenCalledOnce();
-        expect(h.open).toHaveBeenCalledWith(online.url, '_blank', 'noopener,noreferrer');
+        expect(h.open).toHaveBeenCalledWith('https://new-domain.test/new-route/created-doc', '_blank', 'noopener,noreferrer');
         h.injector.dispose();
         expect(h.notifications.show.mock.results.at(-1)!.value.dispose).toHaveBeenCalledOnce();
+    });
+
+    it('reports a failed completion Open and allows a corrected resolver without reconverting', async () => {
+        const h = collaborativeHarness();
+        await h.service.convertToOnline(h.drawing);
+        const action = h.notifications.show.mock.calls.at(-1)![0].action;
+        if (!action || typeof action !== 'object' || !('onClick' in action)) throw new Error('Missing Open action');
+        h.config.getLink = () => {
+            throw new Error('Application route unavailable');
+        };
+        action.onClick({} as never);
+        await vi.waitFor(() => expect(h.messages.show).toHaveBeenCalledWith(expect.objectContaining({ content: 'drawing-ui.ole.failed' })));
+        expect(h.open).not.toHaveBeenCalled();
+        h.config.getLink = () => onlineUrl;
+        action.onClick({} as never);
+        expect(h.open).toHaveBeenCalledWith(onlineUrl, '_blank', 'noopener,noreferrer');
+        expect(h.convert).toHaveBeenCalledOnce();
+        expect(h.drawing.oleOnlineUnit).toEqual(online);
     });
 
     it('also keeps inline attachment conversion on the source page', async () => {
@@ -491,7 +515,7 @@ describe('explicit collaborative OLE conversion', () => {
         expect(h.open).not.toHaveBeenCalled();
         h.drawing.oleOnlineUnit = online;
         await h.service.convertToOnline(h.drawing);
-        expect(h.open).toHaveBeenCalledWith(online.url, '_blank', 'noopener,noreferrer');
+        expect(h.open).toHaveBeenCalledWith(onlineUrl, '_blank', 'noopener,noreferrer');
     });
 
     it('retains a conversion result but does not save its link after edit permission is revoked', async () => {
@@ -553,15 +577,64 @@ describe('explicit collaborative OLE conversion', () => {
         expect(h.save).toHaveBeenCalledOnce();
     });
 
-    it('keeps failed imports and unsafe links out of the drawing snapshot', async () => {
+    it('keeps failed imports and invalid Unit identities out of the drawing snapshot', async () => {
         const h = collaborativeHarness();
         h.convert.mockRejectedValueOnce(new Error('import failed'));
         await expect(h.service.convertToOnline(h.drawing)).rejects.toThrow('import failed');
-        h.convert.mockResolvedValueOnce({ ...online, url: 'javascript:alert(1)' });
+        h.convert.mockResolvedValueOnce({ ...online, unitId: '' });
         await expect(h.service.convertToOnline(h.drawing)).rejects.toThrow('Invalid');
         expect(h.save).not.toHaveBeenCalled();
         expect(h.drawing.oleOnlineUnit).toBeUndefined();
         expect(h.open).not.toHaveBeenCalled();
         expect(h.notifications.show).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'success' }));
+    });
+
+    it('ignores a legacy stored URL and resolves each Open with the current application config', async () => {
+        const h = collaborativeHarness();
+        const legacy = { ...online, url: 'javascript:alert(1)' };
+        h.drawing.oleOnlineUnit = legacy;
+        h.config.convertToOnline = undefined;
+        h.enter$.next();
+        expect(h.attach.mock.lastCall?.[2]).toMatchObject({ showConvert: true, hasOnlineUnit: true });
+        await h.service.convertToOnline(h.drawing);
+        expect(h.open).toHaveBeenLastCalledWith(onlineUrl, '_blank', 'noopener,noreferrer');
+        h.config.getLink = () => '/new-route/created-doc';
+        await h.service.convertToOnline(h.drawing);
+        expect(h.open).toHaveBeenLastCalledWith(new URL('/new-route/created-doc', window.location.href).href, '_blank', 'noopener,noreferrer');
+        expect(h.convert).not.toHaveBeenCalled();
+        expect(h.save).not.toHaveBeenCalled();
+        expect(h.drawing.oleOnlineUnit).toBe(legacy);
+    });
+
+    it('strips legacy adapter URL fields before saving a new online reference', async () => {
+        const h = collaborativeHarness();
+        const legacy = { ...online, url: 'https://obsolete.test/old-route' };
+        h.convert.mockResolvedValueOnce(legacy);
+        await h.service.convertToOnline(h.drawing);
+        expect(h.save).toHaveBeenCalledWith(h.drawing, { unitId: 'created-doc', type: UniverInstanceType.UNIVER_DOC });
+        expect(h.drawing.oleOnlineUnit).not.toHaveProperty('url');
+        expect(h.getLink).not.toHaveBeenCalled();
+    });
+
+    it('hides conversion without a resolver and never falls back to a legacy URL', async () => {
+        const h = collaborativeHarness();
+        h.config.getLink = undefined;
+        h.enter$.next();
+        expect(h.attach.mock.lastCall?.[2].showConvert).toBe(false);
+        await expect(h.service.convertToOnline(h.drawing)).rejects.toThrow();
+        const legacy = { ...online, url: onlineUrl };
+        h.drawing.oleOnlineUnit = legacy;
+        await expect(h.service.convertToOnline(h.drawing)).rejects.toThrow();
+        expect(h.convert).not.toHaveBeenCalled();
+        expect(h.open).not.toHaveBeenCalled();
+    });
+
+    it.each(['javascript:alert(1)', 'data:text/html,unsafe', ''])('rejects unsafe or empty resolved URLs on Open (%s)', async (url) => {
+        const h = collaborativeHarness();
+        h.drawing.oleOnlineUnit = online;
+        h.config.getLink = () => url;
+        await expect(h.service.convertToOnline(h.drawing)).rejects.toThrow('Invalid');
+        expect(h.open).not.toHaveBeenCalled();
+        expect(h.convert).not.toHaveBeenCalled();
     });
 });

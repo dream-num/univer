@@ -14,14 +14,27 @@
  * limitations under the License.
  */
 
-import { afterEach, describe, expect, it, vi } from 'vitest';
-
+import { DesktopLogService, ILogService, Injector, LogLevel } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { HTTPHeaders } from '../../headers';
 import { HTTPRequest } from '../../request';
 import { FetchHTTPImplementation } from '../fetch';
+import { IHTTPImplementation } from '../implementation';
+
+let injector: Injector;
+
+beforeEach(() => {
+    injector = new Injector([
+        [ILogService, { useClass: DesktopLogService }],
+        [IHTTPImplementation, { useClass: FetchHTTPImplementation }],
+    ]);
+    injector.get(ILogService).setLogLevel(LogLevel.SILENT);
+});
 
 afterEach(() => {
+    injector.dispose();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
 });
 
 describe('FetchHTTPImplementation', () => {
@@ -50,7 +63,7 @@ describe('FetchHTTPImplementation', () => {
             },
         })));
 
-        const impl = new FetchHTTPImplementation({ debug: vi.fn(), error: vi.fn() } as any);
+        const impl = injector.get(IHTTPImplementation);
         const req = new HTTPRequest('GET', 'https://example.com', {
             responseType: 'json',
             headers: new HTTPHeaders(),
@@ -82,7 +95,7 @@ describe('FetchHTTPImplementation', () => {
             headers: { 'content-type': 'text/plain', 'content-length': '2' },
         })));
 
-        const impl = new FetchHTTPImplementation({ debug: vi.fn(), error: vi.fn() } as any);
+        const impl = injector.get(IHTTPImplementation);
         const req = new HTTPRequest('GET', 'https://example.com', {
             responseType: 'text',
             reportProgress: true,
@@ -104,7 +117,7 @@ describe('FetchHTTPImplementation', () => {
     });
 
     it('should deserialize text, blob, and arraybuffer bodies', async () => {
-        const impl = new FetchHTTPImplementation({ debug: vi.fn(), error: vi.fn() } as any);
+        const impl = injector.get(IHTTPImplementation);
 
         vi.stubGlobal('fetch', vi.fn(async () => new Response('plain', {
             status: 200,
@@ -137,7 +150,7 @@ describe('FetchHTTPImplementation', () => {
     it('should emit a null body when the response has no stream', async () => {
         vi.stubGlobal('fetch', vi.fn(async () => new Response(null, { status: 204, statusText: 'No Content' })));
 
-        const impl = new FetchHTTPImplementation({ debug: vi.fn(), error: vi.fn() } as any);
+        const impl = injector.get(IHTTPImplementation);
 
         await expect(new Promise<any>((resolve, reject) => {
             impl.send(createRequest('json')).subscribe({ next: resolve, error: reject });
@@ -145,8 +158,8 @@ describe('FetchHTTPImplementation', () => {
     });
 
     it('should emit HTTPResponseError for failed status, bad JSON, unknown response type, and fetch rejection', async () => {
-        const logService = { debug: vi.fn(), error: vi.fn() };
-        const impl = new FetchHTTPImplementation(logService as any);
+        const logError = vi.spyOn(injector.get(ILogService), 'error');
+        const impl = injector.get(IHTTPImplementation);
 
         vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ message: 'bad' }), {
             status: 500,
@@ -155,7 +168,7 @@ describe('FetchHTTPImplementation', () => {
         })));
         await expect(new Promise((resolve, reject) => {
             impl.send(createRequest('json')).subscribe({ next: resolve, error: reject });
-        })).rejects.toMatchObject({ status: 500, statusText: 'Server Error' });
+        })).rejects.toMatchObject({ status: 500, statusText: 'Server Error', error: { message: 'bad' } });
 
         vi.stubGlobal('fetch', vi.fn(async () => new Response('{bad', {
             status: 200,
@@ -164,7 +177,7 @@ describe('FetchHTTPImplementation', () => {
         })));
         await expect(new Promise((resolve, reject) => {
             impl.send(createRequest('json')).subscribe({ next: resolve, error: reject });
-        })).rejects.toMatchObject({ status: 200, statusText: 'OK' });
+        })).rejects.toMatchObject({ status: 200, statusText: 'OK', error: expect.any(SyntaxError) });
 
         vi.stubGlobal('fetch', vi.fn(async () => new Response('body', {
             status: 200,
@@ -172,15 +185,15 @@ describe('FetchHTTPImplementation', () => {
         })));
         await expect(new Promise((resolve, reject) => {
             impl.send(createRequest('document')).subscribe({ next: resolve, error: reject });
-        })).rejects.toMatchObject({ status: 200, statusText: 'OK' });
+        })).rejects.toMatchObject({ status: 200, statusText: 'OK', error: expect.any(Error) });
 
         vi.stubGlobal('fetch', vi.fn(async () => {
             throw Object.assign(new Error('offline'), { status: 0, statusText: 'Offline' });
         }));
         await expect(new Promise((resolve, reject) => {
             impl.send(createRequest('json')).subscribe({ next: resolve, error: reject });
-        })).rejects.toMatchObject({ status: 0, statusText: 'Offline' });
-        expect(logService.error).toHaveBeenCalled();
+        })).rejects.toMatchObject({ status: 0, statusText: 'Offline', error: expect.objectContaining({ message: 'offline' }) });
+        expect(logError).toHaveBeenCalled();
     });
 
     it('should abort the fetch request when unsubscribed', () => {
@@ -190,7 +203,7 @@ describe('FetchHTTPImplementation', () => {
             return new Promise(() => {});
         }));
 
-        const impl = new FetchHTTPImplementation({ debug: vi.fn(), error: vi.fn() } as any);
+        const impl = injector.get(IHTTPImplementation);
         const subscription = impl.send(createRequest('json')).subscribe();
 
         expect(capturedSignal?.aborted).toBe(false);

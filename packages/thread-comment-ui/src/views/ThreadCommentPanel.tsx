@@ -17,15 +17,15 @@
 import type { Nullable } from '@univerjs/core';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import type { Observable } from 'rxjs';
-import type { LocaleKey } from '../locale/types';
-import type { ThreadCommentPanelSection } from './thread-comment-panel/util';
-import type { IThreadCommentTreeProps } from './ThreadCommentTree';
 import { ICommandService, LocaleService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { ActionRow, Button, Select } from '@univerjs/design';
 import { IncreaseIcon } from '@univerjs/icons';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { LocaleKey } from '../locale/types';
+import type { ThreadCommentPanelSection } from './thread-comment-panel/util';
+import type { IThreadCommentTreeProps } from './ThreadCommentTree';
 import { SetActiveCommentOperation } from '../commands/operations/comment.operations';
 import { ThreadCommentPanelService } from '../services/thread-comment-panel.service';
 import { getThreadCommentPanelItemKey, isSameThreadCommentTarget, shouldClearThreadCommentTarget } from './thread-comment-panel/util';
@@ -181,11 +181,14 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                 return;
             }
 
-            const activeElement = document.getElementById(
-                `${location}-${activeComment.unitId}-${activeComment.subUnitId}-${activeComment.commentId}`
-            );
+            const isInsideActiveComment = Object.values(ThreadCommentTreeLocation).some((commentLocation) => {
+                const activeElement = document.getElementById(
+                    `${commentLocation}-${activeComment.unitId}-${activeComment.subUnitId}-${activeComment.commentId}`
+                );
+                return activeElement?.contains(target);
+            });
             if (
-                activeElement?.contains(target) ||
+                isInsideActiveComment ||
                 target.closest('button, input, textarea, select, a, [contenteditable="true"], [role="menu"], [role="menuitem"], [role="option"], [role="listbox"], [role="combobox"], [role="separator"]')
             ) {
                 return;
@@ -199,7 +202,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
 
         document.addEventListener('pointerdown', handlePointerDown, true);
         return () => document.removeEventListener('pointerdown', handlePointerDown, true);
-    }, [activeCommentId, commandService, location, onTempCommentClose, panelService, scopedTempComment]);
+    }, [activeCommentId, commandService, onTempCommentClose, panelService, scopedTempComment]);
 
     useEffect(() => {
         if (!activeCommentId) {

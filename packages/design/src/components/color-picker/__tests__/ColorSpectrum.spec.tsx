@@ -24,7 +24,7 @@ afterEach(() => {
     cleanup();
 });
 
-describe('ColorSpectrum extra', () => {
+describe('ColorSpectrum', () => {
     beforeEach(() => {
         vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(() => {
             const gradient = { addColorStop: vi.fn() };
@@ -65,6 +65,17 @@ describe('ColorSpectrum extra', () => {
 
         expect(onChange).toHaveBeenCalled();
         expect(onChanged).toHaveBeenCalledWith(120, 20, 80);
+    });
+
+    it('renders the zero-saturation edge as white at maximum value', () => {
+        const addColorStop = vi.fn();
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+            createLinearGradient: () => ({ addColorStop }),
+            fillRect: vi.fn(),
+            fillStyle: '',
+        } as unknown as CanvasRenderingContext2D);
+        render(<ColorSpectrum hsv={[120, 0, 100]} onChange={vi.fn()} />);
+        expect(addColorStop).toHaveBeenCalledWith(0, '#ffffff');
     });
 
     it('positions the initial indicator from hsv without waiting for container measurements', () => {

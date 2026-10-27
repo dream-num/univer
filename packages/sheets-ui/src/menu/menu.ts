@@ -16,7 +16,6 @@
 
 import type { IAccessor, IColorStyle, IStyleData, Nullable, Workbook } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import type { LocaleKey } from '../locale/types';
 import {
     BooleanNumber,
     composeStyles,
@@ -83,7 +82,7 @@ import {
     MenuItemType,
 } from '@univerjs/ui';
 import { combineLatest, combineLatestWith, map, Observable, startWith } from 'rxjs';
-
+import type { LocaleKey } from '../locale/types';
 import {
     SheetCopyCommand,
     SheetCutCommand,
@@ -1298,7 +1297,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
 
-    const min = 2;
+    const min = 0;
 
     return {
         id: SetRowHeightCommand.id,
@@ -1343,7 +1342,7 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
 
-    const min = 2;
+    const min = 0;
 
     return {
         id: SetColWidthCommand.id,

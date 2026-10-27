@@ -30,6 +30,12 @@ import { UniverDrawingPlugin } from '@univerjs/drawing';
 univer.registerPlugin(UniverDrawingPlugin);
 ```
 
+## OLE online references
+
+An OLE drawing retains its `oleAttachmentId`, which identifies the original attachment's resource record. After explicit online conversion, `oleOnlineUnit` stores only the new Unit's `unitId` and `type`; it does not store a URL or embed the converted Unit's snapshot.
+
+Configure `ole.getLink(unitId, type)` to resolve the application's current URL when the user opens the online Unit. The optional `@univerjs-pro/ole-exchange-client` integration supplies this callback through its plugin configuration. Legacy stored `url` fields remain unchanged and are ignored when opening.
+
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

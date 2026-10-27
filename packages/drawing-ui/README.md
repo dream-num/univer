@@ -36,9 +36,11 @@ univer.registerPlugin(UniverDrawingUIPlugin);
 
 ## OLE online conversion
 
-For collaborative Sheets, Docs and Slides, the host can enable explicit OLE conversion through `ole.convertToOnline` and its normal drawing mutation commands. Conversion keeps stage progress on the source page. After the new Unit's link is saved on the original drawing, a persistent completion notification offers an Open action. A new tab opens only when the user clicks Open, either in that notification or in the drawing toolbar. The original attachment is retained.
+For collaborative Sheets, Docs and Slides, the host can enable explicit OLE conversion through `ole.convertToOnline` and `ole.getLink`. Conversion keeps stage progress on the source page. The host's normal drawing mutation commands save only `{ unitId, type }` on the original drawing. After that reference is saved, a persistent completion notification offers an Open action. A new tab opens only when the user clicks Open, either in that notification or in the drawing toolbar. The original attachment is retained.
 
-Keep the source page open until link saving completes. Closing the host stops local polling and progress UI; it does not delete an online Unit already created by the server. Applications own durable task recovery. A failed link save can be retried in the same session without converting the attachment again.
+`ole.getLink(unitId, type)` synchronously resolves a relative or absolute HTTP(S) URL on every Open action, including the completion notification. It is not called during conversion. There is no default application route; without this callback, online actions stay hidden while preview and download remain available. Legacy stored `url` fields are ignored, so changing the configured domain or route does not require rewriting existing online references.
+
+Keep the source page open until reference saving completes. Closing the host stops local polling and progress UI; it does not delete an online Unit already created by the server. Applications own durable task recovery. A failed reference save can be retried in the same session without converting the attachment again.
 
 ## Resources
 

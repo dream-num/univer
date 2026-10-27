@@ -55,7 +55,8 @@ export function createOlePreviewViewer(options: IOlePreviewViewerOptions): IDisp
         viewer.registerPlugin(UniverRenderEnginePlugin);
         viewer.registerPlugin(UniverUIPlugin, { container: options.container, portalContainer: options.container, header: false, toolbar: false, footer: false, contextMenu: false });
         const drawing = options.config.getConfig<IUniverDrawingConfig>('drawing.config');
-        viewer.registerPlugin(UniverDrawingPlugin, { ...drawing, ole: { ...drawing?.ole, isCollaborative: () => false, convertToOnline: undefined } });
+        // The standalone viewer owns its providers; source collaboration overrides require services absent here.
+        viewer.registerPlugin(UniverDrawingPlugin, { ...drawing, override: undefined, ole: { ...drawing?.ole, isCollaborative: () => false, convertToOnline: undefined } });
         options.register(viewer);
         const unit = viewer.createUnit(options.type, options.data);
         const injector = viewer.__getInjector();

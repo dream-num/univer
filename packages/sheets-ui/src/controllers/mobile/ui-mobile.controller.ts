@@ -30,7 +30,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DeleteLeftCommand, DeleteRightCommand, DocSelectionRenderService, EnterCommand, IEditorService } from '@univerjs/docs-ui';
-import { DeviceInputEventType, getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
+import { getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
 import {
     SetBoldCommand,
     SetFontFamilyCommand,
@@ -363,7 +363,6 @@ export class SheetUIMobileController extends Disposable {
         const visualViewport = window.visualViewport;
         let stableHeight = Math.round(window.innerHeight);
         let stableWidth = Math.round(window.innerWidth);
-        let keyboardWasVisible = false;
 
         const update = () => {
             const width = Math.round(window.innerWidth);
@@ -380,25 +379,6 @@ export class SheetUIMobileController extends Disposable {
 
             const keyboardVisible = isMobileKeyboardVisible(stableHeight, visibleBottom);
             this._contextService.setContextValue(MOBILE_KEYBOARD_VISIBLE, keyboardVisible);
-
-            if (shouldHideMobileEditorOnKeyboardClose(
-                keyboardWasVisible &&
-                !keyboardVisible,
-                this._contextService.getContextValue(MOBILE_FX_EDITOR_EXPANDED),
-                this._contextService.getContextValue(MOBILE_FORMULA_FUNCTION_PANEL_OPEN),
-                this._editorBridgeService.isForceKeepVisible()
-            )) {
-                const visibleState = this._editorBridgeService.isVisible();
-                if (visibleState.visible) {
-                    this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
-                        ...visibleState,
-                        visible: false,
-                        eventType: DeviceInputEventType.PointerDown,
-                    });
-                }
-            }
-
-            keyboardWasVisible = keyboardVisible;
         };
 
         update();
@@ -444,13 +424,4 @@ export class SheetUIMobileController extends Disposable {
 
 export function isMobileKeyboardVisible(stableHeight: number, visibleBottom: number): boolean {
     return stableHeight - visibleBottom > 80;
-}
-
-export function shouldHideMobileEditorOnKeyboardClose(
-    keyboardClosed: boolean,
-    editorExpanded: boolean,
-    functionPanelOpen: boolean,
-    forceKeepVisible: boolean
-): boolean {
-    return keyboardClosed && !editorExpanded && !functionPanelOpen && !forceKeepVisible;
 }

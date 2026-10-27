@@ -1,7 +1,6 @@
 import type { Plugin, PluginCtor } from '@univerjs/core';
-import type { MountExample } from '../mount-example';
-import type { IWorkbenchMountOptions } from '../workbench-settings';
 import { LocaleType } from '@univerjs/core';
+import { UniverDocsMobileUIPlugin } from '@univerjs/docs-ui';
 import { UniverSheetsConditionalFormattingMobileUIPlugin, UniverSheetsConditionalFormattingPreset } from '@univerjs/preset-sheets-conditional-formatting';
 import {
     UniverSheetsCorePreset,
@@ -19,9 +18,10 @@ import { UniverSheetsSortMobileUIPlugin, UniverSheetsSortPreset } from '@univerj
 import { UniverSheetsTableMobileUIPlugin, UniverSheetsTablePreset } from '@univerjs/preset-sheets-table';
 import { UniverSheetsThreadCommentMobileUIPlugin, UniverSheetsThreadCommentPreset, UniverThreadCommentMobileUIPlugin } from '@univerjs/preset-sheets-thread-comment';
 import { createUniver } from '@univerjs/presets';
-
 import { UniverMobileUIPlugin, UniverUIPlugin } from '@univerjs/ui';
 import { loadSheetLocale } from 'virtual:univer-examples-sheet-locale';
+import type { MountExample } from '../mount-example';
+import type { IWorkbenchMountOptions } from '../workbench-settings';
 import { applyWorkbenchUIChrome, createMountedUniver, replacePresetPlugins } from '../mount-example';
 import { getEffectiveWorkbenchRegion } from '../workbench-settings';
 import { applyWorkbookZoom } from './apply-workbook-zoom';
@@ -51,6 +51,7 @@ const UNIVER_LOCALES = {
 } satisfies Record<IWorkbenchMountOptions['locale'], LocaleType>;
 
 const MOBILE_PLUGINS = new Map<string, PluginCtor<Plugin>>([
+    UniverDocsMobileUIPlugin,
     UniverSheetsMobileUIPlugin,
     UniverSheetsFormulaMobileUIPlugin,
     UniverSheetsNumfmtMobileUIPlugin,

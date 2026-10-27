@@ -40,7 +40,7 @@ import {
     transformCellsToRange,
 } from '../mutations/numfmt.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
-import { getSheetGridCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ITextToNumberCommandParams extends Partial<ISheetCommandSharedParams> {
     ranges?: IRange[];
@@ -56,7 +56,7 @@ export const TextToNumberCommand: ICommand = {
 
     // eslint-disable-next-line max-lines-per-function, complexity
     handler: (accessor: IAccessor, params: ITextToNumberCommandParams) => {
-        const target = getSheetGridCommandTarget(accessor.get(IUniverInstanceService), params);
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
 
         const ranges = params?.ranges || accessor.get(SheetsSelectionsService).getCurrentSelections()?.map((s) => s.range);

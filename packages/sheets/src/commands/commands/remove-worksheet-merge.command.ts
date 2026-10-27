@@ -31,8 +31,8 @@ import type {
 } from '../../basics/interfaces/mutation-interface';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import type { ISheetCommandSharedParams } from '../utils/interface';
+import { SelectionMoveType } from '../../services/selections';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
-import { SelectionMoveType } from '../../services/selections/type';
 import { AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import {
     RemoveMergeUndoMutationFactory,
@@ -40,7 +40,7 @@ import {
 } from '../mutations/remove-worksheet-merge.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
-import { getSheetGridCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IRemoveWorksheetMergeCommandParams extends ISheetCommandSharedParams {
     ranges?: IRange[];
@@ -58,7 +58,7 @@ export const RemoveWorksheetMergeCommand: ICommand = {
         const selections = params?.ranges || selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!selections?.length) return false;
 
-        const target = getSheetGridCommandTarget(accessor.get(IUniverInstanceService), params);
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
 
         const { subUnitId, unitId, worksheet } = target;

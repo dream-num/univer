@@ -18,7 +18,7 @@ import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import type { ISetFrozenMutationParams } from '../mutations/set-frozen.mutation';
 import { SetFrozenMutation, SetFrozenMutationFactory } from '../mutations/set-frozen.mutation';
-import { getSheetGridCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ISetFrozenCommandParams {
     startRow: number;
@@ -37,7 +37,7 @@ export const SetFrozenCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetGridCommandTarget(univerInstanceService, { unitId: params.unitId, subUnitId: params.subUnitId });
+        const target = getSheetCommandTarget(univerInstanceService, { unitId: params.unitId, subUnitId: params.subUnitId });
         if (!target) return false;
 
         const { unitId, subUnitId, worksheet } = target;
@@ -90,7 +90,7 @@ export const CancelFrozenCommand: ICommand<ICancelFrozenCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const target = getSheetGridCommandTarget(univerInstanceService, { unitId: params?.unitId, subUnitId: params?.subUnitId });
+        const target = getSheetCommandTarget(univerInstanceService, { unitId: params?.unitId, subUnitId: params?.subUnitId });
         if (!target) return false;
 
         const { unitId, subUnitId } = target;

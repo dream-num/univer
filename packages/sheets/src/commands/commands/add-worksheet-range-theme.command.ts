@@ -19,7 +19,6 @@ import {
     CommandType,
     ICommandService,
     IUndoRedoService,
-    IUniverInstanceService,
 } from '@univerjs/core';
 import type { IWorksheetRangeThemeStyleMutationParams } from '../../basics/interfaces/mutation-interface';
 import {
@@ -27,15 +26,11 @@ import {
     SetWorksheetRangeThemeStyleMutationFactory,
 } from '../mutations/add-worksheet-range-theme.mutation';
 import { DeleteWorksheetRangeThemeStyleMutation } from '../mutations/delete-worksheet-range-theme.mutation';
-import { getSheetGridCommandTarget } from './utils/target-util';
 
 export const SetWorksheetRangeThemeStyleCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-worksheet-range-theme-style',
     handler: (accessor: IAccessor, params: IWorksheetRangeThemeStyleMutationParams) => {
-        if (!getSheetGridCommandTarget(accessor.get(IUniverInstanceService), params)) {
-            return false;
-        }
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 

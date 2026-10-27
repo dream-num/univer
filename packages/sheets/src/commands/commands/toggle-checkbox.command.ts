@@ -23,7 +23,6 @@ import {
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
-    SheetTypes,
     TextX,
     Tools,
     UniverInstanceType,
@@ -52,7 +51,7 @@ export const ToggleCellCheckboxCommand: ICommand<IToggleCellCheckboxCommandParam
         const sheet = workbook?.getSheetBySheetId(subUnitId);
         const undoRedoService = accessor.get(IUndoRedoService);
         const commandService = accessor.get(ICommandService);
-        if (!sheet || sheet.getConfig().type === SheetTypes.CHART) {
+        if (!sheet) {
             return false;
         }
         const cell = sheet.getCell(row, col);

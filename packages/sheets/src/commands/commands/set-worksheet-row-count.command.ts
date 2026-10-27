@@ -26,7 +26,7 @@ import {
     SetWorksheetRowCountMutation,
     SetWorksheetRowCountUndoMutationFactory,
 } from '../mutations/set-worksheet-row-count.mutation';
-import { getSheetGridCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export const SetWorksheetRowCountCommand: ICommand = {
     type: CommandType.COMMAND,
@@ -39,7 +39,7 @@ export const SetWorksheetRowCountCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetGridCommandTarget(univerInstanceService, params);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const redoMutationParams: ISetWorksheetRowCountMutationParams = {

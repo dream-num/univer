@@ -26,7 +26,7 @@ import {
     SetWorksheetColumnCountMutation,
     SetWorksheetColumnCountUndoMutationFactory,
 } from '../mutations/set-worksheet-column-count.mutation';
-import { getSheetGridCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export const SetWorksheetColumnCountCommand: ICommand = {
     type: CommandType.COMMAND,
@@ -39,7 +39,7 @@ export const SetWorksheetColumnCountCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetGridCommandTarget(univerInstanceService, params);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const redoMutationParams: ISetWorksheetColumnCountMutationParams = {

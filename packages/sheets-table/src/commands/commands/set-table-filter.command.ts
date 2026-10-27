@@ -15,16 +15,7 @@
  */
 
 import type { ICommand, IMutationInfo } from '@univerjs/core';
-import {
-    CommandType,
-    generateRandomId,
-    ICommandService,
-    IUndoRedoService,
-    IUniverInstanceService,
-    sequenceExecute,
-    SheetTypes,
-} from '@univerjs/core';
-import { getSheetCommandTarget } from '@univerjs/sheets';
+import { CommandType, generateRandomId, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
 import type { ISetSheetTableParams } from '../mutations/set-table-filter.mutation';
 import { cloneTableRecordFilter } from '../../models/filter-util/record-filter';
 import { TableManager } from '../../models/table-manager';
@@ -42,18 +33,7 @@ export const SetSheetTableFilterCommand: ICommand<ISetSheetTableParams> = {
         const commandService = accessor.get(ICommandService);
         const tableManager = accessor.get(TableManager);
         const tableId = params.tableId || generateRandomId();
-        const table = tableManager.getTable(params.unitId, tableId);
-        if (!table) {
-            return false;
-        }
-        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), {
-            unitId: params.unitId,
-            subUnitId: table.getSubunitId(),
-        });
-        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
-            return false;
-        }
-        const tableFilters = table.getTableFilters();
+        const tableFilters = tableManager.getTable(params.unitId, tableId)?.getTableFilters();
         const previousFilter = tableFilters?.getColumnFilter(params.column);
         const previousFilterOutRows = [...(tableFilters?.getFilterOutRows() ?? [])];
         const tableFilter = params.tableFilter?.filterType === TableColumnFilterTypeEnum.record

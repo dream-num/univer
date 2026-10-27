@@ -24,7 +24,7 @@ import {
 } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '../utils/interface';
 import { SetRangeValuesMutation } from '../mutations/set-range-values.mutation';
-import { getSheetGridCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './utils/target-util';
 
 interface ICustomMetadata {
     custom: CustomData;
@@ -43,7 +43,7 @@ export const SetRangeCustomMetadataCommand: ICommand = {
     type: CommandType.COMMAND,
 
     handler: (accessor: IAccessor, params: ISetRangeCustomMetadataCommandParams) => {
-        const target = getSheetGridCommandTarget(accessor.get(IUniverInstanceService), params);
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
 
         const commandService = accessor.get(ICommandService);

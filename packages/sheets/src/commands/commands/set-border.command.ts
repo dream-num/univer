@@ -39,7 +39,7 @@ import type { IResult } from './utils/target-util';
 import { BorderStyleManagerService } from '../../services/border-style-manager.service';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
-import { getSheetGridCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './utils/target-util';
 
 function forEach(range: IRange, action: (row: number, column: number) => void): void {
     const { startRow, startColumn, endRow, endColumn } = range;
@@ -549,7 +549,7 @@ export const SetBorderCommand: ICommand = {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const borderStyleManagerService = accessor.get(BorderStyleManagerService);
 
-        const target = getSheetGridCommandTarget(univerInstanceService, params);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const ranges = params?.ranges || selectionManagerService.getCurrentSelections()?.map((s) => s.range);
@@ -598,9 +598,6 @@ export const SetBorderPositionCommand: ICommand<ISetBorderPositionCommandParams>
     id: 'sheet.command.set-border-position',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params: ISetBorderPositionCommandParams) => {
-        if (!getSheetGridCommandTarget(accessor.get(IUniverInstanceService))) {
-            return false;
-        }
         if (!params.value) return false;
         const commandService = accessor.get(ICommandService);
         const borderManager = accessor.get(BorderStyleManagerService);
@@ -613,9 +610,6 @@ export const SetBorderStyleCommand: ICommand = {
     id: 'sheet.command.set-border-style',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params: ISetBorderStyleCommandParams) => {
-        if (!getSheetGridCommandTarget(accessor.get(IUniverInstanceService))) {
-            return false;
-        }
         const commandService = accessor.get(ICommandService);
         const borderManager = accessor.get(BorderStyleManagerService);
         borderManager.setStyle(params.value);
@@ -627,9 +621,6 @@ export const SetBorderColorCommand: ICommand<ISetBorderColorCommandParams> = {
     id: 'sheet.command.set-border-color',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params: ISetBorderColorCommandParams) => {
-        if (!getSheetGridCommandTarget(accessor.get(IUniverInstanceService))) {
-            return false;
-        }
         const commandService = accessor.get(ICommandService);
         const borderManager = accessor.get(BorderStyleManagerService);
         borderManager.setColor(params.value);
@@ -641,9 +632,6 @@ export const SetBorderBasicCommand: ICommand<ISetBorderBasicCommandParams> = {
     id: 'sheet.command.set-border-basic',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params: ISetBorderBasicCommandParams) => {
-        if (!getSheetGridCommandTarget(accessor.get(IUniverInstanceService), params)) {
-            return false;
-        }
         const { unitId, subUnitId, value, ranges } = params;
         const { type, color, style } = value;
 

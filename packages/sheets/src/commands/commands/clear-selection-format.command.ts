@@ -29,7 +29,7 @@ import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-
 import { SheetSkeletonService } from '../../skeleton/skeleton.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { getSuitableRangesInView } from './util';
-import { getSheetGridCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IClearSelectionFormatCommandParams {
     unitId?: string;
@@ -46,7 +46,7 @@ export const ClearSelectionFormatCommand: ICommand<IClearSelectionFormatCommandP
     type: CommandType.COMMAND,
 
     handler: (accessor, params) => {
-        const target = getSheetGridCommandTarget(accessor.get(IUniverInstanceService), { unitId: params?.unitId, subUnitId: params?.subUnitId });
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), { unitId: params?.unitId, subUnitId: params?.subUnitId });
         if (!target) return false;
 
         const selectionManagerService = accessor.get(SheetsSelectionsService);

@@ -24,7 +24,6 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     sequenceExecute,
-    SheetTypes,
 } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import {
@@ -88,7 +87,7 @@ export const SheetTableInsertRowCommand: ICommand<ISheetTableRowColOperationComm
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService);
 
-        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
+        if (!target) {
             return false;
         }
 
@@ -272,7 +271,7 @@ export const SheetTableInsertRowAtCommand: ICommand<ISheetTableInsertAtCommandPa
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId });
-        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
+        if (!target) {
             return false;
         }
 
@@ -372,7 +371,7 @@ export const SheetTableInsertColCommand: ICommand<ISheetTableRowColOperationComm
     handler: (accessor) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService);
-        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
+        if (!target) {
             return false;
         }
         const { worksheet, unitId, subUnitId } = target;
@@ -537,7 +536,7 @@ export const SheetTableInsertColumnAtCommand: ICommand<ISheetTableInsertAtComman
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId });
-        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
+        if (!target) {
             return false;
         }
 
@@ -635,7 +634,7 @@ export const SheetTableRemoveColumnAtCommand: ICommand<ISheetTableInsertAtComman
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId });
-        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
+        if (!target) {
             return false;
         }
 
@@ -757,7 +756,7 @@ export const SheetTableRemoveRowCommand: ICommand<ISheetTableRowColOperationComm
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
+        if (!target) {
             return false;
         }
         const { unitId, subUnitId } = target;
@@ -863,7 +862,7 @@ export const SheetTableRemoveColCommand: ICommand<ISheetTableRowColOperationComm
         }
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
+        if (!target) {
             return false;
         }
         const { workbook, unitId, subUnitId } = target;

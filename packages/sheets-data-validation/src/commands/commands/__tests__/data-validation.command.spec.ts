@@ -16,7 +16,7 @@
 
 import type { Injector, Workbook } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import { CommandType, DataValidationErrorStyle, DataValidationOperator, DataValidationType, ICommandService, IUndoRedoService, SheetTypes } from '@univerjs/core';
+import { DataValidationErrorStyle, DataValidationOperator, DataValidationType, ICommandService } from '@univerjs/core';
 import {
     AddDataValidationMutation,
     RemoveDataValidationMutation,
@@ -76,46 +76,6 @@ describe('sheet data validation commands', () => {
 
     afterEach(() => {
         dispose();
-    });
-
-    async function expectRefused(id: string, params?: object) {
-        const before = JSON.parse(JSON.stringify({ workbook: workbook.save(), chart: model.getRules(unitId, 'chart'), grid: model.getRules(unitId, subUnitId) }));
-        const history = injector.get(IUndoRedoService);
-        const undo = history.pitchTopUndoElement();
-        const redo = history.pitchTopRedoElement();
-        const mutations: string[] = [];
-        const observer = commandService.onCommandExecuted((command) => {
-            if (command.type === CommandType.MUTATION) {
-                mutations.push(command.id);
-            }
-        });
-        try {
-            expect(await commandService.executeCommand(id, params)).toBe(false);
-            expect(JSON.parse(JSON.stringify({ workbook: workbook.save(), chart: model.getRules(unitId, 'chart'), grid: model.getRules(unitId, subUnitId) }))).toEqual(before);
-            expect(history.pitchTopUndoElement()).toBe(undo);
-            expect(history.pitchTopRedoElement()).toBe(redo);
-            expect(mutations).toEqual([]);
-        } finally {
-            observer.dispose();
-        }
-    }
-
-    it('refuses new validation writes and edits of historical Chart rules with no resource or history effects', async () => {
-        workbook.addWorksheet('chart', 1, { id: 'chart', name: 'Chart', type: SheetTypes.CHART, cellData: {} });
-        const chart = { unitId, subUnitId: 'chart' };
-        const rule = { uid: 'historical-checkbox', type: DataValidationType.CHECKBOX, formula1: '1', formula2: '0', ranges: [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 0 }] };
-        await expectRefused(AddSheetDataValidationCommand.id, { ...chart, rule });
-        expect(commandService.syncExecuteCommand(AddDataValidationMutation.id, { ...chart, rule })).toBe(true);
-        await expectRefused(UpdateSheetDataValidationRangeCommand.id, { ...chart, ruleId: rule.uid, ranges: [{ startRow: 2, endRow: 3, startColumn: 1, endColumn: 1 }] });
-        await expectRefused(UpdateSheetDataValidationSettingCommand.id, { ...chart, ruleId: rule.uid, setting: { type: DataValidationType.CHECKBOX, formula1: 'Y', formula2: 'N' } });
-        await expectRefused(UpdateSheetDataValidationOptionsCommand.id, { ...chart, ruleId: rule.uid, options: { showErrorMessage: true } });
-        await expectRefused(ClearRangeDataValidationCommand.id, { ...chart, ranges: rule.ranges });
-        await expectRefused(RemoveSheetDataValidationCommand.id, { ...chart, ruleId: rule.uid });
-        await expectRefused(RemoveSheetAllDataValidationCommand.id, chart);
-        workbook.setActiveSheet(workbook.getSheetBySheetId('chart')!);
-        expect(await commandService.executeCommand(AddSheetDataValidationCommand.id, { unitId, subUnitId, rule })).toBe(true);
-        expect(model.getRules(unitId, subUnitId).some((item) => item.uid === rule.uid)).toBe(true);
-        expect(workbook.getSheetBySheetId('chart')!.getCellMatrix().getSizeOf()).toBe(0);
     });
 
     it('adds checkbox validation to the selected range', async () => {

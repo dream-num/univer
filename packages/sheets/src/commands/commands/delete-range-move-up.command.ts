@@ -24,15 +24,13 @@ import {
     sequenceExecute,
 } from '@univerjs/core';
 import type { IDeleteRangeMutationParams } from '../../basics/interfaces/mutation-interface';
-import type { ISheetCommandSharedParams } from '../utils/interface';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { getRemoveRangeMutations } from '../utils/handle-range.mutation';
 import { followSelectionOperation } from './utils/selection-utils';
-import { getSheetGridCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './utils/target-util';
 
-// Omitted targets retain historical active-sheet command replay semantics.
-export interface IDeleteRangeMoveUpCommandParams extends Partial<ISheetCommandSharedParams> {
+export interface IDeleteRangeMoveUpCommandParams {
     range: IRange;
 }
 
@@ -51,7 +49,7 @@ export const DeleteRangeMoveUpCommand: ICommand = {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        const target = getSheetGridCommandTarget(univerInstanceService, params);
+        const target = getSheetCommandTarget(univerInstanceService);
         if (!target) return false;
 
         const { unitId, subUnitId, workbook, worksheet } = target;

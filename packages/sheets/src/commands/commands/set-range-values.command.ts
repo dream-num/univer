@@ -31,7 +31,7 @@ import { SheetsSelectionsService } from '../../services/selections/selection.ser
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { followSelectionOperation } from './utils/selection-utils';
-import { getSheetGridCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ISetRangeValuesCommandParams extends Partial<ISheetCommandSharedParams> {
     range?: IRange;
@@ -54,7 +54,7 @@ export const SetRangeValuesCommand: ICommand = {
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function
     handler: (accessor: IAccessor, params: ISetRangeValuesCommandParams) => {
-        const target = getSheetGridCommandTarget(accessor.get(IUniverInstanceService), params);
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
 
         const selectionManagerService = accessor.get(SheetsSelectionsService);

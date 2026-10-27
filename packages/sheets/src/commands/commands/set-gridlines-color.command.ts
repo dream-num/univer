@@ -18,7 +18,7 @@ import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import type { ISetGridlinesColorMutationParams } from '../mutations/set-gridlines-color.mutation';
 import { SetGridlinesColorMutation } from '../mutations/set-gridlines-color.mutation';
-import { getSheetGridCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ISetGridlinesColorCommandParams {
     color: string | undefined;
@@ -34,7 +34,7 @@ export const SetGridlinesColorCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetGridCommandTarget(univerInstanceService, params);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { worksheet } = target;

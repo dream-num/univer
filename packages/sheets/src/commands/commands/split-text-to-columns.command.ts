@@ -24,14 +24,14 @@ import {
     Range,
     sequenceExecute,
 } from '@univerjs/core';
-import type { IInsertColMutationParams, IRemoveColMutationParams } from '../../basics/interfaces/mutation-interface';
+import type { IInsertColMutationParams, IRemoveColMutationParams } from '../../basics';
 import type { SplitDelimiterEnum } from '../../basics/split-range-text';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { splitRangeText } from '../../basics/split-range-text';
 import { InsertColMutation, InsertColMutationUndoFactory } from '../mutations/insert-row-col.mutation';
 import { RemoveColMutation } from '../mutations/remove-row-col.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
-import { getSheetGridCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ISplitTextToColumnsCommandParams {
     unitId: string;
@@ -47,7 +47,7 @@ export const SplitTextToColumnsCommand = {
     id: 'sheet.command.split-text-to-columns',
     // eslint-disable-next-line max-lines-per-function
     handler: (accessor: IAccessor, params: ISplitTextToColumnsCommandParams) => {
-        const target = getSheetGridCommandTarget(accessor.get(IUniverInstanceService), params);
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
 
         const { unitId, subUnitId, worksheet } = target;

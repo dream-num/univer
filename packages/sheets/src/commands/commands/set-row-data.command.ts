@@ -24,7 +24,7 @@ import {
 import type { ISetRowDataMutationParams } from '../mutations/set-row-data.mutation';
 import type { ISheetCommandSharedParams } from '../utils/interface';
 import { SetRowDataMutation, SetRowDataMutationFactory } from '../mutations/set-row-data.mutation';
-import { getSheetGridCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export type IRowProperties = Omit<IRowData, 'h' | 'ia' | 'ah' | 'hd'>;
 
@@ -40,7 +40,7 @@ export const SetRowDataCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetGridCommandTarget(univerInstanceService, params);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { rowData } = params;

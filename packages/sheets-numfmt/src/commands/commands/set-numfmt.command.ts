@@ -31,7 +31,6 @@ import {
     IUniverInstanceService,
     ObjectMatrix,
     sequenceExecute,
-    SheetTypes,
 } from '@univerjs/core';
 import {
     checkCellValueType,
@@ -44,7 +43,10 @@ import {
     SetRangeValuesMutation,
     transformCellsToRange,
 } from '@univerjs/sheets';
-import { isAllowedPatternForScientificNotationNumber, isScientificNotationNumericCell } from '../../utils/scientific-notation';
+import {
+    isAllowedPatternForScientificNotationNumber,
+    isScientificNotationNumericCell,
+} from '../../utils/scientific-notation';
 
 export interface ISetNumfmtCommandParams {
     unitId?: string;
@@ -66,9 +68,7 @@ export const SetNumfmtCommand: ICommand<ISetNumfmtCommandParams> = {
         const undoRedoService = accessor.get(IUndoRedoService);
 
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target || target.worksheet.getConfig().type === SheetTypes.CHART) {
-            return false;
-        }
+        if (!target) return false;
 
         const { unitId, subUnitId, worksheet } = target;
         // Because of precision issues with scientific notation values, filter out some format settings for them here.

@@ -35,6 +35,7 @@ import { CanvasColorService, ICanvasColorService, IRenderManagerService, RenderM
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { IFloatDom, IFloatDomLayout } from '../../../../services/dom/canvas-dom-layer.service';
+import { ComponentManager } from '../../../../common/component-manager';
 import { CanvasFloatDomService } from '../../../../services/dom/canvas-dom-layer.service';
 import { connectInjector } from '../../../../utils/di';
 import { FloatDom, FloatDomSingle, resolveFloatDomCurrentUnitId, resolveFloatDomOverflow } from '../FloatDom';
@@ -49,6 +50,7 @@ function renderWithDependencies(element: ReactElement, focusedUnitId: string | n
     const injector = new Injector();
     testInjectors.push(injector);
     injector.add([CanvasFloatDomService]);
+    injector.add([ComponentManager]);
     injector.add([ThemeService]);
     injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
     injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
@@ -133,6 +135,55 @@ describe('resolveFloatDomCurrentUnitId', () => {
 });
 
 describe('FloatDomSingle', () => {
+    it('lets a canvas-owned empty host cancel native pinch zoom and releases wheel forwarding on unmount', async () => {
+        const forwarded: WheelEvent[] = [];
+        const layer: IFloatDom = {
+            ...createFloatDom(),
+            componentKey: 'empty-chart-host',
+            onWheel: (event) => {
+                forwarded.push(event);
+                event.preventDefault();
+            },
+        };
+        const { unmount } = renderWithDependencies(<FloatDomSingle id="dom-1" layer={layer} />);
+        const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
+        const wrapper = inner.parentElement!;
+        const pinch = new WheelEvent('wheel', { ctrlKey: true, deltaY: 1.25, bubbles: true, cancelable: true });
+
+        fireEvent(inner, pinch);
+
+        expect(pinch.defaultPrevented).toBe(true);
+        expect(forwarded).toEqual([pinch]);
+        unmount();
+        const afterUnmount = new WheelEvent('wheel', { ctrlKey: true, deltaY: 1.25, bubbles: true, cancelable: true });
+        fireEvent(wrapper, afterUnmount);
+        expect(afterUnmount.defaultPrevented).toBe(false);
+        expect(forwarded).toHaveLength(1);
+    });
+
+    it('preserves browser zoom when the host does not consume the wheel event', async () => {
+        renderWithDependencies(<FloatDomSingle id="dom-1" layer={createFloatDom()} />);
+        const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
+        const pinch = new WheelEvent('wheel', { ctrlKey: true, deltaY: 1.25, bubbles: true, cancelable: true });
+
+        fireEvent(inner, pinch);
+
+        expect(pinch.defaultPrevented).toBe(false);
+    });
+
+    it('leaves wheel ownership with interactive float DOM content', async () => {
+        const forwarded: WheelEvent[] = [];
+        const layer: IFloatDom = { ...createFloatDom(), eventPassThrough: false, onWheel: (event) => forwarded.push(event) };
+        renderWithDependencies(<FloatDomSingle id="dom-1" layer={layer} />);
+        const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
+        const pinch = new WheelEvent('wheel', { ctrlKey: true, deltaY: 1.25, bubbles: true, cancelable: true });
+
+        fireEvent(inner, pinch);
+
+        expect(pinch.defaultPrevented).toBe(false);
+        expect(forwarded).toEqual([]);
+    });
+
     it('renders an existing BehaviorSubject position without waiting for a later movement event', async () => {
         renderWithDependencies(<FloatDomSingle id="dom-1" layer={createFloatDom()} />);
 

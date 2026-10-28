@@ -384,7 +384,9 @@ export class DocFloatDomController extends Disposable {
                         canvas.dispatchEvent(new PointerEvent(evt.type, evt));
                     },
                     onWheel: (evt: WheelEvent) => {
-                        canvas.dispatchEvent(new WheelEvent(evt.type, evt));
+                        if (!canvas.dispatchEvent(new WheelEvent(evt.type, evt))) {
+                            evt.preventDefault();
+                        }
                     },
                     data,
                     props: mergeDocFloatDomRuntimeProps(undefined, rectParam),

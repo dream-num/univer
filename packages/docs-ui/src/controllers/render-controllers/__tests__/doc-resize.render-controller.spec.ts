@@ -105,4 +105,60 @@ describe('DocResizeRenderController', () => {
             vi.useRealTimers();
         }
     });
+    it('repositions an offscreen document when its existing renderer becomes active', async () => {
+        vi.useFakeTimers();
+        const univer = new Univer();
+        try {
+            const injector = univer.__getInjector();
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+            injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
+            injector.add([DocLayoutExecutorService]);
+            injector.add([DocSelectionManagerService]);
+            const unitId = 'reactivated-doc';
+            univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+                id: unitId,
+                body: {
+                    dataStream: 'Text\r\n',
+                    paragraphs: [{ startIndex: 4, paragraphId: 'reactivated-paragraph' }],
+                    sectionBreaks: [{ startIndex: 5, sectionId: 'reactivated-section' }],
+                },
+                documentStyle: {
+                    documentFlavor: DocumentFlavor.TRADITIONAL,
+                    pageSize: { width: 300, height: 400 },
+                },
+            });
+            const render = injector.get(IRenderManagerService).createRender(unitId) as RenderUnit;
+            render.deactivate();
+            render.addRenderDependencies([[DocSkeletonManagerService], [DocViewScaleService], [DocPageLayoutService]]);
+            const skeleton = render.with(DocSkeletonManagerService).getSkeleton();
+            const documents = new Documents('reactivated-doc-component', skeleton);
+            documents.resize(300, 400);
+            render.mainComponent = documents;
+            render.scene.addObject(documents);
+            render.components.set(DOCS_VIEW_KEY.BACKGROUND, new DocBackground('reactivated-background', skeleton));
+            render.addRenderDependencies([[DocResizeRenderController]]);
+            render.with(DocResizeRenderController);
+            await vi.advanceTimersByTimeAsync(20);
+            render.engine.resizeBySize(800, 600);
+            await vi.advanceTimersByTimeAsync(20);
+            documents.translate(-10000, -10000);
+
+            render.activate();
+            await vi.advanceTimersByTimeAsync(20);
+
+            expect(documents.left).toBeGreaterThan(0);
+            expect(documents.top).toBeGreaterThanOrEqual(0);
+            render.with(DocResizeRenderController).dispose();
+            documents.translate(-10000, -10000);
+            render.deactivate();
+            render.activate();
+            await vi.advanceTimersByTimeAsync(20);
+            expect(documents.left).toBe(-10000);
+        } finally {
+            univer.dispose();
+            vi.restoreAllMocks();
+            vi.useRealTimers();
+        }
+    });
 });

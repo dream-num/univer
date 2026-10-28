@@ -37,7 +37,7 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
-import { SetInlineFormatCommand } from '@univerjs/docs-ui';
+import { EditorColorPicker, SetInlineFormatCommand } from '@univerjs/docs-ui';
 import {
     RangeProtectionPermissionEditPoint,
     RangeProtectionPermissionViewPoint,
@@ -73,7 +73,6 @@ import {
     WorksheetSetRowStylePermission,
 } from '@univerjs/sheets';
 import {
-    COLOR_PICKER_COMPONENT,
     CutCommand,
     FONT_FAMILY_COMPONENT,
     FONT_FAMILY_ITEM_COMPONENT,
@@ -508,7 +507,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
         selections: [
             {
                 label: {
-                    name: COLOR_PICKER_COMPONENT,
+                    name: EditorColorPicker.componentKey,
                     hoverable: false,
                     selectable: false,
                 },
@@ -572,7 +571,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
         selections: [
             {
                 label: {
-                    name: COLOR_PICKER_COMPONENT,
+                    name: EditorColorPicker.componentKey,
                     hoverable: false,
                     selectable: false,
                 },

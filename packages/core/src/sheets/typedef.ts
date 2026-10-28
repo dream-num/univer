@@ -22,7 +22,7 @@ import type { LocaleType } from '../types/enum/locale-type';
 import type { SheetTypes } from '../types/enum/sheet-types';
 import type { BooleanNumber } from '../types/enum/text-style';
 import type { ICellCustomRender } from '../types/interfaces/i-cell-custom-render';
-import type { IDocumentData, PaperType } from '../types/interfaces/i-document-data';
+import type { IDocumentData } from '../types/interfaces/i-document-data';
 import type { IStyleData } from '../types/interfaces/i-style-data';
 import type { IWorkbookCalculationSettings } from './calculation-settings';
 import { CellValueType } from '../types/enum/text-style';
@@ -183,20 +183,6 @@ export interface IWorksheetData {
      * Color of the gridlines.
      */
     gridlinesColor?: string;
-
-    /** Imported protection flags. Chart sheets without a verified projection remain read-only. */
-    protection?: { content?: BooleanNumber; objects?: BooleanNumber };
-
-    /** Physical print settings in CSS pixels; issues retain unsupported or ambiguous import diagnostics. */
-    printSettings?: {
-        paper?: { width: number; height: number; paperType?: PaperType };
-        orientation?: 'portrait' | 'landscape';
-        margin?: Partial<Record<'left' | 'right' | 'top' | 'bottom', number>>;
-        issues: {
-            field: 'paper' | 'orientation' | 'left' | 'right' | 'top' | 'bottom' | 'header' | 'device' | 'source';
-            reason: 'invalid' | 'unsupported' | 'ambiguous';
-        }[];
-    };
 
     /** Image tiled behind the worksheet grid. It is not included when printing. */
     backgroundImage?: IWorksheetBackgroundImage;

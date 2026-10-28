@@ -65,7 +65,7 @@ function createController(options: {
     const renderDisposed$ = new Subject<string>();
     const commandHandlers: Array<(command: { id: string; params?: unknown }) => void> = [];
     const scene = createScene();
-    const canvas = { dispatchEvent: vi.fn() };
+    const canvas = document.createElement('canvas');
     const injector = new Injector([[DocRefreshDrawingsService], [DocFloatDomController]]);
     const docRefreshDrawingsService = injector.get(DocRefreshDrawingsService);
     const refreshDrawings = vi.spyOn(docRefreshDrawingsService, 'refreshDrawings');
@@ -284,6 +284,32 @@ describe('DocFloatDomController', () => {
         expect(canvasFloatDomService.updateFloatDom).not.toHaveBeenCalled();
 
         controller.dispose();
+    });
+
+    it('relays canvas wheel cancellation through the document float DOM callback', async () => {
+        const rect = new Rect('dom-rect', { left: 30, top: 50, width: 50, height: 40 });
+        const { controller, add$, canvas, canvasFloatDomService } = createController({ rects: [rect] });
+        try {
+            add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+            await Promise.resolve();
+            const layer = canvasFloatDomService.addFloatDom.mock.calls[0][0];
+            const unconsumed = new WheelEvent('wheel', { deltaY: 1.25, cancelable: true });
+            layer.onWheel(unconsumed);
+            expect(unconsumed.defaultPrevented).toBe(false);
+            const received: WheelEvent[] = [];
+            canvas.addEventListener('wheel', (event) => {
+                received.push(event);
+                event.preventDefault();
+            });
+            const consumed = new WheelEvent('wheel', { deltaY: 1.25, cancelable: true });
+            layer.onWheel(consumed);
+            expect(consumed.defaultPrevented).toBe(true);
+            expect(received).toHaveLength(1);
+            expect(received[0]).not.toBe(consumed);
+            expect(received[0].deltaY).toBe(1.25);
+        } finally {
+            controller.dispose();
+        }
     });
 
     it('adds rendered float doms, updates their position, and removes them with their rect object', async () => {

@@ -845,6 +845,13 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         return factory?.(context) ?? new Rect(context.key, context.config);
     }
 
+    private _forwardWheelToCanvas(canvas: HTMLCanvasElement, event: WheelEvent): void {
+        // Cancel the native default only when the host canvas consumed the forwarded event.
+        if (!canvas.dispatchEvent(new WheelEvent(event.type, event))) {
+            event.preventDefault();
+        }
+    }
+
     private _bindScrollEvent() {
         this.disposeWithMe(this._lifecycleService.lifecycle$.pipe(filter((s) => s === LifecycleStages.Rendered), take(1)).subscribe(() => {
             this._scrollUpdateListener();
@@ -1446,7 +1453,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         },
                         onWheel: (evt: WheelEvent) => {
                             if (shouldForwardSheetHostedEmbedFloatDomEvent(floatDomParam, evt)) {
-                                canvas.dispatchEvent(new WheelEvent(evt.type, evt));
+                                this._forwardWheelToCanvas(canvas, evt);
                             }
                         },
                         data,
@@ -2159,7 +2166,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 onPointerMove: () => { },
                 onPointerUp: () => { },
                 onWheel: (evt: WheelEvent) => {
-                    canvas.dispatchEvent(new WheelEvent(evt.type, evt));
+                    this._forwardWheelToCanvas(canvas, evt);
                 },
                 data,
                 unitId,
@@ -2402,7 +2409,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 onPointerMove: () => { },
                 onPointerUp: () => { },
                 onWheel: (evt: WheelEvent) => {
-                    canvas.dispatchEvent(new WheelEvent(evt.type, evt));
+                    this._forwardWheelToCanvas(canvas, evt);
                 },
                 data,
                 unitId,

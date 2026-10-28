@@ -332,12 +332,11 @@ function findChildObject(object: unknown, key: string): Rect | undefined {
 function createRender(skeleton: SpreadsheetSkeleton, scene: Scene): IRender {
     const sheetSkeletonManager = new TestSheetSkeletonManager(skeleton);
     const sheetSelectionRenderService = new TestSheetSelectionRenderService();
-    const canvasElement = document.createElement('div');
+    const canvasElement = document.createElement('canvas');
     const testScene = scene as unknown as TestRenderScene;
-    canvasElement.dispatchEvent = (event: Event) => {
-        testScene.canvasEvents.push(event.type);
-        return true;
-    };
+    for (const type of ['pointerdown', 'pointermove', 'pointerup', 'wheel']) {
+        canvasElement.addEventListener(type, (event) => testScene.canvasEvents.push(event.type));
+    }
     const activated$ = new BehaviorSubject(true);
 
     return {
@@ -1122,6 +1121,39 @@ describe('SheetCanvasFloatDomManagerService', () => {
                 top: false,
             },
         });
+    });
+
+    it.each(['drawing', 'range', 'column'] as const)('relays canvas wheel cancellation for a %s float DOM', async (kind) => {
+        const fixture = setup();
+        disposables.push(fixture);
+        const canvas = fixture.get(IRenderManagerService).getRenderUnitById('test')!.engine.getCanvasElement();
+        const options = {
+            componentKey: 'WheelCard',
+            initPosition: { startX: 80, startY: 30, endX: 180, endY: 70 },
+        };
+        if (kind === 'drawing') {
+            fixture.manager.addFloatDomToPosition(options, 'wheel-card');
+            await Promise.resolve();
+        } else if (kind === 'range') {
+            fixture.manager.addFloatDomToRange({ startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 }, options, {}, 'wheel-card');
+        } else {
+            fixture.manager.addFloatDomToColumnHeader(1, options, { width: 100, height: 40 }, 'wheel-card');
+        }
+        const layer = findFloatDom(fixture.get(CanvasFloatDomService), 'wheel-card')!;
+        const unconsumed = new WheelEvent('wheel', { deltaY: 1.25, cancelable: true });
+        layer.onWheel(unconsumed);
+        expect(unconsumed.defaultPrevented).toBe(false);
+        const received: WheelEvent[] = [];
+        canvas.addEventListener('wheel', (event) => {
+            received.push(event);
+            event.preventDefault();
+        });
+        const consumed = new WheelEvent('wheel', { deltaY: 1.25, cancelable: true });
+        layer.onWheel(consumed);
+        expect(consumed.defaultPrevented).toBe(true);
+        expect(received).toHaveLength(1);
+        expect(received[0]).not.toBe(consumed);
+        expect(received[0].deltaY).toBe(1.25);
     });
 
     it('adds range and column header float doms to the canvas layer and removes them through their disposables', () => {

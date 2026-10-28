@@ -171,6 +171,18 @@ function FloatDomSingleContent(props: { layer: IFloatDom; id: string; Component?
         };
     }, [domLayerService, forwardEvents, layer, position, renderManagerService]);
 
+    useEffect(() => {
+        const wrapper = domRef.current;
+        if (!forwardEvents || !wrapper) {
+            return;
+        }
+
+        // Host callbacks must be able to cancel the original event, including on empty canvas-owned hosts.
+        const handleWheel = (event: WheelEvent) => layer.onWheel(event);
+        wrapper.addEventListener('wheel', handleWheel, { passive: false });
+        return () => wrapper.removeEventListener('wheel', handleWheel);
+    }, [forwardEvents, layer, position]);
+
     const instance = univerInstanceService.getUnit(layer.unitId);
     const docDisabled = instance instanceof DocumentDataModel ? instance.getDisabled() : undefined;
     const component = useMemo(() => Component
@@ -243,11 +255,6 @@ function FloatDomSingleContent(props: { layer: IFloatDom; id: string; Component?
                     if (e.target instanceof Element && e.target.hasPointerCapture?.(e.pointerId)) {
                         e.target.releasePointerCapture?.(e.pointerId);
                     }
-                }
-            }}
-            onWheel={(e) => {
-                if (forwardEvents) {
-                    layer.onWheel(e.nativeEvent);
                 }
             }}
         >

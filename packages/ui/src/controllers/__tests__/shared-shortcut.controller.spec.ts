@@ -18,8 +18,10 @@
  * @vitest-environment jsdom
  */
 
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import {
     CommandService,
+    CommandType,
     ConfigService,
     ContextService,
     DesktopLogService,
@@ -31,16 +33,32 @@ import {
     IContextService,
     ILogService,
     Injector,
+    IUndoRedoService,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    LocalUndoRedoService,
     RedoCommand,
     UndoCommand,
+    UniverInstanceService,
+    Workbook,
 } from '@univerjs/core';
+import { createElement } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { ToggleFullscreenOperation } from '../../commands/operations/toggle-fullscreen.operation';
+import { ComponentManager } from '../../common/component-manager';
+import { IconManager } from '../../common/icon-manager';
+import enUS from '../../locale/en-US';
 import { CopyCommand } from '../../services/clipboard/clipboard.command';
+import { DesktopLayoutService, ILayoutService } from '../../services/layout/layout.service';
 import { IPlatformService } from '../../services/platform/platform.service';
 import { IUIRuntimeScopeService, UIRuntimeScopeService } from '../../services/runtime-scope/ui-runtime-scope.service';
 import { KeyCode } from '../../services/shortcut/keycode';
 import { IShortcutService, ShortcutService } from '../../services/shortcut/shortcut.service';
+import { DesktopSidebarService } from '../../services/sidebar/desktop-sidebar.service';
+import { ISidebarService } from '../../services/sidebar/sidebar.service';
+import { RediProvider } from '../../utils/di';
+import { Sidebar } from '../../views/components/sidebar/Sidebar';
 import {
     CopyShortcutItem,
     CutShortcutItem,
@@ -53,6 +71,7 @@ import {
 const injectors: Injector[] = [];
 
 afterEach(() => {
+    cleanup();
     injectors.splice(0).forEach((injector) => injector.dispose());
     document.body.replaceChildren();
 });
@@ -70,7 +89,7 @@ function createContextService(values: Record<string, boolean>): IContextService 
     return context;
 }
 
-function createControllerTestBed(platform: 'mac' | 'windows' | 'linux') {
+function createControllerTestBed(platform: 'mac' | 'windows' | 'linux', withSidebar = false) {
     const injector = createInjector();
     injector.add([ICommandService, { useClass: CommandService }]);
     injector.add([IConfigService, { useClass: ConfigService }]);
@@ -83,9 +102,23 @@ function createControllerTestBed(platform: 'mac' | 'windows' | 'linux') {
     injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
     injector.add([IShortcutService, { useClass: ShortcutService }]);
     injector.add([SharedController]);
+    if (withSidebar) {
+        injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
+        injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
+        injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
+        injector.add([IUndoRedoService, { useClass: LocalUndoRedoService }]);
+        injector.add([LocaleService]);
+        injector.add([ComponentManager]);
+        injector.add([IconManager]);
+        const locale = injector.get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: enUS });
+        locale.setLocale(LocaleType.EN_US);
+        locale.setDirection('ltr');
+    }
     const context = injector.get(IContextService);
     context.setContextValue(FOCUSING_UNIVER_EDITOR, true);
     return {
+        injector,
         controller: injector.get(SharedController),
         commandService: injector.get(ICommandService),
         shortcutService: injector.get(IShortcutService),
@@ -130,6 +163,69 @@ describe('shared shortcut items', () => {
 });
 
 describe('SharedController', () => {
+    it.each(['mac', 'windows'] as const)('undoes and redoes with a real sidebar open while preserving native editing on %s', async (platform) => {
+        const { injector, commandService } = createControllerTestBed(platform, true);
+        const instances = injector.get(IUniverInstanceService);
+        const workbook = injector.createInstance(Workbook, { id: 'history-unit', name: 'Before' });
+        instances.__addUnit(workbook);
+        instances.focusUnit(workbook.getUnitId());
+        const history = injector.get(IUndoRedoService);
+        const mutationId = 'test.sidebar-history.set-name';
+        commandService.registerCommand({
+            id: mutationId,
+            type: CommandType.MUTATION,
+            handler: (_accessor, params: { name: string }) => {
+                workbook.setName(params.name);
+                return true;
+            },
+        });
+        commandService.syncExecuteCommand(mutationId, { name: 'After' });
+        history.pushUndoRedo({
+            unitID: workbook.getUnitId(),
+            undoMutations: [{ id: mutationId, params: { name: 'Before' } }],
+            redoMutations: [{ id: mutationId, params: { name: 'After' } }],
+        });
+        const rendered = render(createElement(RediProvider, { value: { injector } }, createElement('div', null, createElement('div', { 'data-u-comp': 'editor', tabIndex: 0 }, 'Canvas'), createElement(Sidebar))));
+        injector.get(ILayoutService).registerRootContainerElement(rendered.container);
+        const editor = screen.getByText('Canvas');
+        editor.focus();
+        const sidebar = injector.get(ISidebarService);
+        const controls = createElement('div', null, createElement('button', { type: 'button' }, 'Customize'), createElement('input', { 'aria-label': 'Chart title' }), createElement('textarea', { 'aria-label': 'Description' }), createElement('select', { 'aria-label': 'Format' }), createElement('div', { 'aria-label': 'Notes', contentEditable: true, tabIndex: 0 }));
+        act(() => sidebar.open({ id: 'chart-edit', children: { title: controls } }));
+        const closeButton = screen.getByRole('button', { name: 'Close sidebar' });
+        expect(document.activeElement).toBe(closeButton);
+        const undo = () => new KeyboardEvent('keydown', {
+            key: 'z',
+            keyCode: KeyCode.Z,
+            ctrlKey: platform !== 'mac',
+            metaKey: platform === 'mac',
+            bubbles: true,
+            cancelable: true,
+        });
+
+        fireEvent(closeButton, undo());
+        await waitFor(() => expect(workbook.getSnapshot().name).toBe('Before'));
+        expect(sidebar.visible).toBe(true);
+        const customize = screen.getByRole('button', { name: 'Customize' });
+        customize.focus();
+        fireEvent(customize, new KeyboardEvent('keydown', {
+            keyCode: platform === 'mac' ? KeyCode.Z : KeyCode.Y,
+            shiftKey: platform === 'mac',
+            metaKey: platform === 'mac',
+            ctrlKey: platform !== 'mac',
+            bubbles: true,
+        }));
+        await waitFor(() => expect(workbook.getSnapshot().name).toBe('After'));
+        for (const label of ['Chart title', 'Description', 'Format', 'Notes']) {
+            const field = screen.getByLabelText(label);
+            field.focus();
+            const nativeUndo = undo();
+            fireEvent(field, nativeUndo);
+            expect(nativeUndo.defaultPrevented).toBe(false);
+            expect(workbook.getSnapshot().name).toBe('After');
+        }
+    });
+
     it.each((['mac', 'windows', 'linux'] as const).flatMap((platform) => [
         { platform, compact: false },
         { platform, compact: true },

@@ -25,8 +25,8 @@ import {
 import { CURSOR_TYPE, Vector2 } from '@univerjs/engine-render';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { bindFormatPainterCanvas, FormatPainterSessionService } from '@univerjs/ui';
-
 import { ApplyFormatPainterCommand, SetOnceFormatPainterCommand } from '../../commands/commands/set-format-painter.command';
+import { SHEET_VIEW_KEY } from '../../common/keys';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 
@@ -47,7 +47,9 @@ export class FormatPainterRenderController extends Disposable implements IRender
             intercept: false,
             getTarget: (event) => {
                 const picked = this._context.scene.pick(new Vector2(event.offsetX, event.offsetY));
-                if (picked && picked !== this._context.mainComponent) {
+                if (picked && picked !== this._context.mainComponent &&
+                    picked !== this._context.components.get(SHEET_VIEW_KEY.ROW) &&
+                    picked !== this._context.components.get(SHEET_VIEW_KEY.COLUMN)) {
                     return null;
                 }
                 const range = this._selections.getCurrentLastSelection()?.range;

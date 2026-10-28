@@ -285,6 +285,7 @@ export { getCanvasOffsetByEngine, getTextRangeFromCharIndex } from './services/s
 export { getAnchorBounding, getLineBounding, TEXT_RANGE_LAYER_INDEX, TextRange } from './services/selection/text-range';
 export { whenDocAndEditorFocused } from './shortcuts/utils';
 export { DOC_VERTICAL_PADDING } from './types/const/padding';
+export { EditorColorPicker } from './views/EditorColorPicker';
 export { BulletListTypePicker, OrderListTypePicker } from './views/list-type-picker/Picker';
 export { MOBILE_DOC_ELEMENT_MENU, MobileDocElementMenu } from './views/mobile-element-menu/MobileDocElementMenu';
 export { MobileRichTextEditor } from './views/mobile-rich-text-editor/MobileRichTextEditor';

@@ -99,12 +99,7 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
             className="univer-w-72 univer-max-w-full univer-cursor-default univer-rounded-lg"
             onClick={(event) => event.stopPropagation()}
             onKeyDown={(event) => {
-                if (custom) {
-                    event.stopPropagation();
-                }
-                if (event.nativeEvent.isComposing) {
-                    return;
-                }
+                if (custom) event.stopPropagation();
                 if (custom && event.key === 'Escape') {
                     event.preventDefault();
                     cancelCustomColor();
@@ -117,7 +112,7 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
                         ref={customPanelRef}
                         className="univer-grid univer-gap-3"
                         onKeyDown={(event) => {
-                            if (!event.nativeEvent.isComposing && event.key === 'Enter' && event.target instanceof HTMLInputElement) {
+                            if (event.key === 'Enter' && event.target instanceof HTMLInputElement) {
                                 event.preventDefault();
                                 event.stopPropagation();
                                 applyColor(...hsv, alpha);

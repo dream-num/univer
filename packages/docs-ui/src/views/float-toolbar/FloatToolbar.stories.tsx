@@ -38,6 +38,7 @@ import enUS from '../../locale/en-US';
 import zhCN from '../../locale/zh-CN';
 import { FLOAT_TEXT_STYLE_MENU_ID } from '../../menu/menu';
 import { menuSchema } from '../../menu/schema';
+import { EditorColorPicker } from '../EditorColorPicker';
 import { FloatToolbar } from './FloatToolbar';
 
 const meta: Meta<typeof FloatToolbar> = {
@@ -76,19 +77,22 @@ export const Playground = {
         });
 
         useEffect(() => {
-            if (!inject) return;
+            if (!inject) {
+                return;
+            }
 
-            ([
+            const registrations = ([
                 [COLOR_PICKER_COMPONENT, ColorPicker],
+                [EditorColorPicker.componentKey, EditorColorPicker],
                 [FONT_FAMILY_COMPONENT, FontFamily],
                 [FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem],
                 [FONT_SIZE_COMPONENT, FontSize],
-            ] as const).forEach(([key, comp]) => {
-                inject.get(ComponentManager).register(key, comp);
-            });
+            ] as const).map(([key, comp]) => inject.get(ComponentManager).register(key, comp));
 
             const menuManagerService = inject.get(IMenuManagerService);
             menuManagerService.mergeMenu(menuSchema);
+
+            return () => registrations.forEach((registration) => registration.dispose());
         }, [inject]);
 
         return (

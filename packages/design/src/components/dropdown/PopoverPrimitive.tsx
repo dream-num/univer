@@ -33,7 +33,6 @@ function PopoverTrigger({
 
 function PopoverContent({
     className,
-    onEscapeKeyDown,
     align = 'center',
     sideOffset = 4,
     ...props
@@ -65,13 +64,6 @@ function PopoverContent({
                     className
                 )}
                 {...props}
-                onEscapeKeyDown={(event) => {
-                    if (event.isComposing) {
-                        event.preventDefault();
-                        return;
-                    }
-                    onEscapeKeyDown?.(event);
-                }}
             />
         </Portal>
     );

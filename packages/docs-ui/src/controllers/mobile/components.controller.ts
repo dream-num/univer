@@ -77,6 +77,7 @@ import {
 import { ComponentManager, IconManager } from '@univerjs/ui';
 import { DOC_LAYOUT_RECOVERY_COMPONENT, DocLayoutRecovery } from '../../views/DocLayoutRecovery';
 import { DOC_PASTE_OPTIONS_COMPONENT } from '../../views/DocPasteOptions';
+import { EditorColorPicker } from '../../views/EditorColorPicker';
 import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../../views/header-footer/panel/component-name';
 import {
     DefaultTextColorIcon,
@@ -229,6 +230,7 @@ export class MobileComponentsController extends Disposable {
     }
 
     protected _registerComponents(): void {
+        this.disposeWithMe(this._componentManager.register(EditorColorPicker.componentKey, EditorColorPicker));
         this.disposeWithMe(this._componentManager.register(COMPONENT_DOC_HEADER_FOOTER_PANEL, MobileHeaderFooterPanel));
         this.disposeWithMe(this._componentManager.register('doc_ui_paragraph-setting-panel', MobileParagraphSettings));
         this.disposeWithMe(this._componentManager.register(DOC_SECTION_SETTING_COMPONENT, MobileSectionSettings));

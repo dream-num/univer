@@ -120,7 +120,6 @@ function DropdownMenuSubTrigger({
 
 function DropdownMenuSubContent({
     className,
-    onEscapeKeyDown,
     ...props
 }: ComponentProps<typeof SubContent>) {
     return (
@@ -146,20 +145,12 @@ function DropdownMenuSubContent({
                 className
             )}
             {...props}
-            onEscapeKeyDown={(event) => {
-                if (event.isComposing) {
-                    event.preventDefault();
-                    return;
-                }
-                onEscapeKeyDown?.(event);
-            }}
         />
     );
 }
 
 function DropdownMenuContent({
     className,
-    onEscapeKeyDown,
     sideOffset = 4,
     ...props
 }: ComponentProps<typeof Content>) {
@@ -188,13 +179,6 @@ function DropdownMenuContent({
                     className
                 )}
                 {...props}
-                onEscapeKeyDown={(event) => {
-                    if (event.isComposing) {
-                        event.preventDefault();
-                        return;
-                    }
-                    onEscapeKeyDown?.(event);
-                }}
             />
         </Portal>
     );

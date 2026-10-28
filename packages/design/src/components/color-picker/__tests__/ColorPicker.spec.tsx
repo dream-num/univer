@@ -91,38 +91,6 @@ describe('ColorPicker', () => {
         expect(view.getByRole('textbox', { name: 'HEX' })).toHaveValue('3f83f8');
     });
 
-    it.each(['Escape', 'Enter'])('keeps custom input open while %s belongs to IME composition', (key) => {
-        const onChange = vi.fn();
-        const parentKeyDown = vi.fn();
-        const view = render(
-            <ConfigProvider mountContainer={document.body} locale={enUS.design}>
-                <div onKeyDown={parentKeyDown}>
-                    <ColorPicker value="#3F83F8" onChange={onChange} />
-                </div>
-            </ConfigProvider>
-        );
-        fireEvent.click(view.getByRole('button', { name: enUS.design.ColorPicker.more }));
-        const input = view.getByRole('textbox', { name: 'HEX' });
-        fireEvent.change(input, { target: { value: '12ab34' } });
-        fireEvent.compositionStart(input);
-        fireEvent.keyDown(input, { key, isComposing: true });
-
-        expect(input).toHaveFocus();
-        expect(input).toHaveValue('12ab34');
-        expect(onChange).not.toHaveBeenCalled();
-        expect(parentKeyDown).not.toHaveBeenCalled();
-
-        fireEvent.compositionEnd(input);
-        fireEvent.keyDown(input, { key });
-        expect(view.queryByRole('textbox', { name: 'HEX' })).not.toBeInTheDocument();
-        if (key === 'Enter') {
-            expect(onChange).toHaveBeenCalledExactlyOnceWith('#12ab34');
-        } else {
-            expect(onChange).not.toHaveBeenCalled();
-            expect(view.getByRole('button', { name: '#3F83F8' })).toHaveAttribute('aria-pressed', 'true');
-        }
-    });
-
     it('preserves alpha for custom colors and applies with Enter', () => {
         const onChange = vi.fn();
         const view = render(

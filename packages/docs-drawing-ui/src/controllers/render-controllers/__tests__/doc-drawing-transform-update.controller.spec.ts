@@ -16,7 +16,6 @@
 
 import type { IDrawingParam } from '@univerjs/core';
 import type { IImageData } from '@univerjs/drawing';
-import type { DocumentDrawingPublicationProgress } from '../doc-drawing-transform-update.controller';
 import {
     AlignTypeH,
     AlignTypeV,
@@ -41,6 +40,7 @@ import { Documents, DocumentSkeletonPageType, Liquid, Rect, setDocsTableRenderVi
 import { DesktopGalleryService, IGalleryService, IUIPartsService, UIPartsService } from '@univerjs/ui';
 import { EMPTY, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { DocumentDrawingPublicationProgress } from '../doc-drawing-transform-update.controller';
 import { createDocDrawingTestBed } from '../../../__tests__/create-doc-drawing-test-bed';
 import { getDocsTableCellAnchorContext } from '../../doc-drawing-transformer-update.controller';
 import { doesDocMutationAffectDrawingPresentation, getDocMutationAffectedDrawingIds } from '../doc-drawing-mutation';
@@ -189,6 +189,40 @@ describe('DocDrawingTransformUpdateController', () => {
         } finally {
             univer.dispose();
             vi.restoreAllMocks();
+        }
+    });
+
+    it('retains published repeated images while a new layout temporarily omits their header resources', async () => {
+        vi.useFakeTimers();
+        const { univer, render, drawing, manager, controller } = await createRepeatedImageTestBed('partial-header-resources');
+        try {
+            const skeleton = render.with(DocSkeletonManagerService).getSkeleton();
+            const data = skeleton.getSkeletonData()!;
+            const headers = data.skeHeaders;
+            const key = getDrawingShapeKeyByDrawingSearch(drawing, 0);
+            const original = render.scene.getObject(key);
+            const remove = vi.spyOn(manager, 'removeNotification');
+            const refresh = controller as unknown as { _refreshDrawing(currentSkeleton: typeof skeleton): void };
+            expect(original).toBeTruthy();
+
+            skeleton.beginExternalLayout({ reason: 'edit' });
+            expect(skeleton.hasCompleteLayout()).toBe(true);
+            expect(skeleton.getLayoutProgress()?.complete).toBe(false);
+            data.skeHeaders = new Map();
+            refresh._refreshDrawing(skeleton);
+            await vi.advanceTimersByTimeAsync(34);
+
+            expect(remove).not.toHaveBeenCalled();
+            expect(render.scene.getObject(key)).toBe(original);
+            data.skeHeaders = headers;
+            refresh._refreshDrawing(skeleton);
+            await vi.advanceTimersByTimeAsync(34);
+            expect(render.scene.getObject(key)).toBe(original);
+            expect(original).toHaveProperty('visible', true);
+        } finally {
+            univer.dispose();
+            vi.restoreAllMocks();
+            vi.useRealTimers();
         }
     });
 
@@ -1048,6 +1082,7 @@ describe('DocDrawingTransformUpdateController', () => {
             skeTables: [],
         };
         const skeleton = {
+            getLayoutProgress: () => null,
             getSkeletonData: () => ({
                 pages: [page],
                 skeHeaders: new Map([['header-1', new Map([[200, headerPage]])]]),

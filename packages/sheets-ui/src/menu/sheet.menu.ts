@@ -18,6 +18,7 @@ import type { IAccessor, Workbook } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { Subscriber } from 'rxjs';
 import { BooleanNumber, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { EditorColorPicker } from '@univerjs/docs-ui';
 import {
     CopySheetCommand,
     InsertSheetMutation,
@@ -34,7 +35,7 @@ import {
     WorkbookHideSheetPermission,
     WorkbookRenameSheetPermission,
 } from '@univerjs/sheets';
-import { COLOR_PICKER_COMPONENT, getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, combineLatestWith, map, Observable } from 'rxjs';
 import type { LocaleKey } from '../locale/types';
 import { RemoveSheetConfirmCommand } from '../commands/commands/remove-sheet-confirm.command';
@@ -115,7 +116,7 @@ export function ChangeColorSheetMenuItemFactory(accessor: IAccessor): IMenuSelec
             },
             {
                 label: {
-                    name: COLOR_PICKER_COMPONENT,
+                    name: EditorColorPicker.componentKey,
                     hoverable: false,
                     selectable: false,
                 },

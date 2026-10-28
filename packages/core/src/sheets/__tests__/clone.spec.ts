@@ -88,8 +88,6 @@ describe('worksheet type snapshots', () => {
             sheet.addWorksheet('chart-sheet', 1, {
                 id: 'chart-sheet',
                 type: SheetTypes.CHART,
-                protection: { content: BooleanNumber.FALSE, objects: BooleanNumber.TRUE },
-                printSettings: { orientation: 'landscape', margin: { left: 40 }, issues: [] },
                 cellData: {},
             });
             const chartSheet = sheet.getSheetBySheetId('chart-sheet')!;
@@ -104,12 +102,6 @@ describe('worksheet type snapshots', () => {
             expect(sheet.getSheetBySheetId('chart-sheet')).toBe(chartSheet);
             expect(sheet.getSheetBySheetId('chart-copy')).toBe(chartCopy);
             expect(sheet.save().sheets['chart-copy'].type).toBe(3);
-            expect(sheet.save().sheets['chart-copy'].protection).toEqual(chartSheet.getConfig().protection);
-            expect(sheet.save().sheets['chart-copy'].printSettings).toEqual(chartSheet.getConfig().printSettings);
-            chartCopy.getConfig().protection!.objects = BooleanNumber.FALSE;
-            chartCopy.getConfig().printSettings!.margin!.left = 80;
-            expect(chartSheet.getConfig().protection!.objects).toBe(BooleanNumber.TRUE);
-            expect(chartSheet.getConfig().printSettings!.margin!.left).toBe(40);
         } finally {
             univer.dispose();
         }

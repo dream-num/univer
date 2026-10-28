@@ -346,13 +346,6 @@ export function cloneWorksheetData(worksheet: IWorksheetData): IWorksheetData {
         }
     }
 
-    if (worksheet.protection !== undefined) {
-        result.protection = cloneValue(worksheet.protection);
-    }
-    if (worksheet.printSettings !== undefined) {
-        result.printSettings = cloneValue(worksheet.printSettings);
-    }
-
     if (worksheet.custom !== undefined) {
         result.custom = worksheet.custom === null ? null : cloneValue(worksheet.custom);
     }

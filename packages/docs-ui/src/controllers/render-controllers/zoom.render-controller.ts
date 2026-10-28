@@ -56,8 +56,8 @@ export function shouldHandleDocWheelZoom(
 
 export class DocZoomRenderController extends Disposable implements IRenderModule {
     private _isSheetEditor = false;
-    private _initTimer: number;
-    private _updateTimer: number;
+    private _initTimer: number | undefined;
+    private _updateTimer: number | undefined;
     private _fitToWidthAvailableWidth = 0;
 
     constructor(
@@ -79,10 +79,14 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         this._initCommandExecutedListener();
         this._initFitToWidthResizeListener();
         this._isSheetEditor = this._context.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
-        const currentSheet = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        const sheetRenderer = currentSheet && this._renderManagerService.getRenderUnitById(currentSheet.getUnitId());
         // TODO: do not use setTimeout.
         this._initTimer = window.setTimeout(() => {
+            this._initTimer = undefined;
+            if (this._disposed) {
+                return;
+            }
+            const currentSheet = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            const sheetRenderer = currentSheet && this._renderManagerService.getRenderUnitById(currentSheet.getUnitId());
             const zoomRatio = sheetRenderer && this._isSheetEditor
                 ? sheetRenderer.scene.scaleX
                 : getDocEffectiveZoomRatio(this._context.unit);
@@ -98,22 +102,27 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
     override dispose() {
         window.clearTimeout(this._initTimer);
         window.clearTimeout(this._updateTimer);
+        this._initTimer = undefined;
+        this._updateTimer = undefined;
         super.dispose();
     }
 
     private _initSkeletonListener() {
         this.disposeWithMe(this._docSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+            window.clearTimeout(this._updateTimer);
+            this._updateTimer = undefined;
             if (param == null) {
                 return;
             }
 
-            const documentModel = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-            if (!documentModel) return;
-
             this._updateTimer = window.setTimeout(() => {
+                this._updateTimer = undefined;
+                if (this._disposed) {
+                    return;
+                }
                 const currentSheet = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
                 const sheetRenderer = currentSheet && this._renderManagerService.getRenderUnitById(currentSheet.getUnitId());
-                const zoomRatio = !this._isSheetEditor ? getDocEffectiveZoomRatio(documentModel) : sheetRenderer?.scene.scaleX || 1;
+                const zoomRatio = !this._isSheetEditor ? getDocEffectiveZoomRatio(this._context.unit) : sheetRenderer?.scene.scaleX || 1;
 
                 this.updateViewZoom(zoomRatio, false);
             });

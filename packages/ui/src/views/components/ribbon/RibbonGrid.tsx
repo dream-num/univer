@@ -43,10 +43,19 @@ export function RibbonGrid({ groups, title, className, ...props }: IRibbonGridPr
 
         const measure = () => {
             const style = getComputedStyle(container);
-            const availableWidth = container.clientWidth - Number.parseFloat(style.paddingLeft || '0') - Number.parseFloat(style.paddingRight || '0');
-            const widths = groups.map((group) => groupsRef.current.get(group.key)?.getBoundingClientRect().width ?? 0);
+            const availableWidth = Number.parseFloat(style.width) - [style.paddingLeft, style.paddingRight, style.borderLeftWidth, style.borderRightWidth]
+                .reduce((sum, width) => sum + Number.parseFloat(width || '0'), 0);
+            // Keep fractional CSS widths; transformed bounds and rounded offsets can hide More at the boundary.
+            const getWidth = (element: HTMLElement | null | undefined) => element ? Number.parseFloat(getComputedStyle(element).width) || 0 : 0;
+            const getWidths = () => groups.map((group) => getWidth(groupsRef.current.get(group.key)));
+            container.style.setProperty('--ribbon-grid-density', '0');
+            let widths = getWidths();
+            if (widths.reduce((sum, width) => sum + width, 0) > availableWidth) {
+                container.style.setProperty('--ribbon-grid-density', '1');
+                widths = getWidths();
+            }
             const totalWidth = widths.reduce((sum, width) => sum + width, 0);
-            const limit = totalWidth <= availableWidth ? availableWidth : availableWidth - (moreRef.current?.getBoundingClientRect().width ?? 0);
+            const limit = totalWidth <= availableWidth ? availableWidth : availableWidth - getWidth(moreRef.current);
             let used = 0;
             let count = 0;
             for (const width of widths) {
@@ -57,6 +66,7 @@ export function RibbonGrid({ groups, title, className, ...props }: IRibbonGridPr
             setVisibleGroupCount(count);
         };
 
+        measure();
         const observer = new ResizeObserver(measure);
         observer.observe(container);
         groupsRef.current.forEach((element) => observer.observe(element));
@@ -94,6 +104,7 @@ export function RibbonGrid({ groups, title, className, ...props }: IRibbonGridPr
                                 data-u-comp="ribbon-grid-group"
                                 data-group-key={group.key}
                                 aria-hidden={index >= visibleGroupCount || undefined}
+                                style={{ paddingInline: 'calc(8px - 2px * var(--ribbon-grid-density, 0))' }}
                                 className={clsx(`
                                   univer-relative univer-box-border univer-flex univer-w-max univer-shrink-0
                                   univer-flex-col univer-px-2
@@ -105,9 +116,11 @@ export function RibbonGrid({ groups, title, className, ...props }: IRibbonGridPr
                                     data-testid="ribbon-grid-group-grid"
                                     className="
                                       univer-grid univer-min-h-0 univer-flex-1 univer-grid-flow-col
-                                      univer-grid-rows-[repeat(2,1.5rem)] univer-content-center univer-gap-2 univer-py-2
+                                      univer-grid-rows-[repeat(2,1.75rem)] univer-content-center univer-gap-y-0
+                                      univer-py-2
                                       [&>div>span>span]:univer-h-full
                                     "
+                                    style={{ columnGap: 'calc(8px - 4px * var(--ribbon-grid-density, 0))' }}
                                 >
                                     {placements.map((placement) => placement.item.item && (
                                         <div
@@ -124,7 +137,9 @@ export function RibbonGrid({ groups, title, className, ...props }: IRibbonGridPr
                                             style={{
                                                 gridRow: `${placement.row} / span ${placement.rowSpan}`,
                                                 gridColumn: `${placement.column} / span ${placement.columnSpan}`,
-                                                width: placement.width,
+                                                width: placement.minWidth === undefined
+                                                    ? placement.width
+                                                    : `calc(${placement.width}px - ${placement.width! - placement.minWidth}px * var(--ribbon-grid-density, 0))`,
                                             }}
                                         >
                                             <ToolbarItem

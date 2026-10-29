@@ -57,7 +57,8 @@ univer-justify-center univer-rounded univer-border-none univer-bg-transparent un
 univer-text-gray-900 univer-outline-none univer-transition-colors univer-animate-in univer-fade-in
 dark:!univer-text-gray-0 dark:hover:!univer-bg-gray-700 dark:disabled:!univer-text-gray-600
 disabled:univer-cursor-not-allowed disabled:univer-text-gray-300 disabled:hover:univer-bg-transparent
-hover:univer-bg-gray-100 whitespace-nowrap univer-w-max
+hover:univer-bg-gray-100 univer-whitespace-nowrap univer-w-max
+focus-visible:univer-ring-2 focus-visible:univer-ring-inset focus-visible:univer-ring-primary-600
 [&_svg]:univer-shrink-0
 `;
 

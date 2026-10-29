@@ -97,6 +97,15 @@ describe('font input views', () => {
         TestState.reset();
     });
 
+    it('exposes the name passed by its toolbar selector', () => {
+        const rendered = renderWithDependencies(<FontFamily value="Arial" ariaLabel="Font family" onChange={() => {}} />);
+        try {
+            expect(rendered.getByRole('textbox', { name: 'Font family' })).toBeTruthy();
+        } finally {
+            rendered.dispose();
+        }
+    });
+
     it('keeps input pointer actions out of the surrounding menu trigger while the arrow still opens it', () => {
         const rendered = renderWithDependencies(
             <DropdownMenu items={[{ type: 'item', children: 'Font choice' }]}>

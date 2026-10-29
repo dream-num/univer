@@ -53,6 +53,8 @@ export interface IRibbonGridLayout {
     showLabel?: boolean;
     /** Width in pixels. */
     width?: number;
+    /** Width used before the ribbon moves this group into More. */
+    minWidth?: number;
     /** Icon size in pixels. */
     iconSize?: number;
 }

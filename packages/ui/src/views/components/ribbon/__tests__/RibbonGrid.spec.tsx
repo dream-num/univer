@@ -38,6 +38,7 @@ const injectors: Injector[] = [];
 let availableWidth = 250;
 let resizeCallbacks: ResizeObserverCallback[] = [];
 let groupWidths: Record<string, number> = {};
+let compactWidths: Record<string, number> = {};
 
 function mountGrid(groups: IMenuSchema[]) {
     const injector = new Injector([
@@ -53,7 +54,6 @@ function mountGrid(groups: IMenuSchema[]) {
     injectors.push(injector);
     const ConnectedGrid = connectInjector(RibbonGrid, injector) as ComponentType<{ groups: IMenuSchema[]; title: string }>;
     const result = render(<ConnectedGrid groups={groups} title="Start" />);
-    resize();
     return { ...result, ConnectedGrid };
 }
 
@@ -79,16 +79,27 @@ beforeEach(() => {
     availableWidth = 250;
     resizeCallbacks = [];
     groupWidths = {};
+    compactWidths = {};
     vi.stubGlobal('ResizeObserver', class {
         constructor(callback: ResizeObserverCallback) { resizeCallbacks.push(callback); }
         observe() {}
         disconnect() {}
     });
-    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(function (this: HTMLElement) {
-        return this.dataset.uComp === 'ribbon-grid-toolbar' ? availableWidth : 0;
-    });
-    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
-        return { width: this.dataset.groupKey ? groupWidths[this.dataset.groupKey] ?? 100 : 64 } as DOMRect;
+    const getComputedStyle = window.getComputedStyle;
+    vi.stubGlobal('getComputedStyle', (element: Element) => {
+        const style = getComputedStyle(element);
+        const key = element.getAttribute('data-group-key');
+        const toolbar = element.getAttribute('data-u-comp') === 'ribbon-grid-toolbar';
+        const compact = element.closest('[role="toolbar"]')?.getAttribute('style')?.includes('--ribbon-grid-density: 1');
+        const width = toolbar ? availableWidth : key ? (compact ? compactWidths[key] : undefined) ?? groupWidths[key] ?? 100 : 64;
+        return new Proxy(style, {
+            get(target, property) {
+                if (property === 'width') return `${width}px`;
+                if (toolbar && (property === 'borderLeftWidth' || property === 'borderRightWidth')) return '0px';
+                const value = Reflect.get(target, property, target);
+                return typeof value === 'function' ? value.bind(target) : value;
+            },
+        });
     });
 });
 
@@ -100,6 +111,30 @@ afterEach(() => {
 });
 
 describe('RibbonGrid overflow', () => {
+    it('compacts controls before moving a whole group into More', () => {
+        availableWidth = 280;
+        compactWidths.font = 50;
+        const { getByRole, queryByRole } = mountGrid(createGroups());
+        expect(queryByRole('button', { name: 'ui.ribbon.more' })).toBeNull();
+        expect(within(getByRole('toolbar')).getAllByRole('button')).toHaveLength(6);
+
+        availableWidth = 220;
+        resize();
+        expect(getByRole('button', { name: 'ui.ribbon.more' })).toBeTruthy();
+        expect(within(getByRole('toolbar')).getByRole('button', { name: 'font-1' })).toBeTruthy();
+        expect(within(getByRole('toolbar')).queryByRole('button', { name: 'layout-0' })).toBeNull();
+    });
+
+    it('shows More immediately below the exact fit and restores all items at the boundary', () => {
+        availableWidth = 299;
+        const { getByRole, queryByRole } = mountGrid(createGroups());
+        expect(getByRole('button', { name: 'ui.ribbon.more' })).toBeTruthy();
+        availableWidth = 300;
+        resize();
+        expect(queryByRole('button', { name: 'ui.ribbon.more' })).toBeNull();
+        expect(within(getByRole('toolbar')).getAllByRole('button')).toHaveLength(6);
+    });
+
     it('reserves More space, moves whole groups, and restores them when space returns', () => {
         const { getByRole, queryByRole } = mountGrid(createGroups());
         const toolbar = getByRole('toolbar');
@@ -117,6 +152,14 @@ describe('RibbonGrid overflow', () => {
         expect(queryByRole('button', { name: 'ui.ribbon.more' })).toBeNull();
         expect(queryByRole('dialog')).toBeNull();
         expect(within(toolbar).getAllByRole('button')).toHaveLength(6);
+    });
+
+    it('does not lose fractional widths when deciding whether More fits', () => {
+        availableWidth = 300;
+        groupWidths.font = 100.25;
+        const { getByRole } = mountGrid(createGroups());
+        expect(getByRole('button', { name: 'ui.ribbon.more' })).toBeTruthy();
+        expect(within(getByRole('toolbar')).queryByRole('button', { name: 'layout-0' })).toBeNull();
     });
 
     it('remeasures changing group widths without dropping later groups', () => {

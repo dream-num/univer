@@ -26,6 +26,7 @@ export interface IRibbonGridPlacement {
     columnSpan: number;
     showLabel: boolean;
     width?: number;
+    minWidth?: number;
     iconSize?: number;
 }
 
@@ -59,6 +60,7 @@ export function placeRibbonGridItems(items: IMenuSchema[]): IRibbonGridPlacement
             columnSpan,
             showLabel: layout.showLabel ?? false,
             width: layout.width,
+            minWidth: layout.minWidth,
             iconSize: layout.iconSize,
         };
         if (cells.some((cell) => occupied.has(cell))) {
@@ -83,18 +85,33 @@ export function placeRibbonGridItems(items: IMenuSchema[]): IRibbonGridPlacement
             columnSpan,
             showLabel: layout?.showLabel ?? false,
             width: layout?.width,
+            minWidth: layout?.minWidth,
             iconSize: layout?.iconSize,
         });
     }
 
-    return items.map((item) => placements.get(item)!);
+    return items.map((item) => placements.get(item)!).sort((a, b) => a.row - b.row || a.column - b.column);
 }
 
 function isValidGridGeometry(layout: NonNullable<IMenuSchema['gridLayout']>, rowSpan: number, cells: string[]) {
     return cells.length > 0
         && layout.row + rowSpan - 1 <= RIBBON_GRID_ROWS
         && (layout.width === undefined || (Number.isFinite(layout.width) && layout.width > 0))
+        && (layout.minWidth === undefined || (Number.isFinite(layout.minWidth) && layout.minWidth > 0 && layout.minWidth <= (layout.width ?? 0)))
         && (layout.iconSize === undefined || (Number.isFinite(layout.iconSize) && layout.iconSize > 0));
+}
+
+export function groupRibbonOverflowItems(items: IMenuSchema[]): IMenuSchema[][] {
+    const placements = placeRibbonGridItems(items);
+    const groups: IMenuSchema[][] = [];
+    placements.forEach((placement, index) => {
+        const previous = placements[index - 1];
+        if (!previous || placement.row !== previous.row || Boolean(placement.item.item?.icon) !== Boolean(previous.item.item?.icon)) {
+            groups.push([]);
+        }
+        groups[groups.length - 1].push(placement.item);
+    });
+    return groups;
 }
 
 function findFirstAvailableCells(occupied: Set<string>, rowSpan: number, columnSpan: number) {

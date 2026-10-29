@@ -425,7 +425,7 @@ describe('ContextMenuPanel', () => {
         expect(TestState.cancels).toBe(1);
     });
 
-    it('enters, navigates, and exits a submenu with arrow keys', async () => {
+    it.each(['ltr', 'rtl'] as const)('enters, navigates, and exits a submenu with arrow keys in %s', async (direction) => {
         renderWithDependencies(<ContextMenuPanel menuType="root" />, {
             root: [
                 {
@@ -442,11 +442,11 @@ describe('ContextMenuPanel', () => {
                 createButtonItem('bring-front', { title: 'Bring to Front' }),
                 createButtonItem('send-back', { title: 'Send to Back' }),
             ],
-        });
+        }, (injector) => injector.get(LocaleService).setDirection(direction));
         const trigger = screen.getByRole('button', { name: 'Arrange' });
         trigger.focus();
 
-        fireEvent.keyDown(trigger, { key: 'ArrowRight' });
+        fireEvent.keyDown(trigger, { key: direction === 'rtl' ? 'ArrowLeft' : 'ArrowRight' });
         const first = await screen.findByRole('button', { name: 'Bring to Front' });
         await nextFrame();
         await waitFor(() => expect(document.activeElement).toBe(first));
@@ -455,8 +455,85 @@ describe('ContextMenuPanel', () => {
         const second = screen.getByRole('button', { name: 'Send to Back' });
         expect(document.activeElement).toBe(second);
 
-        fireEvent.keyDown(second, { key: 'ArrowLeft' });
+        fireEvent.keyDown(second, { key: direction === 'rtl' ? 'ArrowRight' : 'ArrowLeft' });
         expect(document.activeElement).toBe(trigger);
+    });
+
+    it.each(['click', 'pointer return', 'ArrowRight', 'Enter'])(
+        'keeps a hovered submenu visible and usable after %s on its parent',
+        async (interaction) => {
+            const onOptionSelect = vi.fn();
+            renderWithDependencies(<ContextMenuPanel menuType="root" onOptionSelect={onOptionSelect} />, {
+                root: [{
+                    key: 'copy-special',
+                    order: 0,
+                    item: {
+                        id: 'copy-special',
+                        type: MenuItemType.SUBITEMS,
+                        title: 'Copy special',
+                    },
+                }],
+                'copy-special': [createButtonItem('copy-formula', { title: 'Copy formula only' })],
+            });
+            const trigger = screen.getByRole('button', { name: 'Copy special' });
+
+            fireEvent.mouseEnter(trigger);
+            await nextFrame();
+            expect(screen.getByRole('button', { name: 'Copy formula only' })).not.toBeNull();
+
+            if (interaction === 'click') {
+                fireEvent.click(trigger, { detail: 1 });
+            } else if (interaction === 'pointer return') {
+                const panel = trigger.closest('[tabindex="-1"]');
+                fireEvent.mouseLeave(trigger, { relatedTarget: panel });
+                fireEvent.mouseEnter(trigger);
+            } else {
+                trigger.focus();
+                fireEvent.keyDown(trigger, { key: interaction });
+            }
+            await nextFrame();
+            const option = screen.getByRole('button', { name: 'Copy formula only' });
+            if (interaction === 'ArrowRight' || interaction === 'Enter') {
+                expect(document.activeElement).toBe(option);
+            }
+            fireEvent.click(option);
+
+            expect(onOptionSelect).toHaveBeenCalledOnce();
+            expect(onOptionSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'copy-formula' }));
+            expect(screen.queryByRole('button', { name: 'Copy formula only' })).toBeNull();
+        }
+    );
+
+    it.each(['parent', 'submenu'])('closes the submenu when the pointer leaves the window from its %s', async (origin) => {
+        const contains = Node.prototype.contains;
+        // The test DOM accepts Window here, whereas browsers require a Node.
+        vi.spyOn(Node.prototype, 'contains').mockImplementation(function (this: Node, other) {
+            if (other !== null && !(other instanceof Node)) {
+                throw new TypeError('Node.contains requires a Node');
+            }
+            return contains.call(this, other);
+        });
+        renderWithDependencies(<ContextMenuPanel menuType="root" />, {
+            root: [{
+                key: 'color',
+                order: 0,
+                item: {
+                    id: 'color',
+                    type: MenuItemType.SELECTOR,
+                    title: 'Color',
+                    selections: [{ label: 'Red', value: 'red' }],
+                },
+            }],
+        });
+        const trigger = screen.getByRole('button', { name: 'Color' });
+        fireEvent.mouseEnter(trigger);
+        await nextFrame();
+        const submenu = document.getElementById(trigger.getAttribute('aria-controls')!)!;
+
+        fireEvent.mouseLeave(origin === 'parent' ? trigger : submenu, { relatedTarget: window });
+
+        expect(screen.queryByText('Red')).toBeNull();
+        expect(trigger.getAttribute('aria-expanded')).toBe('false');
     });
 
     it('selects an option from a selector submenu with the selector command id', () => {
@@ -624,6 +701,79 @@ describe('ContextMenuPanel', () => {
             vi.advanceTimersByTime(CONTEXT_MENU_SUBMENU_CLOSE_DELAY + 10);
         });
         expect(screen.getByText('docs-ui.fillColor')).not.toBeNull();
+    });
+
+    describe.each([
+        { direction: 'ltr' as const, triggerLeft: 100, side: 'right' },
+        { direction: 'ltr' as const, triggerLeft: 900, side: 'left' },
+        { direction: 'rtl' as const, triggerLeft: 600, side: 'left' },
+        { direction: 'rtl' as const, triggerLeft: 20, side: 'right' },
+    ])('pointer movement in $direction with a submenu opening to the $side', ({ direction, triggerLeft, side }) => {
+        it.each(['enter submenu', 'pause on sibling', 'click sibling', 'move away', 'leave sibling'])(
+            'protects the diagonal path and handles %s',
+            async (interaction) => {
+                vi.stubGlobal('innerWidth', 1200);
+                const onOptionSelect = vi.fn();
+                renderWithDependencies(<ContextMenuPanel menuType="root" onOptionSelect={onOptionSelect} />, {
+                    root: ['Paste', 'Clear'].map((title, order) => ({
+                        key: title,
+                        order,
+                        item: { id: title, type: MenuItemType.SUBITEMS, title },
+                    })),
+                    Paste: ['Values', 'Format', 'Width', 'Borders', 'Formulas'].map((title) => createButtonItem(title, { title })),
+                    Clear: [createButtonItem('clear-content', { title: 'Clear content' })],
+                }, (injector) => injector.get(LocaleService).setDirection(direction));
+                const paste = screen.getByRole('button', { name: 'Paste' });
+                const clear = screen.getByRole('button', { name: 'Clear' });
+                vi.spyOn(paste.parentElement!, 'getBoundingClientRect').mockReturnValue(new DOMRect(triggerLeft, 100, 200, 32));
+                fireEvent.mouseEnter(paste);
+                const submenu = document.getElementById(paste.getAttribute('aria-controls')!)!;
+                const submenuLeft = side === 'right' ? triggerLeft + 198 : triggerLeft - 198;
+                vi.spyOn(submenu, 'getBoundingClientRect').mockReturnValue(new DOMRect(submenuLeft, 100, 200, 180));
+                vi.spyOn(submenu.firstElementChild!, 'getBoundingClientRect').mockReturnValue(
+                    new DOMRect(submenuLeft + (side === 'right' ? 20 : 0), 100, 180, 180)
+                );
+                await nextFrame();
+                expect(screen.getByRole('button', { name: 'Formulas' })).not.toBeNull();
+                expect(side === 'right'
+                    ? Number.parseFloat(submenu.style.left) > triggerLeft
+                    : Number.parseFloat(submenu.style.left) < triggerLeft).toBe(true);
+
+                vi.useFakeTimers();
+                const originX = triggerLeft + 100;
+                const step = side === 'right' ? 1 : -1;
+                fireEvent.mouseLeave(paste, { relatedTarget: clear, clientX: originX, clientY: 132 });
+                fireEvent.mouseEnter(clear, { clientX: originX + step * 30, clientY: 150 });
+
+                expect(screen.getByRole('button', { name: 'Formulas' })).not.toBeNull();
+                expect(screen.queryByText('Clear content')).toBeNull();
+
+                if (interaction === 'enter submenu') {
+                    fireEvent.mouseMove(clear, { clientX: originX + step * 60, clientY: 165 });
+                    fireEvent.mouseEnter(submenu);
+                    act(() => vi.advanceTimersByTime(CONTEXT_MENU_SUBMENU_CLOSE_DELAY + 1));
+                    fireEvent.click(screen.getByRole('button', { name: 'Formulas' }));
+                    expect(onOptionSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'Formulas' }));
+                } else if (interaction === 'leave sibling') {
+                    fireEvent.mouseLeave(clear, { relatedTarget: clear.closest('[tabindex="-1"]') });
+                    act(() => vi.advanceTimersByTime(CONTEXT_MENU_SUBMENU_CLOSE_DELAY + 1));
+                    expect(screen.queryByText('Clear content')).toBeNull();
+                    expect(screen.queryByText('Formulas')).toBeNull();
+                } else {
+                    if (interaction === 'pause on sibling') {
+                        act(() => vi.advanceTimersByTime(CONTEXT_MENU_SUBMENU_CLOSE_DELAY + 1));
+                    } else if (interaction === 'click sibling') {
+                        fireEvent.click(clear, { detail: 1 });
+                    } else {
+                        fireEvent.mouseMove(clear, { clientX: originX, clientY: 160 });
+                    }
+                    expect(screen.getByText('Clear content')).not.toBeNull();
+                    expect(screen.queryByText('Formulas')).toBeNull();
+                    act(() => vi.advanceTimersByTime(CONTEXT_MENU_SUBMENU_CLOSE_DELAY + 1));
+                    expect(screen.getByText('Clear content')).not.toBeNull();
+                }
+            }
+        );
     });
 
     it('closes an open submenu when its parent becomes disabled', async () => {

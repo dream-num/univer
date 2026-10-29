@@ -25,6 +25,8 @@ import {
 } from '@univerjs/core';
 import { describe, expect, it, onTestFinished } from 'vitest';
 import { InsertSheetMutation } from '../../commands/mutations/insert-sheet.mutation';
+import { SetWorksheetOrderMutation } from '../../commands/mutations/set-worksheet-order.mutation';
+import { SetWorksheetActiveOperation } from '../../commands/operations/set-worksheet-active.operation';
 import { UniverSheetsPlugin } from '../../plugin';
 import { ActiveWorksheetController } from '../active-worksheet.controller';
 
@@ -65,5 +67,35 @@ describe('ActiveWorksheetController insert activation', () => {
             sheet: mergeWorksheetSnapshotWithDefault({ id: 'remote', name: 'Remote' }),
         }, { fromCollab: true })).toBe(true);
         expect(workbook.getActiveSheet()?.getSheetId()).toBe('data');
+    });
+});
+
+describe('ActiveWorksheetController model lifecycle', () => {
+    it('selects the previous surviving sheet when an atomic model write removes the active Chart Sheet', () => {
+        const { workbook, commands } = createRuntime();
+        workbook.addWorksheet('host', 1, mergeWorksheetSnapshotWithDefault({ id: 'host', name: 'Charts', type: SheetTypes.CHART }));
+        workbook.addWorksheet('tail', 2, mergeWorksheetSnapshotWithDefault({ id: 'tail', name: 'Tail' }));
+        commands.syncExecuteCommand(SetWorksheetActiveOperation.id, { unitId: 'unit', subUnitId: 'host' });
+        expect(workbook.removeSheet('host')).toBe(true);
+        expect(workbook.getActiveSheet()?.getSheetId()).toBe('data');
+        expect(workbook.getActiveSheetIndex()).toBe(0);
+    });
+
+    it('retains the local active sheet when another sheet is removed by the model owner', () => {
+        const { workbook } = createRuntime();
+        workbook.addWorksheet('host', 1, mergeWorksheetSnapshotWithDefault({ id: 'host', name: 'Charts', type: SheetTypes.CHART }));
+        expect(workbook.removeSheet('host')).toBe(true);
+        expect(workbook.getActiveSheet()?.getSheetId()).toBe('data');
+    });
+
+    it('selects the previous survivor using the current order after a peer reordered other sheets', () => {
+        const { workbook, commands } = createRuntime();
+        workbook.addWorksheet('host', 1, mergeWorksheetSnapshotWithDefault({ id: 'host', name: 'Charts', type: SheetTypes.CHART }));
+        workbook.addWorksheet('tail', 2, mergeWorksheetSnapshotWithDefault({ id: 'tail', name: 'Tail' }));
+        commands.syncExecuteCommand(SetWorksheetActiveOperation.id, { unitId: 'unit', subUnitId: 'host' });
+        commands.syncExecuteCommand(SetWorksheetOrderMutation.id, { unitId: 'unit', subUnitId: 'tail', fromOrder: 2, toOrder: 0 });
+        expect(workbook.removeSheet('host')).toBe(true);
+        expect(workbook.getActiveSheet()?.getSheetId()).toBe('data');
+        expect(workbook.getActiveSheetIndex()).toBe(1);
     });
 });

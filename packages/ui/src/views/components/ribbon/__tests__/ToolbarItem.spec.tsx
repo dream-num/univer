@@ -15,7 +15,6 @@
  */
 
 import type { ComponentType, ReactElement } from 'react';
-import type { IIconProps } from '../../../../common/icon-manager';
 import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import {
     ContextService,
@@ -29,6 +28,7 @@ import {
 } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
+import type { IIconProps } from '../../../../common/icon-manager';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
 import { ILayoutService } from '../../../../services/layout/layout.service';
@@ -250,6 +250,25 @@ describe('ToolbarItem', () => {
         );
 
         expect(getByText('Financial')).toBeTruthy();
+    });
+
+    it('keeps icon-only overflow selectors named and keyboard-operable without visible titles', async () => {
+        const { getByRole, findByText } = renderWithDependencies(
+            <ToolbarItem
+                id="test-overflow-selector"
+                type={MenuItemType.SELECTOR}
+                icon="TestIcon"
+                title="Alignment"
+                selections={[{ label: 'Align left', value: 'left' }]}
+                grid
+                overflow
+            />
+        );
+        const trigger = getByRole('button', { name: 'Alignment' });
+        expect(trigger.textContent).toBe('');
+        trigger.focus();
+        fireEvent.keyDown(trigger, { key: 'Enter' });
+        expect(await findByText('Align left')).toBeTruthy();
     });
 
     it('does not wrap an interactive custom button label in another button', () => {

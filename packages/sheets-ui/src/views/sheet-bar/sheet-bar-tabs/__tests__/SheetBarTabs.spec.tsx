@@ -23,6 +23,7 @@ import {
     IUniverInstanceService,
     LocaleService,
     LocaleType,
+    mergeWorksheetSnapshotWithDefault,
     SheetTypes,
     Univer,
     UniverInstanceType,
@@ -98,6 +99,16 @@ describe('Chart Sheet tabs', () => {
         const root = createRoot(container);
         try {
             await act(async () => root.render(<RediContext value={{ injector }}><SheetBarTabs /></RediContext>));
+            await act(async () => {
+                workbook.addWorksheet('remote', 2, mergeWorksheetSnapshotWithDefault({ id: 'remote', name: 'Remote Charts', type: SheetTypes.CHART }));
+            });
+            expect(container.querySelector('[role=tab][data-id=remote]')?.textContent).toBe('Remote Charts');
+            expect(workbook.getActiveSheet()?.getSheetId()).toBe('grid');
+            await act(async () => {
+                workbook.removeSheet('remote');
+            });
+            expect(container.querySelector('[role=tab][data-id=remote]')).toBeNull();
+            expect(workbook.getActiveSheet()?.getSheetId()).toBe('grid');
             const chartTab = container.querySelector<HTMLElement>('[role=tab][data-id=chart]')!;
             const gridTab = container.querySelector<HTMLElement>('[role=tab][data-id=grid]')!;
             expect(chartTab.textContent).toBe('Chart1');

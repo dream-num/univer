@@ -16,7 +16,6 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-
 import type { IRibbonGridLayout } from './menu-manager.service';
 
 export type OneOrMany<T> = T | T[];

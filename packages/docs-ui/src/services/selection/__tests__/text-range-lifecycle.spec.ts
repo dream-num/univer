@@ -92,6 +92,32 @@ describe('TextRange callback lifetime', () => {
         expect(vi.getTimerCount()).toBe(0);
     });
 
+    it('replaces a pending hide when another blink callback runs', () => {
+        const interval = vi.spyOn(globalThis, 'setInterval');
+        const range = createRange();
+        const anchor = range.getAnchor()!;
+        const blink = interval.mock.calls[0][0] as () => void;
+
+        vi.advanceTimersByTime(1250);
+        expect(anchor.stroke).toBe('#d020b0');
+        expect(vi.getTimerCount()).toBe(2);
+
+        // Deliver another blink while the previous hide is still pending.
+        blink();
+
+        expect(vi.getTimerCount()).toBe(2);
+        vi.advanceTimersByTime(250);
+        expect(anchor.stroke).toBe('#d020b0');
+        vi.advanceTimersByTime(249);
+        expect(anchor.stroke).toBe('#d020b0');
+        vi.advanceTimersByTime(1);
+        expect(anchor.stroke).toBe('#112233');
+        expect(vi.getTimerCount()).toBe(1);
+
+        range.dispose();
+        expect(vi.getTimerCount()).toBe(0);
+    });
+
     it.each([10, 100, 4000].flatMap((count) => [
         { count, delay: 0, phase: 'initial hide' },
         { count, delay: 1000, phase: 'recurring hide' },

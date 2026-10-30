@@ -15,13 +15,13 @@
  */
 
 import type { KeyboardEvent } from 'react';
-import type { IFontSizeProps } from './interface';
 import { InputNumber } from '@univerjs/design';
 import { useState } from 'react';
+import type { IFontSizeProps } from './interface';
 import { useObservable } from '../../utils/di';
 
 export const FontSize = (props: IFontSizeProps) => {
-    const { value, min, max, onChange, disabled$ } = props;
+    const { value, min, max, onChange, disabled$, ariaLabel } = props;
     const disabled = useObservable(disabled$);
     const [draft, setDraft] = useState<{ source: number; value: number | null } | null>(null);
     const inputValue = draft !== null && draft.source === value ? draft.value : Number(value ?? 0);
@@ -60,6 +60,7 @@ export const FontSize = (props: IFontSizeProps) => {
     return (
         <div className="univer-h-6 univer-w-7 univer-text-sm" onPointerDown={(event) => event.stopPropagation()}>
             <InputNumber
+                aria-label={ariaLabel}
                 className={`
                   univer-block univer-h-6 univer-border-none univer-bg-transparent univer-leading-6
                   [&_input:focus]:!univer-ring-0

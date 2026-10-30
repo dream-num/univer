@@ -38,7 +38,7 @@ import { WorksheetEditPermission } from '../../permission-point/worksheet/edit';
 import { WorksheetViewPermission } from '../../permission-point/worksheet/view';
 import { WorksheetProtectionPointModel } from '../worksheet-permission-point.model';
 import { WorksheetProtectionRuleModel } from '../worksheet-permission-rule.model';
-import { POINT_MODEL_PLUGIN_NAME, RULE_MODEL_PLUGIN_NAME, WorksheetPermissionService } from '../worksheet-permission.service';
+import { POINT_MODEL_PLUGIN_NAME, RULE_MODEL_PLUGIN_NAME } from '../worksheet-permission.service';
 
 const workbookData: IWorkbookData = {
     id: 'test',
@@ -79,8 +79,6 @@ describe('WorksheetPermissionService', () => {
     beforeEach(() => {
         publications = [];
         const testBed = createCommandTestBed(workbookData, undefined, (injector) => {
-            const permissionOwner = injector.get(WorksheetPermissionService);
-            expect(permissionOwner.setWorksheetEditPermissionConstraint((worksheet) => worksheet.getConfig().type !== SheetTypes.CHART)).toBe(true);
             publicationSubscription = injector.get(IPermissionService).permissionPointUpdate$.subscribe((point) => {
                 if (point instanceof WorksheetEditPermission) {
                     publications.push({ id: point.id, value: point.value });
@@ -104,16 +102,16 @@ describe('WorksheetPermissionService', () => {
         univer.dispose();
     });
 
-    it('publishes constrained edit points for existing and newly inserted chart sheets', () => {
-        expect(publications).toContainEqual({ id: editPoint('chart').id, value: false });
+    it('publishes editable points for existing and newly inserted chart sheets', () => {
+        expect(publications).toContainEqual({ id: editPoint('chart').id, value: true });
         expect(publications).toContainEqual({ id: editPoint('grid').id, value: true });
-        expect(permissionService.getPermissionPoint(editPoint('chart').id)?.value).toBe(false);
+        expect(permissionService.getPermissionPoint(editPoint('chart').id)?.value).toBe(true);
         expect(permissionService.getPermissionPoint(editPoint('grid').id)?.value).toBe(true);
         expect(commandService.syncExecuteCommand(InsertSheetMutation.id, {
             unitId: 'test',
             sheet: mergeWorksheetSnapshotWithDefault({ id: 'later-chart', name: 'Later chart', type: SheetTypes.CHART }),
         })).toBe(true);
-        expect(publications).toContainEqual({ id: editPoint('later-chart').id, value: false });
+        expect(publications).toContainEqual({ id: editPoint('later-chart').id, value: true });
     });
 
     it('removes worksheet and range points when the real worksheet is removed', () => {
@@ -135,20 +133,19 @@ describe('WorksheetPermissionService', () => {
         expect(permissionService.getPermissionPoint(editPoint('grid').id)).toBeUndefined();
         expect(permissionService.getPermissionPoint(new WorksheetViewPermission('test', 'grid').id)).toBeUndefined();
         expect(permissionService.getPermissionPoint(rangePoint.id)).toBeUndefined();
-        expect(permissionService.getPermissionPoint(editPoint('chart').id)?.value).toBe(false);
+        expect(permissionService.getPermissionPoint(editPoint('chart').id)?.value).toBe(true);
     });
 
-    it('combines rule updates with the chart constraint without transient allow', () => {
+    it('restores chart edit grants after protection changes', () => {
         worksheetRuleModel.addRule('test', worksheetRule('chart', 'chart-rule'));
         worksheetRuleModel.setRule('test', 'chart', worksheetRule('chart', 'revised-rule'));
         worksheetRuleModel.deleteRule('test', 'chart');
         permissionService.updatePermissionPoint(editPoint('chart').id, true);
-        expect(publications.filter((point) => point.id === editPoint('chart').id).every((point) => point.value === false)).toBe(true);
-        expect(permissionService.getPermissionPoint(editPoint('chart').id)?.value).toBe(false);
+        expect(permissionService.getPermissionPoint(editPoint('chart').id)?.value).toBe(true);
         expect(permissionService.getPermissionPoint(editPoint('grid').id)?.value).toBe(true);
     });
 
-    it('round trips real worksheet resources and preserves chart denial on unload', () => {
+    it('round trips real worksheet protection resources', () => {
         worksheetRuleModel.addRule('test', worksheetRule('grid', 'grid-rule'));
         worksheetPointModel.addRule({ unitId: 'test', subUnitId: 'grid', permissionId: 'grid-point-rule' });
         const resources = resourceManager.getResources('test', UniverInstanceType.UNIVER_SHEET);
@@ -162,10 +159,10 @@ describe('WorksheetPermissionService', () => {
         resourceManager.unloadResources('test', UniverInstanceType.UNIVER_SHEET);
         expect(worksheetRuleModel.getRule('test', 'grid')).toBeUndefined();
         expect(worksheetPointModel.getRule('test', 'grid')).toBeUndefined();
-        expect(permissionService.getPermissionPoint(editPoint('chart').id)?.value).toBe(false);
+        expect(permissionService.getPermissionPoint(editPoint('chart').id)).toBeUndefined();
     });
 
-    it('keeps the existing observable subject and denial when requested edit changes', () => {
+    it('keeps the existing observable subject while edit grants change', () => {
         const chartPoint = editPoint('chart');
         const chartSubject = permissionService.getPermissionPoint$(chartPoint.id);
         const observations: boolean[] = [];
@@ -175,8 +172,8 @@ describe('WorksheetPermissionService', () => {
         permissionService.updatePermissionPoint(chartPoint.id, true);
 
         expect(permissionService.getPermissionPoint$(chartPoint.id)).toBe(chartSubject);
-        expect(permissionService.getPermissionPoint(chartPoint.id)?.value).toBe(false);
-        expect(observations).toEqual([false, false, false]);
+        expect(permissionService.getPermissionPoint(chartPoint.id)?.value).toBe(true);
+        expect(observations).toEqual([true, false, true]);
         subscription?.unsubscribe();
     });
 
@@ -191,7 +188,7 @@ describe('WorksheetPermissionService', () => {
         worksheetRuleModel.deleteRule('test', 'grid');
         expect(permissionService.getPermissionPoint(new WorksheetViewPermission('test', 'grid').id)?.value).toBe(true);
         expect(permissionService.getPermissionPoint(editPoint('grid').id)?.value).toBe(true);
-        expect(permissionService.getPermissionPoint(editPoint('chart').id)?.value).toBe(false);
+        expect(permissionService.getPermissionPoint(editPoint('chart').id)?.value).toBe(true);
     });
 
     it('accepts empty and malformed protection resources without leaving stale rules', () => {
@@ -208,6 +205,6 @@ describe('WorksheetPermissionService', () => {
         ]);
         expect(worksheetRuleModel.getRule('test', 'grid')).toBeUndefined();
         expect(worksheetPointModel.getRule('test', 'grid')).toBeUndefined();
-        expect(permissionService.getPermissionPoint(editPoint('chart').id)?.value).toBe(false);
+        expect(permissionService.getPermissionPoint(editPoint('chart').id)?.value).toBe(true);
     });
 });

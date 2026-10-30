@@ -197,7 +197,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             const { sheetId, skeleton } = param;
             const { scene } = this._context;
             const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-            const prevSheetId = this._currentSkeleton?.worksheet?.getSheetId();
+            const prevSheetId = this._skeleton?.worksheet?.getSheetId();
             this._changeRuntime(skeleton, scene, viewportMain);
 
             // Only handle selection when sheet is actually changed
@@ -394,7 +394,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
     ) {
         this._rangeType = rangeType;
 
-        const skeleton = this._currentSkeleton;
+        const skeleton = this._skeleton;
         const scene = this._scene;
         if (!scene || !skeleton) {
             return;
@@ -583,7 +583,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         viewport?: Viewport,
         scrollTimerType: ScrollTimerType = ScrollTimerType.ALL
     ) {
-        const skeleton = this._currentSkeleton;
+        const skeleton = this._skeleton;
         const scene = this._scene;
         if (!scene || !skeleton) {
             return;

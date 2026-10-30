@@ -319,7 +319,7 @@ describe('Test CommandService', () => {
             ['sync', 'collaboration'],
             ['async', 'ordinary'],
             ['async', 'collaboration'],
-        ])('publishes an applied mutation after a %s %s observer throws and preserves the first error', async (execution, boundary) => {
+        ])('stops %s notification at a failing %s observer and preserves the error', async (execution, boundary) => {
             const mutationID = 'applied-mutation-observer-failure';
             const failure = new Error('first observer failure');
             const notified: string[] = [];
@@ -350,7 +350,7 @@ describe('Test CommandService', () => {
             } else {
                 await expect(commandService.executeCommand(mutationID)).rejects.toBe(failure);
             }
-            expect(notified).toEqual(['ordinary', 'publisher', 'last']);
+            expect(notified).toEqual(boundary === 'ordinary' ? [] : ['ordinary']);
         });
 
         it('Should attach the triggering command id to nested synchronous mutations', () => {

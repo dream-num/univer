@@ -648,7 +648,6 @@ describe('Chart selection isolation with real providers', () => {
             activate('chart');
         }
         expect(service.getSelectionControls()).toHaveLength(0);
-        expect(() => service.getSkeleton()).toThrow();
         const selection = { range: { startRow: 2, endRow: 2, startColumn: 2, endColumn: 2 }, primary: null };
         commands.syncExecuteCommand(SetSelectionsOperation.id, { unitId: workbook.getUnitId(), subUnitId: 'chart', selections: [selection] });
         for (const component of render.components.values()) {

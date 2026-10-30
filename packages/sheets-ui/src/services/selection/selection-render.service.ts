@@ -342,7 +342,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             const { sheetId, skeleton } = param;
             const { scene } = this._context;
             const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-            const prevSheetId = this._currentSkeleton?.worksheet?.getSheetId();
+            const prevSheetId = this._skeleton?.worksheet?.getSheetId();
             this._changeRuntime(skeleton, scene, viewportMain);
 
             if (prevSheetId !== skeleton.worksheet.getSheetId()) {

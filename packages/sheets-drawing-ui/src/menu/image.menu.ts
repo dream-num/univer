@@ -32,7 +32,7 @@ export const SHEETS_IMAGE_MENU_ID = 'sheet.menu.image';
 
 function getImageMenuDisabled$(accessor: IAccessor, floating: boolean) {
     return deriveStateFromActiveSheet$(accessor.get(IUniverInstanceService), true, ({ workbook, worksheet }) => {
-        if (worksheet.getConfig().type === SheetTypes.GRID) {
+        if ((worksheet.getConfig().type ?? SheetTypes.GRID) === SheetTypes.GRID) {
             return getCurrentRangeDisable$(accessor, {
                 workbookTypes: [WorkbookEditablePermission],
                 worksheetTypes: [WorksheetEditPermission],

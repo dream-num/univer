@@ -207,7 +207,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         const edit = this._editorBridgeService.getEditLocation();
         const workbook = this._context.unit;
         const worksheet = edit && workbook.getSheetBySheetId(edit.sheetId);
-        if (!worksheet || worksheet.getConfig().type !== SheetTypes.GRID) {
+        if (!worksheet || (worksheet.getConfig().type ?? SheetTypes.GRID) !== SheetTypes.GRID) {
             this._editorBridgeService.disableForceKeepVisible();
             this._hideEditor(true);
             return;

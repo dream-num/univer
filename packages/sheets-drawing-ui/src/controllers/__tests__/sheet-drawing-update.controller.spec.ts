@@ -255,7 +255,7 @@ describe('target-bound image insertion', () => {
         const image = bed.drawings.getDrawingByParam(search)!;
         expect(image).toBeDefined();
         expect(image.anchorType).toBe(SheetDrawingAnchorType.None);
-        expect(image.transform).toMatchObject({ left: 500, top: 175, width: 300, height: 150 });
+        expect(image.transform).toMatchObject({ left: 500, top: 100, width: 300, height: 150 });
         expect(bed.skeletons.ensureSkeleton('test', 'chart')).toBeUndefined();
         expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
         expect(bed.drawings.getDrawingByParam(search)).toBeUndefined();
@@ -365,13 +365,14 @@ describe('target-bound image insertion', () => {
         expect(bed.drawings.getDrawingData('test', 'chart')).toEqual({});
     });
 
-    it('fails before upload when the Chart page is missing or outside the viewport', async () => {
+    it('uses the logical Chart page outside the viewport and rejects a missing page before upload', async () => {
         const bed = imageBed();
         bed.frame.transformByState({ left: 2000 });
-        expect(await bed.controller.insertFloatImageByFile(bed.file)).toBe(false);
+        expect(await bed.controller.insertFloatImageByFile(bed.file)).toBe(true);
+        expect(bed.drawings.getDrawingData('test', 'chart')['new-image'].transform!.left).toBe(2000);
         bed.render.components.delete('__ChartSheetPage__');
         expect(await bed.controller.insertFloatImageByFile(bed.file)).toBe(false);
-        expect(bed.upload).not.toHaveBeenCalled();
+        expect(bed.upload).toHaveBeenCalledTimes(1);
     });
 
     it.each(['file', 'url'] as const)('rejects an explicit Chart cell target before %s IO while GRID is active', async (method) => {

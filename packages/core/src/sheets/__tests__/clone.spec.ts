@@ -67,16 +67,27 @@ describe('worksheet type snapshots', () => {
         }
     });
 
-    it('defaults legacy worksheets to GRID while retaining explicit and unknown types', () => {
+    it.each([undefined, SheetTypes.GRID])('preserves legacy grid type %s through clone, save and reopen without adding a missing field', (type) => {
         const { univer, sheet } = createCoreTestBed();
         try {
-            sheet.addWorksheet('explicit-grid', 1, { id: 'explicit-grid', type: SheetTypes.GRID });
-            sheet.addWorksheet('future-sheet', 2, { id: 'future-sheet', type: 47 as SheetTypes });
-
-            const saved = sheet.save();
-            expect(saved.sheets.sheet1.type).toBe(0);
-            expect(saved.sheets['explicit-grid'].type).toBe(0);
-            expect(saved.sheets['future-sheet'].type).toBe(47);
+            const original = sheet.getSheetBySheetId('sheet1')!;
+            if (type !== undefined) {
+                original.getConfig().type = type;
+            }
+            const copy = cloneWorksheetData(original.getSnapshot());
+            copy.id = 'grid-copy';
+            sheet.addWorksheet(copy.id, 1, copy);
+            const reopened = createCoreTestBed(JSON.parse(JSON.stringify(sheet.save())));
+            try {
+                for (const id of ['sheet1', copy.id]) {
+                    const worksheet = reopened.sheet.getSheetBySheetId(id)!;
+                    expect(worksheet.getCell(0, 0)?.v).toBe('A1');
+                    expect(worksheet.getSnapshot().type).toBe(type);
+                    expect('type' in worksheet.getSnapshot()).toBe(type !== undefined);
+                }
+            } finally {
+                reopened.univer.dispose();
+            }
         } finally {
             univer.dispose();
         }

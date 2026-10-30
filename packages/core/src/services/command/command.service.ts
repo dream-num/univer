@@ -515,29 +515,11 @@ export class CommandService extends Disposable implements ICommandService {
     }
 
     private _notifyCommandExecuted(command: ICommandInfo, options: IExecutionOptions): void {
-        if (command.type !== CommandType.MUTATION) {
-            if (!options.syncOnly) {
-                this._commandExecutedListeners.forEach((listener) => listener(command, options));
-            }
-            return;
-        }
-
-        // The model has already changed. A failed observer must not hide the forward
-        // mutation from later publishers while its compensation is still published.
-        let failure: { error: unknown } | undefined;
-        const notify = (listener: CommandListener) => {
-            try {
-                listener(command, options);
-            } catch (error) {
-                failure ??= { error };
-            }
-        };
         if (!options.syncOnly) {
-            this._commandExecutedListeners.forEach(notify);
+            this._commandExecutedListeners.forEach((listener) => listener(command, options));
         }
-        this._collabMutationListeners.forEach(notify);
-        if (failure) {
-            throw failure.error;
+        if (command.type === CommandType.MUTATION) {
+            this._collabMutationListeners.forEach((listener) => listener(command, options));
         }
     }
 

@@ -91,6 +91,7 @@ import {
     SetSheetDrawingCommand,
     SetWorksheetBackgroundImageCommand,
     SheetDrawingAnchorType,
+    transformDrawingsToChartSheet,
     transformToAxisAlignPosition,
     transformToDrawingPosition,
 } from '@univerjs/sheets-drawing';
@@ -384,24 +385,22 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             if (!bounds) {
                 return false;
             }
-            scale = Math.min(scale, bounds.width / width, bounds.height / height);
             const marker = { row: 0, column: 0, rowOffset: 0, columnOffset: 0 };
-            const drawing = applySheetDrawingPlacement({
+            const placed = transformDrawingsToChartSheet([{
                 unitId,
                 subUnitId,
                 drawingId: imageId,
                 drawingType: DrawingTypeEnum.DRAWING_IMAGE,
                 imageSourceType,
                 source,
+                transform: { left: 0, top: 0, width: width * scale, height: height * scale },
                 sheetTransform: { from: marker, to: marker },
                 axisAlignSheetTransform: { from: marker, to: marker },
-            }, {
-                kind: SheetDrawingAnchorType.None,
-                left: bounds.left + (bounds.width - width * scale) / 2,
-                top: bounds.top + (bounds.height - height * scale) / 2,
-                width: width * scale,
-                height: height * scale,
-            });
+            }], bounds, target.worksheet.getConfig().rightToLeft === BooleanNumber.TRUE);
+            if (!placed?.length) {
+                return false;
+            }
+            const [drawing] = placed;
             return this._commandService.executeCommand<IInsertSheetDrawingCommandParams>(InsertSheetDrawingCommand.id, { unitId, drawings: [drawing] });
         }
 
@@ -631,7 +630,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         const instances = this._injector.get(IUniverInstanceService);
         const host = getSheetCommandTarget(instances, location ?? { unitId: this._context.unitId });
         const render = host && this._injector.get(IRenderManagerService).getRenderUnitById(host.unitId);
-        if (!host || !render || (host.worksheet.getConfig().type !== SheetTypes.GRID && host.worksheet.getConfig().type !== SheetTypes.CHART)) {
+        if (!host || !render || ((host.worksheet.getConfig().type ?? SheetTypes.GRID) !== SheetTypes.GRID && host.worksheet.getConfig().type !== SheetTypes.CHART)) {
             return null;
         }
         const frame = render.components.get(SHEET_VIEW_KEY.CHART_PAGE);
@@ -642,7 +641,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
     private _captureCellImageTarget(location?: ISheetLocationBase): IImageInsertionTarget | null {
         const target = this._captureImageTarget(location);
-        if (!target || target.worksheet.getConfig().type !== SheetTypes.GRID) {
+        if (!target || (target.worksheet.getConfig().type ?? SheetTypes.GRID) !== SheetTypes.GRID) {
             return null;
         }
         if (!location) {
@@ -691,14 +690,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         if (!frame || ![frame.left, frame.top, frame.width, frame.height].every(Number.isFinite) || frame.width <= 0 || frame.height <= 0) {
             return null;
         }
-        const view = render.scene.getMainViewport().calcViewportInfo().viewBound;
-        const left = Math.max(frame.left, view.left);
-        const top = Math.max(frame.top, view.top);
-        const right = Math.min(frame.left + frame.width, view.right);
-        const bottom = Math.min(frame.top + frame.height, view.bottom);
-        return [left, top, right, bottom].every(Number.isFinite) && right > left && bottom > top
-            ? { left, top, width: right - left, height: bottom - top }
-            : null;
+        return { left: frame.left, top: frame.top, width: frame.width, height: frame.height };
     }
 
     private _getUnitInfo() {

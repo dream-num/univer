@@ -43,10 +43,7 @@ import {
     SetRangeValuesMutation,
     transformCellsToRange,
 } from '@univerjs/sheets';
-import {
-    isAllowedPatternForScientificNotationNumber,
-    isScientificNotationNumericCell,
-} from '../../utils/scientific-notation';
+import { isAllowedPatternForScientificNotationNumber, isScientificNotationNumericCell } from '../../utils/scientific-notation';
 
 export interface ISetNumfmtCommandParams {
     unitId?: string;

@@ -26,10 +26,7 @@ import type { IAnchor } from '../../utils/anchor';
 import type { IMoveConditionalRuleMutationParams } from '../mutations/move-conditional-rule.mutation';
 import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
 import { transformSupportSymmetryAnchor } from '../../utils/anchor';
-import {
-    MoveConditionalRuleMutation,
-    MoveConditionalRuleMutationUndoFactory,
-} from '../mutations/move-conditional-rule.mutation';
+import { MoveConditionalRuleMutation, MoveConditionalRuleMutationUndoFactory } from '../mutations/move-conditional-rule.mutation';
 
 export interface IMoveCfCommandParams {
     unitId?: string;

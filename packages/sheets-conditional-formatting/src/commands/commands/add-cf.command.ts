@@ -26,10 +26,7 @@ import type { IConditionFormattingRule } from '../../models/type';
 import type { MakePropertyOptional } from '../../utils/type';
 import type { IAddConditionalRuleMutationParams } from '../mutations/add-conditional-rule.mutation';
 import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
-import {
-    AddConditionalRuleMutation,
-    AddConditionalRuleMutationUndoFactory,
-} from '../mutations/add-conditional-rule.mutation';
+import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory } from '../mutations/add-conditional-rule.mutation';
 
 export interface IAddCfCommandParams {
     unitId?: string;

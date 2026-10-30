@@ -61,12 +61,16 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
         this._initEmbedRuntimeSessionListener();
     }
 
+    private _getSheetType(): SheetTypes | undefined {
+        return this._context.unit.getActiveSheet()?.getConfig().type;
+    }
+
     private _init(): void {
         const spreadsheetPointerDownObserver = (this._context?.mainComponent as Spreadsheet)?.onPointerDown$;
 
         // Content range context menu
         const spreadsheetSubscription = spreadsheetPointerDownObserver.subscribeEvent((event) => {
-            if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART) {
+            if (this._getSheetType() === SheetTypes.CHART) {
                 return;
             }
             if (this._isContextMenuGesture(event)) {

@@ -138,6 +138,10 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         this._init();
     }
 
+    private _getSheetType(): SheetTypes | undefined {
+        return this._context.unit.getActiveSheet()?.getConfig().type;
+    }
+
     private _init() {
         const sheetObject = this._getSheetObject();
 
@@ -356,7 +360,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
     }
 
     private _updateSelections(selectionDataWithStyleList: ISelectionWithCoord[], type: SelectionMoveType) {
-        if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART) {
+        if (this._getSheetType() === SheetTypes.CHART) {
             return;
         }
         const workbook = this._context.unit;
@@ -567,7 +571,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
     // same as PC
     private _normalSelectionDisabled(): boolean {
-        if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART) {
+        if (this._getSheetType() === SheetTypes.CHART) {
             return true;
         }
         return this._contextService.getContextValue(REF_SELECTIONS_ENABLED);

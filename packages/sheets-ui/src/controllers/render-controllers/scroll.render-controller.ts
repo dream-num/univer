@@ -84,6 +84,10 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         this._initSkeletonListener();
     }
 
+    private _getSheetType(): SheetTypes | undefined {
+        return this._context.unit.getActiveSheet()?.getConfig().type;
+    }
+
     private _wheelEventListener() {
         const { scene } = this._context;
         if (!scene) return;
@@ -174,7 +178,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
         this._pendingWheelOffsetX = 0;
         this._pendingWheelOffsetY = 0;
-        if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART) {
+        if (this._getSheetType() === SheetTypes.CHART) {
             this._context.scene.getMainViewport().scrollByViewportDeltaVal({ viewportScrollX: offsetX, viewportScrollY: offsetY });
             this._context.scene.makeDirty();
             return;
@@ -372,7 +376,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         this.disposeWithMe(this._context.unit.activeSheet$.subscribe(() => {
             this._cancelPendingScroll();
             this._scrollManagerService.setSearchParam(null);
-            if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART) {
+            if (this._getSheetType() === SheetTypes.CHART) {
                 this._scrollManagerService.validViewportScrollInfo$.next(null);
                 this._context.scene.getMainViewport().scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: 0 });
             }
@@ -461,7 +465,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     }
 
     scrollToRange(range: IRange, forceTop?: boolean, forceLeft?: boolean): boolean {
-        if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART) {
+        if (this._getSheetType() === SheetTypes.CHART) {
             return false;
         }
         let { endRow, endColumn, startColumn, startRow } = range;
@@ -688,7 +692,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     // For arrow key to active cell cause scrolling.
     // eslint-disable-next-line max-lines-per-function, complexity
     private _scrollToCell(row: number, column: number, forceTop = false, forceLeft = false) {
-        if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART) {
+        if (this._getSheetType() === SheetTypes.CHART) {
             return false;
         }
         const { rowHeightAccumulation, columnWidthAccumulation } = this._sheetSkeletonManagerService.getCurrentSkeleton() ?? {};

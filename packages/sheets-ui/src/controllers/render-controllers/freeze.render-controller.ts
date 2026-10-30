@@ -174,6 +174,10 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         this._initialize();
     }
 
+    private _getSheetType(): SheetTypes | undefined {
+        return this._context.unit.getActiveSheet()?.getConfig().type;
+    }
+
     override dispose(): void {
         this._clearFreeze();
         super.dispose();
@@ -208,7 +212,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         freezeDirectionType: FREEZE_DIRECTION_TYPE = FREEZE_DIRECTION_TYPE.ROW,
         freezeConfig?: IFreeze
     ) {
-        if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART) {
+        if (this._getSheetType() === SheetTypes.CHART) {
             return null;
         }
         const config = freezeConfig ?? this._getFreeze();
@@ -767,7 +771,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
         this.disposeWithMe(
             this._scrollManagerService.validViewportScrollInfo$.subscribe((param: Nullable<IViewportScrollState>) => {
-                if (!param || this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART) return;
+                if (!param || this._getSheetType() === SheetTypes.CHART) {
+                    return;
+                }
 
                 const { scrollX, scrollY, viewportScrollX, viewportScrollY } = param;
 
@@ -1175,7 +1181,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         this.disposeWithMe(
             toDisposable(
                 this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-                    if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART) {
+                    if (this._getSheetType() === SheetTypes.CHART) {
                         this._clearFreeze();
                         this._lastFreeze = undefined;
                         return;
@@ -1666,7 +1672,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
     }
 
     private _getFreeze() {
-        if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART) {
+        if (this._getSheetType() === SheetTypes.CHART) {
             return;
         }
         return this._sheetSkeletonManagerService

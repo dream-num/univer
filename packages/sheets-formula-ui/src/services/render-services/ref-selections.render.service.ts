@@ -167,6 +167,10 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         this._disableSelectionChanging();
     }
 
+    private _getSheetType(): SheetTypes | undefined {
+        return this._context.unit.getActiveSheet()?.getConfig().type;
+    }
+
     protected _initCanvasEventListeners(): IDisposable {
         const sheetObject = this._getSheetObject();
         const { spreadsheetRowHeader, spreadsheetColumnHeader, spreadsheet, spreadsheetLeftTopPlaceholder } = sheetObject;
@@ -174,7 +178,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
 
         const listenerDisposables = new DisposableCollection();
         listenerDisposables.add(spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
-            if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART || !this.inRefSelectionMode()) {
+            if (this._getSheetType() === SheetTypes.CHART || !this.inRefSelectionMode()) {
                 return;
             }
 
@@ -187,7 +191,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         listenerDisposables.add(
             spreadsheetRowHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
                 const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
-                if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART || !this.inRefSelectionMode() || !skeleton) {
+                if (this._getSheetType() === SheetTypes.CHART || !this.inRefSelectionMode() || !skeleton) {
                     return;
                 }
                 const { row } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
@@ -205,7 +209,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
 
         listenerDisposables.add(spreadsheetColumnHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
             const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
-            if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART || !this.inRefSelectionMode() || !skeleton) {
+            if (this._getSheetType() === SheetTypes.CHART || !this.inRefSelectionMode() || !skeleton) {
                 return;
             }
             const { column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
@@ -225,7 +229,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             // remove all other selections
             this._reset();
             const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
-            if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART || !this.inRefSelectionMode() || !skeleton) {
+            if (this._getSheetType() === SheetTypes.CHART || !this.inRefSelectionMode() || !skeleton) {
                 return;
             }
             const selectionWithStyle = getAllSelection(skeleton);
@@ -289,7 +293,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
     }
 
     private _updateSelections(selectionDataWithStyleList: ISelectionWithCoord[], type: SelectionMoveType): void {
-        if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART) {
+        if (this._getSheetType() === SheetTypes.CHART) {
             return;
         }
         const workbook = this._context.unit;

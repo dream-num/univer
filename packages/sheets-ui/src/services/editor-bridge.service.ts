@@ -268,7 +268,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
     setEditCell(param: ICurrentEditCellParam) {
         const workbook = this._getWorkbookForEditUnit(param.unitId);
-        if (workbook?.getActiveSheet()?.getConfig().type === SheetTypes.CHART ||
+        if (this._getSheetType(workbook) === SheetTypes.CHART ||
             workbook?.getSheetBySheetId(param.sheetId)?.getConfig().type === SheetTypes.CHART) {
             return;
         }
@@ -474,6 +474,10 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         };
     }
 
+    private _getSheetType(workbook: Nullable<Workbook>): SheetTypes | undefined {
+        return workbook?.getActiveSheet()?.getConfig().type;
+    }
+
     private _getWorkbookForEditUnit(unitId: string): Nullable<Workbook> {
         return this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET) ??
             this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
@@ -484,7 +488,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     }
 
     changeVisible(params: IEditorBridgeServiceVisibleParam) {
-        if (params.visible && this._getWorkbookForEditUnit(params.unitId)?.getActiveSheet()?.getConfig().type === SheetTypes.CHART) {
+        if (params.visible && this._getSheetType(this._getWorkbookForEditUnit(params.unitId)) === SheetTypes.CHART) {
             return;
         }
         this._visibleParams = params;

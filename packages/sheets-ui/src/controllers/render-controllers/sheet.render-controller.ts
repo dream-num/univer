@@ -107,6 +107,10 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         this._initRenderMetricSubscriber();
     }
 
+    private _getSheetType(): SheetTypes | undefined {
+        return this._context.unit.getActiveSheet()?.getConfig().type;
+    }
+
     private _addNewRender() {
         const { scene, engine, unit: workbook } = this._context;
 
@@ -542,7 +546,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         }
 
         scene.makeDirty();
-        if (!command.params || this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART) {
+        if (!command.params || this._getSheetType() === SheetTypes.CHART) {
             return;
         }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DeviceType, PointerInput } from '../basics/i-events';
 import { Vector2 } from '../basics/vector2';
 import { Engine } from '../engine';
@@ -47,7 +47,11 @@ function createPointerEvent(type: string, offsetX: number, offsetY: number) {
 }
 
 describe('Transformer', () => {
-    const env = setupRenderTestEnv();
+    let env: ReturnType<typeof setupRenderTestEnv>;
+
+    beforeEach(() => {
+        env = setupRenderTestEnv();
+    });
 
     afterEach(() => {
         env.restore();

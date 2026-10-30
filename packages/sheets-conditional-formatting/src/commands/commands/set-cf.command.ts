@@ -15,6 +15,8 @@
  */
 
 import type { ICommand } from '@univerjs/core';
+import type { IConditionFormattingRule } from '../../models/type';
+import type { ISetConditionalRuleMutationParams } from '../mutations/set-conditional-rule.mutation';
 import {
     CommandType,
     ICommandService,
@@ -22,8 +24,6 @@ import {
     IUniverInstanceService,
 } from '@univerjs/core';
 import { getSheetCommandTarget } from '@univerjs/sheets';
-import type { IConditionFormattingRule } from '../../models/type';
-import type { ISetConditionalRuleMutationParams } from '../mutations/set-conditional-rule.mutation';
 import { SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '../mutations/set-conditional-rule.mutation';
 
 export interface ISetCfCommandParams {

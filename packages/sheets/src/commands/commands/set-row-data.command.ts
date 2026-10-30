@@ -15,14 +15,14 @@
  */
 
 import type { IAccessor, ICommand, IObjectArrayPrimitiveType, IRowData, Nullable } from '@univerjs/core';
+import type { ISetRowDataMutationParams } from '../mutations/set-row-data.mutation';
+import type { ISheetCommandSharedParams } from '../utils/interface';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
 } from '@univerjs/core';
-import type { ISetRowDataMutationParams } from '../mutations/set-row-data.mutation';
-import type { ISheetCommandSharedParams } from '../utils/interface';
 import { SetRowDataMutation, SetRowDataMutationFactory } from '../mutations/set-row-data.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 

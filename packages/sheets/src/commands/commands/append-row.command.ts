@@ -15,19 +15,20 @@
  */
 
 import type { IAccessor, ICellData, ICommand, IMutationInfo, IObjectMatrixPrimitiveType } from '@univerjs/core';
-import {
-    CommandType,
-    ICommandService,
-    IUndoRedoService,
-    sequenceExecute,
-} from '@univerjs/core';
 import type {
     IInsertColMutationParams,
     IInsertRowMutationParams,
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
 } from '../../basics/interfaces/mutation-interface';
+
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+import {
+    CommandType,
+    ICommandService,
+    IUndoRedoService,
+    sequenceExecute,
+} from '@univerjs/core';
 import {
     InsertColMutation,
     InsertColMutationUndoFactory,

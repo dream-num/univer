@@ -15,12 +15,12 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { IWorksheetRangeThemeStyleMutationParams } from '../../basics/interfaces/mutation-interface';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
 } from '@univerjs/core';
-import type { IWorksheetRangeThemeStyleMutationParams } from '../../basics/interfaces/mutation-interface';
 import {
     SetWorksheetRangeThemeStyleMutation,
     SetWorksheetRangeThemeStyleMutationFactory,

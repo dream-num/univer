@@ -15,6 +15,8 @@
  */
 
 import type { IAccessor, ICommand, IMutationInfo, IRange } from '@univerjs/core';
+import type { IDeleteRangeMutationParams } from '../../basics/interfaces/mutation-interface';
+
 import {
     CommandType,
     Dimension,
@@ -23,7 +25,6 @@ import {
     IUniverInstanceService,
     sequenceExecute,
 } from '@univerjs/core';
-import type { IDeleteRangeMutationParams } from '../../basics/interfaces/mutation-interface';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { getRemoveRangeMutations } from '../utils/handle-range.mutation';

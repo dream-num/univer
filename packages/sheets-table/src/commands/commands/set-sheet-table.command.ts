@@ -16,6 +16,8 @@
 
 import type { ICommand, IMutationInfo } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import type { LocaleKey } from '../../locale/types';
+import type { ITableSetConfig } from '../../types/type';
 import {
     CommandType,
     ICommandService,
@@ -34,8 +36,6 @@ import {
     SheetInterceptorService,
     WorkbookEditablePermission,
 } from '@univerjs/sheets';
-import type { LocaleKey } from '../../locale/types';
-import type { ITableSetConfig } from '../../types/type';
 import { TableManager } from '../../models/table-manager';
 import { IRangeOperationTypeEnum } from '../../types/type';
 import { getExistingNamesSet } from '../../util';

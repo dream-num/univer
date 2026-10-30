@@ -15,6 +15,7 @@
  */
 
 import type { CustomData, IAccessor, ICellData, ICommand, IRange } from '@univerjs/core';
+import type { ISheetCommandSharedParams } from '../utils/interface';
 import {
     CommandType,
     ICommandService,
@@ -22,7 +23,6 @@ import {
     ObjectMatrix,
     Tools,
 } from '@univerjs/core';
-import type { ISheetCommandSharedParams } from '../utils/interface';
 import { SetRangeValuesMutation } from '../mutations/set-range-values.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 

@@ -603,12 +603,15 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 return;
             }
 
-            if (!isCropper) {
+            let transformObjects: ReadonlyMap<string, BaseObject>;
+            if (isCropper) {
+                transformObjects = new Map([[applyObject.oKey, applyObject]]);
+            } else {
                 this._updateActiveObjectList(applyObject, evt);
-            }
-            const transformObjects = this._getTransformObjects('moveEnabled');
-            if (!isCropper && !transformObjects.size) {
-                return;
+                transformObjects = this._getTransformObjects('moveEnabled');
+                if (!transformObjects.size) {
+                    return;
+                }
             }
             this._addCancelObserver(scene);
 

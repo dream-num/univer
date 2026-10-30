@@ -87,13 +87,6 @@ export const RemoveSheetDrawingCommand: ICommand = {
             return false;
         }
 
-        // The existing Drawing removal operation and inverse are prepared for one worksheet host.
-        const first = params.drawings[0];
-        if (first && params.drawings.some((drawing) => drawing.unitId !== params.unitId
-            || drawing.subUnitId !== first.subUnitId)) {
-            return false;
-        }
-
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);

@@ -74,6 +74,10 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         }));
     }
 
+    private _getSheetType(): SheetTypes | undefined {
+        return this._context.unit.getActiveSheet()?.getConfig().type;
+    }
+
     override dispose(): void {
         this._disposeCurrent();
         super.dispose();
@@ -110,7 +114,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     }
 
     private _updateEditorPosition(params: Nullable<ISelectionWithStyle[]>) {
-        if (this._context.unit.getActiveSheet()?.getConfig().type === SheetTypes.CHART) {
+        if (this._getSheetType() === SheetTypes.CHART) {
             return;
         }
         if (this._editorBridgeService.isVisible().visible) return;

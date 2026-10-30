@@ -30,7 +30,7 @@ import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 import { useToolbarItemStatus, useToolbarShortcutDisplay } from './hook';
 import { ToolbarButton, toolbarButtonVariants } from './ToolbarButton';
-import { DropdownMenuWrapper, TooltipWrapper } from './TooltipButtonWrapper';
+import { DropdownMenuWrapper, ToolbarDropdownButton, TooltipWrapper } from './TooltipButtonWrapper';
 
 export type IToolbarItemProps = IDisplayMenuItem<IMenuItem> & {
     grid?: boolean;
@@ -50,10 +50,10 @@ const toolbarDisabledClassName = 'univer-pointer-events-none univer-cursor-not-a
 const toolbarButtonSelectorRootVariants = cva(
     `
       univer-toolbar-button-selector-root univer-animate-in univer-fade-in univer-group univer-relative univer-flex
-      univer-h-6 univer-cursor-pointer univer-items-center univer-rounded univer-pr-5 univer-text-sm
+      univer-h-7 univer-cursor-pointer univer-items-center univer-rounded univer-pr-6 univer-text-sm
       univer-transition-colors
       hover:univer-bg-gray-100
-      rtl:univer-pl-5 rtl:univer-pr-0
+      rtl:univer-pl-6 rtl:univer-pr-0
       dark:hover:!univer-bg-gray-700
     `,
     {
@@ -74,8 +74,8 @@ const toolbarButtonSelectorRootVariants = cva(
 
 const toolbarButtonSelectorMainVariants = cva(
     `
-      univer-toolbar-button-selector-main univer-relative univer-z-[1] univer-flex univer-h-full univer-items-center
-      univer-rounded-l univer-px-1 univer-transition-colors
+      univer-toolbar-button-selector-main univer-relative univer-z-[1] univer-flex univer-h-full univer-min-w-7
+      univer-items-center univer-justify-center univer-rounded-l univer-px-1 univer-transition-colors
       hover:univer-bg-gray-200
       rtl:univer-rounded-l-none rtl:univer-rounded-r
       dark:hover:!univer-bg-gray-600
@@ -111,7 +111,7 @@ const toolbarButtonSelectorMainVariants = cva(
 const toolbarButtonSelectorTriggerVariants = cva(
     `
       univer-toolbar-button-selector-trigger univer-absolute univer-right-0 univer-top-0 univer-box-border univer-flex
-      univer-h-6 univer-w-5 univer-items-center univer-justify-center univer-rounded-r univer-transition-colors
+      univer-h-7 univer-w-6 univer-items-center univer-justify-center univer-rounded-r univer-transition-colors
       hover:univer-bg-gray-200
       rtl:univer-left-0 rtl:univer-right-auto rtl:univer-rounded-l rtl:univer-rounded-r-none
       dark:hover:!univer-bg-gray-600
@@ -146,10 +146,13 @@ const toolbarButtonSelectorTriggerVariants = cva(
 
 const toolbarSelectorRootVariants = cva(
     `
-      univer-toolbar-selector-root univer-animate-in univer-fade-in univer-relative univer-flex univer-h-6
-      univer-cursor-pointer univer-items-center univer-gap-2 univer-whitespace-nowrap univer-rounded univer-px-1
+      univer-toolbar-selector-root univer-animate-in univer-fade-in univer-relative univer-flex univer-h-7
+      univer-cursor-pointer univer-items-center univer-gap-1 univer-whitespace-nowrap univer-rounded univer-px-1
       univer-transition-colors
+      focus-within:univer-ring-2 focus-within:univer-ring-inset focus-within:univer-ring-primary-600
       hover:univer-bg-gray-100
+      focus-visible:univer-outline-none focus-visible:univer-ring-2 focus-visible:univer-ring-inset
+      focus-visible:univer-ring-primary-600
       dark:hover:!univer-bg-gray-700
     `,
     {
@@ -273,6 +276,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
         const sId = selectionsCommandId ?? commandId ?? id;
         const customLabelName = typeof label === 'string' ? label : label?.name ?? '';
         const hasCustomLabel = Boolean(componentManager.get(customLabelName));
+        const SelectorTrigger = hasCustomLabel ? ToolbarDropdownButton : 'div';
         let titleToDisplay = grid ? (showLabel ? gridLabel : large ? undefined : title) : title;
         if (overflow) {
             titleToDisplay = hasCustomLabel || (iconToDisplay && !showLabel) ? undefined : gridLabel;
@@ -418,6 +422,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                                         )}
                                     >
                                         <CustomLabel
+                                            ariaLabel={selectorAriaLabel}
                                             title={titleToDisplay}
                                             value={value}
                                             label={label}
@@ -430,6 +435,10 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                             : (
                                 <>
                                     <CustomLabel
+                                        ariaLabel={selectorAriaLabel}
+                                        className={fullWidth && hasCustomLabel
+                                            ? '!univer-w-auto univer-min-w-0 univer-flex-1'
+                                            : undefined}
                                         icon={iconToDisplay}
                                         iconSize={iconSize}
                                         preserveStrokeWidth={preserveStrokeWidth}
@@ -438,13 +447,21 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                                         label={label}
                                         onChange={handleSelectionsValueChange}
                                     />
-                                    <div
+                                    <SelectorTrigger
+                                        disabled={hasCustomLabel ? disabled : undefined}
+                                        aria-label={hasCustomLabel ? selectorAriaLabel : undefined}
+                                        aria-haspopup={hasCustomLabel ? slot ? 'dialog' : 'menu' : undefined}
                                         className={clsx(toolbarSelectorTriggerVariants({ disabled }), {
                                             'univer-ml-auto rtl:univer-ml-0 rtl:univer-mr-auto': grid && !large && !icon,
-                                        })}
+                                        }, 'univer-w-6 univer-shrink-0 univer-justify-center', hasCustomLabel && `
+                                          univer-h-7 univer-cursor-pointer univer-rounded univer-border-0
+                                          univer-bg-transparent univer-p-0 univer-text-inherit
+                                          focus-visible:univer-outline-none focus-visible:univer-ring-2
+                                          focus-visible:univer-ring-inset focus-visible:univer-ring-primary-600
+                                        `)}
                                     >
                                         <MoreDownIcon preserveStrokeWidth={preserveStrokeWidth} />
-                                    </div>
+                                    </SelectorTrigger>
                                 </>
                             )}
                     </div>
@@ -460,7 +477,10 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
             : typeof title === 'string'
                 ? localeService.t(title)
                 : undefined;
-        const buttonClassName = clsx(grid && !large && '[&>svg]:univer-size-4', grid && large
+        const buttonClassName = clsx(grid && !large && `
+          univer-min-w-7
+          [&>svg]:univer-size-4
+        `, grid && large
             ? `
               univer-h-full univer-min-w-14 univer-flex-col univer-gap-1 univer-px-1.5 univer-py-1 univer-text-xs
               [&>svg]:univer-size-6

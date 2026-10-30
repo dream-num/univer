@@ -16,10 +16,10 @@
 
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import type { Observable } from 'rxjs';
-import type { ICustomComponentProps } from '../../services/menu/menu';
 import { LocaleService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { useMemo, useState } from 'react';
+import type { ICustomComponentProps } from '../../services/menu/menu';
 import { useDependency, useObservable } from '../../utils/di';
 import { useFontList } from './use-font-list';
 
@@ -35,7 +35,7 @@ export interface IFontFamilyProps extends ICustomComponentProps<string> {
 
 export const FONT_FAMILY_COMPONENT = 'UI_FONT_FAMILY_COMPONENT';
 
-export const FontFamily = ({ className, disabled: disabledProp, value, disabled$, onChange }: IFontFamilyProps) => {
+export const FontFamily = ({ className, disabled: disabledProp, value, disabled$, onChange, ariaLabel }: IFontFamilyProps) => {
     const disabledObservableValue = useObservable(disabled$);
     const disabled = Boolean(disabledProp || disabledObservableValue);
 
@@ -117,8 +117,10 @@ export const FontFamily = ({ className, disabled: disabledProp, value, disabled$
             style={{ fontFamily: value as string }}
         >
             <input
+                aria-label={ariaLabel}
                 className={`
-                  univer-block univer-h-6 univer-border-none univer-bg-transparent univer-leading-6 univer-text-gray-900
+                  univer-block univer-h-6 univer-w-full univer-min-w-0 univer-border-none univer-bg-transparent
+                  univer-leading-6 univer-text-gray-900
                   focus:univer-outline-none
                   dark:!univer-text-gray-0
                   [&_input:focus]:!univer-ring-0

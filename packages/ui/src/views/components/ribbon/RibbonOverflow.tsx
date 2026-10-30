@@ -22,6 +22,7 @@ import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { IDialogService } from '../../../services/dialog/dialog.service';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import { useDependency } from '../../../utils/di';
+import { groupRibbonOverflowItems } from './ribbon-grid-layout';
 import { toolbarButtonClassName } from './ToolbarButton';
 import { ToolbarItem } from './ToolbarItem';
 import { ToolbarDropdownProvider } from './TooltipButtonWrapper';
@@ -103,23 +104,33 @@ export function RibbonOverflow({ groups, grid = false }: IRibbonOverflowProps) {
                                     </h3>
                                 )}
                                 <div className="univer-flex univer-flex-wrap univer-items-center univer-gap-1">
-                                    {(group.children ?? [group]).map((child) => child.item && (
+                                    {(grid ? groupRibbonOverflowItems(group.children ?? [group]) : [group.children ?? [group]]).filter((items) => items.length > 0).map((items) => (
                                         <div
-                                            key={child.key}
+                                            key={items[0].key}
                                             className="
-                                              univer-min-w-0 univer-max-w-full
-                                              [&>span]:univer-block [&>span]:univer-h-full
+                                              univer-flex univer-max-w-full univer-flex-wrap univer-items-center
+                                              univer-gap-1
                                             "
-                                            style={{ width: child.item.label && !child.item.icon ? child.gridLayout?.width : undefined }}
                                         >
-                                            <ToolbarItem
-                                                {...child.item}
-                                                grid
-                                                showLabel={child.gridLayout?.showLabel}
-                                                fullWidth
-                                                overflow
-                                                preserveStrokeWidth
-                                            />
+                                            {items.map((child) => child.item && (
+                                                <div
+                                                    key={child.key}
+                                                    className="
+                                                      univer-min-w-0 univer-max-w-full
+                                                      [&>span]:univer-block [&>span]:univer-h-full
+                                                    "
+                                                    style={{ maxWidth: child.item.label && !child.item.icon ? child.gridLayout?.minWidth ?? child.gridLayout?.width : undefined }}
+                                                >
+                                                    <ToolbarItem
+                                                        {...child.item}
+                                                        grid
+                                                        showLabel={child.gridLayout?.showLabel}
+                                                        fullWidth
+                                                        overflow
+                                                        preserveStrokeWidth
+                                                    />
+                                                </div>
+                                            ))}
                                         </div>
                                     ))}
                                 </div>

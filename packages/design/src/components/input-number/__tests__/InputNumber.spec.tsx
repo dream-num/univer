@@ -76,6 +76,13 @@ afterEach(() => {
 });
 
 describe('InputNumber', () => {
+    it('forwards the accessible name and native input attributes to the editable control', () => {
+        const { getByRole } = render(<InputNumber aria-label="Font size" name="fontSize" required defaultValue={12} />);
+        const input = getByRole('textbox', { name: 'Font size' });
+        expect(input).toHaveAttribute('name', 'fontSize');
+        expect(input).toBeRequired();
+    });
+
     const onChange = vi.fn();
 
     it('should render with default value', () => {

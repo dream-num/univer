@@ -15,6 +15,7 @@
  */
 
 import type { IGroupBaseBound, ITransformState, Nullable } from '@univerjs/core';
+import { Disposable, EventSubject } from '@univerjs/core';
 import type { IDragEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { IObjectFullState, ITransformChangeState } from './basics/interfaces';
 import type { ITransformerConfig } from './basics/transformer-config';
@@ -23,9 +24,8 @@ import type { UniverRenderingContext } from './context';
 import type { Engine } from './engine';
 import type { Layer } from './layer';
 import type { Scene } from './scene';
-import { Disposable, EventSubject } from '@univerjs/core';
-import { getRenderTransformBaseOnParentBound, getRotatedBoundInGroup } from './basics';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
+import { getRenderTransformBaseOnParentBound, getRotatedBoundInGroup } from './basics/group-transform';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { generateRandomKey, toPx } from './basics/tools';
 import { Transform } from './basics/transform';
@@ -340,7 +340,7 @@ export abstract class BaseObject extends Disposable {
         this.setCursor(val);
     }
 
-    set layer(layer: Layer) {
+    set layer(layer: Nullable<Layer>) {
         this._layer = layer;
     }
 

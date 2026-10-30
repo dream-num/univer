@@ -70,7 +70,7 @@ import { MobileFormulaBarActions, MobileFormulaBarOverlays } from './MobileFormu
 export function MobileFormulaBar() {
     const workbook = useActiveWorkbook();
     const worksheet = useActiveWorksheet(workbook);
-    const isGridSheet = worksheet?.getConfig().type === SheetTypes.GRID;
+    const isGridSheet = !!worksheet && (worksheet.getConfig().type ?? SheetTypes.GRID) === SheetTypes.GRID;
     const editorBridgeService = useDependency(IEditorBridgeService);
     const contextService = useDependency(IContextService);
     const editorService = useDependency(IEditorService);

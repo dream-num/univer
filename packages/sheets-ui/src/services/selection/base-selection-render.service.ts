@@ -137,18 +137,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     private _cancelDownSubscription: Nullable<Subscription>;
     private _cancelUpSubscription: Nullable<Subscription>;
 
-    protected _currentSkeleton: Nullable<SpreadsheetSkeleton> = null;
-
-    protected get _skeleton(): SpreadsheetSkeleton {
-        if (!this._currentSkeleton) {
-            throw new Error('Cell selection requires a current Grid skeleton');
-        }
-        return this._currentSkeleton;
-    }
-
-    protected set _skeleton(skeleton: SpreadsheetSkeleton) {
-        this._currentSkeleton = skeleton;
-    }
+    protected _skeleton!: SpreadsheetSkeleton;
 
     /**
      * From renderContext.
@@ -305,7 +294,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      */
     resetSelectionsByModelData(selectionsWithStyleList: readonly ISelectionWithStyle[]): void {
         const allSelectionControls = this.getSelectionControls();
-        const skeleton = this._currentSkeleton;
+        const skeleton = this._skeleton;
         if (!allSelectionControls || !skeleton) {
             return;
         }
@@ -367,8 +356,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      */
     getSelectionDataWithStyle(): ISelectionWithCoord[] {
         const selectionControls = this._selectionControls;
-        if (this._currentSkeleton) {
-            const [unitId, sheetId] = this._currentSkeleton.getLocation();
+        if (this._skeleton) {
+            const [unitId, sheetId] = this._skeleton.getLocation();
             return selectionControls.map((control) => {
                 const v = control.getValue();
                 v.rangeWithCoord.sheetId = sheetId;
@@ -405,7 +394,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._reset();
         this._escapeShortcutDisposable?.dispose();
         this._escapeShortcutDisposable = null;
-        this._currentSkeleton = null;
+        this._skeleton = undefined!;
         this._activeViewport = null;
         this._selectionMoving = false;
     }
@@ -826,7 +815,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         scaleY: number,
         scrollXY: { x: number; y: number }
     ): Nullable<ISelectionWithCoord> {
-        const skeleton = this._currentSkeleton;
+        const skeleton = this._skeleton;
         if (skeleton == null) return null;
 
         //#region normal selection

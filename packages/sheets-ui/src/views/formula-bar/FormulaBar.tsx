@@ -98,7 +98,7 @@ export function FormulaBar(props: IProps) {
     const componentManager = useDependency(ComponentManager);
     const workbook = useActiveWorkbook();
     const worksheet = useActiveWorksheet(workbook);
-    const isGridSheet = worksheet?.getConfig().type === SheetTypes.GRID;
+    const isGridSheet = !!worksheet && (worksheet.getConfig().type ?? SheetTypes.GRID) === SheetTypes.GRID;
     const editState = useObservable(editorBridgeService.currentEditCellState$);
     const keyCodeConfig = useKeyEventConfig(editState?.unitId);
     const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);

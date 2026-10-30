@@ -26,7 +26,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ITestBed } from './create-test-bed';
 import { InsertSheetMutation } from '../../commands/mutations/insert-sheet.mutation';
 import { WorksheetEditPermission } from '../../services/permission/permission-point/worksheet/edit';
-import { WorksheetPermissionService } from '../../services/permission/worksheet-permission/worksheet-permission.service';
 import { createFacadeTestBed } from './create-test-bed';
 
 describe('sheets facade permissions', () => {
@@ -47,10 +46,8 @@ describe('sheets facade permissions', () => {
         testBed.univer.dispose();
     });
 
-    it('rebinds a missing chart edit point before facade setPoint and retains denial after unprotect', async () => {
+    it('rebinds a missing chart edit point and applies grants through facade setPoint and unprotect', async () => {
         const { get, univerAPI } = testBed;
-        const owner = get(WorksheetPermissionService);
-        expect(owner.setWorksheetEditPermissionConstraint((sheet) => sheet.getConfig().type !== SheetTypes.CHART)).toBe(true);
         const commands = get(ICommandService);
         commands.registerCommand(InsertSheetMutation);
         expect(commands.syncExecuteCommand(InsertSheetMutation.id, {
@@ -61,17 +58,17 @@ describe('sheets facade permissions', () => {
         const chartPermission = chart.getWorksheetPermission();
         const permissionService = get(IPermissionService);
         const editPoint = new WorksheetEditPermission('test', 'chart');
-        expect(permissionService.getPermissionPoint(editPoint.id)?.value).toBe(false);
+        expect(permissionService.getPermissionPoint(editPoint.id)?.value).toBe(true);
 
         await chartPermission.protect({ name: 'Collaborative chart protection' });
         permissionService.deletePermissionPoint(editPoint.id);
         expect(permissionService.getPermissionPoint(editPoint.id)).toBeUndefined();
         await chartPermission.setPoint(univerAPI.Enum.WorksheetPermissionPoint.Edit, true);
-        expect(permissionService.getPermissionPoint(editPoint.id)?.value).toBe(false);
-        expect(chartPermission.canEdit()).toBe(false);
+        expect(permissionService.getPermissionPoint(editPoint.id)?.value).toBe(true);
+        expect(chartPermission.canEdit()).toBe(true);
 
         expect(await chartPermission.unprotect()).toBe(true);
-        expect(permissionService.getPermissionPoint(editPoint.id)?.value).toBe(false);
+        expect(permissionService.getPermissionPoint(editPoint.id)?.value).toBe(true);
         expect(univerAPI.getActiveWorkbook()!.getActiveSheet().getWorksheetPermission().canEdit()).toBe(true);
     });
 

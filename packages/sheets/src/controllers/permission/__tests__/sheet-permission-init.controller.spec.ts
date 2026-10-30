@@ -16,7 +16,17 @@
 
 import type { IWorkbookData, Univer, Workbook } from '@univerjs/core';
 import type { IAllowedResponse } from '@univerjs/protocol';
-import { IAuthzIoService, ICommandService, IPermissionService, IResourceManagerService, IUndoRedoService, IUniverInstanceService, LocaleType, SheetTypes, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import {
+    IAuthzIoService,
+    ICommandService,
+    IPermissionService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    LocaleType,
+    SheetTypes,
+    UniverInstanceType,
+    UserManagerService,
+} from '@univerjs/core';
 import { UnitAction } from '@univerjs/protocol';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createCommandTestBed } from '../../../commands/commands/__tests__/create-command-test-bed';
@@ -27,8 +37,9 @@ import { SetWorksheetNameMutation } from '../../../commands/mutations/set-worksh
 import { EditStateEnum, ViewStateEnum } from '../../../models/range-protection-rule.model';
 import { WorksheetEditPermission } from '../../../services/permission/permission-point/worksheet/edit';
 import { WorksheetViewPermission } from '../../../services/permission/permission-point/worksheet/view';
-import { WorksheetProtectionRuleModel } from '../../../services/permission/worksheet-permission/worksheet-permission-rule.model';
-import { WorksheetPermissionService } from '../../../services/permission/worksheet-permission/worksheet-permission.service';
+import {
+    WorksheetProtectionRuleModel,
+} from '../../../services/permission/worksheet-permission/worksheet-permission-rule.model';
 import { SheetPermissionInitController } from '../sheet-permission-init.controller';
 
 const workbookData: IWorkbookData = {
@@ -44,13 +55,12 @@ const workbookData: IWorkbookData = {
     styles: {},
 };
 
-describe('SheetPermissionInitController with local chart edit constraint', () => {
+describe('SheetPermissionInitController authorization lifecycle', () => {
     let univer: Univer;
     let controller: SheetPermissionInitController;
     let authz: IAuthzIoService;
     let permissions: IPermissionService;
     let rules: WorksheetProtectionRuleModel;
-    let resources: IResourceManagerService;
     let users: UserManagerService;
     let commands: ICommandService;
     let history: IUndoRedoService;
@@ -58,16 +68,12 @@ describe('SheetPermissionInitController with local chart edit constraint', () =>
     const editPoint = (sheetId: string) => new WorksheetEditPermission('test', sheetId);
 
     beforeEach(() => {
-        const bed = createCommandTestBed(workbookData, [[SheetPermissionInitController]], (injector) => {
-            const owner = injector.get(WorksheetPermissionService);
-            expect(owner.setWorksheetEditPermissionConstraint((sheet) => sheet.getConfig().type !== SheetTypes.CHART)).toBe(true);
-        });
+        const bed = createCommandTestBed(workbookData, [[SheetPermissionInitController]]);
         univer = bed.univer;
         controller = bed.get(SheetPermissionInitController);
         authz = bed.get(IAuthzIoService);
         permissions = bed.get(IPermissionService);
         rules = bed.get(WorksheetProtectionRuleModel);
-        resources = bed.get(IResourceManagerService);
         users = bed.get(UserManagerService);
         commands = bed.get(ICommandService);
         history = bed.get(IUndoRedoService);
@@ -82,7 +88,7 @@ describe('SheetPermissionInitController with local chart edit constraint', () =>
         univer.dispose();
     });
 
-    it('keeps a retained chart point denied through deferred allow, user switch and resource reload', async () => {
+    it('applies deferred chart authorization and retains its subject through user switch', async () => {
         let finishAllowed!: (actions: IAllowedResponse['actions']) => void;
         const pendingAllowed = new Promise<IAllowedResponse['actions']>((done) => {
             finishAllowed = done;
@@ -95,6 +101,7 @@ describe('SheetPermissionInitController with local chart edit constraint', () =>
         });
         controller.initPermission();
         const chartPoint = editPoint('chart');
+        permissions.updatePermissionPoint(chartPoint.id, false);
         const subject = permissions.getPermissionPoint$(chartPoint.id);
         const observed: boolean[] = [];
         const subscription = permissions.permissionPointUpdate$.subscribe((point) => {
@@ -113,19 +120,13 @@ describe('SheetPermissionInitController with local chart edit constraint', () =>
         expect(permissions.getPermissionPoint(chartPoint.id)?.value).toBe(false);
         finishAllowed([{ action: UnitAction.Edit, allowed: true }]);
         await Promise.resolve();
-        expect(permissions.getPermissionPoint(chartPoint.id)?.value).toBe(false);
-
-        const snapshot = resources.getResources('test', UniverInstanceType.UNIVER_SHEET);
-        resources.unloadResources('test', UniverInstanceType.UNIVER_SHEET);
-        expect(permissions.getPermissionPoint(chartPoint.id)?.value).toBe(false);
-        resources.loadResources('test', snapshot);
-        expect(permissions.getPermissionPoint(chartPoint.id)?.value).toBe(false);
+        expect(permissions.getPermissionPoint(chartPoint.id)?.value).toBe(true);
 
         users.setCurrentUser({ userID: 'other-user', name: 'Other user' });
         await Promise.resolve();
         expect(permissions.getPermissionPoint$(chartPoint.id)).toBe(subject);
-        expect(permissions.getPermissionPoint(chartPoint.id)?.value).toBe(false);
-        expect(observed.every((value) => value === false)).toBe(true);
+        expect(permissions.getPermissionPoint(chartPoint.id)?.value).toBe(true);
+        expect(observed).toContain(true);
         subscription.unsubscribe();
     });
 
@@ -146,9 +147,9 @@ describe('SheetPermissionInitController with local chart edit constraint', () =>
         });
         await Promise.resolve();
         expect(permissions.getPermissionPoint(gridPoint.id)?.value).toBe(false);
-        expect(permissions.getPermissionPoint(editPoint('chart').id)?.value).toBe(false);
+        expect(permissions.getPermissionPoint(editPoint('chart').id)?.value).toBe(true);
     });
-    it('repeated effective-no-change refresh preserves real GRID undo history', async () => {
+    it('repeated unchanged authorization refresh preserves real GRID undo history', async () => {
         vi.spyOn(authz, 'allowed').mockImplementation((request) => Promise.resolve(
             request.actions.map((action) => ({ action, allowed: true }))
         ));
@@ -174,7 +175,7 @@ describe('SheetPermissionInitController with local chart edit constraint', () =>
         controller.refreshPermission('test', 'chart-rule');
         await Promise.resolve();
 
-        expect(permissions.getPermissionPoint(editPoint('chart').id)?.value).toBe(false);
+        expect(permissions.getPermissionPoint(editPoint('chart').id)?.value).toBe(true);
         expect(history.getUndoRedoStatus('test').undos).toBe(1);
     });
 
@@ -213,14 +214,14 @@ describe('SheetPermissionInitController with local chart edit constraint', () =>
         expect(commands.syncExecuteCommand(InsertSheetMutation.id, { unitId: 'test', sheet: snapshot })).toBe(true);
         const newPoint = permissions.getPermissionPoint(editPoint('chart').id);
         expect(newPoint).not.toBe(oldPoint);
-        expect(newPoint?.value).toBe(false);
+        expect(newPoint?.value).toBe(true);
 
         const newView = permissions.getPermissionPoint(new WorksheetViewPermission('test', 'chart').id);
         expect(newView?.value).toBe(true);
         finishAllowed([{ action: UnitAction.Edit, allowed: false }, { action: UnitAction.View, allowed: false }]);
         await Promise.resolve();
         expect(permissions.getPermissionPoint(editPoint('chart').id)).toBe(newPoint);
-        expect(newPoint?.value).toBe(false);
+        expect(newPoint?.value).toBe(true);
         expect(newView?.value).toBe(true);
         expect(history.getUndoRedoStatus('test').undos).toBe(before);
     });

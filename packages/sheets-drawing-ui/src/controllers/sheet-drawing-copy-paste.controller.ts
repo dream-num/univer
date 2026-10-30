@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IMutationInfo, IRange, Nullable } from '@univerjs/core';
+import type { IDisposable, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { IDiscreteRange } from '@univerjs/sheets';
 import type { IRemoveSheetDrawingCommandParams, ISheetDrawing, ISheetImage } from '@univerjs/sheets-drawing';
 import type { IPasteHookValueType, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import {
+    BooleanNumber,
+    CustomCommandExecutionError,
     DrawingTypeEnum,
     generateRandomId,
     ICommandService,
@@ -27,21 +29,27 @@ import {
     Inject,
     IUniverInstanceService,
     RxDisposable,
+    SheetTypes,
     toDisposable,
+    Tools,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     attachRangeWithCoord,
     discreteRangeToRange,
+    SheetPermissionCheckController,
     SheetSkeletonService,
+    WorkbookCopyPermission,
+    WorksheetCopyPermission,
 } from '@univerjs/sheets';
 import {
     DrawingApplyType,
-    ISheetDrawingService,
     RemoveSheetDrawingCommand,
     SetDrawingApplyMutation,
     SheetDrawingAnchorType,
+    transformDrawingsToChartSheet,
     transformToAxisAlignPosition,
     transformToDrawingPosition,
 } from '@univerjs/sheets-drawing';
@@ -49,6 +57,8 @@ import {
     COPY_TYPE,
     ISheetClipboardService,
     PREDEFINED_HOOK_NAME_PASTE,
+    SHEET_VIEW_KEY,
+    SheetPasteCommand,
     virtualizeDiscreteRanges,
 } from '@univerjs/sheets-ui';
 import { IClipboardInterfaceService } from '@univerjs/ui';
@@ -178,7 +188,7 @@ export class SheetsDrawingCopyPasteController extends RxDisposable {
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
-        @ISheetDrawingService private readonly _sheetDrawings: ISheetDrawingService
+        @Inject(SheetPermissionCheckController) private readonly _permissions: SheetPermissionCheckController
     ) {
         super();
         this._initCopyPaste();
@@ -358,6 +368,10 @@ export class SheetsDrawingCopyPasteController extends RxDisposable {
         }
 
         const { unitId, subUnitId, range } = pasteTo;
+        const worksheet = this._instanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(subUnitId);
+        if (worksheet?.getConfig().type === SheetTypes.CHART) {
+            return this._generateChartSheetImagePasteMutations(pasteTo);
+        }
         const pasteToSkeleton = this._sheetSkeletonService.getSkeleton(unitId, subUnitId);
         if (!pasteToSkeleton) {
             return { redos: [], undos: [] };
@@ -409,10 +423,46 @@ export class SheetsDrawingCopyPasteController extends RxDisposable {
         });
     }
 
+    private _generateChartSheetImagePasteMutations(pasteTo: ISheetDiscreteRangeLocation) {
+        const { unitId, subUnitId } = pasteTo;
+        const worksheet = this._instanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)!.getSheetBySheetId(subUnitId)!;
+        this._permissions.assertWorksheetEditable(unitId, subUnitId);
+        const source = this._copyInfo!;
+        if (!this._permissions.permissionCheckWithoutRange({
+            workbookTypes: [WorkbookCopyPermission],
+            worksheetTypes: [WorksheetCopyPermission],
+        }, source.unitId, source.subUnitId) || source.drawings.some((drawing) =>
+            !Tools.diffValue(drawing, this._drawingService.getDrawingByParam(drawing)))) {
+            throw new CustomCommandExecutionError(SheetPasteCommand.id);
+        }
+        const frame = this._renderManagerService.getRenderUnitById(unitId)?.components.get(SHEET_VIEW_KEY.CHART_PAGE);
+        const originals = this._copyInfo!.drawings;
+        const placed = frame && transformDrawingsToChartSheet(originals, {
+            left: frame.left,
+            top: frame.top,
+            width: frame.width,
+            height: frame.height,
+        }, worksheet.getConfig().rightToLeft === BooleanNumber.TRUE);
+        if (!placed) {
+            return { redos: [], undos: [] };
+        }
+        const copies = new Map(placed.map((drawing) => [drawing.drawingId, drawing]));
+        return this._generateMutations(originals, {
+            unitId,
+            subUnitId,
+            isCut: false,
+            getTransform: (_transform, _sheetTransform, drawing) => {
+                const copy = copies.get(drawing.drawingId)!;
+                return { anchorType: copy.anchorType, transform: copy.transform, sheetTransform: copy.sheetTransform, axisAlignSheetTransform: copy.axisAlignSheetTransform };
+            },
+        });
+    }
+
     private _generateMutations(drawings: ISheetDrawing[], payload: {
         unitId: string;
         subUnitId: string;
-        getTransform: (transform: ISheetDrawing['transform'], sheetTransform: ISheetDrawing['sheetTransform']) => {
+        getTransform: (transform: ISheetDrawing['transform'], sheetTransform: ISheetDrawing['sheetTransform'], drawing: ISheetDrawing) => {
+            anchorType?: SheetDrawingAnchorType;
             transform: ISheetDrawing['transform'];
             sheetTransform: ISheetDrawing['sheetTransform'];
             axisAlignSheetTransform: ISheetDrawing['sheetTransform'];
@@ -436,15 +486,13 @@ export class SheetsDrawingCopyPasteController extends RxDisposable {
             if (!transform) {
                 return;
             }
-            const transformContext = getTransform(transform, sheetTransform);
+            const transformContext = getTransform(transform, sheetTransform, drawing);
             const drawingObject: Partial<ISheetDrawing> = {
                 ...drawing,
+                ...transformContext,
+                drawingId: isCut ? drawing.drawingId : generateRandomId(),
                 unitId,
                 subUnitId,
-                drawingId: isCut ? drawing.drawingId : generateRandomId(),
-                transform: transformContext.transform,
-                sheetTransform: transformContext.sheetTransform,
-                axisAlignSheetTransform: transformContext.axisAlignSheetTransform,
             };
 
             if (isCut) {

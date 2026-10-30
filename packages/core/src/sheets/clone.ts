@@ -281,7 +281,7 @@ export function cloneWorksheetData(worksheet: IWorksheetData): IWorksheetData {
     const result: IWorksheetData = {
         // Primitive values - direct copy
         id: worksheet.id,
-        type: worksheet.type,
+        ...(worksheet.type === undefined ? {} : { type: worksheet.type }),
         name: worksheet.name,
         tabColor: worksheet.tabColor,
         hidden: worksheet.hidden,

@@ -15,6 +15,7 @@
  */
 
 import type { IPermissionPoint, Workbook, Worksheet } from '@univerjs/core';
+import type { BehaviorSubject } from 'rxjs';
 import {
     ILogService,
     Inject,
@@ -25,11 +26,10 @@ import {
     RxDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import type { IObjectModel, IObjectPointModel } from '../type';
 import { RangeProtectionRuleModel } from '../../../models/range-protection-rule.model';
-import { WorksheetEditPermission } from '../permission-point/worksheet/edit';
 import { getAllRangePermissionPoint } from '../range-permission/util';
 import { getAllWorkbookPermissionPoint } from '../workbook-permission';
 import { getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './utils';
@@ -40,31 +40,9 @@ export const RULE_MODEL_PLUGIN_NAME = 'SHEET_WORKSHEET_PROTECTION_PLUGIN';
 export const POINT_MODEL_PLUGIN_NAME = 'SHEET_WORKSHEET_PROTECTION_POINT_PLUGIN';
 
 export class WorksheetPermissionService extends RxDisposable {
-    private _editConstraint?: (worksheet: Worksheet) => boolean;
     private readonly _workbookSubscriptions = new Map<Workbook, Subscription>();
 
-    setWorksheetEditPermissionConstraint(constraint: (worksheet: Worksheet) => boolean): boolean {
-        if (this._editConstraint) {
-            return false;
-        }
-        for (const workbook of this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET)) {
-            if (workbook.getSheets().some((worksheet) => !constraint(worksheet))) {
-                return false;
-            }
-        }
-        this._editConstraint = constraint;
-        return true;
-    }
-
     addWorksheetPermissionPoint<T = boolean>(point: IPermissionPoint<T> | BehaviorSubject<IPermissionPoint<T>>): boolean {
-        const instance = point instanceof BehaviorSubject ? point.getValue() : point;
-        if (instance instanceof WorksheetEditPermission) {
-            const worksheet = this._univerInstanceService.getUnit<Workbook>(instance.unitId, UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(instance.subUnitId);
-            if (!worksheet) {
-                return false;
-            }
-            instance.setLocalEditAllowed(this._editConstraint?.(worksheet) ?? true);
-        }
         return this._permissionService.addPermissionPoint(point);
     }
 
@@ -181,7 +159,7 @@ export class WorksheetPermissionService extends RxDisposable {
             }
             try {
                 return JSON.parse(json);
-            } catch (err) {
+            } catch {
                 return {};
             }
         };
@@ -210,13 +188,7 @@ export class WorksheetPermissionService extends RxDisposable {
 
                             [...getAllWorksheetPermissionPoint(), ...getAllWorksheetPermissionPointByPointPanel()].forEach((F) => {
                                 const instance = new F(unitId, subUnitId);
-                                if (instance instanceof WorksheetEditPermission) {
-                                    if (!this._permissionService.getPermissionPoint(instance.id)) {
-                                        this.addWorksheetPermissionPoint(instance);
-                                    }
-                                } else {
-                                    this._permissionService.deletePermissionPoint(instance.id);
-                                }
+                                this._permissionService.deletePermissionPoint(instance.id);
                             });
                         });
                         getAllWorkbookPermissionPoint().forEach((F) => {
@@ -242,7 +214,7 @@ export class WorksheetPermissionService extends RxDisposable {
             }
             try {
                 return JSON.parse(json);
-            } catch (err) {
+            } catch {
                 return {};
             }
         };

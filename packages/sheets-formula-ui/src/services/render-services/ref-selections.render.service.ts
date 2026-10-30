@@ -264,7 +264,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         // unlike normal selection, there is no need to listen selectionService.selectionMoveEnd$ for keyboard moving event. prompt@highlightFormula would refresh selection.
         this.disposeWithMe(this._refSelectionsService.selectionSet$.subscribe((selectionsWithStyles) => {
             this._reset();
-            const skeleton = this._currentSkeleton;
+            const skeleton = this._skeleton;
             if (!skeleton) {
                 return;
             }
@@ -330,7 +330,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
             // changing sheet
-            if (this._currentSkeleton && this._currentSkeleton.worksheet?.getSheetId() !== skeleton.worksheet.getSheetId()) {
+            if (this._skeleton && this._skeleton.worksheet?.getSheetId() !== skeleton.worksheet.getSheetId()) {
                 this._reset();
             }
             this._changeRuntime(skeleton, scene, viewportMain);
@@ -370,7 +370,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
     ): void {
         this._rangeType = rangeType;
 
-        const skeleton = this._currentSkeleton;
+        const skeleton = this._skeleton;
         const scene = this._scene;
         if (!scene || !skeleton) {
             return;

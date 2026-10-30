@@ -208,7 +208,6 @@ export class FWorksheetPermission extends FBase {
 
     /**
      * Remove worksheet protection.
-     * This removes collaboration protection; retained Office sheet protection still restricts local editing.
      * @returns {Promise<boolean>} A promise resolving to whether protection was removed; also resolves to `true` if already unprotected.
      * @example
      * ```ts

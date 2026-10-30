@@ -73,7 +73,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
 
     const workbook = useActiveWorkbook()!;
     const worksheet = useActiveWorksheet(workbook);
-    const isGridSheet = worksheet?.getConfig().type === SheetTypes.GRID;
+    const isGridSheet = !!worksheet && (worksheet.getConfig().type ?? SheetTypes.GRID) === SheetTypes.GRID;
     const disabled = disable || !isGridSheet;
     const unitId = workbook?.getUnitId();
     const themeService = useDependency(ThemeService);

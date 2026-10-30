@@ -175,14 +175,12 @@ import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui'
 import SheetsUIEnUS from '@univerjs/sheets-ui/locale/en-US'
 import { UniverUIPlugin } from '@univerjs/ui'
 import UIEnUS from '@univerjs/ui/locale/en-US'
-
 import '@univerjs/design/lib/index.css'
 import '@univerjs/ui/lib/index.css'
 import '@univerjs/docs-ui/lib/index.css'
 import '@univerjs/sheets-ui/lib/index.css'
 import '@univerjs/sheets-formula-ui/lib/index.css'
 import '@univerjs/sheets-numfmt-ui/lib/index.css'
-
 import '@univerjs/engine-formula/facade'
 import '@univerjs/ui/facade'
 import '@univerjs/sheets/facade'
@@ -237,7 +235,6 @@ pnpm add @univerjs/presets @univerjs/preset-sheets-core
 import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core'
 import UniverPresetSheetsCoreEnUS from '@univerjs/preset-sheets-core/locales/en-US'
 import { createUniver, LocaleType, mergeLocales } from '@univerjs/presets'
-
 import '@univerjs/preset-sheets-core/lib/index.css'
 
 const { univerAPI } = createUniver({
@@ -392,6 +389,10 @@ pnpm dev
 - 在 [GitHub Discussions](https://github.com/dream-num/univer/discussions) 提问。
 - 加入 [Discord](https://discord.gg/z3NKNT6D2f) 与社区交流。
 - 关注 [Twitter / X](https://twitter.com/univerhq) 和 [YouTube](https://www.youtube.com/@dreamNum)。
+
+微信扫码加入 Univer 交流群：
+
+![Univer 微信交流群二维码](../img/wechat-group-qr.png)
 
 参与社区前，请阅读 [行为准则](../../CODE_OF_CONDUCT.md)。
 

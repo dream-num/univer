@@ -603,9 +603,11 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 return;
             }
 
-            if (!isCropper && (evt.ctrlKey || this._selectedObjectMap.has(this._findGroupObject(applyObject).oKey))
-                && Array.from(this._selectedObjectMap.values()).some((object) => !this._getConfig(object).moveEnabled)) {
+            if (!isCropper) {
                 this._updateActiveObjectList(applyObject, evt);
+            }
+            const transformObjects = this._getTransformObjects('moveEnabled');
+            if (!isCropper && !transformObjects.size) {
                 return;
             }
             this._addCancelObserver(scene);
@@ -624,7 +626,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
             this._viewportScrollY = scrollY;
 
             if (!isCropper) {
-                this._updateActiveObjectList(applyObject, evt);
                 this._changeStart$.next({
                     target: applyObject,
                     objects: this._selectedObjectMap,
@@ -643,12 +644,12 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
             const scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
                 const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
-                this._moving(moveOffsetX, moveOffsetY, scrollTimer, isCropper);
+                this._moving(moveOffsetX, moveOffsetY, scrollTimer, isCropper, transformObjects);
 
                 !isCropper && this._clearControlMap();
 
                 scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
-                    this._moving(moveOffsetX, moveOffsetY, scrollTimer, isCropper);
+                    this._moving(moveOffsetX, moveOffsetY, scrollTimer, isCropper, transformObjects);
                 });
             });
 
@@ -775,7 +776,17 @@ export class Transformer extends Disposable implements ITransformerConfig {
         };
     }
 
-    private _moving(moveOffsetX: number, moveOffsetY: number, scrollTimer: ScrollTimer, isCropper = false) {
+    private _getTransformObjects(capability: 'moveEnabled' | 'resizeEnabled'): Map<string, BaseObject> {
+        return new Map(Array.from(this._selectedObjectMap).filter(([, object]) => this._getConfig(object)[capability]));
+    }
+
+    private _moving(
+        moveOffsetX: number,
+        moveOffsetY: number,
+        scrollTimer: ScrollTimer,
+        isCropper: boolean,
+        transformObjects: ReadonlyMap<string, BaseObject>
+    ) {
         const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
         const x = moveOffsetX - this._viewportScrollX + scrollX;
         const y = moveOffsetY - this._viewportScrollY + scrollY;
@@ -797,7 +808,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
         const { width: topSceneWidth, height: topSceneHeight } = topScene;
 
         if (!isCropper) {
-            const selectedObjects = Array.from(this._selectedObjectMap.values());
+            const selectedObjects = Array.from(transformObjects.values());
             // move boundary check
             for (let i = 0; i < selectedObjects.length; i++) {
                 const moveObject = selectedObjects[i];
@@ -816,7 +827,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 moveTop = boundary.moveTop;
             }
 
-            this._selectedObjectMap.forEach((moveObject) => {
+            transformObjects.forEach((moveObject) => {
                 moveObject.translate(moveLeft + moveObject.left, moveTop + moveObject.top);
             });
             this._changing$.next({
@@ -865,7 +876,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
         scrollTimer: ScrollTimer,
         keepRatio: boolean,
         isCropper = false,
-        applyObject: BaseObject
+        applyObject: BaseObject,
+        transformObjects: ReadonlyMap<string, BaseObject>
     ) {
         const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
         const x = moveOffsetX - this._viewportScrollX + scrollX;
@@ -878,7 +890,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
         const isGroup = applyObject instanceof Group;
 
         if (!isCropper) {
-            this._selectedObjectMap.forEach((moveObject) => {
+            transformObjects.forEach((moveObject) => {
                 this._moveFunc(moveObject, type, x, y, keepRatio, isCropper, isGroup);
             });
             this._changing$.next({
@@ -1190,8 +1202,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
                     this._startOffsetY = evtOffsetY;
                     const topScene = this._getTopScene();
                     const { keepRatio, isCropper } = this._getConfig(applyObject);
-                    if (topScene == null || (!isCropper && Array.from(this._selectedObjectMap.values())
-                        .some((object) => !this._getConfig(object).resizeEnabled))) {
+                    const transformObjects = this._getTransformObjects('resizeEnabled');
+                    if (topScene == null || (!isCropper && !transformObjects.size)) {
                         return;
                     }
                     topScene.getEngine()?.setCapture();
@@ -1211,7 +1223,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                             objects: this._selectedObjectMap,
                             type: MoveObserverType.MOVE_START,
                         });
-                        this._selectedObjectMap.forEach((moveObject) => {
+                        transformObjects.forEach((moveObject) => {
                             const { width, height, left, top } = moveObject.getState();
                             this._startStateMap.set(moveObject.oKey, { width, height, left, top });
                         });
@@ -1228,10 +1240,10 @@ export class Transformer extends Disposable implements ITransformerConfig {
                     this._moveBufferSkip = false;
                     const moveSubscription = topScene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
                         const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
-                        this._anchorMoving(type, moveOffsetX, moveOffsetY, scrollTimer, keepRatio, isCropper, applyObject);
+                        this._anchorMoving(type, moveOffsetX, moveOffsetY, scrollTimer, keepRatio, isCropper, applyObject, transformObjects);
 
                         scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
-                            this._anchorMoving(type, moveOffsetX, moveOffsetY, scrollTimer, keepRatio, isCropper, applyObject);
+                            this._anchorMoving(type, moveOffsetX, moveOffsetY, scrollTimer, keepRatio, isCropper, applyObject, transformObjects);
                         });
                         topScene.setCursor(cursor);
                     });
@@ -1245,7 +1257,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         const { offsetX, offsetY } = event;
 
                         if (!isCropper) {
-                            this._recoverySizeBoundary(Array.from(this._selectedObjectMap.values()), ancestorLeft, ancestorTop, topSceneWidth, topSceneHeight);
+                            this._recoverySizeBoundary(Array.from(transformObjects.values()), ancestorLeft, ancestorTop, topSceneWidth, topSceneHeight);
                             this._changeEnd$.next({
                                 objects: this._selectedObjectMap,
                                 type: MoveObserverType.MOVE_END,

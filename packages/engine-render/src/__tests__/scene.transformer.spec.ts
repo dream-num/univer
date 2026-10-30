@@ -325,24 +325,27 @@ describe('Transformer', () => {
         engine.dispose();
     });
 
-    it.each(['move', 'resize'])('does not %s a mixed selection containing a locked object', (gesture) => {
+    it.each(['move', 'resize'])('only transforms eligible objects during mixed selection %s and preserves selection events', (gesture) => {
         const engine = new Engine('locked-selection-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
         const scene = new Scene('locked-selection-scene', engine, { width: 800, height: 800 });
         const viewport = new Viewport('locked-selection-viewport', scene, { left: 0, top: 0, width: 800, height: 800 });
         const locked = new Rect('locked', { left: 0, top: 0, width: 400, height: 300 });
         locked.transformerConfig = { moveEnabled: false, resizeEnabled: false };
         const editable = new Rect('editable', { left: 100, top: 100, width: 100, height: 100 });
+        editable.transformerConfig = gesture === 'move' ? { resizeEnabled: false } : { moveEnabled: false };
         scene.addObject(locked);
         scene.addObject(editable);
         const transformer = new Transformer(scene);
         const started = vi.fn();
         const subscription = transformer.changeStart$.subscribe(started);
+        const ended = vi.fn();
+        const endSubscription = transformer.changeEnd$.subscribe(ended);
         try {
             transformer.attachTo(editable);
             transformer.setSelectedControl(locked);
             transformer.setSelectedControl(editable);
             const previousLocked = locked.getState();
-            const previousEditable = editable.getState();
+            const previousEditable = { left: editable.left, width: editable.width, height: editable.height };
             if (gesture === 'move') {
                 editable.onPointerDown$.emitEvent(createPointerEvent('pointerdown', 120, 120));
             } else {
@@ -353,19 +356,88 @@ describe('Transformer', () => {
             scene.onPointerMove$.emitEvent(createPointerEvent('pointermove', 300, 300));
             scene.onPointerUp$.emitEvent(createPointerEvent('pointerup', 300, 300));
             expect(locked.getState()).toEqual(previousLocked);
-            expect(editable.getState()).toEqual(previousEditable);
-            expect(started).not.toHaveBeenCalled();
             if (gesture === 'move') {
-                transformer.clearSelectedObjects();
-                transformer.setSelectedControl(editable);
-                editable.onPointerDown$.emitEvent(createPointerEvent('pointerdown', 120, 120));
-                scene.onPointerMove$.emitEvent(createPointerEvent('pointermove', 160, 160));
-                scene.onPointerUp$.emitEvent(createPointerEvent('pointerup', 160, 160));
-                expect(editable.left).toBe(140);
-                expect(locked.getState()).toEqual(previousLocked);
+                expect(editable.left).toBeGreaterThan(previousEditable.left);
+                // The locked object touches the boundary; it must not constrain the editable one.
+                editable.onPointerDown$.emitEvent(createPointerEvent('pointerdown', 300, 300));
+                scene.onPointerMove$.emitEvent(createPointerEvent('pointermove', 40, 40));
+                scene.onPointerUp$.emitEvent(createPointerEvent('pointerup', 40, 40));
+                expect(editable.left).toBeLessThan(previousEditable.left);
+            } else {
+                expect(editable.width).toBeGreaterThan(previousEditable.width);
+                expect(editable.height).toBeGreaterThan(previousEditable.height);
             }
+            expect(started.mock.calls[0][0].objects.size).toBe(2);
+            expect(ended.mock.calls[0][0].objects.size).toBe(2);
+            expect(transformer.getSelectedObjectMap().size).toBe(2);
+            expect(locked.getState()).toEqual(previousLocked);
         } finally {
             subscription.unsubscribe();
+            endSubscription.unsubscribe();
+            transformer.dispose();
+            viewport.dispose();
+            scene.dispose();
+            engine.dispose();
+        }
+    });
+
+    it.each(['move', 'resize'])('does not start a %s gesture when every selected object is locked', (gesture) => {
+        const engine = new Engine('all-locked-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
+        const scene = new Scene('all-locked-scene', engine, { width: 800, height: 800 });
+        const rect = new Rect('all-locked-rect', { left: 100, top: 100, width: 100, height: 100 });
+        scene.addObject(rect);
+        const transformer = new Transformer(scene);
+        const started = vi.fn();
+        const subscription = transformer.changeStart$.subscribe(started);
+        try {
+            transformer.attachTo(rect);
+            transformer.setSelectedControl(rect);
+            const anchor = scene.getAllObjectsByOrderForPick().find((object) => object.oKey.includes('ResizeRB'))!;
+            rect.transformerConfig = { moveEnabled: false, resizeEnabled: false };
+            const previous = rect.getState();
+            if (gesture === 'move') {
+                rect.onPointerDown$.emitEvent(createPointerEvent('pointerdown', 120, 120));
+            } else {
+                anchor.onPointerDown$.emitEvent(createPointerEvent('pointerdown', 200, 200));
+            }
+            scene.onPointerMove$.emitEvent(createPointerEvent('pointermove', 300, 300));
+            scene.onPointerUp$.emitEvent(createPointerEvent('pointerup', 300, 300));
+            expect(rect.getState()).toEqual(previous);
+            expect(started).not.toHaveBeenCalled();
+            expect(transformer.getSelectedObjectMap().get(rect.oKey)).toBe(rect);
+        } finally {
+            subscription.unsubscribe();
+            transformer.dispose();
+            scene.dispose();
+            engine.dispose();
+        }
+    });
+
+    it.each(['move', 'resize'])('preserves the independent crop %s path outside the ordinary selection', (gesture) => {
+        const engine = new Engine('crop-lock-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
+        const scene = new Scene('crop-lock-scene', engine, { width: 800, height: 800 });
+        const viewport = new Viewport('crop-lock-viewport', scene, { width: 800, height: 800 });
+        const crop = new Rect('crop-lock-frame', { left: 100, top: 100, width: 100, height: 100 });
+        crop.transformerConfig = { isCropper: true, moveEnabled: false };
+        scene.addObject(crop);
+        const transformer = new Transformer(scene);
+        try {
+            transformer.attachTo(crop);
+            transformer.createControlForCopper(crop);
+            if (gesture === 'move') {
+                crop.onPointerDown$.emitEvent(createPointerEvent('pointerdown', 120, 120));
+                scene.onPointerMove$.emitEvent(createPointerEvent('pointermove', 160, 160));
+                scene.onPointerUp$.emitEvent(createPointerEvent('pointerup', 160, 160));
+                expect(crop.left).toBe(140);
+            } else {
+                const anchor = scene.getAllObjectsByOrderForPick().find((object) => object.oKey.includes('ResizeRB'))!;
+                const point = anchor.ancestorTransform.applyPoint(new Vector2(anchor.width / 2, anchor.height / 2));
+                anchor.onPointerDown$.emitEvent(createPointerEvent('pointerdown', point.x, point.y));
+                scene.onPointerMove$.emitEvent(createPointerEvent('pointermove', point.x + 40, point.y + 40));
+                scene.onPointerUp$.emitEvent(createPointerEvent('pointerup', point.x + 40, point.y + 40));
+                expect(crop.width).toBeGreaterThan(100);
+            }
+        } finally {
             transformer.dispose();
             viewport.dispose();
             scene.dispose();

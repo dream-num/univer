@@ -18,9 +18,6 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-drawing-ui': {
-        print: {
-            unsupportedObject: 'Il foglio grafico contiene oggetti che non possono ancora essere stampati.',
-        },
         title: 'Immagine',
         backgroundImage: {
             title: 'Immagine di sfondo',

@@ -18,9 +18,6 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-drawing-ui': {
-        print: {
-            unsupportedObject: '圖表工作表包含目前尚無法列印的物件。',
-        },
         title: '圖片',
         backgroundImage: {
             title: '背景圖片',

@@ -18,9 +18,6 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-drawing-ui': {
-        print: {
-            unsupportedObject: 'تحتوي صفحة المخطط على عناصر لا يمكن طباعتها بعد.',
-        },
         title: 'صورة',
         backgroundImage: {
             title: 'صورة الخلفية',

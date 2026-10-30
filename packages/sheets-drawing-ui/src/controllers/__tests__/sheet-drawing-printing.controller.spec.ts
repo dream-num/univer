@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum, ImageSourceType, LocaleService, LocaleType } from '@univerjs/core';
+import { DisposableCollection, DrawingTypeEnum, ImageSourceType, SheetTypes } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingImageClipService, DrawingRenderService } from '@univerjs/drawing-ui';
 import { CanvasColorService, ICanvasColorService, Image, IRenderManagerService } from '@univerjs/engine-render';
 import { SheetPrintingResourceCollector, SheetPrintInterceptorService } from '@univerjs/sheets-ui';
 import { ComponentManager, DesktopGalleryService, IGalleryService, IUIPartsService, UIPartsService } from '@univerjs/ui';
+import { act, createElement } from 'react';
 import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
-import enUS from '../../locale/en-US';
 import { SheetDrawingPrintingController } from '../sheet-drawing-printing.controller';
 
 function installCanvasPlatformDouble(): void {
@@ -81,11 +81,9 @@ describe('SheetDrawingPrintingController', () => {
         collector.close();
     });
 
-    it('makes visible unsupported Chart Sheet objects a required print failure with an owner diagnostic', async () => {
+    it.each([DrawingTypeEnum.DRAWING_DOM, DrawingTypeEnum.DRAWING_BLOCK])('prints a registered component for Chart Sheet drawing type %s and releases its DOM', async (drawingType) => {
         installCanvasPlatformDouble();
         const bed = createSheetsDrawingUiTestBed();
-        onTestFinished(() => bed.univer.dispose());
-        bed.get(LocaleService).load({ [LocaleType.EN_US]: enUS });
         bed.injector.add([SheetPrintInterceptorService]);
         bed.injector.add([IUIPartsService, { useClass: UIPartsService }]);
         bed.injector.add([IGalleryService, { useClass: DesktopGalleryService }]);
@@ -94,35 +92,63 @@ describe('SheetDrawingPrintingController', () => {
         bed.injector.add([ComponentManager]);
         bed.injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
         bed.injector.add([SheetDrawingPrintingController]);
+        const components = bed.get(ComponentManager);
+        components.register('custom-dom', () => createElement('span', null, 'Editor content'));
+        components.register('custom-dom-print', (props: { data?: { label: string } }) => createElement('span', null, props.data?.label));
+        const interceptor = bed.get(SheetPrintInterceptorService);
+        interceptor.registerPrintComponent('custom-dom', 'custom-dom-print');
         bed.get(SheetDrawingPrintingController);
+        const worksheet = bed.workbook.getSheetBySheetId(bed.subUnitId)!;
+        worksheet.getConfig().type = SheetTypes.CHART;
         const drawingManager = bed.get(IDrawingManagerService);
         drawingManager.setDrawingData(bed.unitId, bed.subUnitId, {
             'dom-1': {
                 unitId: bed.unitId,
                 subUnitId: bed.subUnitId,
                 drawingId: 'dom-1',
-                drawingType: DrawingTypeEnum.DRAWING_DOM,
+                drawingType,
                 componentKey: 'custom-dom',
-                transform: { left: 0, top: 0, width: 100, height: 50 },
+                data: { label: 'Printable component content' },
+                transform: { left: 20, top: 10, width: 100, height: 50 },
             },
         } as never);
         drawingManager.setDrawingOrder(bed.unitId, bed.subUnitId, ['dom-1']);
         const collector = new SheetPrintingResourceCollector();
-        const interceptor = bed.get(SheetPrintInterceptorService);
+        const effects = new DisposableCollection();
         const renderer = bed.get(IRenderManagerService).createRender(bed.unitId);
-        interceptor.interceptor.fetchThroughInterceptors(interceptor.interceptor.getInterceptPoints().PRINTING_CHART_DOM_COLLECT)(undefined, {
-            unitId: bed.unitId,
-            subUnitId: bed.subUnitId,
-            scene: renderer.scene,
-            engine: renderer.engine,
-            root: document.createElement('div'),
-            worksheet: bed.workbook.getSheetBySheetId(bed.subUnitId)!,
-            resourceCollector: collector,
-            sourceRect: { x: 0, y: 0, width: 100, height: 50 },
-            contentRect: { x: 0, y: 0, width: 100, height: 50 },
-            offset: { offsetX: 0, offsetY: 0 },
+        const root = document.createElement('div');
+        document.body.appendChild(root);
+        onTestFinished(async () => {
+            await act(async () => {
+                effects.dispose();
+                await Promise.resolve();
+            });
+            collector.close();
+            root.remove();
+            bed.univer.dispose();
         });
-        await expect(collector.wait()).rejects.toThrow();
-        expect(collector.failureMessage).toBe('The Chart Sheet contains objects that cannot be printed yet.');
+        await act(async () => {
+            interceptor.interceptor.fetchThroughInterceptors(interceptor.interceptor.getInterceptPoints().PRINTING_CHART_DOM_COLLECT)(effects, {
+                unitId: bed.unitId,
+                subUnitId: bed.subUnitId,
+                scene: renderer.scene,
+                engine: renderer.engine,
+                root,
+                worksheet,
+                resourceCollector: collector,
+                sourceRect: { x: 0, y: 0, width: 200, height: 100 },
+                contentRect: { x: 0, y: 0, width: 200, height: 100 },
+                offset: { offsetX: 0, offsetY: 0 },
+            });
+            await Promise.resolve();
+        });
+        await collector.wait();
+        expect(root.textContent).toContain('Printable component content');
+        expect(root.textContent).not.toContain('Editor content');
+        await act(async () => {
+            effects.dispose();
+            await Promise.resolve();
+        });
+        expect(root.childElementCount).toBe(0);
     });
 });

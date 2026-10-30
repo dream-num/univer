@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
-import type { Scene } from '@univerjs/engine-render';
+import type { DisposableCollection, IRange, Worksheet } from '@univerjs/core';
+import type { Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { IFloatDomData } from '@univerjs/sheets-drawing';
 import type { SheetPrintingResourceCollector } from '@univerjs/sheets-ui';
-import { Disposable, DrawingTypeEnum, Inject, Injector, LocaleService, Tools } from '@univerjs/core';
+import { Disposable, DrawingTypeEnum, Inject, Injector, Tools } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingRenderService } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetPrintInterceptorService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ComponentManager } from '@univerjs/ui';
-import type { LocaleKey } from '../locale/types';
 import { mountPrintingFloatDom } from '../views/PrintingFloatDom';
 
 export class SheetDrawingPrintingController extends Disposable {
@@ -34,8 +33,7 @@ export class SheetDrawingPrintingController extends Disposable {
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(ComponentManager) private readonly _componetManager: ComponentManager,
-        @Inject(Injector) private readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
 
@@ -142,82 +140,79 @@ export class SheetDrawingPrintingController extends Disposable {
         });
     }
 
-    private _initPrintingDom() {
-        this.disposeWithMe(this._sheetPrintInterceptorService.interceptor.intercept(
-            this._sheetPrintInterceptorService.interceptor.getInterceptPoints().PRINTING_CHART_DOM_COLLECT,
-            {
-                handler: (collection, context, next) => {
-                    const subUnitData = this._drawingManagerService.getDrawingDataForUnit(context.unitId)?.[context.subUnitId];
-                    const hasUnsupportedDom = subUnitData?.order.some((id) => {
-                        const drawing = subUnitData.data[id];
-                        return !drawing.hidden && (drawing.drawingType === DrawingTypeEnum.DRAWING_DOM ||
-                            drawing.drawingType === DrawingTypeEnum.DRAWING_BLOCK);
-                    });
-                    if (hasUnsupportedDom) {
-                        context.resourceCollector.add(
-                            Promise.reject(new Error('Unsupported Chart Sheet drawing')),
-                            { required: true, failureMessage: this._localeService.t<LocaleKey>('sheets-drawing-ui.print.unsupportedObject') }
-                        );
-                    }
-                    return next(collection);
-                },
-            }
-        ));
-        this.disposeWithMe(
-            this._sheetPrintInterceptorService.interceptor.intercept(
-                this._sheetPrintInterceptorService.interceptor.getInterceptPoints().PRINTING_DOM_COLLECT,
-                {
-                    handler: (disposableCollection, pos, next) => {
-                        const { unitId, subUnitId } = pos;
-                        const unitData = this._drawingManagerService.getDrawingDataForUnit(unitId);
-                        const subUnitData = unitData?.[subUnitId];
-                        if (subUnitData) {
-                            const floatDomInfos = subUnitData.order.map((id) => {
-                                const drawing = subUnitData.data[id] as IFloatDomData;
-                                if (drawing.hidden) {
-                                    return null;
-                                }
-                                if (drawing.drawingType === DrawingTypeEnum.DRAWING_DOM || drawing.drawingType === DrawingTypeEnum.DRAWING_BLOCK) {
-                                    const printingComponentKey = this._sheetPrintInterceptorService.getPrintComponent(drawing.componentKey);
-                                    return {
-                                        ...drawing,
-                                        componentKey: this._componetManager.get(printingComponentKey || drawing.componentKey) as any,
-                                    };
-                                }
-
-                                return null;
-                            }).filter(Boolean) as IFloatDomData[];
-                            // Each prepare cycle gets its own React container. Removing the old
-                            // container immediately and unmounting it later prevents its cleanup
-                            // from racing with a new render mounted into the persistent page root.
-                            const printingRoot = document.createElement('div');
-                            printingRoot.style.position = 'absolute';
-                            printingRoot.style.inset = '0';
-                            pos.root.appendChild(printingRoot);
-                            const unmountPrintingFloatDom = mountPrintingFloatDom(
-                                {
-                                    floatDomInfos,
-                                    scene: pos.scene,
-                                    skeleton: pos.skeleton,
-                                    worksheet: pos.worksheet,
-                                },
-                                printingRoot,
-                                this._injector
-                            );
-
-                            disposableCollection?.add(() => {
-                                printingRoot.remove();
-                                queueMicrotask(unmountPrintingFloatDom);
-                            });
-
-                            return next(disposableCollection);
-                        }
-
-                        // Do not terminate the interceptor chain on sheets without drawings.
-                        return next(disposableCollection);
-                    },
+    private _initPrintingDom(): void {
+        const points = this._sheetPrintInterceptorService.interceptor.getInterceptPoints();
+        this.disposeWithMe(this._sheetPrintInterceptorService.interceptor.intercept(points.PRINTING_CHART_DOM_COLLECT, {
+            handler: (collection, context, next) => {
+                if (collection) {
+                    this._addPrintingDom(collection, context);
                 }
-            )
-        );
+                return next(collection);
+            },
+        }));
+        this.disposeWithMe(this._sheetPrintInterceptorService.interceptor.intercept(points.PRINTING_DOM_COLLECT, {
+            handler: (collection, context, next) => {
+                if (collection) {
+                    this._addPrintingDom(collection, context);
+                }
+                return next(collection);
+            },
+        }));
+    }
+
+    private _addPrintingDom(collection: DisposableCollection, context: {
+        unitId: string;
+        subUnitId: string;
+        scene: Scene;
+        root: HTMLElement;
+        worksheet: Worksheet;
+        skeleton?: SpreadsheetSkeleton;
+        resourceCollector: SheetPrintingResourceCollector;
+    }): void {
+        const data = this._drawingManagerService.getDrawingDataForUnit(context.unitId)?.[context.subUnitId];
+        if (!data) {
+            return;
+        }
+        const floatDomInfos = data.order.map((id) => {
+            const drawing = data.data[id] as IFloatDomData;
+            if (drawing.hidden || (drawing.drawingType !== DrawingTypeEnum.DRAWING_DOM
+                && drawing.drawingType !== DrawingTypeEnum.DRAWING_BLOCK)) {
+                return null;
+            }
+            const componentKey = this._sheetPrintInterceptorService.getPrintComponent(drawing.componentKey) || drawing.componentKey;
+            if (!this._componetManager.get(componentKey)) {
+                context.resourceCollector.add(Promise.reject(new Error(componentKey)), { required: !context.skeleton });
+                return null;
+            }
+            return { ...drawing, componentKey };
+        }).filter((drawing): drawing is IFloatDomData => drawing !== null);
+        if (!floatDomInfos.length) {
+            return;
+        }
+        // A separate container keeps delayed unmount from removing a newer preparation's DOM.
+        const printingRoot = document.createElement('div');
+        printingRoot.style.position = 'absolute';
+        printingRoot.style.inset = '0';
+        context.root.appendChild(printingRoot);
+        let onRendered!: () => void;
+        const rendered = new Promise<void>((resolve) => {
+            onRendered = resolve;
+        });
+        let unmountPrintingFloatDom: (() => void) | undefined;
+        collection.add(() => {
+            printingRoot.remove();
+            onRendered();
+            if (unmountPrintingFloatDom) {
+                queueMicrotask(unmountPrintingFloatDom);
+            }
+        });
+        unmountPrintingFloatDom = mountPrintingFloatDom({
+            floatDomInfos,
+            scene: context.scene,
+            skeleton: context.skeleton,
+            worksheet: context.worksheet,
+            onRendered,
+        }, printingRoot, this._injector);
+        context.resourceCollector.add(Promise.race([rendered, context.resourceCollector.whenClosed]), { required: true });
     }
 }

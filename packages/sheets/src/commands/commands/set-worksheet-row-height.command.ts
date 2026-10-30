@@ -19,6 +19,7 @@ import {
     BooleanNumber,
     CommandType,
     ICommandService,
+    isValidSheetDimension,
     IUndoRedoService,
     IUniverInstanceService,
     RANGE_TYPE,
@@ -60,13 +61,18 @@ export const DeltaRowHeightCommand: ICommand = {
         }
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { worksheet, subUnitId, unitId } = target;
 
         const { anchorRow, deltaY } = params;
         const anchorRowHeight = worksheet.getRowHeight(anchorRow);
         const destRowHeight = anchorRowHeight + deltaY;
+        if (!isValidSheetDimension(destRowHeight)) {
+            return false;
+        }
 
         const isAllSheetRange = selections.length === 1 && selections[0].range.rangeType === RANGE_TYPE.ALL;
         const rowSelections = selections.filter((s) => s.range.rangeType === RANGE_TYPE.ROW);
@@ -206,6 +212,9 @@ export const SetRowHeightCommand: ICommand = {
     id: 'sheet.command.set-row-height',
     // eslint-disable-next-line max-lines-per-function
     handler: (accessor: IAccessor, params: ISetRowHeightCommandParams) => {
+        if (!isValidSheetDimension(params?.value)) {
+            return false;
+        }
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -219,7 +228,9 @@ export const SetRowHeightCommand: ICommand = {
         }
 
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { unitId, subUnitId, worksheet } = target;
 
@@ -319,7 +330,9 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { unitId, subUnitId, worksheet } = target;
         const ranges = params?.ranges?.length ? params.ranges : selectionManagerService.getCurrentSelections()?.map((s) => s.range);

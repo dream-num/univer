@@ -24,9 +24,11 @@ import type {
     SpreadsheetColumnHeader,
     SpreadsheetHeader,
 } from '@univerjs/engine-render';
-import type { ISheetSkeletonManagerParam } from '@univerjs/sheets';
+import type { ISheetLocationBase, ISheetSkeletonManagerParam } from '@univerjs/sheets';
 import { Disposable, DisposableCollection, fromEventSubject, IContextService, Inject } from '@univerjs/core';
+import { DeviceType } from '@univerjs/engine-render';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
+import { getCellIndexByOffsetWithMerge } from '../../../common/utils';
 import {
     MOBILE_EXPANDING_SELECTION,
     MOBILE_PINCH_ZOOMING,
@@ -37,12 +39,20 @@ import { SheetScrollManagerService } from '../../../services/scroll-manager.serv
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 
 const TAP_MOVE_THRESHOLD = 10;
+const DOUBLE_TAP_MOVE_THRESHOLD = 20;
 const DOUBLE_TAP_DELAY = 500;
 
 interface IMobileTapState {
-    offsetX: number;
-    offsetY: number;
+    clientX: number;
+    clientY: number;
     pointerId: number | undefined;
+}
+
+interface IMobileCompletedTap {
+    clientX: number;
+    clientY: number;
+    timeStamp: number;
+    cell: ISheetLocationBase;
 }
 
 type MobilePointerEvent = IMouseEvent | IPointerEvent;
@@ -58,7 +68,7 @@ function isPrimaryPointer(event: MobilePointerEvent): boolean {
 export class MobileHoverRenderController extends Disposable implements IRenderModule {
     private _active = false;
     private _tapState: Nullable<IMobileTapState> = null;
-    private _lastCompletedTap: Nullable<IMobileTapState> = null;
+    private _lastCompletedTap: Nullable<IMobileCompletedTap> = null;
     private _completedTapTimer: Nullable<ReturnType<typeof setTimeout>> = null;
     private _suppressEngineDoubleClick = false;
     private _suppressEngineDoubleClickTimer: Nullable<ReturnType<typeof setTimeout>> = null;
@@ -142,6 +152,10 @@ export class MobileHoverRenderController extends Disposable implements IRenderMo
             next: ([event, state]) => {
                 state.stopPropagation();
                 state.skipNextObservers = true;
+                // Touch double taps are validated on pointerup, including cell and gesture checks.
+                if (event.deviceType === DeviceType.Touch) {
+                    return;
+                }
                 if (this._suppressEngineDoubleClick) {
                     this._clearEngineDoubleClickSuppression();
                     return;
@@ -209,8 +223,8 @@ export class MobileHoverRenderController extends Disposable implements IRenderMo
         }
 
         this._tapState = {
-            offsetX: event.offsetX,
-            offsetY: event.offsetY,
+            clientX: event.clientX,
+            clientY: event.clientY,
             pointerId: getPointerId(event),
         };
     }
@@ -222,8 +236,8 @@ export class MobileHoverRenderController extends Disposable implements IRenderMo
         }
 
         if (
-            Math.abs(event.offsetX - this._tapState.offsetX) > TAP_MOVE_THRESHOLD ||
-            Math.abs(event.offsetY - this._tapState.offsetY) > TAP_MOVE_THRESHOLD
+            Math.abs(event.clientX - this._tapState.clientX) > TAP_MOVE_THRESHOLD ||
+            Math.abs(event.clientY - this._tapState.clientY) > TAP_MOVE_THRESHOLD
         ) {
             this._resetTapSequence();
         }
@@ -238,8 +252,8 @@ export class MobileHoverRenderController extends Disposable implements IRenderMo
             return false;
         }
 
-        const completed = Math.abs(event.offsetX - tapState.offsetX) <= TAP_MOVE_THRESHOLD
-            && Math.abs(event.offsetY - tapState.offsetY) <= TAP_MOVE_THRESHOLD
+        const completed = Math.abs(event.clientX - tapState.clientX) <= TAP_MOVE_THRESHOLD
+            && Math.abs(event.clientY - tapState.clientY) <= TAP_MOVE_THRESHOLD
             && !this._contextService.getContextValue(MOBILE_PINCH_ZOOMING)
             && !this._contextService.getContextValue(MOBILE_EXPANDING_SELECTION)
             && !this._contextService.getContextValue(MOBILE_TRIGGER_CONTEXT_MENU);
@@ -251,13 +265,39 @@ export class MobileHoverRenderController extends Disposable implements IRenderMo
     }
 
     private _completeTap(unitId: string, event: MobilePointerEvent): void {
+        const skeletonParam = this._sheetSkeletonManagerService.getCurrentParam();
+        const cellIndex = skeletonParam && getCellIndexByOffsetWithMerge(
+            event.offsetX,
+            event.offsetY,
+            this._context.scene,
+            skeletonParam.skeleton
+        );
+        if (!cellIndex || !skeletonParam) {
+            this._resetCompletedTap();
+            return;
+        }
+
+        const cell: ISheetLocationBase = {
+            unitId,
+            subUnitId: skeletonParam.sheetId,
+            row: cellIndex.actualRow,
+            col: cellIndex.actualCol,
+        };
+        const timeStamp = Number.isFinite(event.timeStamp) ? event.timeStamp : performance.now();
         const lastCompletedTap = this._lastCompletedTap;
         if (
             lastCompletedTap &&
-            Math.abs(event.offsetX - lastCompletedTap.offsetX) <= TAP_MOVE_THRESHOLD &&
-            Math.abs(event.offsetY - lastCompletedTap.offsetY) <= TAP_MOVE_THRESHOLD
+            timeStamp >= lastCompletedTap.timeStamp &&
+            timeStamp - lastCompletedTap.timeStamp <= DOUBLE_TAP_DELAY &&
+            cell.unitId === lastCompletedTap.cell.unitId &&
+            cell.subUnitId === lastCompletedTap.cell.subUnitId &&
+            cell.row === lastCompletedTap.cell.row &&
+            cell.col === lastCompletedTap.cell.col &&
+            Math.abs(event.clientX - lastCompletedTap.clientX) <= DOUBLE_TAP_MOVE_THRESHOLD &&
+            Math.abs(event.clientY - lastCompletedTap.clientY) <= DOUBLE_TAP_MOVE_THRESHOLD
         ) {
             this._resetCompletedTap();
+            this._clearEngineDoubleClickSuppression();
             this._suppressEngineDoubleClick = true;
             this._suppressEngineDoubleClickTimer = setTimeout(() => {
                 this._suppressEngineDoubleClick = false;
@@ -269,9 +309,10 @@ export class MobileHoverRenderController extends Disposable implements IRenderMo
 
         this._resetCompletedTap();
         this._lastCompletedTap = {
-            offsetX: event.offsetX,
-            offsetY: event.offsetY,
-            pointerId: getPointerId(event),
+            clientX: event.clientX,
+            clientY: event.clientY,
+            timeStamp,
+            cell,
         };
         this._completedTapTimer = setTimeout(() => this._resetCompletedTap(), DOUBLE_TAP_DELAY);
     }

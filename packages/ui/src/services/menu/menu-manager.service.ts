@@ -16,9 +16,9 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import type { IMenuItem, MenuConfig } from './menu';
 import { createIdentifier, Disposable, IConfigService, Inject, Injector, merge } from '@univerjs/core';
 import { Subject } from 'rxjs';
+import type { IMenuItem, MenuConfig } from './menu';
 import { mergeMenuConfigs } from '../../common/menu-merge-configs';
 import {
     ContextMenuGroup,
@@ -114,18 +114,23 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 title: 'ui.ribbon.start',
                 [RibbonStartGroup.HISTORY]: {
                     order: 0,
+                    title: 'ui.ribbon.groups.clipboard',
                 },
                 [RibbonStartGroup.FORMAT]: {
                     order: 1,
+                    title: 'ui.ribbon.groups.font',
                 },
                 [RibbonStartGroup.LAYOUT]: {
                     order: 2,
+                    title: 'ui.ribbon.groups.layout',
                 },
                 [RibbonStartGroup.NUMBER]: {
                     order: 3,
+                    title: 'ui.ribbon.groups.number',
                 },
                 [RibbonStartGroup.OTHERS]: {
                     order: 4,
+                    title: 'ui.ribbon.groups.tools',
                 },
             },
             [RibbonPosition.INSERT]: {
@@ -133,15 +138,19 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 title: 'ui.ribbon.insert',
                 [RibbonInsertGroup.EDIT]: {
                     order: 0,
+                    title: 'ui.ribbon.groups.editing',
                 },
                 [RibbonInsertGroup.MEDIA]: {
                     order: 1,
+                    title: 'ui.ribbon.groups.media',
                 },
                 [RibbonInsertGroup.CELL]: {
                     order: 2,
+                    title: 'ui.ribbon.groups.cells',
                 },
                 [RibbonInsertGroup.OTHERS]: {
                     order: 3,
+                    title: 'ui.ribbon.groups.tools',
                 },
             },
             [RibbonPosition.FORMULAS]: {
@@ -149,9 +158,11 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 title: 'ui.ribbon.formulas',
                 [RibbonFormulasGroup.BASIC]: {
                     order: 0,
+                    title: 'ui.ribbon.groups.formulas',
                 },
                 [RibbonFormulasGroup.OTHERS]: {
                     order: 1,
+                    title: 'ui.ribbon.groups.tools',
                 },
             },
             [RibbonPosition.DATA]: {
@@ -159,15 +170,19 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 title: 'ui.ribbon.data',
                 [RibbonDataGroup.FORMULAS]: {
                     order: 0,
+                    title: 'ui.ribbon.groups.formulas',
                 },
                 [RibbonDataGroup.RULES]: {
                     order: 1,
+                    title: 'ui.ribbon.groups.rules',
                 },
                 [RibbonDataGroup.ORGANIZATION]: {
                     order: 2,
+                    title: 'ui.ribbon.groups.organization',
                 },
                 [RibbonDataGroup.OTHERS]: {
                     order: 3,
+                    title: 'ui.ribbon.groups.tools',
                 },
             },
             [RibbonPosition.VIEW]: {
@@ -175,12 +190,15 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 title: 'ui.ribbon.view',
                 [RibbonViewGroup.DISPLAY]: {
                     order: 0,
+                    title: 'ui.ribbon.groups.display',
                 },
                 [RibbonViewGroup.VISIBILITY]: {
                     order: 0,
+                    title: 'ui.ribbon.groups.visibility',
                 },
                 [RibbonViewGroup.OTHERS]: {
                     order: 0,
+                    title: 'ui.ribbon.groups.tools',
                 },
             },
             [RibbonPosition.OTHERS]: {
@@ -188,6 +206,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 title: 'ui.ribbon.others',
                 [RibbonOthersGroup.OTHERS]: {
                     order: 0,
+                    title: 'ui.ribbon.groups.tools',
                 },
             },
         },

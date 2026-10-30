@@ -78,6 +78,7 @@ import {
 import { ComponentManager, IconManager } from '@univerjs/ui';
 import { DOC_LAYOUT_RECOVERY_COMPONENT, DocLayoutRecovery } from '../views/DocLayoutRecovery';
 import { DOC_PASTE_OPTIONS_COMPONENT, DocPasteOptions } from '../views/DocPasteOptions';
+import { EditorColorPicker } from '../views/EditorColorPicker';
 import { FLOAT_MENU_COMPONENT_KEY, FloatToolbar } from '../views/float-toolbar/FloatToolbar';
 import {
     COMPONENT_DOC_HEADER_FOOTER_PANEL,
@@ -251,6 +252,7 @@ export class ComponentsController extends Disposable {
             [DOC_PARAGRAPH_MENU_COMPONENT_KEY, ParagraphMenu],
             [DOC_TABLE_BLOCK_MENU_COMPONENT_KEY, TableBlockMenu],
             [FLOAT_MENU_COMPONENT_KEY, FloatToolbar],
+            [EditorColorPicker.componentKey, EditorColorPicker],
             [PAGE_SETTING_COMPONENT_ID, PageSettings],
             [DOC_LAYOUT_RECOVERY_COMPONENT, DocLayoutRecovery],
         ] as const).forEach(([key, comp]) => {

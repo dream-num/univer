@@ -303,7 +303,7 @@ export function SheetBarTabs() {
                         <>
                             {embedChildType != null && <EmbedSheetTabProductIcon childType={embedChildType} />}
                             {hasProtection && <LockIcon className="univer-shrink-0" />}
-                            <span className="univer-truncate univer-outline-none">{sheet.getName()}</span>
+                            <span className="univer-min-w-px univer-truncate univer-outline-none">{sheet.getName()}</span>
                         </>
                     ),
                     index,

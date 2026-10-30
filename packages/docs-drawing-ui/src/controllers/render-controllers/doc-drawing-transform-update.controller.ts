@@ -792,7 +792,13 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         if (affectedDrawingIds == null || targetedMultiDrawing) {
             const allMultiDrawings = Object.values(updateDrawingMap)
                 .filter((drawing) => drawing.isMultiTransform);
-            this._handleMultiDrawingsTransform(allMultiDrawings as unknown as IDrawingParam[], forceRecreateMultiDrawings);
+            // Partial Worker layouts can temporarily omit previously published header/footer occurrences.
+            const removeMissingDrawings = skeleton.getLayoutProgress()?.complete !== false;
+            this._handleMultiDrawingsTransform(
+                allMultiDrawings as unknown as IDrawingParam[],
+                forceRecreateMultiDrawings,
+                removeMissingDrawings
+            );
         }
     }
 
@@ -963,7 +969,11 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             } as IDrawingParamsWithBehindText));
     }
 
-    private _handleMultiDrawingsTransform(multiDrawings: IDrawingParam[], forceRecreate = false) {
+    private _handleMultiDrawingsTransform(
+        multiDrawings: IDrawingParam[],
+        forceRecreate = false,
+        removeMissingDrawings = true
+    ) {
         const { scene, unitId } = this._context;
         const changedDrawings = multiDrawings.filter((drawing) => forceRecreate || shouldRefreshDocDrawingTransform(
             this._drawingManagerService.getDrawingByParam(drawing) ?? undefined,
@@ -972,7 +982,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         const publishedDrawingIds = new Set(multiDrawings.map((drawing) => drawing.drawingId));
         const removedDrawings = Object.values(this._drawingManagerService.getDrawingData(unitId, unitId))
             .filter((drawing) => drawing.isMultiTransform === BooleanNumber.TRUE &&
-                (forceRecreate || (!publishedDrawingIds.has(drawing.drawingId) && drawing.hidden !== true)));
+                (forceRecreate || (removeMissingDrawings && !publishedDrawingIds.has(drawing.drawingId) && drawing.hidden !== true)));
         if (changedDrawings.length === 0 && removedDrawings.length === 0) {
             return;
         }

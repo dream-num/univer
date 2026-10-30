@@ -25,7 +25,7 @@ afterEach(() => {
     cleanup();
 });
 
-describe('HueSlider extra', () => {
+describe('HueSlider', () => {
     it('should stop propagation, handle drag and emit onChanged', () => {
         const onChange = vi.fn();
         const onChanged = vi.fn();

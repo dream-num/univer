@@ -18,13 +18,19 @@
 /* eslint-disable complexity */
 
 import type { EventState, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
+import type {
+    IMouseEvent,
+    IPointerEvent,
+    IRenderContext,
+    IRenderModule,
+    SpreadsheetColumnHeader,
+    SpreadsheetHeader,
+} from '@univerjs/engine-render';
 import type {
     IDeltaColumnWidthCommandParams,
     IDeltaRowHeightCommandParams,
     ISetWorksheetRowIsAutoHeightCommandParams,
 } from '@univerjs/sheets';
-import type { ISetWorksheetColIsAutoWidthCommandParams } from '../../commands/commands/set-worksheet-auto-col-width.command';
 import {
     createInterceptorKey,
     Disposable,
@@ -34,7 +40,6 @@ import {
     RANGE_TYPE,
 } from '@univerjs/core';
 import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-
 import {
     DeltaColumnWidthCommand,
     DeltaRowHeightCommand,
@@ -42,6 +47,7 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { Subscription } from 'rxjs';
+import type { ISetWorksheetColIsAutoWidthCommandParams } from '../../commands/commands/set-worksheet-auto-col-width.command';
 import { SetWorksheetColAutoWidthCommand } from '../../commands/commands/set-worksheet-auto-col-width.command';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
@@ -416,9 +422,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                             moveChangeY = canvasMaxHeight - scrollBarHorizontalHeight + scrollXY.y - cell.startY;
                         }
 
-                        if (moveChangeY < -(cell.endY - cell.startY) + 2) {
-                            moveChangeY = -(cell.endY - cell.startY) + 2;
-                        }
+                        moveChangeY = Math.max(moveChangeY, -(cell.endY - cell.startY));
 
                         if (isStartMove) {
                             this._resizeHelperShape?.transformByState({
@@ -438,9 +442,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                             moveChangeX = canvasMaxWidth - scrollBarVerticalWidth + scrollXY.x - cell.startX;
                         }
 
-                        if (moveChangeX < -(cell.endX - cell.startX) + 2) {
-                            moveChangeX = -(cell.endX - cell.startX) + 2;
-                        }
+                        moveChangeX = Math.max(moveChangeX, -(cell.endX - cell.startX));
 
                         if (isStartMove) {
                             this._resizeHelperShape?.transformByState({
@@ -458,7 +460,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                     }
                 });
 
-                this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent((upEvt: IPointerEvent | IMouseEvent) => {
+                this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
                     const scene = this._context.scene;
 
                     this._clearObserverEvent();

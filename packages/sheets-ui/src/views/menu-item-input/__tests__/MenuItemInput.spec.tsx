@@ -15,15 +15,48 @@
  */
 
 import type { ReactElement } from 'react';
-import { Injector, LocaleService, LocaleType } from '@univerjs/core';
+import {
+    ICommandService,
+    Injector,
+    LocaleService,
+    LocaleType,
+    RANGE_TYPE,
+    RedoCommand,
+    UndoCommand,
+} from '@univerjs/core';
 import { ConfigProvider } from '@univerjs/design';
 import designEnUS from '@univerjs/design/locale/en-US';
-import { ContextMenuService, IContextMenuService, RediContext } from '@univerjs/ui';
+import {
+    SetColWidthCommand,
+    SetRowHeightCommand,
+    SetWorksheetColWidthMutation,
+    SetWorksheetRowHeightMutation,
+    SetWorksheetRowIsAutoHeightMutation,
+    SheetSkeletonService,
+    SheetsSelectionsService,
+    WorkbookPermissionService,
+    WorksheetPermissionService,
+} from '@univerjs/sheets';
+import {
+    ComponentManager,
+    ContextMenuPanel,
+    ContextMenuService,
+    DesktopLayoutService,
+    IconManager,
+    IContextMenuService,
+    ILayoutService,
+    IMenuManagerService,
+    MenuManagerService,
+    RediContext,
+} from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createCommandTestBed } from '../../../commands/commands/__tests__/create-command-test-bed';
 import enUS from '../../../locale/en-US';
+import { SetColWidthMenuItemFactory, SetRowHeightMenuItemFactory, SheetMenuPosition } from '../../../menu/menu';
+import { MENU_ITEM_INPUT_COMPONENT } from '../interface';
 import { MenuItemInput } from '../MenuItemInput';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -52,8 +85,12 @@ function createInjector() {
     return injector;
 }
 
-function renderWithDependencies(element: ReactElement) {
-    const injector = createInjector();
+function renderWithDependencies(
+    element: ReactElement,
+    setupInjector?: (injector: Injector) => void,
+    injector = createInjector()
+) {
+    setupInjector?.(injector);
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = createRoot(container);
@@ -110,6 +147,136 @@ describe('MenuItemInput', () => {
         disposals.splice(0).forEach((dispose) => dispose());
         ChangeRecords.reset();
         vi.useRealTimers();
+    });
+
+    it.each([
+        ['column', '0'],
+        ['row', '0'],
+        ['column', ''],
+        ['row', ''],
+    ])('applies zero %s size from input %j through the real context menu and supports undo/redo', async (axis, text) => {
+        const testBed = createCommandTestBed(undefined, [[SheetSkeletonService]]);
+        const injector = testBed.univer.__getInjector();
+        const commands = injector.get(ICommandService);
+        injector.get(WorkbookPermissionService);
+        injector.get(WorksheetPermissionService);
+        const worksheet = testBed.sheet.getActiveSheet()!;
+        const isColumn = axis === 'column';
+        const getSize = () => isColumn ? worksheet.getColumnWidth(1) : worksheet.getRowHeight(1);
+        const original = getSize();
+        const executions: Promise<boolean>[] = [];
+        for (const command of [
+            SetColWidthCommand,
+            SetRowHeightCommand,
+            SetWorksheetColWidthMutation,
+            SetWorksheetRowHeightMutation,
+            SetWorksheetRowIsAutoHeightMutation,
+        ]) {
+            commands.registerCommand(command);
+        }
+        injector.get(SheetsSelectionsService).setSelections([{
+            range: {
+                startRow: 1,
+                endRow: 1,
+                startColumn: 1,
+                endColumn: 1,
+                rangeType: isColumn ? RANGE_TYPE.COLUMN : RANGE_TYPE.ROW,
+            },
+            primary: null,
+            style: null,
+        }]);
+        const menuType = isColumn ? SheetMenuPosition.COL_HEADER_CONTEXT_MENU : SheetMenuPosition.ROW_HEADER_CONTEXT_MENU;
+        const commandId = isColumn ? SetColWidthCommand.id : SetRowHeightCommand.id;
+        const { container, unmount } = renderWithDependencies(
+            <ContextMenuPanel
+                menuType={menuType}
+                onOptionSelect={(option) => {
+                    executions.push(commands.executeCommand(option.commandId ?? option.label as string, { value: option.value }));
+                }}
+            />,
+            (injector) => {
+                injector.add([IContextMenuService, { useClass: ContextMenuService }]);
+                injector.add([IMenuManagerService, { useClass: MenuManagerService }]);
+                injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
+                injector.add([ComponentManager]);
+                injector.add([IconManager]);
+                const locales = injector.get(LocaleService);
+                locales.load({ [LocaleType.EN_US]: { ...enUS, ...designEnUS } });
+                locales.setLocale(LocaleType.EN_US);
+                locales.setDirection('ltr');
+                injector.get(ILayoutService).registerRootContainerElement(document.body);
+                injector.get(ComponentManager).register(MENU_ITEM_INPUT_COMPONENT, MenuItemInput);
+                injector.get(IMenuManagerService).appendRootMenu({
+                    [menuType]: {
+                        [commandId]: {
+                            menuItemFactory: isColumn ? SetColWidthMenuItemFactory : SetRowHeightMenuItemFactory,
+                        },
+                    },
+                });
+            },
+            injector
+        );
+        disposals.push(() => {
+            unmount();
+            testBed.univer.dispose();
+        });
+        const input = getInput(container);
+        act(() => input.focus());
+        act(() => input.select());
+        act(() => setInputText(input, text));
+        expect(input.value).toBe('0');
+        const button = input.closest('button');
+        if (!(button instanceof HTMLButtonElement)) {
+            throw new TypeError('Dimension menu item not found');
+        }
+        act(() => button.focus());
+        act(() => button.click());
+        expect(await Promise.all(executions)).toEqual([true]);
+        expect(getSize()).toBe(0);
+        await commands.executeCommand(UndoCommand.id);
+        expect(getSize()).toBe(original);
+        await commands.executeCommand(RedoCommand.id);
+        expect(getSize()).toBe(0);
+    });
+
+    it('reports zero immediately when the configured minimum allows collapsed dimensions', () => {
+        const { container, unmount } = renderWithDependencies(
+            <MenuItemInput
+                prefix="sheets-ui.rightClick.rowHeight"
+                suffix="px"
+                value="24"
+                min={0}
+                max={1000}
+                onChange={(value) => ChangeRecords.push(value)}
+            />
+        );
+        disposals.push(unmount);
+
+        act(() => {
+            setInputText(getInput(container), '0');
+        });
+
+        expect(getInput(container).value).toBe('0');
+        expect(ChangeRecords.values).toEqual(['0']);
+    });
+
+    it('reports the positive minimum when the input is cleared', () => {
+        const { container, unmount } = renderWithDependencies(
+            <MenuItemInput
+                prefix="sheets-ui.rightClick.insertRowsAbove"
+                suffix="sheets-ui.rightClick.insertRowsAboveSuffix"
+                value="12"
+                min={1}
+                max={20}
+                onChange={(value) => ChangeRecords.push(value)}
+            />
+        );
+        disposals.push(unmount);
+
+        act(() => setInputText(getInput(container), ''));
+
+        expect(getInput(container).value).toBe('1');
+        expect(ChangeRecords.values).toEqual(['1']);
     });
 
     it('clamps typed values to the configured maximum before reporting the command value', () => {

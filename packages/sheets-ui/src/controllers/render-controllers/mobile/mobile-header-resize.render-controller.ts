@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-/* eslint-disable max-lines-per-function */
-
-import type { Nullable, Workbook } from '@univerjs/core';
+import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { Subscription } from 'rxjs';
@@ -65,11 +63,7 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
     private _resizeHelperShape: Nullable<Rect>;
 
     private _isDragging: boolean = false;
-    private _touchStartX: number = 0;
-    private _touchStartY: number = 0;
-
-    private _touchMoveHandler: Nullable<(e: TouchEvent) => void>;
-    private _touchEndHandler: Nullable<(e: TouchEvent) => void>;
+    private _resizeListeners: Nullable<IDisposable>;
 
     private _selectionSubscription: Nullable<Subscription>;
     private _scrollSubscription: Nullable<Subscription>;
@@ -87,22 +81,19 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
     }
 
     override dispose(): void {
+        this._cancelResize();
+
         this._rowResizeButton?.dispose();
         this._rowResizeButton = null;
 
         this._columnResizeButton?.dispose();
         this._columnResizeButton = null;
 
-        this._resizeHelperShape?.dispose();
-        this._resizeHelperShape = null;
-
         this._selectionSubscription?.unsubscribe();
         this._selectionSubscription = null;
 
         this._scrollSubscription?.unsubscribe();
         this._scrollSubscription = null;
-
-        this._cleanupTouchHandlers();
 
         super.dispose();
     }
@@ -130,8 +121,8 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
 
         scene.addObjects([this._rowResizeButton, this._columnResizeButton], SHEET_COMPONENT_HEADER_LAYER_INDEX);
 
-        this._bindTouchEventsToButton(this._rowResizeButton, 'row');
-        this._bindTouchEventsToButton(this._columnResizeButton, 'column');
+        this._bindPointerEventsToButton(this._rowResizeButton, 'row');
+        this._bindPointerEventsToButton(this._columnResizeButton, 'column');
     }
 
     private _initSelectionListener(): void {
@@ -145,7 +136,9 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
 
     private _initScrollListener(): void {
         this._scrollSubscription = this._scrollManagerService.validViewportScrollInfo$.subscribe((scrollInfo) => {
-            if (!scrollInfo) return;
+            if (!scrollInfo) {
+                return;
+            }
             this._updateButtonPositionOnScroll();
         });
         this.disposeWithMe(this._scrollSubscription);
@@ -160,7 +153,9 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
         this._currentRow = -1;
         this._currentColumn = -1;
 
-        if (!selections || selections.length === 0) return;
+        if (!selections || selections.length === 0) {
+            return;
+        }
 
         const selection = selections[0];
         const rangeType = selection.range.rangeType;
@@ -175,7 +170,9 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
 
     private _showRowResizeButton(selection: ISelectionWithStyle): void {
         const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
-        if (!skeleton || !this._rowResizeButton) return;
+        if (!skeleton || !this._rowResizeButton) {
+            return;
+        }
 
         const { scene } = this._context;
         const selectionWithCoord = attachSelectionWithCoord(selection, skeleton);
@@ -205,7 +202,9 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
 
     private _showColumnResizeButton(selection: ISelectionWithStyle): void {
         const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
-        if (!skeleton || !this._columnResizeButton) return;
+        if (!skeleton || !this._columnResizeButton) {
+            return;
+        }
 
         const { scene } = this._context;
         const selectionWithCoord = attachSelectionWithCoord(selection, skeleton);
@@ -235,7 +234,9 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
 
     private _updateButtonPositionOnScroll(): void {
         const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
-        if (!skeleton) return;
+        if (!skeleton) {
+            return;
+        }
 
         const { scene } = this._context;
         const { scaleX, scaleY } = scene.getAncestorScale();
@@ -265,29 +266,37 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
         }
     }
 
-    private _bindTouchEventsToButton(button: HeaderMenuResizeShape, type: 'row' | 'column'): void {
-        button.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
+    private _bindPointerEventsToButton(button: HeaderMenuResizeShape, type: 'row' | 'column'): void {
+        this.disposeWithMe(button.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
+            if (evt.button !== 0) {
+                return;
+            }
             // Don't start resize during pinch zoom or selection expansion
-            if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING)) return;
-            if (this._contextService.getContextValue(MOBILE_EXPANDING_SELECTION)) return;
+            if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING)) {
+                return;
+            }
+            if (this._contextService.getContextValue(MOBILE_EXPANDING_SELECTION)) {
+                return;
+            }
 
             this._startResize(evt, type);
-        });
+        }));
     }
 
     private _startResize(evt: IPointerEvent | IMouseEvent, type: 'row' | 'column'): void {
         const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
-        if (!skeleton) return;
+        if (!skeleton) {
+            return;
+        }
 
         const scene = this._context.scene;
         const engine = scene.getEngine();
         const canvasElement = engine?.getCanvasElement();
-        if (!canvasElement) return;
+        if (!canvasElement) {
+            return;
+        }
 
-        // Store initial touch position
-        this._touchStartX = evt.offsetX;
-        this._touchStartY = evt.offsetY;
-        this._isDragging = false;
+        this._cancelResize();
 
         // Get current row/column offset
         const currentOffset = type === 'row'
@@ -300,41 +309,47 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
         // Disable scene object events during drag
         scene.disableObjectsEvent();
 
-        // Setup native touch event handlers
-        this._setupTouchHandlers(canvasElement, type, currentOffset);
+        this._setupPointerHandlers(canvasElement, evt, type, currentOffset);
     }
 
-    private _setupTouchHandlers(canvasElement: HTMLCanvasElement, type: 'row' | 'column', initialOffset: number): void {
-        const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
-        if (!skeleton) return;
-
-        const scene = this._context.scene;
-
-        // Get zoom ratio for delta adjustment
+    private _setupPointerHandlers(
+        canvasElement: HTMLCanvasElement,
+        evt: IPointerEvent | IMouseEvent,
+        type: 'row' | 'column',
+        initialOffset: number
+    ): void {
         const worksheet = this._context.unit.getActiveSheet();
-        const zoomRatio = worksheet?.getZoomRatio() || 1;
-
+        if (!worksheet) {
+            this._cancelResize();
+            return;
+        }
+        const zoomRatio = worksheet.getZoomRatio() || 1;
+        const initialSize = type === 'row'
+            ? worksheet.getRowHeight(this._currentRow)
+            : worksheet.getColumnWidth(this._currentColumn);
+        const anchor = type === 'row' ? this._currentRow : this._currentColumn;
+        const pointerId = 'pointerId' in evt ? evt.pointerId : 0;
+        const startX = evt.offsetX;
+        const startY = evt.offsetY;
         let totalDelta = 0;
 
-        // Touch move handler
-        this._touchMoveHandler = (e: TouchEvent) => {
-            // Check context flags
+        const handlePointerMove = (e: PointerEvent) => {
+            if (e.pointerId !== pointerId) {
+                return;
+            }
             if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING)) {
                 this._cancelResize();
                 return;
             }
 
-            if (e.touches.length !== 1) return;
-
-            const touch = e.touches[0];
             const rect = canvasElement.getBoundingClientRect();
-            const offsetX = touch.clientX - rect.left;
-            const offsetY = touch.clientY - rect.top;
+            const offsetX = e.clientX - rect.left;
+            const offsetY = e.clientY - rect.top;
 
             // Calculate raw delta
             const rawDelta = type === 'row'
-                ? (offsetY - this._touchStartY)
-                : (offsetX - this._touchStartX);
+                ? (offsetY - startY)
+                : (offsetX - startX);
 
             // Apply zoom adjustment (like mobile scroll)
             const adjustedDelta = rawDelta / zoomRatio;
@@ -345,60 +360,66 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
             }
 
             if (this._isDragging) {
-                totalDelta = adjustedDelta;
-                this._updateResizeHelper(type, initialOffset + adjustedDelta);
-                this._updateResizeButton(type, initialOffset + adjustedDelta);
+                totalDelta = Math.max(adjustedDelta, -initialSize);
+                this._updateResizeHelper(type, initialOffset + totalDelta);
+                this._updateResizeButton(type, initialOffset + totalDelta);
             }
 
             e.preventDefault();
         };
 
-        // Touch end handler
-        this._touchEndHandler = (e: TouchEvent) => {
-            scene.enableObjectsEvent();
-
-            if (this._isDragging && Math.abs(totalDelta) >= MINIMAL_OFFSET) {
-                // Execute resize command
-                if (type === 'row') {
-                    this._commandService.executeCommand(DeltaRowHeightCommand.id, {
-                        deltaY: totalDelta,
-                        anchorRow: this._currentRow,
-                    });
-                } else {
-                    this._commandService.executeCommand(DeltaColumnWidthCommand.id, {
-                        deltaX: totalDelta,
-                        anchorCol: this._currentColumn,
-                    });
-                }
+        const handlePointerUp = async (e: PointerEvent) => {
+            if (e.pointerId !== pointerId) {
+                return;
             }
-
+            const shouldResize = this._isDragging && totalDelta !== 0;
             this._cleanupResize();
-
-            if (this._touchMoveHandler) {
-                canvasElement.removeEventListener('touchmove', this._touchMoveHandler);
-            }
-            if (this._touchEndHandler) {
-                canvasElement.removeEventListener('touchend', this._touchEndHandler);
-                canvasElement.removeEventListener('touchcancel', this._touchEndHandler);
-            }
-
             e.preventDefault();
+            // A meaningful drag can collapse a dimension smaller than MINIMAL_OFFSET.
+            if (shouldResize) {
+                await this._commandService.executeCommand(
+                    type === 'row' ? DeltaRowHeightCommand.id : DeltaColumnWidthCommand.id,
+                    type === 'row' ? { deltaY: totalDelta, anchorRow: anchor } : { deltaX: totalDelta, anchorCol: anchor }
+                );
+            }
         };
 
-        // Add event listeners with passive: false
-        canvasElement.addEventListener('touchmove', this._touchMoveHandler, { passive: false });
-        canvasElement.addEventListener('touchend', this._touchEndHandler, { passive: false });
-        canvasElement.addEventListener('touchcancel', this._touchEndHandler, { passive: false });
+        this._bindResizeListeners(canvasElement, pointerId, handlePointerMove, handlePointerUp);
+    }
 
-        this.disposeWithMe(toDisposable(() => {
-            if (this._touchMoveHandler) {
-                canvasElement.removeEventListener('touchmove', this._touchMoveHandler);
+    private _bindResizeListeners(
+        canvasElement: HTMLCanvasElement,
+        pointerId: number,
+        handlePointerMove: (event: PointerEvent) => void,
+        handlePointerUp: (event: PointerEvent) => Promise<void>
+    ): void {
+        const ownerDocument = canvasElement.ownerDocument;
+        const ownerWindow = ownerDocument.defaultView;
+        const handlePointerCancel = (e: PointerEvent) => {
+            if (e.pointerId === pointerId) {
+                this._cancelResize();
             }
-            if (this._touchEndHandler) {
-                canvasElement.removeEventListener('touchend', this._touchEndHandler);
-                canvasElement.removeEventListener('touchcancel', this._touchEndHandler);
+        };
+        const handlePointerDown = (e: PointerEvent) => {
+            if (e.pointerId !== pointerId) {
+                this._cancelResize();
             }
-        }));
+        };
+        const handleBlur = () => this._cancelResize();
+
+        // Listen on the document so releasing outside the canvas also restores scene events.
+        ownerDocument.addEventListener('pointermove', handlePointerMove, { passive: false });
+        ownerDocument.addEventListener('pointerup', handlePointerUp);
+        ownerDocument.addEventListener('pointercancel', handlePointerCancel);
+        ownerDocument.addEventListener('pointerdown', handlePointerDown);
+        ownerWindow?.addEventListener('blur', handleBlur);
+        this._resizeListeners = toDisposable(() => {
+            ownerDocument.removeEventListener('pointermove', handlePointerMove);
+            ownerDocument.removeEventListener('pointerup', handlePointerUp);
+            ownerDocument.removeEventListener('pointercancel', handlePointerCancel);
+            ownerDocument.removeEventListener('pointerdown', handlePointerDown);
+            ownerWindow?.removeEventListener('blur', handleBlur);
+        });
     }
 
     private _createResizeHelper(type: 'row' | 'column', offset: number, skeleton: SpreadsheetSkeleton): void {
@@ -433,7 +454,9 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
     }
 
     private _updateResizeHelper(type: 'row' | 'column', newOffset: number): void {
-        if (!this._resizeHelperShape) return;
+        if (!this._resizeHelperShape) {
+            return;
+        }
 
         const scene = this._context.scene;
         const { scaleX, scaleY } = scene.getAncestorScale();
@@ -453,7 +476,9 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
 
     private _updateResizeButton(type: 'row' | 'column', newOffset: number): void {
         const button = type === 'row' ? this._rowResizeButton : this._columnResizeButton;
-        if (!button) return;
+        if (!button) {
+            return;
+        }
 
         const scene = this._context.scene;
         const { scaleX, scaleY } = scene.getAncestorScale();
@@ -472,31 +497,19 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
     }
 
     private _cleanupResize(): void {
+        this._resizeListeners?.dispose();
+        this._resizeListeners = null;
+        this._context.scene.enableObjectsEvent();
         this._resizeHelperShape?.dispose();
         this._resizeHelperShape = null;
         this._isDragging = false;
     }
 
-    private _cleanupTouchHandlers(): void {
-        const engine = this._context.scene.getEngine();
-        const canvasElement = engine?.getCanvasElement();
-
-        if (canvasElement) {
-            if (this._touchMoveHandler) {
-                canvasElement.removeEventListener('touchmove', this._touchMoveHandler);
-                this._touchMoveHandler = null;
-            }
-            if (this._touchEndHandler) {
-                canvasElement.removeEventListener('touchend', this._touchEndHandler);
-                canvasElement.removeEventListener('touchcancel', this._touchEndHandler);
-                this._touchEndHandler = null;
-            }
-        }
-    }
-
     private _cancelResize(): void {
-        this._context.scene.enableObjectsEvent();
+        if (!this._resizeHelperShape && !this._resizeListeners) {
+            return;
+        }
         this._cleanupResize();
-        this._cleanupTouchHandlers();
+        this._updateButtonPositionOnScroll();
     }
 }

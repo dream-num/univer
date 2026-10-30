@@ -17,8 +17,6 @@
 import type { IUser, LocaleType, UniverInstanceType } from '@univerjs/core';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import type { IUniverUIConfig } from '@univerjs/ui';
-import type { LocaleKey } from '../locale/types';
-import type { IThreadCommentEditorInstance } from './ThreadCommentEditor';
 import {
     dateKit,
     generateRandomId,
@@ -43,6 +41,8 @@ import {
 import { UI_PLUGIN_CONFIG_KEY, useConfigValue, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { debounceTime, map, of, startWith } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
+import type { IThreadCommentEditorInstance } from './ThreadCommentEditor';
 import { SetActiveCommentOperation } from '../commands/operations/comment.operations';
 import { transformDocument2TextNodes, transformTextNodes2Document } from './thread-comment-editor/util';
 import { getThreadCommentEditorId } from './thread-comment-tree/util';
@@ -248,7 +248,10 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                                     <li>
                                                         <button
                                                             type="button"
-                                                            className="hover:univer-bg-gray-200"
+                                                            className={`
+                                                              hover:univer-bg-gray-200
+                                                              dark:hover:!univer-bg-gray-800
+                                                            `}
                                                             onClick={() => onEditingChange?.(true)}
                                                         >
                                                             {localeService.t<LocaleKey>('thread-comment-ui.item.edit')}
@@ -257,7 +260,10 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                                     <li>
                                                         <button
                                                             type="button"
-                                                            className="hover:univer-bg-gray-200"
+                                                            className={`
+                                                              hover:univer-bg-gray-200
+                                                              dark:hover:!univer-bg-gray-800
+                                                            `}
                                                             onClick={handleDeleteItem}
                                                         >
                                                             {localeService.t<LocaleKey>('thread-comment-ui.item.delete')}

@@ -18,6 +18,7 @@ import type { IAccessor, ICommand, IRange } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
+    isValidSheetDimension,
     IUndoRedoService,
     IUniverInstanceService,
     RANGE_TYPE,
@@ -56,13 +57,18 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
         const undoRedoService = accessor.get(IUndoRedoService);
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { worksheet, unitId, subUnitId } = target;
 
         const { anchorCol, deltaX } = params;
         const anchorColWidth = worksheet.getColumnWidth(anchorCol);
         const destColumnWidth = anchorColWidth + deltaX;
+        if (!isValidSheetDimension(destColumnWidth)) {
+            return false;
+        }
 
         const isAllSheetRange = selections.length === 1 && selections[0].range.rangeType === RANGE_TYPE.ALL;
         const colSelections = selections.filter((s) => s.range.rangeType === RANGE_TYPE.COLUMN);
@@ -174,6 +180,9 @@ export const SetColWidthCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-worksheet-col-width',
     handler: (accessor: IAccessor, params: ISetColWidthCommandParams) => {
+        if (!isValidSheetDimension(params?.value)) {
+            return false;
+        }
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -184,7 +193,9 @@ export const SetColWidthCommand: ICommand = {
         if (!selections?.length) return false;
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { subUnitId, unitId, worksheet } = target;
         const skeleton = accessor.get(SheetSkeletonService).getSkeleton(unitId, subUnitId);
@@ -264,7 +275,9 @@ export const SetWorksheetColIsAutoWidthCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { unitId, subUnitId } = target;
 

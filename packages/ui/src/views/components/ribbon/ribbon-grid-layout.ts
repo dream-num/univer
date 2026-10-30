@@ -46,10 +46,7 @@ export function placeRibbonGridItems(items: IMenuSchema[]): IRibbonGridPlacement
         const cells = getCells(layout.row, layout.column, rowSpan, columnSpan);
 
         if (!isValidGridGeometry(layout, rowSpan, cells)) {
-            // eslint-disable-next-line node/prefer-global/process
-            if (process.env.NODE_ENV !== 'production') {
-                globalThis.console.warn(`[RibbonGrid] Invalid gridLayout for "${item.key}"; using fallback placement.`);
-            }
+            globalThis.console.warn(`[RibbonGrid] Invalid gridLayout for "${item.key}"; using fallback placement.`);
             fallbackItems.push({ item });
             continue;
         }

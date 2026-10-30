@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IMenuItemInputProps } from '../../../menu-item-input/interface';
 import { LocaleService, LocaleType, Univer } from '@univerjs/core';
 import { ConfigProvider } from '@univerjs/design';
 import designEnUS from '@univerjs/design/locale/en-US';
@@ -22,6 +21,7 @@ import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { IMenuItemInputProps } from '../../../menu-item-input/interface';
 import enUS from '../../../../locale/en-US';
 import { MobileMenuItemInput } from '../MobileMenuItemInput';
 
@@ -47,6 +47,7 @@ async function renderInput(props: Partial<IMenuItemInputProps> = {}) {
         onChange,
         ...props,
     };
+    const container = document.createElement('div');
     const renderWithProps = (nextProps: Partial<IMenuItemInputProps>) => (
         <RediContext.Provider value={{ injector }}>
             <ConfigProvider locale={designEnUS.design} mountContainer={container}>
@@ -56,7 +57,6 @@ async function renderInput(props: Partial<IMenuItemInputProps> = {}) {
             </ConfigProvider>
         </RediContext.Provider>
     );
-    const container = document.createElement('div');
     document.body.appendChild(container);
     const root = createRoot(container);
     await act(async () => root.render(renderWithProps({})));
@@ -117,6 +117,18 @@ afterEach(() => {
 });
 
 describe('MobileMenuItemInput', () => {
+    it('allows confirming zero when the configured minimum allows collapsed dimensions', async () => {
+        const { container, onChange } = await renderInput({ min: 0 });
+        const input = getInput(container);
+        await setInputText(input, '0');
+        expect(onChange).not.toHaveBeenCalled();
+
+        await act(async () => getConfirmButton(container).click());
+
+        expect(input.value).toBe('0');
+        expect(onChange).toHaveBeenCalledExactlyOnceWith('0');
+    });
+
     it('keeps multi-digit typing as a draft until explicit confirmation', async () => {
         const { container, onChange, onRowClick } = await renderInput();
         const input = getInput(container);

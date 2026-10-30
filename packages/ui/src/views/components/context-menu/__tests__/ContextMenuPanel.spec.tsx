@@ -15,8 +15,6 @@
  */
 
 import type { ReactElement } from 'react';
-import type { IValueOption } from '../../../../services/menu/menu';
-import type { IMenuSchema, MenuSchemaType } from '../../../../services/menu/menu-manager.service';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import {
     ConfigService,
@@ -34,6 +32,8 @@ import {
 import { RediContext } from '@wendellhu/redi/react-bindings';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { IValueOption } from '../../../../services/menu/menu';
+import type { IMenuSchema, MenuSchemaType } from '../../../../services/menu/menu-manager.service';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
 import enUS from '../../../../locale/en-US';
@@ -550,6 +550,11 @@ describe('ContextMenuPanel', () => {
 
         fireEvent.click(screen.getByRole('button', { name: 'Pick a value' }));
 
+        screen.getByRole('button', { name: 'Pick a value' }).focus();
+        const submenu = document.querySelector(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`)!;
+        fireEvent.mouseLeave(submenu, { relatedTarget: document.body });
+        fireEvent.mouseLeave(insertButton.parentElement!, { relatedTarget: document.body });
+
         expect(onPickerClick).toHaveBeenCalledOnce();
         expect(onOptionSelect).not.toHaveBeenCalled();
         expect(screen.getByRole('button', { name: 'Pick a value' })).not.toBeNull();
@@ -653,6 +658,45 @@ describe('ContextMenuPanel', () => {
 
         act(() => disabled$.next(true));
         await waitFor(() => expect(screen.queryByText('docs-ui.printLayout')).toBeNull());
+    });
+
+    it('keeps a submenu inside the viewport when its color editor grows', async () => {
+        vi.stubGlobal('innerHeight', 600);
+        const resizeCallbacks = new Map<Element, () => void>();
+        const disconnect = vi.fn();
+        vi.stubGlobal('ResizeObserver', class {
+            constructor(private readonly callback: () => void) {}
+            observe(element: Element) { resizeCallbacks.set(element, this.callback); }
+            disconnect = disconnect;
+        });
+        const view = renderWithDependencies(
+            <ContextMenuPanel menuType="color-root" />,
+            {
+                'color-root': [{
+                    key: 'color',
+                    order: 0,
+                    item: {
+                        id: 'color',
+                        type: MenuItemType.SELECTOR,
+                        title: 'Color',
+                        selections: [{ label: 'Custom color', value: '#123456' }],
+                    },
+                }],
+            }
+        );
+        const button = screen.getByRole('button', { name: 'Color' });
+        vi.spyOn(button.parentElement!, 'getBoundingClientRect').mockReturnValue(new DOMRect(100, 400, 160, 32));
+        fireEvent.click(button);
+        const submenu = document.querySelector<HTMLElement>(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`)!;
+        let height = 100;
+        vi.spyOn(submenu, 'getBoundingClientRect').mockImplementation(() => new DOMRect(0, 0, 288, height));
+        await nextFrame();
+        height = 320;
+        act(() => resizeCallbacks.get(submenu)!());
+        expect(Number.parseFloat(submenu.style.top) + height).toBeLessThanOrEqual(window.innerHeight);
+        expect(Number.parseFloat(submenu.style.top)).toBeGreaterThanOrEqual(0);
+        view.unmount();
+        expect(disconnect).toHaveBeenCalled();
     });
 
     it('opens submenus to the left by default in rtl when there is enough space', async () => {

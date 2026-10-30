@@ -17,13 +17,15 @@
 import type { IAccessor, Workbook } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { Subscriber } from 'rxjs';
-import type { LocaleKey } from '../locale/types';
 import { BooleanNumber, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { EditorColorPicker } from '@univerjs/docs-ui';
 import {
     CopySheetCommand,
     InsertSheetMutation,
     RemoveSheetMutation,
     SetTabColorCommand,
+    SetTabColorMutation,
+    SetWorksheetActiveOperation,
     SetWorksheetHideCommand,
     SetWorksheetHideMutation,
     SetWorksheetShowCommand,
@@ -33,8 +35,9 @@ import {
     WorkbookHideSheetPermission,
     WorkbookRenameSheetPermission,
 } from '@univerjs/sheets';
-import { COLOR_PICKER_COMPONENT, getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, combineLatestWith, map, Observable } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
 import { RemoveSheetConfirmCommand } from '../commands/commands/remove-sheet-confirm.command';
 import { ShowMenuListCommand } from '../commands/commands/unhide.command';
 import { RenameSheetOperation } from '../commands/operations/rename-sheet.operation';
@@ -98,18 +101,38 @@ export function RenameSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
     };
 }
 
-export function ChangeColorSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
+export function ChangeColorSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey, string, string> {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const commandService = accessor.get(ICommandService);
     return {
         id: SetTabColorCommand.id,
         title: 'sheets-ui.sheetConfig.changeColor',
         type: MenuItemType.SELECTOR,
         selections: [
             {
+                label: 'sheets-ui.toolbar.resetColor',
+                icon: 'NoColorDoubleIcon',
+                value: '',
+            },
+            {
                 label: {
-                    name: COLOR_PICKER_COMPONENT,
+                    name: EditorColorPicker.componentKey,
                     hoverable: false,
                     selectable: false,
                 },
+                value$: new Observable<string>((subscriber) => {
+                    const updateColor = () => {
+                        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                        subscriber.next(workbook?.getActiveSheet()?.getTabColor() ?? '');
+                    };
+                    updateColor();
+                    const disposable = commandService.onCommandExecuted(({ id }) => {
+                        if (id === SetTabColorMutation.id || id === SetWorksheetActiveOperation.id) {
+                            updateColor();
+                        }
+                    });
+                    return () => disposable.dispose();
+                }),
             },
         ],
         hidden$: getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission]),

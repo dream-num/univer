@@ -21,6 +21,8 @@ import type { CustomData, IRange, IRowData, IWorksheetData } from './typedef';
 import type { SheetViewModel } from './view-model';
 import { getArrayLength } from '../shared/object-matrix';
 import { BooleanNumber } from '../types/enum';
+import { isValidSheetDimension, normalizeSheetDimension } from './sheet-dimensions';
+import { DEFAULT_WORKSHEET_ROW_HEIGHT } from './sheet-snapshot-utils';
 import { RANGE_TYPE } from './typedef';
 
 const MAXIMUM_ROW_HEIGHT = 2000;
@@ -85,16 +87,19 @@ export class RowManager {
     getRowHeight(rowPos: number, count: number = 1): number {
         const { _rowData } = this;
         const config = this._config;
+        const defaultHeight = normalizeSheetDimension(config.defaultRowHeight, DEFAULT_WORKSHEET_ROW_HEIGHT, false);
         let height: number = 0;
 
         for (let i = 0; i < count; i++) {
             const row = _rowData[i + rowPos] || {
                 hd: BooleanNumber.FALSE,
-                h: config.defaultRowHeight,
+                h: defaultHeight,
             };
-            const { ia, ah, h = config.defaultRowHeight } = row;
+            const { ia, ah, h = defaultHeight } = row;
 
-            height += (ia == null || ia === BooleanNumber.TRUE) && typeof ah === 'number' ? ah : h;
+            height += (ia == null || ia === BooleanNumber.TRUE) && isValidSheetDimension(ah, false)
+                ? ah
+                : normalizeSheetDimension(h, 0);
         }
 
         return height;
@@ -106,6 +111,9 @@ export class RowManager {
      * @param height row height
      */
     setRowHeight(rowPos: number, height: number) {
+        if (!isValidSheetDimension(height)) {
+            return;
+        }
         const row = this._rowData[rowPos];
 
         // To prevent data redundancy, we only set the height when it is different from the default row height.
@@ -157,6 +165,13 @@ export class RowManager {
             const rowData = rowDataInfo?.[r - startRow];
             if (rowData !== undefined && rowData !== null && Object.keys(rowData).length > 0) {
                 this._rowData[r] = { ...rowData };
+                const row = this._rowData[r];
+                if (row.h !== undefined && !isValidSheetDimension(row.h)) {
+                    row.h = 0;
+                }
+                if (row.ah !== undefined && !isValidSheetDimension(row.ah)) {
+                    delete row.ah;
+                }
             }
         }
     }

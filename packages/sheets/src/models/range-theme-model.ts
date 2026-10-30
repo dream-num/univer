@@ -15,12 +15,22 @@
  */
 
 import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { IRangeThemeStyleItem, IRangeThemeStyleJSON } from './range-theme-util';
-import { Disposable, generateRandomId, Inject, InterceptorEffectEnum, IResourceManagerService, IUniverInstanceService, RTree, UniverInstanceType } from '@univerjs/core';
+import {
+    Disposable,
+    generateRandomId,
+    Inject,
+    InterceptorEffectEnum,
+    IResourceManagerService,
+    IUniverInstanceService,
+    Optional,
+    RTree,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { ISheetRowFilteredService } from '@univerjs/engine-formula';
 import { Subject } from 'rxjs';
+import type { IRangeThemeStyleItem, IRangeThemeStyleJSON } from './range-theme-util';
 import { INTERCEPTOR_POINT, RangeThemeInterceptorId } from '../services/sheet-interceptor/interceptor-const';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
-
 import { RangeThemeStyle } from './range-theme-util';
 import { buildInThemes } from './range-themes/build-in-theme.factory';
 import { defaultRangeThemeStyle, defaultRangeThemeStyleJSONWithLastRowStyle } from './range-themes/default';
@@ -62,7 +72,8 @@ export class SheetRangeThemeModel extends Disposable {
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService,
-        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
+        @Optional(ISheetRowFilteredService) private readonly _sheetRowFilteredService?: ISheetRowFilteredService
     ) {
         super();
         this._registerIntercept();
@@ -132,12 +143,12 @@ export class SheetRangeThemeModel extends Disposable {
             if (sheet) {
                 const rowCount = sheet.getRowCount();
                 const rowManager = sheet.getRowManager();
-                for (let i = 1; i <= rowCount; i++) {
+                for (let i = 0; i < rowCount; i++) {
                     const visible = sheet.getRowVisible(i);
                     if (!visible) {
                         set.add(i);
                     } else {
-                        if (rowManager.getRowHeight(i) === 0) {
+                        if (rowManager.getRowHeight(i) === 0 || this._sheetRowFilteredService?.getRowFiltered(unitId, subUnitId, i)) {
                             set.add(i);
                         }
                     }
@@ -313,11 +324,16 @@ export class SheetRangeThemeModel extends Disposable {
                 const offsetRow = row - rangeInfo.range.startRow;
                 const offsetCol = col - rangeInfo.range.startColumn;
                 const theme = this.getRangeThemeStyle(unitId, themeName);
+                let lastVisibleRow = rangeInfo.range.endRow;
+                const hiddenRows = this._getSheetRowVisibleFuncSet(unitId, subUnitId);
+                while (lastVisibleRow >= rangeInfo.range.startRow && hiddenRows.has(lastVisibleRow)) {
+                    lastVisibleRow--;
+                }
 
                 const zebraCache = this._ensureZebraCrossingCache(unitId, subUnitId, themes[0] as string);
                 const isToggled = zebraCache.getIsToggled(row);
                 if (theme) {
-                    return theme.getStyle(offsetRow, offsetCol, row === rangeInfo.range.endRow, col === rangeInfo.range.endColumn, isToggled);
+                    return theme.getStyle(offsetRow, offsetCol, row === lastVisibleRow, col === rangeInfo.range.endColumn, isToggled);
                 }
             }
         }

@@ -19,9 +19,11 @@
 import type { IDisposable, IDocumentData, ITextRangeParam } from '@univerjs/core';
 import type { Mock } from 'vitest';
 import {
+    createInternalEditorID,
     DataStreamTreeTokenType,
     DisposableCollection,
     DOC_RANGE_TYPE,
+    DOCS_COMMENT_EDITOR_UNIT_ID_KEY,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentDataModel,
@@ -1156,6 +1158,51 @@ describe('DocSelectionRenderService', () => {
         expect(hostPageScrolled).toBe(false);
     });
 
+    it.each([DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY])(
+        'avoids redundant native focus for mobile sheet editor %s while allowing refocus',
+        (unitId) => {
+            const { input, renderUnit, service, univer } = createRealSelectionRenderService({ unitId, mobile: true });
+            const focusSpy = vi.spyOn(input, 'focus');
+            cleanup.push(() => focusSpy.mockRestore(), () => renderUnit.dispose(), () => univer.dispose());
+
+            service.focus();
+            service.focus();
+
+            expect(document.activeElement).toBe(input);
+            expect(focusSpy).toHaveBeenCalledExactlyOnceWith({ preventScroll: true });
+
+            service.blur();
+            service.focus();
+
+            expect(document.activeElement).toBe(input);
+            expect(focusSpy).toHaveBeenCalledTimes(2);
+
+            const otherInput = document.createElement('input');
+            document.body.appendChild(otherInput);
+            otherInput.focus();
+            service.focus();
+
+            expect(document.activeElement).toBe(input);
+            expect(focusSpy).toHaveBeenCalledTimes(3);
+        }
+    );
+
+    it.each([
+        { unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY, mobile: false },
+        { unitId: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, mobile: false },
+        { unitId: 'selection-render-doc', mobile: true },
+    ])('preserves native focus behavior outside mobile sheet editors: %s', (options) => {
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService(options);
+        const focusSpy = vi.spyOn(input, 'focus');
+        cleanup.push(() => focusSpy.mockRestore(), () => renderUnit.dispose(), () => univer.dispose());
+
+        service.focus();
+        service.focus();
+
+        expect(document.activeElement).toBe(input);
+        expect(focusSpy).toHaveBeenCalledTimes(2);
+    });
+
     it('does not steal focus back from an embedded runtime during selection sync', () => {
         const embedCanvas = document.createElement('canvas');
         embedCanvas.tabIndex = 0;
@@ -1462,6 +1509,68 @@ describe('DocSelectionRenderService', () => {
         expect(document.activeElement).toBe(input);
     });
 
+    it.each([
+        { geometry: false, retainedEditor: false },
+        { geometry: false, retainedEditor: true },
+        { geometry: true, retainedEditor: false },
+        { geometry: true, retainedEditor: true },
+    ])('preserves external frame focus during passive selection refresh: %j', ({ geometry, retainedEditor }) => {
+        const frame = document.createElement('iframe');
+        document.body.appendChild(frame);
+        const ownerDocument = frame.contentDocument!;
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService({
+            scene: {
+                getViewports: () => geometry ? [{ getAbsoluteVector: () => ({ x: 30, y: 40 }) }] : [],
+                getEngine: () => ({ name: 'engine' }),
+            },
+        });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        ownerDocument.body.appendChild(TestLayoutService.root);
+        if (geometry) {
+            (service as unknown as { _rangeList: TextRange[] })._rangeList = [{
+                isActive: () => true,
+                getAnchor: () => ({ left: 12, top: 20, visible: true }),
+                dispose: vi.fn(),
+            } as never];
+        }
+        if (retainedEditor) {
+            input.focus();
+        }
+        const peerInput = document.createElement('div');
+        peerInput.tabIndex = -1;
+        document.body.appendChild(peerInput);
+        peerInput.focus();
+        vi.spyOn(ownerDocument, 'hasFocus').mockReturnValue(false);
+        const focus = vi.spyOn(input, 'focus');
+
+        expect(service.canFocusing).toBe(false);
+        service.sync();
+        if (geometry) {
+            expect(service.selectionContainer.style.left).toBe('30px');
+            expect(service.selectionContainer.style.top).toBe('40px');
+        }
+        service.activate(12, 34);
+
+        expect(document.activeElement).toBe(peerInput);
+        expect(focus).not.toHaveBeenCalled();
+        expect(service.selectionContainer.style.left).toBe('12px');
+        expect(service.selectionContainer.style.top).toBe('34px');
+
+        service.activate(12, 34, true);
+        expect(focus).toHaveBeenCalledOnce();
+        expect(ownerDocument.activeElement).toBe(input);
+    });
+
+    it('retains top-level focus recovery when the browser window is inactive', () => {
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService();
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        vi.spyOn(document, 'hasFocus').mockReturnValue(false);
+
+        service.sync();
+
+        expect(document.activeElement).toBe(input);
+    });
+
     it('publishes hidden editor input, paste, focus, and blur events with the typed content', () => {
         const { input, renderUnit, service, univer } = createRealSelectionRenderService();
         cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
@@ -1631,6 +1740,57 @@ describe('DocSelectionRenderService', () => {
         service.sync();
         expect(service.isFocusing).toBe(true);
         expect(focus).not.toHaveBeenCalled();
+    });
+
+    describe.each([false, true])('mobile internal editor blur with visual viewport=%s', (hasVisualViewport) => {
+        it.each([
+            DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+            `${DOCS_COMMENT_EDITOR_UNIT_ID_KEY}_PANEL_unit-1_sheet-1_comment-1`,
+            createInternalEditorID('RICH_TEXT_EDITOR-range-selector'),
+        ])('publishes native blur immediately after editing in %s', (unitId) => {
+            const originalVisualViewport = window.visualViewport;
+            const visualViewport = Object.assign(new EventTarget(), {
+                height: 900,
+                offsetTop: 0,
+                offsetLeft: 0,
+                width: 430,
+            });
+            Object.defineProperty(window, 'visualViewport', {
+                configurable: true,
+                value: hasVisualViewport ? visualViewport : undefined,
+            });
+            cleanup.push(() => Object.defineProperty(window, 'visualViewport', {
+                configurable: true,
+                value: originalVisualViewport,
+            }));
+
+            const { input, renderUnit, service, univer } = createRealSelectionRenderService({ unitId, mobile: true });
+            cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+            const onBlur = vi.fn();
+            const subscription = service.onBlur$.subscribe(onBlur);
+            cleanup.push(() => subscription.unsubscribe());
+
+            for (let cycle = 0; cycle < 3; cycle++) {
+                service.replaceDocRanges([], true);
+                service.focus();
+                expect(service.isEditing).toBe(true);
+                expect(service.isFocusing).toBe(true);
+                visualViewport.height = 500;
+                visualViewport.dispatchEvent(new Event('resize'));
+
+                input.blur();
+
+                expect(service.isFocusing).toBe(false);
+                expect(service.isEditing).toBe(false);
+                expect(onBlur).toHaveBeenCalledTimes(cycle + 1);
+
+                // Keyboard dismissal must not publish the same native blur a second time.
+                visualViewport.height = 900;
+                visualViewport.dispatchEvent(new Event('resize'));
+                expect(onBlur).toHaveBeenCalledTimes(cycle + 1);
+            }
+        });
     });
 
     it('keeps mobile edit mode active without closing a newly focused keyboard', () => {
@@ -2303,6 +2463,76 @@ describe('DocSelectionRenderService', () => {
         expect(pointerMove$.observed).toBe(false);
         expect(pointerUp$.observed).toBe(false);
         expect(pointerCancel$.observed).toBe(false);
+    });
+
+    it.each([
+        DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+        DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+        `${DOCS_COMMENT_EDITOR_UNIT_ID_KEY}_PANEL_unit-1_sheet-1_comment-1`,
+        createInternalEditorID('RICH_TEXT_EDITOR-range-selector'),
+    ])(
+        'keeps the initial mobile internal editor caret visible before typing in %s',
+        (unitId) => {
+            const { input, service, renderUnit, univer } = createRealSelectionRenderService({ unitId, mobile: true });
+            cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+            const range = createTextRange({
+                collapsed: true,
+                startOffset: 0,
+                endOffset: 0,
+                isActive: vi.fn(() => true),
+            });
+            const anchor = range.getAnchor()!;
+            anchor.show.mockImplementation(() => {
+                anchor.visible = true;
+            });
+            anchor.hide.mockImplementation(() => {
+                anchor.visible = false;
+            });
+            range.activate.mockImplementation(() => anchor.show());
+            cursorConvertToTextRangeMock.mockReturnValue(range);
+
+            // Editor.setSelectionRanges publishes a non-editing selection when opening internal editors.
+            service.addDocRanges([{ startOffset: 0, endOffset: 0 }], false, { shouldFocus: false });
+            service.focus();
+
+            expect(document.activeElement).toBe(input);
+            expect(service.isEditing).toBe(false);
+            expect(anchor.visible).toBe(true);
+
+            range.refresh.mockImplementation(() => anchor.hide());
+            service.refreshRanges();
+
+            expect(anchor.visible).toBe(true);
+            expect(mobileSelectionVisualsMock.show).not.toHaveBeenCalled();
+        }
+    );
+
+    it('keeps the standalone mobile doc caret hidden until entering edit mode', () => {
+        const { service, renderUnit, univer } = createRealSelectionRenderService({ mobile: true });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        const range = createTextRange({
+            collapsed: true,
+            startOffset: 0,
+            endOffset: 0,
+            isActive: vi.fn(() => true),
+        });
+        const anchor = range.getAnchor()!;
+        anchor.show.mockImplementation(() => {
+            anchor.visible = true;
+        });
+        anchor.hide.mockImplementation(() => {
+            anchor.visible = false;
+        });
+        range.activate.mockImplementation(() => anchor.show());
+        cursorConvertToTextRangeMock.mockReturnValue(range);
+
+        service.addDocRanges([{ startOffset: 0, endOffset: 0 }], false, { shouldFocus: false });
+
+        expect(anchor.visible).toBe(false);
+
+        service.enterEditing();
+
+        expect(anchor.visible).toBe(true);
     });
 
     it('shows mobile range controls only for the active non-editing selection', () => {

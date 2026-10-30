@@ -39,7 +39,7 @@ import {
     Viewport,
 } from '@univerjs/engine-render';
 import { IWorkbenchService, RediContext, WorkbenchService } from '@univerjs/ui';
-import { act } from 'react';
+import { act, StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
@@ -176,6 +176,56 @@ describe('DocSideMenu', () => {
         for (const [documentFlavor, visible] of [[DocumentFlavor.MODERN, true], [DocumentFlavor.TRADITIONAL, false], [DocumentFlavor.MODERN, true]] as const) {
             act(() => instanceService.focusUnit(String(documentFlavor)));
             expect(container.querySelector('button[aria-expanded]') !== null).toBe(visible);
+        }
+    });
+
+    it('updates outline visibility when the configuration changes', () => {
+        const injector = univer.__getInjector();
+        const configService = injector.get(IConfigService);
+        configService.setConfig(DOCS_UI_PLUGIN_CONFIG_KEY, { toc: true });
+        univer.createUnit(UniverInstanceType.UNIVER_DOC, createDocument('doc', 'Document title'));
+        act(() => root.render(<RediContext.Provider value={{ injector }}><DocSideMenu /></RediContext.Provider>));
+
+        for (const toc of [false, true]) {
+            act(() => configService.setConfig(DOCS_UI_PLUGIN_CONFIG_KEY, { toc }, { merge: true }));
+            expect(container.querySelector('button[aria-expanded]') !== null).toBe(toc);
+        }
+    });
+
+    it('cancels document and layout updates when the outline unmounts', () => {
+        const injector = univer.__getInjector();
+        injector.get(IConfigService).setConfig(DOCS_UI_PLUGIN_CONFIG_KEY, { toc: true });
+        const model = univer.createUnit<IDocumentData, DocumentDataModel>(
+            UniverInstanceType.UNIVER_DOC,
+            createDocument('outline-lifecycle', 'Document title')
+        );
+        const render = injector.get(IRenderManagerService).createRender(model.getUnitId()) as RenderUnit;
+        render.deactivate();
+        render.engine.resizeBySize(1400, 800);
+        render.addRenderDependencies([[DocSkeletonManagerService]]);
+        render.mainComponent = new Documents(model.getUnitId(), render.with(DocSkeletonManagerService).getSkeleton());
+        render.mainComponent.translate(400, 0);
+        render.scene.addObject(render.mainComponent);
+        render.disposeWithMe(new Viewport(VIEWPORT_KEY.VIEW_MAIN, render.scene));
+        render.addRenderDependencies([[DocEventManagerService]]);
+
+        for (let cycle = 0; cycle < 3; cycle++) {
+            act(() => root.render(<StrictMode><RediContext.Provider value={{ injector }}><DocSideMenu /></RediContext.Provider></StrictMode>));
+            act(() => vi.advanceTimersByTime(150));
+            act(() => model.reset({ ...model.getSnapshot(), title: `Updated title ${cycle}` }));
+            act(() => vi.advanceTimersByTime(150));
+            expect(container.querySelector('nav')?.textContent).toContain(`Updated title ${cycle}`);
+
+            act(() => {
+                model.reset({ ...model.getSnapshot(), title: `Pending title ${cycle}` });
+                render.engine.resizeBySize(1400 + cycle, 900 + cycle);
+            });
+            expect(vi.getTimerCount()).toBeGreaterThan(0);
+
+            act(() => root.render(null));
+
+            expect(vi.getTimerCount()).toBe(0);
+            expect(model.change$.observed).toBe(false);
         }
     });
 

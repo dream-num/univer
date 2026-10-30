@@ -32,12 +32,34 @@ import {
 } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
-import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
-import { DrawingImageClipService, DrawingRenderService } from '@univerjs/drawing-ui';
+import {
+    getDrawingShapeKeyByDrawingSearch,
+    IDrawingManagerService,
+    OleService,
+    SetDrawingSelectedOperation,
+} from '@univerjs/drawing';
+import { DrawingImageClipService, DrawingRenderService, OleUIService } from '@univerjs/drawing-ui';
 import { DrawingUpdateController } from '@univerjs/drawing-ui/controllers/drawing-update.controller.ts';
 import { ImageUpdateController } from '@univerjs/drawing-ui/controllers/image-update.controller.ts';
-import { Documents, DocumentSkeletonPageType, Liquid, Rect, setDocsTableRenderViewportProvider } from '@univerjs/engine-render';
-import { DesktopGalleryService, IGalleryService, IUIPartsService, UIPartsService } from '@univerjs/ui';
+import {
+    Documents,
+    DocumentSkeletonPageType,
+    Liquid,
+    Rect,
+    setDocsTableRenderViewportProvider,
+} from '@univerjs/engine-render';
+import {
+    DesktopDialogService,
+    DesktopGalleryService,
+    DesktopMessageService,
+    DesktopNotificationService,
+    IDialogService,
+    IGalleryService,
+    IMessageService,
+    INotificationService,
+    IUIPartsService,
+    UIPartsService,
+} from '@univerjs/ui';
 import { EMPTY, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { DocumentDrawingPublicationProgress } from '../doc-drawing-transform-update.controller';
@@ -106,6 +128,11 @@ async function createRepeatedImageTestBed(unitId: string) {
     } }]);
     injector.add([IUIPartsService, { useClass: UIPartsService }]);
     injector.add([IGalleryService, { useClass: DesktopGalleryService }]);
+    injector.add([IDialogService, { useClass: DesktopDialogService }]);
+    injector.add([IMessageService, { useClass: DesktopMessageService }]);
+    injector.add([INotificationService, { useClass: DesktopNotificationService }]);
+    injector.add([OleService]);
+    injector.add([OleUIService]);
     injector.add([DrawingImageClipService]);
     injector.add([DrawingRenderService]);
     injector.add([DrawingUpdateController]);

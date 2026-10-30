@@ -23,7 +23,7 @@ vi.mock('../../views/PrintingFloatDom', () => ({
     mountPrintingFloatDom: vi.fn(() => vi.fn()),
 }));
 
-function createController(options?: { hasDrawingData?: boolean }) {
+function createController(options?: { hasDrawingData?: boolean; drawingType?: DrawingTypeEnum }) {
     const interceptors = new Map<string, any>();
     const points = {
         PRINTING_COMPONENT_COLLECT: 'PRINTING_COMPONENT_COLLECT',
@@ -39,7 +39,7 @@ function createController(options?: { hasDrawingData?: boolean }) {
                         unitId: 'unit-1',
                         subUnitId: 'sheet-1',
                         drawingId: 'image-1',
-                        drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                        drawingType: options?.drawingType ?? DrawingTypeEnum.DRAWING_IMAGE,
                         transform: { left: 20, top: 30, width: 120, height: 60 },
                     },
                     'chart-1': {
@@ -130,8 +130,8 @@ function createController(options?: { hasDrawingData?: boolean }) {
 }
 
 describe('SheetDrawingPrintingController', () => {
-    it('renders printable images while excluding charts and floating DOM drawings', () => {
-        const { controller, interceptors, points } = createController();
+    it.each([DrawingTypeEnum.DRAWING_IMAGE, DrawingTypeEnum.DRAWING_OLE])('prints images and OLE without editor interaction (type: %s)', (drawingType) => {
+        const { controller, interceptors, points } = createController({ drawingType });
         const scene = {};
         const resourceCollector = { add: vi.fn() };
         const next = vi.fn(() => 'next-result');
@@ -144,8 +144,8 @@ describe('SheetDrawingPrintingController', () => {
         }, next);
 
         expect((controller as any)._drawingRenderService.renderDrawing).toHaveBeenCalledTimes(2);
-        expect((controller as any)._drawingRenderService.renderDrawing).toHaveBeenCalledWith(expect.objectContaining({ drawingId: 'image-1' }), scene, { allowInactiveSheet: true });
-        expect((controller as any)._drawingRenderService.renderDrawing).toHaveBeenCalledWith(expect.objectContaining({ drawingId: 'grouped-image' }), scene, { allowInactiveSheet: true });
+        expect((controller as any)._drawingRenderService.renderDrawing).toHaveBeenCalledWith(expect.objectContaining({ drawingId: 'image-1' }), scene, { allowInactiveSheet: true, interactive: false });
+        expect((controller as any)._drawingRenderService.renderDrawing).toHaveBeenCalledWith(expect.objectContaining({ drawingId: 'grouped-image' }), scene, { allowInactiveSheet: true, interactive: false });
         expect(resourceCollector.add).toHaveBeenCalledTimes(2);
         expect(result).toBe('next-result');
 

@@ -67,6 +67,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
+        "@noble/hashes": "1.8.0",
         "@univerjs/core": "workspace:*"
     },
     "devDependencies": {

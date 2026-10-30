@@ -38,6 +38,9 @@ export function resolveDrawingRotateEnabled(
     options: IDrawingRotateEnabledResolverOptions = {},
     visiting = new Set<string>()
 ): boolean {
+    if (drawing.drawingType === DrawingTypeEnum.DRAWING_OLE) {
+        return false;
+    }
     const drawingKey = getDrawingKey(drawing);
     if (visiting.has(drawingKey)) {
         return true;

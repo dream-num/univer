@@ -96,6 +96,8 @@ export enum DrawingTypeEnum {
      * Spreadsheet Timeline control.
      */
     DRAWING_TIMELINE = 11,
+    /** Independent Office attachment; its preview image is separate from its original file. */
+    DRAWING_OLE = 12,
 }
 
 export type DrawingType = DrawingTypeEnum | number;

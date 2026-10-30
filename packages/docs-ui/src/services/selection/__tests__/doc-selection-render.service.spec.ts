@@ -359,12 +359,16 @@ function createRealSelectionRenderService(options: {
     documentData?: IDocumentData;
     embedInteractionBoundaryService?: Partial<EmbedInteractionBoundaryService>;
     embedRuntimeFocusCoordinator?: EmbedRuntimeFocusCoordinator;
+    layoutMounted?: boolean;
     mainComponent?: unknown;
     mobile?: boolean;
     scene?: unknown;
     unitId?: string;
 } = {}) {
     TestLayoutService.reset();
+    if (options.layoutMounted === false) {
+        TestLayoutService.root.remove();
+    }
     TestDocSkeletonManagerService.reset();
     const univer = new Univer();
     const injector = univer.__getInjector();
@@ -1201,6 +1205,22 @@ describe('DocSelectionRenderService', () => {
 
         expect(document.activeElement).toBe(input);
         expect(focusSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it.each(['focus', 'sync'] as const)('keeps %s inside a modal after its layout mounts late', (action) => {
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService({ layoutMounted: false });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        expect(service.selectionContainer.parentElement).toBe(document.body);
+
+        const dialog = document.createElement('div');
+        dialog.setAttribute('role', 'dialog');
+        dialog.appendChild(TestLayoutService.root);
+        document.body.appendChild(dialog);
+
+        service[action]();
+
+        expect(document.activeElement).toBe(input);
+        expect(dialog.contains(document.activeElement)).toBe(true);
     });
 
     it('does not steal focus back from an embedded runtime during selection sync', () => {

@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IRange, Nullable, Worksheet } from '@univerjs/core';
+import type { IAccessor, ICommand, IMutationInfo, IRange, Nullable, Worksheet } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
     RANGE_TYPE,
+    Rectangle,
     sequenceExecute,
 } from '@univerjs/core';
 import type { ISetRowHiddenMutationParams, ISetRowVisibleMutationParams } from '../mutations/set-row-visible.mutation';
+import type { ISetWorksheetRowHeightMutationParams } from '../mutations/set-worksheet-row-height.mutation';
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
@@ -33,6 +35,10 @@ import {
     SetRowVisibleMutation,
     SetRowVisibleUndoMutationFactory,
 } from '../mutations/set-row-visible.mutation';
+import {
+    SetWorksheetRowHeightMutation,
+    SetWorksheetRowHeightMutationFactory,
+} from '../mutations/set-worksheet-row-height.mutation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
 import { getPrimaryForRange } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
@@ -53,10 +59,37 @@ export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleComm
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), { unitId, subUnitId });
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { worksheet } = target;
-        const redoMutationParams: ISetRowVisibleMutationParams = { unitId, subUnitId, ranges };
+        const zeroHeightRanges: IRange[] = [];
+        for (const range of ranges) {
+            for (let row = range.startRow; row <= range.endRow; row++) {
+                if (worksheet.getRowVisible(row) && worksheet.getRowHeight(row) === 0) {
+                    zeroHeightRanges.push({ ...range, startRow: row, endRow: row });
+                }
+            }
+        }
+        const heightRanges = Rectangle.mergeRanges(zeroHeightRanges);
+        const visibilityRanges = heightRanges.length ? getHiddenRowRanges(worksheet, ranges) : ranges;
+        const heightRedos: IMutationInfo[] = [];
+        const heightUndos: IMutationInfo[] = [];
+        if (heightRanges.length) {
+            const heightParams: ISetWorksheetRowHeightMutationParams = {
+                unitId,
+                subUnitId,
+                ranges: heightRanges,
+                rowHeight: worksheet.getConfig().defaultRowHeight,
+            };
+            heightRedos.push({ id: SetWorksheetRowHeightMutation.id, params: heightParams });
+            heightUndos.push({
+                id: SetWorksheetRowHeightMutation.id,
+                params: SetWorksheetRowHeightMutationFactory(heightParams, worksheet),
+            });
+        }
+        const redoMutationParams: ISetRowVisibleMutationParams = { unitId, subUnitId, ranges: visibilityRanges };
         const setSelectionOperationParams: ISetSelectionsOperationParams = {
             unitId,
             subUnitId,
@@ -79,14 +112,24 @@ export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleComm
             })),
         };
 
+        const visibilityRedos: IMutationInfo[] = visibilityRanges.length
+            ? [{ id: SetRowVisibleMutation.id, params: redoMutationParams }]
+            : [];
+        const visibilityUndos: IMutationInfo[] = visibilityRanges.length
+            ? [{ id: SetRowHiddenMutation.id, params: undoMutationParams }]
+            : [];
         const result = sequenceExecute(
             [
-                { id: SetRowVisibleMutation.id, params: redoMutationParams },
+                ...visibilityRedos,
+                ...heightRedos,
                 { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
             ],
             commandService
         );
 
+        if (!result.result) {
+            return false;
+        }
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: SetSpecificRowsVisibleCommand.id,
             params,
@@ -105,14 +148,16 @@ export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleComm
                 unitID: unitId,
                 undoMutations: [
                     ...(intercepted.preUndos ?? []),
-                    { id: SetRowHiddenMutation.id, params: undoMutationParams },
+                    ...heightUndos,
+                    ...visibilityUndos,
                     { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
                     ...(intercepted.undos ?? []),
                     ...afterInterceptors.undos,
                 ],
                 redoMutations: [
                     ...(intercepted.preRedos ?? []),
-                    { id: SetRowVisibleMutation.id, params: redoMutationParams },
+                    ...visibilityRedos,
+                    ...heightRedos,
                     { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
                     ...intercepted.redos,
                     ...afterInterceptors.redos,

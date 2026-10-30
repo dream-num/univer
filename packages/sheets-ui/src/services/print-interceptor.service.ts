@@ -18,73 +18,24 @@ import type { DisposableCollection, IRange, IRectXYWH, Worksheet } from '@univer
 import type { Engine, Scene, Spreadsheet, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { createInterceptorKey, Disposable, InterceptorManager } from '@univerjs/core';
 
-const DEFAULT_PRINT_RESOURCE_WAIT_MS = 10_000;
-
 /** Tracks asynchronous resources registered by all interceptors for one print page. */
 export class SheetPrintingResourceCollector {
     private readonly _pending = new Set<Promise<unknown>>();
-    private readonly _requiredPending = new Set<Promise<unknown>>();
-    private _requiredFailure: unknown;
-    private _hasRequiredFailure = false;
-    private _failureMessage: string | undefined;
-    private _closed = false;
-    private _notifyClose!: () => void;
-    readonly whenClosed = new Promise<void>((resolve) => { this._notifyClose = resolve; });
 
-    get failureMessage(): string | undefined {
-        return this._failureMessage;
-    }
-
-    get active(): boolean {
-        return !this._closed;
-    }
-
-    close(): void {
-        if (this._closed) {
-            return;
-        }
-        this._closed = true;
-        this._notifyClose();
-    }
-
-    add(resource: Promise<unknown>, options?: { required?: boolean; failureMessage?: string }): void {
-        if (this._closed) {
-            Promise.resolve(resource).catch(() => {});
-            return;
-        }
-        const required = options?.required === true;
+    add(resource: Promise<unknown>): void {
         const tracked = Promise.resolve(resource)
-            .catch((error: unknown) => {
-                if (required && !this._closed && !this._hasRequiredFailure) {
-                    this._hasRequiredFailure = true;
-                    this._requiredFailure = error;
-                    this._failureMessage = options?.failureMessage;
-                }
-            })
-            .finally(() => {
-                this._pending.delete(tracked);
-                this._requiredPending.delete(tracked);
-            });
+            .catch(() => undefined)
+            .finally(() => this._pending.delete(tracked));
         this._pending.add(tracked);
-        if (required) {
-            this._requiredPending.add(tracked);
-        }
     }
 
-    async wait(timeout = DEFAULT_PRINT_RESOURCE_WAIT_MS): Promise<void> {
+    async wait(timeout = 10_000): Promise<void> {
         const deadline = Date.now() + timeout;
         // A completed resource may synchronously register another resource, so keep
         // draining until the set is empty rather than snapshotting it only once.
         while (this._pending.size > 0) {
             const remaining = deadline - Date.now();
             if (remaining <= 0) {
-                if (this._requiredPending.size > 0) {
-                    this.close();
-                    throw new Error('Required print resource timed out');
-                }
-                if (this._hasRequiredFailure) {
-                    throw this._requiredFailure ?? new Error('Required print resource failed');
-                }
                 return;
             }
 
@@ -98,9 +49,6 @@ export class SheetPrintingResourceCollector {
             if (timeoutId !== undefined) {
                 clearTimeout(timeoutId);
             }
-        }
-        if (this._hasRequiredFailure) {
-            throw this._requiredFailure ?? new Error('Required print resource failed');
         }
     }
 }
@@ -133,8 +81,6 @@ interface IChartSheetPrintContext {
     root: HTMLElement;
     worksheet: Worksheet;
     resourceCollector: SheetPrintingResourceCollector;
-    sourceRect: IRectXYWH;
-    contentRect: IRectXYWH;
     offset: {
         offsetX: number;
         offsetY: number;

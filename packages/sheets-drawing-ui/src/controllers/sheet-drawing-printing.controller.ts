@@ -23,7 +23,6 @@ import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingRenderService } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetPrintInterceptorService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { ComponentManager } from '@univerjs/ui';
 import { mountPrintingFloatDom } from '../views/PrintingFloatDom';
 
 export class SheetDrawingPrintingController extends Disposable {
@@ -32,7 +31,6 @@ export class SheetDrawingPrintingController extends Disposable {
         @Inject(DrawingRenderService) private readonly _drawingRenderService: DrawingRenderService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(ComponentManager) private readonly _componetManager: ComponentManager,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
@@ -51,7 +49,7 @@ export class SheetDrawingPrintingController extends Disposable {
         }));
         this.disposeWithMe(this._sheetPrintInterceptorService.interceptor.intercept(points.PRINTING_CHART_COMPONENT_COLLECT, {
             handler: (_param, pos, next) => {
-                this._addCanvasDrawings(pos, true);
+                this._addCanvasDrawings(pos);
                 return next();
             },
         }));
@@ -117,7 +115,7 @@ export class SheetDrawingPrintingController extends Disposable {
         subUnitId: string;
         scene: Scene;
         resourceCollector: SheetPrintingResourceCollector;
-    }, requireRenderedImage = false): void {
+    }): void {
         const { unitId, subUnitId, scene, resourceCollector } = context;
         const subUnitData = this._drawingManagerService.getDrawingDataForUnit(unitId)?.[subUnitId];
         subUnitData?.order.forEach((id) => {
@@ -127,15 +125,9 @@ export class SheetDrawingPrintingController extends Disposable {
                 drawing.drawingType === DrawingTypeEnum.DRAWING_BLOCK) {
                 return;
             }
-            const resource = this._drawingRenderService.renderDrawing(drawing, scene, requireRenderedImage
-                ? { allowInactiveSheet: true, interactive: false, requireRenderedImage: true, whenPageClosed: resourceCollector.whenClosed }
-                : { allowInactiveSheet: true, interactive: false });
+            const resource = this._drawingRenderService.renderDrawing(drawing, scene, { allowInactiveSheet: true, interactive: false });
             if (resource) {
-                if (requireRenderedImage) {
-                    resourceCollector.add(Promise.resolve(resource), { required: true });
-                } else {
-                    resourceCollector.add(Promise.resolve(resource));
-                }
+                resourceCollector.add(Promise.resolve(resource));
             }
         });
     }
@@ -167,7 +159,6 @@ export class SheetDrawingPrintingController extends Disposable {
         root: HTMLElement;
         worksheet: Worksheet;
         skeleton?: SpreadsheetSkeleton;
-        resourceCollector: SheetPrintingResourceCollector;
     }): void {
         const data = this._drawingManagerService.getDrawingDataForUnit(context.unitId)?.[context.subUnitId];
         if (!data) {
@@ -180,10 +171,6 @@ export class SheetDrawingPrintingController extends Disposable {
                 return null;
             }
             const componentKey = this._sheetPrintInterceptorService.getPrintComponent(drawing.componentKey) || drawing.componentKey;
-            if (!this._componetManager.get(componentKey)) {
-                context.resourceCollector.add(Promise.reject(new Error(componentKey)), { required: !context.skeleton });
-                return null;
-            }
             return { ...drawing, componentKey };
         }).filter((drawing): drawing is IFloatDomData => drawing !== null);
         if (!floatDomInfos.length) {
@@ -194,25 +181,15 @@ export class SheetDrawingPrintingController extends Disposable {
         printingRoot.style.position = 'absolute';
         printingRoot.style.inset = '0';
         context.root.appendChild(printingRoot);
-        let onRendered!: () => void;
-        const rendered = new Promise<void>((resolve) => {
-            onRendered = resolve;
-        });
-        let unmountPrintingFloatDom: (() => void) | undefined;
-        collection.add(() => {
-            printingRoot.remove();
-            onRendered();
-            if (unmountPrintingFloatDom) {
-                queueMicrotask(unmountPrintingFloatDom);
-            }
-        });
-        unmountPrintingFloatDom = mountPrintingFloatDom({
+        const unmountPrintingFloatDom = mountPrintingFloatDom({
             floatDomInfos,
             scene: context.scene,
             skeleton: context.skeleton,
             worksheet: context.worksheet,
-            onRendered,
         }, printingRoot, this._injector);
-        context.resourceCollector.add(Promise.race([rendered, context.resourceCollector.whenClosed]), { required: true });
+        collection.add(() => {
+            printingRoot.remove();
+            queueMicrotask(unmountPrintingFloatDom);
+        });
     }
 }

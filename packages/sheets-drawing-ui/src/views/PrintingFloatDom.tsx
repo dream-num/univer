@@ -22,7 +22,7 @@ import type { ComponentType } from 'react';
 import { render, unmount } from '@univerjs/design';
 import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { connectInjector, PrintFloatDomSingle } from '@univerjs/ui';
-import { useLayoutEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { transformBound2DOMBound } from '../services/canvas-float-dom-manager.service';
 
@@ -30,7 +30,6 @@ export interface IPrintingFloatDomProps {
     floatDomInfos: IFloatDomData[];
     scene: Scene;
     skeleton?: SpreadsheetSkeleton;
-    onRendered?: () => void;
     worksheet: Worksheet;
 };
 
@@ -90,15 +89,11 @@ export function createPrintingFloatDom(
 }
 
 export const PrintingFloatDom = (props: IPrintingFloatDomProps) => {
-    const { floatDomInfos, scene, skeleton, worksheet, onRendered } = props;
+    const { floatDomInfos, scene, skeleton, worksheet } = props;
     const floatDomParams = useMemo(
         () => floatDomInfos.map((info) => createPrintingFloatDom(info, scene, skeleton, worksheet)),
         [floatDomInfos, scene, skeleton, worksheet]
     );
-
-    useLayoutEffect(() => {
-        onRendered?.();
-    }, [onRendered]);
 
     return (
         <div style={{ position: 'absolute', top: 0, left: 0 }}>

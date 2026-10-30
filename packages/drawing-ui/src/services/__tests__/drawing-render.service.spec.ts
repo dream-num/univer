@@ -475,64 +475,6 @@ describe('DrawingRenderService', () => {
         expect(urlCase.imageIoService.cacheWrites).toEqual([{ source: 'https://example.test/image.png', imageSourceType: ImageSourceType.URL, image: urlImage.getNative() }]);
     });
 
-    it('rejects a visible print image without a drawable transform', async () => {
-        const { service, scene } = createHarness();
-        await expect(service.renderImages(imageParam({ transform: undefined }), scene as unknown as Scene, {
-            requireRenderedImage: true,
-        })).rejects.toThrow();
-        expect(scene.addedObjects).toHaveLength(0);
-        await expect(service.renderImages(imageParam({ transform: undefined, hidden: true }), scene as unknown as Scene, {
-            requireRenderedImage: true,
-        })).resolves.toBeUndefined();
-    });
-
-    it('requires a loaded print image and rejects a failed native image', async () => {
-        const { service, scene, imageIoService } = createHarness();
-        const printing = service.renderImages(imageParam(), scene as unknown as Scene, { requireRenderedImage: true });
-        await vi.waitFor(() => expect(scene.addedObjects).toHaveLength(1));
-        const native = (scene.addedObjects[0].object as Image).getNative()!;
-        native.onerror?.(new Event('error'));
-        await expect(printing).rejects.toThrow();
-        expect(imageIoService.cacheWrites).toEqual([]);
-    });
-
-    it('accepts a direct URL when its proxy fails but the native image loads', async () => {
-        const { service, scene, urlImageService } = createHarness();
-        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-        urlImageService.imageError = new Error('proxy unavailable');
-        const printing = service.renderImages(imageParam({
-            source: 'https://example.test/direct.png',
-            imageSourceType: ImageSourceType.URL,
-        }), scene as unknown as Scene, { requireRenderedImage: true });
-        await vi.waitFor(() => expect(scene.addedObjects).toHaveLength(1));
-        const native = (scene.addedObjects[0].object as Image).getNative()!;
-        Object.defineProperty(native, 'naturalWidth', { value: 10 });
-        Object.defineProperty(native, 'naturalHeight', { value: 10 });
-        native.onload?.(new Event('load'));
-        await expect(printing).resolves.toHaveLength(1);
-        expect((scene.addedObjects[0].object as Image).getProps().url).toBe('https://example.test/direct.png');
-        errorSpy.mockRestore();
-    });
-
-    it('stops a required image load and detaches its native handlers after page closure', async () => {
-        const { service, scene, imageIoService } = createHarness();
-        let closePage!: () => void;
-        const whenPageClosed = new Promise<void>((resolve) => {
-            closePage = resolve;
-        });
-        const printing = service.renderImages(imageParam(), scene as unknown as Scene, {
-            requireRenderedImage: true,
-            whenPageClosed,
-        });
-        await vi.waitFor(() => expect(scene.addedObjects).toHaveLength(1));
-        const native = (scene.addedObjects[0].object as Image).getNative()!;
-        closePage();
-        await expect(printing).rejects.toThrow();
-        expect(native.onload).toBeNull();
-        expect(native.onerror).toBeNull();
-        expect(imageIoService.cacheWrites).toEqual([]);
-    });
-
     it('keeps URL drawings visible with their original source when downloading fails', async () => {
         const { service, scene, urlImageService } = createHarness();
         const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -659,9 +601,6 @@ describe('DrawingRenderService', () => {
 
         const missingCase = createHarness();
         expect(missingCase.service.renderDrawing(search, missingCase.scene as unknown as Scene)).toBeUndefined();
-        expect(() => missingCase.service.renderDrawing(search, missingCase.scene as unknown as Scene, {
-            requireRenderedImage: true,
-        })).toThrow();
 
         const unsupportedCase = createHarness();
         unsupportedCase.drawingManagerService.drawings.set(drawingKey(search), { ...imageParam(), drawingType: DrawingTypeEnum.DRAWING_SHAPE });

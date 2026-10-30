@@ -14,12 +14,30 @@
  * limitations under the License.
  */
 
-import { DisposableCollection, DrawingTypeEnum, ImageSourceType, SheetTypes } from '@univerjs/core';
+import {
+    DisposableCollection,
+    DrawingTypeEnum,
+    IImageIoService,
+    ImageSourceType,
+    SheetTypes,
+} from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
-import { DrawingImageClipService, DrawingRenderService } from '@univerjs/drawing-ui';
+import { DrawingImageClipService, DrawingRenderService, OleUIService } from '@univerjs/drawing-ui';
 import { CanvasColorService, ICanvasColorService, Image, IRenderManagerService } from '@univerjs/engine-render';
 import { SheetPrintingResourceCollector, SheetPrintInterceptorService } from '@univerjs/sheets-ui';
-import { ComponentManager, DesktopGalleryService, IGalleryService, IUIPartsService, UIPartsService } from '@univerjs/ui';
+import {
+    ComponentManager,
+    DesktopDialogService,
+    DesktopGalleryService,
+    DesktopMessageService,
+    DesktopNotificationService,
+    IDialogService,
+    IGalleryService,
+    IMessageService,
+    INotificationService,
+    IUIPartsService,
+    UIPartsService,
+} from '@univerjs/ui';
 import { act, createElement } from 'react';
 import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
@@ -33,7 +51,7 @@ function installCanvasPlatformDouble(): void {
 
 describe('SheetDrawingPrintingController', () => {
     afterEach(() => vi.restoreAllMocks());
-    it('rejects a Chart Sheet page when a visible image cannot be decoded', async () => {
+    it.each([DrawingTypeEnum.DRAWING_IMAGE, DrawingTypeEnum.DRAWING_OLE])('prints a Chart Sheet drawing at its original placement without editor interaction (type: %s)', async (drawingType) => {
         installCanvasPlatformDouble();
         const bed = createSheetsDrawingUiTestBed();
         onTestFinished(() => bed.univer.dispose());
@@ -41,6 +59,10 @@ describe('SheetDrawingPrintingController', () => {
         bed.injector.add([IUIPartsService, { useClass: UIPartsService }]);
         bed.injector.add([IGalleryService, { useClass: DesktopGalleryService }]);
         bed.injector.add([DrawingImageClipService]);
+        bed.injector.add([IMessageService, { useClass: DesktopMessageService }]);
+        bed.injector.add([IDialogService, { useClass: DesktopDialogService }]);
+        bed.injector.add([INotificationService, { useClass: DesktopNotificationService }]);
+        bed.injector.add([OleUIService]);
         bed.injector.add([DrawingRenderService]);
         bed.injector.add([ComponentManager]);
         bed.injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
@@ -51,13 +73,22 @@ describe('SheetDrawingPrintingController', () => {
             unitId: bed.unitId,
             subUnitId: bed.subUnitId,
             drawingId: 'image-1',
-            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
-            source: 'data:image/png;base64,invalid',
-            imageSourceType: ImageSourceType.BASE64,
-            transform: { left: 0, top: 0, width: 100, height: 50 },
+            drawingType,
+            source: 'https://example.test/print-image.png',
+            imageSourceType: ImageSourceType.URL,
+            transform: { left: 20, top: 10, width: 100, height: 50 },
         };
         drawingManager.setDrawingData(bed.unitId, bed.subUnitId, { 'image-1': drawing } as never);
         drawingManager.setDrawingOrder(bed.unitId, bed.subUnitId, ['image-1']);
+        const cachedImage = document.createElement('img');
+        Object.defineProperties(cachedImage, {
+            complete: { value: true },
+            naturalWidth: { value: 100 },
+            naturalHeight: { value: 50 },
+        });
+        bed.get(IImageIoService).addImageSourceCache(drawing.source, drawing.imageSourceType, cachedImage);
+        bed.workbook.getSheetBySheetId(bed.subUnitId)!.getConfig().type = SheetTypes.CHART;
+        const bindObject = vi.spyOn(bed.get(OleUIService), 'bindObject');
         const collector = new SheetPrintingResourceCollector();
         const renderer = bed.get(IRenderManagerService).createRender(bed.unitId);
         const interceptor = bed.get(SheetPrintInterceptorService);
@@ -69,16 +100,17 @@ describe('SheetDrawingPrintingController', () => {
             root: document.createElement('div'),
             worksheet: bed.workbook.getSheetBySheetId(bed.subUnitId)!,
             resourceCollector: collector,
-            sourceRect: { x: 0, y: 0, width: 100, height: 50 },
-            contentRect: { x: 0, y: 0, width: 100, height: 50 },
             offset: { offsetX: 0, offsetY: 0 },
         });
         const shapeKey = getDrawingShapeKeyByDrawingSearch(drawing);
         await vi.waitFor(() => expect(renderer.scene.getObject(shapeKey)).toBeInstanceOf(Image));
-        const native = (renderer.scene.getObject(shapeKey) as Image).getNative()!;
-        native.onerror?.(new Event('error'));
-        await expect(collector.wait()).rejects.toThrow();
-        collector.close();
+        await collector.wait();
+        const image = renderer.scene.getObject(shapeKey) as Image;
+        if (drawingType === DrawingTypeEnum.DRAWING_IMAGE) {
+            expect(image.getNative()).toBe(cachedImage);
+        }
+        expect(bindObject).toHaveBeenCalledWith(image, expect.objectContaining({ drawingId: drawing.drawingId }), false);
+        expect(image).toMatchObject(drawing.transform);
     });
 
     it.each([DrawingTypeEnum.DRAWING_DOM, DrawingTypeEnum.DRAWING_BLOCK])('prints a registered component for Chart Sheet drawing type %s and releases its DOM', async (drawingType) => {
@@ -88,6 +120,10 @@ describe('SheetDrawingPrintingController', () => {
         bed.injector.add([IUIPartsService, { useClass: UIPartsService }]);
         bed.injector.add([IGalleryService, { useClass: DesktopGalleryService }]);
         bed.injector.add([DrawingImageClipService]);
+        bed.injector.add([IMessageService, { useClass: DesktopMessageService }]);
+        bed.injector.add([IDialogService, { useClass: DesktopDialogService }]);
+        bed.injector.add([INotificationService, { useClass: DesktopNotificationService }]);
+        bed.injector.add([OleUIService]);
         bed.injector.add([DrawingRenderService]);
         bed.injector.add([ComponentManager]);
         bed.injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
@@ -123,7 +159,6 @@ describe('SheetDrawingPrintingController', () => {
                 effects.dispose();
                 await Promise.resolve();
             });
-            collector.close();
             root.remove();
             bed.univer.dispose();
         });
@@ -136,13 +171,10 @@ describe('SheetDrawingPrintingController', () => {
                 root,
                 worksheet,
                 resourceCollector: collector,
-                sourceRect: { x: 0, y: 0, width: 200, height: 100 },
-                contentRect: { x: 0, y: 0, width: 200, height: 100 },
                 offset: { offsetX: 0, offsetY: 0 },
             });
             await Promise.resolve();
         });
-        await collector.wait();
         expect(root.textContent).toContain('Printable component content');
         expect(root.textContent).not.toContain('Editor content');
         await act(async () => {

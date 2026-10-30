@@ -92,6 +92,7 @@ export interface IValueOption<TLocaleKey extends string = string, TValue = undef
 export interface ICustomComponentProps<T> {
     value: T;
     onChange: (v: T) => void;
+    ariaLabel?: string;
 }
 
 export interface IMenuSelectorItem<

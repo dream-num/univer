@@ -136,9 +136,10 @@ describe('ToolbarItem', () => {
         expect(await findByText('Format rows')).toBeTruthy();
     });
 
-    it('keeps a custom selector label as the only keyboard focus target', () => {
-        const { container } = renderWithDependencies(
+    it('opens a custom selector from its named arrow without nesting interactive controls', async () => {
+        const { container, getByRole, findByText } = renderWithDependencies(
             <ToolbarItem
+                tooltip="Format"
                 id="test-custom-selector"
                 type={MenuItemType.SELECTOR}
                 label={{ name: 'TestDynamicOption' }}
@@ -149,7 +150,13 @@ describe('ToolbarItem', () => {
 
         expect(trigger.getAttribute('role')).toBeNull();
         expect(trigger.getAttribute('tabindex')).toBeNull();
-        expect(trigger.querySelector('button')).toBeTruthy();
+        expect(trigger.querySelector('button button')).toBeNull();
+        const arrow = getByRole('button', { name: 'Format' });
+        arrow.focus();
+        fireEvent.keyDown(arrow, { key: 'Enter' });
+        expect(await findByText('Format rows')).toBeTruthy();
+        fireEvent.keyDown(getByRole('menu'), { key: 'Escape' });
+        await waitFor(() => expect(document.activeElement).toBe(arrow));
     });
 
     it('closes open selector options when the parent becomes disabled', async () => {

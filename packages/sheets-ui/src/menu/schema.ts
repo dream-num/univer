@@ -259,7 +259,7 @@ export const menuSchema: MenuSchemaType = {
         [RibbonStartGroup.FORMAT]: {
             [SetRangeFontFamilyCommand.id]: {
                 order: 1,
-                gridLayout: { row: 1, column: 1, columnSpan: 4, width: 180 },
+                gridLayout: { row: 1, column: 1, columnSpan: 4, width: 180, minWidth: 120 },
                 menuItemFactory: FontFamilySelectorMenuItemFactory,
             },
             [SetRangeFontSizeCommand.id]: {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { IDiscreteRange } from '@univerjs/sheets';
 import type { IRemoveSheetDrawingCommandParams, ISheetDrawing, ISheetImage } from '@univerjs/sheets-drawing';
@@ -30,7 +30,6 @@ import {
     IUniverInstanceService,
     RxDisposable,
     SheetTypes,
-    toDisposable,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -119,56 +118,8 @@ const specialPastes: IPasteHookValueType[] = [
     PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMULA,
 ];
 
-interface IDrawingClipboardFeatureCopyParams {
-    fromUnitId: string;
-    fromSubUnitId: string;
-    toUnitId: string;
-    toSubUnitId: string;
-    rootDrawingId: string;
-    idMap: ReadonlyMap<string, string>;
-    originals: readonly ISheetDrawing[];
-    /** Feature owners may adapt their own binding data before Drawing mutations are prepared. */
-    copies: ISheetDrawing[];
-}
-
-/** COPY planning only. null rejects the whole paste; callbacks never mutate live models. */
-type DrawingClipboardFeatureCopyHook = (params: IDrawingClipboardFeatureCopyParams) => {
-    redos: IMutationInfo[];
-    undos: IMutationInfo[];
-} | null;
-
 export class SheetsDrawingCopyPasteController extends RxDisposable {
-    private readonly _featureCopyHooks = new Map<DrawingTypeEnum, DrawingClipboardFeatureCopyHook>();
-
-    public registerFeatureCopyHook(drawingType: DrawingTypeEnum, hook: DrawingClipboardFeatureCopyHook): IDisposable {
-        if (this._featureCopyHooks.has(drawingType)) {
-            throw new Error(`Drawing clipboard copy hook already registered for ${drawingType}`);
-        }
-        this._featureCopyHooks.set(drawingType, hook);
-        return toDisposable(() => {
-            if (this._featureCopyHooks.get(drawingType) === hook) {
-                this._featureCopyHooks.delete(drawingType);
-            }
-        });
-    }
-
-    public createFeatureCopyMutations(params: IDrawingClipboardFeatureCopyParams): { redos: IMutationInfo[]; undos: IMutationInfo[] } | null {
-        const redos: IMutationInfo[] = [];
-        const undos: IMutationInfo[] = [];
-        const types = new Set(params.originals.filter((drawing) => drawing.drawingType !== DrawingTypeEnum.DRAWING_IMAGE).map((drawing) => drawing.drawingType));
-        for (const type of types) {
-            const plan = this._featureCopyHooks.get(type)?.(params);
-            if (!plan) {
-                return null;
-            }
-            redos.push(...plan.redos);
-            undos.unshift(...plan.undos);
-        }
-        return { redos, undos };
-    }
-
     override dispose(): void {
-        this._featureCopyHooks.clear();
         this._copyInfo = null;
         super.dispose();
     }

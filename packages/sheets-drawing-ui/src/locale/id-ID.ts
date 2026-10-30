@@ -18,9 +18,6 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-drawing-ui': {
-        print: {
-            unsupportedObject: 'Lembar bagan berisi objek yang belum dapat dicetak.',
-        },
         title: 'Gambar',
         backgroundImage: {
             title: 'Gambar Latar Belakang',

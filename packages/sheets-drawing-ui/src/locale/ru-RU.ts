@@ -18,9 +18,6 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-drawing-ui': {
-        print: {
-            unsupportedObject: 'Лист диаграммы содержит объекты, которые пока нельзя напечатать.',
-        },
         title: 'Изображение',
         backgroundImage: {
             title: 'Фоновое изображение',

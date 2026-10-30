@@ -18,9 +18,6 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-drawing-ui': {
-        print: {
-            unsupportedObject: 'Hárok grafu obsahuje objekty, ktoré zatiaľ nemožno vytlačiť.',
-        },
         title: 'Obrázok',
         backgroundImage: {
             title: 'Obrázok pozadia',

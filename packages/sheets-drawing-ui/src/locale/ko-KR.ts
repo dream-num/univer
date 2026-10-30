@@ -18,9 +18,6 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-drawing-ui': {
-        print: {
-            unsupportedObject: '차트 시트에 아직 인쇄할 수 없는 개체가 있습니다.',
-        },
         title: '이미지',
         backgroundImage: {
             title: '배경 이미지',

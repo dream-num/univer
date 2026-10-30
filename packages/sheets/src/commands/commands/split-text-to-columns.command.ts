@@ -15,15 +15,7 @@
  */
 
 import type { IAccessor, ICellData, IRange, Nullable } from '@univerjs/core';
-import {
-    CommandType,
-    ICommandService,
-    IUndoRedoService,
-    IUniverInstanceService,
-    ObjectMatrix,
-    Range,
-    sequenceExecute,
-} from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute } from '@univerjs/core';
 import type { IInsertColMutationParams, IRemoveColMutationParams } from '../../basics';
 import type { SplitDelimiterEnum } from '../../basics/split-range-text';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';

@@ -28,17 +28,9 @@ import type { IConditionFormattingRule } from '../../models/type';
 import type { IDeleteConditionalRuleMutationParams } from '../mutations/delete-conditional-rule.mutation';
 import type { ISetConditionalRuleMutationParams } from '../mutations/set-conditional-rule.mutation';
 import { ConditionalFormattingRangeIndexModel } from '../../models/conditional-formatting-range-index-model';
-import {
-    ConditionalFormattingRangeTransformService,
-} from '../../services/conditional-formatting-range-transform.service';
-import {
-    DeleteConditionalRuleMutation,
-    DeleteConditionalRuleMutationUndoFactory,
-} from '../mutations/delete-conditional-rule.mutation';
-import {
-    SetConditionalRuleMutation,
-    setConditionalRuleMutationUndoFactory,
-} from '../mutations/set-conditional-rule.mutation';
+import { ConditionalFormattingRangeTransformService } from '../../services/conditional-formatting-range-transform.service';
+import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../mutations/delete-conditional-rule.mutation';
+import { SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '../mutations/set-conditional-rule.mutation';
 
 export interface IClearRangeCfParams {
     ranges?: IRange[];

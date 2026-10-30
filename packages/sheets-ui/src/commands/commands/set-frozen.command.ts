@@ -18,12 +18,7 @@ import type { ICommand } from '@univerjs/core';
 import type { ISetFrozenMutationParams } from '@univerjs/sheets';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import {
-    getSheetCommandTarget,
-    SetFrozenMutation,
-    SetFrozenMutationFactory,
-    SheetsSelectionsService,
-} from '@univerjs/sheets';
+import { getSheetCommandTarget, SetFrozenMutation, SetFrozenMutationFactory, SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 
 export enum SetSelectionFrozenType {

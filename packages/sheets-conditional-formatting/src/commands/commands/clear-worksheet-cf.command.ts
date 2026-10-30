@@ -25,10 +25,7 @@ import {
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import type { IDeleteConditionalRuleMutationParams } from '../mutations/delete-conditional-rule.mutation';
 import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
-import {
-    DeleteConditionalRuleMutation,
-    DeleteConditionalRuleMutationUndoFactory,
-} from '../mutations/delete-conditional-rule.mutation';
+import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../mutations/delete-conditional-rule.mutation';
 
 export interface IClearWorksheetCfParams {
     unitId?: string;

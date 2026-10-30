@@ -15,13 +15,7 @@
  */
 
 import type { IAccessor, ICommand, IRange } from '@univerjs/core';
-import {
-    CommandType,
-    ICommandService,
-    IUndoRedoService,
-    IUniverInstanceService,
-    sequenceExecute,
-} from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import type { ISheetCommandSharedParams } from '../utils/interface';
 import { generateNullCellValue } from '../../basics/utils';

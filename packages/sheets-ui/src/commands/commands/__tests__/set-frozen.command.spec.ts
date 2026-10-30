@@ -24,12 +24,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import {
-    CancelFrozenCommand,
-    getPrimaryForRange,
-    SetSelectionsOperation,
-    SheetsSelectionsService,
-} from '@univerjs/sheets';
+import { CancelFrozenCommand, getPrimaryForRange, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { IScrollStateWithSearchParam } from '../../../services/scroll-manager.service';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';

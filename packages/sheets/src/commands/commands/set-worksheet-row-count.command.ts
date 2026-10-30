@@ -22,10 +22,7 @@ import {
     IUniverInstanceService,
 } from '@univerjs/core';
 import type { ISetWorksheetRowCountMutationParams } from '../mutations/set-worksheet-row-count.mutation';
-import {
-    SetWorksheetRowCountMutation,
-    SetWorksheetRowCountUndoMutationFactory,
-} from '../mutations/set-worksheet-row-count.mutation';
+import { SetWorksheetRowCountMutation, SetWorksheetRowCountUndoMutationFactory } from '../mutations/set-worksheet-row-count.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 
 export const SetWorksheetRowCountCommand: ICommand = {

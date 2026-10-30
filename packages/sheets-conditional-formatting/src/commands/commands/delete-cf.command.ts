@@ -23,10 +23,7 @@ import {
 } from '@univerjs/core';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import type { IDeleteConditionalRuleMutationParams } from '../mutations/delete-conditional-rule.mutation';
-import {
-    DeleteConditionalRuleMutation,
-    DeleteConditionalRuleMutationUndoFactory,
-} from '../mutations/delete-conditional-rule.mutation';
+import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../mutations/delete-conditional-rule.mutation';
 
 export interface IDeleteCfCommandParams {
     unitId?: string;

@@ -15,13 +15,13 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { ISetWorksheetColumnCountMutationParams } from '../mutations/set-worksheet-column-count.mutation';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
 } from '@univerjs/core';
-import type { ISetWorksheetColumnCountMutationParams } from '../mutations/set-worksheet-column-count.mutation';
 import { SetWorksheetColumnCountMutation, SetWorksheetColumnCountUndoMutationFactory } from '../mutations/set-worksheet-column-count.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 

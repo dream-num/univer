@@ -24,6 +24,9 @@ import type {
     IRange,
     IStyleData,
 } from '@univerjs/core';
+import type { IBorderInfo } from '../../services/border-style-manager.service';
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+import type { IResult } from './utils/target-util';
 import {
     BorderType,
     CommandType,
@@ -33,9 +36,6 @@ import {
     ObjectMatrix,
     Tools,
 } from '@univerjs/core';
-import type { IBorderInfo } from '../../services/border-style-manager.service';
-import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
-import type { IResult } from './utils/target-util';
 import { BorderStyleManagerService } from '../../services/border-style-manager.service';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';

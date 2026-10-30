@@ -15,8 +15,8 @@
  */
 
 import type { ICommand, IMutationInfo } from '@univerjs/core';
-import { CommandType, generateRandomId, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
 import type { ISetSheetTableParams } from '../mutations/set-table-filter.mutation';
+import { CommandType, generateRandomId, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
 import { cloneTableRecordFilter } from '../../models/filter-util/record-filter';
 import { TableManager } from '../../models/table-manager';
 import { TableColumnFilterTypeEnum } from '../../types/enum';

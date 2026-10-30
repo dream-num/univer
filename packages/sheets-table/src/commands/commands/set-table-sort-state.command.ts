@@ -15,8 +15,8 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
 import type { ITableFilterJSON } from '../../types/type';
+import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
 import { TableManager } from '../../models/table-manager';
 import { SetSheetTableMutation } from '../mutations/set-sheet-table.mutation';
 

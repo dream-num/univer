@@ -15,6 +15,10 @@
  */
 
 import type { IAccessor, ICommand, IRange, Worksheet } from '@univerjs/core';
+import type { ISelectionWithStyle } from '../../basics';
+import type { LocaleKey } from '../../locale/types';
+import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../mutations/move-rows-cols.mutation';
+import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import {
     CommandType,
     ErrorService,
@@ -26,10 +30,6 @@ import {
     Rectangle,
     sequenceExecute,
 } from '@univerjs/core';
-import type { ISelectionWithStyle } from '../../basics';
-import type { LocaleKey } from '../../locale/types';
-import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../mutations/move-rows-cols.mutation';
-import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SelectionMoveType } from '../../services/selections/type';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';

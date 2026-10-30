@@ -34,6 +34,8 @@ import type {
     IUpdateDataValidationMutationParams,
 } from '@univerjs/data-validation';
 import type { ISetRangeValuesMutationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
+import type { RangeMutation } from '../../models/rule-matrix';
+import type { CheckboxValidator } from '../../validators';
 import {
     CommandType,
     DataValidationType,
@@ -58,8 +60,6 @@ import {
 } from '@univerjs/data-validation';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
-import type { RangeMutation } from '../../models/rule-matrix';
-import type { CheckboxValidator } from '../../validators';
 import { SheetDataValidationModel } from '../../models/sheet-data-validation-model';
 import { shouldOffsetFormulaByRange } from '../../utils/formula';
 import { getStringCellValue } from '../../utils/get-cell-data-origin';

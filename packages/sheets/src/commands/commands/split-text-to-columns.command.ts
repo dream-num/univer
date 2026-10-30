@@ -15,10 +15,10 @@
  */
 
 import type { IAccessor, ICellData, IRange, Nullable } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute } from '@univerjs/core';
 import type { IInsertColMutationParams, IRemoveColMutationParams } from '../../basics';
 import type { SplitDelimiterEnum } from '../../basics/split-range-text';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute } from '@univerjs/core';
 import { splitRangeText } from '../../basics/split-range-text';
 import { InsertColMutation, InsertColMutationUndoFactory } from '../mutations/insert-row-col.mutation';
 import { RemoveColMutation } from '../mutations/remove-row-col.mutation';

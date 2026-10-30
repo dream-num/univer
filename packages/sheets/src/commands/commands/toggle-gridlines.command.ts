@@ -15,8 +15,8 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import { BooleanNumber, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import type { IToggleGridlinesMutationParams } from '../mutations/toggle-gridlines.mutation';
+import { BooleanNumber, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import { ToggleGridlinesMutation } from '../mutations/toggle-gridlines.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 

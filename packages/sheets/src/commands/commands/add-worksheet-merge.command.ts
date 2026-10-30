@@ -24,6 +24,13 @@ import type {
     Nullable,
     Worksheet,
 } from '@univerjs/core';
+import type {
+    IAddWorksheetMergeMutationParams,
+    IRemoveWorksheetMergeMutationParams,
+} from '../../basics/interfaces/mutation-interface';
+import type { LocaleKey } from '../../locale/types';
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+import type { ISheetCommandSharedParams } from '../utils/interface';
 import {
     CellModeEnum,
     CommandType,
@@ -38,13 +45,6 @@ import {
     sequenceExecute,
     Tools,
 } from '@univerjs/core';
-import type {
-    IAddWorksheetMergeMutationParams,
-    IRemoveWorksheetMergeMutationParams,
-} from '../../basics/interfaces/mutation-interface';
-import type { LocaleKey } from '../../locale/types';
-import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
-import type { ISheetCommandSharedParams } from '../utils/interface';
 import { getAddMergeMutationRangeByType } from '../../controllers/merge-cell.controller';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';

@@ -15,6 +15,7 @@
  */
 
 import type { IFreeze, Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
+import type { IScrollStateWithSearchParam } from '../../../services/scroll-manager.service';
 import {
     ICommandService,
     IUniverInstanceService,
@@ -26,7 +27,6 @@ import {
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { CancelFrozenCommand, getPrimaryForRange, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { IScrollStateWithSearchParam } from '../../../services/scroll-manager.service';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import {
     SetColumnFrozenCommand,

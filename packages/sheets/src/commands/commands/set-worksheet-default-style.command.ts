@@ -15,12 +15,12 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { ISetWorksheetDefaultStyleMutationParams } from '../mutations/set-worksheet-default-style.mutation';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
 } from '@univerjs/core';
-import type { ISetWorksheetDefaultStyleMutationParams } from '../mutations/set-worksheet-default-style.mutation';
 import { SetWorksheetDefaultStyleMutation, SetWorksheetDefaultStyleMutationFactory } from '../mutations/set-worksheet-default-style.mutation';
 
 export const SetWorksheetDefaultStyleCommand: ICommand = {

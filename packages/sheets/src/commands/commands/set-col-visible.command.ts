@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IRange, Nullable, Worksheet } from '@univerjs/core';
+import type { IAccessor, ICommand, IMutationInfo, IRange, Nullable, Worksheet } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -25,6 +25,7 @@ import {
     sequenceExecute,
 } from '@univerjs/core';
 import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams } from '../mutations/set-col-visible.mutation';
+import type { ISetWorksheetColWidthMutationParams } from '../mutations/set-worksheet-col-width.mutation';
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
@@ -59,7 +60,9 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
         const instanceService = accessor.get(IUniverInstanceService);
 
         const target = getSheetCommandTarget(instanceService, { unitId, subUnitId });
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { worksheet } = target;
         const zeroWidthRanges: IRange[] = [];

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IRange, Nullable, Worksheet } from '@univerjs/core';
+import type { IAccessor, ICommand, IMutationInfo, IRange, Nullable, Worksheet } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -25,6 +25,7 @@ import {
     sequenceExecute,
 } from '@univerjs/core';
 import type { ISetRowHiddenMutationParams, ISetRowVisibleMutationParams } from '../mutations/set-row-visible.mutation';
+import type { ISetWorksheetRowHeightMutationParams } from '../mutations/set-worksheet-row-height.mutation';
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
@@ -58,7 +59,9 @@ export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleComm
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), { unitId, subUnitId });
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { worksheet } = target;
         const zeroHeightRanges: IRange[] = [];

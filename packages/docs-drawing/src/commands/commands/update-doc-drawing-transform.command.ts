@@ -14,8 +14,19 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, ICommand, IObjectPositionH, IObjectPositionV, ISize, ISrcRect, JSONXActions, Nullable } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    IAccessor,
+    ICommand,
+    IObjectPositionH,
+    IObjectPositionV,
+    ISize,
+    ISrcRect,
+    JSONXActions,
+    Nullable,
+} from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IOleOnlineUnit } from '@univerjs/drawing';
 import type { IDocImage } from '../../services/doc-drawing.service';
 import {
     CommandType,
@@ -27,13 +38,12 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocHistoryAction, RichTextEditingMutation } from '@univerjs/docs';
-
 import { findDocDrawing } from '../../services/doc-drawing-source';
 
 export interface IDrawingDocTransform {
     drawingId: string;
-    key: 'size' | 'angle' | 'positionH' | 'positionV' | 'flipX' | 'flipY' | 'srcRect' | 'prstGeom' | 'adjustValues';
-    value: ISize | number | boolean | IObjectPositionH | IObjectPositionV | Nullable<ISrcRect> | IDocImage['prstGeom'] | IDocImage['adjustValues'];
+    key: 'size' | 'angle' | 'positionH' | 'positionV' | 'flipX' | 'flipY' | 'srcRect' | 'prstGeom' | 'adjustValues' | 'oleOnlineUnit' | 'oleFileName';
+    value: ISize | number | boolean | IObjectPositionH | IObjectPositionV | Nullable<ISrcRect> | IDocImage['prstGeom'] | IDocImage['adjustValues'] | IOleOnlineUnit | string;
 }
 
 export interface IUpdateDrawingDocTransformCommandParams {
@@ -74,12 +84,15 @@ export const UpdateDrawingDocTransformCommand: ICommand = {
                 return false;
             }
             const oldDrawing = source.drawing;
-            const isImageProperty = key === 'srcRect' || key === 'prstGeom' || key === 'adjustValues';
-            const oldValue = isImageProperty
+            if ((key === 'oleOnlineUnit' || key === 'oleFileName') && oldDrawing.drawingType !== DrawingTypeEnum.DRAWING_OLE) {
+                return false;
+            }
+            const isDrawingProperty = key === 'srcRect' || key === 'prstGeom' || key === 'adjustValues' || key === 'oleOnlineUnit' || key === 'oleFileName';
+            const oldValue = isDrawingProperty
                 ? (key in oldDrawing ? Reflect.get(oldDrawing, key) : undefined)
                 : oldDrawing?.docTransform?.[key];
             if (!Tools.diffValue(oldValue, value)) {
-                const path = isImageProperty
+                const path = isDrawingProperty
                     ? [...source.path, key]
                     : [...source.path, 'docTransform', key];
                 // Optional transform fields such as flips do not exist in older documents.

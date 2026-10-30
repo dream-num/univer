@@ -128,8 +128,8 @@ export class SheetDrawingPrintingController extends Disposable {
                 return;
             }
             const resource = this._drawingRenderService.renderDrawing(drawing, scene, requireRenderedImage
-                ? { allowInactiveSheet: true, requireRenderedImage: true, whenPageClosed: resourceCollector.whenClosed }
-                : { allowInactiveSheet: true });
+                ? { allowInactiveSheet: true, interactive: false, requireRenderedImage: true, whenPageClosed: resourceCollector.whenClosed }
+                : { allowInactiveSheet: true, interactive: false });
             if (resource) {
                 if (requireRenderedImage) {
                     resourceCollector.add(Promise.resolve(resource), { required: true });

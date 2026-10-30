@@ -523,7 +523,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             if (drawingShapes.length) {
                 for (const shape of drawingShapes) {
                     scene.detachTransformerFrom(shape);
-                    this._setTransformerEditable(shape, editable);
+                    this._setTransformerEditable(shape, editable, drawing);
                     try {
                         // Repeated header/footer drawings are faded by the content cover,
                         // never individually: an opaque picture must still hide pictures below it.
@@ -595,7 +595,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         }
     }
 
-    private _setTransformerEditable(shape: BaseObject, editable: boolean): void {
+    private _setTransformerEditable(shape: BaseObject, editable: boolean, drawing: IDocDrawing): void {
         if (editable) {
             const config = this._editableTransformerConfigs.get(shape);
             if (config) {
@@ -616,7 +616,8 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         if (!this._editableEventedStates.has(shape)) {
             this._editableEventedStates.set(shape, shape.evented);
         }
-        shape.evented = false;
+        // OLE attachments remain browsable without enabling drawing transforms.
+        shape.evented = drawing.drawingType === DrawingTypeEnum.DRAWING_OLE;
         this._context.scene.getTransformer()?.clearControlByIds([shape.oKey]);
         shape.transformerConfig = {
             ...shape.transformerConfig,

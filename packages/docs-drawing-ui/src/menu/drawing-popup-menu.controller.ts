@@ -15,6 +15,7 @@
  */
 
 import type { DocumentDataModel, IDisposable, INeedCheckDisposable, Nullable } from '@univerjs/core';
+import type { IOlePreviewContext } from '@univerjs/drawing-ui';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import {
     DrawingTypeEnum,
@@ -34,17 +35,30 @@ import {
     getDocumentDrawingSegmentId,
     getDocumentEntityParentPermissionObjectIds,
     getDocumentEntityPermissionObjectId,
+    getDocumentPermissionValue,
+    setDocumentPermissionValue,
+    UniverDocsPlugin,
 } from '@univerjs/docs';
-import { IDocDrawingAdapterService, IDocDrawingService, RemoveDocDrawingCommand } from '@univerjs/docs-drawing';
-import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import {
+    IDocDrawingAdapterService,
+    IDocDrawingService,
+    RemoveDocDrawingCommand,
+    UniverDocsDrawingPlugin,
+    UpdateDrawingDocTransformCommand,
+} from '@univerjs/docs-drawing';
+import { DocCanvasPopManagerService, DocPageLayoutService, UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import {
     COMPONENT_IMAGE_POPUP_MENU,
+    createOlePreviewViewer,
     ImageCropperObject,
     ImageResetSizeOperation,
+    OleUIService,
     OpenImageCropOperation,
+    registerOlePreviewRenderer,
 } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { UnitAction } from '@univerjs/protocol';
 import {
     ContextMenuPosition,
     FloatingObjectToolbarPosition,
@@ -55,6 +69,7 @@ import {
 import { takeUntil } from 'rxjs';
 import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing.operation';
 import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
+import { UniverDocsDrawingUIPlugin } from '../plugin';
 import { DocDrawingFloatingToolbarAdapterService } from '../services/doc-drawing-floating-toolbar-adapter.service';
 
 interface IDrawingPopupTarget {
@@ -83,9 +98,18 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @IPermissionService private readonly _permissionService: IPermissionService,
-        @IContextMenuService private readonly _contextMenuService: IContextMenuService
+        @IContextMenuService private readonly _contextMenuService: IContextMenuService,
+        @Inject(OleUIService) private readonly _oleUI: OleUIService
     ) {
         super();
+
+        this.disposeWithMe(this._oleUI.registerHost(UniverInstanceType.UNIVER_DOC, {
+            isEditable: (drawing) => this._drawingManagerService.getDrawingEditable() && getDocumentPermissionValue(this._permissionService, drawing.unitId, drawing.unitId, UnitAction.Edit),
+            attach: (object, componentKey, extraProps, drawing, direction = 'top-center') => this._canvasPopManagerService.attachPopupToObject(object, { componentKey, extraProps, direction, portal: true, offset: direction === 'top-center' ? [0, 8] : [0, 0] }, drawing.unitId),
+            rename: (drawing, name) => this._commandService.executeCommand(UpdateDrawingDocTransformCommand.id, { unitId: drawing.unitId, subUnitId: drawing.subUnitId, drawings: [{ drawingId: drawing.drawingId, key: 'oleFileName', value: name }] }),
+            saveOnlineUnit: (drawing, online) => this._commandService.executeCommand(UpdateDrawingDocTransformCommand.id, { unitId: drawing.unitId, subUnitId: drawing.subUnitId, drawings: [{ drawingId: drawing.drawingId, key: 'oleOnlineUnit', value: online }] }),
+            remove: (drawing) => this._commandService.executeCommand(RemoveDocDrawingCommand.id, { unitId: drawing.unitId, drawings: [{ ...drawing, drawingType: DrawingTypeEnum.DRAWING_OLE }] }),
+        }));
 
         this._init();
     }
@@ -337,6 +361,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 if (
                     !drawingParam ||
                     drawingParam.drawingType === DrawingTypeEnum.DRAWING_DOM ||
+                    drawingParam.drawingType === DrawingTypeEnum.DRAWING_OLE ||
                     drawingParam.drawingType === DrawingTypeEnum.DRAWING_SHAPE
                 ) {
                     this._clearPopups(unitId);
@@ -471,3 +496,14 @@ export class DocDrawingPopupMenuController extends RxDisposable {
             });
     }
 }
+
+function createDocOlePreview(context: IOlePreviewContext): IDisposable {
+    return createOlePreviewViewer({ ...context, onResize: (render) => render.with(DocPageLayoutService).calculatePagePosition(), setReadonly: (permissions, unitId) => setDocumentPermissionValue(permissions, unitId, unitId, UnitAction.Edit, false), register: (viewer) => {
+        viewer.registerPlugin(UniverDocsPlugin);
+        viewer.registerPlugin(UniverDocsUIPlugin);
+        viewer.registerPlugin(UniverDocsDrawingPlugin);
+        viewer.registerPlugin(UniverDocsDrawingUIPlugin);
+    } });
+}
+
+registerOlePreviewRenderer(UniverInstanceType.UNIVER_DOC, createDocOlePreview);

@@ -40,7 +40,7 @@ import {
 } from '@univerjs/core';
 import { DocPrintInterceptorService } from '@univerjs/docs-ui';
 import { DrawingManagerService, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
-import { DrawingImageClipService, DrawingRenderService } from '@univerjs/drawing-ui';
+import { DrawingImageClipService, DrawingRenderService, OleUIService } from '@univerjs/drawing-ui';
 import { Documents, DocumentSkeleton, DocumentViewModel, Engine, Scene } from '@univerjs/engine-render';
 import { ComponentManager, IGalleryService } from '@univerjs/ui';
 import { EMPTY, Subject } from 'rxjs';
@@ -104,6 +104,7 @@ describe('DocDrawingPrintingController with real layout and drawing services', (
         } }]);
         injector.add([DrawingImageClipService]);
         injector.add([DrawingRenderService]);
+        injector.add([OleUIService, { useValue: { bindObject: vi.fn() } as never }]);
         injector.add([ComponentManager]);
         injector.add([DocPrintInterceptorService]);
         injector.add([DocDrawingPrintingController]);
@@ -221,10 +222,12 @@ describe('DocDrawingPrintingController with real layout and drawing services', (
     }
 
     it('prints table-cell images with their host page and omits the other body page', () => {
+        const render = vi.spyOn(univer.__getInjector().get(DrawingRenderService), 'renderDrawing');
         const page = skeleton.getSkeletonData()!.pages[0];
         expect(page.skeTables.get('table')!.rows[0].cells[0].skeDrawings.has('cell-image')).toBe(true);
         collect(0);
         expect(renderedImageIds()).toEqual(['body-first', 'cell-image', 'header-image', 'footer-image']);
+        expect(render.mock.calls.every((call) => call[2]?.interactive === false)).toBe(true);
     });
 
     it('prints repeated header and footer images on the second page', () => {

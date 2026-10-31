@@ -26,7 +26,8 @@ import { SheetInterceptorService } from '@univerjs/sheets';
 import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import { resolveSheetDrawingRotateEnabled } from '../../common/rotate-enabled';
 import { ISheetDrawingService } from '../../services/sheet-drawing.service';
-import { createSheetDrawingUpdateMutations } from './sheet-drawing-update-mutations';
+import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
+import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 
 export interface ISetDrawingCommandParams {
     unitId: string;
@@ -110,17 +111,24 @@ export const SetSheetDrawingCommand: ICommand<ISetDrawingCommandParams> = {
         const normalizedDrawings = drawings.map((drawing) => normalizeNonRotatableAngleUpdate(drawing, sheetDrawingService));
         const normalizedParams = { ...params, drawings: normalizedDrawings };
         const jsonOp = sheetDrawingService.getBatchUpdateOp(normalizedDrawings as ISheetDrawing[]) as IDrawingJsonUndo1;
-        const { unitId } = jsonOp;
+        const { unitId, subUnitId, undo, redo, objects } = jsonOp;
         const intercepted = sheetInterceptorService.onCommandExecute({ id: SetSheetDrawingCommand.id, params: normalizedParams });
-        const drawingMutations = createSheetDrawingUpdateMutations(jsonOp);
         const redoMutations = [
             ...(intercepted.preRedos ?? []),
-            ...drawingMutations.redoMutations,
+            {
+                id: SetDrawingApplyMutation.id,
+                params: { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.UPDATE },
+            },
+            { id: ClearSheetDrawingTransformerOperation.id, params: [unitId] },
             ...intercepted.redos,
         ];
         const undoMutations = [
             ...(intercepted.preUndos ?? []),
-            ...drawingMutations.undoMutations,
+            {
+                id: SetDrawingApplyMutation.id,
+                params: { unitId, subUnitId, op: undo, objects, type: DrawingApplyType.UPDATE },
+            },
+            { id: ClearSheetDrawingTransformerOperation.id, params: [unitId] },
             ...intercepted.undos,
         ];
 

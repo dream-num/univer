@@ -73,3 +73,18 @@ it.each([SheetDrawingAnchorType.None, SheetDrawingAnchorType.Position, SheetDraw
         expect(after.sheetTransform.from.column).toBeGreaterThan(0);
     }
 });
+
+it('groups consecutive Chart Sheet nudges into one undo and restores the final geometry on redo', async () => {
+    const bed = createChartDrawingTestBed(undefined, createAbsoluteChart());
+    const search = { unitId: 'test', subUnitId: 'chart', drawingId: 'child' };
+    const before = bed.drawings.getDrawingByParam(search)!;
+    bed.drawings.focusDrawing([search]);
+    expect(await bed.commandService.executeCommand(MoveDrawingsCommand.id, { direction: Direction.RIGHT })).toBe(true);
+    expect(await bed.commandService.executeCommand(MoveDrawingsCommand.id, { direction: Direction.DOWN })).toBe(true);
+    const after = bed.drawings.getDrawingByParam(search)!;
+    expect(after.transform).toMatchObject({ left: 151, top: 121 });
+    expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
+    expect(bed.drawings.getDrawingByParam(search)).toEqual(before);
+    expect(await bed.commandService.executeCommand(RedoCommand.id)).toBe(true);
+    expect(bed.drawings.getDrawingByParam(search)).toEqual(after);
+});

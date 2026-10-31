@@ -48,7 +48,6 @@ import {
     Injector,
     ObjectMatrix,
     RANGE_TYPE,
-    SheetTypes,
     WorksheetHiddenState,
     WrapStrategy,
 } from '@univerjs/core';
@@ -332,9 +331,6 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     setDefaultStyle(style: string | Nullable<IStyleData>): FWorksheet {
-        if (this._worksheet.getConfig().type === SheetTypes.CHART) {
-            return this;
-        }
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         this._commandService.syncExecuteCommand(SetWorksheetDefaultStyleMutation.id, {
@@ -977,9 +973,6 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     autoFitRow(rowPosition: number, auto: BooleanNumber = BooleanNumber.TRUE): FWorksheet {
-        if (this._worksheet.getConfig().type === SheetTypes.CHART) {
-            return this;
-        }
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const ranges = [{

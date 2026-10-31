@@ -2554,14 +2554,10 @@ export class FRange extends FBaseInitialable {
     insertCells(shiftDimension: Dimension): void {
         if (shiftDimension === Dimension.ROWS) {
             this._commandService.executeCommand(InsertRangeMoveDownCommand.id, {
-                unitId: this._workbook.getUnitId(),
-                subUnitId: this._worksheet.getSheetId(),
                 range: this._range,
             });
         } else {
             this._commandService.executeCommand(InsertRangeMoveRightCommand.id, {
-                unitId: this._workbook.getUnitId(),
-                subUnitId: this._worksheet.getSheetId(),
                 range: this._range,
             });
         }
@@ -2626,14 +2622,10 @@ export class FRange extends FBaseInitialable {
     deleteCells(shiftDimension: Dimension): void {
         if (shiftDimension === Dimension.ROWS) {
             this._commandService.executeCommand(DeleteRangeMoveUpCommand.id, {
-                unitId: this._workbook.getUnitId(),
-                subUnitId: this._worksheet.getSheetId(),
                 range: this._range,
             });
         } else {
             this._commandService.executeCommand(DeleteRangeMoveLeftCommand.id, {
-                unitId: this._workbook.getUnitId(),
-                subUnitId: this._worksheet.getSheetId(),
                 range: this._range,
             });
         }

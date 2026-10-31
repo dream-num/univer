@@ -15,7 +15,6 @@
  */
 
 import type { IPermissionPoint, Workbook, Worksheet } from '@univerjs/core';
-import type { BehaviorSubject } from 'rxjs';
 import {
     ILogService,
     Inject,
@@ -42,10 +41,6 @@ export const POINT_MODEL_PLUGIN_NAME = 'SHEET_WORKSHEET_PROTECTION_POINT_PLUGIN'
 export class WorksheetPermissionService extends RxDisposable {
     private readonly _workbookSubscriptions = new Map<Workbook, Subscription>();
 
-    addWorksheetPermissionPoint<T = boolean>(point: IPermissionPoint<T> | BehaviorSubject<IPermissionPoint<T>>): boolean {
-        return this._permissionService.addPermissionPoint(point);
-    }
-
     constructor(
         @Inject(IPermissionService) private _permissionService: IPermissionService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
@@ -70,7 +65,7 @@ export class WorksheetPermissionService extends RxDisposable {
                 const subUnitId = worksheet.getSheetId();
                 [...getAllWorksheetPermissionPoint(), ...getAllWorksheetPermissionPointByPointPanel()].forEach((F) => {
                     const instance = new F(unitId, subUnitId);
-                    this.addWorksheetPermissionPoint(instance);
+                    this._permissionService.addPermissionPoint(instance);
                 });
                 this._logService.debug('[WorksheetPermissionService]', 'Initialization completed', unitId, subUnitId);
             };
@@ -246,6 +241,6 @@ export class WorksheetPermissionService extends RxDisposable {
             return;
         }
 
-        this.addWorksheetPermissionPoint(instance);
+        this._permissionService.addPermissionPoint(instance);
     }
 }

@@ -45,8 +45,6 @@ import {
     RangeProtectionPermissionViewPoint,
     RangeProtectionRuleModel,
     ViewStateEnum,
-    WorksheetEditPermission,
-    WorksheetPermissionService,
     WorksheetProtectionPointModel,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
@@ -88,8 +86,7 @@ export class FWorksheetPermission extends FBase {
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(RangeProtectionRuleModel) private readonly _rangeProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(WorksheetProtectionPointModel) private readonly _worksheetProtectionPointModel: WorksheetProtectionPointModel,
-        @Inject(WorksheetProtectionRuleModel) private readonly _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
-        @Inject(WorksheetPermissionService) private readonly _worksheetPermissionService: WorksheetPermissionService
+        @Inject(WorksheetProtectionRuleModel) private readonly _worksheetProtectionRuleModel: WorksheetProtectionRuleModel
     ) {
         super();
 
@@ -208,6 +205,7 @@ export class FWorksheetPermission extends FBase {
 
     /**
      * Remove worksheet protection.
+     * This deletes the protection rule and resets all permission points to allowed.
      * @returns {Promise<boolean>} A promise resolving to whether protection was removed; also resolves to `true` if already unprotected.
      * @example
      * ```ts
@@ -351,12 +349,12 @@ export class FWorksheetPermission extends FBase {
 
         const instance = new PermissionPointClass(this._unitId, this._subUnitId);
         const permissionPoint = this._permissionService.getPermissionPoint(instance.id);
-        if (permissionPoint && !(instance instanceof WorksheetEditPermission) && permissionPoint.value === value) {
+        if (permissionPoint && permissionPoint.value === value) {
             return; // Value unchanged, no update needed
         }
 
         if (!permissionPoint) {
-            this._worksheetPermissionService.addWorksheetPermissionPoint(instance);
+            this._permissionService.addPermissionPoint(instance);
         }
 
         await this._authzIoService.update({

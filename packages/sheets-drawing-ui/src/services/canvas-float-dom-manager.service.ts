@@ -862,6 +862,16 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         return this._domLayerInfoMap.get(id);
     }
 
+    updateFloatDomEventOptions(id: string, eventOptions: IFloatDom['eventOptions']): void {
+        const info = this._domLayerInfoMap.get(id);
+        if (!info?.floatDomConfig) {
+            return;
+        }
+        // Remounts use this cached configuration rather than the current UI layer.
+        info.floatDomConfig = { ...info.floatDomConfig, eventOptions };
+        this._canvasFloatDomService.updateFloatDom(id, { eventOptions });
+    }
+
     getFloatDomsBySubUnitId(unitId: string, subUnitId: string) {
         return Array.from(this._domLayerInfoMap.values()).filter((info) => info.subUnitId === subUnitId && info.unitId === unitId);
     }

@@ -41,7 +41,9 @@ import {
     SheetPermissionCheckController,
     SheetSkeletonService,
     WorkbookCopyPermission,
+    WorkbookEditablePermission,
     WorksheetCopyPermission,
+    WorksheetEditPermission,
 } from '@univerjs/sheets';
 import {
     DrawingApplyType,
@@ -377,7 +379,12 @@ export class SheetsDrawingCopyPasteController extends RxDisposable {
     private _generateChartSheetImagePasteMutations(pasteTo: ISheetDiscreteRangeLocation) {
         const { unitId, subUnitId } = pasteTo;
         const worksheet = this._instanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)!.getSheetBySheetId(subUnitId)!;
-        this._permissions.assertWorksheetEditable(unitId, subUnitId);
+        if (!this._permissions.permissionCheckWithoutRange({
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission],
+        }, unitId, subUnitId)) {
+            throw new CustomCommandExecutionError(SheetPasteCommand.id);
+        }
         const source = this._copyInfo!;
         if (!this._permissions.permissionCheckWithoutRange({
             workbookTypes: [WorkbookCopyPermission],

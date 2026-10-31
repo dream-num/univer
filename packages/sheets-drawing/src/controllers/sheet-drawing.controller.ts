@@ -17,30 +17,9 @@
 import type { Workbook } from '@univerjs/core';
 import type { IDrawingJsonUndo1, IDrawingSubunitMap } from '@univerjs/drawing';
 import type { ICopySheetCommandInterceptorParams, IRemoveSheetCommandParams } from '@univerjs/sheets';
-import {
-    Disposable,
-    ICommandService,
-    Inject,
-    IResourceManagerService,
-    IUniverInstanceService,
-    UniverInstanceType,
-} from '@univerjs/core';
+import { Disposable, ICommandService, Inject, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { getOrCreateDrawingCopyPlan, IDrawingManagerService } from '@univerjs/drawing';
-import {
-    CopySheetCommand,
-    getSheetCommandTarget,
-    RemoveSheetCommand,
-    SheetInterceptorService,
-    SheetPermissionCheckController,
-} from '@univerjs/sheets';
-import type { IInsertSheetDrawingCommandParams } from '../commands/commands/insert-sheet-drawing.command';
-import type { IRemoveSheetDrawingCommandParams } from '../commands/commands/remove-sheet-drawing.command';
-import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-drawing-arrange.command';
-import type { ISetSheetDrawingPlacementCommandParams } from '../commands/commands/set-sheet-drawing-placement.command';
-import type { ISetDrawingCommandParams } from '../commands/commands/set-sheet-drawing.command';
-import type {
-    ISetWorksheetBackgroundImageCommandParams,
-} from '../commands/commands/set-worksheet-background-image.command';
+import { CopySheetCommand, RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
 import type { ISheetDrawing } from '../services/sheet-drawing.service';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
@@ -83,13 +62,11 @@ export class SheetsDrawingLoadController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @IResourceManagerService private _resourceManagerService: IResourceManagerService,
-        @Inject(SheetPermissionCheckController) private readonly _sheetPermissionCheckController: SheetPermissionCheckController
+        @IResourceManagerService private _resourceManagerService: IResourceManagerService
     ) {
         super();
 
         this._initCommands();
-        this._initPermissionChecks();
         this._initSnapshot();
         this._initSheetChange();
 
@@ -107,32 +84,6 @@ export class SheetsDrawingLoadController extends Disposable {
             SetWorksheetBackgroundImageCommand,
             ClearSheetDrawingTransformerOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
-    }
-
-    private _initPermissionChecks() {
-        this.disposeWithMe(this._commandService.beforeCommandExecuted((command) => {
-            if (command.id === InsertSheetDrawingCommand.id || command.id === RemoveSheetDrawingCommand.id || command.id === SetSheetDrawingCommand.id) {
-                const params = command.params as IInsertSheetDrawingCommandParams | IRemoveSheetDrawingCommandParams | ISetDrawingCommandParams | undefined;
-                for (const drawing of params?.drawings ?? []) {
-                    this._sheetPermissionCheckController.assertWorksheetEditable(drawing.unitId || params?.unitId || '', drawing.subUnitId || '');
-                }
-            } else if (command.id === SetDrawingArrangeCommand.id) {
-                const params = command.params as ISetDrawingArrangeCommandParams | undefined;
-                if (params) {
-                    this._sheetPermissionCheckController.assertWorksheetEditable(params.unitId, params.subUnitId);
-                }
-            } else if (command.id === SetSheetDrawingPlacementCommand.id) {
-                const params = command.params as ISetSheetDrawingPlacementCommandParams | undefined;
-                if (params?.drawings.length) {
-                    this._sheetPermissionCheckController.assertWorksheetEditable(params.unitId, params.subUnitId);
-                }
-            } else if (command.id === SetWorksheetBackgroundImageCommand.id) {
-                const target = getSheetCommandTarget(this._univerInstanceService, command.params as ISetWorksheetBackgroundImageCommandParams | undefined);
-                if (target) {
-                    this._sheetPermissionCheckController.assertWorksheetEditable(target.unitId, target.subUnitId);
-                }
-            }
-        }));
     }
 
     private _initSnapshot() {

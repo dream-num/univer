@@ -15,20 +15,35 @@
  */
 
 import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
-import { DrawingTypeEnum, IPermissionService } from '@univerjs/core';
+import { DrawingTypeEnum, IPermissionService, LocaleType, SheetTypes } from '@univerjs/core';
 import { WorksheetEditPermission } from '@univerjs/sheets';
+import { InsertSheetDrawingCommand, ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { expect, it, onTestFinished } from 'vitest';
+import { createAbsoluteChart } from '../../__tests__/chart-drawing-test-bed';
 import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
 import { FlipSheetDrawingCommand } from '../../commands/commands/flip-drawings.command';
 import { GroupSheetDrawingCommand } from '../../commands/commands/group-sheet-drawing.command';
 import { UngroupSheetDrawingCommand } from '../../commands/commands/ungroup-sheet-drawing.command';
 import { SheetDrawingPermissionController } from '../sheet-drawing-permission.controller';
 
-it('cancels UI group and flip commands through the real worksheet permission point', () => {
-    const runtime = createSheetsDrawingUiTestBed();
+function createPermissionRuntime(type?: SheetTypes) {
+    const runtime = createSheetsDrawingUiTestBed({
+        id: 'test',
+        appVersion: 'test',
+        locale: LocaleType.EN_US,
+        name: 'Chart',
+        styles: {},
+        sheetOrder: ['sheet1'],
+        sheets: { sheet1: { id: 'sheet1', name: 'Chart', ...(type === undefined ? {} : { type }) } },
+    });
     onTestFinished(() => runtime.univer.dispose());
     runtime.injector.add([SheetDrawingPermissionController]);
     runtime.injector.get(SheetDrawingPermissionController);
+    return runtime;
+}
+
+it('cancels Chart Sheet group and flip commands through the existing worksheet permission check', () => {
+    const runtime = createPermissionRuntime(SheetTypes.CHART);
     runtime.commandService.registerCommand(GroupSheetDrawingCommand);
     runtime.commandService.registerCommand(UngroupSheetDrawingCommand);
     runtime.commandService.registerCommand(FlipSheetDrawingCommand);
@@ -56,4 +71,28 @@ it('cancels UI group and flip commands through the real worksheet permission poi
     permissions.updatePermissionPoint(new WorksheetEditPermission(runtime.unitId, runtime.subUnitId).id, true);
     expect(runtime.commandService.syncExecuteCommand(FlipSheetDrawingCommand.id, { unitId: runtime.unitId, drawings: [] })).toBe(false);
     expect(executed).toEqual([FlipSheetDrawingCommand.id]);
+});
+
+it.each([undefined, SheetTypes.CHART])('uses existing permission defaults for Drawing insertion and rejects explicit denial on sheet type %s', (type) => {
+    const runtime = createPermissionRuntime(type);
+    const permissions = runtime.injector.get(IPermissionService);
+    const point = new WorksheetEditPermission(runtime.unitId, runtime.subUnitId);
+    const drawing = createAbsoluteChart('allowed', runtime.subUnitId);
+    permissions.deletePermissionPoint(point.id);
+    expect(runtime.commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, {
+        unitId: runtime.unitId,
+        drawings: [drawing],
+    })).toBe(true);
+    const drawings = runtime.injector.get(ISheetDrawingService);
+    expect(drawings.getDrawingByParam(drawing)).toEqual(drawing);
+
+    point.value = false;
+    expect(permissions.addPermissionPoint(point)).toBe(true);
+    const denied = createAbsoluteChart('denied', runtime.subUnitId);
+    expect(runtime.commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, {
+        unitId: runtime.unitId,
+        drawings: [denied],
+    })).toBe(false);
+    expect(drawings.getDrawingByParam(denied)).toBeUndefined();
+    expect(drawings.getDrawingByParam(drawing)).toEqual(drawing);
 });

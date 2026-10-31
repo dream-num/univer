@@ -15,126 +15,86 @@
  */
 
 import type { Workbook } from '@univerjs/core';
+import type { FUniver } from '@univerjs/core/facade';
 import {
-    BooleanNumber,
-    BorderStyleTypes,
-    BorderType,
-    CommandType,
-    Dimension,
-    Direction,
     ICommandService,
     IConfirmService,
     ILogService,
     Injector,
-    IUndoRedoService,
     IUniverInstanceService,
-    LocaleType,
-    PresetListType,
     RANGE_TYPE,
-    RedoCommand,
-    SheetTypes,
     TestConfirmService,
-    Tools,
-    UndoCommand,
-    Univer,
     UniverInstanceType,
     WorksheetHiddenState,
 } from '@univerjs/core';
-import { FUniver } from '@univerjs/core/facade';
-import { beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
-import { AddWorksheetMergeCommand } from '../../commands/commands/add-worksheet-merge.command';
-import { SetWorksheetRangeThemeStyleCommand } from '../../commands/commands/add-worksheet-range-theme.command';
-import { AppendRowCommand } from '../../commands/commands/append-row.command';
-import { AutoFillCommand } from '../../commands/commands/auto-fill.command';
-import { ClearSelectionAllCommand } from '../../commands/commands/clear-selection-all.command';
-import { ClearSelectionContentCommand } from '../../commands/commands/clear-selection-content.command';
-import { ClearSelectionFormatCommand } from '../../commands/commands/clear-selection-format.command';
-import { DeleteRangeMoveLeftCommand } from '../../commands/commands/delete-range-move-left.command';
-import { DeleteRangeMoveUpCommand } from '../../commands/commands/delete-range-move-up.command';
-import { InsertRangeMoveDownCommand } from '../../commands/commands/insert-range-move-down.command';
-import { InsertRangeMoveRightCommand } from '../../commands/commands/insert-range-move-right.command';
 import {
+    AddWorksheetMergeCommand,
+    AddWorksheetMergeMutation,
+    AppendRowCommand,
+    CancelFrozenCommand,
+    ClearSelectionAllCommand,
+    ClearSelectionContentCommand,
+    ClearSelectionFormatCommand,
     InsertColByRangeCommand,
     InsertColCommand,
+    InsertColMutation,
     InsertRowByRangeCommand,
     InsertRowCommand,
-} from '../../commands/commands/insert-row-col.command';
-import { MoveRangeCommand } from '../../commands/commands/move-range.command';
-import { MoveColsCommand, MoveRowsCommand } from '../../commands/commands/move-rows-cols.command';
-import { RefillCommand } from '../../commands/commands/refill.command';
-import {
+    InsertRowMutation,
+    MoveColsCommand,
+    MoveColsMutation,
+    MoveRowsCommand,
+    MoveRowsMutation,
     RemoveColByRangeCommand,
     RemoveColCommand,
+    RemoveColMutation,
     RemoveRowByRangeCommand,
     RemoveRowCommand,
-} from '../../commands/commands/remove-row-col.command';
-import { RemoveWorksheetMergeCommand } from '../../commands/commands/remove-worksheet-merge.command';
-import { ReorderRangeCommand } from '../../commands/commands/reorder-range.command';
-import {
-    SetBorderBasicCommand,
-    SetBorderColorCommand,
-    SetBorderPositionCommand,
-    SetBorderStyleCommand,
-} from '../../commands/commands/set-border.command';
-import { SetColDataCommand } from '../../commands/commands/set-col-data.command';
-import { SetColHiddenCommand, SetSpecificColsVisibleCommand } from '../../commands/commands/set-col-visible.command';
-import { CancelFrozenCommand, SetFrozenCommand } from '../../commands/commands/set-frozen.command';
-import { SetRangeValuesCommand } from '../../commands/commands/set-range-values.command';
-import { SetRowDataCommand } from '../../commands/commands/set-row-data.command';
-import { SetRowHiddenCommand, SetSpecificRowsVisibleCommand } from '../../commands/commands/set-row-visible.command';
-import {
+    RemoveRowMutation,
+    RemoveWorksheetMergeCommand,
+    RemoveWorksheetMergeMutation,
+    SetColDataCommand,
+    SetColDataMutation,
+    SetColHiddenCommand,
+    SetColHiddenMutation,
+    SetColVisibleMutation,
+    SetColWidthCommand,
+    SetFrozenCommand,
+    SetFrozenMutation,
     SetHorizontalTextAlignCommand,
+    SetRangeValuesCommand,
+    SetRangeValuesMutation,
+    SetRowDataCommand,
+    SetRowDataMutation,
+    SetRowHeightCommand,
+    SetRowHiddenCommand,
+    SetRowHiddenMutation,
+    SetRowVisibleMutation,
+    SetSelectionsOperation,
+    SetSpecificColsVisibleCommand,
+    SetSpecificRowsVisibleCommand,
     SetStyleCommand,
     SetTextWrapCommand,
     SetVerticalTextAlignCommand,
-} from '../../commands/commands/set-style.command';
-import { SetColWidthCommand } from '../../commands/commands/set-worksheet-col-width.command';
-import { SetWorksheetColumnCountCommand } from '../../commands/commands/set-worksheet-column-count.command';
-import { SetWorksheetDefaultStyleCommand } from '../../commands/commands/set-worksheet-default-style.command';
-import { SetWorksheetHideCommand } from '../../commands/commands/set-worksheet-hide.command';
-import { SetWorksheetNameCommand } from '../../commands/commands/set-worksheet-name.command';
-import { SetWorksheetOrderCommand } from '../../commands/commands/set-worksheet-order.command';
-import { SetWorksheetRowCountCommand } from '../../commands/commands/set-worksheet-row-count.command';
-import {
-    SetRowHeightCommand,
-    SetWorksheetRowIsAutoHeightCommand,
-} from '../../commands/commands/set-worksheet-row-height.command';
-import { SetWorksheetShowCommand } from '../../commands/commands/set-worksheet-show.command';
-import { SplitTextToColumnsCommand } from '../../commands/commands/split-text-to-columns.command';
-import { TextToNumberCommand } from '../../commands/commands/text-to-number.command';
-import { ToggleCellCheckboxCommand } from '../../commands/commands/toggle-checkbox.command';
-import { ToggleGridlinesCommand } from '../../commands/commands/toggle-gridlines.command';
-import { AddWorksheetMergeMutation } from '../../commands/mutations/add-worksheet-merge.mutation';
-import { InsertColMutation, InsertRowMutation } from '../../commands/mutations/insert-row-col.mutation';
-import { MoveColsMutation, MoveRowsMutation } from '../../commands/mutations/move-rows-cols.mutation';
-import { RemoveColMutation, RemoveRowMutation } from '../../commands/mutations/remove-row-col.mutation';
-import { RemoveWorksheetMergeMutation } from '../../commands/mutations/remove-worksheet-merge.mutation';
-import { SetColDataMutation } from '../../commands/mutations/set-col-data.mutation';
-import { SetColHiddenMutation, SetColVisibleMutation } from '../../commands/mutations/set-col-visible.mutation';
-import { SetFrozenMutation } from '../../commands/mutations/set-frozen.mutation';
-import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
-import { SetRowDataMutation } from '../../commands/mutations/set-row-data.mutation';
-import { SetRowHiddenMutation, SetRowVisibleMutation } from '../../commands/mutations/set-row-visible.mutation';
-import { SetWorksheetColWidthMutation } from '../../commands/mutations/set-worksheet-col-width.mutation';
-import { SetWorksheetColumnCountMutation } from '../../commands/mutations/set-worksheet-column-count.mutation';
-import { SetWorksheetDefaultStyleMutation } from '../../commands/mutations/set-worksheet-default-style.mutation';
-import { SetWorksheetHideMutation } from '../../commands/mutations/set-worksheet-hide.mutation';
-import { SetWorksheetNameMutation } from '../../commands/mutations/set-worksheet-name.mutation';
-import { SetWorksheetRowCountMutation } from '../../commands/mutations/set-worksheet-row-count.mutation';
-import {
+    SetWorksheetActiveOperation,
+    SetWorksheetColumnCountCommand,
+    SetWorksheetColumnCountMutation,
+    SetWorksheetColWidthMutation,
+    SetWorksheetDefaultStyleMutation,
+    SetWorksheetHideCommand,
+    SetWorksheetHideMutation,
+    SetWorksheetNameCommand,
+    SetWorksheetNameMutation,
+    SetWorksheetRowCountCommand,
+    SetWorksheetRowCountMutation,
     SetWorksheetRowHeightMutation,
+    SetWorksheetRowIsAutoHeightCommand,
     SetWorksheetRowIsAutoHeightMutation,
-} from '../../commands/mutations/set-worksheet-row-height.mutation';
-import { SetSelectionsOperation } from '../../commands/operations/selection.operation';
-import { SetWorksheetActiveOperation } from '../../commands/operations/set-worksheet-active.operation';
-import enUS from '../../locale/en-US';
-import { UniverSheetsPlugin } from '../../plugin';
-import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
-import { AUTO_FILL_APPLY_TYPE } from '../../services/auto-fill/type';
-import { BorderStyleManagerService } from '../../services/border-style-manager.service';
-import { SheetsSelectionsService } from '../../services/selections/selection.service';
-import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import { SheetSkeletonService } from '../../skeleton/skeleton.service';
+    SetWorksheetShowCommand,
+    SheetSkeletonService,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SHEETS_CUSTOM_FIELD_WARNING_MESSAGE } from '../const';
 import { createWorksheetTestBed } from './create-worksheet-test-bed';
 
@@ -826,336 +786,5 @@ describe('Test FWorksheet', () => {
         activeSheet?.setFreeze({ startRow: 21, startColumn: 9, ySplit: 16, xSplit: 4 });
         expect(activeSheet?.getFrozenRows()).toBe(21);
         expect(activeSheet?.getFrozenColumns()).toBe(9);
-    });
-});
-
-describe('Chart Sheet grid editing entry boundaries', () => {
-    function createBed() {
-        const univer = new Univer({ locale: LocaleType.EN_US, locales: { enUS } });
-        univer.registerPlugin(UniverSheetsPlugin);
-        const injector = univer.__getInjector();
-        const bed = { univer, injector, get: injector.get.bind(injector), univerAPI: FUniver.newAPI(injector) };
-        univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
-            id: 'test',
-            appVersion: '3.0.0-alpha',
-            locale: LocaleType.EN_US,
-            name: 'Chart Sheet guards',
-            sheetOrder: ['grid', 'chart', 'other-grid'],
-            styles: {},
-            sheets: {
-                grid: { id: 'grid', name: 'Grid', rowCount: 10, columnCount: 10, cellData: { 0: { 0: { v: 'source' } } } },
-                chart: { id: 'chart', name: 'Chart', type: SheetTypes.CHART, rowCount: 10, columnCount: 10, cellData: {} },
-                'other-grid': { id: 'other-grid', name: 'Other grid', rowCount: 10, columnCount: 10, cellData: {} },
-            },
-        });
-        onTestFinished(() => bed.univer.dispose());
-        const commands = bed.get(ICommandService);
-        const workbook = bed.get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!;
-        workbook.setActiveSheet(workbook.getSheetBySheetId('grid')!);
-        bed.get(IUniverInstanceService).focusUnit('test');
-        const facade = bed.univerAPI.getActiveWorkbook()!;
-        const chart = facade.getSheetBySheetId('chart')!;
-        return { ...bed, commands, workbook, facade, chart };
-    }
-
-    it('keeps Chart Sheet enumeration and legal range reads stable while refusing explicit value, formula and style writes', () => {
-        const { chart, facade, workbook, commands, get } = createBed();
-        const before = Tools.deepClone(workbook.getSheetBySheetId('chart')!.getSnapshot());
-        const mutations: string[] = [];
-        const subscription = commands.onCommandExecuted((command) => {
-            if (command.type === CommandType.MUTATION) mutations.push(command.id);
-        });
-        onTestFinished(() => subscription.dispose());
-        expect(facade.getSheets().map((sheet) => sheet.getSheetId())).toContain('chart');
-        expect(chart.getRange('A1:B2').getValues()).toEqual([[null, null], [null, null]]);
-        expect(chart.getRange('A1').setValue('blocked')).toBeDefined();
-        chart.getRange('A1').setValue('=SUM(A2:A3)');
-        chart.getRange('A1').setFontWeight('bold');
-        chart.getRange('A1').setCustomMetaData({ note: 'blocked' });
-        expect(workbook.getSheetBySheetId('chart')!.getSnapshot()).toEqual(before);
-        expect(mutations).toEqual([]);
-        expect(get(IUndoRedoService).getUndoRedoStatus('test').undos).toBe(0);
-    });
-
-    it('rejects direct facade default-style and automatic-row-height mutation producers before any model change', () => {
-        const { chart, workbook, commands } = createBed();
-        const before = Tools.deepClone(workbook.getSheetBySheetId('chart')!.getSnapshot());
-        const mutations: string[] = [];
-        const subscription = commands.onCommandExecuted((command) => {
-            if (command.type === CommandType.MUTATION) mutations.push(command.id);
-        });
-        onTestFinished(() => subscription.dispose());
-        expect(chart.setDefaultStyle({ fs: 18 })).toBe(chart);
-        expect(chart.autoFitRow(0, BooleanNumber.TRUE)).toBe(chart);
-        expect(workbook.getSheetBySheetId('chart')!.getSnapshot()).toEqual(before);
-        expect(mutations).toEqual([]);
-    });
-
-    it.each([
-        ['range reorder', ReorderRangeCommand, { range: { startRow: 0, endRow: 1, startColumn: 0, endColumn: 0 }, order: { 0: 1, 1: 0 } }],
-        ['worksheet default style', SetWorksheetDefaultStyleCommand, { defaultStyle: { fs: 18 } }],
-        ['split text into columns', SplitTextToColumnsCommand, { range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } }],
-        ['text conversion', TextToNumberCommand, { ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }] }],
-        ['insert row', InsertRowCommand, { range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 9 }, direction: Direction.UP }],
-        ['insert column', InsertColByRangeCommand, { range: { startRow: 0, endRow: 9, startColumn: 0, endColumn: 0 }, direction: Direction.LEFT }],
-        ['remove row', RemoveRowByRangeCommand, { range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 9 } }],
-        ['remove column', RemoveColByRangeCommand, { range: { startRow: 0, endRow: 9, startColumn: 0, endColumn: 0 } }],
-        ['move row', MoveRowsCommand, { range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 9, rangeType: RANGE_TYPE.ROW }, fromRange: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 9 }, toRange: { startRow: 2, endRow: 2, startColumn: 0, endColumn: 9 } }],
-        ['move column', MoveColsCommand, { range: { startRow: 0, endRow: 9, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.COLUMN }, fromRange: { startRow: 0, endRow: 9, startColumn: 0, endColumn: 0 }, toRange: { startRow: 0, endRow: 9, startColumn: 2, endColumn: 2 } }],
-        ['append row', AppendRowCommand, { cellValue: { 0: { 0: { v: 'blocked' } } } }],
-        ['row data and size', SetRowDataCommand, { rowData: { 0: { s: { fs: 18 } } } }],
-        ['column data and size', SetColDataCommand, { columnData: { 0: { s: { fs: 18 } } } }],
-        ['row height', SetRowHeightCommand, { ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }], value: 42 }],
-        ['column width', SetColWidthCommand, { ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }], value: 42 }],
-        ['row visibility', SetRowHiddenCommand, { ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }] }],
-        ['column visibility', SetColHiddenCommand, { ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }] }],
-        ['row count', SetWorksheetRowCountCommand, { rowCount: 20 }],
-        ['column count', SetWorksheetColumnCountCommand, { columnCount: 20 }],
-        ['frozen pane', SetFrozenCommand, { startRow: 0, startColumn: 0, xSplit: 1, ySplit: 1 }],
-        ['gridlines', ToggleGridlinesCommand, {}],
-        ['range theme', SetWorksheetRangeThemeStyleCommand, { range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }, themeName: 'blocked' }],
-        ['merge', AddWorksheetMergeCommand, { selections: [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }] }],
-        ['unmerge', RemoveWorksheetMergeCommand, { ranges: [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }] }],
-        ['clear', ClearSelectionContentCommand, { ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }] }],
-        ['autofill', AutoFillCommand, { sourceRange: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }, targetRange: { startRow: 0, endRow: 1, startColumn: 0, endColumn: 0 } }],
-    ])('refuses %s on an explicit Chart Sheet before mutation or undo notifications', async (_name, command, params) => {
-        const { commands, workbook, get } = createBed();
-        const before = Tools.deepClone(workbook.getSheetBySheetId('chart')!.getSnapshot());
-        const mutations: string[] = [];
-        const subscription = commands.onCommandExecuted((event) => {
-            if (event.type === CommandType.MUTATION) mutations.push(event.id);
-        });
-        onTestFinished(() => subscription.dispose());
-        const collaborationMutations: string[] = [];
-        const collaboration = commands.onMutationExecutedForCollab((event) => collaborationMutations.push(event.id));
-        onTestFinished(() => collaboration.dispose());
-        expect(await commands.executeCommand(command.id, { ...params, unitId: 'test', subUnitId: 'chart' })).toBe(false);
-        expect(collaborationMutations).toEqual([]);
-        expect(workbook.getSheetBySheetId('chart')!.getSnapshot()).toEqual(before);
-        expect(mutations).toEqual([]);
-        expect(get(IUndoRedoService).getUndoRedoStatus('test').undos).toBe(0);
-    });
-
-    it('refuses implicit active Chart Sheet command targets while the generic target and active-sheet Facade remain available', () => {
-        const { commands, workbook, facade } = createBed();
-        workbook.setActiveSheet(workbook.getSheetBySheetId('chart')!);
-        expect(facade.getActiveSheet().getSheetId()).toBe('chart');
-        expect(commands.syncExecuteCommand(SetRangeValuesCommand.id, {
-            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
-            value: 'blocked',
-        })).toBe(false);
-        expect(commands.syncExecuteCommand(SetStyleCommand.id, { style: { type: 'fs', value: 18 } })).toBe(false);
-        expect(workbook.getActiveSheet()!.getCell(0, 0)).toBeUndefined();
-    });
-
-    it.each(['chart-source', 'chart-destination'])('rejects cross-sheet grid moves with %s before source or destination changes', async (direction) => {
-        const { commands, workbook, get } = createBed();
-        const before = Tools.deepClone(workbook.getSnapshot());
-        expect(await commands.executeCommand(MoveRangeCommand.id, {
-            fromUnitId: 'test',
-            toUnitId: 'test',
-            fromSubUnitId: direction === 'chart-source' ? 'chart' : 'grid',
-            toSubUnitId: direction === 'chart-source' ? 'grid' : 'chart',
-            fromRange: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
-            toRange: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
-        })).toBe(false);
-        expect(workbook.getSnapshot()).toEqual(before);
-        expect(get(IUndoRedoService).getUndoRedoStatus('test').undos).toBe(0);
-    });
-
-    it('keeps omitted-type GRID commands, canonical mutations and undo/redo working', async () => {
-        const { commands, facade, workbook } = createBed();
-        const grid = facade.getSheetBySheetId('grid')!;
-        grid.getRange('A1').setValue('new');
-        expect(grid.getRange('A1').getValue()).toBe('new');
-        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
-        expect(grid.getRange('A1').getValue()).toBe('source');
-        expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
-        expect(grid.getRange('A1').getValue()).toBe('new');
-        expect(commands.syncExecuteCommand(SetRangeValuesMutation.id, {
-            unitId: 'test',
-            subUnitId: 'grid',
-            cellValue: { 0: { 0: { v: 'historical replay' } } },
-        })).toBe(true);
-        expect(workbook.getSheetBySheetId('grid')!.getCell(0, 0)?.v).toBe('historical replay');
-    });
-
-    it('allows Chart Sheet name, tab color, visibility and order metadata actions', async () => {
-        const { chart, commands, workbook } = createBed();
-        chart.setName('Renamed chart').setTabColor('#ff0000').hideSheet().showSheet();
-        expect(await commands.executeCommand(SetWorksheetOrderCommand.id, { unitId: 'test', subUnitId: 'chart', order: 0 })).toBe(true);
-        const config = workbook.getSheetBySheetId('chart')!.getConfig();
-        expect(config.name).toBe('Renamed chart');
-        expect(config.tabColor).toBe('#ff0000');
-        expect(config.hidden).toBe(WorksheetHiddenState.VISIBLE);
-        expect(workbook.getSheetIndex(workbook.getSheetBySheetId('chart')!)).toBe(0);
-    });
-
-    it.each([
-        ['insert rows', Dimension.ROWS, true],
-        ['insert columns', Dimension.COLUMNS, true],
-        ['delete rows', Dimension.ROWS, false],
-        ['delete columns', Dimension.COLUMNS, false],
-    ])('keeps explicit Chart Sheet %s from redirecting edits to the active GRID', async (_name, dimension, insert) => {
-        const { chart, commands, workbook, get } = createBed();
-        const before = Tools.deepClone(workbook.getSnapshot());
-        const command = insert
-            ? (dimension === Dimension.ROWS ? InsertRangeMoveDownCommand : InsertRangeMoveRightCommand)
-            : (dimension === Dimension.ROWS ? DeleteRangeMoveUpCommand : DeleteRangeMoveLeftCommand);
-        const completed = new Promise<void>((complete) => {
-            const subscription = commands.onCommandExecuted((event) => {
-                if (event.id === command.id) {
-                    complete();
-                }
-            });
-            onTestFinished(() => subscription.dispose());
-        });
-        const range = chart.getRange('A1');
-        if (insert) {
-            range.insertCells(dimension);
-        } else {
-            range.deleteCells(dimension);
-        }
-        await completed;
-        expect(workbook.getSnapshot()).toEqual(before);
-        expect(get(IUndoRedoService).getUndoRedoStatus('test').undos).toBe(0);
-    });
-
-    it('routes new Facade range inserts to the explicit nonactive GRID and retains undo/redo ownership', async () => {
-        const { facade, commands, workbook } = createBed();
-        const other = facade.getSheetBySheetId('other-grid')!;
-        other.getRange('A1').setValue('other source');
-        let emittedTarget: object | undefined;
-        const completed = new Promise<void>((complete) => {
-            const subscription = commands.onCommandExecuted((event) => {
-                if (event.id === InsertRangeMoveDownCommand.id) {
-                    emittedTarget = event.params;
-                    complete();
-                }
-            });
-            onTestFinished(() => subscription.dispose());
-        });
-        other.getRange('A1').insertCells(Dimension.ROWS);
-        await completed;
-        expect(emittedTarget).toMatchObject({ unitId: 'test', subUnitId: 'other-grid' });
-        expect(other.getRange('A2').getValue()).toBe('other source');
-        expect(workbook.getSheetBySheetId('grid')!.getCell(0, 0)?.v).toBe('source');
-        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
-        expect(other.getRange('A1').getValue()).toBe('other source');
-        expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
-        expect(other.getRange('A2').getValue()).toBe('other source');
-    });
-
-    it('replays historical range commands with omitted targets on active GRID and retains their undo/redo', async () => {
-        const { commands, facade } = createBed();
-        const grid = facade.getSheetBySheetId('grid')!;
-        expect(await commands.executeCommand(InsertRangeMoveDownCommand.id, {
-            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
-        })).toBe(true);
-        expect(grid.getRange('A2').getValue()).toBe('source');
-        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
-        expect(grid.getRange('A1').getValue()).toBe('source');
-        expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
-        expect(grid.getRange('A2').getValue()).toBe('source');
-    });
-
-    it('checks the saved Refill target when a different GRID is active and leaves filling state unchanged on rejection', async () => {
-        const { commands, get, workbook } = createBed();
-        const service = get(IAutoFillService);
-        service.autoFillLocation = {
-            unitId: 'test',
-            subUnitId: 'chart',
-            source: { rows: [0], cols: [0] },
-            target: { rows: [1], cols: [0] },
-        };
-        const before = Tools.deepClone(workbook.getSnapshot());
-        const applyType = service.applyType;
-        expect(await commands.executeCommand(RefillCommand.id, { type: AUTO_FILL_APPLY_TYPE.NO_FORMAT })).toBe(false);
-        expect(service.applyType).toBe(applyType);
-        expect(workbook.getSnapshot()).toEqual(before);
-    });
-
-    it('rechecks the actual implicit move target after an asynchronous interceptor changes the active sheet', async () => {
-        const { commands, workbook, get } = createBed();
-        let resume: ((value: boolean) => void) | undefined;
-        const registration = get(SheetInterceptorService).interceptBeforeCommand({
-            performCheck: (info) => info.id === MoveRangeCommand.id
-                ? new Promise<boolean>((complete) => { resume = complete; })
-                : Promise.resolve(true),
-        });
-        onTestFinished(() => registration.dispose());
-        const result = commands.executeCommand(MoveRangeCommand.id, {
-            fromRange: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
-            toRange: { startRow: 1, endRow: 1, startColumn: 0, endColumn: 0 },
-        });
-        expect(resume).toBeDefined();
-        workbook.setActiveSheet(workbook.getSheetBySheetId('chart')!);
-        const before = Tools.deepClone(workbook.getSnapshot());
-        resume!(true);
-        expect(await result).toBe(false);
-        expect(workbook.getSnapshot()).toEqual(before);
-        expect(get(IUndoRedoService).getUndoRedoStatus('test').undos).toBe(0);
-    });
-
-    it('rejects a Chart Sheet border edit before changing the shared border settings', () => {
-        const { commands, get } = createBed();
-        const manager = get(BorderStyleManagerService);
-        const before = { ...manager.getBorderInfo() };
-        expect(commands.syncExecuteCommand(SetBorderBasicCommand.id, {
-            unitId: 'test',
-            subUnitId: 'chart',
-            ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
-            value: { type: BorderType.TOP, color: '#ff0000', style: BorderStyleTypes.DOUBLE, activeBorderType: true },
-        })).toBe(false);
-        expect(manager.getBorderInfo()).toEqual(before);
-    });
-
-    it.each([
-        ['position', SetBorderPositionCommand, { value: BorderType.TOP }],
-        ['style', SetBorderStyleCommand, { value: BorderStyleTypes.DOUBLE }],
-        ['color', SetBorderColorCommand, { value: '#ff0000' }],
-    ])('rejects the implicit Chart Sheet border %s entry before changing shared settings', (_name, command, params) => {
-        const { commands, get, workbook } = createBed();
-        workbook.setActiveSheet(workbook.getSheetBySheetId('chart')!);
-        const manager = get(BorderStyleManagerService);
-        const settings = { ...manager.getBorderInfo() };
-        const snapshot = Tools.deepClone(workbook.getSnapshot());
-        expect(commands.syncExecuteCommand(command.id, params)).toBe(false);
-        expect(manager.getBorderInfo()).toEqual(settings);
-        expect(workbook.getSnapshot()).toEqual(snapshot);
-        expect(get(IUndoRedoService).getUndoRedoStatus('test').undos).toBe(0);
-    });
-
-    it('retains historic mutation replay but refuses a new rich-text checkbox write to the Chart Sheet', () => {
-        const { commands, workbook, get } = createBed();
-        expect(commands.syncExecuteCommand(SetRangeValuesMutation.id, {
-            unitId: 'test',
-            subUnitId: 'chart',
-            cellValue: { 0: { 0: { p: {
-                id: 'historical-checklist',
-                documentStyle: {},
-                body: {
-                    dataStream: 'Alpha\rBeta\r\n',
-                    paragraphs: [
-                        { startIndex: 5, paragraphId: 'first' },
-                        { startIndex: 10, paragraphId: 'second', bullet: {
-                            listId: 'checklist',
-                            listType: PresetListType.CHECK_LIST,
-                            nestingLevel: 0,
-                        } },
-                    ],
-                },
-            } } } },
-        })).toBe(true);
-        const before = Tools.deepClone(workbook.getSheetBySheetId('chart')!.getSnapshot());
-        expect(commands.syncExecuteCommand(ToggleCellCheckboxCommand.id, {
-            unitId: 'test',
-            subUnitId: 'chart',
-            row: 0,
-            col: 0,
-            paragraphIndex: 10,
-        })).toBe(false);
-        expect(workbook.getSheetBySheetId('chart')!.getSnapshot()).toEqual(before);
-        expect(get(IUndoRedoService).getUndoRedoStatus('test').undos).toBe(0);
     });
 });

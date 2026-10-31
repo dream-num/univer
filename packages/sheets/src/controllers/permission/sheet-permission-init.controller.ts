@@ -30,7 +30,7 @@ import { defaultWorksheetPermissionPoint, getAllWorksheetPermissionPoint, getAll
 import { baseProtectionActions, getAllRangePermissionPoint } from '../../services/permission/range-permission/util';
 import { defaultWorkbookPermissionPoints, getAllWorkbookPermissionPoint } from '../../services/permission/workbook-permission';
 import { WorkbookPermissionService } from '../../services/permission/workbook-permission/workbook-permission.service';
-import { WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '../../services/permission/worksheet-permission';
+import { WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '../../services/permission/worksheet-permission';
 
 export class SheetPermissionInitController extends Disposable {
     constructor(
@@ -41,7 +41,6 @@ export class SheetPermissionInitController extends Disposable {
         @Inject(WorksheetProtectionRuleModel) private _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
         @Inject(UserManagerService) private _userManagerService: UserManagerService,
         @Inject(WorksheetProtectionPointModel) private _worksheetProtectionPointRuleModel: WorksheetProtectionPointModel,
-        @Inject(WorksheetPermissionService) private _worksheetPermissionService: WorksheetPermissionService,
         @Inject(WorkbookPermissionService) private _workbookPermissionService: WorkbookPermissionService,
         @Inject(IUndoRedoService) private _undoRedoService: IUndoRedoService,
         @Inject(ICommandService) private _commandService: ICommandService
@@ -373,7 +372,7 @@ export class SheetPermissionInitController extends Disposable {
                             if (_map.has(instance.id)) {
                                 instance = _map.get(instance.id) as any;
                             }
-                            this._worksheetPermissionService.addWorksheetPermissionPoint(instance);
+                            this._permissionService.addPermissionPoint(instance);
                         });
 
                         const ruleList = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId);

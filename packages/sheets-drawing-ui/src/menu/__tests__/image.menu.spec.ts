@@ -15,7 +15,7 @@
  */
 
 import { IPermissionService } from '@univerjs/core';
-import { WorksheetEditPermission, WorksheetPermissionService } from '@univerjs/sheets';
+import { WorksheetEditPermission } from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
 import { createChartDrawingTestBed } from '../../__tests__/chart-drawing-test-bed';
 import { ImageMenuFactory, UploadCellImageMenuFactory, UploadFloatImageMenuFactory } from '../image.menu';
@@ -44,7 +44,7 @@ describe('Chart image menu permission consumers', () => {
         expect(values).toEqual([true]);
         const point = new WorksheetEditPermission('test', 'chart');
         point.value = false;
-        expect(bed.get(WorksheetPermissionService).addWorksheetPermissionPoint(point)).toBe(true);
+        expect(bed.get(IPermissionService).addPermissionPoint(point)).toBe(true);
         expect(values[values.length - 1]).toBe(true);
         bed.get(IPermissionService).updatePermissionPoint(point.id, true);
         expect(values[values.length - 1]).toBe(false);

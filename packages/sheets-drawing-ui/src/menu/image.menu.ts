@@ -30,6 +30,13 @@ import { InsertCellImageCommand, InsertFloatImageCommand } from '../commands/com
 
 export const SHEETS_IMAGE_MENU_ID = 'sheet.menu.image';
 
+/**
+ * GRID (including an omitted sheet type): the image submenu and both insertion items follow
+ * the shared range-menu rules for editor/drawing focus and workbook, worksheet and range permissions.
+ * CHART: cell-image insertion is always disabled because there are no cells; the image submenu
+ * and floating-image insertion only require workbook and worksheet edit permissions, with no range checks.
+ * Other sheet types, or no active sheet, disable all three menus.
+ */
 function getImageMenuDisabled$(accessor: IAccessor, floating: boolean) {
     return deriveStateFromActiveSheet$(accessor.get(IUniverInstanceService), true, ({ workbook, worksheet }) => {
         if ((worksheet.getConfig().type ?? SheetTypes.GRID) === SheetTypes.GRID) {

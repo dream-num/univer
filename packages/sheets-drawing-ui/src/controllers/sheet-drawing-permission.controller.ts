@@ -16,12 +16,20 @@
 
 import type { Workbook, Worksheet } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
+import type {
+    IInsertSheetDrawingCommandParams,
+    IRemoveSheetDrawingCommandParams,
+    ISetDrawingArrangeCommandParams,
+    ISetDrawingCommandParams,
+} from '@univerjs/sheets-drawing';
 import {
     Disposable,
     ICommandService,
     Inject,
     IPermissionService,
     IUniverInstanceService,
+    LocaleService,
+    SheetTypes,
     UniverInstanceType,
     UserManagerService,
 } from '@univerjs/core';
@@ -33,9 +41,17 @@ import {
     WorksheetEditPermission,
     WorksheetViewPermission,
 } from '@univerjs/sheets';
-import { ISheetDrawingService } from '@univerjs/sheets-drawing';
+import {
+    InsertSheetDrawingCommand,
+    ISheetDrawingService,
+    RemoveSheetDrawingCommand,
+    SetDrawingArrangeCommand,
+    SetSheetDrawingCommand,
+    SetSheetDrawingPlacementCommand,
+} from '@univerjs/sheets-drawing';
 import { combineLatest, distinctUntilChanged, EMPTY, map, switchMap, tap } from 'rxjs';
 import type { IFlipSheetDrawingCommandParams } from '../commands/commands/flip-drawings.command';
+import type { LocaleKey } from '../locale/types';
 import { FlipSheetDrawingCommand } from '../commands/commands/flip-drawings.command';
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
@@ -50,6 +66,7 @@ const drawingObjectTypes = [
 export class SheetDrawingPermissionController extends Disposable {
     constructor(
         @Inject(ICommandService) private _commandService: ICommandService,
+        @Inject(LocaleService) private _localeService: LocaleService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IPermissionService private readonly _permissionService: IPermissionService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -63,6 +80,7 @@ export class SheetDrawingPermissionController extends Disposable {
         this._initViewPermissionChange();
         this._initEditPermissionChange();
         this._initCommandPermissionCheck();
+        this._initChartSheetCommandPermissionCheck();
     }
 
     private _initDrawingVisible() {
@@ -421,23 +439,90 @@ export class SheetDrawingPermissionController extends Disposable {
         );
     }
 
+    private _initChartSheetCommandPermissionCheck(): void {
+        this.disposeWithMe(this._commandService.beforeCommandExecuted((command) => {
+            if (command.id === GroupSheetDrawingCommand.id || command.id === UngroupSheetDrawingCommand.id) {
+                for (const group of (command.params as IDrawingGroupUpdateParam[] | undefined) ?? []) {
+                    this._checkChartSheetEditPermission(group.parent.unitId, group.parent.subUnitId);
+                    for (const child of group.children) {
+                        this._checkChartSheetEditPermission(child.unitId, child.subUnitId);
+                    }
+                }
+                return;
+            }
+            if (command.id === FlipSheetDrawingCommand.id) {
+                const params = command.params as IFlipSheetDrawingCommandParams | undefined;
+                for (const drawing of params?.drawings ?? []) {
+                    this._checkChartSheetEditPermission(drawing.unitId, drawing.subUnitId);
+                }
+            }
+        }));
+    }
+
+    private _checkChartSheetEditPermission(unitId: string, subUnitId: string): void {
+        const worksheet = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
+            ?.getSheetBySheetId(subUnitId);
+        if (worksheet?.getConfig().type !== SheetTypes.CHART) {
+            return;
+        }
+        if (!this._sheetPermissionCheckController.permissionCheckWithoutRange({
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission],
+        }, unitId, subUnitId)) {
+            this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t<LocaleKey>('sheets-drawing-ui.permission.dialog.editErr'));
+        }
+    }
+
     private _initCommandPermissionCheck() {
         this.disposeWithMe(
             this._commandService.beforeCommandExecuted((command) => {
-                if (command.id === GroupSheetDrawingCommand.id || command.id === UngroupSheetDrawingCommand.id) {
-                    for (const group of (command.params as IDrawingGroupUpdateParam[] | undefined) ?? []) {
-                        this._sheetPermissionCheckController.assertWorksheetEditable(group.parent.unitId, group.parent.subUnitId);
-                        for (const child of group.children) {
-                            this._sheetPermissionCheckController.assertWorksheetEditable(child.unitId, child.subUnitId);
-                        }
-                    }
-                } else if (command.id === FlipSheetDrawingCommand.id) {
-                    const params = command.params as IFlipSheetDrawingCommandParams | undefined;
-                    for (const drawing of params?.drawings ?? []) {
-                        this._sheetPermissionCheckController.assertWorksheetEditable(drawing.unitId, drawing.subUnitId);
-                    }
+                let unitId: string | undefined;
+                let subUnitId: string | undefined;
+
+                if (command.id === InsertSheetDrawingCommand.id || command.id === RemoveSheetDrawingCommand.id || command.id === SetSheetDrawingCommand.id) {
+                    const params = command.params as IInsertSheetDrawingCommandParams | IRemoveSheetDrawingCommandParams | ISetDrawingCommandParams;
+                    const { drawings } = params;
+                    unitId = drawings?.[0]?.unitId;
+                    subUnitId = drawings?.[0]?.subUnitId;
+                } else if (command.id === SetSheetDrawingPlacementCommand.id) {
+                    const target = getPlacementCommandTarget(command.params);
+                    unitId = target.unitId;
+                    subUnitId = target.subUnitId;
+                } else if (command.id === SetDrawingArrangeCommand.id) {
+                    const params = command.params as ISetDrawingArrangeCommandParams;
+                    unitId = params.unitId;
+                    subUnitId = params.subUnitId;
+                }
+
+                if (!unitId || !subUnitId) {
+                    return;
+                }
+
+                const permission = this._sheetPermissionCheckController.permissionCheckWithoutRange({
+                    workbookTypes: [WorkbookEditablePermission],
+                    worksheetTypes: [WorksheetEditPermission],
+                }, unitId, subUnitId);
+                if (!permission) {
+                    this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t<LocaleKey>('sheets-drawing-ui.permission.dialog.editErr'));
                 }
             })
         );
     }
+}
+
+function getPlacementCommandTarget(params: object | undefined): {
+    unitId?: string;
+    subUnitId?: string;
+} {
+    if (!params) {
+        return {};
+    }
+
+    const unitId = 'unitId' in params && typeof params.unitId === 'string'
+        ? params.unitId
+        : undefined;
+    const subUnitId = 'subUnitId' in params && typeof params.subUnitId === 'string'
+        ? params.subUnitId
+        : undefined;
+    return { unitId, subUnitId };
 }

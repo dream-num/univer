@@ -16,7 +16,7 @@
 
 // @vitest-environment jsdom
 
-import type { EmbedRuntimeFocusCoordinator } from '../../../services/sheet-embed-integration.service';
+import type { IWorkbookData, Workbook } from '@univerjs/core';
 import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     FOCUSING_FX_BAR_EDITOR,
@@ -25,13 +25,16 @@ import {
     IContextService,
     Injector,
     IUniverInstanceService,
+    Univer,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { ClearSelectionFormatCommand, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { DISABLE_AUTO_FOCUS_KEY, IPlatformService, PlatformService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
+import type { EmbedRuntimeFocusCoordinator } from '../../../services/sheet-embed-integration.service';
 import { SetZoomRatioCommand } from '../../../commands/commands/set-zoom-ratio.command';
 import { SetActivateCellEditOperation } from '../../../commands/operations/activate-cell-edit.operation';
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
@@ -108,13 +111,13 @@ function createController(options?: {
         getViewport: vi.fn((key: string) => key === SHEET_VIEWPORT_KEY.VIEW_MAIN ? viewportMain : null),
     };
     const engine = { width: 800, height: 600 };
-    const worksheet = { getSheetId: vi.fn(() => 'sheet-1') };
-    const workbook = {
-        getUnitId: vi.fn(() => 'unit-1'),
-        getActiveSheet: vi.fn(() => worksheet),
-        getCurrentUnitOfType: vi.fn(() => null as any),
-    };
-    workbook.getCurrentUnitOfType.mockReturnValue(workbook as any);
+    const univer = new Univer();
+    onTestFinished(() => univer.dispose());
+    const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+        id: 'unit-1',
+        sheetOrder: ['sheet-1'],
+        sheets: { 'sheet-1': { id: 'sheet-1', rowCount: 20, columnCount: 20 } },
+    });
     const commandService = createCommandService();
     const contextValues = new Map<string, unknown>([
         [FOCUSING_SHEET, options?.focusingSheet ?? true],
@@ -242,6 +245,7 @@ function createController(options?: {
         },
         refreshEditorPosition: () => editorBridgeRenderController.refreshEditorPosition(),
     };
+    onTestFinished(() => controller.dispose());
     workbook$.next(workbook);
 
     return {
@@ -566,7 +570,7 @@ describe('DesktopCellEditRenderController integration with the editor bridge', (
         });
 
         normal.commandService.syncExecuteCommand.mockClear();
-        normal.commandService.emitBefore({ id: SetWorksheetActiveOperation.id });
+        normal.commandService.emitBefore({ id: SetWorksheetActiveOperation.id, params: { unitId: 'unit-1', subUnitId: 'sheet-1' } });
         expect(normal.commandService.syncExecuteCommand).toHaveBeenCalledWith(SetCellEditVisibleOperation.id, {
             visible: false,
             eventType: DeviceInputEventType.PointerDown,
@@ -574,7 +578,7 @@ describe('DesktopCellEditRenderController integration with the editor bridge', (
         });
 
         normal.commandService.syncExecuteCommand.mockClear();
-        normal.commandService.emitBefore({ id: SetWorksheetActiveOperation.id }, { fromCollab: true });
+        normal.commandService.emitBefore({ id: SetWorksheetActiveOperation.id, params: { unitId: 'unit-1', subUnitId: 'sheet-1' } }, { fromCollab: true });
         expect(normal.commandService.syncExecuteCommand).not.toHaveBeenCalled();
 
         normal.controller.dispose();
@@ -693,7 +697,7 @@ describe('DesktopCellEditRenderController integration with the editor bridge', (
             },
         });
 
-        normal.commandService.emitBefore({ id: SetWorksheetActiveOperation.id });
+        normal.commandService.emitBefore({ id: SetWorksheetActiveOperation.id, params: { unitId: 'unit-1', subUnitId: 'sheet-1' } });
 
         expect(normal.commandService.syncExecuteCommand).not.toHaveBeenCalled();
 

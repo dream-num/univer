@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-import { FOCUSING_SHEET, ICommandService } from '@univerjs/core';
-import { RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import type { IWheelEvent } from '@univerjs/engine-render';
+import { Direction, FOCUSING_SHEET, ICommandService } from '@univerjs/core';
+import { IRenderManagerService, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { SetSelectionsOperation } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
+import { ExpandSelectionCommand } from '../../../commands/commands/set-selection.command';
+import { SetScrollOperation } from '../../../commands/operations/scroll.operation';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
+import { SheetSelectionRenderService } from '../../../services/selection/selection-render.service';
 import { SheetsScrollRenderController } from '../scroll.render-controller';
+import { createChartRenderTestBed } from './chart-render-test-bed';
 import { createRenderTestBed } from './render-test-bed';
 
 function createScrollManagerServiceMock() {
@@ -425,5 +431,95 @@ describe('SheetsScrollRenderController', () => {
         expect(scrolled).toBe(true);
 
         void controller;
+    });
+});
+
+describe('Chart viewport scrolling with real providers', () => {
+    it('uses page pixels, refuses cell scroll and cancels pending Grid wheel and animation across hosts', () => {
+        const { render, manager, activate, commands } = createChartRenderTestBed([
+            [SheetScrollManagerService],
+            [SheetsScrollRenderController],
+        ]);
+        commands.registerCommand(ScrollCommand);
+        commands.registerCommand(SetScrollRelativeCommand);
+        commands.registerCommand(SetScrollOperation);
+        const service = render.with(SheetsScrollRenderController);
+        const scrollManager = render.with(SheetScrollManagerService);
+        const main = render.scene.getMainViewport();
+        const wheel = { deltaX: 0, deltaY: 100, preventDefault: () => {}, ctrlKey: false, shiftKey: false } as IWheelEvent;
+        const callbacks: FrameRequestCallback[] = [];
+        const scheduler = vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((callback) => {
+            callbacks.push(callback);
+            return callbacks.length;
+        });
+        onTestFinished(() => scheduler.mockRestore());
+        render.scene.onMouseWheel$.emitEvent(wheel);
+        service._smoothScrollToViewportPos({ viewportMain: main, viewportScrollX: 400, viewportScrollY: 400, duration: 200 });
+        activate('chart');
+        expect(scrollManager.getCurrentScrollState()).toEqual({ sheetViewStartRow: 0, sheetViewStartColumn: 0, offsetX: 0, offsetY: 0 });
+        expect(main.scrollAnimationFrameId).toBeNull();
+        render.scene.transformByState({ width: 2000, height: 2000 });
+        callbacks.forEach((callback) => callback(performance.now() + 300));
+        scheduler.mockRestore();
+        vi.advanceTimersByTime(300);
+        expect(main.viewportScrollY).toBe(0);
+        expect(service.scrollToCell(5, 5)).toBe(false);
+        expect(service.scrollToRange({ startRow: 5, endRow: 5, startColumn: 5, endColumn: 5 })).toBe(false);
+        render.scene.onMouseWheel$.emitEvent(wheel);
+        vi.advanceTimersByTime(20);
+        expect(main.viewportScrollY).toBe(100);
+        expect(scrollManager.getCurrentScrollState()).toEqual({ sheetViewStartRow: 0, sheetViewStartColumn: 0, offsetX: 0, offsetY: 0 });
+        expect(manager.getCurrentSkeleton()).toBeUndefined();
+        activate('grid');
+        expect(service.scrollToCell(5, 5)).toBe(true);
+        expect(scrollManager.getCurrentScrollState()).toMatchObject({ sheetViewStartRow: 3, sheetViewStartColumn: 3 });
+    });
+});
+
+describe('Deferred Chart scroll isolation', () => {
+    it('discards a Grid selection expansion when its host was left before the deferred scroll', async () => {
+        const { render, activate, commands, workbook } = createChartRenderTestBed([
+            [SheetScrollManagerService],
+            [SheetsScrollRenderController],
+            [SheetSelectionRenderService],
+        ]);
+        commands.registerCommand(ExpandSelectionCommand);
+        commands.registerCommand(ScrollCommand);
+        commands.registerCommand(SetScrollOperation);
+        commands.syncExecuteCommand(SetSelectionsOperation.id, {
+            unitId: workbook.getUnitId(),
+            subUnitId: 'grid',
+            selections: [{ range: { startRow: 39, endRow: 39, startColumn: 0, endColumn: 0 }, primary: workbook.getActiveSheet().getCellInfoInMergeData(39, 0) }],
+        });
+        expect(await commands.executeCommand(ExpandSelectionCommand.id, { direction: Direction.DOWN })).toBe(true);
+        activate('chart');
+        activate('grid');
+        render.with(SheetsScrollRenderController).scrollToCell(2, 2);
+        const main = render.scene.getMainViewport();
+        expect(main.viewportScrollY).toBe(0);
+        vi.advanceTimersByTime(1);
+        expect(main.viewportScrollY).toBe(0);
+    });
+});
+
+describe('Chart scroll lifecycle disposal', () => {
+    it('discards already-dequeued viewport callbacks after disposing the real render unit', () => {
+        const { render, injector, workbook } = createChartRenderTestBed([
+            [SheetScrollManagerService],
+            [SheetsScrollRenderController],
+        ]);
+        const callbacks: FrameRequestCallback[] = [];
+        const scheduler = vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((callback) => {
+            callbacks.push(callback);
+            return callbacks.length;
+        });
+        onTestFinished(() => scheduler.mockRestore());
+        const main = render.scene.getMainViewport();
+        render.scene.onMouseWheel$.emitEvent({ deltaY: 100, deltaX: 0, preventDefault: () => {} } as IWheelEvent);
+        render.with(SheetsScrollRenderController)._smoothScrollToViewportPos({ viewportMain: main, viewportScrollX: 400, viewportScrollY: 400, duration: 200 });
+        const before = main.viewportScrollY;
+        injector.get(IRenderManagerService).removeRender(workbook.getUnitId());
+        expect(() => callbacks.forEach((callback) => callback(performance.now() + 300))).not.toThrow();
+        expect(main.viewportScrollY).toBe(before);
     });
 });

@@ -18,6 +18,7 @@ import type { IGroupBaseBound, ITransformState } from '@univerjs/core';
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ICellOverGridPosition } from '@univerjs/sheets';
 import { DrawingTypeEnum } from '@univerjs/core';
+import { getGroupState, Transform, Vector2 } from '@univerjs/engine-render';
 import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute } from '@univerjs/sheets';
 import type {
     ISheetDrawing,
@@ -163,6 +164,52 @@ export function applySheetDrawingPlacement(
     const placement = normalizePlacement(input, skeleton, requiresArea);
 
     return resolveSheetDrawingPlacement(drawing, placement, skeleton);
+}
+
+/** Place a batch at the logical start corner of a Chart Sheet, preserving its relative geometry. */
+export function transformDrawingsToChartSheet(
+    drawings: readonly ISheetDrawing[],
+    chartSheetBounds: IGroupBaseBound,
+    rightToLeft: boolean
+): ISheetDrawing[] | null {
+    if (validateBounds(chartSheetBounds, true)) {
+        return null;
+    }
+    if (!drawings.length) {
+        return [];
+    }
+    const bounds: IGroupBaseBound[] = [];
+    for (const drawing of drawings) {
+        const state = drawing.transform;
+        if (!state || validateBounds(state as IGroupBaseBound, requiresDrawingArea(drawing))
+            || [state.angle, state.skewX, state.skewY, state.scaleX, state.scaleY]
+                .some((value) => value !== undefined && !Number.isFinite(value))) {
+            return null;
+        }
+        const { width = 0, height = 0, angle = 0 } = state;
+        const matrix = Transform.create().composeMatrix(state);
+        if (angle) {
+            // Match the renderer's center rotation, including scale, skew and flips.
+            matrix.rotate(-angle).translate(width / 2, height / 2).rotate(angle).translate(-width / 2, -height / 2);
+        }
+        const box = matrix.makeBoundingBoxFromPoints([
+            new Vector2(0, 0),
+            new Vector2(width, 0),
+            new Vector2(width, height),
+            new Vector2(0, height),
+        ]);
+        bounds.push({ left: box.left!, top: box.top!, width: box.width!, height: box.height! });
+    }
+    const group = getGroupState(0, 0, bounds);
+    const scale = Math.min(1, group.width ? chartSheetBounds.width / group.width : 1, group.height ? chartSheetBounds.height / group.height : 1);
+    const left = rightToLeft ? chartSheetBounds.left + chartSheetBounds.width - group.width * scale : chartSheetBounds.left;
+    return drawings.map((drawing) => applySheetDrawingPlacement(drawing, {
+        kind: SheetDrawingAnchorType.None,
+        left: left + (drawing.transform!.left! - group.left) * scale,
+        top: chartSheetBounds.top + (drawing.transform!.top! - group.top) * scale,
+        width: drawing.transform!.width! * scale,
+        height: drawing.transform!.height! * scale,
+    }));
 }
 
 /** Refresh layout-derived geometry without changing the drawing's anchor semantics. */

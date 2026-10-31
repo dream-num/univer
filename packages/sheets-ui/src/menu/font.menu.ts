@@ -16,7 +16,6 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import type { LocaleKey } from '../locale/types';
 import {
     DEFAULT_STYLES,
     EDITOR_ACTIVATED,
@@ -41,6 +40,7 @@ import {
 } from '@univerjs/sheets';
 import { FONT_SIZE_COMPONENT, FONT_SIZE_LIST, getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
 import {
     SetRangeFontDecreaseCommand,
     SetRangeFontIncreaseCommand,
@@ -104,7 +104,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
         workbookTypes: [WorkbookEditablePermission],
         worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
         rangeTypes: [RangeProtectionPermissionEditPoint],
-    }, true);
+    }, true, true);
 
     return {
         id: SetRangeFontSizeCommand.id,
@@ -130,7 +130,7 @@ export function FontSizeIncreaseMenuItemFactory(accessor: IAccessor): IMenuButto
         workbookTypes: [WorkbookEditablePermission],
         worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
         rangeTypes: [RangeProtectionPermissionEditPoint],
-    }, true);
+    }, true, true);
 
     return {
         id: SetRangeFontIncreaseCommand.id,
@@ -147,7 +147,7 @@ export function FontSizeDecreaseMenuItemFactory(accessor: IAccessor) {
         workbookTypes: [WorkbookEditablePermission],
         worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
         rangeTypes: [RangeProtectionPermissionEditPoint],
-    }, true);
+    }, true, true);
 
     return {
         id: SetRangeFontDecreaseCommand.id,

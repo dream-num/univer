@@ -281,12 +281,14 @@ export function cloneWorksheetData(worksheet: IWorksheetData): IWorksheetData {
     const result: IWorksheetData = {
         // Primitive values - direct copy
         id: worksheet.id,
+        ...(worksheet.type === undefined ? {} : { type: worksheet.type }),
         name: worksheet.name,
         tabColor: worksheet.tabColor,
         hidden: worksheet.hidden,
         rowCount: worksheet.rowCount,
         columnCount: worksheet.columnCount,
         zoomRatio: worksheet.zoomRatio,
+        ...(worksheet.zoomToFit === undefined ? {} : { zoomToFit: worksheet.zoomToFit }),
         scrollTop: worksheet.scrollTop,
         scrollLeft: worksheet.scrollLeft,
         defaultColumnWidth: worksheet.defaultColumnWidth,

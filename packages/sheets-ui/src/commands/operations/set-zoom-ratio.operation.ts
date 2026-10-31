@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import type { IOperation } from '@univerjs/core';
+import type { BooleanNumber, IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsZoomRenderController } from '../../controllers/render-controllers/zoom.render-controller';
 
 export interface ISetZoomRatioOperationParams {
     zoomRatio: number;
+    /** Historical omission remains manual; only CHART consumes this optional view policy. */
+    zoomToFit?: BooleanNumber;
     unitId: string;
     subUnitId: string;
 }
@@ -31,8 +33,10 @@ export const SetZoomRatioOperation: IOperation<ISetZoomRatioOperationParams> = {
     handler: (accessor, params: ISetZoomRatioOperationParams) => {
         const renderManagerService = accessor.get(IRenderManagerService);
         const renderUnit = renderManagerService.getRenderUnitById(params.unitId);
-        if (!renderUnit) return false;
+        if (!renderUnit) {
+            return false;
+        }
 
-        return renderUnit.with(SheetsZoomRenderController).updateZoom(params.subUnitId, params.zoomRatio);
+        return renderUnit.with(SheetsZoomRenderController).updateZoom(params.subUnitId, params.zoomRatio, params.zoomToFit);
     },
 };

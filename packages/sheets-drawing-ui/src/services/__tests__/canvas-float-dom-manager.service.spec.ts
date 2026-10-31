@@ -28,16 +28,32 @@ import {
     LifecycleService,
     LifecycleStages,
     LocaleType,
+    RedoCommand,
+    UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
-import { IRenderManagerService, Rect, SHEET_VIEWPORT_KEY, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { DrawingApplyType, InsertSheetDrawingCommand, ISheetDrawingService, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetSheetDrawingCommand } from '@univerjs/sheets-drawing';
+import { IRenderManagerService, Rect, SHEET_VIEWPORT_KEY, SpreadsheetSkeleton, Vector2 } from '@univerjs/engine-render';
+import {
+    applySheetDrawingPlacement,
+    DrawingApplyType,
+    InsertSheetDrawingCommand,
+    ISheetDrawingService,
+    RemoveSheetDrawingCommand,
+    SetDrawingApplyMutation,
+    SetSheetDrawingCommand,
+    SheetDrawingAnchorType,
+} from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { CanvasFloatDomService } from '@univerjs/ui';
+import { resolveFloatDomLayout } from '@univerjs/ui/views/components/dom/float-dom-layout.ts';
 import { BehaviorSubject, of, Subject } from 'rxjs';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { ICanvasFloatDomInfo, ISheetFloatDomRenderObjectFactoryContext } from '../canvas-float-dom-manager.service';
+import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
+import type {
+    ICanvasFloatDomInfo,
+    ISheetFloatDomRenderObjectFactoryContext,
+} from '../canvas-float-dom-manager.service';
+import { createAbsoluteChart, createChartDrawingTestBed } from '../../__tests__/chart-drawing-test-bed';
 import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
 import {
     applyFloatDomTransformerConfig,
@@ -45,6 +61,7 @@ import {
     calcSheetFloatDomPosition,
     createFloatDomHostClickIntent,
     createFloatDomMoveDragState,
+    EMBED_FLOAT_DRAG_HANDLE_POINTER_DOWN_EVENT,
     isCanvasFloatDomDrawingType,
     resolveFloatDomMoveDragTransform,
     SheetCanvasFloatDomManagerService,
@@ -315,12 +332,11 @@ function findChildObject(object: unknown, key: string): Rect | undefined {
 function createRender(skeleton: SpreadsheetSkeleton, scene: Scene): IRender {
     const sheetSkeletonManager = new TestSheetSkeletonManager(skeleton);
     const sheetSelectionRenderService = new TestSheetSelectionRenderService();
-    const canvasElement = document.createElement('div');
+    const canvasElement = document.createElement('canvas');
     const testScene = scene as unknown as TestRenderScene;
-    canvasElement.dispatchEvent = (event: Event) => {
-        testScene.canvasEvents.push(event.type);
-        return true;
-    };
+    for (const type of ['pointerdown', 'pointermove', 'pointerup', 'wheel']) {
+        canvasElement.addEventListener(type, (event) => testScene.canvasEvents.push(event.type));
+    }
     const activated$ = new BehaviorSubject(true);
 
     return {
@@ -364,52 +380,6 @@ function createScene(viewport: {
 
 function expectLayout(layout: IFloatDomLayout, expected: IFloatDomLayout): void {
     expect(layout).toEqual(expected);
-}
-
-function createService(drawing: unknown) {
-    const dispose = vi.fn();
-    const removeObject = vi.fn();
-    const disposeRenderObject = vi.fn();
-    const transformer = {
-        clearControlByIds: vi.fn(),
-        clearSelectedObjects: vi.fn(),
-    };
-    const renderObject = {
-        id: 'rect-1',
-        oKey: 'rect-1',
-        dispose: disposeRenderObject,
-    };
-    const syncExecuteCommand = vi.fn(() => true);
-    const getDrawingByParam = vi.fn(() => drawing);
-    const getBatchRemoveOp = vi.fn(() => ({
-        unitId: 'unit-1',
-        subUnitId: 'sheet-1',
-        redo: ['redo-op'],
-        objects: ['object-1'],
-    }));
-    const service = Object.create(SheetCanvasFloatDomManagerService.prototype) as any;
-
-    service._domLayerInfoMap = new Map([
-        ['float-dom-1', {
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            dispose: { dispose },
-            rect: renderObject,
-        }],
-    ]);
-    service._drawingManagerService = { getDrawingByParam };
-    service._commandService = { syncExecuteCommand };
-    service._sheetDrawingService = { getBatchRemoveOp };
-    service._getSceneAndTransformerByDrawingSearch = vi.fn(() => ({
-        scene: {
-            getObjectIncludeInGroup: vi.fn(() => renderObject),
-            getTransformer: vi.fn(() => transformer),
-            removeObject,
-        },
-        transformer,
-    }));
-
-    return { service, dispose, disposeRenderObject, removeObject, syncExecuteCommand, getDrawingByParam, getBatchRemoveOp, transformer };
 }
 
 describe('SheetCanvasFloatDomManagerService', () => {
@@ -634,6 +604,16 @@ describe('SheetCanvasFloatDomManagerService', () => {
             rotateEnabled: false,
             resizeEnabled: true,
         }));
+    });
+
+    it('preserves host move and resize restrictions when chart defaults are reapplied', () => {
+        const rect = new Rect('locked-chart');
+        rect.transformerConfig = { moveEnabled: false, resizeEnabled: false };
+        applySheetChartTransformerConfig(rect);
+        applySheetChartTransformerConfig(rect);
+        expect(rect.transformerConfig.moveEnabled).toBe(false);
+        expect(rect.transformerConfig.resizeEnabled).toBe(false);
+        expect(rect.transformerConfig.rotateEnabled).toBe(false);
     });
 
     it('keeps the chart transformer outside the chart frame', () => {
@@ -953,47 +933,25 @@ describe('SheetCanvasFloatDomManagerService', () => {
         });
     });
 
-    it('removes drawing-backed float doms through the shared remove path', () => {
-        const drawing = {
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            drawingId: 'float-dom-1',
-        };
-        const { service, dispose, disposeRenderObject, syncExecuteCommand, getDrawingByParam, getBatchRemoveOp, transformer } = createService(drawing);
-
-        service.removeFloatDom('float-dom-1');
-
-        expect(dispose).toHaveBeenCalledTimes(1);
-        expect(disposeRenderObject).toHaveBeenCalledTimes(1);
-        expect(transformer.clearControlByIds).toHaveBeenCalledWith(['rect-1']);
-        expect(transformer.clearSelectedObjects).toHaveBeenCalledTimes(1);
-        expect(getDrawingByParam).toHaveBeenCalledWith({
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            drawingId: 'float-dom-1',
-        });
-        expect(getBatchRemoveOp).toHaveBeenCalledWith([drawing]);
-        expect(syncExecuteCommand).toHaveBeenCalledWith(SetDrawingApplyMutation.id, {
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            op: ['redo-op'],
-            objects: ['object-1'],
-            type: DrawingApplyType.REMOVE,
-        });
-        expect(service.getFloatDomInfo('float-dom-1')).toBeUndefined();
+    it('removes drawing-backed float doms from both stores and the real scene', () => {
+        const bed = createChartDrawingTestBed(undefined, createAbsoluteChart());
+        const search = { unitId: 'test', subUnitId: 'chart', drawingId: 'child' };
+        bed.manager.removeFloatDom('child');
+        expect(bed.manager.getFloatDomInfo('child')).toBeUndefined();
+        expect(bed.drawings.getDrawingByParam(search)).toBeUndefined();
+        expect(bed.drawingManager.getDrawingByParam(search)).toBeUndefined();
+        expect(bed.render.scene.getObject(getDrawingShapeKeyByDrawingSearch(search))).toBeUndefined();
     });
 
-    it('removes runtime-only float doms directly', () => {
-        const { service, dispose, disposeRenderObject, syncExecuteCommand, transformer } = createService(null);
-
-        service.removeFloatDom('float-dom-1');
-
-        expect(dispose).toHaveBeenCalledTimes(1);
-        expect(disposeRenderObject).toHaveBeenCalledTimes(1);
-        expect(transformer.clearControlByIds).toHaveBeenCalledWith(['rect-1']);
-        expect(transformer.clearSelectedObjects).toHaveBeenCalledTimes(1);
-        expect(syncExecuteCommand).not.toHaveBeenCalled();
-        expect(service.getFloatDomInfo('float-dom-1')).toBeUndefined();
+    it('detaches only the runtime when requested and preserves the real drawing', () => {
+        const bed = createChartDrawingTestBed(undefined, createAbsoluteChart());
+        const search = { unitId: 'test', subUnitId: 'chart', drawingId: 'child' };
+        const before = bed.drawings.getDrawingByParam(search)!;
+        bed.manager.removeFloatDom('child', false);
+        expect(bed.manager.getFloatDomInfo('child')).toBeUndefined();
+        expect(bed.drawings.getDrawingByParam(search)).toEqual(before);
+        expect(bed.drawingManager.getDrawingByParam(search)).toEqual(before);
+        expect(bed.render.scene.getObject(getDrawingShapeKeyByDrawingSearch(search))).toBeUndefined();
     });
 
     afterEach(() => {
@@ -1163,6 +1121,39 @@ describe('SheetCanvasFloatDomManagerService', () => {
                 top: false,
             },
         });
+    });
+
+    it.each(['drawing', 'range', 'column'] as const)('relays canvas wheel cancellation for a %s float DOM', async (kind) => {
+        const fixture = setup();
+        disposables.push(fixture);
+        const canvas = fixture.get(IRenderManagerService).getRenderUnitById('test')!.engine.getCanvasElement();
+        const options = {
+            componentKey: 'WheelCard',
+            initPosition: { startX: 80, startY: 30, endX: 180, endY: 70 },
+        };
+        if (kind === 'drawing') {
+            fixture.manager.addFloatDomToPosition(options, 'wheel-card');
+            await Promise.resolve();
+        } else if (kind === 'range') {
+            fixture.manager.addFloatDomToRange({ startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 }, options, {}, 'wheel-card');
+        } else {
+            fixture.manager.addFloatDomToColumnHeader(1, options, { width: 100, height: 40 }, 'wheel-card');
+        }
+        const layer = findFloatDom(fixture.get(CanvasFloatDomService), 'wheel-card')!;
+        const unconsumed = new WheelEvent('wheel', { deltaY: 1.25, cancelable: true });
+        layer.onWheel(unconsumed);
+        expect(unconsumed.defaultPrevented).toBe(false);
+        const received: WheelEvent[] = [];
+        canvas.addEventListener('wheel', (event) => {
+            received.push(event);
+            event.preventDefault();
+        });
+        const consumed = new WheelEvent('wheel', { deltaY: 1.25, cancelable: true });
+        layer.onWheel(consumed);
+        expect(consumed.defaultPrevented).toBe(true);
+        expect(received).toHaveLength(1);
+        expect(received[0]).not.toBe(consumed);
+        expect(received[0].deltaY).toBe(1.25);
     });
 
     it('adds range and column header float doms to the canvas layer and removes them through their disposables', () => {
@@ -2138,3 +2129,247 @@ function createStage1FloatDomInfo() {
         },
     };
 }
+
+describe('absolute chart consumers with a real no-grid render', () => {
+    it('mounts initialized and late charts, keeps one real picked rect, and follows viewport geometry', () => {
+        const drawing = createAbsoluteChart();
+        drawing.transform = { ...drawing.transform, skewX: 0, skewY: 0, flipX: false };
+        const bed = createChartDrawingTestBed(undefined, drawing);
+        expect(bed.skeletons.getSkeleton('test', 'chart')).toBeUndefined();
+        const info = bed.manager.getFloatDomInfo('child');
+        expect(info).toBeDefined();
+        const viewport = bed.render.scene.getMainViewport();
+        const assertAligned = () => {
+            const point = viewport.getAbsoluteVector(Vector2.FromArray([info!.rect.left, info!.rect.top]));
+            const position = info!.position$.getValue();
+            expect(position.startX).toBeCloseTo(point.x);
+            expect(position.startY).toBeCloseTo(point.y);
+            expect(bed.render.scene.pick(viewport.getAbsoluteVector(Vector2.FromArray([230, 190]))) === info!.rect).toBe(true);
+        };
+        assertAligned();
+        bed.render.scene.transformByState({ scaleX: 1.5, scaleY: 1.5 });
+        viewport.scrollToViewportPos({ viewportScrollX: 20, viewportScrollY: 30 });
+        assertAligned();
+        bed.drawingManager.addNotification([drawing]);
+        expect(bed.manager.getFloatDomInfo('child')!.rect).toBe(info!.rect);
+        expect(bed.commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [createAbsoluteChart('late')] })).toBe(true);
+        expect(bed.manager.getFloatDomInfo('late')).toBeDefined();
+        expect(bed.skeletons.ensureSkeleton('test', 'chart')).toBeUndefined();
+    });
+
+    it('detaches and recreates chart runtimes across frozen GRID and back, then disposes the host', () => {
+        const bed = createChartDrawingTestBed(undefined, createAbsoluteChart());
+        const old = bed.manager.getFloatDomInfo('child');
+        expect(old).toBeDefined();
+        bed.activate('grid');
+        expect(bed.manager.getFloatDomInfo('child')).toBeUndefined();
+        expect(Boolean(findFloatDom(bed.get(CanvasFloatDomService), 'child'))).toBe(false);
+        expect(bed.skeletons.getSkeleton('test', 'grid')).toBeDefined();
+        expect(bed.workbook.getActiveSheet().getSheetId()).toBe('grid');
+        expect(bed.workbook.getActiveSheet().getFreeze()).toEqual({ startRow: 4, startColumn: 4, xSplit: 2, ySplit: 2 });
+        expect(bed.render.with(SheetSkeletonManagerService).getCurrentSkeleton()?.worksheet.getSheetId()).toBe('grid');
+        expect(bed.render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP)!.isActive).toBe(true);
+        expect(bed.render.scene.getMainViewport().left).toBeGreaterThan(0);
+        bed.activate('chart');
+        expect(bed.render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP)!.isActive).toBe(false);
+        expect(bed.render.scene.getMainViewport().left).toBe(0);
+        expect(bed.manager.getFloatDomInfo('child')!.rect).not.toBe(old!.rect);
+        expect(Boolean(findFloatDom(bed.get(CanvasFloatDomService), 'child'))).toBe(true);
+        expect(bed.skeletons.getSkeleton('test', 'chart')).toBeUndefined();
+        bed.renders.removeRender('test');
+        expect(bed.manager.getFloatDomInfo('child')).toBeUndefined();
+        expect(Boolean(findFloatDom(bed.get(CanvasFloatDomService), 'child'))).toBe(false);
+    });
+});
+
+it('commits a real pointer move in viewport coordinates and cancels pending work on object or host removal', async () => {
+    const drawing = createAbsoluteChart();
+    drawing.transform = { ...drawing.transform, angle: 35 };
+    const bed = createChartDrawingTestBed(undefined, drawing);
+    const search = { unitId: 'test', subUnitId: 'chart', drawingId: 'child' };
+    const original = bed.drawings.getDrawingByParam(search)!;
+    bed.render.scene.transformByState({ scaleX: 1.5, scaleY: 1.5 });
+    const viewport = bed.render.scene.getMainViewport();
+    viewport.scrollToViewportPos({ viewportScrollX: 20, viewportScrollY: 30 });
+    const start = viewport.getAbsoluteVector(Vector2.FromArray([180, 160]));
+    const begin = () => document.dispatchEvent(new CustomEvent(EMBED_FLOAT_DRAG_HANDLE_POINTER_DOWN_EVENT, { detail: {
+        hostUnitId: 'test',
+        hostAnchorId: 'child',
+        pointerId: 1,
+        clientX: start.x,
+        clientY: start.y,
+        button: 0,
+    } }));
+    const move = (type: string) => window.dispatchEvent(new PointerEvent(type, { pointerId: 1, clientX: start.x + 60, clientY: start.y + 45 }));
+    begin();
+    move('pointermove');
+    const info = bed.manager.getFloatDomInfo('child')!;
+    expect(info.rect.left).toBeCloseTo(190);
+    expect(info.rect.top).toBeCloseTo(150);
+    move('pointerup');
+    const changed = bed.drawings.getDrawingByParam(search)!;
+    expect(changed.transform).toMatchObject({ ...original.transform, left: 190, top: 150 });
+    expect(bed.drawingManager.getDrawingByParam(search)).toEqual(changed);
+    expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
+    expect(bed.drawings.getDrawingByParam(search)).toEqual(original);
+    expect(await bed.commandService.executeCommand(RedoCommand.id)).toBe(true);
+    expect(bed.drawings.getDrawingByParam(search)).toEqual(changed);
+    const saved = bed.save();
+    begin();
+    bed.activate('grid');
+    move('pointermove');
+    move('pointerup');
+    expect(bed.drawings.getDrawingByParam(search)).toEqual(changed);
+    const position = info.position$.getValue();
+    viewport.scrollToViewportPos({ viewportScrollX: 40, viewportScrollY: 50 });
+    bed.render.engine.resizeBySize(700, 500);
+    expect(info.position$.getValue()).toEqual(position);
+    bed.activate('chart');
+    begin();
+    expect(await bed.commandService.executeCommand(RemoveSheetDrawingCommand.id, { unitId: 'test', drawings: [search] })).toBe(true);
+    move('pointermove');
+    move('pointerup');
+    expect(bed.drawings.getDrawingByParam(search)).toBeUndefined();
+    expect(bed.manager.getFloatDomInfo('child')).toBeUndefined();
+    bed.univer.dispose();
+    const reopened = createChartDrawingTestBed(saved);
+    expect(reopened.drawings.getDrawingByParam(search)).toEqual(changed);
+});
+
+it.each(['manager', 'render', 'unit'])('cancels pending pointer callbacks when the %s is disposed', (owner) => {
+    const bed = createChartDrawingTestBed(undefined, createAbsoluteChart());
+    const search = { unitId: 'test', subUnitId: 'chart', drawingId: 'child' };
+    const initial = bed.drawings.getDrawingByParam(search)!;
+    const info = bed.manager.getFloatDomInfo('child')!;
+    const position = info.position$.getValue();
+    document.dispatchEvent(new CustomEvent(EMBED_FLOAT_DRAG_HANDLE_POINTER_DOWN_EVENT, { detail: {
+        hostUnitId: 'test',
+        hostAnchorId: 'child',
+        pointerId: 1,
+        clientX: 180,
+        clientY: 160,
+        button: 0,
+    } }));
+    if (owner === 'manager') {
+        bed.manager.dispose();
+    } else if (owner === 'render') {
+        bed.renders.removeRender('test');
+    } else {
+        bed.get(IUniverInstanceService).disposeUnit('test');
+    }
+    window.dispatchEvent(new PointerEvent('pointermove', { pointerId: 1, clientX: 300, clientY: 250 }));
+    window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, clientX: 300, clientY: 250 }));
+    vi.advanceTimersByTime(1);
+    expect(bed.manager.getFloatDomInfo('child')).toBeUndefined();
+    expect(Boolean(findFloatDom(bed.get(CanvasFloatDomService), 'child'))).toBe(false);
+    expect(info.position$.getValue()).toEqual(position);
+    if (owner !== 'unit') {
+        expect(bed.drawings.getDrawingByParam(search)).toEqual(initial);
+    }
+});
+
+it.each([90, 30])('keeps the actual DOM wrapper and pointer commit aligned under Scene rotation %s', (sceneAngle) => {
+    const drawing = createAbsoluteChart();
+    drawing.transform = { ...drawing.transform, angle: 20, skewX: 0, skewY: 0, flipX: false };
+    const bed = createChartDrawingTestBed(undefined, drawing);
+    const scene = bed.render.scene;
+    scene.transformByState({ scaleX: 1.5, scaleY: 1.5 });
+    scene.transform = scene.transform.clone().translate(250, 40).rotate(sceneAngle);
+    const viewport = scene.getMainViewport();
+    viewport.scrollToViewportPos({ viewportScrollX: 20, viewportScrollY: 30 });
+    const info = bed.manager.getFloatDomInfo('child')!;
+    const assertWrapper = (centerX: number, centerY: number) => {
+        const position = info.position$.getValue();
+        // The actual chart host uses zero insets; FloatDom rotates this wrapper around its center.
+        const layout = resolveFloatDomLayout(position, { wrapperInset: 0, contentInset: 0 });
+        expect(layout.wrapper.width).toBeCloseTo(300);
+        expect(layout.wrapper.height).toBeCloseTo(210);
+        expect(position.endX - position.startX).toBeCloseTo(300);
+        expect(position.endY - position.startY).toBeCloseTo(210);
+        const center = viewport.getAbsoluteVector(Vector2.FromArray([centerX, centerY]));
+        expect(layout.wrapper.left + layout.wrapper.width / 2).toBeCloseTo(center.x);
+        expect(layout.wrapper.top + layout.wrapper.height / 2).toBeCloseTo(center.y);
+        expect(position.rotate).toBeCloseTo(sceneAngle + 20);
+        expect(scene.pick(center) === info.rect).toBe(true);
+    };
+    assertWrapper(250, 190);
+    const start = viewport.getAbsoluteVector(Vector2.FromArray([250, 190]));
+    const finish = viewport.getAbsoluteVector(Vector2.FromArray([290, 220]));
+    document.dispatchEvent(new CustomEvent(EMBED_FLOAT_DRAG_HANDLE_POINTER_DOWN_EVENT, { detail: {
+        hostUnitId: 'test',
+        hostAnchorId: 'child',
+        pointerId: 1,
+        clientX: start.x,
+        clientY: start.y,
+        button: 0,
+    } }));
+    window.dispatchEvent(new PointerEvent('pointermove', { pointerId: 1, clientX: finish.x, clientY: finish.y }));
+    window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, clientX: finish.x, clientY: finish.y }));
+    const search = { unitId: 'test', subUnitId: 'chart', drawingId: 'child' };
+    const committed = bed.drawings.getDrawingByParam(search)!.transform!;
+    expect(committed).toMatchObject({ width: 200, height: 140, angle: 20 });
+    expect(committed.left).toBeCloseTo(190);
+    expect(committed.top).toBeCloseTo(150);
+    expect(bed.drawingManager.getDrawingByParam(search)).toEqual(bed.drawings.getDrawingByParam(search));
+    assertWrapper(290, 220);
+    expect(bed.skeletons.ensureSkeleton('test', 'chart')).toBeUndefined();
+});
+
+it('applies an owner move constraint before pointerup and commits preview bounds with symmetric history', async () => {
+    const parent = applySheetDrawingPlacement(createAbsoluteChart('parent'), {
+        kind: SheetDrawingAnchorType.None,
+        left: 100,
+        top: 200,
+        width: 300,
+        height: 200,
+    });
+    const child = {
+        ...applySheetDrawingPlacement(createAbsoluteChart('child'), {
+            kind: SheetDrawingAnchorType.None,
+            left: 140,
+            top: 240,
+            width: 100,
+            height: 80,
+        }),
+        drawingType: DrawingTypeEnum.DRAWING_DOM,
+    };
+    child.transform = { ...child.transform, angle: 35 };
+    const bed = createChartDrawingTestBed(undefined, parent);
+    expect(await bed.commandService.executeCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [child] })).toBe(true);
+    const registration = bed.manager.registerMoveTransformConstraint((drawing, transform) => ({
+        ...transform,
+        left: Math.max(100, Math.min(transform.left!, 400 - drawing.transform!.width!)),
+        top: Math.max(200, Math.min(transform.top!, 400 - drawing.transform!.height!)),
+    }));
+    onTestFinished(() => registration.dispose());
+    const search = { unitId: 'test', subUnitId: 'chart', drawingId: 'child' };
+    const original = bed.drawings.getDrawingByParam(search)!;
+    bed.render.scene.transformByState({ scaleX: 1.5, scaleY: 1.5 });
+    const viewport = bed.render.scene.getMainViewport();
+    const start = viewport.getAbsoluteVector(Vector2.FromArray([160, 260]));
+    const finish = viewport.getAbsoluteVector(Vector2.FromArray([470, 470]));
+    document.dispatchEvent(new CustomEvent(EMBED_FLOAT_DRAG_HANDLE_POINTER_DOWN_EVENT, { detail: {
+        hostUnitId: 'test',
+        hostAnchorId: 'child',
+        pointerId: 1,
+        clientX: start.x,
+        clientY: start.y,
+        button: 0,
+    } }));
+
+    window.dispatchEvent(new PointerEvent('pointermove', { pointerId: 1, clientX: finish.x, clientY: finish.y }));
+
+    const rect = bed.manager.getFloatDomInfo('child')!.rect;
+    expect(rect.left).toBeCloseTo(300);
+    expect(rect.top).toBeCloseTo(320);
+    expect(rect.width).toBe(100);
+    expect(rect.height).toBe(80);
+    expect(bed.drawings.getDrawingByParam(search)).toEqual(original);
+    window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, clientX: finish.x, clientY: finish.y }));
+    const changed = bed.drawings.getDrawingByParam(search)!;
+    expect(changed.transform).toMatchObject({ left: 300, top: 320, width: 100, height: 80, angle: 35 });
+    expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
+    expect(bed.drawings.getDrawingByParam(search)).toEqual(original);
+    expect(await bed.commandService.executeCommand(RedoCommand.id)).toBe(true);
+    expect(bed.drawings.getDrawingByParam(search)).toEqual(changed);
+});

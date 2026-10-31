@@ -16,8 +16,7 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import type { LocaleKey } from '../locale/types';
-import { UniverInstanceType } from '@univerjs/core';
+import { IUniverInstanceService, SheetTypes, UniverInstanceType } from '@univerjs/core';
 import {
     RangeProtectionPermissionViewPoint,
     WorksheetFilterPermission,
@@ -29,9 +28,14 @@ import {
     SheetsFilterService,
     SmartToggleSheetsFilterCommand,
 } from '@univerjs/sheets-filter';
-import { getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from '@univerjs/sheets-ui';
+import {
+    deriveStateFromActiveSheet$,
+    getCurrentRangeDisable$,
+    getObservableWithExclusiveRange$,
+} from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { map, of, switchMap } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
 
 export function SmartToggleFilterMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
     const sheetsFilterService = accessor.get(SheetsFilterService);
@@ -43,16 +47,7 @@ export function SmartToggleFilterMenuItemFactory(accessor: IAccessor): IMenuSele
         tooltip: 'sheets-filter-ui.toolbar.smart-toggle-filter-tooltip',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         activated$: sheetsFilterService.activeFilterModel$.pipe(map((model) => !!model)),
-        disabled$: getObservableWithExclusiveRange$(
-            accessor,
-            getCurrentRangeDisable$(
-                accessor,
-                {
-                    worksheetTypes: [WorksheetFilterPermission, WorksheetViewPermission],
-                    rangeTypes: [RangeProtectionPermissionViewPoint],
-                }
-            )
-        ),
+        disabled$: getFilterRangeDisabled$(accessor),
     };
 }
 
@@ -64,9 +59,14 @@ export function ClearFilterCriteriaMenuItemFactory(accessor: IAccessor): IMenuBu
         type: MenuItemType.BUTTON,
         title: 'sheets-filter-ui.toolbar.clear-filter-criteria',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: sheetsFilterService
-            .activeFilterModel$
-            .pipe(switchMap((model) => model?.hasCriteria$.pipe(map((m) => !m)) ?? of(true))),
+        disabled$: deriveStateFromActiveSheet$(accessor.get(IUniverInstanceService), true, ({ worksheet }) => {
+            if (worksheet.getConfig().type === SheetTypes.CHART) {
+                return of(true);
+            }
+            return sheetsFilterService.activeFilterModel$.pipe(
+                switchMap((model) => model?.hasCriteria$.pipe(map((hasCriteria) => !hasCriteria)) ?? of(true))
+            );
+        }),
     };
 }
 
@@ -78,8 +78,23 @@ export function ReCalcFilterMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         type: MenuItemType.BUTTON,
         title: 'sheets-filter-ui.toolbar.re-calc-filter-conditions',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: sheetsFilterService
-            .activeFilterModel$
-            .pipe(switchMap((model) => model?.hasCriteria$.pipe(map((m) => !m)) ?? of(true))),
+        disabled$: deriveStateFromActiveSheet$(accessor.get(IUniverInstanceService), true, ({ worksheet }) => {
+            if (worksheet.getConfig().type === SheetTypes.CHART) {
+                return of(true);
+            }
+            return sheetsFilterService.activeFilterModel$.pipe(
+                switchMap((model) => model?.hasCriteria$.pipe(map((hasCriteria) => !hasCriteria)) ?? of(true))
+            );
+        }),
     };
+}
+
+function getFilterRangeDisabled$(accessor: IAccessor) {
+    return getObservableWithExclusiveRange$(
+        accessor,
+        getCurrentRangeDisable$(accessor, {
+            worksheetTypes: [WorksheetFilterPermission, WorksheetViewPermission],
+            rangeTypes: [RangeProtectionPermissionViewPoint],
+        })
+    );
 }

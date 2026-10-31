@@ -16,12 +16,12 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { UnitAction } from '@univerjs/protocol';
-import type { IAddRangeProtectionMutationParams } from '../../commands/mutations/add-range-protection.mutation';
-import type { IAddWorksheetProtectionParams } from '../../commands/mutations/add-worksheet-protection.mutation';
-import type { ISetWorksheetPermissionPointsMutationParams } from '../../commands/mutations/set-worksheet-permission-points.mutation';
 import { Disposable, IAuthzIoService, ICommandService, Inject, IPermissionService, IUndoRedoService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
 import { skip } from 'rxjs';
+import type { IAddRangeProtectionMutationParams } from '../../commands/mutations/add-range-protection.mutation';
+import type { IAddWorksheetProtectionParams } from '../../commands/mutations/add-worksheet-protection.mutation';
+import type { ISetWorksheetPermissionPointsMutationParams } from '../../commands/mutations/set-worksheet-permission-points.mutation';
 import { AddRangeProtectionMutation } from '../../commands/mutations/add-range-protection.mutation';
 import { AddWorksheetProtectionMutation } from '../../commands/mutations/add-worksheet-protection.mutation';
 import { SetWorksheetPermissionPointsMutation } from '../../commands/mutations/set-worksheet-permission-points.mutation';

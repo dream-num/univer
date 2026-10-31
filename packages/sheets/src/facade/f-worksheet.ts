@@ -37,8 +37,6 @@ import type {
     ISetTextWrapCommandParams,
     IToggleGridlinesCommandParams,
 } from '@univerjs/sheets';
-import type { FDefinedName } from './f-defined-name';
-import type { FWorkbook } from './f-workbook';
 import {
     BooleanNumber,
     covertCellValue,
@@ -91,6 +89,8 @@ import {
     SheetsSelectionsService,
     ToggleGridlinesCommand,
 } from '@univerjs/sheets';
+import type { FDefinedName } from './f-defined-name';
+import type { FWorkbook } from './f-workbook';
 import { SHEETS_CUSTOM_FIELD_WARNING_MESSAGE } from './const';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FRange } from './f-range';

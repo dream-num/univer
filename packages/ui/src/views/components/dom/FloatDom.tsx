@@ -15,10 +15,10 @@
  */
 
 import type { ComponentType, CSSProperties } from 'react';
-import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
 import { DocumentDataModel, IUniverInstanceService } from '@univerjs/core';
 import { memo, useEffect, useMemo, useRef } from 'react';
 import { first } from 'rxjs';
+import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
 import { ComponentManager } from '../../../common/component-manager';
 import { CanvasFloatDomService, shouldForwardFloatDomEvents, shouldRenderFloatDomLayer } from '../../../services/dom/canvas-dom-layer.service';
 import { useDependency, useObservable } from '../../../utils/di';
@@ -90,6 +90,49 @@ function FloatDomSingleContent(props: { layer: IFloatDom; id: string; Component?
         };
     }, [contentInset, layer.position$, wrapperInset]);
 
+    const eventHandlers = useMemo(() => ({
+        wheel: (event: WheelEvent) => layer.onWheel(event),
+        pointermove: (event: PointerEvent) => layer.onPointerMove(event),
+        pointerdown: (event: PointerEvent) => {
+            layer.onPointerDown(event);
+            // Forwarding may replace the descendant before capture is established.
+            if (event.target instanceof Element && event.target.isConnected) {
+                event.target.setPointerCapture?.(event.pointerId);
+            }
+        },
+        pointerup: (event: PointerEvent) => {
+            try {
+                layer.onPointerUp(event);
+            } finally {
+                if (event.target instanceof Element && event.target.hasPointerCapture?.(event.pointerId)) {
+                    event.target.releasePointerCapture?.(event.pointerId);
+                }
+            }
+        },
+    }), [layer]);
+
+    useEffect(() => {
+        const wrapper = domRef.current;
+        if (!forwardEvents || !wrapper || !layer.eventOptions) {
+            return;
+        }
+
+        const cleanups: Array<() => void> = [];
+        const bindEvent = <K extends keyof typeof eventHandlers>(eventName: K) => {
+            const options = layer.eventOptions?.[eventName];
+            if (options === undefined) {
+                return;
+            }
+            const listener = eventHandlers[eventName] as (event: HTMLElementEventMap[K]) => void;
+            wrapper.addEventListener(eventName, listener, options);
+            cleanups.push(() => wrapper.removeEventListener(eventName, listener, options.capture));
+        };
+        for (const eventName of Object.keys(layer.eventOptions) as Array<keyof typeof eventHandlers>) {
+            bindEvent(eventName);
+        }
+        return () => cleanups.forEach((cleanup) => cleanup());
+    }, [forwardEvents, eventHandlers, layer.eventOptions, position]);
+
     const instance = univerInstanceService.getUnit(layer.unitId);
     const docDisabled = instance instanceof DocumentDataModel ? instance.getDisabled() : undefined;
     const component = useMemo(() => Component
@@ -122,50 +165,30 @@ function FloatDomSingleContent(props: { layer: IFloatDom; id: string; Component?
                 overflow: floatDomOverflow.outerOverflow,
                 touchAction: forwardEvents ? 'none' : undefined,
             }}
-            onPointerMove={(e) => {
+            onWheel={(event) => {
+                if (forwardEvents && layer.eventOptions?.wheel === undefined) {
+                    eventHandlers.wheel(event.nativeEvent);
+                }
+            }}
+            onPointerMove={(event) => {
+                if (forwardEvents && layer.eventOptions?.pointermove === undefined) {
+                    eventHandlers.pointermove(event.nativeEvent);
+                }
+            }}
+            onPointerDown={(event) => {
+                if (forwardEvents && layer.eventOptions?.pointerdown === undefined) {
+                    eventHandlers.pointerdown(event.nativeEvent);
+                }
+            }}
+            onPointerUp={(event) => {
+                if (forwardEvents && layer.eventOptions?.pointerup === undefined) {
+                    eventHandlers.pointerup(event.nativeEvent);
+                }
+            }}
+            onPointerCancel={(event) => {
                 if (forwardEvents) {
-                    layer.onPointerMove(e.nativeEvent);
-                }
-            }}
-            onPointerDown={(e) => {
-                if (forwardEvents) {
-                    // Keep pointerup on the original descendant so its activation handler still runs.
-                    if (e.target instanceof Element) {
-                        e.target.setPointerCapture?.(e.pointerId);
-                    }
-                    layer.onPointerDown(e.nativeEvent);
-                }
-            }}
-            onPointerUp={(e) => {
-                if (!forwardEvents) {
-                    return;
-                }
-
-                try {
-                    layer.onPointerUp(e.nativeEvent);
-                } finally {
-                    if (e.target instanceof Element && e.target.hasPointerCapture?.(e.pointerId)) {
-                        e.target.releasePointerCapture?.(e.pointerId);
-                    }
-                }
-            }}
-            onPointerCancel={(e) => {
-                if (!forwardEvents) {
-                    return;
-                }
-
-                try {
-                    // The layer forwards the original event type, so the canvas receives pointercancel rather than pointerup.
-                    layer.onPointerUp(e.nativeEvent);
-                } finally {
-                    if (e.target instanceof Element && e.target.hasPointerCapture?.(e.pointerId)) {
-                        e.target.releasePointerCapture?.(e.pointerId);
-                    }
-                }
-            }}
-            onWheel={(e) => {
-                if (forwardEvents) {
-                    layer.onWheel(e.nativeEvent);
+                    // Preserve the original event type when forwarding cancellation.
+                    eventHandlers.pointerup(event.nativeEvent);
                 }
             }}
         >

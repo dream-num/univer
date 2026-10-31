@@ -29,6 +29,7 @@ import {
     IContextService,
     Inject,
     IUniverInstanceService,
+    SheetTypes,
     ThemeService,
     toDisposable,
     UniverInstanceType,
@@ -174,11 +175,11 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             this._currentEditCell = null;
         }));
 
-        this._univerInstanceService.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {
+        this.disposeWithMe(this._univerInstanceService.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {
             if (unit.getUnitId() === this._currentEditCellState?.unitId) {
                 this._clearCurrentEditCellState();
             }
-        });
+        }));
     }
 
     refreshEditCellState() {
@@ -264,6 +265,11 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     }
 
     setEditCell(param: ICurrentEditCellParam) {
+        const workbook = this._getWorkbookForEditUnit(param.unitId);
+        if (this._getSheetType(workbook) === SheetTypes.CHART ||
+            workbook?.getSheetBySheetId(param.sheetId)?.getConfig().type === SheetTypes.CHART) {
+            return;
+        }
         this._currentEditCell = param;
 
         /**
@@ -349,8 +355,9 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             return;
         }
 
-        const worksheet = workbook.getActiveSheet();
-        if (!worksheet || worksheet.getSheetId() !== sheetId) {
+        const worksheet = workbook.getSheetBySheetId(sheetId);
+        if (!worksheet || workbook.getActiveSheet() !== worksheet ||
+            (worksheet.getConfig().type ?? SheetTypes.GRID) !== SheetTypes.GRID) {
             return;
         }
 
@@ -466,6 +473,10 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         };
     }
 
+    private _getSheetType(workbook: Nullable<Workbook>): SheetTypes | undefined {
+        return workbook?.getActiveSheet()?.getConfig().type;
+    }
+
     private _getWorkbookForEditUnit(unitId: string): Nullable<Workbook> {
         return this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET) ??
             this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
@@ -476,6 +487,9 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     }
 
     changeVisible(params: IEditorBridgeServiceVisibleParam) {
+        if (params.visible && this._getSheetType(this._getWorkbookForEditUnit(params.unitId)) === SheetTypes.CHART) {
+            return;
+        }
         this._visibleParams = params;
 
         // Reset the dirty status when the editor is visible.

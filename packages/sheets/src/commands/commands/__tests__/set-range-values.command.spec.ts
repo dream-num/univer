@@ -24,7 +24,6 @@ import type {
     Univer,
     Workbook,
 } from '@univerjs/core';
-import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
 import {
     BooleanNumber,
     CellValueType,
@@ -41,6 +40,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../../mutations/set-range-values.mutation';
 import { SetSelectionsOperation } from '../../operations/selection.operation';

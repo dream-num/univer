@@ -283,11 +283,13 @@ export class DrawingPopupMenuController extends RxDisposable {
                     return [];
                 }
 
+                const { icon, params } = item;
                 return [{
                     label: item.title,
+                    ...(typeof icon === 'string' ? { icon } : {}),
                     index: 100 + index,
                     commandId: item.commandId ?? item.id,
-                    commandParams: typeof item.params === 'function' ? item.params() : item.params,
+                    commandParams: typeof params === 'function' ? params.call(item) : params,
                     disable: false,
                 }];
             });

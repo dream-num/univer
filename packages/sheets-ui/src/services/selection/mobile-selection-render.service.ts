@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable complexity */
-/* eslint-disable max-lines-per-function */
 import type {
     EventState,
     ICellWithCoord,
@@ -25,29 +23,61 @@ import type {
     Nullable,
     Workbook,
 } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
-import type { ISelectionWithCoord, ISelectionWithStyle, ISetSelectionsOperationParams, WorkbookSelectionModel } from '@univerjs/sheets';
-import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
+import type {
+    IMouseEvent,
+    IPointerEvent,
+    IRenderContext,
+    IRenderModule,
+    Scene,
+    SpreadsheetSkeleton,
+    Viewport,
+} from '@univerjs/engine-render';
+import type {
+    ISelectionWithCoord,
+    ISelectionWithStyle,
+    ISetSelectionsOperationParams,
+    WorkbookSelectionModel,
+} from '@univerjs/sheets';
 import {
     ICommandService,
     IContextService,
     ILogService,
     Inject,
     Injector,
+    IUniverInstanceService,
     RANGE_TYPE,
+    SheetTypes,
     ThemeService,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { attachSelectionWithCoord, convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SELECTIONS_ENABLED, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    attachSelectionWithCoord,
+    convertSelectionDataToRange,
+    REF_SELECTIONS_ENABLED,
+    SelectionMoveType,
+    SELECTIONS_ENABLED,
+    SetSelectionsOperation,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, merge, startWith } from 'rxjs';
-import { MOBILE_EXPANDING_SELECTION, MOBILE_PINCH_ZOOMING, MOBILE_TRIGGER_CONTEXT_MENU } from '../../consts/mobile-context';
+import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
+import {
+    MOBILE_EXPANDING_SELECTION,
+    MOBILE_PINCH_ZOOMING,
+    MOBILE_TRIGGER_CONTEXT_MENU,
+} from '../../consts/mobile-context';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetScrollManagerService } from '../scroll-manager.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
-import { BaseSelectionRenderService, getTopLeftSelectionOfCurrSheet, selectionDataForSelectAll } from './base-selection-render.service';
+import {
+    BaseSelectionRenderService,
+    getTopLeftSelectionOfCurrSheet,
+    selectionDataForSelectAll,
+} from './base-selection-render.service';
 import { MobileSelectionControl } from './mobile-selection-shape';
 
 enum ExpandingControl {
@@ -93,8 +123,8 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
         @IContextService protected readonly _contextService: IContextService,
-        @Inject(SheetScrollManagerService) private readonly _scrollManagerService: SheetScrollManagerService
-
+        @Inject(SheetScrollManagerService) private readonly _scrollManagerService: SheetScrollManagerService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super(
             injector,
@@ -103,8 +133,13 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             sheetSkeletonManagerService,
             _contextService
         );
+        this._scene = this._context.scene;
         this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
         this._init();
+    }
+
+    private _getSheetType(): SheetTypes | undefined {
+        return this._context.unit.getActiveSheet()?.getConfig().type;
     }
 
     private _init() {
@@ -117,14 +152,48 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         this._initSkeletonChangeListener();
         this._initUserActionSyncListener();
         this._updateControlPointWhenScrolling();
+        this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
+            .subscribe((workbook) => {
+                if (workbook !== this._context.unit && this._expandingSelection) {
+                    this.endSelection();
+                }
+            }));
+    }
+
+    override endSelection(): void {
+        super.endSelection();
+        this._clearExpansionState();
+    }
+
+    protected override _clearRuntime(): void {
+        this._clearExpansionState();
+        super._clearRuntime();
+    }
+
+    private _clearExpansionState(): void {
+        if (this._expandingSelection) {
+            this._contextService.setContextValue(MOBILE_EXPANDING_SELECTION, false);
+        }
+        this._expandingSelection = false;
+        this._anchorCellForExpanding = null;
+        this.expandingControlMode = ExpandingControl.BOTTOM_RIGHT;
     }
 
     private _initSkeletonChangeListener() {
         // changing sheet is not the only way cause currentSkeleton$ emit, a lot of cmds will emit currentSkeleton$
         // COMMAND_LISTENER_SKELETON_CHANGE ---> currentSkeleton$.next
+        this.disposeWithMe(this._context.unit.activeSheet$.subscribe((worksheet) => {
+            if (worksheet?.getConfig().type === SheetTypes.CHART) {
+                this._clearRuntime();
+            }
+        }));
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
             if (param == null) {
-                this._logService.error('[SelectionRenderService]: should not receive null!');
+                this._clearRuntime();
+                return;
+            }
+            const worksheet = this._context.unit.getActiveSheet();
+            if (worksheet?.getConfig().type === SheetTypes.CHART || param.sheetId !== worksheet?.getSheetId()) {
                 return;
             }
 
@@ -291,6 +360,9 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
     }
 
     private _updateSelections(selectionDataWithStyleList: ISelectionWithCoord[], type: SelectionMoveType) {
+        if (this._getSheetType() === SheetTypes.CHART) {
+            return;
+        }
         const workbook = this._context.unit;
         const unitId = workbook.getUnitId();
         const sheetId = workbook.getActiveSheet().getSheetId();
@@ -499,6 +571,9 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
     // same as PC
     private _normalSelectionDisabled(): boolean {
+        if (this._getSheetType() === SheetTypes.CHART) {
+            return true;
+        }
         return this._contextService.getContextValue(REF_SELECTIONS_ENABLED);
     }
 
@@ -545,16 +620,11 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
         // #region pointerup
         // when selection mouse down, disable the short cut service
-        const disposableShortcut = this._shortcutService.forceEscape();
+        this._escapeShortcutDisposable?.dispose();
+        this._escapeShortcutDisposable = this._shortcutService.forceEscape();
         this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent((_evt: IPointerEvent | IMouseEvent) => {
             this.endSelection();
-            this._expandingSelection = false;
-            this._contextService.setContextValue(MOBILE_EXPANDING_SELECTION, false);
-            this.expandingControlMode = ExpandingControl.BOTTOM_RIGHT;
             this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
-
-            // when selection mouse up, enable the short cut service
-            disposableShortcut.dispose();
         });
         // #endregion
     }

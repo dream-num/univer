@@ -15,12 +15,12 @@
  */
 
 import type { IMenuSchema } from '@univerjs/ui';
-import type { LocaleKey } from '../../locale/types';
-import type { IImagePopupMenuExtraProps } from './ImagePopupMenu';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { MobileActionRow } from '@univerjs/design';
 import { IconManager, IDialogService, MenuItemType, MobileMenu, useDependency } from '@univerjs/ui';
 import { of } from 'rxjs';
+import type { LocaleKey } from '../../locale/types';
+import type { IImagePopupMenuExtraProps } from './ImagePopupMenu';
 
 interface IMobileImagePopupMenuProps {
     popup: {
@@ -63,7 +63,8 @@ export function MobileImagePopupMenu({ popup }: IMobileImagePopupMenuProps) {
             <div className="univer-flex univer-flex-col univer-gap-2">
                 {menuItems.map((item) => {
                     const label = localeService.t<LocaleKey>(item.label as LocaleKey);
-                    const Icon = item.icon && iconManager.has(item.icon) ? iconManager.get(item.icon) : null;
+                    const { icon } = item;
+                    const Icon = icon && iconManager.has(icon) ? iconManager.get(icon) : null;
 
                     return (
                         <MobileActionRow

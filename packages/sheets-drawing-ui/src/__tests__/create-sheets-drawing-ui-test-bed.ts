@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency, IDisposable, IWorkbookData, Workbook } from '@univerjs/core';
+import type { Dependency, ICreateUnitOptions, IDisposable, IWorkbookData, Workbook } from '@univerjs/core';
 import {
     BooleanNumber,
     Disposable,
@@ -132,7 +132,11 @@ function hasDependency(dependencies: Dependency[] | undefined, token: unknown): 
     return false;
 }
 
-export function createSheetsDrawingUiTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]) {
+export function createSheetsDrawingUiTestBed(
+    workbookData?: IWorkbookData,
+    dependencies?: Dependency[],
+    createUnitOptions?: ICreateUnitOptions
+) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
@@ -163,9 +167,10 @@ export function createSheetsDrawingUiTestBed(workbookData?: IWorkbookData, depen
     univer.registerPlugin(UniverDrawingPlugin);
     univer.registerPlugin(UniverSheetsDrawingPlugin);
 
-    const workbook = univer.createUnit<IWorkbookData, Workbook>(
+    const workbook = get(IUniverInstanceService).createUnit<IWorkbookData, Workbook>(
         UniverInstanceType.UNIVER_SHEET,
-        Tools.deepClone(workbookData ?? TEST_WORKBOOK_DATA)
+        Tools.deepClone(workbookData ?? TEST_WORKBOOK_DATA),
+        createUnitOptions
     );
 
     get(IUniverInstanceService).focusUnit(workbook.getUnitId());

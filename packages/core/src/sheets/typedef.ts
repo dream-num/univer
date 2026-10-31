@@ -17,14 +17,15 @@
 import type { ImageSourceType } from '../services/image-io/image-io.service';
 import type { IResources } from '../services/resource-manager/type';
 import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, Nullable } from '../shared';
-import type { BooleanNumber } from '../types/enum';
 import type { DateSystem } from '../types/enum/date-system';
 import type { LocaleType } from '../types/enum/locale-type';
-import type { IDocumentData } from '../types/interfaces';
+import type { SheetTypes } from '../types/enum/sheet-types';
+import type { BooleanNumber } from '../types/enum/text-style';
 import type { ICellCustomRender } from '../types/interfaces/i-cell-custom-render';
+import type { IDocumentData } from '../types/interfaces/i-document-data';
 import type { IStyleData } from '../types/interfaces/i-style-data';
 import type { IWorkbookCalculationSettings } from './calculation-settings';
-import { CellValueType } from '../types/enum';
+import { CellValueType } from '../types/enum/text-style';
 
 /**
  * Snapshot of a workbook.
@@ -121,6 +122,9 @@ export interface IWorksheetBackgroundImage {
  * Snapshot of a worksheet.
  */
 export interface IWorksheetData {
+    /** Sheet kind. Historical snapshots without this field use SheetTypes.GRID. */
+    type?: SheetTypes;
+
     /**
      * Id of the worksheet. This should be unique and immutable across the lifecycle of the worksheet.
      */
@@ -144,6 +148,8 @@ export interface IWorksheetData {
     rowCount: number;
     columnCount: number;
     zoomRatio: number;
+    /** CHART view mode: omitted historical snapshots use fixed zoom; TRUE continuously fits the primary chart. */
+    zoomToFit?: BooleanNumber;
     scrollTop: number;
     scrollLeft: number;
     defaultColumnWidth: number;

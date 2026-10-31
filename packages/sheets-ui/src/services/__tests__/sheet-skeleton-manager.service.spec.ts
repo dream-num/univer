@@ -24,15 +24,22 @@ import {
     Injector,
     IUniverInstanceService,
     LocaleService,
+    SheetTypes,
     ThemeService,
     UniverInstanceService,
     UniverInstanceType,
     Workbook,
 } from '@univerjs/core';
-import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import {
+    CanvasColorService,
+    ICanvasColorService,
+    IRenderManagerService,
+    RenderManagerService,
+    SHEET_VIEWPORT_KEY,
+} from '@univerjs/engine-render';
 import { SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { ISheetSelectionRenderService } from '../selection/base-selection-render.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 
@@ -64,6 +71,53 @@ class TestSheetSkeletonService {
 }
 
 describe('SheetSkeletonManagerService', () => {
+    it('clears both current skeleton streams when a real GRID context switches to CHART', () => {
+        const injector = new Injector([
+            [IConfigService, { useClass: ConfigService }],
+            [IContextService, { useClass: ContextService }],
+            [ILogService, { useClass: DesktopLogService }],
+            [LocaleService],
+            [ThemeService],
+            [IUniverInstanceService, { useClass: UniverInstanceService }],
+            [SheetSkeletonService],
+            [ICanvasColorService, { useClass: CanvasColorService }],
+            [IRenderManagerService, { useClass: RenderManagerService }],
+        ]);
+        onTestFinished(() => injector.dispose());
+        const workbook = injector.createInstance(Workbook, {
+            id: 'mixed',
+            sheetOrder: ['grid', 'chart'],
+            sheets: {
+                grid: { id: 'grid', rowCount: 10, columnCount: 10 },
+                chart: { id: 'chart', type: SheetTypes.CHART },
+            },
+        });
+        onTestFinished(() => workbook.dispose());
+        injector.get(SheetSkeletonService);
+        (injector.get(IUniverInstanceService) as UniverInstanceService).__addUnit(workbook);
+        const canvasContext = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
+            { setTransform: vi.fn(), clearRect: vi.fn() } as unknown as CanvasRenderingContext2D
+        );
+        onTestFinished(() => canvasContext.mockRestore());
+        const renderManager = injector.get(IRenderManagerService);
+        renderManager.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService]);
+        const render = renderManager.createRender(workbook.getUnitId());
+        const service = render.with(SheetSkeletonManagerService);
+        const before: unknown[] = [];
+        const current: unknown[] = [];
+        const beforeSubscription = service.currentSkeletonBefore$.subscribe((value) => before.push(value));
+        onTestFinished(() => beforeSubscription.unsubscribe());
+        const currentSubscription = service.currentSkeleton$.subscribe((value) => current.push(value));
+        onTestFinished(() => currentSubscription.unsubscribe());
+        service.setCurrent({ sheetId: 'grid' });
+        expect(service.getCurrentSkeleton()).toBeDefined();
+        service.setCurrent({ sheetId: 'chart' });
+        expect(service.getCurrentSkeleton()).toBeUndefined();
+        expect(service.getCurrentParam()).toBeUndefined();
+        expect(before[before.length - 1]).toBeNull();
+        expect(current[current.length - 1]).toBeNull();
+        expect(service.ensureSkeleton('chart')).toBeUndefined();
+    });
     it('sets the current worksheet skeleton and marks it dirty for recalculation', () => {
         const injector = new Injector();
         injector.add([IConfigService, { useClass: ConfigService }]);

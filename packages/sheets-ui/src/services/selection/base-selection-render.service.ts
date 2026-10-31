@@ -37,7 +37,6 @@ import type { ISelectionStyle, ISelectionWithCoord, ISelectionWithStyle } from '
 import type { Theme } from '@univerjs/themes';
 import type { IShortcutService } from '@univerjs/ui';
 import type { Observable, Subscription } from 'rxjs';
-import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import {
     convertCellToRange,
     createIdentifier,
@@ -55,6 +54,7 @@ import {
 } from '@univerjs/sheets';
 import { IPlatformService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
+import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { isSheetContextMenuGesture, isSheetMultiSelectModifier } from '../../common/selection-input';
 import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
@@ -212,10 +212,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             return;
         }
 
-        this._clearUpdatingListeners();
-        this._reset();
-        this._escapeShortcutDisposable?.dispose();
-        this._escapeShortcutDisposable = null;
+        this._clearRuntime();
 
         this._controlFillConfig$.complete();
         this._selectionMoveEnd$.complete();
@@ -359,7 +356,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      */
     getSelectionDataWithStyle(): ISelectionWithCoord[] {
         const selectionControls = this._selectionControls;
-        if (this._skeleton.worksheet) {
+        if (this._skeleton) {
             const [unitId, sheetId] = this._skeleton.getLocation();
             return selectionControls.map((control) => {
                 const v = control.getValue();
@@ -390,6 +387,16 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         selectionWithStyle.style = style;
         const control = this.newSelectionControl(scene, skeleton, selectionWithStyle);
         return control;
+    }
+
+    protected _clearRuntime(): void {
+        this._clearUpdatingListeners();
+        this._reset();
+        this._escapeShortcutDisposable?.dispose();
+        this._escapeShortcutDisposable = null;
+        this._skeleton = undefined!;
+        this._activeViewport = null;
+        this._selectionMoving = false;
     }
 
     protected _clearAllSelectionControls(): void {
@@ -758,7 +765,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     protected _clearUpdatingListeners(): void {
         const scene = this._scene;
-        scene.enableObjectsEvent();
+        scene?.enableObjectsEvent();
 
         this._scenePointerMoveSub?.unsubscribe();
         this._scenePointerMoveSub = null;

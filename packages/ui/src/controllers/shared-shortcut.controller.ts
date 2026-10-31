@@ -15,7 +15,6 @@
  */
 
 import type { IContextService } from '@univerjs/core';
-import type { IShortcutItem } from '../services/shortcut/shortcut.service';
 import {
     Disposable,
     EDITOR_ACTIVATED,
@@ -25,6 +24,7 @@ import {
     RedoCommand,
     UndoCommand,
 } from '@univerjs/core';
+import type { IShortcutItem } from '../services/shortcut/shortcut.service';
 import { ToggleFullscreenOperation } from '../commands/operations/toggle-fullscreen.operation';
 import { CopyCommand, CutCommand, PasteCommand } from '../services/clipboard/clipboard.command';
 import { KeyCode, MetaKeys } from '../services/shortcut/keycode';

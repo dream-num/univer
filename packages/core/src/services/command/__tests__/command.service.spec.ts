@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { IMultiCommand } from '../command.service';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Injector } from '../../../common/di';
 import { CustomCommandExecutionError } from '../../../common/error';
 import { ConfigService, IConfigService } from '../../config/config.service';
@@ -62,6 +62,8 @@ describe('Test CommandService', () => {
             },
         });
     });
+
+    afterEach(() => injector.dispose());
 
     describe('Test "sequenceExecute" utils function', () => {
         it('Should stop on the failure command', () => {
@@ -312,6 +314,45 @@ describe('Test CommandService', () => {
             expect(collab).not.toHaveBeenCalled();
         });
 
+        it.each([
+            ['sync', 'ordinary'],
+            ['sync', 'collaboration'],
+            ['async', 'ordinary'],
+            ['async', 'collaboration'],
+        ])('stops %s notification at a failing %s observer and preserves the error', async (execution, boundary) => {
+            const mutationID = 'applied-mutation-observer-failure';
+            const failure = new Error('first observer failure');
+            const notified: string[] = [];
+            let applied = false;
+            commandService.registerCommand({ id: mutationID, type: CommandType.MUTATION, handler: () => {
+                applied = true;
+                return true;
+            } });
+            const fail = () => {
+                throw failure;
+            };
+            if (boundary === 'ordinary') {
+                commandService.onCommandExecuted(fail);
+            } else {
+                commandService.onMutationExecutedForCollab(fail);
+            }
+            commandService.onCommandExecuted(() => notified.push('ordinary'));
+            commandService.onMutationExecutedForCollab(() => {
+                notified.push('publisher');
+                expect(applied).toBe(true);
+            });
+            commandService.onMutationExecutedForCollab(() => {
+                throw new Error('later observer failure');
+            });
+            commandService.onMutationExecutedForCollab(() => notified.push('last'));
+            if (execution === 'sync') {
+                expect(() => commandService.syncExecuteCommand(mutationID)).toThrow(failure);
+            } else {
+                await expect(commandService.executeCommand(mutationID)).rejects.toBe(failure);
+            }
+            expect(notified).toEqual(boundary === 'ordinary' ? [] : ['ordinary']);
+        });
+
         it('Should attach the triggering command id to nested synchronous mutations', () => {
             const mutationID = 'nested-trigger-mutation';
             const commandID = 'nested-trigger-command';
@@ -397,6 +438,54 @@ describe('Test CommandService', () => {
 
             await expect(commandService.executeCommand(customErrorCommandID)).resolves.toBe(false);
             expect(commandService.syncExecuteCommand(customErrorCommandID)).toBe(false);
+        });
+
+        it('Should not attach a canceled synchronous command to a later independent mutation', () => {
+            const canceledID = 'canceled-sync-command';
+            const mutationID = 'independent-sync-mutation';
+            const handler = vi.fn(() => true);
+            const emitted: Array<{ trigger?: string }> = [];
+            commandService.registerCommand({ id: canceledID, type: CommandType.COMMAND, handler });
+            commandService.registerCommand({ id: mutationID, type: CommandType.MUTATION, handler: () => true });
+            commandService.beforeCommandExecuted(({ id }) => {
+                if (id === canceledID) {
+                    throw new CustomCommandExecutionError('canceled by test');
+                }
+            });
+            commandService.onMutationExecutedForCollab(({ id, params }) => {
+                if (id === mutationID) {
+                    emitted.push({ trigger: (params as { trigger?: string }).trigger });
+                }
+            });
+
+            expect(commandService.syncExecuteCommand(canceledID)).toBe(false);
+            expect(handler).not.toHaveBeenCalled();
+            expect(commandService.syncExecuteCommand(mutationID, {})).toBe(true);
+            expect(emitted).toEqual([{ trigger: undefined }]);
+        });
+
+        it('Should not attach a canceled asynchronous command to a later independent mutation', async () => {
+            const canceledID = 'canceled-async-command';
+            const mutationID = 'independent-async-mutation';
+            const handler = vi.fn(() => true);
+            const emitted: Array<{ trigger?: string }> = [];
+            commandService.registerCommand({ id: canceledID, type: CommandType.COMMAND, handler });
+            commandService.registerCommand({ id: mutationID, type: CommandType.MUTATION, handler: () => true });
+            commandService.beforeCommandExecuted(({ id }) => {
+                if (id === canceledID) {
+                    throw new CustomCommandExecutionError('canceled by test');
+                }
+            });
+            commandService.onMutationExecutedForCollab(({ id, params }) => {
+                if (id === mutationID) {
+                    emitted.push({ trigger: (params as { trigger?: string }).trigger });
+                }
+            });
+
+            await expect(commandService.executeCommand(canceledID)).resolves.toBe(false);
+            expect(handler).not.toHaveBeenCalled();
+            await expect(commandService.executeCommand(mutationID, {})).resolves.toBe(true);
+            expect(emitted).toEqual([{ trigger: undefined }]);
         });
     });
 

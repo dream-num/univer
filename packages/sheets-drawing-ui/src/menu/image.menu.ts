@@ -16,18 +16,45 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuItem } from '@univerjs/ui';
-import type { LocaleKey } from '../locale/types';
-import { UniverInstanceType } from '@univerjs/core';
+import { IPermissionService, IUniverInstanceService, SheetTypes, UniverInstanceType } from '@univerjs/core';
 import {
     RangeProtectionPermissionEditPoint,
     WorkbookEditablePermission,
     WorksheetEditPermission,
 } from '@univerjs/sheets';
-import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
+import { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
+import { distinctUntilChanged, map, of, startWith } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
 import { InsertCellImageCommand, InsertFloatImageCommand } from '../commands/commands/insert-image.command';
 
 export const SHEETS_IMAGE_MENU_ID = 'sheet.menu.image';
+
+/** Chart Sheets have no cells; other sheet types retain the existing range-menu permission rules. */
+function getImageMenuDisabled$(accessor: IAccessor, floating: boolean) {
+    return deriveStateFromActiveSheet$(accessor.get(IUniverInstanceService), true, ({ workbook, worksheet }) => {
+        if (worksheet.getConfig().type === SheetTypes.CHART) {
+            if (!floating) {
+                return of(true);
+            }
+            const permissions = accessor.get(IPermissionService);
+            const ids = [
+                new WorkbookEditablePermission(workbook.getUnitId()).id,
+                new WorksheetEditPermission(workbook.getUnitId(), worksheet.getSheetId()).id,
+            ];
+            return permissions.permissionPointUpdate$.pipe(
+                startWith(null),
+                map(() => ids.some((id) => permissions.getPermissionPoint(id)?.value !== true)),
+                distinctUntilChanged()
+            );
+        }
+        return getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        });
+    });
+}
 
 export function ImageMenuFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
@@ -36,11 +63,7 @@ export function ImageMenuFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
         icon: 'AddImageIcon',
         tooltip: 'sheets-drawing-ui.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetEditPermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
-        }),
+        disabled$: getImageMenuDisabled$(accessor, true),
     };
 }
 
@@ -48,6 +71,7 @@ export function UploadFloatImageMenuFactory(accessor: IAccessor): IMenuItem<Loca
     return {
         id: InsertFloatImageCommand.id,
         title: 'sheets-drawing-ui.upload.float',
+        disabled$: getImageMenuDisabled$(accessor, true),
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
@@ -57,6 +81,7 @@ export function UploadCellImageMenuFactory(accessor: IAccessor): IMenuItem<Local
     return {
         id: InsertCellImageCommand.id,
         title: 'sheets-drawing-ui.upload.cell',
+        disabled$: getImageMenuDisabled$(accessor, false),
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };

@@ -17,10 +17,10 @@
 import type { Workbook } from '@univerjs/core';
 import type { IDrawingJsonUndo1, IDrawingSubunitMap } from '@univerjs/drawing';
 import type { ICopySheetCommandInterceptorParams, IRemoveSheetCommandParams } from '@univerjs/sheets';
-import type { ISheetDrawing } from '../services/sheet-drawing.service';
 import { Disposable, ICommandService, Inject, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { getOrCreateDrawingCopyPlan, IDrawingManagerService } from '@univerjs/drawing';
 import { CopySheetCommand, RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
+import type { ISheetDrawing } from '../services/sheet-drawing.service';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';

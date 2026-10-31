@@ -33,20 +33,6 @@ import type {
     ISheetRangeLocation,
 } from '@univerjs/sheets';
 import type { Observable } from 'rxjs';
-import type { LocaleKey } from '../../locale/types';
-import type {
-    ICellDataWithSpanInfo,
-    IClipboardPropertyItem,
-    ICopyHookValueType,
-    ICopyOptions,
-    IPasteHookKeyType,
-    IPasteHookValueType,
-    IPasteOptionCache,
-    IPasteTarget,
-    ISheetClipboardHook,
-    ISheetDiscreteRangeLocation,
-    IUniverSheetCopyDataModel,
-} from './type';
 import {
     BooleanNumber,
     CellModeEnum,
@@ -69,6 +55,7 @@ import {
     LocaleService,
     ObjectMatrix,
     sequenceExecute,
+    SheetTypes,
     ThemeService,
     toDisposable,
     Tools,
@@ -100,6 +87,20 @@ import {
     PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
 } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
+import type { LocaleKey } from '../../locale/types';
+import type {
+    ICellDataWithSpanInfo,
+    IClipboardPropertyItem,
+    ICopyHookValueType,
+    ICopyOptions,
+    IPasteHookKeyType,
+    IPasteHookValueType,
+    IPasteOptionCache,
+    IPasteTarget,
+    ISheetClipboardHook,
+    ISheetDiscreteRangeLocation,
+    IUniverSheetCopyDataModel,
+} from './type';
 import { virtualizeDiscreteRanges } from '../../controllers/utils/range-tools';
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -149,6 +150,9 @@ const IMAGE_MIME_TO_EXTENSION = {
 } as const;
 
 export const FORMULA_CLIPBOARD_MIME_TYPE = 'web application/x-univer-sheets-formula';
+
+// The existing object HTML/cache format needs an empty slot, never a grid selection or Chart source range.
+const OBJECT_CLIPBOARD_CARRIER_RANGE: IRange = { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 };
 
 function wrapHtmlForExcel(html: string): string {
     const table = html.match(/<table[\s\S]*<\/table>/)?.[0] ?? html;
@@ -320,10 +324,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
     async copy(options?: ICopyOptions): Promise<boolean> {
         const selection = this._selectionManagerService.getCurrentLastSelection();
-        if (!selection) {
-            return false; // maybe we should notify user that there is no selection
-        }
-
         const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         const worksheet = workbook?.getActiveSheet();
         if (!workbook || !worksheet) {
@@ -333,6 +333,11 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
         const { copyType = COPY_TYPE.COPY, copyHookType = PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY } = options || {};
+        const chartSheet = worksheet.getConfig().type === SheetTypes.CHART;
+        if ((!selection && !chartSheet) || (chartSheet && (copyType !== COPY_TYPE.COPY
+            || copyHookType === PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY))) {
+            return false;
+        }
 
         const focusedObjectHooks = copyHookType === PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY
             ? []
@@ -340,9 +345,13 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const focusedObjectCopied = focusedObjectHooks
             .map((hook) => hook.onBeforeCopyFocusedObject?.(workbookId, worksheetId, copyType))
             .some(Boolean);
+        if (chartSheet && !focusedObjectCopied) {
+            return false;
+        }
+        const range = chartSheet ? OBJECT_CLIPBOARD_CARRIER_RANGE : selection!.range;
         const copyContent = focusedObjectCopied
-            ? this._generateObjectCopyContent(workbookId, worksheetId, selection.range)
-            : this.generateCopyContent(workbookId, worksheetId, selection.range, { copyType, copyHookType });
+            ? this._generateObjectCopyContent(workbookId, worksheetId, range)
+            : this.generateCopyContent(workbookId, worksheetId, range, { copyType, copyHookType });
 
         if (!copyContent) {
             return false;
@@ -374,7 +383,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             this._copyMarkId = null;
         } else {
             const style = createCopyPasteSelectionStyle(this._themeService);
-            this._copyMarkId = this._markSelectionService.addShape({ ...selection, style });
+            this._copyMarkId = this._markSelectionService.addShape({ ...selection!, style });
         }
 
         return true;
@@ -390,13 +399,17 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         const worksheet = workbook?.getActiveSheet();
         const selection = this._selectionManagerService.getCurrentLastSelection();
-        if (!workbook || !worksheet || !selection) {
+        if (!workbook || !worksheet) {
+            return null;
+        }
+        const chartSheet = worksheet.getConfig().type === SheetTypes.CHART;
+        if (!selection && !chartSheet) {
             return null;
         }
         return {
             unitId: workbook.getUnitId(),
             subUnitId: worksheet.getSheetId(),
-            range: Tools.deepClone(selection.range),
+            range: Tools.deepClone(chartSheet ? OBJECT_CLIPBOARD_CARRIER_RANGE : selection!.range),
         };
     }
 
@@ -726,6 +739,11 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (!target.subUnitId || !target.selection) {
             return false;
         }
+        const worksheet = this._univerInstanceService.getUnit<Workbook>(target.unitId, UniverInstanceType.UNIVER_SHEET)
+            ?.getSheetBySheetId(target.subUnitId);
+        if (worksheet?.getConfig().type === SheetTypes.CHART) {
+            return false;
+        }
 
         const range = this._injector.invoke((accessor) => {
             return rangeToDiscreteRange(target.selection!.range, accessor, target.unitId, target.subUnitId);
@@ -951,39 +969,50 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return false;
         }
 
-        const { mapFunc } = virtualizeDiscreteRanges([range]);
         const worksheet = this._univerInstanceService.getUnit<Workbook>(copyUnitId, UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(copySubUnitId);
+        if (worksheet?.getConfig().type === SheetTypes.CHART && (!skipCellCopy || cachedData.copyType !== COPY_TYPE.COPY)) {
+            return false;
+        }
 
         const cellMatrix = new ObjectMatrix<ICellDataWithSpanInfo>();
-        cachedMatrix.forValue((row, col, value) => {
-            const { row: actualRow, col: actualColumn } = mapFunc(row, col);
-            /**
-             * This only needs to include a combination of default styles, row and column styles, and cell styles.
-             * Conditional formatting, data validation, and number format are not included here because they will be applied automatically after pasting.
-             * So here we use `getComposedCellStyleByCellData` to get the final style of the cell raw data.
-             */
-            const cellData = worksheet?.getCellRaw(actualRow, actualColumn);
-            const style = worksheet?.getComposedCellStyleByCellData(actualRow, actualColumn, cellData);
-            const newValue = cloneCellDataWithSpanInfo(value)!;
-            if (style && Object.keys(style).length > 0) {
-                newValue.s = style;
-            }
-            cellMatrix.setValue(row, col, newValue);
+        if (skipCellCopy) {
+            cellMatrix.setValue(0, 0, getEmptyCell());
+        } else {
+            const { mapFunc } = virtualizeDiscreteRanges([range]);
+            cachedMatrix.forValue((row, col, value) => {
+                const { row: actualRow, col: actualColumn } = mapFunc(row, col);
+                /**
+                 * This only needs to include a combination of default styles, row and column styles, and cell styles.
+                 * Conditional formatting, data validation, and number format are not included here because they will be applied automatically after pasting.
+                 * So here we use `getComposedCellStyleByCellData` to get the final style of the cell raw data.
+                 */
+                const cellData = worksheet?.getCellRaw(actualRow, actualColumn);
+                const style = worksheet?.getComposedCellStyleByCellData(actualRow, actualColumn, cellData);
+                const newValue = cloneCellDataWithSpanInfo(value)!;
+                if (style && Object.keys(style).length > 0) {
+                    newValue.s = style;
+                }
+                cellMatrix.setValue(row, col, newValue);
 
-            if (value.colSpan || value.rowSpan) {
-                for (let rStart = 0; rStart < value.rowSpan!; rStart++) {
-                    for (let cStart = 0; cStart < value.colSpan!; cStart++) {
-                        if (rStart === 0 && cStart === 0) continue;
+                if (value.colSpan || value.rowSpan) {
+                    for (let rStart = 0; rStart < value.rowSpan!; rStart++) {
+                        for (let cStart = 0; cStart < value.colSpan!; cStart++) {
+                            if (rStart === 0 && cStart === 0) {
+                                continue;
+                            }
 
-                        const r = row + rStart;
-                        const c = col + cStart;
-                        cellMatrix.setValue(r, c, { s: style });
+                            const r = row + rStart;
+                            const c = col + cStart;
+                            cellMatrix.setValue(r, c, { s: style });
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
         const pasteTarget = this._getPastedRange(cellMatrix, target);
-        if (!pasteTarget) return false;
+        if (!pasteTarget) {
+            return false;
+        }
 
         const pasteToWorksheet = this._univerInstanceService
             .getUnit<Workbook>(pasteTarget.unitId, UniverInstanceType.UNIVER_SHEET)
@@ -1005,23 +1034,28 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
 
         const pasteFromWorkbook = this._univerInstanceService.getUnit<Workbook>(copyUnitId);
-        if (!pasteFromWorkbook) return false;
+        if (!pasteFromWorkbook) {
+            return false;
+        }
         const pasteFromWorksheet = pasteFromWorkbook.getSheetBySheetId(copySubUnitId);
-        if (!pasteFromWorksheet) return false;
-
-        const colManager = pasteFromWorksheet.getColumnManager();
-        const rowManager = pasteFromWorksheet.getRowManager();
+        if (!pasteFromWorksheet) {
+            return false;
+        }
 
         const colProperties: IClipboardPropertyItem[] = [];
         const rowProperties: IClipboardPropertyItem[] = [];
+        if (!skipCellCopy) {
+            const colManager = pasteFromWorksheet.getColumnManager();
+            const rowManager = pasteFromWorksheet.getRowManager();
 
-        range.cols.forEach((i) => {
-            colProperties.push({ width: `${colManager.getColumnWidth(i)}` });
-        });
+            range.cols.forEach((i) => {
+                colProperties.push({ width: `${colManager.getColumnWidth(i)}` });
+            });
 
-        range.rows.forEach((j) => {
-            rowProperties.push({ height: `${rowManager.getRowHeight(j)}` });
-        });
+            range.rows.forEach((j) => {
+                rowProperties.push({ height: `${rowManager.getRowHeight(j)}` });
+            });
+        }
 
         if (cachedData.copyType === COPY_TYPE.CUT) {
             const start = pasteTarget.pastedRange.rows[0];
@@ -1083,140 +1117,200 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     ): boolean {
         const { rowProperties, colProperties, cellMatrix } = data;
         const { unitId, subUnitId, pastedRange } = target;
-        const hooks = this._clipboardHooks;
-        const enabledHooks: ISheetClipboardHook[] = [];
-        const disableCopying = hooks.some(
-            (h) => enabledHooks.push(h) && h.onBeforePaste?.({ unitId, subUnitId, range: pastedRange }) === false
-        );
-        if (disableCopying) {
-            enabledHooks.forEach((h) => h.onAfterPaste?.(false));
+        const worksheet = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
+            ?.getSheetBySheetId(subUnitId);
+        const chartSheet = worksheet?.getConfig().type === SheetTypes.CHART;
+        if (chartSheet && (!source?.skipCellCopy || source.copyType !== COPY_TYPE.COPY)) {
             return false;
         }
-        if (!cellMatrix) return false;
-
-        const pasteFrom = source
-            ? {
-                unitId: source.unitId,
-                subUnitId: source.subUnitId,
-                range: source.range,
-            }
-            : null;
-
-        const payload = {
-            copyType: source?.copyType || COPY_TYPE.COPY,
-            copyId: source?.copyId,
-            pasteType,
-        };
-
-        let redoMutationsInfo: IMutationInfo[] = [];
-        let undoMutationsInfo: IMutationInfo[] = [];
-
-        // if hooks are not special or default, it will be executed in any case.
-        // other hooks will be executed only when the paste type is the same as the hook name, including the default one
-        const pasteHooks = source?.skipCellCopy
-            ? enabledHooks.filter((hook) => hook.onBeforeCopyFocusedObject)
-            : enabledHooks;
-        const filteredHooks: ISheetClipboardHook[] = pasteHooks.filter(
-            (h) => (!h.specialPasteInfo && h.id !== PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE) || pasteType === h.id
-        );
-        filteredHooks.forEach((h) => {
-            const rowReturn = h.onPasteRows?.({ range: pastedRange, unitId, subUnitId });
-            if (rowReturn) {
-                redoMutationsInfo.push(...rowReturn.redos);
-                undoMutationsInfo.push(...rowReturn.undos);
-            }
-
-            const colReturn = h.onPasteColumns?.(
-                { range: pastedRange, unitId, subUnitId },
-                colProperties || [],
-                { pasteType }
+        const chartObjectPaste = chartSheet || (source?.skipCellCopy && this._univerInstanceService
+            .getUnit<Workbook>(source.unitId, UniverInstanceType.UNIVER_SHEET)
+            ?.getSheetBySheetId(source.subUnitId)
+            ?.getConfig()
+            .type === SheetTypes.CHART);
+        const hooks = this._clipboardHooks;
+        const enabledHooks: ISheetClipboardHook[] = [];
+        const executePaste = (): boolean => {
+            const disableCopying = hooks.some(
+                (h) => enabledHooks.push(h) && h.onBeforePaste?.({ unitId, subUnitId, range: pastedRange }) === false
             );
-            if (colReturn) {
-                redoMutationsInfo.push(...colReturn.redos);
-                undoMutationsInfo.push(...colReturn.undos);
+            if (disableCopying) {
+                if (!chartObjectPaste) {
+                    enabledHooks.forEach((h) => h.onAfterPaste?.(false));
+                }
+                return false;
+            }
+            if (!cellMatrix) {
+                return false;
             }
 
-            const contentReturn = h.onPasteCells?.(
-                pasteFrom,
-                { range: pastedRange, unitId, subUnitId },
-                cellMatrix,
-                payload
-            );
-            if (contentReturn) {
-                redoMutationsInfo.push(...contentReturn.redos);
-                undoMutationsInfo.push(...contentReturn.undos);
-            }
-        });
+            const pasteFrom = source
+                ? {
+                    unitId: source.unitId,
+                    subUnitId: source.subUnitId,
+                    range: source.range,
+                }
+                : null;
 
-        // setting the selection should be done separately, regardless of the pasting type.
-        if (payload.copyType === COPY_TYPE.COPY) {
-            const setSelectionOperation = this._getSetSelectionOperation(unitId, subUnitId, pastedRange, cellMatrix, pasteType);
-            if (setSelectionOperation) {
-                redoMutationsInfo.push(setSelectionOperation);
-            }
-        }
-
-        redoMutationsInfo = mergeSetRangeValues(redoMutationsInfo);
-        undoMutationsInfo = mergeSetRangeValues(undoMutationsInfo);
-
-        // Split large SetRangeValuesMutation to avoid performance issues
-        redoMutationsInfo = redoMutationsInfo.flatMap((mutation) =>
-            spilitLargeSetRangeValuesMutations(mutation as IMutationInfo<ISetRangeValuesMutationParams>, {
-                threshold: 20000,
-                maxCellsPerChunk: 10000,
-            })
-        );
-        undoMutationsInfo = undoMutationsInfo.flatMap((mutation) =>
-            spilitLargeSetRangeValuesMutations(mutation as IMutationInfo<ISetRangeValuesMutationParams>, {
-                threshold: 20000,
-                maxCellsPerChunk: 10000,
-            })
-        );
-
-        undoMutationsInfo.push({ id: SetWorksheetActiveOperation.id, params: { unitId: target.unitId, subUnitId: target.subUnitId } });
-
-        this._logService.log('[SheetClipboardService]', 'pasting mutations', {
-            undoMutationsInfo,
-            redoMutationsInfo,
-        });
-
-        const result = redoMutationsInfo.every((m) => this._commandService.syncExecuteCommand(m.id, m.params));
-        if (result) {
-            // handle auto row height for pasted range
-            const autoHeightMutation = this._getPastedRangeAutoHeightMutation(
-                unitId,
-                subUnitId,
-                pastedRange
-            );
-            if (autoHeightMutation) {
-                this._commandService.syncExecuteCommand(autoHeightMutation.redo.id, autoHeightMutation.redo.params);
-                redoMutationsInfo.push(autoHeightMutation.redo);
-                undoMutationsInfo.unshift(autoHeightMutation.undo);
-            }
-
-            // add to undo redo services
-            this._undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                undoMutations: undoMutationsInfo,
-                redoMutations: redoMutationsInfo,
-            });
-
-            this.updatePasteOptionsCache({
-                target: {
-                    pastedRange,
-                    unitId,
-                    subUnitId,
-                },
-                cellMatrix,
-                rowProperties,
-                colProperties,
+            const payload = {
+                copyType: source?.copyType || COPY_TYPE.COPY,
+                copyId: source?.copyId,
                 pasteType,
-                source,
-            });
-            this.setShowMenu(true);
-        }
+            };
 
-        filteredHooks.forEach((h) => h.onAfterPaste?.(result));
+            let redoMutationsInfo: IMutationInfo[] = [];
+            let undoMutationsInfo: IMutationInfo[] = [];
+
+            // if hooks are not special or default, it will be executed in any case.
+            // other hooks will be executed only when the paste type is the same as the hook name, including the default one
+            const pasteHooks = source?.skipCellCopy
+                ? enabledHooks.filter((hook) => hook.onBeforeCopyFocusedObject)
+                : enabledHooks;
+            const filteredHooks: ISheetClipboardHook[] = pasteHooks.filter(
+                (h) => (!h.specialPasteInfo && h.id !== PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE) || pasteType === h.id
+            );
+            filteredHooks.forEach((h) => {
+                if (!chartObjectPaste) {
+                    const rowReturn = h.onPasteRows?.({ range: pastedRange, unitId, subUnitId });
+                    if (rowReturn) {
+                        redoMutationsInfo.push(...rowReturn.redos);
+                        undoMutationsInfo.push(...rowReturn.undos);
+                    }
+
+                    const colReturn = h.onPasteColumns?.(
+                        { range: pastedRange, unitId, subUnitId },
+                        colProperties || [],
+                        { pasteType }
+                    );
+                    if (colReturn) {
+                        redoMutationsInfo.push(...colReturn.redos);
+                        undoMutationsInfo.push(...colReturn.undos);
+                    }
+                }
+                const contentReturn = h.onPasteCells?.(
+                    pasteFrom,
+                    { range: pastedRange, unitId, subUnitId },
+                    cellMatrix,
+                    payload
+                );
+                if (contentReturn) {
+                    redoMutationsInfo.push(...contentReturn.redos);
+                    undoMutationsInfo.push(...contentReturn.undos);
+                }
+            });
+
+            if (chartObjectPaste && redoMutationsInfo.length === 0) {
+                return false;
+            }
+
+            // Object copies involving CHART preserve the target selection; their range is only a cache carrier.
+            if (!chartObjectPaste && payload.copyType === COPY_TYPE.COPY) {
+                const setSelectionOperation = this._getSetSelectionOperation(unitId, subUnitId, pastedRange, cellMatrix, pasteType);
+                if (setSelectionOperation) {
+                    redoMutationsInfo.push(setSelectionOperation);
+                }
+            }
+
+            redoMutationsInfo = mergeSetRangeValues(redoMutationsInfo);
+            undoMutationsInfo = mergeSetRangeValues(undoMutationsInfo);
+
+            // Split large SetRangeValuesMutation to avoid performance issues
+            redoMutationsInfo = redoMutationsInfo.flatMap((mutation) =>
+                spilitLargeSetRangeValuesMutations(mutation as IMutationInfo<ISetRangeValuesMutationParams>, {
+                    threshold: 20000,
+                    maxCellsPerChunk: 10000,
+                })
+            );
+            undoMutationsInfo = undoMutationsInfo.flatMap((mutation) =>
+                spilitLargeSetRangeValuesMutations(mutation as IMutationInfo<ISetRangeValuesMutationParams>, {
+                    threshold: 20000,
+                    maxCellsPerChunk: 10000,
+                })
+            );
+
+            undoMutationsInfo.push({ id: SetWorksheetActiveOperation.id, params: { unitId: target.unitId, subUnitId: target.subUnitId } });
+
+            this._logService.log('[SheetClipboardService]', 'pasting mutations', {
+                undoMutationsInfo,
+                redoMutationsInfo,
+            });
+
+            const result = redoMutationsInfo.every((m) => this._commandService.syncExecuteCommand(m.id, m.params));
+            if (result) {
+                // handle auto row height for pasted range
+                const autoHeightMutation = chartObjectPaste
+                    ? null
+                    : this._getPastedRangeAutoHeightMutation(
+                        unitId,
+                        subUnitId,
+                        pastedRange
+                    );
+                if (autoHeightMutation) {
+                    this._commandService.syncExecuteCommand(autoHeightMutation.redo.id, autoHeightMutation.redo.params);
+                    redoMutationsInfo.push(autoHeightMutation.redo);
+                    undoMutationsInfo.unshift(autoHeightMutation.undo);
+                }
+
+                // add to undo redo services
+                this._undoRedoService.pushUndoRedo({
+                    unitID: unitId,
+                    undoMutations: undoMutationsInfo,
+                    redoMutations: redoMutationsInfo,
+                });
+
+                this.updatePasteOptionsCache({
+                    target: {
+                        pastedRange,
+                        unitId,
+                        subUnitId,
+                    },
+                    cellMatrix,
+                    rowProperties,
+                    colProperties,
+                    pasteType,
+                    source,
+                });
+                this.setShowMenu(true);
+            }
+
+            if (!chartObjectPaste) {
+                filteredHooks.forEach((h) => h.onAfterPaste?.(result));
+            }
+            return result;
+        };
+        let result = false;
+        let pasteThrew = false;
+        let pasteError: unknown;
+        try {
+            result = executePaste();
+        } catch (error) {
+            if (!chartObjectPaste) {
+                throw error;
+            }
+            pasteThrew = true;
+            pasteError = error;
+        }
+        if (!chartObjectPaste) {
+            return result;
+        }
+        let afterPasteThrew = false;
+        let firstAfterPasteError: unknown;
+        for (const hook of enabledHooks) {
+            try {
+                hook.onAfterPaste?.(result);
+            } catch (error) {
+                if (!afterPasteThrew) {
+                    afterPasteThrew = true;
+                    firstAfterPasteError = error;
+                }
+            }
+        }
+        if (pasteThrew) {
+            throw pasteError;
+        }
+        if (afterPasteThrew) {
+            throw firstAfterPasteError;
+        }
         return result;
     }
 

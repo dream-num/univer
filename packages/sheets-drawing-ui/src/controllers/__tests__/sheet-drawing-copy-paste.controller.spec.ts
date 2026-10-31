@@ -16,7 +16,7 @@
 
 import type { IRange, IWorkbookData } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import type { ISheetImage } from '@univerjs/sheets-drawing';
+import type { ISheetDrawing, ISheetImage } from '@univerjs/sheets-drawing';
 import type { ISheetClipboardHook } from '@univerjs/sheets-ui';
 import {
     BooleanNumber,
@@ -24,6 +24,7 @@ import {
     ImageSourceType,
     LocaleType,
     ObjectMatrix,
+    SheetTypes,
     UniverInstanceType,
 } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
@@ -94,7 +95,7 @@ interface ITestClipboardHook extends ISheetClipboardHook {
 
 const testBeds: ReturnType<typeof createSheetsDrawingUiTestBed>[] = [];
 
-function createWorkbookData(unitId: string, subUnitId: string): IWorkbookData {
+function createWorkbookData(unitId: string, subUnitId: string, sheetType = SheetTypes.GRID): IWorkbookData {
     return {
         id: unitId,
         name: 'Book',
@@ -105,6 +106,7 @@ function createWorkbookData(unitId: string, subUnitId: string): IWorkbookData {
         sheets: {
             [subUnitId]: {
                 id: subUnitId,
+                type: sheetType,
                 name: 'Sheet1',
                 rowCount: 20,
                 columnCount: 20,
@@ -118,9 +120,15 @@ function createWorkbookData(unitId: string, subUnitId: string): IWorkbookData {
     };
 }
 
-function createController(options?: { focusedDrawings?: IImageDrawing[]; drawingData?: Record<string, object> }) {
-    const clipboardInterfaceService = { writeText: vi.fn() };
-    const bed = createSheetsDrawingUiTestBed(createWorkbookData('unit-1', 'sheet-1'), [
+function createController(options?: { focusedDrawings?: ISheetDrawing[]; drawingData?: Record<string, object>; sheetType?: SheetTypes; targetSheetType?: SheetTypes }) {
+    const clipboardInterfaceService: IClipboardInterfaceService = {
+        supportClipboard: false,
+        write: vi.fn(async () => {}),
+        writeText: vi.fn(async () => {}),
+        read: vi.fn(async () => []),
+        readText: vi.fn(async () => ''),
+    };
+    const bed = createSheetsDrawingUiTestBed(createWorkbookData('unit-1', 'sheet-1', options?.sheetType), [
         [ISheetClipboardService, { useClass: SheetClipboardService }],
         [IMarkSelectionService, { useClass: MarkSelectionService }],
         [IClipboardInterfaceService, { useValue: clipboardInterfaceService }],
@@ -130,10 +138,14 @@ function createController(options?: { focusedDrawings?: IImageDrawing[]; drawing
         [SheetsDrawingCopyPasteController],
     ]);
     testBeds.push(bed);
-    bed.univer.createUnit(UniverInstanceType.UNIVER_SHEET, createWorkbookData('unit-2', 'sheet-2'));
+    bed.univer.createUnit(UniverInstanceType.UNIVER_SHEET, createWorkbookData('unit-2', 'sheet-2', options?.targetSheetType));
     const skeletonService = bed.get(SheetSkeletonService);
-    skeletonService.ensureSkeleton('unit-1', 'sheet-1');
-    skeletonService.ensureSkeleton('unit-2', 'sheet-2');
+    if (options?.sheetType !== SheetTypes.CHART) {
+        skeletonService.ensureSkeleton('unit-1', 'sheet-1');
+    }
+    if (options?.targetSheetType !== SheetTypes.CHART) {
+        skeletonService.ensureSkeleton('unit-2', 'sheet-2');
+    }
     const drawingManager = bed.get(IDrawingManagerService);
     const data: Record<string, object> = { ...options?.drawingData };
     for (const drawing of options?.focusedDrawings ?? []) {
@@ -154,6 +166,7 @@ function createController(options?: { focusedDrawings?: IImageDrawing[]; drawing
     vi.spyOn(hookDisposable, 'dispose');
 
     return {
+        bed,
         controller,
         hook: sheetClipboardService.getClipboardHooks()[0] as ITestClipboardHook,
         drawingService,

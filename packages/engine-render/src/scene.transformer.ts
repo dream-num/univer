@@ -779,6 +779,10 @@ export class Transformer extends Disposable implements ITransformerConfig {
         };
     }
 
+    /**
+     * Filters selected objects by the requested capability in their effective transformer config.
+     * Objects without that capability stay selected but do not participate in the move or resize gesture.
+     */
     private _getTransformObjects(capability: 'moveEnabled' | 'resizeEnabled'): Map<string, BaseObject> {
         return new Map(Array.from(this._selectedObjectMap).filter(([, object]) => this._getConfig(object)[capability]));
     }

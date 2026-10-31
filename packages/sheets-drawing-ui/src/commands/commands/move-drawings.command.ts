@@ -53,10 +53,7 @@ export const MoveDrawingsCommand: ICommand = {
         const newDrawings = drawings.map((drawing) => {
             const sheetDrawing = drawing as ISheetDrawing;
             const { transform, unitId, subUnitId, anchorType = SheetDrawingAnchorType.Position } = sheetDrawing;
-            const skeleton = anchorType === SheetDrawingAnchorType.None
-                ? undefined
-                : sheetSkeletonService.getSkeleton(unitId, subUnitId) ?? undefined;
-            if (!transform || (anchorType !== SheetDrawingAnchorType.None && !skeleton)) {
+            if (!transform) {
                 return null;
             }
 
@@ -73,7 +70,21 @@ export const MoveDrawingsCommand: ICommand = {
                 bounds.left = left + 1;
             }
 
-            return applySheetDrawingPlacement(sheetDrawing, { kind: anchorType, bounds }, skeleton);
+            switch (anchorType) {
+                case SheetDrawingAnchorType.None:
+                    return applySheetDrawingPlacement(sheetDrawing, { kind: anchorType, bounds });
+                case SheetDrawingAnchorType.Position:
+                case SheetDrawingAnchorType.Both: {
+                    const skeleton = sheetSkeletonService.getSkeleton(unitId, subUnitId);
+                    if (!skeleton) {
+                        return null;
+                    }
+
+                    return applySheetDrawingPlacement(sheetDrawing, { kind: anchorType, bounds }, skeleton);
+                }
+                default:
+                    return null;
+            }
         }).filter((drawing) => drawing != null) as ISheetDrawing[];
 
         if (newDrawings.length === 0) {

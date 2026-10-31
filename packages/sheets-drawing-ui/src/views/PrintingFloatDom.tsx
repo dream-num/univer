@@ -20,7 +20,6 @@ import type { IFloatDomData } from '@univerjs/sheets-drawing';
 import type { IFloatDom, IFloatDomLayout } from '@univerjs/ui';
 import type { ComponentType } from 'react';
 import { render, unmount } from '@univerjs/design';
-import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { connectInjector, PrintFloatDomSingle } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -29,35 +28,32 @@ import { transformBound2DOMBound } from '../services/canvas-float-dom-manager.se
 export interface IPrintingFloatDomProps {
     floatDomInfos: IFloatDomData[];
     scene: Scene;
-    skeleton?: SpreadsheetSkeleton;
+    skeleton: SpreadsheetSkeleton;
     worksheet: Worksheet;
 };
 
 export function createPrintingFloatDom(
     info: IFloatDomData,
     scene: Scene,
-    skeleton: SpreadsheetSkeleton | undefined,
+    skeleton: SpreadsheetSkeleton,
     worksheet: Worksheet
 ) {
     const { width, height, angle, left, top } = info.transform!;
+    // The print root starts at the sheet content origin and does not include row/column headers.
+    const offsetBound = transformBound2DOMBound(
+        {
+            left: left ?? 0,
+            right: (left ?? 0) + (width ?? 0),
+            top: top ?? 0,
+            bottom: (top ?? 0) + (height ?? 0),
+        },
+        scene,
+        skeleton,
+        worksheet,
+        undefined,
+        true
+    );
     const { scaleX, scaleY } = scene.getAncestorScale();
-    const bounds = {
-        left: left ?? 0,
-        right: (left ?? 0) + (width ?? 0),
-        top: top ?? 0,
-        bottom: (top ?? 0) + (height ?? 0),
-    };
-    const viewport = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-    // Chart Sheets have page coordinates and no grid headers or frozen cell panes.
-    const offsetBound = skeleton
-        ? transformBound2DOMBound(bounds, scene, skeleton, worksheet, undefined, true)
-        : {
-            left: (bounds.left - (viewport?.viewportScrollX ?? 0)) * scaleX,
-            right: (bounds.right - (viewport?.viewportScrollX ?? 0)) * scaleX,
-            top: (bounds.top - (viewport?.viewportScrollY ?? 0)) * scaleY,
-            bottom: (bounds.bottom - (viewport?.viewportScrollY ?? 0)) * scaleY,
-            absolute: { left: true, top: true },
-        };
 
     const domPos: IFloatDomLayout = {
         startX: offsetBound.left,

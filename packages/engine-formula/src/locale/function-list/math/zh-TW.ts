@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ABS: {
+        label: 'ABS',
         description: '傳回數字的絕對值。一個數字的絕對值是該數字不帶其符號的形式。 ',
         abstract: '傳回數字的絕對值',
         links: [
@@ -31,6 +32,7 @@ const locale: typeof enUS = {
         },
     },
     ACOS: {
+        label: 'ACOS',
         description:
             '傳回數字的反餘弦值。 反餘弦值是指餘弦值為 number 的角度。 傳回的角度以弧度表示，弧度值在 0（零）到 pi 之間。 ',
         abstract: '傳回數字的反餘弦值',
@@ -45,6 +47,7 @@ const locale: typeof enUS = {
         },
     },
     ACOSH: {
+        label: 'ACOSH',
         description:
             '傳回數字的反雙曲餘弦值。 該數字必須大於或等於 1。 反雙曲餘弦值是指雙曲餘弦值為 number 的值，因此 ACOSH(COSH(number)) 等於 number。 ',
         abstract: '傳回數字的反雙曲餘弦值',
@@ -59,6 +62,7 @@ const locale: typeof enUS = {
         },
     },
     ACOT: {
+        label: 'ACOT',
         description: '傳回數字的反餘切值的主值。 ',
         abstract: '傳回一個數的反餘切值',
         links: [
@@ -72,6 +76,7 @@ const locale: typeof enUS = {
         },
     },
     ACOTH: {
+        label: 'ACOTH',
         description: '傳回一個數的雙曲反餘切值',
         abstract: '傳回一個數的雙曲反餘切值',
         links: [
@@ -85,6 +90,7 @@ const locale: typeof enUS = {
         },
     },
     AGGREGATE: {
+        label: '彙總',
         description: '傳回清單或資料庫中的聚合',
         abstract: '傳回清單或資料庫中的聚合',
         links: [
@@ -101,6 +107,7 @@ const locale: typeof enUS = {
         },
     },
     ARABIC: {
+        label: '阿拉伯數字',
         description: '將羅馬數字轉換為阿拉伯數字',
         abstract: '將羅馬數字轉換為阿拉伯數字',
         links: [
@@ -114,6 +121,7 @@ const locale: typeof enUS = {
         },
     },
     ASIN: {
+        label: 'ASIN',
         description: '傳回數字的反正弦值',
         abstract: '傳回數字的反正弦值',
         links: [
@@ -127,6 +135,7 @@ const locale: typeof enUS = {
         },
     },
     ASINH: {
+        label: 'ASINH',
         description: '傳回數字的反雙曲正弦值',
         abstract: '傳回數字的反雙曲正弦值',
         links: [
@@ -140,6 +149,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN: {
+        label: 'ATAN',
         description: '傳回數字的反正切值',
         abstract: '傳回數字的反正切值',
         links: [
@@ -153,6 +163,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN2: {
+        label: 'ATAN2',
         description: '傳回指定 X 和 Y 座標的反正切值 (正切值的倒數)。 反正切是從 X 軸到穿過原點 (0, 0) 和和一個座標點 (x_num, y_num) 之線段的角度。 該角度是以弧度表示，有效範圍是 -pi 和 pi 之間 (不含 -pi)。',
         abstract: '傳回指定 X 和 Y 座標的反正切值 (正切值的倒數)。 反正切是從 X 軸到穿過原點 (0, 0) 和和一個座標點 (x_num, y_num) 之線段的角度。 該角度是以弧度表示，有效範圍是 -pi 和 pi 之間 (不含 -pi)。',
         links: [
@@ -167,6 +178,7 @@ const locale: typeof enUS = {
         },
     },
     ATANH: {
+        label: 'ATANH',
         description: '傳回數值的反雙曲線正切值。 數值必須介於 -1 和 1 (不含 -1 和 1) 之間。 反雙曲線正切是一個值，其雙曲線正切是一個 數字 ，所以 ATANH(TANH(number)) 等於 數字 。',
         abstract: '傳回數值的反雙曲線正切值。 數值必須介於 -1 和 1 (不含 -1 和 1) 之間。 反雙曲線正切是一個值，其雙曲線正切是一個 數字 ，所以 ATANH(TANH(number)) 等於 數字 。',
         links: [
@@ -180,6 +192,7 @@ const locale: typeof enUS = {
         },
     },
     BASE: {
+        label: '進制',
         description: '將一個數轉換為具有給定基數的文字表示',
         abstract: '將一個數轉換為具有給定基數的文字表示',
         links: [
@@ -195,6 +208,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING: {
+        label: '向上舍入',
         description: '將數字舍入為最接近的整數或最接近的指定基數的倍數',
         abstract: '將數字舍入為最接近的整數或最接近的指定基數的倍數',
         links: [
@@ -209,6 +223,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_MATH: {
+        label: 'CEILING.MATH',
         description: '將數字向上捨入為最接近的整數或最接近的指定基數的倍數',
         abstract: '將數字向上捨入為最接近的整數或最接近的指定基數的倍數',
         links: [
@@ -224,6 +239,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_PRECISE: {
+        label: 'CEILING.PRECISE',
         description: '將數字舍入為最接近的整數或最接近的指定基數的倍數。 無論該數字的符號為何，該數字都向上捨入。 ',
         abstract: '將數字捨去為最接近的整數或最接近的指定基數的倍數。 無論該數字的符號為何，該數字都向上捨入。 ',
         links: [
@@ -238,6 +254,7 @@ const locale: typeof enUS = {
         },
     },
     COMBIN: {
+        label: '組合',
         description: '傳回給定數目物件的組合數',
         abstract: '傳回給定數目物件的組合數',
         links: [
@@ -252,6 +269,7 @@ const locale: typeof enUS = {
         },
     },
     COMBINA: {
+        label: '組合.A',
         description: '傳回給定數目物件具有重複項的組合數',
         abstract: '傳回給定數目物件具有重複項的組合數',
         links: [
@@ -266,6 +284,7 @@ const locale: typeof enUS = {
         },
     },
     COS: {
+        label: 'COS',
         description: '傳回數字的餘弦值',
         abstract: '傳回數字的餘弦值',
         links: [
@@ -279,6 +298,7 @@ const locale: typeof enUS = {
         },
     },
     COSH: {
+        label: 'COSH',
         description: '傳回數字的雙曲餘弦值',
         abstract: '傳回數字的雙曲餘弦值',
         links: [
@@ -292,6 +312,7 @@ const locale: typeof enUS = {
         },
     },
     COT: {
+        label: 'COT',
         description: '返回角度的餘弦值',
         abstract: '返回角度的餘弦值',
         links: [
@@ -305,6 +326,7 @@ const locale: typeof enUS = {
         },
     },
     COTH: {
+        label: 'COTH',
         description: '傳回數字的雙曲餘切值',
         abstract: '傳回數字的雙曲餘切值',
         links: [
@@ -318,6 +340,7 @@ const locale: typeof enUS = {
         },
     },
     CSC: {
+        label: 'CSC',
         description: '傳回角度的餘割值',
         abstract: '傳回角度的餘值值',
         links: [
@@ -331,6 +354,7 @@ const locale: typeof enUS = {
         },
     },
     CSCH: {
+        label: 'CSCH',
         description: '返回角度的雙曲餘割值',
         abstract: '返回角度的雙曲餘割值',
         links: [
@@ -344,6 +368,7 @@ const locale: typeof enUS = {
         },
     },
     DECIMAL: {
+        label: 'DECIMAL',
         description: '將給定基數內的數的文字表示轉換為十進制數',
         abstract: '將給定基數內的數的文字表示轉換為十進制數',
         links: [
@@ -358,6 +383,7 @@ const locale: typeof enUS = {
         },
     },
     DEGREES: {
+        label: '度',
         description: '將弧度轉換為度',
         abstract: '將弧度轉換為度',
         links: [
@@ -371,6 +397,7 @@ const locale: typeof enUS = {
         },
     },
     EVEN: {
+        label: '偶數',
         description: '將數字向上捨入到最接近的偶數',
         abstract: '將數字向上捨入到最接近的偶數',
         links: [
@@ -384,6 +411,7 @@ const locale: typeof enUS = {
         },
     },
     EXP: {
+        label: 'EXP',
         description: '返回e的 n 次方',
         abstract: '返回e的 n 次方',
         links: [
@@ -397,6 +425,7 @@ const locale: typeof enUS = {
         },
     },
     FACT: {
+        label: '階乘',
         description: '傳回數字的階乘',
         abstract: '傳回數字的階乘',
         links: [
@@ -410,6 +439,7 @@ const locale: typeof enUS = {
         },
     },
     FACTDOUBLE: {
+        label: '雙階乘',
         description: '傳回數字的雙倍階乘',
         abstract: '傳回數字的雙倍階乘',
         links: [
@@ -423,6 +453,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR: {
+        label: '向下舍入',
         description: '向絕對值減小的方向舍入數字',
         abstract: '向絕對值減小的方向捨去數字',
         links: [
@@ -437,6 +468,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_MATH: {
+        label: 'FLOOR.MATH',
         description: '將數字向下捨去為最接近的整數或最接近的指定基數的倍數',
         abstract: '將數字向下捨去為最接近的整數或最接近的指定基數的倍數',
         links: [
@@ -452,6 +484,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_PRECISE: {
+        label: 'FLOOR.PRECISE',
         description: '將數字向下捨去為最接近的整數或最接近的指定基數的倍數。 無論該數字的符號為何，該數字都向下捨去。 ',
         abstract: '將數字向下捨去為最接近的整數或最接近的指定基數的倍數。',
         links: [
@@ -466,6 +499,7 @@ const locale: typeof enUS = {
         },
     },
     GCD: {
+        label: '最大公因數',
         description: '傳回最大公約數',
         abstract: '傳回最大公約數',
         links: [
@@ -480,6 +514,7 @@ const locale: typeof enUS = {
         },
     },
     INT: {
+        label: 'INT',
         description: '將數字向下捨去到最接近的整數',
         abstract: '將數字向下捨去到最接近的整數',
         links: [
@@ -493,6 +528,7 @@ const locale: typeof enUS = {
         },
     },
     ISO_CEILING: {
+        label: 'ISO.CEILING',
         description: '傳回一個數字，該數字向上捨入為最接近的整數或最接近的有效位的倍數',
         abstract: '傳回一個數字，該數字向上捨入為最接近的整數或最接近的有效位的倍數',
         links: [
@@ -507,6 +543,7 @@ const locale: typeof enUS = {
         },
     },
     LCM: {
+        label: '最小公倍數',
         description: '傳回最小公倍數',
         abstract: '傳回最小公倍數',
         links: [
@@ -521,6 +558,7 @@ const locale: typeof enUS = {
         },
     },
     LN: {
+        label: 'LN',
         description: '傳回數字的自然對數',
         abstract: '傳回數字的自然對數',
         links: [
@@ -534,6 +572,7 @@ const locale: typeof enUS = {
         },
     },
     LOG: {
+        label: 'LOG',
         description: '傳回數字的以指定底為底的對數',
         abstract: '傳回數字的以指定底為底的對數',
         links: [
@@ -548,6 +587,7 @@ const locale: typeof enUS = {
         },
     },
     LOG10: {
+        label: 'LOG10',
         description: '傳回數字的以 10 為底的對數',
         abstract: '傳回數字的以 10 為底的對數',
         links: [
@@ -561,6 +601,7 @@ const locale: typeof enUS = {
         },
     },
     MDETERM: {
+        label: 'MDETERM',
         description: '傳回陣列的矩陣行列式的值',
         abstract: '傳回陣列的矩陣行列式的值',
         links: [
@@ -574,6 +615,7 @@ const locale: typeof enUS = {
         },
     },
     MINVERSE: {
+        label: 'MINVERSE',
         description: '傳回陣列的逆矩陣',
         abstract: '傳回陣列的逆矩陣',
         links: [
@@ -587,6 +629,7 @@ const locale: typeof enUS = {
         },
     },
     MMULT: {
+        label: 'MMULT',
         description: '傳回兩個陣列的矩陣乘積',
         abstract: '傳回兩個陣列的矩陣乘積',
         links: [
@@ -601,6 +644,7 @@ const locale: typeof enUS = {
         },
     },
     MOD: {
+        label: '除法餘數',
         description: '傳回兩數相除的餘數。 結果的符號與除數相同。 ',
         abstract: '傳回除法的餘數',
         links: [
@@ -615,6 +659,7 @@ const locale: typeof enUS = {
         },
     },
     MROUND: {
+        label: 'MROUND',
         description: '傳回一個捨入到所需倍數的數字',
         abstract: '傳回一個捨去到所需倍數的數字',
         links: [
@@ -629,6 +674,7 @@ const locale: typeof enUS = {
         },
     },
     MULTINOMIAL: {
+        label: 'MULTINOMIAL',
         description: '傳回一組數字的多項式',
         abstract: '傳回一組數字的多項式',
         links: [
@@ -643,6 +689,7 @@ const locale: typeof enUS = {
         },
     },
     MUNIT: {
+        label: 'MUNIT',
         description: '返回單位矩陣或指定維度',
         abstract: '返回單位矩陣或指定維度',
         links: [
@@ -656,6 +703,7 @@ const locale: typeof enUS = {
         },
     },
     ODD: {
+        label: '奇數',
         description: '將數字向上捨入為最接近的奇數',
         abstract: '將數字向上捨入為最接近的奇數',
         links: [
@@ -669,6 +717,7 @@ const locale: typeof enUS = {
         },
     },
     PI: {
+        label: 'PI',
         description: '傳回 pi 的值',
         abstract: '傳回 pi 的值',
         links: [
@@ -681,6 +730,7 @@ const locale: typeof enUS = {
         },
     },
     POWER: {
+        label: '乘冪',
         description: '傳回數字乘冪的結果。 ',
         abstract: '回傳數的乘冪',
         links: [
@@ -695,6 +745,7 @@ const locale: typeof enUS = {
         },
     },
     PRODUCT: {
+        label: '乘積',
         description: '將作為參數提供的所有數字相乘，並傳回乘積。 ',
         abstract: '將其參數相乘',
         links: [
@@ -709,6 +760,7 @@ const locale: typeof enUS = {
         },
     },
     QUOTIENT: {
+        label: '商',
         description: '傳回除法的整數部分',
         abstract: '傳回除法的整數部分',
         links: [
@@ -723,6 +775,7 @@ const locale: typeof enUS = {
         },
     },
     RADIANS: {
+        label: '弧度',
         description: '將度轉換為弧度',
         abstract: '將度轉換為弧度',
         links: [{
@@ -734,6 +787,7 @@ const locale: typeof enUS = {
         },
     },
     RAND: {
+        label: '隨機',
         description: '傳回 0 和 1 之間的一個隨機數',
         abstract: '傳回 0 和 1 之間的隨機數',
         links: [
@@ -746,6 +800,7 @@ const locale: typeof enUS = {
         },
     },
     RANDARRAY: {
+        label: '隨機陣列',
         description: 'RANDARRAY 函數傳回 0 和 1 之間的隨機數字陣列。但是，你可以指定要填滿的列數和欄數、最小值和最大值，以及是否會傳回整個數字或小數值。',
         abstract: 'RANDARRAY 函數傳回 0 和 1 之間的隨機數字陣列。',
         links: [
@@ -763,6 +818,7 @@ const locale: typeof enUS = {
         },
     },
     RANDBETWEEN: {
+        label: '隨機.介於',
         description: '傳回位於兩個指定數之間的一個隨機數',
         abstract: '傳回位於兩個指定數之間的一個隨機數',
         links: [
@@ -777,6 +833,7 @@ const locale: typeof enUS = {
         },
     },
     ROMAN: {
+        label: '羅馬數字',
         description: '將阿拉伯數字轉換為文本式羅馬數字',
         abstract: '將阿拉伯數字轉換為文本式羅馬數字',
         links: [
@@ -791,6 +848,7 @@ const locale: typeof enUS = {
         },
     },
     ROUND: {
+        label: '四捨五入',
         description: '將數字按指定位數舍入',
         abstract: '將數字依指定位數捨去',
         links: [
@@ -805,6 +863,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDBANK: {
+        label: '銀行家舍入',
         description: '依照「四舍六入五成雙」舍入數字',
         abstract: '依照「四舍六入五成雙」舍入數字',
         links: [
@@ -819,6 +878,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDDOWN: {
+        label: '向下四捨五入',
         description: '向絕對值減小的方向舍入數字',
         abstract: '向絕對值減小的方向捨去數字',
         links: [
@@ -833,6 +893,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDUP: {
+        label: '向上四捨五入',
         description: '向絕對值增大的方向舍入數字',
         abstract: '向絕對值增大的方向舍入數字',
         links: [
@@ -847,6 +908,7 @@ const locale: typeof enUS = {
         },
     },
     SEC: {
+        label: 'SEC',
         description: '傳回角度的正割值',
         abstract: '返回角度的正割值',
         links: [
@@ -860,6 +922,7 @@ const locale: typeof enUS = {
         },
     },
     SECH: {
+        label: 'SECH',
         description: '返回角度的雙曲正割值',
         abstract: '返回角度的雙曲正割值',
         links: [
@@ -873,6 +936,7 @@ const locale: typeof enUS = {
         },
     },
     SERIESSUM: {
+        label: 'SERIESSUM',
         description: '傳回基於公式的冪級數的和',
         abstract: '傳回基於公式的冪級數的和',
         links: [
@@ -889,6 +953,7 @@ const locale: typeof enUS = {
         },
     },
     SEQUENCE: {
+        label: 'SEQUENCE',
         description: 'SEQUENCE 函數可在陣列中產生一系列連續數字，例如，1、2、3、4。 ',
         abstract: 'SEQUENCE 函數可在陣列中產生一系列連續數字，例如，1、2、3、4。 ',
         links: [
@@ -905,6 +970,7 @@ const locale: typeof enUS = {
         },
     },
     SIGN: {
+        label: '符號',
         description: '傳回數字的符號',
         abstract: '傳回數字的符號',
         links: [
@@ -918,6 +984,7 @@ const locale: typeof enUS = {
         },
     },
     SIN: {
+        label: 'SIN',
         description: '傳回給定角度的正弦值',
         abstract: '傳回給定角度的正弦值',
         links: [
@@ -931,6 +998,7 @@ const locale: typeof enUS = {
         },
     },
     SINH: {
+        label: 'SINH',
         description: '傳回數字的雙曲正弦值',
         abstract: '傳回數字的雙曲正弦值',
         links: [
@@ -944,6 +1012,7 @@ const locale: typeof enUS = {
         },
     },
     SQRT: {
+        label: '平方根',
         description: '返回正平方根',
         abstract: '返回正平方根',
         links: [
@@ -957,6 +1026,7 @@ const locale: typeof enUS = {
         },
     },
     SQRTPI: {
+        label: '平方根.PI',
         description: '傳回某數與 pi 的乘積的平方根',
         abstract: '傳回某數與 pi 的乘積的平方根',
         links: [
@@ -970,6 +1040,7 @@ const locale: typeof enUS = {
         },
     },
     SUBTOTAL: {
+        label: '小計',
         description: '傳回清單或資料庫中的分類總計。 ',
         abstract: '傳回清單或資料庫中的分類總和',
         links: [
@@ -985,6 +1056,7 @@ const locale: typeof enUS = {
         },
     },
     SUM: {
+        label: '總和',
         description: '將單一值、儲存格引用或是區域相加，或將三者的組合相加。 ',
         abstract: '求參數的和',
         links: [
@@ -1005,6 +1077,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIF: {
+        label: '條件求和',
         description: '範圍中符合指定條件的值求和。 ',
         abstract: '按給定條件對指定儲存格求和',
         links: [
@@ -1029,6 +1102,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIFS: {
+        label: '多條件求和',
         description: '會加總符合多項準則的所有引數。',
         abstract: '會加總符合多項準則的所有引數。',
         links: [
@@ -1046,6 +1120,7 @@ const locale: typeof enUS = {
         },
     },
     SUMPRODUCT: {
+        label: '乘積和',
         description: '傳回對應的陣列元素的乘積和',
         abstract: '傳回對應的陣列元素的乘積和',
         links: [
@@ -1060,6 +1135,7 @@ const locale: typeof enUS = {
         },
     },
     SUMSQ: {
+        label: '平方和',
         description: '傳回參數的平方和',
         abstract: '傳回參數的平方和',
         links: [
@@ -1074,6 +1150,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2MY2: {
+        label: 'SUMX2MY2',
         description: '傳回兩陣列中對應值平方差之和',
         abstract: '傳回兩陣列中對應值平方差之和',
         links: [
@@ -1088,6 +1165,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2PY2: {
+        label: 'SUMX2PY2',
         description: '傳回兩陣列中對應值的平方和總和',
         abstract: '傳回兩陣列中對應值的平方和總和',
         links: [
@@ -1102,6 +1180,7 @@ const locale: typeof enUS = {
         },
     },
     SUMXMY2: {
+        label: 'SUMXMY2',
         description: '傳回兩個陣列中對應值差的平方和',
         abstract: '傳回兩個陣列中對應值差的平方和',
         links: [
@@ -1116,6 +1195,7 @@ const locale: typeof enUS = {
         },
     },
     TAN: {
+        label: 'TAN',
         description: '傳回數字的正切值',
         abstract: '傳回數字的正切值',
         links: [
@@ -1129,6 +1209,7 @@ const locale: typeof enUS = {
         },
     },
     TANH: {
+        label: 'TANH',
         description: '傳回數字的雙曲正切值',
         abstract: '傳回數字的雙曲正切值',
         links: [
@@ -1142,6 +1223,7 @@ const locale: typeof enUS = {
         },
     },
     TRUNC: {
+        label: '截斷',
         description: '將數字截尾取整',
         abstract: '將數字截尾取整',
         links: [

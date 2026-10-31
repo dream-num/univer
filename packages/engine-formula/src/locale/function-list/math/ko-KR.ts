@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ABS: {
+        label: 'ABS',
         description: '숫자의 절대값을 반환합니다. 숫자의 절대값은 부호가 없는 숫자입니다.',
         abstract: '숫자의 절대값을 반환합니다',
         links: [
@@ -31,6 +32,7 @@ const locale: typeof enUS = {
         },
     },
     ACOS: {
+        label: 'ACOS',
         description: '숫자의 아크코사인 또는 역코사인을 반환합니다. 아크코사인은 코사인이 number인 각도입니다. 반환된 각도는 0(영)에서 pi 사이의 범위에서 라디안으로 지정됩니다.',
         abstract: '숫자의 아크코사인을 반환합니다',
         links: [
@@ -44,6 +46,7 @@ const locale: typeof enUS = {
         },
     },
     ACOSH: {
+        label: 'ACOSH',
         description: '숫자의 역쌍곡코사인을 반환합니다. 숫자는 1보다 크거나 같아야 합니다. 역쌍곡코사인은 쌍곡코사인이 number인 값이므로 ACOSH(COSH(number))는 number와 같습니다.',
         abstract: '숫자의 역쌍곡코사인을 반환합니다',
         links: [
@@ -57,6 +60,7 @@ const locale: typeof enUS = {
         },
     },
     ACOT: {
+        label: 'ACOT',
         description: '숫자의 아크코탄젠트 또는 역코탄젠트의 주요 값을 반환합니다.',
         abstract: '숫자의 아크코탄젠트를 반환합니다',
         links: [
@@ -73,6 +77,7 @@ const locale: typeof enUS = {
         },
     },
     ACOTH: {
+        label: 'ACOTH',
         description: '숫자의 쌍곡아크코탄젠트를 반환합니다',
         abstract: '숫자의 쌍곡아크코탄젠트를 반환합니다',
         links: [
@@ -86,6 +91,7 @@ const locale: typeof enUS = {
         },
     },
     AGGREGATE: {
+        label: 'AGGREGATE',
         description: '목록 또는 데이터베이스에서 집계를 반환합니다',
         abstract: '목록 또는 데이터베이스에서 집계를 반환합니다',
         links: [
@@ -102,6 +108,7 @@ const locale: typeof enUS = {
         },
     },
     ARABIC: {
+        label: 'ARABIC',
         description: '로마 숫자를 아라비아 숫자로 변환합니다',
         abstract: '로마 숫자를 아라비아 숫자로 변환합니다',
         links: [
@@ -115,6 +122,7 @@ const locale: typeof enUS = {
         },
     },
     ASIN: {
+        label: 'ASIN',
         description: '숫자의 아크사인을 반환합니다.',
         abstract: '숫자의 아크사인을 반환합니다',
         links: [
@@ -128,6 +136,7 @@ const locale: typeof enUS = {
         },
     },
     ASINH: {
+        label: 'ASINH',
         description: '숫자의 역쌍곡사인을 반환합니다.',
         abstract: '숫자의 역쌍곡사인을 반환합니다',
         links: [
@@ -141,6 +150,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN: {
+        label: 'ATAN',
         description: '숫자의 아크탄젠트를 반환합니다.',
         abstract: '숫자의 아크탄젠트를 반환합니다',
         links: [
@@ -154,6 +164,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN2: {
+        label: 'ATAN2',
         description: 'x 및 y 좌표에서 아크탄젠트를 반환합니다.',
         abstract: 'x 및 y 좌표에서 아크탄젠트를 반환합니다',
         links: [
@@ -168,6 +179,7 @@ const locale: typeof enUS = {
         },
     },
     ATANH: {
+        label: 'ATANH',
         description: '역 하이퍼볼릭 탄젠트 값을 반환합니다. number는 -1과 1 사이의 값이어야 합니다(-1과 1은 제외). 역 하이퍼볼릭 탄젠트 값은 하이퍼볼릭 탄젠트 값이 number 인 값이므로 ATANH(TANH(number))는 number 와 같습니다.',
         abstract: '역 하이퍼볼릭 탄젠트 값을 반환합니다. number는 -1과 1 사이의 값이어야 합니다(-1과 1은 제외). 역 하이퍼볼릭 탄젠트 값은 하이퍼볼릭 탄젠트 값이 number 인 값이므로 ATANH(TANH(number))는 number 와 같습니다.',
         links: [
@@ -181,6 +193,7 @@ const locale: typeof enUS = {
         },
     },
     BASE: {
+        label: 'BASE',
         description: '숫자를 지정된 기수(밑)의 텍스트 표현으로 변환합니다',
         abstract: '숫자를 지정된 기수(밑)의 텍스트 표현으로 변환합니다',
         links: [
@@ -196,6 +209,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING: {
+        label: 'CEILING',
         description: '숫자를 가장 가까운 정수 또는 가장 가까운 significance의 배수로 반올림합니다',
         abstract: '숫자를 가장 가까운 정수 또는 가장 가까운 significance의 배수로 반올림합니다',
         links: [
@@ -210,6 +224,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_MATH: {
+        label: 'CEILING.MATH',
         description: '숫자를 위로 반올림하여 가장 가까운 정수 또는 가장 가까운 significance의 배수로 만듭니다',
         abstract: '숫자를 위로 반올림하여 가장 가까운 정수 또는 가장 가까운 significance의 배수로 만듭니다',
         links: [
@@ -225,6 +240,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_PRECISE: {
+        label: 'CEILING.PRECISE',
         description: '숫자를 가장 가까운 정수 또는 가장 가까운 significance의 배수로 반올림합니다. 숫자의 부호에 관계없이 숫자는 반올림됩니다.',
         abstract: '숫자를 가장 가까운 정수 또는 가장 가까운 significance의 배수로 반올림합니다. 숫자의 부호에 관계없이 숫자는 반올림됩니다.',
         links: [
@@ -239,6 +255,7 @@ const locale: typeof enUS = {
         },
     },
     COMBIN: {
+        label: 'COMBIN',
         description: '지정된 개체 수에 대한 조합의 수를 반환합니다',
         abstract: '지정된 개체 수에 대한 조합의 수를 반환합니다',
         links: [
@@ -253,6 +270,7 @@ const locale: typeof enUS = {
         },
     },
     COMBINA: {
+        label: 'COMBINA',
         description: '지정된 항목 수에 대한 반복 조합의 수를 반환합니다',
         abstract: '지정된 항목 수에 대한 반복 조합의 수를 반환합니다',
         links: [
@@ -267,6 +285,7 @@ const locale: typeof enUS = {
         },
     },
     COS: {
+        label: 'COS',
         description: '숫자의 코사인을 반환합니다.',
         abstract: '숫자의 코사인을 반환합니다',
         links: [
@@ -280,6 +299,7 @@ const locale: typeof enUS = {
         },
     },
     COSH: {
+        label: 'COSH',
         description: '숫자의 쌍곡코사인을 반환합니다',
         abstract: '숫자의 쌍곡코사인을 반환합니다',
         links: [
@@ -293,6 +313,7 @@ const locale: typeof enUS = {
         },
     },
     COT: {
+        label: 'COT',
         description: '각도의 코탄젠트를 반환합니다',
         abstract: '각도의 코탄젠트를 반환합니다',
         links: [
@@ -306,6 +327,7 @@ const locale: typeof enUS = {
         },
     },
     COTH: {
+        label: 'COTH',
         description: '숫자의 쌍곡코탄젠트를 반환합니다',
         abstract: '숫자의 쌍곡코탄젠트를 반환합니다',
         links: [
@@ -319,6 +341,7 @@ const locale: typeof enUS = {
         },
     },
     CSC: {
+        label: 'CSC',
         description: '각도의 코시컨트를 반환합니다',
         abstract: '각도의 코시컨트를 반환합니다',
         links: [
@@ -332,6 +355,7 @@ const locale: typeof enUS = {
         },
     },
     CSCH: {
+        label: 'CSCH',
         description: '각도의 쌍곡코시컨트를 반환합니다',
         abstract: '각도의 쌍곡코시컨트를 반환합니다',
         links: [
@@ -345,6 +369,7 @@ const locale: typeof enUS = {
         },
     },
     DECIMAL: {
+        label: 'DECIMAL',
         description: '지정된 밑의 숫자의 텍스트 표현을 십진수로 변환합니다',
         abstract: '지정된 밑의 숫자의 텍스트 표현을 십진수로 변환합니다',
         links: [
@@ -359,6 +384,7 @@ const locale: typeof enUS = {
         },
     },
     DEGREES: {
+        label: 'DEGREES',
         description: '라디안을 도로 변환합니다',
         abstract: '라디안을 도로 변환합니다',
         links: [
@@ -372,6 +398,7 @@ const locale: typeof enUS = {
         },
     },
     EVEN: {
+        label: 'EVEN',
         description: '숫자를 위로 반올림하여 가장 가까운 짝수 정수로 만듭니다',
         abstract: '숫자를 위로 반올림하여 가장 가까운 짝수 정수로 만듭니다',
         links: [
@@ -385,6 +412,7 @@ const locale: typeof enUS = {
         },
     },
     EXP: {
+        label: 'EXP',
         description: '주어진 숫자의 거듭제곱으로 거듭제곱한 e를 반환합니다',
         abstract: '주어진 숫자의 거듭제곱으로 거듭제곱한 e를 반환합니다',
         links: [
@@ -398,6 +426,7 @@ const locale: typeof enUS = {
         },
     },
     FACT: {
+        label: 'FACT',
         description: '숫자의 계승을 반환합니다',
         abstract: '숫자의 계승을 반환합니다',
         links: [
@@ -411,6 +440,7 @@ const locale: typeof enUS = {
         },
     },
     FACTDOUBLE: {
+        label: 'FACTDOUBLE',
         description: '숫자의 이중 계승을 반환합니다',
         abstract: '숫자의 이중 계승을 반환합니다',
         links: [
@@ -424,6 +454,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR: {
+        label: 'FLOOR',
         description: '숫자를 0 방향으로 내림하여 반올림합니다',
         abstract: '숫자를 0 방향으로 내림하여 반올림합니다',
         links: [
@@ -438,6 +469,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_MATH: {
+        label: 'FLOOR.MATH',
         description: '숫자를 아래로 반올림하여 가장 가까운 정수 또는 가장 가까운 significance의 배수로 만듭니다',
         abstract: '숫자를 아래로 반올림하여 가장 가까운 정수 또는 가장 가까운 significance의 배수로 만듭니다',
         links: [
@@ -453,6 +485,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_PRECISE: {
+        label: 'FLOOR.PRECISE',
         description: '숫자를 가장 가까운 정수 또는 가장 가까운 significance의 배수로 내림합니다. 숫자의 부호에 관계없이 숫자는 내림됩니다.',
         abstract: '숫자를 가장 가까운 정수 또는 가장 가까운 significance의 배수로 내림합니다.',
         links: [
@@ -467,6 +500,7 @@ const locale: typeof enUS = {
         },
     },
     GCD: {
+        label: 'GCD',
         description: '최대공약수를 반환합니다',
         abstract: '최대공약수를 반환합니다',
         links: [
@@ -481,6 +515,7 @@ const locale: typeof enUS = {
         },
     },
     INT: {
+        label: 'INT',
         description: '숫자를 가장 가까운 정수로 내림합니다',
         abstract: '숫자를 가장 가까운 정수로 내림합니다',
         links: [
@@ -494,6 +529,7 @@ const locale: typeof enUS = {
         },
     },
     ISO_CEILING: {
+        label: 'CEILING',
         description: '가장 가까운 정수 또는 가장 가까운 significance의 배수로 반올림된 숫자를 반환합니다',
         abstract: '가장 가까운 정수 또는 가장 가까운 significance의 배수로 반올림된 숫자를 반환합니다',
         links: [
@@ -508,6 +544,7 @@ const locale: typeof enUS = {
         },
     },
     LCM: {
+        label: 'LCM',
         description: '최소공배수를 반환합니다',
         abstract: '최소공배수를 반환합니다',
         links: [
@@ -522,6 +559,7 @@ const locale: typeof enUS = {
         },
     },
     LN: {
+        label: 'LN',
         description: '숫자의 자연 로그를 반환합니다',
         abstract: '숫자의 자연 로그를 반환합니다',
         links: [
@@ -535,6 +573,7 @@ const locale: typeof enUS = {
         },
     },
     LOG: {
+        label: 'LOG',
         description: '지정된 밑에 대한 숫자의 로그를 반환합니다',
         abstract: '지정된 밑에 대한 숫자의 로그를 반환합니다',
         links: [
@@ -549,6 +588,7 @@ const locale: typeof enUS = {
         },
     },
     LOG10: {
+        label: 'LOG10',
         description: '숫자의 밑이 10인 로그를 반환합니다',
         abstract: '숫자의 밑이 10인 로그를 반환합니다',
         links: [
@@ -562,6 +602,7 @@ const locale: typeof enUS = {
         },
     },
     MDETERM: {
+        label: 'MDETERM',
         description: '배열의 행렬 행렬식을 반환합니다',
         abstract: '배열의 행렬 행렬식을 반환합니다',
         links: [
@@ -575,6 +616,7 @@ const locale: typeof enUS = {
         },
     },
     MINVERSE: {
+        label: 'MINVERSE',
         description: '배열의 역행렬을 반환합니다',
         abstract: '배열의 역행렬을 반환합니다',
         links: [
@@ -588,6 +630,7 @@ const locale: typeof enUS = {
         },
     },
     MMULT: {
+        label: 'MMULT',
         description: '두 배열의 행렬 곱을 반환합니다',
         abstract: '두 배열의 행렬 곱을 반환합니다',
         links: [
@@ -602,6 +645,7 @@ const locale: typeof enUS = {
         },
     },
     MOD: {
+        label: 'MOD',
         description: '나눗셈의 나머지를 반환합니다',
         abstract: '나눗셈의 나머지를 반환합니다',
         links: [
@@ -616,6 +660,7 @@ const locale: typeof enUS = {
         },
     },
     MROUND: {
+        label: 'MROUND',
         description: '원하는 배수로 반올림된 숫자를 반환합니다',
         abstract: '원하는 배수로 반올림된 숫자를 반환합니다',
         links: [
@@ -630,6 +675,7 @@ const locale: typeof enUS = {
         },
     },
     MULTINOMIAL: {
+        label: 'MULTINOMIAL',
         description: '값 집합의 다항계수를 반환합니다',
         abstract: '값 집합의 다항계수를 반환합니다',
         links: [
@@ -644,6 +690,7 @@ const locale: typeof enUS = {
         },
     },
     MUNIT: {
+        label: 'MUNIT',
         description: '지정된 차원의 단위 행렬을 반환합니다',
         abstract: '지정된 차원의 단위 행렬을 반환합니다',
         links: [
@@ -657,6 +704,7 @@ const locale: typeof enUS = {
         },
     },
     ODD: {
+        label: 'ODD',
         description: '숫자를 가장 가까운 홀수 정수로 반올림합니다',
         abstract: '숫자를 가장 가까운 홀수 정수로 반올림합니다',
         links: [
@@ -670,6 +718,7 @@ const locale: typeof enUS = {
         },
     },
     PI: {
+        label: 'PI',
         description: 'pi 값을 반환합니다',
         abstract: 'pi 값을 반환합니다',
         links: [
@@ -682,6 +731,7 @@ const locale: typeof enUS = {
         },
     },
     POWER: {
+        label: 'POWER',
         description: '거듭제곱한 숫자의 결과를 반환합니다',
         abstract: '거듭제곱한 숫자의 결과를 반환합니다',
         links: [
@@ -696,6 +746,7 @@ const locale: typeof enUS = {
         },
     },
     PRODUCT: {
+        label: 'PRODUCT',
         description: '인수를 곱합니다',
         abstract: '인수를 곱합니다',
         links: [
@@ -710,6 +761,7 @@ const locale: typeof enUS = {
         },
     },
     QUOTIENT: {
+        label: 'QUOTIENT',
         description: '나눗셈의 정수 부분을 반환합니다',
         abstract: '나눗셈의 정수 부분을 반환합니다',
         links: [
@@ -724,6 +776,7 @@ const locale: typeof enUS = {
         },
     },
     RADIANS: {
+        label: 'RADIANS',
         description: '도를 라디안으로 변환합니다',
         abstract: '도를 라디안으로 변환합니다',
         links: [
@@ -737,6 +790,7 @@ const locale: typeof enUS = {
         },
     },
     RAND: {
+        label: 'RAND',
         description: '0과 1 사이의 난수를 반환합니다',
         abstract: '0과 1 사이의 난수를 반환합니다',
         links: [
@@ -749,6 +803,7 @@ const locale: typeof enUS = {
         },
     },
     RANDARRAY: {
+        label: 'RANDARRAY',
         description: '난수 배열을 반환합니다. 채울 행과 열의 수, 최소값과 최대값, 정수 또는 십진수 값 반환 여부를 지정할 수 있습니다.',
         abstract: '난수 배열을 반환합니다',
         links: [
@@ -766,6 +821,7 @@ const locale: typeof enUS = {
         },
     },
     RANDBETWEEN: {
+        label: 'RANDBETWEEN',
         description: '지정한 숫자 사이의 난수를 반환합니다',
         abstract: '지정한 숫자 사이의 난수를 반환합니다',
         links: [
@@ -780,6 +836,7 @@ const locale: typeof enUS = {
         },
     },
     ROMAN: {
+        label: 'ROMAN',
         description: '아라비아 숫자를 텍스트로 로마 숫자로 변환합니다',
         abstract: '아라비아 숫자를 텍스트로 로마 숫자로 변환합니다',
         links: [
@@ -794,6 +851,7 @@ const locale: typeof enUS = {
         },
     },
     ROUND: {
+        label: 'ROUND',
         description: '숫자를 지정된 자릿수로 반올림합니다',
         abstract: '숫자를 지정된 자릿수로 반올림합니다',
         links: [
@@ -808,6 +866,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDBANK: {
+        label: 'ROUNDBANK',
         description: '은행가 반올림 방식으로 숫자를 반올림합니다.',
         abstract: '은행가 반올림 방식으로 숫자를 반올림합니다.',
         links: [
@@ -822,6 +881,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDDOWN: {
+        label: 'ROUNDDOWN',
         description: '숫자를 0 방향으로 내림합니다',
         abstract: '숫자를 0 방향으로 내림합니다',
         links: [
@@ -836,6 +896,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDUP: {
+        label: 'ROUNDUP',
         description: '숫자를 0에서 멀어지는 방향으로 올림합니다',
         abstract: '숫자를 0에서 멀어지는 방향으로 올림합니다',
         links: [
@@ -850,6 +911,7 @@ const locale: typeof enUS = {
         },
     },
     SEC: {
+        label: 'SEC',
         description: '각도의 시컨트를 반환합니다',
         abstract: '각도의 시컨트를 반환합니다',
         links: [
@@ -863,6 +925,7 @@ const locale: typeof enUS = {
         },
     },
     SECH: {
+        label: 'SECH',
         description: '각도의 쌍곡시컨트를 반환합니다',
         abstract: '각도의 쌍곡시컨트를 반환합니다',
         links: [
@@ -876,6 +939,7 @@ const locale: typeof enUS = {
         },
     },
     SERIESSUM: {
+        label: 'SERIESSUM',
         description: '수식을 기반으로 거듭제곱 급수의 합을 반환합니다',
         abstract: '수식을 기반으로 거듭제곱 급수의 합을 반환합니다',
         links: [
@@ -892,6 +956,7 @@ const locale: typeof enUS = {
         },
     },
     SEQUENCE: {
+        label: 'SEQUENCE',
         description: '1, 2, 3, 4와 같은 순차 숫자 목록을 배열로 생성합니다',
         abstract: '순차 숫자 목록을 배열로 생성합니다',
         links: [
@@ -908,6 +973,7 @@ const locale: typeof enUS = {
         },
     },
     SIGN: {
+        label: 'SIGN',
         description: '숫자의 부호를 반환합니다',
         abstract: '숫자의 부호를 반환합니다',
         links: [
@@ -921,6 +987,7 @@ const locale: typeof enUS = {
         },
     },
     SIN: {
+        label: 'SIN',
         description: '지정한 각도의 사인을 반환합니다',
         abstract: '지정한 각도의 사인을 반환합니다',
         links: [
@@ -934,6 +1001,7 @@ const locale: typeof enUS = {
         },
     },
     SINH: {
+        label: 'SINH',
         description: '숫자의 쌍곡사인을 반환합니다',
         abstract: '숫자의 쌍곡사인을 반환합니다',
         links: [
@@ -947,6 +1015,7 @@ const locale: typeof enUS = {
         },
     },
     SQRT: {
+        label: 'SQRT',
         description: '양의 제곱근을 반환합니다',
         abstract: '양의 제곱근을 반환합니다',
         links: [
@@ -960,6 +1029,7 @@ const locale: typeof enUS = {
         },
     },
     SQRTPI: {
+        label: 'PI',
         description: '(number * pi)의 제곱근을 반환합니다',
         abstract: '(number * pi)의 제곱근을 반환합니다',
         links: [
@@ -973,6 +1043,7 @@ const locale: typeof enUS = {
         },
     },
     SUBTOTAL: {
+        label: 'SUBTOTAL',
         description: '목록이나 데이터베이스에서 부분합을 반환합니다',
         abstract: '목록이나 데이터베이스에서 부분합을 반환합니다',
         links: [
@@ -988,6 +1059,7 @@ const locale: typeof enUS = {
         },
     },
     SUM: {
+        label: 'SUM',
         description: '인수를 더합니다',
         abstract: '인수를 더합니다',
         links: [
@@ -1002,6 +1074,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIF: {
+        label: 'SUMIF',
         description: '지정한 조건에 의해 지정된 셀을 더합니다',
         abstract: '지정한 조건에 의해 지정된 셀을 더합니다',
         links: [
@@ -1017,6 +1090,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIFS: {
+        label: 'SUMIFS',
         description: '범위에서 여러 조건을 충족하는 셀을 더합니다',
         abstract: '범위에서 여러 조건을 충족하는 셀을 더합니다',
         links: [
@@ -1034,6 +1108,7 @@ const locale: typeof enUS = {
         },
     },
     SUMPRODUCT: {
+        label: 'PRODUCT',
         description: '해당 배열 구성 요소의 곱의 합을 반환합니다',
         abstract: '해당 배열 구성 요소의 곱의 합을 반환합니다',
         links: [
@@ -1048,6 +1123,7 @@ const locale: typeof enUS = {
         },
     },
     SUMSQ: {
+        label: 'SUMSQ',
         description: '인수의 제곱의 합을 반환합니다',
         abstract: '인수의 제곱의 합을 반환합니다',
         links: [
@@ -1062,6 +1138,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2MY2: {
+        label: 'SUMX2MY2',
         description: '두 배열에서 해당 값의 제곱 차이의 합을 반환합니다',
         abstract: '두 배열에서 해당 값의 제곱 차이의 합을 반환합니다',
         links: [
@@ -1076,6 +1153,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2PY2: {
+        label: 'SUMX2PY2',
         description: '두 배열에서 해당 값의 제곱 합의 합을 반환합니다',
         abstract: '두 배열에서 해당 값의 제곱 합의 합을 반환합니다',
         links: [
@@ -1090,6 +1168,7 @@ const locale: typeof enUS = {
         },
     },
     SUMXMY2: {
+        label: 'SUMXMY2',
         description: '두 배열에서 해당 값 차이의 제곱의 합을 반환합니다',
         abstract: '두 배열에서 해당 값 차이의 제곱의 합을 반환합니다',
         links: [
@@ -1104,6 +1183,7 @@ const locale: typeof enUS = {
         },
     },
     TAN: {
+        label: 'TAN',
         description: '숫자의 탄젠트를 반환합니다',
         abstract: '숫자의 탄젠트를 반환합니다',
         links: [
@@ -1117,6 +1197,7 @@ const locale: typeof enUS = {
         },
     },
     TANH: {
+        label: 'TANH',
         description: '숫자의 쌍곡탄젠트를 반환합니다',
         abstract: '숫자의 쌍곡탄젠트를 반환합니다',
         links: [
@@ -1130,6 +1211,7 @@ const locale: typeof enUS = {
         },
     },
     TRUNC: {
+        label: 'TRUNC',
         description: '숫자를 정수로 자릅니다',
         abstract: '숫자를 정수로 자릅니다',
         links: [

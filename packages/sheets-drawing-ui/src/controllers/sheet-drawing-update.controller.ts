@@ -49,7 +49,6 @@ import {
     ImageUploadStatusType,
     Inject,
     Injector,
-    IPermissionService,
     IUniverInstanceService,
     IURLImageService,
     LocaleService,
@@ -78,8 +77,6 @@ import {
     SheetInterceptorService,
     SheetSkeletonService,
     SheetsSelectionsService,
-    WorkbookEditablePermission,
-    WorksheetEditPermission,
 } from '@univerjs/sheets';
 import {
     applySheetDrawingPlacement,
@@ -164,15 +161,12 @@ interface IImageInsertionTarget {
     render: IRender;
     unitId: string;
     subUnitId: string;
-    epoch: number;
     location?: ISheetLocationBase;
-    explicit: boolean;
     pageFrame?: Rect;
 }
 
 export class SheetDrawingUpdateController extends Disposable implements IRenderModule {
     private readonly _workbookSelections: WorkbookSelectionModel;
-    private _imageInsertionEpoch = 0;
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @ICommandService private readonly _commandService: ICommandService,
@@ -194,23 +188,6 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
         this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
 
-        this.disposeWithMe(this._context.unit.activeSheet$.subscribe(() => {
-            this._imageInsertionEpoch++;
-        }));
-        this.disposeWithMe(this._injector.get(IUniverInstanceService).getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe(() => {
-            this._imageInsertionEpoch++;
-        }));
-        this.disposeWithMe(this._injector.get(IUniverInstanceService).focused$.subscribe(() => {
-            this._imageInsertionEpoch++;
-        }));
-        this.disposeWithMe(this._injector.get(IPermissionService).permissionPointUpdate$.subscribe((point) => {
-            const workbookId = this._context.unitId;
-            const sheetId = this._context.unit.getActiveSheet()?.getSheetId();
-            if (point.value === false && (point.id === new WorkbookEditablePermission(workbookId).id ||
-                (sheetId && point.id === new WorksheetEditPermission(workbookId, sheetId).id))) {
-                this._imageInsertionEpoch++;
-            }
-        }));
         this._updateDrawingListener();
         this._updateOrderListener();
         this._groupDrawingListener();
@@ -636,7 +613,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }
         const frame = render.components.get(SHEET_VIEW_KEY.CHART_PAGE);
         const pageFrame = frame instanceof Rect ? frame : undefined;
-        const target = { ...host, render, epoch: this._imageInsertionEpoch, location, explicit: Boolean(location), pageFrame };
+        const target = { ...host, render, location, pageFrame };
         return this._isImageTargetValid(target) ? target : null;
     }
 
@@ -670,16 +647,6 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         if (instances.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET) !== workbook ||
             workbook.getSheetBySheetId(subUnitId) !== worksheet || render.isDisposed() ||
             this._injector.get(IRenderManagerService).getRenderUnitById(unitId) !== render) {
-            return false;
-        }
-        if (!target.explicit && (target.epoch !== this._imageInsertionEpoch ||
-            instances.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET) !== workbook ||
-            instances.getFocusedUnit() !== workbook || workbook.getActiveSheet() !== worksheet)) {
-            return false;
-        }
-        const permissions = this._injector.get(IPermissionService);
-        if (permissions.getPermissionPoint(new WorkbookEditablePermission(unitId).id)?.value !== true ||
-            permissions.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value !== true) {
             return false;
         }
         return worksheet.getConfig().type !== SheetTypes.CHART ||

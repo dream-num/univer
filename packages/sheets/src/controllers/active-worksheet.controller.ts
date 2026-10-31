@@ -16,27 +16,23 @@
 
 import type { IMutationInfo, IOperationInfo, Workbook } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { Subscription } from 'rxjs';
-import type { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../basics/interfaces/mutation-interface';
+import type { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../basics';
 import type { ISetWorksheetHideMutationParams } from '../commands/mutations/set-worksheet-hide.mutation';
-import type { ISetWorksheetOrderMutationParams } from '../commands/mutations/set-worksheet-order.mutation';
 import type { ISetSelectionsOperationParams } from '../commands/operations/selection.operation';
 import type { ISetWorksheetActiveOperationParams } from '../commands/operations/set-worksheet-active.operation';
 import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
 import { SetWorksheetHideMutation } from '../commands/mutations/set-worksheet-hide.mutation';
-import { SetWorksheetOrderMutation } from '../commands/mutations/set-worksheet-order.mutation';
 import { SetSelectionsOperation } from '../commands/operations/selection.operation';
 import { SetWorksheetActiveOperation } from '../commands/operations/set-worksheet-active.operation';
 
 /**
  * This controller is responsible for changing the active worksheet when
- * worksheet lifecycle and tab mutations execute. Model-level removals also
- * occur inside atomic mutations, including collaborative replay.
+ * worksheet tab related mutations executes. We cannot write this logic in
+ * commands because it does not take collaborative editing into consideration.
  */
 export class ActiveWorksheetController extends Disposable {
-    private readonly _workbookSubscriptions = new Map<Workbook, Subscription>();
-    private readonly _sheetOrders = new Map<Workbook, readonly string[]>();
+    private _previousSheetIndex = -1;
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -53,12 +49,8 @@ export class ActiveWorksheetController extends Disposable {
         }));
 
         this.disposeWithMe(this._commandService.onCommandExecuted((command, options) => {
-            if (command.id === SetWorksheetOrderMutation.id) {
-                const { unitId } = command.params as ISetWorksheetOrderMutationParams;
-                const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
-                if (workbook) {
-                    this._sheetOrders.set(workbook, workbook.getSheetOrders().slice());
-                }
+            if (command.id === RemoveSheetMutation.id) {
+                return this._adjustActiveSheetOnRemoveSheet(command as IMutationInfo<IRemoveSheetMutationParams>);
             }
 
             if (command.id === SetWorksheetHideMutation.id && (command.params as ISetWorksheetHideMutationParams).hidden) {
@@ -83,40 +75,6 @@ export class ActiveWorksheetController extends Disposable {
                 return this._adjustActiveSheetOnSelection(command as IOperationInfo<ISetSelectionsOperationParams>);
             }
         }));
-
-        this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET)
-            .forEach((workbook) => this._watchWorkbook(workbook));
-        this.disposeWithMe(this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET)
-            .subscribe(({ unit }) => this._watchWorkbook(unit)));
-        this.disposeWithMe(this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET)
-            .subscribe((workbook) => {
-                this._workbookSubscriptions.get(workbook)?.unsubscribe();
-                this._workbookSubscriptions.delete(workbook);
-                this._sheetOrders.delete(workbook);
-            }));
-        this.disposeWithMe(() => {
-            this._workbookSubscriptions.forEach((subscription) => subscription.unsubscribe());
-            this._workbookSubscriptions.clear();
-            this._sheetOrders.clear();
-        });
-    }
-
-    private _watchWorkbook(workbook: Workbook): void {
-        this._sheetOrders.set(workbook, workbook.getSheetOrders().slice());
-        const subscription = new Subscription();
-        subscription.add(workbook.sheetCreated$.subscribe(() => {
-            this._sheetOrders.set(workbook, workbook.getSheetOrders().slice());
-        }));
-        subscription.add(workbook.sheetDisposed$.subscribe((worksheet) => {
-            const removedIndex = this._sheetOrders.get(workbook)!.indexOf(worksheet.getSheetId());
-            this._sheetOrders.set(workbook, workbook.getSheetOrders().slice());
-            if (workbook.getActiveSheet()?.getSheetId() !== worksheet.getSheetId() || !workbook.getSheetSize()) {
-                return;
-            }
-            const nextId = findTheNextUnhiddenSheet(workbook, Math.max(removedIndex - 1, 0));
-            this._switchToNextSheet(workbook.getUnitId(), nextId);
-        }));
-        this._workbookSubscriptions.set(workbook, subscription);
     }
 
     private _adjustActiveSheetOnHideSheet(mutation: IMutationInfo<ISetWorksheetHideMutationParams>) {
@@ -150,7 +108,34 @@ export class ActiveWorksheetController extends Disposable {
             return;
         }
 
-        this._sheetOrders.set(workbook, workbook.getSheetOrders().slice());
+        this._previousSheetIndex = workbook.getSheetIndex(worksheet);
+    }
+
+    private _adjustActiveSheetOnRemoveSheet(mutation: IMutationInfo<IRemoveSheetMutationParams>) {
+        if (this._previousSheetIndex === -1) {
+            return;
+        }
+
+        // If the active sheet is removed, we need to change the active sheet to the previous sheet.
+        // But how to decide which one is the previous sheet? We store the deleted sheet' index
+        // in the `IRemoteSheetMutationParams` and use it to decide the previous sheet.
+
+        // If the current sheet is not the deleted one, we don't have to call _switchToNextSheet.
+        const { unitId } = mutation.params;
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) {
+            return;
+        }
+
+        // _switchToNextSheet is executed only when the current sheet is deleted.
+        const activeSheet = workbook.getActiveSheet();
+        if (activeSheet.getSheetId() === mutation.params.subUnitId) {
+            const previousIndex = this._previousSheetIndex;
+            const nextIndex = previousIndex >= 1 ? previousIndex - 1 : 0;
+            const nextId = findTheNextUnhiddenSheet(workbook, nextIndex);
+
+            this._switchToNextSheet(unitId, nextId);
+        }
     }
 
     private _adjustActiveSheetOnInsertSheet(mutation: IMutationInfo<IInsertSheetMutationParams>) {

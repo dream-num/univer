@@ -34,8 +34,7 @@ import { RangeProtectionRuleModel } from '../../../models/range-protection-rule.
 import { BorderStyleManagerService } from '../../../services/border-style-manager.service';
 import { SheetLazyExecuteScheduleService } from '../../../services/lazy-execute-schedule.service';
 import { WorkbookPermissionService } from '../../../services/permission/workbook-permission/workbook-permission.service';
-import { WorksheetProtectionPointModel } from '../../../services/permission/worksheet-permission/worksheet-permission-point.model';
-import { WorksheetProtectionRuleModel } from '../../../services/permission/worksheet-permission/worksheet-permission-rule.model';
+import { WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '../../../services/permission/worksheet-permission';
 import { WorksheetPermissionService } from '../../../services/permission/worksheet-permission/worksheet-permission.service';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
@@ -83,7 +82,7 @@ export interface ITestBed {
     sheet: Workbook;
 }
 
-export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[], onStarting?: (injector: Injector) => void): ITestBed {
+export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
     const univer = new Univer();
     const injector = univer.__getInjector();
 
@@ -112,7 +111,6 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([SheetLazyExecuteScheduleService]);
 
             dependencies?.forEach((d) => injector.add(d));
-            onStarting?.(injector);
 
             this._injector.get(SheetInterceptorService);
             this._injector.get(SheetSkeletonService);

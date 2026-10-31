@@ -29,7 +29,6 @@ import { ToggleFullscreenOperation } from '../commands/operations/toggle-fullscr
 import { CopyCommand, CutCommand, PasteCommand } from '../services/clipboard/clipboard.command';
 import { KeyCode, MetaKeys } from '../services/shortcut/keycode';
 import { IShortcutService } from '../services/shortcut/shortcut.service';
-import { SIDEBAR_COMPONENT_NAME } from '../services/sidebar/sidebar.service';
 
 // Not that the clipboard shortcut items would only be invoked when the browser fully supports clipboard API.
 // If not, the corresponding shortcut would not be triggered and we will perform clipboard operations
@@ -128,17 +127,15 @@ export class SharedController extends Disposable {
     private _registerShortcuts(): void {
         const shortcutItems = [UndoShortcutItem, RedoShortcutItem, RedoMacShortcutItem];
         for (const shortcut of shortcutItems) {
-            // Command controls and non-editing sidebars can own DOM focus outside the canvas editor.
+            // Keyboard menu dismissal restores its command trigger, not the editor focus context.
             this.disposeWithMe(this._shortcutService.registerShortcut({
                 ...shortcut,
                 eventPreconditions: (event) => {
                     const target = event.target;
-                    if (!(target instanceof HTMLElement) || target !== target.ownerDocument.activeElement || target.isContentEditable) {
-                        return false;
-                    }
-                    const sidebar = target.closest(`[data-u-comp="${SIDEBAR_COMPONENT_NAME}"][aria-expanded="true"]`);
-                    return target.matches('button[data-u-command], [data-u-command][role="button"], [data-embed-floating-menu="true"] button') ||
-                        (sidebar !== null && target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"])') === null);
+                    return target instanceof HTMLElement &&
+                        target === target.ownerDocument.activeElement &&
+                        !target.isContentEditable &&
+                        target.matches('button[data-u-command], [data-u-command][role="button"], [data-embed-floating-menu="true"] button');
                 },
                 preconditions: (contextService) => !(
                     contextService.getContextValue(EDITOR_ACTIVATED) ||

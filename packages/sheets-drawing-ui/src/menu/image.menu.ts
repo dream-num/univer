@@ -30,36 +30,29 @@ import { InsertCellImageCommand, InsertFloatImageCommand } from '../commands/com
 
 export const SHEETS_IMAGE_MENU_ID = 'sheet.menu.image';
 
-/**
- * GRID (including an omitted sheet type): the image submenu and both insertion items follow
- * the shared range-menu rules for editor/drawing focus and workbook, worksheet and range permissions.
- * CHART: cell-image insertion is always disabled because there are no cells; the image submenu
- * and floating-image insertion only require workbook and worksheet edit permissions, with no range checks.
- * Other sheet types, or no active sheet, disable all three menus.
- */
+/** Chart Sheets have no cells; other sheet types retain the existing range-menu permission rules. */
 function getImageMenuDisabled$(accessor: IAccessor, floating: boolean) {
     return deriveStateFromActiveSheet$(accessor.get(IUniverInstanceService), true, ({ workbook, worksheet }) => {
-        const sheetType = worksheet.getConfig().type ?? SheetTypes.GRID;
-        if (sheetType === SheetTypes.GRID) {
-            return getCurrentRangeDisable$(accessor, {
-                workbookTypes: [WorkbookEditablePermission],
-                worksheetTypes: [WorksheetEditPermission],
-                rangeTypes: [RangeProtectionPermissionEditPoint],
-            });
+        if (worksheet.getConfig().type === SheetTypes.CHART) {
+            if (!floating) {
+                return of(true);
+            }
+            const permissions = accessor.get(IPermissionService);
+            const ids = [
+                new WorkbookEditablePermission(workbook.getUnitId()).id,
+                new WorksheetEditPermission(workbook.getUnitId(), worksheet.getSheetId()).id,
+            ];
+            return permissions.permissionPointUpdate$.pipe(
+                startWith(null),
+                map(() => ids.some((id) => permissions.getPermissionPoint(id)?.value !== true)),
+                distinctUntilChanged()
+            );
         }
-        if (!floating || sheetType !== SheetTypes.CHART) {
-            return of(true);
-        }
-        const permissions = accessor.get(IPermissionService);
-        const ids = [
-            new WorkbookEditablePermission(workbook.getUnitId()).id,
-            new WorksheetEditPermission(workbook.getUnitId(), worksheet.getSheetId()).id,
-        ];
-        return permissions.permissionPointUpdate$.pipe(
-            startWith(null),
-            map(() => ids.some((id) => permissions.getPermissionPoint(id)?.value !== true)),
-            distinctUntilChanged()
-        );
+        return getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        });
     });
 }
 

@@ -16,7 +16,6 @@
 
 import type { IWorkbookData } from '@univerjs/core';
 import {
-    CustomCommandExecutionError,
     DrawingTypeEnum,
     ImageSourceType,
     IResourceLoaderService,
@@ -28,13 +27,12 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { InsertSheetCommand, SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
+import { InsertSheetCommand, SheetSkeletonService } from '@univerjs/sheets';
 import { expect, it, onTestFinished } from 'vitest';
 import { createSheetsDrawingTestBed } from '../../../__tests__/create-sheets-drawing-test-bed';
 import { ISheetDrawingService, SheetDrawingAnchorType } from '../../../services/sheet-drawing.service';
 import { InsertSheetDrawingCommand } from '../insert-sheet-drawing.command';
 import { SetSheetDrawingPlacementCommand } from '../set-sheet-drawing-placement.command';
-import { SetSheetDrawingCommand } from '../set-sheet-drawing.command';
 
 it.each([
     { name: 'default dimensions', dimensions: {} },
@@ -135,7 +133,7 @@ it.each([
     expect(restored.get(SheetSkeletonService).getSkeleton('test', 'grid')).toBeDefined();
 });
 
-it('retains GRID Position and Both placement independently of SetSheetDrawingCommand policies', async () => {
+it('retains GRID Position and Both placement through undo and redo', async () => {
     const bed = createSheetsDrawingTestBed();
     onTestFinished(() => bed.univer.dispose());
     const marker = { row: 1, column: 1, rowOffset: 2, columnOffset: 3 };
@@ -151,15 +149,6 @@ it('retains GRID Position and Both placement independently of SetSheetDrawingCom
     };
     expect(await bed.commandService.executeCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [drawing] })).toBe(true);
     bed.get(IUndoRedoService).clearUndoRedo('test');
-    const policy = bed.get(SheetInterceptorService).interceptCommand({
-        getMutations: (command) => {
-            if (command.id === SetSheetDrawingCommand.id) {
-                throw new CustomCommandExecutionError(SetSheetDrawingCommand.id);
-            }
-            return { preRedos: [], redos: [], preUndos: [], undos: [] };
-        },
-    });
-    onTestFinished(() => policy.dispose());
     const skeleton = bed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1');
     expect(skeleton).toBeDefined();
     expect(await bed.commandService.executeCommand(SetSheetDrawingPlacementCommand.id, {

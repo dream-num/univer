@@ -15,12 +15,12 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
+import { CommandType, ICommandService } from '@univerjs/core';
 import { SheetSkeletonService } from '@univerjs/sheets';
 import type { ISheetDrawingPlacementInput } from '../../services/sheet-drawing-placement';
 import { applySheetDrawingPlacement } from '../../services/sheet-drawing-placement';
 import { ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
-import { createSheetDrawingUpdateMutations } from './sheet-drawing-update-mutations';
+import { SetSheetDrawingCommand } from './set-sheet-drawing.command';
 
 export interface ISetSheetDrawingPlacementCommandParams {
     unitId: string;
@@ -40,7 +40,6 @@ export const SetSheetDrawingPlacementCommand: ICommand<ISetSheetDrawingPlacement
         }
 
         const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
         const drawingService = accessor.get(ISheetDrawingService);
         const skeleton = params.drawings.every(({ placement }) => placement.kind === SheetDrawingAnchorType.None)
             ? undefined
@@ -57,12 +56,7 @@ export const SetSheetDrawingPlacementCommand: ICommand<ISetSheetDrawingPlacement
             }
             updatedDrawings.push(applySheetDrawingPlacement(drawing, placement, skeleton));
         }
-        const drawingOp = drawingService.getBatchUpdateOp(updatedDrawings);
-        const { redoMutations, undoMutations } = createSheetDrawingUpdateMutations(drawingOp);
-        if (!sequenceExecute(redoMutations, commandService).result) {
-            return false;
-        }
-        undoRedoService.pushUndoRedo({ unitID: drawingOp.unitId, redoMutations, undoMutations });
-        return true;
+        // Use the shared update flow so drawing interceptors join the same undo/redo entry.
+        return commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { drawings: updatedDrawings });
     },
 };

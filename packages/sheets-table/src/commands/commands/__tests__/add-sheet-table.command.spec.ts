@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import type { IMutationInfo } from '@univerjs/core';
 import {
     ICommandService,
@@ -26,8 +42,6 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
-import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { ITableOptions } from '../../../types/type';
 import enUS from '../../../locale/en-US';
@@ -47,8 +61,6 @@ function createUniver() {
     locale.load({ [LocaleType.EN_US]: enUS });
     locale.setLocale(LocaleType.EN_US);
     locale.setDirection('ltr');
-    univer.registerPlugin(UniverFormulaEnginePlugin);
-    univer.registerPlugin(UniverSheetsPlugin);
     univer.registerPlugin(UniverSheetsTablePlugin);
     univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
         id: 'unit',

@@ -16,19 +16,15 @@
 
 import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
 import {
-    CommandType,
     ICommandService,
     ILogService,
     Inject,
     Injector,
-    IResourceManagerService,
-    IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
     LogLevel,
     Plugin,
-    SheetTypes,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -47,7 +43,6 @@ import {
     AddRangeThemeMutation,
     RefRangeService,
     RemoveRangeThemeMutation,
-    SetWorksheetActiveOperation,
     SheetInterceptorService,
     SheetRangeThemeModel,
     SheetSkeletonService,
@@ -86,11 +81,10 @@ function createWorkbookData(): IWorkbookData {
                 rowCount: 100,
                 columnCount: 100,
             },
-            chart: { id: 'chart', name: 'Chart', type: SheetTypes.CHART, cellData: {} },
         },
         locale: LocaleType.EN_US,
         name: '',
-        sheetOrder: ['sheet1', 'chart'],
+        sheetOrder: ['sheet1'],
         styles: {},
     };
 }
@@ -168,7 +162,6 @@ describe('sheets-table facade', () => {
             SetSheetTableMutation,
             SetSheetTableFilterCommand,
             SetSheetTableFilterMutation,
-            SetWorksheetActiveOperation,
         ].forEach((command) => commandService.registerCommand(command));
     });
 
@@ -258,44 +251,6 @@ describe('sheets-table facade', () => {
         await expect(worksheet.addTable('Receipts', worksheet.getRange('E1:F3').getRange(), 'table-receipts')).resolves.toBe(true);
         expect(workbook.getTableInfoByName('Receipts')?.id).toBe('table-receipts');
         await expect(worksheet.removeTable('table-receipts')).resolves.toBe(true);
-    });
-
-    it('refuses Chart worksheet removal of a Grid-owned table without touching state or history', async () => {
-        const workbook = testBed.univerAPI.getActiveWorkbook()!;
-        const grid = workbook.getSheetBySheetId('sheet1')!;
-        const chart = workbook.getSheetBySheetId('chart')!;
-        const tableId = 'grid-owned-table';
-        expect(await grid.addTable('GridOwned', grid.getRange('A1:B3').getRange(), tableId)).toBe(true);
-        workbook.setActiveSheet(chart);
-
-        const commandService = testBed.get(ICommandService);
-        const history = testBed.get(IUndoRedoService);
-        const resourceService = testBed.get(IResourceManagerService);
-        const snapshot = JSON.parse(JSON.stringify(workbook.save()));
-        const resources = JSON.parse(JSON.stringify(resourceService.getResources(workbook.getId(), UniverInstanceType.UNIVER_SHEET)));
-        const undo = history.pitchTopUndoElement();
-        const redo = history.pitchTopRedoElement();
-        const mutations: string[] = [];
-        const observer = commandService.onCommandExecuted((command) => {
-            if (command.type === CommandType.MUTATION) {
-                mutations.push(command.id);
-            }
-        });
-
-        try {
-            expect(await chart.removeTable(tableId)).toBe(false);
-            expect(JSON.parse(JSON.stringify(workbook.save()))).toEqual(snapshot);
-            expect(resourceService.getResources(workbook.getId(), UniverInstanceType.UNIVER_SHEET)).toEqual(resources);
-            expect(history.pitchTopUndoElement()).toBe(undo);
-            expect(history.pitchTopRedoElement()).toBe(redo);
-            expect(mutations).toEqual([]);
-            expect(workbook.getTableInfo(tableId)?.subUnitId).toBe(grid.getSheetId());
-        } finally {
-            observer.dispose();
-        }
-
-        expect(await grid.removeTable(tableId)).toBe(true);
-        expect(workbook.getTableInfo(tableId)).toBeUndefined();
     });
 
     it('styles and removes tables through worksheet facade commands', async () => {

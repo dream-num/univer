@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-import type { Injector, IWorkbookData, Workbook } from '@univerjs/core';
+import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     DEFAULT_TEXT_FORMAT_EXCEL,
     ICommandService,
     ILogService,
+    Inject,
+    Injector,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
     LogLevel,
+    Plugin,
     RANGE_TYPE,
     RedoCommand,
     RegionService,
@@ -31,11 +34,16 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
-import { INumfmtService, SheetsSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
+import {
+    INumfmtService,
+    NumfmtService,
+    RemoveNumfmtMutation,
+    SetNumfmtMutation,
+    SetRangeValuesMutation,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { getCurrencyFormat } from '../../../base/const/currency-symbols';
-import { UniverSheetsNumfmtPlugin } from '../../../plugin';
 import { AddDecimalCommand } from '../add-decimal.command';
 import { SetCurrencyCommand } from '../set-currency.command';
 import { SetNumfmtCommand } from '../set-numfmt.command';
@@ -86,20 +94,44 @@ function createWorkbookData(): IWorkbookData {
     };
 }
 
-function createCommandTestBed(workbookData: IWorkbookData = createWorkbookData()) {
+function createCommandTestBed(workbookData?: IWorkbookData) {
     const univer = new Univer();
-    univer.registerPlugin(UniverFormulaEnginePlugin);
-    univer.registerPlugin(UniverSheetsPlugin);
-    univer.registerPlugin(UniverSheetsNumfmtPlugin);
     const injector = univer.__getInjector();
-    const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData);
+
+    class TestPlugin extends Plugin {
+        static override pluginName = 'test-plugin';
+        static override type = UniverInstanceType.UNIVER_SHEET;
+
+        constructor(
+            _config: undefined,
+            @Inject(Injector) override readonly _injector: Injector
+        ) {
+            super();
+        }
+
+        override onStarting(): void {
+            const dependencies: Dependency[] = [
+                [SheetsSelectionsService],
+                [INumfmtService, { useClass: NumfmtService }],
+            ];
+
+            dependencies.forEach((dependency) => this._injector.add(dependency));
+        }
+    }
+
+    univer.registerPlugin(TestPlugin);
+    const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData ?? createWorkbookData());
+
     const get = injector.get.bind(injector);
-    get(IUniverInstanceService).focusUnit(sheet.getUnitId());
+    get(IUniverInstanceService).focusUnit('test');
     get(LocaleService).setLocale(LocaleType.ZH_CN);
-    get(LocaleService).setDirection('ltr');
     get(ILogService).setLogLevel(LogLevel.SILENT);
 
-    return { univer, get, sheet };
+    return {
+        univer,
+        get,
+        sheet,
+    };
 }
 
 describe('Sheets numfmt commands', () => {
@@ -119,6 +151,19 @@ describe('Sheets numfmt commands', () => {
         commandService = get(ICommandService);
         selectionService = get(SheetsSelectionsService);
         numfmtService = get(INumfmtService);
+
+        [
+            SetRangeValuesMutation,
+            SetNumfmtMutation,
+            RemoveNumfmtMutation,
+            SetNumfmtCommand,
+            AddDecimalCommand,
+            SubtractDecimalCommand,
+            SetPercentCommand,
+            SetCurrencyCommand,
+        ].forEach((command) => {
+            commandService.registerCommand(command);
+        });
     });
 
     afterEach(() => {

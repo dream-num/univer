@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DisposableCollection, IRange, Worksheet } from '@univerjs/core';
+import type { DisposableCollection, IRange, IRectXYWH, Worksheet } from '@univerjs/core';
 import type { Engine, Scene, Spreadsheet, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { createInterceptorKey, Disposable, InterceptorManager } from '@univerjs/core';
 
@@ -73,9 +73,26 @@ interface ISheetPrintComponentContext extends ISheetPrintContext {
     spreadsheet: Spreadsheet;
 }
 
+interface IChartSheetPrintContext {
+    unitId: string;
+    subUnitId: string;
+    scene: Scene;
+    engine: Engine;
+    root: HTMLElement;
+    worksheet: Worksheet;
+    resourceCollector: SheetPrintingResourceCollector;
+    offset: {
+        offsetX: number;
+        offsetY: number;
+    };
+}
+
 const PRINTING_RANGE = createInterceptorKey<IRange, { unitId: string; subUnitId: string }>('PRINTING_RANGE');
 const PRINTING_COMPONENT_COLLECT = createInterceptorKey<undefined, ISheetPrintComponentContext>('PRINTING_COMPONENT_COLLECT');
 const PRINTING_DOM_COLLECT = createInterceptorKey<DisposableCollection, ISheetPrintContext>('PRINTING_DOM_COLLECT');
+const PRINTING_CHART_PAGE_RECT = createInterceptorKey<IRectXYWH | undefined, { unitId: string; subUnitId: string }>('PRINTING_CHART_PAGE_RECT');
+const PRINTING_CHART_COMPONENT_COLLECT = createInterceptorKey<undefined, IChartSheetPrintContext>('PRINTING_CHART_COMPONENT_COLLECT');
+const PRINTING_CHART_DOM_COLLECT = createInterceptorKey<DisposableCollection, IChartSheetPrintContext>('PRINTING_CHART_DOM_COLLECT');
 
 export class SheetPrintInterceptorService extends Disposable {
     private _printComponentMap: Map<string, string> = new Map();
@@ -83,6 +100,9 @@ export class SheetPrintInterceptorService extends Disposable {
         PRINTING_RANGE,
         PRINTING_COMPONENT_COLLECT,
         PRINTING_DOM_COLLECT,
+        PRINTING_CHART_PAGE_RECT,
+        PRINTING_CHART_COMPONENT_COLLECT,
+        PRINTING_CHART_DOM_COLLECT,
     });
 
     constructor() {
@@ -98,6 +118,19 @@ export class SheetPrintInterceptorService extends Disposable {
         }));
 
         this.disposeWithMe(this.interceptor.intercept(this.interceptor.getInterceptPoints().PRINTING_DOM_COLLECT, {
+            priority: -1,
+            handler: (_value) => _value,
+        }));
+
+        this.disposeWithMe(this.interceptor.intercept(this.interceptor.getInterceptPoints().PRINTING_CHART_PAGE_RECT, {
+            priority: -1,
+            handler: (_value) => _value,
+        }));
+        this.disposeWithMe(this.interceptor.intercept(this.interceptor.getInterceptPoints().PRINTING_CHART_COMPONENT_COLLECT, {
+            priority: -1,
+            handler: (_value) => _value,
+        }));
+        this.disposeWithMe(this.interceptor.intercept(this.interceptor.getInterceptPoints().PRINTING_CHART_DOM_COLLECT, {
             priority: -1,
             handler: (_value) => _value,
         }));

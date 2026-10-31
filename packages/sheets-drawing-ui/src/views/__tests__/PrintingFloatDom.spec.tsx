@@ -199,4 +199,16 @@ describe('PrintingFloatDom', () => {
 
         expect(floatDom.props).toEqual({ printingLabel: 'Ready callback props' });
     });
+    it('maps Chart Sheet DOM bounds with the print viewport scale and scroll without a grid skeleton', () => {
+        currentTestBed = createSheetsDrawingUiTestBed(undefined, [[ComponentManager]]);
+        const scene = new TestPrintingScene();
+        scene.getViewport = () => ({ left: 0, top: 0, right: 600, bottom: 500, viewportScrollX: 10, viewportScrollY: 15 });
+        const [, layer] = createPrintingFloatDom(
+            createFloatDomInfo(),
+            scene as unknown as Scene,
+            undefined,
+            currentTestBed.workbook.getSheetBySheetId(currentTestBed.subUnitId)!
+        );
+        expect(layer.position).toMatchObject({ startX: 15, endX: 315, startY: 50, endY: 250, width: 300, height: 200, rotate: 27 });
+    });
 });

@@ -51,10 +51,14 @@ describe('Chart activation with a real pending Grid edit', () => {
         { rangePicking: true, refuseRestore: false, capturedType: SheetTypes.KANBAN },
         { rangePicking: true, refuseRestore: false, capturedType: SheetTypes.GANTT },
         { rangePicking: true, refuseRestore: false, escape: true },
-        { rangePicking: true, refuseRestore: false, escape: true, restoreEditSheet: true },
         { rangePicking: true, refuseRestore: false, capturedType: SheetTypes.KANBAN, escape: true },
         { rangePicking: true, refuseRestore: false, capturedType: SheetTypes.GANTT, escape: true },
-    ])('preserves captured edit ownership and ordinary ESC behavior with %j', async ({ rangePicking, refuseRestore, capturedType, escape, restoreEditSheet }) => {
+        { rangePicking: true, refuseRestore: false, capturedType: SheetTypes.KANBAN, close: true },
+        { rangePicking: false, refuseRestore: false, capturedType: SheetTypes.KANBAN, close: true },
+        { rangePicking: true, refuseRestore: false, removeCapturedSheet: true },
+        { rangePicking: true, refuseRestore: false, removeCapturedSheet: true, escape: true },
+        { rangePicking: true, refuseRestore: false, removeCapturedSheet: true, close: true },
+    ])('commits valid Grid edits and discards invalid edits without restoring their sheet with %j', async ({ rangePicking, refuseRestore, capturedType, removeCapturedSheet, escape, close }) => {
         const { injector, render, workbook, activate, commands, univer } = createChartRenderTestBed([
             [SheetScrollManagerService],
             [SheetsScrollRenderController],
@@ -111,13 +115,15 @@ describe('Chart activation with a real pending Grid edit', () => {
         if (capturedType !== undefined) {
             workbook.getSheetBySheetId('grid')!.getConfig().type = capturedType;
         }
-        const activated = escape
+        if (removeCapturedSheet) {
+            workbook.removeSheet('grid');
+        }
+        const activated = escape || close
             ? commands.syncExecuteCommand(SetCellEditVisibleOperation.id, {
                 unitId: workbook.getUnitId(),
                 visible: false,
                 eventType: DeviceInputEventType.Keyboard,
-                keycode: KeyCode.ESC,
-                ...(restoreEditSheet === undefined ? {} : { restoreEditSheet }),
+                ...(escape ? { keycode: KeyCode.ESC } : {}),
             })
             : activate('chart');
         await vi.advanceTimersByTimeAsync(10);
@@ -129,41 +135,21 @@ describe('Chart activation with a real pending Grid edit', () => {
             expect(bridge.isVisible().visible).toBe(true);
             return;
         }
-        expect(workbook.getActiveSheet().getSheetId()).toBe(escape ? 'grid' : 'chart');
-        expect(workbook.getSheetBySheetId('grid')!.getCell(1, 1)?.v).toBe(
-            escape || capturedType !== undefined ? undefined : 'Pending Grid value'
+        const invalidEdit = capturedType !== undefined || removeCapturedSheet;
+        const expectedSheet = invalidEdit && rangePicking ? 'grid-other' : 'grid';
+        expect(workbook.getActiveSheet().getSheetId()).toBe(escape || close ? expectedSheet : 'chart');
+        expect(workbook.getSheetBySheetId('grid')?.getCell(1, 1)?.v).toBe(
+            escape || invalidEdit ? undefined : 'Pending Grid value'
         );
         expect(workbook.getSheetBySheetId('chart')!.getCell(1, 1)).toBeUndefined();
+        if (rangePicking) {
+            expect(workbook.getSheetBySheetId('grid-other')!.getCell(1, 1)).toBeUndefined();
+        }
         expect(bridge.isVisible().visible).toBe(false);
-        if (capturedType !== undefined && !escape) {
-            expect(bridge.isVisible().restoreEditSheet).toBe(false);
-            workbook.getSheetBySheetId('grid')!.getConfig().type = SheetTypes.GRID;
-            activate('grid');
-            commands.syncExecuteCommand(SetActivateCellEditOperation.id, {
-                unitId: workbook.getUnitId(),
-                sheetId: 'grid',
-                scene: render.scene,
-                engine: render.engine,
-                primary: workbook.getActiveSheet().getCellInfoInMergeData(1, 1),
-            });
-            commands.syncExecuteCommand(SetCellEditVisibleOperation.id, {
-                unitId: workbook.getUnitId(),
-                visible: true,
-                eventType: DeviceInputEventType.Keyboard,
-            });
-            expect(bridge.isVisible().restoreEditSheet).toBeUndefined();
-            bridge.enableForceKeepVisible();
-            activate('grid-other');
-            commands.syncExecuteCommand(SetCellEditVisibleOperation.id, {
-                unitId: workbook.getUnitId(),
-                visible: false,
-                eventType: DeviceInputEventType.Keyboard,
-                keycode: KeyCode.ESC,
-            });
-            await vi.advanceTimersByTimeAsync(10);
-            expect(workbook.getActiveSheet().getSheetId()).toBe('grid');
-            expect(bridge.isVisible().restoreEditSheet).toBeUndefined();
-            expect(bridge.isVisible().visible).toBe(false);
+        expect(bridge.isForceKeepVisible()).toBe(false);
+        if (invalidEdit) {
+            expect(bridge.getEditLocation()).toBeNull();
+            expect(bridge.getEditCellLayout()).toBeNull();
         }
     });
 });

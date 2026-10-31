@@ -34,7 +34,6 @@ import {
     SetWorksheetActiveOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { KeyCode } from '@univerjs/ui';
 import { merge } from 'rxjs';
 import type { ICurrentEditCellParam } from '../../services/editor-bridge.service';
 import type { ISheetObjectParam } from '../utils/component-tools';
@@ -212,8 +211,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         const workbook = this._context.unit;
         const worksheet = edit && workbook.getSheetBySheetId(edit.sheetId);
         if (!worksheet || (worksheet.getConfig().type ?? SheetTypes.GRID) !== SheetTypes.GRID) {
-            this._editorBridgeService.disableForceKeepVisible();
-            this._hideEditor(true);
+            this._hideEditor();
             return;
         }
         if (this._instanceSrv.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET) !== workbook) {
@@ -263,14 +261,13 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         return typeof dataStream === 'string' && dataStream.startsWith('=');
     }
 
-    private _hideEditor(cancel = false) {
+    private _hideEditor() {
         if (this._editorBridgeService.isVisible().visible !== true) return;
 
         this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
             visible: false,
             eventType: DeviceInputEventType.PointerDown,
             unitId: this._context.unitId,
-            ...(cancel ? { keycode: KeyCode.ESC, restoreEditSheet: false } : {}),
         });
     }
 

@@ -62,10 +62,6 @@ export interface IRangeSelectorProps extends IRichTextEditorProps {
     selectorRef?: RefObject<IRangeSelectorInstance | null>;
     onVerify?: (res: boolean, rangeText: string) => void;
     onRangeSelectorDialogVisibleChange?: (visible: boolean) => void;
-    /** Raw dialog text captured when opening; later updates do not reset an in-progress edit. */
-    rangeSelectorDialogInitialValue?: readonly string[];
-    /** Draft edits only; confirmation continues to use onChange. */
-    onRangeSelectorDialogDraftChange?: (ranges: readonly string[]) => void;
     hideEditor?: boolean;
     forceShowDialogWhenSelectionChanged?: boolean;
     resetRange?: ISelectionWithStyle[];
@@ -75,8 +71,6 @@ export interface IRangeSelectorProps extends IRichTextEditorProps {
 export interface IRangeSelectorDialogProps {
     visible: boolean;
     initialValue: IUnitRangeName[];
-    initialTextRanges?: readonly string[];
-    onDraftChange?: (ranges: readonly string[]) => void;
     unitId: string;
     subUnitId: string;
     maxRangeCount?: number;
@@ -91,8 +85,6 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
     const {
         visible,
         initialValue,
-        initialTextRanges,
-        onDraftChange,
         unitId,
         subUnitId,
         maxRangeCount = Infinity,
@@ -109,11 +101,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
     const scrollbarRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (visible && initialTextRanges) {
-            const draft = initialTextRanges.length ? initialTextRanges.slice() : [''];
-            setRanges(draft);
-            setFocusIndex(draft.length - 1);
-        } else if (visible && initialValue.length) {
+        if (visible && initialValue.length) {
             const newRanges = initialValue.map((range) => range.sheetName ? serializeRangeWithSheet(range.sheetName, range.range) : serializeRange(range.range));
             setRanges(newRanges);
             setFocusIndex(newRanges.length - 1);
@@ -123,25 +111,19 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
         }
     }, [visible]);
 
-    const changeRanges = (nextRanges: string[]) => {
-        setRanges(nextRanges);
-        onDraftChange?.(nextRanges.slice());
-    };
-
     const handleRangeInput = (index: number, value: string) => {
         const newRanges = [...ranges];
         newRanges[index] = value;
-        changeRanges(newRanges);
+        setRanges(newRanges);
     };
     const handleRangeAdd = () => {
-        changeRanges([...ranges, '']);
+        setRanges([...ranges, '']);
         setFocusIndex(ranges.length);
     };
 
     const handleRangeRemove = (index: number) => {
-        const nextRanges = ranges.slice();
-        nextRanges.splice(index, 1);
-        changeRanges(nextRanges);
+        ranges.splice(index, 1);
+        setRanges([...ranges]);
     };
 
     useRangeSelectorSelectionChange({
@@ -170,7 +152,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
 
                 newRanges.push(...addedRanges);
                 const finalRanges = newRanges.slice(0, maxRangeCount);
-                changeRanges(finalRanges);
+                setRanges(finalRanges);
                 setFocusIndex(finalRanges.length - 1);
                 requestAnimationFrame(() => {
                     scrollbarRef.current?.scrollTo({ top: scrollbarRef.current.scrollHeight });
@@ -179,7 +161,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                 // modify
                 newRanges.splice(focusIndex, 1, ...addedRanges);
                 const finalRanges = newRanges.slice(0, maxRangeCount);
-                changeRanges(finalRanges);
+                setRanges(finalRanges);
                 setFocusIndex(focusIndex + addedRanges.length - 1);
             }
         },
@@ -292,8 +274,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
         autoFocus,
         onChange,
         onRangeSelectorDialogVisibleChange,
-        rangeSelectorDialogInitialValue,
-        onRangeSelectorDialogDraftChange,
         onClickOutside,
         onFocusChange,
         forceShowDialogWhenSelectionChanged,
@@ -412,8 +392,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 : null}
             <RangeSelectorDialog
                 initialValue={rangeSelectorRanges}
-                initialTextRanges={rangeSelectorDialogInitialValue}
-                onDraftChange={onRangeSelectorDialogDraftChange}
                 unitId={unitId}
                 subUnitId={subUnitId}
                 visible={popupVisible}

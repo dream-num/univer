@@ -136,11 +136,15 @@ describe('WorksheetPermissionService', () => {
         expect(permissionService.getPermissionPoint(editPoint('chart').id)?.value).toBe(true);
     });
 
-    it('restores chart edit grants after protection changes', () => {
+    it('restores a revoked chart edit grant when its protection rule is removed', () => {
         worksheetRuleModel.addRule('test', worksheetRule('chart', 'chart-rule'));
         worksheetRuleModel.setRule('test', 'chart', worksheetRule('chart', 'revised-rule'));
+        permissionService.updatePermissionPoint(editPoint('chart').id, false);
+        expect(permissionService.getPermissionPoint(editPoint('chart').id)?.value).toBe(false);
+
         worksheetRuleModel.deleteRule('test', 'chart');
-        permissionService.updatePermissionPoint(editPoint('chart').id, true);
+
+        expect(worksheetRuleModel.getRule('test', 'chart')).toBeUndefined();
         expect(permissionService.getPermissionPoint(editPoint('chart').id)?.value).toBe(true);
         expect(permissionService.getPermissionPoint(editPoint('grid').id)?.value).toBe(true);
     });

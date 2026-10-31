@@ -25,7 +25,6 @@ import {
     RxDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import type { IObjectModel, IObjectPointModel } from '../type';
 import { RangeProtectionRuleModel } from '../../../models/range-protection-rule.model';
@@ -39,8 +38,6 @@ export const RULE_MODEL_PLUGIN_NAME = 'SHEET_WORKSHEET_PROTECTION_PLUGIN';
 export const POINT_MODEL_PLUGIN_NAME = 'SHEET_WORKSHEET_PROTECTION_POINT_PLUGIN';
 
 export class WorksheetPermissionService extends RxDisposable {
-    private readonly _workbookSubscriptions = new Map<Workbook, Subscription>();
-
     constructor(
         @Inject(IPermissionService) private _permissionService: IPermissionService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
@@ -72,11 +69,10 @@ export class WorksheetPermissionService extends RxDisposable {
             workbook.getSheets().forEach((worksheet) => {
                 handleWorksheet(worksheet);
             });
-            const subscriptions = new Subscription();
-            subscriptions.add(workbook.sheetCreated$.subscribe((worksheet) => {
+            workbook.sheetCreated$.subscribe((worksheet) => {
                 handleWorksheet(worksheet);
-            }));
-            subscriptions.add(workbook.sheetDisposed$.subscribe((worksheet) => {
+            });
+            workbook.sheetDisposed$.subscribe((worksheet) => {
                 const subUnitId = worksheet.getSheetId();
 
                 const rangeRuleList = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId);
@@ -91,8 +87,7 @@ export class WorksheetPermissionService extends RxDisposable {
                     const instance = new F(unitId, subUnitId);
                     this._permissionService.deletePermissionPoint(instance.id);
                 });
-            }));
-            this._workbookSubscriptions.set(workbook, subscriptions);
+            });
         };
 
         this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => handleWorkbook(workbook));
@@ -100,21 +95,15 @@ export class WorksheetPermissionService extends RxDisposable {
         this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((event) => handleWorkbook(event.unit));
 
         this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => {
-            this._workbookSubscriptions.get(workbook)?.unsubscribe();
-            this._workbookSubscriptions.delete(workbook);
             workbook.getSheets().forEach((worksheet) => {
                 const unitId = workbook.getUnitId();
                 const subUnitId = worksheet.getSheetId();
-                [...getAllWorksheetPermissionPoint(), ...getAllWorksheetPermissionPointByPointPanel()].forEach((F) => {
+                getAllWorksheetPermissionPoint().forEach((F) => {
                     const instance = new F(unitId, subUnitId);
                     this._permissionService.deletePermissionPoint(instance.id);
                 });
             });
         });
-        this.disposeWithMe({ dispose: () => {
-            this._workbookSubscriptions.forEach((subscriptions) => subscriptions.unsubscribe());
-            this._workbookSubscriptions.clear();
-        } });
     }
 
     private _initRuleChange() {
@@ -154,7 +143,7 @@ export class WorksheetPermissionService extends RxDisposable {
             }
             try {
                 return JSON.parse(json);
-            } catch {
+            } catch (err) {
                 return {};
             }
         };
@@ -209,7 +198,7 @@ export class WorksheetPermissionService extends RxDisposable {
             }
             try {
                 return JSON.parse(json);
-            } catch {
+            } catch (err) {
                 return {};
             }
         };

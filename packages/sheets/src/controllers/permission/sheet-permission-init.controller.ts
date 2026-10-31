@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Workbook, Worksheet } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
 import type { UnitAction } from '@univerjs/protocol';
 import { Disposable, IAuthzIoService, ICommandService, Inject, IPermissionService, IUndoRedoService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
@@ -199,19 +199,15 @@ export class SheetPermissionInitController extends Disposable {
         this.disposeWithMe(
             this._worksheetProtectionRuleModel.ruleChange$.subscribe((info) => {
                 if (info.type !== 'delete') {
-                    const workbook = this._univerInstanceService.getUnit<Workbook>(info.unitId, UniverInstanceType.UNIVER_SHEET);
-                    const worksheet = workbook?.getSheetBySheetId(info.subUnitId);
                     this._authzIoService.allowed({
                         objectID: info.rule.permissionId,
                         unitID: info.unitId,
                         objectType: UnitObject.Worksheet,
                         actions: baseProtectionActions,
                     }).then((actionList) => {
-                        // An old request must not write into a replacement sheet with reused IDs.
-                        const currentWorkbook = this._univerInstanceService.getUnit<Workbook>(info.unitId, UniverInstanceType.UNIVER_SHEET);
+                        // Re-check if the rule still exists, as it may have been deleted during the async operation
                         const currentRule = this._worksheetProtectionRuleModel.getRule(info.unitId, info.subUnitId);
-                        if (!worksheet || currentWorkbook !== workbook || currentWorkbook?.getSheetBySheetId(info.subUnitId) !== worksheet
-                            || !currentRule || currentRule.permissionId !== info.rule.permissionId) {
+                        if (!currentRule || currentRule.permissionId !== info.rule.permissionId) {
                             return;
                         }
 
@@ -275,13 +271,11 @@ export class SheetPermissionInitController extends Disposable {
             const unitId = workbook.getUnitId();
             const allSheets = workbook.getSheets();
             const permissionIdWithRuleInstanceMap = new Map();
-            const baseSheetByPermissionId = new Map<string, Worksheet>();
             allSheets.forEach((sheet) => {
                 const subUnitId = sheet.getSheetId();
                 const rule = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
                 if (rule) {
                     permissionIdWithRuleInstanceMap.set(rule.permissionId, rule);
-                    baseSheetByPermissionId.set(rule.permissionId, sheet);
                     allAllowedParams.push({
                         objectID: rule.permissionId,
                         unitID: unitId,
@@ -311,14 +305,9 @@ export class SheetPermissionInitController extends Disposable {
                 permissionMap.forEach((item) => {
                     const rule = permissionIdWithRuleInstanceMap.get(item.objectID);
                     if (rule) {
-                        const baseSheet = baseSheetByPermissionId.get(item.objectID);
-                        const currentWorkbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
-                        if (baseSheet && (currentWorkbook !== workbook || currentWorkbook?.getSheetBySheetId(rule.subUnitId) !== baseSheet)) {
-                            return;
-                        }
-                        const currentRule = baseSheet
-                            ? this._worksheetProtectionRuleModel.getRule(unitId, rule.subUnitId)
-                            : this._worksheetProtectionPointRuleModel.getRule(unitId, rule.subUnitId);
+                        // Re-check if the rule still exists, as it may have been deleted during the async operation
+                        const currentRule = this._worksheetProtectionRuleModel.getRule(unitId, rule.subUnitId)
+                            || this._worksheetProtectionPointRuleModel.getRule(unitId, rule.subUnitId);
                         if (!currentRule || currentRule.permissionId !== item.objectID) {
                             return;
                         }
@@ -400,8 +389,6 @@ export class SheetPermissionInitController extends Disposable {
         let needClearUndoRedo = false;
         if (sheetRuleItem) {
             const [_, subUnitId] = sheetRuleItem;
-            const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
-            const worksheet = workbook?.getSheetBySheetId(subUnitId);
             this._authzIoService.allowed({
                 objectID: permissionId,
                 unitID: unitId,
@@ -410,9 +397,7 @@ export class SheetPermissionInitController extends Disposable {
             }).then((actionList) => {
                 // Re-check if the rule still exists, as it may have been deleted during the async operation
                 const currentRuleItem = this._worksheetProtectionRuleModel.getTargetByPermissionId(unitId, permissionId);
-                const currentWorkbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
-                if (!worksheet || currentWorkbook !== workbook || currentWorkbook?.getSheetBySheetId(subUnitId) !== worksheet
-                    || !currentRuleItem || currentRuleItem[1] !== subUnitId) {
+                if (!currentRuleItem) {
                     return;
                 }
 
@@ -423,10 +408,10 @@ export class SheetPermissionInitController extends Disposable {
                     const action = actionList.find((item) => item.action === unitActionName);
                     if (action) {
                         const originValue = this._permissionService.getPermissionPoint(instance.id)?.value;
-                        this._permissionService.updatePermissionPoint(instance.id, action.allowed);
-                        if (originValue !== this._permissionService.getPermissionPoint(instance.id)?.value) {
+                        if (originValue !== action.allowed) {
                             needClearUndoRedo = true;
                         }
+                        this._permissionService.updatePermissionPoint(instance.id, action.allowed);
                         key += `${action.action}_${action.allowed}`;
                     }
                 });

@@ -101,15 +101,10 @@ function useContainerSize(containerTarget: RefObject<HTMLElement | null>) {
     const [size, setSize] = useState<Nullable<{ width: number; height: number }>>(null);
 
     useEffect(() => {
-        const container = containerTarget.current;
-        if (container) {
-            let active = true;
+        if (containerTarget.current) {
             const getSize = () => {
-                if (!active || containerTarget.current !== container) {
-                    return;
-                }
-                const width = container.clientWidth;
-                const height = container.clientHeight;
+                const width = containerTarget.current!.clientWidth;
+                const height = containerTarget.current!.clientHeight;
                 if (width !== size?.width || height !== size?.height) {
                     setSize({ width, height });
                 }
@@ -117,9 +112,8 @@ function useContainerSize(containerTarget: RefObject<HTMLElement | null>) {
 
             getSize();
             const ob = new ResizeObserver(getSize);
-            ob.observe(container);
+            ob.observe(containerTarget.current);
             return () => {
-                active = false;
                 ob.disconnect();
             };
         }

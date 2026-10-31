@@ -35,6 +35,10 @@ const locale: typeof enUS = {
 
         shortcut: {
             'quick-sum': 'Tổng nhanh',
+            'toggle-show-formulas': 'Hiển thị công thức',
+        },
+        showFormulas: {
+            tooltip: 'Hiển thị công thức',
         },
 
         insert: {

@@ -139,6 +139,7 @@ describe('FloatDomSingle', () => {
         const layer: IFloatDom = {
             ...createFloatDom(),
             componentKey: 'empty-chart-host',
+            eventOptions: { wheel: { passive: false } },
             onWheel: (event) => {
                 forwarded.push(event);
                 event.preventDefault();
@@ -158,6 +159,52 @@ describe('FloatDomSingle', () => {
         fireEvent(wrapper, afterUnmount);
         expect(afterUnmount.defaultPrevented).toBe(false);
         expect(forwarded).toHaveLength(1);
+    });
+
+    it('switches individual events between native and default forwarding without retaining listeners', async () => {
+        const layer = createFloatDom();
+        const onWheel = vi.fn((event: WheelEvent) => event.preventDefault());
+        const onPointerMove = vi.fn();
+        layer.onWheel = onWheel;
+        layer.onPointerMove = onPointerMove;
+        const { injector, unmount } = renderWithDependencies(<FloatDom unitId="doc-1" />);
+        const layers = injector.get(CanvasFloatDomService);
+        act(() => layers.addFloatDom(layer));
+        const inner = await waitFor(() => document.getElementById(layer.id) as HTMLDivElement);
+        const wheel = () => {
+            const event = new WheelEvent('wheel', { bubbles: true, cancelable: true });
+            fireEvent(inner, event);
+            return event;
+        };
+
+        wheel();
+        expect(onWheel).toHaveBeenCalledTimes(1);
+        act(() => layers.updateFloatDom(layer.id, {
+            eventOptions: { wheel: { passive: false }, pointermove: { capture: true } },
+        }));
+        expect(wheel().defaultPrevented).toBe(true);
+        expect(onWheel).toHaveBeenCalledTimes(2);
+        fireEvent.pointerMove(inner);
+        expect(onPointerMove).toHaveBeenCalledTimes(1);
+
+        act(() => layers.updateFloatDom(layer.id, { eventOptions: { wheel: { passive: true } } }));
+        expect(wheel().defaultPrevented).toBe(false);
+        expect(onWheel).toHaveBeenCalledTimes(3);
+        fireEvent.pointerMove(inner);
+        expect(onPointerMove).toHaveBeenCalledTimes(2);
+
+        act(() => layers.updateFloatDom(layer.id, { eventOptions: undefined }));
+        wheel();
+        expect(onWheel).toHaveBeenCalledTimes(4);
+        act(() => layers.updateFloatDom(layer.id, {
+            eventOptions: { wheel: { passive: false } },
+            eventPassThrough: false,
+        }));
+        expect(wheel().defaultPrevented).toBe(false);
+        expect(onWheel).toHaveBeenCalledTimes(4);
+        unmount();
+        wheel();
+        expect(onWheel).toHaveBeenCalledTimes(4);
     });
 
     it('preserves browser zoom when the host does not consume the wheel event', async () => {

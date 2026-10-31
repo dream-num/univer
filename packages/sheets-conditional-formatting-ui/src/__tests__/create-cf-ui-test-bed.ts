@@ -42,7 +42,7 @@ import {
     RemoveOtherFormulaMutation,
     SetOtherFormulaMutation,
 } from '@univerjs/engine-formula';
-import { CanvasColorService, ICanvasColorService } from '@univerjs/engine-render';
+import { CanvasColorService, ICanvasColorService, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     BorderStyleManagerService,
     RangeProtectionRuleModel,
@@ -70,8 +70,24 @@ import {
     MoveConditionalRuleMutation,
     SetConditionalRuleMutation,
 } from '@univerjs/sheets-conditional-formatting';
-import { ISheetClipboardService } from '@univerjs/sheets-ui';
-import { ComponentManager, ISidebarService } from '@univerjs/ui';
+import {
+    IMarkSelectionService,
+    ISheetClipboardService,
+    MarkSelectionService,
+    SheetClipboardService,
+} from '@univerjs/sheets-ui';
+import {
+    BrowserClipboardService,
+    ComponentManager,
+    DesktopNotificationService,
+    IClipboardInterfaceService,
+    INotificationService,
+    IPlatformService,
+    ISidebarService,
+    IUIPartsService,
+    PlatformService,
+    UIPartsService,
+} from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
@@ -314,8 +330,8 @@ function createLocalSheetsTestBed(workbookData?: IWorkbookData, dependencies?: D
     };
 }
 
-export function createCfUiTestBed() {
-    const testBed = createLocalSheetsTestBed();
+export function createCfUiTestBed(workbookData?: IWorkbookData, realClipboard = false) {
+    const testBed = createLocalSheetsTestBed(workbookData);
     const { univer, get, injector } = testBed;
     const commandService = get(ICommandService);
     const selectionsService = get(SheetsSelectionsService);
@@ -330,7 +346,17 @@ export function createCfUiTestBed() {
     injector.add([ConditionalFormattingViewModel]);
     injector.add([ComponentManager]);
     injector.add([ISidebarService, { useClass: TestSidebarService as never }]);
-    injector.add([ISheetClipboardService, { useClass: TestSheetClipboardService as never }]);
+    if (realClipboard) {
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        injector.add([IMarkSelectionService, { useClass: MarkSelectionService }]);
+        injector.add([IPlatformService, { useClass: PlatformService }]);
+        injector.add([IUIPartsService, { useClass: UIPartsService }]);
+        injector.add([INotificationService, { useClass: DesktopNotificationService }]);
+        injector.add([IClipboardInterfaceService, { useClass: BrowserClipboardService }]);
+        injector.add([ISheetClipboardService, { useClass: SheetClipboardService }]);
+    } else {
+        injector.add([ISheetClipboardService, { useClass: TestSheetClipboardService as never }]);
+    }
 
     [
         AddConditionalRuleMutation,

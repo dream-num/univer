@@ -16,7 +16,24 @@
 
 import type { Dependency, ICellData, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { CellValueType, ICommandService, IConfigService, IUniverInstanceService, LocaleType, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
+import {
+    CellValueType,
+    ICommandService,
+    IConfigService,
+    IResourceLoaderService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    LifecycleService,
+    LifecycleStages,
+    LocaleService,
+    LocaleType,
+    RedoCommand,
+    Tools,
+    UndoCommand,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import {
     FormulaDataModel,
     IDefinedNamesService,
@@ -26,11 +43,29 @@ import {
     SetFormulaDataMutation,
     SetTriggerFormulaCalculationStartMutation,
 } from '@univerjs/engine-formula';
-import { InsertSheetMutation, MoveRangeCommand, MoveRangeMutation, RemoveDefinedNameCommand, RemoveSheetCommand, RemoveSheetMutation, SetDefinedNameCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetStyleCommand, SetWorksheetNameCommand, SheetInterceptorService } from '@univerjs/sheets';
+import {
+    InsertSheetMutation,
+    MoveRangeCommand,
+    MoveRangeMutation,
+    RemoveDefinedNameCommand,
+    RemoveSheetCommand,
+    RemoveSheetMutation,
+    SetDefinedNameCommand,
+    SetRangeValuesCommand,
+    SetRangeValuesMutation,
+    SetSelectionsOperation,
+    SetStyleCommand,
+    SetWorksheetNameCommand,
+    SheetInterceptorService,
+} from '@univerjs/sheets';
+import sheetsEnUS from '@univerjs/sheets/locale/en-US';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '../../config/config';
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
+import formulaEnUS from '../../locale/en-US';
+import { UniverSheetsFormulaPlugin } from '../../plugin';
 import { UpdateFormulaController } from '../update-formula.controller';
+import '@univerjs/engine-formula/facade';
 
 function createWorkbookData(): IWorkbookData {
     return {
@@ -936,5 +971,67 @@ describe('UpdateFormulaController', () => {
                 onlyLocal: true,
             }
         );
+    });
+});
+
+describe('UpdateFormulaController removed-source recovery', () => {
+    it('deletes a referenced sheet beside missing-name and blocked-array formulas with one reversible history entry', async () => {
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        const locale = injector.get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: { ...sheetsEnUS, ...formulaEnUS } });
+        locale.setLocale(LocaleType.EN_US);
+        locale.setDirection('ltr');
+        univer.registerPlugin(UniverSheetsFormulaPlugin);
+        try {
+            const api = FUniver.newAPI(univer);
+            const workbook = api.createWorkbook({
+                id: 'error-owner',
+                name: 'Error owner',
+                appVersion: 'test',
+                locale: LocaleType.EN_US,
+                styles: {},
+                sheetOrder: ['scratch', 'summary'],
+                sheets: {
+                    scratch: { id: 'scratch', name: 'Scratch', rowCount: 30, columnCount: 30, cellData: {} },
+                    summary: { id: 'summary', name: 'Summary', rowCount: 30, columnCount: 30, cellData: {} },
+                },
+            });
+            const initial = api.getFormula().onCalculationResultApplied(5_000);
+            injector.get(LifecycleService).stage = LifecycleStages.Rendered;
+            await initial;
+            injector.get(UpdateFormulaController);
+            const source = workbook.create('ErrorSource', 30, 30);
+            source.getRange('A1:A2').setValues([[1], [2]]);
+            const scratch = workbook.getSheetByName('Scratch')!;
+            scratch.getRange('M1').setValue(4);
+            scratch.getRange('J2').setValue({ f: '=MissingRate' });
+            scratch.getRange('J3').setValue({ f: '=SUM(ErrorSource!A1:A2)' });
+            scratch.getRange('K5').setValue('occupied');
+            const written = api.getFormula().onCalculationResultApplied(5_000);
+            scratch.getRange('K4').setValue({ f: '=SEQUENCE(2,2)' });
+            await written;
+            await expect.poll(() => scratch.getRange('J3').getValue()).toBe(3);
+            expect(scratch.getRange('J2').getValue()).toBe('#NAME?');
+            expect(scratch.getRange('K4').getValue()).toBe('#SPILL!');
+            const commands = injector.get(ICommandService);
+            const history = injector.get(IUndoRedoService);
+            const loader = injector.get(IResourceLoaderService);
+            const before = Tools.deepClone(loader.saveUnit<IWorkbookData>(workbook.getId()))!;
+            const beforeHistory = history.getUndoRedoStatus(workbook.getId());
+            expect(workbook.deleteSheet(source)).toBe(true);
+            await expect.poll(() => scratch.getRange('J3').getValue()).toBe('#REF!');
+            expect(history.getUndoRedoStatus(workbook.getId())).toEqual({ undos: beforeHistory.undos + 1, redos: 0 });
+            const after = Tools.deepClone(loader.saveUnit<IWorkbookData>(workbook.getId()))!;
+            injector.get(IUniverInstanceService).focusUnit(workbook.getId());
+            expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true);
+            await expect.poll(() => scratch.getRange('J3').getValue()).toBe(3);
+            expect(loader.saveUnit<IWorkbookData>(workbook.getId())).toEqual(before);
+            expect(commands.syncExecuteCommand(RedoCommand.id)).toBe(true);
+            await expect.poll(() => scratch.getRange('J3').getValue()).toBe('#REF!');
+            expect(loader.saveUnit<IWorkbookData>(workbook.getId())).toEqual(after);
+        } finally {
+            univer.dispose();
+        }
     });
 });

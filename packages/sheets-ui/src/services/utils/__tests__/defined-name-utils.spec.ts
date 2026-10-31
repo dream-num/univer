@@ -14,59 +14,80 @@
  * limitations under the License.
  */
 
-import type { IUniverInstanceService, Workbook } from '@univerjs/core';
-import type {
+import type { IWorkbookData, Workbook } from '@univerjs/core';
+import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
+import { IUniverInstanceService, LocaleService, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
+import {
+    DefinedNamesService,
+    FunctionService,
     IDefinedNamesService,
-    IDefinedNamesServiceParam,
     IFunctionService,
     ISuperTableService,
     LexerTreeBuilder,
+    SuperTableService,
 } from '@univerjs/engine-formula';
-import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { AbsoluteRefType } from '@univerjs/core';
-import { validateDefinedName } from '@univerjs/sheets';
-import { describe, expect, it, vi } from 'vitest';
+import { SCOPE_WORKBOOK_VALUE_DEFINED_NAME, validateDefinedName } from '@univerjs/sheets';
+import enUS from '@univerjs/sheets/locale/en-US';
+import { afterEach, describe, expect, it } from 'vitest';
 import { getAbsoluteRefStringFromSelection, resolveDefinedNameBoxAction } from '../defined-name-utils';
 
-function createWorkbookMock(sheetNames = ['Sheet1']) {
-    const sheets = new Map(sheetNames.map((name, index) => [`sheet-${index}`, {
-        getName: () => name,
-        getRowCount: () => 1000,
-        getColumnCount: () => 20,
-    }]));
-
-    return {
-        getSheetOrders: () => Array.from(sheets.keys()),
-        getSheetBySheetId: (sheetId: string) => sheets.get(sheetId),
-        getActiveSheet: () => sheets.get('sheet-0'),
-    } as unknown as Workbook;
-}
+const univers: Univer[] = [];
 
 function createValidationDeps(overrides: {
     definedName?: IDefinedNamesServiceParam | null;
-    hasTable?: boolean;
-    hasFunction?: boolean;
 } = {}) {
+    const univer = new Univer();
+    univers.push(univer);
+    const injector = univer.__getInjector();
+    injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+    injector.add([IFunctionService, { useClass: FunctionService }]);
+    injector.add([ISuperTableService, { useClass: SuperTableService }]);
+    injector.add([LexerTreeBuilder]);
+    const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+        id: 'unit-1',
+        name: 'Aliases',
+        appVersion: '1.0.0',
+        locale: LocaleType.EN_US,
+        styles: {},
+        sheetOrder: ['sheet-0', 'sheet-1'],
+        sheets: {
+            'sheet-0': { id: 'sheet-0', name: 'Sheet1', rowCount: 1000, columnCount: 20 },
+            'sheet-1': { id: 'sheet-1', name: 'Sheet2', rowCount: 1000, columnCount: 20 },
+        },
+    });
+    const localeService = injector.get(LocaleService);
+    localeService.load({ [LocaleType.EN_US]: enUS });
+    localeService.setLocale(LocaleType.EN_US);
+    localeService.setDirection('ltr');
+    const definedNamesService = injector.get(IDefinedNamesService);
+    if (overrides.definedName) {
+        definedNamesService.registerDefinedNames('unit-1', { [overrides.definedName.id]: overrides.definedName });
+    }
     return {
         unitId: 'unit-1',
         name: 'SalesTotal',
-        workbook: createWorkbookMock(),
-        definedNamesService: {
-            getValueByName: vi.fn(() => overrides.definedName ?? null),
-        } as unknown as IDefinedNamesService,
-        superTableService: {
-            hasTable: vi.fn(() => overrides.hasTable ?? false),
-        } as unknown as ISuperTableService,
-        functionService: {
-            hasExecutor: vi.fn(() => overrides.hasFunction ?? false),
-        } as unknown as IFunctionService,
-        univerInstanceService: {
-            getUnit: vi.fn(() => ({ getSheets: () => [{ getName: () => 'Sheet1' }] })),
-        } as unknown as IUniverInstanceService,
+        workbook,
+        definedNamesService,
+        superTableService: injector.get(ISuperTableService),
+        functionService: injector.get(IFunctionService),
+        univerInstanceService: injector.get(IUniverInstanceService),
+        lexerTreeBuilder: injector.get(LexerTreeBuilder),
     };
 }
 
 describe('defined-name.utils', () => {
+    afterEach(() => univers.splice(0).forEach((univer) => univer.dispose()));
+
+    it.each([undefined, null, SCOPE_WORKBOOK_VALUE_DEFINED_NAME])('treats legacy and explicit workbook scopes alike: %s', (localSheetId) => {
+        const deps = createValidationDeps({
+            definedName: { id: 'legacy', name: 'SalesTotal', formulaOrRefString: '=8' },
+        });
+        const options = { ...deps, formulaOrRefString: '=5', localSheetId };
+        expect(validateDefinedName('SALESTOTAL', options)).toBe('sheets.definedName.nameDuplicate');
+        expect(validateDefinedName('SalesTotal', { ...options, id: 'legacy' })).toBe(true);
+        expect(validateDefinedName('SalesTotal', { ...options, localSheetId: 'sheet-1' })).toBe(true);
+    });
     it('should reject duplicate defined names during validation', () => {
         const name = 'SalesTotal';
         const formulaOrRefString = 'Sheet1!$A$1';
@@ -118,7 +139,7 @@ describe('defined-name.utils', () => {
             rangeString: 'A1',
             unitId,
             formulaOrRefString: existingDefinedName.formulaOrRefString,
-            worksheet: createWorkbookMock().getActiveSheet(),
+            worksheet: createValidationDeps().workbook.getActiveSheet(),
             univerInstanceService,
             definedNamesService,
             superTableService,
@@ -145,7 +166,7 @@ describe('defined-name.utils', () => {
             rangeString: 'A1',
             unitId,
             formulaOrRefString: '',
-            worksheet: createWorkbookMock().getActiveSheet(),
+            worksheet: createValidationDeps().workbook.getActiveSheet(),
             univerInstanceService,
             definedNamesService,
             superTableService,
@@ -172,7 +193,7 @@ describe('defined-name.utils', () => {
             rangeString: 'A1',
             unitId,
             formulaOrRefString: '',
-            worksheet: createWorkbookMock().getActiveSheet(),
+            worksheet: createValidationDeps().workbook.getActiveSheet(),
             univerInstanceService,
             definedNamesService,
             superTableService,
@@ -198,7 +219,7 @@ describe('defined-name.utils', () => {
             rangeString: 'A1',
             unitId,
             formulaOrRefString: 'A1',
-            worksheet: createWorkbookMock().getActiveSheet(),
+            worksheet: createValidationDeps().workbook.getActiveSheet(),
             univerInstanceService,
             definedNamesService,
             superTableService,
@@ -225,7 +246,7 @@ describe('defined-name.utils', () => {
             rangeString: 'A1',
             unitId,
             formulaOrRefString: '',
-            worksheet: createWorkbookMock().getActiveSheet(),
+            worksheet: createValidationDeps().workbook.getActiveSheet(),
             univerInstanceService,
             definedNamesService,
             superTableService,
@@ -238,7 +259,7 @@ describe('defined-name.utils', () => {
     });
 
     it('should build the absolute reference string for a single selected cell', () => {
-        const convertRefersToAbsolute = vi.fn((value: string) => `ABS(${value})`);
+        const deps = createValidationDeps();
         const selections = [{
             range: {
                 startRow: 0,
@@ -249,17 +270,16 @@ describe('defined-name.utils', () => {
         }] as ISelectionWithStyle[];
 
         const absoluteRef = getAbsoluteRefStringFromSelection(
-            createWorkbookMock(),
+            deps.workbook,
             selections,
-            { convertRefersToAbsolute } as unknown as LexerTreeBuilder
+            deps.lexerTreeBuilder
         );
 
-        expect(absoluteRef).toBe('ABS(Sheet1!A1)');
-        expect(convertRefersToAbsolute).toHaveBeenCalledWith('Sheet1!A1', AbsoluteRefType.ALL, AbsoluteRefType.ALL, 'Sheet1');
+        expect(absoluteRef).toBe('Sheet1!$A$1');
     });
 
     it('should build the absolute reference string for a selected range', () => {
-        const convertRefersToAbsolute = vi.fn((value: string) => `ABS(${value})`);
+        const deps = createValidationDeps();
         const selections = [{
             range: {
                 startRow: 1,
@@ -270,12 +290,11 @@ describe('defined-name.utils', () => {
         }] as ISelectionWithStyle[];
 
         const absoluteRef = getAbsoluteRefStringFromSelection(
-            createWorkbookMock(),
+            deps.workbook,
             selections,
-            { convertRefersToAbsolute } as unknown as LexerTreeBuilder
+            deps.lexerTreeBuilder
         );
 
-        expect(absoluteRef).toBe('ABS(Sheet1!B2:C4)');
-        expect(convertRefersToAbsolute).toHaveBeenCalledWith('Sheet1!B2:C4', AbsoluteRefType.ALL, AbsoluteRefType.ALL, 'Sheet1');
+        expect(absoluteRef).toBe('Sheet1!$B$2:$C$4');
     });
 });

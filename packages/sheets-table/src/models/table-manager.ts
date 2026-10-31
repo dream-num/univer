@@ -15,6 +15,9 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
+import { Disposable, generateRandomId, Inject, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
+import { getSheetCommandTarget } from '@univerjs/sheets';
+import { BehaviorSubject, Subject } from 'rxjs';
 import type { LocaleKey } from '../locale/types';
 import type {
     ITableAddedEvent,
@@ -34,9 +37,6 @@ import type {
     ITableSetConfig,
     ITableThemeChangedEvent,
 } from '../types/type';
-import { Disposable, generateRandomId, Inject, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { getSheetCommandTarget } from '@univerjs/sheets';
-import { BehaviorSubject, Subject } from 'rxjs';
 import {
     IRangeOperationTypeEnum,
 } from '../types/type';
@@ -106,14 +106,22 @@ export class TableManager extends Disposable {
      * @param {ITableOptions} [options] Other options of the table.
      * @returns {string} The table id.
      */
-    addTable(unitId: string, subUnitId: string, name: string, range: ITableRange, header?: string[], initId?: string, options?: ITableOptions): string {
+    addTable(unitId: string, subUnitId: string, name: string, range: ITableRange, header?: string[], initId?: string, options?: ITableOptions, tableConfig?: ITableJson): string {
         const id = initId ?? generateRandomId();
         const tableHeader = header || this.getColumnHeader(unitId, subUnitId, range);
         const table = new Table(id, name, range, tableHeader, options);
+        if (tableConfig) {
+            table.fromJSON(Tools.deepClone(tableConfig));
+        }
         // set subunit id to table
         table.setSubunitId(subUnitId);
         const unitMap = this._ensureUnit(unitId);
         unitMap.set(id, table);
+        if (tableConfig) {
+            const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
+            const worksheet = workbook?.getSheetBySheetId(subUnitId);
+            table.getTableFilters().doFilter(worksheet!, table.getTableFilterRange(), workbook?.getDateSystem());
+        }
         this._tableAdd$.next({
             unitId,
             subUnitId,
@@ -123,10 +131,12 @@ export class TableManager extends Disposable {
             tableStyleId: options?.tableStyleId,
         });
 
-        if (options?.filters) {
-            const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
-            const worksheet = workbook?.getSheetBySheetId(subUnitId);
-            table.getTableFilters().doFilter(worksheet!, range, workbook?.getDateSystem());
+        if (tableConfig || options?.filters) {
+            if (!tableConfig) {
+                const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
+                const worksheet = workbook?.getSheetBySheetId(subUnitId);
+                table.getTableFilters().doFilter(worksheet!, range, workbook?.getDateSystem());
+            }
             this._tableFilterChanged$.next({
                 unitId,
                 subUnitId,
@@ -458,12 +468,11 @@ export class TableManager extends Disposable {
                 const subUnitId = table.getSubunitId();
                 if (!result[subUnitId]) {
                     const tableFilteredOutRows = new Set<number>();
+                    const tableFilteredOutRowsByTable: Record<string, number[]> = Object.create(null);
                     const tables = this.getTablesBySubunitId(unitId, subUnitId);
                     tables.forEach((table) => {
-                        const tableFilteredRows = table.getTableFilters().getFilterOutRows();
-                        if (!tableFilteredRows) {
-                            return;
-                        }
+                        const tableFilteredRows = Array.from(table.getTableFilters().getFilterOutRows());
+                        tableFilteredOutRowsByTable[table.getId()] = tableFilteredRows;
                         for (const row of tableFilteredRows) {
                             tableFilteredOutRows.add(row);
                         }
@@ -472,6 +481,9 @@ export class TableManager extends Disposable {
                         tables: [] as ITableJson[],
                         tableFilteredOutRows: Array.from(tableFilteredOutRows),
                     };
+                    if (tables.length > 1) {
+                        result[subUnitId].tableFilteredOutRowsByTable = tableFilteredOutRowsByTable;
+                    }
                 }
                 result[subUnitId].tables.push(table.toJSON());
             });
@@ -488,18 +500,33 @@ export class TableManager extends Disposable {
                 return;
             }
             const sheet = target.worksheet;
-            let tables;
+            let tables: ITableJson[] | undefined;
             // adjust code for older data structures
             if (data[subUnitId].tables) {
                 tables = data[subUnitId].tables;
             } else if (Array.isArray(data[subUnitId])) {
                 // for older versions, where tables were not nested under subUnitId
-                tables = data[subUnitId] as any as ITableJson[];
+                tables = data[subUnitId] as unknown as ITableJson[];
             }
             if (!tables) {
                 return;
             }
             const cachedFilteredOutRows = data[subUnitId].tableFilteredOutRows;
+            const cachedRowsByTable = data[subUnitId].tableFilteredOutRowsByTable;
+            // A legacy sheet-level cache cannot identify which table hid a shared row.
+            const dataRowRanges = !cachedRowsByTable && Array.isArray(cachedFilteredOutRows)
+                ? tables.map((table) => ({
+                    startRow: table.range.startRow + (table.options?.showHeader === false ? 0 : 1),
+                    endRow: table.range.endRow - (table.options?.showFooter ? 1 : 0),
+                }))
+                : [];
+            const hasOverlappingRows = dataRowRanges.some((range, index) => dataRowRanges.some((other, otherIndex) => (
+                index !== otherIndex
+                && range.startRow <= range.endRow
+                && other.startRow <= other.endRow
+                && range.startRow <= other.endRow
+                && other.startRow <= range.endRow
+            )));
             tables.forEach((table) => {
                 const header = this.getColumnHeader(unitId, subUnitId, table.range);
                 const tableInstance = new Table(table.id, table.name, table.range, header, table.options);
@@ -510,10 +537,11 @@ export class TableManager extends Disposable {
                 if (table.filters) {
                     const tableFilter = tableInstance.getTableFilters();
                     tableFilter.fromJSON(table.filters);
-                    if (Array.isArray(cachedFilteredOutRows)) {
+                    const cachedTableRows = cachedRowsByTable?.[table.id];
+                    if (Array.isArray(cachedTableRows) || (Array.isArray(cachedFilteredOutRows) && !cachedRowsByTable && !hasOverlappingRows)) {
                         const { startRow, endRow } = tableInstance.getTableFilterRange();
                         tableFilter.setFilterOutRows(
-                            cachedFilteredOutRows.filter((row) => row >= startRow && row <= endRow)
+                            (cachedTableRows ?? cachedFilteredOutRows).filter((row) => row >= startRow && row <= endRow)
                         );
                     } else {
                         tableFilter.doFilter(sheet, tableInstance.getTableFilterRange(), target.workbook.getDateSystem());

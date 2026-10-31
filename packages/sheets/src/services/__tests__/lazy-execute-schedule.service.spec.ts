@@ -15,9 +15,9 @@
  */
 
 import type { IMutationInfo } from '@univerjs/core';
-import type { ISetRangeValuesMutationParams } from '../../commands/mutations/set-range-values.mutation';
 import { ICommandService, Injector, IUniverInstanceService } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ISetRangeValuesMutationParams } from '../../commands/mutations/set-range-values.mutation';
 import { SheetLazyExecuteScheduleService } from '../lazy-execute-schedule.service';
 
 function createMutation(unitId: string, subUnitId: string): IMutationInfo<ISetRangeValuesMutationParams> {
@@ -90,6 +90,8 @@ describe('SheetLazyExecuteScheduleService', () => {
     });
 
     it('executes scheduled mutations in idle time and marks them onlyLocal', () => {
+        const completed = vi.fn();
+        service.completed$.subscribe(completed);
         service.scheduleMutations('unit-1', 'sheet-1', [
             createMutation('unit-1', 'sheet-1'),
             createMutation('unit-1', 'sheet-1'),
@@ -112,9 +114,12 @@ describe('SheetLazyExecuteScheduleService', () => {
             { onlyLocal: true }
         );
         expect(service.hasPendingTasks()).toBe(false);
+        expect(completed).toHaveBeenCalledWith({ unitId: 'unit-1', subUnitId: 'sheet-1' });
     });
 
     it('drops task when target sheet no longer exists', () => {
+        const completed = vi.fn();
+        service.completed$.subscribe(completed);
         getSheetBySheetId.mockReturnValue(null);
         service.scheduleMutations('unit-1', 'sheet-1', [createMutation('unit-1', 'sheet-1')]);
 
@@ -129,6 +134,7 @@ describe('SheetLazyExecuteScheduleService', () => {
 
         expect(commandService.syncExecuteCommand).not.toHaveBeenCalled();
         expect(service.hasPendingTasks()).toBe(false);
+        expect(completed).not.toHaveBeenCalled();
     });
 
     it('beforeunload handler blocks navigation when tasks are pending', () => {

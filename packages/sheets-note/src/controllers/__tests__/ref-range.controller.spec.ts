@@ -16,7 +16,6 @@
 
 import type { Dependency, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { IInsertColCommandParams, IInsertRowCommandParams, IRemoveColByRangeCommandParams, IRemoveRowByRangeCommandParams } from '@univerjs/sheets';
-import type { ISheetNote } from '../../models/sheets-note.model';
 import { Direction, ICommandService, ILogService, Inject, Injector, IUndoRedoService, IUniverInstanceService, LocaleType, LogLevel, Plugin, touchDependencies, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
 import {
     InsertColByRangeCommand,
@@ -34,6 +33,8 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { ISheetNote } from '../../models/sheets-note.model';
+import { SheetUpdateNoteCommand } from '../../commands/commands/note.command';
 import { SheetsNoteModel } from '../../models/sheets-note.model';
 import { SheetsNoteRefRangeController } from '../sheets-note-ref-range.controller';
 import { SheetsNoteResourceController } from '../sheets-note-resource.controller';
@@ -228,6 +229,30 @@ describe('test note ref range controller', () => {
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
             expect(getNoteByPosition(3, 3)).toStrictEqual(D4CellNote);
             expect(getNoteByPosition(2, 3)).toBeUndefined();
+        });
+
+        it('restores the latest note text when deleting its row is undone', async () => {
+            const original = getNoteByPosition(3, 3)!;
+            const edited = { ...original, note: 'edited note' };
+            expect(commandService.syncExecuteCommand(SheetUpdateNoteCommand.id, {
+                unitId,
+                sheetId: subUnitId,
+                row: 3,
+                col: 3,
+                note: edited,
+            })).toBeTruthy();
+            expect(getNoteByPosition(3, 3)?.note).toBe('edited note');
+
+            const params: IRemoveRowByRangeCommandParams = {
+                unitId,
+                subUnitId,
+                range: { startRow: 3, endRow: 3, startColumn: 0, endColumn: 9 },
+            };
+            expect(commandService.syncExecuteCommand(RemoveRowByRangeCommand.id, params)).toBeTruthy();
+            expect(getNoteByPosition(3, 3)).toBeUndefined();
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expect(getNoteByPosition(3, 3)).toStrictEqual(edited);
         });
 
         it('test D4 cell note when remove column', async () => {

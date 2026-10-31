@@ -89,7 +89,7 @@ export const AddSheetTableCommand: ICommand<IAddSheetTableCommandParams> = {
         options.columns = header.map((name, index) =>
             options.columns?.[index] ?? new TableColumn(generateRandomId(), name).toJSON());
 
-        redos.push({ id: AddSheetTableMutation.id, params: { ...params, tableId, name: tableName, header, options } });
+        redos.push({ id: AddSheetTableMutation.id, params: { ...params, range: { ...range }, tableId, name: tableName, header, options } });
         undos.push({ id: DeleteSheetTableMutation.id, params: { tableId, unitId: params.unitId } });
 
         const res = sequenceExecute(redos, commandService);

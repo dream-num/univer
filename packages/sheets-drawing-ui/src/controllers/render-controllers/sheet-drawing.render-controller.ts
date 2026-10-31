@@ -16,19 +16,22 @@
 
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
-import { Disposable, DrawingTypeEnum, ILogService, Inject } from '@univerjs/core';
+import { Disposable, DrawingTypeEnum, ICommandService, ILogService, Inject } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { SheetSkeletonService } from '@univerjs/sheets';
 import {
+    DrawingApplyType,
     drawingPositionToTransform,
     ISheetDrawingService,
     refreshSheetDrawingPlacement,
+    SetDrawingApplyMutation,
     SheetDrawingAnchorType,
 } from '@univerjs/sheets-drawing';
 
 export class SheetsDrawingRenderController extends Disposable implements IRenderModule {
     constructor(
         private _context: IRenderContext,
+        @ICommandService private readonly _commandService: ICommandService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService,
@@ -47,7 +50,7 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
         // initialize drawing data and add to sheet canvas
         this._sheetDrawingService.initializeNotification(this._context.unitId);
         const data = this._sheetDrawingService.getDrawingDataForUnit(this._context.unitId);
-        const refreshedDrawings: ISheetDrawing[] = [];
+        const updatesBySubUnit = new Map<string, ISheetDrawing[]>();
         for (const subUnit in data) {
             const subUnitData = data[subUnit];
             for (const drawingId in subUnitData.data) {
@@ -62,18 +65,32 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
                     drawingData.anchorType !== SheetDrawingAnchorType.None
                 ) {
                     try {
-                        if (drawingData.drawingType === DrawingTypeEnum.DRAWING_GROUP) {
+                        if (drawingData.drawingType === DrawingTypeEnum.DRAWING_GROUP
+                            || drawingData.drawingType === DrawingTypeEnum.DRAWING_SLICER
+                            || drawingData.drawingType === DrawingTypeEnum.DRAWING_TIMELINE) {
                             const transform = drawingPositionToTransform(drawingData.sheetTransform, skeletonParam);
-                            refreshedDrawings.push({
+                            if (!transform) {
+                                continue;
+                            }
+                            const updates = updatesBySubUnit.get(subUnitId) ?? [];
+                            updates.push({
                                 ...drawingData,
-                                transform: transform && {
+                                transform: {
+                                    ...drawingData.transform,
                                     ...transform,
-                                    left: (transform.left ?? 0) - skeletonParam.skeleton.rowHeaderWidthAndMarginLeft,
-                                    top: (transform.top ?? 0) - skeletonParam.skeleton.columnHeaderHeightAndMarginTop,
+                                    left: drawingData.drawingType === DrawingTypeEnum.DRAWING_GROUP
+                                        ? (transform.left ?? 0) - skeletonParam.skeleton.rowHeaderWidthAndMarginLeft
+                                        : transform.left,
+                                    top: drawingData.drawingType === DrawingTypeEnum.DRAWING_GROUP
+                                        ? (transform.top ?? 0) - skeletonParam.skeleton.columnHeaderHeightAndMarginTop
+                                        : transform.top,
                                 },
                             });
+                            updatesBySubUnit.set(subUnitId, updates);
                         } else {
-                            refreshedDrawings.push(refreshSheetDrawingPlacement(drawingData, skeletonParam.skeleton));
+                            const updates = updatesBySubUnit.get(subUnitId) ?? [];
+                            updates.push(refreshSheetDrawingPlacement(drawingData, skeletonParam.skeleton));
+                            updatesBySubUnit.set(subUnitId, updates);
                         }
                     } catch (error) {
                         this._logService.warn('[SheetsDrawingRenderController]', 'Skipping drawing placement initialization', {
@@ -89,8 +106,21 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
             }
         }
 
-        this._sheetDrawingService.refreshTransform(refreshedDrawings);
         this._drawingManagerService.registerDrawingData(this._context.unitId, this._sheetDrawingService.getDrawingDataForUnit(this._context.unitId));
+        updatesBySubUnit.forEach((updates) => {
+            const { redo, unitId, subUnitId, objects } = this._sheetDrawingService.getBatchUpdateOp(updates);
+            if (!redo) {
+                return;
+            }
+
+            this._commandService.syncExecuteCommand(SetDrawingApplyMutation.id, {
+                unitId,
+                subUnitId,
+                op: redo,
+                objects,
+                type: DrawingApplyType.UPDATE,
+            }, { onlyLocal: true });
+        });
         this._drawingManagerService.initializeNotification(this._context.unitId);
     }
 }

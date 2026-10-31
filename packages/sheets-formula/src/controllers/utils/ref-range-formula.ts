@@ -19,7 +19,22 @@ import type { IFormulaData, IFormulaDataItem, IRangeChange, ISequenceNode } from
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { cellToRange, Direction, isFormulaId, isFormulaString, ObjectMatrix, Rectangle, Tools } from '@univerjs/core';
 import { deserializeRangeWithSheetWithCache, sequenceNodeType, serializeRangeToRefString } from '@univerjs/engine-formula';
-import { EffectRefRangId, handleDeleteRangeMoveLeft, handleDeleteRangeMoveUp, handleInsertCol, handleInsertRangeMoveDown, handleInsertRangeMoveRight, handleInsertRow, handleIRemoveCol, handleIRemoveRow, handleMoveCols, handleMoveRange, handleMoveRows, runRefRangeMutations, SetRangeValuesMutation } from '@univerjs/sheets';
+import {
+    EffectRefRangId,
+    handleDeleteRangeMoveLeft,
+    handleDeleteRangeMoveUp,
+    handleInsertCol,
+    handleInsertRangeMoveDown,
+    handleInsertRangeMoveRight,
+    handleInsertRow,
+    handleIRemoveCol,
+    handleIRemoveRow,
+    handleMoveCols,
+    handleMoveRange,
+    handleMoveRows,
+    runRefRangeMutations,
+    SetRangeValuesMutation,
+} from '@univerjs/sheets';
 import { checkFormulaDataNull } from './offset-formula-data';
 
 export enum FormulaReferenceMoveType {
@@ -294,7 +309,14 @@ function processFormulaChanges(oldFormulaMatrix: ObjectMatrix<Nullable<IFormulaD
 
     oldFormulaMatrix.forValue((row, column, cell) => {
         // Offset is only needed when there is a formula
-        if (cell == null || !isFormulaDataItem(cell)) return true;
+        if (cell == null || !isFormulaDataItem(cell)) {
+            return true;
+        }
+
+        // Worksheet column removal moves the other formulas; this pass owns only affected table references.
+        if (type === FormulaReferenceMoveType.RemoveSuperTableColumn && !newFormulaMatrix.getValue(row, column)) {
+            return true;
+        }
 
         const oldCell = cellToRange(row, column);
         let newCell = null;
@@ -706,6 +728,10 @@ export function checkIsSameUnitAndSheet(
     sequenceRangeUnitId: string,
     sequenceRangeSheetId: string
 ) {
+    if (!sequenceRangeUnitId && userUnitId !== currentFormulaUnitId) {
+        return false;
+    }
+
     if (
         (sequenceRangeUnitId == null || sequenceRangeUnitId.length === 0) &&
         (sequenceRangeSheetId == null || sequenceRangeSheetId.length === 0)

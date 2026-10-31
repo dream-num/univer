@@ -16,9 +16,9 @@
 
 import type { IDisposable, IRange, Nullable } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
-import type { ISheetNote } from '../models/sheets-note.model';
 import { Disposable, ICommandService, Inject, sequenceExecuteAsync } from '@univerjs/core';
 import { handleCommonRangeChangeWithEffectRefCommandsSkipNoInterests, RefRangeService, SheetsSelectionsService } from '@univerjs/sheets';
+import type { ISheetNote } from '../models/sheets-note.model';
 import { RemoveNoteMutation, UpdateNoteMutation, UpdateNotePositionMutation } from '../commands/mutations/note.mutation';
 import { SheetsNoteModel } from '../models/sheets-note.model';
 
@@ -42,6 +42,11 @@ export class SheetsNoteRefRangeController extends Disposable {
     }
 
     private _handleRangeChange = (unitId: string, subUnitId: string, note: ISheetNote, row: number, col: number, resultRange: Nullable<IRange>, silent?: boolean) => {
+        const currentNote = this._sheetsNoteModel.getNote(unitId, subUnitId, { noteId: note.id });
+        if (!currentNote) {
+            return { redos: [], undos: [] };
+        }
+
         if (!resultRange) {
             return {
                 redos: [{
@@ -49,7 +54,7 @@ export class SheetsNoteRefRangeController extends Disposable {
                     params: {
                         unitId,
                         sheetId: subUnitId,
-                        noteId: note.id,
+                        noteId: currentNote.id,
                     },
                 }],
                 undos: [{
@@ -59,7 +64,7 @@ export class SheetsNoteRefRangeController extends Disposable {
                         sheetId: subUnitId,
                         row,
                         col,
-                        note,
+                        note: currentNote,
                     },
                 }],
             };
@@ -71,7 +76,7 @@ export class SheetsNoteRefRangeController extends Disposable {
                 params: {
                     unitId,
                     sheetId: subUnitId,
-                    noteId: note.id,
+                    noteId: currentNote.id,
                     newPosition: {
                         row: resultRange.startRow,
                         col: resultRange.startColumn,
@@ -84,12 +89,12 @@ export class SheetsNoteRefRangeController extends Disposable {
                 params: {
                     unitId,
                     sheetId: subUnitId,
-                    noteId: note.id,
+                    noteId: currentNote.id,
                     newPosition: {
                         row,
                         col,
                     },
-                    note,
+                    note: currentNote,
                     silent,
                 },
             }],

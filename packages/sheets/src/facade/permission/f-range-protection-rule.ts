@@ -15,11 +15,20 @@
  */
 
 import type { IDeleteRangeProtectionMutationParams, ISetRangeProtectionMutationParams } from '@univerjs/sheets';
-import type { FRange } from '../f-range';
-import type { IRangeProtectionOptions, RangePermissionSnapshot } from './permission-types';
-import { IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
+import {
+    AuthzIoLocalService,
+    IAuthzIoService,
+    ICommandService,
+    Inject,
+    Injector,
+    IPermissionService,
+    PermissionStatus,
+    Rectangle,
+} from '@univerjs/core';
 import { UnitObject, UnitRole } from '@univerjs/protocol';
 import { DeleteRangeProtectionMutation, RangeProtectionRuleModel, SetRangeProtectionMutation } from '@univerjs/sheets';
+import type { FRange } from '../f-range';
+import type { IRangeProtectionOptions, RangePermissionSnapshot } from './permission-types';
 import { RANGE_PERMISSION_POINT_MAP } from './permission-point-map';
 import { RangePermissionPoint } from './permission-types';
 import { handleWorksheetRangePermissionIsEmpty } from './util';
@@ -206,12 +215,9 @@ export class FRangeProtectionRule {
         const instance = new PermissionPointClass(this._unitId, this._subUnitId, this._permissionId);
         const permissionPoint = this._permissionService.getPermissionPoint(instance.id);
 
-        if (permissionPoint && permissionPoint.value === value) {
+        if (!(this._authzIoService instanceof AuthzIoLocalService)
+            && permissionPoint?.status === PermissionStatus.DONE && permissionPoint.value === value) {
             return; // Value unchanged, no update needed
-        }
-
-        if (!permissionPoint) {
-            this._permissionService.addPermissionPoint(instance);
         }
 
         await this._authzIoService.update({
@@ -227,6 +233,14 @@ export class FRangeProtectionRule {
             scope: undefined,
             collaborators: undefined,
         });
+
+        if (!this._permissionService.getPermissionPoint(instance.id)) {
+            this._permissionService.addPermissionPoint(instance);
+        }
+
+        if (this._authzIoService instanceof AuthzIoLocalService) {
+            this._authzIoService.setPermissionOverride(this._permissionId, instance.subType, value);
+        }
 
         this._permissionService.updatePermissionPoint(instance.id, value);
     }

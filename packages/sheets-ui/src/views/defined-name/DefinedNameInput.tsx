@@ -17,15 +17,22 @@
 import type { Nullable, Workbook } from '@univerjs/core';
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
 import type { ComponentType } from 'react';
-import type { IRangeSelectorProps } from '../../basics/editor/range';
-import type { LocaleKey } from '../../locale/types';
 import { AbsoluteRefType, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { borderBottomClassName, borderClassName, Button, clsx, Input, Radio, RadioGroup, Select } from '@univerjs/design';
-import { IDefinedNamesService, IFunctionService, isReferenceStrings, ISuperTableService, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
+import {
+    IDefinedNamesService,
+    IFunctionService,
+    isReferenceStrings,
+    ISuperTableService,
+    LexerTreeBuilder,
+    operatorToken,
+} from '@univerjs/engine-formula';
 import { ErrorIcon } from '@univerjs/icons';
 import { SCOPE_WORKBOOK_VALUE_DEFINED_NAME, validateDefinedName } from '@univerjs/sheets';
 import { ComponentManager, useDependency, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { IRangeSelectorProps } from '../../basics/editor/range';
+import type { LocaleKey } from '../../locale/types';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '../../common/keys';
 
 export interface IDefinedNameInputProps extends Omit<IDefinedNamesServiceParam, 'id'> {
@@ -142,6 +149,7 @@ function DefinedNameInputContent(props: IDefinedNameInputProps) {
             superTableService,
             functionService,
             id,
+            localSheetId: localSheetIdValue,
         });
 
         if (typeof validationResult === 'string') {

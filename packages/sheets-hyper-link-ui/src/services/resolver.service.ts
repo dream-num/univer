@@ -17,8 +17,6 @@
 import type { IRange, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { ISheetHyperLinkInfo, ISheetUrlParams } from '@univerjs/sheets-hyper-link';
-import type { IUniverSheetsHyperLinkUIConfig } from '../config/config';
-import type { LocaleKey } from '../locale/types';
 import {
     ICommandService,
     IConfigService,
@@ -37,6 +35,8 @@ import { getPrimaryForRange, SetSelectionsOperation, SetWorksheetActiveOperation
 import { ERROR_RANGE, SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
+import type { IUniverSheetsHyperLinkUIConfig } from '../config/config';
+import type { LocaleKey } from '../locale/types';
 import { SHEETS_HYPER_LINK_UI_PLUGIN_CONFIG_KEY } from '../config/config';
 
 function getContainRange(range: IRange, worksheet: Worksheet) {
@@ -153,7 +153,9 @@ export class SheetsHyperLinkResolverService {
 
                     selections: [{
                         range: realRange,
-                        primary: getPrimaryForRange(realRange, worksheet),
+                        primary: realRange.rangeType === RANGE_TYPE.ROW || realRange.rangeType === RANGE_TYPE.COLUMN
+                            ? null
+                            : getPrimaryForRange(realRange, worksheet),
                     }],
                 } as ISetSelectionsOperationParams
             );

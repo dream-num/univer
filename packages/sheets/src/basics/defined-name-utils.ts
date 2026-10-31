@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { IUniverInstanceService, Workbook } from '@univerjs/core';
+import type { IUniverInstanceService, Nullable, Workbook } from '@univerjs/core';
 import type { IDefinedNamesService, IFunctionService, ISuperTableService } from '@univerjs/engine-formula';
 import { Tools, UniverInstanceType } from '@univerjs/core';
 import { isReferenceStringWithEffectiveColumn } from '@univerjs/engine-formula';
 import { cjk } from '@univerjs/engine-render';
+import { SCOPE_WORKBOOK_VALUE_DEFINED_NAME } from '../controllers/defined-name-data.controller';
 
 interface IValidateDefinedNameOptions {
     unitId: string;
@@ -28,6 +29,7 @@ interface IValidateDefinedNameOptions {
     superTableService: ISuperTableService;
     functionService: IFunctionService;
     id?: string;
+    localSheetId?: Nullable<string>;
 }
 
 export function validateDefinedName(name: string, options: IValidateDefinedNameOptions): true | string {
@@ -35,17 +37,29 @@ export function validateDefinedName(name: string, options: IValidateDefinedNameO
         return 'sheets.definedName.nameEmpty';
     }
 
-    const { unitId, formulaOrRefString, univerInstanceService, definedNamesService, superTableService, functionService, id } = options;
+    const {
+        unitId,
+        formulaOrRefString,
+        univerInstanceService,
+        definedNamesService,
+        superTableService,
+        functionService,
+        id,
+        localSheetId,
+    } = options;
 
     /**
-     * The defined name can't be duplicate with existing defined names.
+     * Names in different scopes may shadow one another; only the target scope must be unique.
      * If id is provided, it means we are updating an existing defined name. We should allow the name to be the same as itself.
      */
-    const existingDefinedName = definedNamesService.getValueByName(unitId, name);
-    if (
-        existingDefinedName &&
-        (id === null || id === undefined || id.length === 0 || existingDefinedName.id !== id)
-    ) {
+    const scope = localSheetId ?? SCOPE_WORKBOOK_VALUE_DEFINED_NAME;
+    const existingDefinedNames = definedNamesService.getDefinedNameMap(unitId);
+    const duplicate = Object.values(existingDefinedNames ?? {}).some((item) =>
+        item.name.toLowerCase() === name.toLowerCase() &&
+        (item.localSheetId ?? SCOPE_WORKBOOK_VALUE_DEFINED_NAME) === scope &&
+        (!id || item.id !== id)
+    );
+    if (duplicate) {
         return 'sheets.definedName.nameDuplicate';
     }
 

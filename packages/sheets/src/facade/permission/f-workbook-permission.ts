@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
-import type { ICollaborator as IProtocolCollaborator } from '@univerjs/protocol';
-import type { ICollaborator, ICollaboratorUser, WorkbookMode, WorkbookPermissionSnapshot } from './permission-types';
-import { IAuthzIoService, Inject, Injector, IPermissionService } from '@univerjs/core';
+import {
+    AuthzIoLocalService,
+    IAuthzIoService,
+    Inject,
+    Injector,
+    IPermissionService,
+    PermissionStatus,
+} from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
 import { UnitObject } from '@univerjs/protocol';
+import type { ICollaborator, ICollaboratorUser, WorkbookMode, WorkbookPermissionSnapshot } from './permission-types';
 import { WORKBOOK_PERMISSION_POINT_MAP } from './permission-point-map';
 import { UnitRole, WorkbookPermissionPoint } from './permission-types';
 
@@ -159,12 +165,9 @@ export class FWorkbookPermission extends FBase {
 
         const instance = new PermissionPointClass(this._unitId);
         const permissionPoint = this._permissionService.getPermissionPoint(instance.id);
-        if (permissionPoint && permissionPoint.value === value) {
+        if (!(this._authzIoService instanceof AuthzIoLocalService)
+            && permissionPoint?.status === PermissionStatus.DONE && permissionPoint.value === value) {
             return; // Value unchanged, no update needed
-        }
-
-        if (!permissionPoint) {
-            this._permissionService.addPermissionPoint(instance);
         }
 
         await this._authzIoService.update({
@@ -180,6 +183,14 @@ export class FWorkbookPermission extends FBase {
             scope: undefined,
             collaborators: undefined,
         });
+
+        if (!this._permissionService.getPermissionPoint(instance.id)) {
+            this._permissionService.addPermissionPoint(instance);
+        }
+
+        if (this._authzIoService instanceof AuthzIoLocalService) {
+            this._authzIoService.setPermissionOverride(this._unitId, instance.subType, value);
+        }
 
         this._permissionService.updatePermissionPoint(instance.id, value);
     }
@@ -264,7 +275,7 @@ export class FWorkbookPermission extends FBase {
      */
     async setCollaborators(collaborators: Array<{ user: ICollaboratorUser; role: UnitRole }>): Promise<void> {
         // Convert to protocol format
-        const protocolCollaborators: IProtocolCollaborator[] = collaborators.map((c) => ({
+        const protocolCollaborators = collaborators.map((c) => ({
             id: c.user.userID,
             subject: c.user,
             role: c.role,

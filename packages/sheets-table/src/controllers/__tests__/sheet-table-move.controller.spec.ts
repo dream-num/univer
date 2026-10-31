@@ -48,7 +48,7 @@ import {
     WorksheetProtectionRuleModel,
     ZebraCrossingCacheController,
 } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MoveSheetTableMutation } from '../../commands/mutations/move-sheet-table.mutation';
 import { FEATURE_TABLE_ID } from '../../const';
 import enUS from '../../locale/en-US';
@@ -256,13 +256,16 @@ describe('SheetTableMoveController', () => {
             .toEqual(workbook.getSheetBySheetId('sheet2')!.getCellMatrix().getMatrix());
     });
 
-    it('moves filtered rows to the destination and clears the old worksheet cache on undo and redo', async () => {
+    it('refreshes filters once when moving a Table across or within worksheets', async () => {
         const injector = univer.__getInjector();
         injector.get(SheetTableMoveController);
         injector.get(TableFilterController);
         const manager = injector.get(TableManager);
         const id = manager.addTable('test', 'sheet1', 'Orders', SOURCE_RANGE, ['Name', 'Amount']);
         manager.addFilter('test', id, 0, { filterType: TableColumnFilterTypeEnum.manual, values: ['A'] });
+        const table = manager.getTableById('test', id)!;
+        const filterSpy = vi.spyOn(table.getTableFilters(), 'doFilter');
+        const zebraSpy = vi.spyOn(injector.get(ZebraCrossingCacheController), 'updateZebraCrossingCache');
         const source = workbook.getSheetBySheetId('sheet1')!;
         const target = workbook.getSheetBySheetId('sheet2')!;
         expect(source.getRowFiltered(2)).toBe(true);
@@ -273,6 +276,8 @@ describe('SheetTableMoveController', () => {
             toSubUnitId: 'sheet2',
             toRange: { startRow: 5, endRow: 8, startColumn: 4, endColumn: 5 },
         })).toBe(true);
+        expect(filterSpy).toHaveBeenCalledTimes(1);
+        expect(zebraSpy).toHaveBeenCalledTimes(2);
         expect(source.getRowFiltered(2)).toBe(false);
         expect(source.getRowFiltered(3)).toBe(false);
         expect(target.getRowFiltered(6)).toBe(false);
@@ -285,6 +290,18 @@ describe('SheetTableMoveController', () => {
         expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
         expect(source.getRowFiltered(2)).toBe(false);
         expect(target.getRowFiltered(7)).toBe(true);
+        filterSpy.mockClear();
+        zebraSpy.mockClear();
+        expect(await commands.executeCommand(MoveRangeCommand.id, {
+            fromSubUnitId: 'sheet2',
+            fromRange: { startRow: 5, endRow: 8, startColumn: 4, endColumn: 5 },
+            toRange: { startRow: 10, endRow: 13, startColumn: 6, endColumn: 7 },
+        })).toBe(true);
+        expect(filterSpy).toHaveBeenCalledTimes(1);
+        expect(zebraSpy).toHaveBeenCalledTimes(1);
+        expect(target.getRowFiltered(7)).toBe(false);
+        expect(target.getRowFiltered(12)).toBe(true);
+        expect(target.getRowFiltered(13)).toBe(true);
     });
 
     it.each([

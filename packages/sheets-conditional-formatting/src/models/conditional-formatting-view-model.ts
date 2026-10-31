@@ -20,7 +20,7 @@ import { Subject } from 'rxjs';
 import { bufferTime, filter, map } from 'rxjs/operators';
 import type { BaseCalculateUnit, IContext } from './calculate-unit-v2/base-calculate-unit';
 import type { IConditionFormattingRule } from './type';
-import { CFRuleType, CFSubRuleType } from '../base/const';
+import { CFRuleType } from '../base/const';
 import { ConditionalFormattingFormulaService } from '../services/conditional-formatting-formula.service';
 import { ColorScaleCalculateUnit } from './calculate-unit-v2/color-scale-calculate-unit';
 import { DataBarCalculateUnit } from './calculate-unit-v2/data-bar-calculate-unit';
@@ -57,7 +57,6 @@ export class ConditionalFormattingViewModel extends Disposable {
     ) {
         super();
         this._initRuleListener();
-        this._handleCustomFormulasSeparately();
         this._initCFFormulaListener();
     }
 
@@ -182,26 +181,11 @@ export class ConditionalFormattingViewModel extends Disposable {
         this._cacheClear$.next();
     }
 
-    private _handleCustomFormulasSeparately() {
-        this.disposeWithMe(
-            this._conditionalFormattingRuleModel.$ruleChange.subscribe((e) => {
-                if (e.type === 'set') {
-                    const { unitId, subUnitId } = e;
-                    const oldRule = e.oldRule!;
-                    // If the range of a custom formula is modified,then the cached formulas must be cleared and recalculated.
-                    if (oldRule.rule.type === CFRuleType.highlightCell && oldRule.rule.subType === CFSubRuleType.formula) {
-                        this._conditionalFormattingFormulaService.deleteCache(unitId, subUnitId, oldRule.cfId);
-                    }
-                }
-            })
-        );
-    }
-
     private _initRuleListener() {
         this.disposeWithMe(
             this._conditionalFormattingRuleModel.$ruleChange.subscribe((e) => {
                 const { unitId, subUnitId, rule } = e;
-                const { cfId, ranges } = rule;
+                const { cfId } = rule;
                 const calculateUnitManager = this._ensureCalculateUnitManager(unitId, subUnitId);
                 this.markRuleDirty(unitId, subUnitId, cfId);
                 switch (e.type) {

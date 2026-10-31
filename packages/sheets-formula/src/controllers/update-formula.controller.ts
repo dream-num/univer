@@ -23,15 +23,21 @@ import type {
     Nullable,
     Workbook,
 } from '@univerjs/core';
-import type { IDirtyUnitDefinedNameMap, IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetNameMap, IFormulaData, IFormulaDataItem, IFormulaDirtyData, IUnitSheetNameMap } from '@univerjs/engine-formula';
+import type {
+    IDirtyUnitDefinedNameMap,
+    IDirtyUnitFeatureMap,
+    IDirtyUnitOtherFormulaMap,
+    IDirtyUnitSheetNameMap,
+    IFormulaData,
+    IFormulaDataItem,
+    IFormulaDirtyData,
+    IUnitSheetNameMap,
+} from '@univerjs/engine-formula';
 import type {
     IInsertSheetMutationParams,
     IRemoveSheetMutationParams,
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
-import type { IUniverSheetsFormulaBaseConfig } from '../config/config';
-import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
-import type { IUnitRangeWithOffset } from './utils/ref-range-move';
 import {
     Disposable,
     ICommandService,
@@ -44,7 +50,21 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { deserializeRangeWithSheetWithCache, ErrorType, FormulaDataModel, generateStringWithSequence, IDefinedNamesService, LexerTreeBuilder, refactorFormulaUnitQualifier, sequenceNodeType, serializeRangeToRefString, SetArrayFormulaDataMutation, SetFormulaDataMutation, SetTriggerFormulaCalculationStartMutation, splitTableStructuredRef } from '@univerjs/engine-formula';
+import {
+    deserializeRangeWithSheetWithCache,
+    ErrorType,
+    FormulaDataModel,
+    generateStringWithSequence,
+    IDefinedNamesService,
+    LexerTreeBuilder,
+    refactorFormulaUnitQualifier,
+    sequenceNodeType,
+    serializeRangeToRefString,
+    SetArrayFormulaDataMutation,
+    SetFormulaDataMutation,
+    SetTriggerFormulaCalculationStartMutation,
+    splitTableStructuredRef,
+} from '@univerjs/engine-formula';
 import {
     ClearSelectionFormatCommand,
     InsertSheetMutation,
@@ -56,9 +76,18 @@ import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { map } from 'rxjs';
+import type { IUniverSheetsFormulaBaseConfig } from '../config/config';
+import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
+import type { IUnitRangeWithOffset } from './utils/ref-range-move';
 import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '../config/config';
 import { removeFormulaData } from './utils/offset-formula-data';
-import { checkIsSameUnitAndSheet, formulaDataToCellData, FormulaReferenceMoveType, getFormulaReferenceMoveUndoRedo, updateRefOffset } from './utils/ref-range-formula';
+import {
+    checkIsSameUnitAndSheet,
+    formulaDataToCellData,
+    FormulaReferenceMoveType,
+    getFormulaReferenceMoveUndoRedo,
+    updateRefOffset,
+} from './utils/ref-range-formula';
 import { getNewRangeByMoveParam } from './utils/ref-range-move';
 import { getReferenceMoveParams } from './utils/ref-range-param';
 
@@ -281,7 +310,9 @@ export class UpdateFormulaController extends Disposable {
 
         const config = this._configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE);
         const calculationMode = config?.initialFormulaComputing ?? CalculationMode.WHEN_EMPTY;
-        if (calculationMode === CalculationMode.NO_CALCULATION) return;
+        if (calculationMode === CalculationMode.NO_CALCULATION) {
+            return;
+        }
         const params = this._getDirtyDataByCalculationMode(calculationMode);
 
         this._commandService.executeCommand(SetTriggerFormulaCalculationStartMutation.id, params, { onlyLocal: true });
@@ -364,6 +395,9 @@ export class UpdateFormulaController extends Disposable {
         const newFormulaData: IFormulaData = Object.create(null);
 
         const { unitId: fromUnitId, sheetId: fromSheetId, sheetName: fromSheetName, targetUnitId, targetSheetId, type, from, to } = formulaReferenceMoveParam;
+        const referenceMoveParam = type === FormulaReferenceMoveType.RemoveSuperTableColumn
+            ? { ...formulaReferenceMoveParam, type: FormulaReferenceMoveType.RemoveColumn }
+            : formulaReferenceMoveParam;
 
         const inCrossSheetCutRangeNewFormulas: Array<{
             fromRow: number;
@@ -409,6 +443,7 @@ export class UpdateFormulaController extends Disposable {
                     }
 
                     let shouldModify = false;
+                    let removedTableColumnReference = false;
                     const refChangeIds: number[] = [];
 
                     // Whether the formula cell is in the moved range and the move is a cross-worksheet cut operation
@@ -445,13 +480,10 @@ export class UpdateFormulaController extends Disposable {
                                 continue;
                             }
 
-                            const oldDefinedName = this._definedNamesService.getValueById(unitId, definedNameId);
-                            if (oldDefinedName === undefined || oldDefinedName === null) {
-                                continue;
-                            }
-
-                            // Make sure the current token is the defined name to be updated.
-                            if (oldDefinedName.name !== token) {
+                            if (
+                                unitId !== fromUnitId
+                                || this._definedNamesService.getValueByName(unitId, token, sheetId)?.id !== definedNameId
+                            ) {
                                 continue;
                             }
 
@@ -488,6 +520,9 @@ export class UpdateFormulaController extends Disposable {
                                 sequenceNodes[i + 1] = nextNode.slice(1);
                             }
                             shouldModify = true;
+                            if (type === FormulaReferenceMoveType.RemoveSuperTableColumn) {
+                                removedTableColumnReference = true;
+                            }
                             refChangeIds.push(i);
 
                             continue;
@@ -570,7 +605,7 @@ export class UpdateFormulaController extends Disposable {
                         } else if (type !== FormulaReferenceMoveType.SetDefinedName) {
                             newRefString = getNewRangeByMoveParam(
                                 sequenceUnitRangeWidthOffset,
-                                formulaReferenceMoveParam,
+                                referenceMoveParam,
                                 unitId,
                                 sheetId,
                                 {
@@ -619,6 +654,10 @@ export class UpdateFormulaController extends Disposable {
                                 shouldModify = true;
                             }
                         }
+                    }
+
+                    if (type === FormulaReferenceMoveType.RemoveSuperTableColumn && !removedTableColumnReference) {
+                        return true;
                     }
 
                     if (!shouldModify) {

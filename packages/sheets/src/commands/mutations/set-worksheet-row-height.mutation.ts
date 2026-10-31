@@ -104,7 +104,7 @@ export const SetWorksheetRowAutoHeightMutationFactory = (
         const { row } = rowInfo;
         results.push({
             row,
-            autoHeight: manager.getRow(row)?.ah ?? worksheet.getConfig().defaultRowHeight,
+            autoHeight: manager.getRow(row)?.ah,
         });
     }
 
@@ -196,8 +196,17 @@ export const SetWorksheetRowAutoHeightMutation: IMutation<ISetWorksheetRowAutoHe
         const rowManager = target.worksheet.getRowManager();
 
         for (const { row, autoHeight } of rowsAutoHeightInfo) {
-            const curRow = rowManager.getRowOrCreate(row);
-            curRow.ah = autoHeight;
+            if (autoHeight === undefined) {
+                const current = rowManager.getRow(row);
+                if (current) {
+                    delete current.ah;
+                    if (Object.keys(current).length === 0) {
+                        rowManager.removeRow(row);
+                    }
+                }
+            } else {
+                rowManager.getRowOrCreate(row).ah = autoHeight;
+            }
         }
 
         return true;

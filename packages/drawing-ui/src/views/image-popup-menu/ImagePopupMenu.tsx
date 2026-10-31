@@ -125,7 +125,8 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
             <DropdownMenu
                 align="start"
                 items={menuItems.map((item) => {
-                    const Icon = item.icon && iconManager.has(item.icon) ? iconManager.get(item.icon) : null;
+                    const { icon } = item;
+                    const Icon = icon && iconManager.has(icon) ? iconManager.get(icon) : null;
                     return {
                         type: 'item',
                         children: (
@@ -460,7 +461,8 @@ function DocChartFloatingToolbar(props: Pick<IDocImageFloatingToolbarProps, 'men
         .filter((item) => item.type !== 'select' && item.icon)
         .sort((a, b) => a.index - b.index);
     const chartTypeOptions = (chartTypeItem?.options ?? []).map((option) => {
-        const Icon = option.icon ? iconManager.get(option.icon) : ChartIcon;
+        const { icon } = option;
+        const Icon = icon ? iconManager.get(icon) : ChartIcon;
 
         return {
             label: String(option.label),

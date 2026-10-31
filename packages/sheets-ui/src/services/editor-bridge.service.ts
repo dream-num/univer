@@ -57,8 +57,6 @@ export interface IEditorBridgeServiceVisibleParam {
     eventType: DeviceInputEventType;
     unitId: string;
     keycode?: KeyCode;
-    /** Restore the captured edit sheet on close by default; false cancels an invalid owner during Chart activation. */
-    restoreEditSheet?: boolean;
     isShift?: boolean;
     initialValue?: string;
     pointerPosition?: { x: number; y: number };
@@ -357,8 +355,9 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             return;
         }
 
-        const worksheet = workbook.getActiveSheet();
-        if (!worksheet || worksheet.getSheetId() !== sheetId) {
+        const worksheet = workbook.getSheetBySheetId(sheetId);
+        if (!worksheet || workbook.getActiveSheet() !== worksheet ||
+            (worksheet.getConfig().type ?? SheetTypes.GRID) !== SheetTypes.GRID) {
             return;
         }
 

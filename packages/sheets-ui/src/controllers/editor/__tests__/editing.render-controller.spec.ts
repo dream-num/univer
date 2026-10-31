@@ -304,6 +304,7 @@ describe('emptyBody', () => {
 function createController(initialDataStream = 'new value\r\n', isPercentFormat = false, isInArrayFormulaRange = false) {
     const worksheet = {
         getSheetId: vi.fn(() => 'sheet-1'),
+        getConfig: vi.fn(() => ({})),
         getCellRaw: vi.fn((): ICellData => ({ v: 'old' })),
         getComposedCellStyleWithoutSelf: vi.fn(() => ({})),
     };

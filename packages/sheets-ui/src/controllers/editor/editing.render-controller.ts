@@ -60,6 +60,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
+    SheetTypes,
     toDisposable,
     Tools,
     UniverInstanceType,
@@ -752,13 +753,12 @@ export class EditingRenderController extends Disposable {
             return;
         }
 
-        if (keycode === KeyCode.ESC && param.restoreEditSheet === false) {
-            this._editorBridgeService.disableForceKeepVisible();
-            return;
-        }
-
         const workbook = this._univerInstanceService.getUnit<Workbook>(currentUnitId, UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) {
+        const editWorksheet = workbook?.getSheetBySheetId(editCellState.sheetId);
+        // A stale edit must not restore its former sheet or submit into a non-Grid sheet.
+        if (!workbook || !editWorksheet || (editWorksheet.getConfig().type ?? SheetTypes.GRID) !== SheetTypes.GRID) {
+            this._editorBridgeService.disableForceKeepVisible();
+            this._editorBridgeService.refreshEditCellState();
             return;
         }
         const worksheet = workbook.getActiveSheet();

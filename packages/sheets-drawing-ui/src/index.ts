@@ -31,7 +31,6 @@ export type { IAddWorksheetBackgroundImageCommandParams } from './commands/comma
 export { EditSheetDrawingOperation } from './commands/operations/edit-sheet-drawing.operation';
 export { SidebarSheetDrawingOperation } from './commands/operations/open-drawing-panel.operation';
 export type { IUniverSheetsDrawingUIConfig } from './config/config';
-export { SheetsDrawingCopyPasteController } from './controllers/sheet-drawing-copy-paste.controller';
 export { SheetsDrawingGroupCopyPasteController } from './controllers/sheet-drawing-group-copy-paste.controller';
 export type { IGroupFeaturePasteHookParams } from './controllers/sheet-drawing-group-copy-paste.controller';
 export { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';

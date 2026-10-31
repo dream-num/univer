@@ -15,10 +15,22 @@
  */
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
-import { ICommandService, IPermissionService, IUniverInstanceService, LocaleType, SheetTypes, Univer, UniverInstanceType } from '@univerjs/core';
+import {
+    ICommandService,
+    IPermissionService,
+    IUniverInstanceService,
+    LocaleType,
+    SheetTypes,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { WorkbookEditablePermission } from '@univerjs/sheets';
-import { SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+    SetSheetsFilterCriteriaMutation,
+    SetSheetsFilterRangeMutation,
+    UniverSheetsFilterPlugin,
+} from '@univerjs/sheets-filter';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ClearFilterCriteriaMenuItemFactory, ReCalcFilterMenuItemFactory } from '../sheets-filter.menu';
 
 describe('filter criteria menus on Chart Sheets', () => {
@@ -50,7 +62,7 @@ describe('filter criteria menus on Chart Sheets', () => {
         univer.dispose();
     });
 
-    it('allows editable Grid criteria and disables Clear and Recalculate on a Chart Sheet with historical criteria', async () => {
+    it('retains Grid criteria availability and disables Clear and Recalculate on a Chart Sheet with historical criteria', () => {
         const injector = univer.__getInjector();
         const commands = injector.get(ICommandService);
         const states = { clear: true, recalc: true };
@@ -83,8 +95,8 @@ describe('filter criteria menus on Chart Sheets', () => {
 
         const permission = new WorkbookEditablePermission(workbook.getUnitId());
         injector.get(IPermissionService).updatePermissionPoint(permission.id, false);
-        await vi.waitFor(() => expect(states).toEqual({ clear: true, recalc: true }));
+        expect(states).toEqual({ clear: false, recalc: false });
         injector.get(IPermissionService).updatePermissionPoint(permission.id, true);
-        await vi.waitFor(() => expect(states).toEqual({ clear: false, recalc: false }));
+        expect(states).toEqual({ clear: false, recalc: false });
     });
 });

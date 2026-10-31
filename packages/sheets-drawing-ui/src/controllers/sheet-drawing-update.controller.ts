@@ -630,7 +630,8 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         const instances = this._injector.get(IUniverInstanceService);
         const host = getSheetCommandTarget(instances, location ?? { unitId: this._context.unitId });
         const render = host && this._injector.get(IRenderManagerService).getRenderUnitById(host.unitId);
-        if (!host || !render || ((host.worksheet.getConfig().type ?? SheetTypes.GRID) !== SheetTypes.GRID && host.worksheet.getConfig().type !== SheetTypes.CHART)) {
+        const sheetType = host?.worksheet.getConfig().type ?? SheetTypes.GRID;
+        if (!host || !render || (sheetType !== SheetTypes.GRID && sheetType !== SheetTypes.CHART)) {
             return null;
         }
         const frame = render.components.get(SHEET_VIEW_KEY.CHART_PAGE);

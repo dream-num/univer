@@ -58,14 +58,16 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
             return false;
         }
 
-        if (worksheet.getConfig().type === SheetTypes.CHART) {
-            worksheet.getConfig().zoomToFit = zoomToFit ?? BooleanNumber.FALSE;
+        const sheetConfig = worksheet.getConfig();
+        const isChartSheet = sheetConfig.type === SheetTypes.CHART;
+        if (isChartSheet) {
+            sheetConfig.zoomToFit = zoomToFit ?? BooleanNumber.FALSE;
         }
 
-        const nextZoomRatio = worksheet.getConfig().type === SheetTypes.CHART && zoomToFit === BooleanNumber.TRUE
+        const nextZoomRatio = isChartSheet && zoomToFit === BooleanNumber.TRUE
             ? Math.min(SHEET_ZOOM_RANGE[1], Math.max(SHEET_ZOOM_RANGE[0], zoomRatio * 100)) / 100
             : zoomRatio;
-        worksheet.getConfig().zoomRatio = nextZoomRatio;
+        sheetConfig.zoomRatio = nextZoomRatio;
         if (worksheet === this._context.unit.getActiveSheet()) {
             this._updateViewZoom(nextZoomRatio);
         }

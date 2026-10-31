@@ -39,14 +39,15 @@ export const SHEETS_IMAGE_MENU_ID = 'sheet.menu.image';
  */
 function getImageMenuDisabled$(accessor: IAccessor, floating: boolean) {
     return deriveStateFromActiveSheet$(accessor.get(IUniverInstanceService), true, ({ workbook, worksheet }) => {
-        if ((worksheet.getConfig().type ?? SheetTypes.GRID) === SheetTypes.GRID) {
+        const sheetType = worksheet.getConfig().type ?? SheetTypes.GRID;
+        if (sheetType === SheetTypes.GRID) {
             return getCurrentRangeDisable$(accessor, {
                 workbookTypes: [WorkbookEditablePermission],
                 worksheetTypes: [WorksheetEditPermission],
                 rangeTypes: [RangeProtectionPermissionEditPoint],
             });
         }
-        if (!floating || worksheet.getConfig().type !== SheetTypes.CHART) {
+        if (!floating || sheetType !== SheetTypes.CHART) {
             return of(true);
         }
         const permissions = accessor.get(IPermissionService);

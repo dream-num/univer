@@ -22,7 +22,21 @@ import { DrawingTypeEnum, generateRandomId, ImageSourceType, IUndoRedoService } 
 import { isGroupableDrawingType } from '@univerjs/drawing';
 import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
 import { SheetSkeletonService } from '@univerjs/sheets';
-import { DrawingApplyType, getSheetDrawingPlacement, InsertSheetDrawingCommand, ISheetDrawingService, normalizeSheetDrawingPlacement, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetSheetDrawingCommand, SetSheetDrawingPlacementCommand, SetWorksheetBackgroundImageCommand, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
+import {
+    DrawingApplyType,
+    getSheetDrawingPlacement,
+    InsertSheetDrawingCommand,
+    ISheetDrawingService,
+    normalizeSheetDrawingPlacement,
+    RemoveSheetDrawingCommand,
+    SetDrawingApplyMutation,
+    SetSheetDrawingCommand,
+    SetSheetDrawingPlacementCommand,
+    SetWorksheetBackgroundImageCommand,
+    SheetDrawingAnchorType,
+    transformToAxisAlignPosition,
+    transformToDrawingPosition,
+} from '@univerjs/sheets-drawing';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { FOverGridImage, FOverGridImageBuilder } from './f-over-grid-image';
 
@@ -751,33 +765,49 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
 
     override groupDrawings(drawingIds: string[], groupId = generateRandomId(10)): string | null {
         const uniqueDrawingIds = Array.from(new Set(drawingIds));
-        if (uniqueDrawingIds.length < 2) return null;
+        if (uniqueDrawingIds.length < 2) {
+            return null;
+        }
 
         const unitId = this._fWorkbook.getId();
         const subUnitId = this.getSheetId();
         const sheetDrawingService = this._sheetDrawingService;
-        if (sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId: groupId })) return null;
+        if (sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId: groupId })) {
+            return null;
+        }
 
         const drawings = uniqueDrawingIds.map((drawingId) => sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId }));
 
-        if (drawings.some((drawing) => !drawing)) return null;
-        if (drawings.some((drawing) => !isGroupableDrawingType(drawing!.drawingType))) return null;
+        if (drawings.some((drawing) => !drawing)) {
+            return null;
+        }
+        if (drawings.some((drawing) => !isGroupableDrawingType(drawing!.drawingType))) {
+            return null;
+        }
+
+        const skeleton = this._sheetSkeletonService.ensureSkeleton(unitId, subUnitId);
+        if (!skeleton) {
+            return null;
+        }
 
         const validDrawings = drawings as ISheetDrawing[];
         const groupTransform = getGroupState(0, 0, validDrawings.map((drawing) => drawing.transform || {}));
-        const groupParam = {
+        const groupParam: ISheetDrawing = {
             unitId,
             subUnitId,
             drawingId: groupId,
             drawingType: DrawingTypeEnum.DRAWING_GROUP,
             transform: groupTransform,
+            anchorType: SheetDrawingAnchorType.Position,
+            sheetTransform: transformToDrawingPosition(groupTransform, skeleton),
+            axisAlignSheetTransform: transformToAxisAlignPosition(groupTransform, skeleton),
             groupBaseBound: {
                 left: groupTransform.left,
                 top: groupTransform.top,
                 width: groupTransform.width,
                 height: groupTransform.height,
             },
-        } as IDrawingParam;
+        };
         const children = validDrawings.map((drawing) => ({
             ...drawing,
             groupId,

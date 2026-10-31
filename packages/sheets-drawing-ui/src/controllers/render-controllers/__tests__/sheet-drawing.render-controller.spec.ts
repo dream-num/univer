@@ -14,21 +14,381 @@
  * limitations under the License.
  */
 
+import type { IWorkbookData } from '@univerjs/core';
+import type { IDrawingSubunitMap } from '@univerjs/drawing';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import type { Subscription } from 'rxjs';
-import { DrawingTypeEnum, ILogService, LocaleType, LogLevel, Tools, UniverInstanceType } from '@univerjs/core';
+import { DrawingTypeEnum, ILogService, ImageSourceType, IUndoRedoService, LocaleType, LogLevel, Tools, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { CanvasColorService, ICanvasColorService, IRenderManagerService } from '@univerjs/engine-render';
 import { SetRangeValuesCommand, SetWorksheetRowAutoHeightMutation, SheetSkeletonService } from '@univerjs/sheets';
-import { ISheetDrawingService, SHEET_DRAWING_PLUGIN, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
+import {
+    ISheetDrawingService,
+    resolveSheetDrawingRotateEnabled,
+    SetDrawingApplyMutation,
+    SetSheetDrawingCommand,
+    SHEET_DRAWING_PLUGIN,
+    SheetDrawingAnchorType,
+} from '@univerjs/sheets-drawing';
 import { describe, expect, it, vi } from 'vitest';
 import { createSheetsDrawingUiTestBed } from '../../../__tests__/create-sheets-drawing-ui-test-bed';
 import { SheetsDrawingRenderController } from '../sheet-drawing.render-controller';
 import '@univerjs/sheets/facade';
 import '@univerjs/sheets-drawing/facade';
 
+const OWNER_UNIT_ID = 'drawing-owner';
+const OTHER_UNIT_ID = 'drawing-other-owner';
+const TIMELINE_ID = 'shared-timeline';
+
+const SHEET_1_POSITION = {
+    from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
+    to: { row: 3, column: 3, rowOffset: 0, columnOffset: 0 },
+};
+
+function createDrawingResource(data: IDrawingSubunitMap<ISheetDrawing>) {
+    return [{ name: SHEET_DRAWING_PLUGIN, data: JSON.stringify(data) }];
+}
+
+function createWorkbookData(id: string, resources: IWorkbookData['resources']): IWorkbookData {
+    return {
+        id,
+        appVersion: '3.0.0-alpha',
+        locale: LocaleType.EN_US,
+        name: id,
+        sheetOrder: ['sheet-1', 'sheet-2'],
+        styles: {},
+        resources,
+        sheets: {
+            'sheet-1': {
+                id: 'sheet-1',
+                name: 'Sheet 1',
+                rowCount: 20,
+                columnCount: 20,
+                defaultColumnWidth: 80,
+                defaultRowHeight: 20,
+                rowHeader: { width: 46 },
+                columnHeader: { height: 20 },
+                cellData: {},
+            },
+            'sheet-2': {
+                id: 'sheet-2',
+                name: 'Sheet 2',
+                rowCount: 20,
+                columnCount: 20,
+                defaultColumnWidth: 50,
+                defaultRowHeight: 25,
+                rowHeader: { width: 30 },
+                columnHeader: { height: 10 },
+                cellData: {},
+            },
+        },
+    };
+}
+
+function createOwnerDrawingData(): IDrawingSubunitMap<ISheetDrawing> {
+    return {
+        'sheet-1': {
+            data: {
+                [TIMELINE_ID]: {
+                    unitId: OWNER_UNIT_ID,
+                    subUnitId: 'sheet-1',
+                    drawingId: TIMELINE_ID,
+                    drawingType: DrawingTypeEnum.DRAWING_TIMELINE,
+                    slicerViewId: 'timeline-view',
+                    anchorType: SheetDrawingAnchorType.Both,
+                    sheetTransform: {
+                        ...SHEET_1_POSITION,
+                        angle: 17,
+                        flipX: true,
+                        flipY: false,
+                        skewX: 3,
+                        skewY: -2,
+                    },
+                    axisAlignSheetTransform: SHEET_1_POSITION,
+                    transform: {
+                        left: 900,
+                        top: 901,
+                        width: 902,
+                        height: 903,
+                        angle: 91,
+                        rotateEnabled: false,
+                    },
+                },
+                'group-1': {
+                    unitId: OWNER_UNIT_ID,
+                    subUnitId: 'sheet-1',
+                    drawingId: 'group-1',
+                    drawingType: DrawingTypeEnum.DRAWING_GROUP,
+                    anchorType: SheetDrawingAnchorType.Both,
+                    sheetTransform: SHEET_1_POSITION,
+                    axisAlignSheetTransform: SHEET_1_POSITION,
+                    transform: { left: 700, top: 701, width: 702, height: 703 },
+                },
+                'group-child': {
+                    unitId: OWNER_UNIT_ID,
+                    subUnitId: 'sheet-1',
+                    drawingId: 'group-child',
+                    drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+                    groupId: 'group-1',
+                    anchorType: SheetDrawingAnchorType.Both,
+                    sheetTransform: SHEET_1_POSITION,
+                    axisAlignSheetTransform: SHEET_1_POSITION,
+                    transform: { left: 11, top: 12, width: 13, height: 14 },
+                },
+                absolute: {
+                    unitId: OWNER_UNIT_ID,
+                    subUnitId: 'sheet-1',
+                    drawingId: 'absolute',
+                    drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+                    anchorType: SheetDrawingAnchorType.None,
+                    sheetTransform: SHEET_1_POSITION,
+                    axisAlignSheetTransform: SHEET_1_POSITION,
+                    transform: { left: 21, top: 22, width: 23, height: 24 },
+                },
+            },
+            order: [TIMELINE_ID, 'group-1', 'group-child', 'absolute'],
+        },
+        'sheet-2': {
+            data: {
+                [TIMELINE_ID]: {
+                    unitId: OWNER_UNIT_ID,
+                    subUnitId: 'sheet-2',
+                    drawingId: TIMELINE_ID,
+                    drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                    imageSourceType: ImageSourceType.URL,
+                    source: 'https://example.com/sheet-2.png',
+                    anchorType: SheetDrawingAnchorType.Position,
+                    sheetTransform: {
+                        from: { row: 2, column: 2, rowOffset: 0, columnOffset: 0 },
+                        to: { row: 4, column: 4, rowOffset: 0, columnOffset: 0 },
+                    },
+                    axisAlignSheetTransform: SHEET_1_POSITION,
+                    transform: { left: 800, top: 801, width: 802, height: 803 },
+                },
+            },
+            order: [TIMELINE_ID],
+        },
+        'missing-sheet': {
+            data: {
+                'missing-skeleton': {
+                    unitId: OWNER_UNIT_ID,
+                    subUnitId: 'missing-sheet',
+                    drawingId: 'missing-skeleton',
+                    drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+                    anchorType: SheetDrawingAnchorType.Both,
+                    sheetTransform: SHEET_1_POSITION,
+                    axisAlignSheetTransform: SHEET_1_POSITION,
+                    transform: { left: 31, top: 32, width: 33, height: 34 },
+                },
+            },
+            order: ['missing-skeleton'],
+        },
+    };
+}
+
+function createOtherOwnerDrawingData(): IDrawingSubunitMap<ISheetDrawing> {
+    return {
+        'sheet-1': {
+            data: {
+                [TIMELINE_ID]: {
+                    unitId: OTHER_UNIT_ID,
+                    subUnitId: 'sheet-1',
+                    drawingId: TIMELINE_ID,
+                    drawingType: DrawingTypeEnum.DRAWING_TIMELINE,
+                    slicerViewId: 'other-timeline-view',
+                    anchorType: SheetDrawingAnchorType.Both,
+                    sheetTransform: SHEET_1_POSITION,
+                    axisAlignSheetTransform: SHEET_1_POSITION,
+                    transform: {
+                        left: 41,
+                        top: 42,
+                        width: 43,
+                        height: 44,
+                        rotateEnabled: false,
+                    },
+                },
+            },
+            order: [TIMELINE_ID],
+        },
+    };
+}
+
 describe('SheetsDrawingRenderController', () => {
+    it('rehydrates cell anchors through real models without losing drawing capabilities or history', () => {
+        const contextSpy = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
+            return { canvas: this, setTransform: vi.fn(), clearRect: vi.fn() } as unknown as CanvasRenderingContext2D;
+        });
+        const bed = createSheetsDrawingUiTestBed(
+            createWorkbookData(OWNER_UNIT_ID, createDrawingResource(createOwnerDrawingData())),
+            [[ICanvasColorService, { useClass: CanvasColorService }]]
+        );
+        const independent = bed.univer.createUnit(
+            UniverInstanceType.UNIVER_SHEET,
+            createWorkbookData(OTHER_UNIT_ID, createDrawingResource(createOtherOwnerDrawingData()))
+        );
+        const renderManager = bed.get(IRenderManagerService);
+        const moduleRegistration = renderManager.registerRenderModule(
+            UniverInstanceType.UNIVER_SHEET,
+            [SheetsDrawingRenderController]
+        );
+        const sheetDrawingService = bed.get(ISheetDrawingService);
+        const drawingManagerService = bed.get(IDrawingManagerService);
+        const history = bed.get(IUndoRedoService);
+        const skeletonService = bed.get(SheetSkeletonService);
+        const hydrationMutations: Array<{ subUnitId: string; objects: unknown; onlyLocal: boolean | undefined }> = [];
+        const commandSubscription = bed.commandService.onCommandExecuted((command, options) => {
+            if (command.id === SetDrawingApplyMutation.id) {
+                const params = command.params as { subUnitId: string; objects: unknown };
+                hydrationMutations.push({ subUnitId: params.subUnitId, objects: params.objects, onlyLocal: options?.onlyLocal });
+            }
+        });
+        const ownerHistoryBefore = history.getUndoRedoStatus(OWNER_UNIT_ID);
+        const otherHistoryBefore = history.getUndoRedoStatus(OTHER_UNIT_ID);
+        const otherBefore = Tools.deepClone(sheetDrawingService.getDrawingByParam({
+            unitId: OTHER_UNIT_ID,
+            subUnitId: 'sheet-1',
+            drawingId: TIMELINE_ID,
+        }));
+
+        try {
+            expect(skeletonService.getSkeletonParam(OWNER_UNIT_ID, 'sheet-1')).toBeDefined();
+            expect(skeletonService.getSkeletonParam(OWNER_UNIT_ID, 'missing-sheet')).toBeUndefined();
+
+            const render = renderManager.createRender(OWNER_UNIT_ID);
+            expect(render.with(SheetsDrawingRenderController)).toBeInstanceOf(SheetsDrawingRenderController);
+
+            const restoredTimeline = sheetDrawingService.getDrawingByParam({
+                unitId: OWNER_UNIT_ID,
+                subUnitId: 'sheet-1',
+                drawingId: TIMELINE_ID,
+            })!;
+            expect(restoredTimeline).toEqual({
+                unitId: OWNER_UNIT_ID,
+                subUnitId: 'sheet-1',
+                drawingId: TIMELINE_ID,
+                drawingType: DrawingTypeEnum.DRAWING_TIMELINE,
+                slicerViewId: 'timeline-view',
+                anchorType: SheetDrawingAnchorType.Both,
+                sheetTransform: {
+                    ...SHEET_1_POSITION,
+                    angle: 17,
+                    flipX: true,
+                    flipY: false,
+                    skewX: 3,
+                    skewY: -2,
+                },
+                axisAlignSheetTransform: SHEET_1_POSITION,
+                transform: {
+                    left: 126,
+                    top: 40,
+                    width: 160,
+                    height: 40,
+                    angle: 17,
+                    flipX: true,
+                    flipY: false,
+                    skewX: 3,
+                    skewY: -2,
+                    rotateEnabled: false,
+                },
+            });
+            expect(drawingManagerService.getDrawingByParam(restoredTimeline)).toEqual(restoredTimeline);
+            expect(resolveSheetDrawingRotateEnabled(restoredTimeline, sheetDrawingService)).toBe(false);
+
+            expect(sheetDrawingService.getDrawingByParam({
+                unitId: OWNER_UNIT_ID,
+                subUnitId: 'sheet-1',
+                drawingId: 'group-1',
+            })?.transform).toEqual({
+                left: 80,
+                top: 20,
+                width: 160,
+                height: 40,
+                angle: 0,
+                flipX: false,
+                flipY: false,
+                skewX: 0,
+                skewY: 0,
+            });
+            expect(sheetDrawingService.getDrawingByParam({
+                unitId: OWNER_UNIT_ID,
+                subUnitId: 'sheet-1',
+                drawingId: 'group-child',
+            })?.transform).toEqual({ left: 11, top: 12, width: 13, height: 14 });
+            expect(sheetDrawingService.getDrawingByParam({
+                unitId: OWNER_UNIT_ID,
+                subUnitId: 'sheet-1',
+                drawingId: 'absolute',
+            })?.transform).toEqual({ left: 21, top: 22, width: 23, height: 24 });
+            expect(sheetDrawingService.getDrawingByParam({
+                unitId: OWNER_UNIT_ID,
+                subUnitId: 'missing-sheet',
+                drawingId: 'missing-skeleton',
+            })?.transform).toEqual({ left: 31, top: 32, width: 33, height: 34 });
+            expect(sheetDrawingService.getDrawingByParam({
+                unitId: OWNER_UNIT_ID,
+                subUnitId: 'sheet-2',
+                drawingId: TIMELINE_ID,
+            })?.transform).toEqual({
+                left: 130,
+                top: 60,
+                width: 802,
+                height: 803,
+            });
+
+            expect(hydrationMutations).toEqual([
+                {
+                    subUnitId: 'sheet-1',
+                    objects: [
+                        { unitId: OWNER_UNIT_ID, subUnitId: 'sheet-1', drawingId: TIMELINE_ID },
+                        { unitId: OWNER_UNIT_ID, subUnitId: 'sheet-1', drawingId: 'group-1' },
+                    ],
+                    onlyLocal: true,
+                },
+                {
+                    subUnitId: 'sheet-2',
+                    objects: [{ unitId: OWNER_UNIT_ID, subUnitId: 'sheet-2', drawingId: TIMELINE_ID }],
+                    onlyLocal: true,
+                },
+            ]);
+            renderManager.createRender(OWNER_UNIT_ID);
+            expect(hydrationMutations).toHaveLength(2);
+            expect(history.getUndoRedoStatus(OWNER_UNIT_ID)).toEqual(ownerHistoryBefore);
+            expect(history.getUndoRedoStatus(OTHER_UNIT_ID)).toEqual(otherHistoryBefore);
+            expect(sheetDrawingService.getDrawingByParam({
+                unitId: OTHER_UNIT_ID,
+                subUnitId: 'sheet-1',
+                drawingId: TIMELINE_ID,
+            })).toEqual(otherBefore);
+            expect(drawingManagerService.getDrawingByParam({
+                unitId: OTHER_UNIT_ID,
+                subUnitId: 'sheet-1',
+                drawingId: TIMELINE_ID,
+            })).toEqual(otherBefore);
+
+            expect(bed.commandService.syncExecuteCommand(SetSheetDrawingCommand.id, {
+                unitId: OWNER_UNIT_ID,
+                drawings: [{
+                    unitId: OWNER_UNIT_ID,
+                    subUnitId: 'sheet-1',
+                    drawingId: TIMELINE_ID,
+                    drawingType: DrawingTypeEnum.DRAWING_TIMELINE,
+                    transform: { angle: 90 },
+                }],
+            })).toBe(true);
+            expect(sheetDrawingService.getDrawingByParam(restoredTimeline)?.transform?.angle).toBe(17);
+            expect(drawingManagerService.getDrawingByParam(restoredTimeline)?.transform?.angle).toBe(17);
+        } finally {
+            contextSpy.mockRestore();
+            commandSubscription.dispose();
+            moduleRegistration.dispose();
+            independent.dispose();
+            bed.univer.dispose();
+        }
+    });
+});
+
+describe('SheetsDrawingRenderController issue 5842', () => {
     it('loads issue 5842 data, initializes healthy images, and preserves edits across save and reload', async () => {
         const canvasContext = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
             { setTransform: vi.fn(), clearRect: vi.fn() } as unknown as CanvasRenderingContext2D
@@ -301,24 +661,30 @@ describe('SheetsDrawingRenderController', () => {
 
             const initializedDrawings = Object.values(drawingData).flatMap((subUnit) => Object.values(subUnit.data));
             expect(sheetDrawingsAdded).toHaveBeenCalledExactlyOnceWith(expect.arrayContaining(initializedDrawings));
-            expect(renderDrawingsAdded).toHaveBeenCalledExactlyOnceWith(expect.arrayContaining(initializedDrawings));
+            const hydratedDrawings = Object.values(drawingManagerService.getDrawingDataForUnit('unit-1'))
+                .flatMap((subUnit) => Object.values(subUnit.data));
+            expect(renderDrawingsAdded).toHaveBeenCalledExactlyOnceWith(expect.arrayContaining(hydratedDrawings));
             const marker = skeleton.getNoMergeCellWithCoordByIndex(1, 2);
-            expect(legacy.transform).toMatchObject({ left: marker.startX, top: marker.startY, width: 24, height: 72 });
-            expect(legacy).not.toHaveProperty('anchorType');
-            expect(group.transform).toMatchObject({
+            const restoredLegacy = sheetDrawingService.getDrawingByParam(legacy as ISheetDrawing)!;
+            const restoredGroup = sheetDrawingService.getDrawingByParam(group as ISheetDrawing)!;
+            expect(restoredLegacy.transform).toMatchObject({ left: marker.startX, top: marker.startY, width: 24, height: 72 });
+            expect(restoredLegacy).not.toHaveProperty('anchorType');
+            expect(restoredGroup.transform).toMatchObject({
                 left: marker.startX - skeleton.rowHeaderWidthAndMarginLeft,
                 top: marker.startY - skeleton.columnHeaderHeightAndMarginTop,
                 width: 24,
                 height: 72,
             });
-            expect(grouped.transform).toEqual({ left: 2, top: 3, width: 40, height: 50 });
-            expect(absolute.transform).toEqual({ left: 240, top: 96, width: 120, height: 80 });
-            expect(missingSkeleton).not.toHaveProperty('transform');
+            expect(sheetDrawingService.getDrawingByParam(grouped as ISheetDrawing)?.transform)
+                .toEqual({ left: 2, top: 3, width: 40, height: 50 });
+            expect(sheetDrawingService.getDrawingByParam(absolute as ISheetDrawing)?.transform)
+                .toEqual({ left: 240, top: 96, width: 120, height: 80 });
+            expect(sheetDrawingService.getDrawingByParam(missingSkeleton as ISheetDrawing)).not.toHaveProperty('transform');
             expect(drawingManagerService.getDrawingByParam({
                 unitId: 'unit-1',
                 subUnitId: 'sheet-1',
                 drawingId: 'legacy-anchor',
-            })?.transform).toEqual(legacy.transform);
+            })?.transform).toEqual(restoredLegacy.transform);
         } finally {
             subscriptions.forEach((subscription) => subscription.unsubscribe());
             bed.univer.dispose();

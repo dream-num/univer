@@ -18,8 +18,18 @@ import type { IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core'
 import type { ICopyPastePayload, IPasteHookValueType, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import { Disposable, Inject, Injector, IUniverInstanceService, Rectangle } from '@univerjs/core';
 import { getSheetCommandTarget, rangeToDiscreteRange } from '@univerjs/sheets';
-import { DATA_VALIDATION_PLUGIN_NAME, getDataValidationDiffMutations, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
-import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
+import {
+    DATA_VALIDATION_PLUGIN_NAME,
+    getDataValidationDiffMutations,
+    SheetDataValidationModel,
+} from '@univerjs/sheets-data-validation';
+import {
+    COPY_TYPE,
+    getRepeatRange,
+    ISheetClipboardService,
+    PREDEFINED_HOOK_NAME_PASTE,
+    virtualizeDiscreteRanges,
+} from '@univerjs/sheets-ui';
 
 interface ICopyInfoType {
     rules: Map<string, IRange[]>;
@@ -101,8 +111,8 @@ export class DataValidationCopyPasteController extends Disposable {
             return { redos: [], undos: [] };
         }
 
-        // If it is cut and paste in the same worksheet, do not need to handle the data validation rules, because the move range had handle the ref range of data validation rules, to see dv-formula-ref-range.controller.ts.
-        if (copyType === COPY_TYPE.CUT && pastedUnitId === copyUnitId && pastedSubUnitId === copySubUnitId) {
+        // The default CUT hook uses MoveRange, which owns rule ranges and their formula references.
+        if (copyType === COPY_TYPE.CUT && pastedUnitId === copyUnitId) {
             this._copyInfo = null;
             return { redos: [], undos: [] };
         }
@@ -113,7 +123,10 @@ export class DataValidationCopyPasteController extends Disposable {
         const repeatRange = getRepeatRange(sourceVirtualRange, targetVirtualRange, true);
         const clearTargetRanges = targetVirtualization.mapRange(targetVirtualRange);
         const getTargetRanges = (sourceRanges: IRange[]) => repeatRange.flatMap(({ startRange }) => sourceRanges.flatMap((sourceRange) => (
-            targetVirtualization.mapRange(Rectangle.getPositionRange(sourceRange, startRange))
+            targetVirtualization.mapRange(Rectangle.getPositionRange(
+                Rectangle.getRelativeRange(sourceRange, sourceVirtualRange),
+                startRange
+            ))
         )));
 
         if (pastedUnitId !== copyUnitId || pastedSubUnitId !== copySubUnitId) {

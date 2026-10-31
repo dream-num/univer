@@ -14,25 +14,10 @@
  * limitations under the License.
  */
 
-/**
- * Copyright 2023-present DreamNum Co., Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import type { IMutationInfo } from '@univerjs/core';
+import type { IMutationInfo, IWorkbookData } from '@univerjs/core';
 import {
     ICommandService,
+    IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
@@ -42,6 +27,10 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
+import sheetsEnUS from '@univerjs/sheets/locale/en-US';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { ITableOptions } from '../../../types/type';
 import enUS from '../../../locale/en-US';
@@ -50,6 +39,138 @@ import { TableManager } from '../../../models/table-manager';
 import { UniverSheetsTablePlugin } from '../../../plugin';
 import { AddSheetTableMutation } from '../../mutations/add-sheet-table.mutation';
 import { AddSheetTableCommand } from '../add-sheet-table.command';
+import '@univerjs/sheets/facade';
+import '../../../facade/f-workbook';
+import '../../../facade/f-worksheet';
+
+const RANGE = { startRow: 0, endRow: 2, startColumn: 0, endColumn: 1 };
+
+function data(id: string): IWorkbookData {
+    return {
+        id,
+        name: id,
+        appVersion: '1.0.0',
+        locale: LocaleType.EN_US,
+        styles: {},
+        sheetOrder: ['independent', 'source'],
+        sheets: {
+            source: {
+                id: 'source',
+                name: 'Source',
+                rowCount: 20,
+                columnCount: 10,
+                cellData: {
+                    0: { 0: { v: 'Name' }, 1: { v: 'Quantity' } },
+                    1: { 0: { v: 'O01' }, 1: { v: 2 } },
+                    2: { 0: { v: 'O02' }, 1: { v: 3 } },
+                    8: { 8: { v: 'source outside' } },
+                },
+            },
+            independent: {
+                id: 'independent',
+                name: 'Independent',
+                rowCount: 20,
+                columnCount: 10,
+                cellData: { 0: { 0: { v: 'independent' } } },
+            },
+        },
+    };
+}
+
+function createRuntime() {
+    const univer = new Univer();
+    const injector = univer.__getInjector();
+    const locale = injector.get(LocaleService);
+    locale.load({ [LocaleType.EN_US]: { ...sheetsEnUS, ...enUS } });
+    locale.setLocale(LocaleType.EN_US);
+    locale.setDirection('ltr');
+    univer.registerPlugin(UniverFormulaEnginePlugin);
+    univer.registerPlugin(UniverSheetsPlugin);
+    univer.registerPlugin(UniverSheetsTablePlugin);
+    const api = FUniver.newAPI(injector);
+    api.createWorkbook(data('owner'));
+    api.createWorkbook(data('other'));
+    injector.get(IUniverInstanceService).focusUnit('other');
+    const owner = api.getWorkbook('owner')!;
+    const commands = injector.get(ICommandService);
+    const history = injector.get(IUndoRedoService);
+    return {
+        univer,
+        api,
+        owner,
+        commands,
+        history,
+        get: injector.get.bind(injector),
+        snapshot: () => JSON.parse(JSON.stringify({
+            owner: owner.save(),
+            other: api.getWorkbook('other')!.save(),
+            history: history.getUndoRedoStatus('owner'),
+        })),
+    };
+}
+
+describe('AddSheetTableCommand parameter validation', () => {
+    it('generates the next localized name from existing tables when a name conflicts with a worksheet', () => {
+        const runtime = createRuntime();
+        try {
+            expect(runtime.commands.syncExecuteCommand(AddSheetTableCommand.id, {
+                unitId: 'owner',
+                subUnitId: 'independent',
+                range: RANGE,
+                name: 'Table9',
+                id: 'existing',
+            })).toBe(true);
+            expect(runtime.commands.syncExecuteCommand(AddSheetTableCommand.id, {
+                unitId: 'owner',
+                subUnitId: 'source',
+                range: RANGE,
+                name: 'Source',
+                id: 'generated',
+            })).toBe(true);
+            expect(runtime.owner.getTableInfo('generated')).toMatchObject({
+                name: 'Table10',
+                columns: [{ displayName: 'Name' }, { displayName: 'Quantity' }],
+            });
+            expect(runtime.history.getUndoRedoStatus('owner')).toEqual({ undos: 2, redos: 0 });
+        } finally {
+            runtime.univer.dispose();
+        }
+    });
+
+    it('rejects missing parameters without changing state', () => {
+        const runtime = createRuntime();
+        try {
+            const before = runtime.snapshot();
+            expect(runtime.commands.syncExecuteCommand(AddSheetTableCommand.id)).toBe(false);
+            expect(runtime.snapshot()).toEqual(before);
+        } finally {
+            runtime.univer.dispose();
+        }
+    });
+});
+
+describe('AddSheetTableCommand history inputs', () => {
+    it('keeps the table range and redo stable when a facade caller changes its range object', async () => {
+        const runtime = createRuntime();
+        const range = { ...RANGE };
+
+        try {
+            const sheet = runtime.owner.getSheetBySheetId('source')!;
+            expect(await sheet.addTable('Orders', range, 'orders')).toBe(true);
+
+            range.endColumn = 2;
+            expect(runtime.owner.getTableInfo('orders')?.range).toEqual(RANGE);
+            expect(runtime.owner.getTableInfo('orders')?.columns).toHaveLength(2);
+            runtime.get(IUniverInstanceService).focusUnit('owner');
+            expect(runtime.commands.syncExecuteCommand('univer.command.undo')).toBe(true);
+            expect(runtime.commands.syncExecuteCommand('univer.command.redo')).toBe(true);
+            expect(runtime.owner.getTableInfo('orders')?.range).toEqual(RANGE);
+            expect(runtime.owner.getTableInfo('orders')?.columns).toHaveLength(2);
+        } finally {
+            runtime.univer.dispose();
+        }
+    });
+});
 
 const universes: Univer[] = [];
 

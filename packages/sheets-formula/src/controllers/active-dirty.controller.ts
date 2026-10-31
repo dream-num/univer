@@ -34,6 +34,8 @@ import type {
 import {
     Disposable,
     Inject,
+    isFormulaId,
+    isFormulaString,
     IUniverInstanceService,
     ObjectMatrix,
     UniverInstanceType,
@@ -287,9 +289,35 @@ export class ActiveDirtyController extends Disposable {
             commandId: InsertSheetMutation.id,
             getDirtyData: (command: ICommandInfo) => {
                 const params = command.params as IInsertSheetMutationParams;
-                return {
-                    dirtyNameMap: this._getInsertSheetMutation(params),
-                };
+                const { sheet, unitId } = params;
+                let hasFormula = false;
+                for (const row of Object.values(sheet.cellData)) {
+                    if (!row) {
+                        continue;
+                    }
+                    for (const cell of Object.values(row) as Array<Nullable<ICellData>>) {
+                        if (isFormulaString(cell?.f) || isFormulaId(cell?.si)) {
+                            hasFormula = true;
+                            break;
+                        }
+                    }
+                    if (hasFormula) {
+                        break;
+                    }
+                }
+                const dirtyRanges: IUnitRange[] = hasFormula
+                    ? [{
+                        unitId,
+                        sheetId: sheet.id,
+                        range: {
+                            startRow: 0,
+                            endRow: sheet.rowCount - 1,
+                            startColumn: 0,
+                            endColumn: sheet.columnCount - 1,
+                        },
+                    }]
+                    : [];
+                return { dirtyNameMap: this._getInsertSheetMutation(params), dirtyRanges };
             },
         });
     }

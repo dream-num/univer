@@ -46,19 +46,18 @@ export class DataValidationAutoFillController extends Disposable {
             const { mapRange, projectRange } = virtualRange;
             const repeats = AutoFillTools.getAutoFillRepeatRange(vSourceRange, vTargetRange);
             const additionsByRuleId = new Map<string, IRange[]>();
-            additionsByRuleId.set('', repeats.flatMap((repeat) => mapRange(Rectangle.getPositionRange(repeat.relativeRange, {
-                startRow: repeat.repeatStartCell.row,
-                endRow: repeat.repeatStartCell.row,
-                startColumn: repeat.repeatStartCell.col,
-                endColumn: repeat.repeatStartCell.col,
-            }))));
+            additionsByRuleId.set('', repeats.flatMap((repeat) => mapRange(Rectangle.moveOffset(
+                repeat.relativeRange,
+                repeat.repeatStartCell.col,
+                repeat.repeatStartCell.row
+            ))));
 
             this._sheetDataValidationModel.getRules(unitId, subUnitId).forEach((rule) => {
                 const relativeSourceRanges = rule.ranges.flatMap((range) => {
                     const projected = projectRange(range);
                     const intersected = projected && getIntersectRange(projected, vSourceRange);
                     return intersected
-                        ? [Rectangle.getRelativeRange(intersected, vSourceRange)]
+                        ? [Rectangle.moveOffset(intersected, -vSourceRange.startColumn, -vSourceRange.startRow)]
                         : [];
                 });
                 const targetRanges = repeats.flatMap((repeat) => relativeSourceRanges.flatMap((sourceRange) => {
@@ -66,12 +65,11 @@ export class DataValidationAutoFillController extends Disposable {
                     if (!copiedRange) {
                         return [];
                     }
-                    return mapRange(Rectangle.getPositionRange(copiedRange, {
-                        startRow: repeat.repeatStartCell.row,
-                        endRow: repeat.repeatStartCell.row,
-                        startColumn: repeat.repeatStartCell.col,
-                        endColumn: repeat.repeatStartCell.col,
-                    }));
+                    return mapRange(Rectangle.moveOffset(
+                        copiedRange,
+                        repeat.repeatStartCell.col,
+                        repeat.repeatStartCell.row
+                    ));
                 }));
                 if (targetRanges.length) {
                     additionsByRuleId.set(rule.uid, targetRanges);

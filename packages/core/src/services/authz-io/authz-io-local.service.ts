@@ -27,13 +27,14 @@ import type {
     IUnitRoleKV,
     IUpdatePermPointRequest,
     UnitAction,
-    UnitObject,
 } from '@univerjs/protocol';
+import { ObjectScope, UnitObject, UnitRole } from '@univerjs/protocol';
 import type { IAuthzIoService } from './type';
-import { ObjectScope, UnitRole } from '@univerjs/protocol';
 import { Inject } from '../../common/di';
 import { UniverInstanceType } from '../../common/unit';
+import { Disposable } from '../../shared/lifecycle';
 import { generateRandomId } from '../../shared/random-id';
+import { IUniverInstanceService } from '../instance/instance.service';
 import { IResourceManagerService } from '../resource-manager/type';
 import { createDefaultUser, isDevRole } from '../user-manager/const';
 import { UserManagerService } from '../user-manager/user-manager.service';
@@ -46,13 +47,14 @@ interface IPermissionData {
     name: string;
     unitID: string;
     strategies: Array<{ action: UnitAction; role: UnitRole }>;
+    overrides?: Record<number, boolean>;
     selectRangeObject?: ICreateRequestSelectRangeObject;
 }
 
 /**
  * Do not use the mock implementation in a production environment as it is a minimal version.
  */
-export class AuthzIoLocalService implements IAuthzIoService {
+export class AuthzIoLocalService extends Disposable implements IAuthzIoService {
     private _permissionMap: Map<string, IPermissionData> = new Map([]);
     // Store explicit permission overrides: key is "objectID:action", value is the allowed state
     private _permissionOverrides: Map<string, boolean> = new Map();
@@ -64,8 +66,10 @@ export class AuthzIoLocalService implements IAuthzIoService {
 
     constructor(
         @IResourceManagerService private _resourceManagerService: IResourceManagerService,
-        @Inject(UserManagerService) private _userManagerService: UserManagerService
+        @Inject(UserManagerService) private _userManagerService: UserManagerService,
+        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService
     ) {
+        super();
         this._initSnapshot();
         this._initDefaultUser();
     }
@@ -87,11 +91,21 @@ export class AuthzIoLocalService implements IAuthzIoService {
     }
 
     private _initSnapshot() {
-        this._resourceManagerService.registerPluginResource({
-            toJson: (_unitId: string) => {
+        const clearUnitPermissions = (unitId: string) => {
+            this._permissionMap.forEach((permission, objectID) => {
+                if (permission.unitID === unitId) {
+                    this._permissionMap.delete(objectID);
+                    this.clearAllOverrides(objectID);
+                }
+            });
+        };
+        this.disposeWithMe(this._resourceManagerService.registerPluginResource<Record<string, IPermissionData>>({
+            toJson: (unitId: string) => {
                 const obj = [...this._permissionMap.keys()].reduce((r, k) => {
                     const v = this._permissionMap.get(k);
-                    r[k] = v!;
+                    if (v?.unitID === unitId) {
+                        r[k] = v;
+                    }
                     return r;
                 }, {} as Record<string, IPermissionData>);
                 return JSON.stringify(obj);
@@ -106,15 +120,19 @@ export class AuthzIoLocalService implements IAuthzIoService {
                 UniverInstanceType.UNIVER_SLIDE,
                 UniverInstanceType.UNIVER_BOARD,
             ],
-            onLoad: (_unitId, resource) => {
+            onLoad: (unitId, resource) => {
+                clearUnitPermissions(unitId);
                 for (const key in resource) {
-                    this._permissionMap.set(key, resource[key]);
+                    if (resource[key].unitID === unitId) {
+                        this._permissionMap.set(key, resource[key]);
+                        Object.entries(resource[key].overrides || {}).forEach(([action, allowed]) => {
+                            this._permissionOverrides.set(`${key}:${action}`, allowed);
+                        });
+                    }
                 }
             },
-            onUnLoad: () => {
-                this._permissionMap.clear();
-            },
-        });
+            onUnLoad: clearUnitPermissions,
+        }));
     }
 
     async create(config: ICreateRequest): Promise<string> {
@@ -272,9 +290,19 @@ export class AuthzIoLocalService implements IAuthzIoService {
 
     async update(config: IUpdatePermPointRequest): Promise<void> {
         const { objectID, strategies } = config;
-        const permissionData = this._permissionMap.get(objectID);
+        let permissionData = this._permissionMap.get(objectID);
+        if (!permissionData && config.objectType === UnitObject.Workbook && objectID === config.unitID
+            && this._univerInstanceService.getUnit(config.unitID, UniverInstanceType.UNIVER_SHEET)) {
+            permissionData = { objectType: config.objectType, unitID: config.unitID, name: config.name, strategies: [] };
+        }
+        if (!permissionData) {
+            throw new Error(`Permission object ${objectID} was not found for unitID ${config.unitID}`);
+        }
+        if (permissionData.unitID !== config.unitID) {
+            throw new Error(`Permission object ${objectID} does not belong to unitID ${config.unitID}`);
+        }
 
-        if (permissionData && strategies) {
+        if (strategies) {
             permissionData.strategies = strategies.map((s) => ({
                 action: s.action,
                 role: s.role,
@@ -304,6 +332,11 @@ export class AuthzIoLocalService implements IAuthzIoService {
     setPermissionOverride(objectID: string, action: number, allowed: boolean): void {
         const key = `${objectID}:${action}`;
         this._permissionOverrides.set(key, allowed);
+        const permission = this._permissionMap.get(objectID);
+        if (permission) {
+            permission.overrides ||= {};
+            permission.overrides[action] = allowed;
+        }
     }
 
     /**
@@ -314,6 +347,13 @@ export class AuthzIoLocalService implements IAuthzIoService {
     clearPermissionOverride(objectID: string, action: number): void {
         const key = `${objectID}:${action}`;
         this._permissionOverrides.delete(key);
+        const permission = this._permissionMap.get(objectID);
+        if (permission?.overrides) {
+            delete permission.overrides[action];
+            if (!Object.keys(permission.overrides).length) {
+                delete permission.overrides;
+            }
+        }
     }
 
     /**
@@ -328,6 +368,10 @@ export class AuthzIoLocalService implements IAuthzIoService {
             }
         });
         keysToDelete.forEach((key) => this._permissionOverrides.delete(key));
+        const permission = this._permissionMap.get(objectID);
+        if (permission) {
+            delete permission.overrides;
+        }
     }
 
     async updateCollaborator(): Promise<void> {

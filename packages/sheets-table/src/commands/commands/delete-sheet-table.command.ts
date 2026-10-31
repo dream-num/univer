@@ -15,9 +15,9 @@
  */
 
 import type { ICommand, IMutationInfo } from '@univerjs/core';
-import type { IDeleteSheetTableParams } from '../mutations/delete-sheet-table.mutation';
-import { CommandType, ICommandService, ILogService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
+import { CommandType, ICommandService, ILogService, IUndoRedoService, sequenceExecute, Tools } from '@univerjs/core';
 import { SheetInterceptorService } from '@univerjs/sheets';
+import type { IDeleteSheetTableParams } from '../mutations/delete-sheet-table.mutation';
 import { TableManager } from '../../models/table-manager';
 import { AddSheetTableMutation } from '../mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from '../mutations/delete-sheet-table.mutation';
@@ -39,7 +39,7 @@ export const DeleteSheetTableCommand: ICommand<IDeleteSheetTableParams> = {
         const undos: IMutationInfo[] = [];
 
         const tableInstance = sheetTableManager.getTable(params.unitId, params.tableId);
-        const tableConfig = tableInstance?.toJSON();
+        const tableConfig = tableInstance && Tools.deepClone(tableInstance.toJSON());
 
         if (!tableConfig) {
             logService.error('[TableManager]: Table not found');
@@ -68,6 +68,7 @@ export const DeleteSheetTableCommand: ICommand<IDeleteSheetTableParams> = {
                 name: tableConfig.name,
                 range: tableConfig.range,
                 options: tableConfig.options,
+                tableConfig,
             },
         });
         tableConfig.filters.tableColumnFilterList?.forEach((tableFilter, column) => {

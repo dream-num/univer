@@ -15,8 +15,9 @@
  */
 
 import type { IMutationInfo, Workbook } from '@univerjs/core';
-import type { ISetRangeValuesMutationParams } from '../commands/mutations/set-range-values.mutation';
 import { Disposable, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Subject } from 'rxjs';
+import type { ISetRangeValuesMutationParams } from '../commands/mutations/set-range-values.mutation';
 
 interface IScheduledTask {
     unitId: string;
@@ -36,6 +37,8 @@ interface IScheduledTask {
  * 4. Warning user if they try to close while tasks are pending
  */
 export class SheetLazyExecuteScheduleService extends Disposable {
+    private readonly _completed$ = new Subject<{ unitId: string; subUnitId: string }>();
+    readonly completed$ = this._completed$.asObservable();
     private _tasks: Map<string, IScheduledTask> = new Map();
     private _idleCallbackId: number | null = null;
     private _beforeUnloadHandler: ((e: BeforeUnloadEvent) => void) | null = null;
@@ -51,6 +54,7 @@ export class SheetLazyExecuteScheduleService extends Disposable {
         this.disposeWithMe(() => {
             this._cancelAllTasks();
             this._removeBeforeUnloadListener();
+            this._completed$.complete();
         });
     }
 
@@ -163,7 +167,6 @@ export class SheetLazyExecuteScheduleService extends Disposable {
                 continue;
             }
 
-            const startIndex = task.currentIndex;
             // Process mutations while we have time remaining
             while (task.currentIndex < task.mutations.length) {
                 if (deadline.timeRemaining() <= 0 && !deadline.didTimeout) {
@@ -180,6 +183,7 @@ export class SheetLazyExecuteScheduleService extends Disposable {
 
             // Task completed, remove it
             this._tasks.delete(taskKey);
+            this._completed$.next({ unitId: task.unitId, subUnitId: task.subUnitId });
         }
 
         // If there are still tasks remaining, schedule next idle

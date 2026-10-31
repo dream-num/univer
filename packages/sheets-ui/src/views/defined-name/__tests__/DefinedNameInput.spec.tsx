@@ -301,4 +301,45 @@ describe('DefinedNameInput', () => {
         expect(confirmed).toBeUndefined();
         expect(getByText(currentContainer, 'The name is invalid')).toBeTruthy();
     });
+
+    it.each([SCOPE_WORKBOOK_VALUE_DEFINED_NAME, 'sheet2'])('validates a collision against the selected scope: %s', async (scope) => {
+        currentBed = createDefinedNameInputTestBed();
+        const names = currentBed.injector.get(IDefinedNamesService);
+        names.registerDefinedNames(UNIT_ID, {
+            existing: { id: 'existing', name: 'ScopedRate', formulaOrRefString: '=8', localSheetId: scope },
+        });
+        let confirmed: IDefinedNamesServiceParam | undefined;
+        const rendered = renderWithDependencies(
+            <DefinedNameInput
+                inputId="scoped-name-input"
+                state
+                name="scopedrate"
+                formulaOrRefString="A1:B2"
+                localSheetId="sheet2"
+                confirm={(param) => {
+                    confirmed = param;
+                }}
+            />,
+            currentBed.injector
+        );
+        root = rendered.root;
+        container = rendered.container;
+        await act(async () => {
+            getByText(rendered.container, 'Confirm').click();
+            await Promise.resolve();
+        });
+        if (scope === 'sheet2') {
+            expect(confirmed).toBeUndefined();
+            expect(getByText(rendered.container, 'Name already exists')).toBeTruthy();
+        } else {
+            expect(confirmed).toMatchObject({
+                name: 'scopedrate',
+                formulaOrRefString: 'Sheet1!$A$1:$B$2',
+                localSheetId: 'sheet2',
+            });
+        }
+        expect(names.getDefinedNameMap(UNIT_ID)).toEqual({
+            existing: { id: 'existing', name: 'ScopedRate', formulaOrRefString: '=8', localSheetId: scope },
+        });
+    });
 });

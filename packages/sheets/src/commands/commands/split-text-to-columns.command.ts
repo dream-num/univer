@@ -15,10 +15,18 @@
  */
 
 import type { IAccessor, ICellData, IRange, Nullable } from '@univerjs/core';
-import type { IInsertColMutationParams, IRemoveColMutationParams } from '../../basics';
+import {
+    CommandType,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    ObjectMatrix,
+    Range,
+    sequenceExecute,
+} from '@univerjs/core';
+import type { IInsertColMutationParams, IRemoveColMutationParams } from '../../basics/interfaces/mutation-interface';
 import type { SplitDelimiterEnum } from '../../basics/split-range-text';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute } from '@univerjs/core';
 import { splitRangeText } from '../../basics/split-range-text';
 import { InsertColMutation, InsertColMutationUndoFactory } from '../mutations/insert-row-col.mutation';
 import { RemoveColMutation } from '../mutations/remove-row-col.mutation';
@@ -37,18 +45,19 @@ export interface ISplitTextToColumnsCommandParams {
 export const SplitTextToColumnsCommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.split-text-to-columns',
-    // eslint-disable-next-line max-lines-per-function
     handler: (accessor: IAccessor, params: ISplitTextToColumnsCommandParams) => {
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { unitId, subUnitId, worksheet } = target;
         const { range, delimiter, customDelimiter, treatMultipleDelimitersAsOne } = params;
         const { lastRow, rs, maxLength } = splitRangeText(worksheet, range, delimiter, customDelimiter, treatMultipleDelimitersAsOne);
         const maxColumn = worksheet.getColumnCount();
-        const { startColumn } = Range.transformRange(range, worksheet);
+        const { startColumn, startRow } = Range.transformRange(range, worksheet);
 
-        if (range.startColumn !== range.endColumn) {
+        if (range.startColumn !== range.endColumn || maxLength === 0) {
             return false;
         }
 
@@ -58,7 +67,7 @@ export const SplitTextToColumnsCommand = {
         const undoMutations = [];
 
         // insert columns if needed
-        const insertColCount = startColumn + maxLength + 1 - maxColumn;
+        const insertColCount = startColumn + maxLength - maxColumn;
         if (insertColCount > 0) {
             const insertColParams: IInsertColMutationParams = {
                 unitId,
@@ -66,8 +75,8 @@ export const SplitTextToColumnsCommand = {
                 range: {
                     startRow: 0,
                     endRow: worksheet.getRowCount() - 1,
-                    startColumn: maxColumn - 1,
-                    endColumn: maxColumn - 1 + insertColCount,
+                    startColumn: maxColumn,
+                    endColumn: maxColumn + insertColCount - 1,
                 },
 
             };
@@ -87,15 +96,18 @@ export const SplitTextToColumnsCommand = {
 
         // set values
         const destRange = {
-            startRow: range.startRow,
-            endRow: lastRow,
+            startRow,
+            endRow: startRow + lastRow,
             startColumn,
-            endColumn: startColumn + maxLength,
+            endColumn: startColumn + maxLength - 1,
         };
         const cellValue = new ObjectMatrix<Nullable<ICellData>>();
         for (let i = destRange.startRow; i <= destRange.endRow; i++) {
+            const values = rs[i - destRange.startRow];
+            if (!values) {
+                continue;
+            }
             for (let j = destRange.startColumn; j <= destRange.endColumn; j++) {
-                const values = rs[i - destRange.startRow];
                 if (j === 0 && values?.length === 1) {
                     cellValue.setValue(i, j, worksheet.getCell(i, j));
                 } else {

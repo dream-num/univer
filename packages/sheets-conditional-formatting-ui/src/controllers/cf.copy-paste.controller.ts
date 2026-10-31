@@ -29,6 +29,7 @@ import {
     IUniverInstanceService,
     Rectangle,
 } from '@univerjs/core';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import {
     getSheetCommandTarget,
     rangeToDiscreteRange,
@@ -36,24 +37,36 @@ import {
 import {
     AddConditionalRuleMutation,
     AddConditionalRuleMutationUndoFactory,
+    CFRuleType,
+    CFSubRuleType,
     ConditionalFormattingRangeTransformService,
     ConditionalFormattingRuleModel,
     DeleteConditionalRuleMutation,
     DeleteConditionalRuleMutationUndoFactory,
+    MoveConditionalRuleMutation,
     SetConditionalRuleMutation,
     setConditionalRuleMutationUndoFactory,
     SHEET_CONDITIONAL_FORMATTING_PLUGIN,
 } from '@univerjs/sheets-conditional-formatting';
-import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
+import {
+    COPY_TYPE,
+    getRepeatRange,
+    ISheetClipboardService,
+    PREDEFINED_HOOK_NAME_PASTE,
+    virtualizeDiscreteRanges,
+} from '@univerjs/sheets-ui';
 
 interface ICopyInfoType {
     rules: Map<string, IRange[]>;
     info: {
         unitId: string;
         subUnitId: string;
-        cfMap: Record<string, Pick<IConditionFormattingRule, 'rule' | 'stopIfTrue'>>;
+        cfMap: Record<string, Pick<IConditionFormattingRule, 'rule' | 'stopIfTrue'> & { anchor: IRange }>;
     };
 }
+
+const getRuleAnchor = (ranges: IRange[]) => ranges.reduce((first, range) =>
+    range.startRow < first.startRow || (range.startRow === first.startRow && range.startColumn < first.startColumn) ? range : first);
 
 const specialPastes: IPasteHookValueType[] = [
     PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMAT,
@@ -93,7 +106,7 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
 
     private _collectConditionalRule(unitId: string, subUnitId: string, range: IRange) {
         const rules = new Map<string, IRange[]>();
-        const cfMap: Record<string, Pick<IConditionFormattingRule, 'rule' | 'stopIfTrue'>> = {};
+        const cfMap: ICopyInfoType['info']['cfMap'] = {};
         this._copyInfo = {
             rules,
             info: {
@@ -117,7 +130,7 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
             });
             if (projectedRanges.length) {
                 rules.set(rule.cfId, projectedRanges.length > 1 ? Rectangle.mergeRanges(projectedRanges) : projectedRanges);
-                cfMap[rule.cfId] = { rule: rule.rule, stopIfTrue: rule.stopIfTrue };
+                cfMap[rule.cfId] = { rule: rule.rule, stopIfTrue: rule.stopIfTrue, anchor: { ...getRuleAnchor(rule.ranges) } };
             }
         });
     }
@@ -137,8 +150,8 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
             return { redos: [], undos: [] };
         }
 
-        // If it is cut and paste in the same worksheet, do not need to handle the conditional formatting, because the move range had handle the ref range of conditional formatting, to see cf-formula-ref-range.controller.ts.
-        if (copyType === COPY_TYPE.CUT && pastedUnitId === copyUnitId && pastedSubUnitId === copySubUnitId) {
+        // The MoveRange interceptor owns same-workbook CUT rule migration and reference changes.
+        if (copyType === COPY_TYPE.CUT && pastedUnitId === copyUnitId) {
             this._copyInfo = null;
             return { redos: [], undos: [] };
         }
@@ -195,7 +208,7 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
         }
 
         const { rules, info } = copyInfo;
-        const waitAddRule = new Map<string, IConditionFormattingRule>();
+        const waitAddRule = new Map<string, { rule: IConditionFormattingRule; anchor: IRange }>();
         const cacheCfIdMap: Record<string, IConditionFormattingRule> = {};
 
         // 3. generate the new conditional formatting rules based on the copy range's conditional formatting rules and the paste position.
@@ -216,7 +229,7 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
                 stopIfTrue: oldRule.stopIfTrue,
             };
             cacheCfIdMap[copyRangeCfId] = rule;
-            waitAddRule.set(rule.cfId, rule);
+            waitAddRule.set(rule.cfId, { rule, anchor: oldRule.anchor });
             return rule;
         };
 
@@ -240,7 +253,10 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
             }
             const current = effectedConditionalFormattingRuleRanges.get(effectKey)!;
             current.add.push(...repeatRange.flatMap((item) => sourceRanges.flatMap((sourceRange) => (
-                targetVirtualization.mapRange(Rectangle.getPositionRange(sourceRange, item.startRange))
+                targetVirtualization.mapRange(Rectangle.getPositionRange(
+                    Rectangle.getRelativeRange(sourceRange, sourceVirtualRange),
+                    item.startRange
+                ))
             ))));
         });
 
@@ -263,23 +279,72 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
             }
 
             const waitAdd = waitAddRule.get(cfId);
+            const rule = waitAdd?.rule ?? this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, cfId);
+            if (!rule) {
+                continue;
+            }
+            const previous = waitAdd?.anchor ?? getRuleAnchor(sourceRanges);
+            const current = getRuleAnchor(ranges);
+            const rowOffset = current.startRow - previous.startRow;
+            const columnOffset = current.startColumn - previous.startColumn;
+            let nextConfig = rule.rule;
+            if (rule.rule.type === CFRuleType.highlightCell && rule.rule.subType === CFSubRuleType.formula && (rowOffset || columnOffset)) {
+                const value = this._injector.get(LexerTreeBuilder).moveFormulaRefOffset(rule.rule.value, columnOffset, rowOffset);
+                if (value.includes('#REF!') && !waitAdd && add.length) {
+                    const retainedRanges = this._conditionalFormattingRangeTransformService.subtractRanges(sourceRanges, remove);
+                    if (retainedRanges.length) {
+                        const retainedAnchor = getRuleAnchor(retainedRanges);
+                        const retainedValue = this._injector.get(LexerTreeBuilder).moveFormulaRefOffset(
+                            rule.rule.value,
+                            retainedAnchor.startColumn - previous.startColumn,
+                            retainedAnchor.startRow - previous.startRow
+                        );
+                        const retainedParams: ISetConditionalRuleMutationParams = {
+                            unitId,
+                            subUnitId,
+                            rule: { ...rule, ranges: retainedRanges, rule: { ...rule.rule, value: retainedValue } },
+                        };
+                        const cloneParams: IAddConditionalRuleMutationParams = {
+                            unitId,
+                            subUnitId,
+                            rule: {
+                                ...rule,
+                                cfId: this._conditionalFormattingRuleModel.createCfId(unitId, subUnitId),
+                                ranges: Rectangle.mergeRanges(add),
+                                rule: { ...rule.rule, value },
+                            },
+                        };
+                        redos.push({ id: SetConditionalRuleMutation.id, params: retainedParams });
+                        redos.push({ id: AddConditionalRuleMutation.id, params: cloneParams });
+                        redos.push({
+                            id: MoveConditionalRuleMutation.id,
+                            params: {
+                                unitId,
+                                subUnitId,
+                                start: { id: cloneParams.rule.cfId, type: 'self' },
+                                end: { id: cfId, type: 'after' },
+                            },
+                        });
+                        undos.push(AddConditionalRuleMutationUndoFactory(this._injector, cloneParams));
+                        undos.push(...setConditionalRuleMutationUndoFactory(this._injector, retainedParams));
+                        continue;
+                    }
+                }
+                nextConfig = { ...rule.rule, value };
+            }
             if (waitAdd) {
                 const addParams: IAddConditionalRuleMutationParams = {
                     unitId: pastedUnitId,
                     subUnitId: pastedSubUnitId,
-                    rule: { ...waitAdd, ranges },
+                    rule: { ...rule, ranges, rule: nextConfig },
                 };
                 redos.push({ id: AddConditionalRuleMutation.id, params: addParams });
                 undos.push(AddConditionalRuleMutationUndoFactory(this._injector, addParams));
             } else {
-                const rule = this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, cfId);
-                if (!rule) {
-                    continue;
-                }
                 const setParams: ISetConditionalRuleMutationParams = {
                     unitId,
                     subUnitId,
-                    rule: { ...rule, ranges },
+                    rule: { ...rule, ranges, rule: nextConfig },
                 };
                 redos.push({ id: SetConditionalRuleMutation.id, params: setParams });
                 undos.push(...setConditionalRuleMutationUndoFactory(this._injector, setParams));

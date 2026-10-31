@@ -16,18 +16,50 @@
 
 import type { IDisposable, IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
-import { AbsoluteRefType, Disposable, DisposableCollection, getIntersectRange, Inject, Injector, isFormulaString, IUniverInstanceService, moveRangeByOffset, Rectangle, UniverInstanceType } from '@univerjs/core';
-import { deserializeRangeWithSheetWithCache, ErrorType, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
-import { getSeparateEffectedRangesOnCommand, handleCommonDefaultRangeChangeWithEffectRefCommands, handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
+import {
+    AbsoluteRefType,
+    Disposable,
+    DisposableCollection,
+    getIntersectRange,
+    Inject,
+    Injector,
+    isFormulaString,
+    IUniverInstanceService,
+    moveRangeByOffset,
+    Rectangle,
+} from '@univerjs/core';
+import {
+    deserializeRangeWithSheetWithCache,
+    ErrorType,
+    generateStringWithSequence,
+    LexerTreeBuilder,
+    sequenceNodeType,
+    serializeRange,
+    serializeRangeWithSheet,
+    serializeRangeWithSpreadsheet,
+} from '@univerjs/engine-formula';
+import {
+    EffectRefRangId,
+    getSeparateEffectedRangesOnCommand,
+    handleCommonDefaultRangeChangeWithEffectRefCommands,
+    handleDefaultRangeChangeWithEffectRefCommands,
+    RefRangeService,
+} from '@univerjs/sheets';
+import type { IFormulaReferenceMoveParam } from '../controllers/utils/ref-range-formula';
+import { getNewRangeByMoveParam } from '../controllers/utils/ref-range-move';
+import { getReferenceMoveParams } from '../controllers/utils/ref-range-param';
 
 export type FormulaChangeMap = Record<string, Record<string, Record<string, string>>>;
 
-export type FormulaChangeCallback = (formulaString: string) => {
+export type FormulaChangeCallback = (formulaString: string, commandInfo: EffectRefRangeParams) => {
     redos: IMutationInfo[];
     undos: IMutationInfo[];
 };
 
-export type RangeFormulaChangeCallback = (infos: { formulas: string[]; ranges: IRange[] }[]) => {
+export type RangeFormulaChangeCallback = (
+    infos: { formulas: string[]; ranges: IRange[] }[],
+    commandInfo: EffectRefRangeParams
+) => {
     redos: IMutationInfo[];
     undos: IMutationInfo[];
 };
@@ -80,12 +112,185 @@ export class FormulaRefRangeService extends Disposable {
         super();
     }
 
+    /** Cross-sheet CUT partitions. Each formula is anchored at its partition's first range. */
+    getRangeFormulaChanges(
+        unitId: string,
+        subUnitId: string,
+        oldRanges: IRange[],
+        formulas: string[],
+        commandInfo: EffectRefRangeParams,
+        offsetFormula = true
+    ) {
+        const original = [{ unitId, subUnitId, ranges: oldRanges, formulas, moved: false }];
+        if (commandInfo.id !== EffectRefRangId.MoveRangeCommandId || !commandInfo.params || !oldRanges.length) {
+            return original;
+        }
+        const sourceUnitId = commandInfo.params.fromUnitId;
+        const sourceWorkbook = sourceUnitId ? this._univerInstanceService.getUnit<Workbook>(sourceUnitId) : null;
+        if (!sourceWorkbook) {
+            return original;
+        }
+        const move = getReferenceMoveParams(sourceWorkbook, commandInfo);
+        if (!move || !move.from || !move.to || move.unitId !== move.targetUnitId || move.sheetId === move.targetSheetId) {
+            return original;
+        }
+        const origin = oldRanges[0];
+        const sourceOwner = unitId === move.unitId && subUnitId === move.sheetId;
+        const targetOwner = unitId === move.targetUnitId && subUnitId === move.targetSheetId;
+        const formulaDeps = formulas.flatMap((formula) => this._getFormulaDependcy(unitId, subUnitId, formula, oldRanges));
+        const boundaries: IRange[] = [];
+        if (sourceOwner || targetOwner) {
+            const effect = sourceOwner ? move.from : move.to;
+            for (const range of oldRanges) {
+                const intersect = getIntersectRange(range, effect);
+                if (intersect) {
+                    boundaries.push(intersect);
+                }
+            }
+        }
+        if (offsetFormula) {
+            for (const dep of formulaDeps) {
+                if (dep.unitId === move.unitId && dep.subUnitId === move.sheetId) {
+                    for (const reference of this._getPartitionReferences(dep.referenceRange)) {
+                        boundaries.push(...this._getAffectedOwnerRanges(
+                            reference,
+                            move.from,
+                            oldRanges,
+                            origin.startRow,
+                            origin.startColumn
+                        ));
+                    }
+                }
+            }
+        }
+        if (!boundaries.length && !formulaDeps.some((dep) =>
+            dep.unitId === move.unitId && dep.subUnitId === move.sheetId && !!getIntersectRange(dep.referenceRange, move.from!)
+        )) {
+            return original;
+        }
+        const grid = Rectangle.splitIntoGrid(boundaries);
+        const pieces = [...grid, ...Rectangle.subtractMulti(oldRanges, grid)];
+        pieces.sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn);
+        const groups = new Map<string, { unitId: string; subUnitId: string; ranges: IRange[]; formulas: string[]; moved: boolean }>();
+        for (const piece of pieces) {
+            if (targetOwner && getIntersectRange(piece, move.to)) {
+                continue;
+            }
+            const moved = sourceOwner && !!getIntersectRange(piece, move.from);
+            const nextUnitId = moved ? move.targetUnitId! : unitId;
+            const nextSubUnitId = moved ? move.targetSheetId! : subUnitId;
+            const nextRange = moved
+                ? Rectangle.moveOffset(piece, move.to.startColumn - move.from.startColumn, move.to.startRow - move.from.startRow)
+                : piece;
+            const nextFormulas = formulas.map((formula) => {
+                if (!isFormulaString(formula)) {
+                    return formula;
+                }
+                const anchored = offsetFormula
+                    ? this._lexerTreeBuilder.moveFormulaRefOffset(
+                        formula,
+                        piece.startColumn - origin.startColumn,
+                        piece.startRow - origin.startRow
+                    )
+                    : formula;
+                return this._transformMoveFormula(unitId, subUnitId, anchored, move, nextUnitId, nextSubUnitId, moved);
+            });
+            // Normalize the complete expression, retaining absolute references and qualifiers.
+            const key = JSON.stringify([nextUnitId, nextSubUnitId, moved, nextFormulas.map((formula) => {
+                if (!offsetFormula || !isFormulaString(formula)) {
+                    return formula;
+                }
+                return this._getMoveFormulaKey(formula, nextRange);
+            })]);
+            const group = groups.get(key);
+            if (group) {
+                group.ranges.push(nextRange);
+            } else {
+                groups.set(key, { unitId: nextUnitId, subUnitId: nextSubUnitId, ranges: [nextRange], formulas: nextFormulas, moved });
+            }
+        }
+        return [...groups.values()].map((group) => ({
+            ...group,
+            ranges: Rectangle.mergeRanges(group.ranges).sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn),
+        }));
+    }
+
+    private _getMoveFormulaKey(formula: string, range: IRange) {
+        return this._lexerTreeBuilder.sequenceNodesBuilder(formula)?.map((node) => {
+            if (typeof node === 'string') {
+                return node;
+            }
+            if (node.nodeType !== sequenceNodeType.REFERENCE) {
+                return { nodeType: node.nodeType, token: node.token };
+            }
+            const ref = deserializeRangeWithSheetWithCache(node.token);
+            return { ...ref, range: moveRangeByOffset(ref.range, -range.startColumn, -range.startRow) };
+        });
+    }
+
+    private _getPartitionReferences(range: IRange) {
+        return [range, {
+            ...range,
+            endRow: range.startRow,
+            endColumn: range.startColumn,
+            endAbsoluteRefType: range.startAbsoluteRefType,
+        }, {
+            ...range,
+            startRow: range.endRow,
+            startColumn: range.endColumn,
+            startAbsoluteRefType: range.endAbsoluteRefType,
+        }];
+    }
+
+    private _transformMoveFormula(
+        unitId: string,
+        subUnitId: string,
+        formula: string,
+        move: IFormulaReferenceMoveParam,
+        nextUnitId: string,
+        nextSubUnitId: string,
+        moved: boolean
+    ) {
+        const nodes = this._lexerTreeBuilder.sequenceNodesBuilder(formula);
+        const transformed = nodes?.map((node) => {
+            if (typeof node !== 'string' && node.nodeType === sequenceNodeType.STRING) {
+                return { ...node, token: `"${node.token.slice(1, -1).split('"').join('""')}"` };
+            }
+            if (typeof node === 'string' || node.nodeType !== sequenceNodeType.REFERENCE) {
+                return node;
+            }
+            const ref = deserializeRangeWithSheetWithCache(node.token);
+            const workbook = this._univerInstanceService.getUnit<Workbook>(ref.unitId || unitId);
+            const sheet = ref.sheetName ? workbook?.getSheetBySheetName(ref.sheetName) : workbook?.getSheetBySheetId(subUnitId);
+            if (!workbook || !sheet) {
+                return node;
+            }
+            const token = getNewRangeByMoveParam({
+                unitId: workbook.getUnitId(),
+                sheetId: sheet.getSheetId(),
+                sheetName: sheet.getName(),
+                range: ref.range,
+                refOffsetX: 0,
+                refOffsetY: 0,
+            }, move, nextUnitId, nextSubUnitId, { preserveSheetQualifier: !!ref.sheetName });
+            if (token != null) {
+                return { ...node, token };
+            }
+            // References left behind by a moved owner stay on their original worksheet.
+            if (moved && workbook.getUnitId() === unitId && sheet.getSheetId() === subUnitId) {
+                return { ...node, token: serializeRangeWithSheet(sheet.getName(), ref.range) };
+            }
+            return node;
+        });
+        return transformed ? `=${generateStringWithSequence(transformed)}` : formula;
+    }
+
     transformFormulaByEffectCommand(unitId: string, subUnitId: string, formula: string, params: EffectRefRangeParams) {
         const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formula);
-        const currentUnit = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const currentSheet = currentUnit.getActiveSheet();
-        const currentUnitId = currentUnit.getUnitId();
-        const currentSheetId = currentSheet.getSheetId();
+        const effectedRanges = getSeparateEffectedRangesOnCommand(this._injector, params);
+        if (!effectedRanges) {
+            return formula;
+        }
 
         const transformSequenceNodes = sequenceNodes?.map((node) => {
             if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
@@ -99,16 +304,14 @@ export class FormulaRefRangeService extends Disposable {
 
                 const realUnitId = workbook!.getUnitId();
                 const realSheetId = worksheet.getSheetId();
-                if ((realUnitId !== currentUnitId) || (realSheetId !== currentSheetId)) {
+                if ((realUnitId !== effectedRanges.unitId) || (realSheetId !== effectedRanges.subUnitId)) {
                     return node;
                 }
                 const newRange = handleDefaultRangeChangeWithEffectRefCommands(range, params);
                 let newToken = '';
 
                 if (newRange) {
-                    const offsetX = newRange.startColumn - range.startColumn;
-                    const offsetY = newRange.startRow - range.startRow;
-                    const finalRange = moveRangeByOffset(range, offsetX, offsetY);
+                    const finalRange = { ...range, ...newRange };
                     if (rangeUnitId && rangeSheetName) {
                         newToken = serializeRangeWithSpreadsheet(rangeUnitId, rangeSheetName, finalRange);
                     } else if (rangeSheetName) {
@@ -132,20 +335,54 @@ export class FormulaRefRangeService extends Disposable {
         return transformSequenceNodes ? `=${generateStringWithSequence(transformSequenceNodes)}` : '';
     }
 
+    private _transformRangeFormula(
+        unitId: string,
+        subUnitId: string,
+        formula: string,
+        commandInfo: EffectRefRangeParams,
+        sourceRange: IRange,
+        targetRange: IRange,
+        ownerRangeAffected: boolean
+    ) {
+        const transformedFormula = this.transformFormulaByEffectCommand(unitId, subUnitId, formula, commandInfo);
+        if (!ownerRangeAffected || (
+            commandInfo.id !== EffectRefRangId.InsertRowCommandId
+            && commandInfo.id !== EffectRefRangId.InsertColCommandId
+        )) {
+            return transformedFormula;
+        }
+
+        // Before-insert ranges include inherited cells preceding the moved original formula anchor.
+        const movedAnchor = handleDefaultRangeChangeWithEffectRefCommands({
+            startRow: sourceRange.startRow,
+            endRow: sourceRange.startRow,
+            startColumn: sourceRange.startColumn,
+            endColumn: sourceRange.startColumn,
+        }, commandInfo);
+        if (!movedAnchor) {
+            return transformedFormula;
+        }
+        const offsetRow = targetRange.startRow - movedAnchor.startRow;
+        const offsetColumn = targetRange.startColumn - movedAnchor.startColumn;
+        return offsetRow || offsetColumn
+            ? this._lexerTreeBuilder.moveFormulaRefOffset(transformedFormula, offsetColumn, offsetRow)
+            : transformedFormula;
+    }
+
     registerFormula(unitId: string, subUnitId: string, formula: string, callback: FormulaChangeCallback): IDisposable {
         const rangeMap = new Map<string, { unitId: string; subUnitId: string; range: IRange; sheetName: string }>();
         const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formula);
         const disposableCollection = new DisposableCollection();
         const handleChange = (params: EffectRefRangeParams) => {
-            const currentUnit = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-            const currentSheet = currentUnit.getActiveSheet();
-            const currentUnitId = currentUnit.getUnitId();
-            const currentSheetId = currentSheet.getSheetId();
+            const effectedRanges = getSeparateEffectedRangesOnCommand(this._injector, params);
+            if (!effectedRanges) {
+                return { redos: [], undos: [] };
+            }
 
             const transformSequenceNodes = sequenceNodes?.map((node) => {
                 if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
                     const rangeInfo = rangeMap.get(node.token)!;
-                    if ((rangeInfo.unitId !== currentUnitId) || (rangeInfo.subUnitId !== currentSheetId)) {
+                    if ((rangeInfo.unitId !== effectedRanges.unitId) || (rangeInfo.subUnitId !== effectedRanges.subUnitId)) {
                         return node;
                     }
 
@@ -153,9 +390,7 @@ export class FormulaRefRangeService extends Disposable {
                     let newToken = '';
 
                     if (newRange) {
-                        const offsetX = newRange.startColumn - rangeInfo.range.startColumn;
-                        const offsetY = newRange.startRow - rangeInfo.range.startRow;
-                        const finalRange = moveRangeByOffset(rangeInfo.range, offsetX, offsetY);
+                        const finalRange = { ...rangeInfo.range, ...newRange };
                         if (rangeInfo.unitId && rangeInfo.sheetName) {
                             newToken = serializeRangeWithSpreadsheet(rangeInfo.unitId, rangeInfo.sheetName, finalRange);
                         } else if (rangeInfo.sheetName) {
@@ -176,7 +411,7 @@ export class FormulaRefRangeService extends Disposable {
                 };
             });
             const newFormulaString = transformSequenceNodes && generateStringWithSequence(transformSequenceNodes);
-            return callback(`=${newFormulaString}`);
+            return callback(`=${newFormulaString}`, params);
         };
 
         sequenceNodes?.forEach((node) => {
@@ -207,15 +442,16 @@ export class FormulaRefRangeService extends Disposable {
     private _getFormulaDependcy(unitId: string, subUnitId: string, formula: string | undefined, ranges: IRange[]) {
         const nodes = isFormulaString(formula) ? this._lexerTreeBuilder.sequenceNodesBuilder(formula!) : null;
 
-        const dependencyRanges: { unitId: string; subUnitId: string; ranges: IRange[] }[] = [];
+        const dependencyRanges: {
+            unitId: string;
+            subUnitId: string;
+            ranges: IRange[];
+            referenceRange: IRange;
+        }[] = [];
         nodes?.forEach((node) => {
             if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
                 const gridRangeName = deserializeRangeWithSheetWithCache(node.token);
                 const { range, unitId: rangeUnitId, sheetName: rangeSheetName } = gridRangeName;
-                // ignore all absolute reference
-                if (range.startAbsoluteRefType === AbsoluteRefType.ALL && range.endAbsoluteRefType === AbsoluteRefType.ALL) {
-                    return;
-                }
                 const workbook = this._univerInstanceService.getUnit<Workbook>(rangeUnitId || unitId);
                 const worksheet = rangeSheetName ? workbook?.getSheetBySheetName(rangeSheetName) : workbook?.getSheetBySheetId(subUnitId);
                 if (!worksheet) {
@@ -225,25 +461,55 @@ export class FormulaRefRangeService extends Disposable {
                 const realSheetId = worksheet.getSheetId();
                 const orginStartRow = ranges[0].startRow;
                 const orginStartColumn = ranges[0].startColumn;
-                const currentStartRow = range.startRow;
-                const currentStartColumn = range.startColumn;
-
-                const offsetRanges = ranges.map((range) => ({
-                    startRow: range.startRow - orginStartRow + currentStartRow,
-                    endRow: range.endRow - orginStartRow + currentStartRow,
-                    startColumn: range.startColumn - orginStartColumn + currentStartColumn,
-                    endColumn: range.endColumn - orginStartColumn + currentStartColumn,
-                }));
+                const offsetRanges = ranges.map((ownerRange) => {
+                    const first = moveRangeByOffset(range, ownerRange.startColumn - orginStartColumn, ownerRange.startRow - orginStartRow);
+                    const last = moveRangeByOffset(range, ownerRange.endColumn - orginStartColumn, ownerRange.endRow - orginStartRow);
+                    return {
+                        startRow: Math.min(first.startRow, last.startRow),
+                        endRow: Math.max(first.endRow, last.endRow),
+                        startColumn: Math.min(first.startColumn, last.startColumn),
+                        endColumn: Math.max(first.endColumn, last.endColumn),
+                    };
+                });
 
                 dependencyRanges.push({
                     unitId: realUnitId,
                     subUnitId: realSheetId,
                     ranges: offsetRanges,
+                    referenceRange: range,
                 });
             }
         });
 
         return dependencyRanges;
+    }
+
+    private _getAffectedOwnerRanges(
+        referenceRange: IRange,
+        effectRange: IRange,
+        ownerRanges: IRange[],
+        originStartRow: number,
+        originStartColumn: number
+    ): IRange[] {
+        const startFixed = referenceRange.startAbsoluteRefType || AbsoluteRefType.NONE;
+        const endFixed = referenceRange.endAbsoluteRefType || AbsoluteRefType.NONE;
+        if (
+            (startFixed & AbsoluteRefType.ROW && referenceRange.startRow > effectRange.endRow)
+            || (endFixed & AbsoluteRefType.ROW && referenceRange.endRow < effectRange.startRow)
+            || (startFixed & AbsoluteRefType.COLUMN && referenceRange.startColumn > effectRange.endColumn)
+            || (endFixed & AbsoluteRefType.COLUMN && referenceRange.endColumn < effectRange.startColumn)
+        ) {
+            return [];
+        }
+        return ownerRanges.flatMap((ownerRange) => {
+            const projected = getIntersectRange({
+                startRow: endFixed & AbsoluteRefType.ROW ? ownerRange.startRow : originStartRow + effectRange.startRow - referenceRange.endRow,
+                endRow: startFixed & AbsoluteRefType.ROW ? ownerRange.endRow : originStartRow + effectRange.endRow - referenceRange.startRow,
+                startColumn: endFixed & AbsoluteRefType.COLUMN ? ownerRange.startColumn : originStartColumn + effectRange.startColumn - referenceRange.endColumn,
+                endColumn: startFixed & AbsoluteRefType.COLUMN ? ownerRange.endColumn : originStartColumn + effectRange.endColumn - referenceRange.startColumn,
+            }, ownerRange);
+            return projected ? [projected] : [];
+        });
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -260,19 +526,26 @@ export class FormulaRefRangeService extends Disposable {
                 };
             }
 
+            const ownerRangeAffected = effectedRanges.unitId === unitId && effectedRanges.subUnitId === subUnitId;
             const originStartRow = oldRanges[0].startRow;
             const originStartColumn = oldRanges[0].startColumn;
-            const deps = [{ unitId, subUnitId, ranges: oldRanges }, ...formulaDeps.flat()];
+            const deps = [{
+                unitId,
+                subUnitId,
+                ranges: oldRanges,
+                referenceRange: {
+                    startRow: originStartRow,
+                    endRow: originStartRow,
+                    startColumn: originStartColumn,
+                    endColumn: originStartColumn,
+                },
+            }, ...formulaDeps.flat()];
             const matchedEffectedRanges: IRange[][] = [];
 
             // 1. calculate effected ranges
-            for (const { unitId: depUnitId, subUnitId: depSubUnitId, ranges } of deps) {
+            for (const { unitId: depUnitId, subUnitId: depSubUnitId, ranges, referenceRange } of deps) {
                 if (depUnitId === effectedRanges.unitId && depSubUnitId === effectedRanges.subUnitId) {
                     const intersectedRanges: IRange[] = [];
-                    const currentStartRow = ranges[0].startRow;
-                    const currentStartColumn = ranges[0].startColumn;
-                    const offsetRow = currentStartRow - originStartRow;
-                    const offsetColumn = currentStartColumn - originStartColumn;
 
                     for (const range of effectedRanges.ranges) {
                         const intersectedRange: IRange[] = [];
@@ -288,13 +561,12 @@ export class FormulaRefRangeService extends Disposable {
                     }
 
                     if (intersectedRanges.length > 0) {
+                        // Endpoint boundaries separate fully transformed references from partial overlaps.
+                        const partitionReferences = this._getPartitionReferences(referenceRange);
                         matchedEffectedRanges.push(
-                            intersectedRanges.map((range) => ({
-                                startRow: range.startRow - offsetRow,
-                                endRow: range.endRow - offsetRow,
-                                startColumn: range.startColumn - offsetColumn,
-                                endColumn: range.endColumn - offsetColumn,
-                            }))
+                            intersectedRanges.flatMap((range) => partitionReferences.flatMap((reference) =>
+                                this._getAffectedOwnerRanges(reference, range, oldRanges, originStartRow, originStartColumn)
+                            ))
                         );
                     }
                 }
@@ -314,7 +586,9 @@ export class FormulaRefRangeService extends Disposable {
                     const currentColumn = range.startColumn;
                     const offsetRow = currentRow - originStartRow;
                     const offsetColumn = currentColumn - originStartColumn;
-                    const transformedRange = handleCommonDefaultRangeChangeWithEffectRefCommands(range, commandInfo).sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn);
+                    const transformedRange = ownerRangeAffected
+                        ? handleCommonDefaultRangeChangeWithEffectRefCommands(range, commandInfo).sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn)
+                        : [range];
                     if (!transformedRange.length) {
                         continue;
                     }
@@ -330,7 +604,9 @@ export class FormulaRefRangeService extends Disposable {
                         // 3.1 move formula ref offset to get formula string for this range before this command
                         const formulaString = isFormulaFormulaString ? this._lexerTreeBuilder.moveFormulaRefOffset(formula!, offsetColumn, offsetRow) : formula!;
                         // 3.2 transform formula by effect command
-                        const newFormula = isFormulaFormulaString ? this.transformFormulaByEffectCommand(unitId, subUnitId, formulaString, commandInfo) : formulaString;
+                        const newFormula = isFormulaFormulaString
+                            ? this._transformRangeFormula(unitId, subUnitId, formulaString, commandInfo, range, transformedRange[0], ownerRangeAffected)
+                            : formulaString;
                         // 3.3 get formula key offset for this range after this command
                         const orginFormula = getFormulaKeyOffset(this._lexerTreeBuilder, newFormula, -transformedOffsetColumn, -transformedOffsetRow);
                         transformedFormulas.push({
@@ -399,7 +675,7 @@ export class FormulaRefRangeService extends Disposable {
                     });
                 }
 
-                return callback(res);
+                return callback(res, commandInfo);
             }
 
             return {

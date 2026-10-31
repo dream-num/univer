@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ITableColumnJson, ITableFilterItem, ITableInfo, ITableJson, ITableOptions, ITableRange } from '../types/type';
 import { generateRandomId } from '@univerjs/core';
+import type { ITableColumnJson, ITableFilterItem, ITableInfo, ITableJson, ITableOptions, ITableRange } from '../types/type';
 import { tableThemeConfig } from '../controllers/table-theme.factory';
 import { TableColumn } from './table-column';
 import { TableFilters } from './table-filter';
@@ -279,7 +279,7 @@ export class Table {
         this._name = json.name;
         this._range = json.range;
         this.tableMeta = json.meta;
-        this._tableStyleId = json.options.tableStyleId || '';
+        this._tableStyleId = json.options.tableStyleId;
         this._showHeader = json.options.showHeader ?? true;
         this._showFooter = json.options.showFooter ?? true;
         this._showAutoFilter = json.options.showAutoFilter ?? true;

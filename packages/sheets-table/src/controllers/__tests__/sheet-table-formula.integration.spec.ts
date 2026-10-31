@@ -782,6 +782,57 @@ describe('Sheet table formula integration', () => {
         expect(calculate('=SUM(#REF!)', 5, 3)).toBe('#REF!');
     });
 
+    it('preserves ordinary formula references when removing a table column', async () => {
+        expect(await commandService.executeCommand(SetRangeValuesCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { startRow: 5, endRow: 5, startColumn: 9, endColumn: 9 },
+            value: { f: '=SUM(B2,C2)' },
+        })).toBe(true);
+        expect(getCellFormula('sheet1', 5, 9)).toBe('=SUM(B2,C2)');
+
+        expect(await commandService.executeCommand(RemoveColCommand.id, {
+            range: {
+                startRow: 0,
+                endRow: 19,
+                startColumn: 0,
+                endColumn: 0,
+                rangeType: RANGE_TYPE.COLUMN,
+            },
+        })).toBe(true);
+        expect(getCellFormula('sheet1', 5, 8)).toBe('=SUM(A2,B2)');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getCellFormula('sheet1', 5, 9)).toBe('=SUM(B2,C2)');
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getCellFormula('sheet1', 5, 8)).toBe('=SUM(A2,B2)');
+    });
+
+    it('updates structured and ordinary references together when removing a table column', async () => {
+        expect(await commandService.executeCommand(SetRangeValuesCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { startRow: 8, endRow: 8, startColumn: 9, endColumn: 9 },
+            value: { f: '=SUM(Orders[amount],C2)' },
+        })).toBe(true);
+
+        expect(await commandService.executeCommand(RemoveColCommand.id, {
+            range: {
+                startRow: 0,
+                endRow: 19,
+                startColumn: 1,
+                endColumn: 1,
+                rangeType: RANGE_TYPE.COLUMN,
+            },
+        })).toBe(true);
+        expect(getCellFormula('sheet1', 8, 8)).toBe('=SUM(#REF!,B2)');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getCellFormula('sheet1', 8, 9)).toBe('=SUM(Orders[amount],C2)');
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getCellFormula('sheet1', 8, 8)).toBe('=SUM(#REF!,B2)');
+    });
+
     it('should sync table formulas when a table is deleted, undone, and redone', async () => {
         expect(await commandService.executeCommand(DeleteSheetTableCommand.id, {
             unitId: 'test',
@@ -904,7 +955,7 @@ describe('Sheet table formula integration', () => {
         ]]);
     });
 
-    it('should move formula cells when worksheet column removal deletes a referenced table column', async () => {
+    it('only rewrites affected formulas before worksheet column removal', async () => {
         const sheetInterceptorService = testBed.injector.get(SheetInterceptorService);
         const removeTableColumnResult = sheetInterceptorService.onCommandExecute({
             id: 'sheet.command.table-remove-col',
@@ -929,6 +980,6 @@ describe('Sheet table formula integration', () => {
             ?.getRange(5, 5, 5, 8)
             .getValues() as Array<Array<Nullable<ICellData>>>;
 
-        expect(values).toEqual([[{ f: '=#REF!' }, { f: '=Table[2]' }, { f: '="Table[1]"' }, null]]);
+        expect(values).toEqual([[{ f: '=#REF!' }, null, { f: '=Table[2]' }, { f: '="Table[1]"' }]]);
     });
 });

@@ -36,7 +36,11 @@ import {
 } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
 import { getImageSize } from '@univerjs/drawing';
-import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute, SheetSkeletonService } from '@univerjs/sheets';
+import {
+    convertPositionCellToSheetOverGrid,
+    convertPositionSheetOverGridToAbsolute,
+    SheetSkeletonService,
+} from '@univerjs/sheets';
 import {
     applySheetDrawingPlacement,
     getSheetDrawingPlacement,
@@ -1039,8 +1043,13 @@ export class FOverGridImage extends FBase {
      * ```
      */
     toBuilder(): FOverGridImageBuilder {
+        const current = this._sheetDrawingService.getDrawingByParam({
+            unitId: this._image.unitId,
+            subUnitId: this._image.subUnitId,
+            drawingId: this._image.drawingId,
+        }) as ISheetImage | undefined;
         const builder = this._injector.createInstance(FOverGridImageBuilder, this._image.unitId, this._image.subUnitId);
-        builder.setImage(this._image);
+        builder.setImage(current ?? this._image);
         return builder;
     }
 
@@ -1076,10 +1085,16 @@ export class FOverGridImage extends FBase {
      */
     setSource(source: string, sourceType?: ImageSourceType): boolean;
     setSource(source: string, sourceType?: ImageSourceType): boolean {
-        const sourceTypeVal = sourceType ?? ImageSourceType.URL;
-        this._image.source = source;
-        this._image.imageSourceType = sourceTypeVal;
-        return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [this._image] });
+        return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, {
+            unitId: this._image.unitId,
+            drawings: [{
+                unitId: this._image.unitId,
+                subUnitId: this._image.subUnitId,
+                drawingId: this._image.drawingId,
+                source,
+                imageSourceType: sourceType ?? ImageSourceType.URL,
+            }],
+        });
     }
 
     /**
@@ -1148,9 +1163,52 @@ export class FOverGridImage extends FBase {
      * ```
      */
     async setSizeAsync(width: number, height: number): Promise<boolean> {
+        const current = this._sheetDrawingService.getDrawingByParam({
+            unitId: this._image.unitId,
+            subUnitId: this._image.subUnitId,
+            drawingId: this._image.drawingId,
+        }) as ISheetImage | undefined;
+        let image = current ?? this._image;
+        let targetWidth = width;
+        let targetHeight = height;
+        if (image.anchorType === SheetDrawingAnchorType.None && Number.isFinite(width) && Number.isFinite(height) && width >= 0 && height >= 0) {
+            if (width === 0 || height === 0) {
+                const { source, imageSourceType } = image;
+                const size = await getImageSize(source);
+                const latest = this._sheetDrawingService.getDrawingByParam({
+                    unitId: image.unitId,
+                    subUnitId: image.subUnitId,
+                    drawingId: image.drawingId,
+                }) as ISheetImage | undefined;
+                if (!latest || latest.source !== source || latest.imageSourceType !== imageSourceType) {
+                    return false;
+                }
+
+                image = latest;
+                targetWidth = width === 0 ? size.width : width;
+                targetHeight = height === 0 ? size.height : height;
+            }
+
+            const placement = getSheetDrawingPlacement(image);
+            if (placement.kind === SheetDrawingAnchorType.None) {
+                const updated = applySheetDrawingPlacement(image, { ...placement, width: targetWidth, height: targetHeight });
+                return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, {
+                    unitId: image.unitId,
+                    drawings: [{
+                        unitId: image.unitId,
+                        subUnitId: image.subUnitId,
+                        drawingId: image.drawingId,
+                        transform: updated.transform,
+                        sheetTransform: updated.sheetTransform,
+                        axisAlignSheetTransform: updated.axisAlignSheetTransform,
+                    }],
+                });
+            }
+        }
+
         const builder = this.toBuilder();
-        builder.setWidth(width);
-        builder.setHeight(height);
+        builder.setWidth(targetWidth);
+        builder.setHeight(targetHeight);
         const param = await builder.buildAsync();
         return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [param] });
     }
@@ -1174,32 +1232,44 @@ export class FOverGridImage extends FBase {
      * ```
      */
     setCrop(top?: number, left?: number, bottom?: number, right?: number): boolean {
-        if (this._image.srcRect == null) {
-            this._image.srcRect = {
-                top: 0,
-                left: 0,
-                bottom: 0,
-                right: 0,
-            };
-        }
+        const current = this._sheetDrawingService.getDrawingByParam({
+            unitId: this._image.unitId,
+            subUnitId: this._image.subUnitId,
+            drawingId: this._image.drawingId,
+        }) as ISheetImage | undefined;
+        const srcRect = {
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+            ...(current ?? this._image).srcRect,
+        };
 
         if (top != null) {
-            this._image.srcRect.top = top;
+            srcRect.top = top;
         }
 
         if (left != null) {
-            this._image.srcRect.left = left;
+            srcRect.left = left;
         }
 
         if (bottom != null) {
-            this._image.srcRect.bottom = bottom;
+            srcRect.bottom = bottom;
         }
 
         if (right != null) {
-            this._image.srcRect.right = right;
+            srcRect.right = right;
         }
 
-        return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [this._image] });
+        return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, {
+            unitId: this._image.unitId,
+            drawings: [{
+                unitId: this._image.unitId,
+                subUnitId: this._image.subUnitId,
+                drawingId: this._image.drawingId,
+                srcRect,
+            }],
+        });
     }
 
     /**
@@ -1218,18 +1288,32 @@ export class FOverGridImage extends FBase {
      * ```
      */
     setRotate(angle: number): boolean {
-        this._image.sheetTransform.angle = angle;
-        this._image.transform && (this._image.transform.angle = angle);
-        if (this._image.transform) {
-            const skeleton = this._sheetSkeletonService.getSkeleton(this._image.unitId, this._image.subUnitId);
+        const current = this._sheetDrawingService.getDrawingByParam({
+            unitId: this._image.unitId,
+            subUnitId: this._image.subUnitId,
+            drawingId: this._image.drawingId,
+        }) as ISheetImage | undefined;
+        const image = current ?? this._image;
+        const updated: Partial<ISheetImage> = {
+            unitId: image.unitId,
+            subUnitId: image.subUnitId,
+            drawingId: image.drawingId,
+            sheetTransform: { ...image.sheetTransform, angle },
+        };
+        if (image.transform) {
+            const transform = { ...image.transform, angle };
+            const skeleton = this._sheetSkeletonService.getSkeleton(image.unitId, image.subUnitId);
             if (!skeleton) {
-                throw new Error(`Skeleton for unitId ${this._image.unitId} and subUnitId ${this._image.subUnitId} not found`);
+                throw new Error(`Skeleton for unitId ${image.unitId} and subUnitId ${image.subUnitId} not found`);
             }
 
-            this._image.axisAlignSheetTransform && (this._image.axisAlignSheetTransform = transformToAxisAlignPosition(this._image.transform, skeleton));
+            updated.transform = transform;
+            if (image.axisAlignSheetTransform) {
+                updated.axisAlignSheetTransform = transformToAxisAlignPosition(transform, skeleton);
+            }
         }
 
-        return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [this._image] });
+        return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: image.unitId, drawings: [updated] });
     }
 
     /**

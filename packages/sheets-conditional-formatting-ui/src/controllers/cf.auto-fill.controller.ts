@@ -14,16 +14,33 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
-import type { IDiscreteRange, ISheetAutoFillHook } from '@univerjs/sheets';
-import type { IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
-import { Disposable, getIntersectRange, Inject, Injector, IUniverInstanceService, Rectangle, UniverInstanceType } from '@univerjs/core';
+import type { IMutationInfo, IRange } from '@univerjs/core';
+import type { IAutoFillLocation, ISheetAutoFillHook } from '@univerjs/sheets';
+import type {
+    IAddConditionalRuleMutationParams,
+    IDeleteConditionalRuleMutationParams,
+    ISetConditionalRuleMutationParams,
+} from '@univerjs/sheets-conditional-formatting';
+import {
+    Disposable,
+    getIntersectRange,
+    Inject,
+    Injector,
+    Rectangle,
+} from '@univerjs/core';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { AUTO_FILL_APPLY_TYPE, AutoFillTools, IAutoFillService } from '@univerjs/sheets';
 import {
+    AddConditionalRuleMutation,
+    AddConditionalRuleMutationUndoFactory,
+    CFRuleType,
+    CFSubRuleType,
     ConditionalFormattingRangeTransformService,
     ConditionalFormattingRuleModel,
+    createCfId,
     DeleteConditionalRuleMutation,
     DeleteConditionalRuleMutationUndoFactory,
+    MoveConditionalRuleMutation,
     SetConditionalRuleMutation,
     setConditionalRuleMutationUndoFactory,
     SHEET_CONDITIONAL_FORMATTING_PLUGIN,
@@ -38,7 +55,6 @@ interface IRangeDelta {
 export class ConditionalFormattingAutoFillController extends Disposable {
     constructor(
         @Inject(Injector) private _injector: Injector,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(IAutoFillService) private _autoFillService: IAutoFillService,
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
         @Inject(ConditionalFormattingRangeTransformService) private _conditionalFormattingRangeTransformService: ConditionalFormattingRangeTransformService
@@ -48,31 +64,24 @@ export class ConditionalFormattingAutoFillController extends Disposable {
         this._initAutoFill();
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _initAutoFill() {
         const noopReturnFunc = () => ({ redos: [], undos: [] });
 
-        const generalApplyFunc = (sourceRange: IDiscreteRange, targetRange: IDiscreteRange) => {
-            const unitId = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
-            const subUnitId = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet()?.getSheetId();
+        const generalApplyFunc = (location: IAutoFillLocation) => {
+            const { unitId, subUnitId, source: sourceRange, target: targetRange } = location;
             const rangeMap: Map<string, IRange[]> = new Map();
             const rangeDeltaMap: Map<string, IRangeDelta> = new Map();
 
             const redos: IMutationInfo[] = [];
             const undos: IMutationInfo[] = [];
-            if (!unitId || !subUnitId) {
-                return noopReturnFunc();
-            }
-
             const virtualization = virtualizeDiscreteRanges([sourceRange, targetRange]);
             const [vSourceRange, vTargetRange] = virtualization.ranges;
             const repeats = AutoFillTools.getAutoFillRepeatRange(vSourceRange, vTargetRange);
-            const targetRanges = repeats.flatMap((repeat) => virtualization.mapRange(Rectangle.getPositionRange(repeat.relativeRange, {
-                startRow: repeat.repeatStartCell.row,
-                endRow: repeat.repeatStartCell.row,
-                startColumn: repeat.repeatStartCell.col,
-                endColumn: repeat.repeatStartCell.col,
-            })));
+            const targetRanges = repeats.flatMap((repeat) => virtualization.mapRange(Rectangle.moveOffset(
+                repeat.relativeRange,
+                repeat.repeatStartCell.col,
+                repeat.repeatStartCell.row
+            )));
             const getRangeDelta = (cfId: string) => {
                 let rangeDelta = rangeDeltaMap.get(cfId);
                 if (!rangeDelta) {
@@ -92,17 +101,16 @@ export class ConditionalFormattingAutoFillController extends Disposable {
                 const sourceRanges = rule.ranges.flatMap((range) => {
                     const projected = virtualization.projectRange(range);
                     const intersected = projected && getIntersectRange(projected, vSourceRange);
-                    return intersected ? [Rectangle.getRelativeRange(intersected, vSourceRange)] : [];
+                    return intersected ? [Rectangle.moveOffset(intersected, -vSourceRange.startColumn, -vSourceRange.startRow)] : [];
                 });
                 const additions = repeats.flatMap((repeat) => sourceRanges.flatMap((range) => {
                     const copiedRange = getIntersectRange(range, repeat.relativeRange);
                     return copiedRange
-                        ? virtualization.mapRange(Rectangle.getPositionRange(copiedRange, {
-                            startRow: repeat.repeatStartCell.row,
-                            endRow: repeat.repeatStartCell.row,
-                            startColumn: repeat.repeatStartCell.col,
-                            endColumn: repeat.repeatStartCell.col,
-                        }))
+                        ? virtualization.mapRange(Rectangle.moveOffset(
+                            copiedRange,
+                            repeat.repeatStartCell.col,
+                            repeat.repeatStartCell.row
+                        ))
                         : [];
                 }));
                 if (additions.length) {
@@ -128,10 +136,61 @@ export class ConditionalFormattingAutoFillController extends Disposable {
                     return;
                 }
                 if (ranges.length) {
+                    const nextRule = { ...rule, ranges };
+                    if (rule.rule.type === CFRuleType.highlightCell && rule.rule.subType === CFSubRuleType.formula) {
+                        const topLeft = (items: IRange[]) => items.reduce((first, item) =>
+                            item.startRow < first.startRow || (item.startRow === first.startRow && item.startColumn < first.startColumn) ? item : first);
+                        const previous = topLeft(rule.ranges);
+                        const current = topLeft(ranges);
+                        const rowOffset = current.startRow - previous.startRow;
+                        const columnOffset = current.startColumn - previous.startColumn;
+                        if (rowOffset || columnOffset) {
+                            const value = this._injector.get(LexerTreeBuilder).moveFormulaRefOffset(rule.rule.value, columnOffset, rowOffset);
+                            const delta = rangeDeltaMap.get(cfId);
+                            if (value.includes('#REF!') && delta?.add.length) {
+                                const retainedRanges = this._conditionalFormattingRangeTransformService.subtractRanges(rule.ranges, delta.remove);
+                                if (retainedRanges.length) {
+                                    const retainedParams: ISetConditionalRuleMutationParams = {
+                                        unitId,
+                                        subUnitId,
+                                        rule: { ...rule, ranges: retainedRanges },
+                                    };
+                                    redos.push({ id: SetConditionalRuleMutation.id, params: retainedParams });
+                                    const clonedParams: IAddConditionalRuleMutationParams = {
+                                        unitId,
+                                        subUnitId,
+                                        rule: {
+                                            ...rule,
+                                            cfId: createCfId(),
+                                            ranges: Rectangle.mergeRanges(delta.add),
+                                            rule: { ...rule.rule, value },
+                                        },
+                                    };
+                                    redos.push({ id: AddConditionalRuleMutation.id, params: clonedParams });
+                                    redos.push({
+                                        id: MoveConditionalRuleMutation.id,
+                                        params: {
+                                            unitId,
+                                            subUnitId,
+                                            start: { id: clonedParams.rule.cfId, type: 'self' },
+                                            end: { id: rule.cfId, type: 'after' },
+                                        },
+                                    });
+                                    undos.push(AddConditionalRuleMutationUndoFactory(this._injector, clonedParams));
+                                    undos.push(...setConditionalRuleMutationUndoFactory(this._injector, retainedParams));
+                                    return;
+                                }
+                            }
+                            nextRule.rule = {
+                                ...rule.rule,
+                                value,
+                            };
+                        }
+                    }
                     const params: ISetConditionalRuleMutationParams = {
                         unitId,
                         subUnitId,
-                        rule: { ...rule, ranges },
+                        rule: nextRule,
                     };
                     redos.push({ id: SetConditionalRuleMutation.id, params });
                     undos.push(...setConditionalRuleMutationUndoFactory(this._injector, params));
@@ -155,8 +214,7 @@ export class ConditionalFormattingAutoFillController extends Disposable {
             id: SHEET_CONDITIONAL_FORMATTING_PLUGIN,
             onFillData: (location, direction, applyType) => {
                 if (applyType === AUTO_FILL_APPLY_TYPE.COPY || applyType === AUTO_FILL_APPLY_TYPE.ONLY_FORMAT || applyType === AUTO_FILL_APPLY_TYPE.SERIES) {
-                    const { source, target } = location;
-                    return generalApplyFunc(source, target);
+                    return generalApplyFunc(location);
                 }
 
                 return noopReturnFunc();

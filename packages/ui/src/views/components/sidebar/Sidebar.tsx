@@ -21,7 +21,7 @@ import { CloseIcon } from '@univerjs/icons';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { LocaleKey } from '../../../locale/types';
 import type { ICustomLabelProps } from '../../custom-label/CustomLabel';
-import { ISidebarService, SIDEBAR_COMPONENT_NAME } from '../../../services/sidebar/sidebar.service';
+import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 
@@ -213,7 +213,7 @@ export function Sidebar() {
     return (
         <section
             ref={sidebarRef}
-            data-u-comp={SIDEBAR_COMPONENT_NAME}
+            data-u-comp="sidebar"
             role="complementary"
             aria-expanded={!!options?.visible}
             aria-hidden={!options?.visible}

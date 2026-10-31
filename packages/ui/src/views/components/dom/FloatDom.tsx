@@ -16,7 +16,6 @@
 
 import type { ComponentType, CSSProperties } from 'react';
 import { DocumentDataModel, IUniverInstanceService } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { memo, useEffect, useMemo, useRef } from 'react';
 import { first } from 'rxjs';
 import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
@@ -65,8 +64,6 @@ function FloatDomSingleContent(props: { layer: IFloatDom; id: string; Component?
     const { layer, id, Component } = props;
 
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const renderManagerService = useDependency(IRenderManagerService);
-    const domLayerService = useDependency(CanvasFloatDomService);
     const position = useObservable(useMemo(() => layer.position$.pipe(first()), [layer.position$]));
     const domRef = useRef<HTMLDivElement>(null);
     const innerDomRef = useRef<HTMLDivElement>(null);
@@ -92,84 +89,6 @@ function FloatDomSingleContent(props: { layer: IFloatDom; id: string; Component?
             subscription.unsubscribe();
         };
     }, [contentInset, layer.position$, wrapperInset]);
-
-    useEffect(() => {
-        const wrapper = domRef.current;
-        if (!forwardEvents || !wrapper) {
-            return;
-        }
-
-        let canvas: HTMLCanvasElement | undefined;
-        const isInternalDestination = (target: EventTarget | null) => {
-            if (!(target instanceof Node) || !target.isConnected || !wrapper.isConnected || !canvas?.isConnected) {
-                return false;
-            }
-            if (target.ownerDocument !== wrapper.ownerDocument ||
-                renderManagerService.getRenderUnitById(layer.unitId)?.engine.getCanvasElement() !== canvas) {
-                return false;
-            }
-
-            const liveLayers = domLayerService.domLayers;
-            const currentLayer = liveLayers.find(([key]) => key === layer.id)?.[1];
-            if (!currentLayer || currentLayer.unitId !== layer.unitId || !shouldForwardFloatDomEvents(currentLayer)) {
-                return false;
-            }
-            if (wrapper.ownerDocument.getElementById(currentLayer.domId ?? layer.id) !== innerDomRef.current) {
-                return false;
-            }
-            if (target === canvas) {
-                return true;
-            }
-
-            return liveLayers.some(([key, candidate]) => {
-                if (candidate.unitId !== layer.unitId || !shouldForwardFloatDomEvents(candidate)) {
-                    return false;
-                }
-                const inner = wrapper.ownerDocument.getElementById(candidate.domId ?? key);
-                const ownedWrapper = inner?.parentElement;
-                return !!inner?.isConnected && !!ownedWrapper?.isConnected && ownedWrapper.contains(target);
-            });
-        };
-        const handleCanvasLeave = (event: PointerEvent) => {
-            // The passthrough DOM and its render canvas form one logical input surface.
-            if (isInternalDestination(event.relatedTarget)) {
-                event.stopImmediatePropagation();
-            }
-        };
-        const unbindCanvas = () => {
-            canvas?.removeEventListener('pointerleave', handleCanvasLeave, true);
-            canvas = undefined;
-        };
-        const bindCanvas = () => {
-            unbindCanvas();
-            canvas = renderManagerService.getRenderUnitById(layer.unitId)?.engine.getCanvasElement();
-            canvas?.addEventListener('pointerleave', handleCanvasLeave, true);
-        };
-        const created = renderManagerService.created$.subscribe((render) => {
-            if (render.unitId === layer.unitId) {
-                bindCanvas();
-            }
-        });
-        const disposed = renderManagerService.disposed$.subscribe((unitId) => {
-            if (unitId === layer.unitId) {
-                unbindCanvas();
-            }
-        });
-        bindCanvas();
-
-        const handlePointerLeave = (event: PointerEvent) => {
-            if (!isInternalDestination(event.relatedTarget)) {
-                layer.onPointerMove(event);
-            }
-        };
-        wrapper.addEventListener('pointerleave', handlePointerLeave);
-        return () => {
-            wrapper.removeEventListener('pointerleave', handlePointerLeave);
-            created.unsubscribe();
-            disposed.unsubscribe();
-            unbindCanvas();
-        };
-    }, [domLayerService, forwardEvents, layer, position, renderManagerService]);
 
     useEffect(() => {
         const wrapper = domRef.current;

@@ -19,8 +19,6 @@ import type { Subject } from 'rxjs';
 import { createIdentifier } from '@univerjs/core';
 import type { ISidebarMethodOptions } from '../../views/components/sidebar/Sidebar';
 
-export const SIDEBAR_COMPONENT_NAME = 'sidebar';
-
 export interface ISidebarService {
     readonly sidebarOptions$: Subject<ISidebarMethodOptions>;
     readonly scrollEvent$: Subject<Event>;

@@ -31,7 +31,7 @@ import {
     UniverInstanceService,
     Workbook,
 } from '@univerjs/core';
-import { CanvasColorService, ICanvasColorService, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { CanvasColorService, ICanvasColorService } from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { IFloatDom, IFloatDomLayout } from '../../../../services/dom/canvas-dom-layer.service';
@@ -53,7 +53,6 @@ function renderWithDependencies(element: ReactElement, focusedUnitId: string | n
     injector.add([ComponentManager]);
     injector.add([ThemeService]);
     injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
-    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
     injector.add([IContextService, { useClass: ContextService }]);
     injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
@@ -331,26 +330,6 @@ describe('FloatDomSingle', () => {
         }
     );
 
-    it('forwards a real wrapper leave to the canvas and removes the listener on unmount', async () => {
-        const canvas = document.createElement('canvas');
-        const canvasLeave = vi.fn();
-        canvas.addEventListener('pointerleave', canvasLeave);
-        const layer = {
-            ...createFloatDom(),
-            onPointerMove: (event: PointerEvent | MouseEvent) => canvas.dispatchEvent(new Event(event.type)),
-        };
-        const { unmount } = renderWithDependencies(<FloatDomSingle id="dom-1" layer={layer} />);
-        const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
-        const wrapper = inner.parentElement as HTMLDivElement;
-
-        fireEvent.pointerLeave(wrapper, { pointerId: 7 });
-        expect(canvasLeave).toHaveBeenCalledOnce();
-
-        unmount();
-        fireEvent.pointerLeave(wrapper, { pointerId: 7 });
-        expect(canvasLeave).toHaveBeenCalledOnce();
-    });
-
     it('captures forwarded pointers on the original descendant and finishes cancelled canvas gestures', async () => {
         const onPointerDown = vi.fn();
         const onPointerUp = vi.fn();
@@ -491,128 +470,5 @@ describe('FloatDom', () => {
 
         await waitFor(() => expect(wrapper.style.width).toBe('100px'));
         expect(inner.style.width).toBe('100px');
-    });
-});
-
-describe('FloatDom logical canvas boundary', () => {
-    async function createBoundaryFixture() {
-        // jsdom has no 2D drawing platform; all ownership and event delivery stay real.
-        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
-            return { canvas: this, setTransform: () => {}, clearRect: () => {} } as unknown as CanvasRenderingContext2D;
-        });
-        const rendered = renderWithDependencies(
-            <>
-                <FloatDom unitId="doc-1" />
-                <FloatDom unitId="foreign-doc" />
-            </>,
-            'doc-1'
-        );
-        const layers = rendered.injector.get(CanvasFloatDomService);
-        act(() => {
-            for (const id of ['current', 'sibling', 'interactive', 'foreign']) {
-                layers.addFloatDom({
-                    ...createFloatDom(),
-                    id,
-                    unitId: id === 'foreign' ? 'foreign-doc' : 'doc-1',
-                    eventPassThrough: id !== 'interactive',
-                    onPointerMove: (event) => {
-                        const canvas = rendered.injector.get(IRenderManagerService)
-                            .getRenderUnitById('doc-1')
-                            ?.engine
-                            .getCanvasElement();
-                        canvas?.dispatchEvent(new MouseEvent(event.type, { relatedTarget: event.relatedTarget }));
-                    },
-                });
-            }
-        });
-        await waitFor(() => expect(document.getElementById('sibling')).not.toBeNull());
-        const manager = rendered.injector.get(IRenderManagerService);
-        function createCanvas() {
-            const renderUnit = manager.createRender('doc-1');
-            const host = document.createElement('div');
-            document.body.appendChild(host);
-            renderUnit.engine.mount(host, false);
-            const leaves: string[] = [];
-            const subscription = renderUnit.engine.onInputChanged$.subscribeEvent((event) => {
-                if (event.type === 'pointerleave') {
-                    leaves.push(event.type);
-                }
-            });
-            return { canvas: renderUnit.engine.getCanvasElement(), leaves, subscription };
-        }
-        const main = createCanvas();
-        const inner = (id: string) => document.getElementById(id)!;
-        const wrapper = inner('current').parentElement!;
-        return { ...rendered, layers, manager, inner, wrapper, main, createCanvas };
-    }
-
-    it.each(['current', 'sibling'] as const)(
-        'does not deliver a logical exit when the canvas enters its live %s passthrough layer',
-        async (id) => {
-            const { main, inner } = await createBoundaryFixture();
-
-            fireEvent(main.canvas, new MouseEvent('pointerleave', { relatedTarget: inner(id) }));
-
-            expect(main.leaves).toEqual([]);
-            main.subscription.unsubscribe();
-        }
-    );
-
-    it.each(['canvas', 'sibling'] as const)(
-        'does not forward a logical exit when a wrapper enters its owned %s',
-        async (destination) => {
-            const { main, inner, wrapper } = await createBoundaryFixture();
-            const target = destination === 'canvas' ? main.canvas : inner('sibling');
-
-            fireEvent(wrapper, new MouseEvent('pointerleave', { relatedTarget: target }));
-
-            expect(main.leaves).toEqual([]);
-            main.subscription.unsubscribe();
-        }
-    );
-
-    it.each(['foreign', 'interactive', 'outside'] as const)(
-        'retains real canvas and wrapper exits toward %s',
-        async (destination) => {
-            const { main, inner, wrapper } = await createBoundaryFixture();
-            const target = destination === 'outside' ? document.body : inner(destination);
-
-            fireEvent(main.canvas, new MouseEvent('pointerleave', { relatedTarget: target }));
-            fireEvent(wrapper, new MouseEvent('pointerleave', { relatedTarget: target }));
-
-            expect(main.leaves).toEqual(['pointerleave', 'pointerleave']);
-            main.subscription.unsubscribe();
-        }
-    );
-
-    it('uses the current layer registry when passthrough ownership changes', async () => {
-        const { main, inner, layers } = await createBoundaryFixture();
-        act(() => layers.updateFloatDom('sibling', { eventPassThrough: false }));
-
-        fireEvent(main.canvas, new MouseEvent('pointerleave', { relatedTarget: inner('sibling') }));
-
-        expect(main.leaves).toEqual(['pointerleave']);
-        main.subscription.unsubscribe();
-    });
-
-    it('binds newly created renders and releases old canvas listeners on disposal and unmount', async () => {
-        const { main, inner, manager, createCanvas, unmount } = await createBoundaryFixture();
-        const target = inner('current');
-        const oldDelivery = vi.fn();
-        main.canvas.addEventListener('pointerleave', oldDelivery);
-        manager.removeRender('doc-1');
-
-        fireEvent(main.canvas, new MouseEvent('pointerleave', { relatedTarget: target }));
-        expect(oldDelivery).toHaveBeenCalledOnce();
-        main.subscription.unsubscribe();
-
-        const replacement = createCanvas();
-        fireEvent(replacement.canvas, new MouseEvent('pointerleave', { relatedTarget: target }));
-        expect(replacement.leaves).toEqual([]);
-
-        unmount();
-        fireEvent(replacement.canvas, new MouseEvent('pointerleave', { relatedTarget: target }));
-        expect(replacement.leaves).toEqual(['pointerleave']);
-        replacement.subscription.unsubscribe();
     });
 });

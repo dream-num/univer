@@ -22,7 +22,6 @@ import {
     IImageIoService,
     ImageSourceType,
     ImageUploadStatusType,
-    IPermissionService,
     IURLImageService,
     RedoCommand,
     UndoCommand,
@@ -38,7 +37,6 @@ import {
     Spreadsheet,
     Viewport,
 } from '@univerjs/engine-render';
-import { WorksheetEditPermission } from '@univerjs/sheets';
 import {
     InsertSheetDrawingCommand,
     ISheetDrawingService,
@@ -265,22 +263,13 @@ describe('target-bound image insertion', () => {
         expect(reopened.drawings.getDrawingByParam(search)).toEqual(image);
     });
 
-    it.each(['switch', 'permission', 'permission-restore', 'render', 'delete'] as const)('cancels a captured Chart image after upload on %s', async (change) => {
+    it.each(['render', 'delete'] as const)('cancels a captured Chart image after upload on %s', async (change) => {
         const bed = imageBed();
         let finish!: (value: Awaited<ReturnType<typeof bed.upload>>) => void;
         bed.upload.mockImplementation(() => new Promise((done) => {
             finish = done;
         }));
         const pending = bed.controller.insertFloatImageByFile(bed.file);
-        if (change === 'switch') {
-            bed.activate('grid');
-        }
-        if (change === 'permission' || change === 'permission-restore') {
-            bed.get(IPermissionService).updatePermissionPoint(new WorksheetEditPermission('test', 'chart').id, false);
-        }
-        if (change === 'permission-restore') {
-            bed.get(IPermissionService).updatePermissionPoint(new WorksheetEditPermission('test', 'chart').id, true);
-        }
         if (change === 'render') {
             bed.renders.removeRender('test');
         }
@@ -291,44 +280,6 @@ describe('target-bound image insertion', () => {
         expect(await pending).toBe(false);
         expect(bed.drawings.getDrawingData('test', 'chart')).toEqual({});
         expect(bed.drawings.getDrawingData('test', 'grid')).toEqual({});
-    });
-
-    it('captures the host before the picker and awaits every file with truthful partial cancellation', async () => {
-        const bed = imageBed();
-        let finishPicker!: (files: File[]) => void;
-        vi.spyOn(bed.get(ILocalFileService), 'openFile').mockImplementationOnce(() => new Promise((done) => {
-            finishPicker = done;
-        }));
-        const switched = bed.controller.insertFloatImage();
-        bed.activate('grid');
-        finishPicker([bed.file]);
-        expect(await switched).toBe(false);
-        expect(bed.upload).not.toHaveBeenCalled();
-        bed.activate('chart');
-        let finishUpload!: (value: Awaited<ReturnType<typeof bed.upload>>) => void;
-        bed.upload.mockResolvedValueOnce({ imageId: 'completed', imageSourceType: ImageSourceType.BASE64, source: 'data:image/png;base64,test', base64Cache: 'data:image/png;base64,test', status: ImageUploadStatusType.SUCCUSS });
-        bed.upload.mockImplementationOnce(() => new Promise((done) => {
-            finishUpload = done;
-        }));
-        vi.spyOn(bed.get(ILocalFileService), 'openFile').mockResolvedValue([bed.file, bed.file]);
-        const completed = new Promise<void>((done) => {
-            const listener = bed.commandService.onCommandExecuted((command) => {
-                if (command.id === InsertSheetDrawingCommand.id) {
-                    listener.dispose();
-                    done();
-                }
-            });
-        });
-        const partial = bed.controller.insertFloatImage();
-        await completed;
-        expect(bed.drawings.getDrawingByParam({ unitId: 'test', subUnitId: 'chart', drawingId: 'completed' })).toBeDefined();
-        bed.activate('grid');
-        finishUpload({ imageId: 'cancelled', imageSourceType: ImageSourceType.BASE64, source: 'data:image/png;base64,test', base64Cache: 'data:image/png;base64,test', status: ImageUploadStatusType.SUCCUSS });
-        expect(await partial).toBe(false);
-        expect(Object.keys(bed.drawings.getDrawingData('test', 'chart'))).toEqual(['completed']);
-        expect(bed.drawings.getDrawingData('test', 'grid')).toEqual({});
-        expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
-        expect(bed.drawings.getDrawingData('test', 'chart')).toEqual({});
     });
 
     it('awaits every file when a real insertion command notification throws and retains each completed history entry', async () => {

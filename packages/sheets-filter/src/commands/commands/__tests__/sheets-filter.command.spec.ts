@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { Injector, IWorkbookData, Workbook } from '@univerjs/core';
+import type { IWorkbookData, Workbook } from '@univerjs/core';
 import {
     ICommandService,
     Inject,
-    Injector as InjectorIdentifier,
+    Injector,
     IUniverInstanceService,
     LocaleType,
     Plugin,
@@ -82,7 +82,7 @@ class SheetsFilterCommandTestPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
     static override pluginName = 'SheetsFilterCommandTestPlugin';
 
-    constructor(_config: unknown, @Inject(InjectorIdentifier) protected readonly _injector: Injector) {
+    constructor(_config: unknown, @Inject(Injector) protected readonly _injector: Injector) {
         super();
     }
 

@@ -109,10 +109,9 @@ export const SetSheetDrawingCommand: ICommand<ISetDrawingCommandParams> = {
         const { drawings } = params;
         const normalizedDrawings = drawings.map((drawing) => normalizeNonRotatableAngleUpdate(drawing, sheetDrawingService));
         const normalizedParams = { ...params, drawings: normalizedDrawings };
-        // Feature owners normalize this command-local payload before generic Drawing captures its JSON1 preimage.
-        const intercepted = sheetInterceptorService.onCommandExecute({ id: SetSheetDrawingCommand.id, params: normalizedParams });
-        const jsonOp = sheetDrawingService.getBatchUpdateOp(normalizedParams.drawings as ISheetDrawing[]) as IDrawingJsonUndo1;
+        const jsonOp = sheetDrawingService.getBatchUpdateOp(normalizedDrawings as ISheetDrawing[]) as IDrawingJsonUndo1;
         const { unitId } = jsonOp;
+        const intercepted = sheetInterceptorService.onCommandExecute({ id: SetSheetDrawingCommand.id, params: normalizedParams });
         const drawingMutations = createSheetDrawingUpdateMutations(jsonOp);
         const redoMutations = [
             ...(intercepted.preRedos ?? []),

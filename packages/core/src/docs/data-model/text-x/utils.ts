@@ -697,6 +697,7 @@ export function composeBody(
     }
 
     const paragraphs: IParagraph[] = [];
+    const replaceParagraphs = coverType === UpdateDocsAttributeType.REPLACE && otherBody.paragraphs != null;
 
     let thisIndex = 0;
     let otherIndex = 0;
@@ -709,11 +710,18 @@ export function composeBody(
         const { startIndex: otherStart } = otherParagraph;
 
         if (thisStart === otherStart) {
-            paragraphs.push(merge(thisParagraph, otherParagraph));
+            paragraphs.push(replaceParagraphs
+                ? {
+                    ...Tools.deepClone(otherParagraph),
+                    paragraphId: otherParagraph.paragraphId ?? thisParagraph.paragraphId,
+                }
+                : merge(thisParagraph, otherParagraph));
             thisIndex++;
             otherIndex++;
         } else if (thisStart < otherStart) {
-            paragraphs.push(Tools.deepClone(thisParagraph));
+            if (!replaceParagraphs) {
+                paragraphs.push(Tools.deepClone(thisParagraph));
+            }
             thisIndex++;
         } else {
             paragraphs.push(Tools.deepClone(otherParagraph));
@@ -721,7 +729,7 @@ export function composeBody(
         }
     }
 
-    if (thisIndex < thisParagraphs.length) {
+    if (!replaceParagraphs && thisIndex < thisParagraphs.length) {
         paragraphs.push(...thisParagraphs.slice(thisIndex));
     }
 
@@ -729,7 +737,7 @@ export function composeBody(
         paragraphs.push(...otherParagraphs.slice(otherIndex));
     }
 
-    if (paragraphs.length) {
+    if (paragraphs.length || replaceParagraphs) {
         retBody.paragraphs = paragraphs;
     }
 

@@ -420,7 +420,21 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
                 }
             }
             if (isChart) {
-                for (const viewport of scene.getViewports()) {
+                for (const key of [
+                    SHEET_VIEWPORT_KEY.VIEW_MAIN,
+                    SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP,
+                    SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT,
+                    SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP,
+                    SHEET_VIEWPORT_KEY.VIEW_ROW_TOP,
+                    SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM,
+                    SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT,
+                    SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT,
+                    SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP,
+                ]) {
+                    const viewport = scene.getViewport(key);
+                    if (!viewport) {
+                        continue;
+                    }
                     if (viewport.viewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN) {
                         viewport.enable();
                         viewport.setMargin(0, 0);

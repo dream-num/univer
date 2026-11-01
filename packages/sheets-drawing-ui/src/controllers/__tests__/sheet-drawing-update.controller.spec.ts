@@ -37,6 +37,7 @@ import {
     Spreadsheet,
     Viewport,
 } from '@univerjs/engine-render';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import {
     InsertSheetDrawingCommand,
     ISheetDrawingService,
@@ -245,6 +246,68 @@ describe('target-bound image insertion', () => {
         const file = new File(['png'], 'test.png', { type: 'image/png' });
         return { ...bed, controller, file, upload, frame };
     }
+
+    it('keeps the original Grid selection and geometry when the user switches sheets during upload', async () => {
+        const bed = imageBed();
+        bed.activate('grid');
+        bed.render.scene.transformByState({ width: 10000, height: 10000 });
+        bed.get(SheetsSelectionsService).setSelections('test', 'grid', [{
+            range: { startRow: 3, endRow: 3, startColumn: 4, endColumn: 4 },
+            primary: null,
+            style: null,
+        }]);
+        let finish!: (value: Awaited<ReturnType<typeof bed.upload>>) => void;
+        bed.upload.mockImplementation(() => new Promise((done) => {
+            finish = done;
+        }));
+        const pending = bed.controller.insertFloatImageByFile(bed.file);
+        bed.activate('chart');
+        bed.render.scene.transformByState({ width: 100, height: 100 });
+        finish({ imageId: 'new-image', imageSourceType: ImageSourceType.BASE64, source: 'data:image/png;base64,test', base64Cache: 'data:image/png;base64,test', status: ImageUploadStatusType.SUCCUSS });
+        expect(await pending).toBe(true);
+        const image = bed.drawings.getDrawingByParam({ unitId: 'test', subUnitId: 'grid', drawingId: 'new-image' })!;
+        expect(image.sheetTransform.from).toMatchObject({ row: 3, column: 4 });
+        expect(image.transform).toMatchObject({ width: 500, height: 250 });
+        expect(bed.drawings.getDrawingData('test', 'chart')).toEqual({});
+        expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(bed.drawings.getDrawingData('test', 'grid')).toEqual({});
+        expect(await bed.commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(bed.drawings.getDrawingByParam({ unitId: 'test', subUnitId: 'grid', drawingId: 'new-image' })).toEqual(image);
+    });
+
+    it('keeps concurrent image insertion origins independent when uploads finish in reverse order', async () => {
+        const bed = imageBed();
+        bed.activate('grid');
+        bed.render.scene.transformByState({ width: 10000, height: 10000 });
+        const uploads: Array<(value: Awaited<ReturnType<typeof bed.upload>>) => void> = [];
+        bed.upload.mockImplementation(() => new Promise((done) => uploads.push(done)));
+        const selections = bed.get(SheetsSelectionsService);
+        selections.setSelections('test', 'grid', [{ range: { startRow: 1, endRow: 1, startColumn: 2, endColumn: 2 }, primary: null, style: null }]);
+        const first = bed.controller.insertFloatImageByFile(bed.file);
+        selections.setSelections('test', 'grid', [{ range: { startRow: 5, endRow: 5, startColumn: 6, endColumn: 6 }, primary: null, style: null }]);
+        const second = bed.controller.insertFloatImageByFile(bed.file);
+        uploads[1]({ imageId: 'second', imageSourceType: ImageSourceType.BASE64, source: 'data:image/png;base64,test', base64Cache: 'data:image/png;base64,test', status: ImageUploadStatusType.SUCCUSS });
+        expect(await second).toBe(true);
+        uploads[0]({ imageId: 'first', imageSourceType: ImageSourceType.BASE64, source: 'data:image/png;base64,test', base64Cache: 'data:image/png;base64,test', status: ImageUploadStatusType.SUCCUSS });
+        expect(await first).toBe(true);
+        expect(bed.drawings.getDrawingByParam({ unitId: 'test', subUnitId: 'grid', drawingId: 'first' })?.sheetTransform.from).toMatchObject({ row: 1, column: 2 });
+        expect(bed.drawings.getDrawingByParam({ unitId: 'test', subUnitId: 'grid', drawingId: 'second' })?.sheetTransform.from).toMatchObject({ row: 5, column: 6 });
+    });
+
+    it('cancels a Grid upload if its captured sheet is deleted', async () => {
+        const bed = imageBed();
+        bed.activate('grid');
+        let finish!: (value: Awaited<ReturnType<typeof bed.upload>>) => void;
+        bed.upload.mockImplementation(() => new Promise((done) => {
+            finish = done;
+        }));
+        const pending = bed.controller.insertFloatImageByFile(bed.file);
+        bed.activate('chart');
+        bed.workbook.removeSheet('grid');
+        finish({ imageId: 'deleted-target', imageSourceType: ImageSourceType.BASE64, source: 'data:image/png;base64,test', base64Cache: 'data:image/png;base64,test', status: ImageUploadStatusType.SUCCUSS });
+        expect(await pending).toBe(false);
+        expect(bed.drawings.getDrawingData('test', 'chart')).toEqual({});
+    });
 
     it('inserts a resource-backed image inside a nonzero Chart page without a skeleton and replays it', async () => {
         const bed = imageBed();

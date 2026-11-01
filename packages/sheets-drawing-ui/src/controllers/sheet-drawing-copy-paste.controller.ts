@@ -165,6 +165,12 @@ export class SheetsDrawingCopyPasteController extends RxDisposable {
                 const [drawing] = drawings;
 
                 if (copyType === COPY_TYPE.CUT) {
+                    const worksheet = this._instanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(subUnitId);
+                    // Image CUT deletes immediately and then replaces the clipboard with native image data.
+                    // Chart Sheet cannot consume that fallback, so reject before removing the source image.
+                    if (worksheet?.getConfig().type === SheetTypes.CHART) {
+                        return false;
+                    }
                     const params: IRemoveSheetDrawingCommandParams = {
                         unitId,
                         drawings,

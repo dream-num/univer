@@ -15,7 +15,7 @@
  */
 
 import { SheetTypes, ThemeService } from '@univerjs/core';
-import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { SHEET_VIEWPORT_KEY, Viewport } from '@univerjs/engine-render';
 import { describe, expect, it } from 'vitest';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
@@ -40,6 +40,19 @@ describe('SheetRenderController', () => {
 });
 
 describe('Chart host render lifecycle', () => {
+    it('preserves plugin viewport visibility across Chart Sheet transitions', () => {
+        const { render, activate, injector } = createChartRenderTestBed();
+        const enabled = injector.createInstance(Viewport, 'plugin-enabled', render.scene, {});
+        const disabled = injector.createInstance(Viewport, 'plugin-disabled', render.scene, {});
+        disabled.disable();
+        activate('chart');
+        expect(enabled.isActive).toBe(true);
+        expect(disabled.isActive).toBe(false);
+        activate('grid');
+        expect(enabled.isActive).toBe(true);
+        expect(disabled.isActive).toBe(false);
+    });
+
     it.each([false, true])('retains the shared renderer and restores frozen Grid after Chart with initialChart=%s', (initialChart) => {
         const { render, manager, activate, workbook, injector } = createChartRenderTestBed([
             [SheetScrollManagerService],

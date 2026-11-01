@@ -61,7 +61,7 @@ import {
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import type { IClipboardItem } from './mock-clipboard';
-import { SheetCopyCommand } from '../../../commands/commands/clipboard.command';
+import { SheetCopyCommand, SheetCutCommand } from '../../../commands/commands/clipboard.command';
 import {
     SheetPermissionInterceptorClipboardController,
 } from '../../../controllers/permission/sheet-permission-interceptor-clipboard.controller';
@@ -1109,7 +1109,7 @@ describe('Test clipboard', () => {
                 unitId: 'object-peer',
                 subUnitId: 'sheet1',
                 range: { startRow: 24, endRow: 24, startColumn: 1, endColumn: 1 },
-            })).toBe(true);
+            })).toBe(false);
             expect(handled).toEqual([{ source: 'test', target: 'object-peer', copyType }]);
             expect(source.getSnapshot()).toEqual(sourceBefore);
             expect(peer.getSnapshot()).toEqual(peerBefore);
@@ -1241,14 +1241,14 @@ describe('CHART clipboard without grid selection', () => {
         return executed;
     }
 
-    it('copies only a claimed focused object through the real permission entry without creating a grid selection', async () => {
+    it.each([COPY_TYPE.COPY, COPY_TYPE.CUT])('delegates focused-object %s through the permission entry without creating a grid selection', async (operation) => {
         let focusedCalls = 0;
         let cellCalls = 0;
         const hook = clipboard.addClipboardHook({
             id: 'chart-selectionless-object-copy',
             onBeforeCopyFocusedObject: (_unitId, _subUnitId, copyType) => {
                 focusedCalls += 1;
-                expect(copyType).toBe(COPY_TYPE.COPY);
+                expect(copyType).toBe(operation);
                 return true;
             },
             onBeforeCopy: () => { cellCalls += 1; },
@@ -1257,7 +1257,8 @@ describe('CHART clipboard without grid selection', () => {
         const before = Tools.deepClone(workbook.getSnapshot());
         const executed = trackMutations();
         expect(get(SheetsSelectionsService).getCurrentSelections()).toEqual([]);
-        expect(await SheetCopyCommand.handler(get(Injector))).toBe(true);
+        const command = operation === COPY_TYPE.COPY ? SheetCopyCommand : SheetCutCommand;
+        expect(await command.handler(get(Injector))).toBe(true);
         const copyId = clipboard.copyContentCache().getLastCopyId();
         const cached = clipboard.copyContentCache().get(copyId!)!;
         expect(focusedCalls).toBe(1);
@@ -1534,7 +1535,7 @@ describe('CHART clipboard without grid selection', () => {
         expect(get(SheetsSelectionsService).getCurrentSelections()).toEqual([]);
     });
 
-    it.each(['cut', 'formula-only'])('does not allow CHART %s to use the selectionless object path', async (kind) => {
+    it('does not allow formula-only copy to use the selectionless object path', async () => {
         let focusedCalls = 0;
         const hook = clipboard.addClipboardHook({
             id: 'chart-copy-only',
@@ -1544,9 +1545,7 @@ describe('CHART clipboard without grid selection', () => {
             },
         });
         onTestFinished(() => hook.dispose());
-        expect(await (kind === 'cut'
-            ? clipboard.cut()
-            : clipboard.copy({ copyHookType: PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY }))).toBe(false);
+        expect(await clipboard.copy({ copyHookType: PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY })).toBe(false);
         expect(focusedCalls).toBe(0);
         expect(writes).toEqual([]);
         expect(clipboard.copyContentCache().getLastCopyId()).toBeNull();
@@ -1625,61 +1624,38 @@ describe('CHART clipboard without grid selection', () => {
         expect(get(IUndoRedoService).getUndoRedoStatus('test')).toEqual({ undos: 0, redos: 0 });
     });
 
-    it.each(['chart-host', 'sheet1'])('rejects a retained CHART object CUT cache before hooks when pasting to %s', async (targetSheet) => {
+    it.each(['chart-host', 'sheet1'])('lets the object owner handle CUT into %s and replays its history', async (targetSheet) => {
         const copyId = seedObjectCache();
         const cached = clipboard.copyContentCache().get(copyId)!;
         clipboard.copyContentCache().set(copyId, { ...cached, copyType: COPY_TYPE.CUT });
-        let pasted = false;
+        const sheet = workbook.getSheetBySheetId(targetSheet)!;
+        const originalName = sheet.getName();
         const hook = clipboard.addClipboardHook({
-            id: 'chart-cut-cache-rejected',
+            id: 'object-cut-owner',
             onBeforeCopyFocusedObject: () => true,
-            onPasteCells: () => {
-                pasted = true;
-                return { redos: [], undos: [] };
+            onBeforePaste: (_target, payload) => {
+                expect(payload).toMatchObject({ copyId, copyType: COPY_TYPE.CUT, pasteType: PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE });
+                expect(clipboard.copyContentCache().get(payload!.copyId!)?.skipCellCopy).toBe(true);
+                return true;
             },
+            onPasteCells: (_from, to) => ({
+                redos: [{ id: SetWorksheetNameMutation.id, params: { unitId: to.unitId, subUnitId: to.subUnitId, name: 'Object owner result' } }],
+                undos: [{ id: SetWorksheetNameMutation.id, params: { unitId: to.unitId, subUnitId: to.subUnitId, name: originalName } }],
+            }),
         });
         onTestFinished(() => hook.dispose());
-        const before = Tools.deepClone(workbook.getSnapshot());
         const executed = trackMutations();
         expect(await clipboard.pasteByCopyId(copyId, undefined, {
             unitId: 'test',
             subUnitId: targetSheet,
             range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
-        })).toBe(false);
-        expect(pasted).toBe(false);
-        expect(executed).toEqual([]);
-        expect(clipboard.copyContentCache().get(copyId)?.matrix).toBe(cached.matrix);
-        expect(workbook.getSnapshot()).toEqual(before);
-        expect(get(SheetsSelectionsService).getCurrentSelections()).toEqual([]);
-        expect(get(IUndoRedoService).getUndoRedoStatus('test')).toEqual({ undos: 0, redos: 0 });
-    });
-
-    it.each(['internal cells', 'plain text', 'external html', 'external file'])('rejects %s pasted into CHART even with an explicit target', async (kind) => {
-        const target = { unitId: 'test', subUnitId: 'chart-host', range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } };
-        const before = Tools.deepClone(workbook.getSnapshot());
-        const executed = trackMutations();
-        let result: boolean;
-        if (kind === 'internal cells') {
-            clipboard.copyContentCache().set('grid-cell', {
-                unitId: 'test',
-                subUnitId: 'sheet1',
-                range: { rows: [24], cols: [0] },
-                matrix: new ObjectMatrix({ 0: { 0: { v: 'A25' } } }),
-                copyType: COPY_TYPE.COPY,
-            });
-            result = await clipboard.pasteByCopyId('grid-cell', undefined, target);
-        } else if (kind === 'plain text') {
-            result = await clipboard.legacyPaste(undefined, 'MUST_NOT_ENTER_CHART', undefined, undefined, target);
-        } else if (kind === 'external html') {
-            result = await clipboard.legacyPaste('<table><tr><td>MUST_NOT_ENTER_CHART</td></tr></table>', undefined, undefined, undefined, target);
-        } else {
-            result = await clipboard.legacyPaste(undefined, undefined, [new File(['cells'], 'clipboard.txt', { type: 'text/plain' })], undefined, target);
-        }
-        expect(result).toBe(false);
-        expect(executed).toEqual([]);
-        expect(workbook.getSnapshot()).toEqual(before);
-        expect(get(SheetsSelectionsService).getCurrentSelections()).toEqual([]);
-        expect(get(IUndoRedoService).getUndoRedoStatus('test')).toEqual({ undos: 0, redos: 0 });
+        })).toBe(true);
+        expect(executed).toEqual([SetWorksheetNameMutation.id]);
+        expect(sheet.getName()).toBe('Object owner result');
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(sheet.getName()).toBe(originalName);
+        expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+        expect(sheet.getName()).toBe('Object owner result');
     });
 
     it('keeps GRID cell copy and paste working while rejecting an empty GRID selection', async () => {

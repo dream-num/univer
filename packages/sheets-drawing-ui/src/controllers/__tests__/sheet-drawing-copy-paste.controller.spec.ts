@@ -47,7 +47,7 @@ import {
     PlatformService,
     UIPartsService,
 } from '@univerjs/ui';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
 import { InsertFloatImageCommand } from '../../commands/commands/insert-image.command';
 import { SheetsDrawingCopyPasteController } from '../sheet-drawing-copy-paste.controller';
@@ -350,6 +350,23 @@ describe('SheetsDrawingCopyPasteController', () => {
         ]);
 
         controller.dispose();
+    });
+
+    it('keeps a Chart Sheet image intact when its native-clipboard cut cannot be pasted back', () => {
+        vi.useFakeTimers();
+        onTestFinished(() => {
+            vi.useRealTimers();
+        });
+        const drawing = createImageDrawing();
+        const { bed, hook, commandService, clipboardInterfaceService } = createController({
+            focusedDrawings: [drawing],
+            sheetType: SheetTypes.CHART,
+        });
+        expect(hook.onBeforeCopyFocusedObject?.('unit-1', 'sheet-1', COPY_TYPE.CUT)).toBe(false);
+        expect(commandService.executeCommand).not.toHaveBeenCalledWith(RemoveSheetDrawingCommand.id, expect.anything());
+        expect(bed.get(ISheetDrawingService).getDrawingByParam(drawing)).toEqual(drawing);
+        vi.advanceTimersByTime(250);
+        expect(clipboardInterfaceService.writeText).not.toHaveBeenCalled();
     });
 
     it('cuts a focused image drawing and pastes it as a new drawing at the target range', () => {

@@ -92,7 +92,7 @@ import {
     transformToAxisAlignPosition,
     transformToDrawingPosition,
 } from '@univerjs/sheets-drawing';
-import { ISheetSelectionRenderService, SHEET_VIEW_KEY, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { SHEET_VIEW_KEY, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
@@ -163,6 +163,9 @@ interface IImageInsertionTarget {
     subUnitId: string;
     location?: ISheetLocationBase;
     pageFrame?: Rect;
+    range: IRange;
+    sceneWidth: number;
+    sceneHeight: number;
 }
 
 export class SheetDrawingUpdateController extends Disposable implements IRenderModule {
@@ -171,7 +174,6 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         private readonly _context: IRenderContext<Workbook>,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
         @ILocalFileService private readonly _fileOpenerService: ILocalFileService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
@@ -346,7 +348,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         if (!this._isImageTargetValid(target) || !Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
             return false;
         }
-        const { width: sceneWidth, height: sceneHeight } = target.render.scene;
+        const { sceneWidth, sceneHeight } = target;
 
         this._imageIoService.addImageSourceCache(source, imageSourceType, image);
 
@@ -387,7 +389,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }
 
         const { skeleton } = sheetSkeletonParam;
-        const sheetTransform = this._getImagePosition(width * scale, height * scale, sceneWidth, sceneHeight, skeleton);
+        const sheetTransform = this._getImagePosition(width * scale, height * scale, sceneWidth, sceneHeight, skeleton, target.range);
         if (!sheetTransform) {
             return false;
         }
@@ -613,7 +615,12 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }
         const frame = render.components.get(SHEET_VIEW_KEY.CHART_PAGE);
         const pageFrame = frame instanceof Rect ? frame : undefined;
-        const target = { ...host, render, location, pageFrame };
+        const selections = this._workbookSelections.getCurrentSelections();
+        const range = selections?.length
+            ? { ...selections[selections.length - 1].range }
+            : { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 };
+        // Preserve the insertion origin while the picker and upload outlive the active sheet.
+        const target = { ...host, render, location, pageFrame, range, sceneWidth: render.scene.width, sceneHeight: render.scene.height };
         return this._isImageTargetValid(target) ? target : null;
     }
 
@@ -673,18 +680,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         };
     }
 
-    private _getImagePosition(imageWidth: number, imageHeight: number, sceneWidth: number, sceneHeight: number, skeleton: SpreadsheetSkeleton): Nullable<ISheetDrawingPosition> {
-        const selections = this._workbookSelections.getCurrentSelections();
-        let range: IRange = {
-            startRow: 0,
-            endRow: 0,
-            startColumn: 0,
-            endColumn: 0,
-        };
-        if (selections && selections.length > 0) {
-            range = selections[selections.length - 1].range;
-        }
-
+    private _getImagePosition(imageWidth: number, imageHeight: number, sceneWidth: number, sceneHeight: number, skeleton: SpreadsheetSkeleton, range: IRange): Nullable<ISheetDrawingPosition> {
         const rangeWithCoord = attachRangeWithCoord(skeleton, range);
         if (rangeWithCoord == null) {
             return;
@@ -716,7 +712,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }
 
         if (isChangeStart) {
-            const newCoord = this._selectionRenderService.getCellWithCoordByOffset(startX, startY);
+            const newCoord = skeleton.getCellWithCoordByOffset(startX, startY, 1, 1, { x: 0, y: 0 });
             if (newCoord == null) {
                 return;
             }
@@ -733,7 +729,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             rowOffset: 0,
         };
 
-        const endSelectionCell = this._selectionRenderService.getCellWithCoordByOffset(startX + imageWidth, startY + imageHeight);
+        const endSelectionCell = skeleton.getCellWithCoordByOffset(startX + imageWidth, startY + imageHeight, 1, 1, { x: 0, y: 0 });
 
         if (endSelectionCell == null) {
             return;

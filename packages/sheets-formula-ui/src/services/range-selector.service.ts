@@ -15,6 +15,7 @@
  */
 
 import type { IUnitRangeName } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
 export interface IShowRangeSelectorDialogOptions {
@@ -26,15 +27,32 @@ export interface IShowRangeSelectorDialogOptions {
     callback: (ranges: IUnitRangeName[]) => void;
 }
 
-export class GlobalRangeSelectorService {
+export class GlobalRangeSelectorService extends Disposable {
     private _currentSelector$ = new BehaviorSubject<IShowRangeSelectorDialogOptions | null>(null);
 
     currentSelector$ = this._currentSelector$.asObservable();
 
+    constructor() {
+        super();
+        this.disposeWithMe(() => {
+            this._currentSelector$.getValue()?.callback([]);
+            this._currentSelector$.complete();
+        });
+    }
+
     showRangeSelectorDialog(opts: IShowRangeSelectorDialogOptions) {
         const callback = opts.callback;
+        let completed = false;
         const promise = new Promise<IUnitRangeName[]>((resolve) => {
             opts.callback = (ranges) => {
+                if (completed) {
+                    return;
+                }
+                completed = true;
+                // Release this request before its callback can open another selector.
+                if (this._currentSelector$.getValue() === opts) {
+                    this._currentSelector$.next(null);
+                }
                 resolve(ranges);
                 callback(ranges);
             };

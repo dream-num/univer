@@ -24,6 +24,7 @@ import {
     IUndoRedoService,
     sequenceExecute,
 } from '@univerjs/core';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { SheetInterceptorService } from '@univerjs/sheets';
 import { ISheetDrawingService } from '../../services/sheet-drawing.service';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
@@ -93,6 +94,9 @@ export const RemoveSheetDrawingCommand: ICommand = {
         const sheetDrawingService = accessor.get(ISheetDrawingService);
 
         const normalizedParams = { ...params, drawings: expandDrawingRemovalParams(sheetDrawingService, params.drawings) };
+        if (!accessor.get(IDrawingManagerService).canExecuteCommand({ id: RemoveSheetDrawingCommand.id, params: normalizedParams })) {
+            return false;
+        }
         // Interceptors share the complete command-local preimage, including feature-owned descendants.
         const intercepted = sheetInterceptorService.onCommandExecute({ id: RemoveSheetDrawingCommand.id, params: normalizedParams });
         const jsonOp = sheetDrawingService.getBatchRemoveOp(normalizedParams.drawings) as IDrawingJsonUndo1;

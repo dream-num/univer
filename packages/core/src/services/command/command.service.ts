@@ -437,20 +437,30 @@ export class CommandService extends Disposable implements ICommandService {
 
                 const stackItemDisposable = this._pushCommandExecutionStack(commandInfo);
                 const _options = options ?? {};
-                try {
-                    this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, _options));
-                    if (this._disposed) {
-                        this._warnCommandSkippedAfterDisposed(id);
-                        return false as R;
-                    }
 
-                    const result = await this._execute<P, R>(command as ICommand<P, R>, params, _options);
-                    this._notifyCommandExecuted(commandInfo, _options);
-
-                    return result;
-                } finally {
+                this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, _options));
+                if (this._disposed) {
                     stackItemDisposable.dispose();
+                    this._warnCommandSkippedAfterDisposed(id);
+                    return false as R;
                 }
+
+                const result = await this._execute<P, R>(command as ICommand<P, R>, params, _options);
+                // For syncOnly mutations, only call collab listeners, not regular listeners
+                if (_options.syncOnly) {
+                    if (command.type === CommandType.MUTATION) {
+                        this._collabMutationListeners.forEach((listener) => listener(commandInfo, _options));
+                    }
+                } else {
+                    this._commandExecutedListeners.forEach((listener) => listener(commandInfo, _options));
+                    if (command.type === CommandType.MUTATION) {
+                        this._collabMutationListeners.forEach((listener) => listener(commandInfo, _options));
+                    }
+                }
+
+                stackItemDisposable.dispose();
+
+                return result;
             }
 
             throw new Error(`[CommandService]: command "${id}" is not registered.`);
@@ -488,20 +498,30 @@ export class CommandService extends Disposable implements ICommandService {
 
                 const stackItemDisposable = this._pushCommandExecutionStack(commandInfo);
                 const _options = options ?? {};
-                try {
-                    this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, _options));
-                    if (this._disposed) {
-                        this._warnCommandSkippedAfterDisposed(id);
-                        return false as R;
-                    }
 
-                    const result = this._syncExecute<P, R>(command as ICommand<P, R>, params, _options);
-                    this._notifyCommandExecuted(commandInfo, _options);
-
-                    return result;
-                } finally {
+                this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, _options));
+                if (this._disposed) {
                     stackItemDisposable.dispose();
+                    this._warnCommandSkippedAfterDisposed(id);
+                    return false as R;
                 }
+
+                const result = this._syncExecute<P, R>(command as ICommand<P, R>, params, _options);
+                // For syncOnly mutations, only call collab listeners, not regular listeners
+                if (_options.syncOnly) {
+                    if (command.type === CommandType.MUTATION) {
+                        this._collabMutationListeners.forEach((listener) => listener(commandInfo, _options));
+                    }
+                } else {
+                    this._commandExecutedListeners.forEach((listener) => listener(commandInfo, _options));
+                    if (command.type === CommandType.MUTATION) {
+                        this._collabMutationListeners.forEach((listener) => listener(commandInfo, _options));
+                    }
+                }
+
+                stackItemDisposable.dispose();
+
+                return result;
             }
 
             throw new Error(`[CommandService]: command "${id}" is not registered.`);
@@ -511,15 +531,6 @@ export class CommandService extends Disposable implements ICommandService {
             } else {
                 throw error;
             }
-        }
-    }
-
-    private _notifyCommandExecuted(command: ICommandInfo, options: IExecutionOptions): void {
-        if (!options.syncOnly) {
-            this._commandExecutedListeners.forEach((listener) => listener(command, options));
-        }
-        if (command.type === CommandType.MUTATION) {
-            this._collabMutationListeners.forEach((listener) => listener(command, options));
         }
     }
 

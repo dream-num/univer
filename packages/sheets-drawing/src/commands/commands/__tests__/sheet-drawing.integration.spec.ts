@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import type { Injector, Univer, Workbook } from '@univerjs/core';
+import type { ICommandService, Injector, Univer, Workbook } from '@univerjs/core';
 import {
     ArrangeTypeEnum,
     DrawingTypeEnum,
-    ICommandService,
     ImageSourceType,
     IUndoRedoService,
     IUniverInstanceService,
@@ -468,22 +467,7 @@ describe('sheet drawing integration', () => {
         expect(Object.prototype.hasOwnProperty.call(restoredChart.axisAlignSheetTransform, 'angle')).toBe(false);
     });
 
-    it('keeps angle updates unchanged when the current drawing is missing', () => {
-        const commandServiceMock = { syncExecuteCommand: vi.fn(() => true) };
-        const undoRedoServiceMock = { pushUndoRedo: vi.fn() };
-        const sheetDrawingServiceMock = {
-            getDrawingByParam: vi.fn(() => undefined),
-            getBatchUpdateOp: vi.fn((drawings: ISheetDrawing[]) => ({
-                unitId: 'test',
-                subUnitId: 'sheet1',
-                undo: null,
-                redo: null,
-                objects: drawings.map(({ unitId, subUnitId, drawingId }) => ({ unitId, subUnitId, drawingId })),
-            })),
-        };
-        const sheetInterceptorServiceMock = {
-            onCommandExecute: vi.fn(() => ({ redos: [], undos: [] })),
-        };
+    it('preserves missing-drawing angle updates when an owner rejects the command before writing', () => {
         const drawing = {
             unitId: 'test',
             subUnitId: 'sheet1',
@@ -491,28 +475,22 @@ describe('sheet drawing integration', () => {
             drawingType: DrawingTypeEnum.DRAWING_CHART,
             transform: { angle: 45 },
         };
-        const accessor = {
-            get: vi.fn((token) => {
-                if (token === ICommandService) return commandServiceMock;
-                if (token === IUndoRedoService) return undoRedoServiceMock;
-                if (token === ISheetDrawingService) return sheetDrawingServiceMock;
-                if (token === SheetInterceptorService) return sheetInterceptorServiceMock;
-                throw new Error('unexpected dependency');
-            }),
-        };
-
-        expect(SetSheetDrawingCommand.handler(accessor as never, {
+        let checked: unknown;
+        const registration = get(IDrawingManagerService).registerCommandCheck(({ id, params }) => {
+            if (id !== SetSheetDrawingCommand.id) {
+                return true;
+            }
+            checked = params;
+            return false;
+        });
+        onTestFinished(() => registration.dispose());
+        expect(commandService.syncExecuteCommand(SetSheetDrawingCommand.id, {
             unitId: 'test',
             drawings: [drawing],
-        })).toBe(true);
-        expect(sheetDrawingServiceMock.getBatchUpdateOp).toHaveBeenCalledWith([drawing]);
-        expect(sheetInterceptorServiceMock.onCommandExecute).toHaveBeenCalledWith({
-            id: SetSheetDrawingCommand.id,
-            params: {
-                unitId: 'test',
-                drawings: [drawing],
-            },
-        });
+        })).toBe(false);
+        expect(checked).toEqual({ unitId: 'test', drawings: [drawing] });
+        expect(get(ISheetDrawingService).getDrawingByParam(drawing)).toBeUndefined();
+        expect(get(IUndoRedoService).getUndoRedoStatus('test')).toEqual({ undos: 0, redos: 0 });
     });
 
     it('arranges drawing order through the real command pipeline', async () => {

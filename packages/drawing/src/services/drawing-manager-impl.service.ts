@@ -15,6 +15,7 @@
  */
 
 import type {
+    ICommandInfo,
     IDrawingGroupNestedIds,
     IDrawingGroupNestedParam,
     IDrawingParam,
@@ -22,6 +23,17 @@ import type {
     Nullable,
 } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import {
+    Disposable,
+    DrawingTypeEnum,
+    JSON1,
+    normalizeDrawingOrderIndex,
+    remove,
+    sortRules,
+    sortRulesByDesc,
+    toDisposable,
+} from '@univerjs/core';
+import { Subject } from 'rxjs';
 import type {
     IDrawingGroupUpdateParam,
     IDrawingMap,
@@ -32,8 +44,6 @@ import type {
     IDrawingVisibleParam,
     IUnitDrawingService,
 } from './drawing-manager.service';
-import { DrawingTypeEnum, JSON1, normalizeDrawingOrderIndex, sortRules, sortRulesByDesc } from '@univerjs/core';
-import { Subject } from 'rxjs';
 
 type JSONOp = JSON1.JSONOp;
 type JSONOpList = JSON1.JSONOpList;
@@ -207,7 +217,7 @@ interface IDrawingRefreshMetadata {
 /**
  * unitId -> subUnitId -> drawingId -> drawingParam
  */
-export class UnitDrawingService<T extends IDrawingParam & IDrawingRefreshMetadata> implements IUnitDrawingService<T> {
+export class UnitDrawingService<T extends IDrawingParam & IDrawingRefreshMetadata> extends Disposable implements IUnitDrawingService<T> {
     drawingManagerData: IDrawingMap<T> = {};
 
     private _oldDrawingManagerData: IDrawingMap<T> = {};
@@ -265,7 +275,8 @@ export class UnitDrawingService<T extends IDrawingParam & IDrawingRefreshMetadat
     private _visible: boolean = true;
     private _editable: boolean = true;
 
-    dispose(): void {
+    override dispose(): void {
+        super.dispose();
         this._remove$.complete();
         this._add$.complete();
         this._update$.complete();
@@ -1160,4 +1171,15 @@ export class UnitDrawingService<T extends IDrawingParam & IDrawingRefreshMetadat
     }
 }
 
-export class DrawingManagerService extends UnitDrawingService<IDrawingParam> { }
+export class DrawingManagerService extends UnitDrawingService<IDrawingParam> {
+    private readonly _commandChecks: Array<(command: ICommandInfo) => boolean> = [];
+
+    registerCommandCheck(check: (command: ICommandInfo) => boolean) {
+        this._commandChecks.push(check);
+        return this.disposeWithMe(toDisposable(() => remove(this._commandChecks, check)));
+    }
+
+    canExecuteCommand(command: ICommandInfo): boolean {
+        return this._commandChecks.every((check) => check(command));
+    }
+}

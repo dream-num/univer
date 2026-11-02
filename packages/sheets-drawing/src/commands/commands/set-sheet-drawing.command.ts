@@ -22,6 +22,7 @@ import {
     IUndoRedoService,
     sequenceExecute,
 } from '@univerjs/core';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { SheetInterceptorService } from '@univerjs/sheets';
 import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import { resolveSheetDrawingRotateEnabled } from '../../common/rotate-enabled';
@@ -110,6 +111,9 @@ export const SetSheetDrawingCommand: ICommand<ISetDrawingCommandParams> = {
         const { drawings } = params;
         const normalizedDrawings = drawings.map((drawing) => normalizeNonRotatableAngleUpdate(drawing, sheetDrawingService));
         const normalizedParams = { ...params, drawings: normalizedDrawings };
+        if (!accessor.get(IDrawingManagerService).canExecuteCommand({ id: SetSheetDrawingCommand.id, params: normalizedParams })) {
+            return false;
+        }
         const jsonOp = sheetDrawingService.getBatchUpdateOp(normalizedDrawings as ISheetDrawing[]) as IDrawingJsonUndo1;
         const { unitId, subUnitId, undo, redo, objects } = jsonOp;
         const intercepted = sheetInterceptorService.onCommandExecute({ id: SetSheetDrawingCommand.id, params: normalizedParams });

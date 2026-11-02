@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-import type { ArrangeTypeEnum, IDisposable, IDrawingGroupNestedParam, IDrawingParam, IDrawingSearch, Nullable } from '@univerjs/core';
+import type {
+    ArrangeTypeEnum,
+    ICommandInfo,
+    IDisposable,
+    IDrawingGroupNestedParam,
+    IDrawingParam,
+    IDrawingSearch,
+    Nullable,
+} from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { createIdentifier } from '@univerjs/core';
 
@@ -160,6 +168,9 @@ export interface IUnitDrawingService<T extends IDrawingParam> extends IUnitNorma
     setDrawingEditable(editable: boolean): void;
 }
 
-export interface IDrawingManagerService extends IUnitDrawingService<IDrawingParam> {}
+export interface IDrawingManagerService extends IUnitDrawingService<IDrawingParam> {
+    registerCommandCheck(check: (command: ICommandInfo) => boolean): IDisposable;
+    canExecuteCommand(command: ICommandInfo): boolean;
+}
 
-export const IDrawingManagerService = createIdentifier<IUnitDrawingService<IDrawingParam>>('univer.drawing-manager.service');
+export const IDrawingManagerService = createIdentifier<IDrawingManagerService>('univer.drawing-manager.service');

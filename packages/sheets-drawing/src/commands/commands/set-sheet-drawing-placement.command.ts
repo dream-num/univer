@@ -16,6 +16,7 @@
 
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService } from '@univerjs/core';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { SheetSkeletonService } from '@univerjs/sheets';
 import type { ISheetDrawingPlacementInput } from '../../services/sheet-drawing-placement';
 import { applySheetDrawingPlacement } from '../../services/sheet-drawing-placement';
@@ -36,6 +37,10 @@ export const SetSheetDrawingPlacementCommand: ICommand<ISetSheetDrawingPlacement
     type: CommandType.COMMAND,
     handler: (accessor, params) => {
         if (!params?.drawings.length) {
+            return false;
+        }
+
+        if (!accessor.get(IDrawingManagerService).canExecuteCommand({ id: SetSheetDrawingPlacementCommand.id, params })) {
             return false;
         }
 

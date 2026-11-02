@@ -82,6 +82,7 @@ function createWorkbookData(
                         2: { v: -12.3, t: CellValueType.NUMBER },
                         3: { v: '20%', t: CellValueType.STRING, s: 'textStyle' },
                         4: { v: 0, t: CellValueType.NUMBER },
+                        5: { v: 0.009999999999999787, t: CellValueType.NUMBER, s: 'textStyle' },
                     },
                 },
             },
@@ -214,6 +215,18 @@ describe('SheetsNumfmtCellContentController', () => {
             },
         });
 
+        expect(getInterceptedCell(worksheet, workbook, 1, 5, get)).toEqual({
+            v: 0.01,
+            t: CellValueType.NUMBER,
+            s: 'textStyle',
+            markers: {
+                tl: {
+                    size: 6,
+                    color: '#409f11',
+                },
+            },
+        });
+
         get(IConfigService).setConfig(SHEETS_NUMFMT_PLUGIN_CONFIG_KEY, { disableTextFormatMark: true });
 
         expect(getInterceptedCell(worksheet, workbook, 1, 0, get)).toEqual({
@@ -224,6 +237,11 @@ describe('SheetsNumfmtCellContentController', () => {
         expect(getInterceptedCell(worksheet, workbook, 1, 3, get)).toEqual({
             v: '20%',
             t: CellValueType.STRING,
+            s: 'textStyle',
+        });
+        expect(getInterceptedCell(worksheet, workbook, 1, 5, get)).toEqual({
+            v: 0.01,
+            t: CellValueType.NUMBER,
             s: 'textStyle',
         });
     });

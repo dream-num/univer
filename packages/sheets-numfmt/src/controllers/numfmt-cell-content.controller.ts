@@ -26,6 +26,7 @@ import {
     Inject,
     InterceptorEffectEnum,
     isDefaultFormat,
+    isRealNum,
     isTextFormat,
     IUniverInstanceService,
     LocaleService,
@@ -34,6 +35,7 @@ import {
     ThemeService,
     UniverInstanceType,
 } from '@univerjs/core';
+import { stripErrorMargin } from '@univerjs/engine-formula';
 import {
     checkCellValueType,
     InterceptCellContentPriority,
@@ -144,11 +146,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
         const formattedCell = cell === location.rawData ? { ...cell } : cell;
 
         if (isTextFormat(pattern)) {
-            formattedCell.t = CellValueType.STRING;
-            if (!this._configService.getConfig<IUniverSheetsNumfmtConfig>(SHEETS_NUMFMT_PLUGIN_CONFIG_KEY)?.disableTextFormatMark) {
-                formattedCell.markers = { ...formattedCell.markers, ...TEXT_FORMAT_MARK };
-            }
-            return formattedCell;
+            return this._formatTextCell(cell, formattedCell);
         }
 
         const cacheParameters = `${unitId}_${sheetId}_${cell.v}_${pattern}_${locale}_${dateSystem}`;
@@ -171,6 +169,25 @@ export class SheetsNumfmtCellContentController extends Disposable {
 
         this._renderCache.setValue(row, col, { result: res, parameters: cacheParameters });
         Object.assign(formattedCell, res);
+        return formattedCell;
+    }
+
+    private _formatTextCell(
+        cell: ICellDataForSheetInterceptor,
+        formattedCell: ICellDataForSheetInterceptor
+    ): ICellDataForSheetInterceptor {
+        // The cell stays text-formatted (keep its marker), but a numeric result
+        // must remain numeric and go through General's precision cleanup.
+        if (cell.t === CellValueType.NUMBER && isRealNum(formattedCell.v)) {
+            formattedCell.v = stripErrorMargin(Number(formattedCell.v));
+        } else {
+            formattedCell.t = CellValueType.STRING;
+        }
+
+        if (!this._configService.getConfig<IUniverSheetsNumfmtConfig>(SHEETS_NUMFMT_PLUGIN_CONFIG_KEY)?.disableTextFormatMark) {
+            formattedCell.markers = { ...formattedCell.markers, ...TEXT_FORMAT_MARK };
+        }
+
         return formattedCell;
     }
 

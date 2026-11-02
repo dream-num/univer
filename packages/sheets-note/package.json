@@ -69,9 +69,9 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
-        "typecheck": "tsc --noEmit",
+        "typecheck": "tsrs --noEmit",
         "build:bundle": "univer-cli build",
-        "build:types": "tsc -p tsconfig.node.json",
+        "build:types": "tsrs -p tsconfig.node.json",
         "build": "pnpm run build:bundle && pnpm run build:types"
     },
     "peerDependencies": {
@@ -87,7 +87,7 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/network": "workspace:*",
         "rxjs": "7.8.2",
-        "typescript": "^6.0.3",
+        "tsrs": "0.20.1-ts7.1.0-beta",
         "vitest": "^5.0.5"
     }
 }

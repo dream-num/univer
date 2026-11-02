@@ -28,7 +28,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/themes": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "css-loader": "^7.1.4",
+        "css-loader": "^7.1.5",
         "postcss-loader": "^8.2.1",
         "storybook": "^10.4.6",
         "storybook-addon-swc": "^1.2.0",

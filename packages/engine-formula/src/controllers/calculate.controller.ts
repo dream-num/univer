@@ -15,6 +15,7 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
 import type {
     ISetFormulaCalculationStartMutation,
@@ -29,7 +30,6 @@ import type {
 } from '../engine/dependency/dependency-tree';
 import type { IFormulaDirtyData } from '../services/current-data.service';
 import type { IAllRuntimeData } from '../services/runtime.service';
-import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { convertRuntimeToUnitData } from '../basics/runtime';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import {
@@ -320,6 +320,7 @@ export class CalculateController extends Disposable {
                 },
                 {
                     onlyLocal: true,
+                    fromFormula: true,
                 }
             );
         }

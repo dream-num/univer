@@ -15,8 +15,8 @@
  */
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
-import { IUniverInstanceService, LocaleType, mergeWorksheetSnapshotWithDefault, SheetTypes, Univer, UniverInstanceType } from '@univerjs/core';
-import { WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { ICommandService, IUniverInstanceService, LocaleType, mergeWorksheetSnapshotWithDefault, SheetTypes, Univer, UniverInstanceType } from '@univerjs/core';
+import { InsertSheetMutation, RemoveSheetMutation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -38,6 +38,9 @@ describe('SheetBarMenu worksheet lifecycle', () => {
             sheets: { grid: { id: 'grid', name: 'Grid' } },
         });
         injector.get(IUniverInstanceService).focusUnit('menu-book');
+        const commands = injector.get(ICommandService);
+        commands.registerCommand(InsertSheetMutation);
+        commands.registerCommand(RemoveSheetMutation);
         const container = document.createElement('div');
         document.body.appendChild(container);
         const root = createRoot(container);
@@ -46,11 +49,15 @@ describe('SheetBarMenu worksheet lifecycle', () => {
             await act(async () => injector.get(ISheetBarService).triggerSheetBarMenu());
             expect(document.querySelector('[role=menu]')?.textContent).toContain('Grid');
             await act(async () => {
-                workbook.addWorksheet('remote', 1, mergeWorksheetSnapshotWithDefault({ id: 'remote', name: 'Remote Charts', type: SheetTypes.CHART }));
+                expect(commands.syncExecuteCommand(InsertSheetMutation.id, {
+                    unitId: 'menu-book',
+                    index: 1,
+                    sheet: mergeWorksheetSnapshotWithDefault({ id: 'remote', name: 'Remote Charts', type: SheetTypes.CHART }),
+                }, { fromCollab: true })).toBe(true);
             });
             expect(document.querySelector('[role=menu]')?.textContent).toContain('Remote Charts');
             await act(async () => {
-                workbook.removeSheet('remote');
+                expect(commands.syncExecuteCommand(RemoveSheetMutation.id, { unitId: 'menu-book', subUnitId: 'remote' }, { fromCollab: true })).toBe(true);
             });
             expect(document.querySelector('[role=menu]')?.textContent).not.toContain('Remote Charts');
             expect(workbook.getActiveSheet()?.getSheetId()).toBe('grid');

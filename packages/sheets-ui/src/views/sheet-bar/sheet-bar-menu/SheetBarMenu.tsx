@@ -25,7 +25,10 @@ import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceSe
 import { clsx, DropdownMenu } from '@univerjs/design';
 import { CheckMarkIcon, ConvertIcon, EyelashIcon } from '@univerjs/icons';
 import {
+    InsertSheetMutation,
+    RemoveSheetMutation,
     SetWorksheetActivateCommand,
+    SetWorksheetActiveOperation,
     SetWorksheetHideMutation,
     SetWorksheetNameMutation,
     SetWorksheetOrderMutation,
@@ -34,7 +37,6 @@ import {
 } from '@univerjs/sheets';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { merge } from 'rxjs';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import { SheetBarButton } from '../sheet-bar-button/SheetBarButton';
 
@@ -97,8 +99,11 @@ export function SheetBarMenu() {
         commandService.onCommandExecuted((commandInfo: ICommandInfo) => {
             switch (commandInfo.id) {
                 case SetWorksheetHideMutation.id:
+                case RemoveSheetMutation.id:
                 case SetWorksheetNameMutation.id:
+                case InsertSheetMutation.id:
                 case SetWorksheetOrderMutation.id:
+                case SetWorksheetActiveOperation.id:
                     statusInit();
                     break;
                 default:
@@ -119,9 +124,6 @@ export function SheetBarMenu() {
 
         const disposables = new DisposableCollection();
         disposables.add(setupStatusUpdate());
-        if (workbook) {
-            disposables.add(merge(workbook.activeSheet$, workbook.sheetCreated$, workbook.sheetDisposed$).subscribe(statusInit));
-        }
         disposables.add(sheetBarService.registerSheetBarMenuHandler({ handleSheetBarMenu }));
 
         return () => disposables.dispose();

@@ -30,7 +30,9 @@ import {
 } from '@univerjs/core';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
+    InsertSheetMutation,
     RangeProtectionRuleModel,
+    RemoveSheetMutation,
     SetWorksheetActiveOperation,
     SetWorksheetNameCommand,
     SetWorksheetNameMutation,
@@ -90,6 +92,8 @@ describe('Chart Sheet tabs', () => {
         });
         injector.get(IUniverInstanceService).focusUnit(workbook.getUnitId());
         const commands = injector.get(ICommandService);
+        commands.registerCommand(InsertSheetMutation);
+        commands.registerCommand(RemoveSheetMutation);
         commands.registerCommand(SetWorksheetActiveOperation);
         commands.registerCommand(SetWorksheetNameCommand);
         commands.registerCommand(SetWorksheetNameMutation);
@@ -100,12 +104,16 @@ describe('Chart Sheet tabs', () => {
         try {
             await act(async () => root.render(<RediContext value={{ injector }}><SheetBarTabs /></RediContext>));
             await act(async () => {
-                workbook.addWorksheet('remote', 2, mergeWorksheetSnapshotWithDefault({ id: 'remote', name: 'Remote Charts', type: SheetTypes.CHART }));
+                expect(commands.syncExecuteCommand(InsertSheetMutation.id, {
+                    unitId: 'tabs-workbook',
+                    index: 2,
+                    sheet: mergeWorksheetSnapshotWithDefault({ id: 'remote', name: 'Remote Charts', type: SheetTypes.CHART }),
+                }, { fromCollab: true })).toBe(true);
             });
             expect(container.querySelector('[role=tab][data-id=remote]')?.textContent).toBe('Remote Charts');
             expect(workbook.getActiveSheet()?.getSheetId()).toBe('grid');
             await act(async () => {
-                workbook.removeSheet('remote');
+                expect(commands.syncExecuteCommand(RemoveSheetMutation.id, { unitId: 'tabs-workbook', subUnitId: 'remote' }, { fromCollab: true })).toBe(true);
             });
             expect(container.querySelector('[role=tab][data-id=remote]')).toBeNull();
             expect(workbook.getActiveSheet()?.getSheetId()).toBe('grid');

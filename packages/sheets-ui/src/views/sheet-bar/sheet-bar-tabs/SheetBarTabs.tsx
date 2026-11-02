@@ -37,7 +37,9 @@ import {
     SlidesMultiIcon,
 } from '@univerjs/icons';
 import {
+    InsertSheetMutation,
     RangeProtectionRuleModel,
+    RemoveSheetMutation,
     SetTabColorMutation,
     SetWorksheetActiveOperation,
     SetWorksheetHideMutation,
@@ -122,7 +124,9 @@ function shouldRefreshSheetTabs(commandInfo: ICommandInfo) {
     switch (commandInfo.id) {
         case SetTabColorMutation.id:
         case SetWorksheetHideMutation.id:
+        case RemoveSheetMutation.id:
         case SetWorksheetNameMutation.id:
+        case InsertSheetMutation.id:
         case SetWorksheetOrderMutation.id:
         case SetWorksheetActiveOperation.id:
             return true;
@@ -610,8 +614,9 @@ export function SheetBarTabs() {
         const renameSubscription = sheetBarService.renameId$.subscribe(() => {
             setTabEditor();
         });
-        const worksheetLifecycleSubscription = merge(workbook.activeSheet$, workbook.sheetCreated$, workbook.sheetDisposed$)
-            .subscribe(() => updateSheetItems());
+        const activeSheetSubscription = workbook.activeSheet$.subscribe(() => {
+            updateSheetItems();
+        });
 
         return () => {
             commandDisposable.dispose();
@@ -620,7 +625,7 @@ export function SheetBarTabs() {
             scrollSubscription.unsubscribe();
             scrollXSubscription.unsubscribe();
             renameSubscription.unsubscribe();
-            worksheetLifecycleSubscription.unsubscribe();
+            activeSheetSubscription.unsubscribe();
             disconnectResizeObserver?.();
         };
     }, [commandService, initializeSlideTabBar, resetOrder, setTabEditor, sheetBarService, syncScrollState, updateSheetItems, workbook]);

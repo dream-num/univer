@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ITestBed } from './create-test-bed';
 import { ICommandService } from '@univerjs/core';
 import {
     AddRangeProtectionMutation,
@@ -23,7 +24,6 @@ import {
     SetRangeProtectionMutation,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { ITestBed } from './create-test-bed';
 import { createFacadeTestBed } from './create-test-bed';
 
 describe('sheets facade permissions', () => {

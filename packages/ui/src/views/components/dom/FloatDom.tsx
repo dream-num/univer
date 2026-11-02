@@ -15,10 +15,10 @@
  */
 
 import type { ComponentType, CSSProperties } from 'react';
+import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
 import { DocumentDataModel, IUniverInstanceService } from '@univerjs/core';
 import { memo, useEffect, useMemo, useRef } from 'react';
 import { first } from 'rxjs';
-import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
 import { ComponentManager } from '../../../common/component-manager';
 import { CanvasFloatDomService, shouldForwardFloatDomEvents, shouldRenderFloatDomLayer } from '../../../services/dom/canvas-dom-layer.service';
 import { useDependency, useObservable } from '../../../utils/di';

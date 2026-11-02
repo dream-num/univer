@@ -16,6 +16,7 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import {
     DEFAULT_STYLES,
     EDITOR_ACTIVATED,
@@ -40,7 +41,6 @@ import {
 } from '@univerjs/sheets';
 import { FONT_SIZE_COMPONENT, FONT_SIZE_LIST, getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
-import type { LocaleKey } from '../locale/types';
 import {
     SetRangeFontDecreaseCommand,
     SetRangeFontIncreaseCommand,

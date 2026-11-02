@@ -47,6 +47,8 @@ import type {
     IStyleTypeValue,
     SplitDelimiterEnum,
 } from '@univerjs/sheets';
+import type { IFacadeClearOptions } from './f-worksheet';
+import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import {
     BooleanNumber,
     covertCellValue,
@@ -95,8 +97,6 @@ import {
     SheetRangeThemeService,
     SplitTextToColumnsCommand,
 } from '@univerjs/sheets';
-import type { IFacadeClearOptions } from './f-worksheet';
-import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import { SHEETS_CUSTOM_FIELD_WARNING_MESSAGE } from './const';
 import { FWorkbook } from './f-workbook';
 import { FWorksheet } from './f-worksheet';

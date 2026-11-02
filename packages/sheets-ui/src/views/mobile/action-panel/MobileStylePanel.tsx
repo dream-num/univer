@@ -24,6 +24,7 @@ import type {
     IValueOption,
     MenuItemDefaultValueType,
 } from '@univerjs/ui';
+import type { LocaleKey } from '../../../locale/types';
 import { BorderStyleTypes, BorderType, LocaleService, ThemeService } from '@univerjs/core';
 import {
     borderBottomClassName,
@@ -57,7 +58,6 @@ import {
 } from '@univerjs/ui';
 import { useMemo, useState } from 'react';
 import { isObservable } from 'rxjs';
-import type { LocaleKey } from '../../../locale/types';
 import {
     ResetRangeTextColorCommand,
     SetRangeBoldCommand,

@@ -21,6 +21,15 @@ import type {
     IDeleteWorksheetProtectionParams,
     IRangeProtectionRule,
 } from '@univerjs/sheets';
+import type { FRange } from '../f-range';
+import type { FWorksheet } from '../f-worksheet';
+import type {
+    IRangeProtectionOptions,
+    IWorksheetPermissionConfig,
+    IWorksheetProtectionOptions,
+    WorksheetMode,
+    WorksheetPermissionSnapshot,
+} from './permission-types';
 import {
     cellToRange,
     generateRandomId,
@@ -48,15 +57,6 @@ import {
     WorksheetProtectionPointModel,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import type { FRange } from '../f-range';
-import type { FWorksheet } from '../f-worksheet';
-import type {
-    IRangeProtectionOptions,
-    IWorksheetPermissionConfig,
-    IWorksheetProtectionOptions,
-    WorksheetMode,
-    WorksheetPermissionSnapshot,
-} from './permission-types';
 import { FRangeProtectionRule } from './f-range-protection-rule';
 import { WORKSHEET_PERMISSION_POINT_MAP } from './permission-point-map';
 import { WorksheetPermissionPoint } from './permission-types';

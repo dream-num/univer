@@ -37,6 +37,7 @@ import type { ISelectionStyle, ISelectionWithCoord, ISelectionWithStyle } from '
 import type { Theme } from '@univerjs/themes';
 import type { IShortcutService } from '@univerjs/ui';
 import type { Observable, Subscription } from 'rxjs';
+import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import {
     convertCellToRange,
     createIdentifier,
@@ -54,7 +55,6 @@ import {
 } from '@univerjs/sheets';
 import { IPlatformService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
-import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { isSheetContextMenuGesture, isSheetMultiSelectModifier } from '../../common/selection-input';
 import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';

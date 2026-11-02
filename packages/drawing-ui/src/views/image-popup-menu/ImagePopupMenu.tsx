@@ -17,6 +17,7 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IValueOption } from '@univerjs/ui';
 import type { ReactNode } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import {
     BooleanNumber,
     ICommandService,
@@ -34,7 +35,6 @@ import {
 } from '@univerjs/icons';
 import { IconManager, useDependency } from '@univerjs/ui';
 import { useState } from 'react';
-import type { LocaleKey } from '../../locale/types';
 
 export interface IImagePopupMenuItem {
     label: string;

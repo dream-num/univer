@@ -15,12 +15,12 @@
  */
 
 import type { IMenuSchema } from '@univerjs/ui';
+import type { LocaleKey } from '../../locale/types';
+import type { IImagePopupMenuExtraProps } from './ImagePopupMenu';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { MobileActionRow } from '@univerjs/design';
 import { IconManager, IDialogService, MenuItemType, MobileMenu, useDependency } from '@univerjs/ui';
 import { of } from 'rxjs';
-import type { LocaleKey } from '../../locale/types';
-import type { IImagePopupMenuExtraProps } from './ImagePopupMenu';
 
 interface IMobileImagePopupMenuProps {
     popup: {

@@ -16,8 +16,6 @@
 
 import type { IAbsoluteTransform, Nullable } from '@univerjs/core';
 import type { Subscription } from 'rxjs';
-import { Disposable, MOVE_BUFFER_VALUE, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
-import { Subject } from 'rxjs';
 import type { BaseObject } from './base-object';
 import type { IMouseEvent, IPointerEvent } from './basics/i-events';
 import type { ITransformerConfig } from './basics/transformer-config';
@@ -26,6 +24,8 @@ import type { UniverRenderingContext } from './context';
 import type { Scene } from './scene';
 import type { IRectProps } from './shape/rect';
 import type { IRegularPolygonProps } from './shape/regular-polygon';
+import { Disposable, MOVE_BUFFER_VALUE, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
+import { Subject } from 'rxjs';
 import { CURSOR_TYPE } from './basics/const';
 import { offsetRotationAxis } from './basics/offset-rotation-axis';
 import { getCurrentScrollXY } from './basics/scroll-xy';

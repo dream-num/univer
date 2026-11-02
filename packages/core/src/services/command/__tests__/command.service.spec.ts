@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { IMultiCommand } from '../command.service';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Injector } from '../../../common/di';
 import { CustomCommandExecutionError } from '../../../common/error';
 import { ConfigService, IConfigService } from '../../config/config.service';

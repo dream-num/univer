@@ -61,7 +61,9 @@ export const DeltaRowHeightCommand: ICommand = {
         }
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { worksheet, subUnitId, unitId } = target;
 
@@ -226,7 +228,9 @@ export const SetRowHeightCommand: ICommand = {
         }
 
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { unitId, subUnitId, worksheet } = target;
 
@@ -326,7 +330,9 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { unitId, subUnitId, worksheet } = target;
         const ranges = params?.ranges?.length ? params.ranges : selectionManagerService.getCurrentSelections()?.map((s) => s.range);

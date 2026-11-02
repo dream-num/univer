@@ -161,30 +161,11 @@ export class DrawingRenderService {
                 zIndex: zIndex === -1 ? (orders.length - 1) : zIndex,
             };
             let shouldBeCache = false;
-            if (isRenderableImageCache(imageNativeCache)) {
-                imageConfig.image = imageNativeCache;
-            } else {
-                if (imageSourceType === ImageSourceType.UUID) {
-                    try {
-                        imageConfig.url = await waitForPage(this._imageIoService.getImage(source));
-                    } catch (error) {
-                        if (requireRenderedImage) {
-                            throw error;
-                        }
-                        console.error(error);
-                        continue;
-                    }
-                } else if (imageSourceType === ImageSourceType.URL) {
-                    try {
-                        imageConfig.url = await waitForPage(this._urlImageService.getImage(source));
-                    } catch (error) {
-                        if (closed) {
-                            throw error;
-                        }
-                        console.error(error);
-                        imageConfig.url = source;
-                    }
-                    shouldBeCache = true;
+            if (drawingType !== DrawingTypeEnum.DRAWING_OLE) {
+                const imageNativeCache = this._imageIoService.getImageSourceCache(source, imageSourceType);
+
+                if (isRenderableImageCache(imageNativeCache)) {
+                    imageConfig.image = imageNativeCache;
                 } else {
                     if (imageSourceType === ImageSourceType.UUID) {
                         try {

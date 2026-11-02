@@ -57,7 +57,9 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
         const undoRedoService = accessor.get(IUndoRedoService);
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { worksheet, unitId, subUnitId } = target;
 
@@ -191,7 +193,9 @@ export const SetColWidthCommand: ICommand = {
         if (!selections?.length) return false;
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { subUnitId, unitId, worksheet } = target;
         const skeleton = accessor.get(SheetSkeletonService).getSkeleton(unitId, subUnitId);
@@ -271,7 +275,9 @@ export const SetWorksheetColIsAutoWidthCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { unitId, subUnitId } = target;
 

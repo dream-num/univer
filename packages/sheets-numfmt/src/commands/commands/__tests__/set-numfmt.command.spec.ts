@@ -23,6 +23,7 @@ import {
     Inject,
     Injector,
     IUniverInstanceService,
+    LocaleService,
     LocaleType,
     LogLevel,
     Plugin,

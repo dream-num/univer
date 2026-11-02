@@ -45,6 +45,8 @@ import {
 import { afterEach, describe, expect, it } from 'vitest';
 import type { ITableOptions } from '../../../types/type';
 import enUS from '../../../locale/en-US';
+import { TableColumn } from '../../../models/table-column';
+import { TableManager } from '../../../models/table-manager';
 import { UniverSheetsTablePlugin } from '../../../plugin';
 import { AddSheetTableMutation } from '../../mutations/add-sheet-table.mutation';
 import { AddSheetTableCommand } from '../add-sheet-table.command';

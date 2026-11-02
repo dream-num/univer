@@ -26,6 +26,7 @@ import type {
     WorkbookPermissionPointConstructor,
 } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
+import type { UnitAction } from '@univerjs/protocol';
 import {
     CustomCommandExecutionError,
     Direction,
@@ -37,20 +38,26 @@ import {
     isICellData,
     IUniverInstanceService,
     LocaleService,
+    MAX_COLUMN_COUNT,
+    MAX_ROW_COUNT,
+    moveRangeByOffset,
     ObjectMatrix,
     Rectangle,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import {
-    deserializeRangeWithSheet,
     deserializeRangeWithSheetWithCache,
+    FormulaDataModel,
+    handleRefStringInfo,
     IDefinedNamesService,
+    IFunctionService,
     LexerTreeBuilder,
+    matchToken,
+    normalizeFormulaUnitName,
     operatorToken,
     sequenceNodeType,
 } from '@univerjs/engine-formula';
-import { UnitAction } from '@univerjs/protocol';
 import { Subject } from 'rxjs';
 import type { IAutoFillCommandParams } from '../../commands/commands/auto-fill.command';
 import type { IClearSelectionAllCommandParams } from '../../commands/commands/clear-selection-all.command';

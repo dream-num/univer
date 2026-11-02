@@ -29,6 +29,7 @@ import {
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import type { LocaleKey } from '../../locale/types';
 import type { ITableOptions } from '../../types/type';
+import { TableColumn } from '../../models/table-column';
 import { TableManager } from '../../models/table-manager';
 import { getExistingNamesSet } from '../../util';
 import { AddSheetTableMutation } from '../mutations/add-sheet-table.mutation';

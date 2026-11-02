@@ -16,6 +16,21 @@
 
 import type { ICellData, IUnitRange, IWorkbookCalculationSettings } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import {
+    AsyncLock,
+    CellValueType,
+    createIdentifier,
+    Disposable,
+    IConfigService,
+    Inject,
+    isFormulaId,
+    isFormulaString,
+    normalizeWorkbookCalculationSettings,
+    ObjectMatrix,
+    Rectangle,
+    requestImmediateMacroTask,
+} from '@univerjs/core';
+import { Subject } from 'rxjs';
 import type {
     IArrayFormulaRangeType,
     IFeatureDirtyRangeType,
@@ -38,18 +53,6 @@ import type { BaseReferenceObject, FunctionVariantType } from '../engine/referen
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { IAllRuntimeData, IExecutionInProgressParams } from './runtime.service';
-import {
-    AsyncLock,
-    CellValueType,
-    createIdentifier,
-    Disposable,
-    IConfigService,
-    Inject,
-    normalizeWorkbookCalculationSettings,
-    ObjectMatrix,
-    requestImmediateMacroTask,
-} from '@univerjs/core';
-import { Subject } from 'rxjs';
 import { ErrorType } from '../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
 import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../config/config';
@@ -335,6 +338,23 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                     newCellData.setValue(row, column, true);
 
                     dirtyRanges.push({ unitId, sheetId, range });
+                });
+
+                const previousRanges = new ObjectMatrix(this._currentConfigService.getArrayFormulaRange()[unitId]?.[sheetId]);
+                const runtimeData = this._runtimeService.getUnitData()[unitId]?.[sheetId];
+                previousRanges.forValue((row, column, range) => {
+                    const runtimeAnchor = runtimeData?.getValue(row, column);
+                    if (!runtimeAnchor || isFormulaString(runtimeAnchor.f) || isFormulaId(runtimeAnchor.si) ||
+                        (range.startRow === range.endRow && range.startColumn === range.endColumn)) {
+                        return;
+                    }
+
+                    newCellData.setValue(row, column, true);
+                    const newRange = cellValue.getValue(row, column);
+                    // Removed spill cells can have dependents outside the new footprint.
+                    if (!newRange || !Rectangle.contains(newRange, range)) {
+                        dirtyRanges.push({ unitId, sheetId, range });
+                    }
                 });
 
                 if (excludedCell[unitId] == null) {

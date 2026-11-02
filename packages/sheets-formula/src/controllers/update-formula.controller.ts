@@ -29,9 +29,6 @@ import type {
     IRemoveSheetMutationParams,
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
-import type { IUniverSheetsFormulaBaseConfig } from '../config/config';
-import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
-import type { IUnitRangeWithOffset } from './utils/ref-range-move';
 import {
     Disposable,
     ICommandService,
@@ -56,6 +53,9 @@ import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { map } from 'rxjs';
+import type { IUniverSheetsFormulaBaseConfig } from '../config/config';
+import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
+import type { IUnitRangeWithOffset } from './utils/ref-range-move';
 import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '../config/config';
 import { removeFormulaData } from './utils/offset-formula-data';
 import { checkIsSameUnitAndSheet, formulaDataToCellData, FormulaReferenceMoveType, getFormulaReferenceMoveUndoRedo, updateRefOffset } from './utils/ref-range-formula';
@@ -129,6 +129,22 @@ export class UpdateFormulaController extends Disposable {
             .subscribe((unitId) => this._handleWorkbookDisposed(unitId)));
     }
 
+    private _getEditedArrayFormulaDirtyRanges(params: ISetRangeValuesMutationParams): IUnitRange[] {
+        const { subUnitId: sheetId, unitId, cellValue } = params;
+        const previousRanges = this._formulaDataModel.getArrayFormulaRange()[unitId]?.[sheetId];
+        const dirtyRanges: IUnitRange[] = [];
+        if (previousRanges) {
+            new ObjectMatrix(cellValue).forValue((row, column) => {
+                const range = previousRanges[row]?.[column];
+                if (range && (range.startRow !== range.endRow || range.startColumn !== range.endColumn)) {
+                    dirtyRanges.push({ unitId, sheetId, range });
+                }
+            });
+        }
+
+        return dirtyRanges;
+    }
+
     private _handleSetRangeValuesMutation(params: ISetRangeValuesMutationParams) {
         const { subUnitId: sheetId, unitId, cellValue } = params;
 
@@ -136,9 +152,14 @@ export class UpdateFormulaController extends Disposable {
             return;
         }
 
+        const dirtyRanges = this._getEditedArrayFormulaDirtyRanges(params);
         const newSheetFormulaData = this._formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
         const arrayFormulaCellDataChanged = this._formulaDataModel.updateArrayFormulaCellData(unitId, sheetId, cellValue);
         const arrayFormulaRangeChanged = this._formulaDataModel.updateArrayFormulaRange(unitId, sheetId, cellValue);
+
+        if (dirtyRanges.length > 0) {
+            this._commandService.syncExecuteCommand(SetTriggerFormulaCalculationStartMutation.id, { dirtyRanges }, { onlyLocal: true });
+        }
 
         if (Object.keys(newSheetFormulaData).length === 0) {
             if (arrayFormulaCellDataChanged || arrayFormulaRangeChanged) {

@@ -16,7 +16,8 @@
 
 import type { Dependency, ICellData, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { CellValueType, ICommandService, IConfigService, IUniverInstanceService, LocaleType, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
+import { CellValueType, ICommandService, IConfigService, IUniverInstanceService, LocaleType, LogLevel, RedoCommand, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import {
     FormulaDataModel,
     IDefinedNamesService,
@@ -25,12 +26,16 @@ import {
     SetDefinedNameMutation,
     SetFormulaDataMutation,
     SetTriggerFormulaCalculationStartMutation,
+    UniverFormulaEnginePlugin,
 } from '@univerjs/engine-formula';
-import { InsertSheetMutation, MoveRangeCommand, MoveRangeMutation, RemoveDefinedNameCommand, RemoveSheetCommand, RemoveSheetMutation, SetDefinedNameCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetStyleCommand, SetWorksheetNameCommand, SheetInterceptorService } from '@univerjs/sheets';
+import { InsertSheetMutation, MoveRangeCommand, MoveRangeMutation, RemoveDefinedNameCommand, RemoveSheetCommand, RemoveSheetMutation, SetDefinedNameCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetStyleCommand, SetWorksheetNameCommand, SheetInterceptorService, UniverSheetsPlugin } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '../../config/config';
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
+import { UniverSheetsFormulaPlugin } from '../../plugin';
 import { UpdateFormulaController } from '../update-formula.controller';
+import '@univerjs/sheets/facade';
+import '../../facade/index';
 
 function createWorkbookData(): IWorkbookData {
     return {
@@ -936,5 +941,98 @@ describe('UpdateFormulaController', () => {
                 onlyLocal: true,
             }
         );
+    });
+});
+
+describe('UpdateFormulaController spill cache integration', () => {
+    it.each([
+        { formula: '=SEQUENCE($A$1)', horizontal: false, scale: 1 },
+        { formula: '=SEQUENCE(1,$A$1)', horizontal: true, scale: 1 },
+        { formula: '=FILTER($M$1:$M$5,$M$1:$M$5<=$A$1)', horizontal: false, scale: 1 },
+        { formula: '=SEQUENCE($A$1)*10', horizontal: false, scale: 10 },
+    ])('updates removed spill cells and their dependents for $formula', async ({ formula, horizontal, scale }) => {
+        const range = horizontal ? 'H1:L1' : 'H1:H5';
+        const tail = horizontal ? 'L1' : 'H5';
+        const removedRange = horizontal ? 'J1:L1' : 'H3:H5';
+        const cellData: NonNullable<IWorkbookData['sheets'][string]['cellData']> = {
+            0: { 0: { v: 5 }, 7: { f: formula }, 13: { f: `=SUM(${range})` } },
+            1: { 13: { f: `=${tail}` } },
+            2: { 13: { f: `=SUM(${removedRange})` } },
+            3: { 13: { f: '=N1*2' } },
+        };
+        for (let row = 0; row < 5; row++) {
+            (cellData[row] ??= {})[12] = { v: row + 1 };
+        }
+        const univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: {} }, logLevel: LogLevel.SILENT });
+        univer.registerPlugin(UniverSheetsPlugin);
+        univer.registerPlugin(UniverFormulaEnginePlugin);
+        univer.registerPlugin(UniverSheetsFormulaPlugin, { initialFormulaComputing: CalculationMode.NO_CALCULATION });
+        const api = FUniver.newAPI(univer);
+        const book = api.createWorkbook({
+            id: 'spill-cache',
+            sheetOrder: ['data', 'check'],
+            sheets: {
+                data: { id: 'data', name: 'Data', rowCount: 20, columnCount: 20, cellData },
+                check: { id: 'check', name: 'Check', rowCount: 5, columnCount: 3, cellData: { 0: { 0: { f: `=SUM(Data!${range})` } } } },
+            },
+        });
+        const sheet = book.getSheetByName('Data')!;
+        const calculator = api.getFormula();
+        univer.__getInjector().get(IUniverInstanceService).focusUnit(book.getId());
+        let calculationIndex = 0;
+        async function calculate(action: () => unknown): Promise<void> {
+            calculationIndex++;
+            let subscription: { dispose(): void };
+            let timer: ReturnType<typeof setTimeout>;
+            const completed = new Promise<void>((resolve, reject) => {
+                subscription = calculator.calculationEnd(() => resolve());
+                timer = setTimeout(() => reject(new Error(`Spill calculation ${calculationIndex} timed out`)), 5000);
+            });
+            try {
+                action();
+                await completed;
+            } finally {
+                clearTimeout(timer!);
+                subscription!.dispose();
+            }
+        }
+        function expectValues(count: number, scalar = false): void {
+            const sum = scalar ? 99 : count * (count + 1) / 2 * scale;
+            expect(sheet.getRange('N1').getValue()).toBe(sum);
+            expect(sheet.getRange('N2').getValue()).toBe(!scalar && count === 5 ? 5 * scale : 0);
+            expect(sheet.getRange('N3').getValue()).toBe(scalar ? 0 : Array.from({ length: Math.max(0, count - 2) }, (_, index) => (index + 3) * scale).reduce((a, b) => a + b, 0));
+            expect(sheet.getRange('N4').getValue()).toBe(sum * 2);
+            expect(book.getSheetByName('Check')!.getRange('A1').getValue()).toBe(sum);
+            for (let index = 0; index < 5; index++) {
+                const address = horizontal ? `${String.fromCharCode(72 + index)}1` : `H${index + 1}`;
+                const expected = scalar ? (index === 0 ? 99 : null) : (index < count ? (index + 1) * scale : null);
+                expect(sheet.getRange(address).getValue() ?? null).toBe(expected);
+            }
+        }
+        try {
+            await calculate(() => calculator.executeCalculation());
+            expectValues(5);
+            for (const count of [2, 1, 5, 1, 3]) {
+                await calculate(() => sheet.getRange('A1').setValue(count));
+                expectValues(count);
+                await calculate(() => calculator.executeCalculation());
+                expectValues(count);
+            }
+            await calculate(() => sheet.getRange(tail).setValue(100));
+            await calculate(() => sheet.getRange('A1').setValue(5));
+            expect(sheet.getRange('H1').getValue()).toBe('#SPILL!');
+            expect(sheet.getRange(tail).getValue()).toBe(100);
+            await calculate(() => sheet.getRange(tail).clearContent());
+            expectValues(5);
+            await calculate(() => sheet.getRange('H1').setFormula('=99'));
+            expectValues(1, true);
+            const commands = univer.__getInjector().get(ICommandService);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            expectValues(5);
+            await calculate(() => expect(commands.syncExecuteCommand(RedoCommand.id)).toBe(true));
+            expectValues(1, true);
+        } finally {
+            univer.dispose();
+        }
     });
 });

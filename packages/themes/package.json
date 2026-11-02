@@ -55,12 +55,13 @@
         "lib"
     ],
     "scripts": {
-        "typecheck": "tsc --noEmit",
+        "typecheck": "tsrs --noEmit",
         "build:bundle": "univer-cli build",
-        "build:types": "tsc -p tsconfig.node.json",
+        "build:types": "tsrs -p tsconfig.node.json",
         "build": "pnpm run build:bundle && pnpm run build:types"
     },
     "devDependencies": {
-        "@univerjs-infra/shared": "workspace:*"
+        "@univerjs-infra/shared": "workspace:*",
+        "tsrs": "0.20.1-ts7.1.0-beta"
     }
 }

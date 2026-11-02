@@ -15,13 +15,14 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType, ICommandService } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { SheetSkeletonService } from '@univerjs/sheets';
+import { SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
 import type { ISheetDrawingPlacementInput } from '../../services/sheet-drawing-placement';
 import { applySheetDrawingPlacement } from '../../services/sheet-drawing-placement';
 import { ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
-import { SetSheetDrawingCommand } from './set-sheet-drawing.command';
+import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
+import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 
 export interface ISetSheetDrawingPlacementCommandParams {
     unitId: string;
@@ -61,7 +62,33 @@ export const SetSheetDrawingPlacementCommand: ICommand<ISetSheetDrawingPlacement
             }
             updatedDrawings.push(applySheetDrawingPlacement(drawing, placement, skeleton));
         }
-        // Use the shared update flow so drawing interceptors join the same undo/redo entry.
-        return commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { drawings: updatedDrawings });
+        const intercepted = accessor.get(SheetInterceptorService).onCommandExecute({
+            id: SetSheetDrawingPlacementCommand.id,
+            params,
+        });
+        const { unitId, subUnitId, undo, redo, objects } = drawingService.getBatchUpdateOp(updatedDrawings);
+        const redoMutations = [
+            ...(intercepted.preRedos ?? []),
+            {
+                id: SetDrawingApplyMutation.id,
+                params: { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.UPDATE },
+            },
+            { id: ClearSheetDrawingTransformerOperation.id, params: [unitId] },
+            ...intercepted.redos,
+        ];
+        const undoMutations = [
+            ...(intercepted.preUndos ?? []),
+            {
+                id: SetDrawingApplyMutation.id,
+                params: { unitId, subUnitId, op: undo, objects, type: DrawingApplyType.UPDATE },
+            },
+            { id: ClearSheetDrawingTransformerOperation.id, params: [unitId] },
+            ...intercepted.undos,
+        ];
+        if (!sequenceExecute(redoMutations, commandService).result) {
+            return false;
+        }
+        accessor.get(IUndoRedoService).pushUndoRedo({ unitID: unitId, redoMutations, undoMutations });
+        return true;
     },
 };

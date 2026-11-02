@@ -27,12 +27,15 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { InsertSheetCommand, SheetSkeletonService } from '@univerjs/sheets';
+import { InsertSheetCommand, SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
 import { expect, it, onTestFinished } from 'vitest';
+import type { ISetSheetDrawingPlacementCommandParams } from '../set-sheet-drawing-placement.command';
 import { createSheetsDrawingTestBed } from '../../../__tests__/create-sheets-drawing-test-bed';
 import { ISheetDrawingService, SheetDrawingAnchorType } from '../../../services/sheet-drawing.service';
+import { SetDrawingApplyMutation } from '../../mutations/set-drawing-apply.mutation';
 import { InsertSheetDrawingCommand } from '../insert-sheet-drawing.command';
 import { SetSheetDrawingPlacementCommand } from '../set-sheet-drawing-placement.command';
+import { SetSheetDrawingCommand } from '../set-sheet-drawing.command';
 
 it.each([
     { name: 'default dimensions', dimensions: {} },
@@ -149,6 +152,27 @@ it('retains GRID Position and Both placement through undo and redo', async () =>
     };
     expect(await bed.commandService.executeCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [drawing] })).toBe(true);
     bed.get(IUndoRedoService).clearUndoRedo('test');
+    const executed: string[] = [];
+    const triggers: Array<string | undefined> = [];
+    const intercepted: SheetDrawingAnchorType[] = [];
+    const notification = bed.commandService.onCommandExecuted(({ id, params }) => {
+        if (id === SetSheetDrawingCommand.id || id === SetSheetDrawingPlacementCommand.id) {
+            executed.push(id);
+        }
+        if (id === SetDrawingApplyMutation.id) {
+            triggers.push((params as { trigger?: string }).trigger);
+        }
+    });
+    onTestFinished(() => notification.dispose());
+    const hook = bed.get(SheetInterceptorService).interceptCommand({
+        getMutations: ({ id, params }) => {
+            if (id === SetSheetDrawingPlacementCommand.id) {
+                intercepted.push((params as ISetSheetDrawingPlacementCommandParams).drawings[0].placement.kind);
+            }
+            return { redos: [], undos: [] };
+        },
+    });
+    onTestFinished(() => hook.dispose());
     const skeleton = bed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1');
     expect(skeleton).toBeDefined();
     expect(await bed.commandService.executeCommand(SetSheetDrawingPlacementCommand.id, {
@@ -184,6 +208,10 @@ it('retains GRID Position and Both placement through undo and redo', async () =>
     expect(updated.transform!.height).toBeGreaterThan(60);
     expect(bed.get(SheetSkeletonService).getSkeleton('test', 'sheet1')).toBe(skeleton);
     expect(bed.get(IUndoRedoService).getUndoRedoStatus('test')).toEqual({ undos: 2, redos: 0 });
+    // Placement owns the authoring event and Mutation trigger; internal update commands must not leak out.
+    expect(executed).toEqual([SetSheetDrawingPlacementCommand.id, SetSheetDrawingPlacementCommand.id]);
+    expect(triggers).toEqual([SetSheetDrawingPlacementCommand.id, SetSheetDrawingPlacementCommand.id]);
+    expect(intercepted).toEqual([SheetDrawingAnchorType.Position, SheetDrawingAnchorType.Both]);
     expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
     expect(bed.get(ISheetDrawingService).getDrawingByParam(search)!.anchorType).toBe(SheetDrawingAnchorType.Position);
     expect(await bed.commandService.executeCommand(RedoCommand.id)).toBe(true);

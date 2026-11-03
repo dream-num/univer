@@ -150,6 +150,29 @@ describe('DependencyManagerService', () => {
         expect(service.searchDependency(searchB)).toEqual(new Set());
     });
 
+    it('keeps one index entry per tree after repeated registrations', () => {
+        const service = createService();
+        const tree = createTree(30, 0, 0);
+        const search = [{
+            unitId: 'unit-1',
+            sheetId: 'sheet-1',
+            range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 1 },
+        }];
+
+        // A tree that cannot reuse its previous result is registered again on every
+        // recalculation; that must not append another copy of its ranges.
+        for (let i = 0; i < 5; i++) {
+            service.addDependencyRTreeCache(tree);
+        }
+
+        const rtree = (service as unknown as {
+            _dependencyRTreeCache: { getTree: (unitId: string, sheetId: string) => { all: () => unknown[] } };
+        })._dependencyRTreeCache;
+
+        expect(rtree.getTree('unit-1', 'sheet-1').all()).toHaveLength(1);
+        expect(service.searchDependency(search)).toEqual(new Set([30]));
+    });
+
     it('should manage other-formula dependency matrices and main-data flag', () => {
         const service = createService();
         const tree = createTree(10, 0, 0);

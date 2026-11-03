@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { hashAlgorithm, LRUMap } from '@univerjs/core';
+import { LRUMap } from '@univerjs/core';
 
 export class FormulaAstLRU<T> {
     private _cache: LRUMap<string, T>;
@@ -23,14 +23,25 @@ export class FormulaAstLRU<T> {
         this._cache = new LRUMap<string, T>(cacheCount);
     }
 
+    /**
+     * Resize the cache. This only decides how many entries are retained; it never
+     * affects correctness, so a later call may freely replace an earlier one.
+     */
+    setLimit(cacheCount: number) {
+        if (Number.isFinite(cacheCount) && cacheCount > 0) {
+            this._cache.limit = cacheCount;
+        }
+    }
+
+    // The full key is stored as-is. Hashing long keys into 32 bits let two different
+    // formulas share one entry, so a cell could be evaluated with another cell's AST.
+    // The cache size already bounds memory, so hashing buys nothing.
     set(formulaString: string, node: T) {
-        const hash = this._hash(formulaString);
-        this._cache.set(hash, node);
+        this._cache.set(formulaString, node);
     }
 
     get(formulaString: string) {
-        const hash = this._hash(formulaString);
-        return this._cache.get(hash);
+        return this._cache.get(formulaString);
     }
 
     clear() {
@@ -38,17 +49,10 @@ export class FormulaAstLRU<T> {
     }
 
     delete(formulaString: string) {
-        this._cache.delete(this._hash(formulaString));
+        this._cache.delete(formulaString);
     }
 
     forEach(callbackfn: (value: T, key: string, map: LRUMap<string, T>) => void, thisArg?: any) {
         this._cache.forEach(callbackfn, thisArg);
-    }
-
-    private _hash(formulaString: string) {
-        if (formulaString.length <= 64) {
-            return formulaString;
-        }
-        return hashAlgorithm(formulaString).toString();
     }
 }

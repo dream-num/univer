@@ -94,12 +94,33 @@ export interface IFormulaDependencyGenerator {
 
 export const IFormulaDependencyGenerator = createIdentifier<IFormulaDependencyGenerator>('engine-formula.dependency-generator');
 
+/**
+ * A range list resolved from one parsed AST. It is keyed by the AST object itself, so it
+ * lives and dies with the AST cache entry and never needs a separate invalidation path.
+ */
+interface IReusableRanges {
+    rangeList: IUnitRange[];
+}
+
+function isEmptyRecord(record: Record<string, unknown> | null | undefined) {
+    return record == null || Object.keys(record).length === 0;
+}
+
 export class FormulaDependencyGenerator extends Disposable implements IFormulaDependencyGenerator {
     private _updateRangeFlattenCache = new Map<string, Map<string, IRange[]>>();
 
     protected _dependencyRTreeCacheForAddressFunction: RTree = new RTree();
 
     protected _dependencyTreeCache = new Map<number, IFormulaDependencyTree>();
+
+    // Keyed by the AST instance the engine is already reusing, so the range list cannot
+    // outlive the AST it was resolved from.
+    private _reusableRanges = new WeakMap<BaseAstNode, IUnitRange[]>();
+
+    // Sheet sizes take part in resolving open-ended references (`A:A`, `A1:`), and the AST
+    // cache does not invalidate on a resize, so the resolved ranges are only reusable while
+    // every sheet keeps the size it had when they were resolved.
+    private _reusableSheetSignature: Nullable<string> = null;
 
     constructor(
         @IFormulaCurrentConfigService protected readonly _currentConfigService: IFormulaCurrentConfigService,
@@ -689,6 +710,50 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
     }
 
     /**
+     * Whether the ranges resolved for this formula may be kept for a later calculation. This
+     * is independent of whether they may be reused right now: a forced calculation rebuilds
+     * the index but the ranges it resolves are still valid for the next one.
+     */
+    private _canShareRanges(tree: IFormulaDependencyTree, addressFunctionNodes: FunctionNode[]) {
+        if (addressFunctionNodes.length > 0) {
+            return false;
+        }
+
+        const excludedCell = this._currentConfigService.getExcludedRange()?.[tree.unitId]?.[tree.subUnitId];
+        return excludedCell?.getValue(tree.row, tree.column) == null;
+    }
+
+    /**
+     * `A:A` and other open-ended references are clipped to the size of the sheet they point
+     * at, so any resize can change a resolved range list without touching the AST.
+     */
+    private _getSheetSignature(unitData: IUnitData) {
+        let signature = '';
+
+        for (const unitId of Object.keys(unitData)) {
+            const sheets = unitData[unitId];
+            if (sheets == null) {
+                continue;
+            }
+
+            for (const sheetId of Object.keys(sheets)) {
+                const sheet = sheets[sheetId];
+                signature += `${unitId}:${sheetId}:${sheet.rowCount}:${sheet.columnCount};`;
+            }
+        }
+
+        return signature;
+    }
+
+    private _takeReusableRanges(node: BaseAstNode) {
+        return this._reusableRanges.get(node);
+    }
+
+    private _storeReusableRanges(node: BaseAstNode, rangeList: IUnitRange[]) {
+        this._reusableRanges.set(node, [...rangeList]);
+    }
+
+    /**
      * Generate nodes for the dependency tree, where each node contains all the reference data ranges included in each formula.
      * @param formulaData
      */
@@ -714,6 +779,12 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
         this._registerOtherFormulas(otherFormulaData, otherFormulaDataKeys, treeList as FormulaDependencyTree[]);
 
         this._registerFeatureFormulas(treeList as FormulaDependencyTree[]);
+
+        const sheetSignature = this._getSheetSignature(unitData);
+
+        const canReuseRanges = this._reusableSheetSignature === sheetSignature
+            && isEmptyRecord(this._currentConfigService.getDirtyNameMap())
+            && isEmptyRecord(this._currentConfigService.getClearDependencyTreeCache());
 
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
@@ -744,13 +815,30 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
                 continue;
             }
 
+            const canShare = this._canShareRanges(tree, addressFunctionNodes);
+            const cachedRangeList = canShare && canReuseRanges ? this._takeReusableRanges(node) : undefined;
+
+            if (cachedRangeList != null) {
+                (tree as FormulaDependencyTree).pushRangeList(cachedRangeList);
+                // The index entries survive only while the dependency index does. A forced
+                // calculation resets it, in which case the tree has to be inserted again.
+                tree.isCache = this._dependencyManagerService.hasDependencyRTreeCache(tree.treeId);
+                continue;
+            }
+
             const rangeList = await this._getRangeListByNode({
                 node,
                 refOffsetX: tree.refOffsetX,
                 refOffsetY: tree.refOffsetY,
             });
             (tree as FormulaDependencyTree).pushRangeList(rangeList);
+
+            if (canShare) {
+                this._storeReusableRanges(node, rangeList);
+            }
         }
+
+        this._reusableSheetSignature = sheetSignature;
 
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];

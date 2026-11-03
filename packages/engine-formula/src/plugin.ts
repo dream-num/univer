@@ -43,6 +43,7 @@ import { SuffixNodeFactory } from './engine/ast-node/suffix-node';
 import { UnionNodeFactory } from './engine/ast-node/union-node';
 import { ValueNodeFactory } from './engine/ast-node/value-node';
 import { FormulaDependencyGenerator, IFormulaDependencyGenerator } from './engine/dependency/formula-dependency';
+import { FORMULA_AST_CACHE } from './engine/utils/generate-ast-node';
 import { Interpreter } from './engine/interpreter/interpreter';
 import { FormulaDataModel } from './models/formula-data.model';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService } from './services/active-dirty-manager.service';
@@ -97,8 +98,21 @@ export class UniverFormulaEnginePlugin extends Plugin {
     }
 
     override onStarting(): void {
+        this._applyCacheConfig();
         this._initialize();
         this._initializeWithOverride();
+    }
+
+    /**
+     * The AST cache lives at module scope, so its size can only be decided by whichever
+     * plugin instance starts last. Resizing only changes how many ASTs are retained, never
+     * calculated values, so a later instance replacing an earlier size is safe.
+     */
+    private _applyCacheConfig() {
+        const { astCacheSize } = this._config;
+        if (typeof astCacheSize === 'number' && astCacheSize > 0) {
+            FORMULA_AST_CACHE.setLimit(astCacheSize);
+        }
     }
 
     override onReady(): void {

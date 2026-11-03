@@ -15,11 +15,23 @@
  */
 
 import type { Injector } from '@univerjs/core';
+import type {
+    IDirtyUnitDefinedNameMap,
+    IDirtyUnitSheetNameMap,
+    IDirtyUnitSuperTableMap,
+    IUnitExcludedCell,
+    IUnitSheetIdToNameMap,
+} from '../../../basics/common';
 import type { FormulaDependencyTreeVirtual } from '../../dependency/dependency-tree';
+import { ObjectMatrix, Styles } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
+import { FUNCTION_NAMES_LOOKUP } from '../../../functions/lookup/function-names';
+import { Indirect } from '../../../functions/lookup/indirect';
 import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
+import { IDependencyManagerService } from '../../../services/dependency-manager.service';
 import { IFeatureCalculationManagerService } from '../../../services/feature-calculation-manager.service';
+import { IFunctionService } from '../../../services/function.service';
 import { IOtherFormulaManagerService } from '../../../services/other-formula-manager.service';
 import { IFormulaRuntimeService } from '../../../services/runtime.service';
 import { FormulaDependencyTree } from '../../dependency/dependency-tree';
@@ -378,6 +390,273 @@ describe('Test dependency', () => {
             vi.spyOn(get(Interpreter), 'execute').mockReturnValue(ErrorValueObject.create(ErrorType.REF));
 
             await expect(formulaDependencyGenerator.generate()).resolves.toHaveLength(1);
+        });
+    });
+
+    describe('dependency reuse', () => {
+        const load = (formula: string, options: {
+            forceCalculate?: boolean;
+            dirtyDefinedNameMap?: IDirtyUnitDefinedNameMap;
+            dirtyNameMap?: IDirtyUnitSheetNameMap;
+            dirtySuperTableMap?: IDirtyUnitSuperTableMap;
+            clearDependencyTreeCache?: IUnitSheetIdToNameMap;
+            excludedCell?: IUnitExcludedCell;
+            sheetData?: unknown;
+            sheetNameMap?: Record<string, string>;
+        } = {}) => {
+            formulaCurrentConfigService.load({
+                formulaData: {
+                    [testUnitId]: {
+                        [testSheetId]: {
+                            0: {
+                                2: { f: formula },
+                            },
+                        },
+                    },
+                },
+                arrayFormulaCellData: {},
+                arrayFormulaRange: {},
+                forceCalculate: options.forceCalculate ?? false,
+                dirtyRanges: [{
+                    unitId: testUnitId,
+                    sheetId: testSheetId,
+                    range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+                }],
+                dirtyNameMap: options.dirtyNameMap ?? {},
+                dirtyDefinedNameMap: options.dirtyDefinedNameMap ?? {},
+                dirtySuperTableMap: options.dirtySuperTableMap ?? {},
+                dirtyUnitFeatureMap: {},
+                dirtyUnitOtherFormulaMap: {},
+                clearDependencyTreeCache: options.clearDependencyTreeCache ?? {},
+                excludedCell: options.excludedCell ?? {},
+                unitSheetNameMap: { [testUnitId]: { Sheet1: testSheetId, ...options.sheetNameMap } },
+                unitStylesData: { [testUnitId]: new Styles({}) },
+                allUnitData: {
+                    [testUnitId]: (options.sheetData ?? testSheetData) as never,
+                },
+            });
+        };
+
+        const spyRangeList = () => vi.spyOn(formulaDependencyGenerator as unknown as {
+            _getRangeListByNode: () => unknown;
+        }, '_getRangeListByNode');
+
+        const rTreeEntryCount = () => {
+            const dependencyManagerService = get(IDependencyManagerService) as unknown as {
+                _dependencyRTreeCache: { getTree: (unitId: string, sheetId: string) => { all: () => unknown[] } };
+            };
+            return dependencyManagerService._dependencyRTreeCache.getTree(testUnitId, testSheetId).all().length;
+        };
+
+        it('reuses the resolved ranges of an unchanged formula', async () => {
+            load('=SUM(A1:B10)', { forceCalculate: true });
+            await formulaDependencyGenerator.generate();
+
+            expect(rTreeEntryCount()).toBe(1);
+
+            const spy = spyRangeList();
+            load('=SUM(A1:B10)');
+            await formulaDependencyGenerator.generate();
+
+            expect(spy).not.toHaveBeenCalled();
+            // Reusing the ranges also means the index entry is left untouched.
+            expect(rTreeEntryCount()).toBe(1);
+        });
+
+        it('keeps the reused formula in the calculation when a referenced cell changes', async () => {
+            load('=SUM(A1:B10)', { forceCalculate: true });
+            await formulaDependencyGenerator.generate();
+
+            const spy = spyRangeList();
+            // The dirty range from the helper covers A1, which the formula references.
+            load('=SUM(A1:B10)');
+            const treeList = await formulaDependencyGenerator.generate();
+
+            expect(spy).not.toHaveBeenCalled();
+            expect(treeList).toHaveLength(1);
+        });
+
+        it('recomputes when the formula text changes', async () => {
+            load('=SUM(A1:B10)', { forceCalculate: true });
+            await formulaDependencyGenerator.generate();
+
+            get(IDependencyManagerService).removeFormulaDependency(testUnitId, testSheetId, 0, 2);
+
+            const spy = spyRangeList();
+            load('=SUM(A1:C10)');
+            await formulaDependencyGenerator.generate();
+
+            expect(spy).toHaveBeenCalledTimes(1);
+            expect(rTreeEntryCount()).toBe(1);
+        });
+
+        it('recomputes when a sheet name is dirty', async () => {
+            load('=SUM(A1:B10)', { forceCalculate: true });
+            await formulaDependencyGenerator.generate();
+
+            const spy = spyRangeList();
+            load('=SUM(A1:B10)', { dirtyNameMap: { [testUnitId]: { [testSheetId]: 'Renamed' } } });
+            await formulaDependencyGenerator.generate();
+
+            expect(spy).toHaveBeenCalledTimes(1);
+        });
+
+        it('recomputes when the sheet size changes', async () => {
+            load('=SUM(A1:B10)', { forceCalculate: true });
+            await formulaDependencyGenerator.generate();
+
+            const spy = spyRangeList();
+            load('=SUM(A1:B10)', {
+                sheetData: {
+                    ...(testSheetData as Record<string, Record<string, unknown>>),
+                    [testSheetId]: {
+                        ...(testSheetData as Record<string, Record<string, unknown>>)[testSheetId],
+                        rowCount: 200,
+                    },
+                },
+            });
+            await formulaDependencyGenerator.generate();
+
+            expect(spy).toHaveBeenCalledTimes(1);
+        });
+
+        it('recomputes when a referenced sheet is resized', async () => {
+            const sheetData = (rowCount: number) => ({
+                ...(testSheetData as Record<string, unknown>),
+                sheet2: {
+                    cellData: new ObjectMatrix({ 0: { 0: { v: 1 } } }),
+                    rowCount,
+                    columnCount: 20,
+                },
+            });
+
+            load('=SUM(Sheet2!A:A)', {
+                forceCalculate: true,
+                sheetData: sheetData(100),
+                sheetNameMap: { Sheet2: 'sheet2' },
+            });
+            await formulaDependencyGenerator.generate();
+
+            const spy = spyRangeList();
+            // Only the referenced sheet is resized; the formula sheet and its AST are untouched,
+            // but an open-ended reference is clipped to the size of the sheet it points at.
+            load('=SUM(Sheet2!A:A)', {
+                sheetData: sheetData(200),
+                sheetNameMap: { Sheet2: 'sheet2' },
+            });
+            await formulaDependencyGenerator.generate();
+
+            expect(spy).toHaveBeenCalledTimes(1);
+        });
+
+        it('reuses the ranges but re-indexes after a forced calculation', async () => {
+            load('=SUM(A1:B10)', { forceCalculate: true });
+            await formulaDependencyGenerator.generate();
+
+            const spy = spyRangeList();
+            load('=SUM(A1:B10)', { forceCalculate: true });
+            await formulaDependencyGenerator.generate();
+
+            // The ranges come from the still cached AST.
+            expect(spy).not.toHaveBeenCalled();
+            // The forced calculation reset the index, so the tree has to be written again.
+            expect(rTreeEntryCount()).toBe(1);
+        });
+
+        it('recomputes when the dependency tree cache is cleared', async () => {
+            load('=SUM(A1:B10)', { forceCalculate: true });
+            await formulaDependencyGenerator.generate();
+
+            const spy = spyRangeList();
+            load('=SUM(A1:B10)', { clearDependencyTreeCache: { [testUnitId]: { [testSheetId]: 'Sheet1' } } });
+            await formulaDependencyGenerator.generate();
+
+            // A cleared dependency cache also drops the resolved ranges, so they are rebuilt.
+            expect(spy).toHaveBeenCalledTimes(1);
+            expect(rTreeEntryCount()).toBe(1);
+        });
+
+        it('recomputes when a defined name change marks the formula dirty', async () => {
+            load('=SUM(A1:B10)', { forceCalculate: true });
+            await formulaDependencyGenerator.generate();
+
+            const spy = spyRangeList();
+            // Dirty defined-name entries are keyed by the affected formula text; the AST cache
+            // rebuilds those formulas, so the range list is resolved again from a new AST.
+            load('=SUM(A1:B10)', { dirtyDefinedNameMap: { [testUnitId]: { 'SUM(A1:B10)': 'changed' } } });
+            await formulaDependencyGenerator.generate();
+
+            expect(spy).toHaveBeenCalledTimes(1);
+        });
+
+        it('keeps reusing a formula that a super table change does not reference', async () => {
+            load('=SUM(A1:B10)', { forceCalculate: true });
+            await formulaDependencyGenerator.generate();
+
+            const spy = spyRangeList();
+            // The dirty table is not referenced by this formula, so its AST (and the ranges
+            // resolved from it) stay valid.
+            load('=SUM(A1:B10)', { dirtySuperTableMap: { [testUnitId]: { table1: 'changed' } } });
+            await formulaDependencyGenerator.generate();
+
+            expect(spy).not.toHaveBeenCalled();
+        });
+
+        it('does not reuse a formula whose references resolve while executing', async () => {
+            // INDIRECT is only flagged as an address function when its executor is registered.
+            get(IFunctionService).registerExecutors(new Indirect(FUNCTION_NAMES_LOOKUP.INDIRECT));
+
+            load('=INDIRECT("A1")', { forceCalculate: true });
+            await formulaDependencyGenerator.generate();
+
+            const spy = spyRangeList();
+            load('=INDIRECT("A1")');
+            await formulaDependencyGenerator.generate();
+
+            // The ranges are resolved again because the target only exists at execution time.
+            expect(spy).toHaveBeenCalled();
+        });
+
+        it('does not reuse a cell excluded from the calculation', async () => {
+            load('=SUM(A1:B10)', { forceCalculate: true });
+            await formulaDependencyGenerator.generate();
+
+            const spy = spyRangeList();
+            load('=SUM(A1:B10)', {
+                excludedCell: {
+                    [testUnitId]: {
+                        [testSheetId]: new ObjectMatrix<boolean>({ 0: { 2: true } }),
+                    },
+                },
+            });
+            await formulaDependencyGenerator.generate();
+
+            expect(spy).toHaveBeenCalledTimes(1);
+        });
+
+        it('recomputes after the AST cache is invalidated for a function', async () => {
+            load('=SUM(A1:B10)', { forceCalculate: true });
+            await formulaDependencyGenerator.generate();
+
+            const spy = spyRangeList();
+            // Unregistering a function removes its cached ASTs, so the next calculation parses
+            // the formula again and the range list is resolved from the new AST.
+            get(IFunctionService).deleteFormulaAstCacheKey('SUM' as never);
+            load('=SUM(A1:B10)');
+            await formulaDependencyGenerator.generate();
+
+            expect(spy).toHaveBeenCalled();
+        });
+
+        it('does not reuse a formula that failed to parse', async () => {
+            load('=1+', { forceCalculate: true });
+            await formulaDependencyGenerator.generate();
+
+            const spy = spyRangeList();
+            load('=1+');
+            await formulaDependencyGenerator.generate();
+
+            expect(spy).toHaveBeenCalled();
         });
     });
 });

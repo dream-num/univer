@@ -45,6 +45,7 @@ export interface IDependencyManagerService {
     addFormulaDependencyByDefinedName(tree: IFormulaDependencyTree, node: Nullable<AstRootNode>): void;
 
     addDependencyRTreeCache(tree: IFormulaDependencyTree): void;
+    hasDependencyRTreeCache(treeId: number): boolean;
     searchDependency(search: IUnitRange[], exceptTreeIds?: Set<number>): Set<number>;
 
     getLastTreeId(): number;
@@ -177,9 +178,28 @@ export class DependencyManagerBaseService extends Disposable implements IDepende
             });
         }
 
+        // A tree keeps its tree id across recalculations, and a tree that cannot reuse its
+        // previous result (dynamic references, a dirtied defined name, a cleared tree cache)
+        // reaches this again with the same ranges. Inserting alone would append another copy
+        // of every range, so the index would grow for as long as the workbook stays open.
+        // Removing by the range's own bounding box first keeps one entry per (tree, range)
+        // without paying for the union bounding box that a whole-sheet removal would need.
+        for (let i = 0; i < searchRanges.length; i++) {
+            this._dependencyRTreeCache.remove(searchRanges[i]);
+        }
+
         this._dependencyRTreeCache.bulkInsert(searchRanges);
 
         this._addAllTreeMap(tree);
+    }
+
+    /**
+     * Whether this tree is currently present in the dependency index. A recalculation that
+     * reuses the ranges of an unchanged formula may skip the index write only while the entry
+     * it relies on still exists; a forced calculation resets the index and clears this state.
+     */
+    hasDependencyRTreeCache(treeId: number): boolean {
+        throw new Error('Method not implemented.');
     }
 
     getLastTreeId() {
@@ -237,6 +257,10 @@ export class DependencyManagerService extends DependencyManagerBaseService imple
     protected _allTreeMap: Map<number, Map<string, Map<string, IRange>>> = new Map();
 
     protected override _dependencyRTreeCache: RTree = new RTree(true); // true: open kd-tree search state
+
+    override hasDependencyRTreeCache(treeId: number) {
+        return this._allTreeMap.has(treeId);
+    }
 
     override reset() {
         this._otherFormulaData.clear();

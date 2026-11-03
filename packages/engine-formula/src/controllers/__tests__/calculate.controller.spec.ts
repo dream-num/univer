@@ -311,7 +311,7 @@ describe('CalculateController', () => {
         expect(commandService.executeCommand).toHaveBeenCalledWith(
             SetArrayFormulaDataMutation.id,
             expect.anything(),
-            { onlyLocal: true }
+            { onlyLocal: true, fromFormula: true }
         );
         expect(commandService.executeCommand).toHaveBeenCalledWith(
             SetImageFormulaDataMutation.id,

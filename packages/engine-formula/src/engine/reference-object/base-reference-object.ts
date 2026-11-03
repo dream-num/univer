@@ -573,7 +573,12 @@ export class BaseReferenceObject extends ObjectClassType {
             let isInRuntimeArrayFormulaRange = false;
 
             activeArrayFormulaRangeMatrix.forValue((_row, _column, range) => {
-                if (row >= range.startRow && row <= range.endRow && column >= range.startColumn && column <= range.endColumn && activeRuntimeArrayFormulaRangeMatrix.getValue(_row, _column)) {
+                if (!(row >= range.startRow && row <= range.endRow && column >= range.startColumn && column <= range.endColumn)) {
+                    return;
+                }
+                const runtimeAnchor = activeRuntimeData?.getValue(_row, _column);
+                const anchorCalculated = runtimeAnchor && !isFormulaString(runtimeAnchor.f) && !isFormulaId(runtimeAnchor.si);
+                if (activeRuntimeArrayFormulaRangeMatrix.getValue(_row, _column) || anchorCalculated) {
                     isInRuntimeArrayFormulaRange = true;
                     return false;
                 }

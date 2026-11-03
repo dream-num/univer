@@ -15,10 +15,10 @@
  */
 
 import type { ICellData } from '@univerjs/core';
-import type { IFormulaDatasetConfig } from '../../basics/common';
-import type { IAllRuntimeData } from '../runtime.service';
 import { IConfigService, Injector, ObjectMatrix } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IFormulaDatasetConfig } from '../../basics/common';
+import type { IAllRuntimeData } from '../runtime.service';
 import { ErrorType } from '../../basics/error-type';
 import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { Lexer } from '../../engine/analysis/lexer';
@@ -60,6 +60,7 @@ function createService() {
         getDirtyData: vi.fn(() => ({})),
         getDirtyDefinedNameMap: vi.fn(() => ({})),
         getExecuteUnitId: vi.fn(() => 'unit'),
+        getArrayFormulaRange: vi.fn(() => ({})),
     };
     const runtimeService = {
         setFormulaExecuteStage: vi.fn(),
@@ -87,6 +88,7 @@ function createService() {
             runtimeFeatureCellData: {},
             dependencyTreeModelData: [],
         })),
+        getUnitData: vi.fn(() => ({})),
         setTotalArrayFormulasToCalculate: vi.fn(),
         setTotalFormulasToCalculate: vi.fn(),
         setCompletedArrayFormulasCount: vi.fn(),
@@ -135,6 +137,7 @@ function createService() {
         getDirtyData = currentConfigService.getDirtyData;
         getDirtyDefinedNameMap = currentConfigService.getDirtyDefinedNameMap;
         getExecuteUnitId = currentConfigService.getExecuteUnitId;
+        getArrayFormulaRange = currentConfigService.getArrayFormulaRange;
     }
 
     class TestRuntimeService {
@@ -151,6 +154,7 @@ function createService() {
         setRuntimeFeatureRange = runtimeService.setRuntimeFeatureRange;
         stopExecution = runtimeService.stopExecution;
         getAllRuntimeData = runtimeService.getAllRuntimeData;
+        getUnitData = runtimeService.getUnitData;
         setTotalArrayFormulasToCalculate = runtimeService.setTotalArrayFormulasToCalculate;
         setTotalFormulasToCalculate = runtimeService.setTotalFormulasToCalculate;
         setCompletedArrayFormulasCount = runtimeService.setCompletedArrayFormulasCount;

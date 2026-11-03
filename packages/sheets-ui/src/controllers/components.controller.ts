@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IUniverSheetsUIConfig } from '../config/config';
 import { Disposable, IConfigService, Inject, Injector } from '@univerjs/core';
 import { ComponentManager, IconManager } from '@univerjs/ui';
+import type { IUniverSheetsUIConfig } from '../config/config';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config/config';
 import {
     UNIVER_SHEET_PERMISSION_DIALOG,
@@ -55,7 +55,6 @@ export class ComponentsController extends Disposable {
         super();
 
         this._registerComponents();
-        this._registerParts();
         this._registerIcons();
     }
 
@@ -87,9 +86,7 @@ export class ComponentsController extends Disposable {
                 })
             );
         }
-    }
 
-    private _registerParts(): void {
         const componentManager = this._componentManager;
 
         // init custom components

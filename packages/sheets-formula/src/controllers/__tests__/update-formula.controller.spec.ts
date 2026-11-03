@@ -220,6 +220,94 @@ describe('UpdateFormulaController', () => {
         expect(values).toEqual([[null, { f: '=SUM(A1:B2)' }]]);
     });
 
+    it('preserves source and other-sheet references when cutting a formula across sheets, undoing and redoing', async () => {
+        const workbook = testBed.injector.get(IUniverInstanceService).getUnit<Workbook>('test')!;
+        const source = workbook.getSheetBySheetId('sheet1')!;
+        const target = workbook.getSheetBySheetId('sheet2')!;
+        const original = '=SUM(A1:B2)+SUM(Sheet2!A1:B2)';
+        commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: { 5: { 2: { f: original } } },
+        });
+
+        expect(await commandService.executeCommand(MoveRangeCommand.id, {
+            fromUnitId: 'test',
+            fromSubUnitId: 'sheet1',
+            toUnitId: 'test',
+            toSubUnitId: 'sheet2',
+            fromRange: { startRow: 5, endRow: 5, startColumn: 2, endColumn: 2 },
+            toRange: { startRow: 7, endRow: 7, startColumn: 3, endColumn: 3 },
+        })).toBe(true);
+        const expected = '=SUM(Sheet1!A1:B2)+SUM(Sheet2!A1:B2)';
+        expect(target.getCell(7, 3)?.f).toBe(expected);
+        expect(source.getCell(5, 2)?.f).toBeFalsy();
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(source.getCell(5, 2)?.f).toBe(original);
+        expect(target.getCell(7, 3)?.f).toBeFalsy();
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(target.getCell(7, 3)?.f).toBe(expected);
+    });
+
+    it('unpacks shared followers when moving a reference used only by their anchor, with undo and redo', async () => {
+        const sheet = testBed.injector.get(IUniverInstanceService).getUnit<Workbook>('test')!.getSheetBySheetId('sheet1')!;
+        commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: {
+                10: { 0: { v: 10 }, 2: { f: '=A11', si: 'shared-move' } },
+                11: { 0: { v: 20 }, 2: { si: 'shared-move' } },
+            },
+        });
+        expect(await commandService.executeCommand(MoveRangeCommand.id, {
+            fromRange: { startRow: 10, endRow: 10, startColumn: 0, endColumn: 0 },
+            toRange: { startRow: 10, endRow: 10, startColumn: 1, endColumn: 1 },
+        })).toBe(true);
+        expect(sheet.getCell(10, 2)?.f).toBe('=B11');
+        expect(sheet.getCell(11, 2)?.f).toBe('=A12');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(sheet.getCell(10, 2)?.f).toBe('=A11');
+        expect(sheet.getCell(11, 2)?.si).toBe('shared-move');
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(sheet.getCell(10, 2)?.f).toBe('=B11');
+        expect(sheet.getCell(11, 2)?.f).toBe('=A12');
+    });
+
+    it.each([
+        {
+            id: 'sheet.command.set-table-config',
+            params: { unitId: 'test', oldTableName: 'Sales', name: 'Revenue' },
+            expected: '=SUM(Revenue[Amount])+SUM(Other[Amount])+SUM(Revenue[Units])+SUM(Revenue[[#Data],[Amount]])',
+        },
+        {
+            id: 'sheet.command.delete-table',
+            params: { unitId: 'test', tableName: 'Sales' },
+            expected: '=SUM(#REF!)+SUM(Other[Amount])+SUM(#REF!)+SUM(#REF!)',
+        },
+        {
+            id: 'sheet.command.table-remove-column-at',
+            params: { unitId: 'test', subUnitId: 'sheet1', tableName: 'Sales', removedColumnNames: ['Amount'] },
+            expected: '=SUM(#REF!)+SUM(Other[Amount])+SUM(Sales[Units])+SUM(#REF!)',
+        },
+    ])('preserves unaffected table references and reversible formula updates for $id', ({ id, params, expected }) => {
+        const original = '=SUM(Sales[Amount])+SUM(Other[Amount])+SUM(Sales[Units])+SUM(Sales[[#Data],[Amount]])';
+        const sheet = testBed.injector.get(IUniverInstanceService).getUnit<Workbook>('test')!.getSheetBySheetId('sheet1')!;
+        commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: { 10: { 1: { f: original } } },
+        });
+        const result = testBed.injector.get(SheetInterceptorService).onCommandExecute({ id, params });
+        for (const mutations of [result.redos, result.undos, result.redos]) {
+            for (const mutation of mutations) {
+                expect(commandService.syncExecuteCommand(mutation.id, mutation.params)).toBe(true);
+            }
+            expect(sheet.getCell(10, 1)?.f).toBe(mutations === result.undos ? original : expected);
+        }
+    });
+
     it('should rewrite formulas when referenced sheets change', () => {
         const sheetInterceptorService = testBed.injector.get(SheetInterceptorService);
 

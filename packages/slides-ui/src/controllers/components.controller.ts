@@ -28,11 +28,11 @@ export class ComponentsController extends Disposable {
     ) {
         super();
 
-        this._registerParts();
+        this._registerComponents();
         this._registerIcons();
     }
 
-    private _registerParts(): void {
+    private _registerComponents(): void {
         const componentManager = this._componentManager;
         this.disposeWithMe(componentManager.register(COMPONENT_SLIDE_IMAGE_POPUP_MENU, SlideImagePopupMenu));
         this.disposeWithMe(componentManager.register(COMPONENT_SLIDE_SIDEBAR, Sidebar));

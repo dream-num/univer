@@ -25,10 +25,14 @@ export { TriggerCalculationController } from './controllers/trigger-calculation.
 export { collectUnitQualifierFormulaPatches, UnitQualifierRenameController } from './controllers/unit-qualifier-rename.controller';
 export { UpdateDefinedNameController } from './controllers/update-defined-name.controller';
 export { UpdateFormulaController } from './controllers/update-formula.controller';
-export { UniverRemoteSheetsFormulaPlugin, UniverSheetsFormulaPlugin } from './plugin';
+export { UniverSheetsFormulaPlugin } from './plugin';
 export { FormulaRefRangeService } from './services/formula-ref-range.service';
 export {
     IRemoteRegisterFunctionService,
     RemoteRegisterFunctionService,
 } from './services/remote/remote-register-function.service';
 export { calculateFormula } from './util/calculate';
+export {
+    /** @deprecated Import from '@univerjs/sheets-formula/worker' instead. This root export will be removed in the next release. */
+    UniverRemoteSheetsFormulaPlugin,
+} from './worker';

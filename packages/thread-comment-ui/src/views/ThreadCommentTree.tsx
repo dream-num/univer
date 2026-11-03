@@ -100,21 +100,6 @@ export interface IThreadCommentItemProps {
 
 const MOCK_ID = '__mock__';
 
-function formatCommentDateTime(value: string, region: LocaleType): string {
-    const date = dateKit(value);
-    const regionTag = LOCALE_META[region].tag;
-
-    return date.formatIntl(regionTag, {
-        year: 'numeric',
-        month: 'numeric',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-        numberingSystem: 'latn',
-    });
-}
-
 const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const {
         item,
@@ -147,6 +132,21 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const avatarFallback = uiConfig?.avatarFallback;
     const currentRegion = useObservable(regionService.currentRegion$, regionService.getCurrentRegion());
     const direction = useObservable(localeService.direction$, localeService.getDirection());
+    function formatCommentDateTime(value: string, region: LocaleType): string {
+        const date = dateKit(value);
+        const regionTag = LOCALE_META[region].tag;
+
+        return date.formatIntl(regionTag, {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+            numberingSystem: 'latn',
+        });
+    }
+
     const dateText = isMock ? null : formatCommentDateTime(item.dT, currentRegion);
 
     const handleDeleteItem = async () => {
@@ -241,7 +241,8 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                                       [&_button]:univer-cursor-pointer [&_button]:univer-rounded
                                                       [&_button]:univer-border-0 [&_button]:univer-bg-transparent
                                                       [&_button]:univer-px-2 [&_button]:univer-py-1.5
-                                                      [&_button]:univer-text-left [&_button]:univer-transition-colors
+                                                      [&_button]:univer-text-left [&_button]:univer-text-inherit
+                                                      [&_button]:univer-transition-colors
                                                       rtl:[&_button]:univer-text-right
                                                     `}
                                                 >
@@ -249,8 +250,8 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                                         <button
                                                             type="button"
                                                             className={`
-                                                              hover:univer-bg-gray-200
-                                                              dark:hover:!univer-bg-gray-800
+                                                              hover:univer-bg-gray-100
+                                                              dark:hover:!univer-bg-gray-600
                                                             `}
                                                             onClick={() => onEditingChange?.(true)}
                                                         >
@@ -261,8 +262,8 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                                         <button
                                                             type="button"
                                                             className={`
-                                                              hover:univer-bg-gray-200
-                                                              dark:hover:!univer-bg-gray-800
+                                                              hover:univer-bg-gray-100
+                                                              dark:hover:!univer-bg-gray-600
                                                             `}
                                                             onClick={handleDeleteItem}
                                                         >

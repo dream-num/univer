@@ -22,4 +22,7 @@ export type { IUniverSheetsFilterUIConfig } from './config/config';
 export { menuSchema as SheetsFilterUIMenuSchema } from './menu/schema';
 export { UniverSheetsFilterMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsFilterUIPlugin } from './plugin';
-export { UniverSheetsFilterUIWorkerPlugin } from './worker/plugin';
+export {
+    /** @deprecated Import from '@univerjs/sheets-filter-ui/worker' instead. This root export will be removed in the next release. */
+    UniverSheetsFilterUIWorkerPlugin,
+} from './worker';

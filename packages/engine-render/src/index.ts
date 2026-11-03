@@ -149,5 +149,8 @@ export { CanvasColorService, DumbCanvasColorService, ICanvasColorService } from 
 export * from './shape';
 export * from './viewport';
 
-export { DocumentLayoutSession } from './worker-layout';
+export {
+    /** @deprecated Import from '@univerjs/engine-render/worker' instead. This root export will be removed in the next release. */
+    DocumentLayoutSession,
+} from './worker';
 export type { IDocumentLayoutSessionStartOptions, IDocumentLayoutStepResult } from './worker-layout';

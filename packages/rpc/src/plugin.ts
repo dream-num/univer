@@ -15,30 +15,23 @@
  */
 
 import type { Dependency } from '@univerjs/core';
+import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
 import type {
     IUniverRPCMainThreadConfig,
-    IUniverRPCWorkerThreadConfig,
 } from './config/config';
-import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
 import pkg from '../package.json';
 import {
     defaultPluginMainThreadConfig,
-    defaultPluginWorkerThreadConfig,
     PLUGIN_CONFIG_KEY_MAIN_THREAD,
-    PLUGIN_CONFIG_KEY_WORKER_THREAD,
 } from './config/config';
 import { DataSyncPrimaryController } from './controllers/data-sync/data-sync-primary.controller';
-import { DataSyncReplicaController } from './controllers/data-sync/data-sync-replica.controller';
 import {
-    IRemoteInstanceService,
     IRemoteSyncService,
     RemoteSyncPrimaryService,
-    WebWorkerRemoteInstanceService,
 } from './services/remote-instance/remote-instance.service';
 import { ChannelService, IRPCChannelService } from './services/rpc/channel.service';
 import {
     createWebWorkerMessagePortOnMain,
-    createWebWorkerMessagePortOnWorker,
 } from './services/rpc/implementations/web-worker-rpc.service';
 
 /**
@@ -91,8 +84,9 @@ export class UniverRPCMainThreadPlugin extends Plugin {
             [
                 IRPCChannelService,
                 {
-                    // eslint-disable-next-line react/no-unnecessary-use-prefix
-                    useFactory: () => new ChannelService(messageProtocol),
+                    useFactory: function createChannelService() {
+                        return new ChannelService(messageProtocol);
+                    },
                 },
             ],
             [DataSyncPrimaryController],
@@ -103,48 +97,5 @@ export class UniverRPCMainThreadPlugin extends Plugin {
 
         // let DataSyncPrimaryController to be initialized and registering other modules
         this._injector.get(DataSyncPrimaryController);
-    }
-}
-
-/**
- * This plugin is used to register the RPC services on the worker thread.
- */
-export class UniverRPCWorkerThreadPlugin extends Plugin {
-    static override pluginName = 'UNIVER_RPC_WORKER_THREAD_PLUGIN';
-    static override packageName = pkg.name;
-    static override version = pkg.version;
-
-    constructor(
-        private readonly _config: Partial<IUniverRPCWorkerThreadConfig> = defaultPluginWorkerThreadConfig,
-        @Inject(Injector) protected readonly _injector: Injector,
-        @IConfigService private readonly _configService: IConfigService
-    ) {
-        super();
-
-        // Manage the plugin configuration.
-        const { ...rest } = merge(
-            {},
-            defaultPluginWorkerThreadConfig,
-            this._config
-        );
-        this._configService.setConfig(PLUGIN_CONFIG_KEY_WORKER_THREAD, rest);
-    }
-
-    override onStarting(): void {
-        (
-            [
-                [DataSyncReplicaController],
-                [
-                    IRPCChannelService,
-                    {
-                        // eslint-disable-next-line react/no-unnecessary-use-prefix
-                        useFactory: () => new ChannelService(createWebWorkerMessagePortOnWorker()),
-                    },
-                ],
-                [IRemoteInstanceService, { useClass: WebWorkerRemoteInstanceService }],
-            ] as Dependency[]
-        ).forEach((dependency) => this._injector.add(dependency));
-
-        this._injector.get(DataSyncReplicaController);
     }
 }

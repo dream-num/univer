@@ -18,10 +18,7 @@ export type { IUniverRPCMainThreadConfig, IUniverRPCWorkerThreadConfig } from '.
 export { PLUGIN_CONFIG_KEY_MAIN_THREAD, PLUGIN_CONFIG_KEY_WORKER_THREAD } from './config/config';
 export { DataSyncPrimaryController } from './controllers/data-sync/data-sync-primary.controller';
 export { DataSyncReplicaController } from './controllers/data-sync/data-sync-replica.controller';
-export {
-    UniverRPCMainThreadPlugin,
-    UniverRPCWorkerThreadPlugin,
-} from './plugin';
+export { UniverRPCMainThreadPlugin } from './plugin';
 export {
     IRemoteInstanceService,
     RemoteInstanceServiceName,
@@ -33,3 +30,7 @@ export { IRemoteSyncService } from './services/remote-instance/remote-instance.s
 export { ChannelService, IRPCChannelService } from './services/rpc/channel.service';
 export { ChannelClient, ChannelServer, fromModule, toModule } from './services/rpc/rpc.service';
 export type { IMessageProtocol } from './services/rpc/rpc.service';
+export {
+    /** @deprecated Import from '@univerjs/rpc/worker' instead. This root export will be removed in the next release. */
+    UniverRPCWorkerThreadPlugin,
+} from './worker';

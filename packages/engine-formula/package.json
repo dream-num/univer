@@ -28,7 +28,8 @@
         ".": "./src/index.ts",
         "./*": "./src/*",
         "./facade": "./src/facade/index.ts",
-        "./locale/*": "./src/locale/*.ts"
+        "./locale/*": "./src/locale/*.ts",
+        "./worker": "./src/worker.ts"
     },
     "main": "./src/index.ts",
     "types": "./lib/types/index.d.ts",
@@ -46,6 +47,11 @@
                 "import": "./lib/es/*",
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
+            },
+            "./worker": {
+                "import": "./lib/es/worker.js",
+                "require": "./lib/cjs/worker.js",
+                "types": "./lib/types/worker.d.ts"
             },
             "./locale/*": {
                 "import": "./lib/es/locale/*.js",

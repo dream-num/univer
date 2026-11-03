@@ -15,7 +15,6 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsDataValidationConfig } from './config/config';
 import {
     DependentOn,
     ICommandService,
@@ -30,6 +29,7 @@ import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
+import type { IUniverSheetsDataValidationConfig } from './config/config';
 import pkg from '../package.json';
 import {
     AddSheetDataValidationCommand,
@@ -40,6 +40,7 @@ import {
     UpdateSheetDataValidationRangeCommand,
     UpdateSheetDataValidationSettingCommand,
 } from './commands/commands/data-validation.command';
+import { UpdateDataValidationFormulaBySheetRenameMutation } from './commands/mutations/update-data-validation-formula-by-sheet-rename.mutation';
 import { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
 import { defaultPluginConfig, SHEETS_DATA_VALIDATION_PLUGIN_CONFIG_KEY } from './config/config';
 import { DataValidationFormulaRefRangeController } from './controllers/dv-formula-ref-range.controller';
@@ -108,6 +109,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             RemoveSheetDataValidationCommand,
             RemoveSheetAllDataValidationCommand,
             ClearRangeDataValidationCommand,
+            UpdateDataValidationFormulaBySheetRenameMutation,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });

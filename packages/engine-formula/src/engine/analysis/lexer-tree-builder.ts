@@ -15,11 +15,11 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
+import { AbsoluteRefType, Disposable, isValidRange, MAX_COLUMN_COUNT, MAX_ROW_COUNT, moveRangeByOffset, Tools } from '@univerjs/core';
 import type { IDirtyUnitDefinedNameMap, IExprTreeNode, ISuperTable } from '../../basics/common';
 import type { IFunctionNames } from '../../basics/function';
 import type { IDefinedNamesServiceParam } from '../../services/defined-names.service';
 import type { ISequenceArray, ISequenceNode } from '../utils/sequence';
-import { AbsoluteRefType, Disposable, isValidRange, MAX_COLUMN_COUNT, MAX_ROW_COUNT, moveRangeByOffset, Tools } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_COUNT_ARRAY, ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { isFormulaLexerToken, isTokenCannotBeAtEnd, isTokenCannotPrecedeSuffixToken } from '../../basics/match-token';
@@ -844,6 +844,7 @@ export class LexerTreeBuilder extends Disposable {
                     } else if (typeof nestedDefinedNameParam === 'object') {
                         const { sequenceString: nestedSequenceString, definedNames: nestedDefinedNames } = nestedDefinedNameParam;
                         sequenceString += nestedSequenceString;
+                        definedNames.push(definedNameToken);
                         nestedDefinedNames.forEach((name) => {
                             definedNames.push(name);
                         });
@@ -955,9 +956,10 @@ export class LexerTreeBuilder extends Disposable {
         const executeUnitId = unitId;
         if (executeUnitId != null && definedNameMap[executeUnitId] != null) {
             const names = Object.keys(definedNameMap[executeUnitId]!);
+            const normalizedFormula = formulaString.toLowerCase();
             for (let i = 0, len = names.length; i < len; i++) {
                 const name = names[i];
-                if (formulaString.indexOf(name) > -1 || lexerNode?.getDefinedNames().includes(name)) {
+                if (normalizedFormula.indexOf(name.toLowerCase()) > -1 || lexerNode?.getDefinedNames().includes(name)) {
                     return true;
                 }
             }
@@ -972,9 +974,10 @@ export class LexerTreeBuilder extends Disposable {
         const executeUnitId = unitId;
         if (executeUnitId != null && definedNameMap[executeUnitId] != null) {
             const names = Object.keys(definedNameMap[executeUnitId]!);
+            const normalizedToken = token.toLowerCase();
             for (let i = 0, len = names.length; i < len; i++) {
                 const name = names[i];
-                if (name === token) {
+                if (name.toLowerCase() === normalizedToken) {
                     return true;
                 }
             }

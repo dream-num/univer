@@ -14,243 +14,182 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Workbook, Worksheet } from '@univerjs/core';
+import type { IWorkbookData, Workbook } from '@univerjs/core';
 import {
-    DesktopLogService,
-    ILogService,
-    Injector,
+    IAuthzIoService,
+    ICommandService,
     IPermissionService,
+    IResourceLoaderService,
     IResourceManagerService,
     IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    Tools,
+    Univer,
     UniverInstanceType,
 } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UnitObject } from '@univerjs/protocol';
-import { Subject } from 'rxjs';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { IRangeProtectionRule } from '../../../../models/range-protection-rule.model';
-import type { IObjectModel, IObjectPointModel } from '../../type';
-import {
-    EditStateEnum,
-    RangeProtectionRuleModel,
-    ViewStateEnum,
-} from '../../../../models/range-protection-rule.model';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { SetWorksheetPermissionPointsCommand } from '../../../../commands/commands/set-worksheet-permission-points.command';
+import { SetWorksheetProtectionMutation } from '../../../../commands/mutations/set-worksheet-protection.mutation';
+import enUS from '../../../../locale/en-US';
+import { UniverSheetsPlugin } from '../../../../plugin';
+import { RangeProtectionPermissionEditPoint } from '../../permission-point/range/edit';
+import { WorksheetEditPermission } from '../../permission-point/worksheet/edit';
+import { getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from '../utils';
 import { WorksheetProtectionPointModel } from '../worksheet-permission-point.model';
 import { WorksheetProtectionRuleModel } from '../worksheet-permission-rule.model';
-import { WorksheetPermissionService } from '../worksheet-permission.service';
+import { POINT_MODEL_PLUGIN_NAME, RULE_MODEL_PLUGIN_NAME, WorksheetPermissionService } from '../worksheet-permission.service';
+import '../../../../facade/f-enum';
+import '../../../../facade/f-range';
+import '../../../../facade/f-univer';
+import '../../../../facade/f-workbook';
+import '../../../../facade/f-worksheet';
 
-class TestPermissionService {
-    readonly addedPermissionIds: string[] = [];
-    readonly deletedPermissionIds: string[] = [];
-    readonly updatedPermissionPoints: Array<{ id: string; value: unknown }> = [];
-    readonly permissionPoints = new Map<string, { id: string; value?: unknown }>();
-
-    addPermissionPoint(point: { id: string; value?: unknown }) {
-        if (this.permissionPoints.has(point.id)) {
-            return false;
-        }
-        this.permissionPoints.set(point.id, point);
-        this.addedPermissionIds.push(point.id);
-        return true;
-    }
-
-    deletePermissionPoint(id: string) {
-        this.deletedPermissionIds.push(id);
-    }
-
-    updatePermissionPoint(id: string, value: unknown) {
-        const point = this.permissionPoints.get(id);
-        if (point) {
-            point.value = value;
-        }
-        this.updatedPermissionPoints.push({ id, value });
-        return true;
-    }
-
-    getPermissionPoint(id: string) {
-        return this.permissionPoints.get(id);
-    }
-}
-
-class TestResourceManagerService {
-    readonly resources: Array<{
-        pluginName: string;
-        toJson: () => string;
-        parseJson: (json: string) => IObjectModel | IObjectPointModel;
-        onLoad: (unitId: string, resources: IObjectModel | IObjectPointModel) => void;
-        onUnLoad: (unitId: string) => void;
-    }> = [];
-
-    registerPluginResource(resource: TestResourceManagerService['resources'][number]): IDisposable {
-        this.resources.push(resource);
-        return { dispose: vi.fn() };
-    }
-}
-
-class TestUniverInstanceService {
-    readonly unitAdded$ = new Subject<{ unit: Workbook }>();
-    readonly unitDisposed$ = new Subject<Workbook>();
-    workbook!: Workbook;
-
-    getAllUnitsForType(): Workbook[] {
-        return [this.workbook];
-    }
-
-    getTypeOfUnitAdded$(type: UniverInstanceType) {
-        return type === UniverInstanceType.UNIVER_SHEET ? this.unitAdded$ : new Subject<{ unit: Workbook }>();
-    }
-
-    getTypeOfUnitDisposed$(type: UniverInstanceType) {
-        return type === UniverInstanceType.UNIVER_SHEET ? this.unitDisposed$ : new Subject<Workbook>();
-    }
-
-    getUnit(unitId: string): Workbook | undefined {
-        return this.workbook.getUnitId() === unitId ? this.workbook : undefined;
-    }
+function createRuntime() {
+    const univer = new Univer();
+    const injector = univer.__getInjector();
+    const locale = injector.get(LocaleService);
+    locale.load({ [LocaleType.EN_US]: enUS });
+    locale.setLocale(LocaleType.EN_US);
+    locale.setDirection('ltr');
+    univer.registerPlugin(UniverFormulaEnginePlugin);
+    univer.registerPlugin(UniverSheetsPlugin);
+    const snapshot: IWorkbookData = {
+        id: 'book-1',
+        name: 'Owner',
+        appVersion: 'test',
+        locale: LocaleType.EN_US,
+        styles: {},
+        sheetOrder: ['sheet-1', 'retained'],
+        sheets: {
+            'sheet-1': { id: 'sheet-1', name: 'Source', rowCount: 10, columnCount: 10, cellData: { 0: { 0: { v: 11 } } } },
+            retained: { id: 'retained', name: 'Retained', rowCount: 10, columnCount: 10 },
+        },
+    };
+    const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, snapshot);
+    univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, { ...Tools.deepClone(snapshot), id: 'foreign' });
+    const api = FUniver.newAPI(injector);
+    injector.get(WorksheetPermissionService);
+    return { univer, injector, workbook, api };
 }
 
 describe('WorksheetPermissionService', () => {
-    let permissionService: TestPermissionService;
-    let resourceManagerService: TestResourceManagerService;
-    let univerInstanceService: TestUniverInstanceService;
-    let worksheetRuleModel: WorksheetProtectionRuleModel;
-    let worksheetPointModel: WorksheetProtectionPointModel;
-    let rangeRuleModel: RangeProtectionRuleModel;
-    let sheetCreated$: Subject<Worksheet>;
-    let sheetDisposed$: Subject<Worksheet>;
-
-    const createWorksheet = (sheetId: string) => ({ getSheetId: () => sheetId }) as unknown as Worksheet;
-    const createWorkbook = (sheetIds = ['sheet-1']) => {
-        sheetCreated$ = new Subject<Worksheet>();
-        sheetDisposed$ = new Subject<Worksheet>();
-        return {
-            getUnitId: () => 'book-1',
-            getSheets: () => sheetIds.map(createWorksheet),
-            sheetCreated$,
-            sheetDisposed$,
-        } as unknown as Workbook;
-    };
-
+    let runtime: ReturnType<typeof createRuntime>;
     beforeEach(() => {
-        const injector = new Injector();
-        injector.add([IPermissionService, { useClass: TestPermissionService as never }]);
-        injector.add([IResourceManagerService, { useClass: TestResourceManagerService as never }]);
-        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
-        injector.add([WorksheetProtectionRuleModel]);
-        injector.add([WorksheetProtectionPointModel]);
-        injector.add([RangeProtectionRuleModel]);
-        injector.add([ILogService, { useClass: DesktopLogService }]);
-        injector.add([WorksheetPermissionService]);
-
-        permissionService = injector.get(IPermissionService) as unknown as TestPermissionService;
-        resourceManagerService = injector.get(IResourceManagerService) as unknown as TestResourceManagerService;
-        univerInstanceService = injector.get(IUniverInstanceService) as unknown as TestUniverInstanceService;
-        worksheetRuleModel = injector.get(WorksheetProtectionRuleModel);
-        worksheetPointModel = injector.get(WorksheetProtectionPointModel);
-        rangeRuleModel = injector.get(RangeProtectionRuleModel);
-        univerInstanceService.workbook = createWorkbook();
-        injector.get(WorksheetPermissionService);
+        runtime = createRuntime();
+    });
+    afterEach(() => {
+        runtime.univer.dispose();
     });
 
-    it('registers worksheet permission points for existing and newly created sheets', () => {
-        expect(permissionService.addedPermissionIds.length).toBeGreaterThan(0);
-        expect(permissionService.addedPermissionIds.every((id) => id.includes('book-1') && id.includes('sheet-1'))).toBe(true);
-
-        permissionService.addedPermissionIds.length = 0;
-        sheetCreated$.next(createWorksheet('sheet-2'));
-
-        expect(permissionService.addedPermissionIds.length).toBeGreaterThan(0);
-        expect(permissionService.addedPermissionIds.every((id) => id.includes('book-1') && id.includes('sheet-2'))).toBe(true);
+    it('registers worksheet permission points for existing and newly created actual sheets', () => {
+        const { injector, api } = runtime;
+        const permissions = injector.get(IPermissionService);
+        const constructors = [...getAllWorksheetPermissionPoint(), ...getAllWorksheetPermissionPointByPointPanel()];
+        for (const Point of constructors) {
+            expect(permissions.getPermissionPoint(new Point('book-1', 'sheet-1').id)).toBeDefined();
+        }
+        const sheet = api.getWorkbook('book-1')!.insertSheet('Second', { sheet: { id: 'sheet-2' } });
+        expect(sheet.getSheetId()).toBe('sheet-2');
+        for (const Point of constructors) {
+            expect(permissions.getPermissionPoint(new Point('book-1', 'sheet-2').id)).toBeDefined();
+            expect(permissions.getPermissionPoint(new Point('foreign', 'sheet-2').id)).toBeUndefined();
+        }
     });
 
-    it('removes worksheet and range permission points when a worksheet is disposed', () => {
-        const rangeRule: IRangeProtectionRule = {
-            id: 'range-rule-1',
-            permissionId: 'range-perm-1',
-            ranges: [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }],
-            unitType: UnitObject.SelectRange,
-            unitId: 'book-1',
-            subUnitId: 'sheet-1',
-            viewState: ViewStateEnum.OthersCanView as ViewStateEnum,
-            editState: EditStateEnum.OnlyMe as EditStateEnum,
-        };
-        rangeRuleModel.addRule('book-1', 'sheet-1', rangeRule);
-
-        sheetDisposed$.next(createWorksheet('sheet-1'));
-
-        expect(permissionService.deletedPermissionIds.some((id) => id.includes('range-perm-1'))).toBe(true);
-        expect(permissionService.deletedPermissionIds.some((id) => id.includes('book-1') && id.includes('sheet-1'))).toBe(true);
+    it('removes worksheet and range permission points when an actual worksheet is deleted', async () => {
+        const { injector, api } = runtime;
+        const permissions = injector.get(IPermissionService);
+        const source = api.getWorkbook('book-1')!.getSheetByName('Source')!;
+        const rule = await source.getRange('A1:B2').getRangePermission().protect();
+        const rangePoint = new RangeProtectionPermissionEditPoint('book-1', 'sheet-1', rule.permissionId);
+        expect(permissions.getPermissionPoint(rangePoint.id)).toBeDefined();
+        const foreign = Tools.deepClone(injector.get(IResourceLoaderService).saveUnit('foreign'));
+        expect(api.getWorkbook('book-1')!.deleteSheet('sheet-1')).toBe(true);
+        expect(permissions.getPermissionPoint(rangePoint.id)).toBeUndefined();
+        for (const Point of [...getAllWorksheetPermissionPoint(), ...getAllWorksheetPermissionPointByPointPanel()]) {
+            expect(permissions.getPermissionPoint(new Point('book-1', 'sheet-1').id)).toBeUndefined();
+            expect(permissions.getPermissionPoint(new Point('foreign', 'sheet-1').id)).toBeDefined();
+        }
+        expect(injector.get(IResourceLoaderService).saveUnit('foreign')).toEqual(foreign);
     });
 
-    it('updates worksheet permission points when protection rules are changed or removed', () => {
-        const rule = {
-            permissionId: 'worksheet-perm-1',
-            unitType: UnitObject.Worksheet,
-            unitId: 'book-1',
-            subUnitId: 'sheet-1',
-            viewState: ViewStateEnum.OthersCanView,
-            editState: EditStateEnum.OnlyMe,
-        };
-
-        worksheetRuleModel.addRule('book-1', rule);
-        worksheetRuleModel.setRule('book-1', 'sheet-1', { ...rule, permissionId: 'worksheet-perm-2' });
-        worksheetRuleModel.deleteRule('book-1', 'sheet-1');
-
-        expect(permissionService.updatedPermissionPoints.some((item) => item.value === true)).toBe(true);
-        expect(permissionService.updatedPermissionPoints.some((item) => item.value !== true)).toBe(true);
-    });
-
-    it('restores worksheet rule and point snapshots and removes resources on unload', () => {
-        const ruleResource = resourceManagerService.resources[0];
-        const pointResource = resourceManagerService.resources[1];
-        const worksheetRule = {
-            permissionId: 'worksheet-perm-1',
-            unitType: UnitObject.Worksheet,
-            unitId: 'book-1',
-            subUnitId: 'sheet-1',
-            viewState: ViewStateEnum.OthersCanView,
-            editState: EditStateEnum.OnlyMe,
-        };
-        const worksheetPoint = { unitId: 'book-1', subUnitId: 'sheet-1', permissionId: 'worksheet-point-1' };
-
-        worksheetRuleModel.addRule('book-1', worksheetRule);
-        worksheetPointModel.addRule(worksheetPoint);
-        expect(ruleResource.toJson()).toContain('worksheet-perm-1');
-        expect(pointResource.toJson()).toContain('worksheet-point-1');
-        expect(ruleResource.parseJson('')).toEqual({});
-        expect(pointResource.parseJson('{bad json')).toEqual({});
-
-        permissionService.addedPermissionIds.length = 0;
-        ruleResource.onLoad('book-1', { 'book-1': [{ ...worksheetRule, subUnitId: 'sheet-2' }] });
-        pointResource.onLoad('book-1', { 'book-1': [{ unitId: 'book-1', subUnitId: 'sheet-2', permissionId: 'worksheet-point-2' }] });
-
-        expect(worksheetRuleModel.getRule('book-1', 'sheet-2')?.permissionId).toBe('worksheet-perm-1');
-        expect(worksheetPointModel.getRule('book-1', 'sheet-2')?.permissionId).toBe('worksheet-point-2');
-        expect(permissionService.addedPermissionIds.some((id) => id.includes('book-1'))).toBe(true);
-
-        ruleResource.onUnLoad('book-1');
-        pointResource.onUnLoad('book-1');
-        expect(worksheetRuleModel.getRule('book-1', 'sheet-1')).toBeUndefined();
-        expect(worksheetPointModel.getRule('book-1', 'sheet-2')).toBeUndefined();
-        expect(permissionService.deletedPermissionIds.some((id) => id.includes('book-1') && id.includes('sheet-1'))).toBe(true);
-    });
-
-    it('updates existing worksheet permission points when rule resources load', () => {
-        const ruleResource = resourceManagerService.resources[0];
-        const existingAddCount = permissionService.addedPermissionIds.length;
-
-        ruleResource.onLoad('book-1', {
-            'sheet-1': [{
-                permissionId: 'worksheet-perm-1',
-                unitType: UnitObject.Worksheet,
-                unitId: 'book-1',
-                subUnitId: 'sheet-1',
-                viewState: ViewStateEnum.OthersCanView,
-                editState: EditStateEnum.OnlyMe,
-            }],
+    it('updates the actual protection binding through mutations and restores worksheet access when protection is removed', async () => {
+        const { injector, api } = runtime;
+        const permission = api.getWorkbook('book-1')!.getSheetByName('Source')!.getWorksheetPermission();
+        const originalID = await permission.protect();
+        await permission.setPoint(api.Enum.WorksheetPermissionPoint.Edit, false);
+        expect(permission.canEdit()).toBe(false);
+        const model = injector.get(WorksheetProtectionRuleModel);
+        const original = Tools.deepClone(model.getRule('book-1', 'sheet-1')!);
+        const replacementID = await injector.get(IAuthzIoService).create({
+            objectType: UnitObject.Worksheet,
+            worksheetObject: { unitID: 'book-1', name: 'Replacement', collaborators: [], strategies: [], scope: undefined },
         });
+        expect(injector.get(ICommandService).syncExecuteCommand(SetWorksheetProtectionMutation.id, {
+            unitId: 'book-1',
+            subUnitId: 'sheet-1',
+            rule: { ...original, permissionId: replacementID },
+        })).toBe(true);
+        expect(model.getRule('book-1', 'sheet-1')?.permissionId).toBe(replacementID);
+        expect(replacementID).not.toBe(originalID);
+        await permission.setPoint(api.Enum.WorksheetPermissionPoint.Edit, false);
+        expect(permission.canEdit()).toBe(false);
+        await permission.unprotect();
+        expect(model.getRule('book-1', 'sheet-1')).toBeUndefined();
+        expect(permission.canEdit()).toBe(true);
+    });
 
-        expect(permissionService.addedPermissionIds.length).toBe(existingAddCount);
-        expect(permissionService.updatedPermissionPoints.length).toBeGreaterThan(0);
-        expect(permissionService.updatedPermissionPoints.every((item) => item.id.includes('book-1') && item.id.includes('sheet-1') && item.value === false)).toBe(true);
+    it('restores actual rule and operations resources and removes only their owner on workbook unload', async () => {
+        const { injector, api } = runtime;
+        const permission = api.getWorkbook('book-1')!.getSheetByName('Source')!.getWorksheetPermission();
+        const permissionID = await permission.protect();
+        await permission.setPoint(api.Enum.WorksheetPermissionPoint.Edit, false);
+        const pointID = await injector.get(IAuthzIoService).create({
+            objectType: UnitObject.Worksheet,
+            worksheetObject: { unitID: 'book-1', name: 'Operations', collaborators: [], strategies: [], scope: undefined },
+        });
+        expect(await injector.get(ICommandService).executeCommand(SetWorksheetPermissionPointsCommand.id, {
+            rule: { unitId: 'book-1', subUnitId: 'sheet-1', permissionId: pointID },
+        })).toBe(true);
+        const resources = injector.get(IResourceManagerService);
+        const ruleHook = resources.getAllResourceHooks().find((hook) => hook.pluginName === RULE_MODEL_PLUGIN_NAME)!;
+        const pointHook = resources.getAllResourceHooks().find((hook) => hook.pluginName === POINT_MODEL_PLUGIN_NAME)!;
+        expect(JSON.parse(ruleHook.toJson('book-1'))['book-1'][0].permissionId).toBe(permissionID);
+        expect(JSON.parse(pointHook.toJson('book-1'))['book-1'][0].permissionId).toBe(pointID);
+        expect(ruleHook.parseJson('')).toEqual({});
+        expect(pointHook.parseJson('{bad json')).toEqual({});
+        const loader = injector.get(IResourceLoaderService);
+        const saved = Tools.deepClone(loader.saveUnit<IWorkbookData>('book-1')!);
+        const foreign = Tools.deepClone(loader.saveUnit('foreign'));
+        injector.get(IUniverInstanceService).disposeUnit('book-1');
+        expect(injector.get(WorksheetProtectionRuleModel).getRule('book-1', 'sheet-1')).toBeUndefined();
+        expect(injector.get(WorksheetProtectionPointModel).getRule('book-1', 'sheet-1')).toBeUndefined();
+        expect(injector.get(IPermissionService).getPermissionPoint(new WorksheetEditPermission('book-1', 'sheet-1').id)).toBeUndefined();
+        expect(loader.saveUnit('foreign')).toEqual(foreign);
+        runtime.univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, JSON.parse(JSON.stringify(saved)));
+        expect(injector.get(WorksheetProtectionRuleModel).getRule('book-1', 'sheet-1')?.permissionId).toBe(permissionID);
+        expect(injector.get(WorksheetProtectionPointModel).getRule('book-1', 'sheet-1')?.permissionId).toBe(pointID);
+        expect(loader.saveUnit('foreign')).toEqual(foreign);
+    });
+
+    it('updates existing worksheet points in place from a correctly owned loaded rule resource', async () => {
+        const { injector, api } = runtime;
+        const permission = api.getWorkbook('book-1')!.getSheetByName('Source')!.getWorksheetPermission();
+        await permission.protect();
+        const permissions = injector.get(IPermissionService);
+        const pointID = new WorksheetEditPermission('book-1', 'sheet-1').id;
+        const point = permissions.getPermissionPoint(pointID);
+        const count = permissions.getAllPermissionPoint().size;
+        const foreign = Tools.deepClone(injector.get(IResourceLoaderService).saveUnit('foreign'));
+        const saved = injector.get(IResourceLoaderService).saveUnit<IWorkbookData>('book-1')!;
+        injector.get(IResourceManagerService).loadResources('book-1', saved.resources);
+        expect(permissions.getPermissionPoint(pointID)).toBe(point);
+        expect(permissions.getPermissionPoint(pointID)?.value).toBe(false);
+        expect(permissions.getAllPermissionPoint().size).toBe(count);
+        expect(injector.get(IResourceLoaderService).saveUnit('foreign')).toEqual(foreign);
     });
 });

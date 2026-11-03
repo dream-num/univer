@@ -16,26 +16,42 @@
 
 import type { IDisposable, IMutationInfo, ISheetDataValidationRule } from '@univerjs/core';
 import type { IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
-import { Disposable, generateRandomId, Inject, toDisposable } from '@univerjs/core';
-import { AddDataValidationMutation, DataValidatorRegistryService, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
+import { Disposable, generateRandomId, Inject, IUniverInstanceService, toDisposable } from '@univerjs/core';
+import {
+    AddDataValidationMutation,
+    DataValidatorRegistryService,
+    RemoveDataValidationMutation,
+    UpdateDataValidationMutation,
+    UpdateRuleType,
+} from '@univerjs/data-validation';
+import { EffectRefRangId } from '@univerjs/sheets';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 import { shouldOffsetFormulaByRange } from '../utils/formula';
 
 export class DataValidationFormulaRefRangeController extends Disposable {
-    private _disposableMap: Map<string, IDisposable> = new Map();
+    private _disposableMap = new Map<string, { unitId: string; disposable: IDisposable }>();
 
     constructor(
         @Inject(SheetDataValidationModel) private _dataValidationModel: SheetDataValidationModel,
         @Inject(FormulaRefRangeService) private _formulaRefRangeService: FormulaRefRangeService,
-        @Inject(DataValidatorRegistryService) private _validatorRegistryService: DataValidatorRegistryService
+        @Inject(DataValidatorRegistryService) private _validatorRegistryService: DataValidatorRegistryService,
+        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService
     ) {
         super();
         this._initRefRange();
+        this.disposeWithMe(this._univerInstanceService.unitDisposed$.subscribe((unit) => {
+            for (const [id, entry] of this._disposableMap) {
+                if (entry.unitId === unit.getUnitId()) {
+                    entry.disposable.dispose();
+                    this._disposableMap.delete(id);
+                }
+            }
+        }));
     }
 
     private _getIdWithUnitId(unitID: string, subUnitId: string, ruleId: string) {
-        return `${unitID}_${subUnitId}_${ruleId}`;
+        return JSON.stringify([unitID, subUnitId, ruleId]);
     }
 
     registerRule = (unitId: string, subUnitId: string, rule: ISheetDataValidationRule) => {
@@ -46,13 +62,17 @@ export class DataValidationFormulaRefRangeController extends Disposable {
         this.register(unitId, subUnitId, rule);
     };
 
-    // eslint-disable-next-line max-lines-per-function
     register(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {
         const oldRanges = rule.ranges;
         const oldFormula1 = rule.formula1;
         const oldFormula2 = rule.formula2;
-        // eslint-disable-next-line max-lines-per-function
-        const disposable = this._formulaRefRangeService.registerRangeFormula(unitId, subUnitId, oldRanges, [oldFormula1 ?? '', oldFormula2 ?? ''], (res) => {
+        const disposable = this._formulaRefRangeService.registerRangeFormula(unitId, subUnitId, oldRanges, [oldFormula1 ?? '', oldFormula2 ?? ''], (res, commandInfo) => {
+            if (commandInfo.id === EffectRefRangId.MoveRangeCommandId
+                && commandInfo.params?.fromUnitId
+                && commandInfo.params.fromUnitId === commandInfo.params.toUnitId
+                && commandInfo.params.fromSubUnitId !== commandInfo.params.toSubUnitId) {
+                return { redos: [], undos: [] };
+            }
             if (res.length === 0) {
                 return {
                     undos: [{
@@ -147,7 +167,7 @@ export class DataValidationFormulaRefRangeController extends Disposable {
             };
         });
         const id = this._getIdWithUnitId(unitId, subUnitId, rule.uid);
-        this._disposableMap.set(id, disposable);
+        this._disposableMap.set(id, { unitId, disposable });
     };
 
     private _initRefRange() {
@@ -166,22 +186,25 @@ export class DataValidationFormulaRefRangeController extends Disposable {
                 switch (option.type) {
                     case 'add': {
                         const rule = option.rule!;
+                        this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule.uid))?.disposable.dispose();
                         this.registerRule(option.unitId, option.subUnitId, rule);
                         break;
                     }
                     case 'remove': {
-                        const disposeSet = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule!.uid));
+                        const disposeSet = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule!.uid))?.disposable;
                         if (disposeSet) {
                             disposeSet.dispose();
                         }
+                        this._disposableMap.delete(this._getIdWithUnitId(unitId, subUnitId, rule!.uid));
                         break;
                     }
                     case 'update': {
                         const rule = option.rule!;
-                        const disposeSet = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule!.uid));
+                        const disposeSet = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule!.uid))?.disposable;
                         if (disposeSet) {
                             disposeSet.dispose();
                         }
+                        this._disposableMap.delete(this._getIdWithUnitId(unitId, subUnitId, rule.uid));
                         this.registerRule(option.unitId, option.subUnitId, rule);
                         break;
                     }
@@ -191,7 +214,7 @@ export class DataValidationFormulaRefRangeController extends Disposable {
 
         this.disposeWithMe(toDisposable(() => {
             this._disposableMap.forEach((item) => {
-                item.dispose();
+                item.disposable.dispose();
             });
             this._disposableMap.clear();
         }));

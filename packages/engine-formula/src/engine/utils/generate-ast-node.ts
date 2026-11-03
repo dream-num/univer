@@ -15,6 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import { regexp } from '@univerjs/core';
 import type { ErrorType } from '../../basics/error-type';
 import type { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import type { Lexer } from '../analysis/lexer';
@@ -23,7 +24,6 @@ import type { AstTreeBuilder } from '../analysis/parser';
 import type { AstRootNode } from '../ast-node/ast-root-node';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { IFormulaDependencyTree } from '../dependency/dependency-tree';
-import { regexp } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_SET } from '../../basics/error-type';
 import { ErrorNode } from '../ast-node/base-ast-node';
@@ -156,7 +156,7 @@ function isDirtyDefinedForNode(node: BaseAstNode, currentConfigService: IFormula
         const names = Object.keys(definedNameMap[executeUnitId]!);
         for (let i = 0, len = names.length; i < len; i++) {
             const name = names[i];
-            if (node.hasDefinedName(name)) {
+            if (node.getDefinedNames()?.some((definedName) => definedName.toLowerCase() === name.toLowerCase())) {
                 return true;
             }
         }

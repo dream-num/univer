@@ -122,11 +122,19 @@ export class SheetCanvasPopManagerService extends Disposable {
     /**
      * Register a feature menu callback for a specific drawing type.such as image, chart, etc.
      */
-    registerFeatureMenu(type: DrawingTypeEnum, getPopupMenuCallBack: getPopupMenuItemCallback, title?: string) {
-        this._popupMenuFeatureMap.set(type, getPopupMenuCallBack);
+    registerFeatureMenu(type: DrawingTypeEnum, getPopupMenuCallBack: getPopupMenuItemCallback, title?: string): IDisposable {
+        const callback: getPopupMenuItemCallback = (...args) => getPopupMenuCallBack(...args);
+        this._popupMenuFeatureMap.set(type, callback);
         if (title) {
             this._popupMenuTitleMap.set(type, title);
         }
+        return toDisposable(() => {
+            if (this._popupMenuFeatureMap.get(type) !== callback) {
+                return;
+            }
+            this._popupMenuFeatureMap.delete(type);
+            this._popupMenuTitleMap.delete(type);
+        });
     }
 
     /**

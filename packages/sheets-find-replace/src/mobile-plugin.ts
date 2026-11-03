@@ -15,12 +15,12 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsFindReplaceConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverFindReplaceMobileUIPlugin } from '@univerjs/find-replace';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
+import type { IUniverSheetsFindReplaceConfig } from './config/config';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_FIND_REPLACE_PLUGIN_CONFIG_KEY } from './config/config';
 import { SheetsFindReplaceMobileController } from './controllers/mobile/sheet-find-replace-mobile.controller';
@@ -60,7 +60,7 @@ export class UniverSheetsFindReplaceMobileUIPlugin extends Plugin {
         this._injector.get(SheetsFindReplaceMobileController);
     }
 
-    override onSteady(): void {
+    override onReady(): void {
         this._injector.get(SheetsFindReplaceController);
     }
 }

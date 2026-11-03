@@ -114,6 +114,7 @@ export function createSheetsDrawingTestBed(workbookData?: IWorkbookData, depende
     const localeService = get(LocaleService);
     localeService.load({ enUS });
     localeService.setLocale(LocaleType.EN_US);
+    localeService.setDirection('ltr');
 
     return {
         univer,

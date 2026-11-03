@@ -14,16 +14,26 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
+import type { IMutationInfo, IRange } from '@univerjs/core';
+import type { IClearSelectionAllCommandParams, IClearSelectionFormatCommandParams } from '@univerjs/sheets';
 import type {
     IConditionalFormattingRuleConfig,
     IConditionFormattingRule,
     IDeleteConditionalRuleMutationParams,
     ISetConditionalRuleMutationParams,
 } from '@univerjs/sheets-conditional-formatting';
-import { Disposable, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { ClearSelectionAllCommand, ClearSelectionFormatCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import { Disposable, Inject, Injector, IUniverInstanceService } from '@univerjs/core';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import {
+    ClearSelectionAllCommand,
+    ClearSelectionFormatCommand,
+    getSheetCommandTarget,
+    SheetInterceptorService,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
+import {
+    CFRuleType,
+    CFSubRuleType,
     ConditionalFormattingRangeIndexModel,
     ConditionalFormattingRangeTransformService,
     DeleteConditionalRuleMutation,
@@ -53,17 +63,16 @@ export class ConditionalFormattingClearController extends Disposable {
                 const undos: IMutationInfo[] = [];
                 const defaultV = { redos, undos };
                 if ([ClearSelectionFormatCommand.id, ClearSelectionAllCommand.id].includes(commandInfo.id)) {
-                    const ranges = this._selectionManagerService.getCurrentSelections()?.map((s) => s.range);
-                    if (!ranges) {
+                    const params = commandInfo.params as IClearSelectionAllCommandParams | IClearSelectionFormatCommandParams | undefined;
+                    const target = getSheetCommandTarget(this._univerInstanceService, params);
+                    if (!target) {
                         return defaultV;
                     }
-                    const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                    const worksheet = workbook.getActiveSheet();
-                    if (!worksheet) {
+                    const ranges = params?.ranges ?? this._selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+                    if (!ranges?.length) {
                         return defaultV;
                     }
-                    const unitId = workbook.getUnitId();
-                    const subUnitId = worksheet.getSheetId();
+                    const { unitId, subUnitId } = target;
 
                     const allRules = this._conditionalFormattingRangeIndexModel.getRulesByRanges(unitId, subUnitId, ranges);
                     if (!allRules || !allRules.length) {
@@ -106,12 +115,25 @@ export function generateClearCfMutations(injector: Injector, allRules: IConditio
     allRules.forEach((rule) => {
         const mergeRanges = rangeTransformService.subtractRanges(rule.ranges, ranges);
         if (mergeRanges.length) {
+            let nextConfig = rule.rule;
+            if (rule.rule.type === CFRuleType.highlightCell && rule.rule.subType === CFSubRuleType.formula) {
+                const topLeft = (items: IRange[]) => items.reduce((first, item) =>
+                    item.startRow < first.startRow || (item.startRow === first.startRow && item.startColumn < first.startColumn) ? item : first);
+                const previous = topLeft(rule.ranges);
+                const current = topLeft(mergeRanges);
+                const rowOffset = current.startRow - previous.startRow;
+                const columnOffset = current.startColumn - previous.startColumn;
+                if (rowOffset || columnOffset) {
+                    const value = injector.get(LexerTreeBuilder).moveFormulaRefOffset(rule.rule.value, columnOffset, rowOffset);
+                    nextConfig = { ...rule.rule, value };
+                }
+            }
             const redo: IMutationInfo<ISetConditionalRuleMutationParams> = {
                 id: SetConditionalRuleMutation.id,
                 params: {
                     unitId,
                     subUnitId,
-                    rule: { ...rule, ranges: mergeRanges },
+                    rule: { ...rule, ranges: mergeRanges, rule: nextConfig },
                 },
             };
             const undo = setConditionalRuleMutationUndoFactory(injector, redo.params);

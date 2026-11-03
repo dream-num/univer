@@ -15,7 +15,6 @@
  */
 
 import type { IPermissionPoint, Workbook, Worksheet } from '@univerjs/core';
-import type { IObjectModel, IObjectPointModel } from '../type';
 import {
     ILogService,
     Inject,
@@ -27,9 +26,10 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { takeUntil } from 'rxjs/operators';
+import type { IObjectModel, IObjectPointModel } from '../type';
 import { RangeProtectionRuleModel } from '../../../models/range-protection-rule.model';
 import { getAllRangePermissionPoint } from '../range-permission/util';
-import { getAllWorkbookPermissionPoint } from '../workbook-permission';
+import { getAllWorkbookPermissionPoint } from '../workbook-permission/util';
 import { getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './utils';
 import { WorksheetProtectionPointModel } from './worksheet-permission-point.model';
 import { WorksheetProtectionRuleModel } from './worksheet-permission-rule.model';
@@ -133,9 +133,9 @@ export class WorksheetPermissionService extends RxDisposable {
     }
 
     private _initRuleSnapshot() {
-        const toJson = () => {
+        const toJson = (unitId: string) => {
             const object = this._worksheetProtectionRuleModel.toObject();
-            return JSON.stringify(object);
+            return JSON.stringify(object[unitId] ? { [unitId]: object[unitId] } : {});
         };
         const parseJson = (json: string): IObjectModel => {
             if (!json) {
@@ -143,7 +143,7 @@ export class WorksheetPermissionService extends RxDisposable {
             }
             try {
                 return JSON.parse(json);
-            } catch (err) {
+            } catch {
                 return {};
             }
         };
@@ -154,11 +154,16 @@ export class WorksheetPermissionService extends RxDisposable {
                 pluginName: RULE_MODEL_PLUGIN_NAME,
                 businesses: [UniverInstanceType.UNIVER_SHEET],
                 onLoad: (unitId, resources) => {
-                    this._worksheetProtectionRuleModel.fromObject(resources);
-                    Object.keys(resources).forEach((subUnitId) => {
+                    const current = this._worksheetProtectionRuleModel.toObject();
+                    current[unitId] = resources[unitId] || [];
+                    this._worksheetProtectionRuleModel.fromObject(current);
+                    const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+                    workbook?.getSheets().forEach((sheet) => {
+                        const subUnitId = sheet.getSheetId();
+                        const protectedSheet = current[unitId].some((rule) => rule.subUnitId === subUnitId);
                         getAllWorksheetPermissionPoint().forEach((F) => {
                             const instance = new F(unitId, subUnitId);
-                            instance.value = false;
+                            instance.value = !protectedSheet;
                             this._addOrUpdatePermissionPoint(instance);
                         });
                     });
@@ -188,9 +193,9 @@ export class WorksheetPermissionService extends RxDisposable {
     }
 
     private _initPointSnapshot() {
-        const toJson = () => {
+        const toJson = (unitId: string) => {
             const object = this._worksheetProtectionPointRuleModel.toObject();
-            return JSON.stringify(object);
+            return JSON.stringify(object[unitId] ? { [unitId]: object[unitId] } : {});
         };
         const parseJson = (json: string): IObjectPointModel => {
             if (!json) {
@@ -198,7 +203,7 @@ export class WorksheetPermissionService extends RxDisposable {
             }
             try {
                 return JSON.parse(json);
-            } catch (err) {
+            } catch {
                 return {};
             }
         };
@@ -209,8 +214,12 @@ export class WorksheetPermissionService extends RxDisposable {
                 pluginName: POINT_MODEL_PLUGIN_NAME,
                 businesses: [UniverInstanceType.UNIVER_SHEET],
                 onLoad: (unitId, resources) => {
-                    this._worksheetProtectionPointRuleModel.fromObject(resources);
-                    Object.keys(resources).forEach((subUnitId) => {
+                    const current = this._worksheetProtectionPointRuleModel.toObject();
+                    current[unitId] = resources[unitId] || [];
+                    this._worksheetProtectionPointRuleModel.fromObject(current);
+                    const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+                    workbook?.getSheets().forEach((sheet) => {
+                        const subUnitId = sheet.getSheetId();
                         getAllWorksheetPermissionPointByPointPanel().forEach((F) => {
                             const instance = new F(unitId, subUnitId);
                             this._addOrUpdatePermissionPoint(instance);

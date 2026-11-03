@@ -15,7 +15,6 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import type { ISetWorksheetNameMutationParams } from '../mutations/set-worksheet-name.mutation';
 import {
     CommandType,
     ICommandService,
@@ -23,6 +22,7 @@ import {
     IUniverInstanceService,
     sequenceExecute,
 } from '@univerjs/core';
+import type { ISetWorksheetNameMutationParams } from '../mutations/set-worksheet-name.mutation';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import {
     SetWorksheetNameMutation,
@@ -53,7 +53,12 @@ export const SetWorksheetNameCommand: ICommand = {
             return false;
         }
 
-        const { unitId, subUnitId, worksheet } = target;
+        const { unitId, subUnitId, worksheet, workbook } = target;
+        if (workbook.getSheets().some((sheet) => (
+            sheet.getSheetId() !== subUnitId && sheet.getName().toLowerCase() === params.name.toLowerCase()
+        ))) {
+            return false;
+        }
         const redoMutationParams: ISetWorksheetNameMutationParams = {
             subUnitId,
             name: params.name,

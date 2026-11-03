@@ -279,6 +279,23 @@ function createSheetHarness() {
 }
 
 describe('SheetCanvasPopManagerService', () => {
+    it('releases feature menus without removing a newer registration of the same callback', () => {
+        const { service } = createSheetHarness();
+        const callback = vi.fn(() => []);
+        const first = service.registerFeatureMenu('image' as never, callback, 'first.title');
+        const second = service.registerFeatureMenu('image' as never, callback, 'second.title');
+
+        first.dispose();
+        expect(service.getFeatureMenuTitle('image' as never)).toBe('second.title');
+        expect(service.getFeatureMenu('unit', 'sheet', 'drawing', 'image' as never)).toEqual([]);
+        second.dispose();
+        second.dispose();
+        expect(service.getFeatureMenuTitle('image' as never)).toBeUndefined();
+        expect(service.getFeatureMenu('unit', 'sheet', 'drawing', 'image' as never)).toBeUndefined();
+        expect(callback).toHaveBeenCalledTimes(1);
+        service.dispose();
+    });
+
     it('resolves registered feature menus for the drawing that opened the menu', () => {
         const { service } = createSheetHarness();
         const callback = vi.fn((unitId: string, subUnitId: string, drawingId: string, drawingType: unknown) => [{

@@ -17,7 +17,6 @@
 import type { Dependency, ICommandInfo, IWorkbookData } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { IInsertSheetMutationParams, IRemoveRowsMutationParams } from '@univerjs/sheets';
-import type { ITestBed } from '../../facade/__tests__/create-test-bed';
 import { LocaleType } from '@univerjs/core';
 import {
     ActiveDirtyManagerService,
@@ -39,6 +38,7 @@ import {
     SetWorkbookCalculationSettingsMutation,
 } from '@univerjs/sheets';
 import { afterEach, describe, expect, it } from 'vitest';
+import type { ITestBed } from '../../facade/__tests__/create-test-bed';
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
 import { ActiveDirtyController } from '../active-dirty.controller';
 
@@ -396,6 +396,7 @@ describe('ActiveDirtyController', () => {
                     'sheet-added': 'Added Sheet',
                 },
             },
+            dirtyRanges: [],
         });
 
         expect(getDirtyData(testBed, {
@@ -418,6 +419,29 @@ describe('ActiveDirtyController', () => {
                     DIRTY_NAME: 'Sheet1!$A$1',
                 },
             },
+        });
+    });
+
+    it('recalculates cached formulas when an inserted sheet changes their name scope', () => {
+        testBed = createControllerTestBed();
+        testBed.injector.get(ActiveDirtyController);
+        const sheet = {
+            ...createWorkbookData().sheets.sheet1,
+            id: 'sheet-copy',
+            name: 'Sheet Copy',
+            cellData: { 0: { 2: { f: '=ScopedRate', v: 5 } } },
+        };
+
+        expect(getDirtyData(testBed, {
+            id: InsertSheetMutation.id,
+            params: { unitId: 'test', sheet },
+        })).toEqual({
+            dirtyNameMap: { test: { 'sheet-copy': 'Sheet Copy' } },
+            dirtyRanges: [{
+                unitId: 'test',
+                sheetId: 'sheet-copy',
+                range: { startRow: 0, endRow: 5, startColumn: 0, endColumn: 7 },
+            }],
         });
     });
 });

@@ -15,9 +15,31 @@
  */
 
 import type { IMutationInfo, Workbook } from '@univerjs/core';
-import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { BuildTextUtils, CustomRangeType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, Inject, IUniverInstanceService, ObjectMatrix, Range, TextX, Tools, UniverInstanceType } from '@univerjs/core';
-import { AFTER_CELL_EDIT, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, getSheetCommandTarget, SetRangeValuesCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import type { IClearSelectionAllCommandParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import {
+    BuildTextUtils,
+    CustomRangeType,
+    Disposable,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    generateRandomId,
+    Inject,
+    IUniverInstanceService,
+    ObjectMatrix,
+    Rectangle,
+    TextX,
+    Tools,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    AFTER_CELL_EDIT,
+    ClearSelectionAllCommand,
+    ClearSelectionContentCommand,
+    ClearSelectionFormatCommand,
+    getSheetCommandTarget,
+    SetRangeValuesCommand,
+    SheetInterceptorService,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { AddHyperLinkMutation } from '../commands/mutations/add-hyper-link.mutation';
 import { RemoveHyperLinkMutation } from '../commands/mutations/remove-hyper-link.mutation';
 import { HyperLinkModel } from '../models/hyper-link.model';
@@ -97,13 +119,28 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                 ) {
                     const redos: IMutationInfo[] = [];
                     const undos: IMutationInfo[] = [];
-                    const selection = this._selectionManagerService.getCurrentLastSelection();
-                    const target = getSheetCommandTarget(this._univerInstanceService, command.params);
-                    if (selection && target) {
+                    const params = command.params as IClearSelectionAllCommandParams | undefined;
+                    const ranges = params?.ranges ?? this._selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+                    const target = getSheetCommandTarget(this._univerInstanceService, params);
+                    if (ranges?.length && target) {
                         const { unitId, subUnitId } = target;
-                        Range.foreach(selection.range, (row, col) => {
-                            const link = this._hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, col);
-                            if (link) {
+                        const onlyRange = ranges.length === 1 ? ranges[0] : null;
+                        let links: ReturnType<HyperLinkModel['getSubUnit']>;
+                        if (onlyRange && onlyRange.startRow === onlyRange.endRow && onlyRange.startColumn === onlyRange.endColumn) {
+                            const link = this._hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, onlyRange.startRow, onlyRange.startColumn);
+                            links = link ? [link] : [];
+                        } else {
+                            links = this._hyperLinkModel.getSubUnit(unitId, subUnitId);
+                        }
+                        for (const link of links) {
+                            const cellRange = {
+                                startRow: link.row,
+                                endRow: link.row,
+                                startColumn: link.column,
+                                endColumn: link.column,
+                            };
+                            if (ranges.some((range) => Rectangle.contains(range, cellRange))
+                                && !target.worksheet.getRowFiltered(link.row)) {
                                 redos.push({
                                     id: RemoveHyperLinkMutation.id,
                                     params: {
@@ -121,7 +158,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                                     },
                                 });
                             }
-                        });
+                        }
                     }
 
                     return {

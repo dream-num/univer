@@ -16,23 +16,53 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { UnitAction } from '@univerjs/protocol';
-import type { IAddRangeProtectionMutationParams } from '../../commands/mutations/add-range-protection.mutation';
-import type { IAddWorksheetProtectionParams } from '../../commands/mutations/add-worksheet-protection.mutation';
-import type { ISetWorksheetPermissionPointsMutationParams } from '../../commands/mutations/set-worksheet-permission-points.mutation';
-import { Disposable, IAuthzIoService, ICommandService, Inject, IPermissionService, IUndoRedoService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import {
+    Disposable,
+    IAuthzIoService,
+    ICommandService,
+    ILogService,
+    Inject,
+    IPermissionService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    UniverInstanceType,
+    UserManagerService,
+} from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
 import { skip } from 'rxjs';
+import type { IAddRangeProtectionMutationParams } from '../../commands/mutations/add-range-protection.mutation';
+import type { IAddWorksheetProtectionParams } from '../../commands/mutations/add-worksheet-protection.mutation';
+import type {
+    ISetWorksheetPermissionPointsMutationParams,
+} from '../../commands/mutations/set-worksheet-permission-points.mutation';
 import { AddRangeProtectionMutation } from '../../commands/mutations/add-range-protection.mutation';
 import { AddWorksheetProtectionMutation } from '../../commands/mutations/add-worksheet-protection.mutation';
-import { SetWorksheetPermissionPointsMutation } from '../../commands/mutations/set-worksheet-permission-points.mutation';
+import {
+    SetWorksheetPermissionPointsMutation,
+} from '../../commands/mutations/set-worksheet-permission-points.mutation';
 import { RangeProtectionRuleModel } from '../../models/range-protection-rule.model';
-import { defaultWorksheetPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from '../../services/permission';
 import { baseProtectionActions, getAllRangePermissionPoint } from '../../services/permission/range-permission/util';
-import { defaultWorkbookPermissionPoints, getAllWorkbookPermissionPoint } from '../../services/permission/workbook-permission';
+import {
+    defaultWorkbookPermissionPoints,
+    getAllWorkbookPermissionPoint,
+} from '../../services/permission/workbook-permission/util';
 import { WorkbookPermissionService } from '../../services/permission/workbook-permission/workbook-permission.service';
-import { WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '../../services/permission/worksheet-permission';
+import {
+    defaultWorksheetPermissionPoint,
+    getAllWorksheetPermissionPoint,
+    getAllWorksheetPermissionPointByPointPanel,
+} from '../../services/permission/worksheet-permission/utils';
+import {
+    WorksheetProtectionPointModel,
+} from '../../services/permission/worksheet-permission/worksheet-permission-point.model';
+import {
+    WorksheetProtectionRuleModel,
+} from '../../services/permission/worksheet-permission/worksheet-permission-rule.model';
 
 export class SheetPermissionInitController extends Disposable {
+    private _initialized = false;
+    private readonly _pendingPermissionQueries = new Map<string, object>();
+
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IPermissionService private _permissionService: IPermissionService,
@@ -43,27 +73,65 @@ export class SheetPermissionInitController extends Disposable {
         @Inject(WorksheetProtectionPointModel) private _worksheetProtectionPointRuleModel: WorksheetProtectionPointModel,
         @Inject(WorkbookPermissionService) private _workbookPermissionService: WorkbookPermissionService,
         @Inject(IUndoRedoService) private _undoRedoService: IUndoRedoService,
-        @Inject(ICommandService) private _commandService: ICommandService
+        @Inject(ICommandService) private _commandService: ICommandService,
+        @ILogService private readonly _logService: ILogService
     ) {
         super();
     }
 
     public initPermission() {
-        this._initRangePermissionFromSnapshot();
+        if (this._initialized) {
+            return;
+        }
+        this._initialized = true;
+        this._initRangePermissionFromSnapshot().catch((error) => this._logService.error(error));
         this._initRangePermissionChange();
-        this._initWorksheetPermissionFromSnapshot();
+        this._initWorksheetPermissionFromSnapshot().catch((error) => this._logService.error(error));
         this._initWorksheetPermissionChange();
         this._initWorksheetPermissionPointsChange();
-        this._initWorkbookPermissionFromSnapshot();
+        this._initWorkbookPermissionFromSnapshot().catch((error) => this._logService.error(error));
         this._initUserChange();
         this._refreshPermissionByCollaCreate();
+        this.disposeWithMe(
+            this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe(({ unit }) => {
+                return Promise.all([
+                    this.initWorkbookPermissionChange(unit.getUnitId()),
+                    this._initWorksheetPermissionFromSnapshot(unit),
+                    this._initRangePermissionFromSnapshot(unit),
+                ]).catch((error) => this._logService.error(error));
+            })
+        );
+    }
+
+    private _trackPermissionChanges(ids: string[]) {
+        const pendingIds = new Set(ids);
+        const changed = new Set<string>();
+        const request = {};
+        pendingIds.forEach((id) => this._pendingPermissionQueries.set(id, request));
+        const subscription = this._permissionService.permissionPointUpdate$.subscribe((point) => {
+            if (pendingIds.has(point.id)) {
+                changed.add(point.id);
+            }
+        });
+        const cleanup = this.disposeWithMe(() => {
+            subscription.unsubscribe();
+            pendingIds.forEach((id) => {
+                if (this._pendingPermissionQueries.get(id) === request) {
+                    this._pendingPermissionQueries.delete(id);
+                }
+            });
+        });
+        return {
+            canApply: (id: string) => this._pendingPermissionQueries.get(id) === request && !changed.has(id),
+            dispose: () => cleanup.dispose(),
+        };
     }
 
     public refreshRangeProtectPermission() {
-        this._initRangePermissionFromSnapshot();
+        this._initRangePermissionFromSnapshot().catch((error) => this._logService.error(error));
     }
 
-    private async _initRangePermissionFromSnapshot() {
+    private async _initRangePermissionFromSnapshot(owner?: Workbook) {
         const initRangePermissionFunc = async (workbook: Workbook) => {
             const allAllowedParams: {
                 objectID: string;
@@ -92,13 +160,20 @@ export class SheetPermissionInitController extends Disposable {
                 return;
             }
 
-            this._authzIoService.batchAllowed(allAllowedParams).then((permissionMap) => {
+            const changes = this._trackPermissionChanges(allAllowedParams.flatMap((params) => {
+                const rule = permissionIdWithRuleInstanceMap.get(params.objectID);
+                return getAllRangePermissionPoint().map((F) => new F(unitId, rule.subUnitId, params.objectID).id);
+            }));
+            return this._authzIoService.batchAllowed(allAllowedParams).then((permissionMap) => {
+                if (this._disposed || this._univerInstanceService.getUnit(unitId) !== workbook) {
+                    return;
+                }
                 permissionMap.forEach((item) => {
                     const rule = permissionIdWithRuleInstanceMap.get(item.objectID);
                     if (rule) {
                         // Re-check if the rule still exists, as it may have been deleted during the async operation
                         const currentRule = this._rangeProtectionRuleModel.getRule(unitId, rule.subUnitId, rule.id);
-                        if (!currentRule) {
+                        if (!currentRule || currentRule.permissionId !== item.objectID) {
                             return;
                         }
 
@@ -106,18 +181,21 @@ export class SheetPermissionInitController extends Disposable {
                             const instance = new F(unitId, rule.subUnitId, item.objectID);
                             const unitActionName = instance.subType;
                             const result = item.actions.find((action) => action.action === unitActionName);
-                            if (result?.allowed !== undefined) {
+                            if (result?.allowed !== undefined && changes.canApply(instance.id)) {
                                 this._permissionService.updatePermissionPoint(instance.id, result.allowed);
                             }
                         });
                     }
                 });
                 this._rangeProtectionRuleModel.changeRuleInitState(true);
-            });
+            }).finally(changes.dispose);
         };
 
-        await Promise.all(this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).map((workbook) => initRangePermissionFunc(workbook)));
-        this._rangeProtectionRuleModel.changeRuleInitState(true);
+        const workbooks = owner ? [owner] : this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        await Promise.all(workbooks.map((workbook) => initRangePermissionFunc(workbook)));
+        if (!this._disposed) {
+            this._rangeProtectionRuleModel.changeRuleInitState(true);
+        }
     }
 
     private _initRangePermissionChange() {
@@ -173,26 +251,36 @@ export class SheetPermissionInitController extends Disposable {
         if (!unitId) {
             return;
         }
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) {
+            return;
+        }
+        const changes = this._trackPermissionChanges(getAllWorkbookPermissionPoint().map((F) => new F(unitId).id));
         return this._authzIoService.allowed({
             objectID: unitId,
             objectType: UnitObject.Workbook,
             unitID: unitId,
             actions: defaultWorkbookPermissionPoints,
         }).then((actionList) => {
+            if (this._disposed || this._univerInstanceService.getUnit(unitId) !== workbook) {
+                return;
+            }
             getAllWorkbookPermissionPoint().forEach((F) => {
                 const instance = new F(unitId);
                 const unitActionName = instance.subType;
                 const action = actionList.find((item) => item.action === unitActionName);
-                if (action) {
+                if (action && changes.canApply(instance.id)) {
                     this._permissionService.updatePermissionPoint(instance.id, action.allowed);
                 }
             });
-        });
+        }).finally(changes.dispose);
     }
 
     private async _initWorkbookPermissionFromSnapshot() {
         await Promise.all(this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).map((workbook) => this.initWorkbookPermissionChange(workbook.getUnitId())));
-        this._workbookPermissionService.changeUnitInitState(true);
+        if (!this._disposed) {
+            this._workbookPermissionService.changeUnitInitState(true);
+        }
     }
 
     private _initWorksheetPermissionChange() {
@@ -260,7 +348,7 @@ export class SheetPermissionInitController extends Disposable {
         );
     }
 
-    private async _initWorksheetPermissionFromSnapshot() {
+    private async _initWorksheetPermissionFromSnapshot(owner?: Workbook) {
         const initSheetPermissionFunc = async (workbook: Workbook) => {
             const allAllowedParams: {
                 objectID: string;
@@ -301,7 +389,15 @@ export class SheetPermissionInitController extends Disposable {
                 return;
             }
 
-            this._authzIoService.batchAllowed(allAllowedParams).then((permissionMap) => {
+            const changes = this._trackPermissionChanges(allAllowedParams.flatMap((params) => {
+                const rule = permissionIdWithRuleInstanceMap.get(params.objectID);
+                return [...getAllWorksheetPermissionPoint(), ...getAllWorksheetPermissionPointByPointPanel()]
+                    .map((F) => new F(unitId, rule.subUnitId).id);
+            }));
+            return this._authzIoService.batchAllowed(allAllowedParams).then((permissionMap) => {
+                if (this._disposed || this._univerInstanceService.getUnit(unitId) !== workbook) {
+                    return;
+                }
                 permissionMap.forEach((item) => {
                     const rule = permissionIdWithRuleInstanceMap.get(item.objectID);
                     if (rule) {
@@ -316,18 +412,21 @@ export class SheetPermissionInitController extends Disposable {
                             const instance = new F(unitId, rule.subUnitId);
                             const unitActionName = instance.subType;
                             const result = item.actions.find((action) => action.action === unitActionName);
-                            if (result?.allowed !== undefined) {
+                            if (result?.allowed !== undefined && changes.canApply(instance.id)) {
                                 this._permissionService.updatePermissionPoint(instance.id, result.allowed);
                             }
                         });
                     }
                 });
                 this._worksheetProtectionRuleModel.changeRuleInitState(true);
-            });
+            }).finally(changes.dispose);
         };
 
-        await Promise.all(this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).map((workbook) => initSheetPermissionFunc(workbook)));
-        this._worksheetProtectionRuleModel.changeRuleInitState(true);
+        const workbooks = owner ? [owner] : this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        await Promise.all(workbooks.map((workbook) => initSheetPermissionFunc(workbook)));
+        if (!this._disposed) {
+            this._worksheetProtectionRuleModel.changeRuleInitState(true);
+        }
     }
 
     private _initUserChange() {
@@ -376,9 +475,9 @@ export class SheetPermissionInitController extends Disposable {
                         });
                     });
 
-                    this._initWorkbookPermissionFromSnapshot();
-                    this._initWorksheetPermissionFromSnapshot();
-                    this._initRangePermissionFromSnapshot();
+                    this._initWorkbookPermissionFromSnapshot().catch((error) => this._logService.error(error));
+                    this._initWorksheetPermissionFromSnapshot().catch((error) => this._logService.error(error));
+                    this._initRangePermissionFromSnapshot().catch((error) => this._logService.error(error));
                 });
             })
         );

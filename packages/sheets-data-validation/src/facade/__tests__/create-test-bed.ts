@@ -66,6 +66,7 @@ import {
     SheetDataValidationModel,
     SheetsDataValidationValidatorService,
 } from '@univerjs/sheets-data-validation';
+import { FormulaRefRangeService } from '@univerjs/sheets-formula';
 import enUS from '@univerjs/sheets/locale/en-US';
 import zhCN from '@univerjs/sheets/locale/zh-CN';
 import { DataValidationController } from '../../controllers/dv.controller';
@@ -150,6 +151,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);
             injector.add([RefRangeService]);
+            injector.add([FormulaRefRangeService]);
             injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
             injector.add([ISuperTableService, { useClass: SuperTableService }]);
@@ -188,7 +190,10 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
     }
 
     // load i18n
-    injector.get(LocaleService).load({ zhCN, enUS });
+    const localeService = injector.get(LocaleService);
+    localeService.load({ zhCN, enUS });
+    localeService.setLocale(LocaleType.EN_US);
+    localeService.setDirection('ltr');
 
     // load theme service
     const themeService = injector.get(ThemeService);

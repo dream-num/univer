@@ -15,10 +15,6 @@
  */
 
 import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
-import type { CFRuleType } from '../../base/const';
-import type { IConditionFormattingRule } from '../../models/type';
-import type { IDeleteConditionalRuleMutationParams } from '../mutations/delete-conditional-rule.mutation';
-import type { ISetConditionalRuleMutationParams } from '../mutations/set-conditional-rule.mutation';
 import {
     CommandType,
     ICommandService,
@@ -26,7 +22,12 @@ import {
     IUniverInstanceService,
     sequenceExecute,
 } from '@univerjs/core';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
+import type { IConditionFormattingRule } from '../../models/type';
+import type { IDeleteConditionalRuleMutationParams } from '../mutations/delete-conditional-rule.mutation';
+import type { ISetConditionalRuleMutationParams } from '../mutations/set-conditional-rule.mutation';
+import { CFRuleType, CFSubRuleType } from '../../base/const';
 import { ConditionalFormattingRangeIndexModel } from '../../models/conditional-formatting-range-index-model';
 import { ConditionalFormattingRangeTransformService } from '../../services/conditional-formatting-range-transform.service';
 import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../mutations/delete-conditional-rule.mutation';
@@ -53,7 +54,9 @@ export const ClearRangeCfCommand: ICommand<IClearRangeCfParams> = {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
 
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { unitId, subUnitId } = target;
         const ranges = params.ranges ?? selectionManagerService.getCurrentSelections()?.map((selection) => selection.range) ?? [];
@@ -69,7 +72,20 @@ export const ClearRangeCfCommand: ICommand<IClearRangeCfParams> = {
         allRuleList.forEach((oldRule) => {
             const newRanges = conditionalFormattingRangeTransformService.subtractRanges(oldRule.ranges, ranges);
             if (newRanges.length) {
-                const rule: IConditionFormattingRule = { ...oldRule, ranges: newRanges };
+                let nextConfig = oldRule.rule;
+                if (oldRule.rule.type === CFRuleType.highlightCell && oldRule.rule.subType === CFSubRuleType.formula) {
+                    const topLeft = (items: IRange[]) => items.reduce((first, item) =>
+                        item.startRow < first.startRow || (item.startRow === first.startRow && item.startColumn < first.startColumn) ? item : first);
+                    const previous = topLeft(oldRule.ranges);
+                    const current = topLeft(newRanges);
+                    const rowOffset = current.startRow - previous.startRow;
+                    const columnOffset = current.startColumn - previous.startColumn;
+                    if (rowOffset || columnOffset) {
+                        const value = accessor.get(LexerTreeBuilder).moveFormulaRefOffset(oldRule.rule.value, columnOffset, rowOffset);
+                        nextConfig = { ...oldRule.rule, value };
+                    }
+                }
+                const rule: IConditionFormattingRule = { ...oldRule, ranges: newRanges, rule: nextConfig };
                 const params = { unitId, subUnitId, rule } as ISetConditionalRuleMutationParams;
                 const undo = setConditionalRuleMutationUndoFactory(accessor, params);
                 redos.push({ id: SetConditionalRuleMutation.id, params });

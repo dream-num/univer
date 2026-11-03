@@ -14,47 +14,132 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, Nullable, Workbook } from '@univerjs/core';
+import type { Injector } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
+import {
+    ICommandService,
+    IUndoRedoService,
+    LocaleService,
+    LocaleType,
+    RedoCommand,
+    Tools,
+    UndoCommand,
+} from '@univerjs/core';
+import { IDefinedNamesService, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
 import { RemoveDefinedNameCommand, SetDefinedNameCommand } from '@univerjs/sheets';
-import { beforeEach, describe, expect, it } from 'vitest';
+import enUS from '@univerjs/sheets/locale/en-US';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { DefinedNameDataController, SCOPE_WORKBOOK_VALUE_DEFINED_NAME } from '../../controllers/defined-name-data.controller';
 import { createFacadeTestBed } from './create-test-bed';
 
 describe('Test FDefinedName', () => {
     let get: Injector['get'];
     let commandService: ICommandService;
     let univerAPI: FUniver;
-    let getValueByPosition: (
-        startRow: number,
-        startColumn: number,
-        endRow: number,
-        endColumn: number
-    ) => Nullable<ICellData>;
+    let testBed: ReturnType<typeof createFacadeTestBed>;
 
     beforeEach(() => {
-        const testBed = createFacadeTestBed();
+        testBed = createFacadeTestBed({
+            id: 'test',
+            name: 'Scoped aliases',
+            appVersion: '1.0.0',
+            locale: LocaleType.EN_US,
+            styles: {},
+            sheetOrder: ['sheet1', 'scratch'],
+            sheets: {
+                sheet1: { id: 'sheet1', name: 'Orders', rowCount: 100, columnCount: 100 },
+                scratch: { id: 'scratch', name: 'Scratch', rowCount: 20, columnCount: 10 },
+            },
+        }, [[DefinedNameDataController]]);
         get = testBed.get;
         univerAPI = testBed.univerAPI;
+        get(DefinedNameDataController);
+        get(LocaleService).load({ [LocaleType.EN_US]: enUS });
+        get(LocaleService).setLocale(LocaleType.EN_US);
+        get(LocaleService).setDirection('ltr');
 
         commandService = get(ICommandService);
         commandService.registerCommand(RemoveDefinedNameCommand);
         commandService.registerCommand(SetDefinedNameMutation);
         commandService.registerCommand(RemoveDefinedNameMutation);
         commandService.registerCommand(SetDefinedNameCommand);
+    });
 
-        getValueByPosition = (
-            startRow: number,
-            startColumn: number,
-            endRow: number,
-            endColumn: number
-        ): Nullable<ICellData> =>
-            get(IUniverInstanceService)
-                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
-                ?.getSheetBySheetId('sheet1')
-                ?.getRange(startRow, startColumn, endRow, endColumn)
-                .getValue();
+    afterEach(() => testBed.univer.dispose());
+
+    it.each(['workbook-first', 'worksheet-first'])('allows independent same-name aliases across scopes: %s', (order) => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        const orders = workbook.getActiveSheet();
+        const scratch = workbook.getSheetByName('Scratch')!;
+        const history = get(IUndoRedoService);
+        const insertGlobal = () => workbook.insertDefinedName('ScopedRate', '=8');
+        const insertLocal = () => orders.insertDefinedName('ScopedRate', '=5');
+        if (order === 'workbook-first') {
+            insertGlobal();
+            insertLocal();
+        } else {
+            insertLocal();
+            insertGlobal();
+        }
+        scratch.insertDefinedName('ScopedRate', '=7');
+
+        expect(workbook.getDefinedNames().map((name) => ({
+            scope: name.getLocalSheetId(),
+            formula: name.getFormulaOrRefString(),
+        }))).toEqual(expect.arrayContaining([
+            { scope: SCOPE_WORKBOOK_VALUE_DEFINED_NAME, formula: '=8' },
+            { scope: orders.getSheetId(), formula: '=5' },
+            { scope: scratch.getSheetId(), formula: '=7' },
+        ]));
+        expect(workbook.getDefinedNames()).toHaveLength(3);
+        const names = get(IDefinedNamesService);
+        expect(names.getValueByName(workbook.getId(), 'ScopedRate', orders.getSheetId())?.formulaOrRefString).toBe('=5');
+        expect(names.getValueByName(workbook.getId(), 'ScopedRate', scratch.getSheetId())?.formulaOrRefString).toBe('=7');
+        expect(names.getValueByName(workbook.getId(), 'ScopedRate')?.formulaOrRefString).toBe('=8');
+        const snapshot = () => Tools.deepClone({
+            workbook: workbook.save(),
+            status: history.getUndoRedoStatus(workbook.getId()),
+            undo: history.pitchTopUndoElement(),
+            redo: history.pitchTopRedoElement(),
+        });
+        const beforeDuplicate = snapshot();
+        const normalizeNameResource = (data: ReturnType<typeof workbook.save>) => ({
+            ...data,
+            resources: data.resources?.map((resource) => resource.name === 'SHEET_DEFINED_NAME_PLUGIN'
+                ? { ...resource, data: JSON.parse(resource.data) as Record<string, unknown> }
+                : resource),
+        });
+        for (const insert of [
+            () => workbook.insertDefinedName('scopedrate', '=9'),
+            () => orders.insertDefinedName('SCOPEDRATE', '=9'),
+            () => scratch.insertDefinedName('scopedrate', '=9'),
+        ]) {
+            expect(insert).toThrow('Name already exists');
+            expect(snapshot()).toEqual(beforeDuplicate);
+        }
+
+        const local = orders.getDefinedNames()[0];
+        const updated = local.toBuilder().setName('SCOPEDRATE').setFormula('6').build();
+        workbook.updateDefinedNameBuilder(updated);
+        expect(orders.getDefinedNames()[0].toBuilder().build().id).toBe(updated.id);
+        expect(orders.getDefinedNames()[0].getFormulaOrRefString()).toBe('=6');
+        const beforeScopeConflict = snapshot();
+        expect(() => orders.getDefinedNames()[0].toBuilder().setScopeToWorkbook().build()).toThrow('Name already exists');
+        expect(snapshot()).toEqual(beforeScopeConflict);
+        expect(commandService.syncExecuteCommand(UndoCommand.id)).toBe(true);
+        expect(orders.getDefinedNames()[0].getFormulaOrRefString()).toBe('=5');
+        expect(normalizeNameResource(workbook.save())).toEqual(normalizeNameResource(beforeDuplicate.workbook));
+        expect(commandService.syncExecuteCommand(RedoCommand.id)).toBe(true);
+        expect(orders.getDefinedNames()[0].getFormulaOrRefString()).toBe('=6');
+        expect(normalizeNameResource(workbook.save())).toEqual(normalizeNameResource(beforeScopeConflict.workbook));
+        const saved = workbook.save();
+        const savedNames = Tools.deepClone(names.getDefinedNameMap(workbook.getId()));
+        expect(saved.resources?.find((resource) => resource.name === 'SHEET_DEFINED_NAME_PLUGIN')?.data)
+            .toBe(JSON.stringify(savedNames));
+        expect(univerAPI.disposeUnit(workbook.getId())).toBe(true);
+        const restored = univerAPI.createWorkbook(saved);
+        expect(names.getDefinedNameMap(restored.getId())).toEqual(savedNames);
+        expect(restored.save().resources).toEqual(saved.resources);
     });
 
     it('defined name insertDefinedName', () => {

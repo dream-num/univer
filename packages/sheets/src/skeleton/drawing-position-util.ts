@@ -93,7 +93,10 @@ export function convertPositionCellToSheetOverGrid(
     const left = precisionTo(startSelectionX + fromColumnOffset, 1);
     const top = precisionTo(startSelectionY + fromRowOffset, 1);
 
-    const endSelectionCell = skeleton.getCellIndexAndOffsetByPosition(left + width, top + height, 1, 1, { x: 0, y: 0 });
+    const endSelectionCell = skeleton.getOffsetRelativeToRowCol(
+        left + width - skeleton.rowHeaderWidthAndMarginLeft,
+        top + height - skeleton.columnHeaderHeightAndMarginTop
+    );
 
     return {
         unitId,

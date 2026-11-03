@@ -16,10 +16,10 @@
 
 import type { IDisposable, IDocumentData, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import type { IUpdateRichHyperLinkMutationParams } from '../commands/mutations/update-hyper-link.mutation';
 import { CustomRangeType, Disposable, DisposableCollection, ICommandService, Inject, isValidRange, IUniverInstanceService, ObjectMatrix, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { getSheetCommandTarget, handleDefaultRangeChangeWithEffectRefCommands, RefRangeService, SetRangeValuesMutation } from '@univerjs/sheets';
+import type { IUpdateRichHyperLinkMutationParams } from '../commands/mutations/update-hyper-link.mutation';
 import { UpdateRichHyperLinkMutation } from '../commands/mutations/update-hyper-link.mutation';
 import { ERROR_RANGE } from '../types/const';
 
@@ -120,7 +120,7 @@ export class SheetsHyperLinkRichTextRefRangeController extends Disposable {
                                                 row,
                                                 col,
                                                 id: customRange.rangeId,
-                                                url: `#gid=${subUnitId}&range=${newRange ? serializeRange(newRange) : ERROR_RANGE}`,
+                                                url: `#gid=${worksheet.getSheetId()}&range=${newRange ? serializeRange(newRange) : ERROR_RANGE}`,
                                             },
                                         }],
                                         undos: [{

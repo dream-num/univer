@@ -24,9 +24,6 @@ import type {
     Workbook,
     Worksheet,
 } from '@univerjs/core';
-import type { LocaleKey } from '../../locale/types';
-import type { IMoveRangeMutationParams } from '../mutations/move-range.mutation';
-import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import {
     cellToRange,
     CommandType,
@@ -42,6 +39,9 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
+import type { IMoveRangeMutationParams } from '../mutations/move-range.mutation';
+import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SelectionMoveType } from '../../services/selections/type';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { MoveRangeMutation } from '../mutations/move-range.mutation';
@@ -172,7 +172,13 @@ export function getMoveRangeCommandMutations(
 
     const commandInfo = {
         id: MoveRangeCommand.id,
-        params,
+        params: {
+            ...params,
+            fromUnitId: unitId,
+            toUnitId: unitId,
+            fromSubUnitId,
+            toSubUnitId,
+        },
     };
 
     const interceptorCommands = sheetInterceptorService.onCommandExecute(commandInfo);

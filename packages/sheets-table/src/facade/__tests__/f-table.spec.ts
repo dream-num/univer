@@ -14,58 +14,30 @@
  * limitations under the License.
  */
 
-import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
+import type { IWorkbookData } from '@univerjs/core';
 import {
-    ICommandService,
     ILogService,
-    Inject,
-    Injector,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
     LogLevel,
-    Plugin,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
 import {
-    DefinedNamesService,
-    FormulaDataModel,
-    FunctionService,
-    IDefinedNamesService,
-    IFunctionService,
-    ISuperTableService,
-    LexerTreeBuilder,
-    SuperTableService,
-} from '@univerjs/engine-formula';
-import {
-    AddRangeThemeMutation,
-    RefRangeService,
-    RemoveRangeThemeMutation,
-    SheetInterceptorService,
-    SheetRangeThemeModel,
-    SheetSkeletonService,
-    SheetsSelectionsService,
-} from '@univerjs/sheets';
-import {
-    AddSheetTableCommand,
-    AddSheetTableMutation,
-    AddTableThemeCommand,
-    DeleteSheetTableCommand,
-    DeleteSheetTableMutation,
-    SetSheetTableCommand,
-    SetSheetTableFilterCommand,
-    SetSheetTableFilterMutation,
-    SetSheetTableMutation,
     SheetTableService,
     TableColumnFilterTypeEnum,
     TableConditionTypeEnum,
     TableManager,
     TableNumberCompareTypeEnum,
 } from '@univerjs/sheets-table';
+import sheetsEnUS from '@univerjs/sheets/locale/en-US';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import enUS from '../../locale/en-US';
+import { UniverSheetsTablePlugin } from '../../plugin';
 import '@univerjs/sheets/facade';
 import '@univerjs/sheets-table/facade';
 
@@ -89,45 +61,18 @@ function createWorkbookData(): IWorkbookData {
     };
 }
 
-function createTableFacadeTestBed(dependencies: Dependency[]) {
+function createTableFacadeTestBed() {
     const univer = new Univer();
     const injector = univer.__getInjector();
 
-    class TestPlugin extends Plugin {
-        static override pluginName = 'test-plugin';
-        static override type = UniverInstanceType.UNIVER_SHEET;
-
-        constructor(
-            _config: undefined,
-            @Inject(Injector) override readonly _injector: Injector
-        ) {
-            super();
-        }
-
-        override onStarting(): void {
-            const injector = this._injector;
-            injector.add([SheetsSelectionsService]);
-            injector.add([SheetInterceptorService]);
-            injector.add([IFunctionService, { useClass: FunctionService }]);
-            injector.add([SheetSkeletonService]);
-            injector.add([SheetRangeThemeModel]);
-            injector.add([FormulaDataModel]);
-            injector.add([LexerTreeBuilder]);
-            injector.add([RefRangeService]);
-            injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
-            injector.add([ISuperTableService, { useClass: SuperTableService }]);
-            dependencies.forEach((dependency) => injector.add(dependency));
-
-            const localeService = injector.get(LocaleService);
-            localeService.load({ [LocaleType.EN_US]: enUS });
-            localeService.setLocale(LocaleType.EN_US);
-
-            this._injector.get(SheetInterceptorService);
-        }
-    }
-
-    univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUnit<IWorkbookData, UnitModel<IWorkbookData>>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
+    const localeService = injector.get(LocaleService);
+    localeService.load({ [LocaleType.EN_US]: { ...sheetsEnUS, ...enUS } });
+    localeService.setLocale(LocaleType.EN_US);
+    localeService.setDirection('ltr');
+    univer.registerPlugin(UniverFormulaEnginePlugin);
+    univer.registerPlugin(UniverSheetsPlugin);
+    univer.registerPlugin(UniverSheetsTablePlugin);
+    const sheet = univer.createUnit(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
     injector.get(IUniverInstanceService).focusUnit(sheet.getUnitId());
     injector.get(ILogService).setLogLevel(LogLevel.SILENT);
 
@@ -142,27 +87,7 @@ describe('sheets-table facade', () => {
     let testBed: ReturnType<typeof createTableFacadeTestBed>;
 
     beforeEach(() => {
-        const dependencies: Dependency[] = [
-            [TableManager],
-            [SheetTableService],
-        ];
-
-        testBed = createTableFacadeTestBed(dependencies);
-
-        const commandService = testBed.get(ICommandService);
-        [
-            AddSheetTableCommand,
-            AddSheetTableMutation,
-            AddTableThemeCommand,
-            AddRangeThemeMutation,
-            DeleteSheetTableCommand,
-            DeleteSheetTableMutation,
-            RemoveRangeThemeMutation,
-            SetSheetTableCommand,
-            SetSheetTableMutation,
-            SetSheetTableFilterCommand,
-            SetSheetTableFilterMutation,
-        ].forEach((command) => commandService.registerCommand(command));
+        testBed = createTableFacadeTestBed();
     });
 
     afterEach(() => {

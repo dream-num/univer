@@ -22,6 +22,8 @@ import type {
     Nullable,
 } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import { DrawingTypeEnum, JSON1, normalizeDrawingOrderIndex, sortRules, sortRulesByDesc } from '@univerjs/core';
+import { Subject } from 'rxjs';
 import type {
     IDrawingGroupUpdateParam,
     IDrawingMap,
@@ -32,8 +34,6 @@ import type {
     IDrawingVisibleParam,
     IUnitDrawingService,
 } from './drawing-manager.service';
-import { DrawingTypeEnum, JSON1, normalizeDrawingOrderIndex, sortRules, sortRulesByDesc } from '@univerjs/core';
-import { Subject } from 'rxjs';
 
 type JSONOp = JSON1.JSONOp;
 type JSONOpList = JSON1.JSONOpList;
@@ -62,6 +62,22 @@ enum DrawingMapItemType {
 
 function isNonEmptyOp(op: JSONOp): boolean {
     return Array.isArray(op) && op.length > 0;
+}
+
+function composeUpdateOps(ops: JSONOp[]): JSONOp {
+    // Compose in pairs so each drawing operation is revisited logarithmically, not once per later drawing.
+    let level = ops;
+    while (level.length > 1) {
+        const next: JSONOp[] = [];
+        for (let index = 0; index < level.length; index += 2) {
+            next.push(index + 1 < level.length
+                ? JSON1.type.compose(level[index], level[index + 1])
+                : level[index]);
+        }
+        level = next;
+    }
+
+    return level[0];
 }
 
 function isJsonValueEqual(left: unknown, right: unknown): boolean {
@@ -551,10 +567,8 @@ export class UnitDrawingService<T extends IDrawingParam & IDrawingRefreshMetadat
             return { undo: null as unknown as JSONOp, redo: null as unknown as JSONOp, unitId, subUnitId, objects };
         }
 
-        const op = ops.reduce(JSON1.type.compose, null);
-        const invertOp = invertOps.reduce(JSON1.type.compose, null);
-
-        // this._update$.next(objects);
+        const op = composeUpdateOps(ops);
+        const invertOp = composeUpdateOps(invertOps);
 
         const { unitId, subUnitId } = updateParams[0];
 

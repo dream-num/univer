@@ -15,6 +15,7 @@
  */
 
 import type { IAccessor, ICommandInfo, IMutationInfo, IRange, Nullable } from '@univerjs/core';
+import { Direction, getIntersectRange, IUniverInstanceService, MAX_COLUMN_COUNT, MAX_ROW_COUNT, mergeIntervals, ObjectMatrix, RANGE_TYPE, Rectangle } from '@univerjs/core';
 import type { IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetMutationParams } from '../../basics';
 import type { IDeleteRangeMoveLeftCommandParams } from '../../commands/commands/delete-range-move-left.command';
 import type { IDeleteRangeMoveUpCommandParams } from '../../commands/commands/delete-range-move-up.command';
@@ -44,7 +45,6 @@ import type {
     IRemoveRowColCommand,
     IReorderRangeCommand,
 } from './type';
-import { Direction, getIntersectRange, IUniverInstanceService, MAX_COLUMN_COUNT, MAX_ROW_COUNT, mergeIntervals, ObjectMatrix, RANGE_TYPE, Rectangle } from '@univerjs/core';
 import { DeleteRangeMoveLeftCommand } from '../../commands/commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../../commands/commands/delete-range-move-up.command';
 import { InsertRangeMoveDownCommand } from '../../commands/commands/insert-range-move-down.command';
@@ -1524,7 +1524,10 @@ export function getSeparateEffectedRangesOnCommand(accessor: IAccessor, command:
         }
         case EffectRefRangId.MoveRangeCommandId: {
             const params = command.params as IMoveRangeCommandParams;
-            const target = getSheetCommandTarget(univerInstanceService);
+            const target = getSheetCommandTarget(univerInstanceService, {
+                unitId: params.fromUnitId ?? params.toUnitId,
+                subUnitId: params.fromSubUnitId,
+            });
             if (!target) return;
 
             const { unitId, subUnitId } = target;

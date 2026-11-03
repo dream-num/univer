@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, Workbook } from '@univerjs/core';
+import type { IMutationInfo } from '@univerjs/core';
 import type {
     IInsertColCommandParams,
     IInsertRowCommandParams,
     IInsertRowMutationParams,
     IRemoveRowColCommandParams,
 } from '@univerjs/sheets';
-import type { LocaleKey } from '../locale/types';
-import type { ITableColumnJson, ITableJson } from '../types/type';
 import {
     Disposable,
     ICommandService,
@@ -31,6 +29,7 @@ import {
     IUniverInstanceService,
     LocaleService,
     Rectangle,
+    Tools,
 } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import {
@@ -46,13 +45,13 @@ import {
     RemoveRowMutation,
     SheetInterceptorService,
 } from '@univerjs/sheets';
+import type { ITableColumnJson, ITableJson } from '../types/type';
 import { AddSheetTableMutation } from '../commands/mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from '../commands/mutations/delete-sheet-table.mutation';
 import { SetSheetTableMutation } from '../commands/mutations/set-sheet-table.mutation';
 import { getCalculatedColumnFillMutation } from '../commands/utils/calculated-column';
 import { TableManager } from '../models/table-manager';
 import { IRangeOperationTypeEnum, IRowColTypeEnum } from '../types/type';
-import { convertCellDataToString, getColumnName } from '../util';
 
 const SHEET_TABLE_REMOVE_COL_COMMAND_ID = 'sheet.command.table-remove-col';
 const DELETE_SHEET_TABLE_COMMAND_ID = 'sheet.command.delete-table';
@@ -254,17 +253,7 @@ export class SheetTableRefRangeController extends Disposable {
                         },
                     });
                     const tableJson = table.toJSON();
-                    undos.push({
-                        id: AddSheetTableMutation.id,
-                        params: {
-                            unitId,
-                            subUnitId,
-                            tableId: tableJson.id,
-                            name: tableJson.name,
-                            range: tableJson.range,
-                            options: tableJson.options,
-                        },
-                    });
+                    undos.push(this._getAddTableMutation(unitId, subUnitId, tableJson));
                 } else if (range.startRow > tableRange.startRow && range.startRow <= tableRange.endRow) {
                     redos.push({
                         id: SetSheetTableMutation.id,
@@ -379,28 +368,7 @@ export class SheetTableRefRangeController extends Disposable {
                         },
                     });
                     const tableJson = table.toJSON();
-                    const { startRow, startColumn, endColumn } = tableJson.range;
-                    const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
-                    const worksheet = workbook?.getSheetBySheetId(subUnitId);
-                    if (!worksheet) {
-                        return { undos, redos, preRedos, preUndos };
-                    }
-                    const header: string[] = [];
-                    for (let i = startColumn; i <= endColumn; i++) {
-                        header.push(convertCellDataToString(worksheet?.getCell(startRow, i)) || getColumnName(i - startColumn + 1, this._localeService.t<LocaleKey>('sheets-table.columnPrefix')));
-                    }
-                    undos.push({
-                        id: AddSheetTableMutation.id,
-                        params: {
-                            unitId,
-                            subUnitId,
-                            tableId: tableJson.id,
-                            name: tableJson.name,
-                            header,
-                            range: tableJson.range,
-                            options: tableJson.options,
-                        },
-                    });
+                    undos.push(this._getAddTableMutation(unitId, subUnitId, tableJson));
                     undos.push(...(formulaMutations.preUndos ?? []), ...formulaMutations.undos);
                 } else if (range.startColumn <= tableRange.startColumn && range.endColumn >= tableRange.startColumn) {
                     const tableJson = table.toJSON();
@@ -543,6 +511,7 @@ export class SheetTableRefRangeController extends Disposable {
                 name: tableJson.name,
                 header,
                 range: tableJson.range,
+                tableConfig: Tools.deepClone(tableJson),
                 options: {
                     ...tableJson.options,
                     columns: tableJson.columns,

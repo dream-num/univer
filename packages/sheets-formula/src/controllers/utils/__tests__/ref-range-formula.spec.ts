@@ -16,10 +16,17 @@
 
 import type { IFormulaDataItem } from '@univerjs/engine-formula';
 import { describe, expect, it } from 'vitest';
-import { formulaDataItemToCellData, formulaDataToCellData, isFormulaDataItem } from '../ref-range-formula';
+import { checkIsSameUnitAndSheet, formulaDataItemToCellData, formulaDataToCellData, isFormulaDataItem } from '../ref-range-formula';
 
 describe('Ref range formula test', () => {
     describe('Util function', () => {
+        it('does not apply a sheet-qualified reference from another workbook with the same sheet id', () => {
+            expect(checkIsSameUnitAndSheet('edited', 'orders', 'other', 'summary', '', 'orders')).toBe(false);
+            expect(checkIsSameUnitAndSheet('edited', 'orders', 'edited', 'summary', '', 'orders')).toBe(true);
+            expect(checkIsSameUnitAndSheet('edited', 'orders', 'other', 'summary', 'edited', 'orders')).toBe(true);
+            expect(checkIsSameUnitAndSheet('edited', 'orders', 'edited', 'summary', 'other', 'orders')).toBe(false);
+        });
+
         it('Function formulaDataItemToCellData', () => {
             let formulaDataItem: IFormulaDataItem = {
                 f: '=SUM(1)',

@@ -15,7 +15,9 @@
  */
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
+import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import {
+    BooleanNumber,
     DesktopLogService,
     Direction,
     DrawingTypeEnum,
@@ -25,6 +27,7 @@ import {
     Injector,
     IResourceLoaderService,
     IUniverInstanceService,
+    LocaleType,
     RANGE_TYPE,
     RedoCommandId,
     Tools,
@@ -81,60 +84,49 @@ import { SHEET_DRAWING_PLUGIN } from '../sheet-drawing.controller';
 const UNIT_ID = 'unit-1';
 const SUB_UNIT_ID = 'sheet-1';
 const injectors: Injector[] = [];
+const skeletonTestBeds: Array<ReturnType<typeof createSheetsDrawingTestBed>> = [];
 
-afterEach(() => injectors.splice(0).forEach((injector) => injector.dispose()));
+afterEach(() => {
+    injectors.splice(0).forEach((injector) => injector.dispose());
+    skeletonTestBeds.splice(0).forEach((testBed) => testBed.univer.dispose());
+});
 
-function createSkeleton(options: { rowHeights?: number[]; colWidths?: number[] } = {}) {
-    const rowHeights = options.rowHeights ?? [];
-    const colWidths = options.colWidths ?? [];
-    const rowHeightAt = (row: number) => rowHeights[row] ?? 20;
-    const colWidthAt = (column: number) => colWidths[column] ?? 10;
-    const sumRows = (end: number) => Array.from({ length: Math.max(end, 0) }, (_, row) => rowHeightAt(row)).reduce((sum, height) => sum + height, 0);
-    const sumCols = (end: number) => Array.from({ length: Math.max(end, 0) }, (_, column) => colWidthAt(column)).reduce((sum, width) => sum + width, 0);
-
-    return {
-        rowHeaderWidth: 0,
-        columnHeaderHeight: 0,
-        rowTotalHeight: 2000,
-        columnTotalWidth: 1000,
-        makeDirty: vi.fn(),
-        calculate: vi.fn(),
-        getNoMergeCellWithCoordByIndex: vi.fn((row: number, column: number) => {
-            const startY = sumRows(row);
-            const startX = sumCols(column);
-            return {
-                startX,
-                endX: startX + colWidthAt(column),
-                startY,
-                endY: startY + rowHeightAt(row),
-            };
-        }),
-        getCellIndexAndOffsetByPosition: vi.fn((left: number, top: number) => {
-            let column = 0;
-            let colStart = 0;
-            while (left >= colStart + colWidthAt(column)) {
-                colStart += colWidthAt(column);
-                column++;
-            }
-
-            let row = 0;
-            let rowStart = 0;
-            while (top >= rowStart + rowHeightAt(row)) {
-                rowStart += rowHeightAt(row);
-                row++;
-            }
-
-            return {
-                column,
-                row,
-                columnOffset: left - colStart,
-                rowOffset: top - rowStart,
-            };
-        }),
+function createSkeleton(options: { rowHeights?: number[]; colWidths?: number[] } = {}): SpreadsheetSkeleton {
+    const workbookData: IWorkbookData = {
+        id: UNIT_ID,
+        appVersion: '3.0.0-alpha',
+        locale: LocaleType.EN_US,
+        name: 'Drawing transform test',
+        sheetOrder: [SUB_UNIT_ID],
+        styles: {},
+        sheets: {
+            [SUB_UNIT_ID]: {
+                id: SUB_UNIT_ID,
+                name: 'Sheet 1',
+                rowCount: 100,
+                columnCount: 100,
+                defaultRowHeight: 20,
+                defaultColumnWidth: 10,
+                rowData: Object.fromEntries((options.rowHeights ?? []).map((height, row) => [row, { h: height }])),
+                columnData: Object.fromEntries((options.colWidths ?? []).map((width, column) => [column, { w: width }])),
+                rowHeader: { width: 0, hidden: BooleanNumber.TRUE },
+                columnHeader: { height: 0, hidden: BooleanNumber.TRUE },
+                cellData: {},
+            },
+        },
     };
+    const testBed = createSheetsDrawingTestBed(workbookData);
+    skeletonTestBeds.push(testBed);
+    const skeleton = testBed.get(SheetSkeletonService).ensureSkeleton(UNIT_ID, SUB_UNIT_ID);
+    if (!skeleton) {
+        throw new Error('Expected the drawing transform test skeleton to exist.');
+    }
+    skeleton.calculate();
+
+    return skeleton;
 }
 
-function transformFromPosition(sheetTransform: any, skeleton: any) {
+function transformFromPosition(sheetTransform: any, skeleton: SpreadsheetSkeleton) {
     const fromCell = skeleton.getNoMergeCellWithCoordByIndex(sheetTransform.from.row, sheetTransform.from.column);
     const toCell = skeleton.getNoMergeCellWithCoordByIndex(sheetTransform.to.row, sheetTransform.to.column);
     const left = fromCell.startX + sheetTransform.from.columnOffset;
@@ -168,7 +160,7 @@ function createDrawing(overrides: Record<string, any> = {}, skeleton = createSke
     };
 }
 
-function createController(options: { drawingData?: Record<string, any>; skeleton?: any } = {}) {
+function createController(options: { drawingData?: Record<string, any>; skeleton?: SpreadsheetSkeleton } = {}) {
     const skeleton = options.skeleton ?? createSkeleton();
     const drawingData = options.drawingData ?? {};
     const sheetSkeletonParam = { unitId: UNIT_ID, sheetId: SUB_UNIT_ID, skeleton };

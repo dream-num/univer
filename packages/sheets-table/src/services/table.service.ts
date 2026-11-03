@@ -15,8 +15,8 @@
  */
 
 import type { Worksheet } from '@univerjs/core';
-import type { ITableFilterItem, ITableInfoWithUnitId, ITableOptions, ITableRange, TableMetaType } from '../types/type';
 import { Disposable, Inject } from '@univerjs/core';
+import type { ITableFilterItem, ITableInfoWithUnitId, ITableJson, ITableOptions, ITableRange, TableMetaType } from '../types/type';
 import { getCellValueWithConditionType } from '../models/filter-util/condition';
 import { TableManager } from '../models/table-manager';
 import { TableConditionTypeEnum } from '../types/enum';
@@ -43,8 +43,8 @@ export class SheetTableService extends Disposable {
         return this._tableManager.getTableList(unitId);
     }
 
-    addTable(unitId: string, subUnitId: string, tableName: string, rangeInfo: ITableRange, tableHeader?: string[], tableId?: string, options?: ITableOptions): string {
-        return this._tableManager.addTable(unitId, subUnitId, tableName, rangeInfo, tableHeader, tableId, options);
+    addTable(unitId: string, subUnitId: string, tableName: string, rangeInfo: ITableRange, tableHeader?: string[], tableId?: string, options?: ITableOptions, tableConfig?: ITableJson): string {
+        return this._tableManager.addTable(unitId, subUnitId, tableName, rangeInfo, tableHeader, tableId, options, tableConfig);
     }
 
     deleteTable(unitId: string, subUnitId: string, tableId: string) {

@@ -282,6 +282,8 @@ export interface ITableResource {
          * The rows that are filtered out by the table filter
          */
         tableFilteredOutRows: number[];
+        /** Keeps the owning table when multiple tables share worksheet rows. */
+        tableFilteredOutRowsByTable?: Record<string, number[]>;
     };
 }
 

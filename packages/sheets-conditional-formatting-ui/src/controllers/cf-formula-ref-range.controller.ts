@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IMutationInfo, IRange } from '@univerjs/core';
+import type { IDisposable, IMutationInfo } from '@univerjs/core';
+import type { EffectRefRangeParams } from '@univerjs/sheets';
 import type { IColorScale, IConditionFormattingRule, IDataBar, IFormulaHighlightCell, IIconSet } from '@univerjs/sheets-conditional-formatting';
 import { Disposable, Inject, Injector, toDisposable, Tools } from '@univerjs/core';
+import { EffectRefRangId, SheetInterceptorService } from '@univerjs/sheets';
 import {
     AddConditionalRuleMutation,
     AddConditionalRuleMutationUndoFactory,
@@ -26,6 +28,8 @@ import {
     ConditionalFormattingRuleModel,
     createCfId,
     DeleteConditionalRuleMutation,
+    DeleteConditionalRuleMutationUndoFactory,
+    MoveConditionalRuleMutation,
     SetConditionalRuleMutation,
     setConditionalRuleMutationUndoFactory,
 } from '@univerjs/sheets-conditional-formatting';
@@ -41,6 +45,76 @@ export class ConditionalFormattingFormulaRefRangeController extends Disposable {
     ) {
         super();
         this._initRefRange();
+        this._initCrossSheetMove();
+    }
+
+    private _initCrossSheetMove() {
+        this.disposeWithMe(this._injector.get(SheetInterceptorService).interceptCommand({
+            getMutations: (commandInfo: EffectRefRangeParams) => {
+                if (commandInfo.id !== EffectRefRangId.MoveRangeCommandId
+                    || !commandInfo.params
+                    || commandInfo.params.fromUnitId !== commandInfo.params.toUnitId
+                    || commandInfo.params.fromSubUnitId === commandInfo.params.toSubUnitId) {
+                    return { redos: [], undos: [] };
+                }
+                const redos: IMutationInfo[] = [];
+                const undos: IMutationInfo[] = [];
+                const additions: IMutationInfo[][] = [];
+                for (const [unitId, sheets] of this._conditionalFormattingRuleModel.getAll()) {
+                    for (const [subUnitId, rules] of sheets) {
+                        for (const rule of rules) {
+                            const changes = this._formulaRefRangeService.getRangeFormulaChanges(
+                                unitId,
+                                subUnitId,
+                                rule.ranges,
+                                this._getRuleFormulas(rule),
+                                commandInfo
+                            );
+                            const retained = changes.find((change) => !change.moved && change.unitId === unitId && change.subUnitId === subUnitId);
+                            if (retained) {
+                                const nextRule = this._updateRuleFormulas(rule, retained.formulas);
+                                nextRule.ranges = retained.ranges;
+                                if (!Tools.diffValue(rule, nextRule)) {
+                                    const params = { unitId, subUnitId, cfId: rule.cfId, rule: nextRule };
+                                    redos.push({ id: SetConditionalRuleMutation.id, params });
+                                    undos.push(...setConditionalRuleMutationUndoFactory(this._injector, params));
+                                }
+                            } else {
+                                const params = { unitId, subUnitId, cfId: rule.cfId };
+                                redos.push({ id: DeleteConditionalRuleMutation.id, params });
+                                undos.push(...DeleteConditionalRuleMutationUndoFactory(this._injector, params));
+                            }
+                            for (const change of changes) {
+                                if (change === retained) {
+                                    continue;
+                                }
+                                const nextRule = this._updateRuleFormulas(rule, change.formulas);
+                                nextRule.cfId = createCfId();
+                                nextRule.ranges = change.ranges;
+                                const params = { unitId: change.unitId, subUnitId: change.subUnitId, rule: nextRule };
+                                const mutations: IMutationInfo[] = [{ id: AddConditionalRuleMutation.id, params }];
+                                if (retained && !change.moved) {
+                                    mutations.push({
+                                        id: MoveConditionalRuleMutation.id,
+                                        params: {
+                                            unitId: change.unitId,
+                                            subUnitId: change.subUnitId,
+                                            start: { id: nextRule.cfId, type: 'self' },
+                                            end: { id: rule.cfId, type: 'after' },
+                                        },
+                                    });
+                                }
+                                additions.push(mutations);
+                                undos.unshift(AddConditionalRuleMutationUndoFactory(this._injector, params));
+                            }
+                        }
+                    }
+                }
+                // AddRule prepends; reverse additions to retain source rule priority.
+                redos.push(...additions.reverse().flat());
+                return { redos, undos };
+            },
+        }));
     }
 
     private _getIdWithUnitId(unitID: string, subUnitId: string, cfId: string) {
@@ -134,7 +208,13 @@ export class ConditionalFormattingFormulaRefRangeController extends Disposable {
         const oldRanges = rule.ranges;
         const oldFormulas = this._getRuleFormulas(rule);
 
-        const disposable = this._formulaRefRangeService.registerRangeFormula(unitId, subUnitId, oldRanges, oldFormulas, (res: { formulas: string[]; ranges: IRange[] }[]) => {
+        const disposable = this._formulaRefRangeService.registerRangeFormula(unitId, subUnitId, oldRanges, oldFormulas, (res, commandInfo) => {
+            if (commandInfo.id === EffectRefRangId.MoveRangeCommandId
+                && commandInfo.params
+                && commandInfo.params.fromUnitId === commandInfo.params.toUnitId
+                && commandInfo.params.fromSubUnitId !== commandInfo.params.toSubUnitId) {
+                return { redos: [], undos: [] };
+            }
             if (res.length === 0) {
                 return {
                     undos: [{

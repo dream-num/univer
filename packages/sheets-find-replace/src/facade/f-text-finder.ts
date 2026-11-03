@@ -17,9 +17,14 @@
 import type { IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IFindComplete, IFindMatch, IFindReplaceState } from '@univerjs/find-replace';
 import { Disposable, Inject, Injector, IUniverInstanceService } from '@univerjs/core';
-import { createInitFindReplaceState, FindBy, FindReplaceModel, FindReplaceState, IFindReplaceService } from '@univerjs/find-replace';
+import {
+    createInitFindReplaceState,
+    FindBy,
+    FindReplaceModel,
+    FindReplaceState,
+    IFindReplaceService,
+} from '@univerjs/find-replace';
 import { FRange } from '@univerjs/sheets/facade';
-import { filter, firstValueFrom } from 'rxjs';
 
 /**
  * @ignore
@@ -422,21 +427,18 @@ export class FTextFinder extends Disposable implements IFTextFinder {
 
     async matchCaseAsync(matchCase: boolean): Promise<IFTextFinder> {
         this._state.changeState({ caseSensitive: matchCase, findCompleted: false });
-        await firstValueFrom(this._state.stateUpdates$.pipe(filter((state) => state.findCompleted === true)));
         await this.ensureCompleteAsync();
         return this;
     }
 
     async matchEntireCellAsync(matchEntireCell: boolean): Promise<IFTextFinder> {
         this._state.changeState({ matchesTheWholeCell: matchEntireCell, findCompleted: false });
-        await firstValueFrom(this._state.stateUpdates$.pipe(filter((state) => state.findCompleted === true)));
         await this.ensureCompleteAsync();
         return this;
     }
 
     async matchFormulaTextAsync(matchFormulaText: boolean): Promise<IFTextFinder> {
         this._state.changeState({ findBy: matchFormulaText ? FindBy.FORMULA : FindBy.VALUE, findCompleted: false });
-        await firstValueFrom(this._state.stateUpdates$.pipe(filter((state) => state.findCompleted === true)));
         await this.ensureCompleteAsync();
         return this;
     }

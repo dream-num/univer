@@ -93,13 +93,15 @@ describe('SheetsDrawingGroupCopyPasteController', () => {
 
 function createSkeleton() {
     return {
+        rowHeaderWidthAndMarginLeft: 0,
+        columnHeaderHeightAndMarginTop: 0,
         getNoMergeCellWithCoordByIndex: vi.fn((row: number, column: number) => ({
             startX: column * 10,
             endX: column * 10 + 10,
             startY: row * 20,
             endY: row * 20 + 20,
         })),
-        getCellIndexAndOffsetByPosition: vi.fn((left: number, top: number) => ({
+        getOffsetRelativeToRowCol: vi.fn((left: number, top: number) => ({
             column: Math.floor(left / 10),
             row: Math.floor(top / 20),
             columnOffset: left % 10,

@@ -42,6 +42,7 @@ import {
     MAX_ROW_COUNT,
     moveRangeByOffset,
     ObjectMatrix,
+    Range,
     Rectangle,
     Tools,
     UniverInstanceType,
@@ -74,6 +75,7 @@ import type {
     IRemoveColByRangeCommandParams,
     IRemoveRowByRangeCommandParams,
 } from '../../commands/commands/remove-row-col.command';
+import type { IReorderRangeCommandParams } from '../../commands/commands/reorder-range.command';
 import type { ISetBorderCommandParams } from '../../commands/commands/set-border.command';
 import type { ISetSpecificColsVisibleCommandParams } from '../../commands/commands/set-col-visible.command';
 import type { ISetRangeValuesCommandParams } from '../../commands/commands/set-range-values.command';
@@ -87,8 +89,10 @@ import type {
     ISetWorksheetRowIsAutoHeightCommandParams,
 } from '../../commands/commands/set-worksheet-row-height.command';
 import type { ISetWorksheetShowCommandParams } from '../../commands/commands/set-worksheet-show.command';
+import type { ISplitTextToColumnsCommandParams } from '../../commands/commands/split-text-to-columns.command';
 import type { ITextToNumberCommandParams } from '../../commands/commands/text-to-number.command';
 import type { LocaleKey } from '../../locale/types';
+import { splitRangeText } from '../../basics/split-range-text';
 import { AutoFillCommand } from '../../commands/commands/auto-fill.command';
 import { ClearSelectionAllCommand } from '../../commands/commands/clear-selection-all.command';
 import { ClearSelectionContentCommand } from '../../commands/commands/clear-selection-content.command';
@@ -103,6 +107,7 @@ import { MoveRangeCommand } from '../../commands/commands/move-range.command';
 import { MoveColsCommand, MoveRowsCommand } from '../../commands/commands/move-rows-cols.command';
 import { RemoveDefinedNameCommand } from '../../commands/commands/remove-defined-name.command';
 import { RemoveColByRangeCommand, RemoveRowByRangeCommand } from '../../commands/commands/remove-row-col.command';
+import { ReorderRangeCommand } from '../../commands/commands/reorder-range.command';
 import { SetBorderCommand } from '../../commands/commands/set-border.command';
 import {
     SetSelectedColsVisibleCommand,
@@ -124,6 +129,7 @@ import {
     SetWorksheetRowIsAutoHeightCommand,
 } from '../../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../../commands/commands/set-worksheet-show.command';
+import { SplitTextToColumnsCommand } from '../../commands/commands/split-text-to-columns.command';
 import { TextToNumberCommand } from '../../commands/commands/text-to-number.command';
 import { getSheetCommandTarget } from '../../commands/commands/utils/target-util';
 import { SetWorksheetNameMutation } from '../../commands/mutations/set-worksheet-name.mutation';
@@ -151,6 +157,7 @@ import {
     WorksheetSetColumnStylePermission,
 } from '../../services/permission/permission-point/worksheet/set-column-style';
 import { WorksheetSetRowStylePermission } from '../../services/permission/permission-point/worksheet/set-row-style';
+import { WorksheetSortPermission } from '../../services/permission/permission-point/worksheet/sort';
 import { WorksheetViewPermission } from '../../services/permission/permission-point/worksheet/view';
 import {
     WorksheetProtectionRuleModel,
@@ -414,6 +421,21 @@ export class SheetPermissionCheckController extends Disposable {
                 errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.setRowColStyleErr');
                 break;
 
+            case ReorderRangeCommand.id:
+                params = commandInfo.params as IReorderRangeCommandParams;
+                permission = this.permissionCheckWithRanges(
+                    {
+                        workbookTypes: [WorkbookEditablePermission],
+                        worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission],
+                        rangeTypes: [RangeProtectionPermissionEditPoint],
+                    },
+                    [params.range],
+                    params.unitId,
+                    params.subUnitId
+                );
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr');
+                break;
+
             // move rows/columns/ranges
             case MoveRowsCommand.id:
             case MoveColsCommand.id:
@@ -606,6 +628,47 @@ export class SheetPermissionCheckController extends Disposable {
                 }
                 errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr');
                 break;
+
+            case SplitTextToColumnsCommand.id: {
+                const splitParams = commandInfo.params as ISplitTextToColumnsCommandParams;
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr');
+                const target = getSheetCommandTarget(this._univerInstanceService, splitParams);
+                if (!target) {
+                    permission = false;
+                    break;
+                }
+                const { worksheet, unitId, subUnitId } = target;
+                const { range, delimiter, customDelimiter, treatMultipleDelimitersAsOne } = splitParams;
+                const { rs, maxLength } = splitRangeText(worksheet, range, delimiter, customDelimiter, treatMultipleDelimitersAsOne);
+                const { startRow, startColumn } = Range.transformRange(range, worksheet);
+                const outputRanges = rs.flatMap((values, index) => values === undefined
+                    ? []
+                    : [{
+                        startRow: startRow + index,
+                        endRow: startRow + index,
+                        startColumn,
+                        endColumn: startColumn + maxLength - 1,
+                    }]);
+                permission = this.permissionCheckWithRanges({
+                    workbookTypes: [WorkbookEditablePermission],
+                    worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
+                    rangeTypes: [RangeProtectionPermissionEditPoint],
+                }, outputRanges, unitId, subUnitId);
+                if (permission && startColumn + maxLength > worksheet.getColumnCount()) {
+                    errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.insertRowColErr');
+                    permission = this.permissionCheckWithRanges({
+                        workbookTypes: [WorkbookEditablePermission, WorkbookInsertColumnPermission],
+                        worksheetTypes: [WorksheetEditPermission, WorksheetInsertColumnPermission],
+                        rangeTypes: [RangeProtectionPermissionEditPoint],
+                    }, [{
+                        startRow: 0,
+                        endRow: worksheet.getRowCount() - 1,
+                        startColumn: worksheet.getColumnCount() - 1,
+                        endColumn: worksheet.getColumnCount() - 1,
+                    }], unitId, subUnitId);
+                }
+                break;
+            }
 
             // text to number
             case TextToNumberCommand.id:

@@ -16,10 +16,10 @@
 
 import type { ICellData, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IOtherFormulaResult } from '@univerjs/engine-formula';
-import type { IConditionalFormattingRuleConfig, IConditionFormattingRule } from '../models/type';
 import { BooleanNumber, CellValueType, Disposable, Inject, IUniverInstanceService, ObjectMatrix, RefAlias, UniverInstanceType } from '@univerjs/core';
 import { FormulaResultStatus, OtherFormulaBizType, RegisterOtherFormulaService } from '@univerjs/engine-formula';
 import { Subject } from 'rxjs';
+import type { IConditionalFormattingRuleConfig, IConditionFormattingRule } from '../models/type';
 import { CFRuleType, CFSubRuleType, CFValueType } from '../base/const';
 import { ConditionalFormattingRuleModel } from '../models/conditional-formatting-rule-model';
 import { getRangesInWorksheet } from '../utils/range';
@@ -55,6 +55,9 @@ export class ConditionalFormattingFormulaService extends Disposable {
     private _initRuleChange() {
         const isNeedMarkFormulaDirty = (rule: IConditionalFormattingRuleConfig) => {
             switch (rule.type) {
+                case CFRuleType.highlightCell: {
+                    return rule.subType === CFSubRuleType.formula;
+                }
                 case CFRuleType.colorScale: {
                     return rule.config.some((item) => item.value.type === CFValueType.formula);
                 }
@@ -74,6 +77,7 @@ export class ConditionalFormattingFormulaService extends Disposable {
             if (option.type === 'set') {
                 if (isNeedMarkFormulaDirty(rule.rule) || (oldRule && isNeedMarkFormulaDirty(oldRule.rule))) {
                     this._removeFormulaByCfId(unitId, subUnitId, rule.cfId);
+                    this._registerRuleFormulas(unitId, subUnitId, rule);
                 }
             }
             if (option.type === 'add') {

@@ -15,7 +15,6 @@
  */
 
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
-import type { FWorksheet } from './f-worksheet';
 import {
     generateRandomId,
     IAuthzIoService,
@@ -37,6 +36,7 @@ import {
     WorksheetProtectionPointModel,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
+import type { FWorksheet } from './f-worksheet';
 
 /**
  * Get defined name field name
@@ -269,7 +269,7 @@ export class FDefinedNameBuilder {
      * ```
      */
     build(): ISetDefinedNameMutationParam {
-        const { unitId, name, formulaOrRefString, id } = this._definedNameParam;
+        const { unitId, name, formulaOrRefString, id, localSheetId } = this._definedNameParam;
         const validationResult = validateDefinedName(name, {
             unitId,
             formulaOrRefString,
@@ -278,6 +278,7 @@ export class FDefinedNameBuilder {
             superTableService: this._injector.get(ISuperTableService),
             functionService: this._injector.get(IFunctionService),
             id,
+            localSheetId,
         });
 
         if (typeof validationResult === 'string') {

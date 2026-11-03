@@ -223,6 +223,9 @@ describe('SheetsHyperLinkResolverService', () => {
             ...range,
             rangeType: range.rangeType ?? RANGE_TYPE.NORMAL,
         });
+        if (range.rangeType === RANGE_TYPE.ROW || range.rangeType === RANGE_TYPE.COLUMN) {
+            expect(injector.get(SheetsSelectionsService).getCurrentLastSelection()?.primary).toBeNull();
+        }
     });
 
     it('should navigate to sheet ranges and execute selection and scroll commands', async () => {

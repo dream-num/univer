@@ -88,6 +88,23 @@ describe('worksheet meta mutations', () => {
         ).toThrowError('universheet is null error!');
     });
 
+    it('undoes a calculated row height without leaving a row entry that did not exist before editing', () => {
+        const worksheet = testBed.sheet.getSheetBySheetId('sheet-1')!;
+        const manager = worksheet.getRowManager();
+        const redo = {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            rowsAutoHeightInfo: [{ row: 3, autoHeight: 24 }],
+        };
+        expect(manager.getRow(3)).toBeUndefined();
+        const undo = SetWorksheetRowAutoHeightMutationFactory(redo, worksheet);
+        expect(undo.rowsAutoHeightInfo).toEqual([{ row: 3, autoHeight: undefined }]);
+        expect(SetWorksheetRowAutoHeightMutation.handler(testBed, redo)).toBe(true);
+        expect(manager.getRow(3)).toEqual({ ah: 24 });
+        expect(SetWorksheetRowAutoHeightMutation.handler(testBed, undo)).toBe(true);
+        expect(manager.getRow(3)).toBeUndefined();
+    });
+
     it('SetGridlinesColorMutation should set color and return false when target missing', () => {
         const worksheet = testBed.sheet.getSheetBySheetId('sheet-1')!;
         expect(
@@ -202,7 +219,7 @@ describe('worksheet meta mutations', () => {
         expect(SetWorksheetRowAutoHeightMutationFactory({ unitId: 'unit-1', subUnitId: 'sheet-1', rowsAutoHeightInfo: [{ row: 1, autoHeight: 50 }, { row: 2, autoHeight: 60 }] }, worksheet)).toEqual({
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
-            rowsAutoHeightInfo: [{ row: 1, autoHeight: 28 }, { row: 2, autoHeight: 19 }],
+            rowsAutoHeightInfo: [{ row: 1, autoHeight: 28 }, { row: 2, autoHeight: undefined }],
         });
         expect(SetWorksheetRowAutoHeightMutation.handler(testBed, { unitId: 'unit-1', subUnitId: 'sheet-1', rowsAutoHeightInfo: [{ row: 1, autoHeight: 51 }, { row: 3, autoHeight: 61 }] })).toBe(true);
         expect(manager.getRow(1)?.ah).toBe(51);

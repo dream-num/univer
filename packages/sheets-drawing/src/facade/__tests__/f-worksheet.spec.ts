@@ -14,31 +14,30 @@
  * limitations under the License.
  */
 
-import type {
-    Injector,
-    Workbook,
-} from '@univerjs/core';
-import type { FWorkbook } from '@univerjs/sheets/facade';
-import type { ISheetDrawingPlacement } from '../../services/sheet-drawing-placement';
-import type { ISheetDrawing } from '../../services/sheet-drawing.service';
+import type { Injector } from '@univerjs/core';
+import type { FWorksheet } from '@univerjs/sheets/facade';
 import {
     DrawingTypeEnum,
     ICommandService,
     ImageSourceType,
+    IUndoRedoService,
     IUniverInstanceService,
     RedoCommand,
     UndoCommand,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { SheetSkeletonService, UniverSheetsPlugin } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ISheetDrawingPlacement } from '../../services/sheet-drawing-placement';
+import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import { createSheetsDrawingTestBed } from '../../__tests__/create-sheets-drawing-test-bed';
 import { InsertSheetDrawingCommand } from '../../commands/commands/insert-sheet-drawing.command';
 import { resolveSheetDrawingRotateEnabled } from '../../common/rotate-enabled';
 import { getSheetDrawingPlacement } from '../../services/sheet-drawing-placement';
 import { ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
-import { FWorksheetDrawingMixin } from '../f-worksheet';
+import '../f-worksheet';
 
 describe('FWorksheetDrawingMixin group drawings', () => {
     let univer: Univer;
@@ -119,6 +118,123 @@ describe('FWorksheetDrawingMixin group drawings', () => {
         expect(fWorksheet.getDrawingGroupChildren('group-1').map((drawing: ISheetDrawing) => drawing.drawingId).sort())
             .toEqual(['chart-1', 'drawing-1']);
         expect(resolveSheetDrawingRotateEnabled(groupDrawing!, sheetDrawingService)).toBe(false);
+    });
+
+    it('creates an owner-anchored group readable by placement and layout through history and snapshot recovery', async () => {
+        const api = FUniver.newAPI(univer);
+        const initial = api.getWorkbook('test')!.save();
+        initial.sheets.sheet1.defaultColumnWidth = 50;
+        initial.sheets.sheet1.defaultRowHeight = 20;
+        initial.sheets.sheet1.rowHeader = { width: 40 };
+        initial.sheets.sheet1.columnHeader = { height: 20 };
+        initial.sheets.sheet2.defaultColumnWidth = 100;
+        initial.sheets.sheet2.defaultRowHeight = 40;
+        initial.sheets.sheet2.rowHeader = { width: 40 };
+        initial.sheets.sheet2.columnHeader = { height: 20 };
+        expect(api.disposeUnit('test')).toBe(true);
+        const workbook = api.createWorkbook(initial);
+        injector.get(IUniverInstanceService).focusUnit('test');
+        workbook.setActiveSheet('sheet2');
+        expect(workbook.getActiveSheet().getSheetId()).toBe('sheet2');
+        const sheet = workbook.getSheetBySheetId('sheet1')!;
+        const commands = injector.get(ICommandService);
+        const history = injector.get(IUndoRedoService);
+        const children = [createDrawing('drawing-1', 120), createDrawing('drawing-2', 190)]
+            .map((drawing) => ({
+                ...drawing,
+                anchorType: SheetDrawingAnchorType.None,
+                transform: { ...drawing.transform, top: 80 },
+            }));
+        expect(commands.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: children })).toBe(true);
+        const before = history.getUndoRedoStatus('test');
+        expect(sheet.groupDrawings(['drawing-1', 'drawing-2'], 'group-1')).toBe('group-1');
+        const placement: ISheetDrawingPlacement = {
+            kind: SheetDrawingAnchorType.Position,
+            from: { row: 3, column: 1, rowOffset: 0, columnOffset: 30 },
+            width: 110,
+            height: 30,
+        };
+        expect(sheet.getDrawingPlacement('group-1')).toEqual(placement);
+        expect(sheet.getDrawingLayout().drawings.find((drawing) => drawing.drawingId === 'group-1'))
+            .toMatchObject({ bounds: { left: 120, top: 80, width: 110, height: 30 }, placement });
+        expect(history.getUndoRedoStatus('test')).toEqual({ undos: before.undos + 1, redos: 0 });
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(sheet.getDrawingPlacement('group-1')).toBeNull();
+        expect(sheet.getDrawingGroupChildren('group-1')).toEqual([]);
+        expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+        expect(sheet.getDrawingPlacement('group-1')).toEqual(placement);
+        const saved = JSON.parse(JSON.stringify(workbook.save()));
+        expect(api.disposeUnit('test')).toBe(true);
+        const reopened = api.createWorkbook(saved).getSheetBySheetId('sheet1')!;
+        expect(reopened.getDrawingPlacement('group-1')).toEqual(placement);
+        expect(reopened.getDrawingLayout().drawings.find((drawing) => drawing.drawingId === 'group-1')?.bounds)
+            .toEqual({ left: 120, top: 80, width: 110, height: 30 });
+        expect(reopened.getDrawingGroupChildren('group-1').map((drawing) => drawing.drawingId).sort())
+            .toEqual(['drawing-1', 'drawing-2']);
+        expect(reopened.ungroupDrawings(['group-1'])).toBe(true);
+        expect(reopened.getDrawingLayout().drawings.map(({ drawingId, bounds }) => ({ drawingId, bounds }))
+            .sort((first, second) => first.drawingId.localeCompare(second.drawingId)))
+            .toEqual([
+                { drawingId: 'drawing-1', bounds: { left: 120, top: 80, width: 40, height: 30 } },
+                { drawingId: 'drawing-2', bounds: { left: 190, top: 80, width: 40, height: 30 } },
+            ]);
+    });
+
+    it('keeps a group anchored to the same column when created at a different zoom', () => {
+        const sheet = createFacade(injector);
+        const commands = injector.get(ICommandService);
+        const skeleton = injector.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+        const children = [createDrawing('drawing-1', 120), createDrawing('drawing-2', 190)]
+            .map((drawing) => ({ ...drawing, anchorType: SheetDrawingAnchorType.None }));
+        expect(commands.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: children })).toBe(true);
+
+        expect(sheet.groupDrawings(['drawing-1', 'drawing-2'], 'group-at-default-zoom')).toBe('group-at-default-zoom');
+        const placement = sheet.getDrawingPlacement('group-at-default-zoom');
+        const bounds = sheet.getDrawingLayout().drawings.find((drawing) => drawing.drawingId === 'group-at-default-zoom')!.bounds;
+        expect(sheet.ungroupDrawings(['group-at-default-zoom'])).toBe(true);
+
+        skeleton.setScale(0.75);
+        expect(sheet.groupDrawings(['drawing-1', 'drawing-2'], 'group-at-75-percent')).toBe('group-at-75-percent');
+
+        sheet.insertColumnsBefore(1, 1);
+        expect(sheet.getDrawingLayout().drawings.find((drawing) => drawing.drawingId === 'group-at-75-percent')?.bounds)
+            .toEqual(bounds);
+        expect(sheet.getDrawingPlacement('group-at-75-percent')).toEqual(placement);
+    });
+
+    it('preserves absolute group scaling and child geometry through ungroup, Undo and snapshot recovery', async () => {
+        const api = FUniver.newAPI(univer);
+        const workbook = api.getWorkbook('test')!;
+        const sheet = workbook.getSheetBySheetId('sheet1')!;
+        const commands = injector.get(ICommandService);
+        const children = [createDrawing('drawing-1', 10), createDrawing('drawing-2', 80)]
+            .map((drawing) => ({ ...drawing, anchorType: SheetDrawingAnchorType.None }));
+        expect(commands.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: children })).toBe(true);
+        expect(sheet.groupDrawings(['drawing-1', 'drawing-2'], 'group-1')).toBe('group-1');
+        const original = sheet.getDrawingPlacement('group-1');
+        const moved: ISheetDrawingPlacement = { kind: SheetDrawingAnchorType.None, left: 500, top: 90, width: 220, height: 60 };
+        expect(sheet.setDrawingPlacement('group-1', moved)).toBe(true);
+        expect(sheet.getDrawingPlacement('group-1')).toEqual(moved);
+        expect(sheet.ungroupDrawings(['group-1'])).toBe(true);
+        const scaled = [
+            { drawingId: 'drawing-1', bounds: { left: 500, top: 90, width: 80, height: 60 } },
+            { drawingId: 'drawing-2', bounds: { left: 640, top: 90, width: 80, height: 60 } },
+        ];
+        expect(sheet.getDrawingLayout().drawings.map(({ drawingId, bounds }) => ({ drawingId, bounds }))
+            .sort((first, second) => first.drawingId.localeCompare(second.drawingId))).toEqual(scaled);
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(sheet.getDrawingPlacement('group-1')).toEqual(moved);
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(sheet.getDrawingPlacement('group-1')).toEqual(original);
+        expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+        expect(sheet.getDrawingPlacement('group-1')).toEqual(moved);
+        const saved = JSON.parse(JSON.stringify(workbook.save()));
+        expect(api.disposeUnit('test')).toBe(true);
+        const reopened = api.createWorkbook(saved).getSheetBySheetId('sheet1')!;
+        expect(reopened.getDrawingPlacement('group-1')).toEqual(moved);
+        expect(reopened.ungroupDrawings(['group-1'])).toBe(true);
+        expect(reopened.getDrawingLayout().drawings.map(({ drawingId, bounds }) => ({ drawingId, bounds }))
+            .sort((first, second) => first.drawingId.localeCompare(second.drawingId))).toEqual(scaled);
     });
 
     it('supports undo and redo for group and ungroup facade operations', async () => {
@@ -249,10 +365,7 @@ describe('FWorksheetDrawingMixin group drawings', () => {
 
     it('builds and round-trips an Absolute image placement without a Sheet skeleton', async () => {
         const fWorksheet = createFacade(injector);
-        const ensureSkeleton = vi.spyOn(injector.get(SheetSkeletonService), 'ensureSkeleton')
-            .mockImplementation(() => {
-                throw new Error('SKELETON_MUST_NOT_BE_READ');
-            });
+        const ensureSkeleton = vi.spyOn(injector.get(SheetSkeletonService), 'ensureSkeleton');
         const placement: ISheetDrawingPlacement = {
             kind: SheetDrawingAnchorType.None,
             left: 640,
@@ -419,10 +532,8 @@ describe('FWorksheetDrawingMixin background image', () => {
     });
 });
 
-function createFacade(injector: Injector): FWorksheetDrawingMixin {
-    const workbook = injector.get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-    const worksheet = workbook.getSheetBySheetId('sheet1')!;
-    return injector.createInstance(FWorksheetDrawingMixin, { getId: () => 'test' } as FWorkbook, workbook, worksheet);
+function createFacade(injector: Injector): FWorksheet {
+    return FUniver.newAPI(injector).getWorkbook('test')!.getSheetBySheetId('sheet1')!;
 }
 
 function createDrawing(drawingId: string, left: number, drawingType = DrawingTypeEnum.DRAWING_SHAPE): ISheetDrawing {

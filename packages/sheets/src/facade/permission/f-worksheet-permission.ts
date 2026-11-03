@@ -21,16 +21,8 @@ import type {
     IDeleteWorksheetProtectionParams,
     IRangeProtectionRule,
 } from '@univerjs/sheets';
-import type { FRange } from '../f-range';
-import type { FWorksheet } from '../f-worksheet';
-import type {
-    IRangeProtectionOptions,
-    IWorksheetPermissionConfig,
-    IWorksheetProtectionOptions,
-    WorksheetMode,
-    WorksheetPermissionSnapshot,
-} from './permission-types';
 import {
+    AuthzIoLocalService,
     cellToRange,
     generateRandomId,
     IAuthzIoService,
@@ -38,6 +30,7 @@ import {
     Inject,
     Injector,
     IPermissionService,
+    PermissionStatus,
     Rectangle,
 } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
@@ -57,6 +50,15 @@ import {
     WorksheetProtectionPointModel,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
+import type { FRange } from '../f-range';
+import type { FWorksheet } from '../f-worksheet';
+import type {
+    IRangeProtectionOptions,
+    IWorksheetPermissionConfig,
+    IWorksheetProtectionOptions,
+    WorksheetMode,
+    WorksheetPermissionSnapshot,
+} from './permission-types';
 import { FRangeProtectionRule } from './f-range-protection-rule';
 import { WORKSHEET_PERMISSION_POINT_MAP } from './permission-point-map';
 import { WorksheetPermissionPoint } from './permission-types';
@@ -349,12 +351,9 @@ export class FWorksheetPermission extends FBase {
 
         const instance = new PermissionPointClass(this._unitId, this._subUnitId);
         const permissionPoint = this._permissionService.getPermissionPoint(instance.id);
-        if (permissionPoint && permissionPoint.value === value) {
+        if (!(this._authzIoService instanceof AuthzIoLocalService)
+            && permissionPoint?.status === PermissionStatus.DONE && permissionPoint.value === value) {
             return; // Value unchanged, no update needed
-        }
-
-        if (!permissionPoint) {
-            this._permissionService.addPermissionPoint(instance);
         }
 
         await this._authzIoService.update({
@@ -370,6 +369,14 @@ export class FWorksheetPermission extends FBase {
             scope: undefined,
             collaborators: undefined,
         });
+
+        if (!this._permissionService.getPermissionPoint(instance.id)) {
+            this._permissionService.addPermissionPoint(instance);
+        }
+
+        if (this._authzIoService instanceof AuthzIoLocalService) {
+            this._authzIoService.setPermissionOverride(worksheetProtectionRule.permissionId, instance.subType, value);
+        }
 
         this._permissionService.updatePermissionPoint(instance.id, value);
     }

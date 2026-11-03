@@ -62,6 +62,8 @@ function createSkeleton() {
     return {
         rowHeaderWidth: 0,
         columnHeaderHeight: 0,
+        rowHeaderWidthAndMarginLeft: 0,
+        columnHeaderHeightAndMarginTop: 0,
         columnTotalWidth: 1000,
         rowTotalHeight: 1000,
         getNoMergeCellWithCoordByIndex: vi.fn((row: number, column: number) => ({
@@ -70,7 +72,7 @@ function createSkeleton() {
             startY: row * 20,
             endY: row * 20 + 20,
         })),
-        getCellIndexAndOffsetByPosition: vi.fn((left: number, top: number) => {
+        getOffsetRelativeToRowCol: vi.fn((left: number, top: number) => {
             const column = Math.floor(left / 10);
             const row = Math.floor(top / 20);
             return {

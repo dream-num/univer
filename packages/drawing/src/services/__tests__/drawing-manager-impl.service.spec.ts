@@ -17,7 +17,6 @@
 import type { IDrawingParam, IDrawingSearch } from '@univerjs/core';
 import { BooleanNumber, DrawingTypeEnum, Injector, JSON1 } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { DrawingManagerService, UnitDrawingService } from '../drawing-manager-impl.service';
 
 const unitId = 'unit';
@@ -206,6 +205,36 @@ describe('UnitDrawingService', () => {
 
         service.applyJson1(unitId, subUnitId, updateOp.undo);
         expect(service.getDrawingByParam(createSearch('chart'))).toEqual(drawing);
+    });
+
+    it('updates a large drawing batch without repeatedly composing the accumulated operation', () => {
+        const drawings = Array.from({ length: 64 }, (_, index) => createDrawing(`image-${index}`, {
+            transform: { left: index, top: index, width: 100, height: 80 },
+        }));
+        service.registerDrawingData(unitId, {
+            [subUnitId]: {
+                data: Object.fromEntries(drawings.map((drawing) => [drawing.drawingId, drawing])),
+                order: drawings.map((drawing) => drawing.drawingId),
+            },
+        });
+        const updated = drawings.map((drawing, index) => ({
+            ...drawing,
+            transform: { ...drawing.transform, left: index + 200, top: index + 300 },
+        }));
+        const updates = [...updated, { ...drawings[0], hidden: true }];
+
+        const composeSpy = vi.spyOn(JSON1.type, 'compose');
+        const updateOp = service.getBatchUpdateOp(updates);
+        const leftOperandBytes = composeSpy.mock.calls.reduce((total, [left]) => total + JSON.stringify(left).length, 0);
+        composeSpy.mockRestore();
+
+        expect(leftOperandBytes).toBeLessThan(JSON.stringify(updateOp.redo).length * 10);
+        expect(updateOp.objects).toHaveLength(65);
+        service.applyJson1(unitId, subUnitId, updateOp.redo);
+        expect(service.getDrawingByParam(updated[0])).toEqual({ ...updated[0], hidden: true });
+        updated.slice(1).forEach((drawing) => expect(service.getDrawingByParam(drawing)).toEqual(drawing));
+        service.applyJson1(unitId, subUnitId, updateOp.undo);
+        drawings.forEach((drawing) => expect(service.getDrawingByParam(drawing)).toEqual(drawing));
     });
 
     it('preserves disjoint nested fields across concurrent drawing updates', () => {

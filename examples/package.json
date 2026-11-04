@@ -36,8 +36,6 @@
         "@univerjs/preset-sheets-table": "workspace:*",
         "@univerjs/preset-sheets-thread-comment": "workspace:*",
         "@univerjs/presets": "workspace:*",
-        "@univerjs/slides": "workspace:*",
-        "@univerjs/slides-ui": "workspace:*",
         "@univerjs/themes": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "react": "19.3.1",

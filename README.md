@@ -4,6 +4,8 @@
 
 <h1>Build your own AI office with Univer Office SDK.</h1>
 
+<p>Start with open-source Sheets and Docs, then connect your own application or agent.</p>
+
 <p><a href="#quick-start">Quick start</a> · <a href="https://docs.univer.ai/">Documentation</a> · <a href="https://univer.ai/compare/">Feature comparison</a> · <a href="https://univer.ai/">Website</a></p>
 
 </div>
@@ -23,23 +25,35 @@ English | [简体中文](./docs/readme/zh-CN.md) | [繁體中文](https://github
 
 Univer Office SDK has three parts:
 
-- **Web SDK** is the foundation: content models, editing, rendering, formula calculation, and Facade APIs. Compose its plugins into an embedded editor or your own Office application, and reuse the same content models, commands, and calculation for Headless processing.
+- **Web SDK** is the foundation: content models, editing, rendering, formula calculation, and Facade APIs (application-facing APIs). Compose its plugins into an embedded editor or your own Office application, and reuse the content models, commands, and calculation for Headless processing without an interactive editor.
 - **Server SDK** adds backend services for real-time collaboration, edit history, and Office file import and export.
 - **AI SDK** connects Office capabilities to existing agents and workflows, with content tools, execution, and review integrations.
 
 **This repository provides the Web SDK's core architecture and engine implementations under Apache-2.0**: content models and snapshot formats, plugin and dependency management, the command system, formula and rendering engines, Facade APIs, UI foundation, and Sheets and Docs editing capabilities. Commercial Web SDK plugins, Server SDK, and commercial AI SDK extensions are distributed and licensed separately.
 
-The demos below show the wider Office SDK, including commercial capabilities. See [open source and commercial extensions](#open-source-and-commercial-extensions) for scope.
+Agents can use the same open-source APIs; your application supplies the model and tool orchestration. The [quotation example](#connect-your-application-to-editable-content) demonstrates editing, calculation, and saving without an AI SDK dependency.
+
+### Open-source capabilities
+
+| Area | Selected capabilities |
+| --- | --- |
+| **Sheets · Editing and layout** | Cell styles, merged cells, in-cell rich text, freeze panes, floating images, and undo/redo. |
+| **Sheets · Data and calculation** | Formulas, defined names, filtering, sorting, data validation, conditional formatting, hyperlinks, comments, and find and replace. |
+| **Docs** | Rich-text editing, paragraph formatting, lists, hyperlinks, comments, and drawing integration. |
+
+Features are composed through plugins and presets; the [quick start](#quick-start) uses only the **Sheets Core preset**. Images use the corresponding drawing plugins. See the [feature comparison](https://univer.ai/compare/) for detailed open-source and commercial coverage.
+
+The demos below showcase the wider **Univer Office SDK**, including commercial capabilities. They show more than the default open-source setup; see [open source and commercial extensions](#open-source-and-commercial-extensions) for scope.
 
 <table>
   <tr>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/spreadsheets"><img src="./docs/img/readme/previews/spreadsheet.png" alt="Sheets" width="420" /></a>
-      <br /><strong>Sheets</strong>
+      <br /><strong>Sheets · Full SDK demo</strong>
     </td>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/docs"><img src="./docs/img/readme/previews/docs-modern.png" alt="Docs" width="420" /></a>
-      <br /><strong>Docs</strong>
+      <br /><strong>Docs · Full SDK demo</strong>
     </td>
   </tr>
 </table>
@@ -55,7 +69,7 @@ The demos below show the wider Office SDK, including commercial capabilities. Se
     </td>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/universe"><img src="./docs/img/readme/previews/univer.png" alt="Univer · Composed Office content" width="420" /></a>
-      <br /><strong>Univer · Composed Office content</strong>
+      <br /><strong>Composed Office content</strong>
     </td>
   </tr>
   <tr>
@@ -82,32 +96,17 @@ The demos below show the wider Office SDK, including commercial capabilities. Se
 
 </details>
 
-## An open-source foundation for evolving Office applications
-
-**Reuse content capabilities across UI and Headless tasks.**
-Content logic and UI are organized separately. Embed Sheets or Docs in a browser, and reuse content models, commands, and formula calculation in Node.js for snapshots and automated tasks.
-
-**Build business features on existing editing capabilities.**
-Custom plugins reuse content models, formula and rendering engines, and connect to existing features through public services, commands, and extension points. Their UI can reuse components, icons, menus, and panel services. Existing feature implementations provide patterns for extending your own spreadsheet and document products.
-
-**Coordinate edits and undo/redo across features.**
-Inserting a row inside a filter range changes both the base content and the filter range; undo needs to restore both. Each feature supplies its own changes and undo data, and the command composes their execution and history. The implementations and tests provide a reference for integrating custom features into these editing workflows.
-
-Explore the [plugin boundaries, feature coordination, and application APIs](#open-source-architecture).
-
 <a id="what-you-can-build"></a>
 
 ## Build on the open-source foundation
 
-This repository provides ready-to-use **Sheets and Docs capabilities**, together with core architecture and engines for developing your own features and editors.
+| Your goal | Use the open-source foundation | Start here |
+| --- | --- | --- |
+| **Embed Sheets or Docs** | Add an editable Office surface to your application or agent product, and connect your data through Facade APIs. | [Quick start](#quick-start) |
+| **Process content without an editor** | Reuse content plugins, models, commands, and calculation in Node.js for editing, snapshots, and automated tasks. | [Headless guide](https://docs.univer.ai/guides/sheets/getting-started/node) |
+| **Develop custom features or editors** | Reuse the engines, UI components, plugin boundaries, dependency injection, and command/undo systems. Follow existing features to extend Sheets and Docs or develop your own editors. | [Open-source architecture](#open-source-architecture) |
 
-| Your goal | Use the open-source foundation |
-| --- | --- |
-| **Develop your own plugins and editors** | Reuse the content models, plugin architecture, dependency injection, command and undo/redo systems, rendering, and UI extension points. Follow existing feature implementations to extend spreadsheets and documents, or build editors such as your own presentation editor on this foundation. |
-| **Embed Sheets or Docs in your application** | Integrate the existing open-source editors into a business system, Office application, or agent product. Use Facade APIs to connect your application and existing agents to content operations and calculation. |
-| **Process content without mounting an editor** | Compose the required open-source content plugins for reading, editing, calculation, and snapshot operations in Node.js. See [Headless Univer](https://docs.univer.ai/guides/sheets/getting-started/node). |
-
-The quick start below follows the second path: embed an existing open-source spreadsheet editor, then extend it with your application's behavior.
+**Coordinate edits and undo/redo across features.** Inserting a row inside a filter range changes both the base content and the filter range; undo needs to restore both. Each feature supplies its own changes and undo data, and the command composes their execution and history. The architecture walkthrough explains how to extend these editing workflows.
 
 <a id="quick-start"></a>
 
@@ -154,6 +153,43 @@ For component frameworks, retain the `univer` instance returned by `createUniver
 Presets compose plugins and register their Facade APIs. Choose **Plugin Mode** when you need precise control over dependencies, plugin replacement, or loading. Follow the [installation guide](https://docs.univer.ai/guides/sheets/getting-started/installation) for both modes, peer dependencies, and framework integrations.
 
 Keep coordinated `@univerjs/*` packages on the same version. Commercial packages must use the matching release line; independently released packages such as icons follow their declared compatibility. See the [API Stability Policy](https://github.com/dream-num/univer/blob/dev/docs/API_STABILITY.md).
+
+<a id="connect-your-application-to-editable-content"></a>
+
+### Connect your application to editable content
+
+Facade APIs are the application-facing interface to workbooks, worksheets, and ranges. Continue from the quick start to populate a quotation, update a quantity from application code, and read the recalculated total:
+
+```ts
+const workbook = univerAPI.getActiveWorkbook()!
+const sheet = workbook.getActiveSheet()
+
+sheet.getRange('A1:D4').setValues([
+  ['Item', 'Quantity', 'Unit price', 'Amount'],
+  ['Seats', 2, 25, '=B2*C2'],
+  ['Support', 1, 100, '=B3*C3'],
+  ['Total', '', '', '=SUM(D2:D3)'],
+])
+
+// An application control or agent can make the same edit.
+sheet.getRange('B2').setValue(4)
+
+univerAPI.getFormula().onCalculationResultApplied().then(() => {
+  console.log(sheet.getRange('D4').getValue()) // 200
+  localStorage.setItem('quotation', JSON.stringify(workbook.save()))
+}).catch(console.error)
+```
+
+The editor and your application operate on the same workbook; formula changes are recalculated automatically. `workbook.save()` returns a JSON snapshot containing the workbook and its registered plugin data. Your application owns persistence; this example uses browser storage. On a later page load, after initialization, restore the snapshot **instead of creating a blank workbook**:
+
+```ts
+const saved = localStorage.getItem('quotation')
+if (saved) {
+  univerAPI.createWorkbook(JSON.parse(saved))
+}
+```
+
+This workflow uses only open-source packages. Snapshot persistence is separate from XLSX import and export, which uses the separately distributed file-conversion capabilities. Use public Facade APIs for application integration; the source links below explain internal implementation and extension points. See the [API Stability Policy](https://github.com/dream-num/univer/blob/dev/docs/API_STABILITY.md) before depending on an extension point.
 
 <a id="open-source-architecture"></a>
 
@@ -351,14 +387,16 @@ When you want more ready-to-integrate capabilities, compose the corresponding **
 
 ### Scope and licensing
 
-The open-source Headless content capabilities belong to the Web SDK foundation. Commercial Web plugins, Server SDK, and AI SDK capabilities beyond that foundation are distributed and licensed separately. The [feature comparison](https://univer.ai/compare/), including its **Open source only** filter, maintains feature-by-feature coverage.
+- **This repository:** Apache-2.0 packages that can be used in commercial applications under that license, including the open-source Headless content capabilities.
+- **Commercial extensions:** Commercial Web SDK plugins, Server SDK, and AI SDK capabilities beyond the open-source foundation are distributed and licensed separately. **Freemium** evaluation includes watermarks and feature limits.
+- **Reference applications:** Open-source applications such as Univer Workspace have their own source licenses. Their SDK dependencies retain their respective licenses.
 
-Commercial capabilities can be evaluated through **Freemium**, with watermarks and feature limits. These limits apply to commercial evaluation; open-source packages retain their own licenses. Official open-source applications and integrations do not require separate application license fees; commercial SDK capabilities use a valid Office SDK license within its authorized scope. See [plans and licensing](https://univer.ai/pricing/).
+See the [feature comparison](https://univer.ai/compare/), including its **Open source only** filter, for detailed coverage and [plans and licensing](https://univer.ai/pricing/) for commercial options.
 
 <details>
 <summary>How shared content models connect editing, collaboration, and files</summary>
 
-These capabilities operate on serializable **Unit snapshots**, including Sheets' `IWorkbookData`, Docs' `IDocumentData`, Slides' `ISlideData`, and Boards' `IBoardData`. These types come from core and the respective product packages. The shared Unit conventions let browser editors, backend services, and agents work with the same content.
+These capabilities operate on serializable **Unit snapshots**, including Sheets' `IWorkbookData`, Docs' `IDocumentData`, Slides' `ISlideData`, and canvases' `IBoardData` (called **Boards** in the API). These types come from core and the respective product packages; current Slides and Boards capabilities are separately distributed commercial products. The shared Unit conventions let browser editors, backend services, and agents work with the same content.
 
 Commands orchestrate edits; **Mutations describe content changes**. Collaboration packages those mutations into **changesets**, applies **operational transformation (OT)** to concurrent changes, and manages confirmed revisions and snapshots. History can reconstruct a revision from a snapshot and subsequent changesets. Read the [collaboration design](https://docs.univer.ai/blog/ot) and [Collaboration SDK overview](https://docs.univer.ai/server/collaboration/overview).
 
@@ -397,18 +435,20 @@ For a complete application reference, start with [Univer Workspace](https://gith
   <tr>
     <td width="50%" valign="top">
       <strong>Agents and editable Office content</strong><br />
-      Keep conversations, spreadsheet editing, and Office content in one workspace.
+      Keep conversations, spreadsheet editing, and Office content in one workspace.<br />
+      <a href="https://space.univer.ai/">Try Workspace</a> · <a href="https://github.com/dream-num/univer-workspace">Workspace source and setup</a>
     </td>
     <td width="50%" valign="top">
       <strong>Web App × Sheet · Experimental</strong><br />
-      Bind controls to cells: the app writes to the sheet, and sheet changes update the app.
+      Bind controls to cells: the app writes to the sheet, and sheet changes update the app.<br />
+      <a href="https://univer.ai/demo/web-app">Try the sheet-powered app demo</a>
     </td>
   </tr>
 </table>
 
 Workspace is open source; its SDK dependencies follow their respective licenses. See the [Workspace overview](https://univer.ai/workspace/) for connected apps and review workflows.
 
-[Try Workspace](https://space.univer.ai/) · [Source and setup](https://github.com/dream-num/univer-workspace) · [Watch an SDK integration demo](https://www.youtube.com/watch?v=1p-SMEiK6Kg)
+[Watch an SDK integration demo](https://www.youtube.com/watch?v=1p-SMEiK6Kg)
 
 ### CLI, agent integrations, and developer skills
 
@@ -475,7 +515,7 @@ Useful commands:
 
 | Command | Purpose |
 | --- | --- |
-| `pnpm dev` | Start the all-in-one Sheets, Docs, and Slides workbench with Vite 8 Bundled Dev and HMR. |
+| `pnpm dev` | Start the Sheets and Docs development workbench. |
 | `pnpm build` | Build workspace packages, excluding internal common packages. |
 | `pnpm test` | Run unit tests through Turbo. |
 | `pnpm typecheck` | Run TypeScript checks through Turbo. |

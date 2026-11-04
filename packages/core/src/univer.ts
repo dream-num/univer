@@ -20,7 +20,7 @@ import type { UnitModel } from './common/unit';
 import type { LogLevel } from './services/log/log.service';
 import type { DependencyOverride } from './services/plugin/plugin-override';
 import type { Plugin, PluginCtor } from './services/plugin/plugin.service';
-import type { ILocales } from './shared';
+import type { ILocales } from './shared/locale';
 import type { LocaleType } from './types/enum/locale-type';
 import { Injector, touchDependencies } from './common/di';
 import { UniverInstanceType } from './common/unit';
@@ -56,9 +56,8 @@ import {
     UNDO_REDO_HISTORY_LIMIT_CONFIG_KEY,
 } from './services/undoredo/undoredo.service';
 import { UserManagerService } from './services/user-manager/user-manager.service';
-import { DisposableCollection, toDisposable } from './shared';
+import { DisposableCollection, toDisposable } from './shared/lifecycle';
 import { Workbook } from './sheets/workbook';
-import { SlideDataModel } from './slides/slide-data-model';
 
 export interface IUniverConfig {
     /**
@@ -202,7 +201,6 @@ export class Univer implements IDisposable {
     private _init(injector: Injector): void {
         this._univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_SHEET, Workbook);
         this._univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_DOC, DocumentDataModel);
-        this._univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_SLIDE, SlideDataModel);
 
         const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;
         univerInstanceService.__setCreateHandler(

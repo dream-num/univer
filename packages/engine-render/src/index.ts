@@ -42,7 +42,7 @@ export {
 export type { IResolvedDrawingShadow } from './basics/drawing-effect';
 export { getOffsetRectForDom } from './basics/position';
 export * from './canvas';
-export * from './components';
+export * from './components/component';
 export type { DocsCustomBlockRenderViewportProvider, IDocsCustomBlockRenderViewport, IDocsCustomBlockRenderViewportInput } from './components/docs/custom-block-render-viewport';
 export { getDocsCustomBlockRenderViewport, setDocsCustomBlockRenderViewportProvider } from './components/docs/custom-block-render-viewport';
 export {
@@ -122,7 +122,28 @@ export { DataStreamTreeNode } from './components/docs/view-model/data-stream-tre
 export { DocumentViewModel } from './components/docs/view-model/document-view-model';
 export { DocumentEditArea } from './components/docs/view-model/document-view-model';
 export { parseDataStreamToTree } from './components/docs/view-model/document-view-model';
-export { DEFAULT_PADDING_DATA } from './components/sheets/sheet.render-skeleton';
+export * from './components/extension';
+export * from './components/sheets/column-header';
+export * from './components/sheets/constants';
+export * from './components/sheets/extensions/background';
+export * from './components/sheets/extensions/border';
+export * from './components/sheets/extensions/column-header-layout';
+export * from './components/sheets/extensions/custom';
+export * from './components/sheets/extensions/font';
+export * from './components/sheets/extensions/marker';
+export * from './components/sheets/extensions/row-header-layout';
+export * from './components/sheets/extensions/sheet-extension';
+export * from './components/sheets/interfaces';
+export * from './components/sheets/row-header';
+export * from './components/sheets/sheet-component';
+export * from './components/sheets/sheet.render-skeleton';
+export { RENDER_RAW_FORMULA_KEY } from './components/sheets/sheet.render-skeleton';
+export * from './components/sheets/spreadsheet';
+export { calculateCellImageRect } from './components/sheets/util';
+export type { ICellImageRectConfig } from './components/sheets/util';
+export * from './components/sheets/watermark/type';
+export * from './components/sheets/watermark/util';
+export * from './components/sheets/watermark/watermark-layer';
 export type { IUniverEngineRenderConfig } from './config/config';
 export * from './context';
 export * from './custom';

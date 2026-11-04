@@ -292,7 +292,7 @@ API 호환성 기대치, experimental APIs, internal APIs, deprecation rules는 
 | --- | --- | --- |
 | **Sheets** | 워크북, 워크시트, 범위, 선택, 수식, 숫자 서식, 필터링, 정렬, 데이터 유효성 검사, 조건부 서식, 하이퍼링크, 댓글, 찾기/바꾸기, 노트, 테이블, drawing integration, 확장 가능한 UI 플러그인. | 실시간 협업, 편집 기록, import/export, printing, charts, pivot tables, sparklines, outlines, shapes, in-cell graphics, data connectors, server-side calculation, 향상된 formula 기능. |
 | **Docs** | 리치 문서 모델, 편집 UI, 목록, 하이퍼링크, drawing integration, 댓글, quick insert, 공유 문서 아키텍처. | 협업, import/export, printing, 향상된 tables/lists, columns, callouts, code blocks, quotes, shapes, remote comment resources. |
-| **Slides** | 프레젠테이션 데이터 모델과 편집 UI 패키지. | Pro slide model/UI, slide import/export, chart/table model 및 UI plugins, 공유 shape editing infrastructure. |
+| **Slides** | — | Slide model/UI, slide import/export, chart/table model 및 UI plugins, 공유 shape editing infrastructure. |
 | **Bases** | Univer의 plugin, command, model 아키텍처 위에서 커스텀 structured-data 경험을 만들 수 있습니다. | Base database model, commands, formula integration, workbench UI, field editors, render-engine views. |
 | **Runtime** | 브라우저 앱, Node.js headless 사용, Web Worker/RPC 패턴, multi-instance 사용, 서버 지향 자동화. | Collaboration client/server packages, Node.js collaboration client, Pro server services, SSR, computing delegation, server-side calculation, changeset replay tooling. |
 | **Integrations** | React, Vue, Web Components, 프레임워크 템플릿, 테마, 로컬라이제이션, 커스텀 플러그인. | Pro presets, enterprise deployment packages. |
@@ -308,7 +308,7 @@ Sheets, Docs, Slides는 Univer의 공통 아키텍처를 기반으로 스프레�
 | **Foundation** | Core SDK, 플러그인 시스템, 렌더링 엔진, 수식 엔진, Facade API, 테마, i18n, framework adapters. | Pro presets, enterprise deployment packages. |
 | **Sheets** | 핵심 스프레드시트 편집, 수식, 숫자 서식, filter/sort, 데이터 유효성 검사, 조건부 서식, 노트, 테이블, 하이퍼링크, 댓글, drawing, 찾기/바꾸기. | 협업, 편집 기록, import/export, print, charts, pivot tables, sparklines, outlines, shapes, in-cell graphics, data connectors, range preprocessing, 향상된 formula engine 기능. |
 | **Docs** | 문서 모델과 편집 UI, 목록, 하이퍼링크, 댓글, quick insert, drawing integration. | 협업, import/export, print, 향상된 tables/lists, columns, callouts, code blocks, quotes, shapes, remote thread-comment resources. |
-| **Slides** | OSS presentation model과 UI packages. | Pro slide model/UI packages, slide import/export, charts, tables, reusable shape editor UI. |
+| **Slides** | — | Slide model/UI packages, slide import/export, charts, tables, reusable shape editor UI. |
 | **Bases** | 커스텀 data-centric products를 위한 확장 가능한 plugin architecture. | Base database core model, commands, mutations, formula integration, workbench UI, field editors, render-engine integration. |
 | **Server and runtime** | Node.js headless runtime, RPC/Web Worker patterns, server-oriented automation primitives. | Collaboration server, Node.js collaboration client, SSR services, computing delegation, server-side calculation, collaboration changeset replay tooling. |
 

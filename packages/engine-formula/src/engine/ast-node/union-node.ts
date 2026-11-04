@@ -121,6 +121,7 @@ export class UnionNode extends BaseAstNode {
     private _copyReferenceContext(source: BaseReferenceObject, target: BaseReferenceObject): void {
         target.setDefaultUnitId(source.getDefaultUnitId());
         target.setDefaultSheetId(source.getDefaultSheetId());
+        target.setCalculationCache(source.getCalculationCache());
         target.setUnitData(source.getUnitData());
         target.setUnitStylesData(source.getUnitStylesData());
         target.setFilteredOutRows(source.getFilteredOutRows());

@@ -15,13 +15,13 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { DateSystem } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
 import type { BaseValueObject } from '../base-value-object';
+import { DateSystem, Injector } from '@univerjs/core';
+import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
-import { CELL_INVERTED_INDEX_CACHE } from '../../../basics/inverted-index-cache';
 import { compareToken } from '../../../basics/token';
 import { getObjectValue } from '../../../functions/util';
+import { FormulaCacheService } from '../../../services/formula-cache.service';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../array-value-object';
 import { ErrorValueObject } from '../base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../primitive-object';
@@ -29,6 +29,8 @@ import { BooleanValueObject, NumberValueObject, StringValueObject } from '../pri
 describe('arrayValueObject test', () => {
     it('matches uncached comparisons after repeated formula-result updates', () => {
         const values = [[1], [3], [5], [7], [9]];
+        const injector = new Injector([[FormulaCacheService]]);
+        const context = injector.get(FormulaCacheService).createCalculation()!;
         const createArray = (useInvertedIndexCache: boolean): ArrayValueObject => ArrayValueObject.create({
             calculateValueList: transformToValueObject(values),
             rowCount: values.length,
@@ -38,14 +40,14 @@ describe('arrayValueObject test', () => {
             row: 10,
             column: 2,
             useInvertedIndexCache,
-        });
-        CELL_INVERTED_INDEX_CACHE.clear();
+        }).withCalculationCache(context);
         try {
+            expect(createArray(true).usesInvertedIndexCache()).toBe(true);
             createArray(true).compare(NumberValueObject.create(3), compareToken.EQUALS);
             for (let update = 0; update < 100; update++) {
                 const row = update % values.length;
                 values[row][0] = (update * 7) % 11;
-                CELL_INVERTED_INDEX_CACHE.set('updated-formulas', 'sheet', 2, values[row][0], row + 10, true);
+                context.invertedIndex.set('updated-formulas', 'sheet', 2, values[row][0], row + 10, true);
                 for (const operator of Object.values(compareToken)) {
                     const criterion = NumberValueObject.create(update % 11);
                     const cached = createArray(true).compare(criterion, operator);
@@ -56,7 +58,7 @@ describe('arrayValueObject test', () => {
                 }
             }
         } finally {
-            CELL_INVERTED_INDEX_CACHE.clear();
+            injector.dispose();
         }
     });
 

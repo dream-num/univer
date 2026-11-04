@@ -17,6 +17,12 @@
 import type { IDocumentData, IStyleData, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { ReactElement } from 'react';
 import type { Root } from 'react-dom/client';
+import type {
+    ICellEditorLayout,
+    ICellEditorState,
+    IEditorBridgeServiceParam,
+    IEditorBridgeServiceVisibleParam,
+} from '../../../services/editor-bridge.service';
 import {
     CommandType,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -33,6 +39,7 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
 import {
     DefinedNamesService,
+    FormulaCacheService,
     FormulaDataModel,
     FunctionService,
     IDefinedNamesService,
@@ -68,12 +75,6 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject, EMPTY } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type {
-    ICellEditorLayout,
-    ICellEditorState,
-    IEditorBridgeServiceParam,
-    IEditorBridgeServiceVisibleParam,
-} from '../../../services/editor-bridge.service';
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../../common/keys';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../../config/config';
@@ -285,6 +286,7 @@ function createFormulaBarTestBed(cellStyle?: IStyleData, realEditorServices = fa
 
     injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
     injector.add([ISuperTableService, { useClass: SuperTableService }]);
+    injector.add([FormulaCacheService]);
     injector.add([IFunctionService, { useClass: FunctionService }]);
     injector.add([FormulaDataModel]);
     injector.add([LexerTreeBuilder, { useClass: LexerTreeBuilder }]);

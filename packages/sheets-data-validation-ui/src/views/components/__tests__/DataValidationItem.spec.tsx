@@ -53,6 +53,7 @@ import {
 import {
     ActiveDirtyManagerService,
     DefinedNamesService,
+    FormulaCacheService,
     FormulaDataModel,
     FunctionService,
     IActiveDirtyManagerService,
@@ -402,6 +403,7 @@ function createItemTestBed(rule: ISheetDataValidationRule = createCheckboxRule()
                 [FormulaDataModel],
                 [LexerTreeBuilder],
                 [RefRangeService],
+                [FormulaCacheService],
                 [IFunctionService, { useClass: FunctionService }],
                 [IDefinedNamesService, { useClass: DefinedNamesService }],
                 [ISuperTableService, { useClass: SuperTableService }],

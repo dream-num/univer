@@ -31,6 +31,7 @@ import {
     ActiveDirtyManagerService,
     CalculateFormulaService,
     DefinedNamesService,
+    FormulaCacheService,
     FormulaCurrentConfigService,
     FormulaDataModel,
     FormulaRuntimeService,
@@ -224,6 +225,7 @@ function createClipboardTestBed() {
     injector.add([LexerTreeBuilder]);
     injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
     injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
+    injector.add([FormulaCacheService]);
     injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
     injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
     injector.add([IRenderManagerService, { useClass: RenderManagerService }]);

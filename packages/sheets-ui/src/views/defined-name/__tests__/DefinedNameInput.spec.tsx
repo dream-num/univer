@@ -27,6 +27,7 @@ import {
 } from '@univerjs/core';
 import {
     DefinedNamesService,
+    FormulaCacheService,
     FunctionService,
     IDefinedNamesService,
     IFunctionService,
@@ -141,6 +142,7 @@ function createDefinedNameInputTestBed() {
 
     injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
     injector.add([ISuperTableService, { useClass: SuperTableService }]);
+    injector.add([FormulaCacheService]);
     injector.add([IFunctionService, { useClass: FunctionService }]);
     injector.add([LexerTreeBuilder, { useClass: LexerTreeBuilder }]);
     injector.add([ComponentManager, { useClass: ComponentManager }]);

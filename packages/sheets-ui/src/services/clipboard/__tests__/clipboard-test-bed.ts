@@ -34,6 +34,7 @@ import {
 import {
     CalculateFormulaService,
     DefinedNamesService,
+    FormulaCacheService,
     FormulaCurrentConfigService,
     FormulaDataModel,
     FormulaRuntimeService,
@@ -614,6 +615,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+            injector.add([FormulaCacheService]);
             injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);

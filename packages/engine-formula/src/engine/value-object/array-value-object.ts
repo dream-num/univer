@@ -15,11 +15,11 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { DateSystem, isRealNum } from '@univerjs/core';
+import type { FormulaCalculationCache } from '../../services/formula-cache.service';
 import type { callbackMapFnType, IArrayValueObject } from './base-value-object';
+import { DateSystem, isRealNum } from '@univerjs/core';
 import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
-import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
 import { regexTestArrayValue } from '../../basics/regex';
 import { compareToken } from '../../basics/token';
 import { ArrayBinarySearchType, ArrayOrderSearchType, getCompare, isWildcard } from '../utils/compare';
@@ -109,6 +109,13 @@ export function transformToValue(array: Nullable<BaseValueObject>[][] = []) {
 }
 
 export class ArrayValueObject extends BaseValueObject {
+    private _calculationCache: FormulaCalculationCache | undefined;
+
+    withCalculationCache(cache: FormulaCalculationCache | undefined): this {
+        this._calculationCache = cache;
+        return this;
+    }
+
     /**
      * Create an array value object based on the string or IArrayValueObject data.
      * @param rawValue
@@ -185,6 +192,7 @@ export class ArrayValueObject extends BaseValueObject {
         //     });
         // });
 
+        this._calculationCache = undefined;
         this._values = [];
 
         this._defaultValue = null;
@@ -246,7 +254,7 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     usesInvertedIndexCache() {
-        return this._useInvertedIndexCache;
+        return this._useInvertedIndexCache && this._calculationCache != null && !this._calculationCache.closed;
     }
 
     usesLegacyImplicitForAggregate() {
@@ -1552,8 +1560,8 @@ export class ArrayValueObject extends BaseValueObject {
          * If comparison operations are conducted for a single numerical value,
          * then retrieve the judgment from the inverted index. This enhances performance.
          */
-        if (batchOperatorType === BatchOperatorType.COMPARE && this._useInvertedIndexCache && !isWildcardComparison) {
-            const { rowsInCache, rowsNotInCache } = CELL_INVERTED_INDEX_CACHE.canUseCache(
+        if (batchOperatorType === BatchOperatorType.COMPARE && this.usesInvertedIndexCache() && !isWildcardComparison) {
+            const { rowsInCache, rowsNotInCache } = this._calculationCache!.invertedIndex.canUseCache(
                 unitId,
                 sheetId,
                 column + startColumn,
@@ -1563,7 +1571,7 @@ export class ArrayValueObject extends BaseValueObject {
 
             if (rowsInCache.length > 0) {
                 if (operator === compareToken.EQUALS && !(valueObject.isString() && isWildcard(valueObject.getValue() as string))) {
-                    const rowPositions = CELL_INVERTED_INDEX_CACHE.getCellPositions(
+                    const rowPositions = this._calculationCache!.invertedIndex.getCellPositions(
                         unitId,
                         sheetId,
                         column + startColumn,
@@ -1585,7 +1593,7 @@ export class ArrayValueObject extends BaseValueObject {
                         });
                     }
                 } else {
-                    const rowValuePositions = CELL_INVERTED_INDEX_CACHE.getCellValuePositions(
+                    const rowValuePositions = this._calculationCache!.invertedIndex.getCellValuePositions(
                         unitId,
                         sheetId,
                         column + startColumn
@@ -1646,8 +1654,8 @@ export class ArrayValueObject extends BaseValueObject {
                             );
                         }
 
-                        if (this._useInvertedIndexCache) {
-                            CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache(
+                        if (this.usesInvertedIndexCache()) {
+                            this._calculationCache!.invertedIndex.setContinueBuildingCache(
                                 unitId,
                                 sheetId,
                                 column + startColumn,
@@ -1678,8 +1686,8 @@ export class ArrayValueObject extends BaseValueObject {
             );
         }
 
-        if (this._useInvertedIndexCache) {
-            CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache(
+        if (this.usesInvertedIndexCache()) {
+            this._calculationCache!.invertedIndex.setContinueBuildingCache(
                 unitId,
                 sheetId,
                 column + startColumn,
@@ -1766,8 +1774,8 @@ export class ArrayValueObject extends BaseValueObject {
             result[r][column] = ErrorValueObject.create(ErrorType.NA);
         }
 
-        if (this._useInvertedIndexCache) {
-            CELL_INVERTED_INDEX_CACHE.set(
+        if (this.usesInvertedIndexCache()) {
+            this._calculationCache!.invertedIndex.set(
                 unitId,
                 sheetId,
                 column + startColumn,
@@ -1990,7 +1998,7 @@ export class ArrayValueObject extends BaseValueObject {
             column,
         };
 
-        return ArrayValueObject.create(arrayValueObjectData, this.getDateSystem());
+        return ArrayValueObject.create(arrayValueObjectData, this.getDateSystem()).withCalculationCache(this._calculationCache);
     }
 }
 

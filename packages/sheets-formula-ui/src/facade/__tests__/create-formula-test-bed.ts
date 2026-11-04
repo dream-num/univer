@@ -38,6 +38,7 @@ import {
     DependencyManagerService,
     DescriptionService,
     FeatureCalculationManagerService,
+    FormulaCacheService,
     FormulaCurrentConfigService,
     FormulaDataModel,
     FormulaDependencyGenerator,
@@ -203,6 +204,7 @@ function registerFormulaDependencies(injector: Injector) {
     injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
     injector.add([IDependencyManagerService, { useClass: DependencyManagerService }]);
     injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
+    injector.add([FormulaCacheService]);
     injector.add([IFunctionService, { useClass: FunctionService }]);
     injector.add([IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }]);
     injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);

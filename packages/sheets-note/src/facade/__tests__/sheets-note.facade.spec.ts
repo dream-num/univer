@@ -34,6 +34,7 @@ import {
 import { FUniver } from '@univerjs/core/facade';
 import {
     DefinedNamesService,
+    FormulaCacheService,
     FormulaDataModel,
     FunctionService,
     IDefinedNamesService,
@@ -109,6 +110,7 @@ function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?: Depend
             // Minimal set of dependencies required by Sheets facade classes.
             this._injector.add([SheetsSelectionsService]);
             this._injector.add([SheetInterceptorService]);
+            this._injector.add([FormulaCacheService]);
             this._injector.add([IFunctionService, { useClass: FunctionService }]);
             this._injector.add([ISocketService, { useClass: WebSocketService }]);
             this._injector.add([IRenderManagerService, { useClass: RenderManagerService }]);

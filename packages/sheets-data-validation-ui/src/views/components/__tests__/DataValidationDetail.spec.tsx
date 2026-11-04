@@ -49,6 +49,7 @@ import { AddDataValidationMutation, DataValidationModel, DataValidatorRegistrySe
 import {
     ActiveDirtyManagerService,
     DefinedNamesService,
+    FormulaCacheService,
     FormulaDataModel,
     FunctionService,
     IActiveDirtyManagerService,
@@ -436,6 +437,7 @@ function createDetailTestBed(rule: ISheetDataValidationRule) {
                 [FormulaDataModel],
                 [LexerTreeBuilder],
                 [RefRangeService],
+                [FormulaCacheService],
                 [IFunctionService, { useClass: FunctionService }],
                 [IDefinedNamesService, { useClass: DefinedNamesService }],
                 [ISuperTableService, { useClass: SuperTableService }],

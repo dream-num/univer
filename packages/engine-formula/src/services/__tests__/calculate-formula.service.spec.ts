@@ -15,23 +15,23 @@
  */
 
 import type { ICellData } from '@univerjs/core';
-import { IConfigService, Injector, ObjectMatrix } from '@univerjs/core';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { IFormulaDatasetConfig } from '../../basics/common';
 import type { IAllRuntimeData } from '../runtime.service';
+import { IConfigService, Inject, Injector, ObjectMatrix } from '@univerjs/core';
+import { describe, expect, it, vi } from 'vitest';
 import { ErrorType } from '../../basics/error-type';
 import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { Lexer } from '../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../engine/analysis/parser';
 import { IFormulaDependencyGenerator } from '../../engine/dependency/formula-dependency';
 import { Interpreter } from '../../engine/interpreter/interpreter';
-import { FORMULA_REF_TO_ARRAY_CACHE } from '../../engine/reference-object/base-reference-object';
 import { createFunctionTestBed } from '../../functions/__tests__/create-function-test-bed';
 import { AsyncCustomFunction } from '../../functions/custom-function';
 import { CalculateFormulaService, ICalculateFormulaService } from '../calculate-formula.service';
 import { IFormulaCurrentConfigService } from '../current-data.service';
 import { DependencyManagerService, IDependencyManagerService } from '../dependency-manager.service';
 import { FeatureCalculationManagerService, IFeatureCalculationManagerService } from '../feature-calculation-manager.service';
+import { FormulaCacheService } from '../formula-cache.service';
 import { IFunctionService } from '../function.service';
 import { FormulaExecutedStateType, FormulaExecuteStageType, IFormulaRuntimeService } from '../runtime.service';
 
@@ -184,10 +184,12 @@ function createService() {
     }
 
     class TestAstTreeBuilder {
+        constructor(@Inject(FormulaCacheService) readonly cacheService: FormulaCacheService) {}
         parse = astTreeBuilder.parse;
     }
 
     const injector = new Injector();
+    injector.add([FormulaCacheService]);
     injector.add([IConfigService, { useClass: TestConfigService as never }]);
     injector.add([Lexer, { useClass: TestLexer as never }]);
     injector.add([IFormulaCurrentConfigService, { useClass: TestCurrentConfigService as never }]);
@@ -220,10 +222,6 @@ function createService() {
 }
 
 describe('CalculateFormulaService', () => {
-    beforeEach(() => {
-        FORMULA_REF_TO_ARRAY_CACHE.clear();
-    });
-
     it('retains a queued scalar source when a preceding asynchronous dependency allows its cell to be cleared', async () => {
         const testBed = createFunctionTestBed(undefined, [
             [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],

@@ -19,7 +19,7 @@ English | [简体中文](./docs/readme/zh-CN.md) | [繁體中文](https://github
 
 ## What is Univer?
 
-**Univer** (**Univer Office SDK**) is a development framework for building Office applications inside your own product. It provides Office editing, calculation, collaboration, and file processing for people and existing agents, using your data and permissions. The product family covers spreadsheets, documents, presentations, relational tables, canvases, and PDFs.
+**Univer** is an Office SDK for building Office applications inside your own product. It provides Office editing, calculation, collaboration, and file processing for people and existing agents, using your data and permissions. The product family covers spreadsheets, documents, presentations, relational tables, canvases, and PDFs.
 
 Univer Office SDK has three parts:
 

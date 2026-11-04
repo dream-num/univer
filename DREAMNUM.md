@@ -12,8 +12,6 @@
 - First-party open-source package presets and the examples and test projects used to exercise the SDK. See the [workspace definition](pnpm-workspace.yaml) and [repository guide](README.md#-repository-guide).
 - Public API compatibility rules for stable, experimental, internal, and deprecated interfaces. See the [API Stability Policy](docs/API_STABILITY.md).
 
-Slides models and editing UI have moved to `@univerjs-pro/slides` and `@univerjs-pro/slides-ui`.
-
 The repository does not own Univer Pro's commercial collaboration, import/export, server, or enterprise capabilities; those are a separate extension layer described in the [open-source and Pro boundary](README.md#-open-source-and-pro).
 
 ## Provides

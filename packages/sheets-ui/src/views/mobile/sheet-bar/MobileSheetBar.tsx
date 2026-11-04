@@ -16,10 +16,7 @@
 
 import type { ICommandInfo, Workbook } from '@univerjs/core';
 import type { MouseEvent } from 'react';
-import type { IUniverSheetsUIConfig } from '../../../config/config';
-import type { LocaleKey } from '../../../locale/types';
-import type { IBaseSheetBarProps } from '../../sheet-bar/sheet-bar-tabs/SheetBarItem';
-import { ICommandService, LocaleService, nameCharacterCheck } from '@univerjs/core';
+import { ICommandService, IPermissionService, LocaleService, nameCharacterCheck } from '@univerjs/core';
 import {
     borderBottomClassName,
     borderLeftClassName,
@@ -42,14 +39,23 @@ import {
     SetWorksheetNameMutation,
     SetWorksheetOrderMutation,
     SetWorksheetShowCommand,
+    WorkbookCreateSheetPermission,
+    WorkbookEditablePermission,
+    WorkbookHideSheetPermission,
+    WorkbookRenameSheetPermission,
 } from '@univerjs/sheets';
 import {
     ContextMenuPosition,
     IContextMenuService,
     useConfigValue,
     useDependency,
+    useObservable,
 } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { EMPTY } from 'rxjs';
+import type { IUniverSheetsUIConfig } from '../../../config/config';
+import type { LocaleKey } from '../../../locale/types';
+import type { IBaseSheetBarProps } from '../../sheet-bar/sheet-bar-tabs/SheetBarItem';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../../config/config';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import { useActiveWorkbook } from '../../hook';
@@ -79,6 +85,35 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
     const contextMenuService = useDependency(IContextMenuService);
     const localeService = useDependency(LocaleService);
     const sheetBarService = useDependency(ISheetBarService);
+    const permissionService = useDependency(IPermissionService);
+    const unitId = workbook.getUnitId();
+    const workbookEditable = useObservable(
+        () => permissionService.getPermissionPoint$(new WorkbookEditablePermission(unitId).id) ?? EMPTY,
+        undefined,
+        false,
+        [permissionService, unitId]
+    )?.value;
+    const workbookCreateSheet = useObservable(
+        () => permissionService.getPermissionPoint$(new WorkbookCreateSheetPermission(unitId).id) ?? EMPTY,
+        undefined,
+        false,
+        [permissionService, unitId]
+    )?.value;
+    const workbookRenameSheet = useObservable(
+        () => permissionService.getPermissionPoint$(new WorkbookRenameSheetPermission(unitId).id) ?? EMPTY,
+        undefined,
+        false,
+        [permissionService, unitId]
+    )?.value;
+    const workbookHideSheet = useObservable(
+        () => permissionService.getPermissionPoint$(new WorkbookHideSheetPermission(unitId).id) ?? EMPTY,
+        undefined,
+        false,
+        [permissionService, unitId]
+    )?.value;
+    const addSheetDisabled = !(workbookEditable && workbookCreateSheet);
+    const renameDisabled = !(workbookEditable && workbookRenameSheet);
+    const unhideDisabled = !(workbookEditable && workbookHideSheet);
     const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
     const addSheetButtonShow = (config?.footer || {}).addSheetButtonConfig?.show ?? true;
 
@@ -154,11 +189,14 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
     }, [contextMenuService, workbook]);
 
     const addSheet = useCallback(() => {
+        if (addSheetDisabled) {
+            return;
+        }
         commandService.executeCommand(InsertSheetCommand.id, { unitId: workbook.getUnitId() });
-    }, [commandService, workbook]);
+    }, [addSheetDisabled, commandService, workbook]);
 
     const confirmRename = useCallback(() => {
-        if (!renameSheetId) {
+        if (!renameSheetId || renameDisabled) {
             return;
         }
 
@@ -182,7 +220,7 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
             name,
         });
         setRenameSheetId(null);
-    }, [commandService, localeService, renameSheetId, renameValue, workbook]);
+    }, [commandService, localeService, renameDisabled, renameSheetId, renameValue, workbook]);
 
     useEffect(() => {
         const disposable = commandService.onCommandExecuted((commandInfo: ICommandInfo) => {
@@ -289,10 +327,12 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                     <button
                         type="button"
                         aria-label={localeService.t<LocaleKey>('sheets-ui.mobile.addSheet')}
+                        disabled={addSheetDisabled}
                         className={clsx(resetButtonClassName, borderLeftClassName, `
                           univer-flex univer-h-10 univer-w-12 univer-shrink-0 univer-items-center univer-justify-center
                           univer-bg-gray-100 univer-text-lg univer-text-gray-800
                           active:univer-bg-gray-200
+                          disabled:univer-cursor-not-allowed disabled:univer-opacity-40
                           dark:!univer-bg-gray-800 dark:!univer-text-gray-100
                           dark:active:!univer-bg-gray-700
                         `)}
@@ -306,7 +346,7 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                 open={Boolean(renameSheetId)}
                 title={localeService.t<LocaleKey>('sheets-ui.sheetConfig.rename')}
                 showCancel
-                showOk
+                showOk={!renameDisabled}
                 onCancel={() => setRenameSheetId(null)}
                 onOk={confirmRename}
                 onOpenChange={(open) => {
@@ -318,6 +358,7 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                 <div className="univer-grid univer-gap-2">
                     <Input
                         autoFocus
+                        disabled={renameDisabled}
                         size="large"
                         value={renameValue}
                         onChange={(value) => {
@@ -358,14 +399,19 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                         <button
                             key={sheetId}
                             type="button"
+                            disabled={unhideDisabled}
                             className={clsx(resetButtonClassName, borderBottomClassName, `
                               univer-flex univer-min-h-12 univer-w-full univer-items-center univer-px-4 univer-py-2
                               univer-text-left univer-text-base univer-font-medium univer-text-gray-900
                               active:univer-bg-gray-100
+                              disabled:univer-opacity-40
                               dark:!univer-text-gray-100
                               dark:active:!univer-bg-gray-700
                             `)}
                             onClick={() => {
+                                if (unhideDisabled) {
+                                    return;
+                                }
                                 commandService.executeCommand(SetWorksheetShowCommand.id, {
                                     unitId: workbook.getUnitId(),
                                     subUnitId: sheetId,

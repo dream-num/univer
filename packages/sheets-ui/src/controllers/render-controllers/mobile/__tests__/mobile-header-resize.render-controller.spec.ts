@@ -17,16 +17,21 @@
 import type { Workbook } from '@univerjs/core';
 import type { BaseObject, IPointerEvent, IRenderContext } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { EventSubject, ICommandService, LocaleType, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
+import { EventSubject, ICommandService, IPermissionService, LocaleType, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import {
     DeltaColumnWidthCommand,
     DeltaRowHeightCommand,
+    RangeProtectionRuleModel,
     SelectionMoveType,
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
     SetWorksheetRowIsAutoHeightMutation,
     SheetSkeletonService,
     SheetsSelectionsService,
+    WorkbookEditablePermission,
+    WorksheetEditPermission,
+    WorksheetSetColumnStylePermission,
+    WorksheetSetRowStylePermission,
 } from '@univerjs/sheets';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SheetScrollManagerService } from '../../../../services/scroll-manager.service';
@@ -80,9 +85,16 @@ function createController(zoomRatio = 2, size = 20) {
                 cellData: {},
             },
         },
-    }, [[SheetSkeletonService]]);
+    }, [[SheetSkeletonService], [RangeProtectionRuleModel]]);
     testBeds.push(testBed);
     const injector = testBed.univer.__getInjector();
+    const permissions = injector.get(IPermissionService);
+    [
+        new WorkbookEditablePermission('test'),
+        new WorksheetEditPermission('test', 'sheet-1'),
+        new WorksheetSetRowStylePermission('test', 'sheet-1'),
+        new WorksheetSetColumnStylePermission('test', 'sheet-1'),
+    ].forEach((permission) => permissions.addPermissionPoint(permission));
     const canvasElement = document.createElement('canvas');
     document.body.appendChild(canvasElement);
     const scene = {
@@ -132,6 +144,7 @@ function createController(zoomRatio = 2, size = 20) {
         controller,
         commandService,
         executeCommand,
+        permissions,
         scene,
         skeleton: skeletonManager.getCurrentSkeleton()!,
         selections: injector.get(SheetsSelectionsService),
@@ -145,6 +158,35 @@ afterEach(() => {
 });
 
 describe('MobileHeaderResizeRenderController business methods', () => {
+    it.each(['row', 'column'] as const)('hides the %s handle and cancels a drag when edit permission is revoked', (axis) => {
+        const { controller, selections, permissions, scene, executeCommand } = createController();
+        selections.setSelections([{
+            range: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 1, rangeType: axis === 'row' ? RANGE_TYPE.ROW : RANGE_TYPE.COLUMN },
+            primary: null,
+            style: null,
+        }], SelectionMoveType.MOVE_END);
+        const handle = axis === 'row' ? controller._rowResizeButton : controller._columnResizeButton;
+        expect(handle.visible).toBe(true);
+        handle.onPointerDown$.emitEvent(pointerEvent('pointerdown', 100, 100, 1));
+        document.dispatchEvent(pointerEvent('pointermove', 110, 110, 1));
+
+        permissions.updatePermissionPoint(new WorkbookEditablePermission('test').id, false);
+        expect(handle.visible).toBe(false);
+        expect(scene.enableObjectsEvent).toHaveBeenCalled();
+        document.dispatchEvent(pointerEvent('pointerup', 110, 110, 1));
+        expect(executeCommand).not.toHaveBeenCalled();
+
+        permissions.updatePermissionPoint(new WorkbookEditablePermission('test').id, true);
+        expect(handle.visible).toBe(true);
+        const permission = axis === 'row'
+            ? new WorksheetSetRowStylePermission('test', 'sheet-1')
+            : new WorksheetSetColumnStylePermission('test', 'sheet-1');
+        permissions.updatePermissionPoint(permission.id, false);
+        expect(handle.visible).toBe(false);
+        handle.onPointerDown$.emitEvent(pointerEvent('pointerdown', 100, 100, 1));
+        expect(executeCommand).not.toHaveBeenCalled();
+    });
+
     it.each([
         { axis: 'row', pointerType: 'mouse' },
         { axis: 'column', pointerType: 'mouse' },

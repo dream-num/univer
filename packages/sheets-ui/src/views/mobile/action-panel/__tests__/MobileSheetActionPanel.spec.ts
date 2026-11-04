@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
+import type { IWorkbookData, Workbook } from '@univerjs/core';
 import type { IMenuSchema } from '@univerjs/ui';
 import type { Root } from 'react-dom/client';
-import type { MobileNumberFormatItem } from '../MobileStylePanel';
 import {
     CommandType,
     FOCUSING_COMMON_DRAWINGS,
     getSheetsEmptySnapshot,
     ICommandService,
     IContextService,
+    IPermissionService,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
@@ -30,7 +31,14 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
-import { SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    getPrimaryForRange,
+    RangeProtectionRuleModel,
+    SheetsSelectionsService,
+    WorkbookEditablePermission,
+    WorksheetEditPermission,
+    WorksheetSetCellValuePermission,
+} from '@univerjs/sheets';
 import {
     ComponentManager,
     IconManager,
@@ -47,6 +55,8 @@ import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject, EMPTY } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import type { MobileNumberFormatItem } from '../MobileStylePanel';
+import { SetCellEditVisibleOperation } from '../../../../commands/operations/cell-edit.operation';
 import enUS from '../../../../locale/en-US';
 import { IEditorBridgeService } from '../../../../services/editor-bridge.service';
 import {
@@ -112,7 +122,11 @@ function renderMobileSheetActionPanel(ribbon: IMenuSchema[] = []) {
 
     injector.get(LocaleService).load({ [LocaleType.EN_US]: enUS });
     injector.get(LocaleService).setLocale(LocaleType.EN_US);
-    univer.createUnit(UniverInstanceType.UNIVER_SHEET, getSheetsEmptySnapshot('mobile-sheet'));
+    injector.get(LocaleService).setDirection('ltr');
+    const workbook = univer.createUnit<IWorkbookData, Workbook>(
+        UniverInstanceType.UNIVER_SHEET,
+        getSheetsEmptySnapshot('mobile-sheet')
+    );
     injector.get(IUniverInstanceService).focusUnit('mobile-sheet');
     injector.add([IEditorBridgeService, {
         useValue: {
@@ -134,14 +148,22 @@ function renderMobileSheetActionPanel(ribbon: IMenuSchema[] = []) {
     injector.add([IRibbonService, {
         useValue: { ribbon$: new BehaviorSubject(ribbon) } as unknown as IRibbonService,
     }]);
-    injector.add([SheetsSelectionsService, {
-        useValue: {
-            selectionMoveEnd$: EMPTY,
-            getCurrentSelections: () => [],
-            getCurrentLastSelection: () => null,
-            setSelections: vi.fn(),
-        } as unknown as SheetsSelectionsService,
+    injector.add([SheetsSelectionsService]);
+    injector.add([RangeProtectionRuleModel]);
+    const worksheet = workbook.getActiveSheet();
+    const range = { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 };
+    injector.get(SheetsSelectionsService).setSelections([{
+        range,
+        primary: getPrimaryForRange(range, worksheet),
+        style: null,
     }]);
+    const permissions = injector.get(IPermissionService);
+    const subUnitId = worksheet.getSheetId();
+    [
+        new WorkbookEditablePermission(workbook.getUnitId()),
+        new WorksheetEditPermission(workbook.getUnitId(), subUnitId),
+        new WorksheetSetCellValuePermission(workbook.getUnitId(), subUnitId),
+    ].forEach((permission) => permissions.addPermissionPoint(permission));
 
     const container = document.createElement('div');
     document.body.appendChild(container);
@@ -154,7 +176,7 @@ function renderMobileSheetActionPanel(ribbon: IMenuSchema[] = []) {
         ));
     });
 
-    return { commandService: injector.get(ICommandService), container, contextService, root, univer };
+    return { commandService: injector.get(ICommandService), container, contextService, permissions, root, subUnitId, univer };
 }
 
 function clickButton(container: HTMLElement, name: string) {
@@ -183,6 +205,30 @@ function disposeRenderedPanel(root: Root, container: HTMLElement, univer: Univer
 }
 
 describe('mobile sheet action panel visibility', () => {
+    it('disables both keyboard entrances when cell editing is forbidden', () => {
+        const { commandService, container, permissions, root, subUnitId, univer } = renderMobileSheetActionPanel();
+        const startEditing = vi.fn(() => true);
+        commandService.registerCommand({ ...SetCellEditVisibleOperation, handler: startEditing });
+        const keyboard = () => container.querySelector<HTMLButtonElement>(
+            'button[aria-label="Start Editing (Selection into the Editor)"]'
+        )!;
+        try {
+            expect(keyboard().disabled).toBe(false);
+            act(() => permissions.updatePermissionPoint(new WorkbookEditablePermission('mobile-sheet').id, false));
+            expect(keyboard().disabled).toBe(true);
+            act(() => keyboard().click());
+            expect(startEditing).not.toHaveBeenCalled();
+            clickButton(container, 'Open sheet tools');
+            expect(keyboard().disabled).toBe(true);
+            act(() => permissions.updatePermissionPoint(new WorkbookEditablePermission('mobile-sheet').id, true));
+            expect(keyboard().disabled).toBe(false);
+            act(() => permissions.updatePermissionPoint(new WorksheetSetCellValuePermission('mobile-sheet', subUnitId).id, false));
+            expect(keyboard().disabled).toBe(true);
+        } finally {
+            disposeRenderedPanel(root, container, univer);
+        }
+    });
+
     it('does not reopen the previous sheet drawer after drawing focus ends', () => {
         const { container, contextService, root, univer } = renderMobileSheetActionPanel();
 

@@ -29,7 +29,11 @@ export class FormulaAstLRU<T> {
      */
     setLimit(cacheCount: number) {
         if (Number.isFinite(cacheCount) && cacheCount > 0) {
-            this._cache.limit = cacheCount;
+            const limit = Math.max(1, Math.floor(cacheCount));
+            this._cache.limit = limit;
+            while (this._cache.size > limit) {
+                this._cache.shift();
+            }
         }
     }
 

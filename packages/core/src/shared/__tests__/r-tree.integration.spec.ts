@@ -14,11 +14,59 @@
  * limitations under the License.
  */
 
-import type { IRange } from '../../sheets/typedef';
 import { describe, expect, it } from 'vitest';
+import type { IRange } from '../../sheets/typedef';
+import type { IRTreeItem } from '../r-tree';
 import { RTree } from '../r-tree';
 
 describe('RTree integration', () => {
+    it.each([false, true])('keeps batch removal equivalent to individual removal (cell cache: %s)', (cellCache) => {
+        const batch = new RTree(cellCache);
+        const individual = new RTree(cellCache);
+        const items: IRTreeItem[] = [];
+        for (const unitId of ['unit-a', 'unit-b']) {
+            for (const sheetId of ['sheet-a', 'sheet-b']) {
+                for (let index = 0; index < 40; index++) {
+                    const row = index % 5;
+                    const column = Math.floor(index / 5);
+                    items.push({ unitId, sheetId, id: index % 7, range: {
+                        startRow: row,
+                        endRow: row + index % 2,
+                        startColumn: column,
+                        endColumn: column + index % 3,
+                    } });
+                }
+            }
+        }
+        batch.bulkInsert(items);
+        individual.bulkInsert(items);
+        batch.openKdTree();
+        individual.openKdTree();
+        const searches = [
+            { ...items[2], range: { startRow: 2, endRow: 2, startColumn: 1, endColumn: 1 } },
+            { ...items[2], range: { startRow: 0, endRow: 0, startColumn: 6, endColumn: 6 } },
+            { ...items[0], range: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 3 } },
+            { ...items[1], range: { startRow: 1, endRow: 4, startColumn: 2, endColumn: 4 } },
+            { ...items[0], range: { startRow: 4, endRow: 5, startColumn: 6, endColumn: 7 } },
+            { ...items[80], range: { startRow: 0, endRow: 5, startColumn: 0, endColumn: 10 } },
+        ];
+        batch.bulkRemove(searches);
+        for (const search of searches) {
+            individual.remove(search);
+        }
+        for (const unitId of ['unit-a', 'unit-b']) {
+            for (const sheetId of ['sheet-a', 'sheet-b']) {
+                for (let row = 0; row < 6; row++) {
+                    for (let column = 0; column < 10; column++) {
+                        const query = { unitId, sheetId, range: { startRow: row, endRow: row, startColumn: column, endColumn: column } };
+                        expect(batch.bulkSearch([query])).toEqual(individual.bulkSearch([query]));
+                    }
+                }
+            }
+        }
+        batch.dispose();
+        individual.dispose();
+    });
     it('should index both single-cell and ranged items and support removal and serialization', () => {
         const tree = new RTree(true);
 

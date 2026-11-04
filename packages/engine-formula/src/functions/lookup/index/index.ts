@@ -15,6 +15,7 @@
  */
 
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { MultiAreaReferenceObject } from '../../../engine/reference-object/multi-area-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import type { CubeValueObject } from '../../../engine/value-object/cube-value-object';
@@ -159,7 +160,7 @@ export class Index extends BaseFunction {
 
         const areaNumValue = Math.floor(+_areaNum.getValue());
 
-        if (areaNumValue < 0) {
+        if (areaNumValue < 1) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
@@ -192,10 +193,10 @@ export class Index extends BaseFunction {
             return ErrorValueObject.create(ErrorType.REF);
         }
 
-        let _reference = reference;
+        const _reference = this._getReferenceArea(reference, areaNumValue);
 
-        if (areaNumValue > 1) {
-            _reference = (reference as CubeValueObject).getCubeValues()[areaNumValue - 1];
+        if (_reference.isError()) {
+            return _reference;
         }
 
         if (
@@ -215,6 +216,18 @@ export class Index extends BaseFunction {
         return this._calculateArrayObject(_reference as BaseValueObject, rowNumValue, columnNumValue);
     }
 
+    private _getReferenceArea(reference: FunctionVariantType, areaNum: number): FunctionVariantType {
+        if (reference.isReferenceObject()) {
+            if ((reference as BaseReferenceObject).isMultiArea()) {
+                return (reference as MultiAreaReferenceObject).getAreas().flat()[areaNum - 1];
+            }
+        } else if ((reference as BaseValueObject).isCube()) {
+            const cube = reference as CubeValueObject;
+            return cube.getCubeReferences()?.[areaNum - 1] ?? cube.getCubeValues()[areaNum - 1];
+        }
+        return reference;
+    }
+
     private _getReferenceCounts(reference: FunctionVariantType): { rowCount: number; columnCount: number }[] {
         let referenceRowColumnCounts = [
             {
@@ -223,7 +236,14 @@ export class Index extends BaseFunction {
             },
         ];
 
-        if (reference.isReferenceObject()) {
+        if (reference.isReferenceObject() && (reference as BaseReferenceObject).isMultiArea()) {
+            referenceRowColumnCounts = (reference as MultiAreaReferenceObject).getAreas().flat().map((area) => {
+                if (area instanceof ErrorValueObject) {
+                    return { rowCount: 1, columnCount: 1 };
+                }
+                return { rowCount: area.getRowCount(), columnCount: area.getColumnCount() };
+            });
+        } else if (reference.isReferenceObject()) {
             referenceRowColumnCounts = [
                 {
                     rowCount: (reference as BaseReferenceObject).getRowCount(),

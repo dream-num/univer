@@ -20,6 +20,15 @@ import type {
     Nullable,
     Workbook,
 } from '@univerjs/core';
+import {
+    createIdentifier,
+    Disposable,
+    Inject,
+    IUniverInstanceService,
+    ObjectMatrix,
+    RTree,
+    UniverInstanceType,
+} from '@univerjs/core';
 import type {
     IFeatureDirtyRangeType,
     IFormulaData,
@@ -45,15 +54,6 @@ import type {
     IFormulaDependencyTreeJson,
     IFormulaDependentsAndInRangeResults,
 } from './dependency-tree';
-import {
-    createIdentifier,
-    Disposable,
-    Inject,
-    IUniverInstanceService,
-    ObjectMatrix,
-    RTree,
-    UniverInstanceType,
-} from '@univerjs/core';
 import { prefixToken, suffixToken } from '../../basics/token';
 import { FUNCTION_NAMES_LOOKUP } from '../../functions/lookup/function-names';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
@@ -94,14 +94,6 @@ export interface IFormulaDependencyGenerator {
 
 export const IFormulaDependencyGenerator = createIdentifier<IFormulaDependencyGenerator>('engine-formula.dependency-generator');
 
-/**
- * A range list resolved from one parsed AST. It is keyed by the AST object itself, so it
- * lives and dies with the AST cache entry and never needs a separate invalidation path.
- */
-interface IReusableRanges {
-    rangeList: IUnitRange[];
-}
-
 function isEmptyRecord(record: Record<string, unknown> | null | undefined) {
     return record == null || Object.keys(record).length === 0;
 }
@@ -115,7 +107,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
 
     // Keyed by the AST instance the engine is already reusing, so the range list cannot
     // outlive the AST it was resolved from.
-    private _reusableRanges = new WeakMap<BaseAstNode, IUnitRange[]>();
+    private _reusableRanges = new WeakMap<BaseAstNode, IUnitRange[] | null>();
 
     // Sheet sizes take part in resolving open-ended references (`A:A`, `A1:`), and the AST
     // cache does not invalidate on a resize, so the resolved ranges are only reusable while
@@ -714,13 +706,30 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
      * is independent of whether they may be reused right now: a forced calculation rebuilds
      * the index but the ranges it resolves are still valid for the next one.
      */
-    private _canShareRanges(tree: IFormulaDependencyTree, addressFunctionNodes: FunctionNode[]) {
+    private _canShareRanges(tree: IFormulaDependencyTree, node: BaseAstNode, addressFunctionNodes: FunctionNode[]) {
         if (addressFunctionNodes.length > 0) {
             return false;
         }
 
         const excludedCell = this._currentConfigService.getExcludedRange()?.[tree.unitId]?.[tree.subUnitId];
-        return excludedCell?.getValue(tree.row, tree.column) == null;
+        if (excludedCell?.getValue(tree.row, tree.column) != null) {
+            return false;
+        }
+
+        const cached = this._reusableRanges.get(node);
+        if (cached !== undefined) {
+            return cached !== null;
+        }
+
+        const references: PreCalculateNodeType[] = [];
+        this._nodeTraversalRef(node, references);
+        if (references.some((reference) => !this._isStaticReference(reference))) {
+            // A stable AST can still resolve different ranges after an input value changes.
+            this._reusableRanges.set(node, null);
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -731,6 +740,8 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
         let signature = '';
 
         for (const unitId of Object.keys(unitData)) {
+            const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+            signature += JSON.stringify(workbook?.getSheetOrders());
             const sheets = unitData[unitId];
             if (sheets == null) {
                 continue;
@@ -786,6 +797,10 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
             && isEmptyRecord(this._currentConfigService.getDirtyNameMap())
             && isEmptyRecord(this._currentConfigService.getClearDependencyTreeCache());
 
+        if (!canReuseRanges) {
+            this._reusableRanges = new WeakMap();
+        }
+
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
 
@@ -815,7 +830,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
                 continue;
             }
 
-            const canShare = this._canShareRanges(tree, addressFunctionNodes);
+            const canShare = this._canShareRanges(tree, node, addressFunctionNodes);
             const cachedRangeList = canShare && canReuseRanges ? this._takeReusableRanges(node) : undefined;
 
             if (cachedRangeList != null) {
@@ -1003,7 +1018,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
                 result.push(item as PreCalculateNodeType);
                 if (item.nodeType === NodeType.UNION) {
                     for (const unionChildItem of item.getChildren()) {
-                        if (unionChildItem.nodeType === NodeType.FUNCTION && (unionChildItem as FunctionNode).isAddress()) {
+                        if (!this._isStaticReference(unionChildItem)) {
                             this._nodeTraversalRef(unionChildItem, result);
                         }
                     }

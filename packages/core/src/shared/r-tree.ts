@@ -15,9 +15,9 @@
  */
 
 import type { BBox } from 'rbush';
-import type { IUnitRange } from '../sheets/typedef';
 import KDBush from 'kdbush';
 import RBush from 'rbush';
+import type { IUnitRange } from '../sheets/typedef';
 
 type StringOrNumber = string | number;
 
@@ -327,8 +327,79 @@ export class RTree {
     }
 
     bulkRemove(searchList: IRTreeItem[]) {
+        if (searchList.length < 2) {
+            for (const search of searchList) {
+                this.remove(search);
+            }
+            return;
+        }
+        const groups = new Map<string, Map<string, Map<StringOrNumber, IRTreeItem[]>>>();
         for (const search of searchList) {
-            this.remove(search);
+            let sheets = groups.get(search.unitId);
+            if (!sheets) {
+                sheets = new Map();
+                groups.set(search.unitId, sheets);
+            }
+            let ids = sheets.get(search.sheetId);
+            if (!ids) {
+                ids = new Map();
+                sheets.set(search.sheetId, ids);
+            }
+            const ranges = ids.get(search.id);
+            if (ranges) {
+                ranges.push(search);
+            } else {
+                ids.set(search.id, [search]);
+            }
+        }
+        for (const [unitId, sheets] of groups) {
+            for (const [sheetId, ids] of sheets) {
+                this._bulkRemoveFromSheet(unitId, sheetId, ids);
+            }
+        }
+    }
+
+    private _bulkRemoveFromSheet(unitId: string, sheetId: string, searches: Map<StringOrNumber, IRTreeItem[]>) {
+        if (searches.size === 1) {
+            const [ranges] = searches.values();
+            if (ranges.length === 1) {
+                this.remove(ranges[0]);
+                return;
+            }
+        }
+        // With the point cache enabled, remove() treats point searches as point-cache-only removals.
+        const matches = (id: StringOrNumber, bounds: BBox, rangedOnly = false) => searches.get(id)?.some(({ range }) =>
+            (!rangedOnly || !this._enableOneCellCache || range.startRow !== range.endRow || range.startColumn !== range.endColumn) &&
+            range.startColumn <= bounds.maxX && range.endColumn >= bounds.minX &&
+            range.startRow <= bounds.maxY && range.endRow >= bounds.minY
+        ) ?? false;
+        const tree = this._tree.get(unitId)?.get(sheetId);
+        if (tree) {
+            const entries = tree.all();
+            let retained = 0;
+            for (const item of entries) {
+                if (!matches(item.id, item, true)) {
+                    entries[retained++] = item;
+                }
+            }
+            if (retained !== entries.length) {
+                entries.length = retained;
+                tree.clear();
+                tree.load(entries);
+            }
+        }
+        const cells = this._oneCellCache.get(unitId)?.get(sheetId);
+        if (cells) {
+            for (const [row, columns] of cells) {
+                for (const [column, ids] of columns) {
+                    const bounds = { minX: column, maxX: column, minY: row, maxY: row };
+                    for (const id of ids) {
+                        if (matches(id, bounds)) {
+                            ids.delete(id);
+                        }
+                    }
+                }
+            }
         }
     }
 

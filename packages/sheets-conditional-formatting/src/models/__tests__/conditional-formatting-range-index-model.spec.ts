@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { IConditionFormattingRule } from '../type';
+import { Injector } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
+import type { IConditionFormattingRule } from '../type';
 import { CFRuleType, CFSubRuleType, CFTextOperator } from '../../base/const';
 import { ConditionalFormattingRangeIndexModel } from '../conditional-formatting-range-index-model';
 import { ConditionalFormattingRuleModel } from '../conditional-formatting-rule-model';
@@ -36,6 +37,32 @@ function createRule(cfId: string, startRow: number, endRow: number, startColumn:
 }
 
 describe('ConditionalFormattingRangeIndexModel', () => {
+    it('replaces and deletes multiple rule ranges without removing overlapping rules or other workbooks', () => {
+        const injector = new Injector([[ConditionalFormattingRuleModel], [ConditionalFormattingRangeIndexModel]]);
+        const rules = injector.get(ConditionalFormattingRuleModel);
+        const index = injector.get(ConditionalFormattingRangeIndexModel);
+        const multiple = createRule('a', 0, 2, 0, 2);
+        multiple.ranges.push({ startRow: 10, endRow: 12, startColumn: 10, endColumn: 12 });
+        try {
+            rules.addRule('unit', 'sheet', multiple);
+            rules.addRule('unit', 'sheet', createRule('b', 0, 2, 0, 2));
+            rules.addRule('other', 'sheet', multiple);
+            const replacement = createRule('a', 20, 21, 20, 21);
+            replacement.ranges.push({ startRow: 30, endRow: 31, startColumn: 30, endColumn: 31 });
+            rules.setRule('unit', 'sheet', replacement, 'a');
+            expect(index.getRuleIdsByCell('unit', 'sheet', 1, 1)).toEqual(new Set(['b']));
+            expect(index.getRuleIdsByCell('unit', 'sheet', 11, 11)).toEqual(new Set());
+            expect(index.getRuleIdsByCell('unit', 'sheet', 20, 20)).toEqual(new Set(['a']));
+            expect(index.getRuleIdsByCell('unit', 'sheet', 30, 30)).toEqual(new Set(['a']));
+            expect(index.getRuleIdsByCell('other', 'sheet', 11, 11)).toEqual(new Set(['a']));
+            rules.deleteRule('unit', 'sheet', 'a');
+            expect(index.getRuleIdsByCell('unit', 'sheet', 20, 20)).toEqual(new Set());
+            expect(index.getRuleIdsByCell('unit', 'sheet', 30, 30)).toEqual(new Set());
+            expect(index.getRuleIdsByCell('unit', 'sheet', 1, 1)).toEqual(new Set(['b']));
+        } finally {
+            injector.dispose();
+        }
+    });
     it('queries rule ids by cell and range through rule model changes', () => {
         const ruleModel = new ConditionalFormattingRuleModel();
         const rangeIndex = new ConditionalFormattingRangeIndexModel(ruleModel);

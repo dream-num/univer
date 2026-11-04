@@ -27,16 +27,22 @@ describe('WatermarkService', () => {
 
     it('reads, updates and deletes the persisted watermark and notifies subscribers', async () => {
         const config: IWatermarkConfigWithType = { type: IWatermarkTypeEnum.Text, config: {} };
-        const getItem = vi.fn(async () => config);
-        const setItem = vi.fn();
-        const removeItem = vi.fn();
+        const storage: ILocalStorageService = {
+            getItem: vi.fn().mockResolvedValue(config),
+            setItem: vi.fn().mockResolvedValue(config),
+            removeItem: vi.fn().mockResolvedValue(undefined),
+            clear: vi.fn().mockResolvedValue(undefined),
+            key: vi.fn().mockResolvedValue(null),
+            keys: vi.fn().mockResolvedValue([]),
+            iterate: vi.fn().mockResolvedValue(undefined),
+        };
         injector = new Injector();
-        injector.add([ILocalStorageService, { useValue: { getItem, setItem, removeItem } }]);
+        injector.add([ILocalStorageService, { useValue: storage }]);
         injector.add([WatermarkService]);
         const service = injector.get(WatermarkService);
 
         await expect(service.getWatermarkConfig()).resolves.toEqual(config);
-        expect(getItem).toHaveBeenCalledWith('UNIVER_WATERMARK_STORAGE_KEY');
+        expect(storage.getItem).toHaveBeenCalledWith('UNIVER_WATERMARK_STORAGE_KEY');
 
         const updateValues: unknown[] = [];
         const refreshValues: number[] = [];
@@ -44,10 +50,10 @@ describe('WatermarkService', () => {
         service.refresh$.subscribe((value) => refreshValues.push(value));
 
         service.updateWatermarkConfig(config);
-        expect(setItem).toHaveBeenCalledWith('UNIVER_WATERMARK_STORAGE_KEY', config);
+        expect(storage.setItem).toHaveBeenCalledWith('UNIVER_WATERMARK_STORAGE_KEY', config);
 
         service.deleteWatermarkConfig();
-        expect(removeItem).toHaveBeenCalledWith('UNIVER_WATERMARK_STORAGE_KEY');
+        expect(storage.removeItem).toHaveBeenCalledWith('UNIVER_WATERMARK_STORAGE_KEY');
         expect(updateValues).toEqual([config, null]);
 
         service.refresh();

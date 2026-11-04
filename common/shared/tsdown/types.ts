@@ -9,7 +9,7 @@ export interface IBuildOptions {
     obfuscatorIgnorePatterns?: RegExp[];
 }
 
-export type TEntryType = 'facade' | 'index' | 'locale' | 'worker';
+export type TEntryType = 'facade' | 'index' | 'locale' | 'render' | 'worker';
 
 export interface IEntryConfig {
     key: string;

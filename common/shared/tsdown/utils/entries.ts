@@ -22,13 +22,11 @@ export function getEntries(packageDir: string): IEntryConfig[] {
         });
     }
 
-    const workerEntry = path.join(packageDir, 'src/worker.ts');
-    if (existsSync(workerEntry)) {
-        entries.push({
-            key: 'worker',
-            path: workerEntry,
-            type: 'worker',
-        });
+    for (const type of ['render', 'worker'] as const) {
+        const entryPath = path.join(packageDir, `src/${type}.ts`);
+        if (existsSync(entryPath)) {
+            entries.push({ key: type, path: entryPath, type });
+        }
     }
 
     const localeDir = path.join(packageDir, LOCALE_DIRECTORY);

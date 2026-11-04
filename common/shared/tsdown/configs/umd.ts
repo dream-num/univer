@@ -27,7 +27,7 @@ function convertLibNameFromPackageName(name: string) {
         .replace(/^@(univerjs(?:-pro)?)\//, (_, matchedPrefix) => {
             return matchedPrefix === 'univerjs-pro' ? 'univer-pro-' : 'univer-';
         })
-        .replace('/facade', '-facade')
+        .replace(/\/(facade|render)$/, '-$1')
         .split('-')
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join('');
@@ -83,8 +83,8 @@ function resolveOutputGlobal(source: string) {
 function getGlobalName(packageName: string, entryKey: string) {
     const name = convertLibNameFromPackageName(packageName);
 
-    if (entryKey === 'facade') {
-        return `${name}Facade`;
+    if (entryKey === 'facade' || entryKey === 'render') {
+        return `${name}${entryKey[0].toUpperCase()}${entryKey.slice(1)}`;
     }
 
     if (entryKey.startsWith('locale/') || entryKey.startsWith('locales/')) {

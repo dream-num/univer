@@ -359,7 +359,6 @@ function deriveDependencyGroups(packageDir: string, packageJson: IPackageJson): 
 function applyPublishManifest(pkg: CleanupPackageJson, packageDir: string) {
     const hasLocales = fs.existsSync(path.resolve(packageDir, 'src/locale'));
     const hasFacade = fs.existsSync(path.resolve(packageDir, 'src/facade/index.ts'));
-    const hasWorker = fs.existsSync(path.resolve(packageDir, 'src/worker.ts'));
 
     pkg.publishConfig = {
         access: 'public',
@@ -381,13 +380,15 @@ function applyPublishManifest(pkg: CleanupPackageJson, packageDir: string) {
 
     pkg.exports ||= {};
 
-    if (hasWorker) {
-        pkg.exports['./worker'] = './src/worker.ts';
-        pkg.publishConfig.exports['./worker'] = {
-            import: './lib/es/worker.js',
-            require: './lib/cjs/worker.js',
-            types: './lib/types/worker.d.ts',
-        };
+    for (const entry of ['render', 'worker']) {
+        if (fs.existsSync(path.resolve(packageDir, `src/${entry}.ts`))) {
+            pkg.exports[`./${entry}`] = `./src/${entry}.ts`;
+            pkg.publishConfig.exports[`./${entry}`] = {
+                import: `./lib/es/${entry}.js`,
+                require: `./lib/cjs/${entry}.js`,
+                types: `./lib/types/${entry}.d.ts`,
+            };
+        }
     }
 
     if (hasLocales) {

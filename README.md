@@ -150,7 +150,7 @@ Your page now contains a spreadsheet editor. Use the returned `univerAPI` to wor
 
 For component frameworks, retain the `univer` instance returned by `createUniver` and call `univer.dispose()` when the component unmounts. See the [lifecycle guide](https://docs.univer.ai/guides/sheets/getting-started/lifecycle).
 
-Presets compose plugins and register their Facade APIs. Choose **Plugin Mode** when you need precise control over dependencies, plugin replacement, or loading. Follow the [installation guide](https://docs.univer.ai/guides/sheets/getting-started/installation) for both modes, peer dependencies, and framework integrations.
+Presets compose plugins and register their Facade APIs. For manual control, see the [Plugin Mode example](#manual-plugin-composition) below. The [installation guide](https://docs.univer.ai/guides/sheets/getting-started/installation) covers both modes, peer dependencies, and framework integrations.
 
 Keep coordinated `@univerjs/*` packages on the same version. Commercial packages must use the matching release line; independently released packages such as icons follow their declared compatibility. See the [API Stability Policy](https://github.com/dream-num/univer/blob/dev/docs/API_STABILITY.md).
 
@@ -190,6 +190,108 @@ if (saved) {
 ```
 
 This workflow uses only open-source packages. Snapshot persistence is separate from XLSX import and export, which uses the separately distributed file-conversion capabilities. Use public Facade APIs for application integration; the source links below explain internal implementation and extension points. See the [API Stability Policy](https://github.com/dream-num/univer/blob/dev/docs/API_STABILITY.md) before depending on an extension point.
+
+<a id="manual-plugin-composition"></a>
+
+<details>
+<summary>Advanced: compose plugins manually (Plugin Mode)</summary>
+
+Use Plugin Mode when you need precise control over plugin selection, dependencies, or loading. The preset above handles this composition for you.
+
+This alternative initialization uses the same `app` container and the Sheets Core preset's browser plugin stack without a Worker. Use it **instead of** the preset initialization, then run the same quotation example with the returned `univerAPI`.
+
+```bash
+pnpm add @univerjs/core @univerjs/design @univerjs/docs @univerjs/docs-ui \
+  @univerjs/engine-formula @univerjs/engine-render @univerjs/network \
+  @univerjs/sheets @univerjs/sheets-ui @univerjs/sheets-formula \
+  @univerjs/sheets-formula-ui @univerjs/sheets-numfmt \
+  @univerjs/sheets-numfmt-ui @univerjs/ui
+```
+
+```ts
+import { LocaleType, mergeLocales, Univer } from '@univerjs/core'
+import { FUniver } from '@univerjs/core/facade'
+import DesignEnUS from '@univerjs/design/locale/en-US'
+import { UniverDocsPlugin } from '@univerjs/docs'
+import { UniverDocsUIPlugin } from '@univerjs/docs-ui'
+import DocsUIEnUS from '@univerjs/docs-ui/locale/en-US'
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula'
+import FormulaEnUS from '@univerjs/engine-formula/locale/en-US'
+import { UniverRenderEnginePlugin } from '@univerjs/engine-render'
+import { UniverNetworkPlugin } from '@univerjs/network'
+import { UniverSheetsPlugin } from '@univerjs/sheets'
+import SheetsEnUS from '@univerjs/sheets/locale/en-US'
+import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula'
+import SheetsFormulaEnUS from '@univerjs/sheets-formula/locale/en-US'
+import { UniverSheetsFormulaUIPlugin } from '@univerjs/sheets-formula-ui'
+import SheetsFormulaUIEnUS from '@univerjs/sheets-formula-ui/locale/en-US'
+import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt'
+import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui'
+import SheetsNumfmtUIEnUS from '@univerjs/sheets-numfmt-ui/locale/en-US'
+import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui'
+import SheetsUIEnUS from '@univerjs/sheets-ui/locale/en-US'
+import { UniverUIPlugin } from '@univerjs/ui'
+import UIEnUS from '@univerjs/ui/locale/en-US'
+
+import '@univerjs/design/lib/index.css'
+import '@univerjs/ui/lib/index.css'
+import '@univerjs/docs-ui/lib/index.css'
+import '@univerjs/sheets-ui/lib/index.css'
+import '@univerjs/sheets-formula-ui/lib/index.css'
+import '@univerjs/sheets-numfmt-ui/lib/index.css'
+
+import '@univerjs/network/facade'
+import '@univerjs/docs/facade'
+import '@univerjs/docs-ui/facade'
+import '@univerjs/engine-formula/facade'
+import '@univerjs/sheets/facade'
+import '@univerjs/ui/facade'
+import '@univerjs/sheets-ui/facade'
+import '@univerjs/sheets-formula/facade'
+import '@univerjs/sheets-numfmt/facade'
+import '@univerjs/sheets-formula-ui/facade'
+
+const univer = new Univer({
+  locale: LocaleType.EN_US,
+  locales: {
+    [LocaleType.EN_US]: mergeLocales(
+      DesignEnUS,
+      DocsUIEnUS,
+      FormulaEnUS,
+      SheetsEnUS,
+      SheetsFormulaEnUS,
+      SheetsFormulaUIEnUS,
+      SheetsNumfmtUIEnUS,
+      SheetsUIEnUS,
+      UIEnUS,
+    ),
+  },
+})
+
+univer.registerPlugin(UniverNetworkPlugin)
+univer.registerPlugin(UniverDocsPlugin)
+univer.registerPlugin(UniverRenderEnginePlugin)
+univer.registerPlugin(UniverUIPlugin, { container: 'app' })
+univer.registerPlugin(UniverDocsUIPlugin)
+univer.registerPlugin(UniverFormulaEnginePlugin)
+univer.registerPlugin(UniverSheetsPlugin, {
+  onlyRegisterFormulaRelatedMutations: false,
+})
+univer.registerPlugin(UniverSheetsUIPlugin, {
+  protectedRangeShadow: true,
+})
+univer.registerPlugin(UniverSheetsNumfmtPlugin)
+univer.registerPlugin(UniverSheetsNumfmtUIPlugin)
+univer.registerPlugin(UniverSheetsFormulaPlugin)
+univer.registerPlugin(UniverSheetsFormulaUIPlugin)
+
+const univerAPI = FUniver.newAPI(univer)
+univerAPI.createWorkbook({})
+```
+
+The Docs plugins support spreadsheet rich-text editing. When adding a feature, include its corresponding Facade extensions, locale bundles, and UI styles. Dispose `univer` when its container is unmounted.
+
+</details>
 
 <a id="open-source-architecture"></a>
 

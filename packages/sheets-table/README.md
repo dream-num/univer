@@ -39,6 +39,18 @@ const univer = new Univer({
 univer.registerPlugin(UniverSheetsTablePlugin);
 ```
 
+## Worker usage
+
+On the main thread, import `UniverSheetsTablePlugin` from `@univerjs/sheets-table`.
+
+In the worker entry, import `UniverSheetsTablePlugin` from `@univerjs/sheets-table/worker`:
+
+```ts
+import { UniverSheetsTablePlugin } from '@univerjs/sheets-table/worker';
+
+univer.registerPlugin(UniverSheetsTablePlugin);
+```
+
 ## Integration Notes
 
 Use this package with `@univerjs/sheets-table-ui` when users need table controls in the sheet UI.

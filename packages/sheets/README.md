@@ -33,6 +33,18 @@ univer.registerPlugin(UniverSheetsPlugin);
 // Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
+## Worker usage
+
+On the main thread, import `UniverSheetsPlugin` from `@univerjs/sheets`. Set `notExecuteFormula: true` to delegate calculation to the worker.
+
+In the worker entry, import `UniverSheetsPlugin` from `@univerjs/sheets/worker`:
+
+```ts
+import { UniverSheetsPlugin } from '@univerjs/sheets/worker';
+
+univer.registerPlugin(UniverSheetsPlugin, { onlyRegisterFormulaRelatedMutations: true });
+```
+
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

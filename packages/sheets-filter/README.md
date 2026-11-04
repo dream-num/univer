@@ -39,6 +39,18 @@ const univer = new Univer({
 univer.registerPlugin(UniverSheetsFilterPlugin);
 ```
 
+## Worker usage
+
+On the main thread, import `UniverSheetsFilterPlugin` from `@univerjs/sheets-filter`.
+
+In the worker entry, import `UniverSheetsFilterPlugin` from `@univerjs/sheets-filter/worker`:
+
+```ts
+import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter/worker';
+
+univer.registerPlugin(UniverSheetsFilterPlugin);
+```
+
 ## Integration Notes
 
 Use this package with `@univerjs/sheets-filter-ui` when users need filter menus and panels.

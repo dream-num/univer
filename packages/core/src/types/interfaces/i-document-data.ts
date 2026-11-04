@@ -1063,22 +1063,7 @@ export interface IDocDrawingPosition {
     flipX?: boolean;
     /** Vertical flip persisted with the document drawing transform. */
     flipY?: boolean;
-    // Union field properties can be only one of the following:
-    // shapeProperties?: IShapeProperties;
-    // chartProperties?: IChartProperties;
-    // imageProperties?: IImageProperties;
 }
-
-/**
- * ChartProperties
- */
-export interface IChartProperties {}
-
-// export enum BulletType {
-//     NONE,
-//     ORDERED_LIST,
-//     UNORDERED_LIST,
-// }
 
 /**
  * Properties of text style

@@ -174,7 +174,7 @@ Also, with the help of vscode and its rich ecosystem, you could directly debug u
 
 ### Browser workbench
 
-`pnpm dev` starts one Vite workbench with lazy-loaded Sheets, Docs, and Slides routes. Use the navigation bar or `#sheets`, `#docs`, and `#slides` URLs to switch products; only one Univer instance stays mounted. The Settings menu provides every built-in language, LTR/RTL direction, region, theme, appearance, ribbon, UI chrome, and zoom controls. Preferences are stored in localStorage and applied to the active instance through runtime APIs without remounting it. Development locale data is loaded on demand so unused product and language graphs do not remain in Vite's memory. End-to-end suites should consume built packages outside this repository instead of coupling tests to source examples.
+`pnpm dev` starts one Vite workbench with lazy-loaded Sheets and Docs routes. Use the navigation bar or `#sheets` and `#docs` URLs to switch products; only one Univer instance stays mounted. The Settings menu provides every built-in language, LTR/RTL direction, region, theme, appearance, ribbon, UI chrome, and zoom controls. Preferences are stored in localStorage and applied to the active instance through runtime APIs without remounting it. Development locale data is loaded on demand so unused product and language graphs do not remain in Vite's memory. End-to-end suites should consume built packages outside this repository instead of coupling tests to source examples.
 
 ### Build Preview
 

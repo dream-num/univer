@@ -523,12 +523,6 @@ importers:
       '@univerjs/presets':
         specifier: workspace:*
         version: link:../presets
-      '@univerjs/slides':
-        specifier: workspace:*
-        version: link:../packages/slides
-      '@univerjs/slides-ui':
-        specifier: workspace:*
-        version: link:../packages/slides-ui
       '@univerjs/themes':
         specifier: workspace:*
         version: link:../packages/themes
@@ -2557,80 +2551,6 @@ importers:
       '@univerjs/themes':
         specifier: workspace:*
         version: link:../themes
-      postcss:
-        specifier: ^8.5.32
-        version: 8.5.32
-      react:
-        specifier: 19.3.0
-        version: 19.3.0
-      rxjs:
-        specifier: 7.8.2
-        version: 7.8.2
-      tailwindcss:
-        specifier: 3.4.18
-        version: 3.4.18
-      tsrs:
-        specifier: 0.20.1-ts7.1.0-beta
-        version: 0.20.1-ts7.1.0-beta
-      vitest:
-        specifier: ^5.0.5
-        version: 5.0.5(@types/node@26.6.6)(@vitest/coverage-istanbul@5.0.5)(happy-dom@20.14.5)(jsdom@29.1.1(@noble/hashes@1.8.0))(vite@8.3.0(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.15)(yaml@2.9.0))
-
-  packages/slides:
-    dependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../engine-render
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
-      rxjs:
-        specifier: 7.8.2
-        version: 7.8.2
-      tsrs:
-        specifier: 0.20.1-ts7.1.0-beta
-        version: 0.20.1-ts7.1.0-beta
-      vitest:
-        specifier: ^5.0.5
-        version: 5.0.5(@types/node@26.6.6)(@vitest/coverage-istanbul@5.0.5)(happy-dom@20.14.5)(jsdom@29.1.1(@noble/hashes@1.8.0))(vite@8.3.0(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.87.0)(terser@5.47.1)(tsx@4.23.15)(yaml@2.9.0))
-
-  packages/slides-ui:
-    dependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../design
-      '@univerjs/docs':
-        specifier: workspace:*
-        version: link:../docs
-      '@univerjs/docs-ui':
-        specifier: workspace:*
-        version: link:../docs-ui
-      '@univerjs/drawing':
-        specifier: workspace:*
-        version: link:../drawing
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../engine-render
-      '@univerjs/icons':
-        specifier: 1.47.0
-        version: 1.47.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      '@univerjs/slides':
-        specifier: workspace:*
-        version: link:../slides
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../ui
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
       postcss:
         specifier: ^8.5.32
         version: 8.5.32

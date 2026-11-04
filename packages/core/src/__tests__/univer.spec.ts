@@ -14,36 +14,60 @@
  * limitations under the License.
  */
 
-import type { ILocales } from '../shared/locale';
 import { defaultTheme } from '@univerjs/themes';
+import { BehaviorSubject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { Injector } from '../common/di';
-import { UniverInstanceType } from '../common/unit';
+import type { ILocales } from '../shared/locale';
+import { Inject, Injector } from '../common/di';
+import { UnitModel, UniverInstanceType } from '../common/unit';
 import { COMMAND_LOG_EXECUTION_CONFIG_KEY } from '../services/command/command.service';
 import { IConfigService } from '../services/config/config.service';
 import { IUniverInstanceService } from '../services/instance/instance.service';
 import { LocaleService } from '../services/locale/locale.service';
 import { LogLevel } from '../services/log/log.service';
+import { Plugin } from '../services/plugin/plugin.service';
 import { RegionService } from '../services/region/region.service';
 import { IUndoRedoService, UNDO_REDO_HISTORY_LIMIT_CONFIG_KEY } from '../services/undoredo/undoredo.service';
-import { Skeleton } from '../skeleton';
 import { LocaleType } from '../types/enum/locale-type';
 import { Univer } from '../univer';
 
-describe('Skeleton', () => {
-    it('should update dirty state and release locale data on dispose', () => {
-        const skeleton = new Skeleton(new LocaleService());
+class TestSlideUnit extends UnitModel {
+    override type = UniverInstanceType.UNIVER_SLIDE;
+    override name$ = new BehaviorSubject('');
+    private _rev = 1;
 
-        expect(skeleton.dirty).toBe(true);
-        expect(skeleton.getFontLocale()).toBeUndefined();
+    constructor(private readonly _snapshot: { id: string; name: string }) {
+        super();
+        this.name$.next(_snapshot.name);
+        this.disposeWithMe(() => this.name$.complete());
+    }
 
-        skeleton.makeDirty(false);
-        expect(skeleton.dirty).toBe(false);
+    override getUnitId() { return this._snapshot.id; }
+    override getSnapshot() { return this._snapshot; }
+    override getRev() { return this._rev; }
+    override incrementRev() { this._rev++; }
+    override setRev(rev: number) { this._rev = rev; }
+    override setName(name: string) {
+        this._snapshot.name = name;
+        this.name$.next(name);
+    }
+}
 
-        skeleton.dispose();
-        expect(skeleton.getFontLocale()).toBeNull();
-    });
-});
+class TestSlidesPlugin extends Plugin {
+    static override pluginName = 'TEST_SLIDES';
+    static override type = UniverInstanceType.UNIVER_SLIDE;
+
+    constructor(@Inject(Injector) protected readonly _injector: Injector) {
+        super();
+    }
+
+    override onStarting(): void {
+        this.disposeWithMe(this._injector.get(IUniverInstanceService).registerCtorForType(
+            UniverInstanceType.UNIVER_SLIDE,
+            TestSlideUnit
+        ));
+    }
+}
 
 describe('Univer', () => {
     it('should apply constructor config and expose locale/config methods', () => {
@@ -131,21 +155,34 @@ describe('Univer', () => {
         expect(activeCallback).toHaveBeenCalledTimes(1);
     });
 
-    it('should delegate plugin registration for tuple-style APIs and support parent injector', () => {
-        const parentInjector = new Injector([]);
+    it('creates slide units using the constructor registered when the plugin starts', () => {
+        const parentInjector = new Injector();
         const univer = new Univer({}, parentInjector);
-        const registerPluginSpy = vi
-            .spyOn((univer as any)._pluginService, 'registerPlugin')
-            .mockImplementation(() => undefined);
 
-        univer.registerPlugins([
-            [class FakePluginA {} as never, { enabled: true }],
-            [class FakePluginB {} as never],
-        ] as never);
+        try {
+            univer.registerPlugins([[TestSlidesPlugin]]);
+            const slide = univer.createUnit<{ id: string; name: string }, TestSlideUnit>(
+                UniverInstanceType.UNIVER_SLIDE,
+                { id: 'slide-1', name: 'Presentation' }
+            );
 
-        expect(registerPluginSpy).toHaveBeenCalledTimes(2);
+            expect(slide).toBeInstanceOf(TestSlideUnit);
+            expect(slide.getSnapshot()).toEqual({ id: 'slide-1', name: 'Presentation' });
+            expect(univer.__getInjector().get(IUniverInstanceService).getUnit('slide-1')).toBe(slide);
+        } finally {
+            univer.dispose();
+            parentInjector.dispose();
+        }
+    });
 
-        registerPluginSpy.mockRestore();
-        univer.dispose();
+    it('rejects slide creation when no plugin provides the model', () => {
+        const univer = new Univer();
+
+        try {
+            expect(() => univer.createUnit(UniverInstanceType.UNIVER_SLIDE, { id: 'slide-1' }))
+                .toThrow(`[Univer]: No constructor registered for unit type ${UniverInstanceType.UNIVER_SLIDE}.`);
+        } finally {
+            univer.dispose();
+        }
     });
 });

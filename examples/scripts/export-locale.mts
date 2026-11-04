@@ -1,5 +1,4 @@
 import process from 'node:process';
-
 import { resolveLocaleModuleUrl } from './locale-module-url.mts';
 
 interface ILocaleModule {
@@ -30,15 +29,6 @@ const LOCALE_SOURCES = {
             '@univerjs/preset-sheets-sort',
             '@univerjs/preset-sheets-table',
             '@univerjs/preset-sheets-thread-comment',
-        ],
-    },
-    slides: {
-        directory: 'locale',
-        packages: [
-            '@univerjs/design',
-            '@univerjs/docs-ui',
-            '@univerjs/slides-ui',
-            '@univerjs/ui',
         ],
     },
 } as const;

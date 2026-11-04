@@ -36,7 +36,7 @@ univer.registerPlugin(UniverSheetsFormulaPlugin);
 Exported plugin classes:
 
 - `UniverSheetsFormulaPlugin`
-- `UniverRemoteSheetsFormulaPlugin`
+- `UniverRemoteSheetsFormulaPlugin` from `@univerjs/sheets-formula/worker`
 
 ## Integration Notes
 

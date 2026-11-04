@@ -38,7 +38,7 @@ Exported plugin classes:
 
 - `UniverSheetsFilterUIPlugin`
 - `UniverSheetsFilterMobileUIPlugin`
-- `UniverSheetsFilterUIWorkerPlugin`
+- `UniverSheetsFilterUIWorkerPlugin` from `@univerjs/sheets-filter-ui/worker`
 
 ## Resources
 

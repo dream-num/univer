@@ -15,7 +15,6 @@
  */
 
 import type { AriaRole, PointerEvent, ReactNode, RefObject, TouchEvent } from 'react';
-import type { MobilePanelLayout } from '../../mobile-workbench/MobileCanvasLayout';
 import {
     clsx,
     MobileOverlayContext,
@@ -24,6 +23,7 @@ import {
     useMobileKeyboardViewportLayout,
 } from '@univerjs/design';
 import { createContext, useCallback, useContext, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { MobilePanelLayout } from '../../mobile-workbench/MobileCanvasLayout';
 import { useMobileCanvasPanel, useMobileOverlayRegistration } from '../../mobile-workbench/MobileCanvasLayout';
 import { MobileDrawerCoordinatorContext } from './MobileDrawerCoordinator';
 
@@ -42,6 +42,7 @@ function assignDrawerRef<T>(ref: MobileDrawerRef<T> | undefined, element: T | nu
 
 const MOBILE_DRAWER_COMPACT_PERCENT = 40;
 const MOBILE_DRAWER_EXPANDED_PERCENT = 80;
+const MOBILE_DIALOG_MAX_PERCENT = 60;
 const MobileDrawerLayoutContext = createContext<MobilePanelLayout>('modal');
 
 export function resolveMobileDrawerRelease(params: {
@@ -78,6 +79,7 @@ export function MobileDrawer(props: {
     role?: AriaRole;
     ariaLabel?: string;
     layout?: MobilePanelLayout;
+    autoHeight?: boolean;
 }) {
     const {
         snap,
@@ -99,6 +101,7 @@ export function MobileDrawer(props: {
         role,
         ariaLabel,
         layout: requestedLayout,
+        autoHeight = false,
     } = props;
     const coordinator = useContext(MobileDrawerCoordinatorContext);
     const registerDrawer = coordinator?.register;
@@ -153,6 +156,9 @@ export function MobileDrawer(props: {
         ? MOBILE_DRAWER_COMPACT_PERCENT
         : MOBILE_DRAWER_EXPANDED_PERCENT);
     const keyboardLayout = useMobileKeyboardViewportLayout(panelElementRef);
+    const contentMaxHeight = keyboardLayout
+        ? `min(${MOBILE_DIALOG_MAX_PERCENT}${viewportHeightUnit}, ${keyboardLayout.availableHeight}px)`
+        : `${MOBILE_DIALOG_MAX_PERCENT}${viewportHeightUnit}`;
 
     useLayoutEffect(() => {
         if (!registerDrawer || !unregisterDrawer) {
@@ -306,59 +312,64 @@ export function MobileDrawer(props: {
                       [&_textarea]:!univer-text-base
                     `, 'univer-pointer-events-auto', dragPercent != null && '!univer-transition-none', panelClassName)}
                     style={{
-                        height: `${drawerPercent}${viewportHeightUnit}`,
+                        height: autoHeight ? 'auto' : `${drawerPercent}${viewportHeightUnit}`,
+                        maxHeight: autoHeight ? contentMaxHeight : undefined,
+                        bottom: autoHeight ? keyboardLayout?.bottom : undefined,
                         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
                     }}
                 >
                     <div
-                        className="
-                          univer-relative univer-flex univer-h-14 univer-shrink-0 univer-items-end univer-bg-gray-0
+                        className={clsx(`
+                          univer-relative univer-flex univer-shrink-0 univer-items-end univer-bg-gray-0
                           dark:!univer-bg-gray-800
-                        "
+                        `, autoHeight ? 'univer-h-12' : 'univer-h-14')}
                     >
-                        <button
-                            type="button"
-                            aria-label={snap === 'compact' ? expandLabel : collapseLabel}
-                            className={clsx(resetButtonClassName, `
-                              univer-absolute univer-left-1/2 univer-top-0 univer-z-10 univer-flex univer-h-6
-                              univer-w-16 -univer-translate-x-1/2 univer-touch-none univer-items-center
-                              univer-justify-center
-                            `)}
-                            style={{ touchAction: 'none' }}
-                            onPointerDown={handlePointerDown}
-                            onPointerMove={handlePointerMove}
-                            onPointerUp={handlePointerUp}
-                            onPointerCancel={handlePointerCancel}
-                            onTouchStart={handleTouchStart}
-                            onTouchMove={handleTouchMove}
-                            onTouchEnd={handleTouchEnd}
-                            onTouchCancel={handleTouchCancel}
-                            onClick={() => {
-                                if (suppressHandleClickRef.current) {
-                                    suppressHandleClickRef.current = false;
-                                    return;
-                                }
-                                onSnapChange(snap === 'compact' ? 'expanded' : 'compact');
-                            }}
-                        >
-                            <span
-                                className="
-                                  univer-h-1 univer-w-10 univer-rounded-full univer-bg-gray-300
-                                  dark:!univer-bg-gray-600
-                                "
-                            />
-                        </button>
+                        {!autoHeight && (
+                            <button
+                                type="button"
+                                aria-label={snap === 'compact' ? expandLabel : collapseLabel}
+                                className={clsx(resetButtonClassName, `
+                                  univer-absolute univer-left-1/2 univer-top-0 univer-z-10 univer-flex univer-h-6
+                                  univer-w-16 -univer-translate-x-1/2 univer-touch-none univer-items-center
+                                  univer-justify-center
+                                `)}
+                                style={{ touchAction: 'none' }}
+                                onPointerDown={handlePointerDown}
+                                onPointerMove={handlePointerMove}
+                                onPointerUp={handlePointerUp}
+                                onPointerCancel={handlePointerCancel}
+                                onTouchStart={handleTouchStart}
+                                onTouchMove={handleTouchMove}
+                                onTouchEnd={handleTouchEnd}
+                                onTouchCancel={handleTouchCancel}
+                                onClick={() => {
+                                    if (suppressHandleClickRef.current) {
+                                        suppressHandleClickRef.current = false;
+                                        return;
+                                    }
+                                    onSnapChange(snap === 'compact' ? 'expanded' : 'compact');
+                                }}
+                            >
+                                <span
+                                    className="
+                                      univer-h-1 univer-w-10 univer-rounded-full univer-bg-gray-300
+                                      dark:!univer-bg-gray-600
+                                    "
+                                />
+                            </button>
+                        )}
                         {header}
                     </div>
                     <div
                         ref={contentRef}
                         className={clsx(
-                            'univer-flex-1 univer-overflow-y-auto univer-overflow-x-hidden univer-p-3',
+                            'univer-overflow-y-auto univer-overflow-x-hidden univer-p-3',
+                            autoHeight ? 'univer-min-h-0 univer-flex-initial' : 'univer-flex-1',
                             scrollbarClassName,
                             contentClassName
                         )}
                         style={{
-                            paddingBottom: keyboardLayout
+                            paddingBottom: !autoHeight && keyboardLayout
                                 ? `calc(0.75rem + ${keyboardLayout.bottom}px)`
                                 : undefined,
                         }}

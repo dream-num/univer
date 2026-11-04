@@ -17,8 +17,6 @@
 import type { Worksheet } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { IValueOption, MobileDrawerSnap } from '@univerjs/ui';
-import type { LocaleKey } from '../../../locale/types';
-import type { IMobileStyleCommand, MobileStyleView } from './MobileStylePanel';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
@@ -26,13 +24,21 @@ import {
     FOCUSING_FX_BAR_EDITOR,
     ICommandService,
     IContextService,
+    Injector,
+    IPermissionService,
     LocaleService,
 } from '@univerjs/core';
 import { clsx, resetButtonClassName, useMobileKeyboardViewportLayout } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { KeyboardIcon, MenuIcon, MoreLeftIcon } from '@univerjs/icons';
-import { getPrimaryForRange, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    checkRangesEditablePermission,
+    getPrimaryForRange,
+    RangeProtectionRuleModel,
+    SheetsSelectionsService,
+    WorksheetSetCellValuePermission,
+} from '@univerjs/sheets';
 import {
     ContextMenuGroup,
     ContextMenuPosition,
@@ -43,13 +49,18 @@ import {
     MobileMenu,
     RibbonPosition,
     RibbonStartGroup,
+    useConfigValue,
     useDependency,
     useObservable,
 } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { map, startWith } from 'rxjs';
+import { map, merge, startWith } from 'rxjs';
+import type { IUniverSheetsUIConfig } from '../../../config/config';
+import type { LocaleKey } from '../../../locale/types';
+import type { IMobileStyleCommand, MobileStyleView } from './MobileStylePanel';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../../config/config';
 import {
     MOBILE_FORMULA_OPERATOR_BAR_HEIGHT,
     MOBILE_FORMULA_OPERATORS_VISIBLE,
@@ -165,6 +176,22 @@ function MobileSheetActionPanelContent() {
     const menuManagerService = useDependency(IMenuManagerService);
     const ribbonService = useDependency(IRibbonService);
     const selectionManagerService = useDependency(SheetsSelectionsService);
+    const injector = useDependency(Injector);
+    const permissionService = useDependency(IPermissionService);
+    const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
+    const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
+    const editingDisabled = useObservable(
+        () => merge(
+            workbook?.activeSheet$ ?? [],
+            selectionManagerService.selectionMoveEnd$,
+            selectionManagerService.selectionSet$,
+            permissionService.permissionPointUpdate$,
+            rangeProtectionRuleModel.ruleChange$
+        ).pipe(startWith(null), map(() => !canEditCell())),
+        true,
+        false,
+        [workbook, selectionManagerService, permissionService, rangeProtectionRuleModel, injector, config?.disableEdit]
+    );
     const ribbon = useObservable(ribbonService.ribbon$, []);
     const operationSchemas = useObservable(
         () => menuManagerService.menuChanged$.pipe(
@@ -344,8 +371,13 @@ function MobileSheetActionPanelContent() {
     }
 
     function openKeyboard() {
+        if (!canEditCell()) {
+            return;
+        }
+
         closeTools();
         layoutService.focus();
+
         if (editing) {
             contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
             editorService.focus(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
@@ -357,6 +389,24 @@ function MobileSheetActionPanelContent() {
             eventType: DeviceInputEventType.Dblclick,
             unitId: workbook!.getUnitId(),
         }).catch(() => undefined);
+    }
+
+    function canEditCell() {
+        const worksheet = workbook?.getActiveSheet();
+        const primary = selectionManagerService.getCurrentLastSelection()?.primary;
+        if (config?.disableEdit || !workbook || !worksheet || !primary) {
+            return false;
+        }
+
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
+        return permissionService.getPermissionPoint(new WorksheetSetCellValuePermission(unitId, subUnitId).id)?.value === true
+            && checkRangesEditablePermission(injector, unitId, subUnitId, [{
+                startRow: primary.actualRow,
+                endRow: primary.actualRow,
+                startColumn: primary.actualColumn,
+                endColumn: primary.actualColumn,
+            }]);
     }
 
     function executeMenuItem(params: IValueOption | IMobileStyleCommand): boolean {
@@ -410,10 +460,12 @@ function MobileSheetActionPanelContent() {
                 <button
                     type="button"
                     aria-label={localeService.t<LocaleKey>('sheets-ui.shortcut.sheet.start-editing')}
+                    disabled={editingDisabled}
                     className={clsx(resetButtonClassName, `
                       univer-pointer-events-auto univer-flex univer-size-12 univer-items-center univer-justify-center
                       univer-rounded-full univer-bg-gray-0 univer-text-xl univer-text-primary-600 univer-shadow-lg
                       active:univer-bg-gray-100
+                      disabled:univer-cursor-not-allowed disabled:univer-opacity-40
                       dark:!univer-bg-gray-800 dark:!univer-text-primary-400
                       dark:active:!univer-bg-gray-700
                     `)}
@@ -451,10 +503,12 @@ function MobileSheetActionPanelContent() {
                 <button
                     type="button"
                     aria-label={localeService.t<LocaleKey>('sheets-ui.shortcut.sheet.start-editing')}
+                    disabled={editingDisabled}
                     className={clsx(resetButtonClassName, `
                       univer-pointer-events-auto univer-flex univer-size-12 univer-items-center univer-justify-center
                       univer-rounded-full univer-bg-gray-0 univer-text-xl univer-text-primary-600 univer-shadow-lg
                       active:univer-bg-gray-100
+                      disabled:univer-cursor-not-allowed disabled:univer-opacity-40
                       dark:!univer-bg-gray-800 dark:!univer-text-primary-400
                       dark:active:!univer-bg-gray-700
                     `)}

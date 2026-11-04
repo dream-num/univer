@@ -15,10 +15,10 @@
  */
 
 import type { ICommand, IRange } from '@univerjs/core';
-import type { IRangeProtectionRule } from '../../models/range-protection-rule.model';
-import type { IWorksheetProtectionRule } from '../../services/permission/type';
 import { CommandType, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
+import type { IRangeProtectionRule } from '../../models/range-protection-rule.model';
+import type { IWorksheetProtectionRule } from '../../services/permission/type';
 import { RangeProtectionRuleModel } from '../../models/range-protection-rule.model';
 import { AddRangeProtectionMutation } from '../mutations/add-range-protection.mutation';
 import { AddWorksheetProtectionMutation } from '../mutations/add-worksheet-protection.mutation';
@@ -62,26 +62,22 @@ export const SetProtectionCommand: ICommand<ISetProtectionParams> = {
             if (oldRule) {
                 if (oldRule.unitType === UnitObject.Worksheet) {
                     redoMutations.push({ id: DeleteWorksheetProtectionMutation.id, params: { unitId, subUnitId } });
-                    undoMutations.push({ id: AddWorksheetProtectionMutation.id, params: { unitId, rule: oldRule, subUnitId: oldRule.subUnitId } });
                 } else if (oldRule.unitType === UnitObject.SelectRange) {
                     redoMutations.push({ id: DeleteRangeProtectionMutation.id, params: { unitId, subUnitId, ruleIds: [(oldRule as IRangeProtectionRule).id] } });
-                    undoMutations.push({ id: AddRangeProtectionMutation.id, params: { unitId, subUnitId, rules: [oldRule] } });
                 }
             }
 
             if (rule.unitType === UnitObject.Worksheet) {
                 redoMutations.push({ id: AddWorksheetProtectionMutation.id, params: { unitId, rule, subUnitId: rule.subUnitId } });
-                undoMutations.unshift({ id: DeleteWorksheetProtectionMutation.id, params: { unitId, subUnitId } });
             } else if (rule.unitType === UnitObject.SelectRange) {
                 (rule as IRangeProtectionRule).id = rangeProtectionRuleModel.createRuleId(unitId, subUnitId);
                 redoMutations.push({ id: AddRangeProtectionMutation.id, params: { unitId, subUnitId, rules: [rule] } });
-                undoMutations.unshift({ id: DeleteRangeProtectionMutation.id, params: { unitId, subUnitId, ruleIds: [(rule as IRangeProtectionRule).id] } });
             }
         }
 
         const result = sequenceExecute(redoMutations, commandService);
 
-        if (result.result) {
+        if (result.result && oldRule?.unitType === rule.unitType) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations,

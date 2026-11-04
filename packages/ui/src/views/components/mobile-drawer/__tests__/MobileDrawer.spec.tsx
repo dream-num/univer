@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { MobileDrawerOpenMode } from '../MobileDrawer';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { ConfigProvider, MobileDropdown } from '@univerjs/design';
 import enUS from '@univerjs/design/locale/en-US';
 import { createElement, useRef } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { MobileDrawerOpenMode } from '../MobileDrawer';
 import { MobileDrawer, resolveMobileDrawerRelease } from '../MobileDrawer';
 import { MobileDrawerCoordinatorProvider } from '../MobileDrawerCoordinator';
 
@@ -50,6 +50,30 @@ afterEach(() => {
 });
 
 describe('mobile drawer snap behavior', () => {
+    it.each([false, true])('fits dialog content with a viewport height limit (dynamic viewport: %s)', (dynamicViewport) => {
+        vi.stubGlobal('CSS', { supports: () => dynamicViewport });
+        const onConfirm = vi.fn();
+        const { container } = render(
+            <MobileDrawer
+                autoHeight
+                snap="expanded"
+                expandLabel="Expand drawer"
+                collapseLabel="Collapse drawer"
+                onSnapChange={vi.fn()}
+                onClose={vi.fn()}
+                header={<h2>Permission required</h2>}
+                footer={<button type="button" onClick={onConfirm}>OK</button>}
+            >
+                <p>This range is protected.</p>
+            </MobileDrawer>
+        );
+        expect(container.querySelector('section')?.style.height).toBe('auto');
+        expect(container.querySelector('section')?.style.maxHeight).toBe(dynamicViewport ? '60dvh' : '60vh');
+        expect(screen.queryByRole('button', { name: 'Collapse drawer' })).toBeNull();
+        fireEvent.click(screen.getByRole('button', { name: 'OK' }));
+        expect(onConfirm).toHaveBeenCalledOnce();
+    });
+
     it.each(['canvas', 'modal'] as const)('coordinates nested %s menus without changing the other layout', (layout) => {
         vi.stubGlobal('CSS', { supports: () => false });
         const app = (open: boolean) => (

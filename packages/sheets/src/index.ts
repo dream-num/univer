@@ -645,7 +645,7 @@ export {
 export type { MutationsAffectRange } from './services/ref-range/util';
 export * from './services/selections';
 export { getNextPrimaryCell } from './services/selections/move-active-cell-util';
-export { InterceptCellContentPriority, INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';
+export { InterceptCellContentPriority, INTERCEPTOR_POINT, RangeThemeInterceptorId } from './services/sheet-interceptor/interceptor-const';
 export {
     AFTER_CELL_EDIT,
     BEFORE_CELL_EDIT,

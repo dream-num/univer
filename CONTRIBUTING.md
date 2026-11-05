@@ -215,9 +215,4 @@ Please refer to [How to Contribute to Facade API](./docs/CONTRIBUTING-FACADE.md)
 
 ### Deprecate API
 
-If you are going to deprecate an API, follow the [API Stability Policy](./docs/API_STABILITY.md) and the steps below:
-
-1. Mark the API as deprecated in the JSDoc, and use `{@link}` to refer to the new API.
-2. In the implementation, call `deprecate` of `ILogService` to log a deprecation message.
-3. Document the migration path in the relevant guide, README, changelog, or release notes when the API is broadly used.
-4. Deprecated stable APIs should remain available until the next major release unless the API is unsafe, broken, or impossible to preserve. In pre-1.0 releases, removals may happen in a minor release, but they should be documented as breaking changes.
+Follow the [deprecation requirements](./docs/API_STABILITY.md#deprecated) in the API Stability Policy for JSDoc annotations, runtime warnings, and migration guidance. Removing or incompatibly changing a deprecated API still requires a [breaking-change notice](./docs/API_STABILITY.md#breaking-changes).

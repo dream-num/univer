@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { Inject, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 import type { IObjectArrayPrimitiveType } from '../shared/object-matrix';
 import type { Nullable } from '../shared/types';
@@ -34,6 +33,7 @@ import type {
 } from './typedef';
 import type { Worksheet } from './worksheet';
 import { AUTO_HEIGHT_FOR_MERGED_CELLS, IS_ROW_STYLE_PRECEDE_COLUMN_STYLE } from '../common/const';
+import { Inject, Injector } from '../common/di';
 import { DocumentDataModel } from '../docs/data-model/document-data-model';
 import { IConfigService } from '../services/config/config.service';
 import { IContextService } from '../services/context/context.service';

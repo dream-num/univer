@@ -82,7 +82,8 @@ html.univer-dark body {
     height: 20px;
     align-items: center;
     flex: 0 0 auto;
-    background: url('../../docs/img/banner-dark.png') center / contain no-repeat;
+    background: url('./assets/univer-logo.svg') center / contain no-repeat;
+    filter: brightness(0);
 }
 
 .workbench-header nav {
@@ -137,7 +138,7 @@ html.univer-dark .workbench-header {
 }
 
 html.univer-dark .workbench-brand {
-    background-image: url('../../docs/img/banner-light.png');
+    filter: none;
 }
 
 .workbench-header a {

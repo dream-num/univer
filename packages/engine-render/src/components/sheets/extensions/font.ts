@@ -24,13 +24,6 @@ import type {
     Nullable,
     ObjectMatrix,
 } from '@univerjs/core';
-import type { IBoundRectNoAngle, IViewportInfo } from '../../../basics/vector2';
-import type { UniverRenderingContext } from '../../../context';
-import type { Documents } from '../../docs/document';
-import type { IDrawInfo } from '../../extension';
-import type { IFontCacheItem } from '../interfaces';
-import type { SheetComponent } from '../sheet-component';
-import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
 import {
     CellValueType,
     getDisplayValueFromCell,
@@ -38,6 +31,13 @@ import {
     Tools,
     WrapStrategy,
 } from '@univerjs/core';
+import type { IBoundRectNoAngle, IViewportInfo } from '../../../basics/vector2';
+import type { UniverRenderingContext } from '../../../context';
+import type { Documents } from '../../docs/document';
+import type { IDrawInfo } from '../../extension';
+import type { IFontCacheItem } from '../interfaces';
+import type { SheetComponent } from '../sheet-component';
+import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
 import { clampRange, inViewRanges } from '../../../basics/tools';
@@ -317,12 +317,12 @@ export class Font extends SheetExtension {
         //#endregion
 
         if (notInMergeRange) {
-            const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row);
+            const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row) && spreadsheetSkeleton.worksheet.getRowHeight(row) > 0;
             if (!visibleRow) {
                 return true;
             }
 
-            const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
+            const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col) && spreadsheetSkeleton.worksheet.getColumnWidth(col) > 0;
             if (!visibleCol) {
                 return true;
             }
@@ -330,7 +330,7 @@ export class Font extends SheetExtension {
             let isAllRowHidden = true;
 
             for (let r = mergeInfo.startRow; r <= mergeInfo.endRow; r++) {
-                const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(r);
+                const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(r) && spreadsheetSkeleton.worksheet.getRowHeight(r) > 0;
                 if (visibleRow) {
                     isAllRowHidden = false;
                     break;
@@ -344,7 +344,7 @@ export class Font extends SheetExtension {
             let isAllColHidden = true;
 
             for (let c = mergeInfo.startColumn; c <= mergeInfo.endColumn; c++) {
-                const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(c);
+                const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(c) && spreadsheetSkeleton.worksheet.getColumnWidth(c) > 0;
                 if (visibleCol) {
                     isAllColHidden = false;
                     break;

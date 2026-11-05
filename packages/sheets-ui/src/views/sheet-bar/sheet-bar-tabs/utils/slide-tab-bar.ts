@@ -343,13 +343,95 @@ export class SlideTabBar {
 
     protected _activeTabItem: SlideTabItem | null = null;
 
-    protected _moveAction: (e: MouseEvent) => void;
+    protected _moveAction = (moveEvent: MouseEvent) => {
+        if (this._activeTabItem) {
+            this._moveActionX = moveEvent.pageX - this._downActionX;
+            if (this._moveActionX <= -this._leftMoveX) {
+                this._moveActionX = -this._leftMoveX;
+            } else if (this._moveActionX >= this._rightMoveX) {
+                this._moveActionX = this._rightMoveX;
+            }
+            this._scrollIncremental = 0;
+            this._scrollLeft(moveEvent);
+            this._scrollRight(moveEvent);
+        }
+    };
 
-    protected _upAction: (e: MouseEvent) => void;
+    protected _upAction = (upEvent: MouseEvent) => {
+        // Clear timer
+        if (this._longPressTimer) {
+            clearTimeout(this._longPressTimer);
+            this._longPressTimer = null;
+        }
+
+        if (!this._activeTabItem) return;
+
+        if (this._activeTabItem.isEditMode()) {
+            const activeSlideItemElement = this._activeTabItem.getSlideTabItem();
+            const pointerId = (upEvent as PointerEvent).pointerId;
+            if (pointerId != null && activeSlideItemElement.hasPointerCapture(pointerId)) {
+                activeSlideItemElement.releasePointerCapture(pointerId);
+            }
+            this._activeTabItem.removeEventListener('pointerup', this._upAction);
+            return;
+        }
+
+        // When blurring after editing the table name, _activeTabItemIndex and _compareIndex may not be equal, causing slideEnd to be triggered
+        const isFromScroll = this._autoScrollTime !== null;
+
+        this._closeAutoScroll();
+        this._activeTabItem.disableFixed();
+        this.updateItems();
+
+        // Restore the mouse cursor
+        const activeSlideItemElement = this._activeTabItem?.getSlideTabItem();
+        if (!activeSlideItemElement) return;
+
+        activeSlideItemElement.style.cursor = '';
+        activeSlideItemElement.releasePointerCapture((upEvent as PointerEvent).pointerId);
+
+        this._activeTabItem?.removeEventListener('pointermove', this._moveAction);
+        this._activeTabItem?.removeEventListener('pointerup', this._upAction);
+        if (
+            this._config.onSlideEnd &&
+            this._activeTabItemIndex !== this._compareIndex &&
+            isFromScroll
+        ) {
+            this.removeListener();
+            this._config.onSlideEnd(upEvent, this._compareIndex || 0);
+        }
+
+        this._scrollIncremental = 0;
+        this._downActionX = 0;
+        this._moveActionX = 0;
+        this._dragStartScrollX = this._slideScrollbar.getScrollX();
+        this._compareIndex = 0;
+    };
 
     protected _downAction: (e: MouseEvent) => void;
 
-    protected _wheelAction: (e: WheelEvent) => void;
+    protected _wheelAction = (wheelEvent: WheelEvent) => {
+        const viewportWidth = this._slideTabBar.parentElement?.clientWidth ?? this._slideTabBar.clientWidth;
+        if (this._slideTabBar.scrollWidth <= viewportWidth) {
+            return;
+        }
+
+        const dominantDelta = Math.abs(wheelEvent.deltaX) > Math.abs(wheelEvent.deltaY)
+            ? wheelEvent.deltaX
+            : wheelEvent.deltaY;
+        if (dominantDelta === 0) {
+            return;
+        }
+
+        const deltaModeMultiplier = wheelEvent.deltaMode === WheelEvent.DOM_DELTA_LINE
+            ? 16
+            : wheelEvent.deltaMode === WheelEvent.DOM_DELTA_PAGE
+                ? viewportWidth
+                : 1;
+
+        wheelEvent.preventDefault();
+        this.setScroll(dominantDelta * deltaModeMultiplier);
+    };
 
     protected _scrollIncremental: number = 0;
 
@@ -383,7 +465,6 @@ export class SlideTabBar {
      */
     protected _rightMoveX: number = 0;
 
-    // eslint-disable-next-line max-lines-per-function
     constructor(config: Partial<ISlideTabBarConfig>) {
         if (config.slideTabBarContainer == null) {
             throw new Error('not found slide-tab-bar root element');
@@ -400,11 +481,16 @@ export class SlideTabBar {
 
         this._initConfig();
 
+        this._downAction = this._createDownAction();
+
+        this.addListener();
+    }
+
+    private _createDownAction(): (event: MouseEvent) => void {
         let lastPageX = 0;
         let lastPageY = 0;
         let lastTime = 0;
-        // eslint-disable-next-line max-lines-per-function
-        this._downAction = (downEvent: MouseEvent) => {
+        return (downEvent: MouseEvent) => {
             // Waiting for the rename of the previous TAB
             if (this._activeTabItem?.isEditMode()) {
                 return;
@@ -417,7 +503,7 @@ export class SlideTabBar {
             }
 
             const slideItemId = (downEvent.target as HTMLElement)
-                ?.closest(`${config.slideTabBarItemSelector}`)
+                ?.closest(this._config.slideTabBarItemSelector)
                 ?.getAttribute('data-id');
             const slideItemIndex = this._slideTabItems.findIndex((item) => item.getId() === slideItemId);
 
@@ -474,109 +560,22 @@ export class SlideTabBar {
             lastPageY = pageY;
             lastTime = current;
 
-            // Set a timer to delay dragging for 300 milliseconds
-            this._longPressTimer = setTimeout(() => {
-                if (!activeSlideItemElement || this._activeTabItem?.isEditMode()) return;
-
-                this._activeTabItem?.enableFixed();
-                this._startAutoScroll();
-                // Set the mouse cursor to drag
-                activeSlideItemElement.setPointerCapture((downEvent as PointerEvent).pointerId);
-                activeSlideItemElement.style.cursor = 'move';
-                this._activeTabItem?.addEventListener('pointermove', this._moveAction);
-            }, SlideTabBar.LongPressDelay);
+            this._startLongPress(downEvent, activeSlideItemElement);
         };
+    }
 
-        this._upAction = (upEvent: MouseEvent) => {
-            // Clear timer
-            if (this._longPressTimer) {
-                clearTimeout(this._longPressTimer);
-                this._longPressTimer = null;
-            }
+    private _startLongPress(downEvent: MouseEvent, activeSlideItemElement: HTMLElement): void {
+        // Set a timer to delay dragging for 300 milliseconds
+        this._longPressTimer = setTimeout(() => {
+            if (!activeSlideItemElement || this._activeTabItem?.isEditMode()) return;
 
-            if (!this._activeTabItem) return;
-
-            if (this._activeTabItem.isEditMode()) {
-                const activeSlideItemElement = this._activeTabItem.getSlideTabItem();
-                const pointerId = (upEvent as PointerEvent).pointerId;
-                if (pointerId != null && activeSlideItemElement.hasPointerCapture(pointerId)) {
-                    activeSlideItemElement.releasePointerCapture(pointerId);
-                }
-                this._activeTabItem.removeEventListener('pointerup', this._upAction);
-                return;
-            }
-
-            // When blurring after editing the table name, _activeTabItemIndex and _compareIndex may not be equal, causing slideEnd to be triggered
-            const isFromScroll = this._autoScrollTime !== null;
-
-            this._closeAutoScroll();
-            this._activeTabItem.disableFixed();
-            // this._sortedItems();
-            this.updateItems();
-
-            // Restore the mouse cursor
-            const activeSlideItemElement = this._activeTabItem?.getSlideTabItem();
-            if (!activeSlideItemElement) return;
-
-            activeSlideItemElement.style.cursor = '';
-            activeSlideItemElement.releasePointerCapture((upEvent as PointerEvent).pointerId);
-
-            this._activeTabItem?.removeEventListener('pointermove', this._moveAction);
-            this._activeTabItem?.removeEventListener('pointerup', this._upAction);
-            if (
-                this._config.onSlideEnd &&
-                this._activeTabItemIndex !== this._compareIndex &&
-                isFromScroll
-            ) {
-                this.removeListener();
-                this._config.onSlideEnd(upEvent, this._compareIndex || 0);
-            }
-
-            this._scrollIncremental = 0;
-            this._downActionX = 0;
-            this._moveActionX = 0;
-            this._dragStartScrollX = this._slideScrollbar.getScrollX();
-            this._compareIndex = 0;
-        };
-
-        this._moveAction = (moveEvent) => {
-            if (this._activeTabItem) {
-                this._moveActionX = moveEvent.pageX - this._downActionX;
-                if (this._moveActionX <= -this._leftMoveX) {
-                    this._moveActionX = -this._leftMoveX;
-                } else if (this._moveActionX >= this._rightMoveX) {
-                    this._moveActionX = this._rightMoveX;
-                }
-                this._scrollIncremental = 0;
-                this._scrollLeft(moveEvent);
-                this._scrollRight(moveEvent);
-            }
-        };
-
-        this._wheelAction = (wheelEvent: WheelEvent) => {
-            const viewportWidth = this._slideTabBar.parentElement?.clientWidth ?? this._slideTabBar.clientWidth;
-            if (this._slideTabBar.scrollWidth <= viewportWidth) {
-                return;
-            }
-
-            const dominantDelta = Math.abs(wheelEvent.deltaX) > Math.abs(wheelEvent.deltaY)
-                ? wheelEvent.deltaX
-                : wheelEvent.deltaY;
-            if (dominantDelta === 0) {
-                return;
-            }
-
-            const deltaModeMultiplier = wheelEvent.deltaMode === WheelEvent.DOM_DELTA_LINE
-                ? 16
-                : wheelEvent.deltaMode === WheelEvent.DOM_DELTA_PAGE
-                    ? viewportWidth
-                    : 1;
-
-            wheelEvent.preventDefault();
-            this.setScroll(dominantDelta * deltaModeMultiplier);
-        };
-
-        this.addListener();
+            this._activeTabItem?.enableFixed();
+            this._startAutoScroll();
+            // Set the mouse cursor to drag
+            activeSlideItemElement.setPointerCapture((downEvent as PointerEvent).pointerId);
+            activeSlideItemElement.style.cursor = 'move';
+            this._activeTabItem?.addEventListener('pointermove', this._moveAction);
+        }, SlideTabBar.LongPressDelay);
     }
 
     static checkedSkipSlide(event: MouseEvent): boolean {

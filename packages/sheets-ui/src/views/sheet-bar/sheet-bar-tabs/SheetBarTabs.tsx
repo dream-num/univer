@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
 import type { IUniverUIConfig } from '@univerjs/ui';
 import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from 'react';
 import {
@@ -27,7 +26,6 @@ import {
     Quantity,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     BasesMultiIcon,
     BoardsMultiIcon,
@@ -61,7 +59,6 @@ import { getEmbedSheetsTabCustomData } from '../../../embed-tab-anchor';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import { ISheetEmbedRuntimeService } from '../../../services/sheet-embed-runtime.service';
-import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { useActiveWorkbook } from '../../hook';
 import { SheetBarItem } from './SheetBarItem';
 import { SheetBarTabsContextMenu } from './SheetBarTabsContextMenu';
@@ -102,39 +99,6 @@ function EmbedSheetTabProductIcon({ childType }: IEmbedSheetTabProductIconProps)
     }
 }
 
-function getScrollShadow(state: IScrollState) {
-    const { leftEnd, rightEnd } = state;
-
-    if (leftEnd && rightEnd) {
-        return SCROLL_SHADOW_NONE;
-    }
-
-    if (leftEnd) {
-        return SCROLL_SHADOW_RIGHT;
-    }
-
-    if (rightEnd) {
-        return SCROLL_SHADOW_LEFT;
-    }
-
-    return SCROLL_SHADOW_BOTH;
-}
-
-function shouldRefreshSheetTabs(commandInfo: ICommandInfo) {
-    switch (commandInfo.id) {
-        case SetTabColorMutation.id:
-        case SetWorksheetHideMutation.id:
-        case RemoveSheetMutation.id:
-        case SetWorksheetNameMutation.id:
-        case InsertSheetMutation.id:
-        case SetWorksheetOrderMutation.id:
-        case SetWorksheetActiveOperation.id:
-            return true;
-        default:
-            return false;
-    }
-}
-
 export function SheetBarTabs() {
     const injector = useDependency(Injector);
     const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>([]);
@@ -145,11 +109,9 @@ export function SheetBarTabs() {
 
     const slideTabBarRef = useRef<SlideTabBar | null>(null);
     const slideTabBarContainerRef = useRef<HTMLDivElement>(null);
-    const activeSheetIdRef = useRef(activeSheetId);
 
     const commandService = useDependency(ICommandService);
     const layoutService = useDependency(ILayoutService);
-    const renderManagerService = useDependency(IRenderManagerService);
     const sheetBarService = useDependency(ISheetBarService);
     const localeService = useDependency(LocaleService);
     const confirmService = useDependency(IConfirmService);
@@ -159,7 +121,6 @@ export function SheetBarTabs() {
     const permissionService = useDependency(IPermissionService);
 
     const workbook = useActiveWorkbook()!;
-    const workbookRef = useRef(workbook);
     const resetOrder = useObservable(worksheetProtectionRuleModel.resetOrder$);
     const config = useConfigValue<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
     const showContextMenu = config?.contextMenu ?? true;
@@ -316,9 +277,7 @@ export function SheetBarTabs() {
                 } satisfies IBaseSheetBarProps;
             });
 
-        // eslint-disable-next-line react/set-state-in-effect
         setSheetList(sheetListItems);
-        // eslint-disable-next-line react/set-state-in-effect
         setActiveSheetId(currentSubUnitId);
     }, [injector, rangeProtectionRuleModel, workbook, worksheetProtectionRuleModel]);
 
@@ -326,8 +285,16 @@ export function SheetBarTabs() {
         slideTabBarRef.current?.getActiveItem()?.setEditor();
     }, []);
 
-    const syncScrollState = useCallback((state: IScrollState) => {
-        setScrollShadow(getScrollShadow(state));
+    const syncScrollState = useCallback(({ leftEnd, rightEnd }: IScrollState) => {
+        if (leftEnd && rightEnd) {
+            setScrollShadow(SCROLL_SHADOW_NONE);
+        } else if (leftEnd) {
+            setScrollShadow(SCROLL_SHADOW_RIGHT);
+        } else if (rightEnd) {
+            setScrollShadow(SCROLL_SHADOW_LEFT);
+        } else {
+            setScrollShadow(SCROLL_SHADOW_BOTH);
+        }
     }, []);
 
     const syncScrollButtonState = useCallback((slideTabBar: SlideTabBar) => {
@@ -343,46 +310,20 @@ export function SheetBarTabs() {
         });
     }, [sheetBarService]);
 
-    useEffect(() => {
-        activeSheetIdRef.current = activeSheetId;
-    }, [activeSheetId]);
-
-    useEffect(() => {
-        workbookRef.current = workbook;
-    }, [workbook]);
-
-    const syncActiveSheetRender = useCallback((subUnitId: string) => {
-        const render = renderManagerService.getRenderUnitById(workbookRef.current.getUnitId());
-        try {
-            render?.with(SheetSkeletonManagerService).setCurrent({ sheetId: subUnitId });
-            render?.scene.makeDirty(true);
-            render?.scene.render();
-        } catch {
-            // The normal command path owns render updates. This fallback only runs when that path was skipped.
-        }
-    }, [renderManagerService]);
-
     const activateSheetTab = useCallback((subUnitId?: string) => {
-        if (!subUnitId || subUnitId === activeSheetIdRef.current) {
+        if (!subUnitId || subUnitId === activeSheetId || slideTabBarRef.current?.getActiveItem()?.isEditMode()) {
             return;
         }
 
         commandService.executeCommand(SetWorksheetActiveOperation.id, {
             subUnitId,
-            unitId: workbookRef.current.getUnitId(),
+            unitId: workbook.getUnitId(),
         }).then((result) => {
-            requestAnimationFrame(() => layoutService.focus(workbookRef.current.getUnitId()));
             if (result !== false) {
-                return;
-            }
-
-            const worksheet = workbookRef.current.getSheetBySheetId(subUnitId);
-            if (worksheet) {
-                workbookRef.current.setActiveSheet(worksheet);
-                syncActiveSheetRender(subUnitId);
+                requestAnimationFrame(() => layoutService.focus(workbook.getUnitId()));
             }
         });
-    }, [commandService, layoutService, syncActiveSheetRender]);
+    }, [activeSheetId, commandService, layoutService, workbook]);
 
     const observeResize = useCallback((slideTabBar: SlideTabBar) => {
         const slideTabBarContainer = slideTabBarContainerRef.current?.querySelector('[data-u-comp=slide-tab-bar]');
@@ -456,6 +397,10 @@ export function SheetBarTabs() {
     const onTabListContextMenu = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
         event.preventDefault();
 
+        if (slideTabBarRef.current?.getActiveItem()?.isEditMode()) {
+            return;
+        }
+
         const triggerItem = (event.target as HTMLElement).closest<HTMLElement>('[data-u-comp=slide-tab-item]');
         const targetSheetId = triggerItem?.dataset.id;
 
@@ -499,10 +444,7 @@ export function SheetBarTabs() {
 
         if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
-            commandService.executeCommand(SetWorksheetActiveOperation.id, {
-                unitId: workbook.getUnitId(),
-                subUnitId: currentSheetId,
-            });
+            activateSheetTab(currentSheetId);
             return;
         }
 
@@ -530,11 +472,8 @@ export function SheetBarTabs() {
         }
 
         nextTab.focus();
-        commandService.executeCommand(SetWorksheetActiveOperation.id, {
-            unitId: workbook.getUnitId(),
-            subUnitId: nextSheetId,
-        });
-    }, [commandService, workbook]);
+        activateSheetTab(nextSheetId);
+    }, [activateSheetTab]);
 
     const initializeSlideTabBar = useCallback(() => {
         const slideTabBar = new SlideTabBar({
@@ -598,12 +537,18 @@ export function SheetBarTabs() {
     ]);
 
     useEffect(() => {
-        updateSheetItems();
-
         const { slideTabBar, disconnectResizeObserver } = initializeSlideTabBar();
         const commandDisposable = commandService.onCommandExecuted((commandInfo) => {
-            if (shouldRefreshSheetTabs(commandInfo)) {
-                updateSheetItems();
+            switch (commandInfo.id) {
+                case SetTabColorMutation.id:
+                case SetWorksheetHideMutation.id:
+                case RemoveSheetMutation.id:
+                case SetWorksheetNameMutation.id:
+                case InsertSheetMutation.id:
+                case SetWorksheetOrderMutation.id:
+                case SetWorksheetActiveOperation.id:
+                    updateSheetItems();
+                    break;
             }
         });
 
@@ -672,12 +617,9 @@ export function SheetBarTabs() {
         };
     }, [rangeProtectionRuleModel, updateSheetItems, worksheetProtectionRuleModel]);
 
-    useEffect(() => {
-        if (!showContextMenu && contextMenuVisible) {
-            // eslint-disable-next-line react/set-state-in-effect
-            setContextMenuVisible(false);
-        }
-    }, [contextMenuVisible, showContextMenu]);
+    if (!showContextMenu && contextMenuVisible) {
+        setContextMenuVisible(false);
+    }
 
     return (
         <SheetBarTabsContextMenu

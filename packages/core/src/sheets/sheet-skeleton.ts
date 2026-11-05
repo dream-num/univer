@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-param-reassign */
 import { Subject } from 'rxjs';
-import type { IObjectArrayPrimitiveType, Nullable } from '../shared';
-import type {
-    IDocumentData,
-    IDocumentRenderConfig,
-    IPaddingData,
-} from '../types/interfaces';
+import type { IObjectArrayPrimitiveType } from '../shared/object-matrix';
+import type { Nullable } from '../shared/types';
+import type { IDocumentData, IDocumentRenderConfig } from '../types/interfaces/i-document-data';
+import type { IPaddingData } from '../types/interfaces/i-style-data';
 import type { Styles } from './styles';
 import type {
     ICellData,
@@ -42,12 +39,17 @@ import { IConfigService } from '../services/config/config.service';
 import { IContextService } from '../services/context/context.service';
 import { LocaleService } from '../services/locale/locale.service';
 import { ThemeService } from '../services/theme/theme.service';
-import { ColorKit, isCellCoverable, ObjectMatrix, Rectangle, searchArray, Tools } from '../shared';
+import { searchArray } from '../shared/array-search';
 import { ImageCacheMap } from '../shared/cache/image-cache';
+import { ColorKit } from '../shared/color/color-kit';
+import { isCellCoverable } from '../shared/common';
+import { ObjectMatrix } from '../shared/object-matrix';
 import { getIntersectRange } from '../shared/range';
+import { Rectangle } from '../shared/rectangle';
+import { Tools } from '../shared/tools';
 import { Skeleton } from '../skeleton';
-import { BooleanNumber, HorizontalAlign } from '../types/enum';
-import { DocumentFlavor } from '../types/interfaces';
+import { BooleanNumber, HorizontalAlign } from '../types/enum/text-style';
+import { DocumentFlavor } from '../types/interfaces/i-document-data';
 import { isValidSheetDimension, normalizeSheetDimension } from './sheet-dimensions';
 import { DEFAULT_WORKSHEET_COLUMN_WIDTH, DEFAULT_WORKSHEET_ROW_HEIGHT } from './sheet-snapshot-utils';
 
@@ -498,7 +500,6 @@ export class SheetSkeleton extends Skeleton {
         return Boolean(mergedData);
     }
 
-    //eslint-disable-next-line complexity
     protected _getOverflowBound(
         row: number,
         startColumn: number,
@@ -507,57 +508,14 @@ export class SheetSkeleton extends Skeleton {
         horizontalAlign = HorizontalAlign.LEFT
     ): number {
         let cumWidth = 0;
-        if (startColumn > endColumn) {
-            const columnCount = this._columnWidthAccumulation.length - 1;
-            for (let i = startColumn; i >= endColumn; i--) {
-                const column = i;
-                const cell = this.worksheet.getCell(row, column);
-                if (
-                    (!isCellCoverable(cell) && column !== startColumn) ||
-                    this.intersectMergeRange(row, column)
-                ) {
-                    if (column === startColumn) {
-                        return column;
-                    }
-                    return column + 1 > columnCount ? columnCount : column + 1;
-                }
-                const { startX, endX } = getCellWithCoordByIndexCore(
-                    row,
-                    column,
-                    this.rowHeightAccumulation,
-                    this.columnWidthAccumulation,
-                    undefined,
-                    this.getGapSizeGetter()
-                );
-
-                // For center alignment, the current cell's width needs to be divided in half for comparison.
-                if (
-                    horizontalAlign === HorizontalAlign.CENTER &&
-                    column === startColumn
-                ) {
-                    cumWidth += (endX - startX) / 2;
-                } else {
-                    cumWidth += endX - startX;
-                }
-
-                if (contentWidth < cumWidth) {
-                    return column;
-                }
-            }
-            return startColumn;
-        }
-        for (let i = startColumn; i <= endColumn; i++) {
-            const column = i;
+        const direction = startColumn > endColumn ? -1 : 1;
+        for (let column = startColumn; direction === 1 ? column <= endColumn : column >= endColumn; column += direction) {
             const cell = this.worksheet.getCell(row, column);
-            if (
-                (!isCellCoverable(cell) && column !== startColumn) ||
-                this.intersectMergeRange(row, column)
-            ) {
+            if ((!isCellCoverable(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
                 if (column === startColumn) {
                     return column;
                 }
-
-                return column - 1 < 0 ? 0 : column - 1;
+                return Tools.clamp(column - direction, 0, this._columnWidthAccumulation.length - 1);
             }
             const { startX, endX } = getCellWithCoordByIndexCore(
                 row,
@@ -567,21 +525,16 @@ export class SheetSkeleton extends Skeleton {
                 undefined,
                 this.getGapSizeGetter()
             );
-
-            if (
-                horizontalAlign === HorizontalAlign.CENTER &&
-                column === startColumn
-            ) {
+            if (horizontalAlign === HorizontalAlign.CENTER && column === startColumn) {
                 cumWidth += (endX - startX) / 2;
             } else {
                 cumWidth += endX - startX;
             }
-
             if (contentWidth < cumWidth) {
                 return column;
             }
         }
-        return endColumn;
+        return direction === 1 ? endColumn : startColumn;
     }
 
     /**
@@ -681,7 +634,6 @@ export class SheetSkeleton extends Skeleton {
      * expand curr range if it's intersect with merge range.
      * @returns {IRange} expanded range because merge info.
      */
-    // eslint-disable-next-line max-lines-per-function
     expandRangeByMerge(range: IRange, inRefSelectionMode?: boolean): IRange {
         let { startRow, startColumn, endRow, endColumn } = range;
         const mergeData = this._worksheetData.mergeData;
@@ -700,20 +652,11 @@ export class SheetSkeleton extends Skeleton {
         let searchedMergeSize = 0;
         let lastSearchedMergeCell: Nullable<IRange> = null;
 
-        // the loop breaks when there are not merged cells intersect with the current range
-        // NOTE: what about the performance issue?
         while (isSearching) {
             isSearching = false;
 
-            for (let i = 0; i < mergeData.length; i++) {
-                const {
-                    startRow: mainStartRow,
-                    startColumn: mainStartColumn,
-                    endRow: mainEndRow,
-                    endColumn: mainEndColumn,
-                } = mergeData[i];
-
-                if (searchedMerge.getValue(mainStartRow, mainStartColumn)) {
+            for (const mergeRange of mergeData) {
+                if (searchedMerge.getValue(mergeRange.startRow, mergeRange.startColumn)) {
                     continue;
                 }
 
@@ -724,22 +667,15 @@ export class SheetSkeleton extends Skeleton {
                     endRow,
                 };
 
-                const rect2 = {
-                    startColumn: mainStartColumn,
-                    startRow: mainStartRow,
-                    endColumn: mainEndColumn,
-                    endRow: mainEndRow,
-                };
-
-                if (getIntersectRange(rect1, rect2)) {
-                    startRow = Math.min(startRow, mainStartRow);
-                    startColumn = Math.min(startColumn, mainStartColumn);
-                    endRow = Math.max(endRow, mainEndRow);
-                    endColumn = Math.max(endColumn, mainEndColumn);
-                    searchedMerge.setValue(mainStartRow, mainStartColumn, true);
+                if (getIntersectRange(rect1, mergeRange)) {
+                    startRow = Math.min(startRow, mergeRange.startRow);
+                    startColumn = Math.min(startColumn, mergeRange.startColumn);
+                    endRow = Math.max(endRow, mergeRange.endRow);
+                    endColumn = Math.max(endColumn, mergeRange.endColumn);
+                    searchedMerge.setValue(mergeRange.startRow, mergeRange.startColumn, true);
                     isSearching = true;
                     searchedMergeSize++;
-                    lastSearchedMergeCell = rect2;
+                    lastSearchedMergeCell = mergeRange;
                 }
             }
         }
@@ -830,7 +766,7 @@ export class SheetSkeleton extends Skeleton {
         options?: IGetRowColByPosOptions
     ): number {
         const { rowHeightAccumulation } = this;
-        offsetY = getTransformOffsetY(
+        const transformedOffsetY = getTransformOffsetY(
             offsetY,
             scaleY,
             scrollXY,
@@ -839,15 +775,15 @@ export class SheetSkeleton extends Skeleton {
 
         let row = searchArray(
             rowHeightAccumulation,
-            offsetY,
+            transformedOffsetY,
             options?.firstMatch
         );
 
         if (options?.closeFirst) {
             // check if upper row was closer than current
             if (
-                Math.abs(rowHeightAccumulation[row] - offsetY) <
-                Math.abs(offsetY - (rowHeightAccumulation[row - 1] ?? 0))
+                Math.abs(rowHeightAccumulation[row] - transformedOffsetY) <
+                Math.abs(transformedOffsetY - (rowHeightAccumulation[row - 1] ?? 0))
             ) {
                 row = row + 1;
             }
@@ -1025,6 +961,8 @@ export class SheetSkeleton extends Skeleton {
      * @param scaleX render scene scale x-axis, scene.getAncestorScale
      * @param scaleY render scene scale y-axis, scene.getAncestorScale
      * @param scrollXY render viewportScroll {x, y}
+     * @param scrollXY.x horizontal scroll offset
+     * @param scrollXY.y vertical scroll offset
      * @param options {IGetRowColByPosOptions}
      * @returns {ICellWithCoord} Selection data with coordinates
      */
@@ -1273,7 +1211,6 @@ export function getCellCoordByIndexSimple(
  * @param {IGapSizeGetter} gapSizeGetter Optional getter for gap sizes before specific rows/columns
  * @returns {ICellWithCoord} The cell position information of the specified row and column, including the position information of the cell and the merge information of the cell
  */
-// eslint-disable-next-line max-lines-per-function
 export function getCellWithCoordByIndexCore(
     row: number,
     column: number,
@@ -1282,41 +1219,16 @@ export function getCellWithCoordByIndexCore(
     mergeDataInfo: Nullable<ICellInfo>,
     gapSizeGetter?: IGapSizeGetter
 ): ICellWithCoord {
-    row = Tools.clamp(row, 0, rowHeightAccumulation.length - 1);
-    column = Tools.clamp(column, 0, columnWidthAccumulation.length - 1);
-    // eslint-disable-next-line prefer-const
-    let { startY, endY, startX, endX } = getCellCoordByIndexSimple(
-        row,
-        column,
+    const actualRow = Tools.clamp(row, 0, rowHeightAccumulation.length - 1);
+    const actualColumn = Tools.clamp(column, 0, columnWidthAccumulation.length - 1);
+    const position = getCellCoordByIndexSimple(
+        actualRow,
+        actualColumn,
         rowHeightAccumulation,
         columnWidthAccumulation,
-        gapSizeGetter?.row(row) ?? 0,
-        gapSizeGetter?.col(column) ?? 0
+        gapSizeGetter?.row(actualRow) ?? 0,
+        gapSizeGetter?.col(actualColumn) ?? 0
     );
-
-    if (!mergeDataInfo) {
-        return {
-            startY,
-            endY,
-            startX,
-            endX,
-            isMerged: false,
-            isMergedMainCell: false,
-            actualRow: row,
-            actualColumn: column,
-            mergeInfo: {
-                startY,
-                endY,
-                startX,
-                endX,
-                startRow: row,
-                startColumn: column,
-                endRow: row,
-                endColumn: column,
-            },
-        };
-    }
-
     const {
         isMerged,
         isMergedMainCell,
@@ -1324,69 +1236,27 @@ export function getCellWithCoordByIndexCore(
         startColumn,
         endRow,
         endColumn,
-    } = mergeDataInfo;
-
-    let mergeInfo = {
-        startRow,
-        startColumn,
-        endRow,
-        endColumn,
-        startY,
-        endY,
-        startX,
-        endX,
+    } = mergeDataInfo ?? {
+        isMerged: false,
+        isMergedMainCell: false,
+        startRow: actualRow,
+        startColumn: actualColumn,
+        endRow: actualRow,
+        endColumn: actualColumn,
     };
-
-    const rowAccumulationCount = rowHeightAccumulation.length - 1;
-    const columnAccumulationCount = columnWidthAccumulation.length - 1;
-
-    if (isMerged && startRow !== -1 && startColumn !== -1) {
-        const mergeRowGapSize = gapSizeGetter?.row(startRow) ?? 0;
-        const mergeColGapSize = gapSizeGetter?.col(startColumn) ?? 0;
-        const mergeStartY = (rowHeightAccumulation[startRow - 1] || 0) + mergeRowGapSize;
-        const mergeEndY =
-            rowHeightAccumulation[endRow] ||
-            rowHeightAccumulation[rowAccumulationCount];
-
-        const mergeStartX = (columnWidthAccumulation[startColumn - 1] || 0) + mergeColGapSize;
-        const mergeEndX =
-            columnWidthAccumulation[endColumn] ||
-            columnWidthAccumulation[columnAccumulationCount];
-        mergeInfo = {
-            ...mergeInfo,
-            startY: mergeStartY,
-            endY: mergeEndY,
-            startX: mergeStartX,
-            endX: mergeEndX,
-        };
-    } else if (!isMerged && endRow !== -1 && endColumn !== -1) {
-        const mergeEndY =
-            rowHeightAccumulation[endRow] ||
-            rowHeightAccumulation[rowAccumulationCount];
-        const mergeEndX =
-            columnWidthAccumulation[endColumn] ||
-            columnWidthAccumulation[columnAccumulationCount];
-
-        mergeInfo = {
-            ...mergeInfo,
-            startY,
-            endY: mergeEndY,
-            startX,
-            endX: mergeEndX,
-        };
+    const mergeInfo = { ...position, startRow, startColumn, endRow, endColumn };
+    const hasMergeBounds = isMerged ? startRow !== -1 && startColumn !== -1 : endRow !== -1 && endColumn !== -1;
+    if (hasMergeBounds) {
+        if (isMerged) {
+            const mergeRowGapSize = gapSizeGetter?.row(startRow) ?? 0;
+            const mergeColGapSize = gapSizeGetter?.col(startColumn) ?? 0;
+            mergeInfo.startY = (rowHeightAccumulation[startRow - 1] ?? 0) + mergeRowGapSize;
+            mergeInfo.startX = (columnWidthAccumulation[startColumn - 1] ?? 0) + mergeColGapSize;
+        }
+        mergeInfo.endY = rowHeightAccumulation[endRow] ?? rowHeightAccumulation[rowHeightAccumulation.length - 1];
+        mergeInfo.endX = columnWidthAccumulation[endColumn] ?? columnWidthAccumulation[columnWidthAccumulation.length - 1];
     }
-
-    return {
-        isMerged,
-        isMergedMainCell,
-        actualRow: row,
-        actualColumn: column,
-        startY,
-        endY,
-        startX,
-        endX,
-        mergeInfo,
-    } as ICellWithCoord;
+    return { ...position, isMerged, isMergedMainCell, actualRow, actualColumn, mergeInfo };
 }
 
 /**
@@ -1394,6 +1264,8 @@ export function getCellWithCoordByIndexCore(
  * @param offsetX Offset value from PointerEvent in canvas element.
  * @param scaleX from scene.getAncestorScale
  * @param scrollXY Scroll value of viewport
+ * @param scrollXY.x horizontal scroll offset
+ * @param scrollXY.y vertical scroll offset
  * @returns {number} x in sheet coordinate.
  */
 export function getTransformOffsetX(
@@ -1414,6 +1286,8 @@ export function getTransformOffsetX(
  * @param offsetY
  * @param scaleY
  * @param scrollXY
+ * @param scrollXY.x horizontal scroll offset
+ * @param scrollXY.y vertical scroll offset
  */
 export function getTransformOffsetY(
     offsetY: number,
@@ -1424,7 +1298,5 @@ export function getTransformOffsetY(
     const { y: scrollY } = scrollXY;
 
     // these values are not affected by zooming (ideal positions)
-    offsetY = offsetY / scaleY + scrollY - columnHeight; //this.columnHeaderHeightAndMarginTop;
-
-    return offsetY;
+    return offsetY / scaleY + scrollY - columnHeight;
 }

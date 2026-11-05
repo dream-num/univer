@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-import { CellValueType, HorizontalAlign, ObjectMatrix, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import type { IWorkbookData, Workbook } from '@univerjs/core';
+import { BooleanNumber, CellValueType, HorizontalAlign, LocaleType, ObjectMatrix, Univer, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { setupRenderTestEnv } from '../../../../__tests__/render-test-utils';
 import { VERTICAL_ROTATE_ANGLE } from '../../../../basics/text-rotation';
+import { UniverRenderingContext2D } from '../../../../context';
 import { Text } from '../../../../shape/text';
+import { SpreadsheetSkeleton } from '../../sheet.render-skeleton';
 import { Font } from '../font';
 
 function createCtx() {
@@ -86,6 +90,8 @@ function createSpreadsheetSkeleton() {
     const worksheet = {
         getRowVisible: vi.fn(() => true),
         getColVisible: vi.fn(() => true),
+        getRowHeight: vi.fn(() => 20),
+        getColumnWidth: vi.fn(() => 40),
         getCell: vi.fn(() => ({ v: 'A', t: CellValueType.STRING })),
         getMergeData: vi.fn(() => []),
         getSpanModel: vi.fn(() => ({
@@ -118,6 +124,79 @@ describe('font extension', () => {
             naturalWidth = 1;
             src = '';
         });
+    });
+
+    it.each([
+        ['hidden columns', false, false, true],
+        ['hidden rows', true, false, true],
+        ['hidden merged columns', false, true, true],
+        ['hidden merged rows', true, true, true],
+        ['zero-width columns', false, false, false],
+        ['zero-height rows', true, false, false],
+        ['zero-width merged columns', false, true, false],
+        ['zero-height merged rows', true, true, false],
+        ['zero-width leading merged columns', false, true, false, 0],
+        ['zero-height leading merged rows', true, true, false, 0],
+        ['partially hidden merged columns', false, true, true, 1, true],
+        ['partially hidden merged rows', true, true, true, 1, true],
+        ['partially zero-width merged columns', false, true, false, 1, true],
+        ['partially zero-height merged rows', true, true, false, 1, true],
+        ['zero-width merged columns with gaps', false, true, false, 0, false, true],
+        ['zero-height merged rows with gaps', true, true, false, 0, false, true],
+        ['hidden merged columns with gaps', false, true, true, 0, false, true],
+        ['hidden merged rows with gaps', true, true, true, 0, false, true],
+        ['partially zero-width merged columns with gaps', false, true, false, 0, true, true],
+        ['partially zero-height merged rows with gaps', true, true, false, 0, true, true],
+    ])('renders only visible text for %s', (_name, rows, merged, hidden, start = 1, partiallyVisible = false, withGaps = false) => {
+        const environment = setupRenderTestEnv();
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const dimension = hidden ? { hd: BooleanNumber.TRUE } : rows ? { h: 0 } : { w: 0 };
+        const dimensions = partiallyVisible ? { [start]: dimension } : { [start]: dimension, [start + 1]: dimension };
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'hidden-cell-text',
+            sheetOrder: ['sheet'],
+            sheets: {
+                sheet: {
+                    id: 'sheet',
+                    rowCount: 5,
+                    columnCount: 5,
+                    rowData: rows ? dimensions : {},
+                    columnData: rows ? {} : dimensions,
+                    mergeData: merged ? [{ startRow: start, endRow: start + 1, startColumn: start, endColumn: start + 1 }] : [],
+                    cellData: {
+                        [start]: { [start]: { v: 'cell text', s: { tb: WrapStrategy.CLIP } } },
+                        3: { 3: { v: 'visible text' } },
+                    },
+                },
+            },
+        });
+        const worksheet = workbook.getActiveSheet()!;
+        const skeleton = univer.__getInjector().createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles());
+        const context = document.createElement('canvas').getContext('2d')!;
+        const fillText = vi.spyOn(context, 'fillText');
+        try {
+            if (withGaps) {
+                skeleton.setGapConfig({
+                    rowGaps: { [start + 1]: { size: 8 } },
+                    colGaps: { [start + 1]: { size: 8 } },
+                });
+            }
+            skeleton.calculate();
+            for (const index of [start, 3]) {
+                const cell = worksheet.getCellRaw(index, index)!;
+                skeleton._setFontStylesCache(index, index, cell, worksheet.getComposedCellStyleByCellData(index, index, cell));
+            }
+            new Font().draw(new UniverRenderingContext2D(context), { scaleX: 1, scaleY: 1 }, skeleton, [], {
+                viewRanges: [{ startRow: 0, endRow: 4, startColumn: 0, endColumn: 4 }],
+                viewportKey: 'viewMain',
+            });
+
+            expect(fillText.mock.calls.map(([text]) => text).sort()).toEqual(partiallyVisible ? ['cell text', 'visible text'] : ['visible text']);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+            environment.restore();
+        }
     });
 
     it('covers fallback image draw branches', () => {
@@ -216,7 +295,6 @@ describe('font extension', () => {
         const drawPlainSpy = vi.spyOn(Text as any, 'drawPlainWith').mockImplementation((..._args: any[]) => undefined);
         const font = new Font() as any;
         const ctx = createCtx();
-        const overflow = new ObjectMatrix<any>();
 
         const renderFontCtx = {
             startX: 0,

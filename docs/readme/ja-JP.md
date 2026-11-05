@@ -36,31 +36,31 @@
 <details>
 <summary>目次</summary>
 
-- [Univer とは？](#what-is-univer)
+- [💡 Univer とは？](#what-is-univer)
   - [オープンソースの機能](#open-source-capabilities)
-- [オープンソースの基盤を使って構築](#what-you-can-build)
+- [🚀 オープンソースの基盤を使って構築](#what-you-can-build)
   - [クイックスタート：オープンソースのスプレッドシートエディター](#quick-start)
   - [アプリケーションを編集可能なコンテンツに接続](#connect-your-application-to-editable-content)
-- [オープンソースアーキテクチャを知る](#open-source-architecture)
+- [🏗️ オープンソースアーキテクチャを知る](#open-source-architecture)
   - [カスタム機能の境界を明確にする](#give-custom-features-clear-boundaries)
   - [複数機能の編集と元に戻す／やり直しを組み合わせる](#compose-cross-feature-edits-and-undoredo)
   - [Facade API とイベントでアプリケーションやエージェントを接続](#connect-applications-and-agents-through-facade-apis-and-events)
-- [Univer Office SDK でアプリケーションを拡張](#open-source-and-commercial-extensions)
+- [🧩 Univer Office SDK でアプリケーションを拡張](#open-source-and-commercial-extensions)
   - [範囲とライセンス](#scope-and-licensing)
-- [アプリケーションのパターンとエコシステム](#application-patterns-and-ecosystem)
+- [🌐 アプリケーションのパターンとエコシステム](#application-patterns-and-ecosystem)
   - [Univer Workspace：Office SDK のリファレンスアプリケーション](#univer-workspace-an-office-sdk-reference-application)
   - [CLI、エージェント統合、開発スキル](#cli-agent-integrations-and-developer-skills)
-- [ドキュメントとコントリビューション](#documentation-and-contributing)
-- [コミュニティ](#community)
-- [セキュリティ](#security)
-- [スポンサー](#sponsors)
-- [ライセンス](#license)
+- [📚 ドキュメントとコントリビューション](#documentation-and-contributing)
+- [💬 コミュニティ](#community)
+- [🔒 セキュリティ](#security)
+- [❤️ スポンサー](#sponsors)
+- [📄 ライセンス](#license)
 
 </details>
 
 <a id="what-is-univer"></a>
 
-## Univer とは？
+## 💡 Univer とは？
 
 **Univer** は、自社製品の中にオフィスアプリケーションを構築するための Office SDK です。独自のデータと権限を使い、ユーザーや既存のエージェントにオフィス編集、計算、共同作業、ファイル処理を提供します。製品群はスプレッドシート、ドキュメント、プレゼンテーション、リレーショナルテーブル、キャンバス、PDF をカバーします。
 
@@ -90,48 +90,52 @@ Univer Office SDK は 3 つの部分で構成されています。
 
 以下のデモは、商用機能を含む広範な **Univer Office SDK** を紹介します。標準のオープンソース構成よりも多くの機能が含まれます。範囲については[オープンソースと商用拡張](#open-source-and-commercial-extensions)をご覧ください。
 
-<p><a href="https://univer.ai/demo/spreadsheets"><img src="../../docs/img/readme/sheets.webp" alt="Sheets" width="960" /></a><br /><strong>Sheets · フル SDK デモ</strong></p>
-
-<p><a href="https://univer.ai/demo/docs"><img src="../../docs/img/readme/docs.webp" alt="Docs" width="960" /></a><br /><strong>Docs · フル SDK デモ</strong></p>
-
-<p><strong>その他のデモ：Web App、組み合わせたコンテンツ、Slides、Relational Tables、Canvases、PDF</strong></p>
-
 <table>
   <tr>
     <td width="50%" valign="top">
+      <a href="https://univer.ai/demo/spreadsheets"><img src="../../docs/img/readme/sheets.webp" alt="Sheets" width="420" /></a>
+      <p><strong>Sheets</strong><br /><a href="https://univer.ai/demo/spreadsheets">デモを開く ↗</a></p>
+    </td>
+    <td width="50%" valign="top">
+      <a href="https://univer.ai/demo/docs"><img src="../../docs/img/readme/docs.webp" alt="Docs" width="420" /></a>
+      <p><strong>Docs</strong><br /><a href="https://univer.ai/demo/docs">デモを開く ↗</a></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
       <a href="https://univer.ai/demo/web-app"><img src="../../docs/img/readme/web-app.webp" alt="Web App · シートを活用したアプリ" width="420" /></a>
-      <br /><strong>Web App · シートを活用したアプリ</strong>
+      <p><strong>Web App · シートを活用したアプリ</strong><br /><a href="https://univer.ai/demo/web-app">デモを開く ↗</a></p>
     </td>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/universe"><img src="../../docs/img/readme/universe.webp" alt="Univer · 組み合わせたオフィスコンテンツ" width="420" /></a>
-      <br /><strong>組み合わせたオフィスコンテンツ</strong>
+      <p><strong>組み合わせたオフィスコンテンツ</strong><br /><a href="https://univer.ai/demo/universe">デモを開く ↗</a></p>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/slides"><img src="../../docs/img/readme/slides.webp" alt="Slides" width="420" /></a>
-      <br /><strong>Slides</strong>
+      <p><strong>Slides</strong><br /><a href="https://univer.ai/demo/slides">デモを開く ↗</a></p>
     </td>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/relational-tables"><img src="../../docs/img/readme/relational-tables.webp" alt="Relational Tables" width="420" /></a>
-      <br /><strong>Relational Tables</strong>
+      <p><strong>Relational Tables</strong><br /><a href="https://univer.ai/demo/relational-tables">デモを開く ↗</a></p>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/canvases"><img src="../../docs/img/readme/canvases.webp" alt="Canvases" width="420" /></a>
-      <br /><strong>Canvases</strong>
+      <p><strong>Canvases</strong><br /><a href="https://univer.ai/demo/canvases">デモを開く ↗</a></p>
     </td>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/pdf"><img src="../../docs/img/readme/pdf.webp" alt="PDF" width="420" /></a>
-      <br /><strong>PDF</strong>
+      <p><strong>PDF</strong><br /><a href="https://univer.ai/demo/pdf">デモを開く ↗</a></p>
     </td>
   </tr>
 </table>
 
 <a id="what-you-can-build"></a>
 
-## オープンソースの基盤を使って構築
+## 🚀 オープンソースの基盤を使って構築
 
 | 目的 | オープンソース基盤の使い方 | はじめに |
 | --- | --- | --- |
@@ -339,7 +343,7 @@ Docs プラグインはスプレッドシート内のリッチテキスト編集
 
 <a id="open-source-architecture"></a>
 
-## オープンソースアーキテクチャを知る
+## 🏗️ オープンソースアーキテクチャを知る
 
 <img src="../../docs/img/readme/architecture-banner.png" alt="" width="960" />
 
@@ -528,7 +532,7 @@ Facade 拡張は機能パッケージに含まれるため、コンテンツ API
 
 <a id="open-source-and-commercial-extensions"></a>
 
-## Univer Office SDK でアプリケーションを拡張
+## 🧩 Univer Office SDK でアプリケーションを拡張
 
 <img src="../../docs/img/readme/sdk-banner.png" alt="" width="960" />
 
@@ -577,7 +581,7 @@ AI SDK は、Web SDK の **Headless コンテンツモデル、コマンド、�
 
 <a id="application-patterns-and-ecosystem"></a>
 
-## アプリケーションのパターンとエコシステム
+## 🌐 アプリケーションのパターンとエコシステム
 
 <img src="../../docs/img/readme/ecosystem-banner.png" alt="" width="960" />
 
@@ -634,7 +638,7 @@ Workspace はオープンソースで、SDK 依存関係にはそれぞれのラ
 
 <a id="documentation-and-contributing"></a>
 
-## ドキュメントとコントリビューション
+## 📚 ドキュメントとコントリビューション
 
 Univer を構築し、改善するすべての[コントリビューター](https://github.com/dream-num/univer/graphs/contributors)に感謝します。エンジン、プラグイン、テスト、ドキュメント、サンプルへの貢献を歓迎します。
 
@@ -710,19 +714,19 @@ Pull Request を作成する前に [CONTRIBUTING.md](../../CONTRIBUTING.md) を�
 
 <a id="community"></a>
 
-## コミュニティ
+## 💬 コミュニティ
 
 [GitHub Discussions](https://github.com/dream-num/univer/discussions) で質問し、[Discord](https://discord.gg/z3NKNT6D2f) に参加して、[X](https://twitter.com/univerhq) や [YouTube](https://www.youtube.com/@dreamNum) をフォローしてください。[行動規範](../../CODE_OF_CONDUCT.md)もお読みください。
 
 <a id="security"></a>
 
-## セキュリティ
+## 🔒 セキュリティ
 
 セキュリティ上の問題を見つけたと思われる場合は、[Security Policy](../../SECURITY.md) に従ってください。
 
 <a id="sponsors"></a>
 
-## スポンサー
+## ❤️ スポンサー
 
 Univer はコミュニティとスポンサーによって支えられています。[Open Collective](https://opencollective.com/univer) からプロジェクトを支援できます。
 
@@ -742,7 +746,7 @@ Univer はコミュニティとスポンサーによって支えられていま�
 
 <a id="license"></a>
 
-## ライセンス
+## 📄 ライセンス
 
 Copyright (c) 2021-present DreamNum Co., Ltd.
 

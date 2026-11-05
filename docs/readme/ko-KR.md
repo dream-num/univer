@@ -36,31 +36,31 @@
 <details>
 <summary>목차</summary>
 
-- [Univer란?](#what-is-univer)
+- [💡 Univer란?](#what-is-univer)
   - [오픈 소스 기능](#open-source-capabilities)
-- [오픈 소스 기반으로 구축하기](#what-you-can-build)
+- [🚀 오픈 소스 기반으로 구축하기](#what-you-can-build)
   - [빠른 시작: 오픈 소스 스프레드시트 편집기](#quick-start)
   - [애플리케이션을 편집 가능한 콘텐츠에 연결하기](#connect-your-application-to-editable-content)
-- [오픈 소스 아키텍처 살펴보기](#open-source-architecture)
+- [🏗️ 오픈 소스 아키텍처 살펴보기](#open-source-architecture)
   - [맞춤 기능의 경계를 명확하게 나누기](#give-custom-features-clear-boundaries)
   - [여러 기능의 편집과 실행 취소/다시 실행 조합하기](#compose-cross-feature-edits-and-undoredo)
   - [Facade API와 이벤트로 애플리케이션 및 에이전트 연결하기](#connect-applications-and-agents-through-facade-apis-and-events)
-- [Univer Office SDK로 애플리케이션 확장하기](#open-source-and-commercial-extensions)
+- [🧩 Univer Office SDK로 애플리케이션 확장하기](#open-source-and-commercial-extensions)
   - [범위와 라이선스](#scope-and-licensing)
-- [애플리케이션 패턴과 생태계](#application-patterns-and-ecosystem)
+- [🌐 애플리케이션 패턴과 생태계](#application-patterns-and-ecosystem)
   - [Univer Workspace: Office SDK 참조 애플리케이션](#univer-workspace-an-office-sdk-reference-application)
   - [CLI, 에이전트 통합, 개발 스킬](#cli-agent-integrations-and-developer-skills)
-- [문서와 기여](#documentation-and-contributing)
-- [커뮤니티](#community)
-- [보안](#security)
-- [스폰서](#sponsors)
-- [라이선스](#license)
+- [📚 문서와 기여](#documentation-and-contributing)
+- [💬 커뮤니티](#community)
+- [🔒 보안](#security)
+- [❤️ 스폰서](#sponsors)
+- [📄 라이선스](#license)
 
 </details>
 
 <a id="what-is-univer"></a>
 
-## Univer란?
+## 💡 Univer란?
 
 **Univer**는 자체 제품 안에 오피스 애플리케이션을 구축하기 위한 Office SDK입니다. 자체 데이터와 권한을 사용해 사용자와 기존 에이전트에 오피스 편집, 계산, 협업, 파일 처리 기능을 제공합니다. 제품군에는 스프레드시트, 문서, 프레젠테이션, 관계형 테이블, 캔버스, PDF가 포함됩니다.
 
@@ -90,48 +90,52 @@ Univer Office SDK는 세 부분으로 구성됩니다.
 
 아래 데모는 상용 기능을 포함한 더 넓은 **Univer Office SDK**를 보여 줍니다. 기본 오픈 소스 구성보다 많은 기능을 포함하며, 범위는 [오픈 소스와 상용 확장](#open-source-and-commercial-extensions)을 참고하세요.
 
-<p><a href="https://univer.ai/demo/spreadsheets"><img src="../../docs/img/readme/sheets.webp" alt="Sheets" width="960" /></a><br /><strong>Sheets · 전체 SDK 데모</strong></p>
-
-<p><a href="https://univer.ai/demo/docs"><img src="../../docs/img/readme/docs.webp" alt="Docs" width="960" /></a><br /><strong>Docs · 전체 SDK 데모</strong></p>
-
-<p><strong>더 많은 데모: Web App, 조합된 콘텐츠, Slides, Relational Tables, Canvases, PDF</strong></p>
-
 <table>
   <tr>
     <td width="50%" valign="top">
+      <a href="https://univer.ai/demo/spreadsheets"><img src="../../docs/img/readme/sheets.webp" alt="Sheets" width="420" /></a>
+      <p><strong>Sheets</strong><br /><a href="https://univer.ai/demo/spreadsheets">데모 열기 ↗</a></p>
+    </td>
+    <td width="50%" valign="top">
+      <a href="https://univer.ai/demo/docs"><img src="../../docs/img/readme/docs.webp" alt="Docs" width="420" /></a>
+      <p><strong>Docs</strong><br /><a href="https://univer.ai/demo/docs">데모 열기 ↗</a></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
       <a href="https://univer.ai/demo/web-app"><img src="../../docs/img/readme/web-app.webp" alt="Web App · 시트 기반 앱" width="420" /></a>
-      <br /><strong>Web App · 시트 기반 앱</strong>
+      <p><strong>Web App · 시트 기반 앱</strong><br /><a href="https://univer.ai/demo/web-app">데모 열기 ↗</a></p>
     </td>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/universe"><img src="../../docs/img/readme/universe.webp" alt="Univer · 조합된 오피스 콘텐츠" width="420" /></a>
-      <br /><strong>조합된 오피스 콘텐츠</strong>
+      <p><strong>조합된 오피스 콘텐츠</strong><br /><a href="https://univer.ai/demo/universe">데모 열기 ↗</a></p>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/slides"><img src="../../docs/img/readme/slides.webp" alt="Slides" width="420" /></a>
-      <br /><strong>Slides</strong>
+      <p><strong>Slides</strong><br /><a href="https://univer.ai/demo/slides">데모 열기 ↗</a></p>
     </td>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/relational-tables"><img src="../../docs/img/readme/relational-tables.webp" alt="Relational Tables" width="420" /></a>
-      <br /><strong>Relational Tables</strong>
+      <p><strong>Relational Tables</strong><br /><a href="https://univer.ai/demo/relational-tables">데모 열기 ↗</a></p>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/canvases"><img src="../../docs/img/readme/canvases.webp" alt="Canvases" width="420" /></a>
-      <br /><strong>Canvases</strong>
+      <p><strong>Canvases</strong><br /><a href="https://univer.ai/demo/canvases">데모 열기 ↗</a></p>
     </td>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/pdf"><img src="../../docs/img/readme/pdf.webp" alt="PDF" width="420" /></a>
-      <br /><strong>PDF</strong>
+      <p><strong>PDF</strong><br /><a href="https://univer.ai/demo/pdf">데모 열기 ↗</a></p>
     </td>
   </tr>
 </table>
 
 <a id="what-you-can-build"></a>
 
-## 오픈 소스 기반으로 구축하기
+## 🚀 오픈 소스 기반으로 구축하기
 
 | 목표 | 오픈 소스 기반 활용 | 시작점 |
 | --- | --- | --- |
@@ -339,7 +343,7 @@ Docs 플러그인은 스프레드시트의 서식 있는 텍스트 편집을 지
 
 <a id="open-source-architecture"></a>
 
-## 오픈 소스 아키텍처 살펴보기
+## 🏗️ 오픈 소스 아키텍처 살펴보기
 
 <img src="../../docs/img/readme/architecture-banner.png" alt="" width="960" />
 
@@ -528,7 +532,7 @@ Facade 확장은 기능 패키지에 포함되므로 콘텐츠 API가 관련 없
 
 <a id="open-source-and-commercial-extensions"></a>
 
-## Univer Office SDK로 애플리케이션 확장하기
+## 🧩 Univer Office SDK로 애플리케이션 확장하기
 
 <img src="../../docs/img/readme/sdk-banner.png" alt="" width="960" />
 
@@ -577,7 +581,7 @@ AI SDK는 Web SDK의 **Headless 콘텐츠 모델, 명령, 계산, Facade API**�
 
 <a id="application-patterns-and-ecosystem"></a>
 
-## 애플리케이션 패턴과 생태계
+## 🌐 애플리케이션 패턴과 생태계
 
 <img src="../../docs/img/readme/ecosystem-banner.png" alt="" width="960" />
 
@@ -634,7 +638,7 @@ Workspace는 오픈 소스이며 SDK 의존성은 각 라이선스를 따릅니�
 
 <a id="documentation-and-contributing"></a>
 
-## 문서와 기여
+## 📚 문서와 기여
 
 Univer를 만들고 개선하는 모든 [기여자](https://github.com/dream-num/univer/graphs/contributors)에게 감사드립니다. 엔진, 플러그인, 테스트, 문서, 예제에 대한 기여를 환영합니다.
 
@@ -710,19 +714,19 @@ Pull Request를 열기 전에 [CONTRIBUTING.md](../../CONTRIBUTING.md)를 읽어
 
 <a id="community"></a>
 
-## 커뮤니티
+## 💬 커뮤니티
 
 [GitHub Discussions](https://github.com/dream-num/univer/discussions)에서 질문하고, [Discord](https://discord.gg/z3NKNT6D2f)에 참여하고, [X](https://twitter.com/univerhq)나 [YouTube](https://www.youtube.com/@dreamNum)를 팔로우하세요. [행동 강령](../../CODE_OF_CONDUCT.md)을 읽어 주세요.
 
 <a id="security"></a>
 
-## 보안
+## 🔒 보안
 
 보안 문제를 발견했다고 생각되면 [Security Policy](../../SECURITY.md)를 따라 주세요.
 
 <a id="sponsors"></a>
 
-## 스폰서
+## ❤️ 스폰서
 
 Univer는 커뮤니티와 스폰서의 지원을 받습니다. [Open Collective](https://opencollective.com/univer)를 통해 프로젝트를 지원할 수 있습니다.
 
@@ -742,7 +746,7 @@ Univer는 커뮤니티와 스폰서의 지원을 받습니다. [Open Collective]
 
 <a id="license"></a>
 
-## 라이선스
+## 📄 라이선스
 
 Copyright (c) 2021-present DreamNum Co., Ltd.
 

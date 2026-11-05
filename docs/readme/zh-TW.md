@@ -36,31 +36,31 @@
 <details>
 <summary>目錄</summary>
 
-- [Univer 是什麼？](#what-is-univer)
+- [💡 Univer 是什麼？](#what-is-univer)
   - [開源能力](#open-source-capabilities)
-- [基於開源基礎建置](#what-you-can-build)
+- [🚀 基於開源基礎建置](#what-you-can-build)
   - [快速開始：開源試算表編輯器](#quick-start)
   - [將應用連線到可編輯內容](#connect-your-application-to-editable-content)
-- [探索開源架構](#open-source-architecture)
+- [🏗️ 探索開源架構](#open-source-architecture)
   - [為自訂功能劃分清晰邊界](#give-custom-features-clear-boundaries)
   - [組合跨功能編輯與復原／取消復原](#compose-cross-feature-edits-and-undoredo)
   - [透過 Facade API 和事件連線應用與 Agent](#connect-applications-and-agents-through-facade-apis-and-events)
-- [使用 Univer Office SDK 擴展應用](#open-source-and-commercial-extensions)
+- [🧩 使用 Univer Office SDK 擴展應用](#open-source-and-commercial-extensions)
   - [範圍與授權](#scope-and-licensing)
-- [應用模式與生態](#application-patterns-and-ecosystem)
+- [🌐 應用模式與生態](#application-patterns-and-ecosystem)
   - [Univer Workspace：Office SDK 參考應用](#univer-workspace-an-office-sdk-reference-application)
   - [CLI、Agent 整合與開發技能](#cli-agent-integrations-and-developer-skills)
-- [文件與貢獻](#documentation-and-contributing)
-- [社區](#community)
-- [安全](#security)
-- [贊助](#sponsors)
-- [授權條款](#license)
+- [📚 文件與貢獻](#documentation-and-contributing)
+- [💬 社區](#community)
+- [🔒 安全](#security)
+- [❤️ 贊助](#sponsors)
+- [📄 授權條款](#license)
 
 </details>
 
 <a id="what-is-univer"></a>
 
-## Univer 是什麼？
+## 💡 Univer 是什麼？
 
 **Univer** 是一套 Office SDK，用於在你自己的產品中建置辦公應用。它基於你的資料和權限，為使用者和現有 Agent 提供辦公編輯、計算、協作及檔案處理能力。產品系列覆蓋試算表、文件、示範文稿、關聯表格、畫布和 PDF。
 
@@ -90,48 +90,52 @@ Agent 可以使用同樣的開源 API，模型和工具編排由你的應用提�
 
 以下示範展示更完整的 **Univer Office SDK**，包括商業能力，其範圍超出預設開源設定；具體請參閱[開源與商業擴展](#open-source-and-commercial-extensions)。
 
-<p><a href="https://univer.ai/demo/spreadsheets"><img src="../../docs/img/readme/sheets.webp" alt="Sheets" width="960" /></a><br /><strong>Sheets · 完整 SDK 示範</strong></p>
-
-<p><a href="https://univer.ai/demo/docs"><img src="../../docs/img/readme/docs.webp" alt="Docs" width="960" /></a><br /><strong>Docs · 完整 SDK 示範</strong></p>
-
-<p><strong>更多示範：Web App、組合式內容、Slides、關聯表格、畫布和 PDF</strong></p>
-
 <table>
   <tr>
     <td width="50%" valign="top">
+      <a href="https://univer.ai/demo/spreadsheets"><img src="../../docs/img/readme/sheets.webp" alt="Sheets" width="420" /></a>
+      <p><strong>Sheets</strong><br /><a href="https://univer.ai/demo/spreadsheets">開啟示範 ↗</a></p>
+    </td>
+    <td width="50%" valign="top">
+      <a href="https://univer.ai/demo/docs"><img src="../../docs/img/readme/docs.webp" alt="Docs" width="420" /></a>
+      <p><strong>Docs</strong><br /><a href="https://univer.ai/demo/docs">開啟示範 ↗</a></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
       <a href="https://univer.ai/demo/web-app"><img src="../../docs/img/readme/web-app.webp" alt="Web App · 由表格驅動的應用" width="420" /></a>
-      <br /><strong>Web App · 由表格驅動的應用</strong>
+      <p><strong>Web App · 由表格驅動的應用</strong><br /><a href="https://univer.ai/demo/web-app">開啟示範 ↗</a></p>
     </td>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/universe"><img src="../../docs/img/readme/universe.webp" alt="Univer · 組合式辦公內容" width="420" /></a>
-      <br /><strong>組合式辦公內容</strong>
+      <p><strong>組合式辦公內容</strong><br /><a href="https://univer.ai/demo/universe">開啟示範 ↗</a></p>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/slides"><img src="../../docs/img/readme/slides.webp" alt="Slides" width="420" /></a>
-      <br /><strong>Slides</strong>
+      <p><strong>Slides</strong><br /><a href="https://univer.ai/demo/slides">開啟示範 ↗</a></p>
     </td>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/relational-tables"><img src="../../docs/img/readme/relational-tables.webp" alt="Relational Tables" width="420" /></a>
-      <br /><strong>Relational Tables</strong>
+      <p><strong>Relational Tables</strong><br /><a href="https://univer.ai/demo/relational-tables">開啟示範 ↗</a></p>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/canvases"><img src="../../docs/img/readme/canvases.webp" alt="Canvases" width="420" /></a>
-      <br /><strong>Canvases</strong>
+      <p><strong>Canvases</strong><br /><a href="https://univer.ai/demo/canvases">開啟示範 ↗</a></p>
     </td>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/pdf"><img src="../../docs/img/readme/pdf.webp" alt="PDF" width="420" /></a>
-      <br /><strong>PDF</strong>
+      <p><strong>PDF</strong><br /><a href="https://univer.ai/demo/pdf">開啟示範 ↗</a></p>
     </td>
   </tr>
 </table>
 
 <a id="what-you-can-build"></a>
 
-## 基於開源基礎建置
+## 🚀 基於開源基礎建置
 
 | 你的目標 | 使用開源基礎 | 從這裡開始 |
 | --- | --- | --- |
@@ -339,7 +343,7 @@ Docs 外掛支援試算表中的富文字編輯。新增功能時，請同時引
 
 <a id="open-source-architecture"></a>
 
-## 探索開源架構
+## 🏗️ 探索開源架構
 
 <img src="../../docs/img/readme/architecture-banner.png" alt="" width="960" />
 
@@ -528,7 +532,7 @@ Facade 擴展隨各自的功能套件提供，因此內容 API 不必引入無�
 
 <a id="open-source-and-commercial-extensions"></a>
 
-## 使用 Univer Office SDK 擴展應用
+## 🧩 使用 Univer Office SDK 擴展應用
 
 <img src="../../docs/img/readme/sdk-banner.png" alt="" width="960" />
 
@@ -577,7 +581,7 @@ AI SDK 建立在 Web SDK 的 **Headless 內容模型、命令、計算和 Facade
 
 <a id="application-patterns-and-ecosystem"></a>
 
-## 應用模式與生態
+## 🌐 應用模式與生態
 
 <img src="../../docs/img/readme/ecosystem-banner.png" alt="" width="960" />
 
@@ -634,7 +638,7 @@ Workspace 是開源應用，其 SDK 依賴遵循各自的授權條款。關聯�
 
 <a id="documentation-and-contributing"></a>
 
-## 文件與貢獻
+## 📚 文件與貢獻
 
 感謝所有參與建置和改進 Univer 的[貢獻者](https://github.com/dream-num/univer/graphs/contributors)。歡迎貢獻引擎、外掛、測試、文件和範例。
 
@@ -710,19 +714,19 @@ pnpm dev
 
 <a id="community"></a>
 
-## 社區
+## 💬 社區
 
 在 [GitHub Discussions](https://github.com/dream-num/univer/discussions) 提問，加入 [Discord](https://discord.gg/z3NKNT6D2f)，並關注 [X](https://twitter.com/univerhq) 或 [YouTube](https://www.youtube.com/@dreamNum)。請閱讀[行為準則](../../CODE_OF_CONDUCT.md)。
 
 <a id="security"></a>
 
-## 安全
+## 🔒 安全
 
 如果你認為發現了安全問題，請遵循 [安全政策](../../SECURITY.md)。
 
 <a id="sponsors"></a>
 
-## 贊助
+## ❤️ 贊助
 
 Univer 由社群和贊助者共同支援。你可以透過 [Open Collective](https://opencollective.com/univer) 支援這個專案。
 
@@ -742,7 +746,7 @@ Univer 由社群和贊助者共同支援。你可以透過 [Open Collective](htt
 
 <a id="license"></a>
 
-## 授權條款
+## 📄 授權條款
 
 Copyright (c) 2021-present DreamNum Co., Ltd.
 

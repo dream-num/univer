@@ -36,31 +36,31 @@
 <details>
 <summary>Inhaltsverzeichnis</summary>
 
-- [Was ist Univer?](#what-is-univer)
+- [💡 Was ist Univer?](#what-is-univer)
   - [Open-Source-Funktionen](#open-source-capabilities)
-- [Auf der Open-Source-Grundlage aufbauen](#what-you-can-build)
+- [🚀 Auf der Open-Source-Grundlage aufbauen](#what-you-can-build)
   - [Schnellstart: ein Open-Source-Tabelleneditor](#quick-start)
   - [Ihre Anwendung mit bearbeitbaren Inhalten verbinden](#connect-your-application-to-editable-content)
-- [Die Open-Source-Architektur erkunden](#open-source-architecture)
+- [🏗️ Die Open-Source-Architektur erkunden](#open-source-architecture)
   - [Eigene Funktionen klar abgrenzen](#give-custom-features-clear-boundaries)
   - [Funktionsübergreifende Bearbeitung und Rückgängig/Wiederholen kombinieren](#compose-cross-feature-edits-and-undoredo)
   - [Anwendungen und Agenten über Facade-APIs und Ereignisse verbinden](#connect-applications-and-agents-through-facade-apis-and-events)
-- [Ihre Anwendung mit Univer Office SDK erweitern](#open-source-and-commercial-extensions)
+- [🧩 Ihre Anwendung mit Univer Office SDK erweitern](#open-source-and-commercial-extensions)
   - [Umfang und Lizenzierung](#scope-and-licensing)
-- [Anwendungsmuster und Ökosystem](#application-patterns-and-ecosystem)
+- [🌐 Anwendungsmuster und Ökosystem](#application-patterns-and-ecosystem)
   - [Univer Workspace: eine Referenzanwendung für Office SDK](#univer-workspace-an-office-sdk-reference-application)
   - [CLI, Agentenintegrationen und Skills für Entwickler](#cli-agent-integrations-and-developer-skills)
-- [Dokumentation und Beiträge](#documentation-and-contributing)
-- [Community](#community)
-- [Sicherheit](#security)
-- [Sponsoren](#sponsors)
-- [Lizenz](#license)
+- [📚 Dokumentation und Beiträge](#documentation-and-contributing)
+- [💬 Community](#community)
+- [🔒 Sicherheit](#security)
+- [❤️ Sponsoren](#sponsors)
+- [📄 Lizenz](#license)
 
 </details>
 
 <a id="what-is-univer"></a>
 
-## Was ist Univer?
+## 💡 Was ist Univer?
 
 **Univer** ist ein Office SDK zum Entwickeln von Office-Anwendungen innerhalb Ihres eigenen Produkts. Es bietet Menschen und bestehenden Agenten Funktionen zur Bearbeitung, Berechnung, Zusammenarbeit und Verarbeitung von Office-Dateien und nutzt dabei Ihre Daten und Berechtigungen. Die Produktfamilie umfasst Tabellenkalkulationen, Dokumente, Präsentationen, relationale Tabellen, Zeichenflächen und PDFs.
 
@@ -90,48 +90,52 @@ Funktionen werden über Plugins und Presets zusammengestellt; der [Schnellstart]
 
 Die folgenden Demos zeigen den größeren Funktionsumfang von **Univer Office SDK**, einschließlich kommerzieller Funktionen. Sie gehen über die standardmäßige Open-Source-Konfiguration hinaus; den jeweiligen Umfang erläutert der Abschnitt [Open Source und kommerzielle Erweiterungen](#open-source-and-commercial-extensions).
 
-<p><a href="https://univer.ai/demo/spreadsheets"><img src="../../docs/img/readme/sheets.webp" alt="Sheets" width="960" /></a><br /><strong>Sheets · Demo des vollständigen SDK</strong></p>
-
-<p><a href="https://univer.ai/demo/docs"><img src="../../docs/img/readme/docs.webp" alt="Docs" width="960" /></a><br /><strong>Docs · Demo des vollständigen SDK</strong></p>
-
-<p><strong>Weitere Demos: Web Apps, kombinierte Inhalte, Slides, Relational Tables, Canvases und PDF</strong></p>
-
 <table>
   <tr>
     <td width="50%" valign="top">
+      <a href="https://univer.ai/demo/spreadsheets"><img src="../../docs/img/readme/sheets.webp" alt="Sheets" width="420" /></a>
+      <p><strong>Sheets</strong><br /><a href="https://univer.ai/demo/spreadsheets">Demo öffnen ↗</a></p>
+    </td>
+    <td width="50%" valign="top">
+      <a href="https://univer.ai/demo/docs"><img src="../../docs/img/readme/docs.webp" alt="Docs" width="420" /></a>
+      <p><strong>Docs</strong><br /><a href="https://univer.ai/demo/docs">Demo öffnen ↗</a></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
       <a href="https://univer.ai/demo/web-app"><img src="../../docs/img/readme/web-app.webp" alt="Web App · Tabellenbasierte Anwendungen" width="420" /></a>
-      <br /><strong>Web App · Tabellenbasierte Anwendungen</strong>
+      <p><strong>Web App · Tabellenbasierte Anwendungen</strong><br /><a href="https://univer.ai/demo/web-app">Demo öffnen ↗</a></p>
     </td>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/universe"><img src="../../docs/img/readme/universe.webp" alt="Univer · Kombinierte Office-Inhalte" width="420" /></a>
-      <br /><strong>Kombinierte Office-Inhalte</strong>
+      <p><strong>Kombinierte Office-Inhalte</strong><br /><a href="https://univer.ai/demo/universe">Demo öffnen ↗</a></p>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/slides"><img src="../../docs/img/readme/slides.webp" alt="Slides" width="420" /></a>
-      <br /><strong>Slides</strong>
+      <p><strong>Slides</strong><br /><a href="https://univer.ai/demo/slides">Demo öffnen ↗</a></p>
     </td>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/relational-tables"><img src="../../docs/img/readme/relational-tables.webp" alt="Relational Tables" width="420" /></a>
-      <br /><strong>Relational Tables</strong>
+      <p><strong>Relational Tables</strong><br /><a href="https://univer.ai/demo/relational-tables">Demo öffnen ↗</a></p>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/canvases"><img src="../../docs/img/readme/canvases.webp" alt="Canvases" width="420" /></a>
-      <br /><strong>Canvases</strong>
+      <p><strong>Canvases</strong><br /><a href="https://univer.ai/demo/canvases">Demo öffnen ↗</a></p>
     </td>
     <td width="50%" valign="top">
       <a href="https://univer.ai/demo/pdf"><img src="../../docs/img/readme/pdf.webp" alt="PDF" width="420" /></a>
-      <br /><strong>PDF</strong>
+      <p><strong>PDF</strong><br /><a href="https://univer.ai/demo/pdf">Demo öffnen ↗</a></p>
     </td>
   </tr>
 </table>
 
 <a id="what-you-can-build"></a>
 
-## Auf der Open-Source-Grundlage aufbauen
+## 🚀 Auf der Open-Source-Grundlage aufbauen
 
 | Ihr Ziel | Die Open-Source-Grundlage nutzen | Einstieg |
 | --- | --- | --- |
@@ -339,7 +343,7 @@ Die Docs-Plugins unterstützen die Rich-Text-Bearbeitung in Tabellenkalkulatione
 
 <a id="open-source-architecture"></a>
 
-## Die Open-Source-Architektur erkunden
+## 🏗️ Die Open-Source-Architektur erkunden
 
 <img src="../../docs/img/readme/architecture-banner.png" alt="" width="960" />
 
@@ -528,7 +532,7 @@ Das Repository liefert funktionierende Implementierungen und Muster für deren E
 
 <a id="open-source-and-commercial-extensions"></a>
 
-## Ihre Anwendung mit Univer Office SDK erweitern
+## 🧩 Ihre Anwendung mit Univer Office SDK erweitern
 
 <img src="../../docs/img/readme/sdk-banner.png" alt="" width="960" />
 
@@ -577,7 +581,7 @@ Bei wiederholten Aufrufen verwenden optionale [Worker-Pools und ein Daemon](http
 
 <a id="application-patterns-and-ecosystem"></a>
 
-## Anwendungsmuster und Ökosystem
+## 🌐 Anwendungsmuster und Ökosystem
 
 <img src="../../docs/img/readme/ecosystem-banner.png" alt="" width="960" />
 
@@ -634,7 +638,7 @@ Jedes Repository dokumentiert seine Einrichtung und SDK-Abhängigkeiten. Einstie
 
 <a id="documentation-and-contributing"></a>
 
-## Dokumentation und Beiträge
+## 📚 Dokumentation und Beiträge
 
 Vielen Dank an alle [Mitwirkenden](https://github.com/dream-num/univer/graphs/contributors), die Univer entwickeln und verbessern. Beiträge zu Engines, Plugins, Tests, Dokumentation und Beispielen sind willkommen.
 
@@ -710,19 +714,19 @@ Lesen Sie [CONTRIBUTING.md](../../CONTRIBUTING.md), bevor Sie einen Pull Request
 
 <a id="community"></a>
 
-## Community
+## 💬 Community
 
 Stellen Sie Fragen in [GitHub Discussions](https://github.com/dream-num/univer/discussions), treten Sie [Discord](https://discord.gg/z3NKNT6D2f) bei und folgen Sie uns auf [X](https://twitter.com/univerhq) oder [YouTube](https://www.youtube.com/@dreamNum). Bitte lesen Sie den [Verhaltenskodex](../../CODE_OF_CONDUCT.md).
 
 <a id="security"></a>
 
-## Sicherheit
+## 🔒 Sicherheit
 
 Wenn Sie glauben, ein Sicherheitsproblem gefunden zu haben, folgen Sie bitte der [Sicherheitsrichtlinie](../../SECURITY.md).
 
 <a id="sponsors"></a>
 
-## Sponsoren
+## ❤️ Sponsoren
 
 Univer wird von der Community und Sponsoren unterstützt. Sie können das Projekt über [Open Collective](https://opencollective.com/univer) fördern.
 
@@ -742,7 +746,7 @@ Univer wird von der Community und Sponsoren unterstützt. Sie können das Projek
 
 <a id="license"></a>
 
-## Lizenz
+## 📄 Lizenz
 
 Copyright (c) 2021-present DreamNum Co., Ltd.
 

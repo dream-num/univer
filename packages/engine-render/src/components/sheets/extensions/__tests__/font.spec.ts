@@ -141,7 +141,13 @@ describe('font extension', () => {
         ['partially hidden merged rows', true, true, true, 1, true],
         ['partially zero-width merged columns', false, true, false, 1, true],
         ['partially zero-height merged rows', true, true, false, 1, true],
-    ])('renders only visible text for %s', (_name, rows, merged, hidden, start = 1, partiallyVisible = false) => {
+        ['zero-width merged columns with gaps', false, true, false, 0, false, true],
+        ['zero-height merged rows with gaps', true, true, false, 0, false, true],
+        ['hidden merged columns with gaps', false, true, true, 0, false, true],
+        ['hidden merged rows with gaps', true, true, true, 0, false, true],
+        ['partially zero-width merged columns with gaps', false, true, false, 0, true, true],
+        ['partially zero-height merged rows with gaps', true, true, false, 0, true, true],
+    ])('renders only visible text for %s', (_name, rows, merged, hidden, start = 1, partiallyVisible = false, withGaps = false) => {
         const environment = setupRenderTestEnv();
         const univer = new Univer({ locale: LocaleType.EN_US });
         const dimension = hidden ? { hd: BooleanNumber.TRUE } : rows ? { h: 0 } : { w: 0 };
@@ -169,6 +175,12 @@ describe('font extension', () => {
         const context = document.createElement('canvas').getContext('2d')!;
         const fillText = vi.spyOn(context, 'fillText');
         try {
+            if (withGaps) {
+                skeleton.setGapConfig({
+                    rowGaps: { [start + 1]: { size: 8 } },
+                    colGaps: { [start + 1]: { size: 8 } },
+                });
+            }
             skeleton.calculate();
             for (const index of [start, 3]) {
                 const cell = worksheet.getCellRaw(index, index)!;

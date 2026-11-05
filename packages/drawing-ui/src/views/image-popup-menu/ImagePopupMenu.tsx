@@ -17,7 +17,6 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IValueOption } from '@univerjs/ui';
 import type { ReactNode } from 'react';
-import type { LocaleKey } from '../../locale/types';
 import {
     BooleanNumber,
     ICommandService,
@@ -35,6 +34,7 @@ import {
 } from '@univerjs/icons';
 import { IconManager, useDependency } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 
 export interface IImagePopupMenuItem {
     label: string;
@@ -52,6 +52,7 @@ export interface IImagePopupMenuItem {
 
 export interface IImagePopupMenuExtraProps {
     menuItems: IImagePopupMenuItem[];
+    icon?: string;
     variant?: 'doc-floating-toolbar' | 'doc-chart-floating-toolbar';
     unitId?: string;
     subUnitId?: string;
@@ -70,10 +71,13 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
     const menuItems = popup?.extraProps?.menuItems;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
+    const iconManager = useDependency(IconManager);
     const [visible, setVisible] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
 
-    if (!menuItems) return null;
+    if (!menuItems) {
+        return null;
+    }
 
     if (
         popup.extraProps?.variant === 'doc-floating-toolbar' &&
@@ -113,6 +117,7 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
     };
 
     const showMore = visible || isHovered;
+    const Icon = popup.extraProps?.icon ? iconManager.get(popup.extraProps.icon) : AutofillDoubleIcon;
 
     return (
         <div
@@ -140,7 +145,7 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
                         'univer-bg-gray-0 dark:!univer-bg-gray-900': !visible,
                     })}
                 >
-                    <AutofillDoubleIcon
+                    <Icon
                         className={`
                           univer-fill-primary-600 univer-text-gray-900
                           dark:!univer-text-gray-0

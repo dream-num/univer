@@ -36,7 +36,7 @@ import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { DrawingPopupMenuController } from '../drawing-popup-menu.controller';
 
-function createControllerHarness(initialDrawingType: DrawingTypeEnum) {
+function createControllerHarness(initialDrawingType: DrawingTypeEnum, icon?: string) {
     const injector = new Injector();
     injector.add([IPermissionService, { useValue: { getPermissionPoint: () => undefined } as never }]);
     injector.add([OleUIService, { useValue: { registerHost: () => toDisposable(() => undefined) } as never }]);
@@ -78,10 +78,12 @@ function createControllerHarness(initialDrawingType: DrawingTypeEnum) {
             }),
         } as never,
     }]);
+    const getFeatureMenuIcon = vi.fn(() => icon);
     injector.add([SheetCanvasPopManagerService, {
         useValue: {
             attachPopupToObject,
             getFeatureMenu: () => undefined,
+            getFeatureMenuIcon,
         } as never,
     }]);
     injector.add([IRenderManagerService, {
@@ -131,6 +133,7 @@ function createControllerHarness(initialDrawingType: DrawingTypeEnum) {
         createControl$,
         drawingObject,
         getAttachedPopup: () => attachedPopup,
+        getFeatureMenuIcon,
         injector,
         popupDisposable,
         setDrawingType: (nextDrawingType: DrawingTypeEnum) => {
@@ -141,11 +144,12 @@ function createControllerHarness(initialDrawingType: DrawingTypeEnum) {
 
 describe('DrawingPopupMenuController', () => {
     it.each([
-        { drawingType: DrawingTypeEnum.DRAWING_IMAGE, label: 'image', icon: undefined },
+        { drawingType: DrawingTypeEnum.DRAWING_IMAGE, label: 'image', icon: 'AddImageIcon' },
         { drawingType: DrawingTypeEnum.DRAWING_DOM, label: 'Float DOM', icon: undefined },
-        { drawingType: DrawingTypeEnum.DRAWING_CHART, label: 'chart', icon: 'ChartIcon' },
+        { drawingType: DrawingTypeEnum.DRAWING_CHART, label: 'chart', icon: 'CustomChartIcon' },
+        { drawingType: DrawingTypeEnum.DRAWING_CHART, label: 'chart without an icon', icon: undefined },
     ])('passes the $label popup icon and constrains its placement in RTL', ({ drawingType, icon }) => {
-        const { attachPopupToObject, createControl$, drawingObject, getAttachedPopup, injector } = createControllerHarness(drawingType);
+        const { attachPopupToObject, createControl$, drawingObject, getAttachedPopup, getFeatureMenuIcon, injector } = createControllerHarness(drawingType, icon);
         const locale = injector.get(LocaleService);
         locale.load({ [LocaleType.EN_US]: {} });
         locale.setLocale(LocaleType.EN_US);
@@ -153,6 +157,7 @@ describe('DrawingPopupMenuController', () => {
         const controller = injector.get(DrawingPopupMenuController);
         createControl$.next();
 
+        expect(getFeatureMenuIcon).toHaveBeenCalledWith(drawingType);
         expect(attachPopupToObject).toHaveBeenCalledWith(
             drawingObject,
             expect.objectContaining({

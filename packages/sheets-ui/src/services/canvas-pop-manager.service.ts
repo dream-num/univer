@@ -25,7 +25,15 @@ import type {
     Workbook,
     Worksheet,
 } from '@univerjs/core';
-import type { BaseObject, IBoundRectNoAngle, IRender, IShapeProps, Shape, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
+import type {
+    BaseObject,
+    IBoundRectNoAngle,
+    IRender,
+    IShapeProps,
+    Shape,
+    SpreadsheetSkeleton,
+    Viewport,
+} from '@univerjs/engine-render';
 import type { ISetWorksheetRowAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
@@ -73,9 +81,9 @@ interface IPopupMenuItem {
 type getPopupMenuItemCallback = (unitId: string, subUnitId: string, drawingId: string, drawingType: DrawingTypeEnum) => IPopupMenuItem[];
 
 export class SheetCanvasPopManagerService extends Disposable {
-    // the DrawingTypeEnum should refer from drawing package, here we just use type, so no need to import the drawing package
     private _popupMenuFeatureMap = new Map<DrawingTypeEnum, getPopupMenuItemCallback>();
     private _popupMenuTitleMap = new Map<DrawingTypeEnum, string>();
+    private _popupMenuIconMap = new Map<DrawingTypeEnum, string | undefined>();
     private _popupMenuOffsetMap = new Map<DrawingTypeEnum, { offsetX: number; offsetY: number }>();
     private readonly _popupDisposables = new Set<IDisposable>();
 
@@ -122,8 +130,14 @@ export class SheetCanvasPopManagerService extends Disposable {
     /**
      * Register a feature menu callback for a specific drawing type.such as image, chart, etc.
      */
-    registerFeatureMenu(type: DrawingTypeEnum, getPopupMenuCallBack: getPopupMenuItemCallback, title?: string) {
+    registerFeatureMenu(
+        type: DrawingTypeEnum,
+        getPopupMenuCallBack: getPopupMenuItemCallback,
+        title?: string,
+        icon?: string
+    ) {
         this._popupMenuFeatureMap.set(type, getPopupMenuCallBack);
+        this._popupMenuIconMap.set(type, icon);
         if (title) {
             this._popupMenuTitleMap.set(type, title);
         }
@@ -158,12 +172,17 @@ export class SheetCanvasPopManagerService extends Disposable {
         return this._popupMenuTitleMap.get(drawingType);
     }
 
+    getFeatureMenuIcon(drawingType: DrawingTypeEnum): Nullable<string> {
+        return this._popupMenuIconMap.get(drawingType);
+    }
+
     override dispose(): void {
         Array.from(this._popupDisposables).forEach((disposable) => disposable.dispose());
         this._popupDisposables.clear();
         super.dispose();
         this._popupMenuFeatureMap.clear();
         this._popupMenuTitleMap.clear();
+        this._popupMenuIconMap.clear();
         this._popupMenuOffsetMap.clear();
     }
 
@@ -182,7 +201,6 @@ export class SheetCanvasPopManagerService extends Disposable {
 
             // We should take the scale into account when canvas is scaled by CSS.
             const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
-            // const { top, left, width } = canvasClientRect; // real width affected by scale
             const scaleAdjust = canvasClientRect.width / widthOfCanvas;
             const canvasScale = currentRender.scene.getAncestorScale().scaleX;
 
@@ -264,7 +282,6 @@ export class SheetCanvasPopManagerService extends Disposable {
 
             // We should take the scale into account when canvas is scaled by CSS.
             const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
-            // const { top, left, width } = canvasClientRect; // real width affected by scale
             const scaleAdjust = canvasClientRect.width / widthOfCanvas;
             const position = {
                 left: (offsetBound.left * scaleAdjust) + canvasClientRect.left,
@@ -902,7 +919,6 @@ export class SheetCanvasPopManagerService extends Disposable {
 
             updatePosition();
         };
-        // const position$ = combineLatest(topLeftPos$, rightBottomPos$);
         const position$ = topLeftPos$.pipe(
             map((topLeft) => {
                 const rightBottomCoord = this._calcCellPositionByCell(endRow, endColumn, currentRender, skeleton, activeViewport);

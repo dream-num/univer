@@ -26,7 +26,36 @@ describe('Scene', () => {
     const env = setupRenderTestEnv();
     afterEach(() => env.restore());
 
-    it('clears the whole canvas when a before-render layout change invalidates a preserved scroll frame', () => {
+    it('preserves backgrounds painted by beforeRender subscribers after clearing the canvas', () => {
+        const engine = new Engine('background', { elementWidth: 300, elementHeight: 200, dpr: 1 });
+        const scene = new Scene('background', engine);
+        const viewport = new Viewport('main', scene, { left: 0, top: 0, width: 300, height: 200 });
+        scene.addObject(new Rect('object', { left: 100, top: 100, width: 20, height: 20 }));
+        const context = engine.getCanvas().getContext();
+        const clear = vi.spyOn(context, 'clearRect');
+        const fill = vi.spyOn(context, 'fillRect');
+        const subscription = scene.beforeRender$.subscribe((canvas) => {
+            if (canvas) {
+                context.fillStyle = '#ffffff';
+                context.fillRect(0, 0, 300, 200);
+            }
+        });
+        try {
+            scene.render();
+            expect(clear).toHaveBeenCalledWith(0, 0, 300, 200);
+            expect(fill).toHaveBeenCalledWith(0, 0, 300, 200);
+            expect(clear.mock.invocationCallOrder[0]).toBeLessThan(fill.mock.invocationCallOrder[0]);
+        } finally {
+            subscription.unsubscribe();
+            clear.mockRestore();
+            fill.mockRestore();
+            viewport.dispose();
+            scene.dispose();
+            engine.dispose();
+        }
+    });
+
+    it('clears the whole canvas when a prepare-render layout change invalidates a preserved scroll frame', () => {
         const engine = new Engine('scene', { elementWidth: 500, elementHeight: 400, dpr: 1 });
         const scene = new Scene('scene', engine, { width: 1000, height: 1000 });
         const viewport = new Viewport('main', scene, { left: 0, top: 0, width: 500, height: 400, allowCache: true });
@@ -35,7 +64,7 @@ describe('Scene', () => {
         scene.addObject(rect);
         scene.render();
         let relayout = false;
-        const subscription = scene.beforeRender$.subscribe(() => {
+        const subscription = scene.prepareRender$.subscribe(() => {
             if (relayout) {
                 rect.translate(150, 100);
                 scene.makeDirty();

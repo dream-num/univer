@@ -296,7 +296,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     ) {
         super();
         this._initialProps(config);
-        this.disposeWithMe(this._scene.beforeRender$.subscribe(() => this._updateRotationControls()));
+        this.disposeWithMe(this._scene.prepareRender$.subscribe(() => this._updateRotationControls()));
     }
 
     /** Hit-test the actual displayed handles using canvas coordinates, including viewport edge avoidance. */

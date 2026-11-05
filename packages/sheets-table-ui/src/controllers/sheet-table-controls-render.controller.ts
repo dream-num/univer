@@ -22,9 +22,6 @@ import type {
     IRenderModule,
     SpreadsheetSkeleton,
 } from '@univerjs/engine-render';
-import type { LocaleKey } from '../locale/types';
-import type { SheetTableMenuAction } from '../views/components/SheetTableMenu';
-import type { ITableControlHitRegion } from '../views/widgets/table-controls-util';
 import {
     CommandType,
     Disposable,
@@ -37,7 +34,7 @@ import {
     LocaleService,
     toDisposable,
 } from '@univerjs/core';
-import { CURSOR_TYPE, Vector2 } from '@univerjs/engine-render';
+import { CURSOR_TYPE, DRAWING_OBJECT_LOWER_LAYER_INDEX, Vector2 } from '@univerjs/engine-render';
 import {
     SelectRangeCommand,
     SheetRangeThemeModel,
@@ -66,6 +63,9 @@ import {
 } from '@univerjs/sheets-ui';
 import { IDialogService, ISidebarService } from '@univerjs/ui';
 import { filter, merge } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
+import type { SheetTableMenuAction } from '../views/components/SheetTableMenu';
+import type { ITableControlHitRegion } from '../views/widgets/table-controls-util';
 import { openRangeSelector } from '../commands/operations/open-table-selector.operation';
 import {
     SHEET_TABLE_MENU,
@@ -80,7 +80,6 @@ import { TABLE_CONTROL_INSERT_BUTTON_SIZE, TABLE_CONTROL_TOP_GAP_SIZE } from '..
 import { SheetTableControlsShape } from '../views/widgets/table-controls.shape';
 import { SheetTableThemeUIController } from './sheet-table-theme-ui.controller';
 
-const TABLE_CONTROLS_LAYER_INDEX = 5002;
 const TABLE_CONTROL_GAP_ROW = 0;
 const TABLE_RENDER_REFRESH_COMMANDS = new Set([
     SetScrollOperation.id,
@@ -139,7 +138,7 @@ export class SheetTableControlsRenderController extends Disposable implements IR
     }
 
     private _initShape(): void {
-        this._context.scene.addObjects([this._shape], TABLE_CONTROLS_LAYER_INDEX);
+        this._context.scene.addObjects([this._shape], DRAWING_OBJECT_LOWER_LAYER_INDEX);
         this.disposeWithMe(toDisposable(() => {
             this._closeFloatingControls();
             this._settingsDialog?.dispose();

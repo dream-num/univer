@@ -70,10 +70,13 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
     const menuItems = popup?.extraProps?.menuItems;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
+    const iconManager = useDependency(IconManager);
     const [visible, setVisible] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
 
-    if (!menuItems) return null;
+    if (!menuItems) {
+        return null;
+    }
 
     if (
         popup.extraProps?.variant === 'doc-floating-toolbar' &&
@@ -121,12 +124,21 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
         >
             <DropdownMenu
                 align="start"
-                items={menuItems.map((item) => ({
-                    type: 'item',
-                    children: localeService.t(item.label as LocaleKey),
-                    disabled: item.disable,
-                    onSelect: () => handleClick(item),
-                }))}
+                items={menuItems.map((item) => {
+                    const { icon } = item;
+                    const Icon = icon && iconManager.has(icon) ? iconManager.get(icon) : null;
+                    return {
+                        type: 'item',
+                        children: (
+                            <>
+                                {Icon && <Icon className="univer-size-4" />}
+                                {localeService.t(item.label as LocaleKey)}
+                            </>
+                        ),
+                        disabled: item.disable,
+                        onSelect: () => handleClick(item),
+                    };
+                })}
                 open={visible}
                 onOpenChange={onVisibleChange}
             >
@@ -449,7 +461,8 @@ function DocChartFloatingToolbar(props: Pick<IDocImageFloatingToolbarProps, 'men
         .filter((item) => item.type !== 'select' && item.icon)
         .sort((a, b) => a.index - b.index);
     const chartTypeOptions = (chartTypeItem?.options ?? []).map((option) => {
-        const Icon = option.icon ? iconManager.get(option.icon) : ChartIcon;
+        const { icon } = option;
+        const Icon = icon ? iconManager.get(icon) : ChartIcon;
 
         return {
             label: String(option.label),

@@ -60,6 +60,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
+    SheetTypes,
     toDisposable,
     Tools,
     UniverInstanceType,
@@ -83,7 +84,12 @@ import {
     VIEWPORT_KEY,
 } from '@univerjs/docs-ui';
 import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
-import { convertTextRotation, DeviceInputEventType, IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
+import {
+    convertTextRotation,
+    DeviceInputEventType,
+    IRenderManagerService,
+    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+} from '@univerjs/engine-render';
 import {
     adjustRangeOnMutation,
     COMMAND_LISTENER_SKELETON_CHANGE,
@@ -748,7 +754,11 @@ export class EditingRenderController extends Disposable {
         }
 
         const workbook = this._univerInstanceService.getUnit<Workbook>(currentUnitId, UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) {
+        const editWorksheet = workbook?.getSheetBySheetId(editCellState.sheetId);
+        // A stale edit must not restore its former sheet or submit into a non-Grid sheet.
+        if (!workbook || !editWorksheet || (editWorksheet.getConfig().type ?? SheetTypes.GRID) !== SheetTypes.GRID) {
+            this._editorBridgeService.disableForceKeepVisible();
+            this._editorBridgeService.refreshEditCellState();
             return;
         }
         const worksheet = workbook.getActiveSheet();

@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-import type { Workbook, Worksheet } from '@univerjs/core';
+import type { Worksheet } from '@univerjs/core';
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
 import type { ChangeEvent, KeyboardEvent } from 'react';
-import type { IScrollToCellCommandParams } from '../../commands/commands/set-scroll.command';
 import {
     debounce,
     generateRandomId,
     ICommandService,
     IUniverInstanceService,
+    SheetTypes,
     ThemeService,
-    UniverInstanceType,
 } from '@univerjs/core';
 import { borderRightClassName, clsx, Dropdown } from '@univerjs/design';
 import {
@@ -46,8 +45,9 @@ import {
     WorkbookEditablePermission,
 } from '@univerjs/sheets';
 import { ILayoutService, useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { map, startWith } from 'rxjs';
+import type { IScrollToCellCommandParams } from '../../commands/commands/set-scroll.command';
 import { ScrollToCellCommand } from '../../commands/commands/set-scroll.command';
 import { genNormalSelectionStyle } from '../../services/selection/const';
 import {
@@ -55,6 +55,7 @@ import {
     getAbsoluteRefStringFromSelection,
     resolveDefinedNameBoxAction,
 } from '../../services/utils/defined-name-utils';
+import { useActiveWorkbook, useActiveWorksheet } from '../hook';
 import { DefinedNameOverlay } from './DefinedNameOverlay';
 
 export function DefinedName({ disable }: { disable: boolean }) {
@@ -70,7 +71,10 @@ export function DefinedName({ disable }: { disable: boolean }) {
     const layoutService = useDependency(ILayoutService);
     const sheetPermissionCheckController = useDependency(SheetPermissionCheckController);
 
-    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    const workbook = useActiveWorkbook()!;
+    const worksheet = useActiveWorksheet(workbook);
+    const isGridSheet = !!worksheet && (worksheet.getConfig().type ?? SheetTypes.GRID) === SheetTypes.GRID;
+    const disabled = disable || !isGridSheet;
     const unitId = workbook?.getUnitId();
     const themeService = useDependency(ThemeService);
 
@@ -154,7 +158,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
         };
     }, [definedNamesService, lexerTreeBuilder, selectionManagerService, unitId, workbook]);
 
-    const handleDefinedNamesList = debounce((value: string) => {
+    const handleDefinedNamesList = useMemo(() => debounce((value: string) => {
         const hasMatch = definedNames.find((i) => i.name.toLowerCase().includes(value.toLowerCase()));
 
         if (hasMatch && !open) {
@@ -162,9 +166,19 @@ export function DefinedName({ disable }: { disable: boolean }) {
         } else if (!hasMatch && open) {
             setOpen(false);
         }
-    }, 100);
+    }, 100), [definedNames, open]);
+
+    useEffect(() => () => handleDefinedNamesList.cancel(), [handleDefinedNamesList, isGridSheet]);
+
+    useEffect(() => {
+        const subscription = workbook?.activeSheet$.subscribe(() => setOpen(false));
+        return () => subscription?.unsubscribe();
+    }, [workbook]);
 
     function handleChangeSelection(e: ChangeEvent<HTMLInputElement>) {
+        if (disabled) {
+            return;
+        }
         const value = e.target.value.trim();
         setInputValue(value);
         setIsInputEvent(true);
@@ -180,6 +194,9 @@ export function DefinedName({ disable }: { disable: boolean }) {
     }
 
     function confirm() {
+        if (disabled) {
+            return false;
+        }
         const formulaOrRefString = getAbsoluteRefStringFromSelection(workbook, selectionManagerService.getCurrentSelections(), lexerTreeBuilder);
         const action = resolveDefinedNameBoxAction({
             inputValue,
@@ -243,7 +260,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
     }
 
     function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
-        if (disable) {
+        if (disabled) {
             return;
         }
 
@@ -296,7 +313,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
             ref={nameBoxRef}
             data-u-comp="defined-name"
             onMouseDown={(e) => {
-                if (disable) {
+                if (disabled) {
                     e.preventDefault();
                 }
             }}
@@ -313,11 +330,11 @@ export function DefinedName({ disable }: { disable: boolean }) {
                   focus:univer-outline-none
                   dark:!univer-border-r-gray-700 dark:!univer-text-gray-0
                 `, borderRightClassName, {
-                    'univer-cursor-not-allowed': disable,
+                    'univer-cursor-not-allowed': disabled,
                 })}
                 type="text"
-                disabled={disable}
-                value={inputValue}
+                disabled={disabled}
+                value={isGridSheet ? inputValue : ''}
                 onChange={handleChangeSelection}
                 onKeyDown={handleKeyDown}
                 onBlur={() => setIsInputEvent(false)}
@@ -335,8 +352,8 @@ export function DefinedName({ disable }: { disable: boolean }) {
                         />
                     </div>
                 )}
-                disabled={disable}
-                open={!disable && open}
+                disabled={disabled}
+                open={!disabled && open}
                 onOpenChange={setOpen}
                 onOpenAutoFocus={(e) => e.preventDefault()}
             >
@@ -348,7 +365,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
                       dark:!univer-text-gray-0
                       dark:hover:!univer-bg-gray-800
                     `, {
-                        'univer-cursor-not-allowed univer-text-gray-300 hover:univer-bg-transparent dark:!univer-text-gray-700': disable,
+                        'univer-cursor-not-allowed univer-text-gray-300 hover:univer-bg-transparent dark:!univer-text-gray-700': disabled,
                     })}
                 >
                     <MoreDownIcon />

@@ -19,11 +19,23 @@
  */
 
 import type { ComponentType, ReactElement } from 'react';
-import type { IFloatDom, IFloatDomLayout } from '../../../../services/dom/canvas-dom-layer.service';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { Injector, IUniverInstanceService } from '@univerjs/core';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+    ContextService,
+    DesktopLogService,
+    IContextService,
+    ILogService,
+    Injector,
+    IUniverInstanceService,
+    ThemeService,
+    UniverInstanceService,
+    Workbook,
+} from '@univerjs/core';
+import { CanvasColorService, ICanvasColorService } from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { IFloatDom, IFloatDomLayout } from '../../../../services/dom/canvas-dom-layer.service';
+import { ComponentManager } from '../../../../common/component-manager';
 import { CanvasFloatDomService } from '../../../../services/dom/canvas-dom-layer.service';
 import { connectInjector } from '../../../../utils/di';
 import { FloatDom, FloatDomSingle, resolveFloatDomCurrentUnitId, resolveFloatDomOverflow } from '../FloatDom';
@@ -32,15 +44,24 @@ function TestFloatDomContent(_props: { hostFloatDomLayout$?: IFloatDom['position
     return <div>float content</div>;
 }
 
-function renderWithDependencies(element: ReactElement, focusedUnit: unknown = null) {
+const testInjectors: Injector[] = [];
+
+function renderWithDependencies(element: ReactElement, focusedUnitId: string | null = null) {
     const injector = new Injector();
+    testInjectors.push(injector);
     injector.add([CanvasFloatDomService]);
-    injector.add([IUniverInstanceService, {
-        useValue: {
-            focused$: new BehaviorSubject(focusedUnit) as never,
-            getUnit: () => undefined,
-        } as never,
-    }]);
+    injector.add([ComponentManager]);
+    injector.add([ThemeService]);
+    injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+    injector.add([IContextService, { useClass: ContextService }]);
+    injector.add([ILogService, { useClass: DesktopLogService }]);
+    injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
+    if (focusedUnitId) {
+        const workbook = injector.createInstance(Workbook, { id: focusedUnitId });
+        const instances = injector.get(IUniverInstanceService);
+        instances.__addUnit(workbook);
+        instances.focusUnit(workbook.getUnitId());
+    }
 
     const ConnectedTestRoot = connectInjector(() => element, injector) as ComponentType;
     const result = render(<ConnectedTestRoot />);
@@ -73,6 +94,16 @@ function createFloatDom(): IFloatDom {
     };
 }
 
+afterEach(() => {
+    cleanup();
+    for (const injector of testInjectors) {
+        injector.dispose();
+    }
+    testInjectors.length = 0;
+    vi.restoreAllMocks();
+    document.body.innerHTML = '';
+});
+
 describe('resolveFloatDomOverflow', () => {
     it('keeps regular float dom layers clipped', () => {
         expect(resolveFloatDomOverflow({})).toEqual({
@@ -103,8 +134,100 @@ describe('resolveFloatDomCurrentUnitId', () => {
 });
 
 describe('FloatDomSingle', () => {
-    afterEach(() => {
-        document.body.innerHTML = '';
+    it('lets a canvas-owned empty host cancel native pinch zoom and releases wheel forwarding on unmount', async () => {
+        const forwarded: WheelEvent[] = [];
+        const layer: IFloatDom = {
+            ...createFloatDom(),
+            componentKey: 'empty-chart-host',
+            eventOptions: { wheel: { passive: false } },
+            onWheel: (event) => {
+                forwarded.push(event);
+                event.preventDefault();
+            },
+        };
+        const { unmount } = renderWithDependencies(<FloatDomSingle id="dom-1" layer={layer} />);
+        const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
+        const wrapper = inner.parentElement!;
+        const pinch = new WheelEvent('wheel', { ctrlKey: true, deltaY: 1.25, bubbles: true, cancelable: true });
+
+        fireEvent(inner, pinch);
+
+        expect(pinch.defaultPrevented).toBe(true);
+        expect(forwarded).toEqual([pinch]);
+        unmount();
+        const afterUnmount = new WheelEvent('wheel', { ctrlKey: true, deltaY: 1.25, bubbles: true, cancelable: true });
+        fireEvent(wrapper, afterUnmount);
+        expect(afterUnmount.defaultPrevented).toBe(false);
+        expect(forwarded).toHaveLength(1);
+    });
+
+    it('switches individual events between native and default forwarding without retaining listeners', async () => {
+        const layer = createFloatDom();
+        const onWheel = vi.fn((event: WheelEvent) => event.preventDefault());
+        const onPointerMove = vi.fn();
+        layer.onWheel = onWheel;
+        layer.onPointerMove = onPointerMove;
+        const { injector, unmount } = renderWithDependencies(<FloatDom unitId="doc-1" />);
+        const layers = injector.get(CanvasFloatDomService);
+        act(() => layers.addFloatDom(layer));
+        const inner = await waitFor(() => document.getElementById(layer.id) as HTMLDivElement);
+        const wheel = () => {
+            const event = new WheelEvent('wheel', { bubbles: true, cancelable: true });
+            fireEvent(inner, event);
+            return event;
+        };
+
+        wheel();
+        expect(onWheel).toHaveBeenCalledTimes(1);
+        act(() => layers.updateFloatDom(layer.id, {
+            eventOptions: { wheel: { passive: false }, pointermove: { capture: true } },
+        }));
+        expect(wheel().defaultPrevented).toBe(true);
+        expect(onWheel).toHaveBeenCalledTimes(2);
+        fireEvent.pointerMove(inner);
+        expect(onPointerMove).toHaveBeenCalledTimes(1);
+
+        act(() => layers.updateFloatDom(layer.id, { eventOptions: { wheel: { passive: true } } }));
+        expect(wheel().defaultPrevented).toBe(false);
+        expect(onWheel).toHaveBeenCalledTimes(3);
+        fireEvent.pointerMove(inner);
+        expect(onPointerMove).toHaveBeenCalledTimes(2);
+
+        act(() => layers.updateFloatDom(layer.id, { eventOptions: undefined }));
+        wheel();
+        expect(onWheel).toHaveBeenCalledTimes(4);
+        act(() => layers.updateFloatDom(layer.id, {
+            eventOptions: { wheel: { passive: false } },
+            eventPassThrough: false,
+        }));
+        expect(wheel().defaultPrevented).toBe(false);
+        expect(onWheel).toHaveBeenCalledTimes(4);
+        unmount();
+        wheel();
+        expect(onWheel).toHaveBeenCalledTimes(4);
+    });
+
+    it('preserves browser zoom when the host does not consume the wheel event', async () => {
+        renderWithDependencies(<FloatDomSingle id="dom-1" layer={createFloatDom()} />);
+        const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
+        const pinch = new WheelEvent('wheel', { ctrlKey: true, deltaY: 1.25, bubbles: true, cancelable: true });
+
+        fireEvent(inner, pinch);
+
+        expect(pinch.defaultPrevented).toBe(false);
+    });
+
+    it('leaves wheel ownership with interactive float DOM content', async () => {
+        const forwarded: WheelEvent[] = [];
+        const layer: IFloatDom = { ...createFloatDom(), eventPassThrough: false, onWheel: (event) => forwarded.push(event) };
+        renderWithDependencies(<FloatDomSingle id="dom-1" layer={layer} />);
+        const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
+        const pinch = new WheelEvent('wheel', { ctrlKey: true, deltaY: 1.25, bubbles: true, cancelable: true });
+
+        fireEvent(inner, pinch);
+
+        expect(pinch.defaultPrevented).toBe(false);
+        expect(forwarded).toEqual([]);
     });
 
     it('renders an existing BehaviorSubject position without waiting for a later movement event', async () => {
@@ -179,6 +302,80 @@ describe('FloatDomSingle', () => {
         fireEvent.pointerDown(inner);
         expect(onPointerDown).toHaveBeenCalledOnce();
     });
+
+    it('keeps the native descendant as capture owner when a forwarded canvas down requests capture', async () => {
+        const canvas = document.createElement('canvas');
+        let captureOwner: Element | undefined;
+        canvas.setPointerCapture = () => {
+            captureOwner = canvas;
+        };
+        canvas.addEventListener('pointerdown', () => canvas.setPointerCapture(7));
+        const layer = {
+            ...createFloatDom(),
+            onPointerDown: () => canvas.dispatchEvent(new Event('pointerdown')),
+        };
+        renderWithDependencies(<FloatDomSingle id="dom-1" layer={layer} />);
+
+        const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
+        inner.setPointerCapture = () => {
+            captureOwner = inner;
+        };
+
+        fireEvent.pointerDown(inner, { pointerId: 7 });
+
+        expect(captureOwner).toBe(inner);
+    });
+
+    it.each(['removed', 'replaced'] as const)(
+        'keeps the forwarded canvas capture when its native descendant is synchronously %s',
+        async (change) => {
+            const canvas = document.createElement('canvas');
+            const descendant = document.createElement('canvas');
+            const replacement = document.createElement('canvas');
+            document.body.appendChild(canvas);
+            let captureOwner: Element | undefined;
+            // jsdom does not implement the native pointer capture API.
+            canvas.setPointerCapture = () => {
+                captureOwner = canvas;
+            };
+            const captureDetachedDescendant = vi.fn(() => {
+                if (!descendant.isConnected) {
+                    throw new DOMException('Cannot capture a disconnected descendant', 'InvalidStateError');
+                }
+                captureOwner = descendant;
+            });
+            descendant.setPointerCapture = captureDetachedDescendant;
+            canvas.addEventListener('pointerdown', () => canvas.setPointerCapture(7));
+            const layer = {
+                ...createFloatDom(),
+                onPointerDown: (event: PointerEvent | MouseEvent) => {
+                    canvas.dispatchEvent(new Event(event.type));
+                    if (change === 'replaced') {
+                        descendant.replaceWith(replacement);
+                    } else {
+                        descendant.remove();
+                    }
+                },
+            };
+            renderWithDependencies(<FloatDomSingle id="dom-1" layer={layer} />);
+            const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
+            inner.appendChild(descendant);
+            const wrapper = inner.parentElement as HTMLDivElement;
+            const captureOnWrapper = vi.fn();
+            wrapper.setPointerCapture = captureOnWrapper;
+
+            fireEvent.pointerDown(descendant, { pointerId: 7 });
+
+            expect(descendant.isConnected).toBe(false);
+            expect(inner.isConnected).toBe(true);
+            if (change === 'replaced') {
+                expect(replacement.parentElement).toBe(inner);
+            }
+            expect(captureDetachedDescendant).not.toHaveBeenCalled();
+            expect(captureOnWrapper).not.toHaveBeenCalled();
+            expect(captureOwner).toBe(canvas);
+        }
+    );
 
     it('captures forwarded pointers on the original descendant and finishes cancelled canvas gestures', async () => {
         const onPointerDown = vi.fn();
@@ -266,14 +463,8 @@ describe('FloatDomSingle', () => {
 });
 
 describe('FloatDom', () => {
-    afterEach(() => {
-        document.body.innerHTML = '';
-    });
-
-    it('renders layers for the focused unit when focused$ emits a unit object', async () => {
-        const rendered = renderWithDependencies(<FloatDom />, {
-            getUnitId: () => 'doc-1',
-        });
+    it('renders layers for the real focused unit', async () => {
+        const rendered = renderWithDependencies(<FloatDom />, 'doc-1');
         rendered.injector.get(CanvasFloatDomService).addFloatDom(createFloatDom());
 
         await waitFor(() => expect(screen.getByText('float content')).not.toBeNull());
@@ -298,7 +489,7 @@ describe('FloatDom', () => {
                 <div data-testid="global-root"><FloatDom /></div>
                 <div data-testid="scoped-root"><FloatDom unitId="doc-1" /></div>
             </>,
-            { getUnitId: () => 'doc-1' }
+            'doc-1'
         );
 
         act(() => rendered.injector.get(CanvasFloatDomService).addFloatDom(createFloatDom()));

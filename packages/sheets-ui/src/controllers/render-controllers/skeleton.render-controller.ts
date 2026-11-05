@@ -17,7 +17,7 @@
 import type { Nullable, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { ISheetSkeletonManagerParam } from '@univerjs/sheets';
-import { Disposable, Inject } from '@univerjs/core';
+import { Disposable, Inject, SheetTypes } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 
@@ -53,7 +53,10 @@ export class SheetSkeletonRenderController extends Disposable implements IRender
             skeleton;
         const workbook = this._context.unit;
         const worksheet = workbook.getActiveSheet();
-        if (!worksheet) return;
+        if (!worksheet || worksheet.getConfig().type === SheetTypes.CHART ||
+            param.unitId !== unitId || param.sheetId !== worksheet.getSheetId()) {
+            return;
+        }
 
         scene?.transformByState({
             width: rowHeaderWidthAndMarginLeft + columnTotalWidth,

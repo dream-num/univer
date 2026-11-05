@@ -22,8 +22,6 @@ import type {
     ISetSelectionsOperationParams,
     WorkbookSelectionModel,
 } from '@univerjs/sheets';
-import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
-import type { SelectionControl } from './selection-control';
 import {
     ICommandService,
     IContextService,
@@ -33,6 +31,7 @@ import {
     RANGE_TYPE,
     Rectangle,
     set,
+    SheetTypes,
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
@@ -48,7 +47,8 @@ import {
 } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, merge, startWith } from 'rxjs';
-
+import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
+import type { SelectionControl } from './selection-control';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -90,8 +90,13 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             _contextService
         );
 
+        this._scene = this._context.scene;
         this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
         this._init();
+    }
+
+    private _getSheetType(): SheetTypes | undefined {
+        return this._context.unit.getActiveSheet()?.getConfig().type;
     }
 
     private _init(): void {
@@ -115,7 +120,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         const { scene } = this._context;
 
         this.disposeWithMe(spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
-            if (this.isSelectionDisabled() || this.inRefSelectionMode()) {
+            if (this._getSheetType() === SheetTypes.CHART || this.isSelectionDisabled() || this.inRefSelectionMode()) {
                 return;
             }
             this._onPointerDown(evt, spreadsheet.zIndex + 1, RANGE_TYPE.NORMAL, this._getActiveViewport(evt));
@@ -126,7 +131,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
         this.disposeWithMe(
             spreadsheetRowHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
-                if (this.isSelectionDisabled() || this.inRefSelectionMode()) {
+                if (this._getSheetType() === SheetTypes.CHART || this.isSelectionDisabled() || this.inRefSelectionMode()) {
                     return;
                 }
 
@@ -145,7 +150,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         );
 
         this.disposeWithMe(spreadsheetColumnHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
-            if (this.isSelectionDisabled() || this.inRefSelectionMode()) {
+            if (this._getSheetType() === SheetTypes.CHART || this.isSelectionDisabled() || this.inRefSelectionMode()) {
                 return;
             }
 
@@ -167,7 +172,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         }));
 
         this.disposeWithMe(spreadsheetLeftTopPlaceholder?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
-            if (this.isSelectionDisabled() || this.inRefSelectionMode()) {
+            if (this._getSheetType() === SheetTypes.CHART || this.isSelectionDisabled() || this.inRefSelectionMode()) {
                 return;
             }
 
@@ -295,6 +300,9 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
      * @param type
      */
     private _updateSelections(selectionDataWithStyleList: ISelectionWithCoord[], type: SelectionMoveType) {
+        if (this._getSheetType() === SheetTypes.CHART) {
+            return;
+        }
         const workbook = this._context.unit;
         const unitId = workbook.getUnitId();
         const sheetId = workbook.getActiveSheet().getSheetId();
@@ -319,9 +327,18 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         // changing sheet is not the only way cause currentSkeleton$ emit, a lot of cmds will emit currentSkeleton$
         // COMMAND_LISTENER_SKELETON_CHANGE ---> currentSkeleton$.next
         // 'sheet.mutation.set-worksheet-row-auto-height' is one of COMMAND_LISTENER_SKELETON_CHANGE
+        this.disposeWithMe(this._context.unit.activeSheet$.subscribe((worksheet) => {
+            if (worksheet?.getConfig().type === SheetTypes.CHART) {
+                this._clearRuntime();
+            }
+        }));
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
             if (param == null) {
-                this._logService.error('[SelectionRenderService]: should not receive null!');
+                this._clearRuntime();
+                return;
+            }
+            const worksheet = this._context.unit.getActiveSheet();
+            if (worksheet?.getConfig().type === SheetTypes.CHART || param.sheetId !== worksheet?.getSheetId()) {
                 return;
             }
 
@@ -361,6 +378,13 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
     private _getSheetObject() {
         return getSheetObject(this._context.unit, this._context)!;
+    }
+
+    override resetSelectionsByModelData(selections: readonly ISelectionWithStyle[]): void {
+        if (this._getSheetType() === SheetTypes.CHART) {
+            return;
+        }
+        super.resetSelectionsByModelData(selections);
     }
 
     /**

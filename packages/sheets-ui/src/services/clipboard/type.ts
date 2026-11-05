@@ -165,9 +165,10 @@ export interface ISheetClipboardHook {
      * Features could use this hook to build copying cache or any other pre-copy jobs.
      *
      * @param pasteTo
+     * @param payload Paste options and the internal copy ID, when available.
      * @returns if it block copying it should return false
      */
-    onBeforePaste?(pasteTo: ISheetDiscreteRangeLocation): boolean;
+    onBeforePaste?(pasteTo: ISheetDiscreteRangeLocation, payload?: ICopyPastePayload): boolean;
 
     /**
      * Handles pasting cells, it needs to return Undo Mutations & Redo Mutations that handle the cell contents

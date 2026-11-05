@@ -15,9 +15,10 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import type { ISheetDrawingPlacementInput } from '../../services/sheet-drawing-placement';
 import { CommandType, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
-import { SheetSkeletonService } from '@univerjs/sheets';
+import { IDrawingManagerService } from '@univerjs/drawing';
+import { SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
+import type { ISheetDrawingPlacementInput } from '../../services/sheet-drawing-placement';
 import { applySheetDrawingPlacement } from '../../services/sheet-drawing-placement';
 import { ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
@@ -40,8 +41,11 @@ export const SetSheetDrawingPlacementCommand: ICommand<ISetSheetDrawingPlacement
             return false;
         }
 
+        if (!accessor.get(IDrawingManagerService).canExecuteCommand({ id: SetSheetDrawingPlacementCommand.id, params })) {
+            return false;
+        }
+
         const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
         const drawingService = accessor.get(ISheetDrawingService);
         const skeleton = params.drawings.every(({ placement }) => placement.kind === SheetDrawingAnchorType.None)
             ? undefined
@@ -58,32 +62,33 @@ export const SetSheetDrawingPlacementCommand: ICommand<ISetSheetDrawingPlacement
             }
             updatedDrawings.push(applySheetDrawingPlacement(drawing, placement, skeleton));
         }
-        const drawingOp = drawingService.getBatchUpdateOp(updatedDrawings);
-        const { unitId, subUnitId, undo, redo, objects } = drawingOp;
+        const intercepted = accessor.get(SheetInterceptorService).onCommandExecute({
+            id: SetSheetDrawingPlacementCommand.id,
+            params,
+        });
+        const { unitId, subUnitId, undo, redo, objects } = drawingService.getBatchUpdateOp(updatedDrawings);
         const redoMutations = [
+            ...(intercepted.preRedos ?? []),
             {
                 id: SetDrawingApplyMutation.id,
                 params: { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.UPDATE },
             },
             { id: ClearSheetDrawingTransformerOperation.id, params: [unitId] },
+            ...intercepted.redos,
         ];
         const undoMutations = [
+            ...(intercepted.preUndos ?? []),
             {
                 id: SetDrawingApplyMutation.id,
                 params: { unitId, subUnitId, op: undo, objects, type: DrawingApplyType.UPDATE },
             },
             { id: ClearSheetDrawingTransformerOperation.id, params: [unitId] },
+            ...intercepted.undos,
         ];
-        const result = sequenceExecute(redoMutations, commandService);
-        if (!result.result) {
+        if (!sequenceExecute(redoMutations, commandService).result) {
             return false;
         }
-
-        undoRedoService.pushUndoRedo({
-            unitID: unitId,
-            undoMutations,
-            redoMutations,
-        });
+        accessor.get(IUndoRedoService).pushUndoRedo({ unitID: unitId, redoMutations, undoMutations });
         return true;
     },
 };

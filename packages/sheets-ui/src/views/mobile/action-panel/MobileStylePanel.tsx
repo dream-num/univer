@@ -882,7 +882,8 @@ function MobileInlineSelectorOption(props: {
     const localeService = useDependency(LocaleService);
     const observableValue = useObservable(option.value$);
     const value = option.value ?? observableValue;
-    const Icon = option.icon ? iconManager.get(option.icon) : null;
+    const { icon } = option;
+    const Icon = icon ? iconManager.get(icon) : null;
     const selected = value === selectedValue;
     const label = typeof option.label === 'string' ? localeService.t(option.label) : String(value ?? '');
 
@@ -1079,7 +1080,8 @@ function MobileStyleOptionsView(props: {
             "
         >
             {selections.map((option, index) => {
-                const Icon = option.icon ? iconManager.get(option.icon) : null;
+                const { icon } = option;
+                const Icon = icon ? iconManager.get(icon) : null;
                 const selected = option.value === status.value;
                 const label = getOptionLabel(localeService, option);
                 return (

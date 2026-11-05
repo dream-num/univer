@@ -19,7 +19,6 @@ import type { IValueOption } from '@univerjs/ui';
 import type { ReactNode } from 'react';
 import {
     BooleanNumber,
-    DrawingTypeEnum,
     ICommandService,
     IUniverInstanceService,
     LocaleService,
@@ -53,7 +52,7 @@ export interface IImagePopupMenuItem {
 
 export interface IImagePopupMenuExtraProps {
     menuItems: IImagePopupMenuItem[];
-    drawingType?: DrawingTypeEnum;
+    icon?: string;
     variant?: 'doc-floating-toolbar' | 'doc-chart-floating-toolbar';
     unitId?: string;
     subUnitId?: string;
@@ -72,6 +71,7 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
     const menuItems = popup?.extraProps?.menuItems;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
+    const iconManager = useDependency(IconManager);
     const [visible, setVisible] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
 
@@ -117,7 +117,7 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
     };
 
     const showMore = visible || isHovered;
-    const Icon = popup.extraProps?.drawingType === DrawingTypeEnum.DRAWING_CHART ? ChartIcon : AutofillDoubleIcon;
+    const Icon = popup.extraProps?.icon ? iconManager.get(popup.extraProps.icon) : AutofillDoubleIcon;
 
     return (
         <div

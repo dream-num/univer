@@ -18,7 +18,8 @@
  * @vitest-environment jsdom
  */
 
-import { CommandType, DrawingTypeEnum, ICommandService, LocaleService, LocaleType, Univer } from '@univerjs/core';
+import { CommandType, ICommandService, LocaleService, LocaleType, Univer } from '@univerjs/core';
+import { AddImageIcon, ChartIcon } from '@univerjs/icons';
 import { IconManager, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -35,14 +36,15 @@ afterEach(async () => {
 });
 
 it.each([
-    { drawingType: DrawingTypeEnum.DRAWING_CHART, icon: 'chart-icon' },
-    { drawingType: DrawingTypeEnum.DRAWING_IMAGE, icon: 'autofill-double-icon' },
-    { drawingType: DrawingTypeEnum.DRAWING_DOM, icon: 'autofill-double-icon' },
-    { drawingType: undefined, icon: 'autofill-double-icon' },
-])('renders the $icon trigger for drawing type $drawingType', async ({ drawingType, icon }) => {
+    { icon: 'ChartIcon', expectedIcon: 'chart-icon' },
+    { icon: 'AddImageIcon', expectedIcon: 'add-image-icon' },
+    { icon: undefined, expectedIcon: 'autofill-double-icon' },
+])('renders the supplied icon or defaults to $expectedIcon', async ({ icon, expectedIcon }) => {
     const univer = new Univer();
     cleanups.push(() => univer.dispose());
     const injector = univer.__getInjector();
+    injector.add([IconManager]);
+    injector.get(IconManager).register({ ChartIcon, AddImageIcon });
     const locale = injector.get(LocaleService);
     locale.load({ [LocaleType.EN_US]: {} });
     locale.setLocale(LocaleType.EN_US);
@@ -55,11 +57,11 @@ it.each([
 
     await act(async () => root.render(
         <RediContext.Provider value={{ injector }}>
-            <ImagePopupMenu popup={{ extraProps: { menuItems: [], drawingType } }} />
+            <ImagePopupMenu popup={{ extraProps: { menuItems: [], icon } }} />
         </RediContext.Provider>
     ));
 
-    expect(container.querySelector(`svg.univerjs-icon-${icon}`)).not.toBeNull();
+    expect(container.querySelector(`svg.univerjs-icon-${expectedIcon}`)).not.toBeNull();
 });
 
 it('dismisses the chart type tooltip while the dropdown is open and routes the selected type', async () => {

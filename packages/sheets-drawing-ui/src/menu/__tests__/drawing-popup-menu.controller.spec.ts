@@ -141,10 +141,10 @@ function createControllerHarness(initialDrawingType: DrawingTypeEnum) {
 
 describe('DrawingPopupMenuController', () => {
     it.each([
-        { drawingType: DrawingTypeEnum.DRAWING_IMAGE, label: 'image' },
-        { drawingType: DrawingTypeEnum.DRAWING_DOM, label: 'Float DOM' },
-        { drawingType: DrawingTypeEnum.DRAWING_CHART, label: 'chart' },
-    ])('constrains the $label popup to the canvas and places it on the left in RTL', ({ drawingType }) => {
+        { drawingType: DrawingTypeEnum.DRAWING_IMAGE, label: 'image', icon: undefined },
+        { drawingType: DrawingTypeEnum.DRAWING_DOM, label: 'Float DOM', icon: undefined },
+        { drawingType: DrawingTypeEnum.DRAWING_CHART, label: 'chart', icon: 'ChartIcon' },
+    ])('passes the $label popup icon and constrains its placement in RTL', ({ drawingType, icon }) => {
         const { attachPopupToObject, createControl$, drawingObject, getAttachedPopup, injector } = createControllerHarness(drawingType);
         const locale = injector.get(LocaleService);
         locale.load({ [LocaleType.EN_US]: {} });
@@ -158,7 +158,7 @@ describe('DrawingPopupMenuController', () => {
             expect.objectContaining({
                 constrainToCanvas: true,
                 direction: 'left',
-                extraProps: expect.objectContaining({ drawingType }),
+                extraProps: expect.objectContaining({ icon }),
             })
         );
         expect(getAttachedPopup()?.extraProps?.menuItems).toEqual(expect.arrayContaining([

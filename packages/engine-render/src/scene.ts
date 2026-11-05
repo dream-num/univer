@@ -15,6 +15,8 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import { Disposable, EventSubject, sortRules, sortRulesByDesc, toDisposable, Tools } from '@univerjs/core';
+import { BehaviorSubject } from 'rxjs';
 import type { BaseObject } from './base-object';
 import type { IDragEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { ISceneTransformState, ITransformChangeState } from './basics/interfaces';
@@ -26,8 +28,6 @@ import type { Engine } from './engine';
 import type { ILayerRenderOptions, IScrollRenderInfo } from './layer';
 import type { SceneViewer } from './scene-viewer';
 import type { Viewport } from './viewport';
-import { Disposable, EventSubject, sortRules, sortRulesByDesc, toDisposable, Tools } from '@univerjs/core';
-import { BehaviorSubject } from 'rxjs';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
 import { DeviceType } from './basics/i-events';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
@@ -1017,6 +1017,7 @@ export class Scene extends Disposable {
 
         const layers = this._layers.sort(sortRules);
         const canvasInstance = this.getEngine()?.getCanvas();
+        this._beforeRender$.next(canvasInstance);
         const shouldTryPreservingEngine = this._preserveEngineOnRender &&
             !this._hasPostRenderCanvasMutation &&
             parentCtx == null &&
@@ -1058,7 +1059,6 @@ export class Scene extends Disposable {
             this.getEngine()?.clearCanvas();
         }
 
-        this._beforeRender$.next(canvasInstance);
         for (let i = 0, len = layers.length; i < len; i++) {
             layers[i].render(parentCtx, i === len - 1, layerRenderOptions);
         }

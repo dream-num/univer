@@ -1,3 +1,5 @@
+<a id="readme-top"></a>
+
 <p align="center"><img src="../../docs/img/readme/hero-banner.png" alt="Univer Office SDK" width="960" /></p>
 
 <h1 align="center">用 Univer Office SDK 建置你的 AI 辦公產品</h1>
@@ -51,6 +53,7 @@
   - [Univer Workspace：Office SDK 參考應用](#univer-workspace-an-office-sdk-reference-application)
   - [CLI、Agent 整合與開發技能](#cli-agent-integrations-and-developer-skills)
 - [📚 文件與貢獻](#documentation-and-contributing)
+  - [執行環境相容性](#runtime-compatibility)
 - [💬 社區](#community)
 - [🔒 安全](#security)
 - [❤️ 贊助](#sponsors)
@@ -61,6 +64,8 @@
 <a id="what-is-univer"></a>
 
 ## 💡 Univer 是什麼？
+
+<p align="center"><img src="../../docs/img/readme/intro-banner.png" alt="Univer Office SDK: Web, Server, and AI SDKs" width="960" /></p>
 
 **Univer** 是一套 Office SDK，用於在你自己的產品中建置辦公應用。它基於你的資料和權限，為使用者和現有 Agent 提供辦公編輯、計算、協作及檔案處理能力。產品系列覆蓋試算表、文件、示範文稿、關聯表格、畫布和 PDF。
 
@@ -78,70 +83,100 @@ Agent 可以使用同樣的開源 API，模型和工具編排由你的應用提�
 
 ### 開源能力
 
-<p><img src="../../docs/img/readme/intro-banner.png" alt="Sheets &amp; Docs" width="960" /></p>
+<div align="center" style="overflow-x: auto;">
 
-| 領域 | 部分能力 |
-| --- | --- |
-| **Sheets · 編輯與佈局** | 儲存格樣式、合併儲存格、儲存格內富文字、凍結窗格、浮動圖片，以及復原／取消復原。 |
-| **Sheets · 資料與計算** | 公式、定義名稱、篩選、排序、資料驗證、條件格式、超連結、評論，以及查找替換。 |
-| **Docs** | 富文字編輯、段落格式、列表、超連結、評論和繪圖整合。 |
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th>領域</th>
+<th>部分能力</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Sheets · 編輯與佈局</strong></td>
+<td>儲存格樣式、合併儲存格、儲存格內富文字、凍結窗格、浮動圖片，以及復原／取消復原。</td>
+</tr>
+<tr>
+<td><strong>Sheets · 資料與計算</strong></td>
+<td>公式、定義名稱、篩選、排序、資料驗證、條件格式、超連結、評論，以及查找替換。</td>
+</tr>
+<tr>
+<td><strong>Docs</strong></td>
+<td>富文字編輯、段落格式、列表、超連結、評論和繪圖整合。</td>
+</tr>
+</tbody>
+</table>
+
+</div>
 
 功能透過外掛和預設組合；[快速開始](#quick-start)僅使用 **Sheets Core 預設**。圖片需要相應的繪圖外掛。詳細的開源和商業能力範圍請參閱[功能對比](https://univer.ai/compare/)。
 
 以下示範展示更完整的 **Univer Office SDK**，包括商業能力，其範圍超出預設開源設定；具體請參閱[開源與商業擴展](#open-source-and-commercial-extensions)。
 
-<table>
-  <tr>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/spreadsheets"><img src="../../docs/img/readme/sheets.webp" alt="Sheets" width="420" /></a>
-      <p><strong>Sheets</strong><br /><a href="https://univer.ai/demo/spreadsheets">開啟示範 ↗</a></p>
-    </td>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/docs"><img src="../../docs/img/readme/docs.webp" alt="Docs" width="420" /></a>
-      <p><strong>Docs</strong><br /><a href="https://univer.ai/demo/docs">開啟示範 ↗</a></p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/web-app"><img src="../../docs/img/readme/web-app.webp" alt="Web App · 由表格驅動的應用" width="420" /></a>
-      <p><strong>Web App · 由表格驅動的應用</strong><br /><a href="https://univer.ai/demo/web-app">開啟示範 ↗</a></p>
-    </td>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/universe"><img src="../../docs/img/readme/universe.webp" alt="Univer · 組合式辦公內容" width="420" /></a>
-      <p><strong>組合式辦公內容</strong><br /><a href="https://univer.ai/demo/universe">開啟示範 ↗</a></p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/slides"><img src="../../docs/img/readme/slides.webp" alt="Slides" width="420" /></a>
-      <p><strong>Slides</strong><br /><a href="https://univer.ai/demo/slides">開啟示範 ↗</a></p>
-    </td>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/relational-tables"><img src="../../docs/img/readme/relational-tables.webp" alt="Relational Tables" width="420" /></a>
-      <p><strong>Relational Tables</strong><br /><a href="https://univer.ai/demo/relational-tables">開啟示範 ↗</a></p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/canvases"><img src="../../docs/img/readme/canvases.webp" alt="Canvases" width="420" /></a>
-      <p><strong>Canvases</strong><br /><a href="https://univer.ai/demo/canvases">開啟示範 ↗</a></p>
-    </td>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/pdf"><img src="../../docs/img/readme/pdf.webp" alt="PDF" width="420" /></a>
-      <p><strong>PDF</strong><br /><a href="https://univer.ai/demo/pdf">開啟示範 ↗</a></p>
-    </td>
-  </tr>
+<div align="center" style="overflow-x: auto;">
+
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+<tbody>
+<tr>
+  <td width="50%"><a href="https://univer.ai/demo/spreadsheets"><img src="../../docs/img/readme/cards/sheets.webp" alt="Sheets — 編輯與佈局 · 資料與計算 — 開啟示範" width="420" /></a></td>
+  <td width="50%"><a href="https://univer.ai/demo/docs"><img src="../../docs/img/readme/cards/docs.webp" alt="Docs — 富文字編輯 — 開啟示範" width="420" /></a></td>
+</tr>
+<tr>
+  <td width="50%"><a href="https://univer.ai/demo/web-app"><img src="../../docs/img/readme/cards/web-app.webp" alt="Web App — 由表格驅動的應用 — 開啟示範" width="420" /></a></td>
+  <td width="50%"><a href="https://univer.ai/demo/universe"><img src="../../docs/img/readme/cards/universe.webp" alt="Univer — 組合式辦公內容 — 開啟示範" width="420" /></a></td>
+</tr>
+<tr>
+  <td width="50%"><a href="https://univer.ai/demo/slides"><img src="../../docs/img/readme/cards/slides.webp" alt="Slides — 開啟示範" width="420" /></a></td>
+  <td width="50%"><a href="https://univer.ai/demo/relational-tables"><img src="../../docs/img/readme/cards/relational-tables.webp" alt="Relational Tables — 開啟示範" width="420" /></a></td>
+</tr>
+<tr>
+  <td width="50%"><a href="https://univer.ai/demo/canvases"><img src="../../docs/img/readme/cards/canvases.webp" alt="Canvases — 開啟示範" width="420" /></a></td>
+  <td width="50%"><a href="https://univer.ai/demo/pdf"><img src="../../docs/img/readme/cards/pdf.webp" alt="PDF — 開啟示範" width="420" /></a></td>
+</tr>
+</tbody>
 </table>
+
+</div>
+
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20%E8%BF%94%E5%9B%9E%E9%A0%82%E9%83%A8-30363D?style=flat-square" alt="返回頂部" height="20" /></a></p>
 
 <a id="what-you-can-build"></a>
 
 ## 🚀 基於開源基礎建置
 
-| 你的目標 | 使用開源基礎 | 從這裡開始 |
-| --- | --- | --- |
-| **嵌入 Sheets 或 Docs** | 為應用或 Agent 產品新增可編輯的辦公界面，並透過 Facade API 連線資料。 | [快速開始](#quick-start) |
-| **在沒有編輯器的情況下處理內容** | 在 Node.js 中重用內容外掛、模型、命令和計算能力，用於編輯、快照和自動化任務。 | [Headless 指南](https://docs.univer.ai/guides/sheets/getting-started/node) |
-| **開發自訂功能或編輯器** | 重用引擎、UI 元件、外掛邊界、依賴注入及命令／復原系統。參考現有功能擴展 Sheets 和 Docs，或開發自己的編輯器。 | [開源架構](#open-source-architecture) |
+<p align="center"><img src="../../docs/img/readme/build-banner.png" alt="Build on open source" width="960" /></p>
+
+<div align="center" style="overflow-x: auto;">
+
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th>你的目標</th>
+<th>使用開源基礎</th>
+<th>從這裡開始</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>嵌入 Sheets 或 Docs</strong></td>
+<td>為應用或 Agent 產品新增可編輯的辦公界面，並透過 Facade API 連線資料。</td>
+<td><a href="#quick-start">快速開始</a></td>
+</tr>
+<tr>
+<td><strong>在沒有編輯器的情況下處理內容</strong></td>
+<td>在 Node.js 中重用內容外掛、模型、命令和計算能力，用於編輯、快照和自動化任務。</td>
+<td><a href="https://docs.univer.ai/guides/sheets/getting-started/node">Headless 指南</a></td>
+</tr>
+<tr>
+<td><strong>開發自訂功能或編輯器</strong></td>
+<td>重用引擎、UI 元件、外掛邊界、依賴注入及命令／復原系統。參考現有功能擴展 Sheets 和 Docs，或開發自己的編輯器。</td>
+<td><a href="#open-source-architecture">開源架構</a></td>
+</tr>
+</tbody>
+</table>
+
+</div>
 
 **協調跨功能的編輯與復原／取消復原。** 在篩選範圍內插入一行，會同時改變基礎內容和篩選範圍，復原時也需要同時恢復兩者。各功能提供自己的變更和復原資料，由命令組合執行並記錄歷史。架構介紹會說明如何擴展這些編輯流程。
 
@@ -341,11 +376,13 @@ Docs 外掛支援試算表中的富文字編輯。新增功能時，請同時引
 
 </details>
 
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20%E8%BF%94%E5%9B%9E%E9%A0%82%E9%83%A8-30363D?style=flat-square" alt="返回頂部" height="20" /></a></p>
+
 <a id="open-source-architecture"></a>
 
 ## 🏗️ 探索開源架構
 
-<img src="../../docs/img/readme/architecture-banner.png" alt="" width="960" />
+<p align="center"><img src="../../docs/img/readme/architecture-banner.png" alt="" width="960" /></p>
 
 <a id="give-custom-features-clear-boundaries"></a>
 
@@ -530,20 +567,46 @@ Facade 擴展隨各自的功能套件提供，因此內容 API 不必引入無�
 
 本倉庫提供可用的功能實現及擴展模式。完整範例請閱讀[篩選功能實現解析](https://docs.univer.ai/blog/anatomy)；依賴擴展點前，請參閱 [API 穩定性策略](../../docs/API_STABILITY.md)。
 
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20%E8%BF%94%E5%9B%9E%E9%A0%82%E9%83%A8-30363D?style=flat-square" alt="返回頂部" height="20" /></a></p>
+
 <a id="open-source-and-commercial-extensions"></a>
 
 ## 🧩 使用 Univer Office SDK 擴展應用
 
-<img src="../../docs/img/readme/sdk-banner.png" alt="" width="960" />
+<p align="center"><img src="../../docs/img/readme/sdk-banner.png" alt="" width="960" /></p>
 
 需要更多可直接整合的能力時，可以組合相應的 **Univer Office SDK** 模組，包括更多內容類型、高級編輯外掛、協作、檔案轉換和 Agent 工具。它們擴展上文介紹的同一套內容模型、外掛架構、命令系統和 Facade 設計，因此可以在現有整合之上繼續建置。
 
-| 組成 | 如何擴展開源基礎 |
-| --- | --- |
-| **開源 Web SDK 核心 · 本倉庫** | 開源的模型、引擎、外掛、UI 基礎設施，以及 Sheets 和 Docs 能力，並提供相應的 Headless 內容操作。可依據 Apache-2.0 授權條款用於商業應用。 |
-| **商業 Web SDK 外掛** | 遵循核心的 Plugin、依賴注入、Command/Mutation 和 Facade 擴展模式，為相應內容類型新增圖表、形狀、樞紐分析表、SmartArt 等功能。 |
-| **Server SDK** | 基於相同的內容模型和 Mutation 約定，增加即時協作、版本歷史和辦公檔案轉換，並與應用的身份、權限和儲存系統整合。 |
-| **AI SDK 擴展** | 重用 Web SDK 的 Headless 與 Facade 能力，提供可組合的 Node.js API 和 CLI 基礎模組，讓 Agent 檢查、編輯和驗證內容，並整合協作與 Worktree 審閱。 |
+<div align="center" style="overflow-x: auto;">
+
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th>組成</th>
+<th>如何擴展開源基礎</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>開源 Web SDK 核心 · 本倉庫</strong></td>
+<td>開源的模型、引擎、外掛、UI 基礎設施，以及 Sheets 和 Docs 能力，並提供相應的 Headless 內容操作。可依據 Apache-2.0 授權條款用於商業應用。</td>
+</tr>
+<tr>
+<td><strong>商業 Web SDK 外掛</strong></td>
+<td>遵循核心的 Plugin、依賴注入、Command/Mutation 和 Facade 擴展模式，為相應內容類型新增圖表、形狀、樞紐分析表、SmartArt 等功能。</td>
+</tr>
+<tr>
+<td><strong>Server SDK</strong></td>
+<td>基於相同的內容模型和 Mutation 約定，增加即時協作、版本歷史和辦公檔案轉換，並與應用的身份、權限和儲存系統整合。</td>
+</tr>
+<tr>
+<td><strong>AI SDK 擴展</strong></td>
+<td>重用 Web SDK 的 Headless 與 Facade 能力，提供可組合的 Node.js API 和 CLI 基礎模組，讓 Agent 檢查、編輯和驗證內容，並整合協作與 Worktree 審閱。</td>
+</tr>
+</tbody>
+</table>
+
+</div>
 
 <a id="scope-and-licensing"></a>
 
@@ -579,11 +642,13 @@ AI SDK 建立在 Web SDK 的 **Headless 內容模型、命令、計算和 Facade
 
 </details>
 
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20%E8%BF%94%E5%9B%9E%E9%A0%82%E9%83%A8-30363D?style=flat-square" alt="返回頂部" height="20" /></a></p>
+
 <a id="application-patterns-and-ecosystem"></a>
 
 ## 🌐 應用模式與生態
 
-<img src="../../docs/img/readme/ecosystem-banner.png" alt="" width="960" />
+<p align="center"><img src="../../docs/img/readme/ecosystem-banner.png" alt="" width="960" /></p>
 
 <a id="univer-workspace-an-office-sdk-reference-application"></a>
 
@@ -591,7 +656,9 @@ AI SDK 建立在 Web SDK 的 **Headless 內容模型、命令、計算和 Facade
 
 需要完整應用參考時，可以從 [Univer Workspace](https://github.com/dream-num/univer-workspace) 開始。它展示了如何將 Univer Office SDK 編輯器、協作、檔案能力、現有 Agent 和人工審閱組合成可自行代管的工作空間。建置自己的辦公應用或 Agent 工作空間時，可以參考其整合模式。
 
-<table>
+<div align="center" style="overflow-x: auto;">
+
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
   <tr>
     <td width="50%" valign="top">
       <a href="https://space.univer.ai/"><img src="../../docs/img/readme/workspace.webp" alt="Univer Workspace 中的可編輯預算表格" width="420" /></a>
@@ -614,6 +681,8 @@ AI SDK 建立在 Web SDK 的 **Headless 內容模型、命令、計算和 Facade
   </tr>
 </table>
 
+</div>
+
 Workspace 是開源應用，其 SDK 依賴遵循各自的授權條款。關聯應用和審閱流程請參閱 [Workspace 概覽](https://univer.ai/workspace/)。
 
 <p align="center"><a href="https://www.youtube.com/watch?v=1p-SMEiK6Kg"><img src="../../docs/img/readme/integration-demo.png" alt="觀看 SDK 整合示範" width="720" /></a></p>
@@ -626,15 +695,44 @@ Workspace 是開源應用，其 SDK 依賴遵循各自的授權條款。關聯�
 
 同樣的 SDK 能力也可以組合進你已經使用的 Agent 和工具中：
 
-| 專案 | 提供的能力 |
-| --- | --- |
-| [Univer CLI](https://github.com/dream-num/univer-cli) | 用於建立、編輯、檢查和交付辦公內容的本地命令行工作空間。 |
-| [Univer Office for DeepSeek Harness](https://github.com/dream-num/dsh-univer-office) | 關聯內容、結果驗證、版本化變更和隔離的 Worktree 協作。 |
-| [Univer Office for WorkBuddy](https://github.com/dream-num/workbuddy-univer-office) | 本地 Office 整合、MCP 預覽和草稿審閱，目前為開發者預覽版。 |
-| [Univer Office for OpenClaw](https://github.com/dream-num/openclaw-univer-office) | 用於建立、審閱和交付辦公內容的工具。 |
-| [Univer SDK Skills](https://github.com/dream-num/univer-sdk-skills) | 幫助編碼 Agent 整合 SDK、開發外掛和實現後端工作流程的指令。 |
+<div align="center" style="overflow-x: auto;">
+
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th>專案</th>
+<th>提供的能力</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/dream-num/univer-cli">Univer CLI</a></td>
+<td>用於建立、編輯、檢查和交付辦公內容的本地命令行工作空間。</td>
+</tr>
+<tr>
+<td><a href="https://github.com/dream-num/dsh-univer-office">Univer Office for DeepSeek Harness</a></td>
+<td>關聯內容、結果驗證、版本化變更和隔離的 Worktree 協作。</td>
+</tr>
+<tr>
+<td><a href="https://github.com/dream-num/workbuddy-univer-office">Univer Office for WorkBuddy</a></td>
+<td>本地 Office 整合、MCP 預覽和草稿審閱，目前為開發者預覽版。</td>
+</tr>
+<tr>
+<td><a href="https://github.com/dream-num/openclaw-univer-office">Univer Office for OpenClaw</a></td>
+<td>用於建立、審閱和交付辦公內容的工具。</td>
+</tr>
+<tr>
+<td><a href="https://github.com/dream-num/univer-sdk-skills">Univer SDK Skills</a></td>
+<td>幫助編碼 Agent 整合 SDK、開發外掛和實現後端工作流程的指令。</td>
+</tr>
+</tbody>
+</table>
+
+</div>
 
 各倉庫均提供設定說明和 SDK 依賴說明。可瀏覽[生態](https://univer.ai/ecosystem/)瞭解 Agent 入口，或參考[文件](https://docs.univer.ai/)建置自己的整合。
+
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20%E8%BF%94%E5%9B%9E%E9%A0%82%E9%83%A8-30363D?style=flat-square" alt="返回頂部" height="20" /></a></p>
 
 <a id="documentation-and-contributing"></a>
 
@@ -644,16 +742,37 @@ Workspace 是開源應用，其 SDK 依賴遵循各自的授權條款。關聯�
 
 <p align="center"><a href="https://docs.univer.ai/guides/sheets">🧩 Web SDK</a> · <a href="https://docs.univer.ai/server">🖥️ Server SDK</a> · <a href="https://docs.univer.ai/ai">🤖 AI SDK</a> · <a href="https://docs.univer.ai/reference/classes/univer">🔧 API 參考</a> · <a href="https://office.univer.ai/">🎮 在線範例</a></p>
 
-<details>
-<summary>執行環境相容性</summary>
+<div align="center" style="overflow-x: auto;">
 
-- **瀏覽器環境**：Univer 以 Chrome 88 為編譯目標，旨在支援 Edge `>=88`、Firefox `>=90`、Chrome `>=88`、Safari `>=14.1` 和 Electron `>=12`。
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+  <tr>
+    <th align="center"><img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/75.0.1/edge/edge_64x64.png" width="32" height="32" alt="" /><br />Edge</th>
+    <th align="center"><img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/75.0.1/firefox/firefox_64x64.png" width="32" height="32" alt="" /><br />Firefox</th>
+    <th align="center"><img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/75.0.1/chrome/chrome_64x64.png" width="32" height="32" alt="" /><br />Chrome</th>
+    <th align="center"><img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/75.0.1/safari/safari_64x64.png" width="32" height="32" alt="" /><br />Safari</th>
+    <th align="center"><img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/75.0.1/electron/electron_64x64.png" width="32" height="32" alt="" /><br />Electron</th>
+  </tr>
+  <tr>
+    <td align="center"><code>&gt;=88</code></td>
+    <td align="center"><code>&gt;=90</code></td>
+    <td align="center"><code>&gt;=88</code></td>
+    <td align="center"><code>&gt;=14.1</code></td>
+    <td align="center"><code>&gt;=12</code></td>
+  </tr>
+</table>
+
+</div>
+
+<p align="center">Univer 以 Chrome 88 為編譯目標，旨在支援上表所列版本。</p>
+
+<a id="runtime-compatibility"></a>
+
+### 執行環境相容性
+
 - **Polyfill**：Univer 依賴 `Intl.Segmenter`。如果目標瀏覽器或執行時未提供該 API，請新增 `@formatjs/intl-segmenter` 等 Polyfill。
 - **建置工具**：推薦 Vite、esbuild 或 Webpack 5。如果建置工具不支援 `package.json` 中的 `exports` 字段（常見於 Webpack 4），可能需要額外的路徑映射。
 - **React**：Univer 的視圖層基於 React 18 建置，支援 React 18 和 19，並為 React 16.9+ 和 17 提供最低限度的相容支援。
 - **Node.js 環境**：Headless Univer 支援 Node.js `>=18.17.0`，開發本倉庫需要 Node.js `>=22.18`。
-
-</details>
 
 <details>
 <summary>在本倉庫中開發</summary>
@@ -687,14 +806,44 @@ pnpm dev
 
 常用命令：
 
-| 命令 | 用途 |
-| --- | --- |
-| `pnpm dev` | 啓動 Sheets 和 Docs 開發工作台。 |
-| `pnpm build` | 建置工作區套件，不包括內部 common 套件。 |
-| `pnpm test` | 透過 Turbo 執行單元測試。 |
-| `pnpm typecheck` | 透過 Turbo 執行 TypeScript 檢查。 |
-| `pnpm lint` | 執行 ESLint。 |
-| `pnpm storybook:dev` | 啓動 Storybook 進行 UI 元件開發。 |
+<div align="center" style="overflow-x: auto;">
+
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th>命令</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="notranslate">pnpm dev</code></td>
+<td>啓動 Sheets 和 Docs 開發工作台。</td>
+</tr>
+<tr>
+<td><code class="notranslate">pnpm build</code></td>
+<td>建置工作區套件，不包括內部 common 套件。</td>
+</tr>
+<tr>
+<td><code class="notranslate">pnpm test</code></td>
+<td>透過 Turbo 執行單元測試。</td>
+</tr>
+<tr>
+<td><code class="notranslate">pnpm typecheck</code></td>
+<td>透過 Turbo 執行 TypeScript 檢查。</td>
+</tr>
+<tr>
+<td><code class="notranslate">pnpm lint</code></td>
+<td>執行 ESLint。</td>
+</tr>
+<tr>
+<td><code class="notranslate">pnpm storybook:dev</code></td>
+<td>啓動 Storybook 進行 UI 元件開發。</td>
+</tr>
+</tbody>
+</table>
+
+</div>
 
 提交 Pull Request 前，請閱讀 [CONTRIBUTING.md](../../CONTRIBUTING.md)。
 
@@ -712,17 +861,23 @@ pnpm dev
 
 </details>
 
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20%E8%BF%94%E5%9B%9E%E9%A0%82%E9%83%A8-30363D?style=flat-square" alt="返回頂部" height="20" /></a></p>
+
 <a id="community"></a>
 
 ## 💬 社區
 
 在 [GitHub Discussions](https://github.com/dream-num/univer/discussions) 提問，加入 [Discord](https://discord.gg/z3NKNT6D2f)，並關注 [X](https://twitter.com/univerhq) 或 [YouTube](https://www.youtube.com/@dreamNum)。請閱讀[行為準則](../../CODE_OF_CONDUCT.md)。
 
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20%E8%BF%94%E5%9B%9E%E9%A0%82%E9%83%A8-30363D?style=flat-square" alt="返回頂部" height="20" /></a></p>
+
 <a id="security"></a>
 
 ## 🔒 安全
 
 如果你認為發現了安全問題，請遵循 [安全政策](../../SECURITY.md)。
+
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20%E8%BF%94%E5%9B%9E%E9%A0%82%E9%83%A8-30363D?style=flat-square" alt="返回頂部" height="20" /></a></p>
 
 <a id="sponsors"></a>
 
@@ -744,6 +899,8 @@ Univer 由社群和贊助者共同支援。你可以透過 [Open Collective](htt
   <a href="https://opencollective.com/univer/backer/6/website"><img src="https://opencollective.com/univer/backer/6/avatar.svg" width="64" height="64" alt="Backer 6" /></a>
 </p>
 
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20%E8%BF%94%E5%9B%9E%E9%A0%82%E9%83%A8-30363D?style=flat-square" alt="返回頂部" height="20" /></a></p>
+
 <a id="license"></a>
 
 ## 📄 授權條款
@@ -751,3 +908,5 @@ Univer 由社群和贊助者共同支援。你可以透過 [Open Collective](htt
 Copyright (c) 2021-present DreamNum Co., Ltd.
 
 本倉庫的開源套件採用 [Apache-2.0](../../LICENSE) 授權條款。商業 SDK 模組單獨散布和授權。
+
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20%E8%BF%94%E5%9B%9E%E9%A0%82%E9%83%A8-30363D?style=flat-square" alt="返回頂部" height="20" /></a></p>

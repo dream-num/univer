@@ -1,3 +1,5 @@
+<a id="readme-top"></a>
+
 <p align="center"><img src="../../docs/img/readme/hero-banner.png" alt="Univer Office SDK" width="960" /></p>
 
 <h1 align="center">Univer Office SDK로 나만의 AI 오피스를 구축하세요.</h1>
@@ -51,6 +53,7 @@
   - [Univer Workspace: Office SDK 참조 애플리케이션](#univer-workspace-an-office-sdk-reference-application)
   - [CLI, 에이전트 통합, 개발 스킬](#cli-agent-integrations-and-developer-skills)
 - [📚 문서와 기여](#documentation-and-contributing)
+  - [런타임 호환성](#runtime-compatibility)
 - [💬 커뮤니티](#community)
 - [🔒 보안](#security)
 - [❤️ 스폰서](#sponsors)
@@ -61,6 +64,8 @@
 <a id="what-is-univer"></a>
 
 ## 💡 Univer란?
+
+<p align="center"><img src="../../docs/img/readme/intro-banner.png" alt="Univer Office SDK: Web, Server, and AI SDKs" width="960" /></p>
 
 **Univer**는 자체 제품 안에 오피스 애플리케이션을 구축하기 위한 Office SDK입니다. 자체 데이터와 권한을 사용해 사용자와 기존 에이전트에 오피스 편집, 계산, 협업, 파일 처리 기능을 제공합니다. 제품군에는 스프레드시트, 문서, 프레젠테이션, 관계형 테이블, 캔버스, PDF가 포함됩니다.
 
@@ -78,70 +83,100 @@ Univer Office SDK는 세 부분으로 구성됩니다.
 
 ### 오픈 소스 기능
 
-<p><img src="../../docs/img/readme/intro-banner.png" alt="Sheets &amp; Docs" width="960" /></p>
+<div align="center" style="overflow-x: auto;">
 
-| 영역 | 주요 기능 |
-| --- | --- |
-| **Sheets · 편집과 레이아웃** | 셀 스타일, 셀 병합, 셀 내부 서식 있는 텍스트, 틀 고정, 부동 이미지, 실행 취소/다시 실행. |
-| **Sheets · 데이터와 계산** | 수식, 정의된 이름, 필터링, 정렬, 데이터 유효성 검사, 조건부 서식, 하이퍼링크, 댓글, 찾기 및 바꾸기. |
-| **Docs** | 서식 있는 텍스트 편집, 단락 서식, 목록, 하이퍼링크, 댓글, 그리기 기능 통합. |
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th>영역</th>
+<th>주요 기능</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Sheets · 편집과 레이아웃</strong></td>
+<td>셀 스타일, 셀 병합, 셀 내부 서식 있는 텍스트, 틀 고정, 부동 이미지, 실행 취소/다시 실행.</td>
+</tr>
+<tr>
+<td><strong>Sheets · 데이터와 계산</strong></td>
+<td>수식, 정의된 이름, 필터링, 정렬, 데이터 유효성 검사, 조건부 서식, 하이퍼링크, 댓글, 찾기 및 바꾸기.</td>
+</tr>
+<tr>
+<td><strong>Docs</strong></td>
+<td>서식 있는 텍스트 편집, 단락 서식, 목록, 하이퍼링크, 댓글, 그리기 기능 통합.</td>
+</tr>
+</tbody>
+</table>
+
+</div>
 
 기능은 플러그인과 프리셋으로 조합합니다. [빠른 시작](#quick-start)은 **Sheets Core 프리셋**만 사용합니다. 이미지에는 해당 그리기 플러그인이 필요합니다. 오픈 소스와 상용 기능의 상세 범위는 [기능 비교](https://univer.ai/compare/)를 확인하세요.
 
 아래 데모는 상용 기능을 포함한 더 넓은 **Univer Office SDK**를 보여 줍니다. 기본 오픈 소스 구성보다 많은 기능을 포함하며, 범위는 [오픈 소스와 상용 확장](#open-source-and-commercial-extensions)을 참고하세요.
 
-<table>
-  <tr>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/spreadsheets"><img src="../../docs/img/readme/sheets.webp" alt="Sheets" width="420" /></a>
-      <p><strong>Sheets</strong><br /><a href="https://univer.ai/demo/spreadsheets">데모 열기 ↗</a></p>
-    </td>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/docs"><img src="../../docs/img/readme/docs.webp" alt="Docs" width="420" /></a>
-      <p><strong>Docs</strong><br /><a href="https://univer.ai/demo/docs">데모 열기 ↗</a></p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/web-app"><img src="../../docs/img/readme/web-app.webp" alt="Web App · 시트 기반 앱" width="420" /></a>
-      <p><strong>Web App · 시트 기반 앱</strong><br /><a href="https://univer.ai/demo/web-app">데모 열기 ↗</a></p>
-    </td>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/universe"><img src="../../docs/img/readme/universe.webp" alt="Univer · 조합된 오피스 콘텐츠" width="420" /></a>
-      <p><strong>조합된 오피스 콘텐츠</strong><br /><a href="https://univer.ai/demo/universe">데모 열기 ↗</a></p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/slides"><img src="../../docs/img/readme/slides.webp" alt="Slides" width="420" /></a>
-      <p><strong>Slides</strong><br /><a href="https://univer.ai/demo/slides">데모 열기 ↗</a></p>
-    </td>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/relational-tables"><img src="../../docs/img/readme/relational-tables.webp" alt="Relational Tables" width="420" /></a>
-      <p><strong>Relational Tables</strong><br /><a href="https://univer.ai/demo/relational-tables">데모 열기 ↗</a></p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/canvases"><img src="../../docs/img/readme/canvases.webp" alt="Canvases" width="420" /></a>
-      <p><strong>Canvases</strong><br /><a href="https://univer.ai/demo/canvases">데모 열기 ↗</a></p>
-    </td>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/pdf"><img src="../../docs/img/readme/pdf.webp" alt="PDF" width="420" /></a>
-      <p><strong>PDF</strong><br /><a href="https://univer.ai/demo/pdf">데모 열기 ↗</a></p>
-    </td>
-  </tr>
+<div align="center" style="overflow-x: auto;">
+
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+<tbody>
+<tr>
+  <td width="50%"><a href="https://univer.ai/demo/spreadsheets"><img src="../../docs/img/readme/cards/sheets.webp" alt="Sheets — 편집과 레이아웃 · 데이터와 계산 — 데모 열기" width="420" /></a></td>
+  <td width="50%"><a href="https://univer.ai/demo/docs"><img src="../../docs/img/readme/cards/docs.webp" alt="Docs — 서식 있는 텍스트 편집 — 데모 열기" width="420" /></a></td>
+</tr>
+<tr>
+  <td width="50%"><a href="https://univer.ai/demo/web-app"><img src="../../docs/img/readme/cards/web-app.webp" alt="Web App — 시트 기반 앱 — 데모 열기" width="420" /></a></td>
+  <td width="50%"><a href="https://univer.ai/demo/universe"><img src="../../docs/img/readme/cards/universe.webp" alt="Univer — 조합된 오피스 콘텐츠 — 데모 열기" width="420" /></a></td>
+</tr>
+<tr>
+  <td width="50%"><a href="https://univer.ai/demo/slides"><img src="../../docs/img/readme/cards/slides.webp" alt="Slides — 데모 열기" width="420" /></a></td>
+  <td width="50%"><a href="https://univer.ai/demo/relational-tables"><img src="../../docs/img/readme/cards/relational-tables.webp" alt="Relational Tables — 데모 열기" width="420" /></a></td>
+</tr>
+<tr>
+  <td width="50%"><a href="https://univer.ai/demo/canvases"><img src="../../docs/img/readme/cards/canvases.webp" alt="Canvases — 데모 열기" width="420" /></a></td>
+  <td width="50%"><a href="https://univer.ai/demo/pdf"><img src="../../docs/img/readme/cards/pdf.webp" alt="PDF — 데모 열기" width="420" /></a></td>
+</tr>
+</tbody>
 </table>
+
+</div>
+
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20%EB%A7%A8%20%EC%9C%84%EB%A1%9C-30363D?style=flat-square" alt="맨 위로" height="20" /></a></p>
 
 <a id="what-you-can-build"></a>
 
 ## 🚀 오픈 소스 기반으로 구축하기
 
-| 목표 | 오픈 소스 기반 활용 | 시작점 |
-| --- | --- | --- |
-| **Sheets 또는 Docs 임베딩** | 애플리케이션이나 에이전트 제품에 편집 가능한 오피스 화면을 추가하고 Facade API로 데이터를 연결합니다. | [빠른 시작](#quick-start) |
-| **편집기 없이 콘텐츠 처리** | Node.js에서 콘텐츠 플러그인, 모델, 명령, 계산을 재사용해 편집, 스냅샷, 자동화 작업을 수행합니다. | [Headless 가이드](https://docs.univer.ai/guides/sheets/getting-started/node) |
-| **맞춤 기능 또는 편집기 개발** | 엔진, UI 컴포넌트, 플러그인 경계, 의존성 주입, 명령/실행 취소 시스템을 재사용합니다. 기존 기능을 참고해 Sheets와 Docs를 확장하거나 자체 편집기를 개발합니다. | [오픈 소스 아키텍처](#open-source-architecture) |
+<p align="center"><img src="../../docs/img/readme/build-banner.png" alt="Build on open source" width="960" /></p>
+
+<div align="center" style="overflow-x: auto;">
+
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th>목표</th>
+<th>오픈 소스 기반 활용</th>
+<th>시작점</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Sheets 또는 Docs 임베딩</strong></td>
+<td>애플리케이션이나 에이전트 제품에 편집 가능한 오피스 화면을 추가하고 Facade API로 데이터를 연결합니다.</td>
+<td><a href="#quick-start">빠른 시작</a></td>
+</tr>
+<tr>
+<td><strong>편집기 없이 콘텐츠 처리</strong></td>
+<td>Node.js에서 콘텐츠 플러그인, 모델, 명령, 계산을 재사용해 편집, 스냅샷, 자동화 작업을 수행합니다.</td>
+<td><a href="https://docs.univer.ai/guides/sheets/getting-started/node">Headless 가이드</a></td>
+</tr>
+<tr>
+<td><strong>맞춤 기능 또는 편집기 개발</strong></td>
+<td>엔진, UI 컴포넌트, 플러그인 경계, 의존성 주입, 명령/실행 취소 시스템을 재사용합니다. 기존 기능을 참고해 Sheets와 Docs를 확장하거나 자체 편집기를 개발합니다.</td>
+<td><a href="#open-source-architecture">오픈 소스 아키텍처</a></td>
+</tr>
+</tbody>
+</table>
+
+</div>
 
 **여러 기능에 걸친 편집과 실행 취소/다시 실행을 조율합니다.** 필터 범위에 행을 삽입하면 기본 콘텐츠와 필터 범위가 모두 바뀌며, 실행 취소 시 둘 다 복원해야 합니다. 각 기능이 자체 변경과 실행 취소 데이터를 제공하고, 명령이 실행과 이력을 조합합니다. 아키텍처 설명에서 이러한 편집 흐름을 확장하는 방법을 다룹니다.
 
@@ -341,11 +376,13 @@ Docs 플러그인은 스프레드시트의 서식 있는 텍스트 편집을 지
 
 </details>
 
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20%EB%A7%A8%20%EC%9C%84%EB%A1%9C-30363D?style=flat-square" alt="맨 위로" height="20" /></a></p>
+
 <a id="open-source-architecture"></a>
 
 ## 🏗️ 오픈 소스 아키텍처 살펴보기
 
-<img src="../../docs/img/readme/architecture-banner.png" alt="" width="960" />
+<p align="center"><img src="../../docs/img/readme/architecture-banner.png" alt="" width="960" /></p>
 
 <a id="give-custom-features-clear-boundaries"></a>
 
@@ -530,20 +567,46 @@ Facade 확장은 기능 패키지에 포함되므로 콘텐츠 API가 관련 없
 
 이 저장소는 실제 기능 구현과 확장 패턴을 제공합니다. 완전한 예제는 [필터 구현 해설](https://docs.univer.ai/blog/anatomy)을 참고하고, 확장 지점에 의존하기 전에는 [API 안정성 정책](../../docs/API_STABILITY.md)을 확인하세요.
 
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20%EB%A7%A8%20%EC%9C%84%EB%A1%9C-30363D?style=flat-square" alt="맨 위로" height="20" /></a></p>
+
 <a id="open-source-and-commercial-extensions"></a>
 
 ## 🧩 Univer Office SDK로 애플리케이션 확장하기
 
-<img src="../../docs/img/readme/sdk-banner.png" alt="" width="960" />
+<p align="center"><img src="../../docs/img/readme/sdk-banner.png" alt="" width="960" /></p>
 
 바로 통합할 수 있는 기능이 더 필요하다면 해당 **Univer Office SDK** 모듈을 조합하세요. 추가 콘텐츠 유형, 고급 편집 플러그인, 협업, 파일 변환, 에이전트 도구를 사용할 수 있습니다. 이들은 위에서 설명한 같은 콘텐츠 모델, 플러그인 아키텍처, 명령 시스템, Facade 설계를 확장하므로 기존 통합을 바탕으로 개발할 수 있습니다.
 
-| 구성 요소 | 기반을 확장하는 방법 |
-| --- | --- |
-| **오픈 소스 Web SDK 코어 · 이 저장소** | 오픈 소스 모델, 엔진, 플러그인, UI 기반, Sheets와 Docs 기능 및 해당 Headless 콘텐츠 작업. Apache-2.0에 따라 상용 애플리케이션에서 사용할 수 있습니다. |
-| **상용 Web SDK 플러그인** | 코어의 Plugin, 의존성 주입, Command/Mutation, Facade 확장 패턴을 따릅니다. 해당 콘텐츠 유형에 차트, 도형, 피벗 테이블, SmartArt 등의 기능을 추가합니다. |
-| **Server SDK** | 같은 콘텐츠 모델과 Mutation 규약을 실시간 협업, 버전 이력, 오피스 파일 변환으로 확장합니다. 애플리케이션의 신원, 권한, 저장소와 통합합니다. |
-| **AI SDK 확장** | Web SDK의 Headless 및 Facade 기능을 재사용해 에이전트가 콘텐츠를 살펴보고 편집하고 검사할 수 있는 조합 가능한 Node.js API와 CLI 기반 요소를 제공합니다. 협업과 Worktree 검토도 통합합니다. |
+<div align="center" style="overflow-x: auto;">
+
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th>구성 요소</th>
+<th>기반을 확장하는 방법</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>오픈 소스 Web SDK 코어 · 이 저장소</strong></td>
+<td>오픈 소스 모델, 엔진, 플러그인, UI 기반, Sheets와 Docs 기능 및 해당 Headless 콘텐츠 작업. Apache-2.0에 따라 상용 애플리케이션에서 사용할 수 있습니다.</td>
+</tr>
+<tr>
+<td><strong>상용 Web SDK 플러그인</strong></td>
+<td>코어의 Plugin, 의존성 주입, Command/Mutation, Facade 확장 패턴을 따릅니다. 해당 콘텐츠 유형에 차트, 도형, 피벗 테이블, SmartArt 등의 기능을 추가합니다.</td>
+</tr>
+<tr>
+<td><strong>Server SDK</strong></td>
+<td>같은 콘텐츠 모델과 Mutation 규약을 실시간 협업, 버전 이력, 오피스 파일 변환으로 확장합니다. 애플리케이션의 신원, 권한, 저장소와 통합합니다.</td>
+</tr>
+<tr>
+<td><strong>AI SDK 확장</strong></td>
+<td>Web SDK의 Headless 및 Facade 기능을 재사용해 에이전트가 콘텐츠를 살펴보고 편집하고 검사할 수 있는 조합 가능한 Node.js API와 CLI 기반 요소를 제공합니다. 협업과 Worktree 검토도 통합합니다.</td>
+</tr>
+</tbody>
+</table>
+
+</div>
 
 <a id="scope-and-licensing"></a>
 
@@ -579,11 +642,13 @@ AI SDK는 Web SDK의 **Headless 콘텐츠 모델, 명령, 계산, Facade API**�
 
 </details>
 
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20%EB%A7%A8%20%EC%9C%84%EB%A1%9C-30363D?style=flat-square" alt="맨 위로" height="20" /></a></p>
+
 <a id="application-patterns-and-ecosystem"></a>
 
 ## 🌐 애플리케이션 패턴과 생태계
 
-<img src="../../docs/img/readme/ecosystem-banner.png" alt="" width="960" />
+<p align="center"><img src="../../docs/img/readme/ecosystem-banner.png" alt="" width="960" /></p>
 
 <a id="univer-workspace-an-office-sdk-reference-application"></a>
 
@@ -591,7 +656,9 @@ AI SDK는 Web SDK의 **Headless 콘텐츠 모델, 명령, 계산, Facade API**�
 
 완전한 애플리케이션 예제는 [Univer Workspace](https://github.com/dream-num/univer-workspace)에서 시작하세요. Univer Office SDK 편집기, 협업, 파일 기능, 기존 에이전트, 사람의 검토를 자체 호스팅 가능한 워크스페이스로 조합하는 방법을 보여 줍니다. 자체 오피스 애플리케이션이나 에이전트 워크스페이스를 구축할 때 이 통합 패턴을 참고하세요.
 
-<table>
+<div align="center" style="overflow-x: auto;">
+
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
   <tr>
     <td width="50%" valign="top">
       <a href="https://space.univer.ai/"><img src="../../docs/img/readme/workspace.webp" alt="Univer Workspace의 편집 가능한 예산 스프레드시트" width="420" /></a>
@@ -614,6 +681,8 @@ AI SDK는 Web SDK의 **Headless 콘텐츠 모델, 명령, 계산, Facade API**�
   </tr>
 </table>
 
+</div>
+
 Workspace는 오픈 소스이며 SDK 의존성은 각 라이선스를 따릅니다. 연결된 앱과 검토 흐름은 [Workspace 개요](https://univer.ai/workspace/)를 확인하세요.
 
 <p align="center"><a href="https://www.youtube.com/watch?v=1p-SMEiK6Kg"><img src="../../docs/img/readme/integration-demo.png" alt="SDK 통합 데모 보기" width="720" /></a></p>
@@ -626,15 +695,44 @@ Workspace는 오픈 소스이며 SDK 의존성은 각 라이선스를 따릅니�
 
 같은 SDK 기능을 이미 사용하는 에이전트와 도구에도 조합할 수 있습니다.
 
-| 프로젝트 | 제공하는 기능 |
-| --- | --- |
-| [Univer CLI](https://github.com/dream-num/univer-cli) | 오피스 콘텐츠를 만들고 편집하고 검사하고 전달하는 로컬 명령줄 워크스페이스. |
-| [Univer Office for DeepSeek Harness](https://github.com/dream-num/dsh-univer-office) | 연결된 콘텐츠, 결과 검증, 버전별 변경, 격리된 Worktree 협업. |
-| [Univer Office for WorkBuddy](https://github.com/dream-num/workbuddy-univer-office) | 로컬 Office 통합, MCP 미리 보기, 초안 검토. 개발자 프리뷰. |
-| [Univer Office for OpenClaw](https://github.com/dream-num/openclaw-univer-office) | 오피스 콘텐츠를 만들고 검토하고 전달하는 도구. |
-| [Univer SDK Skills](https://github.com/dream-num/univer-sdk-skills) | 코딩 에이전트가 SDK를 통합하고 플러그인을 개발하며 백엔드 워크플로를 구현하도록 돕는 지침. |
+<div align="center" style="overflow-x: auto;">
+
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th>프로젝트</th>
+<th>제공하는 기능</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/dream-num/univer-cli">Univer CLI</a></td>
+<td>오피스 콘텐츠를 만들고 편집하고 검사하고 전달하는 로컬 명령줄 워크스페이스.</td>
+</tr>
+<tr>
+<td><a href="https://github.com/dream-num/dsh-univer-office">Univer Office for DeepSeek Harness</a></td>
+<td>연결된 콘텐츠, 결과 검증, 버전별 변경, 격리된 Worktree 협업.</td>
+</tr>
+<tr>
+<td><a href="https://github.com/dream-num/workbuddy-univer-office">Univer Office for WorkBuddy</a></td>
+<td>로컬 Office 통합, MCP 미리 보기, 초안 검토. 개발자 프리뷰.</td>
+</tr>
+<tr>
+<td><a href="https://github.com/dream-num/openclaw-univer-office">Univer Office for OpenClaw</a></td>
+<td>오피스 콘텐츠를 만들고 검토하고 전달하는 도구.</td>
+</tr>
+<tr>
+<td><a href="https://github.com/dream-num/univer-sdk-skills">Univer SDK Skills</a></td>
+<td>코딩 에이전트가 SDK를 통합하고 플러그인을 개발하며 백엔드 워크플로를 구현하도록 돕는 지침.</td>
+</tr>
+</tbody>
+</table>
+
+</div>
 
 각 저장소에 설정과 SDK 의존성이 설명되어 있습니다. 에이전트 진입점은 [생태계](https://univer.ai/ecosystem/)에서 확인하고, 자체 통합을 만들려면 [문서](https://docs.univer.ai/)를 참고하세요.
+
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20%EB%A7%A8%20%EC%9C%84%EB%A1%9C-30363D?style=flat-square" alt="맨 위로" height="20" /></a></p>
 
 <a id="documentation-and-contributing"></a>
 
@@ -644,16 +742,37 @@ Univer를 만들고 개선하는 모든 [기여자](https://github.com/dream-num
 
 <p align="center"><a href="https://docs.univer.ai/guides/sheets">🧩 Web SDK</a> · <a href="https://docs.univer.ai/server">🖥️ Server SDK</a> · <a href="https://docs.univer.ai/ai">🤖 AI SDK</a> · <a href="https://docs.univer.ai/reference/classes/univer">🔧 API 참조</a> · <a href="https://office.univer.ai/">🎮 라이브 데모</a></p>
 
-<details>
-<summary>런타임 호환성</summary>
+<div align="center" style="overflow-x: auto;">
 
-- **브라우저 런타임**: Univer는 Chrome 88을 대상으로 컴파일되며 Edge `>=88`, Firefox `>=90`, Chrome `>=88`, Safari `>=14.1`, Electron `>=12`에서 동작하는 것을 목표로 합니다.
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+  <tr>
+    <th align="center"><img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/75.0.1/edge/edge_64x64.png" width="32" height="32" alt="" /><br />Edge</th>
+    <th align="center"><img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/75.0.1/firefox/firefox_64x64.png" width="32" height="32" alt="" /><br />Firefox</th>
+    <th align="center"><img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/75.0.1/chrome/chrome_64x64.png" width="32" height="32" alt="" /><br />Chrome</th>
+    <th align="center"><img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/75.0.1/safari/safari_64x64.png" width="32" height="32" alt="" /><br />Safari</th>
+    <th align="center"><img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/75.0.1/electron/electron_64x64.png" width="32" height="32" alt="" /><br />Electron</th>
+  </tr>
+  <tr>
+    <td align="center"><code>&gt;=88</code></td>
+    <td align="center"><code>&gt;=90</code></td>
+    <td align="center"><code>&gt;=88</code></td>
+    <td align="center"><code>&gt;=14.1</code></td>
+    <td align="center"><code>&gt;=12</code></td>
+  </tr>
+</table>
+
+</div>
+
+<p align="center">Univer는 Chrome 88을 대상으로 컴파일되며 위에 나열된 버전에서 동작하는 것을 목표로 합니다.</p>
+
+<a id="runtime-compatibility"></a>
+
+### 런타임 호환성
+
 - **폴리필**: Univer는 `Intl.Segmenter`에 의존합니다. 대상 브라우저나 런타임이 제공하지 않으면 `@formatjs/intl-segmenter` 같은 폴리필을 추가하세요.
 - **빌드 도구**: Vite, esbuild, Webpack 5를 권장합니다. 빌드 도구가 `package.json`의 `exports` 필드를 지원하지 않으면(Webpack 4에서 흔함) 추가 경로 매핑이 필요할 수 있습니다.
 - **React**: Univer의 뷰 계층은 React 18을 기반으로 하며 React 18과 19를 지원하고, React 16.9+ 및 17에는 최소한의 호환성 지원을 제공합니다.
 - **Node.js 런타임**: Headless Univer는 Node.js `>=18.17.0`을 지원합니다. 이 모노레포를 개발하려면 Node.js `>=22.18`이 필요합니다.
-
-</details>
 
 <details>
 <summary>이 저장소에서 개발하기</summary>
@@ -687,14 +806,44 @@ pnpm dev
 
 유용한 명령:
 
-| 명령 | 용도 |
-| --- | --- |
-| `pnpm dev` | Sheets와 Docs 개발 워크벤치를 시작합니다. |
-| `pnpm build` | 내부 common 패키지를 제외한 워크스페이스 패키지를 빌드합니다. |
-| `pnpm test` | Turbo로 단위 테스트를 실행합니다. |
-| `pnpm typecheck` | Turbo로 TypeScript 검사를 실행합니다. |
-| `pnpm lint` | ESLint를 실행합니다. |
-| `pnpm storybook:dev` | UI 컴포넌트 개발용 Storybook을 시작합니다. |
+<div align="center" style="overflow-x: auto;">
+
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th>명령</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="notranslate">pnpm dev</code></td>
+<td>Sheets와 Docs 개발 워크벤치를 시작합니다.</td>
+</tr>
+<tr>
+<td><code class="notranslate">pnpm build</code></td>
+<td>내부 common 패키지를 제외한 워크스페이스 패키지를 빌드합니다.</td>
+</tr>
+<tr>
+<td><code class="notranslate">pnpm test</code></td>
+<td>Turbo로 단위 테스트를 실행합니다.</td>
+</tr>
+<tr>
+<td><code class="notranslate">pnpm typecheck</code></td>
+<td>Turbo로 TypeScript 검사를 실행합니다.</td>
+</tr>
+<tr>
+<td><code class="notranslate">pnpm lint</code></td>
+<td>ESLint를 실행합니다.</td>
+</tr>
+<tr>
+<td><code class="notranslate">pnpm storybook:dev</code></td>
+<td>UI 컴포넌트 개발용 Storybook을 시작합니다.</td>
+</tr>
+</tbody>
+</table>
+
+</div>
 
 Pull Request를 열기 전에 [CONTRIBUTING.md](../../CONTRIBUTING.md)를 읽어 주세요.
 
@@ -712,17 +861,23 @@ Pull Request를 열기 전에 [CONTRIBUTING.md](../../CONTRIBUTING.md)를 읽어
 
 </details>
 
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20%EB%A7%A8%20%EC%9C%84%EB%A1%9C-30363D?style=flat-square" alt="맨 위로" height="20" /></a></p>
+
 <a id="community"></a>
 
 ## 💬 커뮤니티
 
 [GitHub Discussions](https://github.com/dream-num/univer/discussions)에서 질문하고, [Discord](https://discord.gg/z3NKNT6D2f)에 참여하고, [X](https://twitter.com/univerhq)나 [YouTube](https://www.youtube.com/@dreamNum)를 팔로우하세요. [행동 강령](../../CODE_OF_CONDUCT.md)을 읽어 주세요.
 
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20%EB%A7%A8%20%EC%9C%84%EB%A1%9C-30363D?style=flat-square" alt="맨 위로" height="20" /></a></p>
+
 <a id="security"></a>
 
 ## 🔒 보안
 
 보안 문제를 발견했다고 생각되면 [Security Policy](../../SECURITY.md)를 따라 주세요.
+
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20%EB%A7%A8%20%EC%9C%84%EB%A1%9C-30363D?style=flat-square" alt="맨 위로" height="20" /></a></p>
 
 <a id="sponsors"></a>
 
@@ -744,6 +899,8 @@ Univer는 커뮤니티와 스폰서의 지원을 받습니다. [Open Collective]
   <a href="https://opencollective.com/univer/backer/6/website"><img src="https://opencollective.com/univer/backer/6/avatar.svg" width="64" height="64" alt="Backer 6" /></a>
 </p>
 
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20%EB%A7%A8%20%EC%9C%84%EB%A1%9C-30363D?style=flat-square" alt="맨 위로" height="20" /></a></p>
+
 <a id="license"></a>
 
 ## 📄 라이선스
@@ -751,3 +908,5 @@ Univer는 커뮤니티와 스폰서의 지원을 받습니다. [Open Collective]
 Copyright (c) 2021-present DreamNum Co., Ltd.
 
 이 저장소의 오픈 소스 패키지는 [Apache-2.0](../../LICENSE) 라이선스로 제공됩니다. 상용 SDK 모듈은 별도로 배포되고 라이선스가 부여됩니다.
+
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20%EB%A7%A8%20%EC%9C%84%EB%A1%9C-30363D?style=flat-square" alt="맨 위로" height="20" /></a></p>

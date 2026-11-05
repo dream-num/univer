@@ -1,3 +1,5 @@
+<a id="readme-top"></a>
+
 <p align="center"><img src="../../docs/img/readme/hero-banner.png" alt="Univer Office SDK" width="960" /></p>
 
 <h1 align="center">Crea tu propia oficina con IA con Univer Office SDK.</h1>
@@ -51,6 +53,7 @@
   - [Univer Workspace: una aplicación de referencia de Office SDK](#univer-workspace-an-office-sdk-reference-application)
   - [CLI, integraciones de agentes y skills para desarrolladores](#cli-agent-integrations-and-developer-skills)
 - [📚 Documentación y contribuciones](#documentation-and-contributing)
+  - [Compatibilidad en tiempo de ejecución](#runtime-compatibility)
 - [💬 Comunidad](#community)
 - [🔒 Seguridad](#security)
 - [❤️ Patrocinadores](#sponsors)
@@ -61,6 +64,8 @@
 <a id="what-is-univer"></a>
 
 ## 💡 ¿Qué es Univer?
+
+<p align="center"><img src="../../docs/img/readme/intro-banner.png" alt="Univer Office SDK: Web, Server, and AI SDKs" width="960" /></p>
 
 **Univer** es un SDK de ofimática para crear aplicaciones de oficina dentro de tu propio producto. Ofrece edición, cálculo, colaboración y procesamiento de archivos de Office para personas y agentes existentes, con tus datos y permisos. La familia de productos abarca hojas de cálculo, documentos, presentaciones, tablas relacionales, lienzos y PDF.
 
@@ -78,70 +83,100 @@ Los agentes pueden utilizar las mismas APIs de código abierto; tu aplicación a
 
 ### Capacidades de código abierto
 
-<p><img src="../../docs/img/readme/intro-banner.png" alt="Sheets &amp; Docs" width="960" /></p>
+<div align="center" style="overflow-x: auto;">
 
-| Área | Capacidades seleccionadas |
-| --- | --- |
-| **Sheets · Edición y diseño** | Estilos de celda, celdas combinadas, texto enriquecido en celdas, paneles inmovilizados, imágenes flotantes y deshacer/rehacer. |
-| **Sheets · Datos y cálculo** | Fórmulas, nombres definidos, filtrado, ordenación, validación de datos, formato condicional, hipervínculos, comentarios y búsqueda y reemplazo. |
-| **Docs** | Edición de texto enriquecido, formato de párrafos, listas, hipervínculos, comentarios e integración de dibujos. |
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th>Área</th>
+<th>Capacidades seleccionadas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Sheets · Edición y diseño</strong></td>
+<td>Estilos de celda, celdas combinadas, texto enriquecido en celdas, paneles inmovilizados, imágenes flotantes y deshacer/rehacer.</td>
+</tr>
+<tr>
+<td><strong>Sheets · Datos y cálculo</strong></td>
+<td>Fórmulas, nombres definidos, filtrado, ordenación, validación de datos, formato condicional, hipervínculos, comentarios y búsqueda y reemplazo.</td>
+</tr>
+<tr>
+<td><strong>Docs</strong></td>
+<td>Edición de texto enriquecido, formato de párrafos, listas, hipervínculos, comentarios e integración de dibujos.</td>
+</tr>
+</tbody>
+</table>
+
+</div>
 
 Las funciones se componen mediante plugins y presets; el [inicio rápido](#quick-start) utiliza únicamente el **preset Sheets Core**. Las imágenes requieren los plugins de dibujo correspondientes. Consulta la [comparación de funciones](https://univer.ai/compare/) para conocer la cobertura detallada de las opciones de código abierto y comerciales.
 
 Las demos siguientes muestran el conjunto más amplio de **Univer Office SDK**, incluidas capacidades comerciales. Van más allá de la configuración de código abierto predeterminada; consulta el alcance en [código abierto y extensiones comerciales](#open-source-and-commercial-extensions).
 
-<table>
-  <tr>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/spreadsheets"><img src="../../docs/img/readme/sheets.webp" alt="Sheets" width="420" /></a>
-      <p><strong>Sheets</strong><br /><a href="https://univer.ai/demo/spreadsheets">Abrir demo ↗</a></p>
-    </td>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/docs"><img src="../../docs/img/readme/docs.webp" alt="Docs" width="420" /></a>
-      <p><strong>Docs</strong><br /><a href="https://univer.ai/demo/docs">Abrir demo ↗</a></p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/web-app"><img src="../../docs/img/readme/web-app.webp" alt="Web App · Aplicaciones basadas en hojas" width="420" /></a>
-      <p><strong>Web App · Aplicaciones basadas en hojas</strong><br /><a href="https://univer.ai/demo/web-app">Abrir demo ↗</a></p>
-    </td>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/universe"><img src="../../docs/img/readme/universe.webp" alt="Univer · Contenido de Office compuesto" width="420" /></a>
-      <p><strong>Contenido de Office compuesto</strong><br /><a href="https://univer.ai/demo/universe">Abrir demo ↗</a></p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/slides"><img src="../../docs/img/readme/slides.webp" alt="Slides" width="420" /></a>
-      <p><strong>Slides</strong><br /><a href="https://univer.ai/demo/slides">Abrir demo ↗</a></p>
-    </td>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/relational-tables"><img src="../../docs/img/readme/relational-tables.webp" alt="Relational Tables" width="420" /></a>
-      <p><strong>Relational Tables</strong><br /><a href="https://univer.ai/demo/relational-tables">Abrir demo ↗</a></p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/canvases"><img src="../../docs/img/readme/canvases.webp" alt="Canvases" width="420" /></a>
-      <p><strong>Canvases</strong><br /><a href="https://univer.ai/demo/canvases">Abrir demo ↗</a></p>
-    </td>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/pdf"><img src="../../docs/img/readme/pdf.webp" alt="PDF" width="420" /></a>
-      <p><strong>PDF</strong><br /><a href="https://univer.ai/demo/pdf">Abrir demo ↗</a></p>
-    </td>
-  </tr>
+<div align="center" style="overflow-x: auto;">
+
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+<tbody>
+<tr>
+  <td width="50%"><a href="https://univer.ai/demo/spreadsheets"><img src="../../docs/img/readme/cards/sheets.webp" alt="Sheets — Edición y diseño · Datos y cálculo — Abrir demo" width="420" /></a></td>
+  <td width="50%"><a href="https://univer.ai/demo/docs"><img src="../../docs/img/readme/cards/docs.webp" alt="Docs — Edición de texto enriquecido — Abrir demo" width="420" /></a></td>
+</tr>
+<tr>
+  <td width="50%"><a href="https://univer.ai/demo/web-app"><img src="../../docs/img/readme/cards/web-app.webp" alt="Web App — Aplicaciones basadas en hojas — Abrir demo" width="420" /></a></td>
+  <td width="50%"><a href="https://univer.ai/demo/universe"><img src="../../docs/img/readme/cards/universe.webp" alt="Univer — Contenido de Office compuesto — Abrir demo" width="420" /></a></td>
+</tr>
+<tr>
+  <td width="50%"><a href="https://univer.ai/demo/slides"><img src="../../docs/img/readme/cards/slides.webp" alt="Slides — Abrir demo" width="420" /></a></td>
+  <td width="50%"><a href="https://univer.ai/demo/relational-tables"><img src="../../docs/img/readme/cards/relational-tables.webp" alt="Relational Tables — Abrir demo" width="420" /></a></td>
+</tr>
+<tr>
+  <td width="50%"><a href="https://univer.ai/demo/canvases"><img src="../../docs/img/readme/cards/canvases.webp" alt="Canvases — Abrir demo" width="420" /></a></td>
+  <td width="50%"><a href="https://univer.ai/demo/pdf"><img src="../../docs/img/readme/cards/pdf.webp" alt="PDF — Abrir demo" width="420" /></a></td>
+</tr>
+</tbody>
 </table>
+
+</div>
+
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20Volver%20arriba-30363D?style=flat-square" alt="Volver arriba" height="20" /></a></p>
 
 <a id="what-you-can-build"></a>
 
 ## 🚀 Construye sobre la base de código abierto
 
-| Tu objetivo | Cómo usar la base de código abierto | Por dónde empezar |
-| --- | --- | --- |
-| **Integrar Sheets o Docs** | Añade una superficie de edición de Office a tu aplicación o producto de agentes y conecta tus datos mediante las APIs Facade. | [Inicio rápido](#quick-start) |
-| **Procesar contenido sin un editor** | Reutiliza plugins de contenido, modelos, comandos y cálculo en Node.js para editar, trabajar con instantáneas y automatizar tareas. | [Guía de Headless](https://docs.univer.ai/guides/sheets/getting-started/node) |
-| **Desarrollar funciones o editores personalizados** | Reutiliza los motores, componentes de UI, límites entre plugins, inyección de dependencias y sistemas de comandos y deshacer. Sigue las funciones existentes para ampliar Sheets y Docs o desarrollar tus propios editores. | [Arquitectura de código abierto](#open-source-architecture) |
+<p align="center"><img src="../../docs/img/readme/build-banner.png" alt="Build on open source" width="960" /></p>
+
+<div align="center" style="overflow-x: auto;">
+
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th>Tu objetivo</th>
+<th>Cómo usar la base de código abierto</th>
+<th>Por dónde empezar</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Integrar Sheets o Docs</strong></td>
+<td>Añade una superficie de edición de Office a tu aplicación o producto de agentes y conecta tus datos mediante las APIs Facade.</td>
+<td><a href="#quick-start">Inicio rápido</a></td>
+</tr>
+<tr>
+<td><strong>Procesar contenido sin un editor</strong></td>
+<td>Reutiliza plugins de contenido, modelos, comandos y cálculo en Node.js para editar, trabajar con instantáneas y automatizar tareas.</td>
+<td><a href="https://docs.univer.ai/guides/sheets/getting-started/node">Guía de Headless</a></td>
+</tr>
+<tr>
+<td><strong>Desarrollar funciones o editores personalizados</strong></td>
+<td>Reutiliza los motores, componentes de UI, límites entre plugins, inyección de dependencias y sistemas de comandos y deshacer. Sigue las funciones existentes para ampliar Sheets y Docs o desarrollar tus propios editores.</td>
+<td><a href="#open-source-architecture">Arquitectura de código abierto</a></td>
+</tr>
+</tbody>
+</table>
+
+</div>
 
 **Coordina las ediciones y deshacer/rehacer entre funciones.** Insertar una fila dentro de un rango de filtro modifica tanto el contenido base como el rango de filtro; deshacer debe restaurar ambos. Cada función aporta sus propios cambios y datos para deshacer, y el comando combina su ejecución e historial. El recorrido por la arquitectura explica cómo ampliar estos flujos de edición.
 
@@ -341,11 +376,13 @@ Los plugins de Docs permiten editar texto enriquecido en hojas de cálculo. Al a
 
 </details>
 
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20Volver%20arriba-30363D?style=flat-square" alt="Volver arriba" height="20" /></a></p>
+
 <a id="open-source-architecture"></a>
 
 ## 🏗️ Explora la arquitectura de código abierto
 
-<img src="../../docs/img/readme/architecture-banner.png" alt="" width="960" />
+<p align="center"><img src="../../docs/img/readme/architecture-banner.png" alt="" width="960" /></p>
 
 <a id="give-custom-features-clear-boundaries"></a>
 
@@ -530,20 +567,46 @@ Las extensiones Facade permanecen en los paquetes de sus funciones, de modo que 
 
 El repositorio ofrece implementaciones de funciones y patrones para ampliarlas. Lee el [recorrido por la implementación del filtrado](https://docs.univer.ai/blog/anatomy) para ver un ejemplo completo, o la [Política de estabilidad de la API](../../docs/API_STABILITY.md) antes de depender de un punto de extensión.
 
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20Volver%20arriba-30363D?style=flat-square" alt="Volver arriba" height="20" /></a></p>
+
 <a id="open-source-and-commercial-extensions"></a>
 
 ## 🧩 Amplía tu aplicación con Univer Office SDK
 
-<img src="../../docs/img/readme/sdk-banner.png" alt="" width="960" />
+<p align="center"><img src="../../docs/img/readme/sdk-banner.png" alt="" width="960" /></p>
 
 Cuando necesites más capacidades listas para integrar, combina los módulos correspondientes de **Univer Office SDK**: tipos de contenido adicionales, plugins de edición avanzada, colaboración, conversión de archivos y herramientas para agentes. Amplían los mismos modelos de contenido, arquitectura de plugins, sistema de comandos y diseño de Facade presentados anteriormente, por lo que puedes aprovechar tu integración existente.
 
-| Parte | Cómo amplía la base |
-| --- | --- |
-| **Núcleo de Web SDK de código abierto · este repositorio** | Modelos, motores, plugins, infraestructura de UI y capacidades de Sheets y Docs de código abierto, con sus correspondientes operaciones Headless sobre contenido. Úsalos en aplicaciones comerciales bajo Apache-2.0. |
-| **Plugins comerciales de Web SDK** | Siguen los patrones de Plugin, inyección de dependencias, Command/Mutation y extensión de Facade del núcleo. Añaden gráficos, formas, tablas dinámicas, SmartArt y otras funciones para los tipos de contenido correspondientes. |
-| **Server SDK** | Amplía los mismos modelos de contenido y convenciones de mutaciones con colaboración en tiempo real, historial de revisiones y conversión de archivos de Office. Se integra con la identidad, los permisos y el almacenamiento de tu aplicación. |
-| **Extensiones de AI SDK** | Reutilizan las capacidades Headless y Facade de Web SDK para proporcionar APIs de Node.js y componentes de CLI que se pueden combinar para que los agentes inspeccionen, editen y comprueben contenido, con integraciones de colaboración y revisión de Worktree. |
+<div align="center" style="overflow-x: auto;">
+
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th>Parte</th>
+<th>Cómo amplía la base</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Núcleo de Web SDK de código abierto · este repositorio</strong></td>
+<td>Modelos, motores, plugins, infraestructura de UI y capacidades de Sheets y Docs de código abierto, con sus correspondientes operaciones Headless sobre contenido. Úsalos en aplicaciones comerciales bajo Apache-2.0.</td>
+</tr>
+<tr>
+<td><strong>Plugins comerciales de Web SDK</strong></td>
+<td>Siguen los patrones de Plugin, inyección de dependencias, Command/Mutation y extensión de Facade del núcleo. Añaden gráficos, formas, tablas dinámicas, SmartArt y otras funciones para los tipos de contenido correspondientes.</td>
+</tr>
+<tr>
+<td><strong>Server SDK</strong></td>
+<td>Amplía los mismos modelos de contenido y convenciones de mutaciones con colaboración en tiempo real, historial de revisiones y conversión de archivos de Office. Se integra con la identidad, los permisos y el almacenamiento de tu aplicación.</td>
+</tr>
+<tr>
+<td><strong>Extensiones de AI SDK</strong></td>
+<td>Reutilizan las capacidades Headless y Facade de Web SDK para proporcionar APIs de Node.js y componentes de CLI que se pueden combinar para que los agentes inspeccionen, editen y comprueben contenido, con integraciones de colaboración y revisión de Worktree.</td>
+</tr>
+</tbody>
+</table>
+
+</div>
 
 <a id="scope-and-licensing"></a>
 
@@ -579,11 +642,13 @@ Para llamadas repetidas, los [pools de Workers y un daemon](https://docs.univer.
 
 </details>
 
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20Volver%20arriba-30363D?style=flat-square" alt="Volver arriba" height="20" /></a></p>
+
 <a id="application-patterns-and-ecosystem"></a>
 
 ## 🌐 Patrones de aplicación y ecosistema
 
-<img src="../../docs/img/readme/ecosystem-banner.png" alt="" width="960" />
+<p align="center"><img src="../../docs/img/readme/ecosystem-banner.png" alt="" width="960" /></p>
 
 <a id="univer-workspace-an-office-sdk-reference-application"></a>
 
@@ -591,7 +656,9 @@ Para llamadas repetidas, los [pools de Workers y un daemon](https://docs.univer.
 
 Para ver una aplicación de referencia completa, empieza por [Univer Workspace](https://github.com/dream-num/univer-workspace). Muestra cómo combinar los editores de Univer Office SDK, colaboración, capacidades de archivos, agentes existentes y revisión humana en un espacio de trabajo autoalojable. Sigue sus patrones de integración al crear tu propia aplicación de oficina o espacio de trabajo para agentes.
 
-<table>
+<div align="center" style="overflow-x: auto;">
+
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
   <tr>
     <td width="50%" valign="top">
       <a href="https://space.univer.ai/"><img src="../../docs/img/readme/workspace.webp" alt="Una hoja de presupuesto editable en Univer Workspace" width="420" /></a>
@@ -614,6 +681,8 @@ Para ver una aplicación de referencia completa, empieza por [Univer Workspace](
   </tr>
 </table>
 
+</div>
+
 Workspace es de código abierto; sus dependencias del SDK siguen sus respectivas licencias. Consulta la [descripción general de Workspace](https://univer.ai/workspace/) para conocer las aplicaciones conectadas y los flujos de revisión.
 
 <p align="center"><a href="https://www.youtube.com/watch?v=1p-SMEiK6Kg"><img src="../../docs/img/readme/integration-demo.png" alt="Ver una demo de integración del SDK" width="720" /></a></p>
@@ -626,15 +695,44 @@ Workspace es de código abierto; sus dependencias del SDK siguen sus respectivas
 
 Las mismas capacidades del SDK también se pueden combinar con los agentes y las herramientas que ya utilizas:
 
-| Proyecto | Qué ofrece |
-| --- | --- |
-| [Univer CLI](https://github.com/dream-num/univer-cli) | Un espacio de trabajo local por línea de comandos para crear, editar, inspeccionar y entregar contenido de Office. |
-| [Univer Office for DeepSeek Harness](https://github.com/dream-num/dsh-univer-office) | Contenido vinculado, verificación de resultados, cambios versionados y colaboración aislada con Worktree. |
-| [Univer Office for WorkBuddy](https://github.com/dream-num/workbuddy-univer-office) | Integración local de Office, vistas previas MCP y revisión de borradores. Versión preliminar para desarrolladores. |
-| [Univer Office for OpenClaw](https://github.com/dream-num/openclaw-univer-office) | Herramientas para crear, revisar y entregar contenido de Office. |
-| [Univer SDK Skills](https://github.com/dream-num/univer-sdk-skills) | Instrucciones que ayudan a los agentes de programación a integrar el SDK, desarrollar plugins e implementar flujos de backend. |
+<div align="center" style="overflow-x: auto;">
+
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th>Proyecto</th>
+<th>Qué ofrece</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/dream-num/univer-cli">Univer CLI</a></td>
+<td>Un espacio de trabajo local por línea de comandos para crear, editar, inspeccionar y entregar contenido de Office.</td>
+</tr>
+<tr>
+<td><a href="https://github.com/dream-num/dsh-univer-office">Univer Office for DeepSeek Harness</a></td>
+<td>Contenido vinculado, verificación de resultados, cambios versionados y colaboración aislada con Worktree.</td>
+</tr>
+<tr>
+<td><a href="https://github.com/dream-num/workbuddy-univer-office">Univer Office for WorkBuddy</a></td>
+<td>Integración local de Office, vistas previas MCP y revisión de borradores. Versión preliminar para desarrolladores.</td>
+</tr>
+<tr>
+<td><a href="https://github.com/dream-num/openclaw-univer-office">Univer Office for OpenClaw</a></td>
+<td>Herramientas para crear, revisar y entregar contenido de Office.</td>
+</tr>
+<tr>
+<td><a href="https://github.com/dream-num/univer-sdk-skills">Univer SDK Skills</a></td>
+<td>Instrucciones que ayudan a los agentes de programación a integrar el SDK, desarrollar plugins e implementar flujos de backend.</td>
+</tr>
+</tbody>
+</table>
+
+</div>
 
 Cada repositorio documenta su configuración y sus dependencias del SDK. Explora el [ecosistema](https://univer.ai/ecosystem/) para encontrar puntos de entrada para agentes, o la [documentación](https://docs.univer.ai/) para crear tu propia integración.
+
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20Volver%20arriba-30363D?style=flat-square" alt="Volver arriba" height="20" /></a></p>
 
 <a id="documentation-and-contributing"></a>
 
@@ -644,16 +742,37 @@ Gracias a todos los [colaboradores](https://github.com/dream-num/univer/graphs/c
 
 <p align="center"><a href="https://docs.univer.ai/guides/sheets">🧩 Web SDK</a> · <a href="https://docs.univer.ai/server">🖥️ Server SDK</a> · <a href="https://docs.univer.ai/ai">🤖 AI SDK</a> · <a href="https://docs.univer.ai/reference/classes/univer">🔧 Referencia de la API</a> · <a href="https://office.univer.ai/">🎮 Demo en vivo</a></p>
 
-<details>
-<summary>Compatibilidad en tiempo de ejecución</summary>
+<div align="center" style="overflow-x: auto;">
 
-- **Navegadores**: Univer se compila con Chrome 88 como objetivo y busca funcionar en Edge `>=88`, Firefox `>=90`, Chrome `>=88`, Safari `>=14.1` y Electron `>=12`.
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+  <tr>
+    <th align="center"><img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/75.0.1/edge/edge_64x64.png" width="32" height="32" alt="" /><br />Edge</th>
+    <th align="center"><img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/75.0.1/firefox/firefox_64x64.png" width="32" height="32" alt="" /><br />Firefox</th>
+    <th align="center"><img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/75.0.1/chrome/chrome_64x64.png" width="32" height="32" alt="" /><br />Chrome</th>
+    <th align="center"><img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/75.0.1/safari/safari_64x64.png" width="32" height="32" alt="" /><br />Safari</th>
+    <th align="center"><img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/75.0.1/electron/electron_64x64.png" width="32" height="32" alt="" /><br />Electron</th>
+  </tr>
+  <tr>
+    <td align="center"><code>&gt;=88</code></td>
+    <td align="center"><code>&gt;=90</code></td>
+    <td align="center"><code>&gt;=88</code></td>
+    <td align="center"><code>&gt;=14.1</code></td>
+    <td align="center"><code>&gt;=12</code></td>
+  </tr>
+</table>
+
+</div>
+
+<p align="center">Univer se compila con Chrome 88 como objetivo y busca funcionar con las versiones indicadas arriba.</p>
+
+<a id="runtime-compatibility"></a>
+
+### Compatibilidad en tiempo de ejecución
+
 - **Polyfills**: Univer depende de `Intl.Segmenter`. Añade un polyfill como `@formatjs/intl-segmenter` si tu navegador o entorno de ejecución no lo proporciona.
 - **Herramientas de compilación**: recomendamos Vite, esbuild o Webpack 5. Si tu herramienta no admite el campo `exports` de `package.json` (habitual en Webpack 4), puede que necesites configurar asignaciones de rutas adicionales.
 - **React**: la capa de vistas de Univer está construida con React 18, admite React 18 y 19, y ofrece soporte mínimo de compatibilidad para React 16.9+ y 17.
 - **Node.js**: Headless Univer admite Node.js `>=18.17.0`. El desarrollo de este monorepo requiere Node.js `>=22.18`.
-
-</details>
 
 <details>
 <summary>Desarrollo en este repositorio</summary>
@@ -687,14 +806,44 @@ pnpm dev
 
 Comandos útiles:
 
-| Comando | Finalidad |
-| --- | --- |
-| `pnpm dev` | Iniciar el entorno de desarrollo de Sheets y Docs. |
-| `pnpm build` | Compilar los paquetes del workspace, excluidos los paquetes comunes internos. |
-| `pnpm test` | Ejecutar pruebas unitarias mediante Turbo. |
-| `pnpm typecheck` | Ejecutar las comprobaciones de TypeScript mediante Turbo. |
-| `pnpm lint` | Ejecutar ESLint. |
-| `pnpm storybook:dev` | Iniciar Storybook para desarrollar componentes de UI. |
+<div align="center" style="overflow-x: auto;">
+
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th>Comando</th>
+<th>Finalidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="notranslate">pnpm dev</code></td>
+<td>Iniciar el entorno de desarrollo de Sheets y Docs.</td>
+</tr>
+<tr>
+<td><code class="notranslate">pnpm build</code></td>
+<td>Compilar los paquetes del workspace, excluidos los paquetes comunes internos.</td>
+</tr>
+<tr>
+<td><code class="notranslate">pnpm test</code></td>
+<td>Ejecutar pruebas unitarias mediante Turbo.</td>
+</tr>
+<tr>
+<td><code class="notranslate">pnpm typecheck</code></td>
+<td>Ejecutar las comprobaciones de TypeScript mediante Turbo.</td>
+</tr>
+<tr>
+<td><code class="notranslate">pnpm lint</code></td>
+<td>Ejecutar ESLint.</td>
+</tr>
+<tr>
+<td><code class="notranslate">pnpm storybook:dev</code></td>
+<td>Iniciar Storybook para desarrollar componentes de UI.</td>
+</tr>
+</tbody>
+</table>
+
+</div>
 
 Lee [CONTRIBUTING.md](../../CONTRIBUTING.md) antes de abrir un pull request.
 
@@ -712,17 +861,23 @@ Lee [CONTRIBUTING.md](../../CONTRIBUTING.md) antes de abrir un pull request.
 
 </details>
 
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20Volver%20arriba-30363D?style=flat-square" alt="Volver arriba" height="20" /></a></p>
+
 <a id="community"></a>
 
 ## 💬 Comunidad
 
 Haz preguntas en [GitHub Discussions](https://github.com/dream-num/univer/discussions), únete a [Discord](https://discord.gg/z3NKNT6D2f) y sigue [X](https://twitter.com/univerhq) o [YouTube](https://www.youtube.com/@dreamNum). Lee el [Código de conducta](../../CODE_OF_CONDUCT.md).
 
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20Volver%20arriba-30363D?style=flat-square" alt="Volver arriba" height="20" /></a></p>
+
 <a id="security"></a>
 
 ## 🔒 Seguridad
 
 Si crees haber encontrado un problema de seguridad, sigue la [Política de Seguridad](../../SECURITY.md).
+
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20Volver%20arriba-30363D?style=flat-square" alt="Volver arriba" height="20" /></a></p>
 
 <a id="sponsors"></a>
 
@@ -744,6 +899,8 @@ Univer cuenta con el apoyo de la comunidad y patrocinadores. Puedes apoyar el pr
   <a href="https://opencollective.com/univer/backer/6/website"><img src="https://opencollective.com/univer/backer/6/avatar.svg" width="64" height="64" alt="Backer 6" /></a>
 </p>
 
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20Volver%20arriba-30363D?style=flat-square" alt="Volver arriba" height="20" /></a></p>
+
 <a id="license"></a>
 
 ## 📄 Licencia
@@ -751,3 +908,5 @@ Univer cuenta con el apoyo de la comunidad y patrocinadores. Puedes apoyar el pr
 Copyright (c) 2021-present DreamNum Co., Ltd.
 
 Los paquetes de código abierto de este repositorio se distribuyen bajo [Apache-2.0](../../LICENSE). Los módulos comerciales del SDK se distribuyen y licencian por separado.
+
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20Volver%20arriba-30363D?style=flat-square" alt="Volver arriba" height="20" /></a></p>

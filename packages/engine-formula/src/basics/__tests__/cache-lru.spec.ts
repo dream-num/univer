@@ -25,33 +25,6 @@ const KEY_A = `${UNIT_ID}:sheet1:15:1168:=A1*326+23354`;
 const KEY_B = `${UNIT_ID}:sheet1:16:16083:=A1*645+321655`;
 
 describe('formulaAstLRU', () => {
-    it.each([[2.5, 2], [0.5, 1]])('bounds later insertions after a fractional limit of %s', (requested, retained) => {
-        const lru = new FormulaAstLRU<number>(5);
-        lru.setLimit(requested);
-        for (let index = 0; index < 20; index++) {
-            lru.set(`key-${index}`, index);
-        }
-        const values: number[] = [];
-        lru.forEach((value) => values.push(value));
-        expect(values).toEqual(Array.from({ length: retained }, (_, index) => 20 - retained + index));
-    });
-    it('evicts the oldest entries immediately when shrinking a populated cache', () => {
-        const lru = new FormulaAstLRU<number>(5);
-        for (let index = 0; index < 5; index++) {
-            lru.set(`key-${index}`, index);
-        }
-        lru.get('key-0');
-        lru.setLimit(2);
-        const retained: string[] = [];
-        lru.forEach((_value, key) => retained.push(key));
-        expect(retained).toEqual(['key-4', 'key-0']);
-        for (let index = 5; index < 20; index++) {
-            lru.set(`key-${index}`, index);
-        }
-        const values: number[] = [];
-        lru.forEach((value) => values.push(value));
-        expect(values).toEqual([18, 19]);
-    });
     it('keeps colliding keys as separate entries', () => {
         expect(hashAlgorithm(KEY_A)).toBe(hashAlgorithm(KEY_B));
 
@@ -106,30 +79,5 @@ describe('formulaAstLRU', () => {
 
         expect(lru.get('unit:sheet:0:0:=1+1')).toBe('short');
         expect(lru.get(KEY_A)).toBe('long');
-    });
-
-    it('resizes without touching values already cached', () => {
-        const lru = new FormulaAstLRU<number>(10);
-        lru.set(KEY_A, 26614);
-
-        lru.setLimit(2);
-        expect(lru.get(KEY_A)).toBe(26614);
-
-        lru.setLimit(0);
-        lru.setLimit(Number.NaN);
-        expect(lru.get(KEY_A)).toBe(26614);
-
-        lru.setLimit(3);
-        lru.set('unit:sheet:0:0:=1+1', 2);
-        lru.set('unit:sheet:0:1:=1+2', 3);
-
-        let size = 0;
-        lru.forEach(() => {
-            size++;
-        });
-        expect(size).toBe(3);
-        // KEY_A was read last, so the oldest remaining entry is the one inserted first
-        // after the resize.
-        expect(lru.get('unit:sheet:0:1:=1+2')).toBe(3);
     });
 });

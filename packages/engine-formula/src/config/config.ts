@@ -33,13 +33,6 @@ export interface IUniverEngineFormulaConfig {
      */
     intervalCount?: number;
 
-    /**
-     * Maximum number of parsed formula ASTs kept in `FORMULA_AST_CACHE`. The built-in default
-     * (5000) is unrelated to how many formulas a workbook holds, so a workbook with more formulas
-     * than the limit re-parses every formula on every recalculation. Set it above the workbook's
-     * formula count to keep the cache warm. It only affects performance and memory, never values.
-     */
-    astCacheSize?: number;
 }
 
 export const defaultPluginConfig: IUniverEngineFormulaConfig = {};

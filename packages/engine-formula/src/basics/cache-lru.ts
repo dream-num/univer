@@ -23,23 +23,8 @@ export class FormulaAstLRU<T> {
         this._cache = new LRUMap<string, T>(cacheCount);
     }
 
-    /**
-     * Resize the cache. This only decides how many entries are retained; it never
-     * affects correctness, so a later call may freely replace an earlier one.
-     */
-    setLimit(cacheCount: number) {
-        if (Number.isFinite(cacheCount) && cacheCount > 0) {
-            const limit = Math.max(1, Math.floor(cacheCount));
-            this._cache.limit = limit;
-            while (this._cache.size > limit) {
-                this._cache.shift();
-            }
-        }
-    }
-
     // The full key is stored as-is. Hashing long keys into 32 bits let two different
     // formulas share one entry, so a cell could be evaluated with another cell's AST.
-    // The cache size already bounds memory, so hashing buys nothing.
     set(formulaString: string, node: T) {
         this._cache.set(formulaString, node);
     }

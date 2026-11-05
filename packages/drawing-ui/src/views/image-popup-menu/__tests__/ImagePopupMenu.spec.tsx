@@ -18,7 +18,7 @@
  * @vitest-environment jsdom
  */
 
-import { CommandType, ICommandService, LocaleService, LocaleType, Univer } from '@univerjs/core';
+import { CommandType, DrawingTypeEnum, ICommandService, LocaleService, LocaleType, Univer } from '@univerjs/core';
 import { IconManager, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -32,6 +32,34 @@ const cleanups: Array<() => void> = [];
 afterEach(async () => {
     cleanups.splice(0).reverse().forEach((dispose) => dispose());
     await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
+});
+
+it.each([
+    { drawingType: DrawingTypeEnum.DRAWING_CHART, icon: 'chart-icon' },
+    { drawingType: DrawingTypeEnum.DRAWING_IMAGE, icon: 'autofill-double-icon' },
+    { drawingType: DrawingTypeEnum.DRAWING_DOM, icon: 'autofill-double-icon' },
+    { drawingType: undefined, icon: 'autofill-double-icon' },
+])('renders the $icon trigger for drawing type $drawingType', async ({ drawingType, icon }) => {
+    const univer = new Univer();
+    cleanups.push(() => univer.dispose());
+    const injector = univer.__getInjector();
+    const locale = injector.get(LocaleService);
+    locale.load({ [LocaleType.EN_US]: {} });
+    locale.setLocale(LocaleType.EN_US);
+    locale.setDirection('ltr');
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    cleanups.push(() => container.remove());
+    const root = createRoot(container);
+    cleanups.push(() => act(() => root.unmount()));
+
+    await act(async () => root.render(
+        <RediContext.Provider value={{ injector }}>
+            <ImagePopupMenu popup={{ extraProps: { menuItems: [], drawingType } }} />
+        </RediContext.Provider>
+    ));
+
+    expect(container.querySelector(`svg.univerjs-icon-${icon}`)).not.toBeNull();
 });
 
 it('dismisses the chart type tooltip while the dropdown is open and routes the selected type', async () => {

@@ -24,6 +24,7 @@ import {
     IPermissionService,
     IUniverInstanceService,
     LocaleService,
+    LocaleType,
     toDisposable,
 } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
@@ -120,7 +121,7 @@ function createControllerHarness(initialDrawingType: DrawingTypeEnum) {
             }],
         } as never,
     }]);
-    injector.add([IContextService, { useValue: new ContextService() }]);
+    injector.add([IContextService, { useClass: ContextService }]);
     injector.add([IImageIoService, { useValue: { change$: imageIoChange$ } as never }]);
     injector.add([ICommandService, { useValue: { syncExecuteCommand: vi.fn() } as never }]);
     injector.add([DrawingPopupMenuController]);
@@ -142,9 +143,13 @@ describe('DrawingPopupMenuController', () => {
     it.each([
         { drawingType: DrawingTypeEnum.DRAWING_IMAGE, label: 'image' },
         { drawingType: DrawingTypeEnum.DRAWING_DOM, label: 'Float DOM' },
+        { drawingType: DrawingTypeEnum.DRAWING_CHART, label: 'chart' },
     ])('constrains the $label popup to the canvas and places it on the left in RTL', ({ drawingType }) => {
         const { attachPopupToObject, createControl$, drawingObject, getAttachedPopup, injector } = createControllerHarness(drawingType);
-        injector.get(LocaleService).setDirection('rtl');
+        const locale = injector.get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: {} });
+        locale.setLocale(LocaleType.EN_US);
+        locale.setDirection('rtl');
         const controller = injector.get(DrawingPopupMenuController);
         createControl$.next();
 
@@ -153,6 +158,7 @@ describe('DrawingPopupMenuController', () => {
             expect.objectContaining({
                 constrainToCanvas: true,
                 direction: 'left',
+                extraProps: expect.objectContaining({ drawingType }),
             })
         );
         expect(getAttachedPopup()?.extraProps?.menuItems).toEqual(expect.arrayContaining([
@@ -174,6 +180,10 @@ describe('DrawingPopupMenuController', () => {
             popupDisposable,
             setDrawingType,
         } = createControllerHarness(DrawingTypeEnum.DRAWING_CHART);
+        const locale = injector.get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: {} });
+        locale.setLocale(LocaleType.EN_US);
+        locale.setDirection('ltr');
         const controller = injector.get(DrawingPopupMenuController);
         createControl$.next();
 

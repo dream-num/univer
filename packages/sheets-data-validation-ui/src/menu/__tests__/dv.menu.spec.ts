@@ -14,15 +14,54 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
-import { OpenValidationPanelOperation } from '../../commands/operations/data-validation.operation';
+import { Univer } from '@univerjs/core';
+import { DesktopSidebarService, ISidebarService } from '@univerjs/ui';
+import { firstValueFrom } from 'rxjs';
+import { describe, expect, it, onTestFinished } from 'vitest';
+import {
+    DATA_VALIDATION_PANEL,
+    OpenValidationPanelOperation,
+} from '../../commands/operations/data-validation.operation';
 import { openDataValidationMenuFactory } from '../dv.menu';
 
 describe('data validation menu', () => {
     it('passes the empty parameter object required to open the manager', () => {
-        expect(openDataValidationMenuFactory()).toMatchObject({
+        const univer = new Univer();
+        onTestFinished(() => univer.dispose());
+        const injector = univer.__getInjector();
+        injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
+        expect(openDataValidationMenuFactory(injector)).toMatchObject({
             id: OpenValidationPanelOperation.id,
             params: {},
         });
+    });
+});
+
+describe('openDataValidationMenuFactory activation', () => {
+    it('tracks opening, replacement, closing, and late subscribers', async () => {
+        const univer = new Univer();
+        onTestFinished(() => univer.dispose());
+        const injector = univer.__getInjector();
+        injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
+
+        const sidebar = injector.get(ISidebarService);
+        const menu = openDataValidationMenuFactory(injector);
+        let activated: boolean | undefined;
+        const subscription = menu.activated$?.subscribe((value) => {
+            activated = value;
+        });
+        onTestFinished(() => subscription?.unsubscribe());
+        expect(activated).toBe(false);
+
+        sidebar.open({ id: DATA_VALIDATION_PANEL });
+        expect(activated).toBe(true);
+        expect(await firstValueFrom(menu.activated$!)).toBe(true);
+
+        sidebar.open({ id: 'another-panel', children: { label: 'another-panel' } });
+        expect(activated).toBe(false);
+
+        sidebar.open({ id: DATA_VALIDATION_PANEL });
+        sidebar.close();
+        expect(activated).toBe(false);
     });
 });

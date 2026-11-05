@@ -27,13 +27,14 @@ import {
     WorksheetSetCellStylePermission,
 } from '@univerjs/sheets';
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
-import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
+import { getMenuHiddenObservable, ISidebarService, MenuItemType } from '@univerjs/ui';
+import { defer, distinctUntilChanged, map, startWith } from 'rxjs';
 import {
     AddSheetDataValidationAndOpenCommand,
     ClearQuickSheetDataValidationCommand,
     InsertQuickSheetDataValidationCommand,
 } from '../commands/commands/data-validation-ui.command';
-import { OpenValidationPanelOperation } from '../commands/operations/data-validation.operation';
+import { DATA_VALIDATION_PANEL, OpenValidationPanelOperation } from '../commands/operations/data-validation.operation';
 import { DROPDOWN_PRESETS_COMPONENT } from '../views/components/DropdownPresets';
 
 export const DATA_VALIDATION_MENU_ID = 'sheet.menu.data-validation';
@@ -200,8 +201,15 @@ export function quickDateMenuFactory(accessor: IAccessor): IMenuSelectorItem<Loc
     };
 }
 
-export function openDataValidationMenuFactory(): IMenuItem<LocaleKey> {
+export function openDataValidationMenuFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
+    const sidebarService = accessor.get(ISidebarService);
+
     return {
+        activated$: defer(() => sidebarService.sidebarOptions$.pipe(
+            startWith(sidebarService.options),
+            map((options) => options.visible === true && options.id === DATA_VALIDATION_PANEL),
+            distinctUntilChanged()
+        )),
         id: OpenValidationPanelOperation.id,
         title: 'sheets-data-validation-ui.panel.title',
         type: MenuItemType.BUTTON,

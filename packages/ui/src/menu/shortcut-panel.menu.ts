@@ -14,13 +14,26 @@
  * limitations under the License.
  */
 
+import type { IAccessor } from '@univerjs/core';
 import type { LocaleKey } from '../locale/types';
 import type { IMenuButtonItem } from '../services/menu/menu';
-import { ToggleShortcutPanelOperation } from '../commands/operations/toggle-shortcut-panel.operation';
+import { defer, distinctUntilChanged, map, startWith } from 'rxjs';
+import {
+    ShortcutPanelComponentName,
+    ToggleShortcutPanelOperation,
+} from '../commands/operations/toggle-shortcut-panel.operation';
 import { MenuItemType } from '../services/menu/menu';
+import { ISidebarService } from '../services/sidebar/sidebar.service';
 
-export function ShortcutPanelMenuItemFactory(): IMenuButtonItem<LocaleKey> {
+export function ShortcutPanelMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+    const sidebarService = accessor.get(ISidebarService);
+
     return {
+        activated$: defer(() => sidebarService.sidebarOptions$.pipe(
+            startWith(sidebarService.options),
+            map((options) => options.visible === true && options.children?.label === ShortcutPanelComponentName),
+            distinctUntilChanged()
+        )),
         id: ToggleShortcutPanelOperation.id,
         title: 'ui.toggle-shortcut-panel',
         tooltip: 'ui.toggle-shortcut-panel',

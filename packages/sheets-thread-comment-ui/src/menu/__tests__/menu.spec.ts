@@ -20,12 +20,15 @@ import {
     Injector,
     IPermissionService,
     IUniverInstanceService,
+    Univer,
     UserManagerService,
 } from '@univerjs/core';
 import { RangeProtectionRuleModel, SheetsSelectionsService, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { BehaviorSubject, of, Subject } from 'rxjs';
-import { describe, expect, it } from 'vitest';
-import { drawingCommentMenuFactory, threadCommentMenuFactory } from '../menu';
+import { DesktopSidebarService, ISidebarService } from '@univerjs/ui';
+import { BehaviorSubject, firstValueFrom, of, Subject } from 'rxjs';
+import { describe, expect, it, onTestFinished } from 'vitest';
+import { SHEETS_THREAD_COMMENT_PANEL } from '../../types/const';
+import { drawingCommentMenuFactory, threadCommentMenuFactory, threadPanelMenuFactory } from '../menu';
 
 describe('drawingCommentMenuFactory', () => {
     it('stays enabled for a focused drawing until comment permission is denied', () => {
@@ -97,5 +100,34 @@ describe('thread comment menu', () => {
         });
 
         accessor.dispose();
+    });
+});
+
+describe('threadPanelMenuFactory activation', () => {
+    it('tracks opening, replacement, closing, and late subscribers', async () => {
+        const univer = new Univer();
+        onTestFinished(() => univer.dispose());
+        const injector = univer.__getInjector();
+        injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
+
+        const sidebar = injector.get(ISidebarService);
+        const menu = threadPanelMenuFactory(injector);
+        let activated: boolean | undefined;
+        const subscription = menu.activated$?.subscribe((value) => {
+            activated = value;
+        });
+        onTestFinished(() => subscription?.unsubscribe());
+        expect(activated).toBe(false);
+
+        sidebar.open({ children: { label: SHEETS_THREAD_COMMENT_PANEL } });
+        expect(activated).toBe(true);
+        expect(await firstValueFrom(menu.activated$!)).toBe(true);
+
+        sidebar.open({ id: 'another-panel', children: { label: 'another-panel' } });
+        expect(activated).toBe(false);
+
+        sidebar.open({ children: { label: SHEETS_THREAD_COMMENT_PANEL } });
+        sidebar.close();
+        expect(activated).toBe(false);
     });
 });
